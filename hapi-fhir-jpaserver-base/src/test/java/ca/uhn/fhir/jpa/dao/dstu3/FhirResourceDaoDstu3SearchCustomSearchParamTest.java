@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.dao.dstu3;
 
 import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
@@ -18,6 +19,7 @@ import org.junit.Test;
 import ca.uhn.fhir.jpa.dao.SearchParameterMap;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.IBundleProvider;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.TestUtil;
 
@@ -30,14 +32,14 @@ public class FhirResourceDaoDstu3SearchCustomSearchParamTest extends BaseJpaDstu
 		fooSp.setCode("foo");
 		fooSp.setType(org.hl7.fhir.dstu3.model.Enumerations.SearchParamType.TOKEN);
 		fooSp.setTitle("FOO SP");
-		fooSp.setXpath("PatientFoo.gender");
+		fooSp.setExpression("PatientFoo.gender");
 		fooSp.setXpathUsage(org.hl7.fhir.dstu3.model.SearchParameter.XPathUsageType.NORMAL);
 		fooSp.setStatus(org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus.ACTIVE);
 		try {
 			mySearchParameterDao.create(fooSp, mySrd);
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertEquals("Invalid path value \"PatientFoo.gender\": Unknown resource name \"PatientFoo\" (this name is not known in FHIR version \"DSTU3\")", e.getMessage());
+			assertEquals("Invalid SearchParameter.expression value \"PatientFoo.gender\": Unknown resource name \"PatientFoo\" (this name is not known in FHIR version \"DSTU3\")", e.getMessage());
 		}
 	}
 
@@ -47,14 +49,14 @@ public class FhirResourceDaoDstu3SearchCustomSearchParamTest extends BaseJpaDstu
 		fooSp.setCode("foo");
 		fooSp.setType(org.hl7.fhir.dstu3.model.Enumerations.SearchParamType.TOKEN);
 		fooSp.setTitle("FOO SP");
-		fooSp.setXpath("Patient.gender or Observation.code");
+		fooSp.setExpression("Patient.gender or Observation.code");
 		fooSp.setXpathUsage(org.hl7.fhir.dstu3.model.SearchParameter.XPathUsageType.NORMAL);
 		fooSp.setStatus(org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus.ACTIVE);
 		try {
 			mySearchParameterDao.create(fooSp, mySrd);
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertEquals("Invalid path value \"Observation.code\". All paths in a single SearchParameter must match the same resource type", e.getMessage());
+			assertEquals("Invalid SearchParameter.expression value \"Observation.code\". All paths in a single SearchParameter must match the same resource type", e.getMessage());
 		}
 	}
 
@@ -70,7 +72,7 @@ public class FhirResourceDaoDstu3SearchCustomSearchParamTest extends BaseJpaDstu
 			mySearchParameterDao.create(fooSp, mySrd);
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertEquals("Resource.xpath is missing", e.getMessage());
+			assertEquals("SearchParameter.expression is missing", e.getMessage());
 		}
 	}
 
@@ -80,14 +82,14 @@ public class FhirResourceDaoDstu3SearchCustomSearchParamTest extends BaseJpaDstu
 		fooSp.setCode("foo");
 		fooSp.setType(org.hl7.fhir.dstu3.model.Enumerations.SearchParamType.TOKEN);
 		fooSp.setTitle("FOO SP");
-		fooSp.setXpath("gender");
+		fooSp.setExpression("gender");
 		fooSp.setXpathUsage(org.hl7.fhir.dstu3.model.SearchParameter.XPathUsageType.NORMAL);
 		fooSp.setStatus(org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus.ACTIVE);
 		try {
 			mySearchParameterDao.create(fooSp, mySrd);
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertEquals("Invalid path value \"gender\". Must start with a resource name", e.getMessage());
+			assertEquals("Invalid SearchParameter.expression value \"gender\". Must start with a resource name", e.getMessage());
 		}
 	}
 
@@ -98,14 +100,14 @@ public class FhirResourceDaoDstu3SearchCustomSearchParamTest extends BaseJpaDstu
 		fooSp.setCode("foo");
 		fooSp.setType(org.hl7.fhir.dstu3.model.Enumerations.SearchParamType.TOKEN);
 		fooSp.setTitle("FOO SP");
-		fooSp.setXpath("Patient.gender");
+		fooSp.setExpression("Patient.gender");
 		fooSp.setXpathUsage(org.hl7.fhir.dstu3.model.SearchParameter.XPathUsageType.NORMAL);
 		fooSp.setStatus(null);
 		try {
 			mySearchParameterDao.create(fooSp, mySrd);
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertEquals("Resource.status is missing or invalid: null", e.getMessage());
+			assertEquals("SearchParameter.status is missing or invalid: null", e.getMessage());
 		}
 
 	}
@@ -117,10 +119,10 @@ public class FhirResourceDaoDstu3SearchCustomSearchParamTest extends BaseJpaDstu
 		fooSp.setCode("foo");
 		fooSp.setType(org.hl7.fhir.dstu3.model.Enumerations.SearchParamType.TOKEN);
 		fooSp.setTitle("FOO SP");
-		fooSp.setXpath("Patient.gender");
+		fooSp.setExpression("Patient.gender");
 		fooSp.setXpathUsage(org.hl7.fhir.dstu3.model.SearchParameter.XPathUsageType.NORMAL);
 		fooSp.setStatus(org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus.ACTIVE);
-		mySearchParameterDao.create(fooSp, mySrd);
+		IIdType spId = mySearchParameterDao.create(fooSp, mySrd).getId().toUnqualifiedVersionless();
 
 		mySearchParamRegsitry.forceRefresh();
 
@@ -150,6 +152,17 @@ public class FhirResourceDaoDstu3SearchCustomSearchParamTest extends BaseJpaDstu
 		foundResources = toUnqualifiedVersionlessIdValues(results);
 		assertThat(foundResources, contains(patId.getValue()));
 
+		// Delete the param
+		mySearchParameterDao.delete(spId, mySrd);
+		
+		mySearchParamRegsitry.forceRefresh();
+		mySystemDao.performReindexingPass(100);
+
+		// Try with custom gender SP
+		map = new SearchParameterMap();
+		map.add("foo", new TokenParam(null, "male"));
+		IBundleProvider res = myPatientDao.search(map);
+		assertEquals(0, res.size());
 	}
 
 	@Test
@@ -159,7 +172,7 @@ public class FhirResourceDaoDstu3SearchCustomSearchParamTest extends BaseJpaDstu
 		fooSp.setCode("foo");
 		fooSp.setType(org.hl7.fhir.dstu3.model.Enumerations.SearchParamType.TOKEN);
 		fooSp.setTitle("FOO SP");
-		fooSp.setXpath("Patient.gender");
+		fooSp.setExpression("Patient.gender");
 		fooSp.setXpathUsage(org.hl7.fhir.dstu3.model.SearchParameter.XPathUsageType.NORMAL);
 		fooSp.setStatus(org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus.DRAFT);
 		mySearchParameterDao.create(fooSp, mySrd);

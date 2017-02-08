@@ -22,6 +22,7 @@ package ca.uhn.fhir.util;
 
 import java.util.Collection;
 
+import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
@@ -84,6 +85,7 @@ public class ParametersUtil {
 	}
 
 	public static IBaseParameters newInstance(FhirContext theContext) {
+		Validate.notNull(theContext, "theContext must not be null");
 		return (IBaseParameters) theContext.getResourceDefinition("Parameters").newInstance();
 	}
 }

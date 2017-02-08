@@ -41,6 +41,7 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoCodeSystem;
+import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemVersionDao;
 import ca.uhn.fhir.jpa.entity.ResourceTable;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
@@ -187,6 +188,9 @@ public class FhirResourceDaoCodeSystemDstu3 extends FhirResourceDaoDstu3<CodeSys
 		return retVal;
 	}
 
+	@Autowired
+	private ITermCodeSystemVersionDao myCsvDao;
+	
 	@Override
 	protected ResourceTable updateEntity(IBaseResource theResource, ResourceTable theEntity, Date theDeletedTimestampOrNull, boolean thePerformIndexing,
 			boolean theUpdateVersion, Date theUpdateTime) {
@@ -198,12 +202,22 @@ public class FhirResourceDaoCodeSystemDstu3 extends FhirResourceDaoDstu3<CodeSys
 			String codeSystemUrl = cs.getUrl();
 			if (cs.getContent() == CodeSystemContentMode.COMPLETE || cs.getContent() == null) {
 				ourLog.info("CodeSystem {} has a status of {}, going to store concepts in terminology tables", retVal.getIdDt().getValue(), cs.getContentElement().getValueAsString());
-				TermCodeSystemVersion persCs = new TermCodeSystemVersion();
-				persCs.setResource(retVal);
-				persCs.setResourceVersionId(retVal.getVersion());
-				persCs.getConcepts().addAll(toPersistedConcepts(cs.getConcept(), persCs));
+				
+				Long codeSystemResourcePid = retVal.getId();
+				TermCodeSystemVersion persCs = myCsvDao.findByCodeSystemResourceAndVersion(codeSystemResourcePid, retVal.getVersion());
+				if (persCs != null) {
+					ourLog.info("Code system version already exists in database");
+				} else {
+					
+					persCs = new TermCodeSystemVersion();
+					persCs.setResource(retVal);
+					persCs.setResourceVersionId(retVal.getVersion());
+					persCs.getConcepts().addAll(toPersistedConcepts(cs.getConcept(), persCs));
+					ourLog.info("Code system has {} concepts", persCs.getConcepts().size());
+					myTerminologySvc.storeNewCodeSystemVersion(codeSystemResourcePid, codeSystemUrl, persCs);
+					
+				}
 
-				myTerminologySvc.storeNewCodeSystemVersion(retVal.getId(), codeSystemUrl, persCs);
 			}
 		}
 

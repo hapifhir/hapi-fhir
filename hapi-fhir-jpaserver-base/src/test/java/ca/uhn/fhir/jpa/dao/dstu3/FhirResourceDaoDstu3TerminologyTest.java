@@ -26,7 +26,9 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 
+import ca.uhn.fhir.jpa.dao.BaseHapiFhirSystemDao;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoCodeSystem.LookupCodeResult;
 import ca.uhn.fhir.jpa.dao.SearchParameterMap;
@@ -34,6 +36,8 @@ import ca.uhn.fhir.jpa.entity.ResourceTable;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink.RelationshipTypeEnum;
+import ca.uhn.fhir.jpa.term.BaseHapiTerminologySvc;
+import ca.uhn.fhir.jpa.term.IHapiTerminologySvc;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.TokenParamModifier;
@@ -52,6 +56,8 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 	@After
 	public void after() {
 		myDaoConfig.setDeferIndexingForCodesystemsOfSize(new DaoConfig().getDeferIndexingForCodesystemsOfSize());
+		
+		BaseHapiTerminologySvc.setForceSaveDeferredAlwaysForUnitTest(false);
 	}
 
 	@Before
@@ -315,6 +321,71 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals("unable to find code system http://example.com/my_code_systemAA", e.getMessage());
+		}
+	}
+
+	@Test
+	public void testExpandWithIsAInExternalValueSet() {
+		createExternalCsAndLocalVs();
+
+		ValueSet vs = new ValueSet();
+		ConceptSetComponent include = vs.getCompose().addInclude();
+		include.setSystem(URL_MY_CODE_SYSTEM);
+		include.addFilter().setOp(FilterOperator.ISA).setValue("childAA").setProperty("concept");
+
+		ValueSet result = myValueSetDao.expand(vs, null);
+		logAndValidateValueSet(result);
+
+		ArrayList<String> codes = toCodesContains(result.getExpansion().getContains());
+		assertThat(codes, containsInAnyOrder("childAAA", "childAAB"));
+
+	}
+
+	@Autowired
+	private IHapiTerminologySvc myHapiTerminologySvc;
+	
+	@Test
+	public void testExpandWithIsAInExternalValueSetReindex() {
+		BaseHapiTerminologySvc.setForceSaveDeferredAlwaysForUnitTest(true);
+		
+		createExternalCsAndLocalVs();
+
+		mySystemDao.markAllResourcesForReindexing();
+
+		mySystemDao.performReindexingPass(100);
+		mySystemDao.performReindexingPass(100);
+		myHapiTerminologySvc.saveDeferred();
+		myHapiTerminologySvc.saveDeferred();
+		myHapiTerminologySvc.saveDeferred();
+		
+		ValueSet vs = new ValueSet();
+		ConceptSetComponent include = vs.getCompose().addInclude();
+		include.setSystem(URL_MY_CODE_SYSTEM);
+		include.addFilter().setOp(FilterOperator.ISA).setValue("childAA").setProperty("concept");
+
+		ValueSet result = myValueSetDao.expand(vs, null);
+		logAndValidateValueSet(result);
+
+		ArrayList<String> codes = toCodesContains(result.getExpansion().getContains());
+		assertThat(codes, containsInAnyOrder("childAAA", "childAAB"));
+
+	}
+
+	@Test
+	public void testExpandInvalid() {
+		createExternalCsAndLocalVs();
+
+		ValueSet vs = new ValueSet();
+		ConceptSetComponent include = vs.getCompose().addInclude();
+		include.setSystem(URL_MY_CODE_SYSTEM);
+		include.addFilter();
+		include.addFilter().setOp(FilterOperator.ISA).setValue("childAA");
+
+		try {
+			myValueSetDao.expand(vs, null);
+			fail();
+		} catch (InvalidRequestException e) {
+			assertEquals("Invalid filter, must have fields populated: property op value", e.getMessage());
 		}
 	}
 

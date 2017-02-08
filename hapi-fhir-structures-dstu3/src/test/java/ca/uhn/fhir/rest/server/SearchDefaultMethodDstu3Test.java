@@ -1,8 +1,7 @@
 package ca.uhn.fhir.rest.server;
 
-import static org.hamcrest.Matchers.either;
-import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.oneOf;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 
@@ -65,7 +64,7 @@ public class SearchDefaultMethodDstu3Test {
 			ourLog.info(responseContent);
 			assertEquals(200, status.getStatusLine().getStatusCode());
 
-			assertThat(ourLastMethod, either(equalTo("search01")).or(equalTo("search02")));
+			assertThat(ourLastMethod, oneOf("search01", "search02", "search03"));
 			assertEquals(null, ourLastParam1);
 			assertEquals(null, ourLastParam2);
 			assertEquals(null, ourLastAdditionalParams);
