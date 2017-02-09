@@ -89,22 +89,6 @@ public interface IRestfulClient {
 	 */
 	void setSummary(SummaryEnum theSummary);
         
-        /**
-         * Specifies that the server should process the message Synchronously or Asynchronously. This is only applicable to the
-         * $process-message server operation
-         * 
-         * @param isAsync The async print flag to use in the request (default is <code>false</code>)
-         */
-        void setMessageAsync(Boolean isAsync);
-        
-        /**
-         * Specifies that the server should send Asynchronous responses to this url. This is only applicable to the
-         * $process-message server operation
-         * 
-         * @param isAsync The async print flag to use in the request (default is <code>false</code>)
-         */
-        void setMessageResponseUrl(String responseUrl);
-
 	/**
 	 * Remove an intercaptor that was previously registered using {@link IRestfulClient#registerInterceptor(IClientInterceptor)}
 	 */

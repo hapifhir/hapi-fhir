@@ -6,19 +6,29 @@
 package ca.uhn.fhir.rest.gclient;
 
 import org.hl7.fhir.instance.model.api.IBaseBundle;
-import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 /**
  *
  * @author HGS
  */
-public interface IOperationProcessMsg<T extends IBaseResource> extends IClientExecutable<IOperationProcessMsg<T>, T> {
+public interface IOperationProcessMsg{
 
-    IOperationProcessMsg<T> setMessageBundle(IBaseBundle theMsgBundle);
+    /**
+     * Set the Message Bundle to POST to the messaging server.<br>
+     * After this call you must choose either the method synchronous or asynchronous to set the processing mode.
+     * 
+     * @param <R>
+     * @param theMsgBundle A Bundle of type message
+     * @return 
+     */
+    <R extends IBaseResource> IOperationProcessMsgMode<R> setMessageBundle(IBaseBundle theMsgBundle);
 
-    IOperationProcessMsg<T> setAsyncProcessingMode();
-
-    IOperationProcessMsg<T> setResponseUrlParam(String respondToUri);
-
+    /**
+     * An optional query parameter indicating that responses from the receiving server should be sent to this url
+     * 
+     * @param respondToUri The receiving endpoint to witch server response messages should be sent.
+     * @return 
+     */
+    IOperationProcessMsg setResponseUrlParam(String respondToUri);
 }

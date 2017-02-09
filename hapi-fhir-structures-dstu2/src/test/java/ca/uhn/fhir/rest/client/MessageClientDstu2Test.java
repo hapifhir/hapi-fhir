@@ -1,21 +1,13 @@
 package ca.uhn.fhir.rest.client;
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 import java.io.InputStream;
 import java.io.StringReader;
 import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.Arrays;
-
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.ReaderInputStream;
 import org.apache.http.HttpResponse;
 import org.apache.http.ProtocolVersion;
 import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicStatusLine;
@@ -31,22 +23,15 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.dstu2.resource.Bundle;
 import ca.uhn.fhir.model.dstu2.resource.MessageHeader;
 import ca.uhn.fhir.model.dstu2.resource.OperationOutcome;
-import ca.uhn.fhir.model.dstu2.resource.Parameters;
-import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.dstu2.valueset.BundleTypeEnum;
 import ca.uhn.fhir.model.dstu2.valueset.ResponseTypeEnum;
-import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.rest.client.apache.ApacheRestfulClientFactory;
-import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.util.TestUtil;
 import java.util.Date;
 import java.util.UUID;
-import org.hl7.fhir.instance.model.api.IBaseBundle;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -98,7 +83,7 @@ public class MessageClientDstu2Test {
             }
         });
 
-        IGenericClient client = ourCtx.getRestfulClientFactory().newGenericClient("http://192.168.4.196:83/fhirServer");
+        IGenericClient client = ourCtx.getRestfulClientFactory().newGenericClient("http://192.168.4.93:83/fhirServer");
 
         client.setEncoding(EncodingEnum.JSON);
 
@@ -108,17 +93,16 @@ public class MessageClientDstu2Test {
                 "MySource", "http://myServer/fhir/", "MyDestination", "http://myDestinationServer/fhir/");
 
 // Invoke $process-message
-        Object response = client
+        OperationOutcome response = client
                 .operation()
-                .onServer()
                 .processMessage()
-                .setAsyncProcessingMode()
                 .setResponseUrlParam("http://myserver/fhir")
                 .setMessageBundle(msgBundle)
+                .asynchronous(OperationOutcome.class)
                 .execute();
 
         //System.out.println(response);
-        assertEquals("http://192.168.4.196:83/fhirServer/$process-message?_format=json&async=true&response-url=http%3A%2F%2Fmyserver%2Ffhir", capt.getAllValues().get(0).getURI().toASCIIString());
+        assertEquals("http://192.168.4.93:83/fhirServer/$process-message?async=true&response-url=http%3A%2F%2Fmyserver%2Ffhir&_format=json", capt.getAllValues().get(0).getURI().toASCIIString());
         assertEquals("POST", capt.getAllValues().get(0).getRequestLine().getMethod());
         //assertEquals("<Parameters xmlns=\"http://hl7.org/fhir\"><parameter><name value=\"resource\"/><resource><Patient xmlns=\"http://hl7.org/fhir\"><name><given value=\"GIVEN\"/></name></Patient></resource></parameter></Parameters>", extractBody(capt, 0));
         //assertNotNull(response.getOperationOutcome());
@@ -145,7 +129,7 @@ public class MessageClientDstu2Test {
             }
         });
 
-        IGenericClient client = ourCtx.getRestfulClientFactory().newGenericClient("http://192.168.4.196:83/fhirServer");
+        IGenericClient client = ourCtx.getRestfulClientFactory().newGenericClient("http://192.168.4.93:83/fhirServer");
 
         client.setEncoding(EncodingEnum.JSON);
 
@@ -155,16 +139,15 @@ public class MessageClientDstu2Test {
                 "MySource", "http://myServer/fhir/", "MyDestination", "http://myDestinationServer/fhir/");
 
 // Invoke $process-message
-        Object response = client
-                .operation()
-                .onServer()
+        Bundle response = client
+                .operation()           
                 .processMessage()
-                .setResponseUrlParam("http://myserver/fhir")
                 .setMessageBundle(msgBundle)
+                .synchronous(Bundle.class)
                 .execute();
 
         //System.out.println(response);
-        assertEquals("http://192.168.4.196:83/fhirServer/$process-message?_format=json&response-url=http%3A%2F%2Fmyserver%2Ffhir", capt.getAllValues().get(0).getURI().toASCIIString());
+        assertEquals("http://192.168.4.93:83/fhirServer/$process-message?async=false&_format=json", capt.getAllValues().get(0).getURI().toASCIIString());
         assertEquals("POST", capt.getAllValues().get(0).getRequestLine().getMethod());
         //assertEquals("<Parameters xmlns=\"http://hl7.org/fhir\"><parameter><name value=\"resource\"/><resource><Patient xmlns=\"http://hl7.org/fhir\"><name><given value=\"GIVEN\"/></name></Patient></resource></parameter></Parameters>", extractBody(capt, 0));
         //assertNotNull(response.getOperationOutcome());
