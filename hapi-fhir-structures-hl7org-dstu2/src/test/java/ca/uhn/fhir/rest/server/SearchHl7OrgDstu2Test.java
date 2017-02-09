@@ -160,6 +160,11 @@ public class SearchHl7OrgDstu2Test {
 				public int size() {
 					return 0;
 				}
+
+				@Override
+				public String getUuid() {
+					return null;
+				}
 			};
 		}
 		

@@ -171,7 +171,7 @@ public class HistoryMethodBinding extends BaseResourceReturningMethodBinding {
 		return new IBundleProvider() {
 			
 			@Override
-			public InstantDt getPublished() {
+			public IPrimitiveType<Date> getPublished() {
 				return resources.getPublished();
 			}
 			
