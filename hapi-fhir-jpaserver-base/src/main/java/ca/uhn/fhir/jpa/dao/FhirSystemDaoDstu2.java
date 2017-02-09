@@ -40,7 +40,6 @@ import java.util.Set;
 import javax.persistence.TypedQuery;
 
 import org.apache.http.NameValuePair;
-import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -493,7 +492,9 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle, MetaDt> {
 			InstantDt deletedInstantOrNull = ResourceMetadataKeyEnum.DELETED_AT.get(nextResource);
 			Date deletedTimestampOrNull = deletedInstantOrNull != null ? deletedInstantOrNull.getValue() : null;
 			boolean shouldUpdate = !nonUpdatedEntities.contains(nextOutcome.getEntity());
-			updateEntity(nextResource, nextOutcome.getEntity(), deletedTimestampOrNull, true, shouldUpdate, updateTime);
+			if (shouldUpdate) {
+				updateEntity(nextResource, nextOutcome.getEntity(), deletedTimestampOrNull, true, true, updateTime);
+			}
 		}
 
 		myEntityManager.flush();
@@ -634,8 +635,10 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle, MetaDt> {
 	}
 
 	private static boolean isPlaceholder(IdDt theId) {
-		if ("urn:oid:".equals(theId.getBaseUrl()) || "urn:uuid:".equals(theId.getBaseUrl())) {
-			return true;
+		if (theId.getValue() != null) {
+			if (theId.getValue().startsWith("urn:oid:") || theId.getValue().startsWith("urn:uuid:")) {
+				return true;
+			}
 		}
 		return false;
 	}

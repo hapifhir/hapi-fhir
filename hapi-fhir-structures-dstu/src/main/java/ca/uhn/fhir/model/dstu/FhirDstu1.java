@@ -375,15 +375,17 @@ public class FhirDstu1 implements IFhirVersion {
 				RuntimeCompositeDatatypeDefinition pdef = (RuntimeCompositeDatatypeDefinition) nextChild.getSingleChildOrThrow();
 				defn.getDefinition().addType().setCode(DataTypeEnum.VALUESET_BINDER.fromCodeString(pdef.getName()));
 			} else {
-				RuntimeResourceBlockDefinition pdef = (RuntimeResourceBlockDefinition) nextChild.getSingleChildOrThrow();
-				scanForExtensions(theProfile, pdef, theExtensionDefToCode);
-
-				for (RuntimeChildDeclaredExtensionDefinition nextChildExt : pdef.getExtensions()) {
-					StructureElementDefinitionType type = defn.getDefinition().addType();
-					type.setCode(DataTypeEnum.EXTENSION);
-					type.setProfile("#" + theExtensionDefToCode.get(nextChildExt));
+				BaseRuntimeElementDefinition<?> singleChildOrThrow = nextChild.getSingleChildOrThrow();
+				if (singleChildOrThrow instanceof RuntimeResourceBlockDefinition) {
+					RuntimeResourceBlockDefinition pdef = (RuntimeResourceBlockDefinition) singleChildOrThrow;
+					scanForExtensions(theProfile, pdef, theExtensionDefToCode);
+	
+					for (RuntimeChildDeclaredExtensionDefinition nextChildExt : pdef.getExtensions()) {
+						StructureElementDefinitionType type = defn.getDefinition().addType();
+						type.setCode(DataTypeEnum.EXTENSION);
+						type.setProfile("#" + theExtensionDefToCode.get(nextChildExt));
+					}
 				}
-
 			}
 		}
 

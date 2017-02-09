@@ -58,6 +58,9 @@ public class TestDstu1Config extends BaseJavaConfigDstu1 {
 		extraProperties.put("hibernate.format_sql", "false");
 		extraProperties.put("hibernate.show_sql", "false");
 		extraProperties.put("hibernate.hbm2ddl.auto", "update");
+		extraProperties.put("hibernate.dialect", "org.hibernate.dialect.DerbyTenSevenDialect");
+		extraProperties.put("hibernate.search.default.directory_provider", "ram");
+		extraProperties.put("hibernate.search.lucene_version","LUCENE_CURRENT");
 		return extraProperties;
 	}
 

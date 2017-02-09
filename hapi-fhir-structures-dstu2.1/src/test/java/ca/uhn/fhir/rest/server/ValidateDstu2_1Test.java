@@ -96,8 +96,11 @@ public class ValidateDstu2_1Test {
 		params.addParameter().setName("resource").setResource(patient);
 		params.addParameter().setName("mode").setValue(new CodeType(" "));
 
+
+		String encodedResource = ourCtx.newXmlParser().encodeResourceToString(params);
+		
 		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient/$validate");
-		httpPost.setEntity(new StringEntity(ourCtx.newXmlParser().encodeResourceToString(params), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+		httpPost.setEntity(new StringEntity(encodedResource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 
 		HttpResponse status = ourClient.execute(httpPost);
 		String resp = IOUtils.toString(status.getEntity().getContent());

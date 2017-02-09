@@ -383,7 +383,8 @@ public class FhirSystemDaoDstu3 extends BaseHapiFhirSystemDao<Bundle, Meta> {
 				IFhirResourceDao resourceDao = getDaoOrThrowException(res.getClass());
 				res.setId((String) null);
 				DaoMethodOutcome outcome;
-				outcome = resourceDao.create(res, nextReqEntry.getRequest().getIfNoneExist(), false, theRequestDetails);
+				String matchUrl = nextReqEntry.getRequest().getIfNoneExist();
+				outcome = resourceDao.create(res, matchUrl, false, theRequestDetails);
 				handleTransactionCreateOrUpdateOutcome(idSubstitutions, idToPersistedOutcome, nextResourceId, outcome, nextRespEntry, resourceType, res);
 				entriesToProcess.put(nextRespEntry, outcome.getEntity());
 				if (outcome.getCreated() == false) {
@@ -489,7 +490,9 @@ public class FhirSystemDaoDstu3 extends BaseHapiFhirSystemDao<Bundle, Meta> {
 			IPrimitiveType<Date> deletedInstantOrNull = ResourceMetadataKeyEnum.DELETED_AT.get((IAnyResource) nextResource);
 			Date deletedTimestampOrNull = deletedInstantOrNull != null ? deletedInstantOrNull.getValue() : null;
 			boolean shouldUpdate = !nonUpdatedEntities.contains(nextOutcome.getEntity());
-			updateEntity(nextResource, nextOutcome.getEntity(), deletedTimestampOrNull, shouldUpdate, shouldUpdate, updateTime);
+			if (shouldUpdate) {
+				updateEntity(nextResource, nextOutcome.getEntity(), deletedTimestampOrNull, shouldUpdate, true, updateTime);
+			}
 		}
 
 		myEntityManager.flush();
@@ -627,8 +630,10 @@ public class FhirSystemDaoDstu3 extends BaseHapiFhirSystemDao<Bundle, Meta> {
 	}
 
 	private static boolean isPlaceholder(IdType theId) {
-		if ("urn:oid:".equals(theId.getBaseUrl()) || "urn:uuid:".equals(theId.getBaseUrl())) {
-			return true;
+		if (theId.getValue() != null) {
+			if (theId.getValue().startsWith("urn:oid:") || theId.getValue().startsWith("urn:uuid:")) {
+				return true;
+			}
 		}
 		return false;
 	}

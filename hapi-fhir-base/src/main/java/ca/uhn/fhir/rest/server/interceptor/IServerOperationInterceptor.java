@@ -24,6 +24,13 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.rest.method.RequestDetails;
 
+/**
+ * Server interceptor with added methods which can be called within the lifecycle of 
+ * write operations (create/update/delete) or within transaction and batch
+ * operations that call these sub-operations.
+ * 
+ * @see ServerOperationInterceptorAdapter
+ */
 public interface IServerOperationInterceptor extends IServerInterceptor {
 
 	/**

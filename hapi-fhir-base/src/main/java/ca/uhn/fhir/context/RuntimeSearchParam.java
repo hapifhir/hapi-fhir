@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.StringTokenizer;
 
+import org.hl7.fhir.instance.model.api.IIdType;
+
 import ca.uhn.fhir.rest.method.RestSearchParameterTypeEnum;
 
 /*
@@ -29,7 +31,7 @@ import ca.uhn.fhir.rest.method.RestSearchParameterTypeEnum;
  */
 
 public class RuntimeSearchParam {
-
+	private final IIdType myId;
 	private final List<RuntimeSearchParam> myCompositeOf;
 	private final String myDescription;
 	private final String myName;
@@ -37,15 +39,28 @@ public class RuntimeSearchParam {
 	private final String myPath;
 	private final Set<String> myTargets;
 	private final Set<String> myProvidesMembershipInCompartments;
+	private final RuntimeSearchParamStatusEnum myStatus;
+	private final String myUri;
 
-	public RuntimeSearchParam(String theName, String theDescription, String thePath, RestSearchParameterTypeEnum theParamType, List<RuntimeSearchParam> theCompositeOf,
-			Set<String> theProvidesMembershipInCompartments, Set<String> theTargets) {
+	public IIdType getId() {
+		return myId;
+	}
+
+	public String getUri() {
+		return myUri;
+	}
+
+	public RuntimeSearchParam(IIdType theId, String theUri, String theName, String theDescription, String thePath, RestSearchParameterTypeEnum theParamType, List<RuntimeSearchParam> theCompositeOf,
+			Set<String> theProvidesMembershipInCompartments, Set<String> theTargets, RuntimeSearchParamStatusEnum theStatus) {
 		super();
+		myId = theId;
+		myUri = theUri;
 		myName = theName;
 		myDescription = theDescription;
 		myPath = thePath;
 		myParamType = theParamType;
 		myCompositeOf = theCompositeOf;
+		myStatus = theStatus;
 		if (theProvidesMembershipInCompartments != null && !theProvidesMembershipInCompartments.isEmpty()) {
 			myProvidesMembershipInCompartments = Collections.unmodifiableSet(theProvidesMembershipInCompartments);
 		} else {
@@ -62,8 +77,12 @@ public class RuntimeSearchParam {
 		return myTargets;
 	}
 
-	public RuntimeSearchParam(String theName, String theDescription, String thePath, RestSearchParameterTypeEnum theParamType, Set<String> theProvidesMembershipInCompartments, Set<String> theTargets) {
-		this(theName, theDescription, thePath, theParamType, null, theProvidesMembershipInCompartments, theTargets);
+	public RuntimeSearchParamStatusEnum getStatus() {
+		return myStatus;
+	}
+
+	public RuntimeSearchParam(String theName, String theDescription, String thePath, RestSearchParameterTypeEnum theParamType, Set<String> theProvidesMembershipInCompartments, Set<String> theTargets, RuntimeSearchParamStatusEnum theStatus) {
+		this(null, null, theName, theDescription, thePath, theParamType, null, theProvidesMembershipInCompartments, theTargets, theStatus);
 	}
 
 	public List<RuntimeSearchParam> getCompositeOf() {
@@ -108,4 +127,10 @@ public class RuntimeSearchParam {
 		return myProvidesMembershipInCompartments;
 	}
 
+	public enum RuntimeSearchParamStatusEnum {
+		ACTIVE,
+		DRAFT,
+		RETIRED
+	}
+	
 }

@@ -19,10 +19,12 @@ import static org.mockito.Mockito.verify;
 
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.io.IOUtils;
+import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.AfterClass;
 import org.junit.Test;
@@ -73,6 +75,43 @@ public class FhirSystemDaoDstu2Test extends BaseJpaDstu2SystemTest {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirSystemDaoDstu2Test.class);
 
+	/**
+	 * Per a message on the mailing list
+	 */
+	@Test
+	public void testTransactionWithPostDoesntUpdate() throws Exception {
+
+		// First bundle (name is Joshua)
+		
+		String input = IOUtils.toString(getClass().getResource("/dstu3-post1.xml"), StandardCharsets.UTF_8);
+		Bundle request = myFhirCtx.newXmlParser().parseResource(Bundle.class, input);
+		Bundle response = mySystemDao.transaction(mySrd, request);
+		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(response));
+		
+		assertEquals(1, response.getEntry().size());
+		assertEquals("201 Created", response.getEntry().get(0).getResponse().getStatus());
+		assertEquals("1", response.getEntry().get(0).getResponse().getEtag());
+		String id = response.getEntry().get(0).getResponse().getLocation();
+		
+		// Now the second (name is Adam, shouldn't get used)
+		
+		input = IOUtils.toString(getClass().getResource("/dstu3-post2.xml"), StandardCharsets.UTF_8);
+		request = myFhirCtx.newXmlParser().parseResource(Bundle.class, input);
+		response = mySystemDao.transaction(mySrd, request);
+		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(response));
+		
+		assertEquals(1, response.getEntry().size());
+		assertEquals("200 OK", response.getEntry().get(0).getResponse().getStatus());
+		assertEquals("1", response.getEntry().get(0).getResponse().getEtag());
+		String id2 = response.getEntry().get(0).getResponse().getLocation();
+		assertEquals(id, id2);
+		
+		Patient patient = myPatientDao.read(new IdType(id), mySrd);
+		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(patient));
+		assertEquals("Joshua", patient.getNameFirstRep().getGivenAsSingleString());
+	}
+
+	
 	@Test
 	public void testReindexing() {
 		Patient p = new Patient();
@@ -1615,13 +1654,11 @@ public class FhirSystemDaoDstu2Test extends BaseJpaDstu2SystemTest {
 		res.addEntry().setResource(p1).getRequest().setMethod(HTTPVerbEnum.POST).setUrl("Patient");
 
 		Observation o1 = new Observation();
-		o1.setId("cid:observation1");
 		o1.addIdentifier().setSystem("system").setValue("testTransactionWithRelativeOidIds02");
 		o1.setSubject(new ResourceReferenceDt("urn:oid:0.1.2.3"));
 		res.addEntry().setResource(o1).getRequest().setMethod(HTTPVerbEnum.POST).setUrl("Observation");
 
 		Observation o2 = new Observation();
-		o2.setId("cid:observation2");
 		o2.addIdentifier().setSystem("system").setValue("testTransactionWithRelativeOidIds03");
 		o2.setSubject(new ResourceReferenceDt("urn:oid:0.1.2.3"));
 		res.addEntry().setResource(o2).getRequest().setMethod(HTTPVerbEnum.POST).setUrl("Observation");
@@ -1760,13 +1797,11 @@ public class FhirSystemDaoDstu2Test extends BaseJpaDstu2SystemTest {
 		res.addEntry().setResource(p1).getRequest().setMethod(HTTPVerbEnum.POST).setUrl("Patient");
 
 		Observation o1 = new Observation();
-		o1.setId("cid:observation1");
 		o1.addIdentifier().setSystem("system").setValue("testTransactionWithRelativeOidIds02");
 		o1.setSubject(new ResourceReferenceDt("Patient/urn:oid:0.1.2.3"));
 		res.addEntry().setResource(o1).getRequest().setMethod(HTTPVerbEnum.POST).setUrl("Observation");
 
 		Observation o2 = new Observation();
-		o2.setId("cid:observation2");
 		o2.addIdentifier().setSystem("system").setValue("testTransactionWithRelativeOidIds03");
 		o2.setSubject(new ResourceReferenceDt("Patient/urn:oid:0.1.2.3"));
 		res.addEntry().setResource(o2).getRequest().setMethod(HTTPVerbEnum.POST).setUrl("Observation");

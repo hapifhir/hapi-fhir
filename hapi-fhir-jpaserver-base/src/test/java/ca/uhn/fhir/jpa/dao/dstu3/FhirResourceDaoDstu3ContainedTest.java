@@ -1,8 +1,5 @@
 package ca.uhn.fhir.jpa.dao.dstu3;
 
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.junit.Assert.assertThat;
-
 import org.hl7.fhir.dstu3.model.Observation;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.Reference;
@@ -11,9 +8,6 @@ import org.junit.AfterClass;
 import org.junit.Test;
 
 import ca.uhn.fhir.jpa.dao.SearchParameterMap;
-import ca.uhn.fhir.rest.param.TokenParam;
-import ca.uhn.fhir.rest.param.TokenParamModifier;
-import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.TestUtil;
 
 public class FhirResourceDaoDstu3ContainedTest extends BaseJpaDstu3Test {

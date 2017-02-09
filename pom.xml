@@ -288,6 +288,19 @@
 			<id>rqg0717</id>
 			<name>James Ren</name>
 		</developer>
+		<developer>
+			<id>Robbert1</id>
+			<name>Robbert van Waveren</name>
+		</developer>
+		<developer>
+			<id>daliboz</id>
+			<name>Jenny Syed</name>
+			<organization>Cerner</organization>
+		</developer>
+		<developer>
+			<id>sekaijin</id>
+			<name>sekaijin</name>
+		</developer>
 	</developers>
 
 	<licenses>
@@ -311,18 +324,18 @@
 		<derby_version>10.13.1.1</derby_version>
 		<jersey_version>2.24</jersey_version>
 		<jetty_version>9.3.14.v20161028</jetty_version>
-		<!-- Note on Hibernate versions: Hibernate 4.3+ uses JPA 2.1, which is too new for a number of platforms including JBoss EAP 6.x and Glassfish 3.0. Upgrade this version with caution! Also note that if 
-			you change this, you may get a failure in hibernate4-maven-plugin. See the note in hapi-fhir-jpaserver-base/pom.xml's configuration for that plugin... -->
-		<!-- 5.2.0 has issues with hibernate-search 5.5.3 -->
-		<hibernate_version>5.1.0.Final</hibernate_version>
-		<hibernate_validator_version>5.2.4.Final</hibernate_validator_version>
+		<hibernate_version>5.2.7.Final</hibernate_version>
+		<hibernate_validator_version>5.3.4.Final</hibernate_validator_version>
+		<!-- Update lucene version when you update hibernate-search version -->
+		<hibernate_search_version>5.7.0.CR1</hibernate_search_version>
+		<lucene_version>5.5.2</lucene_version>
 		<maven_assembly_plugin_version>2.5.3</maven_assembly_plugin_version>
 		<maven_license_plugin_version>1.8</maven_license_plugin_version>
 		<maven_source_plugin_version>2.4</maven_source_plugin_version>
 		<phloc_schematron_version>2.7.1</phloc_schematron_version>
 		<phloc_commons_version>4.4.6</phloc_commons_version>
-		<spring_version>4.3.1.RELEASE</spring_version>
-		<thymeleaf-version>3.0.1.RELEASE</thymeleaf-version>
+		<spring_version>4.3.6.RELEASE</spring_version>
+		<thymeleaf-version>3.0.2.RELEASE</thymeleaf-version>
 		<xmlunit_version>1.6</xmlunit_version>
 
 		<!-- We are aiming to still work on a very old version of SLF4j even though we depend on the newest, just to be nice to users of the API. This version is tested in the hapi-fhir-cobertura. -->
@@ -409,6 +422,11 @@
 				<groupId>javax.json</groupId>
 				<artifactId>javax.json-api</artifactId>
 				<version>1.0</version>
+			</dependency>
+			<dependency>
+				<groupId>com.google.code.gson</groupId>
+				<artifactId>gson</artifactId>
+				<version>2.7</version>
 			</dependency>
 			<dependency>
 				<groupId>javax.mail</groupId>
@@ -511,12 +529,12 @@
 			<dependency>
 				<groupId>org.apache.lucene</groupId>
 				<artifactId>lucene-highlighter</artifactId>
-				<version>5.3.1</version>
+				<version>${lucene_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.lucene</groupId>
 				<artifactId>lucene-analyzers-phonetic</artifactId>
-				<version>5.3.1</version>
+				<version>${lucene_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.maven.doxia</groupId>
@@ -671,7 +689,7 @@
 			<dependency>
 				<groupId>org.hibernate</groupId>
 				<artifactId>hibernate-search-orm</artifactId>
-				<version>5.5.4.Final</version>
+				<version>${hibernate_search_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.javassist</groupId>
@@ -816,7 +834,6 @@
 						-->
 						<testSource>1.8</testSource>
 						<testTarget>1.8</testTarget>
-						<compilerId>javac-with-errorprone</compilerId>
 						<forceJavacCompilerUse>true</forceJavacCompilerUse>
 						<encoding>UTF-8</encoding>
 					</configuration>
@@ -1050,6 +1067,7 @@
 										<ignore></ignore>
 									</action>
 								</pluginExecution>
+								<!-- 
 								<pluginExecution>
 									<pluginExecutionFilter>
 										<groupId>
@@ -1089,6 +1107,7 @@
 										<ignore></ignore>
 									</action>
 								</pluginExecution>
+								 -->
 							</pluginExecutions>
 						</lifecycleMappingMetadata>
 					</configuration>
@@ -1638,7 +1657,8 @@
 				<module>hapi-fhir-cli</module>
 				<module>hapi-fhir-dist</module>
 				<module>examples</module>
-				<module>hapi-fhir-base-example-embedded-ws</module>
+				<module>example-projects/hapi-fhir-base-example-embedded-ws</module>
+				<module>example-projects/hapi-fhir-standalone-overlay-example</module>
 				<module>hapi-fhir-jacoco</module>
 			</modules>
 		</profile>
@@ -1651,6 +1671,20 @@
 						<artifactId>maven-surefire-plugin</artifactId>
 						<configuration>
 							<forkCount>1</forkCount>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+		<profile>
+			<id>ERRORPRONE</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-compiler-plugin</artifactId>
+						<configuration>
+							<compilerId>javac-with-errorprone</compilerId>
 						</configuration>
 					</plugin>
 				</plugins>

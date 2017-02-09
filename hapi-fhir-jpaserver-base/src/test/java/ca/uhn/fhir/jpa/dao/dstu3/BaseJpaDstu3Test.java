@@ -53,6 +53,12 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 	private static JpaValidationSupportChainDstu3 ourJpaValidationSupportChainDstu3;
 	private static IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept> ourValueSetDao;
 
+	
+	@Autowired
+	@Qualifier("mySearchParameterDaoDstu3")
+	protected IFhirResourceDao<SearchParameter> mySearchParameterDao;
+	@Autowired
+	protected ISearchParamRegistry mySearchParamRegsitry;
 //	@Autowired
 //	protected HapiWorkerContext myHapiWorkerContext;
 	@Autowired

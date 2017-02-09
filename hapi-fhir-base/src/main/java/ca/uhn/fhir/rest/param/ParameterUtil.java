@@ -108,8 +108,10 @@ public class ParameterUtil {
 						} else {
 							if (b.length() > 0) {
 								retVal.add(b.toString());
-								b.setLength(0);
+							} else {
+								retVal.add(null);
 							}
+							b.setLength(0);
 						}
 					}
 				} else {

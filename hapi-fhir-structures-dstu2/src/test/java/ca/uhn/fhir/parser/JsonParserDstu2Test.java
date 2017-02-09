@@ -67,6 +67,34 @@ public class JsonParserDstu2Test {
 	private static FhirContext ourCtx = FhirContext.forDstu2();
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(JsonParserDstu2Test.class);
 
+	/**
+	 * See #544
+	 */
+	@Test
+	public void testBundleStitchReferencesByUuid() throws Exception {
+		ca.uhn.fhir.model.dstu2.resource.Bundle bundle = new ca.uhn.fhir.model.dstu2.resource.Bundle();
+		
+		DocumentManifest dm = new DocumentManifest();
+		dm.getSubject().setReference("urn:uuid:96e85cca-9797-45d6-834a-c4eb27f331d3");
+		bundle.addEntry().setResource(dm);
+		
+		Patient patient = new Patient();
+		patient.addName().addFamily("FAMILY");
+		bundle.addEntry().setResource(patient).setFullUrl("urn:uuid:96e85cca-9797-45d6-834a-c4eb27f331d3");
+		
+		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle);
+		ourLog.info(encoded);
+		
+		bundle = ourCtx.newJsonParser().parseResource(ca.uhn.fhir.model.dstu2.resource.Bundle.class, encoded);
+		dm = (DocumentManifest) bundle.getEntry().get(0).getResource();
+		
+		assertEquals("urn:uuid:96e85cca-9797-45d6-834a-c4eb27f331d3", dm.getSubject().getReference().getValue());
+		
+		Patient subject = (Patient) dm.getSubject().getResource();
+		assertNotNull(subject);
+		assertEquals("FAMILY", subject.getNameFirstRep().getFamilyAsSingleString());
+	}
+
 	@Test
 	public void testContainedResourceInExtensionUndeclared() {
 		Patient p = new Patient();
@@ -89,6 +117,21 @@ public class JsonParserDstu2Test {
 		assertEquals("ORG", o.getName());
 	}
 
+	@Test
+	public void testEncodeBundleOldStyleContainingResourceWithUuidBase() {
+		Patient p = new Patient();
+		p.setId(IdDt.newRandomUuid());
+		p.addName().addFamily("PATIENT");
+
+		Bundle b = new Bundle();
+		b.addEntry().setResource(p);
+
+		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeBundleToString(b);
+		ourLog.info(encoded);
+		assertThat(encoded, stringContainsInOrder("fullUrl", p.getId().getValue(), "Patient"));
+	}
+
+	
 	/**
 	 * See #308
 	 */
@@ -1242,8 +1285,8 @@ public class JsonParserDstu2Test {
 		ourLog.info(encoded);
 
 		assertEquals("urn:uuid:180f219f-97a8-486d-99d9-ed631fe4fc57", parsed.getEntry().get(0).getResource().getId().getValue());
-		assertEquals("urn:uuid:", parsed.getEntry().get(0).getResource().getId().getBaseUrl());
-		assertEquals("180f219f-97a8-486d-99d9-ed631fe4fc57", parsed.getEntry().get(0).getResource().getId().getIdPart());
+		assertEquals(null, parsed.getEntry().get(0).getResource().getId().getBaseUrl());
+		assertEquals("urn:uuid:180f219f-97a8-486d-99d9-ed631fe4fc57", parsed.getEntry().get(0).getResource().getId().getIdPart());
 		assertThat(encoded, not(containsString("\"id\":\"180f219f-97a8-486d-99d9-ed631fe4fc57\"")));
 	}
 

@@ -92,7 +92,8 @@ public class FhirResourceDaoDstu3<T extends IAnyResource> extends BaseHapiFhirRe
 			values.addAll(theTerser.getAllPopulatedChildElementsOfType(theResource, BaseResourceReferenceDt.class));
 		} else if (theInclude.getValue().startsWith(theResourceDef.getName() + ":")) {
 			values = new ArrayList<Object>();
-			RuntimeSearchParam sp = theResourceDef.getSearchParam(theInclude.getValue().substring(theInclude.getValue().indexOf(':') + 1));
+			String paramName = theInclude.getValue().substring(theInclude.getValue().indexOf(':') + 1);
+			RuntimeSearchParam sp = getSearchParamByName(theResourceDef, paramName);
 			for (String nextPath : sp.getPathsSplit()) {
 				values.addAll(theTerser.getValues(theResource, nextPath));
 			}

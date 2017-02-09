@@ -721,7 +721,6 @@ class ParserState<T> {
 			myInstance = theInstance;
 		}
 
-		@SuppressWarnings("unchecked")
 		@Override
 		public void wereBack() {
 
@@ -2090,17 +2089,32 @@ class ParserState<T> {
 			final boolean bundle = "Bundle".equals(myContext.getResourceDefinition(myInstance).getName());
 			if (bundle) {
 
+				FhirTerser t = myContext.newTerser();
+				
+				Map<String, IBaseResource> idToResource = new HashMap<String, IBaseResource>();
+				if (myContext.getVersion().getVersion().isNewerThan(FhirVersionEnum.DSTU1)) {
+					List<IBase> entries = t.getValues(myInstance, "Bundle.entry", IBase.class);
+					for (IBase nextEntry : entries) {
+						IPrimitiveType<?> fullUrl = t.getSingleValueOrNull(nextEntry, "fullUrl", IPrimitiveType.class);
+						if (fullUrl != null && isNotBlank(fullUrl.getValueAsString())) {
+							IBaseResource resource = t.getSingleValueOrNull(nextEntry, "resource", IBaseResource.class);
+							if (resource != null) {
+								idToResource.put(fullUrl.getValueAsString(), resource);
+							}
+						}
+					}
+				}
+				
 				/*
 				 * Stitch together resource references
 				 */
-				Map<IIdType, IBaseResource> idToResource = new HashMap<IIdType, IBaseResource>();
-				FhirTerser t = myContext.newTerser();
 				List<IBaseResource> resources = t.getAllPopulatedChildElementsOfType(myInstance, IBaseResource.class);
 				for (IBaseResource next : resources) {
 					IIdType id = next.getIdElement();
 					if (id != null && id.isEmpty() == false) {
 						String resName = myContext.getResourceDefinition(next).getName();
-						idToResource.put(id.withResourceType(resName).toUnqualifiedVersionless(), next);
+						IIdType idType = id.withResourceType(resName).toUnqualifiedVersionless();
+						idToResource.put(idType.getValueAsString(), next);
 					}
 				}
 
@@ -2108,7 +2122,8 @@ class ParserState<T> {
 					List<IBaseReference> refs = myContext.newTerser().getAllPopulatedChildElementsOfType(next, IBaseReference.class);
 					for (IBaseReference nextRef : refs) {
 						if (nextRef.isEmpty() == false && nextRef.getReferenceElement() != null) {
-							IBaseResource target = idToResource.get(nextRef.getReferenceElement().toUnqualifiedVersionless());
+							IIdType unqualifiedVersionless = nextRef.getReferenceElement().toUnqualifiedVersionless();
+							IBaseResource target = idToResource.get(unqualifiedVersionless.getValueAsString());
 							if (target != null) {
 								nextRef.setResource(target);
 							}

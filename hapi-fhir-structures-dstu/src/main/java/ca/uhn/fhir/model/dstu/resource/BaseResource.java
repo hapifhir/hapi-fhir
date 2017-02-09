@@ -34,6 +34,8 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import ca.uhn.fhir.model.api.BaseElement;
+import ca.uhn.fhir.model.api.ICompositeElement;
+import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.api.Tag;
@@ -91,6 +93,17 @@ public abstract class BaseResource extends BaseElement implements IResource {
 
 	@Child(name = "text", order = 1, min = 0, max = 1)
 	private NarrativeDt myText;
+
+	/**
+	 * NOP implementation of this method. 
+	 * 
+	 * @see ICompositeElement#getAllPopulatedChildElementsOfType(Class) for an explanation of why you
+	 * don't need to override this method
+	 */
+	@Override
+	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
+		return Collections.emptyList();
+	}
 
 	@Override
 	public ContainedDt getContained() {

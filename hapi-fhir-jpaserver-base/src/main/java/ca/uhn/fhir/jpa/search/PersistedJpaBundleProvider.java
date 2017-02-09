@@ -19,13 +19,7 @@ package ca.uhn.fhir.jpa.search;
  * limitations under the License.
  * #L%
  */
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
@@ -49,11 +43,7 @@ import ca.uhn.fhir.jpa.dao.IDao;
 import ca.uhn.fhir.jpa.dao.SearchBuilder;
 import ca.uhn.fhir.jpa.dao.data.ISearchDao;
 import ca.uhn.fhir.jpa.dao.data.ISearchResultDao;
-import ca.uhn.fhir.jpa.entity.BaseHasResource;
-import ca.uhn.fhir.jpa.entity.ResourceHistoryTable;
-import ca.uhn.fhir.jpa.entity.Search;
-import ca.uhn.fhir.jpa.entity.SearchResult;
-import ca.uhn.fhir.jpa.entity.SearchTypeEnum;
+import ca.uhn.fhir.jpa.entity.*;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.rest.server.IBundleProvider;
 
@@ -141,9 +131,9 @@ public final class PersistedJpaBundleProvider implements IBundleProvider {
 
 		Set<Long> revIncludedPids = new HashSet<Long>();
 		if (mySearchEntity.getSearchType() == SearchTypeEnum.SEARCH) {
-			revIncludedPids.addAll(SearchBuilder.loadReverseIncludes(myContext, myEntityManager, pidsSubList, mySearchEntity.toRevIncludesList(), true, mySearchEntity.getLastUpdated()));
+			revIncludedPids.addAll(SearchBuilder.loadReverseIncludes(myDao, myContext, myEntityManager, pidsSubList, mySearchEntity.toRevIncludesList(), true, mySearchEntity.getLastUpdated()));
 		}
-		revIncludedPids.addAll(SearchBuilder.loadReverseIncludes(myContext, myEntityManager, pidsSubList, mySearchEntity.toIncludesList(), false, mySearchEntity.getLastUpdated()));
+		revIncludedPids.addAll(SearchBuilder.loadReverseIncludes(myDao, myContext, myEntityManager, pidsSubList, mySearchEntity.toIncludesList(), false, mySearchEntity.getLastUpdated()));
 
 		// Execute the query and make sure we return distinct results
 		List<IBaseResource> resources = new ArrayList<IBaseResource>();
@@ -220,7 +210,7 @@ public final class PersistedJpaBundleProvider implements IBundleProvider {
 		});
 	}
 
-	public String getSearchUuid() {
+	public String getUuid() {
 		return myUuid;
 	}
 

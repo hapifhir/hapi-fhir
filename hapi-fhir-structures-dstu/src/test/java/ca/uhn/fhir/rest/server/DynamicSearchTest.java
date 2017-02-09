@@ -22,6 +22,7 @@ import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.context.RuntimeSearchParam.RuntimeSearchParamStatusEnum;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu.resource.Conformance;
@@ -175,8 +176,8 @@ public class DynamicSearchTest {
 		@Override
 		public List<RuntimeSearchParam> getSearchParameters() {
 			ArrayList<RuntimeSearchParam> retVal = new ArrayList<RuntimeSearchParam>();
-			retVal.add(new RuntimeSearchParam("param1", "This is the first parameter", "Patient.param1", RestSearchParameterTypeEnum.STRING, null, null));
-			retVal.add(new RuntimeSearchParam("param2", "This is the second parameter", "Patient.param2", RestSearchParameterTypeEnum.DATE, null, null));
+			retVal.add(new RuntimeSearchParam("param1", "This is the first parameter", "Patient.param1", RestSearchParameterTypeEnum.STRING, null, null, RuntimeSearchParamStatusEnum.ACTIVE));
+			retVal.add(new RuntimeSearchParam("param2", "This is the second parameter", "Patient.param2", RestSearchParameterTypeEnum.DATE, null, null, RuntimeSearchParamStatusEnum.ACTIVE));
 			return retVal;
 		}
 
