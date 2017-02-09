@@ -34,6 +34,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import ca.uhn.fhir.jpa.dao.BaseSearchParamExtractor;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoSearchParameter;
 import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
+import ca.uhn.fhir.jpa.dao.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.entity.ResourceTable;
 import ca.uhn.fhir.jpa.util.DeleteConflict;
 import ca.uhn.fhir.parser.DataFormatException;
@@ -47,6 +48,9 @@ public class FhirResourceDaoSearchParameterDstu3 extends FhirResourceDaoDstu3<Se
 	@Autowired
 	private IFhirSystemDao<Bundle, Meta> mySystemDao;
 
+	@Autowired
+	private ISearchParamRegistry mySearchParamRegistry;
+	
 	private void markAffectedResources(SearchParameter theResource) {
 		if (theResource != null) {
 			String expression = theResource.getExpression();
@@ -55,6 +59,8 @@ public class FhirResourceDaoSearchParameterDstu3 extends FhirResourceDaoDstu3<Se
 			int updatedCount = myResourceTableDao.markResourcesOfTypeAsRequiringReindexing(resourceType);
 			ourLog.info("Marked {} resources for reindexing", updatedCount);
 		}
+		
+		mySearchParamRegistry.forceRefresh();
 	}
 
 

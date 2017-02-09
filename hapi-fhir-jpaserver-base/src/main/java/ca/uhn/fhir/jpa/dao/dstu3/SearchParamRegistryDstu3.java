@@ -118,7 +118,7 @@ public class SearchParamRegistryDstu3 extends BaseSearchParamRegistry {
 						activeSearchParams.put(nextEntry.getKey(), new HashMap<String, RuntimeSearchParam>());
 					}
 					if (activeSearchParams.containsKey(nextEntry.getKey())) {
-						ourLog.info("Replacing existing/built in search param {}:{} with new one", nextEntry.getKey(), nextName);
+						ourLog.debug("Replacing existing/built in search param {}:{} with new one", nextEntry.getKey(), nextName);
 					}
 					
 					if (nextSp != null) {
