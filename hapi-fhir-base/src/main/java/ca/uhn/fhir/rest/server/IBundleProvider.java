@@ -62,4 +62,15 @@ public interface IBundleProvider {
 	 */
 	InstantDt getPublished();
 
+	/**
+	 * Returns the UUID associated with this search. Note that this
+	 * does not need to return a non-null value unless it a
+	 * {@link IPagingProvider} is being used that requires UUIDs
+	 * being returned.
+	 * <p>
+	 * Otherwise you may simply return {@code null}
+	 * </p>
+	 */
+	public String getUuid();
+
 }

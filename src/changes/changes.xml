@@ -138,6 +138,13 @@
 				JPA server did not return an OperationOutcome in the response for
 				a normal delete operation.
 			</action>
+			<action type="fix">
+				Fix an issue in JPA server where _history results were kept in memory instead
+				of being spooled to the database as they should be. Note that as a part of this fix
+				a new method was added to 
+				<![CDATA[<code>IBundleProvider</code> called <code>getUuid()</code>]]>. This
+				method may return <![CDATA[<code>null</code>]]> in any current cases.
+			</action>
 		</release>
 		<release version="2.2" date="2016-12-20">
 			<action type="add">

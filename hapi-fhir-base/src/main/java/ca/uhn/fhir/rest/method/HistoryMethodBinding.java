@@ -201,7 +201,12 @@ public class HistoryMethodBinding extends BaseResourceReturningMethodBinding {
 
 			@Override
 			public Integer preferredPageSize() {
-				return null;
+				return resources.preferredPageSize();
+			}
+
+			@Override
+			public String getUuid() {
+				return resources.getUuid();
 			}
 		};
 	}

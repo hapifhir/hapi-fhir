@@ -27,10 +27,12 @@ import ca.uhn.fhir.context.RuntimeSearchParam;
 
 public interface ISearchParamRegistry {
 
+	void forceRefresh();
+
+	Map<String, Map<String, RuntimeSearchParam>> getActiveSearchParams();
+
 	Map<String,RuntimeSearchParam> getActiveSearchParams(String theResourceName);
 
 	Collection<RuntimeSearchParam> getAllSearchParams(String theResourceName);
-
-	void forceRefresh();
 
 }
