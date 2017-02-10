@@ -145,6 +145,12 @@
 				<![CDATA[<code>IBundleProvider</code> called <code>getUuid()</code>]]>. This
 				method may return <![CDATA[<code>null</code>]]> in any current cases.
 			</action>
+			<action type="fix">
+				Expanding a ValueSet in JPA server did not correctly apply 
+				<![CDATA[<code>?filter=</code>]]> parameter when the ValueSet
+				being expanded had codes included explicitly (i.e. not by 
+				is-a relationship). Thanks to David Hay for reporting!
+			</action>
 		</release>
 		<release version="2.2" date="2016-12-20">
 			<action type="add">
