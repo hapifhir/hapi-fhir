@@ -76,6 +76,7 @@ public class ResourceProviderCustomSearchParamDstu3Test extends BaseResourceProv
 	@Test
 	public void testSearchForExtension() {
 		SearchParameter eyeColourSp = new SearchParameter();
+		eyeColourSp.addBase("Patient");
 		eyeColourSp.setCode("eyecolour");
 		eyeColourSp.setType(org.hl7.fhir.dstu3.model.Enumerations.SearchParamType.TOKEN);
 		eyeColourSp.setTitle("Eye Colour");
@@ -147,6 +148,7 @@ public class ResourceProviderCustomSearchParamDstu3Test extends BaseResourceProv
 
 		// Add a custom search parameter
 		SearchParameter fooSp = new SearchParameter();
+		fooSp.addBase("Patient");
 		fooSp.setCode("foo");
 		fooSp.setType(org.hl7.fhir.dstu3.model.Enumerations.SearchParamType.TOKEN);
 		fooSp.setTitle("FOO SP");
@@ -157,6 +159,7 @@ public class ResourceProviderCustomSearchParamDstu3Test extends BaseResourceProv
 
 		// Disable an existing parameter
 		fooSp = new SearchParameter();
+		fooSp.addBase("Patient");
 		fooSp.setCode("gender");
 		fooSp.setType(org.hl7.fhir.dstu3.model.Enumerations.SearchParamType.TOKEN);
 		fooSp.setTitle("Gender");
@@ -199,6 +202,7 @@ public class ResourceProviderCustomSearchParamDstu3Test extends BaseResourceProv
 
 		// Add a custom search parameter
 		SearchParameter fooSp = new SearchParameter();
+		fooSp.addBase("Patient");
 		fooSp.setCode("foo");
 		fooSp.setType(org.hl7.fhir.dstu3.model.Enumerations.SearchParamType.TOKEN);
 		fooSp.setTitle("FOO SP");
@@ -209,6 +213,7 @@ public class ResourceProviderCustomSearchParamDstu3Test extends BaseResourceProv
 
 		// Disable an existing parameter
 		fooSp = new SearchParameter();
+		fooSp.addBase("Patient");
 		fooSp.setCode("gender");
 		fooSp.setType(org.hl7.fhir.dstu3.model.Enumerations.SearchParamType.TOKEN);
 		fooSp.setTitle("Gender");
@@ -253,6 +258,7 @@ public class ResourceProviderCustomSearchParamDstu3Test extends BaseResourceProv
 	public void testSearchWithCustomParam() {
 
 		SearchParameter fooSp = new SearchParameter();
+		fooSp.addBase("Patient");
 		fooSp.setCode("foo");
 		fooSp.setType(org.hl7.fhir.dstu3.model.Enumerations.SearchParamType.TOKEN);
 		fooSp.setTitle("FOO SP");
@@ -304,6 +310,7 @@ public class ResourceProviderCustomSearchParamDstu3Test extends BaseResourceProv
 		assertEquals(BaseHapiFhirDao.INDEX_STATUS_INDEXED, res.getIndexStatus().longValue());
 
 		SearchParameter fooSp = new SearchParameter();
+		fooSp.addBase("Patient");
 		fooSp.setCode("foo");
 		fooSp.setType(org.hl7.fhir.dstu3.model.Enumerations.SearchParamType.TOKEN);
 		fooSp.setTitle("FOO SP");
@@ -324,6 +331,7 @@ public class ResourceProviderCustomSearchParamDstu3Test extends BaseResourceProv
 	public void testSearchQualifiedWithCustomReferenceParam() {
 
 		SearchParameter fooSp = new SearchParameter();
+		fooSp.addBase("Patient");
 		fooSp.setCode("foo");
 		fooSp.setType(org.hl7.fhir.dstu3.model.Enumerations.SearchParamType.REFERENCE);
 		fooSp.setTitle("FOO SP");

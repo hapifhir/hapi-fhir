@@ -24,6 +24,7 @@
 				mode. This allows users to create search parameters which contain
 				custom paths, or even override and disable existing search
 				parameters.
+			</action>
 			<action type="fix">
 				CLI example uploader couldn't find STU3 examples after CI server
 				was moved to build.fhir.org
@@ -150,6 +151,11 @@
 				<![CDATA[<code>?filter=</code>]]> parameter when the ValueSet
 				being expanded had codes included explicitly (i.e. not by 
 				is-a relationship). Thanks to David Hay for reporting!
+			</action>
+			<action type="fix">
+				JPA validator incorrectly returned an HTTP 400 instead of an HTTP 422 when
+				the resource ID was not present and required, or vice versa. Thanks to 
+				Brian Postlethwaite for reporting!
 			</action>
 		</release>
 		<release version="2.2" date="2016-12-20">
