@@ -14,6 +14,7 @@ import java.util.Map;
 
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.CapabilityStatement;
+import org.hl7.fhir.dstu3.model.CodeType;
 import org.hl7.fhir.dstu3.model.CapabilityStatement.CapabilityStatementRestComponent;
 import org.hl7.fhir.dstu3.model.CapabilityStatement.CapabilityStatementRestResourceComponent;
 import org.hl7.fhir.dstu3.model.CapabilityStatement.CapabilityStatementRestResourceSearchParamComponent;
@@ -35,6 +36,7 @@ import ca.uhn.fhir.jpa.dao.SearchParameterMap;
 import ca.uhn.fhir.jpa.entity.ResourceTable;
 import ca.uhn.fhir.rest.gclient.ReferenceClientParam;
 import ca.uhn.fhir.rest.gclient.TokenClientParam;
+import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.TestUtil;
@@ -58,7 +60,7 @@ public class ResourceProviderCustomSearchParamDstu3Test extends BaseResourceProv
 	public void saveCreateSearchParamInvalidWithMissingStatus() throws IOException {
 		SearchParameter sp = new SearchParameter();
 		sp.setCode("foo");
-		sp.setXpath("Patient.gender");
+		sp.setExpression("Patient.gender");
 		sp.setXpathUsage(XPathUsageType.NORMAL);
 		sp.setTitle("Foo Param");
 
@@ -66,10 +68,59 @@ public class ResourceProviderCustomSearchParamDstu3Test extends BaseResourceProv
 			ourClient.create().resource(sp).execute();
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertEquals("HTTP 422 Unprocessable Entity: Resource.status is missing or invalid: null", e.getMessage());
+			assertEquals("HTTP 422 Unprocessable Entity: SearchParameter.status is missing or invalid: null", e.getMessage());
 		}
 	}
 
+	
+	@Test
+	public void testSearchForExtension() {
+		SearchParameter eyeColourSp = new SearchParameter();
+		eyeColourSp.addBase("Patient");
+		eyeColourSp.setCode("eyecolour");
+		eyeColourSp.setType(org.hl7.fhir.dstu3.model.Enumerations.SearchParamType.TOKEN);
+		eyeColourSp.setTitle("Eye Colour");
+		eyeColourSp.setExpression("Patient.extension('http://acme.org/eyecolour')");
+		eyeColourSp.setXpathUsage(org.hl7.fhir.dstu3.model.SearchParameter.XPathUsageType.NORMAL);
+		eyeColourSp.setStatus(org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus.ACTIVE);
+
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(eyeColourSp));
+
+		ourClient
+			.create()
+			.resource(eyeColourSp)
+			.execute();
+		
+//		mySearchParamRegsitry.forceRefresh();
+		
+		Patient p1 = new Patient();
+		p1.setActive(true);
+		p1.addExtension().setUrl("http://acme.org/eyecolour").setValue(new CodeType("blue"));
+		IIdType p1id = myPatientDao.create(p1).getId().toUnqualifiedVersionless();
+
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p1));
+
+		Patient p2 = new Patient();
+		p2.setActive(true);
+		p2.addExtension().setUrl("http://acme.org/eyecolour").setValue(new CodeType("green"));
+		IIdType p2id = myPatientDao.create(p2).getId().toUnqualifiedVersionless();
+
+		Bundle bundle = ourClient
+			.search()
+			.forResource(Patient.class)
+			.where(new TokenClientParam("eyecolour").exactly().code("blue"))
+			.returnBundle(Bundle.class)
+			.execute();
+
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
+		
+		List<String> foundResources = toUnqualifiedVersionlessIdValues(bundle);
+		assertThat(foundResources, contains(p1id.getValue()));
+
+	}
+
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResourceProviderCustomSearchParamDstu3Test.class);
+	
 	@Override
 	@Before
 	public void beforeResetConfig() {
@@ -97,20 +148,22 @@ public class ResourceProviderCustomSearchParamDstu3Test extends BaseResourceProv
 
 		// Add a custom search parameter
 		SearchParameter fooSp = new SearchParameter();
+		fooSp.addBase("Patient");
 		fooSp.setCode("foo");
 		fooSp.setType(org.hl7.fhir.dstu3.model.Enumerations.SearchParamType.TOKEN);
 		fooSp.setTitle("FOO SP");
-		fooSp.setXpath("Patient.gender");
+		fooSp.setExpression("Patient.gender");
 		fooSp.setXpathUsage(org.hl7.fhir.dstu3.model.SearchParameter.XPathUsageType.NORMAL);
 		fooSp.setStatus(org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus.ACTIVE);
 		mySearchParameterDao.create(fooSp, mySrd);
 
 		// Disable an existing parameter
 		fooSp = new SearchParameter();
+		fooSp.addBase("Patient");
 		fooSp.setCode("gender");
 		fooSp.setType(org.hl7.fhir.dstu3.model.Enumerations.SearchParamType.TOKEN);
 		fooSp.setTitle("Gender");
-		fooSp.setXpath("Patient.gender");
+		fooSp.setExpression("Patient.gender");
 		fooSp.setXpathUsage(org.hl7.fhir.dstu3.model.SearchParameter.XPathUsageType.NORMAL);
 		fooSp.setStatus(org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus.RETIRED);
 		mySearchParameterDao.create(fooSp, mySrd);
@@ -149,20 +202,22 @@ public class ResourceProviderCustomSearchParamDstu3Test extends BaseResourceProv
 
 		// Add a custom search parameter
 		SearchParameter fooSp = new SearchParameter();
+		fooSp.addBase("Patient");
 		fooSp.setCode("foo");
 		fooSp.setType(org.hl7.fhir.dstu3.model.Enumerations.SearchParamType.TOKEN);
 		fooSp.setTitle("FOO SP");
-		fooSp.setXpath("Patient.gender");
+		fooSp.setExpression("Patient.gender");
 		fooSp.setXpathUsage(org.hl7.fhir.dstu3.model.SearchParameter.XPathUsageType.NORMAL);
 		fooSp.setStatus(org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus.ACTIVE);
 		mySearchParameterDao.create(fooSp, mySrd);
 
 		// Disable an existing parameter
 		fooSp = new SearchParameter();
+		fooSp.addBase("Patient");
 		fooSp.setCode("gender");
 		fooSp.setType(org.hl7.fhir.dstu3.model.Enumerations.SearchParamType.TOKEN);
 		fooSp.setTitle("Gender");
-		fooSp.setXpath("Patient.gender");
+		fooSp.setExpression("Patient.gender");
 		fooSp.setXpathUsage(org.hl7.fhir.dstu3.model.SearchParameter.XPathUsageType.NORMAL);
 		fooSp.setStatus(org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus.RETIRED);
 		mySearchParameterDao.create(fooSp, mySrd);
@@ -203,10 +258,11 @@ public class ResourceProviderCustomSearchParamDstu3Test extends BaseResourceProv
 	public void testSearchWithCustomParam() {
 
 		SearchParameter fooSp = new SearchParameter();
+		fooSp.addBase("Patient");
 		fooSp.setCode("foo");
 		fooSp.setType(org.hl7.fhir.dstu3.model.Enumerations.SearchParamType.TOKEN);
 		fooSp.setTitle("FOO SP");
-		fooSp.setXpath("Patient.gender");
+		fooSp.setExpression("Patient.gender");
 		fooSp.setXpathUsage(org.hl7.fhir.dstu3.model.SearchParameter.XPathUsageType.NORMAL);
 		fooSp.setStatus(org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus.ACTIVE);
 		mySearchParameterDao.create(fooSp, mySrd);
@@ -232,6 +288,7 @@ public class ResourceProviderCustomSearchParamDstu3Test extends BaseResourceProv
 				.where(new TokenClientParam("foo").exactly().code("male"))
 				.returnBundle(Bundle.class)
 				.execute();
+		
 		foundResources = toUnqualifiedVersionlessIdValues(result);
 		assertThat(foundResources, contains(patId.getValue()));
 
@@ -253,10 +310,11 @@ public class ResourceProviderCustomSearchParamDstu3Test extends BaseResourceProv
 		assertEquals(BaseHapiFhirDao.INDEX_STATUS_INDEXED, res.getIndexStatus().longValue());
 
 		SearchParameter fooSp = new SearchParameter();
+		fooSp.addBase("Patient");
 		fooSp.setCode("foo");
 		fooSp.setType(org.hl7.fhir.dstu3.model.Enumerations.SearchParamType.TOKEN);
 		fooSp.setTitle("FOO SP");
-		fooSp.setXpath("Patient.gender");
+		fooSp.setExpression("Patient.gender");
 		fooSp.setXpathUsage(org.hl7.fhir.dstu3.model.SearchParameter.XPathUsageType.NORMAL);
 		fooSp.setStatus(org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus.ACTIVE);
 		mySearchParameterDao.create(fooSp, mySrd);
@@ -273,10 +331,11 @@ public class ResourceProviderCustomSearchParamDstu3Test extends BaseResourceProv
 	public void testSearchQualifiedWithCustomReferenceParam() {
 
 		SearchParameter fooSp = new SearchParameter();
+		fooSp.addBase("Patient");
 		fooSp.setCode("foo");
 		fooSp.setType(org.hl7.fhir.dstu3.model.Enumerations.SearchParamType.REFERENCE);
 		fooSp.setTitle("FOO SP");
-		fooSp.setXpath("Observation.subject");
+		fooSp.setExpression("Observation.subject");
 		fooSp.setXpathUsage(org.hl7.fhir.dstu3.model.SearchParameter.XPathUsageType.NORMAL);
 		fooSp.setStatus(org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus.ACTIVE);
 		mySearchParameterDao.create(fooSp, mySrd);

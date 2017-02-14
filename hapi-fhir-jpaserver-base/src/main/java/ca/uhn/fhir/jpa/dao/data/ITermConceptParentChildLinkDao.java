@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.dao.data;
 
+import java.util.Collection;
+
 /*
  * #%L
  * HAPI FHIR JPA Server
@@ -32,5 +34,8 @@ public interface ITermConceptParentChildLinkDao extends JpaRepository<TermConcep
 	@Query("DELETE FROM TermConceptParentChildLink t WHERE t.myCodeSystem.myId = :cs_pid")
 	@Modifying
 	void deleteByCodeSystemVersion(@Param("cs_pid") Long thePid);
+
+	@Query("SELECT t FROM TermConceptParentChildLink t WHERE t.myChildPid = :child_pid")
+	Collection<TermConceptParentChildLink> findAllWithChild(@Param("child_pid") Long theConceptPid);
 	
 }

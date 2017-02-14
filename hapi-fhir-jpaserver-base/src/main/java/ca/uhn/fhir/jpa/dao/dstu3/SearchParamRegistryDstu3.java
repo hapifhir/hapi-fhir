@@ -10,7 +10,7 @@ package ca.uhn.fhir.jpa.dao.dstu3;
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  * 
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -35,6 +35,7 @@ import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.dstu3.model.CodeType;
 import org.hl7.fhir.dstu3.model.SearchParameter;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import ca.uhn.fhir.context.RuntimeSearchParam;
@@ -50,19 +51,43 @@ import ca.uhn.fhir.rest.server.IBundleProvider;
 public class SearchParamRegistryDstu3 extends BaseSearchParamRegistry {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchParamRegistryDstu3.class);
 
-	@Autowired
-	private IFhirResourceDao<SearchParameter> mySpDao;
-
-	private long myLastRefresh;
-
 	private volatile Map<String, Map<String, RuntimeSearchParam>> myActiveSearchParams;
 
 	@Autowired
 	private DaoConfig myDaoConfig;
 
+	private long myLastRefresh;
+
+	@Autowired
+	private IFhirResourceDao<SearchParameter> mySpDao;
+
+	@Override
+	public void forceRefresh() {
+		myLastRefresh = 0;
+	}
+
+	@Override
+	public Map<String, Map<String, RuntimeSearchParam>> getActiveSearchParams() {
+		refreshCacheIfNeccesary();
+		return myActiveSearchParams;
+	}
+
 	@Override
 	public Map<String, RuntimeSearchParam> getActiveSearchParams(String theResourceName) {
+		refreshCacheIfNeccesary();
+		return myActiveSearchParams.get(theResourceName);
+	}
 
+	private Map<String, RuntimeSearchParam> getSearchParamMap(Map<String, Map<String, RuntimeSearchParam>> searchParams, String theResourceName) {
+		Map<String, RuntimeSearchParam> retVal = searchParams.get(theResourceName);
+		if (retVal == null) {
+			retVal = new HashMap<String, RuntimeSearchParam>();
+			searchParams.put(theResourceName, retVal);
+		}
+		return retVal;
+	}
+
+	private void refreshCacheIfNeccesary() {
 		long refreshInterval = 60 * DateUtils.MILLIS_PER_MINUTE;
 		if (System.currentTimeMillis() - refreshInterval > myLastRefresh) {
 			StopWatch sw = new StopWatch();
@@ -91,7 +116,7 @@ public class SearchParamRegistryDstu3 extends BaseSearchParamRegistry {
 				if (runtimeSp == null) {
 					continue;
 				}
-				
+
 				int dotIdx = runtimeSp.getPath().indexOf('.');
 				if (dotIdx == -1) {
 					ourLog.warn("Can not determine resource type of {}", runtimeSp.getPath());
@@ -113,14 +138,14 @@ public class SearchParamRegistryDstu3 extends BaseSearchParamRegistry {
 					if (nextSp.getStatus() != RuntimeSearchParamStatusEnum.ACTIVE) {
 						nextSp = null;
 					}
-					
+
 					if (!activeSearchParams.containsKey(nextEntry.getKey())) {
 						activeSearchParams.put(nextEntry.getKey(), new HashMap<String, RuntimeSearchParam>());
 					}
 					if (activeSearchParams.containsKey(nextEntry.getKey())) {
-						ourLog.info("Replacing existing/built in search param {}:{} with new one", nextEntry.getKey(), nextName);
+						ourLog.debug("Replacing existing/built in search param {}:{} with new one", nextEntry.getKey(), nextName);
 					}
-					
+
 					if (nextSp != null) {
 						activeSearchParams.get(nextEntry.getKey()).put(nextName, nextSp);
 					} else {
@@ -134,28 +159,12 @@ public class SearchParamRegistryDstu3 extends BaseSearchParamRegistry {
 			myLastRefresh = System.currentTimeMillis();
 			ourLog.info("Refreshed search parameter cache in {}ms", sw.getMillis());
 		}
-
-		return myActiveSearchParams.get(theResourceName);
-	}
-
-	@Override
-	public void forceRefresh() {
-		myLastRefresh = 0;
-	}
-
-	private Map<String, RuntimeSearchParam> getSearchParamMap(Map<String, Map<String, RuntimeSearchParam>> searchParams, String theResourceName) {
-		Map<String, RuntimeSearchParam> retVal = searchParams.get(theResourceName);
-		if (retVal == null) {
-			retVal = new HashMap<String, RuntimeSearchParam>();
-			searchParams.put(theResourceName, retVal);
-		}
-		return retVal;
 	}
 
 	private RuntimeSearchParam toRuntimeSp(SearchParameter theNextSp) {
 		String name = theNextSp.getCode();
 		String description = theNextSp.getDescription();
-		String path = theNextSp.getXpath();
+		String path = theNextSp.getExpression();
 		RestSearchParameterTypeEnum paramType = null;
 		RuntimeSearchParamStatusEnum status = null;
 		switch (theNextSp.getType()) {
@@ -208,7 +217,9 @@ public class SearchParamRegistryDstu3 extends BaseSearchParamRegistry {
 			return null;
 		}
 
-		RuntimeSearchParam retVal = new RuntimeSearchParam(name, description, path, paramType, providesMembershipInCompartments, targets, status);
+		IIdType id = theNextSp.getIdElement();
+		String uri = "";
+		RuntimeSearchParam retVal = new RuntimeSearchParam(id, uri, name, description, path, paramType, null, providesMembershipInCompartments, targets, status);
 		return retVal;
 	}
 

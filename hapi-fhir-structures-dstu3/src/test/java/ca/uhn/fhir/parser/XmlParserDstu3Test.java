@@ -25,7 +25,9 @@ import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
 import org.custommonkey.xmlunit.Diff;
 import org.custommonkey.xmlunit.XMLUnit;
 import org.hamcrest.collection.IsEmptyCollection;
@@ -76,6 +78,24 @@ public class XmlParserDstu3Test {
 		ourCtx.setNarrativeGenerator(null);
 	}
 
+	/**
+	 * See #551
+	 */
+	@Test
+	public void testXmlLargeAttribute() {
+		String largeString = StringUtils.leftPad("", (int) FileUtils.ONE_MB, 'A');
+		
+		Patient p = new Patient();
+		p.addName().setFamily(largeString);
+		
+		String encoded = ourCtx.newXmlParser().encodeResourceToString(p);
+		
+		p = ourCtx.newXmlParser().parseResource(Patient.class, encoded);
+		
+		assertEquals(largeString, p.getNameFirstRep().getFamily());
+	}
+	
+	
 	/**
 	 * See #544
 	 */

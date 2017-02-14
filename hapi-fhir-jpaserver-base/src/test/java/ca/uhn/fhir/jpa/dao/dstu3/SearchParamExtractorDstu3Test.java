@@ -60,7 +60,7 @@ public class SearchParamExtractorDstu3Test {
 			}
 
 			@Override
-			public Collection<RuntimeSearchParam> getAllSearchParams(String theResourceName) {
+			public Map<String, Map<String, RuntimeSearchParam>> getActiveSearchParams() {
 				throw new UnsupportedOperationException();
 			}
 		};

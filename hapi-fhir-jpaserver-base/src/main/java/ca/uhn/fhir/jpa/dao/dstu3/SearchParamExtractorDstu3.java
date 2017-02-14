@@ -50,6 +50,7 @@ import org.hl7.fhir.dstu3.model.ContactPoint;
 import org.hl7.fhir.dstu3.model.DateTimeType;
 import org.hl7.fhir.dstu3.model.Duration;
 import org.hl7.fhir.dstu3.model.Enumeration;
+import org.hl7.fhir.dstu3.model.Extension;
 import org.hl7.fhir.dstu3.model.HumanName;
 import org.hl7.fhir.dstu3.model.Identifier;
 import org.hl7.fhir.dstu3.model.IntegerType;
@@ -520,7 +521,16 @@ public class SearchParamExtractorDstu3 extends BaseSearchParamExtractor implemen
 			// }
 
 			for (Object nextObject : extractValues(nextPath, theResource)) {
+				
+				if (nextObject instanceof Extension) {
+					Extension nextExtension = (Extension)nextObject;
+					nextObject  = nextExtension.getValue();
+				}
 
+				if (nextObject == null) {
+					continue;
+				}
+				
 				// Patient:language
 				if (nextObject instanceof PatientCommunicationComponent) {
 					PatientCommunicationComponent nextValue = (PatientCommunicationComponent) nextObject;

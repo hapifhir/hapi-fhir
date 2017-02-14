@@ -65,5 +65,10 @@ public class SimpleBundleProvider implements IBundleProvider {
 	public Integer preferredPageSize() {
 		return null;
 	}
+
+	@Override
+	public String getUuid() {
+		return null;
+	}
 	
 }

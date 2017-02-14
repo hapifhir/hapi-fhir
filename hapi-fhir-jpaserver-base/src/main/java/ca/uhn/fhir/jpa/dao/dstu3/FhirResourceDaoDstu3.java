@@ -54,6 +54,7 @@ import ca.uhn.fhir.rest.method.RequestDetails;
 import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
+import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
 import ca.uhn.fhir.util.CoverageIgnore;
 import ca.uhn.fhir.util.FhirTerser;
@@ -143,7 +144,8 @@ public class FhirResourceDaoDstu3<T extends IAnyResource> extends BaseHapiFhirRe
 			if (resourceToValidateById != null) {
 				result = validator.validateWithResult(resourceToValidateById);
 			} else {
-				throw new InvalidRequestException("No resource supplied for $validate operation (resource is required unless mode is \"delete\")");
+				String msg = getContext().getLocalizer().getMessage(BaseHapiFhirResourceDao.class, "cantValidateWithNoResource");
+				throw new InvalidRequestException(msg);
 			}
 		} else if (isNotBlank(theRawResource)) {
 			result = validator.validateWithResult(theRawResource);
@@ -180,11 +182,11 @@ public class FhirResourceDaoDstu3<T extends IAnyResource> extends BaseHapiFhirRe
 			boolean hasId = theCtx.getResource().getIdElement().hasIdPart();
 			if (myMode == ValidationModeEnum.CREATE) {
 				if (hasId) {
-					throw new InvalidRequestException("Resource has an ID - ID must not be populated for a FHIR create");
+					throw new UnprocessableEntityException("Resource has an ID - ID must not be populated for a FHIR create");
 				}
 			} else if (myMode == ValidationModeEnum.UPDATE) {
 				if (hasId == false) {
-					throw new InvalidRequestException("Resource has no ID - ID must be populated for a FHIR update");
+					throw new UnprocessableEntityException("Resource has no ID - ID must be populated for a FHIR update");
 				}
 			}
 

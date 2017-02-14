@@ -101,6 +101,7 @@ public class BaseDstu2Config extends BaseConfig {
 	public ca.uhn.fhir.jpa.provider.JpaSystemProviderDstu2 systemProviderDstu2() {
 		ca.uhn.fhir.jpa.provider.JpaSystemProviderDstu2 retVal = new ca.uhn.fhir.jpa.provider.JpaSystemProviderDstu2();
 		retVal.setDao(systemDaoDstu2());
+		retVal.setContext(fhirContextDstu2());
 		return retVal;
 	}
 
