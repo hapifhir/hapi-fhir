@@ -12,7 +12,7 @@
 <a class="jxr_linenumber" name="L4" href="#L4">4</a>   <em class="jxr_comment"> * #%L</em>
 <a class="jxr_linenumber" name="L5" href="#L5">5</a>   <em class="jxr_comment"> * HAPI FHIR JPA Server</em>
 <a class="jxr_linenumber" name="L6" href="#L6">6</a>   <em class="jxr_comment"> * %%</em>
-<a class="jxr_linenumber" name="L7" href="#L7">7</a>   <em class="jxr_comment"> * Copyright (C) 2014 - 2016 University Health Network</em>
+<a class="jxr_linenumber" name="L7" href="#L7">7</a>   <em class="jxr_comment"> * Copyright (C) 2014 - 2017 University Health Network</em>
 <a class="jxr_linenumber" name="L8" href="#L8">8</a>   <em class="jxr_comment"> * %%</em>
 <a class="jxr_linenumber" name="L9" href="#L9">9</a>   <em class="jxr_comment"> * Licensed under the Apache License, Version 2.0 (the "License");</em>
 <a class="jxr_linenumber" name="L10" href="#L10">10</a>  <em class="jxr_comment"> * you may not use this file except in compliance with the License.</em>
@@ -172,7 +172,7 @@
 <a class="jxr_linenumber" name="L164" href="#L164">164</a> 				entity = toEntity(nextResource);
 <a class="jxr_linenumber" name="L165" href="#L165">165</a> 				entity.setUpdated(updateTime);
 <a class="jxr_linenumber" name="L166" href="#L166">166</a> 				entity.setPublished(updateTime);
-<a class="jxr_linenumber" name="L167" href="#L167">167</a> 				<strong class="jxr_keyword">if</strong> (nextId.isEmpty() == false &amp;&amp; <span class="jxr_string">"cid:"</span>.equals(nextId.getBaseUrl())) {
+<a class="jxr_linenumber" name="L167" href="#L167">167</a> 				<strong class="jxr_keyword">if</strong> (nextId.getIdPart() != <strong class="jxr_keyword">null</strong> &amp;&amp; nextId.getIdPart().startsWith(<span class="jxr_string">"cid:"</span>)) {
 <a class="jxr_linenumber" name="L168" href="#L168">168</a> 					ourLog.debug(<span class="jxr_string">"Resource in transaction has ID[{}], will replace with server assigned ID"</span>, nextId.getIdPart());
 <a class="jxr_linenumber" name="L169" href="#L169">169</a> 				} <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (nextResouceOperationIn == BundleEntryTransactionMethodEnum.POST) {
 <a class="jxr_linenumber" name="L170" href="#L170">170</a> 					<strong class="jxr_keyword">if</strong> (nextId.isEmpty() == false) {
@@ -290,7 +290,7 @@
 <a class="jxr_linenumber" name="L282" href="#L282">282</a> 	}
 <a class="jxr_linenumber" name="L283" href="#L283">283</a> 
 <a class="jxr_linenumber" name="L284" href="#L284">284</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">boolean</strong> isPlaceholder(IdDt theId) {
-<a class="jxr_linenumber" name="L285" href="#L285">285</a> 		<strong class="jxr_keyword">if</strong> (<span class="jxr_string">"cid:"</span>.equals(theId.getBaseUrl())) {
+<a class="jxr_linenumber" name="L285" href="#L285">285</a> 		<strong class="jxr_keyword">if</strong> (theId.getIdPart() != <strong class="jxr_keyword">null</strong> &amp;&amp; theId.getIdPart().startsWith(<span class="jxr_string">"cid:"</span>)) {
 <a class="jxr_linenumber" name="L286" href="#L286">286</a> 			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">true</strong>;
 <a class="jxr_linenumber" name="L287" href="#L287">287</a> 		}
 <a class="jxr_linenumber" name="L288" href="#L288">288</a> 		<strong class="jxr_keyword">return</strong> false;
@@ -299,7 +299,7 @@
 <a class="jxr_linenumber" name="L291" href="#L291">291</a> }
 </pre>
 <hr/>
-<div id="footer">Copyright &#169; 2014&#x2013;2016 <a href="http://www.uhn.ca">University Health Network</a>. All rights reserved.</div>
+<div id="footer">Copyright &#169; 2014&#x2013;2017 <a href="http://www.uhn.ca">University Health Network</a>. All rights reserved.</div>
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
   (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),

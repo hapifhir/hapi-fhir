@@ -12,7 +12,7 @@
 <a class="jxr_linenumber" name="L4" href="#L4">4</a>   <em class="jxr_comment"> * #%L</em>
 <a class="jxr_linenumber" name="L5" href="#L5">5</a>   <em class="jxr_comment"> * HAPI FHIR - Core Library</em>
 <a class="jxr_linenumber" name="L6" href="#L6">6</a>   <em class="jxr_comment"> * %%</em>
-<a class="jxr_linenumber" name="L7" href="#L7">7</a>   <em class="jxr_comment"> * Copyright (C) 2014 - 2016 University Health Network</em>
+<a class="jxr_linenumber" name="L7" href="#L7">7</a>   <em class="jxr_comment"> * Copyright (C) 2014 - 2017 University Health Network</em>
 <a class="jxr_linenumber" name="L8" href="#L8">8</a>   <em class="jxr_comment"> * %%</em>
 <a class="jxr_linenumber" name="L9" href="#L9">9</a>   <em class="jxr_comment"> * Licensed under the Apache License, Version 2.0 (the "License");</em>
 <a class="jxr_linenumber" name="L10" href="#L10">10</a>  <em class="jxr_comment"> * you may not use this file except in compliance with the License.</em>
@@ -1897,651 +1897,655 @@
 <a class="jxr_linenumber" name="L1889" href="#L1889">1889</a> 			}
 <a class="jxr_linenumber" name="L1890" href="#L1890">1890</a> 
 <a class="jxr_linenumber" name="L1891" href="#L1891">1891</a> 			<strong class="jxr_keyword">for</strong> (Include next : myRevInclude) {
-<a class="jxr_linenumber" name="L1892" href="#L1892">1892</a> 				addParam(params, Constants.PARAM_REVINCLUDE, next.getValue());
-<a class="jxr_linenumber" name="L1893" href="#L1893">1893</a> 			}
-<a class="jxr_linenumber" name="L1894" href="#L1894">1894</a> 
-<a class="jxr_linenumber" name="L1895" href="#L1895">1895</a> 			<strong class="jxr_keyword">if</strong> (myContext.getVersion().getVersion().isNewerThan(FhirVersionEnum.DSTU2)) {
-<a class="jxr_linenumber" name="L1896" href="#L1896">1896</a> 				SortSpec rootSs = <strong class="jxr_keyword">null</strong>;
-<a class="jxr_linenumber" name="L1897" href="#L1897">1897</a> 				SortSpec lastSs = <strong class="jxr_keyword">null</strong>;
-<a class="jxr_linenumber" name="L1898" href="#L1898">1898</a> 				<strong class="jxr_keyword">for</strong> (SortInternal next : mySort) {
-<a class="jxr_linenumber" name="L1899" href="#L1899">1899</a> 					SortSpec nextSortSpec = <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/rest/api/SortSpec.html">SortSpec</a>();
-<a class="jxr_linenumber" name="L1900" href="#L1900">1900</a> 					nextSortSpec.setParamName(next.getParamValue());
-<a class="jxr_linenumber" name="L1901" href="#L1901">1901</a> 					nextSortSpec.setOrder(next.getDirection());
-<a class="jxr_linenumber" name="L1902" href="#L1902">1902</a> 					<strong class="jxr_keyword">if</strong> (rootSs == <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L1903" href="#L1903">1903</a> 						rootSs = nextSortSpec;
-<a class="jxr_linenumber" name="L1904" href="#L1904">1904</a> 					} <strong class="jxr_keyword">else</strong> {
-<a class="jxr_linenumber" name="L1905" href="#L1905">1905</a> 						lastSs.setChain(nextSortSpec);
-<a class="jxr_linenumber" name="L1906" href="#L1906">1906</a> 					}
-<a class="jxr_linenumber" name="L1907" href="#L1907">1907</a> 					lastSs = nextSortSpec;
-<a class="jxr_linenumber" name="L1908" href="#L1908">1908</a> 				}
-<a class="jxr_linenumber" name="L1909" href="#L1909">1909</a> 				<strong class="jxr_keyword">if</strong> (rootSs != <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L1910" href="#L1910">1910</a> 					addParam(params, Constants.PARAM_SORT, SortParameter.createSortStringDstu3(rootSs));
-<a class="jxr_linenumber" name="L1911" href="#L1911">1911</a> 				}
-<a class="jxr_linenumber" name="L1912" href="#L1912">1912</a> 			} <strong class="jxr_keyword">else</strong> {
-<a class="jxr_linenumber" name="L1913" href="#L1913">1913</a> 				<strong class="jxr_keyword">for</strong> (SortInternal next : mySort) {
-<a class="jxr_linenumber" name="L1914" href="#L1914">1914</a> 					addParam(params, next.getParamName(), next.getParamValue());
+<a class="jxr_linenumber" name="L1892" href="#L1892">1892</a> 				<strong class="jxr_keyword">if</strong> (next.isRecurse()) {
+<a class="jxr_linenumber" name="L1893" href="#L1893">1893</a> 					addParam(params, Constants.PARAM_REVINCLUDE_RECURSE, next.getValue());
+<a class="jxr_linenumber" name="L1894" href="#L1894">1894</a> 				} <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L1895" href="#L1895">1895</a> 					addParam(params, Constants.PARAM_REVINCLUDE, next.getValue());
+<a class="jxr_linenumber" name="L1896" href="#L1896">1896</a> 				}
+<a class="jxr_linenumber" name="L1897" href="#L1897">1897</a> 			}
+<a class="jxr_linenumber" name="L1898" href="#L1898">1898</a> 
+<a class="jxr_linenumber" name="L1899" href="#L1899">1899</a> 			<strong class="jxr_keyword">if</strong> (myContext.getVersion().getVersion().isNewerThan(FhirVersionEnum.DSTU2)) {
+<a class="jxr_linenumber" name="L1900" href="#L1900">1900</a> 				SortSpec rootSs = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L1901" href="#L1901">1901</a> 				SortSpec lastSs = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L1902" href="#L1902">1902</a> 				<strong class="jxr_keyword">for</strong> (SortInternal next : mySort) {
+<a class="jxr_linenumber" name="L1903" href="#L1903">1903</a> 					SortSpec nextSortSpec = <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/rest/api/SortSpec.html">SortSpec</a>();
+<a class="jxr_linenumber" name="L1904" href="#L1904">1904</a> 					nextSortSpec.setParamName(next.getParamValue());
+<a class="jxr_linenumber" name="L1905" href="#L1905">1905</a> 					nextSortSpec.setOrder(next.getDirection());
+<a class="jxr_linenumber" name="L1906" href="#L1906">1906</a> 					<strong class="jxr_keyword">if</strong> (rootSs == <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L1907" href="#L1907">1907</a> 						rootSs = nextSortSpec;
+<a class="jxr_linenumber" name="L1908" href="#L1908">1908</a> 					} <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L1909" href="#L1909">1909</a> 						lastSs.setChain(nextSortSpec);
+<a class="jxr_linenumber" name="L1910" href="#L1910">1910</a> 					}
+<a class="jxr_linenumber" name="L1911" href="#L1911">1911</a> 					lastSs = nextSortSpec;
+<a class="jxr_linenumber" name="L1912" href="#L1912">1912</a> 				}
+<a class="jxr_linenumber" name="L1913" href="#L1913">1913</a> 				<strong class="jxr_keyword">if</strong> (rootSs != <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L1914" href="#L1914">1914</a> 					addParam(params, Constants.PARAM_SORT, SortParameter.createSortStringDstu3(rootSs));
 <a class="jxr_linenumber" name="L1915" href="#L1915">1915</a> 				}
-<a class="jxr_linenumber" name="L1916" href="#L1916">1916</a> 			}
-<a class="jxr_linenumber" name="L1917" href="#L1917">1917</a> 
-<a class="jxr_linenumber" name="L1918" href="#L1918">1918</a> 			<strong class="jxr_keyword">if</strong> (myParamLimit != <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L1919" href="#L1919">1919</a> 				addParam(params, Constants.PARAM_COUNT, Integer.toString(myParamLimit));
+<a class="jxr_linenumber" name="L1916" href="#L1916">1916</a> 			} <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L1917" href="#L1917">1917</a> 				<strong class="jxr_keyword">for</strong> (SortInternal next : mySort) {
+<a class="jxr_linenumber" name="L1918" href="#L1918">1918</a> 					addParam(params, next.getParamName(), next.getParamValue());
+<a class="jxr_linenumber" name="L1919" href="#L1919">1919</a> 				}
 <a class="jxr_linenumber" name="L1920" href="#L1920">1920</a> 			}
 <a class="jxr_linenumber" name="L1921" href="#L1921">1921</a> 
-<a class="jxr_linenumber" name="L1922" href="#L1922">1922</a> 			<strong class="jxr_keyword">if</strong> (myLastUpdated != <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L1923" href="#L1923">1923</a> 				<strong class="jxr_keyword">for</strong> (DateParam next : myLastUpdated.getValuesAsQueryTokens()) {
-<a class="jxr_linenumber" name="L1924" href="#L1924">1924</a> 					addParam(params, Constants.PARAM_LASTUPDATED, next.getValueAsQueryToken(myContext));
-<a class="jxr_linenumber" name="L1925" href="#L1925">1925</a> 				}
-<a class="jxr_linenumber" name="L1926" href="#L1926">1926</a> 			}
-<a class="jxr_linenumber" name="L1927" href="#L1927">1927</a> 
-<a class="jxr_linenumber" name="L1928" href="#L1928">1928</a> 			<strong class="jxr_keyword">if</strong> (myReturnBundleType == <strong class="jxr_keyword">null</strong> &amp;&amp; myContext.getVersion().getVersion().isRi()) {
-<a class="jxr_linenumber" name="L1929" href="#L1929">1929</a> 				<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> IllegalArgumentException(<span class="jxr_string">"When using the client with HL7.org structures, you must specify "</span>
-<a class="jxr_linenumber" name="L1930" href="#L1930">1930</a> 						+ <span class="jxr_string">"the bundle return type for the client by adding \&quot;.returnBundle(org.hl7.fhir.instance.model.Bundle.class)\&quot; to your search method call before the \&quot;.execute()\&quot; method"</span>);
-<a class="jxr_linenumber" name="L1931" href="#L1931">1931</a> 			}
-<a class="jxr_linenumber" name="L1932" href="#L1932">1932</a> 
-<a class="jxr_linenumber" name="L1933" href="#L1933">1933</a> 			IClientResponseHandler&lt;? <strong class="jxr_keyword">extends</strong> IBase&gt; binding;
-<a class="jxr_linenumber" name="L1934" href="#L1934">1934</a> 			<strong class="jxr_keyword">if</strong> (myReturnBundleType != <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L1935" href="#L1935">1935</a> 				binding = <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/rest/client/BaseClient.html">ResourceResponseHandler</a>(myReturnBundleType, getPreferResponseTypes(myResourceType));
-<a class="jxr_linenumber" name="L1936" href="#L1936">1936</a> 			} <strong class="jxr_keyword">else</strong> {
-<a class="jxr_linenumber" name="L1937" href="#L1937">1937</a> 				binding = <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/rest/client/GenericClient.html">BundleResponseHandler</a>(myResourceType);
-<a class="jxr_linenumber" name="L1938" href="#L1938">1938</a> 			}
-<a class="jxr_linenumber" name="L1939" href="#L1939">1939</a> 
-<a class="jxr_linenumber" name="L1940" href="#L1940">1940</a> 			IdDt resourceId = myResourceId != <strong class="jxr_keyword">null</strong> ? <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/model/primitive/IdDt.html">IdDt</a>(myResourceId) : <strong class="jxr_keyword">null</strong>;
-<a class="jxr_linenumber" name="L1941" href="#L1941">1941</a> 
-<a class="jxr_linenumber" name="L1942" href="#L1942">1942</a> 			BaseHttpClientInvocation invocation;
-<a class="jxr_linenumber" name="L1943" href="#L1943">1943</a> 			<strong class="jxr_keyword">if</strong> (mySearchUrl != <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L1944" href="#L1944">1944</a> 				invocation = SearchMethodBinding.createSearchInvocation(myContext, mySearchUrl, params);
-<a class="jxr_linenumber" name="L1945" href="#L1945">1945</a> 			} <strong class="jxr_keyword">else</strong> {
-<a class="jxr_linenumber" name="L1946" href="#L1946">1946</a> 				invocation = SearchMethodBinding.createSearchInvocation(myContext, myResourceName, params, resourceId, myCompartmentName, mySearchStyle);
-<a class="jxr_linenumber" name="L1947" href="#L1947">1947</a> 			}
-<a class="jxr_linenumber" name="L1948" href="#L1948">1948</a> 
-<a class="jxr_linenumber" name="L1949" href="#L1949">1949</a> 			<strong class="jxr_keyword">return</strong> invoke(params, binding, invocation);
-<a class="jxr_linenumber" name="L1950" href="#L1950">1950</a> 
-<a class="jxr_linenumber" name="L1951" href="#L1951">1951</a> 		}
+<a class="jxr_linenumber" name="L1922" href="#L1922">1922</a> 			<strong class="jxr_keyword">if</strong> (myParamLimit != <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L1923" href="#L1923">1923</a> 				addParam(params, Constants.PARAM_COUNT, Integer.toString(myParamLimit));
+<a class="jxr_linenumber" name="L1924" href="#L1924">1924</a> 			}
+<a class="jxr_linenumber" name="L1925" href="#L1925">1925</a> 
+<a class="jxr_linenumber" name="L1926" href="#L1926">1926</a> 			<strong class="jxr_keyword">if</strong> (myLastUpdated != <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L1927" href="#L1927">1927</a> 				<strong class="jxr_keyword">for</strong> (DateParam next : myLastUpdated.getValuesAsQueryTokens()) {
+<a class="jxr_linenumber" name="L1928" href="#L1928">1928</a> 					addParam(params, Constants.PARAM_LASTUPDATED, next.getValueAsQueryToken(myContext));
+<a class="jxr_linenumber" name="L1929" href="#L1929">1929</a> 				}
+<a class="jxr_linenumber" name="L1930" href="#L1930">1930</a> 			}
+<a class="jxr_linenumber" name="L1931" href="#L1931">1931</a> 
+<a class="jxr_linenumber" name="L1932" href="#L1932">1932</a> 			<strong class="jxr_keyword">if</strong> (myReturnBundleType == <strong class="jxr_keyword">null</strong> &amp;&amp; myContext.getVersion().getVersion().isRi()) {
+<a class="jxr_linenumber" name="L1933" href="#L1933">1933</a> 				<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> IllegalArgumentException(<span class="jxr_string">"When using the client with HL7.org structures, you must specify "</span>
+<a class="jxr_linenumber" name="L1934" href="#L1934">1934</a> 						+ <span class="jxr_string">"the bundle return type for the client by adding \&quot;.returnBundle(org.hl7.fhir.instance.model.Bundle.class)\&quot; to your search method call before the \&quot;.execute()\&quot; method"</span>);
+<a class="jxr_linenumber" name="L1935" href="#L1935">1935</a> 			}
+<a class="jxr_linenumber" name="L1936" href="#L1936">1936</a> 
+<a class="jxr_linenumber" name="L1937" href="#L1937">1937</a> 			IClientResponseHandler&lt;? <strong class="jxr_keyword">extends</strong> IBase&gt; binding;
+<a class="jxr_linenumber" name="L1938" href="#L1938">1938</a> 			<strong class="jxr_keyword">if</strong> (myReturnBundleType != <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L1939" href="#L1939">1939</a> 				binding = <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/rest/client/BaseClient.html">ResourceResponseHandler</a>(myReturnBundleType, getPreferResponseTypes(myResourceType));
+<a class="jxr_linenumber" name="L1940" href="#L1940">1940</a> 			} <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L1941" href="#L1941">1941</a> 				binding = <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/rest/client/GenericClient.html">BundleResponseHandler</a>(myResourceType);
+<a class="jxr_linenumber" name="L1942" href="#L1942">1942</a> 			}
+<a class="jxr_linenumber" name="L1943" href="#L1943">1943</a> 
+<a class="jxr_linenumber" name="L1944" href="#L1944">1944</a> 			IdDt resourceId = myResourceId != <strong class="jxr_keyword">null</strong> ? <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/model/primitive/IdDt.html">IdDt</a>(myResourceId) : <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L1945" href="#L1945">1945</a> 
+<a class="jxr_linenumber" name="L1946" href="#L1946">1946</a> 			BaseHttpClientInvocation invocation;
+<a class="jxr_linenumber" name="L1947" href="#L1947">1947</a> 			<strong class="jxr_keyword">if</strong> (mySearchUrl != <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L1948" href="#L1948">1948</a> 				invocation = SearchMethodBinding.createSearchInvocation(myContext, mySearchUrl, params);
+<a class="jxr_linenumber" name="L1949" href="#L1949">1949</a> 			} <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L1950" href="#L1950">1950</a> 				invocation = SearchMethodBinding.createSearchInvocation(myContext, myResourceName, params, resourceId, myCompartmentName, mySearchStyle);
+<a class="jxr_linenumber" name="L1951" href="#L1951">1951</a> 			}
 <a class="jxr_linenumber" name="L1952" href="#L1952">1952</a> 
-<a class="jxr_linenumber" name="L1953" href="#L1953">1953</a> 		@Override
-<a class="jxr_linenumber" name="L1954" href="#L1954">1954</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/gclient/IQuery.html">IQuery</a> forAllResources() {
-<a class="jxr_linenumber" name="L1955" href="#L1955">1955</a> 			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>;
-<a class="jxr_linenumber" name="L1956" href="#L1956">1956</a> 		}
-<a class="jxr_linenumber" name="L1957" href="#L1957">1957</a> 
-<a class="jxr_linenumber" name="L1958" href="#L1958">1958</a> 		@Override
-<a class="jxr_linenumber" name="L1959" href="#L1959">1959</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/gclient/IQuery.html">IQuery</a> forResource(Class&lt;? <strong class="jxr_keyword">extends</strong> IBaseResource&gt; theResourceType) {
-<a class="jxr_linenumber" name="L1960" href="#L1960">1960</a> 			setType(theResourceType);
-<a class="jxr_linenumber" name="L1961" href="#L1961">1961</a> 			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>;
-<a class="jxr_linenumber" name="L1962" href="#L1962">1962</a> 		}
-<a class="jxr_linenumber" name="L1963" href="#L1963">1963</a> 
-<a class="jxr_linenumber" name="L1964" href="#L1964">1964</a> 		@Override
-<a class="jxr_linenumber" name="L1965" href="#L1965">1965</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/gclient/IQuery.html">IQuery</a> forResource(String theResourceName) {
-<a class="jxr_linenumber" name="L1966" href="#L1966">1966</a> 			setType(theResourceName);
-<a class="jxr_linenumber" name="L1967" href="#L1967">1967</a> 			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>;
-<a class="jxr_linenumber" name="L1968" href="#L1968">1968</a> 		}
-<a class="jxr_linenumber" name="L1969" href="#L1969">1969</a> 
-<a class="jxr_linenumber" name="L1970" href="#L1970">1970</a> 		@Override
-<a class="jxr_linenumber" name="L1971" href="#L1971">1971</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/gclient/IQuery.html">IQuery</a> include(<a href="../../../../../ca/uhn/fhir/model/api/Include.html">Include</a> theInclude) {
-<a class="jxr_linenumber" name="L1972" href="#L1972">1972</a> 			myInclude.add(theInclude);
-<a class="jxr_linenumber" name="L1973" href="#L1973">1973</a> 			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>;
-<a class="jxr_linenumber" name="L1974" href="#L1974">1974</a> 		}
-<a class="jxr_linenumber" name="L1975" href="#L1975">1975</a> 
-<a class="jxr_linenumber" name="L1976" href="#L1976">1976</a> 		@Override
-<a class="jxr_linenumber" name="L1977" href="#L1977">1977</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/gclient/IQuery.html">IQuery</a> lastUpdated(<a href="../../../../../ca/uhn/fhir/rest/param/DateRangeParam.html">DateRangeParam</a> theLastUpdated) {
-<a class="jxr_linenumber" name="L1978" href="#L1978">1978</a> 			myLastUpdated = theLastUpdated;
-<a class="jxr_linenumber" name="L1979" href="#L1979">1979</a> 			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>;
-<a class="jxr_linenumber" name="L1980" href="#L1980">1980</a> 		}
-<a class="jxr_linenumber" name="L1981" href="#L1981">1981</a> 
-<a class="jxr_linenumber" name="L1982" href="#L1982">1982</a> 		@Override
-<a class="jxr_linenumber" name="L1983" href="#L1983">1983</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/gclient/IQuery.html">IQuery</a> limitTo(<strong class="jxr_keyword">int</strong> theLimitTo) {
-<a class="jxr_linenumber" name="L1984" href="#L1984">1984</a> 			<strong class="jxr_keyword">return</strong> count(theLimitTo);
-<a class="jxr_linenumber" name="L1985" href="#L1985">1985</a> 		}
-<a class="jxr_linenumber" name="L1986" href="#L1986">1986</a> 
-<a class="jxr_linenumber" name="L1987" href="#L1987">1987</a> 		@Override
-<a class="jxr_linenumber" name="L1988" href="#L1988">1988</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/gclient/IQuery.html">IQuery</a> returnBundle(Class theClass) {
-<a class="jxr_linenumber" name="L1989" href="#L1989">1989</a> 			<strong class="jxr_keyword">if</strong> (theClass == <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L1990" href="#L1990">1990</a> 				<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> NullPointerException(<span class="jxr_string">"theClass must not be null"</span>);
-<a class="jxr_linenumber" name="L1991" href="#L1991">1991</a> 			}
-<a class="jxr_linenumber" name="L1992" href="#L1992">1992</a> 			myReturnBundleType = theClass;
-<a class="jxr_linenumber" name="L1993" href="#L1993">1993</a> 			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>;
-<a class="jxr_linenumber" name="L1994" href="#L1994">1994</a> 		}
-<a class="jxr_linenumber" name="L1995" href="#L1995">1995</a> 
-<a class="jxr_linenumber" name="L1996" href="#L1996">1996</a> 		@Override
-<a class="jxr_linenumber" name="L1997" href="#L1997">1997</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/gclient/IQuery.html">IQuery</a> revInclude(<a href="../../../../../ca/uhn/fhir/model/api/Include.html">Include</a> theInclude) {
-<a class="jxr_linenumber" name="L1998" href="#L1998">1998</a> 			myRevInclude.add(theInclude);
-<a class="jxr_linenumber" name="L1999" href="#L1999">1999</a> 			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>;
-<a class="jxr_linenumber" name="L2000" href="#L2000">2000</a> 		}
-<a class="jxr_linenumber" name="L2001" href="#L2001">2001</a> 
-<a class="jxr_linenumber" name="L2002" href="#L2002">2002</a> 		<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> setType(Class&lt;? <strong class="jxr_keyword">extends</strong> IBaseResource&gt; theResourceType) {
-<a class="jxr_linenumber" name="L2003" href="#L2003">2003</a> 			myResourceType = theResourceType;
-<a class="jxr_linenumber" name="L2004" href="#L2004">2004</a> 			RuntimeResourceDefinition definition = myContext.getResourceDefinition(theResourceType);
-<a class="jxr_linenumber" name="L2005" href="#L2005">2005</a> 			myResourceName = definition.getName();
-<a class="jxr_linenumber" name="L2006" href="#L2006">2006</a> 		}
-<a class="jxr_linenumber" name="L2007" href="#L2007">2007</a> 
-<a class="jxr_linenumber" name="L2008" href="#L2008">2008</a> 		<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> setType(String theResourceName) {
-<a class="jxr_linenumber" name="L2009" href="#L2009">2009</a> 			myResourceType = myContext.getResourceDefinition(theResourceName).getImplementingClass();
-<a class="jxr_linenumber" name="L2010" href="#L2010">2010</a> 			myResourceName = theResourceName;
-<a class="jxr_linenumber" name="L2011" href="#L2011">2011</a> 		}
-<a class="jxr_linenumber" name="L2012" href="#L2012">2012</a> 
-<a class="jxr_linenumber" name="L2013" href="#L2013">2013</a> 		@Override
-<a class="jxr_linenumber" name="L2014" href="#L2014">2014</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/gclient/ISort.html">ISort</a> sort() {
-<a class="jxr_linenumber" name="L2015" href="#L2015">2015</a> 			SortInternal retVal = <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/rest/client/GenericClient.html">SortInternal</a>(<strong class="jxr_keyword">this</strong>);
-<a class="jxr_linenumber" name="L2016" href="#L2016">2016</a> 			mySort.add(retVal);
-<a class="jxr_linenumber" name="L2017" href="#L2017">2017</a> 			<strong class="jxr_keyword">return</strong> retVal;
-<a class="jxr_linenumber" name="L2018" href="#L2018">2018</a> 		}
-<a class="jxr_linenumber" name="L2019" href="#L2019">2019</a> 
-<a class="jxr_linenumber" name="L2020" href="#L2020">2020</a> 		@Override
-<a class="jxr_linenumber" name="L2021" href="#L2021">2021</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/gclient/IQuery.html">IQuery</a> usingStyle(<a href="../../../../../ca/uhn/fhir/rest/method/SearchStyleEnum.html">SearchStyleEnum</a> theStyle) {
-<a class="jxr_linenumber" name="L2022" href="#L2022">2022</a> 			mySearchStyle = theStyle;
-<a class="jxr_linenumber" name="L2023" href="#L2023">2023</a> 			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>;
-<a class="jxr_linenumber" name="L2024" href="#L2024">2024</a> 		}
-<a class="jxr_linenumber" name="L2025" href="#L2025">2025</a> 
-<a class="jxr_linenumber" name="L2026" href="#L2026">2026</a> 		@Override
-<a class="jxr_linenumber" name="L2027" href="#L2027">2027</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/gclient/IQuery.html">IQuery</a> where(ICriterion&lt;?&gt; theCriterion) {
-<a class="jxr_linenumber" name="L2028" href="#L2028">2028</a> 			myCriterion.add((ICriterionInternal) theCriterion);
-<a class="jxr_linenumber" name="L2029" href="#L2029">2029</a> 			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>;
-<a class="jxr_linenumber" name="L2030" href="#L2030">2030</a> 		}
-<a class="jxr_linenumber" name="L2031" href="#L2031">2031</a> 
-<a class="jxr_linenumber" name="L2032" href="#L2032">2032</a> 		@Override
-<a class="jxr_linenumber" name="L2033" href="#L2033">2033</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/gclient/IQuery.html">IQuery</a> withIdAndCompartment(String theResourceId, String theCompartmentName) {
-<a class="jxr_linenumber" name="L2034" href="#L2034">2034</a> 			myResourceId = theResourceId;
-<a class="jxr_linenumber" name="L2035" href="#L2035">2035</a> 			myCompartmentName = theCompartmentName;
-<a class="jxr_linenumber" name="L2036" href="#L2036">2036</a> 			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>;
-<a class="jxr_linenumber" name="L2037" href="#L2037">2037</a> 		}
-<a class="jxr_linenumber" name="L2038" href="#L2038">2038</a> 
-<a class="jxr_linenumber" name="L2039" href="#L2039">2039</a> 		@Override
-<a class="jxr_linenumber" name="L2040" href="#L2040">2040</a> 		<strong class="jxr_keyword">public</strong> IQuery&lt;Object&gt; withProfile(String theProfileUri) {
-<a class="jxr_linenumber" name="L2041" href="#L2041">2041</a> 			Validate.notBlank(theProfileUri, <span class="jxr_string">"theProfileUri must not be null or empty"</span>);
-<a class="jxr_linenumber" name="L2042" href="#L2042">2042</a> 			myProfiles.add(Collections.singletonList(theProfileUri));
-<a class="jxr_linenumber" name="L2043" href="#L2043">2043</a> 			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>;
-<a class="jxr_linenumber" name="L2044" href="#L2044">2044</a> 		}
-<a class="jxr_linenumber" name="L2045" href="#L2045">2045</a> 
-<a class="jxr_linenumber" name="L2046" href="#L2046">2046</a> 		@Override
-<a class="jxr_linenumber" name="L2047" href="#L2047">2047</a> 		<strong class="jxr_keyword">public</strong> IQuery&lt;Object&gt; withAnyProfile(Collection&lt;String&gt; theProfileUris) {
-<a class="jxr_linenumber" name="L2048" href="#L2048">2048</a> 			Validate.notEmpty(theProfileUris, <span class="jxr_string">"theProfileUris must not be null or empty"</span>);
-<a class="jxr_linenumber" name="L2049" href="#L2049">2049</a> 			myProfiles.add(theProfileUris);
-<a class="jxr_linenumber" name="L2050" href="#L2050">2050</a> 			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>;
-<a class="jxr_linenumber" name="L2051" href="#L2051">2051</a> 		}
-<a class="jxr_linenumber" name="L2052" href="#L2052">2052</a> 
-<a class="jxr_linenumber" name="L2053" href="#L2053">2053</a> 		@Override
-<a class="jxr_linenumber" name="L2054" href="#L2054">2054</a> 		<strong class="jxr_keyword">public</strong> IQuery&lt;Object&gt; withSecurity(String theSystem, String theCode) {
-<a class="jxr_linenumber" name="L2055" href="#L2055">2055</a> 			Validate.notBlank(theCode, <span class="jxr_string">"theCode must not be null or empty"</span>);
-<a class="jxr_linenumber" name="L2056" href="#L2056">2056</a> 			mySecurity.add(<strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/rest/param/TokenParam.html">TokenParam</a>(theSystem, theCode));
-<a class="jxr_linenumber" name="L2057" href="#L2057">2057</a> 			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>;
-<a class="jxr_linenumber" name="L2058" href="#L2058">2058</a> 		}
-<a class="jxr_linenumber" name="L2059" href="#L2059">2059</a> 
-<a class="jxr_linenumber" name="L2060" href="#L2060">2060</a> 		@Override
-<a class="jxr_linenumber" name="L2061" href="#L2061">2061</a> 		<strong class="jxr_keyword">public</strong> IQuery&lt;Object&gt; withTag(String theSystem, String theCode) {
-<a class="jxr_linenumber" name="L2062" href="#L2062">2062</a> 			Validate.notBlank(theCode, <span class="jxr_string">"theCode must not be null or empty"</span>);
-<a class="jxr_linenumber" name="L2063" href="#L2063">2063</a> 			myTags.add(<strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/rest/param/TokenParam.html">TokenParam</a>(theSystem, theCode));
-<a class="jxr_linenumber" name="L2064" href="#L2064">2064</a> 			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>;
-<a class="jxr_linenumber" name="L2065" href="#L2065">2065</a> 		}
-<a class="jxr_linenumber" name="L2066" href="#L2066">2066</a> 
-<a class="jxr_linenumber" name="L2067" href="#L2067">2067</a> 	}
-<a class="jxr_linenumber" name="L2068" href="#L2068">2068</a> 
-<a class="jxr_linenumber" name="L2069" href="#L2069">2069</a> 	@SuppressWarnings(<span class="jxr_string">"rawtypes"</span>)
-<a class="jxr_linenumber" name="L2070" href="#L2070">2070</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">class</strong> <a href="../../../../../ca/uhn/fhir/rest/client/GenericClient.html">SortInternal</a> <strong class="jxr_keyword">implements</strong> <a href="../../../../../ca/uhn/fhir/rest/gclient/ISort.html">ISort</a> {
-<a class="jxr_linenumber" name="L2071" href="#L2071">2071</a> 
-<a class="jxr_linenumber" name="L2072" href="#L2072">2072</a> 		<strong class="jxr_keyword">private</strong> <a href="../../../../../ca/uhn/fhir/rest/client/GenericClient.html">SearchInternal</a> myFor;
-<a class="jxr_linenumber" name="L2073" href="#L2073">2073</a> 		<strong class="jxr_keyword">private</strong> String myParamName;
-<a class="jxr_linenumber" name="L2074" href="#L2074">2074</a> 		<strong class="jxr_keyword">private</strong> String myParamValue;
-<a class="jxr_linenumber" name="L2075" href="#L2075">2075</a> 		<strong class="jxr_keyword">private</strong> <a href="../../../../../ca/uhn/fhir/rest/api/SortOrderEnum.html">SortOrderEnum</a> myDirection;
-<a class="jxr_linenumber" name="L2076" href="#L2076">2076</a> 
-<a class="jxr_linenumber" name="L2077" href="#L2077">2077</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/client/GenericClient.html">SortInternal</a>(<a href="../../../../../ca/uhn/fhir/rest/client/GenericClient.html">SearchInternal</a> theFor) {
-<a class="jxr_linenumber" name="L2078" href="#L2078">2078</a> 			myFor = theFor;
-<a class="jxr_linenumber" name="L2079" href="#L2079">2079</a> 		}
+<a class="jxr_linenumber" name="L1953" href="#L1953">1953</a> 			<strong class="jxr_keyword">return</strong> invoke(params, binding, invocation);
+<a class="jxr_linenumber" name="L1954" href="#L1954">1954</a> 
+<a class="jxr_linenumber" name="L1955" href="#L1955">1955</a> 		}
+<a class="jxr_linenumber" name="L1956" href="#L1956">1956</a> 
+<a class="jxr_linenumber" name="L1957" href="#L1957">1957</a> 		@Override
+<a class="jxr_linenumber" name="L1958" href="#L1958">1958</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/gclient/IQuery.html">IQuery</a> forAllResources() {
+<a class="jxr_linenumber" name="L1959" href="#L1959">1959</a> 			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>;
+<a class="jxr_linenumber" name="L1960" href="#L1960">1960</a> 		}
+<a class="jxr_linenumber" name="L1961" href="#L1961">1961</a> 
+<a class="jxr_linenumber" name="L1962" href="#L1962">1962</a> 		@Override
+<a class="jxr_linenumber" name="L1963" href="#L1963">1963</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/gclient/IQuery.html">IQuery</a> forResource(Class&lt;? <strong class="jxr_keyword">extends</strong> IBaseResource&gt; theResourceType) {
+<a class="jxr_linenumber" name="L1964" href="#L1964">1964</a> 			setType(theResourceType);
+<a class="jxr_linenumber" name="L1965" href="#L1965">1965</a> 			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>;
+<a class="jxr_linenumber" name="L1966" href="#L1966">1966</a> 		}
+<a class="jxr_linenumber" name="L1967" href="#L1967">1967</a> 
+<a class="jxr_linenumber" name="L1968" href="#L1968">1968</a> 		@Override
+<a class="jxr_linenumber" name="L1969" href="#L1969">1969</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/gclient/IQuery.html">IQuery</a> forResource(String theResourceName) {
+<a class="jxr_linenumber" name="L1970" href="#L1970">1970</a> 			setType(theResourceName);
+<a class="jxr_linenumber" name="L1971" href="#L1971">1971</a> 			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>;
+<a class="jxr_linenumber" name="L1972" href="#L1972">1972</a> 		}
+<a class="jxr_linenumber" name="L1973" href="#L1973">1973</a> 
+<a class="jxr_linenumber" name="L1974" href="#L1974">1974</a> 		@Override
+<a class="jxr_linenumber" name="L1975" href="#L1975">1975</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/gclient/IQuery.html">IQuery</a> include(<a href="../../../../../ca/uhn/fhir/model/api/Include.html">Include</a> theInclude) {
+<a class="jxr_linenumber" name="L1976" href="#L1976">1976</a> 			myInclude.add(theInclude);
+<a class="jxr_linenumber" name="L1977" href="#L1977">1977</a> 			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>;
+<a class="jxr_linenumber" name="L1978" href="#L1978">1978</a> 		}
+<a class="jxr_linenumber" name="L1979" href="#L1979">1979</a> 
+<a class="jxr_linenumber" name="L1980" href="#L1980">1980</a> 		@Override
+<a class="jxr_linenumber" name="L1981" href="#L1981">1981</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/gclient/IQuery.html">IQuery</a> lastUpdated(<a href="../../../../../ca/uhn/fhir/rest/param/DateRangeParam.html">DateRangeParam</a> theLastUpdated) {
+<a class="jxr_linenumber" name="L1982" href="#L1982">1982</a> 			myLastUpdated = theLastUpdated;
+<a class="jxr_linenumber" name="L1983" href="#L1983">1983</a> 			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>;
+<a class="jxr_linenumber" name="L1984" href="#L1984">1984</a> 		}
+<a class="jxr_linenumber" name="L1985" href="#L1985">1985</a> 
+<a class="jxr_linenumber" name="L1986" href="#L1986">1986</a> 		@Override
+<a class="jxr_linenumber" name="L1987" href="#L1987">1987</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/gclient/IQuery.html">IQuery</a> limitTo(<strong class="jxr_keyword">int</strong> theLimitTo) {
+<a class="jxr_linenumber" name="L1988" href="#L1988">1988</a> 			<strong class="jxr_keyword">return</strong> count(theLimitTo);
+<a class="jxr_linenumber" name="L1989" href="#L1989">1989</a> 		}
+<a class="jxr_linenumber" name="L1990" href="#L1990">1990</a> 
+<a class="jxr_linenumber" name="L1991" href="#L1991">1991</a> 		@Override
+<a class="jxr_linenumber" name="L1992" href="#L1992">1992</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/gclient/IQuery.html">IQuery</a> returnBundle(Class theClass) {
+<a class="jxr_linenumber" name="L1993" href="#L1993">1993</a> 			<strong class="jxr_keyword">if</strong> (theClass == <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L1994" href="#L1994">1994</a> 				<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> NullPointerException(<span class="jxr_string">"theClass must not be null"</span>);
+<a class="jxr_linenumber" name="L1995" href="#L1995">1995</a> 			}
+<a class="jxr_linenumber" name="L1996" href="#L1996">1996</a> 			myReturnBundleType = theClass;
+<a class="jxr_linenumber" name="L1997" href="#L1997">1997</a> 			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>;
+<a class="jxr_linenumber" name="L1998" href="#L1998">1998</a> 		}
+<a class="jxr_linenumber" name="L1999" href="#L1999">1999</a> 
+<a class="jxr_linenumber" name="L2000" href="#L2000">2000</a> 		@Override
+<a class="jxr_linenumber" name="L2001" href="#L2001">2001</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/gclient/IQuery.html">IQuery</a> revInclude(<a href="../../../../../ca/uhn/fhir/model/api/Include.html">Include</a> theInclude) {
+<a class="jxr_linenumber" name="L2002" href="#L2002">2002</a> 			myRevInclude.add(theInclude);
+<a class="jxr_linenumber" name="L2003" href="#L2003">2003</a> 			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>;
+<a class="jxr_linenumber" name="L2004" href="#L2004">2004</a> 		}
+<a class="jxr_linenumber" name="L2005" href="#L2005">2005</a> 
+<a class="jxr_linenumber" name="L2006" href="#L2006">2006</a> 		<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> setType(Class&lt;? <strong class="jxr_keyword">extends</strong> IBaseResource&gt; theResourceType) {
+<a class="jxr_linenumber" name="L2007" href="#L2007">2007</a> 			myResourceType = theResourceType;
+<a class="jxr_linenumber" name="L2008" href="#L2008">2008</a> 			RuntimeResourceDefinition definition = myContext.getResourceDefinition(theResourceType);
+<a class="jxr_linenumber" name="L2009" href="#L2009">2009</a> 			myResourceName = definition.getName();
+<a class="jxr_linenumber" name="L2010" href="#L2010">2010</a> 		}
+<a class="jxr_linenumber" name="L2011" href="#L2011">2011</a> 
+<a class="jxr_linenumber" name="L2012" href="#L2012">2012</a> 		<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> setType(String theResourceName) {
+<a class="jxr_linenumber" name="L2013" href="#L2013">2013</a> 			myResourceType = myContext.getResourceDefinition(theResourceName).getImplementingClass();
+<a class="jxr_linenumber" name="L2014" href="#L2014">2014</a> 			myResourceName = theResourceName;
+<a class="jxr_linenumber" name="L2015" href="#L2015">2015</a> 		}
+<a class="jxr_linenumber" name="L2016" href="#L2016">2016</a> 
+<a class="jxr_linenumber" name="L2017" href="#L2017">2017</a> 		@Override
+<a class="jxr_linenumber" name="L2018" href="#L2018">2018</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/gclient/ISort.html">ISort</a> sort() {
+<a class="jxr_linenumber" name="L2019" href="#L2019">2019</a> 			SortInternal retVal = <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/rest/client/GenericClient.html">SortInternal</a>(<strong class="jxr_keyword">this</strong>);
+<a class="jxr_linenumber" name="L2020" href="#L2020">2020</a> 			mySort.add(retVal);
+<a class="jxr_linenumber" name="L2021" href="#L2021">2021</a> 			<strong class="jxr_keyword">return</strong> retVal;
+<a class="jxr_linenumber" name="L2022" href="#L2022">2022</a> 		}
+<a class="jxr_linenumber" name="L2023" href="#L2023">2023</a> 
+<a class="jxr_linenumber" name="L2024" href="#L2024">2024</a> 		@Override
+<a class="jxr_linenumber" name="L2025" href="#L2025">2025</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/gclient/IQuery.html">IQuery</a> usingStyle(<a href="../../../../../ca/uhn/fhir/rest/method/SearchStyleEnum.html">SearchStyleEnum</a> theStyle) {
+<a class="jxr_linenumber" name="L2026" href="#L2026">2026</a> 			mySearchStyle = theStyle;
+<a class="jxr_linenumber" name="L2027" href="#L2027">2027</a> 			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>;
+<a class="jxr_linenumber" name="L2028" href="#L2028">2028</a> 		}
+<a class="jxr_linenumber" name="L2029" href="#L2029">2029</a> 
+<a class="jxr_linenumber" name="L2030" href="#L2030">2030</a> 		@Override
+<a class="jxr_linenumber" name="L2031" href="#L2031">2031</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/gclient/IQuery.html">IQuery</a> where(ICriterion&lt;?&gt; theCriterion) {
+<a class="jxr_linenumber" name="L2032" href="#L2032">2032</a> 			myCriterion.add((ICriterionInternal) theCriterion);
+<a class="jxr_linenumber" name="L2033" href="#L2033">2033</a> 			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>;
+<a class="jxr_linenumber" name="L2034" href="#L2034">2034</a> 		}
+<a class="jxr_linenumber" name="L2035" href="#L2035">2035</a> 
+<a class="jxr_linenumber" name="L2036" href="#L2036">2036</a> 		@Override
+<a class="jxr_linenumber" name="L2037" href="#L2037">2037</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/gclient/IQuery.html">IQuery</a> withIdAndCompartment(String theResourceId, String theCompartmentName) {
+<a class="jxr_linenumber" name="L2038" href="#L2038">2038</a> 			myResourceId = theResourceId;
+<a class="jxr_linenumber" name="L2039" href="#L2039">2039</a> 			myCompartmentName = theCompartmentName;
+<a class="jxr_linenumber" name="L2040" href="#L2040">2040</a> 			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>;
+<a class="jxr_linenumber" name="L2041" href="#L2041">2041</a> 		}
+<a class="jxr_linenumber" name="L2042" href="#L2042">2042</a> 
+<a class="jxr_linenumber" name="L2043" href="#L2043">2043</a> 		@Override
+<a class="jxr_linenumber" name="L2044" href="#L2044">2044</a> 		<strong class="jxr_keyword">public</strong> IQuery&lt;Object&gt; withProfile(String theProfileUri) {
+<a class="jxr_linenumber" name="L2045" href="#L2045">2045</a> 			Validate.notBlank(theProfileUri, <span class="jxr_string">"theProfileUri must not be null or empty"</span>);
+<a class="jxr_linenumber" name="L2046" href="#L2046">2046</a> 			myProfiles.add(Collections.singletonList(theProfileUri));
+<a class="jxr_linenumber" name="L2047" href="#L2047">2047</a> 			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>;
+<a class="jxr_linenumber" name="L2048" href="#L2048">2048</a> 		}
+<a class="jxr_linenumber" name="L2049" href="#L2049">2049</a> 
+<a class="jxr_linenumber" name="L2050" href="#L2050">2050</a> 		@Override
+<a class="jxr_linenumber" name="L2051" href="#L2051">2051</a> 		<strong class="jxr_keyword">public</strong> IQuery&lt;Object&gt; withAnyProfile(Collection&lt;String&gt; theProfileUris) {
+<a class="jxr_linenumber" name="L2052" href="#L2052">2052</a> 			Validate.notEmpty(theProfileUris, <span class="jxr_string">"theProfileUris must not be null or empty"</span>);
+<a class="jxr_linenumber" name="L2053" href="#L2053">2053</a> 			myProfiles.add(theProfileUris);
+<a class="jxr_linenumber" name="L2054" href="#L2054">2054</a> 			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>;
+<a class="jxr_linenumber" name="L2055" href="#L2055">2055</a> 		}
+<a class="jxr_linenumber" name="L2056" href="#L2056">2056</a> 
+<a class="jxr_linenumber" name="L2057" href="#L2057">2057</a> 		@Override
+<a class="jxr_linenumber" name="L2058" href="#L2058">2058</a> 		<strong class="jxr_keyword">public</strong> IQuery&lt;Object&gt; withSecurity(String theSystem, String theCode) {
+<a class="jxr_linenumber" name="L2059" href="#L2059">2059</a> 			Validate.notBlank(theCode, <span class="jxr_string">"theCode must not be null or empty"</span>);
+<a class="jxr_linenumber" name="L2060" href="#L2060">2060</a> 			mySecurity.add(<strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/rest/param/TokenParam.html">TokenParam</a>(theSystem, theCode));
+<a class="jxr_linenumber" name="L2061" href="#L2061">2061</a> 			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>;
+<a class="jxr_linenumber" name="L2062" href="#L2062">2062</a> 		}
+<a class="jxr_linenumber" name="L2063" href="#L2063">2063</a> 
+<a class="jxr_linenumber" name="L2064" href="#L2064">2064</a> 		@Override
+<a class="jxr_linenumber" name="L2065" href="#L2065">2065</a> 		<strong class="jxr_keyword">public</strong> IQuery&lt;Object&gt; withTag(String theSystem, String theCode) {
+<a class="jxr_linenumber" name="L2066" href="#L2066">2066</a> 			Validate.notBlank(theCode, <span class="jxr_string">"theCode must not be null or empty"</span>);
+<a class="jxr_linenumber" name="L2067" href="#L2067">2067</a> 			myTags.add(<strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/rest/param/TokenParam.html">TokenParam</a>(theSystem, theCode));
+<a class="jxr_linenumber" name="L2068" href="#L2068">2068</a> 			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>;
+<a class="jxr_linenumber" name="L2069" href="#L2069">2069</a> 		}
+<a class="jxr_linenumber" name="L2070" href="#L2070">2070</a> 
+<a class="jxr_linenumber" name="L2071" href="#L2071">2071</a> 	}
+<a class="jxr_linenumber" name="L2072" href="#L2072">2072</a> 
+<a class="jxr_linenumber" name="L2073" href="#L2073">2073</a> 	@SuppressWarnings(<span class="jxr_string">"rawtypes"</span>)
+<a class="jxr_linenumber" name="L2074" href="#L2074">2074</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">class</strong> <a href="../../../../../ca/uhn/fhir/rest/client/GenericClient.html">SortInternal</a> <strong class="jxr_keyword">implements</strong> <a href="../../../../../ca/uhn/fhir/rest/gclient/ISort.html">ISort</a> {
+<a class="jxr_linenumber" name="L2075" href="#L2075">2075</a> 
+<a class="jxr_linenumber" name="L2076" href="#L2076">2076</a> 		<strong class="jxr_keyword">private</strong> <a href="../../../../../ca/uhn/fhir/rest/client/GenericClient.html">SearchInternal</a> myFor;
+<a class="jxr_linenumber" name="L2077" href="#L2077">2077</a> 		<strong class="jxr_keyword">private</strong> String myParamName;
+<a class="jxr_linenumber" name="L2078" href="#L2078">2078</a> 		<strong class="jxr_keyword">private</strong> String myParamValue;
+<a class="jxr_linenumber" name="L2079" href="#L2079">2079</a> 		<strong class="jxr_keyword">private</strong> <a href="../../../../../ca/uhn/fhir/rest/api/SortOrderEnum.html">SortOrderEnum</a> myDirection;
 <a class="jxr_linenumber" name="L2080" href="#L2080">2080</a> 
-<a class="jxr_linenumber" name="L2081" href="#L2081">2081</a> 		@Override
-<a class="jxr_linenumber" name="L2082" href="#L2082">2082</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/gclient/IQuery.html">IQuery</a> ascending(<a href="../../../../../ca/uhn/fhir/rest/gclient/IParam.html">IParam</a> theParam) {
-<a class="jxr_linenumber" name="L2083" href="#L2083">2083</a> 			myParamName = Constants.PARAM_SORT_ASC;
-<a class="jxr_linenumber" name="L2084" href="#L2084">2084</a> 			myDirection = SortOrderEnum.ASC;
-<a class="jxr_linenumber" name="L2085" href="#L2085">2085</a> 			myParamValue = theParam.getParamName();
-<a class="jxr_linenumber" name="L2086" href="#L2086">2086</a> 			<strong class="jxr_keyword">return</strong> myFor;
-<a class="jxr_linenumber" name="L2087" href="#L2087">2087</a> 		}
-<a class="jxr_linenumber" name="L2088" href="#L2088">2088</a> 
-<a class="jxr_linenumber" name="L2089" href="#L2089">2089</a> 		@Override
-<a class="jxr_linenumber" name="L2090" href="#L2090">2090</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/gclient/IQuery.html">IQuery</a> ascending(String theParam) {
-<a class="jxr_linenumber" name="L2091" href="#L2091">2091</a> 			myParamName = Constants.PARAM_SORT_ASC;
-<a class="jxr_linenumber" name="L2092" href="#L2092">2092</a> 			myDirection = SortOrderEnum.ASC;
-<a class="jxr_linenumber" name="L2093" href="#L2093">2093</a> 			myParamValue = theParam;
-<a class="jxr_linenumber" name="L2094" href="#L2094">2094</a> 			<strong class="jxr_keyword">return</strong> myFor;
-<a class="jxr_linenumber" name="L2095" href="#L2095">2095</a> 		}
-<a class="jxr_linenumber" name="L2096" href="#L2096">2096</a> 
-<a class="jxr_linenumber" name="L2097" href="#L2097">2097</a> 		@Override
-<a class="jxr_linenumber" name="L2098" href="#L2098">2098</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/gclient/IQuery.html">IQuery</a> defaultOrder(<a href="../../../../../ca/uhn/fhir/rest/gclient/IParam.html">IParam</a> theParam) {
-<a class="jxr_linenumber" name="L2099" href="#L2099">2099</a> 			myParamName = Constants.PARAM_SORT;
-<a class="jxr_linenumber" name="L2100" href="#L2100">2100</a> 			myDirection = <strong class="jxr_keyword">null</strong>;
-<a class="jxr_linenumber" name="L2101" href="#L2101">2101</a> 			myParamValue = theParam.getParamName();
-<a class="jxr_linenumber" name="L2102" href="#L2102">2102</a> 			<strong class="jxr_keyword">return</strong> myFor;
-<a class="jxr_linenumber" name="L2103" href="#L2103">2103</a> 		}
-<a class="jxr_linenumber" name="L2104" href="#L2104">2104</a> 
-<a class="jxr_linenumber" name="L2105" href="#L2105">2105</a> 		@Override
-<a class="jxr_linenumber" name="L2106" href="#L2106">2106</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/gclient/IQuery.html">IQuery</a> descending(<a href="../../../../../ca/uhn/fhir/rest/gclient/IParam.html">IParam</a> theParam) {
-<a class="jxr_linenumber" name="L2107" href="#L2107">2107</a> 			myParamName = Constants.PARAM_SORT_DESC;
-<a class="jxr_linenumber" name="L2108" href="#L2108">2108</a> 			myDirection = SortOrderEnum.DESC;
-<a class="jxr_linenumber" name="L2109" href="#L2109">2109</a> 			myParamValue = theParam.getParamName();
-<a class="jxr_linenumber" name="L2110" href="#L2110">2110</a> 			<strong class="jxr_keyword">return</strong> myFor;
-<a class="jxr_linenumber" name="L2111" href="#L2111">2111</a> 		}
-<a class="jxr_linenumber" name="L2112" href="#L2112">2112</a> 
-<a class="jxr_linenumber" name="L2113" href="#L2113">2113</a> 		@Override
-<a class="jxr_linenumber" name="L2114" href="#L2114">2114</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/gclient/IQuery.html">IQuery</a> descending(String theParam) {
-<a class="jxr_linenumber" name="L2115" href="#L2115">2115</a> 			myParamName = Constants.PARAM_SORT_DESC;
-<a class="jxr_linenumber" name="L2116" href="#L2116">2116</a> 			myDirection = SortOrderEnum.DESC;
-<a class="jxr_linenumber" name="L2117" href="#L2117">2117</a> 			myParamValue = theParam;
-<a class="jxr_linenumber" name="L2118" href="#L2118">2118</a> 			<strong class="jxr_keyword">return</strong> myFor;
-<a class="jxr_linenumber" name="L2119" href="#L2119">2119</a> 		}
-<a class="jxr_linenumber" name="L2120" href="#L2120">2120</a> 
-<a class="jxr_linenumber" name="L2121" href="#L2121">2121</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/api/SortOrderEnum.html">SortOrderEnum</a> getDirection() {
-<a class="jxr_linenumber" name="L2122" href="#L2122">2122</a> 			<strong class="jxr_keyword">return</strong> myDirection;
+<a class="jxr_linenumber" name="L2081" href="#L2081">2081</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/client/GenericClient.html">SortInternal</a>(<a href="../../../../../ca/uhn/fhir/rest/client/GenericClient.html">SearchInternal</a> theFor) {
+<a class="jxr_linenumber" name="L2082" href="#L2082">2082</a> 			myFor = theFor;
+<a class="jxr_linenumber" name="L2083" href="#L2083">2083</a> 		}
+<a class="jxr_linenumber" name="L2084" href="#L2084">2084</a> 
+<a class="jxr_linenumber" name="L2085" href="#L2085">2085</a> 		@Override
+<a class="jxr_linenumber" name="L2086" href="#L2086">2086</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/gclient/IQuery.html">IQuery</a> ascending(<a href="../../../../../ca/uhn/fhir/rest/gclient/IParam.html">IParam</a> theParam) {
+<a class="jxr_linenumber" name="L2087" href="#L2087">2087</a> 			myParamName = Constants.PARAM_SORT_ASC;
+<a class="jxr_linenumber" name="L2088" href="#L2088">2088</a> 			myDirection = SortOrderEnum.ASC;
+<a class="jxr_linenumber" name="L2089" href="#L2089">2089</a> 			myParamValue = theParam.getParamName();
+<a class="jxr_linenumber" name="L2090" href="#L2090">2090</a> 			<strong class="jxr_keyword">return</strong> myFor;
+<a class="jxr_linenumber" name="L2091" href="#L2091">2091</a> 		}
+<a class="jxr_linenumber" name="L2092" href="#L2092">2092</a> 
+<a class="jxr_linenumber" name="L2093" href="#L2093">2093</a> 		@Override
+<a class="jxr_linenumber" name="L2094" href="#L2094">2094</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/gclient/IQuery.html">IQuery</a> ascending(String theParam) {
+<a class="jxr_linenumber" name="L2095" href="#L2095">2095</a> 			myParamName = Constants.PARAM_SORT_ASC;
+<a class="jxr_linenumber" name="L2096" href="#L2096">2096</a> 			myDirection = SortOrderEnum.ASC;
+<a class="jxr_linenumber" name="L2097" href="#L2097">2097</a> 			myParamValue = theParam;
+<a class="jxr_linenumber" name="L2098" href="#L2098">2098</a> 			<strong class="jxr_keyword">return</strong> myFor;
+<a class="jxr_linenumber" name="L2099" href="#L2099">2099</a> 		}
+<a class="jxr_linenumber" name="L2100" href="#L2100">2100</a> 
+<a class="jxr_linenumber" name="L2101" href="#L2101">2101</a> 		@Override
+<a class="jxr_linenumber" name="L2102" href="#L2102">2102</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/gclient/IQuery.html">IQuery</a> defaultOrder(<a href="../../../../../ca/uhn/fhir/rest/gclient/IParam.html">IParam</a> theParam) {
+<a class="jxr_linenumber" name="L2103" href="#L2103">2103</a> 			myParamName = Constants.PARAM_SORT;
+<a class="jxr_linenumber" name="L2104" href="#L2104">2104</a> 			myDirection = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L2105" href="#L2105">2105</a> 			myParamValue = theParam.getParamName();
+<a class="jxr_linenumber" name="L2106" href="#L2106">2106</a> 			<strong class="jxr_keyword">return</strong> myFor;
+<a class="jxr_linenumber" name="L2107" href="#L2107">2107</a> 		}
+<a class="jxr_linenumber" name="L2108" href="#L2108">2108</a> 
+<a class="jxr_linenumber" name="L2109" href="#L2109">2109</a> 		@Override
+<a class="jxr_linenumber" name="L2110" href="#L2110">2110</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/gclient/IQuery.html">IQuery</a> descending(<a href="../../../../../ca/uhn/fhir/rest/gclient/IParam.html">IParam</a> theParam) {
+<a class="jxr_linenumber" name="L2111" href="#L2111">2111</a> 			myParamName = Constants.PARAM_SORT_DESC;
+<a class="jxr_linenumber" name="L2112" href="#L2112">2112</a> 			myDirection = SortOrderEnum.DESC;
+<a class="jxr_linenumber" name="L2113" href="#L2113">2113</a> 			myParamValue = theParam.getParamName();
+<a class="jxr_linenumber" name="L2114" href="#L2114">2114</a> 			<strong class="jxr_keyword">return</strong> myFor;
+<a class="jxr_linenumber" name="L2115" href="#L2115">2115</a> 		}
+<a class="jxr_linenumber" name="L2116" href="#L2116">2116</a> 
+<a class="jxr_linenumber" name="L2117" href="#L2117">2117</a> 		@Override
+<a class="jxr_linenumber" name="L2118" href="#L2118">2118</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/gclient/IQuery.html">IQuery</a> descending(String theParam) {
+<a class="jxr_linenumber" name="L2119" href="#L2119">2119</a> 			myParamName = Constants.PARAM_SORT_DESC;
+<a class="jxr_linenumber" name="L2120" href="#L2120">2120</a> 			myDirection = SortOrderEnum.DESC;
+<a class="jxr_linenumber" name="L2121" href="#L2121">2121</a> 			myParamValue = theParam;
+<a class="jxr_linenumber" name="L2122" href="#L2122">2122</a> 			<strong class="jxr_keyword">return</strong> myFor;
 <a class="jxr_linenumber" name="L2123" href="#L2123">2123</a> 		}
 <a class="jxr_linenumber" name="L2124" href="#L2124">2124</a> 
-<a class="jxr_linenumber" name="L2125" href="#L2125">2125</a> 		<strong class="jxr_keyword">public</strong> String getParamName() {
-<a class="jxr_linenumber" name="L2126" href="#L2126">2126</a> 			<strong class="jxr_keyword">return</strong> myParamName;
+<a class="jxr_linenumber" name="L2125" href="#L2125">2125</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/api/SortOrderEnum.html">SortOrderEnum</a> getDirection() {
+<a class="jxr_linenumber" name="L2126" href="#L2126">2126</a> 			<strong class="jxr_keyword">return</strong> myDirection;
 <a class="jxr_linenumber" name="L2127" href="#L2127">2127</a> 		}
 <a class="jxr_linenumber" name="L2128" href="#L2128">2128</a> 
-<a class="jxr_linenumber" name="L2129" href="#L2129">2129</a> 		<strong class="jxr_keyword">public</strong> String getParamValue() {
-<a class="jxr_linenumber" name="L2130" href="#L2130">2130</a> 			<strong class="jxr_keyword">return</strong> myParamValue;
+<a class="jxr_linenumber" name="L2129" href="#L2129">2129</a> 		<strong class="jxr_keyword">public</strong> String getParamName() {
+<a class="jxr_linenumber" name="L2130" href="#L2130">2130</a> 			<strong class="jxr_keyword">return</strong> myParamName;
 <a class="jxr_linenumber" name="L2131" href="#L2131">2131</a> 		}
 <a class="jxr_linenumber" name="L2132" href="#L2132">2132</a> 
-<a class="jxr_linenumber" name="L2133" href="#L2133">2133</a> 	}
-<a class="jxr_linenumber" name="L2134" href="#L2134">2134</a> 
-<a class="jxr_linenumber" name="L2135" href="#L2135">2135</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">class</strong> <a href="../../../../../ca/uhn/fhir/rest/client/GenericClient.html">StringResponseHandler</a> <strong class="jxr_keyword">implements</strong> IClientResponseHandler&lt;String&gt; {
+<a class="jxr_linenumber" name="L2133" href="#L2133">2133</a> 		<strong class="jxr_keyword">public</strong> String getParamValue() {
+<a class="jxr_linenumber" name="L2134" href="#L2134">2134</a> 			<strong class="jxr_keyword">return</strong> myParamValue;
+<a class="jxr_linenumber" name="L2135" href="#L2135">2135</a> 		}
 <a class="jxr_linenumber" name="L2136" href="#L2136">2136</a> 
-<a class="jxr_linenumber" name="L2137" href="#L2137">2137</a> 		@Override
-<a class="jxr_linenumber" name="L2138" href="#L2138">2138</a> 		<strong class="jxr_keyword">public</strong> String invokeClient(String theResponseMimeType, Reader theResponseReader, <strong class="jxr_keyword">int</strong> theResponseStatusCode, Map&lt;String, List&lt;String&gt;&gt; theHeaders)
-<a class="jxr_linenumber" name="L2139" href="#L2139">2139</a> 				<strong class="jxr_keyword">throws</strong> IOException, <a href="../../../../../ca/uhn/fhir/rest/server/exceptions/BaseServerResponseException.html">BaseServerResponseException</a> {
-<a class="jxr_linenumber" name="L2140" href="#L2140">2140</a> 			<strong class="jxr_keyword">return</strong> IOUtils.toString(theResponseReader);
-<a class="jxr_linenumber" name="L2141" href="#L2141">2141</a> 		}
-<a class="jxr_linenumber" name="L2142" href="#L2142">2142</a> 	}
-<a class="jxr_linenumber" name="L2143" href="#L2143">2143</a> 
-<a class="jxr_linenumber" name="L2144" href="#L2144">2144</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">class</strong> <a href="../../../../../ca/uhn/fhir/rest/client/GenericClient.html">TagListResponseHandler</a> <strong class="jxr_keyword">implements</strong> IClientResponseHandler&lt;TagList&gt; {
-<a class="jxr_linenumber" name="L2145" href="#L2145">2145</a> 
-<a class="jxr_linenumber" name="L2146" href="#L2146">2146</a> 		@Override
-<a class="jxr_linenumber" name="L2147" href="#L2147">2147</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/model/api/TagList.html">TagList</a> invokeClient(String theResponseMimeType, Reader theResponseReader, <strong class="jxr_keyword">int</strong> theResponseStatusCode, Map&lt;String, List&lt;String&gt;&gt; theHeaders) <strong class="jxr_keyword">throws</strong> BaseServerResponseException {
-<a class="jxr_linenumber" name="L2148" href="#L2148">2148</a> 			EncodingEnum respType = EncodingEnum.forContentType(theResponseMimeType);
-<a class="jxr_linenumber" name="L2149" href="#L2149">2149</a> 			<strong class="jxr_keyword">if</strong> (respType == <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L2150" href="#L2150">2150</a> 				<strong class="jxr_keyword">throw</strong> NonFhirResponseException.newInstance(theResponseStatusCode, theResponseMimeType, theResponseReader);
-<a class="jxr_linenumber" name="L2151" href="#L2151">2151</a> 			}
-<a class="jxr_linenumber" name="L2152" href="#L2152">2152</a> 			IParser parser = respType.newParser(myContext);
-<a class="jxr_linenumber" name="L2153" href="#L2153">2153</a> 			<strong class="jxr_keyword">return</strong> parser.parseTagList(theResponseReader);
-<a class="jxr_linenumber" name="L2154" href="#L2154">2154</a> 		}
-<a class="jxr_linenumber" name="L2155" href="#L2155">2155</a> 	}
-<a class="jxr_linenumber" name="L2156" href="#L2156">2156</a> 
-<a class="jxr_linenumber" name="L2157" href="#L2157">2157</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">class</strong> TransactionExecutable&lt;T&gt; <strong class="jxr_keyword">extends</strong> BaseClientExecutable&lt;ITransactionTyped&lt;T&gt;, T&gt; <strong class="jxr_keyword">implements</strong> ITransactionTyped&lt;T&gt; {
-<a class="jxr_linenumber" name="L2158" href="#L2158">2158</a> 
-<a class="jxr_linenumber" name="L2159" href="#L2159">2159</a> 		<strong class="jxr_keyword">private</strong> <a href="../../../../../org/hl7/fhir/instance/model/api/IBaseBundle.html">IBaseBundle</a> myBaseBundle;
-<a class="jxr_linenumber" name="L2160" href="#L2160">2160</a> 		<strong class="jxr_keyword">private</strong> <a href="../../../../../ca/uhn/fhir/model/api/Bundle.html">Bundle</a> myBundle;
-<a class="jxr_linenumber" name="L2161" href="#L2161">2161</a> 		<strong class="jxr_keyword">private</strong> String myRawBundle;
-<a class="jxr_linenumber" name="L2162" href="#L2162">2162</a> 		<strong class="jxr_keyword">private</strong> <a href="../../../../../ca/uhn/fhir/rest/server/EncodingEnum.html">EncodingEnum</a> myRawBundleEncoding;
-<a class="jxr_linenumber" name="L2163" href="#L2163">2163</a> 		<strong class="jxr_keyword">private</strong> List&lt;? <strong class="jxr_keyword">extends</strong> IBaseResource&gt; myResources;
-<a class="jxr_linenumber" name="L2164" href="#L2164">2164</a> 
-<a class="jxr_linenumber" name="L2165" href="#L2165">2165</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/client/GenericClient.html">TransactionExecutable</a>(<a href="../../../../../ca/uhn/fhir/model/api/Bundle.html">Bundle</a> theResources) {
-<a class="jxr_linenumber" name="L2166" href="#L2166">2166</a> 			myBundle = theResources;
-<a class="jxr_linenumber" name="L2167" href="#L2167">2167</a> 		}
+<a class="jxr_linenumber" name="L2137" href="#L2137">2137</a> 	}
+<a class="jxr_linenumber" name="L2138" href="#L2138">2138</a> 
+<a class="jxr_linenumber" name="L2139" href="#L2139">2139</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">class</strong> <a href="../../../../../ca/uhn/fhir/rest/client/GenericClient.html">StringResponseHandler</a> <strong class="jxr_keyword">implements</strong> IClientResponseHandler&lt;String&gt; {
+<a class="jxr_linenumber" name="L2140" href="#L2140">2140</a> 
+<a class="jxr_linenumber" name="L2141" href="#L2141">2141</a> 		@Override
+<a class="jxr_linenumber" name="L2142" href="#L2142">2142</a> 		<strong class="jxr_keyword">public</strong> String invokeClient(String theResponseMimeType, Reader theResponseReader, <strong class="jxr_keyword">int</strong> theResponseStatusCode, Map&lt;String, List&lt;String&gt;&gt; theHeaders)
+<a class="jxr_linenumber" name="L2143" href="#L2143">2143</a> 				<strong class="jxr_keyword">throws</strong> IOException, <a href="../../../../../ca/uhn/fhir/rest/server/exceptions/BaseServerResponseException.html">BaseServerResponseException</a> {
+<a class="jxr_linenumber" name="L2144" href="#L2144">2144</a> 			<strong class="jxr_keyword">return</strong> IOUtils.toString(theResponseReader);
+<a class="jxr_linenumber" name="L2145" href="#L2145">2145</a> 		}
+<a class="jxr_linenumber" name="L2146" href="#L2146">2146</a> 	}
+<a class="jxr_linenumber" name="L2147" href="#L2147">2147</a> 
+<a class="jxr_linenumber" name="L2148" href="#L2148">2148</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">class</strong> <a href="../../../../../ca/uhn/fhir/rest/client/GenericClient.html">TagListResponseHandler</a> <strong class="jxr_keyword">implements</strong> IClientResponseHandler&lt;TagList&gt; {
+<a class="jxr_linenumber" name="L2149" href="#L2149">2149</a> 
+<a class="jxr_linenumber" name="L2150" href="#L2150">2150</a> 		@Override
+<a class="jxr_linenumber" name="L2151" href="#L2151">2151</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/model/api/TagList.html">TagList</a> invokeClient(String theResponseMimeType, Reader theResponseReader, <strong class="jxr_keyword">int</strong> theResponseStatusCode, Map&lt;String, List&lt;String&gt;&gt; theHeaders) <strong class="jxr_keyword">throws</strong> BaseServerResponseException {
+<a class="jxr_linenumber" name="L2152" href="#L2152">2152</a> 			EncodingEnum respType = EncodingEnum.forContentType(theResponseMimeType);
+<a class="jxr_linenumber" name="L2153" href="#L2153">2153</a> 			<strong class="jxr_keyword">if</strong> (respType == <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L2154" href="#L2154">2154</a> 				<strong class="jxr_keyword">throw</strong> NonFhirResponseException.newInstance(theResponseStatusCode, theResponseMimeType, theResponseReader);
+<a class="jxr_linenumber" name="L2155" href="#L2155">2155</a> 			}
+<a class="jxr_linenumber" name="L2156" href="#L2156">2156</a> 			IParser parser = respType.newParser(myContext);
+<a class="jxr_linenumber" name="L2157" href="#L2157">2157</a> 			<strong class="jxr_keyword">return</strong> parser.parseTagList(theResponseReader);
+<a class="jxr_linenumber" name="L2158" href="#L2158">2158</a> 		}
+<a class="jxr_linenumber" name="L2159" href="#L2159">2159</a> 	}
+<a class="jxr_linenumber" name="L2160" href="#L2160">2160</a> 
+<a class="jxr_linenumber" name="L2161" href="#L2161">2161</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">class</strong> TransactionExecutable&lt;T&gt; <strong class="jxr_keyword">extends</strong> BaseClientExecutable&lt;ITransactionTyped&lt;T&gt;, T&gt; <strong class="jxr_keyword">implements</strong> ITransactionTyped&lt;T&gt; {
+<a class="jxr_linenumber" name="L2162" href="#L2162">2162</a> 
+<a class="jxr_linenumber" name="L2163" href="#L2163">2163</a> 		<strong class="jxr_keyword">private</strong> <a href="../../../../../org/hl7/fhir/instance/model/api/IBaseBundle.html">IBaseBundle</a> myBaseBundle;
+<a class="jxr_linenumber" name="L2164" href="#L2164">2164</a> 		<strong class="jxr_keyword">private</strong> <a href="../../../../../ca/uhn/fhir/model/api/Bundle.html">Bundle</a> myBundle;
+<a class="jxr_linenumber" name="L2165" href="#L2165">2165</a> 		<strong class="jxr_keyword">private</strong> String myRawBundle;
+<a class="jxr_linenumber" name="L2166" href="#L2166">2166</a> 		<strong class="jxr_keyword">private</strong> <a href="../../../../../ca/uhn/fhir/rest/server/EncodingEnum.html">EncodingEnum</a> myRawBundleEncoding;
+<a class="jxr_linenumber" name="L2167" href="#L2167">2167</a> 		<strong class="jxr_keyword">private</strong> List&lt;? <strong class="jxr_keyword">extends</strong> IBaseResource&gt; myResources;
 <a class="jxr_linenumber" name="L2168" href="#L2168">2168</a> 
-<a class="jxr_linenumber" name="L2169" href="#L2169">2169</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/client/GenericClient.html">TransactionExecutable</a>(<a href="../../../../../org/hl7/fhir/instance/model/api/IBaseBundle.html">IBaseBundle</a> theBundle) {
-<a class="jxr_linenumber" name="L2170" href="#L2170">2170</a> 			myBaseBundle = theBundle;
+<a class="jxr_linenumber" name="L2169" href="#L2169">2169</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/client/GenericClient.html">TransactionExecutable</a>(<a href="../../../../../ca/uhn/fhir/model/api/Bundle.html">Bundle</a> theResources) {
+<a class="jxr_linenumber" name="L2170" href="#L2170">2170</a> 			myBundle = theResources;
 <a class="jxr_linenumber" name="L2171" href="#L2171">2171</a> 		}
 <a class="jxr_linenumber" name="L2172" href="#L2172">2172</a> 
-<a class="jxr_linenumber" name="L2173" href="#L2173">2173</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/client/GenericClient.html">TransactionExecutable</a>(List&lt;? <strong class="jxr_keyword">extends</strong> IBaseResource&gt; theResources) {
-<a class="jxr_linenumber" name="L2174" href="#L2174">2174</a> 			myResources = theResources;
+<a class="jxr_linenumber" name="L2173" href="#L2173">2173</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/client/GenericClient.html">TransactionExecutable</a>(<a href="../../../../../org/hl7/fhir/instance/model/api/IBaseBundle.html">IBaseBundle</a> theBundle) {
+<a class="jxr_linenumber" name="L2174" href="#L2174">2174</a> 			myBaseBundle = theBundle;
 <a class="jxr_linenumber" name="L2175" href="#L2175">2175</a> 		}
 <a class="jxr_linenumber" name="L2176" href="#L2176">2176</a> 
-<a class="jxr_linenumber" name="L2177" href="#L2177">2177</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/client/GenericClient.html">TransactionExecutable</a>(String theBundle) {
-<a class="jxr_linenumber" name="L2178" href="#L2178">2178</a> 			myRawBundle = theBundle;
-<a class="jxr_linenumber" name="L2179" href="#L2179">2179</a> 			myRawBundleEncoding = MethodUtil.detectEncodingNoDefault(myRawBundle);
-<a class="jxr_linenumber" name="L2180" href="#L2180">2180</a> 			<strong class="jxr_keyword">if</strong> (myRawBundleEncoding == <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L2181" href="#L2181">2181</a> 				<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> IllegalArgumentException(myContext.getLocalizer().getMessage(GenericClient.<strong class="jxr_keyword">class</strong>, <span class="jxr_string">"cantDetermineRequestType"</span>));
-<a class="jxr_linenumber" name="L2182" href="#L2182">2182</a> 			}
-<a class="jxr_linenumber" name="L2183" href="#L2183">2183</a> 		}
-<a class="jxr_linenumber" name="L2184" href="#L2184">2184</a> 
-<a class="jxr_linenumber" name="L2185" href="#L2185">2185</a> 		@SuppressWarnings({ <span class="jxr_string">"unchecked"</span>, <span class="jxr_string">"rawtypes"</span> })
-<a class="jxr_linenumber" name="L2186" href="#L2186">2186</a> 		@Override
-<a class="jxr_linenumber" name="L2187" href="#L2187">2187</a> 		<strong class="jxr_keyword">public</strong> T execute() {
-<a class="jxr_linenumber" name="L2188" href="#L2188">2188</a> 			Map&lt;String, List&lt;String&gt;&gt; params = <strong class="jxr_keyword">new</strong> HashMap&lt;String, List&lt;String&gt;&gt;();
-<a class="jxr_linenumber" name="L2189" href="#L2189">2189</a> 			<strong class="jxr_keyword">if</strong> (myResources != <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L2190" href="#L2190">2190</a> 				ResourceListResponseHandler binding = <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/rest/client/GenericClient.html">ResourceListResponseHandler</a>(<strong class="jxr_keyword">null</strong>);
-<a class="jxr_linenumber" name="L2191" href="#L2191">2191</a> 				BaseHttpClientInvocation invocation = TransactionMethodBinding.createTransactionInvocation(myResources, myContext);
-<a class="jxr_linenumber" name="L2192" href="#L2192">2192</a> 				<strong class="jxr_keyword">return</strong> (T) invoke(params, binding, invocation);
-<a class="jxr_linenumber" name="L2193" href="#L2193">2193</a> 			} <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (myBaseBundle != <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L2194" href="#L2194">2194</a> 				ResourceResponseHandler binding = <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/rest/client/BaseClient.html">ResourceResponseHandler</a>(myBaseBundle.getClass(), getPreferResponseTypes());
-<a class="jxr_linenumber" name="L2195" href="#L2195">2195</a> 				BaseHttpClientInvocation invocation = TransactionMethodBinding.createTransactionInvocation(myBaseBundle, myContext);
+<a class="jxr_linenumber" name="L2177" href="#L2177">2177</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/client/GenericClient.html">TransactionExecutable</a>(List&lt;? <strong class="jxr_keyword">extends</strong> IBaseResource&gt; theResources) {
+<a class="jxr_linenumber" name="L2178" href="#L2178">2178</a> 			myResources = theResources;
+<a class="jxr_linenumber" name="L2179" href="#L2179">2179</a> 		}
+<a class="jxr_linenumber" name="L2180" href="#L2180">2180</a> 
+<a class="jxr_linenumber" name="L2181" href="#L2181">2181</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/client/GenericClient.html">TransactionExecutable</a>(String theBundle) {
+<a class="jxr_linenumber" name="L2182" href="#L2182">2182</a> 			myRawBundle = theBundle;
+<a class="jxr_linenumber" name="L2183" href="#L2183">2183</a> 			myRawBundleEncoding = MethodUtil.detectEncodingNoDefault(myRawBundle);
+<a class="jxr_linenumber" name="L2184" href="#L2184">2184</a> 			<strong class="jxr_keyword">if</strong> (myRawBundleEncoding == <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L2185" href="#L2185">2185</a> 				<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> IllegalArgumentException(myContext.getLocalizer().getMessage(GenericClient.<strong class="jxr_keyword">class</strong>, <span class="jxr_string">"cantDetermineRequestType"</span>));
+<a class="jxr_linenumber" name="L2186" href="#L2186">2186</a> 			}
+<a class="jxr_linenumber" name="L2187" href="#L2187">2187</a> 		}
+<a class="jxr_linenumber" name="L2188" href="#L2188">2188</a> 
+<a class="jxr_linenumber" name="L2189" href="#L2189">2189</a> 		@SuppressWarnings({ <span class="jxr_string">"unchecked"</span>, <span class="jxr_string">"rawtypes"</span> })
+<a class="jxr_linenumber" name="L2190" href="#L2190">2190</a> 		@Override
+<a class="jxr_linenumber" name="L2191" href="#L2191">2191</a> 		<strong class="jxr_keyword">public</strong> T execute() {
+<a class="jxr_linenumber" name="L2192" href="#L2192">2192</a> 			Map&lt;String, List&lt;String&gt;&gt; params = <strong class="jxr_keyword">new</strong> HashMap&lt;String, List&lt;String&gt;&gt;();
+<a class="jxr_linenumber" name="L2193" href="#L2193">2193</a> 			<strong class="jxr_keyword">if</strong> (myResources != <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L2194" href="#L2194">2194</a> 				ResourceListResponseHandler binding = <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/rest/client/GenericClient.html">ResourceListResponseHandler</a>(<strong class="jxr_keyword">null</strong>);
+<a class="jxr_linenumber" name="L2195" href="#L2195">2195</a> 				BaseHttpClientInvocation invocation = TransactionMethodBinding.createTransactionInvocation(myResources, myContext);
 <a class="jxr_linenumber" name="L2196" href="#L2196">2196</a> 				<strong class="jxr_keyword">return</strong> (T) invoke(params, binding, invocation);
-<a class="jxr_linenumber" name="L2197" href="#L2197">2197</a> 			} <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (myRawBundle != <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L2198" href="#L2198">2198</a> 				StringResponseHandler binding = <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/rest/client/GenericClient.html">StringResponseHandler</a>();
-<a class="jxr_linenumber" name="L2199" href="#L2199">2199</a> 				<em class="jxr_comment">/*</em>
-<a class="jxr_linenumber" name="L2200" href="#L2200">2200</a> <em class="jxr_comment">				 * If the user has explicitly requested a given encoding, we may need to re-encode the raw string</em>
-<a class="jxr_linenumber" name="L2201" href="#L2201">2201</a> <em class="jxr_comment">				 */</em>
-<a class="jxr_linenumber" name="L2202" href="#L2202">2202</a> 				<strong class="jxr_keyword">if</strong> (getParamEncoding() != <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L2203" href="#L2203">2203</a> 					<strong class="jxr_keyword">if</strong> (MethodUtil.detectEncodingNoDefault(myRawBundle) != getParamEncoding()) {
-<a class="jxr_linenumber" name="L2204" href="#L2204">2204</a> 						IBaseResource parsed = parseResourceBody(myRawBundle);
-<a class="jxr_linenumber" name="L2205" href="#L2205">2205</a> 						myRawBundle = getParamEncoding().newParser(getFhirContext()).encodeResourceToString(parsed);
-<a class="jxr_linenumber" name="L2206" href="#L2206">2206</a> 					}
-<a class="jxr_linenumber" name="L2207" href="#L2207">2207</a> 				}
-<a class="jxr_linenumber" name="L2208" href="#L2208">2208</a> 				BaseHttpClientInvocation invocation = TransactionMethodBinding.createTransactionInvocation(myRawBundle, myContext);
-<a class="jxr_linenumber" name="L2209" href="#L2209">2209</a> 				<strong class="jxr_keyword">return</strong> (T) invoke(params, binding, invocation);
-<a class="jxr_linenumber" name="L2210" href="#L2210">2210</a> 			} <strong class="jxr_keyword">else</strong> {
-<a class="jxr_linenumber" name="L2211" href="#L2211">2211</a> 				BundleResponseHandler binding = <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/rest/client/GenericClient.html">BundleResponseHandler</a>(<strong class="jxr_keyword">null</strong>);
-<a class="jxr_linenumber" name="L2212" href="#L2212">2212</a> 				BaseHttpClientInvocation invocation = TransactionMethodBinding.createTransactionInvocation(myBundle, myContext);
+<a class="jxr_linenumber" name="L2197" href="#L2197">2197</a> 			} <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (myBaseBundle != <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L2198" href="#L2198">2198</a> 				ResourceResponseHandler binding = <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/rest/client/BaseClient.html">ResourceResponseHandler</a>(myBaseBundle.getClass(), getPreferResponseTypes());
+<a class="jxr_linenumber" name="L2199" href="#L2199">2199</a> 				BaseHttpClientInvocation invocation = TransactionMethodBinding.createTransactionInvocation(myBaseBundle, myContext);
+<a class="jxr_linenumber" name="L2200" href="#L2200">2200</a> 				<strong class="jxr_keyword">return</strong> (T) invoke(params, binding, invocation);
+<a class="jxr_linenumber" name="L2201" href="#L2201">2201</a> 			} <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (myRawBundle != <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L2202" href="#L2202">2202</a> 				StringResponseHandler binding = <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/rest/client/GenericClient.html">StringResponseHandler</a>();
+<a class="jxr_linenumber" name="L2203" href="#L2203">2203</a> 				<em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L2204" href="#L2204">2204</a> <em class="jxr_comment">				 * If the user has explicitly requested a given encoding, we may need to re-encode the raw string</em>
+<a class="jxr_linenumber" name="L2205" href="#L2205">2205</a> <em class="jxr_comment">				 */</em>
+<a class="jxr_linenumber" name="L2206" href="#L2206">2206</a> 				<strong class="jxr_keyword">if</strong> (getParamEncoding() != <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L2207" href="#L2207">2207</a> 					<strong class="jxr_keyword">if</strong> (MethodUtil.detectEncodingNoDefault(myRawBundle) != getParamEncoding()) {
+<a class="jxr_linenumber" name="L2208" href="#L2208">2208</a> 						IBaseResource parsed = parseResourceBody(myRawBundle);
+<a class="jxr_linenumber" name="L2209" href="#L2209">2209</a> 						myRawBundle = getParamEncoding().newParser(getFhirContext()).encodeResourceToString(parsed);
+<a class="jxr_linenumber" name="L2210" href="#L2210">2210</a> 					}
+<a class="jxr_linenumber" name="L2211" href="#L2211">2211</a> 				}
+<a class="jxr_linenumber" name="L2212" href="#L2212">2212</a> 				BaseHttpClientInvocation invocation = TransactionMethodBinding.createTransactionInvocation(myRawBundle, myContext);
 <a class="jxr_linenumber" name="L2213" href="#L2213">2213</a> 				<strong class="jxr_keyword">return</strong> (T) invoke(params, binding, invocation);
-<a class="jxr_linenumber" name="L2214" href="#L2214">2214</a> 			}
-<a class="jxr_linenumber" name="L2215" href="#L2215">2215</a> 		}
-<a class="jxr_linenumber" name="L2216" href="#L2216">2216</a> 
-<a class="jxr_linenumber" name="L2217" href="#L2217">2217</a> 	}
-<a class="jxr_linenumber" name="L2218" href="#L2218">2218</a> 
-<a class="jxr_linenumber" name="L2219" href="#L2219">2219</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">class</strong> <a href="../../../../../ca/uhn/fhir/rest/client/GenericClient.html">TransactionInternal</a> <strong class="jxr_keyword">implements</strong> <a href="../../../../../ca/uhn/fhir/rest/gclient/ITransaction.html">ITransaction</a> {
+<a class="jxr_linenumber" name="L2214" href="#L2214">2214</a> 			} <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L2215" href="#L2215">2215</a> 				BundleResponseHandler binding = <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/rest/client/GenericClient.html">BundleResponseHandler</a>(<strong class="jxr_keyword">null</strong>);
+<a class="jxr_linenumber" name="L2216" href="#L2216">2216</a> 				BaseHttpClientInvocation invocation = TransactionMethodBinding.createTransactionInvocation(myBundle, myContext);
+<a class="jxr_linenumber" name="L2217" href="#L2217">2217</a> 				<strong class="jxr_keyword">return</strong> (T) invoke(params, binding, invocation);
+<a class="jxr_linenumber" name="L2218" href="#L2218">2218</a> 			}
+<a class="jxr_linenumber" name="L2219" href="#L2219">2219</a> 		}
 <a class="jxr_linenumber" name="L2220" href="#L2220">2220</a> 
-<a class="jxr_linenumber" name="L2221" href="#L2221">2221</a> 		@Override
-<a class="jxr_linenumber" name="L2222" href="#L2222">2222</a> 		<strong class="jxr_keyword">public</strong> ITransactionTyped&lt;Bundle&gt; withBundle(<a href="../../../../../ca/uhn/fhir/model/api/Bundle.html">Bundle</a> theBundle) {
-<a class="jxr_linenumber" name="L2223" href="#L2223">2223</a> 			Validate.notNull(theBundle, <span class="jxr_string">"theBundle must not be null"</span>);
-<a class="jxr_linenumber" name="L2224" href="#L2224">2224</a> 			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> TransactionExecutable&lt;Bundle&gt;(theBundle);
-<a class="jxr_linenumber" name="L2225" href="#L2225">2225</a> 		}
-<a class="jxr_linenumber" name="L2226" href="#L2226">2226</a> 
-<a class="jxr_linenumber" name="L2227" href="#L2227">2227</a> 		@Override
-<a class="jxr_linenumber" name="L2228" href="#L2228">2228</a> 		<strong class="jxr_keyword">public</strong> ITransactionTyped&lt;String&gt; withBundle(String theBundle) {
-<a class="jxr_linenumber" name="L2229" href="#L2229">2229</a> 			Validate.notBlank(theBundle, <span class="jxr_string">"theBundle must not be null"</span>);
-<a class="jxr_linenumber" name="L2230" href="#L2230">2230</a> 			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> TransactionExecutable&lt;String&gt;(theBundle);
-<a class="jxr_linenumber" name="L2231" href="#L2231">2231</a> 		}
-<a class="jxr_linenumber" name="L2232" href="#L2232">2232</a> 
-<a class="jxr_linenumber" name="L2233" href="#L2233">2233</a> 		@Override
-<a class="jxr_linenumber" name="L2234" href="#L2234">2234</a> 		<strong class="jxr_keyword">public</strong> &lt;T <strong class="jxr_keyword">extends</strong> IBaseBundle&gt; ITransactionTyped&lt;T&gt; withBundle(T theBundle) {
-<a class="jxr_linenumber" name="L2235" href="#L2235">2235</a> 			Validate.notNull(theBundle, <span class="jxr_string">"theBundle must not be null"</span>);
-<a class="jxr_linenumber" name="L2236" href="#L2236">2236</a> 			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> TransactionExecutable&lt;T&gt;(theBundle);
-<a class="jxr_linenumber" name="L2237" href="#L2237">2237</a> 		}
-<a class="jxr_linenumber" name="L2238" href="#L2238">2238</a> 
-<a class="jxr_linenumber" name="L2239" href="#L2239">2239</a> 		@Override
-<a class="jxr_linenumber" name="L2240" href="#L2240">2240</a> 		<strong class="jxr_keyword">public</strong> ITransactionTyped&lt;List&lt;IBaseResource&gt;&gt; withResources(List&lt;? <strong class="jxr_keyword">extends</strong> IBaseResource&gt; theResources) {
-<a class="jxr_linenumber" name="L2241" href="#L2241">2241</a> 			Validate.notNull(theResources, <span class="jxr_string">"theResources must not be null"</span>);
-<a class="jxr_linenumber" name="L2242" href="#L2242">2242</a> 			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> TransactionExecutable&lt;List&lt;IBaseResource&gt;&gt;(theResources);
-<a class="jxr_linenumber" name="L2243" href="#L2243">2243</a> 		}
-<a class="jxr_linenumber" name="L2244" href="#L2244">2244</a> 
-<a class="jxr_linenumber" name="L2245" href="#L2245">2245</a> 	}
-<a class="jxr_linenumber" name="L2246" href="#L2246">2246</a> 
-<a class="jxr_linenumber" name="L2247" href="#L2247">2247</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">class</strong> <a href="../../../../../ca/uhn/fhir/rest/client/GenericClient.html">PatchInternal</a> <strong class="jxr_keyword">extends</strong> BaseClientExecutable&lt;IPatchExecutable, MethodOutcome&gt; <strong class="jxr_keyword">implements</strong> IPatch, IPatchWithBody, IPatchExecutable, IPatchWithQuery, <a href="../../../../../ca/uhn/fhir/rest/gclient/IPatchWithQueryTyped.html">IPatchWithQueryTyped</a> {
+<a class="jxr_linenumber" name="L2221" href="#L2221">2221</a> 	}
+<a class="jxr_linenumber" name="L2222" href="#L2222">2222</a> 
+<a class="jxr_linenumber" name="L2223" href="#L2223">2223</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">class</strong> <a href="../../../../../ca/uhn/fhir/rest/client/GenericClient.html">TransactionInternal</a> <strong class="jxr_keyword">implements</strong> <a href="../../../../../ca/uhn/fhir/rest/gclient/ITransaction.html">ITransaction</a> {
+<a class="jxr_linenumber" name="L2224" href="#L2224">2224</a> 
+<a class="jxr_linenumber" name="L2225" href="#L2225">2225</a> 		@Override
+<a class="jxr_linenumber" name="L2226" href="#L2226">2226</a> 		<strong class="jxr_keyword">public</strong> ITransactionTyped&lt;Bundle&gt; withBundle(<a href="../../../../../ca/uhn/fhir/model/api/Bundle.html">Bundle</a> theBundle) {
+<a class="jxr_linenumber" name="L2227" href="#L2227">2227</a> 			Validate.notNull(theBundle, <span class="jxr_string">"theBundle must not be null"</span>);
+<a class="jxr_linenumber" name="L2228" href="#L2228">2228</a> 			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> TransactionExecutable&lt;Bundle&gt;(theBundle);
+<a class="jxr_linenumber" name="L2229" href="#L2229">2229</a> 		}
+<a class="jxr_linenumber" name="L2230" href="#L2230">2230</a> 
+<a class="jxr_linenumber" name="L2231" href="#L2231">2231</a> 		@Override
+<a class="jxr_linenumber" name="L2232" href="#L2232">2232</a> 		<strong class="jxr_keyword">public</strong> ITransactionTyped&lt;String&gt; withBundle(String theBundle) {
+<a class="jxr_linenumber" name="L2233" href="#L2233">2233</a> 			Validate.notBlank(theBundle, <span class="jxr_string">"theBundle must not be null"</span>);
+<a class="jxr_linenumber" name="L2234" href="#L2234">2234</a> 			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> TransactionExecutable&lt;String&gt;(theBundle);
+<a class="jxr_linenumber" name="L2235" href="#L2235">2235</a> 		}
+<a class="jxr_linenumber" name="L2236" href="#L2236">2236</a> 
+<a class="jxr_linenumber" name="L2237" href="#L2237">2237</a> 		@Override
+<a class="jxr_linenumber" name="L2238" href="#L2238">2238</a> 		<strong class="jxr_keyword">public</strong> &lt;T <strong class="jxr_keyword">extends</strong> IBaseBundle&gt; ITransactionTyped&lt;T&gt; withBundle(T theBundle) {
+<a class="jxr_linenumber" name="L2239" href="#L2239">2239</a> 			Validate.notNull(theBundle, <span class="jxr_string">"theBundle must not be null"</span>);
+<a class="jxr_linenumber" name="L2240" href="#L2240">2240</a> 			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> TransactionExecutable&lt;T&gt;(theBundle);
+<a class="jxr_linenumber" name="L2241" href="#L2241">2241</a> 		}
+<a class="jxr_linenumber" name="L2242" href="#L2242">2242</a> 
+<a class="jxr_linenumber" name="L2243" href="#L2243">2243</a> 		@Override
+<a class="jxr_linenumber" name="L2244" href="#L2244">2244</a> 		<strong class="jxr_keyword">public</strong> ITransactionTyped&lt;List&lt;IBaseResource&gt;&gt; withResources(List&lt;? <strong class="jxr_keyword">extends</strong> IBaseResource&gt; theResources) {
+<a class="jxr_linenumber" name="L2245" href="#L2245">2245</a> 			Validate.notNull(theResources, <span class="jxr_string">"theResources must not be null"</span>);
+<a class="jxr_linenumber" name="L2246" href="#L2246">2246</a> 			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> TransactionExecutable&lt;List&lt;IBaseResource&gt;&gt;(theResources);
+<a class="jxr_linenumber" name="L2247" href="#L2247">2247</a> 		}
 <a class="jxr_linenumber" name="L2248" href="#L2248">2248</a> 
-<a class="jxr_linenumber" name="L2249" href="#L2249">2249</a> 		<strong class="jxr_keyword">private</strong> <a href="../../../../../ca/uhn/fhir/rest/client/GenericClient.html">CriterionList</a> myCriterionList;
-<a class="jxr_linenumber" name="L2250" href="#L2250">2250</a> 		<strong class="jxr_keyword">private</strong> <a href="../../../../../org/hl7/fhir/instance/model/api/IIdType.html">IIdType</a> myId;
-<a class="jxr_linenumber" name="L2251" href="#L2251">2251</a> 		<strong class="jxr_keyword">private</strong> <a href="../../../../../ca/uhn/fhir/rest/api/PreferReturnEnum.html">PreferReturnEnum</a> myPrefer;
-<a class="jxr_linenumber" name="L2252" href="#L2252">2252</a> 		<strong class="jxr_keyword">private</strong> <a href="../../../../../ca/uhn/fhir/rest/api/PatchTypeEnum.html">PatchTypeEnum</a> myPatchType;
-<a class="jxr_linenumber" name="L2253" href="#L2253">2253</a> 		<strong class="jxr_keyword">private</strong> String myPatchBody;
-<a class="jxr_linenumber" name="L2254" href="#L2254">2254</a> 		<strong class="jxr_keyword">private</strong> String mySearchUrl;
-<a class="jxr_linenumber" name="L2255" href="#L2255">2255</a> 		<strong class="jxr_keyword">private</strong> String myResourceType;
-<a class="jxr_linenumber" name="L2256" href="#L2256">2256</a> 
-<a class="jxr_linenumber" name="L2257" href="#L2257">2257</a> 		@Override
-<a class="jxr_linenumber" name="L2258" href="#L2258">2258</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/gclient/IPatchWithQueryTyped.html">IPatchWithQueryTyped</a> and(ICriterion&lt;?&gt; theCriterion) {
-<a class="jxr_linenumber" name="L2259" href="#L2259">2259</a> 			myCriterionList.add((ICriterionInternal) theCriterion);
-<a class="jxr_linenumber" name="L2260" href="#L2260">2260</a> 			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>;
-<a class="jxr_linenumber" name="L2261" href="#L2261">2261</a> 		}
-<a class="jxr_linenumber" name="L2262" href="#L2262">2262</a> 
-<a class="jxr_linenumber" name="L2263" href="#L2263">2263</a> 		@Override
-<a class="jxr_linenumber" name="L2264" href="#L2264">2264</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/gclient/IPatchWithQuery.html">IPatchWithQuery</a> conditional(String theResourceType) {
-<a class="jxr_linenumber" name="L2265" href="#L2265">2265</a> 			Validate.notBlank(theResourceType, <span class="jxr_string">"theResourceType must not be null"</span>);
-<a class="jxr_linenumber" name="L2266" href="#L2266">2266</a> 			myResourceType = theResourceType;
-<a class="jxr_linenumber" name="L2267" href="#L2267">2267</a> 			myCriterionList = <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/rest/client/GenericClient.html">CriterionList</a>();
-<a class="jxr_linenumber" name="L2268" href="#L2268">2268</a> 			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>;
-<a class="jxr_linenumber" name="L2269" href="#L2269">2269</a> 		}
-<a class="jxr_linenumber" name="L2270" href="#L2270">2270</a> 
-<a class="jxr_linenumber" name="L2271" href="#L2271">2271</a> 		<em class="jxr_comment">// TODO: This is not longer used.. Deprecate it or just remove it?</em>
-<a class="jxr_linenumber" name="L2272" href="#L2272">2272</a> 		@Override
-<a class="jxr_linenumber" name="L2273" href="#L2273">2273</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/gclient/IPatchWithBody.html">IPatchWithBody</a> conditionalByUrl(String theSearchUrl) {
-<a class="jxr_linenumber" name="L2274" href="#L2274">2274</a> 			mySearchUrl = validateAndEscapeConditionalUrl(theSearchUrl);
-<a class="jxr_linenumber" name="L2275" href="#L2275">2275</a> 			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>;
-<a class="jxr_linenumber" name="L2276" href="#L2276">2276</a> 		}
-<a class="jxr_linenumber" name="L2277" href="#L2277">2277</a> 
-<a class="jxr_linenumber" name="L2278" href="#L2278">2278</a> 		@Override
-<a class="jxr_linenumber" name="L2279" href="#L2279">2279</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/api/MethodOutcome.html">MethodOutcome</a> execute() {
-<a class="jxr_linenumber" name="L2280" href="#L2280">2280</a> 
-<a class="jxr_linenumber" name="L2281" href="#L2281">2281</a> 			<strong class="jxr_keyword">if</strong> (myPatchType == <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L2282" href="#L2282">2282</a> 				<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/rest/server/exceptions/InvalidRequestException.html">InvalidRequestException</a>(<span class="jxr_string">"No patch type supplied, cannot invoke server"</span>);
-<a class="jxr_linenumber" name="L2283" href="#L2283">2283</a> 			}
-<a class="jxr_linenumber" name="L2284" href="#L2284">2284</a> 			<strong class="jxr_keyword">if</strong> (myPatchBody == <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L2285" href="#L2285">2285</a> 				<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/rest/server/exceptions/InvalidRequestException.html">InvalidRequestException</a>(<span class="jxr_string">"No patch body supplied, cannot invoke server"</span>);
-<a class="jxr_linenumber" name="L2286" href="#L2286">2286</a> 			}
-<a class="jxr_linenumber" name="L2287" href="#L2287">2287</a> 
-<a class="jxr_linenumber" name="L2288" href="#L2288">2288</a> 			BaseHttpClientInvocation invocation;
-<a class="jxr_linenumber" name="L2289" href="#L2289">2289</a> 			<strong class="jxr_keyword">if</strong> (isNotBlank(mySearchUrl)) {
-<a class="jxr_linenumber" name="L2290" href="#L2290">2290</a> 				invocation = MethodUtil.createPatchInvocation(myContext, mySearchUrl, myPatchType, myPatchBody);
-<a class="jxr_linenumber" name="L2291" href="#L2291">2291</a> 			} <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (myCriterionList != <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L2292" href="#L2292">2292</a> 				invocation = MethodUtil.createPatchInvocation(myContext, myPatchType, myPatchBody, myResourceType, myCriterionList.toParamList());
-<a class="jxr_linenumber" name="L2293" href="#L2293">2293</a> 			} <strong class="jxr_keyword">else</strong> {
-<a class="jxr_linenumber" name="L2294" href="#L2294">2294</a> 				<strong class="jxr_keyword">if</strong> (myId == <strong class="jxr_keyword">null</strong> || myId.hasIdPart() == false) {
-<a class="jxr_linenumber" name="L2295" href="#L2295">2295</a> 					<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/rest/server/exceptions/InvalidRequestException.html">InvalidRequestException</a>(<span class="jxr_string">"No ID supplied for resource to patch, can not invoke server"</span>);
-<a class="jxr_linenumber" name="L2296" href="#L2296">2296</a> 				}
-<a class="jxr_linenumber" name="L2297" href="#L2297">2297</a> 				invocation = MethodUtil.createPatchInvocation(myContext, myId, myPatchType, myPatchBody);
-<a class="jxr_linenumber" name="L2298" href="#L2298">2298</a> 			}
-<a class="jxr_linenumber" name="L2299" href="#L2299">2299</a> 
-<a class="jxr_linenumber" name="L2300" href="#L2300">2300</a> 			addPreferHeader(myPrefer, invocation);
-<a class="jxr_linenumber" name="L2301" href="#L2301">2301</a> 
-<a class="jxr_linenumber" name="L2302" href="#L2302">2302</a> 			OutcomeResponseHandler binding = <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/rest/client/GenericClient.html">OutcomeResponseHandler</a>(<strong class="jxr_keyword">null</strong>, myPrefer);
+<a class="jxr_linenumber" name="L2249" href="#L2249">2249</a> 	}
+<a class="jxr_linenumber" name="L2250" href="#L2250">2250</a> 
+<a class="jxr_linenumber" name="L2251" href="#L2251">2251</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">class</strong> <a href="../../../../../ca/uhn/fhir/rest/client/GenericClient.html">PatchInternal</a> <strong class="jxr_keyword">extends</strong> BaseClientExecutable&lt;IPatchExecutable, MethodOutcome&gt; <strong class="jxr_keyword">implements</strong> IPatch, IPatchWithBody, IPatchExecutable, IPatchWithQuery, <a href="../../../../../ca/uhn/fhir/rest/gclient/IPatchWithQueryTyped.html">IPatchWithQueryTyped</a> {
+<a class="jxr_linenumber" name="L2252" href="#L2252">2252</a> 
+<a class="jxr_linenumber" name="L2253" href="#L2253">2253</a> 		<strong class="jxr_keyword">private</strong> <a href="../../../../../ca/uhn/fhir/rest/client/GenericClient.html">CriterionList</a> myCriterionList;
+<a class="jxr_linenumber" name="L2254" href="#L2254">2254</a> 		<strong class="jxr_keyword">private</strong> <a href="../../../../../org/hl7/fhir/instance/model/api/IIdType.html">IIdType</a> myId;
+<a class="jxr_linenumber" name="L2255" href="#L2255">2255</a> 		<strong class="jxr_keyword">private</strong> <a href="../../../../../ca/uhn/fhir/rest/api/PreferReturnEnum.html">PreferReturnEnum</a> myPrefer;
+<a class="jxr_linenumber" name="L2256" href="#L2256">2256</a> 		<strong class="jxr_keyword">private</strong> <a href="../../../../../ca/uhn/fhir/rest/api/PatchTypeEnum.html">PatchTypeEnum</a> myPatchType;
+<a class="jxr_linenumber" name="L2257" href="#L2257">2257</a> 		<strong class="jxr_keyword">private</strong> String myPatchBody;
+<a class="jxr_linenumber" name="L2258" href="#L2258">2258</a> 		<strong class="jxr_keyword">private</strong> String mySearchUrl;
+<a class="jxr_linenumber" name="L2259" href="#L2259">2259</a> 		<strong class="jxr_keyword">private</strong> String myResourceType;
+<a class="jxr_linenumber" name="L2260" href="#L2260">2260</a> 
+<a class="jxr_linenumber" name="L2261" href="#L2261">2261</a> 		@Override
+<a class="jxr_linenumber" name="L2262" href="#L2262">2262</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/gclient/IPatchWithQueryTyped.html">IPatchWithQueryTyped</a> and(ICriterion&lt;?&gt; theCriterion) {
+<a class="jxr_linenumber" name="L2263" href="#L2263">2263</a> 			myCriterionList.add((ICriterionInternal) theCriterion);
+<a class="jxr_linenumber" name="L2264" href="#L2264">2264</a> 			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>;
+<a class="jxr_linenumber" name="L2265" href="#L2265">2265</a> 		}
+<a class="jxr_linenumber" name="L2266" href="#L2266">2266</a> 
+<a class="jxr_linenumber" name="L2267" href="#L2267">2267</a> 		@Override
+<a class="jxr_linenumber" name="L2268" href="#L2268">2268</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/gclient/IPatchWithQuery.html">IPatchWithQuery</a> conditional(String theResourceType) {
+<a class="jxr_linenumber" name="L2269" href="#L2269">2269</a> 			Validate.notBlank(theResourceType, <span class="jxr_string">"theResourceType must not be null"</span>);
+<a class="jxr_linenumber" name="L2270" href="#L2270">2270</a> 			myResourceType = theResourceType;
+<a class="jxr_linenumber" name="L2271" href="#L2271">2271</a> 			myCriterionList = <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/rest/client/GenericClient.html">CriterionList</a>();
+<a class="jxr_linenumber" name="L2272" href="#L2272">2272</a> 			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>;
+<a class="jxr_linenumber" name="L2273" href="#L2273">2273</a> 		}
+<a class="jxr_linenumber" name="L2274" href="#L2274">2274</a> 
+<a class="jxr_linenumber" name="L2275" href="#L2275">2275</a> 		<em class="jxr_comment">// TODO: This is not longer used.. Deprecate it or just remove it?</em>
+<a class="jxr_linenumber" name="L2276" href="#L2276">2276</a> 		@Override
+<a class="jxr_linenumber" name="L2277" href="#L2277">2277</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/gclient/IPatchWithBody.html">IPatchWithBody</a> conditionalByUrl(String theSearchUrl) {
+<a class="jxr_linenumber" name="L2278" href="#L2278">2278</a> 			mySearchUrl = validateAndEscapeConditionalUrl(theSearchUrl);
+<a class="jxr_linenumber" name="L2279" href="#L2279">2279</a> 			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>;
+<a class="jxr_linenumber" name="L2280" href="#L2280">2280</a> 		}
+<a class="jxr_linenumber" name="L2281" href="#L2281">2281</a> 
+<a class="jxr_linenumber" name="L2282" href="#L2282">2282</a> 		@Override
+<a class="jxr_linenumber" name="L2283" href="#L2283">2283</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/api/MethodOutcome.html">MethodOutcome</a> execute() {
+<a class="jxr_linenumber" name="L2284" href="#L2284">2284</a> 
+<a class="jxr_linenumber" name="L2285" href="#L2285">2285</a> 			<strong class="jxr_keyword">if</strong> (myPatchType == <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L2286" href="#L2286">2286</a> 				<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/rest/server/exceptions/InvalidRequestException.html">InvalidRequestException</a>(<span class="jxr_string">"No patch type supplied, cannot invoke server"</span>);
+<a class="jxr_linenumber" name="L2287" href="#L2287">2287</a> 			}
+<a class="jxr_linenumber" name="L2288" href="#L2288">2288</a> 			<strong class="jxr_keyword">if</strong> (myPatchBody == <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L2289" href="#L2289">2289</a> 				<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/rest/server/exceptions/InvalidRequestException.html">InvalidRequestException</a>(<span class="jxr_string">"No patch body supplied, cannot invoke server"</span>);
+<a class="jxr_linenumber" name="L2290" href="#L2290">2290</a> 			}
+<a class="jxr_linenumber" name="L2291" href="#L2291">2291</a> 
+<a class="jxr_linenumber" name="L2292" href="#L2292">2292</a> 			BaseHttpClientInvocation invocation;
+<a class="jxr_linenumber" name="L2293" href="#L2293">2293</a> 			<strong class="jxr_keyword">if</strong> (isNotBlank(mySearchUrl)) {
+<a class="jxr_linenumber" name="L2294" href="#L2294">2294</a> 				invocation = MethodUtil.createPatchInvocation(myContext, mySearchUrl, myPatchType, myPatchBody);
+<a class="jxr_linenumber" name="L2295" href="#L2295">2295</a> 			} <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (myCriterionList != <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L2296" href="#L2296">2296</a> 				invocation = MethodUtil.createPatchInvocation(myContext, myPatchType, myPatchBody, myResourceType, myCriterionList.toParamList());
+<a class="jxr_linenumber" name="L2297" href="#L2297">2297</a> 			} <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L2298" href="#L2298">2298</a> 				<strong class="jxr_keyword">if</strong> (myId == <strong class="jxr_keyword">null</strong> || myId.hasIdPart() == false) {
+<a class="jxr_linenumber" name="L2299" href="#L2299">2299</a> 					<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/rest/server/exceptions/InvalidRequestException.html">InvalidRequestException</a>(<span class="jxr_string">"No ID supplied for resource to patch, can not invoke server"</span>);
+<a class="jxr_linenumber" name="L2300" href="#L2300">2300</a> 				}
+<a class="jxr_linenumber" name="L2301" href="#L2301">2301</a> 				invocation = MethodUtil.createPatchInvocation(myContext, myId, myPatchType, myPatchBody);
+<a class="jxr_linenumber" name="L2302" href="#L2302">2302</a> 			}
 <a class="jxr_linenumber" name="L2303" href="#L2303">2303</a> 
-<a class="jxr_linenumber" name="L2304" href="#L2304">2304</a> 			Map&lt;String, List&lt;String&gt;&gt; params = <strong class="jxr_keyword">new</strong> HashMap&lt;String, List&lt;String&gt;&gt;();
-<a class="jxr_linenumber" name="L2305" href="#L2305">2305</a> 			<strong class="jxr_keyword">return</strong> invoke(params, binding, invocation);
-<a class="jxr_linenumber" name="L2306" href="#L2306">2306</a> 
-<a class="jxr_linenumber" name="L2307" href="#L2307">2307</a> 		}
-<a class="jxr_linenumber" name="L2308" href="#L2308">2308</a> 
-<a class="jxr_linenumber" name="L2309" href="#L2309">2309</a> 		@Override
-<a class="jxr_linenumber" name="L2310" href="#L2310">2310</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/gclient/IPatchExecutable.html">IPatchExecutable</a> prefer(<a href="../../../../../ca/uhn/fhir/rest/api/PreferReturnEnum.html">PreferReturnEnum</a> theReturn) {
-<a class="jxr_linenumber" name="L2311" href="#L2311">2311</a> 			myPrefer = theReturn;
-<a class="jxr_linenumber" name="L2312" href="#L2312">2312</a> 			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>;
-<a class="jxr_linenumber" name="L2313" href="#L2313">2313</a> 		}
-<a class="jxr_linenumber" name="L2314" href="#L2314">2314</a> 
-<a class="jxr_linenumber" name="L2315" href="#L2315">2315</a> 
-<a class="jxr_linenumber" name="L2316" href="#L2316">2316</a> 		@Override
-<a class="jxr_linenumber" name="L2317" href="#L2317">2317</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/gclient/IPatchWithQueryTyped.html">IPatchWithQueryTyped</a> where(ICriterion&lt;?&gt; theCriterion) {
-<a class="jxr_linenumber" name="L2318" href="#L2318">2318</a> 			myCriterionList.add((ICriterionInternal) theCriterion);
-<a class="jxr_linenumber" name="L2319" href="#L2319">2319</a> 			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>;
-<a class="jxr_linenumber" name="L2320" href="#L2320">2320</a> 		}
-<a class="jxr_linenumber" name="L2321" href="#L2321">2321</a> 
-<a class="jxr_linenumber" name="L2322" href="#L2322">2322</a> 		@Override
-<a class="jxr_linenumber" name="L2323" href="#L2323">2323</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/gclient/IPatchExecutable.html">IPatchExecutable</a> withId(<a href="../../../../../org/hl7/fhir/instance/model/api/IIdType.html">IIdType</a> theId) {
-<a class="jxr_linenumber" name="L2324" href="#L2324">2324</a> 			<strong class="jxr_keyword">if</strong> (theId == <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L2325" href="#L2325">2325</a> 				<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> NullPointerException(<span class="jxr_string">"theId can not be null"</span>);
-<a class="jxr_linenumber" name="L2326" href="#L2326">2326</a> 			}
-<a class="jxr_linenumber" name="L2327" href="#L2327">2327</a> 			<strong class="jxr_keyword">if</strong> (theId.hasIdPart() == false) {
-<a class="jxr_linenumber" name="L2328" href="#L2328">2328</a> 				<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> NullPointerException(<span class="jxr_string">"theId must not be blank and must contain an ID, found: "</span> + theId.getValue());
-<a class="jxr_linenumber" name="L2329" href="#L2329">2329</a> 			}
-<a class="jxr_linenumber" name="L2330" href="#L2330">2330</a> 			myId = theId;
-<a class="jxr_linenumber" name="L2331" href="#L2331">2331</a> 			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>;
-<a class="jxr_linenumber" name="L2332" href="#L2332">2332</a> 		}
-<a class="jxr_linenumber" name="L2333" href="#L2333">2333</a> 
-<a class="jxr_linenumber" name="L2334" href="#L2334">2334</a> 		@Override
-<a class="jxr_linenumber" name="L2335" href="#L2335">2335</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/gclient/IPatchExecutable.html">IPatchExecutable</a> withId(String theId) {
-<a class="jxr_linenumber" name="L2336" href="#L2336">2336</a> 			<strong class="jxr_keyword">if</strong> (theId == <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L2337" href="#L2337">2337</a> 				<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> NullPointerException(<span class="jxr_string">"theId can not be null"</span>);
-<a class="jxr_linenumber" name="L2338" href="#L2338">2338</a> 			}
-<a class="jxr_linenumber" name="L2339" href="#L2339">2339</a> 			<strong class="jxr_keyword">if</strong> (isBlank(theId)) {
-<a class="jxr_linenumber" name="L2340" href="#L2340">2340</a> 				<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> NullPointerException(<span class="jxr_string">"theId must not be blank and must contain an ID, found: "</span> + theId);
-<a class="jxr_linenumber" name="L2341" href="#L2341">2341</a> 			}
-<a class="jxr_linenumber" name="L2342" href="#L2342">2342</a> 			myId = <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/model/primitive/IdDt.html">IdDt</a>(theId);
-<a class="jxr_linenumber" name="L2343" href="#L2343">2343</a> 			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>;
-<a class="jxr_linenumber" name="L2344" href="#L2344">2344</a> 		}
-<a class="jxr_linenumber" name="L2345" href="#L2345">2345</a> 
-<a class="jxr_linenumber" name="L2346" href="#L2346">2346</a> 		@Override
-<a class="jxr_linenumber" name="L2347" href="#L2347">2347</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/gclient/IPatchWithBody.html">IPatchWithBody</a> withBody(String thePatchBody) {
-<a class="jxr_linenumber" name="L2348" href="#L2348">2348</a> 			Validate.notBlank(thePatchBody, <span class="jxr_string">"thePatchBody must not be blank"</span>);
-<a class="jxr_linenumber" name="L2349" href="#L2349">2349</a> 			
-<a class="jxr_linenumber" name="L2350" href="#L2350">2350</a> 			myPatchBody = thePatchBody;
-<a class="jxr_linenumber" name="L2351" href="#L2351">2351</a> 
-<a class="jxr_linenumber" name="L2352" href="#L2352">2352</a> 			EncodingEnum encoding = MethodUtil.detectEncodingNoDefault(thePatchBody);
-<a class="jxr_linenumber" name="L2353" href="#L2353">2353</a> 			<strong class="jxr_keyword">if</strong> (encoding == EncodingEnum.XML) {
-<a class="jxr_linenumber" name="L2354" href="#L2354">2354</a> 				myPatchType = PatchTypeEnum.XML_PATCH;
-<a class="jxr_linenumber" name="L2355" href="#L2355">2355</a> 			} <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (encoding == EncodingEnum.JSON) {
-<a class="jxr_linenumber" name="L2356" href="#L2356">2356</a> 				myPatchType = PatchTypeEnum.JSON_PATCH;
-<a class="jxr_linenumber" name="L2357" href="#L2357">2357</a> 			} <strong class="jxr_keyword">else</strong> {
-<a class="jxr_linenumber" name="L2358" href="#L2358">2358</a> 				<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> IllegalArgumentException(<span class="jxr_string">"Unable to determine encoding of patch"</span>);
-<a class="jxr_linenumber" name="L2359" href="#L2359">2359</a> 			}
-<a class="jxr_linenumber" name="L2360" href="#L2360">2360</a> 			
-<a class="jxr_linenumber" name="L2361" href="#L2361">2361</a> 			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>;
-<a class="jxr_linenumber" name="L2362" href="#L2362">2362</a> 		}
-<a class="jxr_linenumber" name="L2363" href="#L2363">2363</a> 
-<a class="jxr_linenumber" name="L2364" href="#L2364">2364</a> 		@Override
-<a class="jxr_linenumber" name="L2365" href="#L2365">2365</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/gclient/IPatchWithQuery.html">IPatchWithQuery</a> conditional(Class&lt;? <strong class="jxr_keyword">extends</strong> IBaseResource&gt; theClass) {
-<a class="jxr_linenumber" name="L2366" href="#L2366">2366</a> 			Validate.notNull(theClass, <span class="jxr_string">"theClass must not be null"</span>);
-<a class="jxr_linenumber" name="L2367" href="#L2367">2367</a> 			String resourceType = myContext.getResourceDefinition(theClass).getName();
-<a class="jxr_linenumber" name="L2368" href="#L2368">2368</a> 			<strong class="jxr_keyword">return</strong> conditional(resourceType);
-<a class="jxr_linenumber" name="L2369" href="#L2369">2369</a> 		}
-<a class="jxr_linenumber" name="L2370" href="#L2370">2370</a> 
-<a class="jxr_linenumber" name="L2371" href="#L2371">2371</a> 	}
-<a class="jxr_linenumber" name="L2372" href="#L2372">2372</a> 
-<a class="jxr_linenumber" name="L2373" href="#L2373">2373</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">class</strong> <a href="../../../../../ca/uhn/fhir/rest/client/GenericClient.html">UpdateInternal</a> <strong class="jxr_keyword">extends</strong> BaseClientExecutable&lt;IUpdateExecutable, MethodOutcome&gt; <strong class="jxr_keyword">implements</strong> IUpdate, IUpdateTyped, IUpdateExecutable, IUpdateWithQuery, <a href="../../../../../ca/uhn/fhir/rest/gclient/IUpdateWithQueryTyped.html">IUpdateWithQueryTyped</a> {
+<a class="jxr_linenumber" name="L2304" href="#L2304">2304</a> 			addPreferHeader(myPrefer, invocation);
+<a class="jxr_linenumber" name="L2305" href="#L2305">2305</a> 
+<a class="jxr_linenumber" name="L2306" href="#L2306">2306</a> 			OutcomeResponseHandler binding = <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/rest/client/GenericClient.html">OutcomeResponseHandler</a>(<strong class="jxr_keyword">null</strong>, myPrefer);
+<a class="jxr_linenumber" name="L2307" href="#L2307">2307</a> 
+<a class="jxr_linenumber" name="L2308" href="#L2308">2308</a> 			Map&lt;String, List&lt;String&gt;&gt; params = <strong class="jxr_keyword">new</strong> HashMap&lt;String, List&lt;String&gt;&gt;();
+<a class="jxr_linenumber" name="L2309" href="#L2309">2309</a> 			<strong class="jxr_keyword">return</strong> invoke(params, binding, invocation);
+<a class="jxr_linenumber" name="L2310" href="#L2310">2310</a> 
+<a class="jxr_linenumber" name="L2311" href="#L2311">2311</a> 		}
+<a class="jxr_linenumber" name="L2312" href="#L2312">2312</a> 
+<a class="jxr_linenumber" name="L2313" href="#L2313">2313</a> 		@Override
+<a class="jxr_linenumber" name="L2314" href="#L2314">2314</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/gclient/IPatchExecutable.html">IPatchExecutable</a> prefer(<a href="../../../../../ca/uhn/fhir/rest/api/PreferReturnEnum.html">PreferReturnEnum</a> theReturn) {
+<a class="jxr_linenumber" name="L2315" href="#L2315">2315</a> 			myPrefer = theReturn;
+<a class="jxr_linenumber" name="L2316" href="#L2316">2316</a> 			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>;
+<a class="jxr_linenumber" name="L2317" href="#L2317">2317</a> 		}
+<a class="jxr_linenumber" name="L2318" href="#L2318">2318</a> 
+<a class="jxr_linenumber" name="L2319" href="#L2319">2319</a> 
+<a class="jxr_linenumber" name="L2320" href="#L2320">2320</a> 		@Override
+<a class="jxr_linenumber" name="L2321" href="#L2321">2321</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/gclient/IPatchWithQueryTyped.html">IPatchWithQueryTyped</a> where(ICriterion&lt;?&gt; theCriterion) {
+<a class="jxr_linenumber" name="L2322" href="#L2322">2322</a> 			myCriterionList.add((ICriterionInternal) theCriterion);
+<a class="jxr_linenumber" name="L2323" href="#L2323">2323</a> 			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>;
+<a class="jxr_linenumber" name="L2324" href="#L2324">2324</a> 		}
+<a class="jxr_linenumber" name="L2325" href="#L2325">2325</a> 
+<a class="jxr_linenumber" name="L2326" href="#L2326">2326</a> 		@Override
+<a class="jxr_linenumber" name="L2327" href="#L2327">2327</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/gclient/IPatchExecutable.html">IPatchExecutable</a> withId(<a href="../../../../../org/hl7/fhir/instance/model/api/IIdType.html">IIdType</a> theId) {
+<a class="jxr_linenumber" name="L2328" href="#L2328">2328</a> 			<strong class="jxr_keyword">if</strong> (theId == <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L2329" href="#L2329">2329</a> 				<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> NullPointerException(<span class="jxr_string">"theId can not be null"</span>);
+<a class="jxr_linenumber" name="L2330" href="#L2330">2330</a> 			}
+<a class="jxr_linenumber" name="L2331" href="#L2331">2331</a> 			<strong class="jxr_keyword">if</strong> (theId.hasIdPart() == false) {
+<a class="jxr_linenumber" name="L2332" href="#L2332">2332</a> 				<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> NullPointerException(<span class="jxr_string">"theId must not be blank and must contain an ID, found: "</span> + theId.getValue());
+<a class="jxr_linenumber" name="L2333" href="#L2333">2333</a> 			}
+<a class="jxr_linenumber" name="L2334" href="#L2334">2334</a> 			myId = theId;
+<a class="jxr_linenumber" name="L2335" href="#L2335">2335</a> 			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>;
+<a class="jxr_linenumber" name="L2336" href="#L2336">2336</a> 		}
+<a class="jxr_linenumber" name="L2337" href="#L2337">2337</a> 
+<a class="jxr_linenumber" name="L2338" href="#L2338">2338</a> 		@Override
+<a class="jxr_linenumber" name="L2339" href="#L2339">2339</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/gclient/IPatchExecutable.html">IPatchExecutable</a> withId(String theId) {
+<a class="jxr_linenumber" name="L2340" href="#L2340">2340</a> 			<strong class="jxr_keyword">if</strong> (theId == <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L2341" href="#L2341">2341</a> 				<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> NullPointerException(<span class="jxr_string">"theId can not be null"</span>);
+<a class="jxr_linenumber" name="L2342" href="#L2342">2342</a> 			}
+<a class="jxr_linenumber" name="L2343" href="#L2343">2343</a> 			<strong class="jxr_keyword">if</strong> (isBlank(theId)) {
+<a class="jxr_linenumber" name="L2344" href="#L2344">2344</a> 				<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> NullPointerException(<span class="jxr_string">"theId must not be blank and must contain an ID, found: "</span> + theId);
+<a class="jxr_linenumber" name="L2345" href="#L2345">2345</a> 			}
+<a class="jxr_linenumber" name="L2346" href="#L2346">2346</a> 			myId = <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/model/primitive/IdDt.html">IdDt</a>(theId);
+<a class="jxr_linenumber" name="L2347" href="#L2347">2347</a> 			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>;
+<a class="jxr_linenumber" name="L2348" href="#L2348">2348</a> 		}
+<a class="jxr_linenumber" name="L2349" href="#L2349">2349</a> 
+<a class="jxr_linenumber" name="L2350" href="#L2350">2350</a> 		@Override
+<a class="jxr_linenumber" name="L2351" href="#L2351">2351</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/gclient/IPatchWithBody.html">IPatchWithBody</a> withBody(String thePatchBody) {
+<a class="jxr_linenumber" name="L2352" href="#L2352">2352</a> 			Validate.notBlank(thePatchBody, <span class="jxr_string">"thePatchBody must not be blank"</span>);
+<a class="jxr_linenumber" name="L2353" href="#L2353">2353</a> 			
+<a class="jxr_linenumber" name="L2354" href="#L2354">2354</a> 			myPatchBody = thePatchBody;
+<a class="jxr_linenumber" name="L2355" href="#L2355">2355</a> 
+<a class="jxr_linenumber" name="L2356" href="#L2356">2356</a> 			EncodingEnum encoding = MethodUtil.detectEncodingNoDefault(thePatchBody);
+<a class="jxr_linenumber" name="L2357" href="#L2357">2357</a> 			<strong class="jxr_keyword">if</strong> (encoding == EncodingEnum.XML) {
+<a class="jxr_linenumber" name="L2358" href="#L2358">2358</a> 				myPatchType = PatchTypeEnum.XML_PATCH;
+<a class="jxr_linenumber" name="L2359" href="#L2359">2359</a> 			} <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (encoding == EncodingEnum.JSON) {
+<a class="jxr_linenumber" name="L2360" href="#L2360">2360</a> 				myPatchType = PatchTypeEnum.JSON_PATCH;
+<a class="jxr_linenumber" name="L2361" href="#L2361">2361</a> 			} <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L2362" href="#L2362">2362</a> 				<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> IllegalArgumentException(<span class="jxr_string">"Unable to determine encoding of patch"</span>);
+<a class="jxr_linenumber" name="L2363" href="#L2363">2363</a> 			}
+<a class="jxr_linenumber" name="L2364" href="#L2364">2364</a> 			
+<a class="jxr_linenumber" name="L2365" href="#L2365">2365</a> 			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>;
+<a class="jxr_linenumber" name="L2366" href="#L2366">2366</a> 		}
+<a class="jxr_linenumber" name="L2367" href="#L2367">2367</a> 
+<a class="jxr_linenumber" name="L2368" href="#L2368">2368</a> 		@Override
+<a class="jxr_linenumber" name="L2369" href="#L2369">2369</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/gclient/IPatchWithQuery.html">IPatchWithQuery</a> conditional(Class&lt;? <strong class="jxr_keyword">extends</strong> IBaseResource&gt; theClass) {
+<a class="jxr_linenumber" name="L2370" href="#L2370">2370</a> 			Validate.notNull(theClass, <span class="jxr_string">"theClass must not be null"</span>);
+<a class="jxr_linenumber" name="L2371" href="#L2371">2371</a> 			String resourceType = myContext.getResourceDefinition(theClass).getName();
+<a class="jxr_linenumber" name="L2372" href="#L2372">2372</a> 			<strong class="jxr_keyword">return</strong> conditional(resourceType);
+<a class="jxr_linenumber" name="L2373" href="#L2373">2373</a> 		}
 <a class="jxr_linenumber" name="L2374" href="#L2374">2374</a> 
-<a class="jxr_linenumber" name="L2375" href="#L2375">2375</a> 		<strong class="jxr_keyword">private</strong> <a href="../../../../../ca/uhn/fhir/rest/client/GenericClient.html">CriterionList</a> myCriterionList;
-<a class="jxr_linenumber" name="L2376" href="#L2376">2376</a> 		<strong class="jxr_keyword">private</strong> <a href="../../../../../org/hl7/fhir/instance/model/api/IIdType.html">IIdType</a> myId;
-<a class="jxr_linenumber" name="L2377" href="#L2377">2377</a> 		<strong class="jxr_keyword">private</strong> <a href="../../../../../ca/uhn/fhir/rest/api/PreferReturnEnum.html">PreferReturnEnum</a> myPrefer;
-<a class="jxr_linenumber" name="L2378" href="#L2378">2378</a> 		<strong class="jxr_keyword">private</strong> <a href="../../../../../org/hl7/fhir/instance/model/api/IBaseResource.html">IBaseResource</a> myResource;
-<a class="jxr_linenumber" name="L2379" href="#L2379">2379</a> 		<strong class="jxr_keyword">private</strong> String myResourceBody;
-<a class="jxr_linenumber" name="L2380" href="#L2380">2380</a> 		<strong class="jxr_keyword">private</strong> String mySearchUrl;
-<a class="jxr_linenumber" name="L2381" href="#L2381">2381</a> 
-<a class="jxr_linenumber" name="L2382" href="#L2382">2382</a> 		@Override
-<a class="jxr_linenumber" name="L2383" href="#L2383">2383</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/gclient/IUpdateWithQueryTyped.html">IUpdateWithQueryTyped</a> and(ICriterion&lt;?&gt; theCriterion) {
-<a class="jxr_linenumber" name="L2384" href="#L2384">2384</a> 			myCriterionList.add((ICriterionInternal) theCriterion);
-<a class="jxr_linenumber" name="L2385" href="#L2385">2385</a> 			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>;
-<a class="jxr_linenumber" name="L2386" href="#L2386">2386</a> 		}
-<a class="jxr_linenumber" name="L2387" href="#L2387">2387</a> 
-<a class="jxr_linenumber" name="L2388" href="#L2388">2388</a> 		@Override
-<a class="jxr_linenumber" name="L2389" href="#L2389">2389</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/gclient/IUpdateWithQuery.html">IUpdateWithQuery</a> conditional() {
-<a class="jxr_linenumber" name="L2390" href="#L2390">2390</a> 			myCriterionList = <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/rest/client/GenericClient.html">CriterionList</a>();
-<a class="jxr_linenumber" name="L2391" href="#L2391">2391</a> 			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>;
-<a class="jxr_linenumber" name="L2392" href="#L2392">2392</a> 		}
-<a class="jxr_linenumber" name="L2393" href="#L2393">2393</a> 
-<a class="jxr_linenumber" name="L2394" href="#L2394">2394</a> 		@Override
-<a class="jxr_linenumber" name="L2395" href="#L2395">2395</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/gclient/IUpdateTyped.html">IUpdateTyped</a> conditionalByUrl(String theSearchUrl) {
-<a class="jxr_linenumber" name="L2396" href="#L2396">2396</a> 			mySearchUrl = validateAndEscapeConditionalUrl(theSearchUrl);
-<a class="jxr_linenumber" name="L2397" href="#L2397">2397</a> 			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>;
-<a class="jxr_linenumber" name="L2398" href="#L2398">2398</a> 		}
-<a class="jxr_linenumber" name="L2399" href="#L2399">2399</a> 
-<a class="jxr_linenumber" name="L2400" href="#L2400">2400</a> 		@Override
-<a class="jxr_linenumber" name="L2401" href="#L2401">2401</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/api/MethodOutcome.html">MethodOutcome</a> execute() {
-<a class="jxr_linenumber" name="L2402" href="#L2402">2402</a> 			<strong class="jxr_keyword">if</strong> (myResource == <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L2403" href="#L2403">2403</a> 				myResource = parseResourceBody(myResourceBody);
-<a class="jxr_linenumber" name="L2404" href="#L2404">2404</a> 			}
-<a class="jxr_linenumber" name="L2405" href="#L2405">2405</a> 
-<a class="jxr_linenumber" name="L2406" href="#L2406">2406</a> 			<em class="jxr_comment">// If an explicit encoding is chosen, we will re-serialize to ensure the right encoding</em>
-<a class="jxr_linenumber" name="L2407" href="#L2407">2407</a> 			<strong class="jxr_keyword">if</strong> (getParamEncoding() != <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L2408" href="#L2408">2408</a> 				myResourceBody = <strong class="jxr_keyword">null</strong>;
-<a class="jxr_linenumber" name="L2409" href="#L2409">2409</a> 			}
-<a class="jxr_linenumber" name="L2410" href="#L2410">2410</a> 
-<a class="jxr_linenumber" name="L2411" href="#L2411">2411</a> 			BaseHttpClientInvocation invocation;
-<a class="jxr_linenumber" name="L2412" href="#L2412">2412</a> 			<strong class="jxr_keyword">if</strong> (mySearchUrl != <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L2413" href="#L2413">2413</a> 				invocation = MethodUtil.createUpdateInvocation(myContext, myResource, myResourceBody, mySearchUrl);
-<a class="jxr_linenumber" name="L2414" href="#L2414">2414</a> 			} <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (myCriterionList != <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L2415" href="#L2415">2415</a> 				invocation = MethodUtil.createUpdateInvocation(myContext, myResource, myResourceBody, myCriterionList.toParamList());
-<a class="jxr_linenumber" name="L2416" href="#L2416">2416</a> 			} <strong class="jxr_keyword">else</strong> {
-<a class="jxr_linenumber" name="L2417" href="#L2417">2417</a> 				<strong class="jxr_keyword">if</strong> (myId == <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L2418" href="#L2418">2418</a> 					myId = myResource.getIdElement();
-<a class="jxr_linenumber" name="L2419" href="#L2419">2419</a> 				}
-<a class="jxr_linenumber" name="L2420" href="#L2420">2420</a> 
-<a class="jxr_linenumber" name="L2421" href="#L2421">2421</a> 				<strong class="jxr_keyword">if</strong> (myId == <strong class="jxr_keyword">null</strong> || myId.hasIdPart() == false) {
-<a class="jxr_linenumber" name="L2422" href="#L2422">2422</a> 					<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/rest/server/exceptions/InvalidRequestException.html">InvalidRequestException</a>(<span class="jxr_string">"No ID supplied for resource to update, can not invoke server"</span>);
+<a class="jxr_linenumber" name="L2375" href="#L2375">2375</a> 	}
+<a class="jxr_linenumber" name="L2376" href="#L2376">2376</a> 
+<a class="jxr_linenumber" name="L2377" href="#L2377">2377</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">class</strong> <a href="../../../../../ca/uhn/fhir/rest/client/GenericClient.html">UpdateInternal</a> <strong class="jxr_keyword">extends</strong> BaseClientExecutable&lt;IUpdateExecutable, MethodOutcome&gt; <strong class="jxr_keyword">implements</strong> IUpdate, IUpdateTyped, IUpdateExecutable, IUpdateWithQuery, <a href="../../../../../ca/uhn/fhir/rest/gclient/IUpdateWithQueryTyped.html">IUpdateWithQueryTyped</a> {
+<a class="jxr_linenumber" name="L2378" href="#L2378">2378</a> 
+<a class="jxr_linenumber" name="L2379" href="#L2379">2379</a> 		<strong class="jxr_keyword">private</strong> <a href="../../../../../ca/uhn/fhir/rest/client/GenericClient.html">CriterionList</a> myCriterionList;
+<a class="jxr_linenumber" name="L2380" href="#L2380">2380</a> 		<strong class="jxr_keyword">private</strong> <a href="../../../../../org/hl7/fhir/instance/model/api/IIdType.html">IIdType</a> myId;
+<a class="jxr_linenumber" name="L2381" href="#L2381">2381</a> 		<strong class="jxr_keyword">private</strong> <a href="../../../../../ca/uhn/fhir/rest/api/PreferReturnEnum.html">PreferReturnEnum</a> myPrefer;
+<a class="jxr_linenumber" name="L2382" href="#L2382">2382</a> 		<strong class="jxr_keyword">private</strong> <a href="../../../../../org/hl7/fhir/instance/model/api/IBaseResource.html">IBaseResource</a> myResource;
+<a class="jxr_linenumber" name="L2383" href="#L2383">2383</a> 		<strong class="jxr_keyword">private</strong> String myResourceBody;
+<a class="jxr_linenumber" name="L2384" href="#L2384">2384</a> 		<strong class="jxr_keyword">private</strong> String mySearchUrl;
+<a class="jxr_linenumber" name="L2385" href="#L2385">2385</a> 
+<a class="jxr_linenumber" name="L2386" href="#L2386">2386</a> 		@Override
+<a class="jxr_linenumber" name="L2387" href="#L2387">2387</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/gclient/IUpdateWithQueryTyped.html">IUpdateWithQueryTyped</a> and(ICriterion&lt;?&gt; theCriterion) {
+<a class="jxr_linenumber" name="L2388" href="#L2388">2388</a> 			myCriterionList.add((ICriterionInternal) theCriterion);
+<a class="jxr_linenumber" name="L2389" href="#L2389">2389</a> 			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>;
+<a class="jxr_linenumber" name="L2390" href="#L2390">2390</a> 		}
+<a class="jxr_linenumber" name="L2391" href="#L2391">2391</a> 
+<a class="jxr_linenumber" name="L2392" href="#L2392">2392</a> 		@Override
+<a class="jxr_linenumber" name="L2393" href="#L2393">2393</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/gclient/IUpdateWithQuery.html">IUpdateWithQuery</a> conditional() {
+<a class="jxr_linenumber" name="L2394" href="#L2394">2394</a> 			myCriterionList = <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/rest/client/GenericClient.html">CriterionList</a>();
+<a class="jxr_linenumber" name="L2395" href="#L2395">2395</a> 			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>;
+<a class="jxr_linenumber" name="L2396" href="#L2396">2396</a> 		}
+<a class="jxr_linenumber" name="L2397" href="#L2397">2397</a> 
+<a class="jxr_linenumber" name="L2398" href="#L2398">2398</a> 		@Override
+<a class="jxr_linenumber" name="L2399" href="#L2399">2399</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/gclient/IUpdateTyped.html">IUpdateTyped</a> conditionalByUrl(String theSearchUrl) {
+<a class="jxr_linenumber" name="L2400" href="#L2400">2400</a> 			mySearchUrl = validateAndEscapeConditionalUrl(theSearchUrl);
+<a class="jxr_linenumber" name="L2401" href="#L2401">2401</a> 			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>;
+<a class="jxr_linenumber" name="L2402" href="#L2402">2402</a> 		}
+<a class="jxr_linenumber" name="L2403" href="#L2403">2403</a> 
+<a class="jxr_linenumber" name="L2404" href="#L2404">2404</a> 		@Override
+<a class="jxr_linenumber" name="L2405" href="#L2405">2405</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/api/MethodOutcome.html">MethodOutcome</a> execute() {
+<a class="jxr_linenumber" name="L2406" href="#L2406">2406</a> 			<strong class="jxr_keyword">if</strong> (myResource == <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L2407" href="#L2407">2407</a> 				myResource = parseResourceBody(myResourceBody);
+<a class="jxr_linenumber" name="L2408" href="#L2408">2408</a> 			}
+<a class="jxr_linenumber" name="L2409" href="#L2409">2409</a> 
+<a class="jxr_linenumber" name="L2410" href="#L2410">2410</a> 			<em class="jxr_comment">// If an explicit encoding is chosen, we will re-serialize to ensure the right encoding</em>
+<a class="jxr_linenumber" name="L2411" href="#L2411">2411</a> 			<strong class="jxr_keyword">if</strong> (getParamEncoding() != <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L2412" href="#L2412">2412</a> 				myResourceBody = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L2413" href="#L2413">2413</a> 			}
+<a class="jxr_linenumber" name="L2414" href="#L2414">2414</a> 
+<a class="jxr_linenumber" name="L2415" href="#L2415">2415</a> 			BaseHttpClientInvocation invocation;
+<a class="jxr_linenumber" name="L2416" href="#L2416">2416</a> 			<strong class="jxr_keyword">if</strong> (mySearchUrl != <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L2417" href="#L2417">2417</a> 				invocation = MethodUtil.createUpdateInvocation(myContext, myResource, myResourceBody, mySearchUrl);
+<a class="jxr_linenumber" name="L2418" href="#L2418">2418</a> 			} <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (myCriterionList != <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L2419" href="#L2419">2419</a> 				invocation = MethodUtil.createUpdateInvocation(myContext, myResource, myResourceBody, myCriterionList.toParamList());
+<a class="jxr_linenumber" name="L2420" href="#L2420">2420</a> 			} <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L2421" href="#L2421">2421</a> 				<strong class="jxr_keyword">if</strong> (myId == <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L2422" href="#L2422">2422</a> 					myId = myResource.getIdElement();
 <a class="jxr_linenumber" name="L2423" href="#L2423">2423</a> 				}
-<a class="jxr_linenumber" name="L2424" href="#L2424">2424</a> 				invocation = MethodUtil.createUpdateInvocation(myResource, myResourceBody, myId, myContext);
-<a class="jxr_linenumber" name="L2425" href="#L2425">2425</a> 			}
-<a class="jxr_linenumber" name="L2426" href="#L2426">2426</a> 
-<a class="jxr_linenumber" name="L2427" href="#L2427">2427</a> 			addPreferHeader(myPrefer, invocation);
-<a class="jxr_linenumber" name="L2428" href="#L2428">2428</a> 
-<a class="jxr_linenumber" name="L2429" href="#L2429">2429</a> 			RuntimeResourceDefinition def = myContext.getResourceDefinition(myResource);
-<a class="jxr_linenumber" name="L2430" href="#L2430">2430</a> 			<strong class="jxr_keyword">final</strong> String resourceName = def.getName();
-<a class="jxr_linenumber" name="L2431" href="#L2431">2431</a> 
-<a class="jxr_linenumber" name="L2432" href="#L2432">2432</a> 			OutcomeResponseHandler binding = <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/rest/client/GenericClient.html">OutcomeResponseHandler</a>(resourceName, myPrefer);
-<a class="jxr_linenumber" name="L2433" href="#L2433">2433</a> 
-<a class="jxr_linenumber" name="L2434" href="#L2434">2434</a> 			Map&lt;String, List&lt;String&gt;&gt; params = <strong class="jxr_keyword">new</strong> HashMap&lt;String, List&lt;String&gt;&gt;();
-<a class="jxr_linenumber" name="L2435" href="#L2435">2435</a> 			<strong class="jxr_keyword">return</strong> invoke(params, binding, invocation);
-<a class="jxr_linenumber" name="L2436" href="#L2436">2436</a> 
-<a class="jxr_linenumber" name="L2437" href="#L2437">2437</a> 		}
-<a class="jxr_linenumber" name="L2438" href="#L2438">2438</a> 
-<a class="jxr_linenumber" name="L2439" href="#L2439">2439</a> 		@Override
-<a class="jxr_linenumber" name="L2440" href="#L2440">2440</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/gclient/IUpdateExecutable.html">IUpdateExecutable</a> prefer(<a href="../../../../../ca/uhn/fhir/rest/api/PreferReturnEnum.html">PreferReturnEnum</a> theReturn) {
-<a class="jxr_linenumber" name="L2441" href="#L2441">2441</a> 			myPrefer = theReturn;
-<a class="jxr_linenumber" name="L2442" href="#L2442">2442</a> 			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>;
-<a class="jxr_linenumber" name="L2443" href="#L2443">2443</a> 		}
-<a class="jxr_linenumber" name="L2444" href="#L2444">2444</a> 
-<a class="jxr_linenumber" name="L2445" href="#L2445">2445</a> 		@Override
-<a class="jxr_linenumber" name="L2446" href="#L2446">2446</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/gclient/IUpdateTyped.html">IUpdateTyped</a> resource(<a href="../../../../../org/hl7/fhir/instance/model/api/IBaseResource.html">IBaseResource</a> theResource) {
-<a class="jxr_linenumber" name="L2447" href="#L2447">2447</a> 			Validate.notNull(theResource, <span class="jxr_string">"Resource can not be null"</span>);
-<a class="jxr_linenumber" name="L2448" href="#L2448">2448</a> 			myResource = theResource;
-<a class="jxr_linenumber" name="L2449" href="#L2449">2449</a> 			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>;
-<a class="jxr_linenumber" name="L2450" href="#L2450">2450</a> 		}
-<a class="jxr_linenumber" name="L2451" href="#L2451">2451</a> 
-<a class="jxr_linenumber" name="L2452" href="#L2452">2452</a> 		@Override
-<a class="jxr_linenumber" name="L2453" href="#L2453">2453</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/gclient/IUpdateTyped.html">IUpdateTyped</a> resource(String theResourceBody) {
-<a class="jxr_linenumber" name="L2454" href="#L2454">2454</a> 			Validate.notBlank(theResourceBody, <span class="jxr_string">"Body can not be null or blank"</span>);
-<a class="jxr_linenumber" name="L2455" href="#L2455">2455</a> 			myResourceBody = theResourceBody;
-<a class="jxr_linenumber" name="L2456" href="#L2456">2456</a> 			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>;
-<a class="jxr_linenumber" name="L2457" href="#L2457">2457</a> 		}
-<a class="jxr_linenumber" name="L2458" href="#L2458">2458</a> 
-<a class="jxr_linenumber" name="L2459" href="#L2459">2459</a> 		@Override
-<a class="jxr_linenumber" name="L2460" href="#L2460">2460</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/gclient/IUpdateWithQueryTyped.html">IUpdateWithQueryTyped</a> where(ICriterion&lt;?&gt; theCriterion) {
-<a class="jxr_linenumber" name="L2461" href="#L2461">2461</a> 			myCriterionList.add((ICriterionInternal) theCriterion);
-<a class="jxr_linenumber" name="L2462" href="#L2462">2462</a> 			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>;
-<a class="jxr_linenumber" name="L2463" href="#L2463">2463</a> 		}
-<a class="jxr_linenumber" name="L2464" href="#L2464">2464</a> 
-<a class="jxr_linenumber" name="L2465" href="#L2465">2465</a> 		@Override
-<a class="jxr_linenumber" name="L2466" href="#L2466">2466</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/gclient/IUpdateExecutable.html">IUpdateExecutable</a> withId(<a href="../../../../../org/hl7/fhir/instance/model/api/IIdType.html">IIdType</a> theId) {
-<a class="jxr_linenumber" name="L2467" href="#L2467">2467</a> 			<strong class="jxr_keyword">if</strong> (theId == <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L2468" href="#L2468">2468</a> 				<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> NullPointerException(<span class="jxr_string">"theId can not be null"</span>);
-<a class="jxr_linenumber" name="L2469" href="#L2469">2469</a> 			}
-<a class="jxr_linenumber" name="L2470" href="#L2470">2470</a> 			<strong class="jxr_keyword">if</strong> (theId.hasIdPart() == false) {
-<a class="jxr_linenumber" name="L2471" href="#L2471">2471</a> 				<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> NullPointerException(<span class="jxr_string">"theId must not be blank and must contain an ID, found: "</span> + theId.getValue());
-<a class="jxr_linenumber" name="L2472" href="#L2472">2472</a> 			}
-<a class="jxr_linenumber" name="L2473" href="#L2473">2473</a> 			myId = theId;
-<a class="jxr_linenumber" name="L2474" href="#L2474">2474</a> 			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>;
-<a class="jxr_linenumber" name="L2475" href="#L2475">2475</a> 		}
-<a class="jxr_linenumber" name="L2476" href="#L2476">2476</a> 
-<a class="jxr_linenumber" name="L2477" href="#L2477">2477</a> 		@Override
-<a class="jxr_linenumber" name="L2478" href="#L2478">2478</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/gclient/IUpdateExecutable.html">IUpdateExecutable</a> withId(String theId) {
-<a class="jxr_linenumber" name="L2479" href="#L2479">2479</a> 			<strong class="jxr_keyword">if</strong> (theId == <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L2480" href="#L2480">2480</a> 				<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> NullPointerException(<span class="jxr_string">"theId can not be null"</span>);
-<a class="jxr_linenumber" name="L2481" href="#L2481">2481</a> 			}
-<a class="jxr_linenumber" name="L2482" href="#L2482">2482</a> 			<strong class="jxr_keyword">if</strong> (isBlank(theId)) {
-<a class="jxr_linenumber" name="L2483" href="#L2483">2483</a> 				<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> NullPointerException(<span class="jxr_string">"theId must not be blank and must contain an ID, found: "</span> + theId);
-<a class="jxr_linenumber" name="L2484" href="#L2484">2484</a> 			}
-<a class="jxr_linenumber" name="L2485" href="#L2485">2485</a> 			myId = <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/model/primitive/IdDt.html">IdDt</a>(theId);
-<a class="jxr_linenumber" name="L2486" href="#L2486">2486</a> 			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>;
-<a class="jxr_linenumber" name="L2487" href="#L2487">2487</a> 		}
-<a class="jxr_linenumber" name="L2488" href="#L2488">2488</a> 
-<a class="jxr_linenumber" name="L2489" href="#L2489">2489</a> 	}
-<a class="jxr_linenumber" name="L2490" href="#L2490">2490</a> 
-<a class="jxr_linenumber" name="L2491" href="#L2491">2491</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">class</strong> <a href="../../../../../ca/uhn/fhir/rest/client/GenericClient.html">ValidateInternal</a> <strong class="jxr_keyword">extends</strong> BaseClientExecutable&lt;IValidateUntyped, MethodOutcome&gt; <strong class="jxr_keyword">implements</strong> IValidate, <a href="../../../../../ca/uhn/fhir/rest/gclient/IValidateUntyped.html">IValidateUntyped</a> {
-<a class="jxr_linenumber" name="L2492" href="#L2492">2492</a> 		<strong class="jxr_keyword">private</strong> <a href="../../../../../org/hl7/fhir/instance/model/api/IBaseResource.html">IBaseResource</a> myResource;
-<a class="jxr_linenumber" name="L2493" href="#L2493">2493</a> 
-<a class="jxr_linenumber" name="L2494" href="#L2494">2494</a> 		@Override
-<a class="jxr_linenumber" name="L2495" href="#L2495">2495</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/api/MethodOutcome.html">MethodOutcome</a> execute() {
-<a class="jxr_linenumber" name="L2496" href="#L2496">2496</a> 			BaseHttpClientInvocation invocation = ValidateMethodBindingDstu2Plus.createValidateInvocation(myContext, myResource);
-<a class="jxr_linenumber" name="L2497" href="#L2497">2497</a> 			ResourceResponseHandler&lt;BaseOperationOutcome&gt; handler = <strong class="jxr_keyword">new</strong> ResourceResponseHandler&lt;BaseOperationOutcome&gt;(<strong class="jxr_keyword">null</strong>, <strong class="jxr_keyword">null</strong>);
-<a class="jxr_linenumber" name="L2498" href="#L2498">2498</a> 			IBaseOperationOutcome outcome = invoke(<strong class="jxr_keyword">null</strong>, handler, invocation);
-<a class="jxr_linenumber" name="L2499" href="#L2499">2499</a> 			MethodOutcome retVal = <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/rest/api/MethodOutcome.html">MethodOutcome</a>();
-<a class="jxr_linenumber" name="L2500" href="#L2500">2500</a> 			retVal.setOperationOutcome(outcome);
-<a class="jxr_linenumber" name="L2501" href="#L2501">2501</a> 			<strong class="jxr_keyword">return</strong> retVal;
-<a class="jxr_linenumber" name="L2502" href="#L2502">2502</a> 		}
-<a class="jxr_linenumber" name="L2503" href="#L2503">2503</a> 
-<a class="jxr_linenumber" name="L2504" href="#L2504">2504</a> 		@Override
-<a class="jxr_linenumber" name="L2505" href="#L2505">2505</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/gclient/IValidateUntyped.html">IValidateUntyped</a> resource(<a href="../../../../../org/hl7/fhir/instance/model/api/IBaseResource.html">IBaseResource</a> theResource) {
-<a class="jxr_linenumber" name="L2506" href="#L2506">2506</a> 			Validate.notNull(theResource, <span class="jxr_string">"theResource must not be null"</span>);
-<a class="jxr_linenumber" name="L2507" href="#L2507">2507</a> 			myResource = theResource;
-<a class="jxr_linenumber" name="L2508" href="#L2508">2508</a> 			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>;
-<a class="jxr_linenumber" name="L2509" href="#L2509">2509</a> 		}
-<a class="jxr_linenumber" name="L2510" href="#L2510">2510</a> 
-<a class="jxr_linenumber" name="L2511" href="#L2511">2511</a> 		@Override
-<a class="jxr_linenumber" name="L2512" href="#L2512">2512</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/gclient/IValidateUntyped.html">IValidateUntyped</a> resource(String theResourceRaw) {
-<a class="jxr_linenumber" name="L2513" href="#L2513">2513</a> 			Validate.notBlank(theResourceRaw, <span class="jxr_string">"theResourceRaw must not be null or blank"</span>);
-<a class="jxr_linenumber" name="L2514" href="#L2514">2514</a> 			myResource = parseResourceBody(theResourceRaw);
-<a class="jxr_linenumber" name="L2515" href="#L2515">2515</a> 
-<a class="jxr_linenumber" name="L2516" href="#L2516">2516</a> 			EncodingEnum enc = MethodUtil.detectEncodingNoDefault(theResourceRaw);
-<a class="jxr_linenumber" name="L2517" href="#L2517">2517</a> 			<strong class="jxr_keyword">if</strong> (enc == <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L2518" href="#L2518">2518</a> 				<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> IllegalArgumentException(myContext.getLocalizer().getMessage(GenericClient.<strong class="jxr_keyword">class</strong>, <span class="jxr_string">"cantDetermineRequestType"</span>));
-<a class="jxr_linenumber" name="L2519" href="#L2519">2519</a> 			}
-<a class="jxr_linenumber" name="L2520" href="#L2520">2520</a> 			<strong class="jxr_keyword">switch</strong> (enc) {
-<a class="jxr_linenumber" name="L2521" href="#L2521">2521</a> 			<strong class="jxr_keyword">case</strong> XML:
-<a class="jxr_linenumber" name="L2522" href="#L2522">2522</a> 				encodedXml();
-<a class="jxr_linenumber" name="L2523" href="#L2523">2523</a> 				<strong class="jxr_keyword">break</strong>;
-<a class="jxr_linenumber" name="L2524" href="#L2524">2524</a> 			<strong class="jxr_keyword">case</strong> JSON:
-<a class="jxr_linenumber" name="L2525" href="#L2525">2525</a> 				encodedJson();
-<a class="jxr_linenumber" name="L2526" href="#L2526">2526</a> 				<strong class="jxr_keyword">break</strong>;
-<a class="jxr_linenumber" name="L2527" href="#L2527">2527</a> 			}
-<a class="jxr_linenumber" name="L2528" href="#L2528">2528</a> 			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>;
-<a class="jxr_linenumber" name="L2529" href="#L2529">2529</a> 		}
-<a class="jxr_linenumber" name="L2530" href="#L2530">2530</a> 
-<a class="jxr_linenumber" name="L2531" href="#L2531">2531</a> 	}
-<a class="jxr_linenumber" name="L2532" href="#L2532">2532</a> 
-<a class="jxr_linenumber" name="L2533" href="#L2533">2533</a> }
+<a class="jxr_linenumber" name="L2424" href="#L2424">2424</a> 
+<a class="jxr_linenumber" name="L2425" href="#L2425">2425</a> 				<strong class="jxr_keyword">if</strong> (myId == <strong class="jxr_keyword">null</strong> || myId.hasIdPart() == false) {
+<a class="jxr_linenumber" name="L2426" href="#L2426">2426</a> 					<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/rest/server/exceptions/InvalidRequestException.html">InvalidRequestException</a>(<span class="jxr_string">"No ID supplied for resource to update, can not invoke server"</span>);
+<a class="jxr_linenumber" name="L2427" href="#L2427">2427</a> 				}
+<a class="jxr_linenumber" name="L2428" href="#L2428">2428</a> 				invocation = MethodUtil.createUpdateInvocation(myResource, myResourceBody, myId, myContext);
+<a class="jxr_linenumber" name="L2429" href="#L2429">2429</a> 			}
+<a class="jxr_linenumber" name="L2430" href="#L2430">2430</a> 
+<a class="jxr_linenumber" name="L2431" href="#L2431">2431</a> 			addPreferHeader(myPrefer, invocation);
+<a class="jxr_linenumber" name="L2432" href="#L2432">2432</a> 
+<a class="jxr_linenumber" name="L2433" href="#L2433">2433</a> 			RuntimeResourceDefinition def = myContext.getResourceDefinition(myResource);
+<a class="jxr_linenumber" name="L2434" href="#L2434">2434</a> 			<strong class="jxr_keyword">final</strong> String resourceName = def.getName();
+<a class="jxr_linenumber" name="L2435" href="#L2435">2435</a> 
+<a class="jxr_linenumber" name="L2436" href="#L2436">2436</a> 			OutcomeResponseHandler binding = <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/rest/client/GenericClient.html">OutcomeResponseHandler</a>(resourceName, myPrefer);
+<a class="jxr_linenumber" name="L2437" href="#L2437">2437</a> 
+<a class="jxr_linenumber" name="L2438" href="#L2438">2438</a> 			Map&lt;String, List&lt;String&gt;&gt; params = <strong class="jxr_keyword">new</strong> HashMap&lt;String, List&lt;String&gt;&gt;();
+<a class="jxr_linenumber" name="L2439" href="#L2439">2439</a> 			<strong class="jxr_keyword">return</strong> invoke(params, binding, invocation);
+<a class="jxr_linenumber" name="L2440" href="#L2440">2440</a> 
+<a class="jxr_linenumber" name="L2441" href="#L2441">2441</a> 		}
+<a class="jxr_linenumber" name="L2442" href="#L2442">2442</a> 
+<a class="jxr_linenumber" name="L2443" href="#L2443">2443</a> 		@Override
+<a class="jxr_linenumber" name="L2444" href="#L2444">2444</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/gclient/IUpdateExecutable.html">IUpdateExecutable</a> prefer(<a href="../../../../../ca/uhn/fhir/rest/api/PreferReturnEnum.html">PreferReturnEnum</a> theReturn) {
+<a class="jxr_linenumber" name="L2445" href="#L2445">2445</a> 			myPrefer = theReturn;
+<a class="jxr_linenumber" name="L2446" href="#L2446">2446</a> 			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>;
+<a class="jxr_linenumber" name="L2447" href="#L2447">2447</a> 		}
+<a class="jxr_linenumber" name="L2448" href="#L2448">2448</a> 
+<a class="jxr_linenumber" name="L2449" href="#L2449">2449</a> 		@Override
+<a class="jxr_linenumber" name="L2450" href="#L2450">2450</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/gclient/IUpdateTyped.html">IUpdateTyped</a> resource(<a href="../../../../../org/hl7/fhir/instance/model/api/IBaseResource.html">IBaseResource</a> theResource) {
+<a class="jxr_linenumber" name="L2451" href="#L2451">2451</a> 			Validate.notNull(theResource, <span class="jxr_string">"Resource can not be null"</span>);
+<a class="jxr_linenumber" name="L2452" href="#L2452">2452</a> 			myResource = theResource;
+<a class="jxr_linenumber" name="L2453" href="#L2453">2453</a> 			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>;
+<a class="jxr_linenumber" name="L2454" href="#L2454">2454</a> 		}
+<a class="jxr_linenumber" name="L2455" href="#L2455">2455</a> 
+<a class="jxr_linenumber" name="L2456" href="#L2456">2456</a> 		@Override
+<a class="jxr_linenumber" name="L2457" href="#L2457">2457</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/gclient/IUpdateTyped.html">IUpdateTyped</a> resource(String theResourceBody) {
+<a class="jxr_linenumber" name="L2458" href="#L2458">2458</a> 			Validate.notBlank(theResourceBody, <span class="jxr_string">"Body can not be null or blank"</span>);
+<a class="jxr_linenumber" name="L2459" href="#L2459">2459</a> 			myResourceBody = theResourceBody;
+<a class="jxr_linenumber" name="L2460" href="#L2460">2460</a> 			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>;
+<a class="jxr_linenumber" name="L2461" href="#L2461">2461</a> 		}
+<a class="jxr_linenumber" name="L2462" href="#L2462">2462</a> 
+<a class="jxr_linenumber" name="L2463" href="#L2463">2463</a> 		@Override
+<a class="jxr_linenumber" name="L2464" href="#L2464">2464</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/gclient/IUpdateWithQueryTyped.html">IUpdateWithQueryTyped</a> where(ICriterion&lt;?&gt; theCriterion) {
+<a class="jxr_linenumber" name="L2465" href="#L2465">2465</a> 			myCriterionList.add((ICriterionInternal) theCriterion);
+<a class="jxr_linenumber" name="L2466" href="#L2466">2466</a> 			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>;
+<a class="jxr_linenumber" name="L2467" href="#L2467">2467</a> 		}
+<a class="jxr_linenumber" name="L2468" href="#L2468">2468</a> 
+<a class="jxr_linenumber" name="L2469" href="#L2469">2469</a> 		@Override
+<a class="jxr_linenumber" name="L2470" href="#L2470">2470</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/gclient/IUpdateExecutable.html">IUpdateExecutable</a> withId(<a href="../../../../../org/hl7/fhir/instance/model/api/IIdType.html">IIdType</a> theId) {
+<a class="jxr_linenumber" name="L2471" href="#L2471">2471</a> 			<strong class="jxr_keyword">if</strong> (theId == <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L2472" href="#L2472">2472</a> 				<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> NullPointerException(<span class="jxr_string">"theId can not be null"</span>);
+<a class="jxr_linenumber" name="L2473" href="#L2473">2473</a> 			}
+<a class="jxr_linenumber" name="L2474" href="#L2474">2474</a> 			<strong class="jxr_keyword">if</strong> (theId.hasIdPart() == false) {
+<a class="jxr_linenumber" name="L2475" href="#L2475">2475</a> 				<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> NullPointerException(<span class="jxr_string">"theId must not be blank and must contain an ID, found: "</span> + theId.getValue());
+<a class="jxr_linenumber" name="L2476" href="#L2476">2476</a> 			}
+<a class="jxr_linenumber" name="L2477" href="#L2477">2477</a> 			myId = theId;
+<a class="jxr_linenumber" name="L2478" href="#L2478">2478</a> 			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>;
+<a class="jxr_linenumber" name="L2479" href="#L2479">2479</a> 		}
+<a class="jxr_linenumber" name="L2480" href="#L2480">2480</a> 
+<a class="jxr_linenumber" name="L2481" href="#L2481">2481</a> 		@Override
+<a class="jxr_linenumber" name="L2482" href="#L2482">2482</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/gclient/IUpdateExecutable.html">IUpdateExecutable</a> withId(String theId) {
+<a class="jxr_linenumber" name="L2483" href="#L2483">2483</a> 			<strong class="jxr_keyword">if</strong> (theId == <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L2484" href="#L2484">2484</a> 				<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> NullPointerException(<span class="jxr_string">"theId can not be null"</span>);
+<a class="jxr_linenumber" name="L2485" href="#L2485">2485</a> 			}
+<a class="jxr_linenumber" name="L2486" href="#L2486">2486</a> 			<strong class="jxr_keyword">if</strong> (isBlank(theId)) {
+<a class="jxr_linenumber" name="L2487" href="#L2487">2487</a> 				<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> NullPointerException(<span class="jxr_string">"theId must not be blank and must contain an ID, found: "</span> + theId);
+<a class="jxr_linenumber" name="L2488" href="#L2488">2488</a> 			}
+<a class="jxr_linenumber" name="L2489" href="#L2489">2489</a> 			myId = <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/model/primitive/IdDt.html">IdDt</a>(theId);
+<a class="jxr_linenumber" name="L2490" href="#L2490">2490</a> 			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>;
+<a class="jxr_linenumber" name="L2491" href="#L2491">2491</a> 		}
+<a class="jxr_linenumber" name="L2492" href="#L2492">2492</a> 
+<a class="jxr_linenumber" name="L2493" href="#L2493">2493</a> 	}
+<a class="jxr_linenumber" name="L2494" href="#L2494">2494</a> 
+<a class="jxr_linenumber" name="L2495" href="#L2495">2495</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">class</strong> <a href="../../../../../ca/uhn/fhir/rest/client/GenericClient.html">ValidateInternal</a> <strong class="jxr_keyword">extends</strong> BaseClientExecutable&lt;IValidateUntyped, MethodOutcome&gt; <strong class="jxr_keyword">implements</strong> IValidate, <a href="../../../../../ca/uhn/fhir/rest/gclient/IValidateUntyped.html">IValidateUntyped</a> {
+<a class="jxr_linenumber" name="L2496" href="#L2496">2496</a> 		<strong class="jxr_keyword">private</strong> <a href="../../../../../org/hl7/fhir/instance/model/api/IBaseResource.html">IBaseResource</a> myResource;
+<a class="jxr_linenumber" name="L2497" href="#L2497">2497</a> 
+<a class="jxr_linenumber" name="L2498" href="#L2498">2498</a> 		@Override
+<a class="jxr_linenumber" name="L2499" href="#L2499">2499</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/api/MethodOutcome.html">MethodOutcome</a> execute() {
+<a class="jxr_linenumber" name="L2500" href="#L2500">2500</a> 			BaseHttpClientInvocation invocation = ValidateMethodBindingDstu2Plus.createValidateInvocation(myContext, myResource);
+<a class="jxr_linenumber" name="L2501" href="#L2501">2501</a> 			ResourceResponseHandler&lt;BaseOperationOutcome&gt; handler = <strong class="jxr_keyword">new</strong> ResourceResponseHandler&lt;BaseOperationOutcome&gt;(<strong class="jxr_keyword">null</strong>, <strong class="jxr_keyword">null</strong>);
+<a class="jxr_linenumber" name="L2502" href="#L2502">2502</a> 			IBaseOperationOutcome outcome = invoke(<strong class="jxr_keyword">null</strong>, handler, invocation);
+<a class="jxr_linenumber" name="L2503" href="#L2503">2503</a> 			MethodOutcome retVal = <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/rest/api/MethodOutcome.html">MethodOutcome</a>();
+<a class="jxr_linenumber" name="L2504" href="#L2504">2504</a> 			retVal.setOperationOutcome(outcome);
+<a class="jxr_linenumber" name="L2505" href="#L2505">2505</a> 			<strong class="jxr_keyword">return</strong> retVal;
+<a class="jxr_linenumber" name="L2506" href="#L2506">2506</a> 		}
+<a class="jxr_linenumber" name="L2507" href="#L2507">2507</a> 
+<a class="jxr_linenumber" name="L2508" href="#L2508">2508</a> 		@Override
+<a class="jxr_linenumber" name="L2509" href="#L2509">2509</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/gclient/IValidateUntyped.html">IValidateUntyped</a> resource(<a href="../../../../../org/hl7/fhir/instance/model/api/IBaseResource.html">IBaseResource</a> theResource) {
+<a class="jxr_linenumber" name="L2510" href="#L2510">2510</a> 			Validate.notNull(theResource, <span class="jxr_string">"theResource must not be null"</span>);
+<a class="jxr_linenumber" name="L2511" href="#L2511">2511</a> 			myResource = theResource;
+<a class="jxr_linenumber" name="L2512" href="#L2512">2512</a> 			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>;
+<a class="jxr_linenumber" name="L2513" href="#L2513">2513</a> 		}
+<a class="jxr_linenumber" name="L2514" href="#L2514">2514</a> 
+<a class="jxr_linenumber" name="L2515" href="#L2515">2515</a> 		@Override
+<a class="jxr_linenumber" name="L2516" href="#L2516">2516</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/gclient/IValidateUntyped.html">IValidateUntyped</a> resource(String theResourceRaw) {
+<a class="jxr_linenumber" name="L2517" href="#L2517">2517</a> 			Validate.notBlank(theResourceRaw, <span class="jxr_string">"theResourceRaw must not be null or blank"</span>);
+<a class="jxr_linenumber" name="L2518" href="#L2518">2518</a> 			myResource = parseResourceBody(theResourceRaw);
+<a class="jxr_linenumber" name="L2519" href="#L2519">2519</a> 
+<a class="jxr_linenumber" name="L2520" href="#L2520">2520</a> 			EncodingEnum enc = MethodUtil.detectEncodingNoDefault(theResourceRaw);
+<a class="jxr_linenumber" name="L2521" href="#L2521">2521</a> 			<strong class="jxr_keyword">if</strong> (enc == <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L2522" href="#L2522">2522</a> 				<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> IllegalArgumentException(myContext.getLocalizer().getMessage(GenericClient.<strong class="jxr_keyword">class</strong>, <span class="jxr_string">"cantDetermineRequestType"</span>));
+<a class="jxr_linenumber" name="L2523" href="#L2523">2523</a> 			}
+<a class="jxr_linenumber" name="L2524" href="#L2524">2524</a> 			<strong class="jxr_keyword">switch</strong> (enc) {
+<a class="jxr_linenumber" name="L2525" href="#L2525">2525</a> 			<strong class="jxr_keyword">case</strong> XML:
+<a class="jxr_linenumber" name="L2526" href="#L2526">2526</a> 				encodedXml();
+<a class="jxr_linenumber" name="L2527" href="#L2527">2527</a> 				<strong class="jxr_keyword">break</strong>;
+<a class="jxr_linenumber" name="L2528" href="#L2528">2528</a> 			<strong class="jxr_keyword">case</strong> JSON:
+<a class="jxr_linenumber" name="L2529" href="#L2529">2529</a> 				encodedJson();
+<a class="jxr_linenumber" name="L2530" href="#L2530">2530</a> 				<strong class="jxr_keyword">break</strong>;
+<a class="jxr_linenumber" name="L2531" href="#L2531">2531</a> 			}
+<a class="jxr_linenumber" name="L2532" href="#L2532">2532</a> 			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>;
+<a class="jxr_linenumber" name="L2533" href="#L2533">2533</a> 		}
+<a class="jxr_linenumber" name="L2534" href="#L2534">2534</a> 
+<a class="jxr_linenumber" name="L2535" href="#L2535">2535</a> 	}
+<a class="jxr_linenumber" name="L2536" href="#L2536">2536</a> 
+<a class="jxr_linenumber" name="L2537" href="#L2537">2537</a> }
 </pre>
 <hr/>
-<div id="footer">Copyright &#169; 2014&#x2013;2016 <a href="http://www.uhn.ca">University Health Network</a>. All rights reserved.</div>
+<div id="footer">Copyright &#169; 2014&#x2013;2017 <a href="http://www.uhn.ca">University Health Network</a>. All rights reserved.</div>
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
   (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
