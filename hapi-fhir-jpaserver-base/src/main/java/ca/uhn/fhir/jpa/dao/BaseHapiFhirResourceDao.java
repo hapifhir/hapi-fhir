@@ -192,7 +192,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		validateOkToDelete(deleteConflicts, entity);
 		
-		preDelete(resourceToDelete);
+		preDelete(resourceToDelete, entity);
 		
 		// Notify interceptors
 		if (theRequestDetails != null) {
@@ -722,7 +722,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	 * Subclasses may override to provide behaviour. Invoked within a delete
 	 * transaction with the resource that is about to be deleted. 
 	 */
-	protected void preDelete(T theResourceToDelete) {
+	@SuppressWarnings("unused")
+	protected void preDelete(T theResourceToDelete, ResourceTable theEntityToDelete) {
 		// nothing by default
 	}
 

@@ -98,8 +98,8 @@ public class FhirResourceDaoSearchParameterDstu3 extends FhirResourceDaoDstu3<Se
 	}
 
 	@Override
-	protected void preDelete(SearchParameter theResourceToDelete) {
-		super.preDelete(theResourceToDelete);
+	protected void preDelete(SearchParameter theResourceToDelete, ResourceTable theEntityToDelete) {
+		super.preDelete(theResourceToDelete, theEntityToDelete);
 		markAffectedResources(theResourceToDelete);
 	}
 
