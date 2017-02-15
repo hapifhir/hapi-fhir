@@ -5,7 +5,7 @@
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-fhir</artifactId>
 		<version>2.3-SNAPSHOT</version>
-		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
+		<relativePath>../../pom.xml</relativePath>
 	</parent>
 	<artifactId>hapi-fhir-standalone-overlay-example</artifactId>
 	<build>
