@@ -326,6 +326,7 @@
 		<phloc_commons_version>4.4.6</phloc_commons_version>
 		<spring_version>4.3.1.RELEASE</spring_version>
 		<thymeleaf-version>3.0.1.RELEASE</thymeleaf-version>
+		<ebay_cors_filter_version>1.0.1</ebay_cors_filter_version>
 		<xmlunit_version>1.6</xmlunit_version>
 
 		<!-- We are aiming to still work on a very old version of SLF4j even though we depend on the newest, just to be nice to users of the API. This version is tested in the hapi-fhir-cobertura. -->
@@ -555,6 +556,11 @@
 				<groupId>org.codehaus.woodstox</groupId>
 				<artifactId>woodstox-core-asl</artifactId>
 				<version>4.4.1</version>
+			</dependency>
+			<dependency>
+				<groupId>org.ebaysf.web</groupId>
+				<artifactId>cors-filter</artifactId>
+				<version>${ebay_cors_filter_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.eclipse.jetty</groupId>

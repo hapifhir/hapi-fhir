@@ -37,4 +37,5 @@ public interface IFhirResourceDaoSubscription<T extends IBaseResource> extends I
 
 	void pollForNewUndeliveredResourcesScheduler();
 
+	int pollForNewUndeliveredResources(String resourceType);
 }

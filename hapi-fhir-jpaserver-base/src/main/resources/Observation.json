@@ -1,0 +1,55 @@
+{
+  "resourceType": "Observation",
+  "identifier": [
+    {
+      "value": "0_urn:dns:ba27eb6ef4ce.lampreynetworks.com~1c8774fffe04dd60~150364~20150309021824~~35.0"
+    }
+  ],
+  "status": "final",
+  "category": {
+    "coding": [
+      {
+        "system": "http://hl7.org/fhir/observation-category",
+        "code": "vital-signs",
+        "display": "Vital Signs"
+      }
+    ]
+  },
+  "code": {
+    "coding": [
+      {
+        "system": "urn:iso:std:iso:11073:10101",
+        "code": "150364",
+        "display": "MDC_TEMP_BODY"
+      },
+      {
+        "system": "http://loinc.org",
+        "code": "39156-5",
+        "display": "Body height"
+      },
+      {
+        "system": "http://hl7.org/fhir/data-types",
+        "code": "Quantity",
+        "display": "Value is a Numeric Data Type double"
+      }
+    ]
+  },
+  "subject": {
+    "reference": "Patient/PatientId-0"
+  },
+  "effectiveDateTime": "2017-02-14T17:18:55-05:00",
+  "performer": [
+    {
+      "reference": "Patient/PatientId-0"
+    }
+  ],
+  "valueQuantity": {
+    "value": 35.0,
+    "unit": "degC",
+    "system": "urn:iso:std:iso:11073:10101",
+    "code": "268192"
+  },
+  "device": {
+    "reference": "Device/SysId-1c8774fffe04dd60"
+  }
+}

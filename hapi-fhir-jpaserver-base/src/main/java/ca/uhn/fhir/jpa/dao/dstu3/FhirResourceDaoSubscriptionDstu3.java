@@ -120,9 +120,13 @@ public class FhirResourceDaoSubscriptionDstu3 extends FhirResourceDaoDstu3<Subsc
 		return retVal;
 	}
 
+    public int pollForNewUndeliveredResources() {
+        return pollForNewUndeliveredResources((String) null);
+    }
+
 	@Override
 	@Transactional(propagation = Propagation.NOT_SUPPORTED)
-	public synchronized int pollForNewUndeliveredResources() {
+    public synchronized int pollForNewUndeliveredResources(final String resourceType) {
 		if (getConfig().isSubscriptionEnabled() == false) {
 			return 0;
 		}
@@ -130,18 +134,22 @@ public class FhirResourceDaoSubscriptionDstu3 extends FhirResourceDaoDstu3<Subsc
 
 		// SubscriptionCandidateResource
 
-		Collection<Long> subscriptions = mySubscriptionTableDao.findSubscriptionsWhichNeedToBeChecked(SubscriptionStatusEnum.ACTIVE.getCode(), new Date());
+        Collection<Long> subscriptions;
+
+        //queries for active subscriptions
+        subscriptions = mySubscriptionTableDao.findSubscriptionsWhichNeedToBeChecked(SubscriptionStatusEnum.ACTIVE.getCode(), new Date());
 
 		TransactionTemplate txTemplate = new TransactionTemplate(myTxManager);
 		txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
 		
+        //for each active subscription, get the subscription entity
 		int retVal = 0;
 		for (final Long nextSubscriptionTablePid : subscriptions) {
 			retVal += txTemplate.execute(new TransactionCallback<Integer>() {
 				@Override
 				public Integer doInTransaction(TransactionStatus theStatus) {
 					SubscriptionTable nextSubscriptionTable = mySubscriptionTableDao.findOne(nextSubscriptionTablePid);
-					return pollForNewUndeliveredResources(nextSubscriptionTable);
+                    return pollForNewUndeliveredResources(nextSubscriptionTable, resourceType);
 				}
 			});
 		}
@@ -149,20 +157,31 @@ public class FhirResourceDaoSubscriptionDstu3 extends FhirResourceDaoDstu3<Subsc
 		return retVal;
 	}
 
-	private int pollForNewUndeliveredResources(SubscriptionTable theSubscriptionTable) {
+    private int pollForNewUndeliveredResources(SubscriptionTable theSubscriptionTable, String resourceType) {
 		Subscription subscription = toResource(Subscription.class, theSubscriptionTable.getSubscriptionResource(), false);
+        if (subscription.getChannel().getType() != Subscription.SubscriptionChannelType.WEBSOCKET){
+            ourLog.info("Skipping non web socket subscription");
+            return 0;
+        }
+
+        ourLog.info("subscription for " + resourceType + " with criteria " + subscription.getCriteria());
+        if (resourceType != null && subscription.getCriteria() != null && !subscription.getCriteria().startsWith(resourceType)) {
+            ourLog.info("Skipping subscription search for " + resourceType + " because it does not match the criteria " + subscription.getCriteria());
+            return 0;
+        }
+
 		RuntimeResourceDefinition resourceDef = validateCriteriaAndReturnResourceDefinition(subscription);
 		SearchParameterMap criteriaUrl = translateMatchUrl(getContext(), subscription.getCriteria(), resourceDef);
 
-		criteriaUrl = new SearchParameterMap();
+        //criteriaUrl = new SearchParameterMap();
 		long start = theSubscriptionTable.getMostRecentMatch().getTime();
 		long end = System.currentTimeMillis() - getConfig().getSubscriptionPollDelay();
 		if (end <= start) {
-			ourLog.trace("Skipping search for subscription");
+            ourLog.info("Skipping search for subscription");
 			return 0;
 		}
 
-		ourLog.debug("Subscription {} search from {} to {}", new Object[] { subscription.getIdElement().getIdPart(), new InstantDt(new Date(start)), new InstantDt(new Date(end)) });
+        ourLog.info("Subscription {} search from {} to {}", new Object[]{subscription.getIdElement().getIdPart(), new InstantDt(new Date(start)), new InstantDt(new Date(end))});
 
 		DateRangeParam range = new DateRangeParam();
 		range.setLowerBound(new DateParam(QuantityCompararatorEnum.GREATERTHAN, start));
@@ -170,6 +189,7 @@ public class FhirResourceDaoSubscriptionDstu3 extends FhirResourceDaoDstu3<Subsc
 		criteriaUrl.setLastUpdated(range);
 		criteriaUrl.setSort(new SortSpec(Constants.PARAM_LASTUPDATED, SortOrderEnum.ASC));
 		IFhirResourceDao<? extends IBaseResource> dao = getDao(resourceDef.getImplementingClass());
+        //search for matching criteria
 		IBundleProvider results = dao.search(criteriaUrl);
 		if (results.size() == 0) {
 			return 0;
@@ -289,7 +309,7 @@ public class FhirResourceDaoSubscriptionDstu3 extends FhirResourceDaoDstu3<Subsc
 		return retVal;
 	}
 
-	private RuntimeResourceDefinition validateCriteriaAndReturnResourceDefinition(Subscription theResource) {
+    public RuntimeResourceDefinition validateCriteriaAndReturnResourceDefinition(Subscription theResource) {
 		String query = theResource.getCriteria();
 		if (isBlank(query)) {
 			throw new UnprocessableEntityException("Subscription.criteria must be populated");
