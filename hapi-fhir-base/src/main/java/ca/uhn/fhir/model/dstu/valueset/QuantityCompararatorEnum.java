@@ -119,6 +119,7 @@ public enum QuantityCompararatorEnum {
 	/**
 	 * Converts codes to their respective enumerated values
 	 */
+	@SuppressWarnings("serial")
 	public static final IValueSetEnumBinder<QuantityCompararatorEnum> VALUESET_BINDER = new IValueSetEnumBinder<QuantityCompararatorEnum>() {
 		@Override
 		public String toCodeString(QuantityCompararatorEnum theEnum) {

@@ -34,7 +34,6 @@ import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
-import ca.uhn.fhir.model.api.IPrimitiveDatatype;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.api.annotation.SimpleSetter;
@@ -54,7 +53,7 @@ import ca.uhn.fhir.util.UrlUtil;
  * </p>
  */
 @DatatypeDef(name = "id", profileOf = StringDt.class)
-public class IdDt extends UriDt implements IPrimitiveDatatype<String>, IIdType {
+public class IdDt extends UriDt implements /*IPrimitiveDatatype<String>, */IIdType {
 
 	private String myBaseUrl;
 	private boolean myHaveComponentParts;
@@ -183,6 +182,7 @@ public class IdDt extends UriDt implements IPrimitiveDatatype<String>, IIdType {
 		setValue(theUrl.getValueAsString());
 	}
 
+	@Override
 	public void applyTo(IBaseResource theResouce) {
 		if (theResouce == null) {
 			throw new NullPointerException("theResource can not be null");
@@ -332,12 +332,12 @@ public class IdDt extends UriDt implements IPrimitiveDatatype<String>, IIdType {
 		return myUnqualifiedVersionId;
 	}
 
+	@Override
 	public Long getVersionIdPartAsLong() {
 		if (!hasVersionIdPart()) {
 			return null;
-		} else {
-			return Long.parseLong(getVersionIdPart());
 		}
+		return Long.parseLong(getVersionIdPart());
 	}
 
 	/**
@@ -345,6 +345,7 @@ public class IdDt extends UriDt implements IPrimitiveDatatype<String>, IIdType {
 	 * 
 	 * @see #getBaseUrl()
 	 */
+	@Override
 	public boolean hasBaseUrl() {
 		return isNotBlank(myBaseUrl);
 	}
@@ -440,7 +441,9 @@ public class IdDt extends UriDt implements IPrimitiveDatatype<String>, IIdType {
 
 	/**
 	 * Copies the value from the given IdDt to <code>this</code> IdDt. It is generally not neccesary to use this method but it is provided for consistency with the rest of the API.
+	 * @deprecated
 	 */
+	@Deprecated //override deprecated method
 	@Override
 	public void setId(IdDt theId) {
 		setValue(theId.getValue());
@@ -666,15 +669,14 @@ public class IdDt extends UriDt implements IPrimitiveDatatype<String>, IIdType {
 	public static IdDt of(IBaseResource theResouce) {
 		if (theResouce == null) {
 			throw new NullPointerException("theResource can not be null");
+		}
+		IIdType retVal = theResouce.getIdElement();
+		if (retVal == null) {
+			return null;
+		} else if (retVal instanceof IdDt) {
+			return (IdDt) retVal;
 		} else {
-			IIdType retVal = theResouce.getIdElement();
-			if (retVal == null) {
-				return null;
-			} else if (retVal instanceof IdDt) {
-				return (IdDt) retVal;
-			} else {
-				return new IdDt(retVal.getValue());
-			}
+			return new IdDt(retVal.getValue());
 		}
 	}
 

@@ -7,11 +7,9 @@ import java.io.StringReader;
 
 import org.junit.Test;
 
-import ca.uhn.fhir.context.FhirContext;
-
 public class JsonLikeStructureTest {
-	private static FhirContext ourCtx;
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(JsonLikeStructureTest.class);
+//	private static FhirContext ourCtx;
+//	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(JsonLikeStructureTest.class);
 
 	private static final String TEST_STRUCTURELOADING_DATA = 
 		"{" +

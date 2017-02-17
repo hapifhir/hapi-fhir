@@ -23,6 +23,8 @@ package org.hl7.fhir.exceptions;
 
 public class PathEngineException extends FHIRException {
 
+	private static final long serialVersionUID = -8550234068917355391L;
+
 	public PathEngineException() {
 		super();
 	}

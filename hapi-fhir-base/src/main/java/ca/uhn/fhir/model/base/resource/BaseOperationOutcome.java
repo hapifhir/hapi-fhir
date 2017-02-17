@@ -40,6 +40,8 @@ public interface BaseOperationOutcome extends IResource, IBaseOperationOutcome {
 
 	public static abstract class BaseIssue extends BaseIdentifiableElement implements IResourceBlock {
 	
+		private static final long serialVersionUID = 6700020892151450738L;
+
 		public abstract CodeDt getSeverityElement();
 		
 		public abstract StringDt getDetailsElement();

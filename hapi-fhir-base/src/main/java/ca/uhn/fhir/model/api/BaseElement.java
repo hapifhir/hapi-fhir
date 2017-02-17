@@ -30,8 +30,9 @@ import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
 
-public abstract class BaseElement implements IElement, ISupportsUndeclaredExtensions {
+public abstract class BaseElement implements /*IElement, */ISupportsUndeclaredExtensions {
 
+	private static final long serialVersionUID = -3092659584634499332L;
 	private List<String> myFormatCommentsPost;
 	private List<String> myFormatCommentsPre;
 	

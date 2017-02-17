@@ -32,6 +32,8 @@ import ca.uhn.fhir.model.primitive.XhtmlDt;
  */
 public abstract class BaseNarrativeDt<T extends Enum<?>> extends BaseIdentifiableElement implements ICompositeDatatype, INarrative {
 
+	private static final long serialVersionUID = -525238683230100077L;
+
 	public abstract BoundCodeDt<T> getStatus();
 
 	@Override

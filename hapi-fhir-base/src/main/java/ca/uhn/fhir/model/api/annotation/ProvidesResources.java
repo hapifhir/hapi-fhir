@@ -39,5 +39,5 @@ import java.lang.annotation.RetentionPolicy;
  */
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ProvidesResources {
-    Class[] resources();
+    Class<?>[] resources();
 }

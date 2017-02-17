@@ -3,7 +3,6 @@ package ca.uhn.fhir.rest.gclient;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 import java.util.Collection;
-import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 
