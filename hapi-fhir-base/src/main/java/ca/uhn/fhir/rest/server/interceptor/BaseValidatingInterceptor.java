@@ -20,28 +20,27 @@ package ca.uhn.fhir.rest.server.interceptor;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import org.apache.commons.lang3.Validate;
-import org.apache.commons.lang3.text.StrLookup;
-import org.apache.commons.lang3.text.StrSubstitutor;
-import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
-
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.api.TagList;
+import ca.uhn.fhir.model.base.composite.BaseCodingDt;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.method.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.OperationOutcomeUtil;
-import ca.uhn.fhir.validation.FhirValidator;
-import ca.uhn.fhir.validation.IValidatorModule;
-import ca.uhn.fhir.validation.ResultSeverityEnum;
-import ca.uhn.fhir.validation.SingleValidationMessage;
-import ca.uhn.fhir.validation.ValidationResult;
+import ca.uhn.fhir.validation.*;
+import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.text.StrLookup;
+import org.apache.commons.lang3.text.StrSubstitutor;
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /**
  * This interceptor intercepts each incoming request and if it contains a FHIR resource, validates that resource. The
@@ -69,6 +68,7 @@ abstract class BaseValidatingInterceptor<T> extends InterceptorAdapter {
 	private String myResponseIssueHeaderValue = DEFAULT_RESPONSE_HEADER_VALUE;
 	private String myResponseIssueHeaderValueNoIssues = null;
 	private String myResponseOutcomeHeaderName = provideDefaultResponseHeaderName();
+	private HashMap<ResultSeverityEnum, BaseCodingDt> myAddCodingsOnSeverities = null;
 
 	private List<IValidatorModule> myValidatorModules;
 
@@ -266,6 +266,32 @@ abstract class BaseValidatingInterceptor<T> extends InterceptorAdapter {
 		myValidatorModules = theValidatorModules;
 	}
 
+	public void setCodingsForSeverities(HashMap<ResultSeverityEnum, BaseCodingDt> theAddCodingsForSeverities) {
+		myAddCodingsOnSeverities = theAddCodingsForSeverities != null ? theAddCodingsForSeverities : null;
+	}
+
+	public Map<ResultSeverityEnum, BaseCodingDt> getCodingsForSeverities() { return myAddCodingsOnSeverities; }
+
+	private void addCodingForHighestSeverity(RequestDetails theRequestDetails, ValidationResult theValidationResult) {
+		int highestSeverity = 0;
+		for (SingleValidationMessage next : theValidationResult.getMessages()) {
+			if (next.getSeverity().ordinal() > highestSeverity) {
+				highestSeverity = next.getSeverity().ordinal();
+			}
+		}
+		for (Map.Entry<ResultSeverityEnum, BaseCodingDt> entry : myAddCodingsOnSeverities.entrySet()) {
+			if (entry.getKey().ordinal() == highestSeverity) {
+				// TODO: entry.getValue() to Resource
+				TagList tags = new TagList();
+//				ResourceMetadataKeyEnum.TAG_LIST.put(???, tags);
+				tags.addTag(
+						entry.getValue().getSystemElement().getValueAsString(),
+						entry.getValue().getCodeElement().getValueAsString(),
+						entry.getValue().getDisplayElement().getValueAsString());
+			}
+		}
+	}
+
 	protected void validate(T theRequest, RequestDetails theRequestDetails) {
 		FhirValidator validator = theRequestDetails.getServer().getFhirContext().newValidator();
 		if (myValidatorModules != null) {
@@ -283,7 +309,7 @@ abstract class BaseValidatingInterceptor<T> extends InterceptorAdapter {
 			validationResult = doValidate(validator, theRequest);
 		} catch (Exception e) {
 			if (myIgnoreValidatorExceptions) {
-				ourLog.warn("Validator threw an exception during validaiton", e);
+				ourLog.warn("Validator threw an exception during validation", e);
 				return;
 			}
 			if (e instanceof BaseServerResponseException) {
@@ -291,7 +317,7 @@ abstract class BaseValidatingInterceptor<T> extends InterceptorAdapter {
 			}
 			throw new InternalErrorException(e);
 		}
-		
+
 		if (myAddResponseIssueHeaderOnSeverity != null) {
 			boolean found = false;
 			for (SingleValidationMessage next : validationResult.getMessages()) {
@@ -340,6 +366,9 @@ abstract class BaseValidatingInterceptor<T> extends InterceptorAdapter {
 			}
 		}
 
+		if (myAddCodingsOnSeverities != null) {
+			addCodingForHighestSeverity(theRequestDetails, validationResult);
+		}
 	}
 
 	private static class MyLookup extends StrLookup<String> {
