@@ -171,7 +171,7 @@ public class HistoryMethodBinding extends BaseResourceReturningMethodBinding {
 		return new IBundleProvider() {
 			
 			@Override
-			public InstantDt getPublished() {
+			public IPrimitiveType<Date> getPublished() {
 				return resources.getPublished();
 			}
 			
@@ -202,7 +202,12 @@ public class HistoryMethodBinding extends BaseResourceReturningMethodBinding {
 
 			@Override
 			public Integer preferredPageSize() {
-				return null;
+				return resources.preferredPageSize();
+			}
+
+			@Override
+			public String getUuid() {
+				return resources.getUuid();
 			}
 		};
 	}

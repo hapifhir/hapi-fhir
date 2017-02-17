@@ -11,7 +11,7 @@ import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  * 
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -335,7 +335,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 						continue;
 					}
 				}
-				
+
 				Class<? extends IBaseResource> type = resourceDefinition.getImplementingClass();
 				String id = nextId.getIdPart();
 				if (StringUtils.isBlank(id)) {
@@ -677,18 +677,19 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 			theRequestDetails.getUserData().put(PROCESSING_SUB_REQUEST, Boolean.TRUE);
 		}
 	}
-	
+
 	protected void notifyInterceptors(RestOperationTypeEnum theOperationType, ActionRequestDetails theRequestDetails) {
 		if (theRequestDetails.getId() != null && theRequestDetails.getId().hasResourceType() && isNotBlank(theRequestDetails.getResourceType())) {
 			if (theRequestDetails.getId().getResourceType().equals(theRequestDetails.getResourceType()) == false) {
-				throw new InternalErrorException("Inconsistent server state - Resource types don't match: " + theRequestDetails.getId().getResourceType() + " / " + theRequestDetails.getResourceType());
+				throw new InternalErrorException(
+						"Inconsistent server state - Resource types don't match: " + theRequestDetails.getId().getResourceType() + " / " + theRequestDetails.getResourceType());
 			}
 		}
 
 		if (theRequestDetails.getUserData().get(PROCESSING_SUB_REQUEST) == Boolean.TRUE) {
 			theRequestDetails.notifyIncomingRequestPreHandled(theOperationType);
 		}
-		
+
 		List<IServerInterceptor> interceptors = getConfig().getInterceptors();
 		if (interceptors == null) {
 			return;
@@ -779,7 +780,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 				theEntity.setHasTags(true);
 			}
 		}
-		
+
 		ArrayList<ResourceTag> existingTags = new ArrayList<ResourceTag>();
 		if (theEntity.isHasTags()) {
 			existingTags.addAll(theEntity.getTags());
@@ -937,9 +938,9 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 	 * Subclasses may override to provide behaviour. Called when a resource has been inserted into the database for the first time.
 	 * 
 	 * @param theEntity
-	 *           The entity being updated (Do not modify the entity! Undefined behaviour will occur!)
+	 *            The entity being updated (Do not modify the entity! Undefined behaviour will occur!)
 	 * @param theTag
-	 *           The tag
+	 *            The tag
 	 * @return Returns <code>true</code> if the tag should be removed
 	 */
 	@SuppressWarnings("unused")
@@ -951,9 +952,9 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 	 * Subclasses may override to provide behaviour. Called when a pre-existing resource has been updated in the database
 	 * 
 	 * @param theEntity
-	 *           The resource
+	 *            The resource
 	 * @param theResource
-	 *           The resource being persisted
+	 *            The resource being persisted
 	 */
 	protected void postUpdate(ResourceTable theEntity, T theResource) {
 		// nothing
@@ -1009,9 +1010,9 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 	 * </p>
 	 * 
 	 * @param theEntity
-	 *           The entity being updated (Do not modify the entity! Undefined behaviour will occur!)
+	 *            The entity being updated (Do not modify the entity! Undefined behaviour will occur!)
 	 * @param theTag
-	 *           The tag
+	 *            The tag
 	 * @return Retturns <code>true</code> if the tag should be removed
 	 */
 	protected boolean shouldDroppedTagBeRemovedOnUpdate(ResourceTable theEntity, ResourceTag theTag) {
@@ -1072,7 +1073,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 				}
 			}
 		}
-		
+
 		IParser parser = theEntity.getEncoding().newParser(getContext(theEntity.getFhirVersion()));
 		R retVal;
 		try {
@@ -1241,7 +1242,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 				}
 
 				/*
-				 * Handle references within the resource that are match URLs, for example references like "Patient?identifier=foo". These match URLs are resolved and replaced with the ID of the matching
+				 * Handle references within the resource that are match URLs, for example references like "Patient?identifier=foo". These match URLs are resolved and replaced with the ID of the
+				 * matching
 				 * resource.
 				 */
 				if (myConfig.isAllowInlineMatchUrlReferences()) {
@@ -1437,7 +1439,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 			theEntity.setResourceLinks(links);
 
 			theEntity.toString();
-			
+
 		} // if thePerformIndexing
 
 		theEntity = myEntityManager.merge(theEntity);
@@ -1538,9 +1540,9 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 	 * "subsetted" tag and rejects resources which have it. Subclasses should call the superclass implementation to preserve this check.
 	 * 
 	 * @param theResource
-	 *           The resource that is about to be persisted
+	 *            The resource that is about to be persisted
 	 * @param theEntityToSave
-	 *           TODO
+	 *            TODO
 	 */
 	protected void validateResourceForStorage(T theResource, ResourceTable theEntityToSave) {
 		Object tag = null;
@@ -1747,7 +1749,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 				paramMap.add(nextParamName, param);
 				continue;
 			}
-			
+
 			if (Constants.PARAM_COUNT.equals(nextParamName)) {
 				if (paramList.size() > 0 && paramList.get(0).size() > 0) {
 					String intString = paramList.get(0).get(0);
@@ -1772,7 +1774,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 			} else {
 				RuntimeSearchParam paramDef = theCallingDao.getSearchParamByName(resourceDef, nextParamName);
 				if (paramDef == null) {
-					throw new InvalidRequestException("Failed to parse match URL[" + theMatchUrl + "] - Resource type " + resourceDef.getName() + " does not have a parameter with name: " + nextParamName);
+					throw new InvalidRequestException(
+							"Failed to parse match URL[" + theMatchUrl + "] - Resource type " + resourceDef.getName() + " does not have a parameter with name: " + nextParamName);
 				}
 
 				IQueryParameterAnd<?> param = MethodUtil.parseQueryParams(theContext, paramDef, nextParamName, paramList);

@@ -60,6 +60,11 @@ public class PagingPatientProvider implements IResourceProvider {
             // Typically this method just returns null
             return null;
          }
+
+			@Override
+			public String getUuid() {
+				return null;
+			}
       };
    }
 

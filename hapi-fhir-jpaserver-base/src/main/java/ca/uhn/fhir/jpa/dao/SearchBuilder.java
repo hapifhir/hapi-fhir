@@ -2309,6 +2309,11 @@ public class SearchBuilder {
 		public int size() {
 			return myPids.size();
 		}
+
+		@Override
+		public String getUuid() {
+			return null;
+		}
 	}
 
 }

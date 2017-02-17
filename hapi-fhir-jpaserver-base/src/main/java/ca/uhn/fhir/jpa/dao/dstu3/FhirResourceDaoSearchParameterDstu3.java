@@ -2,8 +2,6 @@ package ca.uhn.fhir.jpa.dao.dstu3;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
-import java.util.List;
-
 /*
  * #%L
  * HAPI FHIR JPA Server
@@ -34,20 +32,23 @@ import org.springframework.scheduling.annotation.Scheduled;
 import ca.uhn.fhir.jpa.dao.BaseSearchParamExtractor;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoSearchParameter;
 import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
+import ca.uhn.fhir.jpa.dao.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.entity.ResourceTable;
-import ca.uhn.fhir.jpa.util.DeleteConflict;
 import ca.uhn.fhir.parser.DataFormatException;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import ca.uhn.fhir.util.ElementUtil;
 
 public class FhirResourceDaoSearchParameterDstu3 extends FhirResourceDaoDstu3<SearchParameter> implements IFhirResourceDaoSearchParameter<SearchParameter> {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoSearchParameterDstu3.class);
 
 	@Autowired
+	private ISearchParamRegistry mySearchParamRegistry;
+
+	@Autowired
 	private IFhirSystemDao<Bundle, Meta> mySystemDao;
 
-	private void markAffectedResources(SearchParameter theResource) {
+	protected void markAffectedResources(SearchParameter theResource) {
 		if (theResource != null) {
 			String expression = theResource.getExpression();
 			String resourceType = expression.substring(0, expression.indexOf('.'));
@@ -55,8 +56,9 @@ public class FhirResourceDaoSearchParameterDstu3 extends FhirResourceDaoDstu3<Se
 			int updatedCount = myResourceTableDao.markResourcesOfTypeAsRequiringReindexing(resourceType);
 			ourLog.info("Marked {} resources for reindexing", updatedCount);
 		}
-	}
 
+		mySearchParamRegistry.forceRefresh();
+	}
 
 	/**
 	 * This method is called once per minute to perform any required re-indexing. During most passes this will
@@ -84,13 +86,6 @@ public class FhirResourceDaoSearchParameterDstu3 extends FhirResourceDaoDstu3<Se
 	}
 
 	@Override
-	protected void preDelete(SearchParameter theResourceToDelete) {
-		super.preDelete(theResourceToDelete);
-		markAffectedResources(theResourceToDelete);
-	}
-
-
-	@Override
 	protected void postPersist(ResourceTable theEntity, SearchParameter theResource) {
 		super.postPersist(theEntity, theResource);
 		markAffectedResources(theResource);
@@ -100,6 +95,12 @@ public class FhirResourceDaoSearchParameterDstu3 extends FhirResourceDaoDstu3<Se
 	protected void postUpdate(ResourceTable theEntity, SearchParameter theResource) {
 		super.postUpdate(theEntity, theResource);
 		markAffectedResources(theResource);
+	}
+
+	@Override
+	protected void preDelete(SearchParameter theResourceToDelete, ResourceTable theEntityToDelete) {
+		super.preDelete(theResourceToDelete, theEntityToDelete);
+		markAffectedResources(theResourceToDelete);
 	}
 
 	@Override
@@ -115,9 +116,18 @@ public class FhirResourceDaoSearchParameterDstu3 extends FhirResourceDaoDstu3<Se
 			throw new UnprocessableEntityException("SearchParameter.expression is missing");
 		}
 
+		if (ElementUtil.isEmpty(theResource.getBase())) {
+			throw new UnprocessableEntityException("SearchParameter.base is missing");
+		}
+
+		expression = expression.trim();
+		theResource.setExpression(expression);
+
 		String[] expressionSplit = BaseSearchParamExtractor.SPLIT.split(expression);
 		String allResourceName = null;
 		for (String nextPath : expressionSplit) {
+			nextPath = nextPath.trim();
+
 			int dotIdx = nextPath.indexOf('.');
 			if (dotIdx == -1) {
 				throw new UnprocessableEntityException("Invalid SearchParameter.expression value \"" + nextPath + "\". Must start with a resource name");

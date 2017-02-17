@@ -575,6 +575,11 @@ public class SearchDstu2Test {
 				public int size() {
 					return 0;
 				}
+
+				@Override
+				public String getUuid() {
+					return null;
+				}
 			};
 		}
 
