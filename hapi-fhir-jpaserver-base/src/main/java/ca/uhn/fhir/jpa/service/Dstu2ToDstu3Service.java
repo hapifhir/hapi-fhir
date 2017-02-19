@@ -3,13 +3,13 @@ package ca.uhn.fhir.jpa.service;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.util.MethodRequest;
 import ca.uhn.fhir.jpa.util.RestUtilities;
-import ca.uhn.fhir.model.dstu2.resource.*;
 import ca.uhn.fhir.model.dstu2.resource.BaseResource;
 import ca.uhn.fhir.model.dstu2.resource.Device;
 import ca.uhn.fhir.model.dstu2.resource.Location;
 import ca.uhn.fhir.model.dstu2.resource.MedicationAdministration;
 import ca.uhn.fhir.model.dstu2.resource.Observation;
 import ca.uhn.fhir.model.dstu2.resource.Subscription;
+import org.apache.http.entity.StringEntity;
 import org.hl7.fhir.converter.dstu2.formats.IParser;
 import org.hl7.fhir.converter.dstu2.model.Resource;
 import org.hl7.fhir.convertor.dstu3.model.Reference;
@@ -19,6 +19,8 @@ import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.exceptions.FHIRFormatError;
 import org.hl7.fhir.instance.model.IdType;
+import org.hl7.fhir.instance.model.api.IBaseCoding;
+import org.hl7.fhir.instance.model.api.IBaseMetaType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,9 +53,13 @@ public class Dstu2ToDstu3Service {
     private IGPackConverter102 packConverter102 = new IGPackConverter102();
     private VersionConvertor_10_20 fhirConverter = new VersionConvertor_10_20(packConverter102);
 
+    public static final String HMS_CODESYSTEM = "http://cognitivemedicine.com/hms";
+    public static final String HMS_CODE = "HMS-FHIR";
+
     //temporaily hardcoded
     //public static final String BASE_URL = "http://cognitive.cds.hspconsortium.org/baseDstu3";
-    public static final String BASE_URL = "http://192.168.1.186/baseDstu3";
+//    public static final String BASE_URL = "http://192.168.1.186/baseDstu3";
+    public static final String BASE_URL = "http://64.87.15.70:9091/baseDstu3";
 
     public void onCreateObservation(Observation observation) throws FHIRException, IOException {
         String json = getAsFhirString(observation);
@@ -80,6 +86,10 @@ public class Dstu2ToDstu3Service {
         }
 
         LoincService.checkLoincCodes(observationDstu3);
+        IBaseMetaType meta = observationDstu3.getMeta();
+        IBaseCoding tag = meta.addTag();
+        tag.setCode(HMS_CODE);
+        tag.setSystem(HMS_CODESYSTEM);
 
         //temporarily set the device to null until we can add devices to DSTU3
         observationDstu3.setDevice(null);
@@ -92,9 +102,23 @@ public class Dstu2ToDstu3Service {
         String json = getAsFhirString(medicationAdministration);
         logger.info(json);
         org.hl7.fhir.convertor.dstu3.model.MedicationAdministration medAdmDstu3 = ConvertorService.convertMedicationAdministration(json);
+        //temporarily set the device to null until we can add devices to DSTU3
+        medAdmDstu3.setDevice(null);
+        IBaseMetaType meta = medAdmDstu3.getMeta();
+        IBaseCoding tag = meta.addTag();
+        tag.setCode(HMS_CODE);
+        tag.setSystem(HMS_CODESYSTEM);
 
-        //send the MedicationAdministration to the DSTU3 server
-        String response = RestUtilities.getResponse(BASE_URL + "/MedicationAdministration", medAdmDstu3, MethodRequest.POST);
+        //can send the MedicationAdministration to the DSTU3 server, but the patient id does not get included even though its in the object
+        //String response = RestUtilities.getResponse(BASE_URL + "/MedicationAdministration", medAdmDstu3, MethodRequest.POST);
+
+        String stringObject = RestUtilities.getAsDstu3JsonString(medAdmDstu3);
+        //todo must fix code that converts the patient into a subject field, but must be patient
+        stringObject = stringObject.replace("\"subject\": {", "\"patient\": {");
+        logger.info(stringObject);
+        StringEntity stringEntity = new StringEntity(stringObject);
+        String response = RestUtilities.getResponse(BASE_URL + "/MedicationAdministration", stringEntity, MethodRequest.POST);
+
 
         System.out.println("...");
     }

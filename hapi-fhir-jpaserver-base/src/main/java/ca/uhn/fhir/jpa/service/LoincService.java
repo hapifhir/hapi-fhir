@@ -13,15 +13,20 @@ public class LoincService {
     private static final String SYSTOLIC_CODE = "8480-6";
     private static final String DIASTOLIC_CODE = "8462-4";
     private static final String MEAN_CODE = "8478-0";
+    private static final String BLOOD_PRESSURE_CODE = "55284-4";
 
     private static final String ISO_SYSTOLIC_CODE = "150021";
     private static final String ISO_DIASTOLIC_CODE = "150022";
     private static final String ISO_MEAN_CODE = "150023";
 
+
     private static final String RTMMS_SYSTEM = "https://rtmms.nist.gov";
     private static final String ISO_SYSTEM = "urn:iso:std:iso:11073:10101";
 
     public static void checkLoincCodes(Observation observationDstu3) throws FHIRException {
+
+
+
         List<Observation.ObservationComponentComponent> componentList = observationDstu3.getComponent();
         if (componentList != null && !componentList.isEmpty()) {
             for (Observation.ObservationComponentComponent component : componentList) {
@@ -73,13 +78,46 @@ public class LoincService {
                             }
                             if (loincCode != null) {
                                 codingList.add(loincCode);
+                                checkLoincBloodPressure(observationDstu3);
                             }
+                            //todo check to see if there is a Loinc observation component code of a blood pressure type,
+                            //but no observation code of Loinc blood pressure
                         }
                     }
                 }
 
             }
         }
+    }
+
+    public static void checkLoincBloodPressure(Observation observationDstu3){
+        //add missing loinc blood pressure code
+        if (!observationDstu3.hasCode()) {
+            CodeableConcept code = new CodeableConcept();
+            code.addCoding(getBloodPressureCode());
+            observationDstu3.setCode(code);
+        } else {
+            //check if there is an existing code, but not a loinc blood pressure code
+            CodeableConcept code = observationDstu3.getCode();
+            boolean hasLoincBloodPressure = false;
+            for (Coding coding : code.getCoding()) {
+                if (LOINC_SYSTEM.equals(coding.getSystem())){
+                    hasLoincBloodPressure = true;
+                }
+            }
+            if (!hasLoincBloodPressure) {
+                code.addCoding(getBloodPressureCode());
+            }
+        }
+    }
+
+    public static Coding getBloodPressureCode() {
+        Coding loincCode = new Coding();
+        loincCode.setSystem(LOINC_SYSTEM);
+        loincCode.setCode(BLOOD_PRESSURE_CODE);
+        loincCode.setDisplay("Blood Pressure");
+
+        return loincCode;
     }
 
     public static Coding getSystolicCode() {
