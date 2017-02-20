@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.service;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.util.MethodRequest;
 import ca.uhn.fhir.jpa.util.RestUtilities;
+import ca.uhn.fhir.model.dstu2.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu2.resource.BaseResource;
 import ca.uhn.fhir.model.dstu2.resource.Device;
 import ca.uhn.fhir.model.dstu2.resource.Location;
@@ -108,6 +109,17 @@ public class Dstu2ToDstu3Service {
         IBaseCoding tag = meta.addTag();
         tag.setCode(HMS_CODE);
         tag.setSystem(HMS_CODESYSTEM);
+
+        System.out.println(medAdmDstu3.getSubject().getReference());
+
+        Reference reference = new Reference();
+        //todo change to query
+        if (medAdmDstu3.getSubject().getReference().equals("Patient/PatientId-1234")) {
+            reference.setReference("MedicationRequest/medicationrequest-labet");
+        } else if (medAdmDstu3.getSubject().getReference().equals("Patient/PatientId-1235")) {
+            reference.setReference("MedicationRequest/medicationrequest-labet2");
+        }
+        medAdmDstu3.setPrescription(reference);
 
         //can send the MedicationAdministration to the DSTU3 server, but the patient id does not get included even though its in the object
         //String response = RestUtilities.getResponse(BASE_URL + "/MedicationAdministration", medAdmDstu3, MethodRequest.POST);
