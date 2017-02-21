@@ -21,8 +21,6 @@ package ca.uhn.fhir.rest.server.interceptor;
  */
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.api.TagList;
-import ca.uhn.fhir.model.base.composite.BaseCodingDt;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.method.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
@@ -36,9 +34,7 @@ import org.apache.commons.lang3.text.StrSubstitutor;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -68,7 +64,6 @@ abstract class BaseValidatingInterceptor<T> extends InterceptorAdapter {
 	private String myResponseIssueHeaderValue = DEFAULT_RESPONSE_HEADER_VALUE;
 	private String myResponseIssueHeaderValueNoIssues = null;
 	private String myResponseOutcomeHeaderName = provideDefaultResponseHeaderName();
-	private HashMap<ResultSeverityEnum, BaseCodingDt> myAddCodingsOnSeverities = null;
 
 	private List<IValidatorModule> myValidatorModules;
 
@@ -266,31 +261,11 @@ abstract class BaseValidatingInterceptor<T> extends InterceptorAdapter {
 		myValidatorModules = theValidatorModules;
 	}
 
-	public void setCodingsForSeverities(HashMap<ResultSeverityEnum, BaseCodingDt> theAddCodingsForSeverities) {
-		myAddCodingsOnSeverities = theAddCodingsForSeverities != null ? theAddCodingsForSeverities : null;
-	}
-
-	public Map<ResultSeverityEnum, BaseCodingDt> getCodingsForSeverities() { return myAddCodingsOnSeverities; }
-
-	private void addCodingForHighestSeverity(RequestDetails theRequestDetails, ValidationResult theValidationResult) {
-		int highestSeverity = 0;
-		for (SingleValidationMessage next : theValidationResult.getMessages()) {
-			if (next.getSeverity().ordinal() > highestSeverity) {
-				highestSeverity = next.getSeverity().ordinal();
-			}
-		}
-		for (Map.Entry<ResultSeverityEnum, BaseCodingDt> entry : myAddCodingsOnSeverities.entrySet()) {
-			if (entry.getKey().ordinal() == highestSeverity) {
-				// TODO: entry.getValue() to Resource
-				TagList tags = new TagList();
-//				ResourceMetadataKeyEnum.TAG_LIST.put(???, tags);
-				tags.addTag(
-						entry.getValue().getSystemElement().getValueAsString(),
-						entry.getValue().getCodeElement().getValueAsString(),
-						entry.getValue().getDisplayElement().getValueAsString());
-			}
-		}
-	}
+	/**
+	 * Hook for subclasses (e.g. add a tag (coding) to an incoming resource when a given severity appears in the
+	 * ValidationResult).
+	 */
+	protected void postProcessResult(RequestDetails theRequestDetails, ValidationResult theValidationResult) { }
 
 	protected void validate(T theRequest, RequestDetails theRequestDetails) {
 		FhirValidator validator = theRequestDetails.getServer().getFhirContext().newValidator();
@@ -366,9 +341,7 @@ abstract class BaseValidatingInterceptor<T> extends InterceptorAdapter {
 			}
 		}
 
-		if (myAddCodingsOnSeverities != null) {
-			addCodingForHighestSeverity(theRequestDetails, validationResult);
-		}
+		postProcessResult(theRequestDetails, validationResult);
 	}
 
 	private static class MyLookup extends StrLookup<String> {
