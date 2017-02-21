@@ -94,6 +94,7 @@ public class Dstu2ToDstu3Service {
 
         //temporarily set the device to null until we can add devices to DSTU3
         observationDstu3.setDevice(null);
+        observationDstu3.setRelated(null);
 
         //send the observation to the DSTU3 server
         String response = RestUtilities.getResponse(BASE_URL + "/Observation", observationDstu3, MethodRequest.POST);
