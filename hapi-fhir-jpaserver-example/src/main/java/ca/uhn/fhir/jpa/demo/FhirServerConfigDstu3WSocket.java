@@ -46,6 +46,7 @@ import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry
 import org.springframework.web.socket.handler.PerConnectionWebSocketHandler;
 
 import javax.persistence.EntityManagerFactory;
+import javax.persistence.PersistenceException;
 import javax.sql.DataSource;
 import java.util.List;
 import java.util.Properties;
@@ -135,6 +136,8 @@ public class FhirServerConfigDstu3WSocket extends BaseJavaConfigDstu3 implements
 		try {
 			RestHookSubscriptionDstu3Interceptor restHook = SpringObjectCaster.getTargetObject(restHookInterceptor, RestHookSubscriptionDstu3Interceptor.class);
 			restHook.initSubscriptions();
+		}catch(PersistenceException e){
+			throw new RuntimeException("Persistence error in setting up resthook subscriptions:" + e.getMessage());
 		}catch(Exception e){
 			throw new RuntimeException("Unable to cast from proxy");
 		}

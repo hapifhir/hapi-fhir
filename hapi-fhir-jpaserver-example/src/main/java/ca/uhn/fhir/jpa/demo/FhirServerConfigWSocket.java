@@ -115,7 +115,7 @@ public class FhirServerConfigWSocket extends BaseJavaConfigDstu2 implements WebS
 			RestHookSubscriptionDstu2Interceptor restHook = SpringObjectCaster.getTargetObject(restHookInterceptor, RestHookSubscriptionDstu2Interceptor.class);
 			restHook.initSubscriptions();
 		}catch(PersistenceException e){
-			System.out.println("...");
+			throw new RuntimeException("Persistence error in setting up resthook subscriptions:" + e.getMessage());
 		}catch(Exception e){
 			throw new RuntimeException("Unable to cast from proxy");
 		}

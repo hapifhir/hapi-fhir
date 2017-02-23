@@ -62,12 +62,12 @@ public class RestHookSubscriptionDstu2Interceptor extends InterceptorAdapter imp
 
     @Autowired
     @Qualifier("mySubscriptionDaoDstu2")
-    protected IFhirResourceDao<Subscription> mySubscriptionDao;
+    private IFhirResourceDao<Subscription> mySubscriptionDao;
 
     private FhirResourceDaoSubscriptionDstu2 myResourceSubscriptionDao;
 
     private static final Logger logger = LoggerFactory.getLogger(RestHookSubscriptionDstu2Interceptor.class);
-    private List<Subscription> restHookSubscriptions = new ArrayList<Subscription>();
+    private final List<Subscription> restHookSubscriptions = new ArrayList<Subscription>();
 
     @PostConstruct
     public void postConstruct(){
@@ -162,6 +162,10 @@ public class RestHookSubscriptionDstu2Interceptor extends InterceptorAdapter imp
         }
     }
 
+    /**
+     * Remove subscription from cache
+     * @param subscriptionId
+     */
     private void removeLocalSubscription(String subscriptionId){
         Subscription localSubscription = getLocalSubscription(subscriptionId);
         if(localSubscription != null) {
@@ -172,6 +176,11 @@ public class RestHookSubscriptionDstu2Interceptor extends InterceptorAdapter imp
         }
     }
 
+    /**
+     * Get subscription from cache
+     * @param id
+     * @return
+     */
     private Subscription getLocalSubscription(String id){
         if(id != null && !id.trim().isEmpty()) {
             int size = restHookSubscriptions.size();
@@ -187,6 +196,11 @@ public class RestHookSubscriptionDstu2Interceptor extends InterceptorAdapter imp
         return null;
     }
 
+    /**
+     * Check subscriptions
+     * @param idType
+     * @param resourceType
+     */
     private void checkSubscriptions(IIdType idType, String resourceType) {
         //handle any object besides subscription, such as a new observation
         for (Subscription subscription : restHookSubscriptions) {

@@ -56,12 +56,12 @@ public class RestHookSubscriptionDstu3Interceptor extends InterceptorAdapter imp
 
     @Autowired
     @Qualifier("mySubscriptionDaoDstu3")
-    protected IFhirResourceDao<Subscription> mySubscriptionDao;
+    private IFhirResourceDao<Subscription> mySubscriptionDao;
 
     private FhirResourceDaoSubscriptionDstu3 myResourceSubscriptionDao;
 
     private static final Logger logger = LoggerFactory.getLogger(RestHookSubscriptionDstu3Interceptor.class);
-    private List<Subscription> restHookSubscriptions = new ArrayList<Subscription>();
+    private final List<Subscription> restHookSubscriptions = new ArrayList<Subscription>();
 
     @PostConstruct
     public void postConstruct(){
@@ -72,6 +72,9 @@ public class RestHookSubscriptionDstu3Interceptor extends InterceptorAdapter imp
         }
     }
 
+    /**
+     * Read the existing subscriptions from the database
+     */
     public void initSubscriptions(){
         SearchParameterMap map = new SearchParameterMap();
         map.add(Subscription.SP_TYPE, new TokenParam(null, Subscription.SubscriptionChannelType.RESTHOOK.toCode()));
@@ -110,6 +113,11 @@ public class RestHookSubscriptionDstu3Interceptor extends InterceptorAdapter imp
         }
     }
 
+    /**
+     * Check subscriptions
+     * @param idType
+     * @param resourceType
+     */
     private void checkSubscriptions(IIdType idType, String resourceType) {
         //handle any object besides subscription, such as a new observation
         for (Subscription subscription : restHookSubscriptions) {
@@ -169,6 +177,12 @@ public class RestHookSubscriptionDstu3Interceptor extends InterceptorAdapter imp
         }
     }
 
+    /**
+     * Checks for updates to subscriptions or if an update to a resource matches
+     * a rest-hook subscription
+     * @param theDetails The request details
+     * @param theResourceTable The actual updated entity
+     */
     @Override
     public void resourceUpdated(ActionRequestDetails theDetails, ResourceTable theResourceTable) {
         String resourceType = theDetails.getResourceType();
@@ -191,6 +205,11 @@ public class RestHookSubscriptionDstu3Interceptor extends InterceptorAdapter imp
         }
     }
 
+    /**
+     * Checks to remove a rest-hook subscription
+     * @param theDetails The request details
+     * @param theResourceTable The actual updated entity
+     */
     @Override
     public void resourceDeleted(ActionRequestDetails theDetails, ResourceTable theResourceTable) {
         logger.info("resource removed type: " + theDetails.getResourceType());
@@ -201,7 +220,11 @@ public class RestHookSubscriptionDstu3Interceptor extends InterceptorAdapter imp
         }
     }
 
-    public void removeLocalSubscription(String subscriptionId){
+    /**
+     * Remove subscription from cache
+     * @param subscriptionId
+     */
+    private void removeLocalSubscription(String subscriptionId){
         Subscription localSubscription = getLocalSubscription(subscriptionId);
         if(localSubscription != null) {
             restHookSubscriptions.remove(localSubscription);
@@ -211,7 +234,12 @@ public class RestHookSubscriptionDstu3Interceptor extends InterceptorAdapter imp
         }
     }
 
-    public Subscription getLocalSubscription(String id){
+    /**
+     * Get subscription from cache
+     * @param id
+     * @return
+     */
+    private Subscription getLocalSubscription(String id){
         if(id != null && !id.trim().isEmpty()) {
             int size = restHookSubscriptions.size();
             if (size > 0) {

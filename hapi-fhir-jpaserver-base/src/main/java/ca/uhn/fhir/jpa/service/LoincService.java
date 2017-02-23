@@ -23,29 +23,31 @@ public class LoincService {
     private static final String RTMMS_SYSTEM = "https://rtmms.nist.gov";
     private static final String ISO_SYSTEM = "urn:iso:std:iso:11073:10101";
 
-    public static void checkLoincCodes(Observation observationDstu3) throws FHIRException {
-
-
-
+    /**
+     * Check and assign loinc codes to {@link Observation}
+     *
+     * @param observationDstu3
+     */
+    public static void checkLoincCodes(Observation observationDstu3) {
         List<Observation.ObservationComponentComponent> componentList = observationDstu3.getComponent();
         if (componentList != null && !componentList.isEmpty()) {
             for (Observation.ObservationComponentComponent component : componentList) {
                 CodeableConcept codeableConcept = component.getCode();
                 if (codeableConcept != null) {
-                    List<Coding> codingList = codeableConcept.getCoding();
-                    if (codingList != null && !codingList.isEmpty()) {
+                    List<Coding> componentCodingList = codeableConcept.getCoding();
+                    if (componentCodingList != null && !componentCodingList.isEmpty()) {
 
-                        boolean hasLoinc = false;
-                        for (Coding coding : codingList) {
+                        boolean hasLoincSystemComponentCode = false;
+                        for (Coding coding : componentCodingList) {
                             if (LOINC_SYSTEM.equals(coding.getSystem())) {
-                                hasLoinc = true;
+                                hasLoincSystemComponentCode = true;
                                 break;
                             }
                         }
 
-                        if (!hasLoinc) {
+                        if (!hasLoincSystemComponentCode) {
                             Coding loincCode = null;
-                            for (Coding coding : codingList) {
+                            for (Coding coding : componentCodingList) {
                                 if (RTMMS_SYSTEM.equals(coding.getSystem()) && ISO_SYSTOLIC_CODE.equals(coding.getCode())) {
                                     loincCode = getSystolicCode();
                                     break;
@@ -77,20 +79,44 @@ public class LoincService {
                                 }
                             }
                             if (loincCode != null) {
-                                codingList.add(loincCode);
-                                checkLoincBloodPressure(observationDstu3);
+                                componentCodingList.add(loincCode);
+                                addLoincBloodPressureObservationCodeIfDoesNotExist(observationDstu3);
                             }
-                            //todo check to see if there is a Loinc observation component code of a blood pressure type,
-                            //but no observation code of Loinc blood pressure
+
+                        } else {
+                            //check to see if there is a Loinc code in the observation.component.code of a blood pressure type,
+                            //but no Loinc code in the observation.code
+                            boolean hasLoincBloodPressureComponentCode = false;
+                            for (Coding coding : componentCodingList) {
+                                if (LOINC_SYSTEM.equals(coding.getSystem()) && MEAN_CODE.equals(coding.getCode())) {
+                                    hasLoincBloodPressureComponentCode = true;
+                                    break;
+                                }
+                                if (LOINC_SYSTEM.equals(coding.getSystem()) && SYSTOLIC_CODE.equals(coding.getCode())) {
+                                    hasLoincBloodPressureComponentCode = true;
+                                    break;
+                                }
+                                if (LOINC_SYSTEM.equals(coding.getSystem()) && DIASTOLIC_CODE.equals(coding.getCode())) {
+                                    hasLoincBloodPressureComponentCode = true;
+                                    break;
+                                }
+                            }
+                            if (hasLoincBloodPressureComponentCode) {
+                                addLoincBloodPressureObservationCodeIfDoesNotExist(observationDstu3);
+                            }
                         }
                     }
                 }
-
             }
         }
     }
 
-    public static void checkLoincBloodPressure(Observation observationDstu3){
+    /**
+     * Assign loinc blood pressure
+     *
+     * @param observationDstu3
+     */
+    private static void addLoincBloodPressureObservationCodeIfDoesNotExist(Observation observationDstu3) {
         //add missing loinc blood pressure code
         if (!observationDstu3.hasCode()) {
             CodeableConcept code = new CodeableConcept();
@@ -101,7 +127,7 @@ public class LoincService {
             CodeableConcept code = observationDstu3.getCode();
             boolean hasLoincBloodPressure = false;
             for (Coding coding : code.getCoding()) {
-                if (LOINC_SYSTEM.equals(coding.getSystem())){
+                if (LOINC_SYSTEM.equals(coding.getSystem())) {
                     hasLoincBloodPressure = true;
                 }
             }
@@ -111,7 +137,12 @@ public class LoincService {
         }
     }
 
-    public static Coding getBloodPressureCode() {
+    /**
+     * Get blood pressure coding
+     *
+     * @return
+     */
+    private static Coding getBloodPressureCode() {
         Coding loincCode = new Coding();
         loincCode.setSystem(LOINC_SYSTEM);
         loincCode.setCode(BLOOD_PRESSURE_CODE);
@@ -120,7 +151,12 @@ public class LoincService {
         return loincCode;
     }
 
-    public static Coding getSystolicCode() {
+    /**
+     * Get systolic blood pressure coding
+     *
+     * @return
+     */
+    private static Coding getSystolicCode() {
         Coding loincCode = new Coding();
         loincCode.setSystem(LOINC_SYSTEM);
         loincCode.setCode(SYSTOLIC_CODE);
@@ -129,7 +165,12 @@ public class LoincService {
         return loincCode;
     }
 
-    public static Coding getDiastolicCode() {
+    /**
+     * Get diastolic blood pressure coding
+     *
+     * @return
+     */
+    private static Coding getDiastolicCode() {
         Coding loincCode = new Coding();
         loincCode.setSystem(LOINC_SYSTEM);
         loincCode.setCode(DIASTOLIC_CODE);
@@ -138,7 +179,12 @@ public class LoincService {
         return loincCode;
     }
 
-    public static Coding getMeanCode() {
+    /**
+     * Get mean blood pressure coding
+     *
+     * @return
+     */
+    private static Coding getMeanCode() {
         Coding loincCode = new Coding();
         loincCode.setSystem(LOINC_SYSTEM);
         loincCode.setCode(MEAN_CODE);
