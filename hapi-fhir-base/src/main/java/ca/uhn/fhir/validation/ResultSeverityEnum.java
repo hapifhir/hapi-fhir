@@ -68,4 +68,12 @@ public enum ResultSeverityEnum {
 		return ourValues.get(theCode);
 	}
 
+	/**
+	 * Convert from Enum ordinal to Enum type.
+	 *
+	 * Usage:
+	 *
+	 * <code>ResultSeverityEnum resultSeverityEnum = ResultSeverityEnum.values[ordinal];</code>
+	 */
+	public static final ResultSeverityEnum values[] = values();
 }
