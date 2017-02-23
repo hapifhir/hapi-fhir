@@ -72,9 +72,9 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
 			codeSystems = new HashMap<String, CodeSystem>();
 			valueSets = new HashMap<String, ValueSet>();
 
-			loadCodeSystems(theContext, codeSystems, valueSets, "/org/hl7/fhir/instance/model/dstu2016may/valueset/valuesets.xml");
-			loadCodeSystems(theContext, codeSystems, valueSets, "/org/hl7/fhir/instance/model/dstu2016may/valueset/v2-tables.xml");
-			loadCodeSystems(theContext, codeSystems, valueSets, "/org/hl7/fhir/instance/model/dstu2016may/valueset/v3-codesystems.xml");
+			loadCodeSystems(theContext, codeSystems, valueSets, "/org/hl7/fhir/dstu2016may/valueset/valuesets.xml");
+			loadCodeSystems(theContext, codeSystems, valueSets, "/org/hl7/fhir/dstu2016may/valueset/v2-tables.xml");
+			loadCodeSystems(theContext, codeSystems, valueSets, "/org/hl7/fhir/dstu2016may/valueset/v3-codesystems.xml");
 
 			myCodeSystems = codeSystems;
 			myValueSets = valueSets;
@@ -210,9 +210,9 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
 		if (structureDefinitions == null) {
 			structureDefinitions = new HashMap<String, StructureDefinition>();
 
-			loadStructureDefinitions(theContext, structureDefinitions, "/org/hl7/fhir/instance/model/dstu2016may/profile/profiles-resources.xml");
-			loadStructureDefinitions(theContext, structureDefinitions, "/org/hl7/fhir/instance/model/dstu2016may/profile/profiles-types.xml");
-			loadStructureDefinitions(theContext, structureDefinitions, "/org/hl7/fhir/instance/model/dstu2016may/profile/profiles-others.xml");
+			loadStructureDefinitions(theContext, structureDefinitions, "/org/hl7/fhir/dstu2016may/profile/profiles-resources.xml");
+			loadStructureDefinitions(theContext, structureDefinitions, "/org/hl7/fhir/dstu2016may/profile/profiles-types.xml");
+			loadStructureDefinitions(theContext, structureDefinitions, "/org/hl7/fhir/dstu2016may/profile/profiles-others.xml");
 
 			myStructureDefinitions = structureDefinitions;
 		}
