@@ -1615,7 +1615,20 @@ public class XmlUtil {
 			 */
 			try {
 				Class.forName("com.ctc.wstx.stax.WstxInputFactory");
-				if (inputFactory instanceof com.ctc.wstx.stax.WstxInputFactory) {
+				boolean isWoodstox = inputFactory instanceof com.ctc.wstx.stax.WstxInputFactory;
+				if ( !isWoodstox )
+				{
+					// Check if implementation is woodstox by property since instanceof check does not work if running in JBoss
+					try
+					{
+						isWoodstox = inputFactory.getProperty( "org.codehaus.stax2.implVersion" ) != null;
+					}
+					catch ( IllegalArgumentException e )
+					{
+						// ignore
+					}
+				}
+				if (isWoodstox) {
 					// inputFactory.setProperty(WstxInputFactory.IS_REPLACING_ENTITY_REFERENCES, false);
 					inputFactory.setProperty(WstxInputProperties.P_UNDECLARED_ENTITY_RESOLVER, XML_RESOLVER);
 					try {
