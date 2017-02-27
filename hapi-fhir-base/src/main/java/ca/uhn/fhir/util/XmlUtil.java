@@ -1623,7 +1623,7 @@ public class XmlUtil {
 					{
 						isWoodstox = inputFactory.getProperty( "org.codehaus.stax2.implVersion" ) != null;
 					}
-					catch ( IllegalArgumentException e )
+					catch ( Exception e )
 					{
 						// ignore
 					}
