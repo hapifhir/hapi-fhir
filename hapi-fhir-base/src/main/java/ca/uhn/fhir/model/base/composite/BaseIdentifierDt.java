@@ -33,6 +33,8 @@ import ca.uhn.fhir.rest.param.StringParam;
 
 public abstract class BaseIdentifierDt extends BaseIdentifiableElement implements ICompositeDatatype, IQueryParameterType {
 
+	private static final long serialVersionUID = 4400972469749953077L;
+
 	@Override
 	public String getQueryParameterQualifier() {
 		return null;
@@ -61,13 +63,12 @@ public abstract class BaseIdentifierDt extends BaseIdentifiableElement implement
 	 */
 	@Override
 	public String getValueAsQueryToken(FhirContext theContext) {
-			UriDt system = (UriDt) getSystemElement();
-			StringDt value = (StringDt) getValueElement();
-			if (system.getValueAsString() != null) {
-				return ParameterUtil.escape(StringUtils.defaultString(system.getValueAsString())) + '|' + ParameterUtil.escape(value.getValueAsString());
-			} else {
-				return ParameterUtil.escape(value.getValueAsString());
-			}
+		UriDt system = getSystemElement();
+		StringDt value = getValueElement();
+		if (system.getValueAsString() != null) {
+			return ParameterUtil.escape(StringUtils.defaultString(system.getValueAsString())) + '|' + ParameterUtil.escape(value.getValueAsString());
+		}
+		return ParameterUtil.escape(value.getValueAsString());
 	}
 
 	/**

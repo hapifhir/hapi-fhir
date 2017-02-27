@@ -112,16 +112,15 @@ public class TransactionMethodBinding extends BaseResourceReturningMethodBinding
 		if (theArgs[myTransactionParamIndex] instanceof Bundle) {
 			Bundle bundle = (Bundle) theArgs[myTransactionParamIndex];
 			return createTransactionInvocation(bundle, context);
-		} else {
-			@SuppressWarnings("unchecked")
-			List<IBaseResource> resources = (List<IBaseResource>) theArgs[myTransactionParamIndex];
-			return createTransactionInvocation(resources, context);
 		}
+		@SuppressWarnings("unchecked")
+		List<IBaseResource> resources = (List<IBaseResource>) theArgs[myTransactionParamIndex];
+		return createTransactionInvocation(resources, context);
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public Object invokeServer(IRestfulServer theServer, RequestDetails theRequest, Object[] theMethodParams) throws InvalidRequestException, InternalErrorException {
+	public Object invokeServer(IRestfulServer<?> theServer, RequestDetails theRequest, Object[] theMethodParams) throws InvalidRequestException, InternalErrorException {
 
 		/*
 		 * The design of HAPI's transaction method for DSTU1 support assumed that a transaction was just an update on a

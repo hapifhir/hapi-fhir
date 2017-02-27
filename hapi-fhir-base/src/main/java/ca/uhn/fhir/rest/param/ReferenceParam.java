@@ -29,11 +29,10 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.util.CoverageIgnore;
 
-public class ReferenceParam extends BaseParam implements IQueryParameterType {
+public class ReferenceParam extends BaseParam /*implements IQueryParameterType*/ {
 
 	private String myChain;
 
@@ -93,9 +92,8 @@ public class ReferenceParam extends BaseParam implements IQueryParameterType {
 	String doGetValueAsQueryToken(FhirContext theContext) {
 		if (isBlank(myId.getResourceType())) {
 			return myId.getValue(); // e.g. urn:asdjd or 123 or cid:wieiuru or #1
-		} else {
-			return myId.getIdPart();
 		}
+		return myId.getIdPart();
 	}
 
 	@Override

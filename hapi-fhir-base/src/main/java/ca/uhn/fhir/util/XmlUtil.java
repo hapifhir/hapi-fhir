@@ -1694,9 +1694,8 @@ public class XmlUtil {
 		if (ourNextException != null) {
 			if (ourNextException instanceof FactoryConfigurationError) {
 				throw ((FactoryConfigurationError)ourNextException);
-			} else {
-				throw (XMLStreamException)ourNextException;
 			}
+			throw (XMLStreamException)ourNextException;
 		}
 	}
 

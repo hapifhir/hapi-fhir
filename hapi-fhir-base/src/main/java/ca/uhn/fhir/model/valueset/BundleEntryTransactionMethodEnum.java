@@ -97,6 +97,9 @@ public enum BundleEntryTransactionMethodEnum {
 	 * Converts codes to their respective enumerated values
 	 */
 	public static final IValueSetEnumBinder<BundleEntryTransactionMethodEnum> VALUESET_BINDER = new IValueSetEnumBinder<BundleEntryTransactionMethodEnum>() {
+
+		private static final long serialVersionUID = 7569681479045998433L;
+
 		@Override
 		public String toCodeString(BundleEntryTransactionMethodEnum theEnum) {
 			return theEnum.getCode();

@@ -152,6 +152,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
       throw new ConfigurationException(e);
     }
 
+    v.setShouldCheckForIdPresence(false);
     v.setBestPracticeWarningLevel(myBestPracticeWarningLevel);
     v.setAnyExtensionsAllowed(true);
     v.setRequireResourceId(false);

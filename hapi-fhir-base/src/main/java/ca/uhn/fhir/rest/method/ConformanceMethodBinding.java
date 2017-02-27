@@ -93,9 +93,8 @@ public class ConformanceMethodBinding extends BaseResourceReturningMethodBinding
 		if ("metadata".equals(theRequest.getOperation())) {
 			if (theRequest.getRequestType() == RequestTypeEnum.GET) {
 				return true;
-			} else {
-				throw new MethodNotAllowedException("/metadata request must use HTTP GET", RequestTypeEnum.GET);
 			}
+			throw new MethodNotAllowedException("/metadata request must use HTTP GET", RequestTypeEnum.GET);
 		}
 
 		return false;

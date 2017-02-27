@@ -114,9 +114,9 @@ public class RuntimeChildDeclaredExtensionDefinition extends RuntimeChildChoiceD
 		if (retVal == null) {
 			if (myModifier) {
 				return "modifierExtension";
-			} else {
-				return "extension";
 			}
+			return "extension";
+
 		}
 		return retVal;
 	}

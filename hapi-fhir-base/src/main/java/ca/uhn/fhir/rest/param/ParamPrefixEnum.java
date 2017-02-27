@@ -147,9 +147,8 @@ public enum ParamPrefixEnum {
 	public String getValueForContext(FhirContext theContext) {
 		if (theContext.getVersion().getVersion() == FhirVersionEnum.DSTU1) {
 			return getDstu1Value();
-		} else {
-			return getValue();
 		}
+		return getValue();
 	}
 
 	/**

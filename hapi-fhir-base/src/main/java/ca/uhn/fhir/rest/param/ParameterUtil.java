@@ -139,9 +139,8 @@ public class ParameterUtil {
 	public static String escapeWithDefault(Object theValue) {
 		if (theValue == null) {
 			return "";
-		} else {
-			return escape(theValue.toString());
 		}
+		return escape(theValue.toString());
 	}
 
 	/**

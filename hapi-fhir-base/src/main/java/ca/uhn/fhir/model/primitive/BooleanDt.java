@@ -60,9 +60,8 @@ public class BooleanDt extends BasePrimitive<Boolean> implements IBaseBooleanDat
 	protected String encode(Boolean theValue) {
 		if (Boolean.TRUE.equals(theValue)) {
 			return "true";
-		} else {
-			return "false";
 		}
+		return "false";
 	}
 
 }

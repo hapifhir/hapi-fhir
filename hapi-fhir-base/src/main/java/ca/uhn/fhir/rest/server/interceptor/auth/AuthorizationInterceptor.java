@@ -44,7 +44,6 @@ import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
 import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
 import ca.uhn.fhir.rest.server.interceptor.IServerOperationInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.InterceptorAdapter;
-import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.CoverageIgnore;
 
 /**
@@ -209,9 +208,8 @@ public class AuthorizationInterceptor extends InterceptorAdapter implements ISer
 		if (decision.getDecidingRule() != null) {
 			String ruleName = defaultString(decision.getDecidingRule().getName(), "(unnamed rule)");
 			throw new ForbiddenOperationException("Access denied by rule: " + ruleName);
-		} else {
-			throw new ForbiddenOperationException("Access denied by default policy (no applicable rules)");
 		}
+		throw new ForbiddenOperationException("Access denied by default policy (no applicable rules)");
 	}
 	
 	private void handleUserOperation(RequestDetails theRequest, IBaseResource theResource, RestOperationTypeEnum operation) {
@@ -230,7 +228,7 @@ public class AuthorizationInterceptor extends InterceptorAdapter implements ISer
 			inputResourceId = theProcessedRequest.getId();
 			break;
 		case OUT:
-			inputResource = null;
+//			inputResource = null;
 			inputResourceId = theProcessedRequest.getId();
 			break;
 		case NONE:

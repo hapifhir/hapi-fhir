@@ -70,6 +70,10 @@ public abstract class BaseResourceIndexedSearchParam implements Serializable {
 		return myResourcePid;
 	}
 
+	public String getResourceType() {
+		return myResourceType;
+	}
+
 	public void setParamName(String theName) {
 		myParamName = theName;
 	}

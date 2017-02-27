@@ -64,6 +64,11 @@ public class BundleProviders {
 			public Integer preferredPageSize() {
 				return null;
 			}
+
+			@Override
+			public String getUuid() {
+				return null;
+			}
 		};
 	}
 

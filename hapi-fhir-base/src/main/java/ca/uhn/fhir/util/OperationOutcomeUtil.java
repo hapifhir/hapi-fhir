@@ -90,9 +90,8 @@ public class OperationOutcomeUtil {
 	public static String getFirstIssueDetails(FhirContext theCtx, IBaseOperationOutcome theOutcome) {
 		if (theCtx.getVersion().getVersion().isNewerThan(FhirVersionEnum.DSTU1)) {
 			return getFirstIssueStringPart(theCtx, theOutcome, "diagnostics");
-		} else {
-			return getFirstIssueStringPart(theCtx, theOutcome, "details");
 		}
+		return getFirstIssueStringPart(theCtx, theOutcome, "details");
 	}
 
 	public static String getFirstIssueLocation(FhirContext theCtx, IBaseOperationOutcome theOutcome) {

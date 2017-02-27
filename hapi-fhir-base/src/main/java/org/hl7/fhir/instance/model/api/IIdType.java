@@ -64,6 +64,7 @@ public interface IIdType extends IPrimitiveType<String> {
 	 * 
 	 * @see #getIdPart()
 	 */
+	@Override
 	String getValue();
 
 	String getVersionIdPart();
@@ -93,6 +94,7 @@ public interface IIdType extends IPrimitiveType<String> {
 	 */
 	boolean isAbsolute();
 
+	@Override
 	boolean isEmpty();
 
 	/**
