@@ -396,7 +396,7 @@ public abstract class BaseHapiTerminologySvc implements IHapiTerminologySvc {
 		if (theConcept.getId() == null || theConcept.getIndexStatus() == null) {
 			retVal++;
 			theConcept.setIndexStatus(BaseHapiFhirDao.INDEX_STATUS_INDEXED);
-			myConceptDao.saveAndFlush(theConcept);
+			myConceptDao.save(theConcept);
 		}
 		
 		ourLog.trace("Saved {} and got PID {}", theConcept.getCode(), theConcept.getId());
