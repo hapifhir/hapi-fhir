@@ -851,7 +851,17 @@ public abstract class BaseParser implements IParser {
 
 	@Override
 	public void setPreferTypes(List<Class<? extends IBaseResource>> thePreferTypes) {
-		myPreferTypes = thePreferTypes;
+		if (thePreferTypes != null) {
+			ArrayList<Class<? extends IBaseResource>> types = new ArrayList<Class<? extends IBaseResource>>();
+			for (Class<? extends IBaseResource> next : thePreferTypes) {
+				if (Modifier.isAbstract(next.getModifiers()) == false) {
+					types.add(next);
+				}
+			}
+			myPreferTypes = Collections.unmodifiableList(types);
+		} else {
+			myPreferTypes = thePreferTypes;
+		}
 	}
 
 	@Override
