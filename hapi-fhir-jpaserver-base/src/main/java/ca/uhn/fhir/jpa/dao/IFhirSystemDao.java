@@ -10,7 +10,7 @@ package ca.uhn.fhir.jpa.dao;
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  * 
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -32,12 +32,16 @@ import ca.uhn.fhir.rest.server.IBundleProvider;
 /**
  * @param <T>
  *           The bundle type
+ * @param <MT>
+ *           The Meta datatype type
  */
 public interface IFhirSystemDao<T, MT> extends IDao {
 
 	/**
 	 * Use with caution! This deletes everything!!
-	 * @param theRequestDetails TODO
+	 * 
+	 * @param theRequestDetails
+	 *           TODO
 	 */
 	void deleteAllTagsOnServer(RequestDetails theRequestDetails);
 
@@ -58,11 +62,13 @@ public interface IFhirSystemDao<T, MT> extends IDao {
 
 	/**
 	 * Not supported for DSTU1
-	 * @param theRequestDetails TODO
+	 * 
+	 * @param theRequestDetails
+	 *           TODO
 	 */
 	MT metaGetOperation(RequestDetails theRequestDetails);
 
-	int performReindexingPass(Integer theCount);
+	Integer performReindexingPass(Integer theCount);
 
 	T transaction(RequestDetails theRequestDetails, T theResources);
 

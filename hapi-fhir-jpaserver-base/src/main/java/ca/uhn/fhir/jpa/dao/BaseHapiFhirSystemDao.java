@@ -21,12 +21,7 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
  * limitations under the License.
  * #L%
  */
-
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.locks.ReentrantLock;
 
 import javax.persistence.Query;
@@ -59,7 +54,6 @@ import ca.uhn.fhir.rest.method.RequestDetails;
 import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
-import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 
 public abstract class BaseHapiFhirSystemDao<T, MT> extends BaseHapiFhirDao<IBaseResource> implements IFhirSystemDao<T, MT> {
 
@@ -278,9 +272,9 @@ public abstract class BaseHapiFhirSystemDao<T, MT> extends BaseHapiFhirDao<IBase
 	
 	@Override
 	@Transactional(propagation = Propagation.NOT_SUPPORTED)
-	public int performReindexingPass(final Integer theCount) {
+	public Integer performReindexingPass(final Integer theCount) {
 		if (!myReindexLock.tryLock()) {
-			return 0;
+			return null;
 		}
 		try {
 			return doPerformReindexingPass(theCount);

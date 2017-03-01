@@ -1087,7 +1087,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 			b.append(" (pid ");
 			b.append(theEntity.getId());
 			b.append(", version ");
-			b.append(myContext.getVersion().getVersion());
+			b.append(theEntity.getFhirVersion().name());
 			b.append("): ");
 			b.append(e.getMessage());
 			String msg = b.toString();

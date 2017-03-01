@@ -46,8 +46,8 @@ public class FhirResourceDaoSearchParameterDstu2 extends FhirResourceDaoDstu2<Se
 			return;
 		}
 
-		int count = mySystemDao.performReindexingPass(100);
-		for (int i = 0; i < 50 && count != 0; i++) {
+		Integer count = mySystemDao.performReindexingPass(100);
+		for (int i = 0; i < 50 && count != null && count != 0; i++) {
 			count = mySystemDao.performReindexingPass(100);
 			try {
 				Thread.sleep(DateUtils.MILLIS_PER_SECOND);
