@@ -42,8 +42,8 @@ import ca.uhn.fhir.jpa.entity.Search;
 /**
  * Deletes old searches
  */
-public class StaleSearchDeletingSvc {
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(StaleSearchDeletingSvc.class);
+public class StaleSearchDeletingSvcImpl implements IStaleSearchDeletingSvc {
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(StaleSearchDeletingSvcImpl.class);
 
 	@Autowired
 	private ISearchDao mySearchDao;
@@ -62,15 +62,23 @@ public class StaleSearchDeletingSvc {
 
 	@Scheduled(fixedDelay = 10 * DateUtils.MILLIS_PER_SECOND)
 	@Transactional(propagation = Propagation.NOT_SUPPORTED)
-	public synchronized void pollForStaleSearches() {
-		if (myDaoConfig.isExpireSearchResults()) {
-			Date cutoff = new Date(System.currentTimeMillis() - myDaoConfig.getExpireSearchResultsAfterMillis());
-			ourLog.debug("Searching for searches which are before {}", cutoff);
-
-			Collection<Search> toDelete = mySearchDao.findWhereCreatedBefore(cutoff);
-			if (toDelete.isEmpty()) {
-				return;
+	@Override
+	public synchronized void schedulePollForStaleSearches() {
+		if (!myDaoConfig.isSchedulingDisabled()) {
+			if (myDaoConfig.isExpireSearchResults()) {
+				pollForStaleSearchesAndDeleteThem();
 			}
+		}
+	}
+
+	@Override
+	@Transactional(propagation = Propagation.NOT_SUPPORTED)
+	public void pollForStaleSearchesAndDeleteThem() {
+		Date cutoff = new Date(System.currentTimeMillis() - myDaoConfig.getExpireSearchResultsAfterMillis());
+		ourLog.debug("Searching for searches which are before {}", cutoff);
+
+		Collection<Search> toDelete = mySearchDao.findWhereCreatedBefore(cutoff);
+		if (!toDelete.isEmpty()) {
 
 			for (final Search next : toDelete) {
 				deleteSearch(next);
