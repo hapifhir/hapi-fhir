@@ -148,10 +148,10 @@ public abstract class BaseRuntimeElementDefinition<T extends IBase> {
 	public T newInstance(Object theArgument) {
 		try {
 			if (theArgument == null) {
-				return getConstructor(null).newInstance(null);
-			} else {
-				return getConstructor(theArgument).newInstance(theArgument);
+				return getConstructor(null).newInstance();
 			}
+			return getConstructor(theArgument).newInstance(theArgument);
+
 		} catch (Exception e) {
 			throw new ConfigurationException("Failed to instantiate type:" + getImplementingClass().getName(), e);
 		}
@@ -171,9 +171,8 @@ public abstract class BaseRuntimeElementDefinition<T extends IBase> {
 			String extUrl = next.getExtensionUrl();
 			if (myUrlToExtension.containsKey(extUrl)) {
 				throw new ConfigurationException("Duplicate extension URL[" + extUrl + "] in Element[" + getName() + "]");
-			} else {
-				myUrlToExtension.put(extUrl, next);
 			}
+			myUrlToExtension.put(extUrl, next);
 			if (next.isModifier()) {
 				myExtensionsModifier.add(next);
 			} else {

@@ -81,6 +81,23 @@
 			</answer>
 		</faq>
 	</part>
+	<part id="Using HAPI">
+		<title>Using HAPI</title>
+		<faq id="jdk_version">
+			<question>
+				What JDK version does HAPI support?
+			</question>
+			<answer>
+				<p>
+					HAPI supports JDK 1.6 for the entire library, except for the CLI tool which is 1.8. 
+				</p>
+				<p>
+					Note that the HAPI library itself also requires a 1.8 JDK to build, since the unit tests 
+					have JDK 1.8 dependencies.
+				</p>
+			</answer>
+		</faq>
+	</part>
 	<part id="JPA Server">
 		<title>JPA Server</title>
 		<faq id="access_underlying_derby_database">

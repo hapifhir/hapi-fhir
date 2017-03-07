@@ -139,13 +139,15 @@ public class ElementUtil {
 		return retVal;
 	}
 
-	@SuppressWarnings("unchecked")
+	//@SuppressWarnings("unchecked")
 	private static <T extends IElement> void addElement(ArrayList<T> retVal, IElement next, Class<T> theType) {
+		//FIXME There seems to be an error on theType == null => if (theType != null|| theType.isAssignableFrom
 		if (theType == null|| theType.isAssignableFrom(next.getClass())) {
-			retVal.add((T) next);
+			retVal.add(theType.cast(next));
 		}
 		if (next instanceof ICompositeElement) {
 			ICompositeElement iCompositeElement = (ICompositeElement) next;
+			//TODO: Use of a deprecated method should be resolved.
 			retVal.addAll(iCompositeElement.getAllPopulatedChildElementsOfType(theType));
 		}
 	}

@@ -61,6 +61,7 @@ public class ApacheHttpResponse implements IHttpResponse {
 		this.myResponse = theResponse;
 	}
 
+	@Deprecated //override deprecated method
 	@Override
 	public void bufferEntitity() throws IOException {
 		bufferEntity();
@@ -77,6 +78,7 @@ public class ApacheHttpResponse implements IHttpResponse {
 			try {
 				this.myEntityBytes = IOUtils.toByteArray(respEntity);
 			} catch (IllegalStateException e) {
+				//FIXME resouce leak
 				throw new InternalErrorException(e);
 			}
 		}

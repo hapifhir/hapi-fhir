@@ -323,6 +323,7 @@ public abstract class BaseClient implements IRestfulClient {
 			}
 
 		} catch (DataFormatException e) {
+			//FIXME potential null access on httpResquest
 			String msg = getFhirContext().getLocalizer().getMessage(BaseClient.class, "failedToParseResponse", httpRequest.getHttpVerbName(), httpRequest.getUri(), e.toString());
 			throw new FhirClientConnectionException(msg, e);
 		} catch (IllegalStateException e) {

@@ -157,6 +157,11 @@
 				the resource ID was not present and required, or vice versa. Thanks to 
 				Brian Postlethwaite for reporting!
 			</action>
+			<action type="fix">
+				When using an annotation based client, a ClassCastException would 
+				occur under certain circumstances when the response contained
+				contained resources
+			</action>
 		</release>
 		<release version="2.2" date="2016-12-20">
 			<action type="add">

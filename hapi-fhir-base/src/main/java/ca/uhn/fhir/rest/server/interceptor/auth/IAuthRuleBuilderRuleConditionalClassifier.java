@@ -1,7 +1,5 @@
 package ca.uhn.fhir.rest.server.interceptor.auth;
 
-import java.util.List;
-
 /*
  * #%L
  * HAPI FHIR - Core Library

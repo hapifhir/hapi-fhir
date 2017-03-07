@@ -120,6 +120,7 @@ public class LoggingInterceptor implements IClientInterceptor {
 		}
 
 		if (myLogResponseBody) {
+			//TODO: Use of a deprecated method should be resolved.
 			theResponse.bufferEntitity();
 			InputStream respEntity = null;
 			try  {

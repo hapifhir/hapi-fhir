@@ -225,9 +225,8 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 				if (!myQueryName.equals(queryName)) {
 					ourLog.trace("Query name does not match {}", myQueryName);
 					return false;
-				} else {
-					methodParamsTemp.add(Constants.PARAM_QUERY);
 				}
+				methodParamsTemp.add(Constants.PARAM_QUERY);
 			} else {
 				ourLog.trace("Query name does not match {}", myQueryName);
 				return false;
@@ -346,9 +345,8 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 			if (theId == null || !theId.hasIdPart()) {
 				String msg = theContext.getLocalizer().getMessage(SearchMethodBinding.class.getName() + ".idNullForCompartmentSearch");
 				throw new InvalidRequestException(msg);
-			} else {
-				compartmentSearch = true;
 			}
+			compartmentSearch = true;
 		}
 
 		/*

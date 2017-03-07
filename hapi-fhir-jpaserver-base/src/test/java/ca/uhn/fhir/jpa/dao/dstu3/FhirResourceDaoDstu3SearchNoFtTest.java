@@ -49,7 +49,7 @@ import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.SearchParameterMap;
 import ca.uhn.fhir.jpa.dao.SearchParameterMap.EverythingModeEnum;
 import ca.uhn.fhir.jpa.entity.*;
-import ca.uhn.fhir.jpa.search.StaleSearchDeletingSvc;
+import ca.uhn.fhir.jpa.search.IStaleSearchDeletingSvc;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
@@ -1510,7 +1510,7 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 	}
 	
 	@Autowired
-	protected StaleSearchDeletingSvc myStaleSearchDeletingSvc;
+	protected IStaleSearchDeletingSvc myStaleSearchDeletingSvc;
 	
 
 	@Test
@@ -1539,7 +1539,7 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 		assertThat(toUnqualifiedVersionlessIds(bundleProvider), containsInAnyOrder(pid1, pid2));
 
 		myDaoConfig.setExpireSearchResults(false);
-		myStaleSearchDeletingSvc.pollForStaleSearches();
+		myStaleSearchDeletingSvc.pollForStaleSearchesAndDeleteThem();
 		Thread.sleep(1500);
 		
 		assertThat(toUnqualifiedVersionlessIds(bundleProvider), (containsInAnyOrder(pid1, pid2)));
@@ -1572,7 +1572,7 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 		Thread.sleep(1500);
 		
 		myDaoConfig.setExpireSearchResultsAfterMillis(500);
-		myStaleSearchDeletingSvc.pollForStaleSearches();
+		myStaleSearchDeletingSvc.pollForStaleSearchesAndDeleteThem();
 		
 		assertThat(toUnqualifiedVersionlessIds(bundleProvider), not(containsInAnyOrder(pid1, pid2)));
 	}

@@ -20,16 +20,6 @@ package ca.uhn.fhir.rest.server.interceptor;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import org.apache.commons.lang3.Validate;
-import org.apache.commons.lang3.text.StrLookup;
-import org.apache.commons.lang3.text.StrSubstitutor;
-import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
-
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.method.RequestDetails;
@@ -37,11 +27,16 @@ import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.OperationOutcomeUtil;
-import ca.uhn.fhir.validation.FhirValidator;
-import ca.uhn.fhir.validation.IValidatorModule;
-import ca.uhn.fhir.validation.ResultSeverityEnum;
-import ca.uhn.fhir.validation.SingleValidationMessage;
-import ca.uhn.fhir.validation.ValidationResult;
+import ca.uhn.fhir.validation.*;
+import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.text.StrLookup;
+import org.apache.commons.lang3.text.StrSubstitutor;
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /**
  * This interceptor intercepts each incoming request and if it contains a FHIR resource, validates that resource. The
@@ -266,6 +261,12 @@ abstract class BaseValidatingInterceptor<T> extends InterceptorAdapter {
 		myValidatorModules = theValidatorModules;
 	}
 
+	/**
+	 * Hook for subclasses (e.g. add a tag (coding) to an incoming resource when a given severity appears in the
+	 * ValidationResult).
+	 */
+	protected void postProcessResult(RequestDetails theRequestDetails, ValidationResult theValidationResult) { }
+
 	protected void validate(T theRequest, RequestDetails theRequestDetails) {
 		FhirValidator validator = theRequestDetails.getServer().getFhirContext().newValidator();
 		if (myValidatorModules != null) {
@@ -283,7 +284,7 @@ abstract class BaseValidatingInterceptor<T> extends InterceptorAdapter {
 			validationResult = doValidate(validator, theRequest);
 		} catch (Exception e) {
 			if (myIgnoreValidatorExceptions) {
-				ourLog.warn("Validator threw an exception during validaiton", e);
+				ourLog.warn("Validator threw an exception during validation", e);
 				return;
 			}
 			if (e instanceof BaseServerResponseException) {
@@ -291,7 +292,7 @@ abstract class BaseValidatingInterceptor<T> extends InterceptorAdapter {
 			}
 			throw new InternalErrorException(e);
 		}
-		
+
 		if (myAddResponseIssueHeaderOnSeverity != null) {
 			boolean found = false;
 			for (SingleValidationMessage next : validationResult.getMessages()) {
@@ -340,6 +341,7 @@ abstract class BaseValidatingInterceptor<T> extends InterceptorAdapter {
 			}
 		}
 
+		postProcessResult(theRequestDetails, validationResult);
 	}
 
 	private static class MyLookup extends StrLookup<String> {

@@ -71,6 +71,7 @@ public interface IResource extends ICompositeElement, org.hl7.fhir.instance.mode
 	 * 
 	 * @since 1.5
 	 */
+	@Override
 	IBaseMetaType getMeta();
 
 	/**

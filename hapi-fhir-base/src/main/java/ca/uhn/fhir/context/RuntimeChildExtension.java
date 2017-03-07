@@ -31,7 +31,7 @@ import ca.uhn.fhir.model.api.annotation.Description;
 
 public class RuntimeChildExtension extends RuntimeChildAny {
 
-	private RuntimeChildUndeclaredExtensionDefinition myExtensionElement;
+//	private RuntimeChildUndeclaredExtensionDefinition myExtensionElement;
 
 	public RuntimeChildExtension(Field theField, String theElementName, Child theChildAnnotation, Description theDescriptionAnnotation) {
 		super(theField, theElementName, theChildAnnotation, theDescriptionAnnotation);

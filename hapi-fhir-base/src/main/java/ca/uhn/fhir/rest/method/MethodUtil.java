@@ -482,9 +482,8 @@ public class MethodUtil {
 										OperationParameter.throwInvalidMode(theObject.toString());
 									}
 									return retVal;
-								} else {
-									return null;
 								}
+								return null;
 							}
 							
 							@Override
@@ -671,6 +670,7 @@ public class MethodUtil {
 			break;
 		}
 
+		//FIXME null access
 		return binder.parse(theContext, theUnqualifiedParamName, theParameters);
 	}
 

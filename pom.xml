@@ -96,6 +96,11 @@
 			<organization>University Health Network</organization>
 		</developer>
 		<developer>
+			<id>dmuylwyk</id>
+			<name>Diederik Muylwyk</name>
+			<organization>Smile CDR</organization>
+		</developer>
+		<developer>
 			<name>Dmitri Sotnikov</name>
 			<organization>University Health Network</organization>
 		</developer>
@@ -234,7 +239,7 @@
 		</developer>
 		<developer>
 			<id>joelsch</id>
-			<name>joelsch</name>
+			<name>Joel Schneider</name>
 		</developer>
 		<developer>
 			<id>euvitudo</id>

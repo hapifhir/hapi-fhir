@@ -87,6 +87,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		myContext = theContext;
 	}
 
+	@Deprecated //override deprecated method
 	@Override
 	public IBaseConformance conformance() {
 		if (myContext.getVersion().getVersion().isRi()) {
@@ -111,6 +112,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		return new CreateInternal();
 	}
 
+	@Deprecated //overide deprecated method
 	@Override
 	public MethodOutcome create(IBaseResource theResource) {
 		BaseHttpClientInvocation invocation = MethodUtil.createCreateInvocation(theResource, myContext);
@@ -133,6 +135,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		return new DeleteInternal();
 	}
 
+	@Deprecated //override deprecated method
 	@Override
 	public MethodOutcome delete(final Class<? extends IBaseResource> theType, IdDt theId) {
 		HttpDeleteClientInvocation invocation = DeleteMethodBinding.createDeleteInvocation(getFhirContext(), theId.withResourceType(toResourceName(theType)));
@@ -146,6 +149,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		return resp;
 	}
 
+	@Deprecated //override deprecated method
 	@Override
 	public MethodOutcome delete(Class<? extends IBaseResource> theType, String theId) {
 		return delete(theType, new IdDt(theId));
@@ -186,12 +190,11 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 		if (theNotModifiedHandler == null) {
 			return invokeClient(myContext, binding, invocation, theEncoding, thePrettyPrint, myLogRequestAndResponse, theSummary, theSubsetElements);
-		} else {
-			try {
-				return invokeClient(myContext, binding, invocation, theEncoding, thePrettyPrint, myLogRequestAndResponse, theSummary, theSubsetElements);
-			} catch (NotModifiedException e) {
-				return theNotModifiedHandler.call();
-			}
+		}
+		try {
+			return invokeClient(myContext, binding, invocation, theEncoding, thePrettyPrint, myLogRequestAndResponse, theSummary, theSubsetElements);
+		} catch (NotModifiedException e) {
+			return theNotModifiedHandler.call();
 		}
 
 	}
@@ -245,6 +248,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		return new HistoryInternal();
 	}
 
+	@Deprecated //override deprecated method
 	@Override
 	public <T extends IBaseResource> Bundle history(final Class<T> theType, IdDt theIdDt, DateTimeDt theSince, Integer theLimit) {
 		String resourceName = theType != null ? toResourceName(theType) : null;
@@ -260,6 +264,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 	}
 
+	@Deprecated //override deprecated method
 	@Override
 	public <T extends IBaseResource> Bundle history(Class<T> theType, String theId, DateTimeDt theSince, Integer theLimit) {
 		return history(theType, new IdDt(theId), theSince, theLimit);
@@ -409,6 +414,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		myLastRequest = theLastRequest;
 	}
 
+	@Deprecated //override deprecated method
 	@Override
 	public void setLogRequestAndResponse(boolean theLogRequestAndResponse) {
 		myLogRequestAndResponse = theLogRequestAndResponse;
@@ -423,6 +429,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		return new TransactionInternal();
 	}
 
+	@Deprecated //override deprecated method
 	@Override
 	public List<IBaseResource> transaction(List<IBaseResource> theResources) {
 		BaseHttpClientInvocation invocation = TransactionMethodBinding.createTransactionInvocation(theResources, myContext);
@@ -569,6 +576,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 		protected SummaryEnum mySummaryMode;
 
+		@Deprecated //override deprecated method
 		@SuppressWarnings("unchecked")
 		@Override
 		public T andLogRequestAndResponse(boolean theLogRequestAndResponse) {
@@ -612,9 +620,8 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		public List<Class<? extends IBaseResource>> getPreferResponseTypes(Class<? extends IBaseResource> theDefault) {
 			if (myPreferResponseTypes != null) {
 				return myPreferResponseTypes;
-			} else {
-				return toTypeList(theDefault);
 			}
+			return toTypeList(theDefault);
 		}
 
 		protected HashSet<String> getSubsetElements() {
@@ -1207,6 +1214,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			return nextOrPrevious(PREVIOUS, theBundle);
 		}
 
+		@Deprecated //override deprecated method
 		@Override
 		public IGetPageTyped url(String thePageUrl) {
 			return new GetPageInternal(thePageUrl);
@@ -1446,29 +1454,27 @@ public class GenericClient extends BaseClient implements IGenericClient {
 				handler = new ResourceResponseHandler(myReturnResourceType);
 				Object retVal = invoke(null, handler, invocation);
 				return retVal;
-			} else {
-				ResourceResponseHandler handler;
-				handler = new ResourceResponseHandler();
-				handler.setPreferResponseTypes(getPreferResponseTypes(myType));
-
-				Object retVal = invoke(null, handler, invocation);
-				if (myContext.getResourceDefinition((IBaseResource) retVal).getName().equals("Parameters")) {
-					return retVal;
-				} else {
-					RuntimeResourceDefinition def = myContext.getResourceDefinition("Parameters");
-					IBaseResource parameters = def.newInstance();
-
-					BaseRuntimeChildDefinition paramChild = def.getChildByName("parameter");
-					BaseRuntimeElementCompositeDefinition<?> paramChildElem = (BaseRuntimeElementCompositeDefinition<?>) paramChild.getChildByName("parameter");
-					IBase parameter = paramChildElem.newInstance();
-					paramChild.getMutator().addValue(parameters, parameter);
-
-					BaseRuntimeChildDefinition resourceElem = paramChildElem.getChildByName("resource");
-					resourceElem.getMutator().addValue(parameter, (IBase) retVal);
-
-					return parameters;
-				}
 			}
+			ResourceResponseHandler handler;
+			handler = new ResourceResponseHandler();
+			handler.setPreferResponseTypes(getPreferResponseTypes(myType));
+
+			Object retVal = invoke(null, handler, invocation);
+			if (myContext.getResourceDefinition((IBaseResource) retVal).getName().equals("Parameters")) {
+				return retVal;
+			}
+			RuntimeResourceDefinition def = myContext.getResourceDefinition("Parameters");
+			IBaseResource parameters = def.newInstance();
+
+			BaseRuntimeChildDefinition paramChild = def.getChildByName("parameter");
+			BaseRuntimeElementCompositeDefinition<?> paramChildElem = (BaseRuntimeElementCompositeDefinition<?>) paramChild.getChildByName("parameter");
+			IBase parameter = paramChildElem.newInstance();
+			paramChild.getMutator().addValue(parameters, parameter);
+
+			BaseRuntimeChildDefinition resourceElem = paramChildElem.getChildByName("resource");
+			resourceElem.getMutator().addValue(parameter, (IBase) retVal);
+
+			return parameters;
 		}
 
 		@Override
@@ -1591,10 +1597,10 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 	private final class OutcomeResponseHandler implements IClientResponseHandler<MethodOutcome> {
 		private PreferReturnEnum myPrefer;
-		private final String myResourceName;
+//		private final String myResourceName;
 
 		private OutcomeResponseHandler(String theResourceName) {
-			myResourceName = theResourceName;
+//			myResourceName = theResourceName;
 		}
 
 		private OutcomeResponseHandler(String theResourceName, PreferReturnEnum thePrefer) {
@@ -1634,9 +1640,8 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		public Object execute() {// AAA
 			if (myId.hasVersionIdPart()) {
 				return doReadOrVRead(myType.getImplementingClass(), myId, true, myNotModifiedHandler, myIfVersionMatches, myPrettyPrint, mySummaryMode, myParamEncoding, getSubsetElements());
-			} else {
-				return doReadOrVRead(myType.getImplementingClass(), myId, false, myNotModifiedHandler, myIfVersionMatches, myPrettyPrint, mySummaryMode, myParamEncoding, getSubsetElements());
 			}
+			return doReadOrVRead(myType.getImplementingClass(), myId, false, myNotModifiedHandler, myIfVersionMatches, myPrettyPrint, mySummaryMode, myParamEncoding, getSubsetElements());
 		}
 
 		@Override
@@ -1774,9 +1779,8 @@ public class GenericClient extends BaseClient implements IGenericClient {
 				IVersionSpecificBundleFactory bundleFactory = myContext.newBundleFactory();
 				bundleFactory.initializeWithBundleResource(response);
 				return bundleFactory.toListOfResources();
-			} else {
-				return new ArrayList<IBaseResource>(new BundleResponseHandler(myType).invokeClient(theResponseMimeType, theResponseReader, theResponseStatusCode, theHeaders).toListOfResources());
 			}
+			return new ArrayList<IBaseResource>(new BundleResponseHandler(myType).invokeClient(theResponseMimeType, theResponseReader, theResponseStatusCode, theHeaders).toListOfResources());
 		}
 	}
 
@@ -1850,6 +1854,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			return this;
 		}
 
+		@Deprecated //override deprecated method
 		@Override
 		public IBase execute() {
 
@@ -1906,8 +1911,11 @@ public class GenericClient extends BaseClient implements IGenericClient {
 					if (rootSs == null) {
 						rootSs = nextSortSpec;
 					} else {
+						//FIXME lastSs is null never set
+						//TODO unused assignment
 						lastSs.setChain(nextSortSpec);
 					}
+					//TODO unused assignment
 					lastSs = nextSortSpec;
 				}
 				if (rootSs != null) {
@@ -1983,6 +1991,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			return this;
 		}
 
+		@Deprecated //override deprecated method
 		@Override
 		public IQuery limitTo(int theLimitTo) {
 			return count(theLimitTo);

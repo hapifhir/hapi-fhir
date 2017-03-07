@@ -177,13 +177,6 @@ public DaoConfig daoConfig() {
 			
 		</section>
 		
-		<section name="Not yet complete">
-			<p>
-				The documentation for the JPA server is not yet complete. Please get in touch
-				if you are able to help us complete it!
-			</p>
-		</section>
-
 		<section name="Architecture">
 		
 			<img src="images/jpa_architecture.png" alt="Architecture" align="right"/>

@@ -1,7 +1,5 @@
 package ca.uhn.fhir.context;
 
-import java.util.concurrent.Callable;
-
 /*
  * #%L
  * HAPI FHIR - Core Library

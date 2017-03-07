@@ -165,7 +165,7 @@ public class SchemaBaseValidator implements IValidatorModule {
 		baseIs = new BOMInputStream(baseIs, false);
 		InputStreamReader baseReader = new InputStreamReader(baseIs, Charset.forName("UTF-8"));
 		Source baseSource = new StreamSource(baseReader, theSystemId);
-
+		//FIXME resource leak
 		return baseSource;
 	}
 
@@ -240,7 +240,7 @@ public class SchemaBaseValidator implements IValidatorModule {
 				}
 
 				input.setByteStream(baseIs);
-
+				//FIXME resource leak
 				return input;
 
 			}

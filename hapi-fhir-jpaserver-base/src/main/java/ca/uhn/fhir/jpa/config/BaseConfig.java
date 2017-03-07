@@ -38,7 +38,8 @@ import org.springframework.scheduling.concurrent.ScheduledExecutorFactoryBean;
 import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
-import ca.uhn.fhir.jpa.search.StaleSearchDeletingSvc;
+import ca.uhn.fhir.jpa.search.IStaleSearchDeletingSvc;
+import ca.uhn.fhir.jpa.search.StaleSearchDeletingSvcImpl;
 
 @Configuration
 @EnableScheduling
@@ -59,13 +60,13 @@ public class BaseConfig implements SchedulingConfigurer {
 
 	@Bean(autowire = Autowire.BY_TYPE)
 	public DatabaseBackedPagingProvider databaseBackedPagingProvider() {
-		DatabaseBackedPagingProvider retVal = new DatabaseBackedPagingProvider(10);
+		DatabaseBackedPagingProvider retVal = new DatabaseBackedPagingProvider();
 		return retVal;
 	}
 
 	@Bean(autowire=Autowire.BY_TYPE)
-	public StaleSearchDeletingSvc staleSearchDeletingSvc() {
-		return new StaleSearchDeletingSvc();
+	public IStaleSearchDeletingSvc staleSearchDeletingSvc() {
+		return new StaleSearchDeletingSvcImpl();
 	}
 
 	@Bean()

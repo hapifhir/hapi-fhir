@@ -105,7 +105,7 @@ public class ServletRequestDetails extends RequestDetails {
 					}
 				}
 			}
-			
+			//FIXME resource leak
 			return requestContents;
 		} catch (IOException e) {
 			ourLog.error("Could not load request resource", e);
