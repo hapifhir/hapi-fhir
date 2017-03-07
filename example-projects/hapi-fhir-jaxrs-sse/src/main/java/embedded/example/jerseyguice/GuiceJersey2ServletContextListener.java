@@ -21,25 +21,18 @@ import java.awt.Desktop;
 import java.net.URI;
 import java.util.EnumSet;
 import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
 
 import javax.servlet.DispatcherType;
 
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
-import org.hl7.fhir.dstu3.model.HumanName;
-import org.hl7.fhir.dstu3.model.IdType;
-import org.hl7.fhir.dstu3.model.Patient;
 import org.slf4j.bridge.SLF4JBridgeHandler;
 
 import com.google.common.collect.Lists;
-import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Module;
-import com.google.inject.Scopes;
 import com.google.inject.Stage;
-import com.google.inject.name.Names;
 import com.google.inject.servlet.GuiceFilter;
 import com.google.inject.servlet.GuiceServletContextListener;
 
@@ -52,28 +45,11 @@ public class GuiceJersey2ServletContextListener extends GuiceServletContextListe
 
 		final List<Module> modules = Lists.newArrayList();
 
-		modules.add(new AbstractModule() {
-
-			@Override
-			protected void configure() {
-				final ConcurrentHashMap<String, List<Patient>> patients = new ConcurrentHashMap<String, List<Patient>>();
-				for (int i = 0; i < 20; i++) {
-
-					final Patient patient = new Patient();
-					patient.getName().add(new HumanName().setFamily("Random Patient " + i));
-					patient.setId(new IdType("Patient", "" + i, "" + 1));
-					patients.put(String.valueOf(i), Lists.newArrayList(patient));
-
-				}
-			}
-		});
-
+	
 		modules.add(new GuiceHk2Helper() {
 			@Override
 			protected void configureServlets() {
-				bind(String.class).annotatedWith(Names.named("1")).toInstance("sad");
-
-				bind(JaxRsPatientProvider.class).in(Scopes.SINGLETON);
+//				bind(JaxRsPatientProvider.class).in(Scopes.SINGLETON);
 				rest("/*").packages(JaxRsPatientProvider.class);
 			}
 		});
