@@ -24,7 +24,6 @@ import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.Observation;
 import org.hl7.fhir.dstu3.model.Subscription;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -32,9 +31,11 @@ import org.slf4j.Logger;
 /**
  * Test the rest-hook subscriptions
  */
-public class RestHookTestDstu3IT {
+public class RestHookTestDstu3WithSubscriptionResponseCriteriaIT {
 
     private static final Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirSubscriptionWithSubscriptionIdDstu3IT.class);
+
+    //public static final String FHIR_DSTU3_URL = "http://localhost:8080/baseDstu3";
     public static final String FHIR_URL = "http://localhost:9093/baseDstu3";
 
     @Test
@@ -49,11 +50,11 @@ public class RestHookTestDstu3IT {
         String criteria1 = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
         String criteria2 = "Observation?code=SNOMED-CT|" + code + "111&_format=xml";
 
-        Subscription subscription1 = createSubscription(criteria1, payload, endpoint, client);
+        Subscription subscription1 = createSubscription(criteria1, "Observation?_format=xml", endpoint, client);
         Subscription subscription2 = createSubscription(criteria2, payload, endpoint, client);
 
         Observation observation1 = sendObservation(code, "SNOMED-CT", client);
-        //Should see only one subscription notification
+        //Should see a bundle
 
         Subscription subscriptionTemp = client.read(Subscription.class, subscription2.getId());
         Assert.assertNotNull(subscriptionTemp);
@@ -107,7 +108,6 @@ public class RestHookTestDstu3IT {
         subscription.setReason("Monitor new neonatal function (note, age will be determined by the monitor)");
         subscription.setStatus(Subscription.SubscriptionStatus.REQUESTED);
         subscription.setCriteria(criteria);
-
         Subscription.SubscriptionChannelComponent channel = new Subscription.SubscriptionChannelComponent();
         channel.setType(Subscription.SubscriptionChannelType.RESTHOOK);
         channel.setPayload(payload);

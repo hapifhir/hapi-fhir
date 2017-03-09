@@ -309,11 +309,15 @@ public class FhirResourceDaoSubscriptionDstu3 extends FhirResourceDaoDstu3<Subsc
 		return retVal;
 	}
 
-    public RuntimeResourceDefinition validateCriteriaAndReturnResourceDefinition(Subscription theResource) {
+	public RuntimeResourceDefinition validateCriteriaAndReturnResourceDefinition(Subscription theResource) {
 		String query = theResource.getCriteria();
 		if (isBlank(query)) {
 			throw new UnprocessableEntityException("Subscription.criteria must be populated");
 		}
+		return validateCriteriaAndReturnResourceDefinition(query);
+	}
+
+    public RuntimeResourceDefinition validateCriteriaAndReturnResourceDefinition(String query) {
 
 		int sep = query.indexOf('?');
 		if (sep <= 1) {

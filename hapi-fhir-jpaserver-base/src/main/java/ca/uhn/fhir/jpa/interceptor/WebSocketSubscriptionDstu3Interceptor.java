@@ -20,10 +20,13 @@ import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoSubscription;
 import ca.uhn.fhir.jpa.entity.ResourceTable;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
+import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.method.RequestDetails;
+import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
 import ca.uhn.fhir.rest.server.interceptor.InterceptorAdapter;
 import org.hl7.fhir.dstu3.model.Subscription;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +34,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 public class WebSocketSubscriptionDstu3Interceptor extends InterceptorAdapter implements IJpaServerInterceptor {
 
@@ -83,5 +87,14 @@ public class WebSocketSubscriptionDstu3Interceptor extends InterceptorAdapter im
         }
 
         return super.outgoingResponse(theRequestDetails, theResponseObject);
+    }
+
+    @Override
+    public boolean incomingRequestPostProcessed(RequestDetails theRequestDetails, HttpServletRequest theRequest, HttpServletResponse theResponse) throws AuthenticationException {
+        if (theRequestDetails.getRestOperationType().equals(RestOperationTypeEnum.DELETE)) {
+            casted.pollForNewUndeliveredResources(theRequestDetails.getResourceName());
+        }
+
+        return super.incomingRequestPostProcessed(theRequestDetails, theRequest, theResponse);
     }
 }

@@ -69,7 +69,7 @@ public class ServerMimetypeDstu3Test {
 	
 	
 	private List<String> toStrings(List<CodeType> theFormat) {
-		ArrayList<String> retVal = new ArrayList<>();
+		ArrayList<String> retVal = new ArrayList<String>();
 		for (CodeType next : theFormat) {
 			retVal.add(next.asStringValue());
 		}

@@ -82,7 +82,7 @@ public class SearchPostDstu3Test {
 		ourLastSortSpec = null;
 		ourLastName = null;
 		
-		for (IServerInterceptor next : new ArrayList<>(ourServlet.getInterceptors())) {
+		for (IServerInterceptor next : new ArrayList<IServerInterceptor>(ourServlet.getInterceptors())) {
 			ourServlet.unregisterInterceptor(next);
 		}
 	}
