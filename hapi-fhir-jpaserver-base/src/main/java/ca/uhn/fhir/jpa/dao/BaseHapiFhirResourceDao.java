@@ -179,7 +179,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	}
 
 	@Override
-	public ResourceTable delete(IIdType theId, List<DeleteConflict> deleteConflicts, RequestDetails theRequestDetails) {
+	public DaoMethodOutcome delete(IIdType theId, List<DeleteConflict> deleteConflicts, RequestDetails theRequestDetails) {
 		if (theId == null || !theId.hasIdPart()) {
 			throw new InvalidRequestException("Can not perform delete, no ID provided");
 		}
@@ -187,6 +187,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		if (theId.hasVersionIdPart() && Long.parseLong(theId.getVersionIdPart()) != entity.getVersion()) {
 			throw new ResourceVersionConflictException("Trying to delete " + theId + " but this is not the current version");
 		}
+
+		StopWatch w = new StopWatch();
 
 		T resourceToDelete = toResource(myResourceType, entity, false);
 
@@ -202,6 +204,16 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		Date updateTime = new Date();
 		ResourceTable savedEntity = updateEntity(null, entity, updateTime, updateTime);
+		resourceToDelete.setId(entity.getIdDt());
+
+//		/* 
+//		 * If we aren't indexing (meaning we're probably executing a sub-operation within a transaction),
+//		 * we'll manually increase the version. This is important because we want the updated version number
+//		 * to be reflected in the resource shared with interceptors
+//		 */
+//		if (!thePerformIndexing) {
+//			incremenetId(resourceToDelete);
+//		}
 
 		// Notify JPA interceptors
 		if (theRequestDetails != null) {
@@ -214,7 +226,16 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			}
 		}
 
-		return savedEntity;
+		DaoMethodOutcome outcome = toMethodOutcome(savedEntity, resourceToDelete).setCreated(true);
+
+		IBaseOperationOutcome oo = OperationOutcomeUtil.newInstance(getContext());
+		String message = getContext().getLocalizer().getMessage(BaseHapiFhirResourceDao.class, "successfulDeletes", 1, w.getMillis());
+		String severity = "information";
+		String code = "informational";
+		OperationOutcomeUtil.addIssue(getContext(), oo, severity, message, null, code);
+		outcome.setOperationOutcome(oo);
+
+		return outcome;
 	}
 
 	@Override
@@ -222,24 +243,22 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		List<DeleteConflict> deleteConflicts = new ArrayList<DeleteConflict>();
 		StopWatch w = new StopWatch();
 
-		ResourceTable savedEntity = delete(theId, deleteConflicts, theRequestDetails);
+		DaoMethodOutcome retVal = delete(theId, deleteConflicts, theRequestDetails);
 
 		validateDeleteConflictsEmptyOrThrowException(deleteConflicts);
 
-		IBaseOperationOutcome oo = OperationOutcomeUtil.newInstance(getContext());
-		String message = getContext().getLocalizer().getMessage(BaseHapiFhirResourceDao.class, "successfulDeletes", 1, w.getMillis());
-		String severity = "information";
-		String code = "informational";
-		OperationOutcomeUtil.addIssue(getContext(), oo, severity, message, null, code);
-
 		ourLog.info("Processed delete on {} in {}ms", theId.getValue(), w.getMillisAndRestart());
-		DaoMethodOutcome retVal = toMethodOutcome(savedEntity, null);
-		retVal.setOperationOutcome(oo);
 		return retVal;
 	}
 
+	/**
+	 * This method gets called by {@link #deleteByUrl(String, List, RequestDetails)} as well as by
+	 * transaction processors 
+	 */
 	@Override
-	public List<ResourceTable> deleteByUrl(String theUrl, List<DeleteConflict> deleteConflicts, RequestDetails theRequestDetails) {
+	public DeleteMethodOutcome deleteByUrl(String theUrl, List<DeleteConflict> deleteConflicts, RequestDetails theRequestDetails) {
+		StopWatch w = new StopWatch();
+
 		Set<Long> resource = processMatchUrl(theUrl, myResourceType);
 		if (resource.size() > 1) {
 			if (myDaoConfig.isAllowMultipleDelete() == false) {
@@ -247,10 +266,10 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			}
 		}
 
-		List<ResourceTable> retVal = new ArrayList<ResourceTable>();
+		List<ResourceTable> deletedResources = new ArrayList<ResourceTable>();
 		for (Long pid : resource) {
 			ResourceTable entity = myEntityManager.find(ResourceTable.class, pid);
-			retVal.add(entity);
+			deletedResources.add(entity);
 
 			validateOkToDelete(deleteConflicts, entity);
 
@@ -274,18 +293,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		}
 
-		return retVal;
-	}
-	
-	@Override
-	public DaoMethodOutcome deleteByUrl(String theUrl, RequestDetails theRequestDetails) {
-		StopWatch w = new StopWatch();
-		List<DeleteConflict> deleteConflicts = new ArrayList<DeleteConflict>();
-
-		List<ResourceTable> deletedResources = deleteByUrl(theUrl, deleteConflicts, theRequestDetails);
-
-		validateDeleteConflictsEmptyOrThrowException(deleteConflicts);
-		
 		IBaseOperationOutcome oo;
 		if (deletedResources.isEmpty()) {
 			oo = OperationOutcomeUtil.newInstance(getContext());
@@ -302,9 +309,22 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		}
 
 		ourLog.info("Processed delete on {} (matched {} resource(s)) in {}ms", new Object[] { theUrl, deletedResources.size(), w.getMillis() });
-		DaoMethodOutcome retVal = new DaoMethodOutcome();
+
+		DeleteMethodOutcome retVal = new DeleteMethodOutcome();
+		retVal.setDeletedEntities(deletedResources);
 		retVal.setOperationOutcome(oo);
 		return retVal;
+	}
+	
+	@Override
+	public DeleteMethodOutcome deleteByUrl(String theUrl, RequestDetails theRequestDetails) {
+		List<DeleteConflict> deleteConflicts = new ArrayList<DeleteConflict>();
+
+		DeleteMethodOutcome outcome = deleteByUrl(theUrl, deleteConflicts, theRequestDetails);
+
+		validateDeleteConflictsEmptyOrThrowException(deleteConflicts);
+		
+		return outcome;
 	}
 
 	@PostConstruct
@@ -362,6 +382,16 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		updateEntity(theResource, entity, null, thePerformIndexing, thePerformIndexing, theUpdateTime);
 		theResource.setId(entity.getIdDt());
 
+		
+		/* 
+		 * If we aren't indexing (meaning we're probably executing a sub-operation within a transaction),
+		 * we'll manually increase the version. This is important because we want the updated version number
+		 * to be reflected in the resource shared with interceptors
+		 */
+		if (!thePerformIndexing) {
+			incremenetId(theResource);
+		}
+		
 		// Notify JPA interceptors
 		if (theRequestDetails != null) {
 			ActionRequestDetails requestDetails = new ActionRequestDetails(theRequestDetails, getContext(), theResource);
@@ -374,12 +404,21 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		}
 
 		DaoMethodOutcome outcome = toMethodOutcome(entity, theResource).setCreated(true);
+		if (!thePerformIndexing) {
+			outcome.setId(theResource.getIdElement());
+		}
 
 		String msg = getContext().getLocalizer().getMessage(BaseHapiFhirResourceDao.class, "successfulCreate", outcome.getId(), w.getMillisAndRestart());
 		outcome.setOperationOutcome(createInfoOperationOutcome(msg));
 
 		ourLog.info(msg);
 		return outcome;
+	}
+
+	private void incremenetId(T theResource) {
+		String newVersion = Long.toString(theResource.getIdElement().getVersionIdPartAsLong() + 1);
+		IIdType newId = theResource.getIdElement().withVersion(newVersion);
+		theResource.setId(newId);
 	}
 
 	private <MT extends IBaseMetaType> void doMetaAdd(MT theMetaAdd, BaseHasResource entity) {
@@ -1138,6 +1177,15 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		// Perform update
 		ResourceTable savedEntity = updateEntity(theResource, entity, null, thePerformIndexing, thePerformIndexing, new Date());
 
+		/* 
+		 * If we aren't indexing (meaning we're probably executing a sub-operation within a transaction),
+		 * we'll manually increase the version. This is important because we want the updated version number
+		 * to be reflected in the resource shared with interceptors
+		 */
+		if (!thePerformIndexing) {
+			incremenetId(theResource);
+		}
+
 		// Notify interceptors
 		if (theRequestDetails != null) {
 			theRequestDetails.getRequestOperationCallback().resourceUpdated(theResource);
@@ -1150,6 +1198,10 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		DaoMethodOutcome outcome = toMethodOutcome(savedEntity, theResource).setCreated(false);
 
+		if (!thePerformIndexing) {
+			outcome.setId(theResource.getIdElement());
+		}
+		
 		String msg = getContext().getLocalizer().getMessage(BaseHapiFhirResourceDao.class, "successfulCreate", outcome.getId(), w.getMillisAndRestart());
 		outcome.setOperationOutcome(createInfoOperationOutcome(msg));
 

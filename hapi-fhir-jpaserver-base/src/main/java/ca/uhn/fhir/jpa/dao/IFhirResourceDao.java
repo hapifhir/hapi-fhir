@@ -39,7 +39,6 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.PatchTypeEnum;
 import ca.uhn.fhir.rest.api.ValidationModeEnum;
 import ca.uhn.fhir.rest.method.RequestDetails;
-import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -84,7 +83,7 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	 * in the provided list
 	 * @param theRequestDetails TODO
 	 */
-	ResourceTable delete(IIdType theResource, List<DeleteConflict> theDeleteConflictsListToPopulate, RequestDetails theRequestDetails);
+	DaoMethodOutcome delete(IIdType theResource, List<DeleteConflict> theDeleteConflictsListToPopulate, RequestDetails theRequestDetails);
 
 	/**
 	 * This method throws an exception if there are delete conflicts
@@ -95,12 +94,12 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	 * This method does not throw an exception if there are delete conflicts, but populates them
 	 * in the provided list
 	 */
-	List<ResourceTable> deleteByUrl(String theUrl, List<DeleteConflict> theDeleteConflictsListToPopulate, RequestDetails theRequestDetails);
+	DeleteMethodOutcome deleteByUrl(String theUrl, List<DeleteConflict> theDeleteConflictsListToPopulate, RequestDetails theRequestDetails);
 
 	/**
 	 * This method throws an exception if there are delete conflicts
 	 */
-	DaoMethodOutcome deleteByUrl(String theString, RequestDetails theRequestDetails);
+	DeleteMethodOutcome deleteByUrl(String theString, RequestDetails theRequestDetails);
 
 	TagList getAllResourceTags(RequestDetails theRequestDetails);
 

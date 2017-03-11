@@ -162,6 +162,10 @@
 				occur under certain circumstances when the response contained
 				contained resources
 			</action>
+			<action type="fix">
+				JPA server interceptor methods for create/update/delete provided
+				the wrong version ID to the interceptors
+			</action>
 		</release>
 		<release version="2.2" date="2016-12-20">
 			<action type="add">

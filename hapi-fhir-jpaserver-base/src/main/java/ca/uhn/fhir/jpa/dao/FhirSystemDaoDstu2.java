@@ -406,14 +406,16 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle, MetaDt> {
 				ca.uhn.fhir.jpa.dao.IFhirResourceDao<? extends IBaseResource> dao = toDao(parts, verb.getCode(), url);
 				int status = Constants.STATUS_HTTP_204_NO_CONTENT;
 				if (parts.getResourceId() != null) {
-					ResourceTable deleted = dao.delete(new IdDt(parts.getResourceType(), parts.getResourceId()), deleteConflicts, theRequestDetails);
-					if (deleted != null) {
-						deletedResources.add(deleted.getIdDt().toUnqualifiedVersionless());
+					DaoMethodOutcome outcome = dao.delete(new IdDt(parts.getResourceType(), parts.getResourceId()), deleteConflicts, theRequestDetails);
+					if (outcome.getEntity() != null) {
+						deletedResources.add(outcome.getId().toUnqualifiedVersionless());
+						entriesToProcess.put(nextRespEntry, outcome.getEntity());
 					}
 				} else {
-					List<ResourceTable> allDeleted = dao.deleteByUrl(parts.getResourceType() + '?' + parts.getParams(), deleteConflicts, theRequestDetails);
+					DeleteMethodOutcome deleteOutcome = dao.deleteByUrl(parts.getResourceType() + '?' + parts.getParams(), deleteConflicts, theRequestDetails);
+					List<ResourceTable> allDeleted = deleteOutcome.getDeletedEntities();
 					for (ResourceTable deleted : allDeleted) {
-						deletedResources.add(deleted.getIdDt().toUnqualifiedVersionless());						
+						deletedResources.add(deleted.getIdDt().toUnqualifiedVersionless());
 					}
 					if (allDeleted.isEmpty()) {
 						status = Constants.STATUS_HTTP_404_NOT_FOUND;

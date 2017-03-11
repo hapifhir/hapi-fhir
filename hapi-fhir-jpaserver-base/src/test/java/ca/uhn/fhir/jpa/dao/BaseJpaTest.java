@@ -67,12 +67,15 @@ public abstract class BaseJpaTest {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseJpaTest.class);
 	protected ServletRequestDetails mySrd;
+	protected ArrayList<IServerInterceptor> myServerInterceptorList;
+	protected IRequestOperationCallback myRequestOperationCallback = mock(IRequestOperationCallback.class);
 
 	@Before
 	public void beforeCreateSrd() {
 		mySrd = mock(ServletRequestDetails.class, Mockito.RETURNS_DEEP_STUBS);
-		when(mySrd.getRequestOperationCallback()).thenReturn(mock(IRequestOperationCallback.class));
-		when(mySrd.getServer().getInterceptors()).thenReturn(new ArrayList<IServerInterceptor>());
+		when(mySrd.getRequestOperationCallback()).thenReturn(myRequestOperationCallback);
+		myServerInterceptorList = new ArrayList<IServerInterceptor>();
+		when(mySrd.getServer().getInterceptors()).thenReturn(myServerInterceptorList);
 		when(mySrd.getUserData()).thenReturn(new HashMap<Object, Object>());
 	}
 
