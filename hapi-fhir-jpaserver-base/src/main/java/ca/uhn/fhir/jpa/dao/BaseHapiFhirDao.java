@@ -1226,13 +1226,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 				uriParams = extractSearchParamUri(theEntity, theResource);
 				coordsParams = extractSearchParamCoords(theEntity, theResource);
 
-				setUpdatedTime(stringParams, theUpdateTime);
-				setUpdatedTime(numberParams, theUpdateTime);
-				setUpdatedTime(quantityParams, theUpdateTime);
-				setUpdatedTime(dateParams, theUpdateTime);
-				setUpdatedTime(uriParams, theUpdateTime);
-				setUpdatedTime(coordsParams, theUpdateTime);
-				
 				// ourLog.info("Indexing resource: {}", entity.getId());
 				ourLog.trace("Storing date indexes: {}", dateParams);
 
@@ -1245,6 +1238,14 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 					}
 				}
 
+				setUpdatedTime(stringParams, theUpdateTime);
+				setUpdatedTime(numberParams, theUpdateTime);
+				setUpdatedTime(quantityParams, theUpdateTime);
+				setUpdatedTime(dateParams, theUpdateTime);
+				setUpdatedTime(uriParams, theUpdateTime);
+				setUpdatedTime(coordsParams, theUpdateTime);
+				setUpdatedTime(tokenParams, theUpdateTime);
+				
 				/*
 				 * Handle references within the resource that are match URLs, for example references like "Patient?identifier=foo". These match URLs are resolved and replaced with the ID of the
 				 * matching
