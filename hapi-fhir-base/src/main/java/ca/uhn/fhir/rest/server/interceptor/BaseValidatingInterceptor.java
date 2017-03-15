@@ -267,7 +267,10 @@ abstract class BaseValidatingInterceptor<T> extends InterceptorAdapter {
 	 */
 	protected void postProcessResult(RequestDetails theRequestDetails, ValidationResult theValidationResult) { }
 
-	protected void validate(T theRequest, RequestDetails theRequestDetails) {
+	/**
+	 * Note: May return null
+	 */
+	protected ValidationResult validate(T theRequest, RequestDetails theRequestDetails) {
 		FhirValidator validator = theRequestDetails.getServer().getFhirContext().newValidator();
 		if (myValidatorModules != null) {
 			for (IValidatorModule next : myValidatorModules) {
@@ -276,7 +279,7 @@ abstract class BaseValidatingInterceptor<T> extends InterceptorAdapter {
 		}
 
 		if (theRequest == null) {
-			return;
+			return null;
 		}
 
 		ValidationResult validationResult;
@@ -285,7 +288,7 @@ abstract class BaseValidatingInterceptor<T> extends InterceptorAdapter {
 		} catch (Exception e) {
 			if (myIgnoreValidatorExceptions) {
 				ourLog.warn("Validator threw an exception during validation", e);
-				return;
+				return null;
 			}
 			if (e instanceof BaseServerResponseException) {
 				throw (BaseServerResponseException)e;
@@ -312,7 +315,7 @@ abstract class BaseValidatingInterceptor<T> extends InterceptorAdapter {
 			for (SingleValidationMessage next : validationResult.getMessages()) {
 				if (next.getSeverity().ordinal() >= myFailOnSeverity) {
 					fail(theRequestDetails, validationResult);
-					return;
+					return validationResult;
 				}
 			}
 		}
@@ -342,6 +345,8 @@ abstract class BaseValidatingInterceptor<T> extends InterceptorAdapter {
 		}
 
 		postProcessResult(theRequestDetails, validationResult);
+		
+		return validationResult;
 	}
 
 	private static class MyLookup extends StrLookup<String> {
