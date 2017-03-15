@@ -40,6 +40,8 @@ import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
 import ca.uhn.fhir.rest.server.interceptor.InterceptorAdapter;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
+import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
@@ -76,6 +78,7 @@ public class RestHookSubscriptionDstu2Interceptor extends InterceptorAdapter imp
 
     private static final Logger logger = LoggerFactory.getLogger(RestHookSubscriptionDstu2Interceptor.class);
     private final List<Subscription> restHookSubscriptions = new ArrayList<Subscription>();
+    private boolean notifyOnDelete = false;
 
     private final static int MAX_THREADS = 1;
 
@@ -185,7 +188,9 @@ public class RestHookSubscriptionDstu2Interceptor extends InterceptorAdapter imp
                 String id = idType.getIdPart();
                 removeLocalSubscription(id);
             } else {
-                checkSubscriptions(idType, resourceType);
+                if (notifyOnDelete) {
+                    checkSubscriptions(idType, resourceType);
+                }
             }
         }
 
@@ -219,7 +224,7 @@ public class RestHookSubscriptionDstu2Interceptor extends InterceptorAdapter imp
             for (IBaseResource nextBase : results.getResources(0, results.size())) {
                 IResource next = (IResource) nextBase;
                 logger.info("Found match: queueing rest-hook notification for resource: {}", next.getIdElement());
-                HttpPost request = createRequest(subscription, next);
+                HttpUriRequest request = createRequest(subscription, next);
                 executor.submit(new HttpRequestDstu2Job(request, subscription));
             }
         }
@@ -232,23 +237,36 @@ public class RestHookSubscriptionDstu2Interceptor extends InterceptorAdapter imp
      * @param resource
      * @return
      */
-    private HttpPost createRequest(Subscription subscription, IResource resource) {
+    private HttpUriRequest createRequest(Subscription subscription, IResource resource) {
         String url = subscription.getChannel().getEndpoint();
-        HttpPost request = new HttpPost(url);
-        request.addHeader("User-Agent", USER_AGENT);
+        HttpUriRequest request = null;
         String payload = subscription.getChannel().getPayload();
+        //HTTP post
         if (payload == null || payload.trim().length() == 0) {
             //return an empty response as there is no payload
             logger.info("No payload found, returning an empty notification");
-        } else if (payload.equals("application/xml") || payload.equals("application/fhir+xml")) {
+            request = new HttpPost(url);
+        }
+        //HTTP put
+        else if (payload.equals("application/xml") || payload.equals("application/fhir+xml")) {
             logger.info("XML payload found");
             StringEntity entity = getStringEntity(EncodingEnum.XML, resource);
-            request.setEntity(entity);
-        } else if (payload.equals("application/json") || payload.equals("application/fhir+json")) {
+            HttpPut putRequest = new HttpPut();
+            putRequest.setEntity(entity);
+
+            request = putRequest;
+        }
+        //HTTP put
+        else if (payload.equals("application/json") || payload.equals("application/fhir+json")) {
             logger.info("JSON payload found");
             StringEntity entity = getStringEntity(EncodingEnum.JSON, resource);
-            request.setEntity(entity);
-        } else if (payload.startsWith("application/fhir+query/")) { //custom payload that is a FHIR query
+            HttpPut putRequest = new HttpPut();
+            putRequest.setEntity(entity);
+
+            request = putRequest;
+        }
+        //HTTP post
+        else if (payload.startsWith("application/fhir+query/")) { //custom payload that is a FHIR query
             logger.info("Custom query payload found");
             String responseCriteria = subscription.getChannel().getPayload().substring(23);
             //get the encoding type from payload which is a FHIR query with &_format=
@@ -258,17 +276,26 @@ public class RestHookSubscriptionDstu2Interceptor extends InterceptorAdapter imp
                 List<IBaseResource> resourcelist = responseResults.getResources(0, responseResults.size());
                 Bundle bundle = createBundle(resourcelist);
                 StringEntity bundleEntity = getStringEntity(encoding, bundle);
-                request.setEntity(bundleEntity);
+                HttpPost postRequest = new HttpPost();
+                postRequest.setEntity(bundleEntity);
+
+                request = postRequest;
             } else {
                 Bundle bundle = new Bundle();
                 bundle.setTotal(0);
                 StringEntity bundleEntity = getStringEntity(encoding, bundle);
-                request.setEntity(bundleEntity);
+                HttpPost postRequest = new HttpPost();
+                postRequest.setEntity(bundleEntity);
+
+                request = postRequest;
             }
 
         } else {
             logger.warn("Unsupported payload " + payload + ". Returning an empty notification");
+            request = new HttpPost(url);
         }
+
+        //request.addHeader("User-Agent", USER_AGENT);
         return request;
     }
 
@@ -383,6 +410,14 @@ public class RestHookSubscriptionDstu2Interceptor extends InterceptorAdapter imp
         }
 
         return null;
+    }
+
+    public boolean isNotifyOnDelete() {
+        return notifyOnDelete;
+    }
+
+    public void setNotifyOnDelete(boolean notifyOnDelete) {
+        this.notifyOnDelete = notifyOnDelete;
     }
 }
 

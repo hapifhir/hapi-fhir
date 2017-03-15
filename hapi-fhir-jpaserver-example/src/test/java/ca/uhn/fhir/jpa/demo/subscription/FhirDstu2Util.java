@@ -1,15 +1,24 @@
 package ca.uhn.fhir.jpa.demo.subscription;
 
 import ca.uhn.fhir.model.dstu2.composite.CodingDt;
+import ca.uhn.fhir.model.dstu2.composite.IdentifierDt;
 import ca.uhn.fhir.model.dstu2.resource.Observation;
+import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.dstu2.resource.Subscription;
+import ca.uhn.fhir.model.dstu2.valueset.AdministrativeGenderEnum;
 import ca.uhn.fhir.model.dstu2.valueset.ObservationStatusEnum;
 import ca.uhn.fhir.model.dstu2.valueset.SubscriptionChannelTypeEnum;
 import ca.uhn.fhir.model.dstu2.valueset.SubscriptionStatusEnum;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.IGenericClient;
+import org.hl7.fhir.instance.model.api.IBaseCoding;
+import org.hl7.fhir.instance.model.api.IBaseMetaType;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 
 public class FhirDstu2Util {
+
+    public static final String LPI_CODESYSTEM = "http://cognitivemedicine.com/lpi";
+    public static final String LPI_CODE = "LPI-FHIR";
 
     public static Subscription createSubscription(String criteria, String payload, String endpoint, IGenericClient client) {
         Subscription subscription = new Subscription();
@@ -54,5 +63,32 @@ public class FhirDstu2Util {
         observation.getCode().addCoding(snomedCoding);
 
         return observation;
+    }
+
+    public static Patient getPatient(){
+        String patientId = "1";
+
+        Patient patient = new Patient();
+        patient.setGender(AdministrativeGenderEnum.MALE);
+
+        IdentifierDt identifier = patient.addIdentifier();
+        identifier.setValue(patientId);
+        identifier.setSystem(LPI_CODESYSTEM);
+
+        IBaseMetaType meta = patient.getMeta();
+        IBaseCoding tag = meta.addTag();
+        tag.setCode(LPI_CODE);
+        tag.setSystem(LPI_CODESYSTEM);
+
+        setTag(patient);
+
+        return patient;
+    }
+
+    public static void setTag(IBaseResource resource){
+        IBaseMetaType meta = resource.getMeta();
+        IBaseCoding tag = meta.addTag();
+        tag.setCode(LPI_CODE);
+        tag.setSystem(LPI_CODESYSTEM);
     }
 }

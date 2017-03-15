@@ -135,6 +135,7 @@ public class FhirServerConfigDstu3WSocket extends BaseJavaConfigDstu3 implements
 
 		try {
 			RestHookSubscriptionDstu3Interceptor restHook = SpringObjectCaster.getTargetObject(restHookInterceptor, RestHookSubscriptionDstu3Interceptor.class);
+			restHook.setNotifyOnDelete(true);
 			restHook.initSubscriptions();
 		}catch(PersistenceException e){
 			throw new RuntimeException("Persistence error in setting up resthook subscriptions:" + e.getMessage());

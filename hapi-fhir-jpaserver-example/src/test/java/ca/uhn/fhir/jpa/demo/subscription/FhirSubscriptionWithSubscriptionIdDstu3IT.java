@@ -41,9 +41,9 @@ import java.net.URI;
  *
  * To execute the following test, execute it the following way:
  * 1. Execute the 'createPatient' test
- * 2. Update the patient id in the 'createSubscriptionWithoutWebsocket' and the 'sendObservation' tests
+ * 2. Update the patient id static variable
  * 3. Execute the 'createSubscription' test
- * 4. Update the subscription id in the 'attachWebSocket' test
+ * 4. Update the subscription id static variable
  * 5. Execute the 'attachWebSocket' test
  * 6. Execute the 'sendObservation' test
  * 7. Look in the 'attachWebSocket' terminal execution and wait for your ping with the subscription id
@@ -52,15 +52,15 @@ public class FhirSubscriptionWithSubscriptionIdDstu3IT {
 
     private static final Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirSubscriptionWithSubscriptionIdDstu3IT.class);
 
-    public static final String LPI_CODESYSTEM = "http://cognitivemedicine.com/lpi";
-    public static final String LPI_CODE = "LPI-FHIR";
-    public static final String FHIR_URL = "http://localhost:8080/baseDstu3";
+    public static final String WEBSOCKET_LISTENER_URL = "ws://localhost:9093/websocket/dstu3";
+
+    public static final String PATIENT_ID = "3";
+    public static final String SUBSCRIPTION_ID = "4";
 
     @Test
     public void createPatient() throws Exception{
-        FhirContext ctx = FhirContext.forDstu3();
-        IGenericClient client = ctx.newRestfulGenericClient(FHIR_URL);
-        Patient patient = getPatient();
+        IGenericClient client = FhirServiceUtil.getFhirDstu3Client();
+        Patient patient = FhirDstu3Util.getPatient();
         MethodOutcome methodOutcome = client.create().resource(patient).execute();
         String id = methodOutcome.getId().getIdPart();
         patient.setId(id);
@@ -69,15 +69,13 @@ public class FhirSubscriptionWithSubscriptionIdDstu3IT {
 
     @Test
     public void createSubscription() {
-        String patientId = "1";
-        FhirContext ctx = FhirContext.forDstu3();
-        IGenericClient client = ctx.newRestfulGenericClient(FHIR_URL);
+        IGenericClient client = FhirServiceUtil.getFhirDstu3Client();
 
         Subscription subscription = new Subscription();
         subscription.setReason("Monitor new neonatal function (note, age will be determined by the monitor)");
         subscription.setStatus(Subscription.SubscriptionStatus.ACTIVE);
-        //subscription.setCriteria("Observation?subject=Patient/" + patientId +"&_format=xml");
-        subscription.setCriteria("Observation?subject=Patient/" + patientId);
+        //subscription.setCriteria("Observation?subject=Patient/" + PATIENT_ID +"&_format=xml");
+        subscription.setCriteria("Observation?subject=Patient/" + PATIENT_ID);
         Subscription.SubscriptionChannelComponent channel = new Subscription.SubscriptionChannelComponent();
         channel.setType(Subscription.SubscriptionChannelType.WEBSOCKET);
         channel.setPayload("application/json");
@@ -91,17 +89,12 @@ public class FhirSubscriptionWithSubscriptionIdDstu3IT {
 
     @Test
     public void attachWebSocket() throws Exception{
-        String subscriptionId = "5";
-        subscriptionId = subscriptionId + "";
-
-        String target = "ws://localhost:8080/websocket/dstu3";
-
         WebSocketClient webSocketClient = new WebSocketClient();
-        SocketImplementation socket = new SocketImplementation(subscriptionId, EncodingEnum.JSON);
+        SocketImplementation socket = new SocketImplementation(SUBSCRIPTION_ID, EncodingEnum.JSON);
 
         try {
             webSocketClient.start();
-            URI echoUri = new URI(target);
+            URI echoUri = new URI(WEBSOCKET_LISTENER_URL);
             ClientUpgradeRequest request = new ClientUpgradeRequest();
             ourLog.info("Connecting to : {}", echoUri);
             webSocketClient.connect(socket, echoUri, request);
@@ -128,11 +121,12 @@ public class FhirSubscriptionWithSubscriptionIdDstu3IT {
         Coding coding = codeableConcept.addCoding();
         coding.setCode("82313006");
         coding.setSystem("SNOMED-CT");
-
+        Reference reference = new Reference();
+        reference.setReference("Patient/"+ PATIENT_ID);
+        observation.setSubject(reference);
         observation.setStatus(Observation.ObservationStatus.FINAL);
 
-        FhirContext ctx = FhirContext.forDstu3();
-        IGenericClient client = ctx.newRestfulGenericClient(FHIR_URL);
+        IGenericClient client = FhirServiceUtil.getFhirDstu3Client();
 
         MethodOutcome methodOutcome2 = client.create().resource(observation).execute();
         String observationId = methodOutcome2.getId().getIdPart();
@@ -143,10 +137,9 @@ public class FhirSubscriptionWithSubscriptionIdDstu3IT {
 
     @Test
     public void createObservationThatDoesNotMatch() throws Exception {
-        String patientId = "4";
         Observation observation = new Observation();
         IdDt idDt = new IdDt();
-        idDt.setValue("Patient/"+ patientId);
+        idDt.setValue("Patient/"+ PATIENT_ID);
         CodeableConcept codeableConcept = new CodeableConcept();
         observation.setCode(codeableConcept);
         Coding coding = codeableConcept.addCoding();
@@ -154,8 +147,7 @@ public class FhirSubscriptionWithSubscriptionIdDstu3IT {
         coding.setSystem("SNOMED-CT");
         observation.setStatus(Observation.ObservationStatus.FINAL);
 
-        FhirContext ctx = FhirContext.forDstu3();
-        IGenericClient client = ctx.newRestfulGenericClient(FHIR_URL);
+        IGenericClient client = FhirServiceUtil.getFhirDstu3Client();
 
         MethodOutcome methodOutcome2 = client.create().resource(observation).execute();
         String observationId = methodOutcome2.getId().getIdPart();
@@ -163,32 +155,5 @@ public class FhirSubscriptionWithSubscriptionIdDstu3IT {
 
         System.out.println("Observation id generated by server is: " + observationId);
 
-    }
-
-    public Patient getPatient(){
-        String patientId = "1";
-
-        Patient patient = new Patient();
-        patient.setGender(Enumerations.AdministrativeGender.MALE);
-
-        Identifier identifier = patient.addIdentifier();
-        identifier.setValue(patientId);
-        identifier.setSystem(LPI_CODESYSTEM);
-
-        IBaseMetaType meta = patient.getMeta();
-        IBaseCoding tag = meta.addTag();
-        tag.setCode(LPI_CODE);
-        tag.setSystem(LPI_CODESYSTEM);
-
-        setTag(patient);
-
-        return patient;
-    }
-
-    public static void setTag(IBaseResource resource){
-        IBaseMetaType meta = resource.getMeta();
-        IBaseCoding tag = meta.addTag();
-        tag.setCode(LPI_CODE);
-        tag.setSystem(LPI_CODESYSTEM);
     }
 }

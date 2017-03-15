@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.thread;
 
 import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.hl7.fhir.dstu3.model.Subscription;
 import org.slf4j.Logger;
@@ -9,14 +9,14 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
-public class HttpRequestDstu3Job implements Runnable{
+public class HttpRequestDstu3Job implements Runnable {
 
-    private HttpPost request;
+    private HttpUriRequest request;
     private Subscription subscription;
 
     private static final Logger logger = LoggerFactory.getLogger(HttpRequestDstu3Job.class);
 
-    public HttpRequestDstu3Job(HttpPost request, Subscription subscription){
+    public HttpRequestDstu3Job(HttpUriRequest request, Subscription subscription) {
         this.request = request;
         this.subscription = subscription;
     }
@@ -32,7 +32,7 @@ public class HttpRequestDstu3Job implements Runnable{
      * @param request
      * @param subscription
      */
-    private void executeRequest(HttpPost request, Subscription subscription) {
+    private void executeRequest(HttpUriRequest request, Subscription subscription) {
         String url = subscription.getChannel().getEndpoint();
 
         try {
@@ -43,6 +43,6 @@ public class HttpRequestDstu3Job implements Runnable{
             e.printStackTrace();
         }
 
-        logger.info("sent: "  + url);
+        logger.info("sent: " + url);
     }
 }

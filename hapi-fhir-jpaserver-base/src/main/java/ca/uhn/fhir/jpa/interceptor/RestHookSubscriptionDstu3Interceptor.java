@@ -22,6 +22,7 @@ import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.SearchParameterMap;
 import ca.uhn.fhir.jpa.dao.dstu3.FhirResourceDaoSubscriptionDstu3;
 import ca.uhn.fhir.jpa.entity.ResourceTable;
+import ca.uhn.fhir.jpa.service.TMinusService;
 import ca.uhn.fhir.jpa.thread.HttpRequestDstu3Job;
 import ca.uhn.fhir.jpa.util.SpringObjectCaster;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
@@ -34,6 +35,8 @@ import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
 import ca.uhn.fhir.rest.server.interceptor.InterceptorAdapter;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
+import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
@@ -69,6 +72,7 @@ public class RestHookSubscriptionDstu3Interceptor extends InterceptorAdapter imp
 
     private static final Logger logger = LoggerFactory.getLogger(RestHookSubscriptionDstu3Interceptor.class);
     private final List<Subscription> restHookSubscriptions = new ArrayList<Subscription>();
+    private boolean notifyOnDelete = false;
 
     private final static int MAX_THREADS = 1;
 
@@ -179,7 +183,9 @@ public class RestHookSubscriptionDstu3Interceptor extends InterceptorAdapter imp
                 String id = idType.getIdPart();
                 removeLocalSubscription(id);
             } else {
-                checkSubscriptions(idType, resourceType);
+                if (notifyOnDelete) {
+                    checkSubscriptions(idType, resourceType);
+                }
             }
         }
 
@@ -203,6 +209,8 @@ public class RestHookSubscriptionDstu3Interceptor extends InterceptorAdapter imp
             //run the subscriptions query and look for matches, add the id as part of the criteria to avoid getting matches of previous resources rather than the recent resource
             String criteria = subscription.getCriteria();
             criteria += "&_id=" + idType.getResourceType() + "/" + idType.getIdPart();
+            criteria = TMinusService.parseCriteria(criteria);
+
             IBundleProvider results = getBundleProvider(criteria);
 
             if (results.size() == 0) {
@@ -213,7 +221,7 @@ public class RestHookSubscriptionDstu3Interceptor extends InterceptorAdapter imp
             for (IBaseResource nextBase : results.getResources(0, results.size())) {
                 IAnyResource next = (IAnyResource) nextBase;
                 logger.info("Found match: queueing rest-hook notification for resource: {}", next.getIdElement());
-                HttpPost request = createRequest(subscription, next);
+                HttpUriRequest request = createRequest(subscription, next);
                 executor.submit(new HttpRequestDstu3Job(request, subscription));
             }
         }
@@ -226,25 +234,41 @@ public class RestHookSubscriptionDstu3Interceptor extends InterceptorAdapter imp
      * @param resource
      * @return
      */
-    private HttpPost createRequest(Subscription subscription, IAnyResource resource) {
+    private HttpUriRequest createRequest(Subscription subscription, IAnyResource resource) {
         String url = subscription.getChannel().getEndpoint();
-        HttpPost request = new HttpPost(url);
-        request.addHeader("User-Agent", USER_AGENT);
+        HttpUriRequest request = null;
+
         String payload = subscription.getChannel().getPayload();
+        //HTTP post
         if (payload == null || payload.trim().length() == 0) {
             //return an empty response as there is no payload
             logger.info("No payload found, returning an empty notification");
-        } else if (payload.equals("application/xml") || payload.equals("application/fhir+xml")) {
+            request = new HttpPost(url);
+        }
+        //HTTP put
+        else if (payload.equals("application/xml") || payload.equals("application/fhir+xml")) {
             logger.info("XML payload found");
             StringEntity entity = getStringEntity(EncodingEnum.XML, resource);
-            request.setEntity(entity);
-        } else if (payload.equals("application/json") || payload.equals("application/fhir+json")) {
+            HttpPut putRequest = new HttpPut(url);
+            putRequest.setEntity(entity);
+
+            request = putRequest;
+        }
+        //HTTP put
+        else if (payload.equals("application/json") || payload.equals("application/fhir+json")) {
             logger.info("JSON payload found");
             StringEntity entity = getStringEntity(EncodingEnum.JSON, resource);
-            request.setEntity(entity);
-        } else if (payload.startsWith("application/fhir+query/")) { //custom payload that is a FHIR query
+            HttpPut putRequest = new HttpPut(url);
+            putRequest.setEntity(entity);
+
+            request = putRequest;
+        }
+        //HTTP post
+        else if (payload.startsWith("application/fhir+query/")) { //custom payload that is a FHIR query
             logger.info("Custom query payload found");
             String responseCriteria = subscription.getChannel().getPayload().substring(23);
+            responseCriteria = TMinusService.parseCriteria(responseCriteria);
+
             //get the encoding type from payload which is a FHIR query with &_format=
             EncodingEnum encoding = getEncoding(responseCriteria);
             IBundleProvider responseResults = getBundleProvider(responseCriteria);
@@ -252,17 +276,25 @@ public class RestHookSubscriptionDstu3Interceptor extends InterceptorAdapter imp
                 List<IBaseResource> resourcelist = responseResults.getResources(0, responseResults.size());
                 Bundle bundle = createBundle(resourcelist);
                 StringEntity bundleEntity = getStringEntity(encoding, bundle);
-                request.setEntity(bundleEntity);
+                HttpPost postRequest = new HttpPost(url);
+                postRequest.setEntity(bundleEntity);
+
+                request = postRequest;
             } else {
                 Bundle bundle = new Bundle();
                 bundle.setTotal(0);
                 StringEntity bundleEntity = getStringEntity(encoding, bundle);
-                request.setEntity(bundleEntity);
-            }
+                HttpPost postRequest = new HttpPost(url);
+                postRequest.setEntity(bundleEntity);
 
+                request = postRequest;
+            }
         } else {
             logger.warn("Unsupported payload " + payload + ". Returning an empty notification");
+            request = new HttpPost(url);
         }
+
+        //request.addHeader("User-Agent", USER_AGENT);
         return request;
     }
 
@@ -374,5 +406,13 @@ public class RestHookSubscriptionDstu3Interceptor extends InterceptorAdapter imp
         }
 
         return null;
+    }
+
+    public boolean isNotifyOnDelete() {
+        return notifyOnDelete;
+    }
+
+    public void setNotifyOnDelete(boolean notifyOnDelete) {
+        this.notifyOnDelete = notifyOnDelete;
     }
 }

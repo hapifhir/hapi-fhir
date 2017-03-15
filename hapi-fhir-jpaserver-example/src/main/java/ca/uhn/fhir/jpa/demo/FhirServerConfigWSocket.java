@@ -113,6 +113,7 @@ public class FhirServerConfigWSocket extends BaseJavaConfigDstu2 implements WebS
 
 		try {
 			RestHookSubscriptionDstu2Interceptor restHook = SpringObjectCaster.getTargetObject(restHookInterceptor, RestHookSubscriptionDstu2Interceptor.class);
+			restHook.setNotifyOnDelete(true);
 			restHook.initSubscriptions();
 		}catch(PersistenceException e){
 			throw new RuntimeException("Persistence error in setting up resthook subscriptions:" + e.getMessage());

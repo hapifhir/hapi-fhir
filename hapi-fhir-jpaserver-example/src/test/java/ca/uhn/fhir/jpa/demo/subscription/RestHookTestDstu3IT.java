@@ -39,8 +39,7 @@ public class RestHookTestDstu3IT {
 
     @Test
     public void testRestHookSubscription(){
-        FhirContext ctx = FhirContext.forDstu3();
-        IGenericClient client = ctx.newRestfulGenericClient(FHIR_URL);
+        IGenericClient client = FhirServiceUtil.getFhirDstu3Client();
 
         String payload = "application/json";
         String endpoint = "http://localhost:10080/rest-hook";
@@ -95,8 +94,7 @@ public class RestHookTestDstu3IT {
 
     @Test
     public void sendObservation(){
-        FhirContext ctx = FhirContext.forDstu3();
-        IGenericClient client = ctx.newRestfulGenericClient(FHIR_URL);
+        IGenericClient client = FhirServiceUtil.getFhirDstu3Client();
         String code = "1000000009";
         Observation observation1 = sendObservation(code, "SNOMED-CT", client);
         //Should see only one subscription notification

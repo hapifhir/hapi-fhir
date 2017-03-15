@@ -2,11 +2,15 @@ package ca.uhn.fhir.jpa.demo.subscription;
 
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.IGenericClient;
-import org.hl7.fhir.dstu3.model.Coding;
-import org.hl7.fhir.dstu3.model.Observation;
-import org.hl7.fhir.dstu3.model.Subscription;
+import org.hl7.fhir.dstu3.model.*;
+import org.hl7.fhir.instance.model.api.IBaseCoding;
+import org.hl7.fhir.instance.model.api.IBaseMetaType;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 
 public class FhirDstu3Util {
+
+    public static final String LPI_CODESYSTEM = "http://cognitivemedicine.com/lpi";
+    public static final String LPI_CODE = "LPI-FHIR";
 
     public static Subscription createSubscription(String criteria, String payload, String endpoint, IGenericClient client) {
         Subscription subscription = new Subscription();
@@ -52,4 +56,38 @@ public class FhirDstu3Util {
 
         return observation;
     }
+
+    /**
+     * Create a patient object for the test
+     * @return
+     */
+    public static Patient getPatient(){
+        String patientId = "1";
+
+        Patient patient = new Patient();
+        patient.setGender(Enumerations.AdministrativeGender.MALE);
+
+        Identifier identifier = patient.addIdentifier();
+        identifier.setValue(patientId);
+        identifier.setSystem(LPI_CODESYSTEM);
+
+        IBaseMetaType meta = patient.getMeta();
+        IBaseCoding tag = meta.addTag();
+        tag.setCode(LPI_CODE);
+        tag.setSystem(LPI_CODESYSTEM);
+        setTag(patient);
+        return patient;
+    }
+
+    /**
+     * Set the tag for a resource
+     * @param resource
+     */
+    public static void setTag(IBaseResource resource){
+        IBaseMetaType meta = resource.getMeta();
+        IBaseCoding tag = meta.addTag();
+        tag.setCode(LPI_CODE);
+        tag.setSystem(LPI_CODESYSTEM);
+    }
+
 }

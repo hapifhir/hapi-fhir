@@ -35,13 +35,9 @@ public class RestHookTestDstu3WithSubscriptionResponseCriteriaIT {
 
     private static final Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirSubscriptionWithSubscriptionIdDstu3IT.class);
 
-    //public static final String FHIR_DSTU3_URL = "http://localhost:8080/baseDstu3";
-    public static final String FHIR_URL = "http://localhost:9093/baseDstu3";
-
     @Test
     public void testRestHookSubscription(){
-        FhirContext ctx = FhirContext.forDstu3();
-        IGenericClient client = ctx.newRestfulGenericClient(FHIR_URL);
+        IGenericClient client = FhirServiceUtil.getFhirDstu3Client();
 
         String payload = "application/json";
         String endpoint = "http://localhost:10080/rest-hook";
@@ -96,8 +92,7 @@ public class RestHookTestDstu3WithSubscriptionResponseCriteriaIT {
 
     @Test
     public void sendObservation(){
-        FhirContext ctx = FhirContext.forDstu3();
-        IGenericClient client = ctx.newRestfulGenericClient(FHIR_URL);
+        IGenericClient client = FhirServiceUtil.getFhirDstu3Client();
         String code = "1000000009";
         Observation observation1 = sendObservation(code, "SNOMED-CT", client);
         //Should see only one subscription notification

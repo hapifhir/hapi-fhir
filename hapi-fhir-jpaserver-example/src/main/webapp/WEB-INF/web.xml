@@ -13,7 +13,7 @@
 	<context-param>
 		<param-name>contextConfigLocation</param-name>
 		<param-value>
-			ca.uhn.fhir.jpa.demo.FhirServerConfigWSocket
+			ca.uhn.fhir.jpa.demo.FhirServerConfigDstu3WSocket
 		</param-value>
 	</context-param>
 
@@ -28,28 +28,28 @@
 		</init-param>
 		<init-param>
 			<param-name>contextConfigLocation</param-name>
-			<param-value>ca.uhn.fhir.jpa.demo.FhirTesterConfig</param-value>
+			<param-value>ca.uhn.fhir.jpa.demo.FhirTesterConfigDstu3</param-value>
 		</init-param>
 		<load-on-startup>2</load-on-startup>
 	</servlet>
 
 	<servlet>
 		<servlet-name>fhirServlet</servlet-name>
-		<servlet-class>ca.uhn.fhir.jpa.demo.JpaServerDemo</servlet-class>
+		<servlet-class>ca.uhn.fhir.jpa.demo.JpaServerDemoDstu3</servlet-class>
 		<init-param>
 			<param-name>ImplementationDescription</param-name>
 			<param-value>FHIR JPA Server</param-value>
 		</init-param>
 		<init-param>
 			<param-name>FhirVersion</param-name>
-			<param-value>DSTU2</param-value>
+			<param-value>DSTU3</param-value>
 		</init-param>
 		<load-on-startup>1</load-on-startup>
 	</servlet>
 
 	<servlet-mapping>
 		<servlet-name>fhirServlet</servlet-name>
-		<url-pattern>/baseDstu2/*</url-pattern>
+		<url-pattern>/baseDstu3/*</url-pattern>
 	</servlet-mapping>
 
 	<servlet-mapping>

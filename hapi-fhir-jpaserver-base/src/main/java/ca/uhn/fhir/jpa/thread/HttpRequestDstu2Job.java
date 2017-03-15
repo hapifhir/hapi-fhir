@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.thread;
 import ca.uhn.fhir.model.dstu2.resource.Subscription;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,12 +12,12 @@ import java.io.IOException;
 
 public class HttpRequestDstu2Job implements Runnable{
 
-    private HttpPost request;
+    private HttpUriRequest request;
     private Subscription subscription;
 
     private static final Logger logger = LoggerFactory.getLogger(HttpRequestDstu2Job.class);
 
-    public HttpRequestDstu2Job(HttpPost request, Subscription subscription){
+    public HttpRequestDstu2Job(HttpUriRequest request, Subscription subscription){
         this.request = request;
         this.subscription = subscription;
     }
@@ -32,7 +33,7 @@ public class HttpRequestDstu2Job implements Runnable{
      * @param request
      * @param subscription
      */
-    private void executeRequest(HttpPost request, Subscription subscription) {
+    private void executeRequest(HttpUriRequest request, Subscription subscription) {
         String url = subscription.getChannel().getEndpoint();
 
         try {
