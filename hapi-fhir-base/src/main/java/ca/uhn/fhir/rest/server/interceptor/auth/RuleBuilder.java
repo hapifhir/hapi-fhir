@@ -371,6 +371,22 @@ public class RuleBuilder implements IAuthRuleBuilder {
 					return appliesToTypes;
 				}
 
+				@Override
+				public IAuthRuleFinished onAnyType() {
+					OperationRule rule = createRule();
+					rule.appliesToAnyType();
+					myRules.add(rule);
+					return new RuleBuilderFinished();
+				}
+
+				@Override
+				public IAuthRuleFinished onAnyInstance() {
+					OperationRule rule = createRule();
+					rule.appliesToAnyInstance();
+					myRules.add(rule);
+					return new RuleBuilderFinished();
+				}
+
 			}
 
 		}
