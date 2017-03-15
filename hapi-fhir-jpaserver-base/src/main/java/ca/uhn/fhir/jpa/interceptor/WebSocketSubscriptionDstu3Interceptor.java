@@ -1,5 +1,5 @@
 /*
- *  Copyright 2016 Cognitive Medical Systems, Inc (http://www.cognitivemedicine.com).
+ *  Copyright 2017 Cognitive Medical Systems, Inc (http://www.cognitivemedicine.com).
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -12,6 +12,8 @@
  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
+ *
+ *  @author Jeff Chung
  */
 
 package ca.uhn.fhir.jpa.interceptor;
@@ -26,7 +28,6 @@ import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
 import ca.uhn.fhir.rest.server.interceptor.InterceptorAdapter;
 import org.hl7.fhir.dstu3.model.Subscription;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -1,5 +1,5 @@
 /*
- *  Copyright 2016 Cognitive Medical Systems, Inc (http://www.cognitivemedicine.com).
+ *  Copyright 2017 Cognitive Medical Systems, Inc (http://www.cognitivemedicine.com).
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -12,20 +12,19 @@
  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
+ *
+ *  @author Jeff Chung
  */
-
 package ca.uhn.fhir.jpa.demo.subscription;
 
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.IGenericClient;
 import ca.uhn.fhir.rest.server.EncodingEnum;
 import org.eclipse.jetty.websocket.client.WebSocketClient;
-import org.hl7.fhir.dstu3.hapi.ctx.FhirDstu3;
-import org.hl7.fhir.dstu3.model.*;
-import org.hl7.fhir.instance.model.api.IBaseCoding;
-import org.hl7.fhir.instance.model.api.IBaseMetaType;
-import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.dstu3.model.CodeableConcept;
+import org.hl7.fhir.dstu3.model.Coding;
+import org.hl7.fhir.dstu3.model.Observation;
+import org.hl7.fhir.dstu3.model.Patient;
 import org.junit.Test;
 
 import java.net.URI;
@@ -33,7 +32,7 @@ import java.net.URI;
 /**
  * Adds a FHIR subscription by creating a websocket that includes the subscription criteria.  The server will create
  * a subscription automatically and return the subscription id
- *
+ * <p>
  * 1. Execute the 'createPatient' test
  * 2. Update the patient id in the 'attachWebSocket' and the 'sendObservation' tests
  * 3. Execute the 'attachWebSocket' test
@@ -47,10 +46,11 @@ public class FhirSubscriptionWithWebsocketCriteriaDstu3IT {
 
     /**
      * Attach a websocket to the FHIR server based on a criteria
+     *
      * @throws Exception
      */
     @Test
-    public void attachWebSocket() throws Exception{
+    public void attachWebSocket() throws Exception {
         String criteria = "Observation?code=SNOMED-CT|82313006&_format=xml";
         SocketImplementation socket = new SocketImplementation(criteria, EncodingEnum.JSON);
         WebSocketClient client = new WebSocketClient();
@@ -62,11 +62,11 @@ public class FhirSubscriptionWithWebsocketCriteriaDstu3IT {
             client.connect(socket, echoUri);
 
             Thread.sleep(5000);
-        }catch(Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
-        while(true){
+        while (true) {
             Thread.sleep(60000);
 
             socket.keepAlive();
@@ -75,10 +75,11 @@ public class FhirSubscriptionWithWebsocketCriteriaDstu3IT {
 
     /**
      * Create a patient in the FHIR server
+     *
      * @throws Exception
      */
     @Test
-    public void createPatient() throws Exception{
+    public void createPatient() throws Exception {
         IGenericClient client = FhirServiceUtil.getFhirDstu3Client();
 
         Patient patient = FhirDstu3Util.getPatient();
@@ -93,7 +94,7 @@ public class FhirSubscriptionWithWebsocketCriteriaDstu3IT {
      * Create an observation in the FHIR server
      */
     @Test
-    public void createObservation(){
+    public void createObservation() {
         IGenericClient client = FhirServiceUtil.getFhirDstu3Client();
 
         Observation observation = new Observation();

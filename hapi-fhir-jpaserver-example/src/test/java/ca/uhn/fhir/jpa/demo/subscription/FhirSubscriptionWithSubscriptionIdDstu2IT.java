@@ -1,5 +1,5 @@
 /*
- *  Copyright 2016 Cognitive Medical Systems, Inc (http://www.cognitivemedicine.com).
+ *  Copyright 2017 Cognitive Medical Systems, Inc (http://www.cognitivemedicine.com).
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -12,18 +12,16 @@
  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
+ *
+ *  @author Jeff Chung
  */
-
 package ca.uhn.fhir.jpa.demo.subscription;
 
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.dstu2.composite.CodeableConceptDt;
 import ca.uhn.fhir.model.dstu2.composite.CodingDt;
-import ca.uhn.fhir.model.dstu2.composite.IdentifierDt;
 import ca.uhn.fhir.model.dstu2.resource.Observation;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.dstu2.resource.Subscription;
-import ca.uhn.fhir.model.dstu2.valueset.AdministrativeGenderEnum;
 import ca.uhn.fhir.model.dstu2.valueset.ObservationStatusEnum;
 import ca.uhn.fhir.model.dstu2.valueset.SubscriptionChannelTypeEnum;
 import ca.uhn.fhir.model.dstu2.valueset.SubscriptionStatusEnum;
@@ -32,9 +30,6 @@ import ca.uhn.fhir.rest.client.IGenericClient;
 import ca.uhn.fhir.rest.server.EncodingEnum;
 import org.eclipse.jetty.websocket.client.ClientUpgradeRequest;
 import org.eclipse.jetty.websocket.client.WebSocketClient;
-import org.hl7.fhir.instance.model.api.IBaseCoding;
-import org.hl7.fhir.instance.model.api.IBaseMetaType;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.Test;
 import org.slf4j.Logger;
 
@@ -43,10 +38,10 @@ import java.net.URI;
 /**
  * Adds a FHIR subscription with criteria through the rest interface. Then creates a websocket with the id of the
  * subscription
- *
+ * <p>
  * Note: This test only returns a ping with the subscription id, Check FhirSubscriptionWithSubscriptionIdDstu3IT for
  * a test that returns the xml of the observation
- *
+ * <p>
  * To execute the following test, execute it the following way:
  * 1. Execute the 'createPatient' test
  * 2. Update the patient id in the 'createSubscriptionWithoutWebsocket' and the 'sendObservation' tests
@@ -61,7 +56,7 @@ public class FhirSubscriptionWithSubscriptionIdDstu2IT {
     private static final Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirSubscriptionWithSubscriptionIdDstu2IT.class);
 
     @Test
-    public void createPatient() throws Exception{
+    public void createPatient() throws Exception {
         IGenericClient client = FhirServiceUtil.getFhirDstu2Client();
         Patient patient = FhirDstu2Util.getPatient();
         MethodOutcome methodOutcome = client.create().resource(patient).execute();
@@ -92,7 +87,7 @@ public class FhirSubscriptionWithSubscriptionIdDstu2IT {
     }
 
     @Test
-    public void attachWebSocket() throws Exception{
+    public void attachWebSocket() throws Exception {
         String subscriptionId = "5";
         subscriptionId = subscriptionId + "";
 

@@ -1,5 +1,5 @@
 /*
- *  Copyright 2016 Cognitive Medical Systems, Inc (http://www.cognitivemedicine.com).
+ *  Copyright 2017 Cognitive Medical Systems, Inc (http://www.cognitivemedicine.com).
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -12,6 +12,8 @@
  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
+ *
+ *  @author Jeff Chung
  */
 
 package ca.uhn.fhir.jpa.demo.subscription;
@@ -43,6 +45,7 @@ public class SocketImplementation {
     /**
      * This method is executed when the client is connecting to the server.
      * In this case, we are sending a message to create the subscription dynamiclly
+     *
      * @param session
      */
     @OnWebSocketConnect
@@ -63,6 +66,7 @@ public class SocketImplementation {
 
     /**
      * This is the message handler for the client
+     *
      * @param theMsg
      */
     @OnWebSocketMessage
@@ -82,8 +86,8 @@ public class SocketImplementation {
         }
     }
 
-    public void keepAlive(){
-        if(this.session != null){
+    public void keepAlive() {
+        if (this.session != null) {
             try {
                 session.getRemote().sendString("keep alive");
             } catch (Throwable t) {

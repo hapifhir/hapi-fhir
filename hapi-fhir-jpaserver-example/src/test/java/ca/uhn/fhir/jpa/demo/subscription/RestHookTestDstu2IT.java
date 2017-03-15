@@ -1,5 +1,5 @@
 /*
- *  Copyright 2016 Cognitive Medical Systems, Inc (http://www.cognitivemedicine.com).
+ *  Copyright 2017 Cognitive Medical Systems, Inc (http://www.cognitivemedicine.com).
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -12,11 +12,12 @@
  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
+ *
+ *  @author Jeff Chung
  */
 
 package ca.uhn.fhir.jpa.demo.subscription;
 
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.dstu2.composite.CodeableConceptDt;
 import ca.uhn.fhir.model.dstu2.composite.CodingDt;
 import ca.uhn.fhir.model.dstu2.resource.Observation;
@@ -42,7 +43,7 @@ public class RestHookTestDstu2IT {
     private static String code = "1000000012";
 
     @Test
-    public void testRestHookSubscription(){
+    public void testRestHookSubscription() {
         IGenericClient client = FhirServiceUtil.getFhirDstu2Client();
 
         String payload = "application/json";
@@ -104,7 +105,7 @@ public class RestHookTestDstu2IT {
     }
 
     @Test
-    public void sendObservation(){
+    public void sendObservation() {
         IGenericClient client = FhirServiceUtil.getFhirDstu2Client();
 
         Observation observation1 = sendObservation(code, "SNOMED-CT", client);
@@ -129,7 +130,7 @@ public class RestHookTestDstu2IT {
         return subscription;
     }
 
-    public Observation sendObservation(String code, String system, IGenericClient client){
+    public Observation sendObservation(String code, String system, IGenericClient client) {
         Observation observation = new Observation();
         CodeableConceptDt codeableConcept = new CodeableConceptDt();
         observation.setCode(codeableConcept);

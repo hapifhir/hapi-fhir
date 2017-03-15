@@ -1,3 +1,20 @@
+/*
+ *  Copyright 2017 Cognitive Medical Systems, Inc (http://www.cognitivemedicine.com).
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *
+ *  @author Jeff Chung
+ */
 package ca.uhn.fhir.jpa.demo.subscription;
 
 import ca.uhn.fhir.model.dstu2.resource.Observation;
@@ -20,19 +37,19 @@ public class ResthookSubscriptionDstu2TestsIT {
     }
 
     @After
-    public void clean(){
+    public void clean() {
         RemoveDstu2Test.deleteResources(Subscription.class, null, client);
         RemoveDstu2Test.deleteResources(Observation.class, null, client);
     }
 
     @Test
-    public void createSnomedObservation(){
+    public void createSnomedObservation() {
         String id = FhirServiceUtil.createResource(FhirDstu2Util.getSnomedObservation(), client);
         FhirServiceUtil.deleteResource(id, Observation.class, client);
     }
 
     @Test
-    public void testSubscriptionsWithoutPayload(){
+    public void testSubscriptionsWithoutPayload() {
         String code = "1000000050";
         String criteria = "Observation?code=SNOMED-CT|" + code;
 
@@ -50,7 +67,7 @@ public class ResthookSubscriptionDstu2TestsIT {
     }
 
     @Test
-    public void testSubscriptionsWithXmlPayload(){
+    public void testSubscriptionsWithXmlPayload() {
         String code = "1000000050";
         String criteria = "Observation?code=SNOMED-CT|" + code;
 
@@ -66,7 +83,7 @@ public class ResthookSubscriptionDstu2TestsIT {
     }
 
     @Test
-    public void testSubscriptionsWithJsonPayload(){
+    public void testSubscriptionsWithJsonPayload() {
         String code = "1000000050";
         String criteria = "Observation?code=SNOMED-CT|" + code;
 
@@ -79,7 +96,7 @@ public class ResthookSubscriptionDstu2TestsIT {
     }
 
     @Test
-    public void testSubscriptionsWithCustomXmlPayload(){
+    public void testSubscriptionsWithCustomXmlPayload() {
         String code = "1000000050";
         String criteria = "Observation?code=SNOMED-CT|" + code;
         String payloadCriteria = "application/fhir+query/" + criteria + "&_format=xml";
@@ -92,7 +109,7 @@ public class ResthookSubscriptionDstu2TestsIT {
     }
 
     @Test
-    public void testSubscriptionsWithCustomJsonPayload(){
+    public void testSubscriptionsWithCustomJsonPayload() {
         String code = "1000000050";
         String criteria = "Observation?code=SNOMED-CT|" + code;
         String payloadCriteria = "application/fhir+query/" + criteria + "&_format=json";
@@ -104,7 +121,7 @@ public class ResthookSubscriptionDstu2TestsIT {
     }
 
     @Test
-    public void testSubscriptionsWithCustomDefaultPayload(){
+    public void testSubscriptionsWithCustomDefaultPayload() {
         String code = "1000000050";
         String criteria = "Observation?code=SNOMED-CT|" + code;
         String payloadCriteria = "application/fhir+query/" + criteria;
@@ -116,7 +133,7 @@ public class ResthookSubscriptionDstu2TestsIT {
     }
 
     @Test
-    public void testSubscriptionsWithCustomDefaultPayloadThatIsEmpty(){
+    public void testSubscriptionsWithCustomDefaultPayloadThatIsEmpty() {
         String code = "1000000050";
         String criteria = "Observation?code=SNOMED-CT|" + code;
         String payloadCriteria = "application/fhir+query/Observation?code=SNOMED-CT|" + code + "1111";
@@ -131,7 +148,7 @@ public class ResthookSubscriptionDstu2TestsIT {
      * Add a 5 second delay to the HttpRequestDstu3Job to test if threading is improving creation speed
      */
     @Test
-    public void testSubscriptionsThreading(){
+    public void testSubscriptionsThreading() {
         String code = "1000000050";
         String criteria = "Observation?code=SNOMED-CT|" + code;
         Observation snomedObservation = FhirDstu2Util.getSnomedObservation();
@@ -150,7 +167,7 @@ public class ResthookSubscriptionDstu2TestsIT {
      * Add a 5 second delay to the HttpRequestDstu3Job to test if threading is improving creation speed
      */
     @Test
-    public void testSubscriptionsThreading2(){
+    public void testSubscriptionsThreading2() {
         String code = "1000000050";
         String criteria = "Observation?code=SNOMED-CT|" + code;
         Observation snomedObservation = FhirDstu2Util.getSnomedObservation();
@@ -160,7 +177,7 @@ public class ResthookSubscriptionDstu2TestsIT {
         FhirDstu2Util.createSubscription(criteria, null, FhirServiceUtil.REST_HOOK_ENDPOINT, client);
         FhirDstu2Util.createSubscription(criteria, null, FhirServiceUtil.REST_HOOK_ENDPOINT, client);
         FhirDstu2Util.createSubscription(criteria, null, FhirServiceUtil.REST_HOOK_ENDPOINT, client);
-        
+
         System.out.println("start");
         FhirServiceUtil.createResource(snomedObservation, client); //should trigger one notification
         System.out.println("done");

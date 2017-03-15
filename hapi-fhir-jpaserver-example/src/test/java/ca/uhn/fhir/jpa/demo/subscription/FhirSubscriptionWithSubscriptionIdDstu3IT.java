@@ -1,5 +1,5 @@
 /*
- *  Copyright 2016 Cognitive Medical Systems, Inc (http://www.cognitivemedicine.com).
+ *  Copyright 2017 Cognitive Medical Systems, Inc (http://www.cognitivemedicine.com).
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -12,11 +12,11 @@
  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
+ *
+ *  @author Jeff Chung
  */
-
 package ca.uhn.fhir.jpa.demo.subscription;
 
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.IGenericClient;
@@ -24,9 +24,6 @@ import ca.uhn.fhir.rest.server.EncodingEnum;
 import org.eclipse.jetty.websocket.client.ClientUpgradeRequest;
 import org.eclipse.jetty.websocket.client.WebSocketClient;
 import org.hl7.fhir.dstu3.model.*;
-import org.hl7.fhir.instance.model.api.IBaseCoding;
-import org.hl7.fhir.instance.model.api.IBaseMetaType;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.Test;
 import org.slf4j.Logger;
 
@@ -35,10 +32,10 @@ import java.net.URI;
 /**
  * Adds a FHIR subscription with criteria through the rest interface. Then creates a websocket with the id of the
  * subscription
- *
+ * <p>
  * Note: This test only returns a ping with the subscription id, Check FhirSubscriptionWithSubscriptionIdDstu3IT for
  * a test that returns the xml of the observation
- *
+ * <p>
  * To execute the following test, execute it the following way:
  * 1. Execute the 'createPatient' test
  * 2. Update the patient id static variable
@@ -58,7 +55,7 @@ public class FhirSubscriptionWithSubscriptionIdDstu3IT {
     public static final String SUBSCRIPTION_ID = "4";
 
     @Test
-    public void createPatient() throws Exception{
+    public void createPatient() throws Exception {
         IGenericClient client = FhirServiceUtil.getFhirDstu3Client();
         Patient patient = FhirDstu3Util.getPatient();
         MethodOutcome methodOutcome = client.create().resource(patient).execute();
@@ -88,7 +85,7 @@ public class FhirSubscriptionWithSubscriptionIdDstu3IT {
     }
 
     @Test
-    public void attachWebSocket() throws Exception{
+    public void attachWebSocket() throws Exception {
         WebSocketClient webSocketClient = new WebSocketClient();
         SocketImplementation socket = new SocketImplementation(SUBSCRIPTION_ID, EncodingEnum.JSON);
 
@@ -122,7 +119,7 @@ public class FhirSubscriptionWithSubscriptionIdDstu3IT {
         coding.setCode("82313006");
         coding.setSystem("SNOMED-CT");
         Reference reference = new Reference();
-        reference.setReference("Patient/"+ PATIENT_ID);
+        reference.setReference("Patient/" + PATIENT_ID);
         observation.setSubject(reference);
         observation.setStatus(Observation.ObservationStatus.FINAL);
 
@@ -139,7 +136,7 @@ public class FhirSubscriptionWithSubscriptionIdDstu3IT {
     public void createObservationThatDoesNotMatch() throws Exception {
         Observation observation = new Observation();
         IdDt idDt = new IdDt();
-        idDt.setValue("Patient/"+ PATIENT_ID);
+        idDt.setValue("Patient/" + PATIENT_ID);
         CodeableConcept codeableConcept = new CodeableConcept();
         observation.setCode(codeableConcept);
         Coding coding = codeableConcept.addCoding();

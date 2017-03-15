@@ -1,3 +1,20 @@
+/*
+ *  Copyright 2017 Cognitive Medical Systems, Inc (http://www.cognitivemedicine.com).
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *
+ *  @author Jeff Chung
+ */
 package ca.uhn.fhir.jpa.demo.subscription;
 
 import ca.uhn.fhir.jpa.service.TMinusService;
@@ -9,9 +26,6 @@ import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-/**
- * Created by Jeff on 3/9/2017.
- */
 public class TminusTest {
 
     @Test
@@ -102,7 +116,7 @@ public class TminusTest {
     }
 
     @Test
-    public void parsingCriteria(){
+    public void parsingCriteria() {
         String criteria = "Observation?code=SNOMED-CT|1000000050&date=Tminus1d&_format=xml";
         //String criteria = "Observation?code=SNOMED-CT|1000000050&date=%3E%3D2017-03-05T12:55:02-08:00&_format=xml";
 
@@ -121,7 +135,7 @@ public class TminusTest {
         Pattern pattern = Pattern.compile("Tminus([0-9]+)([wdhms])");
         Matcher matcher = pattern.matcher(criteria);
 
-        if(matcher.find()){
+        if (matcher.find()) {
             String tMinus = matcher.group();
             String tMinusValue = tMinus.substring(TMINUS.length(), tMinus.length() - 1);
             String tMinusPeriod = tMinus.substring(tMinus.length() - 1);
@@ -129,15 +143,15 @@ public class TminusTest {
             long tMinusLongValue = Long.parseLong(tMinusValue);
             long tMinusMillis = 0L;
 
-            if(WEEK.equals(tMinusPeriod)){
+            if (WEEK.equals(tMinusPeriod)) {
                 tMinusMillis = WEEK_AS_MILLIS * tMinusLongValue;
-            } else if(DAY.equals(tMinusPeriod)){
+            } else if (DAY.equals(tMinusPeriod)) {
                 tMinusMillis = DAY_AS_MILLIS * tMinusLongValue;
-            } else if(HOUR.equals(tMinusPeriod)){
+            } else if (HOUR.equals(tMinusPeriod)) {
                 tMinusMillis = HOUR_AS_MILLIS * tMinusLongValue;
-            } else if(MINUTE.equals(tMinusPeriod)){
+            } else if (MINUTE.equals(tMinusPeriod)) {
                 tMinusMillis = MINUTE_AS_MILLIS * tMinusLongValue;
-            } else if(SECOND.equals(tMinusPeriod)){
+            } else if (SECOND.equals(tMinusPeriod)) {
                 tMinusMillis = 1000 * tMinusLongValue;
             } else {
                 throw new IllegalArgumentException("Period not recognized: " + tMinusPeriod);
@@ -160,7 +174,7 @@ public class TminusTest {
             System.out.println(lowerDate);
             System.out.println(lowerDateTimeType.getValueAsString());
             System.out.println(formattedCriteria);
-        }else{
+        } else {
             System.out.println("nothing");
         }
     }
