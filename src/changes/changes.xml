@@ -166,6 +166,11 @@
 				JPA server interceptor methods for create/update/delete provided
 				the wrong version ID to the interceptors
 			</action>
+			<action type="add">
+				When RequestValidatingInterceptor is used, the validation results
+				are now populated into the OperationOutcome produced by
+				create and update operations
+			</action>
 		</release>
 		<release version="2.2" date="2016-12-20">
 			<action type="add">
