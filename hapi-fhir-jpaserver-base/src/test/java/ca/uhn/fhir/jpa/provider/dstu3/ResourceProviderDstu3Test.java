@@ -138,6 +138,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.util.UrlUtil;
 
@@ -400,6 +401,36 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		String input = IOUtils.toString(getClass().getResourceAsStream("/bryn-bundle.json"), StandardCharsets.UTF_8);
 		Validate.notNull(input);
 		ourClient.create().resource(input).execute().getResource();
+	}
+
+	@Test
+	public void testCreateIncludesRequestValidatorInterceptorOutcome() throws IOException {
+		RequestValidatingInterceptor interceptor = new RequestValidatingInterceptor();
+		assertTrue(interceptor.isAddValidationResultsToResponseOperationOutcome());
+		interceptor.setFailOnSeverity(null);
+		
+		ourRestServer.registerInterceptor(interceptor);
+		try {
+			// Missing status, which is mandatory
+			Observation obs = new Observation();
+			obs.addIdentifier().setSystem("urn:foo").setValue("bar");
+			IBaseResource outcome = ourClient.create().resource(obs).execute().getOperationOutcome();
+
+			String encodedOo = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
+			ourLog.info(encodedOo);
+			assertThat(encodedOo, containsString("cvc-complex-type.2.4.b"));
+			assertThat(encodedOo, containsString("Successfully created resource \\\"Observation/"));
+			
+			interceptor.setAddValidationResultsToResponseOperationOutcome(false);
+			outcome = ourClient.create().resource(obs).execute().getOperationOutcome();
+			encodedOo = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
+			ourLog.info(encodedOo);
+			assertThat(encodedOo, not(containsString("cvc-complex-type.2.4.b")));
+			assertThat(encodedOo, containsString("Successfully created resource \\\"Observation/"));
+
+		} finally {
+			ourRestServer.unregisterInterceptor(interceptor);
+		}
 	}
 
 	@Test
@@ -800,7 +831,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		}
 
 		// Delete should now have no matches
-		
+
 		delete = new HttpDelete(ourServerBase + "/Patient?name=" + methodName);
 		response = ourHttpClient.execute(delete);
 		try {
@@ -3658,7 +3689,8 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			assertThat(resp, not(containsString("Resource has no id")));
 			assertThat(resp, containsString("<pre>No issues detected during validation</pre>"));
 			assertThat(resp,
-					stringContainsInOrder("<issue>", "<severity value=\"information\"/>", "<code value=\"informational\"/>", "<diagnostics value=\"No issues detected during validation\"/>", "</issue>"));
+					stringContainsInOrder("<issue>", "<severity value=\"information\"/>", "<code value=\"informational\"/>", "<diagnostics value=\"No issues detected during validation\"/>",
+							"</issue>"));
 		} finally {
 			IOUtils.closeQuietly(response.getEntity().getContent());
 			response.close();
@@ -3684,7 +3716,8 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			assertThat(resp, not(containsString("Resource has no id")));
 			assertThat(resp, containsString("<pre>No issues detected during validation</pre>"));
 			assertThat(resp,
-					stringContainsInOrder("<issue>", "<severity value=\"information\"/>", "<code value=\"informational\"/>", "<diagnostics value=\"No issues detected during validation\"/>", "</issue>"));
+					stringContainsInOrder("<issue>", "<severity value=\"information\"/>", "<code value=\"informational\"/>", "<diagnostics value=\"No issues detected during validation\"/>",
+							"</issue>"));
 		} finally {
 			IOUtils.closeQuietly(response.getEntity().getContent());
 			response.close();
