@@ -418,14 +418,14 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 			String encodedOo = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
 			ourLog.info(encodedOo);
-			assertThat(encodedOo, containsString("The content of element 'Observation' is not complete"));
+			assertThat(encodedOo, containsString("cvc-complex-type.2.4.b"));
 			assertThat(encodedOo, containsString("Successfully created resource \\\"Observation/"));
 			
 			interceptor.setAddValidationResultsToResponseOperationOutcome(false);
 			outcome = ourClient.create().resource(obs).execute().getOperationOutcome();
 			encodedOo = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
 			ourLog.info(encodedOo);
-			assertThat(encodedOo, not(containsString("The content of element 'Observation' is not complete")));
+			assertThat(encodedOo, not(containsString("cvc-complex-type.2.4.b")));
 			assertThat(encodedOo, containsString("Successfully created resource \\\"Observation/"));
 
 		} finally {
