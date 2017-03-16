@@ -3130,6 +3130,7 @@ public class Observation extends DomainResource {
    */
   @SearchParamDefinition(name="method", path="Observation.method", description="The method used for the observation", type="token" )
   public static final String SP_METHOD = "method";
+
  /**
    * <b>Fluent Client</b> search parameter constant for <b>method</b>
    * <p>
@@ -3140,6 +3141,48 @@ public class Observation extends DomainResource {
    */
   public static final ca.uhn.fhir.rest.gclient.TokenClientParam METHOD = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_METHOD);
 
+ /**
+   * Search parameter: <b>interpretation</b>
+   * <p>
+   * Description: <b>The interpretation used for the observation</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Observation.interpretation</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="interpretation", path="Observation.interpretation", description="The interpretation of the observation", type="token" )
+  public static final String SP_INTERPRETATION = "interpretation";
+
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>interpretation</b>
+   * <p>
+   * Description: <b>The interpretation used for the observation</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Observation.interpretation</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam INTERPRETATION = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_INTERPRETATION);
+
+ /**
+   * Search parameter: <b>body-site</b>
+   * <p>
+   * Description: <b>The body site used for the observation</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Observation.bodysite</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="body-site", path="Observation.bodySite", description="The body site of the observation", type="token" )
+  public static final String SP_BODY_SITE = "body-site";
+  
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>body-site</b>
+   * <p>
+   * Description: <b>The body site used for the observation</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Observation.bodySite</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam BODY_SITE = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_BODY_SITE);
+  
  /**
    * Search parameter: <b>value-quantity</b>
    * <p>
