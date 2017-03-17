@@ -31,13 +31,18 @@ import org.hl7.fhir.dstu2016may.model.ValueSet.ConceptReferenceComponent;
 import org.hl7.fhir.dstu2016may.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.dstu2016may.model.ValueSet.ValueSetExpansionComponent;
 import org.hl7.fhir.dstu2016may.model.ValueSet.ValueSetExpansionContainsComponent;
+import org.hl7.fhir.dstu2016may.terminologies.ValueSetExpander;
 import org.hl7.fhir.dstu2016may.terminologies.ValueSetExpander.ValueSetExpansionOutcome;
+import org.hl7.fhir.dstu2016may.terminologies.ValueSetExpanderFactory;
+import org.hl7.fhir.dstu2016may.terminologies.ValueSetExpanderSimple;
 import org.hl7.fhir.dstu2016may.utils.IWorkerContext;
 import org.hl7.fhir.dstu2016may.validation.IResourceValidator;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
-public final class HapiWorkerContext implements IWorkerContext  {
+public final class HapiWorkerContext implements IWorkerContext, ValueSetExpanderFactory  {
 	private final FhirContext myCtx;
 	private Map<String, Resource> myFetchedResourceCache = new HashMap<String, Resource>();
 	private IValidationSupport myValidationSupport;
@@ -201,8 +206,8 @@ public final class HapiWorkerContext implements IWorkerContext  {
 				}
 			}
 		}
-		
-		
+
+
 		boolean caseSensitive = true;
 		if (isNotBlank(theSystem)) {
 			CodeSystem system = fetchCodeSystem(theSystem);
@@ -259,10 +264,27 @@ public final class HapiWorkerContext implements IWorkerContext  {
 		return new ValidationResult(IssueSeverity.ERROR, "Unknown code[" + theCode + "] in system[" + theSystem + "]");
 	}
 
+	@Override
+	public ValueSetExpander getExpander() {
+		ValueSetExpanderSimple retVal = new ValueSetExpanderSimple(this, this);
+		return retVal;
+	}
 
 	@Override
 	public ValueSetExpansionOutcome expandVS(ValueSet theSource, boolean theCacheOk) {
-		throw new UnsupportedOperationException();
+		ValueSetExpansionOutcome vso;
+		try {
+			vso = getExpander().expand(theSource);
+		} catch (InvalidRequestException e) {
+			throw e;
+		} catch (Exception e) {
+			throw new InternalErrorException(e);
+		}
+		if (vso.getError() != null) {
+			throw new InvalidRequestException(vso.getError());
+		} else {
+			return vso;
+		}
 	}
 
 	@Override
