@@ -187,6 +187,11 @@
 				base URL for extensions. Thanks to Sebastien Riviere for the 
 				pull request!
 			</action>
+			<action type="fix" issue="568">
+				Correct the resource paths for the DSTU2.1 validation resources,
+				allowing the validator to correctly work against those structures.
+				Thanks to Michael Lawley for the pull request!
+			</action>
 		</release>
 		<release version="2.2" date="2016-12-20">
 			<action type="add">
