@@ -518,6 +518,20 @@
 				
 				
 			</subsection>
+			
+			<subsection name="Built-In Operations - Process-Message">
+				<p>
+					The <code>$process-message</code> operation asks the server to accept a fhir
+					message bundle for processing.
+				</p>
+				<macro name="snippet">
+					<param name="id" value="processMessage" />
+					<param name="file" value="examples/src/main/java/example/ClientExamples.java" />
+				</macro>
+				
+				
+			</subsection>
+			
 		</section>
 
 	</body>

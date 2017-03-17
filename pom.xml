@@ -306,6 +306,10 @@
 			<id>sekaijin</id>
 			<name>sekaijin</name>
 		</developer>
+		<developer>
+			<id>hugosoares</id>
+			<name>Hugo Soares</name>
+		</developer>
 	</developers>
 
 	<licenses>
