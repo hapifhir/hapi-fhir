@@ -25,6 +25,8 @@ public class FHIRException extends Exception {
 
 	// Note that the 4-argument constructor has been removed as it is not JDK6 compatible
 	
+	private static final long serialVersionUID = -1793365096090608037L;
+
 	public FHIRException() {
 		super();
 	}

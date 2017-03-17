@@ -145,6 +145,7 @@ public class BaseDateTimeTypeDstu3Test {
 		verifyFails("1974-12-25+10:00");
 
 		// Out of range
+      verifyFails("2015-02-30");
 		verifyFails("1974-13-25");
 		verifyFails("1974-12-32");
 		verifyFails("2015-02-29");

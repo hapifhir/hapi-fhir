@@ -86,7 +86,7 @@ public class DynamicSearchMethodBinding extends BaseResourceReturningMethodBindi
 	}
 
 	@Override
-	public IBundleProvider invokeServer(IRestfulServer theServer, RequestDetails theRequest, Object[] theMethodParams) throws InvalidRequestException, InternalErrorException {
+	public IBundleProvider invokeServer(IRestfulServer<?> theServer, RequestDetails theRequest, Object[] theMethodParams) throws InvalidRequestException, InternalErrorException {
 		if (myIdParamIndex != null) {
 			theMethodParams[myIdParamIndex] = theRequest.getId();
 		}

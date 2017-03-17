@@ -47,6 +47,7 @@ public class PortUtil {
 			Thread.sleep(500);
 			return port;
 		} catch (Exception e) {
+			//FIXME resource leak
 			throw new Error(e);
 		}
 	}

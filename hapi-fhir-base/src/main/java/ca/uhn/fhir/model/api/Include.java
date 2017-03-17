@@ -142,9 +142,8 @@ public class Include {
 		int secondColon = myValue.indexOf(':', firstColon + 1);
 		if (secondColon != -1) {
 			return myValue.substring(firstColon + 1, secondColon);
-		} else {
-			return myValue.substring(firstColon + 1);
 		}
+		return myValue.substring(firstColon + 1);
 	}
 
 	/**
@@ -158,9 +157,8 @@ public class Include {
 		int secondColon = myValue.indexOf(':', firstColon + 1);
 		if (secondColon != -1) {
 			return myValue.substring(secondColon + 1);
-		} else {
-			return null;
 		}
+		return null;
 
 	}
 

@@ -27,8 +27,6 @@ import java.lang.annotation.Target;
 
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
-import ca.uhn.fhir.model.api.IResource;
-
 /**
  * RESTful method annotation to be used for the FHIR
  * <a href="http://hl7.org/implement/standards/fhir/http.html#delete">delete</a> method.

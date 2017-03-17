@@ -26,12 +26,12 @@ import java.util.List;
 
 public class Table<T> {
 
-	private int rowCount;
+//	private int rowCount;
 	private int colCount;
 	private List<List<T>> rows = new ArrayList<List<T>>();
 	
 	public Table(int rowCount, int colCount) {
-		this.rowCount = rowCount;
+//		this.rowCount = rowCount;
 		this.colCount = colCount;
 		for (int r = 0; r < rowCount; r++) {
 			rows.add(new ArrayList<T>());

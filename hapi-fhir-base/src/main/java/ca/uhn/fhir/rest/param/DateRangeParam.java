@@ -345,6 +345,7 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 	public void setRangeFromDatesInclusive(String theLowerBound, String theUpperBound) {
 		myLowerBound = theLowerBound != null ? new DateParam(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, theLowerBound) : null;
 		myUpperBound = theUpperBound != null ? new DateParam(ParamPrefixEnum.LESSTHAN_OR_EQUALS, theUpperBound) : null;
+		//FIXME potential null access on theLowerBound
 		if (isNotBlank(theLowerBound) && isNotBlank(theUpperBound) && theLowerBound.equals(theUpperBound)) {
 			myLowerBound.setPrefix(ParamPrefixEnum.EQUAL);
 			myUpperBound.setPrefix(ParamPrefixEnum.EQUAL);

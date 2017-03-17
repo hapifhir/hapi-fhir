@@ -50,6 +50,7 @@ import org.hibernate.search.annotations.Store;
 @Entity
 @Table(name = "HFJ_SPIDX_STRING", indexes = { 
 	@Index(name = "IDX_SP_STRING", columnList = "RES_TYPE,SP_NAME,SP_VALUE_NORMALIZED"), 
+	@Index(name = "IDX_SP_STRING_UPDATED", columnList = "SP_UPDATED"), 
 	@Index(name = "IDX_SP_STRING_RESID", columnList = "RES_ID") 
 })
 @Indexed()

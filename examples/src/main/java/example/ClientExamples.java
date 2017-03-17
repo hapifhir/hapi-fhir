@@ -1,5 +1,8 @@
 package example;
 
+import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.okhttp.client.OkHttpRestfulClientFactory;
 import ca.uhn.fhir.rest.client.IGenericClient;
@@ -33,6 +36,26 @@ public class ClientExamples {
       // Create the client
       IGenericClient genericClient = ctx.newRestfulGenericClient("http://localhost:9999/fhir");
       // END SNIPPET: proxy
+   }
+
+   @SuppressWarnings("unused")
+   public void processMessage() {
+      // START SNIPPET: processMessage
+      FhirContext ctx = FhirContext.forDstu3();
+
+      // Create the client
+      IGenericClient client = ctx.newRestfulGenericClient("http://localhost:9999/fhir");
+      
+      Bundle bundle = new Bundle();
+      // ..populate the bundle..
+      
+      Bundle response = client
+            .operation()
+            .processMessage() // New operation for sending messages
+            .setMessageBundle(bundle)
+            .asynchronous(Bundle.class)
+            .execute();
+      // END SNIPPET: processMessage
    }
 
    @SuppressWarnings("unused")

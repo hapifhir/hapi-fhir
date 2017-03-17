@@ -474,9 +474,8 @@ public abstract class BaseRuntimeElementCompositeDefinition<T extends IBase> ext
 			for (String nextName : next.getValidChildNames()) {
 				if (myNameToChild.containsKey(nextName)) {
 					throw new ConfigurationException("Duplicate child name[" + nextName + "] in Element[" + getName() + "]");
-				} else {
-					myNameToChild.put(nextName, next);
 				}
+				myNameToChild.put(nextName, next);
 			}
 		}
 

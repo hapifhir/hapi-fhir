@@ -70,7 +70,7 @@ public class ClientTransactionExamples {
          .setResource(patient)
          .getRequest()
             .setUrl("Patient")
-            .setIfNoneExist("Patient?identifier=http://acme.org/mrns|12345")
+            .setIfNoneExist("identifier=http://acme.org/mrns|12345")
             .setMethod(HTTPVerbEnum.POST);
       
       // Add the observation. This entry is a POST with no header

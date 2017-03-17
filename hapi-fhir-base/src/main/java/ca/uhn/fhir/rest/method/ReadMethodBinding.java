@@ -99,9 +99,8 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding implem
 	public RestOperationTypeEnum getRestOperationType(RequestDetails theRequestDetails) {
 		if (mySupportsVersion && theRequestDetails.getId().hasVersionIdPart()) {
 			return RestOperationTypeEnum.VREAD;
-		} else {
-			return RestOperationTypeEnum.READ;
 		}
+		return RestOperationTypeEnum.READ;
 	}
 
 	@Override

@@ -152,9 +152,8 @@ abstract class BaseOutcomeReturningMethodBindingWithResourceParam extends BaseOu
 	/**
 	 * Subclasses may override
 	 */
-	@SuppressWarnings("unused")
 	protected void validateResourceIdAndUrlIdForNonConditionalOperation(IBaseResource theResource, String theResourceId, String theUrlId, String theMatchUrl) {
-		// nothing by default
+		return;
 	}
 
 }

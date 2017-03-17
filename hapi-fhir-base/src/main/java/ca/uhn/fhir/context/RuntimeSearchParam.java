@@ -1,10 +1,8 @@
 package ca.uhn.fhir.context;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-import java.util.StringTokenizer;
+import static org.apache.commons.lang3.StringUtils.trim;
+
+import java.util.*;
 
 import org.hl7.fhir.instance.model.api.IIdType;
 
@@ -32,6 +30,7 @@ import ca.uhn.fhir.rest.method.RestSearchParameterTypeEnum;
 
 public class RuntimeSearchParam {
 	private final IIdType myId;
+	private final Set<String> myBase;
 	private final List<RuntimeSearchParam> myCompositeOf;
 	private final String myDescription;
 	private final String myName;
@@ -71,6 +70,17 @@ public class RuntimeSearchParam {
 		} else {
 			myTargets = null;
 		}
+		
+		HashSet<String> base = new HashSet<String>();
+		int indexOf = thePath.indexOf('.');
+		if (indexOf != -1) {
+			base.add(trim(thePath.substring(0, indexOf)));
+		}
+		myBase = Collections.unmodifiableSet(base);
+	}
+
+	public Set<String> getBase() {
+		return myBase;
 	}
 
 	public Set<String> getTargets() {

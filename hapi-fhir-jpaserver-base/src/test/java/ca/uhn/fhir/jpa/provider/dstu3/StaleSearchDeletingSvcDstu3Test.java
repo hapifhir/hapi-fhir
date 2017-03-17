@@ -17,7 +17,6 @@ import org.junit.Test;
 import ca.uhn.fhir.rest.gclient.IClientExecutable;
 import ca.uhn.fhir.rest.gclient.IQuery;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
-import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.TestUtil;
 
 public class StaleSearchDeletingSvcDstu3Test extends BaseResourceProviderDstu3Test {
@@ -69,13 +68,13 @@ public class StaleSearchDeletingSvcDstu3Test extends BaseResourceProviderDstu3Te
 		Bundle resp2 = ourClient.search().byUrl(nextLinkUrl).returnBundle(Bundle.class).execute();
 		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(resp2));
 		
-		myStaleSearchDeletingSvc.pollForStaleSearches();
+		myStaleSearchDeletingSvc.pollForStaleSearchesAndDeleteThem();
 		
 		ourClient.search().byUrl(nextLinkUrl).returnBundle(Bundle.class).execute();
 		
 		Thread.sleep(20);
 		myDaoConfig.setExpireSearchResultsAfterMillis(10);
-		myStaleSearchDeletingSvc.pollForStaleSearches();
+		myStaleSearchDeletingSvc.pollForStaleSearchesAndDeleteThem();
 
 		try {
 			ourClient.search().byUrl(nextLinkUrl).returnBundle(Bundle.class).execute();

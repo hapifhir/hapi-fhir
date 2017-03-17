@@ -30,7 +30,6 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.annotation.Update;
@@ -150,11 +149,10 @@ public class UpdateMethodBinding extends BaseOutcomeReturningMethodBindingWithRe
 			if (isBlank(theResourceId)) {
 				String msg = getContext().getLocalizer().getMessage(BaseOutcomeReturningMethodBindingWithResourceParam.class, "noIdInBodyForUpdate");
 				throw new InvalidRequestException(msg);
-			} else {
-				if (!theResourceId.equals(theUrlId)) {
-					String msg = getContext().getLocalizer().getMessage(BaseOutcomeReturningMethodBindingWithResourceParam.class, "incorrectIdForUpdate", theResourceId, theUrlId);
-					throw new InvalidRequestException(msg);
-				}
+			}
+			if (!theResourceId.equals(theUrlId)) {
+				String msg = getContext().getLocalizer().getMessage(BaseOutcomeReturningMethodBindingWithResourceParam.class, "incorrectIdForUpdate", theResourceId, theUrlId);
+				throw new InvalidRequestException(msg);
 			}
 		} else {
 			theResource.setId((IIdType)null);

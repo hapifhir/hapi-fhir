@@ -21,12 +21,8 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
  * limitations under the License.
  * #L%
  */
-
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+import java.util.concurrent.locks.ReentrantLock;
 
 import javax.persistence.Query;
 import javax.persistence.Tuple;
@@ -58,20 +54,21 @@ import ca.uhn.fhir.rest.method.RequestDetails;
 import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
-import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 
 public abstract class BaseHapiFhirSystemDao<T, MT> extends BaseHapiFhirDao<IBaseResource> implements IFhirSystemDao<T, MT> {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseHapiFhirSystemDao.class);
 
 	@Autowired
-	private PlatformTransactionManager myTxManager;
-
-	@Autowired
 	private IForcedIdDao myForcedIdDao;
+
+	private ReentrantLock myReindexLock = new ReentrantLock(false);
 
 	@Autowired
 	private ITermConceptDao myTermConceptDao;
+
+	@Autowired
+	private PlatformTransactionManager myTxManager;
 
 	@Transactional(propagation = Propagation.REQUIRED)
 	@Override
@@ -205,8 +202,14 @@ public abstract class BaseHapiFhirSystemDao<T, MT> extends BaseHapiFhirDao<IBase
 	@Transactional()
 	@Override
 	public int markAllResourcesForReindexing() {
+		
+		ourLog.info("Marking all resources as needing reindexing");
 		int retVal = myEntityManager.createQuery("UPDATE " + ResourceTable.class.getSimpleName() + " t SET t.myIndexStatus = null").executeUpdate();
+		
+		ourLog.info("Marking all concepts as needing reindexing");
 		retVal += myTermConceptDao.markAllForReindexing();
+		
+		ourLog.info("Done marking reindexing");
 		return retVal;
 	}
 
@@ -266,16 +269,21 @@ public abstract class BaseHapiFhirSystemDao<T, MT> extends BaseHapiFhirDao<IBase
 			}
 		});
 	}
-
+	
 	@Override
 	@Transactional(propagation = Propagation.NOT_SUPPORTED)
-	public int performReindexingPass(final Integer theCount) {
+	public Integer performReindexingPass(final Integer theCount) {
+		if (!myReindexLock.tryLock()) {
+			return null;
+		}
 		try {
 			return doPerformReindexingPass(theCount);
 		} catch (ReindexFailureException e) {
 			ourLog.warn("Reindexing failed for resource {}", e.getResourceId());
 			markResourceAsIndexingFailed(e.getResourceId());
 			return -1;
+		} finally {
+			myReindexLock.unlock();
 		}
 	}
 

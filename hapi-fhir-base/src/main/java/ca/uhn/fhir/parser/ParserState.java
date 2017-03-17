@@ -142,6 +142,7 @@ class ParserState<T> {
 		if (entry.getLinkSelf() != null && entry.getLinkSelf().isEmpty() == false) {
 			id = new IdDt(entry.getLinkSelf().getValue());
 		} else {
+			//TODO: Use of a deprecated method should be resolved.
 			id = entry.getId();
 		}
 
@@ -159,6 +160,7 @@ class ParserState<T> {
 
 		if (resource != null) {
 			resource.getResourceMetadata().put(ResourceMetadataKeyEnum.DELETED_AT, entry.getDeletedAt());
+			//TODO: Use of a deprecated method should be resolved.
 			resource.getResourceMetadata().put(ResourceMetadataKeyEnum.VERSION_ID, id);
 		}
 	}
@@ -364,6 +366,7 @@ class ParserState<T> {
 		@Override
 		public void attributeValue(String theName, String theValue) throws DataFormatException {
 			if ("ref".equals(theName)) {
+				//TODO: Use of a deprecated method should be resolved.
 				getEntry().setId(new IdDt(theValue));
 			} else if ("when".equals(theName)) {
 				getEntry().setDeleted(new InstantDt(theValue));
@@ -451,10 +454,12 @@ class ParserState<T> {
 			if ("title".equals(theLocalPart)) {
 				push(new AtomPrimitiveState(myEntry.getTitle()));
 			} else if ("id".equals(theLocalPart)) {
+				//TODO: Use of a deprecated method should be resolved.
 				push(new AtomPrimitiveState(myEntry.getId()));
 			} else if ("link".equals(theLocalPart)) {
 				push(new AtomLinkState(myEntry));
 			} else if ("updated".equals(theLocalPart)) {
+				//TODO: Use of a deprecated method should be resolved.
 				push(new AtomPrimitiveState(myEntry.getUpdated()));
 			} else if ("published".equals(theLocalPart)) {
 				push(new AtomPrimitiveState(myEntry.getPublished()));
@@ -771,7 +776,7 @@ class ParserState<T> {
 			myErrorHandler.unknownAttribute(null, theName);
 		}
 
-		public boolean elementIsRepeating(@SuppressWarnings("unused") String theChildName) {
+		public boolean elementIsRepeating(String theChildName) {
 			return false;
 		}
 
@@ -1031,6 +1036,7 @@ class ParserState<T> {
 		@Override
 		public void enteringNewElement(String theNamespaceUri, String theLocalPart) throws DataFormatException {
 			if ("base".equals(theLocalPart)) {
+				//TODO: Use of a deprecated method should be resolved.
 				push(new PrimitiveState(getPreResourceState(), myEntry.getLinkBase()));
 			} else if ("request".equals(theLocalPart)) {
 				push(new BundleEntryTransactionState(myEntry));
@@ -1302,6 +1308,7 @@ class ParserState<T> {
 				}
 
 				String bundleBaseUrl = myInstance.getLinkBase().getValue();
+				//TODO: Use of a deprecated method should be resolved.
 				String entryBaseUrl = nextEntry.getLinkBase().getValue();
 				String version = ResourceMetadataKeyEnum.VERSION.get(nextResource);
 				String resourceName = myContext.getResourceDefinition(nextResource).getName();
@@ -2030,9 +2037,8 @@ class ParserState<T> {
 		private PreResourceState getRootPreResourceState() {
 			if (getPreResourceState() != null) {
 				return getPreResourceState();
-			} else {
-				return this;
 			}
+			return this;
 		}
 
 		@Override
@@ -2590,8 +2596,7 @@ class ParserState<T> {
 		public void attributeValue(String theName, String theValue) throws DataFormatException {
 			if (myJsonMode) {
 				myDt.setValueAsString(theValue);
-				return;
-			} else {
+			} else {				
 				// IGNORE - don't handle this as an error, we process these as XML events
 			}
 		}

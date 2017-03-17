@@ -24,6 +24,7 @@
 				mode. This allows users to create search parameters which contain
 				custom paths, or even override and disable existing search
 				parameters.
+			</action>
 			<action type="fix">
 				CLI example uploader couldn't find STU3 examples after CI server
 				was moved to build.fhir.org
@@ -122,6 +123,64 @@
 			<action type="fix" issue="548">
 				Clean up dependencies and remove Eclipse project files from git. Thanks to
 				@sekaijin for the pull request!
+			</action>
+			<action type="fix">
+				When performing a conditional create in a transaction in JPA server, 
+				if a resource already existed matching the conditional expression, the 
+				server did not change the version of the resource but did update the body
+				with the passed in body. Thanks to Artem Sopin for reporting and providing a test
+				case for this!
+			</action>
+			<action type="fix">
+				Client revincludes did not include the :recurse modifier. Thanks to
+				Jenny Meinsma for pointing this out on Zulip!
+			</action>
+			<action type="add">
+				JPA server did not return an OperationOutcome in the response for
+				a normal delete operation.
+			</action>
+			<action type="fix">
+				Fix an issue in JPA server where _history results were kept in memory instead
+				of being spooled to the database as they should be. Note that as a part of this fix
+				a new method was added to 
+				<![CDATA[<code>IBundleProvider</code> called <code>getUuid()</code>]]>. This
+				method may return <![CDATA[<code>null</code>]]> in any current cases.
+			</action>
+			<action type="fix">
+				Expanding a ValueSet in JPA server did not correctly apply 
+				<![CDATA[<code>?filter=</code>]]> parameter when the ValueSet
+				being expanded had codes included explicitly (i.e. not by 
+				is-a relationship). Thanks to David Hay for reporting!
+			</action>
+			<action type="fix">
+				JPA validator incorrectly returned an HTTP 400 instead of an HTTP 422 when
+				the resource ID was not present and required, or vice versa. Thanks to 
+				Brian Postlethwaite for reporting!
+			</action>
+			<action type="fix">
+				When using an annotation based client, a ClassCastException would 
+				occur under certain circumstances when the response contained
+				contained resources
+			</action>
+			<action type="fix">
+				JPA server interceptor methods for create/update/delete provided
+				the wrong version ID to the interceptors
+			</action>
+			<action type="add">
+				A post-processing hook for subclasses of BaseValidatingInterceptor is now available.
+			</action>
+			<action type="add" issue="585">
+				AuthorizationInterceptor can now authorize (allow/deny) extended operations
+				on instances and types by wildcard (on any type, or on any instance)
+			</action>
+			<action type="add" issue="595">
+				When RequestValidatingInterceptor is used, the validation results
+				are now populated into the OperationOutcome produced by
+				create and update operations
+			</action>
+			<action type="add">
+				Add support for the $process-message operation to fluent client.
+				Thanks to Hugo Soares for the pull request!
 			</action>
 		</release>
 		<release version="2.2" date="2016-12-20">

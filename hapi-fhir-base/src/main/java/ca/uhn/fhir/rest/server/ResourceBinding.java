@@ -55,9 +55,8 @@ public class ResourceBinding {
 			if (rm.incomingServerRequestMatchesMethod(theRequest)) {
 				ourLog.debug("Handler {} matches", rm);
 				return rm;
-			} else {
-				ourLog.trace("Handler {} does not match", rm);
 			}
+			ourLog.trace("Handler {} does not match", rm);
 		}
 		return null;
 	}

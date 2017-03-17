@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.List;
 
 import ca.uhn.fhir.model.api.Bundle;
+import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.dstu.resource.DiagnosticReport;
 import ca.uhn.fhir.model.dstu.resource.Observation;
@@ -49,6 +50,9 @@ public interface ITestClient extends IBasicClient {
 
 	@Search()
 	public List<Patient> getPatientByDob(@RequiredParam(name=Patient.SP_BIRTHDATE) DateParam theBirthDate);
+
+	@Search(type=ExtendedPatient.class)
+	public List<IResource> getPatientByDobWithGenericResourceReturnType(@RequiredParam(name=Patient.SP_BIRTHDATE) DateParam theBirthDate);
 
 	@Search()
 	public List<Patient> getPatientMultipleIdentifiers(@RequiredParam(name = "ids") TokenOrListParam theIdentifiers);

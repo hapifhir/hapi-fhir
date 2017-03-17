@@ -43,6 +43,7 @@ import org.hibernate.search.annotations.Field;
 @Table(name = "HFJ_SPIDX_TOKEN", indexes = {
 	@Index(name = "IDX_SP_TOKEN", columnList = "RES_TYPE,SP_NAME,SP_SYSTEM,SP_VALUE"),
 	@Index(name = "IDX_SP_TOKEN_UNQUAL", columnList = "RES_TYPE,SP_NAME,SP_VALUE"),
+	@Index(name = "IDX_SP_TOKEN_UPDATED", columnList = "SP_UPDATED"), 
 	@Index(name = "IDX_SP_TOKEN_RESID", columnList = "RES_ID") 
 })
 //@formatter:on

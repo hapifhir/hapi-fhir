@@ -24,8 +24,9 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.util.ElementUtil;
 
-public class BaseBundle extends BaseElement implements IElement {
+public class BaseBundle extends BaseElement /*implements IElement*/ {
 
+	private static final long serialVersionUID = 3349586533271409727L;
 	private StringDt myAuthorName;
 	private StringDt myAuthorUri;
 	private IdDt myId;

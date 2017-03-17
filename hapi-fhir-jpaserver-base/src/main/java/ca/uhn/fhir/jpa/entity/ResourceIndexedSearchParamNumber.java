@@ -47,6 +47,7 @@ import ca.uhn.fhir.jpa.util.BigDecimalNumericFieldBridge;
 @Entity
 @Table(name = "HFJ_SPIDX_NUMBER", indexes= {
 	@Index(name = "IDX_SP_NUMBER", columnList = "RES_TYPE,SP_NAME,SP_VALUE"),
+	@Index(name = "IDX_SP_NUMBER_UPDATED", columnList = "SP_UPDATED"), 
 	@Index(name = "IDX_SP_NUMBER_RESID", columnList = "RES_ID") 
 })
 //@formatter:on

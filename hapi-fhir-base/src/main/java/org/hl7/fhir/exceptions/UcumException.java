@@ -23,6 +23,8 @@ package org.hl7.fhir.exceptions;
 
 public class UcumException extends FHIRException {
 
+	private static final long serialVersionUID = -8535757334881835619L;
+
 	public UcumException() {
 		super();
 	}

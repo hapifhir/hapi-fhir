@@ -1,30 +1,24 @@
 package ca.uhn.fhir.rest.client;
 
-import static org.hamcrest.Matchers.containsString;
-import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.io.IOException;
 import java.io.StringReader;
 import java.nio.charset.Charset;
-import java.util.Arrays;
+import java.util.List;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.ReaderInputStream;
 import org.apache.http.HttpResponse;
 import org.apache.http.ProtocolVersion;
 import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicStatusLine;
-import org.hl7.fhir.dstu3.model.Binary;
-import org.hl7.fhir.dstu3.model.Conformance;
-import org.hl7.fhir.dstu3.model.OperationOutcome;
-import org.hl7.fhir.dstu3.model.Patient;
+import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.Organization;
+import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -36,65 +30,53 @@ import org.mockito.stubbing.Answer;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.rest.param.DateParam;
+import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.util.TestUtil;
-import ca.uhn.fhir.util.VersionUtil;
 
 public class ClientWithCustomTypeDstu3Test {
-	private static FhirContext ourCtx;
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ClientWithCustomTypeDstu3Test.class);
-	private HttpClient myHttpClient;
-	private HttpResponse myHttpResponse;
+  private static FhirContext ourCtx;
+  private HttpClient myHttpClient;
+  private HttpResponse myHttpResponse;
 
-	@AfterClass
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
+  @AfterClass
+  public static void afterClassClearContext() {
+    TestUtil.clearAllStaticFieldsForUnitTest();
+  }
 
+  @Before
+  public void before() {
+    myHttpClient = mock(HttpClient.class, new ReturnsDeepStubs());
+    ourCtx.getRestfulClientFactory().setHttpClient(myHttpClient);
+    ourCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
+    myHttpResponse = mock(HttpResponse.class, new ReturnsDeepStubs());
+  }
 
-	@Before
-	public void before() {
-		myHttpClient = mock(HttpClient.class, new ReturnsDeepStubs());
-		ourCtx.getRestfulClientFactory().setHttpClient(myHttpClient);
-		ourCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
-		myHttpResponse = mock(HttpResponse.class, new ReturnsDeepStubs());
-	}
+  @Test
+  public void testReadCustomType() throws Exception {
+    IParser p = ourCtx.newXmlParser();
 
-	private byte[] extractBodyAsByteArray(ArgumentCaptor<HttpUriRequest> capt) throws IOException {
-		byte[] body = IOUtils.toByteArray(((HttpEntityEnclosingRequestBase) capt.getAllValues().get(0)).getEntity().getContent());
-		return body;
-	}
+    MyPatientWithExtensions response = new MyPatientWithExtensions();
+    response.addName().setFamily("FAMILY");
+    response.getStringExt().setValue("STRINGVAL");
+    response.getDateExt().setValueAsString("2011-01-02");
+    final String respString = p.encodeResourceToString(response);
 
-	private String extractBodyAsString(ArgumentCaptor<HttpUriRequest> capt) throws IOException {
-		String body = IOUtils.toString(((HttpEntityEnclosingRequestBase) capt.getAllValues().get(0)).getEntity().getContent(), "UTF-8");
-		return body;
-	}
+    ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+    when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
+    when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+    when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+    when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<ReaderInputStream>() {
+      @Override
+      public ReaderInputStream answer(InvocationOnMock theInvocation) throws Throwable {
+        return new ReaderInputStream(new StringReader(respString), Charset.forName("UTF-8"));
+      }
+    });
 
+    IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
 
-	@Test
-	public void testReadCustomType() throws Exception {
-		IParser p = ourCtx.newXmlParser();
-
-		MyPatientWithExtensions response = new MyPatientWithExtensions();
-		response.addName().setFamily("FAMILY");
-		response.getStringExt().setValue("STRINGVAL");
-		response.getDateExt().setValueAsString("2011-01-02");
-		final String respString = p.encodeResourceToString(response);
-		
-		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
-		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
-		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
-		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
-		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<ReaderInputStream>() {
-			@Override
-			public ReaderInputStream answer(InvocationOnMock theInvocation) throws Throwable {
-				return new ReaderInputStream(new StringReader(respString), Charset.forName("UTF-8"));
-			}
-		});
-
-		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
-
-		//@formatter:off
+    //@formatter:off
 		MyPatientWithExtensions value = client
 			.read()
 			.resource(MyPatientWithExtensions.class)
@@ -102,23 +84,97 @@ public class ClientWithCustomTypeDstu3Test {
 			.execute();
 		//@formatter:on
 
-		HttpUriRequest request = capt.getAllValues().get(0);
+    HttpUriRequest request = capt.getAllValues().get(0);
 
-		assertEquals("http://example.com/fhir/Patient/123", request.getURI().toASCIIString());
-		assertEquals("GET", request.getMethod());
+    assertEquals("http://example.com/fhir/Patient/123", request.getURI().toASCIIString());
+    assertEquals("GET", request.getMethod());
 
-		assertEquals(1, value.getName().size());
-		assertEquals("FAMILY", value.getName().get(0).getFamily());
-		assertEquals("STRINGVAL", value.getStringExt().getValue());
-		assertEquals("2011-01-02", value.getDateExt().getValueAsString());
-		
-	}
+    assertEquals(1, value.getName().size());
+    assertEquals("FAMILY", value.getName().get(0).getFamily());
+    assertEquals("STRINGVAL", value.getStringExt().getValue());
+    assertEquals("2011-01-02", value.getDateExt().getValueAsString());
 
+  }
 
+  @Test
+  public void testSearchWithGenericReturnType() throws Exception {
 
-	@BeforeClass
-	public static void beforeClass() {
-		ourCtx = FhirContext.forDstu3();
-	}
+    final Bundle bundle = new Bundle();
+
+    final ExtendedPatient patient = new ExtendedPatient();
+    patient.addIdentifier().setValue("PRP1660");
+    bundle.addEntry().setResource(patient);
+
+    final Organization org = new Organization();
+    org.setName("FOO");
+    patient.getManagingOrganization().setResource(org);
+
+    final FhirContext ctx = FhirContext.forDstu3();
+    ctx.setDefaultTypeForProfile(ExtendedPatient.HTTP_FOO_PROFILES_PROFILE, ExtendedPatient.class);
+    ctx.getRestfulClientFactory().setHttpClient(myHttpClient);
+    ctx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
+
+    String msg = ctx.newXmlParser().setPrettyPrint(true).encodeResourceToString(bundle);
+
+    ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+
+    when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+    when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+    when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
+
+    // httpResponse = new BasicHttpResponse(statusline, catalog, locale)
+    when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
+
+    ITestClient client = ctx.newRestfulClient(ITestClient.class, "http://foo");
+    List<IBaseResource> response = client.getPatientByDobWithGenericResourceReturnType(new DateParam(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, "2011-01-02"));
+
+    assertEquals("http://foo/Patient?birthdate=ge2011-01-02", capt.getValue().getURI().toString());
+    ExtendedPatient patientResp = (ExtendedPatient) response.get(0);
+    assertEquals("PRP1660", patientResp.getIdentifier().get(0).getValue());
+
+  }
+
+  @Test
+  public void testSearchWithGenericReturnType2() throws Exception {
+
+    final Bundle bundle = new Bundle();
+
+    final ExtendedPatient patient = new ExtendedPatient();
+    patient.addIdentifier().setValue("PRP1660");
+    bundle.addEntry().setResource(patient);
+
+    final Organization org = new Organization();
+    org.setName("FOO");
+    patient.getManagingOrganization().setResource(org);
+
+    final FhirContext ctx = FhirContext.forDstu3();
+    ctx.setDefaultTypeForProfile(ExtendedPatient.HTTP_FOO_PROFILES_PROFILE, ExtendedPatient.class);
+    ctx.getRestfulClientFactory().setHttpClient(myHttpClient);
+    ctx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
+
+    String msg = ctx.newXmlParser().setPrettyPrint(true).encodeResourceToString(bundle);
+
+    ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+
+    when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+    when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+    when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
+
+    // httpResponse = new BasicHttpResponse(statusline, catalog, locale)
+    when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
+
+    ITestClient client = ctx.newRestfulClient(ITestClient.class, "http://foo");
+    List<IAnyResource> response = client.getPatientByDobWithGenericResourceReturnType2(new DateParam(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, "2011-01-02"));
+
+    assertEquals("http://foo/Patient?birthdate=ge2011-01-02", capt.getValue().getURI().toString());
+    ExtendedPatient patientResp = (ExtendedPatient) response.get(0);
+    assertEquals("PRP1660", patientResp.getIdentifier().get(0).getValue());
+
+  }
+
+  @BeforeClass
+  public static void beforeClass() {
+    ourCtx = FhirContext.forDstu3();
+  }
 
 }

@@ -53,7 +53,7 @@
       <request>
          <method value="POST"/>
          <url value="Patient"/>
-         <ifNoneExist value="Patient?identifier=http://acme.org/mrns|12345"/>
+         <ifNoneExist value="identifier=http://acme.org/mrns|12345"/>
       </request>
    </entry>
    <entry>

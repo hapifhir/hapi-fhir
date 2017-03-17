@@ -120,9 +120,8 @@ public class QualifiedParamList extends ArrayList<String> {
 			char nextChar = theString.charAt(i);
 			if (nextChar != '\\') {
 				break;
-			} else {
-				retVal++;
 			}
+			retVal++;
 		}
 		return retVal;
 	}

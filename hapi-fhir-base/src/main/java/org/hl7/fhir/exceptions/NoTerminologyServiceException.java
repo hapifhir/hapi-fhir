@@ -23,6 +23,8 @@ package org.hl7.fhir.exceptions;
 
 public class NoTerminologyServiceException extends FHIRException {
 
+	private static final long serialVersionUID = 8196224236579018584L;
+
 	public NoTerminologyServiceException() {
 		super();
 	}

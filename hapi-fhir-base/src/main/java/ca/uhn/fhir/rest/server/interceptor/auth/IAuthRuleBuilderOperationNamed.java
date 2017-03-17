@@ -1,7 +1,5 @@
 package ca.uhn.fhir.rest.server.interceptor.auth;
 
-import org.apache.http.impl.client.HttpClientBuilder;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -38,6 +36,11 @@ public interface IAuthRuleBuilderOperationNamed {
 	IAuthRuleBuilderRuleOpClassifierFinished onType(Class<? extends IBaseResource> theType);
 
 	/**
+	 * Rule applies to invocations of this operation at the <code>type</code> level on any type
+	 */
+	IAuthRuleFinished onAnyType();
+
+	/**
 	 * Rule applies to invocations of this operation at the <code>instance</code> level
 	 */
 	IAuthRuleBuilderRuleOpClassifierFinished onInstance(IIdType theInstanceId);
@@ -46,5 +49,10 @@ public interface IAuthRuleBuilderOperationNamed {
 	 * Rule applies to invocations of this operation at the <code>instance</code> level on any instance of the given type
 	 */
 	IAuthRuleBuilderRuleOpClassifierFinished onInstancesOfType(Class<? extends IBaseResource> theType);
+
+	/**
+	 * Rule applies to invocations of this operation at the <code>instance</code> level on any instance
+	 */
+	IAuthRuleFinished onAnyInstance();
 
 }

@@ -151,9 +151,8 @@ public abstract class BaseQueryParameter implements IParameter {
 
 			if (handlesMissing()) {
 				return parse(theRequest.getServer().getFhirContext(), paramList);
-			} else {
-				return null;
 			}
+			return null;
 		}
 
 		return parse(theRequest.getServer().getFhirContext(), paramList);

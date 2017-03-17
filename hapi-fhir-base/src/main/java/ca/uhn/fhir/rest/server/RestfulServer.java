@@ -266,9 +266,8 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 		if (resourceMethod == null) {
 			if (isBlank(requestPath)) {
 				throw new InvalidRequestException(myFhirContext.getLocalizer().getMessage(RestfulServer.class, "rootRequest"));
-			} else {
-				throw new InvalidRequestException(myFhirContext.getLocalizer().getMessage(RestfulServer.class, "unknownMethod", requestType.name(), requestPath, requestDetails.getParameters().keySet()));
-			}
+			} 
+			throw new InvalidRequestException(myFhirContext.getLocalizer().getMessage(RestfulServer.class, "unknownMethod", requestType.name(), requestPath, requestDetails.getParameters().keySet()));
 		}
 		return resourceMethod;
 	}
@@ -324,45 +323,44 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 
 			if (!Modifier.isPublic(m.getModifiers())) {
 				throw new ConfigurationException("Method '" + m.getName() + "' is not public, FHIR RESTful methods must be public");
+			}
+			if (Modifier.isStatic(m.getModifiers())) {
+				throw new ConfigurationException("Method '" + m.getName() + "' is static, FHIR RESTful methods must not be static");
+			} 
+			ourLog.debug("Scanning public method: {}#{}", theProvider.getClass(), m.getName());
+
+			String resourceName = foundMethodBinding.getResourceName();
+			ResourceBinding resourceBinding;
+			if (resourceName == null) {
+				resourceBinding = myServerBinding;
 			} else {
-				if (Modifier.isStatic(m.getModifiers())) {
-					throw new ConfigurationException("Method '" + m.getName() + "' is static, FHIR RESTful methods must not be static");
+				RuntimeResourceDefinition definition = getFhirContext().getResourceDefinition(resourceName);
+				if (myResourceNameToBinding.containsKey(definition.getName())) {
+					resourceBinding = myResourceNameToBinding.get(definition.getName());
 				} else {
-					ourLog.debug("Scanning public method: {}#{}", theProvider.getClass(), m.getName());
+					resourceBinding = new ResourceBinding();
+					resourceBinding.setResourceName(resourceName);
+					myResourceNameToBinding.put(resourceName, resourceBinding);
+				}
+			}
 
-					String resourceName = foundMethodBinding.getResourceName();
-					ResourceBinding resourceBinding;
-					if (resourceName == null) {
-						resourceBinding = myServerBinding;
-					} else {
-						RuntimeResourceDefinition definition = getFhirContext().getResourceDefinition(resourceName);
-						if (myResourceNameToBinding.containsKey(definition.getName())) {
-							resourceBinding = myResourceNameToBinding.get(definition.getName());
-						} else {
-							resourceBinding = new ResourceBinding();
-							resourceBinding.setResourceName(resourceName);
-							myResourceNameToBinding.put(resourceName, resourceBinding);
-						}
-					}
-
-					List<Class<?>> allowableParams = foundMethodBinding.getAllowableParamAnnotations();
-					if (allowableParams != null) {
-						for (Annotation[] nextParamAnnotations : m.getParameterAnnotations()) {
-							for (Annotation annotation : nextParamAnnotations) {
-								Package pack = annotation.annotationType().getPackage();
-								if (pack.equals(IdParam.class.getPackage())) {
-									if (!allowableParams.contains(annotation.annotationType())) {
-										throw new ConfigurationException("Method[" + m.toString() + "] is not allowed to have a parameter annotated with " + annotation);
-									}
-								}
+			List<Class<?>> allowableParams = foundMethodBinding.getAllowableParamAnnotations();
+			if (allowableParams != null) {
+				for (Annotation[] nextParamAnnotations : m.getParameterAnnotations()) {
+					for (Annotation annotation : nextParamAnnotations) {
+						Package pack = annotation.annotationType().getPackage();
+						if (pack.equals(IdParam.class.getPackage())) {
+							if (!allowableParams.contains(annotation.annotationType())) {
+								throw new ConfigurationException("Method[" + m.toString() + "] is not allowed to have a parameter annotated with " + annotation);
 							}
 						}
 					}
-
-					resourceBinding.addMethod(foundMethodBinding);
-					ourLog.debug(" * Method: {}#{} is a handler", theProvider.getClass(), m.getName());
 				}
 			}
+
+			resourceBinding.addMethod(foundMethodBinding);
+			ourLog.debug(" * Method: {}#{} is a handler", theProvider.getClass(), m.getName());
+
 		}
 
 		return count;
@@ -406,6 +404,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	@Override
 	public FhirContext getFhirContext() {
 		if (myFhirContext == null) {
+			//TODO: Use of a deprecated method should be resolved.
 			myFhirContext = new FhirContext();
 		}
 		return myFhirContext;

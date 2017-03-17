@@ -80,7 +80,9 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
   // used during the build process to keep the overall volume of messages down
   private boolean suppressLoincSnomedMessages;
 
-  public InstanceValidator(IWorkerContext theContext) throws Exception {
+  private boolean shouldCheckForIdPresence = true;
+
+public InstanceValidator(IWorkerContext theContext) throws Exception {
     super();
     this.context = theContext;
     source = Source.InstanceValidator;
@@ -115,6 +117,10 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
       default: // do nothing
       }
     }
+  }
+
+  public void setShouldCheckForIdPresence(boolean theShouldCheckForIdPresence) {
+    shouldCheckForIdPresence = theShouldCheckForIdPresence;
   }
 
   private boolean check(String v1, String v2) {
@@ -1838,7 +1844,7 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
             if (type.equals("Extension"))
               checkExtension(errors, ei.path, ei.element, ei.definition, profile, localStack);
             else if (type.equals("Resource"))
-              validateContains(errors, ei.path, ei.definition, definition, ei.element, localStack, !isBundleEntry(ei.path) && !isParametersEntry(ei.path)); // if
+              validateContains(errors, ei.path, ei.definition, definition, ei.element, localStack, !isBundleEntry(ei.path) && !isParametersEntry(ei.path) && shouldCheckForIdPresence); // if
                                                                                                                              // (str.matches(".*([.,/])work\\1$"))
             else {
               StructureDefinition p = getProfileForType(ei.definition, type);

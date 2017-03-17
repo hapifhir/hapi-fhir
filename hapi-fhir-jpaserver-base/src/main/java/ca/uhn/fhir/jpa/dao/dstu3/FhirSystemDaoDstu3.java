@@ -50,6 +50,7 @@ import com.google.common.collect.ArrayListMultimap;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirSystemDao;
 import ca.uhn.fhir.jpa.dao.DaoMethodOutcome;
+import ca.uhn.fhir.jpa.dao.DeleteMethodOutcome;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.entity.ResourceTable;
 import ca.uhn.fhir.jpa.entity.TagDefinition;
@@ -369,6 +370,12 @@ public class FhirSystemDaoDstu3 extends BaseHapiFhirSystemDao<Bundle, Meta> {
 					}
 				}
 
+//			} else {
+//				
+//				if (isNotBlank(nextReqEntry.getRequest().getUrl())) {
+//					nextResourceId = new IdType(nextReqEntry.getRequest().getUrl());
+//				}
+				
 			}
 
 			HTTPVerb verb = nextReqEntry.getRequest().getMethodElement().getValue();
@@ -383,8 +390,11 @@ public class FhirSystemDaoDstu3 extends BaseHapiFhirSystemDao<Bundle, Meta> {
 				IFhirResourceDao resourceDao = getDaoOrThrowException(res.getClass());
 				res.setId((String) null);
 				DaoMethodOutcome outcome;
-				outcome = resourceDao.create(res, nextReqEntry.getRequest().getIfNoneExist(), false, theRequestDetails);
-				handleTransactionCreateOrUpdateOutcome(idSubstitutions, idToPersistedOutcome, nextResourceId, outcome, nextRespEntry, resourceType, res);
+				String matchUrl = nextReqEntry.getRequest().getIfNoneExist();
+				outcome = resourceDao.create(res, matchUrl, false, theRequestDetails);
+				if (nextResourceId != null) {
+					handleTransactionCreateOrUpdateOutcome(idSubstitutions, idToPersistedOutcome, nextResourceId, outcome, nextRespEntry, resourceType, res);
+				}
 				entriesToProcess.put(nextRespEntry, outcome.getEntity());
 				if (outcome.getCreated() == false) {
 					nonUpdatedEntities.add(outcome.getEntity());
@@ -401,22 +411,27 @@ public class FhirSystemDaoDstu3 extends BaseHapiFhirSystemDao<Bundle, Meta> {
 				if (parts.getResourceId() != null) {
 					IdType deleteId = new IdType(parts.getResourceType(), parts.getResourceId());
 					if (!deletedResources.contains(deleteId.getValueAsString())) {
-						ResourceTable deleted = dao.delete(deleteId, deleteConflicts, theRequestDetails);
-						if (deleted != null) {
+						DaoMethodOutcome outcome = dao.delete(deleteId, deleteConflicts, theRequestDetails);
+						if (outcome.getEntity() != null) {
 							deletedResources.add(deleteId.getValueAsString());
+							entriesToProcess.put(nextRespEntry, outcome.getEntity());
 						}
 					}
 				} else {
-					List<ResourceTable> allDeleted = dao.deleteByUrl(parts.getResourceType() + '?' + parts.getParams(), deleteConflicts, theRequestDetails);
+					DeleteMethodOutcome deleteOutcome = dao.deleteByUrl(parts.getResourceType() + '?' + parts.getParams(), deleteConflicts, theRequestDetails);
+					List<ResourceTable> allDeleted = deleteOutcome.getDeletedEntities();
 					for (ResourceTable deleted : allDeleted) {
 						deletedResources.add(deleted.getIdDt().toUnqualifiedVersionless().getValueAsString());
 					}
 					if (allDeleted.isEmpty()) {
 						status = Constants.STATUS_HTTP_204_NO_CONTENT;
 					}
+					
+					nextRespEntry.getResponse().setOutcome((Resource) deleteOutcome.getOperationOutcome());
 				}
 
 				nextRespEntry.getResponse().setStatus(toStatusString(status));
+				
 				break;
 			}
 			case PUT: {
@@ -489,7 +504,9 @@ public class FhirSystemDaoDstu3 extends BaseHapiFhirSystemDao<Bundle, Meta> {
 			IPrimitiveType<Date> deletedInstantOrNull = ResourceMetadataKeyEnum.DELETED_AT.get((IAnyResource) nextResource);
 			Date deletedTimestampOrNull = deletedInstantOrNull != null ? deletedInstantOrNull.getValue() : null;
 			boolean shouldUpdate = !nonUpdatedEntities.contains(nextOutcome.getEntity());
-			updateEntity(nextResource, nextOutcome.getEntity(), deletedTimestampOrNull, shouldUpdate, shouldUpdate, updateTime);
+			if (shouldUpdate) {
+				updateEntity(nextResource, nextOutcome.getEntity(), deletedTimestampOrNull, shouldUpdate, true, updateTime);
+			}
 		}
 
 		myEntityManager.flush();
@@ -627,7 +644,7 @@ public class FhirSystemDaoDstu3 extends BaseHapiFhirSystemDao<Bundle, Meta> {
 	}
 
 	private static boolean isPlaceholder(IdType theId) {
-		if (theId.getValue() != null) {
+		if (theId != null && theId.getValue() != null) {
 			if (theId.getValue().startsWith("urn:oid:") || theId.getValue().startsWith("urn:uuid:")) {
 				return true;
 			}
