@@ -115,7 +115,7 @@ public class ViewGenerator {
 	}
 
 	private void addExtension(BaseRuntimeElementCompositeDefinition<?> theSourceDef, BaseElement theSource, BaseElement theTarget, RuntimeChildDeclaredExtensionDefinition nextExt, String url) {
-		RuntimeChildDeclaredExtensionDefinition sourceDeclaredExt = theSourceDef.getDeclaredExtension(url);
+		RuntimeChildDeclaredExtensionDefinition sourceDeclaredExt = theSourceDef.getDeclaredExtension(url, "");
 		if (sourceDeclaredExt == null) {
 			
 			for (ExtensionDt next : theSource.getAllUndeclaredExtensions()) {

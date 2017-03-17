@@ -13,6 +13,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.hl7.fhir.dstu3.model.IdType;
+import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.StringType;
@@ -34,6 +35,7 @@ import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.annotation.Update;
+import ca.uhn.fhir.rest.annotation.Validate;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
@@ -128,6 +130,13 @@ public class TestJaxRsMockPatientRestProviderDstu3 extends AbstractJaxRsResource
 		return mock.someCustomOperation(myId, dummyInput);
 	}
 
+	@Validate()
+	public MethodOutcome validate(@ResourceParam final Patient resource) {
+		MethodOutcome mO = new MethodOutcome();
+		mO.setOperationOutcome(new OperationOutcome());
+		return mO;
+	}
+  
 	@Override
 	public Class<Patient> getResourceType() {
 		return Patient.class;

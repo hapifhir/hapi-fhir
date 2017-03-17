@@ -22,6 +22,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import java.io.IOException;
+import java.io.StringReader;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -2167,6 +2168,72 @@ public class JsonParserDstu3Test {
 
 		ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(result.toOperationOutcome()));
 		assertTrue(result.isSuccessful());
+	}
+
+	/**
+	 * Test for the url generated based on the server config
+	 */
+	@Test
+	public void testCustomUrlExtension() {
+		final String expected = "{\"resourceType\":\"Patient\",\"extension\":[{\"url\":\"http://www.example.com/petname\",\"valueString\":\"myName\"}]}";
+
+		final MyPatientWithCustomUrlExtension patient = new MyPatientWithCustomUrlExtension();
+		patient.setPetName(new StringType("myName"));
+
+		final IParser jsonParser = ourCtx.newJsonParser();
+		jsonParser.setServerBaseUrl("http://www.example.com");
+
+		final String parsedPatient = jsonParser.encodeResourceToString(patient);
+		System.out.println(parsedPatient);
+		assertEquals(expected, parsedPatient);
+
+		// Parse with string
+		MyPatientWithCustomUrlExtension newPatient = jsonParser.parseResource(MyPatientWithCustomUrlExtension.class, parsedPatient);
+		assertEquals("myName", newPatient.getPetName().getValue());
+
+		// Parse with stream
+		newPatient = jsonParser.parseResource(MyPatientWithCustomUrlExtension.class, new StringReader(parsedPatient));
+		assertEquals("myName", newPatient.getPetName().getValue());
+
+		//Check no NPE if base server not configure
+		newPatient = ourCtx.newJsonParser().parseResource(MyPatientWithCustomUrlExtension.class, new StringReader(parsedPatient));
+		assertNull("myName", newPatient.getPetName());
+		assertEquals("myName", ((StringType) newPatient.getExtensionsByUrl("http://www.example.com/petname").get(0).getValue()).getValue());
+	}
+
+	@Test
+	public void testCustomUrlExtensioninBundle() {
+		final String expected = "{\"resourceType\":\"Bundle\",\"entry\":[{\"resource\":{\"resourceType\":\"Patient\",\"extension\":[{\"url\":\"http://www.example.com/petname\",\"valueString\":\"myName\"}]}}]}";
+
+		final MyPatientWithCustomUrlExtension patient = new MyPatientWithCustomUrlExtension();
+		patient.setPetName(new StringType("myName"));
+
+		final Bundle bundle = new Bundle();
+		final BundleEntryComponent entry = new BundleEntryComponent();
+		entry.setResource(patient);
+		bundle.addEntry(entry);
+
+		final IParser jsonParser = ourCtx.newJsonParser();
+		jsonParser.setServerBaseUrl("http://www.example.com");
+
+		final String parsedBundle = jsonParser.encodeResourceToString(bundle);
+		System.out.println(parsedBundle);
+		assertEquals(expected, parsedBundle);
+
+		// Parse with string
+		Bundle newBundle = jsonParser.parseResource(Bundle.class, parsedBundle);
+		assertNotNull(newBundle);
+		assertEquals(1, newBundle.getEntry().size());
+		Patient newPatient = (Patient) newBundle.getEntry().get(0).getResource();
+		assertEquals("myName", ((StringType) newPatient.getExtensionsByUrl("http://www.example.com/petname").get(0).getValue()).getValue());
+
+		// Parse with stream
+		newBundle = jsonParser.parseResource(Bundle.class, new StringReader(parsedBundle));
+		assertNotNull(newBundle);
+		assertEquals(1, newBundle.getEntry().size());
+		newPatient = (Patient) newBundle.getEntry().get(0).getResource();
+		assertEquals("myName", ((StringType) newPatient.getExtensionsByUrl("http://www.example.com/petname").get(0).getValue()).getValue());
+
 	}
 
 	@AfterClass

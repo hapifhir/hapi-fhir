@@ -9,12 +9,14 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import java.io.IOException;
+import java.io.StringReader;
 import java.util.*;
 
 import org.apache.commons.io.IOUtils;
@@ -48,6 +50,7 @@ import ca.uhn.fhir.model.dstu2.valueset.IdentifierUseEnum;
 import ca.uhn.fhir.model.dstu2.valueset.MaritalStatusCodesEnum;
 import ca.uhn.fhir.model.dstu2.valueset.ObservationStatusEnum;
 import ca.uhn.fhir.model.dstu2.valueset.UnknownContentCodeEnum;
+import ca.uhn.fhir.model.primitive.BooleanDt;
 import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.DateDt;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
@@ -1914,5 +1917,87 @@ public class JsonParserDstu2Test {
 		
 		assertEquals("2011-01-01", condition.getDateRecordedElement().getValueAsString());
 	}
-	
+
+	/**
+	 * Test for the url generated based on the server config
+	 */
+	@Test
+	public void testGeneratedUrls() {
+		final IParser jsonParser = ourCtx.newJsonParser().setPrettyPrint(true);
+		jsonParser.setServerBaseUrl("http://myserver.com");
+
+		final CustomPatientDstu2 patient = new CustomPatientDstu2();
+		patient.setHomeless(new BooleanDt(true));
+
+		final String parsedPatient = jsonParser.encodeResourceToString(patient);
+
+		assertTrue(parsedPatient.contains("http://myserver.com/StructureDefinition/Patient"));
+		assertTrue(parsedPatient.contains("http://myserver.com/StructureDefinition/homeless"));
+	}	
+  
+	/**
+	 * Test for the url generated based on the server config
+	 */
+	@Test
+	public void testCustomUrlExtension() {
+		final String expected = "{\"resourceType\":\"Patient\",\"extension\":[{\"url\":\"http://www.example.com/petname\",\"valueString\":\"myName\"}]}";
+
+		final MyPatientWithCustomUrlExtension patient = new MyPatientWithCustomUrlExtension();
+		patient.setPetName(new StringDt("myName"));
+
+		final IParser jsonParser = ourCtx.newJsonParser();
+		jsonParser.setServerBaseUrl("http://www.example.com");
+
+		final String parsedPatient = jsonParser.encodeResourceToString(patient);
+		System.out.println(parsedPatient);
+		assertEquals(expected, parsedPatient);
+
+		// Parse with string
+		MyPatientWithCustomUrlExtension newPatient = jsonParser.parseResource(MyPatientWithCustomUrlExtension.class, parsedPatient);
+		assertEquals("myName", newPatient.getPetName().getValue());
+
+		// Parse with stream
+		newPatient = jsonParser.parseResource(MyPatientWithCustomUrlExtension.class, new StringReader(parsedPatient));
+		assertEquals("myName", newPatient.getPetName().getValue());
+
+		//Check no NPE if base server not configure
+		newPatient = ourCtx.newJsonParser().parseResource(MyPatientWithCustomUrlExtension.class, new StringReader(parsedPatient));
+		assertNull("myName", newPatient.getPetName());
+		assertEquals("myName", ((StringDt) newPatient.getUndeclaredExtensionsByUrl("http://www.example.com/petname").get(0).getValue()).getValue());
+	}
+
+	@Test
+	public void testCustomUrlExtensioninBundle() {
+		final String expected = "{\"resourceType\":\"Bundle\",\"entry\":[{\"resource\":{\"resourceType\":\"Patient\",\"extension\":[{\"url\":\"http://www.example.com/petname\",\"valueString\":\"myName\"}]}}]}";
+
+		final MyPatientWithCustomUrlExtension patient = new MyPatientWithCustomUrlExtension();
+		patient.setPetName(new StringDt("myName"));
+
+		final Bundle bundle = new Bundle();
+		final BundleEntry entry = new BundleEntry();
+		entry.setResource(patient);
+		bundle.addEntry(entry);
+
+		final IParser jsonParser = ourCtx.newJsonParser();
+		jsonParser.setServerBaseUrl("http://www.example.com");
+
+		final String parsedBundle = jsonParser.encodeBundleToString(bundle);
+		System.out.println(parsedBundle);
+		assertEquals(expected, parsedBundle);
+
+		// Parse with string
+		Bundle newBundle = jsonParser.parseBundle(parsedBundle);
+		assertNotNull(newBundle);
+		assertEquals(1, newBundle.getEntries().size());
+		Patient newPatient = (Patient) newBundle.getEntries().get(0).getResource();
+		assertEquals("myName", ((StringDt) newPatient.getUndeclaredExtensionsByUrl("http://www.example.com/petname").get(0).getValue()).getValue());
+
+		// Parse with stream
+		newBundle = jsonParser.parseBundle(new StringReader(parsedBundle));
+		assertNotNull(newBundle);
+		assertEquals(1, newBundle.getEntries().size());
+		newPatient = (Patient) newBundle.getEntries().get(0).getResource();
+		assertEquals("myName", ((StringDt) newPatient.getUndeclaredExtensionsByUrl("http://www.example.com/petname").get(0).getValue()).getValue());
+
+	}  
 }

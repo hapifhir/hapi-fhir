@@ -999,8 +999,15 @@ public InstanceValidator(IWorkerContext theContext) throws Exception {
     return null;
   }
 
-  private StructureDefinition getProfileForType(String type) throws Exception {
-    return context.fetchResource(StructureDefinition.class, "http://hl7.org/fhir/StructureDefinition/" + type);
+  private StructureDefinition getProfileForType(ElementDefinition ed, String type) throws Exception {
+    //return context.fetchResource(StructureDefinition.class, "http://hl7.org/fhir/StructureDefinition/" + type);
+    final String url;
+    if (!"Reference".equals(type) && ed.getType().get(0).hasProfile()) {
+      url = ed.getType().get(0).getProfile().get(0).getValue();
+    } else {
+      url = "http://hl7.org/fhir/StructureDefinition/" + type;
+    }
+    return context.fetchResource(StructureDefinition.class, url);    
   }
 
   private Element getValueForDiscriminator(WrapperElement element, String discriminator, ElementDefinition criteria) {
@@ -1188,8 +1195,14 @@ public InstanceValidator(IWorkerContext theContext) throws Exception {
       return context.fetchResource(StructureDefinition.class, pr);
   }
 
-  private ElementDefinition resolveType(String type) throws EOperationOutcome, Exception {
-    String url = "http://hl7.org/fhir/StructureDefinition/" + type;
+  private ElementDefinition resolveType(ElementDefinition ed, String type) throws EOperationOutcome, Exception {
+    final String url;
+    if (ed.getType().get(0).hasProfile()) {
+      url = ed.getType().get(0).getProfile().get(0).getValue();
+    } else {
+      url = "http://hl7.org/fhir/StructureDefinition/" + type;
+    }
+
     StructureDefinition sd = context.fetchResource(StructureDefinition.class, url);
     if (sd == null || !sd.hasSnapshot())
       return null;
@@ -1809,7 +1822,7 @@ public InstanceValidator(IWorkerContext theContext) throws Exception {
             type = null;
           }
         }
-        NodeStack localStack = stack.push(ei.element, ei.count, ei.definition, type == null ? typeDefn : resolveType(type));
+        NodeStack localStack = stack.push(ei.element, ei.count, ei.definition, type == null ? typeDefn : resolveType(ei.definition, type));
         String localStackLiterapPath = localStack.getLiteralPath();
         String eiPath = ei.path;
         assert(eiPath.equals(localStackLiterapPath)) : "ei.path: " + ei.path + "  -  localStack.getLiterapPath: " + localStackLiterapPath;
@@ -1834,7 +1847,7 @@ public InstanceValidator(IWorkerContext theContext) throws Exception {
               validateContains(errors, ei.path, ei.definition, definition, ei.element, localStack, !isBundleEntry(ei.path) && !isParametersEntry(ei.path) && shouldCheckForIdPresence); // if
                                                                                                                              // (str.matches(".*([.,/])work\\1$"))
             else {
-              StructureDefinition p = getProfileForType(type);
+              StructureDefinition p = getProfileForType(ei.definition, type);
               if (rule(errors, IssueType.STRUCTURE, ei.line(), ei.col(), ei.path, p != null, "Unknown type " + type)) {
                 validateElement(errors, p, p.getSnapshot().getElement().get(0), profile, ei.definition, ei.element, type, localStack);
               }
