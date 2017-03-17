@@ -301,18 +301,6 @@ public class AuthorizationInterceptor extends InterceptorAdapter implements ISer
 		return true;
 	}
 
-	private List<IBaseResource> toListOfResourcesAndExcludeContainer(IBaseResource theResponseObject, FhirContext fhirContext) {
-		List<IBaseResource> resources;
-		resources = fhirContext.newTerser().getAllPopulatedChildElementsOfType(theResponseObject, IBaseResource.class);
-		
-		// Exclude the container
-		if (resources.size() > 0 && resources.get(0) == theResponseObject) {
-			resources = resources.subList(1, resources.size());
-		}
-		
-		return resources;
-	}
-
 	@CoverageIgnore
 	@Override
 	public boolean outgoingResponse(RequestDetails theRequestDetails, TagList theResponseObject) {
@@ -350,6 +338,18 @@ public class AuthorizationInterceptor extends InterceptorAdapter implements ISer
 		myDefaultPolicy = theDefaultPolicy;
 	}
 
+	private List<IBaseResource> toListOfResourcesAndExcludeContainer(IBaseResource theResponseObject, FhirContext fhirContext) {
+		List<IBaseResource> resources;
+		resources = fhirContext.newTerser().getAllPopulatedChildElementsOfType(theResponseObject, IBaseResource.class);
+		
+		// Exclude the container
+		if (resources.size() > 0 && resources.get(0) == theResponseObject) {
+			resources = resources.subList(1, resources.size());
+		}
+		
+		return resources;
+	}
+
 //	private List<IBaseResource> toListOfResources(FhirContext fhirContext, IBaseBundle responseBundle) {
 //		List<IBaseResource> retVal = BundleUtil.toListOfResources(fhirContext, responseBundle);
 //		for (int i = 0; i < retVal.size(); i++) {
@@ -368,10 +368,10 @@ public class AuthorizationInterceptor extends InterceptorAdapter implements ISer
 	}
 
 	private enum OperationExamineDirection {
+		BOTH,
 		IN,
-		NONE,
+		NONE, 
 		OUT, 
-		BOTH, 
 	}
 
 	public static class Verdict {
