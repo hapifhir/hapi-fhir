@@ -7,3 +7,15 @@ insert_final_newline = true
 [*.java]
 charset = utf-8
 indent_style = tab
+
+[*.xml]
+charset = utf-8
+indent_style = tab
+
+[*.json]
+charset = utf-8
+indent_style = tab
+
+[*.vm]
+charset = utf-8
+indent_style = tab

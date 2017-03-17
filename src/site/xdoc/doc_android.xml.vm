@@ -46,11 +46,8 @@
 					</li>
 				</ul>
 				<source><![CDATA[dependencies {
-    compile (group: 'ca.uhn.hapi.fhir', name: 'hapi-fhir-android', version: '${project.version}', classifier: 'dstu2') {
-        exclude module: 'javax.servlet-api'
-        exclude module: 'hapi-fhir-base'
-    }
-    }]]></source>
+	compile "ca.uhn.hapi.fhir:hapi-fhir-android:2.2:dstu2@jar"
+}]]></source>
 			
 				<p>
 					You may also download a copy from the GitHub 
@@ -79,7 +76,14 @@
 				If you know of others, please let us know!
 			</p>
 			<ul>
-				<li><a href="https://github.com/SynappzMA/FHIR-Android">https://github.com/SynappzMA/FHIR-Android</a> (Nice FHIR DSTU2 search app)</li>
+				<li>
+					<a href="https://github.com/hapifhir/hapi-fhir-android-integration-test">https://github.com/hapifhir/hapi-fhir-android-integration-test</a>
+					- hapi-fhir-android Integration Test and Reference Application is our test platform for validating new releases. Created by Thomas Andersen.
+				</li>
+				<li>
+					<a href="https://github.com/SynappzMA/FHIR-Android">https://github.com/SynappzMA/FHIR-Android</a>
+					- Nice FHIR DSTU2 search app
+				</li>
 			</ul>
 			
 		</section>
