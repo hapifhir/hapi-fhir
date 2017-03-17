@@ -268,6 +268,11 @@ abstract class BaseValidatingInterceptor<T> extends InterceptorAdapter {
 	protected void postProcessResult(RequestDetails theRequestDetails, ValidationResult theValidationResult) { }
 
 	/**
+	 * Hook for subclasses on failure (e.g. add a response header to an incoming resource upon rejection).
+	 */
+	protected void postProcessResultOnFailure(RequestDetails theRequestDetails, ValidationResult theValidationResult) { }
+
+	/**
 	 * Note: May return null
 	 */
 	protected ValidationResult validate(T theRequest, RequestDetails theRequestDetails) {
@@ -314,6 +319,7 @@ abstract class BaseValidatingInterceptor<T> extends InterceptorAdapter {
 		if (myFailOnSeverity != null) {
 			for (SingleValidationMessage next : validationResult.getMessages()) {
 				if (next.getSeverity().ordinal() >= myFailOnSeverity) {
+					postProcessResultOnFailure(theRequestDetails, validationResult);
 					fail(theRequestDetails, validationResult);
 					return validationResult;
 				}

@@ -202,6 +202,11 @@
 				the JPA database, improving performance of this operation. Thanks to
 				Joel Schneider for the pull request and analysis!
 			</action>
+			<action type="add">
+				A new post-processing hook for subclasses of BaseValidatingInterceptor is now
+				available. The hook exposes the request details on validation failure prior to throwing an
+				UnprocessableEntityException.
+			</action>
 		</release>
 		<release version="2.2" date="2016-12-20">
 			<action type="add">
