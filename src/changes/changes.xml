@@ -197,6 +197,11 @@
 				on certain platforms where the StAX parser was overridden. Thanks to
 				GitHub user @Jodue for the pull request!
 			</action>
+			<action type="add" issue="575">
+				Remove an unneccesary database flush when saving large code systems to
+				the JPA database, improving performance of this operation. Thanks to
+				Joel Schneider for the pull request and analysis!
+			</action>
 		</release>
 		<release version="2.2" date="2016-12-20">
 			<action type="add">

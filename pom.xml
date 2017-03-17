@@ -318,6 +318,10 @@
 			<id>jodue</id>
 			<name>jodue</name>
 		</developer>
+		<developer>
+			<id>joelsch</id>
+			<name>Joel Schneider</name>
+		</developer>
 	</developers>
 
 	<licenses>
