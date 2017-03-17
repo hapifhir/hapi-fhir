@@ -88,7 +88,7 @@ public interface IRestfulClient {
 	 * to be applied globally on this client.
 	 */
 	void setSummary(SummaryEnum theSummary);
-
+        
 	/**
 	 * Remove an intercaptor that was previously registered using {@link IRestfulClient#registerInterceptor(IClientInterceptor)}
 	 */
