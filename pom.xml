@@ -314,6 +314,10 @@
 			<id>SRiviere</id>
 			<name>Sebastien Riviere</name>
 		</developer>
+		<developer>
+			<id>jodue</id>
+			<name>jodue</name>
+		</developer>
 	</developers>
 
 	<licenses>

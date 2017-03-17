@@ -192,6 +192,11 @@
 				allowing the validator to correctly work against those structures.
 				Thanks to Michael Lawley for the pull request!
 			</action>
+			<action type="fix" issue="551">
+				XML Parser failed to parse large field values (greater than 512 Kb)
+				on certain platforms where the StAX parser was overridden. Thanks to
+				GitHub user @Jodue for the pull request!
+			</action>
 		</release>
 		<release version="2.2" date="2016-12-20">
 			<action type="add">
