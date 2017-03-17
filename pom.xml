@@ -310,6 +310,10 @@
 			<id>hugosoares</id>
 			<name>Hugo Soares</name>
 		</developer>
+		<developer>
+			<id>SRiviere</id>
+			<name>Sebastien Riviere</name>
+		</developer>
 	</developers>
 
 	<licenses>
