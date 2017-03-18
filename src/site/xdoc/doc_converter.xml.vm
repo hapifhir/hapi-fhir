@@ -50,7 +50,7 @@
 				</p>
 				<macro name="snippet">
 					<param name="id" value="1020"/>
-					<param name="file" value="examples/src/main/java/example/ConverterExample.java"/>
+					<param name="file" value="examples/src/main/java/example/ConverterExamples.java"/>
 				</macro>
 			</subsection>
 			
@@ -63,7 +63,7 @@
 				</p>
 				<macro name="snippet">
 					<param name="id" value="1420"/>
-					<param name="file" value="examples/src/main/java/example/ConverterExample.java"/>
+					<param name="file" value="examples/src/main/java/example/ConverterExamples.java"/>
 				</macro>
 			</subsection>
 

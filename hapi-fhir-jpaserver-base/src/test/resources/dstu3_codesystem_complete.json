@@ -15,13 +15,13 @@
 	"compositional": false,
 	"versionNeeded": false,
 	"content": "complete",
-	"concept": {
+	"concept": [{
 		"code": "work",
 		"display": "Work",
 		"definition": "An office address. First choice for business related contacts during business hours.",
-		"designation": {
+		"designation": [{
 			"language": "IT",
 			"value": "Lavoro"
-		}
-	}
+		}]
+	}]
 }

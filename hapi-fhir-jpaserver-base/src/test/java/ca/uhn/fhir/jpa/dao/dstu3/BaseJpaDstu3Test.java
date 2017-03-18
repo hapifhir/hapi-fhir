@@ -40,6 +40,7 @@ import ca.uhn.fhir.jpa.search.IStaleSearchDeletingSvc;
 import ca.uhn.fhir.jpa.term.IHapiTerminologySvc;
 import ca.uhn.fhir.jpa.validation.JpaValidationSupportChainDstu3;
 import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.rest.method.MethodUtil;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.util.TestUtil;
@@ -225,6 +226,7 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 		myDaoConfig.setHardSearchLimit(1000);
 		myDaoConfig.setHardTagListLimit(1000);
 		myDaoConfig.setIncludeLimit(2000);
+		myFhirCtx.setParserErrorHandler(new StrictErrorHandler());
 	}
 
 	@Override

@@ -78,11 +78,17 @@
 				This release brings the STU3 definitions up to the  
 				latest definitions (FHIR 1.9.0 - SVN 11501). It also brings
 				in the latest validator fixes, as well as a number of other
-				useful enhancements and fixes.
+				useful enhancements and fixes, including:
 			</p>
+			<ul>
+				<li>A new experimental module for <a href="./doc_converter.html">converting from DSTU2/2.1 structures to STU3 structures</a></li>
+				<li>Support in the JPA server for <a href="https://smilecdr.com/blog/20170208_custom_search_parameters">custom search parameters</a> (STU3 only for now)</li>
+				<li>Many other performance fixes, enhancements, and bugfixes</li>
+			</ul>
 			<p>
 				As always, the <a href="./changes-report.html">changelog</a> has the full list
-				of changes in this release.
+				of changes in this release. Thanks to everyone who contributed to this release, either
+				by submitting pull requests, suggesting new features, or filing bug requests!
 			</p>
 			<p>
 				- <a href="https://github.com/jamesagnew/">James Agnew</a>
@@ -115,7 +121,8 @@
 				- <a href="https://github.com/jamesagnew/">James Agnew</a>
 			</p>
 			<br/><br/>
-	
+
+			<!-- 
 			<p>
 				<b>November 11, 2016 - HAPI FHIR 2.1 Released</b> -
 				The next release of HAPI has now been uploaded to the Maven repos and 
@@ -162,9 +169,6 @@
 			</p>
 			<br/><br/>
 
-
-
-			<!--
 			<p>
 				<b>August 30, 2016 - HAPI FHIR 2.0 Released</b> -
 				The next release of HAPI has now been uploaded to the Maven repos and 

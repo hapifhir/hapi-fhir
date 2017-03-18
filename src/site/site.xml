@@ -86,6 +86,7 @@
 				<item name="Tags" href="./doc_tags.html" />
 				<item name="Validation" href="./doc_validation.html" />
 				<item name="Custom Structures" href="./doc_custom_structures.html" />
+				<item name="Version Converter" href="./doc_converter.html" />
 			</item>
 			<item name="RESTful Client" href="./doc_rest_client.html" >
 				<item name="Fluent/Generic Client" href="./doc_rest_client.html" />

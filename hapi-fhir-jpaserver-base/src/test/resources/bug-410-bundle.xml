@@ -1,5 +1,4 @@
-<Bundle xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://hl7.org/fhir C:/VSTS/git/MedViewMapForce/Schema/fhir-single.xsd"
-	xmlns="http://hl7.org/fhir">
+<Bundle xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://hl7.org/fhir">
 	<id value="af89d63e90e34ec4b123c5fcc74b54e5" />
 	<type value="transaction" />
 	<entry>
@@ -38,7 +37,6 @@
 				</identifier>
 				<identifier>
 					<use value="secondary" />
-					<value value="" />
 					<assigner>
 						<display value="Entitlement" />
 					</assigner>
@@ -107,21 +105,6 @@
 						<manufacturer>
 							<display value="PF" />
 						</manufacturer>
-						<product>
-							<form>
-								<text value="Ear drops" />
-							</form>
-							<ingredient>
-								<item>
-									<display value="Chloramphenicol" />
-								</item>
-								<amount>
-									<extension url="http://erx.com.au/id/itemstrength">
-										<valueString value="5 mg/mL" />
-									</extension>
-								</amount>
-							</ingredient>
-						</product>
 					</Medication>
 				</contained>
 				<contained>
@@ -155,77 +138,6 @@
 						</address>
 					</Organization>
 				</contained>
-				<contained>
-					<Practitioner>
-						<text>
-							<status value="generated" />
-							<xhtml:div>Ellison, Christine. HPI-I:8003616566689462</xhtml:div>
-						</text>
-						<identifier>
-							<use value="secondary" />
-							<system value="http://health.gov.au/health-id" />
-							<value value="8003616566689462" />
-							<assigner>
-								<display value="HPI-I" />
-							</assigner>
-						</identifier>
-						<identifier>
-							<use value="secondary" />
-							<type>
-								<coding>
-									<system value="http://hl7.org.au/v2/0203" />
-									<code value="PRESC" />
-									<display value="Prescriber Number" />
-								</coding>
-								<text value="Prescriber Number" />
-							</type>
-							<system value="http://ns.electronichealth.net.au/id/hi/presc" />
-							<value value="1234567" />
-						</identifier>
-						<identifier>
-							<use value="official" />
-							<type>
-								<coding>
-									<system value="http://hl7.org.au/v2/0203" />
-									<code value="PRN" />
-									<display value="Provider Number" />
-								</coding>
-								<text value="Provider Number" />
-							</type>
-							<system value="http://ns.electronichealth.net.au/id/hi/prn" />
-							<value value="22" />
-						</identifier>
-						<name>
-							<use value="official" />
-							<family value="Ellison" />
-							<given value="Christine" />
-						</name>
-						<telecom>
-							<system value="phone" />
-							<value value="862126900" />
-							<use value="work" />
-						</telecom>
-						<telecom>
-							<system value="fax" />
-							<value value="862126980" />
-							<use value="work" />
-						</telecom>
-						<practitionerRole>
-							<managingOrganization>
-								<reference value="#eb5685fc5cc94b3282a7ecceb0ec59c5" />
-								<display value="MILLENNIUM HEALTH SERVICE" />
-							</managingOrganization>
-							<role>
-								<coding>
-									<system value="http://hl7.org/fhir/ValueSet/anzsco-occupations" />
-									<code value="253000" />
-									<display value="Medical Practitioners nfd" />
-								</coding>
-								<text value="Medical Practitioners nfd" />
-							</role>
-						</practitionerRole>
-					</Practitioner>
-				</contained>
 				<identifier>
 					<use value="official" />
 					<type>
@@ -247,28 +159,17 @@
 					<system value="http://erx.com.au/id/DVAAuthority" />
 					<value value="0:" />
 				</identifier>
-				<dateWritten value="2016-05-20T00:00:00" />
 				<status value="active" />
-				<patient>
+				<subject>
 					<reference value="urn:uuid:3E286BBC7F4D6C4BB951011E2F6B7C03" />
 					<display value="JENKINS, Margurite" />
-				</patient>
-				<prescriber>
-					<reference value="#20975244144243c0ae981bfce906e5ab" />
-					<display value="Ellison, Christine" />
-				</prescriber>
-				<reasonCodeableConcept>
-					<text value="" />
-				</reasonCodeableConcept>
+				</subject>
 				<medicationReference>
 					<reference value="#990f3dd481f3486d83ade87ce1f5e6ee" />
 					<display value="Chloramphenicol" />
 				</medicationReference>
 				<dosageInstruction>
 					<text value="one daily" />
-					<route>
-						<text value="" />
-					</route>
 				</dosageInstruction>
 				<dispenseRequest>
 					<numberOfRepeatsAllowed value="0" />
@@ -276,15 +177,6 @@
 						<value value="1" />
 					</quantity>
 				</dispenseRequest>
-				<substitution>
-					<type>
-						<coding>
-							<system value="http://hl7.org/fhir/v3/substanceAdminSubstitution" />
-							<code value="N" />
-							<display value="none" />
-						</coding>
-					</type>
-				</substitution>
 			</MedicationRequest>
 		</resource>
 		<request>
@@ -387,20 +279,6 @@
 					<family value="LENNON" />
 					<given value="GEORGE" />
 				</name>
-				<practitionerRole>
-					<managingOrganization>
-						<reference value="urn:uuid:c6f81e7e4c844cb3a9e423edaf70e92b" />
-						<display value="PCEHRCERT47" />
-					</managingOrganization>
-					<role>
-						<coding>
-							<system value="http://hl7.org/fhir/ValueSet/anzsco-occupations" />
-							<code value="253000" />
-							<display value="Pharmacists nfd" />
-						</coding>
-						<text value="Pharmacists nfd" />
-					</role>
-				</practitionerRole>
 			</Practitioner>
 		</resource>
 		<request>
@@ -510,21 +388,6 @@
 						<manufacturer>
 							<display value="PF" />
 						</manufacturer>
-						<product>
-							<form>
-								<text value="EAR-DRP" />
-							</form>
-							<ingredient>
-								<item>
-									<display value="CHLORAMPHENICOL" />
-								</item>
-								<amount>
-									<extension url="http://erx.com.au/id/itemstrength">
-										<valueString value="0.5%" />
-									</extension>
-								</amount>
-							</ingredient>
-						</product>
 					</Medication>
 				</contained>
 				<extension url="http://erx.com.au/id/SupplyNumber">
@@ -582,14 +445,6 @@
 					<system value="http://erx.com.au/id/OriginalPharmacyApprovalNumber" />
 					<value value="HN249M" />
 				</identifier>
-				<patient>
-					<reference value="urn:uuid:3E286BBC7F4D6C4BB951011E2F6B7C03" />
-					<display value="JENKINS, Margurite" />
-				</patient>
-				<dispenser>
-					<reference value="urn:uuid:854b6f6e4398497ea91238a223310a2d" />
-					<display value="LENNON, GEORGE" />
-				</dispenser>
 				<authorizingPrescription>
 					<reference value="urn:uuid:902d418781be4fc185d9f45e523598f1" />
 					<display value="1MN89XMN3B26M4B7P0-4" />

@@ -2031,7 +2031,6 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 				"  \"identifier\":[\n" + 
 				"     {\n" + 
 				"       \"use\":\"official\",\n" + 
-				"       \"label\":\"HSP 2.16.840.1.113883.3.239.23.21\",\n" + 
 				"       \"system\":\"urn:cgta:hsp_ids\",\n" + 
 				"       \"value\":\"urn:oid:2.16.840.1.113883.3.239.23.21\"\n" + 
 				"     }\n" + 
