@@ -69,9 +69,6 @@ public class FhirResourceDaoDstu3SearchWithLuceneDisabledTest extends BaseJpaTes
 	@Qualifier("myDeviceDaoDstu3")
 	private IFhirResourceDao<Device> myDeviceDao;
 	@Autowired
-	@Qualifier("myDiagnosticRequestDaoDstu3")
-	private IFhirResourceDao<DiagnosticRequest> myDiagnosticRequestDao;
-	@Autowired
 	@Qualifier("myDiagnosticReportDaoDstu3")
 	private IFhirResourceDao<DiagnosticReport> myDiagnosticReportDao;
 	@Autowired

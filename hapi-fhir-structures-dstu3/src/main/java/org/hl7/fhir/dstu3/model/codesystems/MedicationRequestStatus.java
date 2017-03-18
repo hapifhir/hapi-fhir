@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -65,6 +65,10 @@ public enum MedicationRequestStatus {
          */
         DRAFT, 
         /**
+         * The authoring system does not know which of the status values currently applies for this request
+         */
+        UNKNOWN, 
+        /**
          * added to help the parsers
          */
         NULL;
@@ -85,6 +89,8 @@ public enum MedicationRequestStatus {
           return STOPPED;
         if ("draft".equals(codeString))
           return DRAFT;
+        if ("unknown".equals(codeString))
+          return UNKNOWN;
         throw new FHIRException("Unknown MedicationRequestStatus code '"+codeString+"'");
         }
         public String toCode() {
@@ -96,6 +102,7 @@ public enum MedicationRequestStatus {
             case ENTEREDINERROR: return "entered-in-error";
             case STOPPED: return "stopped";
             case DRAFT: return "draft";
+            case UNKNOWN: return "unknown";
             default: return "?";
           }
         }
@@ -111,6 +118,7 @@ public enum MedicationRequestStatus {
             case ENTEREDINERROR: return "The prescription was entered in error.";
             case STOPPED: return "Actions implied by the prescription are to be permanently halted, before all of them occurred.";
             case DRAFT: return "The prescription is not yet 'actionable', i.e. it is a work in progress, requires sign-off or verification, and needs to be run through decision support process.";
+            case UNKNOWN: return "The authoring system does not know which of the status values currently applies for this request";
             default: return "?";
           }
         }
@@ -123,6 +131,7 @@ public enum MedicationRequestStatus {
             case ENTEREDINERROR: return "Entered In Error";
             case STOPPED: return "Stopped";
             case DRAFT: return "Draft";
+            case UNKNOWN: return "Unknown";
             default: return "?";
           }
     }

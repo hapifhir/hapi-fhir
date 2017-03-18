@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
 
 
 import org.hl7.fhir.dstu3.model.EnumFactory;
@@ -55,6 +55,8 @@ public class ExRevenueCenterEnumFactory implements EnumFactory<ExRevenueCenter> 
       return ExRevenueCenter._0451;
     if ("0452".equals(codeString))
       return ExRevenueCenter._0452;
+    if ("0010".equals(codeString))
+      return ExRevenueCenter._0010;
     throw new IllegalArgumentException("Unknown ExRevenueCenter code '"+codeString+"'");
   }
 
@@ -75,6 +77,8 @@ public class ExRevenueCenterEnumFactory implements EnumFactory<ExRevenueCenter> 
       return "0451";
     if (code == ExRevenueCenter._0452)
       return "0452";
+    if (code == ExRevenueCenter._0010)
+      return "0010";
     return "?";
   }
 

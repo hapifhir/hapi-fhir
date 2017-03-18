@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
 
 
 import org.hl7.fhir.dstu3.model.EnumFactory;
@@ -55,8 +55,6 @@ public class ItemTypeEnumFactory implements EnumFactory<ItemType> {
       return ItemType.DATE;
     if ("dateTime".equals(codeString))
       return ItemType.DATETIME;
-    if ("instant".equals(codeString))
-      return ItemType.INSTANT;
     if ("time".equals(codeString))
       return ItemType.TIME;
     if ("string".equals(codeString))
@@ -95,8 +93,6 @@ public class ItemTypeEnumFactory implements EnumFactory<ItemType> {
       return "date";
     if (code == ItemType.DATETIME)
       return "dateTime";
-    if (code == ItemType.INSTANT)
-      return "instant";
     if (code == ItemType.TIME)
       return "time";
     if (code == ItemType.STRING)

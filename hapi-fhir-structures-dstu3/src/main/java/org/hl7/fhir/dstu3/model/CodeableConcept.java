@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
 
 import java.util.*;
 
@@ -189,35 +189,46 @@ public class CodeableConcept extends Type implements ICompositeType {
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case -1355086998: // coding
           this.getCoding().add(castToCoding(value)); // Coding
-          break;
+          return value;
         case 3556653: // text
           this.text = castToString(value); // StringType
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("coding"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("coding")) {
           this.getCoding().add(castToCoding(value));
-        else if (name.equals("text"))
+        } else if (name.equals("text")) {
           this.text = castToString(value); // StringType
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case -1355086998:  return addCoding(); // Coding
-        case 3556653: throw new FHIRException("Cannot make property text as it is not a complex type"); // StringType
+        case -1355086998:  return addCoding(); 
+        case 3556653:  return getTextElement();
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -1355086998: /*coding*/ return new String[] {"Coding"};
+        case 3556653: /*text*/ return new String[] {"string"};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }

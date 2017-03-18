@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,17 +37,17 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum ContractTermSubtype {
 
         /**
-         * Oral Health: examinations, diagnositics, cleaning and basic restorative services.
+         * Terms that go to the very root of a contract.
          */
-        ORALHEALTHBASIC, 
+        CONDITION, 
         /**
-         * Oral Health: major treatment and restorative services.
+         * Less imperative than a condition, so the contract will survive a breach
          */
-        ORALHEALTHMAJOR, 
+        WARRANTY, 
         /**
-         * Oral Health: orthodontic services, eg. braces.
+         * Breach of which may or may not go to the root of the contract depending upon the nature of the breach
          */
-        ORALHEALTHORTHODONTIC, 
+        INNOMINATE, 
         /**
          * added to help the parsers
          */
@@ -55,19 +55,19 @@ public enum ContractTermSubtype {
         public static ContractTermSubtype fromCode(String codeString) throws FHIRException {
             if (codeString == null || "".equals(codeString))
                 return null;
-        if ("oralhealth-basic".equals(codeString))
-          return ORALHEALTHBASIC;
-        if ("oralhealth-major".equals(codeString))
-          return ORALHEALTHMAJOR;
-        if ("oralhealth-orthodontic".equals(codeString))
-          return ORALHEALTHORTHODONTIC;
+        if ("condition".equals(codeString))
+          return CONDITION;
+        if ("warranty".equals(codeString))
+          return WARRANTY;
+        if ("innominate".equals(codeString))
+          return INNOMINATE;
         throw new FHIRException("Unknown ContractTermSubtype code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
-            case ORALHEALTHBASIC: return "oralhealth-basic";
-            case ORALHEALTHMAJOR: return "oralhealth-major";
-            case ORALHEALTHORTHODONTIC: return "oralhealth-orthodontic";
+            case CONDITION: return "condition";
+            case WARRANTY: return "warranty";
+            case INNOMINATE: return "innominate";
             default: return "?";
           }
         }
@@ -76,17 +76,17 @@ public enum ContractTermSubtype {
         }
         public String getDefinition() {
           switch (this) {
-            case ORALHEALTHBASIC: return "Oral Health: examinations, diagnositics, cleaning and basic restorative services.";
-            case ORALHEALTHMAJOR: return "Oral Health: major treatment and restorative services.";
-            case ORALHEALTHORTHODONTIC: return "Oral Health: orthodontic services, eg. braces.";
+            case CONDITION: return "Terms that go to the very root of a contract.";
+            case WARRANTY: return "Less imperative than a condition, so the contract will survive a breach";
+            case INNOMINATE: return "Breach of which may or may not go to the root of the contract depending upon the nature of the breach";
             default: return "?";
           }
         }
         public String getDisplay() {
           switch (this) {
-            case ORALHEALTHBASIC: return "OralHealth-Basic";
-            case ORALHEALTHMAJOR: return "OralHealth-Major";
-            case ORALHEALTHORTHODONTIC: return "OralHealth-Orthodontic";
+            case CONDITION: return "Condition";
+            case WARRANTY: return "Warranty";
+            case INNOMINATE: return "Innominate";
             default: return "?";
           }
     }

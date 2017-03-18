@@ -33,7 +33,7 @@ package org.hl7.fhir.instance.model;
 import java.util.List;
 
 import org.hl7.fhir.instance.model.api.INarrative;
-import org.hl7.fhir.instance.utilities.xhtml.XhtmlNode;
+import org.hl7.fhir.utilities.xhtml.XhtmlNode;
 
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;

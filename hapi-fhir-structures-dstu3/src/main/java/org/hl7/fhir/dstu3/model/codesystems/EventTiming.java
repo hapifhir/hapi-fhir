@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -53,6 +53,10 @@ public enum EventTiming {
          */
         NIGHT, 
         /**
+         * event occurs [offset] after subject goes to sleep
+         */
+        PHS, 
+        /**
          * added to help the parsers
          */
         NULL;
@@ -67,6 +71,8 @@ public enum EventTiming {
           return EVE;
         if ("NIGHT".equals(codeString))
           return NIGHT;
+        if ("PHS".equals(codeString))
+          return PHS;
         throw new FHIRException("Unknown EventTiming code '"+codeString+"'");
         }
         public String toCode() {
@@ -75,6 +81,7 @@ public enum EventTiming {
             case AFT: return "AFT";
             case EVE: return "EVE";
             case NIGHT: return "NIGHT";
+            case PHS: return "PHS";
             default: return "?";
           }
         }
@@ -87,6 +94,7 @@ public enum EventTiming {
             case AFT: return "event occurs during the afternoon";
             case EVE: return "event occurs during the evening";
             case NIGHT: return "event occurs during the night";
+            case PHS: return "event occurs [offset] after subject goes to sleep";
             default: return "?";
           }
         }
@@ -96,6 +104,7 @@ public enum EventTiming {
             case AFT: return "Afternoon";
             case EVE: return "Evening";
             case NIGHT: return "Night";
+            case PHS: return "After Sleep";
             default: return "?";
           }
     }

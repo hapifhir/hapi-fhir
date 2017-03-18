@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
 
 import java.util.*;
 
@@ -140,8 +140,10 @@ public class EnrollmentResponse extends DomainResource {
         throw new IllegalArgumentException("Unknown EnrollmentResponseStatus code '"+codeString+"'");
         }
         public Enumeration<EnrollmentResponseStatus> fromType(Base code) throws FHIRException {
-          if (code == null || code.isEmpty())
+          if (code == null)
             return null;
+          if (code.isEmpty())
+            return new Enumeration<EnrollmentResponseStatus>(this);
           String codeString = ((PrimitiveType) code).asStringValue();
           if (codeString == null || "".equals(codeString))
             return null;
@@ -696,77 +698,97 @@ public class EnrollmentResponse extends DomainResource {
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case -1618432855: // identifier
           this.getIdentifier().add(castToIdentifier(value)); // Identifier
-          break;
+          return value;
         case -892481550: // status
-          this.status = new EnrollmentResponseStatusEnumFactory().fromType(value); // Enumeration<EnrollmentResponseStatus>
-          break;
+          value = new EnrollmentResponseStatusEnumFactory().fromType(castToCode(value));
+          this.status = (Enumeration) value; // Enumeration<EnrollmentResponseStatus>
+          return value;
         case 1095692943: // request
           this.request = castToReference(value); // Reference
-          break;
+          return value;
         case -1106507950: // outcome
           this.outcome = castToCodeableConcept(value); // CodeableConcept
-          break;
+          return value;
         case 583380919: // disposition
           this.disposition = castToString(value); // StringType
-          break;
+          return value;
         case 1028554472: // created
           this.created = castToDateTime(value); // DateTimeType
-          break;
+          return value;
         case 1178922291: // organization
           this.organization = castToReference(value); // Reference
-          break;
+          return value;
         case 1601527200: // requestProvider
           this.requestProvider = castToReference(value); // Reference
-          break;
+          return value;
         case 599053666: // requestOrganization
           this.requestOrganization = castToReference(value); // Reference
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("identifier"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("identifier")) {
           this.getIdentifier().add(castToIdentifier(value));
-        else if (name.equals("status"))
-          this.status = new EnrollmentResponseStatusEnumFactory().fromType(value); // Enumeration<EnrollmentResponseStatus>
-        else if (name.equals("request"))
+        } else if (name.equals("status")) {
+          value = new EnrollmentResponseStatusEnumFactory().fromType(castToCode(value));
+          this.status = (Enumeration) value; // Enumeration<EnrollmentResponseStatus>
+        } else if (name.equals("request")) {
           this.request = castToReference(value); // Reference
-        else if (name.equals("outcome"))
+        } else if (name.equals("outcome")) {
           this.outcome = castToCodeableConcept(value); // CodeableConcept
-        else if (name.equals("disposition"))
+        } else if (name.equals("disposition")) {
           this.disposition = castToString(value); // StringType
-        else if (name.equals("created"))
+        } else if (name.equals("created")) {
           this.created = castToDateTime(value); // DateTimeType
-        else if (name.equals("organization"))
+        } else if (name.equals("organization")) {
           this.organization = castToReference(value); // Reference
-        else if (name.equals("requestProvider"))
+        } else if (name.equals("requestProvider")) {
           this.requestProvider = castToReference(value); // Reference
-        else if (name.equals("requestOrganization"))
+        } else if (name.equals("requestOrganization")) {
           this.requestOrganization = castToReference(value); // Reference
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case -1618432855:  return addIdentifier(); // Identifier
-        case -892481550: throw new FHIRException("Cannot make property status as it is not a complex type"); // Enumeration<EnrollmentResponseStatus>
-        case 1095692943:  return getRequest(); // Reference
-        case -1106507950:  return getOutcome(); // CodeableConcept
-        case 583380919: throw new FHIRException("Cannot make property disposition as it is not a complex type"); // StringType
-        case 1028554472: throw new FHIRException("Cannot make property created as it is not a complex type"); // DateTimeType
-        case 1178922291:  return getOrganization(); // Reference
-        case 1601527200:  return getRequestProvider(); // Reference
-        case 599053666:  return getRequestOrganization(); // Reference
+        case -1618432855:  return addIdentifier(); 
+        case -892481550:  return getStatusElement();
+        case 1095692943:  return getRequest(); 
+        case -1106507950:  return getOutcome(); 
+        case 583380919:  return getDispositionElement();
+        case 1028554472:  return getCreatedElement();
+        case 1178922291:  return getOrganization(); 
+        case 1601527200:  return getRequestProvider(); 
+        case 599053666:  return getRequestOrganization(); 
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -1618432855: /*identifier*/ return new String[] {"Identifier"};
+        case -892481550: /*status*/ return new String[] {"code"};
+        case 1095692943: /*request*/ return new String[] {"Reference"};
+        case -1106507950: /*outcome*/ return new String[] {"CodeableConcept"};
+        case 583380919: /*disposition*/ return new String[] {"string"};
+        case 1028554472: /*created*/ return new String[] {"dateTime"};
+        case 1178922291: /*organization*/ return new String[] {"Reference"};
+        case 1601527200: /*requestProvider*/ return new String[] {"Reference"};
+        case 599053666: /*requestOrganization*/ return new String[] {"Reference"};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }

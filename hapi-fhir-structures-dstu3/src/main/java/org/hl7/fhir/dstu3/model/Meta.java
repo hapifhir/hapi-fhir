@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
 
 import java.util.*;
 
@@ -431,53 +431,67 @@ public class Meta extends Type implements IBaseMetaType {
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case -1407102957: // versionId
           this.versionId = castToId(value); // IdType
-          break;
+          return value;
         case 1649733957: // lastUpdated
           this.lastUpdated = castToInstant(value); // InstantType
-          break;
+          return value;
         case -309425751: // profile
           this.getProfile().add(castToUri(value)); // UriType
-          break;
+          return value;
         case 949122880: // security
           this.getSecurity().add(castToCoding(value)); // Coding
-          break;
+          return value;
         case 114586: // tag
           this.getTag().add(castToCoding(value)); // Coding
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("versionId"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("versionId")) {
           this.versionId = castToId(value); // IdType
-        else if (name.equals("lastUpdated"))
+        } else if (name.equals("lastUpdated")) {
           this.lastUpdated = castToInstant(value); // InstantType
-        else if (name.equals("profile"))
+        } else if (name.equals("profile")) {
           this.getProfile().add(castToUri(value));
-        else if (name.equals("security"))
+        } else if (name.equals("security")) {
           this.getSecurity().add(castToCoding(value));
-        else if (name.equals("tag"))
+        } else if (name.equals("tag")) {
           this.getTag().add(castToCoding(value));
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case -1407102957: throw new FHIRException("Cannot make property versionId as it is not a complex type"); // IdType
-        case 1649733957: throw new FHIRException("Cannot make property lastUpdated as it is not a complex type"); // InstantType
-        case -309425751: throw new FHIRException("Cannot make property profile as it is not a complex type"); // UriType
-        case 949122880:  return addSecurity(); // Coding
-        case 114586:  return addTag(); // Coding
+        case -1407102957:  return getVersionIdElement();
+        case 1649733957:  return getLastUpdatedElement();
+        case -309425751:  return addProfileElement();
+        case 949122880:  return addSecurity(); 
+        case 114586:  return addTag(); 
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -1407102957: /*versionId*/ return new String[] {"id"};
+        case 1649733957: /*lastUpdated*/ return new String[] {"instant"};
+        case -309425751: /*profile*/ return new String[] {"uri"};
+        case 949122880: /*security*/ return new String[] {"Coding"};
+        case 114586: /*tag*/ return new String[] {"Coding"};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }

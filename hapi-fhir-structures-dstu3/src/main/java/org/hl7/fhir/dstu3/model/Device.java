@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
 
 import java.util.*;
 
@@ -48,111 +48,915 @@ import org.hl7.fhir.exceptions.FHIRException;
 @ResourceDef(name="Device", profile="http://hl7.org/fhir/Profile/Device")
 public class Device extends DomainResource {
 
-    public enum DeviceStatus {
+    public enum UDIEntryType {
         /**
-         * The Device is available for use.
+         * A Barcode scanner captured the the data from the device label
          */
-        AVAILABLE, 
+        BARCODE, 
         /**
-         * The Device is no longer available for use (e.g. lost, expired, damaged).
+         * An RFID chip reader captured the the data from the device label
          */
-        NOTAVAILABLE, 
+        RFID, 
         /**
-         * The Device was entered in error and voided.
+         * The data was read from the label by a person and manually entered. (e.g.  via a keyboard)
          */
-        ENTEREDINERROR, 
+        MANUAL, 
+        /**
+         * The data orginated from a patient's implant card and read by an operator.
+         */
+        CARD, 
+        /**
+         * The data orginated from a patient source and not directly scanned or read from a label or card.
+         */
+        SELFREPORTED, 
+        /**
+         * The method of data capture has not been determined
+         */
+        UNKNOWN, 
         /**
          * added to help the parsers with the generic types
          */
         NULL;
-        public static DeviceStatus fromCode(String codeString) throws FHIRException {
+        public static UDIEntryType fromCode(String codeString) throws FHIRException {
             if (codeString == null || "".equals(codeString))
                 return null;
-        if ("available".equals(codeString))
-          return AVAILABLE;
-        if ("not-available".equals(codeString))
-          return NOTAVAILABLE;
-        if ("entered-in-error".equals(codeString))
-          return ENTEREDINERROR;
+        if ("barcode".equals(codeString))
+          return BARCODE;
+        if ("rfid".equals(codeString))
+          return RFID;
+        if ("manual".equals(codeString))
+          return MANUAL;
+        if ("card".equals(codeString))
+          return CARD;
+        if ("self-reported".equals(codeString))
+          return SELFREPORTED;
+        if ("unknown".equals(codeString))
+          return UNKNOWN;
         if (Configuration.isAcceptInvalidEnums())
           return null;
         else
-          throw new FHIRException("Unknown DeviceStatus code '"+codeString+"'");
+          throw new FHIRException("Unknown UDIEntryType code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
-            case AVAILABLE: return "available";
-            case NOTAVAILABLE: return "not-available";
-            case ENTEREDINERROR: return "entered-in-error";
+            case BARCODE: return "barcode";
+            case RFID: return "rfid";
+            case MANUAL: return "manual";
+            case CARD: return "card";
+            case SELFREPORTED: return "self-reported";
+            case UNKNOWN: return "unknown";
             default: return "?";
           }
         }
         public String getSystem() {
           switch (this) {
-            case AVAILABLE: return "http://hl7.org/fhir/devicestatus";
-            case NOTAVAILABLE: return "http://hl7.org/fhir/devicestatus";
-            case ENTEREDINERROR: return "http://hl7.org/fhir/devicestatus";
+            case BARCODE: return "http://hl7.org/fhir/udi-entry-type";
+            case RFID: return "http://hl7.org/fhir/udi-entry-type";
+            case MANUAL: return "http://hl7.org/fhir/udi-entry-type";
+            case CARD: return "http://hl7.org/fhir/udi-entry-type";
+            case SELFREPORTED: return "http://hl7.org/fhir/udi-entry-type";
+            case UNKNOWN: return "http://hl7.org/fhir/udi-entry-type";
             default: return "?";
           }
         }
         public String getDefinition() {
           switch (this) {
-            case AVAILABLE: return "The Device is available for use.";
-            case NOTAVAILABLE: return "The Device is no longer available for use (e.g. lost, expired, damaged).";
-            case ENTEREDINERROR: return "The Device was entered in error and voided.";
+            case BARCODE: return "A Barcode scanner captured the the data from the device label";
+            case RFID: return "An RFID chip reader captured the the data from the device label";
+            case MANUAL: return "The data was read from the label by a person and manually entered. (e.g.  via a keyboard)";
+            case CARD: return "The data orginated from a patient's implant card and read by an operator.";
+            case SELFREPORTED: return "The data orginated from a patient source and not directly scanned or read from a label or card.";
+            case UNKNOWN: return "The method of data capture has not been determined";
             default: return "?";
           }
         }
         public String getDisplay() {
           switch (this) {
-            case AVAILABLE: return "Available";
-            case NOTAVAILABLE: return "Not Available";
-            case ENTEREDINERROR: return "Entered in Error";
+            case BARCODE: return "BarCode";
+            case RFID: return "RFID";
+            case MANUAL: return "Manual";
+            case CARD: return "Card";
+            case SELFREPORTED: return "Self Reported";
+            case UNKNOWN: return "Unknown";
             default: return "?";
           }
         }
     }
 
-  public static class DeviceStatusEnumFactory implements EnumFactory<DeviceStatus> {
-    public DeviceStatus fromCode(String codeString) throws IllegalArgumentException {
+  public static class UDIEntryTypeEnumFactory implements EnumFactory<UDIEntryType> {
+    public UDIEntryType fromCode(String codeString) throws IllegalArgumentException {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
-        if ("available".equals(codeString))
-          return DeviceStatus.AVAILABLE;
-        if ("not-available".equals(codeString))
-          return DeviceStatus.NOTAVAILABLE;
-        if ("entered-in-error".equals(codeString))
-          return DeviceStatus.ENTEREDINERROR;
-        throw new IllegalArgumentException("Unknown DeviceStatus code '"+codeString+"'");
+        if ("barcode".equals(codeString))
+          return UDIEntryType.BARCODE;
+        if ("rfid".equals(codeString))
+          return UDIEntryType.RFID;
+        if ("manual".equals(codeString))
+          return UDIEntryType.MANUAL;
+        if ("card".equals(codeString))
+          return UDIEntryType.CARD;
+        if ("self-reported".equals(codeString))
+          return UDIEntryType.SELFREPORTED;
+        if ("unknown".equals(codeString))
+          return UDIEntryType.UNKNOWN;
+        throw new IllegalArgumentException("Unknown UDIEntryType code '"+codeString+"'");
         }
-        public Enumeration<DeviceStatus> fromType(Base code) throws FHIRException {
-          if (code == null || code.isEmpty())
+        public Enumeration<UDIEntryType> fromType(Base code) throws FHIRException {
+          if (code == null)
             return null;
+          if (code.isEmpty())
+            return new Enumeration<UDIEntryType>(this);
           String codeString = ((PrimitiveType) code).asStringValue();
           if (codeString == null || "".equals(codeString))
             return null;
-        if ("available".equals(codeString))
-          return new Enumeration<DeviceStatus>(this, DeviceStatus.AVAILABLE);
-        if ("not-available".equals(codeString))
-          return new Enumeration<DeviceStatus>(this, DeviceStatus.NOTAVAILABLE);
-        if ("entered-in-error".equals(codeString))
-          return new Enumeration<DeviceStatus>(this, DeviceStatus.ENTEREDINERROR);
-        throw new FHIRException("Unknown DeviceStatus code '"+codeString+"'");
+        if ("barcode".equals(codeString))
+          return new Enumeration<UDIEntryType>(this, UDIEntryType.BARCODE);
+        if ("rfid".equals(codeString))
+          return new Enumeration<UDIEntryType>(this, UDIEntryType.RFID);
+        if ("manual".equals(codeString))
+          return new Enumeration<UDIEntryType>(this, UDIEntryType.MANUAL);
+        if ("card".equals(codeString))
+          return new Enumeration<UDIEntryType>(this, UDIEntryType.CARD);
+        if ("self-reported".equals(codeString))
+          return new Enumeration<UDIEntryType>(this, UDIEntryType.SELFREPORTED);
+        if ("unknown".equals(codeString))
+          return new Enumeration<UDIEntryType>(this, UDIEntryType.UNKNOWN);
+        throw new FHIRException("Unknown UDIEntryType code '"+codeString+"'");
         }
-    public String toCode(DeviceStatus code) {
-      if (code == DeviceStatus.AVAILABLE)
-        return "available";
-      if (code == DeviceStatus.NOTAVAILABLE)
-        return "not-available";
-      if (code == DeviceStatus.ENTEREDINERROR)
-        return "entered-in-error";
+    public String toCode(UDIEntryType code) {
+      if (code == UDIEntryType.BARCODE)
+        return "barcode";
+      if (code == UDIEntryType.RFID)
+        return "rfid";
+      if (code == UDIEntryType.MANUAL)
+        return "manual";
+      if (code == UDIEntryType.CARD)
+        return "card";
+      if (code == UDIEntryType.SELFREPORTED)
+        return "self-reported";
+      if (code == UDIEntryType.UNKNOWN)
+        return "unknown";
       return "?";
       }
-    public String toSystem(DeviceStatus code) {
+    public String toSystem(UDIEntryType code) {
       return code.getSystem();
       }
     }
+
+    public enum FHIRDeviceStatus {
+        /**
+         * The Device is available for use.  Note: This means for *implanted devices*  the device is implanted in the patient.
+         */
+        ACTIVE, 
+        /**
+         * The Device is no longer available for use (e.g. lost, expired, damaged).  Note: This means for *implanted devices*  the device has been removed from the patient.
+         */
+        INACTIVE, 
+        /**
+         * The Device was entered in error and voided.
+         */
+        ENTEREDINERROR, 
+        /**
+         * The status of the device has not been determined.
+         */
+        UNKNOWN, 
+        /**
+         * added to help the parsers with the generic types
+         */
+        NULL;
+        public static FHIRDeviceStatus fromCode(String codeString) throws FHIRException {
+            if (codeString == null || "".equals(codeString))
+                return null;
+        if ("active".equals(codeString))
+          return ACTIVE;
+        if ("inactive".equals(codeString))
+          return INACTIVE;
+        if ("entered-in-error".equals(codeString))
+          return ENTEREDINERROR;
+        if ("unknown".equals(codeString))
+          return UNKNOWN;
+        if (Configuration.isAcceptInvalidEnums())
+          return null;
+        else
+          throw new FHIRException("Unknown FHIRDeviceStatus code '"+codeString+"'");
+        }
+        public String toCode() {
+          switch (this) {
+            case ACTIVE: return "active";
+            case INACTIVE: return "inactive";
+            case ENTEREDINERROR: return "entered-in-error";
+            case UNKNOWN: return "unknown";
+            default: return "?";
+          }
+        }
+        public String getSystem() {
+          switch (this) {
+            case ACTIVE: return "http://hl7.org/fhir/device-status";
+            case INACTIVE: return "http://hl7.org/fhir/device-status";
+            case ENTEREDINERROR: return "http://hl7.org/fhir/device-status";
+            case UNKNOWN: return "http://hl7.org/fhir/device-status";
+            default: return "?";
+          }
+        }
+        public String getDefinition() {
+          switch (this) {
+            case ACTIVE: return "The Device is available for use.  Note: This means for *implanted devices*  the device is implanted in the patient.";
+            case INACTIVE: return "The Device is no longer available for use (e.g. lost, expired, damaged).  Note: This means for *implanted devices*  the device has been removed from the patient.";
+            case ENTEREDINERROR: return "The Device was entered in error and voided.";
+            case UNKNOWN: return "The status of the device has not been determined.";
+            default: return "?";
+          }
+        }
+        public String getDisplay() {
+          switch (this) {
+            case ACTIVE: return "Active";
+            case INACTIVE: return "Inactive";
+            case ENTEREDINERROR: return "Entered in Error";
+            case UNKNOWN: return "Unknown";
+            default: return "?";
+          }
+        }
+    }
+
+  public static class FHIRDeviceStatusEnumFactory implements EnumFactory<FHIRDeviceStatus> {
+    public FHIRDeviceStatus fromCode(String codeString) throws IllegalArgumentException {
+      if (codeString == null || "".equals(codeString))
+            if (codeString == null || "".equals(codeString))
+                return null;
+        if ("active".equals(codeString))
+          return FHIRDeviceStatus.ACTIVE;
+        if ("inactive".equals(codeString))
+          return FHIRDeviceStatus.INACTIVE;
+        if ("entered-in-error".equals(codeString))
+          return FHIRDeviceStatus.ENTEREDINERROR;
+        if ("unknown".equals(codeString))
+          return FHIRDeviceStatus.UNKNOWN;
+        throw new IllegalArgumentException("Unknown FHIRDeviceStatus code '"+codeString+"'");
+        }
+        public Enumeration<FHIRDeviceStatus> fromType(Base code) throws FHIRException {
+          if (code == null)
+            return null;
+          if (code.isEmpty())
+            return new Enumeration<FHIRDeviceStatus>(this);
+          String codeString = ((PrimitiveType) code).asStringValue();
+          if (codeString == null || "".equals(codeString))
+            return null;
+        if ("active".equals(codeString))
+          return new Enumeration<FHIRDeviceStatus>(this, FHIRDeviceStatus.ACTIVE);
+        if ("inactive".equals(codeString))
+          return new Enumeration<FHIRDeviceStatus>(this, FHIRDeviceStatus.INACTIVE);
+        if ("entered-in-error".equals(codeString))
+          return new Enumeration<FHIRDeviceStatus>(this, FHIRDeviceStatus.ENTEREDINERROR);
+        if ("unknown".equals(codeString))
+          return new Enumeration<FHIRDeviceStatus>(this, FHIRDeviceStatus.UNKNOWN);
+        throw new FHIRException("Unknown FHIRDeviceStatus code '"+codeString+"'");
+        }
+    public String toCode(FHIRDeviceStatus code) {
+      if (code == FHIRDeviceStatus.ACTIVE)
+        return "active";
+      if (code == FHIRDeviceStatus.INACTIVE)
+        return "inactive";
+      if (code == FHIRDeviceStatus.ENTEREDINERROR)
+        return "entered-in-error";
+      if (code == FHIRDeviceStatus.UNKNOWN)
+        return "unknown";
+      return "?";
+      }
+    public String toSystem(FHIRDeviceStatus code) {
+      return code.getSystem();
+      }
+    }
+
+    @Block()
+    public static class DeviceUdiComponent extends BackboneElement implements IBaseBackboneElement {
+        /**
+         * The device identifier (DI) is a mandatory, fixed portion of a UDI that identifies the labeler and the specific version or model of a device.
+         */
+        @Child(name = "deviceIdentifier", type = {StringType.class}, order=1, min=0, max=1, modifier=false, summary=true)
+        @Description(shortDefinition="Mandatory fixed portion of UDI", formalDefinition="The device identifier (DI) is a mandatory, fixed portion of a UDI that identifies the labeler and the specific version or model of a device." )
+        protected StringType deviceIdentifier;
+
+        /**
+         * Name of device as used in labeling or catalog.
+         */
+        @Child(name = "name", type = {StringType.class}, order=2, min=0, max=1, modifier=false, summary=true)
+        @Description(shortDefinition="Device Name as appears on UDI label", formalDefinition="Name of device as used in labeling or catalog." )
+        protected StringType name;
+
+        /**
+         * The identity of the authoritative source for UDI generation within a  jurisdiction.  All UDIs are globally unique within a single namespace. with the appropriate repository uri as the system.  For example,  UDIs of devices managed in the U.S. by the FDA, the value is  http://hl7.org/fhir/NamingSystem/fda-udi.
+         */
+        @Child(name = "jurisdiction", type = {UriType.class}, order=3, min=0, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="Regional UDI authority", formalDefinition="The identity of the authoritative source for UDI generation within a  jurisdiction.  All UDIs are globally unique within a single namespace. with the appropriate repository uri as the system.  For example,  UDIs of devices managed in the U.S. by the FDA, the value is  http://hl7.org/fhir/NamingSystem/fda-udi." )
+        protected UriType jurisdiction;
+
+        /**
+         * The full UDI carrier as the human readable form (HRF) representation of the barcode string as printed on the packaging of the device.
+         */
+        @Child(name = "carrierHRF", type = {StringType.class}, order=4, min=0, max=1, modifier=false, summary=true)
+        @Description(shortDefinition="UDI Human Readable Barcode String", formalDefinition="The full UDI carrier as the human readable form (HRF) representation of the barcode string as printed on the packaging of the device." )
+        protected StringType carrierHRF;
+
+        /**
+         * The full UDI carrier of the Automatic Identification and Data Capture (AIDC) technology representation of the barcode string as printed on the packaging of the device - E.g a barcode or RFID.   Because of limitations on character sets in XML and the need to round-trip JSON data through XML, AIDC Formats *SHALL* be base64 encoded.
+         */
+        @Child(name = "carrierAIDC", type = {Base64BinaryType.class}, order=5, min=0, max=1, modifier=false, summary=true)
+        @Description(shortDefinition="UDI Machine Readable Barcode String", formalDefinition="The full UDI carrier of the Automatic Identification and Data Capture (AIDC) technology representation of the barcode string as printed on the packaging of the device - E.g a barcode or RFID.   Because of limitations on character sets in XML and the need to round-trip JSON data through XML, AIDC Formats *SHALL* be base64 encoded." )
+        protected Base64BinaryType carrierAIDC;
+
+        /**
+         * Organization that is charged with issuing UDIs for devices.  For example, the US FDA issuers include :
+1) GS1: 
+http://hl7.org/fhir/NamingSystem/gs1-di, 
+2) HIBCC:
+http://hl7.org/fhir/NamingSystem/hibcc-dI, 
+3) ICCBBA for blood containers:
+http://hl7.org/fhir/NamingSystem/iccbba-blood-di, 
+4) ICCBA for other devices:
+http://hl7.org/fhir/NamingSystem/iccbba-other-di.
+         */
+        @Child(name = "issuer", type = {UriType.class}, order=6, min=0, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="UDI Issuing Organization", formalDefinition="Organization that is charged with issuing UDIs for devices.  For example, the US FDA issuers include :\n1) GS1: \nhttp://hl7.org/fhir/NamingSystem/gs1-di, \n2) HIBCC:\nhttp://hl7.org/fhir/NamingSystem/hibcc-dI, \n3) ICCBBA for blood containers:\nhttp://hl7.org/fhir/NamingSystem/iccbba-blood-di, \n4) ICCBA for other devices:\nhttp://hl7.org/fhir/NamingSystem/iccbba-other-di." )
+        protected UriType issuer;
+
+        /**
+         * A coded entry to indicate how the data was entered.
+         */
+        @Child(name = "entryType", type = {CodeType.class}, order=7, min=0, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="barcode | rfid | manual +", formalDefinition="A coded entry to indicate how the data was entered." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/udi-entry-type")
+        protected Enumeration<UDIEntryType> entryType;
+
+        private static final long serialVersionUID = -1105798343L;
+
+    /**
+     * Constructor
+     */
+      public DeviceUdiComponent() {
+        super();
+      }
+
+        /**
+         * @return {@link #deviceIdentifier} (The device identifier (DI) is a mandatory, fixed portion of a UDI that identifies the labeler and the specific version or model of a device.). This is the underlying object with id, value and extensions. The accessor "getDeviceIdentifier" gives direct access to the value
+         */
+        public StringType getDeviceIdentifierElement() { 
+          if (this.deviceIdentifier == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create DeviceUdiComponent.deviceIdentifier");
+            else if (Configuration.doAutoCreate())
+              this.deviceIdentifier = new StringType(); // bb
+          return this.deviceIdentifier;
+        }
+
+        public boolean hasDeviceIdentifierElement() { 
+          return this.deviceIdentifier != null && !this.deviceIdentifier.isEmpty();
+        }
+
+        public boolean hasDeviceIdentifier() { 
+          return this.deviceIdentifier != null && !this.deviceIdentifier.isEmpty();
+        }
+
+        /**
+         * @param value {@link #deviceIdentifier} (The device identifier (DI) is a mandatory, fixed portion of a UDI that identifies the labeler and the specific version or model of a device.). This is the underlying object with id, value and extensions. The accessor "getDeviceIdentifier" gives direct access to the value
+         */
+        public DeviceUdiComponent setDeviceIdentifierElement(StringType value) { 
+          this.deviceIdentifier = value;
+          return this;
+        }
+
+        /**
+         * @return The device identifier (DI) is a mandatory, fixed portion of a UDI that identifies the labeler and the specific version or model of a device.
+         */
+        public String getDeviceIdentifier() { 
+          return this.deviceIdentifier == null ? null : this.deviceIdentifier.getValue();
+        }
+
+        /**
+         * @param value The device identifier (DI) is a mandatory, fixed portion of a UDI that identifies the labeler and the specific version or model of a device.
+         */
+        public DeviceUdiComponent setDeviceIdentifier(String value) { 
+          if (Utilities.noString(value))
+            this.deviceIdentifier = null;
+          else {
+            if (this.deviceIdentifier == null)
+              this.deviceIdentifier = new StringType();
+            this.deviceIdentifier.setValue(value);
+          }
+          return this;
+        }
+
+        /**
+         * @return {@link #name} (Name of device as used in labeling or catalog.). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
+         */
+        public StringType getNameElement() { 
+          if (this.name == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create DeviceUdiComponent.name");
+            else if (Configuration.doAutoCreate())
+              this.name = new StringType(); // bb
+          return this.name;
+        }
+
+        public boolean hasNameElement() { 
+          return this.name != null && !this.name.isEmpty();
+        }
+
+        public boolean hasName() { 
+          return this.name != null && !this.name.isEmpty();
+        }
+
+        /**
+         * @param value {@link #name} (Name of device as used in labeling or catalog.). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
+         */
+        public DeviceUdiComponent setNameElement(StringType value) { 
+          this.name = value;
+          return this;
+        }
+
+        /**
+         * @return Name of device as used in labeling or catalog.
+         */
+        public String getName() { 
+          return this.name == null ? null : this.name.getValue();
+        }
+
+        /**
+         * @param value Name of device as used in labeling or catalog.
+         */
+        public DeviceUdiComponent setName(String value) { 
+          if (Utilities.noString(value))
+            this.name = null;
+          else {
+            if (this.name == null)
+              this.name = new StringType();
+            this.name.setValue(value);
+          }
+          return this;
+        }
+
+        /**
+         * @return {@link #jurisdiction} (The identity of the authoritative source for UDI generation within a  jurisdiction.  All UDIs are globally unique within a single namespace. with the appropriate repository uri as the system.  For example,  UDIs of devices managed in the U.S. by the FDA, the value is  http://hl7.org/fhir/NamingSystem/fda-udi.). This is the underlying object with id, value and extensions. The accessor "getJurisdiction" gives direct access to the value
+         */
+        public UriType getJurisdictionElement() { 
+          if (this.jurisdiction == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create DeviceUdiComponent.jurisdiction");
+            else if (Configuration.doAutoCreate())
+              this.jurisdiction = new UriType(); // bb
+          return this.jurisdiction;
+        }
+
+        public boolean hasJurisdictionElement() { 
+          return this.jurisdiction != null && !this.jurisdiction.isEmpty();
+        }
+
+        public boolean hasJurisdiction() { 
+          return this.jurisdiction != null && !this.jurisdiction.isEmpty();
+        }
+
+        /**
+         * @param value {@link #jurisdiction} (The identity of the authoritative source for UDI generation within a  jurisdiction.  All UDIs are globally unique within a single namespace. with the appropriate repository uri as the system.  For example,  UDIs of devices managed in the U.S. by the FDA, the value is  http://hl7.org/fhir/NamingSystem/fda-udi.). This is the underlying object with id, value and extensions. The accessor "getJurisdiction" gives direct access to the value
+         */
+        public DeviceUdiComponent setJurisdictionElement(UriType value) { 
+          this.jurisdiction = value;
+          return this;
+        }
+
+        /**
+         * @return The identity of the authoritative source for UDI generation within a  jurisdiction.  All UDIs are globally unique within a single namespace. with the appropriate repository uri as the system.  For example,  UDIs of devices managed in the U.S. by the FDA, the value is  http://hl7.org/fhir/NamingSystem/fda-udi.
+         */
+        public String getJurisdiction() { 
+          return this.jurisdiction == null ? null : this.jurisdiction.getValue();
+        }
+
+        /**
+         * @param value The identity of the authoritative source for UDI generation within a  jurisdiction.  All UDIs are globally unique within a single namespace. with the appropriate repository uri as the system.  For example,  UDIs of devices managed in the U.S. by the FDA, the value is  http://hl7.org/fhir/NamingSystem/fda-udi.
+         */
+        public DeviceUdiComponent setJurisdiction(String value) { 
+          if (Utilities.noString(value))
+            this.jurisdiction = null;
+          else {
+            if (this.jurisdiction == null)
+              this.jurisdiction = new UriType();
+            this.jurisdiction.setValue(value);
+          }
+          return this;
+        }
+
+        /**
+         * @return {@link #carrierHRF} (The full UDI carrier as the human readable form (HRF) representation of the barcode string as printed on the packaging of the device.). This is the underlying object with id, value and extensions. The accessor "getCarrierHRF" gives direct access to the value
+         */
+        public StringType getCarrierHRFElement() { 
+          if (this.carrierHRF == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create DeviceUdiComponent.carrierHRF");
+            else if (Configuration.doAutoCreate())
+              this.carrierHRF = new StringType(); // bb
+          return this.carrierHRF;
+        }
+
+        public boolean hasCarrierHRFElement() { 
+          return this.carrierHRF != null && !this.carrierHRF.isEmpty();
+        }
+
+        public boolean hasCarrierHRF() { 
+          return this.carrierHRF != null && !this.carrierHRF.isEmpty();
+        }
+
+        /**
+         * @param value {@link #carrierHRF} (The full UDI carrier as the human readable form (HRF) representation of the barcode string as printed on the packaging of the device.). This is the underlying object with id, value and extensions. The accessor "getCarrierHRF" gives direct access to the value
+         */
+        public DeviceUdiComponent setCarrierHRFElement(StringType value) { 
+          this.carrierHRF = value;
+          return this;
+        }
+
+        /**
+         * @return The full UDI carrier as the human readable form (HRF) representation of the barcode string as printed on the packaging of the device.
+         */
+        public String getCarrierHRF() { 
+          return this.carrierHRF == null ? null : this.carrierHRF.getValue();
+        }
+
+        /**
+         * @param value The full UDI carrier as the human readable form (HRF) representation of the barcode string as printed on the packaging of the device.
+         */
+        public DeviceUdiComponent setCarrierHRF(String value) { 
+          if (Utilities.noString(value))
+            this.carrierHRF = null;
+          else {
+            if (this.carrierHRF == null)
+              this.carrierHRF = new StringType();
+            this.carrierHRF.setValue(value);
+          }
+          return this;
+        }
+
+        /**
+         * @return {@link #carrierAIDC} (The full UDI carrier of the Automatic Identification and Data Capture (AIDC) technology representation of the barcode string as printed on the packaging of the device - E.g a barcode or RFID.   Because of limitations on character sets in XML and the need to round-trip JSON data through XML, AIDC Formats *SHALL* be base64 encoded.). This is the underlying object with id, value and extensions. The accessor "getCarrierAIDC" gives direct access to the value
+         */
+        public Base64BinaryType getCarrierAIDCElement() { 
+          if (this.carrierAIDC == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create DeviceUdiComponent.carrierAIDC");
+            else if (Configuration.doAutoCreate())
+              this.carrierAIDC = new Base64BinaryType(); // bb
+          return this.carrierAIDC;
+        }
+
+        public boolean hasCarrierAIDCElement() { 
+          return this.carrierAIDC != null && !this.carrierAIDC.isEmpty();
+        }
+
+        public boolean hasCarrierAIDC() { 
+          return this.carrierAIDC != null && !this.carrierAIDC.isEmpty();
+        }
+
+        /**
+         * @param value {@link #carrierAIDC} (The full UDI carrier of the Automatic Identification and Data Capture (AIDC) technology representation of the barcode string as printed on the packaging of the device - E.g a barcode or RFID.   Because of limitations on character sets in XML and the need to round-trip JSON data through XML, AIDC Formats *SHALL* be base64 encoded.). This is the underlying object with id, value and extensions. The accessor "getCarrierAIDC" gives direct access to the value
+         */
+        public DeviceUdiComponent setCarrierAIDCElement(Base64BinaryType value) { 
+          this.carrierAIDC = value;
+          return this;
+        }
+
+        /**
+         * @return The full UDI carrier of the Automatic Identification and Data Capture (AIDC) technology representation of the barcode string as printed on the packaging of the device - E.g a barcode or RFID.   Because of limitations on character sets in XML and the need to round-trip JSON data through XML, AIDC Formats *SHALL* be base64 encoded.
+         */
+        public byte[] getCarrierAIDC() { 
+          return this.carrierAIDC == null ? null : this.carrierAIDC.getValue();
+        }
+
+        /**
+         * @param value The full UDI carrier of the Automatic Identification and Data Capture (AIDC) technology representation of the barcode string as printed on the packaging of the device - E.g a barcode or RFID.   Because of limitations on character sets in XML and the need to round-trip JSON data through XML, AIDC Formats *SHALL* be base64 encoded.
+         */
+        public DeviceUdiComponent setCarrierAIDC(byte[] value) { 
+          if (value == null)
+            this.carrierAIDC = null;
+          else {
+            if (this.carrierAIDC == null)
+              this.carrierAIDC = new Base64BinaryType();
+            this.carrierAIDC.setValue(value);
+          }
+          return this;
+        }
+
+        /**
+         * @return {@link #issuer} (Organization that is charged with issuing UDIs for devices.  For example, the US FDA issuers include :
+1) GS1: 
+http://hl7.org/fhir/NamingSystem/gs1-di, 
+2) HIBCC:
+http://hl7.org/fhir/NamingSystem/hibcc-dI, 
+3) ICCBBA for blood containers:
+http://hl7.org/fhir/NamingSystem/iccbba-blood-di, 
+4) ICCBA for other devices:
+http://hl7.org/fhir/NamingSystem/iccbba-other-di.). This is the underlying object with id, value and extensions. The accessor "getIssuer" gives direct access to the value
+         */
+        public UriType getIssuerElement() { 
+          if (this.issuer == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create DeviceUdiComponent.issuer");
+            else if (Configuration.doAutoCreate())
+              this.issuer = new UriType(); // bb
+          return this.issuer;
+        }
+
+        public boolean hasIssuerElement() { 
+          return this.issuer != null && !this.issuer.isEmpty();
+        }
+
+        public boolean hasIssuer() { 
+          return this.issuer != null && !this.issuer.isEmpty();
+        }
+
+        /**
+         * @param value {@link #issuer} (Organization that is charged with issuing UDIs for devices.  For example, the US FDA issuers include :
+1) GS1: 
+http://hl7.org/fhir/NamingSystem/gs1-di, 
+2) HIBCC:
+http://hl7.org/fhir/NamingSystem/hibcc-dI, 
+3) ICCBBA for blood containers:
+http://hl7.org/fhir/NamingSystem/iccbba-blood-di, 
+4) ICCBA for other devices:
+http://hl7.org/fhir/NamingSystem/iccbba-other-di.). This is the underlying object with id, value and extensions. The accessor "getIssuer" gives direct access to the value
+         */
+        public DeviceUdiComponent setIssuerElement(UriType value) { 
+          this.issuer = value;
+          return this;
+        }
+
+        /**
+         * @return Organization that is charged with issuing UDIs for devices.  For example, the US FDA issuers include :
+1) GS1: 
+http://hl7.org/fhir/NamingSystem/gs1-di, 
+2) HIBCC:
+http://hl7.org/fhir/NamingSystem/hibcc-dI, 
+3) ICCBBA for blood containers:
+http://hl7.org/fhir/NamingSystem/iccbba-blood-di, 
+4) ICCBA for other devices:
+http://hl7.org/fhir/NamingSystem/iccbba-other-di.
+         */
+        public String getIssuer() { 
+          return this.issuer == null ? null : this.issuer.getValue();
+        }
+
+        /**
+         * @param value Organization that is charged with issuing UDIs for devices.  For example, the US FDA issuers include :
+1) GS1: 
+http://hl7.org/fhir/NamingSystem/gs1-di, 
+2) HIBCC:
+http://hl7.org/fhir/NamingSystem/hibcc-dI, 
+3) ICCBBA for blood containers:
+http://hl7.org/fhir/NamingSystem/iccbba-blood-di, 
+4) ICCBA for other devices:
+http://hl7.org/fhir/NamingSystem/iccbba-other-di.
+         */
+        public DeviceUdiComponent setIssuer(String value) { 
+          if (Utilities.noString(value))
+            this.issuer = null;
+          else {
+            if (this.issuer == null)
+              this.issuer = new UriType();
+            this.issuer.setValue(value);
+          }
+          return this;
+        }
+
+        /**
+         * @return {@link #entryType} (A coded entry to indicate how the data was entered.). This is the underlying object with id, value and extensions. The accessor "getEntryType" gives direct access to the value
+         */
+        public Enumeration<UDIEntryType> getEntryTypeElement() { 
+          if (this.entryType == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create DeviceUdiComponent.entryType");
+            else if (Configuration.doAutoCreate())
+              this.entryType = new Enumeration<UDIEntryType>(new UDIEntryTypeEnumFactory()); // bb
+          return this.entryType;
+        }
+
+        public boolean hasEntryTypeElement() { 
+          return this.entryType != null && !this.entryType.isEmpty();
+        }
+
+        public boolean hasEntryType() { 
+          return this.entryType != null && !this.entryType.isEmpty();
+        }
+
+        /**
+         * @param value {@link #entryType} (A coded entry to indicate how the data was entered.). This is the underlying object with id, value and extensions. The accessor "getEntryType" gives direct access to the value
+         */
+        public DeviceUdiComponent setEntryTypeElement(Enumeration<UDIEntryType> value) { 
+          this.entryType = value;
+          return this;
+        }
+
+        /**
+         * @return A coded entry to indicate how the data was entered.
+         */
+        public UDIEntryType getEntryType() { 
+          return this.entryType == null ? null : this.entryType.getValue();
+        }
+
+        /**
+         * @param value A coded entry to indicate how the data was entered.
+         */
+        public DeviceUdiComponent setEntryType(UDIEntryType value) { 
+          if (value == null)
+            this.entryType = null;
+          else {
+            if (this.entryType == null)
+              this.entryType = new Enumeration<UDIEntryType>(new UDIEntryTypeEnumFactory());
+            this.entryType.setValue(value);
+          }
+          return this;
+        }
+
+        protected void listChildren(List<Property> childrenList) {
+          super.listChildren(childrenList);
+          childrenList.add(new Property("deviceIdentifier", "string", "The device identifier (DI) is a mandatory, fixed portion of a UDI that identifies the labeler and the specific version or model of a device.", 0, java.lang.Integer.MAX_VALUE, deviceIdentifier));
+          childrenList.add(new Property("name", "string", "Name of device as used in labeling or catalog.", 0, java.lang.Integer.MAX_VALUE, name));
+          childrenList.add(new Property("jurisdiction", "uri", "The identity of the authoritative source for UDI generation within a  jurisdiction.  All UDIs are globally unique within a single namespace. with the appropriate repository uri as the system.  For example,  UDIs of devices managed in the U.S. by the FDA, the value is  http://hl7.org/fhir/NamingSystem/fda-udi.", 0, java.lang.Integer.MAX_VALUE, jurisdiction));
+          childrenList.add(new Property("carrierHRF", "string", "The full UDI carrier as the human readable form (HRF) representation of the barcode string as printed on the packaging of the device.", 0, java.lang.Integer.MAX_VALUE, carrierHRF));
+          childrenList.add(new Property("carrierAIDC", "base64Binary", "The full UDI carrier of the Automatic Identification and Data Capture (AIDC) technology representation of the barcode string as printed on the packaging of the device - E.g a barcode or RFID.   Because of limitations on character sets in XML and the need to round-trip JSON data through XML, AIDC Formats *SHALL* be base64 encoded.", 0, java.lang.Integer.MAX_VALUE, carrierAIDC));
+          childrenList.add(new Property("issuer", "uri", "Organization that is charged with issuing UDIs for devices.  For example, the US FDA issuers include :\n1) GS1: \nhttp://hl7.org/fhir/NamingSystem/gs1-di, \n2) HIBCC:\nhttp://hl7.org/fhir/NamingSystem/hibcc-dI, \n3) ICCBBA for blood containers:\nhttp://hl7.org/fhir/NamingSystem/iccbba-blood-di, \n4) ICCBA for other devices:\nhttp://hl7.org/fhir/NamingSystem/iccbba-other-di.", 0, java.lang.Integer.MAX_VALUE, issuer));
+          childrenList.add(new Property("entryType", "code", "A coded entry to indicate how the data was entered.", 0, java.lang.Integer.MAX_VALUE, entryType));
+        }
+
+      @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 1322005407: /*deviceIdentifier*/ return this.deviceIdentifier == null ? new Base[0] : new Base[] {this.deviceIdentifier}; // StringType
+        case 3373707: /*name*/ return this.name == null ? new Base[0] : new Base[] {this.name}; // StringType
+        case -507075711: /*jurisdiction*/ return this.jurisdiction == null ? new Base[0] : new Base[] {this.jurisdiction}; // UriType
+        case 806499972: /*carrierHRF*/ return this.carrierHRF == null ? new Base[0] : new Base[] {this.carrierHRF}; // StringType
+        case -768521825: /*carrierAIDC*/ return this.carrierAIDC == null ? new Base[0] : new Base[] {this.carrierAIDC}; // Base64BinaryType
+        case -1179159879: /*issuer*/ return this.issuer == null ? new Base[0] : new Base[] {this.issuer}; // UriType
+        case -479362356: /*entryType*/ return this.entryType == null ? new Base[0] : new Base[] {this.entryType}; // Enumeration<UDIEntryType>
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 1322005407: // deviceIdentifier
+          this.deviceIdentifier = castToString(value); // StringType
+          return value;
+        case 3373707: // name
+          this.name = castToString(value); // StringType
+          return value;
+        case -507075711: // jurisdiction
+          this.jurisdiction = castToUri(value); // UriType
+          return value;
+        case 806499972: // carrierHRF
+          this.carrierHRF = castToString(value); // StringType
+          return value;
+        case -768521825: // carrierAIDC
+          this.carrierAIDC = castToBase64Binary(value); // Base64BinaryType
+          return value;
+        case -1179159879: // issuer
+          this.issuer = castToUri(value); // UriType
+          return value;
+        case -479362356: // entryType
+          value = new UDIEntryTypeEnumFactory().fromType(castToCode(value));
+          this.entryType = (Enumeration) value; // Enumeration<UDIEntryType>
+          return value;
+        default: return super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("deviceIdentifier")) {
+          this.deviceIdentifier = castToString(value); // StringType
+        } else if (name.equals("name")) {
+          this.name = castToString(value); // StringType
+        } else if (name.equals("jurisdiction")) {
+          this.jurisdiction = castToUri(value); // UriType
+        } else if (name.equals("carrierHRF")) {
+          this.carrierHRF = castToString(value); // StringType
+        } else if (name.equals("carrierAIDC")) {
+          this.carrierAIDC = castToBase64Binary(value); // Base64BinaryType
+        } else if (name.equals("issuer")) {
+          this.issuer = castToUri(value); // UriType
+        } else if (name.equals("entryType")) {
+          value = new UDIEntryTypeEnumFactory().fromType(castToCode(value));
+          this.entryType = (Enumeration) value; // Enumeration<UDIEntryType>
+        } else
+          return super.setProperty(name, value);
+        return value;
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 1322005407:  return getDeviceIdentifierElement();
+        case 3373707:  return getNameElement();
+        case -507075711:  return getJurisdictionElement();
+        case 806499972:  return getCarrierHRFElement();
+        case -768521825:  return getCarrierAIDCElement();
+        case -1179159879:  return getIssuerElement();
+        case -479362356:  return getEntryTypeElement();
+        default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 1322005407: /*deviceIdentifier*/ return new String[] {"string"};
+        case 3373707: /*name*/ return new String[] {"string"};
+        case -507075711: /*jurisdiction*/ return new String[] {"uri"};
+        case 806499972: /*carrierHRF*/ return new String[] {"string"};
+        case -768521825: /*carrierAIDC*/ return new String[] {"base64Binary"};
+        case -1179159879: /*issuer*/ return new String[] {"uri"};
+        case -479362356: /*entryType*/ return new String[] {"code"};
+        default: return super.getTypesForProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("deviceIdentifier")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Device.deviceIdentifier");
+        }
+        else if (name.equals("name")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Device.name");
+        }
+        else if (name.equals("jurisdiction")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Device.jurisdiction");
+        }
+        else if (name.equals("carrierHRF")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Device.carrierHRF");
+        }
+        else if (name.equals("carrierAIDC")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Device.carrierAIDC");
+        }
+        else if (name.equals("issuer")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Device.issuer");
+        }
+        else if (name.equals("entryType")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Device.entryType");
+        }
+        else
+          return super.addChild(name);
+      }
+
+      public DeviceUdiComponent copy() {
+        DeviceUdiComponent dst = new DeviceUdiComponent();
+        copyValues(dst);
+        dst.deviceIdentifier = deviceIdentifier == null ? null : deviceIdentifier.copy();
+        dst.name = name == null ? null : name.copy();
+        dst.jurisdiction = jurisdiction == null ? null : jurisdiction.copy();
+        dst.carrierHRF = carrierHRF == null ? null : carrierHRF.copy();
+        dst.carrierAIDC = carrierAIDC == null ? null : carrierAIDC.copy();
+        dst.issuer = issuer == null ? null : issuer.copy();
+        dst.entryType = entryType == null ? null : entryType.copy();
+        return dst;
+      }
+
+      @Override
+      public boolean equalsDeep(Base other) {
+        if (!super.equalsDeep(other))
+          return false;
+        if (!(other instanceof DeviceUdiComponent))
+          return false;
+        DeviceUdiComponent o = (DeviceUdiComponent) other;
+        return compareDeep(deviceIdentifier, o.deviceIdentifier, true) && compareDeep(name, o.name, true)
+           && compareDeep(jurisdiction, o.jurisdiction, true) && compareDeep(carrierHRF, o.carrierHRF, true)
+           && compareDeep(carrierAIDC, o.carrierAIDC, true) && compareDeep(issuer, o.issuer, true) && compareDeep(entryType, o.entryType, true)
+          ;
+      }
+
+      @Override
+      public boolean equalsShallow(Base other) {
+        if (!super.equalsShallow(other))
+          return false;
+        if (!(other instanceof DeviceUdiComponent))
+          return false;
+        DeviceUdiComponent o = (DeviceUdiComponent) other;
+        return compareValues(deviceIdentifier, o.deviceIdentifier, true) && compareValues(name, o.name, true)
+           && compareValues(jurisdiction, o.jurisdiction, true) && compareValues(carrierHRF, o.carrierHRF, true)
+           && compareValues(carrierAIDC, o.carrierAIDC, true) && compareValues(issuer, o.issuer, true) && compareValues(entryType, o.entryType, true)
+          ;
+      }
+
+      public boolean isEmpty() {
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(deviceIdentifier, name, jurisdiction
+          , carrierHRF, carrierAIDC, issuer, entryType);
+      }
+
+  public String fhirType() {
+    return "Device.udi";
+
+  }
+
+  }
 
     /**
      * Unique instance identifiers assigned to a device by manufacturers other organizations or owners.
@@ -162,19 +966,19 @@ public class Device extends DomainResource {
     protected List<Identifier> identifier;
 
     /**
-     * [Unique device identifier (UDI)](device.html#5.11.3.2.2) barcode or rfid string assigned to device label or package.
+     * [Unique device identifier (UDI)](device.html#5.11.3.2.2) assigned to device label or package.
      */
-    @Child(name = "udiCarrier", type = {Identifier.class}, order=1, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Unique Device Identifier (UDI) Barcode string", formalDefinition="[Unique device identifier (UDI)](device.html#5.11.3.2.2) barcode or rfid string assigned to device label or package." )
-    protected Identifier udiCarrier;
+    @Child(name = "udi", type = {}, order=1, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="Unique Device Identifier (UDI) Barcode string", formalDefinition="[Unique device identifier (UDI)](device.html#5.11.3.2.2) assigned to device label or package." )
+    protected DeviceUdiComponent udi;
 
     /**
      * Status of the Device availability.
      */
     @Child(name = "status", type = {CodeType.class}, order=2, min=0, max=1, modifier=true, summary=true)
-    @Description(shortDefinition="available | not-available | entered-in-error", formalDefinition="Status of the Device availability." )
-    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/devicestatus")
-    protected Enumeration<DeviceStatus> status;
+    @Description(shortDefinition="active | inactive | entered-in-error | unknown", formalDefinition="Status of the Device availability." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/device-status")
+    protected Enumeration<FHIRDeviceStatus> status;
 
     /**
      * Code or identifier to identify a kind of device.
@@ -283,7 +1087,15 @@ public class Device extends DomainResource {
     @Description(shortDefinition="Device notes and comments", formalDefinition="Descriptive information, usage information or implantation information that is not captured in an existing element." )
     protected List<Annotation> note;
 
-    private static final long serialVersionUID = -710362206L;
+    /**
+     * Provides additional safety characteristics about a medical device.  For example devices containing latex.
+     */
+    @Child(name = "safety", type = {CodeableConcept.class}, order=16, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Description(shortDefinition="Safety Characteristics of Device", formalDefinition="Provides additional safety characteristics about a medical device.  For example devices containing latex." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/device-safety")
+    protected List<CodeableConcept> safety;
+
+    private static final long serialVersionUID = -1056263930L;
 
   /**
    * Constructor
@@ -346,38 +1158,38 @@ public class Device extends DomainResource {
     }
 
     /**
-     * @return {@link #udiCarrier} ([Unique device identifier (UDI)](device.html#5.11.3.2.2) barcode or rfid string assigned to device label or package.)
+     * @return {@link #udi} ([Unique device identifier (UDI)](device.html#5.11.3.2.2) assigned to device label or package.)
      */
-    public Identifier getUdiCarrier() { 
-      if (this.udiCarrier == null)
+    public DeviceUdiComponent getUdi() { 
+      if (this.udi == null)
         if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create Device.udiCarrier");
+          throw new Error("Attempt to auto-create Device.udi");
         else if (Configuration.doAutoCreate())
-          this.udiCarrier = new Identifier(); // cc
-      return this.udiCarrier;
+          this.udi = new DeviceUdiComponent(); // cc
+      return this.udi;
     }
 
-    public boolean hasUdiCarrier() { 
-      return this.udiCarrier != null && !this.udiCarrier.isEmpty();
+    public boolean hasUdi() { 
+      return this.udi != null && !this.udi.isEmpty();
     }
 
     /**
-     * @param value {@link #udiCarrier} ([Unique device identifier (UDI)](device.html#5.11.3.2.2) barcode or rfid string assigned to device label or package.)
+     * @param value {@link #udi} ([Unique device identifier (UDI)](device.html#5.11.3.2.2) assigned to device label or package.)
      */
-    public Device setUdiCarrier(Identifier value) { 
-      this.udiCarrier = value;
+    public Device setUdi(DeviceUdiComponent value) { 
+      this.udi = value;
       return this;
     }
 
     /**
      * @return {@link #status} (Status of the Device availability.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
      */
-    public Enumeration<DeviceStatus> getStatusElement() { 
+    public Enumeration<FHIRDeviceStatus> getStatusElement() { 
       if (this.status == null)
         if (Configuration.errorOnAutoCreate())
           throw new Error("Attempt to auto-create Device.status");
         else if (Configuration.doAutoCreate())
-          this.status = new Enumeration<DeviceStatus>(new DeviceStatusEnumFactory()); // bb
+          this.status = new Enumeration<FHIRDeviceStatus>(new FHIRDeviceStatusEnumFactory()); // bb
       return this.status;
     }
 
@@ -392,7 +1204,7 @@ public class Device extends DomainResource {
     /**
      * @param value {@link #status} (Status of the Device availability.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
      */
-    public Device setStatusElement(Enumeration<DeviceStatus> value) { 
+    public Device setStatusElement(Enumeration<FHIRDeviceStatus> value) { 
       this.status = value;
       return this;
     }
@@ -400,19 +1212,19 @@ public class Device extends DomainResource {
     /**
      * @return Status of the Device availability.
      */
-    public DeviceStatus getStatus() { 
+    public FHIRDeviceStatus getStatus() { 
       return this.status == null ? null : this.status.getValue();
     }
 
     /**
      * @param value Status of the Device availability.
      */
-    public Device setStatus(DeviceStatus value) { 
+    public Device setStatus(FHIRDeviceStatus value) { 
       if (value == null)
         this.status = null;
       else {
         if (this.status == null)
-          this.status = new Enumeration<DeviceStatus>(new DeviceStatusEnumFactory());
+          this.status = new Enumeration<FHIRDeviceStatus>(new FHIRDeviceStatusEnumFactory());
         this.status.setValue(value);
       }
       return this;
@@ -1023,10 +1835,63 @@ public class Device extends DomainResource {
       return getNote().get(0);
     }
 
+    /**
+     * @return {@link #safety} (Provides additional safety characteristics about a medical device.  For example devices containing latex.)
+     */
+    public List<CodeableConcept> getSafety() { 
+      if (this.safety == null)
+        this.safety = new ArrayList<CodeableConcept>();
+      return this.safety;
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public Device setSafety(List<CodeableConcept> theSafety) { 
+      this.safety = theSafety;
+      return this;
+    }
+
+    public boolean hasSafety() { 
+      if (this.safety == null)
+        return false;
+      for (CodeableConcept item : this.safety)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    public CodeableConcept addSafety() { //3
+      CodeableConcept t = new CodeableConcept();
+      if (this.safety == null)
+        this.safety = new ArrayList<CodeableConcept>();
+      this.safety.add(t);
+      return t;
+    }
+
+    public Device addSafety(CodeableConcept t) { //3
+      if (t == null)
+        return this;
+      if (this.safety == null)
+        this.safety = new ArrayList<CodeableConcept>();
+      this.safety.add(t);
+      return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #safety}, creating it if it does not already exist
+     */
+    public CodeableConcept getSafetyFirstRep() { 
+      if (getSafety().isEmpty()) {
+        addSafety();
+      }
+      return getSafety().get(0);
+    }
+
       protected void listChildren(List<Property> childrenList) {
         super.listChildren(childrenList);
         childrenList.add(new Property("identifier", "Identifier", "Unique instance identifiers assigned to a device by manufacturers other organizations or owners.", 0, java.lang.Integer.MAX_VALUE, identifier));
-        childrenList.add(new Property("udiCarrier", "Identifier", "[Unique device identifier (UDI)](device.html#5.11.3.2.2) barcode or rfid string assigned to device label or package.", 0, java.lang.Integer.MAX_VALUE, udiCarrier));
+        childrenList.add(new Property("udi", "", "[Unique device identifier (UDI)](device.html#5.11.3.2.2) assigned to device label or package.", 0, java.lang.Integer.MAX_VALUE, udi));
         childrenList.add(new Property("status", "code", "Status of the Device availability.", 0, java.lang.Integer.MAX_VALUE, status));
         childrenList.add(new Property("type", "CodeableConcept", "Code or identifier to identify a kind of device.", 0, java.lang.Integer.MAX_VALUE, type));
         childrenList.add(new Property("lotNumber", "string", "Lot number assigned by the manufacturer.", 0, java.lang.Integer.MAX_VALUE, lotNumber));
@@ -1041,14 +1906,15 @@ public class Device extends DomainResource {
         childrenList.add(new Property("location", "Reference(Location)", "The place where the device can be found.", 0, java.lang.Integer.MAX_VALUE, location));
         childrenList.add(new Property("url", "uri", "A network address on which the device may be contacted directly.", 0, java.lang.Integer.MAX_VALUE, url));
         childrenList.add(new Property("note", "Annotation", "Descriptive information, usage information or implantation information that is not captured in an existing element.", 0, java.lang.Integer.MAX_VALUE, note));
+        childrenList.add(new Property("safety", "CodeableConcept", "Provides additional safety characteristics about a medical device.  For example devices containing latex.", 0, java.lang.Integer.MAX_VALUE, safety));
       }
 
       @Override
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
         case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : this.identifier.toArray(new Base[this.identifier.size()]); // Identifier
-        case -1343558178: /*udiCarrier*/ return this.udiCarrier == null ? new Base[0] : new Base[] {this.udiCarrier}; // Identifier
-        case -892481550: /*status*/ return this.status == null ? new Base[0] : new Base[] {this.status}; // Enumeration<DeviceStatus>
+        case 115642: /*udi*/ return this.udi == null ? new Base[0] : new Base[] {this.udi}; // DeviceUdiComponent
+        case -892481550: /*status*/ return this.status == null ? new Base[0] : new Base[] {this.status}; // Enumeration<FHIRDeviceStatus>
         case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // CodeableConcept
         case 462547450: /*lotNumber*/ return this.lotNumber == null ? new Base[0] : new Base[] {this.lotNumber}; // StringType
         case -1969347631: /*manufacturer*/ return this.manufacturer == null ? new Base[0] : new Base[] {this.manufacturer}; // StringType
@@ -1062,125 +1928,160 @@ public class Device extends DomainResource {
         case 1901043637: /*location*/ return this.location == null ? new Base[0] : new Base[] {this.location}; // Reference
         case 116079: /*url*/ return this.url == null ? new Base[0] : new Base[] {this.url}; // UriType
         case 3387378: /*note*/ return this.note == null ? new Base[0] : this.note.toArray(new Base[this.note.size()]); // Annotation
+        case -909893934: /*safety*/ return this.safety == null ? new Base[0] : this.safety.toArray(new Base[this.safety.size()]); // CodeableConcept
         default: return super.getProperty(hash, name, checkValid);
         }
 
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case -1618432855: // identifier
           this.getIdentifier().add(castToIdentifier(value)); // Identifier
-          break;
-        case -1343558178: // udiCarrier
-          this.udiCarrier = castToIdentifier(value); // Identifier
-          break;
+          return value;
+        case 115642: // udi
+          this.udi = (DeviceUdiComponent) value; // DeviceUdiComponent
+          return value;
         case -892481550: // status
-          this.status = new DeviceStatusEnumFactory().fromType(value); // Enumeration<DeviceStatus>
-          break;
+          value = new FHIRDeviceStatusEnumFactory().fromType(castToCode(value));
+          this.status = (Enumeration) value; // Enumeration<FHIRDeviceStatus>
+          return value;
         case 3575610: // type
           this.type = castToCodeableConcept(value); // CodeableConcept
-          break;
+          return value;
         case 462547450: // lotNumber
           this.lotNumber = castToString(value); // StringType
-          break;
+          return value;
         case -1969347631: // manufacturer
           this.manufacturer = castToString(value); // StringType
-          break;
+          return value;
         case 416714767: // manufactureDate
           this.manufactureDate = castToDateTime(value); // DateTimeType
-          break;
+          return value;
         case -668811523: // expirationDate
           this.expirationDate = castToDateTime(value); // DateTimeType
-          break;
+          return value;
         case 104069929: // model
           this.model = castToString(value); // StringType
-          break;
+          return value;
         case 351608024: // version
           this.version = castToString(value); // StringType
-          break;
+          return value;
         case -791418107: // patient
           this.patient = castToReference(value); // Reference
-          break;
+          return value;
         case 106164915: // owner
           this.owner = castToReference(value); // Reference
-          break;
+          return value;
         case 951526432: // contact
           this.getContact().add(castToContactPoint(value)); // ContactPoint
-          break;
+          return value;
         case 1901043637: // location
           this.location = castToReference(value); // Reference
-          break;
+          return value;
         case 116079: // url
           this.url = castToUri(value); // UriType
-          break;
+          return value;
         case 3387378: // note
           this.getNote().add(castToAnnotation(value)); // Annotation
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        case -909893934: // safety
+          this.getSafety().add(castToCodeableConcept(value)); // CodeableConcept
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("identifier"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("identifier")) {
           this.getIdentifier().add(castToIdentifier(value));
-        else if (name.equals("udiCarrier"))
-          this.udiCarrier = castToIdentifier(value); // Identifier
-        else if (name.equals("status"))
-          this.status = new DeviceStatusEnumFactory().fromType(value); // Enumeration<DeviceStatus>
-        else if (name.equals("type"))
+        } else if (name.equals("udi")) {
+          this.udi = (DeviceUdiComponent) value; // DeviceUdiComponent
+        } else if (name.equals("status")) {
+          value = new FHIRDeviceStatusEnumFactory().fromType(castToCode(value));
+          this.status = (Enumeration) value; // Enumeration<FHIRDeviceStatus>
+        } else if (name.equals("type")) {
           this.type = castToCodeableConcept(value); // CodeableConcept
-        else if (name.equals("lotNumber"))
+        } else if (name.equals("lotNumber")) {
           this.lotNumber = castToString(value); // StringType
-        else if (name.equals("manufacturer"))
+        } else if (name.equals("manufacturer")) {
           this.manufacturer = castToString(value); // StringType
-        else if (name.equals("manufactureDate"))
+        } else if (name.equals("manufactureDate")) {
           this.manufactureDate = castToDateTime(value); // DateTimeType
-        else if (name.equals("expirationDate"))
+        } else if (name.equals("expirationDate")) {
           this.expirationDate = castToDateTime(value); // DateTimeType
-        else if (name.equals("model"))
+        } else if (name.equals("model")) {
           this.model = castToString(value); // StringType
-        else if (name.equals("version"))
+        } else if (name.equals("version")) {
           this.version = castToString(value); // StringType
-        else if (name.equals("patient"))
+        } else if (name.equals("patient")) {
           this.patient = castToReference(value); // Reference
-        else if (name.equals("owner"))
+        } else if (name.equals("owner")) {
           this.owner = castToReference(value); // Reference
-        else if (name.equals("contact"))
+        } else if (name.equals("contact")) {
           this.getContact().add(castToContactPoint(value));
-        else if (name.equals("location"))
+        } else if (name.equals("location")) {
           this.location = castToReference(value); // Reference
-        else if (name.equals("url"))
+        } else if (name.equals("url")) {
           this.url = castToUri(value); // UriType
-        else if (name.equals("note"))
+        } else if (name.equals("note")) {
           this.getNote().add(castToAnnotation(value));
-        else
-          super.setProperty(name, value);
+        } else if (name.equals("safety")) {
+          this.getSafety().add(castToCodeableConcept(value));
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case -1618432855:  return addIdentifier(); // Identifier
-        case -1343558178:  return getUdiCarrier(); // Identifier
-        case -892481550: throw new FHIRException("Cannot make property status as it is not a complex type"); // Enumeration<DeviceStatus>
-        case 3575610:  return getType(); // CodeableConcept
-        case 462547450: throw new FHIRException("Cannot make property lotNumber as it is not a complex type"); // StringType
-        case -1969347631: throw new FHIRException("Cannot make property manufacturer as it is not a complex type"); // StringType
-        case 416714767: throw new FHIRException("Cannot make property manufactureDate as it is not a complex type"); // DateTimeType
-        case -668811523: throw new FHIRException("Cannot make property expirationDate as it is not a complex type"); // DateTimeType
-        case 104069929: throw new FHIRException("Cannot make property model as it is not a complex type"); // StringType
-        case 351608024: throw new FHIRException("Cannot make property version as it is not a complex type"); // StringType
-        case -791418107:  return getPatient(); // Reference
-        case 106164915:  return getOwner(); // Reference
-        case 951526432:  return addContact(); // ContactPoint
-        case 1901043637:  return getLocation(); // Reference
-        case 116079: throw new FHIRException("Cannot make property url as it is not a complex type"); // UriType
-        case 3387378:  return addNote(); // Annotation
+        case -1618432855:  return addIdentifier(); 
+        case 115642:  return getUdi(); 
+        case -892481550:  return getStatusElement();
+        case 3575610:  return getType(); 
+        case 462547450:  return getLotNumberElement();
+        case -1969347631:  return getManufacturerElement();
+        case 416714767:  return getManufactureDateElement();
+        case -668811523:  return getExpirationDateElement();
+        case 104069929:  return getModelElement();
+        case 351608024:  return getVersionElement();
+        case -791418107:  return getPatient(); 
+        case 106164915:  return getOwner(); 
+        case 951526432:  return addContact(); 
+        case 1901043637:  return getLocation(); 
+        case 116079:  return getUrlElement();
+        case 3387378:  return addNote(); 
+        case -909893934:  return addSafety(); 
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -1618432855: /*identifier*/ return new String[] {"Identifier"};
+        case 115642: /*udi*/ return new String[] {};
+        case -892481550: /*status*/ return new String[] {"code"};
+        case 3575610: /*type*/ return new String[] {"CodeableConcept"};
+        case 462547450: /*lotNumber*/ return new String[] {"string"};
+        case -1969347631: /*manufacturer*/ return new String[] {"string"};
+        case 416714767: /*manufactureDate*/ return new String[] {"dateTime"};
+        case -668811523: /*expirationDate*/ return new String[] {"dateTime"};
+        case 104069929: /*model*/ return new String[] {"string"};
+        case 351608024: /*version*/ return new String[] {"string"};
+        case -791418107: /*patient*/ return new String[] {"Reference"};
+        case 106164915: /*owner*/ return new String[] {"Reference"};
+        case 951526432: /*contact*/ return new String[] {"ContactPoint"};
+        case 1901043637: /*location*/ return new String[] {"Reference"};
+        case 116079: /*url*/ return new String[] {"uri"};
+        case 3387378: /*note*/ return new String[] {"Annotation"};
+        case -909893934: /*safety*/ return new String[] {"CodeableConcept"};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }
@@ -1190,9 +2091,9 @@ public class Device extends DomainResource {
         if (name.equals("identifier")) {
           return addIdentifier();
         }
-        else if (name.equals("udiCarrier")) {
-          this.udiCarrier = new Identifier();
-          return this.udiCarrier;
+        else if (name.equals("udi")) {
+          this.udi = new DeviceUdiComponent();
+          return this.udi;
         }
         else if (name.equals("status")) {
           throw new FHIRException("Cannot call addChild on a primitive type Device.status");
@@ -1240,6 +2141,9 @@ public class Device extends DomainResource {
         else if (name.equals("note")) {
           return addNote();
         }
+        else if (name.equals("safety")) {
+          return addSafety();
+        }
         else
           return super.addChild(name);
       }
@@ -1257,7 +2161,7 @@ public class Device extends DomainResource {
           for (Identifier i : identifier)
             dst.identifier.add(i.copy());
         };
-        dst.udiCarrier = udiCarrier == null ? null : udiCarrier.copy();
+        dst.udi = udi == null ? null : udi.copy();
         dst.status = status == null ? null : status.copy();
         dst.type = type == null ? null : type.copy();
         dst.lotNumber = lotNumber == null ? null : lotNumber.copy();
@@ -1280,6 +2184,11 @@ public class Device extends DomainResource {
           for (Annotation i : note)
             dst.note.add(i.copy());
         };
+        if (safety != null) {
+          dst.safety = new ArrayList<CodeableConcept>();
+          for (CodeableConcept i : safety)
+            dst.safety.add(i.copy());
+        };
         return dst;
       }
 
@@ -1294,12 +2203,12 @@ public class Device extends DomainResource {
         if (!(other instanceof Device))
           return false;
         Device o = (Device) other;
-        return compareDeep(identifier, o.identifier, true) && compareDeep(udiCarrier, o.udiCarrier, true)
-           && compareDeep(status, o.status, true) && compareDeep(type, o.type, true) && compareDeep(lotNumber, o.lotNumber, true)
-           && compareDeep(manufacturer, o.manufacturer, true) && compareDeep(manufactureDate, o.manufactureDate, true)
-           && compareDeep(expirationDate, o.expirationDate, true) && compareDeep(model, o.model, true) && compareDeep(version, o.version, true)
-           && compareDeep(patient, o.patient, true) && compareDeep(owner, o.owner, true) && compareDeep(contact, o.contact, true)
-           && compareDeep(location, o.location, true) && compareDeep(url, o.url, true) && compareDeep(note, o.note, true)
+        return compareDeep(identifier, o.identifier, true) && compareDeep(udi, o.udi, true) && compareDeep(status, o.status, true)
+           && compareDeep(type, o.type, true) && compareDeep(lotNumber, o.lotNumber, true) && compareDeep(manufacturer, o.manufacturer, true)
+           && compareDeep(manufactureDate, o.manufactureDate, true) && compareDeep(expirationDate, o.expirationDate, true)
+           && compareDeep(model, o.model, true) && compareDeep(version, o.version, true) && compareDeep(patient, o.patient, true)
+           && compareDeep(owner, o.owner, true) && compareDeep(contact, o.contact, true) && compareDeep(location, o.location, true)
+           && compareDeep(url, o.url, true) && compareDeep(note, o.note, true) && compareDeep(safety, o.safety, true)
           ;
       }
 
@@ -1317,15 +2226,35 @@ public class Device extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, udiCarrier, status
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, udi, status
           , type, lotNumber, manufacturer, manufactureDate, expirationDate, model, version
-          , patient, owner, contact, location, url, note);
+          , patient, owner, contact, location, url, note, safety);
       }
 
   @Override
   public ResourceType getResourceType() {
     return ResourceType.Device;
    }
+
+ /**
+   * Search parameter: <b>udi-di</b>
+   * <p>
+   * Description: <b>The udi Device Identifier (DI)</b><br>
+   * Type: <b>string</b><br>
+   * Path: <b>Device.udi.deviceIdentifier</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="udi-di", path="Device.udi.deviceIdentifier", description="The udi Device Identifier (DI)", type="string" )
+  public static final String SP_UDI_DI = "udi-di";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>udi-di</b>
+   * <p>
+   * Description: <b>The udi Device Identifier (DI)</b><br>
+   * Type: <b>string</b><br>
+   * Path: <b>Device.udi.deviceIdentifier</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.StringClientParam UDI_DI = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_UDI_DI);
 
  /**
    * Search parameter: <b>identifier</b>
@@ -1346,6 +2275,46 @@ public class Device extends DomainResource {
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.TokenClientParam IDENTIFIER = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_IDENTIFIER);
+
+ /**
+   * Search parameter: <b>udi-carrier</b>
+   * <p>
+   * Description: <b>UDI Barcode (RFID or other technology) string either in HRF format or AIDC format converted to base64 string.</b><br>
+   * Type: <b>string</b><br>
+   * Path: <b>Device.udi.carrierHRF, Device.udi.carrierAIDC</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="udi-carrier", path="Device.udi.carrierHRF | Device.udi.carrierAIDC", description="UDI Barcode (RFID or other technology) string either in HRF format or AIDC format converted to base64 string.", type="string" )
+  public static final String SP_UDI_CARRIER = "udi-carrier";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>udi-carrier</b>
+   * <p>
+   * Description: <b>UDI Barcode (RFID or other technology) string either in HRF format or AIDC format converted to base64 string.</b><br>
+   * Type: <b>string</b><br>
+   * Path: <b>Device.udi.carrierHRF, Device.udi.carrierAIDC</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.StringClientParam UDI_CARRIER = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_UDI_CARRIER);
+
+ /**
+   * Search parameter: <b>device-name</b>
+   * <p>
+   * Description: <b>A server defined search that may match any of the string fields in the Device.udi.name  or Device.type.coding.display or  Device.type.text</b><br>
+   * Type: <b>string</b><br>
+   * Path: <b>Device.udi.name, Device.type.text, Device.type.coding.display</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="device-name", path="Device.udi.name | Device.type.text | Device.type.coding.display", description="A server defined search that may match any of the string fields in the Device.udi.name  or Device.type.coding.display or  Device.type.text", type="string" )
+  public static final String SP_DEVICE_NAME = "device-name";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>device-name</b>
+   * <p>
+   * Description: <b>A server defined search that may match any of the string fields in the Device.udi.name  or Device.type.coding.display or  Device.type.text</b><br>
+   * Type: <b>string</b><br>
+   * Path: <b>Device.udi.name, Device.type.text, Device.type.coding.display</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.StringClientParam DEVICE_NAME = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_DEVICE_NAME);
 
  /**
    * Search parameter: <b>patient</b>
@@ -1464,26 +2433,6 @@ public class Device extends DomainResource {
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.TokenClientParam TYPE = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_TYPE);
-
- /**
-   * Search parameter: <b>udicarrier</b>
-   * <p>
-   * Description: <b>Barcode string (udi)</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>Device.udiCarrier</b><br>
-   * </p>
-   */
-  @SearchParamDefinition(name="udicarrier", path="Device.udiCarrier", description="Barcode string (udi)", type="token" )
-  public static final String SP_UDICARRIER = "udicarrier";
- /**
-   * <b>Fluent Client</b> search parameter constant for <b>udicarrier</b>
-   * <p>
-   * Description: <b>Barcode string (udi)</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>Device.udiCarrier</b><br>
-   * </p>
-   */
-  public static final ca.uhn.fhir.rest.gclient.TokenClientParam UDICARRIER = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_UDICARRIER);
 
  /**
    * Search parameter: <b>url</b>

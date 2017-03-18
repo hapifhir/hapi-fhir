@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
 
 
 import org.hl7.fhir.dstu3.model.EnumFactory;
@@ -43,6 +43,14 @@ public class ServicePharmacyEnumFactory implements EnumFactory<ServicePharmacy> 
       return ServicePharmacy.SMOKECESS;
     if ("flushot".equals(codeString))
       return ServicePharmacy.FLUSHOT;
+    if ("drugcost".equals(codeString))
+      return ServicePharmacy.DRUGCOST;
+    if ("markup".equals(codeString))
+      return ServicePharmacy.MARKUP;
+    if ("dispensefee".equals(codeString))
+      return ServicePharmacy.DISPENSEFEE;
+    if ("compoundfee".equals(codeString))
+      return ServicePharmacy.COMPOUNDFEE;
     throw new IllegalArgumentException("Unknown ServicePharmacy code '"+codeString+"'");
   }
 
@@ -51,6 +59,14 @@ public class ServicePharmacyEnumFactory implements EnumFactory<ServicePharmacy> 
       return "smokecess";
     if (code == ServicePharmacy.FLUSHOT)
       return "flushot";
+    if (code == ServicePharmacy.DRUGCOST)
+      return "drugcost";
+    if (code == ServicePharmacy.MARKUP)
+      return "markup";
+    if (code == ServicePharmacy.DISPENSEFEE)
+      return "dispensefee";
+    if (code == ServicePharmacy.COMPOUNDFEE)
+      return "compoundfee";
     return "?";
   }
 

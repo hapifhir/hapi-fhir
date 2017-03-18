@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
 
 import java.util.*;
 
@@ -382,53 +382,68 @@ public class DataRequirement extends Type implements ICompositeType {
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case 3433509: // path
           this.path = castToString(value); // StringType
-          break;
+          return value;
         case -1410174671: // valueSet
           this.valueSet = castToType(value); // Type
-          break;
+          return value;
         case -766209282: // valueCode
           this.getValueCode().add(castToCode(value)); // CodeType
-          break;
+          return value;
         case -1887705029: // valueCoding
           this.getValueCoding().add(castToCoding(value)); // Coding
-          break;
+          return value;
         case 924902896: // valueCodeableConcept
           this.getValueCodeableConcept().add(castToCodeableConcept(value)); // CodeableConcept
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("path"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("path")) {
           this.path = castToString(value); // StringType
-        else if (name.equals("valueSet[x]"))
+        } else if (name.equals("valueSet[x]")) {
           this.valueSet = castToType(value); // Type
-        else if (name.equals("valueCode"))
+        } else if (name.equals("valueCode")) {
           this.getValueCode().add(castToCode(value));
-        else if (name.equals("valueCoding"))
+        } else if (name.equals("valueCoding")) {
           this.getValueCoding().add(castToCoding(value));
-        else if (name.equals("valueCodeableConcept"))
+        } else if (name.equals("valueCodeableConcept")) {
           this.getValueCodeableConcept().add(castToCodeableConcept(value));
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 3433509: throw new FHIRException("Cannot make property path as it is not a complex type"); // StringType
-        case -1438410321:  return getValueSet(); // Type
-        case -766209282: throw new FHIRException("Cannot make property valueCode as it is not a complex type"); // CodeType
-        case -1887705029:  return addValueCoding(); // Coding
-        case 924902896:  return addValueCodeableConcept(); // CodeableConcept
+        case 3433509:  return getPathElement();
+        case -1438410321:  return getValueSet(); 
+        case -1410174671:  return getValueSet(); 
+        case -766209282:  return addValueCodeElement();
+        case -1887705029:  return addValueCoding(); 
+        case 924902896:  return addValueCodeableConcept(); 
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3433509: /*path*/ return new String[] {"string"};
+        case -1410174671: /*valueSet*/ return new String[] {"string", "Reference"};
+        case -766209282: /*valueCode*/ return new String[] {"code"};
+        case -1887705029: /*valueCoding*/ return new String[] {"Coding"};
+        case 924902896: /*valueCodeableConcept*/ return new String[] {"CodeableConcept"};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }
@@ -669,35 +684,47 @@ public class DataRequirement extends Type implements ICompositeType {
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case 3433509: // path
           this.path = castToString(value); // StringType
-          break;
+          return value;
         case 111972721: // value
           this.value = castToType(value); // Type
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("path"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("path")) {
           this.path = castToString(value); // StringType
-        else if (name.equals("value[x]"))
+        } else if (name.equals("value[x]")) {
           this.value = castToType(value); // Type
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 3433509: throw new FHIRException("Cannot make property path as it is not a complex type"); // StringType
-        case -1410166417:  return getValue(); // Type
+        case 3433509:  return getPathElement();
+        case -1410166417:  return getValue(); 
+        case 111972721:  return getValue(); 
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3433509: /*path*/ return new String[] {"string"};
+        case 111972721: /*value*/ return new String[] {"dateTime", "Period", "Duration"};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }
@@ -778,10 +805,10 @@ public class DataRequirement extends Type implements ICompositeType {
     protected List<UriType> profile;
 
     /**
-     * Indicates that specific elements of the type are referenced by the knowledge module and must be supported by the consumer in order to obtain an effective evaluation. This does not mean that a value is required for this element, only that the consuming system must understand the element and be able to provide values for it if they are available.
+     * Indicates that specific elements of the type are referenced by the knowledge module and must be supported by the consumer in order to obtain an effective evaluation. This does not mean that a value is required for this element, only that the consuming system must understand the element and be able to provide values for it if they are available. Note that the value for this element can be a path to allow references to nested elements. In that case, all the elements along the path must be supported.
      */
     @Child(name = "mustSupport", type = {StringType.class}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-    @Description(shortDefinition="Indicates that specific structure elements are referenced by the knowledge module", formalDefinition="Indicates that specific elements of the type are referenced by the knowledge module and must be supported by the consumer in order to obtain an effective evaluation. This does not mean that a value is required for this element, only that the consuming system must understand the element and be able to provide values for it if they are available." )
+    @Description(shortDefinition="Indicates that specific structure elements are referenced by the knowledge module", formalDefinition="Indicates that specific elements of the type are referenced by the knowledge module and must be supported by the consumer in order to obtain an effective evaluation. This does not mean that a value is required for this element, only that the consuming system must understand the element and be able to provide values for it if they are available. Note that the value for this element can be a path to allow references to nested elements. In that case, all the elements along the path must be supported." )
     protected List<StringType> mustSupport;
 
     /**
@@ -922,7 +949,7 @@ public class DataRequirement extends Type implements ICompositeType {
     }
 
     /**
-     * @return {@link #mustSupport} (Indicates that specific elements of the type are referenced by the knowledge module and must be supported by the consumer in order to obtain an effective evaluation. This does not mean that a value is required for this element, only that the consuming system must understand the element and be able to provide values for it if they are available.)
+     * @return {@link #mustSupport} (Indicates that specific elements of the type are referenced by the knowledge module and must be supported by the consumer in order to obtain an effective evaluation. This does not mean that a value is required for this element, only that the consuming system must understand the element and be able to provide values for it if they are available. Note that the value for this element can be a path to allow references to nested elements. In that case, all the elements along the path must be supported.)
      */
     public List<StringType> getMustSupport() { 
       if (this.mustSupport == null)
@@ -948,7 +975,7 @@ public class DataRequirement extends Type implements ICompositeType {
     }
 
     /**
-     * @return {@link #mustSupport} (Indicates that specific elements of the type are referenced by the knowledge module and must be supported by the consumer in order to obtain an effective evaluation. This does not mean that a value is required for this element, only that the consuming system must understand the element and be able to provide values for it if they are available.)
+     * @return {@link #mustSupport} (Indicates that specific elements of the type are referenced by the knowledge module and must be supported by the consumer in order to obtain an effective evaluation. This does not mean that a value is required for this element, only that the consuming system must understand the element and be able to provide values for it if they are available. Note that the value for this element can be a path to allow references to nested elements. In that case, all the elements along the path must be supported.)
      */
     public StringType addMustSupportElement() {//2 
       StringType t = new StringType();
@@ -959,7 +986,7 @@ public class DataRequirement extends Type implements ICompositeType {
     }
 
     /**
-     * @param value {@link #mustSupport} (Indicates that specific elements of the type are referenced by the knowledge module and must be supported by the consumer in order to obtain an effective evaluation. This does not mean that a value is required for this element, only that the consuming system must understand the element and be able to provide values for it if they are available.)
+     * @param value {@link #mustSupport} (Indicates that specific elements of the type are referenced by the knowledge module and must be supported by the consumer in order to obtain an effective evaluation. This does not mean that a value is required for this element, only that the consuming system must understand the element and be able to provide values for it if they are available. Note that the value for this element can be a path to allow references to nested elements. In that case, all the elements along the path must be supported.)
      */
     public DataRequirement addMustSupport(String value) { //1
       StringType t = new StringType();
@@ -971,7 +998,7 @@ public class DataRequirement extends Type implements ICompositeType {
     }
 
     /**
-     * @param value {@link #mustSupport} (Indicates that specific elements of the type are referenced by the knowledge module and must be supported by the consumer in order to obtain an effective evaluation. This does not mean that a value is required for this element, only that the consuming system must understand the element and be able to provide values for it if they are available.)
+     * @param value {@link #mustSupport} (Indicates that specific elements of the type are referenced by the knowledge module and must be supported by the consumer in order to obtain an effective evaluation. This does not mean that a value is required for this element, only that the consuming system must understand the element and be able to provide values for it if they are available. Note that the value for this element can be a path to allow references to nested elements. In that case, all the elements along the path must be supported.)
      */
     public boolean hasMustSupport(String value) { 
       if (this.mustSupport == null)
@@ -1092,7 +1119,7 @@ public class DataRequirement extends Type implements ICompositeType {
         super.listChildren(childrenList);
         childrenList.add(new Property("type", "code", "The type of the required data, specified as the type name of a resource. For profiles, this value is set to the type of the base resource of the profile.", 0, java.lang.Integer.MAX_VALUE, type));
         childrenList.add(new Property("profile", "uri", "The profile of the required data, specified as the uri of the profile definition.", 0, java.lang.Integer.MAX_VALUE, profile));
-        childrenList.add(new Property("mustSupport", "string", "Indicates that specific elements of the type are referenced by the knowledge module and must be supported by the consumer in order to obtain an effective evaluation. This does not mean that a value is required for this element, only that the consuming system must understand the element and be able to provide values for it if they are available.", 0, java.lang.Integer.MAX_VALUE, mustSupport));
+        childrenList.add(new Property("mustSupport", "string", "Indicates that specific elements of the type are referenced by the knowledge module and must be supported by the consumer in order to obtain an effective evaluation. This does not mean that a value is required for this element, only that the consuming system must understand the element and be able to provide values for it if they are available. Note that the value for this element can be a path to allow references to nested elements. In that case, all the elements along the path must be supported.", 0, java.lang.Integer.MAX_VALUE, mustSupport));
         childrenList.add(new Property("codeFilter", "", "Code filters specify additional constraints on the data, specifying the value set of interest for a particular element of the data.", 0, java.lang.Integer.MAX_VALUE, codeFilter));
         childrenList.add(new Property("dateFilter", "", "Date filters specify additional constraints on the data in terms of the applicable date range for specific elements.", 0, java.lang.Integer.MAX_VALUE, dateFilter));
       }
@@ -1111,53 +1138,67 @@ public class DataRequirement extends Type implements ICompositeType {
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case 3575610: // type
           this.type = castToCode(value); // CodeType
-          break;
+          return value;
         case -309425751: // profile
           this.getProfile().add(castToUri(value)); // UriType
-          break;
+          return value;
         case -1402857082: // mustSupport
           this.getMustSupport().add(castToString(value)); // StringType
-          break;
+          return value;
         case -1303674939: // codeFilter
           this.getCodeFilter().add((DataRequirementCodeFilterComponent) value); // DataRequirementCodeFilterComponent
-          break;
+          return value;
         case 149531846: // dateFilter
           this.getDateFilter().add((DataRequirementDateFilterComponent) value); // DataRequirementDateFilterComponent
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("type"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("type")) {
           this.type = castToCode(value); // CodeType
-        else if (name.equals("profile"))
+        } else if (name.equals("profile")) {
           this.getProfile().add(castToUri(value));
-        else if (name.equals("mustSupport"))
+        } else if (name.equals("mustSupport")) {
           this.getMustSupport().add(castToString(value));
-        else if (name.equals("codeFilter"))
+        } else if (name.equals("codeFilter")) {
           this.getCodeFilter().add((DataRequirementCodeFilterComponent) value);
-        else if (name.equals("dateFilter"))
+        } else if (name.equals("dateFilter")) {
           this.getDateFilter().add((DataRequirementDateFilterComponent) value);
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 3575610: throw new FHIRException("Cannot make property type as it is not a complex type"); // CodeType
-        case -309425751: throw new FHIRException("Cannot make property profile as it is not a complex type"); // UriType
-        case -1402857082: throw new FHIRException("Cannot make property mustSupport as it is not a complex type"); // StringType
-        case -1303674939:  return addCodeFilter(); // DataRequirementCodeFilterComponent
-        case 149531846:  return addDateFilter(); // DataRequirementDateFilterComponent
+        case 3575610:  return getTypeElement();
+        case -309425751:  return addProfileElement();
+        case -1402857082:  return addMustSupportElement();
+        case -1303674939:  return addCodeFilter(); 
+        case 149531846:  return addDateFilter(); 
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3575610: /*type*/ return new String[] {"code"};
+        case -309425751: /*profile*/ return new String[] {"uri"};
+        case -1402857082: /*mustSupport*/ return new String[] {"string"};
+        case -1303674939: /*codeFilter*/ return new String[] {};
+        case 149531846: /*dateFilter*/ return new String[] {};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }

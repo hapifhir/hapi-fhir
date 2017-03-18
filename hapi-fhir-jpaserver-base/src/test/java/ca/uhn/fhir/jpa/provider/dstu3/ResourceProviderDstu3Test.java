@@ -70,7 +70,7 @@ import org.hl7.fhir.dstu3.model.Condition;
 import org.hl7.fhir.dstu3.model.DateTimeType;
 import org.hl7.fhir.dstu3.model.DateType;
 import org.hl7.fhir.dstu3.model.Device;
-import org.hl7.fhir.dstu3.model.DiagnosticRequest;
+import org.hl7.fhir.dstu3.model.ProcedureRequest;
 import org.hl7.fhir.dstu3.model.DocumentManifest;
 import org.hl7.fhir.dstu3.model.DocumentReference;
 import org.hl7.fhir.dstu3.model.Encounter;
@@ -158,6 +158,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	@Override
 	public void before() throws Exception {
 		super.before();
+		myFhirCtx.setParserErrorHandler(new StrictErrorHandler());
 
 		myDaoConfig.setAllowMultipleDelete(true);
 	}
@@ -916,17 +917,17 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	 * See issue #52
 	 */
 	@Test
-	public void testDiagnosticRequestResources() throws Exception {
+	public void testProcedureRequestResources() throws Exception {
 		IGenericClient client = ourClient;
 
-		int initialSize = client.search().forResource(DiagnosticRequest.class).returnBundle(Bundle.class).execute().getEntry().size();
+		int initialSize = client.search().forResource(ProcedureRequest.class).returnBundle(Bundle.class).execute().getEntry().size();
 
-		DiagnosticRequest res = new DiagnosticRequest();
+		ProcedureRequest res = new ProcedureRequest();
 		res.addIdentifier().setSystem("urn:foo").setValue("123");
 
 		client.create().resource(res).execute();
 
-		int newSize = client.search().forResource(DiagnosticRequest.class).returnBundle(Bundle.class).execute().getEntry().size();
+		int newSize = client.search().forResource(ProcedureRequest.class).returnBundle(Bundle.class).execute().getEntry().size();
 
 		assertEquals(1, newSize - initialSize);
 
@@ -1024,19 +1025,19 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		IIdType locCId = ourClient.create().resource(locChild).execute().getId().toUnqualifiedVersionless();
 
 		Encounter encU = new Encounter();
-		encU.getPatient().setReferenceElement(patientId);
+		encU.getSubject().setReferenceElement(patientId);
 		encU.addLocation().getLocation().setReferenceElement(locCId);
 		IIdType encUId = ourClient.create().resource(encU).execute().getId().toUnqualifiedVersionless();
 
 		Encounter enc = new Encounter();
-		enc.getPatient().setReferenceElement(patientId);
+		enc.getSubject().setReferenceElement(patientId);
 		enc.addLocation().getLocation().setReferenceElement(locCId);
 		IIdType encId = ourClient.create().resource(enc).execute().getId().toUnqualifiedVersionless();
 
 		Observation obs = new Observation();
 		obs.getSubject().setReferenceElement(patientId);
 		obs.getDevice().setReferenceElement(devId);
-		obs.getEncounter().setReferenceElement(encId);
+		obs.getContext().setReferenceElement(encId);
 		IIdType obsId = ourClient.create().resource(obs).execute().getId().toUnqualifiedVersionless();
 
 		ourLog.info("IDs: EncU:" + encUId.getIdPart() + " Enc:" + encId.getIdPart() + "  " + patientId.toUnqualifiedVersionless());
@@ -1092,14 +1093,14 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		IIdType encUId = ourClient.create().resource(encU).execute().getId().toUnqualifiedVersionless();
 
 		Encounter enc = new Encounter();
-		enc.getPatient().setReferenceElement(patientId);
+		enc.getSubject().setReferenceElement(patientId);
 		enc.addLocation().getLocation().setReferenceElement(locCId);
 		IIdType encId = ourClient.create().resource(enc).execute().getId().toUnqualifiedVersionless();
 
 		Observation obs = new Observation();
 		obs.getSubject().setReferenceElement(patientId);
 		obs.getDevice().setReferenceElement(devId);
-		obs.getEncounter().setReferenceElement(encId);
+		obs.getContext().setReferenceElement(encId);
 		IIdType obsId = ourClient.create().resource(obs).execute().getId().toUnqualifiedVersionless();
 
 		Parameters output = ourClient.operation().onType(Encounter.class).named("everything").withNoParameters(Parameters.class).execute();
@@ -1196,13 +1197,12 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	// }
 
 	/**
-	 * See #147
+	 * See #147"Patient"
 	 */
 	@Test
 	public void testEverythingPatientDoesntRepeatPatient() throws Exception {
 		Bundle b;
 		IParser parser = myFhirCtx.newJsonParser();
-		parser.setParserErrorHandler(new StrictErrorHandler());
 		b = parser.parseResource(Bundle.class, new InputStreamReader(ResourceProviderDstu3Test.class.getResourceAsStream("/bug147-bundle-dstu3.json")));
 
 		Bundle resp = ourClient.transaction().withBundle(b).execute();
@@ -1272,7 +1272,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		IIdType patId = myPatientDao.create(pat, mySrd).getId().toUnqualifiedVersionless();
 
 		MedicationRequest mo = new MedicationRequest();
-		mo.getPatient().setReferenceElement(patId);
+		mo.getSubject().setReferenceElement(patId);
 		mo.setMedication(new Reference(medId));
 		IIdType moId = myMedicationRequestDao.create(mo, mySrd).getId().toUnqualifiedVersionless();
 
@@ -1352,7 +1352,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		IIdType obsId = ourClient.create().resource(obs).execute().getId().toUnqualifiedVersionless();
 
 		Encounter enc = new Encounter();
-		enc.getPatient().setReferenceElement(patientId);
+		enc.getSubject().setReferenceElement(patientId);
 		IIdType encId = ourClient.create().resource(enc).execute().getId().toUnqualifiedVersionless();
 
 		Parameters output = ourClient.operation().onInstance(patientId).named("everything").withNoParameters(Parameters.class).execute();
@@ -1498,6 +1498,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	 */
 	@Test
 	public void testEverythingWithLargeSet() throws Exception {
+		
 		String inputString = IOUtils.toString(getClass().getResourceAsStream("/david_big_bundle.json"), StandardCharsets.UTF_8);
 		Bundle inputBundle = myFhirCtx.newJsonParser().parseResource(Bundle.class, inputString);
 		inputBundle.setType(BundleType.TRANSACTION);
@@ -1511,9 +1512,17 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 		mySystemDao.transaction(mySrd, inputBundle);
 
-		Bundle responseBundle = ourClient.operation().onInstance(new IdType("Patient/A161443")).named("everything").withParameter(Parameters.class, "_count", new IntegerType(50)).useHttpGet()
-				.returnResourceType(Bundle.class).execute();
+		Bundle responseBundle = ourClient
+				.operation()
+				.onInstance(new IdType("Patient/A161443"))
+				.named("everything")
+				.withParameter(Parameters.class, "_count", new IntegerType(50))
+				.useHttpGet()
+				.returnResourceType(Bundle.class)
+				.execute();
 
+		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(responseBundle));
+		
 		TreeSet<String> ids = new TreeSet<String>();
 		for (int i = 0; i < responseBundle.getEntry().size(); i++) {
 			for (BundleEntryComponent nextEntry : responseBundle.getEntry()) {
@@ -2160,16 +2169,6 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		}
 	}
 
-	@Test
-	public void testResourceSorting() throws Exception {
-		String input = IOUtils.toString(getClass().getResourceAsStream("/two_questionnaires.json"), StandardCharsets.UTF_8);
-		String respString = ourClient.transaction().withBundle(input).prettyPrint().execute();
-		ourLog.info(respString);
-
-		ourHttpClient.execute(new HttpGet("http://localhost:" + ourPort
-				+ "/QuestionnaireResponse?patient=QR3295&questionnaire=profile&_sort:desc=authored&_count=5&_include=QuestionnaireResponse:questionnaire&_include=QuestionnaireResponse:subject"));
-		// Bundle bundle =
-	}
 
 	@Test
 	public void testSaveAndRetrieveExistingNarrativeJson() {

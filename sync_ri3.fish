@@ -13,21 +13,8 @@ rm hapi-fhir-structures-dstu3/src/main/java/org/hl7/fhir/dstu3/model/codesystems
 cp ~/workspace/fhir/trunk/build/temp/java/org.hl7.fhir.dstu3/src/org/hl7/fhir/dstu3/model/* hapi-fhir-structures-dstu3/src/main/java/org/hl7/fhir/dstu3/model/
 cp ~/workspace/fhir/trunk/build/temp/java/org.hl7.fhir.dstu3/src/org/hl7/fhir/dstu3/model/codesystems/* hapi-fhir-structures-dstu3/src/main/java/org/hl7/fhir/dstu3/model/codesystems/
 
-# Copy Spreadsheets
-rm hapi-tinder-plugin/src/main/resources/res/dstu3/*.xml; cp ~/workspace/fhir/trunk/build/source/*/*-spreadsheet.xml hapi-tinder-plugin/src/main/resources/res/dstu3/; rm hapi-tinder-plugin/src/main/resources/res/dstu3/*-*-*.xml
 
-cp ~/workspace/fhir/trunk/build/publish/*.sch hapi-fhir-validation-resources-dstu3/src/main/resources/org/hl7/fhir/instance/model/dstu3/schema/
-
-cp ~/workspace/fhir/trunk/build/publish/fhir-single.xsd  hapi-fhir-validation-resources-dstu3/src/main/resources/org/hl7/fhir/instance/model/dstu3/schema/
-cp ~/workspace/fhir/trunk/build/publish/fhir-xhtml.xsd   hapi-fhir-validation-resources-dstu3/src/main/resources/org/hl7/fhir/instance/model/dstu3/schema/
-cp ~/workspace/fhir/trunk/build/publish/xml.xsd   hapi-fhir-validation-resources-dstu3/src/main/resources/org/hl7/fhir/instance/model/dstu3/schema/
-
-cp ~/workspace/fhir/trunk/build/publish/profiles-*.xml hapi-fhir-validation-resources-dstu3/src/main/resources/org/hl7/fhir/instance/model/dstu3/profile/
-cp ~/workspace/fhir/trunk/build/publish/v2-tables.xml  hapi-fhir-validation-resources-dstu3/src/main/resources/org/hl7/fhir/instance/model/dstu3/valueset/
-cp ~/workspace/fhir/trunk/build/publish/v3-codesystems.xml   hapi-fhir-validation-resources-dstu3/src/main/resources/org/hl7/fhir/instance/model/dstu3/valueset/
-cp ~/workspace/fhir/trunk/build/publish/valuesets.xml    hapi-fhir-validation-resources-dstu3/src/main/resources/org/hl7/fhir/instance/model/dstu3/valueset/
-cp ~/workspace/fhir/trunk/build/implementations/java/org.hl7.fhir.dstu3/src/org/hl7/fhir/dstu3/utils/FHIRPathEngine.java hapi-fhir-structures-dstu3/src/main/java/org/hl7/fhir/dstu3/utils/
-cp ~/workspace/fhir/trunk/build/implementations/java/org.hl7.fhir.dstu3/src/org/hl7/fhir/dstu3/validation/InstanceValidator.java  hapi-fhir-structures-dstu3/src/main/java/org/hl7/fhir/dstu3/validation/
+p ~/workspace/fhir/trunk/build/implementations/java/org.hl7.fhir.dstu3/src/org/hl7/fhir/dstu3/utils/FHIRPathEngine.java hapi-fhir-structures-dstu3/src/main/java/org/hl7/fhir/dstu3/utils/
 cp ~/workspace/fhir/trunk/build/implementations/java/org.hl7.fhir.utilities/src/org/hl7/fhir/utilities/xhtml/HierarchicalTableGenerator.java    hapi-fhir-structures-dstu3/src/main/java/org/hl7/fhir/utilities/xhtml/
 cp ~/workspace/fhir/trunk/build/implementations/java/org.hl7.fhir.dstu3/src/org/hl7/fhir/dstu3/terminologies/ValueSetExpanderSimple.java   hapi-fhir-structures-dstu3/src/main/java/org/hl7/fhir/dstu3/terminologies/
 cp ~/workspace/fhir/trunk/build/implementations/java/org.hl7.fhir.dstu3/src/org/hl7/fhir/dstu3/terminologies/ValueSetExpander.java   hapi-fhir-structures-dstu3/src/main/java/org/hl7/fhir/dstu3/terminologies/
@@ -50,4 +37,31 @@ cp /home/james/workspace/fhir/trunk/build/implementations/java/org.hl7.fhir.dstu
 cp /home/james/workspace/fhir/trunk/build/implementations/java/org.hl7.fhir.dstu3/src/org/hl7/fhir/dstu3/utils/formats/XmlLocationData.java   hapi-fhir-structures-dstu3/src/main/java/org/hl7/fhir/dstu3/utils/formats/
 
 cp /home/james/workspace/fhir/trunk/build/implementations/java/org.hl7.fhir.dstu3/src/org/hl7/fhir/dstu3/terminologies/CodeSystemUtilities.java   hapi-fhir-structures-dstu3/src/main/java/org/hl7/fhir/dstu3/terminologies/
-cp /home/james/workspace/fhir/trunk/build/implementations/java/org.hl7.fhir.dstu3/src/org/hl7/fhir/dstu3/validation/ValidationEngine.java   hapi-fhir-structures-dstu3/src/main/java/org/hl7/fhir/dstu3/validation/
+
+
+# Validation
+rm hapi-fhir-validator/src/main/java/org/hl7/fhir/dstu3/validation/*
+cp ~/workspace/fhir/trunk/build/implementations/java/org.hl7.fhir.validation/src/org/hl7/fhir/dstu3/validator/*.java hapi-fhir-structures-dstu3/src/main/java/org/hl7/fhir/dstu3/validation/
+cp ~/workspace/fhir/trunk/build/implementations/java/org.hl7.fhir.utilities/src/org/hl7/fhir/utilities/validation/ValidationMessage.java hapi-fhir-validator/src/main/java/org/hl7/fhir/utilities/validation/
+ cp ~/workspace/fhir/trunk/build/implementations/java/org.hl7.fhir.dstu3/src/org/hl7/fhir/dstu3/utils/IResourceValidator.java hapi-fhir-validator/src/main/java/org/hl7/fhir/dstu3/utils/
+cp ~/workspace/fhir/trunk/build/implementations/java/org.hl7.fhir.dstu3/src/org/hl7/fhir/dstu3/utils/ValidationProfileSet.java  hapi-fhir-validator/src/main/java/org/hl7/fhir/dstu3/utils/
+
+
+
+ 
+# Copy Spreadsheets
+rm hapi-tinder-plugin/src/main/resources/res/dstu3/*.xml; cp ~/workspace/fhir/trunk/build/source/*/*-spreadsheet.xml hapi-tinder-plugin/src/main/resources/res/dstu3/; rm hapi-tinder-plugin/src/main/resources/res/dstu3/*-*-*.xml
+
+# Copy Validation Resources
+cp ~/workspace/fhir/trunk/build/publish/*.sch hapi-fhir-validation-resources-dstu3/src/main/resources/org/hl7/fhir/instance/model/dstu3/schema/
+
+cp ~/workspace/fhir/trunk/build/publish/fhir-single.xsd  hapi-fhir-validation-resources-dstu3/src/main/resources/org/hl7/fhir/instance/model/dstu3/schema/
+cp ~/workspace/fhir/trunk/build/publish/fhir-xhtml.xsd   hapi-fhir-validation-resources-dstu3/src/main/resources/org/hl7/fhir/instance/model/dstu3/schema/
+cp ~/workspace/fhir/trunk/build/publish/xml.xsd   hapi-fhir-validation-resources-dstu3/src/main/resources/org/hl7/fhir/instance/model/dstu3/schema/
+
+cp ~/workspace/fhir/trunk/build/publish/profiles-*.xml hapi-fhir-validation-resources-dstu3/src/main/resources/org/hl7/fhir/instance/model/dstu3/profile/
+cp ~/workspace/fhir/trunk/build/publish/v2-tables.xml  hapi-fhir-validation-resources-dstu3/src/main/resources/org/hl7/fhir/instance/model/dstu3/valueset/
+cp ~/workspace/fhir/trunk/build/publish/v3-codesystems.xml   hapi-fhir-validation-resources-dstu3/src/main/resources/org/hl7/fhir/instance/model/dstu3/valueset/
+cp ~/workspace/fhir/trunk/build/publish/valuesets.xml    hapi-fhir-validation-resources-dstu3/src/main/resources/org/hl7/fhir/instance/model/dstu3/valueset/
+c
+

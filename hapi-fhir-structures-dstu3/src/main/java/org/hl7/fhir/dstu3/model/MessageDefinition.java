@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
 
 import java.util.*;
 
@@ -47,7 +47,7 @@ import org.hl7.fhir.exceptions.FHIRException;
  * Defines the characteristics of a message that can be shared between systems, including the type of event that initiates the message, the content to be transmitted and what response(s), if any, are permitted.
  */
 @ResourceDef(name="MessageDefinition", profile="http://hl7.org/fhir/Profile/MessageDefinition")
-@ChildOrder(names={"url", "version", "name", "title", "status", "experimental", "date", "publisher", "contact", "description", "useContext", "jurisdiction", "purpose", "copyright", "base", "parent", "replaces", "event", "category", "focus", "responseRequired", "allowedResponse"})
+@ChildOrder(names={"url", "identifier", "version", "name", "title", "status", "experimental", "date", "publisher", "contact", "description", "useContext", "jurisdiction", "purpose", "copyright", "base", "parent", "replaces", "event", "category", "focus", "responseRequired", "allowedResponse"})
 public class MessageDefinition extends MetadataResource {
 
     public enum MessageSignificanceCategory {
@@ -129,8 +129,10 @@ public class MessageDefinition extends MetadataResource {
         throw new IllegalArgumentException("Unknown MessageSignificanceCategory code '"+codeString+"'");
         }
         public Enumeration<MessageSignificanceCategory> fromType(Base code) throws FHIRException {
-          if (code == null || code.isEmpty())
+          if (code == null)
             return null;
+          if (code.isEmpty())
+            return new Enumeration<MessageSignificanceCategory>(this);
           String codeString = ((PrimitiveType) code).asStringValue();
           if (codeString == null || "".equals(codeString))
             return null;
@@ -413,47 +415,60 @@ public class MessageDefinition extends MetadataResource {
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case 3059181: // code
           this.code = castToCode(value); // CodeType
-          break;
+          return value;
         case -309425751: // profile
           this.profile = castToReference(value); // Reference
-          break;
+          return value;
         case 108114: // min
           this.min = castToUnsignedInt(value); // UnsignedIntType
-          break;
+          return value;
         case 107876: // max
           this.max = castToString(value); // StringType
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("code"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("code")) {
           this.code = castToCode(value); // CodeType
-        else if (name.equals("profile"))
+        } else if (name.equals("profile")) {
           this.profile = castToReference(value); // Reference
-        else if (name.equals("min"))
+        } else if (name.equals("min")) {
           this.min = castToUnsignedInt(value); // UnsignedIntType
-        else if (name.equals("max"))
+        } else if (name.equals("max")) {
           this.max = castToString(value); // StringType
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 3059181: throw new FHIRException("Cannot make property code as it is not a complex type"); // CodeType
-        case -309425751:  return getProfile(); // Reference
-        case 108114: throw new FHIRException("Cannot make property min as it is not a complex type"); // UnsignedIntType
-        case 107876: throw new FHIRException("Cannot make property max as it is not a complex type"); // StringType
+        case 3059181:  return getCodeElement();
+        case -309425751:  return getProfile(); 
+        case 108114:  return getMinElement();
+        case 107876:  return getMaxElement();
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3059181: /*code*/ return new String[] {"code"};
+        case -309425751: /*profile*/ return new String[] {"Reference"};
+        case 108114: /*min*/ return new String[] {"unsignedInt"};
+        case 107876: /*max*/ return new String[] {"string"};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }
@@ -527,7 +542,7 @@ public class MessageDefinition extends MetadataResource {
          * A reference to the message definition that must be adhered to by this supported response.
          */
         @Child(name = "message", type = {MessageDefinition.class}, order=1, min=1, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="MessageDefinition for response", formalDefinition="A reference to the message definition that must be adhered to by this supported response." )
+        @Description(shortDefinition="Reference to allowed message definition response", formalDefinition="A reference to the message definition that must be adhered to by this supported response." )
         protected Reference message;
 
         /**
@@ -669,35 +684,46 @@ public class MessageDefinition extends MetadataResource {
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case 954925063: // message
           this.message = castToReference(value); // Reference
-          break;
+          return value;
         case -73377282: // situation
           this.situation = castToMarkdown(value); // MarkdownType
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("message"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("message")) {
           this.message = castToReference(value); // Reference
-        else if (name.equals("situation"))
+        } else if (name.equals("situation")) {
           this.situation = castToMarkdown(value); // MarkdownType
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 954925063:  return getMessage(); // Reference
-        case -73377282: throw new FHIRException("Cannot make property situation as it is not a complex type"); // MarkdownType
+        case 954925063:  return getMessage(); 
+        case -73377282:  return getSituationElement();
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 954925063: /*message*/ return new String[] {"Reference"};
+        case -73377282: /*situation*/ return new String[] {"markdown"};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }
@@ -755,23 +781,30 @@ public class MessageDefinition extends MetadataResource {
   }
 
     /**
+     * A formal identifier that is used to identify this message definition when it is represented in other formats, or referenced in a specification, model, design or an instance.
+     */
+    @Child(name = "identifier", type = {Identifier.class}, order=0, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="Additional identifier for the message definition", formalDefinition="A formal identifier that is used to identify this message definition when it is represented in other formats, or referenced in a specification, model, design or an instance." )
+    protected Identifier identifier;
+
+    /**
      * Explains why this message definition is needed and why it has been designed as it has.
      */
-    @Child(name = "purpose", type = {MarkdownType.class}, order=0, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "purpose", type = {MarkdownType.class}, order=1, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Why this message definition is defined", formalDefinition="Explains why this message definition is needed and why it has been designed as it has." )
     protected MarkdownType purpose;
 
     /**
      * A copyright statement relating to the message definition and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the message definition.
      */
-    @Child(name = "copyright", type = {MarkdownType.class}, order=1, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "copyright", type = {MarkdownType.class}, order=2, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Use and/or publishing restrictions", formalDefinition="A copyright statement relating to the message definition and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the message definition." )
     protected MarkdownType copyright;
 
     /**
      * The MessageDefinition this new definition is a profile of.
      */
-    @Child(name = "base", type = {MessageDefinition.class}, order=2, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "base", type = {MessageDefinition.class}, order=3, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Definition this one is based on", formalDefinition="The MessageDefinition this new definition is a profile of." )
     protected Reference base;
 
@@ -783,7 +816,7 @@ public class MessageDefinition extends MetadataResource {
     /**
      * Identifies a protocol or workflow that this MessageDefinition represents a step in.
      */
-    @Child(name = "parent", type = {ActivityDefinition.class, PlanDefinition.class}, order=3, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "parent", type = {ActivityDefinition.class, PlanDefinition.class}, order=4, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Protocol/workflow this is part of", formalDefinition="Identifies a protocol or workflow that this MessageDefinition represents a step in." )
     protected List<Reference> parent;
     /**
@@ -795,7 +828,7 @@ public class MessageDefinition extends MetadataResource {
     /**
      * A MessageDefinition that is superseded by this definition.
      */
-    @Child(name = "replaces", type = {MessageDefinition.class}, order=4, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "replaces", type = {MessageDefinition.class}, order=5, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Takes the place of", formalDefinition="A MessageDefinition that is superseded by this definition." )
     protected List<Reference> replaces;
     /**
@@ -807,7 +840,7 @@ public class MessageDefinition extends MetadataResource {
     /**
      * A coded identifier of a supported messaging event.
      */
-    @Child(name = "event", type = {Coding.class}, order=5, min=1, max=1, modifier=false, summary=true)
+    @Child(name = "event", type = {Coding.class}, order=6, min=1, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Event type", formalDefinition="A coded identifier of a supported messaging event." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/message-events")
     protected Coding event;
@@ -815,7 +848,7 @@ public class MessageDefinition extends MetadataResource {
     /**
      * The impact of the content of the message.
      */
-    @Child(name = "category", type = {CodeType.class}, order=6, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "category", type = {CodeType.class}, order=7, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Consequence | Currency | Notification", formalDefinition="The impact of the content of the message." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/message-significance-category")
     protected Enumeration<MessageSignificanceCategory> category;
@@ -823,25 +856,25 @@ public class MessageDefinition extends MetadataResource {
     /**
      * Identifies the resource (or resources) that are being addressed by the event.  For example, the Encounter for an admit message or two Account records for a merge.
      */
-    @Child(name = "focus", type = {}, order=7, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "focus", type = {}, order=8, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Resource(s) that are the subject of the event", formalDefinition="Identifies the resource (or resources) that are being addressed by the event.  For example, the Encounter for an admit message or two Account records for a merge." )
     protected List<MessageDefinitionFocusComponent> focus;
 
     /**
      * Indicates whether a response is required for this message.
      */
-    @Child(name = "responseRequired", type = {BooleanType.class}, order=8, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "responseRequired", type = {BooleanType.class}, order=9, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Is a response required?", formalDefinition="Indicates whether a response is required for this message." )
     protected BooleanType responseRequired;
 
     /**
      * Indicates what types of messages may be sent as an application-level response to this message.
      */
-    @Child(name = "allowedResponse", type = {}, order=9, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "allowedResponse", type = {}, order=10, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Responses to this message", formalDefinition="Indicates what types of messages may be sent as an application-level response to this message." )
     protected List<MessageDefinitionAllowedResponseComponent> allowedResponse;
 
-    private static final long serialVersionUID = -372176378L;
+    private static final long serialVersionUID = -219916580L;
 
   /**
    * Constructor
@@ -906,6 +939,30 @@ public class MessageDefinition extends MetadataResource {
           this.url = new UriType();
         this.url.setValue(value);
       }
+      return this;
+    }
+
+    /**
+     * @return {@link #identifier} (A formal identifier that is used to identify this message definition when it is represented in other formats, or referenced in a specification, model, design or an instance.)
+     */
+    public Identifier getIdentifier() { 
+      if (this.identifier == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create MessageDefinition.identifier");
+        else if (Configuration.doAutoCreate())
+          this.identifier = new Identifier(); // cc
+      return this.identifier;
+    }
+
+    public boolean hasIdentifier() { 
+      return this.identifier != null && !this.identifier.isEmpty();
+    }
+
+    /**
+     * @param value {@link #identifier} (A formal identifier that is used to identify this message definition when it is represented in other formats, or referenced in a specification, model, design or an instance.)
+     */
+    public MessageDefinition setIdentifier(Identifier value) { 
+      this.identifier = value;
       return this;
     }
 
@@ -1955,6 +2012,7 @@ public class MessageDefinition extends MetadataResource {
       protected void listChildren(List<Property> childrenList) {
         super.listChildren(childrenList);
         childrenList.add(new Property("url", "uri", "An absolute URL that is used to identify this message definition when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this message definition is (or will be) published. The URL SHOULD include the major version of the message definition. For more information see [Technical and Business Versions](resource.html#versions).", 0, java.lang.Integer.MAX_VALUE, url));
+        childrenList.add(new Property("identifier", "Identifier", "A formal identifier that is used to identify this message definition when it is represented in other formats, or referenced in a specification, model, design or an instance.", 0, java.lang.Integer.MAX_VALUE, identifier));
         childrenList.add(new Property("version", "string", "The identifier that is used to identify this version of the message definition when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the message definition author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions are orderable.", 0, java.lang.Integer.MAX_VALUE, version));
         childrenList.add(new Property("name", "string", "A natural language name identifying the message definition. This name should be usable as an identifier for the module by machine processing applications such as code generation.", 0, java.lang.Integer.MAX_VALUE, name));
         childrenList.add(new Property("title", "string", "A short, descriptive, user-friendly title for the message definition.", 0, java.lang.Integer.MAX_VALUE, title));
@@ -1982,6 +2040,7 @@ public class MessageDefinition extends MetadataResource {
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
         case 116079: /*url*/ return this.url == null ? new Base[0] : new Base[] {this.url}; // UriType
+        case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : new Base[] {this.identifier}; // Identifier
         case 351608024: /*version*/ return this.version == null ? new Base[0] : new Base[] {this.version}; // StringType
         case 3373707: /*name*/ return this.name == null ? new Base[0] : new Base[] {this.name}; // StringType
         case 110371416: /*title*/ return this.title == null ? new Base[0] : new Base[] {this.title}; // StringType
@@ -2009,155 +2068,197 @@ public class MessageDefinition extends MetadataResource {
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case 116079: // url
           this.url = castToUri(value); // UriType
-          break;
+          return value;
+        case -1618432855: // identifier
+          this.identifier = castToIdentifier(value); // Identifier
+          return value;
         case 351608024: // version
           this.version = castToString(value); // StringType
-          break;
+          return value;
         case 3373707: // name
           this.name = castToString(value); // StringType
-          break;
+          return value;
         case 110371416: // title
           this.title = castToString(value); // StringType
-          break;
+          return value;
         case -892481550: // status
-          this.status = new PublicationStatusEnumFactory().fromType(value); // Enumeration<PublicationStatus>
-          break;
+          value = new PublicationStatusEnumFactory().fromType(castToCode(value));
+          this.status = (Enumeration) value; // Enumeration<PublicationStatus>
+          return value;
         case -404562712: // experimental
           this.experimental = castToBoolean(value); // BooleanType
-          break;
+          return value;
         case 3076014: // date
           this.date = castToDateTime(value); // DateTimeType
-          break;
+          return value;
         case 1447404028: // publisher
           this.publisher = castToString(value); // StringType
-          break;
+          return value;
         case 951526432: // contact
           this.getContact().add(castToContactDetail(value)); // ContactDetail
-          break;
+          return value;
         case -1724546052: // description
           this.description = castToMarkdown(value); // MarkdownType
-          break;
+          return value;
         case -669707736: // useContext
           this.getUseContext().add(castToUsageContext(value)); // UsageContext
-          break;
+          return value;
         case -507075711: // jurisdiction
           this.getJurisdiction().add(castToCodeableConcept(value)); // CodeableConcept
-          break;
+          return value;
         case -220463842: // purpose
           this.purpose = castToMarkdown(value); // MarkdownType
-          break;
+          return value;
         case 1522889671: // copyright
           this.copyright = castToMarkdown(value); // MarkdownType
-          break;
+          return value;
         case 3016401: // base
           this.base = castToReference(value); // Reference
-          break;
+          return value;
         case -995424086: // parent
           this.getParent().add(castToReference(value)); // Reference
-          break;
+          return value;
         case -430332865: // replaces
           this.getReplaces().add(castToReference(value)); // Reference
-          break;
+          return value;
         case 96891546: // event
           this.event = castToCoding(value); // Coding
-          break;
+          return value;
         case 50511102: // category
-          this.category = new MessageSignificanceCategoryEnumFactory().fromType(value); // Enumeration<MessageSignificanceCategory>
-          break;
+          value = new MessageSignificanceCategoryEnumFactory().fromType(castToCode(value));
+          this.category = (Enumeration) value; // Enumeration<MessageSignificanceCategory>
+          return value;
         case 97604824: // focus
           this.getFocus().add((MessageDefinitionFocusComponent) value); // MessageDefinitionFocusComponent
-          break;
+          return value;
         case 791597824: // responseRequired
           this.responseRequired = castToBoolean(value); // BooleanType
-          break;
+          return value;
         case -1130933751: // allowedResponse
           this.getAllowedResponse().add((MessageDefinitionAllowedResponseComponent) value); // MessageDefinitionAllowedResponseComponent
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("url"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("url")) {
           this.url = castToUri(value); // UriType
-        else if (name.equals("version"))
+        } else if (name.equals("identifier")) {
+          this.identifier = castToIdentifier(value); // Identifier
+        } else if (name.equals("version")) {
           this.version = castToString(value); // StringType
-        else if (name.equals("name"))
+        } else if (name.equals("name")) {
           this.name = castToString(value); // StringType
-        else if (name.equals("title"))
+        } else if (name.equals("title")) {
           this.title = castToString(value); // StringType
-        else if (name.equals("status"))
-          this.status = new PublicationStatusEnumFactory().fromType(value); // Enumeration<PublicationStatus>
-        else if (name.equals("experimental"))
+        } else if (name.equals("status")) {
+          value = new PublicationStatusEnumFactory().fromType(castToCode(value));
+          this.status = (Enumeration) value; // Enumeration<PublicationStatus>
+        } else if (name.equals("experimental")) {
           this.experimental = castToBoolean(value); // BooleanType
-        else if (name.equals("date"))
+        } else if (name.equals("date")) {
           this.date = castToDateTime(value); // DateTimeType
-        else if (name.equals("publisher"))
+        } else if (name.equals("publisher")) {
           this.publisher = castToString(value); // StringType
-        else if (name.equals("contact"))
+        } else if (name.equals("contact")) {
           this.getContact().add(castToContactDetail(value));
-        else if (name.equals("description"))
+        } else if (name.equals("description")) {
           this.description = castToMarkdown(value); // MarkdownType
-        else if (name.equals("useContext"))
+        } else if (name.equals("useContext")) {
           this.getUseContext().add(castToUsageContext(value));
-        else if (name.equals("jurisdiction"))
+        } else if (name.equals("jurisdiction")) {
           this.getJurisdiction().add(castToCodeableConcept(value));
-        else if (name.equals("purpose"))
+        } else if (name.equals("purpose")) {
           this.purpose = castToMarkdown(value); // MarkdownType
-        else if (name.equals("copyright"))
+        } else if (name.equals("copyright")) {
           this.copyright = castToMarkdown(value); // MarkdownType
-        else if (name.equals("base"))
+        } else if (name.equals("base")) {
           this.base = castToReference(value); // Reference
-        else if (name.equals("parent"))
+        } else if (name.equals("parent")) {
           this.getParent().add(castToReference(value));
-        else if (name.equals("replaces"))
+        } else if (name.equals("replaces")) {
           this.getReplaces().add(castToReference(value));
-        else if (name.equals("event"))
+        } else if (name.equals("event")) {
           this.event = castToCoding(value); // Coding
-        else if (name.equals("category"))
-          this.category = new MessageSignificanceCategoryEnumFactory().fromType(value); // Enumeration<MessageSignificanceCategory>
-        else if (name.equals("focus"))
+        } else if (name.equals("category")) {
+          value = new MessageSignificanceCategoryEnumFactory().fromType(castToCode(value));
+          this.category = (Enumeration) value; // Enumeration<MessageSignificanceCategory>
+        } else if (name.equals("focus")) {
           this.getFocus().add((MessageDefinitionFocusComponent) value);
-        else if (name.equals("responseRequired"))
+        } else if (name.equals("responseRequired")) {
           this.responseRequired = castToBoolean(value); // BooleanType
-        else if (name.equals("allowedResponse"))
+        } else if (name.equals("allowedResponse")) {
           this.getAllowedResponse().add((MessageDefinitionAllowedResponseComponent) value);
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 116079: throw new FHIRException("Cannot make property url as it is not a complex type"); // UriType
-        case 351608024: throw new FHIRException("Cannot make property version as it is not a complex type"); // StringType
-        case 3373707: throw new FHIRException("Cannot make property name as it is not a complex type"); // StringType
-        case 110371416: throw new FHIRException("Cannot make property title as it is not a complex type"); // StringType
-        case -892481550: throw new FHIRException("Cannot make property status as it is not a complex type"); // Enumeration<PublicationStatus>
-        case -404562712: throw new FHIRException("Cannot make property experimental as it is not a complex type"); // BooleanType
-        case 3076014: throw new FHIRException("Cannot make property date as it is not a complex type"); // DateTimeType
-        case 1447404028: throw new FHIRException("Cannot make property publisher as it is not a complex type"); // StringType
-        case 951526432:  return addContact(); // ContactDetail
-        case -1724546052: throw new FHIRException("Cannot make property description as it is not a complex type"); // MarkdownType
-        case -669707736:  return addUseContext(); // UsageContext
-        case -507075711:  return addJurisdiction(); // CodeableConcept
-        case -220463842: throw new FHIRException("Cannot make property purpose as it is not a complex type"); // MarkdownType
-        case 1522889671: throw new FHIRException("Cannot make property copyright as it is not a complex type"); // MarkdownType
-        case 3016401:  return getBase(); // Reference
-        case -995424086:  return addParent(); // Reference
-        case -430332865:  return addReplaces(); // Reference
-        case 96891546:  return getEvent(); // Coding
-        case 50511102: throw new FHIRException("Cannot make property category as it is not a complex type"); // Enumeration<MessageSignificanceCategory>
-        case 97604824:  return addFocus(); // MessageDefinitionFocusComponent
-        case 791597824: throw new FHIRException("Cannot make property responseRequired as it is not a complex type"); // BooleanType
-        case -1130933751:  return addAllowedResponse(); // MessageDefinitionAllowedResponseComponent
+        case 116079:  return getUrlElement();
+        case -1618432855:  return getIdentifier(); 
+        case 351608024:  return getVersionElement();
+        case 3373707:  return getNameElement();
+        case 110371416:  return getTitleElement();
+        case -892481550:  return getStatusElement();
+        case -404562712:  return getExperimentalElement();
+        case 3076014:  return getDateElement();
+        case 1447404028:  return getPublisherElement();
+        case 951526432:  return addContact(); 
+        case -1724546052:  return getDescriptionElement();
+        case -669707736:  return addUseContext(); 
+        case -507075711:  return addJurisdiction(); 
+        case -220463842:  return getPurposeElement();
+        case 1522889671:  return getCopyrightElement();
+        case 3016401:  return getBase(); 
+        case -995424086:  return addParent(); 
+        case -430332865:  return addReplaces(); 
+        case 96891546:  return getEvent(); 
+        case 50511102:  return getCategoryElement();
+        case 97604824:  return addFocus(); 
+        case 791597824:  return getResponseRequiredElement();
+        case -1130933751:  return addAllowedResponse(); 
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 116079: /*url*/ return new String[] {"uri"};
+        case -1618432855: /*identifier*/ return new String[] {"Identifier"};
+        case 351608024: /*version*/ return new String[] {"string"};
+        case 3373707: /*name*/ return new String[] {"string"};
+        case 110371416: /*title*/ return new String[] {"string"};
+        case -892481550: /*status*/ return new String[] {"code"};
+        case -404562712: /*experimental*/ return new String[] {"boolean"};
+        case 3076014: /*date*/ return new String[] {"dateTime"};
+        case 1447404028: /*publisher*/ return new String[] {"string"};
+        case 951526432: /*contact*/ return new String[] {"ContactDetail"};
+        case -1724546052: /*description*/ return new String[] {"markdown"};
+        case -669707736: /*useContext*/ return new String[] {"UsageContext"};
+        case -507075711: /*jurisdiction*/ return new String[] {"CodeableConcept"};
+        case -220463842: /*purpose*/ return new String[] {"markdown"};
+        case 1522889671: /*copyright*/ return new String[] {"markdown"};
+        case 3016401: /*base*/ return new String[] {"Reference"};
+        case -995424086: /*parent*/ return new String[] {"Reference"};
+        case -430332865: /*replaces*/ return new String[] {"Reference"};
+        case 96891546: /*event*/ return new String[] {"Coding"};
+        case 50511102: /*category*/ return new String[] {"code"};
+        case 97604824: /*focus*/ return new String[] {};
+        case 791597824: /*responseRequired*/ return new String[] {"boolean"};
+        case -1130933751: /*allowedResponse*/ return new String[] {};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }
@@ -2166,6 +2267,10 @@ public class MessageDefinition extends MetadataResource {
       public Base addChild(String name) throws FHIRException {
         if (name.equals("url")) {
           throw new FHIRException("Cannot call addChild on a primitive type MessageDefinition.url");
+        }
+        else if (name.equals("identifier")) {
+          this.identifier = new Identifier();
+          return this.identifier;
         }
         else if (name.equals("version")) {
           throw new FHIRException("Cannot call addChild on a primitive type MessageDefinition.version");
@@ -2245,6 +2350,7 @@ public class MessageDefinition extends MetadataResource {
         MessageDefinition dst = new MessageDefinition();
         copyValues(dst);
         dst.url = url == null ? null : url.copy();
+        dst.identifier = identifier == null ? null : identifier.copy();
         dst.version = version == null ? null : version.copy();
         dst.name = name == null ? null : name.copy();
         dst.title = title == null ? null : title.copy();
@@ -2308,10 +2414,11 @@ public class MessageDefinition extends MetadataResource {
         if (!(other instanceof MessageDefinition))
           return false;
         MessageDefinition o = (MessageDefinition) other;
-        return compareDeep(purpose, o.purpose, true) && compareDeep(copyright, o.copyright, true) && compareDeep(base, o.base, true)
-           && compareDeep(parent, o.parent, true) && compareDeep(replaces, o.replaces, true) && compareDeep(event, o.event, true)
-           && compareDeep(category, o.category, true) && compareDeep(focus, o.focus, true) && compareDeep(responseRequired, o.responseRequired, true)
-           && compareDeep(allowedResponse, o.allowedResponse, true);
+        return compareDeep(identifier, o.identifier, true) && compareDeep(purpose, o.purpose, true) && compareDeep(copyright, o.copyright, true)
+           && compareDeep(base, o.base, true) && compareDeep(parent, o.parent, true) && compareDeep(replaces, o.replaces, true)
+           && compareDeep(event, o.event, true) && compareDeep(category, o.category, true) && compareDeep(focus, o.focus, true)
+           && compareDeep(responseRequired, o.responseRequired, true) && compareDeep(allowedResponse, o.allowedResponse, true)
+          ;
       }
 
       @Override
@@ -2326,8 +2433,8 @@ public class MessageDefinition extends MetadataResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(purpose, copyright, base
-          , parent, replaces, event, category, focus, responseRequired, allowedResponse
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, purpose, copyright
+          , base, parent, replaces, event, category, focus, responseRequired, allowedResponse
           );
       }
 
@@ -2357,6 +2464,26 @@ public class MessageDefinition extends MetadataResource {
   public static final ca.uhn.fhir.rest.gclient.DateClientParam DATE = new ca.uhn.fhir.rest.gclient.DateClientParam(SP_DATE);
 
  /**
+   * Search parameter: <b>identifier</b>
+   * <p>
+   * Description: <b>External identifiers for the message definition</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>MessageDefinition.identifier</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="identifier", path="MessageDefinition.identifier", description="External identifiers for the message definition", type="token" )
+  public static final String SP_IDENTIFIER = "identifier";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
+   * <p>
+   * Description: <b>External identifiers for the message definition</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>MessageDefinition.identifier</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam IDENTIFIER = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_IDENTIFIER);
+
+ /**
    * Search parameter: <b>jurisdiction</b>
    * <p>
    * Description: <b>Intended jurisdiction for message definition</b><br>
@@ -2377,26 +2504,6 @@ public class MessageDefinition extends MetadataResource {
   public static final ca.uhn.fhir.rest.gclient.TokenClientParam JURISDICTION = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_JURISDICTION);
 
  /**
-   * Search parameter: <b>name</b>
-   * <p>
-   * Description: <b>Name of the message definition</b><br>
-   * Type: <b>string</b><br>
-   * Path: <b>MessageDefinition.name</b><br>
-   * </p>
-   */
-  @SearchParamDefinition(name="name", path="MessageDefinition.name", description="Name of the message definition", type="string" )
-  public static final String SP_NAME = "name";
- /**
-   * <b>Fluent Client</b> search parameter constant for <b>name</b>
-   * <p>
-   * Description: <b>Name of the message definition</b><br>
-   * Type: <b>string</b><br>
-   * Path: <b>MessageDefinition.name</b><br>
-   * </p>
-   */
-  public static final ca.uhn.fhir.rest.gclient.StringClientParam NAME = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_NAME);
-
- /**
    * Search parameter: <b>description</b>
    * <p>
    * Description: <b>Text search against the description of the message definition</b><br>
@@ -2415,26 +2522,6 @@ public class MessageDefinition extends MetadataResource {
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.StringClientParam DESCRIPTION = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_DESCRIPTION);
-
- /**
-   * Search parameter: <b>publisher</b>
-   * <p>
-   * Description: <b>Name of the publisher of the message definition</b><br>
-   * Type: <b>string</b><br>
-   * Path: <b>MessageDefinition.publisher</b><br>
-   * </p>
-   */
-  @SearchParamDefinition(name="publisher", path="MessageDefinition.publisher", description="Name of the publisher of the message definition", type="string" )
-  public static final String SP_PUBLISHER = "publisher";
- /**
-   * <b>Fluent Client</b> search parameter constant for <b>publisher</b>
-   * <p>
-   * Description: <b>Name of the publisher of the message definition</b><br>
-   * Type: <b>string</b><br>
-   * Path: <b>MessageDefinition.publisher</b><br>
-   * </p>
-   */
-  public static final ca.uhn.fhir.rest.gclient.StringClientParam PUBLISHER = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_PUBLISHER);
 
  /**
    * Search parameter: <b>focus</b>
@@ -2477,6 +2564,86 @@ public class MessageDefinition extends MetadataResource {
   public static final ca.uhn.fhir.rest.gclient.StringClientParam TITLE = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_TITLE);
 
  /**
+   * Search parameter: <b>version</b>
+   * <p>
+   * Description: <b>The business version of the message definition</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>MessageDefinition.version</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="version", path="MessageDefinition.version", description="The business version of the message definition", type="token" )
+  public static final String SP_VERSION = "version";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>version</b>
+   * <p>
+   * Description: <b>The business version of the message definition</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>MessageDefinition.version</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam VERSION = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_VERSION);
+
+ /**
+   * Search parameter: <b>url</b>
+   * <p>
+   * Description: <b>The uri that identifies the message definition</b><br>
+   * Type: <b>uri</b><br>
+   * Path: <b>MessageDefinition.url</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="url", path="MessageDefinition.url", description="The uri that identifies the message definition", type="uri" )
+  public static final String SP_URL = "url";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>url</b>
+   * <p>
+   * Description: <b>The uri that identifies the message definition</b><br>
+   * Type: <b>uri</b><br>
+   * Path: <b>MessageDefinition.url</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.UriClientParam URL = new ca.uhn.fhir.rest.gclient.UriClientParam(SP_URL);
+
+ /**
+   * Search parameter: <b>name</b>
+   * <p>
+   * Description: <b>Name of the message definition</b><br>
+   * Type: <b>string</b><br>
+   * Path: <b>MessageDefinition.name</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="name", path="MessageDefinition.name", description="Name of the message definition", type="string" )
+  public static final String SP_NAME = "name";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>name</b>
+   * <p>
+   * Description: <b>Name of the message definition</b><br>
+   * Type: <b>string</b><br>
+   * Path: <b>MessageDefinition.name</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.StringClientParam NAME = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_NAME);
+
+ /**
+   * Search parameter: <b>publisher</b>
+   * <p>
+   * Description: <b>Name of the publisher of the message definition</b><br>
+   * Type: <b>string</b><br>
+   * Path: <b>MessageDefinition.publisher</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="publisher", path="MessageDefinition.publisher", description="Name of the publisher of the message definition", type="string" )
+  public static final String SP_PUBLISHER = "publisher";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>publisher</b>
+   * <p>
+   * Description: <b>Name of the publisher of the message definition</b><br>
+   * Type: <b>string</b><br>
+   * Path: <b>MessageDefinition.publisher</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.StringClientParam PUBLISHER = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_PUBLISHER);
+
+ /**
    * Search parameter: <b>event</b>
    * <p>
    * Description: <b>The event that triggers the message</b><br>
@@ -2515,46 +2682,6 @@ public class MessageDefinition extends MetadataResource {
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.TokenClientParam CATEGORY = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_CATEGORY);
-
- /**
-   * Search parameter: <b>version</b>
-   * <p>
-   * Description: <b>The version identifier of the message definition</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>MessageDefinition.version</b><br>
-   * </p>
-   */
-  @SearchParamDefinition(name="version", path="MessageDefinition.version", description="The version identifier of the message definition", type="token" )
-  public static final String SP_VERSION = "version";
- /**
-   * <b>Fluent Client</b> search parameter constant for <b>version</b>
-   * <p>
-   * Description: <b>The version identifier of the message definition</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>MessageDefinition.version</b><br>
-   * </p>
-   */
-  public static final ca.uhn.fhir.rest.gclient.TokenClientParam VERSION = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_VERSION);
-
- /**
-   * Search parameter: <b>url</b>
-   * <p>
-   * Description: <b>The uri that identifies the message definition</b><br>
-   * Type: <b>uri</b><br>
-   * Path: <b>MessageDefinition.url</b><br>
-   * </p>
-   */
-  @SearchParamDefinition(name="url", path="MessageDefinition.url", description="The uri that identifies the message definition", type="uri" )
-  public static final String SP_URL = "url";
- /**
-   * <b>Fluent Client</b> search parameter constant for <b>url</b>
-   * <p>
-   * Description: <b>The uri that identifies the message definition</b><br>
-   * Type: <b>uri</b><br>
-   * Path: <b>MessageDefinition.url</b><br>
-   * </p>
-   */
-  public static final ca.uhn.fhir.rest.gclient.UriClientParam URL = new ca.uhn.fhir.rest.gclient.UriClientParam(SP_URL);
 
  /**
    * Search parameter: <b>status</b>

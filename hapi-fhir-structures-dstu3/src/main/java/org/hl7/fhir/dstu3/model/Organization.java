@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
 
 import java.util.*;
 
@@ -234,47 +234,60 @@ public class Organization extends DomainResource {
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case -220463842: // purpose
           this.purpose = castToCodeableConcept(value); // CodeableConcept
-          break;
+          return value;
         case 3373707: // name
           this.name = castToHumanName(value); // HumanName
-          break;
+          return value;
         case -1429363305: // telecom
           this.getTelecom().add(castToContactPoint(value)); // ContactPoint
-          break;
+          return value;
         case -1147692044: // address
           this.address = castToAddress(value); // Address
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("purpose"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("purpose")) {
           this.purpose = castToCodeableConcept(value); // CodeableConcept
-        else if (name.equals("name"))
+        } else if (name.equals("name")) {
           this.name = castToHumanName(value); // HumanName
-        else if (name.equals("telecom"))
+        } else if (name.equals("telecom")) {
           this.getTelecom().add(castToContactPoint(value));
-        else if (name.equals("address"))
+        } else if (name.equals("address")) {
           this.address = castToAddress(value); // Address
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case -220463842:  return getPurpose(); // CodeableConcept
-        case 3373707:  return getName(); // HumanName
-        case -1429363305:  return addTelecom(); // ContactPoint
-        case -1147692044:  return getAddress(); // Address
+        case -220463842:  return getPurpose(); 
+        case 3373707:  return getName(); 
+        case -1429363305:  return addTelecom(); 
+        case -1147692044:  return getAddress(); 
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -220463842: /*purpose*/ return new String[] {"CodeableConcept"};
+        case 3373707: /*name*/ return new String[] {"HumanName"};
+        case -1429363305: /*telecom*/ return new String[] {"ContactPoint"};
+        case -1147692044: /*address*/ return new String[] {"Address"};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }
@@ -362,12 +375,12 @@ public class Organization extends DomainResource {
     protected BooleanType active;
 
     /**
-     * The kind of organization that this is.
+     * The kind(s) of organization that this is.
      */
-    @Child(name = "type", type = {CodeableConcept.class}, order=2, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Kind of organization", formalDefinition="The kind of organization that this is." )
+    @Child(name = "type", type = {CodeableConcept.class}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Description(shortDefinition="Kind of organization", formalDefinition="The kind(s) of organization that this is." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/organization-type")
-    protected CodeableConcept type;
+    protected List<CodeableConcept> type;
 
     /**
      * A name associated with the organization.
@@ -428,7 +441,7 @@ public class Organization extends DomainResource {
     protected List<Endpoint> endpointTarget;
 
 
-    private static final long serialVersionUID = 1607359371L;
+    private static final long serialVersionUID = -2113244111L;
 
   /**
    * Constructor
@@ -536,27 +549,56 @@ public class Organization extends DomainResource {
     }
 
     /**
-     * @return {@link #type} (The kind of organization that this is.)
+     * @return {@link #type} (The kind(s) of organization that this is.)
      */
-    public CodeableConcept getType() { 
+    public List<CodeableConcept> getType() { 
       if (this.type == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create Organization.type");
-        else if (Configuration.doAutoCreate())
-          this.type = new CodeableConcept(); // cc
+        this.type = new ArrayList<CodeableConcept>();
       return this.type;
     }
 
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public Organization setType(List<CodeableConcept> theType) { 
+      this.type = theType;
+      return this;
+    }
+
     public boolean hasType() { 
-      return this.type != null && !this.type.isEmpty();
+      if (this.type == null)
+        return false;
+      for (CodeableConcept item : this.type)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    public CodeableConcept addType() { //3
+      CodeableConcept t = new CodeableConcept();
+      if (this.type == null)
+        this.type = new ArrayList<CodeableConcept>();
+      this.type.add(t);
+      return t;
+    }
+
+    public Organization addType(CodeableConcept t) { //3
+      if (t == null)
+        return this;
+      if (this.type == null)
+        this.type = new ArrayList<CodeableConcept>();
+      this.type.add(t);
+      return this;
     }
 
     /**
-     * @param value {@link #type} (The kind of organization that this is.)
+     * @return The first repetition of repeating field {@link #type}, creating it if it does not already exist
      */
-    public Organization setType(CodeableConcept value) { 
-      this.type = value;
-      return this;
+    public CodeableConcept getTypeFirstRep() { 
+      if (getType().isEmpty()) {
+        addType();
+      }
+      return getType().get(0);
     }
 
     /**
@@ -951,7 +993,7 @@ public class Organization extends DomainResource {
         super.listChildren(childrenList);
         childrenList.add(new Property("identifier", "Identifier", "Identifier for the organization that is used to identify the organization across multiple disparate systems.", 0, java.lang.Integer.MAX_VALUE, identifier));
         childrenList.add(new Property("active", "boolean", "Whether the organization's record is still in active use.", 0, java.lang.Integer.MAX_VALUE, active));
-        childrenList.add(new Property("type", "CodeableConcept", "The kind of organization that this is.", 0, java.lang.Integer.MAX_VALUE, type));
+        childrenList.add(new Property("type", "CodeableConcept", "The kind(s) of organization that this is.", 0, java.lang.Integer.MAX_VALUE, type));
         childrenList.add(new Property("name", "string", "A name associated with the organization.", 0, java.lang.Integer.MAX_VALUE, name));
         childrenList.add(new Property("alias", "string", "A list of alternate names that the organization is known as, or was known as in the past.", 0, java.lang.Integer.MAX_VALUE, alias));
         childrenList.add(new Property("telecom", "ContactPoint", "A contact detail for the organization.", 0, java.lang.Integer.MAX_VALUE, telecom));
@@ -966,7 +1008,7 @@ public class Organization extends DomainResource {
         switch (hash) {
         case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : this.identifier.toArray(new Base[this.identifier.size()]); // Identifier
         case -1422950650: /*active*/ return this.active == null ? new Base[0] : new Base[] {this.active}; // BooleanType
-        case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // CodeableConcept
+        case 3575610: /*type*/ return this.type == null ? new Base[0] : this.type.toArray(new Base[this.type.size()]); // CodeableConcept
         case 3373707: /*name*/ return this.name == null ? new Base[0] : new Base[] {this.name}; // StringType
         case 92902992: /*alias*/ return this.alias == null ? new Base[0] : this.alias.toArray(new Base[this.alias.size()]); // StringType
         case -1429363305: /*telecom*/ return this.telecom == null ? new Base[0] : this.telecom.toArray(new Base[this.telecom.size()]); // ContactPoint
@@ -980,83 +1022,102 @@ public class Organization extends DomainResource {
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case -1618432855: // identifier
           this.getIdentifier().add(castToIdentifier(value)); // Identifier
-          break;
+          return value;
         case -1422950650: // active
           this.active = castToBoolean(value); // BooleanType
-          break;
+          return value;
         case 3575610: // type
-          this.type = castToCodeableConcept(value); // CodeableConcept
-          break;
+          this.getType().add(castToCodeableConcept(value)); // CodeableConcept
+          return value;
         case 3373707: // name
           this.name = castToString(value); // StringType
-          break;
+          return value;
         case 92902992: // alias
           this.getAlias().add(castToString(value)); // StringType
-          break;
+          return value;
         case -1429363305: // telecom
           this.getTelecom().add(castToContactPoint(value)); // ContactPoint
-          break;
+          return value;
         case -1147692044: // address
           this.getAddress().add(castToAddress(value)); // Address
-          break;
+          return value;
         case -995410646: // partOf
           this.partOf = castToReference(value); // Reference
-          break;
+          return value;
         case 951526432: // contact
           this.getContact().add((OrganizationContactComponent) value); // OrganizationContactComponent
-          break;
+          return value;
         case 1741102485: // endpoint
           this.getEndpoint().add(castToReference(value)); // Reference
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("identifier"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("identifier")) {
           this.getIdentifier().add(castToIdentifier(value));
-        else if (name.equals("active"))
+        } else if (name.equals("active")) {
           this.active = castToBoolean(value); // BooleanType
-        else if (name.equals("type"))
-          this.type = castToCodeableConcept(value); // CodeableConcept
-        else if (name.equals("name"))
+        } else if (name.equals("type")) {
+          this.getType().add(castToCodeableConcept(value));
+        } else if (name.equals("name")) {
           this.name = castToString(value); // StringType
-        else if (name.equals("alias"))
+        } else if (name.equals("alias")) {
           this.getAlias().add(castToString(value));
-        else if (name.equals("telecom"))
+        } else if (name.equals("telecom")) {
           this.getTelecom().add(castToContactPoint(value));
-        else if (name.equals("address"))
+        } else if (name.equals("address")) {
           this.getAddress().add(castToAddress(value));
-        else if (name.equals("partOf"))
+        } else if (name.equals("partOf")) {
           this.partOf = castToReference(value); // Reference
-        else if (name.equals("contact"))
+        } else if (name.equals("contact")) {
           this.getContact().add((OrganizationContactComponent) value);
-        else if (name.equals("endpoint"))
+        } else if (name.equals("endpoint")) {
           this.getEndpoint().add(castToReference(value));
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case -1618432855:  return addIdentifier(); // Identifier
-        case -1422950650: throw new FHIRException("Cannot make property active as it is not a complex type"); // BooleanType
-        case 3575610:  return getType(); // CodeableConcept
-        case 3373707: throw new FHIRException("Cannot make property name as it is not a complex type"); // StringType
-        case 92902992: throw new FHIRException("Cannot make property alias as it is not a complex type"); // StringType
-        case -1429363305:  return addTelecom(); // ContactPoint
-        case -1147692044:  return addAddress(); // Address
-        case -995410646:  return getPartOf(); // Reference
-        case 951526432:  return addContact(); // OrganizationContactComponent
-        case 1741102485:  return addEndpoint(); // Reference
+        case -1618432855:  return addIdentifier(); 
+        case -1422950650:  return getActiveElement();
+        case 3575610:  return addType(); 
+        case 3373707:  return getNameElement();
+        case 92902992:  return addAliasElement();
+        case -1429363305:  return addTelecom(); 
+        case -1147692044:  return addAddress(); 
+        case -995410646:  return getPartOf(); 
+        case 951526432:  return addContact(); 
+        case 1741102485:  return addEndpoint(); 
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -1618432855: /*identifier*/ return new String[] {"Identifier"};
+        case -1422950650: /*active*/ return new String[] {"boolean"};
+        case 3575610: /*type*/ return new String[] {"CodeableConcept"};
+        case 3373707: /*name*/ return new String[] {"string"};
+        case 92902992: /*alias*/ return new String[] {"string"};
+        case -1429363305: /*telecom*/ return new String[] {"ContactPoint"};
+        case -1147692044: /*address*/ return new String[] {"Address"};
+        case -995410646: /*partOf*/ return new String[] {"Reference"};
+        case 951526432: /*contact*/ return new String[] {};
+        case 1741102485: /*endpoint*/ return new String[] {"Reference"};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }
@@ -1070,8 +1131,7 @@ public class Organization extends DomainResource {
           throw new FHIRException("Cannot call addChild on a primitive type Organization.active");
         }
         else if (name.equals("type")) {
-          this.type = new CodeableConcept();
-          return this.type;
+          return addType();
         }
         else if (name.equals("name")) {
           throw new FHIRException("Cannot call addChild on a primitive type Organization.name");
@@ -1113,7 +1173,11 @@ public class Organization extends DomainResource {
             dst.identifier.add(i.copy());
         };
         dst.active = active == null ? null : active.copy();
-        dst.type = type == null ? null : type.copy();
+        if (type != null) {
+          dst.type = new ArrayList<CodeableConcept>();
+          for (CodeableConcept i : type)
+            dst.type.add(i.copy());
+        };
         dst.name = name == null ? null : name.copy();
         if (alias != null) {
           dst.alias = new ArrayList<StringType>();
@@ -1205,17 +1269,17 @@ public class Organization extends DomainResource {
  /**
    * Search parameter: <b>partof</b>
    * <p>
-   * Description: <b>Search all organizations that are part of the given organization</b><br>
+   * Description: <b>An organization of which this organization forms a part</b><br>
    * Type: <b>reference</b><br>
    * Path: <b>Organization.partOf</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="partof", path="Organization.partOf", description="Search all organizations that are part of the given organization", type="reference", target={Organization.class } )
+  @SearchParamDefinition(name="partof", path="Organization.partOf", description="An organization of which this organization forms a part", type="reference", target={Organization.class } )
   public static final String SP_PARTOF = "partof";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>partof</b>
    * <p>
-   * Description: <b>Search all organizations that are part of the given organization</b><br>
+   * Description: <b>An organization of which this organization forms a part</b><br>
    * Type: <b>reference</b><br>
    * Path: <b>Organization.partOf</b><br>
    * </p>
@@ -1231,17 +1295,17 @@ public class Organization extends DomainResource {
  /**
    * Search parameter: <b>address</b>
    * <p>
-   * Description: <b>A (part of the) address of the Organization</b><br>
+   * Description: <b>A (part of the) address of the organization</b><br>
    * Type: <b>string</b><br>
    * Path: <b>Organization.address</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="address", path="Organization.address", description="A (part of the) address of the Organization", type="string" )
+  @SearchParamDefinition(name="address", path="Organization.address", description="A (part of the) address of the organization", type="string" )
   public static final String SP_ADDRESS = "address";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>address</b>
    * <p>
-   * Description: <b>A (part of the) address of the Organization</b><br>
+   * Description: <b>A (part of the) address of the organization</b><br>
    * Type: <b>string</b><br>
    * Path: <b>Organization.address</b><br>
    * </p>
@@ -1397,17 +1461,17 @@ public class Organization extends DomainResource {
  /**
    * Search parameter: <b>name</b>
    * <p>
-   * Description: <b>A portion of the organization's name, or alias</b><br>
+   * Description: <b>A portion of the organization's name or alias</b><br>
    * Type: <b>string</b><br>
    * Path: <b>Organization.name, Organization.alias</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="name", path="Organization.name or Organization.alias", description="A portion of the organization's name, or alias", type="string" )
+  @SearchParamDefinition(name="name", path="Organization.name | Organization.alias", description="A portion of the organization's name or alias", type="string" )
   public static final String SP_NAME = "name";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>name</b>
    * <p>
-   * Description: <b>A portion of the organization's name, or alias</b><br>
+   * Description: <b>A portion of the organization's name or alias</b><br>
    * Type: <b>string</b><br>
    * Path: <b>Organization.name, Organization.alias</b><br>
    * </p>

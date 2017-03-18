@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -132,15 +132,15 @@ public enum GoalStatusReason {
         }
         public String getDisplay() {
           switch (this) {
-            case SURGERY: return "surgery";
-            case LIFEEVENT: return "life event";
-            case REPLACED: return "replaced";
-            case PATIENTREQUEST: return "patient request";
-            case TEMPNOTATTAINABLE: return "Goal not attainable temporarily";
-            case PERMANENTNOTATTAINABLE: return "Goal not attainable permanently";
-            case FINANCIALBARRIER: return "Financial reason";
-            case LACKOFTRANSPORTATION: return "Lack of transportation";
-            case LACKOFSOCIALSUPPORT: return "Lack of social support";
+            case SURGERY: return "Surgery";
+            case LIFEEVENT: return "Life Event";
+            case REPLACED: return "Replaced";
+            case PATIENTREQUEST: return "Patient Request";
+            case TEMPNOTATTAINABLE: return "Goal Not Attainable Temporarily";
+            case PERMANENTNOTATTAINABLE: return "Goal Not Attainable Permanently";
+            case FINANCIALBARRIER: return "Financial Reason";
+            case LACKOFTRANSPORTATION: return "Lack Of Transportation";
+            case LACKOFSOCIALSUPPORT: return "Lack Of Social Support";
             default: return "?";
           }
     }

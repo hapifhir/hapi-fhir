@@ -58,7 +58,7 @@ import org.hl7.fhir.instance.model.ValueSet.ValueSetCodeSystemComponent;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.INarrative;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.hl7.fhir.instance.utilities.xhtml.XhtmlNode;
+import org.hl7.fhir.utilities.xhtml.XhtmlNode;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Ignore;
@@ -76,20 +76,20 @@ import net.sf.json.JSON;
 import net.sf.json.JSONSerializer;
 
 public class JsonParserHl7OrgDstu2Test {
-	private static FhirContext ourCtx = FhirContext.forDstu2Hl7Org();
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(JsonParserHl7OrgDstu2Test.class);
+  private static FhirContext ourCtx = FhirContext.forDstu2Hl7Org();
+  private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(JsonParserHl7OrgDstu2Test.class);
 
-	@After
-	public void after() {
-		ourCtx.setNarrativeGenerator(null);
-	}
+  @After
+  public void after() {
+    ourCtx.setNarrativeGenerator(null);
+  }
 
-	@AfterClass
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
+  @AfterClass
+  public static void afterClassClearContext() {
+    TestUtil.clearAllStaticFieldsForUnitTest();
+  }
 
-	@Test
+  @Test
   public void testEncodeUndeclaredExtensionWithEnumerationContent() {
     IParser parser = ourCtx.newJsonParser();
 
@@ -110,160 +110,161 @@ public class JsonParserHl7OrgDstu2Test {
 
   }
 
-	
-	@Test
-	public void testEncodeNarrativeSuppressed() throws Exception {
-		Patient patient = new Patient();
-		patient.setId("Patient/1/_history/1");
-		patient.getText().setDivAsString("<div>THE DIV</div>");
-		patient.addName().addFamily("FAMILY");
-		patient.getMaritalStatus().addCoding().setCode("D");
+  @Test
+  public void testEncodeNarrativeSuppressed() throws Exception {
+    Patient patient = new Patient();
+    patient.setId("Patient/1/_history/1");
+    patient.getText().setDivAsString("<div>THE DIV</div>");
+    patient.addName().addFamily("FAMILY");
+    patient.getMaritalStatus().addCoding().setCode("D");
 
-		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).setSuppressNarratives(true).encodeResourceToString(patient);
-		ourLog.info(encoded);
-		
-		assertThat(encoded, containsString("Patient"));
-		assertThat(encoded, stringContainsInOrder(Constants.TAG_SUBSETTED_SYSTEM, Constants.TAG_SUBSETTED_CODE));
-		assertThat(encoded, not(containsString("text")));
-		assertThat(encoded, not(containsString("THE DIV")));
-		assertThat(encoded, containsString("family"));
-		assertThat(encoded, containsString("maritalStatus"));
-	}
+    String encoded = ourCtx.newJsonParser().setPrettyPrint(true).setSuppressNarratives(true).encodeResourceToString(patient);
+    ourLog.info(encoded);
 
-	@Test
-	public void testEncodeAndParseExtensions() throws Exception {
+    assertThat(encoded, containsString("Patient"));
+    assertThat(encoded, stringContainsInOrder(Constants.TAG_SUBSETTED_SYSTEM, Constants.TAG_SUBSETTED_CODE));
+    assertThat(encoded, not(containsString("text")));
+    assertThat(encoded, not(containsString("THE DIV")));
+    assertThat(encoded, containsString("family"));
+    assertThat(encoded, containsString("maritalStatus"));
+  }
 
-		Patient patient = new Patient();
-		patient.addIdentifier().setUse(IdentifierUse.OFFICIAL).setSystem("urn:example").setValue("7000135");
+  @Test
+  public void testEncodeAndParseExtensions() throws Exception {
 
-		Extension ext = new Extension();
-		ext.setUrl("http://example.com/extensions#someext");
-		ext.setValue(new DateTimeType("2011-01-02T11:13:15"));
-		patient.getExtension().add(ext);
+    Patient patient = new Patient();
+    patient.addIdentifier().setUse(IdentifierUse.OFFICIAL).setSystem("urn:example").setValue("7000135");
 
-		Extension parent = new Extension().setUrl("http://example.com#parent");
-		patient.getExtension().add(parent);
-		Extension child1 = new Extension().setUrl("http://example.com#child").setValue(new StringType("value1"));
-		parent.getExtension().add(child1);
-		Extension child2 = new Extension().setUrl("http://example.com#child").setValue(new StringType("value2"));
-		parent.getExtension().add(child2);
+    Extension ext = new Extension();
+    ext.setUrl("http://example.com/extensions#someext");
+    ext.setValue(new DateTimeType("2011-01-02T11:13:15"));
+    patient.getExtension().add(ext);
 
-		Extension modExt = new Extension();
-		modExt.setUrl("http://example.com/extensions#modext");
-		modExt.setValue(new DateType("1995-01-02"));
-		patient.getModifierExtension().add(modExt);
+    Extension parent = new Extension().setUrl("http://example.com#parent");
+    patient.getExtension().add(parent);
+    Extension child1 = new Extension().setUrl("http://example.com#child").setValue(new StringType("value1"));
+    parent.getExtension().add(child1);
+    Extension child2 = new Extension().setUrl("http://example.com#child").setValue(new StringType("value2"));
+    parent.getExtension().add(child2);
 
-		HumanName name = patient.addName();
-		name.addFamily("Blah");
-		StringType given = name.addGivenElement();
-		given.setValue("Joe");
-		Extension ext2 = new Extension().setUrl("http://examples.com#givenext").setValue(new StringType("given"));
-		given.getExtension().add(ext2);
+    Extension modExt = new Extension();
+    modExt.setUrl("http://example.com/extensions#modext");
+    modExt.setValue(new DateType("1995-01-02"));
+    patient.getModifierExtension().add(modExt);
 
-		StringType given2 = name.addGivenElement();
-		given2.setValue("Shmoe");
-		Extension given2ext = new Extension().setUrl("http://examples.com#givenext_parent");
-		given2.getExtension().add(given2ext);
-		given2ext.addExtension().setUrl("http://examples.com#givenext_child").setValue(new StringType("CHILD"));
+    HumanName name = patient.addName();
+    name.addFamily("Blah");
+    StringType given = name.addGivenElement();
+    given.setValue("Joe");
+    Extension ext2 = new Extension().setUrl("http://examples.com#givenext").setValue(new StringType("given"));
+    given.getExtension().add(ext2);
 
-		String output = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient);
-		ourLog.info(output);
+    StringType given2 = name.addGivenElement();
+    given2.setValue("Shmoe");
+    Extension given2ext = new Extension().setUrl("http://examples.com#givenext_parent");
+    given2.getExtension().add(given2ext);
+    given2ext.addExtension().setUrl("http://examples.com#givenext_child").setValue(new StringType("CHILD"));
 
-		String enc = ourCtx.newJsonParser().encodeResourceToString(patient);
-		assertThat(enc, org.hamcrest.Matchers.stringContainsInOrder("{\"resourceType\":\"Patient\",", "\"extension\":[{\"url\":\"http://example.com/extensions#someext\",\"valueDateTime\":\"2011-01-02T11:13:15\"}",
-				"{\"url\":\"http://example.com#parent\",\"extension\":[{\"url\":\"http://example.com#child\",\"valueString\":\"value1\"},{\"url\":\"http://example.com#child\",\"valueString\":\"value2\"}]}"));
-		assertThat(enc, org.hamcrest.Matchers.stringContainsInOrder("\"modifierExtension\":[" + "{" + "\"url\":\"http://example.com/extensions#modext\"," + "\"valueDate\":\"1995-01-02\"" + "}" + "],"));
-		assertThat(enc, containsString("\"_given\":[" + "{" + "\"extension\":[" + "{" + "\"url\":\"http://examples.com#givenext\"," + "\"valueString\":\"given\"" + "}" + "]" + "}," + "{" + "\"extension\":[" + "{" + "\"url\":\"http://examples.com#givenext_parent\"," + "\"extension\":[" + "{"
-				+ "\"url\":\"http://examples.com#givenext_child\"," + "\"valueString\":\"CHILD\"" + "}" + "]" + "}" + "]" + "}"));
+    String output = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient);
+    ourLog.info(output);
 
-		/*
-		 * Now parse this back
-		 */
+    String enc = ourCtx.newJsonParser().encodeResourceToString(patient);
+    assertThat(enc,
+        org.hamcrest.Matchers.stringContainsInOrder("{\"resourceType\":\"Patient\",", "\"extension\":[{\"url\":\"http://example.com/extensions#someext\",\"valueDateTime\":\"2011-01-02T11:13:15\"}",
+            "{\"url\":\"http://example.com#parent\",\"extension\":[{\"url\":\"http://example.com#child\",\"valueString\":\"value1\"},{\"url\":\"http://example.com#child\",\"valueString\":\"value2\"}]}"));
+    assertThat(enc, org.hamcrest.Matchers.stringContainsInOrder("\"modifierExtension\":[" + "{" + "\"url\":\"http://example.com/extensions#modext\"," + "\"valueDate\":\"1995-01-02\"" + "}" + "],"));
+    assertThat(enc, containsString("\"_given\":[" + "{" + "\"extension\":[" + "{" + "\"url\":\"http://examples.com#givenext\"," + "\"valueString\":\"given\"" + "}" + "]" + "}," + "{"
+        + "\"extension\":[" + "{" + "\"url\":\"http://examples.com#givenext_parent\"," + "\"extension\":[" + "{"
+        + "\"url\":\"http://examples.com#givenext_child\"," + "\"valueString\":\"CHILD\"" + "}" + "]" + "}" + "]" + "}"));
 
-		Patient parsed = ourCtx.newJsonParser().parseResource(Patient.class, enc);
-		ext = parsed.getExtension().get(0);
-		assertEquals("http://example.com/extensions#someext", ext.getUrl());
-		assertEquals("2011-01-02T11:13:15", ((DateTimeType) ext.getValue()).getValueAsString());
+    /*
+     * Now parse this back
+     */
 
-		parent = patient.getExtension().get(1);
-		assertEquals("http://example.com#parent", parent.getUrl());
-		assertNull(parent.getValue());
-		child1 = parent.getExtension().get(0);
-		assertEquals("http://example.com#child", child1.getUrl());
-		assertEquals("value1", ((StringType) child1.getValue()).getValueAsString());
-		child2 = parent.getExtension().get(1);
-		assertEquals("http://example.com#child", child2.getUrl());
-		assertEquals("value2", ((StringType) child2.getValue()).getValueAsString());
+    Patient parsed = ourCtx.newJsonParser().parseResource(Patient.class, enc);
+    ext = parsed.getExtension().get(0);
+    assertEquals("http://example.com/extensions#someext", ext.getUrl());
+    assertEquals("2011-01-02T11:13:15", ((DateTimeType) ext.getValue()).getValueAsString());
 
-		modExt = parsed.getModifierExtension().get(0);
-		assertEquals("http://example.com/extensions#modext", modExt.getUrl());
-		assertEquals("1995-01-02", ((DateType) modExt.getValue()).getValueAsString());
+    parent = patient.getExtension().get(1);
+    assertEquals("http://example.com#parent", parent.getUrl());
+    assertNull(parent.getValue());
+    child1 = parent.getExtension().get(0);
+    assertEquals("http://example.com#child", child1.getUrl());
+    assertEquals("value1", ((StringType) child1.getValue()).getValueAsString());
+    child2 = parent.getExtension().get(1);
+    assertEquals("http://example.com#child", child2.getUrl());
+    assertEquals("value2", ((StringType) child2.getValue()).getValueAsString());
 
-		name = parsed.getName().get(0);
+    modExt = parsed.getModifierExtension().get(0);
+    assertEquals("http://example.com/extensions#modext", modExt.getUrl());
+    assertEquals("1995-01-02", ((DateType) modExt.getValue()).getValueAsString());
 
-		ext2 = name.getGiven().get(0).getExtension().get(0);
-		assertEquals("http://examples.com#givenext", ext2.getUrl());
-		assertEquals("given", ((StringType) ext2.getValue()).getValueAsString());
+    name = parsed.getName().get(0);
 
-		given2ext = name.getGiven().get(1).getExtension().get(0);
-		assertEquals("http://examples.com#givenext_parent", given2ext.getUrl());
-		assertNull(given2ext.getValue());
-		Extension given2ext2 = given2ext.getExtension().get(0);
-		assertEquals("http://examples.com#givenext_child", given2ext2.getUrl());
-		assertEquals("CHILD", ((StringType) given2ext2.getValue()).getValue());
+    ext2 = name.getGiven().get(0).getExtension().get(0);
+    assertEquals("http://examples.com#givenext", ext2.getUrl());
+    assertEquals("given", ((StringType) ext2.getValue()).getValueAsString());
 
-	}
+    given2ext = name.getGiven().get(1).getExtension().get(0);
+    assertEquals("http://examples.com#givenext_parent", given2ext.getUrl());
+    assertNull(given2ext.getValue());
+    Extension given2ext2 = given2ext.getExtension().get(0);
+    assertEquals("http://examples.com#givenext_child", given2ext2.getUrl());
+    assertEquals("CHILD", ((StringType) given2ext2.getValue()).getValue());
 
-	@Test
-	public void testEncodeBinaryResource() {
+  }
 
-		Binary patient = new Binary();
-		patient.setContentType("foo");
-		patient.setContent(new byte[] { 1, 2, 3, 4 });
+  @Test
+  public void testEncodeBinaryResource() {
 
-		String val = ourCtx.newJsonParser().encodeResourceToString(patient);
-		assertEquals("{\"resourceType\":\"Binary\",\"contentType\":\"foo\",\"content\":\"AQIDBA==\"}", val);
+    Binary patient = new Binary();
+    patient.setContentType("foo");
+    patient.setContent(new byte[] { 1, 2, 3, 4 });
 
-	}
+    String val = ourCtx.newJsonParser().encodeResourceToString(patient);
+    assertEquals("{\"resourceType\":\"Binary\",\"contentType\":\"foo\",\"content\":\"AQIDBA==\"}", val);
 
-	@Test
-	public void testEncodeBundle() throws InterruptedException {
-		Bundle b = new Bundle();
+  }
 
-		InstantType pub = InstantType.now();
-		b.getMeta().setLastUpdatedElement(pub);
-		Thread.sleep(2);
+  @Test
+  public void testEncodeBundle() throws InterruptedException {
+    Bundle b = new Bundle();
 
-		Patient p1 = new Patient();
-		p1.addName().addFamily("Family1");
-		p1.setId("1");
-		BundleEntryComponent entry = b.addEntry();
-		entry.setResource(p1);
+    InstantType pub = InstantType.now();
+    b.getMeta().setLastUpdatedElement(pub);
+    Thread.sleep(2);
 
-		Patient p2 = new Patient();
-		p2.setId("Patient/2");
-		p2.addName().addFamily("Family2");
-		entry = b.addEntry();
-		entry.setResource(p2);
+    Patient p1 = new Patient();
+    p1.addName().addFamily("Family1");
+    p1.setId("1");
+    BundleEntryComponent entry = b.addEntry();
+    entry.setResource(p1);
 
-		BundleEntryComponent deletedEntry = b.addEntry();
-		Patient dp = new Patient();
-		deletedEntry.setResource(dp);
+    Patient p2 = new Patient();
+    p2.setId("Patient/2");
+    p2.addName().addFamily("Family2");
+    entry = b.addEntry();
+    entry.setResource(p2);
 
-		dp.setId(("3"));
-		InstantType nowDt = InstantType.withCurrentTime();
-		dp.getMeta().setLastUpdatedElement(nowDt);
+    BundleEntryComponent deletedEntry = b.addEntry();
+    Patient dp = new Patient();
+    deletedEntry.setResource(dp);
 
-		String bundleString = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(b);
-		ourLog.info(bundleString);
+    dp.setId(("3"));
+    InstantType nowDt = InstantType.withCurrentTime();
+    dp.getMeta().setLastUpdatedElement(nowDt);
 
-		// List<String> strings = new ArrayList<String>();
-		// strings.addAll(Arrays.asList("\"published\":\"" + pub.getValueAsString() + "\""));
-		// strings.addAll(Arrays.asList("\"id\":\"1\""));
-		// strings.addAll(Arrays.asList("\"id\":\"2\"", "\"rel\":\"alternate\"", "\"href\":\"http://foo/bar\""));
-		// strings.addAll(Arrays.asList("\"deleted\":\"" + nowDt.getValueAsString() + "\"", "\"id\":\"Patient/3\""));
+    String bundleString = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(b);
+    ourLog.info(bundleString);
 
-		//@formatter:off
+    // List<String> strings = new ArrayList<String>();
+    // strings.addAll(Arrays.asList("\"published\":\"" + pub.getValueAsString() + "\""));
+    // strings.addAll(Arrays.asList("\"id\":\"1\""));
+    // strings.addAll(Arrays.asList("\"id\":\"2\"", "\"rel\":\"alternate\"", "\"href\":\"http://foo/bar\""));
+    // strings.addAll(Arrays.asList("\"deleted\":\"" + nowDt.getValueAsString() + "\"", "\"id\":\"Patient/3\""));
+
+    //@formatter:off
 		String[] strings = new String[] {
 			"\"resourceType\": \"Bundle\",",
 			"\"lastUpdated\": \"" + pub.getValueAsString() + "\"",
@@ -442,7 +443,7 @@ public class JsonParserHl7OrgDstu2Test {
 		String str = p.encodeResourceToString(rpt);
 
 		ourLog.info(str);
-		assertThat(str, StringContains.containsString("<div>AAA</div>"));
+		assertThat(str, StringContains.containsString("<div xmlns=\\\"http://www.w3.org/1999/xhtml\\\">AAA</div>"));
 		String substring = "\"reference\": \"#";
 		assertThat(str, StringContains.containsString(substring));
 
@@ -672,21 +673,21 @@ public class JsonParserHl7OrgDstu2Test {
 		Patient p = new Patient();
 		p.addIdentifier().setSystem("foo").setValue("bar");
 		p.getText().setStatus(NarrativeStatus.GENERATED);
-		p.getText().setDivAsString("<div>hello</div>");
+		p.getText().setDivAsString("<div>AAA</div>");
 
 		Bundle b = new Bundle();
 		b.setTotal(123);
 		b.addEntry().setResource(p);
 
-		String out = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(b);
-		ourLog.info(out);
-		assertThat(out, containsString("<div>hello</div>"));
+		String str = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(b);
+		ourLog.info(str);
+		assertThat(str, StringContains.containsString("<div xmlns=\\\"http://www.w3.org/1999/xhtml\\\">AAA</div>"));
 
 		p.getText().setDivAsString("<xhtml:div xmlns:xhtml=\"http://www.w3.org/1999/xhtml\">hello</xhtml:div>");
-		out = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(b);
-		ourLog.info(out);
+		str = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(b);
+		ourLog.info(str);
 		// Backslashes need to be escaped because they are in a JSON value
-		assertThat(out, containsString(">hello<"));
+		assertThat(str, containsString(">hello<"));
 
 	}	
 	
@@ -882,58 +883,58 @@ public class JsonParserHl7OrgDstu2Test {
 				"}").replace("\n", "").replaceAll(" +", "")));
 		//@formatter:on
 
-		Patient parsed = ourCtx.newJsonParser().parseResource(Patient.class, new StringReader(enc));
-		assertEquals(1, parsed.getName().get(0).getFamily().get(0).getExtension().size());
-		Extension ext = parsed.getName().get(0).getFamily().get(0).getExtension().get(0);
-		assertEquals("Hello", ((IPrimitiveType<?>) ext.getValue()).getValue());
+    Patient parsed = ourCtx.newJsonParser().parseResource(Patient.class, new StringReader(enc));
+    assertEquals(1, parsed.getName().get(0).getFamily().get(0).getExtension().size());
+    Extension ext = parsed.getName().get(0).getFamily().get(0).getExtension().get(0);
+    assertEquals("Hello", ((IPrimitiveType<?>) ext.getValue()).getValue());
 
-	}
+  }
 
-	@Test
-	public void testMoreExtensions() throws Exception {
+  @Test
+  public void testMoreExtensions() throws Exception {
 
-		Patient patient = new Patient();
-		patient.addIdentifier().setUse(IdentifierUse.OFFICIAL).setSystem("urn:example").setValue("7000135");
+    Patient patient = new Patient();
+    patient.addIdentifier().setUse(IdentifierUse.OFFICIAL).setSystem("urn:example").setValue("7000135");
 
-		Extension ext = new Extension();
-		ext.setUrl("http://example.com/extensions#someext");
-		ext.setValue(new DateTimeType("2011-01-02T11:13:15"));
+    Extension ext = new Extension();
+    ext.setUrl("http://example.com/extensions#someext");
+    ext.setValue(new DateTimeType("2011-01-02T11:13:15"));
 
-		// Add the extension to the resource
-		patient.getExtension().add(ext);
-		// END SNIPPET: resourceExtension
+    // Add the extension to the resource
+    patient.getExtension().add(ext);
+    // END SNIPPET: resourceExtension
 
-		// START SNIPPET: resourceStringExtension
-		HumanName name = patient.addName();
-		name.addFamily("Shmoe");
-		StringType given = name.addGivenElement();
-		given.setValue("Joe");
-		Extension ext2 = new Extension().setUrl("http://examples.com#givenext").setValue(new StringType("given"));
-		given.getExtension().add(ext2);
+    // START SNIPPET: resourceStringExtension
+    HumanName name = patient.addName();
+    name.addFamily("Shmoe");
+    StringType given = name.addGivenElement();
+    given.setValue("Joe");
+    Extension ext2 = new Extension().setUrl("http://examples.com#givenext").setValue(new StringType("given"));
+    given.getExtension().add(ext2);
 
-		StringType given2 = name.addGivenElement();
-		given2.setValue("Shmoe");
-		Extension given2ext = new Extension().setUrl("http://examples.com#givenext_parent");
-		given2.getExtension().add(given2ext);
-		given2ext.addExtension().setUrl("http://examples.com#givenext_child").setValue(new StringType("CHILD"));
-		// END SNIPPET: resourceStringExtension
+    StringType given2 = name.addGivenElement();
+    given2.setValue("Shmoe");
+    Extension given2ext = new Extension().setUrl("http://examples.com#givenext_parent");
+    given2.getExtension().add(given2ext);
+    given2ext.addExtension().setUrl("http://examples.com#givenext_child").setValue(new StringType("CHILD"));
+    // END SNIPPET: resourceStringExtension
 
-		// START SNIPPET: subExtension
-		Extension parent = new Extension().setUrl("http://example.com#parent");
-		patient.getExtension().add(parent);
+    // START SNIPPET: subExtension
+    Extension parent = new Extension().setUrl("http://example.com#parent");
+    patient.getExtension().add(parent);
 
-		Extension child1 = new Extension().setUrl("http://example.com#child").setValue(new StringType("value1"));
-		parent.getExtension().add(child1);
+    Extension child1 = new Extension().setUrl("http://example.com#child").setValue(new StringType("value1"));
+    parent.getExtension().add(child1);
 
-		Extension child2 = new Extension().setUrl("http://example.com#child").setValue(new StringType("value1"));
-		parent.getExtension().add(child2);
-		// END SNIPPET: subExtension
+    Extension child2 = new Extension().setUrl("http://example.com#child").setValue(new StringType("value1"));
+    parent.getExtension().add(child2);
+    // END SNIPPET: subExtension
 
-		String output = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient);
-		ourLog.info(output);
+    String output = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient);
+    ourLog.info(output);
 
-		String enc = ourCtx.newJsonParser().encodeResourceToString(patient);
-		//@formatter:off
+    String enc = ourCtx.newJsonParser().encodeResourceToString(patient);
+    //@formatter:off
 		assertThat(enc, containsString(("{" + 
 				"\"resourceType\":\"Patient\"," + 
 				"    \"extension\":[" + 
@@ -957,7 +958,7 @@ public class JsonParserHl7OrgDstu2Test {
 				"    ]").replace(" ", "")));
 		//@formatter:on
 
-		//@formatter:off
+    //@formatter:off
 		assertThat(enc, containsString((
 				"            \"given\":[" + 
 				"                \"Joe\"," + 
@@ -987,18 +988,18 @@ public class JsonParserHl7OrgDstu2Test {
 				"                }" + 
 				"").replace(" ", "")));
 		//@formatter:on
-	}
+  }
 
-	/*
-	 * Narrative generation is disabled for HL7org structs for now
-	 */
-	// @Test
-	public void testNarrativeGeneration() throws DataFormatException, IOException {
+  /*
+   * Narrative generation is disabled for HL7org structs for now
+   */
+  // @Test
+  public void testNarrativeGeneration() throws DataFormatException, IOException {
 
-		Patient patient = new Patient();
-		patient.addName().addFamily("Smith");
-		Organization org = new Organization();
-		patient.getManagingOrganization().setResource(org);
+    Patient patient = new Patient();
+    patient.addName().addFamily("Smith");
+    Organization org = new Organization();
+    patient.getManagingOrganization().setResource(org);
 
     INarrativeGenerator gen = new INarrativeGenerator() {
 
@@ -1014,66 +1015,66 @@ public class JsonParserHl7OrgDstu2Test {
 
     };
 
-		FhirContext context = ourCtx;
-		context.setNarrativeGenerator(gen);
-		IParser p = context.newJsonParser();
-		p.encodeResourceToWriter(patient, new OutputStreamWriter(System.out));
-		String str = p.encodeResourceToString(patient);
+    FhirContext context = ourCtx;
+    context.setNarrativeGenerator(gen);
+    IParser p = context.newJsonParser();
+    p.encodeResourceToWriter(patient, new OutputStreamWriter(System.out));
+    String str = p.encodeResourceToString(patient);
 
-		ourLog.info(str);
+    ourLog.info(str);
 
-		assertThat(str, StringContains.containsString(",\"text\":{\"status\":\"generated\",\"div\":\"<div>help</div>\"},"));
-	}
+    assertThat(str, StringContains.containsString(",\"text\":{\"status\":\"generated\",\"div\":\"<div>help</div>\"},"));
+  }
 
-	@Test
-	public void testNestedContainedResources() {
+  @Test
+  public void testNestedContainedResources() {
 
-		Observation A = new Observation();
-		A.getCode().setText("A");
+    Observation A = new Observation();
+    A.getCode().setText("A");
 
-		Observation B = new Observation();
-		B.getCode().setText("B");
-		A.addRelated().setTarget(new Reference(B));
+    Observation B = new Observation();
+    B.getCode().setText("B");
+    A.addRelated().setTarget(new Reference(B));
 
-		Observation C = new Observation();
-		C.getCode().setText("C");
-		B.addRelated().setTarget(new Reference(C));
+    Observation C = new Observation();
+    C.getCode().setText("C");
+    B.addRelated().setTarget(new Reference(C));
 
-		String str = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(A);
-		ourLog.info(str);
+    String str = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(A);
+    ourLog.info(str);
 
-		assertThat(str, stringContainsInOrder(Arrays.asList("\"text\": \"B\"", "\"text\": \"C\"", "\"text\": \"A\"")));
+    assertThat(str, stringContainsInOrder(Arrays.asList("\"text\": \"B\"", "\"text\": \"C\"", "\"text\": \"A\"")));
 
-		// Only one (outer) contained block
-		int idx0 = str.indexOf("\"contained\"");
-		int idx1 = str.indexOf("\"contained\"", idx0 + 1);
+    // Only one (outer) contained block
+    int idx0 = str.indexOf("\"contained\"");
+    int idx1 = str.indexOf("\"contained\"", idx0 + 1);
 
-		assertNotEquals(-1, idx0);
-		assertEquals(-1, idx1);
+    assertNotEquals(-1, idx0);
+    assertEquals(-1, idx1);
 
-		Observation obs = ourCtx.newJsonParser().parseResource(Observation.class, str);
-		assertEquals("A", obs.getCode().getTextElement().getValue());
+    Observation obs = ourCtx.newJsonParser().parseResource(Observation.class, str);
+    assertEquals("A", obs.getCode().getTextElement().getValue());
 
-		Observation obsB = (Observation) obs.getRelated().get(0).getTarget().getResource();
-		assertEquals("B", obsB.getCode().getTextElement().getValue());
+    Observation obsB = (Observation) obs.getRelated().get(0).getTarget().getResource();
+    assertEquals("B", obsB.getCode().getTextElement().getValue());
 
-		Observation obsC = (Observation) obsB.getRelated().get(0).getTarget().getResource();
-		assertEquals("C", obsC.getCode().getTextElement().getValue());
+    Observation obsC = (Observation) obsB.getRelated().get(0).getTarget().getResource();
+    assertEquals("C", obsC.getCode().getTextElement().getValue());
 
-	}
+  }
 
-	@Test
-	public void testParseBinaryResource() {
+  @Test
+  public void testParseBinaryResource() {
 
-		Binary val = ourCtx.newJsonParser().parseResource(Binary.class, "{\"resourceType\":\"Binary\",\"contentType\":\"foo\",\"content\":\"AQIDBA==\"}");
-		assertEquals("foo", val.getContentType());
-		assertArrayEquals(new byte[] { 1, 2, 3, 4 }, val.getContent());
+    Binary val = ourCtx.newJsonParser().parseResource(Binary.class, "{\"resourceType\":\"Binary\",\"contentType\":\"foo\",\"content\":\"AQIDBA==\"}");
+    assertEquals("foo", val.getContentType());
+    assertArrayEquals(new byte[] { 1, 2, 3, 4 }, val.getContent());
 
-	}
+  }
 
-	@Test
-	public void testParseEmptyNarrative() throws Exception {
-		//@formatter:off
+  @Test
+  public void testParseEmptyNarrative() throws Exception {
+    //@formatter:off
 		String text = "{\n" + 
 				"    \"resourceType\" : \"Patient\",\n" + 
 				"    \"extension\" : [\n" + 
@@ -1088,95 +1089,95 @@ public class JsonParserHl7OrgDstu2Test {
 				"}";
 		//@formatter:on
 
-		Patient res = (Patient) ourCtx.newJsonParser().parseResource(text);
-		XhtmlNode div = res.getText().getDiv();
-		String value = div.getValueAsString();
+    Patient res = (Patient) ourCtx.newJsonParser().parseResource(text);
+    XhtmlNode div = res.getText().getDiv();
+    String value = div.getValueAsString();
 
-		assertNull(value);
-		List<XhtmlNode> childNodes = div.getChildNodes();
+    assertNull(value);
+    List<XhtmlNode> childNodes = div.getChildNodes();
     assertTrue(childNodes == null || childNodes.isEmpty());
-	}
+  }
 
-	@Test
-	public void testParseSimpleBundle() {
-		String bundle = "{\"resourceType\":\"Bundle\",\"entry\":[{\"resource\":{\"resourceType\":\"Patient\",\"identifier\":[{\"system\":\"idsystem\"}]}}]}";
-		Bundle b = ourCtx.newJsonParser().parseResource(Bundle.class, bundle);
+  @Test
+  public void testParseSimpleBundle() {
+    String bundle = "{\"resourceType\":\"Bundle\",\"entry\":[{\"resource\":{\"resourceType\":\"Patient\",\"identifier\":[{\"system\":\"idsystem\"}]}}]}";
+    Bundle b = ourCtx.newJsonParser().parseResource(Bundle.class, bundle);
 
-		assertNotNull(b.getEntry().get(0).getResource());
-		Patient p = (Patient) b.getEntry().get(0).getResource();
-		assertEquals("idsystem", p.getIdentifier().get(0).getSystem());
-	}
+    assertNotNull(b.getEntry().get(0).getResource());
+    Patient p = (Patient) b.getEntry().get(0).getResource();
+    assertEquals("idsystem", p.getIdentifier().get(0).getSystem());
+  }
 
-	@Test
-	public void testParseSingleQuotes() {
-		ourCtx.newJsonParser().parseResource(Bundle.class, "{ \"resourceType\": \"Bundle\" }");
-		ourCtx.newJsonParser().parseResource(Bundle.class, "{ 'resourceType': 'Bundle' }");
-	}
+  @Test
+  public void testParseSingleQuotes() {
+    ourCtx.newJsonParser().parseResource(Bundle.class, "{ \"resourceType\": \"Bundle\" }");
+    ourCtx.newJsonParser().parseResource(Bundle.class, "{ 'resourceType': 'Bundle' }");
+  }
 
-	/**
-	 * HAPI FHIR < 0.6 incorrectly used "resource" instead of "reference"
-	 */
-	@Test
-	@Ignore
-	public void testParseWithIncorrectReference() throws IOException {
-		String jsonString = IOUtils.toString(JsonParser.class.getResourceAsStream("/example-patient-general-hl7orgdstu2.json"));
-		jsonString = jsonString.replace("\"reference\"", "\"resource\"");
-		Patient parsed = ourCtx.newJsonParser().parseResource(Patient.class, jsonString);
-		assertEquals("Organization/1", parsed.getManagingOrganization().getReference());
-	}
+  /**
+   * HAPI FHIR < 0.6 incorrectly used "resource" instead of "reference"
+   */
+  @Test
+  @Ignore
+  public void testParseWithIncorrectReference() throws IOException {
+    String jsonString = IOUtils.toString(JsonParser.class.getResourceAsStream("/example-patient-general-hl7orgdstu2.json"));
+    jsonString = jsonString.replace("\"reference\"", "\"resource\"");
+    Patient parsed = ourCtx.newJsonParser().parseResource(Patient.class, jsonString);
+    assertEquals("Organization/1", parsed.getManagingOrganization().getReference());
+  }
 
-	@Test
-	public void testSimpleParse() throws DataFormatException, IOException {
+  @Test
+  public void testSimpleParse() throws DataFormatException, IOException {
 
-		String msg = IOUtils.toString(XmlParser.class.getResourceAsStream("/example-patient-general-hl7orgdstu2.json"));
-		IParser p = ourCtx.newJsonParser();
-		// ourLog.info("Reading in message: {}", msg);
-		Patient res = p.parseResource(Patient.class, msg);
+    String msg = IOUtils.toString(XmlParser.class.getResourceAsStream("/example-patient-general-hl7orgdstu2.json"));
+    IParser p = ourCtx.newJsonParser();
+    // ourLog.info("Reading in message: {}", msg);
+    Patient res = p.parseResource(Patient.class, msg);
 
-		assertEquals(2, res.getExtension().size());
-		assertEquals(1, res.getModifierExtension().size());
+    assertEquals(2, res.getExtension().size());
+    assertEquals(1, res.getModifierExtension().size());
 
-		String encoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(res);
-		ourLog.info(encoded);
+    String encoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(res);
+    ourLog.info(encoded);
 
-	}
+  }
 
-	@Test
-	public void testSimpleResourceEncode() throws IOException {
+  @Test
+  public void testSimpleResourceEncode() throws IOException {
 
-		String xmlString = IOUtils.toString(JsonParser.class.getResourceAsStream("/example-patient-general-hl7orgdstu2.xml"), Charset.forName("UTF-8"));
-		Patient obs = ourCtx.newXmlParser().parseResource(Patient.class, xmlString);
+    String xmlString = IOUtils.toString(JsonParser.class.getResourceAsStream("/example-patient-general-hl7orgdstu2.xml"), Charset.forName("UTF-8"));
+    Patient obs = ourCtx.newXmlParser().parseResource(Patient.class, xmlString);
 
-		List<Extension> undeclaredExtensions = obs.getContact().get(0).getName().getFamily().get(0).getExtension();
-		Extension undeclaredExtension = undeclaredExtensions.get(0);
-		assertEquals("http://hl7.org/fhir/Profile/iso-21090#qualifier", undeclaredExtension.getUrl());
+    List<Extension> undeclaredExtensions = obs.getContact().get(0).getName().getFamily().get(0).getExtension();
+    Extension undeclaredExtension = undeclaredExtensions.get(0);
+    assertEquals("http://hl7.org/fhir/Profile/iso-21090#qualifier", undeclaredExtension.getUrl());
 
-		ourLog.info(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+    ourLog.info(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 
-		IParser jsonParser = ourCtx.newJsonParser();
-		String encoded = jsonParser.encodeResourceToString(obs);
-		ourLog.info(encoded);
+    IParser jsonParser = ourCtx.newJsonParser();
+    String encoded = jsonParser.encodeResourceToString(obs);
+    ourLog.info(encoded);
 
-		String jsonString = IOUtils.toString(JsonParser.class.getResourceAsStream("/example-patient-general-hl7orgdstu2.json"), Charset.forName("UTF-8"));
+    String jsonString = IOUtils.toString(JsonParser.class.getResourceAsStream("/example-patient-general-hl7orgdstu2.json"), Charset.forName("UTF-8"));
 
-		JSON expected = JSONSerializer.toJSON(jsonString);
-		JSON actual = JSONSerializer.toJSON(encoded.trim());
+    JSON expected = JSONSerializer.toJSON(jsonString);
+    JSON actual = JSONSerializer.toJSON(encoded.trim());
 
-		// The encoded escapes quote marks using XML escaping instead of JSON escaping, which is probably nicer anyhow...
-		String exp = expected.toString().replace("\\\"Jim\\\"", "&quot;Jim&quot;");
+    // The encoded escapes quote marks using XML escaping instead of JSON escaping, which is probably nicer anyhow...
+    String exp = expected.toString().replace("\\\"Jim\\\"", "&quot;Jim&quot;");
 
-		// This shows up when we parse XML
-		String act = actual.toString().replace(" xmlns=\\\"http://www.w3.org/1999/xhtml\\\"", "");
+    // This shows up when we parse XML
+    String act = actual.toString().replace(" xmlns=\\\"http://www.w3.org/1999/xhtml\\\"", "");
 
-		ourLog.info("Expected: {}", exp);
-		ourLog.info("Actual  : {}", act);
-		assertEquals(exp, act);
+    ourLog.info("Expected: {}", exp);
+    ourLog.info("Actual  : {}", act);
+    assertEquals(exp, act);
 
-	}
+  }
 
-	@Test
-	public void testParsePrimitiveExtension() {
-	  //@formatter:off
+  @Test
+  public void testParsePrimitiveExtension() {
+    //@formatter:off
 	  String input = "{\n" + 
 	      "    \"resourceType\":\"Patient\",\n" + 
 	      "    \"contact\":[\n" + 
@@ -1277,23 +1278,23 @@ public class JsonParserHl7OrgDstu2Test {
 				"}";
 		//@formatter:on
 
-		TagList tagList = ourCtx.newJsonParser().parseTagList(tagListStr);
-		assertEquals(3, tagList.size());
-		assertEquals("term0", tagList.get(0).getTerm());
-		assertEquals("label0", tagList.get(0).getLabel());
-		assertEquals("scheme0", tagList.get(0).getScheme());
-		assertEquals("term1", tagList.get(1).getTerm());
-		assertEquals("label1", tagList.get(1).getLabel());
-		assertEquals(null, tagList.get(1).getScheme());
-		assertEquals("term2", tagList.get(2).getTerm());
-		assertEquals("label2", tagList.get(2).getLabel());
-		assertEquals(null, tagList.get(2).getScheme());
+    TagList tagList = ourCtx.newJsonParser().parseTagList(tagListStr);
+    assertEquals(3, tagList.size());
+    assertEquals("term0", tagList.get(0).getTerm());
+    assertEquals("label0", tagList.get(0).getLabel());
+    assertEquals("scheme0", tagList.get(0).getScheme());
+    assertEquals("term1", tagList.get(1).getTerm());
+    assertEquals("label1", tagList.get(1).getLabel());
+    assertEquals(null, tagList.get(1).getScheme());
+    assertEquals("term2", tagList.get(2).getTerm());
+    assertEquals("label2", tagList.get(2).getLabel());
+    assertEquals(null, tagList.get(2).getScheme());
 
-		/*
-		 * Encode
-		 */
+    /*
+     * Encode
+     */
 
-		//@formatter:off
+    //@formatter:off
 		String expected = "{" + 
 				"\"resourceType\":\"TagList\"," + 
 				"\"category\":[" + 
@@ -1314,47 +1315,47 @@ public class JsonParserHl7OrgDstu2Test {
 				"}";
 		//@formatter:on
 
-		String encoded = ourCtx.newJsonParser().encodeTagListToString(tagList);
-		assertEquals(expected, encoded);
+    String encoded = ourCtx.newJsonParser().encodeTagListToString(tagList);
+    assertEquals(expected, encoded);
 
-	}
+  }
 
-	@ResourceDef(name = "Patient")
-	public static class MyPatientWithOneDeclaredAddressExtension extends Patient {
+  @ResourceDef(name = "Patient")
+  public static class MyPatientWithOneDeclaredAddressExtension extends Patient {
 
-		private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-		@Child(order = 0, name = "foo")
-		@ca.uhn.fhir.model.api.annotation.Extension(url = "urn:foo", definedLocally = true, isModifier = false)
-		private Address myFoo;
+    @Child(order = 0, name = "foo")
+    @ca.uhn.fhir.model.api.annotation.Extension(url = "urn:foo", definedLocally = true, isModifier = false)
+    private Address myFoo;
 
-		public Address getFoo() {
-			return myFoo;
-		}
+    public Address getFoo() {
+      return myFoo;
+    }
 
-		public void setFoo(Address theFoo) {
-			myFoo = theFoo;
-		}
+    public void setFoo(Address theFoo) {
+      myFoo = theFoo;
+    }
 
-	}
+  }
 
-	@ResourceDef(name = "Patient")
-	public static class MyPatientWithOneDeclaredExtension extends Patient {
+  @ResourceDef(name = "Patient")
+  public static class MyPatientWithOneDeclaredExtension extends Patient {
 
-		private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-		@Child(order = 0, name = "foo")
-		@ca.uhn.fhir.model.api.annotation.Extension(url = "urn:foo", definedLocally = true, isModifier = false)
-		private Reference myFoo;
+    @Child(order = 0, name = "foo")
+    @ca.uhn.fhir.model.api.annotation.Extension(url = "urn:foo", definedLocally = true, isModifier = false)
+    private Reference myFoo;
 
-		public Reference getFoo() {
-			return myFoo;
-		}
+    public Reference getFoo() {
+      return myFoo;
+    }
 
-		public void setFoo(Reference theFoo) {
-			myFoo = theFoo;
-		}
+    public void setFoo(Reference theFoo) {
+      myFoo = theFoo;
+    }
 
-	}
+  }
 
 }

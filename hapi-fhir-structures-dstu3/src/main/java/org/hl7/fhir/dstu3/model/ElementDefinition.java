@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
 
 import java.util.*;
 
@@ -151,8 +151,10 @@ public class ElementDefinition extends Type implements ICompositeType {
         throw new IllegalArgumentException("Unknown PropertyRepresentation code '"+codeString+"'");
         }
         public Enumeration<PropertyRepresentation> fromType(Base code) throws FHIRException {
-          if (code == null || code.isEmpty())
+          if (code == null)
             return null;
+          if (code.isEmpty())
+            return new Enumeration<PropertyRepresentation>(this);
           String codeString = ((PrimitiveType) code).asStringValue();
           if (codeString == null || "".equals(codeString))
             return null;
@@ -182,6 +184,146 @@ public class ElementDefinition extends Type implements ICompositeType {
       return "?";
       }
     public String toSystem(PropertyRepresentation code) {
+      return code.getSystem();
+      }
+    }
+
+    public enum DiscriminatorType {
+        /**
+         * The slices have different values in the nominated element
+         */
+        VALUE, 
+        /**
+         * The slices are differentiated by the presence or absence of the nominated element
+         */
+        EXISTS, 
+        /**
+         * The slices have different values in the nominated element, as determined by testing them against the applicable ElementDefinition.pattern[x]
+         */
+        PATTERN, 
+        /**
+         * The slices are differentiated by type of the nominated element to a specifed profile
+         */
+        TYPE, 
+        /**
+         * The slices are differentiated by conformance of the nominated element to a specifed profile
+         */
+        PROFILE, 
+        /**
+         * added to help the parsers with the generic types
+         */
+        NULL;
+        public static DiscriminatorType fromCode(String codeString) throws FHIRException {
+            if (codeString == null || "".equals(codeString))
+                return null;
+        if ("value".equals(codeString))
+          return VALUE;
+        if ("exists".equals(codeString))
+          return EXISTS;
+        if ("pattern".equals(codeString))
+          return PATTERN;
+        if ("type".equals(codeString))
+          return TYPE;
+        if ("profile".equals(codeString))
+          return PROFILE;
+        if (Configuration.isAcceptInvalidEnums())
+          return null;
+        else
+          throw new FHIRException("Unknown DiscriminatorType code '"+codeString+"'");
+        }
+        public String toCode() {
+          switch (this) {
+            case VALUE: return "value";
+            case EXISTS: return "exists";
+            case PATTERN: return "pattern";
+            case TYPE: return "type";
+            case PROFILE: return "profile";
+            default: return "?";
+          }
+        }
+        public String getSystem() {
+          switch (this) {
+            case VALUE: return "http://hl7.org/fhir/discriminator-type";
+            case EXISTS: return "http://hl7.org/fhir/discriminator-type";
+            case PATTERN: return "http://hl7.org/fhir/discriminator-type";
+            case TYPE: return "http://hl7.org/fhir/discriminator-type";
+            case PROFILE: return "http://hl7.org/fhir/discriminator-type";
+            default: return "?";
+          }
+        }
+        public String getDefinition() {
+          switch (this) {
+            case VALUE: return "The slices have different values in the nominated element";
+            case EXISTS: return "The slices are differentiated by the presence or absence of the nominated element";
+            case PATTERN: return "The slices have different values in the nominated element, as determined by testing them against the applicable ElementDefinition.pattern[x]";
+            case TYPE: return "The slices are differentiated by type of the nominated element to a specifed profile";
+            case PROFILE: return "The slices are differentiated by conformance of the nominated element to a specifed profile";
+            default: return "?";
+          }
+        }
+        public String getDisplay() {
+          switch (this) {
+            case VALUE: return "Value";
+            case EXISTS: return "Exists";
+            case PATTERN: return "Pattern";
+            case TYPE: return "Type";
+            case PROFILE: return "Profile";
+            default: return "?";
+          }
+        }
+    }
+
+  public static class DiscriminatorTypeEnumFactory implements EnumFactory<DiscriminatorType> {
+    public DiscriminatorType fromCode(String codeString) throws IllegalArgumentException {
+      if (codeString == null || "".equals(codeString))
+            if (codeString == null || "".equals(codeString))
+                return null;
+        if ("value".equals(codeString))
+          return DiscriminatorType.VALUE;
+        if ("exists".equals(codeString))
+          return DiscriminatorType.EXISTS;
+        if ("pattern".equals(codeString))
+          return DiscriminatorType.PATTERN;
+        if ("type".equals(codeString))
+          return DiscriminatorType.TYPE;
+        if ("profile".equals(codeString))
+          return DiscriminatorType.PROFILE;
+        throw new IllegalArgumentException("Unknown DiscriminatorType code '"+codeString+"'");
+        }
+        public Enumeration<DiscriminatorType> fromType(Base code) throws FHIRException {
+          if (code == null)
+            return null;
+          if (code.isEmpty())
+            return new Enumeration<DiscriminatorType>(this);
+          String codeString = ((PrimitiveType) code).asStringValue();
+          if (codeString == null || "".equals(codeString))
+            return null;
+        if ("value".equals(codeString))
+          return new Enumeration<DiscriminatorType>(this, DiscriminatorType.VALUE);
+        if ("exists".equals(codeString))
+          return new Enumeration<DiscriminatorType>(this, DiscriminatorType.EXISTS);
+        if ("pattern".equals(codeString))
+          return new Enumeration<DiscriminatorType>(this, DiscriminatorType.PATTERN);
+        if ("type".equals(codeString))
+          return new Enumeration<DiscriminatorType>(this, DiscriminatorType.TYPE);
+        if ("profile".equals(codeString))
+          return new Enumeration<DiscriminatorType>(this, DiscriminatorType.PROFILE);
+        throw new FHIRException("Unknown DiscriminatorType code '"+codeString+"'");
+        }
+    public String toCode(DiscriminatorType code) {
+      if (code == DiscriminatorType.VALUE)
+        return "value";
+      if (code == DiscriminatorType.EXISTS)
+        return "exists";
+      if (code == DiscriminatorType.PATTERN)
+        return "pattern";
+      if (code == DiscriminatorType.TYPE)
+        return "type";
+      if (code == DiscriminatorType.PROFILE)
+        return "profile";
+      return "?";
+      }
+    public String toSystem(DiscriminatorType code) {
       return code.getSystem();
       }
     }
@@ -265,8 +407,10 @@ public class ElementDefinition extends Type implements ICompositeType {
         throw new IllegalArgumentException("Unknown SlicingRules code '"+codeString+"'");
         }
         public Enumeration<SlicingRules> fromType(Base code) throws FHIRException {
-          if (code == null || code.isEmpty())
+          if (code == null)
             return null;
+          if (code.isEmpty())
+            return new Enumeration<SlicingRules>(this);
           String codeString = ((PrimitiveType) code).asStringValue();
           if (codeString == null || "".equals(codeString))
             return null;
@@ -371,8 +515,10 @@ public class ElementDefinition extends Type implements ICompositeType {
         throw new IllegalArgumentException("Unknown AggregationMode code '"+codeString+"'");
         }
         public Enumeration<AggregationMode> fromType(Base code) throws FHIRException {
-          if (code == null || code.isEmpty())
+          if (code == null)
             return null;
+          if (code.isEmpty())
+            return new Enumeration<AggregationMode>(this);
           String codeString = ((PrimitiveType) code).asStringValue();
           if (codeString == null || "".equals(codeString))
             return null;
@@ -477,8 +623,10 @@ public class ElementDefinition extends Type implements ICompositeType {
         throw new IllegalArgumentException("Unknown ReferenceVersionRules code '"+codeString+"'");
         }
         public Enumeration<ReferenceVersionRules> fromType(Base code) throws FHIRException {
-          if (code == null || code.isEmpty())
+          if (code == null)
             return null;
+          if (code.isEmpty())
+            return new Enumeration<ReferenceVersionRules>(this);
           String codeString = ((PrimitiveType) code).asStringValue();
           if (codeString == null || "".equals(codeString))
             return null;
@@ -571,8 +719,10 @@ public class ElementDefinition extends Type implements ICompositeType {
         throw new IllegalArgumentException("Unknown ConstraintSeverity code '"+codeString+"'");
         }
         public Enumeration<ConstraintSeverity> fromType(Base code) throws FHIRException {
-          if (code == null || code.isEmpty())
+          if (code == null)
             return null;
+          if (code.isEmpty())
+            return new Enumeration<ConstraintSeverity>(this);
           String codeString = ((PrimitiveType) code).asStringValue();
           if (codeString == null || "".equals(codeString))
             return null;
@@ -599,9 +749,9 @@ public class ElementDefinition extends Type implements ICompositeType {
         /**
          * Designates which child elements are used to discriminate between the slices when processing an instance. If one or more discriminators are provided, the value of the child elements in the instance data SHALL completely distinguish which slice the element in the resource matches based on the allowed values for those elements in each of the slices.
          */
-        @Child(name = "discriminator", type = {StringType.class}, order=1, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+        @Child(name = "discriminator", type = {}, order=1, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
         @Description(shortDefinition="Element values that are used to distinguish the slices", formalDefinition="Designates which child elements are used to discriminate between the slices when processing an instance. If one or more discriminators are provided, the value of the child elements in the instance data SHALL completely distinguish which slice the element in the resource matches based on the allowed values for those elements in each of the slices." )
-        protected List<StringType> discriminator;
+        protected List<ElementDefinitionSlicingDiscriminatorComponent> discriminator;
 
         /**
          * A human-readable text description of how the slicing works. If there is no discriminator, this is required to be present to provide whatever information is possible about how the slices can be differentiated.
@@ -625,7 +775,7 @@ public class ElementDefinition extends Type implements ICompositeType {
         @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/resource-slicing-rules")
         protected Enumeration<SlicingRules> rules;
 
-        private static final long serialVersionUID = 233544215L;
+        private static final long serialVersionUID = -311635839L;
 
     /**
      * Constructor
@@ -645,16 +795,16 @@ public class ElementDefinition extends Type implements ICompositeType {
         /**
          * @return {@link #discriminator} (Designates which child elements are used to discriminate between the slices when processing an instance. If one or more discriminators are provided, the value of the child elements in the instance data SHALL completely distinguish which slice the element in the resource matches based on the allowed values for those elements in each of the slices.)
          */
-        public List<StringType> getDiscriminator() { 
+        public List<ElementDefinitionSlicingDiscriminatorComponent> getDiscriminator() { 
           if (this.discriminator == null)
-            this.discriminator = new ArrayList<StringType>();
+            this.discriminator = new ArrayList<ElementDefinitionSlicingDiscriminatorComponent>();
           return this.discriminator;
         }
 
         /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
-        public ElementDefinitionSlicingComponent setDiscriminator(List<StringType> theDiscriminator) { 
+        public ElementDefinitionSlicingComponent setDiscriminator(List<ElementDefinitionSlicingDiscriminatorComponent> theDiscriminator) { 
           this.discriminator = theDiscriminator;
           return this;
         }
@@ -662,45 +812,37 @@ public class ElementDefinition extends Type implements ICompositeType {
         public boolean hasDiscriminator() { 
           if (this.discriminator == null)
             return false;
-          for (StringType item : this.discriminator)
+          for (ElementDefinitionSlicingDiscriminatorComponent item : this.discriminator)
             if (!item.isEmpty())
               return true;
           return false;
         }
 
-        /**
-         * @return {@link #discriminator} (Designates which child elements are used to discriminate between the slices when processing an instance. If one or more discriminators are provided, the value of the child elements in the instance data SHALL completely distinguish which slice the element in the resource matches based on the allowed values for those elements in each of the slices.)
-         */
-        public StringType addDiscriminatorElement() {//2 
-          StringType t = new StringType();
+        public ElementDefinitionSlicingDiscriminatorComponent addDiscriminator() { //3
+          ElementDefinitionSlicingDiscriminatorComponent t = new ElementDefinitionSlicingDiscriminatorComponent();
           if (this.discriminator == null)
-            this.discriminator = new ArrayList<StringType>();
+            this.discriminator = new ArrayList<ElementDefinitionSlicingDiscriminatorComponent>();
           this.discriminator.add(t);
           return t;
         }
 
-        /**
-         * @param value {@link #discriminator} (Designates which child elements are used to discriminate between the slices when processing an instance. If one or more discriminators are provided, the value of the child elements in the instance data SHALL completely distinguish which slice the element in the resource matches based on the allowed values for those elements in each of the slices.)
-         */
-        public ElementDefinitionSlicingComponent addDiscriminator(String value) { //1
-          StringType t = new StringType();
-          t.setValue(value);
+        public ElementDefinitionSlicingComponent addDiscriminator(ElementDefinitionSlicingDiscriminatorComponent t) { //3
+          if (t == null)
+            return this;
           if (this.discriminator == null)
-            this.discriminator = new ArrayList<StringType>();
+            this.discriminator = new ArrayList<ElementDefinitionSlicingDiscriminatorComponent>();
           this.discriminator.add(t);
           return this;
         }
 
         /**
-         * @param value {@link #discriminator} (Designates which child elements are used to discriminate between the slices when processing an instance. If one or more discriminators are provided, the value of the child elements in the instance data SHALL completely distinguish which slice the element in the resource matches based on the allowed values for those elements in each of the slices.)
+         * @return The first repetition of repeating field {@link #discriminator}, creating it if it does not already exist
          */
-        public boolean hasDiscriminator(String value) { 
-          if (this.discriminator == null)
-            return false;
-          for (StringType v : this.discriminator)
-            if (v.equals(value)) // string
-              return true;
-          return false;
+        public ElementDefinitionSlicingDiscriminatorComponent getDiscriminatorFirstRep() { 
+          if (getDiscriminator().isEmpty()) {
+            addDiscriminator();
+          }
+          return getDiscriminator().get(0);
         }
 
         /**
@@ -844,7 +986,7 @@ public class ElementDefinition extends Type implements ICompositeType {
 
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
-          childrenList.add(new Property("discriminator", "string", "Designates which child elements are used to discriminate between the slices when processing an instance. If one or more discriminators are provided, the value of the child elements in the instance data SHALL completely distinguish which slice the element in the resource matches based on the allowed values for those elements in each of the slices.", 0, java.lang.Integer.MAX_VALUE, discriminator));
+          childrenList.add(new Property("discriminator", "", "Designates which child elements are used to discriminate between the slices when processing an instance. If one or more discriminators are provided, the value of the child elements in the instance data SHALL completely distinguish which slice the element in the resource matches based on the allowed values for those elements in each of the slices.", 0, java.lang.Integer.MAX_VALUE, discriminator));
           childrenList.add(new Property("description", "string", "A human-readable text description of how the slicing works. If there is no discriminator, this is required to be present to provide whatever information is possible about how the slices can be differentiated.", 0, java.lang.Integer.MAX_VALUE, description));
           childrenList.add(new Property("ordered", "boolean", "If the matching elements have to occur in the same order as defined in the profile.", 0, java.lang.Integer.MAX_VALUE, ordered));
           childrenList.add(new Property("rules", "code", "Whether additional slices are allowed or not. When the slices are ordered, profile authors can also say that additional slices are only allowed at the end.", 0, java.lang.Integer.MAX_VALUE, rules));
@@ -853,7 +995,7 @@ public class ElementDefinition extends Type implements ICompositeType {
       @Override
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
-        case -1888270692: /*discriminator*/ return this.discriminator == null ? new Base[0] : this.discriminator.toArray(new Base[this.discriminator.size()]); // StringType
+        case -1888270692: /*discriminator*/ return this.discriminator == null ? new Base[0] : this.discriminator.toArray(new Base[this.discriminator.size()]); // ElementDefinitionSlicingDiscriminatorComponent
         case -1724546052: /*description*/ return this.description == null ? new Base[0] : new Base[] {this.description}; // StringType
         case -1207109523: /*ordered*/ return this.ordered == null ? new Base[0] : new Base[] {this.ordered}; // BooleanType
         case 108873975: /*rules*/ return this.rules == null ? new Base[0] : new Base[] {this.rules}; // Enumeration<SlicingRules>
@@ -863,47 +1005,62 @@ public class ElementDefinition extends Type implements ICompositeType {
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case -1888270692: // discriminator
-          this.getDiscriminator().add(castToString(value)); // StringType
-          break;
+          this.getDiscriminator().add((ElementDefinitionSlicingDiscriminatorComponent) value); // ElementDefinitionSlicingDiscriminatorComponent
+          return value;
         case -1724546052: // description
           this.description = castToString(value); // StringType
-          break;
+          return value;
         case -1207109523: // ordered
           this.ordered = castToBoolean(value); // BooleanType
-          break;
+          return value;
         case 108873975: // rules
-          this.rules = new SlicingRulesEnumFactory().fromType(value); // Enumeration<SlicingRules>
-          break;
-        default: super.setProperty(hash, name, value);
+          value = new SlicingRulesEnumFactory().fromType(castToCode(value));
+          this.rules = (Enumeration) value; // Enumeration<SlicingRules>
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("discriminator"))
-          this.getDiscriminator().add(castToString(value));
-        else if (name.equals("description"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("discriminator")) {
+          this.getDiscriminator().add((ElementDefinitionSlicingDiscriminatorComponent) value);
+        } else if (name.equals("description")) {
           this.description = castToString(value); // StringType
-        else if (name.equals("ordered"))
+        } else if (name.equals("ordered")) {
           this.ordered = castToBoolean(value); // BooleanType
-        else if (name.equals("rules"))
-          this.rules = new SlicingRulesEnumFactory().fromType(value); // Enumeration<SlicingRules>
-        else
-          super.setProperty(name, value);
+        } else if (name.equals("rules")) {
+          value = new SlicingRulesEnumFactory().fromType(castToCode(value));
+          this.rules = (Enumeration) value; // Enumeration<SlicingRules>
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case -1888270692: throw new FHIRException("Cannot make property discriminator as it is not a complex type"); // StringType
-        case -1724546052: throw new FHIRException("Cannot make property description as it is not a complex type"); // StringType
-        case -1207109523: throw new FHIRException("Cannot make property ordered as it is not a complex type"); // BooleanType
-        case 108873975: throw new FHIRException("Cannot make property rules as it is not a complex type"); // Enumeration<SlicingRules>
+        case -1888270692:  return addDiscriminator(); 
+        case -1724546052:  return getDescriptionElement();
+        case -1207109523:  return getOrderedElement();
+        case 108873975:  return getRulesElement();
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -1888270692: /*discriminator*/ return new String[] {};
+        case -1724546052: /*description*/ return new String[] {"string"};
+        case -1207109523: /*ordered*/ return new String[] {"boolean"};
+        case 108873975: /*rules*/ return new String[] {"code"};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }
@@ -911,7 +1068,7 @@ public class ElementDefinition extends Type implements ICompositeType {
       @Override
       public Base addChild(String name) throws FHIRException {
         if (name.equals("discriminator")) {
-          throw new FHIRException("Cannot call addChild on a primitive type ElementDefinition.discriminator");
+          return addDiscriminator();
         }
         else if (name.equals("description")) {
           throw new FHIRException("Cannot call addChild on a primitive type ElementDefinition.description");
@@ -930,8 +1087,8 @@ public class ElementDefinition extends Type implements ICompositeType {
         ElementDefinitionSlicingComponent dst = new ElementDefinitionSlicingComponent();
         copyValues(dst);
         if (discriminator != null) {
-          dst.discriminator = new ArrayList<StringType>();
-          for (StringType i : discriminator)
+          dst.discriminator = new ArrayList<ElementDefinitionSlicingDiscriminatorComponent>();
+          for (ElementDefinitionSlicingDiscriminatorComponent i : discriminator)
             dst.discriminator.add(i.copy());
         };
         dst.description = description == null ? null : description.copy();
@@ -958,8 +1115,8 @@ public class ElementDefinition extends Type implements ICompositeType {
         if (!(other instanceof ElementDefinitionSlicingComponent))
           return false;
         ElementDefinitionSlicingComponent o = (ElementDefinitionSlicingComponent) other;
-        return compareValues(discriminator, o.discriminator, true) && compareValues(description, o.description, true)
-           && compareValues(ordered, o.ordered, true) && compareValues(rules, o.rules, true);
+        return compareValues(description, o.description, true) && compareValues(ordered, o.ordered, true) && compareValues(rules, o.rules, true)
+          ;
       }
 
       public boolean isEmpty() {
@@ -969,6 +1126,245 @@ public class ElementDefinition extends Type implements ICompositeType {
 
   public String fhirType() {
     return "ElementDefinition.slicing";
+
+  }
+
+  }
+
+    @Block()
+    public static class ElementDefinitionSlicingDiscriminatorComponent extends Element implements IBaseDatatypeElement {
+        /**
+         * How the element value is interpreted when discrimination is evaluated.
+         */
+        @Child(name = "type", type = {CodeType.class}, order=1, min=1, max=1, modifier=false, summary=true)
+        @Description(shortDefinition="value | exists | pattern | type | profile", formalDefinition="How the element value is interpreted when discrimination is evaluated." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/discriminator-type")
+        protected Enumeration<DiscriminatorType> type;
+
+        /**
+         * A FHIRPath expression, using a restricted subset of FHIRPath, that is used to identify the element on which discrimination is based.
+         */
+        @Child(name = "path", type = {StringType.class}, order=2, min=1, max=1, modifier=false, summary=true)
+        @Description(shortDefinition="Path to element value", formalDefinition="A FHIRPath expression, using a restricted subset of FHIRPath, that is used to identify the element on which discrimination is based." )
+        protected StringType path;
+
+        private static final long serialVersionUID = 1151159293L;
+
+    /**
+     * Constructor
+     */
+      public ElementDefinitionSlicingDiscriminatorComponent() {
+        super();
+      }
+
+    /**
+     * Constructor
+     */
+      public ElementDefinitionSlicingDiscriminatorComponent(Enumeration<DiscriminatorType> type, StringType path) {
+        super();
+        this.type = type;
+        this.path = path;
+      }
+
+        /**
+         * @return {@link #type} (How the element value is interpreted when discrimination is evaluated.). This is the underlying object with id, value and extensions. The accessor "getType" gives direct access to the value
+         */
+        public Enumeration<DiscriminatorType> getTypeElement() { 
+          if (this.type == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create ElementDefinitionSlicingDiscriminatorComponent.type");
+            else if (Configuration.doAutoCreate())
+              this.type = new Enumeration<DiscriminatorType>(new DiscriminatorTypeEnumFactory()); // bb
+          return this.type;
+        }
+
+        public boolean hasTypeElement() { 
+          return this.type != null && !this.type.isEmpty();
+        }
+
+        public boolean hasType() { 
+          return this.type != null && !this.type.isEmpty();
+        }
+
+        /**
+         * @param value {@link #type} (How the element value is interpreted when discrimination is evaluated.). This is the underlying object with id, value and extensions. The accessor "getType" gives direct access to the value
+         */
+        public ElementDefinitionSlicingDiscriminatorComponent setTypeElement(Enumeration<DiscriminatorType> value) { 
+          this.type = value;
+          return this;
+        }
+
+        /**
+         * @return How the element value is interpreted when discrimination is evaluated.
+         */
+        public DiscriminatorType getType() { 
+          return this.type == null ? null : this.type.getValue();
+        }
+
+        /**
+         * @param value How the element value is interpreted when discrimination is evaluated.
+         */
+        public ElementDefinitionSlicingDiscriminatorComponent setType(DiscriminatorType value) { 
+            if (this.type == null)
+              this.type = new Enumeration<DiscriminatorType>(new DiscriminatorTypeEnumFactory());
+            this.type.setValue(value);
+          return this;
+        }
+
+        /**
+         * @return {@link #path} (A FHIRPath expression, using a restricted subset of FHIRPath, that is used to identify the element on which discrimination is based.). This is the underlying object with id, value and extensions. The accessor "getPath" gives direct access to the value
+         */
+        public StringType getPathElement() { 
+          if (this.path == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create ElementDefinitionSlicingDiscriminatorComponent.path");
+            else if (Configuration.doAutoCreate())
+              this.path = new StringType(); // bb
+          return this.path;
+        }
+
+        public boolean hasPathElement() { 
+          return this.path != null && !this.path.isEmpty();
+        }
+
+        public boolean hasPath() { 
+          return this.path != null && !this.path.isEmpty();
+        }
+
+        /**
+         * @param value {@link #path} (A FHIRPath expression, using a restricted subset of FHIRPath, that is used to identify the element on which discrimination is based.). This is the underlying object with id, value and extensions. The accessor "getPath" gives direct access to the value
+         */
+        public ElementDefinitionSlicingDiscriminatorComponent setPathElement(StringType value) { 
+          this.path = value;
+          return this;
+        }
+
+        /**
+         * @return A FHIRPath expression, using a restricted subset of FHIRPath, that is used to identify the element on which discrimination is based.
+         */
+        public String getPath() { 
+          return this.path == null ? null : this.path.getValue();
+        }
+
+        /**
+         * @param value A FHIRPath expression, using a restricted subset of FHIRPath, that is used to identify the element on which discrimination is based.
+         */
+        public ElementDefinitionSlicingDiscriminatorComponent setPath(String value) { 
+            if (this.path == null)
+              this.path = new StringType();
+            this.path.setValue(value);
+          return this;
+        }
+
+        protected void listChildren(List<Property> childrenList) {
+          super.listChildren(childrenList);
+          childrenList.add(new Property("type", "code", "How the element value is interpreted when discrimination is evaluated.", 0, java.lang.Integer.MAX_VALUE, type));
+          childrenList.add(new Property("path", "string", "A FHIRPath expression, using a restricted subset of FHIRPath, that is used to identify the element on which discrimination is based.", 0, java.lang.Integer.MAX_VALUE, path));
+        }
+
+      @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // Enumeration<DiscriminatorType>
+        case 3433509: /*path*/ return this.path == null ? new Base[0] : new Base[] {this.path}; // StringType
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 3575610: // type
+          value = new DiscriminatorTypeEnumFactory().fromType(castToCode(value));
+          this.type = (Enumeration) value; // Enumeration<DiscriminatorType>
+          return value;
+        case 3433509: // path
+          this.path = castToString(value); // StringType
+          return value;
+        default: return super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("type")) {
+          value = new DiscriminatorTypeEnumFactory().fromType(castToCode(value));
+          this.type = (Enumeration) value; // Enumeration<DiscriminatorType>
+        } else if (name.equals("path")) {
+          this.path = castToString(value); // StringType
+        } else
+          return super.setProperty(name, value);
+        return value;
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3575610:  return getTypeElement();
+        case 3433509:  return getPathElement();
+        default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3575610: /*type*/ return new String[] {"code"};
+        case 3433509: /*path*/ return new String[] {"string"};
+        default: return super.getTypesForProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("type")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ElementDefinition.type");
+        }
+        else if (name.equals("path")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ElementDefinition.path");
+        }
+        else
+          return super.addChild(name);
+      }
+
+      public ElementDefinitionSlicingDiscriminatorComponent copy() {
+        ElementDefinitionSlicingDiscriminatorComponent dst = new ElementDefinitionSlicingDiscriminatorComponent();
+        copyValues(dst);
+        dst.type = type == null ? null : type.copy();
+        dst.path = path == null ? null : path.copy();
+        return dst;
+      }
+
+      @Override
+      public boolean equalsDeep(Base other) {
+        if (!super.equalsDeep(other))
+          return false;
+        if (!(other instanceof ElementDefinitionSlicingDiscriminatorComponent))
+          return false;
+        ElementDefinitionSlicingDiscriminatorComponent o = (ElementDefinitionSlicingDiscriminatorComponent) other;
+        return compareDeep(type, o.type, true) && compareDeep(path, o.path, true);
+      }
+
+      @Override
+      public boolean equalsShallow(Base other) {
+        if (!super.equalsShallow(other))
+          return false;
+        if (!(other instanceof ElementDefinitionSlicingDiscriminatorComponent))
+          return false;
+        ElementDefinitionSlicingDiscriminatorComponent o = (ElementDefinitionSlicingDiscriminatorComponent) other;
+        return compareValues(type, o.type, true) && compareValues(path, o.path, true);
+      }
+
+      public boolean isEmpty() {
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(type, path);
+      }
+
+  public String fhirType() {
+    return "ElementDefinition.slicing.discriminator";
 
   }
 
@@ -1170,41 +1566,53 @@ public class ElementDefinition extends Type implements ICompositeType {
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case 3433509: // path
           this.path = castToString(value); // StringType
-          break;
+          return value;
         case 108114: // min
           this.min = castToInteger(value); // IntegerType
-          break;
+          return value;
         case 107876: // max
           this.max = castToString(value); // StringType
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("path"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("path")) {
           this.path = castToString(value); // StringType
-        else if (name.equals("min"))
+        } else if (name.equals("min")) {
           this.min = castToInteger(value); // IntegerType
-        else if (name.equals("max"))
+        } else if (name.equals("max")) {
           this.max = castToString(value); // StringType
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 3433509: throw new FHIRException("Cannot make property path as it is not a complex type"); // StringType
-        case 108114: throw new FHIRException("Cannot make property min as it is not a complex type"); // IntegerType
-        case 107876: throw new FHIRException("Cannot make property max as it is not a complex type"); // StringType
+        case 3433509:  return getPathElement();
+        case 108114:  return getMinElement();
+        case 107876:  return getMaxElement();
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3433509: /*path*/ return new String[] {"string"};
+        case 108114: /*min*/ return new String[] {"integer"};
+        case 107876: /*max*/ return new String[] {"string"};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }
@@ -1599,53 +2007,71 @@ public class ElementDefinition extends Type implements ICompositeType {
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case 3059181: // code
           this.code = castToUri(value); // UriType
-          break;
+          return value;
         case -309425751: // profile
           this.profile = castToUri(value); // UriType
-          break;
+          return value;
         case 1994521304: // targetProfile
           this.targetProfile = castToUri(value); // UriType
-          break;
+          return value;
         case 841524962: // aggregation
-          this.getAggregation().add(new AggregationModeEnumFactory().fromType(value)); // Enumeration<AggregationMode>
-          break;
+          value = new AggregationModeEnumFactory().fromType(castToCode(value));
+          this.getAggregation().add((Enumeration) value); // Enumeration<AggregationMode>
+          return value;
         case -670487542: // versioning
-          this.versioning = new ReferenceVersionRulesEnumFactory().fromType(value); // Enumeration<ReferenceVersionRules>
-          break;
-        default: super.setProperty(hash, name, value);
+          value = new ReferenceVersionRulesEnumFactory().fromType(castToCode(value));
+          this.versioning = (Enumeration) value; // Enumeration<ReferenceVersionRules>
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("code"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("code")) {
           this.code = castToUri(value); // UriType
-        else if (name.equals("profile"))
+        } else if (name.equals("profile")) {
           this.profile = castToUri(value); // UriType
-        else if (name.equals("targetProfile"))
+        } else if (name.equals("targetProfile")) {
           this.targetProfile = castToUri(value); // UriType
-        else if (name.equals("aggregation"))
-          this.getAggregation().add(new AggregationModeEnumFactory().fromType(value));
-        else if (name.equals("versioning"))
-          this.versioning = new ReferenceVersionRulesEnumFactory().fromType(value); // Enumeration<ReferenceVersionRules>
-        else
-          super.setProperty(name, value);
+        } else if (name.equals("aggregation")) {
+          value = new AggregationModeEnumFactory().fromType(castToCode(value));
+          this.getAggregation().add((Enumeration) value);
+        } else if (name.equals("versioning")) {
+          value = new ReferenceVersionRulesEnumFactory().fromType(castToCode(value));
+          this.versioning = (Enumeration) value; // Enumeration<ReferenceVersionRules>
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 3059181: throw new FHIRException("Cannot make property code as it is not a complex type"); // UriType
-        case -309425751: throw new FHIRException("Cannot make property profile as it is not a complex type"); // UriType
-        case 1994521304: throw new FHIRException("Cannot make property targetProfile as it is not a complex type"); // UriType
-        case 841524962: throw new FHIRException("Cannot make property aggregation as it is not a complex type"); // Enumeration<AggregationMode>
-        case -670487542: throw new FHIRException("Cannot make property versioning as it is not a complex type"); // Enumeration<ReferenceVersionRules>
+        case 3059181:  return getCodeElement();
+        case -309425751:  return getProfileElement();
+        case 1994521304:  return getTargetProfileElement();
+        case 841524962:  return addAggregationElement();
+        case -670487542:  return getVersioningElement();
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3059181: /*code*/ return new String[] {"uri"};
+        case -309425751: /*profile*/ return new String[] {"uri"};
+        case 1994521304: /*targetProfile*/ return new String[] {"uri"};
+        case 841524962: /*aggregation*/ return new String[] {"code"};
+        case -670487542: /*versioning*/ return new String[] {"code"};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }
@@ -1837,35 +2263,47 @@ public class ElementDefinition extends Type implements ICompositeType {
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case 102727412: // label
           this.label = castToString(value); // StringType
-          break;
+          return value;
         case 111972721: // value
           this.value = castToType(value); // org.hl7.fhir.dstu3.model.Type
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("label"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("label")) {
           this.label = castToString(value); // StringType
-        else if (name.equals("value[x]"))
+        } else if (name.equals("value[x]")) {
           this.value = castToType(value); // org.hl7.fhir.dstu3.model.Type
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 102727412: throw new FHIRException("Cannot make property label as it is not a complex type"); // StringType
-        case -1410166417:  return getValue(); // org.hl7.fhir.dstu3.model.Type
+        case 102727412:  return getLabelElement();
+        case -1410166417:  return getValue(); 
+        case 111972721:  return getValue(); 
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 102727412: /*label*/ return new String[] {"string"};
+        case 111972721: /*value*/ return new String[] {"*"};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }
@@ -2082,10 +2520,10 @@ public class ElementDefinition extends Type implements ICompositeType {
         protected StringType human;
 
         /**
-         * A [FluentPath](http://hl7.org/fluentpath) expression of constraint that can be executed to see if this constraint is met.
+         * A [FHIRPath](http://hl7.org/fluentpath) expression of constraint that can be executed to see if this constraint is met.
          */
         @Child(name = "expression", type = {StringType.class}, order=5, min=1, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="FluentPath expression of constraint", formalDefinition="A [FluentPath](http://hl7.org/fluentpath) expression of constraint that can be executed to see if this constraint is met." )
+        @Description(shortDefinition="FHIRPath expression of constraint", formalDefinition="A [FHIRPath](http://hl7.org/fluentpath) expression of constraint that can be executed to see if this constraint is met." )
         protected StringType expression;
 
         /**
@@ -2307,7 +2745,7 @@ public class ElementDefinition extends Type implements ICompositeType {
         }
 
         /**
-         * @return {@link #expression} (A [FluentPath](http://hl7.org/fluentpath) expression of constraint that can be executed to see if this constraint is met.). This is the underlying object with id, value and extensions. The accessor "getExpression" gives direct access to the value
+         * @return {@link #expression} (A [FHIRPath](http://hl7.org/fluentpath) expression of constraint that can be executed to see if this constraint is met.). This is the underlying object with id, value and extensions. The accessor "getExpression" gives direct access to the value
          */
         public StringType getExpressionElement() { 
           if (this.expression == null)
@@ -2327,7 +2765,7 @@ public class ElementDefinition extends Type implements ICompositeType {
         }
 
         /**
-         * @param value {@link #expression} (A [FluentPath](http://hl7.org/fluentpath) expression of constraint that can be executed to see if this constraint is met.). This is the underlying object with id, value and extensions. The accessor "getExpression" gives direct access to the value
+         * @param value {@link #expression} (A [FHIRPath](http://hl7.org/fluentpath) expression of constraint that can be executed to see if this constraint is met.). This is the underlying object with id, value and extensions. The accessor "getExpression" gives direct access to the value
          */
         public ElementDefinitionConstraintComponent setExpressionElement(StringType value) { 
           this.expression = value;
@@ -2335,14 +2773,14 @@ public class ElementDefinition extends Type implements ICompositeType {
         }
 
         /**
-         * @return A [FluentPath](http://hl7.org/fluentpath) expression of constraint that can be executed to see if this constraint is met.
+         * @return A [FHIRPath](http://hl7.org/fluentpath) expression of constraint that can be executed to see if this constraint is met.
          */
         public String getExpression() { 
           return this.expression == null ? null : this.expression.getValue();
         }
 
         /**
-         * @param value A [FluentPath](http://hl7.org/fluentpath) expression of constraint that can be executed to see if this constraint is met.
+         * @param value A [FHIRPath](http://hl7.org/fluentpath) expression of constraint that can be executed to see if this constraint is met.
          */
         public ElementDefinitionConstraintComponent setExpression(String value) { 
             if (this.expression == null)
@@ -2455,7 +2893,7 @@ public class ElementDefinition extends Type implements ICompositeType {
           childrenList.add(new Property("requirements", "string", "Description of why this constraint is necessary or appropriate.", 0, java.lang.Integer.MAX_VALUE, requirements));
           childrenList.add(new Property("severity", "code", "Identifies the impact constraint violation has on the conformance of the instance.", 0, java.lang.Integer.MAX_VALUE, severity));
           childrenList.add(new Property("human", "string", "Text that can be used to describe the constraint in messages identifying that the constraint has been violated.", 0, java.lang.Integer.MAX_VALUE, human));
-          childrenList.add(new Property("expression", "string", "A [FluentPath](http://hl7.org/fluentpath) expression of constraint that can be executed to see if this constraint is met.", 0, java.lang.Integer.MAX_VALUE, expression));
+          childrenList.add(new Property("expression", "string", "A [FHIRPath](http://hl7.org/fluentpath) expression of constraint that can be executed to see if this constraint is met.", 0, java.lang.Integer.MAX_VALUE, expression));
           childrenList.add(new Property("xpath", "string", "An XPath expression of constraint that can be executed to see if this constraint is met.", 0, java.lang.Integer.MAX_VALUE, xpath));
           childrenList.add(new Property("source", "uri", "A reference to the original source of the constraint, for traceability purposes.", 0, java.lang.Integer.MAX_VALUE, source));
         }
@@ -2476,65 +2914,83 @@ public class ElementDefinition extends Type implements ICompositeType {
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case 106079: // key
           this.key = castToId(value); // IdType
-          break;
+          return value;
         case -1619874672: // requirements
           this.requirements = castToString(value); // StringType
-          break;
+          return value;
         case 1478300413: // severity
-          this.severity = new ConstraintSeverityEnumFactory().fromType(value); // Enumeration<ConstraintSeverity>
-          break;
+          value = new ConstraintSeverityEnumFactory().fromType(castToCode(value));
+          this.severity = (Enumeration) value; // Enumeration<ConstraintSeverity>
+          return value;
         case 99639597: // human
           this.human = castToString(value); // StringType
-          break;
+          return value;
         case -1795452264: // expression
           this.expression = castToString(value); // StringType
-          break;
+          return value;
         case 114256029: // xpath
           this.xpath = castToString(value); // StringType
-          break;
+          return value;
         case -896505829: // source
           this.source = castToUri(value); // UriType
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("key"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("key")) {
           this.key = castToId(value); // IdType
-        else if (name.equals("requirements"))
+        } else if (name.equals("requirements")) {
           this.requirements = castToString(value); // StringType
-        else if (name.equals("severity"))
-          this.severity = new ConstraintSeverityEnumFactory().fromType(value); // Enumeration<ConstraintSeverity>
-        else if (name.equals("human"))
+        } else if (name.equals("severity")) {
+          value = new ConstraintSeverityEnumFactory().fromType(castToCode(value));
+          this.severity = (Enumeration) value; // Enumeration<ConstraintSeverity>
+        } else if (name.equals("human")) {
           this.human = castToString(value); // StringType
-        else if (name.equals("expression"))
+        } else if (name.equals("expression")) {
           this.expression = castToString(value); // StringType
-        else if (name.equals("xpath"))
+        } else if (name.equals("xpath")) {
           this.xpath = castToString(value); // StringType
-        else if (name.equals("source"))
+        } else if (name.equals("source")) {
           this.source = castToUri(value); // UriType
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 106079: throw new FHIRException("Cannot make property key as it is not a complex type"); // IdType
-        case -1619874672: throw new FHIRException("Cannot make property requirements as it is not a complex type"); // StringType
-        case 1478300413: throw new FHIRException("Cannot make property severity as it is not a complex type"); // Enumeration<ConstraintSeverity>
-        case 99639597: throw new FHIRException("Cannot make property human as it is not a complex type"); // StringType
-        case -1795452264: throw new FHIRException("Cannot make property expression as it is not a complex type"); // StringType
-        case 114256029: throw new FHIRException("Cannot make property xpath as it is not a complex type"); // StringType
-        case -896505829: throw new FHIRException("Cannot make property source as it is not a complex type"); // UriType
+        case 106079:  return getKeyElement();
+        case -1619874672:  return getRequirementsElement();
+        case 1478300413:  return getSeverityElement();
+        case 99639597:  return getHumanElement();
+        case -1795452264:  return getExpressionElement();
+        case 114256029:  return getXpathElement();
+        case -896505829:  return getSourceElement();
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 106079: /*key*/ return new String[] {"id"};
+        case -1619874672: /*requirements*/ return new String[] {"string"};
+        case 1478300413: /*severity*/ return new String[] {"code"};
+        case 99639597: /*human*/ return new String[] {"string"};
+        case -1795452264: /*expression*/ return new String[] {"string"};
+        case 114256029: /*xpath*/ return new String[] {"string"};
+        case -896505829: /*source*/ return new String[] {"uri"};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }
@@ -2814,41 +3270,56 @@ public class ElementDefinition extends Type implements ICompositeType {
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case 1791316033: // strength
-          this.strength = new BindingStrengthEnumFactory().fromType(value); // Enumeration<BindingStrength>
-          break;
+          value = new BindingStrengthEnumFactory().fromType(castToCode(value));
+          this.strength = (Enumeration) value; // Enumeration<BindingStrength>
+          return value;
         case -1724546052: // description
           this.description = castToString(value); // StringType
-          break;
+          return value;
         case -1410174671: // valueSet
           this.valueSet = castToType(value); // Type
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("strength"))
-          this.strength = new BindingStrengthEnumFactory().fromType(value); // Enumeration<BindingStrength>
-        else if (name.equals("description"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("strength")) {
+          value = new BindingStrengthEnumFactory().fromType(castToCode(value));
+          this.strength = (Enumeration) value; // Enumeration<BindingStrength>
+        } else if (name.equals("description")) {
           this.description = castToString(value); // StringType
-        else if (name.equals("valueSet[x]"))
+        } else if (name.equals("valueSet[x]")) {
           this.valueSet = castToType(value); // Type
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 1791316033: throw new FHIRException("Cannot make property strength as it is not a complex type"); // Enumeration<BindingStrength>
-        case -1724546052: throw new FHIRException("Cannot make property description as it is not a complex type"); // StringType
-        case -1438410321:  return getValueSet(); // Type
+        case 1791316033:  return getStrengthElement();
+        case -1724546052:  return getDescriptionElement();
+        case -1438410321:  return getValueSet(); 
+        case -1410174671:  return getValueSet(); 
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 1791316033: /*strength*/ return new String[] {"code"};
+        case -1724546052: /*description*/ return new String[] {"string"};
+        case -1410174671: /*valueSet*/ return new String[] {"uri", "Reference"};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }
@@ -3115,41 +3586,53 @@ public class ElementDefinition extends Type implements ICompositeType {
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case -135761730: // identity
           this.identity = castToId(value); // IdType
-          break;
+          return value;
         case -1613589672: // language
           this.language = castToCode(value); // CodeType
-          break;
+          return value;
         case 107868: // map
           this.map = castToString(value); // StringType
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("identity"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("identity")) {
           this.identity = castToId(value); // IdType
-        else if (name.equals("language"))
+        } else if (name.equals("language")) {
           this.language = castToCode(value); // CodeType
-        else if (name.equals("map"))
+        } else if (name.equals("map")) {
           this.map = castToString(value); // StringType
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case -135761730: throw new FHIRException("Cannot make property identity as it is not a complex type"); // IdType
-        case -1613589672: throw new FHIRException("Cannot make property language as it is not a complex type"); // CodeType
-        case 107868: throw new FHIRException("Cannot make property map as it is not a complex type"); // StringType
+        case -135761730:  return getIdentityElement();
+        case -1613589672:  return getLanguageElement();
+        case 107868:  return getMapElement();
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -135761730: /*identity*/ return new String[] {"id"};
+        case -1613589672: /*language*/ return new String[] {"code"};
+        case 107868: /*map*/ return new String[] {"string"};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }
@@ -3235,17 +3718,17 @@ public class ElementDefinition extends Type implements ICompositeType {
     protected StringType sliceName;
 
     /**
-     * The text to display beside the element indicating its meaning or to use to prompt for the element in a user display or form.
+     * A single preferred label which is the text to display beside the element indicating its meaning or to use to prompt for the element in a user display or form.
      */
     @Child(name = "label", type = {StringType.class}, order=3, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Name for element to display with or prompt for element", formalDefinition="The text to display beside the element indicating its meaning or to use to prompt for the element in a user display or form." )
+    @Description(shortDefinition="Name for element to display with or prompt for element", formalDefinition="A single preferred label which is the text to display beside the element indicating its meaning or to use to prompt for the element in a user display or form." )
     protected StringType label;
 
     /**
-     * A code that provides the meaning for the element according to a particular terminology.
+     * A code that has the same meaning as the element in a particular terminology.
      */
     @Child(name = "code", type = {Coding.class}, order=4, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-    @Description(shortDefinition="Defining code", formalDefinition="A code that provides the meaning for the element according to a particular terminology." )
+    @Description(shortDefinition="Corresponding codes in terminologies", formalDefinition="A code that has the same meaning as the element in a particular terminology." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/observation-codes")
     protected List<Coding> code;
 
@@ -3260,7 +3743,7 @@ public class ElementDefinition extends Type implements ICompositeType {
      * A concise description of what this element means (e.g. for use in autogenerated summaries).
      */
     @Child(name = "short", type = {StringType.class}, order=6, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Concise definition for xml presentation", formalDefinition="A concise description of what this element means (e.g. for use in autogenerated summaries)." )
+    @Description(shortDefinition="Concise definition for space-constrained presentation", formalDefinition="A concise description of what this element means (e.g. for use in autogenerated summaries)." )
     protected StringType short_;
 
     /**
@@ -3273,9 +3756,9 @@ public class ElementDefinition extends Type implements ICompositeType {
     /**
      * Explanatory notes and implementation guidance about the data element, including notes about how to use the data properly, exceptions to proper use, etc.
      */
-    @Child(name = "comments", type = {MarkdownType.class}, order=8, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "comment", type = {MarkdownType.class}, order=8, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Comments about the use of this element", formalDefinition="Explanatory notes and implementation guidance about the data element, including notes about how to use the data properly, exceptions to proper use, etc." )
-    protected MarkdownType comments;
+    protected MarkdownType comment;
 
     /**
      * This element is for traceability of why the element was created and why the constraints exist as they do. This may be used to point to source materials or specifications that drove the structure of this element.
@@ -3294,9 +3777,9 @@ public class ElementDefinition extends Type implements ICompositeType {
     /**
      * The minimum number of times this element SHALL appear in the instance.
      */
-    @Child(name = "min", type = {IntegerType.class}, order=11, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "min", type = {UnsignedIntType.class}, order=11, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Minimum Cardinality", formalDefinition="The minimum number of times this element SHALL appear in the instance." )
-    protected IntegerType min;
+    protected UnsignedIntType min;
 
     /**
      * The maximum number of times this element is permitted to appear in the instance.
@@ -3341,97 +3824,104 @@ public class ElementDefinition extends Type implements ICompositeType {
     protected MarkdownType meaningWhenMissing;
 
     /**
+     * If present, indicates that the order of the repeating element has meaning and describes what that meaning is.  If absent, it means that the order of the element has no meaning.
+     */
+    @Child(name = "orderMeaning", type = {StringType.class}, order=18, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="What the order of the elements means", formalDefinition="If present, indicates that the order of the repeating element has meaning and describes what that meaning is.  If absent, it means that the order of the element has no meaning." )
+    protected StringType orderMeaning;
+
+    /**
      * Specifies a value that SHALL be exactly the value  for this element in the instance. For purposes of comparison, non-significant whitespace is ignored, and all values must be an exact match (case and accent sensitive). Missing elements/attributes must also be missing.
      */
-    @Child(name = "fixed", type = {}, order=18, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "fixed", type = {}, order=19, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Value must be exactly this", formalDefinition="Specifies a value that SHALL be exactly the value  for this element in the instance. For purposes of comparison, non-significant whitespace is ignored, and all values must be an exact match (case and accent sensitive). Missing elements/attributes must also be missing." )
     protected org.hl7.fhir.dstu3.model.Type fixed;
 
     /**
      * Specifies a value that the value in the instance SHALL follow - that is, any value in the pattern must be found in the instance. Other additional values may be found too. This is effectively constraint by example.  The values of elements present in the pattern must match exactly (case-sensitive, accent-sensitive, etc.).
      */
-    @Child(name = "pattern", type = {}, order=19, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "pattern", type = {}, order=20, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Value must have at least these property values", formalDefinition="Specifies a value that the value in the instance SHALL follow - that is, any value in the pattern must be found in the instance. Other additional values may be found too. This is effectively constraint by example.  The values of elements present in the pattern must match exactly (case-sensitive, accent-sensitive, etc.)." )
     protected org.hl7.fhir.dstu3.model.Type pattern;
 
     /**
      * A sample value for this element demonstrating the type of information that would typically be found in the element.
      */
-    @Child(name = "example", type = {}, order=20, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "example", type = {}, order=21, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Example value (as defined for type)", formalDefinition="A sample value for this element demonstrating the type of information that would typically be found in the element." )
     protected List<ElementDefinitionExampleComponent> example;
 
     /**
      * The minimum allowed value for the element. The value is inclusive. This is allowed for the types date, dateTime, instant, time, decimal, integer, and Quantity.
      */
-    @Child(name = "minValue", type = {DateType.class, DateTimeType.class, InstantType.class, TimeType.class, DecimalType.class, IntegerType.class, PositiveIntType.class, UnsignedIntType.class, Quantity.class}, order=21, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "minValue", type = {DateType.class, DateTimeType.class, InstantType.class, TimeType.class, DecimalType.class, IntegerType.class, PositiveIntType.class, UnsignedIntType.class, Quantity.class}, order=22, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Minimum Allowed Value (for some types)", formalDefinition="The minimum allowed value for the element. The value is inclusive. This is allowed for the types date, dateTime, instant, time, decimal, integer, and Quantity." )
     protected Type minValue;
 
     /**
      * The maximum allowed value for the element. The value is inclusive. This is allowed for the types date, dateTime, instant, time, decimal, integer, and Quantity.
      */
-    @Child(name = "maxValue", type = {DateType.class, DateTimeType.class, InstantType.class, TimeType.class, DecimalType.class, IntegerType.class, PositiveIntType.class, UnsignedIntType.class, Quantity.class}, order=22, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "maxValue", type = {DateType.class, DateTimeType.class, InstantType.class, TimeType.class, DecimalType.class, IntegerType.class, PositiveIntType.class, UnsignedIntType.class, Quantity.class}, order=23, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Maximum Allowed Value (for some types)", formalDefinition="The maximum allowed value for the element. The value is inclusive. This is allowed for the types date, dateTime, instant, time, decimal, integer, and Quantity." )
     protected Type maxValue;
 
     /**
      * Indicates the maximum length in characters that is permitted to be present in conformant instances and which is expected to be supported by conformant consumers that support the element.
      */
-    @Child(name = "maxLength", type = {IntegerType.class}, order=23, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "maxLength", type = {IntegerType.class}, order=24, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Max length for strings", formalDefinition="Indicates the maximum length in characters that is permitted to be present in conformant instances and which is expected to be supported by conformant consumers that support the element." )
     protected IntegerType maxLength;
 
     /**
      * A reference to an invariant that may make additional statements about the cardinality or value in the instance.
      */
-    @Child(name = "condition", type = {IdType.class}, order=24, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "condition", type = {IdType.class}, order=25, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Reference to invariant about presence", formalDefinition="A reference to an invariant that may make additional statements about the cardinality or value in the instance." )
     protected List<IdType> condition;
 
     /**
      * Formal constraints such as co-occurrence and other constraints that can be computationally evaluated within the context of the instance.
      */
-    @Child(name = "constraint", type = {}, order=25, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "constraint", type = {}, order=26, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Condition that must evaluate to true", formalDefinition="Formal constraints such as co-occurrence and other constraints that can be computationally evaluated within the context of the instance." )
     protected List<ElementDefinitionConstraintComponent> constraint;
 
     /**
      * If true, implementations that produce or consume resources SHALL provide "support" for the element in some meaningful way.  If false, the element may be ignored and not supported.
      */
-    @Child(name = "mustSupport", type = {BooleanType.class}, order=26, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "mustSupport", type = {BooleanType.class}, order=27, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="If the element must supported", formalDefinition="If true, implementations that produce or consume resources SHALL provide \"support\" for the element in some meaningful way.  If false, the element may be ignored and not supported." )
     protected BooleanType mustSupport;
 
     /**
      * If true, the value of this element affects the interpretation of the element or resource that contains it, and the value of the element cannot be ignored. Typically, this is used for status, negation and qualification codes. The effect of this is that the element cannot be ignored by systems: they SHALL either recognize the element and process it, and/or a pre-determination has been made that it is not relevant to their particular system.
      */
-    @Child(name = "isModifier", type = {BooleanType.class}, order=27, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "isModifier", type = {BooleanType.class}, order=28, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="If this modifies the meaning of other elements", formalDefinition="If true, the value of this element affects the interpretation of the element or resource that contains it, and the value of the element cannot be ignored. Typically, this is used for status, negation and qualification codes. The effect of this is that the element cannot be ignored by systems: they SHALL either recognize the element and process it, and/or a pre-determination has been made that it is not relevant to their particular system." )
     protected BooleanType isModifier;
 
     /**
      * Whether the element should be included if a client requests a search with the parameter _summary=true.
      */
-    @Child(name = "isSummary", type = {BooleanType.class}, order=28, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "isSummary", type = {BooleanType.class}, order=29, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Include when _summary = true?", formalDefinition="Whether the element should be included if a client requests a search with the parameter _summary=true." )
     protected BooleanType isSummary;
 
     /**
-     * Binds to a value set if this element is coded (code, Coding, CodeableConcept).
+     * Binds to a value set if this element is coded (code, Coding, CodeableConcept, Quantity), or the data types (string, uri).
      */
-    @Child(name = "binding", type = {}, order=29, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="ValueSet details if this is coded", formalDefinition="Binds to a value set if this element is coded (code, Coding, CodeableConcept)." )
+    @Child(name = "binding", type = {}, order=30, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="ValueSet details if this is coded", formalDefinition="Binds to a value set if this element is coded (code, Coding, CodeableConcept, Quantity), or the data types (string, uri)." )
     protected ElementDefinitionBindingComponent binding;
 
     /**
      * Identifies a concept from an external specification that roughly corresponds to this element.
      */
-    @Child(name = "mapping", type = {}, order=30, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "mapping", type = {}, order=31, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Map element to another set of definitions", formalDefinition="Identifies a concept from an external specification that roughly corresponds to this element." )
     protected List<ElementDefinitionMappingComponent> mapping;
 
-    private static final long serialVersionUID = -976239057L;
+    private static final long serialVersionUID = -278262340L;
 
   /**
    * Constructor
@@ -3604,7 +4094,7 @@ public class ElementDefinition extends Type implements ICompositeType {
     }
 
     /**
-     * @return {@link #label} (The text to display beside the element indicating its meaning or to use to prompt for the element in a user display or form.). This is the underlying object with id, value and extensions. The accessor "getLabel" gives direct access to the value
+     * @return {@link #label} (A single preferred label which is the text to display beside the element indicating its meaning or to use to prompt for the element in a user display or form.). This is the underlying object with id, value and extensions. The accessor "getLabel" gives direct access to the value
      */
     public StringType getLabelElement() { 
       if (this.label == null)
@@ -3624,7 +4114,7 @@ public class ElementDefinition extends Type implements ICompositeType {
     }
 
     /**
-     * @param value {@link #label} (The text to display beside the element indicating its meaning or to use to prompt for the element in a user display or form.). This is the underlying object with id, value and extensions. The accessor "getLabel" gives direct access to the value
+     * @param value {@link #label} (A single preferred label which is the text to display beside the element indicating its meaning or to use to prompt for the element in a user display or form.). This is the underlying object with id, value and extensions. The accessor "getLabel" gives direct access to the value
      */
     public ElementDefinition setLabelElement(StringType value) { 
       this.label = value;
@@ -3632,14 +4122,14 @@ public class ElementDefinition extends Type implements ICompositeType {
     }
 
     /**
-     * @return The text to display beside the element indicating its meaning or to use to prompt for the element in a user display or form.
+     * @return A single preferred label which is the text to display beside the element indicating its meaning or to use to prompt for the element in a user display or form.
      */
     public String getLabel() { 
       return this.label == null ? null : this.label.getValue();
     }
 
     /**
-     * @param value The text to display beside the element indicating its meaning or to use to prompt for the element in a user display or form.
+     * @param value A single preferred label which is the text to display beside the element indicating its meaning or to use to prompt for the element in a user display or form.
      */
     public ElementDefinition setLabel(String value) { 
       if (Utilities.noString(value))
@@ -3653,7 +4143,7 @@ public class ElementDefinition extends Type implements ICompositeType {
     }
 
     /**
-     * @return {@link #code} (A code that provides the meaning for the element according to a particular terminology.)
+     * @return {@link #code} (A code that has the same meaning as the element in a particular terminology.)
      */
     public List<Coding> getCode() { 
       if (this.code == null)
@@ -3828,50 +4318,50 @@ public class ElementDefinition extends Type implements ICompositeType {
     }
 
     /**
-     * @return {@link #comments} (Explanatory notes and implementation guidance about the data element, including notes about how to use the data properly, exceptions to proper use, etc.). This is the underlying object with id, value and extensions. The accessor "getComments" gives direct access to the value
+     * @return {@link #comment} (Explanatory notes and implementation guidance about the data element, including notes about how to use the data properly, exceptions to proper use, etc.). This is the underlying object with id, value and extensions. The accessor "getComment" gives direct access to the value
      */
-    public MarkdownType getCommentsElement() { 
-      if (this.comments == null)
+    public MarkdownType getCommentElement() { 
+      if (this.comment == null)
         if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create ElementDefinition.comments");
+          throw new Error("Attempt to auto-create ElementDefinition.comment");
         else if (Configuration.doAutoCreate())
-          this.comments = new MarkdownType(); // bb
-      return this.comments;
+          this.comment = new MarkdownType(); // bb
+      return this.comment;
     }
 
-    public boolean hasCommentsElement() { 
-      return this.comments != null && !this.comments.isEmpty();
+    public boolean hasCommentElement() { 
+      return this.comment != null && !this.comment.isEmpty();
     }
 
-    public boolean hasComments() { 
-      return this.comments != null && !this.comments.isEmpty();
+    public boolean hasComment() { 
+      return this.comment != null && !this.comment.isEmpty();
     }
 
     /**
-     * @param value {@link #comments} (Explanatory notes and implementation guidance about the data element, including notes about how to use the data properly, exceptions to proper use, etc.). This is the underlying object with id, value and extensions. The accessor "getComments" gives direct access to the value
+     * @param value {@link #comment} (Explanatory notes and implementation guidance about the data element, including notes about how to use the data properly, exceptions to proper use, etc.). This is the underlying object with id, value and extensions. The accessor "getComment" gives direct access to the value
      */
-    public ElementDefinition setCommentsElement(MarkdownType value) { 
-      this.comments = value;
+    public ElementDefinition setCommentElement(MarkdownType value) { 
+      this.comment = value;
       return this;
     }
 
     /**
      * @return Explanatory notes and implementation guidance about the data element, including notes about how to use the data properly, exceptions to proper use, etc.
      */
-    public String getComments() { 
-      return this.comments == null ? null : this.comments.getValue();
+    public String getComment() { 
+      return this.comment == null ? null : this.comment.getValue();
     }
 
     /**
      * @param value Explanatory notes and implementation guidance about the data element, including notes about how to use the data properly, exceptions to proper use, etc.
      */
-    public ElementDefinition setComments(String value) { 
+    public ElementDefinition setComment(String value) { 
       if (value == null)
-        this.comments = null;
+        this.comment = null;
       else {
-        if (this.comments == null)
-          this.comments = new MarkdownType();
-        this.comments.setValue(value);
+        if (this.comment == null)
+          this.comment = new MarkdownType();
+        this.comment.setValue(value);
       }
       return this;
     }
@@ -3989,12 +4479,12 @@ public class ElementDefinition extends Type implements ICompositeType {
     /**
      * @return {@link #min} (The minimum number of times this element SHALL appear in the instance.). This is the underlying object with id, value and extensions. The accessor "getMin" gives direct access to the value
      */
-    public IntegerType getMinElement() { 
+    public UnsignedIntType getMinElement() { 
       if (this.min == null)
         if (Configuration.errorOnAutoCreate())
           throw new Error("Attempt to auto-create ElementDefinition.min");
         else if (Configuration.doAutoCreate())
-          this.min = new IntegerType(); // bb
+          this.min = new UnsignedIntType(); // bb
       return this.min;
     }
 
@@ -4009,7 +4499,7 @@ public class ElementDefinition extends Type implements ICompositeType {
     /**
      * @param value {@link #min} (The minimum number of times this element SHALL appear in the instance.). This is the underlying object with id, value and extensions. The accessor "getMin" gives direct access to the value
      */
-    public ElementDefinition setMinElement(IntegerType value) { 
+    public ElementDefinition setMinElement(UnsignedIntType value) { 
       this.min = value;
       return this;
     }
@@ -4026,7 +4516,7 @@ public class ElementDefinition extends Type implements ICompositeType {
      */
     public ElementDefinition setMin(int value) { 
         if (this.min == null)
-          this.min = new IntegerType();
+          this.min = new UnsignedIntType();
         this.min.setValue(value);
       return this;
     }
@@ -4270,6 +4760,55 @@ public class ElementDefinition extends Type implements ICompositeType {
         if (this.meaningWhenMissing == null)
           this.meaningWhenMissing = new MarkdownType();
         this.meaningWhenMissing.setValue(value);
+      }
+      return this;
+    }
+
+    /**
+     * @return {@link #orderMeaning} (If present, indicates that the order of the repeating element has meaning and describes what that meaning is.  If absent, it means that the order of the element has no meaning.). This is the underlying object with id, value and extensions. The accessor "getOrderMeaning" gives direct access to the value
+     */
+    public StringType getOrderMeaningElement() { 
+      if (this.orderMeaning == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create ElementDefinition.orderMeaning");
+        else if (Configuration.doAutoCreate())
+          this.orderMeaning = new StringType(); // bb
+      return this.orderMeaning;
+    }
+
+    public boolean hasOrderMeaningElement() { 
+      return this.orderMeaning != null && !this.orderMeaning.isEmpty();
+    }
+
+    public boolean hasOrderMeaning() { 
+      return this.orderMeaning != null && !this.orderMeaning.isEmpty();
+    }
+
+    /**
+     * @param value {@link #orderMeaning} (If present, indicates that the order of the repeating element has meaning and describes what that meaning is.  If absent, it means that the order of the element has no meaning.). This is the underlying object with id, value and extensions. The accessor "getOrderMeaning" gives direct access to the value
+     */
+    public ElementDefinition setOrderMeaningElement(StringType value) { 
+      this.orderMeaning = value;
+      return this;
+    }
+
+    /**
+     * @return If present, indicates that the order of the repeating element has meaning and describes what that meaning is.  If absent, it means that the order of the element has no meaning.
+     */
+    public String getOrderMeaning() { 
+      return this.orderMeaning == null ? null : this.orderMeaning.getValue();
+    }
+
+    /**
+     * @param value If present, indicates that the order of the repeating element has meaning and describes what that meaning is.  If absent, it means that the order of the element has no meaning.
+     */
+    public ElementDefinition setOrderMeaning(String value) { 
+      if (Utilities.noString(value))
+        this.orderMeaning = null;
+      else {
+        if (this.orderMeaning == null)
+          this.orderMeaning = new StringType();
+        this.orderMeaning.setValue(value);
       }
       return this;
     }
@@ -4932,7 +5471,7 @@ public class ElementDefinition extends Type implements ICompositeType {
     }
 
     /**
-     * @return {@link #binding} (Binds to a value set if this element is coded (code, Coding, CodeableConcept).)
+     * @return {@link #binding} (Binds to a value set if this element is coded (code, Coding, CodeableConcept, Quantity), or the data types (string, uri).)
      */
     public ElementDefinitionBindingComponent getBinding() { 
       if (this.binding == null)
@@ -4948,7 +5487,7 @@ public class ElementDefinition extends Type implements ICompositeType {
     }
 
     /**
-     * @param value {@link #binding} (Binds to a value set if this element is coded (code, Coding, CodeableConcept).)
+     * @param value {@link #binding} (Binds to a value set if this element is coded (code, Coding, CodeableConcept, Quantity), or the data types (string, uri).)
      */
     public ElementDefinition setBinding(ElementDefinitionBindingComponent value) { 
       this.binding = value;
@@ -5013,21 +5552,22 @@ public class ElementDefinition extends Type implements ICompositeType {
         childrenList.add(new Property("path", "string", "The path identifies the element and is expressed as a \".\"-separated list of ancestor elements, beginning with the name of the resource or extension.", 0, java.lang.Integer.MAX_VALUE, path));
         childrenList.add(new Property("representation", "code", "Codes that define how this element is represented in instances, when the deviation varies from the normal case.", 0, java.lang.Integer.MAX_VALUE, representation));
         childrenList.add(new Property("sliceName", "string", "The name of this element definition slice, when slicing is working. The name must be a token with no dots or spaces. This is a unique name referring to a specific set of constraints applied to this element, used to provide a name to different slices of the same element.", 0, java.lang.Integer.MAX_VALUE, sliceName));
-        childrenList.add(new Property("label", "string", "The text to display beside the element indicating its meaning or to use to prompt for the element in a user display or form.", 0, java.lang.Integer.MAX_VALUE, label));
-        childrenList.add(new Property("code", "Coding", "A code that provides the meaning for the element according to a particular terminology.", 0, java.lang.Integer.MAX_VALUE, code));
+        childrenList.add(new Property("label", "string", "A single preferred label which is the text to display beside the element indicating its meaning or to use to prompt for the element in a user display or form.", 0, java.lang.Integer.MAX_VALUE, label));
+        childrenList.add(new Property("code", "Coding", "A code that has the same meaning as the element in a particular terminology.", 0, java.lang.Integer.MAX_VALUE, code));
         childrenList.add(new Property("slicing", "", "Indicates that the element is sliced into a set of alternative definitions (i.e. in a structure definition, there are multiple different constraints on a single element in the base resource). Slicing can be used in any resource that has cardinality ..* on the base resource, or any resource with a choice of types. The set of slices is any elements that come after this in the element sequence that have the same path, until a shorter path occurs (the shorter path terminates the set).", 0, java.lang.Integer.MAX_VALUE, slicing));
         childrenList.add(new Property("short", "string", "A concise description of what this element means (e.g. for use in autogenerated summaries).", 0, java.lang.Integer.MAX_VALUE, short_));
         childrenList.add(new Property("definition", "markdown", "Provides a complete explanation of the meaning of the data element for human readability.  For the case of elements derived from existing elements (e.g. constraints), the definition SHALL be consistent with the base definition, but convey the meaning of the element in the particular context of use of the resource.", 0, java.lang.Integer.MAX_VALUE, definition));
-        childrenList.add(new Property("comments", "markdown", "Explanatory notes and implementation guidance about the data element, including notes about how to use the data properly, exceptions to proper use, etc.", 0, java.lang.Integer.MAX_VALUE, comments));
+        childrenList.add(new Property("comment", "markdown", "Explanatory notes and implementation guidance about the data element, including notes about how to use the data properly, exceptions to proper use, etc.", 0, java.lang.Integer.MAX_VALUE, comment));
         childrenList.add(new Property("requirements", "markdown", "This element is for traceability of why the element was created and why the constraints exist as they do. This may be used to point to source materials or specifications that drove the structure of this element.", 0, java.lang.Integer.MAX_VALUE, requirements));
         childrenList.add(new Property("alias", "string", "Identifies additional names by which this element might also be known.", 0, java.lang.Integer.MAX_VALUE, alias));
-        childrenList.add(new Property("min", "integer", "The minimum number of times this element SHALL appear in the instance.", 0, java.lang.Integer.MAX_VALUE, min));
+        childrenList.add(new Property("min", "unsignedInt", "The minimum number of times this element SHALL appear in the instance.", 0, java.lang.Integer.MAX_VALUE, min));
         childrenList.add(new Property("max", "string", "The maximum number of times this element is permitted to appear in the instance.", 0, java.lang.Integer.MAX_VALUE, max));
         childrenList.add(new Property("base", "", "Information about the base definition of the element, provided to make it unnecessary for tools to trace the deviation of the element through the derived and related profiles. This information is provided when the element definition is not the original definition of an element - i.g. either in a constraint on another type, or for elements from a super type in a snap shot.", 0, java.lang.Integer.MAX_VALUE, base));
         childrenList.add(new Property("contentReference", "uri", "Identifies the identity of an element defined elsewhere in the profile whose content rules should be applied to the current element.", 0, java.lang.Integer.MAX_VALUE, contentReference));
         childrenList.add(new Property("type", "", "The data type or resource that the value of this element is permitted to be.", 0, java.lang.Integer.MAX_VALUE, type));
         childrenList.add(new Property("defaultValue[x]", "*", "The value that should be used if there is no value stated in the instance (e.g. 'if not otherwise specified, the abstract is false').", 0, java.lang.Integer.MAX_VALUE, defaultValue));
         childrenList.add(new Property("meaningWhenMissing", "markdown", "The Implicit meaning that is to be understood when this element is missing (e.g. 'when this element is missing, the period is ongoing'.", 0, java.lang.Integer.MAX_VALUE, meaningWhenMissing));
+        childrenList.add(new Property("orderMeaning", "string", "If present, indicates that the order of the repeating element has meaning and describes what that meaning is.  If absent, it means that the order of the element has no meaning.", 0, java.lang.Integer.MAX_VALUE, orderMeaning));
         childrenList.add(new Property("fixed[x]", "*", "Specifies a value that SHALL be exactly the value  for this element in the instance. For purposes of comparison, non-significant whitespace is ignored, and all values must be an exact match (case and accent sensitive). Missing elements/attributes must also be missing.", 0, java.lang.Integer.MAX_VALUE, fixed));
         childrenList.add(new Property("pattern[x]", "*", "Specifies a value that the value in the instance SHALL follow - that is, any value in the pattern must be found in the instance. Other additional values may be found too. This is effectively constraint by example.  The values of elements present in the pattern must match exactly (case-sensitive, accent-sensitive, etc.).", 0, java.lang.Integer.MAX_VALUE, pattern));
         childrenList.add(new Property("example", "", "A sample value for this element demonstrating the type of information that would typically be found in the element.", 0, java.lang.Integer.MAX_VALUE, example));
@@ -5039,7 +5579,7 @@ public class ElementDefinition extends Type implements ICompositeType {
         childrenList.add(new Property("mustSupport", "boolean", "If true, implementations that produce or consume resources SHALL provide \"support\" for the element in some meaningful way.  If false, the element may be ignored and not supported.", 0, java.lang.Integer.MAX_VALUE, mustSupport));
         childrenList.add(new Property("isModifier", "boolean", "If true, the value of this element affects the interpretation of the element or resource that contains it, and the value of the element cannot be ignored. Typically, this is used for status, negation and qualification codes. The effect of this is that the element cannot be ignored by systems: they SHALL either recognize the element and process it, and/or a pre-determination has been made that it is not relevant to their particular system.", 0, java.lang.Integer.MAX_VALUE, isModifier));
         childrenList.add(new Property("isSummary", "boolean", "Whether the element should be included if a client requests a search with the parameter _summary=true.", 0, java.lang.Integer.MAX_VALUE, isSummary));
-        childrenList.add(new Property("binding", "", "Binds to a value set if this element is coded (code, Coding, CodeableConcept).", 0, java.lang.Integer.MAX_VALUE, binding));
+        childrenList.add(new Property("binding", "", "Binds to a value set if this element is coded (code, Coding, CodeableConcept, Quantity), or the data types (string, uri).", 0, java.lang.Integer.MAX_VALUE, binding));
         childrenList.add(new Property("mapping", "", "Identifies a concept from an external specification that roughly corresponds to this element.", 0, java.lang.Integer.MAX_VALUE, mapping));
       }
 
@@ -5054,16 +5594,17 @@ public class ElementDefinition extends Type implements ICompositeType {
         case -2119287345: /*slicing*/ return this.slicing == null ? new Base[0] : new Base[] {this.slicing}; // ElementDefinitionSlicingComponent
         case 109413500: /*short*/ return this.short_ == null ? new Base[0] : new Base[] {this.short_}; // StringType
         case -1014418093: /*definition*/ return this.definition == null ? new Base[0] : new Base[] {this.definition}; // MarkdownType
-        case -602415628: /*comments*/ return this.comments == null ? new Base[0] : new Base[] {this.comments}; // MarkdownType
+        case 950398559: /*comment*/ return this.comment == null ? new Base[0] : new Base[] {this.comment}; // MarkdownType
         case -1619874672: /*requirements*/ return this.requirements == null ? new Base[0] : new Base[] {this.requirements}; // MarkdownType
         case 92902992: /*alias*/ return this.alias == null ? new Base[0] : this.alias.toArray(new Base[this.alias.size()]); // StringType
-        case 108114: /*min*/ return this.min == null ? new Base[0] : new Base[] {this.min}; // IntegerType
+        case 108114: /*min*/ return this.min == null ? new Base[0] : new Base[] {this.min}; // UnsignedIntType
         case 107876: /*max*/ return this.max == null ? new Base[0] : new Base[] {this.max}; // StringType
         case 3016401: /*base*/ return this.base == null ? new Base[0] : new Base[] {this.base}; // ElementDefinitionBaseComponent
         case 1193747154: /*contentReference*/ return this.contentReference == null ? new Base[0] : new Base[] {this.contentReference}; // UriType
         case 3575610: /*type*/ return this.type == null ? new Base[0] : this.type.toArray(new Base[this.type.size()]); // TypeRefComponent
         case -659125328: /*defaultValue*/ return this.defaultValue == null ? new Base[0] : new Base[] {this.defaultValue}; // org.hl7.fhir.dstu3.model.Type
         case 1857257103: /*meaningWhenMissing*/ return this.meaningWhenMissing == null ? new Base[0] : new Base[] {this.meaningWhenMissing}; // MarkdownType
+        case 1828196047: /*orderMeaning*/ return this.orderMeaning == null ? new Base[0] : new Base[] {this.orderMeaning}; // StringType
         case 97445748: /*fixed*/ return this.fixed == null ? new Base[0] : new Base[] {this.fixed}; // org.hl7.fhir.dstu3.model.Type
         case -791090288: /*pattern*/ return this.pattern == null ? new Base[0] : new Base[] {this.pattern}; // org.hl7.fhir.dstu3.model.Type
         case -1322970774: /*example*/ return this.example == null ? new Base[0] : this.example.toArray(new Base[this.example.size()]); // ElementDefinitionExampleComponent
@@ -5083,209 +5624,263 @@ public class ElementDefinition extends Type implements ICompositeType {
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case 3433509: // path
           this.path = castToString(value); // StringType
-          break;
+          return value;
         case -671065907: // representation
-          this.getRepresentation().add(new PropertyRepresentationEnumFactory().fromType(value)); // Enumeration<PropertyRepresentation>
-          break;
+          value = new PropertyRepresentationEnumFactory().fromType(castToCode(value));
+          this.getRepresentation().add((Enumeration) value); // Enumeration<PropertyRepresentation>
+          return value;
         case -825289923: // sliceName
           this.sliceName = castToString(value); // StringType
-          break;
+          return value;
         case 102727412: // label
           this.label = castToString(value); // StringType
-          break;
+          return value;
         case 3059181: // code
           this.getCode().add(castToCoding(value)); // Coding
-          break;
+          return value;
         case -2119287345: // slicing
           this.slicing = (ElementDefinitionSlicingComponent) value; // ElementDefinitionSlicingComponent
-          break;
+          return value;
         case 109413500: // short
           this.short_ = castToString(value); // StringType
-          break;
+          return value;
         case -1014418093: // definition
           this.definition = castToMarkdown(value); // MarkdownType
-          break;
-        case -602415628: // comments
-          this.comments = castToMarkdown(value); // MarkdownType
-          break;
+          return value;
+        case 950398559: // comment
+          this.comment = castToMarkdown(value); // MarkdownType
+          return value;
         case -1619874672: // requirements
           this.requirements = castToMarkdown(value); // MarkdownType
-          break;
+          return value;
         case 92902992: // alias
           this.getAlias().add(castToString(value)); // StringType
-          break;
+          return value;
         case 108114: // min
-          this.min = castToInteger(value); // IntegerType
-          break;
+          this.min = castToUnsignedInt(value); // UnsignedIntType
+          return value;
         case 107876: // max
           this.max = castToString(value); // StringType
-          break;
+          return value;
         case 3016401: // base
           this.base = (ElementDefinitionBaseComponent) value; // ElementDefinitionBaseComponent
-          break;
+          return value;
         case 1193747154: // contentReference
           this.contentReference = castToUri(value); // UriType
-          break;
+          return value;
         case 3575610: // type
           this.getType().add((TypeRefComponent) value); // TypeRefComponent
-          break;
+          return value;
         case -659125328: // defaultValue
           this.defaultValue = castToType(value); // org.hl7.fhir.dstu3.model.Type
-          break;
+          return value;
         case 1857257103: // meaningWhenMissing
           this.meaningWhenMissing = castToMarkdown(value); // MarkdownType
-          break;
+          return value;
+        case 1828196047: // orderMeaning
+          this.orderMeaning = castToString(value); // StringType
+          return value;
         case 97445748: // fixed
           this.fixed = castToType(value); // org.hl7.fhir.dstu3.model.Type
-          break;
+          return value;
         case -791090288: // pattern
           this.pattern = castToType(value); // org.hl7.fhir.dstu3.model.Type
-          break;
+          return value;
         case -1322970774: // example
           this.getExample().add((ElementDefinitionExampleComponent) value); // ElementDefinitionExampleComponent
-          break;
+          return value;
         case -1376969153: // minValue
           this.minValue = castToType(value); // Type
-          break;
+          return value;
         case 399227501: // maxValue
           this.maxValue = castToType(value); // Type
-          break;
+          return value;
         case -791400086: // maxLength
           this.maxLength = castToInteger(value); // IntegerType
-          break;
+          return value;
         case -861311717: // condition
           this.getCondition().add(castToId(value)); // IdType
-          break;
+          return value;
         case -190376483: // constraint
           this.getConstraint().add((ElementDefinitionConstraintComponent) value); // ElementDefinitionConstraintComponent
-          break;
+          return value;
         case -1402857082: // mustSupport
           this.mustSupport = castToBoolean(value); // BooleanType
-          break;
+          return value;
         case -1408783839: // isModifier
           this.isModifier = castToBoolean(value); // BooleanType
-          break;
+          return value;
         case 1857548060: // isSummary
           this.isSummary = castToBoolean(value); // BooleanType
-          break;
+          return value;
         case -108220795: // binding
           this.binding = (ElementDefinitionBindingComponent) value; // ElementDefinitionBindingComponent
-          break;
+          return value;
         case 837556430: // mapping
           this.getMapping().add((ElementDefinitionMappingComponent) value); // ElementDefinitionMappingComponent
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("path"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("path")) {
           this.path = castToString(value); // StringType
-        else if (name.equals("representation"))
-          this.getRepresentation().add(new PropertyRepresentationEnumFactory().fromType(value));
-        else if (name.equals("sliceName"))
+        } else if (name.equals("representation")) {
+          value = new PropertyRepresentationEnumFactory().fromType(castToCode(value));
+          this.getRepresentation().add((Enumeration) value);
+        } else if (name.equals("sliceName")) {
           this.sliceName = castToString(value); // StringType
-        else if (name.equals("label"))
+        } else if (name.equals("label")) {
           this.label = castToString(value); // StringType
-        else if (name.equals("code"))
+        } else if (name.equals("code")) {
           this.getCode().add(castToCoding(value));
-        else if (name.equals("slicing"))
+        } else if (name.equals("slicing")) {
           this.slicing = (ElementDefinitionSlicingComponent) value; // ElementDefinitionSlicingComponent
-        else if (name.equals("short"))
+        } else if (name.equals("short")) {
           this.short_ = castToString(value); // StringType
-        else if (name.equals("definition"))
+        } else if (name.equals("definition")) {
           this.definition = castToMarkdown(value); // MarkdownType
-        else if (name.equals("comments"))
-          this.comments = castToMarkdown(value); // MarkdownType
-        else if (name.equals("requirements"))
+        } else if (name.equals("comment")) {
+          this.comment = castToMarkdown(value); // MarkdownType
+        } else if (name.equals("requirements")) {
           this.requirements = castToMarkdown(value); // MarkdownType
-        else if (name.equals("alias"))
+        } else if (name.equals("alias")) {
           this.getAlias().add(castToString(value));
-        else if (name.equals("min"))
-          this.min = castToInteger(value); // IntegerType
-        else if (name.equals("max"))
+        } else if (name.equals("min")) {
+          this.min = castToUnsignedInt(value); // UnsignedIntType
+        } else if (name.equals("max")) {
           this.max = castToString(value); // StringType
-        else if (name.equals("base"))
+        } else if (name.equals("base")) {
           this.base = (ElementDefinitionBaseComponent) value; // ElementDefinitionBaseComponent
-        else if (name.equals("contentReference"))
+        } else if (name.equals("contentReference")) {
           this.contentReference = castToUri(value); // UriType
-        else if (name.equals("type"))
+        } else if (name.equals("type")) {
           this.getType().add((TypeRefComponent) value);
-        else if (name.equals("defaultValue[x]"))
+        } else if (name.equals("defaultValue[x]")) {
           this.defaultValue = castToType(value); // org.hl7.fhir.dstu3.model.Type
-        else if (name.equals("meaningWhenMissing"))
+        } else if (name.equals("meaningWhenMissing")) {
           this.meaningWhenMissing = castToMarkdown(value); // MarkdownType
-        else if (name.equals("fixed[x]"))
+        } else if (name.equals("orderMeaning")) {
+          this.orderMeaning = castToString(value); // StringType
+        } else if (name.equals("fixed[x]")) {
           this.fixed = castToType(value); // org.hl7.fhir.dstu3.model.Type
-        else if (name.equals("pattern[x]"))
+        } else if (name.equals("pattern[x]")) {
           this.pattern = castToType(value); // org.hl7.fhir.dstu3.model.Type
-        else if (name.equals("example"))
+        } else if (name.equals("example")) {
           this.getExample().add((ElementDefinitionExampleComponent) value);
-        else if (name.equals("minValue[x]"))
+        } else if (name.equals("minValue[x]")) {
           this.minValue = castToType(value); // Type
-        else if (name.equals("maxValue[x]"))
+        } else if (name.equals("maxValue[x]")) {
           this.maxValue = castToType(value); // Type
-        else if (name.equals("maxLength"))
+        } else if (name.equals("maxLength")) {
           this.maxLength = castToInteger(value); // IntegerType
-        else if (name.equals("condition"))
+        } else if (name.equals("condition")) {
           this.getCondition().add(castToId(value));
-        else if (name.equals("constraint"))
+        } else if (name.equals("constraint")) {
           this.getConstraint().add((ElementDefinitionConstraintComponent) value);
-        else if (name.equals("mustSupport"))
+        } else if (name.equals("mustSupport")) {
           this.mustSupport = castToBoolean(value); // BooleanType
-        else if (name.equals("isModifier"))
+        } else if (name.equals("isModifier")) {
           this.isModifier = castToBoolean(value); // BooleanType
-        else if (name.equals("isSummary"))
+        } else if (name.equals("isSummary")) {
           this.isSummary = castToBoolean(value); // BooleanType
-        else if (name.equals("binding"))
+        } else if (name.equals("binding")) {
           this.binding = (ElementDefinitionBindingComponent) value; // ElementDefinitionBindingComponent
-        else if (name.equals("mapping"))
+        } else if (name.equals("mapping")) {
           this.getMapping().add((ElementDefinitionMappingComponent) value);
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 3433509: throw new FHIRException("Cannot make property path as it is not a complex type"); // StringType
-        case -671065907: throw new FHIRException("Cannot make property representation as it is not a complex type"); // Enumeration<PropertyRepresentation>
-        case -825289923: throw new FHIRException("Cannot make property sliceName as it is not a complex type"); // StringType
-        case 102727412: throw new FHIRException("Cannot make property label as it is not a complex type"); // StringType
-        case 3059181:  return addCode(); // Coding
-        case -2119287345:  return getSlicing(); // ElementDefinitionSlicingComponent
-        case 109413500: throw new FHIRException("Cannot make property short as it is not a complex type"); // StringType
-        case -1014418093: throw new FHIRException("Cannot make property definition as it is not a complex type"); // MarkdownType
-        case -602415628: throw new FHIRException("Cannot make property comments as it is not a complex type"); // MarkdownType
-        case -1619874672: throw new FHIRException("Cannot make property requirements as it is not a complex type"); // MarkdownType
-        case 92902992: throw new FHIRException("Cannot make property alias as it is not a complex type"); // StringType
-        case 108114: throw new FHIRException("Cannot make property min as it is not a complex type"); // IntegerType
-        case 107876: throw new FHIRException("Cannot make property max as it is not a complex type"); // StringType
-        case 3016401:  return getBase(); // ElementDefinitionBaseComponent
-        case 1193747154: throw new FHIRException("Cannot make property contentReference as it is not a complex type"); // UriType
-        case 3575610:  return addType(); // TypeRefComponent
-        case 587922128:  return getDefaultValue(); // org.hl7.fhir.dstu3.model.Type
-        case 1857257103: throw new FHIRException("Cannot make property meaningWhenMissing as it is not a complex type"); // MarkdownType
-        case -391522164:  return getFixed(); // org.hl7.fhir.dstu3.model.Type
-        case -885125392:  return getPattern(); // org.hl7.fhir.dstu3.model.Type
-        case -1322970774:  return addExample(); // ElementDefinitionExampleComponent
-        case -55301663:  return getMinValue(); // Type
-        case 622130931:  return getMaxValue(); // Type
-        case -791400086: throw new FHIRException("Cannot make property maxLength as it is not a complex type"); // IntegerType
-        case -861311717: throw new FHIRException("Cannot make property condition as it is not a complex type"); // IdType
-        case -190376483:  return addConstraint(); // ElementDefinitionConstraintComponent
-        case -1402857082: throw new FHIRException("Cannot make property mustSupport as it is not a complex type"); // BooleanType
-        case -1408783839: throw new FHIRException("Cannot make property isModifier as it is not a complex type"); // BooleanType
-        case 1857548060: throw new FHIRException("Cannot make property isSummary as it is not a complex type"); // BooleanType
-        case -108220795:  return getBinding(); // ElementDefinitionBindingComponent
-        case 837556430:  return addMapping(); // ElementDefinitionMappingComponent
+        case 3433509:  return getPathElement();
+        case -671065907:  return addRepresentationElement();
+        case -825289923:  return getSliceNameElement();
+        case 102727412:  return getLabelElement();
+        case 3059181:  return addCode(); 
+        case -2119287345:  return getSlicing(); 
+        case 109413500:  return getShortElement();
+        case -1014418093:  return getDefinitionElement();
+        case 950398559:  return getCommentElement();
+        case -1619874672:  return getRequirementsElement();
+        case 92902992:  return addAliasElement();
+        case 108114:  return getMinElement();
+        case 107876:  return getMaxElement();
+        case 3016401:  return getBase(); 
+        case 1193747154:  return getContentReferenceElement();
+        case 3575610:  return addType(); 
+        case 587922128:  return getDefaultValue(); 
+        case -659125328:  return getDefaultValue(); 
+        case 1857257103:  return getMeaningWhenMissingElement();
+        case 1828196047:  return getOrderMeaningElement();
+        case -391522164:  return getFixed(); 
+        case 97445748:  return getFixed(); 
+        case -885125392:  return getPattern(); 
+        case -791090288:  return getPattern(); 
+        case -1322970774:  return addExample(); 
+        case -55301663:  return getMinValue(); 
+        case -1376969153:  return getMinValue(); 
+        case 622130931:  return getMaxValue(); 
+        case 399227501:  return getMaxValue(); 
+        case -791400086:  return getMaxLengthElement();
+        case -861311717:  return addConditionElement();
+        case -190376483:  return addConstraint(); 
+        case -1402857082:  return getMustSupportElement();
+        case -1408783839:  return getIsModifierElement();
+        case 1857548060:  return getIsSummaryElement();
+        case -108220795:  return getBinding(); 
+        case 837556430:  return addMapping(); 
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3433509: /*path*/ return new String[] {"string"};
+        case -671065907: /*representation*/ return new String[] {"code"};
+        case -825289923: /*sliceName*/ return new String[] {"string"};
+        case 102727412: /*label*/ return new String[] {"string"};
+        case 3059181: /*code*/ return new String[] {"Coding"};
+        case -2119287345: /*slicing*/ return new String[] {};
+        case 109413500: /*short*/ return new String[] {"string"};
+        case -1014418093: /*definition*/ return new String[] {"markdown"};
+        case 950398559: /*comment*/ return new String[] {"markdown"};
+        case -1619874672: /*requirements*/ return new String[] {"markdown"};
+        case 92902992: /*alias*/ return new String[] {"string"};
+        case 108114: /*min*/ return new String[] {"unsignedInt"};
+        case 107876: /*max*/ return new String[] {"string"};
+        case 3016401: /*base*/ return new String[] {};
+        case 1193747154: /*contentReference*/ return new String[] {"uri"};
+        case 3575610: /*type*/ return new String[] {};
+        case -659125328: /*defaultValue*/ return new String[] {"*"};
+        case 1857257103: /*meaningWhenMissing*/ return new String[] {"markdown"};
+        case 1828196047: /*orderMeaning*/ return new String[] {"string"};
+        case 97445748: /*fixed*/ return new String[] {"*"};
+        case -791090288: /*pattern*/ return new String[] {"*"};
+        case -1322970774: /*example*/ return new String[] {};
+        case -1376969153: /*minValue*/ return new String[] {"date", "dateTime", "instant", "time", "decimal", "integer", "positiveInt", "unsignedInt", "Quantity"};
+        case 399227501: /*maxValue*/ return new String[] {"date", "dateTime", "instant", "time", "decimal", "integer", "positiveInt", "unsignedInt", "Quantity"};
+        case -791400086: /*maxLength*/ return new String[] {"integer"};
+        case -861311717: /*condition*/ return new String[] {"id"};
+        case -190376483: /*constraint*/ return new String[] {};
+        case -1402857082: /*mustSupport*/ return new String[] {"boolean"};
+        case -1408783839: /*isModifier*/ return new String[] {"boolean"};
+        case 1857548060: /*isSummary*/ return new String[] {"boolean"};
+        case -108220795: /*binding*/ return new String[] {};
+        case 837556430: /*mapping*/ return new String[] {};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }
@@ -5317,8 +5912,8 @@ public class ElementDefinition extends Type implements ICompositeType {
         else if (name.equals("definition")) {
           throw new FHIRException("Cannot call addChild on a primitive type ElementDefinition.definition");
         }
-        else if (name.equals("comments")) {
-          throw new FHIRException("Cannot call addChild on a primitive type ElementDefinition.comments");
+        else if (name.equals("comment")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ElementDefinition.comment");
         }
         else if (name.equals("requirements")) {
           throw new FHIRException("Cannot call addChild on a primitive type ElementDefinition.requirements");
@@ -5476,6 +6071,9 @@ public class ElementDefinition extends Type implements ICompositeType {
         }
         else if (name.equals("meaningWhenMissing")) {
           throw new FHIRException("Cannot call addChild on a primitive type ElementDefinition.meaningWhenMissing");
+        }
+        else if (name.equals("orderMeaning")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ElementDefinition.orderMeaning");
         }
         else if (name.equals("fixedBoolean")) {
           this.fixed = new BooleanType();
@@ -5869,7 +6467,7 @@ public class ElementDefinition extends Type implements ICompositeType {
         dst.slicing = slicing == null ? null : slicing.copy();
         dst.short_ = short_ == null ? null : short_.copy();
         dst.definition = definition == null ? null : definition.copy();
-        dst.comments = comments == null ? null : comments.copy();
+        dst.comment = comment == null ? null : comment.copy();
         dst.requirements = requirements == null ? null : requirements.copy();
         if (alias != null) {
           dst.alias = new ArrayList<StringType>();
@@ -5887,6 +6485,7 @@ public class ElementDefinition extends Type implements ICompositeType {
         };
         dst.defaultValue = defaultValue == null ? null : defaultValue.copy();
         dst.meaningWhenMissing = meaningWhenMissing == null ? null : meaningWhenMissing.copy();
+        dst.orderMeaning = orderMeaning == null ? null : orderMeaning.copy();
         dst.fixed = fixed == null ? null : fixed.copy();
         dst.pattern = pattern == null ? null : pattern.copy();
         if (example != null) {
@@ -5932,15 +6531,16 @@ public class ElementDefinition extends Type implements ICompositeType {
         ElementDefinition o = (ElementDefinition) other;
         return compareDeep(path, o.path, true) && compareDeep(representation, o.representation, true) && compareDeep(sliceName, o.sliceName, true)
            && compareDeep(label, o.label, true) && compareDeep(code, o.code, true) && compareDeep(slicing, o.slicing, true)
-           && compareDeep(short_, o.short_, true) && compareDeep(definition, o.definition, true) && compareDeep(comments, o.comments, true)
+           && compareDeep(short_, o.short_, true) && compareDeep(definition, o.definition, true) && compareDeep(comment, o.comment, true)
            && compareDeep(requirements, o.requirements, true) && compareDeep(alias, o.alias, true) && compareDeep(min, o.min, true)
            && compareDeep(max, o.max, true) && compareDeep(base, o.base, true) && compareDeep(contentReference, o.contentReference, true)
            && compareDeep(type, o.type, true) && compareDeep(defaultValue, o.defaultValue, true) && compareDeep(meaningWhenMissing, o.meaningWhenMissing, true)
-           && compareDeep(fixed, o.fixed, true) && compareDeep(pattern, o.pattern, true) && compareDeep(example, o.example, true)
-           && compareDeep(minValue, o.minValue, true) && compareDeep(maxValue, o.maxValue, true) && compareDeep(maxLength, o.maxLength, true)
-           && compareDeep(condition, o.condition, true) && compareDeep(constraint, o.constraint, true) && compareDeep(mustSupport, o.mustSupport, true)
-           && compareDeep(isModifier, o.isModifier, true) && compareDeep(isSummary, o.isSummary, true) && compareDeep(binding, o.binding, true)
-           && compareDeep(mapping, o.mapping, true);
+           && compareDeep(orderMeaning, o.orderMeaning, true) && compareDeep(fixed, o.fixed, true) && compareDeep(pattern, o.pattern, true)
+           && compareDeep(example, o.example, true) && compareDeep(minValue, o.minValue, true) && compareDeep(maxValue, o.maxValue, true)
+           && compareDeep(maxLength, o.maxLength, true) && compareDeep(condition, o.condition, true) && compareDeep(constraint, o.constraint, true)
+           && compareDeep(mustSupport, o.mustSupport, true) && compareDeep(isModifier, o.isModifier, true)
+           && compareDeep(isSummary, o.isSummary, true) && compareDeep(binding, o.binding, true) && compareDeep(mapping, o.mapping, true)
+          ;
       }
 
       @Override
@@ -5952,19 +6552,19 @@ public class ElementDefinition extends Type implements ICompositeType {
         ElementDefinition o = (ElementDefinition) other;
         return compareValues(path, o.path, true) && compareValues(representation, o.representation, true) && compareValues(sliceName, o.sliceName, true)
            && compareValues(label, o.label, true) && compareValues(short_, o.short_, true) && compareValues(definition, o.definition, true)
-           && compareValues(comments, o.comments, true) && compareValues(requirements, o.requirements, true) && compareValues(alias, o.alias, true)
+           && compareValues(comment, o.comment, true) && compareValues(requirements, o.requirements, true) && compareValues(alias, o.alias, true)
            && compareValues(min, o.min, true) && compareValues(max, o.max, true) && compareValues(contentReference, o.contentReference, true)
-           && compareValues(meaningWhenMissing, o.meaningWhenMissing, true) && compareValues(maxLength, o.maxLength, true)
-           && compareValues(condition, o.condition, true) && compareValues(mustSupport, o.mustSupport, true) && compareValues(isModifier, o.isModifier, true)
-           && compareValues(isSummary, o.isSummary, true);
+           && compareValues(meaningWhenMissing, o.meaningWhenMissing, true) && compareValues(orderMeaning, o.orderMeaning, true)
+           && compareValues(maxLength, o.maxLength, true) && compareValues(condition, o.condition, true) && compareValues(mustSupport, o.mustSupport, true)
+           && compareValues(isModifier, o.isModifier, true) && compareValues(isSummary, o.isSummary, true);
       }
 
       public boolean isEmpty() {
         return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(path, representation, sliceName
-          , label, code, slicing, short_, definition, comments, requirements, alias, min
-          , max, base, contentReference, type, defaultValue, meaningWhenMissing, fixed, pattern
-          , example, minValue, maxValue, maxLength, condition, constraint, mustSupport, isModifier
-          , isSummary, binding, mapping);
+          , label, code, slicing, short_, definition, comment, requirements, alias, min
+          , max, base, contentReference, type, defaultValue, meaningWhenMissing, orderMeaning
+          , fixed, pattern, example, minValue, maxValue, maxLength, condition, constraint
+          , mustSupport, isModifier, isSummary, binding, mapping);
       }
 
 // added from java-adornments.txt:

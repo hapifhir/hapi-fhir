@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,23 +37,23 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum VaccinationProtocolDoseStatusReason {
 
         /**
-         * null
+         * The product was stored in a manner inconsistent with manufacturer guidelines potentially reducing the effectiveness of the product.
          */
         ADVSTORAGE, 
         /**
-         * null
+         * The product was stored at a temperature inconsistent with manufacturer guidelines potentially reducing the effectiveness of the product.
          */
         COLDCHBRK, 
         /**
-         * null
+         * The product was administered after the expiration date associated with lot of vaccine.
          */
         EXPLOT, 
         /**
-         * null
+         * The product was administered at a time inconsistent with the documented schedule.
          */
         OUTSIDESCHED, 
         /**
-         * null
+         * The product administered has been recalled by the manufacturer.
          */
         PRODRECALL, 
         /**
@@ -90,11 +90,11 @@ public enum VaccinationProtocolDoseStatusReason {
         }
         public String getDefinition() {
           switch (this) {
-            case ADVSTORAGE: return "";
-            case COLDCHBRK: return "";
-            case EXPLOT: return "";
-            case OUTSIDESCHED: return "";
-            case PRODRECALL: return "";
+            case ADVSTORAGE: return "The product was stored in a manner inconsistent with manufacturer guidelines potentially reducing the effectiveness of the product.";
+            case COLDCHBRK: return "The product was stored at a temperature inconsistent with manufacturer guidelines potentially reducing the effectiveness of the product.";
+            case EXPLOT: return "The product was administered after the expiration date associated with lot of vaccine.";
+            case OUTSIDESCHED: return "The product was administered at a time inconsistent with the documented schedule.";
+            case PRODRECALL: return "The product administered has been recalled by the manufacturer.";
             default: return "?";
           }
         }

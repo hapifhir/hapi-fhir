@@ -2,7 +2,7 @@ package ca.uhn.fhir.jpa.config.dstu3;
 
 import org.hl7.fhir.dstu3.hapi.validation.FhirInstanceValidator;
 import org.hl7.fhir.dstu3.hapi.validation.IValidationSupport;
-import org.hl7.fhir.dstu3.validation.IResourceValidator.BestPracticeWarningLevel;
+import org.hl7.fhir.dstu3.utils.IResourceValidator.BestPracticeWarningLevel;
 
 /*
  * #%L

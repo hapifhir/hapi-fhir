@@ -1,18 +1,21 @@
 package org.hl7.fhir.dstu3.model;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.hl7.fhir.dstu3.elementmodel.Element;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
+import org.hl7.fhir.utilities.xhtml.XhtmlParser;
 
 import ca.uhn.fhir.model.api.IElement;
-
+//Add comment to test SVN
 public abstract class Base implements Serializable, IBase, IElement {
 
   /**
@@ -115,7 +118,7 @@ private Map<String, Object> userData;
 	
 	protected abstract void listChildren(List<Property> result) ;
 	
-	public void setProperty(String name, Base value) throws FHIRException {
+	public Base setProperty(String name, Base value) throws FHIRException {
 	  throw new FHIRException("Attempt to set unknown property "+name);
 	}
 	
@@ -390,11 +393,10 @@ private Map<String, Object> userData;
       throw new FHIRException("Unable to convert a "+b.getClass().getName()+" to an Annotation");
   }
   
-  public DosageInstruction castToDosageInstruction(Base b) throws FHIRException {
-    if (b instanceof DosageInstruction)
-      return (DosageInstruction) b;
-    else
-      throw new FHIRException("Unable to convert a "+b.getClass().getName()+" to an DosageInstruction");
+  public Dosage castToDosage(Base b) throws FHIRException {
+    if (b instanceof Dosage)
+      return (Dosage) b;
+    else      throw new FHIRException("Unable to convert a "+b.getClass().getName()+" to an DosageInstruction");
   }
   
 	
@@ -627,6 +629,28 @@ private Map<String, Object> userData;
 			throw new FHIRException("Unable to convert a "+b.getClass().getName()+" to a TriggerDefinition");
 	}
 
+  public XhtmlNode castToXhtml(Base b) throws FHIRException {
+    if (b instanceof Element) {
+      return ((Element) b).getXhtml();
+    } else if (b instanceof StringType) {
+      try {
+        return new XhtmlParser().parseFragment(((StringType) b).asStringValue());
+      } catch (IOException e) {
+        throw new FHIRException(e);
+      }
+    } else
+      throw new FHIRException("Unable to convert a "+b.getClass().getName()+" to XHtml");
+  }
+  
+  public String castToXhtmlString(Base b) throws FHIRException {
+    if (b instanceof Element) {
+      return ((Element) b).getValue();
+    } else if (b instanceof StringType) {
+      return ((StringType) b).asStringValue();
+    } else
+      throw new FHIRException("Unable to convert a "+b.getClass().getName()+" to XHtml string");
+  }
+  
 	protected boolean isMetadataBased() {
   	return false;
 	}
@@ -637,7 +661,7 @@ private Map<String, Object> userData;
   	return null; 
 	}
 
-	public void setProperty(int hash, String name, Base value) throws FHIRException {
+	public Base setProperty(int hash, String name, Base value) throws FHIRException {
 		throw new FHIRException("Attempt to write to invalid property '"+name+"' on type "+fhirType());
 	}
 
@@ -645,6 +669,10 @@ private Map<String, Object> userData;
 		throw new FHIRException("Attempt to make an invalid property '"+name+"' on type "+fhirType());
 	}
 
+	public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+    throw new FHIRException("Attempt to get types for an invalid property '"+name+"' on type "+fhirType());
+	}
+	
 	public static boolean equals(String v1, String v2) {
   	if (v1 == null && v2 == null)
   		return true;

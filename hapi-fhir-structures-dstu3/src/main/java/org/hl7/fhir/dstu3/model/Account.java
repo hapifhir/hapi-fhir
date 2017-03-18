@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
 
 import java.util.*;
 
@@ -127,8 +127,10 @@ public class Account extends DomainResource {
         throw new IllegalArgumentException("Unknown AccountStatus code '"+codeString+"'");
         }
         public Enumeration<AccountStatus> fromType(Base code) throws FHIRException {
-          if (code == null || code.isEmpty())
+          if (code == null)
             return null;
+          if (code.isEmpty())
+            return new Enumeration<AccountStatus>(this);
           String codeString = ((PrimitiveType) code).asStringValue();
           if (codeString == null || "".equals(codeString))
             return null;
@@ -155,11 +157,263 @@ public class Account extends DomainResource {
     }
 
     @Block()
+    public static class CoverageComponent extends BackboneElement implements IBaseBackboneElement {
+        /**
+         * The party(s) that are responsible for payment (or part of) of charges applied to this account (including self-pay).
+
+A coverage may only be resposible for specific types of charges, and the sequence of the coverages in the account could be important when processing billing.
+         */
+        @Child(name = "coverage", type = {Coverage.class}, order=1, min=1, max=1, modifier=false, summary=true)
+        @Description(shortDefinition="The party(s) that are responsible for covering the payment of this account", formalDefinition="The party(s) that are responsible for payment (or part of) of charges applied to this account (including self-pay).\n\nA coverage may only be resposible for specific types of charges, and the sequence of the coverages in the account could be important when processing billing." )
+        protected Reference coverage;
+
+        /**
+         * The actual object that is the target of the reference (The party(s) that are responsible for payment (or part of) of charges applied to this account (including self-pay).
+
+A coverage may only be resposible for specific types of charges, and the sequence of the coverages in the account could be important when processing billing.)
+         */
+        protected Coverage coverageTarget;
+
+        /**
+         * The priority of the coverage in the context of this account.
+         */
+        @Child(name = "priority", type = {PositiveIntType.class}, order=2, min=0, max=1, modifier=false, summary=true)
+        @Description(shortDefinition="The priority of the coverage in the context of this account", formalDefinition="The priority of the coverage in the context of this account." )
+        protected PositiveIntType priority;
+
+        private static final long serialVersionUID = -1046265008L;
+
+    /**
+     * Constructor
+     */
+      public CoverageComponent() {
+        super();
+      }
+
+    /**
+     * Constructor
+     */
+      public CoverageComponent(Reference coverage) {
+        super();
+        this.coverage = coverage;
+      }
+
+        /**
+         * @return {@link #coverage} (The party(s) that are responsible for payment (or part of) of charges applied to this account (including self-pay).
+
+A coverage may only be resposible for specific types of charges, and the sequence of the coverages in the account could be important when processing billing.)
+         */
+        public Reference getCoverage() { 
+          if (this.coverage == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create CoverageComponent.coverage");
+            else if (Configuration.doAutoCreate())
+              this.coverage = new Reference(); // cc
+          return this.coverage;
+        }
+
+        public boolean hasCoverage() { 
+          return this.coverage != null && !this.coverage.isEmpty();
+        }
+
+        /**
+         * @param value {@link #coverage} (The party(s) that are responsible for payment (or part of) of charges applied to this account (including self-pay).
+
+A coverage may only be resposible for specific types of charges, and the sequence of the coverages in the account could be important when processing billing.)
+         */
+        public CoverageComponent setCoverage(Reference value) { 
+          this.coverage = value;
+          return this;
+        }
+
+        /**
+         * @return {@link #coverage} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The party(s) that are responsible for payment (or part of) of charges applied to this account (including self-pay).
+
+A coverage may only be resposible for specific types of charges, and the sequence of the coverages in the account could be important when processing billing.)
+         */
+        public Coverage getCoverageTarget() { 
+          if (this.coverageTarget == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create CoverageComponent.coverage");
+            else if (Configuration.doAutoCreate())
+              this.coverageTarget = new Coverage(); // aa
+          return this.coverageTarget;
+        }
+
+        /**
+         * @param value {@link #coverage} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The party(s) that are responsible for payment (or part of) of charges applied to this account (including self-pay).
+
+A coverage may only be resposible for specific types of charges, and the sequence of the coverages in the account could be important when processing billing.)
+         */
+        public CoverageComponent setCoverageTarget(Coverage value) { 
+          this.coverageTarget = value;
+          return this;
+        }
+
+        /**
+         * @return {@link #priority} (The priority of the coverage in the context of this account.). This is the underlying object with id, value and extensions. The accessor "getPriority" gives direct access to the value
+         */
+        public PositiveIntType getPriorityElement() { 
+          if (this.priority == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create CoverageComponent.priority");
+            else if (Configuration.doAutoCreate())
+              this.priority = new PositiveIntType(); // bb
+          return this.priority;
+        }
+
+        public boolean hasPriorityElement() { 
+          return this.priority != null && !this.priority.isEmpty();
+        }
+
+        public boolean hasPriority() { 
+          return this.priority != null && !this.priority.isEmpty();
+        }
+
+        /**
+         * @param value {@link #priority} (The priority of the coverage in the context of this account.). This is the underlying object with id, value and extensions. The accessor "getPriority" gives direct access to the value
+         */
+        public CoverageComponent setPriorityElement(PositiveIntType value) { 
+          this.priority = value;
+          return this;
+        }
+
+        /**
+         * @return The priority of the coverage in the context of this account.
+         */
+        public int getPriority() { 
+          return this.priority == null || this.priority.isEmpty() ? 0 : this.priority.getValue();
+        }
+
+        /**
+         * @param value The priority of the coverage in the context of this account.
+         */
+        public CoverageComponent setPriority(int value) { 
+            if (this.priority == null)
+              this.priority = new PositiveIntType();
+            this.priority.setValue(value);
+          return this;
+        }
+
+        protected void listChildren(List<Property> childrenList) {
+          super.listChildren(childrenList);
+          childrenList.add(new Property("coverage", "Reference(Coverage)", "The party(s) that are responsible for payment (or part of) of charges applied to this account (including self-pay).\n\nA coverage may only be resposible for specific types of charges, and the sequence of the coverages in the account could be important when processing billing.", 0, java.lang.Integer.MAX_VALUE, coverage));
+          childrenList.add(new Property("priority", "positiveInt", "The priority of the coverage in the context of this account.", 0, java.lang.Integer.MAX_VALUE, priority));
+        }
+
+      @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case -351767064: /*coverage*/ return this.coverage == null ? new Base[0] : new Base[] {this.coverage}; // Reference
+        case -1165461084: /*priority*/ return this.priority == null ? new Base[0] : new Base[] {this.priority}; // PositiveIntType
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case -351767064: // coverage
+          this.coverage = castToReference(value); // Reference
+          return value;
+        case -1165461084: // priority
+          this.priority = castToPositiveInt(value); // PositiveIntType
+          return value;
+        default: return super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("coverage")) {
+          this.coverage = castToReference(value); // Reference
+        } else if (name.equals("priority")) {
+          this.priority = castToPositiveInt(value); // PositiveIntType
+        } else
+          return super.setProperty(name, value);
+        return value;
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -351767064:  return getCoverage(); 
+        case -1165461084:  return getPriorityElement();
+        default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -351767064: /*coverage*/ return new String[] {"Reference"};
+        case -1165461084: /*priority*/ return new String[] {"positiveInt"};
+        default: return super.getTypesForProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("coverage")) {
+          this.coverage = new Reference();
+          return this.coverage;
+        }
+        else if (name.equals("priority")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Account.priority");
+        }
+        else
+          return super.addChild(name);
+      }
+
+      public CoverageComponent copy() {
+        CoverageComponent dst = new CoverageComponent();
+        copyValues(dst);
+        dst.coverage = coverage == null ? null : coverage.copy();
+        dst.priority = priority == null ? null : priority.copy();
+        return dst;
+      }
+
+      @Override
+      public boolean equalsDeep(Base other) {
+        if (!super.equalsDeep(other))
+          return false;
+        if (!(other instanceof CoverageComponent))
+          return false;
+        CoverageComponent o = (CoverageComponent) other;
+        return compareDeep(coverage, o.coverage, true) && compareDeep(priority, o.priority, true);
+      }
+
+      @Override
+      public boolean equalsShallow(Base other) {
+        if (!super.equalsShallow(other))
+          return false;
+        if (!(other instanceof CoverageComponent))
+          return false;
+        CoverageComponent o = (CoverageComponent) other;
+        return compareValues(priority, o.priority, true);
+      }
+
+      public boolean isEmpty() {
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(coverage, priority);
+      }
+
+  public String fhirType() {
+    return "Account.coverage";
+
+  }
+
+  }
+
+    @Block()
     public static class GuarantorComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * The entity who is responsible.
          */
-        @Child(name = "party", type = {Patient.class, RelatedPerson.class, Organization.class}, order=1, min=1, max=1, modifier=false, summary=true)
+        @Child(name = "party", type = {Patient.class, RelatedPerson.class, Organization.class}, order=1, min=1, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Responsible entity", formalDefinition="The entity who is responsible." )
         protected Reference party;
 
@@ -171,14 +425,14 @@ public class Account extends DomainResource {
         /**
          * A guarantor may be placed on credit hold or otherwise have their role temporarily suspended.
          */
-        @Child(name = "onHold", type = {BooleanType.class}, order=2, min=0, max=1, modifier=false, summary=true)
+        @Child(name = "onHold", type = {BooleanType.class}, order=2, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Credit or other hold applied", formalDefinition="A guarantor may be placed on credit hold or otherwise have their role temporarily suspended." )
         protected BooleanType onHold;
 
         /**
          * The timeframe during which the guarantor accepts responsibility for the account.
          */
-        @Child(name = "period", type = {Period.class}, order=3, min=0, max=1, modifier=false, summary=true)
+        @Child(name = "period", type = {Period.class}, order=3, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Guarrantee account during", formalDefinition="The timeframe during which the guarantor accepts responsibility for the account." )
         protected Period period;
 
@@ -326,41 +580,53 @@ public class Account extends DomainResource {
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case 106437350: // party
           this.party = castToReference(value); // Reference
-          break;
+          return value;
         case -1013289154: // onHold
           this.onHold = castToBoolean(value); // BooleanType
-          break;
+          return value;
         case -991726143: // period
           this.period = castToPeriod(value); // Period
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("party"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("party")) {
           this.party = castToReference(value); // Reference
-        else if (name.equals("onHold"))
+        } else if (name.equals("onHold")) {
           this.onHold = castToBoolean(value); // BooleanType
-        else if (name.equals("period"))
+        } else if (name.equals("period")) {
           this.period = castToPeriod(value); // Period
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 106437350:  return getParty(); // Reference
-        case -1013289154: throw new FHIRException("Cannot make property onHold as it is not a complex type"); // BooleanType
-        case -991726143:  return getPeriod(); // Period
+        case 106437350:  return getParty(); 
+        case -1013289154:  return getOnHoldElement();
+        case -991726143:  return getPeriod(); 
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 106437350: /*party*/ return new String[] {"Reference"};
+        case -1013289154: /*onHold*/ return new String[] {"boolean"};
+        case -991726143: /*period*/ return new String[] {"Period"};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }
@@ -431,76 +697,32 @@ public class Account extends DomainResource {
     protected List<Identifier> identifier;
 
     /**
-     * Name used for the account when displaying it to humans in reports, etc.
+     * Indicates whether the account is presently used/useable or not.
      */
-    @Child(name = "name", type = {StringType.class}, order=1, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Human-readable label", formalDefinition="Name used for the account when displaying it to humans in reports, etc." )
-    protected StringType name;
+    @Child(name = "status", type = {CodeType.class}, order=1, min=0, max=1, modifier=true, summary=true)
+    @Description(shortDefinition="active | inactive | entered-in-error", formalDefinition="Indicates whether the account is presently used/useable or not." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/account-status")
+    protected Enumeration<AccountStatus> status;
 
     /**
      * Categorizes the account for reporting and searching purposes.
      */
     @Child(name = "type", type = {CodeableConcept.class}, order=2, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="E.g. patient, expense, depreciation", formalDefinition="Categorizes the account for reporting and searching purposes." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/account-type")
     protected CodeableConcept type;
 
     /**
-     * Indicates whether the account is presently used/useable or not.
+     * Name used for the account when displaying it to humans in reports, etc.
      */
-    @Child(name = "status", type = {CodeType.class}, order=3, min=0, max=1, modifier=true, summary=true)
-    @Description(shortDefinition="active | inactive | entered-in-error", formalDefinition="Indicates whether the account is presently used/useable or not." )
-    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/account-status")
-    protected Enumeration<AccountStatus> status;
-
-    /**
-     * Indicates the period of time over which the account is allowed to have transactions posted to it.
-This period may be different to the coveragePeriod which is the duration of time that services may occur.
-     */
-    @Child(name = "active", type = {Period.class}, order=4, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Time window that transactions may be posted to this account", formalDefinition="Indicates the period of time over which the account is allowed to have transactions posted to it.\nThis period may be different to the coveragePeriod which is the duration of time that services may occur." )
-    protected Period active;
-
-    /**
-     * Identifies the currency to which transactions must be converted when crediting or debiting the account.
-     */
-    @Child(name = "currency", type = {Coding.class}, order=5, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Base currency in which balance is tracked", formalDefinition="Identifies the currency to which transactions must be converted when crediting or debiting the account." )
-    protected Coding currency;
-
-    /**
-     * Represents the sum of all credits less all debits associated with the account.  Might be positive, zero or negative.
-     */
-    @Child(name = "balance", type = {Money.class}, order=6, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="How much is in account?", formalDefinition="Represents the sum of all credits less all debits associated with the account.  Might be positive, zero or negative." )
-    protected Money balance;
-
-    /**
-     * The party(s) that are responsible for payment (or part of) of charges applied to this account (including self-pay).
-
-A coverage may only be resposible for specific types of charges, and the sequence of the coverages in the account could be important when processing billing.
-     */
-    @Child(name = "coverage", type = {Coverage.class}, order=7, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-    @Description(shortDefinition="The party(s) that are responsible for covering the payment of this account", formalDefinition="The party(s) that are responsible for payment (or part of) of charges applied to this account (including self-pay).\n\nA coverage may only be resposible for specific types of charges, and the sequence of the coverages in the account could be important when processing billing." )
-    protected List<Reference> coverage;
-    /**
-     * The actual objects that are the target of the reference (The party(s) that are responsible for payment (or part of) of charges applied to this account (including self-pay).
-
-A coverage may only be resposible for specific types of charges, and the sequence of the coverages in the account could be important when processing billing.)
-     */
-    protected List<Coverage> coverageTarget;
-
-
-    /**
-     * Identifies the period of time the account applies to; e.g. accounts created per fiscal year, quarter, etc.
-     */
-    @Child(name = "coveragePeriod", type = {Period.class}, order=8, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Transaction window", formalDefinition="Identifies the period of time the account applies to; e.g. accounts created per fiscal year, quarter, etc." )
-    protected Period coveragePeriod;
+    @Child(name = "name", type = {StringType.class}, order=3, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="Human-readable label", formalDefinition="Name used for the account when displaying it to humans in reports, etc." )
+    protected StringType name;
 
     /**
      * Identifies the patient, device, practitioner, location or other object the account is associated with.
      */
-    @Child(name = "subject", type = {Patient.class, Device.class, Practitioner.class, Location.class, HealthcareService.class, Organization.class}, order=9, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "subject", type = {Patient.class, Device.class, Practitioner.class, Location.class, HealthcareService.class, Organization.class}, order=4, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="What is account tied to?", formalDefinition="Identifies the patient, device, practitioner, location or other object the account is associated with." )
     protected Reference subject;
 
@@ -510,9 +732,38 @@ A coverage may only be resposible for specific types of charges, and the sequenc
     protected Resource subjectTarget;
 
     /**
+     * Identifies the period of time the account applies to; e.g. accounts created per fiscal year, quarter, etc.
+     */
+    @Child(name = "period", type = {Period.class}, order=5, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="Transaction window", formalDefinition="Identifies the period of time the account applies to; e.g. accounts created per fiscal year, quarter, etc." )
+    protected Period period;
+
+    /**
+     * Indicates the period of time over which the account is allowed to have transactions posted to it.
+This period may be different to the coveragePeriod which is the duration of time that services may occur.
+     */
+    @Child(name = "active", type = {Period.class}, order=6, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="Time window that transactions may be posted to this account", formalDefinition="Indicates the period of time over which the account is allowed to have transactions posted to it.\nThis period may be different to the coveragePeriod which is the duration of time that services may occur." )
+    protected Period active;
+
+    /**
+     * Represents the sum of all credits less all debits associated with the account.  Might be positive, zero or negative.
+     */
+    @Child(name = "balance", type = {Money.class}, order=7, min=0, max=1, modifier=false, summary=false)
+    @Description(shortDefinition="How much is in account?", formalDefinition="Represents the sum of all credits less all debits associated with the account.  Might be positive, zero or negative." )
+    protected Money balance;
+
+    /**
+     * The party(s) that are responsible for covering the payment of this account, and what order should they be applied to the account.
+     */
+    @Child(name = "coverage", type = {}, order=8, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Description(shortDefinition="The party(s) that are responsible for covering the payment of this account, and what order should they be applied to the account", formalDefinition="The party(s) that are responsible for covering the payment of this account, and what order should they be applied to the account." )
+    protected List<CoverageComponent> coverage;
+
+    /**
      * Indicates the organization, department, etc. with responsibility for the account.
      */
-    @Child(name = "owner", type = {Organization.class}, order=10, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "owner", type = {Organization.class}, order=9, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Who is responsible?", formalDefinition="Indicates the organization, department, etc. with responsibility for the account." )
     protected Reference owner;
 
@@ -524,18 +775,18 @@ A coverage may only be resposible for specific types of charges, and the sequenc
     /**
      * Provides additional information about what the account tracks and how it is used.
      */
-    @Child(name = "description", type = {StringType.class}, order=11, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "description", type = {StringType.class}, order=10, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Explanation of purpose/use", formalDefinition="Provides additional information about what the account tracks and how it is used." )
     protected StringType description;
 
     /**
      * Parties financially responsible for the account.
      */
-    @Child(name = "guarantor", type = {}, order=12, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "guarantor", type = {}, order=11, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Responsible for the account", formalDefinition="Parties financially responsible for the account." )
     protected List<GuarantorComponent> guarantor;
 
-    private static final long serialVersionUID = -124781610L;
+    private static final long serialVersionUID = 1653702558L;
 
   /**
    * Constructor
@@ -598,79 +849,6 @@ A coverage may only be resposible for specific types of charges, and the sequenc
     }
 
     /**
-     * @return {@link #name} (Name used for the account when displaying it to humans in reports, etc.). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
-     */
-    public StringType getNameElement() { 
-      if (this.name == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create Account.name");
-        else if (Configuration.doAutoCreate())
-          this.name = new StringType(); // bb
-      return this.name;
-    }
-
-    public boolean hasNameElement() { 
-      return this.name != null && !this.name.isEmpty();
-    }
-
-    public boolean hasName() { 
-      return this.name != null && !this.name.isEmpty();
-    }
-
-    /**
-     * @param value {@link #name} (Name used for the account when displaying it to humans in reports, etc.). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
-     */
-    public Account setNameElement(StringType value) { 
-      this.name = value;
-      return this;
-    }
-
-    /**
-     * @return Name used for the account when displaying it to humans in reports, etc.
-     */
-    public String getName() { 
-      return this.name == null ? null : this.name.getValue();
-    }
-
-    /**
-     * @param value Name used for the account when displaying it to humans in reports, etc.
-     */
-    public Account setName(String value) { 
-      if (Utilities.noString(value))
-        this.name = null;
-      else {
-        if (this.name == null)
-          this.name = new StringType();
-        this.name.setValue(value);
-      }
-      return this;
-    }
-
-    /**
-     * @return {@link #type} (Categorizes the account for reporting and searching purposes.)
-     */
-    public CodeableConcept getType() { 
-      if (this.type == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create Account.type");
-        else if (Configuration.doAutoCreate())
-          this.type = new CodeableConcept(); // cc
-      return this.type;
-    }
-
-    public boolean hasType() { 
-      return this.type != null && !this.type.isEmpty();
-    }
-
-    /**
-     * @param value {@link #type} (Categorizes the account for reporting and searching purposes.)
-     */
-    public Account setType(CodeableConcept value) { 
-      this.type = value;
-      return this;
-    }
-
-    /**
      * @return {@link #status} (Indicates whether the account is presently used/useable or not.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
      */
     public Enumeration<AccountStatus> getStatusElement() { 
@@ -720,177 +898,75 @@ A coverage may only be resposible for specific types of charges, and the sequenc
     }
 
     /**
-     * @return {@link #active} (Indicates the period of time over which the account is allowed to have transactions posted to it.
-This period may be different to the coveragePeriod which is the duration of time that services may occur.)
+     * @return {@link #type} (Categorizes the account for reporting and searching purposes.)
      */
-    public Period getActive() { 
-      if (this.active == null)
+    public CodeableConcept getType() { 
+      if (this.type == null)
         if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create Account.active");
+          throw new Error("Attempt to auto-create Account.type");
         else if (Configuration.doAutoCreate())
-          this.active = new Period(); // cc
-      return this.active;
+          this.type = new CodeableConcept(); // cc
+      return this.type;
     }
 
-    public boolean hasActive() { 
-      return this.active != null && !this.active.isEmpty();
+    public boolean hasType() { 
+      return this.type != null && !this.type.isEmpty();
     }
 
     /**
-     * @param value {@link #active} (Indicates the period of time over which the account is allowed to have transactions posted to it.
-This period may be different to the coveragePeriod which is the duration of time that services may occur.)
+     * @param value {@link #type} (Categorizes the account for reporting and searching purposes.)
      */
-    public Account setActive(Period value) { 
-      this.active = value;
+    public Account setType(CodeableConcept value) { 
+      this.type = value;
       return this;
     }
 
     /**
-     * @return {@link #currency} (Identifies the currency to which transactions must be converted when crediting or debiting the account.)
+     * @return {@link #name} (Name used for the account when displaying it to humans in reports, etc.). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
      */
-    public Coding getCurrency() { 
-      if (this.currency == null)
+    public StringType getNameElement() { 
+      if (this.name == null)
         if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create Account.currency");
+          throw new Error("Attempt to auto-create Account.name");
         else if (Configuration.doAutoCreate())
-          this.currency = new Coding(); // cc
-      return this.currency;
+          this.name = new StringType(); // bb
+      return this.name;
     }
 
-    public boolean hasCurrency() { 
-      return this.currency != null && !this.currency.isEmpty();
+    public boolean hasNameElement() { 
+      return this.name != null && !this.name.isEmpty();
+    }
+
+    public boolean hasName() { 
+      return this.name != null && !this.name.isEmpty();
     }
 
     /**
-     * @param value {@link #currency} (Identifies the currency to which transactions must be converted when crediting or debiting the account.)
+     * @param value {@link #name} (Name used for the account when displaying it to humans in reports, etc.). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
      */
-    public Account setCurrency(Coding value) { 
-      this.currency = value;
+    public Account setNameElement(StringType value) { 
+      this.name = value;
       return this;
     }
 
     /**
-     * @return {@link #balance} (Represents the sum of all credits less all debits associated with the account.  Might be positive, zero or negative.)
+     * @return Name used for the account when displaying it to humans in reports, etc.
      */
-    public Money getBalance() { 
-      if (this.balance == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create Account.balance");
-        else if (Configuration.doAutoCreate())
-          this.balance = new Money(); // cc
-      return this.balance;
-    }
-
-    public boolean hasBalance() { 
-      return this.balance != null && !this.balance.isEmpty();
+    public String getName() { 
+      return this.name == null ? null : this.name.getValue();
     }
 
     /**
-     * @param value {@link #balance} (Represents the sum of all credits less all debits associated with the account.  Might be positive, zero or negative.)
+     * @param value Name used for the account when displaying it to humans in reports, etc.
      */
-    public Account setBalance(Money value) { 
-      this.balance = value;
-      return this;
-    }
-
-    /**
-     * @return {@link #coverage} (The party(s) that are responsible for payment (or part of) of charges applied to this account (including self-pay).
-
-A coverage may only be resposible for specific types of charges, and the sequence of the coverages in the account could be important when processing billing.)
-     */
-    public List<Reference> getCoverage() { 
-      if (this.coverage == null)
-        this.coverage = new ArrayList<Reference>();
-      return this.coverage;
-    }
-
-    /**
-     * @return Returns a reference to <code>this</code> for easy method chaining
-     */
-    public Account setCoverage(List<Reference> theCoverage) { 
-      this.coverage = theCoverage;
-      return this;
-    }
-
-    public boolean hasCoverage() { 
-      if (this.coverage == null)
-        return false;
-      for (Reference item : this.coverage)
-        if (!item.isEmpty())
-          return true;
-      return false;
-    }
-
-    public Reference addCoverage() { //3
-      Reference t = new Reference();
-      if (this.coverage == null)
-        this.coverage = new ArrayList<Reference>();
-      this.coverage.add(t);
-      return t;
-    }
-
-    public Account addCoverage(Reference t) { //3
-      if (t == null)
-        return this;
-      if (this.coverage == null)
-        this.coverage = new ArrayList<Reference>();
-      this.coverage.add(t);
-      return this;
-    }
-
-    /**
-     * @return The first repetition of repeating field {@link #coverage}, creating it if it does not already exist
-     */
-    public Reference getCoverageFirstRep() { 
-      if (getCoverage().isEmpty()) {
-        addCoverage();
+    public Account setName(String value) { 
+      if (Utilities.noString(value))
+        this.name = null;
+      else {
+        if (this.name == null)
+          this.name = new StringType();
+        this.name.setValue(value);
       }
-      return getCoverage().get(0);
-    }
-
-    /**
-     * @deprecated Use Reference#setResource(IBaseResource) instead
-     */
-    @Deprecated
-    public List<Coverage> getCoverageTarget() { 
-      if (this.coverageTarget == null)
-        this.coverageTarget = new ArrayList<Coverage>();
-      return this.coverageTarget;
-    }
-
-    /**
-     * @deprecated Use Reference#setResource(IBaseResource) instead
-     */
-    @Deprecated
-    public Coverage addCoverageTarget() { 
-      Coverage r = new Coverage();
-      if (this.coverageTarget == null)
-        this.coverageTarget = new ArrayList<Coverage>();
-      this.coverageTarget.add(r);
-      return r;
-    }
-
-    /**
-     * @return {@link #coveragePeriod} (Identifies the period of time the account applies to; e.g. accounts created per fiscal year, quarter, etc.)
-     */
-    public Period getCoveragePeriod() { 
-      if (this.coveragePeriod == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create Account.coveragePeriod");
-        else if (Configuration.doAutoCreate())
-          this.coveragePeriod = new Period(); // cc
-      return this.coveragePeriod;
-    }
-
-    public boolean hasCoveragePeriod() { 
-      return this.coveragePeriod != null && !this.coveragePeriod.isEmpty();
-    }
-
-    /**
-     * @param value {@link #coveragePeriod} (Identifies the period of time the account applies to; e.g. accounts created per fiscal year, quarter, etc.)
-     */
-    public Account setCoveragePeriod(Period value) { 
-      this.coveragePeriod = value;
       return this;
     }
 
@@ -931,6 +1007,133 @@ A coverage may only be resposible for specific types of charges, and the sequenc
     public Account setSubjectTarget(Resource value) { 
       this.subjectTarget = value;
       return this;
+    }
+
+    /**
+     * @return {@link #period} (Identifies the period of time the account applies to; e.g. accounts created per fiscal year, quarter, etc.)
+     */
+    public Period getPeriod() { 
+      if (this.period == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create Account.period");
+        else if (Configuration.doAutoCreate())
+          this.period = new Period(); // cc
+      return this.period;
+    }
+
+    public boolean hasPeriod() { 
+      return this.period != null && !this.period.isEmpty();
+    }
+
+    /**
+     * @param value {@link #period} (Identifies the period of time the account applies to; e.g. accounts created per fiscal year, quarter, etc.)
+     */
+    public Account setPeriod(Period value) { 
+      this.period = value;
+      return this;
+    }
+
+    /**
+     * @return {@link #active} (Indicates the period of time over which the account is allowed to have transactions posted to it.
+This period may be different to the coveragePeriod which is the duration of time that services may occur.)
+     */
+    public Period getActive() { 
+      if (this.active == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create Account.active");
+        else if (Configuration.doAutoCreate())
+          this.active = new Period(); // cc
+      return this.active;
+    }
+
+    public boolean hasActive() { 
+      return this.active != null && !this.active.isEmpty();
+    }
+
+    /**
+     * @param value {@link #active} (Indicates the period of time over which the account is allowed to have transactions posted to it.
+This period may be different to the coveragePeriod which is the duration of time that services may occur.)
+     */
+    public Account setActive(Period value) { 
+      this.active = value;
+      return this;
+    }
+
+    /**
+     * @return {@link #balance} (Represents the sum of all credits less all debits associated with the account.  Might be positive, zero or negative.)
+     */
+    public Money getBalance() { 
+      if (this.balance == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create Account.balance");
+        else if (Configuration.doAutoCreate())
+          this.balance = new Money(); // cc
+      return this.balance;
+    }
+
+    public boolean hasBalance() { 
+      return this.balance != null && !this.balance.isEmpty();
+    }
+
+    /**
+     * @param value {@link #balance} (Represents the sum of all credits less all debits associated with the account.  Might be positive, zero or negative.)
+     */
+    public Account setBalance(Money value) { 
+      this.balance = value;
+      return this;
+    }
+
+    /**
+     * @return {@link #coverage} (The party(s) that are responsible for covering the payment of this account, and what order should they be applied to the account.)
+     */
+    public List<CoverageComponent> getCoverage() { 
+      if (this.coverage == null)
+        this.coverage = new ArrayList<CoverageComponent>();
+      return this.coverage;
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public Account setCoverage(List<CoverageComponent> theCoverage) { 
+      this.coverage = theCoverage;
+      return this;
+    }
+
+    public boolean hasCoverage() { 
+      if (this.coverage == null)
+        return false;
+      for (CoverageComponent item : this.coverage)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    public CoverageComponent addCoverage() { //3
+      CoverageComponent t = new CoverageComponent();
+      if (this.coverage == null)
+        this.coverage = new ArrayList<CoverageComponent>();
+      this.coverage.add(t);
+      return t;
+    }
+
+    public Account addCoverage(CoverageComponent t) { //3
+      if (t == null)
+        return this;
+      if (this.coverage == null)
+        this.coverage = new ArrayList<CoverageComponent>();
+      this.coverage.add(t);
+      return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #coverage}, creating it if it does not already exist
+     */
+    public CoverageComponent getCoverageFirstRep() { 
+      if (getCoverage().isEmpty()) {
+        addCoverage();
+      }
+      return getCoverage().get(0);
     }
 
     /**
@@ -1082,15 +1285,14 @@ A coverage may only be resposible for specific types of charges, and the sequenc
       protected void listChildren(List<Property> childrenList) {
         super.listChildren(childrenList);
         childrenList.add(new Property("identifier", "Identifier", "Unique identifier used to reference the account.  May or may not be intended for human use (e.g. credit card number).", 0, java.lang.Integer.MAX_VALUE, identifier));
-        childrenList.add(new Property("name", "string", "Name used for the account when displaying it to humans in reports, etc.", 0, java.lang.Integer.MAX_VALUE, name));
-        childrenList.add(new Property("type", "CodeableConcept", "Categorizes the account for reporting and searching purposes.", 0, java.lang.Integer.MAX_VALUE, type));
         childrenList.add(new Property("status", "code", "Indicates whether the account is presently used/useable or not.", 0, java.lang.Integer.MAX_VALUE, status));
-        childrenList.add(new Property("active", "Period", "Indicates the period of time over which the account is allowed to have transactions posted to it.\nThis period may be different to the coveragePeriod which is the duration of time that services may occur.", 0, java.lang.Integer.MAX_VALUE, active));
-        childrenList.add(new Property("currency", "Coding", "Identifies the currency to which transactions must be converted when crediting or debiting the account.", 0, java.lang.Integer.MAX_VALUE, currency));
-        childrenList.add(new Property("balance", "Money", "Represents the sum of all credits less all debits associated with the account.  Might be positive, zero or negative.", 0, java.lang.Integer.MAX_VALUE, balance));
-        childrenList.add(new Property("coverage", "Reference(Coverage)", "The party(s) that are responsible for payment (or part of) of charges applied to this account (including self-pay).\n\nA coverage may only be resposible for specific types of charges, and the sequence of the coverages in the account could be important when processing billing.", 0, java.lang.Integer.MAX_VALUE, coverage));
-        childrenList.add(new Property("coveragePeriod", "Period", "Identifies the period of time the account applies to; e.g. accounts created per fiscal year, quarter, etc.", 0, java.lang.Integer.MAX_VALUE, coveragePeriod));
+        childrenList.add(new Property("type", "CodeableConcept", "Categorizes the account for reporting and searching purposes.", 0, java.lang.Integer.MAX_VALUE, type));
+        childrenList.add(new Property("name", "string", "Name used for the account when displaying it to humans in reports, etc.", 0, java.lang.Integer.MAX_VALUE, name));
         childrenList.add(new Property("subject", "Reference(Patient|Device|Practitioner|Location|HealthcareService|Organization)", "Identifies the patient, device, practitioner, location or other object the account is associated with.", 0, java.lang.Integer.MAX_VALUE, subject));
+        childrenList.add(new Property("period", "Period", "Identifies the period of time the account applies to; e.g. accounts created per fiscal year, quarter, etc.", 0, java.lang.Integer.MAX_VALUE, period));
+        childrenList.add(new Property("active", "Period", "Indicates the period of time over which the account is allowed to have transactions posted to it.\nThis period may be different to the coveragePeriod which is the duration of time that services may occur.", 0, java.lang.Integer.MAX_VALUE, active));
+        childrenList.add(new Property("balance", "Money", "Represents the sum of all credits less all debits associated with the account.  Might be positive, zero or negative.", 0, java.lang.Integer.MAX_VALUE, balance));
+        childrenList.add(new Property("coverage", "", "The party(s) that are responsible for covering the payment of this account, and what order should they be applied to the account.", 0, java.lang.Integer.MAX_VALUE, coverage));
         childrenList.add(new Property("owner", "Reference(Organization)", "Indicates the organization, department, etc. with responsibility for the account.", 0, java.lang.Integer.MAX_VALUE, owner));
         childrenList.add(new Property("description", "string", "Provides additional information about what the account tracks and how it is used.", 0, java.lang.Integer.MAX_VALUE, description));
         childrenList.add(new Property("guarantor", "", "Parties financially responsible for the account.", 0, java.lang.Integer.MAX_VALUE, guarantor));
@@ -1100,15 +1302,14 @@ A coverage may only be resposible for specific types of charges, and the sequenc
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
         case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : this.identifier.toArray(new Base[this.identifier.size()]); // Identifier
-        case 3373707: /*name*/ return this.name == null ? new Base[0] : new Base[] {this.name}; // StringType
-        case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // CodeableConcept
         case -892481550: /*status*/ return this.status == null ? new Base[0] : new Base[] {this.status}; // Enumeration<AccountStatus>
-        case -1422950650: /*active*/ return this.active == null ? new Base[0] : new Base[] {this.active}; // Period
-        case 575402001: /*currency*/ return this.currency == null ? new Base[0] : new Base[] {this.currency}; // Coding
-        case -339185956: /*balance*/ return this.balance == null ? new Base[0] : new Base[] {this.balance}; // Money
-        case -351767064: /*coverage*/ return this.coverage == null ? new Base[0] : this.coverage.toArray(new Base[this.coverage.size()]); // Reference
-        case 1024117193: /*coveragePeriod*/ return this.coveragePeriod == null ? new Base[0] : new Base[] {this.coveragePeriod}; // Period
+        case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // CodeableConcept
+        case 3373707: /*name*/ return this.name == null ? new Base[0] : new Base[] {this.name}; // StringType
         case -1867885268: /*subject*/ return this.subject == null ? new Base[0] : new Base[] {this.subject}; // Reference
+        case -991726143: /*period*/ return this.period == null ? new Base[0] : new Base[] {this.period}; // Period
+        case -1422950650: /*active*/ return this.active == null ? new Base[0] : new Base[] {this.active}; // Period
+        case -339185956: /*balance*/ return this.balance == null ? new Base[0] : new Base[] {this.balance}; // Money
+        case -351767064: /*coverage*/ return this.coverage == null ? new Base[0] : this.coverage.toArray(new Base[this.coverage.size()]); // CoverageComponent
         case 106164915: /*owner*/ return this.owner == null ? new Base[0] : new Base[] {this.owner}; // Reference
         case -1724546052: /*description*/ return this.description == null ? new Base[0] : new Base[] {this.description}; // StringType
         case -188629045: /*guarantor*/ return this.guarantor == null ? new Base[0] : this.guarantor.toArray(new Base[this.guarantor.size()]); // GuarantorComponent
@@ -1118,101 +1319,118 @@ A coverage may only be resposible for specific types of charges, and the sequenc
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case -1618432855: // identifier
           this.getIdentifier().add(castToIdentifier(value)); // Identifier
-          break;
-        case 3373707: // name
-          this.name = castToString(value); // StringType
-          break;
+          return value;
+        case -892481550: // status
+          value = new AccountStatusEnumFactory().fromType(castToCode(value));
+          this.status = (Enumeration) value; // Enumeration<AccountStatus>
+          return value;
         case 3575610: // type
           this.type = castToCodeableConcept(value); // CodeableConcept
-          break;
-        case -892481550: // status
-          this.status = new AccountStatusEnumFactory().fromType(value); // Enumeration<AccountStatus>
-          break;
-        case -1422950650: // active
-          this.active = castToPeriod(value); // Period
-          break;
-        case 575402001: // currency
-          this.currency = castToCoding(value); // Coding
-          break;
-        case -339185956: // balance
-          this.balance = castToMoney(value); // Money
-          break;
-        case -351767064: // coverage
-          this.getCoverage().add(castToReference(value)); // Reference
-          break;
-        case 1024117193: // coveragePeriod
-          this.coveragePeriod = castToPeriod(value); // Period
-          break;
+          return value;
+        case 3373707: // name
+          this.name = castToString(value); // StringType
+          return value;
         case -1867885268: // subject
           this.subject = castToReference(value); // Reference
-          break;
+          return value;
+        case -991726143: // period
+          this.period = castToPeriod(value); // Period
+          return value;
+        case -1422950650: // active
+          this.active = castToPeriod(value); // Period
+          return value;
+        case -339185956: // balance
+          this.balance = castToMoney(value); // Money
+          return value;
+        case -351767064: // coverage
+          this.getCoverage().add((CoverageComponent) value); // CoverageComponent
+          return value;
         case 106164915: // owner
           this.owner = castToReference(value); // Reference
-          break;
+          return value;
         case -1724546052: // description
           this.description = castToString(value); // StringType
-          break;
+          return value;
         case -188629045: // guarantor
           this.getGuarantor().add((GuarantorComponent) value); // GuarantorComponent
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("identifier"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("identifier")) {
           this.getIdentifier().add(castToIdentifier(value));
-        else if (name.equals("name"))
-          this.name = castToString(value); // StringType
-        else if (name.equals("type"))
+        } else if (name.equals("status")) {
+          value = new AccountStatusEnumFactory().fromType(castToCode(value));
+          this.status = (Enumeration) value; // Enumeration<AccountStatus>
+        } else if (name.equals("type")) {
           this.type = castToCodeableConcept(value); // CodeableConcept
-        else if (name.equals("status"))
-          this.status = new AccountStatusEnumFactory().fromType(value); // Enumeration<AccountStatus>
-        else if (name.equals("active"))
-          this.active = castToPeriod(value); // Period
-        else if (name.equals("currency"))
-          this.currency = castToCoding(value); // Coding
-        else if (name.equals("balance"))
-          this.balance = castToMoney(value); // Money
-        else if (name.equals("coverage"))
-          this.getCoverage().add(castToReference(value));
-        else if (name.equals("coveragePeriod"))
-          this.coveragePeriod = castToPeriod(value); // Period
-        else if (name.equals("subject"))
+        } else if (name.equals("name")) {
+          this.name = castToString(value); // StringType
+        } else if (name.equals("subject")) {
           this.subject = castToReference(value); // Reference
-        else if (name.equals("owner"))
+        } else if (name.equals("period")) {
+          this.period = castToPeriod(value); // Period
+        } else if (name.equals("active")) {
+          this.active = castToPeriod(value); // Period
+        } else if (name.equals("balance")) {
+          this.balance = castToMoney(value); // Money
+        } else if (name.equals("coverage")) {
+          this.getCoverage().add((CoverageComponent) value);
+        } else if (name.equals("owner")) {
           this.owner = castToReference(value); // Reference
-        else if (name.equals("description"))
+        } else if (name.equals("description")) {
           this.description = castToString(value); // StringType
-        else if (name.equals("guarantor"))
+        } else if (name.equals("guarantor")) {
           this.getGuarantor().add((GuarantorComponent) value);
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case -1618432855:  return addIdentifier(); // Identifier
-        case 3373707: throw new FHIRException("Cannot make property name as it is not a complex type"); // StringType
-        case 3575610:  return getType(); // CodeableConcept
-        case -892481550: throw new FHIRException("Cannot make property status as it is not a complex type"); // Enumeration<AccountStatus>
-        case -1422950650:  return getActive(); // Period
-        case 575402001:  return getCurrency(); // Coding
-        case -339185956:  return getBalance(); // Money
-        case -351767064:  return addCoverage(); // Reference
-        case 1024117193:  return getCoveragePeriod(); // Period
-        case -1867885268:  return getSubject(); // Reference
-        case 106164915:  return getOwner(); // Reference
-        case -1724546052: throw new FHIRException("Cannot make property description as it is not a complex type"); // StringType
-        case -188629045:  return addGuarantor(); // GuarantorComponent
+        case -1618432855:  return addIdentifier(); 
+        case -892481550:  return getStatusElement();
+        case 3575610:  return getType(); 
+        case 3373707:  return getNameElement();
+        case -1867885268:  return getSubject(); 
+        case -991726143:  return getPeriod(); 
+        case -1422950650:  return getActive(); 
+        case -339185956:  return getBalance(); 
+        case -351767064:  return addCoverage(); 
+        case 106164915:  return getOwner(); 
+        case -1724546052:  return getDescriptionElement();
+        case -188629045:  return addGuarantor(); 
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -1618432855: /*identifier*/ return new String[] {"Identifier"};
+        case -892481550: /*status*/ return new String[] {"code"};
+        case 3575610: /*type*/ return new String[] {"CodeableConcept"};
+        case 3373707: /*name*/ return new String[] {"string"};
+        case -1867885268: /*subject*/ return new String[] {"Reference"};
+        case -991726143: /*period*/ return new String[] {"Period"};
+        case -1422950650: /*active*/ return new String[] {"Period"};
+        case -339185956: /*balance*/ return new String[] {"Money"};
+        case -351767064: /*coverage*/ return new String[] {};
+        case 106164915: /*owner*/ return new String[] {"Reference"};
+        case -1724546052: /*description*/ return new String[] {"string"};
+        case -188629045: /*guarantor*/ return new String[] {};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }
@@ -1222,23 +1440,27 @@ A coverage may only be resposible for specific types of charges, and the sequenc
         if (name.equals("identifier")) {
           return addIdentifier();
         }
-        else if (name.equals("name")) {
-          throw new FHIRException("Cannot call addChild on a primitive type Account.name");
+        else if (name.equals("status")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Account.status");
         }
         else if (name.equals("type")) {
           this.type = new CodeableConcept();
           return this.type;
         }
-        else if (name.equals("status")) {
-          throw new FHIRException("Cannot call addChild on a primitive type Account.status");
+        else if (name.equals("name")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Account.name");
+        }
+        else if (name.equals("subject")) {
+          this.subject = new Reference();
+          return this.subject;
+        }
+        else if (name.equals("period")) {
+          this.period = new Period();
+          return this.period;
         }
         else if (name.equals("active")) {
           this.active = new Period();
           return this.active;
-        }
-        else if (name.equals("currency")) {
-          this.currency = new Coding();
-          return this.currency;
         }
         else if (name.equals("balance")) {
           this.balance = new Money();
@@ -1246,14 +1468,6 @@ A coverage may only be resposible for specific types of charges, and the sequenc
         }
         else if (name.equals("coverage")) {
           return addCoverage();
-        }
-        else if (name.equals("coveragePeriod")) {
-          this.coveragePeriod = new Period();
-          return this.coveragePeriod;
-        }
-        else if (name.equals("subject")) {
-          this.subject = new Reference();
-          return this.subject;
         }
         else if (name.equals("owner")) {
           this.owner = new Reference();
@@ -1282,19 +1496,18 @@ A coverage may only be resposible for specific types of charges, and the sequenc
           for (Identifier i : identifier)
             dst.identifier.add(i.copy());
         };
-        dst.name = name == null ? null : name.copy();
-        dst.type = type == null ? null : type.copy();
         dst.status = status == null ? null : status.copy();
+        dst.type = type == null ? null : type.copy();
+        dst.name = name == null ? null : name.copy();
+        dst.subject = subject == null ? null : subject.copy();
+        dst.period = period == null ? null : period.copy();
         dst.active = active == null ? null : active.copy();
-        dst.currency = currency == null ? null : currency.copy();
         dst.balance = balance == null ? null : balance.copy();
         if (coverage != null) {
-          dst.coverage = new ArrayList<Reference>();
-          for (Reference i : coverage)
+          dst.coverage = new ArrayList<CoverageComponent>();
+          for (CoverageComponent i : coverage)
             dst.coverage.add(i.copy());
         };
-        dst.coveragePeriod = coveragePeriod == null ? null : coveragePeriod.copy();
-        dst.subject = subject == null ? null : subject.copy();
         dst.owner = owner == null ? null : owner.copy();
         dst.description = description == null ? null : description.copy();
         if (guarantor != null) {
@@ -1316,11 +1529,11 @@ A coverage may only be resposible for specific types of charges, and the sequenc
         if (!(other instanceof Account))
           return false;
         Account o = (Account) other;
-        return compareDeep(identifier, o.identifier, true) && compareDeep(name, o.name, true) && compareDeep(type, o.type, true)
-           && compareDeep(status, o.status, true) && compareDeep(active, o.active, true) && compareDeep(currency, o.currency, true)
-           && compareDeep(balance, o.balance, true) && compareDeep(coverage, o.coverage, true) && compareDeep(coveragePeriod, o.coveragePeriod, true)
-           && compareDeep(subject, o.subject, true) && compareDeep(owner, o.owner, true) && compareDeep(description, o.description, true)
-           && compareDeep(guarantor, o.guarantor, true);
+        return compareDeep(identifier, o.identifier, true) && compareDeep(status, o.status, true) && compareDeep(type, o.type, true)
+           && compareDeep(name, o.name, true) && compareDeep(subject, o.subject, true) && compareDeep(period, o.period, true)
+           && compareDeep(active, o.active, true) && compareDeep(balance, o.balance, true) && compareDeep(coverage, o.coverage, true)
+           && compareDeep(owner, o.owner, true) && compareDeep(description, o.description, true) && compareDeep(guarantor, o.guarantor, true)
+          ;
       }
 
       @Override
@@ -1330,14 +1543,14 @@ A coverage may only be resposible for specific types of charges, and the sequenc
         if (!(other instanceof Account))
           return false;
         Account o = (Account) other;
-        return compareValues(name, o.name, true) && compareValues(status, o.status, true) && compareValues(description, o.description, true)
+        return compareValues(status, o.status, true) && compareValues(name, o.name, true) && compareValues(description, o.description, true)
           ;
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, name, type, status
-          , active, currency, balance, coverage, coveragePeriod, subject, owner, description
-          , guarantor);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, status, type
+          , name, subject, period, active, balance, coverage, owner, description, guarantor
+          );
       }
 
   @Override
@@ -1396,17 +1609,17 @@ A coverage may only be resposible for specific types of charges, and the sequenc
    * <p>
    * Description: <b>Transaction window</b><br>
    * Type: <b>date</b><br>
-   * Path: <b>Account.coveragePeriod</b><br>
+   * Path: <b>Account.period</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="period", path="Account.coveragePeriod", description="Transaction window", type="date" )
+  @SearchParamDefinition(name="period", path="Account.period", description="Transaction window", type="date" )
   public static final String SP_PERIOD = "period";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>period</b>
    * <p>
    * Description: <b>Transaction window</b><br>
    * Type: <b>date</b><br>
-   * Path: <b>Account.coveragePeriod</b><br>
+   * Path: <b>Account.period</b><br>
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.DateClientParam PERIOD = new ca.uhn.fhir.rest.gclient.DateClientParam(SP_PERIOD);

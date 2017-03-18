@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
 
 
 import org.hl7.fhir.dstu3.model.EnumFactory;
@@ -41,60 +41,60 @@ public class GoalStatusEnumFactory implements EnumFactory<GoalStatus> {
       return null;
     if ("proposed".equals(codeString))
       return GoalStatus.PROPOSED;
-    if ("planned".equals(codeString))
-      return GoalStatus.PLANNED;
     if ("accepted".equals(codeString))
       return GoalStatus.ACCEPTED;
-    if ("rejected".equals(codeString))
-      return GoalStatus.REJECTED;
+    if ("planned".equals(codeString))
+      return GoalStatus.PLANNED;
     if ("in-progress".equals(codeString))
       return GoalStatus.INPROGRESS;
-    if ("achieved".equals(codeString))
-      return GoalStatus.ACHIEVED;
-    if ("sustaining".equals(codeString))
-      return GoalStatus.SUSTAINING;
-    if ("on-hold".equals(codeString))
-      return GoalStatus.ONHOLD;
-    if ("cancelled".equals(codeString))
-      return GoalStatus.CANCELLED;
     if ("on-target".equals(codeString))
       return GoalStatus.ONTARGET;
     if ("ahead-of-target".equals(codeString))
       return GoalStatus.AHEADOFTARGET;
     if ("behind-target".equals(codeString))
       return GoalStatus.BEHINDTARGET;
+    if ("sustaining".equals(codeString))
+      return GoalStatus.SUSTAINING;
+    if ("achieved".equals(codeString))
+      return GoalStatus.ACHIEVED;
+    if ("on-hold".equals(codeString))
+      return GoalStatus.ONHOLD;
+    if ("cancelled".equals(codeString))
+      return GoalStatus.CANCELLED;
     if ("entered-in-error".equals(codeString))
       return GoalStatus.ENTEREDINERROR;
+    if ("rejected".equals(codeString))
+      return GoalStatus.REJECTED;
     throw new IllegalArgumentException("Unknown GoalStatus code '"+codeString+"'");
   }
 
   public String toCode(GoalStatus code) {
     if (code == GoalStatus.PROPOSED)
       return "proposed";
-    if (code == GoalStatus.PLANNED)
-      return "planned";
     if (code == GoalStatus.ACCEPTED)
       return "accepted";
-    if (code == GoalStatus.REJECTED)
-      return "rejected";
+    if (code == GoalStatus.PLANNED)
+      return "planned";
     if (code == GoalStatus.INPROGRESS)
       return "in-progress";
-    if (code == GoalStatus.ACHIEVED)
-      return "achieved";
-    if (code == GoalStatus.SUSTAINING)
-      return "sustaining";
-    if (code == GoalStatus.ONHOLD)
-      return "on-hold";
-    if (code == GoalStatus.CANCELLED)
-      return "cancelled";
     if (code == GoalStatus.ONTARGET)
       return "on-target";
     if (code == GoalStatus.AHEADOFTARGET)
       return "ahead-of-target";
     if (code == GoalStatus.BEHINDTARGET)
       return "behind-target";
+    if (code == GoalStatus.SUSTAINING)
+      return "sustaining";
+    if (code == GoalStatus.ACHIEVED)
+      return "achieved";
+    if (code == GoalStatus.ONHOLD)
+      return "on-hold";
+    if (code == GoalStatus.CANCELLED)
+      return "cancelled";
     if (code == GoalStatus.ENTEREDINERROR)
       return "entered-in-error";
+    if (code == GoalStatus.REJECTED)
+      return "rejected";
     return "?";
   }
 

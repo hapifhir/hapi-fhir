@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
 
 
 import org.hl7.fhir.dstu3.model.EnumFactory;
@@ -39,34 +39,34 @@ public class ProcedureProgressStatusCodesEnumFactory implements EnumFactory<Proc
   public ProcedureProgressStatusCodes fromCode(String codeString) throws IllegalArgumentException {
     if (codeString == null || "".equals(codeString))
       return null;
-    if ("a".equals(codeString))
-      return ProcedureProgressStatusCodes.A;
-    if ("b".equals(codeString))
-      return ProcedureProgressStatusCodes.B;
-    if ("c".equals(codeString))
-      return ProcedureProgressStatusCodes.C;
-    if ("d".equals(codeString))
-      return ProcedureProgressStatusCodes.D;
-    if ("e".equals(codeString))
-      return ProcedureProgressStatusCodes.E;
-    if ("f".equals(codeString))
-      return ProcedureProgressStatusCodes.F;
+    if ("in-operating-room".equals(codeString))
+      return ProcedureProgressStatusCodes.INOPERATINGROOM;
+    if ("prepared".equals(codeString))
+      return ProcedureProgressStatusCodes.PREPARED;
+    if ("anesthesia-induced".equals(codeString))
+      return ProcedureProgressStatusCodes.ANESTHESIAINDUCED;
+    if ("open-incision".equals(codeString))
+      return ProcedureProgressStatusCodes.OPENINCISION;
+    if ("closed-incision".equals(codeString))
+      return ProcedureProgressStatusCodes.CLOSEDINCISION;
+    if ("in-recovery-room".equals(codeString))
+      return ProcedureProgressStatusCodes.INRECOVERYROOM;
     throw new IllegalArgumentException("Unknown ProcedureProgressStatusCodes code '"+codeString+"'");
   }
 
   public String toCode(ProcedureProgressStatusCodes code) {
-    if (code == ProcedureProgressStatusCodes.A)
-      return "a";
-    if (code == ProcedureProgressStatusCodes.B)
-      return "b";
-    if (code == ProcedureProgressStatusCodes.C)
-      return "c";
-    if (code == ProcedureProgressStatusCodes.D)
-      return "d";
-    if (code == ProcedureProgressStatusCodes.E)
-      return "e";
-    if (code == ProcedureProgressStatusCodes.F)
-      return "f";
+    if (code == ProcedureProgressStatusCodes.INOPERATINGROOM)
+      return "in-operating-room";
+    if (code == ProcedureProgressStatusCodes.PREPARED)
+      return "prepared";
+    if (code == ProcedureProgressStatusCodes.ANESTHESIAINDUCED)
+      return "anesthesia-induced";
+    if (code == ProcedureProgressStatusCodes.OPENINCISION)
+      return "open-incision";
+    if (code == ProcedureProgressStatusCodes.CLOSEDINCISION)
+      return "closed-incision";
+    if (code == ProcedureProgressStatusCodes.INRECOVERYROOM)
+      return "in-recovery-room";
     return "?";
   }
 

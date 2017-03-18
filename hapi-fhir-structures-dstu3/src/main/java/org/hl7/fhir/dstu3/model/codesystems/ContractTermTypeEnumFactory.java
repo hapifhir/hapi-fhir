@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
 
 
 import org.hl7.fhir.dstu3.model.EnumFactory;
@@ -39,18 +39,18 @@ public class ContractTermTypeEnumFactory implements EnumFactory<ContractTermType
   public ContractTermType fromCode(String codeString) throws IllegalArgumentException {
     if (codeString == null || "".equals(codeString))
       return null;
-    if ("oralhealth".equals(codeString))
-      return ContractTermType.ORALHEALTH;
-    if ("vision".equals(codeString))
-      return ContractTermType.VISION;
+    if ("statutory".equals(codeString))
+      return ContractTermType.STATUTORY;
+    if ("subject-to".equals(codeString))
+      return ContractTermType.SUBJECTTO;
     throw new IllegalArgumentException("Unknown ContractTermType code '"+codeString+"'");
   }
 
   public String toCode(ContractTermType code) {
-    if (code == ContractTermType.ORALHEALTH)
-      return "oralhealth";
-    if (code == ContractTermType.VISION)
-      return "vision";
+    if (code == ContractTermType.STATUTORY)
+      return "statutory";
+    if (code == ContractTermType.SUBJECTTO)
+      return "subject-to";
     return "?";
   }
 

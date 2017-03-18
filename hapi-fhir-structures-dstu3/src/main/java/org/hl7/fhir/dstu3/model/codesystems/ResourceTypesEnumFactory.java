@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
 
 
 import org.hl7.fhir.dstu3.model.EnumFactory;
@@ -43,6 +43,8 @@ public class ResourceTypesEnumFactory implements EnumFactory<ResourceTypes> {
       return ResourceTypes.ACCOUNT;
     if ("ActivityDefinition".equals(codeString))
       return ResourceTypes.ACTIVITYDEFINITION;
+    if ("AdverseEvent".equals(codeString))
+      return ResourceTypes.ADVERSEEVENT;
     if ("AllergyIntolerance".equals(codeString))
       return ResourceTypes.ALLERGYINTOLERANCE;
     if ("Appointment".equals(codeString))
@@ -65,6 +67,8 @@ public class ResourceTypesEnumFactory implements EnumFactory<ResourceTypes> {
       return ResourceTypes.CAREPLAN;
     if ("CareTeam".equals(codeString))
       return ResourceTypes.CARETEAM;
+    if ("ChargeItem".equals(codeString))
+      return ResourceTypes.CHARGEITEM;
     if ("Claim".equals(codeString))
       return ResourceTypes.CLAIM;
     if ("ClaimResponse".equals(codeString))
@@ -101,14 +105,12 @@ public class ResourceTypesEnumFactory implements EnumFactory<ResourceTypes> {
       return ResourceTypes.DEVICECOMPONENT;
     if ("DeviceMetric".equals(codeString))
       return ResourceTypes.DEVICEMETRIC;
-    if ("DeviceUseRequest".equals(codeString))
-      return ResourceTypes.DEVICEUSEREQUEST;
+    if ("DeviceRequest".equals(codeString))
+      return ResourceTypes.DEVICEREQUEST;
     if ("DeviceUseStatement".equals(codeString))
       return ResourceTypes.DEVICEUSESTATEMENT;
     if ("DiagnosticReport".equals(codeString))
       return ResourceTypes.DIAGNOSTICREPORT;
-    if ("DiagnosticRequest".equals(codeString))
-      return ResourceTypes.DIAGNOSTICREQUEST;
     if ("DocumentManifest".equals(codeString))
       return ResourceTypes.DOCUMENTMANIFEST;
     if ("DocumentReference".equals(codeString))
@@ -139,6 +141,8 @@ public class ResourceTypesEnumFactory implements EnumFactory<ResourceTypes> {
       return ResourceTypes.FLAG;
     if ("Goal".equals(codeString))
       return ResourceTypes.GOAL;
+    if ("GraphDefinition".equals(codeString))
+      return ResourceTypes.GRAPHDEFINITION;
     if ("Group".equals(codeString))
       return ResourceTypes.GROUP;
     if ("GuidanceResponse".equals(codeString))
@@ -185,8 +189,8 @@ public class ResourceTypesEnumFactory implements EnumFactory<ResourceTypes> {
       return ResourceTypes.MESSAGEHEADER;
     if ("NamingSystem".equals(codeString))
       return ResourceTypes.NAMINGSYSTEM;
-    if ("NutritionRequest".equals(codeString))
-      return ResourceTypes.NUTRITIONREQUEST;
+    if ("NutritionOrder".equals(codeString))
+      return ResourceTypes.NUTRITIONORDER;
     if ("Observation".equals(codeString))
       return ResourceTypes.OBSERVATION;
     if ("OperationDefinition".equals(codeString))
@@ -281,6 +285,8 @@ public class ResourceTypesEnumFactory implements EnumFactory<ResourceTypes> {
       return "Account";
     if (code == ResourceTypes.ACTIVITYDEFINITION)
       return "ActivityDefinition";
+    if (code == ResourceTypes.ADVERSEEVENT)
+      return "AdverseEvent";
     if (code == ResourceTypes.ALLERGYINTOLERANCE)
       return "AllergyIntolerance";
     if (code == ResourceTypes.APPOINTMENT)
@@ -303,6 +309,8 @@ public class ResourceTypesEnumFactory implements EnumFactory<ResourceTypes> {
       return "CarePlan";
     if (code == ResourceTypes.CARETEAM)
       return "CareTeam";
+    if (code == ResourceTypes.CHARGEITEM)
+      return "ChargeItem";
     if (code == ResourceTypes.CLAIM)
       return "Claim";
     if (code == ResourceTypes.CLAIMRESPONSE)
@@ -339,14 +347,12 @@ public class ResourceTypesEnumFactory implements EnumFactory<ResourceTypes> {
       return "DeviceComponent";
     if (code == ResourceTypes.DEVICEMETRIC)
       return "DeviceMetric";
-    if (code == ResourceTypes.DEVICEUSEREQUEST)
-      return "DeviceUseRequest";
+    if (code == ResourceTypes.DEVICEREQUEST)
+      return "DeviceRequest";
     if (code == ResourceTypes.DEVICEUSESTATEMENT)
       return "DeviceUseStatement";
     if (code == ResourceTypes.DIAGNOSTICREPORT)
       return "DiagnosticReport";
-    if (code == ResourceTypes.DIAGNOSTICREQUEST)
-      return "DiagnosticRequest";
     if (code == ResourceTypes.DOCUMENTMANIFEST)
       return "DocumentManifest";
     if (code == ResourceTypes.DOCUMENTREFERENCE)
@@ -377,6 +383,8 @@ public class ResourceTypesEnumFactory implements EnumFactory<ResourceTypes> {
       return "Flag";
     if (code == ResourceTypes.GOAL)
       return "Goal";
+    if (code == ResourceTypes.GRAPHDEFINITION)
+      return "GraphDefinition";
     if (code == ResourceTypes.GROUP)
       return "Group";
     if (code == ResourceTypes.GUIDANCERESPONSE)
@@ -423,8 +431,8 @@ public class ResourceTypesEnumFactory implements EnumFactory<ResourceTypes> {
       return "MessageHeader";
     if (code == ResourceTypes.NAMINGSYSTEM)
       return "NamingSystem";
-    if (code == ResourceTypes.NUTRITIONREQUEST)
-      return "NutritionRequest";
+    if (code == ResourceTypes.NUTRITIONORDER)
+      return "NutritionOrder";
     if (code == ResourceTypes.OBSERVATION)
       return "Observation";
     if (code == ResourceTypes.OPERATIONDEFINITION)

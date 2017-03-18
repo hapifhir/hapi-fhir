@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
 
 
 import org.hl7.fhir.dstu3.model.EnumFactory;
@@ -43,10 +43,10 @@ public class RequestPriorityEnumFactory implements EnumFactory<RequestPriority> 
       return RequestPriority.ROUTINE;
     if ("urgent".equals(codeString))
       return RequestPriority.URGENT;
-    if ("stat".equals(codeString))
-      return RequestPriority.STAT;
     if ("asap".equals(codeString))
       return RequestPriority.ASAP;
+    if ("stat".equals(codeString))
+      return RequestPriority.STAT;
     throw new IllegalArgumentException("Unknown RequestPriority code '"+codeString+"'");
   }
 
@@ -55,10 +55,10 @@ public class RequestPriorityEnumFactory implements EnumFactory<RequestPriority> 
       return "routine";
     if (code == RequestPriority.URGENT)
       return "urgent";
-    if (code == RequestPriority.STAT)
-      return "stat";
     if (code == RequestPriority.ASAP)
       return "asap";
+    if (code == RequestPriority.STAT)
+      return "stat";
     return "?";
   }
 

@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
 
 
 import org.hl7.fhir.dstu3.model.EnumFactory;
@@ -47,6 +47,8 @@ public class ClaimModifiersEnumFactory implements EnumFactory<ClaimModifiers> {
       return ClaimModifiers.C;
     if ("e".equals(codeString))
       return ClaimModifiers.E;
+    if ("rooh".equals(codeString))
+      return ClaimModifiers.ROOH;
     if ("x".equals(codeString))
       return ClaimModifiers.X;
     throw new IllegalArgumentException("Unknown ClaimModifiers code '"+codeString+"'");
@@ -61,6 +63,8 @@ public class ClaimModifiersEnumFactory implements EnumFactory<ClaimModifiers> {
       return "c";
     if (code == ClaimModifiers.E)
       return "e";
+    if (code == ClaimModifiers.ROOH)
+      return "rooh";
     if (code == ClaimModifiers.X)
       return "x";
     return "?";

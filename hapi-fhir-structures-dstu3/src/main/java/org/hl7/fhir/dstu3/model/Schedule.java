@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
 
 import java.util.*;
 
@@ -43,7 +43,7 @@ import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.exceptions.FHIRException;
 /**
- * A container for slot(s) of time that may be available for booking appointments.
+ * A container for slots of time that may be available for booking appointments.
  */
 @ResourceDef(name="Schedule", profile="http://hl7.org/fhir/Profile/Schedule")
 public class Schedule extends DomainResource {
@@ -87,16 +87,16 @@ public class Schedule extends DomainResource {
     protected List<CodeableConcept> specialty;
 
     /**
-     * The resource this Schedule resource is providing availability information for. These are expected to usually be one of HealthcareService, Location, Practitioner, Device, Patient or RelatedPerson.
+     * The resource this Schedule resource is providing availability information for. These are expected to usually be one of HealthcareService, Location, Practitioner, PractitionerRole, Device, Patient or RelatedPerson.
      */
-    @Child(name = "actor", type = {Patient.class, Practitioner.class, RelatedPerson.class, Device.class, HealthcareService.class, Location.class}, order=5, min=1, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="The resource this Schedule resource is providing availability information for. These are expected to usually be one of HealthcareService, Location, Practitioner, Device, Patient or RelatedPerson", formalDefinition="The resource this Schedule resource is providing availability information for. These are expected to usually be one of HealthcareService, Location, Practitioner, Device, Patient or RelatedPerson." )
-    protected Reference actor;
-
+    @Child(name = "actor", type = {Patient.class, Practitioner.class, PractitionerRole.class, RelatedPerson.class, Device.class, HealthcareService.class, Location.class}, order=5, min=1, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Description(shortDefinition="The resource this Schedule resource is providing availability information for. These are expected to usually be one of HealthcareService, Location, Practitioner, PractitionerRole, Device, Patient or RelatedPerson", formalDefinition="The resource this Schedule resource is providing availability information for. These are expected to usually be one of HealthcareService, Location, Practitioner, PractitionerRole, Device, Patient or RelatedPerson." )
+    protected List<Reference> actor;
     /**
-     * The actual object that is the target of the reference (The resource this Schedule resource is providing availability information for. These are expected to usually be one of HealthcareService, Location, Practitioner, Device, Patient or RelatedPerson.)
+     * The actual objects that are the target of the reference (The resource this Schedule resource is providing availability information for. These are expected to usually be one of HealthcareService, Location, Practitioner, PractitionerRole, Device, Patient or RelatedPerson.)
      */
-    protected Resource actorTarget;
+    protected List<Resource> actorTarget;
+
 
     /**
      * The period of time that the slots that are attached to this Schedule resource cover (even if none exist). These  cover the amount of time that an organization's planning horizon; the interval for which they are currently accepting appointments. This does not define a "template" for planning outside these dates.
@@ -106,27 +106,19 @@ public class Schedule extends DomainResource {
     protected Period planningHorizon;
 
     /**
-     * Comments on the availability to describe any extended information. Such as custom constraints on the slot(s) that may be associated.
+     * Comments on the availability to describe any extended information. Such as custom constraints on the slots that may be associated.
      */
     @Child(name = "comment", type = {StringType.class}, order=7, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Comments on the availability to describe any extended information. Such as custom constraints on the slot(s) that may be associated", formalDefinition="Comments on the availability to describe any extended information. Such as custom constraints on the slot(s) that may be associated." )
+    @Description(shortDefinition="Comments on the availability to describe any extended information. Such as custom constraints on the slots that may be associated", formalDefinition="Comments on the availability to describe any extended information. Such as custom constraints on the slots that may be associated." )
     protected StringType comment;
 
-    private static final long serialVersionUID = 2029938060L;
+    private static final long serialVersionUID = -266680210L;
 
   /**
    * Constructor
    */
     public Schedule() {
       super();
-    }
-
-  /**
-   * Constructor
-   */
-    public Schedule(Reference actor) {
-      super();
-      this.actor = actor;
     }
 
     /**
@@ -358,42 +350,66 @@ public class Schedule extends DomainResource {
     }
 
     /**
-     * @return {@link #actor} (The resource this Schedule resource is providing availability information for. These are expected to usually be one of HealthcareService, Location, Practitioner, Device, Patient or RelatedPerson.)
+     * @return {@link #actor} (The resource this Schedule resource is providing availability information for. These are expected to usually be one of HealthcareService, Location, Practitioner, PractitionerRole, Device, Patient or RelatedPerson.)
      */
-    public Reference getActor() { 
+    public List<Reference> getActor() { 
       if (this.actor == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create Schedule.actor");
-        else if (Configuration.doAutoCreate())
-          this.actor = new Reference(); // cc
+        this.actor = new ArrayList<Reference>();
       return this.actor;
     }
 
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public Schedule setActor(List<Reference> theActor) { 
+      this.actor = theActor;
+      return this;
+    }
+
     public boolean hasActor() { 
-      return this.actor != null && !this.actor.isEmpty();
+      if (this.actor == null)
+        return false;
+      for (Reference item : this.actor)
+        if (!item.isEmpty())
+          return true;
+      return false;
     }
 
-    /**
-     * @param value {@link #actor} (The resource this Schedule resource is providing availability information for. These are expected to usually be one of HealthcareService, Location, Practitioner, Device, Patient or RelatedPerson.)
-     */
-    public Schedule setActor(Reference value) { 
-      this.actor = value;
+    public Reference addActor() { //3
+      Reference t = new Reference();
+      if (this.actor == null)
+        this.actor = new ArrayList<Reference>();
+      this.actor.add(t);
+      return t;
+    }
+
+    public Schedule addActor(Reference t) { //3
+      if (t == null)
+        return this;
+      if (this.actor == null)
+        this.actor = new ArrayList<Reference>();
+      this.actor.add(t);
       return this;
     }
 
     /**
-     * @return {@link #actor} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The resource this Schedule resource is providing availability information for. These are expected to usually be one of HealthcareService, Location, Practitioner, Device, Patient or RelatedPerson.)
+     * @return The first repetition of repeating field {@link #actor}, creating it if it does not already exist
      */
-    public Resource getActorTarget() { 
+    public Reference getActorFirstRep() { 
+      if (getActor().isEmpty()) {
+        addActor();
+      }
+      return getActor().get(0);
+    }
+
+    /**
+     * @deprecated Use Reference#setResource(IBaseResource) instead
+     */
+    @Deprecated
+    public List<Resource> getActorTarget() { 
+      if (this.actorTarget == null)
+        this.actorTarget = new ArrayList<Resource>();
       return this.actorTarget;
-    }
-
-    /**
-     * @param value {@link #actor} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The resource this Schedule resource is providing availability information for. These are expected to usually be one of HealthcareService, Location, Practitioner, Device, Patient or RelatedPerson.)
-     */
-    public Schedule setActorTarget(Resource value) { 
-      this.actorTarget = value;
-      return this;
     }
 
     /**
@@ -421,7 +437,7 @@ public class Schedule extends DomainResource {
     }
 
     /**
-     * @return {@link #comment} (Comments on the availability to describe any extended information. Such as custom constraints on the slot(s) that may be associated.). This is the underlying object with id, value and extensions. The accessor "getComment" gives direct access to the value
+     * @return {@link #comment} (Comments on the availability to describe any extended information. Such as custom constraints on the slots that may be associated.). This is the underlying object with id, value and extensions. The accessor "getComment" gives direct access to the value
      */
     public StringType getCommentElement() { 
       if (this.comment == null)
@@ -441,7 +457,7 @@ public class Schedule extends DomainResource {
     }
 
     /**
-     * @param value {@link #comment} (Comments on the availability to describe any extended information. Such as custom constraints on the slot(s) that may be associated.). This is the underlying object with id, value and extensions. The accessor "getComment" gives direct access to the value
+     * @param value {@link #comment} (Comments on the availability to describe any extended information. Such as custom constraints on the slots that may be associated.). This is the underlying object with id, value and extensions. The accessor "getComment" gives direct access to the value
      */
     public Schedule setCommentElement(StringType value) { 
       this.comment = value;
@@ -449,14 +465,14 @@ public class Schedule extends DomainResource {
     }
 
     /**
-     * @return Comments on the availability to describe any extended information. Such as custom constraints on the slot(s) that may be associated.
+     * @return Comments on the availability to describe any extended information. Such as custom constraints on the slots that may be associated.
      */
     public String getComment() { 
       return this.comment == null ? null : this.comment.getValue();
     }
 
     /**
-     * @param value Comments on the availability to describe any extended information. Such as custom constraints on the slot(s) that may be associated.
+     * @param value Comments on the availability to describe any extended information. Such as custom constraints on the slots that may be associated.
      */
     public Schedule setComment(String value) { 
       if (Utilities.noString(value))
@@ -476,9 +492,9 @@ public class Schedule extends DomainResource {
         childrenList.add(new Property("serviceCategory", "CodeableConcept", "A broad categorisation of the service that is to be performed during this appointment.", 0, java.lang.Integer.MAX_VALUE, serviceCategory));
         childrenList.add(new Property("serviceType", "CodeableConcept", "The specific service that is to be performed during this appointment.", 0, java.lang.Integer.MAX_VALUE, serviceType));
         childrenList.add(new Property("specialty", "CodeableConcept", "The specialty of a practitioner that would be required to perform the service requested in this appointment.", 0, java.lang.Integer.MAX_VALUE, specialty));
-        childrenList.add(new Property("actor", "Reference(Patient|Practitioner|RelatedPerson|Device|HealthcareService|Location)", "The resource this Schedule resource is providing availability information for. These are expected to usually be one of HealthcareService, Location, Practitioner, Device, Patient or RelatedPerson.", 0, java.lang.Integer.MAX_VALUE, actor));
+        childrenList.add(new Property("actor", "Reference(Patient|Practitioner|PractitionerRole|RelatedPerson|Device|HealthcareService|Location)", "The resource this Schedule resource is providing availability information for. These are expected to usually be one of HealthcareService, Location, Practitioner, PractitionerRole, Device, Patient or RelatedPerson.", 0, java.lang.Integer.MAX_VALUE, actor));
         childrenList.add(new Property("planningHorizon", "Period", "The period of time that the slots that are attached to this Schedule resource cover (even if none exist). These  cover the amount of time that an organization's planning horizon; the interval for which they are currently accepting appointments. This does not define a \"template\" for planning outside these dates.", 0, java.lang.Integer.MAX_VALUE, planningHorizon));
-        childrenList.add(new Property("comment", "string", "Comments on the availability to describe any extended information. Such as custom constraints on the slot(s) that may be associated.", 0, java.lang.Integer.MAX_VALUE, comment));
+        childrenList.add(new Property("comment", "string", "Comments on the availability to describe any extended information. Such as custom constraints on the slots that may be associated.", 0, java.lang.Integer.MAX_VALUE, comment));
       }
 
       @Override
@@ -489,7 +505,7 @@ public class Schedule extends DomainResource {
         case 1281188563: /*serviceCategory*/ return this.serviceCategory == null ? new Base[0] : new Base[] {this.serviceCategory}; // CodeableConcept
         case -1928370289: /*serviceType*/ return this.serviceType == null ? new Base[0] : this.serviceType.toArray(new Base[this.serviceType.size()]); // CodeableConcept
         case -1694759682: /*specialty*/ return this.specialty == null ? new Base[0] : this.specialty.toArray(new Base[this.specialty.size()]); // CodeableConcept
-        case 92645877: /*actor*/ return this.actor == null ? new Base[0] : new Base[] {this.actor}; // Reference
+        case 92645877: /*actor*/ return this.actor == null ? new Base[0] : this.actor.toArray(new Base[this.actor.size()]); // Reference
         case -1718507650: /*planningHorizon*/ return this.planningHorizon == null ? new Base[0] : new Base[] {this.planningHorizon}; // Period
         case 950398559: /*comment*/ return this.comment == null ? new Base[0] : new Base[] {this.comment}; // StringType
         default: return super.getProperty(hash, name, checkValid);
@@ -498,71 +514,88 @@ public class Schedule extends DomainResource {
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case -1618432855: // identifier
           this.getIdentifier().add(castToIdentifier(value)); // Identifier
-          break;
+          return value;
         case -1422950650: // active
           this.active = castToBoolean(value); // BooleanType
-          break;
+          return value;
         case 1281188563: // serviceCategory
           this.serviceCategory = castToCodeableConcept(value); // CodeableConcept
-          break;
+          return value;
         case -1928370289: // serviceType
           this.getServiceType().add(castToCodeableConcept(value)); // CodeableConcept
-          break;
+          return value;
         case -1694759682: // specialty
           this.getSpecialty().add(castToCodeableConcept(value)); // CodeableConcept
-          break;
+          return value;
         case 92645877: // actor
-          this.actor = castToReference(value); // Reference
-          break;
+          this.getActor().add(castToReference(value)); // Reference
+          return value;
         case -1718507650: // planningHorizon
           this.planningHorizon = castToPeriod(value); // Period
-          break;
+          return value;
         case 950398559: // comment
           this.comment = castToString(value); // StringType
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("identifier"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("identifier")) {
           this.getIdentifier().add(castToIdentifier(value));
-        else if (name.equals("active"))
+        } else if (name.equals("active")) {
           this.active = castToBoolean(value); // BooleanType
-        else if (name.equals("serviceCategory"))
+        } else if (name.equals("serviceCategory")) {
           this.serviceCategory = castToCodeableConcept(value); // CodeableConcept
-        else if (name.equals("serviceType"))
+        } else if (name.equals("serviceType")) {
           this.getServiceType().add(castToCodeableConcept(value));
-        else if (name.equals("specialty"))
+        } else if (name.equals("specialty")) {
           this.getSpecialty().add(castToCodeableConcept(value));
-        else if (name.equals("actor"))
-          this.actor = castToReference(value); // Reference
-        else if (name.equals("planningHorizon"))
+        } else if (name.equals("actor")) {
+          this.getActor().add(castToReference(value));
+        } else if (name.equals("planningHorizon")) {
           this.planningHorizon = castToPeriod(value); // Period
-        else if (name.equals("comment"))
+        } else if (name.equals("comment")) {
           this.comment = castToString(value); // StringType
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case -1618432855:  return addIdentifier(); // Identifier
-        case -1422950650: throw new FHIRException("Cannot make property active as it is not a complex type"); // BooleanType
-        case 1281188563:  return getServiceCategory(); // CodeableConcept
-        case -1928370289:  return addServiceType(); // CodeableConcept
-        case -1694759682:  return addSpecialty(); // CodeableConcept
-        case 92645877:  return getActor(); // Reference
-        case -1718507650:  return getPlanningHorizon(); // Period
-        case 950398559: throw new FHIRException("Cannot make property comment as it is not a complex type"); // StringType
+        case -1618432855:  return addIdentifier(); 
+        case -1422950650:  return getActiveElement();
+        case 1281188563:  return getServiceCategory(); 
+        case -1928370289:  return addServiceType(); 
+        case -1694759682:  return addSpecialty(); 
+        case 92645877:  return addActor(); 
+        case -1718507650:  return getPlanningHorizon(); 
+        case 950398559:  return getCommentElement();
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -1618432855: /*identifier*/ return new String[] {"Identifier"};
+        case -1422950650: /*active*/ return new String[] {"boolean"};
+        case 1281188563: /*serviceCategory*/ return new String[] {"CodeableConcept"};
+        case -1928370289: /*serviceType*/ return new String[] {"CodeableConcept"};
+        case -1694759682: /*specialty*/ return new String[] {"CodeableConcept"};
+        case 92645877: /*actor*/ return new String[] {"Reference"};
+        case -1718507650: /*planningHorizon*/ return new String[] {"Period"};
+        case 950398559: /*comment*/ return new String[] {"string"};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }
@@ -586,8 +619,7 @@ public class Schedule extends DomainResource {
           return addSpecialty();
         }
         else if (name.equals("actor")) {
-          this.actor = new Reference();
-          return this.actor;
+          return addActor();
         }
         else if (name.equals("planningHorizon")) {
           this.planningHorizon = new Period();
@@ -625,7 +657,11 @@ public class Schedule extends DomainResource {
           for (CodeableConcept i : specialty)
             dst.specialty.add(i.copy());
         };
-        dst.actor = actor == null ? null : actor.copy();
+        if (actor != null) {
+          dst.actor = new ArrayList<Reference>();
+          for (Reference i : actor)
+            dst.actor.add(i.copy());
+        };
         dst.planningHorizon = planningHorizon == null ? null : planningHorizon.copy();
         dst.comment = comment == null ? null : comment.copy();
         return dst;
@@ -676,7 +712,7 @@ public class Schedule extends DomainResource {
    * Path: <b>Schedule.actor</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="actor", path="Schedule.actor", description="The individual(HealthcareService, Practitioner, Location, ...) to find a Schedule for", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner"), @ca.uhn.fhir.model.api.annotation.Compartment(name="RelatedPerson") }, target={Device.class, HealthcareService.class, Location.class, Patient.class, Practitioner.class, RelatedPerson.class } )
+  @SearchParamDefinition(name="actor", path="Schedule.actor", description="The individual(HealthcareService, Practitioner, Location, ...) to find a Schedule for", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner"), @ca.uhn.fhir.model.api.annotation.Compartment(name="RelatedPerson") }, target={Device.class, HealthcareService.class, Location.class, Patient.class, Practitioner.class, PractitionerRole.class, RelatedPerson.class } )
   public static final String SP_ACTOR = "actor";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>actor</b>

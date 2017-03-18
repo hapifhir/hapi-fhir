@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
 
 
 import org.hl7.fhir.dstu3.model.EnumFactory;
@@ -65,8 +65,8 @@ public class DataTypesEnumFactory implements EnumFactory<DataTypes> {
       return DataTypes.DATAREQUIREMENT;
     if ("Distance".equals(codeString))
       return DataTypes.DISTANCE;
-    if ("DosageInstruction".equals(codeString))
-      return DataTypes.DOSAGEINSTRUCTION;
+    if ("Dosage".equals(codeString))
+      return DataTypes.DOSAGE;
     if ("Duration".equals(codeString))
       return DataTypes.DURATION;
     if ("Element".equals(codeString))
@@ -177,8 +177,8 @@ public class DataTypesEnumFactory implements EnumFactory<DataTypes> {
       return "DataRequirement";
     if (code == DataTypes.DISTANCE)
       return "Distance";
-    if (code == DataTypes.DOSAGEINSTRUCTION)
-      return "DosageInstruction";
+    if (code == DataTypes.DOSAGE)
+      return "Dosage";
     if (code == DataTypes.DURATION)
       return "Duration";
     if (code == DataTypes.ELEMENT)

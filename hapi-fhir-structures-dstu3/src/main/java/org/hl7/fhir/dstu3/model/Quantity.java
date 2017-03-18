@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
 
 import java.util.*;
 
@@ -139,8 +139,10 @@ public class Quantity extends Type implements ICompositeType {
         throw new IllegalArgumentException("Unknown QuantityComparator code '"+codeString+"'");
         }
         public Enumeration<QuantityComparator> fromType(Base code) throws FHIRException {
-          if (code == null || code.isEmpty())
+          if (code == null)
             return null;
+          if (code.isEmpty())
+            return new Enumeration<QuantityComparator>(this);
           String codeString = ((PrimitiveType) code).asStringValue();
           if (codeString == null || "".equals(codeString))
             return null;
@@ -552,53 +554,69 @@ public class Quantity extends Type implements ICompositeType {
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case 111972721: // value
           this.value = castToDecimal(value); // DecimalType
-          break;
+          return value;
         case -844673834: // comparator
-          this.comparator = new QuantityComparatorEnumFactory().fromType(value); // Enumeration<QuantityComparator>
-          break;
+          value = new QuantityComparatorEnumFactory().fromType(castToCode(value));
+          this.comparator = (Enumeration) value; // Enumeration<QuantityComparator>
+          return value;
         case 3594628: // unit
           this.unit = castToString(value); // StringType
-          break;
+          return value;
         case -887328209: // system
           this.system = castToUri(value); // UriType
-          break;
+          return value;
         case 3059181: // code
           this.code = castToCode(value); // CodeType
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("value"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("value")) {
           this.value = castToDecimal(value); // DecimalType
-        else if (name.equals("comparator"))
-          this.comparator = new QuantityComparatorEnumFactory().fromType(value); // Enumeration<QuantityComparator>
-        else if (name.equals("unit"))
+        } else if (name.equals("comparator")) {
+          value = new QuantityComparatorEnumFactory().fromType(castToCode(value));
+          this.comparator = (Enumeration) value; // Enumeration<QuantityComparator>
+        } else if (name.equals("unit")) {
           this.unit = castToString(value); // StringType
-        else if (name.equals("system"))
+        } else if (name.equals("system")) {
           this.system = castToUri(value); // UriType
-        else if (name.equals("code"))
+        } else if (name.equals("code")) {
           this.code = castToCode(value); // CodeType
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 111972721: throw new FHIRException("Cannot make property value as it is not a complex type"); // DecimalType
-        case -844673834: throw new FHIRException("Cannot make property comparator as it is not a complex type"); // Enumeration<QuantityComparator>
-        case 3594628: throw new FHIRException("Cannot make property unit as it is not a complex type"); // StringType
-        case -887328209: throw new FHIRException("Cannot make property system as it is not a complex type"); // UriType
-        case 3059181: throw new FHIRException("Cannot make property code as it is not a complex type"); // CodeType
+        case 111972721:  return getValueElement();
+        case -844673834:  return getComparatorElement();
+        case 3594628:  return getUnitElement();
+        case -887328209:  return getSystemElement();
+        case 3059181:  return getCodeElement();
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 111972721: /*value*/ return new String[] {"decimal"};
+        case -844673834: /*comparator*/ return new String[] {"code"};
+        case 3594628: /*unit*/ return new String[] {"string"};
+        case -887328209: /*system*/ return new String[] {"uri"};
+        case 3059181: /*code*/ return new String[] {"code"};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }

@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
 
 import java.util.*;
 
@@ -152,8 +152,10 @@ public class AuditEvent extends DomainResource {
         throw new IllegalArgumentException("Unknown AuditEventAction code '"+codeString+"'");
         }
         public Enumeration<AuditEventAction> fromType(Base code) throws FHIRException {
-          if (code == null || code.isEmpty())
+          if (code == null)
             return null;
+          if (code.isEmpty())
+            return new Enumeration<AuditEventAction>(this);
           String codeString = ((PrimitiveType) code).asStringValue();
           if (codeString == null || "".equals(codeString))
             return null;
@@ -278,8 +280,10 @@ public class AuditEvent extends DomainResource {
         throw new IllegalArgumentException("Unknown AuditEventOutcome code '"+codeString+"'");
         }
         public Enumeration<AuditEventOutcome> fromType(Base code) throws FHIRException {
-          if (code == null || code.isEmpty())
+          if (code == null)
             return null;
+          if (code.isEmpty())
+            return new Enumeration<AuditEventOutcome>(this);
           String codeString = ((PrimitiveType) code).asStringValue();
           if (codeString == null || "".equals(codeString))
             return null;
@@ -412,8 +416,10 @@ public class AuditEvent extends DomainResource {
         throw new IllegalArgumentException("Unknown AuditEventAgentNetworkType code '"+codeString+"'");
         }
         public Enumeration<AuditEventAgentNetworkType> fromType(Base code) throws FHIRException {
-          if (code == null || code.isEmpty())
+          if (code == null)
             return null;
+          if (code.isEmpty())
+            return new Enumeration<AuditEventAgentNetworkType>(this);
           String codeString = ((PrimitiveType) code).asStringValue();
           if (codeString == null || "".equals(codeString))
             return null;
@@ -450,11 +456,11 @@ public class AuditEvent extends DomainResource {
     @Block()
     public static class AuditEventAgentComponent extends BackboneElement implements IBaseBackboneElement {
         /**
-         * Specification of the role(s) the user plays when performing the event. Additional may contain security role codes that come from local codes defined by the access control security system (e.g. RBAC, ABAC) used in the local context.
+         * The security role that the user was acting under, that come from local codes defined by the access control security system (e.g. RBAC, ABAC) used in the local context.
          */
         @Child(name = "role", type = {CodeableConcept.class}, order=1, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-        @Description(shortDefinition="Agent role in the event", formalDefinition="Specification of the role(s) the user plays when performing the event. Additional may contain security role codes that come from local codes defined by the access control security system (e.g. RBAC, ABAC) used in the local context." )
-        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/dicm-402-roleid")
+        @Description(shortDefinition="Agent role in the event", formalDefinition="The security role that the user was acting under, that come from local codes defined by the access control security system (e.g. RBAC, ABAC) used in the local context." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/security-role-type")
         protected List<CodeableConcept> role;
 
         /**
@@ -557,7 +563,7 @@ public class AuditEvent extends DomainResource {
       }
 
         /**
-         * @return {@link #role} (Specification of the role(s) the user plays when performing the event. Additional may contain security role codes that come from local codes defined by the access control security system (e.g. RBAC, ABAC) used in the local context.)
+         * @return {@link #role} (The security role that the user was acting under, that come from local codes defined by the access control security system (e.g. RBAC, ABAC) used in the local context.)
          */
         public List<CodeableConcept> getRole() { 
           if (this.role == null)
@@ -1023,7 +1029,7 @@ public class AuditEvent extends DomainResource {
 
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
-          childrenList.add(new Property("role", "CodeableConcept", "Specification of the role(s) the user plays when performing the event. Additional may contain security role codes that come from local codes defined by the access control security system (e.g. RBAC, ABAC) used in the local context.", 0, java.lang.Integer.MAX_VALUE, role));
+          childrenList.add(new Property("role", "CodeableConcept", "The security role that the user was acting under, that come from local codes defined by the access control security system (e.g. RBAC, ABAC) used in the local context.", 0, java.lang.Integer.MAX_VALUE, role));
           childrenList.add(new Property("reference", "Reference(Practitioner|Organization|Device|Patient|RelatedPerson)", "Direct reference to a resource that identifies the agent.", 0, java.lang.Integer.MAX_VALUE, reference));
           childrenList.add(new Property("userId", "Identifier", "Unique identifier for the user actively participating in the event.", 0, java.lang.Integer.MAX_VALUE, userId));
           childrenList.add(new Property("altId", "string", "Alternative agent Identifier. For a human, this should be a user identifier text string from authentication system. This identifier would be one known to a common authentication system (e.g. single sign-on), if available.", 0, java.lang.Integer.MAX_VALUE, altId));
@@ -1056,89 +1062,109 @@ public class AuditEvent extends DomainResource {
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case 3506294: // role
           this.getRole().add(castToCodeableConcept(value)); // CodeableConcept
-          break;
+          return value;
         case -925155509: // reference
           this.reference = castToReference(value); // Reference
-          break;
+          return value;
         case -836030906: // userId
           this.userId = castToIdentifier(value); // Identifier
-          break;
+          return value;
         case 92912804: // altId
           this.altId = castToString(value); // StringType
-          break;
+          return value;
         case 3373707: // name
           this.name = castToString(value); // StringType
-          break;
+          return value;
         case 693934258: // requestor
           this.requestor = castToBoolean(value); // BooleanType
-          break;
+          return value;
         case 1901043637: // location
           this.location = castToReference(value); // Reference
-          break;
+          return value;
         case -982670030: // policy
           this.getPolicy().add(castToUri(value)); // UriType
-          break;
+          return value;
         case 103772132: // media
           this.media = castToCoding(value); // Coding
-          break;
+          return value;
         case 1843485230: // network
           this.network = (AuditEventAgentNetworkComponent) value; // AuditEventAgentNetworkComponent
-          break;
+          return value;
         case -1881902670: // purposeOfUse
           this.getPurposeOfUse().add(castToCodeableConcept(value)); // CodeableConcept
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("role"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("role")) {
           this.getRole().add(castToCodeableConcept(value));
-        else if (name.equals("reference"))
+        } else if (name.equals("reference")) {
           this.reference = castToReference(value); // Reference
-        else if (name.equals("userId"))
+        } else if (name.equals("userId")) {
           this.userId = castToIdentifier(value); // Identifier
-        else if (name.equals("altId"))
+        } else if (name.equals("altId")) {
           this.altId = castToString(value); // StringType
-        else if (name.equals("name"))
+        } else if (name.equals("name")) {
           this.name = castToString(value); // StringType
-        else if (name.equals("requestor"))
+        } else if (name.equals("requestor")) {
           this.requestor = castToBoolean(value); // BooleanType
-        else if (name.equals("location"))
+        } else if (name.equals("location")) {
           this.location = castToReference(value); // Reference
-        else if (name.equals("policy"))
+        } else if (name.equals("policy")) {
           this.getPolicy().add(castToUri(value));
-        else if (name.equals("media"))
+        } else if (name.equals("media")) {
           this.media = castToCoding(value); // Coding
-        else if (name.equals("network"))
+        } else if (name.equals("network")) {
           this.network = (AuditEventAgentNetworkComponent) value; // AuditEventAgentNetworkComponent
-        else if (name.equals("purposeOfUse"))
+        } else if (name.equals("purposeOfUse")) {
           this.getPurposeOfUse().add(castToCodeableConcept(value));
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 3506294:  return addRole(); // CodeableConcept
-        case -925155509:  return getReference(); // Reference
-        case -836030906:  return getUserId(); // Identifier
-        case 92912804: throw new FHIRException("Cannot make property altId as it is not a complex type"); // StringType
-        case 3373707: throw new FHIRException("Cannot make property name as it is not a complex type"); // StringType
-        case 693934258: throw new FHIRException("Cannot make property requestor as it is not a complex type"); // BooleanType
-        case 1901043637:  return getLocation(); // Reference
-        case -982670030: throw new FHIRException("Cannot make property policy as it is not a complex type"); // UriType
-        case 103772132:  return getMedia(); // Coding
-        case 1843485230:  return getNetwork(); // AuditEventAgentNetworkComponent
-        case -1881902670:  return addPurposeOfUse(); // CodeableConcept
+        case 3506294:  return addRole(); 
+        case -925155509:  return getReference(); 
+        case -836030906:  return getUserId(); 
+        case 92912804:  return getAltIdElement();
+        case 3373707:  return getNameElement();
+        case 693934258:  return getRequestorElement();
+        case 1901043637:  return getLocation(); 
+        case -982670030:  return addPolicyElement();
+        case 103772132:  return getMedia(); 
+        case 1843485230:  return getNetwork(); 
+        case -1881902670:  return addPurposeOfUse(); 
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3506294: /*role*/ return new String[] {"CodeableConcept"};
+        case -925155509: /*reference*/ return new String[] {"Reference"};
+        case -836030906: /*userId*/ return new String[] {"Identifier"};
+        case 92912804: /*altId*/ return new String[] {"string"};
+        case 3373707: /*name*/ return new String[] {"string"};
+        case 693934258: /*requestor*/ return new String[] {"boolean"};
+        case 1901043637: /*location*/ return new String[] {"Reference"};
+        case -982670030: /*policy*/ return new String[] {"uri"};
+        case 103772132: /*media*/ return new String[] {"Coding"};
+        case 1843485230: /*network*/ return new String[] {};
+        case -1881902670: /*purposeOfUse*/ return new String[] {"CodeableConcept"};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }
@@ -1393,35 +1419,48 @@ public class AuditEvent extends DomainResource {
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case -1147692044: // address
           this.address = castToString(value); // StringType
-          break;
+          return value;
         case 3575610: // type
-          this.type = new AuditEventAgentNetworkTypeEnumFactory().fromType(value); // Enumeration<AuditEventAgentNetworkType>
-          break;
-        default: super.setProperty(hash, name, value);
+          value = new AuditEventAgentNetworkTypeEnumFactory().fromType(castToCode(value));
+          this.type = (Enumeration) value; // Enumeration<AuditEventAgentNetworkType>
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("address"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("address")) {
           this.address = castToString(value); // StringType
-        else if (name.equals("type"))
-          this.type = new AuditEventAgentNetworkTypeEnumFactory().fromType(value); // Enumeration<AuditEventAgentNetworkType>
-        else
-          super.setProperty(name, value);
+        } else if (name.equals("type")) {
+          value = new AuditEventAgentNetworkTypeEnumFactory().fromType(castToCode(value));
+          this.type = (Enumeration) value; // Enumeration<AuditEventAgentNetworkType>
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case -1147692044: throw new FHIRException("Cannot make property address as it is not a complex type"); // StringType
-        case 3575610: throw new FHIRException("Cannot make property type as it is not a complex type"); // Enumeration<AuditEventAgentNetworkType>
+        case -1147692044:  return getAddressElement();
+        case 3575610:  return getTypeElement();
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -1147692044: /*address*/ return new String[] {"string"};
+        case 3575610: /*type*/ return new String[] {"code"};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }
@@ -1663,41 +1702,53 @@ public class AuditEvent extends DomainResource {
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case 3530567: // site
           this.site = castToString(value); // StringType
-          break;
+          return value;
         case -1618432855: // identifier
           this.identifier = castToIdentifier(value); // Identifier
-          break;
+          return value;
         case 3575610: // type
           this.getType().add(castToCoding(value)); // Coding
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("site"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("site")) {
           this.site = castToString(value); // StringType
-        else if (name.equals("identifier"))
+        } else if (name.equals("identifier")) {
           this.identifier = castToIdentifier(value); // Identifier
-        else if (name.equals("type"))
+        } else if (name.equals("type")) {
           this.getType().add(castToCoding(value));
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 3530567: throw new FHIRException("Cannot make property site as it is not a complex type"); // StringType
-        case -1618432855:  return getIdentifier(); // Identifier
-        case 3575610:  return addType(); // Coding
+        case 3530567:  return getSiteElement();
+        case -1618432855:  return getIdentifier(); 
+        case 3575610:  return addType(); 
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3530567: /*site*/ return new String[] {"string"};
+        case -1618432855: /*identifier*/ return new String[] {"Identifier"};
+        case 3575610: /*type*/ return new String[] {"Coding"};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }
@@ -1805,7 +1856,7 @@ public class AuditEvent extends DomainResource {
          */
         @Child(name = "lifecycle", type = {Coding.class}, order=5, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Life-cycle stage for the entity", formalDefinition="Identifier for the data life-cycle stage for the entity." )
-        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/object-lifecycle")
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/object-lifecycle-events")
         protected Coding lifecycle;
 
         /**
@@ -2274,83 +2325,102 @@ public class AuditEvent extends DomainResource {
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case -1618432855: // identifier
           this.identifier = castToIdentifier(value); // Identifier
-          break;
+          return value;
         case -925155509: // reference
           this.reference = castToReference(value); // Reference
-          break;
+          return value;
         case 3575610: // type
           this.type = castToCoding(value); // Coding
-          break;
+          return value;
         case 3506294: // role
           this.role = castToCoding(value); // Coding
-          break;
+          return value;
         case -302323862: // lifecycle
           this.lifecycle = castToCoding(value); // Coding
-          break;
+          return value;
         case -722296940: // securityLabel
           this.getSecurityLabel().add(castToCoding(value)); // Coding
-          break;
+          return value;
         case 3373707: // name
           this.name = castToString(value); // StringType
-          break;
+          return value;
         case -1724546052: // description
           this.description = castToString(value); // StringType
-          break;
+          return value;
         case 107944136: // query
           this.query = castToBase64Binary(value); // Base64BinaryType
-          break;
+          return value;
         case -1335224239: // detail
           this.getDetail().add((AuditEventEntityDetailComponent) value); // AuditEventEntityDetailComponent
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("identifier"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("identifier")) {
           this.identifier = castToIdentifier(value); // Identifier
-        else if (name.equals("reference"))
+        } else if (name.equals("reference")) {
           this.reference = castToReference(value); // Reference
-        else if (name.equals("type"))
+        } else if (name.equals("type")) {
           this.type = castToCoding(value); // Coding
-        else if (name.equals("role"))
+        } else if (name.equals("role")) {
           this.role = castToCoding(value); // Coding
-        else if (name.equals("lifecycle"))
+        } else if (name.equals("lifecycle")) {
           this.lifecycle = castToCoding(value); // Coding
-        else if (name.equals("securityLabel"))
+        } else if (name.equals("securityLabel")) {
           this.getSecurityLabel().add(castToCoding(value));
-        else if (name.equals("name"))
+        } else if (name.equals("name")) {
           this.name = castToString(value); // StringType
-        else if (name.equals("description"))
+        } else if (name.equals("description")) {
           this.description = castToString(value); // StringType
-        else if (name.equals("query"))
+        } else if (name.equals("query")) {
           this.query = castToBase64Binary(value); // Base64BinaryType
-        else if (name.equals("detail"))
+        } else if (name.equals("detail")) {
           this.getDetail().add((AuditEventEntityDetailComponent) value);
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case -1618432855:  return getIdentifier(); // Identifier
-        case -925155509:  return getReference(); // Reference
-        case 3575610:  return getType(); // Coding
-        case 3506294:  return getRole(); // Coding
-        case -302323862:  return getLifecycle(); // Coding
-        case -722296940:  return addSecurityLabel(); // Coding
-        case 3373707: throw new FHIRException("Cannot make property name as it is not a complex type"); // StringType
-        case -1724546052: throw new FHIRException("Cannot make property description as it is not a complex type"); // StringType
-        case 107944136: throw new FHIRException("Cannot make property query as it is not a complex type"); // Base64BinaryType
-        case -1335224239:  return addDetail(); // AuditEventEntityDetailComponent
+        case -1618432855:  return getIdentifier(); 
+        case -925155509:  return getReference(); 
+        case 3575610:  return getType(); 
+        case 3506294:  return getRole(); 
+        case -302323862:  return getLifecycle(); 
+        case -722296940:  return addSecurityLabel(); 
+        case 3373707:  return getNameElement();
+        case -1724546052:  return getDescriptionElement();
+        case 107944136:  return getQueryElement();
+        case -1335224239:  return addDetail(); 
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -1618432855: /*identifier*/ return new String[] {"Identifier"};
+        case -925155509: /*reference*/ return new String[] {"Reference"};
+        case 3575610: /*type*/ return new String[] {"Coding"};
+        case 3506294: /*role*/ return new String[] {"Coding"};
+        case -302323862: /*lifecycle*/ return new String[] {"Coding"};
+        case -722296940: /*securityLabel*/ return new String[] {"Coding"};
+        case 3373707: /*name*/ return new String[] {"string"};
+        case -1724546052: /*description*/ return new String[] {"string"};
+        case 107944136: /*query*/ return new String[] {"base64Binary"};
+        case -1335224239: /*detail*/ return new String[] {};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }
@@ -2597,35 +2667,46 @@ public class AuditEvent extends DomainResource {
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case 3575610: // type
           this.type = castToString(value); // StringType
-          break;
+          return value;
         case 111972721: // value
           this.value = castToBase64Binary(value); // Base64BinaryType
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("type"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("type")) {
           this.type = castToString(value); // StringType
-        else if (name.equals("value"))
+        } else if (name.equals("value")) {
           this.value = castToBase64Binary(value); // Base64BinaryType
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 3575610: throw new FHIRException("Cannot make property type as it is not a complex type"); // StringType
-        case 111972721: throw new FHIRException("Cannot make property value as it is not a complex type"); // Base64BinaryType
+        case 3575610:  return getTypeElement();
+        case 111972721:  return getValueElement();
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3575610: /*type*/ return new String[] {"string"};
+        case 111972721: /*value*/ return new String[] {"base64Binary"};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }
@@ -3260,83 +3341,106 @@ public class AuditEvent extends DomainResource {
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case 3575610: // type
           this.type = castToCoding(value); // Coding
-          break;
+          return value;
         case -1867567750: // subtype
           this.getSubtype().add(castToCoding(value)); // Coding
-          break;
+          return value;
         case -1422950858: // action
-          this.action = new AuditEventActionEnumFactory().fromType(value); // Enumeration<AuditEventAction>
-          break;
+          value = new AuditEventActionEnumFactory().fromType(castToCode(value));
+          this.action = (Enumeration) value; // Enumeration<AuditEventAction>
+          return value;
         case -799233872: // recorded
           this.recorded = castToInstant(value); // InstantType
-          break;
+          return value;
         case -1106507950: // outcome
-          this.outcome = new AuditEventOutcomeEnumFactory().fromType(value); // Enumeration<AuditEventOutcome>
-          break;
+          value = new AuditEventOutcomeEnumFactory().fromType(castToCode(value));
+          this.outcome = (Enumeration) value; // Enumeration<AuditEventOutcome>
+          return value;
         case 1062502659: // outcomeDesc
           this.outcomeDesc = castToString(value); // StringType
-          break;
+          return value;
         case -341917691: // purposeOfEvent
           this.getPurposeOfEvent().add(castToCodeableConcept(value)); // CodeableConcept
-          break;
+          return value;
         case 92750597: // agent
           this.getAgent().add((AuditEventAgentComponent) value); // AuditEventAgentComponent
-          break;
+          return value;
         case -896505829: // source
           this.source = (AuditEventSourceComponent) value; // AuditEventSourceComponent
-          break;
+          return value;
         case -1298275357: // entity
           this.getEntity().add((AuditEventEntityComponent) value); // AuditEventEntityComponent
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("type"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("type")) {
           this.type = castToCoding(value); // Coding
-        else if (name.equals("subtype"))
+        } else if (name.equals("subtype")) {
           this.getSubtype().add(castToCoding(value));
-        else if (name.equals("action"))
-          this.action = new AuditEventActionEnumFactory().fromType(value); // Enumeration<AuditEventAction>
-        else if (name.equals("recorded"))
+        } else if (name.equals("action")) {
+          value = new AuditEventActionEnumFactory().fromType(castToCode(value));
+          this.action = (Enumeration) value; // Enumeration<AuditEventAction>
+        } else if (name.equals("recorded")) {
           this.recorded = castToInstant(value); // InstantType
-        else if (name.equals("outcome"))
-          this.outcome = new AuditEventOutcomeEnumFactory().fromType(value); // Enumeration<AuditEventOutcome>
-        else if (name.equals("outcomeDesc"))
+        } else if (name.equals("outcome")) {
+          value = new AuditEventOutcomeEnumFactory().fromType(castToCode(value));
+          this.outcome = (Enumeration) value; // Enumeration<AuditEventOutcome>
+        } else if (name.equals("outcomeDesc")) {
           this.outcomeDesc = castToString(value); // StringType
-        else if (name.equals("purposeOfEvent"))
+        } else if (name.equals("purposeOfEvent")) {
           this.getPurposeOfEvent().add(castToCodeableConcept(value));
-        else if (name.equals("agent"))
+        } else if (name.equals("agent")) {
           this.getAgent().add((AuditEventAgentComponent) value);
-        else if (name.equals("source"))
+        } else if (name.equals("source")) {
           this.source = (AuditEventSourceComponent) value; // AuditEventSourceComponent
-        else if (name.equals("entity"))
+        } else if (name.equals("entity")) {
           this.getEntity().add((AuditEventEntityComponent) value);
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 3575610:  return getType(); // Coding
-        case -1867567750:  return addSubtype(); // Coding
-        case -1422950858: throw new FHIRException("Cannot make property action as it is not a complex type"); // Enumeration<AuditEventAction>
-        case -799233872: throw new FHIRException("Cannot make property recorded as it is not a complex type"); // InstantType
-        case -1106507950: throw new FHIRException("Cannot make property outcome as it is not a complex type"); // Enumeration<AuditEventOutcome>
-        case 1062502659: throw new FHIRException("Cannot make property outcomeDesc as it is not a complex type"); // StringType
-        case -341917691:  return addPurposeOfEvent(); // CodeableConcept
-        case 92750597:  return addAgent(); // AuditEventAgentComponent
-        case -896505829:  return getSource(); // AuditEventSourceComponent
-        case -1298275357:  return addEntity(); // AuditEventEntityComponent
+        case 3575610:  return getType(); 
+        case -1867567750:  return addSubtype(); 
+        case -1422950858:  return getActionElement();
+        case -799233872:  return getRecordedElement();
+        case -1106507950:  return getOutcomeElement();
+        case 1062502659:  return getOutcomeDescElement();
+        case -341917691:  return addPurposeOfEvent(); 
+        case 92750597:  return addAgent(); 
+        case -896505829:  return getSource(); 
+        case -1298275357:  return addEntity(); 
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3575610: /*type*/ return new String[] {"Coding"};
+        case -1867567750: /*subtype*/ return new String[] {"Coding"};
+        case -1422950858: /*action*/ return new String[] {"code"};
+        case -799233872: /*recorded*/ return new String[] {"instant"};
+        case -1106507950: /*outcome*/ return new String[] {"code"};
+        case 1062502659: /*outcomeDesc*/ return new String[] {"string"};
+        case -341917691: /*purposeOfEvent*/ return new String[] {"CodeableConcept"};
+        case 92750597: /*agent*/ return new String[] {};
+        case -896505829: /*source*/ return new String[] {};
+        case -1298275357: /*entity*/ return new String[] {};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }
@@ -3541,24 +3645,24 @@ public class AuditEvent extends DomainResource {
   public static final ca.uhn.fhir.rest.gclient.StringClientParam ADDRESS = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_ADDRESS);
 
  /**
-   * Search parameter: <b>role</b>
+   * Search parameter: <b>entity-role</b>
    * <p>
    * Description: <b>What role the entity played</b><br>
    * Type: <b>token</b><br>
    * Path: <b>AuditEvent.entity.role</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="role", path="AuditEvent.entity.role", description="What role the entity played", type="token" )
-  public static final String SP_ROLE = "role";
+  @SearchParamDefinition(name="entity-role", path="AuditEvent.entity.role", description="What role the entity played", type="token" )
+  public static final String SP_ENTITY_ROLE = "entity-role";
  /**
-   * <b>Fluent Client</b> search parameter constant for <b>role</b>
+   * <b>Fluent Client</b> search parameter constant for <b>entity-role</b>
    * <p>
    * Description: <b>What role the entity played</b><br>
    * Type: <b>token</b><br>
    * Path: <b>AuditEvent.entity.role</b><br>
    * </p>
    */
-  public static final ca.uhn.fhir.rest.gclient.TokenClientParam ROLE = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_ROLE);
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam ENTITY_ROLE = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_ENTITY_ROLE);
 
  /**
    * Search parameter: <b>source</b>
@@ -3745,6 +3849,26 @@ public class AuditEvent extends DomainResource {
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.TokenClientParam ACTION = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_ACTION);
+
+ /**
+   * Search parameter: <b>agent-role</b>
+   * <p>
+   * Description: <b>Agent role in the event</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>AuditEvent.agent.role</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="agent-role", path="AuditEvent.agent.role", description="Agent role in the event", type="token" )
+  public static final String SP_AGENT_ROLE = "agent-role";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>agent-role</b>
+   * <p>
+   * Description: <b>Agent role in the event</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>AuditEvent.agent.role</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam AGENT_ROLE = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_AGENT_ROLE);
 
  /**
    * Search parameter: <b>user</b>

@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
 
 import java.util.*;
 
@@ -139,8 +139,10 @@ public class OperationOutcome extends DomainResource implements IBaseOperationOu
         throw new IllegalArgumentException("Unknown IssueSeverity code '"+codeString+"'");
         }
         public Enumeration<IssueSeverity> fromType(Base code) throws FHIRException {
-          if (code == null || code.isEmpty())
+          if (code == null)
             return null;
+          if (code.isEmpty())
+            return new Enumeration<IssueSeverity>(this);
           String codeString = ((PrimitiveType) code).asStringValue();
           if (codeString == null || "".equals(codeString))
             return null;
@@ -561,8 +563,10 @@ public class OperationOutcome extends DomainResource implements IBaseOperationOu
         throw new IllegalArgumentException("Unknown IssueType code '"+codeString+"'");
         }
         public Enumeration<IssueType> fromType(Base code) throws FHIRException {
-          if (code == null || code.isEmpty())
+          if (code == null)
             return null;
+          if (code.isEmpty())
+            return new Enumeration<IssueType>(this);
           String codeString = ((PrimitiveType) code).asStringValue();
           if (codeString == null || "".equals(codeString))
             return null;
@@ -726,17 +730,17 @@ public class OperationOutcome extends DomainResource implements IBaseOperationOu
         protected StringType diagnostics;
 
         /**
-         * A simple XPath limited to element names, repetition indicators and the default child access that identifies one of the elements in the resource that caused this issue to be raised.
+         * For resource issues, this will be a simple XPath limited to element names, repetition indicators and the default child access that identifies one of the elements in the resource that caused this issue to be raised.  For HTTP errors, will be "http." + the parameter name.
          */
         @Child(name = "location", type = {StringType.class}, order=5, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-        @Description(shortDefinition="XPath of element(s) related to issue", formalDefinition="A simple XPath limited to element names, repetition indicators and the default child access that identifies one of the elements in the resource that caused this issue to be raised." )
+        @Description(shortDefinition="Path of element(s) related to issue", formalDefinition="For resource issues, this will be a simple XPath limited to element names, repetition indicators and the default child access that identifies one of the elements in the resource that caused this issue to be raised.  For HTTP errors, will be \"http.\" + the parameter name." )
         protected List<StringType> location;
 
         /**
-         * A simple FluentPath limited to element names, repetition indicators and the default child access that identifies one of the elements in the resource that caused this issue to be raised.
+         * A simple FHIRPath limited to element names, repetition indicators and the default child access that identifies one of the elements in the resource that caused this issue to be raised.
          */
         @Child(name = "expression", type = {StringType.class}, order=6, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-        @Description(shortDefinition="FluentPath of element(s) related to issue", formalDefinition="A simple FluentPath limited to element names, repetition indicators and the default child access that identifies one of the elements in the resource that caused this issue to be raised." )
+        @Description(shortDefinition="FHIRPath of element(s) related to issue", formalDefinition="A simple FHIRPath limited to element names, repetition indicators and the default child access that identifies one of the elements in the resource that caused this issue to be raised." )
         protected List<StringType> expression;
 
         private static final long serialVersionUID = -1681095438L;
@@ -921,7 +925,7 @@ public class OperationOutcome extends DomainResource implements IBaseOperationOu
         }
 
         /**
-         * @return {@link #location} (A simple XPath limited to element names, repetition indicators and the default child access that identifies one of the elements in the resource that caused this issue to be raised.)
+         * @return {@link #location} (For resource issues, this will be a simple XPath limited to element names, repetition indicators and the default child access that identifies one of the elements in the resource that caused this issue to be raised.  For HTTP errors, will be "http." + the parameter name.)
          */
         public List<StringType> getLocation() { 
           if (this.location == null)
@@ -947,7 +951,7 @@ public class OperationOutcome extends DomainResource implements IBaseOperationOu
         }
 
         /**
-         * @return {@link #location} (A simple XPath limited to element names, repetition indicators and the default child access that identifies one of the elements in the resource that caused this issue to be raised.)
+         * @return {@link #location} (For resource issues, this will be a simple XPath limited to element names, repetition indicators and the default child access that identifies one of the elements in the resource that caused this issue to be raised.  For HTTP errors, will be "http." + the parameter name.)
          */
         public StringType addLocationElement() {//2 
           StringType t = new StringType();
@@ -958,7 +962,7 @@ public class OperationOutcome extends DomainResource implements IBaseOperationOu
         }
 
         /**
-         * @param value {@link #location} (A simple XPath limited to element names, repetition indicators and the default child access that identifies one of the elements in the resource that caused this issue to be raised.)
+         * @param value {@link #location} (For resource issues, this will be a simple XPath limited to element names, repetition indicators and the default child access that identifies one of the elements in the resource that caused this issue to be raised.  For HTTP errors, will be "http." + the parameter name.)
          */
         public OperationOutcomeIssueComponent addLocation(String value) { //1
           StringType t = new StringType();
@@ -970,7 +974,7 @@ public class OperationOutcome extends DomainResource implements IBaseOperationOu
         }
 
         /**
-         * @param value {@link #location} (A simple XPath limited to element names, repetition indicators and the default child access that identifies one of the elements in the resource that caused this issue to be raised.)
+         * @param value {@link #location} (For resource issues, this will be a simple XPath limited to element names, repetition indicators and the default child access that identifies one of the elements in the resource that caused this issue to be raised.  For HTTP errors, will be "http." + the parameter name.)
          */
         public boolean hasLocation(String value) { 
           if (this.location == null)
@@ -982,7 +986,7 @@ public class OperationOutcome extends DomainResource implements IBaseOperationOu
         }
 
         /**
-         * @return {@link #expression} (A simple FluentPath limited to element names, repetition indicators and the default child access that identifies one of the elements in the resource that caused this issue to be raised.)
+         * @return {@link #expression} (A simple FHIRPath limited to element names, repetition indicators and the default child access that identifies one of the elements in the resource that caused this issue to be raised.)
          */
         public List<StringType> getExpression() { 
           if (this.expression == null)
@@ -1008,7 +1012,7 @@ public class OperationOutcome extends DomainResource implements IBaseOperationOu
         }
 
         /**
-         * @return {@link #expression} (A simple FluentPath limited to element names, repetition indicators and the default child access that identifies one of the elements in the resource that caused this issue to be raised.)
+         * @return {@link #expression} (A simple FHIRPath limited to element names, repetition indicators and the default child access that identifies one of the elements in the resource that caused this issue to be raised.)
          */
         public StringType addExpressionElement() {//2 
           StringType t = new StringType();
@@ -1019,7 +1023,7 @@ public class OperationOutcome extends DomainResource implements IBaseOperationOu
         }
 
         /**
-         * @param value {@link #expression} (A simple FluentPath limited to element names, repetition indicators and the default child access that identifies one of the elements in the resource that caused this issue to be raised.)
+         * @param value {@link #expression} (A simple FHIRPath limited to element names, repetition indicators and the default child access that identifies one of the elements in the resource that caused this issue to be raised.)
          */
         public OperationOutcomeIssueComponent addExpression(String value) { //1
           StringType t = new StringType();
@@ -1031,7 +1035,7 @@ public class OperationOutcome extends DomainResource implements IBaseOperationOu
         }
 
         /**
-         * @param value {@link #expression} (A simple FluentPath limited to element names, repetition indicators and the default child access that identifies one of the elements in the resource that caused this issue to be raised.)
+         * @param value {@link #expression} (A simple FHIRPath limited to element names, repetition indicators and the default child access that identifies one of the elements in the resource that caused this issue to be raised.)
          */
         public boolean hasExpression(String value) { 
           if (this.expression == null)
@@ -1048,8 +1052,8 @@ public class OperationOutcome extends DomainResource implements IBaseOperationOu
           childrenList.add(new Property("code", "code", "Describes the type of the issue. The system that creates an OperationOutcome SHALL choose the most applicable code from the IssueType value set, and may additional provide its own code for the error in the details element.", 0, java.lang.Integer.MAX_VALUE, code));
           childrenList.add(new Property("details", "CodeableConcept", "Additional details about the error. This may be a text description of the error, or a system code that identifies the error.", 0, java.lang.Integer.MAX_VALUE, details));
           childrenList.add(new Property("diagnostics", "string", "Additional diagnostic information about the issue.  Typically, this may be a description of how a value is erroneous, or a stack dump to help trace the issue.", 0, java.lang.Integer.MAX_VALUE, diagnostics));
-          childrenList.add(new Property("location", "string", "A simple XPath limited to element names, repetition indicators and the default child access that identifies one of the elements in the resource that caused this issue to be raised.", 0, java.lang.Integer.MAX_VALUE, location));
-          childrenList.add(new Property("expression", "string", "A simple FluentPath limited to element names, repetition indicators and the default child access that identifies one of the elements in the resource that caused this issue to be raised.", 0, java.lang.Integer.MAX_VALUE, expression));
+          childrenList.add(new Property("location", "string", "For resource issues, this will be a simple XPath limited to element names, repetition indicators and the default child access that identifies one of the elements in the resource that caused this issue to be raised.  For HTTP errors, will be \"http.\" + the parameter name.", 0, java.lang.Integer.MAX_VALUE, location));
+          childrenList.add(new Property("expression", "string", "A simple FHIRPath limited to element names, repetition indicators and the default child access that identifies one of the elements in the resource that caused this issue to be raised.", 0, java.lang.Integer.MAX_VALUE, expression));
         }
 
       @Override
@@ -1067,59 +1071,78 @@ public class OperationOutcome extends DomainResource implements IBaseOperationOu
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case 1478300413: // severity
-          this.severity = new IssueSeverityEnumFactory().fromType(value); // Enumeration<IssueSeverity>
-          break;
+          value = new IssueSeverityEnumFactory().fromType(castToCode(value));
+          this.severity = (Enumeration) value; // Enumeration<IssueSeverity>
+          return value;
         case 3059181: // code
-          this.code = new IssueTypeEnumFactory().fromType(value); // Enumeration<IssueType>
-          break;
+          value = new IssueTypeEnumFactory().fromType(castToCode(value));
+          this.code = (Enumeration) value; // Enumeration<IssueType>
+          return value;
         case 1557721666: // details
           this.details = castToCodeableConcept(value); // CodeableConcept
-          break;
+          return value;
         case -740386388: // diagnostics
           this.diagnostics = castToString(value); // StringType
-          break;
+          return value;
         case 1901043637: // location
           this.getLocation().add(castToString(value)); // StringType
-          break;
+          return value;
         case -1795452264: // expression
           this.getExpression().add(castToString(value)); // StringType
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("severity"))
-          this.severity = new IssueSeverityEnumFactory().fromType(value); // Enumeration<IssueSeverity>
-        else if (name.equals("code"))
-          this.code = new IssueTypeEnumFactory().fromType(value); // Enumeration<IssueType>
-        else if (name.equals("details"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("severity")) {
+          value = new IssueSeverityEnumFactory().fromType(castToCode(value));
+          this.severity = (Enumeration) value; // Enumeration<IssueSeverity>
+        } else if (name.equals("code")) {
+          value = new IssueTypeEnumFactory().fromType(castToCode(value));
+          this.code = (Enumeration) value; // Enumeration<IssueType>
+        } else if (name.equals("details")) {
           this.details = castToCodeableConcept(value); // CodeableConcept
-        else if (name.equals("diagnostics"))
+        } else if (name.equals("diagnostics")) {
           this.diagnostics = castToString(value); // StringType
-        else if (name.equals("location"))
+        } else if (name.equals("location")) {
           this.getLocation().add(castToString(value));
-        else if (name.equals("expression"))
+        } else if (name.equals("expression")) {
           this.getExpression().add(castToString(value));
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 1478300413: throw new FHIRException("Cannot make property severity as it is not a complex type"); // Enumeration<IssueSeverity>
-        case 3059181: throw new FHIRException("Cannot make property code as it is not a complex type"); // Enumeration<IssueType>
-        case 1557721666:  return getDetails(); // CodeableConcept
-        case -740386388: throw new FHIRException("Cannot make property diagnostics as it is not a complex type"); // StringType
-        case 1901043637: throw new FHIRException("Cannot make property location as it is not a complex type"); // StringType
-        case -1795452264: throw new FHIRException("Cannot make property expression as it is not a complex type"); // StringType
+        case 1478300413:  return getSeverityElement();
+        case 3059181:  return getCodeElement();
+        case 1557721666:  return getDetails(); 
+        case -740386388:  return getDiagnosticsElement();
+        case 1901043637:  return addLocationElement();
+        case -1795452264:  return addExpressionElement();
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 1478300413: /*severity*/ return new String[] {"code"};
+        case 3059181: /*code*/ return new String[] {"code"};
+        case 1557721666: /*details*/ return new String[] {"CodeableConcept"};
+        case -740386388: /*diagnostics*/ return new String[] {"string"};
+        case 1901043637: /*location*/ return new String[] {"string"};
+        case -1795452264: /*expression*/ return new String[] {"string"};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }
@@ -1288,29 +1311,39 @@ public class OperationOutcome extends DomainResource implements IBaseOperationOu
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case 100509913: // issue
           this.getIssue().add((OperationOutcomeIssueComponent) value); // OperationOutcomeIssueComponent
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("issue"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("issue")) {
           this.getIssue().add((OperationOutcomeIssueComponent) value);
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 100509913:  return addIssue(); // OperationOutcomeIssueComponent
+        case 100509913:  return addIssue(); 
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 100509913: /*issue*/ return new String[] {};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }

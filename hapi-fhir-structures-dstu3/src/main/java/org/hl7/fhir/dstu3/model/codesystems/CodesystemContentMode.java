@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -43,7 +43,7 @@ public enum CodesystemContentMode {
         /**
          * A few representative concepts are included in the code system resource
          */
-        EXAMPLAR, 
+        EXAMPLE, 
         /**
          * A subset of the code system concepts are included in the code system resource
          */
@@ -61,8 +61,8 @@ public enum CodesystemContentMode {
                 return null;
         if ("not-present".equals(codeString))
           return NOTPRESENT;
-        if ("examplar".equals(codeString))
-          return EXAMPLAR;
+        if ("example".equals(codeString))
+          return EXAMPLE;
         if ("fragment".equals(codeString))
           return FRAGMENT;
         if ("complete".equals(codeString))
@@ -72,7 +72,7 @@ public enum CodesystemContentMode {
         public String toCode() {
           switch (this) {
             case NOTPRESENT: return "not-present";
-            case EXAMPLAR: return "examplar";
+            case EXAMPLE: return "example";
             case FRAGMENT: return "fragment";
             case COMPLETE: return "complete";
             default: return "?";
@@ -84,7 +84,7 @@ public enum CodesystemContentMode {
         public String getDefinition() {
           switch (this) {
             case NOTPRESENT: return "None of the concepts defined by the code system are included in the code system resource";
-            case EXAMPLAR: return "A few representative concepts are included in the code system resource";
+            case EXAMPLE: return "A few representative concepts are included in the code system resource";
             case FRAGMENT: return "A subset of the code system concepts are included in the code system resource";
             case COMPLETE: return "All the concepts defined by the code system are included in the code system resource";
             default: return "?";
@@ -93,7 +93,7 @@ public enum CodesystemContentMode {
         public String getDisplay() {
           switch (this) {
             case NOTPRESENT: return "Not Present";
-            case EXAMPLAR: return "Examplar";
+            case EXAMPLE: return "Example";
             case FRAGMENT: return "Fragment";
             case COMPLETE: return "Complete";
             default: return "?";

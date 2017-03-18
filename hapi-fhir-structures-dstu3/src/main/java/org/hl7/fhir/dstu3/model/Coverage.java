@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
 
 import java.util.*;
 
@@ -43,7 +43,7 @@ import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.exceptions.FHIRException;
 /**
- * Financial instrument which may be used to pay for or reimburse health care products and services.
+ * Financial instrument which may be used to reimburse or pay for health care products and services.
  */
 @ResourceDef(name="Coverage", profile="http://hl7.org/fhir/Profile/Coverage")
 public class Coverage extends DomainResource {
@@ -139,8 +139,10 @@ public class Coverage extends DomainResource {
         throw new IllegalArgumentException("Unknown CoverageStatus code '"+codeString+"'");
         }
         public Enumeration<CoverageStatus> fromType(Base code) throws FHIRException {
-          if (code == null || code.isEmpty())
+          if (code == null)
             return null;
+          if (code.isEmpty())
+            return new Enumeration<CoverageStatus>(this);
           String codeString = ((PrimitiveType) code).asStringValue();
           if (codeString == null || "".equals(codeString))
             return null;
@@ -229,10 +231,10 @@ public class Coverage extends DomainResource {
         protected StringType subPlanDisplay;
 
         /**
-         * Identifies a style or collective of coverage issues by the underwriter, for example may be used to identify a class of coverage or employer group.
+         * Identifies a style or collective of coverage issues by the underwriter, for example may be used to identify a class of coverage such as a level of deductables or co-payment.
          */
         @Child(name = "class", type = {StringType.class}, order=9, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="An identifier for the class", formalDefinition="Identifies a style or collective of coverage issues by the underwriter, for example may be used to identify a class of coverage or employer group." )
+        @Description(shortDefinition="An identifier for the class", formalDefinition="Identifies a style or collective of coverage issues by the underwriter, for example may be used to identify a class of coverage such as a level of deductables or co-payment." )
         protected StringType class_;
 
         /**
@@ -243,10 +245,10 @@ public class Coverage extends DomainResource {
         protected StringType classDisplay;
 
         /**
-         * Identifies a sub-style or sub-collective of coverage issues by the underwriter, for example may be used to identify a subclass of coverage or employer group.
+         * Identifies a sub-style or sub-collective of coverage issues by the underwriter, for example may be used to identify a subclass of coverage such as a sub-level of deductables or co-payment.
          */
         @Child(name = "subClass", type = {StringType.class}, order=11, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="An identifier for the subsection of the class", formalDefinition="Identifies a sub-style or sub-collective of coverage issues by the underwriter, for example may be used to identify a subclass of coverage or employer group." )
+        @Description(shortDefinition="An identifier for the subsection of the class", formalDefinition="Identifies a sub-style or sub-collective of coverage issues by the underwriter, for example may be used to identify a subclass of coverage such as a sub-level of deductables or co-payment." )
         protected StringType subClass;
 
         /**
@@ -658,7 +660,7 @@ public class Coverage extends DomainResource {
         }
 
         /**
-         * @return {@link #class_} (Identifies a style or collective of coverage issues by the underwriter, for example may be used to identify a class of coverage or employer group.). This is the underlying object with id, value and extensions. The accessor "getClass_" gives direct access to the value
+         * @return {@link #class_} (Identifies a style or collective of coverage issues by the underwriter, for example may be used to identify a class of coverage such as a level of deductables or co-payment.). This is the underlying object with id, value and extensions. The accessor "getClass_" gives direct access to the value
          */
         public StringType getClass_Element() { 
           if (this.class_ == null)
@@ -678,7 +680,7 @@ public class Coverage extends DomainResource {
         }
 
         /**
-         * @param value {@link #class_} (Identifies a style or collective of coverage issues by the underwriter, for example may be used to identify a class of coverage or employer group.). This is the underlying object with id, value and extensions. The accessor "getClass_" gives direct access to the value
+         * @param value {@link #class_} (Identifies a style or collective of coverage issues by the underwriter, for example may be used to identify a class of coverage such as a level of deductables or co-payment.). This is the underlying object with id, value and extensions. The accessor "getClass_" gives direct access to the value
          */
         public GroupComponent setClass_Element(StringType value) { 
           this.class_ = value;
@@ -686,14 +688,14 @@ public class Coverage extends DomainResource {
         }
 
         /**
-         * @return Identifies a style or collective of coverage issues by the underwriter, for example may be used to identify a class of coverage or employer group.
+         * @return Identifies a style or collective of coverage issues by the underwriter, for example may be used to identify a class of coverage such as a level of deductables or co-payment.
          */
         public String getClass_() { 
           return this.class_ == null ? null : this.class_.getValue();
         }
 
         /**
-         * @param value Identifies a style or collective of coverage issues by the underwriter, for example may be used to identify a class of coverage or employer group.
+         * @param value Identifies a style or collective of coverage issues by the underwriter, for example may be used to identify a class of coverage such as a level of deductables or co-payment.
          */
         public GroupComponent setClass_(String value) { 
           if (Utilities.noString(value))
@@ -756,7 +758,7 @@ public class Coverage extends DomainResource {
         }
 
         /**
-         * @return {@link #subClass} (Identifies a sub-style or sub-collective of coverage issues by the underwriter, for example may be used to identify a subclass of coverage or employer group.). This is the underlying object with id, value and extensions. The accessor "getSubClass" gives direct access to the value
+         * @return {@link #subClass} (Identifies a sub-style or sub-collective of coverage issues by the underwriter, for example may be used to identify a subclass of coverage such as a sub-level of deductables or co-payment.). This is the underlying object with id, value and extensions. The accessor "getSubClass" gives direct access to the value
          */
         public StringType getSubClassElement() { 
           if (this.subClass == null)
@@ -776,7 +778,7 @@ public class Coverage extends DomainResource {
         }
 
         /**
-         * @param value {@link #subClass} (Identifies a sub-style or sub-collective of coverage issues by the underwriter, for example may be used to identify a subclass of coverage or employer group.). This is the underlying object with id, value and extensions. The accessor "getSubClass" gives direct access to the value
+         * @param value {@link #subClass} (Identifies a sub-style or sub-collective of coverage issues by the underwriter, for example may be used to identify a subclass of coverage such as a sub-level of deductables or co-payment.). This is the underlying object with id, value and extensions. The accessor "getSubClass" gives direct access to the value
          */
         public GroupComponent setSubClassElement(StringType value) { 
           this.subClass = value;
@@ -784,14 +786,14 @@ public class Coverage extends DomainResource {
         }
 
         /**
-         * @return Identifies a sub-style or sub-collective of coverage issues by the underwriter, for example may be used to identify a subclass of coverage or employer group.
+         * @return Identifies a sub-style or sub-collective of coverage issues by the underwriter, for example may be used to identify a subclass of coverage such as a sub-level of deductables or co-payment.
          */
         public String getSubClass() { 
           return this.subClass == null ? null : this.subClass.getValue();
         }
 
         /**
-         * @param value Identifies a sub-style or sub-collective of coverage issues by the underwriter, for example may be used to identify a subclass of coverage or employer group.
+         * @param value Identifies a sub-style or sub-collective of coverage issues by the underwriter, for example may be used to identify a subclass of coverage such as a sub-level of deductables or co-payment.
          */
         public GroupComponent setSubClass(String value) { 
           if (Utilities.noString(value))
@@ -863,9 +865,9 @@ public class Coverage extends DomainResource {
           childrenList.add(new Property("planDisplay", "string", "A short description for the plan.", 0, java.lang.Integer.MAX_VALUE, planDisplay));
           childrenList.add(new Property("subPlan", "string", "Identifies a sub-style or sub-collective of coverage issued by the underwriter, for example may be used to identify a subset of a collection of benefits provided to employees.", 0, java.lang.Integer.MAX_VALUE, subPlan));
           childrenList.add(new Property("subPlanDisplay", "string", "A short description for the subplan.", 0, java.lang.Integer.MAX_VALUE, subPlanDisplay));
-          childrenList.add(new Property("class", "string", "Identifies a style or collective of coverage issues by the underwriter, for example may be used to identify a class of coverage or employer group.", 0, java.lang.Integer.MAX_VALUE, class_));
+          childrenList.add(new Property("class", "string", "Identifies a style or collective of coverage issues by the underwriter, for example may be used to identify a class of coverage such as a level of deductables or co-payment.", 0, java.lang.Integer.MAX_VALUE, class_));
           childrenList.add(new Property("classDisplay", "string", "A short description for the class.", 0, java.lang.Integer.MAX_VALUE, classDisplay));
-          childrenList.add(new Property("subClass", "string", "Identifies a sub-style or sub-collective of coverage issues by the underwriter, for example may be used to identify a subclass of coverage or employer group.", 0, java.lang.Integer.MAX_VALUE, subClass));
+          childrenList.add(new Property("subClass", "string", "Identifies a sub-style or sub-collective of coverage issues by the underwriter, for example may be used to identify a subclass of coverage such as a sub-level of deductables or co-payment.", 0, java.lang.Integer.MAX_VALUE, subClass));
           childrenList.add(new Property("subClassDisplay", "string", "A short description for the subclass.", 0, java.lang.Integer.MAX_VALUE, subClassDisplay));
         }
 
@@ -890,95 +892,116 @@ public class Coverage extends DomainResource {
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case 98629247: // group
           this.group = castToString(value); // StringType
-          break;
+          return value;
         case 1322335555: // groupDisplay
           this.groupDisplay = castToString(value); // StringType
-          break;
+          return value;
         case -2101792737: // subGroup
           this.subGroup = castToString(value); // StringType
-          break;
+          return value;
         case 1051914147: // subGroupDisplay
           this.subGroupDisplay = castToString(value); // StringType
-          break;
+          return value;
         case 3443497: // plan
           this.plan = castToString(value); // StringType
-          break;
+          return value;
         case -896076455: // planDisplay
           this.planDisplay = castToString(value); // StringType
-          break;
+          return value;
         case -1868653175: // subPlan
           this.subPlan = castToString(value); // StringType
-          break;
+          return value;
         case -1736083719: // subPlanDisplay
           this.subPlanDisplay = castToString(value); // StringType
-          break;
+          return value;
         case 94742904: // class
           this.class_ = castToString(value); // StringType
-          break;
+          return value;
         case 1707405354: // classDisplay
           this.classDisplay = castToString(value); // StringType
-          break;
+          return value;
         case -2105679080: // subClass
           this.subClass = castToString(value); // StringType
-          break;
+          return value;
         case 1436983946: // subClassDisplay
           this.subClassDisplay = castToString(value); // StringType
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("group"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("group")) {
           this.group = castToString(value); // StringType
-        else if (name.equals("groupDisplay"))
+        } else if (name.equals("groupDisplay")) {
           this.groupDisplay = castToString(value); // StringType
-        else if (name.equals("subGroup"))
+        } else if (name.equals("subGroup")) {
           this.subGroup = castToString(value); // StringType
-        else if (name.equals("subGroupDisplay"))
+        } else if (name.equals("subGroupDisplay")) {
           this.subGroupDisplay = castToString(value); // StringType
-        else if (name.equals("plan"))
+        } else if (name.equals("plan")) {
           this.plan = castToString(value); // StringType
-        else if (name.equals("planDisplay"))
+        } else if (name.equals("planDisplay")) {
           this.planDisplay = castToString(value); // StringType
-        else if (name.equals("subPlan"))
+        } else if (name.equals("subPlan")) {
           this.subPlan = castToString(value); // StringType
-        else if (name.equals("subPlanDisplay"))
+        } else if (name.equals("subPlanDisplay")) {
           this.subPlanDisplay = castToString(value); // StringType
-        else if (name.equals("class"))
+        } else if (name.equals("class")) {
           this.class_ = castToString(value); // StringType
-        else if (name.equals("classDisplay"))
+        } else if (name.equals("classDisplay")) {
           this.classDisplay = castToString(value); // StringType
-        else if (name.equals("subClass"))
+        } else if (name.equals("subClass")) {
           this.subClass = castToString(value); // StringType
-        else if (name.equals("subClassDisplay"))
+        } else if (name.equals("subClassDisplay")) {
           this.subClassDisplay = castToString(value); // StringType
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 98629247: throw new FHIRException("Cannot make property group as it is not a complex type"); // StringType
-        case 1322335555: throw new FHIRException("Cannot make property groupDisplay as it is not a complex type"); // StringType
-        case -2101792737: throw new FHIRException("Cannot make property subGroup as it is not a complex type"); // StringType
-        case 1051914147: throw new FHIRException("Cannot make property subGroupDisplay as it is not a complex type"); // StringType
-        case 3443497: throw new FHIRException("Cannot make property plan as it is not a complex type"); // StringType
-        case -896076455: throw new FHIRException("Cannot make property planDisplay as it is not a complex type"); // StringType
-        case -1868653175: throw new FHIRException("Cannot make property subPlan as it is not a complex type"); // StringType
-        case -1736083719: throw new FHIRException("Cannot make property subPlanDisplay as it is not a complex type"); // StringType
-        case 94742904: throw new FHIRException("Cannot make property class as it is not a complex type"); // StringType
-        case 1707405354: throw new FHIRException("Cannot make property classDisplay as it is not a complex type"); // StringType
-        case -2105679080: throw new FHIRException("Cannot make property subClass as it is not a complex type"); // StringType
-        case 1436983946: throw new FHIRException("Cannot make property subClassDisplay as it is not a complex type"); // StringType
+        case 98629247:  return getGroupElement();
+        case 1322335555:  return getGroupDisplayElement();
+        case -2101792737:  return getSubGroupElement();
+        case 1051914147:  return getSubGroupDisplayElement();
+        case 3443497:  return getPlanElement();
+        case -896076455:  return getPlanDisplayElement();
+        case -1868653175:  return getSubPlanElement();
+        case -1736083719:  return getSubPlanDisplayElement();
+        case 94742904:  return getClass_Element();
+        case 1707405354:  return getClassDisplayElement();
+        case -2105679080:  return getSubClassElement();
+        case 1436983946:  return getSubClassDisplayElement();
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 98629247: /*group*/ return new String[] {"string"};
+        case 1322335555: /*groupDisplay*/ return new String[] {"string"};
+        case -2101792737: /*subGroup*/ return new String[] {"string"};
+        case 1051914147: /*subGroupDisplay*/ return new String[] {"string"};
+        case 3443497: /*plan*/ return new String[] {"string"};
+        case -896076455: /*planDisplay*/ return new String[] {"string"};
+        case -1868653175: /*subPlan*/ return new String[] {"string"};
+        case -1736083719: /*subPlanDisplay*/ return new String[] {"string"};
+        case 94742904: /*class*/ return new String[] {"string"};
+        case 1707405354: /*classDisplay*/ return new String[] {"string"};
+        case -2105679080: /*subClass*/ return new String[] {"string"};
+        case 1436983946: /*subClassDisplay*/ return new String[] {"string"};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }
@@ -1078,7 +1101,7 @@ public class Coverage extends DomainResource {
       }
 
   public String fhirType() {
-    return "Coverage.group";
+    return "Coverage.grouping";
 
   }
 
@@ -1103,7 +1126,7 @@ public class Coverage extends DomainResource {
      * The type of coverage: social program, medical plan, accident coverage (workers compensation, auto), group health or payment by an individual or organization.
      */
     @Child(name = "type", type = {CodeableConcept.class}, order=2, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Type of coverage", formalDefinition="The type of coverage: social program, medical plan, accident coverage (workers compensation, auto), group health or payment by an individual or organization." )
+    @Description(shortDefinition="Type of coverage such as medical or accident", formalDefinition="The type of coverage: social program, medical plan, accident coverage (workers compensation, auto), group health or payment by an individual or organization." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/coverage-type")
     protected CodeableConcept type;
 
@@ -1180,9 +1203,9 @@ public class Coverage extends DomainResource {
     /**
      * A suite of underwrite specific classifiers, for example may be used to identify a class of coverage or employer group, Policy, Plan.
      */
-    @Child(name = "group", type = {}, order=10, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "grouping", type = {}, order=10, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Additional coverage classifications", formalDefinition="A suite of underwrite specific classifiers, for example may be used to identify a class of coverage or employer group, Policy, Plan." )
-    protected GroupComponent group;
+    protected GroupComponent grouping;
 
     /**
      * A unique identifier for a dependent under the coverage.
@@ -1224,7 +1247,7 @@ public class Coverage extends DomainResource {
     protected List<Contract> contractTarget;
 
 
-    private static final long serialVersionUID = -2003248518L;
+    private static final long serialVersionUID = -1719168406L;
 
   /**
    * Constructor
@@ -1642,26 +1665,26 @@ public class Coverage extends DomainResource {
     }
 
     /**
-     * @return {@link #group} (A suite of underwrite specific classifiers, for example may be used to identify a class of coverage or employer group, Policy, Plan.)
+     * @return {@link #grouping} (A suite of underwrite specific classifiers, for example may be used to identify a class of coverage or employer group, Policy, Plan.)
      */
-    public GroupComponent getGroup() { 
-      if (this.group == null)
+    public GroupComponent getGrouping() { 
+      if (this.grouping == null)
         if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create Coverage.group");
+          throw new Error("Attempt to auto-create Coverage.grouping");
         else if (Configuration.doAutoCreate())
-          this.group = new GroupComponent(); // cc
-      return this.group;
+          this.grouping = new GroupComponent(); // cc
+      return this.grouping;
     }
 
-    public boolean hasGroup() { 
-      return this.group != null && !this.group.isEmpty();
+    public boolean hasGrouping() { 
+      return this.grouping != null && !this.grouping.isEmpty();
     }
 
     /**
-     * @param value {@link #group} (A suite of underwrite specific classifiers, for example may be used to identify a class of coverage or employer group, Policy, Plan.)
+     * @param value {@link #grouping} (A suite of underwrite specific classifiers, for example may be used to identify a class of coverage or employer group, Policy, Plan.)
      */
-    public Coverage setGroup(GroupComponent value) { 
-      this.group = value;
+    public Coverage setGrouping(GroupComponent value) { 
+      this.grouping = value;
       return this;
     }
 
@@ -1944,7 +1967,7 @@ public class Coverage extends DomainResource {
         childrenList.add(new Property("relationship", "CodeableConcept", "The relationship of beneficiary (patient) to the subscriber.", 0, java.lang.Integer.MAX_VALUE, relationship));
         childrenList.add(new Property("period", "Period", "Time period during which the coverage is in force. A missing start date indicates the start date isn't known, a missing end date means the coverage is continuing to be in force.", 0, java.lang.Integer.MAX_VALUE, period));
         childrenList.add(new Property("payor", "Reference(Organization|Patient|RelatedPerson)", "The program or plan underwriter or payor including both insurance and non-insurance agreements, such as patient-pay agreements. May provide multiple identifiers such as insurance company identifier or business identifier (BIN number).", 0, java.lang.Integer.MAX_VALUE, payor));
-        childrenList.add(new Property("group", "", "A suite of underwrite specific classifiers, for example may be used to identify a class of coverage or employer group, Policy, Plan.", 0, java.lang.Integer.MAX_VALUE, group));
+        childrenList.add(new Property("grouping", "", "A suite of underwrite specific classifiers, for example may be used to identify a class of coverage or employer group, Policy, Plan.", 0, java.lang.Integer.MAX_VALUE, grouping));
         childrenList.add(new Property("dependent", "string", "A unique identifier for a dependent under the coverage.", 0, java.lang.Integer.MAX_VALUE, dependent));
         childrenList.add(new Property("sequence", "string", "An optional counter for a particular instance of the identified coverage which increments upon each renewal.", 0, java.lang.Integer.MAX_VALUE, sequence));
         childrenList.add(new Property("order", "positiveInt", "The order of applicability of this coverage relative to other coverages which are currently inforce. Note, there may be gaps in the numbering and this does not imply primary, secondard etc. as the specific positioning of coverages depends upon the episode of care.", 0, java.lang.Integer.MAX_VALUE, order));
@@ -1965,7 +1988,7 @@ public class Coverage extends DomainResource {
         case -261851592: /*relationship*/ return this.relationship == null ? new Base[0] : new Base[] {this.relationship}; // CodeableConcept
         case -991726143: /*period*/ return this.period == null ? new Base[0] : new Base[] {this.period}; // Period
         case 106443915: /*payor*/ return this.payor == null ? new Base[0] : this.payor.toArray(new Base[this.payor.size()]); // Reference
-        case 98629247: /*group*/ return this.group == null ? new Base[0] : new Base[] {this.group}; // GroupComponent
+        case 506371331: /*grouping*/ return this.grouping == null ? new Base[0] : new Base[] {this.grouping}; // GroupComponent
         case -1109226753: /*dependent*/ return this.dependent == null ? new Base[0] : new Base[] {this.dependent}; // StringType
         case 1349547969: /*sequence*/ return this.sequence == null ? new Base[0] : new Base[] {this.sequence}; // StringType
         case 106006350: /*order*/ return this.order == null ? new Base[0] : new Base[] {this.order}; // PositiveIntType
@@ -1977,119 +2000,146 @@ public class Coverage extends DomainResource {
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case -1618432855: // identifier
           this.getIdentifier().add(castToIdentifier(value)); // Identifier
-          break;
+          return value;
         case -892481550: // status
-          this.status = new CoverageStatusEnumFactory().fromType(value); // Enumeration<CoverageStatus>
-          break;
+          value = new CoverageStatusEnumFactory().fromType(castToCode(value));
+          this.status = (Enumeration) value; // Enumeration<CoverageStatus>
+          return value;
         case 3575610: // type
           this.type = castToCodeableConcept(value); // CodeableConcept
-          break;
+          return value;
         case 2046898558: // policyHolder
           this.policyHolder = castToReference(value); // Reference
-          break;
+          return value;
         case -1219769240: // subscriber
           this.subscriber = castToReference(value); // Reference
-          break;
+          return value;
         case 327834531: // subscriberId
           this.subscriberId = castToString(value); // StringType
-          break;
+          return value;
         case -565102875: // beneficiary
           this.beneficiary = castToReference(value); // Reference
-          break;
+          return value;
         case -261851592: // relationship
           this.relationship = castToCodeableConcept(value); // CodeableConcept
-          break;
+          return value;
         case -991726143: // period
           this.period = castToPeriod(value); // Period
-          break;
+          return value;
         case 106443915: // payor
           this.getPayor().add(castToReference(value)); // Reference
-          break;
-        case 98629247: // group
-          this.group = (GroupComponent) value; // GroupComponent
-          break;
+          return value;
+        case 506371331: // grouping
+          this.grouping = (GroupComponent) value; // GroupComponent
+          return value;
         case -1109226753: // dependent
           this.dependent = castToString(value); // StringType
-          break;
+          return value;
         case 1349547969: // sequence
           this.sequence = castToString(value); // StringType
-          break;
+          return value;
         case 106006350: // order
           this.order = castToPositiveInt(value); // PositiveIntType
-          break;
+          return value;
         case 1843485230: // network
           this.network = castToString(value); // StringType
-          break;
+          return value;
         case -566947566: // contract
           this.getContract().add(castToReference(value)); // Reference
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("identifier"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("identifier")) {
           this.getIdentifier().add(castToIdentifier(value));
-        else if (name.equals("status"))
-          this.status = new CoverageStatusEnumFactory().fromType(value); // Enumeration<CoverageStatus>
-        else if (name.equals("type"))
+        } else if (name.equals("status")) {
+          value = new CoverageStatusEnumFactory().fromType(castToCode(value));
+          this.status = (Enumeration) value; // Enumeration<CoverageStatus>
+        } else if (name.equals("type")) {
           this.type = castToCodeableConcept(value); // CodeableConcept
-        else if (name.equals("policyHolder"))
+        } else if (name.equals("policyHolder")) {
           this.policyHolder = castToReference(value); // Reference
-        else if (name.equals("subscriber"))
+        } else if (name.equals("subscriber")) {
           this.subscriber = castToReference(value); // Reference
-        else if (name.equals("subscriberId"))
+        } else if (name.equals("subscriberId")) {
           this.subscriberId = castToString(value); // StringType
-        else if (name.equals("beneficiary"))
+        } else if (name.equals("beneficiary")) {
           this.beneficiary = castToReference(value); // Reference
-        else if (name.equals("relationship"))
+        } else if (name.equals("relationship")) {
           this.relationship = castToCodeableConcept(value); // CodeableConcept
-        else if (name.equals("period"))
+        } else if (name.equals("period")) {
           this.period = castToPeriod(value); // Period
-        else if (name.equals("payor"))
+        } else if (name.equals("payor")) {
           this.getPayor().add(castToReference(value));
-        else if (name.equals("group"))
-          this.group = (GroupComponent) value; // GroupComponent
-        else if (name.equals("dependent"))
+        } else if (name.equals("grouping")) {
+          this.grouping = (GroupComponent) value; // GroupComponent
+        } else if (name.equals("dependent")) {
           this.dependent = castToString(value); // StringType
-        else if (name.equals("sequence"))
+        } else if (name.equals("sequence")) {
           this.sequence = castToString(value); // StringType
-        else if (name.equals("order"))
+        } else if (name.equals("order")) {
           this.order = castToPositiveInt(value); // PositiveIntType
-        else if (name.equals("network"))
+        } else if (name.equals("network")) {
           this.network = castToString(value); // StringType
-        else if (name.equals("contract"))
+        } else if (name.equals("contract")) {
           this.getContract().add(castToReference(value));
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case -1618432855:  return addIdentifier(); // Identifier
-        case -892481550: throw new FHIRException("Cannot make property status as it is not a complex type"); // Enumeration<CoverageStatus>
-        case 3575610:  return getType(); // CodeableConcept
-        case 2046898558:  return getPolicyHolder(); // Reference
-        case -1219769240:  return getSubscriber(); // Reference
-        case 327834531: throw new FHIRException("Cannot make property subscriberId as it is not a complex type"); // StringType
-        case -565102875:  return getBeneficiary(); // Reference
-        case -261851592:  return getRelationship(); // CodeableConcept
-        case -991726143:  return getPeriod(); // Period
-        case 106443915:  return addPayor(); // Reference
-        case 98629247:  return getGroup(); // GroupComponent
-        case -1109226753: throw new FHIRException("Cannot make property dependent as it is not a complex type"); // StringType
-        case 1349547969: throw new FHIRException("Cannot make property sequence as it is not a complex type"); // StringType
-        case 106006350: throw new FHIRException("Cannot make property order as it is not a complex type"); // PositiveIntType
-        case 1843485230: throw new FHIRException("Cannot make property network as it is not a complex type"); // StringType
-        case -566947566:  return addContract(); // Reference
+        case -1618432855:  return addIdentifier(); 
+        case -892481550:  return getStatusElement();
+        case 3575610:  return getType(); 
+        case 2046898558:  return getPolicyHolder(); 
+        case -1219769240:  return getSubscriber(); 
+        case 327834531:  return getSubscriberIdElement();
+        case -565102875:  return getBeneficiary(); 
+        case -261851592:  return getRelationship(); 
+        case -991726143:  return getPeriod(); 
+        case 106443915:  return addPayor(); 
+        case 506371331:  return getGrouping(); 
+        case -1109226753:  return getDependentElement();
+        case 1349547969:  return getSequenceElement();
+        case 106006350:  return getOrderElement();
+        case 1843485230:  return getNetworkElement();
+        case -566947566:  return addContract(); 
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -1618432855: /*identifier*/ return new String[] {"Identifier"};
+        case -892481550: /*status*/ return new String[] {"code"};
+        case 3575610: /*type*/ return new String[] {"CodeableConcept"};
+        case 2046898558: /*policyHolder*/ return new String[] {"Reference"};
+        case -1219769240: /*subscriber*/ return new String[] {"Reference"};
+        case 327834531: /*subscriberId*/ return new String[] {"string"};
+        case -565102875: /*beneficiary*/ return new String[] {"Reference"};
+        case -261851592: /*relationship*/ return new String[] {"CodeableConcept"};
+        case -991726143: /*period*/ return new String[] {"Period"};
+        case 106443915: /*payor*/ return new String[] {"Reference"};
+        case 506371331: /*grouping*/ return new String[] {};
+        case -1109226753: /*dependent*/ return new String[] {"string"};
+        case 1349547969: /*sequence*/ return new String[] {"string"};
+        case 106006350: /*order*/ return new String[] {"positiveInt"};
+        case 1843485230: /*network*/ return new String[] {"string"};
+        case -566947566: /*contract*/ return new String[] {"Reference"};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }
@@ -2132,9 +2182,9 @@ public class Coverage extends DomainResource {
         else if (name.equals("payor")) {
           return addPayor();
         }
-        else if (name.equals("group")) {
-          this.group = new GroupComponent();
-          return this.group;
+        else if (name.equals("grouping")) {
+          this.grouping = new GroupComponent();
+          return this.grouping;
         }
         else if (name.equals("dependent")) {
           throw new FHIRException("Cannot call addChild on a primitive type Coverage.dependent");
@@ -2181,7 +2231,7 @@ public class Coverage extends DomainResource {
           for (Reference i : payor)
             dst.payor.add(i.copy());
         };
-        dst.group = group == null ? null : group.copy();
+        dst.grouping = grouping == null ? null : grouping.copy();
         dst.dependent = dependent == null ? null : dependent.copy();
         dst.sequence = sequence == null ? null : sequence.copy();
         dst.order = order == null ? null : order.copy();
@@ -2209,7 +2259,7 @@ public class Coverage extends DomainResource {
            && compareDeep(policyHolder, o.policyHolder, true) && compareDeep(subscriber, o.subscriber, true)
            && compareDeep(subscriberId, o.subscriberId, true) && compareDeep(beneficiary, o.beneficiary, true)
            && compareDeep(relationship, o.relationship, true) && compareDeep(period, o.period, true) && compareDeep(payor, o.payor, true)
-           && compareDeep(group, o.group, true) && compareDeep(dependent, o.dependent, true) && compareDeep(sequence, o.sequence, true)
+           && compareDeep(grouping, o.grouping, true) && compareDeep(dependent, o.dependent, true) && compareDeep(sequence, o.sequence, true)
            && compareDeep(order, o.order, true) && compareDeep(network, o.network, true) && compareDeep(contract, o.contract, true)
           ;
       }
@@ -2229,7 +2279,7 @@ public class Coverage extends DomainResource {
       public boolean isEmpty() {
         return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, status, type
           , policyHolder, subscriber, subscriberId, beneficiary, relationship, period, payor
-          , group, dependent, sequence, order, network, contract);
+          , grouping, dependent, sequence, order, network, contract);
       }
 
   @Override
@@ -2258,47 +2308,21 @@ public class Coverage extends DomainResource {
   public static final ca.uhn.fhir.rest.gclient.TokenClientParam IDENTIFIER = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_IDENTIFIER);
 
  /**
-   * Search parameter: <b>policyholder</b>
-   * <p>
-   * Description: <b>Reference to the policyholder</b><br>
-   * Type: <b>reference</b><br>
-   * Path: <b>Coverage.policyHolder</b><br>
-   * </p>
-   */
-  @SearchParamDefinition(name="policyholder", path="Coverage.policyHolder", description="Reference to the policyholder", type="reference", target={Organization.class, Patient.class, RelatedPerson.class } )
-  public static final String SP_POLICYHOLDER = "policyholder";
- /**
-   * <b>Fluent Client</b> search parameter constant for <b>policyholder</b>
-   * <p>
-   * Description: <b>Reference to the policyholder</b><br>
-   * Type: <b>reference</b><br>
-   * Path: <b>Coverage.policyHolder</b><br>
-   * </p>
-   */
-  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam POLICYHOLDER = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_POLICYHOLDER);
-
-/**
-   * Constant for fluent queries to be used to add include statements. Specifies
-   * the path value of "<b>Coverage:policyholder</b>".
-   */
-  public static final ca.uhn.fhir.model.api.Include INCLUDE_POLICYHOLDER = new ca.uhn.fhir.model.api.Include("Coverage:policyholder").toLocked();
-
- /**
    * Search parameter: <b>subgroup</b>
    * <p>
    * Description: <b>Sub-group identifier</b><br>
    * Type: <b>string</b><br>
-   * Path: <b>Coverage.group.subGroup</b><br>
+   * Path: <b>Coverage.grouping.subGroup</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="subgroup", path="Coverage.group.subGroup", description="Sub-group identifier", type="string" )
+  @SearchParamDefinition(name="subgroup", path="Coverage.grouping.subGroup", description="Sub-group identifier", type="string" )
   public static final String SP_SUBGROUP = "subgroup";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>subgroup</b>
    * <p>
    * Description: <b>Sub-group identifier</b><br>
    * Type: <b>string</b><br>
-   * Path: <b>Coverage.group.subGroup</b><br>
+   * Path: <b>Coverage.grouping.subGroup</b><br>
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.StringClientParam SUBGROUP = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_SUBGROUP);
@@ -2311,7 +2335,7 @@ public class Coverage extends DomainResource {
    * Path: <b>Coverage.subscriber</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="subscriber", path="Coverage.subscriber", description="Reference to the subscriber", type="reference", target={Patient.class, RelatedPerson.class } )
+  @SearchParamDefinition(name="subscriber", path="Coverage.subscriber", description="Reference to the subscriber", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient"), @ca.uhn.fhir.model.api.annotation.Compartment(name="RelatedPerson") }, target={Patient.class, RelatedPerson.class } )
   public static final String SP_SUBSCRIBER = "subscriber";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>subscriber</b>
@@ -2334,17 +2358,17 @@ public class Coverage extends DomainResource {
    * <p>
    * Description: <b>Sub-plan identifier</b><br>
    * Type: <b>string</b><br>
-   * Path: <b>Coverage.group.subPlan</b><br>
+   * Path: <b>Coverage.grouping.subPlan</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="subplan", path="Coverage.group.subPlan", description="Sub-plan identifier", type="string" )
+  @SearchParamDefinition(name="subplan", path="Coverage.grouping.subPlan", description="Sub-plan identifier", type="string" )
   public static final String SP_SUBPLAN = "subplan";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>subplan</b>
    * <p>
    * Description: <b>Sub-plan identifier</b><br>
    * Type: <b>string</b><br>
-   * Path: <b>Coverage.group.subPlan</b><br>
+   * Path: <b>Coverage.grouping.subPlan</b><br>
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.StringClientParam SUBPLAN = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_SUBPLAN);
@@ -2397,7 +2421,7 @@ public class Coverage extends DomainResource {
    * Path: <b>Coverage.payor</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="payor", path="Coverage.payor", description="The identity of the insurer or party paying for services", type="reference", target={Organization.class, Patient.class, RelatedPerson.class } )
+  @SearchParamDefinition(name="payor", path="Coverage.payor", description="The identity of the insurer or party paying for services", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient"), @ca.uhn.fhir.model.api.annotation.Compartment(name="RelatedPerson") }, target={Organization.class, Patient.class, RelatedPerson.class } )
   public static final String SP_PAYOR = "payor";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>payor</b>
@@ -2423,7 +2447,7 @@ public class Coverage extends DomainResource {
    * Path: <b>Coverage.beneficiary</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="beneficiary", path="Coverage.beneficiary", description="Covered party", type="reference", target={Patient.class } )
+  @SearchParamDefinition(name="beneficiary", path="Coverage.beneficiary", description="Covered party", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") }, target={Patient.class } )
   public static final String SP_BENEFICIARY = "beneficiary";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>beneficiary</b>
@@ -2446,17 +2470,17 @@ public class Coverage extends DomainResource {
    * <p>
    * Description: <b>Sub-class identifier</b><br>
    * Type: <b>string</b><br>
-   * Path: <b>Coverage.group.subClass</b><br>
+   * Path: <b>Coverage.grouping.subClass</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="subclass", path="Coverage.group.subClass", description="Sub-class identifier", type="string" )
+  @SearchParamDefinition(name="subclass", path="Coverage.grouping.subClass", description="Sub-class identifier", type="string" )
   public static final String SP_SUBCLASS = "subclass";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>subclass</b>
    * <p>
    * Description: <b>Sub-class identifier</b><br>
    * Type: <b>string</b><br>
-   * Path: <b>Coverage.group.subClass</b><br>
+   * Path: <b>Coverage.grouping.subClass</b><br>
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.StringClientParam SUBCLASS = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_SUBCLASS);
@@ -2466,17 +2490,17 @@ public class Coverage extends DomainResource {
    * <p>
    * Description: <b>A plan or policy identifier</b><br>
    * Type: <b>string</b><br>
-   * Path: <b>Coverage.group.plan</b><br>
+   * Path: <b>Coverage.grouping.plan</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="plan", path="Coverage.group.plan", description="A plan or policy identifier", type="string" )
+  @SearchParamDefinition(name="plan", path="Coverage.grouping.plan", description="A plan or policy identifier", type="string" )
   public static final String SP_PLAN = "plan";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>plan</b>
    * <p>
    * Description: <b>A plan or policy identifier</b><br>
    * Type: <b>string</b><br>
-   * Path: <b>Coverage.group.plan</b><br>
+   * Path: <b>Coverage.grouping.plan</b><br>
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.StringClientParam PLAN = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_PLAN);
@@ -2486,17 +2510,17 @@ public class Coverage extends DomainResource {
    * <p>
    * Description: <b>Class identifier</b><br>
    * Type: <b>string</b><br>
-   * Path: <b>Coverage.group.class</b><br>
+   * Path: <b>Coverage.grouping.class</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="class", path="Coverage.group.class", description="Class identifier", type="string" )
+  @SearchParamDefinition(name="class", path="Coverage.grouping.class", description="Class identifier", type="string" )
   public static final String SP_CLASS = "class";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>class</b>
    * <p>
    * Description: <b>Class identifier</b><br>
    * Type: <b>string</b><br>
-   * Path: <b>Coverage.group.class</b><br>
+   * Path: <b>Coverage.grouping.class</b><br>
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.StringClientParam CLASS = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_CLASS);
@@ -2526,20 +2550,46 @@ public class Coverage extends DomainResource {
    * <p>
    * Description: <b>Group identifier</b><br>
    * Type: <b>string</b><br>
-   * Path: <b>Coverage.group.group</b><br>
+   * Path: <b>Coverage.grouping.group</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="group", path="Coverage.group.group", description="Group identifier", type="string" )
+  @SearchParamDefinition(name="group", path="Coverage.grouping.group", description="Group identifier", type="string" )
   public static final String SP_GROUP = "group";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>group</b>
    * <p>
    * Description: <b>Group identifier</b><br>
    * Type: <b>string</b><br>
-   * Path: <b>Coverage.group.group</b><br>
+   * Path: <b>Coverage.grouping.group</b><br>
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.StringClientParam GROUP = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_GROUP);
+
+ /**
+   * Search parameter: <b>policy-holder</b>
+   * <p>
+   * Description: <b>Reference to the policyholder</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>Coverage.policyHolder</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="policy-holder", path="Coverage.policyHolder", description="Reference to the policyholder", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient"), @ca.uhn.fhir.model.api.annotation.Compartment(name="RelatedPerson") }, target={Organization.class, Patient.class, RelatedPerson.class } )
+  public static final String SP_POLICY_HOLDER = "policy-holder";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>policy-holder</b>
+   * <p>
+   * Description: <b>Reference to the policyholder</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>Coverage.policyHolder</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam POLICY_HOLDER = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_POLICY_HOLDER);
+
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>Coverage:policy-holder</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_POLICY_HOLDER = new ca.uhn.fhir.model.api.Include("Coverage:policy-holder").toLocked();
 
 
 }

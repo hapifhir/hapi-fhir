@@ -33,7 +33,8 @@
     <sch:rule context="f:Observation/f:referenceRange">
       <sch:assert test="count(f:low) &gt;= 1">low: minimum cardinality of 'low' is 1</sch:assert>
       <sch:assert test="count(f:high) &lt;= 0">high: maximum cardinality of 'high' is 0</sch:assert>
-      <sch:assert test="count(f:meaning) &lt;= 0">meaning: maximum cardinality of 'meaning' is 0</sch:assert>
+      <sch:assert test="count(f:type) &lt;= 0">type: maximum cardinality of 'type' is 0</sch:assert>
+      <sch:assert test="count(f:appliesTo) &lt;= 0">appliesTo: maximum cardinality of 'appliesTo' is 0</sch:assert>
       <sch:assert test="count(f:age) &lt;= 0">age: maximum cardinality of 'age' is 0</sch:assert>
     </sch:rule>
   </sch:pattern>

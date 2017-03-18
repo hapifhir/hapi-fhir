@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
 
 import java.util.*;
 
@@ -53,28 +53,28 @@ public class Parameters extends Resource implements IBaseParameters {
         /**
          * The name of the parameter (reference to the operation definition).
          */
-        @Child(name = "name", type = {StringType.class}, order=1, min=1, max=1, modifier=false, summary=false)
+        @Child(name = "name", type = {StringType.class}, order=1, min=1, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Name from the definition", formalDefinition="The name of the parameter (reference to the operation definition)." )
         protected StringType name;
 
         /**
          * If the parameter is a data type.
          */
-        @Child(name = "value", type = {}, order=2, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "value", type = {}, order=2, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="If parameter is a data type", formalDefinition="If the parameter is a data type." )
         protected org.hl7.fhir.dstu3.model.Type value;
 
         /**
          * If the parameter is a whole resource.
          */
-        @Child(name = "resource", type = {Resource.class}, order=3, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "resource", type = {Resource.class}, order=3, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="If parameter is a whole resource", formalDefinition="If the parameter is a whole resource." )
         protected Resource resource;
 
         /**
          * A named part of a multi-part parameter.
          */
-        @Child(name = "part", type = {ParametersParameterComponent.class}, order=4, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Child(name = "part", type = {ParametersParameterComponent.class}, order=4, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
         @Description(shortDefinition="Named part of a multi-part parameter", formalDefinition="A named part of a multi-part parameter." )
         protected List<ParametersParameterComponent> part;
 
@@ -252,47 +252,61 @@ public class Parameters extends Resource implements IBaseParameters {
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case 3373707: // name
           this.name = castToString(value); // StringType
-          break;
+          return value;
         case 111972721: // value
           this.value = castToType(value); // org.hl7.fhir.dstu3.model.Type
-          break;
+          return value;
         case -341064690: // resource
           this.resource = castToResource(value); // Resource
-          break;
+          return value;
         case 3433459: // part
           this.getPart().add((ParametersParameterComponent) value); // ParametersParameterComponent
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("name"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("name")) {
           this.name = castToString(value); // StringType
-        else if (name.equals("value[x]"))
+        } else if (name.equals("value[x]")) {
           this.value = castToType(value); // org.hl7.fhir.dstu3.model.Type
-        else if (name.equals("resource"))
+        } else if (name.equals("resource")) {
           this.resource = castToResource(value); // Resource
-        else if (name.equals("part"))
+        } else if (name.equals("part")) {
           this.getPart().add((ParametersParameterComponent) value);
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 3373707: throw new FHIRException("Cannot make property name as it is not a complex type"); // StringType
-        case -1410166417:  return getValue(); // org.hl7.fhir.dstu3.model.Type
+        case 3373707:  return getNameElement();
+        case -1410166417:  return getValue(); 
+        case 111972721:  return getValue(); 
         case -341064690: throw new FHIRException("Cannot make property resource as it is not a complex type"); // Resource
-        case 3433459:  return addPart(); // ParametersParameterComponent
+        case 3433459:  return addPart(); 
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3373707: /*name*/ return new String[] {"string"};
+        case 111972721: /*value*/ return new String[] {"*"};
+        case -341064690: /*resource*/ return new String[] {"Resource"};
+        case 3433459: /*part*/ return new String[] {"@Parameters.parameter"};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }
@@ -485,7 +499,7 @@ public class Parameters extends Resource implements IBaseParameters {
       }
 
   public String fhirType() {
-    return "null";
+    return "Parameters.parameter";
 
   }
 
@@ -494,7 +508,7 @@ public class Parameters extends Resource implements IBaseParameters {
     /**
      * A parameter passed to or received from the operation.
      */
-    @Child(name = "parameter", type = {}, order=0, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "parameter", type = {}, order=0, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Operation Parameter", formalDefinition="A parameter passed to or received from the operation." )
     protected List<ParametersParameterComponent> parameter;
 
@@ -575,29 +589,39 @@ public class Parameters extends Resource implements IBaseParameters {
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case 1954460585: // parameter
           this.getParameter().add((ParametersParameterComponent) value); // ParametersParameterComponent
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("parameter"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("parameter")) {
           this.getParameter().add((ParametersParameterComponent) value);
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 1954460585:  return addParameter(); // ParametersParameterComponent
+        case 1954460585:  return addParameter(); 
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 1954460585: /*parameter*/ return new String[] {};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }

@@ -1,13 +1,15 @@
 package org.hl7.fhir.instance.model;
 
+import java.io.IOException;
 import java.net.URISyntaxException;
 import java.text.ParseException;
 import java.util.UUID;
 
+import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.ContactPoint.ContactPointSystem;
 import org.hl7.fhir.instance.model.Narrative.NarrativeStatus;
 import org.hl7.fhir.instance.utilities.Utilities;
-import org.hl7.fhir.instance.utilities.xhtml.XhtmlParser;
+import org.hl7.fhir.utilities.xhtml.XhtmlParser;
 
 /*
 Copyright (c) 2011+, HL7, Inc
@@ -113,7 +115,7 @@ public class Factory {
 	return res;
   }
 
-	public static Extension newExtension(String uri, Type value, boolean evenIfNull) throws Exception {
+	public static Extension newExtension(String uri, Type value, boolean evenIfNull) {
 		if (!evenIfNull && value == null)
 			return null;
 		Extension e = new Extension();
@@ -122,7 +124,7 @@ public class Factory {
 	  return e;
   }
 
-	public static CodeableConcept newCodeableConcept(String code, String system, String display) throws Exception {
+	public static CodeableConcept newCodeableConcept(String code, String system, String display) {
 		CodeableConcept cc = new CodeableConcept();
 		Coding c = new Coding();
 		c.setCode(code);
@@ -132,20 +134,20 @@ public class Factory {
 	  return cc;
   }
 
-	public static Reference makeReference(String url) throws Exception {
+	public static Reference makeReference(String url) {
 	  Reference rr = new Reference();
 	  rr.setReference(url);
 	  return rr;
 	}
 
-	public static Narrative newNarrative(NarrativeStatus status, String html) throws Exception {
+	public static Narrative newNarrative(NarrativeStatus status, String html) throws IOException, FHIRException  {
 		Narrative n = new Narrative();
 		n.setStatus(status);
 		n.setDiv(new XhtmlParser().parseFragment("<div>"+Utilities.escapeXml(html)+"</div>"));
 		return n;
 	}
 
-	public static Coding makeCoding(String code) throws Exception {
+	public static Coding makeCoding(String code) throws FHIRException  {
 		String[] parts = code.split("\\|");
 		Coding c = new Coding();
 		if (parts.length == 2) {
@@ -156,7 +158,7 @@ public class Factory {
 			c.setCode(parts[1]);
 			c.setDisplay(parts[2]);
 		} else 
-			throw new Exception("Unable to understand the code '"+code+"'. Use the format system|code(|display)");
+			throw new FHIRException("Unable to understand the code '"+code+"'. Use the format system|code(|display)");
 		return c;
 	}
 

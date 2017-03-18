@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
 
 
 import org.hl7.fhir.dstu3.model.EnumFactory;
@@ -39,22 +39,22 @@ public class SequenceTypeEnumFactory implements EnumFactory<SequenceType> {
   public SequenceType fromCode(String codeString) throws IllegalArgumentException {
     if (codeString == null || "".equals(codeString))
       return null;
-    if ("AA".equals(codeString))
+    if ("aa".equals(codeString))
       return SequenceType.AA;
-    if ("DNA".equals(codeString))
+    if ("dna".equals(codeString))
       return SequenceType.DNA;
-    if ("RNA".equals(codeString))
+    if ("rna".equals(codeString))
       return SequenceType.RNA;
     throw new IllegalArgumentException("Unknown SequenceType code '"+codeString+"'");
   }
 
   public String toCode(SequenceType code) {
     if (code == SequenceType.AA)
-      return "AA";
+      return "aa";
     if (code == SequenceType.DNA)
-      return "DNA";
+      return "dna";
     if (code == SequenceType.RNA)
-      return "RNA";
+      return "rna";
     return "?";
   }
 

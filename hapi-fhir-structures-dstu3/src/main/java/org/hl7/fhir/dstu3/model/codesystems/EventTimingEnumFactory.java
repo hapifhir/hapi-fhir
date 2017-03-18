@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
 
 
 import org.hl7.fhir.dstu3.model.EnumFactory;
@@ -47,6 +47,8 @@ public class EventTimingEnumFactory implements EnumFactory<EventTiming> {
       return EventTiming.EVE;
     if ("NIGHT".equals(codeString))
       return EventTiming.NIGHT;
+    if ("PHS".equals(codeString))
+      return EventTiming.PHS;
     throw new IllegalArgumentException("Unknown EventTiming code '"+codeString+"'");
   }
 
@@ -59,6 +61,8 @@ public class EventTimingEnumFactory implements EnumFactory<EventTiming> {
       return "EVE";
     if (code == EventTiming.NIGHT)
       return "NIGHT";
+    if (code == EventTiming.PHS)
+      return "PHS";
     return "?";
   }
 

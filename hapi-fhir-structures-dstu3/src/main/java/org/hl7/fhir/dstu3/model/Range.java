@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
 
 import java.util.*;
 
@@ -134,35 +134,46 @@ public class Range extends Type implements ICompositeType {
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case 107348: // low
           this.low = castToSimpleQuantity(value); // SimpleQuantity
-          break;
+          return value;
         case 3202466: // high
           this.high = castToSimpleQuantity(value); // SimpleQuantity
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("low"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("low")) {
           this.low = castToSimpleQuantity(value); // SimpleQuantity
-        else if (name.equals("high"))
+        } else if (name.equals("high")) {
           this.high = castToSimpleQuantity(value); // SimpleQuantity
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 107348:  return getLow(); // SimpleQuantity
-        case 3202466:  return getHigh(); // SimpleQuantity
+        case 107348:  return getLow(); 
+        case 3202466:  return getHigh(); 
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 107348: /*low*/ return new String[] {"SimpleQuantity"};
+        case 3202466: /*high*/ return new String[] {"SimpleQuantity"};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }

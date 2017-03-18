@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
 
 import java.util.*;
 
@@ -54,15 +54,15 @@ public class Task extends DomainResource {
          */
         DRAFT, 
         /**
-         * The task is ready to be acted upon and action is sought
+         * The task is ready to be acted upon and action is sought.
          */
         REQUESTED, 
         /**
-         * A potential performer has claimed ownership of the task and is evaluating whether to perform it
+         * A potential performer has claimed ownership of the task and is evaluating whether to perform it.
          */
         RECEIVED, 
         /**
-         * The potential performer has agreed to execute the task but has not yet started work
+         * The potential performer has agreed to execute the task but has not yet started work.
          */
         ACCEPTED, 
         /**
@@ -74,7 +74,7 @@ public class Task extends DomainResource {
          */
         READY, 
         /**
-         * the task was not completed (more or less) as requested
+         * The task was not completed.
          */
         CANCELLED, 
         /**
@@ -82,7 +82,7 @@ public class Task extends DomainResource {
          */
         INPROGRESS, 
         /**
-         * Task has been started but work has been paused
+         * Task has been started but work has been paused.
          */
         ONHOLD, 
         /**
@@ -90,11 +90,11 @@ public class Task extends DomainResource {
          */
         FAILED, 
         /**
-         * The task has been completed (more or less) as requested.
+         * The task has been completed.
          */
         COMPLETED, 
         /**
-         * The task should never have existed and is retained only because of the possibility it may have used
+         * The task should never have existed and is retained only because of the possibility it may have used.
          */
         ENTEREDINERROR, 
         /**
@@ -170,17 +170,17 @@ public class Task extends DomainResource {
         public String getDefinition() {
           switch (this) {
             case DRAFT: return "The task is not yet ready to be acted upon.";
-            case REQUESTED: return "The task is ready to be acted upon and action is sought";
-            case RECEIVED: return "A potential performer has claimed ownership of the task and is evaluating whether to perform it";
-            case ACCEPTED: return "The potential performer has agreed to execute the task but has not yet started work";
+            case REQUESTED: return "The task is ready to be acted upon and action is sought.";
+            case RECEIVED: return "A potential performer has claimed ownership of the task and is evaluating whether to perform it.";
+            case ACCEPTED: return "The potential performer has agreed to execute the task but has not yet started work.";
             case REJECTED: return "The potential performer who claimed ownership of the task has decided not to execute it prior to performing any action.";
             case READY: return "Task is ready to be performed, but no action has yet been taken.  Used in place of requested/received/accepted/rejected when request assignment and acceptance is a given.";
-            case CANCELLED: return "the task was not completed (more or less) as requested";
+            case CANCELLED: return "The task was not completed.";
             case INPROGRESS: return "Task has been started but is not yet complete.";
-            case ONHOLD: return "Task has been started but work has been paused";
+            case ONHOLD: return "Task has been started but work has been paused.";
             case FAILED: return "The task was attempted but could not be completed due to some error.";
-            case COMPLETED: return "The task has been completed (more or less) as requested.";
-            case ENTEREDINERROR: return "The task should never have existed and is retained only because of the possibility it may have used";
+            case COMPLETED: return "The task has been completed.";
+            case ENTEREDINERROR: return "The task should never have existed and is retained only because of the possibility it may have used.";
             default: return "?";
           }
         }
@@ -235,8 +235,10 @@ public class Task extends DomainResource {
         throw new IllegalArgumentException("Unknown TaskStatus code '"+codeString+"'");
         }
         public Enumeration<TaskStatus> fromType(Base code) throws FHIRException {
-          if (code == null || code.isEmpty())
+          if (code == null)
             return null;
+          if (code.isEmpty())
+            return new Enumeration<TaskStatus>(this);
           String codeString = ((PrimitiveType) code).asStringValue();
           if (codeString == null || "".equals(codeString))
             return null;
@@ -439,8 +441,10 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
         throw new IllegalArgumentException("Unknown TaskIntent code '"+codeString+"'");
         }
         public Enumeration<TaskIntent> fromType(Base code) throws FHIRException {
-          if (code == null || code.isEmpty())
+          if (code == null)
             return null;
+          if (code.isEmpty())
+            return new Enumeration<TaskIntent>(this);
           String codeString = ((PrimitiveType) code).asStringValue();
           if (codeString == null || "".equals(codeString))
             return null;
@@ -488,21 +492,21 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
 
     public enum TaskPriority {
         /**
-         * The order has a normal priority .
+         * The request has normal priority
          */
         ROUTINE, 
         /**
-         * The order should be urgently.
+         * The request should be actioned promptly - higher priority than routine
          */
         URGENT, 
         /**
-         * The order is time-critical.
-         */
-        STAT, 
-        /**
-         * The order should be acted on as soon as possible.
+         * The request should be actioned as soon as possible - higher priority than urgent
          */
         ASAP, 
+        /**
+         * The request should be actioned immediately - highest possible priority.  E.g. an emergency
+         */
+        STAT, 
         /**
          * added to help the parsers with the generic types
          */
@@ -514,10 +518,10 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
           return ROUTINE;
         if ("urgent".equals(codeString))
           return URGENT;
-        if ("stat".equals(codeString))
-          return STAT;
         if ("asap".equals(codeString))
           return ASAP;
+        if ("stat".equals(codeString))
+          return STAT;
         if (Configuration.isAcceptInvalidEnums())
           return null;
         else
@@ -527,8 +531,8 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
           switch (this) {
             case ROUTINE: return "routine";
             case URGENT: return "urgent";
-            case STAT: return "stat";
             case ASAP: return "asap";
+            case STAT: return "stat";
             default: return "?";
           }
         }
@@ -536,17 +540,17 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
           switch (this) {
             case ROUTINE: return "http://hl7.org/fhir/request-priority";
             case URGENT: return "http://hl7.org/fhir/request-priority";
-            case STAT: return "http://hl7.org/fhir/request-priority";
             case ASAP: return "http://hl7.org/fhir/request-priority";
+            case STAT: return "http://hl7.org/fhir/request-priority";
             default: return "?";
           }
         }
         public String getDefinition() {
           switch (this) {
-            case ROUTINE: return "The order has a normal priority .";
-            case URGENT: return "The order should be urgently.";
-            case STAT: return "The order is time-critical.";
-            case ASAP: return "The order should be acted on as soon as possible.";
+            case ROUTINE: return "The request has normal priority";
+            case URGENT: return "The request should be actioned promptly - higher priority than routine";
+            case ASAP: return "The request should be actioned as soon as possible - higher priority than urgent";
+            case STAT: return "The request should be actioned immediately - highest possible priority.  E.g. an emergency";
             default: return "?";
           }
         }
@@ -554,8 +558,8 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
           switch (this) {
             case ROUTINE: return "Routine";
             case URGENT: return "Urgent";
-            case STAT: return "Stat";
             case ASAP: return "ASAP";
+            case STAT: return "STAT";
             default: return "?";
           }
         }
@@ -570,15 +574,17 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
           return TaskPriority.ROUTINE;
         if ("urgent".equals(codeString))
           return TaskPriority.URGENT;
-        if ("stat".equals(codeString))
-          return TaskPriority.STAT;
         if ("asap".equals(codeString))
           return TaskPriority.ASAP;
+        if ("stat".equals(codeString))
+          return TaskPriority.STAT;
         throw new IllegalArgumentException("Unknown TaskPriority code '"+codeString+"'");
         }
         public Enumeration<TaskPriority> fromType(Base code) throws FHIRException {
-          if (code == null || code.isEmpty())
+          if (code == null)
             return null;
+          if (code.isEmpty())
+            return new Enumeration<TaskPriority>(this);
           String codeString = ((PrimitiveType) code).asStringValue();
           if (codeString == null || "".equals(codeString))
             return null;
@@ -586,10 +592,10 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
           return new Enumeration<TaskPriority>(this, TaskPriority.ROUTINE);
         if ("urgent".equals(codeString))
           return new Enumeration<TaskPriority>(this, TaskPriority.URGENT);
-        if ("stat".equals(codeString))
-          return new Enumeration<TaskPriority>(this, TaskPriority.STAT);
         if ("asap".equals(codeString))
           return new Enumeration<TaskPriority>(this, TaskPriority.ASAP);
+        if ("stat".equals(codeString))
+          return new Enumeration<TaskPriority>(this, TaskPriority.STAT);
         throw new FHIRException("Unknown TaskPriority code '"+codeString+"'");
         }
     public String toCode(TaskPriority code) {
@@ -597,10 +603,10 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
         return "routine";
       if (code == TaskPriority.URGENT)
         return "urgent";
-      if (code == TaskPriority.STAT)
-        return "stat";
       if (code == TaskPriority.ASAP)
         return "asap";
+      if (code == TaskPriority.STAT)
+        return "stat";
       return "?";
       }
     public String toSystem(TaskPriority code) {
@@ -751,35 +757,46 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case 92750597: // agent
           this.agent = castToReference(value); // Reference
-          break;
+          return value;
         case -14402964: // onBehalfOf
           this.onBehalfOf = castToReference(value); // Reference
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("agent"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("agent")) {
           this.agent = castToReference(value); // Reference
-        else if (name.equals("onBehalfOf"))
+        } else if (name.equals("onBehalfOf")) {
           this.onBehalfOf = castToReference(value); // Reference
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 92750597:  return getAgent(); // Reference
-        case -14402964:  return getOnBehalfOf(); // Reference
+        case 92750597:  return getAgent(); 
+        case -14402964:  return getOnBehalfOf(); 
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 92750597: /*agent*/ return new String[] {"Reference"};
+        case -14402964: /*onBehalfOf*/ return new String[] {"Reference"};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }
@@ -850,7 +867,7 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
          * Over what time-period is fulfillment sought.
          */
         @Child(name = "period", type = {Period.class}, order=2, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Over what time-period is fulfillment sought", formalDefinition="Over what time-period is fulfillment sought." )
+        @Description(shortDefinition="When fulfillment sought", formalDefinition="Over what time-period is fulfillment sought." )
         protected Period period;
 
         /**
@@ -1025,41 +1042,53 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case 984367650: // repetitions
           this.repetitions = castToPositiveInt(value); // PositiveIntType
-          break;
+          return value;
         case -991726143: // period
           this.period = castToPeriod(value); // Period
-          break;
+          return value;
         case 820081177: // recipient
           this.getRecipient().add(castToReference(value)); // Reference
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("repetitions"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("repetitions")) {
           this.repetitions = castToPositiveInt(value); // PositiveIntType
-        else if (name.equals("period"))
+        } else if (name.equals("period")) {
           this.period = castToPeriod(value); // Period
-        else if (name.equals("recipient"))
+        } else if (name.equals("recipient")) {
           this.getRecipient().add(castToReference(value));
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 984367650: throw new FHIRException("Cannot make property repetitions as it is not a complex type"); // PositiveIntType
-        case -991726143:  return getPeriod(); // Period
-        case 820081177:  return addRecipient(); // Reference
+        case 984367650:  return getRepetitionsElement();
+        case -991726143:  return getPeriod(); 
+        case 820081177:  return addRecipient(); 
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 984367650: /*repetitions*/ return new String[] {"positiveInt"};
+        case -991726143: /*period*/ return new String[] {"Period"};
+        case 820081177: /*recipient*/ return new String[] {"Reference"};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }
@@ -1220,35 +1249,47 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case 3575610: // type
           this.type = castToCodeableConcept(value); // CodeableConcept
-          break;
+          return value;
         case 111972721: // value
           this.value = castToType(value); // org.hl7.fhir.dstu3.model.Type
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("type"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("type")) {
           this.type = castToCodeableConcept(value); // CodeableConcept
-        else if (name.equals("value[x]"))
+        } else if (name.equals("value[x]")) {
           this.value = castToType(value); // org.hl7.fhir.dstu3.model.Type
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 3575610:  return getType(); // CodeableConcept
-        case -1410166417:  return getValue(); // org.hl7.fhir.dstu3.model.Type
+        case 3575610:  return getType(); 
+        case -1410166417:  return getValue(); 
+        case 111972721:  return getValue(); 
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3575610: /*type*/ return new String[] {"CodeableConcept"};
+        case 111972721: /*value*/ return new String[] {"*"};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }
@@ -1528,35 +1569,47 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case 3575610: // type
           this.type = castToCodeableConcept(value); // CodeableConcept
-          break;
+          return value;
         case 111972721: // value
           this.value = castToType(value); // org.hl7.fhir.dstu3.model.Type
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("type"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("type")) {
           this.type = castToCodeableConcept(value); // CodeableConcept
-        else if (name.equals("value[x]"))
+        } else if (name.equals("value[x]")) {
           this.value = castToType(value); // org.hl7.fhir.dstu3.model.Type
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 3575610:  return getType(); // CodeableConcept
-        case -1410166417:  return getValue(); // org.hl7.fhir.dstu3.model.Type
+        case 3575610:  return getType(); 
+        case -1410166417:  return getValue(); 
+        case 111972721:  return getValue(); 
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3575610: /*type*/ return new String[] {"CodeableConcept"};
+        case 111972721: /*value*/ return new String[] {"*"};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }
@@ -1757,13 +1810,13 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
     protected Type definition;
 
     /**
-     * BasedOn refers to a higher-level authorization that triggered the creation of the task.  It references a "request" resource such as a DiagnosticRequest, MedicationRequest, ProcedureRequest, CarePlan, etc. which is distinct from the "request" resource the task is seeking to fulfil.  This latter resource is referenced by FocusOn.  For example, based on a DiagnosticRequest (= BasedOn), a task is created to fulfil a procedureRequest ( = FocusOn ) to collect a specimen from a patient.
+     * BasedOn refers to a higher-level authorization that triggered the creation of the task.  It references a "request" resource such as a ProcedureRequest, MedicationRequest, ProcedureRequest, CarePlan, etc. which is distinct from the "request" resource the task is seeking to fulfil.  This latter resource is referenced by FocusOn.  For example, based on a ProcedureRequest (= BasedOn), a task is created to fulfil a procedureRequest ( = FocusOn ) to collect a specimen from a patient.
      */
     @Child(name = "basedOn", type = {Reference.class}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-    @Description(shortDefinition="Request fulfilled by this task", formalDefinition="BasedOn refers to a higher-level authorization that triggered the creation of the task.  It references a \"request\" resource such as a DiagnosticRequest, MedicationRequest, ProcedureRequest, CarePlan, etc. which is distinct from the \"request\" resource the task is seeking to fulfil.  This latter resource is referenced by FocusOn.  For example, based on a DiagnosticRequest (= BasedOn), a task is created to fulfil a procedureRequest ( = FocusOn ) to collect a specimen from a patient." )
+    @Description(shortDefinition="Request fulfilled by this task", formalDefinition="BasedOn refers to a higher-level authorization that triggered the creation of the task.  It references a \"request\" resource such as a ProcedureRequest, MedicationRequest, ProcedureRequest, CarePlan, etc. which is distinct from the \"request\" resource the task is seeking to fulfil.  This latter resource is referenced by FocusOn.  For example, based on a ProcedureRequest (= BasedOn), a task is created to fulfil a procedureRequest ( = FocusOn ) to collect a specimen from a patient." )
     protected List<Reference> basedOn;
     /**
-     * The actual objects that are the target of the reference (BasedOn refers to a higher-level authorization that triggered the creation of the task.  It references a "request" resource such as a DiagnosticRequest, MedicationRequest, ProcedureRequest, CarePlan, etc. which is distinct from the "request" resource the task is seeking to fulfil.  This latter resource is referenced by FocusOn.  For example, based on a DiagnosticRequest (= BasedOn), a task is created to fulfil a procedureRequest ( = FocusOn ) to collect a specimen from a patient.)
+     * The actual objects that are the target of the reference (BasedOn refers to a higher-level authorization that triggered the creation of the task.  It references a "request" resource such as a ProcedureRequest, MedicationRequest, ProcedureRequest, CarePlan, etc. which is distinct from the "request" resource the task is seeking to fulfil.  This latter resource is referenced by FocusOn.  For example, based on a ProcedureRequest (= BasedOn), a task is created to fulfil a procedureRequest ( = FocusOn ) to collect a specimen from a patient.)
      */
     protected List<Resource> basedOnTarget;
 
@@ -1813,7 +1866,7 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
      * Indicates the "level" of actionability associated with the Task.  I.e. Is this a proposed task, a planned task, an actionable task, etc.
      */
     @Child(name = "intent", type = {CodeType.class}, order=8, min=1, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="proposed | planned | actionable +", formalDefinition="Indicates the \"level\" of actionability associated with the Task.  I.e. Is this a proposed task, a planned task, an actionable task, etc." )
+    @Description(shortDefinition="proposal | plan | order +", formalDefinition="Indicates the \"level\" of actionability associated with the Task.  I.e. Is this a proposed task, a planned task, an actionable task, etc." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/request-intent")
     protected Enumeration<TaskIntent> intent;
 
@@ -1912,14 +1965,14 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
     protected List<CodeableConcept> performerType;
 
     /**
-     * The owner of this task.  The participant who can execute this task.
+     * Individual organization or Device currently responsible for task execution.
      */
     @Child(name = "owner", type = {Device.class, Organization.class, Patient.class, Practitioner.class, RelatedPerson.class}, order=20, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Task Owner", formalDefinition="The owner of this task.  The participant who can execute this task." )
+    @Description(shortDefinition="Responsible individual", formalDefinition="Individual organization or Device currently responsible for task execution." )
     protected Reference owner;
 
     /**
-     * The actual object that is the target of the reference (The owner of this task.  The participant who can execute this task.)
+     * The actual object that is the target of the reference (Individual organization or Device currently responsible for task execution.)
      */
     protected Resource ownerTarget;
 
@@ -2087,7 +2140,7 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
     }
 
     /**
-     * @return {@link #basedOn} (BasedOn refers to a higher-level authorization that triggered the creation of the task.  It references a "request" resource such as a DiagnosticRequest, MedicationRequest, ProcedureRequest, CarePlan, etc. which is distinct from the "request" resource the task is seeking to fulfil.  This latter resource is referenced by FocusOn.  For example, based on a DiagnosticRequest (= BasedOn), a task is created to fulfil a procedureRequest ( = FocusOn ) to collect a specimen from a patient.)
+     * @return {@link #basedOn} (BasedOn refers to a higher-level authorization that triggered the creation of the task.  It references a "request" resource such as a ProcedureRequest, MedicationRequest, ProcedureRequest, CarePlan, etc. which is distinct from the "request" resource the task is seeking to fulfil.  This latter resource is referenced by FocusOn.  For example, based on a ProcedureRequest (= BasedOn), a task is created to fulfil a procedureRequest ( = FocusOn ) to collect a specimen from a patient.)
      */
     public List<Reference> getBasedOn() { 
       if (this.basedOn == null)
@@ -2825,7 +2878,7 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
     }
 
     /**
-     * @return {@link #owner} (The owner of this task.  The participant who can execute this task.)
+     * @return {@link #owner} (Individual organization or Device currently responsible for task execution.)
      */
     public Reference getOwner() { 
       if (this.owner == null)
@@ -2841,7 +2894,7 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
     }
 
     /**
-     * @param value {@link #owner} (The owner of this task.  The participant who can execute this task.)
+     * @param value {@link #owner} (Individual organization or Device currently responsible for task execution.)
      */
     public Task setOwner(Reference value) { 
       this.owner = value;
@@ -2849,14 +2902,14 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
     }
 
     /**
-     * @return {@link #owner} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The owner of this task.  The participant who can execute this task.)
+     * @return {@link #owner} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (Individual organization or Device currently responsible for task execution.)
      */
     public Resource getOwnerTarget() { 
       return this.ownerTarget;
     }
 
     /**
-     * @param value {@link #owner} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The owner of this task.  The participant who can execute this task.)
+     * @param value {@link #owner} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (Individual organization or Device currently responsible for task execution.)
      */
     public Task setOwnerTarget(Resource value) { 
       this.ownerTarget = value;
@@ -3149,7 +3202,7 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
         super.listChildren(childrenList);
         childrenList.add(new Property("identifier", "Identifier", "The business identifier for this task.", 0, java.lang.Integer.MAX_VALUE, identifier));
         childrenList.add(new Property("definition[x]", "uri|Reference(ActivityDefinition)", "A reference to a formal or informal definition of the task.  For example, a protocol, a step within a defined workflow definition, etc.", 0, java.lang.Integer.MAX_VALUE, definition));
-        childrenList.add(new Property("basedOn", "Reference(Any)", "BasedOn refers to a higher-level authorization that triggered the creation of the task.  It references a \"request\" resource such as a DiagnosticRequest, MedicationRequest, ProcedureRequest, CarePlan, etc. which is distinct from the \"request\" resource the task is seeking to fulfil.  This latter resource is referenced by FocusOn.  For example, based on a DiagnosticRequest (= BasedOn), a task is created to fulfil a procedureRequest ( = FocusOn ) to collect a specimen from a patient.", 0, java.lang.Integer.MAX_VALUE, basedOn));
+        childrenList.add(new Property("basedOn", "Reference(Any)", "BasedOn refers to a higher-level authorization that triggered the creation of the task.  It references a \"request\" resource such as a ProcedureRequest, MedicationRequest, ProcedureRequest, CarePlan, etc. which is distinct from the \"request\" resource the task is seeking to fulfil.  This latter resource is referenced by FocusOn.  For example, based on a ProcedureRequest (= BasedOn), a task is created to fulfil a procedureRequest ( = FocusOn ) to collect a specimen from a patient.", 0, java.lang.Integer.MAX_VALUE, basedOn));
         childrenList.add(new Property("groupIdentifier", "Identifier", "An identifier that links together multiple tasks and other requests that were created in the same context.", 0, java.lang.Integer.MAX_VALUE, groupIdentifier));
         childrenList.add(new Property("partOf", "Reference(Task)", "Task that this particular task is part of.", 0, java.lang.Integer.MAX_VALUE, partOf));
         childrenList.add(new Property("status", "code", "The current status of the task.", 0, java.lang.Integer.MAX_VALUE, status));
@@ -3167,7 +3220,7 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
         childrenList.add(new Property("lastModified", "dateTime", "The date and time of last modification to this task.", 0, java.lang.Integer.MAX_VALUE, lastModified));
         childrenList.add(new Property("requester", "", "The creator of the task.", 0, java.lang.Integer.MAX_VALUE, requester));
         childrenList.add(new Property("performerType", "CodeableConcept", "The type of participant that can execute the task.", 0, java.lang.Integer.MAX_VALUE, performerType));
-        childrenList.add(new Property("owner", "Reference(Device|Organization|Patient|Practitioner|RelatedPerson)", "The owner of this task.  The participant who can execute this task.", 0, java.lang.Integer.MAX_VALUE, owner));
+        childrenList.add(new Property("owner", "Reference(Device|Organization|Patient|Practitioner|RelatedPerson)", "Individual organization or Device currently responsible for task execution.", 0, java.lang.Integer.MAX_VALUE, owner));
         childrenList.add(new Property("reason", "CodeableConcept", "A description or code indicating why this task needs to be performed.", 0, java.lang.Integer.MAX_VALUE, reason));
         childrenList.add(new Property("note", "Annotation", "Free-text information captured about the task as it progresses.", 0, java.lang.Integer.MAX_VALUE, note));
         childrenList.add(new Property("relevantHistory", "Reference(Provenance)", "Links to Provenance records for past versions of this Task that identify key state transitions or updates that are likely to be relevant to a user looking at the current version of the task.", 0, java.lang.Integer.MAX_VALUE, relevantHistory));
@@ -3212,185 +3265,228 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case -1618432855: // identifier
           this.getIdentifier().add(castToIdentifier(value)); // Identifier
-          break;
+          return value;
         case -1014418093: // definition
           this.definition = castToType(value); // Type
-          break;
+          return value;
         case -332612366: // basedOn
           this.getBasedOn().add(castToReference(value)); // Reference
-          break;
+          return value;
         case -445338488: // groupIdentifier
           this.groupIdentifier = castToIdentifier(value); // Identifier
-          break;
+          return value;
         case -995410646: // partOf
           this.getPartOf().add(castToReference(value)); // Reference
-          break;
+          return value;
         case -892481550: // status
-          this.status = new TaskStatusEnumFactory().fromType(value); // Enumeration<TaskStatus>
-          break;
+          value = new TaskStatusEnumFactory().fromType(castToCode(value));
+          this.status = (Enumeration) value; // Enumeration<TaskStatus>
+          return value;
         case 2051346646: // statusReason
           this.statusReason = castToCodeableConcept(value); // CodeableConcept
-          break;
+          return value;
         case 2008591314: // businessStatus
           this.businessStatus = castToCodeableConcept(value); // CodeableConcept
-          break;
+          return value;
         case -1183762788: // intent
-          this.intent = new TaskIntentEnumFactory().fromType(value); // Enumeration<TaskIntent>
-          break;
+          value = new TaskIntentEnumFactory().fromType(castToCode(value));
+          this.intent = (Enumeration) value; // Enumeration<TaskIntent>
+          return value;
         case -1165461084: // priority
-          this.priority = new TaskPriorityEnumFactory().fromType(value); // Enumeration<TaskPriority>
-          break;
+          value = new TaskPriorityEnumFactory().fromType(castToCode(value));
+          this.priority = (Enumeration) value; // Enumeration<TaskPriority>
+          return value;
         case 3059181: // code
           this.code = castToCodeableConcept(value); // CodeableConcept
-          break;
+          return value;
         case -1724546052: // description
           this.description = castToString(value); // StringType
-          break;
+          return value;
         case 97604824: // focus
           this.focus = castToReference(value); // Reference
-          break;
+          return value;
         case 101577: // for
           this.for_ = castToReference(value); // Reference
-          break;
+          return value;
         case 951530927: // context
           this.context = castToReference(value); // Reference
-          break;
+          return value;
         case 1218624249: // executionPeriod
           this.executionPeriod = castToPeriod(value); // Period
-          break;
+          return value;
         case -1500852503: // authoredOn
           this.authoredOn = castToDateTime(value); // DateTimeType
-          break;
+          return value;
         case 1959003007: // lastModified
           this.lastModified = castToDateTime(value); // DateTimeType
-          break;
+          return value;
         case 693933948: // requester
           this.requester = (TaskRequesterComponent) value; // TaskRequesterComponent
-          break;
+          return value;
         case -901444568: // performerType
           this.getPerformerType().add(castToCodeableConcept(value)); // CodeableConcept
-          break;
+          return value;
         case 106164915: // owner
           this.owner = castToReference(value); // Reference
-          break;
+          return value;
         case -934964668: // reason
           this.reason = castToCodeableConcept(value); // CodeableConcept
-          break;
+          return value;
         case 3387378: // note
           this.getNote().add(castToAnnotation(value)); // Annotation
-          break;
+          return value;
         case 1538891575: // relevantHistory
           this.getRelevantHistory().add(castToReference(value)); // Reference
-          break;
+          return value;
         case -1561062452: // restriction
           this.restriction = (TaskRestrictionComponent) value; // TaskRestrictionComponent
-          break;
+          return value;
         case 100358090: // input
           this.getInput().add((ParameterComponent) value); // ParameterComponent
-          break;
+          return value;
         case -1005512447: // output
           this.getOutput().add((TaskOutputComponent) value); // TaskOutputComponent
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("identifier"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("identifier")) {
           this.getIdentifier().add(castToIdentifier(value));
-        else if (name.equals("definition[x]"))
+        } else if (name.equals("definition[x]")) {
           this.definition = castToType(value); // Type
-        else if (name.equals("basedOn"))
+        } else if (name.equals("basedOn")) {
           this.getBasedOn().add(castToReference(value));
-        else if (name.equals("groupIdentifier"))
+        } else if (name.equals("groupIdentifier")) {
           this.groupIdentifier = castToIdentifier(value); // Identifier
-        else if (name.equals("partOf"))
+        } else if (name.equals("partOf")) {
           this.getPartOf().add(castToReference(value));
-        else if (name.equals("status"))
-          this.status = new TaskStatusEnumFactory().fromType(value); // Enumeration<TaskStatus>
-        else if (name.equals("statusReason"))
+        } else if (name.equals("status")) {
+          value = new TaskStatusEnumFactory().fromType(castToCode(value));
+          this.status = (Enumeration) value; // Enumeration<TaskStatus>
+        } else if (name.equals("statusReason")) {
           this.statusReason = castToCodeableConcept(value); // CodeableConcept
-        else if (name.equals("businessStatus"))
+        } else if (name.equals("businessStatus")) {
           this.businessStatus = castToCodeableConcept(value); // CodeableConcept
-        else if (name.equals("intent"))
-          this.intent = new TaskIntentEnumFactory().fromType(value); // Enumeration<TaskIntent>
-        else if (name.equals("priority"))
-          this.priority = new TaskPriorityEnumFactory().fromType(value); // Enumeration<TaskPriority>
-        else if (name.equals("code"))
+        } else if (name.equals("intent")) {
+          value = new TaskIntentEnumFactory().fromType(castToCode(value));
+          this.intent = (Enumeration) value; // Enumeration<TaskIntent>
+        } else if (name.equals("priority")) {
+          value = new TaskPriorityEnumFactory().fromType(castToCode(value));
+          this.priority = (Enumeration) value; // Enumeration<TaskPriority>
+        } else if (name.equals("code")) {
           this.code = castToCodeableConcept(value); // CodeableConcept
-        else if (name.equals("description"))
+        } else if (name.equals("description")) {
           this.description = castToString(value); // StringType
-        else if (name.equals("focus"))
+        } else if (name.equals("focus")) {
           this.focus = castToReference(value); // Reference
-        else if (name.equals("for"))
+        } else if (name.equals("for")) {
           this.for_ = castToReference(value); // Reference
-        else if (name.equals("context"))
+        } else if (name.equals("context")) {
           this.context = castToReference(value); // Reference
-        else if (name.equals("executionPeriod"))
+        } else if (name.equals("executionPeriod")) {
           this.executionPeriod = castToPeriod(value); // Period
-        else if (name.equals("authoredOn"))
+        } else if (name.equals("authoredOn")) {
           this.authoredOn = castToDateTime(value); // DateTimeType
-        else if (name.equals("lastModified"))
+        } else if (name.equals("lastModified")) {
           this.lastModified = castToDateTime(value); // DateTimeType
-        else if (name.equals("requester"))
+        } else if (name.equals("requester")) {
           this.requester = (TaskRequesterComponent) value; // TaskRequesterComponent
-        else if (name.equals("performerType"))
+        } else if (name.equals("performerType")) {
           this.getPerformerType().add(castToCodeableConcept(value));
-        else if (name.equals("owner"))
+        } else if (name.equals("owner")) {
           this.owner = castToReference(value); // Reference
-        else if (name.equals("reason"))
+        } else if (name.equals("reason")) {
           this.reason = castToCodeableConcept(value); // CodeableConcept
-        else if (name.equals("note"))
+        } else if (name.equals("note")) {
           this.getNote().add(castToAnnotation(value));
-        else if (name.equals("relevantHistory"))
+        } else if (name.equals("relevantHistory")) {
           this.getRelevantHistory().add(castToReference(value));
-        else if (name.equals("restriction"))
+        } else if (name.equals("restriction")) {
           this.restriction = (TaskRestrictionComponent) value; // TaskRestrictionComponent
-        else if (name.equals("input"))
+        } else if (name.equals("input")) {
           this.getInput().add((ParameterComponent) value);
-        else if (name.equals("output"))
+        } else if (name.equals("output")) {
           this.getOutput().add((TaskOutputComponent) value);
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case -1618432855:  return addIdentifier(); // Identifier
-        case -1139422643:  return getDefinition(); // Type
-        case -332612366:  return addBasedOn(); // Reference
-        case -445338488:  return getGroupIdentifier(); // Identifier
-        case -995410646:  return addPartOf(); // Reference
-        case -892481550: throw new FHIRException("Cannot make property status as it is not a complex type"); // Enumeration<TaskStatus>
-        case 2051346646:  return getStatusReason(); // CodeableConcept
-        case 2008591314:  return getBusinessStatus(); // CodeableConcept
-        case -1183762788: throw new FHIRException("Cannot make property intent as it is not a complex type"); // Enumeration<TaskIntent>
-        case -1165461084: throw new FHIRException("Cannot make property priority as it is not a complex type"); // Enumeration<TaskPriority>
-        case 3059181:  return getCode(); // CodeableConcept
-        case -1724546052: throw new FHIRException("Cannot make property description as it is not a complex type"); // StringType
-        case 97604824:  return getFocus(); // Reference
-        case 101577:  return getFor(); // Reference
-        case 951530927:  return getContext(); // Reference
-        case 1218624249:  return getExecutionPeriod(); // Period
-        case -1500852503: throw new FHIRException("Cannot make property authoredOn as it is not a complex type"); // DateTimeType
-        case 1959003007: throw new FHIRException("Cannot make property lastModified as it is not a complex type"); // DateTimeType
-        case 693933948:  return getRequester(); // TaskRequesterComponent
-        case -901444568:  return addPerformerType(); // CodeableConcept
-        case 106164915:  return getOwner(); // Reference
-        case -934964668:  return getReason(); // CodeableConcept
-        case 3387378:  return addNote(); // Annotation
-        case 1538891575:  return addRelevantHistory(); // Reference
-        case -1561062452:  return getRestriction(); // TaskRestrictionComponent
-        case 100358090:  return addInput(); // ParameterComponent
-        case -1005512447:  return addOutput(); // TaskOutputComponent
+        case -1618432855:  return addIdentifier(); 
+        case -1139422643:  return getDefinition(); 
+        case -1014418093:  return getDefinition(); 
+        case -332612366:  return addBasedOn(); 
+        case -445338488:  return getGroupIdentifier(); 
+        case -995410646:  return addPartOf(); 
+        case -892481550:  return getStatusElement();
+        case 2051346646:  return getStatusReason(); 
+        case 2008591314:  return getBusinessStatus(); 
+        case -1183762788:  return getIntentElement();
+        case -1165461084:  return getPriorityElement();
+        case 3059181:  return getCode(); 
+        case -1724546052:  return getDescriptionElement();
+        case 97604824:  return getFocus(); 
+        case 101577:  return getFor(); 
+        case 951530927:  return getContext(); 
+        case 1218624249:  return getExecutionPeriod(); 
+        case -1500852503:  return getAuthoredOnElement();
+        case 1959003007:  return getLastModifiedElement();
+        case 693933948:  return getRequester(); 
+        case -901444568:  return addPerformerType(); 
+        case 106164915:  return getOwner(); 
+        case -934964668:  return getReason(); 
+        case 3387378:  return addNote(); 
+        case 1538891575:  return addRelevantHistory(); 
+        case -1561062452:  return getRestriction(); 
+        case 100358090:  return addInput(); 
+        case -1005512447:  return addOutput(); 
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -1618432855: /*identifier*/ return new String[] {"Identifier"};
+        case -1014418093: /*definition*/ return new String[] {"uri", "Reference"};
+        case -332612366: /*basedOn*/ return new String[] {"Reference"};
+        case -445338488: /*groupIdentifier*/ return new String[] {"Identifier"};
+        case -995410646: /*partOf*/ return new String[] {"Reference"};
+        case -892481550: /*status*/ return new String[] {"code"};
+        case 2051346646: /*statusReason*/ return new String[] {"CodeableConcept"};
+        case 2008591314: /*businessStatus*/ return new String[] {"CodeableConcept"};
+        case -1183762788: /*intent*/ return new String[] {"code"};
+        case -1165461084: /*priority*/ return new String[] {"code"};
+        case 3059181: /*code*/ return new String[] {"CodeableConcept"};
+        case -1724546052: /*description*/ return new String[] {"string"};
+        case 97604824: /*focus*/ return new String[] {"Reference"};
+        case 101577: /*for*/ return new String[] {"Reference"};
+        case 951530927: /*context*/ return new String[] {"Reference"};
+        case 1218624249: /*executionPeriod*/ return new String[] {"Period"};
+        case -1500852503: /*authoredOn*/ return new String[] {"dateTime"};
+        case 1959003007: /*lastModified*/ return new String[] {"dateTime"};
+        case 693933948: /*requester*/ return new String[] {};
+        case -901444568: /*performerType*/ return new String[] {"CodeableConcept"};
+        case 106164915: /*owner*/ return new String[] {"Reference"};
+        case -934964668: /*reason*/ return new String[] {"CodeableConcept"};
+        case 3387378: /*note*/ return new String[] {"Annotation"};
+        case 1538891575: /*relevantHistory*/ return new String[] {"Reference"};
+        case -1561062452: /*restriction*/ return new String[] {};
+        case 100358090: /*input*/ return new String[] {};
+        case -1005512447: /*output*/ return new String[] {};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }
@@ -3979,52 +4075,6 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
    * the path value of "<b>Task:patient</b>".
    */
   public static final ca.uhn.fhir.model.api.Include INCLUDE_PATIENT = new ca.uhn.fhir.model.api.Include("Task:patient").toLocked();
-
- /**
-   * Search parameter: <b>statusreason</b>
-   * <p>
-   * Description: <b>Search by status reason</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>Task.statusReason</b><br>
-   * </p>
-   */
-  @SearchParamDefinition(name="statusreason", path="Task.statusReason", description="Search by status reason", type="token" )
-  public static final String SP_STATUSREASON = "statusreason";
- /**
-   * <b>Fluent Client</b> search parameter constant for <b>statusreason</b>
-   * <p>
-   * Description: <b>Search by status reason</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>Task.statusReason</b><br>
-   * </p>
-   */
-  public static final ca.uhn.fhir.rest.gclient.TokenClientParam STATUSREASON = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_STATUSREASON);
-
- /**
-   * Search parameter: <b>definition-ref</b>
-   * <p>
-   * Description: <b>Search by task definition as a Reference</b><br>
-   * Type: <b>reference</b><br>
-   * Path: <b>Task.definitionReference</b><br>
-   * </p>
-   */
-  @SearchParamDefinition(name="definition-ref", path="Task.definition.as(Reference)", description="Search by task definition as a Reference", type="reference", target={ActivityDefinition.class } )
-  public static final String SP_DEFINITION_REF = "definition-ref";
- /**
-   * <b>Fluent Client</b> search parameter constant for <b>definition-ref</b>
-   * <p>
-   * Description: <b>Search by task definition as a Reference</b><br>
-   * Type: <b>reference</b><br>
-   * Path: <b>Task.definitionReference</b><br>
-   * </p>
-   */
-  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam DEFINITION_REF = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_DEFINITION_REF);
-
-/**
-   * Constant for fluent queries to be used to add include statements. Specifies
-   * the path value of "<b>Task:definition-ref</b>".
-   */
-  public static final ca.uhn.fhir.model.api.Include INCLUDE_DEFINITION_REF = new ca.uhn.fhir.model.api.Include("Task:definition-ref").toLocked();
 
  /**
    * Search parameter: <b>organization</b>

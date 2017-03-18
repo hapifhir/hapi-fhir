@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -49,6 +49,10 @@ public enum ExProgramCode {
          */
         AUSCR, 
         /**
+         * No program code applies.
+         */
+        NONE, 
+        /**
          * added to help the parsers
          */
         NULL;
@@ -61,6 +65,8 @@ public enum ExProgramCode {
           return HD;
         if ("auscr".equals(codeString))
           return AUSCR;
+        if ("none".equals(codeString))
+          return NONE;
         throw new FHIRException("Unknown ExProgramCode code '"+codeString+"'");
         }
         public String toCode() {
@@ -68,6 +74,7 @@ public enum ExProgramCode {
             case AS: return "as";
             case HD: return "hd";
             case AUSCR: return "auscr";
+            case NONE: return "none";
             default: return "?";
           }
         }
@@ -79,6 +86,7 @@ public enum ExProgramCode {
             case AS: return "Child Asthma Program";
             case HD: return "Heamodialisis Program.";
             case AUSCR: return "Autism Screening Program.";
+            case NONE: return "No program code applies.";
             default: return "?";
           }
         }
@@ -87,6 +95,7 @@ public enum ExProgramCode {
             case AS: return "Child Asthma";
             case HD: return "Heamodialisis";
             case AUSCR: return "Autism Screening";
+            case NONE: return "None";
             default: return "?";
           }
     }

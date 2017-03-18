@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
 
 import java.util.*;
 
@@ -140,8 +140,10 @@ public class PaymentReconciliation extends DomainResource {
         throw new IllegalArgumentException("Unknown PaymentReconciliationStatus code '"+codeString+"'");
         }
         public Enumeration<PaymentReconciliationStatus> fromType(Base code) throws FHIRException {
-          if (code == null || code.isEmpty())
+          if (code == null)
             return null;
+          if (code.isEmpty())
+            return new Enumeration<PaymentReconciliationStatus>(this);
           String codeString = ((PrimitiveType) code).asStringValue();
           if (codeString == null || "".equals(codeString))
             return null;
@@ -206,14 +208,14 @@ public class PaymentReconciliation extends DomainResource {
         protected Resource responseTarget;
 
         /**
-         * The Organization which submitted the invoice or financial transaction.
+         * The Organization which submitted the claim or financial transaction.
          */
         @Child(name = "submitter", type = {Organization.class}, order=4, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Submitter", formalDefinition="The Organization which submitted the invoice or financial transaction." )
+        @Description(shortDefinition="Organization which submitted the claim", formalDefinition="The Organization which submitted the claim or financial transaction." )
         protected Reference submitter;
 
         /**
-         * The actual object that is the target of the reference (The Organization which submitted the invoice or financial transaction.)
+         * The actual object that is the target of the reference (The Organization which submitted the claim or financial transaction.)
          */
         protected Organization submitterTarget;
 
@@ -221,7 +223,7 @@ public class PaymentReconciliation extends DomainResource {
          * The organization which is receiving the payment.
          */
         @Child(name = "payee", type = {Organization.class}, order=5, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Payee", formalDefinition="The organization which is receiving the payment." )
+        @Description(shortDefinition="Organization which is receiving the payment", formalDefinition="The organization which is receiving the payment." )
         protected Reference payee;
 
         /**
@@ -240,7 +242,7 @@ public class PaymentReconciliation extends DomainResource {
          * Amount paid for this detail.
          */
         @Child(name = "amount", type = {Money.class}, order=7, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Detail amount", formalDefinition="Amount paid for this detail." )
+        @Description(shortDefinition="Amount being paid", formalDefinition="Amount paid for this detail." )
         protected Money amount;
 
         private static final long serialVersionUID = 661095855L;
@@ -363,7 +365,7 @@ public class PaymentReconciliation extends DomainResource {
         }
 
         /**
-         * @return {@link #submitter} (The Organization which submitted the invoice or financial transaction.)
+         * @return {@link #submitter} (The Organization which submitted the claim or financial transaction.)
          */
         public Reference getSubmitter() { 
           if (this.submitter == null)
@@ -379,7 +381,7 @@ public class PaymentReconciliation extends DomainResource {
         }
 
         /**
-         * @param value {@link #submitter} (The Organization which submitted the invoice or financial transaction.)
+         * @param value {@link #submitter} (The Organization which submitted the claim or financial transaction.)
          */
         public DetailsComponent setSubmitter(Reference value) { 
           this.submitter = value;
@@ -387,7 +389,7 @@ public class PaymentReconciliation extends DomainResource {
         }
 
         /**
-         * @return {@link #submitter} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The Organization which submitted the invoice or financial transaction.)
+         * @return {@link #submitter} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The Organization which submitted the claim or financial transaction.)
          */
         public Organization getSubmitterTarget() { 
           if (this.submitterTarget == null)
@@ -399,7 +401,7 @@ public class PaymentReconciliation extends DomainResource {
         }
 
         /**
-         * @param value {@link #submitter} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The Organization which submitted the invoice or financial transaction.)
+         * @param value {@link #submitter} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The Organization which submitted the claim or financial transaction.)
          */
         public DetailsComponent setSubmitterTarget(Organization value) { 
           this.submitterTarget = value;
@@ -528,7 +530,7 @@ public class PaymentReconciliation extends DomainResource {
           childrenList.add(new Property("type", "CodeableConcept", "Code to indicate the nature of the payment, adjustment, funds advance, etc.", 0, java.lang.Integer.MAX_VALUE, type));
           childrenList.add(new Property("request", "Reference(Any)", "The claim or financial resource.", 0, java.lang.Integer.MAX_VALUE, request));
           childrenList.add(new Property("response", "Reference(Any)", "The claim response resource.", 0, java.lang.Integer.MAX_VALUE, response));
-          childrenList.add(new Property("submitter", "Reference(Organization)", "The Organization which submitted the invoice or financial transaction.", 0, java.lang.Integer.MAX_VALUE, submitter));
+          childrenList.add(new Property("submitter", "Reference(Organization)", "The Organization which submitted the claim or financial transaction.", 0, java.lang.Integer.MAX_VALUE, submitter));
           childrenList.add(new Property("payee", "Reference(Organization)", "The organization which is receiving the payment.", 0, java.lang.Integer.MAX_VALUE, payee));
           childrenList.add(new Property("date", "date", "The date of the invoice or financial resource.", 0, java.lang.Integer.MAX_VALUE, date));
           childrenList.add(new Property("amount", "Money", "Amount paid for this detail.", 0, java.lang.Integer.MAX_VALUE, amount));
@@ -550,65 +552,81 @@ public class PaymentReconciliation extends DomainResource {
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case 3575610: // type
           this.type = castToCodeableConcept(value); // CodeableConcept
-          break;
+          return value;
         case 1095692943: // request
           this.request = castToReference(value); // Reference
-          break;
+          return value;
         case -340323263: // response
           this.response = castToReference(value); // Reference
-          break;
+          return value;
         case 348678409: // submitter
           this.submitter = castToReference(value); // Reference
-          break;
+          return value;
         case 106443592: // payee
           this.payee = castToReference(value); // Reference
-          break;
+          return value;
         case 3076014: // date
           this.date = castToDate(value); // DateType
-          break;
+          return value;
         case -1413853096: // amount
           this.amount = castToMoney(value); // Money
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("type"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("type")) {
           this.type = castToCodeableConcept(value); // CodeableConcept
-        else if (name.equals("request"))
+        } else if (name.equals("request")) {
           this.request = castToReference(value); // Reference
-        else if (name.equals("response"))
+        } else if (name.equals("response")) {
           this.response = castToReference(value); // Reference
-        else if (name.equals("submitter"))
+        } else if (name.equals("submitter")) {
           this.submitter = castToReference(value); // Reference
-        else if (name.equals("payee"))
+        } else if (name.equals("payee")) {
           this.payee = castToReference(value); // Reference
-        else if (name.equals("date"))
+        } else if (name.equals("date")) {
           this.date = castToDate(value); // DateType
-        else if (name.equals("amount"))
+        } else if (name.equals("amount")) {
           this.amount = castToMoney(value); // Money
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 3575610:  return getType(); // CodeableConcept
-        case 1095692943:  return getRequest(); // Reference
-        case -340323263:  return getResponse(); // Reference
-        case 348678409:  return getSubmitter(); // Reference
-        case 106443592:  return getPayee(); // Reference
-        case 3076014: throw new FHIRException("Cannot make property date as it is not a complex type"); // DateType
-        case -1413853096:  return getAmount(); // Money
+        case 3575610:  return getType(); 
+        case 1095692943:  return getRequest(); 
+        case -340323263:  return getResponse(); 
+        case 348678409:  return getSubmitter(); 
+        case 106443592:  return getPayee(); 
+        case 3076014:  return getDateElement();
+        case -1413853096:  return getAmount(); 
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3575610: /*type*/ return new String[] {"CodeableConcept"};
+        case 1095692943: /*request*/ return new String[] {"Reference"};
+        case -340323263: /*response*/ return new String[] {"Reference"};
+        case 348678409: /*submitter*/ return new String[] {"Reference"};
+        case 106443592: /*payee*/ return new String[] {"Reference"};
+        case 3076014: /*date*/ return new String[] {"date"};
+        case -1413853096: /*amount*/ return new String[] {"Money"};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }
@@ -707,7 +725,7 @@ public class PaymentReconciliation extends DomainResource {
          * The note text.
          */
         @Child(name = "text", type = {StringType.class}, order=2, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Notes text", formalDefinition="The note text." )
+        @Description(shortDefinition="Comment on the processing", formalDefinition="The note text." )
         protected StringType text;
 
         private static final long serialVersionUID = 874830709L;
@@ -809,35 +827,46 @@ public class PaymentReconciliation extends DomainResource {
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case 3575610: // type
           this.type = castToCodeableConcept(value); // CodeableConcept
-          break;
+          return value;
         case 3556653: // text
           this.text = castToString(value); // StringType
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("type"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("type")) {
           this.type = castToCodeableConcept(value); // CodeableConcept
-        else if (name.equals("text"))
+        } else if (name.equals("text")) {
           this.text = castToString(value); // StringType
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 3575610:  return getType(); // CodeableConcept
-        case 3556653: throw new FHIRException("Cannot make property text as it is not a complex type"); // StringType
+        case 3575610:  return getType(); 
+        case 3556653:  return getTextElement();
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3575610: /*type*/ return new String[] {"CodeableConcept"};
+        case 3556653: /*text*/ return new String[] {"string"};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }
@@ -888,7 +917,7 @@ public class PaymentReconciliation extends DomainResource {
       }
 
   public String fhirType() {
-    return "PaymentReconciliation.note";
+    return "PaymentReconciliation.processNote";
 
   }
 
@@ -990,7 +1019,7 @@ public class PaymentReconciliation extends DomainResource {
      * List of individual settlement amounts and the corresponding transaction.
      */
     @Child(name = "detail", type = {}, order=10, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="Details", formalDefinition="List of individual settlement amounts and the corresponding transaction." )
+    @Description(shortDefinition="List of settlements", formalDefinition="List of individual settlement amounts and the corresponding transaction." )
     protected List<DetailsComponent> detail;
 
     /**
@@ -1011,11 +1040,11 @@ public class PaymentReconciliation extends DomainResource {
     /**
      * Suite of notes.
      */
-    @Child(name = "note", type = {}, order=13, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="Note text", formalDefinition="Suite of notes." )
-    protected List<NotesComponent> note;
+    @Child(name = "processNote", type = {}, order=13, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Description(shortDefinition="Processing comments", formalDefinition="Suite of notes." )
+    protected List<NotesComponent> processNote;
 
-    private static final long serialVersionUID = -358990199L;
+    private static final long serialVersionUID = -665475468L;
 
   /**
    * Constructor
@@ -1550,56 +1579,56 @@ public class PaymentReconciliation extends DomainResource {
     }
 
     /**
-     * @return {@link #note} (Suite of notes.)
+     * @return {@link #processNote} (Suite of notes.)
      */
-    public List<NotesComponent> getNote() { 
-      if (this.note == null)
-        this.note = new ArrayList<NotesComponent>();
-      return this.note;
+    public List<NotesComponent> getProcessNote() { 
+      if (this.processNote == null)
+        this.processNote = new ArrayList<NotesComponent>();
+      return this.processNote;
     }
 
     /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
-    public PaymentReconciliation setNote(List<NotesComponent> theNote) { 
-      this.note = theNote;
+    public PaymentReconciliation setProcessNote(List<NotesComponent> theProcessNote) { 
+      this.processNote = theProcessNote;
       return this;
     }
 
-    public boolean hasNote() { 
-      if (this.note == null)
+    public boolean hasProcessNote() { 
+      if (this.processNote == null)
         return false;
-      for (NotesComponent item : this.note)
+      for (NotesComponent item : this.processNote)
         if (!item.isEmpty())
           return true;
       return false;
     }
 
-    public NotesComponent addNote() { //3
+    public NotesComponent addProcessNote() { //3
       NotesComponent t = new NotesComponent();
-      if (this.note == null)
-        this.note = new ArrayList<NotesComponent>();
-      this.note.add(t);
+      if (this.processNote == null)
+        this.processNote = new ArrayList<NotesComponent>();
+      this.processNote.add(t);
       return t;
     }
 
-    public PaymentReconciliation addNote(NotesComponent t) { //3
+    public PaymentReconciliation addProcessNote(NotesComponent t) { //3
       if (t == null)
         return this;
-      if (this.note == null)
-        this.note = new ArrayList<NotesComponent>();
-      this.note.add(t);
+      if (this.processNote == null)
+        this.processNote = new ArrayList<NotesComponent>();
+      this.processNote.add(t);
       return this;
     }
 
     /**
-     * @return The first repetition of repeating field {@link #note}, creating it if it does not already exist
+     * @return The first repetition of repeating field {@link #processNote}, creating it if it does not already exist
      */
-    public NotesComponent getNoteFirstRep() { 
-      if (getNote().isEmpty()) {
-        addNote();
+    public NotesComponent getProcessNoteFirstRep() { 
+      if (getProcessNote().isEmpty()) {
+        addProcessNote();
       }
-      return getNote().get(0);
+      return getProcessNote().get(0);
     }
 
       protected void listChildren(List<Property> childrenList) {
@@ -1617,7 +1646,7 @@ public class PaymentReconciliation extends DomainResource {
         childrenList.add(new Property("detail", "", "List of individual settlement amounts and the corresponding transaction.", 0, java.lang.Integer.MAX_VALUE, detail));
         childrenList.add(new Property("form", "CodeableConcept", "The form to be used for printing the content.", 0, java.lang.Integer.MAX_VALUE, form));
         childrenList.add(new Property("total", "Money", "Total payment amount.", 0, java.lang.Integer.MAX_VALUE, total));
-        childrenList.add(new Property("note", "", "Suite of notes.", 0, java.lang.Integer.MAX_VALUE, note));
+        childrenList.add(new Property("processNote", "", "Suite of notes.", 0, java.lang.Integer.MAX_VALUE, processNote));
       }
 
       @Override
@@ -1636,114 +1665,139 @@ public class PaymentReconciliation extends DomainResource {
         case -1335224239: /*detail*/ return this.detail == null ? new Base[0] : this.detail.toArray(new Base[this.detail.size()]); // DetailsComponent
         case 3148996: /*form*/ return this.form == null ? new Base[0] : new Base[] {this.form}; // CodeableConcept
         case 110549828: /*total*/ return this.total == null ? new Base[0] : new Base[] {this.total}; // Money
-        case 3387378: /*note*/ return this.note == null ? new Base[0] : this.note.toArray(new Base[this.note.size()]); // NotesComponent
+        case 202339073: /*processNote*/ return this.processNote == null ? new Base[0] : this.processNote.toArray(new Base[this.processNote.size()]); // NotesComponent
         default: return super.getProperty(hash, name, checkValid);
         }
 
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case -1618432855: // identifier
           this.getIdentifier().add(castToIdentifier(value)); // Identifier
-          break;
+          return value;
         case -892481550: // status
-          this.status = new PaymentReconciliationStatusEnumFactory().fromType(value); // Enumeration<PaymentReconciliationStatus>
-          break;
+          value = new PaymentReconciliationStatusEnumFactory().fromType(castToCode(value));
+          this.status = (Enumeration) value; // Enumeration<PaymentReconciliationStatus>
+          return value;
         case -991726143: // period
           this.period = castToPeriod(value); // Period
-          break;
+          return value;
         case 1028554472: // created
           this.created = castToDateTime(value); // DateTimeType
-          break;
+          return value;
         case 1178922291: // organization
           this.organization = castToReference(value); // Reference
-          break;
+          return value;
         case 1095692943: // request
           this.request = castToReference(value); // Reference
-          break;
+          return value;
         case -1106507950: // outcome
           this.outcome = castToCodeableConcept(value); // CodeableConcept
-          break;
+          return value;
         case 583380919: // disposition
           this.disposition = castToString(value); // StringType
-          break;
+          return value;
         case 1601527200: // requestProvider
           this.requestProvider = castToReference(value); // Reference
-          break;
+          return value;
         case 599053666: // requestOrganization
           this.requestOrganization = castToReference(value); // Reference
-          break;
+          return value;
         case -1335224239: // detail
           this.getDetail().add((DetailsComponent) value); // DetailsComponent
-          break;
+          return value;
         case 3148996: // form
           this.form = castToCodeableConcept(value); // CodeableConcept
-          break;
+          return value;
         case 110549828: // total
           this.total = castToMoney(value); // Money
-          break;
-        case 3387378: // note
-          this.getNote().add((NotesComponent) value); // NotesComponent
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        case 202339073: // processNote
+          this.getProcessNote().add((NotesComponent) value); // NotesComponent
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("identifier"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("identifier")) {
           this.getIdentifier().add(castToIdentifier(value));
-        else if (name.equals("status"))
-          this.status = new PaymentReconciliationStatusEnumFactory().fromType(value); // Enumeration<PaymentReconciliationStatus>
-        else if (name.equals("period"))
+        } else if (name.equals("status")) {
+          value = new PaymentReconciliationStatusEnumFactory().fromType(castToCode(value));
+          this.status = (Enumeration) value; // Enumeration<PaymentReconciliationStatus>
+        } else if (name.equals("period")) {
           this.period = castToPeriod(value); // Period
-        else if (name.equals("created"))
+        } else if (name.equals("created")) {
           this.created = castToDateTime(value); // DateTimeType
-        else if (name.equals("organization"))
+        } else if (name.equals("organization")) {
           this.organization = castToReference(value); // Reference
-        else if (name.equals("request"))
+        } else if (name.equals("request")) {
           this.request = castToReference(value); // Reference
-        else if (name.equals("outcome"))
+        } else if (name.equals("outcome")) {
           this.outcome = castToCodeableConcept(value); // CodeableConcept
-        else if (name.equals("disposition"))
+        } else if (name.equals("disposition")) {
           this.disposition = castToString(value); // StringType
-        else if (name.equals("requestProvider"))
+        } else if (name.equals("requestProvider")) {
           this.requestProvider = castToReference(value); // Reference
-        else if (name.equals("requestOrganization"))
+        } else if (name.equals("requestOrganization")) {
           this.requestOrganization = castToReference(value); // Reference
-        else if (name.equals("detail"))
+        } else if (name.equals("detail")) {
           this.getDetail().add((DetailsComponent) value);
-        else if (name.equals("form"))
+        } else if (name.equals("form")) {
           this.form = castToCodeableConcept(value); // CodeableConcept
-        else if (name.equals("total"))
+        } else if (name.equals("total")) {
           this.total = castToMoney(value); // Money
-        else if (name.equals("note"))
-          this.getNote().add((NotesComponent) value);
-        else
-          super.setProperty(name, value);
+        } else if (name.equals("processNote")) {
+          this.getProcessNote().add((NotesComponent) value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case -1618432855:  return addIdentifier(); // Identifier
-        case -892481550: throw new FHIRException("Cannot make property status as it is not a complex type"); // Enumeration<PaymentReconciliationStatus>
-        case -991726143:  return getPeriod(); // Period
-        case 1028554472: throw new FHIRException("Cannot make property created as it is not a complex type"); // DateTimeType
-        case 1178922291:  return getOrganization(); // Reference
-        case 1095692943:  return getRequest(); // Reference
-        case -1106507950:  return getOutcome(); // CodeableConcept
-        case 583380919: throw new FHIRException("Cannot make property disposition as it is not a complex type"); // StringType
-        case 1601527200:  return getRequestProvider(); // Reference
-        case 599053666:  return getRequestOrganization(); // Reference
-        case -1335224239:  return addDetail(); // DetailsComponent
-        case 3148996:  return getForm(); // CodeableConcept
-        case 110549828:  return getTotal(); // Money
-        case 3387378:  return addNote(); // NotesComponent
+        case -1618432855:  return addIdentifier(); 
+        case -892481550:  return getStatusElement();
+        case -991726143:  return getPeriod(); 
+        case 1028554472:  return getCreatedElement();
+        case 1178922291:  return getOrganization(); 
+        case 1095692943:  return getRequest(); 
+        case -1106507950:  return getOutcome(); 
+        case 583380919:  return getDispositionElement();
+        case 1601527200:  return getRequestProvider(); 
+        case 599053666:  return getRequestOrganization(); 
+        case -1335224239:  return addDetail(); 
+        case 3148996:  return getForm(); 
+        case 110549828:  return getTotal(); 
+        case 202339073:  return addProcessNote(); 
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -1618432855: /*identifier*/ return new String[] {"Identifier"};
+        case -892481550: /*status*/ return new String[] {"code"};
+        case -991726143: /*period*/ return new String[] {"Period"};
+        case 1028554472: /*created*/ return new String[] {"dateTime"};
+        case 1178922291: /*organization*/ return new String[] {"Reference"};
+        case 1095692943: /*request*/ return new String[] {"Reference"};
+        case -1106507950: /*outcome*/ return new String[] {"CodeableConcept"};
+        case 583380919: /*disposition*/ return new String[] {"string"};
+        case 1601527200: /*requestProvider*/ return new String[] {"Reference"};
+        case 599053666: /*requestOrganization*/ return new String[] {"Reference"};
+        case -1335224239: /*detail*/ return new String[] {};
+        case 3148996: /*form*/ return new String[] {"CodeableConcept"};
+        case 110549828: /*total*/ return new String[] {"Money"};
+        case 202339073: /*processNote*/ return new String[] {};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }
@@ -1797,8 +1851,8 @@ public class PaymentReconciliation extends DomainResource {
           this.total = new Money();
           return this.total;
         }
-        else if (name.equals("note")) {
-          return addNote();
+        else if (name.equals("processNote")) {
+          return addProcessNote();
         }
         else
           return super.addChild(name);
@@ -1833,10 +1887,10 @@ public class PaymentReconciliation extends DomainResource {
         };
         dst.form = form == null ? null : form.copy();
         dst.total = total == null ? null : total.copy();
-        if (note != null) {
-          dst.note = new ArrayList<NotesComponent>();
-          for (NotesComponent i : note)
-            dst.note.add(i.copy());
+        if (processNote != null) {
+          dst.processNote = new ArrayList<NotesComponent>();
+          for (NotesComponent i : processNote)
+            dst.processNote.add(i.copy());
         };
         return dst;
       }
@@ -1856,7 +1910,7 @@ public class PaymentReconciliation extends DomainResource {
            && compareDeep(created, o.created, true) && compareDeep(organization, o.organization, true) && compareDeep(request, o.request, true)
            && compareDeep(outcome, o.outcome, true) && compareDeep(disposition, o.disposition, true) && compareDeep(requestProvider, o.requestProvider, true)
            && compareDeep(requestOrganization, o.requestOrganization, true) && compareDeep(detail, o.detail, true)
-           && compareDeep(form, o.form, true) && compareDeep(total, o.total, true) && compareDeep(note, o.note, true)
+           && compareDeep(form, o.form, true) && compareDeep(total, o.total, true) && compareDeep(processNote, o.processNote, true)
           ;
       }
 
@@ -1874,7 +1928,7 @@ public class PaymentReconciliation extends DomainResource {
       public boolean isEmpty() {
         return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, status, period
           , created, organization, request, outcome, disposition, requestProvider, requestOrganization
-          , detail, form, total, note);
+          , detail, form, total, processNote);
       }
 
   @Override
@@ -2028,7 +2082,7 @@ public class PaymentReconciliation extends DomainResource {
    * Path: <b>PaymentReconciliation.requestProvider</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="request-provider", path="PaymentReconciliation.requestProvider", description="The reference to the provider who sumbitted the claim", type="reference", target={Practitioner.class } )
+  @SearchParamDefinition(name="request-provider", path="PaymentReconciliation.requestProvider", description="The reference to the provider who sumbitted the claim", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") }, target={Practitioner.class } )
   public static final String SP_REQUEST_PROVIDER = "request-provider";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>request-provider</b>

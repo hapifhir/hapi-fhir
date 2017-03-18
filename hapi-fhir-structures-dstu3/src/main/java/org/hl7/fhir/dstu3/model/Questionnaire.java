@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
 
 import java.util.*;
 
@@ -128,8 +128,10 @@ public class Questionnaire extends DomainResource {
         throw new IllegalArgumentException("Unknown QuestionnaireStatus code '"+codeString+"'");
         }
         public Enumeration<QuestionnaireStatus> fromType(Base code) throws FHIRException {
-          if (code == null || code.isEmpty())
+          if (code == null)
             return null;
+          if (code.isEmpty())
+            return new Enumeration<QuestionnaireStatus>(this);
           String codeString = ((PrimitiveType) code).asStringValue();
           if (codeString == null || "".equals(codeString))
             return null;
@@ -189,10 +191,6 @@ public class Questionnaire extends DomainResource {
          */
         DATETIME, 
         /**
-         * Question with a system timestamp answer
-         */
-        INSTANT, 
-        /**
          * Question with a time (hour/minute/second) answer independent of date.
          */
         TIME, 
@@ -251,8 +249,6 @@ public class Questionnaire extends DomainResource {
           return DATE;
         if ("dateTime".equals(codeString))
           return DATETIME;
-        if ("instant".equals(codeString))
-          return INSTANT;
         if ("time".equals(codeString))
           return TIME;
         if ("string".equals(codeString))
@@ -286,7 +282,6 @@ public class Questionnaire extends DomainResource {
             case INTEGER: return "integer";
             case DATE: return "date";
             case DATETIME: return "dateTime";
-            case INSTANT: return "instant";
             case TIME: return "time";
             case STRING: return "string";
             case TEXT: return "text";
@@ -309,7 +304,6 @@ public class Questionnaire extends DomainResource {
             case INTEGER: return "http://hl7.org/fhir/item-type";
             case DATE: return "http://hl7.org/fhir/item-type";
             case DATETIME: return "http://hl7.org/fhir/item-type";
-            case INSTANT: return "http://hl7.org/fhir/item-type";
             case TIME: return "http://hl7.org/fhir/item-type";
             case STRING: return "http://hl7.org/fhir/item-type";
             case TEXT: return "http://hl7.org/fhir/item-type";
@@ -332,7 +326,6 @@ public class Questionnaire extends DomainResource {
             case INTEGER: return "Question with an integer answer";
             case DATE: return "Question with adate answer";
             case DATETIME: return "Question with a date and time answer";
-            case INSTANT: return "Question with a system timestamp answer";
             case TIME: return "Question with a time (hour/minute/second) answer independent of date.";
             case STRING: return "Question with a short (few words to short sentence) free-text entry answer";
             case TEXT: return "Question with a long (potentially multi-paragraph) free-text entry (still captured as a string) answer";
@@ -355,7 +348,6 @@ public class Questionnaire extends DomainResource {
             case INTEGER: return "Integer";
             case DATE: return "Date";
             case DATETIME: return "Date Time";
-            case INSTANT: return "Instant";
             case TIME: return "Time";
             case STRING: return "String";
             case TEXT: return "Text";
@@ -391,8 +383,6 @@ public class Questionnaire extends DomainResource {
           return QuestionnaireItemType.DATE;
         if ("dateTime".equals(codeString))
           return QuestionnaireItemType.DATETIME;
-        if ("instant".equals(codeString))
-          return QuestionnaireItemType.INSTANT;
         if ("time".equals(codeString))
           return QuestionnaireItemType.TIME;
         if ("string".equals(codeString))
@@ -414,8 +404,10 @@ public class Questionnaire extends DomainResource {
         throw new IllegalArgumentException("Unknown QuestionnaireItemType code '"+codeString+"'");
         }
         public Enumeration<QuestionnaireItemType> fromType(Base code) throws FHIRException {
-          if (code == null || code.isEmpty())
+          if (code == null)
             return null;
+          if (code.isEmpty())
+            return new Enumeration<QuestionnaireItemType>(this);
           String codeString = ((PrimitiveType) code).asStringValue();
           if (codeString == null || "".equals(codeString))
             return null;
@@ -435,8 +427,6 @@ public class Questionnaire extends DomainResource {
           return new Enumeration<QuestionnaireItemType>(this, QuestionnaireItemType.DATE);
         if ("dateTime".equals(codeString))
           return new Enumeration<QuestionnaireItemType>(this, QuestionnaireItemType.DATETIME);
-        if ("instant".equals(codeString))
-          return new Enumeration<QuestionnaireItemType>(this, QuestionnaireItemType.INSTANT);
         if ("time".equals(codeString))
           return new Enumeration<QuestionnaireItemType>(this, QuestionnaireItemType.TIME);
         if ("string".equals(codeString))
@@ -474,8 +464,6 @@ public class Questionnaire extends DomainResource {
         return "date";
       if (code == QuestionnaireItemType.DATETIME)
         return "dateTime";
-      if (code == QuestionnaireItemType.INSTANT)
-        return "instant";
       if (code == QuestionnaireItemType.TIME)
         return "time";
       if (code == QuestionnaireItemType.STRING)
@@ -513,26 +501,26 @@ public class Questionnaire extends DomainResource {
         /**
          * A reference to an [[[ElementDefinition]]] that provides the details for the item. If a definition is provided, then the following element values can be inferred from the definition: 
 
-* concept (ElementDefinition.code)
+* code (ElementDefinition.code)
 * type (ElementDefinition.type)
 * required (ElementDefinition.min)
 * repeats (ElementDefinition.max)
 * maxLength (ElementDefinition.maxLength)
 * options (ElementDefinition.binding)
 
-Any information provided in these elements overrides the information from the definition.
+Any information provided in these elements on a Questionnaire Item overrides the information from the definition.
          */
         @Child(name = "definition", type = {UriType.class}, order=2, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="ElementDefinition - details for the item", formalDefinition="A reference to an [[[ElementDefinition]]] that provides the details for the item. If a definition is provided, then the following element values can be inferred from the definition: \n\n* concept (ElementDefinition.code)\n* type (ElementDefinition.type)\n* required (ElementDefinition.min)\n* repeats (ElementDefinition.max)\n* maxLength (ElementDefinition.maxLength)\n* options (ElementDefinition.binding)\n\nAny information provided in these elements overrides the information from the definition." )
+        @Description(shortDefinition="ElementDefinition - details for the item", formalDefinition="A reference to an [[[ElementDefinition]]] that provides the details for the item. If a definition is provided, then the following element values can be inferred from the definition: \n\n* code (ElementDefinition.code)\n* type (ElementDefinition.type)\n* required (ElementDefinition.min)\n* repeats (ElementDefinition.max)\n* maxLength (ElementDefinition.maxLength)\n* options (ElementDefinition.binding)\n\nAny information provided in these elements on a Questionnaire Item overrides the information from the definition." )
         protected UriType definition;
 
         /**
-         * Terminology code that corresponds to this group or question (e.g. LOINC).
+         * A Terminology code that corresponds to this group or question (e.g. a code from LOINC, which defines many questions and answers).
          */
-        @Child(name = "concept", type = {Coding.class}, order=3, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-        @Description(shortDefinition="Concept that represents this item within in a questionnaire", formalDefinition="Terminology code that corresponds to this group or question (e.g. LOINC)." )
+        @Child(name = "code", type = {Coding.class}, order=3, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+        @Description(shortDefinition="Corresponding Concept for this item in a terminology", formalDefinition="A Terminology code that corresponds to this group or question (e.g. a code from LOINC, which defines many questions and answers)." )
         @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/questionnaire-questions")
-        protected List<Coding> concept;
+        protected List<Coding> code;
 
         /**
          * A short label for a particular group, question or set of display text within the questionnaire.
@@ -551,7 +539,7 @@ Any information provided in these elements overrides the information from the de
         /**
          * Identifies the type of questionnaire item this is - whether text for display, a grouping of other items or a particular type of data to be captured (string, integer, coded choice, etc.).
          */
-        @Child(name = "type", type = {CodeType.class}, order=6, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "type", type = {CodeType.class}, order=6, min=1, max=1, modifier=false, summary=false)
         @Description(shortDefinition="group | display | boolean | decimal | integer | date | dateTime +", formalDefinition="Identifies the type of questionnaire item this is - whether text for display, a grouping of other items or a particular type of data to be captured (string, integer, coded choice, etc.)." )
         @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/item-type")
         protected Enumeration<QuestionnaireItemType> type;
@@ -613,8 +601,9 @@ Any information provided in these elements overrides the information from the de
         /**
          * The value that should be defaulted when rendering the questionnaire for user input.
          */
-        @Child(name = "initial", type = {BooleanType.class, DecimalType.class, IntegerType.class, DateType.class, DateTimeType.class, InstantType.class, TimeType.class, StringType.class, UriType.class, Attachment.class, Coding.class, Quantity.class, Reference.class}, order=14, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "initial", type = {BooleanType.class, DecimalType.class, IntegerType.class, DateType.class, DateTimeType.class, TimeType.class, StringType.class, UriType.class, Attachment.class, Coding.class, Quantity.class, Reference.class}, order=14, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Default value when item is first rendered", formalDefinition="The value that should be defaulted when rendering the questionnaire for user input." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/questionnaire-answers")
         protected Type initial;
 
         /**
@@ -624,7 +613,7 @@ Any information provided in these elements overrides the information from the de
         @Description(shortDefinition="Nested questionnaire items", formalDefinition="Allows text, questions and other groups to be nested beneath a question or group." )
         protected List<QuestionnaireItemComponent> item;
 
-        private static final long serialVersionUID = 1410801685L;
+        private static final long serialVersionUID = -1997112302L;
 
     /**
      * Constructor
@@ -636,9 +625,10 @@ Any information provided in these elements overrides the information from the de
     /**
      * Constructor
      */
-      public QuestionnaireItemComponent(StringType linkId) {
+      public QuestionnaireItemComponent(StringType linkId, Enumeration<QuestionnaireItemType> type) {
         super();
         this.linkId = linkId;
+        this.type = type;
       }
 
         /**
@@ -689,14 +679,14 @@ Any information provided in these elements overrides the information from the de
         /**
          * @return {@link #definition} (A reference to an [[[ElementDefinition]]] that provides the details for the item. If a definition is provided, then the following element values can be inferred from the definition: 
 
-* concept (ElementDefinition.code)
+* code (ElementDefinition.code)
 * type (ElementDefinition.type)
 * required (ElementDefinition.min)
 * repeats (ElementDefinition.max)
 * maxLength (ElementDefinition.maxLength)
 * options (ElementDefinition.binding)
 
-Any information provided in these elements overrides the information from the definition.). This is the underlying object with id, value and extensions. The accessor "getDefinition" gives direct access to the value
+Any information provided in these elements on a Questionnaire Item overrides the information from the definition.). This is the underlying object with id, value and extensions. The accessor "getDefinition" gives direct access to the value
          */
         public UriType getDefinitionElement() { 
           if (this.definition == null)
@@ -718,14 +708,14 @@ Any information provided in these elements overrides the information from the de
         /**
          * @param value {@link #definition} (A reference to an [[[ElementDefinition]]] that provides the details for the item. If a definition is provided, then the following element values can be inferred from the definition: 
 
-* concept (ElementDefinition.code)
+* code (ElementDefinition.code)
 * type (ElementDefinition.type)
 * required (ElementDefinition.min)
 * repeats (ElementDefinition.max)
 * maxLength (ElementDefinition.maxLength)
 * options (ElementDefinition.binding)
 
-Any information provided in these elements overrides the information from the definition.). This is the underlying object with id, value and extensions. The accessor "getDefinition" gives direct access to the value
+Any information provided in these elements on a Questionnaire Item overrides the information from the definition.). This is the underlying object with id, value and extensions. The accessor "getDefinition" gives direct access to the value
          */
         public QuestionnaireItemComponent setDefinitionElement(UriType value) { 
           this.definition = value;
@@ -735,14 +725,14 @@ Any information provided in these elements overrides the information from the de
         /**
          * @return A reference to an [[[ElementDefinition]]] that provides the details for the item. If a definition is provided, then the following element values can be inferred from the definition: 
 
-* concept (ElementDefinition.code)
+* code (ElementDefinition.code)
 * type (ElementDefinition.type)
 * required (ElementDefinition.min)
 * repeats (ElementDefinition.max)
 * maxLength (ElementDefinition.maxLength)
 * options (ElementDefinition.binding)
 
-Any information provided in these elements overrides the information from the definition.
+Any information provided in these elements on a Questionnaire Item overrides the information from the definition.
          */
         public String getDefinition() { 
           return this.definition == null ? null : this.definition.getValue();
@@ -751,14 +741,14 @@ Any information provided in these elements overrides the information from the de
         /**
          * @param value A reference to an [[[ElementDefinition]]] that provides the details for the item. If a definition is provided, then the following element values can be inferred from the definition: 
 
-* concept (ElementDefinition.code)
+* code (ElementDefinition.code)
 * type (ElementDefinition.type)
 * required (ElementDefinition.min)
 * repeats (ElementDefinition.max)
 * maxLength (ElementDefinition.maxLength)
 * options (ElementDefinition.binding)
 
-Any information provided in these elements overrides the information from the definition.
+Any information provided in these elements on a Questionnaire Item overrides the information from the definition.
          */
         public QuestionnaireItemComponent setDefinition(String value) { 
           if (Utilities.noString(value))
@@ -772,56 +762,56 @@ Any information provided in these elements overrides the information from the de
         }
 
         /**
-         * @return {@link #concept} (Terminology code that corresponds to this group or question (e.g. LOINC).)
+         * @return {@link #code} (A Terminology code that corresponds to this group or question (e.g. a code from LOINC, which defines many questions and answers).)
          */
-        public List<Coding> getConcept() { 
-          if (this.concept == null)
-            this.concept = new ArrayList<Coding>();
-          return this.concept;
+        public List<Coding> getCode() { 
+          if (this.code == null)
+            this.code = new ArrayList<Coding>();
+          return this.code;
         }
 
         /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
-        public QuestionnaireItemComponent setConcept(List<Coding> theConcept) { 
-          this.concept = theConcept;
+        public QuestionnaireItemComponent setCode(List<Coding> theCode) { 
+          this.code = theCode;
           return this;
         }
 
-        public boolean hasConcept() { 
-          if (this.concept == null)
+        public boolean hasCode() { 
+          if (this.code == null)
             return false;
-          for (Coding item : this.concept)
+          for (Coding item : this.code)
             if (!item.isEmpty())
               return true;
           return false;
         }
 
-        public Coding addConcept() { //3
+        public Coding addCode() { //3
           Coding t = new Coding();
-          if (this.concept == null)
-            this.concept = new ArrayList<Coding>();
-          this.concept.add(t);
+          if (this.code == null)
+            this.code = new ArrayList<Coding>();
+          this.code.add(t);
           return t;
         }
 
-        public QuestionnaireItemComponent addConcept(Coding t) { //3
+        public QuestionnaireItemComponent addCode(Coding t) { //3
           if (t == null)
             return this;
-          if (this.concept == null)
-            this.concept = new ArrayList<Coding>();
-          this.concept.add(t);
+          if (this.code == null)
+            this.code = new ArrayList<Coding>();
+          this.code.add(t);
           return this;
         }
 
         /**
-         * @return The first repetition of repeating field {@link #concept}, creating it if it does not already exist
+         * @return The first repetition of repeating field {@link #code}, creating it if it does not already exist
          */
-        public Coding getConceptFirstRep() { 
-          if (getConcept().isEmpty()) {
-            addConcept();
+        public Coding getCodeFirstRep() { 
+          if (getCode().isEmpty()) {
+            addCode();
           }
-          return getConcept().get(0);
+          return getCode().get(0);
         }
 
         /**
@@ -961,13 +951,9 @@ Any information provided in these elements overrides the information from the de
          * @param value Identifies the type of questionnaire item this is - whether text for display, a grouping of other items or a particular type of data to be captured (string, integer, coded choice, etc.).
          */
         public QuestionnaireItemComponent setType(QuestionnaireItemType value) { 
-          if (value == null)
-            this.type = null;
-          else {
             if (this.type == null)
               this.type = new Enumeration<QuestionnaireItemType>(new QuestionnaireItemTypeEnumFactory());
             this.type.setValue(value);
-          }
           return this;
         }
 
@@ -1376,19 +1362,6 @@ Any information provided in these elements overrides the information from the de
         /**
          * @return {@link #initial} (The value that should be defaulted when rendering the questionnaire for user input.)
          */
-        public InstantType getInitialInstantType() throws FHIRException { 
-          if (!(this.initial instanceof InstantType))
-            throw new FHIRException("Type mismatch: the type InstantType was expected, but "+this.initial.getClass().getName()+" was encountered");
-          return (InstantType) this.initial;
-        }
-
-        public boolean hasInitialInstantType() { 
-          return this.initial instanceof InstantType;
-        }
-
-        /**
-         * @return {@link #initial} (The value that should be defaulted when rendering the questionnaire for user input.)
-         */
         public TimeType getInitialTimeType() throws FHIRException { 
           if (!(this.initial instanceof TimeType))
             throw new FHIRException("Type mismatch: the type TimeType was expected, but "+this.initial.getClass().getName()+" was encountered");
@@ -1545,8 +1518,8 @@ Any information provided in these elements overrides the information from the de
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
           childrenList.add(new Property("linkId", "string", "An identifier that is unique within the Questionnaire allowing linkage to the equivalent item in a QuestionnaireResponse resource.", 0, java.lang.Integer.MAX_VALUE, linkId));
-          childrenList.add(new Property("definition", "uri", "A reference to an [[[ElementDefinition]]] that provides the details for the item. If a definition is provided, then the following element values can be inferred from the definition: \n\n* concept (ElementDefinition.code)\n* type (ElementDefinition.type)\n* required (ElementDefinition.min)\n* repeats (ElementDefinition.max)\n* maxLength (ElementDefinition.maxLength)\n* options (ElementDefinition.binding)\n\nAny information provided in these elements overrides the information from the definition.", 0, java.lang.Integer.MAX_VALUE, definition));
-          childrenList.add(new Property("concept", "Coding", "Terminology code that corresponds to this group or question (e.g. LOINC).", 0, java.lang.Integer.MAX_VALUE, concept));
+          childrenList.add(new Property("definition", "uri", "A reference to an [[[ElementDefinition]]] that provides the details for the item. If a definition is provided, then the following element values can be inferred from the definition: \n\n* code (ElementDefinition.code)\n* type (ElementDefinition.type)\n* required (ElementDefinition.min)\n* repeats (ElementDefinition.max)\n* maxLength (ElementDefinition.maxLength)\n* options (ElementDefinition.binding)\n\nAny information provided in these elements on a Questionnaire Item overrides the information from the definition.", 0, java.lang.Integer.MAX_VALUE, definition));
+          childrenList.add(new Property("code", "Coding", "A Terminology code that corresponds to this group or question (e.g. a code from LOINC, which defines many questions and answers).", 0, java.lang.Integer.MAX_VALUE, code));
           childrenList.add(new Property("prefix", "string", "A short label for a particular group, question or set of display text within the questionnaire.", 0, java.lang.Integer.MAX_VALUE, prefix));
           childrenList.add(new Property("text", "string", "The name of a section, the text of a question or text content for a text item.", 0, java.lang.Integer.MAX_VALUE, text));
           childrenList.add(new Property("type", "code", "Identifies the type of questionnaire item this is - whether text for display, a grouping of other items or a particular type of data to be captured (string, integer, coded choice, etc.).", 0, java.lang.Integer.MAX_VALUE, type));
@@ -1557,7 +1530,7 @@ Any information provided in these elements overrides the information from the de
           childrenList.add(new Property("maxLength", "integer", "The maximum number of characters that are permitted in the answer to be considered a \"valid\" QuestionnaireResponse.", 0, java.lang.Integer.MAX_VALUE, maxLength));
           childrenList.add(new Property("options", "Reference(ValueSet)", "Reference to a value set containing a list of codes representing permitted answers for the question.", 0, java.lang.Integer.MAX_VALUE, options));
           childrenList.add(new Property("option", "", "For a \"choice\" question, identifies one of the permitted answers for the question.", 0, java.lang.Integer.MAX_VALUE, option));
-          childrenList.add(new Property("initial[x]", "boolean|decimal|integer|date|dateTime|instant|time|string|uri|Attachment|Coding|Quantity|Reference(Any)", "The value that should be defaulted when rendering the questionnaire for user input.", 0, java.lang.Integer.MAX_VALUE, initial));
+          childrenList.add(new Property("initial[x]", "boolean|decimal|integer|date|dateTime|time|string|uri|Attachment|Coding|Quantity|Reference(Any)", "The value that should be defaulted when rendering the questionnaire for user input.", 0, java.lang.Integer.MAX_VALUE, initial));
           childrenList.add(new Property("item", "@Questionnaire.item", "Allows text, questions and other groups to be nested beneath a question or group.", 0, java.lang.Integer.MAX_VALUE, item));
         }
 
@@ -1566,7 +1539,7 @@ Any information provided in these elements overrides the information from the de
         switch (hash) {
         case -1102667083: /*linkId*/ return this.linkId == null ? new Base[0] : new Base[] {this.linkId}; // StringType
         case -1014418093: /*definition*/ return this.definition == null ? new Base[0] : new Base[] {this.definition}; // UriType
-        case 951024232: /*concept*/ return this.concept == null ? new Base[0] : this.concept.toArray(new Base[this.concept.size()]); // Coding
+        case 3059181: /*code*/ return this.code == null ? new Base[0] : this.code.toArray(new Base[this.code.size()]); // Coding
         case -980110702: /*prefix*/ return this.prefix == null ? new Base[0] : new Base[] {this.prefix}; // StringType
         case 3556653: /*text*/ return this.text == null ? new Base[0] : new Base[] {this.text}; // StringType
         case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // Enumeration<QuestionnaireItemType>
@@ -1585,113 +1558,140 @@ Any information provided in these elements overrides the information from the de
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case -1102667083: // linkId
           this.linkId = castToString(value); // StringType
-          break;
+          return value;
         case -1014418093: // definition
           this.definition = castToUri(value); // UriType
-          break;
-        case 951024232: // concept
-          this.getConcept().add(castToCoding(value)); // Coding
-          break;
+          return value;
+        case 3059181: // code
+          this.getCode().add(castToCoding(value)); // Coding
+          return value;
         case -980110702: // prefix
           this.prefix = castToString(value); // StringType
-          break;
+          return value;
         case 3556653: // text
           this.text = castToString(value); // StringType
-          break;
+          return value;
         case 3575610: // type
-          this.type = new QuestionnaireItemTypeEnumFactory().fromType(value); // Enumeration<QuestionnaireItemType>
-          break;
+          value = new QuestionnaireItemTypeEnumFactory().fromType(castToCode(value));
+          this.type = (Enumeration) value; // Enumeration<QuestionnaireItemType>
+          return value;
         case 1893321565: // enableWhen
           this.getEnableWhen().add((QuestionnaireItemEnableWhenComponent) value); // QuestionnaireItemEnableWhenComponent
-          break;
+          return value;
         case -393139297: // required
           this.required = castToBoolean(value); // BooleanType
-          break;
+          return value;
         case 1094288952: // repeats
           this.repeats = castToBoolean(value); // BooleanType
-          break;
+          return value;
         case -867683742: // readOnly
           this.readOnly = castToBoolean(value); // BooleanType
-          break;
+          return value;
         case -791400086: // maxLength
           this.maxLength = castToInteger(value); // IntegerType
-          break;
+          return value;
         case -1249474914: // options
           this.options = castToReference(value); // Reference
-          break;
+          return value;
         case -1010136971: // option
           this.getOption().add((QuestionnaireItemOptionComponent) value); // QuestionnaireItemOptionComponent
-          break;
+          return value;
         case 1948342084: // initial
           this.initial = castToType(value); // Type
-          break;
+          return value;
         case 3242771: // item
           this.getItem().add((QuestionnaireItemComponent) value); // QuestionnaireItemComponent
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("linkId"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("linkId")) {
           this.linkId = castToString(value); // StringType
-        else if (name.equals("definition"))
+        } else if (name.equals("definition")) {
           this.definition = castToUri(value); // UriType
-        else if (name.equals("concept"))
-          this.getConcept().add(castToCoding(value));
-        else if (name.equals("prefix"))
+        } else if (name.equals("code")) {
+          this.getCode().add(castToCoding(value));
+        } else if (name.equals("prefix")) {
           this.prefix = castToString(value); // StringType
-        else if (name.equals("text"))
+        } else if (name.equals("text")) {
           this.text = castToString(value); // StringType
-        else if (name.equals("type"))
-          this.type = new QuestionnaireItemTypeEnumFactory().fromType(value); // Enumeration<QuestionnaireItemType>
-        else if (name.equals("enableWhen"))
+        } else if (name.equals("type")) {
+          value = new QuestionnaireItemTypeEnumFactory().fromType(castToCode(value));
+          this.type = (Enumeration) value; // Enumeration<QuestionnaireItemType>
+        } else if (name.equals("enableWhen")) {
           this.getEnableWhen().add((QuestionnaireItemEnableWhenComponent) value);
-        else if (name.equals("required"))
+        } else if (name.equals("required")) {
           this.required = castToBoolean(value); // BooleanType
-        else if (name.equals("repeats"))
+        } else if (name.equals("repeats")) {
           this.repeats = castToBoolean(value); // BooleanType
-        else if (name.equals("readOnly"))
+        } else if (name.equals("readOnly")) {
           this.readOnly = castToBoolean(value); // BooleanType
-        else if (name.equals("maxLength"))
+        } else if (name.equals("maxLength")) {
           this.maxLength = castToInteger(value); // IntegerType
-        else if (name.equals("options"))
+        } else if (name.equals("options")) {
           this.options = castToReference(value); // Reference
-        else if (name.equals("option"))
+        } else if (name.equals("option")) {
           this.getOption().add((QuestionnaireItemOptionComponent) value);
-        else if (name.equals("initial[x]"))
+        } else if (name.equals("initial[x]")) {
           this.initial = castToType(value); // Type
-        else if (name.equals("item"))
+        } else if (name.equals("item")) {
           this.getItem().add((QuestionnaireItemComponent) value);
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case -1102667083: throw new FHIRException("Cannot make property linkId as it is not a complex type"); // StringType
-        case -1014418093: throw new FHIRException("Cannot make property definition as it is not a complex type"); // UriType
-        case 951024232:  return addConcept(); // Coding
-        case -980110702: throw new FHIRException("Cannot make property prefix as it is not a complex type"); // StringType
-        case 3556653: throw new FHIRException("Cannot make property text as it is not a complex type"); // StringType
-        case 3575610: throw new FHIRException("Cannot make property type as it is not a complex type"); // Enumeration<QuestionnaireItemType>
-        case 1893321565:  return addEnableWhen(); // QuestionnaireItemEnableWhenComponent
-        case -393139297: throw new FHIRException("Cannot make property required as it is not a complex type"); // BooleanType
-        case 1094288952: throw new FHIRException("Cannot make property repeats as it is not a complex type"); // BooleanType
-        case -867683742: throw new FHIRException("Cannot make property readOnly as it is not a complex type"); // BooleanType
-        case -791400086: throw new FHIRException("Cannot make property maxLength as it is not a complex type"); // IntegerType
-        case -1249474914:  return getOptions(); // Reference
-        case -1010136971:  return addOption(); // QuestionnaireItemOptionComponent
-        case 871077564:  return getInitial(); // Type
-        case 3242771:  return addItem(); // QuestionnaireItemComponent
+        case -1102667083:  return getLinkIdElement();
+        case -1014418093:  return getDefinitionElement();
+        case 3059181:  return addCode(); 
+        case -980110702:  return getPrefixElement();
+        case 3556653:  return getTextElement();
+        case 3575610:  return getTypeElement();
+        case 1893321565:  return addEnableWhen(); 
+        case -393139297:  return getRequiredElement();
+        case 1094288952:  return getRepeatsElement();
+        case -867683742:  return getReadOnlyElement();
+        case -791400086:  return getMaxLengthElement();
+        case -1249474914:  return getOptions(); 
+        case -1010136971:  return addOption(); 
+        case 871077564:  return getInitial(); 
+        case 1948342084:  return getInitial(); 
+        case 3242771:  return addItem(); 
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -1102667083: /*linkId*/ return new String[] {"string"};
+        case -1014418093: /*definition*/ return new String[] {"uri"};
+        case 3059181: /*code*/ return new String[] {"Coding"};
+        case -980110702: /*prefix*/ return new String[] {"string"};
+        case 3556653: /*text*/ return new String[] {"string"};
+        case 3575610: /*type*/ return new String[] {"code"};
+        case 1893321565: /*enableWhen*/ return new String[] {};
+        case -393139297: /*required*/ return new String[] {"boolean"};
+        case 1094288952: /*repeats*/ return new String[] {"boolean"};
+        case -867683742: /*readOnly*/ return new String[] {"boolean"};
+        case -791400086: /*maxLength*/ return new String[] {"integer"};
+        case -1249474914: /*options*/ return new String[] {"Reference"};
+        case -1010136971: /*option*/ return new String[] {};
+        case 1948342084: /*initial*/ return new String[] {"boolean", "decimal", "integer", "date", "dateTime", "time", "string", "uri", "Attachment", "Coding", "Quantity", "Reference"};
+        case 3242771: /*item*/ return new String[] {"@Questionnaire.item"};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }
@@ -1704,8 +1704,8 @@ Any information provided in these elements overrides the information from the de
         else if (name.equals("definition")) {
           throw new FHIRException("Cannot call addChild on a primitive type Questionnaire.definition");
         }
-        else if (name.equals("concept")) {
-          return addConcept();
+        else if (name.equals("code")) {
+          return addCode();
         }
         else if (name.equals("prefix")) {
           throw new FHIRException("Cannot call addChild on a primitive type Questionnaire.prefix");
@@ -1758,10 +1758,6 @@ Any information provided in these elements overrides the information from the de
           this.initial = new DateTimeType();
           return this.initial;
         }
-        else if (name.equals("initialInstant")) {
-          this.initial = new InstantType();
-          return this.initial;
-        }
         else if (name.equals("initialTime")) {
           this.initial = new TimeType();
           return this.initial;
@@ -1802,10 +1798,10 @@ Any information provided in these elements overrides the information from the de
         copyValues(dst);
         dst.linkId = linkId == null ? null : linkId.copy();
         dst.definition = definition == null ? null : definition.copy();
-        if (concept != null) {
-          dst.concept = new ArrayList<Coding>();
-          for (Coding i : concept)
-            dst.concept.add(i.copy());
+        if (code != null) {
+          dst.code = new ArrayList<Coding>();
+          for (Coding i : code)
+            dst.code.add(i.copy());
         };
         dst.prefix = prefix == null ? null : prefix.copy();
         dst.text = text == null ? null : text.copy();
@@ -1841,7 +1837,7 @@ Any information provided in these elements overrides the information from the de
         if (!(other instanceof QuestionnaireItemComponent))
           return false;
         QuestionnaireItemComponent o = (QuestionnaireItemComponent) other;
-        return compareDeep(linkId, o.linkId, true) && compareDeep(definition, o.definition, true) && compareDeep(concept, o.concept, true)
+        return compareDeep(linkId, o.linkId, true) && compareDeep(definition, o.definition, true) && compareDeep(code, o.code, true)
            && compareDeep(prefix, o.prefix, true) && compareDeep(text, o.text, true) && compareDeep(type, o.type, true)
            && compareDeep(enableWhen, o.enableWhen, true) && compareDeep(required, o.required, true) && compareDeep(repeats, o.repeats, true)
            && compareDeep(readOnly, o.readOnly, true) && compareDeep(maxLength, o.maxLength, true) && compareDeep(options, o.options, true)
@@ -1863,7 +1859,7 @@ Any information provided in these elements overrides the information from the de
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(linkId, definition, concept
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(linkId, definition, code
           , prefix, text, type, enableWhen, required, repeats, readOnly, maxLength, options
           , option, initial, item);
       }
@@ -1894,8 +1890,9 @@ Any information provided in these elements overrides the information from the de
         /**
          * If present, then the answer for the referenced question must match this answer for all components present in the enableWhen.answer.
          */
-        @Child(name = "answer", type = {BooleanType.class, DecimalType.class, IntegerType.class, DateType.class, DateTimeType.class, InstantType.class, TimeType.class, StringType.class, UriType.class, Attachment.class, Coding.class, Quantity.class, Reference.class}, order=3, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "answer", type = {BooleanType.class, DecimalType.class, IntegerType.class, DateType.class, DateTimeType.class, TimeType.class, StringType.class, UriType.class, Attachment.class, Coding.class, Quantity.class, Reference.class}, order=3, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Value question must have", formalDefinition="If present, then the answer for the referenced question must match this answer for all components present in the enableWhen.answer." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/questionnaire-answers")
         protected Type answer;
 
         private static final long serialVersionUID = -300241115L;
@@ -2080,19 +2077,6 @@ Any information provided in these elements overrides the information from the de
         /**
          * @return {@link #answer} (If present, then the answer for the referenced question must match this answer for all components present in the enableWhen.answer.)
          */
-        public InstantType getAnswerInstantType() throws FHIRException { 
-          if (!(this.answer instanceof InstantType))
-            throw new FHIRException("Type mismatch: the type InstantType was expected, but "+this.answer.getClass().getName()+" was encountered");
-          return (InstantType) this.answer;
-        }
-
-        public boolean hasAnswerInstantType() { 
-          return this.answer instanceof InstantType;
-        }
-
-        /**
-         * @return {@link #answer} (If present, then the answer for the referenced question must match this answer for all components present in the enableWhen.answer.)
-         */
         public TimeType getAnswerTimeType() throws FHIRException { 
           if (!(this.answer instanceof TimeType))
             throw new FHIRException("Type mismatch: the type TimeType was expected, but "+this.answer.getClass().getName()+" was encountered");
@@ -2197,7 +2181,7 @@ Any information provided in these elements overrides the information from the de
           super.listChildren(childrenList);
           childrenList.add(new Property("question", "string", "The linkId for the question whose answer (or lack of answer) governs whether this item is enabled.", 0, java.lang.Integer.MAX_VALUE, question));
           childrenList.add(new Property("hasAnswer", "boolean", "If present, indicates that this item should be enabled only if the specified question is answered or not answered.", 0, java.lang.Integer.MAX_VALUE, hasAnswer));
-          childrenList.add(new Property("answer[x]", "boolean|decimal|integer|date|dateTime|instant|time|string|uri|Attachment|Coding|Quantity|Reference(Any)", "If present, then the answer for the referenced question must match this answer for all components present in the enableWhen.answer.", 0, java.lang.Integer.MAX_VALUE, answer));
+          childrenList.add(new Property("answer[x]", "boolean|decimal|integer|date|dateTime|time|string|uri|Attachment|Coding|Quantity|Reference(Any)", "If present, then the answer for the referenced question must match this answer for all components present in the enableWhen.answer.", 0, java.lang.Integer.MAX_VALUE, answer));
         }
 
       @Override
@@ -2212,41 +2196,54 @@ Any information provided in these elements overrides the information from the de
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case -1165870106: // question
           this.question = castToString(value); // StringType
-          break;
+          return value;
         case -793058568: // hasAnswer
           this.hasAnswer = castToBoolean(value); // BooleanType
-          break;
+          return value;
         case -1412808770: // answer
           this.answer = castToType(value); // Type
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("question"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("question")) {
           this.question = castToString(value); // StringType
-        else if (name.equals("hasAnswer"))
+        } else if (name.equals("hasAnswer")) {
           this.hasAnswer = castToBoolean(value); // BooleanType
-        else if (name.equals("answer[x]"))
+        } else if (name.equals("answer[x]")) {
           this.answer = castToType(value); // Type
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case -1165870106: throw new FHIRException("Cannot make property question as it is not a complex type"); // StringType
-        case -793058568: throw new FHIRException("Cannot make property hasAnswer as it is not a complex type"); // BooleanType
-        case 1693524994:  return getAnswer(); // Type
+        case -1165870106:  return getQuestionElement();
+        case -793058568:  return getHasAnswerElement();
+        case 1693524994:  return getAnswer(); 
+        case -1412808770:  return getAnswer(); 
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -1165870106: /*question*/ return new String[] {"string"};
+        case -793058568: /*hasAnswer*/ return new String[] {"boolean"};
+        case -1412808770: /*answer*/ return new String[] {"boolean", "decimal", "integer", "date", "dateTime", "time", "string", "uri", "Attachment", "Coding", "Quantity", "Reference"};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }
@@ -2277,10 +2274,6 @@ Any information provided in these elements overrides the information from the de
         }
         else if (name.equals("answerDateTime")) {
           this.answer = new DateTimeType();
-          return this.answer;
-        }
-        else if (name.equals("answerInstant")) {
-          this.answer = new InstantType();
           return this.answer;
         }
         else if (name.equals("answerTime")) {
@@ -2483,29 +2476,40 @@ Any information provided in these elements overrides the information from the de
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case 111972721: // value
           this.value = castToType(value); // Type
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("value[x]"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("value[x]")) {
           this.value = castToType(value); // Type
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case -1410166417:  return getValue(); // Type
+        case -1410166417:  return getValue(); 
+        case 111972721:  return getValue(); 
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 111972721: /*value*/ return new String[] {"integer", "date", "time", "string", "Coding"};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }
@@ -2642,10 +2646,10 @@ Any information provided in these elements overrides the information from the de
     /**
      * Identifies how this question or group of questions is known in a particular terminology such as LOINC.
      */
-    @Child(name = "concept", type = {Coding.class}, order=9, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "code", type = {Coding.class}, order=9, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Concept that represents the overall questionnaire", formalDefinition="Identifies how this question or group of questions is known in a particular terminology such as LOINC." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/questionnaire-questions")
-    protected List<Coding> concept;
+    protected List<Coding> code;
 
     /**
      * Identifies the types of subjects that can be the subject of the questionnaire.
@@ -2662,7 +2666,7 @@ Any information provided in these elements overrides the information from the de
     @Description(shortDefinition="Questions and sections within the Questionnaire", formalDefinition="The questions and groupings of questions that make up the questionnaire." )
     protected List<QuestionnaireItemComponent> item;
 
-    private static final long serialVersionUID = 1271324566L;
+    private static final long serialVersionUID = -334575587L;
 
   /**
    * Constructor
@@ -3129,56 +3133,56 @@ Any information provided in these elements overrides the information from the de
     }
 
     /**
-     * @return {@link #concept} (Identifies how this question or group of questions is known in a particular terminology such as LOINC.)
+     * @return {@link #code} (Identifies how this question or group of questions is known in a particular terminology such as LOINC.)
      */
-    public List<Coding> getConcept() { 
-      if (this.concept == null)
-        this.concept = new ArrayList<Coding>();
-      return this.concept;
+    public List<Coding> getCode() { 
+      if (this.code == null)
+        this.code = new ArrayList<Coding>();
+      return this.code;
     }
 
     /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
-    public Questionnaire setConcept(List<Coding> theConcept) { 
-      this.concept = theConcept;
+    public Questionnaire setCode(List<Coding> theCode) { 
+      this.code = theCode;
       return this;
     }
 
-    public boolean hasConcept() { 
-      if (this.concept == null)
+    public boolean hasCode() { 
+      if (this.code == null)
         return false;
-      for (Coding item : this.concept)
+      for (Coding item : this.code)
         if (!item.isEmpty())
           return true;
       return false;
     }
 
-    public Coding addConcept() { //3
+    public Coding addCode() { //3
       Coding t = new Coding();
-      if (this.concept == null)
-        this.concept = new ArrayList<Coding>();
-      this.concept.add(t);
+      if (this.code == null)
+        this.code = new ArrayList<Coding>();
+      this.code.add(t);
       return t;
     }
 
-    public Questionnaire addConcept(Coding t) { //3
+    public Questionnaire addCode(Coding t) { //3
       if (t == null)
         return this;
-      if (this.concept == null)
-        this.concept = new ArrayList<Coding>();
-      this.concept.add(t);
+      if (this.code == null)
+        this.code = new ArrayList<Coding>();
+      this.code.add(t);
       return this;
     }
 
     /**
-     * @return The first repetition of repeating field {@link #concept}, creating it if it does not already exist
+     * @return The first repetition of repeating field {@link #code}, creating it if it does not already exist
      */
-    public Coding getConceptFirstRep() { 
-      if (getConcept().isEmpty()) {
-        addConcept();
+    public Coding getCodeFirstRep() { 
+      if (getCode().isEmpty()) {
+        addCode();
       }
-      return getConcept().get(0);
+      return getCode().get(0);
     }
 
     /**
@@ -3306,7 +3310,7 @@ Any information provided in these elements overrides the information from the de
         childrenList.add(new Property("telecom", "ContactPoint", "Contact details to assist a user in finding and communicating with the publisher.", 0, java.lang.Integer.MAX_VALUE, telecom));
         childrenList.add(new Property("useContext", "CodeableConcept", "A code that identifies the questionnaire as falling into a particular group of like questionnaires; e.g. \"Pediatric\", \"Admissions\", \"Research\", \"Demographic\", \"Opinion Survey\", etc.", 0, java.lang.Integer.MAX_VALUE, useContext));
         childrenList.add(new Property("title", "string", "The name or label associated with this questionnaire.", 0, java.lang.Integer.MAX_VALUE, title));
-        childrenList.add(new Property("concept", "Coding", "Identifies how this question or group of questions is known in a particular terminology such as LOINC.", 0, java.lang.Integer.MAX_VALUE, concept));
+        childrenList.add(new Property("code", "Coding", "Identifies how this question or group of questions is known in a particular terminology such as LOINC.", 0, java.lang.Integer.MAX_VALUE, code));
         childrenList.add(new Property("subjectType", "code", "Identifies the types of subjects that can be the subject of the questionnaire.", 0, java.lang.Integer.MAX_VALUE, subjectType));
         childrenList.add(new Property("item", "", "The questions and groupings of questions that make up the questionnaire.", 0, java.lang.Integer.MAX_VALUE, item));
       }
@@ -3323,7 +3327,7 @@ Any information provided in these elements overrides the information from the de
         case -1429363305: /*telecom*/ return this.telecom == null ? new Base[0] : this.telecom.toArray(new Base[this.telecom.size()]); // ContactPoint
         case -669707736: /*useContext*/ return this.useContext == null ? new Base[0] : this.useContext.toArray(new Base[this.useContext.size()]); // CodeableConcept
         case 110371416: /*title*/ return this.title == null ? new Base[0] : new Base[] {this.title}; // StringType
-        case 951024232: /*concept*/ return this.concept == null ? new Base[0] : this.concept.toArray(new Base[this.concept.size()]); // Coding
+        case 3059181: /*code*/ return this.code == null ? new Base[0] : this.code.toArray(new Base[this.code.size()]); // Coding
         case -603200890: /*subjectType*/ return this.subjectType == null ? new Base[0] : this.subjectType.toArray(new Base[this.subjectType.size()]); // CodeType
         case 3242771: /*item*/ return this.item == null ? new Base[0] : this.item.toArray(new Base[this.item.size()]); // QuestionnaireItemComponent
         default: return super.getProperty(hash, name, checkValid);
@@ -3332,95 +3336,118 @@ Any information provided in these elements overrides the information from the de
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case 116079: // url
           this.url = castToUri(value); // UriType
-          break;
+          return value;
         case -1618432855: // identifier
           this.getIdentifier().add(castToIdentifier(value)); // Identifier
-          break;
+          return value;
         case 351608024: // version
           this.version = castToString(value); // StringType
-          break;
+          return value;
         case -892481550: // status
-          this.status = new QuestionnaireStatusEnumFactory().fromType(value); // Enumeration<QuestionnaireStatus>
-          break;
+          value = new QuestionnaireStatusEnumFactory().fromType(castToCode(value));
+          this.status = (Enumeration) value; // Enumeration<QuestionnaireStatus>
+          return value;
         case 3076014: // date
           this.date = castToDateTime(value); // DateTimeType
-          break;
+          return value;
         case 1447404028: // publisher
           this.publisher = castToString(value); // StringType
-          break;
+          return value;
         case -1429363305: // telecom
           this.getTelecom().add(castToContactPoint(value)); // ContactPoint
-          break;
+          return value;
         case -669707736: // useContext
           this.getUseContext().add(castToCodeableConcept(value)); // CodeableConcept
-          break;
+          return value;
         case 110371416: // title
           this.title = castToString(value); // StringType
-          break;
-        case 951024232: // concept
-          this.getConcept().add(castToCoding(value)); // Coding
-          break;
+          return value;
+        case 3059181: // code
+          this.getCode().add(castToCoding(value)); // Coding
+          return value;
         case -603200890: // subjectType
           this.getSubjectType().add(castToCode(value)); // CodeType
-          break;
+          return value;
         case 3242771: // item
           this.getItem().add((QuestionnaireItemComponent) value); // QuestionnaireItemComponent
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("url"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("url")) {
           this.url = castToUri(value); // UriType
-        else if (name.equals("identifier"))
+        } else if (name.equals("identifier")) {
           this.getIdentifier().add(castToIdentifier(value));
-        else if (name.equals("version"))
+        } else if (name.equals("version")) {
           this.version = castToString(value); // StringType
-        else if (name.equals("status"))
-          this.status = new QuestionnaireStatusEnumFactory().fromType(value); // Enumeration<QuestionnaireStatus>
-        else if (name.equals("date"))
+        } else if (name.equals("status")) {
+          value = new QuestionnaireStatusEnumFactory().fromType(castToCode(value));
+          this.status = (Enumeration) value; // Enumeration<QuestionnaireStatus>
+        } else if (name.equals("date")) {
           this.date = castToDateTime(value); // DateTimeType
-        else if (name.equals("publisher"))
+        } else if (name.equals("publisher")) {
           this.publisher = castToString(value); // StringType
-        else if (name.equals("telecom"))
+        } else if (name.equals("telecom")) {
           this.getTelecom().add(castToContactPoint(value));
-        else if (name.equals("useContext"))
+        } else if (name.equals("useContext")) {
           this.getUseContext().add(castToCodeableConcept(value));
-        else if (name.equals("title"))
+        } else if (name.equals("title")) {
           this.title = castToString(value); // StringType
-        else if (name.equals("concept"))
-          this.getConcept().add(castToCoding(value));
-        else if (name.equals("subjectType"))
+        } else if (name.equals("code")) {
+          this.getCode().add(castToCoding(value));
+        } else if (name.equals("subjectType")) {
           this.getSubjectType().add(castToCode(value));
-        else if (name.equals("item"))
+        } else if (name.equals("item")) {
           this.getItem().add((QuestionnaireItemComponent) value);
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 116079: throw new FHIRException("Cannot make property url as it is not a complex type"); // UriType
-        case -1618432855:  return addIdentifier(); // Identifier
-        case 351608024: throw new FHIRException("Cannot make property version as it is not a complex type"); // StringType
-        case -892481550: throw new FHIRException("Cannot make property status as it is not a complex type"); // Enumeration<QuestionnaireStatus>
-        case 3076014: throw new FHIRException("Cannot make property date as it is not a complex type"); // DateTimeType
-        case 1447404028: throw new FHIRException("Cannot make property publisher as it is not a complex type"); // StringType
-        case -1429363305:  return addTelecom(); // ContactPoint
-        case -669707736:  return addUseContext(); // CodeableConcept
-        case 110371416: throw new FHIRException("Cannot make property title as it is not a complex type"); // StringType
-        case 951024232:  return addConcept(); // Coding
-        case -603200890: throw new FHIRException("Cannot make property subjectType as it is not a complex type"); // CodeType
-        case 3242771:  return addItem(); // QuestionnaireItemComponent
+        case 116079:  return getUrlElement();
+        case -1618432855:  return addIdentifier(); 
+        case 351608024:  return getVersionElement();
+        case -892481550:  return getStatusElement();
+        case 3076014:  return getDateElement();
+        case 1447404028:  return getPublisherElement();
+        case -1429363305:  return addTelecom(); 
+        case -669707736:  return addUseContext(); 
+        case 110371416:  return getTitleElement();
+        case 3059181:  return addCode(); 
+        case -603200890:  return addSubjectTypeElement();
+        case 3242771:  return addItem(); 
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 116079: /*url*/ return new String[] {"uri"};
+        case -1618432855: /*identifier*/ return new String[] {"Identifier"};
+        case 351608024: /*version*/ return new String[] {"string"};
+        case -892481550: /*status*/ return new String[] {"code"};
+        case 3076014: /*date*/ return new String[] {"dateTime"};
+        case 1447404028: /*publisher*/ return new String[] {"string"};
+        case -1429363305: /*telecom*/ return new String[] {"ContactPoint"};
+        case -669707736: /*useContext*/ return new String[] {"CodeableConcept"};
+        case 110371416: /*title*/ return new String[] {"string"};
+        case 3059181: /*code*/ return new String[] {"Coding"};
+        case -603200890: /*subjectType*/ return new String[] {"code"};
+        case 3242771: /*item*/ return new String[] {};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }
@@ -3454,8 +3481,8 @@ Any information provided in these elements overrides the information from the de
         else if (name.equals("title")) {
           throw new FHIRException("Cannot call addChild on a primitive type Questionnaire.title");
         }
-        else if (name.equals("concept")) {
-          return addConcept();
+        else if (name.equals("code")) {
+          return addCode();
         }
         else if (name.equals("subjectType")) {
           throw new FHIRException("Cannot call addChild on a primitive type Questionnaire.subjectType");
@@ -3496,10 +3523,10 @@ Any information provided in these elements overrides the information from the de
             dst.useContext.add(i.copy());
         };
         dst.title = title == null ? null : title.copy();
-        if (concept != null) {
-          dst.concept = new ArrayList<Coding>();
-          for (Coding i : concept)
-            dst.concept.add(i.copy());
+        if (code != null) {
+          dst.code = new ArrayList<Coding>();
+          for (Coding i : code)
+            dst.code.add(i.copy());
         };
         if (subjectType != null) {
           dst.subjectType = new ArrayList<CodeType>();
@@ -3528,7 +3555,7 @@ Any information provided in these elements overrides the information from the de
         return compareDeep(url, o.url, true) && compareDeep(identifier, o.identifier, true) && compareDeep(version, o.version, true)
            && compareDeep(status, o.status, true) && compareDeep(date, o.date, true) && compareDeep(publisher, o.publisher, true)
            && compareDeep(telecom, o.telecom, true) && compareDeep(useContext, o.useContext, true) && compareDeep(title, o.title, true)
-           && compareDeep(concept, o.concept, true) && compareDeep(subjectType, o.subjectType, true) && compareDeep(item, o.item, true)
+           && compareDeep(code, o.code, true) && compareDeep(subjectType, o.subjectType, true) && compareDeep(item, o.item, true)
           ;
       }
 
@@ -3546,8 +3573,8 @@ Any information provided in these elements overrides the information from the de
 
       public boolean isEmpty() {
         return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(url, identifier, version
-          , status, date, publisher, telecom, useContext, title, concept, subjectType
-          , item);
+          , status, date, publisher, telecom, useContext, title, code, subjectType, item
+          );
       }
 
   @Override
@@ -3600,17 +3627,17 @@ Any information provided in these elements overrides the information from the de
    * <p>
    * Description: <b>A code that corresponds to the questionnaire or one of its groups</b><br>
    * Type: <b>token</b><br>
-   * Path: <b>Questionnaire.item.concept</b><br>
+   * Path: <b>Questionnaire.item.code</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="code", path="Questionnaire.item.concept", description="A code that corresponds to the questionnaire or one of its groups", type="token" )
+  @SearchParamDefinition(name="code", path="Questionnaire.item.code", description="A code that corresponds to the questionnaire or one of its groups", type="token" )
   public static final String SP_CODE = "code";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>code</b>
    * <p>
    * Description: <b>A code that corresponds to the questionnaire or one of its groups</b><br>
    * Type: <b>token</b><br>
-   * Path: <b>Questionnaire.item.concept</b><br>
+   * Path: <b>Questionnaire.item.code</b><br>
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.TokenClientParam CODE = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_CODE);

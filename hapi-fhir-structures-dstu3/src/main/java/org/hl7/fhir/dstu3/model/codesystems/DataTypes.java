@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -89,9 +89,9 @@ public enum DataTypes {
          */
         DISTANCE, 
         /**
-         * Indicates how the medication is to be used by the patient.
+         * Indicates how the medication is/was taken or should be taken by the patient.
          */
-        DOSAGEINSTRUCTION, 
+        DOSAGE, 
         /**
          * A length of time.
          */
@@ -169,7 +169,7 @@ public enum DataTypes {
          */
         SIMPLEQUANTITY, 
         /**
-         * Specifies an event that may occur multiple times. Timing schedules are used to record when things are expected or requested to occur. The most common usage is in dosage instructions for medications. They are also used when planning care of various kinds.
+         * Specifies an event that may occur multiple times. Timing schedules are used to record when things are planned, expected or requested to occur. The most common usage is in dosage instructions for medications. They are also used when planning care of various kinds, and may be used for reporting the schedule to which past regular activities were carried out.
          */
         TIMING, 
         /**
@@ -285,8 +285,8 @@ public enum DataTypes {
           return DATAREQUIREMENT;
         if ("Distance".equals(codeString))
           return DISTANCE;
-        if ("DosageInstruction".equals(codeString))
-          return DOSAGEINSTRUCTION;
+        if ("Dosage".equals(codeString))
+          return DOSAGE;
         if ("Duration".equals(codeString))
           return DURATION;
         if ("Element".equals(codeString))
@@ -384,7 +384,7 @@ public enum DataTypes {
             case COUNT: return "Count";
             case DATAREQUIREMENT: return "DataRequirement";
             case DISTANCE: return "Distance";
-            case DOSAGEINSTRUCTION: return "DosageInstruction";
+            case DOSAGE: return "Dosage";
             case DURATION: return "Duration";
             case ELEMENT: return "Element";
             case ELEMENTDEFINITION: return "ElementDefinition";
@@ -446,7 +446,7 @@ public enum DataTypes {
             case COUNT: return "A measured amount (or an amount that can potentially be measured). Note that measured amounts include amounts that are not precisely quantified, including amounts involving arbitrary units and floating currencies.";
             case DATAREQUIREMENT: return "Describes a required data item for evaluation in terms of the type of data, and optional code- or date-based filters of the data.";
             case DISTANCE: return "A length - a value with a unit that is a physical distance.";
-            case DOSAGEINSTRUCTION: return "Indicates how the medication is to be used by the patient.";
+            case DOSAGE: return "Indicates how the medication is/was taken or should be taken by the patient.";
             case DURATION: return "A length of time.";
             case ELEMENT: return "Base definition for all elements in a resource.";
             case ELEMENTDEFINITION: return "Captures constraints on each element within the resource, profile, or extension.";
@@ -466,7 +466,7 @@ public enum DataTypes {
             case SAMPLEDDATA: return "A series of measurements taken by a device, with upper and lower limits. There may be more than one dimension in the data.";
             case SIGNATURE: return "A digital signature along with supporting context. The signature may be electronic/cryptographic in nature, or a graphical image representing a hand-written signature, or a signature process. Different Signature approaches have different utilities.";
             case SIMPLEQUANTITY: return "";
-            case TIMING: return "Specifies an event that may occur multiple times. Timing schedules are used to record when things are expected or requested to occur. The most common usage is in dosage instructions for medications. They are also used when planning care of various kinds.";
+            case TIMING: return "Specifies an event that may occur multiple times. Timing schedules are used to record when things are planned, expected or requested to occur. The most common usage is in dosage instructions for medications. They are also used when planning care of various kinds, and may be used for reporting the schedule to which past regular activities were carried out.";
             case TRIGGERDEFINITION: return "A description of a triggering event.";
             case USAGECONTEXT: return "Specifies clinical/business/etc metadata that can be used to retrieve, index and/or categorize an artifact. This metadata can either be specific to the applicable population (e.g., age category, DRG) or the specific context of care (e.g., venue, care setting, provider of care).";
             case BASE64BINARY: return "A stream of bytes";
@@ -505,7 +505,7 @@ public enum DataTypes {
             case COUNT: return "Count";
             case DATAREQUIREMENT: return "DataRequirement";
             case DISTANCE: return "Distance";
-            case DOSAGEINSTRUCTION: return "DosageInstruction";
+            case DOSAGE: return "Dosage";
             case DURATION: return "Duration";
             case ELEMENT: return "Element";
             case ELEMENTDEFINITION: return "ElementDefinition";

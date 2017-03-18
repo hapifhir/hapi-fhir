@@ -470,8 +470,9 @@ public class FhirInstanceValidatorDstu3Test {
 		// @formatter:on
 
 		ValidationResult output = myVal.validateWithResult(input);
-		assertEquals(output.toString(), 1, output.getMessages().size());
+		assertEquals(output.toString(), 2, output.getMessages().size());
 		assertThat(output.getMessages().get(0).getMessage(), containsString("Element must have some content"));
+      assertThat(output.getMessages().get(1).getMessage(), containsString("primitive types must have a value or must have child extensions"));
 	}
 
 	@Test
@@ -481,7 +482,6 @@ public class FhirInstanceValidatorDstu3Test {
 				"                        <id value=\"referralToMentalHealthCare\"/>\n" + 
 				"                        <status value=\"draft\"/>\n" + 
 				"                        <description value=\"refer to primary care mental-health integrated care program for evaluation and treatment of mental health conditions now\"/>\n" + 
-				"                        <category value=\"referral\"/>\n" + 
 				"                        <code>\n" + 
 				"                                <coding>\n" + 
 				"                                        <!-- Error: Connection to http://localhost:960 refused -->\n" + 
@@ -497,7 +497,6 @@ public class FhirInstanceValidatorDstu3Test {
 				"                                        </extension>\n" + 
 				"                                </event>\n" + 
 				"                        </timingTiming>\n" + 
-				"                        <participantType value=\"practitioner\"/>\n" + 
 				"                </ActivityDefinition>";
 		// @formatter:on
 
@@ -529,7 +528,7 @@ public class FhirInstanceValidatorDstu3Test {
 		// input.getMeta().addProfile("http://hl7.org/fhir/StructureDefinition/devicemetricobservation");
 
 		input.addIdentifier().setSystem("http://acme").setValue("12345");
-		input.getEncounter().setReference("http://foo.com/Encounter/9");
+		input.getContext().setReference("http://foo.com/Encounter/9");
 		input.setStatus(ObservationStatus.FINAL);
 		input.getCode().addCoding().setSystem("http://loinc.org").setCode("12345");
 
@@ -549,7 +548,7 @@ public class FhirInstanceValidatorDstu3Test {
 		input.getMeta().addProfile("http://hl7.org/fhir/StructureDefinition/devicemetricobservation");
 
 		input.addIdentifier().setSystem("http://acme").setValue("12345");
-		input.getEncounter().setReference("http://foo.com/Encounter/9");
+		input.getContext().setReference("http://foo.com/Encounter/9");
 		input.setStatus(ObservationStatus.FINAL);
 		input.getCode().addCoding().setSystem("http://loinc.org").setCode("12345");
 
@@ -558,7 +557,7 @@ public class FhirInstanceValidatorDstu3Test {
 		List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
 
 		assertThat(errors.toString(), containsString("Element 'Observation.subject': minimum required = 1, but only found 0"));
-		assertThat(errors.toString(), containsString("Element 'Observation.encounter: max allowed = 0, but found 1"));
+		assertThat(errors.toString(), containsString("Element 'Observation.context: max allowed = 0, but found 1"));
 		assertThat(errors.toString(), containsString("Element 'Observation.device': minimum required = 1, but only found 0"));
 		assertThat(errors.toString(), containsString(""));
 	}
@@ -620,7 +619,7 @@ public class FhirInstanceValidatorDstu3Test {
 		//@formatter:on
 		ValidationResult output = myVal.validateWithResult(input);
 		logResultsAndReturnAll(output);
-		assertEquals("The value provided ('notvalidcode') is not in the value set http://hl7.org/fhir/ValueSet/observation-status (http://hl7.org/fhir/ValueSet/observation-status, and a code is required from this value set)", output.getMessages().get(0).getMessage());
+		assertEquals("The value provided ('notvalidcode') is not in the value set http://hl7.org/fhir/ValueSet/observation-status (http://hl7.org/fhir/ValueSet/observation-status, and a code is required from this value set) (error message = Unknown code[notvalidcode] in system[null])", output.getMessages().get(0).getMessage());
 	}
 
 	@Test

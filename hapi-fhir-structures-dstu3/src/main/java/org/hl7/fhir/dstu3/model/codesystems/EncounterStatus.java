@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -44,6 +44,10 @@ public enum EncounterStatus {
          * The Patient is present for the encounter, however is not currently meeting with a practitioner.
          */
         ARRIVED, 
+        /**
+         * The patient has been assessed for the priority of their treatment based on the severity of their condition.
+         */
+        TRIAGED, 
         /**
          * The Encounter has begun and the patient is present / the practitioner and the patient are meeting.
          */
@@ -65,6 +69,10 @@ public enum EncounterStatus {
          */
         ENTEREDINERROR, 
         /**
+         * The encounter status is unknown. Note that "unknown" is a value of last resort and every attempt should be made to provide a meaningful value other than "unknown".
+         */
+        UNKNOWN, 
+        /**
          * added to help the parsers
          */
         NULL;
@@ -75,6 +83,8 @@ public enum EncounterStatus {
           return PLANNED;
         if ("arrived".equals(codeString))
           return ARRIVED;
+        if ("triaged".equals(codeString))
+          return TRIAGED;
         if ("in-progress".equals(codeString))
           return INPROGRESS;
         if ("onleave".equals(codeString))
@@ -85,17 +95,21 @@ public enum EncounterStatus {
           return CANCELLED;
         if ("entered-in-error".equals(codeString))
           return ENTEREDINERROR;
+        if ("unknown".equals(codeString))
+          return UNKNOWN;
         throw new FHIRException("Unknown EncounterStatus code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
             case PLANNED: return "planned";
             case ARRIVED: return "arrived";
+            case TRIAGED: return "triaged";
             case INPROGRESS: return "in-progress";
             case ONLEAVE: return "onleave";
             case FINISHED: return "finished";
             case CANCELLED: return "cancelled";
             case ENTEREDINERROR: return "entered-in-error";
+            case UNKNOWN: return "unknown";
             default: return "?";
           }
         }
@@ -106,11 +120,13 @@ public enum EncounterStatus {
           switch (this) {
             case PLANNED: return "The Encounter has not yet started.";
             case ARRIVED: return "The Patient is present for the encounter, however is not currently meeting with a practitioner.";
+            case TRIAGED: return "The patient has been assessed for the priority of their treatment based on the severity of their condition.";
             case INPROGRESS: return "The Encounter has begun and the patient is present / the practitioner and the patient are meeting.";
             case ONLEAVE: return "The Encounter has begun, but the patient is temporarily on leave.";
             case FINISHED: return "The Encounter has ended.";
             case CANCELLED: return "The Encounter has ended before it has begun.";
             case ENTEREDINERROR: return "This instance should not have been part of this patient's medical record.";
+            case UNKNOWN: return "The encounter status is unknown. Note that \"unknown\" is a value of last resort and every attempt should be made to provide a meaningful value other than \"unknown\".";
             default: return "?";
           }
         }
@@ -118,11 +134,13 @@ public enum EncounterStatus {
           switch (this) {
             case PLANNED: return "Planned";
             case ARRIVED: return "Arrived";
+            case TRIAGED: return "Triaged";
             case INPROGRESS: return "In Progress";
             case ONLEAVE: return "On Leave";
             case FINISHED: return "Finished";
             case CANCELLED: return "Cancelled";
             case ENTEREDINERROR: return "Entered in Error";
+            case UNKNOWN: return "Unknown";
             default: return "?";
           }
     }

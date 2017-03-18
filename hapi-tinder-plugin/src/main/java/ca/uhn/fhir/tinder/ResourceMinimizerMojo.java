@@ -94,13 +94,6 @@ public class ResourceMinimizerMojo extends AbstractMojo {
 						}
 					}
 				}
-			} else if (input instanceof org.hl7.fhir.instance.model.Bundle) {
-				for (BundleEntryComponent nextEntry : ((org.hl7.fhir.instance.model.Bundle) input).getEntry()) {
-					if (nextEntry.getResource() instanceof DomainResource) {
-						((DomainResource) nextEntry.getResource()).getText().getDiv().setValueAsString((String) null);
-						((DomainResource) nextEntry.getResource()).getText().getStatusElement().setValueAsString((String) null);
-					}
-				}
 			} else if (input instanceof org.hl7.fhir.dstu3.model.Bundle) {
 				for (org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent nextEntry : ((org.hl7.fhir.dstu3.model.Bundle) input).getEntry()) {
 					if (nextEntry.getResource() instanceof org.hl7.fhir.dstu3.model.DomainResource) {
@@ -115,10 +108,10 @@ public class ResourceMinimizerMojo extends AbstractMojo {
 						((org.hl7.fhir.dstu2016may.model.DomainResource) nextEntry.getResource()).getText().getStatusElement().setValueAsString((String) null);
 					}
 				}
-			} else if (input instanceof DomainResource) {
+			} else if (input instanceof org.hl7.fhir.dstu3.model.DomainResource) {
 				try {
-					((DomainResource) input).getText().setDivAsString(null);
-					((DomainResource) input).getText().getStatusElement().setValueAsString(null);
+					((org.hl7.fhir.dstu3.model.DomainResource) input).getText().setDivAsString(null);
+					((org.hl7.fhir.dstu3.model.DomainResource) input).getText().getStatusElement().setValueAsString(null);
 				} catch (Exception e) {
 					ourLog.error("Failed to clear narrative", e);
 				}
@@ -224,21 +217,21 @@ public class ResourceMinimizerMojo extends AbstractMojo {
 		byteCount += m.getByteCount();
 		fileCount += m.getFileCount();
 
-		m = new ResourceMinimizerMojo();
-		m.myCtx = ctxDstu2_1;
-		m.targetDirectory = new File("../hapi-fhir-validation-resources-dstu2.1/src/main/resources/org/hl7/fhir/dstu2016may/profile");
-		m.fhirVersion = "DSTU2_1";
-		m.execute();
-		byteCount += m.getByteCount();
-		fileCount += m.getFileCount();
-
-		m = new ResourceMinimizerMojo();
-		m.myCtx = ctxDstu2_1;
-		m.targetDirectory = new File("../hapi-fhir-validation-resources-dstu2.1/src/main/resources/org/hl7/fhir/dstu2016may/valueset");
-		m.fhirVersion = "DSTU2_1";
-		m.execute();
-		byteCount += m.getByteCount();
-		fileCount += m.getFileCount();
+//		m = new ResourceMinimizerMojo();
+//		m.myCtx = ctxDstu2_1;
+//		m.targetDirectory = new File("../hapi-fhir-validation-resources-dstu2.1/src/main/resources/org/hl7/fhir/dstu2016may/profile");
+//		m.fhirVersion = "DSTU2_1";
+//		m.execute();
+//		byteCount += m.getByteCount();
+//		fileCount += m.getFileCount();
+//
+//		m = new ResourceMinimizerMojo();
+//		m.myCtx = ctxDstu2_1;
+//		m.targetDirectory = new File("../hapi-fhir-validation-resources-dstu2.1/src/main/resources/org/hl7/fhir/dstu2016may/valueset");
+//		m.fhirVersion = "DSTU2_1";
+//		m.execute();
+//		byteCount += m.getByteCount();
+//		fileCount += m.getFileCount();
 
 		ourLog.info("Trimmed {} files", fileCount);
 		ourLog.info("Trimmed {} bytes", FileUtils.byteCountToDisplaySize(byteCount));

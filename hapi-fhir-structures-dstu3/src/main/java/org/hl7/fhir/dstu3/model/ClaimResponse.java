@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
 
 import java.util.*;
 
@@ -141,8 +141,10 @@ public class ClaimResponse extends DomainResource {
         throw new IllegalArgumentException("Unknown ClaimResponseStatus code '"+codeString+"'");
         }
         public Enumeration<ClaimResponseStatus> fromType(Base code) throws FHIRException {
-          if (code == null || code.isEmpty())
+          if (code == null)
             return null;
+          if (code.isEmpty())
+            return new Enumeration<ClaimResponseStatus>(this);
           String codeString = ((PrimitiveType) code).asStringValue();
           if (codeString == null || "".equals(codeString))
             return null;
@@ -189,10 +191,10 @@ public class ClaimResponse extends DomainResource {
         protected List<PositiveIntType> noteNumber;
 
         /**
-         * The adjudications results.
+         * The adjudication results.
          */
         @Child(name = "adjudication", type = {}, order=3, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-        @Description(shortDefinition="Adjudication details", formalDefinition="The adjudications results." )
+        @Description(shortDefinition="Adjudication details", formalDefinition="The adjudication results." )
         protected List<AdjudicationComponent> adjudication;
 
         /**
@@ -326,7 +328,7 @@ public class ClaimResponse extends DomainResource {
         }
 
         /**
-         * @return {@link #adjudication} (The adjudications results.)
+         * @return {@link #adjudication} (The adjudication results.)
          */
         public List<AdjudicationComponent> getAdjudication() { 
           if (this.adjudication == null)
@@ -435,7 +437,7 @@ public class ClaimResponse extends DomainResource {
           super.listChildren(childrenList);
           childrenList.add(new Property("sequenceLinkId", "positiveInt", "A service line number.", 0, java.lang.Integer.MAX_VALUE, sequenceLinkId));
           childrenList.add(new Property("noteNumber", "positiveInt", "A list of note references to the notes provided below.", 0, java.lang.Integer.MAX_VALUE, noteNumber));
-          childrenList.add(new Property("adjudication", "", "The adjudications results.", 0, java.lang.Integer.MAX_VALUE, adjudication));
+          childrenList.add(new Property("adjudication", "", "The adjudication results.", 0, java.lang.Integer.MAX_VALUE, adjudication));
           childrenList.add(new Property("detail", "", "The second tier service adjudications for submitted services.", 0, java.lang.Integer.MAX_VALUE, detail));
         }
 
@@ -452,47 +454,60 @@ public class ClaimResponse extends DomainResource {
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case -1422298666: // sequenceLinkId
           this.sequenceLinkId = castToPositiveInt(value); // PositiveIntType
-          break;
+          return value;
         case -1110033957: // noteNumber
           this.getNoteNumber().add(castToPositiveInt(value)); // PositiveIntType
-          break;
+          return value;
         case -231349275: // adjudication
           this.getAdjudication().add((AdjudicationComponent) value); // AdjudicationComponent
-          break;
+          return value;
         case -1335224239: // detail
           this.getDetail().add((ItemDetailComponent) value); // ItemDetailComponent
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("sequenceLinkId"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("sequenceLinkId")) {
           this.sequenceLinkId = castToPositiveInt(value); // PositiveIntType
-        else if (name.equals("noteNumber"))
+        } else if (name.equals("noteNumber")) {
           this.getNoteNumber().add(castToPositiveInt(value));
-        else if (name.equals("adjudication"))
+        } else if (name.equals("adjudication")) {
           this.getAdjudication().add((AdjudicationComponent) value);
-        else if (name.equals("detail"))
+        } else if (name.equals("detail")) {
           this.getDetail().add((ItemDetailComponent) value);
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case -1422298666: throw new FHIRException("Cannot make property sequenceLinkId as it is not a complex type"); // PositiveIntType
-        case -1110033957: throw new FHIRException("Cannot make property noteNumber as it is not a complex type"); // PositiveIntType
-        case -231349275:  return addAdjudication(); // AdjudicationComponent
-        case -1335224239:  return addDetail(); // ItemDetailComponent
+        case -1422298666:  return getSequenceLinkIdElement();
+        case -1110033957:  return addNoteNumberElement();
+        case -231349275:  return addAdjudication(); 
+        case -1335224239:  return addDetail(); 
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -1422298666: /*sequenceLinkId*/ return new String[] {"positiveInt"};
+        case -1110033957: /*noteNumber*/ return new String[] {"positiveInt"};
+        case -231349275: /*adjudication*/ return new String[] {};
+        case -1335224239: /*detail*/ return new String[] {};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }
@@ -585,7 +600,7 @@ public class ClaimResponse extends DomainResource {
          * Adjudication reason such as limit reached.
          */
         @Child(name = "reason", type = {CodeableConcept.class}, order=2, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Adjudication reason", formalDefinition="Adjudication reason such as limit reached." )
+        @Description(shortDefinition="Explanation of Adjudication outcome", formalDefinition="Adjudication reason such as limit reached." )
         @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/adjudication-reason")
         protected CodeableConcept reason;
 
@@ -780,47 +795,60 @@ public class ClaimResponse extends DomainResource {
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case 50511102: // category
           this.category = castToCodeableConcept(value); // CodeableConcept
-          break;
+          return value;
         case -934964668: // reason
           this.reason = castToCodeableConcept(value); // CodeableConcept
-          break;
+          return value;
         case -1413853096: // amount
           this.amount = castToMoney(value); // Money
-          break;
+          return value;
         case 111972721: // value
           this.value = castToDecimal(value); // DecimalType
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("category"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("category")) {
           this.category = castToCodeableConcept(value); // CodeableConcept
-        else if (name.equals("reason"))
+        } else if (name.equals("reason")) {
           this.reason = castToCodeableConcept(value); // CodeableConcept
-        else if (name.equals("amount"))
+        } else if (name.equals("amount")) {
           this.amount = castToMoney(value); // Money
-        else if (name.equals("value"))
+        } else if (name.equals("value")) {
           this.value = castToDecimal(value); // DecimalType
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 50511102:  return getCategory(); // CodeableConcept
-        case -934964668:  return getReason(); // CodeableConcept
-        case -1413853096:  return getAmount(); // Money
-        case 111972721: throw new FHIRException("Cannot make property value as it is not a complex type"); // DecimalType
+        case 50511102:  return getCategory(); 
+        case -934964668:  return getReason(); 
+        case -1413853096:  return getAmount(); 
+        case 111972721:  return getValueElement();
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 50511102: /*category*/ return new String[] {"CodeableConcept"};
+        case -934964668: /*reason*/ return new String[] {"CodeableConcept"};
+        case -1413853096: /*amount*/ return new String[] {"Money"};
+        case 111972721: /*value*/ return new String[] {"decimal"};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }
@@ -909,7 +937,7 @@ public class ClaimResponse extends DomainResource {
          * The adjudications results.
          */
         @Child(name = "adjudication", type = {AdjudicationComponent.class}, order=3, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-        @Description(shortDefinition="Detail adjudication", formalDefinition="The adjudications results." )
+        @Description(shortDefinition="Detail level adjudication details", formalDefinition="The adjudications results." )
         protected List<AdjudicationComponent> adjudication;
 
         /**
@@ -1169,47 +1197,60 @@ public class ClaimResponse extends DomainResource {
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case -1422298666: // sequenceLinkId
           this.sequenceLinkId = castToPositiveInt(value); // PositiveIntType
-          break;
+          return value;
         case -1110033957: // noteNumber
           this.getNoteNumber().add(castToPositiveInt(value)); // PositiveIntType
-          break;
+          return value;
         case -231349275: // adjudication
           this.getAdjudication().add((AdjudicationComponent) value); // AdjudicationComponent
-          break;
+          return value;
         case -828829007: // subDetail
           this.getSubDetail().add((SubDetailComponent) value); // SubDetailComponent
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("sequenceLinkId"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("sequenceLinkId")) {
           this.sequenceLinkId = castToPositiveInt(value); // PositiveIntType
-        else if (name.equals("noteNumber"))
+        } else if (name.equals("noteNumber")) {
           this.getNoteNumber().add(castToPositiveInt(value));
-        else if (name.equals("adjudication"))
+        } else if (name.equals("adjudication")) {
           this.getAdjudication().add((AdjudicationComponent) value);
-        else if (name.equals("subDetail"))
+        } else if (name.equals("subDetail")) {
           this.getSubDetail().add((SubDetailComponent) value);
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case -1422298666: throw new FHIRException("Cannot make property sequenceLinkId as it is not a complex type"); // PositiveIntType
-        case -1110033957: throw new FHIRException("Cannot make property noteNumber as it is not a complex type"); // PositiveIntType
-        case -231349275:  return addAdjudication(); // AdjudicationComponent
-        case -828829007:  return addSubDetail(); // SubDetailComponent
+        case -1422298666:  return getSequenceLinkIdElement();
+        case -1110033957:  return addNoteNumberElement();
+        case -231349275:  return addAdjudication(); 
+        case -828829007:  return addSubDetail(); 
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -1422298666: /*sequenceLinkId*/ return new String[] {"positiveInt"};
+        case -1110033957: /*noteNumber*/ return new String[] {"positiveInt"};
+        case -231349275: /*adjudication*/ return new String[] {"@ClaimResponse.item.adjudication"};
+        case -828829007: /*subDetail*/ return new String[] {};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }
@@ -1309,7 +1350,7 @@ public class ClaimResponse extends DomainResource {
          * The adjudications results.
          */
         @Child(name = "adjudication", type = {AdjudicationComponent.class}, order=3, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-        @Description(shortDefinition="Subdetail adjudication", formalDefinition="The adjudications results." )
+        @Description(shortDefinition="Subdetail level adjudication details", formalDefinition="The adjudications results." )
         protected List<AdjudicationComponent> adjudication;
 
         private static final long serialVersionUID = 1770463342L;
@@ -1507,41 +1548,53 @@ public class ClaimResponse extends DomainResource {
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case -1422298666: // sequenceLinkId
           this.sequenceLinkId = castToPositiveInt(value); // PositiveIntType
-          break;
+          return value;
         case -1110033957: // noteNumber
           this.getNoteNumber().add(castToPositiveInt(value)); // PositiveIntType
-          break;
+          return value;
         case -231349275: // adjudication
           this.getAdjudication().add((AdjudicationComponent) value); // AdjudicationComponent
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("sequenceLinkId"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("sequenceLinkId")) {
           this.sequenceLinkId = castToPositiveInt(value); // PositiveIntType
-        else if (name.equals("noteNumber"))
+        } else if (name.equals("noteNumber")) {
           this.getNoteNumber().add(castToPositiveInt(value));
-        else if (name.equals("adjudication"))
+        } else if (name.equals("adjudication")) {
           this.getAdjudication().add((AdjudicationComponent) value);
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case -1422298666: throw new FHIRException("Cannot make property sequenceLinkId as it is not a complex type"); // PositiveIntType
-        case -1110033957: throw new FHIRException("Cannot make property noteNumber as it is not a complex type"); // PositiveIntType
-        case -231349275:  return addAdjudication(); // AdjudicationComponent
+        case -1422298666:  return getSequenceLinkIdElement();
+        case -1110033957:  return addNoteNumberElement();
+        case -231349275:  return addAdjudication(); 
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -1422298666: /*sequenceLinkId*/ return new String[] {"positiveInt"};
+        case -1110033957: /*noteNumber*/ return new String[] {"positiveInt"};
+        case -231349275: /*adjudication*/ return new String[] {"@ClaimResponse.item.adjudication"};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }
@@ -2098,77 +2151,95 @@ public class ClaimResponse extends DomainResource {
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case -1422298666: // sequenceLinkId
           this.getSequenceLinkId().add(castToPositiveInt(value)); // PositiveIntType
-          break;
+          return value;
         case 1099842588: // revenue
           this.revenue = castToCodeableConcept(value); // CodeableConcept
-          break;
+          return value;
         case 50511102: // category
           this.category = castToCodeableConcept(value); // CodeableConcept
-          break;
+          return value;
         case 1984153269: // service
           this.service = castToCodeableConcept(value); // CodeableConcept
-          break;
+          return value;
         case -615513385: // modifier
           this.getModifier().add(castToCodeableConcept(value)); // CodeableConcept
-          break;
+          return value;
         case 101254: // fee
           this.fee = castToMoney(value); // Money
-          break;
+          return value;
         case -1110033957: // noteNumber
           this.getNoteNumber().add(castToPositiveInt(value)); // PositiveIntType
-          break;
+          return value;
         case -231349275: // adjudication
           this.getAdjudication().add((AdjudicationComponent) value); // AdjudicationComponent
-          break;
+          return value;
         case -1335224239: // detail
           this.getDetail().add((AddedItemsDetailComponent) value); // AddedItemsDetailComponent
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("sequenceLinkId"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("sequenceLinkId")) {
           this.getSequenceLinkId().add(castToPositiveInt(value));
-        else if (name.equals("revenue"))
+        } else if (name.equals("revenue")) {
           this.revenue = castToCodeableConcept(value); // CodeableConcept
-        else if (name.equals("category"))
+        } else if (name.equals("category")) {
           this.category = castToCodeableConcept(value); // CodeableConcept
-        else if (name.equals("service"))
+        } else if (name.equals("service")) {
           this.service = castToCodeableConcept(value); // CodeableConcept
-        else if (name.equals("modifier"))
+        } else if (name.equals("modifier")) {
           this.getModifier().add(castToCodeableConcept(value));
-        else if (name.equals("fee"))
+        } else if (name.equals("fee")) {
           this.fee = castToMoney(value); // Money
-        else if (name.equals("noteNumber"))
+        } else if (name.equals("noteNumber")) {
           this.getNoteNumber().add(castToPositiveInt(value));
-        else if (name.equals("adjudication"))
+        } else if (name.equals("adjudication")) {
           this.getAdjudication().add((AdjudicationComponent) value);
-        else if (name.equals("detail"))
+        } else if (name.equals("detail")) {
           this.getDetail().add((AddedItemsDetailComponent) value);
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case -1422298666: throw new FHIRException("Cannot make property sequenceLinkId as it is not a complex type"); // PositiveIntType
-        case 1099842588:  return getRevenue(); // CodeableConcept
-        case 50511102:  return getCategory(); // CodeableConcept
-        case 1984153269:  return getService(); // CodeableConcept
-        case -615513385:  return addModifier(); // CodeableConcept
-        case 101254:  return getFee(); // Money
-        case -1110033957: throw new FHIRException("Cannot make property noteNumber as it is not a complex type"); // PositiveIntType
-        case -231349275:  return addAdjudication(); // AdjudicationComponent
-        case -1335224239:  return addDetail(); // AddedItemsDetailComponent
+        case -1422298666:  return addSequenceLinkIdElement();
+        case 1099842588:  return getRevenue(); 
+        case 50511102:  return getCategory(); 
+        case 1984153269:  return getService(); 
+        case -615513385:  return addModifier(); 
+        case 101254:  return getFee(); 
+        case -1110033957:  return addNoteNumberElement();
+        case -231349275:  return addAdjudication(); 
+        case -1335224239:  return addDetail(); 
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -1422298666: /*sequenceLinkId*/ return new String[] {"positiveInt"};
+        case 1099842588: /*revenue*/ return new String[] {"CodeableConcept"};
+        case 50511102: /*category*/ return new String[] {"CodeableConcept"};
+        case 1984153269: /*service*/ return new String[] {"CodeableConcept"};
+        case -615513385: /*modifier*/ return new String[] {"CodeableConcept"};
+        case 101254: /*fee*/ return new String[] {"Money"};
+        case -1110033957: /*noteNumber*/ return new String[] {"positiveInt"};
+        case -231349275: /*adjudication*/ return new String[] {"@ClaimResponse.item.adjudication"};
+        case -1335224239: /*detail*/ return new String[] {};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }
@@ -2635,65 +2706,81 @@ public class ClaimResponse extends DomainResource {
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case 1099842588: // revenue
           this.revenue = castToCodeableConcept(value); // CodeableConcept
-          break;
+          return value;
         case 50511102: // category
           this.category = castToCodeableConcept(value); // CodeableConcept
-          break;
+          return value;
         case 1984153269: // service
           this.service = castToCodeableConcept(value); // CodeableConcept
-          break;
+          return value;
         case -615513385: // modifier
           this.getModifier().add(castToCodeableConcept(value)); // CodeableConcept
-          break;
+          return value;
         case 101254: // fee
           this.fee = castToMoney(value); // Money
-          break;
+          return value;
         case -1110033957: // noteNumber
           this.getNoteNumber().add(castToPositiveInt(value)); // PositiveIntType
-          break;
+          return value;
         case -231349275: // adjudication
           this.getAdjudication().add((AdjudicationComponent) value); // AdjudicationComponent
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("revenue"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("revenue")) {
           this.revenue = castToCodeableConcept(value); // CodeableConcept
-        else if (name.equals("category"))
+        } else if (name.equals("category")) {
           this.category = castToCodeableConcept(value); // CodeableConcept
-        else if (name.equals("service"))
+        } else if (name.equals("service")) {
           this.service = castToCodeableConcept(value); // CodeableConcept
-        else if (name.equals("modifier"))
+        } else if (name.equals("modifier")) {
           this.getModifier().add(castToCodeableConcept(value));
-        else if (name.equals("fee"))
+        } else if (name.equals("fee")) {
           this.fee = castToMoney(value); // Money
-        else if (name.equals("noteNumber"))
+        } else if (name.equals("noteNumber")) {
           this.getNoteNumber().add(castToPositiveInt(value));
-        else if (name.equals("adjudication"))
+        } else if (name.equals("adjudication")) {
           this.getAdjudication().add((AdjudicationComponent) value);
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 1099842588:  return getRevenue(); // CodeableConcept
-        case 50511102:  return getCategory(); // CodeableConcept
-        case 1984153269:  return getService(); // CodeableConcept
-        case -615513385:  return addModifier(); // CodeableConcept
-        case 101254:  return getFee(); // Money
-        case -1110033957: throw new FHIRException("Cannot make property noteNumber as it is not a complex type"); // PositiveIntType
-        case -231349275:  return addAdjudication(); // AdjudicationComponent
+        case 1099842588:  return getRevenue(); 
+        case 50511102:  return getCategory(); 
+        case 1984153269:  return getService(); 
+        case -615513385:  return addModifier(); 
+        case 101254:  return getFee(); 
+        case -1110033957:  return addNoteNumberElement();
+        case -231349275:  return addAdjudication(); 
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 1099842588: /*revenue*/ return new String[] {"CodeableConcept"};
+        case 50511102: /*category*/ return new String[] {"CodeableConcept"};
+        case 1984153269: /*service*/ return new String[] {"CodeableConcept"};
+        case -615513385: /*modifier*/ return new String[] {"CodeableConcept"};
+        case 101254: /*fee*/ return new String[] {"Money"};
+        case -1110033957: /*noteNumber*/ return new String[] {"positiveInt"};
+        case -231349275: /*adjudication*/ return new String[] {"@ClaimResponse.item.adjudication"};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }
@@ -3016,47 +3103,60 @@ public class ClaimResponse extends DomainResource {
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case -1422298666: // sequenceLinkId
           this.sequenceLinkId = castToPositiveInt(value); // PositiveIntType
-          break;
+          return value;
         case 516748423: // detailSequenceLinkId
           this.detailSequenceLinkId = castToPositiveInt(value); // PositiveIntType
-          break;
+          return value;
         case -1061088569: // subdetailSequenceLinkId
           this.subdetailSequenceLinkId = castToPositiveInt(value); // PositiveIntType
-          break;
+          return value;
         case 3059181: // code
           this.code = castToCodeableConcept(value); // CodeableConcept
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("sequenceLinkId"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("sequenceLinkId")) {
           this.sequenceLinkId = castToPositiveInt(value); // PositiveIntType
-        else if (name.equals("detailSequenceLinkId"))
+        } else if (name.equals("detailSequenceLinkId")) {
           this.detailSequenceLinkId = castToPositiveInt(value); // PositiveIntType
-        else if (name.equals("subdetailSequenceLinkId"))
+        } else if (name.equals("subdetailSequenceLinkId")) {
           this.subdetailSequenceLinkId = castToPositiveInt(value); // PositiveIntType
-        else if (name.equals("code"))
+        } else if (name.equals("code")) {
           this.code = castToCodeableConcept(value); // CodeableConcept
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case -1422298666: throw new FHIRException("Cannot make property sequenceLinkId as it is not a complex type"); // PositiveIntType
-        case 516748423: throw new FHIRException("Cannot make property detailSequenceLinkId as it is not a complex type"); // PositiveIntType
-        case -1061088569: throw new FHIRException("Cannot make property subdetailSequenceLinkId as it is not a complex type"); // PositiveIntType
-        case 3059181:  return getCode(); // CodeableConcept
+        case -1422298666:  return getSequenceLinkIdElement();
+        case 516748423:  return getDetailSequenceLinkIdElement();
+        case -1061088569:  return getSubdetailSequenceLinkIdElement();
+        case 3059181:  return getCode(); 
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -1422298666: /*sequenceLinkId*/ return new String[] {"positiveInt"};
+        case 516748423: /*detailSequenceLinkId*/ return new String[] {"positiveInt"};
+        case -1061088569: /*subdetailSequenceLinkId*/ return new String[] {"positiveInt"};
+        case 3059181: /*code*/ return new String[] {"CodeableConcept"};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }
@@ -3146,7 +3246,7 @@ public class ClaimResponse extends DomainResource {
          * Reason for the payment adjustment.
          */
         @Child(name = "adjustmentReason", type = {CodeableConcept.class}, order=3, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Reason for Payment adjustment", formalDefinition="Reason for the payment adjustment." )
+        @Description(shortDefinition="Explanation for the non-claim adjustment", formalDefinition="Reason for the payment adjustment." )
         @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/payment-adjustment-reason")
         protected CodeableConcept adjustmentReason;
 
@@ -3161,14 +3261,14 @@ public class ClaimResponse extends DomainResource {
          * Payable less any payment adjustment.
          */
         @Child(name = "amount", type = {Money.class}, order=5, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Payment amount", formalDefinition="Payable less any payment adjustment." )
+        @Description(shortDefinition="Payable amount after adjustment", formalDefinition="Payable less any payment adjustment." )
         protected Money amount;
 
         /**
          * Payment identifier.
          */
         @Child(name = "identifier", type = {Identifier.class}, order=6, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Payment identifier", formalDefinition="Payment identifier." )
+        @Description(shortDefinition="Identifier of the payment instrument", formalDefinition="Payment identifier." )
         protected Identifier identifier;
 
         private static final long serialVersionUID = 1539906026L;
@@ -3374,59 +3474,74 @@ public class ClaimResponse extends DomainResource {
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case 3575610: // type
           this.type = castToCodeableConcept(value); // CodeableConcept
-          break;
+          return value;
         case 1977085293: // adjustment
           this.adjustment = castToMoney(value); // Money
-          break;
+          return value;
         case -1255938543: // adjustmentReason
           this.adjustmentReason = castToCodeableConcept(value); // CodeableConcept
-          break;
+          return value;
         case 3076014: // date
           this.date = castToDate(value); // DateType
-          break;
+          return value;
         case -1413853096: // amount
           this.amount = castToMoney(value); // Money
-          break;
+          return value;
         case -1618432855: // identifier
           this.identifier = castToIdentifier(value); // Identifier
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("type"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("type")) {
           this.type = castToCodeableConcept(value); // CodeableConcept
-        else if (name.equals("adjustment"))
+        } else if (name.equals("adjustment")) {
           this.adjustment = castToMoney(value); // Money
-        else if (name.equals("adjustmentReason"))
+        } else if (name.equals("adjustmentReason")) {
           this.adjustmentReason = castToCodeableConcept(value); // CodeableConcept
-        else if (name.equals("date"))
+        } else if (name.equals("date")) {
           this.date = castToDate(value); // DateType
-        else if (name.equals("amount"))
+        } else if (name.equals("amount")) {
           this.amount = castToMoney(value); // Money
-        else if (name.equals("identifier"))
+        } else if (name.equals("identifier")) {
           this.identifier = castToIdentifier(value); // Identifier
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 3575610:  return getType(); // CodeableConcept
-        case 1977085293:  return getAdjustment(); // Money
-        case -1255938543:  return getAdjustmentReason(); // CodeableConcept
-        case 3076014: throw new FHIRException("Cannot make property date as it is not a complex type"); // DateType
-        case -1413853096:  return getAmount(); // Money
-        case -1618432855:  return getIdentifier(); // Identifier
+        case 3575610:  return getType(); 
+        case 1977085293:  return getAdjustment(); 
+        case -1255938543:  return getAdjustmentReason(); 
+        case 3076014:  return getDateElement();
+        case -1413853096:  return getAmount(); 
+        case -1618432855:  return getIdentifier(); 
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3575610: /*type*/ return new String[] {"CodeableConcept"};
+        case 1977085293: /*adjustment*/ return new String[] {"Money"};
+        case -1255938543: /*adjustmentReason*/ return new String[] {"CodeableConcept"};
+        case 3076014: /*date*/ return new String[] {"date"};
+        case -1413853096: /*amount*/ return new String[] {"Money"};
+        case -1618432855: /*identifier*/ return new String[] {"Identifier"};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }
@@ -3512,7 +3627,7 @@ public class ClaimResponse extends DomainResource {
          * An integer associated with each note which may be referred to from each service line item.
          */
         @Child(name = "number", type = {PositiveIntType.class}, order=1, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Note Number for this note", formalDefinition="An integer associated with each note which may be referred to from each service line item." )
+        @Description(shortDefinition="Sequence Number for this note", formalDefinition="An integer associated with each note which may be referred to from each service line item." )
         protected PositiveIntType number;
 
         /**
@@ -3534,7 +3649,7 @@ public class ClaimResponse extends DomainResource {
          * The ISO-639-1 alpha 2 code in lower case for the language, optionally followed by a hyphen and the ISO-3166-1 alpha 2 code for the region in upper case; e.g. "en" for English, or "en-US" for American English versus "en-EN" for England English.
          */
         @Child(name = "language", type = {CodeableConcept.class}, order=4, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Language", formalDefinition="The ISO-639-1 alpha 2 code in lower case for the language, optionally followed by a hyphen and the ISO-3166-1 alpha 2 code for the region in upper case; e.g. \"en\" for English, or \"en-US\" for American English versus \"en-EN\" for England English." )
+        @Description(shortDefinition="Language if different from the resource", formalDefinition="The ISO-639-1 alpha 2 code in lower case for the language, optionally followed by a hyphen and the ISO-3166-1 alpha 2 code for the region in upper case; e.g. \"en\" for English, or \"en-US\" for American English versus \"en-EN\" for England English." )
         @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/languages")
         protected CodeableConcept language;
 
@@ -3710,47 +3825,60 @@ public class ClaimResponse extends DomainResource {
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case -1034364087: // number
           this.number = castToPositiveInt(value); // PositiveIntType
-          break;
+          return value;
         case 3575610: // type
           this.type = castToCodeableConcept(value); // CodeableConcept
-          break;
+          return value;
         case 3556653: // text
           this.text = castToString(value); // StringType
-          break;
+          return value;
         case -1613589672: // language
           this.language = castToCodeableConcept(value); // CodeableConcept
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("number"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("number")) {
           this.number = castToPositiveInt(value); // PositiveIntType
-        else if (name.equals("type"))
+        } else if (name.equals("type")) {
           this.type = castToCodeableConcept(value); // CodeableConcept
-        else if (name.equals("text"))
+        } else if (name.equals("text")) {
           this.text = castToString(value); // StringType
-        else if (name.equals("language"))
+        } else if (name.equals("language")) {
           this.language = castToCodeableConcept(value); // CodeableConcept
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case -1034364087: throw new FHIRException("Cannot make property number as it is not a complex type"); // PositiveIntType
-        case 3575610:  return getType(); // CodeableConcept
-        case 3556653: throw new FHIRException("Cannot make property text as it is not a complex type"); // StringType
-        case -1613589672:  return getLanguage(); // CodeableConcept
+        case -1034364087:  return getNumberElement();
+        case 3575610:  return getType(); 
+        case 3556653:  return getTextElement();
+        case -1613589672:  return getLanguage(); 
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -1034364087: /*number*/ return new String[] {"positiveInt"};
+        case 3575610: /*type*/ return new String[] {"CodeableConcept"};
+        case 3556653: /*text*/ return new String[] {"string"};
+        case -1613589672: /*language*/ return new String[] {"CodeableConcept"};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }
@@ -3812,7 +3940,7 @@ public class ClaimResponse extends DomainResource {
       }
 
   public String fhirType() {
-    return "ClaimResponse.note";
+    return "ClaimResponse.processNote";
 
   }
 
@@ -4204,59 +4332,74 @@ public class ClaimResponse extends DomainResource {
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case 1349547969: // sequence
           this.sequence = castToPositiveInt(value); // PositiveIntType
-          break;
+          return value;
         case 97604197: // focal
           this.focal = castToBoolean(value); // BooleanType
-          break;
+          return value;
         case -351767064: // coverage
           this.coverage = castToReference(value); // Reference
-          break;
+          return value;
         case 259920682: // businessArrangement
           this.businessArrangement = castToString(value); // StringType
-          break;
+          return value;
         case 522246568: // preAuthRef
           this.getPreAuthRef().add(castToString(value)); // StringType
-          break;
+          return value;
         case 689513629: // claimResponse
           this.claimResponse = castToReference(value); // Reference
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("sequence"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("sequence")) {
           this.sequence = castToPositiveInt(value); // PositiveIntType
-        else if (name.equals("focal"))
+        } else if (name.equals("focal")) {
           this.focal = castToBoolean(value); // BooleanType
-        else if (name.equals("coverage"))
+        } else if (name.equals("coverage")) {
           this.coverage = castToReference(value); // Reference
-        else if (name.equals("businessArrangement"))
+        } else if (name.equals("businessArrangement")) {
           this.businessArrangement = castToString(value); // StringType
-        else if (name.equals("preAuthRef"))
+        } else if (name.equals("preAuthRef")) {
           this.getPreAuthRef().add(castToString(value));
-        else if (name.equals("claimResponse"))
+        } else if (name.equals("claimResponse")) {
           this.claimResponse = castToReference(value); // Reference
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 1349547969: throw new FHIRException("Cannot make property sequence as it is not a complex type"); // PositiveIntType
-        case 97604197: throw new FHIRException("Cannot make property focal as it is not a complex type"); // BooleanType
-        case -351767064:  return getCoverage(); // Reference
-        case 259920682: throw new FHIRException("Cannot make property businessArrangement as it is not a complex type"); // StringType
-        case 522246568: throw new FHIRException("Cannot make property preAuthRef as it is not a complex type"); // StringType
-        case 689513629:  return getClaimResponse(); // Reference
+        case 1349547969:  return getSequenceElement();
+        case 97604197:  return getFocalElement();
+        case -351767064:  return getCoverage(); 
+        case 259920682:  return getBusinessArrangementElement();
+        case 522246568:  return addPreAuthRefElement();
+        case 689513629:  return getClaimResponse(); 
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 1349547969: /*sequence*/ return new String[] {"positiveInt"};
+        case 97604197: /*focal*/ return new String[] {"boolean"};
+        case -351767064: /*coverage*/ return new String[] {"Reference"};
+        case 259920682: /*businessArrangement*/ return new String[] {"string"};
+        case 522246568: /*preAuthRef*/ return new String[] {"string"};
+        case 689513629: /*claimResponse*/ return new String[] {"Reference"};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }
@@ -4354,17 +4497,29 @@ public class ClaimResponse extends DomainResource {
     protected Enumeration<ClaimResponseStatus> status;
 
     /**
+     * Patient Resource.
+     */
+    @Child(name = "patient", type = {Patient.class}, order=2, min=0, max=1, modifier=false, summary=false)
+    @Description(shortDefinition="The subject of the Products and Services", formalDefinition="Patient Resource." )
+    protected Reference patient;
+
+    /**
+     * The actual object that is the target of the reference (Patient Resource.)
+     */
+    protected Patient patientTarget;
+
+    /**
      * The date when the enclosed suite of services were performed or completed.
      */
-    @Child(name = "created", type = {DateTimeType.class}, order=2, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "created", type = {DateTimeType.class}, order=3, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Creation date", formalDefinition="The date when the enclosed suite of services were performed or completed." )
     protected DateTimeType created;
 
     /**
      * The Insurer who produced this adjudicated response.
      */
-    @Child(name = "insurer", type = {Organization.class}, order=3, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Insurer", formalDefinition="The Insurer who produced this adjudicated response." )
+    @Child(name = "insurer", type = {Organization.class}, order=4, min=0, max=1, modifier=false, summary=false)
+    @Description(shortDefinition="Insurance issuing organization", formalDefinition="The Insurer who produced this adjudicated response." )
     protected Reference insurer;
 
     /**
@@ -4375,7 +4530,7 @@ public class ClaimResponse extends DomainResource {
     /**
      * The practitioner who is responsible for the services rendered to the patient.
      */
-    @Child(name = "requestProvider", type = {Practitioner.class}, order=4, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "requestProvider", type = {Practitioner.class}, order=5, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Responsible practitioner", formalDefinition="The practitioner who is responsible for the services rendered to the patient." )
     protected Reference requestProvider;
 
@@ -4387,7 +4542,7 @@ public class ClaimResponse extends DomainResource {
     /**
      * The organization which is responsible for the services rendered to the patient.
      */
-    @Child(name = "requestOrganization", type = {Organization.class}, order=5, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "requestOrganization", type = {Organization.class}, order=6, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Responsible organization", formalDefinition="The organization which is responsible for the services rendered to the patient." )
     protected Reference requestOrganization;
 
@@ -4399,7 +4554,7 @@ public class ClaimResponse extends DomainResource {
     /**
      * Original request resource referrence.
      */
-    @Child(name = "request", type = {Claim.class}, order=6, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "request", type = {Claim.class}, order=7, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Id of resource triggering adjudication", formalDefinition="Original request resource referrence." )
     protected Reference request;
 
@@ -4411,7 +4566,7 @@ public class ClaimResponse extends DomainResource {
     /**
      * Processing outcome errror, partial or complete processing.
      */
-    @Child(name = "outcome", type = {CodeableConcept.class}, order=7, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "outcome", type = {CodeableConcept.class}, order=8, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="complete | error | partial", formalDefinition="Processing outcome errror, partial or complete processing." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/remittance-outcome")
     protected CodeableConcept outcome;
@@ -4419,14 +4574,14 @@ public class ClaimResponse extends DomainResource {
     /**
      * A description of the status of the adjudication.
      */
-    @Child(name = "disposition", type = {StringType.class}, order=8, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "disposition", type = {StringType.class}, order=9, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Disposition Message", formalDefinition="A description of the status of the adjudication." )
     protected StringType disposition;
 
     /**
      * Party to be reimbursed: Subscriber, provider, other.
      */
-    @Child(name = "payeeType", type = {CodeableConcept.class}, order=9, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "payeeType", type = {CodeableConcept.class}, order=10, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Party to be paid any benefits payable", formalDefinition="Party to be reimbursed: Subscriber, provider, other." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/payeetype")
     protected CodeableConcept payeeType;
@@ -4434,56 +4589,56 @@ public class ClaimResponse extends DomainResource {
     /**
      * The first tier service adjudications for submitted services.
      */
-    @Child(name = "item", type = {}, order=10, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "item", type = {}, order=11, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Line items", formalDefinition="The first tier service adjudications for submitted services." )
     protected List<ItemComponent> item;
 
     /**
      * The first tier service adjudications for payor added services.
      */
-    @Child(name = "addItem", type = {}, order=11, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "addItem", type = {}, order=12, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Insurer added line items", formalDefinition="The first tier service adjudications for payor added services." )
     protected List<AddedItemComponent> addItem;
 
     /**
      * Mutually exclusive with Services Provided (Item).
      */
-    @Child(name = "error", type = {}, order=12, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "error", type = {}, order=13, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Processing errors", formalDefinition="Mutually exclusive with Services Provided (Item)." )
     protected List<ErrorComponent> error;
 
     /**
      * The total cost of the services reported.
      */
-    @Child(name = "totalCost", type = {Money.class}, order=13, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "totalCost", type = {Money.class}, order=14, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Total Cost of service from the Claim", formalDefinition="The total cost of the services reported." )
     protected Money totalCost;
 
     /**
      * The amount of deductible applied which was not allocated to any particular service line.
      */
-    @Child(name = "unallocDeductable", type = {Money.class}, order=14, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "unallocDeductable", type = {Money.class}, order=15, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Unallocated deductible", formalDefinition="The amount of deductible applied which was not allocated to any particular service line." )
     protected Money unallocDeductable;
 
     /**
      * Total amount of benefit payable (Equal to sum of the Benefit amounts from all detail lines and additions less the Unallocated Deductible).
      */
-    @Child(name = "totalBenefit", type = {Money.class}, order=15, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "totalBenefit", type = {Money.class}, order=16, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Total benefit payable for the Claim", formalDefinition="Total amount of benefit payable (Equal to sum of the Benefit amounts from all detail lines and additions less the Unallocated Deductible)." )
     protected Money totalBenefit;
 
     /**
      * Payment details for the claim if the claim has been paid.
      */
-    @Child(name = "payment", type = {}, order=16, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "payment", type = {}, order=17, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Payment details, if paid", formalDefinition="Payment details for the claim if the claim has been paid." )
     protected PaymentComponent payment;
 
     /**
      * Status of funds reservation (For provider, for Patient, None).
      */
-    @Child(name = "reserved", type = {Coding.class}, order=17, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "reserved", type = {Coding.class}, order=18, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Funds reserved status", formalDefinition="Status of funds reservation (For provider, for Patient, None)." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/fundsreserve")
     protected Coding reserved;
@@ -4491,7 +4646,7 @@ public class ClaimResponse extends DomainResource {
     /**
      * The form to be used for printing the content.
      */
-    @Child(name = "form", type = {CodeableConcept.class}, order=18, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "form", type = {CodeableConcept.class}, order=19, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Printed Form Identifier", formalDefinition="The form to be used for printing the content." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/forms")
     protected CodeableConcept form;
@@ -4499,14 +4654,14 @@ public class ClaimResponse extends DomainResource {
     /**
      * Note text.
      */
-    @Child(name = "note", type = {}, order=19, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "processNote", type = {}, order=20, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Processing notes", formalDefinition="Note text." )
-    protected List<NoteComponent> note;
+    protected List<NoteComponent> processNote;
 
     /**
      * Request for additional supporting or authorizing information, such as: documents, images or resources.
      */
-    @Child(name = "communicationRequest", type = {CommunicationRequest.class}, order=20, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "communicationRequest", type = {CommunicationRequest.class}, order=21, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Request for additional information", formalDefinition="Request for additional supporting or authorizing information, such as: documents, images or resources." )
     protected List<Reference> communicationRequest;
     /**
@@ -4518,11 +4673,11 @@ public class ClaimResponse extends DomainResource {
     /**
      * Financial instrument by which payment information for health care.
      */
-    @Child(name = "insurance", type = {}, order=21, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "insurance", type = {}, order=22, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Insurance or medical plan", formalDefinition="Financial instrument by which payment information for health care." )
     protected List<InsuranceComponent> insurance;
 
-    private static final long serialVersionUID = 1883063635L;
+    private static final long serialVersionUID = -488591755L;
 
   /**
    * Constructor
@@ -4630,6 +4785,50 @@ public class ClaimResponse extends DomainResource {
           this.status = new Enumeration<ClaimResponseStatus>(new ClaimResponseStatusEnumFactory());
         this.status.setValue(value);
       }
+      return this;
+    }
+
+    /**
+     * @return {@link #patient} (Patient Resource.)
+     */
+    public Reference getPatient() { 
+      if (this.patient == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create ClaimResponse.patient");
+        else if (Configuration.doAutoCreate())
+          this.patient = new Reference(); // cc
+      return this.patient;
+    }
+
+    public boolean hasPatient() { 
+      return this.patient != null && !this.patient.isEmpty();
+    }
+
+    /**
+     * @param value {@link #patient} (Patient Resource.)
+     */
+    public ClaimResponse setPatient(Reference value) { 
+      this.patient = value;
+      return this;
+    }
+
+    /**
+     * @return {@link #patient} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (Patient Resource.)
+     */
+    public Patient getPatientTarget() { 
+      if (this.patientTarget == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create ClaimResponse.patient");
+        else if (Configuration.doAutoCreate())
+          this.patientTarget = new Patient(); // aa
+      return this.patientTarget;
+    }
+
+    /**
+     * @param value {@link #patient} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (Patient Resource.)
+     */
+    public ClaimResponse setPatientTarget(Patient value) { 
+      this.patientTarget = value;
       return this;
     }
 
@@ -5259,56 +5458,56 @@ public class ClaimResponse extends DomainResource {
     }
 
     /**
-     * @return {@link #note} (Note text.)
+     * @return {@link #processNote} (Note text.)
      */
-    public List<NoteComponent> getNote() { 
-      if (this.note == null)
-        this.note = new ArrayList<NoteComponent>();
-      return this.note;
+    public List<NoteComponent> getProcessNote() { 
+      if (this.processNote == null)
+        this.processNote = new ArrayList<NoteComponent>();
+      return this.processNote;
     }
 
     /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
-    public ClaimResponse setNote(List<NoteComponent> theNote) { 
-      this.note = theNote;
+    public ClaimResponse setProcessNote(List<NoteComponent> theProcessNote) { 
+      this.processNote = theProcessNote;
       return this;
     }
 
-    public boolean hasNote() { 
-      if (this.note == null)
+    public boolean hasProcessNote() { 
+      if (this.processNote == null)
         return false;
-      for (NoteComponent item : this.note)
+      for (NoteComponent item : this.processNote)
         if (!item.isEmpty())
           return true;
       return false;
     }
 
-    public NoteComponent addNote() { //3
+    public NoteComponent addProcessNote() { //3
       NoteComponent t = new NoteComponent();
-      if (this.note == null)
-        this.note = new ArrayList<NoteComponent>();
-      this.note.add(t);
+      if (this.processNote == null)
+        this.processNote = new ArrayList<NoteComponent>();
+      this.processNote.add(t);
       return t;
     }
 
-    public ClaimResponse addNote(NoteComponent t) { //3
+    public ClaimResponse addProcessNote(NoteComponent t) { //3
       if (t == null)
         return this;
-      if (this.note == null)
-        this.note = new ArrayList<NoteComponent>();
-      this.note.add(t);
+      if (this.processNote == null)
+        this.processNote = new ArrayList<NoteComponent>();
+      this.processNote.add(t);
       return this;
     }
 
     /**
-     * @return The first repetition of repeating field {@link #note}, creating it if it does not already exist
+     * @return The first repetition of repeating field {@link #processNote}, creating it if it does not already exist
      */
-    public NoteComponent getNoteFirstRep() { 
-      if (getNote().isEmpty()) {
-        addNote();
+    public NoteComponent getProcessNoteFirstRep() { 
+      if (getProcessNote().isEmpty()) {
+        addProcessNote();
       }
-      return getNote().get(0);
+      return getProcessNote().get(0);
     }
 
     /**
@@ -5443,6 +5642,7 @@ public class ClaimResponse extends DomainResource {
         super.listChildren(childrenList);
         childrenList.add(new Property("identifier", "Identifier", "The Response business identifier.", 0, java.lang.Integer.MAX_VALUE, identifier));
         childrenList.add(new Property("status", "code", "The status of the resource instance.", 0, java.lang.Integer.MAX_VALUE, status));
+        childrenList.add(new Property("patient", "Reference(Patient)", "Patient Resource.", 0, java.lang.Integer.MAX_VALUE, patient));
         childrenList.add(new Property("created", "dateTime", "The date when the enclosed suite of services were performed or completed.", 0, java.lang.Integer.MAX_VALUE, created));
         childrenList.add(new Property("insurer", "Reference(Organization)", "The Insurer who produced this adjudicated response.", 0, java.lang.Integer.MAX_VALUE, insurer));
         childrenList.add(new Property("requestProvider", "Reference(Practitioner)", "The practitioner who is responsible for the services rendered to the patient.", 0, java.lang.Integer.MAX_VALUE, requestProvider));
@@ -5460,7 +5660,7 @@ public class ClaimResponse extends DomainResource {
         childrenList.add(new Property("payment", "", "Payment details for the claim if the claim has been paid.", 0, java.lang.Integer.MAX_VALUE, payment));
         childrenList.add(new Property("reserved", "Coding", "Status of funds reservation (For provider, for Patient, None).", 0, java.lang.Integer.MAX_VALUE, reserved));
         childrenList.add(new Property("form", "CodeableConcept", "The form to be used for printing the content.", 0, java.lang.Integer.MAX_VALUE, form));
-        childrenList.add(new Property("note", "", "Note text.", 0, java.lang.Integer.MAX_VALUE, note));
+        childrenList.add(new Property("processNote", "", "Note text.", 0, java.lang.Integer.MAX_VALUE, processNote));
         childrenList.add(new Property("communicationRequest", "Reference(CommunicationRequest)", "Request for additional supporting or authorizing information, such as: documents, images or resources.", 0, java.lang.Integer.MAX_VALUE, communicationRequest));
         childrenList.add(new Property("insurance", "", "Financial instrument by which payment information for health care.", 0, java.lang.Integer.MAX_VALUE, insurance));
       }
@@ -5470,6 +5670,7 @@ public class ClaimResponse extends DomainResource {
         switch (hash) {
         case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : this.identifier.toArray(new Base[this.identifier.size()]); // Identifier
         case -892481550: /*status*/ return this.status == null ? new Base[0] : new Base[] {this.status}; // Enumeration<ClaimResponseStatus>
+        case -791418107: /*patient*/ return this.patient == null ? new Base[0] : new Base[] {this.patient}; // Reference
         case 1028554472: /*created*/ return this.created == null ? new Base[0] : new Base[] {this.created}; // DateTimeType
         case 1957615864: /*insurer*/ return this.insurer == null ? new Base[0] : new Base[] {this.insurer}; // Reference
         case 1601527200: /*requestProvider*/ return this.requestProvider == null ? new Base[0] : new Base[] {this.requestProvider}; // Reference
@@ -5487,7 +5688,7 @@ public class ClaimResponse extends DomainResource {
         case -786681338: /*payment*/ return this.payment == null ? new Base[0] : new Base[] {this.payment}; // PaymentComponent
         case -350385368: /*reserved*/ return this.reserved == null ? new Base[0] : new Base[] {this.reserved}; // Coding
         case 3148996: /*form*/ return this.form == null ? new Base[0] : new Base[] {this.form}; // CodeableConcept
-        case 3387378: /*note*/ return this.note == null ? new Base[0] : this.note.toArray(new Base[this.note.size()]); // NoteComponent
+        case 202339073: /*processNote*/ return this.processNote == null ? new Base[0] : this.processNote.toArray(new Base[this.processNote.size()]); // NoteComponent
         case -2071896615: /*communicationRequest*/ return this.communicationRequest == null ? new Base[0] : this.communicationRequest.toArray(new Base[this.communicationRequest.size()]); // Reference
         case 73049818: /*insurance*/ return this.insurance == null ? new Base[0] : this.insurance.toArray(new Base[this.insurance.size()]); // InsuranceComponent
         default: return super.getProperty(hash, name, checkValid);
@@ -5496,155 +5697,195 @@ public class ClaimResponse extends DomainResource {
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case -1618432855: // identifier
           this.getIdentifier().add(castToIdentifier(value)); // Identifier
-          break;
+          return value;
         case -892481550: // status
-          this.status = new ClaimResponseStatusEnumFactory().fromType(value); // Enumeration<ClaimResponseStatus>
-          break;
+          value = new ClaimResponseStatusEnumFactory().fromType(castToCode(value));
+          this.status = (Enumeration) value; // Enumeration<ClaimResponseStatus>
+          return value;
+        case -791418107: // patient
+          this.patient = castToReference(value); // Reference
+          return value;
         case 1028554472: // created
           this.created = castToDateTime(value); // DateTimeType
-          break;
+          return value;
         case 1957615864: // insurer
           this.insurer = castToReference(value); // Reference
-          break;
+          return value;
         case 1601527200: // requestProvider
           this.requestProvider = castToReference(value); // Reference
-          break;
+          return value;
         case 599053666: // requestOrganization
           this.requestOrganization = castToReference(value); // Reference
-          break;
+          return value;
         case 1095692943: // request
           this.request = castToReference(value); // Reference
-          break;
+          return value;
         case -1106507950: // outcome
           this.outcome = castToCodeableConcept(value); // CodeableConcept
-          break;
+          return value;
         case 583380919: // disposition
           this.disposition = castToString(value); // StringType
-          break;
+          return value;
         case -316321118: // payeeType
           this.payeeType = castToCodeableConcept(value); // CodeableConcept
-          break;
+          return value;
         case 3242771: // item
           this.getItem().add((ItemComponent) value); // ItemComponent
-          break;
+          return value;
         case -1148899500: // addItem
           this.getAddItem().add((AddedItemComponent) value); // AddedItemComponent
-          break;
+          return value;
         case 96784904: // error
           this.getError().add((ErrorComponent) value); // ErrorComponent
-          break;
+          return value;
         case -577782479: // totalCost
           this.totalCost = castToMoney(value); // Money
-          break;
+          return value;
         case 2096309753: // unallocDeductable
           this.unallocDeductable = castToMoney(value); // Money
-          break;
+          return value;
         case 332332211: // totalBenefit
           this.totalBenefit = castToMoney(value); // Money
-          break;
+          return value;
         case -786681338: // payment
           this.payment = (PaymentComponent) value; // PaymentComponent
-          break;
+          return value;
         case -350385368: // reserved
           this.reserved = castToCoding(value); // Coding
-          break;
+          return value;
         case 3148996: // form
           this.form = castToCodeableConcept(value); // CodeableConcept
-          break;
-        case 3387378: // note
-          this.getNote().add((NoteComponent) value); // NoteComponent
-          break;
+          return value;
+        case 202339073: // processNote
+          this.getProcessNote().add((NoteComponent) value); // NoteComponent
+          return value;
         case -2071896615: // communicationRequest
           this.getCommunicationRequest().add(castToReference(value)); // Reference
-          break;
+          return value;
         case 73049818: // insurance
           this.getInsurance().add((InsuranceComponent) value); // InsuranceComponent
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("identifier"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("identifier")) {
           this.getIdentifier().add(castToIdentifier(value));
-        else if (name.equals("status"))
-          this.status = new ClaimResponseStatusEnumFactory().fromType(value); // Enumeration<ClaimResponseStatus>
-        else if (name.equals("created"))
+        } else if (name.equals("status")) {
+          value = new ClaimResponseStatusEnumFactory().fromType(castToCode(value));
+          this.status = (Enumeration) value; // Enumeration<ClaimResponseStatus>
+        } else if (name.equals("patient")) {
+          this.patient = castToReference(value); // Reference
+        } else if (name.equals("created")) {
           this.created = castToDateTime(value); // DateTimeType
-        else if (name.equals("insurer"))
+        } else if (name.equals("insurer")) {
           this.insurer = castToReference(value); // Reference
-        else if (name.equals("requestProvider"))
+        } else if (name.equals("requestProvider")) {
           this.requestProvider = castToReference(value); // Reference
-        else if (name.equals("requestOrganization"))
+        } else if (name.equals("requestOrganization")) {
           this.requestOrganization = castToReference(value); // Reference
-        else if (name.equals("request"))
+        } else if (name.equals("request")) {
           this.request = castToReference(value); // Reference
-        else if (name.equals("outcome"))
+        } else if (name.equals("outcome")) {
           this.outcome = castToCodeableConcept(value); // CodeableConcept
-        else if (name.equals("disposition"))
+        } else if (name.equals("disposition")) {
           this.disposition = castToString(value); // StringType
-        else if (name.equals("payeeType"))
+        } else if (name.equals("payeeType")) {
           this.payeeType = castToCodeableConcept(value); // CodeableConcept
-        else if (name.equals("item"))
+        } else if (name.equals("item")) {
           this.getItem().add((ItemComponent) value);
-        else if (name.equals("addItem"))
+        } else if (name.equals("addItem")) {
           this.getAddItem().add((AddedItemComponent) value);
-        else if (name.equals("error"))
+        } else if (name.equals("error")) {
           this.getError().add((ErrorComponent) value);
-        else if (name.equals("totalCost"))
+        } else if (name.equals("totalCost")) {
           this.totalCost = castToMoney(value); // Money
-        else if (name.equals("unallocDeductable"))
+        } else if (name.equals("unallocDeductable")) {
           this.unallocDeductable = castToMoney(value); // Money
-        else if (name.equals("totalBenefit"))
+        } else if (name.equals("totalBenefit")) {
           this.totalBenefit = castToMoney(value); // Money
-        else if (name.equals("payment"))
+        } else if (name.equals("payment")) {
           this.payment = (PaymentComponent) value; // PaymentComponent
-        else if (name.equals("reserved"))
+        } else if (name.equals("reserved")) {
           this.reserved = castToCoding(value); // Coding
-        else if (name.equals("form"))
+        } else if (name.equals("form")) {
           this.form = castToCodeableConcept(value); // CodeableConcept
-        else if (name.equals("note"))
-          this.getNote().add((NoteComponent) value);
-        else if (name.equals("communicationRequest"))
+        } else if (name.equals("processNote")) {
+          this.getProcessNote().add((NoteComponent) value);
+        } else if (name.equals("communicationRequest")) {
           this.getCommunicationRequest().add(castToReference(value));
-        else if (name.equals("insurance"))
+        } else if (name.equals("insurance")) {
           this.getInsurance().add((InsuranceComponent) value);
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case -1618432855:  return addIdentifier(); // Identifier
-        case -892481550: throw new FHIRException("Cannot make property status as it is not a complex type"); // Enumeration<ClaimResponseStatus>
-        case 1028554472: throw new FHIRException("Cannot make property created as it is not a complex type"); // DateTimeType
-        case 1957615864:  return getInsurer(); // Reference
-        case 1601527200:  return getRequestProvider(); // Reference
-        case 599053666:  return getRequestOrganization(); // Reference
-        case 1095692943:  return getRequest(); // Reference
-        case -1106507950:  return getOutcome(); // CodeableConcept
-        case 583380919: throw new FHIRException("Cannot make property disposition as it is not a complex type"); // StringType
-        case -316321118:  return getPayeeType(); // CodeableConcept
-        case 3242771:  return addItem(); // ItemComponent
-        case -1148899500:  return addAddItem(); // AddedItemComponent
-        case 96784904:  return addError(); // ErrorComponent
-        case -577782479:  return getTotalCost(); // Money
-        case 2096309753:  return getUnallocDeductable(); // Money
-        case 332332211:  return getTotalBenefit(); // Money
-        case -786681338:  return getPayment(); // PaymentComponent
-        case -350385368:  return getReserved(); // Coding
-        case 3148996:  return getForm(); // CodeableConcept
-        case 3387378:  return addNote(); // NoteComponent
-        case -2071896615:  return addCommunicationRequest(); // Reference
-        case 73049818:  return addInsurance(); // InsuranceComponent
+        case -1618432855:  return addIdentifier(); 
+        case -892481550:  return getStatusElement();
+        case -791418107:  return getPatient(); 
+        case 1028554472:  return getCreatedElement();
+        case 1957615864:  return getInsurer(); 
+        case 1601527200:  return getRequestProvider(); 
+        case 599053666:  return getRequestOrganization(); 
+        case 1095692943:  return getRequest(); 
+        case -1106507950:  return getOutcome(); 
+        case 583380919:  return getDispositionElement();
+        case -316321118:  return getPayeeType(); 
+        case 3242771:  return addItem(); 
+        case -1148899500:  return addAddItem(); 
+        case 96784904:  return addError(); 
+        case -577782479:  return getTotalCost(); 
+        case 2096309753:  return getUnallocDeductable(); 
+        case 332332211:  return getTotalBenefit(); 
+        case -786681338:  return getPayment(); 
+        case -350385368:  return getReserved(); 
+        case 3148996:  return getForm(); 
+        case 202339073:  return addProcessNote(); 
+        case -2071896615:  return addCommunicationRequest(); 
+        case 73049818:  return addInsurance(); 
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -1618432855: /*identifier*/ return new String[] {"Identifier"};
+        case -892481550: /*status*/ return new String[] {"code"};
+        case -791418107: /*patient*/ return new String[] {"Reference"};
+        case 1028554472: /*created*/ return new String[] {"dateTime"};
+        case 1957615864: /*insurer*/ return new String[] {"Reference"};
+        case 1601527200: /*requestProvider*/ return new String[] {"Reference"};
+        case 599053666: /*requestOrganization*/ return new String[] {"Reference"};
+        case 1095692943: /*request*/ return new String[] {"Reference"};
+        case -1106507950: /*outcome*/ return new String[] {"CodeableConcept"};
+        case 583380919: /*disposition*/ return new String[] {"string"};
+        case -316321118: /*payeeType*/ return new String[] {"CodeableConcept"};
+        case 3242771: /*item*/ return new String[] {};
+        case -1148899500: /*addItem*/ return new String[] {};
+        case 96784904: /*error*/ return new String[] {};
+        case -577782479: /*totalCost*/ return new String[] {"Money"};
+        case 2096309753: /*unallocDeductable*/ return new String[] {"Money"};
+        case 332332211: /*totalBenefit*/ return new String[] {"Money"};
+        case -786681338: /*payment*/ return new String[] {};
+        case -350385368: /*reserved*/ return new String[] {"Coding"};
+        case 3148996: /*form*/ return new String[] {"CodeableConcept"};
+        case 202339073: /*processNote*/ return new String[] {};
+        case -2071896615: /*communicationRequest*/ return new String[] {"Reference"};
+        case 73049818: /*insurance*/ return new String[] {};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }
@@ -5656,6 +5897,10 @@ public class ClaimResponse extends DomainResource {
         }
         else if (name.equals("status")) {
           throw new FHIRException("Cannot call addChild on a primitive type ClaimResponse.status");
+        }
+        else if (name.equals("patient")) {
+          this.patient = new Reference();
+          return this.patient;
         }
         else if (name.equals("created")) {
           throw new FHIRException("Cannot call addChild on a primitive type ClaimResponse.created");
@@ -5720,8 +5965,8 @@ public class ClaimResponse extends DomainResource {
           this.form = new CodeableConcept();
           return this.form;
         }
-        else if (name.equals("note")) {
-          return addNote();
+        else if (name.equals("processNote")) {
+          return addProcessNote();
         }
         else if (name.equals("communicationRequest")) {
           return addCommunicationRequest();
@@ -5747,6 +5992,7 @@ public class ClaimResponse extends DomainResource {
             dst.identifier.add(i.copy());
         };
         dst.status = status == null ? null : status.copy();
+        dst.patient = patient == null ? null : patient.copy();
         dst.created = created == null ? null : created.copy();
         dst.insurer = insurer == null ? null : insurer.copy();
         dst.requestProvider = requestProvider == null ? null : requestProvider.copy();
@@ -5776,10 +6022,10 @@ public class ClaimResponse extends DomainResource {
         dst.payment = payment == null ? null : payment.copy();
         dst.reserved = reserved == null ? null : reserved.copy();
         dst.form = form == null ? null : form.copy();
-        if (note != null) {
-          dst.note = new ArrayList<NoteComponent>();
-          for (NoteComponent i : note)
-            dst.note.add(i.copy());
+        if (processNote != null) {
+          dst.processNote = new ArrayList<NoteComponent>();
+          for (NoteComponent i : processNote)
+            dst.processNote.add(i.copy());
         };
         if (communicationRequest != null) {
           dst.communicationRequest = new ArrayList<Reference>();
@@ -5805,14 +6051,14 @@ public class ClaimResponse extends DomainResource {
         if (!(other instanceof ClaimResponse))
           return false;
         ClaimResponse o = (ClaimResponse) other;
-        return compareDeep(identifier, o.identifier, true) && compareDeep(status, o.status, true) && compareDeep(created, o.created, true)
-           && compareDeep(insurer, o.insurer, true) && compareDeep(requestProvider, o.requestProvider, true)
+        return compareDeep(identifier, o.identifier, true) && compareDeep(status, o.status, true) && compareDeep(patient, o.patient, true)
+           && compareDeep(created, o.created, true) && compareDeep(insurer, o.insurer, true) && compareDeep(requestProvider, o.requestProvider, true)
            && compareDeep(requestOrganization, o.requestOrganization, true) && compareDeep(request, o.request, true)
            && compareDeep(outcome, o.outcome, true) && compareDeep(disposition, o.disposition, true) && compareDeep(payeeType, o.payeeType, true)
            && compareDeep(item, o.item, true) && compareDeep(addItem, o.addItem, true) && compareDeep(error, o.error, true)
            && compareDeep(totalCost, o.totalCost, true) && compareDeep(unallocDeductable, o.unallocDeductable, true)
            && compareDeep(totalBenefit, o.totalBenefit, true) && compareDeep(payment, o.payment, true) && compareDeep(reserved, o.reserved, true)
-           && compareDeep(form, o.form, true) && compareDeep(note, o.note, true) && compareDeep(communicationRequest, o.communicationRequest, true)
+           && compareDeep(form, o.form, true) && compareDeep(processNote, o.processNote, true) && compareDeep(communicationRequest, o.communicationRequest, true)
            && compareDeep(insurance, o.insurance, true);
       }
 
@@ -5828,10 +6074,10 @@ public class ClaimResponse extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, status, created
-          , insurer, requestProvider, requestOrganization, request, outcome, disposition, payeeType
-          , item, addItem, error, totalCost, unallocDeductable, totalBenefit, payment, reserved
-          , form, note, communicationRequest, insurance);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, status, patient
+          , created, insurer, requestProvider, requestOrganization, request, outcome, disposition
+          , payeeType, item, addItem, error, totalCost, unallocDeductable, totalBenefit
+          , payment, reserved, form, processNote, communicationRequest, insurance);
       }
 
   @Override
@@ -5952,6 +6198,32 @@ public class ClaimResponse extends DomainResource {
   public static final ca.uhn.fhir.rest.gclient.DateClientParam CREATED = new ca.uhn.fhir.rest.gclient.DateClientParam(SP_CREATED);
 
  /**
+   * Search parameter: <b>patient</b>
+   * <p>
+   * Description: <b>The subject of care.</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>ClaimResponse.patient</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="patient", path="ClaimResponse.patient", description="The subject of care.", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") }, target={Patient.class } )
+  public static final String SP_PATIENT = "patient";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>patient</b>
+   * <p>
+   * Description: <b>The subject of care.</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>ClaimResponse.patient</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam PATIENT = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_PATIENT);
+
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>ClaimResponse:patient</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_PATIENT = new ca.uhn.fhir.model.api.Include("ClaimResponse:patient").toLocked();
+
+ /**
    * Search parameter: <b>payment-date</b>
    * <p>
    * Description: <b>The expected paymentDate</b><br>
@@ -5970,6 +6242,32 @@ public class ClaimResponse extends DomainResource {
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.DateClientParam PAYMENT_DATE = new ca.uhn.fhir.rest.gclient.DateClientParam(SP_PAYMENT_DATE);
+
+ /**
+   * Search parameter: <b>request-provider</b>
+   * <p>
+   * Description: <b>The Provider of the claim</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>ClaimResponse.requestProvider</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="request-provider", path="ClaimResponse.requestProvider", description="The Provider of the claim", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") }, target={Practitioner.class } )
+  public static final String SP_REQUEST_PROVIDER = "request-provider";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>request-provider</b>
+   * <p>
+   * Description: <b>The Provider of the claim</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>ClaimResponse.requestProvider</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam REQUEST_PROVIDER = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_REQUEST_PROVIDER);
+
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>ClaimResponse:request-provider</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_REQUEST_PROVIDER = new ca.uhn.fhir.model.api.Include("ClaimResponse:request-provider").toLocked();
 
  /**
    * Search parameter: <b>outcome</b>

@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
 
 import java.util.*;
 
@@ -163,8 +163,10 @@ public class ResearchSubject extends DomainResource {
         throw new IllegalArgumentException("Unknown ResearchSubjectStatus code '"+codeString+"'");
         }
         public Enumeration<ResearchSubjectStatus> fromType(Base code) throws FHIRException {
-          if (code == null || code.isEmpty())
+          if (code == null)
             return null;
+          if (code.isEmpty())
+            return new Enumeration<ResearchSubjectStatus>(this);
           String codeString = ((PrimitiveType) code).asStringValue();
           if (codeString == null || "".equals(codeString))
             return null;
@@ -645,71 +647,90 @@ public class ResearchSubject extends DomainResource {
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case -1618432855: // identifier
           this.identifier = castToIdentifier(value); // Identifier
-          break;
+          return value;
         case -892481550: // status
-          this.status = new ResearchSubjectStatusEnumFactory().fromType(value); // Enumeration<ResearchSubjectStatus>
-          break;
+          value = new ResearchSubjectStatusEnumFactory().fromType(castToCode(value));
+          this.status = (Enumeration) value; // Enumeration<ResearchSubjectStatus>
+          return value;
         case -991726143: // period
           this.period = castToPeriod(value); // Period
-          break;
+          return value;
         case 109776329: // study
           this.study = castToReference(value); // Reference
-          break;
+          return value;
         case -46292327: // individual
           this.individual = castToReference(value); // Reference
-          break;
+          return value;
         case 1741912494: // assignedArm
           this.assignedArm = castToString(value); // StringType
-          break;
+          return value;
         case 528827886: // actualArm
           this.actualArm = castToString(value); // StringType
-          break;
+          return value;
         case 951500826: // consent
           this.consent = castToReference(value); // Reference
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("identifier"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("identifier")) {
           this.identifier = castToIdentifier(value); // Identifier
-        else if (name.equals("status"))
-          this.status = new ResearchSubjectStatusEnumFactory().fromType(value); // Enumeration<ResearchSubjectStatus>
-        else if (name.equals("period"))
+        } else if (name.equals("status")) {
+          value = new ResearchSubjectStatusEnumFactory().fromType(castToCode(value));
+          this.status = (Enumeration) value; // Enumeration<ResearchSubjectStatus>
+        } else if (name.equals("period")) {
           this.period = castToPeriod(value); // Period
-        else if (name.equals("study"))
+        } else if (name.equals("study")) {
           this.study = castToReference(value); // Reference
-        else if (name.equals("individual"))
+        } else if (name.equals("individual")) {
           this.individual = castToReference(value); // Reference
-        else if (name.equals("assignedArm"))
+        } else if (name.equals("assignedArm")) {
           this.assignedArm = castToString(value); // StringType
-        else if (name.equals("actualArm"))
+        } else if (name.equals("actualArm")) {
           this.actualArm = castToString(value); // StringType
-        else if (name.equals("consent"))
+        } else if (name.equals("consent")) {
           this.consent = castToReference(value); // Reference
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case -1618432855:  return getIdentifier(); // Identifier
-        case -892481550: throw new FHIRException("Cannot make property status as it is not a complex type"); // Enumeration<ResearchSubjectStatus>
-        case -991726143:  return getPeriod(); // Period
-        case 109776329:  return getStudy(); // Reference
-        case -46292327:  return getIndividual(); // Reference
-        case 1741912494: throw new FHIRException("Cannot make property assignedArm as it is not a complex type"); // StringType
-        case 528827886: throw new FHIRException("Cannot make property actualArm as it is not a complex type"); // StringType
-        case 951500826:  return getConsent(); // Reference
+        case -1618432855:  return getIdentifier(); 
+        case -892481550:  return getStatusElement();
+        case -991726143:  return getPeriod(); 
+        case 109776329:  return getStudy(); 
+        case -46292327:  return getIndividual(); 
+        case 1741912494:  return getAssignedArmElement();
+        case 528827886:  return getActualArmElement();
+        case 951500826:  return getConsent(); 
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -1618432855: /*identifier*/ return new String[] {"Identifier"};
+        case -892481550: /*status*/ return new String[] {"code"};
+        case -991726143: /*period*/ return new String[] {"Period"};
+        case 109776329: /*study*/ return new String[] {"Reference"};
+        case -46292327: /*individual*/ return new String[] {"Reference"};
+        case 1741912494: /*assignedArm*/ return new String[] {"string"};
+        case 528827886: /*actualArm*/ return new String[] {"string"};
+        case 951500826: /*consent*/ return new String[] {"Reference"};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }

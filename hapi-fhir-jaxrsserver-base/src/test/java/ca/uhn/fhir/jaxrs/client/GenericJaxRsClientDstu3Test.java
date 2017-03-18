@@ -31,7 +31,7 @@ import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.dstu3.model.Bundle.BundleLinkComponent;
 import org.hl7.fhir.dstu3.model.Bundle.HTTPVerb;
 import org.hl7.fhir.dstu3.model.CodeType;
-import org.hl7.fhir.dstu3.model.Conformance;
+import org.hl7.fhir.dstu3.model.CapabilityStatement;
 import org.hl7.fhir.dstu3.model.DateType;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Identifier;
@@ -123,7 +123,7 @@ public class GenericJaxRsClientDstu3Test {
 	public void testAcceptHeaderFetchConformance() throws Exception {
 		IParser p = ourCtx.newXmlParser();
 
-		Conformance conf = new Conformance();
+		CapabilityStatement conf = new CapabilityStatement();
 		conf.setCopyright("COPY");
 
 		final String respString = p.encodeResourceToString(conf);
@@ -134,19 +134,19 @@ public class GenericJaxRsClientDstu3Test {
 
 		
 
-		client.fetchConformance().ofType(Conformance.class).execute();
+		client.fetchConformance().ofType(CapabilityStatement.class).execute();
 		assertEquals("http://localhost:" + ourPort + "/fhir/metadata", ourRequestUri);
 		assertEquals(1, ourRequestHeaders.get("Accept").size());
 		assertThat(ourRequestHeaders.get("Accept").get(0).getValue(), containsString(Constants.HEADER_ACCEPT_VALUE_XML_OR_JSON_NON_LEGACY));
 		
 
-		client.fetchConformance().ofType(Conformance.class).encodedJson().execute();
+		client.fetchConformance().ofType(CapabilityStatement.class).encodedJson().execute();
 		assertEquals("http://localhost:" + ourPort + "/fhir/metadata?_format=json", ourRequestUri);
 		assertEquals(1, ourRequestHeaders.get("Accept").size());
 		assertThat(ourRequestHeaders.get("Accept").get(0).getValue(), containsString(Constants.CT_FHIR_JSON));
 		
 
-		client.fetchConformance().ofType(Conformance.class).encodedXml().execute();
+		client.fetchConformance().ofType(CapabilityStatement.class).encodedXml().execute();
 		assertEquals("http://localhost:" + ourPort + "/fhir/metadata?_format=xml", ourRequestUri);
 		assertEquals(1, ourRequestHeaders.get("Accept").size());
 		assertThat(ourRequestHeaders.get("Accept").get(0).getValue(), containsString(Constants.CT_FHIR_XML));
@@ -157,14 +157,14 @@ public class GenericJaxRsClientDstu3Test {
 	public void testAcceptHeaderPreflightConformance() throws Exception {
 		final IParser p = ourCtx.newXmlParser();
 
-		final Conformance conf = new Conformance();
+		final CapabilityStatement conf = new CapabilityStatement();
 		conf.setCopyright("COPY");
 
 		final Patient patient = new Patient();
 		patient.addName().setFamily("FAMILY");
 
 		ourResponseContentType = Constants.CT_FHIR_XML + "; charset=UTF-8";
-		ourResponseBodies = new String[] { p.encodeResourceToString(conf), p.encodeResourceToString(conf), p.encodeResourceToString(patient) };
+		ourResponseBodies = new String[] { p.encodeResourceToString(conf), p.encodeResourceToString(patient) };
 
 		ourCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.ONCE);
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort + "/fhir");
@@ -172,12 +172,11 @@ public class GenericJaxRsClientDstu3Test {
 		Patient resp = client.read(Patient.class, new IdType("123").getValue());
 		assertEquals("FAMILY", resp.getName().get(0).getFamily());
 		assertEquals("http://localhost:" + ourPort + "/fhir/metadata", ourRequestUriAll.get(0));
-		assertEquals("http://localhost:" + ourPort + "/fhir/metadata", ourRequestUriAll.get(1));
 		assertEquals(1, ourRequestHeadersAll.get(0).get("Accept").size());
 		assertThat(ourRequestHeadersAll.get(0).get("Accept").get(0).getValue(), containsString(Constants.HEADER_ACCEPT_VALUE_XML_OR_JSON_NON_LEGACY));
 		assertThat(ourRequestHeadersAll.get(0).get("Accept").get(0).getValue(), containsString(Constants.CT_FHIR_XML));
 		assertThat(ourRequestHeadersAll.get(0).get("Accept").get(0).getValue(), containsString(Constants.CT_FHIR_JSON));
-		assertEquals("http://localhost:" + ourPort + "/fhir/Patient/123", ourRequestUriAll.get(2));
+		assertEquals("http://localhost:" + ourPort + "/fhir/Patient/123", ourRequestUriAll.get(1));
 		assertEquals(1, ourRequestHeadersAll.get(1).get("Accept").size());
 		assertThat(ourRequestHeadersAll.get(1).get("Accept").get(0).getValue(), containsString(Constants.HEADER_ACCEPT_VALUE_XML_OR_JSON_NON_LEGACY));
 		assertThat(ourRequestHeadersAll.get(1).get("Accept").get(0).getValue(), containsString(Constants.CT_FHIR_XML));
@@ -188,14 +187,14 @@ public class GenericJaxRsClientDstu3Test {
 	public void testAcceptHeaderPreflightConformancePreferJson() throws Exception {
 		final IParser p = ourCtx.newXmlParser();
 
-		final Conformance conf = new Conformance();
+		final CapabilityStatement conf = new CapabilityStatement();
 		conf.setCopyright("COPY");
 
 		final Patient patient = new Patient();
 		patient.addName().setFamily("FAMILY");
 
 		ourResponseContentType = Constants.CT_FHIR_XML + "; charset=UTF-8";
-		ourResponseBodies = new String[] { p.encodeResourceToString(conf), p.encodeResourceToString(conf), p.encodeResourceToString(patient) };
+		ourResponseBodies = new String[] { p.encodeResourceToString(conf), p.encodeResourceToString(patient) };
 
 		ourCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.ONCE);
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort + "/fhir");
@@ -204,11 +203,10 @@ public class GenericJaxRsClientDstu3Test {
 		Patient resp = client.read(Patient.class, new IdType("123").getValue());
 		assertEquals("FAMILY", resp.getName().get(0).getFamily());
 		assertEquals("http://localhost:" + ourPort + "/fhir/metadata?_format=json", ourRequestUriAll.get(0));
-		assertEquals("http://localhost:" + ourPort + "/fhir/metadata?_format=json", ourRequestUriAll.get(1));
 		assertEquals(1, ourRequestHeadersAll.get(0).get("Accept").size());
 		assertThat(ourRequestHeadersAll.get(0).get("Accept").get(0).getValue(), containsString(Constants.CT_FHIR_JSON));
 		assertThat(ourRequestHeadersAll.get(0).get("Accept").get(0).getValue(), not(containsString(Constants.CT_FHIR_XML)));
-		assertEquals("http://localhost:" + ourPort + "/fhir/Patient/123?_format=json", ourRequestUriAll.get(2));
+		assertEquals("http://localhost:" + ourPort + "/fhir/Patient/123?_format=json", ourRequestUriAll.get(1));
 		assertEquals(1, ourRequestHeadersAll.get(1).get("Accept").size());
 		assertThat(ourRequestHeadersAll.get(1).get("Accept").get(0).getValue(), containsString(Constants.CT_FHIR_JSON));
 		assertThat(ourRequestHeadersAll.get(1).get("Accept").get(0).getValue(), not(containsString(Constants.CT_FHIR_XML)));
@@ -218,7 +216,7 @@ public class GenericJaxRsClientDstu3Test {
 	public void testConformance() throws Exception {
 		IParser p = ourCtx.newXmlParser();
 
-		Conformance conf = new Conformance();
+		CapabilityStatement conf = new CapabilityStatement();
 		conf.setCopyright("COPY");
 
 		final String respString = p.encodeResourceToString(conf);
@@ -231,7 +229,7 @@ public class GenericJaxRsClientDstu3Test {
 		
 
 		//@formatter:off
-		Conformance resp = (Conformance)client.fetchConformance().ofType(Conformance.class).execute();
+		CapabilityStatement resp = (CapabilityStatement)client.fetchConformance().ofType(CapabilityStatement.class).execute();
 
 		//@formatter:on
 		assertEquals("http://localhost:" + ourPort + "/fhir/metadata", ourRequestUri);

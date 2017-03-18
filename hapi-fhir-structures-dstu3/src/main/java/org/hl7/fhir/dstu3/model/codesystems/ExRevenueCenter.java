@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -69,6 +69,10 @@ public enum ExRevenueCenter {
          */
         _0452, 
         /**
+         * Vision Clinic
+         */
+        _0010, 
+        /**
          * added to help the parsers
          */
         NULL;
@@ -91,6 +95,8 @@ public enum ExRevenueCenter {
           return _0451;
         if ("0452".equals(codeString))
           return _0452;
+        if ("0010".equals(codeString))
+          return _0010;
         throw new FHIRException("Unknown ExRevenueCenter code '"+codeString+"'");
         }
         public String toCode() {
@@ -103,6 +109,7 @@ public enum ExRevenueCenter {
             case _0450: return "0450";
             case _0451: return "0451";
             case _0452: return "0452";
+            case _0010: return "0010";
             default: return "?";
           }
         }
@@ -119,6 +126,7 @@ public enum ExRevenueCenter {
             case _0450: return "Emergency Room";
             case _0451: return "Emergency Room - EM/EMTALA";
             case _0452: return "Emergency Room - beyond EMTALA";
+            case _0010: return "Vision Clinic";
             default: return "?";
           }
         }
@@ -132,6 +140,7 @@ public enum ExRevenueCenter {
             case _0450: return "Emergency Room";
             case _0451: return "Emergency Room - EM/EMTALA";
             case _0452: return "Emergency Room - beyond EMTALA";
+            case _0010: return "Vision Clinic";
             default: return "?";
           }
     }

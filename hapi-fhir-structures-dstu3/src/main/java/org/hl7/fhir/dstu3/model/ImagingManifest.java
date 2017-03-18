@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
 
 import java.util.*;
 
@@ -43,7 +43,7 @@ import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.exceptions.FHIRException;
 /**
- * A manifest of a set of DICOM Service-Object Pair Instances (SOP Instances).  The referenced SOP Instances (images or other content) are for a single patient, and may be from one or more studies. The referenced SOP Instances may have been selected for a purpose, such as  conference, or consult.  Reflecting a range of sharing purposes, typical ImagingManifest resources may include all SOP Instances in a study (perhaps for sharing through a Health Information Exchange); key images from multiple studies (for reference by a referring or treating physician); both a multi-frame ultrasound instance ("cine" video clip) and a set of measurements taken from that instance (for inclusion in a teaching file); and so on.
+ * A text description of the DICOM SOP instances selected in the ImagingManifest; or the reason for, or significance of, the selection.
  */
 @ResourceDef(name="ImagingManifest", profile="http://hl7.org/fhir/Profile/ImagingManifest")
 public class ImagingManifest extends DomainResource {
@@ -70,11 +70,16 @@ public class ImagingManifest extends DomainResource {
         protected ImagingStudy imagingStudyTarget;
 
         /**
-         * Methods of accessing  (e.g., retrieving, viewing) the study.
+         * The network service providing access (e.g., query, view, or retrieval) for the study. See implementation notes for information about using DICOM endpoints. A study-level endpoint applies to each series in the study, unless overridden by a series-level endpoint with the same Endpoint.type.
          */
-        @Child(name = "baseLocation", type = {}, order=3, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-        @Description(shortDefinition="Study access service endpoint", formalDefinition="Methods of accessing  (e.g., retrieving, viewing) the study." )
-        protected List<StudyBaseLocationComponent> baseLocation;
+        @Child(name = "endpoint", type = {Endpoint.class}, order=3, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+        @Description(shortDefinition="Study access service endpoint", formalDefinition="The network service providing access (e.g., query, view, or retrieval) for the study. See implementation notes for information about using DICOM endpoints. A study-level endpoint applies to each series in the study, unless overridden by a series-level endpoint with the same Endpoint.type." )
+        protected List<Reference> endpoint;
+        /**
+         * The actual objects that are the target of the reference (The network service providing access (e.g., query, view, or retrieval) for the study. See implementation notes for information about using DICOM endpoints. A study-level endpoint applies to each series in the study, unless overridden by a series-level endpoint with the same Endpoint.type.)
+         */
+        protected List<Endpoint> endpointTarget;
+
 
         /**
          * Series identity and locating information of the DICOM SOP instances in the selection.
@@ -83,7 +88,7 @@ public class ImagingManifest extends DomainResource {
         @Description(shortDefinition="Series identity of the selected instances", formalDefinition="Series identity and locating information of the DICOM SOP instances in the selection." )
         protected List<SeriesComponent> series;
 
-        private static final long serialVersionUID = 1076481516L;
+        private static final long serialVersionUID = -538170921L;
 
     /**
      * Constructor
@@ -190,56 +195,78 @@ public class ImagingManifest extends DomainResource {
         }
 
         /**
-         * @return {@link #baseLocation} (Methods of accessing  (e.g., retrieving, viewing) the study.)
+         * @return {@link #endpoint} (The network service providing access (e.g., query, view, or retrieval) for the study. See implementation notes for information about using DICOM endpoints. A study-level endpoint applies to each series in the study, unless overridden by a series-level endpoint with the same Endpoint.type.)
          */
-        public List<StudyBaseLocationComponent> getBaseLocation() { 
-          if (this.baseLocation == null)
-            this.baseLocation = new ArrayList<StudyBaseLocationComponent>();
-          return this.baseLocation;
+        public List<Reference> getEndpoint() { 
+          if (this.endpoint == null)
+            this.endpoint = new ArrayList<Reference>();
+          return this.endpoint;
         }
 
         /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
-        public StudyComponent setBaseLocation(List<StudyBaseLocationComponent> theBaseLocation) { 
-          this.baseLocation = theBaseLocation;
+        public StudyComponent setEndpoint(List<Reference> theEndpoint) { 
+          this.endpoint = theEndpoint;
           return this;
         }
 
-        public boolean hasBaseLocation() { 
-          if (this.baseLocation == null)
+        public boolean hasEndpoint() { 
+          if (this.endpoint == null)
             return false;
-          for (StudyBaseLocationComponent item : this.baseLocation)
+          for (Reference item : this.endpoint)
             if (!item.isEmpty())
               return true;
           return false;
         }
 
-        public StudyBaseLocationComponent addBaseLocation() { //3
-          StudyBaseLocationComponent t = new StudyBaseLocationComponent();
-          if (this.baseLocation == null)
-            this.baseLocation = new ArrayList<StudyBaseLocationComponent>();
-          this.baseLocation.add(t);
+        public Reference addEndpoint() { //3
+          Reference t = new Reference();
+          if (this.endpoint == null)
+            this.endpoint = new ArrayList<Reference>();
+          this.endpoint.add(t);
           return t;
         }
 
-        public StudyComponent addBaseLocation(StudyBaseLocationComponent t) { //3
+        public StudyComponent addEndpoint(Reference t) { //3
           if (t == null)
             return this;
-          if (this.baseLocation == null)
-            this.baseLocation = new ArrayList<StudyBaseLocationComponent>();
-          this.baseLocation.add(t);
+          if (this.endpoint == null)
+            this.endpoint = new ArrayList<Reference>();
+          this.endpoint.add(t);
           return this;
         }
 
         /**
-         * @return The first repetition of repeating field {@link #baseLocation}, creating it if it does not already exist
+         * @return The first repetition of repeating field {@link #endpoint}, creating it if it does not already exist
          */
-        public StudyBaseLocationComponent getBaseLocationFirstRep() { 
-          if (getBaseLocation().isEmpty()) {
-            addBaseLocation();
+        public Reference getEndpointFirstRep() { 
+          if (getEndpoint().isEmpty()) {
+            addEndpoint();
           }
-          return getBaseLocation().get(0);
+          return getEndpoint().get(0);
+        }
+
+        /**
+         * @deprecated Use Reference#setResource(IBaseResource) instead
+         */
+        @Deprecated
+        public List<Endpoint> getEndpointTarget() { 
+          if (this.endpointTarget == null)
+            this.endpointTarget = new ArrayList<Endpoint>();
+          return this.endpointTarget;
+        }
+
+        /**
+         * @deprecated Use Reference#setResource(IBaseResource) instead
+         */
+        @Deprecated
+        public Endpoint addEndpointTarget() { 
+          Endpoint r = new Endpoint();
+          if (this.endpointTarget == null)
+            this.endpointTarget = new ArrayList<Endpoint>();
+          this.endpointTarget.add(r);
+          return r;
         }
 
         /**
@@ -299,7 +326,7 @@ public class ImagingManifest extends DomainResource {
           super.listChildren(childrenList);
           childrenList.add(new Property("uid", "oid", "Study instance UID of the SOP instances in the selection.", 0, java.lang.Integer.MAX_VALUE, uid));
           childrenList.add(new Property("imagingStudy", "Reference(ImagingStudy)", "Reference to the Imaging Study in FHIR form.", 0, java.lang.Integer.MAX_VALUE, imagingStudy));
-          childrenList.add(new Property("baseLocation", "", "Methods of accessing  (e.g., retrieving, viewing) the study.", 0, java.lang.Integer.MAX_VALUE, baseLocation));
+          childrenList.add(new Property("endpoint", "Reference(Endpoint)", "The network service providing access (e.g., query, view, or retrieval) for the study. See implementation notes for information about using DICOM endpoints. A study-level endpoint applies to each series in the study, unless overridden by a series-level endpoint with the same Endpoint.type.", 0, java.lang.Integer.MAX_VALUE, endpoint));
           childrenList.add(new Property("series", "", "Series identity and locating information of the DICOM SOP instances in the selection.", 0, java.lang.Integer.MAX_VALUE, series));
         }
 
@@ -308,7 +335,7 @@ public class ImagingManifest extends DomainResource {
         switch (hash) {
         case 115792: /*uid*/ return this.uid == null ? new Base[0] : new Base[] {this.uid}; // OidType
         case -814900911: /*imagingStudy*/ return this.imagingStudy == null ? new Base[0] : new Base[] {this.imagingStudy}; // Reference
-        case 231778726: /*baseLocation*/ return this.baseLocation == null ? new Base[0] : this.baseLocation.toArray(new Base[this.baseLocation.size()]); // StudyBaseLocationComponent
+        case 1741102485: /*endpoint*/ return this.endpoint == null ? new Base[0] : this.endpoint.toArray(new Base[this.endpoint.size()]); // Reference
         case -905838985: /*series*/ return this.series == null ? new Base[0] : this.series.toArray(new Base[this.series.size()]); // SeriesComponent
         default: return super.getProperty(hash, name, checkValid);
         }
@@ -316,47 +343,60 @@ public class ImagingManifest extends DomainResource {
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case 115792: // uid
           this.uid = castToOid(value); // OidType
-          break;
+          return value;
         case -814900911: // imagingStudy
           this.imagingStudy = castToReference(value); // Reference
-          break;
-        case 231778726: // baseLocation
-          this.getBaseLocation().add((StudyBaseLocationComponent) value); // StudyBaseLocationComponent
-          break;
+          return value;
+        case 1741102485: // endpoint
+          this.getEndpoint().add(castToReference(value)); // Reference
+          return value;
         case -905838985: // series
           this.getSeries().add((SeriesComponent) value); // SeriesComponent
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("uid"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("uid")) {
           this.uid = castToOid(value); // OidType
-        else if (name.equals("imagingStudy"))
+        } else if (name.equals("imagingStudy")) {
           this.imagingStudy = castToReference(value); // Reference
-        else if (name.equals("baseLocation"))
-          this.getBaseLocation().add((StudyBaseLocationComponent) value);
-        else if (name.equals("series"))
+        } else if (name.equals("endpoint")) {
+          this.getEndpoint().add(castToReference(value));
+        } else if (name.equals("series")) {
           this.getSeries().add((SeriesComponent) value);
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 115792: throw new FHIRException("Cannot make property uid as it is not a complex type"); // OidType
-        case -814900911:  return getImagingStudy(); // Reference
-        case 231778726:  return addBaseLocation(); // StudyBaseLocationComponent
-        case -905838985:  return addSeries(); // SeriesComponent
+        case 115792:  return getUidElement();
+        case -814900911:  return getImagingStudy(); 
+        case 1741102485:  return addEndpoint(); 
+        case -905838985:  return addSeries(); 
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 115792: /*uid*/ return new String[] {"oid"};
+        case -814900911: /*imagingStudy*/ return new String[] {"Reference"};
+        case 1741102485: /*endpoint*/ return new String[] {"Reference"};
+        case -905838985: /*series*/ return new String[] {};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }
@@ -370,8 +410,8 @@ public class ImagingManifest extends DomainResource {
           this.imagingStudy = new Reference();
           return this.imagingStudy;
         }
-        else if (name.equals("baseLocation")) {
-          return addBaseLocation();
+        else if (name.equals("endpoint")) {
+          return addEndpoint();
         }
         else if (name.equals("series")) {
           return addSeries();
@@ -385,10 +425,10 @@ public class ImagingManifest extends DomainResource {
         copyValues(dst);
         dst.uid = uid == null ? null : uid.copy();
         dst.imagingStudy = imagingStudy == null ? null : imagingStudy.copy();
-        if (baseLocation != null) {
-          dst.baseLocation = new ArrayList<StudyBaseLocationComponent>();
-          for (StudyBaseLocationComponent i : baseLocation)
-            dst.baseLocation.add(i.copy());
+        if (endpoint != null) {
+          dst.endpoint = new ArrayList<Reference>();
+          for (Reference i : endpoint)
+            dst.endpoint.add(i.copy());
         };
         if (series != null) {
           dst.series = new ArrayList<SeriesComponent>();
@@ -405,7 +445,7 @@ public class ImagingManifest extends DomainResource {
         if (!(other instanceof StudyComponent))
           return false;
         StudyComponent o = (StudyComponent) other;
-        return compareDeep(uid, o.uid, true) && compareDeep(imagingStudy, o.imagingStudy, true) && compareDeep(baseLocation, o.baseLocation, true)
+        return compareDeep(uid, o.uid, true) && compareDeep(imagingStudy, o.imagingStudy, true) && compareDeep(endpoint, o.endpoint, true)
            && compareDeep(series, o.series, true);
       }
 
@@ -420,218 +460,12 @@ public class ImagingManifest extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(uid, imagingStudy, baseLocation
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(uid, imagingStudy, endpoint
           , series);
       }
 
   public String fhirType() {
     return "ImagingManifest.study";
-
-  }
-
-  }
-
-    @Block()
-    public static class StudyBaseLocationComponent extends BackboneElement implements IBaseBackboneElement {
-        /**
-         * The service type for accessing (e.g., retrieving, viewing) the DICOM instances.
-         */
-        @Child(name = "type", type = {Coding.class}, order=1, min=1, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="WADO-RS | WADO-URI | IID", formalDefinition="The service type for accessing (e.g., retrieving, viewing) the DICOM instances." )
-        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/dWebType")
-        protected Coding type;
-
-        /**
-         * The service URL for accessing the study. The interpretation of the URL depends on the type of the service specified in ImagingManifest.study.baseLocation.type.
-         */
-        @Child(name = "url", type = {UriType.class}, order=2, min=1, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Study access URL", formalDefinition="The service URL for accessing the study. The interpretation of the URL depends on the type of the service specified in ImagingManifest.study.baseLocation.type." )
-        protected UriType url;
-
-        private static final long serialVersionUID = 1242620527L;
-
-    /**
-     * Constructor
-     */
-      public StudyBaseLocationComponent() {
-        super();
-      }
-
-    /**
-     * Constructor
-     */
-      public StudyBaseLocationComponent(Coding type, UriType url) {
-        super();
-        this.type = type;
-        this.url = url;
-      }
-
-        /**
-         * @return {@link #type} (The service type for accessing (e.g., retrieving, viewing) the DICOM instances.)
-         */
-        public Coding getType() { 
-          if (this.type == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create StudyBaseLocationComponent.type");
-            else if (Configuration.doAutoCreate())
-              this.type = new Coding(); // cc
-          return this.type;
-        }
-
-        public boolean hasType() { 
-          return this.type != null && !this.type.isEmpty();
-        }
-
-        /**
-         * @param value {@link #type} (The service type for accessing (e.g., retrieving, viewing) the DICOM instances.)
-         */
-        public StudyBaseLocationComponent setType(Coding value) { 
-          this.type = value;
-          return this;
-        }
-
-        /**
-         * @return {@link #url} (The service URL for accessing the study. The interpretation of the URL depends on the type of the service specified in ImagingManifest.study.baseLocation.type.). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
-         */
-        public UriType getUrlElement() { 
-          if (this.url == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create StudyBaseLocationComponent.url");
-            else if (Configuration.doAutoCreate())
-              this.url = new UriType(); // bb
-          return this.url;
-        }
-
-        public boolean hasUrlElement() { 
-          return this.url != null && !this.url.isEmpty();
-        }
-
-        public boolean hasUrl() { 
-          return this.url != null && !this.url.isEmpty();
-        }
-
-        /**
-         * @param value {@link #url} (The service URL for accessing the study. The interpretation of the URL depends on the type of the service specified in ImagingManifest.study.baseLocation.type.). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
-         */
-        public StudyBaseLocationComponent setUrlElement(UriType value) { 
-          this.url = value;
-          return this;
-        }
-
-        /**
-         * @return The service URL for accessing the study. The interpretation of the URL depends on the type of the service specified in ImagingManifest.study.baseLocation.type.
-         */
-        public String getUrl() { 
-          return this.url == null ? null : this.url.getValue();
-        }
-
-        /**
-         * @param value The service URL for accessing the study. The interpretation of the URL depends on the type of the service specified in ImagingManifest.study.baseLocation.type.
-         */
-        public StudyBaseLocationComponent setUrl(String value) { 
-            if (this.url == null)
-              this.url = new UriType();
-            this.url.setValue(value);
-          return this;
-        }
-
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("type", "Coding", "The service type for accessing (e.g., retrieving, viewing) the DICOM instances.", 0, java.lang.Integer.MAX_VALUE, type));
-          childrenList.add(new Property("url", "uri", "The service URL for accessing the study. The interpretation of the URL depends on the type of the service specified in ImagingManifest.study.baseLocation.type.", 0, java.lang.Integer.MAX_VALUE, url));
-        }
-
-      @Override
-      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
-        switch (hash) {
-        case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // Coding
-        case 116079: /*url*/ return this.url == null ? new Base[0] : new Base[] {this.url}; // UriType
-        default: return super.getProperty(hash, name, checkValid);
-        }
-
-      }
-
-      @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
-        switch (hash) {
-        case 3575610: // type
-          this.type = castToCoding(value); // Coding
-          break;
-        case 116079: // url
-          this.url = castToUri(value); // UriType
-          break;
-        default: super.setProperty(hash, name, value);
-        }
-
-      }
-
-      @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("type"))
-          this.type = castToCoding(value); // Coding
-        else if (name.equals("url"))
-          this.url = castToUri(value); // UriType
-        else
-          super.setProperty(name, value);
-      }
-
-      @Override
-      public Base makeProperty(int hash, String name) throws FHIRException {
-        switch (hash) {
-        case 3575610:  return getType(); // Coding
-        case 116079: throw new FHIRException("Cannot make property url as it is not a complex type"); // UriType
-        default: return super.makeProperty(hash, name);
-        }
-
-      }
-
-      @Override
-      public Base addChild(String name) throws FHIRException {
-        if (name.equals("type")) {
-          this.type = new Coding();
-          return this.type;
-        }
-        else if (name.equals("url")) {
-          throw new FHIRException("Cannot call addChild on a primitive type ImagingManifest.url");
-        }
-        else
-          return super.addChild(name);
-      }
-
-      public StudyBaseLocationComponent copy() {
-        StudyBaseLocationComponent dst = new StudyBaseLocationComponent();
-        copyValues(dst);
-        dst.type = type == null ? null : type.copy();
-        dst.url = url == null ? null : url.copy();
-        return dst;
-      }
-
-      @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
-          return false;
-        if (!(other instanceof StudyBaseLocationComponent))
-          return false;
-        StudyBaseLocationComponent o = (StudyBaseLocationComponent) other;
-        return compareDeep(type, o.type, true) && compareDeep(url, o.url, true);
-      }
-
-      @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
-          return false;
-        if (!(other instanceof StudyBaseLocationComponent))
-          return false;
-        StudyBaseLocationComponent o = (StudyBaseLocationComponent) other;
-        return compareValues(url, o.url, true);
-      }
-
-      public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(type, url);
-      }
-
-  public String fhirType() {
-    return "ImagingManifest.study.baseLocation";
 
   }
 
@@ -647,11 +481,16 @@ public class ImagingManifest extends DomainResource {
         protected OidType uid;
 
         /**
-         * Methods of accessing (e.g. retrieving) the series.
+         * The network service providing access (e.g., query, view, or retrieval) for this series. See implementation notes for information about using DICOM endpoints. A series-level endpoint, if present, has precedence over a study-level endpoint with the same Endpoint.type.
          */
-        @Child(name = "baseLocation", type = {}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-        @Description(shortDefinition="Series access endpoint", formalDefinition="Methods of accessing (e.g. retrieving) the series." )
-        protected List<SeriesBaseLocationComponent> baseLocation;
+        @Child(name = "endpoint", type = {Endpoint.class}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+        @Description(shortDefinition="Series access endpoint", formalDefinition="The network service providing access (e.g., query, view, or retrieval) for this series. See implementation notes for information about using DICOM endpoints. A series-level endpoint, if present, has precedence over a study-level endpoint with the same Endpoint.type." )
+        protected List<Reference> endpoint;
+        /**
+         * The actual objects that are the target of the reference (The network service providing access (e.g., query, view, or retrieval) for this series. See implementation notes for information about using DICOM endpoints. A series-level endpoint, if present, has precedence over a study-level endpoint with the same Endpoint.type.)
+         */
+        protected List<Endpoint> endpointTarget;
+
 
         /**
          * Identity and locating information of the selected DICOM SOP instances.
@@ -660,7 +499,7 @@ public class ImagingManifest extends DomainResource {
         @Description(shortDefinition="The selected instance", formalDefinition="Identity and locating information of the selected DICOM SOP instances." )
         protected List<InstanceComponent> instance;
 
-        private static final long serialVersionUID = -1085739489L;
+        private static final long serialVersionUID = -1682136598L;
 
     /**
      * Constructor
@@ -723,56 +562,78 @@ public class ImagingManifest extends DomainResource {
         }
 
         /**
-         * @return {@link #baseLocation} (Methods of accessing (e.g. retrieving) the series.)
+         * @return {@link #endpoint} (The network service providing access (e.g., query, view, or retrieval) for this series. See implementation notes for information about using DICOM endpoints. A series-level endpoint, if present, has precedence over a study-level endpoint with the same Endpoint.type.)
          */
-        public List<SeriesBaseLocationComponent> getBaseLocation() { 
-          if (this.baseLocation == null)
-            this.baseLocation = new ArrayList<SeriesBaseLocationComponent>();
-          return this.baseLocation;
+        public List<Reference> getEndpoint() { 
+          if (this.endpoint == null)
+            this.endpoint = new ArrayList<Reference>();
+          return this.endpoint;
         }
 
         /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
-        public SeriesComponent setBaseLocation(List<SeriesBaseLocationComponent> theBaseLocation) { 
-          this.baseLocation = theBaseLocation;
+        public SeriesComponent setEndpoint(List<Reference> theEndpoint) { 
+          this.endpoint = theEndpoint;
           return this;
         }
 
-        public boolean hasBaseLocation() { 
-          if (this.baseLocation == null)
+        public boolean hasEndpoint() { 
+          if (this.endpoint == null)
             return false;
-          for (SeriesBaseLocationComponent item : this.baseLocation)
+          for (Reference item : this.endpoint)
             if (!item.isEmpty())
               return true;
           return false;
         }
 
-        public SeriesBaseLocationComponent addBaseLocation() { //3
-          SeriesBaseLocationComponent t = new SeriesBaseLocationComponent();
-          if (this.baseLocation == null)
-            this.baseLocation = new ArrayList<SeriesBaseLocationComponent>();
-          this.baseLocation.add(t);
+        public Reference addEndpoint() { //3
+          Reference t = new Reference();
+          if (this.endpoint == null)
+            this.endpoint = new ArrayList<Reference>();
+          this.endpoint.add(t);
           return t;
         }
 
-        public SeriesComponent addBaseLocation(SeriesBaseLocationComponent t) { //3
+        public SeriesComponent addEndpoint(Reference t) { //3
           if (t == null)
             return this;
-          if (this.baseLocation == null)
-            this.baseLocation = new ArrayList<SeriesBaseLocationComponent>();
-          this.baseLocation.add(t);
+          if (this.endpoint == null)
+            this.endpoint = new ArrayList<Reference>();
+          this.endpoint.add(t);
           return this;
         }
 
         /**
-         * @return The first repetition of repeating field {@link #baseLocation}, creating it if it does not already exist
+         * @return The first repetition of repeating field {@link #endpoint}, creating it if it does not already exist
          */
-        public SeriesBaseLocationComponent getBaseLocationFirstRep() { 
-          if (getBaseLocation().isEmpty()) {
-            addBaseLocation();
+        public Reference getEndpointFirstRep() { 
+          if (getEndpoint().isEmpty()) {
+            addEndpoint();
           }
-          return getBaseLocation().get(0);
+          return getEndpoint().get(0);
+        }
+
+        /**
+         * @deprecated Use Reference#setResource(IBaseResource) instead
+         */
+        @Deprecated
+        public List<Endpoint> getEndpointTarget() { 
+          if (this.endpointTarget == null)
+            this.endpointTarget = new ArrayList<Endpoint>();
+          return this.endpointTarget;
+        }
+
+        /**
+         * @deprecated Use Reference#setResource(IBaseResource) instead
+         */
+        @Deprecated
+        public Endpoint addEndpointTarget() { 
+          Endpoint r = new Endpoint();
+          if (this.endpointTarget == null)
+            this.endpointTarget = new ArrayList<Endpoint>();
+          this.endpointTarget.add(r);
+          return r;
         }
 
         /**
@@ -831,7 +692,7 @@ public class ImagingManifest extends DomainResource {
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
           childrenList.add(new Property("uid", "oid", "Series instance UID of the SOP instances in the selection.", 0, java.lang.Integer.MAX_VALUE, uid));
-          childrenList.add(new Property("baseLocation", "", "Methods of accessing (e.g. retrieving) the series.", 0, java.lang.Integer.MAX_VALUE, baseLocation));
+          childrenList.add(new Property("endpoint", "Reference(Endpoint)", "The network service providing access (e.g., query, view, or retrieval) for this series. See implementation notes for information about using DICOM endpoints. A series-level endpoint, if present, has precedence over a study-level endpoint with the same Endpoint.type.", 0, java.lang.Integer.MAX_VALUE, endpoint));
           childrenList.add(new Property("instance", "", "Identity and locating information of the selected DICOM SOP instances.", 0, java.lang.Integer.MAX_VALUE, instance));
         }
 
@@ -839,7 +700,7 @@ public class ImagingManifest extends DomainResource {
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
         case 115792: /*uid*/ return this.uid == null ? new Base[0] : new Base[] {this.uid}; // OidType
-        case 231778726: /*baseLocation*/ return this.baseLocation == null ? new Base[0] : this.baseLocation.toArray(new Base[this.baseLocation.size()]); // SeriesBaseLocationComponent
+        case 1741102485: /*endpoint*/ return this.endpoint == null ? new Base[0] : this.endpoint.toArray(new Base[this.endpoint.size()]); // Reference
         case 555127957: /*instance*/ return this.instance == null ? new Base[0] : this.instance.toArray(new Base[this.instance.size()]); // InstanceComponent
         default: return super.getProperty(hash, name, checkValid);
         }
@@ -847,41 +708,53 @@ public class ImagingManifest extends DomainResource {
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case 115792: // uid
           this.uid = castToOid(value); // OidType
-          break;
-        case 231778726: // baseLocation
-          this.getBaseLocation().add((SeriesBaseLocationComponent) value); // SeriesBaseLocationComponent
-          break;
+          return value;
+        case 1741102485: // endpoint
+          this.getEndpoint().add(castToReference(value)); // Reference
+          return value;
         case 555127957: // instance
           this.getInstance().add((InstanceComponent) value); // InstanceComponent
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("uid"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("uid")) {
           this.uid = castToOid(value); // OidType
-        else if (name.equals("baseLocation"))
-          this.getBaseLocation().add((SeriesBaseLocationComponent) value);
-        else if (name.equals("instance"))
+        } else if (name.equals("endpoint")) {
+          this.getEndpoint().add(castToReference(value));
+        } else if (name.equals("instance")) {
           this.getInstance().add((InstanceComponent) value);
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 115792: throw new FHIRException("Cannot make property uid as it is not a complex type"); // OidType
-        case 231778726:  return addBaseLocation(); // SeriesBaseLocationComponent
-        case 555127957:  return addInstance(); // InstanceComponent
+        case 115792:  return getUidElement();
+        case 1741102485:  return addEndpoint(); 
+        case 555127957:  return addInstance(); 
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 115792: /*uid*/ return new String[] {"oid"};
+        case 1741102485: /*endpoint*/ return new String[] {"Reference"};
+        case 555127957: /*instance*/ return new String[] {};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }
@@ -891,8 +764,8 @@ public class ImagingManifest extends DomainResource {
         if (name.equals("uid")) {
           throw new FHIRException("Cannot call addChild on a primitive type ImagingManifest.uid");
         }
-        else if (name.equals("baseLocation")) {
-          return addBaseLocation();
+        else if (name.equals("endpoint")) {
+          return addEndpoint();
         }
         else if (name.equals("instance")) {
           return addInstance();
@@ -905,10 +778,10 @@ public class ImagingManifest extends DomainResource {
         SeriesComponent dst = new SeriesComponent();
         copyValues(dst);
         dst.uid = uid == null ? null : uid.copy();
-        if (baseLocation != null) {
-          dst.baseLocation = new ArrayList<SeriesBaseLocationComponent>();
-          for (SeriesBaseLocationComponent i : baseLocation)
-            dst.baseLocation.add(i.copy());
+        if (endpoint != null) {
+          dst.endpoint = new ArrayList<Reference>();
+          for (Reference i : endpoint)
+            dst.endpoint.add(i.copy());
         };
         if (instance != null) {
           dst.instance = new ArrayList<InstanceComponent>();
@@ -925,7 +798,7 @@ public class ImagingManifest extends DomainResource {
         if (!(other instanceof SeriesComponent))
           return false;
         SeriesComponent o = (SeriesComponent) other;
-        return compareDeep(uid, o.uid, true) && compareDeep(baseLocation, o.baseLocation, true) && compareDeep(instance, o.instance, true)
+        return compareDeep(uid, o.uid, true) && compareDeep(endpoint, o.endpoint, true) && compareDeep(instance, o.instance, true)
           ;
       }
 
@@ -940,218 +813,12 @@ public class ImagingManifest extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(uid, baseLocation, instance
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(uid, endpoint, instance
           );
       }
 
   public String fhirType() {
     return "ImagingManifest.study.series";
-
-  }
-
-  }
-
-    @Block()
-    public static class SeriesBaseLocationComponent extends BackboneElement implements IBaseBackboneElement {
-        /**
-         * The service type for accessing (e.g., retrieving) the DICOM instances.
-         */
-        @Child(name = "type", type = {Coding.class}, order=1, min=1, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="WADO-RS | WADO-URI | IID", formalDefinition="The service type for accessing (e.g., retrieving) the DICOM instances." )
-        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/dWebType")
-        protected Coding type;
-
-        /**
-         * The service URL for accessing the study. The interpretation of the URL depends on the type of the service specified in ImagingManifest.study.series.baseLocation.type.
-         */
-        @Child(name = "url", type = {UriType.class}, order=2, min=1, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Series access URL", formalDefinition="The service URL for accessing the study. The interpretation of the URL depends on the type of the service specified in ImagingManifest.study.series.baseLocation.type." )
-        protected UriType url;
-
-        private static final long serialVersionUID = 1242620527L;
-
-    /**
-     * Constructor
-     */
-      public SeriesBaseLocationComponent() {
-        super();
-      }
-
-    /**
-     * Constructor
-     */
-      public SeriesBaseLocationComponent(Coding type, UriType url) {
-        super();
-        this.type = type;
-        this.url = url;
-      }
-
-        /**
-         * @return {@link #type} (The service type for accessing (e.g., retrieving) the DICOM instances.)
-         */
-        public Coding getType() { 
-          if (this.type == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create SeriesBaseLocationComponent.type");
-            else if (Configuration.doAutoCreate())
-              this.type = new Coding(); // cc
-          return this.type;
-        }
-
-        public boolean hasType() { 
-          return this.type != null && !this.type.isEmpty();
-        }
-
-        /**
-         * @param value {@link #type} (The service type for accessing (e.g., retrieving) the DICOM instances.)
-         */
-        public SeriesBaseLocationComponent setType(Coding value) { 
-          this.type = value;
-          return this;
-        }
-
-        /**
-         * @return {@link #url} (The service URL for accessing the study. The interpretation of the URL depends on the type of the service specified in ImagingManifest.study.series.baseLocation.type.). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
-         */
-        public UriType getUrlElement() { 
-          if (this.url == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create SeriesBaseLocationComponent.url");
-            else if (Configuration.doAutoCreate())
-              this.url = new UriType(); // bb
-          return this.url;
-        }
-
-        public boolean hasUrlElement() { 
-          return this.url != null && !this.url.isEmpty();
-        }
-
-        public boolean hasUrl() { 
-          return this.url != null && !this.url.isEmpty();
-        }
-
-        /**
-         * @param value {@link #url} (The service URL for accessing the study. The interpretation of the URL depends on the type of the service specified in ImagingManifest.study.series.baseLocation.type.). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
-         */
-        public SeriesBaseLocationComponent setUrlElement(UriType value) { 
-          this.url = value;
-          return this;
-        }
-
-        /**
-         * @return The service URL for accessing the study. The interpretation of the URL depends on the type of the service specified in ImagingManifest.study.series.baseLocation.type.
-         */
-        public String getUrl() { 
-          return this.url == null ? null : this.url.getValue();
-        }
-
-        /**
-         * @param value The service URL for accessing the study. The interpretation of the URL depends on the type of the service specified in ImagingManifest.study.series.baseLocation.type.
-         */
-        public SeriesBaseLocationComponent setUrl(String value) { 
-            if (this.url == null)
-              this.url = new UriType();
-            this.url.setValue(value);
-          return this;
-        }
-
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("type", "Coding", "The service type for accessing (e.g., retrieving) the DICOM instances.", 0, java.lang.Integer.MAX_VALUE, type));
-          childrenList.add(new Property("url", "uri", "The service URL for accessing the study. The interpretation of the URL depends on the type of the service specified in ImagingManifest.study.series.baseLocation.type.", 0, java.lang.Integer.MAX_VALUE, url));
-        }
-
-      @Override
-      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
-        switch (hash) {
-        case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // Coding
-        case 116079: /*url*/ return this.url == null ? new Base[0] : new Base[] {this.url}; // UriType
-        default: return super.getProperty(hash, name, checkValid);
-        }
-
-      }
-
-      @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
-        switch (hash) {
-        case 3575610: // type
-          this.type = castToCoding(value); // Coding
-          break;
-        case 116079: // url
-          this.url = castToUri(value); // UriType
-          break;
-        default: super.setProperty(hash, name, value);
-        }
-
-      }
-
-      @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("type"))
-          this.type = castToCoding(value); // Coding
-        else if (name.equals("url"))
-          this.url = castToUri(value); // UriType
-        else
-          super.setProperty(name, value);
-      }
-
-      @Override
-      public Base makeProperty(int hash, String name) throws FHIRException {
-        switch (hash) {
-        case 3575610:  return getType(); // Coding
-        case 116079: throw new FHIRException("Cannot make property url as it is not a complex type"); // UriType
-        default: return super.makeProperty(hash, name);
-        }
-
-      }
-
-      @Override
-      public Base addChild(String name) throws FHIRException {
-        if (name.equals("type")) {
-          this.type = new Coding();
-          return this.type;
-        }
-        else if (name.equals("url")) {
-          throw new FHIRException("Cannot call addChild on a primitive type ImagingManifest.url");
-        }
-        else
-          return super.addChild(name);
-      }
-
-      public SeriesBaseLocationComponent copy() {
-        SeriesBaseLocationComponent dst = new SeriesBaseLocationComponent();
-        copyValues(dst);
-        dst.type = type == null ? null : type.copy();
-        dst.url = url == null ? null : url.copy();
-        return dst;
-      }
-
-      @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
-          return false;
-        if (!(other instanceof SeriesBaseLocationComponent))
-          return false;
-        SeriesBaseLocationComponent o = (SeriesBaseLocationComponent) other;
-        return compareDeep(type, o.type, true) && compareDeep(url, o.url, true);
-      }
-
-      @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
-          return false;
-        if (!(other instanceof SeriesBaseLocationComponent))
-          return false;
-        SeriesBaseLocationComponent o = (SeriesBaseLocationComponent) other;
-        return compareValues(url, o.url, true);
-      }
-
-      public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(type, url);
-      }
-
-  public String fhirType() {
-    return "ImagingManifest.study.series.baseLocation";
 
   }
 
@@ -1298,35 +965,46 @@ public class ImagingManifest extends DomainResource {
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case 1560041540: // sopClass
           this.sopClass = castToOid(value); // OidType
-          break;
+          return value;
         case 115792: // uid
           this.uid = castToOid(value); // OidType
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("sopClass"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("sopClass")) {
           this.sopClass = castToOid(value); // OidType
-        else if (name.equals("uid"))
+        } else if (name.equals("uid")) {
           this.uid = castToOid(value); // OidType
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 1560041540: throw new FHIRException("Cannot make property sopClass as it is not a complex type"); // OidType
-        case 115792: throw new FHIRException("Cannot make property uid as it is not a complex type"); // OidType
+        case 1560041540:  return getSopClassElement();
+        case 115792:  return getUidElement();
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 1560041540: /*sopClass*/ return new String[] {"oid"};
+        case 115792: /*uid*/ return new String[] {"oid"};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }
@@ -1385,9 +1063,9 @@ public class ImagingManifest extends DomainResource {
     /**
      * Unique identifier of the the DICOM Key Object Selection (KOS) that this resource represents.
      */
-    @Child(name = "uid", type = {OidType.class}, order=0, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "identifier", type = {Identifier.class}, order=0, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="SOP Instance UID", formalDefinition="Unique identifier of the the DICOM Key Object Selection (KOS) that this resource represents." )
-    protected OidType uid;
+    protected Identifier identifier;
 
     /**
      * A patient resource reference which is the patient subject of all DICOM SOP Instances in this ImagingManifest.
@@ -1421,28 +1099,21 @@ public class ImagingManifest extends DomainResource {
     protected Resource authorTarget;
 
     /**
-     * The reason for, or significance of, the selection of objects referenced in the resource.
+     * Free text narrative description of the ImagingManifest.  
+The value may be derived from the DICOM Standard Part 16, CID-7010 descriptions (e.g. Best in Set, Complete Study Content). Note that those values cover the wide range of uses of the DICOM Key Object Selection object, several of which are not supported by ImagingManifest. Specifically, there is no expected behavior associated with descriptions that suggest referenced images be removed or not used.
      */
-    @Child(name = "title", type = {CodeableConcept.class}, order=4, min=1, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Reason for selection", formalDefinition="The reason for, or significance of, the selection of objects referenced in the resource." )
-    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/kos-title")
-    protected CodeableConcept title;
-
-    /**
-     * Text description of the DICOM SOP instances selected in the ImagingManifest. This should be aligned with the content of the title element, and can provide further explanation of the SOP instances in the selection.
-     */
-    @Child(name = "description", type = {StringType.class}, order=5, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Description text", formalDefinition="Text description of the DICOM SOP instances selected in the ImagingManifest. This should be aligned with the content of the title element, and can provide further explanation of the SOP instances in the selection." )
+    @Child(name = "description", type = {StringType.class}, order=4, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="Description text", formalDefinition="Free text narrative description of the ImagingManifest.  \nThe value may be derived from the DICOM Standard Part 16, CID-7010 descriptions (e.g. Best in Set, Complete Study Content). Note that those values cover the wide range of uses of the DICOM Key Object Selection object, several of which are not supported by ImagingManifest. Specifically, there is no expected behavior associated with descriptions that suggest referenced images be removed or not used." )
     protected StringType description;
 
     /**
      * Study identity and locating information of the DICOM SOP instances in the selection.
      */
-    @Child(name = "study", type = {}, order=6, min=1, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "study", type = {}, order=5, min=1, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Study identity of the selected instances", formalDefinition="Study identity and locating information of the DICOM SOP instances in the selection." )
     protected List<StudyComponent> study;
 
-    private static final long serialVersionUID = 1428713335L;
+    private static final long serialVersionUID = 245941978L;
 
   /**
    * Constructor
@@ -1454,58 +1125,32 @@ public class ImagingManifest extends DomainResource {
   /**
    * Constructor
    */
-    public ImagingManifest(Reference patient, CodeableConcept title) {
+    public ImagingManifest(Reference patient) {
       super();
       this.patient = patient;
-      this.title = title;
     }
 
     /**
-     * @return {@link #uid} (Unique identifier of the the DICOM Key Object Selection (KOS) that this resource represents.). This is the underlying object with id, value and extensions. The accessor "getUid" gives direct access to the value
+     * @return {@link #identifier} (Unique identifier of the the DICOM Key Object Selection (KOS) that this resource represents.)
      */
-    public OidType getUidElement() { 
-      if (this.uid == null)
+    public Identifier getIdentifier() { 
+      if (this.identifier == null)
         if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create ImagingManifest.uid");
+          throw new Error("Attempt to auto-create ImagingManifest.identifier");
         else if (Configuration.doAutoCreate())
-          this.uid = new OidType(); // bb
-      return this.uid;
+          this.identifier = new Identifier(); // cc
+      return this.identifier;
     }
 
-    public boolean hasUidElement() { 
-      return this.uid != null && !this.uid.isEmpty();
-    }
-
-    public boolean hasUid() { 
-      return this.uid != null && !this.uid.isEmpty();
+    public boolean hasIdentifier() { 
+      return this.identifier != null && !this.identifier.isEmpty();
     }
 
     /**
-     * @param value {@link #uid} (Unique identifier of the the DICOM Key Object Selection (KOS) that this resource represents.). This is the underlying object with id, value and extensions. The accessor "getUid" gives direct access to the value
+     * @param value {@link #identifier} (Unique identifier of the the DICOM Key Object Selection (KOS) that this resource represents.)
      */
-    public ImagingManifest setUidElement(OidType value) { 
-      this.uid = value;
-      return this;
-    }
-
-    /**
-     * @return Unique identifier of the the DICOM Key Object Selection (KOS) that this resource represents.
-     */
-    public String getUid() { 
-      return this.uid == null ? null : this.uid.getValue();
-    }
-
-    /**
-     * @param value Unique identifier of the the DICOM Key Object Selection (KOS) that this resource represents.
-     */
-    public ImagingManifest setUid(String value) { 
-      if (Utilities.noString(value))
-        this.uid = null;
-      else {
-        if (this.uid == null)
-          this.uid = new OidType();
-        this.uid.setValue(value);
-      }
+    public ImagingManifest setIdentifier(Identifier value) { 
+      this.identifier = value;
       return this;
     }
 
@@ -1642,31 +1287,8 @@ public class ImagingManifest extends DomainResource {
     }
 
     /**
-     * @return {@link #title} (The reason for, or significance of, the selection of objects referenced in the resource.)
-     */
-    public CodeableConcept getTitle() { 
-      if (this.title == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create ImagingManifest.title");
-        else if (Configuration.doAutoCreate())
-          this.title = new CodeableConcept(); // cc
-      return this.title;
-    }
-
-    public boolean hasTitle() { 
-      return this.title != null && !this.title.isEmpty();
-    }
-
-    /**
-     * @param value {@link #title} (The reason for, or significance of, the selection of objects referenced in the resource.)
-     */
-    public ImagingManifest setTitle(CodeableConcept value) { 
-      this.title = value;
-      return this;
-    }
-
-    /**
-     * @return {@link #description} (Text description of the DICOM SOP instances selected in the ImagingManifest. This should be aligned with the content of the title element, and can provide further explanation of the SOP instances in the selection.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
+     * @return {@link #description} (Free text narrative description of the ImagingManifest.  
+The value may be derived from the DICOM Standard Part 16, CID-7010 descriptions (e.g. Best in Set, Complete Study Content). Note that those values cover the wide range of uses of the DICOM Key Object Selection object, several of which are not supported by ImagingManifest. Specifically, there is no expected behavior associated with descriptions that suggest referenced images be removed or not used.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
      */
     public StringType getDescriptionElement() { 
       if (this.description == null)
@@ -1686,7 +1308,8 @@ public class ImagingManifest extends DomainResource {
     }
 
     /**
-     * @param value {@link #description} (Text description of the DICOM SOP instances selected in the ImagingManifest. This should be aligned with the content of the title element, and can provide further explanation of the SOP instances in the selection.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
+     * @param value {@link #description} (Free text narrative description of the ImagingManifest.  
+The value may be derived from the DICOM Standard Part 16, CID-7010 descriptions (e.g. Best in Set, Complete Study Content). Note that those values cover the wide range of uses of the DICOM Key Object Selection object, several of which are not supported by ImagingManifest. Specifically, there is no expected behavior associated with descriptions that suggest referenced images be removed or not used.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
      */
     public ImagingManifest setDescriptionElement(StringType value) { 
       this.description = value;
@@ -1694,14 +1317,16 @@ public class ImagingManifest extends DomainResource {
     }
 
     /**
-     * @return Text description of the DICOM SOP instances selected in the ImagingManifest. This should be aligned with the content of the title element, and can provide further explanation of the SOP instances in the selection.
+     * @return Free text narrative description of the ImagingManifest.  
+The value may be derived from the DICOM Standard Part 16, CID-7010 descriptions (e.g. Best in Set, Complete Study Content). Note that those values cover the wide range of uses of the DICOM Key Object Selection object, several of which are not supported by ImagingManifest. Specifically, there is no expected behavior associated with descriptions that suggest referenced images be removed or not used.
      */
     public String getDescription() { 
       return this.description == null ? null : this.description.getValue();
     }
 
     /**
-     * @param value Text description of the DICOM SOP instances selected in the ImagingManifest. This should be aligned with the content of the title element, and can provide further explanation of the SOP instances in the selection.
+     * @param value Free text narrative description of the ImagingManifest.  
+The value may be derived from the DICOM Standard Part 16, CID-7010 descriptions (e.g. Best in Set, Complete Study Content). Note that those values cover the wide range of uses of the DICOM Key Object Selection object, several of which are not supported by ImagingManifest. Specifically, there is no expected behavior associated with descriptions that suggest referenced images be removed or not used.
      */
     public ImagingManifest setDescription(String value) { 
       if (Utilities.noString(value))
@@ -1769,23 +1394,21 @@ public class ImagingManifest extends DomainResource {
 
       protected void listChildren(List<Property> childrenList) {
         super.listChildren(childrenList);
-        childrenList.add(new Property("uid", "oid", "Unique identifier of the the DICOM Key Object Selection (KOS) that this resource represents.", 0, java.lang.Integer.MAX_VALUE, uid));
+        childrenList.add(new Property("identifier", "Identifier", "Unique identifier of the the DICOM Key Object Selection (KOS) that this resource represents.", 0, java.lang.Integer.MAX_VALUE, identifier));
         childrenList.add(new Property("patient", "Reference(Patient)", "A patient resource reference which is the patient subject of all DICOM SOP Instances in this ImagingManifest.", 0, java.lang.Integer.MAX_VALUE, patient));
         childrenList.add(new Property("authoringTime", "dateTime", "Date and time when the selection of the referenced instances were made. It is (typically) different from the creation date of the selection resource, and from dates associated with the referenced instances (e.g. capture time of the referenced image).", 0, java.lang.Integer.MAX_VALUE, authoringTime));
         childrenList.add(new Property("author", "Reference(Practitioner|Device|Organization|Patient|RelatedPerson)", "Author of ImagingManifest. It can be a human author or a device which made the decision of the SOP instances selected. For example, a radiologist selected a set of imaging SOP instances to attach in a diagnostic report, and a CAD application may author a selection to describe SOP instances it used to generate a detection conclusion.", 0, java.lang.Integer.MAX_VALUE, author));
-        childrenList.add(new Property("title", "CodeableConcept", "The reason for, or significance of, the selection of objects referenced in the resource.", 0, java.lang.Integer.MAX_VALUE, title));
-        childrenList.add(new Property("description", "string", "Text description of the DICOM SOP instances selected in the ImagingManifest. This should be aligned with the content of the title element, and can provide further explanation of the SOP instances in the selection.", 0, java.lang.Integer.MAX_VALUE, description));
+        childrenList.add(new Property("description", "string", "Free text narrative description of the ImagingManifest.  \nThe value may be derived from the DICOM Standard Part 16, CID-7010 descriptions (e.g. Best in Set, Complete Study Content). Note that those values cover the wide range of uses of the DICOM Key Object Selection object, several of which are not supported by ImagingManifest. Specifically, there is no expected behavior associated with descriptions that suggest referenced images be removed or not used.", 0, java.lang.Integer.MAX_VALUE, description));
         childrenList.add(new Property("study", "", "Study identity and locating information of the DICOM SOP instances in the selection.", 0, java.lang.Integer.MAX_VALUE, study));
       }
 
       @Override
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
-        case 115792: /*uid*/ return this.uid == null ? new Base[0] : new Base[] {this.uid}; // OidType
+        case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : new Base[] {this.identifier}; // Identifier
         case -791418107: /*patient*/ return this.patient == null ? new Base[0] : new Base[] {this.patient}; // Reference
         case -1724532252: /*authoringTime*/ return this.authoringTime == null ? new Base[0] : new Base[] {this.authoringTime}; // DateTimeType
         case -1406328437: /*author*/ return this.author == null ? new Base[0] : new Base[] {this.author}; // Reference
-        case 110371416: /*title*/ return this.title == null ? new Base[0] : new Base[] {this.title}; // CodeableConcept
         case -1724546052: /*description*/ return this.description == null ? new Base[0] : new Base[] {this.description}; // StringType
         case 109776329: /*study*/ return this.study == null ? new Base[0] : this.study.toArray(new Base[this.study.size()]); // StudyComponent
         default: return super.getProperty(hash, name, checkValid);
@@ -1794,73 +1417,83 @@ public class ImagingManifest extends DomainResource {
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
-        case 115792: // uid
-          this.uid = castToOid(value); // OidType
-          break;
+        case -1618432855: // identifier
+          this.identifier = castToIdentifier(value); // Identifier
+          return value;
         case -791418107: // patient
           this.patient = castToReference(value); // Reference
-          break;
+          return value;
         case -1724532252: // authoringTime
           this.authoringTime = castToDateTime(value); // DateTimeType
-          break;
+          return value;
         case -1406328437: // author
           this.author = castToReference(value); // Reference
-          break;
-        case 110371416: // title
-          this.title = castToCodeableConcept(value); // CodeableConcept
-          break;
+          return value;
         case -1724546052: // description
           this.description = castToString(value); // StringType
-          break;
+          return value;
         case 109776329: // study
           this.getStudy().add((StudyComponent) value); // StudyComponent
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("uid"))
-          this.uid = castToOid(value); // OidType
-        else if (name.equals("patient"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("identifier")) {
+          this.identifier = castToIdentifier(value); // Identifier
+        } else if (name.equals("patient")) {
           this.patient = castToReference(value); // Reference
-        else if (name.equals("authoringTime"))
+        } else if (name.equals("authoringTime")) {
           this.authoringTime = castToDateTime(value); // DateTimeType
-        else if (name.equals("author"))
+        } else if (name.equals("author")) {
           this.author = castToReference(value); // Reference
-        else if (name.equals("title"))
-          this.title = castToCodeableConcept(value); // CodeableConcept
-        else if (name.equals("description"))
+        } else if (name.equals("description")) {
           this.description = castToString(value); // StringType
-        else if (name.equals("study"))
+        } else if (name.equals("study")) {
           this.getStudy().add((StudyComponent) value);
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 115792: throw new FHIRException("Cannot make property uid as it is not a complex type"); // OidType
-        case -791418107:  return getPatient(); // Reference
-        case -1724532252: throw new FHIRException("Cannot make property authoringTime as it is not a complex type"); // DateTimeType
-        case -1406328437:  return getAuthor(); // Reference
-        case 110371416:  return getTitle(); // CodeableConcept
-        case -1724546052: throw new FHIRException("Cannot make property description as it is not a complex type"); // StringType
-        case 109776329:  return addStudy(); // StudyComponent
+        case -1618432855:  return getIdentifier(); 
+        case -791418107:  return getPatient(); 
+        case -1724532252:  return getAuthoringTimeElement();
+        case -1406328437:  return getAuthor(); 
+        case -1724546052:  return getDescriptionElement();
+        case 109776329:  return addStudy(); 
         default: return super.makeProperty(hash, name);
         }
 
       }
 
       @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -1618432855: /*identifier*/ return new String[] {"Identifier"};
+        case -791418107: /*patient*/ return new String[] {"Reference"};
+        case -1724532252: /*authoringTime*/ return new String[] {"dateTime"};
+        case -1406328437: /*author*/ return new String[] {"Reference"};
+        case -1724546052: /*description*/ return new String[] {"string"};
+        case 109776329: /*study*/ return new String[] {};
+        default: return super.getTypesForProperty(hash, name);
+        }
+
+      }
+
+      @Override
       public Base addChild(String name) throws FHIRException {
-        if (name.equals("uid")) {
-          throw new FHIRException("Cannot call addChild on a primitive type ImagingManifest.uid");
+        if (name.equals("identifier")) {
+          this.identifier = new Identifier();
+          return this.identifier;
         }
         else if (name.equals("patient")) {
           this.patient = new Reference();
@@ -1872,10 +1505,6 @@ public class ImagingManifest extends DomainResource {
         else if (name.equals("author")) {
           this.author = new Reference();
           return this.author;
-        }
-        else if (name.equals("title")) {
-          this.title = new CodeableConcept();
-          return this.title;
         }
         else if (name.equals("description")) {
           throw new FHIRException("Cannot call addChild on a primitive type ImagingManifest.description");
@@ -1895,11 +1524,10 @@ public class ImagingManifest extends DomainResource {
       public ImagingManifest copy() {
         ImagingManifest dst = new ImagingManifest();
         copyValues(dst);
-        dst.uid = uid == null ? null : uid.copy();
+        dst.identifier = identifier == null ? null : identifier.copy();
         dst.patient = patient == null ? null : patient.copy();
         dst.authoringTime = authoringTime == null ? null : authoringTime.copy();
         dst.author = author == null ? null : author.copy();
-        dst.title = title == null ? null : title.copy();
         dst.description = description == null ? null : description.copy();
         if (study != null) {
           dst.study = new ArrayList<StudyComponent>();
@@ -1920,9 +1548,9 @@ public class ImagingManifest extends DomainResource {
         if (!(other instanceof ImagingManifest))
           return false;
         ImagingManifest o = (ImagingManifest) other;
-        return compareDeep(uid, o.uid, true) && compareDeep(patient, o.patient, true) && compareDeep(authoringTime, o.authoringTime, true)
-           && compareDeep(author, o.author, true) && compareDeep(title, o.title, true) && compareDeep(description, o.description, true)
-           && compareDeep(study, o.study, true);
+        return compareDeep(identifier, o.identifier, true) && compareDeep(patient, o.patient, true) && compareDeep(authoringTime, o.authoringTime, true)
+           && compareDeep(author, o.author, true) && compareDeep(description, o.description, true) && compareDeep(study, o.study, true)
+          ;
       }
 
       @Override
@@ -1932,13 +1560,13 @@ public class ImagingManifest extends DomainResource {
         if (!(other instanceof ImagingManifest))
           return false;
         ImagingManifest o = (ImagingManifest) other;
-        return compareValues(uid, o.uid, true) && compareValues(authoringTime, o.authoringTime, true) && compareValues(description, o.description, true)
+        return compareValues(authoringTime, o.authoringTime, true) && compareValues(description, o.description, true)
           ;
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(uid, patient, authoringTime
-          , author, title, description, study);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, patient, authoringTime
+          , author, description, study);
       }
 
   @Override
@@ -1949,37 +1577,63 @@ public class ImagingManifest extends DomainResource {
  /**
    * Search parameter: <b>identifier</b>
    * <p>
-   * Description: <b>UID of key DICOM object selection</b><br>
-   * Type: <b>uri</b><br>
-   * Path: <b>ImagingManifest.uid</b><br>
+   * Description: <b>UID of the ImagingManifest (or a DICOM Key Object Selection which it represents)</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>ImagingManifest.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="ImagingManifest.uid", description="UID of key DICOM object selection", type="uri" )
+  @SearchParamDefinition(name="identifier", path="ImagingManifest.identifier", description="UID of the ImagingManifest (or a DICOM Key Object Selection which it represents)", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
    * <p>
-   * Description: <b>UID of key DICOM object selection</b><br>
-   * Type: <b>uri</b><br>
-   * Path: <b>ImagingManifest.uid</b><br>
+   * Description: <b>UID of the ImagingManifest (or a DICOM Key Object Selection which it represents)</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>ImagingManifest.identifier</b><br>
    * </p>
    */
-  public static final ca.uhn.fhir.rest.gclient.UriClientParam IDENTIFIER = new ca.uhn.fhir.rest.gclient.UriClientParam(SP_IDENTIFIER);
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam IDENTIFIER = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_IDENTIFIER);
+
+ /**
+   * Search parameter: <b>endpoint</b>
+   * <p>
+   * Description: <b>The endpoint for the study or series</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>ImagingManifest.study.endpoint, ImagingManifest.study.series.endpoint</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="endpoint", path="ImagingManifest.study.endpoint | ImagingManifest.study.series.endpoint", description="The endpoint for the study or series", type="reference", target={Endpoint.class } )
+  public static final String SP_ENDPOINT = "endpoint";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>endpoint</b>
+   * <p>
+   * Description: <b>The endpoint for the study or series</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>ImagingManifest.study.endpoint, ImagingManifest.study.series.endpoint</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam ENDPOINT = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_ENDPOINT);
+
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>ImagingManifest:endpoint</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_ENDPOINT = new ca.uhn.fhir.model.api.Include("ImagingManifest:endpoint").toLocked();
 
  /**
    * Search parameter: <b>authoring-time</b>
    * <p>
-   * Description: <b>Time of key DICOM object selection authoring</b><br>
+   * Description: <b>Time of the ImagingManifest (or a DICOM Key Object Selection which it represents) authoring</b><br>
    * Type: <b>date</b><br>
    * Path: <b>ImagingManifest.authoringTime</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="authoring-time", path="ImagingManifest.authoringTime", description="Time of key DICOM object selection authoring", type="date" )
+  @SearchParamDefinition(name="authoring-time", path="ImagingManifest.authoringTime", description="Time of the ImagingManifest (or a DICOM Key Object Selection which it represents) authoring", type="date" )
   public static final String SP_AUTHORING_TIME = "authoring-time";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>authoring-time</b>
    * <p>
-   * Description: <b>Time of key DICOM object selection authoring</b><br>
+   * Description: <b>Time of the ImagingManifest (or a DICOM Key Object Selection which it represents) authoring</b><br>
    * Type: <b>date</b><br>
    * Path: <b>ImagingManifest.authoringTime</b><br>
    * </p>
@@ -1989,17 +1643,17 @@ public class ImagingManifest extends DomainResource {
  /**
    * Search parameter: <b>selected-study</b>
    * <p>
-   * Description: <b>Study selected in key DICOM object selection</b><br>
+   * Description: <b>Study selected in the ImagingManifest (or a DICOM Key Object Selection which it represents)</b><br>
    * Type: <b>uri</b><br>
    * Path: <b>ImagingManifest.study.uid</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="selected-study", path="ImagingManifest.study.uid", description="Study selected in key DICOM object selection", type="uri" )
+  @SearchParamDefinition(name="selected-study", path="ImagingManifest.study.uid", description="Study selected in the ImagingManifest (or a DICOM Key Object Selection which it represents)", type="uri" )
   public static final String SP_SELECTED_STUDY = "selected-study";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>selected-study</b>
    * <p>
-   * Description: <b>Study selected in key DICOM object selection</b><br>
+   * Description: <b>Study selected in the ImagingManifest (or a DICOM Key Object Selection which it represents)</b><br>
    * Type: <b>uri</b><br>
    * Path: <b>ImagingManifest.study.uid</b><br>
    * </p>
@@ -2009,17 +1663,17 @@ public class ImagingManifest extends DomainResource {
  /**
    * Search parameter: <b>author</b>
    * <p>
-   * Description: <b>Author of key DICOM object selection</b><br>
+   * Description: <b>Author of the ImagingManifest (or a DICOM Key Object Selection which it represents)</b><br>
    * Type: <b>reference</b><br>
    * Path: <b>ImagingManifest.author</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="author", path="ImagingManifest.author", description="Author of key DICOM object selection", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner"), @ca.uhn.fhir.model.api.annotation.Compartment(name="RelatedPerson") }, target={Device.class, Organization.class, Patient.class, Practitioner.class, RelatedPerson.class } )
+  @SearchParamDefinition(name="author", path="ImagingManifest.author", description="Author of the ImagingManifest (or a DICOM Key Object Selection which it represents)", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner"), @ca.uhn.fhir.model.api.annotation.Compartment(name="RelatedPerson") }, target={Device.class, Organization.class, Patient.class, Practitioner.class, RelatedPerson.class } )
   public static final String SP_AUTHOR = "author";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>author</b>
    * <p>
-   * Description: <b>Author of key DICOM object selection</b><br>
+   * Description: <b>Author of the ImagingManifest (or a DICOM Key Object Selection which it represents)</b><br>
    * Type: <b>reference</b><br>
    * Path: <b>ImagingManifest.author</b><br>
    * </p>
@@ -2035,17 +1689,17 @@ public class ImagingManifest extends DomainResource {
  /**
    * Search parameter: <b>patient</b>
    * <p>
-   * Description: <b>Subject of key DICOM object selection</b><br>
+   * Description: <b>Subject of the ImagingManifest (or a DICOM Key Object Selection which it represents)</b><br>
    * Type: <b>reference</b><br>
    * Path: <b>ImagingManifest.patient</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="ImagingManifest.patient", description="Subject of key DICOM object selection", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") }, target={Patient.class } )
+  @SearchParamDefinition(name="patient", path="ImagingManifest.patient", description="Subject of the ImagingManifest (or a DICOM Key Object Selection which it represents)", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") }, target={Patient.class } )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>
    * <p>
-   * Description: <b>Subject of key DICOM object selection</b><br>
+   * Description: <b>Subject of the ImagingManifest (or a DICOM Key Object Selection which it represents)</b><br>
    * Type: <b>reference</b><br>
    * Path: <b>ImagingManifest.patient</b><br>
    * </p>
@@ -2059,24 +1713,30 @@ public class ImagingManifest extends DomainResource {
   public static final ca.uhn.fhir.model.api.Include INCLUDE_PATIENT = new ca.uhn.fhir.model.api.Include("ImagingManifest:patient").toLocked();
 
  /**
-   * Search parameter: <b>title</b>
+   * Search parameter: <b>imaging-study</b>
    * <p>
-   * Description: <b>Title of key DICOM object selection</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>ImagingManifest.title</b><br>
+   * Description: <b>ImagingStudy resource selected in the ImagingManifest (or a DICOM Key Object Selection which it represents)</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>ImagingManifest.study.imagingStudy</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="title", path="ImagingManifest.title", description="Title of key DICOM object selection", type="token" )
-  public static final String SP_TITLE = "title";
+  @SearchParamDefinition(name="imaging-study", path="ImagingManifest.study.imagingStudy", description="ImagingStudy resource selected in the ImagingManifest (or a DICOM Key Object Selection which it represents)", type="reference", target={ImagingStudy.class } )
+  public static final String SP_IMAGING_STUDY = "imaging-study";
  /**
-   * <b>Fluent Client</b> search parameter constant for <b>title</b>
+   * <b>Fluent Client</b> search parameter constant for <b>imaging-study</b>
    * <p>
-   * Description: <b>Title of key DICOM object selection</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>ImagingManifest.title</b><br>
+   * Description: <b>ImagingStudy resource selected in the ImagingManifest (or a DICOM Key Object Selection which it represents)</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>ImagingManifest.study.imagingStudy</b><br>
    * </p>
    */
-  public static final ca.uhn.fhir.rest.gclient.TokenClientParam TITLE = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_TITLE);
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam IMAGING_STUDY = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_IMAGING_STUDY);
+
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>ImagingManifest:imaging-study</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_IMAGING_STUDY = new ca.uhn.fhir.model.api.Include("ImagingManifest:imaging-study").toLocked();
 
 
 }

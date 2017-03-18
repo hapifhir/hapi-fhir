@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
 
 
 import org.hl7.fhir.dstu3.model.EnumFactory;
@@ -45,6 +45,8 @@ public class ExProgramCodeEnumFactory implements EnumFactory<ExProgramCode> {
       return ExProgramCode.HD;
     if ("auscr".equals(codeString))
       return ExProgramCode.AUSCR;
+    if ("none".equals(codeString))
+      return ExProgramCode.NONE;
     throw new IllegalArgumentException("Unknown ExProgramCode code '"+codeString+"'");
   }
 
@@ -55,6 +57,8 @@ public class ExProgramCodeEnumFactory implements EnumFactory<ExProgramCode> {
       return "hd";
     if (code == ExProgramCode.AUSCR)
       return "auscr";
+    if (code == ExProgramCode.NONE)
+      return "none";
     return "?";
   }
 

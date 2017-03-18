@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
 
 
 import org.hl7.fhir.dstu3.model.EnumFactory;
@@ -47,6 +47,8 @@ public class QuestionnaireAnswersStatusEnumFactory implements EnumFactory<Questi
       return QuestionnaireAnswersStatus.AMENDED;
     if ("entered-in-error".equals(codeString))
       return QuestionnaireAnswersStatus.ENTEREDINERROR;
+    if ("stopped".equals(codeString))
+      return QuestionnaireAnswersStatus.STOPPED;
     throw new IllegalArgumentException("Unknown QuestionnaireAnswersStatus code '"+codeString+"'");
   }
 
@@ -59,6 +61,8 @@ public class QuestionnaireAnswersStatusEnumFactory implements EnumFactory<Questi
       return "amended";
     if (code == QuestionnaireAnswersStatus.ENTEREDINERROR)
       return "entered-in-error";
+    if (code == QuestionnaireAnswersStatus.STOPPED)
+      return "stopped";
     return "?";
   }
 

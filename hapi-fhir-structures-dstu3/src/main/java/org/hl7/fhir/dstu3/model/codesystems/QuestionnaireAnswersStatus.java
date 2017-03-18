@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -53,6 +53,10 @@ public enum QuestionnaireAnswersStatus {
          */
         ENTEREDINERROR, 
         /**
+         * This QuestionnaireResponse has been partially filled out with answers, but it is unknown whether changes or additions are expected to be made to it.
+         */
+        STOPPED, 
+        /**
          * added to help the parsers
          */
         NULL;
@@ -67,6 +71,8 @@ public enum QuestionnaireAnswersStatus {
           return AMENDED;
         if ("entered-in-error".equals(codeString))
           return ENTEREDINERROR;
+        if ("stopped".equals(codeString))
+          return STOPPED;
         throw new FHIRException("Unknown QuestionnaireAnswersStatus code '"+codeString+"'");
         }
         public String toCode() {
@@ -75,6 +81,7 @@ public enum QuestionnaireAnswersStatus {
             case COMPLETED: return "completed";
             case AMENDED: return "amended";
             case ENTEREDINERROR: return "entered-in-error";
+            case STOPPED: return "stopped";
             default: return "?";
           }
         }
@@ -87,6 +94,7 @@ public enum QuestionnaireAnswersStatus {
             case COMPLETED: return "This QuestionnaireResponse has been filled out with answers, and the current content is regarded as definitive.";
             case AMENDED: return "This QuestionnaireResponse has been filled out with answers, then marked as complete, yet changes or additions have been made to it afterwards.";
             case ENTEREDINERROR: return "This QuestionnaireResponse was entered in error and voided.";
+            case STOPPED: return "This QuestionnaireResponse has been partially filled out with answers, but it is unknown whether changes or additions are expected to be made to it.";
             default: return "?";
           }
         }
@@ -96,6 +104,7 @@ public enum QuestionnaireAnswersStatus {
             case COMPLETED: return "Completed";
             case AMENDED: return "Amended";
             case ENTEREDINERROR: return "Entered In Error";
+            case STOPPED: return "Stopped";
             default: return "?";
           }
     }

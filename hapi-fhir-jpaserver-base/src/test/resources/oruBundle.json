@@ -130,7 +130,7 @@
 		{
 			"fullUrl": "urn:uuid:3b3f2d52-2153-44ac-b6b9-d1153db04561",
 			"resource": {
-				"resourceType": "DiagnosticRequest",
+				"resourceType": "ProcedureRequest",
 				"contained": [
 					{
 						"resourceType": "Practitioner",
@@ -174,7 +174,7 @@
 			},
 			"request": {
 				"method": "PUT",
-				"url": "/DiagnosticRequest?identifier=EPR%7CSM.14.145"
+				"url": "/ProcedureRequest?identifier=EPR%7CSM.14.145"
 			}
 		},
 		{

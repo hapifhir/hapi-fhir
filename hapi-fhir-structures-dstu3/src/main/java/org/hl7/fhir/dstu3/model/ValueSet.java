@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
 
 import java.util.*;
 
@@ -47,7 +47,7 @@ import org.hl7.fhir.exceptions.FHIRException;
  * A value set specifies a set of codes drawn from one or more code systems.
  */
 @ResourceDef(name="ValueSet", profile="http://hl7.org/fhir/Profile/ValueSet")
-@ChildOrder(names={"url", "identifier", "version", "name", "title", "status", "experimental", "publisher", "contact", "date", "description", "useContext", "jurisdiction", "immutable", "purpose", "copyright", "extensible", "compose", "expansion"})
+@ChildOrder(names={"url", "identifier", "version", "name", "title", "status", "experimental", "date", "publisher", "contact", "description", "useContext", "jurisdiction", "immutable", "purpose", "copyright", "extensible", "compose", "expansion"})
 public class ValueSet extends MetadataResource {
 
     public enum FilterOperator {
@@ -201,8 +201,10 @@ public class ValueSet extends MetadataResource {
         throw new IllegalArgumentException("Unknown FilterOperator code '"+codeString+"'");
         }
         public Enumeration<FilterOperator> fromType(Base code) throws FHIRException {
-          if (code == null || code.isEmpty())
+          if (code == null)
             return null;
+          if (code.isEmpty())
+            return new Enumeration<FilterOperator>(this);
           String codeString = ((PrimitiveType) code).asStringValue();
           if (codeString == null || "".equals(codeString))
             return null;
@@ -512,47 +514,60 @@ public class ValueSet extends MetadataResource {
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case 1391591896: // lockedDate
           this.lockedDate = castToDate(value); // DateType
-          break;
+          return value;
         case 24665195: // inactive
           this.inactive = castToBoolean(value); // BooleanType
-          break;
+          return value;
         case 1942574248: // include
           this.getInclude().add((ConceptSetComponent) value); // ConceptSetComponent
-          break;
+          return value;
         case -1321148966: // exclude
           this.getExclude().add((ConceptSetComponent) value); // ConceptSetComponent
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("lockedDate"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("lockedDate")) {
           this.lockedDate = castToDate(value); // DateType
-        else if (name.equals("inactive"))
+        } else if (name.equals("inactive")) {
           this.inactive = castToBoolean(value); // BooleanType
-        else if (name.equals("include"))
+        } else if (name.equals("include")) {
           this.getInclude().add((ConceptSetComponent) value);
-        else if (name.equals("exclude"))
+        } else if (name.equals("exclude")) {
           this.getExclude().add((ConceptSetComponent) value);
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 1391591896: throw new FHIRException("Cannot make property lockedDate as it is not a complex type"); // DateType
-        case 24665195: throw new FHIRException("Cannot make property inactive as it is not a complex type"); // BooleanType
-        case 1942574248:  return addInclude(); // ConceptSetComponent
-        case -1321148966:  return addExclude(); // ConceptSetComponent
+        case 1391591896:  return getLockedDateElement();
+        case 24665195:  return getInactiveElement();
+        case 1942574248:  return addInclude(); 
+        case -1321148966:  return addExclude(); 
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 1391591896: /*lockedDate*/ return new String[] {"date"};
+        case 24665195: /*inactive*/ return new String[] {"boolean"};
+        case 1942574248: /*include*/ return new String[] {};
+        case -1321148966: /*exclude*/ return new String[] {"@ValueSet.compose.include"};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }
@@ -652,7 +667,7 @@ public class ValueSet extends MetadataResource {
         /**
          * Select concepts by specify a matching criteria based on the properties (including relationships) defined by the system. If multiple filters are specified, they SHALL all be true.
          */
-        @Child(name = "filter", type = {}, order=4, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Child(name = "filter", type = {}, order=4, min=0, max=Child.MAX_UNLIMITED, modifier=true, summary=true)
         @Description(shortDefinition="Select codes/concepts by their properties (including relationships)", formalDefinition="Select concepts by specify a matching criteria based on the properties (including relationships) defined by the system. If multiple filters are specified, they SHALL all be true." )
         protected List<ConceptSetFilterComponent> filter;
 
@@ -960,53 +975,67 @@ public class ValueSet extends MetadataResource {
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case -887328209: // system
           this.system = castToUri(value); // UriType
-          break;
+          return value;
         case 351608024: // version
           this.version = castToString(value); // StringType
-          break;
+          return value;
         case 951024232: // concept
           this.getConcept().add((ConceptReferenceComponent) value); // ConceptReferenceComponent
-          break;
+          return value;
         case -1274492040: // filter
           this.getFilter().add((ConceptSetFilterComponent) value); // ConceptSetFilterComponent
-          break;
+          return value;
         case -1410174671: // valueSet
           this.getValueSet().add(castToUri(value)); // UriType
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("system"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("system")) {
           this.system = castToUri(value); // UriType
-        else if (name.equals("version"))
+        } else if (name.equals("version")) {
           this.version = castToString(value); // StringType
-        else if (name.equals("concept"))
+        } else if (name.equals("concept")) {
           this.getConcept().add((ConceptReferenceComponent) value);
-        else if (name.equals("filter"))
+        } else if (name.equals("filter")) {
           this.getFilter().add((ConceptSetFilterComponent) value);
-        else if (name.equals("valueSet"))
+        } else if (name.equals("valueSet")) {
           this.getValueSet().add(castToUri(value));
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case -887328209: throw new FHIRException("Cannot make property system as it is not a complex type"); // UriType
-        case 351608024: throw new FHIRException("Cannot make property version as it is not a complex type"); // StringType
-        case 951024232:  return addConcept(); // ConceptReferenceComponent
-        case -1274492040:  return addFilter(); // ConceptSetFilterComponent
-        case -1410174671: throw new FHIRException("Cannot make property valueSet as it is not a complex type"); // UriType
+        case -887328209:  return getSystemElement();
+        case 351608024:  return getVersionElement();
+        case 951024232:  return addConcept(); 
+        case -1274492040:  return addFilter(); 
+        case -1410174671:  return addValueSetElement();
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -887328209: /*system*/ return new String[] {"uri"};
+        case 351608024: /*version*/ return new String[] {"string"};
+        case 951024232: /*concept*/ return new String[] {};
+        case -1274492040: /*filter*/ return new String[] {};
+        case -1410174671: /*valueSet*/ return new String[] {"uri"};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }
@@ -1102,7 +1131,7 @@ public class ValueSet extends MetadataResource {
          * The text to display to the user for this concept in the context of this valueset. If no display is provided, then applications using the value set use the display specified for the code by the system.
          */
         @Child(name = "display", type = {StringType.class}, order=2, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Text to display for this code for this value set", formalDefinition="The text to display to the user for this concept in the context of this valueset. If no display is provided, then applications using the value set use the display specified for the code by the system." )
+        @Description(shortDefinition="Text to display for this code for this value set in this valueset", formalDefinition="The text to display to the user for this concept in the context of this valueset. If no display is provided, then applications using the value set use the display specified for the code by the system." )
         protected StringType display;
 
         /**
@@ -1295,41 +1324,53 @@ public class ValueSet extends MetadataResource {
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case 3059181: // code
           this.code = castToCode(value); // CodeType
-          break;
+          return value;
         case 1671764162: // display
           this.display = castToString(value); // StringType
-          break;
+          return value;
         case -900931593: // designation
           this.getDesignation().add((ConceptReferenceDesignationComponent) value); // ConceptReferenceDesignationComponent
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("code"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("code")) {
           this.code = castToCode(value); // CodeType
-        else if (name.equals("display"))
+        } else if (name.equals("display")) {
           this.display = castToString(value); // StringType
-        else if (name.equals("designation"))
+        } else if (name.equals("designation")) {
           this.getDesignation().add((ConceptReferenceDesignationComponent) value);
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 3059181: throw new FHIRException("Cannot make property code as it is not a complex type"); // CodeType
-        case 1671764162: throw new FHIRException("Cannot make property display as it is not a complex type"); // StringType
-        case -900931593:  return addDesignation(); // ConceptReferenceDesignationComponent
+        case 3059181:  return getCodeElement();
+        case 1671764162:  return getDisplayElement();
+        case -900931593:  return addDesignation(); 
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3059181: /*code*/ return new String[] {"code"};
+        case 1671764162: /*display*/ return new String[] {"string"};
+        case -900931593: /*designation*/ return new String[] {};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }
@@ -1574,41 +1615,53 @@ public class ValueSet extends MetadataResource {
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case -1613589672: // language
           this.language = castToCode(value); // CodeType
-          break;
+          return value;
         case 116103: // use
           this.use = castToCoding(value); // Coding
-          break;
+          return value;
         case 111972721: // value
           this.value = castToString(value); // StringType
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("language"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("language")) {
           this.language = castToCode(value); // CodeType
-        else if (name.equals("use"))
+        } else if (name.equals("use")) {
           this.use = castToCoding(value); // Coding
-        else if (name.equals("value"))
+        } else if (name.equals("value")) {
           this.value = castToString(value); // StringType
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case -1613589672: throw new FHIRException("Cannot make property language as it is not a complex type"); // CodeType
-        case 116103:  return getUse(); // Coding
-        case 111972721: throw new FHIRException("Cannot make property value as it is not a complex type"); // StringType
+        case -1613589672:  return getLanguageElement();
+        case 116103:  return getUse(); 
+        case 111972721:  return getValueElement();
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -1613589672: /*language*/ return new String[] {"code"};
+        case 116103: /*use*/ return new String[] {"Coding"};
+        case 111972721: /*value*/ return new String[] {"string"};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }
@@ -1675,23 +1728,23 @@ public class ValueSet extends MetadataResource {
         /**
          * A code that identifies a property defined in the code system.
          */
-        @Child(name = "property", type = {CodeType.class}, order=1, min=1, max=1, modifier=false, summary=false)
+        @Child(name = "property", type = {CodeType.class}, order=1, min=1, max=1, modifier=false, summary=true)
         @Description(shortDefinition="A property defined by the code system", formalDefinition="A code that identifies a property defined in the code system." )
         protected CodeType property;
 
         /**
          * The kind of operation to perform as a part of the filter criteria.
          */
-        @Child(name = "op", type = {CodeType.class}, order=2, min=1, max=1, modifier=true, summary=false)
+        @Child(name = "op", type = {CodeType.class}, order=2, min=1, max=1, modifier=false, summary=true)
         @Description(shortDefinition="= | is-a | descendent-of | is-not-a | regex | in | not-in | generalizes | exists", formalDefinition="The kind of operation to perform as a part of the filter criteria." )
         @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/filter-operator")
         protected Enumeration<FilterOperator> op;
 
         /**
-         * The match value may be either a code defined by the system, or a string value, which is a regex match on the literal string of the property value.
+         * The match value may be either a code defined by the system, or a string value, which is a regex match on the literal string of the property value when the operation is 'regex', or one of the values (true and false), when the operation is 'exists'.
          */
-        @Child(name = "value", type = {CodeType.class}, order=3, min=1, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Code from the system, or regex criteria", formalDefinition="The match value may be either a code defined by the system, or a string value, which is a regex match on the literal string of the property value." )
+        @Child(name = "value", type = {CodeType.class}, order=3, min=1, max=1, modifier=false, summary=true)
+        @Description(shortDefinition="Code from the system, or regex criteria, or boolean value for exists", formalDefinition="The match value may be either a code defined by the system, or a string value, which is a regex match on the literal string of the property value when the operation is 'regex', or one of the values (true and false), when the operation is 'exists'." )
         protected CodeType value;
 
         private static final long serialVersionUID = 1985515000L;
@@ -1804,7 +1857,7 @@ public class ValueSet extends MetadataResource {
         }
 
         /**
-         * @return {@link #value} (The match value may be either a code defined by the system, or a string value, which is a regex match on the literal string of the property value.). This is the underlying object with id, value and extensions. The accessor "getValue" gives direct access to the value
+         * @return {@link #value} (The match value may be either a code defined by the system, or a string value, which is a regex match on the literal string of the property value when the operation is 'regex', or one of the values (true and false), when the operation is 'exists'.). This is the underlying object with id, value and extensions. The accessor "getValue" gives direct access to the value
          */
         public CodeType getValueElement() { 
           if (this.value == null)
@@ -1824,7 +1877,7 @@ public class ValueSet extends MetadataResource {
         }
 
         /**
-         * @param value {@link #value} (The match value may be either a code defined by the system, or a string value, which is a regex match on the literal string of the property value.). This is the underlying object with id, value and extensions. The accessor "getValue" gives direct access to the value
+         * @param value {@link #value} (The match value may be either a code defined by the system, or a string value, which is a regex match on the literal string of the property value when the operation is 'regex', or one of the values (true and false), when the operation is 'exists'.). This is the underlying object with id, value and extensions. The accessor "getValue" gives direct access to the value
          */
         public ConceptSetFilterComponent setValueElement(CodeType value) { 
           this.value = value;
@@ -1832,14 +1885,14 @@ public class ValueSet extends MetadataResource {
         }
 
         /**
-         * @return The match value may be either a code defined by the system, or a string value, which is a regex match on the literal string of the property value.
+         * @return The match value may be either a code defined by the system, or a string value, which is a regex match on the literal string of the property value when the operation is 'regex', or one of the values (true and false), when the operation is 'exists'.
          */
         public String getValue() { 
           return this.value == null ? null : this.value.getValue();
         }
 
         /**
-         * @param value The match value may be either a code defined by the system, or a string value, which is a regex match on the literal string of the property value.
+         * @param value The match value may be either a code defined by the system, or a string value, which is a regex match on the literal string of the property value when the operation is 'regex', or one of the values (true and false), when the operation is 'exists'.
          */
         public ConceptSetFilterComponent setValue(String value) { 
             if (this.value == null)
@@ -1852,7 +1905,7 @@ public class ValueSet extends MetadataResource {
           super.listChildren(childrenList);
           childrenList.add(new Property("property", "code", "A code that identifies a property defined in the code system.", 0, java.lang.Integer.MAX_VALUE, property));
           childrenList.add(new Property("op", "code", "The kind of operation to perform as a part of the filter criteria.", 0, java.lang.Integer.MAX_VALUE, op));
-          childrenList.add(new Property("value", "code", "The match value may be either a code defined by the system, or a string value, which is a regex match on the literal string of the property value.", 0, java.lang.Integer.MAX_VALUE, value));
+          childrenList.add(new Property("value", "code", "The match value may be either a code defined by the system, or a string value, which is a regex match on the literal string of the property value when the operation is 'regex', or one of the values (true and false), when the operation is 'exists'.", 0, java.lang.Integer.MAX_VALUE, value));
         }
 
       @Override
@@ -1867,41 +1920,55 @@ public class ValueSet extends MetadataResource {
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case -993141291: // property
           this.property = castToCode(value); // CodeType
-          break;
+          return value;
         case 3553: // op
-          this.op = new FilterOperatorEnumFactory().fromType(value); // Enumeration<FilterOperator>
-          break;
+          value = new FilterOperatorEnumFactory().fromType(castToCode(value));
+          this.op = (Enumeration) value; // Enumeration<FilterOperator>
+          return value;
         case 111972721: // value
           this.value = castToCode(value); // CodeType
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("property"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("property")) {
           this.property = castToCode(value); // CodeType
-        else if (name.equals("op"))
-          this.op = new FilterOperatorEnumFactory().fromType(value); // Enumeration<FilterOperator>
-        else if (name.equals("value"))
+        } else if (name.equals("op")) {
+          value = new FilterOperatorEnumFactory().fromType(castToCode(value));
+          this.op = (Enumeration) value; // Enumeration<FilterOperator>
+        } else if (name.equals("value")) {
           this.value = castToCode(value); // CodeType
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case -993141291: throw new FHIRException("Cannot make property property as it is not a complex type"); // CodeType
-        case 3553: throw new FHIRException("Cannot make property op as it is not a complex type"); // Enumeration<FilterOperator>
-        case 111972721: throw new FHIRException("Cannot make property value as it is not a complex type"); // CodeType
+        case -993141291:  return getPropertyElement();
+        case 3553:  return getOpElement();
+        case 111972721:  return getValueElement();
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -993141291: /*property*/ return new String[] {"code"};
+        case 3553: /*op*/ return new String[] {"code"};
+        case 111972721: /*value*/ return new String[] {"code"};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }
@@ -2336,59 +2403,74 @@ public class ValueSet extends MetadataResource {
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case -1618432855: // identifier
           this.identifier = castToUri(value); // UriType
-          break;
+          return value;
         case 55126294: // timestamp
           this.timestamp = castToDateTime(value); // DateTimeType
-          break;
+          return value;
         case 110549828: // total
           this.total = castToInteger(value); // IntegerType
-          break;
+          return value;
         case -1019779949: // offset
           this.offset = castToInteger(value); // IntegerType
-          break;
+          return value;
         case 1954460585: // parameter
           this.getParameter().add((ValueSetExpansionParameterComponent) value); // ValueSetExpansionParameterComponent
-          break;
+          return value;
         case -567445985: // contains
           this.getContains().add((ValueSetExpansionContainsComponent) value); // ValueSetExpansionContainsComponent
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("identifier"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("identifier")) {
           this.identifier = castToUri(value); // UriType
-        else if (name.equals("timestamp"))
+        } else if (name.equals("timestamp")) {
           this.timestamp = castToDateTime(value); // DateTimeType
-        else if (name.equals("total"))
+        } else if (name.equals("total")) {
           this.total = castToInteger(value); // IntegerType
-        else if (name.equals("offset"))
+        } else if (name.equals("offset")) {
           this.offset = castToInteger(value); // IntegerType
-        else if (name.equals("parameter"))
+        } else if (name.equals("parameter")) {
           this.getParameter().add((ValueSetExpansionParameterComponent) value);
-        else if (name.equals("contains"))
+        } else if (name.equals("contains")) {
           this.getContains().add((ValueSetExpansionContainsComponent) value);
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case -1618432855: throw new FHIRException("Cannot make property identifier as it is not a complex type"); // UriType
-        case 55126294: throw new FHIRException("Cannot make property timestamp as it is not a complex type"); // DateTimeType
-        case 110549828: throw new FHIRException("Cannot make property total as it is not a complex type"); // IntegerType
-        case -1019779949: throw new FHIRException("Cannot make property offset as it is not a complex type"); // IntegerType
-        case 1954460585:  return addParameter(); // ValueSetExpansionParameterComponent
-        case -567445985:  return addContains(); // ValueSetExpansionContainsComponent
+        case -1618432855:  return getIdentifierElement();
+        case 55126294:  return getTimestampElement();
+        case 110549828:  return getTotalElement();
+        case -1019779949:  return getOffsetElement();
+        case 1954460585:  return addParameter(); 
+        case -567445985:  return addContains(); 
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -1618432855: /*identifier*/ return new String[] {"uri"};
+        case 55126294: /*timestamp*/ return new String[] {"dateTime"};
+        case 110549828: /*total*/ return new String[] {"integer"};
+        case -1019779949: /*offset*/ return new String[] {"integer"};
+        case 1954460585: /*parameter*/ return new String[] {};
+        case -567445985: /*contains*/ return new String[] {};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }
@@ -2664,35 +2746,47 @@ public class ValueSet extends MetadataResource {
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case 3373707: // name
           this.name = castToString(value); // StringType
-          break;
+          return value;
         case 111972721: // value
           this.value = castToType(value); // Type
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("name"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("name")) {
           this.name = castToString(value); // StringType
-        else if (name.equals("value[x]"))
+        } else if (name.equals("value[x]")) {
           this.value = castToType(value); // Type
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 3373707: throw new FHIRException("Cannot make property name as it is not a complex type"); // StringType
-        case -1410166417:  return getValue(); // Type
+        case 3373707:  return getNameElement();
+        case -1410166417:  return getValue(); 
+        case 111972721:  return getValue(); 
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3373707: /*name*/ return new String[] {"string"};
+        case 111972721: /*value*/ return new String[] {"string", "boolean", "integer", "decimal", "uri", "code"};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }
@@ -3257,71 +3351,88 @@ public class ValueSet extends MetadataResource {
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case -887328209: // system
           this.system = castToUri(value); // UriType
-          break;
+          return value;
         case 1732898850: // abstract
           this.abstract_ = castToBoolean(value); // BooleanType
-          break;
+          return value;
         case 24665195: // inactive
           this.inactive = castToBoolean(value); // BooleanType
-          break;
+          return value;
         case 351608024: // version
           this.version = castToString(value); // StringType
-          break;
+          return value;
         case 3059181: // code
           this.code = castToCode(value); // CodeType
-          break;
+          return value;
         case 1671764162: // display
           this.display = castToString(value); // StringType
-          break;
+          return value;
         case -900931593: // designation
           this.getDesignation().add((ConceptReferenceDesignationComponent) value); // ConceptReferenceDesignationComponent
-          break;
+          return value;
         case -567445985: // contains
           this.getContains().add((ValueSetExpansionContainsComponent) value); // ValueSetExpansionContainsComponent
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("system"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("system")) {
           this.system = castToUri(value); // UriType
-        else if (name.equals("abstract"))
+        } else if (name.equals("abstract")) {
           this.abstract_ = castToBoolean(value); // BooleanType
-        else if (name.equals("inactive"))
+        } else if (name.equals("inactive")) {
           this.inactive = castToBoolean(value); // BooleanType
-        else if (name.equals("version"))
+        } else if (name.equals("version")) {
           this.version = castToString(value); // StringType
-        else if (name.equals("code"))
+        } else if (name.equals("code")) {
           this.code = castToCode(value); // CodeType
-        else if (name.equals("display"))
+        } else if (name.equals("display")) {
           this.display = castToString(value); // StringType
-        else if (name.equals("designation"))
+        } else if (name.equals("designation")) {
           this.getDesignation().add((ConceptReferenceDesignationComponent) value);
-        else if (name.equals("contains"))
+        } else if (name.equals("contains")) {
           this.getContains().add((ValueSetExpansionContainsComponent) value);
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case -887328209: throw new FHIRException("Cannot make property system as it is not a complex type"); // UriType
-        case 1732898850: throw new FHIRException("Cannot make property abstract as it is not a complex type"); // BooleanType
-        case 24665195: throw new FHIRException("Cannot make property inactive as it is not a complex type"); // BooleanType
-        case 351608024: throw new FHIRException("Cannot make property version as it is not a complex type"); // StringType
-        case 3059181: throw new FHIRException("Cannot make property code as it is not a complex type"); // CodeType
-        case 1671764162: throw new FHIRException("Cannot make property display as it is not a complex type"); // StringType
-        case -900931593:  return addDesignation(); // ConceptReferenceDesignationComponent
-        case -567445985:  return addContains(); // ValueSetExpansionContainsComponent
+        case -887328209:  return getSystemElement();
+        case 1732898850:  return getAbstractElement();
+        case 24665195:  return getInactiveElement();
+        case 351608024:  return getVersionElement();
+        case 3059181:  return getCodeElement();
+        case 1671764162:  return getDisplayElement();
+        case -900931593:  return addDesignation(); 
+        case -567445985:  return addContains(); 
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -887328209: /*system*/ return new String[] {"uri"};
+        case 1732898850: /*abstract*/ return new String[] {"boolean"};
+        case 24665195: /*inactive*/ return new String[] {"boolean"};
+        case 351608024: /*version*/ return new String[] {"string"};
+        case 3059181: /*code*/ return new String[] {"code"};
+        case 1671764162: /*display*/ return new String[] {"string"};
+        case -900931593: /*designation*/ return new String[] {"@ValueSet.compose.include.concept.designation"};
+        case -567445985: /*contains*/ return new String[] {"@ValueSet.expansion.contains"};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }
@@ -3820,6 +3931,55 @@ public class ValueSet extends MetadataResource {
     }
 
     /**
+     * @return {@link #date} (The date  (and optionally time) when the value set was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the value set changes. (e.g. the 'content logical definition').). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
+     */
+    public DateTimeType getDateElement() { 
+      if (this.date == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create ValueSet.date");
+        else if (Configuration.doAutoCreate())
+          this.date = new DateTimeType(); // bb
+      return this.date;
+    }
+
+    public boolean hasDateElement() { 
+      return this.date != null && !this.date.isEmpty();
+    }
+
+    public boolean hasDate() { 
+      return this.date != null && !this.date.isEmpty();
+    }
+
+    /**
+     * @param value {@link #date} (The date  (and optionally time) when the value set was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the value set changes. (e.g. the 'content logical definition').). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
+     */
+    public ValueSet setDateElement(DateTimeType value) { 
+      this.date = value;
+      return this;
+    }
+
+    /**
+     * @return The date  (and optionally time) when the value set was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the value set changes. (e.g. the 'content logical definition').
+     */
+    public Date getDate() { 
+      return this.date == null ? null : this.date.getValue();
+    }
+
+    /**
+     * @param value The date  (and optionally time) when the value set was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the value set changes. (e.g. the 'content logical definition').
+     */
+    public ValueSet setDate(Date value) { 
+      if (value == null)
+        this.date = null;
+      else {
+        if (this.date == null)
+          this.date = new DateTimeType();
+        this.date.setValue(value);
+      }
+      return this;
+    }
+
+    /**
      * @return {@link #publisher} (The name of the individual or organization that published the value set.). This is the underlying object with id, value and extensions. The accessor "getPublisher" gives direct access to the value
      */
     public StringType getPublisherElement() { 
@@ -3919,55 +4079,6 @@ public class ValueSet extends MetadataResource {
         addContact();
       }
       return getContact().get(0);
-    }
-
-    /**
-     * @return {@link #date} (The date  (and optionally time) when the value set was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the value set changes. (e.g. the 'content logical definition').). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
-     */
-    public DateTimeType getDateElement() { 
-      if (this.date == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create ValueSet.date");
-        else if (Configuration.doAutoCreate())
-          this.date = new DateTimeType(); // bb
-      return this.date;
-    }
-
-    public boolean hasDateElement() { 
-      return this.date != null && !this.date.isEmpty();
-    }
-
-    public boolean hasDate() { 
-      return this.date != null && !this.date.isEmpty();
-    }
-
-    /**
-     * @param value {@link #date} (The date  (and optionally time) when the value set was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the value set changes. (e.g. the 'content logical definition').). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
-     */
-    public ValueSet setDateElement(DateTimeType value) { 
-      this.date = value;
-      return this;
-    }
-
-    /**
-     * @return The date  (and optionally time) when the value set was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the value set changes. (e.g. the 'content logical definition').
-     */
-    public Date getDate() { 
-      return this.date == null ? null : this.date.getValue();
-    }
-
-    /**
-     * @param value The date  (and optionally time) when the value set was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the value set changes. (e.g. the 'content logical definition').
-     */
-    public ValueSet setDate(Date value) { 
-      if (value == null)
-        this.date = null;
-      else {
-        if (this.date == null)
-          this.date = new DateTimeType();
-        this.date.setValue(value);
-      }
-      return this;
     }
 
     /**
@@ -4370,9 +4481,9 @@ public class ValueSet extends MetadataResource {
         childrenList.add(new Property("title", "string", "A short, descriptive, user-friendly title for the value set.", 0, java.lang.Integer.MAX_VALUE, title));
         childrenList.add(new Property("status", "code", "The status of this value set. Enables tracking the life-cycle of the content.", 0, java.lang.Integer.MAX_VALUE, status));
         childrenList.add(new Property("experimental", "boolean", "A flag to indicate that this value set is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.", 0, java.lang.Integer.MAX_VALUE, experimental));
+        childrenList.add(new Property("date", "dateTime", "The date  (and optionally time) when the value set was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the value set changes. (e.g. the 'content logical definition').", 0, java.lang.Integer.MAX_VALUE, date));
         childrenList.add(new Property("publisher", "string", "The name of the individual or organization that published the value set.", 0, java.lang.Integer.MAX_VALUE, publisher));
         childrenList.add(new Property("contact", "ContactDetail", "Contact details to assist a user in finding and communicating with the publisher.", 0, java.lang.Integer.MAX_VALUE, contact));
-        childrenList.add(new Property("date", "dateTime", "The date  (and optionally time) when the value set was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the value set changes. (e.g. the 'content logical definition').", 0, java.lang.Integer.MAX_VALUE, date));
         childrenList.add(new Property("description", "markdown", "A free text natural language description of the value set from the consumer's perspective.", 0, java.lang.Integer.MAX_VALUE, description));
         childrenList.add(new Property("useContext", "UsageContext", "The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching of code system definitions.", 0, java.lang.Integer.MAX_VALUE, useContext));
         childrenList.add(new Property("jurisdiction", "CodeableConcept", "A jurisdiction in which the value set is intended to be used.", 0, java.lang.Integer.MAX_VALUE, jurisdiction));
@@ -4394,9 +4505,9 @@ public class ValueSet extends MetadataResource {
         case 110371416: /*title*/ return this.title == null ? new Base[0] : new Base[] {this.title}; // StringType
         case -892481550: /*status*/ return this.status == null ? new Base[0] : new Base[] {this.status}; // Enumeration<PublicationStatus>
         case -404562712: /*experimental*/ return this.experimental == null ? new Base[0] : new Base[] {this.experimental}; // BooleanType
+        case 3076014: /*date*/ return this.date == null ? new Base[0] : new Base[] {this.date}; // DateTimeType
         case 1447404028: /*publisher*/ return this.publisher == null ? new Base[0] : new Base[] {this.publisher}; // StringType
         case 951526432: /*contact*/ return this.contact == null ? new Base[0] : this.contact.toArray(new Base[this.contact.size()]); // ContactDetail
-        case 3076014: /*date*/ return this.date == null ? new Base[0] : new Base[] {this.date}; // DateTimeType
         case -1724546052: /*description*/ return this.description == null ? new Base[0] : new Base[] {this.description}; // MarkdownType
         case -669707736: /*useContext*/ return this.useContext == null ? new Base[0] : this.useContext.toArray(new Base[this.useContext.size()]); // UsageContext
         case -507075711: /*jurisdiction*/ return this.jurisdiction == null ? new Base[0] : this.jurisdiction.toArray(new Base[this.jurisdiction.size()]); // CodeableConcept
@@ -4412,137 +4523,167 @@ public class ValueSet extends MetadataResource {
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case 116079: // url
           this.url = castToUri(value); // UriType
-          break;
+          return value;
         case -1618432855: // identifier
           this.getIdentifier().add(castToIdentifier(value)); // Identifier
-          break;
+          return value;
         case 351608024: // version
           this.version = castToString(value); // StringType
-          break;
+          return value;
         case 3373707: // name
           this.name = castToString(value); // StringType
-          break;
+          return value;
         case 110371416: // title
           this.title = castToString(value); // StringType
-          break;
+          return value;
         case -892481550: // status
-          this.status = new PublicationStatusEnumFactory().fromType(value); // Enumeration<PublicationStatus>
-          break;
+          value = new PublicationStatusEnumFactory().fromType(castToCode(value));
+          this.status = (Enumeration) value; // Enumeration<PublicationStatus>
+          return value;
         case -404562712: // experimental
           this.experimental = castToBoolean(value); // BooleanType
-          break;
-        case 1447404028: // publisher
-          this.publisher = castToString(value); // StringType
-          break;
-        case 951526432: // contact
-          this.getContact().add(castToContactDetail(value)); // ContactDetail
-          break;
+          return value;
         case 3076014: // date
           this.date = castToDateTime(value); // DateTimeType
-          break;
+          return value;
+        case 1447404028: // publisher
+          this.publisher = castToString(value); // StringType
+          return value;
+        case 951526432: // contact
+          this.getContact().add(castToContactDetail(value)); // ContactDetail
+          return value;
         case -1724546052: // description
           this.description = castToMarkdown(value); // MarkdownType
-          break;
+          return value;
         case -669707736: // useContext
           this.getUseContext().add(castToUsageContext(value)); // UsageContext
-          break;
+          return value;
         case -507075711: // jurisdiction
           this.getJurisdiction().add(castToCodeableConcept(value)); // CodeableConcept
-          break;
+          return value;
         case 1596987778: // immutable
           this.immutable = castToBoolean(value); // BooleanType
-          break;
+          return value;
         case -220463842: // purpose
           this.purpose = castToMarkdown(value); // MarkdownType
-          break;
+          return value;
         case 1522889671: // copyright
           this.copyright = castToMarkdown(value); // MarkdownType
-          break;
+          return value;
         case -1809433861: // extensible
           this.extensible = castToBoolean(value); // BooleanType
-          break;
+          return value;
         case 950497682: // compose
           this.compose = (ValueSetComposeComponent) value; // ValueSetComposeComponent
-          break;
+          return value;
         case 17878207: // expansion
           this.expansion = (ValueSetExpansionComponent) value; // ValueSetExpansionComponent
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("url"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("url")) {
           this.url = castToUri(value); // UriType
-        else if (name.equals("identifier"))
+        } else if (name.equals("identifier")) {
           this.getIdentifier().add(castToIdentifier(value));
-        else if (name.equals("version"))
+        } else if (name.equals("version")) {
           this.version = castToString(value); // StringType
-        else if (name.equals("name"))
+        } else if (name.equals("name")) {
           this.name = castToString(value); // StringType
-        else if (name.equals("title"))
+        } else if (name.equals("title")) {
           this.title = castToString(value); // StringType
-        else if (name.equals("status"))
-          this.status = new PublicationStatusEnumFactory().fromType(value); // Enumeration<PublicationStatus>
-        else if (name.equals("experimental"))
+        } else if (name.equals("status")) {
+          value = new PublicationStatusEnumFactory().fromType(castToCode(value));
+          this.status = (Enumeration) value; // Enumeration<PublicationStatus>
+        } else if (name.equals("experimental")) {
           this.experimental = castToBoolean(value); // BooleanType
-        else if (name.equals("publisher"))
-          this.publisher = castToString(value); // StringType
-        else if (name.equals("contact"))
-          this.getContact().add(castToContactDetail(value));
-        else if (name.equals("date"))
+        } else if (name.equals("date")) {
           this.date = castToDateTime(value); // DateTimeType
-        else if (name.equals("description"))
+        } else if (name.equals("publisher")) {
+          this.publisher = castToString(value); // StringType
+        } else if (name.equals("contact")) {
+          this.getContact().add(castToContactDetail(value));
+        } else if (name.equals("description")) {
           this.description = castToMarkdown(value); // MarkdownType
-        else if (name.equals("useContext"))
+        } else if (name.equals("useContext")) {
           this.getUseContext().add(castToUsageContext(value));
-        else if (name.equals("jurisdiction"))
+        } else if (name.equals("jurisdiction")) {
           this.getJurisdiction().add(castToCodeableConcept(value));
-        else if (name.equals("immutable"))
+        } else if (name.equals("immutable")) {
           this.immutable = castToBoolean(value); // BooleanType
-        else if (name.equals("purpose"))
+        } else if (name.equals("purpose")) {
           this.purpose = castToMarkdown(value); // MarkdownType
-        else if (name.equals("copyright"))
+        } else if (name.equals("copyright")) {
           this.copyright = castToMarkdown(value); // MarkdownType
-        else if (name.equals("extensible"))
+        } else if (name.equals("extensible")) {
           this.extensible = castToBoolean(value); // BooleanType
-        else if (name.equals("compose"))
+        } else if (name.equals("compose")) {
           this.compose = (ValueSetComposeComponent) value; // ValueSetComposeComponent
-        else if (name.equals("expansion"))
+        } else if (name.equals("expansion")) {
           this.expansion = (ValueSetExpansionComponent) value; // ValueSetExpansionComponent
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 116079: throw new FHIRException("Cannot make property url as it is not a complex type"); // UriType
-        case -1618432855:  return addIdentifier(); // Identifier
-        case 351608024: throw new FHIRException("Cannot make property version as it is not a complex type"); // StringType
-        case 3373707: throw new FHIRException("Cannot make property name as it is not a complex type"); // StringType
-        case 110371416: throw new FHIRException("Cannot make property title as it is not a complex type"); // StringType
-        case -892481550: throw new FHIRException("Cannot make property status as it is not a complex type"); // Enumeration<PublicationStatus>
-        case -404562712: throw new FHIRException("Cannot make property experimental as it is not a complex type"); // BooleanType
-        case 1447404028: throw new FHIRException("Cannot make property publisher as it is not a complex type"); // StringType
-        case 951526432:  return addContact(); // ContactDetail
-        case 3076014: throw new FHIRException("Cannot make property date as it is not a complex type"); // DateTimeType
-        case -1724546052: throw new FHIRException("Cannot make property description as it is not a complex type"); // MarkdownType
-        case -669707736:  return addUseContext(); // UsageContext
-        case -507075711:  return addJurisdiction(); // CodeableConcept
-        case 1596987778: throw new FHIRException("Cannot make property immutable as it is not a complex type"); // BooleanType
-        case -220463842: throw new FHIRException("Cannot make property purpose as it is not a complex type"); // MarkdownType
-        case 1522889671: throw new FHIRException("Cannot make property copyright as it is not a complex type"); // MarkdownType
-        case -1809433861: throw new FHIRException("Cannot make property extensible as it is not a complex type"); // BooleanType
-        case 950497682:  return getCompose(); // ValueSetComposeComponent
-        case 17878207:  return getExpansion(); // ValueSetExpansionComponent
+        case 116079:  return getUrlElement();
+        case -1618432855:  return addIdentifier(); 
+        case 351608024:  return getVersionElement();
+        case 3373707:  return getNameElement();
+        case 110371416:  return getTitleElement();
+        case -892481550:  return getStatusElement();
+        case -404562712:  return getExperimentalElement();
+        case 3076014:  return getDateElement();
+        case 1447404028:  return getPublisherElement();
+        case 951526432:  return addContact(); 
+        case -1724546052:  return getDescriptionElement();
+        case -669707736:  return addUseContext(); 
+        case -507075711:  return addJurisdiction(); 
+        case 1596987778:  return getImmutableElement();
+        case -220463842:  return getPurposeElement();
+        case 1522889671:  return getCopyrightElement();
+        case -1809433861:  return getExtensibleElement();
+        case 950497682:  return getCompose(); 
+        case 17878207:  return getExpansion(); 
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 116079: /*url*/ return new String[] {"uri"};
+        case -1618432855: /*identifier*/ return new String[] {"Identifier"};
+        case 351608024: /*version*/ return new String[] {"string"};
+        case 3373707: /*name*/ return new String[] {"string"};
+        case 110371416: /*title*/ return new String[] {"string"};
+        case -892481550: /*status*/ return new String[] {"code"};
+        case -404562712: /*experimental*/ return new String[] {"boolean"};
+        case 3076014: /*date*/ return new String[] {"dateTime"};
+        case 1447404028: /*publisher*/ return new String[] {"string"};
+        case 951526432: /*contact*/ return new String[] {"ContactDetail"};
+        case -1724546052: /*description*/ return new String[] {"markdown"};
+        case -669707736: /*useContext*/ return new String[] {"UsageContext"};
+        case -507075711: /*jurisdiction*/ return new String[] {"CodeableConcept"};
+        case 1596987778: /*immutable*/ return new String[] {"boolean"};
+        case -220463842: /*purpose*/ return new String[] {"markdown"};
+        case 1522889671: /*copyright*/ return new String[] {"markdown"};
+        case -1809433861: /*extensible*/ return new String[] {"boolean"};
+        case 950497682: /*compose*/ return new String[] {};
+        case 17878207: /*expansion*/ return new String[] {};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }
@@ -4570,14 +4711,14 @@ public class ValueSet extends MetadataResource {
         else if (name.equals("experimental")) {
           throw new FHIRException("Cannot call addChild on a primitive type ValueSet.experimental");
         }
+        else if (name.equals("date")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ValueSet.date");
+        }
         else if (name.equals("publisher")) {
           throw new FHIRException("Cannot call addChild on a primitive type ValueSet.publisher");
         }
         else if (name.equals("contact")) {
           return addContact();
-        }
-        else if (name.equals("date")) {
-          throw new FHIRException("Cannot call addChild on a primitive type ValueSet.date");
         }
         else if (name.equals("description")) {
           throw new FHIRException("Cannot call addChild on a primitive type ValueSet.description");
@@ -4631,13 +4772,13 @@ public class ValueSet extends MetadataResource {
         dst.title = title == null ? null : title.copy();
         dst.status = status == null ? null : status.copy();
         dst.experimental = experimental == null ? null : experimental.copy();
+        dst.date = date == null ? null : date.copy();
         dst.publisher = publisher == null ? null : publisher.copy();
         if (contact != null) {
           dst.contact = new ArrayList<ContactDetail>();
           for (ContactDetail i : contact)
             dst.contact.add(i.copy());
         };
-        dst.date = date == null ? null : date.copy();
         dst.description = description == null ? null : description.copy();
         if (useContext != null) {
           dst.useContext = new ArrayList<UsageContext>();
@@ -4858,17 +4999,17 @@ public class ValueSet extends MetadataResource {
  /**
    * Search parameter: <b>version</b>
    * <p>
-   * Description: <b>The version identifier of the value set</b><br>
+   * Description: <b>The business version of the value set</b><br>
    * Type: <b>token</b><br>
    * Path: <b>ValueSet.version</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="version", path="ValueSet.version", description="The version identifier of the value set", type="token" )
+  @SearchParamDefinition(name="version", path="ValueSet.version", description="The business version of the value set", type="token" )
   public static final String SP_VERSION = "version";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>version</b>
    * <p>
-   * Description: <b>The version identifier of the value set</b><br>
+   * Description: <b>The business version of the value set</b><br>
    * Type: <b>token</b><br>
    * Path: <b>ValueSet.version</b><br>
    * </p>

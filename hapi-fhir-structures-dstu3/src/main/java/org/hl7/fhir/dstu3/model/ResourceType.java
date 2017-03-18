@@ -2,11 +2,12 @@ package org.hl7.fhir.dstu3.model;
 
 import org.hl7.fhir.exceptions.FHIRException;
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
 
 public enum ResourceType {
     Account,
     ActivityDefinition,
+    AdverseEvent,
     AllergyIntolerance,
     Appointment,
     AppointmentResponse,
@@ -18,6 +19,7 @@ public enum ResourceType {
     CapabilityStatement,
     CarePlan,
     CareTeam,
+    ChargeItem,
     Claim,
     ClaimResponse,
     ClinicalImpression,
@@ -36,10 +38,9 @@ public enum ResourceType {
     Device,
     DeviceComponent,
     DeviceMetric,
-    DeviceUseRequest,
+    DeviceRequest,
     DeviceUseStatement,
     DiagnosticReport,
-    DiagnosticRequest,
     DocumentManifest,
     DocumentReference,
     EligibilityRequest,
@@ -54,6 +55,7 @@ public enum ResourceType {
     FamilyMemberHistory,
     Flag,
     Goal,
+    GraphDefinition,
     Group,
     GuidanceResponse,
     HealthcareService,
@@ -77,7 +79,7 @@ public enum ResourceType {
     MessageDefinition,
     MessageHeader,
     NamingSystem,
-    NutritionRequest,
+    NutritionOrder,
     Observation,
     OperationDefinition,
     OperationOutcome,
@@ -128,6 +130,8 @@ public enum ResourceType {
       return "account";
     case ActivityDefinition:
       return "activitydefinition";
+    case AdverseEvent:
+      return "adverseevent";
     case AllergyIntolerance:
       return "allergyintolerance";
     case Appointment:
@@ -150,6 +154,8 @@ public enum ResourceType {
       return "careplan";
     case CareTeam:
       return "careteam";
+    case ChargeItem:
+      return "chargeitem";
     case Claim:
       return "claim";
     case ClaimResponse:
@@ -186,14 +192,12 @@ public enum ResourceType {
       return "devicecomponent";
     case DeviceMetric:
       return "devicemetric";
-    case DeviceUseRequest:
-      return "deviceuserequest";
+    case DeviceRequest:
+      return "devicerequest";
     case DeviceUseStatement:
       return "deviceusestatement";
     case DiagnosticReport:
       return "diagnosticreport";
-    case DiagnosticRequest:
-      return "diagnosticrequest";
     case DocumentManifest:
       return "documentmanifest";
     case DocumentReference:
@@ -222,6 +226,8 @@ public enum ResourceType {
       return "flag";
     case Goal:
       return "goal";
+    case GraphDefinition:
+      return "graphdefinition";
     case Group:
       return "group";
     case GuidanceResponse:
@@ -268,8 +274,8 @@ public enum ResourceType {
       return "messageheader";
     case NamingSystem:
       return "namingsystem";
-    case NutritionRequest:
-      return "nutritionrequest";
+    case NutritionOrder:
+      return "nutritionorder";
     case Observation:
       return "observation";
     case OperationDefinition:
@@ -364,6 +370,8 @@ public enum ResourceType {
       return Account;
     if ("ActivityDefinition".equals(code))
       return ActivityDefinition;
+    if ("AdverseEvent".equals(code))
+      return AdverseEvent;
     if ("AllergyIntolerance".equals(code))
       return AllergyIntolerance;
     if ("Appointment".equals(code))
@@ -386,6 +394,8 @@ public enum ResourceType {
       return CarePlan;
     if ("CareTeam".equals(code))
       return CareTeam;
+    if ("ChargeItem".equals(code))
+      return ChargeItem;
     if ("Claim".equals(code))
       return Claim;
     if ("ClaimResponse".equals(code))
@@ -422,14 +432,12 @@ public enum ResourceType {
       return DeviceComponent;
     if ("DeviceMetric".equals(code))
       return DeviceMetric;
-    if ("DeviceUseRequest".equals(code))
-      return DeviceUseRequest;
+    if ("DeviceRequest".equals(code))
+      return DeviceRequest;
     if ("DeviceUseStatement".equals(code))
       return DeviceUseStatement;
     if ("DiagnosticReport".equals(code))
       return DiagnosticReport;
-    if ("DiagnosticRequest".equals(code))
-      return DiagnosticRequest;
     if ("DocumentManifest".equals(code))
       return DocumentManifest;
     if ("DocumentReference".equals(code))
@@ -458,6 +466,8 @@ public enum ResourceType {
       return Flag;
     if ("Goal".equals(code))
       return Goal;
+    if ("GraphDefinition".equals(code))
+      return GraphDefinition;
     if ("Group".equals(code))
       return Group;
     if ("GuidanceResponse".equals(code))
@@ -504,8 +514,8 @@ public enum ResourceType {
       return MessageHeader;
     if ("NamingSystem".equals(code))
       return NamingSystem;
-    if ("NutritionRequest".equals(code))
-      return NutritionRequest;
+    if ("NutritionOrder".equals(code))
+      return NutritionOrder;
     if ("Observation".equals(code))
       return Observation;
     if ("OperationDefinition".equals(code))

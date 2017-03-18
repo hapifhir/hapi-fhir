@@ -49,6 +49,9 @@
     <sch:rule context="//f:ImmunizationRecommendation/f:patient/f:identifier/f:assigner">
       <sch:assert test="not(starts-with(f:reference/@value, '#')) or exists(ancestor::*[self::f:entry or self::f:parameter]/f:resource/f:*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')]|/*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')])">ref-1: SHALL have a contained resource if a local reference is provided</sch:assert>
     </sch:rule>
+    <sch:rule context="//f:ImmunizationRecommendation/f:recommendation">
+      <sch:assert test="exists(f:vaccineCode) or exists(f:targetDisease)">imr-1: One of vaccineCode or targetDisease SHALL be present</sch:assert>
+    </sch:rule>
     <sch:rule context="//f:ImmunizationRecommendation/f:recommendation/f:protocol/f:authority">
       <sch:assert test="not(starts-with(f:reference/@value, '#')) or exists(ancestor::*[self::f:entry or self::f:parameter]/f:resource/f:*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')]|/*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')])">ref-1: SHALL have a contained resource if a local reference is provided</sch:assert>
     </sch:rule>

@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
 
 import java.util.*;
 
@@ -140,8 +140,10 @@ public class ProcessResponse extends DomainResource {
         throw new IllegalArgumentException("Unknown ProcessResponseStatus code '"+codeString+"'");
         }
         public Enumeration<ProcessResponseStatus> fromType(Base code) throws FHIRException {
-          if (code == null || code.isEmpty())
+          if (code == null)
             return null;
+          if (code.isEmpty())
+            return new Enumeration<ProcessResponseStatus>(this);
           String codeString = ((PrimitiveType) code).asStringValue();
           if (codeString == null || "".equals(codeString))
             return null;
@@ -172,7 +174,7 @@ public class ProcessResponse extends DomainResource {
     }
 
     @Block()
-    public static class ProcessResponseNoteComponent extends BackboneElement implements IBaseBackboneElement {
+    public static class ProcessResponseProcessNoteComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * The note purpose: Print/Display.
          */
@@ -185,7 +187,7 @@ public class ProcessResponse extends DomainResource {
          * The note text.
          */
         @Child(name = "text", type = {StringType.class}, order=2, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Notes text", formalDefinition="The note text." )
+        @Description(shortDefinition="Comment on the processing", formalDefinition="The note text." )
         protected StringType text;
 
         private static final long serialVersionUID = 874830709L;
@@ -193,7 +195,7 @@ public class ProcessResponse extends DomainResource {
     /**
      * Constructor
      */
-      public ProcessResponseNoteComponent() {
+      public ProcessResponseProcessNoteComponent() {
         super();
       }
 
@@ -203,7 +205,7 @@ public class ProcessResponse extends DomainResource {
         public CodeableConcept getType() { 
           if (this.type == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create ProcessResponseNoteComponent.type");
+              throw new Error("Attempt to auto-create ProcessResponseProcessNoteComponent.type");
             else if (Configuration.doAutoCreate())
               this.type = new CodeableConcept(); // cc
           return this.type;
@@ -216,7 +218,7 @@ public class ProcessResponse extends DomainResource {
         /**
          * @param value {@link #type} (The note purpose: Print/Display.)
          */
-        public ProcessResponseNoteComponent setType(CodeableConcept value) { 
+        public ProcessResponseProcessNoteComponent setType(CodeableConcept value) { 
           this.type = value;
           return this;
         }
@@ -227,7 +229,7 @@ public class ProcessResponse extends DomainResource {
         public StringType getTextElement() { 
           if (this.text == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create ProcessResponseNoteComponent.text");
+              throw new Error("Attempt to auto-create ProcessResponseProcessNoteComponent.text");
             else if (Configuration.doAutoCreate())
               this.text = new StringType(); // bb
           return this.text;
@@ -244,7 +246,7 @@ public class ProcessResponse extends DomainResource {
         /**
          * @param value {@link #text} (The note text.). This is the underlying object with id, value and extensions. The accessor "getText" gives direct access to the value
          */
-        public ProcessResponseNoteComponent setTextElement(StringType value) { 
+        public ProcessResponseProcessNoteComponent setTextElement(StringType value) { 
           this.text = value;
           return this;
         }
@@ -259,7 +261,7 @@ public class ProcessResponse extends DomainResource {
         /**
          * @param value The note text.
          */
-        public ProcessResponseNoteComponent setText(String value) { 
+        public ProcessResponseProcessNoteComponent setText(String value) { 
           if (Utilities.noString(value))
             this.text = null;
           else {
@@ -287,35 +289,46 @@ public class ProcessResponse extends DomainResource {
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case 3575610: // type
           this.type = castToCodeableConcept(value); // CodeableConcept
-          break;
+          return value;
         case 3556653: // text
           this.text = castToString(value); // StringType
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("type"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("type")) {
           this.type = castToCodeableConcept(value); // CodeableConcept
-        else if (name.equals("text"))
+        } else if (name.equals("text")) {
           this.text = castToString(value); // StringType
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 3575610:  return getType(); // CodeableConcept
-        case 3556653: throw new FHIRException("Cannot make property text as it is not a complex type"); // StringType
+        case 3575610:  return getType(); 
+        case 3556653:  return getTextElement();
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3575610: /*type*/ return new String[] {"CodeableConcept"};
+        case 3556653: /*text*/ return new String[] {"string"};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }
@@ -333,8 +346,8 @@ public class ProcessResponse extends DomainResource {
           return super.addChild(name);
       }
 
-      public ProcessResponseNoteComponent copy() {
-        ProcessResponseNoteComponent dst = new ProcessResponseNoteComponent();
+      public ProcessResponseProcessNoteComponent copy() {
+        ProcessResponseProcessNoteComponent dst = new ProcessResponseProcessNoteComponent();
         copyValues(dst);
         dst.type = type == null ? null : type.copy();
         dst.text = text == null ? null : text.copy();
@@ -345,9 +358,9 @@ public class ProcessResponse extends DomainResource {
       public boolean equalsDeep(Base other) {
         if (!super.equalsDeep(other))
           return false;
-        if (!(other instanceof ProcessResponseNoteComponent))
+        if (!(other instanceof ProcessResponseProcessNoteComponent))
           return false;
-        ProcessResponseNoteComponent o = (ProcessResponseNoteComponent) other;
+        ProcessResponseProcessNoteComponent o = (ProcessResponseProcessNoteComponent) other;
         return compareDeep(type, o.type, true) && compareDeep(text, o.text, true);
       }
 
@@ -355,9 +368,9 @@ public class ProcessResponse extends DomainResource {
       public boolean equalsShallow(Base other) {
         if (!super.equalsShallow(other))
           return false;
-        if (!(other instanceof ProcessResponseNoteComponent))
+        if (!(other instanceof ProcessResponseProcessNoteComponent))
           return false;
-        ProcessResponseNoteComponent o = (ProcessResponseNoteComponent) other;
+        ProcessResponseProcessNoteComponent o = (ProcessResponseProcessNoteComponent) other;
         return compareValues(text, o.text, true);
       }
 
@@ -366,7 +379,7 @@ public class ProcessResponse extends DomainResource {
       }
 
   public String fhirType() {
-    return "ProcessResponse.note";
+    return "ProcessResponse.processNote";
 
   }
 
@@ -466,11 +479,11 @@ public class ProcessResponse extends DomainResource {
     protected CodeableConcept form;
 
     /**
-     * Suite of processing note or additional requirements is the processing has been held.
+     * Suite of processing notes or additional requirements if the processing has been held.
      */
-    @Child(name = "note", type = {}, order=10, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="Notes", formalDefinition="Suite of processing note or additional requirements is the processing has been held." )
-    protected List<ProcessResponseNoteComponent> note;
+    @Child(name = "processNote", type = {}, order=10, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Description(shortDefinition="Processing comments or additional requirements", formalDefinition="Suite of processing notes or additional requirements if the processing has been held." )
+    protected List<ProcessResponseProcessNoteComponent> processNote;
 
     /**
      * Processing errors.
@@ -492,7 +505,7 @@ public class ProcessResponse extends DomainResource {
     protected List<CommunicationRequest> communicationRequestTarget;
 
 
-    private static final long serialVersionUID = -184071719L;
+    private static final long serialVersionUID = -2058462467L;
 
   /**
    * Constructor
@@ -921,56 +934,56 @@ public class ProcessResponse extends DomainResource {
     }
 
     /**
-     * @return {@link #note} (Suite of processing note or additional requirements is the processing has been held.)
+     * @return {@link #processNote} (Suite of processing notes or additional requirements if the processing has been held.)
      */
-    public List<ProcessResponseNoteComponent> getNote() { 
-      if (this.note == null)
-        this.note = new ArrayList<ProcessResponseNoteComponent>();
-      return this.note;
+    public List<ProcessResponseProcessNoteComponent> getProcessNote() { 
+      if (this.processNote == null)
+        this.processNote = new ArrayList<ProcessResponseProcessNoteComponent>();
+      return this.processNote;
     }
 
     /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
-    public ProcessResponse setNote(List<ProcessResponseNoteComponent> theNote) { 
-      this.note = theNote;
+    public ProcessResponse setProcessNote(List<ProcessResponseProcessNoteComponent> theProcessNote) { 
+      this.processNote = theProcessNote;
       return this;
     }
 
-    public boolean hasNote() { 
-      if (this.note == null)
+    public boolean hasProcessNote() { 
+      if (this.processNote == null)
         return false;
-      for (ProcessResponseNoteComponent item : this.note)
+      for (ProcessResponseProcessNoteComponent item : this.processNote)
         if (!item.isEmpty())
           return true;
       return false;
     }
 
-    public ProcessResponseNoteComponent addNote() { //3
-      ProcessResponseNoteComponent t = new ProcessResponseNoteComponent();
-      if (this.note == null)
-        this.note = new ArrayList<ProcessResponseNoteComponent>();
-      this.note.add(t);
+    public ProcessResponseProcessNoteComponent addProcessNote() { //3
+      ProcessResponseProcessNoteComponent t = new ProcessResponseProcessNoteComponent();
+      if (this.processNote == null)
+        this.processNote = new ArrayList<ProcessResponseProcessNoteComponent>();
+      this.processNote.add(t);
       return t;
     }
 
-    public ProcessResponse addNote(ProcessResponseNoteComponent t) { //3
+    public ProcessResponse addProcessNote(ProcessResponseProcessNoteComponent t) { //3
       if (t == null)
         return this;
-      if (this.note == null)
-        this.note = new ArrayList<ProcessResponseNoteComponent>();
-      this.note.add(t);
+      if (this.processNote == null)
+        this.processNote = new ArrayList<ProcessResponseProcessNoteComponent>();
+      this.processNote.add(t);
       return this;
     }
 
     /**
-     * @return The first repetition of repeating field {@link #note}, creating it if it does not already exist
+     * @return The first repetition of repeating field {@link #processNote}, creating it if it does not already exist
      */
-    public ProcessResponseNoteComponent getNoteFirstRep() { 
-      if (getNote().isEmpty()) {
-        addNote();
+    public ProcessResponseProcessNoteComponent getProcessNoteFirstRep() { 
+      if (getProcessNote().isEmpty()) {
+        addProcessNote();
       }
-      return getNote().get(0);
+      return getProcessNote().get(0);
     }
 
     /**
@@ -1113,7 +1126,7 @@ public class ProcessResponse extends DomainResource {
         childrenList.add(new Property("requestProvider", "Reference(Practitioner)", "The practitioner who is responsible for the services rendered to the patient.", 0, java.lang.Integer.MAX_VALUE, requestProvider));
         childrenList.add(new Property("requestOrganization", "Reference(Organization)", "The organization which is responsible for the services rendered to the patient.", 0, java.lang.Integer.MAX_VALUE, requestOrganization));
         childrenList.add(new Property("form", "CodeableConcept", "The form to be used for printing the content.", 0, java.lang.Integer.MAX_VALUE, form));
-        childrenList.add(new Property("note", "", "Suite of processing note or additional requirements is the processing has been held.", 0, java.lang.Integer.MAX_VALUE, note));
+        childrenList.add(new Property("processNote", "", "Suite of processing notes or additional requirements if the processing has been held.", 0, java.lang.Integer.MAX_VALUE, processNote));
         childrenList.add(new Property("error", "CodeableConcept", "Processing errors.", 0, java.lang.Integer.MAX_VALUE, error));
         childrenList.add(new Property("communicationRequest", "Reference(CommunicationRequest)", "Request for additional supporting or authorizing information, such as: documents, images or resources.", 0, java.lang.Integer.MAX_VALUE, communicationRequest));
       }
@@ -1131,7 +1144,7 @@ public class ProcessResponse extends DomainResource {
         case 1601527200: /*requestProvider*/ return this.requestProvider == null ? new Base[0] : new Base[] {this.requestProvider}; // Reference
         case 599053666: /*requestOrganization*/ return this.requestOrganization == null ? new Base[0] : new Base[] {this.requestOrganization}; // Reference
         case 3148996: /*form*/ return this.form == null ? new Base[0] : new Base[] {this.form}; // CodeableConcept
-        case 3387378: /*note*/ return this.note == null ? new Base[0] : this.note.toArray(new Base[this.note.size()]); // ProcessResponseNoteComponent
+        case 202339073: /*processNote*/ return this.processNote == null ? new Base[0] : this.processNote.toArray(new Base[this.processNote.size()]); // ProcessResponseProcessNoteComponent
         case 96784904: /*error*/ return this.error == null ? new Base[0] : this.error.toArray(new Base[this.error.size()]); // CodeableConcept
         case -2071896615: /*communicationRequest*/ return this.communicationRequest == null ? new Base[0] : this.communicationRequest.toArray(new Base[this.communicationRequest.size()]); // Reference
         default: return super.getProperty(hash, name, checkValid);
@@ -1140,101 +1153,125 @@ public class ProcessResponse extends DomainResource {
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case -1618432855: // identifier
           this.getIdentifier().add(castToIdentifier(value)); // Identifier
-          break;
+          return value;
         case -892481550: // status
-          this.status = new ProcessResponseStatusEnumFactory().fromType(value); // Enumeration<ProcessResponseStatus>
-          break;
+          value = new ProcessResponseStatusEnumFactory().fromType(castToCode(value));
+          this.status = (Enumeration) value; // Enumeration<ProcessResponseStatus>
+          return value;
         case 1028554472: // created
           this.created = castToDateTime(value); // DateTimeType
-          break;
+          return value;
         case 1178922291: // organization
           this.organization = castToReference(value); // Reference
-          break;
+          return value;
         case 1095692943: // request
           this.request = castToReference(value); // Reference
-          break;
+          return value;
         case -1106507950: // outcome
           this.outcome = castToCodeableConcept(value); // CodeableConcept
-          break;
+          return value;
         case 583380919: // disposition
           this.disposition = castToString(value); // StringType
-          break;
+          return value;
         case 1601527200: // requestProvider
           this.requestProvider = castToReference(value); // Reference
-          break;
+          return value;
         case 599053666: // requestOrganization
           this.requestOrganization = castToReference(value); // Reference
-          break;
+          return value;
         case 3148996: // form
           this.form = castToCodeableConcept(value); // CodeableConcept
-          break;
-        case 3387378: // note
-          this.getNote().add((ProcessResponseNoteComponent) value); // ProcessResponseNoteComponent
-          break;
+          return value;
+        case 202339073: // processNote
+          this.getProcessNote().add((ProcessResponseProcessNoteComponent) value); // ProcessResponseProcessNoteComponent
+          return value;
         case 96784904: // error
           this.getError().add(castToCodeableConcept(value)); // CodeableConcept
-          break;
+          return value;
         case -2071896615: // communicationRequest
           this.getCommunicationRequest().add(castToReference(value)); // Reference
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("identifier"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("identifier")) {
           this.getIdentifier().add(castToIdentifier(value));
-        else if (name.equals("status"))
-          this.status = new ProcessResponseStatusEnumFactory().fromType(value); // Enumeration<ProcessResponseStatus>
-        else if (name.equals("created"))
+        } else if (name.equals("status")) {
+          value = new ProcessResponseStatusEnumFactory().fromType(castToCode(value));
+          this.status = (Enumeration) value; // Enumeration<ProcessResponseStatus>
+        } else if (name.equals("created")) {
           this.created = castToDateTime(value); // DateTimeType
-        else if (name.equals("organization"))
+        } else if (name.equals("organization")) {
           this.organization = castToReference(value); // Reference
-        else if (name.equals("request"))
+        } else if (name.equals("request")) {
           this.request = castToReference(value); // Reference
-        else if (name.equals("outcome"))
+        } else if (name.equals("outcome")) {
           this.outcome = castToCodeableConcept(value); // CodeableConcept
-        else if (name.equals("disposition"))
+        } else if (name.equals("disposition")) {
           this.disposition = castToString(value); // StringType
-        else if (name.equals("requestProvider"))
+        } else if (name.equals("requestProvider")) {
           this.requestProvider = castToReference(value); // Reference
-        else if (name.equals("requestOrganization"))
+        } else if (name.equals("requestOrganization")) {
           this.requestOrganization = castToReference(value); // Reference
-        else if (name.equals("form"))
+        } else if (name.equals("form")) {
           this.form = castToCodeableConcept(value); // CodeableConcept
-        else if (name.equals("note"))
-          this.getNote().add((ProcessResponseNoteComponent) value);
-        else if (name.equals("error"))
+        } else if (name.equals("processNote")) {
+          this.getProcessNote().add((ProcessResponseProcessNoteComponent) value);
+        } else if (name.equals("error")) {
           this.getError().add(castToCodeableConcept(value));
-        else if (name.equals("communicationRequest"))
+        } else if (name.equals("communicationRequest")) {
           this.getCommunicationRequest().add(castToReference(value));
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case -1618432855:  return addIdentifier(); // Identifier
-        case -892481550: throw new FHIRException("Cannot make property status as it is not a complex type"); // Enumeration<ProcessResponseStatus>
-        case 1028554472: throw new FHIRException("Cannot make property created as it is not a complex type"); // DateTimeType
-        case 1178922291:  return getOrganization(); // Reference
-        case 1095692943:  return getRequest(); // Reference
-        case -1106507950:  return getOutcome(); // CodeableConcept
-        case 583380919: throw new FHIRException("Cannot make property disposition as it is not a complex type"); // StringType
-        case 1601527200:  return getRequestProvider(); // Reference
-        case 599053666:  return getRequestOrganization(); // Reference
-        case 3148996:  return getForm(); // CodeableConcept
-        case 3387378:  return addNote(); // ProcessResponseNoteComponent
-        case 96784904:  return addError(); // CodeableConcept
-        case -2071896615:  return addCommunicationRequest(); // Reference
+        case -1618432855:  return addIdentifier(); 
+        case -892481550:  return getStatusElement();
+        case 1028554472:  return getCreatedElement();
+        case 1178922291:  return getOrganization(); 
+        case 1095692943:  return getRequest(); 
+        case -1106507950:  return getOutcome(); 
+        case 583380919:  return getDispositionElement();
+        case 1601527200:  return getRequestProvider(); 
+        case 599053666:  return getRequestOrganization(); 
+        case 3148996:  return getForm(); 
+        case 202339073:  return addProcessNote(); 
+        case 96784904:  return addError(); 
+        case -2071896615:  return addCommunicationRequest(); 
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -1618432855: /*identifier*/ return new String[] {"Identifier"};
+        case -892481550: /*status*/ return new String[] {"code"};
+        case 1028554472: /*created*/ return new String[] {"dateTime"};
+        case 1178922291: /*organization*/ return new String[] {"Reference"};
+        case 1095692943: /*request*/ return new String[] {"Reference"};
+        case -1106507950: /*outcome*/ return new String[] {"CodeableConcept"};
+        case 583380919: /*disposition*/ return new String[] {"string"};
+        case 1601527200: /*requestProvider*/ return new String[] {"Reference"};
+        case 599053666: /*requestOrganization*/ return new String[] {"Reference"};
+        case 3148996: /*form*/ return new String[] {"CodeableConcept"};
+        case 202339073: /*processNote*/ return new String[] {};
+        case 96784904: /*error*/ return new String[] {"CodeableConcept"};
+        case -2071896615: /*communicationRequest*/ return new String[] {"Reference"};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }
@@ -1277,8 +1314,8 @@ public class ProcessResponse extends DomainResource {
           this.form = new CodeableConcept();
           return this.form;
         }
-        else if (name.equals("note")) {
-          return addNote();
+        else if (name.equals("processNote")) {
+          return addProcessNote();
         }
         else if (name.equals("error")) {
           return addError();
@@ -1312,10 +1349,10 @@ public class ProcessResponse extends DomainResource {
         dst.requestProvider = requestProvider == null ? null : requestProvider.copy();
         dst.requestOrganization = requestOrganization == null ? null : requestOrganization.copy();
         dst.form = form == null ? null : form.copy();
-        if (note != null) {
-          dst.note = new ArrayList<ProcessResponseNoteComponent>();
-          for (ProcessResponseNoteComponent i : note)
-            dst.note.add(i.copy());
+        if (processNote != null) {
+          dst.processNote = new ArrayList<ProcessResponseProcessNoteComponent>();
+          for (ProcessResponseProcessNoteComponent i : processNote)
+            dst.processNote.add(i.copy());
         };
         if (error != null) {
           dst.error = new ArrayList<CodeableConcept>();
@@ -1345,7 +1382,7 @@ public class ProcessResponse extends DomainResource {
            && compareDeep(organization, o.organization, true) && compareDeep(request, o.request, true) && compareDeep(outcome, o.outcome, true)
            && compareDeep(disposition, o.disposition, true) && compareDeep(requestProvider, o.requestProvider, true)
            && compareDeep(requestOrganization, o.requestOrganization, true) && compareDeep(form, o.form, true)
-           && compareDeep(note, o.note, true) && compareDeep(error, o.error, true) && compareDeep(communicationRequest, o.communicationRequest, true)
+           && compareDeep(processNote, o.processNote, true) && compareDeep(error, o.error, true) && compareDeep(communicationRequest, o.communicationRequest, true)
           ;
       }
 
@@ -1363,7 +1400,7 @@ public class ProcessResponse extends DomainResource {
       public boolean isEmpty() {
         return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, status, created
           , organization, request, outcome, disposition, requestProvider, requestOrganization
-          , form, note, error, communicationRequest);
+          , form, processNote, error, communicationRequest);
       }
 
   @Override

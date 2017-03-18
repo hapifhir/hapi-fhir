@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
 
 import java.util.*;
 
@@ -139,8 +139,10 @@ public class ProcessRequest extends DomainResource {
         throw new IllegalArgumentException("Unknown ProcessRequestStatus code '"+codeString+"'");
         }
         public Enumeration<ProcessRequestStatus> fromType(Base code) throws FHIRException {
-          if (code == null || code.isEmpty())
+          if (code == null)
             return null;
+          if (code.isEmpty())
+            return new Enumeration<ProcessRequestStatus>(this);
           String codeString = ((PrimitiveType) code).asStringValue();
           if (codeString == null || "".equals(codeString))
             return null;
@@ -261,8 +263,10 @@ public class ProcessRequest extends DomainResource {
         throw new IllegalArgumentException("Unknown ActionList code '"+codeString+"'");
         }
         public Enumeration<ActionList> fromType(Base code) throws FHIRException {
-          if (code == null || code.isEmpty())
+          if (code == null)
             return null;
+          if (code.isEmpty())
+            return new Enumeration<ActionList>(this);
           String codeString = ((PrimitiveType) code).asStringValue();
           if (codeString == null || "".equals(codeString))
             return null;
@@ -378,29 +382,39 @@ public class ProcessRequest extends DomainResource {
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case -1422298666: // sequenceLinkId
           this.sequenceLinkId = castToInteger(value); // IntegerType
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("sequenceLinkId"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("sequenceLinkId")) {
           this.sequenceLinkId = castToInteger(value); // IntegerType
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case -1422298666: throw new FHIRException("Cannot make property sequenceLinkId as it is not a complex type"); // IntegerType
+        case -1422298666:  return getSequenceLinkIdElement();
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -1422298666: /*sequenceLinkId*/ return new String[] {"integer"};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }
@@ -479,7 +493,7 @@ public class ProcessRequest extends DomainResource {
      * The organization which is the target of the request.
      */
     @Child(name = "target", type = {Organization.class}, order=3, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Target of the request", formalDefinition="The organization which is the target of the request." )
+    @Description(shortDefinition="Party which is the target of the request", formalDefinition="The organization which is the target of the request." )
     protected Reference target;
 
     /**
@@ -522,7 +536,7 @@ public class ProcessRequest extends DomainResource {
      * Reference of resource which is the target or subject of this action.
      */
     @Child(name = "request", type = {Reference.class}, order=7, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Request reference", formalDefinition="Reference of resource which is the target or subject of this action." )
+    @Description(shortDefinition="Reference to the Request resource", formalDefinition="Reference of resource which is the target or subject of this action." )
     protected Reference request;
 
     /**
@@ -534,7 +548,7 @@ public class ProcessRequest extends DomainResource {
      * Reference of a prior response to resource which is the target or subject of this action.
      */
     @Child(name = "response", type = {Reference.class}, order=8, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Response reference", formalDefinition="Reference of a prior response to resource which is the target or subject of this action." )
+    @Description(shortDefinition="Reference to the Response resource", formalDefinition="Reference of a prior response to resource which is the target or subject of this action." )
     protected Reference response;
 
     /**
@@ -546,7 +560,7 @@ public class ProcessRequest extends DomainResource {
      * If true remove all history excluding audit.
      */
     @Child(name = "nullify", type = {BooleanType.class}, order=9, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Nullify", formalDefinition="If true remove all history excluding audit." )
+    @Description(shortDefinition="Remove history", formalDefinition="If true remove all history excluding audit." )
     protected BooleanType nullify;
 
     /**
@@ -581,7 +595,7 @@ public class ProcessRequest extends DomainResource {
      * A period of time during which the fulfilling resources would have been created.
      */
     @Child(name = "period", type = {Period.class}, order=14, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Period", formalDefinition="A period of time during which the fulfilling resources would have been created." )
+    @Description(shortDefinition="Selection period", formalDefinition="A period of time during which the fulfilling resources would have been created." )
     protected Period period;
 
     private static final long serialVersionUID = -346692020L;
@@ -1339,113 +1353,141 @@ public class ProcessRequest extends DomainResource {
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case -1618432855: // identifier
           this.getIdentifier().add(castToIdentifier(value)); // Identifier
-          break;
+          return value;
         case -892481550: // status
-          this.status = new ProcessRequestStatusEnumFactory().fromType(value); // Enumeration<ProcessRequestStatus>
-          break;
+          value = new ProcessRequestStatusEnumFactory().fromType(castToCode(value));
+          this.status = (Enumeration) value; // Enumeration<ProcessRequestStatus>
+          return value;
         case -1422950858: // action
-          this.action = new ActionListEnumFactory().fromType(value); // Enumeration<ActionList>
-          break;
+          value = new ActionListEnumFactory().fromType(castToCode(value));
+          this.action = (Enumeration) value; // Enumeration<ActionList>
+          return value;
         case -880905839: // target
           this.target = castToReference(value); // Reference
-          break;
+          return value;
         case 1028554472: // created
           this.created = castToDateTime(value); // DateTimeType
-          break;
+          return value;
         case -987494927: // provider
           this.provider = castToReference(value); // Reference
-          break;
+          return value;
         case 1178922291: // organization
           this.organization = castToReference(value); // Reference
-          break;
+          return value;
         case 1095692943: // request
           this.request = castToReference(value); // Reference
-          break;
+          return value;
         case -340323263: // response
           this.response = castToReference(value); // Reference
-          break;
+          return value;
         case -2001137643: // nullify
           this.nullify = castToBoolean(value); // BooleanType
-          break;
+          return value;
         case -925155509: // reference
           this.reference = castToString(value); // StringType
-          break;
+          return value;
         case 3242771: // item
           this.getItem().add((ItemsComponent) value); // ItemsComponent
-          break;
+          return value;
         case 1942574248: // include
           this.getInclude().add(castToString(value)); // StringType
-          break;
+          return value;
         case -1321148966: // exclude
           this.getExclude().add(castToString(value)); // StringType
-          break;
+          return value;
         case -991726143: // period
           this.period = castToPeriod(value); // Period
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("identifier"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("identifier")) {
           this.getIdentifier().add(castToIdentifier(value));
-        else if (name.equals("status"))
-          this.status = new ProcessRequestStatusEnumFactory().fromType(value); // Enumeration<ProcessRequestStatus>
-        else if (name.equals("action"))
-          this.action = new ActionListEnumFactory().fromType(value); // Enumeration<ActionList>
-        else if (name.equals("target"))
+        } else if (name.equals("status")) {
+          value = new ProcessRequestStatusEnumFactory().fromType(castToCode(value));
+          this.status = (Enumeration) value; // Enumeration<ProcessRequestStatus>
+        } else if (name.equals("action")) {
+          value = new ActionListEnumFactory().fromType(castToCode(value));
+          this.action = (Enumeration) value; // Enumeration<ActionList>
+        } else if (name.equals("target")) {
           this.target = castToReference(value); // Reference
-        else if (name.equals("created"))
+        } else if (name.equals("created")) {
           this.created = castToDateTime(value); // DateTimeType
-        else if (name.equals("provider"))
+        } else if (name.equals("provider")) {
           this.provider = castToReference(value); // Reference
-        else if (name.equals("organization"))
+        } else if (name.equals("organization")) {
           this.organization = castToReference(value); // Reference
-        else if (name.equals("request"))
+        } else if (name.equals("request")) {
           this.request = castToReference(value); // Reference
-        else if (name.equals("response"))
+        } else if (name.equals("response")) {
           this.response = castToReference(value); // Reference
-        else if (name.equals("nullify"))
+        } else if (name.equals("nullify")) {
           this.nullify = castToBoolean(value); // BooleanType
-        else if (name.equals("reference"))
+        } else if (name.equals("reference")) {
           this.reference = castToString(value); // StringType
-        else if (name.equals("item"))
+        } else if (name.equals("item")) {
           this.getItem().add((ItemsComponent) value);
-        else if (name.equals("include"))
+        } else if (name.equals("include")) {
           this.getInclude().add(castToString(value));
-        else if (name.equals("exclude"))
+        } else if (name.equals("exclude")) {
           this.getExclude().add(castToString(value));
-        else if (name.equals("period"))
+        } else if (name.equals("period")) {
           this.period = castToPeriod(value); // Period
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case -1618432855:  return addIdentifier(); // Identifier
-        case -892481550: throw new FHIRException("Cannot make property status as it is not a complex type"); // Enumeration<ProcessRequestStatus>
-        case -1422950858: throw new FHIRException("Cannot make property action as it is not a complex type"); // Enumeration<ActionList>
-        case -880905839:  return getTarget(); // Reference
-        case 1028554472: throw new FHIRException("Cannot make property created as it is not a complex type"); // DateTimeType
-        case -987494927:  return getProvider(); // Reference
-        case 1178922291:  return getOrganization(); // Reference
-        case 1095692943:  return getRequest(); // Reference
-        case -340323263:  return getResponse(); // Reference
-        case -2001137643: throw new FHIRException("Cannot make property nullify as it is not a complex type"); // BooleanType
-        case -925155509: throw new FHIRException("Cannot make property reference as it is not a complex type"); // StringType
-        case 3242771:  return addItem(); // ItemsComponent
-        case 1942574248: throw new FHIRException("Cannot make property include as it is not a complex type"); // StringType
-        case -1321148966: throw new FHIRException("Cannot make property exclude as it is not a complex type"); // StringType
-        case -991726143:  return getPeriod(); // Period
+        case -1618432855:  return addIdentifier(); 
+        case -892481550:  return getStatusElement();
+        case -1422950858:  return getActionElement();
+        case -880905839:  return getTarget(); 
+        case 1028554472:  return getCreatedElement();
+        case -987494927:  return getProvider(); 
+        case 1178922291:  return getOrganization(); 
+        case 1095692943:  return getRequest(); 
+        case -340323263:  return getResponse(); 
+        case -2001137643:  return getNullifyElement();
+        case -925155509:  return getReferenceElement();
+        case 3242771:  return addItem(); 
+        case 1942574248:  return addIncludeElement();
+        case -1321148966:  return addExcludeElement();
+        case -991726143:  return getPeriod(); 
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -1618432855: /*identifier*/ return new String[] {"Identifier"};
+        case -892481550: /*status*/ return new String[] {"code"};
+        case -1422950858: /*action*/ return new String[] {"code"};
+        case -880905839: /*target*/ return new String[] {"Reference"};
+        case 1028554472: /*created*/ return new String[] {"dateTime"};
+        case -987494927: /*provider*/ return new String[] {"Reference"};
+        case 1178922291: /*organization*/ return new String[] {"Reference"};
+        case 1095692943: /*request*/ return new String[] {"Reference"};
+        case -340323263: /*response*/ return new String[] {"Reference"};
+        case -2001137643: /*nullify*/ return new String[] {"boolean"};
+        case -925155509: /*reference*/ return new String[] {"string"};
+        case 3242771: /*item*/ return new String[] {};
+        case 1942574248: /*include*/ return new String[] {"string"};
+        case -1321148966: /*exclude*/ return new String[] {"string"};
+        case -991726143: /*period*/ return new String[] {"Period"};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }

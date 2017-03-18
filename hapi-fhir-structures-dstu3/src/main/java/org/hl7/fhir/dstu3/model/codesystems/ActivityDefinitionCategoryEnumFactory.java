@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
 
 
 import org.hl7.fhir.dstu3.model.EnumFactory;
@@ -39,62 +39,22 @@ public class ActivityDefinitionCategoryEnumFactory implements EnumFactory<Activi
   public ActivityDefinitionCategory fromCode(String codeString) throws IllegalArgumentException {
     if (codeString == null || "".equals(codeString))
       return null;
-    if ("communication".equals(codeString))
-      return ActivityDefinitionCategory.COMMUNICATION;
-    if ("device".equals(codeString))
-      return ActivityDefinitionCategory.DEVICE;
-    if ("diagnostic".equals(codeString))
-      return ActivityDefinitionCategory.DIAGNOSTIC;
-    if ("diet".equals(codeString))
-      return ActivityDefinitionCategory.DIET;
-    if ("drug".equals(codeString))
-      return ActivityDefinitionCategory.DRUG;
-    if ("encounter".equals(codeString))
-      return ActivityDefinitionCategory.ENCOUNTER;
-    if ("immunization".equals(codeString))
-      return ActivityDefinitionCategory.IMMUNIZATION;
-    if ("observation".equals(codeString))
-      return ActivityDefinitionCategory.OBSERVATION;
-    if ("procedure".equals(codeString))
-      return ActivityDefinitionCategory.PROCEDURE;
-    if ("referral".equals(codeString))
-      return ActivityDefinitionCategory.REFERRAL;
-    if ("supply".equals(codeString))
-      return ActivityDefinitionCategory.SUPPLY;
-    if ("vision".equals(codeString))
-      return ActivityDefinitionCategory.VISION;
-    if ("other".equals(codeString))
-      return ActivityDefinitionCategory.OTHER;
+    if ("treatment".equals(codeString))
+      return ActivityDefinitionCategory.TREATMENT;
+    if ("education".equals(codeString))
+      return ActivityDefinitionCategory.EDUCATION;
+    if ("assessment".equals(codeString))
+      return ActivityDefinitionCategory.ASSESSMENT;
     throw new IllegalArgumentException("Unknown ActivityDefinitionCategory code '"+codeString+"'");
   }
 
   public String toCode(ActivityDefinitionCategory code) {
-    if (code == ActivityDefinitionCategory.COMMUNICATION)
-      return "communication";
-    if (code == ActivityDefinitionCategory.DEVICE)
-      return "device";
-    if (code == ActivityDefinitionCategory.DIAGNOSTIC)
-      return "diagnostic";
-    if (code == ActivityDefinitionCategory.DIET)
-      return "diet";
-    if (code == ActivityDefinitionCategory.DRUG)
-      return "drug";
-    if (code == ActivityDefinitionCategory.ENCOUNTER)
-      return "encounter";
-    if (code == ActivityDefinitionCategory.IMMUNIZATION)
-      return "immunization";
-    if (code == ActivityDefinitionCategory.OBSERVATION)
-      return "observation";
-    if (code == ActivityDefinitionCategory.PROCEDURE)
-      return "procedure";
-    if (code == ActivityDefinitionCategory.REFERRAL)
-      return "referral";
-    if (code == ActivityDefinitionCategory.SUPPLY)
-      return "supply";
-    if (code == ActivityDefinitionCategory.VISION)
-      return "vision";
-    if (code == ActivityDefinitionCategory.OTHER)
-      return "other";
+    if (code == ActivityDefinitionCategory.TREATMENT)
+      return "treatment";
+    if (code == ActivityDefinitionCategory.EDUCATION)
+      return "education";
+    if (code == ActivityDefinitionCategory.ASSESSMENT)
+      return "assessment";
     return "?";
   }
 

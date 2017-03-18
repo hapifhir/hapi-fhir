@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
 
 
 import org.hl7.fhir.dstu3.model.EnumFactory;
@@ -45,6 +45,8 @@ public class SupplydeliveryStatusEnumFactory implements EnumFactory<Supplydelive
       return SupplydeliveryStatus.COMPLETED;
     if ("abandoned".equals(codeString))
       return SupplydeliveryStatus.ABANDONED;
+    if ("entered-in-error".equals(codeString))
+      return SupplydeliveryStatus.ENTEREDINERROR;
     throw new IllegalArgumentException("Unknown SupplydeliveryStatus code '"+codeString+"'");
   }
 
@@ -55,6 +57,8 @@ public class SupplydeliveryStatusEnumFactory implements EnumFactory<Supplydelive
       return "completed";
     if (code == SupplydeliveryStatus.ABANDONED)
       return "abandoned";
+    if (code == SupplydeliveryStatus.ENTEREDINERROR)
+      return "entered-in-error";
     return "?";
   }
 

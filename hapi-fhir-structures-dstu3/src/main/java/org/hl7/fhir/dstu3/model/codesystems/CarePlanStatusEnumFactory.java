@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
 
 
 import org.hl7.fhir.dstu3.model.EnumFactory;
@@ -39,8 +39,6 @@ public class CarePlanStatusEnumFactory implements EnumFactory<CarePlanStatus> {
   public CarePlanStatus fromCode(String codeString) throws IllegalArgumentException {
     if (codeString == null || "".equals(codeString))
       return null;
-    if ("proposed".equals(codeString))
-      return CarePlanStatus.PROPOSED;
     if ("draft".equals(codeString))
       return CarePlanStatus.DRAFT;
     if ("active".equals(codeString))
@@ -59,8 +57,6 @@ public class CarePlanStatusEnumFactory implements EnumFactory<CarePlanStatus> {
   }
 
   public String toCode(CarePlanStatus code) {
-    if (code == CarePlanStatus.PROPOSED)
-      return "proposed";
     if (code == CarePlanStatus.DRAFT)
       return "draft";
     if (code == CarePlanStatus.ACTIVE)

@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -49,7 +49,7 @@ public enum DefinitionStatus {
          */
         WITHDRAWN, 
         /**
-         * The authoring system does not know which of the status values currently applies for this definition.
+         * The authoring system does not know which of the status values currently applies for this request.  Note: This concept is not to be used for "other" - one of the listed statuses is presumed to apply, it's just not known which one.
          */
         UNKNOWN, 
         /**
@@ -86,7 +86,7 @@ public enum DefinitionStatus {
             case DRAFT: return "The definition is in the design stage and is not yet considered to be \"ready for use\"";
             case ACTIVE: return "The definition is considered ready for use";
             case WITHDRAWN: return "The definition should no longer be used";
-            case UNKNOWN: return "The authoring system does not know which of the status values currently applies for this definition.";
+            case UNKNOWN: return "The authoring system does not know which of the status values currently applies for this request.  Note: This concept is not to be used for \"other\" - one of the listed statuses is presumed to apply, it's just not known which one.";
             default: return "?";
           }
         }

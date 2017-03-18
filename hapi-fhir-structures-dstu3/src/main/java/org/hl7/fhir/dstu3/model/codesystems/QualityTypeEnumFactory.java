@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
 
 
 import org.hl7.fhir.dstu3.model.EnumFactory;
@@ -39,22 +39,22 @@ public class QualityTypeEnumFactory implements EnumFactory<QualityType> {
   public QualityType fromCode(String codeString) throws IllegalArgumentException {
     if (codeString == null || "".equals(codeString))
       return null;
-    if ("INDEL".equals(codeString))
+    if ("indel".equals(codeString))
       return QualityType.INDEL;
-    if ("SNP".equals(codeString))
+    if ("snp".equals(codeString))
       return QualityType.SNP;
-    if ("UNKNOWN".equals(codeString))
+    if ("unknown".equals(codeString))
       return QualityType.UNKNOWN;
     throw new IllegalArgumentException("Unknown QualityType code '"+codeString+"'");
   }
 
   public String toCode(QualityType code) {
     if (code == QualityType.INDEL)
-      return "INDEL";
+      return "indel";
     if (code == QualityType.SNP)
-      return "SNP";
+      return "snp";
     if (code == QualityType.UNKNOWN)
-      return "UNKNOWN";
+      return "unknown";
     return "?";
   }
 

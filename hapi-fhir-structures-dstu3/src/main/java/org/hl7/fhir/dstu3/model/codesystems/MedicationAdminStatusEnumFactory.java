@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
 
 
 import org.hl7.fhir.dstu3.model.EnumFactory;
@@ -49,6 +49,8 @@ public class MedicationAdminStatusEnumFactory implements EnumFactory<MedicationA
       return MedicationAdminStatus.ENTEREDINERROR;
     if ("stopped".equals(codeString))
       return MedicationAdminStatus.STOPPED;
+    if ("unknown".equals(codeString))
+      return MedicationAdminStatus.UNKNOWN;
     throw new IllegalArgumentException("Unknown MedicationAdminStatus code '"+codeString+"'");
   }
 
@@ -63,6 +65,8 @@ public class MedicationAdminStatusEnumFactory implements EnumFactory<MedicationA
       return "entered-in-error";
     if (code == MedicationAdminStatus.STOPPED)
       return "stopped";
+    if (code == MedicationAdminStatus.UNKNOWN)
+      return "unknown";
     return "?";
   }
 

@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
 
 import java.util.*;
 
@@ -685,89 +685,111 @@ public class RelatedPerson extends DomainResource {
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case -1618432855: // identifier
           this.getIdentifier().add(castToIdentifier(value)); // Identifier
-          break;
+          return value;
         case -1422950650: // active
           this.active = castToBoolean(value); // BooleanType
-          break;
+          return value;
         case -791418107: // patient
           this.patient = castToReference(value); // Reference
-          break;
+          return value;
         case -261851592: // relationship
           this.relationship = castToCodeableConcept(value); // CodeableConcept
-          break;
+          return value;
         case 3373707: // name
           this.getName().add(castToHumanName(value)); // HumanName
-          break;
+          return value;
         case -1429363305: // telecom
           this.getTelecom().add(castToContactPoint(value)); // ContactPoint
-          break;
+          return value;
         case -1249512767: // gender
-          this.gender = new AdministrativeGenderEnumFactory().fromType(value); // Enumeration<AdministrativeGender>
-          break;
+          value = new AdministrativeGenderEnumFactory().fromType(castToCode(value));
+          this.gender = (Enumeration) value; // Enumeration<AdministrativeGender>
+          return value;
         case -1210031859: // birthDate
           this.birthDate = castToDate(value); // DateType
-          break;
+          return value;
         case -1147692044: // address
           this.getAddress().add(castToAddress(value)); // Address
-          break;
+          return value;
         case 106642994: // photo
           this.getPhoto().add(castToAttachment(value)); // Attachment
-          break;
+          return value;
         case -991726143: // period
           this.period = castToPeriod(value); // Period
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("identifier"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("identifier")) {
           this.getIdentifier().add(castToIdentifier(value));
-        else if (name.equals("active"))
+        } else if (name.equals("active")) {
           this.active = castToBoolean(value); // BooleanType
-        else if (name.equals("patient"))
+        } else if (name.equals("patient")) {
           this.patient = castToReference(value); // Reference
-        else if (name.equals("relationship"))
+        } else if (name.equals("relationship")) {
           this.relationship = castToCodeableConcept(value); // CodeableConcept
-        else if (name.equals("name"))
+        } else if (name.equals("name")) {
           this.getName().add(castToHumanName(value));
-        else if (name.equals("telecom"))
+        } else if (name.equals("telecom")) {
           this.getTelecom().add(castToContactPoint(value));
-        else if (name.equals("gender"))
-          this.gender = new AdministrativeGenderEnumFactory().fromType(value); // Enumeration<AdministrativeGender>
-        else if (name.equals("birthDate"))
+        } else if (name.equals("gender")) {
+          value = new AdministrativeGenderEnumFactory().fromType(castToCode(value));
+          this.gender = (Enumeration) value; // Enumeration<AdministrativeGender>
+        } else if (name.equals("birthDate")) {
           this.birthDate = castToDate(value); // DateType
-        else if (name.equals("address"))
+        } else if (name.equals("address")) {
           this.getAddress().add(castToAddress(value));
-        else if (name.equals("photo"))
+        } else if (name.equals("photo")) {
           this.getPhoto().add(castToAttachment(value));
-        else if (name.equals("period"))
+        } else if (name.equals("period")) {
           this.period = castToPeriod(value); // Period
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case -1618432855:  return addIdentifier(); // Identifier
-        case -1422950650: throw new FHIRException("Cannot make property active as it is not a complex type"); // BooleanType
-        case -791418107:  return getPatient(); // Reference
-        case -261851592:  return getRelationship(); // CodeableConcept
-        case 3373707:  return addName(); // HumanName
-        case -1429363305:  return addTelecom(); // ContactPoint
-        case -1249512767: throw new FHIRException("Cannot make property gender as it is not a complex type"); // Enumeration<AdministrativeGender>
-        case -1210031859: throw new FHIRException("Cannot make property birthDate as it is not a complex type"); // DateType
-        case -1147692044:  return addAddress(); // Address
-        case 106642994:  return addPhoto(); // Attachment
-        case -991726143:  return getPeriod(); // Period
+        case -1618432855:  return addIdentifier(); 
+        case -1422950650:  return getActiveElement();
+        case -791418107:  return getPatient(); 
+        case -261851592:  return getRelationship(); 
+        case 3373707:  return addName(); 
+        case -1429363305:  return addTelecom(); 
+        case -1249512767:  return getGenderElement();
+        case -1210031859:  return getBirthDateElement();
+        case -1147692044:  return addAddress(); 
+        case 106642994:  return addPhoto(); 
+        case -991726143:  return getPeriod(); 
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -1618432855: /*identifier*/ return new String[] {"Identifier"};
+        case -1422950650: /*active*/ return new String[] {"boolean"};
+        case -791418107: /*patient*/ return new String[] {"Reference"};
+        case -261851592: /*relationship*/ return new String[] {"CodeableConcept"};
+        case 3373707: /*name*/ return new String[] {"HumanName"};
+        case -1429363305: /*telecom*/ return new String[] {"ContactPoint"};
+        case -1249512767: /*gender*/ return new String[] {"code"};
+        case -1210031859: /*birthDate*/ return new String[] {"date"};
+        case -1147692044: /*address*/ return new String[] {"Address"};
+        case 106642994: /*photo*/ return new String[] {"Attachment"};
+        case -991726143: /*period*/ return new String[] {"Period"};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }

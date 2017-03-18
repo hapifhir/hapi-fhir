@@ -58,6 +58,9 @@
     <sch:rule context="//f:DataElement/f:useContext/f:valueRange/f:high">
       <sch:assert test="not(exists(f:code)) or exists(f:system)">qty-3: If a code for the unit is present, the system SHALL also be present</sch:assert>
     </sch:rule>
+    <sch:rule context="//f:DataElement/f:mapping">
+      <sch:assert test="exists(f:uri) or exists(f:name)">dae-3: At least one of  name or uri SHALL be present</sch:assert>
+    </sch:rule>
     <sch:rule context="//f:DataElement/f:element">
       <sch:assert test="not(exists(f:base))">dae-1: No base allowed</sch:assert>
       <sch:assert test="not(exists(f:slicing))">dae-2: No slicing allowed</sch:assert>

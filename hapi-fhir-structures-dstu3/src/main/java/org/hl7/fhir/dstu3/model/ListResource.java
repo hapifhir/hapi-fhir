@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
 
 import java.util.*;
 
@@ -127,8 +127,10 @@ public class ListResource extends DomainResource {
         throw new IllegalArgumentException("Unknown ListStatus code '"+codeString+"'");
         }
         public Enumeration<ListStatus> fromType(Base code) throws FHIRException {
-          if (code == null || code.isEmpty())
+          if (code == null)
             return null;
+          if (code.isEmpty())
+            return new Enumeration<ListStatus>(this);
           String codeString = ((PrimitiveType) code).asStringValue();
           if (codeString == null || "".equals(codeString))
             return null;
@@ -233,8 +235,10 @@ public class ListResource extends DomainResource {
         throw new IllegalArgumentException("Unknown ListMode code '"+codeString+"'");
         }
         public Enumeration<ListMode> fromType(Base code) throws FHIRException {
-          if (code == null || code.isEmpty())
+          if (code == null)
             return null;
+          if (code.isEmpty())
+            return new Enumeration<ListMode>(this);
           String codeString = ((PrimitiveType) code).asStringValue();
           if (codeString == null || "".equals(codeString))
             return null;
@@ -491,47 +495,60 @@ public class ListResource extends DomainResource {
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case 3145580: // flag
           this.flag = castToCodeableConcept(value); // CodeableConcept
-          break;
+          return value;
         case 1550463001: // deleted
           this.deleted = castToBoolean(value); // BooleanType
-          break;
+          return value;
         case 3076014: // date
           this.date = castToDateTime(value); // DateTimeType
-          break;
+          return value;
         case 3242771: // item
           this.item = castToReference(value); // Reference
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("flag"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("flag")) {
           this.flag = castToCodeableConcept(value); // CodeableConcept
-        else if (name.equals("deleted"))
+        } else if (name.equals("deleted")) {
           this.deleted = castToBoolean(value); // BooleanType
-        else if (name.equals("date"))
+        } else if (name.equals("date")) {
           this.date = castToDateTime(value); // DateTimeType
-        else if (name.equals("item"))
+        } else if (name.equals("item")) {
           this.item = castToReference(value); // Reference
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 3145580:  return getFlag(); // CodeableConcept
-        case 1550463001: throw new FHIRException("Cannot make property deleted as it is not a complex type"); // BooleanType
-        case 3076014: throw new FHIRException("Cannot make property date as it is not a complex type"); // DateTimeType
-        case 3242771:  return getItem(); // Reference
+        case 3145580:  return getFlag(); 
+        case 1550463001:  return getDeletedElement();
+        case 3076014:  return getDateElement();
+        case 3242771:  return getItem(); 
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3145580: /*flag*/ return new String[] {"CodeableConcept"};
+        case 1550463001: /*deleted*/ return new String[] {"boolean"};
+        case 3076014: /*date*/ return new String[] {"dateTime"};
+        case 3242771: /*item*/ return new String[] {"Reference"};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }
@@ -1308,101 +1325,127 @@ public class ListResource extends DomainResource {
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case -1618432855: // identifier
           this.getIdentifier().add(castToIdentifier(value)); // Identifier
-          break;
+          return value;
         case -892481550: // status
-          this.status = new ListStatusEnumFactory().fromType(value); // Enumeration<ListStatus>
-          break;
+          value = new ListStatusEnumFactory().fromType(castToCode(value));
+          this.status = (Enumeration) value; // Enumeration<ListStatus>
+          return value;
         case 3357091: // mode
-          this.mode = new ListModeEnumFactory().fromType(value); // Enumeration<ListMode>
-          break;
+          value = new ListModeEnumFactory().fromType(castToCode(value));
+          this.mode = (Enumeration) value; // Enumeration<ListMode>
+          return value;
         case 110371416: // title
           this.title = castToString(value); // StringType
-          break;
+          return value;
         case 3059181: // code
           this.code = castToCodeableConcept(value); // CodeableConcept
-          break;
+          return value;
         case -1867885268: // subject
           this.subject = castToReference(value); // Reference
-          break;
+          return value;
         case 1524132147: // encounter
           this.encounter = castToReference(value); // Reference
-          break;
+          return value;
         case 3076014: // date
           this.date = castToDateTime(value); // DateTimeType
-          break;
+          return value;
         case -896505829: // source
           this.source = castToReference(value); // Reference
-          break;
+          return value;
         case -391079516: // orderedBy
           this.orderedBy = castToCodeableConcept(value); // CodeableConcept
-          break;
+          return value;
         case 3387378: // note
           this.getNote().add(castToAnnotation(value)); // Annotation
-          break;
+          return value;
         case 96667762: // entry
           this.getEntry().add((ListEntryComponent) value); // ListEntryComponent
-          break;
+          return value;
         case 1140135409: // emptyReason
           this.emptyReason = castToCodeableConcept(value); // CodeableConcept
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("identifier"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("identifier")) {
           this.getIdentifier().add(castToIdentifier(value));
-        else if (name.equals("status"))
-          this.status = new ListStatusEnumFactory().fromType(value); // Enumeration<ListStatus>
-        else if (name.equals("mode"))
-          this.mode = new ListModeEnumFactory().fromType(value); // Enumeration<ListMode>
-        else if (name.equals("title"))
+        } else if (name.equals("status")) {
+          value = new ListStatusEnumFactory().fromType(castToCode(value));
+          this.status = (Enumeration) value; // Enumeration<ListStatus>
+        } else if (name.equals("mode")) {
+          value = new ListModeEnumFactory().fromType(castToCode(value));
+          this.mode = (Enumeration) value; // Enumeration<ListMode>
+        } else if (name.equals("title")) {
           this.title = castToString(value); // StringType
-        else if (name.equals("code"))
+        } else if (name.equals("code")) {
           this.code = castToCodeableConcept(value); // CodeableConcept
-        else if (name.equals("subject"))
+        } else if (name.equals("subject")) {
           this.subject = castToReference(value); // Reference
-        else if (name.equals("encounter"))
+        } else if (name.equals("encounter")) {
           this.encounter = castToReference(value); // Reference
-        else if (name.equals("date"))
+        } else if (name.equals("date")) {
           this.date = castToDateTime(value); // DateTimeType
-        else if (name.equals("source"))
+        } else if (name.equals("source")) {
           this.source = castToReference(value); // Reference
-        else if (name.equals("orderedBy"))
+        } else if (name.equals("orderedBy")) {
           this.orderedBy = castToCodeableConcept(value); // CodeableConcept
-        else if (name.equals("note"))
+        } else if (name.equals("note")) {
           this.getNote().add(castToAnnotation(value));
-        else if (name.equals("entry"))
+        } else if (name.equals("entry")) {
           this.getEntry().add((ListEntryComponent) value);
-        else if (name.equals("emptyReason"))
+        } else if (name.equals("emptyReason")) {
           this.emptyReason = castToCodeableConcept(value); // CodeableConcept
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case -1618432855:  return addIdentifier(); // Identifier
-        case -892481550: throw new FHIRException("Cannot make property status as it is not a complex type"); // Enumeration<ListStatus>
-        case 3357091: throw new FHIRException("Cannot make property mode as it is not a complex type"); // Enumeration<ListMode>
-        case 110371416: throw new FHIRException("Cannot make property title as it is not a complex type"); // StringType
-        case 3059181:  return getCode(); // CodeableConcept
-        case -1867885268:  return getSubject(); // Reference
-        case 1524132147:  return getEncounter(); // Reference
-        case 3076014: throw new FHIRException("Cannot make property date as it is not a complex type"); // DateTimeType
-        case -896505829:  return getSource(); // Reference
-        case -391079516:  return getOrderedBy(); // CodeableConcept
-        case 3387378:  return addNote(); // Annotation
-        case 96667762:  return addEntry(); // ListEntryComponent
-        case 1140135409:  return getEmptyReason(); // CodeableConcept
+        case -1618432855:  return addIdentifier(); 
+        case -892481550:  return getStatusElement();
+        case 3357091:  return getModeElement();
+        case 110371416:  return getTitleElement();
+        case 3059181:  return getCode(); 
+        case -1867885268:  return getSubject(); 
+        case 1524132147:  return getEncounter(); 
+        case 3076014:  return getDateElement();
+        case -896505829:  return getSource(); 
+        case -391079516:  return getOrderedBy(); 
+        case 3387378:  return addNote(); 
+        case 96667762:  return addEntry(); 
+        case 1140135409:  return getEmptyReason(); 
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -1618432855: /*identifier*/ return new String[] {"Identifier"};
+        case -892481550: /*status*/ return new String[] {"code"};
+        case 3357091: /*mode*/ return new String[] {"code"};
+        case 110371416: /*title*/ return new String[] {"string"};
+        case 3059181: /*code*/ return new String[] {"CodeableConcept"};
+        case -1867885268: /*subject*/ return new String[] {"Reference"};
+        case 1524132147: /*encounter*/ return new String[] {"Reference"};
+        case 3076014: /*date*/ return new String[] {"dateTime"};
+        case -896505829: /*source*/ return new String[] {"Reference"};
+        case -391079516: /*orderedBy*/ return new String[] {"CodeableConcept"};
+        case 3387378: /*note*/ return new String[] {"Annotation"};
+        case 96667762: /*entry*/ return new String[] {};
+        case 1140135409: /*emptyReason*/ return new String[] {"CodeableConcept"};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }

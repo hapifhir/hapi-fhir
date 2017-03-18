@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -39,15 +39,15 @@ public enum GoalPriority {
         /**
          * Indicates that the goal is of considerable importance and should be a primary focus of care delivery.
          */
-        HIGH, 
+        HIGHPRIORITY, 
         /**
          * Indicates that the goal has a reasonable degree of importance and that concrete action should be taken towards the goal.  Attainment is not as critical as high-priority goals.
          */
-        MEDIUM, 
+        MEDIUMPRIORITY, 
         /**
          * The goal is desirable but is not sufficiently important to devote significant resources to.  Achievement of the goal may be sought when incidental to achieving other goals.
          */
-        LOW, 
+        LOWPRIORITY, 
         /**
          * added to help the parsers
          */
@@ -55,19 +55,19 @@ public enum GoalPriority {
         public static GoalPriority fromCode(String codeString) throws FHIRException {
             if (codeString == null || "".equals(codeString))
                 return null;
-        if ("high".equals(codeString))
-          return HIGH;
-        if ("medium".equals(codeString))
-          return MEDIUM;
-        if ("low".equals(codeString))
-          return LOW;
+        if ("high-priority".equals(codeString))
+          return HIGHPRIORITY;
+        if ("medium-priority".equals(codeString))
+          return MEDIUMPRIORITY;
+        if ("low-priority".equals(codeString))
+          return LOWPRIORITY;
         throw new FHIRException("Unknown GoalPriority code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
-            case HIGH: return "high";
-            case MEDIUM: return "medium";
-            case LOW: return "low";
+            case HIGHPRIORITY: return "high-priority";
+            case MEDIUMPRIORITY: return "medium-priority";
+            case LOWPRIORITY: return "low-priority";
             default: return "?";
           }
         }
@@ -76,17 +76,17 @@ public enum GoalPriority {
         }
         public String getDefinition() {
           switch (this) {
-            case HIGH: return "Indicates that the goal is of considerable importance and should be a primary focus of care delivery.";
-            case MEDIUM: return "Indicates that the goal has a reasonable degree of importance and that concrete action should be taken towards the goal.  Attainment is not as critical as high-priority goals.";
-            case LOW: return "The goal is desirable but is not sufficiently important to devote significant resources to.  Achievement of the goal may be sought when incidental to achieving other goals.";
+            case HIGHPRIORITY: return "Indicates that the goal is of considerable importance and should be a primary focus of care delivery.";
+            case MEDIUMPRIORITY: return "Indicates that the goal has a reasonable degree of importance and that concrete action should be taken towards the goal.  Attainment is not as critical as high-priority goals.";
+            case LOWPRIORITY: return "The goal is desirable but is not sufficiently important to devote significant resources to.  Achievement of the goal may be sought when incidental to achieving other goals.";
             default: return "?";
           }
         }
         public String getDisplay() {
           switch (this) {
-            case HIGH: return "high";
-            case MEDIUM: return "medium";
-            case LOW: return "low";
+            case HIGHPRIORITY: return "High Priority";
+            case MEDIUMPRIORITY: return "Medium Priority";
+            case LOWPRIORITY: return "Low Priority";
             default: return "?";
           }
     }

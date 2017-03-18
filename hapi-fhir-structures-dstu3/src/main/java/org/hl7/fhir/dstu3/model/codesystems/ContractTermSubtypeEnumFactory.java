@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
 
 
 import org.hl7.fhir.dstu3.model.EnumFactory;
@@ -39,22 +39,22 @@ public class ContractTermSubtypeEnumFactory implements EnumFactory<ContractTermS
   public ContractTermSubtype fromCode(String codeString) throws IllegalArgumentException {
     if (codeString == null || "".equals(codeString))
       return null;
-    if ("oralhealth-basic".equals(codeString))
-      return ContractTermSubtype.ORALHEALTHBASIC;
-    if ("oralhealth-major".equals(codeString))
-      return ContractTermSubtype.ORALHEALTHMAJOR;
-    if ("oralhealth-orthodontic".equals(codeString))
-      return ContractTermSubtype.ORALHEALTHORTHODONTIC;
+    if ("condition".equals(codeString))
+      return ContractTermSubtype.CONDITION;
+    if ("warranty".equals(codeString))
+      return ContractTermSubtype.WARRANTY;
+    if ("innominate".equals(codeString))
+      return ContractTermSubtype.INNOMINATE;
     throw new IllegalArgumentException("Unknown ContractTermSubtype code '"+codeString+"'");
   }
 
   public String toCode(ContractTermSubtype code) {
-    if (code == ContractTermSubtype.ORALHEALTHBASIC)
-      return "oralhealth-basic";
-    if (code == ContractTermSubtype.ORALHEALTHMAJOR)
-      return "oralhealth-major";
-    if (code == ContractTermSubtype.ORALHEALTHORTHODONTIC)
-      return "oralhealth-orthodontic";
+    if (code == ContractTermSubtype.CONDITION)
+      return "condition";
+    if (code == ContractTermSubtype.WARRANTY)
+      return "warranty";
+    if (code == ContractTermSubtype.INNOMINATE)
+      return "innominate";
     return "?";
   }
 

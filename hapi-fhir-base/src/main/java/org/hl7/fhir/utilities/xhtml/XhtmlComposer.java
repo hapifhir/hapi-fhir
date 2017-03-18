@@ -28,30 +28,14 @@ POSSIBILITY OF SUCH DAMAGE.
 */
 package org.hl7.fhir.utilities.xhtml;
 
-/*
- * #%L
- * HAPI FHIR - Core Library
- * %%
- * Copyright (C) 2014 - 2017 University Health Network
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.StringWriter;
+import java.io.UnsupportedEncodingException;
+import java.io.Writer;
 
-
-import java.io.*;
-
-import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.utilities.xml.IXMLWriter;
 import org.w3c.dom.Element;
@@ -67,8 +51,9 @@ public class XhtmlComposer {
     return pretty;
   }
 
-  public void setPretty(boolean pretty) {
+  public XhtmlComposer setPretty(boolean pretty) {
     this.pretty = pretty;
+    return this;
   }
 
   public boolean isXmlOnly() {
@@ -83,7 +68,7 @@ public class XhtmlComposer {
 
   private Writer dst;
 
-  public String compose(XhtmlDocument doc) throws IOException, FHIRException  {
+  public String compose(XhtmlDocument doc) throws IOException  {
     StringWriter sdst = new StringWriter();
     dst = sdst;
     composeDoc(doc);
@@ -97,7 +82,7 @@ public class XhtmlComposer {
     return sdst.toString();
   }
 
-  public void compose(OutputStream stream, XhtmlDocument doc) throws IOException, FHIRException  {
+  public void compose(OutputStream stream, XhtmlDocument doc) throws IOException  {
     byte[] bom = new byte[] { (byte)0xEF, (byte)0xBB, (byte)0xBF };
     stream.write(bom);
     dst = new OutputStreamWriter(stream, "UTF-8");
@@ -105,7 +90,7 @@ public class XhtmlComposer {
     dst.flush();
   }
 
-  private void composeDoc(XhtmlDocument doc) throws IOException, FHIRException  {
+  private void composeDoc(XhtmlDocument doc) throws IOException  {
     // headers....
 //    dst.append("<html>" + (isPretty() ? "\r\n" : ""));
     for (XhtmlNode c : doc.getChildNodes())
@@ -122,10 +107,14 @@ public class XhtmlComposer {
       writeInstruction(node);
     else if (node.getNodeType() == NodeType.Element)
       writeElement(indent, node);
+    else if (node.getNodeType() == NodeType.Document)
+      writeDocument(indent, node);
     else if (node.getNodeType() == NodeType.Text)
       writeText(node);
+    else if (node.getNodeType() == null)
+      throw new IOException("Null node type");
     else
-      throw new Error("Unknown node type: "+node.getNodeType().toString());
+      throw new IOException("Unknown node type: "+node.getNodeType().toString());
   }
 
   private void writeText(XhtmlNode node) throws IOException  {
@@ -139,7 +128,7 @@ public class XhtmlComposer {
         dst.append("&gt;");
       else if (c == '"')
         dst.append("&quot;");
-      else if (!xmlOnly) {
+      else if (xmlOnly) {
         dst.append(c);
       } else {
         if (c == XhtmlNode.NBSP.charAt(0))
@@ -224,6 +213,13 @@ public class XhtmlComposer {
     }
   }
 
+  private void writeDocument(String indent, XhtmlNode node) throws IOException  {
+    indent = "";
+    for (XhtmlNode c : node.getChildNodes())
+      writeNode(indent, c);
+  }
+
+
   public void compose(IXMLWriter xml, XhtmlNode node) throws IOException  {
     if (node.getNodeType() == NodeType.Comment)
       xml.comment(node.getContent(), isPretty());
@@ -236,8 +232,14 @@ public class XhtmlComposer {
   }
 
   private void composeElement(IXMLWriter xml, XhtmlNode node) throws IOException  {
-    for (String n : node.getAttributes().keySet())
+    for (String n : node.getAttributes().keySet()) {
+      if (n.equals("xmlns")) 
+      	xml.setDefaultNamespace(node.getAttributes().get(n));
+      else if (n.startsWith("xmlns:")) 
+      	xml.namespace(n.substring(6), node.getAttributes().get(n));
+      else
       xml.attribute(n, node.getAttributes().get(n));
+    }
     xml.enter(XHTML_NS, node.getName());
     for (XhtmlNode n : node.getChildNodes())
       compose(xml, n);
@@ -314,6 +316,33 @@ public class XhtmlComposer {
       }
     } else
       throw new Error("Unknown node type: "+node.getNodeType().toString());
+  }
+
+  public void compose(OutputStream stream, XhtmlNode x) throws IOException {
+    byte[] bom = new byte[] { (byte)0xEF, (byte)0xBB, (byte)0xBF };
+    stream.write(bom);
+    dst = new OutputStreamWriter(stream, "UTF-8");
+    dst.append("<html><head><link rel=\"stylesheet\" href=\"fhir.css\"/></head><body>\r\n");
+    writeNode("", x);
+    dst.append("</body></html>\r\n");
+    dst.flush();
+  }
+
+  public void composeDocument(FileOutputStream f, XhtmlNode xhtml) throws IOException {
+    byte[] bom = new byte[] { (byte)0xEF, (byte)0xBB, (byte)0xBF };
+    f.write(bom);
+    dst = new OutputStreamWriter(f, "UTF-8");
+    writeNode("", xhtml);
+    dst.flush();
+    dst.close();
+  }
+
+  public String composeEx(XhtmlNode node) {
+    try {
+      return compose(node);
+    } catch (IOException e) {
+      throw new Error(e);
+    }
   }
   
 }

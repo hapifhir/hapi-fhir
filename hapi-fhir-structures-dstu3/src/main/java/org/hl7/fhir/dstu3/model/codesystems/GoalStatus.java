@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -41,39 +41,19 @@ public enum GoalStatus {
          */
         PROPOSED, 
         /**
-         * A goal is planned for this patient
-         */
-        PLANNED, 
-        /**
-         * A proposed goal was accepted
+         * A proposed goal was accepted or acknowledged
          */
         ACCEPTED, 
         /**
-         * A proposed goal was rejected
+         * A goal is planned for this patient
          */
-        REJECTED, 
+        PLANNED, 
         /**
          * The goal is being sought but has not yet been reached.  (Also applies if goal was reached in the past but there has been regression and goal is being sought again)
          */
         INPROGRESS, 
         /**
-         * The goal has been met and no further action is needed
-         */
-        ACHIEVED, 
-        /**
-         * The goal has been met, but ongoing activity is needed to sustain the goal objective
-         */
-        SUSTAINING, 
-        /**
-         * The goal remains a long term objective but is no longer being actively pursued for a temporary period of time.
-         */
-        ONHOLD, 
-        /**
-         * The goal is no longer being sought
-         */
-        CANCELLED, 
-        /**
-         * The goal is on scheduled for the planned timelines
+         * The goal is on schedule for the planned timelines
          */
         ONTARGET, 
         /**
@@ -85,9 +65,29 @@ public enum GoalStatus {
          */
         BEHINDTARGET, 
         /**
+         * The goal has been met, but ongoing activity is needed to sustain the goal objective
+         */
+        SUSTAINING, 
+        /**
+         * The goal has been met and no further action is needed
+         */
+        ACHIEVED, 
+        /**
+         * The goal remains a long term objective but is no longer being actively pursued for a temporary period of time.
+         */
+        ONHOLD, 
+        /**
+         * The previously accepted goal is no longer being sought
+         */
+        CANCELLED, 
+        /**
          * The goal was entered in error and voided.
          */
         ENTEREDINERROR, 
+        /**
+         * A proposed goal was rejected
+         */
+        REJECTED, 
         /**
          * added to help the parsers
          */
@@ -97,47 +97,47 @@ public enum GoalStatus {
                 return null;
         if ("proposed".equals(codeString))
           return PROPOSED;
-        if ("planned".equals(codeString))
-          return PLANNED;
         if ("accepted".equals(codeString))
           return ACCEPTED;
-        if ("rejected".equals(codeString))
-          return REJECTED;
+        if ("planned".equals(codeString))
+          return PLANNED;
         if ("in-progress".equals(codeString))
           return INPROGRESS;
-        if ("achieved".equals(codeString))
-          return ACHIEVED;
-        if ("sustaining".equals(codeString))
-          return SUSTAINING;
-        if ("on-hold".equals(codeString))
-          return ONHOLD;
-        if ("cancelled".equals(codeString))
-          return CANCELLED;
         if ("on-target".equals(codeString))
           return ONTARGET;
         if ("ahead-of-target".equals(codeString))
           return AHEADOFTARGET;
         if ("behind-target".equals(codeString))
           return BEHINDTARGET;
+        if ("sustaining".equals(codeString))
+          return SUSTAINING;
+        if ("achieved".equals(codeString))
+          return ACHIEVED;
+        if ("on-hold".equals(codeString))
+          return ONHOLD;
+        if ("cancelled".equals(codeString))
+          return CANCELLED;
         if ("entered-in-error".equals(codeString))
           return ENTEREDINERROR;
+        if ("rejected".equals(codeString))
+          return REJECTED;
         throw new FHIRException("Unknown GoalStatus code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
             case PROPOSED: return "proposed";
-            case PLANNED: return "planned";
             case ACCEPTED: return "accepted";
-            case REJECTED: return "rejected";
+            case PLANNED: return "planned";
             case INPROGRESS: return "in-progress";
-            case ACHIEVED: return "achieved";
-            case SUSTAINING: return "sustaining";
-            case ONHOLD: return "on-hold";
-            case CANCELLED: return "cancelled";
             case ONTARGET: return "on-target";
             case AHEADOFTARGET: return "ahead-of-target";
             case BEHINDTARGET: return "behind-target";
+            case SUSTAINING: return "sustaining";
+            case ACHIEVED: return "achieved";
+            case ONHOLD: return "on-hold";
+            case CANCELLED: return "cancelled";
             case ENTEREDINERROR: return "entered-in-error";
+            case REJECTED: return "rejected";
             default: return "?";
           }
         }
@@ -147,36 +147,36 @@ public enum GoalStatus {
         public String getDefinition() {
           switch (this) {
             case PROPOSED: return "A goal is proposed for this patient";
+            case ACCEPTED: return "A proposed goal was accepted or acknowledged";
             case PLANNED: return "A goal is planned for this patient";
-            case ACCEPTED: return "A proposed goal was accepted";
-            case REJECTED: return "A proposed goal was rejected";
             case INPROGRESS: return "The goal is being sought but has not yet been reached.  (Also applies if goal was reached in the past but there has been regression and goal is being sought again)";
-            case ACHIEVED: return "The goal has been met and no further action is needed";
-            case SUSTAINING: return "The goal has been met, but ongoing activity is needed to sustain the goal objective";
-            case ONHOLD: return "The goal remains a long term objective but is no longer being actively pursued for a temporary period of time.";
-            case CANCELLED: return "The goal is no longer being sought";
-            case ONTARGET: return "The goal is on scheduled for the planned timelines";
+            case ONTARGET: return "The goal is on schedule for the planned timelines";
             case AHEADOFTARGET: return "The goal is ahead of the planned timelines";
             case BEHINDTARGET: return "The goal is behind the planned timelines";
+            case SUSTAINING: return "The goal has been met, but ongoing activity is needed to sustain the goal objective";
+            case ACHIEVED: return "The goal has been met and no further action is needed";
+            case ONHOLD: return "The goal remains a long term objective but is no longer being actively pursued for a temporary period of time.";
+            case CANCELLED: return "The previously accepted goal is no longer being sought";
             case ENTEREDINERROR: return "The goal was entered in error and voided.";
+            case REJECTED: return "A proposed goal was rejected";
             default: return "?";
           }
         }
         public String getDisplay() {
           switch (this) {
             case PROPOSED: return "Proposed";
-            case PLANNED: return "Planned";
             case ACCEPTED: return "Accepted";
-            case REJECTED: return "Rejected";
+            case PLANNED: return "Planned";
             case INPROGRESS: return "In Progress";
-            case ACHIEVED: return "Achieved";
-            case SUSTAINING: return "Sustaining";
-            case ONHOLD: return "On Hold";
-            case CANCELLED: return "Cancelled";
             case ONTARGET: return "On Target";
             case AHEADOFTARGET: return "Ahead of Target";
             case BEHINDTARGET: return "Behind Target";
+            case SUSTAINING: return "Sustaining";
+            case ACHIEVED: return "Achieved";
+            case ONHOLD: return "On Hold";
+            case CANCELLED: return "Cancelled";
             case ENTEREDINERROR: return "Entered In Error";
+            case REJECTED: return "Rejected";
             default: return "?";
           }
     }

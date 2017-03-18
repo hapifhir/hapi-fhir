@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
 
 import java.util.*;
 
@@ -278,47 +278,60 @@ public abstract class DomainResource extends Resource implements IBaseHasExtensi
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case 3556653: // text
           this.text = castToNarrative(value); // Narrative
-          break;
+          return value;
         case -410956685: // contained
           this.getContained().add(castToResource(value)); // Resource
-          break;
+          return value;
         case -612557761: // extension
           this.getExtension().add(castToExtension(value)); // Extension
-          break;
+          return value;
         case -298878168: // modifierExtension
           this.getModifierExtension().add(castToExtension(value)); // Extension
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("text"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("text")) {
           this.text = castToNarrative(value); // Narrative
-        else if (name.equals("contained"))
+        } else if (name.equals("contained")) {
           this.getContained().add(castToResource(value));
-        else if (name.equals("extension"))
+        } else if (name.equals("extension")) {
           this.getExtension().add(castToExtension(value));
-        else if (name.equals("modifierExtension"))
+        } else if (name.equals("modifierExtension")) {
           this.getModifierExtension().add(castToExtension(value));
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 3556653:  return getText(); // Narrative
+        case 3556653:  return getText(); 
         case -410956685: throw new FHIRException("Cannot make property contained as it is not a complex type"); // Resource
-        case -612557761:  return addExtension(); // Extension
-        case -298878168:  return addModifierExtension(); // Extension
+        case -612557761:  return addExtension(); 
+        case -298878168:  return addModifierExtension(); 
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3556653: /*text*/ return new String[] {"Narrative"};
+        case -410956685: /*contained*/ return new String[] {"Resource"};
+        case -612557761: /*extension*/ return new String[] {"Extension"};
+        case -298878168: /*modifierExtension*/ return new String[] {"Extension"};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }

@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
 
 
 import org.hl7.fhir.dstu3.model.EnumFactory;
@@ -71,6 +71,8 @@ public class ServiceUsclsEnumFactory implements EnumFactory<ServiceUscls> {
       return ServiceUscls._21212;
     if ("27211".equals(codeString))
       return ServiceUscls._27211;
+    if ("67211".equals(codeString))
+      return ServiceUscls._67211;
     if ("99111".equals(codeString))
       return ServiceUscls._99111;
     if ("99333".equals(codeString))
@@ -113,6 +115,8 @@ public class ServiceUsclsEnumFactory implements EnumFactory<ServiceUscls> {
       return "21212";
     if (code == ServiceUscls._27211)
       return "27211";
+    if (code == ServiceUscls._67211)
+      return "67211";
     if (code == ServiceUscls._99111)
       return "99111";
     if (code == ServiceUscls._99333)

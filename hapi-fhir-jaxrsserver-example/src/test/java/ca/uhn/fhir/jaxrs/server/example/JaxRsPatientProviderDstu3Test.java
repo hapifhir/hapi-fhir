@@ -14,7 +14,7 @@ import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
-import org.hl7.fhir.dstu3.model.Conformance;
+import org.hl7.fhir.dstu3.model.CapabilityStatement;
 import org.hl7.fhir.dstu3.model.DateType;
 import org.hl7.fhir.dstu3.model.HumanName;
 import org.hl7.fhir.dstu3.model.IdType;
@@ -255,7 +255,7 @@ public class JaxRsPatientProviderDstu3Test {
     @Test
     @Ignore
     public void testConformance() {
-        final Conformance conf = client.fetchConformance().ofType(Conformance.class).execute();
+        final CapabilityStatement conf = client.fetchConformance().ofType(CapabilityStatement.class).execute();
         System.out.println(conf.getRest().get(0).getResource().get(0).getType());
         assertEquals(conf.getRest().get(0).getResource().get(0).getType().toString(), "Patient");
     }    

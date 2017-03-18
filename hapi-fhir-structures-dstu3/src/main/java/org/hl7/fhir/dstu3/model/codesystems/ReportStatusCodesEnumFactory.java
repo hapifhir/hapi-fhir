@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
 
 
 import org.hl7.fhir.dstu3.model.EnumFactory;
@@ -39,22 +39,30 @@ public class ReportStatusCodesEnumFactory implements EnumFactory<ReportStatusCod
   public ReportStatusCodes fromCode(String codeString) throws IllegalArgumentException {
     if (codeString == null || "".equals(codeString))
       return null;
-    if ("complete".equals(codeString))
-      return ReportStatusCodes.COMPLETE;
-    if ("pending".equals(codeString))
-      return ReportStatusCodes.PENDING;
-    if ("error".equals(codeString))
-      return ReportStatusCodes.ERROR;
+    if ("completed".equals(codeString))
+      return ReportStatusCodes.COMPLETED;
+    if ("in-progress".equals(codeString))
+      return ReportStatusCodes.INPROGRESS;
+    if ("waiting".equals(codeString))
+      return ReportStatusCodes.WAITING;
+    if ("stopped".equals(codeString))
+      return ReportStatusCodes.STOPPED;
+    if ("entered-in-error".equals(codeString))
+      return ReportStatusCodes.ENTEREDINERROR;
     throw new IllegalArgumentException("Unknown ReportStatusCodes code '"+codeString+"'");
   }
 
   public String toCode(ReportStatusCodes code) {
-    if (code == ReportStatusCodes.COMPLETE)
-      return "complete";
-    if (code == ReportStatusCodes.PENDING)
-      return "pending";
-    if (code == ReportStatusCodes.ERROR)
-      return "error";
+    if (code == ReportStatusCodes.COMPLETED)
+      return "completed";
+    if (code == ReportStatusCodes.INPROGRESS)
+      return "in-progress";
+    if (code == ReportStatusCodes.WAITING)
+      return "waiting";
+    if (code == ReportStatusCodes.STOPPED)
+      return "stopped";
+    if (code == ReportStatusCodes.ENTEREDINERROR)
+      return "entered-in-error";
     return "?";
   }
 

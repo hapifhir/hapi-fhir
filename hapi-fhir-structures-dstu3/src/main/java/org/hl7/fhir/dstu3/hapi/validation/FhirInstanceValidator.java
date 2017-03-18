@@ -9,12 +9,16 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.apache.commons.lang3.Validate;
-import org.hl7.fhir.dstu3.model.OperationOutcome.IssueSeverity;
+import org.hl7.fhir.dstu3.model.Base;
 import org.hl7.fhir.dstu3.model.StructureDefinition;
-import org.hl7.fhir.dstu3.validation.IResourceValidator.BestPracticeWarningLevel;
-import org.hl7.fhir.dstu3.validation.IResourceValidator.IdStatus;
+import org.hl7.fhir.dstu3.model.TypeDetails;
+import org.hl7.fhir.dstu3.utils.FHIRPathEngine.IEvaluationContext;
+import org.hl7.fhir.dstu3.utils.IResourceValidator.BestPracticeWarningLevel;
+import org.hl7.fhir.dstu3.utils.IResourceValidator.IdStatus;
 import org.hl7.fhir.dstu3.validation.InstanceValidator;
-import org.hl7.fhir.dstu3.validation.ValidationMessage;
+import org.hl7.fhir.exceptions.PathEngineException;
+import org.hl7.fhir.utilities.validation.ValidationMessage;
+import org.hl7.fhir.utilities.validation.ValidationMessage.IssueSeverity;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -34,11 +38,11 @@ import ca.uhn.fhir.validation.IValidatorModule;
 public class FhirInstanceValidator extends BaseValidatorBridge implements IValidatorModule {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirInstanceValidator.class);
+
 	private BestPracticeWarningLevel myBestPracticeWarningLevel;
 	private DocumentBuilderFactory myDocBuilderFactory;
 	private StructureDefinition myStructureDefintion;
 	private IValidationSupport myValidationSupport;
-
 	/**
 	 * Constructor
 	 * 
@@ -72,6 +76,12 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 		}
 		root = theDocument.getDocumentElement();
 		return root.getLocalName();
+	}
+
+	private StructureDefinition findStructureDefinitionForResourceName(final FhirContext theCtx, String resourceName) {
+		String sdName = "http://hl7.org/fhir/StructureDefinition/" + resourceName;
+		StructureDefinition profile = myStructureDefintion != null ? myStructureDefintion : myValidationSupport.fetchStructureDefinition(theCtx, sdName);
+		return profile;
 	}
 
 	/**
@@ -131,8 +141,9 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 		HapiWorkerContext workerContext = new HapiWorkerContext(theCtx, myValidationSupport);
 
 		InstanceValidator v;
+		IEvaluationContext evaluationCtx = new NullEvaluationContext();
 		try {
-			v = new InstanceValidator(workerContext);
+			v = new InstanceValidator(workerContext, evaluationCtx);
 		} catch (Exception e) {
 			throw new ConfigurationException(e);
 		}
@@ -193,15 +204,48 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 		return messages;
 	}
 
-	private StructureDefinition findStructureDefinitionForResourceName(final FhirContext theCtx, String resourceName) {
-		String sdName = "http://hl7.org/fhir/StructureDefinition/" + resourceName;
-		StructureDefinition profile = myStructureDefintion != null ? myStructureDefintion : myValidationSupport.fetchStructureDefinition(theCtx, sdName);
-		return profile;
-	}
-
 	@Override
 	protected List<ValidationMessage> validate(IValidationContext<?> theCtx) {
 		return validate(theCtx.getFhirContext(), theCtx.getResourceAsString(), theCtx.getResourceAsStringEncoding());
+	}
+
+	public class NullEvaluationContext implements IEvaluationContext {
+
+		@Override
+		public TypeDetails checkFunction(Object theAppContext, String theFunctionName, List<TypeDetails> theParameters) throws PathEngineException {
+			return null;
+		}
+
+		@Override
+		public List<Base> executeFunction(Object theAppContext, String theFunctionName, List<List<Base>> theParameters) {
+			return null;
+		}
+
+		@Override
+		public boolean log(String theArgument, List<Base> theFocus) {
+			return false;
+		}
+
+		@Override
+		public Base resolveConstant(Object theAppContext, String theName) throws PathEngineException {
+			return null;
+		}
+
+		@Override
+		public TypeDetails resolveConstantType(Object theAppContext, String theName) throws PathEngineException {
+			return null;
+		}
+
+		@Override
+		public FunctionDetails resolveFunction(String theFunctionName) {
+			return null;
+		}
+
+		@Override
+		public Base resolveReference(Object theAppContext, String theUrl) {
+			return null;
+		}
+
 	}
 
 

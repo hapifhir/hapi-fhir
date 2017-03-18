@@ -53,13 +53,13 @@
       <sch:assert test="not(f:type/@value='display' and (f:required or f:repeats))">que-6: Required and repeat aren't permitted for display items</sch:assert>
       <sch:assert test="f:type/@value=('choice','open-choice') or not(f:option or f:options)">que-5: Only 'choice' items can have options</sch:assert>
       <sch:assert test="not(f:options and f:option)">que-4: A question cannot have both option and options</sch:assert>
-      <sch:assert test="not(f:type/@value='display' and f:concept)">que-3: Display items cannot have a &quot;concept&quot; asserted</sch:assert>
+      <sch:assert test="not(f:type/@value='display' and f:code)">que-3: Display items cannot have a &quot;code&quot; asserted</sch:assert>
       <sch:assert test="f:type/@value=('boolean', 'decimal', 'integer', 'open-choice', 'string', 'text', 'url') or not(f:maxLength)">que-10: Maximum length can only be declared for simple question types</sch:assert>
       <sch:assert test="not((f:type/@value='group' and not(f:item)) or (f:type/@value='display' and f:item))">que-1: Group items must have nested items, display items cannot have nested items</sch:assert>
-      <sch:assert test="not(exists(f:type)) or exists(f:definition)">que-11: Type is required if a definition is not provided</sch:assert>
+      <sch:assert test="exists(f:type) or exists(f:definition)">que-11: Type is required if a definition is not provided</sch:assert>
     </sch:rule>
     <sch:rule context="//f:Questionnaire/f:item/f:enableWhen">
-      <sch:assert test="count(*[starts-with(local-name(.), 'answer')]|answered) = 1">que-7: enableWhen must contain either an 'answer' or an 'answered' element</sch:assert>
+      <sch:assert test="count(*[starts-with(local-name(.), 'answer')]|hasAnswer) = 1">que-7: enableWhen must contain either a 'answer' or a 'hasAnswer' element</sch:assert>
     </sch:rule>
     <sch:rule context="//f:Questionnaire/f:item/f:enableWhen/f:answerAttachment">
       <sch:assert test="not(exists(f:data)) or exists(f:contentType)">att-1: It the Attachment has data, it SHALL have a contentType</sch:assert>

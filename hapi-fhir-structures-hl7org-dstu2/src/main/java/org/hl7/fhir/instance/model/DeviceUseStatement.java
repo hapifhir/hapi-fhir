@@ -38,6 +38,7 @@ import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.parser.DataFormatException;
 /**
  * A record of a device being used by a patient where the record is the result of a report from the patient or another clinician.
  */
@@ -145,13 +146,13 @@ public class DeviceUseStatement extends DomainResource {
     /**
      * @return {@link #bodySite} (Indicates the site on the subject's body where the device was used ( i.e. the target site).)
      */
-    public CodeableConcept getBodySiteCodeableConcept() throws Exception { 
+    public CodeableConcept getBodySiteCodeableConcept() { 
       if (!(this.bodySite instanceof CodeableConcept))
-        throw new Exception("Type mismatch: the type CodeableConcept was expected, but "+this.bodySite.getClass().getName()+" was encountered");
+        throw new DataFormatException("Type mismatch: the type CodeableConcept was expected, but "+this.bodySite.getClass().getName()+" was encountered");
       return (CodeableConcept) this.bodySite;
     }
 
-    public boolean hasBodySiteCodeableConcept() throws Exception { 
+    public boolean hasBodySiteCodeableConcept() { 
       return this.bodySite instanceof CodeableConcept;
     }
 

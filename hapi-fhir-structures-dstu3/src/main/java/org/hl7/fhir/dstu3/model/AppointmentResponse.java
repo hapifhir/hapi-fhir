@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
 
 import java.util.*;
 
@@ -139,8 +139,10 @@ public class AppointmentResponse extends DomainResource {
         throw new IllegalArgumentException("Unknown ParticipantStatus code '"+codeString+"'");
         }
         public Enumeration<ParticipantStatus> fromType(Base code) throws FHIRException {
-          if (code == null || code.isEmpty())
+          if (code == null)
             return null;
+          if (code.isEmpty())
+            return new Enumeration<ParticipantStatus>(this);
           String codeString = ((PrimitiveType) code).asStringValue();
           if (codeString == null || "".equals(codeString))
             return null;
@@ -666,71 +668,90 @@ public class AppointmentResponse extends DomainResource {
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case -1618432855: // identifier
           this.getIdentifier().add(castToIdentifier(value)); // Identifier
-          break;
+          return value;
         case -1474995297: // appointment
           this.appointment = castToReference(value); // Reference
-          break;
+          return value;
         case 109757538: // start
           this.start = castToInstant(value); // InstantType
-          break;
+          return value;
         case 100571: // end
           this.end = castToInstant(value); // InstantType
-          break;
+          return value;
         case 841294093: // participantType
           this.getParticipantType().add(castToCodeableConcept(value)); // CodeableConcept
-          break;
+          return value;
         case 92645877: // actor
           this.actor = castToReference(value); // Reference
-          break;
+          return value;
         case 996096261: // participantStatus
-          this.participantStatus = new ParticipantStatusEnumFactory().fromType(value); // Enumeration<ParticipantStatus>
-          break;
+          value = new ParticipantStatusEnumFactory().fromType(castToCode(value));
+          this.participantStatus = (Enumeration) value; // Enumeration<ParticipantStatus>
+          return value;
         case 950398559: // comment
           this.comment = castToString(value); // StringType
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("identifier"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("identifier")) {
           this.getIdentifier().add(castToIdentifier(value));
-        else if (name.equals("appointment"))
+        } else if (name.equals("appointment")) {
           this.appointment = castToReference(value); // Reference
-        else if (name.equals("start"))
+        } else if (name.equals("start")) {
           this.start = castToInstant(value); // InstantType
-        else if (name.equals("end"))
+        } else if (name.equals("end")) {
           this.end = castToInstant(value); // InstantType
-        else if (name.equals("participantType"))
+        } else if (name.equals("participantType")) {
           this.getParticipantType().add(castToCodeableConcept(value));
-        else if (name.equals("actor"))
+        } else if (name.equals("actor")) {
           this.actor = castToReference(value); // Reference
-        else if (name.equals("participantStatus"))
-          this.participantStatus = new ParticipantStatusEnumFactory().fromType(value); // Enumeration<ParticipantStatus>
-        else if (name.equals("comment"))
+        } else if (name.equals("participantStatus")) {
+          value = new ParticipantStatusEnumFactory().fromType(castToCode(value));
+          this.participantStatus = (Enumeration) value; // Enumeration<ParticipantStatus>
+        } else if (name.equals("comment")) {
           this.comment = castToString(value); // StringType
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case -1618432855:  return addIdentifier(); // Identifier
-        case -1474995297:  return getAppointment(); // Reference
-        case 109757538: throw new FHIRException("Cannot make property start as it is not a complex type"); // InstantType
-        case 100571: throw new FHIRException("Cannot make property end as it is not a complex type"); // InstantType
-        case 841294093:  return addParticipantType(); // CodeableConcept
-        case 92645877:  return getActor(); // Reference
-        case 996096261: throw new FHIRException("Cannot make property participantStatus as it is not a complex type"); // Enumeration<ParticipantStatus>
-        case 950398559: throw new FHIRException("Cannot make property comment as it is not a complex type"); // StringType
+        case -1618432855:  return addIdentifier(); 
+        case -1474995297:  return getAppointment(); 
+        case 109757538:  return getStartElement();
+        case 100571:  return getEndElement();
+        case 841294093:  return addParticipantType(); 
+        case 92645877:  return getActor(); 
+        case 996096261:  return getParticipantStatusElement();
+        case 950398559:  return getCommentElement();
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -1618432855: /*identifier*/ return new String[] {"Identifier"};
+        case -1474995297: /*appointment*/ return new String[] {"Reference"};
+        case 109757538: /*start*/ return new String[] {"instant"};
+        case 100571: /*end*/ return new String[] {"instant"};
+        case 841294093: /*participantType*/ return new String[] {"CodeableConcept"};
+        case 92645877: /*actor*/ return new String[] {"Reference"};
+        case 996096261: /*participantStatus*/ return new String[] {"code"};
+        case 950398559: /*comment*/ return new String[] {"string"};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }

@@ -38,6 +38,7 @@ import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.parser.DataFormatException;
 /**
  * A request for a procedure to be performed. May be a proposal or an order.
  */
@@ -617,13 +618,13 @@ public class ProcedureRequest extends DomainResource {
     /**
      * @return {@link #reason} (The reason why the procedure is being proposed or ordered. This procedure request may be motivated by a Condition for instance.)
      */
-    public CodeableConcept getReasonCodeableConcept() throws Exception { 
+    public CodeableConcept getReasonCodeableConcept() { 
       if (!(this.reason instanceof CodeableConcept))
-        throw new Exception("Type mismatch: the type CodeableConcept was expected, but "+this.reason.getClass().getName()+" was encountered");
+        throw new DataFormatException("Type mismatch: the type CodeableConcept was expected, but "+this.reason.getClass().getName()+" was encountered");
       return (CodeableConcept) this.reason;
     }
 
-    public boolean hasReasonCodeableConcept() throws Exception { 
+    public boolean hasReasonCodeableConcept() { 
       return this.reason instanceof CodeableConcept;
     }
 

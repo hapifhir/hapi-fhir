@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -53,6 +53,10 @@ public enum ClaimModifiers {
          */
         E, 
         /**
+         * A Rush service or service performed outside of normal office hours.
+         */
+        ROOH, 
+        /**
          * None.
          */
         X, 
@@ -71,6 +75,8 @@ public enum ClaimModifiers {
           return C;
         if ("e".equals(codeString))
           return E;
+        if ("rooh".equals(codeString))
+          return ROOH;
         if ("x".equals(codeString))
           return X;
         throw new FHIRException("Unknown ClaimModifiers code '"+codeString+"'");
@@ -81,6 +87,7 @@ public enum ClaimModifiers {
             case B: return "b";
             case C: return "c";
             case E: return "e";
+            case ROOH: return "rooh";
             case X: return "x";
             default: return "?";
           }
@@ -94,6 +101,7 @@ public enum ClaimModifiers {
             case B: return "Temporary service or installation.";
             case C: return "Treatment associated with TMJ.";
             case E: return "Implant or associated with an implant.";
+            case ROOH: return "A Rush service or service performed outside of normal office hours.";
             case X: return "None.";
             default: return "?";
           }
@@ -104,6 +112,7 @@ public enum ClaimModifiers {
             case B: return "Temporary service or installation";
             case C: return "TMJ treatment";
             case E: return "Implant or associated with an implant";
+            case ROOH: return "Rush or Outside of office hours";
             case X: return "None";
             default: return "?";
           }

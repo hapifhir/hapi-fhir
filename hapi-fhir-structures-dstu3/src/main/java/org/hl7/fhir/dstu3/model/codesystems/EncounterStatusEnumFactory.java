@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
 
 
 import org.hl7.fhir.dstu3.model.EnumFactory;
@@ -43,6 +43,8 @@ public class EncounterStatusEnumFactory implements EnumFactory<EncounterStatus> 
       return EncounterStatus.PLANNED;
     if ("arrived".equals(codeString))
       return EncounterStatus.ARRIVED;
+    if ("triaged".equals(codeString))
+      return EncounterStatus.TRIAGED;
     if ("in-progress".equals(codeString))
       return EncounterStatus.INPROGRESS;
     if ("onleave".equals(codeString))
@@ -53,6 +55,8 @@ public class EncounterStatusEnumFactory implements EnumFactory<EncounterStatus> 
       return EncounterStatus.CANCELLED;
     if ("entered-in-error".equals(codeString))
       return EncounterStatus.ENTEREDINERROR;
+    if ("unknown".equals(codeString))
+      return EncounterStatus.UNKNOWN;
     throw new IllegalArgumentException("Unknown EncounterStatus code '"+codeString+"'");
   }
 
@@ -61,6 +65,8 @@ public class EncounterStatusEnumFactory implements EnumFactory<EncounterStatus> 
       return "planned";
     if (code == EncounterStatus.ARRIVED)
       return "arrived";
+    if (code == EncounterStatus.TRIAGED)
+      return "triaged";
     if (code == EncounterStatus.INPROGRESS)
       return "in-progress";
     if (code == EncounterStatus.ONLEAVE)
@@ -71,6 +77,8 @@ public class EncounterStatusEnumFactory implements EnumFactory<EncounterStatus> 
       return "cancelled";
     if (code == EncounterStatus.ENTEREDINERROR)
       return "entered-in-error";
+    if (code == EncounterStatus.UNKNOWN)
+      return "unknown";
     return "?";
   }
 

@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,25 +37,17 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum ReportResultCodes {
 
         /**
-         * The action was successful.
+         * All test operations successfully passed all asserts
          */
         PASS, 
         /**
-         * The action was skipped.
-         */
-        SKIP, 
-        /**
-         * The action failed.
+         * One or more test operations failed one or more asserts
          */
         FAIL, 
         /**
-         * The action passed but with warnings.
+         * One or more test operations is pending execution completion
          */
-        WARNING, 
-        /**
-         * The action encountered a fatal error and the engine was unable to process.
-         */
-        ERROR, 
+        PENDING, 
         /**
          * added to help the parsers
          */
@@ -65,23 +57,17 @@ public enum ReportResultCodes {
                 return null;
         if ("pass".equals(codeString))
           return PASS;
-        if ("skip".equals(codeString))
-          return SKIP;
         if ("fail".equals(codeString))
           return FAIL;
-        if ("warning".equals(codeString))
-          return WARNING;
-        if ("error".equals(codeString))
-          return ERROR;
+        if ("pending".equals(codeString))
+          return PENDING;
         throw new FHIRException("Unknown ReportResultCodes code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
             case PASS: return "pass";
-            case SKIP: return "skip";
             case FAIL: return "fail";
-            case WARNING: return "warning";
-            case ERROR: return "error";
+            case PENDING: return "pending";
             default: return "?";
           }
         }
@@ -90,21 +76,17 @@ public enum ReportResultCodes {
         }
         public String getDefinition() {
           switch (this) {
-            case PASS: return "The action was successful.";
-            case SKIP: return "The action was skipped.";
-            case FAIL: return "The action failed.";
-            case WARNING: return "The action passed but with warnings.";
-            case ERROR: return "The action encountered a fatal error and the engine was unable to process.";
+            case PASS: return "All test operations successfully passed all asserts";
+            case FAIL: return "One or more test operations failed one or more asserts";
+            case PENDING: return "One or more test operations is pending execution completion";
             default: return "?";
           }
         }
         public String getDisplay() {
           switch (this) {
-            case PASS: return "pass";
-            case SKIP: return "skip";
-            case FAIL: return "fail";
-            case WARNING: return "warning";
-            case ERROR: return "error";
+            case PASS: return "Pass";
+            case FAIL: return "Fail";
+            case PENDING: return "Pending";
             default: return "?";
           }
     }

@@ -2,8 +2,8 @@ package org.hl7.fhir.dstu3.hapi.validation;
 
 import java.util.List;
 
-import org.hl7.fhir.dstu3.validation.ValidationMessage;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.utilities.validation.ValidationMessage;
 
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.validation.IValidationContext;

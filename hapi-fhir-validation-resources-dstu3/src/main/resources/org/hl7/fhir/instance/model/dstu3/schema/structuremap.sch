@@ -59,8 +59,8 @@
       <sch:assert test="not(exists(f:code)) or exists(f:system)">qty-3: If a code for the unit is present, the system SHALL also be present</sch:assert>
     </sch:rule>
     <sch:rule context="//f:StructureMap/f:group/f:rule/f:target">
-      <sch:assert test="not(f:/context)) or (f:/contextType)">smp-2: Must have a contextType if you have a context</sch:assert>
-      <sch:assert test="not(f:/element)) or (f:/context)">smp-1: Can only have a element if you have a context</sch:assert>
+      <sch:assert test="not(f:context) or (f:contextType)">smp-2: Must have a contextType if you have a context</sch:assert>
+      <sch:assert test="not(f:element) or (f:context)">smp-1: Can only have a element if you have a context</sch:assert>
     </sch:rule>
   </sch:pattern>
 </sch:schema>

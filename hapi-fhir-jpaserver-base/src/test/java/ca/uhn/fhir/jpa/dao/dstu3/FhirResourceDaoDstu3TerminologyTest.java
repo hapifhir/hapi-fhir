@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.Set;
 
 import org.hl7.fhir.dstu3.model.*;
-import org.hl7.fhir.dstu3.model.AllergyIntolerance.AllergyIntoleranceCategory;
 import org.hl7.fhir.dstu3.model.AllergyIntolerance.AllergyIntoleranceClinicalStatus;
 import org.hl7.fhir.dstu3.model.CodeSystem.CodeSystemContentMode;
 import org.hl7.fhir.dstu3.model.CodeSystem.ConceptDefinitionComponent;
@@ -21,6 +20,7 @@ import org.hl7.fhir.dstu3.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.dstu3.model.ValueSet.FilterOperator;
 import org.hl7.fhir.dstu3.model.ValueSet.ValueSetComposeComponent;
 import org.hl7.fhir.dstu3.model.ValueSet.ValueSetExpansionContainsComponent;
+import org.hl7.fhir.dstu3.model.codesystems.AllergyIntoleranceCategory;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -842,17 +842,20 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 	public void testSearchCodeBelowBuiltInCodesystemUnqualified() {
 		AllergyIntolerance ai1 = new AllergyIntolerance();
 		ai1.setClinicalStatus(AllergyIntoleranceClinicalStatus.ACTIVE);
-		ai1.addCategoryElement().setValue(AllergyIntoleranceCategory.MEDICATION);
+		ai1.getCategoryFirstRep().getCodingFirstRep().setCode(AllergyIntoleranceCategory.MEDICATION.toCode());
+		ai1.getCategoryFirstRep().getCodingFirstRep().setSystem(AllergyIntoleranceCategory.MEDICATION.getSystem());
 		String id1 = myAllergyIntoleranceDao.create(ai1, mySrd).getId().toUnqualifiedVersionless().getValue();
 
 		AllergyIntolerance ai2 = new AllergyIntolerance();
 		ai2.setClinicalStatus(AllergyIntoleranceClinicalStatus.RESOLVED);
-		ai2.addCategoryElement().setValue(AllergyIntoleranceCategory.BIOLOGIC);
+		ai2.getCategoryFirstRep().getCodingFirstRep().setCode(AllergyIntoleranceCategory.BIOLOGIC.toCode());
+		ai2.getCategoryFirstRep().getCodingFirstRep().setSystem(AllergyIntoleranceCategory.BIOLOGIC.getSystem());
 		String id2 = myAllergyIntoleranceDao.create(ai2, mySrd).getId().toUnqualifiedVersionless().getValue();
 
 		AllergyIntolerance ai3 = new AllergyIntolerance();
 		ai3.setClinicalStatus(AllergyIntoleranceClinicalStatus.INACTIVE);
-		ai3.addCategoryElement().setValue(AllergyIntoleranceCategory.FOOD);
+		ai3.getCategoryFirstRep().getCodingFirstRep().setCode(AllergyIntoleranceCategory.FOOD.toCode());
+		ai3.getCategoryFirstRep().getCodingFirstRep().setSystem(AllergyIntoleranceCategory.FOOD.getSystem());
 		String id3 = myAllergyIntoleranceDao.create(ai3, mySrd).getId().toUnqualifiedVersionless().getValue();
 
 		SearchParameterMap params;
@@ -866,7 +869,7 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 
 		params = new SearchParameterMap();
 		params.add(AllergyIntolerance.SP_CATEGORY, new TokenParam(null, AllergyIntoleranceCategory.MEDICATION.toCode()).setModifier(TokenParamModifier.BELOW));
-		assertThat(toUnqualifiedVersionlessIdValues(myAllergyIntoleranceDao.search(params)), containsInAnyOrder(id1, id2));
+		assertThat(toUnqualifiedVersionlessIdValues(myAllergyIntoleranceDao.search(params)), containsInAnyOrder(id1));
 
 		params = new SearchParameterMap();
 		params.add(AllergyIntolerance.SP_CLINICAL_STATUS, new TokenParam(null, AllergyIntoleranceClinicalStatus.RESOLVED.toCode()).setModifier(TokenParamModifier.BELOW));

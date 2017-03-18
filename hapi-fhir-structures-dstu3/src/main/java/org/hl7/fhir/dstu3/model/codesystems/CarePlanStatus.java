@@ -29,17 +29,13 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
 
 public enum CarePlanStatus {
 
-        /**
-         * The plan has been suggested but no commitment to it has yet been made.
-         */
-        PROPOSED, 
         /**
          * The plan is in development or awaiting use but is not yet intended to be acted upon.
          */
@@ -75,8 +71,6 @@ public enum CarePlanStatus {
         public static CarePlanStatus fromCode(String codeString) throws FHIRException {
             if (codeString == null || "".equals(codeString))
                 return null;
-        if ("proposed".equals(codeString))
-          return PROPOSED;
         if ("draft".equals(codeString))
           return DRAFT;
         if ("active".equals(codeString))
@@ -95,7 +89,6 @@ public enum CarePlanStatus {
         }
         public String toCode() {
           switch (this) {
-            case PROPOSED: return "proposed";
             case DRAFT: return "draft";
             case ACTIVE: return "active";
             case SUSPENDED: return "suspended";
@@ -111,7 +104,6 @@ public enum CarePlanStatus {
         }
         public String getDefinition() {
           switch (this) {
-            case PROPOSED: return "The plan has been suggested but no commitment to it has yet been made.";
             case DRAFT: return "The plan is in development or awaiting use but is not yet intended to be acted upon.";
             case ACTIVE: return "The plan is intended to be followed and used as part of patient care.";
             case SUSPENDED: return "The plan has been temporarily stopped but is expected to resume in the future.";
@@ -124,7 +116,6 @@ public enum CarePlanStatus {
         }
         public String getDisplay() {
           switch (this) {
-            case PROPOSED: return "Proposed";
             case DRAFT: return "Pending";
             case ACTIVE: return "Active";
             case SUSPENDED: return "Suspended";

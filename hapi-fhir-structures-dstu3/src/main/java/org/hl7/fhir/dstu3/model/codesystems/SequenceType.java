@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -55,19 +55,19 @@ public enum SequenceType {
         public static SequenceType fromCode(String codeString) throws FHIRException {
             if (codeString == null || "".equals(codeString))
                 return null;
-        if ("AA".equals(codeString))
+        if ("aa".equals(codeString))
           return AA;
-        if ("DNA".equals(codeString))
+        if ("dna".equals(codeString))
           return DNA;
-        if ("RNA".equals(codeString))
+        if ("rna".equals(codeString))
           return RNA;
         throw new FHIRException("Unknown SequenceType code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
-            case AA: return "AA";
-            case DNA: return "DNA";
-            case RNA: return "RNA";
+            case AA: return "aa";
+            case DNA: return "dna";
+            case RNA: return "rna";
             default: return "?";
           }
         }

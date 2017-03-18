@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -101,6 +101,10 @@ public enum ServiceUscls {
          */
         _27211, 
         /**
+         * Maryland Bridge
+         */
+        _67211, 
+        /**
          * Lab, commercial
          */
         _99111, 
@@ -151,6 +155,8 @@ public enum ServiceUscls {
           return _21212;
         if ("27211".equals(codeString))
           return _27211;
+        if ("67211".equals(codeString))
+          return _67211;
         if ("99111".equals(codeString))
           return _99111;
         if ("99333".equals(codeString))
@@ -177,6 +183,7 @@ public enum ServiceUscls {
             case _21211: return "21211";
             case _21212: return "21212";
             case _27211: return "27211";
+            case _67211: return "67211";
             case _99111: return "99111";
             case _99333: return "99333";
             case _99555: return "99555";
@@ -204,6 +211,7 @@ public enum ServiceUscls {
             case _21211: return "Amalgam, 1 surface";
             case _21212: return "Amalgam, 2 surface";
             case _27211: return "Crown, PFM";
+            case _67211: return "Maryland Bridge";
             case _99111: return "Lab, commercial";
             case _99333: return "Lab, in office";
             case _99555: return "Expense";
@@ -228,6 +236,7 @@ public enum ServiceUscls {
             case _21211: return "Amalgam, 1 surface";
             case _21212: return "Amalgam, 2 surface";
             case _27211: return "Crown, PFM";
+            case _67211: return "Maryland Bridge";
             case _99111: return "Lab, commercial";
             case _99333: return "Lab, in office";
             case _99555: return "Expense";

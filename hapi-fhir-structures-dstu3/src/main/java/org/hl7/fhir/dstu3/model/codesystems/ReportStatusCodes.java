@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,17 +37,25 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum ReportStatusCodes {
 
         /**
-         * The TestReport is complete.
+         * All test operations have completed
          */
-        COMPLETE, 
+        COMPLETED, 
         /**
-         * The TestReport is pending.
+         * A test operations is currently executing
          */
-        PENDING, 
+        INPROGRESS, 
         /**
-         * The TestReport failed with an error.
+         * A test operation is waiting for an external client request
          */
-        ERROR, 
+        WAITING, 
+        /**
+         * The test script execution was manually stopped
+         */
+        STOPPED, 
+        /**
+         * This test report was entered or created in error
+         */
+        ENTEREDINERROR, 
         /**
          * added to help the parsers
          */
@@ -55,19 +63,25 @@ public enum ReportStatusCodes {
         public static ReportStatusCodes fromCode(String codeString) throws FHIRException {
             if (codeString == null || "".equals(codeString))
                 return null;
-        if ("complete".equals(codeString))
-          return COMPLETE;
-        if ("pending".equals(codeString))
-          return PENDING;
-        if ("error".equals(codeString))
-          return ERROR;
+        if ("completed".equals(codeString))
+          return COMPLETED;
+        if ("in-progress".equals(codeString))
+          return INPROGRESS;
+        if ("waiting".equals(codeString))
+          return WAITING;
+        if ("stopped".equals(codeString))
+          return STOPPED;
+        if ("entered-in-error".equals(codeString))
+          return ENTEREDINERROR;
         throw new FHIRException("Unknown ReportStatusCodes code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
-            case COMPLETE: return "complete";
-            case PENDING: return "pending";
-            case ERROR: return "error";
+            case COMPLETED: return "completed";
+            case INPROGRESS: return "in-progress";
+            case WAITING: return "waiting";
+            case STOPPED: return "stopped";
+            case ENTEREDINERROR: return "entered-in-error";
             default: return "?";
           }
         }
@@ -76,17 +90,21 @@ public enum ReportStatusCodes {
         }
         public String getDefinition() {
           switch (this) {
-            case COMPLETE: return "The TestReport is complete.";
-            case PENDING: return "The TestReport is pending.";
-            case ERROR: return "The TestReport failed with an error.";
+            case COMPLETED: return "All test operations have completed";
+            case INPROGRESS: return "A test operations is currently executing";
+            case WAITING: return "A test operation is waiting for an external client request";
+            case STOPPED: return "The test script execution was manually stopped";
+            case ENTEREDINERROR: return "This test report was entered or created in error";
             default: return "?";
           }
         }
         public String getDisplay() {
           switch (this) {
-            case COMPLETE: return "complete";
-            case PENDING: return "pending";
-            case ERROR: return "error";
+            case COMPLETED: return "Completed";
+            case INPROGRESS: return "In Progress";
+            case WAITING: return "Waiting";
+            case STOPPED: return "Stopped";
+            case ENTEREDINERROR: return "Entered In Error";
             default: return "?";
           }
     }

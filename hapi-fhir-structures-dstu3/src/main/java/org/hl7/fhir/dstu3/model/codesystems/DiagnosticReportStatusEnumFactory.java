@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
 
 
 import org.hl7.fhir.dstu3.model.EnumFactory;
@@ -43,8 +43,12 @@ public class DiagnosticReportStatusEnumFactory implements EnumFactory<Diagnostic
       return DiagnosticReportStatus.REGISTERED;
     if ("partial".equals(codeString))
       return DiagnosticReportStatus.PARTIAL;
+    if ("preliminary".equals(codeString))
+      return DiagnosticReportStatus.PRELIMINARY;
     if ("final".equals(codeString))
       return DiagnosticReportStatus.FINAL;
+    if ("amended".equals(codeString))
+      return DiagnosticReportStatus.AMENDED;
     if ("corrected".equals(codeString))
       return DiagnosticReportStatus.CORRECTED;
     if ("appended".equals(codeString))
@@ -53,6 +57,8 @@ public class DiagnosticReportStatusEnumFactory implements EnumFactory<Diagnostic
       return DiagnosticReportStatus.CANCELLED;
     if ("entered-in-error".equals(codeString))
       return DiagnosticReportStatus.ENTEREDINERROR;
+    if ("unknown".equals(codeString))
+      return DiagnosticReportStatus.UNKNOWN;
     throw new IllegalArgumentException("Unknown DiagnosticReportStatus code '"+codeString+"'");
   }
 
@@ -61,8 +67,12 @@ public class DiagnosticReportStatusEnumFactory implements EnumFactory<Diagnostic
       return "registered";
     if (code == DiagnosticReportStatus.PARTIAL)
       return "partial";
+    if (code == DiagnosticReportStatus.PRELIMINARY)
+      return "preliminary";
     if (code == DiagnosticReportStatus.FINAL)
       return "final";
+    if (code == DiagnosticReportStatus.AMENDED)
+      return "amended";
     if (code == DiagnosticReportStatus.CORRECTED)
       return "corrected";
     if (code == DiagnosticReportStatus.APPENDED)
@@ -71,6 +81,8 @@ public class DiagnosticReportStatusEnumFactory implements EnumFactory<Diagnostic
       return "cancelled";
     if (code == DiagnosticReportStatus.ENTEREDINERROR)
       return "entered-in-error";
+    if (code == DiagnosticReportStatus.UNKNOWN)
+      return "unknown";
     return "?";
   }
 

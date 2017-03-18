@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
 
 import java.util.*;
 
@@ -129,8 +129,10 @@ public class CapabilityStatement extends MetadataResource implements IBaseConfor
         throw new IllegalArgumentException("Unknown CapabilityStatementKind code '"+codeString+"'");
         }
         public Enumeration<CapabilityStatementKind> fromType(Base code) throws FHIRException {
-          if (code == null || code.isEmpty())
+          if (code == null)
             return null;
+          if (code.isEmpty())
+            return new Enumeration<CapabilityStatementKind>(this);
           String codeString = ((PrimitiveType) code).asStringValue();
           if (codeString == null || "".equals(codeString))
             return null;
@@ -247,8 +249,10 @@ public class CapabilityStatement extends MetadataResource implements IBaseConfor
         throw new IllegalArgumentException("Unknown UnknownContentCode code '"+codeString+"'");
         }
         public Enumeration<UnknownContentCode> fromType(Base code) throws FHIRException {
-          if (code == null || code.isEmpty())
+          if (code == null)
             return null;
+          if (code.isEmpty())
+            return new Enumeration<UnknownContentCode>(this);
           String codeString = ((PrimitiveType) code).asStringValue();
           if (codeString == null || "".equals(codeString))
             return null;
@@ -345,8 +349,10 @@ public class CapabilityStatement extends MetadataResource implements IBaseConfor
         throw new IllegalArgumentException("Unknown RestfulCapabilityMode code '"+codeString+"'");
         }
         public Enumeration<RestfulCapabilityMode> fromType(Base code) throws FHIRException {
-          if (code == null || code.isEmpty())
+          if (code == null)
             return null;
+          if (code.isEmpty())
+            return new Enumeration<RestfulCapabilityMode>(this);
           String codeString = ((PrimitiveType) code).asStringValue();
           if (codeString == null || "".equals(codeString))
             return null;
@@ -519,8 +525,10 @@ public class CapabilityStatement extends MetadataResource implements IBaseConfor
         throw new IllegalArgumentException("Unknown TypeRestfulInteraction code '"+codeString+"'");
         }
         public Enumeration<TypeRestfulInteraction> fromType(Base code) throws FHIRException {
-          if (code == null || code.isEmpty())
+          if (code == null)
             return null;
+          if (code.isEmpty())
+            return new Enumeration<TypeRestfulInteraction>(this);
           String codeString = ((PrimitiveType) code).asStringValue();
           if (codeString == null || "".equals(codeString))
             return null;
@@ -649,8 +657,10 @@ public class CapabilityStatement extends MetadataResource implements IBaseConfor
         throw new IllegalArgumentException("Unknown ResourceVersionPolicy code '"+codeString+"'");
         }
         public Enumeration<ResourceVersionPolicy> fromType(Base code) throws FHIRException {
-          if (code == null || code.isEmpty())
+          if (code == null)
             return null;
+          if (code.isEmpty())
+            return new Enumeration<ResourceVersionPolicy>(this);
           String codeString = ((PrimitiveType) code).asStringValue();
           if (codeString == null || "".equals(codeString))
             return null;
@@ -767,8 +777,10 @@ public class CapabilityStatement extends MetadataResource implements IBaseConfor
         throw new IllegalArgumentException("Unknown ConditionalReadStatus code '"+codeString+"'");
         }
         public Enumeration<ConditionalReadStatus> fromType(Base code) throws FHIRException {
-          if (code == null || code.isEmpty())
+          if (code == null)
             return null;
+          if (code.isEmpty())
+            return new Enumeration<ConditionalReadStatus>(this);
           String codeString = ((PrimitiveType) code).asStringValue();
           if (codeString == null || "".equals(codeString))
             return null;
@@ -877,8 +889,10 @@ public class CapabilityStatement extends MetadataResource implements IBaseConfor
         throw new IllegalArgumentException("Unknown ConditionalDeleteStatus code '"+codeString+"'");
         }
         public Enumeration<ConditionalDeleteStatus> fromType(Base code) throws FHIRException {
-          if (code == null || code.isEmpty())
+          if (code == null)
             return null;
+          if (code.isEmpty())
+            return new Enumeration<ConditionalDeleteStatus>(this);
           String codeString = ((PrimitiveType) code).asStringValue();
           if (codeString == null || "".equals(codeString))
             return null;
@@ -1007,8 +1021,10 @@ public class CapabilityStatement extends MetadataResource implements IBaseConfor
         throw new IllegalArgumentException("Unknown ReferenceHandlingPolicy code '"+codeString+"'");
         }
         public Enumeration<ReferenceHandlingPolicy> fromType(Base code) throws FHIRException {
-          if (code == null || code.isEmpty())
+          if (code == null)
             return null;
+          if (code.isEmpty())
+            return new Enumeration<ReferenceHandlingPolicy>(this);
           String codeString = ((PrimitiveType) code).asStringValue();
           if (codeString == null || "".equals(codeString))
             return null;
@@ -1133,8 +1149,10 @@ public class CapabilityStatement extends MetadataResource implements IBaseConfor
         throw new IllegalArgumentException("Unknown SystemRestfulInteraction code '"+codeString+"'");
         }
         public Enumeration<SystemRestfulInteraction> fromType(Base code) throws FHIRException {
-          if (code == null || code.isEmpty())
+          if (code == null)
             return null;
+          if (code.isEmpty())
+            return new Enumeration<SystemRestfulInteraction>(this);
           String codeString = ((PrimitiveType) code).asStringValue();
           if (codeString == null || "".equals(codeString))
             return null;
@@ -1160,6 +1178,98 @@ public class CapabilityStatement extends MetadataResource implements IBaseConfor
       return "?";
       }
     public String toSystem(SystemRestfulInteraction code) {
+      return code.getSystem();
+      }
+    }
+
+    public enum EventCapabilityMode {
+        /**
+         * The application sends requests and receives responses.
+         */
+        SENDER, 
+        /**
+         * The application receives requests and sends responses.
+         */
+        RECEIVER, 
+        /**
+         * added to help the parsers with the generic types
+         */
+        NULL;
+        public static EventCapabilityMode fromCode(String codeString) throws FHIRException {
+            if (codeString == null || "".equals(codeString))
+                return null;
+        if ("sender".equals(codeString))
+          return SENDER;
+        if ("receiver".equals(codeString))
+          return RECEIVER;
+        if (Configuration.isAcceptInvalidEnums())
+          return null;
+        else
+          throw new FHIRException("Unknown EventCapabilityMode code '"+codeString+"'");
+        }
+        public String toCode() {
+          switch (this) {
+            case SENDER: return "sender";
+            case RECEIVER: return "receiver";
+            default: return "?";
+          }
+        }
+        public String getSystem() {
+          switch (this) {
+            case SENDER: return "http://hl7.org/fhir/event-capability-mode";
+            case RECEIVER: return "http://hl7.org/fhir/event-capability-mode";
+            default: return "?";
+          }
+        }
+        public String getDefinition() {
+          switch (this) {
+            case SENDER: return "The application sends requests and receives responses.";
+            case RECEIVER: return "The application receives requests and sends responses.";
+            default: return "?";
+          }
+        }
+        public String getDisplay() {
+          switch (this) {
+            case SENDER: return "Sender";
+            case RECEIVER: return "Receiver";
+            default: return "?";
+          }
+        }
+    }
+
+  public static class EventCapabilityModeEnumFactory implements EnumFactory<EventCapabilityMode> {
+    public EventCapabilityMode fromCode(String codeString) throws IllegalArgumentException {
+      if (codeString == null || "".equals(codeString))
+            if (codeString == null || "".equals(codeString))
+                return null;
+        if ("sender".equals(codeString))
+          return EventCapabilityMode.SENDER;
+        if ("receiver".equals(codeString))
+          return EventCapabilityMode.RECEIVER;
+        throw new IllegalArgumentException("Unknown EventCapabilityMode code '"+codeString+"'");
+        }
+        public Enumeration<EventCapabilityMode> fromType(Base code) throws FHIRException {
+          if (code == null)
+            return null;
+          if (code.isEmpty())
+            return new Enumeration<EventCapabilityMode>(this);
+          String codeString = ((PrimitiveType) code).asStringValue();
+          if (codeString == null || "".equals(codeString))
+            return null;
+        if ("sender".equals(codeString))
+          return new Enumeration<EventCapabilityMode>(this, EventCapabilityMode.SENDER);
+        if ("receiver".equals(codeString))
+          return new Enumeration<EventCapabilityMode>(this, EventCapabilityMode.RECEIVER);
+        throw new FHIRException("Unknown EventCapabilityMode code '"+codeString+"'");
+        }
+    public String toCode(EventCapabilityMode code) {
+      if (code == EventCapabilityMode.SENDER)
+        return "sender";
+      if (code == EventCapabilityMode.RECEIVER)
+        return "receiver";
+      return "?";
+      }
+    public String toSystem(EventCapabilityMode code) {
       return code.getSystem();
       }
     }
@@ -1243,8 +1353,10 @@ public class CapabilityStatement extends MetadataResource implements IBaseConfor
         throw new IllegalArgumentException("Unknown MessageSignificanceCategory code '"+codeString+"'");
         }
         public Enumeration<MessageSignificanceCategory> fromType(Base code) throws FHIRException {
-          if (code == null || code.isEmpty())
+          if (code == null)
             return null;
+          if (code.isEmpty())
+            return new Enumeration<MessageSignificanceCategory>(this);
           String codeString = ((PrimitiveType) code).asStringValue();
           if (codeString == null || "".equals(codeString))
             return null;
@@ -1266,96 +1378,6 @@ public class CapabilityStatement extends MetadataResource implements IBaseConfor
       return "?";
       }
     public String toSystem(MessageSignificanceCategory code) {
-      return code.getSystem();
-      }
-    }
-
-    public enum EventCapabilityMode {
-        /**
-         * The application sends requests and receives responses.
-         */
-        SENDER, 
-        /**
-         * The application receives requests and sends responses.
-         */
-        RECEIVER, 
-        /**
-         * added to help the parsers with the generic types
-         */
-        NULL;
-        public static EventCapabilityMode fromCode(String codeString) throws FHIRException {
-            if (codeString == null || "".equals(codeString))
-                return null;
-        if ("sender".equals(codeString))
-          return SENDER;
-        if ("receiver".equals(codeString))
-          return RECEIVER;
-        if (Configuration.isAcceptInvalidEnums())
-          return null;
-        else
-          throw new FHIRException("Unknown EventCapabilityMode code '"+codeString+"'");
-        }
-        public String toCode() {
-          switch (this) {
-            case SENDER: return "sender";
-            case RECEIVER: return "receiver";
-            default: return "?";
-          }
-        }
-        public String getSystem() {
-          switch (this) {
-            case SENDER: return "http://hl7.org/fhir/event-capability-mode";
-            case RECEIVER: return "http://hl7.org/fhir/event-capability-mode";
-            default: return "?";
-          }
-        }
-        public String getDefinition() {
-          switch (this) {
-            case SENDER: return "The application sends requests and receives responses.";
-            case RECEIVER: return "The application receives requests and sends responses.";
-            default: return "?";
-          }
-        }
-        public String getDisplay() {
-          switch (this) {
-            case SENDER: return "Sender";
-            case RECEIVER: return "Receiver";
-            default: return "?";
-          }
-        }
-    }
-
-  public static class EventCapabilityModeEnumFactory implements EnumFactory<EventCapabilityMode> {
-    public EventCapabilityMode fromCode(String codeString) throws IllegalArgumentException {
-      if (codeString == null || "".equals(codeString))
-            if (codeString == null || "".equals(codeString))
-                return null;
-        if ("sender".equals(codeString))
-          return EventCapabilityMode.SENDER;
-        if ("receiver".equals(codeString))
-          return EventCapabilityMode.RECEIVER;
-        throw new IllegalArgumentException("Unknown EventCapabilityMode code '"+codeString+"'");
-        }
-        public Enumeration<EventCapabilityMode> fromType(Base code) throws FHIRException {
-          if (code == null || code.isEmpty())
-            return null;
-          String codeString = ((PrimitiveType) code).asStringValue();
-          if (codeString == null || "".equals(codeString))
-            return null;
-        if ("sender".equals(codeString))
-          return new Enumeration<EventCapabilityMode>(this, EventCapabilityMode.SENDER);
-        if ("receiver".equals(codeString))
-          return new Enumeration<EventCapabilityMode>(this, EventCapabilityMode.RECEIVER);
-        throw new FHIRException("Unknown EventCapabilityMode code '"+codeString+"'");
-        }
-    public String toCode(EventCapabilityMode code) {
-      if (code == EventCapabilityMode.SENDER)
-        return "sender";
-      if (code == EventCapabilityMode.RECEIVER)
-        return "receiver";
-      return "?";
-      }
-    public String toSystem(EventCapabilityMode code) {
       return code.getSystem();
       }
     }
@@ -1427,8 +1449,10 @@ public class CapabilityStatement extends MetadataResource implements IBaseConfor
         throw new IllegalArgumentException("Unknown DocumentMode code '"+codeString+"'");
         }
         public Enumeration<DocumentMode> fromType(Base code) throws FHIRException {
-          if (code == null || code.isEmpty())
+          if (code == null)
             return null;
+          if (code.isEmpty())
+            return new Enumeration<DocumentMode>(this);
           String codeString = ((PrimitiveType) code).asStringValue();
           if (codeString == null || "".equals(codeString))
             return null;
@@ -1652,41 +1676,53 @@ public class CapabilityStatement extends MetadataResource implements IBaseConfor
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case 3373707: // name
           this.name = castToString(value); // StringType
-          break;
+          return value;
         case 351608024: // version
           this.version = castToString(value); // StringType
-          break;
+          return value;
         case 212873301: // releaseDate
           this.releaseDate = castToDateTime(value); // DateTimeType
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("name"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("name")) {
           this.name = castToString(value); // StringType
-        else if (name.equals("version"))
+        } else if (name.equals("version")) {
           this.version = castToString(value); // StringType
-        else if (name.equals("releaseDate"))
+        } else if (name.equals("releaseDate")) {
           this.releaseDate = castToDateTime(value); // DateTimeType
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 3373707: throw new FHIRException("Cannot make property name as it is not a complex type"); // StringType
-        case 351608024: throw new FHIRException("Cannot make property version as it is not a complex type"); // StringType
-        case 212873301: throw new FHIRException("Cannot make property releaseDate as it is not a complex type"); // DateTimeType
+        case 3373707:  return getNameElement();
+        case 351608024:  return getVersionElement();
+        case 212873301:  return getReleaseDateElement();
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3373707: /*name*/ return new String[] {"string"};
+        case 351608024: /*version*/ return new String[] {"string"};
+        case 212873301: /*releaseDate*/ return new String[] {"dateTime"};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }
@@ -1893,35 +1929,46 @@ public class CapabilityStatement extends MetadataResource implements IBaseConfor
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case -1724546052: // description
           this.description = castToString(value); // StringType
-          break;
+          return value;
         case 116079: // url
           this.url = castToUri(value); // UriType
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("description"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("description")) {
           this.description = castToString(value); // StringType
-        else if (name.equals("url"))
+        } else if (name.equals("url")) {
           this.url = castToUri(value); // UriType
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case -1724546052: throw new FHIRException("Cannot make property description as it is not a complex type"); // StringType
-        case 116079: throw new FHIRException("Cannot make property url as it is not a complex type"); // UriType
+        case -1724546052:  return getDescriptionElement();
+        case 116079:  return getUrlElement();
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -1724546052: /*description*/ return new String[] {"string"};
+        case 116079: /*url*/ return new String[] {"uri"};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }
@@ -2473,71 +2520,90 @@ public class CapabilityStatement extends MetadataResource implements IBaseConfor
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case 3357091: // mode
-          this.mode = new RestfulCapabilityModeEnumFactory().fromType(value); // Enumeration<RestfulCapabilityMode>
-          break;
+          value = new RestfulCapabilityModeEnumFactory().fromType(castToCode(value));
+          this.mode = (Enumeration) value; // Enumeration<RestfulCapabilityMode>
+          return value;
         case 1587405498: // documentation
           this.documentation = castToString(value); // StringType
-          break;
+          return value;
         case 949122880: // security
           this.security = (CapabilityStatementRestSecurityComponent) value; // CapabilityStatementRestSecurityComponent
-          break;
+          return value;
         case -341064690: // resource
           this.getResource().add((CapabilityStatementRestResourceComponent) value); // CapabilityStatementRestResourceComponent
-          break;
+          return value;
         case 1844104722: // interaction
           this.getInteraction().add((SystemInteractionComponent) value); // SystemInteractionComponent
-          break;
+          return value;
         case -553645115: // searchParam
           this.getSearchParam().add((CapabilityStatementRestResourceSearchParamComponent) value); // CapabilityStatementRestResourceSearchParamComponent
-          break;
+          return value;
         case 1662702951: // operation
           this.getOperation().add((CapabilityStatementRestOperationComponent) value); // CapabilityStatementRestOperationComponent
-          break;
+          return value;
         case -397756334: // compartment
           this.getCompartment().add(castToUri(value)); // UriType
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("mode"))
-          this.mode = new RestfulCapabilityModeEnumFactory().fromType(value); // Enumeration<RestfulCapabilityMode>
-        else if (name.equals("documentation"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("mode")) {
+          value = new RestfulCapabilityModeEnumFactory().fromType(castToCode(value));
+          this.mode = (Enumeration) value; // Enumeration<RestfulCapabilityMode>
+        } else if (name.equals("documentation")) {
           this.documentation = castToString(value); // StringType
-        else if (name.equals("security"))
+        } else if (name.equals("security")) {
           this.security = (CapabilityStatementRestSecurityComponent) value; // CapabilityStatementRestSecurityComponent
-        else if (name.equals("resource"))
+        } else if (name.equals("resource")) {
           this.getResource().add((CapabilityStatementRestResourceComponent) value);
-        else if (name.equals("interaction"))
+        } else if (name.equals("interaction")) {
           this.getInteraction().add((SystemInteractionComponent) value);
-        else if (name.equals("searchParam"))
+        } else if (name.equals("searchParam")) {
           this.getSearchParam().add((CapabilityStatementRestResourceSearchParamComponent) value);
-        else if (name.equals("operation"))
+        } else if (name.equals("operation")) {
           this.getOperation().add((CapabilityStatementRestOperationComponent) value);
-        else if (name.equals("compartment"))
+        } else if (name.equals("compartment")) {
           this.getCompartment().add(castToUri(value));
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 3357091: throw new FHIRException("Cannot make property mode as it is not a complex type"); // Enumeration<RestfulCapabilityMode>
-        case 1587405498: throw new FHIRException("Cannot make property documentation as it is not a complex type"); // StringType
-        case 949122880:  return getSecurity(); // CapabilityStatementRestSecurityComponent
-        case -341064690:  return addResource(); // CapabilityStatementRestResourceComponent
-        case 1844104722:  return addInteraction(); // SystemInteractionComponent
-        case -553645115:  return addSearchParam(); // CapabilityStatementRestResourceSearchParamComponent
-        case 1662702951:  return addOperation(); // CapabilityStatementRestOperationComponent
-        case -397756334: throw new FHIRException("Cannot make property compartment as it is not a complex type"); // UriType
+        case 3357091:  return getModeElement();
+        case 1587405498:  return getDocumentationElement();
+        case 949122880:  return getSecurity(); 
+        case -341064690:  return addResource(); 
+        case 1844104722:  return addInteraction(); 
+        case -553645115:  return addSearchParam(); 
+        case 1662702951:  return addOperation(); 
+        case -397756334:  return addCompartmentElement();
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3357091: /*mode*/ return new String[] {"code"};
+        case 1587405498: /*documentation*/ return new String[] {"string"};
+        case 949122880: /*security*/ return new String[] {};
+        case -341064690: /*resource*/ return new String[] {};
+        case 1844104722: /*interaction*/ return new String[] {};
+        case -553645115: /*searchParam*/ return new String[] {"@CapabilityStatement.rest.resource.searchParam"};
+        case 1662702951: /*operation*/ return new String[] {};
+        case -397756334: /*compartment*/ return new String[] {"uri"};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }
@@ -2903,47 +2969,60 @@ public class CapabilityStatement extends MetadataResource implements IBaseConfor
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case 3059629: // cors
           this.cors = castToBoolean(value); // BooleanType
-          break;
+          return value;
         case 1984153269: // service
           this.getService().add(castToCodeableConcept(value)); // CodeableConcept
-          break;
+          return value;
         case -1724546052: // description
           this.description = castToString(value); // StringType
-          break;
+          return value;
         case 1952399767: // certificate
           this.getCertificate().add((CapabilityStatementRestSecurityCertificateComponent) value); // CapabilityStatementRestSecurityCertificateComponent
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("cors"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("cors")) {
           this.cors = castToBoolean(value); // BooleanType
-        else if (name.equals("service"))
+        } else if (name.equals("service")) {
           this.getService().add(castToCodeableConcept(value));
-        else if (name.equals("description"))
+        } else if (name.equals("description")) {
           this.description = castToString(value); // StringType
-        else if (name.equals("certificate"))
+        } else if (name.equals("certificate")) {
           this.getCertificate().add((CapabilityStatementRestSecurityCertificateComponent) value);
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 3059629: throw new FHIRException("Cannot make property cors as it is not a complex type"); // BooleanType
-        case 1984153269:  return addService(); // CodeableConcept
-        case -1724546052: throw new FHIRException("Cannot make property description as it is not a complex type"); // StringType
-        case 1952399767:  return addCertificate(); // CapabilityStatementRestSecurityCertificateComponent
+        case 3059629:  return getCorsElement();
+        case 1984153269:  return addService(); 
+        case -1724546052:  return getDescriptionElement();
+        case 1952399767:  return addCertificate(); 
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3059629: /*cors*/ return new String[] {"boolean"};
+        case 1984153269: /*service*/ return new String[] {"CodeableConcept"};
+        case -1724546052: /*description*/ return new String[] {"string"};
+        case 1952399767: /*certificate*/ return new String[] {};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }
@@ -3157,35 +3236,46 @@ public class CapabilityStatement extends MetadataResource implements IBaseConfor
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case 3575610: // type
           this.type = castToCode(value); // CodeType
-          break;
+          return value;
         case 3026845: // blob
           this.blob = castToBase64Binary(value); // Base64BinaryType
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("type"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("type")) {
           this.type = castToCode(value); // CodeType
-        else if (name.equals("blob"))
+        } else if (name.equals("blob")) {
           this.blob = castToBase64Binary(value); // Base64BinaryType
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 3575610: throw new FHIRException("Cannot make property type as it is not a complex type"); // CodeType
-        case 3026845: throw new FHIRException("Cannot make property blob as it is not a complex type"); // Base64BinaryType
+        case 3575610:  return getTypeElement();
+        case 3026845:  return getBlobElement();
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3575610: /*type*/ return new String[] {"code"};
+        case 3026845: /*blob*/ return new String[] {"base64Binary"};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }
@@ -4172,113 +4262,145 @@ public class CapabilityStatement extends MetadataResource implements IBaseConfor
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case 3575610: // type
           this.type = castToCode(value); // CodeType
-          break;
+          return value;
         case -309425751: // profile
           this.profile = castToReference(value); // Reference
-          break;
+          return value;
         case 1587405498: // documentation
           this.documentation = castToMarkdown(value); // MarkdownType
-          break;
+          return value;
         case 1844104722: // interaction
           this.getInteraction().add((ResourceInteractionComponent) value); // ResourceInteractionComponent
-          break;
+          return value;
         case -670487542: // versioning
-          this.versioning = new ResourceVersionPolicyEnumFactory().fromType(value); // Enumeration<ResourceVersionPolicy>
-          break;
+          value = new ResourceVersionPolicyEnumFactory().fromType(castToCode(value));
+          this.versioning = (Enumeration) value; // Enumeration<ResourceVersionPolicy>
+          return value;
         case 187518494: // readHistory
           this.readHistory = castToBoolean(value); // BooleanType
-          break;
+          return value;
         case -1400550619: // updateCreate
           this.updateCreate = castToBoolean(value); // BooleanType
-          break;
+          return value;
         case 6401826: // conditionalCreate
           this.conditionalCreate = castToBoolean(value); // BooleanType
-          break;
+          return value;
         case 822786364: // conditionalRead
-          this.conditionalRead = new ConditionalReadStatusEnumFactory().fromType(value); // Enumeration<ConditionalReadStatus>
-          break;
+          value = new ConditionalReadStatusEnumFactory().fromType(castToCode(value));
+          this.conditionalRead = (Enumeration) value; // Enumeration<ConditionalReadStatus>
+          return value;
         case 519849711: // conditionalUpdate
           this.conditionalUpdate = castToBoolean(value); // BooleanType
-          break;
+          return value;
         case 23237585: // conditionalDelete
-          this.conditionalDelete = new ConditionalDeleteStatusEnumFactory().fromType(value); // Enumeration<ConditionalDeleteStatus>
-          break;
+          value = new ConditionalDeleteStatusEnumFactory().fromType(castToCode(value));
+          this.conditionalDelete = (Enumeration) value; // Enumeration<ConditionalDeleteStatus>
+          return value;
         case 796257373: // referencePolicy
-          this.getReferencePolicy().add(new ReferenceHandlingPolicyEnumFactory().fromType(value)); // Enumeration<ReferenceHandlingPolicy>
-          break;
+          value = new ReferenceHandlingPolicyEnumFactory().fromType(castToCode(value));
+          this.getReferencePolicy().add((Enumeration) value); // Enumeration<ReferenceHandlingPolicy>
+          return value;
         case -1035904544: // searchInclude
           this.getSearchInclude().add(castToString(value)); // StringType
-          break;
+          return value;
         case -2123884979: // searchRevInclude
           this.getSearchRevInclude().add(castToString(value)); // StringType
-          break;
+          return value;
         case -553645115: // searchParam
           this.getSearchParam().add((CapabilityStatementRestResourceSearchParamComponent) value); // CapabilityStatementRestResourceSearchParamComponent
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("type"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("type")) {
           this.type = castToCode(value); // CodeType
-        else if (name.equals("profile"))
+        } else if (name.equals("profile")) {
           this.profile = castToReference(value); // Reference
-        else if (name.equals("documentation"))
+        } else if (name.equals("documentation")) {
           this.documentation = castToMarkdown(value); // MarkdownType
-        else if (name.equals("interaction"))
+        } else if (name.equals("interaction")) {
           this.getInteraction().add((ResourceInteractionComponent) value);
-        else if (name.equals("versioning"))
-          this.versioning = new ResourceVersionPolicyEnumFactory().fromType(value); // Enumeration<ResourceVersionPolicy>
-        else if (name.equals("readHistory"))
+        } else if (name.equals("versioning")) {
+          value = new ResourceVersionPolicyEnumFactory().fromType(castToCode(value));
+          this.versioning = (Enumeration) value; // Enumeration<ResourceVersionPolicy>
+        } else if (name.equals("readHistory")) {
           this.readHistory = castToBoolean(value); // BooleanType
-        else if (name.equals("updateCreate"))
+        } else if (name.equals("updateCreate")) {
           this.updateCreate = castToBoolean(value); // BooleanType
-        else if (name.equals("conditionalCreate"))
+        } else if (name.equals("conditionalCreate")) {
           this.conditionalCreate = castToBoolean(value); // BooleanType
-        else if (name.equals("conditionalRead"))
-          this.conditionalRead = new ConditionalReadStatusEnumFactory().fromType(value); // Enumeration<ConditionalReadStatus>
-        else if (name.equals("conditionalUpdate"))
+        } else if (name.equals("conditionalRead")) {
+          value = new ConditionalReadStatusEnumFactory().fromType(castToCode(value));
+          this.conditionalRead = (Enumeration) value; // Enumeration<ConditionalReadStatus>
+        } else if (name.equals("conditionalUpdate")) {
           this.conditionalUpdate = castToBoolean(value); // BooleanType
-        else if (name.equals("conditionalDelete"))
-          this.conditionalDelete = new ConditionalDeleteStatusEnumFactory().fromType(value); // Enumeration<ConditionalDeleteStatus>
-        else if (name.equals("referencePolicy"))
-          this.getReferencePolicy().add(new ReferenceHandlingPolicyEnumFactory().fromType(value));
-        else if (name.equals("searchInclude"))
+        } else if (name.equals("conditionalDelete")) {
+          value = new ConditionalDeleteStatusEnumFactory().fromType(castToCode(value));
+          this.conditionalDelete = (Enumeration) value; // Enumeration<ConditionalDeleteStatus>
+        } else if (name.equals("referencePolicy")) {
+          value = new ReferenceHandlingPolicyEnumFactory().fromType(castToCode(value));
+          this.getReferencePolicy().add((Enumeration) value);
+        } else if (name.equals("searchInclude")) {
           this.getSearchInclude().add(castToString(value));
-        else if (name.equals("searchRevInclude"))
+        } else if (name.equals("searchRevInclude")) {
           this.getSearchRevInclude().add(castToString(value));
-        else if (name.equals("searchParam"))
+        } else if (name.equals("searchParam")) {
           this.getSearchParam().add((CapabilityStatementRestResourceSearchParamComponent) value);
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 3575610: throw new FHIRException("Cannot make property type as it is not a complex type"); // CodeType
-        case -309425751:  return getProfile(); // Reference
-        case 1587405498: throw new FHIRException("Cannot make property documentation as it is not a complex type"); // MarkdownType
-        case 1844104722:  return addInteraction(); // ResourceInteractionComponent
-        case -670487542: throw new FHIRException("Cannot make property versioning as it is not a complex type"); // Enumeration<ResourceVersionPolicy>
-        case 187518494: throw new FHIRException("Cannot make property readHistory as it is not a complex type"); // BooleanType
-        case -1400550619: throw new FHIRException("Cannot make property updateCreate as it is not a complex type"); // BooleanType
-        case 6401826: throw new FHIRException("Cannot make property conditionalCreate as it is not a complex type"); // BooleanType
-        case 822786364: throw new FHIRException("Cannot make property conditionalRead as it is not a complex type"); // Enumeration<ConditionalReadStatus>
-        case 519849711: throw new FHIRException("Cannot make property conditionalUpdate as it is not a complex type"); // BooleanType
-        case 23237585: throw new FHIRException("Cannot make property conditionalDelete as it is not a complex type"); // Enumeration<ConditionalDeleteStatus>
-        case 796257373: throw new FHIRException("Cannot make property referencePolicy as it is not a complex type"); // Enumeration<ReferenceHandlingPolicy>
-        case -1035904544: throw new FHIRException("Cannot make property searchInclude as it is not a complex type"); // StringType
-        case -2123884979: throw new FHIRException("Cannot make property searchRevInclude as it is not a complex type"); // StringType
-        case -553645115:  return addSearchParam(); // CapabilityStatementRestResourceSearchParamComponent
+        case 3575610:  return getTypeElement();
+        case -309425751:  return getProfile(); 
+        case 1587405498:  return getDocumentationElement();
+        case 1844104722:  return addInteraction(); 
+        case -670487542:  return getVersioningElement();
+        case 187518494:  return getReadHistoryElement();
+        case -1400550619:  return getUpdateCreateElement();
+        case 6401826:  return getConditionalCreateElement();
+        case 822786364:  return getConditionalReadElement();
+        case 519849711:  return getConditionalUpdateElement();
+        case 23237585:  return getConditionalDeleteElement();
+        case 796257373:  return addReferencePolicyElement();
+        case -1035904544:  return addSearchIncludeElement();
+        case -2123884979:  return addSearchRevIncludeElement();
+        case -553645115:  return addSearchParam(); 
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3575610: /*type*/ return new String[] {"code"};
+        case -309425751: /*profile*/ return new String[] {"Reference"};
+        case 1587405498: /*documentation*/ return new String[] {"markdown"};
+        case 1844104722: /*interaction*/ return new String[] {};
+        case -670487542: /*versioning*/ return new String[] {"code"};
+        case 187518494: /*readHistory*/ return new String[] {"boolean"};
+        case -1400550619: /*updateCreate*/ return new String[] {"boolean"};
+        case 6401826: /*conditionalCreate*/ return new String[] {"boolean"};
+        case 822786364: /*conditionalRead*/ return new String[] {"code"};
+        case 519849711: /*conditionalUpdate*/ return new String[] {"boolean"};
+        case 23237585: /*conditionalDelete*/ return new String[] {"code"};
+        case 796257373: /*referencePolicy*/ return new String[] {"code"};
+        case -1035904544: /*searchInclude*/ return new String[] {"string"};
+        case -2123884979: /*searchRevInclude*/ return new String[] {"string"};
+        case -553645115: /*searchParam*/ return new String[] {};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }
@@ -4567,35 +4689,48 @@ public class CapabilityStatement extends MetadataResource implements IBaseConfor
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case 3059181: // code
-          this.code = new TypeRestfulInteractionEnumFactory().fromType(value); // Enumeration<TypeRestfulInteraction>
-          break;
+          value = new TypeRestfulInteractionEnumFactory().fromType(castToCode(value));
+          this.code = (Enumeration) value; // Enumeration<TypeRestfulInteraction>
+          return value;
         case 1587405498: // documentation
           this.documentation = castToString(value); // StringType
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("code"))
-          this.code = new TypeRestfulInteractionEnumFactory().fromType(value); // Enumeration<TypeRestfulInteraction>
-        else if (name.equals("documentation"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("code")) {
+          value = new TypeRestfulInteractionEnumFactory().fromType(castToCode(value));
+          this.code = (Enumeration) value; // Enumeration<TypeRestfulInteraction>
+        } else if (name.equals("documentation")) {
           this.documentation = castToString(value); // StringType
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 3059181: throw new FHIRException("Cannot make property code as it is not a complex type"); // Enumeration<TypeRestfulInteraction>
-        case 1587405498: throw new FHIRException("Cannot make property documentation as it is not a complex type"); // StringType
+        case 3059181:  return getCodeElement();
+        case 1587405498:  return getDocumentationElement();
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3059181: /*code*/ return new String[] {"code"};
+        case 1587405498: /*documentation*/ return new String[] {"string"};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }
@@ -4909,47 +5044,62 @@ public class CapabilityStatement extends MetadataResource implements IBaseConfor
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case 3373707: // name
           this.name = castToString(value); // StringType
-          break;
+          return value;
         case -1014418093: // definition
           this.definition = castToUri(value); // UriType
-          break;
+          return value;
         case 3575610: // type
-          this.type = new SearchParamTypeEnumFactory().fromType(value); // Enumeration<SearchParamType>
-          break;
+          value = new SearchParamTypeEnumFactory().fromType(castToCode(value));
+          this.type = (Enumeration) value; // Enumeration<SearchParamType>
+          return value;
         case 1587405498: // documentation
           this.documentation = castToString(value); // StringType
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("name"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("name")) {
           this.name = castToString(value); // StringType
-        else if (name.equals("definition"))
+        } else if (name.equals("definition")) {
           this.definition = castToUri(value); // UriType
-        else if (name.equals("type"))
-          this.type = new SearchParamTypeEnumFactory().fromType(value); // Enumeration<SearchParamType>
-        else if (name.equals("documentation"))
+        } else if (name.equals("type")) {
+          value = new SearchParamTypeEnumFactory().fromType(castToCode(value));
+          this.type = (Enumeration) value; // Enumeration<SearchParamType>
+        } else if (name.equals("documentation")) {
           this.documentation = castToString(value); // StringType
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 3373707: throw new FHIRException("Cannot make property name as it is not a complex type"); // StringType
-        case -1014418093: throw new FHIRException("Cannot make property definition as it is not a complex type"); // UriType
-        case 3575610: throw new FHIRException("Cannot make property type as it is not a complex type"); // Enumeration<SearchParamType>
-        case 1587405498: throw new FHIRException("Cannot make property documentation as it is not a complex type"); // StringType
+        case 3373707:  return getNameElement();
+        case -1014418093:  return getDefinitionElement();
+        case 3575610:  return getTypeElement();
+        case 1587405498:  return getDocumentationElement();
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3373707: /*name*/ return new String[] {"string"};
+        case -1014418093: /*definition*/ return new String[] {"uri"};
+        case 3575610: /*type*/ return new String[] {"code"};
+        case 1587405498: /*documentation*/ return new String[] {"string"};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }
@@ -5161,35 +5311,48 @@ public class CapabilityStatement extends MetadataResource implements IBaseConfor
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case 3059181: // code
-          this.code = new SystemRestfulInteractionEnumFactory().fromType(value); // Enumeration<SystemRestfulInteraction>
-          break;
+          value = new SystemRestfulInteractionEnumFactory().fromType(castToCode(value));
+          this.code = (Enumeration) value; // Enumeration<SystemRestfulInteraction>
+          return value;
         case 1587405498: // documentation
           this.documentation = castToString(value); // StringType
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("code"))
-          this.code = new SystemRestfulInteractionEnumFactory().fromType(value); // Enumeration<SystemRestfulInteraction>
-        else if (name.equals("documentation"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("code")) {
+          value = new SystemRestfulInteractionEnumFactory().fromType(castToCode(value));
+          this.code = (Enumeration) value; // Enumeration<SystemRestfulInteraction>
+        } else if (name.equals("documentation")) {
           this.documentation = castToString(value); // StringType
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 3059181: throw new FHIRException("Cannot make property code as it is not a complex type"); // Enumeration<SystemRestfulInteraction>
-        case 1587405498: throw new FHIRException("Cannot make property documentation as it is not a complex type"); // StringType
+        case 3059181:  return getCodeElement();
+        case 1587405498:  return getDocumentationElement();
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3059181: /*code*/ return new String[] {"code"};
+        case 1587405498: /*documentation*/ return new String[] {"string"};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }
@@ -5390,35 +5553,46 @@ public class CapabilityStatement extends MetadataResource implements IBaseConfor
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case 3373707: // name
           this.name = castToString(value); // StringType
-          break;
+          return value;
         case -1014418093: // definition
           this.definition = castToReference(value); // Reference
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("name"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("name")) {
           this.name = castToString(value); // StringType
-        else if (name.equals("definition"))
+        } else if (name.equals("definition")) {
           this.definition = castToReference(value); // Reference
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 3373707: throw new FHIRException("Cannot make property name as it is not a complex type"); // StringType
-        case -1014418093:  return getDefinition(); // Reference
+        case 3373707:  return getNameElement();
+        case -1014418093:  return getDefinition(); 
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3373707: /*name*/ return new String[] {"string"};
+        case -1014418093: /*definition*/ return new String[] {"Reference"};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }
@@ -5499,13 +5673,20 @@ public class CapabilityStatement extends MetadataResource implements IBaseConfor
         protected StringType documentation;
 
         /**
+         * References to message definitions for messages this system can send or receive.
+         */
+        @Child(name = "supportedMessage", type = {}, order=4, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+        @Description(shortDefinition="Messages supported by this system", formalDefinition="References to message definitions for messages this system can send or receive." )
+        protected List<CapabilityStatementMessagingSupportedMessageComponent> supportedMessage;
+
+        /**
          * A description of the solution's support for an event at this end-point.
          */
-        @Child(name = "event", type = {}, order=4, min=1, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+        @Child(name = "event", type = {}, order=5, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
         @Description(shortDefinition="Declare support for this event", formalDefinition="A description of the solution's support for an event at this end-point." )
         protected List<CapabilityStatementMessagingEventComponent> event;
 
-        private static final long serialVersionUID = -1337173493L;
+        private static final long serialVersionUID = 816243355L;
 
     /**
      * Constructor
@@ -5662,6 +5843,59 @@ public class CapabilityStatement extends MetadataResource implements IBaseConfor
         }
 
         /**
+         * @return {@link #supportedMessage} (References to message definitions for messages this system can send or receive.)
+         */
+        public List<CapabilityStatementMessagingSupportedMessageComponent> getSupportedMessage() { 
+          if (this.supportedMessage == null)
+            this.supportedMessage = new ArrayList<CapabilityStatementMessagingSupportedMessageComponent>();
+          return this.supportedMessage;
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public CapabilityStatementMessagingComponent setSupportedMessage(List<CapabilityStatementMessagingSupportedMessageComponent> theSupportedMessage) { 
+          this.supportedMessage = theSupportedMessage;
+          return this;
+        }
+
+        public boolean hasSupportedMessage() { 
+          if (this.supportedMessage == null)
+            return false;
+          for (CapabilityStatementMessagingSupportedMessageComponent item : this.supportedMessage)
+            if (!item.isEmpty())
+              return true;
+          return false;
+        }
+
+        public CapabilityStatementMessagingSupportedMessageComponent addSupportedMessage() { //3
+          CapabilityStatementMessagingSupportedMessageComponent t = new CapabilityStatementMessagingSupportedMessageComponent();
+          if (this.supportedMessage == null)
+            this.supportedMessage = new ArrayList<CapabilityStatementMessagingSupportedMessageComponent>();
+          this.supportedMessage.add(t);
+          return t;
+        }
+
+        public CapabilityStatementMessagingComponent addSupportedMessage(CapabilityStatementMessagingSupportedMessageComponent t) { //3
+          if (t == null)
+            return this;
+          if (this.supportedMessage == null)
+            this.supportedMessage = new ArrayList<CapabilityStatementMessagingSupportedMessageComponent>();
+          this.supportedMessage.add(t);
+          return this;
+        }
+
+        /**
+         * @return The first repetition of repeating field {@link #supportedMessage}, creating it if it does not already exist
+         */
+        public CapabilityStatementMessagingSupportedMessageComponent getSupportedMessageFirstRep() { 
+          if (getSupportedMessage().isEmpty()) {
+            addSupportedMessage();
+          }
+          return getSupportedMessage().get(0);
+        }
+
+        /**
          * @return {@link #event} (A description of the solution's support for an event at this end-point.)
          */
         public List<CapabilityStatementMessagingEventComponent> getEvent() { 
@@ -5719,6 +5953,7 @@ public class CapabilityStatement extends MetadataResource implements IBaseConfor
           childrenList.add(new Property("endpoint", "", "An endpoint (network accessible address) to which messages and/or replies are to be sent.", 0, java.lang.Integer.MAX_VALUE, endpoint));
           childrenList.add(new Property("reliableCache", "unsignedInt", "Length if the receiver's reliable messaging cache in minutes (if a receiver) or how long the cache length on the receiver should be (if a sender).", 0, java.lang.Integer.MAX_VALUE, reliableCache));
           childrenList.add(new Property("documentation", "string", "Documentation about the system's messaging capabilities for this endpoint not otherwise documented by the capability statement.  For example, process for becoming an authorized messaging exchange partner.", 0, java.lang.Integer.MAX_VALUE, documentation));
+          childrenList.add(new Property("supportedMessage", "", "References to message definitions for messages this system can send or receive.", 0, java.lang.Integer.MAX_VALUE, supportedMessage));
           childrenList.add(new Property("event", "", "A description of the solution's support for an event at this end-point.", 0, java.lang.Integer.MAX_VALUE, event));
         }
 
@@ -5728,6 +5963,7 @@ public class CapabilityStatement extends MetadataResource implements IBaseConfor
         case 1741102485: /*endpoint*/ return this.endpoint == null ? new Base[0] : this.endpoint.toArray(new Base[this.endpoint.size()]); // CapabilityStatementMessagingEndpointComponent
         case 897803608: /*reliableCache*/ return this.reliableCache == null ? new Base[0] : new Base[] {this.reliableCache}; // UnsignedIntType
         case 1587405498: /*documentation*/ return this.documentation == null ? new Base[0] : new Base[] {this.documentation}; // StringType
+        case -1805139079: /*supportedMessage*/ return this.supportedMessage == null ? new Base[0] : this.supportedMessage.toArray(new Base[this.supportedMessage.size()]); // CapabilityStatementMessagingSupportedMessageComponent
         case 96891546: /*event*/ return this.event == null ? new Base[0] : this.event.toArray(new Base[this.event.size()]); // CapabilityStatementMessagingEventComponent
         default: return super.getProperty(hash, name, checkValid);
         }
@@ -5735,47 +5971,67 @@ public class CapabilityStatement extends MetadataResource implements IBaseConfor
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case 1741102485: // endpoint
           this.getEndpoint().add((CapabilityStatementMessagingEndpointComponent) value); // CapabilityStatementMessagingEndpointComponent
-          break;
+          return value;
         case 897803608: // reliableCache
           this.reliableCache = castToUnsignedInt(value); // UnsignedIntType
-          break;
+          return value;
         case 1587405498: // documentation
           this.documentation = castToString(value); // StringType
-          break;
+          return value;
+        case -1805139079: // supportedMessage
+          this.getSupportedMessage().add((CapabilityStatementMessagingSupportedMessageComponent) value); // CapabilityStatementMessagingSupportedMessageComponent
+          return value;
         case 96891546: // event
           this.getEvent().add((CapabilityStatementMessagingEventComponent) value); // CapabilityStatementMessagingEventComponent
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("endpoint"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("endpoint")) {
           this.getEndpoint().add((CapabilityStatementMessagingEndpointComponent) value);
-        else if (name.equals("reliableCache"))
+        } else if (name.equals("reliableCache")) {
           this.reliableCache = castToUnsignedInt(value); // UnsignedIntType
-        else if (name.equals("documentation"))
+        } else if (name.equals("documentation")) {
           this.documentation = castToString(value); // StringType
-        else if (name.equals("event"))
+        } else if (name.equals("supportedMessage")) {
+          this.getSupportedMessage().add((CapabilityStatementMessagingSupportedMessageComponent) value);
+        } else if (name.equals("event")) {
           this.getEvent().add((CapabilityStatementMessagingEventComponent) value);
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 1741102485:  return addEndpoint(); // CapabilityStatementMessagingEndpointComponent
-        case 897803608: throw new FHIRException("Cannot make property reliableCache as it is not a complex type"); // UnsignedIntType
-        case 1587405498: throw new FHIRException("Cannot make property documentation as it is not a complex type"); // StringType
-        case 96891546:  return addEvent(); // CapabilityStatementMessagingEventComponent
+        case 1741102485:  return addEndpoint(); 
+        case 897803608:  return getReliableCacheElement();
+        case 1587405498:  return getDocumentationElement();
+        case -1805139079:  return addSupportedMessage(); 
+        case 96891546:  return addEvent(); 
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 1741102485: /*endpoint*/ return new String[] {};
+        case 897803608: /*reliableCache*/ return new String[] {"unsignedInt"};
+        case 1587405498: /*documentation*/ return new String[] {"string"};
+        case -1805139079: /*supportedMessage*/ return new String[] {};
+        case 96891546: /*event*/ return new String[] {};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }
@@ -5790,6 +6046,9 @@ public class CapabilityStatement extends MetadataResource implements IBaseConfor
         }
         else if (name.equals("documentation")) {
           throw new FHIRException("Cannot call addChild on a primitive type CapabilityStatement.documentation");
+        }
+        else if (name.equals("supportedMessage")) {
+          return addSupportedMessage();
         }
         else if (name.equals("event")) {
           return addEvent();
@@ -5808,6 +6067,11 @@ public class CapabilityStatement extends MetadataResource implements IBaseConfor
         };
         dst.reliableCache = reliableCache == null ? null : reliableCache.copy();
         dst.documentation = documentation == null ? null : documentation.copy();
+        if (supportedMessage != null) {
+          dst.supportedMessage = new ArrayList<CapabilityStatementMessagingSupportedMessageComponent>();
+          for (CapabilityStatementMessagingSupportedMessageComponent i : supportedMessage)
+            dst.supportedMessage.add(i.copy());
+        };
         if (event != null) {
           dst.event = new ArrayList<CapabilityStatementMessagingEventComponent>();
           for (CapabilityStatementMessagingEventComponent i : event)
@@ -5824,7 +6088,8 @@ public class CapabilityStatement extends MetadataResource implements IBaseConfor
           return false;
         CapabilityStatementMessagingComponent o = (CapabilityStatementMessagingComponent) other;
         return compareDeep(endpoint, o.endpoint, true) && compareDeep(reliableCache, o.reliableCache, true)
-           && compareDeep(documentation, o.documentation, true) && compareDeep(event, o.event, true);
+           && compareDeep(documentation, o.documentation, true) && compareDeep(supportedMessage, o.supportedMessage, true)
+           && compareDeep(event, o.event, true);
       }
 
       @Override
@@ -5840,7 +6105,7 @@ public class CapabilityStatement extends MetadataResource implements IBaseConfor
 
       public boolean isEmpty() {
         return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(endpoint, reliableCache, documentation
-          , event);
+          , supportedMessage, event);
       }
 
   public String fhirType() {
@@ -5864,7 +6129,7 @@ public class CapabilityStatement extends MetadataResource implements IBaseConfor
          * The network address of the end-point. For solutions that do not use network addresses for routing, it can be just an identifier.
          */
         @Child(name = "address", type = {UriType.class}, order=2, min=1, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Address of end-point", formalDefinition="The network address of the end-point. For solutions that do not use network addresses for routing, it can be just an identifier." )
+        @Description(shortDefinition="Network address or identifier of the end-point", formalDefinition="The network address of the end-point. For solutions that do not use network addresses for routing, it can be just an identifier." )
         protected UriType address;
 
         private static final long serialVersionUID = 1294656428L;
@@ -5971,35 +6236,46 @@ public class CapabilityStatement extends MetadataResource implements IBaseConfor
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case -989163880: // protocol
           this.protocol = castToCoding(value); // Coding
-          break;
+          return value;
         case -1147692044: // address
           this.address = castToUri(value); // UriType
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("protocol"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("protocol")) {
           this.protocol = castToCoding(value); // Coding
-        else if (name.equals("address"))
+        } else if (name.equals("address")) {
           this.address = castToUri(value); // UriType
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case -989163880:  return getProtocol(); // Coding
-        case -1147692044: throw new FHIRException("Cannot make property address as it is not a complex type"); // UriType
+        case -989163880:  return getProtocol(); 
+        case -1147692044:  return getAddressElement();
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -989163880: /*protocol*/ return new String[] {"Coding"};
+        case -1147692044: /*address*/ return new String[] {"uri"};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }
@@ -6051,6 +6327,250 @@ public class CapabilityStatement extends MetadataResource implements IBaseConfor
 
   public String fhirType() {
     return "CapabilityStatement.messaging.endpoint";
+
+  }
+
+  }
+
+    @Block()
+    public static class CapabilityStatementMessagingSupportedMessageComponent extends BackboneElement implements IBaseBackboneElement {
+        /**
+         * The mode of this event declaration - whether application is sender or receiver.
+         */
+        @Child(name = "mode", type = {CodeType.class}, order=1, min=1, max=1, modifier=false, summary=true)
+        @Description(shortDefinition="sender | receiver", formalDefinition="The mode of this event declaration - whether application is sender or receiver." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/event-capability-mode")
+        protected Enumeration<EventCapabilityMode> mode;
+
+        /**
+         * Points to a message definition that identifies the messaging event, message structure, allowed responses, etc.
+         */
+        @Child(name = "definition", type = {MessageDefinition.class}, order=2, min=1, max=1, modifier=false, summary=true)
+        @Description(shortDefinition="Message supported by this system", formalDefinition="Points to a message definition that identifies the messaging event, message structure, allowed responses, etc." )
+        protected Reference definition;
+
+        /**
+         * The actual object that is the target of the reference (Points to a message definition that identifies the messaging event, message structure, allowed responses, etc.)
+         */
+        protected MessageDefinition definitionTarget;
+
+        private static final long serialVersionUID = -741523869L;
+
+    /**
+     * Constructor
+     */
+      public CapabilityStatementMessagingSupportedMessageComponent() {
+        super();
+      }
+
+    /**
+     * Constructor
+     */
+      public CapabilityStatementMessagingSupportedMessageComponent(Enumeration<EventCapabilityMode> mode, Reference definition) {
+        super();
+        this.mode = mode;
+        this.definition = definition;
+      }
+
+        /**
+         * @return {@link #mode} (The mode of this event declaration - whether application is sender or receiver.). This is the underlying object with id, value and extensions. The accessor "getMode" gives direct access to the value
+         */
+        public Enumeration<EventCapabilityMode> getModeElement() { 
+          if (this.mode == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create CapabilityStatementMessagingSupportedMessageComponent.mode");
+            else if (Configuration.doAutoCreate())
+              this.mode = new Enumeration<EventCapabilityMode>(new EventCapabilityModeEnumFactory()); // bb
+          return this.mode;
+        }
+
+        public boolean hasModeElement() { 
+          return this.mode != null && !this.mode.isEmpty();
+        }
+
+        public boolean hasMode() { 
+          return this.mode != null && !this.mode.isEmpty();
+        }
+
+        /**
+         * @param value {@link #mode} (The mode of this event declaration - whether application is sender or receiver.). This is the underlying object with id, value and extensions. The accessor "getMode" gives direct access to the value
+         */
+        public CapabilityStatementMessagingSupportedMessageComponent setModeElement(Enumeration<EventCapabilityMode> value) { 
+          this.mode = value;
+          return this;
+        }
+
+        /**
+         * @return The mode of this event declaration - whether application is sender or receiver.
+         */
+        public EventCapabilityMode getMode() { 
+          return this.mode == null ? null : this.mode.getValue();
+        }
+
+        /**
+         * @param value The mode of this event declaration - whether application is sender or receiver.
+         */
+        public CapabilityStatementMessagingSupportedMessageComponent setMode(EventCapabilityMode value) { 
+            if (this.mode == null)
+              this.mode = new Enumeration<EventCapabilityMode>(new EventCapabilityModeEnumFactory());
+            this.mode.setValue(value);
+          return this;
+        }
+
+        /**
+         * @return {@link #definition} (Points to a message definition that identifies the messaging event, message structure, allowed responses, etc.)
+         */
+        public Reference getDefinition() { 
+          if (this.definition == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create CapabilityStatementMessagingSupportedMessageComponent.definition");
+            else if (Configuration.doAutoCreate())
+              this.definition = new Reference(); // cc
+          return this.definition;
+        }
+
+        public boolean hasDefinition() { 
+          return this.definition != null && !this.definition.isEmpty();
+        }
+
+        /**
+         * @param value {@link #definition} (Points to a message definition that identifies the messaging event, message structure, allowed responses, etc.)
+         */
+        public CapabilityStatementMessagingSupportedMessageComponent setDefinition(Reference value) { 
+          this.definition = value;
+          return this;
+        }
+
+        /**
+         * @return {@link #definition} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (Points to a message definition that identifies the messaging event, message structure, allowed responses, etc.)
+         */
+        public MessageDefinition getDefinitionTarget() { 
+          if (this.definitionTarget == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create CapabilityStatementMessagingSupportedMessageComponent.definition");
+            else if (Configuration.doAutoCreate())
+              this.definitionTarget = new MessageDefinition(); // aa
+          return this.definitionTarget;
+        }
+
+        /**
+         * @param value {@link #definition} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (Points to a message definition that identifies the messaging event, message structure, allowed responses, etc.)
+         */
+        public CapabilityStatementMessagingSupportedMessageComponent setDefinitionTarget(MessageDefinition value) { 
+          this.definitionTarget = value;
+          return this;
+        }
+
+        protected void listChildren(List<Property> childrenList) {
+          super.listChildren(childrenList);
+          childrenList.add(new Property("mode", "code", "The mode of this event declaration - whether application is sender or receiver.", 0, java.lang.Integer.MAX_VALUE, mode));
+          childrenList.add(new Property("definition", "Reference(MessageDefinition)", "Points to a message definition that identifies the messaging event, message structure, allowed responses, etc.", 0, java.lang.Integer.MAX_VALUE, definition));
+        }
+
+      @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 3357091: /*mode*/ return this.mode == null ? new Base[0] : new Base[] {this.mode}; // Enumeration<EventCapabilityMode>
+        case -1014418093: /*definition*/ return this.definition == null ? new Base[0] : new Base[] {this.definition}; // Reference
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 3357091: // mode
+          value = new EventCapabilityModeEnumFactory().fromType(castToCode(value));
+          this.mode = (Enumeration) value; // Enumeration<EventCapabilityMode>
+          return value;
+        case -1014418093: // definition
+          this.definition = castToReference(value); // Reference
+          return value;
+        default: return super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("mode")) {
+          value = new EventCapabilityModeEnumFactory().fromType(castToCode(value));
+          this.mode = (Enumeration) value; // Enumeration<EventCapabilityMode>
+        } else if (name.equals("definition")) {
+          this.definition = castToReference(value); // Reference
+        } else
+          return super.setProperty(name, value);
+        return value;
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3357091:  return getModeElement();
+        case -1014418093:  return getDefinition(); 
+        default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3357091: /*mode*/ return new String[] {"code"};
+        case -1014418093: /*definition*/ return new String[] {"Reference"};
+        default: return super.getTypesForProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("mode")) {
+          throw new FHIRException("Cannot call addChild on a primitive type CapabilityStatement.mode");
+        }
+        else if (name.equals("definition")) {
+          this.definition = new Reference();
+          return this.definition;
+        }
+        else
+          return super.addChild(name);
+      }
+
+      public CapabilityStatementMessagingSupportedMessageComponent copy() {
+        CapabilityStatementMessagingSupportedMessageComponent dst = new CapabilityStatementMessagingSupportedMessageComponent();
+        copyValues(dst);
+        dst.mode = mode == null ? null : mode.copy();
+        dst.definition = definition == null ? null : definition.copy();
+        return dst;
+      }
+
+      @Override
+      public boolean equalsDeep(Base other) {
+        if (!super.equalsDeep(other))
+          return false;
+        if (!(other instanceof CapabilityStatementMessagingSupportedMessageComponent))
+          return false;
+        CapabilityStatementMessagingSupportedMessageComponent o = (CapabilityStatementMessagingSupportedMessageComponent) other;
+        return compareDeep(mode, o.mode, true) && compareDeep(definition, o.definition, true);
+      }
+
+      @Override
+      public boolean equalsShallow(Base other) {
+        if (!super.equalsShallow(other))
+          return false;
+        if (!(other instanceof CapabilityStatementMessagingSupportedMessageComponent))
+          return false;
+        CapabilityStatementMessagingSupportedMessageComponent o = (CapabilityStatementMessagingSupportedMessageComponent) other;
+        return compareValues(mode, o.mode, true);
+      }
+
+      public boolean isEmpty() {
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(mode, definition);
+      }
+
+  public String fhirType() {
+    return "CapabilityStatement.messaging.supportedMessage";
 
   }
 
@@ -6469,65 +6989,85 @@ public class CapabilityStatement extends MetadataResource implements IBaseConfor
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case 3059181: // code
           this.code = castToCoding(value); // Coding
-          break;
+          return value;
         case 50511102: // category
-          this.category = new MessageSignificanceCategoryEnumFactory().fromType(value); // Enumeration<MessageSignificanceCategory>
-          break;
+          value = new MessageSignificanceCategoryEnumFactory().fromType(castToCode(value));
+          this.category = (Enumeration) value; // Enumeration<MessageSignificanceCategory>
+          return value;
         case 3357091: // mode
-          this.mode = new EventCapabilityModeEnumFactory().fromType(value); // Enumeration<EventCapabilityMode>
-          break;
+          value = new EventCapabilityModeEnumFactory().fromType(castToCode(value));
+          this.mode = (Enumeration) value; // Enumeration<EventCapabilityMode>
+          return value;
         case 97604824: // focus
           this.focus = castToCode(value); // CodeType
-          break;
+          return value;
         case 1095692943: // request
           this.request = castToReference(value); // Reference
-          break;
+          return value;
         case -340323263: // response
           this.response = castToReference(value); // Reference
-          break;
+          return value;
         case 1587405498: // documentation
           this.documentation = castToString(value); // StringType
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("code"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("code")) {
           this.code = castToCoding(value); // Coding
-        else if (name.equals("category"))
-          this.category = new MessageSignificanceCategoryEnumFactory().fromType(value); // Enumeration<MessageSignificanceCategory>
-        else if (name.equals("mode"))
-          this.mode = new EventCapabilityModeEnumFactory().fromType(value); // Enumeration<EventCapabilityMode>
-        else if (name.equals("focus"))
+        } else if (name.equals("category")) {
+          value = new MessageSignificanceCategoryEnumFactory().fromType(castToCode(value));
+          this.category = (Enumeration) value; // Enumeration<MessageSignificanceCategory>
+        } else if (name.equals("mode")) {
+          value = new EventCapabilityModeEnumFactory().fromType(castToCode(value));
+          this.mode = (Enumeration) value; // Enumeration<EventCapabilityMode>
+        } else if (name.equals("focus")) {
           this.focus = castToCode(value); // CodeType
-        else if (name.equals("request"))
+        } else if (name.equals("request")) {
           this.request = castToReference(value); // Reference
-        else if (name.equals("response"))
+        } else if (name.equals("response")) {
           this.response = castToReference(value); // Reference
-        else if (name.equals("documentation"))
+        } else if (name.equals("documentation")) {
           this.documentation = castToString(value); // StringType
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 3059181:  return getCode(); // Coding
-        case 50511102: throw new FHIRException("Cannot make property category as it is not a complex type"); // Enumeration<MessageSignificanceCategory>
-        case 3357091: throw new FHIRException("Cannot make property mode as it is not a complex type"); // Enumeration<EventCapabilityMode>
-        case 97604824: throw new FHIRException("Cannot make property focus as it is not a complex type"); // CodeType
-        case 1095692943:  return getRequest(); // Reference
-        case -340323263:  return getResponse(); // Reference
-        case 1587405498: throw new FHIRException("Cannot make property documentation as it is not a complex type"); // StringType
+        case 3059181:  return getCode(); 
+        case 50511102:  return getCategoryElement();
+        case 3357091:  return getModeElement();
+        case 97604824:  return getFocusElement();
+        case 1095692943:  return getRequest(); 
+        case -340323263:  return getResponse(); 
+        case 1587405498:  return getDocumentationElement();
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3059181: /*code*/ return new String[] {"Coding"};
+        case 50511102: /*category*/ return new String[] {"code"};
+        case 3357091: /*mode*/ return new String[] {"code"};
+        case 97604824: /*focus*/ return new String[] {"code"};
+        case 1095692943: /*request*/ return new String[] {"Reference"};
+        case -340323263: /*response*/ return new String[] {"Reference"};
+        case 1587405498: /*documentation*/ return new String[] {"string"};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }
@@ -6814,41 +7354,55 @@ public class CapabilityStatement extends MetadataResource implements IBaseConfor
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case 3357091: // mode
-          this.mode = new DocumentModeEnumFactory().fromType(value); // Enumeration<DocumentMode>
-          break;
+          value = new DocumentModeEnumFactory().fromType(castToCode(value));
+          this.mode = (Enumeration) value; // Enumeration<DocumentMode>
+          return value;
         case 1587405498: // documentation
           this.documentation = castToString(value); // StringType
-          break;
+          return value;
         case -309425751: // profile
           this.profile = castToReference(value); // Reference
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("mode"))
-          this.mode = new DocumentModeEnumFactory().fromType(value); // Enumeration<DocumentMode>
-        else if (name.equals("documentation"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("mode")) {
+          value = new DocumentModeEnumFactory().fromType(castToCode(value));
+          this.mode = (Enumeration) value; // Enumeration<DocumentMode>
+        } else if (name.equals("documentation")) {
           this.documentation = castToString(value); // StringType
-        else if (name.equals("profile"))
+        } else if (name.equals("profile")) {
           this.profile = castToReference(value); // Reference
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 3357091: throw new FHIRException("Cannot make property mode as it is not a complex type"); // Enumeration<DocumentMode>
-        case 1587405498: throw new FHIRException("Cannot make property documentation as it is not a complex type"); // StringType
-        case -309425751:  return getProfile(); // Reference
+        case 3357091:  return getModeElement();
+        case 1587405498:  return getDocumentationElement();
+        case -309425751:  return getProfile(); 
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3357091: /*mode*/ return new String[] {"code"};
+        case 1587405498: /*documentation*/ return new String[] {"string"};
+        case -309425751: /*profile*/ return new String[] {"Reference"};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }
@@ -8458,185 +9012,227 @@ public class CapabilityStatement extends MetadataResource implements IBaseConfor
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case 116079: // url
           this.url = castToUri(value); // UriType
-          break;
+          return value;
         case 351608024: // version
           this.version = castToString(value); // StringType
-          break;
+          return value;
         case 3373707: // name
           this.name = castToString(value); // StringType
-          break;
+          return value;
         case 110371416: // title
           this.title = castToString(value); // StringType
-          break;
+          return value;
         case -892481550: // status
-          this.status = new PublicationStatusEnumFactory().fromType(value); // Enumeration<PublicationStatus>
-          break;
+          value = new PublicationStatusEnumFactory().fromType(castToCode(value));
+          this.status = (Enumeration) value; // Enumeration<PublicationStatus>
+          return value;
         case -404562712: // experimental
           this.experimental = castToBoolean(value); // BooleanType
-          break;
+          return value;
         case 3076014: // date
           this.date = castToDateTime(value); // DateTimeType
-          break;
+          return value;
         case 1447404028: // publisher
           this.publisher = castToString(value); // StringType
-          break;
+          return value;
         case 951526432: // contact
           this.getContact().add(castToContactDetail(value)); // ContactDetail
-          break;
+          return value;
         case -1724546052: // description
           this.description = castToMarkdown(value); // MarkdownType
-          break;
+          return value;
         case -669707736: // useContext
           this.getUseContext().add(castToUsageContext(value)); // UsageContext
-          break;
+          return value;
         case -507075711: // jurisdiction
           this.getJurisdiction().add(castToCodeableConcept(value)); // CodeableConcept
-          break;
+          return value;
         case -220463842: // purpose
           this.purpose = castToMarkdown(value); // MarkdownType
-          break;
+          return value;
         case 1522889671: // copyright
           this.copyright = castToMarkdown(value); // MarkdownType
-          break;
+          return value;
         case 3292052: // kind
-          this.kind = new CapabilityStatementKindEnumFactory().fromType(value); // Enumeration<CapabilityStatementKind>
-          break;
+          value = new CapabilityStatementKindEnumFactory().fromType(castToCode(value));
+          this.kind = (Enumeration) value; // Enumeration<CapabilityStatementKind>
+          return value;
         case -246883639: // instantiates
           this.getInstantiates().add(castToUri(value)); // UriType
-          break;
+          return value;
         case 1319330215: // software
           this.software = (CapabilityStatementSoftwareComponent) value; // CapabilityStatementSoftwareComponent
-          break;
+          return value;
         case 1683336114: // implementation
           this.implementation = (CapabilityStatementImplementationComponent) value; // CapabilityStatementImplementationComponent
-          break;
+          return value;
         case 461006061: // fhirVersion
           this.fhirVersion = castToId(value); // IdType
-          break;
+          return value;
         case -1862642142: // acceptUnknown
-          this.acceptUnknown = new UnknownContentCodeEnumFactory().fromType(value); // Enumeration<UnknownContentCode>
-          break;
+          value = new UnknownContentCodeEnumFactory().fromType(castToCode(value));
+          this.acceptUnknown = (Enumeration) value; // Enumeration<UnknownContentCode>
+          return value;
         case -1268779017: // format
           this.getFormat().add(castToCode(value)); // CodeType
-          break;
+          return value;
         case 172338783: // patchFormat
           this.getPatchFormat().add(castToCode(value)); // CodeType
-          break;
+          return value;
         case 156966506: // implementationGuide
           this.getImplementationGuide().add(castToUri(value)); // UriType
-          break;
+          return value;
         case -309425751: // profile
           this.getProfile().add(castToReference(value)); // Reference
-          break;
+          return value;
         case 3496916: // rest
           this.getRest().add((CapabilityStatementRestComponent) value); // CapabilityStatementRestComponent
-          break;
+          return value;
         case -1440008444: // messaging
           this.getMessaging().add((CapabilityStatementMessagingComponent) value); // CapabilityStatementMessagingComponent
-          break;
+          return value;
         case 861720859: // document
           this.getDocument().add((CapabilityStatementDocumentComponent) value); // CapabilityStatementDocumentComponent
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("url"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("url")) {
           this.url = castToUri(value); // UriType
-        else if (name.equals("version"))
+        } else if (name.equals("version")) {
           this.version = castToString(value); // StringType
-        else if (name.equals("name"))
+        } else if (name.equals("name")) {
           this.name = castToString(value); // StringType
-        else if (name.equals("title"))
+        } else if (name.equals("title")) {
           this.title = castToString(value); // StringType
-        else if (name.equals("status"))
-          this.status = new PublicationStatusEnumFactory().fromType(value); // Enumeration<PublicationStatus>
-        else if (name.equals("experimental"))
+        } else if (name.equals("status")) {
+          value = new PublicationStatusEnumFactory().fromType(castToCode(value));
+          this.status = (Enumeration) value; // Enumeration<PublicationStatus>
+        } else if (name.equals("experimental")) {
           this.experimental = castToBoolean(value); // BooleanType
-        else if (name.equals("date"))
+        } else if (name.equals("date")) {
           this.date = castToDateTime(value); // DateTimeType
-        else if (name.equals("publisher"))
+        } else if (name.equals("publisher")) {
           this.publisher = castToString(value); // StringType
-        else if (name.equals("contact"))
+        } else if (name.equals("contact")) {
           this.getContact().add(castToContactDetail(value));
-        else if (name.equals("description"))
+        } else if (name.equals("description")) {
           this.description = castToMarkdown(value); // MarkdownType
-        else if (name.equals("useContext"))
+        } else if (name.equals("useContext")) {
           this.getUseContext().add(castToUsageContext(value));
-        else if (name.equals("jurisdiction"))
+        } else if (name.equals("jurisdiction")) {
           this.getJurisdiction().add(castToCodeableConcept(value));
-        else if (name.equals("purpose"))
+        } else if (name.equals("purpose")) {
           this.purpose = castToMarkdown(value); // MarkdownType
-        else if (name.equals("copyright"))
+        } else if (name.equals("copyright")) {
           this.copyright = castToMarkdown(value); // MarkdownType
-        else if (name.equals("kind"))
-          this.kind = new CapabilityStatementKindEnumFactory().fromType(value); // Enumeration<CapabilityStatementKind>
-        else if (name.equals("instantiates"))
+        } else if (name.equals("kind")) {
+          value = new CapabilityStatementKindEnumFactory().fromType(castToCode(value));
+          this.kind = (Enumeration) value; // Enumeration<CapabilityStatementKind>
+        } else if (name.equals("instantiates")) {
           this.getInstantiates().add(castToUri(value));
-        else if (name.equals("software"))
+        } else if (name.equals("software")) {
           this.software = (CapabilityStatementSoftwareComponent) value; // CapabilityStatementSoftwareComponent
-        else if (name.equals("implementation"))
+        } else if (name.equals("implementation")) {
           this.implementation = (CapabilityStatementImplementationComponent) value; // CapabilityStatementImplementationComponent
-        else if (name.equals("fhirVersion"))
+        } else if (name.equals("fhirVersion")) {
           this.fhirVersion = castToId(value); // IdType
-        else if (name.equals("acceptUnknown"))
-          this.acceptUnknown = new UnknownContentCodeEnumFactory().fromType(value); // Enumeration<UnknownContentCode>
-        else if (name.equals("format"))
+        } else if (name.equals("acceptUnknown")) {
+          value = new UnknownContentCodeEnumFactory().fromType(castToCode(value));
+          this.acceptUnknown = (Enumeration) value; // Enumeration<UnknownContentCode>
+        } else if (name.equals("format")) {
           this.getFormat().add(castToCode(value));
-        else if (name.equals("patchFormat"))
+        } else if (name.equals("patchFormat")) {
           this.getPatchFormat().add(castToCode(value));
-        else if (name.equals("implementationGuide"))
+        } else if (name.equals("implementationGuide")) {
           this.getImplementationGuide().add(castToUri(value));
-        else if (name.equals("profile"))
+        } else if (name.equals("profile")) {
           this.getProfile().add(castToReference(value));
-        else if (name.equals("rest"))
+        } else if (name.equals("rest")) {
           this.getRest().add((CapabilityStatementRestComponent) value);
-        else if (name.equals("messaging"))
+        } else if (name.equals("messaging")) {
           this.getMessaging().add((CapabilityStatementMessagingComponent) value);
-        else if (name.equals("document"))
+        } else if (name.equals("document")) {
           this.getDocument().add((CapabilityStatementDocumentComponent) value);
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 116079: throw new FHIRException("Cannot make property url as it is not a complex type"); // UriType
-        case 351608024: throw new FHIRException("Cannot make property version as it is not a complex type"); // StringType
-        case 3373707: throw new FHIRException("Cannot make property name as it is not a complex type"); // StringType
-        case 110371416: throw new FHIRException("Cannot make property title as it is not a complex type"); // StringType
-        case -892481550: throw new FHIRException("Cannot make property status as it is not a complex type"); // Enumeration<PublicationStatus>
-        case -404562712: throw new FHIRException("Cannot make property experimental as it is not a complex type"); // BooleanType
-        case 3076014: throw new FHIRException("Cannot make property date as it is not a complex type"); // DateTimeType
-        case 1447404028: throw new FHIRException("Cannot make property publisher as it is not a complex type"); // StringType
-        case 951526432:  return addContact(); // ContactDetail
-        case -1724546052: throw new FHIRException("Cannot make property description as it is not a complex type"); // MarkdownType
-        case -669707736:  return addUseContext(); // UsageContext
-        case -507075711:  return addJurisdiction(); // CodeableConcept
-        case -220463842: throw new FHIRException("Cannot make property purpose as it is not a complex type"); // MarkdownType
-        case 1522889671: throw new FHIRException("Cannot make property copyright as it is not a complex type"); // MarkdownType
-        case 3292052: throw new FHIRException("Cannot make property kind as it is not a complex type"); // Enumeration<CapabilityStatementKind>
-        case -246883639: throw new FHIRException("Cannot make property instantiates as it is not a complex type"); // UriType
-        case 1319330215:  return getSoftware(); // CapabilityStatementSoftwareComponent
-        case 1683336114:  return getImplementation(); // CapabilityStatementImplementationComponent
-        case 461006061: throw new FHIRException("Cannot make property fhirVersion as it is not a complex type"); // IdType
-        case -1862642142: throw new FHIRException("Cannot make property acceptUnknown as it is not a complex type"); // Enumeration<UnknownContentCode>
-        case -1268779017: throw new FHIRException("Cannot make property format as it is not a complex type"); // CodeType
-        case 172338783: throw new FHIRException("Cannot make property patchFormat as it is not a complex type"); // CodeType
-        case 156966506: throw new FHIRException("Cannot make property implementationGuide as it is not a complex type"); // UriType
-        case -309425751:  return addProfile(); // Reference
-        case 3496916:  return addRest(); // CapabilityStatementRestComponent
-        case -1440008444:  return addMessaging(); // CapabilityStatementMessagingComponent
-        case 861720859:  return addDocument(); // CapabilityStatementDocumentComponent
+        case 116079:  return getUrlElement();
+        case 351608024:  return getVersionElement();
+        case 3373707:  return getNameElement();
+        case 110371416:  return getTitleElement();
+        case -892481550:  return getStatusElement();
+        case -404562712:  return getExperimentalElement();
+        case 3076014:  return getDateElement();
+        case 1447404028:  return getPublisherElement();
+        case 951526432:  return addContact(); 
+        case -1724546052:  return getDescriptionElement();
+        case -669707736:  return addUseContext(); 
+        case -507075711:  return addJurisdiction(); 
+        case -220463842:  return getPurposeElement();
+        case 1522889671:  return getCopyrightElement();
+        case 3292052:  return getKindElement();
+        case -246883639:  return addInstantiatesElement();
+        case 1319330215:  return getSoftware(); 
+        case 1683336114:  return getImplementation(); 
+        case 461006061:  return getFhirVersionElement();
+        case -1862642142:  return getAcceptUnknownElement();
+        case -1268779017:  return addFormatElement();
+        case 172338783:  return addPatchFormatElement();
+        case 156966506:  return addImplementationGuideElement();
+        case -309425751:  return addProfile(); 
+        case 3496916:  return addRest(); 
+        case -1440008444:  return addMessaging(); 
+        case 861720859:  return addDocument(); 
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 116079: /*url*/ return new String[] {"uri"};
+        case 351608024: /*version*/ return new String[] {"string"};
+        case 3373707: /*name*/ return new String[] {"string"};
+        case 110371416: /*title*/ return new String[] {"string"};
+        case -892481550: /*status*/ return new String[] {"code"};
+        case -404562712: /*experimental*/ return new String[] {"boolean"};
+        case 3076014: /*date*/ return new String[] {"dateTime"};
+        case 1447404028: /*publisher*/ return new String[] {"string"};
+        case 951526432: /*contact*/ return new String[] {"ContactDetail"};
+        case -1724546052: /*description*/ return new String[] {"markdown"};
+        case -669707736: /*useContext*/ return new String[] {"UsageContext"};
+        case -507075711: /*jurisdiction*/ return new String[] {"CodeableConcept"};
+        case -220463842: /*purpose*/ return new String[] {"markdown"};
+        case 1522889671: /*copyright*/ return new String[] {"markdown"};
+        case 3292052: /*kind*/ return new String[] {"code"};
+        case -246883639: /*instantiates*/ return new String[] {"uri"};
+        case 1319330215: /*software*/ return new String[] {};
+        case 1683336114: /*implementation*/ return new String[] {};
+        case 461006061: /*fhirVersion*/ return new String[] {"id"};
+        case -1862642142: /*acceptUnknown*/ return new String[] {"code"};
+        case -1268779017: /*format*/ return new String[] {"code"};
+        case 172338783: /*patchFormat*/ return new String[] {"code"};
+        case 156966506: /*implementationGuide*/ return new String[] {"uri"};
+        case -309425751: /*profile*/ return new String[] {"Reference"};
+        case 3496916: /*rest*/ return new String[] {};
+        case -1440008444: /*messaging*/ return new String[] {};
+        case 861720859: /*document*/ return new String[] {};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }
@@ -9018,17 +9614,17 @@ public class CapabilityStatement extends MetadataResource implements IBaseConfor
  /**
    * Search parameter: <b>version</b>
    * <p>
-   * Description: <b>The version identifier of the capability statement</b><br>
+   * Description: <b>The business version of the capability statement</b><br>
    * Type: <b>token</b><br>
    * Path: <b>CapabilityStatement.version</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="version", path="CapabilityStatement.version", description="The version identifier of the capability statement", type="token" )
+  @SearchParamDefinition(name="version", path="CapabilityStatement.version", description="The business version of the capability statement", type="token" )
   public static final String SP_VERSION = "version";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>version</b>
    * <p>
-   * Description: <b>The version identifier of the capability statement</b><br>
+   * Description: <b>The business version of the capability statement</b><br>
    * Type: <b>token</b><br>
    * Path: <b>CapabilityStatement.version</b><br>
    * </p>

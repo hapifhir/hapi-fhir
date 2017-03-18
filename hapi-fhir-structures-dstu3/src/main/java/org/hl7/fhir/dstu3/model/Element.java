@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
 
 import java.util.*;
 
@@ -220,35 +220,46 @@ public abstract class Element extends Base implements IBaseHasExtensions, IBaseE
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case 3355: // id
           this.id = castToString(value); // StringType
-          break;
+          return value;
         case -612557761: // extension
           this.getExtension().add(castToExtension(value)); // Extension
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("id"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("id")) {
           this.id = castToString(value); // StringType
-        else if (name.equals("extension"))
+        } else if (name.equals("extension")) {
           this.getExtension().add(castToExtension(value));
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 3355: throw new FHIRException("Cannot make property id as it is not a complex type"); // StringType
-        case -612557761:  return addExtension(); // Extension
+        case 3355:  return getIdElement();
+        case -612557761:  return addExtension(); 
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3355: /*id*/ return new String[] {"string"};
+        case -612557761: /*extension*/ return new String[] {"Extension"};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }

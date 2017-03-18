@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
 
 
 import org.hl7.fhir.dstu3.model.EnumFactory;
@@ -39,22 +39,22 @@ public class GoalPriorityEnumFactory implements EnumFactory<GoalPriority> {
   public GoalPriority fromCode(String codeString) throws IllegalArgumentException {
     if (codeString == null || "".equals(codeString))
       return null;
-    if ("high".equals(codeString))
-      return GoalPriority.HIGH;
-    if ("medium".equals(codeString))
-      return GoalPriority.MEDIUM;
-    if ("low".equals(codeString))
-      return GoalPriority.LOW;
+    if ("high-priority".equals(codeString))
+      return GoalPriority.HIGHPRIORITY;
+    if ("medium-priority".equals(codeString))
+      return GoalPriority.MEDIUMPRIORITY;
+    if ("low-priority".equals(codeString))
+      return GoalPriority.LOWPRIORITY;
     throw new IllegalArgumentException("Unknown GoalPriority code '"+codeString+"'");
   }
 
   public String toCode(GoalPriority code) {
-    if (code == GoalPriority.HIGH)
-      return "high";
-    if (code == GoalPriority.MEDIUM)
-      return "medium";
-    if (code == GoalPriority.LOW)
-      return "low";
+    if (code == GoalPriority.HIGHPRIORITY)
+      return "high-priority";
+    if (code == GoalPriority.MEDIUMPRIORITY)
+      return "medium-priority";
+    if (code == GoalPriority.LOWPRIORITY)
+      return "low-priority";
     return "?";
   }
 

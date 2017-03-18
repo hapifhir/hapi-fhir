@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
 
 
 import org.hl7.fhir.dstu3.model.EnumFactory;
@@ -41,28 +41,20 @@ public class ReportResultCodesEnumFactory implements EnumFactory<ReportResultCod
       return null;
     if ("pass".equals(codeString))
       return ReportResultCodes.PASS;
-    if ("skip".equals(codeString))
-      return ReportResultCodes.SKIP;
     if ("fail".equals(codeString))
       return ReportResultCodes.FAIL;
-    if ("warning".equals(codeString))
-      return ReportResultCodes.WARNING;
-    if ("error".equals(codeString))
-      return ReportResultCodes.ERROR;
+    if ("pending".equals(codeString))
+      return ReportResultCodes.PENDING;
     throw new IllegalArgumentException("Unknown ReportResultCodes code '"+codeString+"'");
   }
 
   public String toCode(ReportResultCodes code) {
     if (code == ReportResultCodes.PASS)
       return "pass";
-    if (code == ReportResultCodes.SKIP)
-      return "skip";
     if (code == ReportResultCodes.FAIL)
       return "fail";
-    if (code == ReportResultCodes.WARNING)
-      return "warning";
-    if (code == ReportResultCodes.ERROR)
-      return "error";
+    if (code == ReportResultCodes.PENDING)
+      return "pending";
     return "?";
   }
 

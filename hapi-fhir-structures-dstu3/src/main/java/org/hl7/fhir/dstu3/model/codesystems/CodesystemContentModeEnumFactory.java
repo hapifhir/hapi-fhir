@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
 
 
 import org.hl7.fhir.dstu3.model.EnumFactory;
@@ -41,8 +41,8 @@ public class CodesystemContentModeEnumFactory implements EnumFactory<CodesystemC
       return null;
     if ("not-present".equals(codeString))
       return CodesystemContentMode.NOTPRESENT;
-    if ("examplar".equals(codeString))
-      return CodesystemContentMode.EXAMPLAR;
+    if ("example".equals(codeString))
+      return CodesystemContentMode.EXAMPLE;
     if ("fragment".equals(codeString))
       return CodesystemContentMode.FRAGMENT;
     if ("complete".equals(codeString))
@@ -53,8 +53,8 @@ public class CodesystemContentModeEnumFactory implements EnumFactory<CodesystemC
   public String toCode(CodesystemContentMode code) {
     if (code == CodesystemContentMode.NOTPRESENT)
       return "not-present";
-    if (code == CodesystemContentMode.EXAMPLAR)
-      return "examplar";
+    if (code == CodesystemContentMode.EXAMPLE)
+      return "example";
     if (code == CodesystemContentMode.FRAGMENT)
       return "fragment";
     if (code == CodesystemContentMode.COMPLETE)

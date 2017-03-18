@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,39 +37,39 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum MeasurePopulation {
 
         /**
-         * The initial population for the measure
+         * The initial population refers to all patients or events to be evaluated by a quality measure involving patients who share a common set of specified characterstics. All patients or events counted (for example, as numerator, as denominator) are drawn from the initial population
          */
         INITIALPOPULATION, 
         /**
-         * The numerator for the measure
+         * The upper portion of a fraction used to calculate a rate, proportion, or ratio. Also called the measure focus, it is the target process, condition, event, or outcome. Numerator criteria are the processes or outcomes expected for each patient, or event defined in the denominator. A numerator statement describes the clinical action that satisfies the conditions of the measure
          */
         NUMERATOR, 
         /**
-         * The numerator exclusion for the measure
+         * Numerator exclusion criteria define patients or events to be removed from the numerator. Numerator exclusions are used in proportion and ratio measures to help narrow the numerator (for inverted measures)
          */
         NUMERATOREXCLUSION, 
         /**
-         * The denominator for the measure
+         * The lower portion of a fraction used to calculate a rate, proportion, or ratio. The denominator can be the same as the initial population, or a subset of the initial population to further constrain the population for the purpose of the measure
          */
         DENOMINATOR, 
         /**
-         * The denominator exclusion for the measure
+         * Denominator exclusion criteria define patients or events that should be removed from the denominator before determining if numerator criteria are met. Denominator exclusions are used in proportion and ratio measures to help narrow the denominator. For example, patients with bilateral lower extremity amputations would be listed as a denominator exclusion for a measure requiring foot exams
          */
         DENOMINATOREXCLUSION, 
         /**
-         * The denominator exception for the measure
+         * Denominator exceptions are conditions that should remove a patient or event from the denominator of a measure only if the numerator criteria are not met. Denominator exception allows for adjustment of the calculated score for those providers with higher risk populations. Denominator exception criteria are only used in proportion measures
          */
         DENOMINATOREXCEPTION, 
         /**
-         * The measure population for the measure
+         * Measure population criteria define the patients or events for which the individual observation for the measure should be taken. Measure populations are used for continuous variable measures rather than numerator and denominator criteria
          */
         MEASUREPOPULATION, 
         /**
-         * The measure population exclusion for the measure
+         * Measure population criteria define the patients or events that should be removed from the measure population before determining the outcome of one or more continuous variables defined for the measure observation. Measure population exclusion criteria are used within continuous variable measures to help narrow the measure population
          */
         MEASUREPOPULATIONEXCLUSION, 
         /**
-         * The measure observation for the measure
+         * Defines the individual observation to be performed for each patient or event in the measure population. Measure observations for each case in the population are aggregated to determine the overall measure score for the population
          */
         MEASUREOBSERVATION, 
         /**
@@ -118,15 +118,15 @@ public enum MeasurePopulation {
         }
         public String getDefinition() {
           switch (this) {
-            case INITIALPOPULATION: return "The initial population for the measure";
-            case NUMERATOR: return "The numerator for the measure";
-            case NUMERATOREXCLUSION: return "The numerator exclusion for the measure";
-            case DENOMINATOR: return "The denominator for the measure";
-            case DENOMINATOREXCLUSION: return "The denominator exclusion for the measure";
-            case DENOMINATOREXCEPTION: return "The denominator exception for the measure";
-            case MEASUREPOPULATION: return "The measure population for the measure";
-            case MEASUREPOPULATIONEXCLUSION: return "The measure population exclusion for the measure";
-            case MEASUREOBSERVATION: return "The measure observation for the measure";
+            case INITIALPOPULATION: return "The initial population refers to all patients or events to be evaluated by a quality measure involving patients who share a common set of specified characterstics. All patients or events counted (for example, as numerator, as denominator) are drawn from the initial population";
+            case NUMERATOR: return "The upper portion of a fraction used to calculate a rate, proportion, or ratio. Also called the measure focus, it is the target process, condition, event, or outcome. Numerator criteria are the processes or outcomes expected for each patient, or event defined in the denominator. A numerator statement describes the clinical action that satisfies the conditions of the measure";
+            case NUMERATOREXCLUSION: return "Numerator exclusion criteria define patients or events to be removed from the numerator. Numerator exclusions are used in proportion and ratio measures to help narrow the numerator (for inverted measures)";
+            case DENOMINATOR: return "The lower portion of a fraction used to calculate a rate, proportion, or ratio. The denominator can be the same as the initial population, or a subset of the initial population to further constrain the population for the purpose of the measure";
+            case DENOMINATOREXCLUSION: return "Denominator exclusion criteria define patients or events that should be removed from the denominator before determining if numerator criteria are met. Denominator exclusions are used in proportion and ratio measures to help narrow the denominator. For example, patients with bilateral lower extremity amputations would be listed as a denominator exclusion for a measure requiring foot exams";
+            case DENOMINATOREXCEPTION: return "Denominator exceptions are conditions that should remove a patient or event from the denominator of a measure only if the numerator criteria are not met. Denominator exception allows for adjustment of the calculated score for those providers with higher risk populations. Denominator exception criteria are only used in proportion measures";
+            case MEASUREPOPULATION: return "Measure population criteria define the patients or events for which the individual observation for the measure should be taken. Measure populations are used for continuous variable measures rather than numerator and denominator criteria";
+            case MEASUREPOPULATIONEXCLUSION: return "Measure population criteria define the patients or events that should be removed from the measure population before determining the outcome of one or more continuous variables defined for the measure observation. Measure population exclusion criteria are used within continuous variable measures to help narrow the measure population";
+            case MEASUREOBSERVATION: return "Defines the individual observation to be performed for each patient or event in the measure population. Measure observations for each case in the population are aggregated to determine the overall measure score for the population";
             default: return "?";
           }
         }

@@ -25,6 +25,7 @@ import org.hl7.fhir.dstu3.model.ExpressionNode.Kind;
 import org.hl7.fhir.dstu3.model.ExpressionNode.Operation;
 import org.hl7.fhir.dstu3.model.ExpressionNode.SourceLocation;
 import org.hl7.fhir.dstu3.model.IntegerType;
+import org.hl7.fhir.dstu3.model.Property;
 import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.dstu3.model.StructureDefinition;
@@ -103,7 +104,7 @@ public class FHIRPathEngine {
      * @param focus
      * @return
      */
-    public boolean Log(String argument, List<Base> focus);
+    public boolean log(String argument, List<Base> focus);
 
     // extensibility for functions
     /**
@@ -128,6 +129,14 @@ public class FHIRPathEngine {
      * @return
      */
     public List<Base> executeFunction(Object appContext, String functionName, List<List<Base>> parameters);
+    
+    /**
+     * Implementation of resolve() function. Passed a string, return matching resource, if one is known - else null
+     * @param appInfo
+     * @param url
+     * @return
+     */
+    public Base resolveReference(Object appContext, String url);
   }
 
 
@@ -413,6 +422,20 @@ public class FHIRPathEngine {
   /**
    * evaluate a path and return true or false (e.g. for an invariant)
    * 
+   * @param appinfo - application context
+   * @param base - the object against which the path is being evaluated
+   * @param path - the FHIR Path statement to use
+   * @return
+   * @throws FHIRException 
+   * @
+   */
+  public boolean evaluateToBoolean(Object appInfo, Resource resource, Base base, ExpressionNode node) throws FHIRException {
+    return convertToBoolean(evaluate(appInfo, resource, base, node));
+  }
+
+  /**
+   * evaluate a path and return true or false (e.g. for an invariant)
+   * 
    * @param base - the object against which the path is being evaluated
    * @param path - the FHIR Path statement to use
    * @return
@@ -480,7 +503,7 @@ public class FHIRPathEngine {
 
 
   private void log(String name, List<Base> contents) {
-    if (hostServices == null || !hostServices.Log(name, contents)) {
+    if (hostServices == null || !hostServices.log(name, contents)) {
       if (log.length() > 0)
         log.append("; ");
       log.append(name);
@@ -1242,7 +1265,7 @@ public class FHIRPathEngine {
       return doEquals(left, right);
     if (left.hasType("boolean") && right.hasType("boolean"))
       return doEquals(left, right);
-    if (left.hasType("integer", "decimal") && right.hasType("integer", "decimal"))
+    if (left.hasType("integer", "decimal", "unsignedInt", "positiveInt") && right.hasType("integer", "decimal", "unsignedInt", "positiveInt"))
       return Utilities.equivalentNumber(left.primitiveValue(), right.primitiveValue());
     if (left.hasType("date", "dateTime", "time", "instant") && right.hasType("date", "dateTime", "time", "instant"))
       return Utilities.equivalentNumber(left.primitiveValue(), right.primitiveValue());
@@ -1324,7 +1347,7 @@ public class FHIRPathEngine {
       Base r = right.get(0);
       if (l.hasType("string") && r.hasType("string")) 
         return makeBoolean(l.primitiveValue().compareTo(r.primitiveValue()) > 0);
-      else if ((l.hasType("integer", "decimal")) && (r.hasType("integer", "decimal"))) 
+      else if ((l.hasType("integer", "decimal", "unsignedInt", "positiveInt")) && (r.hasType("integer", "decimal", "unsignedInt", "positiveInt"))) 
         return makeBoolean(new Double(l.primitiveValue()) > new Double(r.primitiveValue()));
       else if ((l.hasType("date", "dateTime", "instant")) && (r.hasType("date", "dateTime", "instant"))) 
         return makeBoolean(l.primitiveValue().compareTo(r.primitiveValue()) > 0);
@@ -1348,7 +1371,7 @@ public class FHIRPathEngine {
       Base r = right.get(0);
       if (l.hasType("string") && r.hasType("string")) 
         return makeBoolean(l.primitiveValue().compareTo(r.primitiveValue()) <= 0);
-      else if ((l.hasType("integer", "decimal")) && (r.hasType("integer", "decimal"))) 
+      else if ((l.hasType("integer", "decimal", "unsignedInt", "positiveInt")) && (r.hasType("integer", "decimal", "unsignedInt", "positiveInt"))) 
         return makeBoolean(new Double(l.primitiveValue()) <= new Double(r.primitiveValue()));
       else if ((l.hasType("date", "dateTime", "instant")) && (r.hasType("date", "dateTime", "instant"))) 
         return makeBoolean(l.primitiveValue().compareTo(r.primitiveValue()) <= 0);
@@ -1374,7 +1397,7 @@ public class FHIRPathEngine {
       Base r = right.get(0);
       if (l.hasType("string") && r.hasType("string")) 
         return makeBoolean(l.primitiveValue().compareTo(r.primitiveValue()) >= 0);
-      else if ((l.hasType("integer", "decimal")) && (r.hasType("integer", "decimal"))) 
+      else if ((l.hasType("integer", "decimal", "unsignedInt", "positiveInt")) && (r.hasType("integer", "decimal", "unsignedInt", "positiveInt"))) 
         return makeBoolean(new Double(l.primitiveValue()) >= new Double(r.primitiveValue()));
       else if ((l.hasType("date", "dateTime", "instant")) && (r.hasType("date", "dateTime", "instant"))) 
         return makeBoolean(l.primitiveValue().compareTo(r.primitiveValue()) >= 0);
@@ -1598,7 +1621,7 @@ public class FHIRPathEngine {
     Base l = left.get(0);
     Base r = right.get(0);
 
-    if (l.hasType("integer", "decimal") && r.hasType("integer", "decimal")) {
+    if (l.hasType("integer", "decimal", "unsignedInt", "positiveInt") && r.hasType("integer", "decimal", "unsignedInt", "positiveInt")) {
       Decimal d1;
       try {
         d1 = new Decimal(l.primitiveValue());
@@ -1733,8 +1756,14 @@ public class FHIRPathEngine {
     if (atEntry && Character.isUpperCase(exp.getName().charAt(0))) {// special case for start up
       if (item.isResource() && item.fhirType().equals(exp.getName()))  
         result.add(item);
-    } else
+    } else 
       getChildrenByName(item, exp.getName(), result);
+    if (result.size() == 0 && atEntry && context.appInfo != null) {
+      Base temp = hostServices.resolveConstant(context.appInfo, exp.getName());
+      if (temp != null) {
+        result.add(temp);
+      }
+    }
     return result;
   }	
 
@@ -2328,7 +2357,30 @@ public class FHIRPathEngine {
 
 
   private List<Base> funcResolve(ExecutionContext context, List<Base> focus, ExpressionNode exp) {
-    throw new Error("not Implemented yet");
+    List<Base> result = new ArrayList<Base>();
+    for (Base item : focus) {
+      if (hostServices != null) {
+        String s = convertToString(item);
+        if (item.fhirType().equals("Reference")) {
+          Property p = item.getChildByName("reference");
+          if (p.hasValues())
+            s = convertToString(p.getValues().get(0));
+        }
+        Base res = null;
+        if (s.startsWith("#")) {
+          String id = s.substring(1);
+          Property p = context.resource.getChildByName("contained");
+          for (Base c : p.getValues()) {
+            if (id.equals(c.getIdBase()))
+              res = c;
+          }
+        } else
+         res = hostServices.resolveReference(context.appInfo, s);
+        if (res != null)
+          result.add(res);
+      }
+    }
+    return result;
   }
 
 	private List<Base> funcExtension(ExecutionContext context, List<Base> focus, ExpressionNode exp) throws FHIRException {

@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
 
 import java.util.*;
 
@@ -47,6 +47,194 @@ import org.hl7.fhir.exceptions.FHIRException;
  */
 @ResourceDef(name="DetectedIssue", profile="http://hl7.org/fhir/Profile/DetectedIssue")
 public class DetectedIssue extends DomainResource {
+
+    public enum DetectedIssueStatus {
+        /**
+         * The existence of the observation is registered, but there is no result yet available.
+         */
+        REGISTERED, 
+        /**
+         * This is an initial or interim observation: data may be incomplete or unverified.
+         */
+        PRELIMINARY, 
+        /**
+         * The observation is complete.
+         */
+        FINAL, 
+        /**
+         * Subsequent to being Final, the observation has been modified subsequent.  This includes updates/new information and corrections.
+         */
+        AMENDED, 
+        /**
+         * Subsequent to being Final, the observation has been modified to correct an error in the test result.
+         */
+        CORRECTED, 
+        /**
+         * The observation is unavailable because the measurement was not started or not completed (also sometimes called "aborted").
+         */
+        CANCELLED, 
+        /**
+         * The observation has been withdrawn following previous final release.  This electronic record should never have existed, though it is possible that real-world decisions were based on it. (If real-world activity has occurred, the status should be "cancelled" rather than "entered-in-error".)
+         */
+        ENTEREDINERROR, 
+        /**
+         * The authoring system does not know which of the status values currently applies for this request. Note: This concept is not to be used for "other" - one of the listed statuses is presumed to apply, it's just not known which one.
+         */
+        UNKNOWN, 
+        /**
+         * added to help the parsers with the generic types
+         */
+        NULL;
+        public static DetectedIssueStatus fromCode(String codeString) throws FHIRException {
+            if (codeString == null || "".equals(codeString))
+                return null;
+        if ("registered".equals(codeString))
+          return REGISTERED;
+        if ("preliminary".equals(codeString))
+          return PRELIMINARY;
+        if ("final".equals(codeString))
+          return FINAL;
+        if ("amended".equals(codeString))
+          return AMENDED;
+        if ("corrected".equals(codeString))
+          return CORRECTED;
+        if ("cancelled".equals(codeString))
+          return CANCELLED;
+        if ("entered-in-error".equals(codeString))
+          return ENTEREDINERROR;
+        if ("unknown".equals(codeString))
+          return UNKNOWN;
+        if (Configuration.isAcceptInvalidEnums())
+          return null;
+        else
+          throw new FHIRException("Unknown DetectedIssueStatus code '"+codeString+"'");
+        }
+        public String toCode() {
+          switch (this) {
+            case REGISTERED: return "registered";
+            case PRELIMINARY: return "preliminary";
+            case FINAL: return "final";
+            case AMENDED: return "amended";
+            case CORRECTED: return "corrected";
+            case CANCELLED: return "cancelled";
+            case ENTEREDINERROR: return "entered-in-error";
+            case UNKNOWN: return "unknown";
+            default: return "?";
+          }
+        }
+        public String getSystem() {
+          switch (this) {
+            case REGISTERED: return "http://hl7.org/fhir/observation-status";
+            case PRELIMINARY: return "http://hl7.org/fhir/observation-status";
+            case FINAL: return "http://hl7.org/fhir/observation-status";
+            case AMENDED: return "http://hl7.org/fhir/observation-status";
+            case CORRECTED: return "http://hl7.org/fhir/observation-status";
+            case CANCELLED: return "http://hl7.org/fhir/observation-status";
+            case ENTEREDINERROR: return "http://hl7.org/fhir/observation-status";
+            case UNKNOWN: return "http://hl7.org/fhir/observation-status";
+            default: return "?";
+          }
+        }
+        public String getDefinition() {
+          switch (this) {
+            case REGISTERED: return "The existence of the observation is registered, but there is no result yet available.";
+            case PRELIMINARY: return "This is an initial or interim observation: data may be incomplete or unverified.";
+            case FINAL: return "The observation is complete.";
+            case AMENDED: return "Subsequent to being Final, the observation has been modified subsequent.  This includes updates/new information and corrections.";
+            case CORRECTED: return "Subsequent to being Final, the observation has been modified to correct an error in the test result.";
+            case CANCELLED: return "The observation is unavailable because the measurement was not started or not completed (also sometimes called \"aborted\").";
+            case ENTEREDINERROR: return "The observation has been withdrawn following previous final release.  This electronic record should never have existed, though it is possible that real-world decisions were based on it. (If real-world activity has occurred, the status should be \"cancelled\" rather than \"entered-in-error\".)";
+            case UNKNOWN: return "The authoring system does not know which of the status values currently applies for this request. Note: This concept is not to be used for \"other\" - one of the listed statuses is presumed to apply, it's just not known which one.";
+            default: return "?";
+          }
+        }
+        public String getDisplay() {
+          switch (this) {
+            case REGISTERED: return "Registered";
+            case PRELIMINARY: return "Preliminary";
+            case FINAL: return "Final";
+            case AMENDED: return "Amended";
+            case CORRECTED: return "Corrected";
+            case CANCELLED: return "Cancelled";
+            case ENTEREDINERROR: return "Entered in Error";
+            case UNKNOWN: return "Unknown";
+            default: return "?";
+          }
+        }
+    }
+
+  public static class DetectedIssueStatusEnumFactory implements EnumFactory<DetectedIssueStatus> {
+    public DetectedIssueStatus fromCode(String codeString) throws IllegalArgumentException {
+      if (codeString == null || "".equals(codeString))
+            if (codeString == null || "".equals(codeString))
+                return null;
+        if ("registered".equals(codeString))
+          return DetectedIssueStatus.REGISTERED;
+        if ("preliminary".equals(codeString))
+          return DetectedIssueStatus.PRELIMINARY;
+        if ("final".equals(codeString))
+          return DetectedIssueStatus.FINAL;
+        if ("amended".equals(codeString))
+          return DetectedIssueStatus.AMENDED;
+        if ("corrected".equals(codeString))
+          return DetectedIssueStatus.CORRECTED;
+        if ("cancelled".equals(codeString))
+          return DetectedIssueStatus.CANCELLED;
+        if ("entered-in-error".equals(codeString))
+          return DetectedIssueStatus.ENTEREDINERROR;
+        if ("unknown".equals(codeString))
+          return DetectedIssueStatus.UNKNOWN;
+        throw new IllegalArgumentException("Unknown DetectedIssueStatus code '"+codeString+"'");
+        }
+        public Enumeration<DetectedIssueStatus> fromType(Base code) throws FHIRException {
+          if (code == null)
+            return null;
+          if (code.isEmpty())
+            return new Enumeration<DetectedIssueStatus>(this);
+          String codeString = ((PrimitiveType) code).asStringValue();
+          if (codeString == null || "".equals(codeString))
+            return null;
+        if ("registered".equals(codeString))
+          return new Enumeration<DetectedIssueStatus>(this, DetectedIssueStatus.REGISTERED);
+        if ("preliminary".equals(codeString))
+          return new Enumeration<DetectedIssueStatus>(this, DetectedIssueStatus.PRELIMINARY);
+        if ("final".equals(codeString))
+          return new Enumeration<DetectedIssueStatus>(this, DetectedIssueStatus.FINAL);
+        if ("amended".equals(codeString))
+          return new Enumeration<DetectedIssueStatus>(this, DetectedIssueStatus.AMENDED);
+        if ("corrected".equals(codeString))
+          return new Enumeration<DetectedIssueStatus>(this, DetectedIssueStatus.CORRECTED);
+        if ("cancelled".equals(codeString))
+          return new Enumeration<DetectedIssueStatus>(this, DetectedIssueStatus.CANCELLED);
+        if ("entered-in-error".equals(codeString))
+          return new Enumeration<DetectedIssueStatus>(this, DetectedIssueStatus.ENTEREDINERROR);
+        if ("unknown".equals(codeString))
+          return new Enumeration<DetectedIssueStatus>(this, DetectedIssueStatus.UNKNOWN);
+        throw new FHIRException("Unknown DetectedIssueStatus code '"+codeString+"'");
+        }
+    public String toCode(DetectedIssueStatus code) {
+      if (code == DetectedIssueStatus.REGISTERED)
+        return "registered";
+      if (code == DetectedIssueStatus.PRELIMINARY)
+        return "preliminary";
+      if (code == DetectedIssueStatus.FINAL)
+        return "final";
+      if (code == DetectedIssueStatus.AMENDED)
+        return "amended";
+      if (code == DetectedIssueStatus.CORRECTED)
+        return "corrected";
+      if (code == DetectedIssueStatus.CANCELLED)
+        return "cancelled";
+      if (code == DetectedIssueStatus.ENTEREDINERROR)
+        return "entered-in-error";
+      if (code == DetectedIssueStatus.UNKNOWN)
+        return "unknown";
+      return "?";
+      }
+    public String toSystem(DetectedIssueStatus code) {
+      return code.getSystem();
+      }
+    }
 
     public enum DetectedIssueSeverity {
         /**
@@ -127,8 +315,10 @@ public class DetectedIssue extends DomainResource {
         throw new IllegalArgumentException("Unknown DetectedIssueSeverity code '"+codeString+"'");
         }
         public Enumeration<DetectedIssueSeverity> fromType(Base code) throws FHIRException {
-          if (code == null || code.isEmpty())
+          if (code == null)
             return null;
+          if (code.isEmpty())
+            return new Enumeration<DetectedIssueSeverity>(this);
           String codeString = ((PrimitiveType) code).asStringValue();
           if (codeString == null || "".equals(codeString))
             return null;
@@ -336,41 +526,53 @@ public class DetectedIssue extends DomainResource {
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case -1422950858: // action
           this.action = castToCodeableConcept(value); // CodeableConcept
-          break;
+          return value;
         case 3076014: // date
           this.date = castToDateTime(value); // DateTimeType
-          break;
+          return value;
         case -1406328437: // author
           this.author = castToReference(value); // Reference
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("action"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("action")) {
           this.action = castToCodeableConcept(value); // CodeableConcept
-        else if (name.equals("date"))
+        } else if (name.equals("date")) {
           this.date = castToDateTime(value); // DateTimeType
-        else if (name.equals("author"))
+        } else if (name.equals("author")) {
           this.author = castToReference(value); // Reference
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case -1422950858:  return getAction(); // CodeableConcept
-        case 3076014: throw new FHIRException("Cannot make property date as it is not a complex type"); // DateTimeType
-        case -1406328437:  return getAuthor(); // Reference
+        case -1422950858:  return getAction(); 
+        case 3076014:  return getDateElement();
+        case -1406328437:  return getAuthor(); 
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -1422950858: /*action*/ return new String[] {"CodeableConcept"};
+        case 3076014: /*date*/ return new String[] {"dateTime"};
+        case -1406328437: /*author*/ return new String[] {"Reference"};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }
@@ -434,21 +636,24 @@ public class DetectedIssue extends DomainResource {
   }
 
     /**
-     * Indicates the patient whose record the detected issue is associated with.
+     * Business identifier associated with the detected issue record.
      */
-    @Child(name = "patient", type = {Patient.class}, order=0, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Associated patient", formalDefinition="Indicates the patient whose record the detected issue is associated with." )
-    protected Reference patient;
+    @Child(name = "identifier", type = {Identifier.class}, order=0, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="Unique id for the detected issue", formalDefinition="Business identifier associated with the detected issue record." )
+    protected Identifier identifier;
 
     /**
-     * The actual object that is the target of the reference (Indicates the patient whose record the detected issue is associated with.)
+     * Indicates the status of the detected issue.
      */
-    protected Patient patientTarget;
+    @Child(name = "status", type = {CodeType.class}, order=1, min=1, max=1, modifier=true, summary=true)
+    @Description(shortDefinition="registered | preliminary | final | amended +", formalDefinition="Indicates the status of the detected issue." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/observation-status")
+    protected Enumeration<DetectedIssueStatus> status;
 
     /**
      * Identifies the general type of issue identified.
      */
-    @Child(name = "category", type = {CodeableConcept.class}, order=1, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "category", type = {CodeableConcept.class}, order=2, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Issue Category, e.g. drug-drug, duplicate therapy, etc.", formalDefinition="Identifies the general type of issue identified." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/detectedissue-category")
     protected CodeableConcept category;
@@ -456,29 +661,22 @@ public class DetectedIssue extends DomainResource {
     /**
      * Indicates the degree of importance associated with the identified issue based on the potential impact on the patient.
      */
-    @Child(name = "severity", type = {CodeType.class}, order=2, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "severity", type = {CodeType.class}, order=3, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="high | moderate | low", formalDefinition="Indicates the degree of importance associated with the identified issue based on the potential impact on the patient." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/detectedissue-severity")
     protected Enumeration<DetectedIssueSeverity> severity;
 
     /**
-     * Indicates the resource representing the current activity or proposed activity that is potentially problematic.
+     * Indicates the patient whose record the detected issue is associated with.
      */
-    @Child(name = "implicated", type = {Reference.class}, order=3, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-    @Description(shortDefinition="Problem resource", formalDefinition="Indicates the resource representing the current activity or proposed activity that is potentially problematic." )
-    protected List<Reference> implicated;
-    /**
-     * The actual objects that are the target of the reference (Indicates the resource representing the current activity or proposed activity that is potentially problematic.)
-     */
-    protected List<Resource> implicatedTarget;
-
+    @Child(name = "patient", type = {Patient.class}, order=4, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="Associated patient", formalDefinition="Indicates the patient whose record the detected issue is associated with." )
+    protected Reference patient;
 
     /**
-     * A textual explanation of the detected issue.
+     * The actual object that is the target of the reference (Indicates the patient whose record the detected issue is associated with.)
      */
-    @Child(name = "detail", type = {StringType.class}, order=4, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Description and context", formalDefinition="A textual explanation of the detected issue." )
-    protected StringType detail;
+    protected Patient patientTarget;
 
     /**
      * The date or date-time when the detected issue was initially identified.
@@ -500,27 +698,39 @@ public class DetectedIssue extends DomainResource {
     protected Resource authorTarget;
 
     /**
-     * Business identifier associated with the detected issue record.
+     * Indicates the resource representing the current activity or proposed activity that is potentially problematic.
      */
-    @Child(name = "identifier", type = {Identifier.class}, order=7, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Unique id for the detected issue", formalDefinition="Business identifier associated with the detected issue record." )
-    protected Identifier identifier;
+    @Child(name = "implicated", type = {Reference.class}, order=7, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Description(shortDefinition="Problem resource", formalDefinition="Indicates the resource representing the current activity or proposed activity that is potentially problematic." )
+    protected List<Reference> implicated;
+    /**
+     * The actual objects that are the target of the reference (Indicates the resource representing the current activity or proposed activity that is potentially problematic.)
+     */
+    protected List<Resource> implicatedTarget;
+
+
+    /**
+     * A textual explanation of the detected issue.
+     */
+    @Child(name = "detail", type = {StringType.class}, order=8, min=0, max=1, modifier=false, summary=false)
+    @Description(shortDefinition="Description and context", formalDefinition="A textual explanation of the detected issue." )
+    protected StringType detail;
 
     /**
      * The literature, knowledge-base or similar reference that describes the propensity for the detected issue identified.
      */
-    @Child(name = "reference", type = {UriType.class}, order=8, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "reference", type = {UriType.class}, order=9, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Authority for issue", formalDefinition="The literature, knowledge-base or similar reference that describes the propensity for the detected issue identified." )
     protected UriType reference;
 
     /**
      * Indicates an action that has been taken or is committed to to reduce or eliminate the likelihood of the risk identified by the detected issue from manifesting.  Can also reflect an observation of known mitigating factors that may reduce/eliminate the need for any action.
      */
-    @Child(name = "mitigation", type = {}, order=9, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "mitigation", type = {}, order=10, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Step taken to address", formalDefinition="Indicates an action that has been taken or is committed to to reduce or eliminate the likelihood of the risk identified by the detected issue from manifesting.  Can also reflect an observation of known mitigating factors that may reduce/eliminate the need for any action." )
     protected List<DetectedIssueMitigationComponent> mitigation;
 
-    private static final long serialVersionUID = -403732234L;
+    private static final long serialVersionUID = -1002889332L;
 
   /**
    * Constructor
@@ -529,47 +739,80 @@ public class DetectedIssue extends DomainResource {
       super();
     }
 
+  /**
+   * Constructor
+   */
+    public DetectedIssue(Enumeration<DetectedIssueStatus> status) {
+      super();
+      this.status = status;
+    }
+
     /**
-     * @return {@link #patient} (Indicates the patient whose record the detected issue is associated with.)
+     * @return {@link #identifier} (Business identifier associated with the detected issue record.)
      */
-    public Reference getPatient() { 
-      if (this.patient == null)
+    public Identifier getIdentifier() { 
+      if (this.identifier == null)
         if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create DetectedIssue.patient");
+          throw new Error("Attempt to auto-create DetectedIssue.identifier");
         else if (Configuration.doAutoCreate())
-          this.patient = new Reference(); // cc
-      return this.patient;
+          this.identifier = new Identifier(); // cc
+      return this.identifier;
     }
 
-    public boolean hasPatient() { 
-      return this.patient != null && !this.patient.isEmpty();
+    public boolean hasIdentifier() { 
+      return this.identifier != null && !this.identifier.isEmpty();
     }
 
     /**
-     * @param value {@link #patient} (Indicates the patient whose record the detected issue is associated with.)
+     * @param value {@link #identifier} (Business identifier associated with the detected issue record.)
      */
-    public DetectedIssue setPatient(Reference value) { 
-      this.patient = value;
+    public DetectedIssue setIdentifier(Identifier value) { 
+      this.identifier = value;
       return this;
     }
 
     /**
-     * @return {@link #patient} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (Indicates the patient whose record the detected issue is associated with.)
+     * @return {@link #status} (Indicates the status of the detected issue.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
      */
-    public Patient getPatientTarget() { 
-      if (this.patientTarget == null)
+    public Enumeration<DetectedIssueStatus> getStatusElement() { 
+      if (this.status == null)
         if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create DetectedIssue.patient");
+          throw new Error("Attempt to auto-create DetectedIssue.status");
         else if (Configuration.doAutoCreate())
-          this.patientTarget = new Patient(); // aa
-      return this.patientTarget;
+          this.status = new Enumeration<DetectedIssueStatus>(new DetectedIssueStatusEnumFactory()); // bb
+      return this.status;
+    }
+
+    public boolean hasStatusElement() { 
+      return this.status != null && !this.status.isEmpty();
+    }
+
+    public boolean hasStatus() { 
+      return this.status != null && !this.status.isEmpty();
     }
 
     /**
-     * @param value {@link #patient} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (Indicates the patient whose record the detected issue is associated with.)
+     * @param value {@link #status} (Indicates the status of the detected issue.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
      */
-    public DetectedIssue setPatientTarget(Patient value) { 
-      this.patientTarget = value;
+    public DetectedIssue setStatusElement(Enumeration<DetectedIssueStatus> value) { 
+      this.status = value;
+      return this;
+    }
+
+    /**
+     * @return Indicates the status of the detected issue.
+     */
+    public DetectedIssueStatus getStatus() { 
+      return this.status == null ? null : this.status.getValue();
+    }
+
+    /**
+     * @param value Indicates the status of the detected issue.
+     */
+    public DetectedIssue setStatus(DetectedIssueStatus value) { 
+        if (this.status == null)
+          this.status = new Enumeration<DetectedIssueStatus>(new DetectedIssueStatusEnumFactory());
+        this.status.setValue(value);
       return this;
     }
 
@@ -643,6 +886,138 @@ public class DetectedIssue extends DomainResource {
           this.severity = new Enumeration<DetectedIssueSeverity>(new DetectedIssueSeverityEnumFactory());
         this.severity.setValue(value);
       }
+      return this;
+    }
+
+    /**
+     * @return {@link #patient} (Indicates the patient whose record the detected issue is associated with.)
+     */
+    public Reference getPatient() { 
+      if (this.patient == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create DetectedIssue.patient");
+        else if (Configuration.doAutoCreate())
+          this.patient = new Reference(); // cc
+      return this.patient;
+    }
+
+    public boolean hasPatient() { 
+      return this.patient != null && !this.patient.isEmpty();
+    }
+
+    /**
+     * @param value {@link #patient} (Indicates the patient whose record the detected issue is associated with.)
+     */
+    public DetectedIssue setPatient(Reference value) { 
+      this.patient = value;
+      return this;
+    }
+
+    /**
+     * @return {@link #patient} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (Indicates the patient whose record the detected issue is associated with.)
+     */
+    public Patient getPatientTarget() { 
+      if (this.patientTarget == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create DetectedIssue.patient");
+        else if (Configuration.doAutoCreate())
+          this.patientTarget = new Patient(); // aa
+      return this.patientTarget;
+    }
+
+    /**
+     * @param value {@link #patient} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (Indicates the patient whose record the detected issue is associated with.)
+     */
+    public DetectedIssue setPatientTarget(Patient value) { 
+      this.patientTarget = value;
+      return this;
+    }
+
+    /**
+     * @return {@link #date} (The date or date-time when the detected issue was initially identified.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
+     */
+    public DateTimeType getDateElement() { 
+      if (this.date == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create DetectedIssue.date");
+        else if (Configuration.doAutoCreate())
+          this.date = new DateTimeType(); // bb
+      return this.date;
+    }
+
+    public boolean hasDateElement() { 
+      return this.date != null && !this.date.isEmpty();
+    }
+
+    public boolean hasDate() { 
+      return this.date != null && !this.date.isEmpty();
+    }
+
+    /**
+     * @param value {@link #date} (The date or date-time when the detected issue was initially identified.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
+     */
+    public DetectedIssue setDateElement(DateTimeType value) { 
+      this.date = value;
+      return this;
+    }
+
+    /**
+     * @return The date or date-time when the detected issue was initially identified.
+     */
+    public Date getDate() { 
+      return this.date == null ? null : this.date.getValue();
+    }
+
+    /**
+     * @param value The date or date-time when the detected issue was initially identified.
+     */
+    public DetectedIssue setDate(Date value) { 
+      if (value == null)
+        this.date = null;
+      else {
+        if (this.date == null)
+          this.date = new DateTimeType();
+        this.date.setValue(value);
+      }
+      return this;
+    }
+
+    /**
+     * @return {@link #author} (Individual or device responsible for the issue being raised.  For example, a decision support application or a pharmacist conducting a medication review.)
+     */
+    public Reference getAuthor() { 
+      if (this.author == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create DetectedIssue.author");
+        else if (Configuration.doAutoCreate())
+          this.author = new Reference(); // cc
+      return this.author;
+    }
+
+    public boolean hasAuthor() { 
+      return this.author != null && !this.author.isEmpty();
+    }
+
+    /**
+     * @param value {@link #author} (Individual or device responsible for the issue being raised.  For example, a decision support application or a pharmacist conducting a medication review.)
+     */
+    public DetectedIssue setAuthor(Reference value) { 
+      this.author = value;
+      return this;
+    }
+
+    /**
+     * @return {@link #author} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (Individual or device responsible for the issue being raised.  For example, a decision support application or a pharmacist conducting a medication review.)
+     */
+    public Resource getAuthorTarget() { 
+      return this.authorTarget;
+    }
+
+    /**
+     * @param value {@link #author} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (Individual or device responsible for the issue being raised.  For example, a decision support application or a pharmacist conducting a medication review.)
+     */
+    public DetectedIssue setAuthorTarget(Resource value) { 
+      this.authorTarget = value;
       return this;
     }
 
@@ -759,118 +1134,6 @@ public class DetectedIssue extends DomainResource {
     }
 
     /**
-     * @return {@link #date} (The date or date-time when the detected issue was initially identified.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
-     */
-    public DateTimeType getDateElement() { 
-      if (this.date == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create DetectedIssue.date");
-        else if (Configuration.doAutoCreate())
-          this.date = new DateTimeType(); // bb
-      return this.date;
-    }
-
-    public boolean hasDateElement() { 
-      return this.date != null && !this.date.isEmpty();
-    }
-
-    public boolean hasDate() { 
-      return this.date != null && !this.date.isEmpty();
-    }
-
-    /**
-     * @param value {@link #date} (The date or date-time when the detected issue was initially identified.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
-     */
-    public DetectedIssue setDateElement(DateTimeType value) { 
-      this.date = value;
-      return this;
-    }
-
-    /**
-     * @return The date or date-time when the detected issue was initially identified.
-     */
-    public Date getDate() { 
-      return this.date == null ? null : this.date.getValue();
-    }
-
-    /**
-     * @param value The date or date-time when the detected issue was initially identified.
-     */
-    public DetectedIssue setDate(Date value) { 
-      if (value == null)
-        this.date = null;
-      else {
-        if (this.date == null)
-          this.date = new DateTimeType();
-        this.date.setValue(value);
-      }
-      return this;
-    }
-
-    /**
-     * @return {@link #author} (Individual or device responsible for the issue being raised.  For example, a decision support application or a pharmacist conducting a medication review.)
-     */
-    public Reference getAuthor() { 
-      if (this.author == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create DetectedIssue.author");
-        else if (Configuration.doAutoCreate())
-          this.author = new Reference(); // cc
-      return this.author;
-    }
-
-    public boolean hasAuthor() { 
-      return this.author != null && !this.author.isEmpty();
-    }
-
-    /**
-     * @param value {@link #author} (Individual or device responsible for the issue being raised.  For example, a decision support application or a pharmacist conducting a medication review.)
-     */
-    public DetectedIssue setAuthor(Reference value) { 
-      this.author = value;
-      return this;
-    }
-
-    /**
-     * @return {@link #author} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (Individual or device responsible for the issue being raised.  For example, a decision support application or a pharmacist conducting a medication review.)
-     */
-    public Resource getAuthorTarget() { 
-      return this.authorTarget;
-    }
-
-    /**
-     * @param value {@link #author} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (Individual or device responsible for the issue being raised.  For example, a decision support application or a pharmacist conducting a medication review.)
-     */
-    public DetectedIssue setAuthorTarget(Resource value) { 
-      this.authorTarget = value;
-      return this;
-    }
-
-    /**
-     * @return {@link #identifier} (Business identifier associated with the detected issue record.)
-     */
-    public Identifier getIdentifier() { 
-      if (this.identifier == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create DetectedIssue.identifier");
-        else if (Configuration.doAutoCreate())
-          this.identifier = new Identifier(); // cc
-      return this.identifier;
-    }
-
-    public boolean hasIdentifier() { 
-      return this.identifier != null && !this.identifier.isEmpty();
-    }
-
-    /**
-     * @param value {@link #identifier} (Business identifier associated with the detected issue record.)
-     */
-    public DetectedIssue setIdentifier(Identifier value) { 
-      this.identifier = value;
-      return this;
-    }
-
-    /**
      * @return {@link #reference} (The literature, knowledge-base or similar reference that describes the propensity for the detected issue identified.). This is the underlying object with id, value and extensions. The accessor "getReference" gives direct access to the value
      */
     public UriType getReferenceElement() { 
@@ -974,14 +1237,15 @@ public class DetectedIssue extends DomainResource {
 
       protected void listChildren(List<Property> childrenList) {
         super.listChildren(childrenList);
-        childrenList.add(new Property("patient", "Reference(Patient)", "Indicates the patient whose record the detected issue is associated with.", 0, java.lang.Integer.MAX_VALUE, patient));
+        childrenList.add(new Property("identifier", "Identifier", "Business identifier associated with the detected issue record.", 0, java.lang.Integer.MAX_VALUE, identifier));
+        childrenList.add(new Property("status", "code", "Indicates the status of the detected issue.", 0, java.lang.Integer.MAX_VALUE, status));
         childrenList.add(new Property("category", "CodeableConcept", "Identifies the general type of issue identified.", 0, java.lang.Integer.MAX_VALUE, category));
         childrenList.add(new Property("severity", "code", "Indicates the degree of importance associated with the identified issue based on the potential impact on the patient.", 0, java.lang.Integer.MAX_VALUE, severity));
-        childrenList.add(new Property("implicated", "Reference(Any)", "Indicates the resource representing the current activity or proposed activity that is potentially problematic.", 0, java.lang.Integer.MAX_VALUE, implicated));
-        childrenList.add(new Property("detail", "string", "A textual explanation of the detected issue.", 0, java.lang.Integer.MAX_VALUE, detail));
+        childrenList.add(new Property("patient", "Reference(Patient)", "Indicates the patient whose record the detected issue is associated with.", 0, java.lang.Integer.MAX_VALUE, patient));
         childrenList.add(new Property("date", "dateTime", "The date or date-time when the detected issue was initially identified.", 0, java.lang.Integer.MAX_VALUE, date));
         childrenList.add(new Property("author", "Reference(Practitioner|Device)", "Individual or device responsible for the issue being raised.  For example, a decision support application or a pharmacist conducting a medication review.", 0, java.lang.Integer.MAX_VALUE, author));
-        childrenList.add(new Property("identifier", "Identifier", "Business identifier associated with the detected issue record.", 0, java.lang.Integer.MAX_VALUE, identifier));
+        childrenList.add(new Property("implicated", "Reference(Any)", "Indicates the resource representing the current activity or proposed activity that is potentially problematic.", 0, java.lang.Integer.MAX_VALUE, implicated));
+        childrenList.add(new Property("detail", "string", "A textual explanation of the detected issue.", 0, java.lang.Integer.MAX_VALUE, detail));
         childrenList.add(new Property("reference", "uri", "The literature, knowledge-base or similar reference that describes the propensity for the detected issue identified.", 0, java.lang.Integer.MAX_VALUE, reference));
         childrenList.add(new Property("mitigation", "", "Indicates an action that has been taken or is committed to to reduce or eliminate the likelihood of the risk identified by the detected issue from manifesting.  Can also reflect an observation of known mitigating factors that may reduce/eliminate the need for any action.", 0, java.lang.Integer.MAX_VALUE, mitigation));
       }
@@ -989,14 +1253,15 @@ public class DetectedIssue extends DomainResource {
       @Override
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
-        case -791418107: /*patient*/ return this.patient == null ? new Base[0] : new Base[] {this.patient}; // Reference
+        case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : new Base[] {this.identifier}; // Identifier
+        case -892481550: /*status*/ return this.status == null ? new Base[0] : new Base[] {this.status}; // Enumeration<DetectedIssueStatus>
         case 50511102: /*category*/ return this.category == null ? new Base[0] : new Base[] {this.category}; // CodeableConcept
         case 1478300413: /*severity*/ return this.severity == null ? new Base[0] : new Base[] {this.severity}; // Enumeration<DetectedIssueSeverity>
-        case -810216884: /*implicated*/ return this.implicated == null ? new Base[0] : this.implicated.toArray(new Base[this.implicated.size()]); // Reference
-        case -1335224239: /*detail*/ return this.detail == null ? new Base[0] : new Base[] {this.detail}; // StringType
+        case -791418107: /*patient*/ return this.patient == null ? new Base[0] : new Base[] {this.patient}; // Reference
         case 3076014: /*date*/ return this.date == null ? new Base[0] : new Base[] {this.date}; // DateTimeType
         case -1406328437: /*author*/ return this.author == null ? new Base[0] : new Base[] {this.author}; // Reference
-        case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : new Base[] {this.identifier}; // Identifier
+        case -810216884: /*implicated*/ return this.implicated == null ? new Base[0] : this.implicated.toArray(new Base[this.implicated.size()]); // Reference
+        case -1335224239: /*detail*/ return this.detail == null ? new Base[0] : new Base[] {this.detail}; // StringType
         case -925155509: /*reference*/ return this.reference == null ? new Base[0] : new Base[] {this.reference}; // UriType
         case 1293793087: /*mitigation*/ return this.mitigation == null ? new Base[0] : this.mitigation.toArray(new Base[this.mitigation.size()]); // DetectedIssueMitigationComponent
         default: return super.getProperty(hash, name, checkValid);
@@ -1005,92 +1270,125 @@ public class DetectedIssue extends DomainResource {
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
-        case -791418107: // patient
-          this.patient = castToReference(value); // Reference
-          break;
-        case 50511102: // category
-          this.category = castToCodeableConcept(value); // CodeableConcept
-          break;
-        case 1478300413: // severity
-          this.severity = new DetectedIssueSeverityEnumFactory().fromType(value); // Enumeration<DetectedIssueSeverity>
-          break;
-        case -810216884: // implicated
-          this.getImplicated().add(castToReference(value)); // Reference
-          break;
-        case -1335224239: // detail
-          this.detail = castToString(value); // StringType
-          break;
-        case 3076014: // date
-          this.date = castToDateTime(value); // DateTimeType
-          break;
-        case -1406328437: // author
-          this.author = castToReference(value); // Reference
-          break;
         case -1618432855: // identifier
           this.identifier = castToIdentifier(value); // Identifier
-          break;
+          return value;
+        case -892481550: // status
+          value = new DetectedIssueStatusEnumFactory().fromType(castToCode(value));
+          this.status = (Enumeration) value; // Enumeration<DetectedIssueStatus>
+          return value;
+        case 50511102: // category
+          this.category = castToCodeableConcept(value); // CodeableConcept
+          return value;
+        case 1478300413: // severity
+          value = new DetectedIssueSeverityEnumFactory().fromType(castToCode(value));
+          this.severity = (Enumeration) value; // Enumeration<DetectedIssueSeverity>
+          return value;
+        case -791418107: // patient
+          this.patient = castToReference(value); // Reference
+          return value;
+        case 3076014: // date
+          this.date = castToDateTime(value); // DateTimeType
+          return value;
+        case -1406328437: // author
+          this.author = castToReference(value); // Reference
+          return value;
+        case -810216884: // implicated
+          this.getImplicated().add(castToReference(value)); // Reference
+          return value;
+        case -1335224239: // detail
+          this.detail = castToString(value); // StringType
+          return value;
         case -925155509: // reference
           this.reference = castToUri(value); // UriType
-          break;
+          return value;
         case 1293793087: // mitigation
           this.getMitigation().add((DetectedIssueMitigationComponent) value); // DetectedIssueMitigationComponent
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("patient"))
-          this.patient = castToReference(value); // Reference
-        else if (name.equals("category"))
-          this.category = castToCodeableConcept(value); // CodeableConcept
-        else if (name.equals("severity"))
-          this.severity = new DetectedIssueSeverityEnumFactory().fromType(value); // Enumeration<DetectedIssueSeverity>
-        else if (name.equals("implicated"))
-          this.getImplicated().add(castToReference(value));
-        else if (name.equals("detail"))
-          this.detail = castToString(value); // StringType
-        else if (name.equals("date"))
-          this.date = castToDateTime(value); // DateTimeType
-        else if (name.equals("author"))
-          this.author = castToReference(value); // Reference
-        else if (name.equals("identifier"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("identifier")) {
           this.identifier = castToIdentifier(value); // Identifier
-        else if (name.equals("reference"))
+        } else if (name.equals("status")) {
+          value = new DetectedIssueStatusEnumFactory().fromType(castToCode(value));
+          this.status = (Enumeration) value; // Enumeration<DetectedIssueStatus>
+        } else if (name.equals("category")) {
+          this.category = castToCodeableConcept(value); // CodeableConcept
+        } else if (name.equals("severity")) {
+          value = new DetectedIssueSeverityEnumFactory().fromType(castToCode(value));
+          this.severity = (Enumeration) value; // Enumeration<DetectedIssueSeverity>
+        } else if (name.equals("patient")) {
+          this.patient = castToReference(value); // Reference
+        } else if (name.equals("date")) {
+          this.date = castToDateTime(value); // DateTimeType
+        } else if (name.equals("author")) {
+          this.author = castToReference(value); // Reference
+        } else if (name.equals("implicated")) {
+          this.getImplicated().add(castToReference(value));
+        } else if (name.equals("detail")) {
+          this.detail = castToString(value); // StringType
+        } else if (name.equals("reference")) {
           this.reference = castToUri(value); // UriType
-        else if (name.equals("mitigation"))
+        } else if (name.equals("mitigation")) {
           this.getMitigation().add((DetectedIssueMitigationComponent) value);
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case -791418107:  return getPatient(); // Reference
-        case 50511102:  return getCategory(); // CodeableConcept
-        case 1478300413: throw new FHIRException("Cannot make property severity as it is not a complex type"); // Enumeration<DetectedIssueSeverity>
-        case -810216884:  return addImplicated(); // Reference
-        case -1335224239: throw new FHIRException("Cannot make property detail as it is not a complex type"); // StringType
-        case 3076014: throw new FHIRException("Cannot make property date as it is not a complex type"); // DateTimeType
-        case -1406328437:  return getAuthor(); // Reference
-        case -1618432855:  return getIdentifier(); // Identifier
-        case -925155509: throw new FHIRException("Cannot make property reference as it is not a complex type"); // UriType
-        case 1293793087:  return addMitigation(); // DetectedIssueMitigationComponent
+        case -1618432855:  return getIdentifier(); 
+        case -892481550:  return getStatusElement();
+        case 50511102:  return getCategory(); 
+        case 1478300413:  return getSeverityElement();
+        case -791418107:  return getPatient(); 
+        case 3076014:  return getDateElement();
+        case -1406328437:  return getAuthor(); 
+        case -810216884:  return addImplicated(); 
+        case -1335224239:  return getDetailElement();
+        case -925155509:  return getReferenceElement();
+        case 1293793087:  return addMitigation(); 
         default: return super.makeProperty(hash, name);
         }
 
       }
 
       @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -1618432855: /*identifier*/ return new String[] {"Identifier"};
+        case -892481550: /*status*/ return new String[] {"code"};
+        case 50511102: /*category*/ return new String[] {"CodeableConcept"};
+        case 1478300413: /*severity*/ return new String[] {"code"};
+        case -791418107: /*patient*/ return new String[] {"Reference"};
+        case 3076014: /*date*/ return new String[] {"dateTime"};
+        case -1406328437: /*author*/ return new String[] {"Reference"};
+        case -810216884: /*implicated*/ return new String[] {"Reference"};
+        case -1335224239: /*detail*/ return new String[] {"string"};
+        case -925155509: /*reference*/ return new String[] {"uri"};
+        case 1293793087: /*mitigation*/ return new String[] {};
+        default: return super.getTypesForProperty(hash, name);
+        }
+
+      }
+
+      @Override
       public Base addChild(String name) throws FHIRException {
-        if (name.equals("patient")) {
-          this.patient = new Reference();
-          return this.patient;
+        if (name.equals("identifier")) {
+          this.identifier = new Identifier();
+          return this.identifier;
+        }
+        else if (name.equals("status")) {
+          throw new FHIRException("Cannot call addChild on a primitive type DetectedIssue.status");
         }
         else if (name.equals("category")) {
           this.category = new CodeableConcept();
@@ -1099,11 +1397,9 @@ public class DetectedIssue extends DomainResource {
         else if (name.equals("severity")) {
           throw new FHIRException("Cannot call addChild on a primitive type DetectedIssue.severity");
         }
-        else if (name.equals("implicated")) {
-          return addImplicated();
-        }
-        else if (name.equals("detail")) {
-          throw new FHIRException("Cannot call addChild on a primitive type DetectedIssue.detail");
+        else if (name.equals("patient")) {
+          this.patient = new Reference();
+          return this.patient;
         }
         else if (name.equals("date")) {
           throw new FHIRException("Cannot call addChild on a primitive type DetectedIssue.date");
@@ -1112,9 +1408,11 @@ public class DetectedIssue extends DomainResource {
           this.author = new Reference();
           return this.author;
         }
-        else if (name.equals("identifier")) {
-          this.identifier = new Identifier();
-          return this.identifier;
+        else if (name.equals("implicated")) {
+          return addImplicated();
+        }
+        else if (name.equals("detail")) {
+          throw new FHIRException("Cannot call addChild on a primitive type DetectedIssue.detail");
         }
         else if (name.equals("reference")) {
           throw new FHIRException("Cannot call addChild on a primitive type DetectedIssue.reference");
@@ -1134,18 +1432,19 @@ public class DetectedIssue extends DomainResource {
       public DetectedIssue copy() {
         DetectedIssue dst = new DetectedIssue();
         copyValues(dst);
-        dst.patient = patient == null ? null : patient.copy();
+        dst.identifier = identifier == null ? null : identifier.copy();
+        dst.status = status == null ? null : status.copy();
         dst.category = category == null ? null : category.copy();
         dst.severity = severity == null ? null : severity.copy();
+        dst.patient = patient == null ? null : patient.copy();
+        dst.date = date == null ? null : date.copy();
+        dst.author = author == null ? null : author.copy();
         if (implicated != null) {
           dst.implicated = new ArrayList<Reference>();
           for (Reference i : implicated)
             dst.implicated.add(i.copy());
         };
         dst.detail = detail == null ? null : detail.copy();
-        dst.date = date == null ? null : date.copy();
-        dst.author = author == null ? null : author.copy();
-        dst.identifier = identifier == null ? null : identifier.copy();
         dst.reference = reference == null ? null : reference.copy();
         if (mitigation != null) {
           dst.mitigation = new ArrayList<DetectedIssueMitigationComponent>();
@@ -1166,10 +1465,10 @@ public class DetectedIssue extends DomainResource {
         if (!(other instanceof DetectedIssue))
           return false;
         DetectedIssue o = (DetectedIssue) other;
-        return compareDeep(patient, o.patient, true) && compareDeep(category, o.category, true) && compareDeep(severity, o.severity, true)
-           && compareDeep(implicated, o.implicated, true) && compareDeep(detail, o.detail, true) && compareDeep(date, o.date, true)
-           && compareDeep(author, o.author, true) && compareDeep(identifier, o.identifier, true) && compareDeep(reference, o.reference, true)
-           && compareDeep(mitigation, o.mitigation, true);
+        return compareDeep(identifier, o.identifier, true) && compareDeep(status, o.status, true) && compareDeep(category, o.category, true)
+           && compareDeep(severity, o.severity, true) && compareDeep(patient, o.patient, true) && compareDeep(date, o.date, true)
+           && compareDeep(author, o.author, true) && compareDeep(implicated, o.implicated, true) && compareDeep(detail, o.detail, true)
+           && compareDeep(reference, o.reference, true) && compareDeep(mitigation, o.mitigation, true);
       }
 
       @Override
@@ -1179,13 +1478,14 @@ public class DetectedIssue extends DomainResource {
         if (!(other instanceof DetectedIssue))
           return false;
         DetectedIssue o = (DetectedIssue) other;
-        return compareValues(severity, o.severity, true) && compareValues(detail, o.detail, true) && compareValues(date, o.date, true)
-           && compareValues(reference, o.reference, true);
+        return compareValues(status, o.status, true) && compareValues(severity, o.severity, true) && compareValues(date, o.date, true)
+           && compareValues(detail, o.detail, true) && compareValues(reference, o.reference, true);
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(patient, category, severity
-          , implicated, detail, date, author, identifier, reference, mitigation);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, status, category
+          , severity, patient, date, author, implicated, detail, reference, mitigation
+          );
       }
 
   @Override

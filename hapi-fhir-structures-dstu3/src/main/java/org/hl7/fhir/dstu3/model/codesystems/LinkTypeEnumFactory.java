@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
 
 
 import org.hl7.fhir.dstu3.model.EnumFactory;
@@ -39,8 +39,10 @@ public class LinkTypeEnumFactory implements EnumFactory<LinkType> {
   public LinkType fromCode(String codeString) throws IllegalArgumentException {
     if (codeString == null || "".equals(codeString))
       return null;
-    if ("replace".equals(codeString))
-      return LinkType.REPLACE;
+    if ("replaced-by".equals(codeString))
+      return LinkType.REPLACEDBY;
+    if ("replaces".equals(codeString))
+      return LinkType.REPLACES;
     if ("refer".equals(codeString))
       return LinkType.REFER;
     if ("seealso".equals(codeString))
@@ -49,8 +51,10 @@ public class LinkTypeEnumFactory implements EnumFactory<LinkType> {
   }
 
   public String toCode(LinkType code) {
-    if (code == LinkType.REPLACE)
-      return "replace";
+    if (code == LinkType.REPLACEDBY)
+      return "replaced-by";
+    if (code == LinkType.REPLACES)
+      return "replaces";
     if (code == LinkType.REFER)
       return "refer";
     if (code == LinkType.SEEALSO)

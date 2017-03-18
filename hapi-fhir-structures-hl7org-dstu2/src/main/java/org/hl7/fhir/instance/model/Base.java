@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.utilities.xhtml.XhtmlNode;
+import org.hl7.fhir.utilities.xhtml.XhtmlNode;
 
 public abstract class Base implements Serializable, IBase {
 

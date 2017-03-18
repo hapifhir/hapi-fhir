@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
 
 import java.util.*;
 
@@ -138,8 +138,10 @@ public class Address extends Type implements ICompositeType {
         throw new IllegalArgumentException("Unknown AddressUse code '"+codeString+"'");
         }
         public Enumeration<AddressUse> fromType(Base code) throws FHIRException {
-          if (code == null || code.isEmpty())
+          if (code == null)
             return null;
+          if (code.isEmpty())
+            return new Enumeration<AddressUse>(this);
           String codeString = ((PrimitiveType) code).asStringValue();
           if (codeString == null || "".equals(codeString))
             return null;
@@ -248,8 +250,10 @@ public class Address extends Type implements ICompositeType {
         throw new IllegalArgumentException("Unknown AddressType code '"+codeString+"'");
         }
         public Enumeration<AddressType> fromType(Base code) throws FHIRException {
-          if (code == null || code.isEmpty())
+          if (code == null)
             return null;
+          if (code.isEmpty())
+            return new Enumeration<AddressType>(this);
           String codeString = ((PrimitiveType) code).asStringValue();
           if (codeString == null || "".equals(codeString))
             return null;
@@ -866,83 +870,106 @@ public class Address extends Type implements ICompositeType {
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case 116103: // use
-          this.use = new AddressUseEnumFactory().fromType(value); // Enumeration<AddressUse>
-          break;
+          value = new AddressUseEnumFactory().fromType(castToCode(value));
+          this.use = (Enumeration) value; // Enumeration<AddressUse>
+          return value;
         case 3575610: // type
-          this.type = new AddressTypeEnumFactory().fromType(value); // Enumeration<AddressType>
-          break;
+          value = new AddressTypeEnumFactory().fromType(castToCode(value));
+          this.type = (Enumeration) value; // Enumeration<AddressType>
+          return value;
         case 3556653: // text
           this.text = castToString(value); // StringType
-          break;
+          return value;
         case 3321844: // line
           this.getLine().add(castToString(value)); // StringType
-          break;
+          return value;
         case 3053931: // city
           this.city = castToString(value); // StringType
-          break;
+          return value;
         case 288961422: // district
           this.district = castToString(value); // StringType
-          break;
+          return value;
         case 109757585: // state
           this.state = castToString(value); // StringType
-          break;
+          return value;
         case 2011152728: // postalCode
           this.postalCode = castToString(value); // StringType
-          break;
+          return value;
         case 957831062: // country
           this.country = castToString(value); // StringType
-          break;
+          return value;
         case -991726143: // period
           this.period = castToPeriod(value); // Period
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("use"))
-          this.use = new AddressUseEnumFactory().fromType(value); // Enumeration<AddressUse>
-        else if (name.equals("type"))
-          this.type = new AddressTypeEnumFactory().fromType(value); // Enumeration<AddressType>
-        else if (name.equals("text"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("use")) {
+          value = new AddressUseEnumFactory().fromType(castToCode(value));
+          this.use = (Enumeration) value; // Enumeration<AddressUse>
+        } else if (name.equals("type")) {
+          value = new AddressTypeEnumFactory().fromType(castToCode(value));
+          this.type = (Enumeration) value; // Enumeration<AddressType>
+        } else if (name.equals("text")) {
           this.text = castToString(value); // StringType
-        else if (name.equals("line"))
+        } else if (name.equals("line")) {
           this.getLine().add(castToString(value));
-        else if (name.equals("city"))
+        } else if (name.equals("city")) {
           this.city = castToString(value); // StringType
-        else if (name.equals("district"))
+        } else if (name.equals("district")) {
           this.district = castToString(value); // StringType
-        else if (name.equals("state"))
+        } else if (name.equals("state")) {
           this.state = castToString(value); // StringType
-        else if (name.equals("postalCode"))
+        } else if (name.equals("postalCode")) {
           this.postalCode = castToString(value); // StringType
-        else if (name.equals("country"))
+        } else if (name.equals("country")) {
           this.country = castToString(value); // StringType
-        else if (name.equals("period"))
+        } else if (name.equals("period")) {
           this.period = castToPeriod(value); // Period
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 116103: throw new FHIRException("Cannot make property use as it is not a complex type"); // Enumeration<AddressUse>
-        case 3575610: throw new FHIRException("Cannot make property type as it is not a complex type"); // Enumeration<AddressType>
-        case 3556653: throw new FHIRException("Cannot make property text as it is not a complex type"); // StringType
-        case 3321844: throw new FHIRException("Cannot make property line as it is not a complex type"); // StringType
-        case 3053931: throw new FHIRException("Cannot make property city as it is not a complex type"); // StringType
-        case 288961422: throw new FHIRException("Cannot make property district as it is not a complex type"); // StringType
-        case 109757585: throw new FHIRException("Cannot make property state as it is not a complex type"); // StringType
-        case 2011152728: throw new FHIRException("Cannot make property postalCode as it is not a complex type"); // StringType
-        case 957831062: throw new FHIRException("Cannot make property country as it is not a complex type"); // StringType
-        case -991726143:  return getPeriod(); // Period
+        case 116103:  return getUseElement();
+        case 3575610:  return getTypeElement();
+        case 3556653:  return getTextElement();
+        case 3321844:  return addLineElement();
+        case 3053931:  return getCityElement();
+        case 288961422:  return getDistrictElement();
+        case 109757585:  return getStateElement();
+        case 2011152728:  return getPostalCodeElement();
+        case 957831062:  return getCountryElement();
+        case -991726143:  return getPeriod(); 
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 116103: /*use*/ return new String[] {"code"};
+        case 3575610: /*type*/ return new String[] {"code"};
+        case 3556653: /*text*/ return new String[] {"string"};
+        case 3321844: /*line*/ return new String[] {"string"};
+        case 3053931: /*city*/ return new String[] {"string"};
+        case 288961422: /*district*/ return new String[] {"string"};
+        case 109757585: /*state*/ return new String[] {"string"};
+        case 2011152728: /*postalCode*/ return new String[] {"string"};
+        case 957831062: /*country*/ return new String[] {"string"};
+        case -991726143: /*period*/ return new String[] {"Period"};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }

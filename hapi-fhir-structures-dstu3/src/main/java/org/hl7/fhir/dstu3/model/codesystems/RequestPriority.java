@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,21 +37,21 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum RequestPriority {
 
         /**
-         * The order has a normal priority .
+         * The request has normal priority
          */
         ROUTINE, 
         /**
-         * The order should be urgently.
+         * The request should be actioned promptly - higher priority than routine
          */
         URGENT, 
         /**
-         * The order is time-critical.
-         */
-        STAT, 
-        /**
-         * The order should be acted on as soon as possible.
+         * The request should be actioned as soon as possible - higher priority than urgent
          */
         ASAP, 
+        /**
+         * The request should be actioned immediately - highest possible priority.  E.g. an emergency
+         */
+        STAT, 
         /**
          * added to help the parsers
          */
@@ -63,18 +63,18 @@ public enum RequestPriority {
           return ROUTINE;
         if ("urgent".equals(codeString))
           return URGENT;
-        if ("stat".equals(codeString))
-          return STAT;
         if ("asap".equals(codeString))
           return ASAP;
+        if ("stat".equals(codeString))
+          return STAT;
         throw new FHIRException("Unknown RequestPriority code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
             case ROUTINE: return "routine";
             case URGENT: return "urgent";
-            case STAT: return "stat";
             case ASAP: return "asap";
+            case STAT: return "stat";
             default: return "?";
           }
         }
@@ -83,10 +83,10 @@ public enum RequestPriority {
         }
         public String getDefinition() {
           switch (this) {
-            case ROUTINE: return "The order has a normal priority .";
-            case URGENT: return "The order should be urgently.";
-            case STAT: return "The order is time-critical.";
-            case ASAP: return "The order should be acted on as soon as possible.";
+            case ROUTINE: return "The request has normal priority";
+            case URGENT: return "The request should be actioned promptly - higher priority than routine";
+            case ASAP: return "The request should be actioned as soon as possible - higher priority than urgent";
+            case STAT: return "The request should be actioned immediately - highest possible priority.  E.g. an emergency";
             default: return "?";
           }
         }
@@ -94,8 +94,8 @@ public enum RequestPriority {
           switch (this) {
             case ROUTINE: return "Routine";
             case URGENT: return "Urgent";
-            case STAT: return "Stat";
             case ASAP: return "ASAP";
+            case STAT: return "STAT";
             default: return "?";
           }
     }

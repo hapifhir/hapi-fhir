@@ -861,64 +861,11 @@ public class GenericClientDstu3Test {
 		assertEquals("http://testForceConformanceCapabilityStatement.com/fhir/metadata", capt.getAllValues().get(3).getURI().toASCIIString());
 	}
 
-	@SuppressWarnings("deprecation")
-	@Test
-	public void testFetchCapabilityStatementReceiveConformance() throws Exception {
-		final IParser p = ourCtx.newXmlParser();
-
-		final Conformance conf = new Conformance();
-		conf.setCopyright("COPY");
-
-		final Patient patient = new Patient();
-		patient.addName().setFamily("FAM");
-
-		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
-		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
-		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
-		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
-		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<ReaderInputStream>() {
-
-			@Override
-			public ReaderInputStream answer(InvocationOnMock theInvocation) throws Throwable {
-				final String respString;
-				if (myAnswerCount > 1) {
-					ourLog.info("Encoding patient");
-					respString = p.encodeResourceToString(patient);
-				} else {
-					ourLog.info("Encoding conformance");
-					respString = p.encodeResourceToString(conf);
-				}
-				myAnswerCount++;
-				return new ReaderInputStream(new StringReader(respString), Charset.forName("UTF-8"));
-			}
-		});
-
-		ourCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.ONCE);
-		IGenericClient client = ourCtx.newRestfulGenericClient("http://testForceConformanceConformance.com/fhir");
-
-		client.read().resource("Patient").withId("1").execute();
-		assertEquals(3, capt.getAllValues().size());
-		assertEquals("http://testForceConformanceConformance.com/fhir/metadata", capt.getAllValues().get(0).getURI().toASCIIString());
-		assertEquals("http://testForceConformanceConformance.com/fhir/metadata", capt.getAllValues().get(1).getURI().toASCIIString());
-		assertEquals("http://testForceConformanceConformance.com/fhir/Patient/1", capt.getAllValues().get(2).getURI().toASCIIString());
-
-		client.read().resource("Patient").withId("1").execute();
-		assertEquals(4, capt.getAllValues().size());
-		assertEquals("http://testForceConformanceConformance.com/fhir/Patient/1", capt.getAllValues().get(3).getURI().toASCIIString());
-
-		myAnswerCount = 0;
-		client.forceConformanceCheck();
-		assertEquals(6, capt.getAllValues().size());
-		assertEquals("http://testForceConformanceConformance.com/fhir/metadata", capt.getAllValues().get(4).getURI().toASCIIString());
-		assertEquals("http://testForceConformanceConformance.com/fhir/metadata", capt.getAllValues().get(5).getURI().toASCIIString());
-	}
-
-	@SuppressWarnings("deprecation")
 	@Test
 	public void testForceConformance() throws Exception {
 		final IParser p = ourCtx.newXmlParser();
 
-		final Conformance conf = new Conformance();
+		final CapabilityStatement conf = new CapabilityStatement();
 		conf.setCopyright("COPY");
 
 		final Patient patient = new Patient();
@@ -933,7 +880,7 @@ public class GenericClientDstu3Test {
 			@Override
 			public ReaderInputStream answer(InvocationOnMock theInvocation) throws Throwable {
 				final String respString;
-				if (myAnswerCount > 1) {
+				if (myAnswerCount >= 1) {
 					ourLog.info("Encoding patient");
 					respString = p.encodeResourceToString(patient);
 				} else {
@@ -949,20 +896,18 @@ public class GenericClientDstu3Test {
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://testForceConformance.com/fhir");
 
 		client.read().resource("Patient").withId("1").execute();
-		assertEquals(3, capt.getAllValues().size());
+		assertEquals(2, capt.getAllValues().size());
 		assertEquals("http://testForceConformance.com/fhir/metadata", capt.getAllValues().get(0).getURI().toASCIIString());
-		assertEquals("http://testForceConformance.com/fhir/metadata", capt.getAllValues().get(1).getURI().toASCIIString());
-		assertEquals("http://testForceConformance.com/fhir/Patient/1", capt.getAllValues().get(2).getURI().toASCIIString());
+		assertEquals("http://testForceConformance.com/fhir/Patient/1", capt.getAllValues().get(1).getURI().toASCIIString());
 
 		client.read().resource("Patient").withId("1").execute();
-		assertEquals(4, capt.getAllValues().size());
-		assertEquals("http://testForceConformance.com/fhir/Patient/1", capt.getAllValues().get(3).getURI().toASCIIString());
+		assertEquals(3, capt.getAllValues().size());
+		assertEquals("http://testForceConformance.com/fhir/Patient/1", capt.getAllValues().get(2).getURI().toASCIIString());
 
 		myAnswerCount = 0;
 		client.forceConformanceCheck();
-		assertEquals(6, capt.getAllValues().size());
-		assertEquals("http://testForceConformance.com/fhir/metadata", capt.getAllValues().get(4).getURI().toASCIIString());
-		assertEquals("http://testForceConformance.com/fhir/metadata", capt.getAllValues().get(5).getURI().toASCIIString());
+		assertEquals(4, capt.getAllValues().size());
+		assertEquals("http://testForceConformance.com/fhir/metadata", capt.getAllValues().get(3).getURI().toASCIIString());
 	}
 
 	@Test
@@ -1904,7 +1849,7 @@ public class GenericClientDstu3Test {
 	public void testUserAgentForBinary() throws Exception {
 		IParser p = ourCtx.newXmlParser();
 
-		Conformance conf = new Conformance();
+		CapabilityStatement conf = new CapabilityStatement();
 		conf.setCopyright("COPY");
 
 		final String respString = p.encodeResourceToString(conf);
@@ -1941,7 +1886,7 @@ public class GenericClientDstu3Test {
 	public void testUserAgentForConformance() throws Exception {
 		IParser p = ourCtx.newXmlParser();
 
-		Conformance conf = new Conformance();
+		CapabilityStatement conf = new CapabilityStatement();
 		conf.setCopyright("COPY");
 
 		final String respString = p.encodeResourceToString(conf);
@@ -1958,7 +1903,7 @@ public class GenericClientDstu3Test {
 
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
 
-		client.fetchConformance().ofType(Conformance.class).execute();
+		client.fetchConformance().ofType(CapabilityStatement.class).execute();
 		assertEquals("http://example.com/fhir/metadata", capt.getAllValues().get(0).getURI().toASCIIString());
 		validateUserAgent(capt);
 	}

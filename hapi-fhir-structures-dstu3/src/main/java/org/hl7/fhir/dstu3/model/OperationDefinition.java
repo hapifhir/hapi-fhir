@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
 
 import java.util.*;
 
@@ -117,8 +117,10 @@ public class OperationDefinition extends MetadataResource {
         throw new IllegalArgumentException("Unknown OperationKind code '"+codeString+"'");
         }
         public Enumeration<OperationKind> fromType(Base code) throws FHIRException {
-          if (code == null || code.isEmpty())
+          if (code == null)
             return null;
+          if (code.isEmpty())
+            return new Enumeration<OperationKind>(this);
           String codeString = ((PrimitiveType) code).asStringValue();
           if (codeString == null || "".equals(codeString))
             return null;
@@ -207,8 +209,10 @@ public class OperationDefinition extends MetadataResource {
         throw new IllegalArgumentException("Unknown OperationParameterUse code '"+codeString+"'");
         }
         public Enumeration<OperationParameterUse> fromType(Base code) throws FHIRException {
-          if (code == null || code.isEmpty())
+          if (code == null)
             return null;
+          if (code.isEmpty())
+            return new Enumeration<OperationParameterUse>(this);
           String codeString = ((PrimitiveType) code).asStringValue();
           if (codeString == null || "".equals(codeString))
             return null;
@@ -811,83 +815,106 @@ public class OperationDefinition extends MetadataResource {
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case 3373707: // name
           this.name = castToCode(value); // CodeType
-          break;
+          return value;
         case 116103: // use
-          this.use = new OperationParameterUseEnumFactory().fromType(value); // Enumeration<OperationParameterUse>
-          break;
+          value = new OperationParameterUseEnumFactory().fromType(castToCode(value));
+          this.use = (Enumeration) value; // Enumeration<OperationParameterUse>
+          return value;
         case 108114: // min
           this.min = castToInteger(value); // IntegerType
-          break;
+          return value;
         case 107876: // max
           this.max = castToString(value); // StringType
-          break;
+          return value;
         case 1587405498: // documentation
           this.documentation = castToString(value); // StringType
-          break;
+          return value;
         case 3575610: // type
           this.type = castToCode(value); // CodeType
-          break;
+          return value;
         case -710454014: // searchType
-          this.searchType = new SearchParamTypeEnumFactory().fromType(value); // Enumeration<SearchParamType>
-          break;
+          value = new SearchParamTypeEnumFactory().fromType(castToCode(value));
+          this.searchType = (Enumeration) value; // Enumeration<SearchParamType>
+          return value;
         case -309425751: // profile
           this.profile = castToReference(value); // Reference
-          break;
+          return value;
         case -108220795: // binding
           this.binding = (OperationDefinitionParameterBindingComponent) value; // OperationDefinitionParameterBindingComponent
-          break;
+          return value;
         case 3433459: // part
           this.getPart().add((OperationDefinitionParameterComponent) value); // OperationDefinitionParameterComponent
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("name"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("name")) {
           this.name = castToCode(value); // CodeType
-        else if (name.equals("use"))
-          this.use = new OperationParameterUseEnumFactory().fromType(value); // Enumeration<OperationParameterUse>
-        else if (name.equals("min"))
+        } else if (name.equals("use")) {
+          value = new OperationParameterUseEnumFactory().fromType(castToCode(value));
+          this.use = (Enumeration) value; // Enumeration<OperationParameterUse>
+        } else if (name.equals("min")) {
           this.min = castToInteger(value); // IntegerType
-        else if (name.equals("max"))
+        } else if (name.equals("max")) {
           this.max = castToString(value); // StringType
-        else if (name.equals("documentation"))
+        } else if (name.equals("documentation")) {
           this.documentation = castToString(value); // StringType
-        else if (name.equals("type"))
+        } else if (name.equals("type")) {
           this.type = castToCode(value); // CodeType
-        else if (name.equals("searchType"))
-          this.searchType = new SearchParamTypeEnumFactory().fromType(value); // Enumeration<SearchParamType>
-        else if (name.equals("profile"))
+        } else if (name.equals("searchType")) {
+          value = new SearchParamTypeEnumFactory().fromType(castToCode(value));
+          this.searchType = (Enumeration) value; // Enumeration<SearchParamType>
+        } else if (name.equals("profile")) {
           this.profile = castToReference(value); // Reference
-        else if (name.equals("binding"))
+        } else if (name.equals("binding")) {
           this.binding = (OperationDefinitionParameterBindingComponent) value; // OperationDefinitionParameterBindingComponent
-        else if (name.equals("part"))
+        } else if (name.equals("part")) {
           this.getPart().add((OperationDefinitionParameterComponent) value);
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 3373707: throw new FHIRException("Cannot make property name as it is not a complex type"); // CodeType
-        case 116103: throw new FHIRException("Cannot make property use as it is not a complex type"); // Enumeration<OperationParameterUse>
-        case 108114: throw new FHIRException("Cannot make property min as it is not a complex type"); // IntegerType
-        case 107876: throw new FHIRException("Cannot make property max as it is not a complex type"); // StringType
-        case 1587405498: throw new FHIRException("Cannot make property documentation as it is not a complex type"); // StringType
-        case 3575610: throw new FHIRException("Cannot make property type as it is not a complex type"); // CodeType
-        case -710454014: throw new FHIRException("Cannot make property searchType as it is not a complex type"); // Enumeration<SearchParamType>
-        case -309425751:  return getProfile(); // Reference
-        case -108220795:  return getBinding(); // OperationDefinitionParameterBindingComponent
-        case 3433459:  return addPart(); // OperationDefinitionParameterComponent
+        case 3373707:  return getNameElement();
+        case 116103:  return getUseElement();
+        case 108114:  return getMinElement();
+        case 107876:  return getMaxElement();
+        case 1587405498:  return getDocumentationElement();
+        case 3575610:  return getTypeElement();
+        case -710454014:  return getSearchTypeElement();
+        case -309425751:  return getProfile(); 
+        case -108220795:  return getBinding(); 
+        case 3433459:  return addPart(); 
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3373707: /*name*/ return new String[] {"code"};
+        case 116103: /*use*/ return new String[] {"code"};
+        case 108114: /*min*/ return new String[] {"integer"};
+        case 107876: /*max*/ return new String[] {"string"};
+        case 1587405498: /*documentation*/ return new String[] {"string"};
+        case 3575610: /*type*/ return new String[] {"code"};
+        case -710454014: /*searchType*/ return new String[] {"code"};
+        case -309425751: /*profile*/ return new String[] {"Reference"};
+        case -108220795: /*binding*/ return new String[] {};
+        case 3433459: /*part*/ return new String[] {"@OperationDefinition.parameter"};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }
@@ -1129,35 +1156,49 @@ public class OperationDefinition extends MetadataResource {
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case 1791316033: // strength
-          this.strength = new BindingStrengthEnumFactory().fromType(value); // Enumeration<BindingStrength>
-          break;
+          value = new BindingStrengthEnumFactory().fromType(castToCode(value));
+          this.strength = (Enumeration) value; // Enumeration<BindingStrength>
+          return value;
         case -1410174671: // valueSet
           this.valueSet = castToType(value); // Type
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("strength"))
-          this.strength = new BindingStrengthEnumFactory().fromType(value); // Enumeration<BindingStrength>
-        else if (name.equals("valueSet[x]"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("strength")) {
+          value = new BindingStrengthEnumFactory().fromType(castToCode(value));
+          this.strength = (Enumeration) value; // Enumeration<BindingStrength>
+        } else if (name.equals("valueSet[x]")) {
           this.valueSet = castToType(value); // Type
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 1791316033: throw new FHIRException("Cannot make property strength as it is not a complex type"); // Enumeration<BindingStrength>
-        case -1438410321:  return getValueSet(); // Type
+        case 1791316033:  return getStrengthElement();
+        case -1438410321:  return getValueSet(); 
+        case -1410174671:  return getValueSet(); 
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 1791316033: /*strength*/ return new String[] {"code"};
+        case -1410174671: /*valueSet*/ return new String[] {"uri", "Reference"};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }
@@ -1370,35 +1411,46 @@ public class OperationDefinition extends MetadataResource {
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case -379607596: // parameterName
           this.getParameterName().add(castToString(value)); // StringType
-          break;
+          return value;
         case 950398559: // comment
           this.comment = castToString(value); // StringType
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("parameterName"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("parameterName")) {
           this.getParameterName().add(castToString(value));
-        else if (name.equals("comment"))
+        } else if (name.equals("comment")) {
           this.comment = castToString(value); // StringType
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case -379607596: throw new FHIRException("Cannot make property parameterName as it is not a complex type"); // StringType
-        case 950398559: throw new FHIRException("Cannot make property comment as it is not a complex type"); // StringType
+        case -379607596:  return addParameterNameElement();
+        case 950398559:  return getCommentElement();
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -379607596: /*parameterName*/ return new String[] {"string"};
+        case 950398559: /*comment*/ return new String[] {"string"};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }
@@ -1545,10 +1597,10 @@ public class OperationDefinition extends MetadataResource {
     protected List<OperationDefinitionParameterComponent> parameter;
 
     /**
-     * Defines an appropriate combination of parameters to use when invoking this operation.
+     * Defines an appropriate combination of parameters to use when invoking this operation, to help code generators when generating overloaded parameter sets for this operation.
      */
     @Child(name = "overload", type = {}, order=11, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="For generating overloaded methods in code", formalDefinition="Defines an appropriate combination of parameters to use when invoking this operation." )
+    @Description(shortDefinition="Define overloaded variants for when  generating code", formalDefinition="Defines an appropriate combination of parameters to use when invoking this operation, to help code generators when generating overloaded parameter sets for this operation." )
     protected List<OperationDefinitionOverloadComponent> overload;
 
     private static final long serialVersionUID = 1292377899L;
@@ -2640,7 +2692,7 @@ public class OperationDefinition extends MetadataResource {
     }
 
     /**
-     * @return {@link #overload} (Defines an appropriate combination of parameters to use when invoking this operation.)
+     * @return {@link #overload} (Defines an appropriate combination of parameters to use when invoking this operation, to help code generators when generating overloaded parameter sets for this operation.)
      */
     public List<OperationDefinitionOverloadComponent> getOverload() { 
       if (this.overload == null)
@@ -2716,7 +2768,7 @@ public class OperationDefinition extends MetadataResource {
         childrenList.add(new Property("type", "boolean", "Indicates whether this operation or named query can be invoked at the resource type level for any given resource type level (e.g. without needing to choose a specific resource id for the context).", 0, java.lang.Integer.MAX_VALUE, type));
         childrenList.add(new Property("instance", "boolean", "Indicates whether this operation can be invoked on a particular instance of one of the given types.", 0, java.lang.Integer.MAX_VALUE, instance));
         childrenList.add(new Property("parameter", "", "The parameters for the operation/query.", 0, java.lang.Integer.MAX_VALUE, parameter));
-        childrenList.add(new Property("overload", "", "Defines an appropriate combination of parameters to use when invoking this operation.", 0, java.lang.Integer.MAX_VALUE, overload));
+        childrenList.add(new Property("overload", "", "Defines an appropriate combination of parameters to use when invoking this operation, to help code generators when generating overloaded parameter sets for this operation.", 0, java.lang.Integer.MAX_VALUE, overload));
       }
 
       @Override
@@ -2751,161 +2803,197 @@ public class OperationDefinition extends MetadataResource {
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case 116079: // url
           this.url = castToUri(value); // UriType
-          break;
+          return value;
         case 351608024: // version
           this.version = castToString(value); // StringType
-          break;
+          return value;
         case 3373707: // name
           this.name = castToString(value); // StringType
-          break;
+          return value;
         case -892481550: // status
-          this.status = new PublicationStatusEnumFactory().fromType(value); // Enumeration<PublicationStatus>
-          break;
+          value = new PublicationStatusEnumFactory().fromType(castToCode(value));
+          this.status = (Enumeration) value; // Enumeration<PublicationStatus>
+          return value;
         case 3292052: // kind
-          this.kind = new OperationKindEnumFactory().fromType(value); // Enumeration<OperationKind>
-          break;
+          value = new OperationKindEnumFactory().fromType(castToCode(value));
+          this.kind = (Enumeration) value; // Enumeration<OperationKind>
+          return value;
         case -404562712: // experimental
           this.experimental = castToBoolean(value); // BooleanType
-          break;
+          return value;
         case 3076014: // date
           this.date = castToDateTime(value); // DateTimeType
-          break;
+          return value;
         case 1447404028: // publisher
           this.publisher = castToString(value); // StringType
-          break;
+          return value;
         case 951526432: // contact
           this.getContact().add(castToContactDetail(value)); // ContactDetail
-          break;
+          return value;
         case -1724546052: // description
           this.description = castToMarkdown(value); // MarkdownType
-          break;
+          return value;
         case -669707736: // useContext
           this.getUseContext().add(castToUsageContext(value)); // UsageContext
-          break;
+          return value;
         case -507075711: // jurisdiction
           this.getJurisdiction().add(castToCodeableConcept(value)); // CodeableConcept
-          break;
+          return value;
         case -220463842: // purpose
           this.purpose = castToMarkdown(value); // MarkdownType
-          break;
+          return value;
         case 1680468793: // idempotent
           this.idempotent = castToBoolean(value); // BooleanType
-          break;
+          return value;
         case 3059181: // code
           this.code = castToCode(value); // CodeType
-          break;
+          return value;
         case 950398559: // comment
           this.comment = castToString(value); // StringType
-          break;
+          return value;
         case 3016401: // base
           this.base = castToReference(value); // Reference
-          break;
+          return value;
         case -341064690: // resource
           this.getResource().add(castToCode(value)); // CodeType
-          break;
+          return value;
         case -887328209: // system
           this.system = castToBoolean(value); // BooleanType
-          break;
+          return value;
         case 3575610: // type
           this.type = castToBoolean(value); // BooleanType
-          break;
+          return value;
         case 555127957: // instance
           this.instance = castToBoolean(value); // BooleanType
-          break;
+          return value;
         case 1954460585: // parameter
           this.getParameter().add((OperationDefinitionParameterComponent) value); // OperationDefinitionParameterComponent
-          break;
+          return value;
         case 529823674: // overload
           this.getOverload().add((OperationDefinitionOverloadComponent) value); // OperationDefinitionOverloadComponent
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("url"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("url")) {
           this.url = castToUri(value); // UriType
-        else if (name.equals("version"))
+        } else if (name.equals("version")) {
           this.version = castToString(value); // StringType
-        else if (name.equals("name"))
+        } else if (name.equals("name")) {
           this.name = castToString(value); // StringType
-        else if (name.equals("status"))
-          this.status = new PublicationStatusEnumFactory().fromType(value); // Enumeration<PublicationStatus>
-        else if (name.equals("kind"))
-          this.kind = new OperationKindEnumFactory().fromType(value); // Enumeration<OperationKind>
-        else if (name.equals("experimental"))
+        } else if (name.equals("status")) {
+          value = new PublicationStatusEnumFactory().fromType(castToCode(value));
+          this.status = (Enumeration) value; // Enumeration<PublicationStatus>
+        } else if (name.equals("kind")) {
+          value = new OperationKindEnumFactory().fromType(castToCode(value));
+          this.kind = (Enumeration) value; // Enumeration<OperationKind>
+        } else if (name.equals("experimental")) {
           this.experimental = castToBoolean(value); // BooleanType
-        else if (name.equals("date"))
+        } else if (name.equals("date")) {
           this.date = castToDateTime(value); // DateTimeType
-        else if (name.equals("publisher"))
+        } else if (name.equals("publisher")) {
           this.publisher = castToString(value); // StringType
-        else if (name.equals("contact"))
+        } else if (name.equals("contact")) {
           this.getContact().add(castToContactDetail(value));
-        else if (name.equals("description"))
+        } else if (name.equals("description")) {
           this.description = castToMarkdown(value); // MarkdownType
-        else if (name.equals("useContext"))
+        } else if (name.equals("useContext")) {
           this.getUseContext().add(castToUsageContext(value));
-        else if (name.equals("jurisdiction"))
+        } else if (name.equals("jurisdiction")) {
           this.getJurisdiction().add(castToCodeableConcept(value));
-        else if (name.equals("purpose"))
+        } else if (name.equals("purpose")) {
           this.purpose = castToMarkdown(value); // MarkdownType
-        else if (name.equals("idempotent"))
+        } else if (name.equals("idempotent")) {
           this.idempotent = castToBoolean(value); // BooleanType
-        else if (name.equals("code"))
+        } else if (name.equals("code")) {
           this.code = castToCode(value); // CodeType
-        else if (name.equals("comment"))
+        } else if (name.equals("comment")) {
           this.comment = castToString(value); // StringType
-        else if (name.equals("base"))
+        } else if (name.equals("base")) {
           this.base = castToReference(value); // Reference
-        else if (name.equals("resource"))
+        } else if (name.equals("resource")) {
           this.getResource().add(castToCode(value));
-        else if (name.equals("system"))
+        } else if (name.equals("system")) {
           this.system = castToBoolean(value); // BooleanType
-        else if (name.equals("type"))
+        } else if (name.equals("type")) {
           this.type = castToBoolean(value); // BooleanType
-        else if (name.equals("instance"))
+        } else if (name.equals("instance")) {
           this.instance = castToBoolean(value); // BooleanType
-        else if (name.equals("parameter"))
+        } else if (name.equals("parameter")) {
           this.getParameter().add((OperationDefinitionParameterComponent) value);
-        else if (name.equals("overload"))
+        } else if (name.equals("overload")) {
           this.getOverload().add((OperationDefinitionOverloadComponent) value);
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 116079: throw new FHIRException("Cannot make property url as it is not a complex type"); // UriType
-        case 351608024: throw new FHIRException("Cannot make property version as it is not a complex type"); // StringType
-        case 3373707: throw new FHIRException("Cannot make property name as it is not a complex type"); // StringType
-        case -892481550: throw new FHIRException("Cannot make property status as it is not a complex type"); // Enumeration<PublicationStatus>
-        case 3292052: throw new FHIRException("Cannot make property kind as it is not a complex type"); // Enumeration<OperationKind>
-        case -404562712: throw new FHIRException("Cannot make property experimental as it is not a complex type"); // BooleanType
-        case 3076014: throw new FHIRException("Cannot make property date as it is not a complex type"); // DateTimeType
-        case 1447404028: throw new FHIRException("Cannot make property publisher as it is not a complex type"); // StringType
-        case 951526432:  return addContact(); // ContactDetail
-        case -1724546052: throw new FHIRException("Cannot make property description as it is not a complex type"); // MarkdownType
-        case -669707736:  return addUseContext(); // UsageContext
-        case -507075711:  return addJurisdiction(); // CodeableConcept
-        case -220463842: throw new FHIRException("Cannot make property purpose as it is not a complex type"); // MarkdownType
-        case 1680468793: throw new FHIRException("Cannot make property idempotent as it is not a complex type"); // BooleanType
-        case 3059181: throw new FHIRException("Cannot make property code as it is not a complex type"); // CodeType
-        case 950398559: throw new FHIRException("Cannot make property comment as it is not a complex type"); // StringType
-        case 3016401:  return getBase(); // Reference
-        case -341064690: throw new FHIRException("Cannot make property resource as it is not a complex type"); // CodeType
-        case -887328209: throw new FHIRException("Cannot make property system as it is not a complex type"); // BooleanType
-        case 3575610: throw new FHIRException("Cannot make property type as it is not a complex type"); // BooleanType
-        case 555127957: throw new FHIRException("Cannot make property instance as it is not a complex type"); // BooleanType
-        case 1954460585:  return addParameter(); // OperationDefinitionParameterComponent
-        case 529823674:  return addOverload(); // OperationDefinitionOverloadComponent
+        case 116079:  return getUrlElement();
+        case 351608024:  return getVersionElement();
+        case 3373707:  return getNameElement();
+        case -892481550:  return getStatusElement();
+        case 3292052:  return getKindElement();
+        case -404562712:  return getExperimentalElement();
+        case 3076014:  return getDateElement();
+        case 1447404028:  return getPublisherElement();
+        case 951526432:  return addContact(); 
+        case -1724546052:  return getDescriptionElement();
+        case -669707736:  return addUseContext(); 
+        case -507075711:  return addJurisdiction(); 
+        case -220463842:  return getPurposeElement();
+        case 1680468793:  return getIdempotentElement();
+        case 3059181:  return getCodeElement();
+        case 950398559:  return getCommentElement();
+        case 3016401:  return getBase(); 
+        case -341064690:  return addResourceElement();
+        case -887328209:  return getSystemElement();
+        case 3575610:  return getTypeElement();
+        case 555127957:  return getInstanceElement();
+        case 1954460585:  return addParameter(); 
+        case 529823674:  return addOverload(); 
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 116079: /*url*/ return new String[] {"uri"};
+        case 351608024: /*version*/ return new String[] {"string"};
+        case 3373707: /*name*/ return new String[] {"string"};
+        case -892481550: /*status*/ return new String[] {"code"};
+        case 3292052: /*kind*/ return new String[] {"code"};
+        case -404562712: /*experimental*/ return new String[] {"boolean"};
+        case 3076014: /*date*/ return new String[] {"dateTime"};
+        case 1447404028: /*publisher*/ return new String[] {"string"};
+        case 951526432: /*contact*/ return new String[] {"ContactDetail"};
+        case -1724546052: /*description*/ return new String[] {"markdown"};
+        case -669707736: /*useContext*/ return new String[] {"UsageContext"};
+        case -507075711: /*jurisdiction*/ return new String[] {"CodeableConcept"};
+        case -220463842: /*purpose*/ return new String[] {"markdown"};
+        case 1680468793: /*idempotent*/ return new String[] {"boolean"};
+        case 3059181: /*code*/ return new String[] {"code"};
+        case 950398559: /*comment*/ return new String[] {"string"};
+        case 3016401: /*base*/ return new String[] {"Reference"};
+        case -341064690: /*resource*/ return new String[] {"code"};
+        case -887328209: /*system*/ return new String[] {"boolean"};
+        case 3575610: /*type*/ return new String[] {"boolean"};
+        case 555127957: /*instance*/ return new String[] {"boolean"};
+        case 1954460585: /*parameter*/ return new String[] {};
+        case 529823674: /*overload*/ return new String[] {};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }
@@ -3229,17 +3317,17 @@ public class OperationDefinition extends MetadataResource {
  /**
    * Search parameter: <b>version</b>
    * <p>
-   * Description: <b>The version identifier of the operation definition</b><br>
+   * Description: <b>The business version of the operation definition</b><br>
    * Type: <b>token</b><br>
    * Path: <b>OperationDefinition.version</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="version", path="OperationDefinition.version", description="The version identifier of the operation definition", type="token" )
+  @SearchParamDefinition(name="version", path="OperationDefinition.version", description="The business version of the operation definition", type="token" )
   public static final String SP_VERSION = "version";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>version</b>
    * <p>
-   * Description: <b>The version identifier of the operation definition</b><br>
+   * Description: <b>The business version of the operation definition</b><br>
    * Type: <b>token</b><br>
    * Path: <b>OperationDefinition.version</b><br>
    * </p>

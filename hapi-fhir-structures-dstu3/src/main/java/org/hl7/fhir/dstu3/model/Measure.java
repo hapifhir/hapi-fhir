@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
 
 import java.util.*;
 
@@ -47,682 +47,8 @@ import org.hl7.fhir.exceptions.FHIRException;
  * The Measure resource provides the definition of a quality measure.
  */
 @ResourceDef(name="Measure", profile="http://hl7.org/fhir/Profile/Measure")
-@ChildOrder(names={"url", "identifier", "version", "name", "title", "status", "experimental", "date", "description", "purpose", "usage", "approvalDate", "lastReviewDate", "effectivePeriod", "useContext", "jurisdiction", "topic", "contributor", "publisher", "contact", "copyright", "relatedArtifact", "library", "disclaimer", "scoring", "compositeScoring", "type", "riskAdjustment", "rateAggregation", "rationale", "clinicalRecommendationStatement", "improvementNotation", "definition", "guidance", "set", "group", "supplementalData"})
+@ChildOrder(names={"url", "identifier", "version", "name", "title", "status", "experimental", "date", "publisher", "description", "purpose", "usage", "approvalDate", "lastReviewDate", "effectivePeriod", "useContext", "jurisdiction", "topic", "contributor", "contact", "copyright", "relatedArtifact", "library", "disclaimer", "scoring", "compositeScoring", "type", "riskAdjustment", "rateAggregation", "rationale", "clinicalRecommendationStatement", "improvementNotation", "definition", "guidance", "set", "group", "supplementalData"})
 public class Measure extends MetadataResource {
-
-    public enum MeasureScoring {
-        /**
-         * The measure score is defined using a proportion
-         */
-        PROPORTION, 
-        /**
-         * The measure score is defined using a ratio
-         */
-        RATIO, 
-        /**
-         * The score is defined by a calculation of some quantity
-         */
-        CONTINUOUSVARIABLE, 
-        /**
-         * The measure is a cohort definition
-         */
-        COHORT, 
-        /**
-         * added to help the parsers with the generic types
-         */
-        NULL;
-        public static MeasureScoring fromCode(String codeString) throws FHIRException {
-            if (codeString == null || "".equals(codeString))
-                return null;
-        if ("proportion".equals(codeString))
-          return PROPORTION;
-        if ("ratio".equals(codeString))
-          return RATIO;
-        if ("continuous-variable".equals(codeString))
-          return CONTINUOUSVARIABLE;
-        if ("cohort".equals(codeString))
-          return COHORT;
-        if (Configuration.isAcceptInvalidEnums())
-          return null;
-        else
-          throw new FHIRException("Unknown MeasureScoring code '"+codeString+"'");
-        }
-        public String toCode() {
-          switch (this) {
-            case PROPORTION: return "proportion";
-            case RATIO: return "ratio";
-            case CONTINUOUSVARIABLE: return "continuous-variable";
-            case COHORT: return "cohort";
-            default: return "?";
-          }
-        }
-        public String getSystem() {
-          switch (this) {
-            case PROPORTION: return "http://hl7.org/fhir/measure-scoring";
-            case RATIO: return "http://hl7.org/fhir/measure-scoring";
-            case CONTINUOUSVARIABLE: return "http://hl7.org/fhir/measure-scoring";
-            case COHORT: return "http://hl7.org/fhir/measure-scoring";
-            default: return "?";
-          }
-        }
-        public String getDefinition() {
-          switch (this) {
-            case PROPORTION: return "The measure score is defined using a proportion";
-            case RATIO: return "The measure score is defined using a ratio";
-            case CONTINUOUSVARIABLE: return "The score is defined by a calculation of some quantity";
-            case COHORT: return "The measure is a cohort definition";
-            default: return "?";
-          }
-        }
-        public String getDisplay() {
-          switch (this) {
-            case PROPORTION: return "Proportion";
-            case RATIO: return "Ratio";
-            case CONTINUOUSVARIABLE: return "Continuous Variable";
-            case COHORT: return "Cohort";
-            default: return "?";
-          }
-        }
-    }
-
-  public static class MeasureScoringEnumFactory implements EnumFactory<MeasureScoring> {
-    public MeasureScoring fromCode(String codeString) throws IllegalArgumentException {
-      if (codeString == null || "".equals(codeString))
-            if (codeString == null || "".equals(codeString))
-                return null;
-        if ("proportion".equals(codeString))
-          return MeasureScoring.PROPORTION;
-        if ("ratio".equals(codeString))
-          return MeasureScoring.RATIO;
-        if ("continuous-variable".equals(codeString))
-          return MeasureScoring.CONTINUOUSVARIABLE;
-        if ("cohort".equals(codeString))
-          return MeasureScoring.COHORT;
-        throw new IllegalArgumentException("Unknown MeasureScoring code '"+codeString+"'");
-        }
-        public Enumeration<MeasureScoring> fromType(Base code) throws FHIRException {
-          if (code == null || code.isEmpty())
-            return null;
-          String codeString = ((PrimitiveType) code).asStringValue();
-          if (codeString == null || "".equals(codeString))
-            return null;
-        if ("proportion".equals(codeString))
-          return new Enumeration<MeasureScoring>(this, MeasureScoring.PROPORTION);
-        if ("ratio".equals(codeString))
-          return new Enumeration<MeasureScoring>(this, MeasureScoring.RATIO);
-        if ("continuous-variable".equals(codeString))
-          return new Enumeration<MeasureScoring>(this, MeasureScoring.CONTINUOUSVARIABLE);
-        if ("cohort".equals(codeString))
-          return new Enumeration<MeasureScoring>(this, MeasureScoring.COHORT);
-        throw new FHIRException("Unknown MeasureScoring code '"+codeString+"'");
-        }
-    public String toCode(MeasureScoring code) {
-      if (code == MeasureScoring.PROPORTION)
-        return "proportion";
-      if (code == MeasureScoring.RATIO)
-        return "ratio";
-      if (code == MeasureScoring.CONTINUOUSVARIABLE)
-        return "continuous-variable";
-      if (code == MeasureScoring.COHORT)
-        return "cohort";
-      return "?";
-      }
-    public String toSystem(MeasureScoring code) {
-      return code.getSystem();
-      }
-    }
-
-    public enum CompositeMeasureScoring {
-        /**
-         * Opportunity scoring combines the scores from component measures by combining the numerators and denominators for each component
-         */
-        OPPORTUNITY, 
-        /**
-         * All-or-nothing scoring includes an individual in the numerator of the composite measure if they are in the numerators of all of the component measures in which they are in the denominator
-         */
-        ALLORNOTHING, 
-        /**
-         * Linear scoring gives an individual a score based on the number of numerators in which they appear
-         */
-        LINEAR, 
-        /**
-         * Weighted scoring gives an individual a score based on a weigthed factor for each component numerator in which they appear
-         */
-        WEIGHTED, 
-        /**
-         * added to help the parsers with the generic types
-         */
-        NULL;
-        public static CompositeMeasureScoring fromCode(String codeString) throws FHIRException {
-            if (codeString == null || "".equals(codeString))
-                return null;
-        if ("opportunity".equals(codeString))
-          return OPPORTUNITY;
-        if ("all-or-nothing".equals(codeString))
-          return ALLORNOTHING;
-        if ("linear".equals(codeString))
-          return LINEAR;
-        if ("weighted".equals(codeString))
-          return WEIGHTED;
-        if (Configuration.isAcceptInvalidEnums())
-          return null;
-        else
-          throw new FHIRException("Unknown CompositeMeasureScoring code '"+codeString+"'");
-        }
-        public String toCode() {
-          switch (this) {
-            case OPPORTUNITY: return "opportunity";
-            case ALLORNOTHING: return "all-or-nothing";
-            case LINEAR: return "linear";
-            case WEIGHTED: return "weighted";
-            default: return "?";
-          }
-        }
-        public String getSystem() {
-          switch (this) {
-            case OPPORTUNITY: return "http://hl7.org/fhir/composite-measure-scoring";
-            case ALLORNOTHING: return "http://hl7.org/fhir/composite-measure-scoring";
-            case LINEAR: return "http://hl7.org/fhir/composite-measure-scoring";
-            case WEIGHTED: return "http://hl7.org/fhir/composite-measure-scoring";
-            default: return "?";
-          }
-        }
-        public String getDefinition() {
-          switch (this) {
-            case OPPORTUNITY: return "Opportunity scoring combines the scores from component measures by combining the numerators and denominators for each component";
-            case ALLORNOTHING: return "All-or-nothing scoring includes an individual in the numerator of the composite measure if they are in the numerators of all of the component measures in which they are in the denominator";
-            case LINEAR: return "Linear scoring gives an individual a score based on the number of numerators in which they appear";
-            case WEIGHTED: return "Weighted scoring gives an individual a score based on a weigthed factor for each component numerator in which they appear";
-            default: return "?";
-          }
-        }
-        public String getDisplay() {
-          switch (this) {
-            case OPPORTUNITY: return "Opportunity";
-            case ALLORNOTHING: return "All-or-nothing";
-            case LINEAR: return "Linear";
-            case WEIGHTED: return "Weighted";
-            default: return "?";
-          }
-        }
-    }
-
-  public static class CompositeMeasureScoringEnumFactory implements EnumFactory<CompositeMeasureScoring> {
-    public CompositeMeasureScoring fromCode(String codeString) throws IllegalArgumentException {
-      if (codeString == null || "".equals(codeString))
-            if (codeString == null || "".equals(codeString))
-                return null;
-        if ("opportunity".equals(codeString))
-          return CompositeMeasureScoring.OPPORTUNITY;
-        if ("all-or-nothing".equals(codeString))
-          return CompositeMeasureScoring.ALLORNOTHING;
-        if ("linear".equals(codeString))
-          return CompositeMeasureScoring.LINEAR;
-        if ("weighted".equals(codeString))
-          return CompositeMeasureScoring.WEIGHTED;
-        throw new IllegalArgumentException("Unknown CompositeMeasureScoring code '"+codeString+"'");
-        }
-        public Enumeration<CompositeMeasureScoring> fromType(Base code) throws FHIRException {
-          if (code == null || code.isEmpty())
-            return null;
-          String codeString = ((PrimitiveType) code).asStringValue();
-          if (codeString == null || "".equals(codeString))
-            return null;
-        if ("opportunity".equals(codeString))
-          return new Enumeration<CompositeMeasureScoring>(this, CompositeMeasureScoring.OPPORTUNITY);
-        if ("all-or-nothing".equals(codeString))
-          return new Enumeration<CompositeMeasureScoring>(this, CompositeMeasureScoring.ALLORNOTHING);
-        if ("linear".equals(codeString))
-          return new Enumeration<CompositeMeasureScoring>(this, CompositeMeasureScoring.LINEAR);
-        if ("weighted".equals(codeString))
-          return new Enumeration<CompositeMeasureScoring>(this, CompositeMeasureScoring.WEIGHTED);
-        throw new FHIRException("Unknown CompositeMeasureScoring code '"+codeString+"'");
-        }
-    public String toCode(CompositeMeasureScoring code) {
-      if (code == CompositeMeasureScoring.OPPORTUNITY)
-        return "opportunity";
-      if (code == CompositeMeasureScoring.ALLORNOTHING)
-        return "all-or-nothing";
-      if (code == CompositeMeasureScoring.LINEAR)
-        return "linear";
-      if (code == CompositeMeasureScoring.WEIGHTED)
-        return "weighted";
-      return "?";
-      }
-    public String toSystem(CompositeMeasureScoring code) {
-      return code.getSystem();
-      }
-    }
-
-    public enum MeasureType {
-        /**
-         * A measure which focuses on a process which leads to a certain outcome, meaning that a scientific basis exists for believing that the process, when executed well, will increase the probability of achieving a desired outcome
-         */
-        PROCESS, 
-        /**
-         * A measure that indicates the result of the performance (or non-performance) of a function or process
-         */
-        OUTCOME, 
-        /**
-         * A measure that focuses on a health care provider's capacity, systems, and processes to provide high-quality care
-         */
-        STRUCTURE, 
-        /**
-         * A measure that focuses on patient-reported information
-         */
-        PATIENTREPORTEDOUTCOME, 
-        /**
-         * A measure that combines multiple component measures in to a single quality measure
-         */
-        COMPOSITE, 
-        /**
-         * added to help the parsers with the generic types
-         */
-        NULL;
-        public static MeasureType fromCode(String codeString) throws FHIRException {
-            if (codeString == null || "".equals(codeString))
-                return null;
-        if ("process".equals(codeString))
-          return PROCESS;
-        if ("outcome".equals(codeString))
-          return OUTCOME;
-        if ("structure".equals(codeString))
-          return STRUCTURE;
-        if ("patient-reported-outcome".equals(codeString))
-          return PATIENTREPORTEDOUTCOME;
-        if ("composite".equals(codeString))
-          return COMPOSITE;
-        if (Configuration.isAcceptInvalidEnums())
-          return null;
-        else
-          throw new FHIRException("Unknown MeasureType code '"+codeString+"'");
-        }
-        public String toCode() {
-          switch (this) {
-            case PROCESS: return "process";
-            case OUTCOME: return "outcome";
-            case STRUCTURE: return "structure";
-            case PATIENTREPORTEDOUTCOME: return "patient-reported-outcome";
-            case COMPOSITE: return "composite";
-            default: return "?";
-          }
-        }
-        public String getSystem() {
-          switch (this) {
-            case PROCESS: return "http://hl7.org/fhir/measure-type";
-            case OUTCOME: return "http://hl7.org/fhir/measure-type";
-            case STRUCTURE: return "http://hl7.org/fhir/measure-type";
-            case PATIENTREPORTEDOUTCOME: return "http://hl7.org/fhir/measure-type";
-            case COMPOSITE: return "http://hl7.org/fhir/measure-type";
-            default: return "?";
-          }
-        }
-        public String getDefinition() {
-          switch (this) {
-            case PROCESS: return "A measure which focuses on a process which leads to a certain outcome, meaning that a scientific basis exists for believing that the process, when executed well, will increase the probability of achieving a desired outcome";
-            case OUTCOME: return "A measure that indicates the result of the performance (or non-performance) of a function or process";
-            case STRUCTURE: return "A measure that focuses on a health care provider's capacity, systems, and processes to provide high-quality care";
-            case PATIENTREPORTEDOUTCOME: return "A measure that focuses on patient-reported information";
-            case COMPOSITE: return "A measure that combines multiple component measures in to a single quality measure";
-            default: return "?";
-          }
-        }
-        public String getDisplay() {
-          switch (this) {
-            case PROCESS: return "Process";
-            case OUTCOME: return "Outcome";
-            case STRUCTURE: return "Structure";
-            case PATIENTREPORTEDOUTCOME: return "Patient Reported Outcome";
-            case COMPOSITE: return "Composite";
-            default: return "?";
-          }
-        }
-    }
-
-  public static class MeasureTypeEnumFactory implements EnumFactory<MeasureType> {
-    public MeasureType fromCode(String codeString) throws IllegalArgumentException {
-      if (codeString == null || "".equals(codeString))
-            if (codeString == null || "".equals(codeString))
-                return null;
-        if ("process".equals(codeString))
-          return MeasureType.PROCESS;
-        if ("outcome".equals(codeString))
-          return MeasureType.OUTCOME;
-        if ("structure".equals(codeString))
-          return MeasureType.STRUCTURE;
-        if ("patient-reported-outcome".equals(codeString))
-          return MeasureType.PATIENTREPORTEDOUTCOME;
-        if ("composite".equals(codeString))
-          return MeasureType.COMPOSITE;
-        throw new IllegalArgumentException("Unknown MeasureType code '"+codeString+"'");
-        }
-        public Enumeration<MeasureType> fromType(Base code) throws FHIRException {
-          if (code == null || code.isEmpty())
-            return null;
-          String codeString = ((PrimitiveType) code).asStringValue();
-          if (codeString == null || "".equals(codeString))
-            return null;
-        if ("process".equals(codeString))
-          return new Enumeration<MeasureType>(this, MeasureType.PROCESS);
-        if ("outcome".equals(codeString))
-          return new Enumeration<MeasureType>(this, MeasureType.OUTCOME);
-        if ("structure".equals(codeString))
-          return new Enumeration<MeasureType>(this, MeasureType.STRUCTURE);
-        if ("patient-reported-outcome".equals(codeString))
-          return new Enumeration<MeasureType>(this, MeasureType.PATIENTREPORTEDOUTCOME);
-        if ("composite".equals(codeString))
-          return new Enumeration<MeasureType>(this, MeasureType.COMPOSITE);
-        throw new FHIRException("Unknown MeasureType code '"+codeString+"'");
-        }
-    public String toCode(MeasureType code) {
-      if (code == MeasureType.PROCESS)
-        return "process";
-      if (code == MeasureType.OUTCOME)
-        return "outcome";
-      if (code == MeasureType.STRUCTURE)
-        return "structure";
-      if (code == MeasureType.PATIENTREPORTEDOUTCOME)
-        return "patient-reported-outcome";
-      if (code == MeasureType.COMPOSITE)
-        return "composite";
-      return "?";
-      }
-    public String toSystem(MeasureType code) {
-      return code.getSystem();
-      }
-    }
-
-    public enum MeasurePopulationType {
-        /**
-         * The initial population for the measure
-         */
-        INITIALPOPULATION, 
-        /**
-         * The numerator for the measure
-         */
-        NUMERATOR, 
-        /**
-         * The numerator exclusion for the measure
-         */
-        NUMERATOREXCLUSION, 
-        /**
-         * The denominator for the measure
-         */
-        DENOMINATOR, 
-        /**
-         * The denominator exclusion for the measure
-         */
-        DENOMINATOREXCLUSION, 
-        /**
-         * The denominator exception for the measure
-         */
-        DENOMINATOREXCEPTION, 
-        /**
-         * The measure population for the measure
-         */
-        MEASUREPOPULATION, 
-        /**
-         * The measure population exclusion for the measure
-         */
-        MEASUREPOPULATIONEXCLUSION, 
-        /**
-         * The measure observation for the measure
-         */
-        MEASUREOBSERVATION, 
-        /**
-         * added to help the parsers with the generic types
-         */
-        NULL;
-        public static MeasurePopulationType fromCode(String codeString) throws FHIRException {
-            if (codeString == null || "".equals(codeString))
-                return null;
-        if ("initial-population".equals(codeString))
-          return INITIALPOPULATION;
-        if ("numerator".equals(codeString))
-          return NUMERATOR;
-        if ("numerator-exclusion".equals(codeString))
-          return NUMERATOREXCLUSION;
-        if ("denominator".equals(codeString))
-          return DENOMINATOR;
-        if ("denominator-exclusion".equals(codeString))
-          return DENOMINATOREXCLUSION;
-        if ("denominator-exception".equals(codeString))
-          return DENOMINATOREXCEPTION;
-        if ("measure-population".equals(codeString))
-          return MEASUREPOPULATION;
-        if ("measure-population-exclusion".equals(codeString))
-          return MEASUREPOPULATIONEXCLUSION;
-        if ("measure-observation".equals(codeString))
-          return MEASUREOBSERVATION;
-        if (Configuration.isAcceptInvalidEnums())
-          return null;
-        else
-          throw new FHIRException("Unknown MeasurePopulationType code '"+codeString+"'");
-        }
-        public String toCode() {
-          switch (this) {
-            case INITIALPOPULATION: return "initial-population";
-            case NUMERATOR: return "numerator";
-            case NUMERATOREXCLUSION: return "numerator-exclusion";
-            case DENOMINATOR: return "denominator";
-            case DENOMINATOREXCLUSION: return "denominator-exclusion";
-            case DENOMINATOREXCEPTION: return "denominator-exception";
-            case MEASUREPOPULATION: return "measure-population";
-            case MEASUREPOPULATIONEXCLUSION: return "measure-population-exclusion";
-            case MEASUREOBSERVATION: return "measure-observation";
-            default: return "?";
-          }
-        }
-        public String getSystem() {
-          switch (this) {
-            case INITIALPOPULATION: return "http://hl7.org/fhir/measure-population";
-            case NUMERATOR: return "http://hl7.org/fhir/measure-population";
-            case NUMERATOREXCLUSION: return "http://hl7.org/fhir/measure-population";
-            case DENOMINATOR: return "http://hl7.org/fhir/measure-population";
-            case DENOMINATOREXCLUSION: return "http://hl7.org/fhir/measure-population";
-            case DENOMINATOREXCEPTION: return "http://hl7.org/fhir/measure-population";
-            case MEASUREPOPULATION: return "http://hl7.org/fhir/measure-population";
-            case MEASUREPOPULATIONEXCLUSION: return "http://hl7.org/fhir/measure-population";
-            case MEASUREOBSERVATION: return "http://hl7.org/fhir/measure-population";
-            default: return "?";
-          }
-        }
-        public String getDefinition() {
-          switch (this) {
-            case INITIALPOPULATION: return "The initial population for the measure";
-            case NUMERATOR: return "The numerator for the measure";
-            case NUMERATOREXCLUSION: return "The numerator exclusion for the measure";
-            case DENOMINATOR: return "The denominator for the measure";
-            case DENOMINATOREXCLUSION: return "The denominator exclusion for the measure";
-            case DENOMINATOREXCEPTION: return "The denominator exception for the measure";
-            case MEASUREPOPULATION: return "The measure population for the measure";
-            case MEASUREPOPULATIONEXCLUSION: return "The measure population exclusion for the measure";
-            case MEASUREOBSERVATION: return "The measure observation for the measure";
-            default: return "?";
-          }
-        }
-        public String getDisplay() {
-          switch (this) {
-            case INITIALPOPULATION: return "Initial Population";
-            case NUMERATOR: return "Numerator";
-            case NUMERATOREXCLUSION: return "Numerator Exclusion";
-            case DENOMINATOR: return "Denominator";
-            case DENOMINATOREXCLUSION: return "Denominator Exclusion";
-            case DENOMINATOREXCEPTION: return "Denominator Exception";
-            case MEASUREPOPULATION: return "Measure Population";
-            case MEASUREPOPULATIONEXCLUSION: return "Measure Population Exclusion";
-            case MEASUREOBSERVATION: return "Measure Observation";
-            default: return "?";
-          }
-        }
-    }
-
-  public static class MeasurePopulationTypeEnumFactory implements EnumFactory<MeasurePopulationType> {
-    public MeasurePopulationType fromCode(String codeString) throws IllegalArgumentException {
-      if (codeString == null || "".equals(codeString))
-            if (codeString == null || "".equals(codeString))
-                return null;
-        if ("initial-population".equals(codeString))
-          return MeasurePopulationType.INITIALPOPULATION;
-        if ("numerator".equals(codeString))
-          return MeasurePopulationType.NUMERATOR;
-        if ("numerator-exclusion".equals(codeString))
-          return MeasurePopulationType.NUMERATOREXCLUSION;
-        if ("denominator".equals(codeString))
-          return MeasurePopulationType.DENOMINATOR;
-        if ("denominator-exclusion".equals(codeString))
-          return MeasurePopulationType.DENOMINATOREXCLUSION;
-        if ("denominator-exception".equals(codeString))
-          return MeasurePopulationType.DENOMINATOREXCEPTION;
-        if ("measure-population".equals(codeString))
-          return MeasurePopulationType.MEASUREPOPULATION;
-        if ("measure-population-exclusion".equals(codeString))
-          return MeasurePopulationType.MEASUREPOPULATIONEXCLUSION;
-        if ("measure-observation".equals(codeString))
-          return MeasurePopulationType.MEASUREOBSERVATION;
-        throw new IllegalArgumentException("Unknown MeasurePopulationType code '"+codeString+"'");
-        }
-        public Enumeration<MeasurePopulationType> fromType(Base code) throws FHIRException {
-          if (code == null || code.isEmpty())
-            return null;
-          String codeString = ((PrimitiveType) code).asStringValue();
-          if (codeString == null || "".equals(codeString))
-            return null;
-        if ("initial-population".equals(codeString))
-          return new Enumeration<MeasurePopulationType>(this, MeasurePopulationType.INITIALPOPULATION);
-        if ("numerator".equals(codeString))
-          return new Enumeration<MeasurePopulationType>(this, MeasurePopulationType.NUMERATOR);
-        if ("numerator-exclusion".equals(codeString))
-          return new Enumeration<MeasurePopulationType>(this, MeasurePopulationType.NUMERATOREXCLUSION);
-        if ("denominator".equals(codeString))
-          return new Enumeration<MeasurePopulationType>(this, MeasurePopulationType.DENOMINATOR);
-        if ("denominator-exclusion".equals(codeString))
-          return new Enumeration<MeasurePopulationType>(this, MeasurePopulationType.DENOMINATOREXCLUSION);
-        if ("denominator-exception".equals(codeString))
-          return new Enumeration<MeasurePopulationType>(this, MeasurePopulationType.DENOMINATOREXCEPTION);
-        if ("measure-population".equals(codeString))
-          return new Enumeration<MeasurePopulationType>(this, MeasurePopulationType.MEASUREPOPULATION);
-        if ("measure-population-exclusion".equals(codeString))
-          return new Enumeration<MeasurePopulationType>(this, MeasurePopulationType.MEASUREPOPULATIONEXCLUSION);
-        if ("measure-observation".equals(codeString))
-          return new Enumeration<MeasurePopulationType>(this, MeasurePopulationType.MEASUREOBSERVATION);
-        throw new FHIRException("Unknown MeasurePopulationType code '"+codeString+"'");
-        }
-    public String toCode(MeasurePopulationType code) {
-      if (code == MeasurePopulationType.INITIALPOPULATION)
-        return "initial-population";
-      if (code == MeasurePopulationType.NUMERATOR)
-        return "numerator";
-      if (code == MeasurePopulationType.NUMERATOREXCLUSION)
-        return "numerator-exclusion";
-      if (code == MeasurePopulationType.DENOMINATOR)
-        return "denominator";
-      if (code == MeasurePopulationType.DENOMINATOREXCLUSION)
-        return "denominator-exclusion";
-      if (code == MeasurePopulationType.DENOMINATOREXCEPTION)
-        return "denominator-exception";
-      if (code == MeasurePopulationType.MEASUREPOPULATION)
-        return "measure-population";
-      if (code == MeasurePopulationType.MEASUREPOPULATIONEXCLUSION)
-        return "measure-population-exclusion";
-      if (code == MeasurePopulationType.MEASUREOBSERVATION)
-        return "measure-observation";
-      return "?";
-      }
-    public String toSystem(MeasurePopulationType code) {
-      return code.getSystem();
-      }
-    }
-
-    public enum MeasureDataUsage {
-        /**
-         * The data is intended to be provided as additional information alongside the measure results
-         */
-        SUPPLEMENTALDATA, 
-        /**
-         * The data is intended to be used to calculate and apply a risk adjustment model for the measure
-         */
-        RISKADJUSTMENTFACTOR, 
-        /**
-         * added to help the parsers with the generic types
-         */
-        NULL;
-        public static MeasureDataUsage fromCode(String codeString) throws FHIRException {
-            if (codeString == null || "".equals(codeString))
-                return null;
-        if ("supplemental-data".equals(codeString))
-          return SUPPLEMENTALDATA;
-        if ("risk-adjustment-factor".equals(codeString))
-          return RISKADJUSTMENTFACTOR;
-        if (Configuration.isAcceptInvalidEnums())
-          return null;
-        else
-          throw new FHIRException("Unknown MeasureDataUsage code '"+codeString+"'");
-        }
-        public String toCode() {
-          switch (this) {
-            case SUPPLEMENTALDATA: return "supplemental-data";
-            case RISKADJUSTMENTFACTOR: return "risk-adjustment-factor";
-            default: return "?";
-          }
-        }
-        public String getSystem() {
-          switch (this) {
-            case SUPPLEMENTALDATA: return "http://hl7.org/fhir/measure-data-usage";
-            case RISKADJUSTMENTFACTOR: return "http://hl7.org/fhir/measure-data-usage";
-            default: return "?";
-          }
-        }
-        public String getDefinition() {
-          switch (this) {
-            case SUPPLEMENTALDATA: return "The data is intended to be provided as additional information alongside the measure results";
-            case RISKADJUSTMENTFACTOR: return "The data is intended to be used to calculate and apply a risk adjustment model for the measure";
-            default: return "?";
-          }
-        }
-        public String getDisplay() {
-          switch (this) {
-            case SUPPLEMENTALDATA: return "Supplemental Data";
-            case RISKADJUSTMENTFACTOR: return "Risk Adjustment Factor";
-            default: return "?";
-          }
-        }
-    }
-
-  public static class MeasureDataUsageEnumFactory implements EnumFactory<MeasureDataUsage> {
-    public MeasureDataUsage fromCode(String codeString) throws IllegalArgumentException {
-      if (codeString == null || "".equals(codeString))
-            if (codeString == null || "".equals(codeString))
-                return null;
-        if ("supplemental-data".equals(codeString))
-          return MeasureDataUsage.SUPPLEMENTALDATA;
-        if ("risk-adjustment-factor".equals(codeString))
-          return MeasureDataUsage.RISKADJUSTMENTFACTOR;
-        throw new IllegalArgumentException("Unknown MeasureDataUsage code '"+codeString+"'");
-        }
-        public Enumeration<MeasureDataUsage> fromType(Base code) throws FHIRException {
-          if (code == null || code.isEmpty())
-            return null;
-          String codeString = ((PrimitiveType) code).asStringValue();
-          if (codeString == null || "".equals(codeString))
-            return null;
-        if ("supplemental-data".equals(codeString))
-          return new Enumeration<MeasureDataUsage>(this, MeasureDataUsage.SUPPLEMENTALDATA);
-        if ("risk-adjustment-factor".equals(codeString))
-          return new Enumeration<MeasureDataUsage>(this, MeasureDataUsage.RISKADJUSTMENTFACTOR);
-        throw new FHIRException("Unknown MeasureDataUsage code '"+codeString+"'");
-        }
-    public String toCode(MeasureDataUsage code) {
-      if (code == MeasureDataUsage.SUPPLEMENTALDATA)
-        return "supplemental-data";
-      if (code == MeasureDataUsage.RISKADJUSTMENTFACTOR)
-        return "risk-adjustment-factor";
-      return "?";
-      }
-    public String toSystem(MeasureDataUsage code) {
-      return code.getSystem();
-      }
-    }
 
     @Block()
     public static class MeasureGroupComponent extends BackboneElement implements IBaseBackboneElement {
@@ -1029,53 +355,67 @@ public class Measure extends MetadataResource {
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case -1618432855: // identifier
           this.identifier = castToIdentifier(value); // Identifier
-          break;
+          return value;
         case 3373707: // name
           this.name = castToString(value); // StringType
-          break;
+          return value;
         case -1724546052: // description
           this.description = castToString(value); // StringType
-          break;
+          return value;
         case -2023558323: // population
           this.getPopulation().add((MeasureGroupPopulationComponent) value); // MeasureGroupPopulationComponent
-          break;
+          return value;
         case 90983669: // stratifier
           this.getStratifier().add((MeasureGroupStratifierComponent) value); // MeasureGroupStratifierComponent
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("identifier"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("identifier")) {
           this.identifier = castToIdentifier(value); // Identifier
-        else if (name.equals("name"))
+        } else if (name.equals("name")) {
           this.name = castToString(value); // StringType
-        else if (name.equals("description"))
+        } else if (name.equals("description")) {
           this.description = castToString(value); // StringType
-        else if (name.equals("population"))
+        } else if (name.equals("population")) {
           this.getPopulation().add((MeasureGroupPopulationComponent) value);
-        else if (name.equals("stratifier"))
+        } else if (name.equals("stratifier")) {
           this.getStratifier().add((MeasureGroupStratifierComponent) value);
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case -1618432855:  return getIdentifier(); // Identifier
-        case 3373707: throw new FHIRException("Cannot make property name as it is not a complex type"); // StringType
-        case -1724546052: throw new FHIRException("Cannot make property description as it is not a complex type"); // StringType
-        case -2023558323:  return addPopulation(); // MeasureGroupPopulationComponent
-        case 90983669:  return addStratifier(); // MeasureGroupStratifierComponent
+        case -1618432855:  return getIdentifier(); 
+        case 3373707:  return getNameElement();
+        case -1724546052:  return getDescriptionElement();
+        case -2023558323:  return addPopulation(); 
+        case 90983669:  return addStratifier(); 
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -1618432855: /*identifier*/ return new String[] {"Identifier"};
+        case 3373707: /*name*/ return new String[] {"string"};
+        case -1724546052: /*description*/ return new String[] {"string"};
+        case -2023558323: /*population*/ return new String[] {};
+        case 90983669: /*stratifier*/ return new String[] {};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }
@@ -1157,19 +497,19 @@ public class Measure extends MetadataResource {
     @Block()
     public static class MeasureGroupPopulationComponent extends BackboneElement implements IBaseBackboneElement {
         /**
-         * The type of population criteria.
-         */
-        @Child(name = "type", type = {CodeType.class}, order=1, min=1, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="initial-population | numerator | numerator-exclusion | denominator | denominator-exclusion | denominator-exception | measure-population | measure-population-exclusion | measure-observation", formalDefinition="The type of population criteria." )
-        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/measure-population")
-        protected Enumeration<MeasurePopulationType> type;
-
-        /**
          * A unique identifier for the population criteria. This identifier is used to report data against this criteria within the measure report.
          */
-        @Child(name = "identifier", type = {Identifier.class}, order=2, min=1, max=1, modifier=false, summary=false)
+        @Child(name = "identifier", type = {Identifier.class}, order=1, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Unique identifier", formalDefinition="A unique identifier for the population criteria. This identifier is used to report data against this criteria within the measure report." )
         protected Identifier identifier;
+
+        /**
+         * The type of population criteria.
+         */
+        @Child(name = "code", type = {CodeableConcept.class}, order=2, min=0, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="initial-population | numerator | numerator-exclusion | denominator | denominator-exclusion | denominator-exception | measure-population | measure-population-exclusion | measure-observation", formalDefinition="The type of population criteria." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/measure-population")
+        protected CodeableConcept code;
 
         /**
          * Optional name or short description of this population.
@@ -1192,7 +532,7 @@ public class Measure extends MetadataResource {
         @Description(shortDefinition="The name of a valid referenced CQL expression (may be namespaced) that defines this population criteria", formalDefinition="The name of a valid referenced CQL expression (may be namespaced) that defines this population criteria." )
         protected StringType criteria;
 
-        private static final long serialVersionUID = 1158202275L;
+        private static final long serialVersionUID = -561575429L;
 
     /**
      * Constructor
@@ -1204,57 +544,10 @@ public class Measure extends MetadataResource {
     /**
      * Constructor
      */
-      public MeasureGroupPopulationComponent(Enumeration<MeasurePopulationType> type, Identifier identifier, StringType criteria) {
+      public MeasureGroupPopulationComponent(StringType criteria) {
         super();
-        this.type = type;
-        this.identifier = identifier;
         this.criteria = criteria;
       }
-
-        /**
-         * @return {@link #type} (The type of population criteria.). This is the underlying object with id, value and extensions. The accessor "getType" gives direct access to the value
-         */
-        public Enumeration<MeasurePopulationType> getTypeElement() { 
-          if (this.type == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create MeasureGroupPopulationComponent.type");
-            else if (Configuration.doAutoCreate())
-              this.type = new Enumeration<MeasurePopulationType>(new MeasurePopulationTypeEnumFactory()); // bb
-          return this.type;
-        }
-
-        public boolean hasTypeElement() { 
-          return this.type != null && !this.type.isEmpty();
-        }
-
-        public boolean hasType() { 
-          return this.type != null && !this.type.isEmpty();
-        }
-
-        /**
-         * @param value {@link #type} (The type of population criteria.). This is the underlying object with id, value and extensions. The accessor "getType" gives direct access to the value
-         */
-        public MeasureGroupPopulationComponent setTypeElement(Enumeration<MeasurePopulationType> value) { 
-          this.type = value;
-          return this;
-        }
-
-        /**
-         * @return The type of population criteria.
-         */
-        public MeasurePopulationType getType() { 
-          return this.type == null ? null : this.type.getValue();
-        }
-
-        /**
-         * @param value The type of population criteria.
-         */
-        public MeasureGroupPopulationComponent setType(MeasurePopulationType value) { 
-            if (this.type == null)
-              this.type = new Enumeration<MeasurePopulationType>(new MeasurePopulationTypeEnumFactory());
-            this.type.setValue(value);
-          return this;
-        }
 
         /**
          * @return {@link #identifier} (A unique identifier for the population criteria. This identifier is used to report data against this criteria within the measure report.)
@@ -1277,6 +570,30 @@ public class Measure extends MetadataResource {
          */
         public MeasureGroupPopulationComponent setIdentifier(Identifier value) { 
           this.identifier = value;
+          return this;
+        }
+
+        /**
+         * @return {@link #code} (The type of population criteria.)
+         */
+        public CodeableConcept getCode() { 
+          if (this.code == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create MeasureGroupPopulationComponent.code");
+            else if (Configuration.doAutoCreate())
+              this.code = new CodeableConcept(); // cc
+          return this.code;
+        }
+
+        public boolean hasCode() { 
+          return this.code != null && !this.code.isEmpty();
+        }
+
+        /**
+         * @param value {@link #code} (The type of population criteria.)
+         */
+        public MeasureGroupPopulationComponent setCode(CodeableConcept value) { 
+          this.code = value;
           return this;
         }
 
@@ -1425,8 +742,8 @@ public class Measure extends MetadataResource {
 
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
-          childrenList.add(new Property("type", "code", "The type of population criteria.", 0, java.lang.Integer.MAX_VALUE, type));
           childrenList.add(new Property("identifier", "Identifier", "A unique identifier for the population criteria. This identifier is used to report data against this criteria within the measure report.", 0, java.lang.Integer.MAX_VALUE, identifier));
+          childrenList.add(new Property("code", "CodeableConcept", "The type of population criteria.", 0, java.lang.Integer.MAX_VALUE, code));
           childrenList.add(new Property("name", "string", "Optional name or short description of this population.", 0, java.lang.Integer.MAX_VALUE, name));
           childrenList.add(new Property("description", "string", "The human readable description of this population criteria.", 0, java.lang.Integer.MAX_VALUE, description));
           childrenList.add(new Property("criteria", "string", "The name of a valid referenced CQL expression (may be namespaced) that defines this population criteria.", 0, java.lang.Integer.MAX_VALUE, criteria));
@@ -1435,8 +752,8 @@ public class Measure extends MetadataResource {
       @Override
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
-        case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // Enumeration<MeasurePopulationType>
         case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : new Base[] {this.identifier}; // Identifier
+        case 3059181: /*code*/ return this.code == null ? new Base[0] : new Base[] {this.code}; // CodeableConcept
         case 3373707: /*name*/ return this.name == null ? new Base[0] : new Base[] {this.name}; // StringType
         case -1724546052: /*description*/ return this.description == null ? new Base[0] : new Base[] {this.description}; // StringType
         case 1952046943: /*criteria*/ return this.criteria == null ? new Base[0] : new Base[] {this.criteria}; // StringType
@@ -1446,65 +763,80 @@ public class Measure extends MetadataResource {
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
-        case 3575610: // type
-          this.type = new MeasurePopulationTypeEnumFactory().fromType(value); // Enumeration<MeasurePopulationType>
-          break;
         case -1618432855: // identifier
           this.identifier = castToIdentifier(value); // Identifier
-          break;
+          return value;
+        case 3059181: // code
+          this.code = castToCodeableConcept(value); // CodeableConcept
+          return value;
         case 3373707: // name
           this.name = castToString(value); // StringType
-          break;
+          return value;
         case -1724546052: // description
           this.description = castToString(value); // StringType
-          break;
+          return value;
         case 1952046943: // criteria
           this.criteria = castToString(value); // StringType
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("type"))
-          this.type = new MeasurePopulationTypeEnumFactory().fromType(value); // Enumeration<MeasurePopulationType>
-        else if (name.equals("identifier"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("identifier")) {
           this.identifier = castToIdentifier(value); // Identifier
-        else if (name.equals("name"))
+        } else if (name.equals("code")) {
+          this.code = castToCodeableConcept(value); // CodeableConcept
+        } else if (name.equals("name")) {
           this.name = castToString(value); // StringType
-        else if (name.equals("description"))
+        } else if (name.equals("description")) {
           this.description = castToString(value); // StringType
-        else if (name.equals("criteria"))
+        } else if (name.equals("criteria")) {
           this.criteria = castToString(value); // StringType
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 3575610: throw new FHIRException("Cannot make property type as it is not a complex type"); // Enumeration<MeasurePopulationType>
-        case -1618432855:  return getIdentifier(); // Identifier
-        case 3373707: throw new FHIRException("Cannot make property name as it is not a complex type"); // StringType
-        case -1724546052: throw new FHIRException("Cannot make property description as it is not a complex type"); // StringType
-        case 1952046943: throw new FHIRException("Cannot make property criteria as it is not a complex type"); // StringType
+        case -1618432855:  return getIdentifier(); 
+        case 3059181:  return getCode(); 
+        case 3373707:  return getNameElement();
+        case -1724546052:  return getDescriptionElement();
+        case 1952046943:  return getCriteriaElement();
         default: return super.makeProperty(hash, name);
         }
 
       }
 
       @Override
-      public Base addChild(String name) throws FHIRException {
-        if (name.equals("type")) {
-          throw new FHIRException("Cannot call addChild on a primitive type Measure.type");
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -1618432855: /*identifier*/ return new String[] {"Identifier"};
+        case 3059181: /*code*/ return new String[] {"CodeableConcept"};
+        case 3373707: /*name*/ return new String[] {"string"};
+        case -1724546052: /*description*/ return new String[] {"string"};
+        case 1952046943: /*criteria*/ return new String[] {"string"};
+        default: return super.getTypesForProperty(hash, name);
         }
-        else if (name.equals("identifier")) {
+
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("identifier")) {
           this.identifier = new Identifier();
           return this.identifier;
+        }
+        else if (name.equals("code")) {
+          this.code = new CodeableConcept();
+          return this.code;
         }
         else if (name.equals("name")) {
           throw new FHIRException("Cannot call addChild on a primitive type Measure.name");
@@ -1522,8 +854,8 @@ public class Measure extends MetadataResource {
       public MeasureGroupPopulationComponent copy() {
         MeasureGroupPopulationComponent dst = new MeasureGroupPopulationComponent();
         copyValues(dst);
-        dst.type = type == null ? null : type.copy();
         dst.identifier = identifier == null ? null : identifier.copy();
+        dst.code = code == null ? null : code.copy();
         dst.name = name == null ? null : name.copy();
         dst.description = description == null ? null : description.copy();
         dst.criteria = criteria == null ? null : criteria.copy();
@@ -1537,7 +869,7 @@ public class Measure extends MetadataResource {
         if (!(other instanceof MeasureGroupPopulationComponent))
           return false;
         MeasureGroupPopulationComponent o = (MeasureGroupPopulationComponent) other;
-        return compareDeep(type, o.type, true) && compareDeep(identifier, o.identifier, true) && compareDeep(name, o.name, true)
+        return compareDeep(identifier, o.identifier, true) && compareDeep(code, o.code, true) && compareDeep(name, o.name, true)
            && compareDeep(description, o.description, true) && compareDeep(criteria, o.criteria, true);
       }
 
@@ -1548,12 +880,12 @@ public class Measure extends MetadataResource {
         if (!(other instanceof MeasureGroupPopulationComponent))
           return false;
         MeasureGroupPopulationComponent o = (MeasureGroupPopulationComponent) other;
-        return compareValues(type, o.type, true) && compareValues(name, o.name, true) && compareValues(description, o.description, true)
-           && compareValues(criteria, o.criteria, true);
+        return compareValues(name, o.name, true) && compareValues(description, o.description, true) && compareValues(criteria, o.criteria, true)
+          ;
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(type, identifier, name, description
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, code, name, description
           , criteria);
       }
 
@@ -1569,7 +901,7 @@ public class Measure extends MetadataResource {
         /**
          * The identifier for the stratifier used to coordinate the reported data back to this stratifier.
          */
-        @Child(name = "identifier", type = {Identifier.class}, order=1, min=1, max=1, modifier=false, summary=false)
+        @Child(name = "identifier", type = {Identifier.class}, order=1, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="The identifier for the stratifier used to coordinate the reported data back to this stratifier", formalDefinition="The identifier for the stratifier used to coordinate the reported data back to this stratifier." )
         protected Identifier identifier;
 
@@ -1577,7 +909,7 @@ public class Measure extends MetadataResource {
          * The criteria for the stratifier. This must be the name of an expression defined within a referenced library.
          */
         @Child(name = "criteria", type = {StringType.class}, order=2, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Stratifier criteria", formalDefinition="The criteria for the stratifier. This must be the name of an expression defined within a referenced library." )
+        @Description(shortDefinition="How the measure should be stratified", formalDefinition="The criteria for the stratifier. This must be the name of an expression defined within a referenced library." )
         protected StringType criteria;
 
         /**
@@ -1594,14 +926,6 @@ public class Measure extends MetadataResource {
      */
       public MeasureGroupStratifierComponent() {
         super();
-      }
-
-    /**
-     * Constructor
-     */
-      public MeasureGroupStratifierComponent(Identifier identifier) {
-        super();
-        this.identifier = identifier;
       }
 
         /**
@@ -1745,41 +1069,53 @@ public class Measure extends MetadataResource {
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case -1618432855: // identifier
           this.identifier = castToIdentifier(value); // Identifier
-          break;
+          return value;
         case 1952046943: // criteria
           this.criteria = castToString(value); // StringType
-          break;
+          return value;
         case 3433509: // path
           this.path = castToString(value); // StringType
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("identifier"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("identifier")) {
           this.identifier = castToIdentifier(value); // Identifier
-        else if (name.equals("criteria"))
+        } else if (name.equals("criteria")) {
           this.criteria = castToString(value); // StringType
-        else if (name.equals("path"))
+        } else if (name.equals("path")) {
           this.path = castToString(value); // StringType
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case -1618432855:  return getIdentifier(); // Identifier
-        case 1952046943: throw new FHIRException("Cannot make property criteria as it is not a complex type"); // StringType
-        case 3433509: throw new FHIRException("Cannot make property path as it is not a complex type"); // StringType
+        case -1618432855:  return getIdentifier(); 
+        case 1952046943:  return getCriteriaElement();
+        case 3433509:  return getPathElement();
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -1618432855: /*identifier*/ return new String[] {"Identifier"};
+        case 1952046943: /*criteria*/ return new String[] {"string"};
+        case 3433509: /*path*/ return new String[] {"string"};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }
@@ -1847,23 +1183,23 @@ public class Measure extends MetadataResource {
         /**
          * An identifier for the supplemental data.
          */
-        @Child(name = "identifier", type = {Identifier.class}, order=1, min=1, max=1, modifier=false, summary=false)
+        @Child(name = "identifier", type = {Identifier.class}, order=1, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Identifier, unique within the measure", formalDefinition="An identifier for the supplemental data." )
         protected Identifier identifier;
 
         /**
          * An indicator of the intended usage for the supplemental data element. Supplemental data indicates the data is additional information requested to augment the measure information. Risk adjustment factor indicates the data is additional information used to calculate risk adjustment factors when applying a risk model to the measure calculation.
          */
-        @Child(name = "usage", type = {CodeType.class}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Child(name = "usage", type = {CodeableConcept.class}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="supplemental-data | risk-adjustment-factor", formalDefinition="An indicator of the intended usage for the supplemental data element. Supplemental data indicates the data is additional information requested to augment the measure information. Risk adjustment factor indicates the data is additional information used to calculate risk adjustment factors when applying a risk model to the measure calculation." )
         @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/measure-data-usage")
-        protected List<Enumeration<MeasureDataUsage>> usage;
+        protected List<CodeableConcept> usage;
 
         /**
          * The criteria for the supplemental data. This must be the name of a valid expression defined within a referenced library, and defines the data to be returned for this element.
          */
         @Child(name = "criteria", type = {StringType.class}, order=3, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Supplemental data criteria", formalDefinition="The criteria for the supplemental data. This must be the name of a valid expression defined within a referenced library, and defines the data to be returned for this element." )
+        @Description(shortDefinition="Expression describing additional data to be reporrted", formalDefinition="The criteria for the supplemental data. This must be the name of a valid expression defined within a referenced library, and defines the data to be returned for this element." )
         protected StringType criteria;
 
         /**
@@ -1873,21 +1209,13 @@ public class Measure extends MetadataResource {
         @Description(shortDefinition="Path to the supplemental data element", formalDefinition="The supplemental data to be supplied as part of the measure response, specified as a valid FHIR Resource Path." )
         protected StringType path;
 
-        private static final long serialVersionUID = 1666728717L;
+        private static final long serialVersionUID = -101576770L;
 
     /**
      * Constructor
      */
       public MeasureSupplementalDataComponent() {
         super();
-      }
-
-    /**
-     * Constructor
-     */
-      public MeasureSupplementalDataComponent(Identifier identifier) {
-        super();
-        this.identifier = identifier;
       }
 
         /**
@@ -1917,16 +1245,16 @@ public class Measure extends MetadataResource {
         /**
          * @return {@link #usage} (An indicator of the intended usage for the supplemental data element. Supplemental data indicates the data is additional information requested to augment the measure information. Risk adjustment factor indicates the data is additional information used to calculate risk adjustment factors when applying a risk model to the measure calculation.)
          */
-        public List<Enumeration<MeasureDataUsage>> getUsage() { 
+        public List<CodeableConcept> getUsage() { 
           if (this.usage == null)
-            this.usage = new ArrayList<Enumeration<MeasureDataUsage>>();
+            this.usage = new ArrayList<CodeableConcept>();
           return this.usage;
         }
 
         /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
-        public MeasureSupplementalDataComponent setUsage(List<Enumeration<MeasureDataUsage>> theUsage) { 
+        public MeasureSupplementalDataComponent setUsage(List<CodeableConcept> theUsage) { 
           this.usage = theUsage;
           return this;
         }
@@ -1934,45 +1262,37 @@ public class Measure extends MetadataResource {
         public boolean hasUsage() { 
           if (this.usage == null)
             return false;
-          for (Enumeration<MeasureDataUsage> item : this.usage)
+          for (CodeableConcept item : this.usage)
             if (!item.isEmpty())
               return true;
           return false;
         }
 
-        /**
-         * @return {@link #usage} (An indicator of the intended usage for the supplemental data element. Supplemental data indicates the data is additional information requested to augment the measure information. Risk adjustment factor indicates the data is additional information used to calculate risk adjustment factors when applying a risk model to the measure calculation.)
-         */
-        public Enumeration<MeasureDataUsage> addUsageElement() {//2 
-          Enumeration<MeasureDataUsage> t = new Enumeration<MeasureDataUsage>(new MeasureDataUsageEnumFactory());
+        public CodeableConcept addUsage() { //3
+          CodeableConcept t = new CodeableConcept();
           if (this.usage == null)
-            this.usage = new ArrayList<Enumeration<MeasureDataUsage>>();
+            this.usage = new ArrayList<CodeableConcept>();
           this.usage.add(t);
           return t;
         }
 
-        /**
-         * @param value {@link #usage} (An indicator of the intended usage for the supplemental data element. Supplemental data indicates the data is additional information requested to augment the measure information. Risk adjustment factor indicates the data is additional information used to calculate risk adjustment factors when applying a risk model to the measure calculation.)
-         */
-        public MeasureSupplementalDataComponent addUsage(MeasureDataUsage value) { //1
-          Enumeration<MeasureDataUsage> t = new Enumeration<MeasureDataUsage>(new MeasureDataUsageEnumFactory());
-          t.setValue(value);
+        public MeasureSupplementalDataComponent addUsage(CodeableConcept t) { //3
+          if (t == null)
+            return this;
           if (this.usage == null)
-            this.usage = new ArrayList<Enumeration<MeasureDataUsage>>();
+            this.usage = new ArrayList<CodeableConcept>();
           this.usage.add(t);
           return this;
         }
 
         /**
-         * @param value {@link #usage} (An indicator of the intended usage for the supplemental data element. Supplemental data indicates the data is additional information requested to augment the measure information. Risk adjustment factor indicates the data is additional information used to calculate risk adjustment factors when applying a risk model to the measure calculation.)
+         * @return The first repetition of repeating field {@link #usage}, creating it if it does not already exist
          */
-        public boolean hasUsage(MeasureDataUsage value) { 
-          if (this.usage == null)
-            return false;
-          for (Enumeration<MeasureDataUsage> v : this.usage)
-            if (v.getValue().equals(value)) // code
-              return true;
-          return false;
+        public CodeableConcept getUsageFirstRep() { 
+          if (getUsage().isEmpty()) {
+            addUsage();
+          }
+          return getUsage().get(0);
         }
 
         /**
@@ -2076,7 +1396,7 @@ public class Measure extends MetadataResource {
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
           childrenList.add(new Property("identifier", "Identifier", "An identifier for the supplemental data.", 0, java.lang.Integer.MAX_VALUE, identifier));
-          childrenList.add(new Property("usage", "code", "An indicator of the intended usage for the supplemental data element. Supplemental data indicates the data is additional information requested to augment the measure information. Risk adjustment factor indicates the data is additional information used to calculate risk adjustment factors when applying a risk model to the measure calculation.", 0, java.lang.Integer.MAX_VALUE, usage));
+          childrenList.add(new Property("usage", "CodeableConcept", "An indicator of the intended usage for the supplemental data element. Supplemental data indicates the data is additional information requested to augment the measure information. Risk adjustment factor indicates the data is additional information used to calculate risk adjustment factors when applying a risk model to the measure calculation.", 0, java.lang.Integer.MAX_VALUE, usage));
           childrenList.add(new Property("criteria", "string", "The criteria for the supplemental data. This must be the name of a valid expression defined within a referenced library, and defines the data to be returned for this element.", 0, java.lang.Integer.MAX_VALUE, criteria));
           childrenList.add(new Property("path", "string", "The supplemental data to be supplied as part of the measure response, specified as a valid FHIR Resource Path.", 0, java.lang.Integer.MAX_VALUE, path));
         }
@@ -2085,7 +1405,7 @@ public class Measure extends MetadataResource {
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
         case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : new Base[] {this.identifier}; // Identifier
-        case 111574433: /*usage*/ return this.usage == null ? new Base[0] : this.usage.toArray(new Base[this.usage.size()]); // Enumeration<MeasureDataUsage>
+        case 111574433: /*usage*/ return this.usage == null ? new Base[0] : this.usage.toArray(new Base[this.usage.size()]); // CodeableConcept
         case 1952046943: /*criteria*/ return this.criteria == null ? new Base[0] : new Base[] {this.criteria}; // StringType
         case 3433509: /*path*/ return this.path == null ? new Base[0] : new Base[] {this.path}; // StringType
         default: return super.getProperty(hash, name, checkValid);
@@ -2094,47 +1414,60 @@ public class Measure extends MetadataResource {
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case -1618432855: // identifier
           this.identifier = castToIdentifier(value); // Identifier
-          break;
+          return value;
         case 111574433: // usage
-          this.getUsage().add(new MeasureDataUsageEnumFactory().fromType(value)); // Enumeration<MeasureDataUsage>
-          break;
+          this.getUsage().add(castToCodeableConcept(value)); // CodeableConcept
+          return value;
         case 1952046943: // criteria
           this.criteria = castToString(value); // StringType
-          break;
+          return value;
         case 3433509: // path
           this.path = castToString(value); // StringType
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("identifier"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("identifier")) {
           this.identifier = castToIdentifier(value); // Identifier
-        else if (name.equals("usage"))
-          this.getUsage().add(new MeasureDataUsageEnumFactory().fromType(value));
-        else if (name.equals("criteria"))
+        } else if (name.equals("usage")) {
+          this.getUsage().add(castToCodeableConcept(value));
+        } else if (name.equals("criteria")) {
           this.criteria = castToString(value); // StringType
-        else if (name.equals("path"))
+        } else if (name.equals("path")) {
           this.path = castToString(value); // StringType
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case -1618432855:  return getIdentifier(); // Identifier
-        case 111574433: throw new FHIRException("Cannot make property usage as it is not a complex type"); // Enumeration<MeasureDataUsage>
-        case 1952046943: throw new FHIRException("Cannot make property criteria as it is not a complex type"); // StringType
-        case 3433509: throw new FHIRException("Cannot make property path as it is not a complex type"); // StringType
+        case -1618432855:  return getIdentifier(); 
+        case 111574433:  return addUsage(); 
+        case 1952046943:  return getCriteriaElement();
+        case 3433509:  return getPathElement();
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -1618432855: /*identifier*/ return new String[] {"Identifier"};
+        case 111574433: /*usage*/ return new String[] {"CodeableConcept"};
+        case 1952046943: /*criteria*/ return new String[] {"string"};
+        case 3433509: /*path*/ return new String[] {"string"};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }
@@ -2146,7 +1479,7 @@ public class Measure extends MetadataResource {
           return this.identifier;
         }
         else if (name.equals("usage")) {
-          throw new FHIRException("Cannot call addChild on a primitive type Measure.usage");
+          return addUsage();
         }
         else if (name.equals("criteria")) {
           throw new FHIRException("Cannot call addChild on a primitive type Measure.criteria");
@@ -2163,8 +1496,8 @@ public class Measure extends MetadataResource {
         copyValues(dst);
         dst.identifier = identifier == null ? null : identifier.copy();
         if (usage != null) {
-          dst.usage = new ArrayList<Enumeration<MeasureDataUsage>>();
-          for (Enumeration<MeasureDataUsage> i : usage)
+          dst.usage = new ArrayList<CodeableConcept>();
+          for (CodeableConcept i : usage)
             dst.usage.add(i.copy());
         };
         dst.criteria = criteria == null ? null : criteria.copy();
@@ -2190,8 +1523,7 @@ public class Measure extends MetadataResource {
         if (!(other instanceof MeasureSupplementalDataComponent))
           return false;
         MeasureSupplementalDataComponent o = (MeasureSupplementalDataComponent) other;
-        return compareValues(usage, o.usage, true) && compareValues(criteria, o.criteria, true) && compareValues(path, o.path, true)
-          ;
+        return compareValues(criteria, o.criteria, true) && compareValues(path, o.path, true);
       }
 
       public boolean isEmpty() {
@@ -2231,28 +1563,29 @@ public class Measure extends MetadataResource {
      * The date on which the asset content was approved by the publisher. Approval happens once when the content is officially approved for usage.
      */
     @Child(name = "approvalDate", type = {DateType.class}, order=3, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="When measure approved by publisher", formalDefinition="The date on which the asset content was approved by the publisher. Approval happens once when the content is officially approved for usage." )
+    @Description(shortDefinition="When the measure was approved by publisher", formalDefinition="The date on which the asset content was approved by the publisher. Approval happens once when the content is officially approved for usage." )
     protected DateType approvalDate;
 
     /**
-     * The date on which the asset content was last reviewed. Review happens periodically after that, but doesn't change the original approval date.
+     * The date on which the asset content was last reviewed. Review happens periodically after approval, but doesn't change the original approval date.
      */
     @Child(name = "lastReviewDate", type = {DateType.class}, order=4, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Last review date for the measure", formalDefinition="The date on which the asset content was last reviewed. Review happens periodically after that, but doesn't change the original approval date." )
+    @Description(shortDefinition="When the measure was last reviewed", formalDefinition="The date on which the asset content was last reviewed. Review happens periodically after approval, but doesn't change the original approval date." )
     protected DateType lastReviewDate;
 
     /**
      * The period during which the measure content was or is planned to be effective.
      */
     @Child(name = "effectivePeriod", type = {Period.class}, order=5, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="The effective date range for the measure", formalDefinition="The period during which the measure content was or is planned to be effective." )
+    @Description(shortDefinition="When the measure is effective", formalDefinition="The period during which the measure content was or is planned to be effective." )
     protected Period effectivePeriod;
 
     /**
-     * Clinical topics related to the content of the measure.
+     * Descriptive topics related to the content of the measure. Topics provide a high-level categorization of the type of the measure that can be useful for filtering and searching.
      */
     @Child(name = "topic", type = {CodeableConcept.class}, order=6, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="Descriptional topics for the measure", formalDefinition="Clinical topics related to the content of the measure." )
+    @Description(shortDefinition="E.g. Education, Treatment, Assessment, etc", formalDefinition="Descriptive topics related to the content of the measure. Topics provide a high-level categorization of the type of the measure that can be useful for filtering and searching." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/definition-topic")
     protected List<CodeableConcept> topic;
 
     /**
@@ -2273,7 +1606,7 @@ public class Measure extends MetadataResource {
      * Related artifacts such as additional documentation, justification, or bibliographic references.
      */
     @Child(name = "relatedArtifact", type = {RelatedArtifact.class}, order=9, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="Related artifacts for the measure", formalDefinition="Related artifacts such as additional documentation, justification, or bibliographic references." )
+    @Description(shortDefinition="Additional documentation, citations, etc", formalDefinition="Related artifacts such as additional documentation, justification, or bibliographic references." )
     protected List<RelatedArtifact> relatedArtifact;
 
     /**
@@ -2289,35 +1622,35 @@ public class Measure extends MetadataResource {
 
 
     /**
-     * A disclaimer for the use of the measure.
+     * Notices and disclaimers regarding the use of the measure, or related to intellectual property (such as code systems) referenced by the measure.
      */
     @Child(name = "disclaimer", type = {MarkdownType.class}, order=11, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Disclaimer for the measure", formalDefinition="A disclaimer for the use of the measure." )
+    @Description(shortDefinition="Disclaimer for use of the measure or its referenced content", formalDefinition="Notices and disclaimers regarding the use of the measure, or related to intellectual property (such as code systems) referenced by the measure." )
     protected MarkdownType disclaimer;
 
     /**
-     * The measure scoring type, e.g. proportion, CV.
+     * Indicates how the calculation is performed for the measure, including proportion, ratio, continuous variable, and cohort. The value set is extensible, allowing additional measure scoring types to be represented.
      */
-    @Child(name = "scoring", type = {CodeType.class}, order=12, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="proportion | ratio | continuous-variable | cohort", formalDefinition="The measure scoring type, e.g. proportion, CV." )
+    @Child(name = "scoring", type = {CodeableConcept.class}, order=12, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="proportion | ratio | continuous-variable | cohort", formalDefinition="Indicates how the calculation is performed for the measure, including proportion, ratio, continuous variable, and cohort. The value set is extensible, allowing additional measure scoring types to be represented." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/measure-scoring")
-    protected Enumeration<MeasureScoring> scoring;
+    protected CodeableConcept scoring;
 
     /**
      * If this is a composite measure, the scoring method used to combine the component measures to determine the composite score.
      */
-    @Child(name = "compositeScoring", type = {CodeType.class}, order=13, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "compositeScoring", type = {CodeableConcept.class}, order=13, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="opportunity | all-or-nothing | linear | weighted", formalDefinition="If this is a composite measure, the scoring method used to combine the component measures to determine the composite score." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/composite-measure-scoring")
-    protected Enumeration<CompositeMeasureScoring> compositeScoring;
+    protected CodeableConcept compositeScoring;
 
     /**
-     * The measure type, e.g. process, outcome.
+     * Indicates whether the measure is used to examine a process, an outcome over time, a patient-reported outcome, or a structure measure such as utilization.
      */
-    @Child(name = "type", type = {CodeType.class}, order=14, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-    @Description(shortDefinition="process | outcome | structure | patient-reported-outcome | composite", formalDefinition="The measure type, e.g. process, outcome." )
+    @Child(name = "type", type = {CodeableConcept.class}, order=14, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Description(shortDefinition="process | outcome | structure | patient-reported-outcome | composite", formalDefinition="Indicates whether the measure is used to examine a process, an outcome over time, a patient-reported outcome, or a structure measure such as utilization." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/measure-type")
-    protected List<Enumeration<MeasureType>> type;
+    protected List<CodeableConcept> type;
 
     /**
      * A description of the risk adjustment factors that may impact the resulting score for the measure and how they may be accounted for when computing and reporting measure results.
@@ -2327,45 +1660,45 @@ public class Measure extends MetadataResource {
     protected StringType riskAdjustment;
 
     /**
-     * A description of the rate aggregation for the measure.
+     * Describes how to combine the information calculated, based on logic in each of several populations, into one summarized result.
      */
     @Child(name = "rateAggregation", type = {StringType.class}, order=16, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="How is rate aggregation performed for this measure", formalDefinition="A description of the rate aggregation for the measure." )
+    @Description(shortDefinition="How is rate aggregation performed for this measure", formalDefinition="Describes how to combine the information calculated, based on logic in each of several populations, into one summarized result." )
     protected StringType rateAggregation;
 
     /**
-     * The rationale for the measure.
+     * Provides a succint statement of the need for the measure. Usually includes statements pertaining to importance criterion: impact, gap in care, and evidence.
      */
     @Child(name = "rationale", type = {MarkdownType.class}, order=17, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Why does this measure exist", formalDefinition="The rationale for the measure." )
+    @Description(shortDefinition="Why does this measure exist", formalDefinition="Provides a succint statement of the need for the measure. Usually includes statements pertaining to importance criterion: impact, gap in care, and evidence." )
     protected MarkdownType rationale;
 
     /**
-     * The clinical recommendation statement for the measure.
+     * Provides a summary of relevant clinical guidelines or other clinical recommendations supporting the measure.
      */
     @Child(name = "clinicalRecommendationStatement", type = {MarkdownType.class}, order=18, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Clinical recommendation", formalDefinition="The clinical recommendation statement for the measure." )
+    @Description(shortDefinition="Summary of clinical guidelines", formalDefinition="Provides a summary of relevant clinical guidelines or other clinical recommendations supporting the measure." )
     protected MarkdownType clinicalRecommendationStatement;
 
     /**
-     * Improvement notation for the measure, e.g. higher score indicates better quality.
+     * Information on whether an increase or decrease in score is the preferred result (e.g., a higher score indicates better quality OR a lower score indicates better quality OR quality is whthin a range).
      */
     @Child(name = "improvementNotation", type = {StringType.class}, order=19, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Improvement notation for the measure, e.g. higher score indicates better quality", formalDefinition="Improvement notation for the measure, e.g. higher score indicates better quality." )
+    @Description(shortDefinition="Improvement notation for the measure, e.g. higher score indicates better quality", formalDefinition="Information on whether an increase or decrease in score is the preferred result (e.g., a higher score indicates better quality OR a lower score indicates better quality OR quality is whthin a range)." )
     protected StringType improvementNotation;
 
     /**
-     * A narrative description of the complete measure calculation.
+     * Provides a description of an individual term used within the measure.
      */
-    @Child(name = "definition", type = {MarkdownType.class}, order=20, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="A natural language definition of the measure", formalDefinition="A narrative description of the complete measure calculation." )
-    protected MarkdownType definition;
+    @Child(name = "definition", type = {MarkdownType.class}, order=20, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Description(shortDefinition="Defined terms used in the measure documentation", formalDefinition="Provides a description of an individual term used within the measure." )
+    protected List<MarkdownType> definition;
 
     /**
      * Additional guidance for the measure including how it can be used in a clinical context, and the intent of the measure.
      */
     @Child(name = "guidance", type = {MarkdownType.class}, order=21, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="The guidance for the measure", formalDefinition="Additional guidance for the measure including how it can be used in a clinical context, and the intent of the measure." )
+    @Description(shortDefinition="Additional guidance for implementers", formalDefinition="Additional guidance for the measure including how it can be used in a clinical context, and the intent of the measure." )
     protected MarkdownType guidance;
 
     /**
@@ -2386,10 +1719,10 @@ public class Measure extends MetadataResource {
      * The supplemental data criteria for the measure report, specified as either the name of a valid CQL expression within a referenced library, or a valid FHIR Resource Path.
      */
     @Child(name = "supplementalData", type = {}, order=24, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="Supplemental data", formalDefinition="The supplemental data criteria for the measure report, specified as either the name of a valid CQL expression within a referenced library, or a valid FHIR Resource Path." )
+    @Description(shortDefinition="What other data should be reported with the measure", formalDefinition="The supplemental data criteria for the measure report, specified as either the name of a valid CQL expression within a referenced library, or a valid FHIR Resource Path." )
     protected List<MeasureSupplementalDataComponent> supplementalData;
 
-    private static final long serialVersionUID = 2104944282L;
+    private static final long serialVersionUID = -875918689L;
 
   /**
    * Constructor
@@ -2795,6 +2128,55 @@ public class Measure extends MetadataResource {
     }
 
     /**
+     * @return {@link #publisher} (The name of the individual or organization that published the measure.). This is the underlying object with id, value and extensions. The accessor "getPublisher" gives direct access to the value
+     */
+    public StringType getPublisherElement() { 
+      if (this.publisher == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create Measure.publisher");
+        else if (Configuration.doAutoCreate())
+          this.publisher = new StringType(); // bb
+      return this.publisher;
+    }
+
+    public boolean hasPublisherElement() { 
+      return this.publisher != null && !this.publisher.isEmpty();
+    }
+
+    public boolean hasPublisher() { 
+      return this.publisher != null && !this.publisher.isEmpty();
+    }
+
+    /**
+     * @param value {@link #publisher} (The name of the individual or organization that published the measure.). This is the underlying object with id, value and extensions. The accessor "getPublisher" gives direct access to the value
+     */
+    public Measure setPublisherElement(StringType value) { 
+      this.publisher = value;
+      return this;
+    }
+
+    /**
+     * @return The name of the individual or organization that published the measure.
+     */
+    public String getPublisher() { 
+      return this.publisher == null ? null : this.publisher.getValue();
+    }
+
+    /**
+     * @param value The name of the individual or organization that published the measure.
+     */
+    public Measure setPublisher(String value) { 
+      if (Utilities.noString(value))
+        this.publisher = null;
+      else {
+        if (this.publisher == null)
+          this.publisher = new StringType();
+        this.publisher.setValue(value);
+      }
+      return this;
+    }
+
+    /**
      * @return {@link #description} (A free text natural language description of the measure from the consumer's perspective.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
      */
     public MarkdownType getDescriptionElement() { 
@@ -2991,7 +2373,7 @@ public class Measure extends MetadataResource {
     }
 
     /**
-     * @return {@link #lastReviewDate} (The date on which the asset content was last reviewed. Review happens periodically after that, but doesn't change the original approval date.). This is the underlying object with id, value and extensions. The accessor "getLastReviewDate" gives direct access to the value
+     * @return {@link #lastReviewDate} (The date on which the asset content was last reviewed. Review happens periodically after approval, but doesn't change the original approval date.). This is the underlying object with id, value and extensions. The accessor "getLastReviewDate" gives direct access to the value
      */
     public DateType getLastReviewDateElement() { 
       if (this.lastReviewDate == null)
@@ -3011,7 +2393,7 @@ public class Measure extends MetadataResource {
     }
 
     /**
-     * @param value {@link #lastReviewDate} (The date on which the asset content was last reviewed. Review happens periodically after that, but doesn't change the original approval date.). This is the underlying object with id, value and extensions. The accessor "getLastReviewDate" gives direct access to the value
+     * @param value {@link #lastReviewDate} (The date on which the asset content was last reviewed. Review happens periodically after approval, but doesn't change the original approval date.). This is the underlying object with id, value and extensions. The accessor "getLastReviewDate" gives direct access to the value
      */
     public Measure setLastReviewDateElement(DateType value) { 
       this.lastReviewDate = value;
@@ -3019,14 +2401,14 @@ public class Measure extends MetadataResource {
     }
 
     /**
-     * @return The date on which the asset content was last reviewed. Review happens periodically after that, but doesn't change the original approval date.
+     * @return The date on which the asset content was last reviewed. Review happens periodically after approval, but doesn't change the original approval date.
      */
     public Date getLastReviewDate() { 
       return this.lastReviewDate == null ? null : this.lastReviewDate.getValue();
     }
 
     /**
-     * @param value The date on which the asset content was last reviewed. Review happens periodically after that, but doesn't change the original approval date.
+     * @param value The date on which the asset content was last reviewed. Review happens periodically after approval, but doesn't change the original approval date.
      */
     public Measure setLastReviewDate(Date value) { 
       if (value == null)
@@ -3170,7 +2552,7 @@ public class Measure extends MetadataResource {
     }
 
     /**
-     * @return {@link #topic} (Clinical topics related to the content of the measure.)
+     * @return {@link #topic} (Descriptive topics related to the content of the measure. Topics provide a high-level categorization of the type of the measure that can be useful for filtering and searching.)
      */
     public List<CodeableConcept> getTopic() { 
       if (this.topic == null)
@@ -3273,55 +2655,6 @@ public class Measure extends MetadataResource {
         addContributor();
       }
       return getContributor().get(0);
-    }
-
-    /**
-     * @return {@link #publisher} (The name of the individual or organization that published the measure.). This is the underlying object with id, value and extensions. The accessor "getPublisher" gives direct access to the value
-     */
-    public StringType getPublisherElement() { 
-      if (this.publisher == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create Measure.publisher");
-        else if (Configuration.doAutoCreate())
-          this.publisher = new StringType(); // bb
-      return this.publisher;
-    }
-
-    public boolean hasPublisherElement() { 
-      return this.publisher != null && !this.publisher.isEmpty();
-    }
-
-    public boolean hasPublisher() { 
-      return this.publisher != null && !this.publisher.isEmpty();
-    }
-
-    /**
-     * @param value {@link #publisher} (The name of the individual or organization that published the measure.). This is the underlying object with id, value and extensions. The accessor "getPublisher" gives direct access to the value
-     */
-    public Measure setPublisherElement(StringType value) { 
-      this.publisher = value;
-      return this;
-    }
-
-    /**
-     * @return The name of the individual or organization that published the measure.
-     */
-    public String getPublisher() { 
-      return this.publisher == null ? null : this.publisher.getValue();
-    }
-
-    /**
-     * @param value The name of the individual or organization that published the measure.
-     */
-    public Measure setPublisher(String value) { 
-      if (Utilities.noString(value))
-        this.publisher = null;
-      else {
-        if (this.publisher == null)
-          this.publisher = new StringType();
-        this.publisher.setValue(value);
-      }
-      return this;
     }
 
     /**
@@ -3555,7 +2888,7 @@ public class Measure extends MetadataResource {
     }
 
     /**
-     * @return {@link #disclaimer} (A disclaimer for the use of the measure.). This is the underlying object with id, value and extensions. The accessor "getDisclaimer" gives direct access to the value
+     * @return {@link #disclaimer} (Notices and disclaimers regarding the use of the measure, or related to intellectual property (such as code systems) referenced by the measure.). This is the underlying object with id, value and extensions. The accessor "getDisclaimer" gives direct access to the value
      */
     public MarkdownType getDisclaimerElement() { 
       if (this.disclaimer == null)
@@ -3575,7 +2908,7 @@ public class Measure extends MetadataResource {
     }
 
     /**
-     * @param value {@link #disclaimer} (A disclaimer for the use of the measure.). This is the underlying object with id, value and extensions. The accessor "getDisclaimer" gives direct access to the value
+     * @param value {@link #disclaimer} (Notices and disclaimers regarding the use of the measure, or related to intellectual property (such as code systems) referenced by the measure.). This is the underlying object with id, value and extensions. The accessor "getDisclaimer" gives direct access to the value
      */
     public Measure setDisclaimerElement(MarkdownType value) { 
       this.disclaimer = value;
@@ -3583,14 +2916,14 @@ public class Measure extends MetadataResource {
     }
 
     /**
-     * @return A disclaimer for the use of the measure.
+     * @return Notices and disclaimers regarding the use of the measure, or related to intellectual property (such as code systems) referenced by the measure.
      */
     public String getDisclaimer() { 
       return this.disclaimer == null ? null : this.disclaimer.getValue();
     }
 
     /**
-     * @param value A disclaimer for the use of the measure.
+     * @param value Notices and disclaimers regarding the use of the measure, or related to intellectual property (such as code systems) referenced by the measure.
      */
     public Measure setDisclaimer(String value) { 
       if (value == null)
@@ -3604,19 +2937,15 @@ public class Measure extends MetadataResource {
     }
 
     /**
-     * @return {@link #scoring} (The measure scoring type, e.g. proportion, CV.). This is the underlying object with id, value and extensions. The accessor "getScoring" gives direct access to the value
+     * @return {@link #scoring} (Indicates how the calculation is performed for the measure, including proportion, ratio, continuous variable, and cohort. The value set is extensible, allowing additional measure scoring types to be represented.)
      */
-    public Enumeration<MeasureScoring> getScoringElement() { 
+    public CodeableConcept getScoring() { 
       if (this.scoring == null)
         if (Configuration.errorOnAutoCreate())
           throw new Error("Attempt to auto-create Measure.scoring");
         else if (Configuration.doAutoCreate())
-          this.scoring = new Enumeration<MeasureScoring>(new MeasureScoringEnumFactory()); // bb
+          this.scoring = new CodeableConcept(); // cc
       return this.scoring;
-    }
-
-    public boolean hasScoringElement() { 
-      return this.scoring != null && !this.scoring.isEmpty();
     }
 
     public boolean hasScoring() { 
@@ -3624,48 +2953,23 @@ public class Measure extends MetadataResource {
     }
 
     /**
-     * @param value {@link #scoring} (The measure scoring type, e.g. proportion, CV.). This is the underlying object with id, value and extensions. The accessor "getScoring" gives direct access to the value
+     * @param value {@link #scoring} (Indicates how the calculation is performed for the measure, including proportion, ratio, continuous variable, and cohort. The value set is extensible, allowing additional measure scoring types to be represented.)
      */
-    public Measure setScoringElement(Enumeration<MeasureScoring> value) { 
+    public Measure setScoring(CodeableConcept value) { 
       this.scoring = value;
       return this;
     }
 
     /**
-     * @return The measure scoring type, e.g. proportion, CV.
+     * @return {@link #compositeScoring} (If this is a composite measure, the scoring method used to combine the component measures to determine the composite score.)
      */
-    public MeasureScoring getScoring() { 
-      return this.scoring == null ? null : this.scoring.getValue();
-    }
-
-    /**
-     * @param value The measure scoring type, e.g. proportion, CV.
-     */
-    public Measure setScoring(MeasureScoring value) { 
-      if (value == null)
-        this.scoring = null;
-      else {
-        if (this.scoring == null)
-          this.scoring = new Enumeration<MeasureScoring>(new MeasureScoringEnumFactory());
-        this.scoring.setValue(value);
-      }
-      return this;
-    }
-
-    /**
-     * @return {@link #compositeScoring} (If this is a composite measure, the scoring method used to combine the component measures to determine the composite score.). This is the underlying object with id, value and extensions. The accessor "getCompositeScoring" gives direct access to the value
-     */
-    public Enumeration<CompositeMeasureScoring> getCompositeScoringElement() { 
+    public CodeableConcept getCompositeScoring() { 
       if (this.compositeScoring == null)
         if (Configuration.errorOnAutoCreate())
           throw new Error("Attempt to auto-create Measure.compositeScoring");
         else if (Configuration.doAutoCreate())
-          this.compositeScoring = new Enumeration<CompositeMeasureScoring>(new CompositeMeasureScoringEnumFactory()); // bb
+          this.compositeScoring = new CodeableConcept(); // cc
       return this.compositeScoring;
-    }
-
-    public boolean hasCompositeScoringElement() { 
-      return this.compositeScoring != null && !this.compositeScoring.isEmpty();
     }
 
     public boolean hasCompositeScoring() { 
@@ -3673,47 +2977,26 @@ public class Measure extends MetadataResource {
     }
 
     /**
-     * @param value {@link #compositeScoring} (If this is a composite measure, the scoring method used to combine the component measures to determine the composite score.). This is the underlying object with id, value and extensions. The accessor "getCompositeScoring" gives direct access to the value
+     * @param value {@link #compositeScoring} (If this is a composite measure, the scoring method used to combine the component measures to determine the composite score.)
      */
-    public Measure setCompositeScoringElement(Enumeration<CompositeMeasureScoring> value) { 
+    public Measure setCompositeScoring(CodeableConcept value) { 
       this.compositeScoring = value;
       return this;
     }
 
     /**
-     * @return If this is a composite measure, the scoring method used to combine the component measures to determine the composite score.
+     * @return {@link #type} (Indicates whether the measure is used to examine a process, an outcome over time, a patient-reported outcome, or a structure measure such as utilization.)
      */
-    public CompositeMeasureScoring getCompositeScoring() { 
-      return this.compositeScoring == null ? null : this.compositeScoring.getValue();
-    }
-
-    /**
-     * @param value If this is a composite measure, the scoring method used to combine the component measures to determine the composite score.
-     */
-    public Measure setCompositeScoring(CompositeMeasureScoring value) { 
-      if (value == null)
-        this.compositeScoring = null;
-      else {
-        if (this.compositeScoring == null)
-          this.compositeScoring = new Enumeration<CompositeMeasureScoring>(new CompositeMeasureScoringEnumFactory());
-        this.compositeScoring.setValue(value);
-      }
-      return this;
-    }
-
-    /**
-     * @return {@link #type} (The measure type, e.g. process, outcome.)
-     */
-    public List<Enumeration<MeasureType>> getType() { 
+    public List<CodeableConcept> getType() { 
       if (this.type == null)
-        this.type = new ArrayList<Enumeration<MeasureType>>();
+        this.type = new ArrayList<CodeableConcept>();
       return this.type;
     }
 
     /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
-    public Measure setType(List<Enumeration<MeasureType>> theType) { 
+    public Measure setType(List<CodeableConcept> theType) { 
       this.type = theType;
       return this;
     }
@@ -3721,45 +3004,37 @@ public class Measure extends MetadataResource {
     public boolean hasType() { 
       if (this.type == null)
         return false;
-      for (Enumeration<MeasureType> item : this.type)
+      for (CodeableConcept item : this.type)
         if (!item.isEmpty())
           return true;
       return false;
     }
 
-    /**
-     * @return {@link #type} (The measure type, e.g. process, outcome.)
-     */
-    public Enumeration<MeasureType> addTypeElement() {//2 
-      Enumeration<MeasureType> t = new Enumeration<MeasureType>(new MeasureTypeEnumFactory());
+    public CodeableConcept addType() { //3
+      CodeableConcept t = new CodeableConcept();
       if (this.type == null)
-        this.type = new ArrayList<Enumeration<MeasureType>>();
+        this.type = new ArrayList<CodeableConcept>();
       this.type.add(t);
       return t;
     }
 
-    /**
-     * @param value {@link #type} (The measure type, e.g. process, outcome.)
-     */
-    public Measure addType(MeasureType value) { //1
-      Enumeration<MeasureType> t = new Enumeration<MeasureType>(new MeasureTypeEnumFactory());
-      t.setValue(value);
+    public Measure addType(CodeableConcept t) { //3
+      if (t == null)
+        return this;
       if (this.type == null)
-        this.type = new ArrayList<Enumeration<MeasureType>>();
+        this.type = new ArrayList<CodeableConcept>();
       this.type.add(t);
       return this;
     }
 
     /**
-     * @param value {@link #type} (The measure type, e.g. process, outcome.)
+     * @return The first repetition of repeating field {@link #type}, creating it if it does not already exist
      */
-    public boolean hasType(MeasureType value) { 
-      if (this.type == null)
-        return false;
-      for (Enumeration<MeasureType> v : this.type)
-        if (v.getValue().equals(value)) // code
-          return true;
-      return false;
+    public CodeableConcept getTypeFirstRep() { 
+      if (getType().isEmpty()) {
+        addType();
+      }
+      return getType().get(0);
     }
 
     /**
@@ -3812,7 +3087,7 @@ public class Measure extends MetadataResource {
     }
 
     /**
-     * @return {@link #rateAggregation} (A description of the rate aggregation for the measure.). This is the underlying object with id, value and extensions. The accessor "getRateAggregation" gives direct access to the value
+     * @return {@link #rateAggregation} (Describes how to combine the information calculated, based on logic in each of several populations, into one summarized result.). This is the underlying object with id, value and extensions. The accessor "getRateAggregation" gives direct access to the value
      */
     public StringType getRateAggregationElement() { 
       if (this.rateAggregation == null)
@@ -3832,7 +3107,7 @@ public class Measure extends MetadataResource {
     }
 
     /**
-     * @param value {@link #rateAggregation} (A description of the rate aggregation for the measure.). This is the underlying object with id, value and extensions. The accessor "getRateAggregation" gives direct access to the value
+     * @param value {@link #rateAggregation} (Describes how to combine the information calculated, based on logic in each of several populations, into one summarized result.). This is the underlying object with id, value and extensions. The accessor "getRateAggregation" gives direct access to the value
      */
     public Measure setRateAggregationElement(StringType value) { 
       this.rateAggregation = value;
@@ -3840,14 +3115,14 @@ public class Measure extends MetadataResource {
     }
 
     /**
-     * @return A description of the rate aggregation for the measure.
+     * @return Describes how to combine the information calculated, based on logic in each of several populations, into one summarized result.
      */
     public String getRateAggregation() { 
       return this.rateAggregation == null ? null : this.rateAggregation.getValue();
     }
 
     /**
-     * @param value A description of the rate aggregation for the measure.
+     * @param value Describes how to combine the information calculated, based on logic in each of several populations, into one summarized result.
      */
     public Measure setRateAggregation(String value) { 
       if (Utilities.noString(value))
@@ -3861,7 +3136,7 @@ public class Measure extends MetadataResource {
     }
 
     /**
-     * @return {@link #rationale} (The rationale for the measure.). This is the underlying object with id, value and extensions. The accessor "getRationale" gives direct access to the value
+     * @return {@link #rationale} (Provides a succint statement of the need for the measure. Usually includes statements pertaining to importance criterion: impact, gap in care, and evidence.). This is the underlying object with id, value and extensions. The accessor "getRationale" gives direct access to the value
      */
     public MarkdownType getRationaleElement() { 
       if (this.rationale == null)
@@ -3881,7 +3156,7 @@ public class Measure extends MetadataResource {
     }
 
     /**
-     * @param value {@link #rationale} (The rationale for the measure.). This is the underlying object with id, value and extensions. The accessor "getRationale" gives direct access to the value
+     * @param value {@link #rationale} (Provides a succint statement of the need for the measure. Usually includes statements pertaining to importance criterion: impact, gap in care, and evidence.). This is the underlying object with id, value and extensions. The accessor "getRationale" gives direct access to the value
      */
     public Measure setRationaleElement(MarkdownType value) { 
       this.rationale = value;
@@ -3889,14 +3164,14 @@ public class Measure extends MetadataResource {
     }
 
     /**
-     * @return The rationale for the measure.
+     * @return Provides a succint statement of the need for the measure. Usually includes statements pertaining to importance criterion: impact, gap in care, and evidence.
      */
     public String getRationale() { 
       return this.rationale == null ? null : this.rationale.getValue();
     }
 
     /**
-     * @param value The rationale for the measure.
+     * @param value Provides a succint statement of the need for the measure. Usually includes statements pertaining to importance criterion: impact, gap in care, and evidence.
      */
     public Measure setRationale(String value) { 
       if (value == null)
@@ -3910,7 +3185,7 @@ public class Measure extends MetadataResource {
     }
 
     /**
-     * @return {@link #clinicalRecommendationStatement} (The clinical recommendation statement for the measure.). This is the underlying object with id, value and extensions. The accessor "getClinicalRecommendationStatement" gives direct access to the value
+     * @return {@link #clinicalRecommendationStatement} (Provides a summary of relevant clinical guidelines or other clinical recommendations supporting the measure.). This is the underlying object with id, value and extensions. The accessor "getClinicalRecommendationStatement" gives direct access to the value
      */
     public MarkdownType getClinicalRecommendationStatementElement() { 
       if (this.clinicalRecommendationStatement == null)
@@ -3930,7 +3205,7 @@ public class Measure extends MetadataResource {
     }
 
     /**
-     * @param value {@link #clinicalRecommendationStatement} (The clinical recommendation statement for the measure.). This is the underlying object with id, value and extensions. The accessor "getClinicalRecommendationStatement" gives direct access to the value
+     * @param value {@link #clinicalRecommendationStatement} (Provides a summary of relevant clinical guidelines or other clinical recommendations supporting the measure.). This is the underlying object with id, value and extensions. The accessor "getClinicalRecommendationStatement" gives direct access to the value
      */
     public Measure setClinicalRecommendationStatementElement(MarkdownType value) { 
       this.clinicalRecommendationStatement = value;
@@ -3938,14 +3213,14 @@ public class Measure extends MetadataResource {
     }
 
     /**
-     * @return The clinical recommendation statement for the measure.
+     * @return Provides a summary of relevant clinical guidelines or other clinical recommendations supporting the measure.
      */
     public String getClinicalRecommendationStatement() { 
       return this.clinicalRecommendationStatement == null ? null : this.clinicalRecommendationStatement.getValue();
     }
 
     /**
-     * @param value The clinical recommendation statement for the measure.
+     * @param value Provides a summary of relevant clinical guidelines or other clinical recommendations supporting the measure.
      */
     public Measure setClinicalRecommendationStatement(String value) { 
       if (value == null)
@@ -3959,7 +3234,7 @@ public class Measure extends MetadataResource {
     }
 
     /**
-     * @return {@link #improvementNotation} (Improvement notation for the measure, e.g. higher score indicates better quality.). This is the underlying object with id, value and extensions. The accessor "getImprovementNotation" gives direct access to the value
+     * @return {@link #improvementNotation} (Information on whether an increase or decrease in score is the preferred result (e.g., a higher score indicates better quality OR a lower score indicates better quality OR quality is whthin a range).). This is the underlying object with id, value and extensions. The accessor "getImprovementNotation" gives direct access to the value
      */
     public StringType getImprovementNotationElement() { 
       if (this.improvementNotation == null)
@@ -3979,7 +3254,7 @@ public class Measure extends MetadataResource {
     }
 
     /**
-     * @param value {@link #improvementNotation} (Improvement notation for the measure, e.g. higher score indicates better quality.). This is the underlying object with id, value and extensions. The accessor "getImprovementNotation" gives direct access to the value
+     * @param value {@link #improvementNotation} (Information on whether an increase or decrease in score is the preferred result (e.g., a higher score indicates better quality OR a lower score indicates better quality OR quality is whthin a range).). This is the underlying object with id, value and extensions. The accessor "getImprovementNotation" gives direct access to the value
      */
     public Measure setImprovementNotationElement(StringType value) { 
       this.improvementNotation = value;
@@ -3987,14 +3262,14 @@ public class Measure extends MetadataResource {
     }
 
     /**
-     * @return Improvement notation for the measure, e.g. higher score indicates better quality.
+     * @return Information on whether an increase or decrease in score is the preferred result (e.g., a higher score indicates better quality OR a lower score indicates better quality OR quality is whthin a range).
      */
     public String getImprovementNotation() { 
       return this.improvementNotation == null ? null : this.improvementNotation.getValue();
     }
 
     /**
-     * @param value Improvement notation for the measure, e.g. higher score indicates better quality.
+     * @param value Information on whether an increase or decrease in score is the preferred result (e.g., a higher score indicates better quality OR a lower score indicates better quality OR quality is whthin a range).
      */
     public Measure setImprovementNotation(String value) { 
       if (Utilities.noString(value))
@@ -4008,52 +3283,64 @@ public class Measure extends MetadataResource {
     }
 
     /**
-     * @return {@link #definition} (A narrative description of the complete measure calculation.). This is the underlying object with id, value and extensions. The accessor "getDefinition" gives direct access to the value
+     * @return {@link #definition} (Provides a description of an individual term used within the measure.)
      */
-    public MarkdownType getDefinitionElement() { 
+    public List<MarkdownType> getDefinition() { 
       if (this.definition == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create Measure.definition");
-        else if (Configuration.doAutoCreate())
-          this.definition = new MarkdownType(); // bb
+        this.definition = new ArrayList<MarkdownType>();
       return this.definition;
     }
 
-    public boolean hasDefinitionElement() { 
-      return this.definition != null && !this.definition.isEmpty();
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public Measure setDefinition(List<MarkdownType> theDefinition) { 
+      this.definition = theDefinition;
+      return this;
     }
 
     public boolean hasDefinition() { 
-      return this.definition != null && !this.definition.isEmpty();
+      if (this.definition == null)
+        return false;
+      for (MarkdownType item : this.definition)
+        if (!item.isEmpty())
+          return true;
+      return false;
     }
 
     /**
-     * @param value {@link #definition} (A narrative description of the complete measure calculation.). This is the underlying object with id, value and extensions. The accessor "getDefinition" gives direct access to the value
+     * @return {@link #definition} (Provides a description of an individual term used within the measure.)
      */
-    public Measure setDefinitionElement(MarkdownType value) { 
-      this.definition = value;
+    public MarkdownType addDefinitionElement() {//2 
+      MarkdownType t = new MarkdownType();
+      if (this.definition == null)
+        this.definition = new ArrayList<MarkdownType>();
+      this.definition.add(t);
+      return t;
+    }
+
+    /**
+     * @param value {@link #definition} (Provides a description of an individual term used within the measure.)
+     */
+    public Measure addDefinition(String value) { //1
+      MarkdownType t = new MarkdownType();
+      t.setValue(value);
+      if (this.definition == null)
+        this.definition = new ArrayList<MarkdownType>();
+      this.definition.add(t);
       return this;
     }
 
     /**
-     * @return A narrative description of the complete measure calculation.
+     * @param value {@link #definition} (Provides a description of an individual term used within the measure.)
      */
-    public String getDefinition() { 
-      return this.definition == null ? null : this.definition.getValue();
-    }
-
-    /**
-     * @param value A narrative description of the complete measure calculation.
-     */
-    public Measure setDefinition(String value) { 
-      if (value == null)
-        this.definition = null;
-      else {
-        if (this.definition == null)
-          this.definition = new MarkdownType();
-        this.definition.setValue(value);
-      }
-      return this;
+    public boolean hasDefinition(String value) { 
+      if (this.definition == null)
+        return false;
+      for (MarkdownType v : this.definition)
+        if (v.equals(value)) // markdown
+          return true;
+      return false;
     }
 
     /**
@@ -4270,31 +3557,31 @@ public class Measure extends MetadataResource {
         childrenList.add(new Property("status", "code", "The status of this measure. Enables tracking the life-cycle of the content.", 0, java.lang.Integer.MAX_VALUE, status));
         childrenList.add(new Property("experimental", "boolean", "A flag to indicate that this measure is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.", 0, java.lang.Integer.MAX_VALUE, experimental));
         childrenList.add(new Property("date", "dateTime", "The date  (and optionally time) when the measure was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the measure changes.", 0, java.lang.Integer.MAX_VALUE, date));
+        childrenList.add(new Property("publisher", "string", "The name of the individual or organization that published the measure.", 0, java.lang.Integer.MAX_VALUE, publisher));
         childrenList.add(new Property("description", "markdown", "A free text natural language description of the measure from the consumer's perspective.", 0, java.lang.Integer.MAX_VALUE, description));
         childrenList.add(new Property("purpose", "markdown", "Explains why this measure is needed and why it has been designed as it has.", 0, java.lang.Integer.MAX_VALUE, purpose));
         childrenList.add(new Property("usage", "string", "A detailed description of how the measure is used from a clinical perspective.", 0, java.lang.Integer.MAX_VALUE, usage));
         childrenList.add(new Property("approvalDate", "date", "The date on which the asset content was approved by the publisher. Approval happens once when the content is officially approved for usage.", 0, java.lang.Integer.MAX_VALUE, approvalDate));
-        childrenList.add(new Property("lastReviewDate", "date", "The date on which the asset content was last reviewed. Review happens periodically after that, but doesn't change the original approval date.", 0, java.lang.Integer.MAX_VALUE, lastReviewDate));
+        childrenList.add(new Property("lastReviewDate", "date", "The date on which the asset content was last reviewed. Review happens periodically after approval, but doesn't change the original approval date.", 0, java.lang.Integer.MAX_VALUE, lastReviewDate));
         childrenList.add(new Property("effectivePeriod", "Period", "The period during which the measure content was or is planned to be effective.", 0, java.lang.Integer.MAX_VALUE, effectivePeriod));
         childrenList.add(new Property("useContext", "UsageContext", "The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching of code system definitions.", 0, java.lang.Integer.MAX_VALUE, useContext));
         childrenList.add(new Property("jurisdiction", "CodeableConcept", "A jurisdiction in which the measure is intended to be used.", 0, java.lang.Integer.MAX_VALUE, jurisdiction));
-        childrenList.add(new Property("topic", "CodeableConcept", "Clinical topics related to the content of the measure.", 0, java.lang.Integer.MAX_VALUE, topic));
+        childrenList.add(new Property("topic", "CodeableConcept", "Descriptive topics related to the content of the measure. Topics provide a high-level categorization of the type of the measure that can be useful for filtering and searching.", 0, java.lang.Integer.MAX_VALUE, topic));
         childrenList.add(new Property("contributor", "Contributor", "A contributor to the content of the measure, including authors, editors, reviewers, and endorsers.", 0, java.lang.Integer.MAX_VALUE, contributor));
-        childrenList.add(new Property("publisher", "string", "The name of the individual or organization that published the measure.", 0, java.lang.Integer.MAX_VALUE, publisher));
         childrenList.add(new Property("contact", "ContactDetail", "Contact details to assist a user in finding and communicating with the publisher.", 0, java.lang.Integer.MAX_VALUE, contact));
         childrenList.add(new Property("copyright", "markdown", "A copyright statement relating to the measure and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the measure.", 0, java.lang.Integer.MAX_VALUE, copyright));
         childrenList.add(new Property("relatedArtifact", "RelatedArtifact", "Related artifacts such as additional documentation, justification, or bibliographic references.", 0, java.lang.Integer.MAX_VALUE, relatedArtifact));
         childrenList.add(new Property("library", "Reference(Library)", "A reference to a Library resource containing the formal logic used by the measure.", 0, java.lang.Integer.MAX_VALUE, library));
-        childrenList.add(new Property("disclaimer", "markdown", "A disclaimer for the use of the measure.", 0, java.lang.Integer.MAX_VALUE, disclaimer));
-        childrenList.add(new Property("scoring", "code", "The measure scoring type, e.g. proportion, CV.", 0, java.lang.Integer.MAX_VALUE, scoring));
-        childrenList.add(new Property("compositeScoring", "code", "If this is a composite measure, the scoring method used to combine the component measures to determine the composite score.", 0, java.lang.Integer.MAX_VALUE, compositeScoring));
-        childrenList.add(new Property("type", "code", "The measure type, e.g. process, outcome.", 0, java.lang.Integer.MAX_VALUE, type));
+        childrenList.add(new Property("disclaimer", "markdown", "Notices and disclaimers regarding the use of the measure, or related to intellectual property (such as code systems) referenced by the measure.", 0, java.lang.Integer.MAX_VALUE, disclaimer));
+        childrenList.add(new Property("scoring", "CodeableConcept", "Indicates how the calculation is performed for the measure, including proportion, ratio, continuous variable, and cohort. The value set is extensible, allowing additional measure scoring types to be represented.", 0, java.lang.Integer.MAX_VALUE, scoring));
+        childrenList.add(new Property("compositeScoring", "CodeableConcept", "If this is a composite measure, the scoring method used to combine the component measures to determine the composite score.", 0, java.lang.Integer.MAX_VALUE, compositeScoring));
+        childrenList.add(new Property("type", "CodeableConcept", "Indicates whether the measure is used to examine a process, an outcome over time, a patient-reported outcome, or a structure measure such as utilization.", 0, java.lang.Integer.MAX_VALUE, type));
         childrenList.add(new Property("riskAdjustment", "string", "A description of the risk adjustment factors that may impact the resulting score for the measure and how they may be accounted for when computing and reporting measure results.", 0, java.lang.Integer.MAX_VALUE, riskAdjustment));
-        childrenList.add(new Property("rateAggregation", "string", "A description of the rate aggregation for the measure.", 0, java.lang.Integer.MAX_VALUE, rateAggregation));
-        childrenList.add(new Property("rationale", "markdown", "The rationale for the measure.", 0, java.lang.Integer.MAX_VALUE, rationale));
-        childrenList.add(new Property("clinicalRecommendationStatement", "markdown", "The clinical recommendation statement for the measure.", 0, java.lang.Integer.MAX_VALUE, clinicalRecommendationStatement));
-        childrenList.add(new Property("improvementNotation", "string", "Improvement notation for the measure, e.g. higher score indicates better quality.", 0, java.lang.Integer.MAX_VALUE, improvementNotation));
-        childrenList.add(new Property("definition", "markdown", "A narrative description of the complete measure calculation.", 0, java.lang.Integer.MAX_VALUE, definition));
+        childrenList.add(new Property("rateAggregation", "string", "Describes how to combine the information calculated, based on logic in each of several populations, into one summarized result.", 0, java.lang.Integer.MAX_VALUE, rateAggregation));
+        childrenList.add(new Property("rationale", "markdown", "Provides a succint statement of the need for the measure. Usually includes statements pertaining to importance criterion: impact, gap in care, and evidence.", 0, java.lang.Integer.MAX_VALUE, rationale));
+        childrenList.add(new Property("clinicalRecommendationStatement", "markdown", "Provides a summary of relevant clinical guidelines or other clinical recommendations supporting the measure.", 0, java.lang.Integer.MAX_VALUE, clinicalRecommendationStatement));
+        childrenList.add(new Property("improvementNotation", "string", "Information on whether an increase or decrease in score is the preferred result (e.g., a higher score indicates better quality OR a lower score indicates better quality OR quality is whthin a range).", 0, java.lang.Integer.MAX_VALUE, improvementNotation));
+        childrenList.add(new Property("definition", "markdown", "Provides a description of an individual term used within the measure.", 0, java.lang.Integer.MAX_VALUE, definition));
         childrenList.add(new Property("guidance", "markdown", "Additional guidance for the measure including how it can be used in a clinical context, and the intent of the measure.", 0, java.lang.Integer.MAX_VALUE, guidance));
         childrenList.add(new Property("set", "string", "The measure set, e.g. Preventive Care and Screening.", 0, java.lang.Integer.MAX_VALUE, set));
         childrenList.add(new Property("group", "", "A group of population criteria for the measure.", 0, java.lang.Integer.MAX_VALUE, group));
@@ -4312,6 +3599,7 @@ public class Measure extends MetadataResource {
         case -892481550: /*status*/ return this.status == null ? new Base[0] : new Base[] {this.status}; // Enumeration<PublicationStatus>
         case -404562712: /*experimental*/ return this.experimental == null ? new Base[0] : new Base[] {this.experimental}; // BooleanType
         case 3076014: /*date*/ return this.date == null ? new Base[0] : new Base[] {this.date}; // DateTimeType
+        case 1447404028: /*publisher*/ return this.publisher == null ? new Base[0] : new Base[] {this.publisher}; // StringType
         case -1724546052: /*description*/ return this.description == null ? new Base[0] : new Base[] {this.description}; // MarkdownType
         case -220463842: /*purpose*/ return this.purpose == null ? new Base[0] : new Base[] {this.purpose}; // MarkdownType
         case 111574433: /*usage*/ return this.usage == null ? new Base[0] : new Base[] {this.usage}; // StringType
@@ -4322,21 +3610,20 @@ public class Measure extends MetadataResource {
         case -507075711: /*jurisdiction*/ return this.jurisdiction == null ? new Base[0] : this.jurisdiction.toArray(new Base[this.jurisdiction.size()]); // CodeableConcept
         case 110546223: /*topic*/ return this.topic == null ? new Base[0] : this.topic.toArray(new Base[this.topic.size()]); // CodeableConcept
         case -1895276325: /*contributor*/ return this.contributor == null ? new Base[0] : this.contributor.toArray(new Base[this.contributor.size()]); // Contributor
-        case 1447404028: /*publisher*/ return this.publisher == null ? new Base[0] : new Base[] {this.publisher}; // StringType
         case 951526432: /*contact*/ return this.contact == null ? new Base[0] : this.contact.toArray(new Base[this.contact.size()]); // ContactDetail
         case 1522889671: /*copyright*/ return this.copyright == null ? new Base[0] : new Base[] {this.copyright}; // MarkdownType
         case 666807069: /*relatedArtifact*/ return this.relatedArtifact == null ? new Base[0] : this.relatedArtifact.toArray(new Base[this.relatedArtifact.size()]); // RelatedArtifact
         case 166208699: /*library*/ return this.library == null ? new Base[0] : this.library.toArray(new Base[this.library.size()]); // Reference
         case 432371099: /*disclaimer*/ return this.disclaimer == null ? new Base[0] : new Base[] {this.disclaimer}; // MarkdownType
-        case 1924005583: /*scoring*/ return this.scoring == null ? new Base[0] : new Base[] {this.scoring}; // Enumeration<MeasureScoring>
-        case 569347656: /*compositeScoring*/ return this.compositeScoring == null ? new Base[0] : new Base[] {this.compositeScoring}; // Enumeration<CompositeMeasureScoring>
-        case 3575610: /*type*/ return this.type == null ? new Base[0] : this.type.toArray(new Base[this.type.size()]); // Enumeration<MeasureType>
+        case 1924005583: /*scoring*/ return this.scoring == null ? new Base[0] : new Base[] {this.scoring}; // CodeableConcept
+        case 569347656: /*compositeScoring*/ return this.compositeScoring == null ? new Base[0] : new Base[] {this.compositeScoring}; // CodeableConcept
+        case 3575610: /*type*/ return this.type == null ? new Base[0] : this.type.toArray(new Base[this.type.size()]); // CodeableConcept
         case 93273500: /*riskAdjustment*/ return this.riskAdjustment == null ? new Base[0] : new Base[] {this.riskAdjustment}; // StringType
         case 1254503906: /*rateAggregation*/ return this.rateAggregation == null ? new Base[0] : new Base[] {this.rateAggregation}; // StringType
         case 345689335: /*rationale*/ return this.rationale == null ? new Base[0] : new Base[] {this.rationale}; // MarkdownType
         case -18631389: /*clinicalRecommendationStatement*/ return this.clinicalRecommendationStatement == null ? new Base[0] : new Base[] {this.clinicalRecommendationStatement}; // MarkdownType
         case -2085456136: /*improvementNotation*/ return this.improvementNotation == null ? new Base[0] : new Base[] {this.improvementNotation}; // StringType
-        case -1014418093: /*definition*/ return this.definition == null ? new Base[0] : new Base[] {this.definition}; // MarkdownType
+        case -1014418093: /*definition*/ return this.definition == null ? new Base[0] : this.definition.toArray(new Base[this.definition.size()]); // MarkdownType
         case -1314002088: /*guidance*/ return this.guidance == null ? new Base[0] : new Base[] {this.guidance}; // MarkdownType
         case 113762: /*set*/ return this.set == null ? new Base[0] : new Base[] {this.set}; // StringType
         case 98629247: /*group*/ return this.group == null ? new Base[0] : this.group.toArray(new Base[this.group.size()]); // MeasureGroupComponent
@@ -4347,245 +3634,293 @@ public class Measure extends MetadataResource {
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case 116079: // url
           this.url = castToUri(value); // UriType
-          break;
+          return value;
         case -1618432855: // identifier
           this.getIdentifier().add(castToIdentifier(value)); // Identifier
-          break;
+          return value;
         case 351608024: // version
           this.version = castToString(value); // StringType
-          break;
+          return value;
         case 3373707: // name
           this.name = castToString(value); // StringType
-          break;
+          return value;
         case 110371416: // title
           this.title = castToString(value); // StringType
-          break;
+          return value;
         case -892481550: // status
-          this.status = new PublicationStatusEnumFactory().fromType(value); // Enumeration<PublicationStatus>
-          break;
+          value = new PublicationStatusEnumFactory().fromType(castToCode(value));
+          this.status = (Enumeration) value; // Enumeration<PublicationStatus>
+          return value;
         case -404562712: // experimental
           this.experimental = castToBoolean(value); // BooleanType
-          break;
+          return value;
         case 3076014: // date
           this.date = castToDateTime(value); // DateTimeType
-          break;
-        case -1724546052: // description
-          this.description = castToMarkdown(value); // MarkdownType
-          break;
-        case -220463842: // purpose
-          this.purpose = castToMarkdown(value); // MarkdownType
-          break;
-        case 111574433: // usage
-          this.usage = castToString(value); // StringType
-          break;
-        case 223539345: // approvalDate
-          this.approvalDate = castToDate(value); // DateType
-          break;
-        case -1687512484: // lastReviewDate
-          this.lastReviewDate = castToDate(value); // DateType
-          break;
-        case -403934648: // effectivePeriod
-          this.effectivePeriod = castToPeriod(value); // Period
-          break;
-        case -669707736: // useContext
-          this.getUseContext().add(castToUsageContext(value)); // UsageContext
-          break;
-        case -507075711: // jurisdiction
-          this.getJurisdiction().add(castToCodeableConcept(value)); // CodeableConcept
-          break;
-        case 110546223: // topic
-          this.getTopic().add(castToCodeableConcept(value)); // CodeableConcept
-          break;
-        case -1895276325: // contributor
-          this.getContributor().add(castToContributor(value)); // Contributor
-          break;
+          return value;
         case 1447404028: // publisher
           this.publisher = castToString(value); // StringType
-          break;
+          return value;
+        case -1724546052: // description
+          this.description = castToMarkdown(value); // MarkdownType
+          return value;
+        case -220463842: // purpose
+          this.purpose = castToMarkdown(value); // MarkdownType
+          return value;
+        case 111574433: // usage
+          this.usage = castToString(value); // StringType
+          return value;
+        case 223539345: // approvalDate
+          this.approvalDate = castToDate(value); // DateType
+          return value;
+        case -1687512484: // lastReviewDate
+          this.lastReviewDate = castToDate(value); // DateType
+          return value;
+        case -403934648: // effectivePeriod
+          this.effectivePeriod = castToPeriod(value); // Period
+          return value;
+        case -669707736: // useContext
+          this.getUseContext().add(castToUsageContext(value)); // UsageContext
+          return value;
+        case -507075711: // jurisdiction
+          this.getJurisdiction().add(castToCodeableConcept(value)); // CodeableConcept
+          return value;
+        case 110546223: // topic
+          this.getTopic().add(castToCodeableConcept(value)); // CodeableConcept
+          return value;
+        case -1895276325: // contributor
+          this.getContributor().add(castToContributor(value)); // Contributor
+          return value;
         case 951526432: // contact
           this.getContact().add(castToContactDetail(value)); // ContactDetail
-          break;
+          return value;
         case 1522889671: // copyright
           this.copyright = castToMarkdown(value); // MarkdownType
-          break;
+          return value;
         case 666807069: // relatedArtifact
           this.getRelatedArtifact().add(castToRelatedArtifact(value)); // RelatedArtifact
-          break;
+          return value;
         case 166208699: // library
           this.getLibrary().add(castToReference(value)); // Reference
-          break;
+          return value;
         case 432371099: // disclaimer
           this.disclaimer = castToMarkdown(value); // MarkdownType
-          break;
+          return value;
         case 1924005583: // scoring
-          this.scoring = new MeasureScoringEnumFactory().fromType(value); // Enumeration<MeasureScoring>
-          break;
+          this.scoring = castToCodeableConcept(value); // CodeableConcept
+          return value;
         case 569347656: // compositeScoring
-          this.compositeScoring = new CompositeMeasureScoringEnumFactory().fromType(value); // Enumeration<CompositeMeasureScoring>
-          break;
+          this.compositeScoring = castToCodeableConcept(value); // CodeableConcept
+          return value;
         case 3575610: // type
-          this.getType().add(new MeasureTypeEnumFactory().fromType(value)); // Enumeration<MeasureType>
-          break;
+          this.getType().add(castToCodeableConcept(value)); // CodeableConcept
+          return value;
         case 93273500: // riskAdjustment
           this.riskAdjustment = castToString(value); // StringType
-          break;
+          return value;
         case 1254503906: // rateAggregation
           this.rateAggregation = castToString(value); // StringType
-          break;
+          return value;
         case 345689335: // rationale
           this.rationale = castToMarkdown(value); // MarkdownType
-          break;
+          return value;
         case -18631389: // clinicalRecommendationStatement
           this.clinicalRecommendationStatement = castToMarkdown(value); // MarkdownType
-          break;
+          return value;
         case -2085456136: // improvementNotation
           this.improvementNotation = castToString(value); // StringType
-          break;
+          return value;
         case -1014418093: // definition
-          this.definition = castToMarkdown(value); // MarkdownType
-          break;
+          this.getDefinition().add(castToMarkdown(value)); // MarkdownType
+          return value;
         case -1314002088: // guidance
           this.guidance = castToMarkdown(value); // MarkdownType
-          break;
+          return value;
         case 113762: // set
           this.set = castToString(value); // StringType
-          break;
+          return value;
         case 98629247: // group
           this.getGroup().add((MeasureGroupComponent) value); // MeasureGroupComponent
-          break;
+          return value;
         case 1447496814: // supplementalData
           this.getSupplementalData().add((MeasureSupplementalDataComponent) value); // MeasureSupplementalDataComponent
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("url"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("url")) {
           this.url = castToUri(value); // UriType
-        else if (name.equals("identifier"))
+        } else if (name.equals("identifier")) {
           this.getIdentifier().add(castToIdentifier(value));
-        else if (name.equals("version"))
+        } else if (name.equals("version")) {
           this.version = castToString(value); // StringType
-        else if (name.equals("name"))
+        } else if (name.equals("name")) {
           this.name = castToString(value); // StringType
-        else if (name.equals("title"))
+        } else if (name.equals("title")) {
           this.title = castToString(value); // StringType
-        else if (name.equals("status"))
-          this.status = new PublicationStatusEnumFactory().fromType(value); // Enumeration<PublicationStatus>
-        else if (name.equals("experimental"))
+        } else if (name.equals("status")) {
+          value = new PublicationStatusEnumFactory().fromType(castToCode(value));
+          this.status = (Enumeration) value; // Enumeration<PublicationStatus>
+        } else if (name.equals("experimental")) {
           this.experimental = castToBoolean(value); // BooleanType
-        else if (name.equals("date"))
+        } else if (name.equals("date")) {
           this.date = castToDateTime(value); // DateTimeType
-        else if (name.equals("description"))
-          this.description = castToMarkdown(value); // MarkdownType
-        else if (name.equals("purpose"))
-          this.purpose = castToMarkdown(value); // MarkdownType
-        else if (name.equals("usage"))
-          this.usage = castToString(value); // StringType
-        else if (name.equals("approvalDate"))
-          this.approvalDate = castToDate(value); // DateType
-        else if (name.equals("lastReviewDate"))
-          this.lastReviewDate = castToDate(value); // DateType
-        else if (name.equals("effectivePeriod"))
-          this.effectivePeriod = castToPeriod(value); // Period
-        else if (name.equals("useContext"))
-          this.getUseContext().add(castToUsageContext(value));
-        else if (name.equals("jurisdiction"))
-          this.getJurisdiction().add(castToCodeableConcept(value));
-        else if (name.equals("topic"))
-          this.getTopic().add(castToCodeableConcept(value));
-        else if (name.equals("contributor"))
-          this.getContributor().add(castToContributor(value));
-        else if (name.equals("publisher"))
+        } else if (name.equals("publisher")) {
           this.publisher = castToString(value); // StringType
-        else if (name.equals("contact"))
+        } else if (name.equals("description")) {
+          this.description = castToMarkdown(value); // MarkdownType
+        } else if (name.equals("purpose")) {
+          this.purpose = castToMarkdown(value); // MarkdownType
+        } else if (name.equals("usage")) {
+          this.usage = castToString(value); // StringType
+        } else if (name.equals("approvalDate")) {
+          this.approvalDate = castToDate(value); // DateType
+        } else if (name.equals("lastReviewDate")) {
+          this.lastReviewDate = castToDate(value); // DateType
+        } else if (name.equals("effectivePeriod")) {
+          this.effectivePeriod = castToPeriod(value); // Period
+        } else if (name.equals("useContext")) {
+          this.getUseContext().add(castToUsageContext(value));
+        } else if (name.equals("jurisdiction")) {
+          this.getJurisdiction().add(castToCodeableConcept(value));
+        } else if (name.equals("topic")) {
+          this.getTopic().add(castToCodeableConcept(value));
+        } else if (name.equals("contributor")) {
+          this.getContributor().add(castToContributor(value));
+        } else if (name.equals("contact")) {
           this.getContact().add(castToContactDetail(value));
-        else if (name.equals("copyright"))
+        } else if (name.equals("copyright")) {
           this.copyright = castToMarkdown(value); // MarkdownType
-        else if (name.equals("relatedArtifact"))
+        } else if (name.equals("relatedArtifact")) {
           this.getRelatedArtifact().add(castToRelatedArtifact(value));
-        else if (name.equals("library"))
+        } else if (name.equals("library")) {
           this.getLibrary().add(castToReference(value));
-        else if (name.equals("disclaimer"))
+        } else if (name.equals("disclaimer")) {
           this.disclaimer = castToMarkdown(value); // MarkdownType
-        else if (name.equals("scoring"))
-          this.scoring = new MeasureScoringEnumFactory().fromType(value); // Enumeration<MeasureScoring>
-        else if (name.equals("compositeScoring"))
-          this.compositeScoring = new CompositeMeasureScoringEnumFactory().fromType(value); // Enumeration<CompositeMeasureScoring>
-        else if (name.equals("type"))
-          this.getType().add(new MeasureTypeEnumFactory().fromType(value));
-        else if (name.equals("riskAdjustment"))
+        } else if (name.equals("scoring")) {
+          this.scoring = castToCodeableConcept(value); // CodeableConcept
+        } else if (name.equals("compositeScoring")) {
+          this.compositeScoring = castToCodeableConcept(value); // CodeableConcept
+        } else if (name.equals("type")) {
+          this.getType().add(castToCodeableConcept(value));
+        } else if (name.equals("riskAdjustment")) {
           this.riskAdjustment = castToString(value); // StringType
-        else if (name.equals("rateAggregation"))
+        } else if (name.equals("rateAggregation")) {
           this.rateAggregation = castToString(value); // StringType
-        else if (name.equals("rationale"))
+        } else if (name.equals("rationale")) {
           this.rationale = castToMarkdown(value); // MarkdownType
-        else if (name.equals("clinicalRecommendationStatement"))
+        } else if (name.equals("clinicalRecommendationStatement")) {
           this.clinicalRecommendationStatement = castToMarkdown(value); // MarkdownType
-        else if (name.equals("improvementNotation"))
+        } else if (name.equals("improvementNotation")) {
           this.improvementNotation = castToString(value); // StringType
-        else if (name.equals("definition"))
-          this.definition = castToMarkdown(value); // MarkdownType
-        else if (name.equals("guidance"))
+        } else if (name.equals("definition")) {
+          this.getDefinition().add(castToMarkdown(value));
+        } else if (name.equals("guidance")) {
           this.guidance = castToMarkdown(value); // MarkdownType
-        else if (name.equals("set"))
+        } else if (name.equals("set")) {
           this.set = castToString(value); // StringType
-        else if (name.equals("group"))
+        } else if (name.equals("group")) {
           this.getGroup().add((MeasureGroupComponent) value);
-        else if (name.equals("supplementalData"))
+        } else if (name.equals("supplementalData")) {
           this.getSupplementalData().add((MeasureSupplementalDataComponent) value);
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 116079: throw new FHIRException("Cannot make property url as it is not a complex type"); // UriType
-        case -1618432855:  return addIdentifier(); // Identifier
-        case 351608024: throw new FHIRException("Cannot make property version as it is not a complex type"); // StringType
-        case 3373707: throw new FHIRException("Cannot make property name as it is not a complex type"); // StringType
-        case 110371416: throw new FHIRException("Cannot make property title as it is not a complex type"); // StringType
-        case -892481550: throw new FHIRException("Cannot make property status as it is not a complex type"); // Enumeration<PublicationStatus>
-        case -404562712: throw new FHIRException("Cannot make property experimental as it is not a complex type"); // BooleanType
-        case 3076014: throw new FHIRException("Cannot make property date as it is not a complex type"); // DateTimeType
-        case -1724546052: throw new FHIRException("Cannot make property description as it is not a complex type"); // MarkdownType
-        case -220463842: throw new FHIRException("Cannot make property purpose as it is not a complex type"); // MarkdownType
-        case 111574433: throw new FHIRException("Cannot make property usage as it is not a complex type"); // StringType
-        case 223539345: throw new FHIRException("Cannot make property approvalDate as it is not a complex type"); // DateType
-        case -1687512484: throw new FHIRException("Cannot make property lastReviewDate as it is not a complex type"); // DateType
-        case -403934648:  return getEffectivePeriod(); // Period
-        case -669707736:  return addUseContext(); // UsageContext
-        case -507075711:  return addJurisdiction(); // CodeableConcept
-        case 110546223:  return addTopic(); // CodeableConcept
-        case -1895276325:  return addContributor(); // Contributor
-        case 1447404028: throw new FHIRException("Cannot make property publisher as it is not a complex type"); // StringType
-        case 951526432:  return addContact(); // ContactDetail
-        case 1522889671: throw new FHIRException("Cannot make property copyright as it is not a complex type"); // MarkdownType
-        case 666807069:  return addRelatedArtifact(); // RelatedArtifact
-        case 166208699:  return addLibrary(); // Reference
-        case 432371099: throw new FHIRException("Cannot make property disclaimer as it is not a complex type"); // MarkdownType
-        case 1924005583: throw new FHIRException("Cannot make property scoring as it is not a complex type"); // Enumeration<MeasureScoring>
-        case 569347656: throw new FHIRException("Cannot make property compositeScoring as it is not a complex type"); // Enumeration<CompositeMeasureScoring>
-        case 3575610: throw new FHIRException("Cannot make property type as it is not a complex type"); // Enumeration<MeasureType>
-        case 93273500: throw new FHIRException("Cannot make property riskAdjustment as it is not a complex type"); // StringType
-        case 1254503906: throw new FHIRException("Cannot make property rateAggregation as it is not a complex type"); // StringType
-        case 345689335: throw new FHIRException("Cannot make property rationale as it is not a complex type"); // MarkdownType
-        case -18631389: throw new FHIRException("Cannot make property clinicalRecommendationStatement as it is not a complex type"); // MarkdownType
-        case -2085456136: throw new FHIRException("Cannot make property improvementNotation as it is not a complex type"); // StringType
-        case -1014418093: throw new FHIRException("Cannot make property definition as it is not a complex type"); // MarkdownType
-        case -1314002088: throw new FHIRException("Cannot make property guidance as it is not a complex type"); // MarkdownType
-        case 113762: throw new FHIRException("Cannot make property set as it is not a complex type"); // StringType
-        case 98629247:  return addGroup(); // MeasureGroupComponent
-        case 1447496814:  return addSupplementalData(); // MeasureSupplementalDataComponent
+        case 116079:  return getUrlElement();
+        case -1618432855:  return addIdentifier(); 
+        case 351608024:  return getVersionElement();
+        case 3373707:  return getNameElement();
+        case 110371416:  return getTitleElement();
+        case -892481550:  return getStatusElement();
+        case -404562712:  return getExperimentalElement();
+        case 3076014:  return getDateElement();
+        case 1447404028:  return getPublisherElement();
+        case -1724546052:  return getDescriptionElement();
+        case -220463842:  return getPurposeElement();
+        case 111574433:  return getUsageElement();
+        case 223539345:  return getApprovalDateElement();
+        case -1687512484:  return getLastReviewDateElement();
+        case -403934648:  return getEffectivePeriod(); 
+        case -669707736:  return addUseContext(); 
+        case -507075711:  return addJurisdiction(); 
+        case 110546223:  return addTopic(); 
+        case -1895276325:  return addContributor(); 
+        case 951526432:  return addContact(); 
+        case 1522889671:  return getCopyrightElement();
+        case 666807069:  return addRelatedArtifact(); 
+        case 166208699:  return addLibrary(); 
+        case 432371099:  return getDisclaimerElement();
+        case 1924005583:  return getScoring(); 
+        case 569347656:  return getCompositeScoring(); 
+        case 3575610:  return addType(); 
+        case 93273500:  return getRiskAdjustmentElement();
+        case 1254503906:  return getRateAggregationElement();
+        case 345689335:  return getRationaleElement();
+        case -18631389:  return getClinicalRecommendationStatementElement();
+        case -2085456136:  return getImprovementNotationElement();
+        case -1014418093:  return addDefinitionElement();
+        case -1314002088:  return getGuidanceElement();
+        case 113762:  return getSetElement();
+        case 98629247:  return addGroup(); 
+        case 1447496814:  return addSupplementalData(); 
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 116079: /*url*/ return new String[] {"uri"};
+        case -1618432855: /*identifier*/ return new String[] {"Identifier"};
+        case 351608024: /*version*/ return new String[] {"string"};
+        case 3373707: /*name*/ return new String[] {"string"};
+        case 110371416: /*title*/ return new String[] {"string"};
+        case -892481550: /*status*/ return new String[] {"code"};
+        case -404562712: /*experimental*/ return new String[] {"boolean"};
+        case 3076014: /*date*/ return new String[] {"dateTime"};
+        case 1447404028: /*publisher*/ return new String[] {"string"};
+        case -1724546052: /*description*/ return new String[] {"markdown"};
+        case -220463842: /*purpose*/ return new String[] {"markdown"};
+        case 111574433: /*usage*/ return new String[] {"string"};
+        case 223539345: /*approvalDate*/ return new String[] {"date"};
+        case -1687512484: /*lastReviewDate*/ return new String[] {"date"};
+        case -403934648: /*effectivePeriod*/ return new String[] {"Period"};
+        case -669707736: /*useContext*/ return new String[] {"UsageContext"};
+        case -507075711: /*jurisdiction*/ return new String[] {"CodeableConcept"};
+        case 110546223: /*topic*/ return new String[] {"CodeableConcept"};
+        case -1895276325: /*contributor*/ return new String[] {"Contributor"};
+        case 951526432: /*contact*/ return new String[] {"ContactDetail"};
+        case 1522889671: /*copyright*/ return new String[] {"markdown"};
+        case 666807069: /*relatedArtifact*/ return new String[] {"RelatedArtifact"};
+        case 166208699: /*library*/ return new String[] {"Reference"};
+        case 432371099: /*disclaimer*/ return new String[] {"markdown"};
+        case 1924005583: /*scoring*/ return new String[] {"CodeableConcept"};
+        case 569347656: /*compositeScoring*/ return new String[] {"CodeableConcept"};
+        case 3575610: /*type*/ return new String[] {"CodeableConcept"};
+        case 93273500: /*riskAdjustment*/ return new String[] {"string"};
+        case 1254503906: /*rateAggregation*/ return new String[] {"string"};
+        case 345689335: /*rationale*/ return new String[] {"markdown"};
+        case -18631389: /*clinicalRecommendationStatement*/ return new String[] {"markdown"};
+        case -2085456136: /*improvementNotation*/ return new String[] {"string"};
+        case -1014418093: /*definition*/ return new String[] {"markdown"};
+        case -1314002088: /*guidance*/ return new String[] {"markdown"};
+        case 113762: /*set*/ return new String[] {"string"};
+        case 98629247: /*group*/ return new String[] {};
+        case 1447496814: /*supplementalData*/ return new String[] {};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }
@@ -4615,6 +3950,9 @@ public class Measure extends MetadataResource {
         }
         else if (name.equals("date")) {
           throw new FHIRException("Cannot call addChild on a primitive type Measure.date");
+        }
+        else if (name.equals("publisher")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Measure.publisher");
         }
         else if (name.equals("description")) {
           throw new FHIRException("Cannot call addChild on a primitive type Measure.description");
@@ -4647,9 +3985,6 @@ public class Measure extends MetadataResource {
         else if (name.equals("contributor")) {
           return addContributor();
         }
-        else if (name.equals("publisher")) {
-          throw new FHIRException("Cannot call addChild on a primitive type Measure.publisher");
-        }
         else if (name.equals("contact")) {
           return addContact();
         }
@@ -4666,13 +4001,15 @@ public class Measure extends MetadataResource {
           throw new FHIRException("Cannot call addChild on a primitive type Measure.disclaimer");
         }
         else if (name.equals("scoring")) {
-          throw new FHIRException("Cannot call addChild on a primitive type Measure.scoring");
+          this.scoring = new CodeableConcept();
+          return this.scoring;
         }
         else if (name.equals("compositeScoring")) {
-          throw new FHIRException("Cannot call addChild on a primitive type Measure.compositeScoring");
+          this.compositeScoring = new CodeableConcept();
+          return this.compositeScoring;
         }
         else if (name.equals("type")) {
-          throw new FHIRException("Cannot call addChild on a primitive type Measure.type");
+          return addType();
         }
         else if (name.equals("riskAdjustment")) {
           throw new FHIRException("Cannot call addChild on a primitive type Measure.riskAdjustment");
@@ -4728,6 +4065,7 @@ public class Measure extends MetadataResource {
         dst.status = status == null ? null : status.copy();
         dst.experimental = experimental == null ? null : experimental.copy();
         dst.date = date == null ? null : date.copy();
+        dst.publisher = publisher == null ? null : publisher.copy();
         dst.description = description == null ? null : description.copy();
         dst.purpose = purpose == null ? null : purpose.copy();
         dst.usage = usage == null ? null : usage.copy();
@@ -4754,7 +4092,6 @@ public class Measure extends MetadataResource {
           for (Contributor i : contributor)
             dst.contributor.add(i.copy());
         };
-        dst.publisher = publisher == null ? null : publisher.copy();
         if (contact != null) {
           dst.contact = new ArrayList<ContactDetail>();
           for (ContactDetail i : contact)
@@ -4775,8 +4112,8 @@ public class Measure extends MetadataResource {
         dst.scoring = scoring == null ? null : scoring.copy();
         dst.compositeScoring = compositeScoring == null ? null : compositeScoring.copy();
         if (type != null) {
-          dst.type = new ArrayList<Enumeration<MeasureType>>();
-          for (Enumeration<MeasureType> i : type)
+          dst.type = new ArrayList<CodeableConcept>();
+          for (CodeableConcept i : type)
             dst.type.add(i.copy());
         };
         dst.riskAdjustment = riskAdjustment == null ? null : riskAdjustment.copy();
@@ -4784,7 +4121,11 @@ public class Measure extends MetadataResource {
         dst.rationale = rationale == null ? null : rationale.copy();
         dst.clinicalRecommendationStatement = clinicalRecommendationStatement == null ? null : clinicalRecommendationStatement.copy();
         dst.improvementNotation = improvementNotation == null ? null : improvementNotation.copy();
-        dst.definition = definition == null ? null : definition.copy();
+        if (definition != null) {
+          dst.definition = new ArrayList<MarkdownType>();
+          for (MarkdownType i : definition)
+            dst.definition.add(i.copy());
+        };
         dst.guidance = guidance == null ? null : guidance.copy();
         dst.set = set == null ? null : set.copy();
         if (group != null) {
@@ -4833,11 +4174,11 @@ public class Measure extends MetadataResource {
         Measure o = (Measure) other;
         return compareValues(purpose, o.purpose, true) && compareValues(usage, o.usage, true) && compareValues(approvalDate, o.approvalDate, true)
            && compareValues(lastReviewDate, o.lastReviewDate, true) && compareValues(copyright, o.copyright, true)
-           && compareValues(disclaimer, o.disclaimer, true) && compareValues(scoring, o.scoring, true) && compareValues(compositeScoring, o.compositeScoring, true)
-           && compareValues(type, o.type, true) && compareValues(riskAdjustment, o.riskAdjustment, true) && compareValues(rateAggregation, o.rateAggregation, true)
-           && compareValues(rationale, o.rationale, true) && compareValues(clinicalRecommendationStatement, o.clinicalRecommendationStatement, true)
-           && compareValues(improvementNotation, o.improvementNotation, true) && compareValues(definition, o.definition, true)
-           && compareValues(guidance, o.guidance, true) && compareValues(set, o.set, true);
+           && compareValues(disclaimer, o.disclaimer, true) && compareValues(riskAdjustment, o.riskAdjustment, true)
+           && compareValues(rateAggregation, o.rateAggregation, true) && compareValues(rationale, o.rationale, true)
+           && compareValues(clinicalRecommendationStatement, o.clinicalRecommendationStatement, true) && compareValues(improvementNotation, o.improvementNotation, true)
+           && compareValues(definition, o.definition, true) && compareValues(guidance, o.guidance, true) && compareValues(set, o.set, true)
+          ;
       }
 
       public boolean isEmpty() {
@@ -5036,17 +4377,17 @@ public class Measure extends MetadataResource {
  /**
    * Search parameter: <b>version</b>
    * <p>
-   * Description: <b>The version identifier of the measure</b><br>
+   * Description: <b>The business version of the measure</b><br>
    * Type: <b>token</b><br>
    * Path: <b>Measure.version</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="version", path="Measure.version", description="The version identifier of the measure", type="token" )
+  @SearchParamDefinition(name="version", path="Measure.version", description="The business version of the measure", type="token" )
   public static final String SP_VERSION = "version";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>version</b>
    * <p>
-   * Description: <b>The version identifier of the measure</b><br>
+   * Description: <b>The business version of the measure</b><br>
    * Type: <b>token</b><br>
    * Path: <b>Measure.version</b><br>
    * </p>

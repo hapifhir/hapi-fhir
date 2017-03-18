@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -57,6 +57,10 @@ public enum MedicationAdminStatus {
          */
         STOPPED, 
         /**
+         * The authoring system does not know which of the status values currently applies for this request. Note: This concept is not to be used for "other" - one of the listed statuses is presumed to apply, it's just not known which one.
+         */
+        UNKNOWN, 
+        /**
          * added to help the parsers
          */
         NULL;
@@ -73,6 +77,8 @@ public enum MedicationAdminStatus {
           return ENTEREDINERROR;
         if ("stopped".equals(codeString))
           return STOPPED;
+        if ("unknown".equals(codeString))
+          return UNKNOWN;
         throw new FHIRException("Unknown MedicationAdminStatus code '"+codeString+"'");
         }
         public String toCode() {
@@ -82,6 +88,7 @@ public enum MedicationAdminStatus {
             case COMPLETED: return "completed";
             case ENTEREDINERROR: return "entered-in-error";
             case STOPPED: return "stopped";
+            case UNKNOWN: return "unknown";
             default: return "?";
           }
         }
@@ -95,6 +102,7 @@ public enum MedicationAdminStatus {
             case COMPLETED: return "All actions that are implied by the administration have occurred.";
             case ENTEREDINERROR: return "The administration was entered in error and therefore nullified.";
             case STOPPED: return "Actions implied by the administration have been permanently halted, before all of them occurred.";
+            case UNKNOWN: return "The authoring system does not know which of the status values currently applies for this request. Note: This concept is not to be used for \"other\" - one of the listed statuses is presumed to apply, it's just not known which one.";
             default: return "?";
           }
         }
@@ -105,6 +113,7 @@ public enum MedicationAdminStatus {
             case COMPLETED: return "Completed";
             case ENTEREDINERROR: return "Entered in Error";
             case STOPPED: return "Stopped";
+            case UNKNOWN: return "Unknown";
             default: return "?";
           }
     }

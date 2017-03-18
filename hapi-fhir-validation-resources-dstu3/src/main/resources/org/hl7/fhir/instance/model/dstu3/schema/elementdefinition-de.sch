@@ -56,6 +56,12 @@
     </sch:rule>
   </sch:pattern>
   <sch:pattern>
+    <sch:title>ElementDefinition.slicing.discriminator</sch:title>
+    <sch:rule context="f:ElementDefinition/f:slicing/f:discriminator">
+      <sch:assert test="@value|f:*|h:div">All FHIR elements must have a @value or children (inherited)</sch:assert>
+    </sch:rule>
+  </sch:pattern>
+  <sch:pattern>
     <sch:title>ElementDefinition.max</sch:title>
     <sch:rule context="f:ElementDefinition/f:max">
       <sch:assert test="@value='*' or (normalize-space(@value)!='' and normalize-space(translate(@value, '0123456789',''))='')">Max SHALL be a number or &quot;*&quot; (inherited)</sch:assert>

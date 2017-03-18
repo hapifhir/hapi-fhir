@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
 
 import java.util.*;
 
@@ -115,8 +115,10 @@ public class ParameterDefinition extends Type implements ICompositeType {
         throw new IllegalArgumentException("Unknown ParameterUse code '"+codeString+"'");
         }
         public Enumeration<ParameterUse> fromType(Base code) throws FHIRException {
-          if (code == null || code.isEmpty())
+          if (code == null)
             return null;
+          if (code.isEmpty())
+            return new Enumeration<ParameterUse>(this);
           String codeString = ((PrimitiveType) code).asStringValue();
           if (codeString == null || "".equals(codeString))
             return null;
@@ -149,7 +151,7 @@ public class ParameterDefinition extends Type implements ICompositeType {
      * Whether the parameter is input or output for the module.
      */
     @Child(name = "use", type = {CodeType.class}, order=1, min=1, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="input | output", formalDefinition="Whether the parameter is input or output for the module." )
+    @Description(shortDefinition="in | out", formalDefinition="Whether the parameter is input or output for the module." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/operation-parameter-use")
     protected Enumeration<ParameterUse> use;
 
@@ -565,65 +567,83 @@ public class ParameterDefinition extends Type implements ICompositeType {
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case 3373707: // name
           this.name = castToCode(value); // CodeType
-          break;
+          return value;
         case 116103: // use
-          this.use = new ParameterUseEnumFactory().fromType(value); // Enumeration<ParameterUse>
-          break;
+          value = new ParameterUseEnumFactory().fromType(castToCode(value));
+          this.use = (Enumeration) value; // Enumeration<ParameterUse>
+          return value;
         case 108114: // min
           this.min = castToInteger(value); // IntegerType
-          break;
+          return value;
         case 107876: // max
           this.max = castToString(value); // StringType
-          break;
+          return value;
         case 1587405498: // documentation
           this.documentation = castToString(value); // StringType
-          break;
+          return value;
         case 3575610: // type
           this.type = castToCode(value); // CodeType
-          break;
+          return value;
         case -309425751: // profile
           this.profile = castToReference(value); // Reference
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("name"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("name")) {
           this.name = castToCode(value); // CodeType
-        else if (name.equals("use"))
-          this.use = new ParameterUseEnumFactory().fromType(value); // Enumeration<ParameterUse>
-        else if (name.equals("min"))
+        } else if (name.equals("use")) {
+          value = new ParameterUseEnumFactory().fromType(castToCode(value));
+          this.use = (Enumeration) value; // Enumeration<ParameterUse>
+        } else if (name.equals("min")) {
           this.min = castToInteger(value); // IntegerType
-        else if (name.equals("max"))
+        } else if (name.equals("max")) {
           this.max = castToString(value); // StringType
-        else if (name.equals("documentation"))
+        } else if (name.equals("documentation")) {
           this.documentation = castToString(value); // StringType
-        else if (name.equals("type"))
+        } else if (name.equals("type")) {
           this.type = castToCode(value); // CodeType
-        else if (name.equals("profile"))
+        } else if (name.equals("profile")) {
           this.profile = castToReference(value); // Reference
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 3373707: throw new FHIRException("Cannot make property name as it is not a complex type"); // CodeType
-        case 116103: throw new FHIRException("Cannot make property use as it is not a complex type"); // Enumeration<ParameterUse>
-        case 108114: throw new FHIRException("Cannot make property min as it is not a complex type"); // IntegerType
-        case 107876: throw new FHIRException("Cannot make property max as it is not a complex type"); // StringType
-        case 1587405498: throw new FHIRException("Cannot make property documentation as it is not a complex type"); // StringType
-        case 3575610: throw new FHIRException("Cannot make property type as it is not a complex type"); // CodeType
-        case -309425751:  return getProfile(); // Reference
+        case 3373707:  return getNameElement();
+        case 116103:  return getUseElement();
+        case 108114:  return getMinElement();
+        case 107876:  return getMaxElement();
+        case 1587405498:  return getDocumentationElement();
+        case 3575610:  return getTypeElement();
+        case -309425751:  return getProfile(); 
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3373707: /*name*/ return new String[] {"code"};
+        case 116103: /*use*/ return new String[] {"code"};
+        case 108114: /*min*/ return new String[] {"integer"};
+        case 107876: /*max*/ return new String[] {"string"};
+        case 1587405498: /*documentation*/ return new String[] {"string"};
+        case 3575610: /*type*/ return new String[] {"code"};
+        case -309425751: /*profile*/ return new String[] {"Reference"};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }

@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -75,11 +75,11 @@ public enum ObservationStatistics {
         /**
          * The 20th [Percentile](https://en.wikipedia.org/wiki/Percentile) of N measurements over the stated period
          */
-        PCT20, 
+        _20PERCENT, 
         /**
          * The 80th [Percentile](https://en.wikipedia.org/wiki/Percentile) of N measurements over the stated period
          */
-        PCT80, 
+        _80PERCENT, 
         /**
          * The lower [Quartile](https://en.wikipedia.org/wiki/Quartile) Boundary of N measurements over the stated period
          */
@@ -109,6 +109,18 @@ public enum ObservationStatistics {
          */
         _54, 
         /**
+         * Skewness is a measure of the asymmetry of the probability distribution of a real-valued random variable about its mean. The skewness value can be positive or negative, or even undefined.  Source: [Wikipedia](https://en.wikipedia.org/wiki/Skewness)
+         */
+        SKEW, 
+        /**
+         * Kurtosis  is a measure of the "tailedness" of the probability distribution of a real-valued random variable.   Source: [Wikipedia](https://en.wikipedia.org/wiki/Kurtosis)
+         */
+        KURTOSIS, 
+        /**
+         * Linear regression is an approach for modeling two-dimensional sample points with one independent variable and one dependent variable (conventionally, the x and y coordinates in a Cartesian coordinate system) and finds a linear function (a non-vertical straight line) that, as accurately as possible, predicts the dependent variable values as a function of the independent variables. Source: [Wikipedia](https://en.wikipedia.org/wiki/Simple_linear_regression)  This Statistic code will return both a gradient and an intercept value.
+         */
+        REGRESSION, 
+        /**
          * added to help the parsers
          */
         NULL;
@@ -133,10 +145,10 @@ public enum ObservationStatistics {
           return SUM;
         if ("variance".equals(codeString))
           return VARIANCE;
-        if ("%20".equals(codeString))
-          return PCT20;
-        if ("%80".equals(codeString))
-          return PCT80;
+        if ("20-percent".equals(codeString))
+          return _20PERCENT;
+        if ("80-percent".equals(codeString))
+          return _80PERCENT;
         if ("4-lower".equals(codeString))
           return _4LOWER;
         if ("4-upper".equals(codeString))
@@ -151,6 +163,12 @@ public enum ObservationStatistics {
           return _53;
         if ("5-4".equals(codeString))
           return _54;
+        if ("skew".equals(codeString))
+          return SKEW;
+        if ("kurtosis".equals(codeString))
+          return KURTOSIS;
+        if ("regression".equals(codeString))
+          return REGRESSION;
         throw new FHIRException("Unknown ObservationStatistics code '"+codeString+"'");
         }
         public String toCode() {
@@ -164,8 +182,8 @@ public enum ObservationStatistics {
             case STDDEV: return "std-dev";
             case SUM: return "sum";
             case VARIANCE: return "variance";
-            case PCT20: return "%20";
-            case PCT80: return "%80";
+            case _20PERCENT: return "20-percent";
+            case _80PERCENT: return "80-percent";
             case _4LOWER: return "4-lower";
             case _4UPPER: return "4-upper";
             case _4DEV: return "4-dev";
@@ -173,6 +191,9 @@ public enum ObservationStatistics {
             case _52: return "5-2";
             case _53: return "5-3";
             case _54: return "5-4";
+            case SKEW: return "skew";
+            case KURTOSIS: return "kurtosis";
+            case REGRESSION: return "regression";
             default: return "?";
           }
         }
@@ -190,8 +211,8 @@ public enum ObservationStatistics {
             case STDDEV: return "The [standard deviation](https://en.wikipedia.org/wiki/Standard_deviation) of N measurements over the stated period";
             case SUM: return "The [sum](https://en.wikipedia.org/wiki/Summation) of N measurements over the stated period";
             case VARIANCE: return "The [variance](https://en.wikipedia.org/wiki/Variance) of N measurements over the stated period";
-            case PCT20: return "The 20th [Percentile](https://en.wikipedia.org/wiki/Percentile) of N measurements over the stated period";
-            case PCT80: return "The 80th [Percentile](https://en.wikipedia.org/wiki/Percentile) of N measurements over the stated period";
+            case _20PERCENT: return "The 20th [Percentile](https://en.wikipedia.org/wiki/Percentile) of N measurements over the stated period";
+            case _80PERCENT: return "The 80th [Percentile](https://en.wikipedia.org/wiki/Percentile) of N measurements over the stated period";
             case _4LOWER: return "The lower [Quartile](https://en.wikipedia.org/wiki/Quartile) Boundary of N measurements over the stated period";
             case _4UPPER: return "The upper [Quartile](https://en.wikipedia.org/wiki/Quartile) Boundary of N measurements over the stated period";
             case _4DEV: return "The difference between the upper and lower [Quartiles](https://en.wikipedia.org/wiki/Quartile) is called the Interquartile range. (IQR = Q3-Q1) Quartile deviation or Semi-interquartile range is one-half the difference between the first and the third quartiles.";
@@ -199,6 +220,9 @@ public enum ObservationStatistics {
             case _52: return "The second of four values that divide the N measurementsinto a frequency distribution of five classes with each containing one fifth of the total population";
             case _53: return "The third of four values that divide the N measurementsinto a frequency distribution of five classes with each containing one fifth of the total population";
             case _54: return "The fourth of four values that divide the N measurementsinto a frequency distribution of five classes with each containing one fifth of the total population";
+            case SKEW: return "Skewness is a measure of the asymmetry of the probability distribution of a real-valued random variable about its mean. The skewness value can be positive or negative, or even undefined.  Source: [Wikipedia](https://en.wikipedia.org/wiki/Skewness)";
+            case KURTOSIS: return "Kurtosis  is a measure of the \"tailedness\" of the probability distribution of a real-valued random variable.   Source: [Wikipedia](https://en.wikipedia.org/wiki/Kurtosis)";
+            case REGRESSION: return "Linear regression is an approach for modeling two-dimensional sample points with one independent variable and one dependent variable (conventionally, the x and y coordinates in a Cartesian coordinate system) and finds a linear function (a non-vertical straight line) that, as accurately as possible, predicts the dependent variable values as a function of the independent variables. Source: [Wikipedia](https://en.wikipedia.org/wiki/Simple_linear_regression)  This Statistic code will return both a gradient and an intercept value.";
             default: return "?";
           }
         }
@@ -210,18 +234,21 @@ public enum ObservationStatistics {
             case COUNT: return "Count";
             case TOTALCOUNT: return "Total Count";
             case MEDIAN: return "Median";
-            case STDDEV: return "standard deviation";
-            case SUM: return "sum";
-            case VARIANCE: return "variance";
-            case PCT20: return "20th percentile";
-            case PCT80: return "80th percentile";
-            case _4LOWER: return "lower quartile";
-            case _4UPPER: return "upper quartile";
-            case _4DEV: return "quartile deviation";
-            case _51: return "1st quintile";
-            case _52: return "2nd quintile";
-            case _53: return "3rd quintile";
-            case _54: return "4th quintile";
+            case STDDEV: return "Standard Deviation";
+            case SUM: return "Sum";
+            case VARIANCE: return "Variance";
+            case _20PERCENT: return "20th Percentile";
+            case _80PERCENT: return "80th Percentile";
+            case _4LOWER: return "Lower Quartile";
+            case _4UPPER: return "Upper Quartile";
+            case _4DEV: return "Quartile Deviation";
+            case _51: return "1st Quintile";
+            case _52: return "2nd Quintile";
+            case _53: return "3rd Quintile";
+            case _54: return "4th Quintile";
+            case SKEW: return "Skew";
+            case KURTOSIS: return "Kurtosis";
+            case REGRESSION: return "Regression";
             default: return "?";
           }
     }

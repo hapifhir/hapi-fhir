@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -41,7 +41,7 @@ public enum RemittanceOutcome {
          */
         COMPLETE, 
         /**
-         * One or more erros have been detected in the Claim
+         * One or more errors have been detected in the Claim
          */
         ERROR, 
         /**
@@ -77,7 +77,7 @@ public enum RemittanceOutcome {
         public String getDefinition() {
           switch (this) {
             case COMPLETE: return "The processing has completed without errors";
-            case ERROR: return "One or more erros have been detected in the Claim";
+            case ERROR: return "One or more errors have been detected in the Claim";
             case PARTIAL: return "No errors have been detected in the Claim and some of the adjudication has been performed.";
             default: return "?";
           }

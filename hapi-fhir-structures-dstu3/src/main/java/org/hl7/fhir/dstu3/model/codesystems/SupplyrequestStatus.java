@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,21 +37,33 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum SupplyrequestStatus {
 
         /**
-         * Supply has been requested, but not dispensed.
+         * The request has been created but is not yet complete or ready for action
          */
-        REQUESTED, 
+        DRAFT, 
         /**
-         * Supply has been received by the requestor.
+         * The request is ready to be acted upon
+         */
+        ACTIVE, 
+        /**
+         * The authorization/request to act has been temporarily withdrawn but is expected to resume in the future
+         */
+        SUSPENDED, 
+        /**
+         * The authorization/request to act has been terminated prior to the full completion of the intended actions.  No further activity should occur.
+         */
+        CANCELLED, 
+        /**
+         * Activity against the request has been sufficiently completed to the satisfaction of the requester
          */
         COMPLETED, 
         /**
-         * The supply will not be completed because the supplier was unable or unwilling to supply the item.
+         * This electronic record should never have existed, though it is possible that real-world decisions were based on it.  (If real-world activity has occurred, the status should be "cancelled" rather than "entered-in-error".)
          */
-        FAILED, 
+        ENTEREDINERROR, 
         /**
-         * The orderer of the supply cancelled the request.
+         * The authoring system does not know which of the status values currently applies for this request.  Note: This concept is not to be used for "other" - one of the listed statuses is presumed to apply, it's just not known which one.
          */
-        CANCELLED, 
+        UNKNOWN, 
         /**
          * added to help the parsers
          */
@@ -59,22 +71,31 @@ public enum SupplyrequestStatus {
         public static SupplyrequestStatus fromCode(String codeString) throws FHIRException {
             if (codeString == null || "".equals(codeString))
                 return null;
-        if ("requested".equals(codeString))
-          return REQUESTED;
-        if ("completed".equals(codeString))
-          return COMPLETED;
-        if ("failed".equals(codeString))
-          return FAILED;
+        if ("draft".equals(codeString))
+          return DRAFT;
+        if ("active".equals(codeString))
+          return ACTIVE;
+        if ("suspended".equals(codeString))
+          return SUSPENDED;
         if ("cancelled".equals(codeString))
           return CANCELLED;
+        if ("completed".equals(codeString))
+          return COMPLETED;
+        if ("entered-in-error".equals(codeString))
+          return ENTEREDINERROR;
+        if ("unknown".equals(codeString))
+          return UNKNOWN;
         throw new FHIRException("Unknown SupplyrequestStatus code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
-            case REQUESTED: return "requested";
-            case COMPLETED: return "completed";
-            case FAILED: return "failed";
+            case DRAFT: return "draft";
+            case ACTIVE: return "active";
+            case SUSPENDED: return "suspended";
             case CANCELLED: return "cancelled";
+            case COMPLETED: return "completed";
+            case ENTEREDINERROR: return "entered-in-error";
+            case UNKNOWN: return "unknown";
             default: return "?";
           }
         }
@@ -83,19 +104,25 @@ public enum SupplyrequestStatus {
         }
         public String getDefinition() {
           switch (this) {
-            case REQUESTED: return "Supply has been requested, but not dispensed.";
-            case COMPLETED: return "Supply has been received by the requestor.";
-            case FAILED: return "The supply will not be completed because the supplier was unable or unwilling to supply the item.";
-            case CANCELLED: return "The orderer of the supply cancelled the request.";
+            case DRAFT: return "The request has been created but is not yet complete or ready for action";
+            case ACTIVE: return "The request is ready to be acted upon";
+            case SUSPENDED: return "The authorization/request to act has been temporarily withdrawn but is expected to resume in the future";
+            case CANCELLED: return "The authorization/request to act has been terminated prior to the full completion of the intended actions.  No further activity should occur.";
+            case COMPLETED: return "Activity against the request has been sufficiently completed to the satisfaction of the requester";
+            case ENTEREDINERROR: return "This electronic record should never have existed, though it is possible that real-world decisions were based on it.  (If real-world activity has occurred, the status should be \"cancelled\" rather than \"entered-in-error\".)";
+            case UNKNOWN: return "The authoring system does not know which of the status values currently applies for this request.  Note: This concept is not to be used for \"other\" - one of the listed statuses is presumed to apply, it's just not known which one.";
             default: return "?";
           }
         }
         public String getDisplay() {
           switch (this) {
-            case REQUESTED: return "Requested";
-            case COMPLETED: return "Received";
-            case FAILED: return "Failed";
+            case DRAFT: return "Draft";
+            case ACTIVE: return "Active";
+            case SUSPENDED: return "Suspended";
             case CANCELLED: return "Cancelled";
+            case COMPLETED: return "Completed";
+            case ENTEREDINERROR: return "Entered in Error";
+            case UNKNOWN: return "Unknown";
             default: return "?";
           }
     }

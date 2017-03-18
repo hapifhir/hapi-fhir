@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
 
 
 import org.hl7.fhir.dstu3.model.EnumFactory;
@@ -49,6 +49,8 @@ public class ContactPointSystemEnumFactory implements EnumFactory<ContactPointSy
       return ContactPointSystem.PAGER;
     if ("url".equals(codeString))
       return ContactPointSystem.URL;
+    if ("sms".equals(codeString))
+      return ContactPointSystem.SMS;
     if ("other".equals(codeString))
       return ContactPointSystem.OTHER;
     throw new IllegalArgumentException("Unknown ContactPointSystem code '"+codeString+"'");
@@ -65,6 +67,8 @@ public class ContactPointSystemEnumFactory implements EnumFactory<ContactPointSy
       return "pager";
     if (code == ContactPointSystem.URL)
       return "url";
+    if (code == ContactPointSystem.SMS)
+      return "sms";
     if (code == ContactPointSystem.OTHER)
       return "other";
     return "?";

@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -45,13 +45,13 @@ public enum AllergyIntoleranceCategory {
          */
         MEDICATION, 
         /**
-         * A preparation that is synthesized from living organisms or their products, especially a human or animal protein, such as a hormone or antitoxin, that is used as a diagnostic, preventive, or therapeutic agent. Also called biological drug. Examples of biologic medications include: vaccines; allergenic extracts, which are used for both diagnosis and treatment (for example, allergy shots); gene therapies; cellular therapies.  There are other biologic products, such as tissues, that are not typically associated with allergies.
-         */
-        BIOLOGIC, 
-        /**
          * Any substances that are encountered in the environment, including any substance not already classified as food, medication, or biologic.
          */
         ENVIRONMENT, 
+        /**
+         * A preparation that is synthesized from living organisms or their products, especially a human or animal protein, such as a hormone or antitoxin, that is used as a diagnostic, preventive, or therapeutic agent. Examples of biologic medications include: vaccines; allergenic extracts, which are used for both diagnosis and treatment (for example, allergy shots); gene therapies; cellular therapies.  There are other biologic products, such as tissues, that are not typically associated with allergies.
+         */
+        BIOLOGIC, 
         /**
          * added to help the parsers
          */
@@ -63,18 +63,18 @@ public enum AllergyIntoleranceCategory {
           return FOOD;
         if ("medication".equals(codeString))
           return MEDICATION;
-        if ("biologic".equals(codeString))
-          return BIOLOGIC;
         if ("environment".equals(codeString))
           return ENVIRONMENT;
+        if ("biologic".equals(codeString))
+          return BIOLOGIC;
         throw new FHIRException("Unknown AllergyIntoleranceCategory code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
             case FOOD: return "food";
             case MEDICATION: return "medication";
-            case BIOLOGIC: return "biologic";
             case ENVIRONMENT: return "environment";
+            case BIOLOGIC: return "biologic";
             default: return "?";
           }
         }
@@ -85,8 +85,8 @@ public enum AllergyIntoleranceCategory {
           switch (this) {
             case FOOD: return "Any substance consumed to provide nutritional support for the body.";
             case MEDICATION: return "Substances administered to achieve a physiological effect.";
-            case BIOLOGIC: return "A preparation that is synthesized from living organisms or their products, especially a human or animal protein, such as a hormone or antitoxin, that is used as a diagnostic, preventive, or therapeutic agent. Also called biological drug. Examples of biologic medications include: vaccines; allergenic extracts, which are used for both diagnosis and treatment (for example, allergy shots); gene therapies; cellular therapies.  There are other biologic products, such as tissues, that are not typically associated with allergies.";
             case ENVIRONMENT: return "Any substances that are encountered in the environment, including any substance not already classified as food, medication, or biologic.";
+            case BIOLOGIC: return "A preparation that is synthesized from living organisms or their products, especially a human or animal protein, such as a hormone or antitoxin, that is used as a diagnostic, preventive, or therapeutic agent. Examples of biologic medications include: vaccines; allergenic extracts, which are used for both diagnosis and treatment (for example, allergy shots); gene therapies; cellular therapies.  There are other biologic products, such as tissues, that are not typically associated with allergies.";
             default: return "?";
           }
         }
@@ -94,8 +94,8 @@ public enum AllergyIntoleranceCategory {
           switch (this) {
             case FOOD: return "Food";
             case MEDICATION: return "Medication";
-            case BIOLOGIC: return "Biologic";
             case ENVIRONMENT: return "Environment";
+            case BIOLOGIC: return "Biologic";
             default: return "?";
           }
     }

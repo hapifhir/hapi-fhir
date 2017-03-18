@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Mon, Jan 16, 2017 12:12-0500 for FHIR v1.9.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -41,7 +41,7 @@ public enum ConsentStatus {
          */
         DRAFT, 
         /**
-         * The consent has be proposed but not yet agreed to by all parties. The negotiation stage.
+         * The consent has been proposed but not yet agreed to by all parties. The negotiation stage.
          */
         PROPOSED, 
         /**
@@ -98,7 +98,7 @@ public enum ConsentStatus {
         public String getDefinition() {
           switch (this) {
             case DRAFT: return "The consent is in development or awaiting use but is not yet intended to be acted upon.";
-            case PROPOSED: return "The consent has be proposed but not yet agreed to by all parties. The negotiation stage.";
+            case PROPOSED: return "The consent has been proposed but not yet agreed to by all parties. The negotiation stage.";
             case ACTIVE: return "The consent is to be followed and enforced.";
             case REJECTED: return "The consent has been rejected by one or more of the parties.";
             case INACTIVE: return "The consent is terminated or replaced.";

@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -57,6 +57,10 @@ public enum GuidanceResponseStatus {
          */
         FAILURE, 
         /**
+         * The response was entered in error
+         */
+        ENTEREDINERROR, 
+        /**
          * added to help the parsers
          */
         NULL;
@@ -73,6 +77,8 @@ public enum GuidanceResponseStatus {
           return INPROGRESS;
         if ("failure".equals(codeString))
           return FAILURE;
+        if ("entered-in-error".equals(codeString))
+          return ENTEREDINERROR;
         throw new FHIRException("Unknown GuidanceResponseStatus code '"+codeString+"'");
         }
         public String toCode() {
@@ -82,6 +88,7 @@ public enum GuidanceResponseStatus {
             case DATAREQUIRED: return "data-required";
             case INPROGRESS: return "in-progress";
             case FAILURE: return "failure";
+            case ENTEREDINERROR: return "entered-in-error";
             default: return "?";
           }
         }
@@ -95,6 +102,7 @@ public enum GuidanceResponseStatus {
             case DATAREQUIRED: return "The request was processed, but more data is required to complete the evaluation";
             case INPROGRESS: return "The request is currently being processed";
             case FAILURE: return "The request was not processed successfully";
+            case ENTEREDINERROR: return "The response was entered in error";
             default: return "?";
           }
         }
@@ -105,6 +113,7 @@ public enum GuidanceResponseStatus {
             case DATAREQUIRED: return "Data Required";
             case INPROGRESS: return "In Progress";
             case FAILURE: return "Failure";
+            case ENTEREDINERROR: return "Entered In Error";
             default: return "?";
           }
     }

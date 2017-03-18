@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
 
 
 import org.hl7.fhir.dstu3.model.EnumFactory;
@@ -39,6 +39,8 @@ public class MedicationDispenseStatusEnumFactory implements EnumFactory<Medicati
   public MedicationDispenseStatus fromCode(String codeString) throws IllegalArgumentException {
     if (codeString == null || "".equals(codeString))
       return null;
+    if ("preparation".equals(codeString))
+      return MedicationDispenseStatus.PREPARATION;
     if ("in-progress".equals(codeString))
       return MedicationDispenseStatus.INPROGRESS;
     if ("on-hold".equals(codeString))
@@ -53,6 +55,8 @@ public class MedicationDispenseStatusEnumFactory implements EnumFactory<Medicati
   }
 
   public String toCode(MedicationDispenseStatus code) {
+    if (code == MedicationDispenseStatus.PREPARATION)
+      return "preparation";
     if (code == MedicationDispenseStatus.INPROGRESS)
       return "in-progress";
     if (code == MedicationDispenseStatus.ONHOLD)

@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -45,6 +45,22 @@ public enum ServicePharmacy {
          */
         FLUSHOT, 
         /**
+         * The wholesale price of the medication.
+         */
+        DRUGCOST, 
+        /**
+         * The additional cost assessed on the drug.
+         */
+        MARKUP, 
+        /**
+         * The professional fee charged for dispensing the product or service.
+         */
+        DISPENSEFEE, 
+        /**
+         * The professional fee charged for compounding the medication.
+         */
+        COMPOUNDFEE, 
+        /**
          * added to help the parsers
          */
         NULL;
@@ -55,12 +71,24 @@ public enum ServicePharmacy {
           return SMOKECESS;
         if ("flushot".equals(codeString))
           return FLUSHOT;
+        if ("drugcost".equals(codeString))
+          return DRUGCOST;
+        if ("markup".equals(codeString))
+          return MARKUP;
+        if ("dispensefee".equals(codeString))
+          return DISPENSEFEE;
+        if ("compoundfee".equals(codeString))
+          return COMPOUNDFEE;
         throw new FHIRException("Unknown ServicePharmacy code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
             case SMOKECESS: return "smokecess";
             case FLUSHOT: return "flushot";
+            case DRUGCOST: return "drugcost";
+            case MARKUP: return "markup";
+            case DISPENSEFEE: return "dispensefee";
+            case COMPOUNDFEE: return "compoundfee";
             default: return "?";
           }
         }
@@ -71,6 +99,10 @@ public enum ServicePharmacy {
           switch (this) {
             case SMOKECESS: return "Smoking cessation";
             case FLUSHOT: return "Flu Shot";
+            case DRUGCOST: return "The wholesale price of the medication.";
+            case MARKUP: return "The additional cost assessed on the drug.";
+            case DISPENSEFEE: return "The professional fee charged for dispensing the product or service.";
+            case COMPOUNDFEE: return "The professional fee charged for compounding the medication.";
             default: return "?";
           }
         }
@@ -78,6 +110,10 @@ public enum ServicePharmacy {
           switch (this) {
             case SMOKECESS: return "Smoking cessation";
             case FLUSHOT: return "Flu Shot";
+            case DRUGCOST: return "Drug Cost";
+            case MARKUP: return "Markup";
+            case DISPENSEFEE: return "Dispense Fee";
+            case COMPOUNDFEE: return "Compounding Fee";
             default: return "?";
           }
     }

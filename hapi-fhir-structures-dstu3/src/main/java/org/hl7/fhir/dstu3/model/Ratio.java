@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
 
 import java.util.*;
 
@@ -134,35 +134,46 @@ public class Ratio extends Type implements ICompositeType {
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case 1747334793: // numerator
           this.numerator = castToQuantity(value); // Quantity
-          break;
+          return value;
         case -1983274394: // denominator
           this.denominator = castToQuantity(value); // Quantity
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("numerator"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("numerator")) {
           this.numerator = castToQuantity(value); // Quantity
-        else if (name.equals("denominator"))
+        } else if (name.equals("denominator")) {
           this.denominator = castToQuantity(value); // Quantity
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 1747334793:  return getNumerator(); // Quantity
-        case -1983274394:  return getDenominator(); // Quantity
+        case 1747334793:  return getNumerator(); 
+        case -1983274394:  return getDenominator(); 
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 1747334793: /*numerator*/ return new String[] {"Quantity"};
+        case -1983274394: /*denominator*/ return new String[] {"Quantity"};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }

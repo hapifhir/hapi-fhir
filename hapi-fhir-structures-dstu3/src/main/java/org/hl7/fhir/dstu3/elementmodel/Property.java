@@ -249,7 +249,7 @@ public class Property {
         }
         sd = context.fetchResource(StructureDefinition.class, url);
         if (sd == null)
-          throw new DefinitionException("Unable to find class '"+t+"' for name '"+elementName+"' on property "+definition.getPath());
+          throw new DefinitionException("Unable to find type '"+t+"' for name '"+elementName+"' on property "+definition.getPath());
         children = ProfileUtilities.getChildMap(sd, sd.getSnapshot().getElement().get(0));
       }
     }
@@ -327,6 +327,16 @@ public class Property {
     List<Property> children = getChildProperties(name, null);
     for (Property p : children) {
       if (p.getName().equals(name)) {
+        return p;
+      }
+    }
+    return null;
+  }
+
+  public Property getChildSimpleName(String elementName, String name) throws DefinitionException {
+    List<Property> children = getChildProperties(elementName, null);
+    for (Property p : children) {
+      if (p.getName().equals(name) || p.getName().equals(name+"[x]")) {
         return p;
       }
     }

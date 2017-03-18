@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -45,9 +45,13 @@ public enum SupplydeliveryStatus {
          */
         COMPLETED, 
         /**
-         * Dispensing was not completed.
+         * Delivery was not completed.
          */
         ABANDONED, 
+        /**
+         * This electronic record should never have existed, though it is possible that real-world decisions were based on it. (If real-world activity has occurred, the status should be "cancelled" rather than "entered-in-error".)
+         */
+        ENTEREDINERROR, 
         /**
          * added to help the parsers
          */
@@ -61,6 +65,8 @@ public enum SupplydeliveryStatus {
           return COMPLETED;
         if ("abandoned".equals(codeString))
           return ABANDONED;
+        if ("entered-in-error".equals(codeString))
+          return ENTEREDINERROR;
         throw new FHIRException("Unknown SupplydeliveryStatus code '"+codeString+"'");
         }
         public String toCode() {
@@ -68,6 +74,7 @@ public enum SupplydeliveryStatus {
             case INPROGRESS: return "in-progress";
             case COMPLETED: return "completed";
             case ABANDONED: return "abandoned";
+            case ENTEREDINERROR: return "entered-in-error";
             default: return "?";
           }
         }
@@ -78,7 +85,8 @@ public enum SupplydeliveryStatus {
           switch (this) {
             case INPROGRESS: return "Supply has been requested, but not delivered.";
             case COMPLETED: return "Supply has been delivered (\"completed\").";
-            case ABANDONED: return "Dispensing was not completed.";
+            case ABANDONED: return "Delivery was not completed.";
+            case ENTEREDINERROR: return "This electronic record should never have existed, though it is possible that real-world decisions were based on it. (If real-world activity has occurred, the status should be \"cancelled\" rather than \"entered-in-error\".)";
             default: return "?";
           }
         }
@@ -87,6 +95,7 @@ public enum SupplydeliveryStatus {
             case INPROGRESS: return "In Progress";
             case COMPLETED: return "Delivered";
             case ABANDONED: return "Abandoned";
+            case ENTEREDINERROR: return "Entered In Error";
             default: return "?";
           }
     }

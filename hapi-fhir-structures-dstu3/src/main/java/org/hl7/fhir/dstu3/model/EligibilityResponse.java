@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
 
 import java.util.*;
 
@@ -140,8 +140,10 @@ public class EligibilityResponse extends DomainResource {
         throw new IllegalArgumentException("Unknown EligibilityResponseStatus code '"+codeString+"'");
         }
         public Enumeration<EligibilityResponseStatus> fromType(Base code) throws FHIRException {
-          if (code == null || code.isEmpty())
+          if (code == null)
             return null;
+          if (code.isEmpty())
+            return new Enumeration<EligibilityResponseStatus>(this);
           String codeString = ((PrimitiveType) code).asStringValue();
           if (codeString == null || "".equals(codeString))
             return null;
@@ -373,41 +375,53 @@ public class EligibilityResponse extends DomainResource {
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case -351767064: // coverage
           this.coverage = castToReference(value); // Reference
-          break;
+          return value;
         case -566947566: // contract
           this.contract = castToReference(value); // Reference
-          break;
+          return value;
         case 596003397: // benefitBalance
           this.getBenefitBalance().add((BenefitsComponent) value); // BenefitsComponent
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("coverage"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("coverage")) {
           this.coverage = castToReference(value); // Reference
-        else if (name.equals("contract"))
+        } else if (name.equals("contract")) {
           this.contract = castToReference(value); // Reference
-        else if (name.equals("benefitBalance"))
+        } else if (name.equals("benefitBalance")) {
           this.getBenefitBalance().add((BenefitsComponent) value);
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case -351767064:  return getCoverage(); // Reference
-        case -566947566:  return getContract(); // Reference
-        case 596003397:  return addBenefitBalance(); // BenefitsComponent
+        case -351767064:  return getCoverage(); 
+        case -566947566:  return getContract(); 
+        case 596003397:  return addBenefitBalance(); 
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -351767064: /*coverage*/ return new String[] {"Reference"};
+        case -566947566: /*contract*/ return new String[] {"Reference"};
+        case 596003397: /*benefitBalance*/ return new String[] {};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }
@@ -481,7 +495,7 @@ public class EligibilityResponse extends DomainResource {
          * Dental, Vision, Medical, Pharmacy, Rehab etc.
          */
         @Child(name = "category", type = {CodeableConcept.class}, order=1, min=1, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Benefit Category", formalDefinition="Dental, Vision, Medical, Pharmacy, Rehab etc." )
+        @Description(shortDefinition="Type of services covered", formalDefinition="Dental, Vision, Medical, Pharmacy, Rehab etc." )
         @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/benefit-category")
         protected CodeableConcept category;
 
@@ -489,7 +503,7 @@ public class EligibilityResponse extends DomainResource {
          * Dental: basic, major, ortho; Vision exam, glasses, contacts; etc.
          */
         @Child(name = "subCategory", type = {CodeableConcept.class}, order=2, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Benefit SubCategory", formalDefinition="Dental: basic, major, ortho; Vision exam, glasses, contacts; etc." )
+        @Description(shortDefinition="Detailed services covered within the type", formalDefinition="Dental: basic, major, ortho; Vision exam, glasses, contacts; etc." )
         @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/benefit-subcategory")
         protected CodeableConcept subCategory;
 
@@ -511,7 +525,7 @@ public class EligibilityResponse extends DomainResource {
          * A richer description of the benefit, for example 'DENT2 covers 100% of basic, 50% of major but exclused Ortho, Implants and Costmetic services'.
          */
         @Child(name = "description", type = {StringType.class}, order=5, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Description of the benefit", formalDefinition="A richer description of the benefit, for example 'DENT2 covers 100% of basic, 50% of major but exclused Ortho, Implants and Costmetic services'." )
+        @Description(shortDefinition="Description of the benefit or services covered", formalDefinition="A richer description of the benefit, for example 'DENT2 covers 100% of basic, 50% of major but exclused Ortho, Implants and Costmetic services'." )
         protected StringType description;
 
         /**
@@ -909,77 +923,95 @@ public class EligibilityResponse extends DomainResource {
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case 50511102: // category
           this.category = castToCodeableConcept(value); // CodeableConcept
-          break;
+          return value;
         case 1365024606: // subCategory
           this.subCategory = castToCodeableConcept(value); // CodeableConcept
-          break;
+          return value;
         case 1994055114: // excluded
           this.excluded = castToBoolean(value); // BooleanType
-          break;
+          return value;
         case 3373707: // name
           this.name = castToString(value); // StringType
-          break;
+          return value;
         case -1724546052: // description
           this.description = castToString(value); // StringType
-          break;
+          return value;
         case 1843485230: // network
           this.network = castToCodeableConcept(value); // CodeableConcept
-          break;
+          return value;
         case 3594628: // unit
           this.unit = castToCodeableConcept(value); // CodeableConcept
-          break;
+          return value;
         case 3556460: // term
           this.term = castToCodeableConcept(value); // CodeableConcept
-          break;
+          return value;
         case 357555337: // financial
           this.getFinancial().add((BenefitComponent) value); // BenefitComponent
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("category"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("category")) {
           this.category = castToCodeableConcept(value); // CodeableConcept
-        else if (name.equals("subCategory"))
+        } else if (name.equals("subCategory")) {
           this.subCategory = castToCodeableConcept(value); // CodeableConcept
-        else if (name.equals("excluded"))
+        } else if (name.equals("excluded")) {
           this.excluded = castToBoolean(value); // BooleanType
-        else if (name.equals("name"))
+        } else if (name.equals("name")) {
           this.name = castToString(value); // StringType
-        else if (name.equals("description"))
+        } else if (name.equals("description")) {
           this.description = castToString(value); // StringType
-        else if (name.equals("network"))
+        } else if (name.equals("network")) {
           this.network = castToCodeableConcept(value); // CodeableConcept
-        else if (name.equals("unit"))
+        } else if (name.equals("unit")) {
           this.unit = castToCodeableConcept(value); // CodeableConcept
-        else if (name.equals("term"))
+        } else if (name.equals("term")) {
           this.term = castToCodeableConcept(value); // CodeableConcept
-        else if (name.equals("financial"))
+        } else if (name.equals("financial")) {
           this.getFinancial().add((BenefitComponent) value);
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 50511102:  return getCategory(); // CodeableConcept
-        case 1365024606:  return getSubCategory(); // CodeableConcept
-        case 1994055114: throw new FHIRException("Cannot make property excluded as it is not a complex type"); // BooleanType
-        case 3373707: throw new FHIRException("Cannot make property name as it is not a complex type"); // StringType
-        case -1724546052: throw new FHIRException("Cannot make property description as it is not a complex type"); // StringType
-        case 1843485230:  return getNetwork(); // CodeableConcept
-        case 3594628:  return getUnit(); // CodeableConcept
-        case 3556460:  return getTerm(); // CodeableConcept
-        case 357555337:  return addFinancial(); // BenefitComponent
+        case 50511102:  return getCategory(); 
+        case 1365024606:  return getSubCategory(); 
+        case 1994055114:  return getExcludedElement();
+        case 3373707:  return getNameElement();
+        case -1724546052:  return getDescriptionElement();
+        case 1843485230:  return getNetwork(); 
+        case 3594628:  return getUnit(); 
+        case 3556460:  return getTerm(); 
+        case 357555337:  return addFinancial(); 
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 50511102: /*category*/ return new String[] {"CodeableConcept"};
+        case 1365024606: /*subCategory*/ return new String[] {"CodeableConcept"};
+        case 1994055114: /*excluded*/ return new String[] {"boolean"};
+        case 3373707: /*name*/ return new String[] {"string"};
+        case -1724546052: /*description*/ return new String[] {"string"};
+        case 1843485230: /*network*/ return new String[] {"CodeableConcept"};
+        case 3594628: /*unit*/ return new String[] {"CodeableConcept"};
+        case 3556460: /*term*/ return new String[] {"CodeableConcept"};
+        case 357555337: /*financial*/ return new String[] {};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }
@@ -1090,18 +1122,18 @@ public class EligibilityResponse extends DomainResource {
         /**
          * Benefits allowed.
          */
-        @Child(name = "benefit", type = {UnsignedIntType.class, StringType.class, Money.class}, order=2, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "allowed", type = {UnsignedIntType.class, StringType.class, Money.class}, order=2, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Benefits allowed", formalDefinition="Benefits allowed." )
-        protected Type benefit;
+        protected Type allowed;
 
         /**
          * Benefits used.
          */
-        @Child(name = "benefitUsed", type = {UnsignedIntType.class, Money.class}, order=3, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "used", type = {UnsignedIntType.class, Money.class}, order=3, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Benefits used", formalDefinition="Benefits used." )
-        protected Type benefitUsed;
+        protected Type used;
 
-        private static final long serialVersionUID = -1013861008L;
+        private static final long serialVersionUID = -1506285314L;
 
     /**
      * Constructor
@@ -1143,162 +1175,176 @@ public class EligibilityResponse extends DomainResource {
         }
 
         /**
-         * @return {@link #benefit} (Benefits allowed.)
+         * @return {@link #allowed} (Benefits allowed.)
          */
-        public Type getBenefit() { 
-          return this.benefit;
+        public Type getAllowed() { 
+          return this.allowed;
         }
 
         /**
-         * @return {@link #benefit} (Benefits allowed.)
+         * @return {@link #allowed} (Benefits allowed.)
          */
-        public UnsignedIntType getBenefitUnsignedIntType() throws FHIRException { 
-          if (!(this.benefit instanceof UnsignedIntType))
-            throw new FHIRException("Type mismatch: the type UnsignedIntType was expected, but "+this.benefit.getClass().getName()+" was encountered");
-          return (UnsignedIntType) this.benefit;
+        public UnsignedIntType getAllowedUnsignedIntType() throws FHIRException { 
+          if (!(this.allowed instanceof UnsignedIntType))
+            throw new FHIRException("Type mismatch: the type UnsignedIntType was expected, but "+this.allowed.getClass().getName()+" was encountered");
+          return (UnsignedIntType) this.allowed;
         }
 
-        public boolean hasBenefitUnsignedIntType() { 
-          return this.benefit instanceof UnsignedIntType;
+        public boolean hasAllowedUnsignedIntType() { 
+          return this.allowed instanceof UnsignedIntType;
         }
 
         /**
-         * @return {@link #benefit} (Benefits allowed.)
+         * @return {@link #allowed} (Benefits allowed.)
          */
-        public StringType getBenefitStringType() throws FHIRException { 
-          if (!(this.benefit instanceof StringType))
-            throw new FHIRException("Type mismatch: the type StringType was expected, but "+this.benefit.getClass().getName()+" was encountered");
-          return (StringType) this.benefit;
+        public StringType getAllowedStringType() throws FHIRException { 
+          if (!(this.allowed instanceof StringType))
+            throw new FHIRException("Type mismatch: the type StringType was expected, but "+this.allowed.getClass().getName()+" was encountered");
+          return (StringType) this.allowed;
         }
 
-        public boolean hasBenefitStringType() { 
-          return this.benefit instanceof StringType;
+        public boolean hasAllowedStringType() { 
+          return this.allowed instanceof StringType;
         }
 
         /**
-         * @return {@link #benefit} (Benefits allowed.)
+         * @return {@link #allowed} (Benefits allowed.)
          */
-        public Money getBenefitMoney() throws FHIRException { 
-          if (!(this.benefit instanceof Money))
-            throw new FHIRException("Type mismatch: the type Money was expected, but "+this.benefit.getClass().getName()+" was encountered");
-          return (Money) this.benefit;
+        public Money getAllowedMoney() throws FHIRException { 
+          if (!(this.allowed instanceof Money))
+            throw new FHIRException("Type mismatch: the type Money was expected, but "+this.allowed.getClass().getName()+" was encountered");
+          return (Money) this.allowed;
         }
 
-        public boolean hasBenefitMoney() { 
-          return this.benefit instanceof Money;
+        public boolean hasAllowedMoney() { 
+          return this.allowed instanceof Money;
         }
 
-        public boolean hasBenefit() { 
-          return this.benefit != null && !this.benefit.isEmpty();
+        public boolean hasAllowed() { 
+          return this.allowed != null && !this.allowed.isEmpty();
         }
 
         /**
-         * @param value {@link #benefit} (Benefits allowed.)
+         * @param value {@link #allowed} (Benefits allowed.)
          */
-        public BenefitComponent setBenefit(Type value) { 
-          this.benefit = value;
+        public BenefitComponent setAllowed(Type value) { 
+          this.allowed = value;
           return this;
         }
 
         /**
-         * @return {@link #benefitUsed} (Benefits used.)
+         * @return {@link #used} (Benefits used.)
          */
-        public Type getBenefitUsed() { 
-          return this.benefitUsed;
+        public Type getUsed() { 
+          return this.used;
         }
 
         /**
-         * @return {@link #benefitUsed} (Benefits used.)
+         * @return {@link #used} (Benefits used.)
          */
-        public UnsignedIntType getBenefitUsedUnsignedIntType() throws FHIRException { 
-          if (!(this.benefitUsed instanceof UnsignedIntType))
-            throw new FHIRException("Type mismatch: the type UnsignedIntType was expected, but "+this.benefitUsed.getClass().getName()+" was encountered");
-          return (UnsignedIntType) this.benefitUsed;
+        public UnsignedIntType getUsedUnsignedIntType() throws FHIRException { 
+          if (!(this.used instanceof UnsignedIntType))
+            throw new FHIRException("Type mismatch: the type UnsignedIntType was expected, but "+this.used.getClass().getName()+" was encountered");
+          return (UnsignedIntType) this.used;
         }
 
-        public boolean hasBenefitUsedUnsignedIntType() { 
-          return this.benefitUsed instanceof UnsignedIntType;
+        public boolean hasUsedUnsignedIntType() { 
+          return this.used instanceof UnsignedIntType;
         }
 
         /**
-         * @return {@link #benefitUsed} (Benefits used.)
+         * @return {@link #used} (Benefits used.)
          */
-        public Money getBenefitUsedMoney() throws FHIRException { 
-          if (!(this.benefitUsed instanceof Money))
-            throw new FHIRException("Type mismatch: the type Money was expected, but "+this.benefitUsed.getClass().getName()+" was encountered");
-          return (Money) this.benefitUsed;
+        public Money getUsedMoney() throws FHIRException { 
+          if (!(this.used instanceof Money))
+            throw new FHIRException("Type mismatch: the type Money was expected, but "+this.used.getClass().getName()+" was encountered");
+          return (Money) this.used;
         }
 
-        public boolean hasBenefitUsedMoney() { 
-          return this.benefitUsed instanceof Money;
+        public boolean hasUsedMoney() { 
+          return this.used instanceof Money;
         }
 
-        public boolean hasBenefitUsed() { 
-          return this.benefitUsed != null && !this.benefitUsed.isEmpty();
+        public boolean hasUsed() { 
+          return this.used != null && !this.used.isEmpty();
         }
 
         /**
-         * @param value {@link #benefitUsed} (Benefits used.)
+         * @param value {@link #used} (Benefits used.)
          */
-        public BenefitComponent setBenefitUsed(Type value) { 
-          this.benefitUsed = value;
+        public BenefitComponent setUsed(Type value) { 
+          this.used = value;
           return this;
         }
 
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
           childrenList.add(new Property("type", "CodeableConcept", "Deductable, visits, benefit amount.", 0, java.lang.Integer.MAX_VALUE, type));
-          childrenList.add(new Property("benefit[x]", "unsignedInt|string|Money", "Benefits allowed.", 0, java.lang.Integer.MAX_VALUE, benefit));
-          childrenList.add(new Property("benefitUsed[x]", "unsignedInt|Money", "Benefits used.", 0, java.lang.Integer.MAX_VALUE, benefitUsed));
+          childrenList.add(new Property("allowed[x]", "unsignedInt|string|Money", "Benefits allowed.", 0, java.lang.Integer.MAX_VALUE, allowed));
+          childrenList.add(new Property("used[x]", "unsignedInt|Money", "Benefits used.", 0, java.lang.Integer.MAX_VALUE, used));
         }
 
       @Override
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
         case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // CodeableConcept
-        case -222710633: /*benefit*/ return this.benefit == null ? new Base[0] : new Base[] {this.benefit}; // Type
-        case -549981964: /*benefitUsed*/ return this.benefitUsed == null ? new Base[0] : new Base[] {this.benefitUsed}; // Type
+        case -911343192: /*allowed*/ return this.allowed == null ? new Base[0] : new Base[] {this.allowed}; // Type
+        case 3599293: /*used*/ return this.used == null ? new Base[0] : new Base[] {this.used}; // Type
         default: return super.getProperty(hash, name, checkValid);
         }
 
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case 3575610: // type
           this.type = castToCodeableConcept(value); // CodeableConcept
-          break;
-        case -222710633: // benefit
-          this.benefit = castToType(value); // Type
-          break;
-        case -549981964: // benefitUsed
-          this.benefitUsed = castToType(value); // Type
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        case -911343192: // allowed
+          this.allowed = castToType(value); // Type
+          return value;
+        case 3599293: // used
+          this.used = castToType(value); // Type
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("type"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("type")) {
           this.type = castToCodeableConcept(value); // CodeableConcept
-        else if (name.equals("benefit[x]"))
-          this.benefit = castToType(value); // Type
-        else if (name.equals("benefitUsed[x]"))
-          this.benefitUsed = castToType(value); // Type
-        else
-          super.setProperty(name, value);
+        } else if (name.equals("allowed[x]")) {
+          this.allowed = castToType(value); // Type
+        } else if (name.equals("used[x]")) {
+          this.used = castToType(value); // Type
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 3575610:  return getType(); // CodeableConcept
-        case 952095881:  return getBenefit(); // Type
-        case 787635980:  return getBenefitUsed(); // Type
+        case 3575610:  return getType(); 
+        case -1336663592:  return getAllowed(); 
+        case -911343192:  return getAllowed(); 
+        case -147553373:  return getUsed(); 
+        case 3599293:  return getUsed(); 
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3575610: /*type*/ return new String[] {"CodeableConcept"};
+        case -911343192: /*allowed*/ return new String[] {"unsignedInt", "string", "Money"};
+        case 3599293: /*used*/ return new String[] {"unsignedInt", "Money"};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }
@@ -1309,25 +1355,25 @@ public class EligibilityResponse extends DomainResource {
           this.type = new CodeableConcept();
           return this.type;
         }
-        else if (name.equals("benefitUnsignedInt")) {
-          this.benefit = new UnsignedIntType();
-          return this.benefit;
+        else if (name.equals("allowedUnsignedInt")) {
+          this.allowed = new UnsignedIntType();
+          return this.allowed;
         }
-        else if (name.equals("benefitString")) {
-          this.benefit = new StringType();
-          return this.benefit;
+        else if (name.equals("allowedString")) {
+          this.allowed = new StringType();
+          return this.allowed;
         }
-        else if (name.equals("benefitMoney")) {
-          this.benefit = new Money();
-          return this.benefit;
+        else if (name.equals("allowedMoney")) {
+          this.allowed = new Money();
+          return this.allowed;
         }
-        else if (name.equals("benefitUsedUnsignedInt")) {
-          this.benefitUsed = new UnsignedIntType();
-          return this.benefitUsed;
+        else if (name.equals("usedUnsignedInt")) {
+          this.used = new UnsignedIntType();
+          return this.used;
         }
-        else if (name.equals("benefitUsedMoney")) {
-          this.benefitUsed = new Money();
-          return this.benefitUsed;
+        else if (name.equals("usedMoney")) {
+          this.used = new Money();
+          return this.used;
         }
         else
           return super.addChild(name);
@@ -1337,8 +1383,8 @@ public class EligibilityResponse extends DomainResource {
         BenefitComponent dst = new BenefitComponent();
         copyValues(dst);
         dst.type = type == null ? null : type.copy();
-        dst.benefit = benefit == null ? null : benefit.copy();
-        dst.benefitUsed = benefitUsed == null ? null : benefitUsed.copy();
+        dst.allowed = allowed == null ? null : allowed.copy();
+        dst.used = used == null ? null : used.copy();
         return dst;
       }
 
@@ -1349,7 +1395,7 @@ public class EligibilityResponse extends DomainResource {
         if (!(other instanceof BenefitComponent))
           return false;
         BenefitComponent o = (BenefitComponent) other;
-        return compareDeep(type, o.type, true) && compareDeep(benefit, o.benefit, true) && compareDeep(benefitUsed, o.benefitUsed, true)
+        return compareDeep(type, o.type, true) && compareDeep(allowed, o.allowed, true) && compareDeep(used, o.used, true)
           ;
       }
 
@@ -1364,8 +1410,7 @@ public class EligibilityResponse extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(type, benefit, benefitUsed
-          );
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(type, allowed, used);
       }
 
   public String fhirType() {
@@ -1441,29 +1486,39 @@ public class EligibilityResponse extends DomainResource {
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case 3059181: // code
           this.code = castToCodeableConcept(value); // CodeableConcept
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("code"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("code")) {
           this.code = castToCodeableConcept(value); // CodeableConcept
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 3059181:  return getCode(); // CodeableConcept
+        case 3059181:  return getCode(); 
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3059181: /*code*/ return new String[] {"CodeableConcept"};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }
@@ -1593,7 +1648,7 @@ public class EligibilityResponse extends DomainResource {
      * The Insurer who produced this adjudicated response.
      */
     @Child(name = "insurer", type = {Organization.class}, order=8, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Insurer", formalDefinition="The Insurer who produced this adjudicated response." )
+    @Description(shortDefinition="Insurer issuing the coverage", formalDefinition="The Insurer who produced this adjudicated response." )
     protected Reference insurer;
 
     /**
@@ -1605,7 +1660,7 @@ public class EligibilityResponse extends DomainResource {
      * Flag indicating if the coverage provided is inforce currently  if no service date(s) specified or for the whole duration of the service dates.
      */
     @Child(name = "inforce", type = {BooleanType.class}, order=9, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Coverage inforce", formalDefinition="Flag indicating if the coverage provided is inforce currently  if no service date(s) specified or for the whole duration of the service dates." )
+    @Description(shortDefinition="Coverage inforce indicator", formalDefinition="Flag indicating if the coverage provided is inforce currently  if no service date(s) specified or for the whole duration of the service dates." )
     protected BooleanType inforce;
 
     /**
@@ -2253,101 +2308,125 @@ public class EligibilityResponse extends DomainResource {
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case -1618432855: // identifier
           this.getIdentifier().add(castToIdentifier(value)); // Identifier
-          break;
+          return value;
         case -892481550: // status
-          this.status = new EligibilityResponseStatusEnumFactory().fromType(value); // Enumeration<EligibilityResponseStatus>
-          break;
+          value = new EligibilityResponseStatusEnumFactory().fromType(castToCode(value));
+          this.status = (Enumeration) value; // Enumeration<EligibilityResponseStatus>
+          return value;
         case 1028554472: // created
           this.created = castToDateTime(value); // DateTimeType
-          break;
+          return value;
         case 1601527200: // requestProvider
           this.requestProvider = castToReference(value); // Reference
-          break;
+          return value;
         case 599053666: // requestOrganization
           this.requestOrganization = castToReference(value); // Reference
-          break;
+          return value;
         case 1095692943: // request
           this.request = castToReference(value); // Reference
-          break;
+          return value;
         case -1106507950: // outcome
           this.outcome = castToCodeableConcept(value); // CodeableConcept
-          break;
+          return value;
         case 583380919: // disposition
           this.disposition = castToString(value); // StringType
-          break;
+          return value;
         case 1957615864: // insurer
           this.insurer = castToReference(value); // Reference
-          break;
+          return value;
         case 1945431270: // inforce
           this.inforce = castToBoolean(value); // BooleanType
-          break;
+          return value;
         case 73049818: // insurance
           this.getInsurance().add((InsuranceComponent) value); // InsuranceComponent
-          break;
+          return value;
         case 3148996: // form
           this.form = castToCodeableConcept(value); // CodeableConcept
-          break;
+          return value;
         case 96784904: // error
           this.getError().add((ErrorsComponent) value); // ErrorsComponent
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("identifier"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("identifier")) {
           this.getIdentifier().add(castToIdentifier(value));
-        else if (name.equals("status"))
-          this.status = new EligibilityResponseStatusEnumFactory().fromType(value); // Enumeration<EligibilityResponseStatus>
-        else if (name.equals("created"))
+        } else if (name.equals("status")) {
+          value = new EligibilityResponseStatusEnumFactory().fromType(castToCode(value));
+          this.status = (Enumeration) value; // Enumeration<EligibilityResponseStatus>
+        } else if (name.equals("created")) {
           this.created = castToDateTime(value); // DateTimeType
-        else if (name.equals("requestProvider"))
+        } else if (name.equals("requestProvider")) {
           this.requestProvider = castToReference(value); // Reference
-        else if (name.equals("requestOrganization"))
+        } else if (name.equals("requestOrganization")) {
           this.requestOrganization = castToReference(value); // Reference
-        else if (name.equals("request"))
+        } else if (name.equals("request")) {
           this.request = castToReference(value); // Reference
-        else if (name.equals("outcome"))
+        } else if (name.equals("outcome")) {
           this.outcome = castToCodeableConcept(value); // CodeableConcept
-        else if (name.equals("disposition"))
+        } else if (name.equals("disposition")) {
           this.disposition = castToString(value); // StringType
-        else if (name.equals("insurer"))
+        } else if (name.equals("insurer")) {
           this.insurer = castToReference(value); // Reference
-        else if (name.equals("inforce"))
+        } else if (name.equals("inforce")) {
           this.inforce = castToBoolean(value); // BooleanType
-        else if (name.equals("insurance"))
+        } else if (name.equals("insurance")) {
           this.getInsurance().add((InsuranceComponent) value);
-        else if (name.equals("form"))
+        } else if (name.equals("form")) {
           this.form = castToCodeableConcept(value); // CodeableConcept
-        else if (name.equals("error"))
+        } else if (name.equals("error")) {
           this.getError().add((ErrorsComponent) value);
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case -1618432855:  return addIdentifier(); // Identifier
-        case -892481550: throw new FHIRException("Cannot make property status as it is not a complex type"); // Enumeration<EligibilityResponseStatus>
-        case 1028554472: throw new FHIRException("Cannot make property created as it is not a complex type"); // DateTimeType
-        case 1601527200:  return getRequestProvider(); // Reference
-        case 599053666:  return getRequestOrganization(); // Reference
-        case 1095692943:  return getRequest(); // Reference
-        case -1106507950:  return getOutcome(); // CodeableConcept
-        case 583380919: throw new FHIRException("Cannot make property disposition as it is not a complex type"); // StringType
-        case 1957615864:  return getInsurer(); // Reference
-        case 1945431270: throw new FHIRException("Cannot make property inforce as it is not a complex type"); // BooleanType
-        case 73049818:  return addInsurance(); // InsuranceComponent
-        case 3148996:  return getForm(); // CodeableConcept
-        case 96784904:  return addError(); // ErrorsComponent
+        case -1618432855:  return addIdentifier(); 
+        case -892481550:  return getStatusElement();
+        case 1028554472:  return getCreatedElement();
+        case 1601527200:  return getRequestProvider(); 
+        case 599053666:  return getRequestOrganization(); 
+        case 1095692943:  return getRequest(); 
+        case -1106507950:  return getOutcome(); 
+        case 583380919:  return getDispositionElement();
+        case 1957615864:  return getInsurer(); 
+        case 1945431270:  return getInforceElement();
+        case 73049818:  return addInsurance(); 
+        case 3148996:  return getForm(); 
+        case 96784904:  return addError(); 
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -1618432855: /*identifier*/ return new String[] {"Identifier"};
+        case -892481550: /*status*/ return new String[] {"code"};
+        case 1028554472: /*created*/ return new String[] {"dateTime"};
+        case 1601527200: /*requestProvider*/ return new String[] {"Reference"};
+        case 599053666: /*requestOrganization*/ return new String[] {"Reference"};
+        case 1095692943: /*request*/ return new String[] {"Reference"};
+        case -1106507950: /*outcome*/ return new String[] {"CodeableConcept"};
+        case 583380919: /*disposition*/ return new String[] {"string"};
+        case 1957615864: /*insurer*/ return new String[] {"Reference"};
+        case 1945431270: /*inforce*/ return new String[] {"boolean"};
+        case 73049818: /*insurance*/ return new String[] {};
+        case 3148996: /*form*/ return new String[] {"CodeableConcept"};
+        case 96784904: /*error*/ return new String[] {};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }
@@ -2625,7 +2704,7 @@ public class EligibilityResponse extends DomainResource {
    * Path: <b>EligibilityResponse.requestProvider</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="request-provider", path="EligibilityResponse.requestProvider", description="The EligibilityRequest provider", type="reference", target={Practitioner.class } )
+  @SearchParamDefinition(name="request-provider", path="EligibilityResponse.requestProvider", description="The EligibilityRequest provider", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") }, target={Practitioner.class } )
   public static final String SP_REQUEST_PROVIDER = "request-provider";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>request-provider</b>

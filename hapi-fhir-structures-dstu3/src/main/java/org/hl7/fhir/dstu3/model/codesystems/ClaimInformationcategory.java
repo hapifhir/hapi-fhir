@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -69,6 +69,10 @@ public enum ClaimInformationcategory {
          */
         MISSINGTOOTH, 
         /**
+         * The type of prosthesis and date of supply if a previously supplied prosthesis.
+         */
+        PROSTHESIS, 
+        /**
          * Other information identified by the type.system.
          */
         OTHER, 
@@ -95,6 +99,8 @@ public enum ClaimInformationcategory {
           return ATTACHMENT;
         if ("missingtooth".equals(codeString))
           return MISSINGTOOTH;
+        if ("prosthesis".equals(codeString))
+          return PROSTHESIS;
         if ("other".equals(codeString))
           return OTHER;
         throw new FHIRException("Unknown ClaimInformationcategory code '"+codeString+"'");
@@ -109,6 +115,7 @@ public enum ClaimInformationcategory {
             case MATERIAL: return "material";
             case ATTACHMENT: return "attachment";
             case MISSINGTOOTH: return "missingtooth";
+            case PROSTHESIS: return "prosthesis";
             case OTHER: return "other";
             default: return "?";
           }
@@ -126,6 +133,7 @@ public enum ClaimInformationcategory {
             case MATERIAL: return "Materials being forwarded, eg. Models, molds, images, documents.";
             case ATTACHMENT: return "Materials attached such as images, documents and resources.";
             case MISSINGTOOTH: return "Teeth which are missing for any reason, for example: prior extraction, never developed.";
+            case PROSTHESIS: return "The type of prosthesis and date of supply if a previously supplied prosthesis.";
             case OTHER: return "Other information identified by the type.system.";
             default: return "?";
           }
@@ -140,6 +148,7 @@ public enum ClaimInformationcategory {
             case MATERIAL: return "Materials Forwarded";
             case ATTACHMENT: return "Attachment";
             case MISSINGTOOTH: return "Missing Tooth";
+            case PROSTHESIS: return "Prosthesis";
             case OTHER: return "Other";
             default: return "?";
           }

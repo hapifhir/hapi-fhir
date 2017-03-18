@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
 
 import java.util.*;
 
@@ -47,7 +47,7 @@ import org.hl7.fhir.exceptions.FHIRException;
  * Resource to define constraints on the Expansion of a FHIR ValueSet.
  */
 @ResourceDef(name="ExpansionProfile", profile="http://hl7.org/fhir/Profile/ExpansionProfile")
-@ChildOrder(names={"url", "identifier", "version", "name", "status", "experimental", "publisher", "contact", "date", "description", "useContext", "jurisdiction", "fixedVersion", "excludedSystem", "includeDesignations", "designation", "includeDefinition", "activeOnly", "excludeNested", "excludeNotForUI", "excludePostCoordinated", "displayLanguage", "limitedExpansion"})
+@ChildOrder(names={"url", "identifier", "version", "name", "status", "experimental", "date", "publisher", "contact", "description", "useContext", "jurisdiction", "fixedVersion", "excludedSystem", "includeDesignations", "designation", "includeDefinition", "activeOnly", "excludeNested", "excludeNotForUI", "excludePostCoordinated", "displayLanguage", "limitedExpansion"})
 public class ExpansionProfile extends MetadataResource {
 
     public enum SystemVersionProcessingMode {
@@ -60,7 +60,7 @@ public class ExpansionProfile extends MetadataResource {
          */
         CHECK, 
         /**
-         * Use this version of the code system irrespective of which version is specified by a value set. Note that this has obvious safety issues, in that it may result in a value set expansion giving a different list of codes that is both wrong and unsafe, and implementers should only use this capability reluctantly. It primarily exists to deal with situations where specifications have fallen into decay as time passes
+         * Use this version of the code system irrespective of which version is specified by a value set. Note that this has obvious safety issues, in that it may result in a value set expansion giving a different list of codes that is both wrong and unsafe, and implementers should only use this capability reluctantly. It primarily exists to deal with situations where specifications have fallen into decay as time passes. If a  version is override, the version used SHALL explicitly be represented in the expansion parameters
          */
         OVERRIDE, 
         /**
@@ -101,7 +101,7 @@ public class ExpansionProfile extends MetadataResource {
           switch (this) {
             case DEFAULT: return "Use this version of the code system if a value set doesn't specify a version";
             case CHECK: return "Use this version of the code system. If a value set specifies a different version, the expansion operation should fail";
-            case OVERRIDE: return "Use this version of the code system irrespective of which version is specified by a value set. Note that this has obvious safety issues, in that it may result in a value set expansion giving a different list of codes that is both wrong and unsafe, and implementers should only use this capability reluctantly. It primarily exists to deal with situations where specifications have fallen into decay as time passes";
+            case OVERRIDE: return "Use this version of the code system irrespective of which version is specified by a value set. Note that this has obvious safety issues, in that it may result in a value set expansion giving a different list of codes that is both wrong and unsafe, and implementers should only use this capability reluctantly. It primarily exists to deal with situations where specifications have fallen into decay as time passes. If a  version is override, the version used SHALL explicitly be represented in the expansion parameters";
             default: return "?";
           }
         }
@@ -129,8 +129,10 @@ public class ExpansionProfile extends MetadataResource {
         throw new IllegalArgumentException("Unknown SystemVersionProcessingMode code '"+codeString+"'");
         }
         public Enumeration<SystemVersionProcessingMode> fromType(Base code) throws FHIRException {
-          if (code == null || code.isEmpty())
+          if (code == null)
             return null;
+          if (code.isEmpty())
+            return new Enumeration<SystemVersionProcessingMode>(this);
           String codeString = ((PrimitiveType) code).asStringValue();
           if (codeString == null || "".equals(codeString))
             return null;
@@ -353,41 +355,55 @@ public class ExpansionProfile extends MetadataResource {
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case -887328209: // system
           this.system = castToUri(value); // UriType
-          break;
+          return value;
         case 351608024: // version
           this.version = castToString(value); // StringType
-          break;
+          return value;
         case 3357091: // mode
-          this.mode = new SystemVersionProcessingModeEnumFactory().fromType(value); // Enumeration<SystemVersionProcessingMode>
-          break;
-        default: super.setProperty(hash, name, value);
+          value = new SystemVersionProcessingModeEnumFactory().fromType(castToCode(value));
+          this.mode = (Enumeration) value; // Enumeration<SystemVersionProcessingMode>
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("system"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("system")) {
           this.system = castToUri(value); // UriType
-        else if (name.equals("version"))
+        } else if (name.equals("version")) {
           this.version = castToString(value); // StringType
-        else if (name.equals("mode"))
-          this.mode = new SystemVersionProcessingModeEnumFactory().fromType(value); // Enumeration<SystemVersionProcessingMode>
-        else
-          super.setProperty(name, value);
+        } else if (name.equals("mode")) {
+          value = new SystemVersionProcessingModeEnumFactory().fromType(castToCode(value));
+          this.mode = (Enumeration) value; // Enumeration<SystemVersionProcessingMode>
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case -887328209: throw new FHIRException("Cannot make property system as it is not a complex type"); // UriType
-        case 351608024: throw new FHIRException("Cannot make property version as it is not a complex type"); // StringType
-        case 3357091: throw new FHIRException("Cannot make property mode as it is not a complex type"); // Enumeration<SystemVersionProcessingMode>
+        case -887328209:  return getSystemElement();
+        case 351608024:  return getVersionElement();
+        case 3357091:  return getModeElement();
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -887328209: /*system*/ return new String[] {"uri"};
+        case 351608024: /*version*/ return new String[] {"string"};
+        case 3357091: /*mode*/ return new String[] {"code"};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }
@@ -593,35 +609,46 @@ public class ExpansionProfile extends MetadataResource {
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case -887328209: // system
           this.system = castToUri(value); // UriType
-          break;
+          return value;
         case 351608024: // version
           this.version = castToString(value); // StringType
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("system"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("system")) {
           this.system = castToUri(value); // UriType
-        else if (name.equals("version"))
+        } else if (name.equals("version")) {
           this.version = castToString(value); // StringType
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case -887328209: throw new FHIRException("Cannot make property system as it is not a complex type"); // UriType
-        case 351608024: throw new FHIRException("Cannot make property version as it is not a complex type"); // StringType
+        case -887328209:  return getSystemElement();
+        case 351608024:  return getVersionElement();
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -887328209: /*system*/ return new String[] {"uri"};
+        case 351608024: /*version*/ return new String[] {"string"};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }
@@ -767,35 +794,46 @@ public class ExpansionProfile extends MetadataResource {
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case 1942574248: // include
           this.include = (DesignationIncludeComponent) value; // DesignationIncludeComponent
-          break;
+          return value;
         case -1321148966: // exclude
           this.exclude = (DesignationExcludeComponent) value; // DesignationExcludeComponent
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("include"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("include")) {
           this.include = (DesignationIncludeComponent) value; // DesignationIncludeComponent
-        else if (name.equals("exclude"))
+        } else if (name.equals("exclude")) {
           this.exclude = (DesignationExcludeComponent) value; // DesignationExcludeComponent
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 1942574248:  return getInclude(); // DesignationIncludeComponent
-        case -1321148966:  return getExclude(); // DesignationExcludeComponent
+        case 1942574248:  return getInclude(); 
+        case -1321148966:  return getExclude(); 
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 1942574248: /*include*/ return new String[] {};
+        case -1321148966: /*exclude*/ return new String[] {};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }
@@ -939,29 +977,39 @@ public class ExpansionProfile extends MetadataResource {
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case -900931593: // designation
           this.getDesignation().add((DesignationIncludeDesignationComponent) value); // DesignationIncludeDesignationComponent
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("designation"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("designation")) {
           this.getDesignation().add((DesignationIncludeDesignationComponent) value);
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case -900931593:  return addDesignation(); // DesignationIncludeDesignationComponent
+        case -900931593:  return addDesignation(); 
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -900931593: /*designation*/ return new String[] {};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }
@@ -1028,10 +1076,10 @@ public class ExpansionProfile extends MetadataResource {
         protected CodeType language;
 
         /**
-         * Designation uses for inclusion in the expansion.
+         * Which kinds of designation to include in the expansion.
          */
         @Child(name = "use", type = {Coding.class}, order=2, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="Designation use", formalDefinition="Designation uses for inclusion in the expansion." )
+        @Description(shortDefinition="What kind of Designation to include", formalDefinition="Which kinds of designation to include in the expansion." )
         @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/designation-use")
         protected Coding use;
 
@@ -1094,7 +1142,7 @@ public class ExpansionProfile extends MetadataResource {
         }
 
         /**
-         * @return {@link #use} (Designation uses for inclusion in the expansion.)
+         * @return {@link #use} (Which kinds of designation to include in the expansion.)
          */
         public Coding getUse() { 
           if (this.use == null)
@@ -1110,7 +1158,7 @@ public class ExpansionProfile extends MetadataResource {
         }
 
         /**
-         * @param value {@link #use} (Designation uses for inclusion in the expansion.)
+         * @param value {@link #use} (Which kinds of designation to include in the expansion.)
          */
         public DesignationIncludeDesignationComponent setUse(Coding value) { 
           this.use = value;
@@ -1120,7 +1168,7 @@ public class ExpansionProfile extends MetadataResource {
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
           childrenList.add(new Property("language", "code", "The language this designation is defined for.", 0, java.lang.Integer.MAX_VALUE, language));
-          childrenList.add(new Property("use", "Coding", "Designation uses for inclusion in the expansion.", 0, java.lang.Integer.MAX_VALUE, use));
+          childrenList.add(new Property("use", "Coding", "Which kinds of designation to include in the expansion.", 0, java.lang.Integer.MAX_VALUE, use));
         }
 
       @Override
@@ -1134,35 +1182,46 @@ public class ExpansionProfile extends MetadataResource {
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case -1613589672: // language
           this.language = castToCode(value); // CodeType
-          break;
+          return value;
         case 116103: // use
           this.use = castToCoding(value); // Coding
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("language"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("language")) {
           this.language = castToCode(value); // CodeType
-        else if (name.equals("use"))
+        } else if (name.equals("use")) {
           this.use = castToCoding(value); // Coding
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case -1613589672: throw new FHIRException("Cannot make property language as it is not a complex type"); // CodeType
-        case 116103:  return getUse(); // Coding
+        case -1613589672:  return getLanguageElement();
+        case 116103:  return getUse(); 
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -1613589672: /*language*/ return new String[] {"code"};
+        case 116103: /*use*/ return new String[] {"Coding"};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }
@@ -1305,29 +1364,39 @@ public class ExpansionProfile extends MetadataResource {
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case -900931593: // designation
           this.getDesignation().add((DesignationExcludeDesignationComponent) value); // DesignationExcludeDesignationComponent
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("designation"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("designation")) {
           this.getDesignation().add((DesignationExcludeDesignationComponent) value);
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case -900931593:  return addDesignation(); // DesignationExcludeDesignationComponent
+        case -900931593:  return addDesignation(); 
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -900931593: /*designation*/ return new String[] {};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }
@@ -1394,10 +1463,10 @@ public class ExpansionProfile extends MetadataResource {
         protected CodeType language;
 
         /**
-         * Designation uses for exclusion in the expansion.
+         * Which kinds of designation to exclude from the expansion.
          */
         @Child(name = "use", type = {Coding.class}, order=2, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="Designation use", formalDefinition="Designation uses for exclusion in the expansion." )
+        @Description(shortDefinition="What kind of Designation to exclude", formalDefinition="Which kinds of designation to exclude from the expansion." )
         @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/designation-use")
         protected Coding use;
 
@@ -1460,7 +1529,7 @@ public class ExpansionProfile extends MetadataResource {
         }
 
         /**
-         * @return {@link #use} (Designation uses for exclusion in the expansion.)
+         * @return {@link #use} (Which kinds of designation to exclude from the expansion.)
          */
         public Coding getUse() { 
           if (this.use == null)
@@ -1476,7 +1545,7 @@ public class ExpansionProfile extends MetadataResource {
         }
 
         /**
-         * @param value {@link #use} (Designation uses for exclusion in the expansion.)
+         * @param value {@link #use} (Which kinds of designation to exclude from the expansion.)
          */
         public DesignationExcludeDesignationComponent setUse(Coding value) { 
           this.use = value;
@@ -1486,7 +1555,7 @@ public class ExpansionProfile extends MetadataResource {
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
           childrenList.add(new Property("language", "code", "The language this designation is defined for.", 0, java.lang.Integer.MAX_VALUE, language));
-          childrenList.add(new Property("use", "Coding", "Designation uses for exclusion in the expansion.", 0, java.lang.Integer.MAX_VALUE, use));
+          childrenList.add(new Property("use", "Coding", "Which kinds of designation to exclude from the expansion.", 0, java.lang.Integer.MAX_VALUE, use));
         }
 
       @Override
@@ -1500,35 +1569,46 @@ public class ExpansionProfile extends MetadataResource {
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case -1613589672: // language
           this.language = castToCode(value); // CodeType
-          break;
+          return value;
         case 116103: // use
           this.use = castToCoding(value); // Coding
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("language"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("language")) {
           this.language = castToCode(value); // CodeType
-        else if (name.equals("use"))
+        } else if (name.equals("use")) {
           this.use = castToCoding(value); // Coding
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case -1613589672: throw new FHIRException("Cannot make property language as it is not a complex type"); // CodeType
-        case 116103:  return getUse(); // Coding
+        case -1613589672:  return getLanguageElement();
+        case 116103:  return getUse(); 
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -1613589672: /*language*/ return new String[] {"code"};
+        case 116103: /*use*/ return new String[] {"Coding"};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }
@@ -1949,6 +2029,55 @@ public class ExpansionProfile extends MetadataResource {
     }
 
     /**
+     * @return {@link #date} (The date  (and optionally time) when the expansion profile was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the expansion profile changes.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
+     */
+    public DateTimeType getDateElement() { 
+      if (this.date == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create ExpansionProfile.date");
+        else if (Configuration.doAutoCreate())
+          this.date = new DateTimeType(); // bb
+      return this.date;
+    }
+
+    public boolean hasDateElement() { 
+      return this.date != null && !this.date.isEmpty();
+    }
+
+    public boolean hasDate() { 
+      return this.date != null && !this.date.isEmpty();
+    }
+
+    /**
+     * @param value {@link #date} (The date  (and optionally time) when the expansion profile was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the expansion profile changes.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
+     */
+    public ExpansionProfile setDateElement(DateTimeType value) { 
+      this.date = value;
+      return this;
+    }
+
+    /**
+     * @return The date  (and optionally time) when the expansion profile was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the expansion profile changes.
+     */
+    public Date getDate() { 
+      return this.date == null ? null : this.date.getValue();
+    }
+
+    /**
+     * @param value The date  (and optionally time) when the expansion profile was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the expansion profile changes.
+     */
+    public ExpansionProfile setDate(Date value) { 
+      if (value == null)
+        this.date = null;
+      else {
+        if (this.date == null)
+          this.date = new DateTimeType();
+        this.date.setValue(value);
+      }
+      return this;
+    }
+
+    /**
      * @return {@link #publisher} (The name of the individual or organization that published the expansion profile.). This is the underlying object with id, value and extensions. The accessor "getPublisher" gives direct access to the value
      */
     public StringType getPublisherElement() { 
@@ -2048,55 +2177,6 @@ public class ExpansionProfile extends MetadataResource {
         addContact();
       }
       return getContact().get(0);
-    }
-
-    /**
-     * @return {@link #date} (The date  (and optionally time) when the expansion profile was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the expansion profile changes.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
-     */
-    public DateTimeType getDateElement() { 
-      if (this.date == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create ExpansionProfile.date");
-        else if (Configuration.doAutoCreate())
-          this.date = new DateTimeType(); // bb
-      return this.date;
-    }
-
-    public boolean hasDateElement() { 
-      return this.date != null && !this.date.isEmpty();
-    }
-
-    public boolean hasDate() { 
-      return this.date != null && !this.date.isEmpty();
-    }
-
-    /**
-     * @param value {@link #date} (The date  (and optionally time) when the expansion profile was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the expansion profile changes.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
-     */
-    public ExpansionProfile setDateElement(DateTimeType value) { 
-      this.date = value;
-      return this;
-    }
-
-    /**
-     * @return The date  (and optionally time) when the expansion profile was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the expansion profile changes.
-     */
-    public Date getDate() { 
-      return this.date == null ? null : this.date.getValue();
-    }
-
-    /**
-     * @param value The date  (and optionally time) when the expansion profile was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the expansion profile changes.
-     */
-    public ExpansionProfile setDate(Date value) { 
-      if (value == null)
-        this.date = null;
-      else {
-        if (this.date == null)
-          this.date = new DateTimeType();
-        this.date.setValue(value);
-      }
-      return this;
     }
 
     /**
@@ -2727,9 +2807,9 @@ public class ExpansionProfile extends MetadataResource {
         childrenList.add(new Property("name", "string", "A natural language name identifying the expansion profile. This name should be usable as an identifier for the module by machine processing applications such as code generation.", 0, java.lang.Integer.MAX_VALUE, name));
         childrenList.add(new Property("status", "code", "The status of this expansion profile. Enables tracking the life-cycle of the content.", 0, java.lang.Integer.MAX_VALUE, status));
         childrenList.add(new Property("experimental", "boolean", "A flag to indicate that this expansion profile is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.", 0, java.lang.Integer.MAX_VALUE, experimental));
+        childrenList.add(new Property("date", "dateTime", "The date  (and optionally time) when the expansion profile was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the expansion profile changes.", 0, java.lang.Integer.MAX_VALUE, date));
         childrenList.add(new Property("publisher", "string", "The name of the individual or organization that published the expansion profile.", 0, java.lang.Integer.MAX_VALUE, publisher));
         childrenList.add(new Property("contact", "ContactDetail", "Contact details to assist a user in finding and communicating with the publisher.", 0, java.lang.Integer.MAX_VALUE, contact));
-        childrenList.add(new Property("date", "dateTime", "The date  (and optionally time) when the expansion profile was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the expansion profile changes.", 0, java.lang.Integer.MAX_VALUE, date));
         childrenList.add(new Property("description", "markdown", "A free text natural language description of the expansion profile from the consumer's perspective.", 0, java.lang.Integer.MAX_VALUE, description));
         childrenList.add(new Property("useContext", "UsageContext", "The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching of code system definitions.", 0, java.lang.Integer.MAX_VALUE, useContext));
         childrenList.add(new Property("jurisdiction", "CodeableConcept", "A jurisdiction in which the expansion profile is intended to be used.", 0, java.lang.Integer.MAX_VALUE, jurisdiction));
@@ -2755,9 +2835,9 @@ public class ExpansionProfile extends MetadataResource {
         case 3373707: /*name*/ return this.name == null ? new Base[0] : new Base[] {this.name}; // StringType
         case -892481550: /*status*/ return this.status == null ? new Base[0] : new Base[] {this.status}; // Enumeration<PublicationStatus>
         case -404562712: /*experimental*/ return this.experimental == null ? new Base[0] : new Base[] {this.experimental}; // BooleanType
+        case 3076014: /*date*/ return this.date == null ? new Base[0] : new Base[] {this.date}; // DateTimeType
         case 1447404028: /*publisher*/ return this.publisher == null ? new Base[0] : new Base[] {this.publisher}; // StringType
         case 951526432: /*contact*/ return this.contact == null ? new Base[0] : this.contact.toArray(new Base[this.contact.size()]); // ContactDetail
-        case 3076014: /*date*/ return this.date == null ? new Base[0] : new Base[] {this.date}; // DateTimeType
         case -1724546052: /*description*/ return this.description == null ? new Base[0] : new Base[] {this.description}; // MarkdownType
         case -669707736: /*useContext*/ return this.useContext == null ? new Base[0] : this.useContext.toArray(new Base[this.useContext.size()]); // UsageContext
         case -507075711: /*jurisdiction*/ return this.jurisdiction == null ? new Base[0] : this.jurisdiction.toArray(new Base[this.jurisdiction.size()]); // CodeableConcept
@@ -2778,161 +2858,195 @@ public class ExpansionProfile extends MetadataResource {
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case 116079: // url
           this.url = castToUri(value); // UriType
-          break;
+          return value;
         case -1618432855: // identifier
           this.identifier = castToIdentifier(value); // Identifier
-          break;
+          return value;
         case 351608024: // version
           this.version = castToString(value); // StringType
-          break;
+          return value;
         case 3373707: // name
           this.name = castToString(value); // StringType
-          break;
+          return value;
         case -892481550: // status
-          this.status = new PublicationStatusEnumFactory().fromType(value); // Enumeration<PublicationStatus>
-          break;
+          value = new PublicationStatusEnumFactory().fromType(castToCode(value));
+          this.status = (Enumeration) value; // Enumeration<PublicationStatus>
+          return value;
         case -404562712: // experimental
           this.experimental = castToBoolean(value); // BooleanType
-          break;
-        case 1447404028: // publisher
-          this.publisher = castToString(value); // StringType
-          break;
-        case 951526432: // contact
-          this.getContact().add(castToContactDetail(value)); // ContactDetail
-          break;
+          return value;
         case 3076014: // date
           this.date = castToDateTime(value); // DateTimeType
-          break;
+          return value;
+        case 1447404028: // publisher
+          this.publisher = castToString(value); // StringType
+          return value;
+        case 951526432: // contact
+          this.getContact().add(castToContactDetail(value)); // ContactDetail
+          return value;
         case -1724546052: // description
           this.description = castToMarkdown(value); // MarkdownType
-          break;
+          return value;
         case -669707736: // useContext
           this.getUseContext().add(castToUsageContext(value)); // UsageContext
-          break;
+          return value;
         case -507075711: // jurisdiction
           this.getJurisdiction().add(castToCodeableConcept(value)); // CodeableConcept
-          break;
+          return value;
         case 807748292: // fixedVersion
           this.getFixedVersion().add((ExpansionProfileFixedVersionComponent) value); // ExpansionProfileFixedVersionComponent
-          break;
+          return value;
         case 2125282457: // excludedSystem
           this.excludedSystem = (ExpansionProfileExcludedSystemComponent) value; // ExpansionProfileExcludedSystemComponent
-          break;
+          return value;
         case 461507620: // includeDesignations
           this.includeDesignations = castToBoolean(value); // BooleanType
-          break;
+          return value;
         case -900931593: // designation
           this.designation = (ExpansionProfileDesignationComponent) value; // ExpansionProfileDesignationComponent
-          break;
+          return value;
         case 127972379: // includeDefinition
           this.includeDefinition = castToBoolean(value); // BooleanType
-          break;
+          return value;
         case 2043813842: // activeOnly
           this.activeOnly = castToBoolean(value); // BooleanType
-          break;
+          return value;
         case 424992625: // excludeNested
           this.excludeNested = castToBoolean(value); // BooleanType
-          break;
+          return value;
         case 667582980: // excludeNotForUI
           this.excludeNotForUI = castToBoolean(value); // BooleanType
-          break;
+          return value;
         case 563335154: // excludePostCoordinated
           this.excludePostCoordinated = castToBoolean(value); // BooleanType
-          break;
+          return value;
         case 1486237242: // displayLanguage
           this.displayLanguage = castToCode(value); // CodeType
-          break;
+          return value;
         case 597771333: // limitedExpansion
           this.limitedExpansion = castToBoolean(value); // BooleanType
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("url"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("url")) {
           this.url = castToUri(value); // UriType
-        else if (name.equals("identifier"))
+        } else if (name.equals("identifier")) {
           this.identifier = castToIdentifier(value); // Identifier
-        else if (name.equals("version"))
+        } else if (name.equals("version")) {
           this.version = castToString(value); // StringType
-        else if (name.equals("name"))
+        } else if (name.equals("name")) {
           this.name = castToString(value); // StringType
-        else if (name.equals("status"))
-          this.status = new PublicationStatusEnumFactory().fromType(value); // Enumeration<PublicationStatus>
-        else if (name.equals("experimental"))
+        } else if (name.equals("status")) {
+          value = new PublicationStatusEnumFactory().fromType(castToCode(value));
+          this.status = (Enumeration) value; // Enumeration<PublicationStatus>
+        } else if (name.equals("experimental")) {
           this.experimental = castToBoolean(value); // BooleanType
-        else if (name.equals("publisher"))
-          this.publisher = castToString(value); // StringType
-        else if (name.equals("contact"))
-          this.getContact().add(castToContactDetail(value));
-        else if (name.equals("date"))
+        } else if (name.equals("date")) {
           this.date = castToDateTime(value); // DateTimeType
-        else if (name.equals("description"))
+        } else if (name.equals("publisher")) {
+          this.publisher = castToString(value); // StringType
+        } else if (name.equals("contact")) {
+          this.getContact().add(castToContactDetail(value));
+        } else if (name.equals("description")) {
           this.description = castToMarkdown(value); // MarkdownType
-        else if (name.equals("useContext"))
+        } else if (name.equals("useContext")) {
           this.getUseContext().add(castToUsageContext(value));
-        else if (name.equals("jurisdiction"))
+        } else if (name.equals("jurisdiction")) {
           this.getJurisdiction().add(castToCodeableConcept(value));
-        else if (name.equals("fixedVersion"))
+        } else if (name.equals("fixedVersion")) {
           this.getFixedVersion().add((ExpansionProfileFixedVersionComponent) value);
-        else if (name.equals("excludedSystem"))
+        } else if (name.equals("excludedSystem")) {
           this.excludedSystem = (ExpansionProfileExcludedSystemComponent) value; // ExpansionProfileExcludedSystemComponent
-        else if (name.equals("includeDesignations"))
+        } else if (name.equals("includeDesignations")) {
           this.includeDesignations = castToBoolean(value); // BooleanType
-        else if (name.equals("designation"))
+        } else if (name.equals("designation")) {
           this.designation = (ExpansionProfileDesignationComponent) value; // ExpansionProfileDesignationComponent
-        else if (name.equals("includeDefinition"))
+        } else if (name.equals("includeDefinition")) {
           this.includeDefinition = castToBoolean(value); // BooleanType
-        else if (name.equals("activeOnly"))
+        } else if (name.equals("activeOnly")) {
           this.activeOnly = castToBoolean(value); // BooleanType
-        else if (name.equals("excludeNested"))
+        } else if (name.equals("excludeNested")) {
           this.excludeNested = castToBoolean(value); // BooleanType
-        else if (name.equals("excludeNotForUI"))
+        } else if (name.equals("excludeNotForUI")) {
           this.excludeNotForUI = castToBoolean(value); // BooleanType
-        else if (name.equals("excludePostCoordinated"))
+        } else if (name.equals("excludePostCoordinated")) {
           this.excludePostCoordinated = castToBoolean(value); // BooleanType
-        else if (name.equals("displayLanguage"))
+        } else if (name.equals("displayLanguage")) {
           this.displayLanguage = castToCode(value); // CodeType
-        else if (name.equals("limitedExpansion"))
+        } else if (name.equals("limitedExpansion")) {
           this.limitedExpansion = castToBoolean(value); // BooleanType
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 116079: throw new FHIRException("Cannot make property url as it is not a complex type"); // UriType
-        case -1618432855:  return getIdentifier(); // Identifier
-        case 351608024: throw new FHIRException("Cannot make property version as it is not a complex type"); // StringType
-        case 3373707: throw new FHIRException("Cannot make property name as it is not a complex type"); // StringType
-        case -892481550: throw new FHIRException("Cannot make property status as it is not a complex type"); // Enumeration<PublicationStatus>
-        case -404562712: throw new FHIRException("Cannot make property experimental as it is not a complex type"); // BooleanType
-        case 1447404028: throw new FHIRException("Cannot make property publisher as it is not a complex type"); // StringType
-        case 951526432:  return addContact(); // ContactDetail
-        case 3076014: throw new FHIRException("Cannot make property date as it is not a complex type"); // DateTimeType
-        case -1724546052: throw new FHIRException("Cannot make property description as it is not a complex type"); // MarkdownType
-        case -669707736:  return addUseContext(); // UsageContext
-        case -507075711:  return addJurisdiction(); // CodeableConcept
-        case 807748292:  return addFixedVersion(); // ExpansionProfileFixedVersionComponent
-        case 2125282457:  return getExcludedSystem(); // ExpansionProfileExcludedSystemComponent
-        case 461507620: throw new FHIRException("Cannot make property includeDesignations as it is not a complex type"); // BooleanType
-        case -900931593:  return getDesignation(); // ExpansionProfileDesignationComponent
-        case 127972379: throw new FHIRException("Cannot make property includeDefinition as it is not a complex type"); // BooleanType
-        case 2043813842: throw new FHIRException("Cannot make property activeOnly as it is not a complex type"); // BooleanType
-        case 424992625: throw new FHIRException("Cannot make property excludeNested as it is not a complex type"); // BooleanType
-        case 667582980: throw new FHIRException("Cannot make property excludeNotForUI as it is not a complex type"); // BooleanType
-        case 563335154: throw new FHIRException("Cannot make property excludePostCoordinated as it is not a complex type"); // BooleanType
-        case 1486237242: throw new FHIRException("Cannot make property displayLanguage as it is not a complex type"); // CodeType
-        case 597771333: throw new FHIRException("Cannot make property limitedExpansion as it is not a complex type"); // BooleanType
+        case 116079:  return getUrlElement();
+        case -1618432855:  return getIdentifier(); 
+        case 351608024:  return getVersionElement();
+        case 3373707:  return getNameElement();
+        case -892481550:  return getStatusElement();
+        case -404562712:  return getExperimentalElement();
+        case 3076014:  return getDateElement();
+        case 1447404028:  return getPublisherElement();
+        case 951526432:  return addContact(); 
+        case -1724546052:  return getDescriptionElement();
+        case -669707736:  return addUseContext(); 
+        case -507075711:  return addJurisdiction(); 
+        case 807748292:  return addFixedVersion(); 
+        case 2125282457:  return getExcludedSystem(); 
+        case 461507620:  return getIncludeDesignationsElement();
+        case -900931593:  return getDesignation(); 
+        case 127972379:  return getIncludeDefinitionElement();
+        case 2043813842:  return getActiveOnlyElement();
+        case 424992625:  return getExcludeNestedElement();
+        case 667582980:  return getExcludeNotForUIElement();
+        case 563335154:  return getExcludePostCoordinatedElement();
+        case 1486237242:  return getDisplayLanguageElement();
+        case 597771333:  return getLimitedExpansionElement();
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 116079: /*url*/ return new String[] {"uri"};
+        case -1618432855: /*identifier*/ return new String[] {"Identifier"};
+        case 351608024: /*version*/ return new String[] {"string"};
+        case 3373707: /*name*/ return new String[] {"string"};
+        case -892481550: /*status*/ return new String[] {"code"};
+        case -404562712: /*experimental*/ return new String[] {"boolean"};
+        case 3076014: /*date*/ return new String[] {"dateTime"};
+        case 1447404028: /*publisher*/ return new String[] {"string"};
+        case 951526432: /*contact*/ return new String[] {"ContactDetail"};
+        case -1724546052: /*description*/ return new String[] {"markdown"};
+        case -669707736: /*useContext*/ return new String[] {"UsageContext"};
+        case -507075711: /*jurisdiction*/ return new String[] {"CodeableConcept"};
+        case 807748292: /*fixedVersion*/ return new String[] {};
+        case 2125282457: /*excludedSystem*/ return new String[] {};
+        case 461507620: /*includeDesignations*/ return new String[] {"boolean"};
+        case -900931593: /*designation*/ return new String[] {};
+        case 127972379: /*includeDefinition*/ return new String[] {"boolean"};
+        case 2043813842: /*activeOnly*/ return new String[] {"boolean"};
+        case 424992625: /*excludeNested*/ return new String[] {"boolean"};
+        case 667582980: /*excludeNotForUI*/ return new String[] {"boolean"};
+        case 563335154: /*excludePostCoordinated*/ return new String[] {"boolean"};
+        case 1486237242: /*displayLanguage*/ return new String[] {"code"};
+        case 597771333: /*limitedExpansion*/ return new String[] {"boolean"};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }
@@ -2958,14 +3072,14 @@ public class ExpansionProfile extends MetadataResource {
         else if (name.equals("experimental")) {
           throw new FHIRException("Cannot call addChild on a primitive type ExpansionProfile.experimental");
         }
+        else if (name.equals("date")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ExpansionProfile.date");
+        }
         else if (name.equals("publisher")) {
           throw new FHIRException("Cannot call addChild on a primitive type ExpansionProfile.publisher");
         }
         else if (name.equals("contact")) {
           return addContact();
-        }
-        else if (name.equals("date")) {
-          throw new FHIRException("Cannot call addChild on a primitive type ExpansionProfile.date");
         }
         else if (name.equals("description")) {
           throw new FHIRException("Cannot call addChild on a primitive type ExpansionProfile.description");
@@ -3029,13 +3143,13 @@ public class ExpansionProfile extends MetadataResource {
         dst.name = name == null ? null : name.copy();
         dst.status = status == null ? null : status.copy();
         dst.experimental = experimental == null ? null : experimental.copy();
+        dst.date = date == null ? null : date.copy();
         dst.publisher = publisher == null ? null : publisher.copy();
         if (contact != null) {
           dst.contact = new ArrayList<ContactDetail>();
           for (ContactDetail i : contact)
             dst.contact.add(i.copy());
         };
-        dst.date = date == null ? null : date.copy();
         dst.description = description == null ? null : description.copy();
         if (useContext != null) {
           dst.useContext = new ArrayList<UsageContext>();
@@ -3233,17 +3347,17 @@ public class ExpansionProfile extends MetadataResource {
  /**
    * Search parameter: <b>version</b>
    * <p>
-   * Description: <b>The version identifier of the expansion profile</b><br>
+   * Description: <b>The business version of the expansion profile</b><br>
    * Type: <b>token</b><br>
    * Path: <b>ExpansionProfile.version</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="version", path="ExpansionProfile.version", description="The version identifier of the expansion profile", type="token" )
+  @SearchParamDefinition(name="version", path="ExpansionProfile.version", description="The business version of the expansion profile", type="token" )
   public static final String SP_VERSION = "version";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>version</b>
    * <p>
-   * Description: <b>The version identifier of the expansion profile</b><br>
+   * Description: <b>The business version of the expansion profile</b><br>
    * Type: <b>token</b><br>
    * Path: <b>ExpansionProfile.version</b><br>
    * </p>

@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,57 +37,17 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum ActivityDefinitionCategory {
 
         /**
-         * To communicate with a participant in some way
+         * The activity is intended to provide or is related to treatment of the patient
          */
-        COMMUNICATION, 
+        TREATMENT, 
         /**
-         * To use a specific device
+         * The activity is intended to provide or is related to education of the patient
          */
-        DEVICE, 
+        EDUCATION, 
         /**
-         * To perform a particular diagnostic
+         * The activity is intended to perform or is related to assessment of the patient
          */
-        DIAGNOSTIC, 
-        /**
-         * To consume food of a specified nature
-         */
-        DIET, 
-        /**
-         * To consume/receive a drug or other product
-         */
-        DRUG, 
-        /**
-         * To meet with the patient (in-patient, out-patient, etc.)
-         */
-        ENCOUNTER, 
-        /**
-         * To administer a particular immunization
-         */
-        IMMUNIZATION, 
-        /**
-         * To capture information about a patient (vitals, labs, etc.)
-         */
-        OBSERVATION, 
-        /**
-         * To modify the patient in some way (surgery, physiotherapy, education, counseling, etc.)
-         */
-        PROCEDURE, 
-        /**
-         * To refer the patient to receive some service
-         */
-        REFERRAL, 
-        /**
-         * To provide something to the patient (medication, medical supply, etc.)
-         */
-        SUPPLY, 
-        /**
-         * To receive a particular vision correction device
-         */
-        VISION, 
-        /**
-         * Some other form of action
-         */
-        OTHER, 
+        ASSESSMENT, 
         /**
          * added to help the parsers
          */
@@ -95,49 +55,19 @@ public enum ActivityDefinitionCategory {
         public static ActivityDefinitionCategory fromCode(String codeString) throws FHIRException {
             if (codeString == null || "".equals(codeString))
                 return null;
-        if ("communication".equals(codeString))
-          return COMMUNICATION;
-        if ("device".equals(codeString))
-          return DEVICE;
-        if ("diagnostic".equals(codeString))
-          return DIAGNOSTIC;
-        if ("diet".equals(codeString))
-          return DIET;
-        if ("drug".equals(codeString))
-          return DRUG;
-        if ("encounter".equals(codeString))
-          return ENCOUNTER;
-        if ("immunization".equals(codeString))
-          return IMMUNIZATION;
-        if ("observation".equals(codeString))
-          return OBSERVATION;
-        if ("procedure".equals(codeString))
-          return PROCEDURE;
-        if ("referral".equals(codeString))
-          return REFERRAL;
-        if ("supply".equals(codeString))
-          return SUPPLY;
-        if ("vision".equals(codeString))
-          return VISION;
-        if ("other".equals(codeString))
-          return OTHER;
+        if ("treatment".equals(codeString))
+          return TREATMENT;
+        if ("education".equals(codeString))
+          return EDUCATION;
+        if ("assessment".equals(codeString))
+          return ASSESSMENT;
         throw new FHIRException("Unknown ActivityDefinitionCategory code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
-            case COMMUNICATION: return "communication";
-            case DEVICE: return "device";
-            case DIAGNOSTIC: return "diagnostic";
-            case DIET: return "diet";
-            case DRUG: return "drug";
-            case ENCOUNTER: return "encounter";
-            case IMMUNIZATION: return "immunization";
-            case OBSERVATION: return "observation";
-            case PROCEDURE: return "procedure";
-            case REFERRAL: return "referral";
-            case SUPPLY: return "supply";
-            case VISION: return "vision";
-            case OTHER: return "other";
+            case TREATMENT: return "treatment";
+            case EDUCATION: return "education";
+            case ASSESSMENT: return "assessment";
             default: return "?";
           }
         }
@@ -146,37 +76,17 @@ public enum ActivityDefinitionCategory {
         }
         public String getDefinition() {
           switch (this) {
-            case COMMUNICATION: return "To communicate with a participant in some way";
-            case DEVICE: return "To use a specific device";
-            case DIAGNOSTIC: return "To perform a particular diagnostic";
-            case DIET: return "To consume food of a specified nature";
-            case DRUG: return "To consume/receive a drug or other product";
-            case ENCOUNTER: return "To meet with the patient (in-patient, out-patient, etc.)";
-            case IMMUNIZATION: return "To administer a particular immunization";
-            case OBSERVATION: return "To capture information about a patient (vitals, labs, etc.)";
-            case PROCEDURE: return "To modify the patient in some way (surgery, physiotherapy, education, counseling, etc.)";
-            case REFERRAL: return "To refer the patient to receive some service";
-            case SUPPLY: return "To provide something to the patient (medication, medical supply, etc.)";
-            case VISION: return "To receive a particular vision correction device";
-            case OTHER: return "Some other form of action";
+            case TREATMENT: return "The activity is intended to provide or is related to treatment of the patient";
+            case EDUCATION: return "The activity is intended to provide or is related to education of the patient";
+            case ASSESSMENT: return "The activity is intended to perform or is related to assessment of the patient";
             default: return "?";
           }
         }
         public String getDisplay() {
           switch (this) {
-            case COMMUNICATION: return "Communication";
-            case DEVICE: return "Device";
-            case DIAGNOSTIC: return "Diagnostic";
-            case DIET: return "Diet";
-            case DRUG: return "Drug";
-            case ENCOUNTER: return "Encounter";
-            case IMMUNIZATION: return "Immunization";
-            case OBSERVATION: return "Observation";
-            case PROCEDURE: return "Procedure";
-            case REFERRAL: return "Referral";
-            case SUPPLY: return "Supply";
-            case VISION: return "Vision";
-            case OTHER: return "Other";
+            case TREATMENT: return "Treatment";
+            case EDUCATION: return "Education";
+            case ASSESSMENT: return "Assessment";
             default: return "?";
           }
     }

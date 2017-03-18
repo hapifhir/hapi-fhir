@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
 
 import java.util.*;
 
@@ -174,8 +174,10 @@ public class TriggerDefinition extends Type implements ICompositeType {
         throw new IllegalArgumentException("Unknown TriggerType code '"+codeString+"'");
         }
         public Enumeration<TriggerType> fromType(Base code) throws FHIRException {
-          if (code == null || code.isEmpty())
+          if (code == null)
             return null;
+          if (code.isEmpty())
+            return new Enumeration<TriggerType>(this);
           String codeString = ((PrimitiveType) code).asStringValue();
           if (codeString == null || "".equals(codeString))
             return null;
@@ -473,47 +475,63 @@ public class TriggerDefinition extends Type implements ICompositeType {
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case 3575610: // type
-          this.type = new TriggerTypeEnumFactory().fromType(value); // Enumeration<TriggerType>
-          break;
+          value = new TriggerTypeEnumFactory().fromType(castToCode(value));
+          this.type = (Enumeration) value; // Enumeration<TriggerType>
+          return value;
         case 31228997: // eventName
           this.eventName = castToString(value); // StringType
-          break;
+          return value;
         case 125465476: // eventTiming
           this.eventTiming = castToType(value); // Type
-          break;
+          return value;
         case 30931300: // eventData
           this.eventData = castToDataRequirement(value); // DataRequirement
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("type"))
-          this.type = new TriggerTypeEnumFactory().fromType(value); // Enumeration<TriggerType>
-        else if (name.equals("eventName"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("type")) {
+          value = new TriggerTypeEnumFactory().fromType(castToCode(value));
+          this.type = (Enumeration) value; // Enumeration<TriggerType>
+        } else if (name.equals("eventName")) {
           this.eventName = castToString(value); // StringType
-        else if (name.equals("eventTiming[x]"))
+        } else if (name.equals("eventTiming[x]")) {
           this.eventTiming = castToType(value); // Type
-        else if (name.equals("eventData"))
+        } else if (name.equals("eventData")) {
           this.eventData = castToDataRequirement(value); // DataRequirement
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 3575610: throw new FHIRException("Cannot make property type as it is not a complex type"); // Enumeration<TriggerType>
-        case 31228997: throw new FHIRException("Cannot make property eventName as it is not a complex type"); // StringType
-        case 1120539260:  return getEventTiming(); // Type
-        case 30931300:  return getEventData(); // DataRequirement
+        case 3575610:  return getTypeElement();
+        case 31228997:  return getEventNameElement();
+        case 1120539260:  return getEventTiming(); 
+        case 125465476:  return getEventTiming(); 
+        case 30931300:  return getEventData(); 
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3575610: /*type*/ return new String[] {"code"};
+        case 31228997: /*eventName*/ return new String[] {"string"};
+        case 125465476: /*eventTiming*/ return new String[] {"Timing", "Reference", "date", "dateTime"};
+        case 30931300: /*eventData*/ return new String[] {"DataRequirement"};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }

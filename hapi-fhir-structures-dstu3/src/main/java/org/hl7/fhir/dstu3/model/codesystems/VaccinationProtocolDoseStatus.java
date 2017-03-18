@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,11 +37,11 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum VaccinationProtocolDoseStatus {
 
         /**
-         * null
+         * The dose counts toward fulfilling a path to immunity for a patient, providing protection against the target disease.
          */
         COUNT, 
         /**
-         * null
+         * The dose does not count toward fulfilling a path to immunity for a patient.
          */
         NOCOUNT, 
         /**
@@ -69,8 +69,8 @@ public enum VaccinationProtocolDoseStatus {
         }
         public String getDefinition() {
           switch (this) {
-            case COUNT: return "";
-            case NOCOUNT: return "";
+            case COUNT: return "The dose counts toward fulfilling a path to immunity for a patient, providing protection against the target disease.";
+            case NOCOUNT: return "The dose does not count toward fulfilling a path to immunity for a patient.";
             default: return "?";
           }
         }

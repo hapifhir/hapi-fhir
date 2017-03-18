@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
 
 import java.util.*;
 
@@ -420,59 +420,76 @@ public class Signature extends Type implements ICompositeType {
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case 3575610: // type
           this.getType().add(castToCoding(value)); // Coding
-          break;
+          return value;
         case 3648314: // when
           this.when = castToInstant(value); // InstantType
-          break;
+          return value;
         case 117694: // who
           this.who = castToType(value); // Type
-          break;
+          return value;
         case -14402964: // onBehalfOf
           this.onBehalfOf = castToType(value); // Type
-          break;
+          return value;
         case -389131437: // contentType
           this.contentType = castToCode(value); // CodeType
-          break;
+          return value;
         case 3026845: // blob
           this.blob = castToBase64Binary(value); // Base64BinaryType
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("type"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("type")) {
           this.getType().add(castToCoding(value));
-        else if (name.equals("when"))
+        } else if (name.equals("when")) {
           this.when = castToInstant(value); // InstantType
-        else if (name.equals("who[x]"))
+        } else if (name.equals("who[x]")) {
           this.who = castToType(value); // Type
-        else if (name.equals("onBehalfOf[x]"))
+        } else if (name.equals("onBehalfOf[x]")) {
           this.onBehalfOf = castToType(value); // Type
-        else if (name.equals("contentType"))
+        } else if (name.equals("contentType")) {
           this.contentType = castToCode(value); // CodeType
-        else if (name.equals("blob"))
+        } else if (name.equals("blob")) {
           this.blob = castToBase64Binary(value); // Base64BinaryType
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 3575610:  return addType(); // Coding
-        case 3648314: throw new FHIRException("Cannot make property when as it is not a complex type"); // InstantType
-        case -788654078:  return getWho(); // Type
-        case 418120340:  return getOnBehalfOf(); // Type
-        case -389131437: throw new FHIRException("Cannot make property contentType as it is not a complex type"); // CodeType
-        case 3026845: throw new FHIRException("Cannot make property blob as it is not a complex type"); // Base64BinaryType
+        case 3575610:  return addType(); 
+        case 3648314:  return getWhenElement();
+        case -788654078:  return getWho(); 
+        case 117694:  return getWho(); 
+        case 418120340:  return getOnBehalfOf(); 
+        case -14402964:  return getOnBehalfOf(); 
+        case -389131437:  return getContentTypeElement();
+        case 3026845:  return getBlobElement();
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3575610: /*type*/ return new String[] {"Coding"};
+        case 3648314: /*when*/ return new String[] {"instant"};
+        case 117694: /*who*/ return new String[] {"uri", "Reference"};
+        case -14402964: /*onBehalfOf*/ return new String[] {"uri", "Reference"};
+        case -389131437: /*contentType*/ return new String[] {"code"};
+        case 3026845: /*blob*/ return new String[] {"base64Binary"};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }

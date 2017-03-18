@@ -25,15 +25,12 @@ import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpEntityEnclosingRequest;
 import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.HttpEntityWrapper;
 import org.apache.http.message.BasicHeader;
 import org.hl7.fhir.dstu3.model.CapabilityStatement;
 import org.hl7.fhir.dstu3.model.CapabilityStatement.CapabilityStatementRestComponent;
 import org.hl7.fhir.dstu3.model.CapabilityStatement.CapabilityStatementRestResourceComponent;
-import org.hl7.fhir.dstu3.model.Conformance.ConformanceRestComponent;
-import org.hl7.fhir.dstu3.model.Conformance.ConformanceRestResourceComponent;
 import org.hl7.fhir.dstu3.model.DecimalType;
 import org.hl7.fhir.dstu3.model.Extension;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -51,7 +48,6 @@ import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu.resource.Conformance;
 import ca.uhn.fhir.model.dstu.resource.Conformance.Rest;
 import ca.uhn.fhir.model.primitive.DecimalDt;
-import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.client.GenericClient;
 import ca.uhn.fhir.rest.client.IClientInterceptor;
 import ca.uhn.fhir.rest.client.apache.ApacheHttpRequest;
@@ -453,40 +449,19 @@ public class BaseController {
 		CaptureInterceptor interceptor = new CaptureInterceptor();
 		GenericClient client = theRequest.newClient(theServletRequest, getContext(theRequest), myConfig, interceptor);
 
-		org.hl7.fhir.dstu3.model.Conformance conformance = null;
 		org.hl7.fhir.dstu3.model.CapabilityStatement capabilityStatement = new CapabilityStatement();
 		try {
 			capabilityStatement = client.fetchConformance().ofType(org.hl7.fhir.dstu3.model.CapabilityStatement.class).execute();
 		} catch (Exception ex) {
-			try {
-				conformance = client.fetchConformance().ofType(org.hl7.fhir.dstu3.model.Conformance.class).execute();
-			} catch (Exception e) {
-				ourLog.warn("Failed to load conformance statement", e);
-				theModel.put("errorMsg", "Failed to load conformance statement, error was: " + e.toString());
-			}
+			ourLog.warn("Failed to load conformance statement", ex);
+			theModel.put("errorMsg", "Failed to load conformance statement, error was: " + ex.toString());
 		}
 
-		if (conformance != null) {
-			theModel.put("jsonEncodedConf", getContext(theRequest).newJsonParser().encodeResourceToString(conformance));
-		} else {
-			theModel.put("jsonEncodedConf", getContext(theRequest).newJsonParser().encodeResourceToString(capabilityStatement));
-		}
+		theModel.put("jsonEncodedConf", getContext(theRequest).newJsonParser().encodeResourceToString(capabilityStatement));
 		
 		Map<String, Number> resourceCounts = new HashMap<String, Number>();
 		long total = 0;
 
-		if (conformance != null) {
-			for (ConformanceRestComponent nextRest : conformance.getRest()) {
-				for (ConformanceRestResourceComponent nextResource : nextRest.getResource()) {
-					List<Extension> exts = nextResource.getExtensionsByUrl(RESOURCE_COUNT_EXT_URL);
-					if (exts != null && exts.size() > 0) {
-						Number nextCount = ((DecimalType) (exts.get(0).getValue())).getValueAsNumber();
-						resourceCounts.put(nextResource.getTypeElement().getValue(), nextCount);
-						total += nextCount.longValue();
-					}
-				}
-			}
-		}
 		for (CapabilityStatementRestComponent nextRest : capabilityStatement.getRest()) {
 			for (CapabilityStatementRestResourceComponent nextResource : nextRest.getResource()) {
 				List<Extension> exts = nextResource.getExtensionsByUrl(RESOURCE_COUNT_EXT_URL);
@@ -501,30 +476,6 @@ public class BaseController {
 		theModel.put("resourceCounts", resourceCounts);
 
 		if (total > 0) {
-			if (conformance != null) {
-				for (ConformanceRestComponent nextRest : conformance.getRest()) {
-					Collections.sort(nextRest.getResource(), new Comparator<ConformanceRestResourceComponent>() {
-						@Override
-						public int compare(ConformanceRestResourceComponent theO1, ConformanceRestResourceComponent theO2) {
-							DecimalType count1 = new DecimalType();
-							List<Extension> count1exts = theO1.getExtensionsByUrl(RESOURCE_COUNT_EXT_URL);
-							if (count1exts != null && count1exts.size() > 0) {
-								count1 = (DecimalType) count1exts.get(0).getValue();
-							}
-							DecimalType count2 = new DecimalType();
-							List<Extension> count2exts = theO2.getExtensionsByUrl(RESOURCE_COUNT_EXT_URL);
-							if (count2exts != null && count2exts.size() > 0) {
-								count2 = (DecimalType) count2exts.get(0).getValue();
-							}
-							int retVal = count2.compareTo(count1);
-							if (retVal == 0) {
-								retVal = theO1.getTypeElement().getValue().compareTo(theO2.getTypeElement().getValue());
-							}
-							return retVal;
-						}
-					});
-				}
-			}
 			for (CapabilityStatementRestComponent nextRest : capabilityStatement.getRest()) {
 				Collections.sort(nextRest.getResource(), new Comparator<CapabilityStatementRestResourceComponent>() {
 					@Override
@@ -550,11 +501,6 @@ public class BaseController {
 		}
 
 		theModel.put("requiredParamExtension", ExtensionConstants.PARAM_IS_REQUIRED);
-
-		if (conformance != null) {
-			theModel.put("conf", conformance);
-			return conformance;
-		}
 
 		theModel.put("conf", capabilityStatement);
 		return capabilityStatement;

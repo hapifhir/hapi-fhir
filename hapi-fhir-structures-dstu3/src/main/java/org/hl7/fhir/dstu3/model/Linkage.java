@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
 
 import java.util.*;
 
@@ -127,8 +127,10 @@ public class Linkage extends DomainResource {
         throw new IllegalArgumentException("Unknown LinkageType code '"+codeString+"'");
         }
         public Enumeration<LinkageType> fromType(Base code) throws FHIRException {
-          if (code == null || code.isEmpty())
+          if (code == null)
             return null;
+          if (code.isEmpty())
+            return new Enumeration<LinkageType>(this);
           String codeString = ((PrimitiveType) code).asStringValue();
           if (codeString == null || "".equals(codeString))
             return null;
@@ -275,35 +277,48 @@ public class Linkage extends DomainResource {
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case 3575610: // type
-          this.type = new LinkageTypeEnumFactory().fromType(value); // Enumeration<LinkageType>
-          break;
+          value = new LinkageTypeEnumFactory().fromType(castToCode(value));
+          this.type = (Enumeration) value; // Enumeration<LinkageType>
+          return value;
         case -341064690: // resource
           this.resource = castToReference(value); // Reference
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("type"))
-          this.type = new LinkageTypeEnumFactory().fromType(value); // Enumeration<LinkageType>
-        else if (name.equals("resource"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("type")) {
+          value = new LinkageTypeEnumFactory().fromType(castToCode(value));
+          this.type = (Enumeration) value; // Enumeration<LinkageType>
+        } else if (name.equals("resource")) {
           this.resource = castToReference(value); // Reference
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 3575610: throw new FHIRException("Cannot make property type as it is not a complex type"); // Enumeration<LinkageType>
-        case -341064690:  return getResource(); // Reference
+        case 3575610:  return getTypeElement();
+        case -341064690:  return getResource(); 
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3575610: /*type*/ return new String[] {"code"};
+        case -341064690: /*resource*/ return new String[] {"Reference"};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }
@@ -361,9 +376,16 @@ public class Linkage extends DomainResource {
   }
 
     /**
+     * Indicates whether the asserted set of linkages are considered to be "in effect".
+     */
+    @Child(name = "active", type = {BooleanType.class}, order=0, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="Whether this linkage assertion is active or not", formalDefinition="Indicates whether the asserted set of linkages are considered to be \"in effect\"." )
+    protected BooleanType active;
+
+    /**
      * Identifies the user or organization responsible for asserting the linkages and who establishes the context for evaluating the nature of each linkage.
      */
-    @Child(name = "author", type = {Practitioner.class, Organization.class}, order=0, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "author", type = {Practitioner.class, Organization.class}, order=1, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Who is responsible for linkages", formalDefinition="Identifies the user or organization responsible for asserting the linkages and who establishes the context for evaluating the nature of each linkage." )
     protected Reference author;
 
@@ -375,17 +397,62 @@ public class Linkage extends DomainResource {
     /**
      * Identifies one of the records that is considered to refer to the same real-world occurrence as well as how the items hould be evaluated within the collection of linked items.
      */
-    @Child(name = "item", type = {}, order=1, min=1, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "item", type = {}, order=2, min=1, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Item to be linked", formalDefinition="Identifies one of the records that is considered to refer to the same real-world occurrence as well as how the items hould be evaluated within the collection of linked items." )
     protected List<LinkageItemComponent> item;
 
-    private static final long serialVersionUID = 371266420L;
+    private static final long serialVersionUID = 25900306L;
 
   /**
    * Constructor
    */
     public Linkage() {
       super();
+    }
+
+    /**
+     * @return {@link #active} (Indicates whether the asserted set of linkages are considered to be "in effect".). This is the underlying object with id, value and extensions. The accessor "getActive" gives direct access to the value
+     */
+    public BooleanType getActiveElement() { 
+      if (this.active == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create Linkage.active");
+        else if (Configuration.doAutoCreate())
+          this.active = new BooleanType(); // bb
+      return this.active;
+    }
+
+    public boolean hasActiveElement() { 
+      return this.active != null && !this.active.isEmpty();
+    }
+
+    public boolean hasActive() { 
+      return this.active != null && !this.active.isEmpty();
+    }
+
+    /**
+     * @param value {@link #active} (Indicates whether the asserted set of linkages are considered to be "in effect".). This is the underlying object with id, value and extensions. The accessor "getActive" gives direct access to the value
+     */
+    public Linkage setActiveElement(BooleanType value) { 
+      this.active = value;
+      return this;
+    }
+
+    /**
+     * @return Indicates whether the asserted set of linkages are considered to be "in effect".
+     */
+    public boolean getActive() { 
+      return this.active == null || this.active.isEmpty() ? false : this.active.getValue();
+    }
+
+    /**
+     * @param value Indicates whether the asserted set of linkages are considered to be "in effect".
+     */
+    public Linkage setActive(boolean value) { 
+        if (this.active == null)
+          this.active = new BooleanType();
+        this.active.setValue(value);
+      return this;
     }
 
     /**
@@ -482,6 +549,7 @@ public class Linkage extends DomainResource {
 
       protected void listChildren(List<Property> childrenList) {
         super.listChildren(childrenList);
+        childrenList.add(new Property("active", "boolean", "Indicates whether the asserted set of linkages are considered to be \"in effect\".", 0, java.lang.Integer.MAX_VALUE, active));
         childrenList.add(new Property("author", "Reference(Practitioner|Organization)", "Identifies the user or organization responsible for asserting the linkages and who establishes the context for evaluating the nature of each linkage.", 0, java.lang.Integer.MAX_VALUE, author));
         childrenList.add(new Property("item", "", "Identifies one of the records that is considered to refer to the same real-world occurrence as well as how the items hould be evaluated within the collection of linked items.", 0, java.lang.Integer.MAX_VALUE, item));
       }
@@ -489,6 +557,7 @@ public class Linkage extends DomainResource {
       @Override
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
+        case -1422950650: /*active*/ return this.active == null ? new Base[0] : new Base[] {this.active}; // BooleanType
         case -1406328437: /*author*/ return this.author == null ? new Base[0] : new Base[] {this.author}; // Reference
         case 3242771: /*item*/ return this.item == null ? new Base[0] : this.item.toArray(new Base[this.item.size()]); // LinkageItemComponent
         default: return super.getProperty(hash, name, checkValid);
@@ -497,42 +566,63 @@ public class Linkage extends DomainResource {
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
+        case -1422950650: // active
+          this.active = castToBoolean(value); // BooleanType
+          return value;
         case -1406328437: // author
           this.author = castToReference(value); // Reference
-          break;
+          return value;
         case 3242771: // item
           this.getItem().add((LinkageItemComponent) value); // LinkageItemComponent
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("author"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("active")) {
+          this.active = castToBoolean(value); // BooleanType
+        } else if (name.equals("author")) {
           this.author = castToReference(value); // Reference
-        else if (name.equals("item"))
+        } else if (name.equals("item")) {
           this.getItem().add((LinkageItemComponent) value);
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case -1406328437:  return getAuthor(); // Reference
-        case 3242771:  return addItem(); // LinkageItemComponent
+        case -1422950650:  return getActiveElement();
+        case -1406328437:  return getAuthor(); 
+        case 3242771:  return addItem(); 
         default: return super.makeProperty(hash, name);
         }
 
       }
 
       @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -1422950650: /*active*/ return new String[] {"boolean"};
+        case -1406328437: /*author*/ return new String[] {"Reference"};
+        case 3242771: /*item*/ return new String[] {};
+        default: return super.getTypesForProperty(hash, name);
+        }
+
+      }
+
+      @Override
       public Base addChild(String name) throws FHIRException {
-        if (name.equals("author")) {
+        if (name.equals("active")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Linkage.active");
+        }
+        else if (name.equals("author")) {
           this.author = new Reference();
           return this.author;
         }
@@ -551,6 +641,7 @@ public class Linkage extends DomainResource {
       public Linkage copy() {
         Linkage dst = new Linkage();
         copyValues(dst);
+        dst.active = active == null ? null : active.copy();
         dst.author = author == null ? null : author.copy();
         if (item != null) {
           dst.item = new ArrayList<LinkageItemComponent>();
@@ -571,7 +662,8 @@ public class Linkage extends DomainResource {
         if (!(other instanceof Linkage))
           return false;
         Linkage o = (Linkage) other;
-        return compareDeep(author, o.author, true) && compareDeep(item, o.item, true);
+        return compareDeep(active, o.active, true) && compareDeep(author, o.author, true) && compareDeep(item, o.item, true)
+          ;
       }
 
       @Override
@@ -581,11 +673,11 @@ public class Linkage extends DomainResource {
         if (!(other instanceof Linkage))
           return false;
         Linkage o = (Linkage) other;
-        return true;
+        return compareValues(active, o.active, true);
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(author, item);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(active, author, item);
       }
 
   @Override

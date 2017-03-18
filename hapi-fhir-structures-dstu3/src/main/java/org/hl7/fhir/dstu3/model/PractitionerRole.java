@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
 
 import java.util.*;
 
@@ -175,8 +175,10 @@ public class PractitionerRole extends DomainResource {
         throw new IllegalArgumentException("Unknown DaysOfWeek code '"+codeString+"'");
         }
         public Enumeration<DaysOfWeek> fromType(Base code) throws FHIRException {
-          if (code == null || code.isEmpty())
+          if (code == null)
             return null;
+          if (code.isEmpty())
+            return new Enumeration<DaysOfWeek>(this);
           String codeString = ((PrimitiveType) code).asStringValue();
           if (codeString == null || "".equals(codeString))
             return null;
@@ -483,47 +485,62 @@ public class PractitionerRole extends DomainResource {
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case 68050338: // daysOfWeek
-          this.getDaysOfWeek().add(new DaysOfWeekEnumFactory().fromType(value)); // Enumeration<DaysOfWeek>
-          break;
+          value = new DaysOfWeekEnumFactory().fromType(castToCode(value));
+          this.getDaysOfWeek().add((Enumeration) value); // Enumeration<DaysOfWeek>
+          return value;
         case -1414913477: // allDay
           this.allDay = castToBoolean(value); // BooleanType
-          break;
+          return value;
         case -1039453818: // availableStartTime
           this.availableStartTime = castToTime(value); // TimeType
-          break;
+          return value;
         case 101151551: // availableEndTime
           this.availableEndTime = castToTime(value); // TimeType
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("daysOfWeek"))
-          this.getDaysOfWeek().add(new DaysOfWeekEnumFactory().fromType(value));
-        else if (name.equals("allDay"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("daysOfWeek")) {
+          value = new DaysOfWeekEnumFactory().fromType(castToCode(value));
+          this.getDaysOfWeek().add((Enumeration) value);
+        } else if (name.equals("allDay")) {
           this.allDay = castToBoolean(value); // BooleanType
-        else if (name.equals("availableStartTime"))
+        } else if (name.equals("availableStartTime")) {
           this.availableStartTime = castToTime(value); // TimeType
-        else if (name.equals("availableEndTime"))
+        } else if (name.equals("availableEndTime")) {
           this.availableEndTime = castToTime(value); // TimeType
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 68050338: throw new FHIRException("Cannot make property daysOfWeek as it is not a complex type"); // Enumeration<DaysOfWeek>
-        case -1414913477: throw new FHIRException("Cannot make property allDay as it is not a complex type"); // BooleanType
-        case -1039453818: throw new FHIRException("Cannot make property availableStartTime as it is not a complex type"); // TimeType
-        case 101151551: throw new FHIRException("Cannot make property availableEndTime as it is not a complex type"); // TimeType
+        case 68050338:  return addDaysOfWeekElement();
+        case -1414913477:  return getAllDayElement();
+        case -1039453818:  return getAvailableStartTimeElement();
+        case 101151551:  return getAvailableEndTimeElement();
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 68050338: /*daysOfWeek*/ return new String[] {"code"};
+        case -1414913477: /*allDay*/ return new String[] {"boolean"};
+        case -1039453818: /*availableStartTime*/ return new String[] {"time"};
+        case 101151551: /*availableEndTime*/ return new String[] {"time"};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }
@@ -713,35 +730,46 @@ public class PractitionerRole extends DomainResource {
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case -1724546052: // description
           this.description = castToString(value); // StringType
-          break;
+          return value;
         case -1320499647: // during
           this.during = castToPeriod(value); // Period
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("description"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("description")) {
           this.description = castToString(value); // StringType
-        else if (name.equals("during"))
+        } else if (name.equals("during")) {
           this.during = castToPeriod(value); // Period
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case -1724546052: throw new FHIRException("Cannot make property description as it is not a complex type"); // StringType
-        case -1320499647:  return getDuring(); // Period
+        case -1724546052:  return getDescriptionElement();
+        case -1320499647:  return getDuring(); 
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -1724546052: /*description*/ return new String[] {"string"};
+        case -1320499647: /*during*/ return new String[] {"Period"};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }
@@ -813,9 +841,16 @@ public class PractitionerRole extends DomainResource {
     protected BooleanType active;
 
     /**
+     * The period during which the person is authorized to act as a practitioner in these role(s) for the organization.
+     */
+    @Child(name = "period", type = {Period.class}, order=2, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="The period during which the practitioner is authorized to perform in these role(s)", formalDefinition="The period during which the person is authorized to act as a practitioner in these role(s) for the organization." )
+    protected Period period;
+
+    /**
      * Practitioner that is able to provide the defined services for the organation.
      */
-    @Child(name = "practitioner", type = {Practitioner.class}, order=2, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "practitioner", type = {Practitioner.class}, order=3, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Practitioner that is able to provide the defined services for the organation", formalDefinition="Practitioner that is able to provide the defined services for the organation." )
     protected Reference practitioner;
 
@@ -827,7 +862,7 @@ public class PractitionerRole extends DomainResource {
     /**
      * The organization where the Practitioner performs the roles associated.
      */
-    @Child(name = "organization", type = {Organization.class}, order=3, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "organization", type = {Organization.class}, order=4, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Organization where the roles are available", formalDefinition="The organization where the Practitioner performs the roles associated." )
     protected Reference organization;
 
@@ -839,7 +874,7 @@ public class PractitionerRole extends DomainResource {
     /**
      * Roles which this practitioner is authorized to perform for the organization.
      */
-    @Child(name = "code", type = {CodeableConcept.class}, order=4, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "code", type = {CodeableConcept.class}, order=5, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Roles which this practitioner may perform", formalDefinition="Roles which this practitioner is authorized to perform for the organization." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/practitioner-role")
     protected List<CodeableConcept> code;
@@ -847,7 +882,7 @@ public class PractitionerRole extends DomainResource {
     /**
      * Specific specialty of the practitioner.
      */
-    @Child(name = "specialty", type = {CodeableConcept.class}, order=5, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "specialty", type = {CodeableConcept.class}, order=6, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Specific specialty of the practitioner", formalDefinition="Specific specialty of the practitioner." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/c80-practice-codes")
     protected List<CodeableConcept> specialty;
@@ -855,7 +890,7 @@ public class PractitionerRole extends DomainResource {
     /**
      * The location(s) at which this practitioner provides care.
      */
-    @Child(name = "location", type = {Location.class}, order=6, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "location", type = {Location.class}, order=7, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="The location(s) at which this practitioner provides care", formalDefinition="The location(s) at which this practitioner provides care." )
     protected List<Reference> location;
     /**
@@ -867,7 +902,7 @@ public class PractitionerRole extends DomainResource {
     /**
      * The list of healthcare services that this worker provides for this role's Organization/Location(s).
      */
-    @Child(name = "healthcareService", type = {HealthcareService.class}, order=7, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "healthcareService", type = {HealthcareService.class}, order=8, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="The list of healthcare services that this worker provides for this role's Organization/Location(s)", formalDefinition="The list of healthcare services that this worker provides for this role's Organization/Location(s)." )
     protected List<Reference> healthcareService;
     /**
@@ -879,16 +914,9 @@ public class PractitionerRole extends DomainResource {
     /**
      * Contact details that are specific to the role/location/service.
      */
-    @Child(name = "telecom", type = {ContactPoint.class}, order=8, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "telecom", type = {ContactPoint.class}, order=9, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Contact details that are specific to the role/location/service", formalDefinition="Contact details that are specific to the role/location/service." )
     protected List<ContactPoint> telecom;
-
-    /**
-     * The period during which the person is authorized to act as a practitioner in these role(s) for the organization.
-     */
-    @Child(name = "period", type = {Period.class}, order=9, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="The period during which the practitioner is authorized to perform in these role(s)", formalDefinition="The period during which the person is authorized to act as a practitioner in these role(s) for the organization." )
-    protected Period period;
 
     /**
      * A collection of times that the Service Site is available.
@@ -923,7 +951,7 @@ public class PractitionerRole extends DomainResource {
     protected List<Endpoint> endpointTarget;
 
 
-    private static final long serialVersionUID = -1170829137L;
+    private static final long serialVersionUID = 423338051L;
 
   /**
    * Constructor
@@ -1027,6 +1055,30 @@ public class PractitionerRole extends DomainResource {
         if (this.active == null)
           this.active = new BooleanType();
         this.active.setValue(value);
+      return this;
+    }
+
+    /**
+     * @return {@link #period} (The period during which the person is authorized to act as a practitioner in these role(s) for the organization.)
+     */
+    public Period getPeriod() { 
+      if (this.period == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create PractitionerRole.period");
+        else if (Configuration.doAutoCreate())
+          this.period = new Period(); // cc
+      return this.period;
+    }
+
+    public boolean hasPeriod() { 
+      return this.period != null && !this.period.isEmpty();
+    }
+
+    /**
+     * @param value {@link #period} (The period during which the person is authorized to act as a practitioner in these role(s) for the organization.)
+     */
+    public PractitionerRole setPeriod(Period value) { 
+      this.period = value;
       return this;
     }
 
@@ -1428,30 +1480,6 @@ public class PractitionerRole extends DomainResource {
     }
 
     /**
-     * @return {@link #period} (The period during which the person is authorized to act as a practitioner in these role(s) for the organization.)
-     */
-    public Period getPeriod() { 
-      if (this.period == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create PractitionerRole.period");
-        else if (Configuration.doAutoCreate())
-          this.period = new Period(); // cc
-      return this.period;
-    }
-
-    public boolean hasPeriod() { 
-      return this.period != null && !this.period.isEmpty();
-    }
-
-    /**
-     * @param value {@link #period} (The period during which the person is authorized to act as a practitioner in these role(s) for the organization.)
-     */
-    public PractitionerRole setPeriod(Period value) { 
-      this.period = value;
-      return this;
-    }
-
-    /**
      * @return {@link #availableTime} (A collection of times that the Service Site is available.)
      */
     public List<PractitionerRoleAvailableTimeComponent> getAvailableTime() { 
@@ -1685,6 +1713,7 @@ public class PractitionerRole extends DomainResource {
         super.listChildren(childrenList);
         childrenList.add(new Property("identifier", "Identifier", "Business Identifiers that are specific to a role/location.", 0, java.lang.Integer.MAX_VALUE, identifier));
         childrenList.add(new Property("active", "boolean", "Whether this practitioner's record is in active use.", 0, java.lang.Integer.MAX_VALUE, active));
+        childrenList.add(new Property("period", "Period", "The period during which the person is authorized to act as a practitioner in these role(s) for the organization.", 0, java.lang.Integer.MAX_VALUE, period));
         childrenList.add(new Property("practitioner", "Reference(Practitioner)", "Practitioner that is able to provide the defined services for the organation.", 0, java.lang.Integer.MAX_VALUE, practitioner));
         childrenList.add(new Property("organization", "Reference(Organization)", "The organization where the Practitioner performs the roles associated.", 0, java.lang.Integer.MAX_VALUE, organization));
         childrenList.add(new Property("code", "CodeableConcept", "Roles which this practitioner is authorized to perform for the organization.", 0, java.lang.Integer.MAX_VALUE, code));
@@ -1692,7 +1721,6 @@ public class PractitionerRole extends DomainResource {
         childrenList.add(new Property("location", "Reference(Location)", "The location(s) at which this practitioner provides care.", 0, java.lang.Integer.MAX_VALUE, location));
         childrenList.add(new Property("healthcareService", "Reference(HealthcareService)", "The list of healthcare services that this worker provides for this role's Organization/Location(s).", 0, java.lang.Integer.MAX_VALUE, healthcareService));
         childrenList.add(new Property("telecom", "ContactPoint", "Contact details that are specific to the role/location/service.", 0, java.lang.Integer.MAX_VALUE, telecom));
-        childrenList.add(new Property("period", "Period", "The period during which the person is authorized to act as a practitioner in these role(s) for the organization.", 0, java.lang.Integer.MAX_VALUE, period));
         childrenList.add(new Property("availableTime", "", "A collection of times that the Service Site is available.", 0, java.lang.Integer.MAX_VALUE, availableTime));
         childrenList.add(new Property("notAvailable", "", "The HealthcareService is not available during this period of time due to the provided reason.", 0, java.lang.Integer.MAX_VALUE, notAvailable));
         childrenList.add(new Property("availabilityExceptions", "string", "A description of site availability exceptions, e.g. public holiday availability. Succinctly describing all possible exceptions to normal site availability as details in the available Times and not available Times.", 0, java.lang.Integer.MAX_VALUE, availabilityExceptions));
@@ -1704,6 +1732,7 @@ public class PractitionerRole extends DomainResource {
         switch (hash) {
         case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : this.identifier.toArray(new Base[this.identifier.size()]); // Identifier
         case -1422950650: /*active*/ return this.active == null ? new Base[0] : new Base[] {this.active}; // BooleanType
+        case -991726143: /*period*/ return this.period == null ? new Base[0] : new Base[] {this.period}; // Period
         case 574573338: /*practitioner*/ return this.practitioner == null ? new Base[0] : new Base[] {this.practitioner}; // Reference
         case 1178922291: /*organization*/ return this.organization == null ? new Base[0] : new Base[] {this.organization}; // Reference
         case 3059181: /*code*/ return this.code == null ? new Base[0] : this.code.toArray(new Base[this.code.size()]); // CodeableConcept
@@ -1711,7 +1740,6 @@ public class PractitionerRole extends DomainResource {
         case 1901043637: /*location*/ return this.location == null ? new Base[0] : this.location.toArray(new Base[this.location.size()]); // Reference
         case 1289661064: /*healthcareService*/ return this.healthcareService == null ? new Base[0] : this.healthcareService.toArray(new Base[this.healthcareService.size()]); // Reference
         case -1429363305: /*telecom*/ return this.telecom == null ? new Base[0] : this.telecom.toArray(new Base[this.telecom.size()]); // ContactPoint
-        case -991726143: /*period*/ return this.period == null ? new Base[0] : new Base[] {this.period}; // Period
         case 1873069366: /*availableTime*/ return this.availableTime == null ? new Base[0] : this.availableTime.toArray(new Base[this.availableTime.size()]); // PractitionerRoleAvailableTimeComponent
         case -629572298: /*notAvailable*/ return this.notAvailable == null ? new Base[0] : this.notAvailable.toArray(new Base[this.notAvailable.size()]); // PractitionerRoleNotAvailableComponent
         case -1149143617: /*availabilityExceptions*/ return this.availabilityExceptions == null ? new Base[0] : new Base[] {this.availabilityExceptions}; // StringType
@@ -1722,107 +1750,130 @@ public class PractitionerRole extends DomainResource {
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case -1618432855: // identifier
           this.getIdentifier().add(castToIdentifier(value)); // Identifier
-          break;
+          return value;
         case -1422950650: // active
           this.active = castToBoolean(value); // BooleanType
-          break;
-        case 574573338: // practitioner
-          this.practitioner = castToReference(value); // Reference
-          break;
-        case 1178922291: // organization
-          this.organization = castToReference(value); // Reference
-          break;
-        case 3059181: // code
-          this.getCode().add(castToCodeableConcept(value)); // CodeableConcept
-          break;
-        case -1694759682: // specialty
-          this.getSpecialty().add(castToCodeableConcept(value)); // CodeableConcept
-          break;
-        case 1901043637: // location
-          this.getLocation().add(castToReference(value)); // Reference
-          break;
-        case 1289661064: // healthcareService
-          this.getHealthcareService().add(castToReference(value)); // Reference
-          break;
-        case -1429363305: // telecom
-          this.getTelecom().add(castToContactPoint(value)); // ContactPoint
-          break;
+          return value;
         case -991726143: // period
           this.period = castToPeriod(value); // Period
-          break;
+          return value;
+        case 574573338: // practitioner
+          this.practitioner = castToReference(value); // Reference
+          return value;
+        case 1178922291: // organization
+          this.organization = castToReference(value); // Reference
+          return value;
+        case 3059181: // code
+          this.getCode().add(castToCodeableConcept(value)); // CodeableConcept
+          return value;
+        case -1694759682: // specialty
+          this.getSpecialty().add(castToCodeableConcept(value)); // CodeableConcept
+          return value;
+        case 1901043637: // location
+          this.getLocation().add(castToReference(value)); // Reference
+          return value;
+        case 1289661064: // healthcareService
+          this.getHealthcareService().add(castToReference(value)); // Reference
+          return value;
+        case -1429363305: // telecom
+          this.getTelecom().add(castToContactPoint(value)); // ContactPoint
+          return value;
         case 1873069366: // availableTime
           this.getAvailableTime().add((PractitionerRoleAvailableTimeComponent) value); // PractitionerRoleAvailableTimeComponent
-          break;
+          return value;
         case -629572298: // notAvailable
           this.getNotAvailable().add((PractitionerRoleNotAvailableComponent) value); // PractitionerRoleNotAvailableComponent
-          break;
+          return value;
         case -1149143617: // availabilityExceptions
           this.availabilityExceptions = castToString(value); // StringType
-          break;
+          return value;
         case 1741102485: // endpoint
           this.getEndpoint().add(castToReference(value)); // Reference
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("identifier"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("identifier")) {
           this.getIdentifier().add(castToIdentifier(value));
-        else if (name.equals("active"))
+        } else if (name.equals("active")) {
           this.active = castToBoolean(value); // BooleanType
-        else if (name.equals("practitioner"))
-          this.practitioner = castToReference(value); // Reference
-        else if (name.equals("organization"))
-          this.organization = castToReference(value); // Reference
-        else if (name.equals("code"))
-          this.getCode().add(castToCodeableConcept(value));
-        else if (name.equals("specialty"))
-          this.getSpecialty().add(castToCodeableConcept(value));
-        else if (name.equals("location"))
-          this.getLocation().add(castToReference(value));
-        else if (name.equals("healthcareService"))
-          this.getHealthcareService().add(castToReference(value));
-        else if (name.equals("telecom"))
-          this.getTelecom().add(castToContactPoint(value));
-        else if (name.equals("period"))
+        } else if (name.equals("period")) {
           this.period = castToPeriod(value); // Period
-        else if (name.equals("availableTime"))
+        } else if (name.equals("practitioner")) {
+          this.practitioner = castToReference(value); // Reference
+        } else if (name.equals("organization")) {
+          this.organization = castToReference(value); // Reference
+        } else if (name.equals("code")) {
+          this.getCode().add(castToCodeableConcept(value));
+        } else if (name.equals("specialty")) {
+          this.getSpecialty().add(castToCodeableConcept(value));
+        } else if (name.equals("location")) {
+          this.getLocation().add(castToReference(value));
+        } else if (name.equals("healthcareService")) {
+          this.getHealthcareService().add(castToReference(value));
+        } else if (name.equals("telecom")) {
+          this.getTelecom().add(castToContactPoint(value));
+        } else if (name.equals("availableTime")) {
           this.getAvailableTime().add((PractitionerRoleAvailableTimeComponent) value);
-        else if (name.equals("notAvailable"))
+        } else if (name.equals("notAvailable")) {
           this.getNotAvailable().add((PractitionerRoleNotAvailableComponent) value);
-        else if (name.equals("availabilityExceptions"))
+        } else if (name.equals("availabilityExceptions")) {
           this.availabilityExceptions = castToString(value); // StringType
-        else if (name.equals("endpoint"))
+        } else if (name.equals("endpoint")) {
           this.getEndpoint().add(castToReference(value));
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case -1618432855:  return addIdentifier(); // Identifier
-        case -1422950650: throw new FHIRException("Cannot make property active as it is not a complex type"); // BooleanType
-        case 574573338:  return getPractitioner(); // Reference
-        case 1178922291:  return getOrganization(); // Reference
-        case 3059181:  return addCode(); // CodeableConcept
-        case -1694759682:  return addSpecialty(); // CodeableConcept
-        case 1901043637:  return addLocation(); // Reference
-        case 1289661064:  return addHealthcareService(); // Reference
-        case -1429363305:  return addTelecom(); // ContactPoint
-        case -991726143:  return getPeriod(); // Period
-        case 1873069366:  return addAvailableTime(); // PractitionerRoleAvailableTimeComponent
-        case -629572298:  return addNotAvailable(); // PractitionerRoleNotAvailableComponent
-        case -1149143617: throw new FHIRException("Cannot make property availabilityExceptions as it is not a complex type"); // StringType
-        case 1741102485:  return addEndpoint(); // Reference
+        case -1618432855:  return addIdentifier(); 
+        case -1422950650:  return getActiveElement();
+        case -991726143:  return getPeriod(); 
+        case 574573338:  return getPractitioner(); 
+        case 1178922291:  return getOrganization(); 
+        case 3059181:  return addCode(); 
+        case -1694759682:  return addSpecialty(); 
+        case 1901043637:  return addLocation(); 
+        case 1289661064:  return addHealthcareService(); 
+        case -1429363305:  return addTelecom(); 
+        case 1873069366:  return addAvailableTime(); 
+        case -629572298:  return addNotAvailable(); 
+        case -1149143617:  return getAvailabilityExceptionsElement();
+        case 1741102485:  return addEndpoint(); 
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -1618432855: /*identifier*/ return new String[] {"Identifier"};
+        case -1422950650: /*active*/ return new String[] {"boolean"};
+        case -991726143: /*period*/ return new String[] {"Period"};
+        case 574573338: /*practitioner*/ return new String[] {"Reference"};
+        case 1178922291: /*organization*/ return new String[] {"Reference"};
+        case 3059181: /*code*/ return new String[] {"CodeableConcept"};
+        case -1694759682: /*specialty*/ return new String[] {"CodeableConcept"};
+        case 1901043637: /*location*/ return new String[] {"Reference"};
+        case 1289661064: /*healthcareService*/ return new String[] {"Reference"};
+        case -1429363305: /*telecom*/ return new String[] {"ContactPoint"};
+        case 1873069366: /*availableTime*/ return new String[] {};
+        case -629572298: /*notAvailable*/ return new String[] {};
+        case -1149143617: /*availabilityExceptions*/ return new String[] {"string"};
+        case 1741102485: /*endpoint*/ return new String[] {"Reference"};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }
@@ -1834,6 +1885,10 @@ public class PractitionerRole extends DomainResource {
         }
         else if (name.equals("active")) {
           throw new FHIRException("Cannot call addChild on a primitive type PractitionerRole.active");
+        }
+        else if (name.equals("period")) {
+          this.period = new Period();
+          return this.period;
         }
         else if (name.equals("practitioner")) {
           this.practitioner = new Reference();
@@ -1857,10 +1912,6 @@ public class PractitionerRole extends DomainResource {
         }
         else if (name.equals("telecom")) {
           return addTelecom();
-        }
-        else if (name.equals("period")) {
-          this.period = new Period();
-          return this.period;
         }
         else if (name.equals("availableTime")) {
           return addAvailableTime();
@@ -1892,6 +1943,7 @@ public class PractitionerRole extends DomainResource {
             dst.identifier.add(i.copy());
         };
         dst.active = active == null ? null : active.copy();
+        dst.period = period == null ? null : period.copy();
         dst.practitioner = practitioner == null ? null : practitioner.copy();
         dst.organization = organization == null ? null : organization.copy();
         if (code != null) {
@@ -1919,7 +1971,6 @@ public class PractitionerRole extends DomainResource {
           for (ContactPoint i : telecom)
             dst.telecom.add(i.copy());
         };
-        dst.period = period == null ? null : period.copy();
         if (availableTime != null) {
           dst.availableTime = new ArrayList<PractitionerRoleAvailableTimeComponent>();
           for (PractitionerRoleAvailableTimeComponent i : availableTime)
@@ -1950,12 +2001,13 @@ public class PractitionerRole extends DomainResource {
         if (!(other instanceof PractitionerRole))
           return false;
         PractitionerRole o = (PractitionerRole) other;
-        return compareDeep(identifier, o.identifier, true) && compareDeep(active, o.active, true) && compareDeep(practitioner, o.practitioner, true)
-           && compareDeep(organization, o.organization, true) && compareDeep(code, o.code, true) && compareDeep(specialty, o.specialty, true)
-           && compareDeep(location, o.location, true) && compareDeep(healthcareService, o.healthcareService, true)
-           && compareDeep(telecom, o.telecom, true) && compareDeep(period, o.period, true) && compareDeep(availableTime, o.availableTime, true)
-           && compareDeep(notAvailable, o.notAvailable, true) && compareDeep(availabilityExceptions, o.availabilityExceptions, true)
-           && compareDeep(endpoint, o.endpoint, true);
+        return compareDeep(identifier, o.identifier, true) && compareDeep(active, o.active, true) && compareDeep(period, o.period, true)
+           && compareDeep(practitioner, o.practitioner, true) && compareDeep(organization, o.organization, true)
+           && compareDeep(code, o.code, true) && compareDeep(specialty, o.specialty, true) && compareDeep(location, o.location, true)
+           && compareDeep(healthcareService, o.healthcareService, true) && compareDeep(telecom, o.telecom, true)
+           && compareDeep(availableTime, o.availableTime, true) && compareDeep(notAvailable, o.notAvailable, true)
+           && compareDeep(availabilityExceptions, o.availabilityExceptions, true) && compareDeep(endpoint, o.endpoint, true)
+          ;
       }
 
       @Override
@@ -1970,8 +2022,8 @@ public class PractitionerRole extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, active, practitioner
-          , organization, code, specialty, location, healthcareService, telecom, period
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, active, period
+          , practitioner, organization, code, specialty, location, healthcareService, telecom
           , availableTime, notAvailable, availabilityExceptions, endpoint);
       }
 

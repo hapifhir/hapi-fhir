@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
 
 
 import org.hl7.fhir.dstu3.model.EnumFactory;
@@ -39,26 +39,38 @@ public class SupplyrequestStatusEnumFactory implements EnumFactory<Supplyrequest
   public SupplyrequestStatus fromCode(String codeString) throws IllegalArgumentException {
     if (codeString == null || "".equals(codeString))
       return null;
-    if ("requested".equals(codeString))
-      return SupplyrequestStatus.REQUESTED;
-    if ("completed".equals(codeString))
-      return SupplyrequestStatus.COMPLETED;
-    if ("failed".equals(codeString))
-      return SupplyrequestStatus.FAILED;
+    if ("draft".equals(codeString))
+      return SupplyrequestStatus.DRAFT;
+    if ("active".equals(codeString))
+      return SupplyrequestStatus.ACTIVE;
+    if ("suspended".equals(codeString))
+      return SupplyrequestStatus.SUSPENDED;
     if ("cancelled".equals(codeString))
       return SupplyrequestStatus.CANCELLED;
+    if ("completed".equals(codeString))
+      return SupplyrequestStatus.COMPLETED;
+    if ("entered-in-error".equals(codeString))
+      return SupplyrequestStatus.ENTEREDINERROR;
+    if ("unknown".equals(codeString))
+      return SupplyrequestStatus.UNKNOWN;
     throw new IllegalArgumentException("Unknown SupplyrequestStatus code '"+codeString+"'");
   }
 
   public String toCode(SupplyrequestStatus code) {
-    if (code == SupplyrequestStatus.REQUESTED)
-      return "requested";
-    if (code == SupplyrequestStatus.COMPLETED)
-      return "completed";
-    if (code == SupplyrequestStatus.FAILED)
-      return "failed";
+    if (code == SupplyrequestStatus.DRAFT)
+      return "draft";
+    if (code == SupplyrequestStatus.ACTIVE)
+      return "active";
+    if (code == SupplyrequestStatus.SUSPENDED)
+      return "suspended";
     if (code == SupplyrequestStatus.CANCELLED)
       return "cancelled";
+    if (code == SupplyrequestStatus.COMPLETED)
+      return "completed";
+    if (code == SupplyrequestStatus.ENTEREDINERROR)
+      return "entered-in-error";
+    if (code == SupplyrequestStatus.UNKNOWN)
+      return "unknown";
     return "?";
   }
 

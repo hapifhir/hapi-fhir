@@ -3,7 +3,6 @@ package ca.uhn.fhir.cli;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.Collections;
 import java.util.Comparator;
 
@@ -13,7 +12,7 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
-import org.hl7.fhir.dstu3.model.Conformance;
+import org.hl7.fhir.dstu3.model.CapabilityStatement;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
@@ -25,9 +24,7 @@ import ca.uhn.fhir.model.dstu2.resource.Bundle;
 import ca.uhn.fhir.model.dstu2.resource.Bundle.Entry;
 import ca.uhn.fhir.model.dstu2.resource.StructureDefinition;
 import ca.uhn.fhir.model.dstu2.resource.ValueSet;
-import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.client.IGenericClient;
-import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 
 public class ValidationDataUploader extends BaseCommand {
@@ -295,7 +292,7 @@ public class ValidationDataUploader extends BaseCommand {
 		for (BundleEntryComponent i : bundle.getEntry()) {
 			org.hl7.fhir.dstu3.model.Resource next = i.getResource();
 			next.setId(next.getIdElement().toUnqualifiedVersionless());
-			if (next instanceof Conformance) {
+			if (next instanceof CapabilityStatement) {
 				continue;
 			}
 	

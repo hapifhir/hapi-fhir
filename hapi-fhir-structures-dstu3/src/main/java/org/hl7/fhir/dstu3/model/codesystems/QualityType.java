@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -55,19 +55,19 @@ public enum QualityType {
         public static QualityType fromCode(String codeString) throws FHIRException {
             if (codeString == null || "".equals(codeString))
                 return null;
-        if ("INDEL".equals(codeString))
+        if ("indel".equals(codeString))
           return INDEL;
-        if ("SNP".equals(codeString))
+        if ("snp".equals(codeString))
           return SNP;
-        if ("UNKNOWN".equals(codeString))
+        if ("unknown".equals(codeString))
           return UNKNOWN;
         throw new FHIRException("Unknown QualityType code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
-            case INDEL: return "INDEL";
-            case SNP: return "SNP";
-            case UNKNOWN: return "UNKNOWN";
+            case INDEL: return "indel";
+            case SNP: return "snp";
+            case UNKNOWN: return "unknown";
             default: return "?";
           }
         }

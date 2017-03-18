@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,13 +37,13 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum ContractTermType {
 
         /**
-         * Oral Health insurance terms and conditions.
+         * Based on specialized statutes that deal with particular subjects.
          */
-        ORALHEALTH, 
+        STATUTORY, 
         /**
-         * Vision insuracne terms and conditions.
+         * Execution of the term in the contract is conditional on the execution of other actions.
          */
-        VISION, 
+        SUBJECTTO, 
         /**
          * added to help the parsers
          */
@@ -51,16 +51,16 @@ public enum ContractTermType {
         public static ContractTermType fromCode(String codeString) throws FHIRException {
             if (codeString == null || "".equals(codeString))
                 return null;
-        if ("oralhealth".equals(codeString))
-          return ORALHEALTH;
-        if ("vision".equals(codeString))
-          return VISION;
+        if ("statutory".equals(codeString))
+          return STATUTORY;
+        if ("subject-to".equals(codeString))
+          return SUBJECTTO;
         throw new FHIRException("Unknown ContractTermType code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
-            case ORALHEALTH: return "oralhealth";
-            case VISION: return "vision";
+            case STATUTORY: return "statutory";
+            case SUBJECTTO: return "subject-to";
             default: return "?";
           }
         }
@@ -69,15 +69,15 @@ public enum ContractTermType {
         }
         public String getDefinition() {
           switch (this) {
-            case ORALHEALTH: return "Oral Health insurance terms and conditions.";
-            case VISION: return "Vision insuracne terms and conditions.";
+            case STATUTORY: return "Based on specialized statutes that deal with particular subjects.";
+            case SUBJECTTO: return "Execution of the term in the contract is conditional on the execution of other actions.";
             default: return "?";
           }
         }
         public String getDisplay() {
           switch (this) {
-            case ORALHEALTH: return "OralHealth";
-            case VISION: return "Vision";
+            case STATUTORY: return "Statutory";
+            case SUBJECTTO: return "Subject To";
             default: return "?";
           }
     }

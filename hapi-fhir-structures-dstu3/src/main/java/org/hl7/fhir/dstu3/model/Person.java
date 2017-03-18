@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
 
 import java.util.*;
 
@@ -140,8 +140,10 @@ public class Person extends DomainResource {
         throw new IllegalArgumentException("Unknown IdentityAssuranceLevel code '"+codeString+"'");
         }
         public Enumeration<IdentityAssuranceLevel> fromType(Base code) throws FHIRException {
-          if (code == null || code.isEmpty())
+          if (code == null)
             return null;
+          if (code.isEmpty())
+            return new Enumeration<IdentityAssuranceLevel>(this);
           String codeString = ((PrimitiveType) code).asStringValue();
           if (codeString == null || "".equals(codeString))
             return null;
@@ -315,35 +317,48 @@ public class Person extends DomainResource {
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case -880905839: // target
           this.target = castToReference(value); // Reference
-          break;
+          return value;
         case 1771900717: // assurance
-          this.assurance = new IdentityAssuranceLevelEnumFactory().fromType(value); // Enumeration<IdentityAssuranceLevel>
-          break;
-        default: super.setProperty(hash, name, value);
+          value = new IdentityAssuranceLevelEnumFactory().fromType(castToCode(value));
+          this.assurance = (Enumeration) value; // Enumeration<IdentityAssuranceLevel>
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("target"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("target")) {
           this.target = castToReference(value); // Reference
-        else if (name.equals("assurance"))
-          this.assurance = new IdentityAssuranceLevelEnumFactory().fromType(value); // Enumeration<IdentityAssuranceLevel>
-        else
-          super.setProperty(name, value);
+        } else if (name.equals("assurance")) {
+          value = new IdentityAssuranceLevelEnumFactory().fromType(castToCode(value));
+          this.assurance = (Enumeration) value; // Enumeration<IdentityAssuranceLevel>
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case -880905839:  return getTarget(); // Reference
-        case 1771900717: throw new FHIRException("Cannot make property assurance as it is not a complex type"); // Enumeration<IdentityAssuranceLevel>
+        case -880905839:  return getTarget(); 
+        case 1771900717:  return getAssuranceElement();
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -880905839: /*target*/ return new String[] {"Reference"};
+        case 1771900717: /*assurance*/ return new String[] {"code"};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }
@@ -994,83 +1009,104 @@ public class Person extends DomainResource {
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case -1618432855: // identifier
           this.getIdentifier().add(castToIdentifier(value)); // Identifier
-          break;
+          return value;
         case 3373707: // name
           this.getName().add(castToHumanName(value)); // HumanName
-          break;
+          return value;
         case -1429363305: // telecom
           this.getTelecom().add(castToContactPoint(value)); // ContactPoint
-          break;
+          return value;
         case -1249512767: // gender
-          this.gender = new AdministrativeGenderEnumFactory().fromType(value); // Enumeration<AdministrativeGender>
-          break;
+          value = new AdministrativeGenderEnumFactory().fromType(castToCode(value));
+          this.gender = (Enumeration) value; // Enumeration<AdministrativeGender>
+          return value;
         case -1210031859: // birthDate
           this.birthDate = castToDate(value); // DateType
-          break;
+          return value;
         case -1147692044: // address
           this.getAddress().add(castToAddress(value)); // Address
-          break;
+          return value;
         case 106642994: // photo
           this.photo = castToAttachment(value); // Attachment
-          break;
+          return value;
         case -2058947787: // managingOrganization
           this.managingOrganization = castToReference(value); // Reference
-          break;
+          return value;
         case -1422950650: // active
           this.active = castToBoolean(value); // BooleanType
-          break;
+          return value;
         case 3321850: // link
           this.getLink().add((PersonLinkComponent) value); // PersonLinkComponent
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("identifier"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("identifier")) {
           this.getIdentifier().add(castToIdentifier(value));
-        else if (name.equals("name"))
+        } else if (name.equals("name")) {
           this.getName().add(castToHumanName(value));
-        else if (name.equals("telecom"))
+        } else if (name.equals("telecom")) {
           this.getTelecom().add(castToContactPoint(value));
-        else if (name.equals("gender"))
-          this.gender = new AdministrativeGenderEnumFactory().fromType(value); // Enumeration<AdministrativeGender>
-        else if (name.equals("birthDate"))
+        } else if (name.equals("gender")) {
+          value = new AdministrativeGenderEnumFactory().fromType(castToCode(value));
+          this.gender = (Enumeration) value; // Enumeration<AdministrativeGender>
+        } else if (name.equals("birthDate")) {
           this.birthDate = castToDate(value); // DateType
-        else if (name.equals("address"))
+        } else if (name.equals("address")) {
           this.getAddress().add(castToAddress(value));
-        else if (name.equals("photo"))
+        } else if (name.equals("photo")) {
           this.photo = castToAttachment(value); // Attachment
-        else if (name.equals("managingOrganization"))
+        } else if (name.equals("managingOrganization")) {
           this.managingOrganization = castToReference(value); // Reference
-        else if (name.equals("active"))
+        } else if (name.equals("active")) {
           this.active = castToBoolean(value); // BooleanType
-        else if (name.equals("link"))
+        } else if (name.equals("link")) {
           this.getLink().add((PersonLinkComponent) value);
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case -1618432855:  return addIdentifier(); // Identifier
-        case 3373707:  return addName(); // HumanName
-        case -1429363305:  return addTelecom(); // ContactPoint
-        case -1249512767: throw new FHIRException("Cannot make property gender as it is not a complex type"); // Enumeration<AdministrativeGender>
-        case -1210031859: throw new FHIRException("Cannot make property birthDate as it is not a complex type"); // DateType
-        case -1147692044:  return addAddress(); // Address
-        case 106642994:  return getPhoto(); // Attachment
-        case -2058947787:  return getManagingOrganization(); // Reference
-        case -1422950650: throw new FHIRException("Cannot make property active as it is not a complex type"); // BooleanType
-        case 3321850:  return addLink(); // PersonLinkComponent
+        case -1618432855:  return addIdentifier(); 
+        case 3373707:  return addName(); 
+        case -1429363305:  return addTelecom(); 
+        case -1249512767:  return getGenderElement();
+        case -1210031859:  return getBirthDateElement();
+        case -1147692044:  return addAddress(); 
+        case 106642994:  return getPhoto(); 
+        case -2058947787:  return getManagingOrganization(); 
+        case -1422950650:  return getActiveElement();
+        case 3321850:  return addLink(); 
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -1618432855: /*identifier*/ return new String[] {"Identifier"};
+        case 3373707: /*name*/ return new String[] {"HumanName"};
+        case -1429363305: /*telecom*/ return new String[] {"ContactPoint"};
+        case -1249512767: /*gender*/ return new String[] {"code"};
+        case -1210031859: /*birthDate*/ return new String[] {"date"};
+        case -1147692044: /*address*/ return new String[] {"Address"};
+        case 106642994: /*photo*/ return new String[] {"Attachment"};
+        case -2058947787: /*managingOrganization*/ return new String[] {"Reference"};
+        case -1422950650: /*active*/ return new String[] {"boolean"};
+        case 3321850: /*link*/ return new String[] {};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }

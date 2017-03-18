@@ -29,12 +29,13 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
 
 import java.util.*;
 
 import java.math.*;
 import org.hl7.fhir.utilities.Utilities;
+import org.hl7.fhir.dstu3.model.Enumerations.*;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.api.annotation.Child;
@@ -51,21 +52,65 @@ public class Contract extends DomainResource {
 
     public enum ContractStatus {
         /**
-         * The instance is currently in-force.
+         * Contract is augmented with additional information to correct errors in a predecessor or to updated values in a predecessor. Usage: Contract altered within effective time. Precedence Order = 9. Comparable FHIR and v.3 status codes: revised; replaced.
          */
-        ACTIVE, 
+        AMENDED, 
         /**
-         * The instance is withdrawn, rescinded or reversed.
+         * Contract is augmented with additional information that was missing from a predecessor Contract. Usage: Contract altered within effective time. Precedence Order = 9. Comparable FHIR and v.3 status codes: updated, replaced.
+         */
+        APPENDED, 
+        /**
+         * Contract is terminated due to failure of the Grantor and/or the Grantee to fulfil one or more contract provisions. Usage: Abnormal contract termination. Precedence Order = 10. Comparable FHIR and v.3 status codes: stopped; failed; aborted.
          */
         CANCELLED, 
         /**
-         * A new instance the contents of which is not complete.
+         * Contract is pended to rectify failure of the Grantor or the Grantee to fulfil contract provision(s). E.g., Grantee complaint about Grantor's failure to comply with contract provisions. Usage: Contract pended. Precedence Order = 7.Comparable FHIR and v.3 status codes: on hold; pended; suspended.
          */
-        DRAFT, 
+        DISPUTED, 
         /**
-         * The instance was entered in error.
+         * Contract was created in error. No Precedence Order.  Status may be applied to a Contract with any status.
          */
         ENTEREDINERROR, 
+        /**
+         * Contract execution pending; may be executed when either the Grantor or the Grantee accepts the contract provisions by signing. I.e., where either the Grantor or the Grantee has signed, but not both. E.g., when an insurance applicant signs the insurers application, which references the policy. Usage: Optional first step of contract execution activity.  May be skipped and contracting activity moves directly to executed state. Precedence Order = 3. Comparable FHIR and v.3 status codes: draft; preliminary; planned; intended; active.
+         */
+        EXECUTABLE, 
+        /**
+         * Contract is activated for period stipulated when both the Grantor and Grantee have signed it. Usage: Required state for normal completion of contracting activity.  Precedence Order = 6. Comparable FHIR and v.3 status codes: accepted; completed.
+         */
+        EXECUTED, 
+        /**
+         * Contract execution is suspended while either or both the Grantor and Grantee propose and consider new or revised contract provisions. I.e., where the party which has not signed proposes changes to the terms.  E .g., a life insurer declines to agree to the signed application because the life insurer has evidence that the applicant, who asserted to being younger or a non-smoker to get a lower premium rate - but offers instead to agree to a higher premium based on the applicants actual age or smoking status. Usage: Optional contract activity between executable and executed state. Precedence Order = 4. Comparable FHIR and v.3 status codes: in progress; review; held.
+         */
+        NEGOTIABLE, 
+        /**
+         * Contract is a proposal by either the Grantor or the Grantee. Aka - A Contract hard copy or electronic 'template','form' or 'application'. E.g., health insurance application; consent directive form. Usage: Beginning of contract negotiation, which may have been completed as a precondition because used for 0..* contracts. Precedence Order = 2. Comparable FHIR and v.3 status codes: requested; new.
+         */
+        OFFERED, 
+        /**
+         * Contract template is available as the basis for an application or offer by the Grantor or Grantee. E.g., health insurance policy; consent directive policy.  Usage: Required initial contract activity, which may have been completed as a precondition because used for 0..* contracts. Precedence Order = 1. Comparable FHIR and v.3 status codes: proposed; intended.
+         */
+        POLICY, 
+        /**
+         *  Execution of the Contract is not completed because either or both the Grantor and Grantee decline to accept some or all of the contract provisions. Usage: Optional contract activity between executable and abnormal termination. Precedence Order = 5. Comparable FHIR and v.3 status codes:  stopped; cancelled.
+         */
+        REJECTED, 
+        /**
+         * Beginning of a successor Contract at the termination of predecessor Contract lifecycle. Usage: Follows termination of a preceding Contract that has reached its expiry date. Precedence Order = 13. Comparable FHIR and v.3 status codes: superseded.
+         */
+        RENEWED, 
+        /**
+         * A Contract that is rescinded.  May be required prior to replacing with an updated Contract. Comparable FHIR and v.3 status codes: nullified.
+         */
+        REVOKED, 
+        /**
+         * Contract is reactivated after being pended because of faulty execution. *E.g., competency of the signer(s), or where the policy is substantially different from and did not accompany the application/form so that the applicant could not compare them. Aka - ''reactivated''. Usage: Optional stage where a pended contract is reactivated. Precedence Order = 8. Comparable FHIR and v.3 status codes: reactivated.
+         */
+        RESOLVED, 
+        /**
+         * Contract reaches its expiry date. It may or may not be renewed or renegotiated. Usage: Normal end of contract period. Precedence Order = 12. Comparable FHIR and v.3 status codes: Obsoleted.
+         */
+        TERMINATED, 
         /**
          * added to help the parsers with the generic types
          */
@@ -73,14 +118,36 @@ public class Contract extends DomainResource {
         public static ContractStatus fromCode(String codeString) throws FHIRException {
             if (codeString == null || "".equals(codeString))
                 return null;
-        if ("active".equals(codeString))
-          return ACTIVE;
+        if ("amended".equals(codeString))
+          return AMENDED;
+        if ("appended".equals(codeString))
+          return APPENDED;
         if ("cancelled".equals(codeString))
           return CANCELLED;
-        if ("draft".equals(codeString))
-          return DRAFT;
+        if ("disputed".equals(codeString))
+          return DISPUTED;
         if ("entered-in-error".equals(codeString))
           return ENTEREDINERROR;
+        if ("executable".equals(codeString))
+          return EXECUTABLE;
+        if ("executed".equals(codeString))
+          return EXECUTED;
+        if ("negotiable".equals(codeString))
+          return NEGOTIABLE;
+        if ("offered".equals(codeString))
+          return OFFERED;
+        if ("policy".equals(codeString))
+          return POLICY;
+        if ("rejected".equals(codeString))
+          return REJECTED;
+        if ("renewed".equals(codeString))
+          return RENEWED;
+        if ("revoked".equals(codeString))
+          return REVOKED;
+        if ("resolved".equals(codeString))
+          return RESOLVED;
+        if ("terminated".equals(codeString))
+          return TERMINATED;
         if (Configuration.isAcceptInvalidEnums())
           return null;
         else
@@ -88,37 +155,81 @@ public class Contract extends DomainResource {
         }
         public String toCode() {
           switch (this) {
-            case ACTIVE: return "active";
+            case AMENDED: return "amended";
+            case APPENDED: return "appended";
             case CANCELLED: return "cancelled";
-            case DRAFT: return "draft";
+            case DISPUTED: return "disputed";
             case ENTEREDINERROR: return "entered-in-error";
+            case EXECUTABLE: return "executable";
+            case EXECUTED: return "executed";
+            case NEGOTIABLE: return "negotiable";
+            case OFFERED: return "offered";
+            case POLICY: return "policy";
+            case REJECTED: return "rejected";
+            case RENEWED: return "renewed";
+            case REVOKED: return "revoked";
+            case RESOLVED: return "resolved";
+            case TERMINATED: return "terminated";
             default: return "?";
           }
         }
         public String getSystem() {
           switch (this) {
-            case ACTIVE: return "http://hl7.org/fhir/fm-status";
-            case CANCELLED: return "http://hl7.org/fhir/fm-status";
-            case DRAFT: return "http://hl7.org/fhir/fm-status";
-            case ENTEREDINERROR: return "http://hl7.org/fhir/fm-status";
+            case AMENDED: return "http://hl7.org/fhir/contract-status";
+            case APPENDED: return "http://hl7.org/fhir/contract-status";
+            case CANCELLED: return "http://hl7.org/fhir/contract-status";
+            case DISPUTED: return "http://hl7.org/fhir/contract-status";
+            case ENTEREDINERROR: return "http://hl7.org/fhir/contract-status";
+            case EXECUTABLE: return "http://hl7.org/fhir/contract-status";
+            case EXECUTED: return "http://hl7.org/fhir/contract-status";
+            case NEGOTIABLE: return "http://hl7.org/fhir/contract-status";
+            case OFFERED: return "http://hl7.org/fhir/contract-status";
+            case POLICY: return "http://hl7.org/fhir/contract-status";
+            case REJECTED: return "http://hl7.org/fhir/contract-status";
+            case RENEWED: return "http://hl7.org/fhir/contract-status";
+            case REVOKED: return "http://hl7.org/fhir/contract-status";
+            case RESOLVED: return "http://hl7.org/fhir/contract-status";
+            case TERMINATED: return "http://hl7.org/fhir/contract-status";
             default: return "?";
           }
         }
         public String getDefinition() {
           switch (this) {
-            case ACTIVE: return "The instance is currently in-force.";
-            case CANCELLED: return "The instance is withdrawn, rescinded or reversed.";
-            case DRAFT: return "A new instance the contents of which is not complete.";
-            case ENTEREDINERROR: return "The instance was entered in error.";
+            case AMENDED: return "Contract is augmented with additional information to correct errors in a predecessor or to updated values in a predecessor. Usage: Contract altered within effective time. Precedence Order = 9. Comparable FHIR and v.3 status codes: revised; replaced.";
+            case APPENDED: return "Contract is augmented with additional information that was missing from a predecessor Contract. Usage: Contract altered within effective time. Precedence Order = 9. Comparable FHIR and v.3 status codes: updated, replaced.";
+            case CANCELLED: return "Contract is terminated due to failure of the Grantor and/or the Grantee to fulfil one or more contract provisions. Usage: Abnormal contract termination. Precedence Order = 10. Comparable FHIR and v.3 status codes: stopped; failed; aborted.";
+            case DISPUTED: return "Contract is pended to rectify failure of the Grantor or the Grantee to fulfil contract provision(s). E.g., Grantee complaint about Grantor's failure to comply with contract provisions. Usage: Contract pended. Precedence Order = 7.Comparable FHIR and v.3 status codes: on hold; pended; suspended.";
+            case ENTEREDINERROR: return "Contract was created in error. No Precedence Order.  Status may be applied to a Contract with any status.";
+            case EXECUTABLE: return "Contract execution pending; may be executed when either the Grantor or the Grantee accepts the contract provisions by signing. I.e., where either the Grantor or the Grantee has signed, but not both. E.g., when an insurance applicant signs the insurers application, which references the policy. Usage: Optional first step of contract execution activity.  May be skipped and contracting activity moves directly to executed state. Precedence Order = 3. Comparable FHIR and v.3 status codes: draft; preliminary; planned; intended; active.";
+            case EXECUTED: return "Contract is activated for period stipulated when both the Grantor and Grantee have signed it. Usage: Required state for normal completion of contracting activity.  Precedence Order = 6. Comparable FHIR and v.3 status codes: accepted; completed.";
+            case NEGOTIABLE: return "Contract execution is suspended while either or both the Grantor and Grantee propose and consider new or revised contract provisions. I.e., where the party which has not signed proposes changes to the terms.  E .g., a life insurer declines to agree to the signed application because the life insurer has evidence that the applicant, who asserted to being younger or a non-smoker to get a lower premium rate - but offers instead to agree to a higher premium based on the applicants actual age or smoking status. Usage: Optional contract activity between executable and executed state. Precedence Order = 4. Comparable FHIR and v.3 status codes: in progress; review; held.";
+            case OFFERED: return "Contract is a proposal by either the Grantor or the Grantee. Aka - A Contract hard copy or electronic 'template','form' or 'application'. E.g., health insurance application; consent directive form. Usage: Beginning of contract negotiation, which may have been completed as a precondition because used for 0..* contracts. Precedence Order = 2. Comparable FHIR and v.3 status codes: requested; new.";
+            case POLICY: return "Contract template is available as the basis for an application or offer by the Grantor or Grantee. E.g., health insurance policy; consent directive policy.  Usage: Required initial contract activity, which may have been completed as a precondition because used for 0..* contracts. Precedence Order = 1. Comparable FHIR and v.3 status codes: proposed; intended.";
+            case REJECTED: return " Execution of the Contract is not completed because either or both the Grantor and Grantee decline to accept some or all of the contract provisions. Usage: Optional contract activity between executable and abnormal termination. Precedence Order = 5. Comparable FHIR and v.3 status codes:  stopped; cancelled.";
+            case RENEWED: return "Beginning of a successor Contract at the termination of predecessor Contract lifecycle. Usage: Follows termination of a preceding Contract that has reached its expiry date. Precedence Order = 13. Comparable FHIR and v.3 status codes: superseded.";
+            case REVOKED: return "A Contract that is rescinded.  May be required prior to replacing with an updated Contract. Comparable FHIR and v.3 status codes: nullified.";
+            case RESOLVED: return "Contract is reactivated after being pended because of faulty execution. *E.g., competency of the signer(s), or where the policy is substantially different from and did not accompany the application/form so that the applicant could not compare them. Aka - ''reactivated''. Usage: Optional stage where a pended contract is reactivated. Precedence Order = 8. Comparable FHIR and v.3 status codes: reactivated.";
+            case TERMINATED: return "Contract reaches its expiry date. It may or may not be renewed or renegotiated. Usage: Normal end of contract period. Precedence Order = 12. Comparable FHIR and v.3 status codes: Obsoleted.";
             default: return "?";
           }
         }
         public String getDisplay() {
           switch (this) {
-            case ACTIVE: return "Active";
+            case AMENDED: return "Amended";
+            case APPENDED: return "Appended";
             case CANCELLED: return "Cancelled";
-            case DRAFT: return "Draft";
+            case DISPUTED: return "Disputed";
             case ENTEREDINERROR: return "Entered in Error";
+            case EXECUTABLE: return "Executable";
+            case EXECUTED: return "Executed";
+            case NEGOTIABLE: return "Negotiable";
+            case OFFERED: return "Offered";
+            case POLICY: return "Policy";
+            case REJECTED: return "Rejected";
+            case RENEWED: return "Renewed";
+            case REVOKED: return "Revoked";
+            case RESOLVED: return "Resolved";
+            case TERMINATED: return "Terminated";
             default: return "?";
           }
         }
@@ -129,41 +240,109 @@ public class Contract extends DomainResource {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
-        if ("active".equals(codeString))
-          return ContractStatus.ACTIVE;
+        if ("amended".equals(codeString))
+          return ContractStatus.AMENDED;
+        if ("appended".equals(codeString))
+          return ContractStatus.APPENDED;
         if ("cancelled".equals(codeString))
           return ContractStatus.CANCELLED;
-        if ("draft".equals(codeString))
-          return ContractStatus.DRAFT;
+        if ("disputed".equals(codeString))
+          return ContractStatus.DISPUTED;
         if ("entered-in-error".equals(codeString))
           return ContractStatus.ENTEREDINERROR;
+        if ("executable".equals(codeString))
+          return ContractStatus.EXECUTABLE;
+        if ("executed".equals(codeString))
+          return ContractStatus.EXECUTED;
+        if ("negotiable".equals(codeString))
+          return ContractStatus.NEGOTIABLE;
+        if ("offered".equals(codeString))
+          return ContractStatus.OFFERED;
+        if ("policy".equals(codeString))
+          return ContractStatus.POLICY;
+        if ("rejected".equals(codeString))
+          return ContractStatus.REJECTED;
+        if ("renewed".equals(codeString))
+          return ContractStatus.RENEWED;
+        if ("revoked".equals(codeString))
+          return ContractStatus.REVOKED;
+        if ("resolved".equals(codeString))
+          return ContractStatus.RESOLVED;
+        if ("terminated".equals(codeString))
+          return ContractStatus.TERMINATED;
         throw new IllegalArgumentException("Unknown ContractStatus code '"+codeString+"'");
         }
         public Enumeration<ContractStatus> fromType(Base code) throws FHIRException {
-          if (code == null || code.isEmpty())
+          if (code == null)
             return null;
+          if (code.isEmpty())
+            return new Enumeration<ContractStatus>(this);
           String codeString = ((PrimitiveType) code).asStringValue();
           if (codeString == null || "".equals(codeString))
             return null;
-        if ("active".equals(codeString))
-          return new Enumeration<ContractStatus>(this, ContractStatus.ACTIVE);
+        if ("amended".equals(codeString))
+          return new Enumeration<ContractStatus>(this, ContractStatus.AMENDED);
+        if ("appended".equals(codeString))
+          return new Enumeration<ContractStatus>(this, ContractStatus.APPENDED);
         if ("cancelled".equals(codeString))
           return new Enumeration<ContractStatus>(this, ContractStatus.CANCELLED);
-        if ("draft".equals(codeString))
-          return new Enumeration<ContractStatus>(this, ContractStatus.DRAFT);
+        if ("disputed".equals(codeString))
+          return new Enumeration<ContractStatus>(this, ContractStatus.DISPUTED);
         if ("entered-in-error".equals(codeString))
           return new Enumeration<ContractStatus>(this, ContractStatus.ENTEREDINERROR);
+        if ("executable".equals(codeString))
+          return new Enumeration<ContractStatus>(this, ContractStatus.EXECUTABLE);
+        if ("executed".equals(codeString))
+          return new Enumeration<ContractStatus>(this, ContractStatus.EXECUTED);
+        if ("negotiable".equals(codeString))
+          return new Enumeration<ContractStatus>(this, ContractStatus.NEGOTIABLE);
+        if ("offered".equals(codeString))
+          return new Enumeration<ContractStatus>(this, ContractStatus.OFFERED);
+        if ("policy".equals(codeString))
+          return new Enumeration<ContractStatus>(this, ContractStatus.POLICY);
+        if ("rejected".equals(codeString))
+          return new Enumeration<ContractStatus>(this, ContractStatus.REJECTED);
+        if ("renewed".equals(codeString))
+          return new Enumeration<ContractStatus>(this, ContractStatus.RENEWED);
+        if ("revoked".equals(codeString))
+          return new Enumeration<ContractStatus>(this, ContractStatus.REVOKED);
+        if ("resolved".equals(codeString))
+          return new Enumeration<ContractStatus>(this, ContractStatus.RESOLVED);
+        if ("terminated".equals(codeString))
+          return new Enumeration<ContractStatus>(this, ContractStatus.TERMINATED);
         throw new FHIRException("Unknown ContractStatus code '"+codeString+"'");
         }
     public String toCode(ContractStatus code) {
-      if (code == ContractStatus.ACTIVE)
-        return "active";
+      if (code == ContractStatus.AMENDED)
+        return "amended";
+      if (code == ContractStatus.APPENDED)
+        return "appended";
       if (code == ContractStatus.CANCELLED)
         return "cancelled";
-      if (code == ContractStatus.DRAFT)
-        return "draft";
+      if (code == ContractStatus.DISPUTED)
+        return "disputed";
       if (code == ContractStatus.ENTEREDINERROR)
         return "entered-in-error";
+      if (code == ContractStatus.EXECUTABLE)
+        return "executable";
+      if (code == ContractStatus.EXECUTED)
+        return "executed";
+      if (code == ContractStatus.NEGOTIABLE)
+        return "negotiable";
+      if (code == ContractStatus.OFFERED)
+        return "offered";
+      if (code == ContractStatus.POLICY)
+        return "policy";
+      if (code == ContractStatus.REJECTED)
+        return "rejected";
+      if (code == ContractStatus.RENEWED)
+        return "renewed";
+      if (code == ContractStatus.REVOKED)
+        return "revoked";
+      if (code == ContractStatus.RESOLVED)
+        return "resolved";
+      if (code == ContractStatus.TERMINATED)
+        return "terminated";
       return "?";
       }
     public String toSystem(ContractStatus code) {
@@ -189,7 +368,7 @@ public class Contract extends DomainResource {
          * Role type of agent assigned roles in this Contract.
          */
         @Child(name = "role", type = {CodeableConcept.class}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-        @Description(shortDefinition="Contract  Agent Role", formalDefinition="Role type of agent assigned roles in this Contract." )
+        @Description(shortDefinition="Role type of the agent", formalDefinition="Role type of agent assigned roles in this Contract." )
         @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/contract-actorrole")
         protected List<CodeableConcept> role;
 
@@ -319,35 +498,46 @@ public class Contract extends DomainResource {
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case 92645877: // actor
           this.actor = castToReference(value); // Reference
-          break;
+          return value;
         case 3506294: // role
           this.getRole().add(castToCodeableConcept(value)); // CodeableConcept
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("actor"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("actor")) {
           this.actor = castToReference(value); // Reference
-        else if (name.equals("role"))
+        } else if (name.equals("role")) {
           this.getRole().add(castToCodeableConcept(value));
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 92645877:  return getActor(); // Reference
-        case 3506294:  return addRole(); // CodeableConcept
+        case 92645877:  return getActor(); 
+        case 3506294:  return addRole(); 
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 92645877: /*actor*/ return new String[] {"Reference"};
+        case 3506294: /*role*/ return new String[] {"CodeableConcept"};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }
@@ -414,7 +604,7 @@ public class Contract extends DomainResource {
          * Role of this Contract signer, e.g. notary, grantee.
          */
         @Child(name = "type", type = {Coding.class}, order=1, min=1, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Contract Signer Type", formalDefinition="Role of this Contract signer, e.g. notary, grantee." )
+        @Description(shortDefinition="Contract Signatory Role", formalDefinition="Role of this Contract signer, e.g. notary, grantee." )
         @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/contract-signer-type")
         protected Coding type;
 
@@ -590,41 +780,53 @@ public class Contract extends DomainResource {
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case 3575610: // type
           this.type = castToCoding(value); // Coding
-          break;
+          return value;
         case 106437350: // party
           this.party = castToReference(value); // Reference
-          break;
+          return value;
         case 1073584312: // signature
           this.getSignature().add(castToSignature(value)); // Signature
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("type"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("type")) {
           this.type = castToCoding(value); // Coding
-        else if (name.equals("party"))
+        } else if (name.equals("party")) {
           this.party = castToReference(value); // Reference
-        else if (name.equals("signature"))
+        } else if (name.equals("signature")) {
           this.getSignature().add(castToSignature(value));
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 3575610:  return getType(); // Coding
-        case 106437350:  return getParty(); // Reference
-        case 1073584312:  return addSignature(); // Signature
+        case 3575610:  return getType(); 
+        case 106437350:  return getParty(); 
+        case 1073584312:  return addSignature(); 
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3575610: /*type*/ return new String[] {"Coding"};
+        case 106437350: /*party*/ return new String[] {"Reference"};
+        case 1073584312: /*signature*/ return new String[] {"Signature"};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }
@@ -704,7 +906,7 @@ public class Contract extends DomainResource {
          * Identifies a Contract Valued Item instance.
          */
         @Child(name = "identifier", type = {Identifier.class}, order=2, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Contract Valued Item Identifier", formalDefinition="Identifies a Contract Valued Item instance." )
+        @Description(shortDefinition="Contract Valued Item Number", formalDefinition="Identifies a Contract Valued Item instance." )
         protected Identifier identifier;
 
         /**
@@ -1111,71 +1313,89 @@ public class Contract extends DomainResource {
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case -1298275357: // entity
           this.entity = castToType(value); // Type
-          break;
+          return value;
         case -1618432855: // identifier
           this.identifier = castToIdentifier(value); // Identifier
-          break;
+          return value;
         case -929905388: // effectiveTime
           this.effectiveTime = castToDateTime(value); // DateTimeType
-          break;
+          return value;
         case -1285004149: // quantity
           this.quantity = castToSimpleQuantity(value); // SimpleQuantity
-          break;
+          return value;
         case -486196699: // unitPrice
           this.unitPrice = castToMoney(value); // Money
-          break;
+          return value;
         case -1282148017: // factor
           this.factor = castToDecimal(value); // DecimalType
-          break;
+          return value;
         case -982754077: // points
           this.points = castToDecimal(value); // DecimalType
-          break;
+          return value;
         case 108957: // net
           this.net = castToMoney(value); // Money
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("entity[x]"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("entity[x]")) {
           this.entity = castToType(value); // Type
-        else if (name.equals("identifier"))
+        } else if (name.equals("identifier")) {
           this.identifier = castToIdentifier(value); // Identifier
-        else if (name.equals("effectiveTime"))
+        } else if (name.equals("effectiveTime")) {
           this.effectiveTime = castToDateTime(value); // DateTimeType
-        else if (name.equals("quantity"))
+        } else if (name.equals("quantity")) {
           this.quantity = castToSimpleQuantity(value); // SimpleQuantity
-        else if (name.equals("unitPrice"))
+        } else if (name.equals("unitPrice")) {
           this.unitPrice = castToMoney(value); // Money
-        else if (name.equals("factor"))
+        } else if (name.equals("factor")) {
           this.factor = castToDecimal(value); // DecimalType
-        else if (name.equals("points"))
+        } else if (name.equals("points")) {
           this.points = castToDecimal(value); // DecimalType
-        else if (name.equals("net"))
+        } else if (name.equals("net")) {
           this.net = castToMoney(value); // Money
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case -740568643:  return getEntity(); // Type
-        case -1618432855:  return getIdentifier(); // Identifier
-        case -929905388: throw new FHIRException("Cannot make property effectiveTime as it is not a complex type"); // DateTimeType
-        case -1285004149:  return getQuantity(); // SimpleQuantity
-        case -486196699:  return getUnitPrice(); // Money
-        case -1282148017: throw new FHIRException("Cannot make property factor as it is not a complex type"); // DecimalType
-        case -982754077: throw new FHIRException("Cannot make property points as it is not a complex type"); // DecimalType
-        case 108957:  return getNet(); // Money
+        case -740568643:  return getEntity(); 
+        case -1298275357:  return getEntity(); 
+        case -1618432855:  return getIdentifier(); 
+        case -929905388:  return getEffectiveTimeElement();
+        case -1285004149:  return getQuantity(); 
+        case -486196699:  return getUnitPrice(); 
+        case -1282148017:  return getFactorElement();
+        case -982754077:  return getPointsElement();
+        case 108957:  return getNet(); 
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -1298275357: /*entity*/ return new String[] {"CodeableConcept", "Reference"};
+        case -1618432855: /*identifier*/ return new String[] {"Identifier"};
+        case -929905388: /*effectiveTime*/ return new String[] {"dateTime"};
+        case -1285004149: /*quantity*/ return new String[] {"SimpleQuantity"};
+        case -486196699: /*unitPrice*/ return new String[] {"Money"};
+        case -1282148017: /*factor*/ return new String[] {"decimal"};
+        case -982754077: /*points*/ return new String[] {"decimal"};
+        case 108957: /*net*/ return new String[] {"Money"};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }
@@ -1274,7 +1494,7 @@ public class Contract extends DomainResource {
          * Unique identifier for this particular Contract Provision.
          */
         @Child(name = "identifier", type = {Identifier.class}, order=1, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="Contract Term identifier", formalDefinition="Unique identifier for this particular Contract Provision." )
+        @Description(shortDefinition="Contract Term Number", formalDefinition="Unique identifier for this particular Contract Provision." )
         protected Identifier identifier;
 
         /**
@@ -1295,7 +1515,7 @@ public class Contract extends DomainResource {
          * Type of Contract Provision such as specific requirements, purposes for actions, obligations, prohibitions, e.g. life time maximum benefit.
          */
         @Child(name = "type", type = {CodeableConcept.class}, order=4, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Contract Term Type", formalDefinition="Type of Contract Provision such as specific requirements, purposes for actions, obligations, prohibitions, e.g. life time maximum benefit." )
+        @Description(shortDefinition="Contract Term Type or Form", formalDefinition="Type of Contract Provision such as specific requirements, purposes for actions, obligations, prohibitions, e.g. life time maximum benefit." )
         @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/contract-term-type")
         protected CodeableConcept type;
 
@@ -1303,7 +1523,7 @@ public class Contract extends DomainResource {
          * Subtype of this Contract Provision, e.g. life time maximum payment for a contract term for specific valued item, e.g. disability payment.
          */
         @Child(name = "subType", type = {CodeableConcept.class}, order=5, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Contract Term Subtype", formalDefinition="Subtype of this Contract Provision, e.g. life time maximum payment for a contract term for specific valued item, e.g. disability payment." )
+        @Description(shortDefinition="Contract Term Type specific classification", formalDefinition="Subtype of this Contract Provision, e.g. life time maximum payment for a contract term for specific valued item, e.g. disability payment." )
         @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/contract-term-subtype")
         protected CodeableConcept subType;
 
@@ -1323,7 +1543,7 @@ public class Contract extends DomainResource {
          * Action stipulated by this Contract Provision.
          */
         @Child(name = "action", type = {CodeableConcept.class}, order=7, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-        @Description(shortDefinition="Contract Term Action", formalDefinition="Action stipulated by this Contract Provision." )
+        @Description(shortDefinition="Contract Term Activity", formalDefinition="Action stipulated by this Contract Provision." )
         @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/contract-action")
         protected List<CodeableConcept> action;
 
@@ -1331,39 +1551,47 @@ public class Contract extends DomainResource {
          * Reason or purpose for the action stipulated by this Contract Provision.
          */
         @Child(name = "actionReason", type = {CodeableConcept.class}, order=8, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-        @Description(shortDefinition="Contract Term Action Reason", formalDefinition="Reason or purpose for the action stipulated by this Contract Provision." )
+        @Description(shortDefinition="Purpose for the Contract Term Action", formalDefinition="Reason or purpose for the action stipulated by this Contract Provision." )
         @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/v3-PurposeOfUse")
         protected List<CodeableConcept> actionReason;
 
         /**
+         * A set of security labels that define which terms are controlled by this condition.
+         */
+        @Child(name = "securityLabel", type = {Coding.class}, order=9, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+        @Description(shortDefinition="Security Labels that define affected terms", formalDefinition="A set of security labels that define which terms are controlled by this condition." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/security-labels")
+        protected List<Coding> securityLabel;
+
+        /**
          * An actor taking a role in an activity for which it can be assigned some degree of responsibility for the activity taking place.
          */
-        @Child(name = "agent", type = {}, order=9, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Child(name = "agent", type = {}, order=10, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="Contract Term Agent List", formalDefinition="An actor taking a role in an activity for which it can be assigned some degree of responsibility for the activity taking place." )
         protected List<TermAgentComponent> agent;
 
         /**
          * Human readable form of this Contract Provision.
          */
-        @Child(name = "text", type = {StringType.class}, order=10, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "text", type = {StringType.class}, order=11, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Human readable Contract term text", formalDefinition="Human readable form of this Contract Provision." )
         protected StringType text;
 
         /**
          * Contract Provision Valued Item List.
          */
-        @Child(name = "valuedItem", type = {}, order=11, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-        @Description(shortDefinition="Contract Term Valued Item", formalDefinition="Contract Provision Valued Item List." )
+        @Child(name = "valuedItem", type = {}, order=12, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Description(shortDefinition="Contract Term Valued Item List", formalDefinition="Contract Provision Valued Item List." )
         protected List<TermValuedItemComponent> valuedItem;
 
         /**
          * Nested group of Contract Provisions.
          */
-        @Child(name = "group", type = {TermComponent.class}, order=12, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Child(name = "group", type = {TermComponent.class}, order=13, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="Nested Contract Term Group", formalDefinition="Nested group of Contract Provisions." )
         protected List<TermComponent> group;
 
-        private static final long serialVersionUID = -1949614999L;
+        private static final long serialVersionUID = 812661371L;
 
     /**
      * Constructor
@@ -1687,6 +1915,59 @@ public class Contract extends DomainResource {
         }
 
         /**
+         * @return {@link #securityLabel} (A set of security labels that define which terms are controlled by this condition.)
+         */
+        public List<Coding> getSecurityLabel() { 
+          if (this.securityLabel == null)
+            this.securityLabel = new ArrayList<Coding>();
+          return this.securityLabel;
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public TermComponent setSecurityLabel(List<Coding> theSecurityLabel) { 
+          this.securityLabel = theSecurityLabel;
+          return this;
+        }
+
+        public boolean hasSecurityLabel() { 
+          if (this.securityLabel == null)
+            return false;
+          for (Coding item : this.securityLabel)
+            if (!item.isEmpty())
+              return true;
+          return false;
+        }
+
+        public Coding addSecurityLabel() { //3
+          Coding t = new Coding();
+          if (this.securityLabel == null)
+            this.securityLabel = new ArrayList<Coding>();
+          this.securityLabel.add(t);
+          return t;
+        }
+
+        public TermComponent addSecurityLabel(Coding t) { //3
+          if (t == null)
+            return this;
+          if (this.securityLabel == null)
+            this.securityLabel = new ArrayList<Coding>();
+          this.securityLabel.add(t);
+          return this;
+        }
+
+        /**
+         * @return The first repetition of repeating field {@link #securityLabel}, creating it if it does not already exist
+         */
+        public Coding getSecurityLabelFirstRep() { 
+          if (getSecurityLabel().isEmpty()) {
+            addSecurityLabel();
+          }
+          return getSecurityLabel().get(0);
+        }
+
+        /**
          * @return {@link #agent} (An actor taking a role in an activity for which it can be assigned some degree of responsibility for the activity taking place.)
          */
         public List<TermAgentComponent> getAgent() { 
@@ -1904,6 +2185,7 @@ public class Contract extends DomainResource {
           childrenList.add(new Property("topic", "Reference(Any)", "The matter of concern in the context of this provision of the agrement.", 0, java.lang.Integer.MAX_VALUE, topic));
           childrenList.add(new Property("action", "CodeableConcept", "Action stipulated by this Contract Provision.", 0, java.lang.Integer.MAX_VALUE, action));
           childrenList.add(new Property("actionReason", "CodeableConcept", "Reason or purpose for the action stipulated by this Contract Provision.", 0, java.lang.Integer.MAX_VALUE, actionReason));
+          childrenList.add(new Property("securityLabel", "Coding", "A set of security labels that define which terms are controlled by this condition.", 0, java.lang.Integer.MAX_VALUE, securityLabel));
           childrenList.add(new Property("agent", "", "An actor taking a role in an activity for which it can be assigned some degree of responsibility for the activity taking place.", 0, java.lang.Integer.MAX_VALUE, agent));
           childrenList.add(new Property("text", "string", "Human readable form of this Contract Provision.", 0, java.lang.Integer.MAX_VALUE, text));
           childrenList.add(new Property("valuedItem", "", "Contract Provision Valued Item List.", 0, java.lang.Integer.MAX_VALUE, valuedItem));
@@ -1921,6 +2203,7 @@ public class Contract extends DomainResource {
         case 110546223: /*topic*/ return this.topic == null ? new Base[0] : this.topic.toArray(new Base[this.topic.size()]); // Reference
         case -1422950858: /*action*/ return this.action == null ? new Base[0] : this.action.toArray(new Base[this.action.size()]); // CodeableConcept
         case 1465121818: /*actionReason*/ return this.actionReason == null ? new Base[0] : this.actionReason.toArray(new Base[this.actionReason.size()]); // CodeableConcept
+        case -722296940: /*securityLabel*/ return this.securityLabel == null ? new Base[0] : this.securityLabel.toArray(new Base[this.securityLabel.size()]); // Coding
         case 92750597: /*agent*/ return this.agent == null ? new Base[0] : this.agent.toArray(new Base[this.agent.size()]); // TermAgentComponent
         case 3556653: /*text*/ return this.text == null ? new Base[0] : new Base[] {this.text}; // StringType
         case 2046675654: /*valuedItem*/ return this.valuedItem == null ? new Base[0] : this.valuedItem.toArray(new Base[this.valuedItem.size()]); // TermValuedItemComponent
@@ -1931,95 +2214,123 @@ public class Contract extends DomainResource {
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case -1618432855: // identifier
           this.identifier = castToIdentifier(value); // Identifier
-          break;
+          return value;
         case -1179159893: // issued
           this.issued = castToDateTime(value); // DateTimeType
-          break;
+          return value;
         case -793235316: // applies
           this.applies = castToPeriod(value); // Period
-          break;
+          return value;
         case 3575610: // type
           this.type = castToCodeableConcept(value); // CodeableConcept
-          break;
+          return value;
         case -1868521062: // subType
           this.subType = castToCodeableConcept(value); // CodeableConcept
-          break;
+          return value;
         case 110546223: // topic
           this.getTopic().add(castToReference(value)); // Reference
-          break;
+          return value;
         case -1422950858: // action
           this.getAction().add(castToCodeableConcept(value)); // CodeableConcept
-          break;
+          return value;
         case 1465121818: // actionReason
           this.getActionReason().add(castToCodeableConcept(value)); // CodeableConcept
-          break;
+          return value;
+        case -722296940: // securityLabel
+          this.getSecurityLabel().add(castToCoding(value)); // Coding
+          return value;
         case 92750597: // agent
           this.getAgent().add((TermAgentComponent) value); // TermAgentComponent
-          break;
+          return value;
         case 3556653: // text
           this.text = castToString(value); // StringType
-          break;
+          return value;
         case 2046675654: // valuedItem
           this.getValuedItem().add((TermValuedItemComponent) value); // TermValuedItemComponent
-          break;
+          return value;
         case 98629247: // group
           this.getGroup().add((TermComponent) value); // TermComponent
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("identifier"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("identifier")) {
           this.identifier = castToIdentifier(value); // Identifier
-        else if (name.equals("issued"))
+        } else if (name.equals("issued")) {
           this.issued = castToDateTime(value); // DateTimeType
-        else if (name.equals("applies"))
+        } else if (name.equals("applies")) {
           this.applies = castToPeriod(value); // Period
-        else if (name.equals("type"))
+        } else if (name.equals("type")) {
           this.type = castToCodeableConcept(value); // CodeableConcept
-        else if (name.equals("subType"))
+        } else if (name.equals("subType")) {
           this.subType = castToCodeableConcept(value); // CodeableConcept
-        else if (name.equals("topic"))
+        } else if (name.equals("topic")) {
           this.getTopic().add(castToReference(value));
-        else if (name.equals("action"))
+        } else if (name.equals("action")) {
           this.getAction().add(castToCodeableConcept(value));
-        else if (name.equals("actionReason"))
+        } else if (name.equals("actionReason")) {
           this.getActionReason().add(castToCodeableConcept(value));
-        else if (name.equals("agent"))
+        } else if (name.equals("securityLabel")) {
+          this.getSecurityLabel().add(castToCoding(value));
+        } else if (name.equals("agent")) {
           this.getAgent().add((TermAgentComponent) value);
-        else if (name.equals("text"))
+        } else if (name.equals("text")) {
           this.text = castToString(value); // StringType
-        else if (name.equals("valuedItem"))
+        } else if (name.equals("valuedItem")) {
           this.getValuedItem().add((TermValuedItemComponent) value);
-        else if (name.equals("group"))
+        } else if (name.equals("group")) {
           this.getGroup().add((TermComponent) value);
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case -1618432855:  return getIdentifier(); // Identifier
-        case -1179159893: throw new FHIRException("Cannot make property issued as it is not a complex type"); // DateTimeType
-        case -793235316:  return getApplies(); // Period
-        case 3575610:  return getType(); // CodeableConcept
-        case -1868521062:  return getSubType(); // CodeableConcept
-        case 110546223:  return addTopic(); // Reference
-        case -1422950858:  return addAction(); // CodeableConcept
-        case 1465121818:  return addActionReason(); // CodeableConcept
-        case 92750597:  return addAgent(); // TermAgentComponent
-        case 3556653: throw new FHIRException("Cannot make property text as it is not a complex type"); // StringType
-        case 2046675654:  return addValuedItem(); // TermValuedItemComponent
-        case 98629247:  return addGroup(); // TermComponent
+        case -1618432855:  return getIdentifier(); 
+        case -1179159893:  return getIssuedElement();
+        case -793235316:  return getApplies(); 
+        case 3575610:  return getType(); 
+        case -1868521062:  return getSubType(); 
+        case 110546223:  return addTopic(); 
+        case -1422950858:  return addAction(); 
+        case 1465121818:  return addActionReason(); 
+        case -722296940:  return addSecurityLabel(); 
+        case 92750597:  return addAgent(); 
+        case 3556653:  return getTextElement();
+        case 2046675654:  return addValuedItem(); 
+        case 98629247:  return addGroup(); 
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -1618432855: /*identifier*/ return new String[] {"Identifier"};
+        case -1179159893: /*issued*/ return new String[] {"dateTime"};
+        case -793235316: /*applies*/ return new String[] {"Period"};
+        case 3575610: /*type*/ return new String[] {"CodeableConcept"};
+        case -1868521062: /*subType*/ return new String[] {"CodeableConcept"};
+        case 110546223: /*topic*/ return new String[] {"Reference"};
+        case -1422950858: /*action*/ return new String[] {"CodeableConcept"};
+        case 1465121818: /*actionReason*/ return new String[] {"CodeableConcept"};
+        case -722296940: /*securityLabel*/ return new String[] {"Coding"};
+        case 92750597: /*agent*/ return new String[] {};
+        case 3556653: /*text*/ return new String[] {"string"};
+        case 2046675654: /*valuedItem*/ return new String[] {};
+        case 98629247: /*group*/ return new String[] {"@Contract.term"};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }
@@ -2053,6 +2364,9 @@ public class Contract extends DomainResource {
         }
         else if (name.equals("actionReason")) {
           return addActionReason();
+        }
+        else if (name.equals("securityLabel")) {
+          return addSecurityLabel();
         }
         else if (name.equals("agent")) {
           return addAgent();
@@ -2093,6 +2407,11 @@ public class Contract extends DomainResource {
           for (CodeableConcept i : actionReason)
             dst.actionReason.add(i.copy());
         };
+        if (securityLabel != null) {
+          dst.securityLabel = new ArrayList<Coding>();
+          for (Coding i : securityLabel)
+            dst.securityLabel.add(i.copy());
+        };
         if (agent != null) {
           dst.agent = new ArrayList<TermAgentComponent>();
           for (TermAgentComponent i : agent)
@@ -2121,9 +2440,9 @@ public class Contract extends DomainResource {
         TermComponent o = (TermComponent) other;
         return compareDeep(identifier, o.identifier, true) && compareDeep(issued, o.issued, true) && compareDeep(applies, o.applies, true)
            && compareDeep(type, o.type, true) && compareDeep(subType, o.subType, true) && compareDeep(topic, o.topic, true)
-           && compareDeep(action, o.action, true) && compareDeep(actionReason, o.actionReason, true) && compareDeep(agent, o.agent, true)
-           && compareDeep(text, o.text, true) && compareDeep(valuedItem, o.valuedItem, true) && compareDeep(group, o.group, true)
-          ;
+           && compareDeep(action, o.action, true) && compareDeep(actionReason, o.actionReason, true) && compareDeep(securityLabel, o.securityLabel, true)
+           && compareDeep(agent, o.agent, true) && compareDeep(text, o.text, true) && compareDeep(valuedItem, o.valuedItem, true)
+           && compareDeep(group, o.group, true);
       }
 
       @Override
@@ -2138,8 +2457,8 @@ public class Contract extends DomainResource {
 
       public boolean isEmpty() {
         return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, issued, applies
-          , type, subType, topic, action, actionReason, agent, text, valuedItem, group
-          );
+          , type, subType, topic, action, actionReason, securityLabel, agent, text, valuedItem
+          , group);
       }
 
   public String fhirType() {
@@ -2155,7 +2474,7 @@ public class Contract extends DomainResource {
          * The agent assigned a role in this Contract Provision.
          */
         @Child(name = "actor", type = {Contract.class, Device.class, Group.class, Location.class, Organization.class, Patient.class, Practitioner.class, RelatedPerson.class, Substance.class}, order=1, min=1, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Contract Term Agent List", formalDefinition="The agent assigned a role in this Contract Provision." )
+        @Description(shortDefinition="Contract Term Agent Subject", formalDefinition="The agent assigned a role in this Contract Provision." )
         protected Reference actor;
 
         /**
@@ -2167,7 +2486,7 @@ public class Contract extends DomainResource {
          * Role played by the agent assigned this role in the execution of this Contract Provision.
          */
         @Child(name = "role", type = {CodeableConcept.class}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-        @Description(shortDefinition="Contract Term Agent Role", formalDefinition="Role played by the agent assigned this role in the execution of this Contract Provision." )
+        @Description(shortDefinition="Type of the Contract Term Agent", formalDefinition="Role played by the agent assigned this role in the execution of this Contract Provision." )
         @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/contract-actorrole")
         protected List<CodeableConcept> role;
 
@@ -2297,35 +2616,46 @@ public class Contract extends DomainResource {
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case 92645877: // actor
           this.actor = castToReference(value); // Reference
-          break;
+          return value;
         case 3506294: // role
           this.getRole().add(castToCodeableConcept(value)); // CodeableConcept
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("actor"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("actor")) {
           this.actor = castToReference(value); // Reference
-        else if (name.equals("role"))
+        } else if (name.equals("role")) {
           this.getRole().add(castToCodeableConcept(value));
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 92645877:  return getActor(); // Reference
-        case 3506294:  return addRole(); // CodeableConcept
+        case 92645877:  return getActor(); 
+        case 3506294:  return addRole(); 
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 92645877: /*actor*/ return new String[] {"Reference"};
+        case 3506294: /*role*/ return new String[] {"CodeableConcept"};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }
@@ -2399,7 +2729,7 @@ public class Contract extends DomainResource {
          * Identifies a Contract Provision Valued Item instance.
          */
         @Child(name = "identifier", type = {Identifier.class}, order=2, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Contract Term Valued Item Identifier", formalDefinition="Identifies a Contract Provision Valued Item instance." )
+        @Description(shortDefinition="Contract Term Valued Item Number", formalDefinition="Identifies a Contract Provision Valued Item instance." )
         protected Identifier identifier;
 
         /**
@@ -2806,71 +3136,89 @@ public class Contract extends DomainResource {
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case -1298275357: // entity
           this.entity = castToType(value); // Type
-          break;
+          return value;
         case -1618432855: // identifier
           this.identifier = castToIdentifier(value); // Identifier
-          break;
+          return value;
         case -929905388: // effectiveTime
           this.effectiveTime = castToDateTime(value); // DateTimeType
-          break;
+          return value;
         case -1285004149: // quantity
           this.quantity = castToSimpleQuantity(value); // SimpleQuantity
-          break;
+          return value;
         case -486196699: // unitPrice
           this.unitPrice = castToMoney(value); // Money
-          break;
+          return value;
         case -1282148017: // factor
           this.factor = castToDecimal(value); // DecimalType
-          break;
+          return value;
         case -982754077: // points
           this.points = castToDecimal(value); // DecimalType
-          break;
+          return value;
         case 108957: // net
           this.net = castToMoney(value); // Money
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("entity[x]"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("entity[x]")) {
           this.entity = castToType(value); // Type
-        else if (name.equals("identifier"))
+        } else if (name.equals("identifier")) {
           this.identifier = castToIdentifier(value); // Identifier
-        else if (name.equals("effectiveTime"))
+        } else if (name.equals("effectiveTime")) {
           this.effectiveTime = castToDateTime(value); // DateTimeType
-        else if (name.equals("quantity"))
+        } else if (name.equals("quantity")) {
           this.quantity = castToSimpleQuantity(value); // SimpleQuantity
-        else if (name.equals("unitPrice"))
+        } else if (name.equals("unitPrice")) {
           this.unitPrice = castToMoney(value); // Money
-        else if (name.equals("factor"))
+        } else if (name.equals("factor")) {
           this.factor = castToDecimal(value); // DecimalType
-        else if (name.equals("points"))
+        } else if (name.equals("points")) {
           this.points = castToDecimal(value); // DecimalType
-        else if (name.equals("net"))
+        } else if (name.equals("net")) {
           this.net = castToMoney(value); // Money
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case -740568643:  return getEntity(); // Type
-        case -1618432855:  return getIdentifier(); // Identifier
-        case -929905388: throw new FHIRException("Cannot make property effectiveTime as it is not a complex type"); // DateTimeType
-        case -1285004149:  return getQuantity(); // SimpleQuantity
-        case -486196699:  return getUnitPrice(); // Money
-        case -1282148017: throw new FHIRException("Cannot make property factor as it is not a complex type"); // DecimalType
-        case -982754077: throw new FHIRException("Cannot make property points as it is not a complex type"); // DecimalType
-        case 108957:  return getNet(); // Money
+        case -740568643:  return getEntity(); 
+        case -1298275357:  return getEntity(); 
+        case -1618432855:  return getIdentifier(); 
+        case -929905388:  return getEffectiveTimeElement();
+        case -1285004149:  return getQuantity(); 
+        case -486196699:  return getUnitPrice(); 
+        case -1282148017:  return getFactorElement();
+        case -982754077:  return getPointsElement();
+        case 108957:  return getNet(); 
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -1298275357: /*entity*/ return new String[] {"CodeableConcept", "Reference"};
+        case -1618432855: /*identifier*/ return new String[] {"Identifier"};
+        case -929905388: /*effectiveTime*/ return new String[] {"dateTime"};
+        case -1285004149: /*quantity*/ return new String[] {"SimpleQuantity"};
+        case -486196699: /*unitPrice*/ return new String[] {"Money"};
+        case -1282148017: /*factor*/ return new String[] {"decimal"};
+        case -982754077: /*points*/ return new String[] {"decimal"};
+        case 108957: /*net*/ return new String[] {"Money"};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }
@@ -3049,29 +3397,40 @@ public class Contract extends DomainResource {
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case 951530617: // content
           this.content = castToType(value); // Type
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("content[x]"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("content[x]")) {
           this.content = castToType(value); // Type
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 264548711:  return getContent(); // Type
+        case 264548711:  return getContent(); 
+        case 951530617:  return getContent(); 
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 951530617: /*content*/ return new String[] {"Attachment", "Reference"};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }
@@ -3214,29 +3573,40 @@ public class Contract extends DomainResource {
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case 951530617: // content
           this.content = castToType(value); // Type
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("content[x]"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("content[x]")) {
           this.content = castToType(value); // Type
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 264548711:  return getContent(); // Type
+        case 264548711:  return getContent(); 
+        case 951530617:  return getContent(); 
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 951530617: /*content*/ return new String[] {"Attachment", "Reference"};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }
@@ -3379,29 +3749,40 @@ public class Contract extends DomainResource {
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case 951530617: // content
           this.content = castToType(value); // Type
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("content[x]"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("content[x]")) {
           this.content = castToType(value); // Type
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 264548711:  return getContent(); // Type
+        case 264548711:  return getContent(); 
+        case 951530617:  return getContent(); 
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 951530617: /*content*/ return new String[] {"Attachment", "Reference"};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }
@@ -3462,15 +3843,15 @@ public class Contract extends DomainResource {
      * Unique identifier for this Contract.
      */
     @Child(name = "identifier", type = {Identifier.class}, order=0, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Contract identifier", formalDefinition="Unique identifier for this Contract." )
+    @Description(shortDefinition="Contract number", formalDefinition="Unique identifier for this Contract." )
     protected Identifier identifier;
 
     /**
      * The status of the resource instance.
      */
     @Child(name = "status", type = {CodeType.class}, order=1, min=0, max=1, modifier=true, summary=true)
-    @Description(shortDefinition="active | cancelled | draft | entered-in-error", formalDefinition="The status of the resource instance." )
-    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/fm-status")
+    @Description(shortDefinition="amended | appended | cancelled | disputed | entered-in-error | executable | executed | negotiable | offered | policy | rejected | renewed | revoked | resolved | terminated", formalDefinition="The status of the resource instance." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/contract-status")
     protected Enumeration<ContractStatus> status;
 
     /**
@@ -3539,7 +3920,7 @@ public class Contract extends DomainResource {
      * Type of Contract such as an insurance policy, real estate contract, a will, power of attorny, Privacy or Security policy , trust framework agreement, etc.
      */
     @Child(name = "type", type = {CodeableConcept.class}, order=8, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Contract Type", formalDefinition="Type of Contract such as an insurance policy, real estate contract, a will, power of attorny, Privacy or Security policy , trust framework agreement, etc." )
+    @Description(shortDefinition="Type or form", formalDefinition="Type of Contract such as an insurance policy, real estate contract, a will, power of attorny, Privacy or Security policy , trust framework agreement, etc." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/contract-type")
     protected CodeableConcept type;
 
@@ -3547,7 +3928,7 @@ public class Contract extends DomainResource {
      * More specific type or specialization of an overarching or more general contract such as auto insurance, home owner  insurance, prenupial agreement, Advanced-Directive, or privacy consent.
      */
     @Child(name = "subType", type = {CodeableConcept.class}, order=9, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-    @Description(shortDefinition="Contract Subtype", formalDefinition="More specific type or specialization of an overarching or more general contract such as auto insurance, home owner  insurance, prenupial agreement, Advanced-Directive, or privacy consent." )
+    @Description(shortDefinition="Subtype within the context of type", formalDefinition="More specific type or specialization of an overarching or more general contract such as auto insurance, home owner  insurance, prenupial agreement, Advanced-Directive, or privacy consent." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/contract-subtype")
     protected List<CodeableConcept> subType;
 
@@ -3555,7 +3936,7 @@ public class Contract extends DomainResource {
      * Action stipulated by this Contract.
      */
     @Child(name = "action", type = {CodeableConcept.class}, order=10, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="Contract Action", formalDefinition="Action stipulated by this Contract." )
+    @Description(shortDefinition="Action stipulated by this Contract", formalDefinition="Action stipulated by this Contract." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/contract-action")
     protected List<CodeableConcept> action;
 
@@ -3563,67 +3944,91 @@ public class Contract extends DomainResource {
      * Reason for action stipulated by this Contract.
      */
     @Child(name = "actionReason", type = {CodeableConcept.class}, order=11, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="Contract Action Reason", formalDefinition="Reason for action stipulated by this Contract." )
+    @Description(shortDefinition="Rationale for the stiplulated action", formalDefinition="Reason for action stipulated by this Contract." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/v3-PurposeOfUse")
     protected List<CodeableConcept> actionReason;
 
     /**
+     * The type of decision made by a grantor with respect to an offer made by a grantee.
+     */
+    @Child(name = "decisionType", type = {CodeableConcept.class}, order=12, min=0, max=1, modifier=false, summary=false)
+    @Description(shortDefinition="Decision by Grantor", formalDefinition="The type of decision made by a grantor with respect to an offer made by a grantee." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/v3-ActConsentDirective")
+    protected CodeableConcept decisionType;
+
+    /**
+     * The minimal content derived from the basal information source at a specific stage in its lifecycle.
+     */
+    @Child(name = "contentDerivative", type = {CodeableConcept.class}, order=13, min=0, max=1, modifier=false, summary=false)
+    @Description(shortDefinition="Content derived from the basal information", formalDefinition="The minimal content derived from the basal information source at a specific stage in its lifecycle." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/contract-content-derivative")
+    protected CodeableConcept contentDerivative;
+
+    /**
+     * A set of security labels that define which resources are controlled by this consent. If more than one label is specified, all resources must have all the specified labels.
+     */
+    @Child(name = "securityLabel", type = {Coding.class}, order=14, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Description(shortDefinition="Security Labels that define affected resources", formalDefinition="A set of security labels that define which resources are controlled by this consent. If more than one label is specified, all resources must have all the specified labels." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/security-labels")
+    protected List<Coding> securityLabel;
+
+    /**
      * An actor taking a role in an activity for which it can be assigned some degree of responsibility for the activity taking place.
      */
-    @Child(name = "agent", type = {}, order=12, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="Contract Agent", formalDefinition="An actor taking a role in an activity for which it can be assigned some degree of responsibility for the activity taking place." )
+    @Child(name = "agent", type = {}, order=15, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Description(shortDefinition="Entity being ascribed responsibility", formalDefinition="An actor taking a role in an activity for which it can be assigned some degree of responsibility for the activity taking place." )
     protected List<AgentComponent> agent;
 
     /**
      * Parties with legal standing in the Contract, including the principal parties, the grantor(s) and grantee(s), which are any person or organization bound by the contract, and any ancillary parties, which facilitate the execution of the contract such as a notary or witness.
      */
-    @Child(name = "signer", type = {}, order=13, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="Contract Signer", formalDefinition="Parties with legal standing in the Contract, including the principal parties, the grantor(s) and grantee(s), which are any person or organization bound by the contract, and any ancillary parties, which facilitate the execution of the contract such as a notary or witness." )
+    @Child(name = "signer", type = {}, order=16, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Description(shortDefinition="Contract Signatory", formalDefinition="Parties with legal standing in the Contract, including the principal parties, the grantor(s) and grantee(s), which are any person or organization bound by the contract, and any ancillary parties, which facilitate the execution of the contract such as a notary or witness." )
     protected List<SignatoryComponent> signer;
 
     /**
      * Contract Valued Item List.
      */
-    @Child(name = "valuedItem", type = {}, order=14, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="Contract Valued Item", formalDefinition="Contract Valued Item List." )
+    @Child(name = "valuedItem", type = {}, order=17, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Description(shortDefinition="Contract Valued Item List", formalDefinition="Contract Valued Item List." )
     protected List<ValuedItemComponent> valuedItem;
 
     /**
      * One or more Contract Provisions, which may be related and conveyed as a group, and may contain nested groups.
      */
-    @Child(name = "term", type = {}, order=15, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "term", type = {}, order=18, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Contract Term List", formalDefinition="One or more Contract Provisions, which may be related and conveyed as a group, and may contain nested groups." )
     protected List<TermComponent> term;
 
     /**
      * Legally binding Contract: This is the signed and legally recognized representation of the Contract, which is considered the "source of truth" and which would be the basis for legal action related to enforcement of this Contract.
      */
-    @Child(name = "binding", type = {Attachment.class, Composition.class, DocumentReference.class, QuestionnaireResponse.class}, order=16, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "binding", type = {Attachment.class, Composition.class, DocumentReference.class, QuestionnaireResponse.class}, order=19, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Binding Contract", formalDefinition="Legally binding Contract: This is the signed and legally recognized representation of the Contract, which is considered the \"source of truth\" and which would be the basis for legal action related to enforcement of this Contract." )
     protected Type binding;
 
     /**
      * The "patient friendly language" versionof the Contract in whole or in parts. "Patient friendly language" means the representation of the Contract and Contract Provisions in a manner that is readily accessible and understandable by a layperson in accordance with best practices for communication styles that ensure that those agreeing to or signing the Contract understand the roles, actions, obligations, responsibilities, and implication of the agreement.
      */
-    @Child(name = "friendly", type = {}, order=17, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "friendly", type = {}, order=20, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Contract Friendly Language", formalDefinition="The \"patient friendly language\" versionof the Contract in whole or in parts. \"Patient friendly language\" means the representation of the Contract and Contract Provisions in a manner that is readily accessible and understandable by a layperson in accordance with best practices for communication styles that ensure that those agreeing to or signing the Contract understand the roles, actions, obligations, responsibilities, and implication of the agreement." )
     protected List<FriendlyLanguageComponent> friendly;
 
     /**
      * List of Legal expressions or representations of this Contract.
      */
-    @Child(name = "legal", type = {}, order=18, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "legal", type = {}, order=21, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Contract Legal Language", formalDefinition="List of Legal expressions or representations of this Contract." )
     protected List<LegalLanguageComponent> legal;
 
     /**
      * List of Computable Policy Rule Language Representations of this Contract.
      */
-    @Child(name = "rule", type = {}, order=19, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "rule", type = {}, order=22, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Computable Contract Language", formalDefinition="List of Computable Policy Rule Language Representations of this Contract." )
     protected List<ComputableLanguageComponent> rule;
 
-    private static final long serialVersionUID = 90292068L;
+    private static final long serialVersionUID = -254555038L;
 
   /**
    * Constructor
@@ -4238,6 +4643,107 @@ public class Contract extends DomainResource {
     }
 
     /**
+     * @return {@link #decisionType} (The type of decision made by a grantor with respect to an offer made by a grantee.)
+     */
+    public CodeableConcept getDecisionType() { 
+      if (this.decisionType == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create Contract.decisionType");
+        else if (Configuration.doAutoCreate())
+          this.decisionType = new CodeableConcept(); // cc
+      return this.decisionType;
+    }
+
+    public boolean hasDecisionType() { 
+      return this.decisionType != null && !this.decisionType.isEmpty();
+    }
+
+    /**
+     * @param value {@link #decisionType} (The type of decision made by a grantor with respect to an offer made by a grantee.)
+     */
+    public Contract setDecisionType(CodeableConcept value) { 
+      this.decisionType = value;
+      return this;
+    }
+
+    /**
+     * @return {@link #contentDerivative} (The minimal content derived from the basal information source at a specific stage in its lifecycle.)
+     */
+    public CodeableConcept getContentDerivative() { 
+      if (this.contentDerivative == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create Contract.contentDerivative");
+        else if (Configuration.doAutoCreate())
+          this.contentDerivative = new CodeableConcept(); // cc
+      return this.contentDerivative;
+    }
+
+    public boolean hasContentDerivative() { 
+      return this.contentDerivative != null && !this.contentDerivative.isEmpty();
+    }
+
+    /**
+     * @param value {@link #contentDerivative} (The minimal content derived from the basal information source at a specific stage in its lifecycle.)
+     */
+    public Contract setContentDerivative(CodeableConcept value) { 
+      this.contentDerivative = value;
+      return this;
+    }
+
+    /**
+     * @return {@link #securityLabel} (A set of security labels that define which resources are controlled by this consent. If more than one label is specified, all resources must have all the specified labels.)
+     */
+    public List<Coding> getSecurityLabel() { 
+      if (this.securityLabel == null)
+        this.securityLabel = new ArrayList<Coding>();
+      return this.securityLabel;
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public Contract setSecurityLabel(List<Coding> theSecurityLabel) { 
+      this.securityLabel = theSecurityLabel;
+      return this;
+    }
+
+    public boolean hasSecurityLabel() { 
+      if (this.securityLabel == null)
+        return false;
+      for (Coding item : this.securityLabel)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    public Coding addSecurityLabel() { //3
+      Coding t = new Coding();
+      if (this.securityLabel == null)
+        this.securityLabel = new ArrayList<Coding>();
+      this.securityLabel.add(t);
+      return t;
+    }
+
+    public Contract addSecurityLabel(Coding t) { //3
+      if (t == null)
+        return this;
+      if (this.securityLabel == null)
+        this.securityLabel = new ArrayList<Coding>();
+      this.securityLabel.add(t);
+      return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #securityLabel}, creating it if it does not already exist
+     */
+    public Coding getSecurityLabelFirstRep() { 
+      if (getSecurityLabel().isEmpty()) {
+        addSecurityLabel();
+      }
+      return getSecurityLabel().get(0);
+    }
+
+    /**
      * @return {@link #agent} (An actor taking a role in an activity for which it can be assigned some degree of responsibility for the activity taking place.)
      */
     public List<AgentComponent> getAgent() { 
@@ -4667,6 +5173,9 @@ public class Contract extends DomainResource {
         childrenList.add(new Property("subType", "CodeableConcept", "More specific type or specialization of an overarching or more general contract such as auto insurance, home owner  insurance, prenupial agreement, Advanced-Directive, or privacy consent.", 0, java.lang.Integer.MAX_VALUE, subType));
         childrenList.add(new Property("action", "CodeableConcept", "Action stipulated by this Contract.", 0, java.lang.Integer.MAX_VALUE, action));
         childrenList.add(new Property("actionReason", "CodeableConcept", "Reason for action stipulated by this Contract.", 0, java.lang.Integer.MAX_VALUE, actionReason));
+        childrenList.add(new Property("decisionType", "CodeableConcept", "The type of decision made by a grantor with respect to an offer made by a grantee.", 0, java.lang.Integer.MAX_VALUE, decisionType));
+        childrenList.add(new Property("contentDerivative", "CodeableConcept", "The minimal content derived from the basal information source at a specific stage in its lifecycle.", 0, java.lang.Integer.MAX_VALUE, contentDerivative));
+        childrenList.add(new Property("securityLabel", "Coding", "A set of security labels that define which resources are controlled by this consent. If more than one label is specified, all resources must have all the specified labels.", 0, java.lang.Integer.MAX_VALUE, securityLabel));
         childrenList.add(new Property("agent", "", "An actor taking a role in an activity for which it can be assigned some degree of responsibility for the activity taking place.", 0, java.lang.Integer.MAX_VALUE, agent));
         childrenList.add(new Property("signer", "", "Parties with legal standing in the Contract, including the principal parties, the grantor(s) and grantee(s), which are any person or organization bound by the contract, and any ancillary parties, which facilitate the execution of the contract such as a notary or witness.", 0, java.lang.Integer.MAX_VALUE, signer));
         childrenList.add(new Property("valuedItem", "", "Contract Valued Item List.", 0, java.lang.Integer.MAX_VALUE, valuedItem));
@@ -4692,6 +5201,9 @@ public class Contract extends DomainResource {
         case -1868521062: /*subType*/ return this.subType == null ? new Base[0] : this.subType.toArray(new Base[this.subType.size()]); // CodeableConcept
         case -1422950858: /*action*/ return this.action == null ? new Base[0] : this.action.toArray(new Base[this.action.size()]); // CodeableConcept
         case 1465121818: /*actionReason*/ return this.actionReason == null ? new Base[0] : this.actionReason.toArray(new Base[this.actionReason.size()]); // CodeableConcept
+        case 676128054: /*decisionType*/ return this.decisionType == null ? new Base[0] : new Base[] {this.decisionType}; // CodeableConcept
+        case -92412192: /*contentDerivative*/ return this.contentDerivative == null ? new Base[0] : new Base[] {this.contentDerivative}; // CodeableConcept
+        case -722296940: /*securityLabel*/ return this.securityLabel == null ? new Base[0] : this.securityLabel.toArray(new Base[this.securityLabel.size()]); // Coding
         case 92750597: /*agent*/ return this.agent == null ? new Base[0] : this.agent.toArray(new Base[this.agent.size()]); // AgentComponent
         case -902467798: /*signer*/ return this.signer == null ? new Base[0] : this.signer.toArray(new Base[this.signer.size()]); // SignatoryComponent
         case 2046675654: /*valuedItem*/ return this.valuedItem == null ? new Base[0] : this.valuedItem.toArray(new Base[this.valuedItem.size()]); // ValuedItemComponent
@@ -4706,143 +5218,196 @@ public class Contract extends DomainResource {
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case -1618432855: // identifier
           this.identifier = castToIdentifier(value); // Identifier
-          break;
+          return value;
         case -892481550: // status
-          this.status = new ContractStatusEnumFactory().fromType(value); // Enumeration<ContractStatus>
-          break;
+          value = new ContractStatusEnumFactory().fromType(castToCode(value));
+          this.status = (Enumeration) value; // Enumeration<ContractStatus>
+          return value;
         case -1179159893: // issued
           this.issued = castToDateTime(value); // DateTimeType
-          break;
+          return value;
         case -793235316: // applies
           this.applies = castToPeriod(value); // Period
-          break;
+          return value;
         case -1867885268: // subject
           this.getSubject().add(castToReference(value)); // Reference
-          break;
+          return value;
         case 110546223: // topic
           this.getTopic().add(castToReference(value)); // Reference
-          break;
+          return value;
         case 1475610435: // authority
           this.getAuthority().add(castToReference(value)); // Reference
-          break;
+          return value;
         case -1326197564: // domain
           this.getDomain().add(castToReference(value)); // Reference
-          break;
+          return value;
         case 3575610: // type
           this.type = castToCodeableConcept(value); // CodeableConcept
-          break;
+          return value;
         case -1868521062: // subType
           this.getSubType().add(castToCodeableConcept(value)); // CodeableConcept
-          break;
+          return value;
         case -1422950858: // action
           this.getAction().add(castToCodeableConcept(value)); // CodeableConcept
-          break;
+          return value;
         case 1465121818: // actionReason
           this.getActionReason().add(castToCodeableConcept(value)); // CodeableConcept
-          break;
+          return value;
+        case 676128054: // decisionType
+          this.decisionType = castToCodeableConcept(value); // CodeableConcept
+          return value;
+        case -92412192: // contentDerivative
+          this.contentDerivative = castToCodeableConcept(value); // CodeableConcept
+          return value;
+        case -722296940: // securityLabel
+          this.getSecurityLabel().add(castToCoding(value)); // Coding
+          return value;
         case 92750597: // agent
           this.getAgent().add((AgentComponent) value); // AgentComponent
-          break;
+          return value;
         case -902467798: // signer
           this.getSigner().add((SignatoryComponent) value); // SignatoryComponent
-          break;
+          return value;
         case 2046675654: // valuedItem
           this.getValuedItem().add((ValuedItemComponent) value); // ValuedItemComponent
-          break;
+          return value;
         case 3556460: // term
           this.getTerm().add((TermComponent) value); // TermComponent
-          break;
+          return value;
         case -108220795: // binding
           this.binding = castToType(value); // Type
-          break;
+          return value;
         case -1423054677: // friendly
           this.getFriendly().add((FriendlyLanguageComponent) value); // FriendlyLanguageComponent
-          break;
+          return value;
         case 102851257: // legal
           this.getLegal().add((LegalLanguageComponent) value); // LegalLanguageComponent
-          break;
+          return value;
         case 3512060: // rule
           this.getRule().add((ComputableLanguageComponent) value); // ComputableLanguageComponent
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("identifier"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("identifier")) {
           this.identifier = castToIdentifier(value); // Identifier
-        else if (name.equals("status"))
-          this.status = new ContractStatusEnumFactory().fromType(value); // Enumeration<ContractStatus>
-        else if (name.equals("issued"))
+        } else if (name.equals("status")) {
+          value = new ContractStatusEnumFactory().fromType(castToCode(value));
+          this.status = (Enumeration) value; // Enumeration<ContractStatus>
+        } else if (name.equals("issued")) {
           this.issued = castToDateTime(value); // DateTimeType
-        else if (name.equals("applies"))
+        } else if (name.equals("applies")) {
           this.applies = castToPeriod(value); // Period
-        else if (name.equals("subject"))
+        } else if (name.equals("subject")) {
           this.getSubject().add(castToReference(value));
-        else if (name.equals("topic"))
+        } else if (name.equals("topic")) {
           this.getTopic().add(castToReference(value));
-        else if (name.equals("authority"))
+        } else if (name.equals("authority")) {
           this.getAuthority().add(castToReference(value));
-        else if (name.equals("domain"))
+        } else if (name.equals("domain")) {
           this.getDomain().add(castToReference(value));
-        else if (name.equals("type"))
+        } else if (name.equals("type")) {
           this.type = castToCodeableConcept(value); // CodeableConcept
-        else if (name.equals("subType"))
+        } else if (name.equals("subType")) {
           this.getSubType().add(castToCodeableConcept(value));
-        else if (name.equals("action"))
+        } else if (name.equals("action")) {
           this.getAction().add(castToCodeableConcept(value));
-        else if (name.equals("actionReason"))
+        } else if (name.equals("actionReason")) {
           this.getActionReason().add(castToCodeableConcept(value));
-        else if (name.equals("agent"))
+        } else if (name.equals("decisionType")) {
+          this.decisionType = castToCodeableConcept(value); // CodeableConcept
+        } else if (name.equals("contentDerivative")) {
+          this.contentDerivative = castToCodeableConcept(value); // CodeableConcept
+        } else if (name.equals("securityLabel")) {
+          this.getSecurityLabel().add(castToCoding(value));
+        } else if (name.equals("agent")) {
           this.getAgent().add((AgentComponent) value);
-        else if (name.equals("signer"))
+        } else if (name.equals("signer")) {
           this.getSigner().add((SignatoryComponent) value);
-        else if (name.equals("valuedItem"))
+        } else if (name.equals("valuedItem")) {
           this.getValuedItem().add((ValuedItemComponent) value);
-        else if (name.equals("term"))
+        } else if (name.equals("term")) {
           this.getTerm().add((TermComponent) value);
-        else if (name.equals("binding[x]"))
+        } else if (name.equals("binding[x]")) {
           this.binding = castToType(value); // Type
-        else if (name.equals("friendly"))
+        } else if (name.equals("friendly")) {
           this.getFriendly().add((FriendlyLanguageComponent) value);
-        else if (name.equals("legal"))
+        } else if (name.equals("legal")) {
           this.getLegal().add((LegalLanguageComponent) value);
-        else if (name.equals("rule"))
+        } else if (name.equals("rule")) {
           this.getRule().add((ComputableLanguageComponent) value);
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case -1618432855:  return getIdentifier(); // Identifier
-        case -892481550: throw new FHIRException("Cannot make property status as it is not a complex type"); // Enumeration<ContractStatus>
-        case -1179159893: throw new FHIRException("Cannot make property issued as it is not a complex type"); // DateTimeType
-        case -793235316:  return getApplies(); // Period
-        case -1867885268:  return addSubject(); // Reference
-        case 110546223:  return addTopic(); // Reference
-        case 1475610435:  return addAuthority(); // Reference
-        case -1326197564:  return addDomain(); // Reference
-        case 3575610:  return getType(); // CodeableConcept
-        case -1868521062:  return addSubType(); // CodeableConcept
-        case -1422950858:  return addAction(); // CodeableConcept
-        case 1465121818:  return addActionReason(); // CodeableConcept
-        case 92750597:  return addAgent(); // AgentComponent
-        case -902467798:  return addSigner(); // SignatoryComponent
-        case 2046675654:  return addValuedItem(); // ValuedItemComponent
-        case 3556460:  return addTerm(); // TermComponent
-        case 1514826715:  return getBinding(); // Type
-        case -1423054677:  return addFriendly(); // FriendlyLanguageComponent
-        case 102851257:  return addLegal(); // LegalLanguageComponent
-        case 3512060:  return addRule(); // ComputableLanguageComponent
+        case -1618432855:  return getIdentifier(); 
+        case -892481550:  return getStatusElement();
+        case -1179159893:  return getIssuedElement();
+        case -793235316:  return getApplies(); 
+        case -1867885268:  return addSubject(); 
+        case 110546223:  return addTopic(); 
+        case 1475610435:  return addAuthority(); 
+        case -1326197564:  return addDomain(); 
+        case 3575610:  return getType(); 
+        case -1868521062:  return addSubType(); 
+        case -1422950858:  return addAction(); 
+        case 1465121818:  return addActionReason(); 
+        case 676128054:  return getDecisionType(); 
+        case -92412192:  return getContentDerivative(); 
+        case -722296940:  return addSecurityLabel(); 
+        case 92750597:  return addAgent(); 
+        case -902467798:  return addSigner(); 
+        case 2046675654:  return addValuedItem(); 
+        case 3556460:  return addTerm(); 
+        case 1514826715:  return getBinding(); 
+        case -108220795:  return getBinding(); 
+        case -1423054677:  return addFriendly(); 
+        case 102851257:  return addLegal(); 
+        case 3512060:  return addRule(); 
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -1618432855: /*identifier*/ return new String[] {"Identifier"};
+        case -892481550: /*status*/ return new String[] {"code"};
+        case -1179159893: /*issued*/ return new String[] {"dateTime"};
+        case -793235316: /*applies*/ return new String[] {"Period"};
+        case -1867885268: /*subject*/ return new String[] {"Reference"};
+        case 110546223: /*topic*/ return new String[] {"Reference"};
+        case 1475610435: /*authority*/ return new String[] {"Reference"};
+        case -1326197564: /*domain*/ return new String[] {"Reference"};
+        case 3575610: /*type*/ return new String[] {"CodeableConcept"};
+        case -1868521062: /*subType*/ return new String[] {"CodeableConcept"};
+        case -1422950858: /*action*/ return new String[] {"CodeableConcept"};
+        case 1465121818: /*actionReason*/ return new String[] {"CodeableConcept"};
+        case 676128054: /*decisionType*/ return new String[] {"CodeableConcept"};
+        case -92412192: /*contentDerivative*/ return new String[] {"CodeableConcept"};
+        case -722296940: /*securityLabel*/ return new String[] {"Coding"};
+        case 92750597: /*agent*/ return new String[] {};
+        case -902467798: /*signer*/ return new String[] {};
+        case 2046675654: /*valuedItem*/ return new String[] {};
+        case 3556460: /*term*/ return new String[] {};
+        case -108220795: /*binding*/ return new String[] {"Attachment", "Reference"};
+        case -1423054677: /*friendly*/ return new String[] {};
+        case 102851257: /*legal*/ return new String[] {};
+        case 3512060: /*rule*/ return new String[] {};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }
@@ -4887,6 +5452,17 @@ public class Contract extends DomainResource {
         }
         else if (name.equals("actionReason")) {
           return addActionReason();
+        }
+        else if (name.equals("decisionType")) {
+          this.decisionType = new CodeableConcept();
+          return this.decisionType;
+        }
+        else if (name.equals("contentDerivative")) {
+          this.contentDerivative = new CodeableConcept();
+          return this.contentDerivative;
+        }
+        else if (name.equals("securityLabel")) {
+          return addSecurityLabel();
         }
         else if (name.equals("agent")) {
           return addAgent();
@@ -4969,6 +5545,13 @@ public class Contract extends DomainResource {
           for (CodeableConcept i : actionReason)
             dst.actionReason.add(i.copy());
         };
+        dst.decisionType = decisionType == null ? null : decisionType.copy();
+        dst.contentDerivative = contentDerivative == null ? null : contentDerivative.copy();
+        if (securityLabel != null) {
+          dst.securityLabel = new ArrayList<Coding>();
+          for (Coding i : securityLabel)
+            dst.securityLabel.add(i.copy());
+        };
         if (agent != null) {
           dst.agent = new ArrayList<AgentComponent>();
           for (AgentComponent i : agent)
@@ -5023,9 +5606,11 @@ public class Contract extends DomainResource {
            && compareDeep(applies, o.applies, true) && compareDeep(subject, o.subject, true) && compareDeep(topic, o.topic, true)
            && compareDeep(authority, o.authority, true) && compareDeep(domain, o.domain, true) && compareDeep(type, o.type, true)
            && compareDeep(subType, o.subType, true) && compareDeep(action, o.action, true) && compareDeep(actionReason, o.actionReason, true)
-           && compareDeep(agent, o.agent, true) && compareDeep(signer, o.signer, true) && compareDeep(valuedItem, o.valuedItem, true)
-           && compareDeep(term, o.term, true) && compareDeep(binding, o.binding, true) && compareDeep(friendly, o.friendly, true)
-           && compareDeep(legal, o.legal, true) && compareDeep(rule, o.rule, true);
+           && compareDeep(decisionType, o.decisionType, true) && compareDeep(contentDerivative, o.contentDerivative, true)
+           && compareDeep(securityLabel, o.securityLabel, true) && compareDeep(agent, o.agent, true) && compareDeep(signer, o.signer, true)
+           && compareDeep(valuedItem, o.valuedItem, true) && compareDeep(term, o.term, true) && compareDeep(binding, o.binding, true)
+           && compareDeep(friendly, o.friendly, true) && compareDeep(legal, o.legal, true) && compareDeep(rule, o.rule, true)
+          ;
       }
 
       @Override
@@ -5041,7 +5626,8 @@ public class Contract extends DomainResource {
       public boolean isEmpty() {
         return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, status, issued
           , applies, subject, topic, authority, domain, type, subType, action, actionReason
-          , agent, signer, valuedItem, term, binding, friendly, legal, rule);
+          , decisionType, contentDerivative, securityLabel, agent, signer, valuedItem, term
+          , binding, friendly, legal, rule);
       }
 
   @Override
@@ -5094,32 +5680,6 @@ public class Contract extends DomainResource {
    * the path value of "<b>Contract:agent</b>".
    */
   public static final ca.uhn.fhir.model.api.Include INCLUDE_AGENT = new ca.uhn.fhir.model.api.Include("Contract:agent").toLocked();
-
- /**
-   * Search parameter: <b>ttopic</b>
-   * <p>
-   * Description: <b>The identity of the topic of the contract terms</b><br>
-   * Type: <b>reference</b><br>
-   * Path: <b>Contract.term.topic</b><br>
-   * </p>
-   */
-  @SearchParamDefinition(name="ttopic", path="Contract.term.topic", description="The identity of the topic of the contract terms", type="reference" )
-  public static final String SP_TTOPIC = "ttopic";
- /**
-   * <b>Fluent Client</b> search parameter constant for <b>ttopic</b>
-   * <p>
-   * Description: <b>The identity of the topic of the contract terms</b><br>
-   * Type: <b>reference</b><br>
-   * Path: <b>Contract.term.topic</b><br>
-   * </p>
-   */
-  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam TTOPIC = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_TTOPIC);
-
-/**
-   * Constant for fluent queries to be used to add include statements. Specifies
-   * the path value of "<b>Contract:ttopic</b>".
-   */
-  public static final ca.uhn.fhir.model.api.Include INCLUDE_TTOPIC = new ca.uhn.fhir.model.api.Include("Contract:ttopic").toLocked();
 
  /**
    * Search parameter: <b>patient</b>
@@ -5226,30 +5786,30 @@ public class Contract extends DomainResource {
   public static final ca.uhn.fhir.model.api.Include INCLUDE_DOMAIN = new ca.uhn.fhir.model.api.Include("Contract:domain").toLocked();
 
  /**
-   * Search parameter: <b>topic</b>
+   * Search parameter: <b>term-topic</b>
    * <p>
-   * Description: <b>The identity of the topic of the contract</b><br>
+   * Description: <b>The identity of the topic of the contract terms</b><br>
    * Type: <b>reference</b><br>
-   * Path: <b>Contract.topic</b><br>
+   * Path: <b>Contract.term.topic</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="topic", path="Contract.topic", description="The identity of the topic of the contract", type="reference" )
-  public static final String SP_TOPIC = "topic";
+  @SearchParamDefinition(name="term-topic", path="Contract.term.topic", description="The identity of the topic of the contract terms", type="reference" )
+  public static final String SP_TERM_TOPIC = "term-topic";
  /**
-   * <b>Fluent Client</b> search parameter constant for <b>topic</b>
+   * <b>Fluent Client</b> search parameter constant for <b>term-topic</b>
    * <p>
-   * Description: <b>The identity of the topic of the contract</b><br>
+   * Description: <b>The identity of the topic of the contract terms</b><br>
    * Type: <b>reference</b><br>
-   * Path: <b>Contract.topic</b><br>
+   * Path: <b>Contract.term.topic</b><br>
    * </p>
    */
-  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam TOPIC = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_TOPIC);
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam TERM_TOPIC = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_TERM_TOPIC);
 
 /**
    * Constant for fluent queries to be used to add include statements. Specifies
-   * the path value of "<b>Contract:topic</b>".
+   * the path value of "<b>Contract:term-topic</b>".
    */
-  public static final ca.uhn.fhir.model.api.Include INCLUDE_TOPIC = new ca.uhn.fhir.model.api.Include("Contract:topic").toLocked();
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_TERM_TOPIC = new ca.uhn.fhir.model.api.Include("Contract:term-topic").toLocked();
 
  /**
    * Search parameter: <b>issued</b>

@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Thu, Feb 9, 2017 08:03-0500 for FHIR v1.9.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,9 +37,17 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum ProcedureStatus {
 
         /**
-         * The procedure is still occurring.
+         * The core procedure has not started yet, but some staging activities have begun (e.g. surgical suite preparation).  Preparation stages may be tracked for billing purposes.
+         */
+        PREPARATION, 
+        /**
+         * The procedure is currently occurring.
          */
         INPROGRESS, 
+        /**
+         * The procedure has been temporarily stopped but is expected to resume in the future
+         */
+        SUSPENDED, 
         /**
          * The procedure was terminated without completing successfully.
          */
@@ -49,11 +57,11 @@ public enum ProcedureStatus {
          */
         COMPLETED, 
         /**
-         * The statement was entered in error and Is not valid.
+         * This electronic record should never have existed.
          */
         ENTEREDINERROR, 
         /**
-         * The authoring system doesn't know the current state of the procedure.
+         * The authoring system does not know which of the status values currently applies for this procedure.  Note: This concept is not to be used for "other" - one of the listed statuses is presumed to apply, it's just not known which one.
          */
         UNKNOWN, 
         /**
@@ -63,8 +71,12 @@ public enum ProcedureStatus {
         public static ProcedureStatus fromCode(String codeString) throws FHIRException {
             if (codeString == null || "".equals(codeString))
                 return null;
+        if ("preparation".equals(codeString))
+          return PREPARATION;
         if ("in-progress".equals(codeString))
           return INPROGRESS;
+        if ("suspended".equals(codeString))
+          return SUSPENDED;
         if ("aborted".equals(codeString))
           return ABORTED;
         if ("completed".equals(codeString))
@@ -77,7 +89,9 @@ public enum ProcedureStatus {
         }
         public String toCode() {
           switch (this) {
+            case PREPARATION: return "preparation";
             case INPROGRESS: return "in-progress";
+            case SUSPENDED: return "suspended";
             case ABORTED: return "aborted";
             case COMPLETED: return "completed";
             case ENTEREDINERROR: return "entered-in-error";
@@ -90,17 +104,21 @@ public enum ProcedureStatus {
         }
         public String getDefinition() {
           switch (this) {
-            case INPROGRESS: return "The procedure is still occurring.";
+            case PREPARATION: return "The core procedure has not started yet, but some staging activities have begun (e.g. surgical suite preparation).  Preparation stages may be tracked for billing purposes.";
+            case INPROGRESS: return "The procedure is currently occurring.";
+            case SUSPENDED: return "The procedure has been temporarily stopped but is expected to resume in the future";
             case ABORTED: return "The procedure was terminated without completing successfully.";
             case COMPLETED: return "All actions involved in the procedure have taken place.";
-            case ENTEREDINERROR: return "The statement was entered in error and Is not valid.";
-            case UNKNOWN: return "The authoring system doesn't know the current state of the procedure.";
+            case ENTEREDINERROR: return "This electronic record should never have existed.";
+            case UNKNOWN: return "The authoring system does not know which of the status values currently applies for this procedure.  Note: This concept is not to be used for \"other\" - one of the listed statuses is presumed to apply, it's just not known which one.";
             default: return "?";
           }
         }
         public String getDisplay() {
           switch (this) {
+            case PREPARATION: return "Preparation";
             case INPROGRESS: return "In Progress";
+            case SUSPENDED: return "Suspended";
             case ABORTED: return "Aboted";
             case COMPLETED: return "Completed";
             case ENTEREDINERROR: return "Entered in Error";

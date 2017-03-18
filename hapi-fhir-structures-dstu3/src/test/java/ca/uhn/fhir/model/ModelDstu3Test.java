@@ -20,7 +20,7 @@ import org.hl7.fhir.dstu3.model.HumanName;
 import org.hl7.fhir.dstu3.model.Identifier;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.Practitioner;
-import org.hl7.fhir.dstu3.model.Practitioner.PractitionerRoleComponent;
+import org.hl7.fhir.dstu3.model.Practitioner.PractitionerQualificationComponent;
 import org.hl7.fhir.instance.model.api.IBaseElement;
 import org.junit.AfterClass;
 import org.junit.Test;
@@ -66,8 +66,8 @@ public class ModelDstu3Test {
 	@Test
 	public void testDontUseBoundCodeForExampleBinding() {
 		Practitioner p = new Practitioner();
-		PractitionerRoleComponent role = p.addRole();
-		CodeableConcept roleField = role.getCode();
+		PractitionerQualificationComponent qualification = p.addQualification();
+		CodeableConcept roleField = qualification.getCode();
 		assertEquals(CodeableConcept.class, roleField.getClass());
 	}
 

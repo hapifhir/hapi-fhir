@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
 
 
 import org.hl7.fhir.dstu3.model.EnumFactory;
@@ -49,6 +49,8 @@ public class GuidanceResponseStatusEnumFactory implements EnumFactory<GuidanceRe
       return GuidanceResponseStatus.INPROGRESS;
     if ("failure".equals(codeString))
       return GuidanceResponseStatus.FAILURE;
+    if ("entered-in-error".equals(codeString))
+      return GuidanceResponseStatus.ENTEREDINERROR;
     throw new IllegalArgumentException("Unknown GuidanceResponseStatus code '"+codeString+"'");
   }
 
@@ -63,6 +65,8 @@ public class GuidanceResponseStatusEnumFactory implements EnumFactory<GuidanceRe
       return "in-progress";
     if (code == GuidanceResponseStatus.FAILURE)
       return "failure";
+    if (code == GuidanceResponseStatus.ENTEREDINERROR)
+      return "entered-in-error";
     return "?";
   }
 

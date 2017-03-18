@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
 
 import java.util.*;
 
@@ -151,8 +151,10 @@ public class Slot extends DomainResource {
         throw new IllegalArgumentException("Unknown SlotStatus code '"+codeString+"'");
         }
         public Enumeration<SlotStatus> fromType(Base code) throws FHIRException {
-          if (code == null || code.isEmpty())
+          if (code == null)
             return null;
+          if (code.isEmpty())
+            return new Enumeration<SlotStatus>(this);
           String codeString = ((PrimitiveType) code).asStringValue();
           if (codeString == null || "".equals(codeString))
             return null;
@@ -218,10 +220,10 @@ public class Slot extends DomainResource {
     protected List<CodeableConcept> specialty;
 
     /**
-     * The style of appointment or patient that has been booked in the slot (not service type).
+     * The style of appointment or patient that may be booked in the slot (not service type).
      */
     @Child(name = "appointmentType", type = {CodeableConcept.class}, order=4, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="The style of appointment or patient that has been booked in the slot (not service type)", formalDefinition="The style of appointment or patient that has been booked in the slot (not service type)." )
+    @Description(shortDefinition="The style of appointment or patient that may be booked in the slot (not service type)", formalDefinition="The style of appointment or patient that may be booked in the slot (not service type)." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/v2-0276")
     protected CodeableConcept appointmentType;
 
@@ -477,7 +479,7 @@ public class Slot extends DomainResource {
     }
 
     /**
-     * @return {@link #appointmentType} (The style of appointment or patient that has been booked in the slot (not service type).)
+     * @return {@link #appointmentType} (The style of appointment or patient that may be booked in the slot (not service type).)
      */
     public CodeableConcept getAppointmentType() { 
       if (this.appointmentType == null)
@@ -493,7 +495,7 @@ public class Slot extends DomainResource {
     }
 
     /**
-     * @param value {@link #appointmentType} (The style of appointment or patient that has been booked in the slot (not service type).)
+     * @param value {@link #appointmentType} (The style of appointment or patient that may be booked in the slot (not service type).)
      */
     public Slot setAppointmentType(CodeableConcept value) { 
       this.appointmentType = value;
@@ -779,7 +781,7 @@ public class Slot extends DomainResource {
         childrenList.add(new Property("serviceCategory", "CodeableConcept", "A broad categorisation of the service that is to be performed during this appointment.", 0, java.lang.Integer.MAX_VALUE, serviceCategory));
         childrenList.add(new Property("serviceType", "CodeableConcept", "The type of appointments that can be booked into this slot (ideally this would be an identifiable service - which is at a location, rather than the location itself). If provided then this overrides the value provided on the availability resource.", 0, java.lang.Integer.MAX_VALUE, serviceType));
         childrenList.add(new Property("specialty", "CodeableConcept", "The specialty of a practitioner that would be required to perform the service requested in this appointment.", 0, java.lang.Integer.MAX_VALUE, specialty));
-        childrenList.add(new Property("appointmentType", "CodeableConcept", "The style of appointment or patient that has been booked in the slot (not service type).", 0, java.lang.Integer.MAX_VALUE, appointmentType));
+        childrenList.add(new Property("appointmentType", "CodeableConcept", "The style of appointment or patient that may be booked in the slot (not service type).", 0, java.lang.Integer.MAX_VALUE, appointmentType));
         childrenList.add(new Property("schedule", "Reference(Schedule)", "The schedule resource that this slot defines an interval of status information.", 0, java.lang.Integer.MAX_VALUE, schedule));
         childrenList.add(new Property("status", "code", "busy | free | busy-unavailable | busy-tentative | entered-in-error.", 0, java.lang.Integer.MAX_VALUE, status));
         childrenList.add(new Property("start", "instant", "Date/Time that the slot is to begin.", 0, java.lang.Integer.MAX_VALUE, start));
@@ -808,89 +810,111 @@ public class Slot extends DomainResource {
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case -1618432855: // identifier
           this.getIdentifier().add(castToIdentifier(value)); // Identifier
-          break;
+          return value;
         case 1281188563: // serviceCategory
           this.serviceCategory = castToCodeableConcept(value); // CodeableConcept
-          break;
+          return value;
         case -1928370289: // serviceType
           this.getServiceType().add(castToCodeableConcept(value)); // CodeableConcept
-          break;
+          return value;
         case -1694759682: // specialty
           this.getSpecialty().add(castToCodeableConcept(value)); // CodeableConcept
-          break;
+          return value;
         case -1596426375: // appointmentType
           this.appointmentType = castToCodeableConcept(value); // CodeableConcept
-          break;
+          return value;
         case -697920873: // schedule
           this.schedule = castToReference(value); // Reference
-          break;
+          return value;
         case -892481550: // status
-          this.status = new SlotStatusEnumFactory().fromType(value); // Enumeration<SlotStatus>
-          break;
+          value = new SlotStatusEnumFactory().fromType(castToCode(value));
+          this.status = (Enumeration) value; // Enumeration<SlotStatus>
+          return value;
         case 109757538: // start
           this.start = castToInstant(value); // InstantType
-          break;
+          return value;
         case 100571: // end
           this.end = castToInstant(value); // InstantType
-          break;
+          return value;
         case 2068545308: // overbooked
           this.overbooked = castToBoolean(value); // BooleanType
-          break;
+          return value;
         case 950398559: // comment
           this.comment = castToString(value); // StringType
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("identifier"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("identifier")) {
           this.getIdentifier().add(castToIdentifier(value));
-        else if (name.equals("serviceCategory"))
+        } else if (name.equals("serviceCategory")) {
           this.serviceCategory = castToCodeableConcept(value); // CodeableConcept
-        else if (name.equals("serviceType"))
+        } else if (name.equals("serviceType")) {
           this.getServiceType().add(castToCodeableConcept(value));
-        else if (name.equals("specialty"))
+        } else if (name.equals("specialty")) {
           this.getSpecialty().add(castToCodeableConcept(value));
-        else if (name.equals("appointmentType"))
+        } else if (name.equals("appointmentType")) {
           this.appointmentType = castToCodeableConcept(value); // CodeableConcept
-        else if (name.equals("schedule"))
+        } else if (name.equals("schedule")) {
           this.schedule = castToReference(value); // Reference
-        else if (name.equals("status"))
-          this.status = new SlotStatusEnumFactory().fromType(value); // Enumeration<SlotStatus>
-        else if (name.equals("start"))
+        } else if (name.equals("status")) {
+          value = new SlotStatusEnumFactory().fromType(castToCode(value));
+          this.status = (Enumeration) value; // Enumeration<SlotStatus>
+        } else if (name.equals("start")) {
           this.start = castToInstant(value); // InstantType
-        else if (name.equals("end"))
+        } else if (name.equals("end")) {
           this.end = castToInstant(value); // InstantType
-        else if (name.equals("overbooked"))
+        } else if (name.equals("overbooked")) {
           this.overbooked = castToBoolean(value); // BooleanType
-        else if (name.equals("comment"))
+        } else if (name.equals("comment")) {
           this.comment = castToString(value); // StringType
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case -1618432855:  return addIdentifier(); // Identifier
-        case 1281188563:  return getServiceCategory(); // CodeableConcept
-        case -1928370289:  return addServiceType(); // CodeableConcept
-        case -1694759682:  return addSpecialty(); // CodeableConcept
-        case -1596426375:  return getAppointmentType(); // CodeableConcept
-        case -697920873:  return getSchedule(); // Reference
-        case -892481550: throw new FHIRException("Cannot make property status as it is not a complex type"); // Enumeration<SlotStatus>
-        case 109757538: throw new FHIRException("Cannot make property start as it is not a complex type"); // InstantType
-        case 100571: throw new FHIRException("Cannot make property end as it is not a complex type"); // InstantType
-        case 2068545308: throw new FHIRException("Cannot make property overbooked as it is not a complex type"); // BooleanType
-        case 950398559: throw new FHIRException("Cannot make property comment as it is not a complex type"); // StringType
+        case -1618432855:  return addIdentifier(); 
+        case 1281188563:  return getServiceCategory(); 
+        case -1928370289:  return addServiceType(); 
+        case -1694759682:  return addSpecialty(); 
+        case -1596426375:  return getAppointmentType(); 
+        case -697920873:  return getSchedule(); 
+        case -892481550:  return getStatusElement();
+        case 109757538:  return getStartElement();
+        case 100571:  return getEndElement();
+        case 2068545308:  return getOverbookedElement();
+        case 950398559:  return getCommentElement();
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -1618432855: /*identifier*/ return new String[] {"Identifier"};
+        case 1281188563: /*serviceCategory*/ return new String[] {"CodeableConcept"};
+        case -1928370289: /*serviceType*/ return new String[] {"CodeableConcept"};
+        case -1694759682: /*specialty*/ return new String[] {"CodeableConcept"};
+        case -1596426375: /*appointmentType*/ return new String[] {"CodeableConcept"};
+        case -697920873: /*schedule*/ return new String[] {"Reference"};
+        case -892481550: /*status*/ return new String[] {"code"};
+        case 109757538: /*start*/ return new String[] {"instant"};
+        case 100571: /*end*/ return new String[] {"instant"};
+        case 2068545308: /*overbooked*/ return new String[] {"boolean"};
+        case 950398559: /*comment*/ return new String[] {"string"};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }

@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
 
 import java.util.*;
 
@@ -43,7 +43,7 @@ import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.exceptions.FHIRException;
 /**
- * Specifies an event that may occur multiple times. Timing schedules are used to record when things are expected or requested to occur. The most common usage is in dosage instructions for medications. They are also used when planning care of various kinds.
+ * Specifies an event that may occur multiple times. Timing schedules are used to record when things are planned, expected or requested to occur. The most common usage is in dosage instructions for medications. They are also used when planning care of various kinds, and may be used for reporting the schedule to which past regular activities were carried out.
  */
 @DatatypeDef(name="Timing")
 public class Timing extends Type implements ICompositeType {
@@ -141,13 +141,13 @@ public class Timing extends Type implements ICompositeType {
         }
         public String getDisplay() {
           switch (this) {
-            case S: return "s";
-            case MIN: return "min";
-            case H: return "h";
-            case D: return "d";
-            case WK: return "wk";
-            case MO: return "mo";
-            case A: return "a";
+            case S: return "second";
+            case MIN: return "minute";
+            case H: return "hour";
+            case D: return "day";
+            case WK: return "week";
+            case MO: return "month";
+            case A: return "year";
             default: return "?";
           }
         }
@@ -175,8 +175,10 @@ public class Timing extends Type implements ICompositeType {
         throw new IllegalArgumentException("Unknown UnitsOfTime code '"+codeString+"'");
         }
         public Enumeration<UnitsOfTime> fromType(Base code) throws FHIRException {
-          if (code == null || code.isEmpty())
+          if (code == null)
             return null;
+          if (code.isEmpty())
+            return new Enumeration<UnitsOfTime>(this);
           String codeString = ((PrimitiveType) code).asStringValue();
           if (codeString == null || "".equals(codeString))
             return null;
@@ -345,8 +347,10 @@ public class Timing extends Type implements ICompositeType {
         throw new IllegalArgumentException("Unknown DayOfWeek code '"+codeString+"'");
         }
         public Enumeration<DayOfWeek> fromType(Base code) throws FHIRException {
-          if (code == null || code.isEmpty())
+          if (code == null)
             return null;
+          if (code.isEmpty())
+            return new Enumeration<DayOfWeek>(this);
           String codeString = ((PrimitiveType) code).asStringValue();
           if (codeString == null || "".equals(codeString))
             return null;
@@ -405,6 +409,10 @@ public class Timing extends Type implements ICompositeType {
          * event occurs during the night
          */
         NIGHT, 
+        /**
+         * event occurs [offset] after subject goes to sleep
+         */
+        PHS, 
         /**
          * null
          */
@@ -476,6 +484,8 @@ public class Timing extends Type implements ICompositeType {
           return EVE;
         if ("NIGHT".equals(codeString))
           return NIGHT;
+        if ("PHS".equals(codeString))
+          return PHS;
         if ("HS".equals(codeString))
           return HS;
         if ("WAKE".equals(codeString))
@@ -515,6 +525,7 @@ public class Timing extends Type implements ICompositeType {
             case AFT: return "AFT";
             case EVE: return "EVE";
             case NIGHT: return "NIGHT";
+            case PHS: return "PHS";
             case HS: return "HS";
             case WAKE: return "WAKE";
             case C: return "C";
@@ -538,6 +549,7 @@ public class Timing extends Type implements ICompositeType {
             case AFT: return "http://hl7.org/fhir/event-timing";
             case EVE: return "http://hl7.org/fhir/event-timing";
             case NIGHT: return "http://hl7.org/fhir/event-timing";
+            case PHS: return "http://hl7.org/fhir/event-timing";
             case HS: return "http://hl7.org/fhir/v3/TimingEvent";
             case WAKE: return "http://hl7.org/fhir/v3/TimingEvent";
             case C: return "http://hl7.org/fhir/v3/TimingEvent";
@@ -561,6 +573,7 @@ public class Timing extends Type implements ICompositeType {
             case AFT: return "event occurs during the afternoon";
             case EVE: return "event occurs during the evening";
             case NIGHT: return "event occurs during the night";
+            case PHS: return "event occurs [offset] after subject goes to sleep";
             case HS: return "";
             case WAKE: return "";
             case C: return "";
@@ -584,6 +597,7 @@ public class Timing extends Type implements ICompositeType {
             case AFT: return "Afternoon";
             case EVE: return "Evening";
             case NIGHT: return "Night";
+            case PHS: return "After Sleep";
             case HS: return "HS";
             case WAKE: return "WAKE";
             case C: return "C";
@@ -616,6 +630,8 @@ public class Timing extends Type implements ICompositeType {
           return EventTiming.EVE;
         if ("NIGHT".equals(codeString))
           return EventTiming.NIGHT;
+        if ("PHS".equals(codeString))
+          return EventTiming.PHS;
         if ("HS".equals(codeString))
           return EventTiming.HS;
         if ("WAKE".equals(codeString))
@@ -647,8 +663,10 @@ public class Timing extends Type implements ICompositeType {
         throw new IllegalArgumentException("Unknown EventTiming code '"+codeString+"'");
         }
         public Enumeration<EventTiming> fromType(Base code) throws FHIRException {
-          if (code == null || code.isEmpty())
+          if (code == null)
             return null;
+          if (code.isEmpty())
+            return new Enumeration<EventTiming>(this);
           String codeString = ((PrimitiveType) code).asStringValue();
           if (codeString == null || "".equals(codeString))
             return null;
@@ -660,6 +678,8 @@ public class Timing extends Type implements ICompositeType {
           return new Enumeration<EventTiming>(this, EventTiming.EVE);
         if ("NIGHT".equals(codeString))
           return new Enumeration<EventTiming>(this, EventTiming.NIGHT);
+        if ("PHS".equals(codeString))
+          return new Enumeration<EventTiming>(this, EventTiming.PHS);
         if ("HS".equals(codeString))
           return new Enumeration<EventTiming>(this, EventTiming.HS);
         if ("WAKE".equals(codeString))
@@ -699,6 +719,8 @@ public class Timing extends Type implements ICompositeType {
         return "EVE";
       if (code == EventTiming.NIGHT)
         return "NIGHT";
+      if (code == EventTiming.PHS)
+        return "PHS";
       if (code == EventTiming.HS)
         return "HS";
       if (code == EventTiming.WAKE)
@@ -787,10 +809,10 @@ public class Timing extends Type implements ICompositeType {
         protected IntegerType frequency;
 
         /**
-         * If present, indicates that the frequency is a range - so repeat between [frequency] and [frequencyMax] times within the period or period range.
+         * If present, indicates that the frequency is a range - so to repeat between [frequency] and [frequencyMax] times within the period or period range.
          */
         @Child(name = "frequencyMax", type = {IntegerType.class}, order=8, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="Event occurs up to frequencyMax times per period", formalDefinition="If present, indicates that the frequency is a range - so repeat between [frequency] and [frequencyMax] times within the period or period range." )
+        @Description(shortDefinition="Event occurs up to frequencyMax times per period", formalDefinition="If present, indicates that the frequency is a range - so to repeat between [frequency] and [frequencyMax] times within the period or period range." )
         protected IntegerType frequencyMax;
 
         /**
@@ -831,12 +853,12 @@ public class Timing extends Type implements ICompositeType {
         protected List<TimeType> timeOfDay;
 
         /**
-         * A real world event that the occurrence of the event should be tied to.
+         * Real world events that the occurrence of the event should be tied to.
          */
-        @Child(name = "when", type = {CodeType.class}, order=14, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="Regular life events the event is tied to", formalDefinition="A real world event that the occurrence of the event should be tied to." )
+        @Child(name = "when", type = {CodeType.class}, order=14, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+        @Description(shortDefinition="Regular life events the event is tied to", formalDefinition="Real world events that the occurrence of the event should be tied to." )
         @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/event-timing")
-        protected Enumeration<EventTiming> when;
+        protected List<Enumeration<EventTiming>> when;
 
         /**
          * The number of minutes from the event. If the event code does not indicate whether the minutes is before or after the event, then the offset is assumed to be after the event.
@@ -845,7 +867,7 @@ public class Timing extends Type implements ICompositeType {
         @Description(shortDefinition="Minutes from event (before or after)", formalDefinition="The number of minutes from the event. If the event code does not indicate whether the minutes is before or after the event, then the offset is assumed to be after the event." )
         protected UnsignedIntType offset;
 
-        private static final long serialVersionUID = -1646532442L;
+        private static final long serialVersionUID = -1590643356L;
 
     /**
      * Constructor
@@ -1231,7 +1253,7 @@ public class Timing extends Type implements ICompositeType {
         }
 
         /**
-         * @return {@link #frequencyMax} (If present, indicates that the frequency is a range - so repeat between [frequency] and [frequencyMax] times within the period or period range.). This is the underlying object with id, value and extensions. The accessor "getFrequencyMax" gives direct access to the value
+         * @return {@link #frequencyMax} (If present, indicates that the frequency is a range - so to repeat between [frequency] and [frequencyMax] times within the period or period range.). This is the underlying object with id, value and extensions. The accessor "getFrequencyMax" gives direct access to the value
          */
         public IntegerType getFrequencyMaxElement() { 
           if (this.frequencyMax == null)
@@ -1251,7 +1273,7 @@ public class Timing extends Type implements ICompositeType {
         }
 
         /**
-         * @param value {@link #frequencyMax} (If present, indicates that the frequency is a range - so repeat between [frequency] and [frequencyMax] times within the period or period range.). This is the underlying object with id, value and extensions. The accessor "getFrequencyMax" gives direct access to the value
+         * @param value {@link #frequencyMax} (If present, indicates that the frequency is a range - so to repeat between [frequency] and [frequencyMax] times within the period or period range.). This is the underlying object with id, value and extensions. The accessor "getFrequencyMax" gives direct access to the value
          */
         public TimingRepeatComponent setFrequencyMaxElement(IntegerType value) { 
           this.frequencyMax = value;
@@ -1259,14 +1281,14 @@ public class Timing extends Type implements ICompositeType {
         }
 
         /**
-         * @return If present, indicates that the frequency is a range - so repeat between [frequency] and [frequencyMax] times within the period or period range.
+         * @return If present, indicates that the frequency is a range - so to repeat between [frequency] and [frequencyMax] times within the period or period range.
          */
         public int getFrequencyMax() { 
           return this.frequencyMax == null || this.frequencyMax.isEmpty() ? 0 : this.frequencyMax.getValue();
         }
 
         /**
-         * @param value If present, indicates that the frequency is a range - so repeat between [frequency] and [frequencyMax] times within the period or period range.
+         * @param value If present, indicates that the frequency is a range - so to repeat between [frequency] and [frequencyMax] times within the period or period range.
          */
         public TimingRepeatComponent setFrequencyMax(int value) { 
             if (this.frequencyMax == null)
@@ -1581,52 +1603,64 @@ public class Timing extends Type implements ICompositeType {
         }
 
         /**
-         * @return {@link #when} (A real world event that the occurrence of the event should be tied to.). This is the underlying object with id, value and extensions. The accessor "getWhen" gives direct access to the value
+         * @return {@link #when} (Real world events that the occurrence of the event should be tied to.)
          */
-        public Enumeration<EventTiming> getWhenElement() { 
+        public List<Enumeration<EventTiming>> getWhen() { 
           if (this.when == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create TimingRepeatComponent.when");
-            else if (Configuration.doAutoCreate())
-              this.when = new Enumeration<EventTiming>(new EventTimingEnumFactory()); // bb
+            this.when = new ArrayList<Enumeration<EventTiming>>();
           return this.when;
         }
 
-        public boolean hasWhenElement() { 
-          return this.when != null && !this.when.isEmpty();
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public TimingRepeatComponent setWhen(List<Enumeration<EventTiming>> theWhen) { 
+          this.when = theWhen;
+          return this;
         }
 
         public boolean hasWhen() { 
-          return this.when != null && !this.when.isEmpty();
+          if (this.when == null)
+            return false;
+          for (Enumeration<EventTiming> item : this.when)
+            if (!item.isEmpty())
+              return true;
+          return false;
         }
 
         /**
-         * @param value {@link #when} (A real world event that the occurrence of the event should be tied to.). This is the underlying object with id, value and extensions. The accessor "getWhen" gives direct access to the value
+         * @return {@link #when} (Real world events that the occurrence of the event should be tied to.)
          */
-        public TimingRepeatComponent setWhenElement(Enumeration<EventTiming> value) { 
-          this.when = value;
+        public Enumeration<EventTiming> addWhenElement() {//2 
+          Enumeration<EventTiming> t = new Enumeration<EventTiming>(new EventTimingEnumFactory());
+          if (this.when == null)
+            this.when = new ArrayList<Enumeration<EventTiming>>();
+          this.when.add(t);
+          return t;
+        }
+
+        /**
+         * @param value {@link #when} (Real world events that the occurrence of the event should be tied to.)
+         */
+        public TimingRepeatComponent addWhen(EventTiming value) { //1
+          Enumeration<EventTiming> t = new Enumeration<EventTiming>(new EventTimingEnumFactory());
+          t.setValue(value);
+          if (this.when == null)
+            this.when = new ArrayList<Enumeration<EventTiming>>();
+          this.when.add(t);
           return this;
         }
 
         /**
-         * @return A real world event that the occurrence of the event should be tied to.
+         * @param value {@link #when} (Real world events that the occurrence of the event should be tied to.)
          */
-        public EventTiming getWhen() { 
-          return this.when == null ? null : this.when.getValue();
-        }
-
-        /**
-         * @param value A real world event that the occurrence of the event should be tied to.
-         */
-        public TimingRepeatComponent setWhen(EventTiming value) { 
-          if (value == null)
-            this.when = null;
-          else {
-            if (this.when == null)
-              this.when = new Enumeration<EventTiming>(new EventTimingEnumFactory());
-            this.when.setValue(value);
-          }
-          return this;
+        public boolean hasWhen(EventTiming value) { 
+          if (this.when == null)
+            return false;
+          for (Enumeration<EventTiming> v : this.when)
+            if (v.getValue().equals(value)) // code
+              return true;
+          return false;
         }
 
         /**
@@ -1683,13 +1717,13 @@ public class Timing extends Type implements ICompositeType {
           childrenList.add(new Property("durationMax", "decimal", "The upper limit of how long this thing happens for when it happens.", 0, java.lang.Integer.MAX_VALUE, durationMax));
           childrenList.add(new Property("durationUnit", "code", "The units of time for the duration, in UCUM units.", 0, java.lang.Integer.MAX_VALUE, durationUnit));
           childrenList.add(new Property("frequency", "integer", "The number of times to repeat the action within the specified period / period range (i.e. both period and periodMax provided).", 0, java.lang.Integer.MAX_VALUE, frequency));
-          childrenList.add(new Property("frequencyMax", "integer", "If present, indicates that the frequency is a range - so repeat between [frequency] and [frequencyMax] times within the period or period range.", 0, java.lang.Integer.MAX_VALUE, frequencyMax));
+          childrenList.add(new Property("frequencyMax", "integer", "If present, indicates that the frequency is a range - so to repeat between [frequency] and [frequencyMax] times within the period or period range.", 0, java.lang.Integer.MAX_VALUE, frequencyMax));
           childrenList.add(new Property("period", "decimal", "Indicates the duration of time over which repetitions are to occur; e.g. to express \"3 times per day\", 3 would be the frequency and \"1 day\" would be the period.", 0, java.lang.Integer.MAX_VALUE, period));
           childrenList.add(new Property("periodMax", "decimal", "If present, indicates that the period is a range from [period] to [periodMax], allowing expressing concepts such as \"do this once every 3-5 days.", 0, java.lang.Integer.MAX_VALUE, periodMax));
           childrenList.add(new Property("periodUnit", "code", "The units of time for the period in UCUM units.", 0, java.lang.Integer.MAX_VALUE, periodUnit));
           childrenList.add(new Property("dayOfWeek", "code", "If one or more days of week is provided, then the action happens only on the specified day(s).", 0, java.lang.Integer.MAX_VALUE, dayOfWeek));
           childrenList.add(new Property("timeOfDay", "time", "Specified time of day for action to take place.", 0, java.lang.Integer.MAX_VALUE, timeOfDay));
-          childrenList.add(new Property("when", "code", "A real world event that the occurrence of the event should be tied to.", 0, java.lang.Integer.MAX_VALUE, when));
+          childrenList.add(new Property("when", "code", "Real world events that the occurrence of the event should be tied to.", 0, java.lang.Integer.MAX_VALUE, when));
           childrenList.add(new Property("offset", "unsignedInt", "The number of minutes from the event. If the event code does not indicate whether the minutes is before or after the event, then the offset is assumed to be after the event.", 0, java.lang.Integer.MAX_VALUE, offset));
         }
 
@@ -1709,7 +1743,7 @@ public class Timing extends Type implements ICompositeType {
         case 384367333: /*periodUnit*/ return this.periodUnit == null ? new Base[0] : new Base[] {this.periodUnit}; // Enumeration<UnitsOfTime>
         case -730552025: /*dayOfWeek*/ return this.dayOfWeek == null ? new Base[0] : this.dayOfWeek.toArray(new Base[this.dayOfWeek.size()]); // Enumeration<DayOfWeek>
         case 21434232: /*timeOfDay*/ return this.timeOfDay == null ? new Base[0] : this.timeOfDay.toArray(new Base[this.timeOfDay.size()]); // TimeType
-        case 3648314: /*when*/ return this.when == null ? new Base[0] : new Base[] {this.when}; // Enumeration<EventTiming>
+        case 3648314: /*when*/ return this.when == null ? new Base[0] : this.when.toArray(new Base[this.when.size()]); // Enumeration<EventTiming>
         case -1019779949: /*offset*/ return this.offset == null ? new Base[0] : new Base[] {this.offset}; // UnsignedIntType
         default: return super.getProperty(hash, name, checkValid);
         }
@@ -1717,113 +1751,146 @@ public class Timing extends Type implements ICompositeType {
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case -1383205195: // bounds
           this.bounds = castToType(value); // Type
-          break;
+          return value;
         case 94851343: // count
           this.count = castToInteger(value); // IntegerType
-          break;
+          return value;
         case -372044331: // countMax
           this.countMax = castToInteger(value); // IntegerType
-          break;
+          return value;
         case -1992012396: // duration
           this.duration = castToDecimal(value); // DecimalType
-          break;
+          return value;
         case -478083280: // durationMax
           this.durationMax = castToDecimal(value); // DecimalType
-          break;
+          return value;
         case -1935429320: // durationUnit
-          this.durationUnit = new UnitsOfTimeEnumFactory().fromType(value); // Enumeration<UnitsOfTime>
-          break;
+          value = new UnitsOfTimeEnumFactory().fromType(castToCode(value));
+          this.durationUnit = (Enumeration) value; // Enumeration<UnitsOfTime>
+          return value;
         case -70023844: // frequency
           this.frequency = castToInteger(value); // IntegerType
-          break;
+          return value;
         case 1273846376: // frequencyMax
           this.frequencyMax = castToInteger(value); // IntegerType
-          break;
+          return value;
         case -991726143: // period
           this.period = castToDecimal(value); // DecimalType
-          break;
+          return value;
         case 566580195: // periodMax
           this.periodMax = castToDecimal(value); // DecimalType
-          break;
+          return value;
         case 384367333: // periodUnit
-          this.periodUnit = new UnitsOfTimeEnumFactory().fromType(value); // Enumeration<UnitsOfTime>
-          break;
+          value = new UnitsOfTimeEnumFactory().fromType(castToCode(value));
+          this.periodUnit = (Enumeration) value; // Enumeration<UnitsOfTime>
+          return value;
         case -730552025: // dayOfWeek
-          this.getDayOfWeek().add(new DayOfWeekEnumFactory().fromType(value)); // Enumeration<DayOfWeek>
-          break;
+          value = new DayOfWeekEnumFactory().fromType(castToCode(value));
+          this.getDayOfWeek().add((Enumeration) value); // Enumeration<DayOfWeek>
+          return value;
         case 21434232: // timeOfDay
           this.getTimeOfDay().add(castToTime(value)); // TimeType
-          break;
+          return value;
         case 3648314: // when
-          this.when = new EventTimingEnumFactory().fromType(value); // Enumeration<EventTiming>
-          break;
+          value = new EventTimingEnumFactory().fromType(castToCode(value));
+          this.getWhen().add((Enumeration) value); // Enumeration<EventTiming>
+          return value;
         case -1019779949: // offset
           this.offset = castToUnsignedInt(value); // UnsignedIntType
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("bounds[x]"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("bounds[x]")) {
           this.bounds = castToType(value); // Type
-        else if (name.equals("count"))
+        } else if (name.equals("count")) {
           this.count = castToInteger(value); // IntegerType
-        else if (name.equals("countMax"))
+        } else if (name.equals("countMax")) {
           this.countMax = castToInteger(value); // IntegerType
-        else if (name.equals("duration"))
+        } else if (name.equals("duration")) {
           this.duration = castToDecimal(value); // DecimalType
-        else if (name.equals("durationMax"))
+        } else if (name.equals("durationMax")) {
           this.durationMax = castToDecimal(value); // DecimalType
-        else if (name.equals("durationUnit"))
-          this.durationUnit = new UnitsOfTimeEnumFactory().fromType(value); // Enumeration<UnitsOfTime>
-        else if (name.equals("frequency"))
+        } else if (name.equals("durationUnit")) {
+          value = new UnitsOfTimeEnumFactory().fromType(castToCode(value));
+          this.durationUnit = (Enumeration) value; // Enumeration<UnitsOfTime>
+        } else if (name.equals("frequency")) {
           this.frequency = castToInteger(value); // IntegerType
-        else if (name.equals("frequencyMax"))
+        } else if (name.equals("frequencyMax")) {
           this.frequencyMax = castToInteger(value); // IntegerType
-        else if (name.equals("period"))
+        } else if (name.equals("period")) {
           this.period = castToDecimal(value); // DecimalType
-        else if (name.equals("periodMax"))
+        } else if (name.equals("periodMax")) {
           this.periodMax = castToDecimal(value); // DecimalType
-        else if (name.equals("periodUnit"))
-          this.periodUnit = new UnitsOfTimeEnumFactory().fromType(value); // Enumeration<UnitsOfTime>
-        else if (name.equals("dayOfWeek"))
-          this.getDayOfWeek().add(new DayOfWeekEnumFactory().fromType(value));
-        else if (name.equals("timeOfDay"))
+        } else if (name.equals("periodUnit")) {
+          value = new UnitsOfTimeEnumFactory().fromType(castToCode(value));
+          this.periodUnit = (Enumeration) value; // Enumeration<UnitsOfTime>
+        } else if (name.equals("dayOfWeek")) {
+          value = new DayOfWeekEnumFactory().fromType(castToCode(value));
+          this.getDayOfWeek().add((Enumeration) value);
+        } else if (name.equals("timeOfDay")) {
           this.getTimeOfDay().add(castToTime(value));
-        else if (name.equals("when"))
-          this.when = new EventTimingEnumFactory().fromType(value); // Enumeration<EventTiming>
-        else if (name.equals("offset"))
+        } else if (name.equals("when")) {
+          value = new EventTimingEnumFactory().fromType(castToCode(value));
+          this.getWhen().add((Enumeration) value);
+        } else if (name.equals("offset")) {
           this.offset = castToUnsignedInt(value); // UnsignedIntType
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case -1149635157:  return getBounds(); // Type
-        case 94851343: throw new FHIRException("Cannot make property count as it is not a complex type"); // IntegerType
-        case -372044331: throw new FHIRException("Cannot make property countMax as it is not a complex type"); // IntegerType
-        case -1992012396: throw new FHIRException("Cannot make property duration as it is not a complex type"); // DecimalType
-        case -478083280: throw new FHIRException("Cannot make property durationMax as it is not a complex type"); // DecimalType
-        case -1935429320: throw new FHIRException("Cannot make property durationUnit as it is not a complex type"); // Enumeration<UnitsOfTime>
-        case -70023844: throw new FHIRException("Cannot make property frequency as it is not a complex type"); // IntegerType
-        case 1273846376: throw new FHIRException("Cannot make property frequencyMax as it is not a complex type"); // IntegerType
-        case -991726143: throw new FHIRException("Cannot make property period as it is not a complex type"); // DecimalType
-        case 566580195: throw new FHIRException("Cannot make property periodMax as it is not a complex type"); // DecimalType
-        case 384367333: throw new FHIRException("Cannot make property periodUnit as it is not a complex type"); // Enumeration<UnitsOfTime>
-        case -730552025: throw new FHIRException("Cannot make property dayOfWeek as it is not a complex type"); // Enumeration<DayOfWeek>
-        case 21434232: throw new FHIRException("Cannot make property timeOfDay as it is not a complex type"); // TimeType
-        case 3648314: throw new FHIRException("Cannot make property when as it is not a complex type"); // Enumeration<EventTiming>
-        case -1019779949: throw new FHIRException("Cannot make property offset as it is not a complex type"); // UnsignedIntType
+        case -1149635157:  return getBounds(); 
+        case -1383205195:  return getBounds(); 
+        case 94851343:  return getCountElement();
+        case -372044331:  return getCountMaxElement();
+        case -1992012396:  return getDurationElement();
+        case -478083280:  return getDurationMaxElement();
+        case -1935429320:  return getDurationUnitElement();
+        case -70023844:  return getFrequencyElement();
+        case 1273846376:  return getFrequencyMaxElement();
+        case -991726143:  return getPeriodElement();
+        case 566580195:  return getPeriodMaxElement();
+        case 384367333:  return getPeriodUnitElement();
+        case -730552025:  return addDayOfWeekElement();
+        case 21434232:  return addTimeOfDayElement();
+        case 3648314:  return addWhenElement();
+        case -1019779949:  return getOffsetElement();
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -1383205195: /*bounds*/ return new String[] {"Duration", "Range", "Period"};
+        case 94851343: /*count*/ return new String[] {"integer"};
+        case -372044331: /*countMax*/ return new String[] {"integer"};
+        case -1992012396: /*duration*/ return new String[] {"decimal"};
+        case -478083280: /*durationMax*/ return new String[] {"decimal"};
+        case -1935429320: /*durationUnit*/ return new String[] {"code"};
+        case -70023844: /*frequency*/ return new String[] {"integer"};
+        case 1273846376: /*frequencyMax*/ return new String[] {"integer"};
+        case -991726143: /*period*/ return new String[] {"decimal"};
+        case 566580195: /*periodMax*/ return new String[] {"decimal"};
+        case 384367333: /*periodUnit*/ return new String[] {"code"};
+        case -730552025: /*dayOfWeek*/ return new String[] {"code"};
+        case 21434232: /*timeOfDay*/ return new String[] {"time"};
+        case 3648314: /*when*/ return new String[] {"code"};
+        case -1019779949: /*offset*/ return new String[] {"unsignedInt"};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }
@@ -1912,7 +1979,11 @@ public class Timing extends Type implements ICompositeType {
           for (TimeType i : timeOfDay)
             dst.timeOfDay.add(i.copy());
         };
-        dst.when = when == null ? null : when.copy();
+        if (when != null) {
+          dst.when = new ArrayList<Enumeration<EventTiming>>();
+          for (Enumeration<EventTiming> i : when)
+            dst.when.add(i.copy());
+        };
         dst.offset = offset == null ? null : offset.copy();
         return dst;
       }
@@ -1968,17 +2039,17 @@ public class Timing extends Type implements ICompositeType {
     protected List<DateTimeType> event;
 
     /**
-     * A set of rules that describe when the event should occur.
+     * A set of rules that describe when the event is scheduled.
      */
     @Child(name = "repeat", type = {}, order=1, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="When the event is to occur", formalDefinition="A set of rules that describe when the event should occur." )
+    @Description(shortDefinition="When the event is to occur", formalDefinition="A set of rules that describe when the event is scheduled." )
     protected TimingRepeatComponent repeat;
 
     /**
-     * A code for the timing pattern. Some codes such as BID are ubiquitous, but many institutions define their own additional codes. If a code is provided, the code is understood to be a complete statement of whatever is specified in the structured timing data, and either the code or the data may be used to interpret the Timing.
+     * A code for the timing schedule. Some codes such as BID are ubiquitous, but many institutions define their own additional codes. If a code is provided, the code is understood to be a complete statement of whatever is specified in the structured timing data, and either the code or the data may be used to interpret the Timing, with the exception that .repeat.bounds still applies over the code (and is not contained in the code).
      */
     @Child(name = "code", type = {CodeableConcept.class}, order=2, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="BID | TID | QID | AM | PM | QD | QOD | Q4H | Q6H +", formalDefinition="A code for the timing pattern. Some codes such as BID are ubiquitous, but many institutions define their own additional codes. If a code is provided, the code is understood to be a complete statement of whatever is specified in the structured timing data, and either the code or the data may be used to interpret the Timing." )
+    @Description(shortDefinition="BID | TID | QID | AM | PM | QD | QOD | Q4H | Q6H +", formalDefinition="A code for the timing schedule. Some codes such as BID are ubiquitous, but many institutions define their own additional codes. If a code is provided, the code is understood to be a complete statement of whatever is specified in the structured timing data, and either the code or the data may be used to interpret the Timing, with the exception that .repeat.bounds still applies over the code (and is not contained in the code)." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/timing-abbreviation")
     protected CodeableConcept code;
 
@@ -2053,7 +2124,7 @@ public class Timing extends Type implements ICompositeType {
     }
 
     /**
-     * @return {@link #repeat} (A set of rules that describe when the event should occur.)
+     * @return {@link #repeat} (A set of rules that describe when the event is scheduled.)
      */
     public TimingRepeatComponent getRepeat() { 
       if (this.repeat == null)
@@ -2069,7 +2140,7 @@ public class Timing extends Type implements ICompositeType {
     }
 
     /**
-     * @param value {@link #repeat} (A set of rules that describe when the event should occur.)
+     * @param value {@link #repeat} (A set of rules that describe when the event is scheduled.)
      */
     public Timing setRepeat(TimingRepeatComponent value) { 
       this.repeat = value;
@@ -2077,7 +2148,7 @@ public class Timing extends Type implements ICompositeType {
     }
 
     /**
-     * @return {@link #code} (A code for the timing pattern. Some codes such as BID are ubiquitous, but many institutions define their own additional codes. If a code is provided, the code is understood to be a complete statement of whatever is specified in the structured timing data, and either the code or the data may be used to interpret the Timing.)
+     * @return {@link #code} (A code for the timing schedule. Some codes such as BID are ubiquitous, but many institutions define their own additional codes. If a code is provided, the code is understood to be a complete statement of whatever is specified in the structured timing data, and either the code or the data may be used to interpret the Timing, with the exception that .repeat.bounds still applies over the code (and is not contained in the code).)
      */
     public CodeableConcept getCode() { 
       if (this.code == null)
@@ -2093,7 +2164,7 @@ public class Timing extends Type implements ICompositeType {
     }
 
     /**
-     * @param value {@link #code} (A code for the timing pattern. Some codes such as BID are ubiquitous, but many institutions define their own additional codes. If a code is provided, the code is understood to be a complete statement of whatever is specified in the structured timing data, and either the code or the data may be used to interpret the Timing.)
+     * @param value {@link #code} (A code for the timing schedule. Some codes such as BID are ubiquitous, but many institutions define their own additional codes. If a code is provided, the code is understood to be a complete statement of whatever is specified in the structured timing data, and either the code or the data may be used to interpret the Timing, with the exception that .repeat.bounds still applies over the code (and is not contained in the code).)
      */
     public Timing setCode(CodeableConcept value) { 
       this.code = value;
@@ -2103,8 +2174,8 @@ public class Timing extends Type implements ICompositeType {
       protected void listChildren(List<Property> childrenList) {
         super.listChildren(childrenList);
         childrenList.add(new Property("event", "dateTime", "Identifies specific times when the event occurs.", 0, java.lang.Integer.MAX_VALUE, event));
-        childrenList.add(new Property("repeat", "", "A set of rules that describe when the event should occur.", 0, java.lang.Integer.MAX_VALUE, repeat));
-        childrenList.add(new Property("code", "CodeableConcept", "A code for the timing pattern. Some codes such as BID are ubiquitous, but many institutions define their own additional codes. If a code is provided, the code is understood to be a complete statement of whatever is specified in the structured timing data, and either the code or the data may be used to interpret the Timing.", 0, java.lang.Integer.MAX_VALUE, code));
+        childrenList.add(new Property("repeat", "", "A set of rules that describe when the event is scheduled.", 0, java.lang.Integer.MAX_VALUE, repeat));
+        childrenList.add(new Property("code", "CodeableConcept", "A code for the timing schedule. Some codes such as BID are ubiquitous, but many institutions define their own additional codes. If a code is provided, the code is understood to be a complete statement of whatever is specified in the structured timing data, and either the code or the data may be used to interpret the Timing, with the exception that .repeat.bounds still applies over the code (and is not contained in the code).", 0, java.lang.Integer.MAX_VALUE, code));
       }
 
       @Override
@@ -2119,41 +2190,53 @@ public class Timing extends Type implements ICompositeType {
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case 96891546: // event
           this.getEvent().add(castToDateTime(value)); // DateTimeType
-          break;
+          return value;
         case -934531685: // repeat
           this.repeat = (TimingRepeatComponent) value; // TimingRepeatComponent
-          break;
+          return value;
         case 3059181: // code
           this.code = castToCodeableConcept(value); // CodeableConcept
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("event"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("event")) {
           this.getEvent().add(castToDateTime(value));
-        else if (name.equals("repeat"))
+        } else if (name.equals("repeat")) {
           this.repeat = (TimingRepeatComponent) value; // TimingRepeatComponent
-        else if (name.equals("code"))
+        } else if (name.equals("code")) {
           this.code = castToCodeableConcept(value); // CodeableConcept
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 96891546: throw new FHIRException("Cannot make property event as it is not a complex type"); // DateTimeType
-        case -934531685:  return getRepeat(); // TimingRepeatComponent
-        case 3059181:  return getCode(); // CodeableConcept
+        case 96891546:  return addEventElement();
+        case -934531685:  return getRepeat(); 
+        case 3059181:  return getCode(); 
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 96891546: /*event*/ return new String[] {"dateTime"};
+        case -934531685: /*repeat*/ return new String[] {};
+        case 3059181: /*code*/ return new String[] {"CodeableConcept"};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }

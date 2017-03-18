@@ -42,6 +42,7 @@ import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.parser.DataFormatException;
 /**
  * Indicates that a medication product is to be or has been dispensed for a named person/patient.  This includes a description of the medication product (supply) provided and the instructions for administering the medication.  The medication dispense is the result of a pharmacy system responding to a medication order.
  */
@@ -405,13 +406,13 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
         /**
          * @return {@link #site} (A coded specification of the anatomic site where the medication first enters the body.)
          */
-        public CodeableConcept getSiteCodeableConcept() throws Exception { 
+        public CodeableConcept getSiteCodeableConcept() { 
           if (!(this.site instanceof CodeableConcept))
-            throw new Exception("Type mismatch: the type CodeableConcept was expected, but "+this.site.getClass().getName()+" was encountered");
+            throw new DataFormatException("Type mismatch: the type CodeableConcept was expected, but "+this.site.getClass().getName()+" was encountered");
           return (CodeableConcept) this.site;
         }
 
-        public boolean hasSiteCodeableConcept() throws Exception { 
+        public boolean hasSiteCodeableConcept() { 
           return this.site instanceof CodeableConcept;
         }
 

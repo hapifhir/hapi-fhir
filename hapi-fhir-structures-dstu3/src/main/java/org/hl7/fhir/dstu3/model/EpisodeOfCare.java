@@ -29,11 +29,12 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
 
 import java.util.*;
 
 import org.hl7.fhir.utilities.Utilities;
+import org.hl7.fhir.dstu3.model.Enumerations.*;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.api.annotation.Child;
@@ -175,8 +176,10 @@ public class EpisodeOfCare extends DomainResource {
         throw new IllegalArgumentException("Unknown EpisodeOfCareStatus code '"+codeString+"'");
         }
         public Enumeration<EpisodeOfCareStatus> fromType(Base code) throws FHIRException {
-          if (code == null || code.isEmpty())
+          if (code == null)
             return null;
+          if (code.isEmpty())
+            return new Enumeration<EpisodeOfCareStatus>(this);
           String codeString = ((PrimitiveType) code).asStringValue();
           if (codeString == null || "".equals(codeString))
             return null;
@@ -232,7 +235,7 @@ public class EpisodeOfCare extends DomainResource {
          * The period during this EpisodeOfCare that the specific status applied.
          */
         @Child(name = "period", type = {Period.class}, order=2, min=1, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Period for the status", formalDefinition="The period during this EpisodeOfCare that the specific status applied." )
+        @Description(shortDefinition="Duration the EpisodeOfCare was in the specified status", formalDefinition="The period during this EpisodeOfCare that the specific status applied." )
         protected Period period;
 
         private static final long serialVersionUID = -1192432864L;
@@ -339,35 +342,48 @@ public class EpisodeOfCare extends DomainResource {
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case -892481550: // status
-          this.status = new EpisodeOfCareStatusEnumFactory().fromType(value); // Enumeration<EpisodeOfCareStatus>
-          break;
+          value = new EpisodeOfCareStatusEnumFactory().fromType(castToCode(value));
+          this.status = (Enumeration) value; // Enumeration<EpisodeOfCareStatus>
+          return value;
         case -991726143: // period
           this.period = castToPeriod(value); // Period
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("status"))
-          this.status = new EpisodeOfCareStatusEnumFactory().fromType(value); // Enumeration<EpisodeOfCareStatus>
-        else if (name.equals("period"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("status")) {
+          value = new EpisodeOfCareStatusEnumFactory().fromType(castToCode(value));
+          this.status = (Enumeration) value; // Enumeration<EpisodeOfCareStatus>
+        } else if (name.equals("period")) {
           this.period = castToPeriod(value); // Period
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case -892481550: throw new FHIRException("Cannot make property status as it is not a complex type"); // Enumeration<EpisodeOfCareStatus>
-        case -991726143:  return getPeriod(); // Period
+        case -892481550:  return getStatusElement();
+        case -991726143:  return getPeriod(); 
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -892481550: /*status*/ return new String[] {"code"};
+        case -991726143: /*period*/ return new String[] {"Period"};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }
@@ -424,11 +440,298 @@ public class EpisodeOfCare extends DomainResource {
 
   }
 
+    @Block()
+    public static class DiagnosisComponent extends BackboneElement implements IBaseBackboneElement {
+        /**
+         * A list of conditions/problems/diagnoses that this episode of care is intended to be providing care for.
+         */
+        @Child(name = "condition", type = {Condition.class}, order=1, min=1, max=1, modifier=false, summary=true)
+        @Description(shortDefinition="Conditions/problems/diagnoses this episode of care is for", formalDefinition="A list of conditions/problems/diagnoses that this episode of care is intended to be providing care for." )
+        protected Reference condition;
+
+        /**
+         * The actual object that is the target of the reference (A list of conditions/problems/diagnoses that this episode of care is intended to be providing care for.)
+         */
+        protected Condition conditionTarget;
+
+        /**
+         * Role that this diagnosis has within the episode of care (e.g. admission, billing, discharge …).
+         */
+        @Child(name = "role", type = {CodeableConcept.class}, order=2, min=0, max=1, modifier=false, summary=true)
+        @Description(shortDefinition="Role that this diagnosis has within the episode of care (e.g. admission, billing, discharge …)", formalDefinition="Role that this diagnosis has within the episode of care (e.g. admission, billing, discharge …)." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/diagnosis-role")
+        protected CodeableConcept role;
+
+        /**
+         * Ranking of the diagnosis (for each role type).
+         */
+        @Child(name = "rank", type = {PositiveIntType.class}, order=3, min=0, max=1, modifier=false, summary=true)
+        @Description(shortDefinition="Ranking of the diagnosis (for each role type)", formalDefinition="Ranking of the diagnosis (for each role type)." )
+        protected PositiveIntType rank;
+
+        private static final long serialVersionUID = 249445632L;
+
     /**
-     * Identifier(s) by which this EpisodeOfCare is known.
+     * Constructor
+     */
+      public DiagnosisComponent() {
+        super();
+      }
+
+    /**
+     * Constructor
+     */
+      public DiagnosisComponent(Reference condition) {
+        super();
+        this.condition = condition;
+      }
+
+        /**
+         * @return {@link #condition} (A list of conditions/problems/diagnoses that this episode of care is intended to be providing care for.)
+         */
+        public Reference getCondition() { 
+          if (this.condition == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create DiagnosisComponent.condition");
+            else if (Configuration.doAutoCreate())
+              this.condition = new Reference(); // cc
+          return this.condition;
+        }
+
+        public boolean hasCondition() { 
+          return this.condition != null && !this.condition.isEmpty();
+        }
+
+        /**
+         * @param value {@link #condition} (A list of conditions/problems/diagnoses that this episode of care is intended to be providing care for.)
+         */
+        public DiagnosisComponent setCondition(Reference value) { 
+          this.condition = value;
+          return this;
+        }
+
+        /**
+         * @return {@link #condition} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (A list of conditions/problems/diagnoses that this episode of care is intended to be providing care for.)
+         */
+        public Condition getConditionTarget() { 
+          if (this.conditionTarget == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create DiagnosisComponent.condition");
+            else if (Configuration.doAutoCreate())
+              this.conditionTarget = new Condition(); // aa
+          return this.conditionTarget;
+        }
+
+        /**
+         * @param value {@link #condition} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (A list of conditions/problems/diagnoses that this episode of care is intended to be providing care for.)
+         */
+        public DiagnosisComponent setConditionTarget(Condition value) { 
+          this.conditionTarget = value;
+          return this;
+        }
+
+        /**
+         * @return {@link #role} (Role that this diagnosis has within the episode of care (e.g. admission, billing, discharge …).)
+         */
+        public CodeableConcept getRole() { 
+          if (this.role == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create DiagnosisComponent.role");
+            else if (Configuration.doAutoCreate())
+              this.role = new CodeableConcept(); // cc
+          return this.role;
+        }
+
+        public boolean hasRole() { 
+          return this.role != null && !this.role.isEmpty();
+        }
+
+        /**
+         * @param value {@link #role} (Role that this diagnosis has within the episode of care (e.g. admission, billing, discharge …).)
+         */
+        public DiagnosisComponent setRole(CodeableConcept value) { 
+          this.role = value;
+          return this;
+        }
+
+        /**
+         * @return {@link #rank} (Ranking of the diagnosis (for each role type).). This is the underlying object with id, value and extensions. The accessor "getRank" gives direct access to the value
+         */
+        public PositiveIntType getRankElement() { 
+          if (this.rank == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create DiagnosisComponent.rank");
+            else if (Configuration.doAutoCreate())
+              this.rank = new PositiveIntType(); // bb
+          return this.rank;
+        }
+
+        public boolean hasRankElement() { 
+          return this.rank != null && !this.rank.isEmpty();
+        }
+
+        public boolean hasRank() { 
+          return this.rank != null && !this.rank.isEmpty();
+        }
+
+        /**
+         * @param value {@link #rank} (Ranking of the diagnosis (for each role type).). This is the underlying object with id, value and extensions. The accessor "getRank" gives direct access to the value
+         */
+        public DiagnosisComponent setRankElement(PositiveIntType value) { 
+          this.rank = value;
+          return this;
+        }
+
+        /**
+         * @return Ranking of the diagnosis (for each role type).
+         */
+        public int getRank() { 
+          return this.rank == null || this.rank.isEmpty() ? 0 : this.rank.getValue();
+        }
+
+        /**
+         * @param value Ranking of the diagnosis (for each role type).
+         */
+        public DiagnosisComponent setRank(int value) { 
+            if (this.rank == null)
+              this.rank = new PositiveIntType();
+            this.rank.setValue(value);
+          return this;
+        }
+
+        protected void listChildren(List<Property> childrenList) {
+          super.listChildren(childrenList);
+          childrenList.add(new Property("condition", "Reference(Condition)", "A list of conditions/problems/diagnoses that this episode of care is intended to be providing care for.", 0, java.lang.Integer.MAX_VALUE, condition));
+          childrenList.add(new Property("role", "CodeableConcept", "Role that this diagnosis has within the episode of care (e.g. admission, billing, discharge …).", 0, java.lang.Integer.MAX_VALUE, role));
+          childrenList.add(new Property("rank", "positiveInt", "Ranking of the diagnosis (for each role type).", 0, java.lang.Integer.MAX_VALUE, rank));
+        }
+
+      @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case -861311717: /*condition*/ return this.condition == null ? new Base[0] : new Base[] {this.condition}; // Reference
+        case 3506294: /*role*/ return this.role == null ? new Base[0] : new Base[] {this.role}; // CodeableConcept
+        case 3492908: /*rank*/ return this.rank == null ? new Base[0] : new Base[] {this.rank}; // PositiveIntType
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case -861311717: // condition
+          this.condition = castToReference(value); // Reference
+          return value;
+        case 3506294: // role
+          this.role = castToCodeableConcept(value); // CodeableConcept
+          return value;
+        case 3492908: // rank
+          this.rank = castToPositiveInt(value); // PositiveIntType
+          return value;
+        default: return super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("condition")) {
+          this.condition = castToReference(value); // Reference
+        } else if (name.equals("role")) {
+          this.role = castToCodeableConcept(value); // CodeableConcept
+        } else if (name.equals("rank")) {
+          this.rank = castToPositiveInt(value); // PositiveIntType
+        } else
+          return super.setProperty(name, value);
+        return value;
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -861311717:  return getCondition(); 
+        case 3506294:  return getRole(); 
+        case 3492908:  return getRankElement();
+        default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -861311717: /*condition*/ return new String[] {"Reference"};
+        case 3506294: /*role*/ return new String[] {"CodeableConcept"};
+        case 3492908: /*rank*/ return new String[] {"positiveInt"};
+        default: return super.getTypesForProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("condition")) {
+          this.condition = new Reference();
+          return this.condition;
+        }
+        else if (name.equals("role")) {
+          this.role = new CodeableConcept();
+          return this.role;
+        }
+        else if (name.equals("rank")) {
+          throw new FHIRException("Cannot call addChild on a primitive type EpisodeOfCare.rank");
+        }
+        else
+          return super.addChild(name);
+      }
+
+      public DiagnosisComponent copy() {
+        DiagnosisComponent dst = new DiagnosisComponent();
+        copyValues(dst);
+        dst.condition = condition == null ? null : condition.copy();
+        dst.role = role == null ? null : role.copy();
+        dst.rank = rank == null ? null : rank.copy();
+        return dst;
+      }
+
+      @Override
+      public boolean equalsDeep(Base other) {
+        if (!super.equalsDeep(other))
+          return false;
+        if (!(other instanceof DiagnosisComponent))
+          return false;
+        DiagnosisComponent o = (DiagnosisComponent) other;
+        return compareDeep(condition, o.condition, true) && compareDeep(role, o.role, true) && compareDeep(rank, o.rank, true)
+          ;
+      }
+
+      @Override
+      public boolean equalsShallow(Base other) {
+        if (!super.equalsShallow(other))
+          return false;
+        if (!(other instanceof DiagnosisComponent))
+          return false;
+        DiagnosisComponent o = (DiagnosisComponent) other;
+        return compareValues(rank, o.rank, true);
+      }
+
+      public boolean isEmpty() {
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(condition, role, rank);
+      }
+
+  public String fhirType() {
+    return "EpisodeOfCare.diagnosis";
+
+  }
+
+  }
+
+    /**
+     * The EpisodeOfCare may be known by different identifiers for different contexts of use, such as when an external agency is tracking the Episode for funding purposes.
      */
     @Child(name = "identifier", type = {Identifier.class}, order=0, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="Identifier(s) for the EpisodeOfCare", formalDefinition="Identifier(s) by which this EpisodeOfCare is known." )
+    @Description(shortDefinition="Business Identifier(s) relevant for this EpisodeOfCare", formalDefinition="The EpisodeOfCare may be known by different identifiers for different contexts of use, such as when an external agency is tracking the Episode for funding purposes." )
     protected List<Identifier> identifier;
 
     /**
@@ -443,7 +746,7 @@ public class EpisodeOfCare extends DomainResource {
      * The history of statuses that the EpisodeOfCare has been through (without requiring processing the history of the resource).
      */
     @Child(name = "statusHistory", type = {}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="Past list of status codes", formalDefinition="The history of statuses that the EpisodeOfCare has been through (without requiring processing the history of the resource)." )
+    @Description(shortDefinition="Past list of status codes (the current status may be included to cover the start date of the status)", formalDefinition="The history of statuses that the EpisodeOfCare has been through (without requiring processing the history of the resource)." )
     protected List<EpisodeOfCareStatusHistoryComponent> statusHistory;
 
     /**
@@ -451,29 +754,25 @@ public class EpisodeOfCare extends DomainResource {
      */
     @Child(name = "type", type = {CodeableConcept.class}, order=3, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Type/class  - e.g. specialist referral, disease management", formalDefinition="A classification of the type of episode of care; e.g. specialist referral, disease management, type of funded care." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/episodeofcare-type")
     protected List<CodeableConcept> type;
 
     /**
-     * A list of conditions/problems/diagnoses that this episode of care is intended to be providing care for.
+     * The list of diagnosis relevant to this episode of care.
      */
-    @Child(name = "condition", type = {Condition.class}, order=4, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="Conditions/problems/diagnoses this episode of care is for", formalDefinition="A list of conditions/problems/diagnoses that this episode of care is intended to be providing care for." )
-    protected List<Reference> condition;
-    /**
-     * The actual objects that are the target of the reference (A list of conditions/problems/diagnoses that this episode of care is intended to be providing care for.)
-     */
-    protected List<Condition> conditionTarget;
-
+    @Child(name = "diagnosis", type = {}, order=4, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Description(shortDefinition="The list of diagnosis relevant to this episode of care", formalDefinition="The list of diagnosis relevant to this episode of care." )
+    protected List<DiagnosisComponent> diagnosis;
 
     /**
-     * The patient that this EpisodeOfCare applies to.
+     * The patient who is the focus of this episode of care.
      */
     @Child(name = "patient", type = {Patient.class}, order=5, min=1, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Patient for this episode of care", formalDefinition="The patient that this EpisodeOfCare applies to." )
+    @Description(shortDefinition="The patient who is the focus of this episode of care", formalDefinition="The patient who is the focus of this episode of care." )
     protected Reference patient;
 
     /**
-     * The actual object that is the target of the reference (The patient that this EpisodeOfCare applies to.)
+     * The actual object that is the target of the reference (The patient who is the focus of this episode of care.)
      */
     protected Patient patientTarget;
 
@@ -544,7 +843,7 @@ public class EpisodeOfCare extends DomainResource {
     protected List<Account> accountTarget;
 
 
-    private static final long serialVersionUID = -1726118845L;
+    private static final long serialVersionUID = 76719771L;
 
   /**
    * Constructor
@@ -563,7 +862,7 @@ public class EpisodeOfCare extends DomainResource {
     }
 
     /**
-     * @return {@link #identifier} (Identifier(s) by which this EpisodeOfCare is known.)
+     * @return {@link #identifier} (The EpisodeOfCare may be known by different identifiers for different contexts of use, such as when an external agency is tracking the Episode for funding purposes.)
      */
     public List<Identifier> getIdentifier() { 
       if (this.identifier == null)
@@ -767,82 +1066,60 @@ public class EpisodeOfCare extends DomainResource {
     }
 
     /**
-     * @return {@link #condition} (A list of conditions/problems/diagnoses that this episode of care is intended to be providing care for.)
+     * @return {@link #diagnosis} (The list of diagnosis relevant to this episode of care.)
      */
-    public List<Reference> getCondition() { 
-      if (this.condition == null)
-        this.condition = new ArrayList<Reference>();
-      return this.condition;
+    public List<DiagnosisComponent> getDiagnosis() { 
+      if (this.diagnosis == null)
+        this.diagnosis = new ArrayList<DiagnosisComponent>();
+      return this.diagnosis;
     }
 
     /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
-    public EpisodeOfCare setCondition(List<Reference> theCondition) { 
-      this.condition = theCondition;
+    public EpisodeOfCare setDiagnosis(List<DiagnosisComponent> theDiagnosis) { 
+      this.diagnosis = theDiagnosis;
       return this;
     }
 
-    public boolean hasCondition() { 
-      if (this.condition == null)
+    public boolean hasDiagnosis() { 
+      if (this.diagnosis == null)
         return false;
-      for (Reference item : this.condition)
+      for (DiagnosisComponent item : this.diagnosis)
         if (!item.isEmpty())
           return true;
       return false;
     }
 
-    public Reference addCondition() { //3
-      Reference t = new Reference();
-      if (this.condition == null)
-        this.condition = new ArrayList<Reference>();
-      this.condition.add(t);
+    public DiagnosisComponent addDiagnosis() { //3
+      DiagnosisComponent t = new DiagnosisComponent();
+      if (this.diagnosis == null)
+        this.diagnosis = new ArrayList<DiagnosisComponent>();
+      this.diagnosis.add(t);
       return t;
     }
 
-    public EpisodeOfCare addCondition(Reference t) { //3
+    public EpisodeOfCare addDiagnosis(DiagnosisComponent t) { //3
       if (t == null)
         return this;
-      if (this.condition == null)
-        this.condition = new ArrayList<Reference>();
-      this.condition.add(t);
+      if (this.diagnosis == null)
+        this.diagnosis = new ArrayList<DiagnosisComponent>();
+      this.diagnosis.add(t);
       return this;
     }
 
     /**
-     * @return The first repetition of repeating field {@link #condition}, creating it if it does not already exist
+     * @return The first repetition of repeating field {@link #diagnosis}, creating it if it does not already exist
      */
-    public Reference getConditionFirstRep() { 
-      if (getCondition().isEmpty()) {
-        addCondition();
+    public DiagnosisComponent getDiagnosisFirstRep() { 
+      if (getDiagnosis().isEmpty()) {
+        addDiagnosis();
       }
-      return getCondition().get(0);
+      return getDiagnosis().get(0);
     }
 
     /**
-     * @deprecated Use Reference#setResource(IBaseResource) instead
-     */
-    @Deprecated
-    public List<Condition> getConditionTarget() { 
-      if (this.conditionTarget == null)
-        this.conditionTarget = new ArrayList<Condition>();
-      return this.conditionTarget;
-    }
-
-    /**
-     * @deprecated Use Reference#setResource(IBaseResource) instead
-     */
-    @Deprecated
-    public Condition addConditionTarget() { 
-      Condition r = new Condition();
-      if (this.conditionTarget == null)
-        this.conditionTarget = new ArrayList<Condition>();
-      this.conditionTarget.add(r);
-      return r;
-    }
-
-    /**
-     * @return {@link #patient} (The patient that this EpisodeOfCare applies to.)
+     * @return {@link #patient} (The patient who is the focus of this episode of care.)
      */
     public Reference getPatient() { 
       if (this.patient == null)
@@ -858,7 +1135,7 @@ public class EpisodeOfCare extends DomainResource {
     }
 
     /**
-     * @param value {@link #patient} (The patient that this EpisodeOfCare applies to.)
+     * @param value {@link #patient} (The patient who is the focus of this episode of care.)
      */
     public EpisodeOfCare setPatient(Reference value) { 
       this.patient = value;
@@ -866,7 +1143,7 @@ public class EpisodeOfCare extends DomainResource {
     }
 
     /**
-     * @return {@link #patient} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The patient that this EpisodeOfCare applies to.)
+     * @return {@link #patient} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The patient who is the focus of this episode of care.)
      */
     public Patient getPatientTarget() { 
       if (this.patientTarget == null)
@@ -878,7 +1155,7 @@ public class EpisodeOfCare extends DomainResource {
     }
 
     /**
-     * @param value {@link #patient} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The patient that this EpisodeOfCare applies to.)
+     * @param value {@link #patient} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The patient who is the focus of this episode of care.)
      */
     public EpisodeOfCare setPatientTarget(Patient value) { 
       this.patientTarget = value;
@@ -1224,12 +1501,12 @@ public class EpisodeOfCare extends DomainResource {
 
       protected void listChildren(List<Property> childrenList) {
         super.listChildren(childrenList);
-        childrenList.add(new Property("identifier", "Identifier", "Identifier(s) by which this EpisodeOfCare is known.", 0, java.lang.Integer.MAX_VALUE, identifier));
+        childrenList.add(new Property("identifier", "Identifier", "The EpisodeOfCare may be known by different identifiers for different contexts of use, such as when an external agency is tracking the Episode for funding purposes.", 0, java.lang.Integer.MAX_VALUE, identifier));
         childrenList.add(new Property("status", "code", "planned | waitlist | active | onhold | finished | cancelled.", 0, java.lang.Integer.MAX_VALUE, status));
         childrenList.add(new Property("statusHistory", "", "The history of statuses that the EpisodeOfCare has been through (without requiring processing the history of the resource).", 0, java.lang.Integer.MAX_VALUE, statusHistory));
         childrenList.add(new Property("type", "CodeableConcept", "A classification of the type of episode of care; e.g. specialist referral, disease management, type of funded care.", 0, java.lang.Integer.MAX_VALUE, type));
-        childrenList.add(new Property("condition", "Reference(Condition)", "A list of conditions/problems/diagnoses that this episode of care is intended to be providing care for.", 0, java.lang.Integer.MAX_VALUE, condition));
-        childrenList.add(new Property("patient", "Reference(Patient)", "The patient that this EpisodeOfCare applies to.", 0, java.lang.Integer.MAX_VALUE, patient));
+        childrenList.add(new Property("diagnosis", "", "The list of diagnosis relevant to this episode of care.", 0, java.lang.Integer.MAX_VALUE, diagnosis));
+        childrenList.add(new Property("patient", "Reference(Patient)", "The patient who is the focus of this episode of care.", 0, java.lang.Integer.MAX_VALUE, patient));
         childrenList.add(new Property("managingOrganization", "Reference(Organization)", "The organization that has assumed the specific responsibilities for the specified duration.", 0, java.lang.Integer.MAX_VALUE, managingOrganization));
         childrenList.add(new Property("period", "Period", "The interval during which the managing organization assumes the defined responsibility.", 0, java.lang.Integer.MAX_VALUE, period));
         childrenList.add(new Property("referralRequest", "Reference(ReferralRequest)", "Referral Request(s) that are fulfilled by this EpisodeOfCare, incoming referrals.", 0, java.lang.Integer.MAX_VALUE, referralRequest));
@@ -1245,7 +1522,7 @@ public class EpisodeOfCare extends DomainResource {
         case -892481550: /*status*/ return this.status == null ? new Base[0] : new Base[] {this.status}; // Enumeration<EpisodeOfCareStatus>
         case -986695614: /*statusHistory*/ return this.statusHistory == null ? new Base[0] : this.statusHistory.toArray(new Base[this.statusHistory.size()]); // EpisodeOfCareStatusHistoryComponent
         case 3575610: /*type*/ return this.type == null ? new Base[0] : this.type.toArray(new Base[this.type.size()]); // CodeableConcept
-        case -861311717: /*condition*/ return this.condition == null ? new Base[0] : this.condition.toArray(new Base[this.condition.size()]); // Reference
+        case 1196993265: /*diagnosis*/ return this.diagnosis == null ? new Base[0] : this.diagnosis.toArray(new Base[this.diagnosis.size()]); // DiagnosisComponent
         case -791418107: /*patient*/ return this.patient == null ? new Base[0] : new Base[] {this.patient}; // Reference
         case -2058947787: /*managingOrganization*/ return this.managingOrganization == null ? new Base[0] : new Base[] {this.managingOrganization}; // Reference
         case -991726143: /*period*/ return this.period == null ? new Base[0] : new Base[] {this.period}; // Period
@@ -1259,95 +1536,118 @@ public class EpisodeOfCare extends DomainResource {
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case -1618432855: // identifier
           this.getIdentifier().add(castToIdentifier(value)); // Identifier
-          break;
+          return value;
         case -892481550: // status
-          this.status = new EpisodeOfCareStatusEnumFactory().fromType(value); // Enumeration<EpisodeOfCareStatus>
-          break;
+          value = new EpisodeOfCareStatusEnumFactory().fromType(castToCode(value));
+          this.status = (Enumeration) value; // Enumeration<EpisodeOfCareStatus>
+          return value;
         case -986695614: // statusHistory
           this.getStatusHistory().add((EpisodeOfCareStatusHistoryComponent) value); // EpisodeOfCareStatusHistoryComponent
-          break;
+          return value;
         case 3575610: // type
           this.getType().add(castToCodeableConcept(value)); // CodeableConcept
-          break;
-        case -861311717: // condition
-          this.getCondition().add(castToReference(value)); // Reference
-          break;
+          return value;
+        case 1196993265: // diagnosis
+          this.getDiagnosis().add((DiagnosisComponent) value); // DiagnosisComponent
+          return value;
         case -791418107: // patient
           this.patient = castToReference(value); // Reference
-          break;
+          return value;
         case -2058947787: // managingOrganization
           this.managingOrganization = castToReference(value); // Reference
-          break;
+          return value;
         case -991726143: // period
           this.period = castToPeriod(value); // Period
-          break;
+          return value;
         case -310299598: // referralRequest
           this.getReferralRequest().add(castToReference(value)); // Reference
-          break;
+          return value;
         case -1147746468: // careManager
           this.careManager = castToReference(value); // Reference
-          break;
+          return value;
         case 3555933: // team
           this.getTeam().add(castToReference(value)); // Reference
-          break;
+          return value;
         case -1177318867: // account
           this.getAccount().add(castToReference(value)); // Reference
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("identifier"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("identifier")) {
           this.getIdentifier().add(castToIdentifier(value));
-        else if (name.equals("status"))
-          this.status = new EpisodeOfCareStatusEnumFactory().fromType(value); // Enumeration<EpisodeOfCareStatus>
-        else if (name.equals("statusHistory"))
+        } else if (name.equals("status")) {
+          value = new EpisodeOfCareStatusEnumFactory().fromType(castToCode(value));
+          this.status = (Enumeration) value; // Enumeration<EpisodeOfCareStatus>
+        } else if (name.equals("statusHistory")) {
           this.getStatusHistory().add((EpisodeOfCareStatusHistoryComponent) value);
-        else if (name.equals("type"))
+        } else if (name.equals("type")) {
           this.getType().add(castToCodeableConcept(value));
-        else if (name.equals("condition"))
-          this.getCondition().add(castToReference(value));
-        else if (name.equals("patient"))
+        } else if (name.equals("diagnosis")) {
+          this.getDiagnosis().add((DiagnosisComponent) value);
+        } else if (name.equals("patient")) {
           this.patient = castToReference(value); // Reference
-        else if (name.equals("managingOrganization"))
+        } else if (name.equals("managingOrganization")) {
           this.managingOrganization = castToReference(value); // Reference
-        else if (name.equals("period"))
+        } else if (name.equals("period")) {
           this.period = castToPeriod(value); // Period
-        else if (name.equals("referralRequest"))
+        } else if (name.equals("referralRequest")) {
           this.getReferralRequest().add(castToReference(value));
-        else if (name.equals("careManager"))
+        } else if (name.equals("careManager")) {
           this.careManager = castToReference(value); // Reference
-        else if (name.equals("team"))
+        } else if (name.equals("team")) {
           this.getTeam().add(castToReference(value));
-        else if (name.equals("account"))
+        } else if (name.equals("account")) {
           this.getAccount().add(castToReference(value));
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case -1618432855:  return addIdentifier(); // Identifier
-        case -892481550: throw new FHIRException("Cannot make property status as it is not a complex type"); // Enumeration<EpisodeOfCareStatus>
-        case -986695614:  return addStatusHistory(); // EpisodeOfCareStatusHistoryComponent
-        case 3575610:  return addType(); // CodeableConcept
-        case -861311717:  return addCondition(); // Reference
-        case -791418107:  return getPatient(); // Reference
-        case -2058947787:  return getManagingOrganization(); // Reference
-        case -991726143:  return getPeriod(); // Period
-        case -310299598:  return addReferralRequest(); // Reference
-        case -1147746468:  return getCareManager(); // Reference
-        case 3555933:  return addTeam(); // Reference
-        case -1177318867:  return addAccount(); // Reference
+        case -1618432855:  return addIdentifier(); 
+        case -892481550:  return getStatusElement();
+        case -986695614:  return addStatusHistory(); 
+        case 3575610:  return addType(); 
+        case 1196993265:  return addDiagnosis(); 
+        case -791418107:  return getPatient(); 
+        case -2058947787:  return getManagingOrganization(); 
+        case -991726143:  return getPeriod(); 
+        case -310299598:  return addReferralRequest(); 
+        case -1147746468:  return getCareManager(); 
+        case 3555933:  return addTeam(); 
+        case -1177318867:  return addAccount(); 
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -1618432855: /*identifier*/ return new String[] {"Identifier"};
+        case -892481550: /*status*/ return new String[] {"code"};
+        case -986695614: /*statusHistory*/ return new String[] {};
+        case 3575610: /*type*/ return new String[] {"CodeableConcept"};
+        case 1196993265: /*diagnosis*/ return new String[] {};
+        case -791418107: /*patient*/ return new String[] {"Reference"};
+        case -2058947787: /*managingOrganization*/ return new String[] {"Reference"};
+        case -991726143: /*period*/ return new String[] {"Period"};
+        case -310299598: /*referralRequest*/ return new String[] {"Reference"};
+        case -1147746468: /*careManager*/ return new String[] {"Reference"};
+        case 3555933: /*team*/ return new String[] {"Reference"};
+        case -1177318867: /*account*/ return new String[] {"Reference"};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }
@@ -1366,8 +1666,8 @@ public class EpisodeOfCare extends DomainResource {
         else if (name.equals("type")) {
           return addType();
         }
-        else if (name.equals("condition")) {
-          return addCondition();
+        else if (name.equals("diagnosis")) {
+          return addDiagnosis();
         }
         else if (name.equals("patient")) {
           this.patient = new Reference();
@@ -1422,10 +1722,10 @@ public class EpisodeOfCare extends DomainResource {
           for (CodeableConcept i : type)
             dst.type.add(i.copy());
         };
-        if (condition != null) {
-          dst.condition = new ArrayList<Reference>();
-          for (Reference i : condition)
-            dst.condition.add(i.copy());
+        if (diagnosis != null) {
+          dst.diagnosis = new ArrayList<DiagnosisComponent>();
+          for (DiagnosisComponent i : diagnosis)
+            dst.diagnosis.add(i.copy());
         };
         dst.patient = patient == null ? null : patient.copy();
         dst.managingOrganization = managingOrganization == null ? null : managingOrganization.copy();
@@ -1461,7 +1761,7 @@ public class EpisodeOfCare extends DomainResource {
           return false;
         EpisodeOfCare o = (EpisodeOfCare) other;
         return compareDeep(identifier, o.identifier, true) && compareDeep(status, o.status, true) && compareDeep(statusHistory, o.statusHistory, true)
-           && compareDeep(type, o.type, true) && compareDeep(condition, o.condition, true) && compareDeep(patient, o.patient, true)
+           && compareDeep(type, o.type, true) && compareDeep(diagnosis, o.diagnosis, true) && compareDeep(patient, o.patient, true)
            && compareDeep(managingOrganization, o.managingOrganization, true) && compareDeep(period, o.period, true)
            && compareDeep(referralRequest, o.referralRequest, true) && compareDeep(careManager, o.careManager, true)
            && compareDeep(team, o.team, true) && compareDeep(account, o.account, true);
@@ -1479,7 +1779,7 @@ public class EpisodeOfCare extends DomainResource {
 
       public boolean isEmpty() {
         return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, status, statusHistory
-          , type, condition, patient, managingOrganization, period, referralRequest, careManager
+          , type, diagnosis, patient, managingOrganization, period, referralRequest, careManager
           , team, account);
       }
 
@@ -1511,17 +1811,17 @@ public class EpisodeOfCare extends DomainResource {
  /**
    * Search parameter: <b>identifier</b>
    * <p>
-   * Description: <b>Identifier(s) for the EpisodeOfCare</b><br>
+   * Description: <b>Business Identifier(s) relevant for this EpisodeOfCare</b><br>
    * Type: <b>token</b><br>
    * Path: <b>EpisodeOfCare.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="EpisodeOfCare.identifier", description="Identifier(s) for the EpisodeOfCare", type="token" )
+  @SearchParamDefinition(name="identifier", path="EpisodeOfCare.identifier", description="Business Identifier(s) relevant for this EpisodeOfCare", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
    * <p>
-   * Description: <b>Identifier(s) for the EpisodeOfCare</b><br>
+   * Description: <b>Business Identifier(s) relevant for this EpisodeOfCare</b><br>
    * Type: <b>token</b><br>
    * Path: <b>EpisodeOfCare.identifier</b><br>
    * </p>
@@ -1533,17 +1833,17 @@ public class EpisodeOfCare extends DomainResource {
    * <p>
    * Description: <b>Conditions/problems/diagnoses this episode of care is for</b><br>
    * Type: <b>reference</b><br>
-   * Path: <b>EpisodeOfCare.condition</b><br>
+   * Path: <b>EpisodeOfCare.diagnosis.condition</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="condition", path="EpisodeOfCare.condition", description="Conditions/problems/diagnoses this episode of care is for", type="reference", target={Condition.class } )
+  @SearchParamDefinition(name="condition", path="EpisodeOfCare.diagnosis.condition", description="Conditions/problems/diagnoses this episode of care is for", type="reference", target={Condition.class } )
   public static final String SP_CONDITION = "condition";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>condition</b>
    * <p>
    * Description: <b>Conditions/problems/diagnoses this episode of care is for</b><br>
    * Type: <b>reference</b><br>
-   * Path: <b>EpisodeOfCare.condition</b><br>
+   * Path: <b>EpisodeOfCare.diagnosis.condition</b><br>
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam CONDITION = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_CONDITION);
@@ -1583,17 +1883,17 @@ public class EpisodeOfCare extends DomainResource {
  /**
    * Search parameter: <b>patient</b>
    * <p>
-   * Description: <b>Patient for this episode of care</b><br>
+   * Description: <b>The patient who is the focus of this episode of care</b><br>
    * Type: <b>reference</b><br>
    * Path: <b>EpisodeOfCare.patient</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="EpisodeOfCare.patient", description="Patient for this episode of care", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") }, target={Patient.class } )
+  @SearchParamDefinition(name="patient", path="EpisodeOfCare.patient", description="The patient who is the focus of this episode of care", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") }, target={Patient.class } )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>
    * <p>
-   * Description: <b>Patient for this episode of care</b><br>
+   * Description: <b>The patient who is the focus of this episode of care</b><br>
    * Type: <b>reference</b><br>
    * Path: <b>EpisodeOfCare.patient</b><br>
    * </p>

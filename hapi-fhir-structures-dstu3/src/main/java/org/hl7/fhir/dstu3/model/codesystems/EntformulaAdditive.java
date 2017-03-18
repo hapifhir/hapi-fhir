@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,23 +37,23 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum EntformulaAdditive {
 
         /**
-         * null
+         * Modular lipid enteral formula component
          */
         LIPID, 
         /**
-         * null
+         * Modular protein enteral formula component
          */
         PROTEIN, 
         /**
-         * null
+         * Modular carbohydrate enteral formula component
          */
         CARBOHYDRATE, 
         /**
-         * null
+         * Modular fiber enteral formula component
          */
         FIBER, 
         /**
-         * null
+         * Added water
          */
         WATER, 
         /**
@@ -90,21 +90,21 @@ public enum EntformulaAdditive {
         }
         public String getDefinition() {
           switch (this) {
-            case LIPID: return "";
-            case PROTEIN: return "";
-            case CARBOHYDRATE: return "";
-            case FIBER: return "";
-            case WATER: return "";
-            default: return "?";
-          }
-        }
-        public String getDisplay() {
-          switch (this) {
             case LIPID: return "Modular lipid enteral formula component";
             case PROTEIN: return "Modular protein enteral formula component";
             case CARBOHYDRATE: return "Modular carbohydrate enteral formula component";
             case FIBER: return "Modular fiber enteral formula component";
             case WATER: return "Added water";
+            default: return "?";
+          }
+        }
+        public String getDisplay() {
+          switch (this) {
+            case LIPID: return "Lipid";
+            case PROTEIN: return "Protein";
+            case CARBOHYDRATE: return "Carbohydrate";
+            case FIBER: return "Fiber";
+            case WATER: return "Water";
             default: return "?";
           }
     }

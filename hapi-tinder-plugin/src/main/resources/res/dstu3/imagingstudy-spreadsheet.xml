@@ -9,19 +9,19 @@
   <Author>Grahame</Author>
   <LastAuthor>John Moehrke</LastAuthor>
   <Created>2012-03-19T11:12:07Z</Created>
-  <LastSaved>2016-09-28T20:51:58Z</LastSaved>
+  <LastSaved>2017-02-02T17:03:29Z</LastSaved>
   <Version>16.00</Version>
  </DocumentProperties>
  <OfficeDocumentSettings xmlns="urn:schemas-microsoft-com:office:office">
   <AllowPNG/>
  </OfficeDocumentSettings>
  <ExcelWorkbook xmlns="urn:schemas-microsoft-com:office:excel">
-  <WindowHeight>5100</WindowHeight>
-  <WindowWidth>17268</WindowWidth>
+  <WindowHeight>10344</WindowHeight>
+  <WindowWidth>23040</WindowWidth>
   <WindowTopX>0</WindowTopX>
   <WindowTopY>0</WindowTopY>
-  <ActiveSheet>7</ActiveSheet>
-  <FirstVisibleSheet>1</FirstVisibleSheet>
+  <ActiveSheet>8</ActiveSheet>
+  <FirstVisibleSheet>5</FirstVisibleSheet>
   <RefModeR1C1/>
   <ProtectStructure>False</ProtectStructure>
   <ProtectWindows>False</ProtectWindows>
@@ -810,7 +810,12 @@
    </Borders>
    <Interior/>
   </Style>
-  <Style ss:ID="s158">
+  <Style ss:ID="s158" ss:Parent="s62">
+   <Alignment ss:Vertical="Top" ss:WrapText="1"/>
+   <Borders/>
+   <Interior/>
+  </Style>
+  <Style ss:ID="s160">
    <Alignment ss:Horizontal="Left" ss:Vertical="Top" ss:ShrinkToFit="1"
     ss:WrapText="1"/>
    <Borders>
@@ -819,7 +824,7 @@
    </Borders>
    <Interior/>
   </Style>
-  <Style ss:ID="s160" ss:Parent="s63">
+  <Style ss:ID="s162" ss:Parent="s63">
    <Alignment ss:Horizontal="Left" ss:Vertical="Top" ss:WrapText="1"/>
    <Borders>
     <Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="1"/>
@@ -829,7 +834,7 @@
    <NumberFormat/>
    <Protection/>
   </Style>
-  <Style ss:ID="s161" ss:Parent="s63">
+  <Style ss:ID="s163" ss:Parent="s63">
    <Alignment ss:Horizontal="Left" ss:Vertical="Top" ss:WrapText="1"/>
    <Borders/>
    <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#000000"/>
@@ -837,7 +842,7 @@
    <NumberFormat/>
    <Protection/>
   </Style>
-  <Style ss:ID="s162" ss:Parent="s63">
+  <Style ss:ID="s164" ss:Parent="s63">
    <Alignment ss:Horizontal="Left" ss:Vertical="Top" ss:WrapText="1"/>
    <Borders>
     <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="3"/>
@@ -904,9 +909,9 @@
  <Worksheet ss:Name="Data Elements">
   <Names>
    <NamedRange ss:Name="_FilterDatabase"
-    ss:RefersTo="='Data Elements'!R1C1:R100C25" ss:Hidden="1"/>
+    ss:RefersTo="='Data Elements'!R1C1:R104C25" ss:Hidden="1"/>
   </Names>
-  <Table ss:ExpandedColumnCount="25" ss:ExpandedRowCount="100" x:FullColumns="1"
+  <Table ss:ExpandedColumnCount="25" ss:ExpandedRowCount="104" x:FullColumns="1"
    x:FullRows="1" ss:StyleID="s69" ss:DefaultColumnWidth="65.400000000000006"
    ss:DefaultRowHeight="15">
    <Column ss:StyleID="s70" ss:AutoFitWidth="0" ss:Width="273.59999999999997"/>
@@ -1321,7 +1326,8 @@
     <Cell ss:StyleID="s94"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s93"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s94"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s95"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s95"><Data ss:Type="String">inboundRelationship[typeCode=COMP].source[classCode=ENC, moodCode=EVN]</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s95"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s96"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s95"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1375,7 +1381,7 @@
     <Cell ss:StyleID="s92"><Data ss:Type="String">0..*</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s92"><Data ss:Type="String">Reference(ReferralRequest|CarePlan|DiagnosticRequest|ProcedureRequest)</Data><NamedCell
+    <Cell ss:StyleID="s92"><Data ss:Type="String">Reference(ReferralRequest|CarePlan|ProcedureRequest)</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><Data ss:Type="String">Y</Data><NamedCell
@@ -1477,8 +1483,43 @@
     <Cell ss:StyleID="s95"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s98"><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="273.45">
+    <Cell ss:StyleID="s99"><Data ss:Type="String">ImagingStudy.endpoint</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s100"><Data ss:Type="String">0..*</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s100"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s100"><Data ss:Type="String" x:Ticked="1">Reference(Endpoint)</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s92"><Data ss:Type="String">Y</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s100"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s100"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s100"><Data ss:Type="String">Study access endpoint</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s100"><Data ss:Type="String">The network service providing access (e.g., query, view, or retrieval) for the study. See implementation notes for information about using DICOM endpoints. A study-level endpoint applies to each series in the study, unless overridden by a series-level endpoint with the same Endpoint.type</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s100"><Data ss:Type="String">Access methods for viewing (e.g. IHE’s IID profile) or retrieving (e.g., DICOM’s WADO-URI and WADO-RS) the study or the study’s series or instances. The study-level baseLocation applies to each series in the study, unless overridden in series by a series-level baseLocation of the same type. </Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s100"><Data ss:Type="String">Typical endpoint types include DICOM WADO-RS, which is used to retrieve DICOM instances in native or rendered (e.g., JPG, PNG), formats using a RESTful API; DICOM WADO-URI, which can similarly retrieve native or rendered instances, except using an HTTP query-based approach; DICOM QIDO-RS, which allows RESTful query for DICOM information without retrieving the actual instances; or IHE Invoke Image Display (IID), which provides standard invokation of an imaging web viewer.</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s94"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s95"><Data ss:Type="String">Not supported</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s95"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s100"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s100"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s97"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="Default"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+   </Row>
    <Row ss:AutoFitHeight="0" ss:Height="45">
-    <Cell ss:StyleID="s99"><Data ss:Type="String">ImagingStudy.baseLocation</Data><NamedCell
+    <Cell ss:StyleID="s99"><Data ss:Type="String">!ImagingStudy.baseLocation</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s100"><Data ss:Type="String">0..*</Data><NamedCell
@@ -1513,7 +1554,7 @@
     <Cell ss:StyleID="Default"><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="30">
-    <Cell ss:StyleID="s99"><Data ss:Type="String">ImagingStudy.baseLocation.type</Data><NamedCell
+    <Cell ss:StyleID="s99"><Data ss:Type="String">!ImagingStudy.baseLocation.type</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s100"><Data ss:Type="String">1..1</Data><NamedCell
@@ -1546,7 +1587,7 @@
     <Cell ss:StyleID="Default"><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="45">
-    <Cell ss:StyleID="s99"><Data ss:Type="String">ImagingStudy.baseLocation.url</Data><NamedCell
+    <Cell ss:StyleID="s99"><Data ss:Type="String">!ImagingStudy.baseLocation.url</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s100"><Data ss:Type="String">1..1</Data><NamedCell
@@ -1578,12 +1619,12 @@
     <Cell ss:StyleID="s95"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="Default"><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
-   <Row ss:AutoFitHeight="0" ss:Height="90">
+   <Row ss:AutoFitHeight="0" ss:Height="115.2">
     <Cell ss:StyleID="s91"><Data ss:Type="String">ImagingStudy.numberOfSeries</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><Data ss:Type="String">NumberOfStudyRelatedSeries</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s92"><Data ss:Type="String">1..1</Data><NamedCell
+    <Cell ss:StyleID="s92"><Data ss:Type="String">0..1</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><Data ss:Type="String">unsignedInt</Data><NamedCell
@@ -1599,7 +1640,7 @@
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><Data ss:Type="String">Number of Study Related Series</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s93"><Data ss:Type="String">Number of Series in Study</Data><NamedCell
+    <Cell ss:StyleID="s93"><Data ss:Type="String">Number of Series in the Study. This value given may be larger than the number of series elements this Resource contains due to resource availability, security, or other factors. This element should be present if any series elements are present</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s94"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s93"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1619,7 +1660,7 @@
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><Data ss:Type="String">NumberOfStudyRelatedInstances</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s92"><Data ss:Type="String">1..1</Data><NamedCell
+    <Cell ss:StyleID="s92"><Data ss:Type="String">0..1</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><Data ss:Type="String">unsignedInt</Data><NamedCell
@@ -1635,7 +1676,7 @@
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><Data ss:Type="String">Number of Study Related Instances</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s93"><Data ss:Type="String">Number of SOP Instances in Study</Data><NamedCell
+    <Cell ss:StyleID="s93"><Data ss:Type="String">Number of SOP Instances in Study. This value given may be larger than the number of instance elements this Resource contains due to resource availability, security, or other factors. This element should be present if any instance elements are present</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s94"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s93"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1651,10 +1692,9 @@
     <Cell ss:StyleID="s98"><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="60">
-    <Cell ss:StyleID="s91"><Data ss:Type="String">ImagingStudy.procedure</Data><NamedCell
+    <Cell ss:StyleID="s91"><Data ss:Type="String">ImagingStudy.procedureReference</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s92"><Data ss:Type="String">ProcedureCodeSequence</Data><NamedCell
-      ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><Data ss:Type="String">0..*</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1669,9 +1709,9 @@
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s92"><Data ss:Type="String">Type of procedure performed</Data><NamedCell
+    <Cell ss:StyleID="s92"><Data ss:Type="String">The performed Procedure Reference</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s93"><Data ss:Type="String">Type of procedure performed</Data><NamedCell
+    <Cell ss:StyleID="s93"><Data ss:Type="String">A reference to the performed Procedure</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s94"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s93"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1681,6 +1721,42 @@
     <Cell ss:StyleID="s95"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s96"><Data ss:Type="String">(0008,1032)</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s95"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s97"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s95"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s98"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="60">
+    <Cell ss:StyleID="s91"><Data ss:Type="String">ImagingStudy.procedureCode</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s92"><Data ss:Type="String">ProcedureCodeSequence</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s92"><Data ss:Type="String">0..*</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s92"><Data ss:Type="String">CodeableConcept</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s92"><Data ss:Type="String">Y</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s92"><Data ss:Type="String">ImagingProcedureCode</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s92"><Data ss:Type="String">The performed procedure code</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s93"><Data ss:Type="String">The code for the performed procedure type</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s94"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s93"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s94"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s95"><Data ss:Type="String">.outboundRelationship[typeCode=COMP].target[classCode=PROC, moodCode=EVN]</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s95"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s96"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s95"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s97"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s95"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1706,14 +1782,15 @@
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s92"><Data ss:Type="String">Reason for study</Data><NamedCell
+    <Cell ss:StyleID="s92"><Data ss:Type="String">Why the study was requested</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s93"><Data ss:Type="String">Description of clinical codition indicating why the ImagingStudy was requested.</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s94"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s93"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s94"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s95"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s95"><Data ss:Type="String">.reasonCode</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s95"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s96"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s95"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1939,12 +2016,12 @@
     <Cell ss:StyleID="s95"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s98"><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
-   <Row ss:AutoFitHeight="0" ss:Height="90">
+   <Row ss:AutoFitHeight="0" ss:Height="115.2">
     <Cell ss:StyleID="s91"><Data ss:Type="String">ImagingStudy.series.numberOfInstances</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><Data ss:Type="String">NumberOfSeriesRelatedInstances</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s92"><Data ss:Type="String">1..1</Data><NamedCell
+    <Cell ss:StyleID="s92"><Data ss:Type="String">0..1</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><Data ss:Type="String">unsignedInt</Data><NamedCell
@@ -1960,7 +2037,7 @@
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><Data ss:Type="String">Number of Series Related Instances</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s93"><Data ss:Type="String">Number of SOP Instances in Series.</Data><NamedCell
+    <Cell ss:StyleID="s93"><Data ss:Type="String">Number of SOP Instances in Study. This value given may be larger than the number of instance elements this Resource contains due to resource availability, security, or other factors. This element should be present if any instance elements are present</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s94"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s93"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -2012,8 +2089,43 @@
     <Cell ss:StyleID="s95"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s98"><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="230.55">
+    <Cell ss:StyleID="s99"><Data ss:Type="String">ImagingStudy.series.endpoint</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s100"><Data ss:Type="String">0..*</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s100"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s100"><Data ss:Type="String" x:Ticked="1">Reference(Endpoint)</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s92"><Data ss:Type="String">Y</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s100"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s100"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s100"><Data ss:Type="String">Series access endpoint</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s100"><Data ss:Type="String">The network service providing access (e.g., query, view, or retrieval) for this series. See implementation notes for information about using DICOM endpoints. A series-level endpoint, if present, has precedence over a study-level endpoint with the same Endpoint.type</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s100"><Data ss:Type="String">Access methods for retrieving (e.g., DICOM’s WADO-URI and WADO-RS) the series or the series’ instances. A baseLocation specified at the series level has precedence over a baseLocation of the same type specified at the study level.</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s100"><Data ss:Type="String">Typical endpoint types include DICOM WADO-RS, which is used to retrieve DICOM instances in native or rendered (e.g., JPG, PNG), formats using a RESTful API; DICOM WADO-URI, which can similarly retrieve native or rendered instances, except using an HTTP query-based approach; and DICOM QIDO-RS, which allows RESTful query for DICOM information without retrieving the actual instances.</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s94"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s95"><Data ss:Type="String">Not supported</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s95"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s100"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s100"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s97"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="Default"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+   </Row>
    <Row ss:AutoFitHeight="0" ss:Height="45">
-    <Cell ss:StyleID="s99"><Data ss:Type="String">ImagingStudy.series.baseLocation</Data><NamedCell
+    <Cell ss:StyleID="s99"><Data ss:Type="String">!ImagingStudy.series.baseLocation</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s100"><Data ss:Type="String">0..*</Data><NamedCell
@@ -2042,14 +2154,13 @@
     <Cell ss:StyleID="s95"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s95"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s100"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s100"><Data ss:Type="String">300;300</Data><NamedCell
-      ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s100"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s97"><Data ss:Type="String">620;270</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="Default"><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="30">
-    <Cell ss:StyleID="s99"><Data ss:Type="String">ImagingStudy.series.baseLocation.type</Data><NamedCell
+    <Cell ss:StyleID="s99"><Data ss:Type="String">!ImagingStudy.series.baseLocation.type</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s100"><Data ss:Type="String">1..1</Data><NamedCell
@@ -2082,7 +2193,7 @@
     <Cell ss:StyleID="Default"><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="45">
-    <Cell ss:StyleID="s99"><Data ss:Type="String">ImagingStudy.series.baseLocation.url</Data><NamedCell
+    <Cell ss:StyleID="s99"><Data ss:Type="String">!ImagingStudy.series.baseLocation.url</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s100"><Data ss:Type="String">1..1</Data><NamedCell
@@ -2216,6 +2327,43 @@
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s95"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s96"><Data ss:Type="String">(0008,0021) + (0008,0031)</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s95"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s97"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s95"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s98"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="144">
+    <Cell ss:StyleID="s91"><Data ss:Type="String">ImagingStudy.series.performer</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s92"><Data ss:Type="String">PerformingPysiciansName, OperatorsName</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s92"><Data ss:Type="String">0..*</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s92"><Data ss:Type="String">Reference(Practitioner)</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s92"><Data ss:Type="String">Y</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s92"><Data ss:Type="String">who.actor</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s92"><Data ss:Type="String">Who performed the series</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s93"><Data ss:Type="String">The physician or operator (often the radiology technician)  who performed the series. The performer is recorded at the series level, since each series in a study may be performed by a different practitioner, at different times, and using different devices. A series may be performed by multiple practitioners.</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s94"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s93"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s94"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s95"><Data ss:Type="String">.participation[typeCode=PRF].role</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s95"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s96"><Data ss:Type="String">(0008,1050) | (0008,1072)</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s95"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s97"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -4069,7 +4217,7 @@
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>
-   <TopRowBottomPane>10</TopRowBottomPane>
+   <TopRowBottomPane>16</TopRowBottomPane>
    <SplitVertical>1</SplitVertical>
    <LeftColumnRightPane>1</LeftColumnRightPane>
    <ActivePane>0</ActivePane>
@@ -4086,15 +4234,15 @@
     </Pane>
     <Pane>
      <Number>0</Number>
-     <ActiveRow>12</ActiveRow>
-     <ActiveCol>0</ActiveCol>
+     <ActiveRow>20</ActiveRow>
+     <ActiveCol>7</ActiveCol>
     </Pane>
    </Panes>
    <ProtectObjects>False</ProtectObjects>
    <ProtectScenarios>False</ProtectScenarios>
    <x:PageLayoutZoom>0</x:PageLayoutZoom>
   </WorksheetOptions>
-  <AutoFilter x:Range="R1C1:R100C25"
+  <AutoFilter x:Range="R1C1:R104C25"
    xmlns="urn:schemas-microsoft-com:office:excel">
   </AutoFilter>
  </Worksheet>
@@ -4638,7 +4786,7 @@
    <Column ss:StyleID="s123" ss:AutoFitWidth="0" ss:Width="71.400000000000006"/>
    <Column ss:StyleID="s123" ss:AutoFitWidth="0" ss:Width="57"/>
    <Column ss:StyleID="s123" ss:AutoFitWidth="0" ss:Width="110.4"/>
-   <Column ss:StyleID="s123" ss:AutoFitWidth="0" ss:Width="210"/>
+   <Column ss:StyleID="s123" ss:AutoFitWidth="0" ss:Width="296.39999999999998"/>
    <Column ss:StyleID="s123" ss:AutoFitWidth="0" ss:Width="383.40000000000003"/>
    <Row ss:AutoFitHeight="0" ss:StyleID="s124">
     <Cell ss:StyleID="s113"><Data ss:Type="String">Name</Data><Comment ss:Author=""><ss:Data
@@ -4753,18 +4901,18 @@
     <Cell ss:StyleID="s130"><Data ss:Type="String">The reason for the study</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s128"/>
+    <Cell ss:StyleID="s128"><Data ss:Type="String">performer</Data></Cell>
+    <Cell ss:StyleID="s92"><Data ss:Type="String">reference</Data></Cell>
     <Cell ss:StyleID="s92"/>
-    <Cell ss:StyleID="s92"/>
-    <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s130"/>
+    <Cell ss:StyleID="s129"><Data ss:Type="String">ImagingStudy.series.performer</Data></Cell>
+    <Cell ss:StyleID="s130"><Data ss:Type="String">The person who performed the study</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s128"/>
+    <Cell ss:StyleID="s128"><Data ss:Type="String">endpoint</Data></Cell>
+    <Cell ss:StyleID="s92"><Data ss:Type="String">reference</Data></Cell>
     <Cell ss:StyleID="s92"/>
-    <Cell ss:StyleID="s92"/>
-    <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s130"/>
+    <Cell ss:StyleID="s129"><Data ss:Type="String">ImagingStudy.endpoint | ImagingStudy.series.endpoint</Data></Cell>
+    <Cell ss:StyleID="s130"><Data ss:Type="String">The endpoint for te study or series</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s128"/>
@@ -4883,7 +5031,7 @@
     </Pane>
     <Pane>
      <Number>0</Number>
-     <ActiveRow>5</ActiveRow>
+     <ActiveRow>16</ActiveRow>
      <ActiveCol>0</ActiveCol>
     </Pane>
    </Panes>
@@ -6188,13 +6336,13 @@
       ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s152"/>
+    <Cell ss:StyleID="s152"><Data ss:Type="String">Comprenensive</Data></Cell>
     <Cell ss:StyleID="s92"/>
-    <Cell ss:StyleID="s93"/>
-    <Cell ss:StyleID="s92"/>
-    <Cell ss:StyleID="s92"/>
+    <Cell ss:StyleID="s93"><Data ss:Type="String">Example XR imaging study with full elements </Data></Cell>
+    <Cell ss:StyleID="s92"><Data ss:Type="String">example-xr</Data></Cell>
+    <Cell ss:StyleID="s92"><Data ss:Type="String">imagingstudy-example-xr.xml</Data></Cell>
     <Cell ss:StyleID="s142"/>
-    <Cell ss:StyleID="s153"/>
+    <Cell ss:StyleID="s153"><Data ss:Type="String">Y</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s152"/>
@@ -6529,7 +6677,6 @@
     <PageMargins x:Bottom="0.75" x:Left="0.7" x:Right="0.7" x:Top="0.75"/>
    </PageSetup>
    <Unsynced/>
-   <Selected/>
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>
@@ -6549,7 +6696,8 @@
     </Pane>
     <Pane>
      <Number>0</Number>
-     <ActiveCol>3</ActiveCol>
+     <ActiveRow>2</ActiveRow>
+     <ActiveCol>5</ActiveCol>
     </Pane>
    </Panes>
    <ProtectObjects>False</ProtectObjects>
@@ -6564,14 +6712,14 @@
    <NamedRange ss:Name="_FilterDatabase" ss:RefersTo="=Bindings!R1C1:R1C13"
     ss:Hidden="1"/>
   </Names>
-  <Table ss:ExpandedColumnCount="13" ss:ExpandedRowCount="27" x:FullColumns="1"
+  <Table ss:ExpandedColumnCount="13" ss:ExpandedRowCount="26" x:FullColumns="1"
    x:FullRows="1" ss:StyleID="s123" ss:DefaultColumnWidth="65.400000000000006"
    ss:DefaultRowHeight="15">
    <Column ss:StyleID="s123" ss:Width="114.6"/>
    <Column ss:StyleID="s123" ss:AutoFitWidth="0" ss:Width="275.40000000000003"/>
    <Column ss:StyleID="s123" ss:Width="51"/>
-   <Column ss:StyleID="s123" ss:Width="45"/>
-   <Column ss:StyleID="s123" ss:Width="146.39999999999998"/>
+   <Column ss:StyleID="s123" ss:AutoFitWidth="0" ss:Width="81"/>
+   <Column ss:StyleID="s123" ss:AutoFitWidth="0" ss:Width="261"/>
    <Column ss:StyleID="s123" ss:Width="173.39999999999998"/>
    <Column ss:StyleID="s123" ss:AutoFitWidth="0" ss:Width="98.4"/>
    <Column ss:StyleID="s123" ss:AutoFitWidth="0" ss:Width="89.4"/>
@@ -6668,7 +6816,8 @@
     <Cell ss:StyleID="s92"><Data ss:Type="String">Codes describing anatomical locations. May include laterality.</Data></Cell>
     <Cell ss:StyleID="s129"><Data ss:Type="String">value set</Data></Cell>
     <Cell ss:StyleID="s129"><Data ss:Type="String">example</Data></Cell>
-    <Cell ss:StyleID="s129"><Data ss:Type="String">http://hl7.org/fhir/ValueSet/body-site</Data></Cell>
+    <Cell ss:StyleID="s158" ss:HRef="http://hl7.org/fhir/ValueSet/body-site"><Data
+      ss:Type="String">http://hl7.org/fhir/ValueSet/body-site</Data></Cell>
     <Cell ss:StyleID="s129"><Data ss:Type="String">SNOMED CT Body site concepts</Data></Cell>
     <Cell ss:StyleID="s129"/>
     <Cell ss:StyleID="s129"/>
@@ -6683,22 +6832,7 @@
     <Cell ss:StyleID="s92"><Data ss:Type="String">Codes describing body site laterality (left, right, etc.).</Data></Cell>
     <Cell ss:StyleID="s129"><Data ss:Type="String">value set</Data></Cell>
     <Cell ss:StyleID="s129"><Data ss:Type="String">example</Data></Cell>
-    <Cell ss:StyleID="s129"><Data ss:Type="String">valueset-bodysite-laterality</Data></Cell>
-    <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s130"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s157"><Data ss:Type="String">dWebType</Data></Cell>
-    <Cell ss:StyleID="s92"><Data ss:Type="String">The type of the service endpoint </Data></Cell>
-    <Cell ss:StyleID="s129"><Data ss:Type="String">code list</Data></Cell>
-    <Cell ss:StyleID="s129"><Data ss:Type="String">extensible</Data></Cell>
-    <Cell ss:StyleID="s129"><Data ss:Type="String">#dWebType</Data></Cell>
+    <Cell ss:StyleID="Default"><Data ss:Type="String">valueset-bodysite-laterality</Data></Cell>
     <Cell ss:StyleID="s129"/>
     <Cell ss:StyleID="s129"/>
     <Cell ss:StyleID="s129"/>
@@ -6711,11 +6845,27 @@
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s157"><Data ss:Type="String">ImagingReason</Data></Cell>
     <Cell ss:StyleID="s92"><Data ss:Type="String">The reason for the study</Data></Cell>
-    <Cell ss:StyleID="s129"><Data ss:Type="String">unbound</Data></Cell>
+    <Cell ss:StyleID="s129"><Data ss:Type="String">value set</Data></Cell>
     <Cell ss:StyleID="s129"><Data ss:Type="String">example</Data></Cell>
+    <Cell ss:StyleID="s62" ss:HRef="http://hl7.org/fhir/ValueSet/procedure-reason"><Data
+      ss:Type="String">http://hl7.org/fhir/ValueSet/procedure-reason</Data></Cell>
     <Cell ss:StyleID="s129"/>
     <Cell ss:StyleID="s129"/>
     <Cell ss:StyleID="s129"/>
+    <Cell ss:StyleID="s129"/>
+    <Cell ss:StyleID="s129"/>
+    <Cell ss:StyleID="s129"/>
+    <Cell ss:StyleID="s129"/>
+    <Cell ss:StyleID="s130"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s157"><Data ss:Type="String">ImagingProcedureCode</Data></Cell>
+    <Cell ss:StyleID="s92"><Data ss:Type="String">The performed procedure type</Data></Cell>
+    <Cell ss:StyleID="s129"><Data ss:Type="String">value set</Data></Cell>
+    <Cell ss:StyleID="s129"><Data ss:Type="String">example</Data></Cell>
+    <Cell ss:StyleID="s62" ss:HRef="http://hl7.org/fhir/ValueSet/procedure-code"><Data
+      ss:Type="String">http://hl7.org/fhir/ValueSet/procedure-code</Data></Cell>
+    <Cell ss:Index="7" ss:StyleID="s129"/>
     <Cell ss:StyleID="s129"/>
     <Cell ss:StyleID="s129"/>
     <Cell ss:StyleID="s129"/>
@@ -6979,22 +7129,7 @@
     <Cell ss:StyleID="s130"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s157"/>
-    <Cell ss:StyleID="s92"/>
-    <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s130"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s158"/>
+    <Cell ss:StyleID="s160"/>
     <Cell ss:StyleID="s132"/>
     <Cell ss:StyleID="s133"/>
     <Cell ss:StyleID="s133"/>
@@ -7022,6 +7157,7 @@
     <HorizontalResolution>600</HorizontalResolution>
     <VerticalResolution>600</VerticalResolution>
    </Print>
+   <Selected/>
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>
@@ -7112,9 +7248,9 @@
     <Cell ss:StyleID="s150"><Data ss:Type="String">AR</Data></Cell>
     <Cell ss:StyleID="s139"/>
     <Cell ss:StyleID="s126"><Data ss:Type="String">http://nema.org/dicom/dicm</Data></Cell>
-    <Cell ss:StyleID="s160"/>
-    <Cell ss:StyleID="s160"/>
-    <Cell ss:StyleID="s160"/>
+    <Cell ss:StyleID="s162"/>
+    <Cell ss:StyleID="s162"/>
+    <Cell ss:StyleID="s162"/>
     <Cell ss:StyleID="s139"/>
     <Cell ss:StyleID="s139"/>
     <Cell ss:StyleID="s151"/>
@@ -7123,9 +7259,9 @@
     <Cell ss:StyleID="s152"><Data ss:Type="String">AU</Data></Cell>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"><Data ss:Type="String">http://nema.org/dicom/dicm</Data></Cell>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -7134,9 +7270,9 @@
     <Cell ss:StyleID="s152"><Data ss:Type="String">BDUS</Data></Cell>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"><Data ss:Type="String">http://nema.org/dicom/dicm</Data></Cell>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -7145,9 +7281,9 @@
     <Cell ss:StyleID="s152"><Data ss:Type="String">BI</Data></Cell>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"><Data ss:Type="String">http://nema.org/dicom/dicm</Data></Cell>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -7156,9 +7292,9 @@
     <Cell ss:StyleID="s152"><Data ss:Type="String">BMD</Data></Cell>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"><Data ss:Type="String">http://nema.org/dicom/dicm</Data></Cell>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -7167,9 +7303,9 @@
     <Cell ss:StyleID="s152"><Data ss:Type="String">CR</Data></Cell>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"><Data ss:Type="String">http://nema.org/dicom/dicm</Data></Cell>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -7178,9 +7314,9 @@
     <Cell ss:StyleID="s152"><Data ss:Type="String">CT</Data></Cell>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"><Data ss:Type="String">http://nema.org/dicom/dicm</Data></Cell>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -7189,9 +7325,9 @@
     <Cell ss:StyleID="s152"><Data ss:Type="String">DG</Data></Cell>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"><Data ss:Type="String">http://nema.org/dicom/dicm</Data></Cell>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -7200,9 +7336,9 @@
     <Cell ss:StyleID="s152"><Data ss:Type="String">DX</Data></Cell>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"><Data ss:Type="String">http://nema.org/dicom/dicm</Data></Cell>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -7211,9 +7347,9 @@
     <Cell ss:StyleID="s152"><Data ss:Type="String">ECG</Data></Cell>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"><Data ss:Type="String">http://nema.org/dicom/dicm</Data></Cell>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -7222,9 +7358,9 @@
     <Cell ss:StyleID="s152"><Data ss:Type="String">EPS</Data></Cell>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"><Data ss:Type="String">http://nema.org/dicom/dicm</Data></Cell>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -7233,9 +7369,9 @@
     <Cell ss:StyleID="s152"><Data ss:Type="String">ES</Data></Cell>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"><Data ss:Type="String">http://nema.org/dicom/dicm</Data></Cell>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -7244,9 +7380,9 @@
     <Cell ss:StyleID="s152"><Data ss:Type="String">GM</Data></Cell>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"><Data ss:Type="String">http://nema.org/dicom/dicm</Data></Cell>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -7255,9 +7391,9 @@
     <Cell ss:StyleID="s152"><Data ss:Type="String">HC</Data></Cell>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"><Data ss:Type="String">http://nema.org/dicom/dicm</Data></Cell>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -7266,9 +7402,9 @@
     <Cell ss:StyleID="s152"><Data ss:Type="String">HD</Data></Cell>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"><Data ss:Type="String">http://nema.org/dicom/dicm</Data></Cell>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -7277,9 +7413,9 @@
     <Cell ss:StyleID="s152"><Data ss:Type="String">IO</Data></Cell>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"><Data ss:Type="String">http://nema.org/dicom/dicm</Data></Cell>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -7288,9 +7424,9 @@
     <Cell ss:StyleID="s152"><Data ss:Type="String">IVOCT</Data></Cell>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"><Data ss:Type="String">http://nema.org/dicom/dicm</Data></Cell>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -7299,9 +7435,9 @@
     <Cell ss:StyleID="s152"><Data ss:Type="String">IVUS</Data></Cell>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"><Data ss:Type="String">http://nema.org/dicom/dicm</Data></Cell>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -7310,9 +7446,9 @@
     <Cell ss:StyleID="s152"><Data ss:Type="String">KER</Data></Cell>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"><Data ss:Type="String">http://nema.org/dicom/dicm</Data></Cell>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -7321,9 +7457,9 @@
     <Cell ss:StyleID="s152"><Data ss:Type="String">KO</Data></Cell>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"><Data ss:Type="String">http://nema.org/dicom/dicm</Data></Cell>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -7332,9 +7468,9 @@
     <Cell ss:StyleID="s152"><Data ss:Type="String">LEN</Data></Cell>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"><Data ss:Type="String">http://nema.org/dicom/dicm</Data></Cell>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -7343,9 +7479,9 @@
     <Cell ss:StyleID="s152"><Data ss:Type="String">LS</Data></Cell>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"><Data ss:Type="String">http://nema.org/dicom/dicm</Data></Cell>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -7354,9 +7490,9 @@
     <Cell ss:StyleID="s152"><Data ss:Type="String">MG</Data></Cell>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"><Data ss:Type="String">http://nema.org/dicom/dicm</Data></Cell>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -7365,9 +7501,9 @@
     <Cell ss:StyleID="s152"><Data ss:Type="String">MR</Data></Cell>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"><Data ss:Type="String">http://nema.org/dicom/dicm</Data></Cell>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -7376,9 +7512,9 @@
     <Cell ss:StyleID="s152"><Data ss:Type="String">NM</Data></Cell>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"><Data ss:Type="String">http://nema.org/dicom/dicm</Data></Cell>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -7387,9 +7523,9 @@
     <Cell ss:StyleID="s152"><Data ss:Type="String">OAM</Data></Cell>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"><Data ss:Type="String">http://nema.org/dicom/dicm</Data></Cell>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -7398,9 +7534,9 @@
     <Cell ss:StyleID="s152"><Data ss:Type="String">OCT</Data></Cell>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"><Data ss:Type="String">http://nema.org/dicom/dicm</Data></Cell>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -7409,9 +7545,9 @@
     <Cell ss:StyleID="s152"><Data ss:Type="String">OP</Data></Cell>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"><Data ss:Type="String">http://nema.org/dicom/dicm</Data></Cell>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -7420,9 +7556,9 @@
     <Cell ss:StyleID="s152"><Data ss:Type="String">OPM</Data></Cell>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"><Data ss:Type="String">http://nema.org/dicom/dicm</Data></Cell>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -7431,9 +7567,9 @@
     <Cell ss:StyleID="s152"><Data ss:Type="String">OPT</Data></Cell>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"><Data ss:Type="String">http://nema.org/dicom/dicm</Data></Cell>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -7442,9 +7578,9 @@
     <Cell ss:StyleID="s152"><Data ss:Type="String">OPV</Data></Cell>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"><Data ss:Type="String">http://nema.org/dicom/dicm</Data></Cell>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -7453,9 +7589,9 @@
     <Cell ss:StyleID="s152"><Data ss:Type="String">OT</Data></Cell>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"><Data ss:Type="String">http://nema.org/dicom/dicm</Data></Cell>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -7464,9 +7600,9 @@
     <Cell ss:StyleID="s152"><Data ss:Type="String">PR</Data></Cell>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"><Data ss:Type="String">http://nema.org/dicom/dicm</Data></Cell>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -7475,9 +7611,9 @@
     <Cell ss:StyleID="s152"><Data ss:Type="String">PT</Data></Cell>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"><Data ss:Type="String">http://nema.org/dicom/dicm</Data></Cell>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -7486,9 +7622,9 @@
     <Cell ss:StyleID="s152"><Data ss:Type="String">PX</Data></Cell>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"><Data ss:Type="String">http://nema.org/dicom/dicm</Data></Cell>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -7497,9 +7633,9 @@
     <Cell ss:StyleID="s152"><Data ss:Type="String">REG</Data></Cell>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"><Data ss:Type="String">http://nema.org/dicom/dicm</Data></Cell>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -7508,9 +7644,9 @@
     <Cell ss:StyleID="s152"><Data ss:Type="String">RF</Data></Cell>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"><Data ss:Type="String">http://nema.org/dicom/dicm</Data></Cell>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -7519,9 +7655,9 @@
     <Cell ss:StyleID="s152"><Data ss:Type="String">RG</Data></Cell>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"><Data ss:Type="String">http://nema.org/dicom/dicm</Data></Cell>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -7530,9 +7666,9 @@
     <Cell ss:StyleID="s152"><Data ss:Type="String">RTDOSE</Data></Cell>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"><Data ss:Type="String">http://nema.org/dicom/dicm</Data></Cell>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -7541,9 +7677,9 @@
     <Cell ss:StyleID="s152"><Data ss:Type="String">RTIMAGE</Data></Cell>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"><Data ss:Type="String">http://nema.org/dicom/dicm</Data></Cell>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -7552,9 +7688,9 @@
     <Cell ss:StyleID="s152"><Data ss:Type="String">RTPLAN</Data></Cell>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"><Data ss:Type="String">http://nema.org/dicom/dicm</Data></Cell>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -7563,9 +7699,9 @@
     <Cell ss:StyleID="s152"><Data ss:Type="String">RTRECORD</Data></Cell>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"><Data ss:Type="String">http://nema.org/dicom/dicm</Data></Cell>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -7574,9 +7710,9 @@
     <Cell ss:StyleID="s152"><Data ss:Type="String">RTSTRUCT</Data></Cell>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"><Data ss:Type="String">http://nema.org/dicom/dicm</Data></Cell>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -7585,9 +7721,9 @@
     <Cell ss:StyleID="s152"><Data ss:Type="String">SEG</Data></Cell>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"><Data ss:Type="String">http://nema.org/dicom/dicm</Data></Cell>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -7596,9 +7732,9 @@
     <Cell ss:StyleID="s152"><Data ss:Type="String">SM</Data></Cell>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"><Data ss:Type="String">http://nema.org/dicom/dicm</Data></Cell>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -7607,9 +7743,9 @@
     <Cell ss:StyleID="s152"><Data ss:Type="String">SMR</Data></Cell>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"><Data ss:Type="String">http://nema.org/dicom/dicm</Data></Cell>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -7618,9 +7754,9 @@
     <Cell ss:StyleID="s152"><Data ss:Type="String">SR</Data></Cell>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"><Data ss:Type="String">http://nema.org/dicom/dicm</Data></Cell>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -7629,9 +7765,9 @@
     <Cell ss:StyleID="s152"><Data ss:Type="String">SRF</Data></Cell>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"><Data ss:Type="String">http://nema.org/dicom/dicm</Data></Cell>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -7640,9 +7776,9 @@
     <Cell ss:StyleID="s154"><Data ss:Type="String">TG</Data></Cell>
     <Cell ss:StyleID="s145"/>
     <Cell ss:StyleID="s133"><Data ss:Type="String">http://nema.org/dicom/dicm</Data></Cell>
-    <Cell ss:StyleID="s162"/>
-    <Cell ss:StyleID="s162"/>
-    <Cell ss:StyleID="s162"/>
+    <Cell ss:StyleID="s164"/>
+    <Cell ss:StyleID="s164"/>
+    <Cell ss:StyleID="s164"/>
     <Cell ss:StyleID="s145"/>
     <Cell ss:StyleID="s145"/>
     <Cell ss:StyleID="s156"/>
@@ -7679,7 +7815,7 @@
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>
-   <TopRowBottomPane>1</TopRowBottomPane>
+   <TopRowBottomPane>34</TopRowBottomPane>
    <SplitVertical>1</SplitVertical>
    <LeftColumnRightPane>1</LeftColumnRightPane>
    <ActivePane>0</ActivePane>
@@ -7692,10 +7828,12 @@
     </Pane>
     <Pane>
      <Number>2</Number>
+     <ActiveRow>1</ActiveRow>
     </Pane>
     <Pane>
      <Number>0</Number>
-     <ActiveCol>0</ActiveCol>
+     <ActiveRow>1</ActiveRow>
+     <ActiveCol>2</ActiveCol>
     </Pane>
    </Panes>
    <ProtectObjects>False</ProtectObjects>
@@ -7764,9 +7902,9 @@
     <Cell ss:StyleID="s150"><Data ss:Type="String">ONLINE</Data></Cell>
     <Cell ss:StyleID="s139"/>
     <Cell ss:StyleID="s126"><Data ss:Type="String">http://nema.org/dicom/dicm</Data></Cell>
-    <Cell ss:StyleID="s160"/>
-    <Cell ss:StyleID="s160"/>
-    <Cell ss:StyleID="s160"><Data ss:Type="String">Resources are immediately available.</Data></Cell>
+    <Cell ss:StyleID="s162"/>
+    <Cell ss:StyleID="s162"/>
+    <Cell ss:StyleID="s162"><Data ss:Type="String">Resources are immediately available.</Data></Cell>
     <Cell ss:StyleID="s139"/>
     <Cell ss:StyleID="s139"/>
     <Cell ss:StyleID="s151"/>
@@ -7775,9 +7913,9 @@
     <Cell ss:StyleID="s152"><Data ss:Type="String">OFFLINE</Data></Cell>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"><Data ss:Type="String">http://nema.org/dicom/dicm</Data></Cell>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"><Data ss:Type="String">Resources need to be retrieved by manual intervention.</Data></Cell>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"><Data ss:Type="String">Resources need to be retrieved by manual intervention.</Data></Cell>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -7786,9 +7924,9 @@
     <Cell ss:StyleID="s152"><Data ss:Type="String">NEARLINE</Data></Cell>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"><Data ss:Type="String">http://nema.org/dicom/dicm</Data></Cell>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"><Data ss:Type="String">Resources need to be retrieved from relatively slow media.</Data></Cell>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"><Data ss:Type="String">Resources need to be retrieved from relatively slow media.</Data></Cell>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -7797,9 +7935,9 @@
     <Cell ss:StyleID="s152"><Data ss:Type="String">UNAVAILABLE</Data></Cell>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"><Data ss:Type="String">http://nema.org/dicom/dicm</Data></Cell>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"><Data ss:Type="String">Resources cannot be retrieved.</Data></Cell>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"><Data ss:Type="String">Resources cannot be retrieved.</Data></Cell>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -7808,9 +7946,9 @@
     <Cell ss:StyleID="s152"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -7819,9 +7957,9 @@
     <Cell ss:StyleID="s152"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -7830,9 +7968,9 @@
     <Cell ss:StyleID="s152"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -7841,9 +7979,9 @@
     <Cell ss:StyleID="s152"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -7852,9 +7990,9 @@
     <Cell ss:StyleID="s152"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -7863,9 +8001,9 @@
     <Cell ss:StyleID="s152"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -7874,9 +8012,9 @@
     <Cell ss:StyleID="s152"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -7885,9 +8023,9 @@
     <Cell ss:StyleID="s152"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -7896,9 +8034,9 @@
     <Cell ss:StyleID="s152"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -7907,9 +8045,9 @@
     <Cell ss:StyleID="s152"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -7918,9 +8056,9 @@
     <Cell ss:StyleID="s152"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -7929,9 +8067,9 @@
     <Cell ss:StyleID="s152"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -7940,9 +8078,9 @@
     <Cell ss:StyleID="s152"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -7951,9 +8089,9 @@
     <Cell ss:StyleID="s152"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -7962,9 +8100,9 @@
     <Cell ss:StyleID="s152"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -7973,9 +8111,9 @@
     <Cell ss:StyleID="s152"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -7984,9 +8122,9 @@
     <Cell ss:StyleID="s152"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -7995,9 +8133,9 @@
     <Cell ss:StyleID="s152"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -8006,9 +8144,9 @@
     <Cell ss:StyleID="s152"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -8017,9 +8155,9 @@
     <Cell ss:StyleID="s152"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -8028,9 +8166,9 @@
     <Cell ss:StyleID="s152"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -8039,9 +8177,9 @@
     <Cell ss:StyleID="s152"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -8050,9 +8188,9 @@
     <Cell ss:StyleID="s152"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -8061,9 +8199,9 @@
     <Cell ss:StyleID="s152"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -8072,9 +8210,9 @@
     <Cell ss:StyleID="s152"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -8083,9 +8221,9 @@
     <Cell ss:StyleID="s152"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -8094,9 +8232,9 @@
     <Cell ss:StyleID="s152"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -8105,9 +8243,9 @@
     <Cell ss:StyleID="s152"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -8116,9 +8254,9 @@
     <Cell ss:StyleID="s152"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -8127,9 +8265,9 @@
     <Cell ss:StyleID="s152"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -8138,9 +8276,9 @@
     <Cell ss:StyleID="s152"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -8149,9 +8287,9 @@
     <Cell ss:StyleID="s152"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -8160,9 +8298,9 @@
     <Cell ss:StyleID="s152"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -8171,9 +8309,9 @@
     <Cell ss:StyleID="s152"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -8182,9 +8320,9 @@
     <Cell ss:StyleID="s152"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -8193,9 +8331,9 @@
     <Cell ss:StyleID="s152"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -8204,9 +8342,9 @@
     <Cell ss:StyleID="s152"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -8215,9 +8353,9 @@
     <Cell ss:StyleID="s152"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -8226,9 +8364,9 @@
     <Cell ss:StyleID="s152"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -8237,9 +8375,9 @@
     <Cell ss:StyleID="s152"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -8248,9 +8386,9 @@
     <Cell ss:StyleID="s152"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -8259,9 +8397,9 @@
     <Cell ss:StyleID="s152"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -8270,9 +8408,9 @@
     <Cell ss:StyleID="s152"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -8281,9 +8419,9 @@
     <Cell ss:StyleID="s152"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -8292,9 +8430,9 @@
     <Cell ss:StyleID="s154"/>
     <Cell ss:StyleID="s145"/>
     <Cell ss:StyleID="s133"/>
-    <Cell ss:StyleID="s162"/>
-    <Cell ss:StyleID="s162"/>
-    <Cell ss:StyleID="s162"/>
+    <Cell ss:StyleID="s164"/>
+    <Cell ss:StyleID="s164"/>
+    <Cell ss:StyleID="s164"/>
     <Cell ss:StyleID="s145"/>
     <Cell ss:StyleID="s145"/>
     <Cell ss:StyleID="s156"/>
@@ -8327,7 +8465,8 @@
     </Pane>
     <Pane>
      <Number>0</Number>
-     <ActiveCol>0</ActiveCol>
+     <ActiveRow>30</ActiveRow>
+     <ActiveCol>5</ActiveCol>
     </Pane>
    </Panes>
    <ProtectObjects>False</ProtectObjects>
@@ -8396,9 +8535,9 @@
     <Cell ss:StyleID="s150"><Data ss:Type="String">AR</Data></Cell>
     <Cell ss:StyleID="s139"/>
     <Cell ss:StyleID="s126"><Data ss:Type="String">http://nema.org/dicom/dicm</Data></Cell>
-    <Cell ss:StyleID="s160"/>
-    <Cell ss:StyleID="s160"/>
-    <Cell ss:StyleID="s160"/>
+    <Cell ss:StyleID="s162"/>
+    <Cell ss:StyleID="s162"/>
+    <Cell ss:StyleID="s162"/>
     <Cell ss:StyleID="s139"/>
     <Cell ss:StyleID="s139"/>
     <Cell ss:StyleID="s151"/>
@@ -8407,9 +8546,9 @@
     <Cell ss:StyleID="s152"><Data ss:Type="String">BMD </Data></Cell>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"><Data ss:Type="String">http://nema.org/dicom/dicm</Data></Cell>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -8418,9 +8557,9 @@
     <Cell ss:StyleID="s152"><Data ss:Type="String">BDUS</Data></Cell>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"><Data ss:Type="String">http://nema.org/dicom/dicm</Data></Cell>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -8429,9 +8568,9 @@
     <Cell ss:StyleID="s152"><Data ss:Type="String">EPS</Data></Cell>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"><Data ss:Type="String">http://nema.org/dicom/dicm</Data></Cell>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -8440,9 +8579,9 @@
     <Cell ss:StyleID="s152"><Data ss:Type="String">CR</Data></Cell>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"><Data ss:Type="String">http://nema.org/dicom/dicm</Data></Cell>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -8451,9 +8590,9 @@
     <Cell ss:StyleID="s152"><Data ss:Type="String">CT</Data></Cell>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"><Data ss:Type="String">http://nema.org/dicom/dicm</Data></Cell>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -8462,9 +8601,9 @@
     <Cell ss:StyleID="s152"><Data ss:Type="String">DX</Data></Cell>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"><Data ss:Type="String">http://nema.org/dicom/dicm</Data></Cell>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -8473,9 +8612,9 @@
     <Cell ss:StyleID="s152"><Data ss:Type="String">ECG</Data></Cell>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"><Data ss:Type="String">http://nema.org/dicom/dicm</Data></Cell>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -8484,9 +8623,9 @@
     <Cell ss:StyleID="s152"><Data ss:Type="String">ES</Data></Cell>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"><Data ss:Type="String">http://nema.org/dicom/dicm</Data></Cell>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -8495,9 +8634,9 @@
     <Cell ss:StyleID="s152"><Data ss:Type="String">XC</Data></Cell>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"><Data ss:Type="String">http://nema.org/dicom/dicm</Data></Cell>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"><Data ss:Type="String">Use this for general photography</Data></Cell>
@@ -8506,9 +8645,9 @@
     <Cell ss:StyleID="s152"><Data ss:Type="String">GM</Data></Cell>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"><Data ss:Type="String">http://nema.org/dicom/dicm</Data></Cell>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -8517,9 +8656,9 @@
     <Cell ss:StyleID="s152"><Data ss:Type="String">HD</Data></Cell>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"><Data ss:Type="String">http://nema.org/dicom/dicm</Data></Cell>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -8528,9 +8667,9 @@
     <Cell ss:StyleID="s152"><Data ss:Type="String">IO</Data></Cell>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"><Data ss:Type="String">http://nema.org/dicom/dicm</Data></Cell>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -8539,9 +8678,9 @@
     <Cell ss:StyleID="s152"><Data ss:Type="String">IVOCT </Data></Cell>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"><Data ss:Type="String">http://nema.org/dicom/dicm</Data></Cell>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -8550,9 +8689,9 @@
     <Cell ss:StyleID="s152"><Data ss:Type="String">IVUS</Data></Cell>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"><Data ss:Type="String">http://nema.org/dicom/dicm</Data></Cell>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -8561,9 +8700,9 @@
     <Cell ss:StyleID="s152"><Data ss:Type="String">KER</Data></Cell>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"><Data ss:Type="String">http://nema.org/dicom/dicm</Data></Cell>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -8572,9 +8711,9 @@
     <Cell ss:StyleID="s152"><Data ss:Type="String">LEN</Data></Cell>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"><Data ss:Type="String">http://nema.org/dicom/dicm</Data></Cell>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -8583,9 +8722,9 @@
     <Cell ss:StyleID="s152"><Data ss:Type="String">MR</Data></Cell>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"><Data ss:Type="String">http://nema.org/dicom/dicm</Data></Cell>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -8594,9 +8733,9 @@
     <Cell ss:StyleID="s152"><Data ss:Type="String">MG</Data></Cell>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"><Data ss:Type="String">http://nema.org/dicom/dicm</Data></Cell>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -8605,9 +8744,9 @@
     <Cell ss:StyleID="s152"><Data ss:Type="String">NM</Data></Cell>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"><Data ss:Type="String">http://nema.org/dicom/dicm</Data></Cell>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -8616,9 +8755,9 @@
     <Cell ss:StyleID="s152"><Data ss:Type="String">OAM </Data></Cell>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"><Data ss:Type="String">http://nema.org/dicom/dicm</Data></Cell>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -8627,9 +8766,9 @@
     <Cell ss:StyleID="s152"><Data ss:Type="String">OCT </Data></Cell>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"><Data ss:Type="String">http://nema.org/dicom/dicm</Data></Cell>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -8638,9 +8777,9 @@
     <Cell ss:StyleID="s152"><Data ss:Type="String">OPM</Data></Cell>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"><Data ss:Type="String">http://nema.org/dicom/dicm</Data></Cell>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -8649,9 +8788,9 @@
     <Cell ss:StyleID="s152"><Data ss:Type="String">OP</Data></Cell>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"><Data ss:Type="String">http://nema.org/dicom/dicm</Data></Cell>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -8660,9 +8799,9 @@
     <Cell ss:StyleID="s152"><Data ss:Type="String">OPR</Data></Cell>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"><Data ss:Type="String">http://nema.org/dicom/dicm</Data></Cell>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -8671,9 +8810,9 @@
     <Cell ss:StyleID="s152"><Data ss:Type="String">OPT</Data></Cell>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"><Data ss:Type="String">http://nema.org/dicom/dicm</Data></Cell>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -8682,9 +8821,9 @@
     <Cell ss:StyleID="s152"><Data ss:Type="String">OPV </Data></Cell>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"><Data ss:Type="String">http://nema.org/dicom/dicm</Data></Cell>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -8693,9 +8832,9 @@
     <Cell ss:StyleID="s152"><Data ss:Type="String">PX</Data></Cell>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"><Data ss:Type="String">http://nema.org/dicom/dicm</Data></Cell>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -8704,9 +8843,9 @@
     <Cell ss:StyleID="s152"><Data ss:Type="String">PT </Data></Cell>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"><Data ss:Type="String">http://nema.org/dicom/dicm</Data></Cell>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -8715,9 +8854,9 @@
     <Cell ss:StyleID="s152"><Data ss:Type="String">RF</Data></Cell>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"><Data ss:Type="String">http://nema.org/dicom/dicm</Data></Cell>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -8726,9 +8865,9 @@
     <Cell ss:StyleID="s152"><Data ss:Type="String">RG</Data></Cell>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"><Data ss:Type="String">http://nema.org/dicom/dicm</Data></Cell>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -8737,9 +8876,9 @@
     <Cell ss:StyleID="s152"><Data ss:Type="String">SM</Data></Cell>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"><Data ss:Type="String">http://nema.org/dicom/dicm</Data></Cell>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -8748,9 +8887,9 @@
     <Cell ss:StyleID="s152"><Data ss:Type="String">SRF</Data></Cell>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"><Data ss:Type="String">http://nema.org/dicom/dicm</Data></Cell>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -8759,9 +8898,9 @@
     <Cell ss:StyleID="s152"><Data ss:Type="String">US</Data></Cell>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"><Data ss:Type="String">http://nema.org/dicom/dicm</Data></Cell>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -8770,9 +8909,9 @@
     <Cell ss:StyleID="s152"><Data ss:Type="String">VA</Data></Cell>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"><Data ss:Type="String">http://nema.org/dicom/dicm</Data></Cell>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -8781,9 +8920,9 @@
     <Cell ss:StyleID="s152"><Data ss:Type="String">XA</Data></Cell>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"><Data ss:Type="String">http://nema.org/dicom/dicm</Data></Cell>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -8792,9 +8931,9 @@
     <Cell ss:StyleID="s152"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -8803,9 +8942,9 @@
     <Cell ss:StyleID="s152"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -8814,9 +8953,9 @@
     <Cell ss:StyleID="s152"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -8825,9 +8964,9 @@
     <Cell ss:StyleID="s152"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -8836,9 +8975,9 @@
     <Cell ss:StyleID="s152"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -8847,9 +8986,9 @@
     <Cell ss:StyleID="s152"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -8858,9 +8997,9 @@
     <Cell ss:StyleID="s152"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -8869,9 +9008,9 @@
     <Cell ss:StyleID="s152"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -8880,9 +9019,9 @@
     <Cell ss:StyleID="s152"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -8891,9 +9030,9 @@
     <Cell ss:StyleID="s152"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -8902,9 +9041,9 @@
     <Cell ss:StyleID="s152"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -8913,9 +9052,9 @@
     <Cell ss:StyleID="s152"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -8924,9 +9063,9 @@
     <Cell ss:StyleID="s154"/>
     <Cell ss:StyleID="s145"/>
     <Cell ss:StyleID="s133"/>
-    <Cell ss:StyleID="s162"/>
-    <Cell ss:StyleID="s162"/>
-    <Cell ss:StyleID="s162"/>
+    <Cell ss:StyleID="s164"/>
+    <Cell ss:StyleID="s164"/>
+    <Cell ss:StyleID="s164"/>
     <Cell ss:StyleID="s145"/>
     <Cell ss:StyleID="s145"/>
     <Cell ss:StyleID="s156"/>
@@ -8959,644 +9098,14 @@
     </Pane>
     <Pane>
      <Number>0</Number>
-     <ActiveCol>0</ActiveCol>
+     <ActiveRow>0</ActiveRow>
+     <ActiveCol>2</ActiveCol>
+     <RangeSelection>C3</RangeSelection>
     </Pane>
    </Panes>
    <ProtectObjects>False</ProtectObjects>
    <ProtectScenarios>False</ProtectScenarios>
    <x:PageLayoutZoom>0</x:PageLayoutZoom>
-  </WorksheetOptions>
-  <AutoFilter x:Range="R1C1:R1C9" xmlns="urn:schemas-microsoft-com:office:excel">
-  </AutoFilter>
- </Worksheet>
- <Worksheet ss:Name="dWebType">
-  <Names>
-   <NamedRange ss:Name="_FilterDatabase" ss:RefersTo="=dWebType!R1C1:R1C9"
-    ss:Hidden="1"/>
-  </Names>
-  <Table ss:ExpandedColumnCount="9" ss:ExpandedRowCount="51" x:FullColumns="1"
-   x:FullRows="1" ss:StyleID="s148" ss:DefaultColumnWidth="65.400000000000006"
-   ss:DefaultRowHeight="15">
-   <Column ss:StyleID="s148" ss:Width="80.400000000000006"/>
-   <Column ss:StyleID="s148" ss:AutoFitWidth="0" ss:Width="35.4"/>
-   <Column ss:StyleID="s148" ss:AutoFitWidth="0" ss:Width="155.39999999999998"/>
-   <Column ss:StyleID="s148" ss:AutoFitWidth="0" ss:Width="80.400000000000006"
-    ss:Span="1"/>
-   <Column ss:Index="6" ss:StyleID="s148" ss:AutoFitWidth="0"
-    ss:Width="245.39999999999998"/>
-   <Column ss:StyleID="s148" ss:AutoFitWidth="0" ss:Width="84" ss:Span="1"/>
-   <Column ss:Index="9" ss:StyleID="s148" ss:AutoFitWidth="0" ss:Width="242.4"/>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s113"><Data ss:Type="String">Code</Data><Comment ss:Author=""><ss:Data
-       xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Face="Tahoma"
-        x:Family="Swiss" html:Size="8" html:Color="#000000">The code to be sent over the wire</Font>       </ss:Data></Comment><NamedCell
-      ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s114"><Data ss:Type="String">Id</Data><Comment ss:Author=""><ss:Data
-       xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Face="Tahoma"
-        x:Family="Swiss" html:Size="8" html:Color="#000000">Unique number for the code.  Required when System is not specified, not permitted otherwise</Font>       </ss:Data></Comment><NamedCell
-      ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s114"><Data ss:Type="String">System</Data><Comment
-      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">The URL of the external code system from which the list is selected.  Must be the same for all codes if specified.</Font>       </ss:Data></Comment><NamedCell
-      ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s114"><Data ss:Type="String">Parent</Data><Comment
-      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">The code this code is a specialization of (if any).  Content should be &quot;#&quot; + the Id of the parent code</Font>       </ss:Data></Comment><NamedCell
-      ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s114"><Data ss:Type="String">Display</Data><Comment
-      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Display value for code.  Omit if the code *is* the display value (as for internal codes)</Font>       </ss:Data></Comment><NamedCell
-      ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s114"><Data ss:Type="String">Definition</Data><Comment
-      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Meaning of the code.  Include unless meaning obvious to all users.  Required if display not</Font>       </ss:Data></Comment><NamedCell
-      ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s114"><Data ss:Type="String">v2</Data><Comment ss:Author=""><ss:Data
-       xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Face="Tahoma"
-        x:Family="Swiss" html:Size="8" html:Color="#000000">Mappings to v2 codes - See wiki for syntax</Font>       </ss:Data></Comment><NamedCell
-      ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s114"><Data ss:Type="String">v3</Data><Comment ss:Author=""><ss:Data
-       xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Face="Tahoma"
-        x:Family="Swiss" html:Size="8" html:Color="#000000">Mappings to v3 codes - See wiki for syntax</Font>       </ss:Data></Comment><NamedCell
-      ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s115"><Data ss:Type="String">Committee Notes</Data><Comment
-      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Additional notes about the code.  Not published</Font>       </ss:Data></Comment><NamedCell
-      ss:Name="_FilterDatabase"/></Cell>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s150"><Data ss:Type="String">WADO-RS</Data></Cell>
-    <Cell ss:StyleID="s139"/>
-    <Cell ss:StyleID="s126"/>
-    <Cell ss:StyleID="s160"/>
-    <Cell ss:StyleID="s150"><Data ss:Type="String">WADO-RS</Data></Cell>
-    <Cell ss:StyleID="s160"><Data ss:Type="String">Web Access to DICOM Persistent Objects - RESTful Services</Data></Cell>
-    <Cell ss:StyleID="s139"/>
-    <Cell ss:StyleID="s139"/>
-    <Cell ss:StyleID="s151"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s152"><Data ss:Type="String">WADO-URI</Data></Cell>
-    <Cell ss:StyleID="s142"/>
-    <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s152"><Data ss:Type="String">WADO-URI</Data></Cell>
-    <Cell ss:StyleID="s161"><Data ss:Type="String">Web Access to DICOM Persistent Objects - URI</Data></Cell>
-    <Cell ss:StyleID="s142"/>
-    <Cell ss:StyleID="s142"/>
-    <Cell ss:StyleID="s153"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s152"><Data ss:Type="String">IID</Data></Cell>
-    <Cell ss:StyleID="s142"/>
-    <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s152"><Data ss:Type="String">IID</Data></Cell>
-    <Cell ss:StyleID="s161"><Data ss:Type="String">IHE - Invoke Image Display Profile</Data></Cell>
-    <Cell ss:StyleID="s142"/>
-    <Cell ss:StyleID="s142"/>
-    <Cell ss:StyleID="s153"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s152"/>
-    <Cell ss:StyleID="s142"/>
-    <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s142"/>
-    <Cell ss:StyleID="s142"/>
-    <Cell ss:StyleID="s153"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s152"/>
-    <Cell ss:StyleID="s142"/>
-    <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s142"/>
-    <Cell ss:StyleID="s142"/>
-    <Cell ss:StyleID="s153"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s152"/>
-    <Cell ss:StyleID="s142"/>
-    <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s142"/>
-    <Cell ss:StyleID="s142"/>
-    <Cell ss:StyleID="s153"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s152"/>
-    <Cell ss:StyleID="s142"/>
-    <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s142"/>
-    <Cell ss:StyleID="s142"/>
-    <Cell ss:StyleID="s153"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s152"/>
-    <Cell ss:StyleID="s142"/>
-    <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s142"/>
-    <Cell ss:StyleID="s142"/>
-    <Cell ss:StyleID="s153"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s152"/>
-    <Cell ss:StyleID="s142"/>
-    <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s142"/>
-    <Cell ss:StyleID="s142"/>
-    <Cell ss:StyleID="s153"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s152"/>
-    <Cell ss:StyleID="s142"/>
-    <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s142"/>
-    <Cell ss:StyleID="s142"/>
-    <Cell ss:StyleID="s153"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s152"/>
-    <Cell ss:StyleID="s142"/>
-    <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s142"/>
-    <Cell ss:StyleID="s142"/>
-    <Cell ss:StyleID="s153"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s152"/>
-    <Cell ss:StyleID="s142"/>
-    <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s142"/>
-    <Cell ss:StyleID="s142"/>
-    <Cell ss:StyleID="s153"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s152"/>
-    <Cell ss:StyleID="s142"/>
-    <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s142"/>
-    <Cell ss:StyleID="s142"/>
-    <Cell ss:StyleID="s153"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s152"/>
-    <Cell ss:StyleID="s142"/>
-    <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s142"/>
-    <Cell ss:StyleID="s142"/>
-    <Cell ss:StyleID="s153"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s152"/>
-    <Cell ss:StyleID="s142"/>
-    <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s142"/>
-    <Cell ss:StyleID="s142"/>
-    <Cell ss:StyleID="s153"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s152"/>
-    <Cell ss:StyleID="s142"/>
-    <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s142"/>
-    <Cell ss:StyleID="s142"/>
-    <Cell ss:StyleID="s153"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s152"/>
-    <Cell ss:StyleID="s142"/>
-    <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s142"/>
-    <Cell ss:StyleID="s142"/>
-    <Cell ss:StyleID="s153"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s152"/>
-    <Cell ss:StyleID="s142"/>
-    <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s142"/>
-    <Cell ss:StyleID="s142"/>
-    <Cell ss:StyleID="s153"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s152"/>
-    <Cell ss:StyleID="s142"/>
-    <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s142"/>
-    <Cell ss:StyleID="s142"/>
-    <Cell ss:StyleID="s153"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s152"/>
-    <Cell ss:StyleID="s142"/>
-    <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s142"/>
-    <Cell ss:StyleID="s142"/>
-    <Cell ss:StyleID="s153"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s152"/>
-    <Cell ss:StyleID="s142"/>
-    <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s142"/>
-    <Cell ss:StyleID="s142"/>
-    <Cell ss:StyleID="s153"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s152"/>
-    <Cell ss:StyleID="s142"/>
-    <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s142"/>
-    <Cell ss:StyleID="s142"/>
-    <Cell ss:StyleID="s153"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s152"/>
-    <Cell ss:StyleID="s142"/>
-    <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s142"/>
-    <Cell ss:StyleID="s142"/>
-    <Cell ss:StyleID="s153"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s152"/>
-    <Cell ss:StyleID="s142"/>
-    <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s142"/>
-    <Cell ss:StyleID="s142"/>
-    <Cell ss:StyleID="s153"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s152"/>
-    <Cell ss:StyleID="s142"/>
-    <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s142"/>
-    <Cell ss:StyleID="s142"/>
-    <Cell ss:StyleID="s153"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s152"/>
-    <Cell ss:StyleID="s142"/>
-    <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s142"/>
-    <Cell ss:StyleID="s142"/>
-    <Cell ss:StyleID="s153"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s152"/>
-    <Cell ss:StyleID="s142"/>
-    <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s142"/>
-    <Cell ss:StyleID="s142"/>
-    <Cell ss:StyleID="s153"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s152"/>
-    <Cell ss:StyleID="s142"/>
-    <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s142"/>
-    <Cell ss:StyleID="s142"/>
-    <Cell ss:StyleID="s153"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s152"/>
-    <Cell ss:StyleID="s142"/>
-    <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s142"/>
-    <Cell ss:StyleID="s142"/>
-    <Cell ss:StyleID="s153"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s152"/>
-    <Cell ss:StyleID="s142"/>
-    <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s142"/>
-    <Cell ss:StyleID="s142"/>
-    <Cell ss:StyleID="s153"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s152"/>
-    <Cell ss:StyleID="s142"/>
-    <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s142"/>
-    <Cell ss:StyleID="s142"/>
-    <Cell ss:StyleID="s153"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s152"/>
-    <Cell ss:StyleID="s142"/>
-    <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s142"/>
-    <Cell ss:StyleID="s142"/>
-    <Cell ss:StyleID="s153"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s152"/>
-    <Cell ss:StyleID="s142"/>
-    <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s142"/>
-    <Cell ss:StyleID="s142"/>
-    <Cell ss:StyleID="s153"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s152"/>
-    <Cell ss:StyleID="s142"/>
-    <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s142"/>
-    <Cell ss:StyleID="s142"/>
-    <Cell ss:StyleID="s153"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s152"/>
-    <Cell ss:StyleID="s142"/>
-    <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s142"/>
-    <Cell ss:StyleID="s142"/>
-    <Cell ss:StyleID="s153"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s152"/>
-    <Cell ss:StyleID="s142"/>
-    <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s142"/>
-    <Cell ss:StyleID="s142"/>
-    <Cell ss:StyleID="s153"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s152"/>
-    <Cell ss:StyleID="s142"/>
-    <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s142"/>
-    <Cell ss:StyleID="s142"/>
-    <Cell ss:StyleID="s153"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s152"/>
-    <Cell ss:StyleID="s142"/>
-    <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s142"/>
-    <Cell ss:StyleID="s142"/>
-    <Cell ss:StyleID="s153"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s152"/>
-    <Cell ss:StyleID="s142"/>
-    <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s142"/>
-    <Cell ss:StyleID="s142"/>
-    <Cell ss:StyleID="s153"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s152"/>
-    <Cell ss:StyleID="s142"/>
-    <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s142"/>
-    <Cell ss:StyleID="s142"/>
-    <Cell ss:StyleID="s153"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s152"/>
-    <Cell ss:StyleID="s142"/>
-    <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s142"/>
-    <Cell ss:StyleID="s142"/>
-    <Cell ss:StyleID="s153"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s152"/>
-    <Cell ss:StyleID="s142"/>
-    <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s142"/>
-    <Cell ss:StyleID="s142"/>
-    <Cell ss:StyleID="s153"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s152"/>
-    <Cell ss:StyleID="s142"/>
-    <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s142"/>
-    <Cell ss:StyleID="s142"/>
-    <Cell ss:StyleID="s153"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s152"/>
-    <Cell ss:StyleID="s142"/>
-    <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s142"/>
-    <Cell ss:StyleID="s142"/>
-    <Cell ss:StyleID="s153"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s152"/>
-    <Cell ss:StyleID="s142"/>
-    <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s142"/>
-    <Cell ss:StyleID="s142"/>
-    <Cell ss:StyleID="s153"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s152"/>
-    <Cell ss:StyleID="s142"/>
-    <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s142"/>
-    <Cell ss:StyleID="s142"/>
-    <Cell ss:StyleID="s153"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s152"/>
-    <Cell ss:StyleID="s142"/>
-    <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s142"/>
-    <Cell ss:StyleID="s142"/>
-    <Cell ss:StyleID="s153"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s152"/>
-    <Cell ss:StyleID="s142"/>
-    <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s142"/>
-    <Cell ss:StyleID="s142"/>
-    <Cell ss:StyleID="s153"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s145"/>
-    <Cell ss:StyleID="s133"/>
-    <Cell ss:StyleID="s162"/>
-    <Cell ss:StyleID="s162"/>
-    <Cell ss:StyleID="s162"/>
-    <Cell ss:StyleID="s145"/>
-    <Cell ss:StyleID="s145"/>
-    <Cell ss:StyleID="s156"/>
-   </Row>
-   <Row ss:AutoFitHeight="0"/>
-  </Table>
-  <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">
-   <PageSetup>
-    <Header x:Margin="0.3"/>
-    <Footer x:Margin="0.3"/>
-    <PageMargins x:Bottom="0.75" x:Left="0.7" x:Right="0.7" x:Top="0.75"/>
-   </PageSetup>
-   <Unsynced/>
-   <FreezePanes/>
-   <FrozenNoSplit/>
-   <SplitHorizontal>1</SplitHorizontal>
-   <TopRowBottomPane>1</TopRowBottomPane>
-   <SplitVertical>1</SplitVertical>
-   <LeftColumnRightPane>1</LeftColumnRightPane>
-   <ActivePane>0</ActivePane>
-   <Panes>
-    <Pane>
-     <Number>3</Number>
-    </Pane>
-    <Pane>
-     <Number>1</Number>
-    </Pane>
-    <Pane>
-     <Number>2</Number>
-    </Pane>
-    <Pane>
-     <Number>0</Number>
-     <ActiveRow>12</ActiveRow>
-     <ActiveCol>4</ActiveCol>
-    </Pane>
-   </Panes>
-   <ProtectObjects>False</ProtectObjects>
-   <ProtectScenarios>False</ProtectScenarios>
   </WorksheetOptions>
   <AutoFilter x:Range="R1C1:R1C9" xmlns="urn:schemas-microsoft-com:office:excel">
   </AutoFilter>
@@ -9660,9 +9169,9 @@
     <Cell ss:StyleID="s150"/>
     <Cell ss:StyleID="s139"/>
     <Cell ss:StyleID="s126"/>
-    <Cell ss:StyleID="s160"/>
-    <Cell ss:StyleID="s160"/>
-    <Cell ss:StyleID="s160"/>
+    <Cell ss:StyleID="s162"/>
+    <Cell ss:StyleID="s162"/>
+    <Cell ss:StyleID="s162"/>
     <Cell ss:StyleID="s139"/>
     <Cell ss:StyleID="s139"/>
     <Cell ss:StyleID="s151"/>
@@ -9671,9 +9180,9 @@
     <Cell ss:StyleID="s152"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -9682,9 +9191,9 @@
     <Cell ss:StyleID="s152"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -9693,9 +9202,9 @@
     <Cell ss:StyleID="s152"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -9704,9 +9213,9 @@
     <Cell ss:StyleID="s152"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -9715,9 +9224,9 @@
     <Cell ss:StyleID="s152"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -9726,9 +9235,9 @@
     <Cell ss:StyleID="s152"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -9737,9 +9246,9 @@
     <Cell ss:StyleID="s152"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -9748,9 +9257,9 @@
     <Cell ss:StyleID="s152"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -9759,9 +9268,9 @@
     <Cell ss:StyleID="s152"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -9770,9 +9279,9 @@
     <Cell ss:StyleID="s152"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -9781,9 +9290,9 @@
     <Cell ss:StyleID="s152"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -9792,9 +9301,9 @@
     <Cell ss:StyleID="s152"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -9803,9 +9312,9 @@
     <Cell ss:StyleID="s152"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -9814,9 +9323,9 @@
     <Cell ss:StyleID="s152"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -9825,9 +9334,9 @@
     <Cell ss:StyleID="s152"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -9836,9 +9345,9 @@
     <Cell ss:StyleID="s152"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -9847,9 +9356,9 @@
     <Cell ss:StyleID="s152"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -9858,9 +9367,9 @@
     <Cell ss:StyleID="s152"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -9869,9 +9378,9 @@
     <Cell ss:StyleID="s152"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -9880,9 +9389,9 @@
     <Cell ss:StyleID="s152"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -9891,9 +9400,9 @@
     <Cell ss:StyleID="s152"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -9902,9 +9411,9 @@
     <Cell ss:StyleID="s152"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -9913,9 +9422,9 @@
     <Cell ss:StyleID="s152"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -9924,9 +9433,9 @@
     <Cell ss:StyleID="s152"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -9935,9 +9444,9 @@
     <Cell ss:StyleID="s152"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -9946,9 +9455,9 @@
     <Cell ss:StyleID="s152"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -9957,9 +9466,9 @@
     <Cell ss:StyleID="s152"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -9968,9 +9477,9 @@
     <Cell ss:StyleID="s152"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -9979,9 +9488,9 @@
     <Cell ss:StyleID="s152"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -9990,9 +9499,9 @@
     <Cell ss:StyleID="s152"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -10001,9 +9510,9 @@
     <Cell ss:StyleID="s152"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -10012,9 +9521,9 @@
     <Cell ss:StyleID="s152"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -10023,9 +9532,9 @@
     <Cell ss:StyleID="s152"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -10034,9 +9543,9 @@
     <Cell ss:StyleID="s152"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -10045,9 +9554,9 @@
     <Cell ss:StyleID="s152"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -10056,9 +9565,9 @@
     <Cell ss:StyleID="s152"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -10067,9 +9576,9 @@
     <Cell ss:StyleID="s152"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -10078,9 +9587,9 @@
     <Cell ss:StyleID="s152"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -10089,9 +9598,9 @@
     <Cell ss:StyleID="s152"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -10100,9 +9609,9 @@
     <Cell ss:StyleID="s152"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -10111,9 +9620,9 @@
     <Cell ss:StyleID="s152"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -10122,9 +9631,9 @@
     <Cell ss:StyleID="s152"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -10133,9 +9642,9 @@
     <Cell ss:StyleID="s152"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -10144,9 +9653,9 @@
     <Cell ss:StyleID="s152"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -10155,9 +9664,9 @@
     <Cell ss:StyleID="s152"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -10166,9 +9675,9 @@
     <Cell ss:StyleID="s152"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -10177,9 +9686,9 @@
     <Cell ss:StyleID="s152"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s129"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
-    <Cell ss:StyleID="s161"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
+    <Cell ss:StyleID="s163"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s153"/>
@@ -10188,9 +9697,9 @@
     <Cell ss:StyleID="s154"/>
     <Cell ss:StyleID="s145"/>
     <Cell ss:StyleID="s133"/>
-    <Cell ss:StyleID="s162"/>
-    <Cell ss:StyleID="s162"/>
-    <Cell ss:StyleID="s162"/>
+    <Cell ss:StyleID="s164"/>
+    <Cell ss:StyleID="s164"/>
+    <Cell ss:StyleID="s164"/>
     <Cell ss:StyleID="s145"/>
     <Cell ss:StyleID="s145"/>
     <Cell ss:StyleID="s156"/>

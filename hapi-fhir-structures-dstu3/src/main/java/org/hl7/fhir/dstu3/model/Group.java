@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
 
 import java.util.*;
 
@@ -163,8 +163,10 @@ public class Group extends DomainResource {
         throw new IllegalArgumentException("Unknown GroupType code '"+codeString+"'");
         }
         public Enumeration<GroupType> fromType(Base code) throws FHIRException {
-          if (code == null || code.isEmpty())
+          if (code == null)
             return null;
+          if (code.isEmpty())
+            return new Enumeration<GroupType>(this);
           String codeString = ((PrimitiveType) code).asStringValue();
           if (codeString == null || "".equals(codeString))
             return null;
@@ -436,47 +438,61 @@ public class Group extends DomainResource {
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case 3059181: // code
           this.code = castToCodeableConcept(value); // CodeableConcept
-          break;
+          return value;
         case 111972721: // value
           this.value = castToType(value); // Type
-          break;
+          return value;
         case -1321148966: // exclude
           this.exclude = castToBoolean(value); // BooleanType
-          break;
+          return value;
         case -991726143: // period
           this.period = castToPeriod(value); // Period
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("code"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("code")) {
           this.code = castToCodeableConcept(value); // CodeableConcept
-        else if (name.equals("value[x]"))
+        } else if (name.equals("value[x]")) {
           this.value = castToType(value); // Type
-        else if (name.equals("exclude"))
+        } else if (name.equals("exclude")) {
           this.exclude = castToBoolean(value); // BooleanType
-        else if (name.equals("period"))
+        } else if (name.equals("period")) {
           this.period = castToPeriod(value); // Period
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 3059181:  return getCode(); // CodeableConcept
-        case -1410166417:  return getValue(); // Type
-        case -1321148966: throw new FHIRException("Cannot make property exclude as it is not a complex type"); // BooleanType
-        case -991726143:  return getPeriod(); // Period
+        case 3059181:  return getCode(); 
+        case -1410166417:  return getValue(); 
+        case 111972721:  return getValue(); 
+        case -1321148966:  return getExcludeElement();
+        case -991726143:  return getPeriod(); 
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3059181: /*code*/ return new String[] {"CodeableConcept"};
+        case 111972721: /*value*/ return new String[] {"CodeableConcept", "boolean", "Quantity", "Range"};
+        case -1321148966: /*exclude*/ return new String[] {"boolean"};
+        case -991726143: /*period*/ return new String[] {"Period"};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }
@@ -729,41 +745,53 @@ public class Group extends DomainResource {
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case -1298275357: // entity
           this.entity = castToReference(value); // Reference
-          break;
+          return value;
         case -991726143: // period
           this.period = castToPeriod(value); // Period
-          break;
+          return value;
         case 24665195: // inactive
           this.inactive = castToBoolean(value); // BooleanType
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("entity"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("entity")) {
           this.entity = castToReference(value); // Reference
-        else if (name.equals("period"))
+        } else if (name.equals("period")) {
           this.period = castToPeriod(value); // Period
-        else if (name.equals("inactive"))
+        } else if (name.equals("inactive")) {
           this.inactive = castToBoolean(value); // BooleanType
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case -1298275357:  return getEntity(); // Reference
-        case -991726143:  return getPeriod(); // Period
-        case 24665195: throw new FHIRException("Cannot make property inactive as it is not a complex type"); // BooleanType
+        case -1298275357:  return getEntity(); 
+        case -991726143:  return getPeriod(); 
+        case 24665195:  return getInactiveElement();
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -1298275357: /*entity*/ return new String[] {"Reference"};
+        case -991726143: /*period*/ return new String[] {"Period"};
+        case 24665195: /*inactive*/ return new String[] {"boolean"};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }
@@ -835,9 +863,16 @@ public class Group extends DomainResource {
     protected List<Identifier> identifier;
 
     /**
+     * Indicates whether the record for the group is available for use or is merely being retained for historical purposes.
+     */
+    @Child(name = "active", type = {BooleanType.class}, order=1, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="Whether this group's record is in active use", formalDefinition="Indicates whether the record for the group is available for use or is merely being retained for historical purposes." )
+    protected BooleanType active;
+
+    /**
      * Identifies the broad classification of the kind of resources the group includes.
      */
-    @Child(name = "type", type = {CodeType.class}, order=1, min=1, max=1, modifier=false, summary=true)
+    @Child(name = "type", type = {CodeType.class}, order=2, min=1, max=1, modifier=false, summary=true)
     @Description(shortDefinition="person | animal | practitioner | device | medication | substance", formalDefinition="Identifies the broad classification of the kind of resources the group includes." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/group-type")
     protected Enumeration<GroupType> type;
@@ -845,16 +880,9 @@ public class Group extends DomainResource {
     /**
      * If true, indicates that the resource refers to a specific group of real individuals.  If false, the group defines a set of intended individuals.
      */
-    @Child(name = "actual", type = {BooleanType.class}, order=2, min=1, max=1, modifier=false, summary=true)
+    @Child(name = "actual", type = {BooleanType.class}, order=3, min=1, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Descriptive or actual", formalDefinition="If true, indicates that the resource refers to a specific group of real individuals.  If false, the group defines a set of intended individuals." )
     protected BooleanType actual;
-
-    /**
-     * Indicates whether the record for the group is available for use or is merely being retained for historical purposes.
-     */
-    @Child(name = "active", type = {BooleanType.class}, order=3, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Whether this group's record is in active use", formalDefinition="Indicates whether the record for the group is available for use or is merely being retained for historical purposes." )
-    protected BooleanType active;
 
     /**
      * Provides a specific type of resource the group includes; e.g. "cow", "syringe", etc.
@@ -891,7 +919,7 @@ public class Group extends DomainResource {
     @Description(shortDefinition="Who or what is in group", formalDefinition="Identifies the resource instances that are members of the group." )
     protected List<GroupMemberComponent> member;
 
-    private static final long serialVersionUID = -437086579L;
+    private static final long serialVersionUID = 659980713L;
 
   /**
    * Constructor
@@ -960,6 +988,51 @@ public class Group extends DomainResource {
         addIdentifier();
       }
       return getIdentifier().get(0);
+    }
+
+    /**
+     * @return {@link #active} (Indicates whether the record for the group is available for use or is merely being retained for historical purposes.). This is the underlying object with id, value and extensions. The accessor "getActive" gives direct access to the value
+     */
+    public BooleanType getActiveElement() { 
+      if (this.active == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create Group.active");
+        else if (Configuration.doAutoCreate())
+          this.active = new BooleanType(); // bb
+      return this.active;
+    }
+
+    public boolean hasActiveElement() { 
+      return this.active != null && !this.active.isEmpty();
+    }
+
+    public boolean hasActive() { 
+      return this.active != null && !this.active.isEmpty();
+    }
+
+    /**
+     * @param value {@link #active} (Indicates whether the record for the group is available for use or is merely being retained for historical purposes.). This is the underlying object with id, value and extensions. The accessor "getActive" gives direct access to the value
+     */
+    public Group setActiveElement(BooleanType value) { 
+      this.active = value;
+      return this;
+    }
+
+    /**
+     * @return Indicates whether the record for the group is available for use or is merely being retained for historical purposes.
+     */
+    public boolean getActive() { 
+      return this.active == null || this.active.isEmpty() ? false : this.active.getValue();
+    }
+
+    /**
+     * @param value Indicates whether the record for the group is available for use or is merely being retained for historical purposes.
+     */
+    public Group setActive(boolean value) { 
+        if (this.active == null)
+          this.active = new BooleanType();
+        this.active.setValue(value);
+      return this;
     }
 
     /**
@@ -1049,51 +1122,6 @@ public class Group extends DomainResource {
         if (this.actual == null)
           this.actual = new BooleanType();
         this.actual.setValue(value);
-      return this;
-    }
-
-    /**
-     * @return {@link #active} (Indicates whether the record for the group is available for use or is merely being retained for historical purposes.). This is the underlying object with id, value and extensions. The accessor "getActive" gives direct access to the value
-     */
-    public BooleanType getActiveElement() { 
-      if (this.active == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create Group.active");
-        else if (Configuration.doAutoCreate())
-          this.active = new BooleanType(); // bb
-      return this.active;
-    }
-
-    public boolean hasActiveElement() { 
-      return this.active != null && !this.active.isEmpty();
-    }
-
-    public boolean hasActive() { 
-      return this.active != null && !this.active.isEmpty();
-    }
-
-    /**
-     * @param value {@link #active} (Indicates whether the record for the group is available for use or is merely being retained for historical purposes.). This is the underlying object with id, value and extensions. The accessor "getActive" gives direct access to the value
-     */
-    public Group setActiveElement(BooleanType value) { 
-      this.active = value;
-      return this;
-    }
-
-    /**
-     * @return Indicates whether the record for the group is available for use or is merely being retained for historical purposes.
-     */
-    public boolean getActive() { 
-      return this.active == null || this.active.isEmpty() ? false : this.active.getValue();
-    }
-
-    /**
-     * @param value Indicates whether the record for the group is available for use or is merely being retained for historical purposes.
-     */
-    public Group setActive(boolean value) { 
-        if (this.active == null)
-          this.active = new BooleanType();
-        this.active.setValue(value);
       return this;
     }
 
@@ -1324,9 +1352,9 @@ public class Group extends DomainResource {
       protected void listChildren(List<Property> childrenList) {
         super.listChildren(childrenList);
         childrenList.add(new Property("identifier", "Identifier", "A unique business identifier for this group.", 0, java.lang.Integer.MAX_VALUE, identifier));
+        childrenList.add(new Property("active", "boolean", "Indicates whether the record for the group is available for use or is merely being retained for historical purposes.", 0, java.lang.Integer.MAX_VALUE, active));
         childrenList.add(new Property("type", "code", "Identifies the broad classification of the kind of resources the group includes.", 0, java.lang.Integer.MAX_VALUE, type));
         childrenList.add(new Property("actual", "boolean", "If true, indicates that the resource refers to a specific group of real individuals.  If false, the group defines a set of intended individuals.", 0, java.lang.Integer.MAX_VALUE, actual));
-        childrenList.add(new Property("active", "boolean", "Indicates whether the record for the group is available for use or is merely being retained for historical purposes.", 0, java.lang.Integer.MAX_VALUE, active));
         childrenList.add(new Property("code", "CodeableConcept", "Provides a specific type of resource the group includes; e.g. \"cow\", \"syringe\", etc.", 0, java.lang.Integer.MAX_VALUE, code));
         childrenList.add(new Property("name", "string", "A label assigned to the group for human identification and communication.", 0, java.lang.Integer.MAX_VALUE, name));
         childrenList.add(new Property("quantity", "unsignedInt", "A count of the number of resource instances that are part of the group.", 0, java.lang.Integer.MAX_VALUE, quantity));
@@ -1338,9 +1366,9 @@ public class Group extends DomainResource {
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
         case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : this.identifier.toArray(new Base[this.identifier.size()]); // Identifier
+        case -1422950650: /*active*/ return this.active == null ? new Base[0] : new Base[] {this.active}; // BooleanType
         case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // Enumeration<GroupType>
         case -1422939762: /*actual*/ return this.actual == null ? new Base[0] : new Base[] {this.actual}; // BooleanType
-        case -1422950650: /*active*/ return this.active == null ? new Base[0] : new Base[] {this.active}; // BooleanType
         case 3059181: /*code*/ return this.code == null ? new Base[0] : new Base[] {this.code}; // CodeableConcept
         case 3373707: /*name*/ return this.name == null ? new Base[0] : new Base[] {this.name}; // StringType
         case -1285004149: /*quantity*/ return this.quantity == null ? new Base[0] : new Base[] {this.quantity}; // UnsignedIntType
@@ -1352,77 +1380,97 @@ public class Group extends DomainResource {
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case -1618432855: // identifier
           this.getIdentifier().add(castToIdentifier(value)); // Identifier
-          break;
-        case 3575610: // type
-          this.type = new GroupTypeEnumFactory().fromType(value); // Enumeration<GroupType>
-          break;
-        case -1422939762: // actual
-          this.actual = castToBoolean(value); // BooleanType
-          break;
+          return value;
         case -1422950650: // active
           this.active = castToBoolean(value); // BooleanType
-          break;
+          return value;
+        case 3575610: // type
+          value = new GroupTypeEnumFactory().fromType(castToCode(value));
+          this.type = (Enumeration) value; // Enumeration<GroupType>
+          return value;
+        case -1422939762: // actual
+          this.actual = castToBoolean(value); // BooleanType
+          return value;
         case 3059181: // code
           this.code = castToCodeableConcept(value); // CodeableConcept
-          break;
+          return value;
         case 3373707: // name
           this.name = castToString(value); // StringType
-          break;
+          return value;
         case -1285004149: // quantity
           this.quantity = castToUnsignedInt(value); // UnsignedIntType
-          break;
+          return value;
         case 366313883: // characteristic
           this.getCharacteristic().add((GroupCharacteristicComponent) value); // GroupCharacteristicComponent
-          break;
+          return value;
         case -1077769574: // member
           this.getMember().add((GroupMemberComponent) value); // GroupMemberComponent
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("identifier"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("identifier")) {
           this.getIdentifier().add(castToIdentifier(value));
-        else if (name.equals("type"))
-          this.type = new GroupTypeEnumFactory().fromType(value); // Enumeration<GroupType>
-        else if (name.equals("actual"))
-          this.actual = castToBoolean(value); // BooleanType
-        else if (name.equals("active"))
+        } else if (name.equals("active")) {
           this.active = castToBoolean(value); // BooleanType
-        else if (name.equals("code"))
+        } else if (name.equals("type")) {
+          value = new GroupTypeEnumFactory().fromType(castToCode(value));
+          this.type = (Enumeration) value; // Enumeration<GroupType>
+        } else if (name.equals("actual")) {
+          this.actual = castToBoolean(value); // BooleanType
+        } else if (name.equals("code")) {
           this.code = castToCodeableConcept(value); // CodeableConcept
-        else if (name.equals("name"))
+        } else if (name.equals("name")) {
           this.name = castToString(value); // StringType
-        else if (name.equals("quantity"))
+        } else if (name.equals("quantity")) {
           this.quantity = castToUnsignedInt(value); // UnsignedIntType
-        else if (name.equals("characteristic"))
+        } else if (name.equals("characteristic")) {
           this.getCharacteristic().add((GroupCharacteristicComponent) value);
-        else if (name.equals("member"))
+        } else if (name.equals("member")) {
           this.getMember().add((GroupMemberComponent) value);
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case -1618432855:  return addIdentifier(); // Identifier
-        case 3575610: throw new FHIRException("Cannot make property type as it is not a complex type"); // Enumeration<GroupType>
-        case -1422939762: throw new FHIRException("Cannot make property actual as it is not a complex type"); // BooleanType
-        case -1422950650: throw new FHIRException("Cannot make property active as it is not a complex type"); // BooleanType
-        case 3059181:  return getCode(); // CodeableConcept
-        case 3373707: throw new FHIRException("Cannot make property name as it is not a complex type"); // StringType
-        case -1285004149: throw new FHIRException("Cannot make property quantity as it is not a complex type"); // UnsignedIntType
-        case 366313883:  return addCharacteristic(); // GroupCharacteristicComponent
-        case -1077769574:  return addMember(); // GroupMemberComponent
+        case -1618432855:  return addIdentifier(); 
+        case -1422950650:  return getActiveElement();
+        case 3575610:  return getTypeElement();
+        case -1422939762:  return getActualElement();
+        case 3059181:  return getCode(); 
+        case 3373707:  return getNameElement();
+        case -1285004149:  return getQuantityElement();
+        case 366313883:  return addCharacteristic(); 
+        case -1077769574:  return addMember(); 
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -1618432855: /*identifier*/ return new String[] {"Identifier"};
+        case -1422950650: /*active*/ return new String[] {"boolean"};
+        case 3575610: /*type*/ return new String[] {"code"};
+        case -1422939762: /*actual*/ return new String[] {"boolean"};
+        case 3059181: /*code*/ return new String[] {"CodeableConcept"};
+        case 3373707: /*name*/ return new String[] {"string"};
+        case -1285004149: /*quantity*/ return new String[] {"unsignedInt"};
+        case 366313883: /*characteristic*/ return new String[] {};
+        case -1077769574: /*member*/ return new String[] {};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }
@@ -1432,14 +1480,14 @@ public class Group extends DomainResource {
         if (name.equals("identifier")) {
           return addIdentifier();
         }
+        else if (name.equals("active")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Group.active");
+        }
         else if (name.equals("type")) {
           throw new FHIRException("Cannot call addChild on a primitive type Group.type");
         }
         else if (name.equals("actual")) {
           throw new FHIRException("Cannot call addChild on a primitive type Group.actual");
-        }
-        else if (name.equals("active")) {
-          throw new FHIRException("Cannot call addChild on a primitive type Group.active");
         }
         else if (name.equals("code")) {
           this.code = new CodeableConcept();
@@ -1474,9 +1522,9 @@ public class Group extends DomainResource {
           for (Identifier i : identifier)
             dst.identifier.add(i.copy());
         };
+        dst.active = active == null ? null : active.copy();
         dst.type = type == null ? null : type.copy();
         dst.actual = actual == null ? null : actual.copy();
-        dst.active = active == null ? null : active.copy();
         dst.code = code == null ? null : code.copy();
         dst.name = name == null ? null : name.copy();
         dst.quantity = quantity == null ? null : quantity.copy();
@@ -1504,8 +1552,8 @@ public class Group extends DomainResource {
         if (!(other instanceof Group))
           return false;
         Group o = (Group) other;
-        return compareDeep(identifier, o.identifier, true) && compareDeep(type, o.type, true) && compareDeep(actual, o.actual, true)
-           && compareDeep(active, o.active, true) && compareDeep(code, o.code, true) && compareDeep(name, o.name, true)
+        return compareDeep(identifier, o.identifier, true) && compareDeep(active, o.active, true) && compareDeep(type, o.type, true)
+           && compareDeep(actual, o.actual, true) && compareDeep(code, o.code, true) && compareDeep(name, o.name, true)
            && compareDeep(quantity, o.quantity, true) && compareDeep(characteristic, o.characteristic, true)
            && compareDeep(member, o.member, true);
       }
@@ -1517,13 +1565,13 @@ public class Group extends DomainResource {
         if (!(other instanceof Group))
           return false;
         Group o = (Group) other;
-        return compareValues(type, o.type, true) && compareValues(actual, o.actual, true) && compareValues(active, o.active, true)
+        return compareValues(active, o.active, true) && compareValues(type, o.type, true) && compareValues(actual, o.actual, true)
            && compareValues(name, o.name, true) && compareValues(quantity, o.quantity, true);
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, type, actual
-          , active, code, name, quantity, characteristic, member);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, active, type
+          , actual, code, name, quantity, characteristic, member);
       }
 
   @Override

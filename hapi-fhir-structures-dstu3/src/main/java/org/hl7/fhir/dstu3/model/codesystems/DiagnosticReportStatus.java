@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -45,15 +45,23 @@ public enum DiagnosticReportStatus {
          */
         PARTIAL, 
         /**
+         * Verified early results are available, but not all  results are final.
+         */
+        PRELIMINARY, 
+        /**
          * The report is complete and verified by an authorized person.
          */
         FINAL, 
         /**
-         * The report has been modified subsequent to being Final, and is complete and verified by an authorized person
+         * Subsequent to being Final, the report has been modified.  This includes any change in the results, diagnosis, narrative text, or other content of a report that has been issued.
+         */
+        AMENDED, 
+        /**
+         * Subsequent to being Final, the report has been modified  to correct an error in the report or referenced results.
          */
         CORRECTED, 
         /**
-         * The report has been modified subsequent to being Final, and is complete and verified by an authorized person. New content has been added, but existing content hasn't changed.
+         * Subsequent to being Final, the report has been modified by adding new content. The existing content is unchanged.
          */
         APPENDED, 
         /**
@@ -61,9 +69,13 @@ public enum DiagnosticReportStatus {
          */
         CANCELLED, 
         /**
-         * The report has been withdrawn following a previous final release.
+         * The report has been withdrawn following a previous final release.  This electronic record should never have existed, though it is possible that real-world decisions were based on it. (If real-world activity has occurred, the status should be "cancelled" rather than "entered-in-error".)
          */
         ENTEREDINERROR, 
+        /**
+         * The authoring system does not know which of the status values currently applies for this request. Note: This concept is not to be used for "other" - one of the listed statuses is presumed to apply, it's just not known which one.
+         */
+        UNKNOWN, 
         /**
          * added to help the parsers
          */
@@ -75,8 +87,12 @@ public enum DiagnosticReportStatus {
           return REGISTERED;
         if ("partial".equals(codeString))
           return PARTIAL;
+        if ("preliminary".equals(codeString))
+          return PRELIMINARY;
         if ("final".equals(codeString))
           return FINAL;
+        if ("amended".equals(codeString))
+          return AMENDED;
         if ("corrected".equals(codeString))
           return CORRECTED;
         if ("appended".equals(codeString))
@@ -85,17 +101,22 @@ public enum DiagnosticReportStatus {
           return CANCELLED;
         if ("entered-in-error".equals(codeString))
           return ENTEREDINERROR;
+        if ("unknown".equals(codeString))
+          return UNKNOWN;
         throw new FHIRException("Unknown DiagnosticReportStatus code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
             case REGISTERED: return "registered";
             case PARTIAL: return "partial";
+            case PRELIMINARY: return "preliminary";
             case FINAL: return "final";
+            case AMENDED: return "amended";
             case CORRECTED: return "corrected";
             case APPENDED: return "appended";
             case CANCELLED: return "cancelled";
             case ENTEREDINERROR: return "entered-in-error";
+            case UNKNOWN: return "unknown";
             default: return "?";
           }
         }
@@ -106,11 +127,14 @@ public enum DiagnosticReportStatus {
           switch (this) {
             case REGISTERED: return "The existence of the report is registered, but there is nothing yet available.";
             case PARTIAL: return "This is a partial (e.g. initial, interim or preliminary) report: data in the report may be incomplete or unverified.";
+            case PRELIMINARY: return "Verified early results are available, but not all  results are final.";
             case FINAL: return "The report is complete and verified by an authorized person.";
-            case CORRECTED: return "The report has been modified subsequent to being Final, and is complete and verified by an authorized person";
-            case APPENDED: return "The report has been modified subsequent to being Final, and is complete and verified by an authorized person. New content has been added, but existing content hasn't changed.";
+            case AMENDED: return "Subsequent to being Final, the report has been modified.  This includes any change in the results, diagnosis, narrative text, or other content of a report that has been issued.";
+            case CORRECTED: return "Subsequent to being Final, the report has been modified  to correct an error in the report or referenced results.";
+            case APPENDED: return "Subsequent to being Final, the report has been modified by adding new content. The existing content is unchanged.";
             case CANCELLED: return "The report is unavailable because the measurement was not started or not completed (also sometimes called \"aborted\").";
-            case ENTEREDINERROR: return "The report has been withdrawn following a previous final release.";
+            case ENTEREDINERROR: return "The report has been withdrawn following a previous final release.  This electronic record should never have existed, though it is possible that real-world decisions were based on it. (If real-world activity has occurred, the status should be \"cancelled\" rather than \"entered-in-error\".)";
+            case UNKNOWN: return "The authoring system does not know which of the status values currently applies for this request. Note: This concept is not to be used for \"other\" - one of the listed statuses is presumed to apply, it's just not known which one.";
             default: return "?";
           }
         }
@@ -118,11 +142,14 @@ public enum DiagnosticReportStatus {
           switch (this) {
             case REGISTERED: return "Registered";
             case PARTIAL: return "Partial";
+            case PRELIMINARY: return "Preliminary";
             case FINAL: return "Final";
+            case AMENDED: return "Amended";
             case CORRECTED: return "Corrected";
             case APPENDED: return "Appended";
             case CANCELLED: return "Cancelled";
             case ENTEREDINERROR: return "Entered in Error";
+            case UNKNOWN: return "Unknown";
             default: return "?";
           }
     }

@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -57,6 +57,10 @@ public enum ContactPointSystem {
          */
         URL, 
         /**
+         * A contact that can be used for sending an sms message (e.g. mobide phones, some landlines)
+         */
+        SMS, 
+        /**
          * A contact that is not a phone, fax, page or email address and is not expressible as a URL.  E.g. Internal mail address.  This SHOULD NOT be used for contacts that are expressible as a URL (e.g. Skype, Twitter, Facebook, etc.)  Extensions may be used to distinguish "other" contact types.
          */
         OTHER, 
@@ -77,6 +81,8 @@ public enum ContactPointSystem {
           return PAGER;
         if ("url".equals(codeString))
           return URL;
+        if ("sms".equals(codeString))
+          return SMS;
         if ("other".equals(codeString))
           return OTHER;
         throw new FHIRException("Unknown ContactPointSystem code '"+codeString+"'");
@@ -88,6 +94,7 @@ public enum ContactPointSystem {
             case EMAIL: return "email";
             case PAGER: return "pager";
             case URL: return "url";
+            case SMS: return "sms";
             case OTHER: return "other";
             default: return "?";
           }
@@ -102,6 +109,7 @@ public enum ContactPointSystem {
             case EMAIL: return "The value is an email address.";
             case PAGER: return "The value is a pager number. These may be local pager numbers that are only usable on a particular pager system.";
             case URL: return "A contact that is not a phone, fax, pager or email address and is expressed as a URL.  This is intended for various personal contacts including blogs, Skype, Twitter, Facebook, etc. Do not use for email addresses.";
+            case SMS: return "A contact that can be used for sending an sms message (e.g. mobide phones, some landlines)";
             case OTHER: return "A contact that is not a phone, fax, page or email address and is not expressible as a URL.  E.g. Internal mail address.  This SHOULD NOT be used for contacts that are expressible as a URL (e.g. Skype, Twitter, Facebook, etc.)  Extensions may be used to distinguish \"other\" contact types.";
             default: return "?";
           }
@@ -113,6 +121,7 @@ public enum ContactPointSystem {
             case EMAIL: return "Email";
             case PAGER: return "Pager";
             case URL: return "URL";
+            case SMS: return "SMS";
             case OTHER: return "Other";
             default: return "?";
           }

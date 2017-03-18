@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
 
 
 import org.hl7.fhir.dstu3.model.EnumFactory;
@@ -39,90 +39,118 @@ public class ConsentCategoryEnumFactory implements EnumFactory<ConsentCategory> 
   public ConsentCategory fromCode(String codeString) throws IllegalArgumentException {
     if (codeString == null || "".equals(codeString))
       return null;
-    if ("cat1".equals(codeString))
-      return ConsentCategory.CAT1;
-    if ("advance-directive".equals(codeString))
-      return ConsentCategory.ADVANCEDIRECTIVE;
-    if ("cat2".equals(codeString))
-      return ConsentCategory.CAT2;
-    if ("medical-consent".equals(codeString))
-      return ConsentCategory.MEDICALCONSENT;
-    if ("cat3".equals(codeString))
-      return ConsentCategory.CAT3;
-    if ("hipaa".equals(codeString))
-      return ConsentCategory.HIPAA;
+    if ("42-CFR-2".equals(codeString))
+      return ConsentCategory._42CFR2;
+    if ("ACD".equals(codeString))
+      return ConsentCategory.ACD;
+    if ("CRIC".equals(codeString))
+      return ConsentCategory.CRIC;
+    if ("DNR".equals(codeString))
+      return ConsentCategory.DNR;
+    if ("EMRGONLY".equals(codeString))
+      return ConsentCategory.EMRGONLY;
+    if ("Illinois-Minor-Procedure".equals(codeString))
+      return ConsentCategory.ILLINOISMINORPROCEDURE;
+    if ("HCD".equals(codeString))
+      return ConsentCategory.HCD;
+    if ("HIPAA-Auth".equals(codeString))
+      return ConsentCategory.HIPAAAUTH;
+    if ("HIPAA-NPP".equals(codeString))
+      return ConsentCategory.HIPAANPP;
+    if ("HIPAA-Restrictions".equals(codeString))
+      return ConsentCategory.HIPAARESTRICTIONS;
+    if ("HIPAA-Research".equals(codeString))
+      return ConsentCategory.HIPAARESEARCH;
+    if ("HIPAA-Self-Pay".equals(codeString))
+      return ConsentCategory.HIPAASELFPAY;
+    if ("MDHHS-5515".equals(codeString))
+      return ConsentCategory.MDHHS5515;
+    if ("NYSSIPP".equals(codeString))
+      return ConsentCategory.NYSSIPP;
+    if ("NPP".equals(codeString))
+      return ConsentCategory.NPP;
+    if ("POLST".equals(codeString))
+      return ConsentCategory.POLST;
+    if ("RESEARCH".equals(codeString))
+      return ConsentCategory.RESEARCH;
+    if ("RSDID".equals(codeString))
+      return ConsentCategory.RSDID;
+    if ("RSREID".equals(codeString))
+      return ConsentCategory.RSREID;
     if ("SSA-827".equals(codeString))
       return ConsentCategory.SSA827;
-    if ("cat4".equals(codeString))
-      return ConsentCategory.CAT4;
-    if ("DCH-3927".equals(codeString))
-      return ConsentCategory.DCH3927;
-    if ("squaxin".equals(codeString))
-      return ConsentCategory.SQUAXIN;
-    if ("cat5".equals(codeString))
-      return ConsentCategory.CAT5;
-    if ("nl-lsp".equals(codeString))
-      return ConsentCategory.NLLSP;
-    if ("at-elga".equals(codeString))
-      return ConsentCategory.ATELGA;
-    if ("cat6".equals(codeString))
-      return ConsentCategory.CAT6;
-    if ("nih-hipaa".equals(codeString))
-      return ConsentCategory.NIHHIPAA;
-    if ("nci".equals(codeString))
-      return ConsentCategory.NCI;
-    if ("nih-grdr".equals(codeString))
-      return ConsentCategory.NIHGRDR;
-    if ("va-10-10116".equals(codeString))
+    if ("VA-10-0484".equals(codeString))
+      return ConsentCategory.VA100484;
+    if ("VA-10-0485".equals(codeString))
+      return ConsentCategory.VA100485;
+    if ("VA-10-5345".equals(codeString))
+      return ConsentCategory.VA105345;
+    if ("VA-10-5345a".equals(codeString))
+      return ConsentCategory.VA105345A;
+    if ("VA-10-5345a-MHV".equals(codeString))
+      return ConsentCategory.VA105345AMHV;
+    if ("VA-10-10116".equals(codeString))
       return ConsentCategory.VA1010116;
-    if ("nih-527".equals(codeString))
-      return ConsentCategory.NIH527;
-    if ("ga4gh".equals(codeString))
-      return ConsentCategory.GA4GH;
+    if ("VA-21-4142".equals(codeString))
+      return ConsentCategory.VA214142;
     throw new IllegalArgumentException("Unknown ConsentCategory code '"+codeString+"'");
   }
 
   public String toCode(ConsentCategory code) {
-    if (code == ConsentCategory.CAT1)
-      return "cat1";
-    if (code == ConsentCategory.ADVANCEDIRECTIVE)
-      return "advance-directive";
-    if (code == ConsentCategory.CAT2)
-      return "cat2";
-    if (code == ConsentCategory.MEDICALCONSENT)
-      return "medical-consent";
-    if (code == ConsentCategory.CAT3)
-      return "cat3";
-    if (code == ConsentCategory.HIPAA)
-      return "hipaa";
+    if (code == ConsentCategory._42CFR2)
+      return "42-CFR-2";
+    if (code == ConsentCategory.ACD)
+      return "ACD";
+    if (code == ConsentCategory.CRIC)
+      return "CRIC";
+    if (code == ConsentCategory.DNR)
+      return "DNR";
+    if (code == ConsentCategory.EMRGONLY)
+      return "EMRGONLY";
+    if (code == ConsentCategory.ILLINOISMINORPROCEDURE)
+      return "Illinois-Minor-Procedure";
+    if (code == ConsentCategory.HCD)
+      return "HCD";
+    if (code == ConsentCategory.HIPAAAUTH)
+      return "HIPAA-Auth";
+    if (code == ConsentCategory.HIPAANPP)
+      return "HIPAA-NPP";
+    if (code == ConsentCategory.HIPAARESTRICTIONS)
+      return "HIPAA-Restrictions";
+    if (code == ConsentCategory.HIPAARESEARCH)
+      return "HIPAA-Research";
+    if (code == ConsentCategory.HIPAASELFPAY)
+      return "HIPAA-Self-Pay";
+    if (code == ConsentCategory.MDHHS5515)
+      return "MDHHS-5515";
+    if (code == ConsentCategory.NYSSIPP)
+      return "NYSSIPP";
+    if (code == ConsentCategory.NPP)
+      return "NPP";
+    if (code == ConsentCategory.POLST)
+      return "POLST";
+    if (code == ConsentCategory.RESEARCH)
+      return "RESEARCH";
+    if (code == ConsentCategory.RSDID)
+      return "RSDID";
+    if (code == ConsentCategory.RSREID)
+      return "RSREID";
     if (code == ConsentCategory.SSA827)
       return "SSA-827";
-    if (code == ConsentCategory.CAT4)
-      return "cat4";
-    if (code == ConsentCategory.DCH3927)
-      return "DCH-3927";
-    if (code == ConsentCategory.SQUAXIN)
-      return "squaxin";
-    if (code == ConsentCategory.CAT5)
-      return "cat5";
-    if (code == ConsentCategory.NLLSP)
-      return "nl-lsp";
-    if (code == ConsentCategory.ATELGA)
-      return "at-elga";
-    if (code == ConsentCategory.CAT6)
-      return "cat6";
-    if (code == ConsentCategory.NIHHIPAA)
-      return "nih-hipaa";
-    if (code == ConsentCategory.NCI)
-      return "nci";
-    if (code == ConsentCategory.NIHGRDR)
-      return "nih-grdr";
+    if (code == ConsentCategory.VA100484)
+      return "VA-10-0484";
+    if (code == ConsentCategory.VA100485)
+      return "VA-10-0485";
+    if (code == ConsentCategory.VA105345)
+      return "VA-10-5345";
+    if (code == ConsentCategory.VA105345A)
+      return "VA-10-5345a";
+    if (code == ConsentCategory.VA105345AMHV)
+      return "VA-10-5345a-MHV";
     if (code == ConsentCategory.VA1010116)
-      return "va-10-10116";
-    if (code == ConsentCategory.NIH527)
-      return "nih-527";
-    if (code == ConsentCategory.GA4GH)
-      return "ga4gh";
+      return "VA-10-10116";
+    if (code == ConsentCategory.VA214142)
+      return "VA-21-4142";
     return "?";
   }
 

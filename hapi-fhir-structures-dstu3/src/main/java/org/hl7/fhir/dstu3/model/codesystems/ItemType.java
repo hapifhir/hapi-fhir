@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -68,10 +68,6 @@ public enum ItemType {
          * Question with a date and time answer
          */
         DATETIME, 
-        /**
-         * Question with a system timestamp answer
-         */
-        INSTANT, 
         /**
          * Question with a time (hour/minute/second) answer independent of date.
          */
@@ -131,8 +127,6 @@ public enum ItemType {
           return DATE;
         if ("dateTime".equals(codeString))
           return DATETIME;
-        if ("instant".equals(codeString))
-          return INSTANT;
         if ("time".equals(codeString))
           return TIME;
         if ("string".equals(codeString))
@@ -163,7 +157,6 @@ public enum ItemType {
             case INTEGER: return "integer";
             case DATE: return "date";
             case DATETIME: return "dateTime";
-            case INSTANT: return "instant";
             case TIME: return "time";
             case STRING: return "string";
             case TEXT: return "text";
@@ -189,7 +182,6 @@ public enum ItemType {
             case INTEGER: return "Question with an integer answer";
             case DATE: return "Question with adate answer";
             case DATETIME: return "Question with a date and time answer";
-            case INSTANT: return "Question with a system timestamp answer";
             case TIME: return "Question with a time (hour/minute/second) answer independent of date.";
             case STRING: return "Question with a short (few words to short sentence) free-text entry answer";
             case TEXT: return "Question with a long (potentially multi-paragraph) free-text entry (still captured as a string) answer";
@@ -212,7 +204,6 @@ public enum ItemType {
             case INTEGER: return "Integer";
             case DATE: return "Date";
             case DATETIME: return "Date Time";
-            case INSTANT: return "Instant";
             case TIME: return "Time";
             case STRING: return "String";
             case TEXT: return "Text";

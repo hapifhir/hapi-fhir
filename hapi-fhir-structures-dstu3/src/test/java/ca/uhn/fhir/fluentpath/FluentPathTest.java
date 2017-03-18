@@ -1,5 +1,6 @@
 package ca.uhn.fhir.fluentpath;
 
+import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.*;
 
 import java.util.List;
@@ -51,7 +52,7 @@ public class FluentPathTest {
 		try {
 			fp.evaluate(p, "Patient....nameFOO", HumanName.class);
 		} catch (FluentPathExecutionException e) {
-			assertEquals("org.hl7.fhir.dstu3.utils.FHIRLexer$FHIRLexerException: Error in Patient....nameFOO at 1, 1: Found . expecting a token name", e.getMessage());
+			assertThat(e.getMessage(), containsString("termination at unexpected token"));
 		}
 	}
 

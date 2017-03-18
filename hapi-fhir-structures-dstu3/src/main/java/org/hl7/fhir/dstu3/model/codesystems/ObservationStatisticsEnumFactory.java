@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
 
 
 import org.hl7.fhir.dstu3.model.EnumFactory;
@@ -57,10 +57,10 @@ public class ObservationStatisticsEnumFactory implements EnumFactory<Observation
       return ObservationStatistics.SUM;
     if ("variance".equals(codeString))
       return ObservationStatistics.VARIANCE;
-    if ("%20".equals(codeString))
-      return ObservationStatistics.PCT20;
-    if ("%80".equals(codeString))
-      return ObservationStatistics.PCT80;
+    if ("20-percent".equals(codeString))
+      return ObservationStatistics._20PERCENT;
+    if ("80-percent".equals(codeString))
+      return ObservationStatistics._80PERCENT;
     if ("4-lower".equals(codeString))
       return ObservationStatistics._4LOWER;
     if ("4-upper".equals(codeString))
@@ -75,6 +75,12 @@ public class ObservationStatisticsEnumFactory implements EnumFactory<Observation
       return ObservationStatistics._53;
     if ("5-4".equals(codeString))
       return ObservationStatistics._54;
+    if ("skew".equals(codeString))
+      return ObservationStatistics.SKEW;
+    if ("kurtosis".equals(codeString))
+      return ObservationStatistics.KURTOSIS;
+    if ("regression".equals(codeString))
+      return ObservationStatistics.REGRESSION;
     throw new IllegalArgumentException("Unknown ObservationStatistics code '"+codeString+"'");
   }
 
@@ -97,10 +103,10 @@ public class ObservationStatisticsEnumFactory implements EnumFactory<Observation
       return "sum";
     if (code == ObservationStatistics.VARIANCE)
       return "variance";
-    if (code == ObservationStatistics.PCT20)
-      return "%20";
-    if (code == ObservationStatistics.PCT80)
-      return "%80";
+    if (code == ObservationStatistics._20PERCENT)
+      return "20-percent";
+    if (code == ObservationStatistics._80PERCENT)
+      return "80-percent";
     if (code == ObservationStatistics._4LOWER)
       return "4-lower";
     if (code == ObservationStatistics._4UPPER)
@@ -115,6 +121,12 @@ public class ObservationStatisticsEnumFactory implements EnumFactory<Observation
       return "5-3";
     if (code == ObservationStatistics._54)
       return "5-4";
+    if (code == ObservationStatistics.SKEW)
+      return "skew";
+    if (code == ObservationStatistics.KURTOSIS)
+      return "kurtosis";
+    if (code == ObservationStatistics.REGRESSION)
+      return "regression";
     return "?";
   }
 

@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
 
 import java.util.*;
 
@@ -531,71 +531,88 @@ public class Attachment extends Type implements ICompositeType {
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case -389131437: // contentType
           this.contentType = castToCode(value); // CodeType
-          break;
+          return value;
         case -1613589672: // language
           this.language = castToCode(value); // CodeType
-          break;
+          return value;
         case 3076010: // data
           this.data = castToBase64Binary(value); // Base64BinaryType
-          break;
+          return value;
         case 116079: // url
           this.url = castToUri(value); // UriType
-          break;
+          return value;
         case 3530753: // size
           this.size = castToUnsignedInt(value); // UnsignedIntType
-          break;
+          return value;
         case 3195150: // hash
           this.hash = castToBase64Binary(value); // Base64BinaryType
-          break;
+          return value;
         case 110371416: // title
           this.title = castToString(value); // StringType
-          break;
+          return value;
         case 1820421855: // creation
           this.creation = castToDateTime(value); // DateTimeType
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("contentType"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("contentType")) {
           this.contentType = castToCode(value); // CodeType
-        else if (name.equals("language"))
+        } else if (name.equals("language")) {
           this.language = castToCode(value); // CodeType
-        else if (name.equals("data"))
+        } else if (name.equals("data")) {
           this.data = castToBase64Binary(value); // Base64BinaryType
-        else if (name.equals("url"))
+        } else if (name.equals("url")) {
           this.url = castToUri(value); // UriType
-        else if (name.equals("size"))
+        } else if (name.equals("size")) {
           this.size = castToUnsignedInt(value); // UnsignedIntType
-        else if (name.equals("hash"))
+        } else if (name.equals("hash")) {
           this.hash = castToBase64Binary(value); // Base64BinaryType
-        else if (name.equals("title"))
+        } else if (name.equals("title")) {
           this.title = castToString(value); // StringType
-        else if (name.equals("creation"))
+        } else if (name.equals("creation")) {
           this.creation = castToDateTime(value); // DateTimeType
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case -389131437: throw new FHIRException("Cannot make property contentType as it is not a complex type"); // CodeType
-        case -1613589672: throw new FHIRException("Cannot make property language as it is not a complex type"); // CodeType
-        case 3076010: throw new FHIRException("Cannot make property data as it is not a complex type"); // Base64BinaryType
-        case 116079: throw new FHIRException("Cannot make property url as it is not a complex type"); // UriType
-        case 3530753: throw new FHIRException("Cannot make property size as it is not a complex type"); // UnsignedIntType
-        case 3195150: throw new FHIRException("Cannot make property hash as it is not a complex type"); // Base64BinaryType
-        case 110371416: throw new FHIRException("Cannot make property title as it is not a complex type"); // StringType
-        case 1820421855: throw new FHIRException("Cannot make property creation as it is not a complex type"); // DateTimeType
+        case -389131437:  return getContentTypeElement();
+        case -1613589672:  return getLanguageElement();
+        case 3076010:  return getDataElement();
+        case 116079:  return getUrlElement();
+        case 3530753:  return getSizeElement();
+        case 3195150:  return getHashElement();
+        case 110371416:  return getTitleElement();
+        case 1820421855:  return getCreationElement();
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -389131437: /*contentType*/ return new String[] {"code"};
+        case -1613589672: /*language*/ return new String[] {"code"};
+        case 3076010: /*data*/ return new String[] {"base64Binary"};
+        case 116079: /*url*/ return new String[] {"uri"};
+        case 3530753: /*size*/ return new String[] {"unsignedInt"};
+        case 3195150: /*hash*/ return new String[] {"base64Binary"};
+        case 110371416: /*title*/ return new String[] {"string"};
+        case 1820421855: /*creation*/ return new String[] {"dateTime"};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }

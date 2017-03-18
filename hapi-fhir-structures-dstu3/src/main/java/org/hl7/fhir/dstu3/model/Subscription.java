@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
 
 import java.util.*;
 
@@ -139,8 +139,10 @@ public class Subscription extends DomainResource {
         throw new IllegalArgumentException("Unknown SubscriptionStatus code '"+codeString+"'");
         }
         public Enumeration<SubscriptionStatus> fromType(Base code) throws FHIRException {
-          if (code == null || code.isEmpty())
+          if (code == null)
             return null;
+          if (code.isEmpty())
+            return new Enumeration<SubscriptionStatus>(this);
           String codeString = ((PrimitiveType) code).asStringValue();
           if (codeString == null || "".equals(codeString))
             return null;
@@ -273,8 +275,10 @@ public class Subscription extends DomainResource {
         throw new IllegalArgumentException("Unknown SubscriptionChannelType code '"+codeString+"'");
         }
         public Enumeration<SubscriptionChannelType> fromType(Base code) throws FHIRException {
-          if (code == null || code.isEmpty())
+          if (code == null)
             return null;
+          if (code.isEmpty())
+            return new Enumeration<SubscriptionChannelType>(this);
           String codeString = ((PrimitiveType) code).asStringValue();
           if (codeString == null || "".equals(codeString))
             return null;
@@ -335,11 +339,11 @@ public class Subscription extends DomainResource {
         /**
          * Additional headers / information to send as part of the notification.
          */
-        @Child(name = "header", type = {StringType.class}, order=4, min=0, max=1, modifier=false, summary=true)
+        @Child(name = "header", type = {StringType.class}, order=4, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
         @Description(shortDefinition="Usage depends on the channel type", formalDefinition="Additional headers / information to send as part of the notification." )
-        protected StringType header;
+        protected List<StringType> header;
 
-        private static final long serialVersionUID = -279715391L;
+        private static final long serialVersionUID = -854610293L;
 
     /**
      * Constructor
@@ -500,52 +504,64 @@ public class Subscription extends DomainResource {
         }
 
         /**
-         * @return {@link #header} (Additional headers / information to send as part of the notification.). This is the underlying object with id, value and extensions. The accessor "getHeader" gives direct access to the value
+         * @return {@link #header} (Additional headers / information to send as part of the notification.)
          */
-        public StringType getHeaderElement() { 
+        public List<StringType> getHeader() { 
           if (this.header == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create SubscriptionChannelComponent.header");
-            else if (Configuration.doAutoCreate())
-              this.header = new StringType(); // bb
+            this.header = new ArrayList<StringType>();
           return this.header;
         }
 
-        public boolean hasHeaderElement() { 
-          return this.header != null && !this.header.isEmpty();
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public SubscriptionChannelComponent setHeader(List<StringType> theHeader) { 
+          this.header = theHeader;
+          return this;
         }
 
         public boolean hasHeader() { 
-          return this.header != null && !this.header.isEmpty();
+          if (this.header == null)
+            return false;
+          for (StringType item : this.header)
+            if (!item.isEmpty())
+              return true;
+          return false;
         }
 
         /**
-         * @param value {@link #header} (Additional headers / information to send as part of the notification.). This is the underlying object with id, value and extensions. The accessor "getHeader" gives direct access to the value
+         * @return {@link #header} (Additional headers / information to send as part of the notification.)
          */
-        public SubscriptionChannelComponent setHeaderElement(StringType value) { 
-          this.header = value;
+        public StringType addHeaderElement() {//2 
+          StringType t = new StringType();
+          if (this.header == null)
+            this.header = new ArrayList<StringType>();
+          this.header.add(t);
+          return t;
+        }
+
+        /**
+         * @param value {@link #header} (Additional headers / information to send as part of the notification.)
+         */
+        public SubscriptionChannelComponent addHeader(String value) { //1
+          StringType t = new StringType();
+          t.setValue(value);
+          if (this.header == null)
+            this.header = new ArrayList<StringType>();
+          this.header.add(t);
           return this;
         }
 
         /**
-         * @return Additional headers / information to send as part of the notification.
+         * @param value {@link #header} (Additional headers / information to send as part of the notification.)
          */
-        public String getHeader() { 
-          return this.header == null ? null : this.header.getValue();
-        }
-
-        /**
-         * @param value Additional headers / information to send as part of the notification.
-         */
-        public SubscriptionChannelComponent setHeader(String value) { 
-          if (Utilities.noString(value))
-            this.header = null;
-          else {
-            if (this.header == null)
-              this.header = new StringType();
-            this.header.setValue(value);
-          }
-          return this;
+        public boolean hasHeader(String value) { 
+          if (this.header == null)
+            return false;
+          for (StringType v : this.header)
+            if (v.equals(value)) // string
+              return true;
+          return false;
         }
 
         protected void listChildren(List<Property> childrenList) {
@@ -562,54 +578,69 @@ public class Subscription extends DomainResource {
         case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // Enumeration<SubscriptionChannelType>
         case 1741102485: /*endpoint*/ return this.endpoint == null ? new Base[0] : new Base[] {this.endpoint}; // UriType
         case -786701938: /*payload*/ return this.payload == null ? new Base[0] : new Base[] {this.payload}; // StringType
-        case -1221270899: /*header*/ return this.header == null ? new Base[0] : new Base[] {this.header}; // StringType
+        case -1221270899: /*header*/ return this.header == null ? new Base[0] : this.header.toArray(new Base[this.header.size()]); // StringType
         default: return super.getProperty(hash, name, checkValid);
         }
 
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case 3575610: // type
-          this.type = new SubscriptionChannelTypeEnumFactory().fromType(value); // Enumeration<SubscriptionChannelType>
-          break;
+          value = new SubscriptionChannelTypeEnumFactory().fromType(castToCode(value));
+          this.type = (Enumeration) value; // Enumeration<SubscriptionChannelType>
+          return value;
         case 1741102485: // endpoint
           this.endpoint = castToUri(value); // UriType
-          break;
+          return value;
         case -786701938: // payload
           this.payload = castToString(value); // StringType
-          break;
+          return value;
         case -1221270899: // header
-          this.header = castToString(value); // StringType
-          break;
-        default: super.setProperty(hash, name, value);
+          this.getHeader().add(castToString(value)); // StringType
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("type"))
-          this.type = new SubscriptionChannelTypeEnumFactory().fromType(value); // Enumeration<SubscriptionChannelType>
-        else if (name.equals("endpoint"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("type")) {
+          value = new SubscriptionChannelTypeEnumFactory().fromType(castToCode(value));
+          this.type = (Enumeration) value; // Enumeration<SubscriptionChannelType>
+        } else if (name.equals("endpoint")) {
           this.endpoint = castToUri(value); // UriType
-        else if (name.equals("payload"))
+        } else if (name.equals("payload")) {
           this.payload = castToString(value); // StringType
-        else if (name.equals("header"))
-          this.header = castToString(value); // StringType
-        else
-          super.setProperty(name, value);
+        } else if (name.equals("header")) {
+          this.getHeader().add(castToString(value));
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 3575610: throw new FHIRException("Cannot make property type as it is not a complex type"); // Enumeration<SubscriptionChannelType>
-        case 1741102485: throw new FHIRException("Cannot make property endpoint as it is not a complex type"); // UriType
-        case -786701938: throw new FHIRException("Cannot make property payload as it is not a complex type"); // StringType
-        case -1221270899: throw new FHIRException("Cannot make property header as it is not a complex type"); // StringType
+        case 3575610:  return getTypeElement();
+        case 1741102485:  return getEndpointElement();
+        case -786701938:  return getPayloadElement();
+        case -1221270899:  return addHeaderElement();
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3575610: /*type*/ return new String[] {"code"};
+        case 1741102485: /*endpoint*/ return new String[] {"uri"};
+        case -786701938: /*payload*/ return new String[] {"string"};
+        case -1221270899: /*header*/ return new String[] {"string"};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }
@@ -638,7 +669,11 @@ public class Subscription extends DomainResource {
         dst.type = type == null ? null : type.copy();
         dst.endpoint = endpoint == null ? null : endpoint.copy();
         dst.payload = payload == null ? null : payload.copy();
-        dst.header = header == null ? null : header.copy();
+        if (header != null) {
+          dst.header = new ArrayList<StringType>();
+          for (StringType i : header)
+            dst.header.add(i.copy());
+        };
         return dst;
       }
 
@@ -677,11 +712,12 @@ public class Subscription extends DomainResource {
   }
 
     /**
-     * The rules that the server should use to determine when to generate notifications for this subscription.
+     * The status of the subscription, which marks the server state for managing the subscription.
      */
-    @Child(name = "criteria", type = {StringType.class}, order=0, min=1, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Rule for server push criteria", formalDefinition="The rules that the server should use to determine when to generate notifications for this subscription." )
-    protected StringType criteria;
+    @Child(name = "status", type = {CodeType.class}, order=0, min=1, max=1, modifier=true, summary=true)
+    @Description(shortDefinition="requested | active | error | off", formalDefinition="The status of the subscription, which marks the server state for managing the subscription." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/subscription-status")
+    protected Enumeration<SubscriptionStatus> status;
 
     /**
      * Contact details for a human to contact about the subscription. The primary use of this for system administrator troubleshooting.
@@ -691,40 +727,39 @@ public class Subscription extends DomainResource {
     protected List<ContactPoint> contact;
 
     /**
+     * The time for the server to turn the subscription off.
+     */
+    @Child(name = "end", type = {InstantType.class}, order=2, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="When to automatically delete the subscription", formalDefinition="The time for the server to turn the subscription off." )
+    protected InstantType end;
+
+    /**
      * A description of why this subscription is defined.
      */
-    @Child(name = "reason", type = {StringType.class}, order=2, min=1, max=1, modifier=false, summary=true)
+    @Child(name = "reason", type = {StringType.class}, order=3, min=1, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Description of why this subscription was created", formalDefinition="A description of why this subscription is defined." )
     protected StringType reason;
 
     /**
-     * The status of the subscription, which marks the server state for managing the subscription.
+     * The rules that the server should use to determine when to generate notifications for this subscription.
      */
-    @Child(name = "status", type = {CodeType.class}, order=3, min=1, max=1, modifier=true, summary=true)
-    @Description(shortDefinition="requested | active | error | off", formalDefinition="The status of the subscription, which marks the server state for managing the subscription." )
-    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/subscription-status")
-    protected Enumeration<SubscriptionStatus> status;
+    @Child(name = "criteria", type = {StringType.class}, order=4, min=1, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="Rule for server push criteria", formalDefinition="The rules that the server should use to determine when to generate notifications for this subscription." )
+    protected StringType criteria;
 
     /**
      * A record of the last error that occurred when the server processed a notification.
      */
-    @Child(name = "error", type = {StringType.class}, order=4, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "error", type = {StringType.class}, order=5, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Latest error note", formalDefinition="A record of the last error that occurred when the server processed a notification." )
     protected StringType error;
 
     /**
      * Details where to send notifications when resources are received that meet the criteria.
      */
-    @Child(name = "channel", type = {}, order=5, min=1, max=1, modifier=false, summary=true)
+    @Child(name = "channel", type = {}, order=6, min=1, max=1, modifier=false, summary=true)
     @Description(shortDefinition="The channel on which to report matches to the criteria", formalDefinition="Details where to send notifications when resources are received that meet the criteria." )
     protected SubscriptionChannelComponent channel;
-
-    /**
-     * The time for the server to turn the subscription off.
-     */
-    @Child(name = "end", type = {InstantType.class}, order=6, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="When to automatically delete the subscription", formalDefinition="The time for the server to turn the subscription off." )
-    protected InstantType end;
 
     /**
      * A tag to add to any resource that matches the criteria, after the subscription is processed.
@@ -734,7 +769,7 @@ public class Subscription extends DomainResource {
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/subscription-tag")
     protected List<Coding> tag;
 
-    private static final long serialVersionUID = -1390870804L;
+    private static final long serialVersionUID = 99986202L;
 
   /**
    * Constructor
@@ -746,56 +781,56 @@ public class Subscription extends DomainResource {
   /**
    * Constructor
    */
-    public Subscription(StringType criteria, StringType reason, Enumeration<SubscriptionStatus> status, SubscriptionChannelComponent channel) {
+    public Subscription(Enumeration<SubscriptionStatus> status, StringType reason, StringType criteria, SubscriptionChannelComponent channel) {
       super();
-      this.criteria = criteria;
-      this.reason = reason;
       this.status = status;
+      this.reason = reason;
+      this.criteria = criteria;
       this.channel = channel;
     }
 
     /**
-     * @return {@link #criteria} (The rules that the server should use to determine when to generate notifications for this subscription.). This is the underlying object with id, value and extensions. The accessor "getCriteria" gives direct access to the value
+     * @return {@link #status} (The status of the subscription, which marks the server state for managing the subscription.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
      */
-    public StringType getCriteriaElement() { 
-      if (this.criteria == null)
+    public Enumeration<SubscriptionStatus> getStatusElement() { 
+      if (this.status == null)
         if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create Subscription.criteria");
+          throw new Error("Attempt to auto-create Subscription.status");
         else if (Configuration.doAutoCreate())
-          this.criteria = new StringType(); // bb
-      return this.criteria;
+          this.status = new Enumeration<SubscriptionStatus>(new SubscriptionStatusEnumFactory()); // bb
+      return this.status;
     }
 
-    public boolean hasCriteriaElement() { 
-      return this.criteria != null && !this.criteria.isEmpty();
+    public boolean hasStatusElement() { 
+      return this.status != null && !this.status.isEmpty();
     }
 
-    public boolean hasCriteria() { 
-      return this.criteria != null && !this.criteria.isEmpty();
+    public boolean hasStatus() { 
+      return this.status != null && !this.status.isEmpty();
     }
 
     /**
-     * @param value {@link #criteria} (The rules that the server should use to determine when to generate notifications for this subscription.). This is the underlying object with id, value and extensions. The accessor "getCriteria" gives direct access to the value
+     * @param value {@link #status} (The status of the subscription, which marks the server state for managing the subscription.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
      */
-    public Subscription setCriteriaElement(StringType value) { 
-      this.criteria = value;
+    public Subscription setStatusElement(Enumeration<SubscriptionStatus> value) { 
+      this.status = value;
       return this;
     }
 
     /**
-     * @return The rules that the server should use to determine when to generate notifications for this subscription.
+     * @return The status of the subscription, which marks the server state for managing the subscription.
      */
-    public String getCriteria() { 
-      return this.criteria == null ? null : this.criteria.getValue();
+    public SubscriptionStatus getStatus() { 
+      return this.status == null ? null : this.status.getValue();
     }
 
     /**
-     * @param value The rules that the server should use to determine when to generate notifications for this subscription.
+     * @param value The status of the subscription, which marks the server state for managing the subscription.
      */
-    public Subscription setCriteria(String value) { 
-        if (this.criteria == null)
-          this.criteria = new StringType();
-        this.criteria.setValue(value);
+    public Subscription setStatus(SubscriptionStatus value) { 
+        if (this.status == null)
+          this.status = new Enumeration<SubscriptionStatus>(new SubscriptionStatusEnumFactory());
+        this.status.setValue(value);
       return this;
     }
 
@@ -853,6 +888,55 @@ public class Subscription extends DomainResource {
     }
 
     /**
+     * @return {@link #end} (The time for the server to turn the subscription off.). This is the underlying object with id, value and extensions. The accessor "getEnd" gives direct access to the value
+     */
+    public InstantType getEndElement() { 
+      if (this.end == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create Subscription.end");
+        else if (Configuration.doAutoCreate())
+          this.end = new InstantType(); // bb
+      return this.end;
+    }
+
+    public boolean hasEndElement() { 
+      return this.end != null && !this.end.isEmpty();
+    }
+
+    public boolean hasEnd() { 
+      return this.end != null && !this.end.isEmpty();
+    }
+
+    /**
+     * @param value {@link #end} (The time for the server to turn the subscription off.). This is the underlying object with id, value and extensions. The accessor "getEnd" gives direct access to the value
+     */
+    public Subscription setEndElement(InstantType value) { 
+      this.end = value;
+      return this;
+    }
+
+    /**
+     * @return The time for the server to turn the subscription off.
+     */
+    public Date getEnd() { 
+      return this.end == null ? null : this.end.getValue();
+    }
+
+    /**
+     * @param value The time for the server to turn the subscription off.
+     */
+    public Subscription setEnd(Date value) { 
+      if (value == null)
+        this.end = null;
+      else {
+        if (this.end == null)
+          this.end = new InstantType();
+        this.end.setValue(value);
+      }
+      return this;
+    }
+
+    /**
      * @return {@link #reason} (A description of why this subscription is defined.). This is the underlying object with id, value and extensions. The accessor "getReason" gives direct access to the value
      */
     public StringType getReasonElement() { 
@@ -898,47 +982,47 @@ public class Subscription extends DomainResource {
     }
 
     /**
-     * @return {@link #status} (The status of the subscription, which marks the server state for managing the subscription.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
+     * @return {@link #criteria} (The rules that the server should use to determine when to generate notifications for this subscription.). This is the underlying object with id, value and extensions. The accessor "getCriteria" gives direct access to the value
      */
-    public Enumeration<SubscriptionStatus> getStatusElement() { 
-      if (this.status == null)
+    public StringType getCriteriaElement() { 
+      if (this.criteria == null)
         if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create Subscription.status");
+          throw new Error("Attempt to auto-create Subscription.criteria");
         else if (Configuration.doAutoCreate())
-          this.status = new Enumeration<SubscriptionStatus>(new SubscriptionStatusEnumFactory()); // bb
-      return this.status;
+          this.criteria = new StringType(); // bb
+      return this.criteria;
     }
 
-    public boolean hasStatusElement() { 
-      return this.status != null && !this.status.isEmpty();
+    public boolean hasCriteriaElement() { 
+      return this.criteria != null && !this.criteria.isEmpty();
     }
 
-    public boolean hasStatus() { 
-      return this.status != null && !this.status.isEmpty();
+    public boolean hasCriteria() { 
+      return this.criteria != null && !this.criteria.isEmpty();
     }
 
     /**
-     * @param value {@link #status} (The status of the subscription, which marks the server state for managing the subscription.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
+     * @param value {@link #criteria} (The rules that the server should use to determine when to generate notifications for this subscription.). This is the underlying object with id, value and extensions. The accessor "getCriteria" gives direct access to the value
      */
-    public Subscription setStatusElement(Enumeration<SubscriptionStatus> value) { 
-      this.status = value;
+    public Subscription setCriteriaElement(StringType value) { 
+      this.criteria = value;
       return this;
     }
 
     /**
-     * @return The status of the subscription, which marks the server state for managing the subscription.
+     * @return The rules that the server should use to determine when to generate notifications for this subscription.
      */
-    public SubscriptionStatus getStatus() { 
-      return this.status == null ? null : this.status.getValue();
+    public String getCriteria() { 
+      return this.criteria == null ? null : this.criteria.getValue();
     }
 
     /**
-     * @param value The status of the subscription, which marks the server state for managing the subscription.
+     * @param value The rules that the server should use to determine when to generate notifications for this subscription.
      */
-    public Subscription setStatus(SubscriptionStatus value) { 
-        if (this.status == null)
-          this.status = new Enumeration<SubscriptionStatus>(new SubscriptionStatusEnumFactory());
-        this.status.setValue(value);
+    public Subscription setCriteria(String value) { 
+        if (this.criteria == null)
+          this.criteria = new StringType();
+        this.criteria.setValue(value);
       return this;
     }
 
@@ -1016,55 +1100,6 @@ public class Subscription extends DomainResource {
     }
 
     /**
-     * @return {@link #end} (The time for the server to turn the subscription off.). This is the underlying object with id, value and extensions. The accessor "getEnd" gives direct access to the value
-     */
-    public InstantType getEndElement() { 
-      if (this.end == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create Subscription.end");
-        else if (Configuration.doAutoCreate())
-          this.end = new InstantType(); // bb
-      return this.end;
-    }
-
-    public boolean hasEndElement() { 
-      return this.end != null && !this.end.isEmpty();
-    }
-
-    public boolean hasEnd() { 
-      return this.end != null && !this.end.isEmpty();
-    }
-
-    /**
-     * @param value {@link #end} (The time for the server to turn the subscription off.). This is the underlying object with id, value and extensions. The accessor "getEnd" gives direct access to the value
-     */
-    public Subscription setEndElement(InstantType value) { 
-      this.end = value;
-      return this;
-    }
-
-    /**
-     * @return The time for the server to turn the subscription off.
-     */
-    public Date getEnd() { 
-      return this.end == null ? null : this.end.getValue();
-    }
-
-    /**
-     * @param value The time for the server to turn the subscription off.
-     */
-    public Subscription setEnd(Date value) { 
-      if (value == null)
-        this.end = null;
-      else {
-        if (this.end == null)
-          this.end = new InstantType();
-        this.end.setValue(value);
-      }
-      return this;
-    }
-
-    /**
      * @return {@link #tag} (A tag to add to any resource that matches the criteria, after the subscription is processed.)
      */
     public List<Coding> getTag() { 
@@ -1119,26 +1154,26 @@ public class Subscription extends DomainResource {
 
       protected void listChildren(List<Property> childrenList) {
         super.listChildren(childrenList);
-        childrenList.add(new Property("criteria", "string", "The rules that the server should use to determine when to generate notifications for this subscription.", 0, java.lang.Integer.MAX_VALUE, criteria));
-        childrenList.add(new Property("contact", "ContactPoint", "Contact details for a human to contact about the subscription. The primary use of this for system administrator troubleshooting.", 0, java.lang.Integer.MAX_VALUE, contact));
-        childrenList.add(new Property("reason", "string", "A description of why this subscription is defined.", 0, java.lang.Integer.MAX_VALUE, reason));
         childrenList.add(new Property("status", "code", "The status of the subscription, which marks the server state for managing the subscription.", 0, java.lang.Integer.MAX_VALUE, status));
+        childrenList.add(new Property("contact", "ContactPoint", "Contact details for a human to contact about the subscription. The primary use of this for system administrator troubleshooting.", 0, java.lang.Integer.MAX_VALUE, contact));
+        childrenList.add(new Property("end", "instant", "The time for the server to turn the subscription off.", 0, java.lang.Integer.MAX_VALUE, end));
+        childrenList.add(new Property("reason", "string", "A description of why this subscription is defined.", 0, java.lang.Integer.MAX_VALUE, reason));
+        childrenList.add(new Property("criteria", "string", "The rules that the server should use to determine when to generate notifications for this subscription.", 0, java.lang.Integer.MAX_VALUE, criteria));
         childrenList.add(new Property("error", "string", "A record of the last error that occurred when the server processed a notification.", 0, java.lang.Integer.MAX_VALUE, error));
         childrenList.add(new Property("channel", "", "Details where to send notifications when resources are received that meet the criteria.", 0, java.lang.Integer.MAX_VALUE, channel));
-        childrenList.add(new Property("end", "instant", "The time for the server to turn the subscription off.", 0, java.lang.Integer.MAX_VALUE, end));
         childrenList.add(new Property("tag", "Coding", "A tag to add to any resource that matches the criteria, after the subscription is processed.", 0, java.lang.Integer.MAX_VALUE, tag));
       }
 
       @Override
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
-        case 1952046943: /*criteria*/ return this.criteria == null ? new Base[0] : new Base[] {this.criteria}; // StringType
-        case 951526432: /*contact*/ return this.contact == null ? new Base[0] : this.contact.toArray(new Base[this.contact.size()]); // ContactPoint
-        case -934964668: /*reason*/ return this.reason == null ? new Base[0] : new Base[] {this.reason}; // StringType
         case -892481550: /*status*/ return this.status == null ? new Base[0] : new Base[] {this.status}; // Enumeration<SubscriptionStatus>
+        case 951526432: /*contact*/ return this.contact == null ? new Base[0] : this.contact.toArray(new Base[this.contact.size()]); // ContactPoint
+        case 100571: /*end*/ return this.end == null ? new Base[0] : new Base[] {this.end}; // InstantType
+        case -934964668: /*reason*/ return this.reason == null ? new Base[0] : new Base[] {this.reason}; // StringType
+        case 1952046943: /*criteria*/ return this.criteria == null ? new Base[0] : new Base[] {this.criteria}; // StringType
         case 96784904: /*error*/ return this.error == null ? new Base[0] : new Base[] {this.error}; // StringType
         case 738950403: /*channel*/ return this.channel == null ? new Base[0] : new Base[] {this.channel}; // SubscriptionChannelComponent
-        case 100571: /*end*/ return this.end == null ? new Base[0] : new Base[] {this.end}; // InstantType
         case 114586: /*tag*/ return this.tag == null ? new Base[0] : this.tag.toArray(new Base[this.tag.size()]); // Coding
         default: return super.getProperty(hash, name, checkValid);
         }
@@ -1146,88 +1181,110 @@ public class Subscription extends DomainResource {
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
-        case 1952046943: // criteria
-          this.criteria = castToString(value); // StringType
-          break;
+        case -892481550: // status
+          value = new SubscriptionStatusEnumFactory().fromType(castToCode(value));
+          this.status = (Enumeration) value; // Enumeration<SubscriptionStatus>
+          return value;
         case 951526432: // contact
           this.getContact().add(castToContactPoint(value)); // ContactPoint
-          break;
-        case -934964668: // reason
-          this.reason = castToString(value); // StringType
-          break;
-        case -892481550: // status
-          this.status = new SubscriptionStatusEnumFactory().fromType(value); // Enumeration<SubscriptionStatus>
-          break;
-        case 96784904: // error
-          this.error = castToString(value); // StringType
-          break;
-        case 738950403: // channel
-          this.channel = (SubscriptionChannelComponent) value; // SubscriptionChannelComponent
-          break;
+          return value;
         case 100571: // end
           this.end = castToInstant(value); // InstantType
-          break;
+          return value;
+        case -934964668: // reason
+          this.reason = castToString(value); // StringType
+          return value;
+        case 1952046943: // criteria
+          this.criteria = castToString(value); // StringType
+          return value;
+        case 96784904: // error
+          this.error = castToString(value); // StringType
+          return value;
+        case 738950403: // channel
+          this.channel = (SubscriptionChannelComponent) value; // SubscriptionChannelComponent
+          return value;
         case 114586: // tag
           this.getTag().add(castToCoding(value)); // Coding
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("criteria"))
-          this.criteria = castToString(value); // StringType
-        else if (name.equals("contact"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("status")) {
+          value = new SubscriptionStatusEnumFactory().fromType(castToCode(value));
+          this.status = (Enumeration) value; // Enumeration<SubscriptionStatus>
+        } else if (name.equals("contact")) {
           this.getContact().add(castToContactPoint(value));
-        else if (name.equals("reason"))
-          this.reason = castToString(value); // StringType
-        else if (name.equals("status"))
-          this.status = new SubscriptionStatusEnumFactory().fromType(value); // Enumeration<SubscriptionStatus>
-        else if (name.equals("error"))
-          this.error = castToString(value); // StringType
-        else if (name.equals("channel"))
-          this.channel = (SubscriptionChannelComponent) value; // SubscriptionChannelComponent
-        else if (name.equals("end"))
+        } else if (name.equals("end")) {
           this.end = castToInstant(value); // InstantType
-        else if (name.equals("tag"))
+        } else if (name.equals("reason")) {
+          this.reason = castToString(value); // StringType
+        } else if (name.equals("criteria")) {
+          this.criteria = castToString(value); // StringType
+        } else if (name.equals("error")) {
+          this.error = castToString(value); // StringType
+        } else if (name.equals("channel")) {
+          this.channel = (SubscriptionChannelComponent) value; // SubscriptionChannelComponent
+        } else if (name.equals("tag")) {
           this.getTag().add(castToCoding(value));
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 1952046943: throw new FHIRException("Cannot make property criteria as it is not a complex type"); // StringType
-        case 951526432:  return addContact(); // ContactPoint
-        case -934964668: throw new FHIRException("Cannot make property reason as it is not a complex type"); // StringType
-        case -892481550: throw new FHIRException("Cannot make property status as it is not a complex type"); // Enumeration<SubscriptionStatus>
-        case 96784904: throw new FHIRException("Cannot make property error as it is not a complex type"); // StringType
-        case 738950403:  return getChannel(); // SubscriptionChannelComponent
-        case 100571: throw new FHIRException("Cannot make property end as it is not a complex type"); // InstantType
-        case 114586:  return addTag(); // Coding
+        case -892481550:  return getStatusElement();
+        case 951526432:  return addContact(); 
+        case 100571:  return getEndElement();
+        case -934964668:  return getReasonElement();
+        case 1952046943:  return getCriteriaElement();
+        case 96784904:  return getErrorElement();
+        case 738950403:  return getChannel(); 
+        case 114586:  return addTag(); 
         default: return super.makeProperty(hash, name);
         }
 
       }
 
       @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -892481550: /*status*/ return new String[] {"code"};
+        case 951526432: /*contact*/ return new String[] {"ContactPoint"};
+        case 100571: /*end*/ return new String[] {"instant"};
+        case -934964668: /*reason*/ return new String[] {"string"};
+        case 1952046943: /*criteria*/ return new String[] {"string"};
+        case 96784904: /*error*/ return new String[] {"string"};
+        case 738950403: /*channel*/ return new String[] {};
+        case 114586: /*tag*/ return new String[] {"Coding"};
+        default: return super.getTypesForProperty(hash, name);
+        }
+
+      }
+
+      @Override
       public Base addChild(String name) throws FHIRException {
-        if (name.equals("criteria")) {
-          throw new FHIRException("Cannot call addChild on a primitive type Subscription.criteria");
+        if (name.equals("status")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Subscription.status");
         }
         else if (name.equals("contact")) {
           return addContact();
         }
+        else if (name.equals("end")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Subscription.end");
+        }
         else if (name.equals("reason")) {
           throw new FHIRException("Cannot call addChild on a primitive type Subscription.reason");
         }
-        else if (name.equals("status")) {
-          throw new FHIRException("Cannot call addChild on a primitive type Subscription.status");
+        else if (name.equals("criteria")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Subscription.criteria");
         }
         else if (name.equals("error")) {
           throw new FHIRException("Cannot call addChild on a primitive type Subscription.error");
@@ -1235,9 +1292,6 @@ public class Subscription extends DomainResource {
         else if (name.equals("channel")) {
           this.channel = new SubscriptionChannelComponent();
           return this.channel;
-        }
-        else if (name.equals("end")) {
-          throw new FHIRException("Cannot call addChild on a primitive type Subscription.end");
         }
         else if (name.equals("tag")) {
           return addTag();
@@ -1254,17 +1308,17 @@ public class Subscription extends DomainResource {
       public Subscription copy() {
         Subscription dst = new Subscription();
         copyValues(dst);
-        dst.criteria = criteria == null ? null : criteria.copy();
+        dst.status = status == null ? null : status.copy();
         if (contact != null) {
           dst.contact = new ArrayList<ContactPoint>();
           for (ContactPoint i : contact)
             dst.contact.add(i.copy());
         };
+        dst.end = end == null ? null : end.copy();
         dst.reason = reason == null ? null : reason.copy();
-        dst.status = status == null ? null : status.copy();
+        dst.criteria = criteria == null ? null : criteria.copy();
         dst.error = error == null ? null : error.copy();
         dst.channel = channel == null ? null : channel.copy();
-        dst.end = end == null ? null : end.copy();
         if (tag != null) {
           dst.tag = new ArrayList<Coding>();
           for (Coding i : tag)
@@ -1284,9 +1338,9 @@ public class Subscription extends DomainResource {
         if (!(other instanceof Subscription))
           return false;
         Subscription o = (Subscription) other;
-        return compareDeep(criteria, o.criteria, true) && compareDeep(contact, o.contact, true) && compareDeep(reason, o.reason, true)
-           && compareDeep(status, o.status, true) && compareDeep(error, o.error, true) && compareDeep(channel, o.channel, true)
-           && compareDeep(end, o.end, true) && compareDeep(tag, o.tag, true);
+        return compareDeep(status, o.status, true) && compareDeep(contact, o.contact, true) && compareDeep(end, o.end, true)
+           && compareDeep(reason, o.reason, true) && compareDeep(criteria, o.criteria, true) && compareDeep(error, o.error, true)
+           && compareDeep(channel, o.channel, true) && compareDeep(tag, o.tag, true);
       }
 
       @Override
@@ -1296,13 +1350,13 @@ public class Subscription extends DomainResource {
         if (!(other instanceof Subscription))
           return false;
         Subscription o = (Subscription) other;
-        return compareValues(criteria, o.criteria, true) && compareValues(reason, o.reason, true) && compareValues(status, o.status, true)
-           && compareValues(error, o.error, true) && compareValues(end, o.end, true);
+        return compareValues(status, o.status, true) && compareValues(end, o.end, true) && compareValues(reason, o.reason, true)
+           && compareValues(criteria, o.criteria, true) && compareValues(error, o.error, true);
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(criteria, contact, reason
-          , status, error, channel, end, tag);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(status, contact, end, reason
+          , criteria, error, channel, tag);
       }
 
   @Override
@@ -1313,17 +1367,17 @@ public class Subscription extends DomainResource {
  /**
    * Search parameter: <b>payload</b>
    * <p>
-   * Description: <b>Mimetype to send, or omit for no payload</b><br>
+   * Description: <b>The mime-type of the notification payload</b><br>
    * Type: <b>string</b><br>
    * Path: <b>Subscription.channel.payload</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="payload", path="Subscription.channel.payload", description="Mimetype to send, or omit for no payload", type="string" )
+  @SearchParamDefinition(name="payload", path="Subscription.channel.payload", description="The mime-type of the notification payload", type="string" )
   public static final String SP_PAYLOAD = "payload";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>payload</b>
    * <p>
-   * Description: <b>Mimetype to send, or omit for no payload</b><br>
+   * Description: <b>The mime-type of the notification payload</b><br>
    * Type: <b>string</b><br>
    * Path: <b>Subscription.channel.payload</b><br>
    * </p>
@@ -1333,17 +1387,17 @@ public class Subscription extends DomainResource {
  /**
    * Search parameter: <b>criteria</b>
    * <p>
-   * Description: <b>Rule for server push criteria</b><br>
+   * Description: <b>The search rules used to determine when to send a notification</b><br>
    * Type: <b>string</b><br>
    * Path: <b>Subscription.criteria</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="criteria", path="Subscription.criteria", description="Rule for server push criteria", type="string" )
+  @SearchParamDefinition(name="criteria", path="Subscription.criteria", description="The search rules used to determine when to send a notification", type="string" )
   public static final String SP_CRITERIA = "criteria";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>criteria</b>
    * <p>
-   * Description: <b>Rule for server push criteria</b><br>
+   * Description: <b>The search rules used to determine when to send a notification</b><br>
    * Type: <b>string</b><br>
    * Path: <b>Subscription.criteria</b><br>
    * </p>
@@ -1351,19 +1405,39 @@ public class Subscription extends DomainResource {
   public static final ca.uhn.fhir.rest.gclient.StringClientParam CRITERIA = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_CRITERIA);
 
  /**
+   * Search parameter: <b>add-tag</b>
+   * <p>
+   * Description: <b>A tag to be added to the resource matching the criteria</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Subscription.tag</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="add-tag", path="Subscription.tag", description="A tag to be added to the resource matching the criteria", type="token" )
+  public static final String SP_ADD_TAG = "add-tag";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>add-tag</b>
+   * <p>
+   * Description: <b>A tag to be added to the resource matching the criteria</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Subscription.tag</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam ADD_TAG = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_ADD_TAG);
+
+ /**
    * Search parameter: <b>contact</b>
    * <p>
-   * Description: <b>Contact details for source (e.g. troubleshooting)</b><br>
+   * Description: <b>Contact details for the subscription</b><br>
    * Type: <b>token</b><br>
    * Path: <b>Subscription.contact</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="contact", path="Subscription.contact", description="Contact details for source (e.g. troubleshooting)", type="token" )
+  @SearchParamDefinition(name="contact", path="Subscription.contact", description="Contact details for the subscription", type="token" )
   public static final String SP_CONTACT = "contact";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>contact</b>
    * <p>
-   * Description: <b>Contact details for source (e.g. troubleshooting)</b><br>
+   * Description: <b>Contact details for the subscription</b><br>
    * Type: <b>token</b><br>
    * Path: <b>Subscription.contact</b><br>
    * </p>
@@ -1371,39 +1445,19 @@ public class Subscription extends DomainResource {
   public static final ca.uhn.fhir.rest.gclient.TokenClientParam CONTACT = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_CONTACT);
 
  /**
-   * Search parameter: <b>tag</b>
-   * <p>
-   * Description: <b>A tag to add to matching resources</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>Subscription.tag</b><br>
-   * </p>
-   */
-  @SearchParamDefinition(name="tag", path="Subscription.tag", description="A tag to add to matching resources", type="token" )
-  public static final String SP_TAG = "tag";
- /**
-   * <b>Fluent Client</b> search parameter constant for <b>tag</b>
-   * <p>
-   * Description: <b>A tag to add to matching resources</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>Subscription.tag</b><br>
-   * </p>
-   */
-  public static final ca.uhn.fhir.rest.gclient.TokenClientParam TAG = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_TAG);
-
- /**
    * Search parameter: <b>type</b>
    * <p>
-   * Description: <b>rest-hook | websocket | email | sms | message</b><br>
+   * Description: <b>The type of channel for the sent notifications</b><br>
    * Type: <b>token</b><br>
    * Path: <b>Subscription.channel.type</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="type", path="Subscription.channel.type", description="rest-hook | websocket | email | sms | message", type="token" )
+  @SearchParamDefinition(name="type", path="Subscription.channel.type", description="The type of channel for the sent notifications", type="token" )
   public static final String SP_TYPE = "type";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>type</b>
    * <p>
-   * Description: <b>rest-hook | websocket | email | sms | message</b><br>
+   * Description: <b>The type of channel for the sent notifications</b><br>
    * Type: <b>token</b><br>
    * Path: <b>Subscription.channel.type</b><br>
    * </p>
@@ -1413,17 +1467,17 @@ public class Subscription extends DomainResource {
  /**
    * Search parameter: <b>url</b>
    * <p>
-   * Description: <b>Where the channel points to</b><br>
+   * Description: <b>The uri that will receive the notifications</b><br>
    * Type: <b>uri</b><br>
    * Path: <b>Subscription.channel.endpoint</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="url", path="Subscription.channel.endpoint", description="Where the channel points to", type="uri" )
+  @SearchParamDefinition(name="url", path="Subscription.channel.endpoint", description="The uri that will receive the notifications", type="uri" )
   public static final String SP_URL = "url";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>url</b>
    * <p>
-   * Description: <b>Where the channel points to</b><br>
+   * Description: <b>The uri that will receive the notifications</b><br>
    * Type: <b>uri</b><br>
    * Path: <b>Subscription.channel.endpoint</b><br>
    * </p>
@@ -1433,17 +1487,17 @@ public class Subscription extends DomainResource {
  /**
    * Search parameter: <b>status</b>
    * <p>
-   * Description: <b>requested | active | error | off</b><br>
+   * Description: <b>The current state of the subscription</b><br>
    * Type: <b>token</b><br>
    * Path: <b>Subscription.status</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="status", path="Subscription.status", description="requested | active | error | off", type="token" )
+  @SearchParamDefinition(name="status", path="Subscription.status", description="The current state of the subscription", type="token" )
   public static final String SP_STATUS = "status";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>status</b>
    * <p>
-   * Description: <b>requested | active | error | off</b><br>
+   * Description: <b>The current state of the subscription</b><br>
    * Type: <b>token</b><br>
    * Path: <b>Subscription.status</b><br>
    * </p>

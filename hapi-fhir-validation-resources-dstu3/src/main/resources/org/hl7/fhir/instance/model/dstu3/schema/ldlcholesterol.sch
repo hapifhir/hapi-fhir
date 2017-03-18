@@ -12,7 +12,6 @@
   <sch:pattern>
     <sch:title>f:Observation</sch:title>
     <sch:rule context="f:Observation">
-      <sch:assert test="count(f:extension) &lt;= 1">extension: maximum cardinality of 'extension' is 1</sch:assert>
       <sch:assert test="count(f:referenceRange) &gt;= 1">referenceRange: minimum cardinality of 'referenceRange' is 1</sch:assert>
       <sch:assert test="count(f:referenceRange) &lt;= 1">referenceRange: maximum cardinality of 'referenceRange' is 1</sch:assert>
       <sch:assert test="count(f:related) &lt;= 0">related: maximum cardinality of 'related' is 0</sch:assert>
@@ -30,18 +29,12 @@
     </sch:rule>
   </sch:pattern>
   <sch:pattern>
-    <sch:title>Observation.extension</sch:title>
-    <sch:rule context="f:Observation/f:extension">
-      <sch:assert test="@value|f:*|h:div">All FHIR elements must have a @value or children (inherited)</sch:assert>
-      <sch:assert test="exists(f:extension)!=exists(f:*[starts-with(local-name(.), 'value')])">Must have either extensions or value[x], not both (inherited)</sch:assert>
-    </sch:rule>
-  </sch:pattern>
-  <sch:pattern>
     <sch:title>f:Observation/f:referenceRange</sch:title>
     <sch:rule context="f:Observation/f:referenceRange">
       <sch:assert test="count(f:low) &lt;= 0">low: maximum cardinality of 'low' is 0</sch:assert>
       <sch:assert test="count(f:high) &gt;= 1">high: minimum cardinality of 'high' is 1</sch:assert>
-      <sch:assert test="count(f:meaning) &lt;= 0">meaning: maximum cardinality of 'meaning' is 0</sch:assert>
+      <sch:assert test="count(f:type) &lt;= 0">type: maximum cardinality of 'type' is 0</sch:assert>
+      <sch:assert test="count(f:appliesTo) &lt;= 0">appliesTo: maximum cardinality of 'appliesTo' is 0</sch:assert>
       <sch:assert test="count(f:age) &lt;= 0">age: maximum cardinality of 'age' is 0</sch:assert>
     </sch:rule>
   </sch:pattern>

@@ -29,13 +29,17 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
 
 public enum MedicationDispenseStatus {
 
+        /**
+         * The core event has not started yet, but some staging activities have begun (e.g. initial compounding or packaging of medication). Preparation stages may be tracked for billing purposes.
+         */
+        PREPARATION, 
         /**
          * The dispense has started but has not yet completed.
          */
@@ -63,6 +67,8 @@ public enum MedicationDispenseStatus {
         public static MedicationDispenseStatus fromCode(String codeString) throws FHIRException {
             if (codeString == null || "".equals(codeString))
                 return null;
+        if ("preparation".equals(codeString))
+          return PREPARATION;
         if ("in-progress".equals(codeString))
           return INPROGRESS;
         if ("on-hold".equals(codeString))
@@ -77,6 +83,7 @@ public enum MedicationDispenseStatus {
         }
         public String toCode() {
           switch (this) {
+            case PREPARATION: return "preparation";
             case INPROGRESS: return "in-progress";
             case ONHOLD: return "on-hold";
             case COMPLETED: return "completed";
@@ -90,6 +97,7 @@ public enum MedicationDispenseStatus {
         }
         public String getDefinition() {
           switch (this) {
+            case PREPARATION: return "The core event has not started yet, but some staging activities have begun (e.g. initial compounding or packaging of medication). Preparation stages may be tracked for billing purposes.";
             case INPROGRESS: return "The dispense has started but has not yet completed.";
             case ONHOLD: return "Actions implied by the administration have been temporarily halted, but are expected to continue later. May also be called \"suspended\"";
             case COMPLETED: return "All actions that are implied by the dispense have occurred.";
@@ -100,6 +108,7 @@ public enum MedicationDispenseStatus {
         }
         public String getDisplay() {
           switch (this) {
+            case PREPARATION: return "Preparation";
             case INPROGRESS: return "In Progress";
             case ONHOLD: return "On Hold";
             case COMPLETED: return "Completed";

@@ -131,7 +131,7 @@
 					"div": "<div>Date:2015-04-05T11:45:44+12:00</div>"
 				},
 
-				"patient": 
+				"subject": 
 				{
 					"reference": "Patient/1702"
 				},
@@ -262,7 +262,7 @@
 					"lastUpdated": "2015-04-04T16:48:24.135-04:00"
 				},
 
-				"patient": 
+				"subject": 
 				{
 					"reference": "Patient/1702"
 				}
@@ -338,7 +338,7 @@
 					"div": "<div>Date:function (a){var b=F(this,a||db.defaultFormat);return this.lang().postformat(b)}</div>"
 				},
 
-				"patient": 
+				"subject": 
 				{
 					"reference": "Patient/1702"
 				}

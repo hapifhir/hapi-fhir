@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
 
 import java.util.*;
 
@@ -139,8 +139,10 @@ public class Identifier extends Type implements ICompositeType {
         throw new IllegalArgumentException("Unknown IdentifierUse code '"+codeString+"'");
         }
         public Enumeration<IdentifierUse> fromType(Base code) throws FHIRException {
-          if (code == null || code.isEmpty())
+          if (code == null)
             return null;
+          if (code.isEmpty())
+            return new Enumeration<IdentifierUse>(this);
           String codeString = ((PrimitiveType) code).asStringValue();
           if (codeString == null || "".equals(codeString))
             return null;
@@ -187,10 +189,10 @@ public class Identifier extends Type implements ICompositeType {
     protected CodeableConcept type;
 
     /**
-     * Establishes the namespace in which set of possible id values is unique.
+     * Establishes the namespace for the value - that is, a URL that describes a set values that are unique.
      */
     @Child(name = "system", type = {UriType.class}, order=2, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="The namespace for the identifier", formalDefinition="Establishes the namespace in which set of possible id values is unique." )
+    @Description(shortDefinition="The namespace for the identifier value", formalDefinition="Establishes the namespace for the value - that is, a URL that describes a set values that are unique." )
     protected UriType system;
 
     /**
@@ -302,7 +304,7 @@ public class Identifier extends Type implements ICompositeType {
     }
 
     /**
-     * @return {@link #system} (Establishes the namespace in which set of possible id values is unique.). This is the underlying object with id, value and extensions. The accessor "getSystem" gives direct access to the value
+     * @return {@link #system} (Establishes the namespace for the value - that is, a URL that describes a set values that are unique.). This is the underlying object with id, value and extensions. The accessor "getSystem" gives direct access to the value
      */
     public UriType getSystemElement() { 
       if (this.system == null)
@@ -322,7 +324,7 @@ public class Identifier extends Type implements ICompositeType {
     }
 
     /**
-     * @param value {@link #system} (Establishes the namespace in which set of possible id values is unique.). This is the underlying object with id, value and extensions. The accessor "getSystem" gives direct access to the value
+     * @param value {@link #system} (Establishes the namespace for the value - that is, a URL that describes a set values that are unique.). This is the underlying object with id, value and extensions. The accessor "getSystem" gives direct access to the value
      */
     public Identifier setSystemElement(UriType value) { 
       this.system = value;
@@ -330,14 +332,14 @@ public class Identifier extends Type implements ICompositeType {
     }
 
     /**
-     * @return Establishes the namespace in which set of possible id values is unique.
+     * @return Establishes the namespace for the value - that is, a URL that describes a set values that are unique.
      */
     public String getSystem() { 
       return this.system == null ? null : this.system.getValue();
     }
 
     /**
-     * @param value Establishes the namespace in which set of possible id values is unique.
+     * @param value Establishes the namespace for the value - that is, a URL that describes a set values that are unique.
      */
     public Identifier setSystem(String value) { 
       if (Utilities.noString(value))
@@ -471,7 +473,7 @@ public class Identifier extends Type implements ICompositeType {
         super.listChildren(childrenList);
         childrenList.add(new Property("use", "code", "The purpose of this identifier.", 0, java.lang.Integer.MAX_VALUE, use));
         childrenList.add(new Property("type", "CodeableConcept", "A coded type for the identifier that can be used to determine which identifier to use for a specific purpose.", 0, java.lang.Integer.MAX_VALUE, type));
-        childrenList.add(new Property("system", "uri", "Establishes the namespace in which set of possible id values is unique.", 0, java.lang.Integer.MAX_VALUE, system));
+        childrenList.add(new Property("system", "uri", "Establishes the namespace for the value - that is, a URL that describes a set values that are unique.", 0, java.lang.Integer.MAX_VALUE, system));
         childrenList.add(new Property("value", "string", "The portion of the identifier typically relevant to the user and which is unique within the context of the system.", 0, java.lang.Integer.MAX_VALUE, value));
         childrenList.add(new Property("period", "Period", "Time period during which identifier is/was valid for use.", 0, java.lang.Integer.MAX_VALUE, period));
         childrenList.add(new Property("assigner", "Reference(Organization)", "Organization that issued/manages the identifier.", 0, java.lang.Integer.MAX_VALUE, assigner));
@@ -492,59 +494,76 @@ public class Identifier extends Type implements ICompositeType {
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case 116103: // use
-          this.use = new IdentifierUseEnumFactory().fromType(value); // Enumeration<IdentifierUse>
-          break;
+          value = new IdentifierUseEnumFactory().fromType(castToCode(value));
+          this.use = (Enumeration) value; // Enumeration<IdentifierUse>
+          return value;
         case 3575610: // type
           this.type = castToCodeableConcept(value); // CodeableConcept
-          break;
+          return value;
         case -887328209: // system
           this.system = castToUri(value); // UriType
-          break;
+          return value;
         case 111972721: // value
           this.value = castToString(value); // StringType
-          break;
+          return value;
         case -991726143: // period
           this.period = castToPeriod(value); // Period
-          break;
+          return value;
         case -369881636: // assigner
           this.assigner = castToReference(value); // Reference
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("use"))
-          this.use = new IdentifierUseEnumFactory().fromType(value); // Enumeration<IdentifierUse>
-        else if (name.equals("type"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("use")) {
+          value = new IdentifierUseEnumFactory().fromType(castToCode(value));
+          this.use = (Enumeration) value; // Enumeration<IdentifierUse>
+        } else if (name.equals("type")) {
           this.type = castToCodeableConcept(value); // CodeableConcept
-        else if (name.equals("system"))
+        } else if (name.equals("system")) {
           this.system = castToUri(value); // UriType
-        else if (name.equals("value"))
+        } else if (name.equals("value")) {
           this.value = castToString(value); // StringType
-        else if (name.equals("period"))
+        } else if (name.equals("period")) {
           this.period = castToPeriod(value); // Period
-        else if (name.equals("assigner"))
+        } else if (name.equals("assigner")) {
           this.assigner = castToReference(value); // Reference
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 116103: throw new FHIRException("Cannot make property use as it is not a complex type"); // Enumeration<IdentifierUse>
-        case 3575610:  return getType(); // CodeableConcept
-        case -887328209: throw new FHIRException("Cannot make property system as it is not a complex type"); // UriType
-        case 111972721: throw new FHIRException("Cannot make property value as it is not a complex type"); // StringType
-        case -991726143:  return getPeriod(); // Period
-        case -369881636:  return getAssigner(); // Reference
+        case 116103:  return getUseElement();
+        case 3575610:  return getType(); 
+        case -887328209:  return getSystemElement();
+        case 111972721:  return getValueElement();
+        case -991726143:  return getPeriod(); 
+        case -369881636:  return getAssigner(); 
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 116103: /*use*/ return new String[] {"code"};
+        case 3575610: /*type*/ return new String[] {"CodeableConcept"};
+        case -887328209: /*system*/ return new String[] {"uri"};
+        case 111972721: /*value*/ return new String[] {"string"};
+        case -991726143: /*period*/ return new String[] {"Period"};
+        case -369881636: /*assigner*/ return new String[] {"Reference"};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }
