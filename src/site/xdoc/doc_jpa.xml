@@ -157,7 +157,7 @@ public DaoConfig daoConfig() {
 				<p>
 					On the other hand, if you want the server to be configurable to
 					allow remote references, you can set this with the confguration below.
-					Using the <code>setAllowInlineMatchUrlReferences</code> means that
+					Using the <code>setAllowExternalReferences</code> means that
 					it will be possible to search for references that refer to these
 					external references.
 				</p>
@@ -166,7 +166,7 @@ public DaoConfig daoConfig() {
 public DaoConfig daoConfig() {
 	DaoConfig retVal = new DaoConfig();
 	// Allow external references
-	retVal.setAllowInlineMatchUrlReferences(true);
+	retVal.setAllowExternalReferences(true);
 	
 	// If you are allowing external references, it is recommended to
 	// also tell the server which references actually will be local
