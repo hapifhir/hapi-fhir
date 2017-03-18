@@ -3,10 +3,12 @@ package example;
 import org.hl7.fhir.convertors.NullVersionConverterAdvisor;
 import org.hl7.fhir.convertors.VersionConvertorAdvisor;
 import org.hl7.fhir.convertors.VersionConvertor_10_20;
+import org.hl7.fhir.convertors.VersionConvertor_14_20;
 import org.hl7.fhir.exceptions.FHIRException;
 
 public class ConverterExamples {
 
+	@SuppressWarnings("unused")
 	public void c1020() throws FHIRException {
 	//START SNIPPET: 1020
 		// Create a converter
@@ -22,4 +24,18 @@ public class ConverterExamples {
 		String context = output.getContext().getReference();
 	//END SNIPPET: 1020
 	}
+	
+	@SuppressWarnings("unused")
+	public void c1420() throws FHIRException {
+	//START SNIPPET: 1420
+		// Create a resource to convert
+		org.hl7.fhir.dstu2016may.model.Questionnaire input = new org.hl7.fhir.dstu2016may.model.Questionnaire();
+		input.setTitle("My title");
+		
+		// Convert the resource
+		org.hl7.fhir.dstu3.model.Questionnaire output = VersionConvertor_14_20.convertQuestionnaire(input);
+		String context = output.getTitle();
+	//END SNIPPET: 1420
+	}
+
 }

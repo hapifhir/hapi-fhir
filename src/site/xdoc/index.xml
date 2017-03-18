@@ -70,6 +70,26 @@
 
 		<section name="Announcements">
 			<p>
+				<b>March 17, 2017 - HAPI FHIR 2.3 Released</b> -
+				The next release of HAPI has now been uploaded to the Maven repos and 
+				GitHub's releases section.
+			</p>
+			<p>
+				This release brings the STU3 definitions up to the  
+				latest definitions (FHIR 1.9.0 - SVN 11501). It also brings
+				in the latest validator fixes, as well as a number of other
+				useful enhancements and fixes.
+			</p>
+			<p>
+				As always, the <a href="./changes-report.html">changelog</a> has the full list
+				of changes in this release.
+			</p>
+			<p>
+				- <a href="https://github.com/jamesagnew/">James Agnew</a>
+			</p>
+			<br/><br/>
+
+			<p>
 				<b>December 20, 2016 - HAPI FHIR 2.2 Released</b> -
 				The next release of HAPI has now been uploaded to the Maven repos and 
 				GitHub's releases section.
