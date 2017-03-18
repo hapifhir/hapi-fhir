@@ -35,9 +35,9 @@
 <a class="jxr_linenumber" name="L27" href="#L27">27</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.context.ConfigurationException;
 <a class="jxr_linenumber" name="L28" href="#L28">28</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.context.FhirContext;
 <a class="jxr_linenumber" name="L29" href="#L29">29</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.context.RuntimeResourceDefinition;
-<a class="jxr_linenumber" name="L30" href="#L30">30</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.model.api.IResource;
-<a class="jxr_linenumber" name="L31" href="#L31">31</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.annotation.Delete;
-<a class="jxr_linenumber" name="L32" href="#L32">32</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.annotation.IdParam;
+<a class="jxr_linenumber" name="L30" href="#L30">30</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.annotation.Delete;
+<a class="jxr_linenumber" name="L31" href="#L31">31</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.annotation.IdParam;
+<a class="jxr_linenumber" name="L32" href="#L32">32</a>  <em class="jxr_comment">//TODO Use of a deprecated method should be resolved</em>
 <a class="jxr_linenumber" name="L33" href="#L33">33</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.annotation.VersionIdParam;
 <a class="jxr_linenumber" name="L34" href="#L34">34</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.server.IResourceProvider;
 <a class="jxr_linenumber" name="L35" href="#L35">35</a>  
@@ -70,22 +70,23 @@
 <a class="jxr_linenumber" name="L62" href="#L62">62</a>  
 <a class="jxr_linenumber" name="L63" href="#L63">63</a>  		Integer versionIdParameterIndex = MethodUtil.findVersionIdParameterIndex(theMethod);
 <a class="jxr_linenumber" name="L64" href="#L64">64</a>  		<strong class="jxr_keyword">if</strong> (versionIdParameterIndex != <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L65" href="#L65">65</a>  			<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/context/ConfigurationException.html">ConfigurationException</a>(<span class="jxr_string">"Method '"</span> + theMethod.getName() + <span class="jxr_string">"' on type '"</span> + theMethod.getDeclaringClass().getCanonicalName() + <span class="jxr_string">"' has a parameter annotated with the @"</span> + VersionIdParam.<strong class="jxr_keyword">class</strong>.getSimpleName() + <span class="jxr_string">" annotation but delete methods may not have this annotation"</span>);
-<a class="jxr_linenumber" name="L66" href="#L66">66</a>  		}
-<a class="jxr_linenumber" name="L67" href="#L67">67</a>  
-<a class="jxr_linenumber" name="L68" href="#L68">68</a>  	}
-<a class="jxr_linenumber" name="L69" href="#L69">69</a>  
-<a class="jxr_linenumber" name="L70" href="#L70">70</a>  	@Override
-<a class="jxr_linenumber" name="L71" href="#L71">71</a>  	<strong class="jxr_keyword">public</strong> String getResourceName() {
-<a class="jxr_linenumber" name="L72" href="#L72">72</a>  		<strong class="jxr_keyword">return</strong> myResourceName;
-<a class="jxr_linenumber" name="L73" href="#L73">73</a>  	}
-<a class="jxr_linenumber" name="L74" href="#L74">74</a>  
-<a class="jxr_linenumber" name="L75" href="#L75">75</a>  	<strong class="jxr_keyword">protected</strong> Integer getIdParameterIndex() {
-<a class="jxr_linenumber" name="L76" href="#L76">76</a>  		<strong class="jxr_keyword">return</strong> myIdParameterIndex;
-<a class="jxr_linenumber" name="L77" href="#L77">77</a>  	}
-<a class="jxr_linenumber" name="L78" href="#L78">78</a>  
+<a class="jxr_linenumber" name="L65" href="#L65">65</a>  			<em class="jxr_comment">//TODO Use of a deprecated method should be resolved</em>
+<a class="jxr_linenumber" name="L66" href="#L66">66</a>  			<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/context/ConfigurationException.html">ConfigurationException</a>(<span class="jxr_string">"Method '"</span> + theMethod.getName() + <span class="jxr_string">"' on type '"</span> + theMethod.getDeclaringClass().getCanonicalName() + <span class="jxr_string">"' has a parameter annotated with the @"</span> + VersionIdParam.<strong class="jxr_keyword">class</strong>.getSimpleName() + <span class="jxr_string">" annotation but delete methods may not have this annotation"</span>);
+<a class="jxr_linenumber" name="L67" href="#L67">67</a>  		}
+<a class="jxr_linenumber" name="L68" href="#L68">68</a>  
+<a class="jxr_linenumber" name="L69" href="#L69">69</a>  	}
+<a class="jxr_linenumber" name="L70" href="#L70">70</a>  
+<a class="jxr_linenumber" name="L71" href="#L71">71</a>  	@Override
+<a class="jxr_linenumber" name="L72" href="#L72">72</a>  	<strong class="jxr_keyword">public</strong> String getResourceName() {
+<a class="jxr_linenumber" name="L73" href="#L73">73</a>  		<strong class="jxr_keyword">return</strong> myResourceName;
+<a class="jxr_linenumber" name="L74" href="#L74">74</a>  	}
+<a class="jxr_linenumber" name="L75" href="#L75">75</a>  
+<a class="jxr_linenumber" name="L76" href="#L76">76</a>  	<strong class="jxr_keyword">protected</strong> Integer getIdParameterIndex() {
+<a class="jxr_linenumber" name="L77" href="#L77">77</a>  		<strong class="jxr_keyword">return</strong> myIdParameterIndex;
+<a class="jxr_linenumber" name="L78" href="#L78">78</a>  	}
 <a class="jxr_linenumber" name="L79" href="#L79">79</a>  
-<a class="jxr_linenumber" name="L80" href="#L80">80</a>  }
+<a class="jxr_linenumber" name="L80" href="#L80">80</a>  
+<a class="jxr_linenumber" name="L81" href="#L81">81</a>  }
 </pre>
 <hr/>
 <div id="footer">Copyright &#169; 2014&#x2013;2017 <a href="http://www.uhn.ca">University Health Network</a>. All rights reserved.</div>

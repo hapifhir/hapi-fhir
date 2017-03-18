@@ -331,202 +331,204 @@
 <a class="jxr_linenumber" name="L323" href="#L323">323</a> 			}
 <a class="jxr_linenumber" name="L324" href="#L324">324</a> 
 <a class="jxr_linenumber" name="L325" href="#L325">325</a> 		} <strong class="jxr_keyword">catch</strong> (DataFormatException e) {
-<a class="jxr_linenumber" name="L326" href="#L326">326</a> 			String msg = getFhirContext().getLocalizer().getMessage(BaseClient.<strong class="jxr_keyword">class</strong>, <span class="jxr_string">"failedToParseResponse"</span>, httpRequest.getHttpVerbName(), httpRequest.getUri(), e.toString());
-<a class="jxr_linenumber" name="L327" href="#L327">327</a> 			<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/rest/client/exceptions/FhirClientConnectionException.html">FhirClientConnectionException</a>(msg, e);
-<a class="jxr_linenumber" name="L328" href="#L328">328</a> 		} <strong class="jxr_keyword">catch</strong> (IllegalStateException e) {
-<a class="jxr_linenumber" name="L329" href="#L329">329</a> 			<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/rest/client/exceptions/FhirClientConnectionException.html">FhirClientConnectionException</a>(e);
-<a class="jxr_linenumber" name="L330" href="#L330">330</a> 		} <strong class="jxr_keyword">catch</strong> (IOException e) {
-<a class="jxr_linenumber" name="L331" href="#L331">331</a> 			String msg = getFhirContext().getLocalizer().getMessage(BaseClient.<strong class="jxr_keyword">class</strong>, <span class="jxr_string">"ioExceptionDuringOperation"</span>, httpRequest.getHttpVerbName(), httpRequest.getUri(), e.toString());
-<a class="jxr_linenumber" name="L332" href="#L332">332</a> 			<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/rest/client/exceptions/FhirClientConnectionException.html">FhirClientConnectionException</a>(msg, e);
-<a class="jxr_linenumber" name="L333" href="#L333">333</a> 		} <strong class="jxr_keyword">catch</strong> (RuntimeException e) {
-<a class="jxr_linenumber" name="L334" href="#L334">334</a> 			<strong class="jxr_keyword">throw</strong> e;
-<a class="jxr_linenumber" name="L335" href="#L335">335</a> 		} <strong class="jxr_keyword">catch</strong> (Exception e) {
-<a class="jxr_linenumber" name="L336" href="#L336">336</a> 			<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/rest/client/exceptions/FhirClientConnectionException.html">FhirClientConnectionException</a>(e);
-<a class="jxr_linenumber" name="L337" href="#L337">337</a> 		} <strong class="jxr_keyword">finally</strong> {
-<a class="jxr_linenumber" name="L338" href="#L338">338</a> 			<strong class="jxr_keyword">if</strong> (response != <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L339" href="#L339">339</a> 				response.close();
-<a class="jxr_linenumber" name="L340" href="#L340">340</a> 			}
-<a class="jxr_linenumber" name="L341" href="#L341">341</a> 		}
-<a class="jxr_linenumber" name="L342" href="#L342">342</a> 	}
-<a class="jxr_linenumber" name="L343" href="#L343">343</a> 
-<a class="jxr_linenumber" name="L344" href="#L344">344</a> 	<em class="jxr_javadoccomment">/**</em>
-<a class="jxr_linenumber" name="L345" href="#L345">345</a> <em class="jxr_javadoccomment">	 * For now, this is a part of the internal API of HAPI - Use with caution as this method may change!</em>
-<a class="jxr_linenumber" name="L346" href="#L346">346</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L347" href="#L347">347</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">boolean</strong> isKeepResponses() {
-<a class="jxr_linenumber" name="L348" href="#L348">348</a> 		<strong class="jxr_keyword">return</strong> myKeepResponses;
-<a class="jxr_linenumber" name="L349" href="#L349">349</a> 	}
-<a class="jxr_linenumber" name="L350" href="#L350">350</a> 
-<a class="jxr_linenumber" name="L351" href="#L351">351</a> 	<em class="jxr_javadoccomment">/**</em>
-<a class="jxr_linenumber" name="L352" href="#L352">352</a> <em class="jxr_javadoccomment">	 * Returns the pretty print flag, which is a request to the server for it to return "pretty printed" responses. Note</em>
-<a class="jxr_linenumber" name="L353" href="#L353">353</a> <em class="jxr_javadoccomment">	 * that this is currently a non-standard flag (_pretty) which is supported only by HAPI based servers (and any other</em>
-<a class="jxr_linenumber" name="L354" href="#L354">354</a> <em class="jxr_javadoccomment">	 * servers which might implement it).</em>
-<a class="jxr_linenumber" name="L355" href="#L355">355</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L356" href="#L356">356</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">boolean</strong> isPrettyPrint() {
-<a class="jxr_linenumber" name="L357" href="#L357">357</a> 		<strong class="jxr_keyword">return</strong> Boolean.TRUE.equals(myPrettyPrint);
-<a class="jxr_linenumber" name="L358" href="#L358">358</a> 	}
-<a class="jxr_linenumber" name="L359" href="#L359">359</a> 
-<a class="jxr_linenumber" name="L360" href="#L360">360</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> keepResponseAndLogIt(<strong class="jxr_keyword">boolean</strong> theLogRequestAndResponse, <a href="../../../../../ca/uhn/fhir/rest/client/api/IHttpResponse.html">IHttpResponse</a> response, String responseString) {
-<a class="jxr_linenumber" name="L361" href="#L361">361</a> 		<strong class="jxr_keyword">if</strong> (myKeepResponses) {
-<a class="jxr_linenumber" name="L362" href="#L362">362</a> 			myLastResponse = response;
-<a class="jxr_linenumber" name="L363" href="#L363">363</a> 			myLastResponseBody = responseString;
-<a class="jxr_linenumber" name="L364" href="#L364">364</a> 		}
-<a class="jxr_linenumber" name="L365" href="#L365">365</a> 		<strong class="jxr_keyword">if</strong> (theLogRequestAndResponse) {
-<a class="jxr_linenumber" name="L366" href="#L366">366</a> 			String message = <span class="jxr_string">"HTTP "</span> + response.getStatus() + <span class="jxr_string">" "</span> + response.getStatusInfo();
-<a class="jxr_linenumber" name="L367" href="#L367">367</a> 			<strong class="jxr_keyword">if</strong> (StringUtils.isNotBlank(responseString)) {
-<a class="jxr_linenumber" name="L368" href="#L368">368</a> 				ourLog.info(<span class="jxr_string">"Client response: {}\n{}"</span>, message, responseString);
-<a class="jxr_linenumber" name="L369" href="#L369">369</a> 			} <strong class="jxr_keyword">else</strong> {
-<a class="jxr_linenumber" name="L370" href="#L370">370</a> 				ourLog.info(<span class="jxr_string">"Client response: {}"</span>, message, responseString);
-<a class="jxr_linenumber" name="L371" href="#L371">371</a> 			}
-<a class="jxr_linenumber" name="L372" href="#L372">372</a> 		} <strong class="jxr_keyword">else</strong> {
-<a class="jxr_linenumber" name="L373" href="#L373">373</a> 			ourLog.trace(<span class="jxr_string">"FHIR response:\n{}\n{}"</span>, response, responseString);
-<a class="jxr_linenumber" name="L374" href="#L374">374</a> 		}
-<a class="jxr_linenumber" name="L375" href="#L375">375</a> 	}
-<a class="jxr_linenumber" name="L376" href="#L376">376</a> 
-<a class="jxr_linenumber" name="L377" href="#L377">377</a> 	@Override
-<a class="jxr_linenumber" name="L378" href="#L378">378</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> registerInterceptor(<a href="../../../../../ca/uhn/fhir/rest/client/IClientInterceptor.html">IClientInterceptor</a> theInterceptor) {
-<a class="jxr_linenumber" name="L379" href="#L379">379</a> 		Validate.notNull(theInterceptor, <span class="jxr_string">"Interceptor can not be null"</span>);
-<a class="jxr_linenumber" name="L380" href="#L380">380</a> 		myInterceptors.add(theInterceptor);
-<a class="jxr_linenumber" name="L381" href="#L381">381</a> 	}
-<a class="jxr_linenumber" name="L382" href="#L382">382</a> 
-<a class="jxr_linenumber" name="L383" href="#L383">383</a> 	<em class="jxr_javadoccomment">/**</em>
-<a class="jxr_linenumber" name="L384" href="#L384">384</a> <em class="jxr_javadoccomment">	 * This method is an internal part of the HAPI API and may change, use with caution. If you want to disable the</em>
-<a class="jxr_linenumber" name="L385" href="#L385">385</a> <em class="jxr_javadoccomment">	 * loading of conformance statements, use</em>
-<a class="jxr_linenumber" name="L386" href="#L386">386</a> <em class="jxr_javadoccomment">	 * {@link IRestfulClientFactory#setServerValidationModeEnum(ServerValidationModeEnum)}</em>
-<a class="jxr_linenumber" name="L387" href="#L387">387</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L388" href="#L388">388</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> setDontValidateConformance(<strong class="jxr_keyword">boolean</strong> theDontValidateConformance) {
-<a class="jxr_linenumber" name="L389" href="#L389">389</a> 		myDontValidateConformance = theDontValidateConformance;
-<a class="jxr_linenumber" name="L390" href="#L390">390</a> 	}
-<a class="jxr_linenumber" name="L391" href="#L391">391</a> 
-<a class="jxr_linenumber" name="L392" href="#L392">392</a> 	<em class="jxr_javadoccomment">/**</em>
-<a class="jxr_linenumber" name="L393" href="#L393">393</a> <em class="jxr_javadoccomment">	 * Sets the encoding that will be used on requests. Default is &lt;code&gt;null&lt;/code&gt;, which means the client will not</em>
-<a class="jxr_linenumber" name="L394" href="#L394">394</a> <em class="jxr_javadoccomment">	 * explicitly request an encoding. (This is perfectly acceptable behaviour according to the FHIR specification. In</em>
-<a class="jxr_linenumber" name="L395" href="#L395">395</a> <em class="jxr_javadoccomment">	 * this case, the server will choose which encoding to return, and the client can handle either XML or JSON)</em>
-<a class="jxr_linenumber" name="L396" href="#L396">396</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L397" href="#L397">397</a> 	@Override
-<a class="jxr_linenumber" name="L398" href="#L398">398</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> setEncoding(<a href="../../../../../ca/uhn/fhir/rest/server/EncodingEnum.html">EncodingEnum</a> theEncoding) {
-<a class="jxr_linenumber" name="L399" href="#L399">399</a> 		myEncoding = theEncoding;
-<a class="jxr_linenumber" name="L400" href="#L400">400</a> 		<em class="jxr_comment">// return this;</em>
-<a class="jxr_linenumber" name="L401" href="#L401">401</a> 	}
-<a class="jxr_linenumber" name="L402" href="#L402">402</a> 
-<a class="jxr_linenumber" name="L403" href="#L403">403</a> 	<em class="jxr_javadoccomment">/**</em>
-<a class="jxr_linenumber" name="L404" href="#L404">404</a> <em class="jxr_javadoccomment">	 * For now, this is a part of the internal API of HAPI - Use with caution as this method may change!</em>
-<a class="jxr_linenumber" name="L405" href="#L405">405</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L406" href="#L406">406</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> setKeepResponses(<strong class="jxr_keyword">boolean</strong> theKeepResponses) {
-<a class="jxr_linenumber" name="L407" href="#L407">407</a> 		myKeepResponses = theKeepResponses;
-<a class="jxr_linenumber" name="L408" href="#L408">408</a> 	}
-<a class="jxr_linenumber" name="L409" href="#L409">409</a> 
-<a class="jxr_linenumber" name="L410" href="#L410">410</a> 	<em class="jxr_javadoccomment">/**</em>
-<a class="jxr_linenumber" name="L411" href="#L411">411</a> <em class="jxr_javadoccomment">	 * Sets the pretty print flag, which is a request to the server for it to return "pretty printed" responses. Note</em>
-<a class="jxr_linenumber" name="L412" href="#L412">412</a> <em class="jxr_javadoccomment">	 * that this is currently a non-standard flag (_pretty) which is supported only by HAPI based servers (and any other</em>
-<a class="jxr_linenumber" name="L413" href="#L413">413</a> <em class="jxr_javadoccomment">	 * servers which might implement it).</em>
-<a class="jxr_linenumber" name="L414" href="#L414">414</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L415" href="#L415">415</a> 	@Override
-<a class="jxr_linenumber" name="L416" href="#L416">416</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> setPrettyPrint(Boolean thePrettyPrint) {
-<a class="jxr_linenumber" name="L417" href="#L417">417</a> 		myPrettyPrint = thePrettyPrint;
-<a class="jxr_linenumber" name="L418" href="#L418">418</a> 		<em class="jxr_comment">// return this;</em>
-<a class="jxr_linenumber" name="L419" href="#L419">419</a> 	}
-<a class="jxr_linenumber" name="L420" href="#L420">420</a> 
-<a class="jxr_linenumber" name="L421" href="#L421">421</a> 	@Override
-<a class="jxr_linenumber" name="L422" href="#L422">422</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> setSummary(<a href="../../../../../ca/uhn/fhir/rest/api/SummaryEnum.html">SummaryEnum</a> theSummary) {
-<a class="jxr_linenumber" name="L423" href="#L423">423</a> 		mySummary = theSummary;
-<a class="jxr_linenumber" name="L424" href="#L424">424</a> 	}
-<a class="jxr_linenumber" name="L425" href="#L425">425</a> 
-<a class="jxr_linenumber" name="L426" href="#L426">426</a> 	@Override
-<a class="jxr_linenumber" name="L427" href="#L427">427</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> unregisterInterceptor(<a href="../../../../../ca/uhn/fhir/rest/client/IClientInterceptor.html">IClientInterceptor</a> theInterceptor) {
-<a class="jxr_linenumber" name="L428" href="#L428">428</a> 		Validate.notNull(theInterceptor, <span class="jxr_string">"Interceptor can not be null"</span>);
-<a class="jxr_linenumber" name="L429" href="#L429">429</a> 		myInterceptors.remove(theInterceptor);
-<a class="jxr_linenumber" name="L430" href="#L430">430</a> 	}
-<a class="jxr_linenumber" name="L431" href="#L431">431</a> 	<strong class="jxr_keyword">static</strong> ArrayList&lt;Class&lt;? <strong class="jxr_keyword">extends</strong> IBaseResource&gt;&gt; toTypeList(Class&lt;? <strong class="jxr_keyword">extends</strong> IBaseResource&gt; thePreferResponseType) {
-<a class="jxr_linenumber" name="L432" href="#L432">432</a> 		ArrayList&lt;Class&lt;? <strong class="jxr_keyword">extends</strong> IBaseResource&gt;&gt; preferResponseTypes = <strong class="jxr_keyword">null</strong>;
-<a class="jxr_linenumber" name="L433" href="#L433">433</a> 		<strong class="jxr_keyword">if</strong> (thePreferResponseType != <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L434" href="#L434">434</a> 			preferResponseTypes = <strong class="jxr_keyword">new</strong> ArrayList&lt;Class&lt;? <strong class="jxr_keyword">extends</strong> IBaseResource&gt;&gt;(1);
-<a class="jxr_linenumber" name="L435" href="#L435">435</a> 			preferResponseTypes.add(thePreferResponseType);
-<a class="jxr_linenumber" name="L436" href="#L436">436</a> 		}
-<a class="jxr_linenumber" name="L437" href="#L437">437</a> 		<strong class="jxr_keyword">return</strong> preferResponseTypes;
-<a class="jxr_linenumber" name="L438" href="#L438">438</a> 	}
-<a class="jxr_linenumber" name="L439" href="#L439">439</a> 
-<a class="jxr_linenumber" name="L440" href="#L440">440</a> 	<strong class="jxr_keyword">protected</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">class</strong> ResourceResponseHandler&lt;T <strong class="jxr_keyword">extends</strong> IBaseResource&gt; <strong class="jxr_keyword">implements</strong> IClientResponseHandler&lt;T&gt; {
-<a class="jxr_linenumber" name="L441" href="#L441">441</a> 
-<a class="jxr_linenumber" name="L442" href="#L442">442</a> 		<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">boolean</strong> myAllowHtmlResponse;
-<a class="jxr_linenumber" name="L443" href="#L443">443</a> 		<strong class="jxr_keyword">private</strong> <a href="../../../../../org/hl7/fhir/instance/model/api/IIdType.html">IIdType</a> myId;
-<a class="jxr_linenumber" name="L444" href="#L444">444</a> 		<strong class="jxr_keyword">private</strong> List&lt;Class&lt;? <strong class="jxr_keyword">extends</strong> IBaseResource&gt;&gt; myPreferResponseTypes;
-<a class="jxr_linenumber" name="L445" href="#L445">445</a> 		<strong class="jxr_keyword">private</strong> Class&lt;T&gt; myReturnType;
-<a class="jxr_linenumber" name="L446" href="#L446">446</a> 
-<a class="jxr_linenumber" name="L447" href="#L447">447</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/client/BaseClient.html">ResourceResponseHandler</a>() {
-<a class="jxr_linenumber" name="L448" href="#L448">448</a> 			<strong class="jxr_keyword">this</strong>(<strong class="jxr_keyword">null</strong>);
-<a class="jxr_linenumber" name="L449" href="#L449">449</a> 		}
-<a class="jxr_linenumber" name="L450" href="#L450">450</a> 
-<a class="jxr_linenumber" name="L451" href="#L451">451</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/client/BaseClient.html">ResourceResponseHandler</a>(Class&lt;T&gt; theReturnType) {
-<a class="jxr_linenumber" name="L452" href="#L452">452</a> 			<strong class="jxr_keyword">this</strong>(theReturnType, <strong class="jxr_keyword">null</strong>, <strong class="jxr_keyword">null</strong>);
-<a class="jxr_linenumber" name="L453" href="#L453">453</a> 		}
-<a class="jxr_linenumber" name="L454" href="#L454">454</a> 
-<a class="jxr_linenumber" name="L455" href="#L455">455</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/client/BaseClient.html">ResourceResponseHandler</a>(Class&lt;T&gt; theReturnType, Class&lt;? <strong class="jxr_keyword">extends</strong> IBaseResource&gt; thePreferResponseType, <a href="../../../../../org/hl7/fhir/instance/model/api/IIdType.html">IIdType</a> theId) {
-<a class="jxr_linenumber" name="L456" href="#L456">456</a> 			<strong class="jxr_keyword">this</strong>(theReturnType, thePreferResponseType, theId, false);
-<a class="jxr_linenumber" name="L457" href="#L457">457</a> 		}
-<a class="jxr_linenumber" name="L458" href="#L458">458</a> 
-<a class="jxr_linenumber" name="L459" href="#L459">459</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/client/BaseClient.html">ResourceResponseHandler</a>(Class&lt;T&gt; theReturnType, Class&lt;? <strong class="jxr_keyword">extends</strong> IBaseResource&gt; thePreferResponseType, <a href="../../../../../org/hl7/fhir/instance/model/api/IIdType.html">IIdType</a> theId, <strong class="jxr_keyword">boolean</strong> theAllowHtmlResponse) {
-<a class="jxr_linenumber" name="L460" href="#L460">460</a> 			<strong class="jxr_keyword">this</strong>(theReturnType, toTypeList(thePreferResponseType), theId, theAllowHtmlResponse);
-<a class="jxr_linenumber" name="L461" href="#L461">461</a> 		}
-<a class="jxr_linenumber" name="L462" href="#L462">462</a> 
-<a class="jxr_linenumber" name="L463" href="#L463">463</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/client/BaseClient.html">ResourceResponseHandler</a>(Class&lt;T&gt; theClass, List&lt;Class&lt;? <strong class="jxr_keyword">extends</strong> IBaseResource&gt;&gt; thePreferResponseTypes) {
-<a class="jxr_linenumber" name="L464" href="#L464">464</a> 			<strong class="jxr_keyword">this</strong>(theClass, thePreferResponseTypes, <strong class="jxr_keyword">null</strong>, false);
-<a class="jxr_linenumber" name="L465" href="#L465">465</a> 		}
-<a class="jxr_linenumber" name="L466" href="#L466">466</a> 
-<a class="jxr_linenumber" name="L467" href="#L467">467</a> 		
-<a class="jxr_linenumber" name="L468" href="#L468">468</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/client/BaseClient.html">ResourceResponseHandler</a>(Class&lt;T&gt; theReturnType, List&lt;Class&lt;? <strong class="jxr_keyword">extends</strong> IBaseResource&gt;&gt; thePreferResponseTypes, <a href="../../../../../org/hl7/fhir/instance/model/api/IIdType.html">IIdType</a> theId, <strong class="jxr_keyword">boolean</strong> theAllowHtmlResponse) {
-<a class="jxr_linenumber" name="L469" href="#L469">469</a> 			myReturnType = theReturnType;
-<a class="jxr_linenumber" name="L470" href="#L470">470</a> 			myId = theId;
-<a class="jxr_linenumber" name="L471" href="#L471">471</a> 			myPreferResponseTypes = thePreferResponseTypes;
-<a class="jxr_linenumber" name="L472" href="#L472">472</a> 			myAllowHtmlResponse = theAllowHtmlResponse;
-<a class="jxr_linenumber" name="L473" href="#L473">473</a> 		}
-<a class="jxr_linenumber" name="L474" href="#L474">474</a> 
-<a class="jxr_linenumber" name="L475" href="#L475">475</a> 		@Override
-<a class="jxr_linenumber" name="L476" href="#L476">476</a> 		<strong class="jxr_keyword">public</strong> T invokeClient(String theResponseMimeType, Reader theResponseReader, <strong class="jxr_keyword">int</strong> theResponseStatusCode, Map&lt;String, List&lt;String&gt;&gt; theHeaders) <strong class="jxr_keyword">throws</strong> BaseServerResponseException {
-<a class="jxr_linenumber" name="L477" href="#L477">477</a> 			EncodingEnum respType = EncodingEnum.forContentType(theResponseMimeType);
-<a class="jxr_linenumber" name="L478" href="#L478">478</a> 			<strong class="jxr_keyword">if</strong> (respType == <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L479" href="#L479">479</a> 				<strong class="jxr_keyword">if</strong> (myAllowHtmlResponse &amp;&amp; theResponseMimeType.toLowerCase().contains(Constants.CT_HTML) &amp;&amp; myReturnType != <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L480" href="#L480">480</a> 					<strong class="jxr_keyword">return</strong> readHtmlResponse(theResponseReader);
-<a class="jxr_linenumber" name="L481" href="#L481">481</a> 				}
-<a class="jxr_linenumber" name="L482" href="#L482">482</a> 				<strong class="jxr_keyword">throw</strong> NonFhirResponseException.newInstance(theResponseStatusCode, theResponseMimeType, theResponseReader);
-<a class="jxr_linenumber" name="L483" href="#L483">483</a> 			}
-<a class="jxr_linenumber" name="L484" href="#L484">484</a> 			IParser parser = respType.newParser(getFhirContext());
-<a class="jxr_linenumber" name="L485" href="#L485">485</a> 			<strong class="jxr_keyword">if</strong> (myPreferResponseTypes != <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L486" href="#L486">486</a> 				parser.setPreferTypes(myPreferResponseTypes);
-<a class="jxr_linenumber" name="L487" href="#L487">487</a> 			}
-<a class="jxr_linenumber" name="L488" href="#L488">488</a> 			T retVal = parser.parseResource(myReturnType, theResponseReader);
-<a class="jxr_linenumber" name="L489" href="#L489">489</a> 
-<a class="jxr_linenumber" name="L490" href="#L490">490</a> 			MethodUtil.parseClientRequestResourceHeaders(myId, theHeaders, retVal);
+<a class="jxr_linenumber" name="L326" href="#L326">326</a> 			<em class="jxr_comment">//FIXME potential null access on httpResquest</em>
+<a class="jxr_linenumber" name="L327" href="#L327">327</a> 			String msg = getFhirContext().getLocalizer().getMessage(BaseClient.<strong class="jxr_keyword">class</strong>, <span class="jxr_string">"failedToParseResponse"</span>, httpRequest.getHttpVerbName(), httpRequest.getUri(), e.toString());
+<a class="jxr_linenumber" name="L328" href="#L328">328</a> 			<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/rest/client/exceptions/FhirClientConnectionException.html">FhirClientConnectionException</a>(msg, e);
+<a class="jxr_linenumber" name="L329" href="#L329">329</a> 		} <strong class="jxr_keyword">catch</strong> (IllegalStateException e) {
+<a class="jxr_linenumber" name="L330" href="#L330">330</a> 			<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/rest/client/exceptions/FhirClientConnectionException.html">FhirClientConnectionException</a>(e);
+<a class="jxr_linenumber" name="L331" href="#L331">331</a> 		} <strong class="jxr_keyword">catch</strong> (IOException e) {
+<a class="jxr_linenumber" name="L332" href="#L332">332</a> 			String msg = getFhirContext().getLocalizer().getMessage(BaseClient.<strong class="jxr_keyword">class</strong>, <span class="jxr_string">"ioExceptionDuringOperation"</span>, httpRequest.getHttpVerbName(), httpRequest.getUri(), e.toString());
+<a class="jxr_linenumber" name="L333" href="#L333">333</a> 			<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/rest/client/exceptions/FhirClientConnectionException.html">FhirClientConnectionException</a>(msg, e);
+<a class="jxr_linenumber" name="L334" href="#L334">334</a> 		} <strong class="jxr_keyword">catch</strong> (RuntimeException e) {
+<a class="jxr_linenumber" name="L335" href="#L335">335</a> 			<strong class="jxr_keyword">throw</strong> e;
+<a class="jxr_linenumber" name="L336" href="#L336">336</a> 		} <strong class="jxr_keyword">catch</strong> (Exception e) {
+<a class="jxr_linenumber" name="L337" href="#L337">337</a> 			<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/rest/client/exceptions/FhirClientConnectionException.html">FhirClientConnectionException</a>(e);
+<a class="jxr_linenumber" name="L338" href="#L338">338</a> 		} <strong class="jxr_keyword">finally</strong> {
+<a class="jxr_linenumber" name="L339" href="#L339">339</a> 			<strong class="jxr_keyword">if</strong> (response != <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L340" href="#L340">340</a> 				response.close();
+<a class="jxr_linenumber" name="L341" href="#L341">341</a> 			}
+<a class="jxr_linenumber" name="L342" href="#L342">342</a> 		}
+<a class="jxr_linenumber" name="L343" href="#L343">343</a> 	}
+<a class="jxr_linenumber" name="L344" href="#L344">344</a> 
+<a class="jxr_linenumber" name="L345" href="#L345">345</a> 	<em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L346" href="#L346">346</a> <em class="jxr_javadoccomment">	 * For now, this is a part of the internal API of HAPI - Use with caution as this method may change!</em>
+<a class="jxr_linenumber" name="L347" href="#L347">347</a> <em class="jxr_javadoccomment">	 */</em>
+<a class="jxr_linenumber" name="L348" href="#L348">348</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">boolean</strong> isKeepResponses() {
+<a class="jxr_linenumber" name="L349" href="#L349">349</a> 		<strong class="jxr_keyword">return</strong> myKeepResponses;
+<a class="jxr_linenumber" name="L350" href="#L350">350</a> 	}
+<a class="jxr_linenumber" name="L351" href="#L351">351</a> 
+<a class="jxr_linenumber" name="L352" href="#L352">352</a> 	<em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L353" href="#L353">353</a> <em class="jxr_javadoccomment">	 * Returns the pretty print flag, which is a request to the server for it to return "pretty printed" responses. Note</em>
+<a class="jxr_linenumber" name="L354" href="#L354">354</a> <em class="jxr_javadoccomment">	 * that this is currently a non-standard flag (_pretty) which is supported only by HAPI based servers (and any other</em>
+<a class="jxr_linenumber" name="L355" href="#L355">355</a> <em class="jxr_javadoccomment">	 * servers which might implement it).</em>
+<a class="jxr_linenumber" name="L356" href="#L356">356</a> <em class="jxr_javadoccomment">	 */</em>
+<a class="jxr_linenumber" name="L357" href="#L357">357</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">boolean</strong> isPrettyPrint() {
+<a class="jxr_linenumber" name="L358" href="#L358">358</a> 		<strong class="jxr_keyword">return</strong> Boolean.TRUE.equals(myPrettyPrint);
+<a class="jxr_linenumber" name="L359" href="#L359">359</a> 	}
+<a class="jxr_linenumber" name="L360" href="#L360">360</a> 
+<a class="jxr_linenumber" name="L361" href="#L361">361</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> keepResponseAndLogIt(<strong class="jxr_keyword">boolean</strong> theLogRequestAndResponse, <a href="../../../../../ca/uhn/fhir/rest/client/api/IHttpResponse.html">IHttpResponse</a> response, String responseString) {
+<a class="jxr_linenumber" name="L362" href="#L362">362</a> 		<strong class="jxr_keyword">if</strong> (myKeepResponses) {
+<a class="jxr_linenumber" name="L363" href="#L363">363</a> 			myLastResponse = response;
+<a class="jxr_linenumber" name="L364" href="#L364">364</a> 			myLastResponseBody = responseString;
+<a class="jxr_linenumber" name="L365" href="#L365">365</a> 		}
+<a class="jxr_linenumber" name="L366" href="#L366">366</a> 		<strong class="jxr_keyword">if</strong> (theLogRequestAndResponse) {
+<a class="jxr_linenumber" name="L367" href="#L367">367</a> 			String message = <span class="jxr_string">"HTTP "</span> + response.getStatus() + <span class="jxr_string">" "</span> + response.getStatusInfo();
+<a class="jxr_linenumber" name="L368" href="#L368">368</a> 			<strong class="jxr_keyword">if</strong> (StringUtils.isNotBlank(responseString)) {
+<a class="jxr_linenumber" name="L369" href="#L369">369</a> 				ourLog.info(<span class="jxr_string">"Client response: {}\n{}"</span>, message, responseString);
+<a class="jxr_linenumber" name="L370" href="#L370">370</a> 			} <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L371" href="#L371">371</a> 				ourLog.info(<span class="jxr_string">"Client response: {}"</span>, message, responseString);
+<a class="jxr_linenumber" name="L372" href="#L372">372</a> 			}
+<a class="jxr_linenumber" name="L373" href="#L373">373</a> 		} <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L374" href="#L374">374</a> 			ourLog.trace(<span class="jxr_string">"FHIR response:\n{}\n{}"</span>, response, responseString);
+<a class="jxr_linenumber" name="L375" href="#L375">375</a> 		}
+<a class="jxr_linenumber" name="L376" href="#L376">376</a> 	}
+<a class="jxr_linenumber" name="L377" href="#L377">377</a> 
+<a class="jxr_linenumber" name="L378" href="#L378">378</a> 	@Override
+<a class="jxr_linenumber" name="L379" href="#L379">379</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> registerInterceptor(<a href="../../../../../ca/uhn/fhir/rest/client/IClientInterceptor.html">IClientInterceptor</a> theInterceptor) {
+<a class="jxr_linenumber" name="L380" href="#L380">380</a> 		Validate.notNull(theInterceptor, <span class="jxr_string">"Interceptor can not be null"</span>);
+<a class="jxr_linenumber" name="L381" href="#L381">381</a> 		myInterceptors.add(theInterceptor);
+<a class="jxr_linenumber" name="L382" href="#L382">382</a> 	}
+<a class="jxr_linenumber" name="L383" href="#L383">383</a> 
+<a class="jxr_linenumber" name="L384" href="#L384">384</a> 	<em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L385" href="#L385">385</a> <em class="jxr_javadoccomment">	 * This method is an internal part of the HAPI API and may change, use with caution. If you want to disable the</em>
+<a class="jxr_linenumber" name="L386" href="#L386">386</a> <em class="jxr_javadoccomment">	 * loading of conformance statements, use</em>
+<a class="jxr_linenumber" name="L387" href="#L387">387</a> <em class="jxr_javadoccomment">	 * {@link IRestfulClientFactory#setServerValidationModeEnum(ServerValidationModeEnum)}</em>
+<a class="jxr_linenumber" name="L388" href="#L388">388</a> <em class="jxr_javadoccomment">	 */</em>
+<a class="jxr_linenumber" name="L389" href="#L389">389</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> setDontValidateConformance(<strong class="jxr_keyword">boolean</strong> theDontValidateConformance) {
+<a class="jxr_linenumber" name="L390" href="#L390">390</a> 		myDontValidateConformance = theDontValidateConformance;
+<a class="jxr_linenumber" name="L391" href="#L391">391</a> 	}
+<a class="jxr_linenumber" name="L392" href="#L392">392</a> 
+<a class="jxr_linenumber" name="L393" href="#L393">393</a> 	<em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L394" href="#L394">394</a> <em class="jxr_javadoccomment">	 * Sets the encoding that will be used on requests. Default is &lt;code&gt;null&lt;/code&gt;, which means the client will not</em>
+<a class="jxr_linenumber" name="L395" href="#L395">395</a> <em class="jxr_javadoccomment">	 * explicitly request an encoding. (This is perfectly acceptable behaviour according to the FHIR specification. In</em>
+<a class="jxr_linenumber" name="L396" href="#L396">396</a> <em class="jxr_javadoccomment">	 * this case, the server will choose which encoding to return, and the client can handle either XML or JSON)</em>
+<a class="jxr_linenumber" name="L397" href="#L397">397</a> <em class="jxr_javadoccomment">	 */</em>
+<a class="jxr_linenumber" name="L398" href="#L398">398</a> 	@Override
+<a class="jxr_linenumber" name="L399" href="#L399">399</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> setEncoding(<a href="../../../../../ca/uhn/fhir/rest/server/EncodingEnum.html">EncodingEnum</a> theEncoding) {
+<a class="jxr_linenumber" name="L400" href="#L400">400</a> 		myEncoding = theEncoding;
+<a class="jxr_linenumber" name="L401" href="#L401">401</a> 		<em class="jxr_comment">// return this;</em>
+<a class="jxr_linenumber" name="L402" href="#L402">402</a> 	}
+<a class="jxr_linenumber" name="L403" href="#L403">403</a> 
+<a class="jxr_linenumber" name="L404" href="#L404">404</a> 	<em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L405" href="#L405">405</a> <em class="jxr_javadoccomment">	 * For now, this is a part of the internal API of HAPI - Use with caution as this method may change!</em>
+<a class="jxr_linenumber" name="L406" href="#L406">406</a> <em class="jxr_javadoccomment">	 */</em>
+<a class="jxr_linenumber" name="L407" href="#L407">407</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> setKeepResponses(<strong class="jxr_keyword">boolean</strong> theKeepResponses) {
+<a class="jxr_linenumber" name="L408" href="#L408">408</a> 		myKeepResponses = theKeepResponses;
+<a class="jxr_linenumber" name="L409" href="#L409">409</a> 	}
+<a class="jxr_linenumber" name="L410" href="#L410">410</a> 
+<a class="jxr_linenumber" name="L411" href="#L411">411</a> 	<em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L412" href="#L412">412</a> <em class="jxr_javadoccomment">	 * Sets the pretty print flag, which is a request to the server for it to return "pretty printed" responses. Note</em>
+<a class="jxr_linenumber" name="L413" href="#L413">413</a> <em class="jxr_javadoccomment">	 * that this is currently a non-standard flag (_pretty) which is supported only by HAPI based servers (and any other</em>
+<a class="jxr_linenumber" name="L414" href="#L414">414</a> <em class="jxr_javadoccomment">	 * servers which might implement it).</em>
+<a class="jxr_linenumber" name="L415" href="#L415">415</a> <em class="jxr_javadoccomment">	 */</em>
+<a class="jxr_linenumber" name="L416" href="#L416">416</a> 	@Override
+<a class="jxr_linenumber" name="L417" href="#L417">417</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> setPrettyPrint(Boolean thePrettyPrint) {
+<a class="jxr_linenumber" name="L418" href="#L418">418</a> 		myPrettyPrint = thePrettyPrint;
+<a class="jxr_linenumber" name="L419" href="#L419">419</a> 		<em class="jxr_comment">// return this;</em>
+<a class="jxr_linenumber" name="L420" href="#L420">420</a> 	}
+<a class="jxr_linenumber" name="L421" href="#L421">421</a> 
+<a class="jxr_linenumber" name="L422" href="#L422">422</a> 	@Override
+<a class="jxr_linenumber" name="L423" href="#L423">423</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> setSummary(<a href="../../../../../ca/uhn/fhir/rest/api/SummaryEnum.html">SummaryEnum</a> theSummary) {
+<a class="jxr_linenumber" name="L424" href="#L424">424</a> 		mySummary = theSummary;
+<a class="jxr_linenumber" name="L425" href="#L425">425</a> 	}
+<a class="jxr_linenumber" name="L426" href="#L426">426</a> 
+<a class="jxr_linenumber" name="L427" href="#L427">427</a> 	@Override
+<a class="jxr_linenumber" name="L428" href="#L428">428</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> unregisterInterceptor(<a href="../../../../../ca/uhn/fhir/rest/client/IClientInterceptor.html">IClientInterceptor</a> theInterceptor) {
+<a class="jxr_linenumber" name="L429" href="#L429">429</a> 		Validate.notNull(theInterceptor, <span class="jxr_string">"Interceptor can not be null"</span>);
+<a class="jxr_linenumber" name="L430" href="#L430">430</a> 		myInterceptors.remove(theInterceptor);
+<a class="jxr_linenumber" name="L431" href="#L431">431</a> 	}
+<a class="jxr_linenumber" name="L432" href="#L432">432</a> 	<strong class="jxr_keyword">static</strong> ArrayList&lt;Class&lt;? <strong class="jxr_keyword">extends</strong> IBaseResource&gt;&gt; toTypeList(Class&lt;? <strong class="jxr_keyword">extends</strong> IBaseResource&gt; thePreferResponseType) {
+<a class="jxr_linenumber" name="L433" href="#L433">433</a> 		ArrayList&lt;Class&lt;? <strong class="jxr_keyword">extends</strong> IBaseResource&gt;&gt; preferResponseTypes = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L434" href="#L434">434</a> 		<strong class="jxr_keyword">if</strong> (thePreferResponseType != <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L435" href="#L435">435</a> 			preferResponseTypes = <strong class="jxr_keyword">new</strong> ArrayList&lt;Class&lt;? <strong class="jxr_keyword">extends</strong> IBaseResource&gt;&gt;(1);
+<a class="jxr_linenumber" name="L436" href="#L436">436</a> 			preferResponseTypes.add(thePreferResponseType);
+<a class="jxr_linenumber" name="L437" href="#L437">437</a> 		}
+<a class="jxr_linenumber" name="L438" href="#L438">438</a> 		<strong class="jxr_keyword">return</strong> preferResponseTypes;
+<a class="jxr_linenumber" name="L439" href="#L439">439</a> 	}
+<a class="jxr_linenumber" name="L440" href="#L440">440</a> 
+<a class="jxr_linenumber" name="L441" href="#L441">441</a> 	<strong class="jxr_keyword">protected</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">class</strong> ResourceResponseHandler&lt;T <strong class="jxr_keyword">extends</strong> IBaseResource&gt; <strong class="jxr_keyword">implements</strong> IClientResponseHandler&lt;T&gt; {
+<a class="jxr_linenumber" name="L442" href="#L442">442</a> 
+<a class="jxr_linenumber" name="L443" href="#L443">443</a> 		<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">boolean</strong> myAllowHtmlResponse;
+<a class="jxr_linenumber" name="L444" href="#L444">444</a> 		<strong class="jxr_keyword">private</strong> <a href="../../../../../org/hl7/fhir/instance/model/api/IIdType.html">IIdType</a> myId;
+<a class="jxr_linenumber" name="L445" href="#L445">445</a> 		<strong class="jxr_keyword">private</strong> List&lt;Class&lt;? <strong class="jxr_keyword">extends</strong> IBaseResource&gt;&gt; myPreferResponseTypes;
+<a class="jxr_linenumber" name="L446" href="#L446">446</a> 		<strong class="jxr_keyword">private</strong> Class&lt;T&gt; myReturnType;
+<a class="jxr_linenumber" name="L447" href="#L447">447</a> 
+<a class="jxr_linenumber" name="L448" href="#L448">448</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/client/BaseClient.html">ResourceResponseHandler</a>() {
+<a class="jxr_linenumber" name="L449" href="#L449">449</a> 			<strong class="jxr_keyword">this</strong>(<strong class="jxr_keyword">null</strong>);
+<a class="jxr_linenumber" name="L450" href="#L450">450</a> 		}
+<a class="jxr_linenumber" name="L451" href="#L451">451</a> 
+<a class="jxr_linenumber" name="L452" href="#L452">452</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/client/BaseClient.html">ResourceResponseHandler</a>(Class&lt;T&gt; theReturnType) {
+<a class="jxr_linenumber" name="L453" href="#L453">453</a> 			<strong class="jxr_keyword">this</strong>(theReturnType, <strong class="jxr_keyword">null</strong>, <strong class="jxr_keyword">null</strong>);
+<a class="jxr_linenumber" name="L454" href="#L454">454</a> 		}
+<a class="jxr_linenumber" name="L455" href="#L455">455</a> 
+<a class="jxr_linenumber" name="L456" href="#L456">456</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/client/BaseClient.html">ResourceResponseHandler</a>(Class&lt;T&gt; theReturnType, Class&lt;? <strong class="jxr_keyword">extends</strong> IBaseResource&gt; thePreferResponseType, <a href="../../../../../org/hl7/fhir/instance/model/api/IIdType.html">IIdType</a> theId) {
+<a class="jxr_linenumber" name="L457" href="#L457">457</a> 			<strong class="jxr_keyword">this</strong>(theReturnType, thePreferResponseType, theId, false);
+<a class="jxr_linenumber" name="L458" href="#L458">458</a> 		}
+<a class="jxr_linenumber" name="L459" href="#L459">459</a> 
+<a class="jxr_linenumber" name="L460" href="#L460">460</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/client/BaseClient.html">ResourceResponseHandler</a>(Class&lt;T&gt; theReturnType, Class&lt;? <strong class="jxr_keyword">extends</strong> IBaseResource&gt; thePreferResponseType, <a href="../../../../../org/hl7/fhir/instance/model/api/IIdType.html">IIdType</a> theId, <strong class="jxr_keyword">boolean</strong> theAllowHtmlResponse) {
+<a class="jxr_linenumber" name="L461" href="#L461">461</a> 			<strong class="jxr_keyword">this</strong>(theReturnType, toTypeList(thePreferResponseType), theId, theAllowHtmlResponse);
+<a class="jxr_linenumber" name="L462" href="#L462">462</a> 		}
+<a class="jxr_linenumber" name="L463" href="#L463">463</a> 
+<a class="jxr_linenumber" name="L464" href="#L464">464</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/client/BaseClient.html">ResourceResponseHandler</a>(Class&lt;T&gt; theClass, List&lt;Class&lt;? <strong class="jxr_keyword">extends</strong> IBaseResource&gt;&gt; thePreferResponseTypes) {
+<a class="jxr_linenumber" name="L465" href="#L465">465</a> 			<strong class="jxr_keyword">this</strong>(theClass, thePreferResponseTypes, <strong class="jxr_keyword">null</strong>, false);
+<a class="jxr_linenumber" name="L466" href="#L466">466</a> 		}
+<a class="jxr_linenumber" name="L467" href="#L467">467</a> 
+<a class="jxr_linenumber" name="L468" href="#L468">468</a> 		
+<a class="jxr_linenumber" name="L469" href="#L469">469</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/client/BaseClient.html">ResourceResponseHandler</a>(Class&lt;T&gt; theReturnType, List&lt;Class&lt;? <strong class="jxr_keyword">extends</strong> IBaseResource&gt;&gt; thePreferResponseTypes, <a href="../../../../../org/hl7/fhir/instance/model/api/IIdType.html">IIdType</a> theId, <strong class="jxr_keyword">boolean</strong> theAllowHtmlResponse) {
+<a class="jxr_linenumber" name="L470" href="#L470">470</a> 			myReturnType = theReturnType;
+<a class="jxr_linenumber" name="L471" href="#L471">471</a> 			myId = theId;
+<a class="jxr_linenumber" name="L472" href="#L472">472</a> 			myPreferResponseTypes = thePreferResponseTypes;
+<a class="jxr_linenumber" name="L473" href="#L473">473</a> 			myAllowHtmlResponse = theAllowHtmlResponse;
+<a class="jxr_linenumber" name="L474" href="#L474">474</a> 		}
+<a class="jxr_linenumber" name="L475" href="#L475">475</a> 
+<a class="jxr_linenumber" name="L476" href="#L476">476</a> 		@Override
+<a class="jxr_linenumber" name="L477" href="#L477">477</a> 		<strong class="jxr_keyword">public</strong> T invokeClient(String theResponseMimeType, Reader theResponseReader, <strong class="jxr_keyword">int</strong> theResponseStatusCode, Map&lt;String, List&lt;String&gt;&gt; theHeaders) <strong class="jxr_keyword">throws</strong> BaseServerResponseException {
+<a class="jxr_linenumber" name="L478" href="#L478">478</a> 			EncodingEnum respType = EncodingEnum.forContentType(theResponseMimeType);
+<a class="jxr_linenumber" name="L479" href="#L479">479</a> 			<strong class="jxr_keyword">if</strong> (respType == <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L480" href="#L480">480</a> 				<strong class="jxr_keyword">if</strong> (myAllowHtmlResponse &amp;&amp; theResponseMimeType.toLowerCase().contains(Constants.CT_HTML) &amp;&amp; myReturnType != <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L481" href="#L481">481</a> 					<strong class="jxr_keyword">return</strong> readHtmlResponse(theResponseReader);
+<a class="jxr_linenumber" name="L482" href="#L482">482</a> 				}
+<a class="jxr_linenumber" name="L483" href="#L483">483</a> 				<strong class="jxr_keyword">throw</strong> NonFhirResponseException.newInstance(theResponseStatusCode, theResponseMimeType, theResponseReader);
+<a class="jxr_linenumber" name="L484" href="#L484">484</a> 			}
+<a class="jxr_linenumber" name="L485" href="#L485">485</a> 			IParser parser = respType.newParser(getFhirContext());
+<a class="jxr_linenumber" name="L486" href="#L486">486</a>       parser.setServerBaseUrl(getUrlBase());
+<a class="jxr_linenumber" name="L487" href="#L487">487</a> 			<strong class="jxr_keyword">if</strong> (myPreferResponseTypes != <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L488" href="#L488">488</a> 				parser.setPreferTypes(myPreferResponseTypes);
+<a class="jxr_linenumber" name="L489" href="#L489">489</a> 			}
+<a class="jxr_linenumber" name="L490" href="#L490">490</a> 			T retVal = parser.parseResource(myReturnType, theResponseReader);
 <a class="jxr_linenumber" name="L491" href="#L491">491</a> 
-<a class="jxr_linenumber" name="L492" href="#L492">492</a> 			<strong class="jxr_keyword">return</strong> retVal;
-<a class="jxr_linenumber" name="L493" href="#L493">493</a> 		}
-<a class="jxr_linenumber" name="L494" href="#L494">494</a> 
-<a class="jxr_linenumber" name="L495" href="#L495">495</a> 		@SuppressWarnings(<span class="jxr_string">"unchecked"</span>)
-<a class="jxr_linenumber" name="L496" href="#L496">496</a> 		<strong class="jxr_keyword">private</strong> T readHtmlResponse(Reader theResponseReader) {
-<a class="jxr_linenumber" name="L497" href="#L497">497</a> 			RuntimeResourceDefinition resDef = getFhirContext().getResourceDefinition(myReturnType);
-<a class="jxr_linenumber" name="L498" href="#L498">498</a> 			IBaseResource instance = resDef.newInstance();
-<a class="jxr_linenumber" name="L499" href="#L499">499</a> 			BaseRuntimeChildDefinition textChild = resDef.getChildByName(<span class="jxr_string">"text"</span>);
-<a class="jxr_linenumber" name="L500" href="#L500">500</a> 			BaseRuntimeElementCompositeDefinition&lt;?&gt; textElement = (BaseRuntimeElementCompositeDefinition&lt;?&gt;) textChild.getChildByName(<span class="jxr_string">"text"</span>);
-<a class="jxr_linenumber" name="L501" href="#L501">501</a> 			IBase textInstance = textElement.newInstance();
-<a class="jxr_linenumber" name="L502" href="#L502">502</a> 			textChild.getMutator().addValue(instance, textInstance);
-<a class="jxr_linenumber" name="L503" href="#L503">503</a> 
-<a class="jxr_linenumber" name="L504" href="#L504">504</a> 			BaseRuntimeChildDefinition divChild = textElement.getChildByName(<span class="jxr_string">"div"</span>);
-<a class="jxr_linenumber" name="L505" href="#L505">505</a> 			BaseRuntimeElementDefinition&lt;?&gt; divElement = divChild.getChildByName(<span class="jxr_string">"div"</span>);
-<a class="jxr_linenumber" name="L506" href="#L506">506</a> 			IPrimitiveType&lt;?&gt; divInstance = (IPrimitiveType&lt;?&gt;) divElement.newInstance();
-<a class="jxr_linenumber" name="L507" href="#L507">507</a> 			<strong class="jxr_keyword">try</strong> {
-<a class="jxr_linenumber" name="L508" href="#L508">508</a> 				divInstance.setValueAsString(IOUtils.toString(theResponseReader));
-<a class="jxr_linenumber" name="L509" href="#L509">509</a> 			} <strong class="jxr_keyword">catch</strong> (Exception e) {
-<a class="jxr_linenumber" name="L510" href="#L510">510</a> 				<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/rest/client/exceptions/InvalidResponseException.html">InvalidResponseException</a>(400, <span class="jxr_string">"Failed to process HTML response from server: "</span> + e.getMessage(), e);
-<a class="jxr_linenumber" name="L511" href="#L511">511</a> 			}
-<a class="jxr_linenumber" name="L512" href="#L512">512</a> 			divChild.getMutator().addValue(textInstance, divInstance);
-<a class="jxr_linenumber" name="L513" href="#L513">513</a> 			<strong class="jxr_keyword">return</strong> (T) instance;
-<a class="jxr_linenumber" name="L514" href="#L514">514</a> 		}
-<a class="jxr_linenumber" name="L515" href="#L515">515</a> 
-<a class="jxr_linenumber" name="L516" href="#L516">516</a> 		<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> setPreferResponseTypes(List&lt;Class&lt;? <strong class="jxr_keyword">extends</strong> IBaseResource&gt;&gt; thePreferResponseTypes) {
-<a class="jxr_linenumber" name="L517" href="#L517">517</a> 			myPreferResponseTypes = thePreferResponseTypes;
-<a class="jxr_linenumber" name="L518" href="#L518">518</a> 		}
-<a class="jxr_linenumber" name="L519" href="#L519">519</a> 	}
-<a class="jxr_linenumber" name="L520" href="#L520">520</a> 
-<a class="jxr_linenumber" name="L521" href="#L521">521</a> }
+<a class="jxr_linenumber" name="L492" href="#L492">492</a> 			MethodUtil.parseClientRequestResourceHeaders(myId, theHeaders, retVal);
+<a class="jxr_linenumber" name="L493" href="#L493">493</a> 
+<a class="jxr_linenumber" name="L494" href="#L494">494</a> 			<strong class="jxr_keyword">return</strong> retVal;
+<a class="jxr_linenumber" name="L495" href="#L495">495</a> 		}
+<a class="jxr_linenumber" name="L496" href="#L496">496</a> 
+<a class="jxr_linenumber" name="L497" href="#L497">497</a> 		@SuppressWarnings(<span class="jxr_string">"unchecked"</span>)
+<a class="jxr_linenumber" name="L498" href="#L498">498</a> 		<strong class="jxr_keyword">private</strong> T readHtmlResponse(Reader theResponseReader) {
+<a class="jxr_linenumber" name="L499" href="#L499">499</a> 			RuntimeResourceDefinition resDef = getFhirContext().getResourceDefinition(myReturnType);
+<a class="jxr_linenumber" name="L500" href="#L500">500</a> 			IBaseResource instance = resDef.newInstance();
+<a class="jxr_linenumber" name="L501" href="#L501">501</a> 			BaseRuntimeChildDefinition textChild = resDef.getChildByName(<span class="jxr_string">"text"</span>);
+<a class="jxr_linenumber" name="L502" href="#L502">502</a> 			BaseRuntimeElementCompositeDefinition&lt;?&gt; textElement = (BaseRuntimeElementCompositeDefinition&lt;?&gt;) textChild.getChildByName(<span class="jxr_string">"text"</span>);
+<a class="jxr_linenumber" name="L503" href="#L503">503</a> 			IBase textInstance = textElement.newInstance();
+<a class="jxr_linenumber" name="L504" href="#L504">504</a> 			textChild.getMutator().addValue(instance, textInstance);
+<a class="jxr_linenumber" name="L505" href="#L505">505</a> 
+<a class="jxr_linenumber" name="L506" href="#L506">506</a> 			BaseRuntimeChildDefinition divChild = textElement.getChildByName(<span class="jxr_string">"div"</span>);
+<a class="jxr_linenumber" name="L507" href="#L507">507</a> 			BaseRuntimeElementDefinition&lt;?&gt; divElement = divChild.getChildByName(<span class="jxr_string">"div"</span>);
+<a class="jxr_linenumber" name="L508" href="#L508">508</a> 			IPrimitiveType&lt;?&gt; divInstance = (IPrimitiveType&lt;?&gt;) divElement.newInstance();
+<a class="jxr_linenumber" name="L509" href="#L509">509</a> 			<strong class="jxr_keyword">try</strong> {
+<a class="jxr_linenumber" name="L510" href="#L510">510</a> 				divInstance.setValueAsString(IOUtils.toString(theResponseReader));
+<a class="jxr_linenumber" name="L511" href="#L511">511</a> 			} <strong class="jxr_keyword">catch</strong> (Exception e) {
+<a class="jxr_linenumber" name="L512" href="#L512">512</a> 				<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/rest/client/exceptions/InvalidResponseException.html">InvalidResponseException</a>(400, <span class="jxr_string">"Failed to process HTML response from server: "</span> + e.getMessage(), e);
+<a class="jxr_linenumber" name="L513" href="#L513">513</a> 			}
+<a class="jxr_linenumber" name="L514" href="#L514">514</a> 			divChild.getMutator().addValue(textInstance, divInstance);
+<a class="jxr_linenumber" name="L515" href="#L515">515</a> 			<strong class="jxr_keyword">return</strong> (T) instance;
+<a class="jxr_linenumber" name="L516" href="#L516">516</a> 		}
+<a class="jxr_linenumber" name="L517" href="#L517">517</a> 
+<a class="jxr_linenumber" name="L518" href="#L518">518</a> 		<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> setPreferResponseTypes(List&lt;Class&lt;? <strong class="jxr_keyword">extends</strong> IBaseResource&gt;&gt; thePreferResponseTypes) {
+<a class="jxr_linenumber" name="L519" href="#L519">519</a> 			myPreferResponseTypes = thePreferResponseTypes;
+<a class="jxr_linenumber" name="L520" href="#L520">520</a> 		}
+<a class="jxr_linenumber" name="L521" href="#L521">521</a> 	}
+<a class="jxr_linenumber" name="L522" href="#L522">522</a> 
+<a class="jxr_linenumber" name="L523" href="#L523">523</a> }
 </pre>
 <hr/>
 <div id="footer">Copyright &#169; 2014&#x2013;2017 <a href="http://www.uhn.ca">University Health Network</a>. All rights reserved.</div>

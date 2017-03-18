@@ -100,8 +100,8 @@
 <a class="jxr_linenumber" name="L92" href="#L92">92</a>  			StringAndListParam thePlan, 
 <a class="jxr_linenumber" name="L93" href="#L93">93</a>    
 <a class="jxr_linenumber" name="L94" href="#L94">94</a>  			@Description(shortDefinition=<span class="jxr_string">"Reference to the policyholder"</span>)
-<a class="jxr_linenumber" name="L95" href="#L95">95</a>  			@OptionalParam(name=<span class="jxr_string">"policyholder"</span>, targetTypes={  } )
-<a class="jxr_linenumber" name="L96" href="#L96">96</a>  			ReferenceAndListParam thePolicyholder, 
+<a class="jxr_linenumber" name="L95" href="#L95">95</a>  			@OptionalParam(name=<span class="jxr_string">"policy-holder"</span>, targetTypes={  } )
+<a class="jxr_linenumber" name="L96" href="#L96">96</a>  			ReferenceAndListParam thePolicy_holder, 
 <a class="jxr_linenumber" name="L97" href="#L97">97</a>    
 <a class="jxr_linenumber" name="L98" href="#L98">98</a>  			@Description(shortDefinition=<span class="jxr_string">"Sequence number"</span>)
 <a class="jxr_linenumber" name="L99" href="#L99">99</a>  			@OptionalParam(name=<span class="jxr_string">"sequence"</span>)
@@ -137,7 +137,7 @@
 <a class="jxr_linenumber" name="L129" href="#L129">129</a> 			DateRangeParam theLastUpdated, 
 <a class="jxr_linenumber" name="L130" href="#L130">130</a> 
 <a class="jxr_linenumber" name="L131" href="#L131">131</a> 			@IncludeParam(allow= {
-<a class="jxr_linenumber" name="L132" href="#L132">132</a> 					<span class="jxr_string">"Coverage:beneficiary"</span> , 					<span class="jxr_string">"Coverage:payor"</span> , 					<span class="jxr_string">"Coverage:policyholder"</span> , 					<span class="jxr_string">"Coverage:subscriber"</span> , 						<span class="jxr_string">"Coverage:beneficiary"</span> , 					<span class="jxr_string">"Coverage:payor"</span> , 					<span class="jxr_string">"Coverage:policyholder"</span> , 					<span class="jxr_string">"Coverage:subscriber"</span> , 						<span class="jxr_string">"Coverage:beneficiary"</span> , 					<span class="jxr_string">"Coverage:payor"</span> , 					<span class="jxr_string">"Coverage:policyholder"</span> , 					<span class="jxr_string">"Coverage:subscriber"</span> , 						<span class="jxr_string">"Coverage:beneficiary"</span> , 					<span class="jxr_string">"Coverage:payor"</span> , 					<span class="jxr_string">"Coverage:policyholder"</span> , 					<span class="jxr_string">"Coverage:subscriber"</span> 					, <span class="jxr_string">"*"</span>
+<a class="jxr_linenumber" name="L132" href="#L132">132</a> 					<span class="jxr_string">"Coverage:beneficiary"</span> , 					<span class="jxr_string">"Coverage:payor"</span> , 					<span class="jxr_string">"Coverage:policy-holder"</span> , 					<span class="jxr_string">"Coverage:subscriber"</span> , 						<span class="jxr_string">"Coverage:beneficiary"</span> , 					<span class="jxr_string">"Coverage:payor"</span> , 					<span class="jxr_string">"Coverage:policy-holder"</span> , 					<span class="jxr_string">"Coverage:subscriber"</span> , 						<span class="jxr_string">"Coverage:beneficiary"</span> , 					<span class="jxr_string">"Coverage:payor"</span> , 					<span class="jxr_string">"Coverage:policy-holder"</span> , 					<span class="jxr_string">"Coverage:subscriber"</span> , 						<span class="jxr_string">"Coverage:beneficiary"</span> , 					<span class="jxr_string">"Coverage:payor"</span> , 					<span class="jxr_string">"Coverage:policy-holder"</span> , 					<span class="jxr_string">"Coverage:subscriber"</span> 					, <span class="jxr_string">"*"</span>
 <a class="jxr_linenumber" name="L133" href="#L133">133</a> 			}) 
 <a class="jxr_linenumber" name="L134" href="#L134">134</a> 			Set&lt;Include&gt; theIncludes,
 <a class="jxr_linenumber" name="L135" href="#L135">135</a> 			
@@ -165,7 +165,7 @@
 <a class="jxr_linenumber" name="L157" href="#L157">157</a> 			paramMap.add(<span class="jxr_string">"identifier"</span>, theIdentifier);
 <a class="jxr_linenumber" name="L158" href="#L158">158</a> 			paramMap.add(<span class="jxr_string">"payor"</span>, thePayor);
 <a class="jxr_linenumber" name="L159" href="#L159">159</a> 			paramMap.add(<span class="jxr_string">"plan"</span>, thePlan);
-<a class="jxr_linenumber" name="L160" href="#L160">160</a> 			paramMap.add(<span class="jxr_string">"policyholder"</span>, thePolicyholder);
+<a class="jxr_linenumber" name="L160" href="#L160">160</a> 			paramMap.add(<span class="jxr_string">"policy-holder"</span>, thePolicy_holder);
 <a class="jxr_linenumber" name="L161" href="#L161">161</a> 			paramMap.add(<span class="jxr_string">"sequence"</span>, theSequence);
 <a class="jxr_linenumber" name="L162" href="#L162">162</a> 			paramMap.add(<span class="jxr_string">"subclass"</span>, theSubclass);
 <a class="jxr_linenumber" name="L163" href="#L163">163</a> 			paramMap.add(<span class="jxr_string">"subgroup"</span>, theSubgroup);

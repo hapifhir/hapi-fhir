@@ -252,323 +252,325 @@
 <a class="jxr_linenumber" name="L244" href="#L244">244</a> 			}
 <a class="jxr_linenumber" name="L245" href="#L245">245</a> 		}
 <a class="jxr_linenumber" name="L246" href="#L246">246</a> 
-<a class="jxr_linenumber" name="L247" href="#L247">247</a> 		<strong class="jxr_keyword">if</strong> (blockDefinition == <strong class="jxr_keyword">null</strong> &amp;&amp; datatypeDefinition == <strong class="jxr_keyword">null</strong> &amp;&amp; resourceDefinition == <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L248" href="#L248">248</a> 			<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../ca/uhn/fhir/context/ConfigurationException.html">ConfigurationException</a>(<span class="jxr_string">"Resource class["</span> + theClass.getName() + <span class="jxr_string">"] does not contain any valid HAPI-FHIR annotations"</span>);
-<a class="jxr_linenumber" name="L249" href="#L249">249</a> 		}
-<a class="jxr_linenumber" name="L250" href="#L250">250</a> 	}
-<a class="jxr_linenumber" name="L251" href="#L251">251</a> 
-<a class="jxr_linenumber" name="L252" href="#L252">252</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> scanBlock(Class&lt;? <strong class="jxr_keyword">extends</strong> IBase&gt; theClass) {
-<a class="jxr_linenumber" name="L253" href="#L253">253</a> 		ourLog.debug(<span class="jxr_string">"Scanning resource block class: {}"</span>, theClass.getName());
-<a class="jxr_linenumber" name="L254" href="#L254">254</a> 
-<a class="jxr_linenumber" name="L255" href="#L255">255</a> 		String resourceName = theClass.getCanonicalName();
-<a class="jxr_linenumber" name="L256" href="#L256">256</a> 		<strong class="jxr_keyword">if</strong> (isBlank(resourceName)) {
-<a class="jxr_linenumber" name="L257" href="#L257">257</a> 			<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../ca/uhn/fhir/context/ConfigurationException.html">ConfigurationException</a>(<span class="jxr_string">"Block type @"</span> + Block.<strong class="jxr_keyword">class</strong>.getSimpleName() + <span class="jxr_string">" annotation contains no name: "</span> + theClass.getCanonicalName());
-<a class="jxr_linenumber" name="L258" href="#L258">258</a> 		}
-<a class="jxr_linenumber" name="L259" href="#L259">259</a> 
-<a class="jxr_linenumber" name="L260" href="#L260">260</a> 		RuntimeResourceBlockDefinition blockDef = <strong class="jxr_keyword">new</strong> <a href="../../../../ca/uhn/fhir/context/RuntimeResourceBlockDefinition.html">RuntimeResourceBlockDefinition</a>(resourceName, theClass, isStandardType(theClass), myContext, myClassToElementDefinitions);
-<a class="jxr_linenumber" name="L261" href="#L261">261</a> 		myClassToElementDefinitions.put(theClass, blockDef);
-<a class="jxr_linenumber" name="L262" href="#L262">262</a> 	}
-<a class="jxr_linenumber" name="L263" href="#L263">263</a> 
-<a class="jxr_linenumber" name="L264" href="#L264">264</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> scanCompositeDatatype(Class&lt;? <strong class="jxr_keyword">extends</strong> ICompositeType&gt; theClass, <a href="../../../../ca/uhn/fhir/model/api/annotation/DatatypeDef.html">DatatypeDef</a> theDatatypeDefinition) {
-<a class="jxr_linenumber" name="L265" href="#L265">265</a> 		ourLog.debug(<span class="jxr_string">"Scanning datatype class: {}"</span>, theClass.getName());
-<a class="jxr_linenumber" name="L266" href="#L266">266</a> 
-<a class="jxr_linenumber" name="L267" href="#L267">267</a> 		RuntimeCompositeDatatypeDefinition elementDef;
-<a class="jxr_linenumber" name="L268" href="#L268">268</a> 		<strong class="jxr_keyword">if</strong> (theClass.equals(ExtensionDt.<strong class="jxr_keyword">class</strong>)) {
-<a class="jxr_linenumber" name="L269" href="#L269">269</a> 			elementDef = <strong class="jxr_keyword">new</strong> <a href="../../../../ca/uhn/fhir/context/RuntimeExtensionDtDefinition.html">RuntimeExtensionDtDefinition</a>(theDatatypeDefinition, theClass, <strong class="jxr_keyword">true</strong>, myContext, myClassToElementDefinitions);
-<a class="jxr_linenumber" name="L270" href="#L270">270</a> 			<em class="jxr_comment">// } else if (IBaseMetaType.class.isAssignableFrom(theClass)) {</em>
-<a class="jxr_linenumber" name="L271" href="#L271">271</a> 			<em class="jxr_comment">// resourceDef = new RuntimeMetaDefinition(theDatatypeDefinition, theClass, isStandardType(theClass));</em>
-<a class="jxr_linenumber" name="L272" href="#L272">272</a> 		} <strong class="jxr_keyword">else</strong> {
-<a class="jxr_linenumber" name="L273" href="#L273">273</a> 			elementDef = <strong class="jxr_keyword">new</strong> <a href="../../../../ca/uhn/fhir/context/RuntimeCompositeDatatypeDefinition.html">RuntimeCompositeDatatypeDefinition</a>(theDatatypeDefinition, theClass, isStandardType(theClass), myContext, myClassToElementDefinitions);
-<a class="jxr_linenumber" name="L274" href="#L274">274</a> 		}
-<a class="jxr_linenumber" name="L275" href="#L275">275</a> 		myClassToElementDefinitions.put(theClass, elementDef);
-<a class="jxr_linenumber" name="L276" href="#L276">276</a> 		myNameToElementDefinitions.put(elementDef.getName().toLowerCase(), elementDef);
-<a class="jxr_linenumber" name="L277" href="#L277">277</a> 
-<a class="jxr_linenumber" name="L278" href="#L278">278</a> 		<em class="jxr_comment">/*</em>
-<a class="jxr_linenumber" name="L279" href="#L279">279</a> <em class="jxr_comment">		 * See #423:</em>
-<a class="jxr_linenumber" name="L280" href="#L280">280</a> <em class="jxr_comment">		 * If the type contains a field that has a custom type, we want to make</em>
-<a class="jxr_linenumber" name="L281" href="#L281">281</a> <em class="jxr_comment">		 * sure that this type gets scanned as well</em>
-<a class="jxr_linenumber" name="L282" href="#L282">282</a> <em class="jxr_comment">		 */</em>
-<a class="jxr_linenumber" name="L283" href="#L283">283</a> 		elementDef.populateScanAlso(myScanAlso);
-<a class="jxr_linenumber" name="L284" href="#L284">284</a> 	}
-<a class="jxr_linenumber" name="L285" href="#L285">285</a> 
-<a class="jxr_linenumber" name="L286" href="#L286">286</a> 
+<a class="jxr_linenumber" name="L247" href="#L247">247</a> 		<strong class="jxr_keyword">if</strong> (blockDefinition == <strong class="jxr_keyword">null</strong>
+<a class="jxr_linenumber" name="L248" href="#L248">248</a> <em class="jxr_comment">//Redundant	checking &amp;&amp; datatypeDefinition == null &amp;&amp; resourceDefinition == null</em>
+<a class="jxr_linenumber" name="L249" href="#L249">249</a> 				) {
+<a class="jxr_linenumber" name="L250" href="#L250">250</a> 			<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../ca/uhn/fhir/context/ConfigurationException.html">ConfigurationException</a>(<span class="jxr_string">"Resource class["</span> + theClass.getName() + <span class="jxr_string">"] does not contain any valid HAPI-FHIR annotations"</span>);
+<a class="jxr_linenumber" name="L251" href="#L251">251</a> 		}
+<a class="jxr_linenumber" name="L252" href="#L252">252</a> 	}
+<a class="jxr_linenumber" name="L253" href="#L253">253</a> 
+<a class="jxr_linenumber" name="L254" href="#L254">254</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> scanBlock(Class&lt;? <strong class="jxr_keyword">extends</strong> IBase&gt; theClass) {
+<a class="jxr_linenumber" name="L255" href="#L255">255</a> 		ourLog.debug(<span class="jxr_string">"Scanning resource block class: {}"</span>, theClass.getName());
+<a class="jxr_linenumber" name="L256" href="#L256">256</a> 
+<a class="jxr_linenumber" name="L257" href="#L257">257</a> 		String resourceName = theClass.getCanonicalName();
+<a class="jxr_linenumber" name="L258" href="#L258">258</a> 		<strong class="jxr_keyword">if</strong> (isBlank(resourceName)) {
+<a class="jxr_linenumber" name="L259" href="#L259">259</a> 			<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../ca/uhn/fhir/context/ConfigurationException.html">ConfigurationException</a>(<span class="jxr_string">"Block type @"</span> + Block.<strong class="jxr_keyword">class</strong>.getSimpleName() + <span class="jxr_string">" annotation contains no name: "</span> + theClass.getCanonicalName());
+<a class="jxr_linenumber" name="L260" href="#L260">260</a> 		}
+<a class="jxr_linenumber" name="L261" href="#L261">261</a> 
+<a class="jxr_linenumber" name="L262" href="#L262">262</a> 		RuntimeResourceBlockDefinition blockDef = <strong class="jxr_keyword">new</strong> <a href="../../../../ca/uhn/fhir/context/RuntimeResourceBlockDefinition.html">RuntimeResourceBlockDefinition</a>(resourceName, theClass, isStandardType(theClass), myContext, myClassToElementDefinitions);
+<a class="jxr_linenumber" name="L263" href="#L263">263</a> 		myClassToElementDefinitions.put(theClass, blockDef);
+<a class="jxr_linenumber" name="L264" href="#L264">264</a> 	}
+<a class="jxr_linenumber" name="L265" href="#L265">265</a> 
+<a class="jxr_linenumber" name="L266" href="#L266">266</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> scanCompositeDatatype(Class&lt;? <strong class="jxr_keyword">extends</strong> ICompositeType&gt; theClass, <a href="../../../../ca/uhn/fhir/model/api/annotation/DatatypeDef.html">DatatypeDef</a> theDatatypeDefinition) {
+<a class="jxr_linenumber" name="L267" href="#L267">267</a> 		ourLog.debug(<span class="jxr_string">"Scanning datatype class: {}"</span>, theClass.getName());
+<a class="jxr_linenumber" name="L268" href="#L268">268</a> 
+<a class="jxr_linenumber" name="L269" href="#L269">269</a> 		RuntimeCompositeDatatypeDefinition elementDef;
+<a class="jxr_linenumber" name="L270" href="#L270">270</a> 		<strong class="jxr_keyword">if</strong> (theClass.equals(ExtensionDt.<strong class="jxr_keyword">class</strong>)) {
+<a class="jxr_linenumber" name="L271" href="#L271">271</a> 			elementDef = <strong class="jxr_keyword">new</strong> <a href="../../../../ca/uhn/fhir/context/RuntimeExtensionDtDefinition.html">RuntimeExtensionDtDefinition</a>(theDatatypeDefinition, theClass, <strong class="jxr_keyword">true</strong>, myContext, myClassToElementDefinitions);
+<a class="jxr_linenumber" name="L272" href="#L272">272</a> 			<em class="jxr_comment">// } else if (IBaseMetaType.class.isAssignableFrom(theClass)) {</em>
+<a class="jxr_linenumber" name="L273" href="#L273">273</a> 			<em class="jxr_comment">// resourceDef = new RuntimeMetaDefinition(theDatatypeDefinition, theClass, isStandardType(theClass));</em>
+<a class="jxr_linenumber" name="L274" href="#L274">274</a> 		} <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L275" href="#L275">275</a> 			elementDef = <strong class="jxr_keyword">new</strong> <a href="../../../../ca/uhn/fhir/context/RuntimeCompositeDatatypeDefinition.html">RuntimeCompositeDatatypeDefinition</a>(theDatatypeDefinition, theClass, isStandardType(theClass), myContext, myClassToElementDefinitions);
+<a class="jxr_linenumber" name="L276" href="#L276">276</a> 		}
+<a class="jxr_linenumber" name="L277" href="#L277">277</a> 		myClassToElementDefinitions.put(theClass, elementDef);
+<a class="jxr_linenumber" name="L278" href="#L278">278</a> 		myNameToElementDefinitions.put(elementDef.getName().toLowerCase(), elementDef);
+<a class="jxr_linenumber" name="L279" href="#L279">279</a> 
+<a class="jxr_linenumber" name="L280" href="#L280">280</a> 		<em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L281" href="#L281">281</a> <em class="jxr_comment">		 * See #423:</em>
+<a class="jxr_linenumber" name="L282" href="#L282">282</a> <em class="jxr_comment">		 * If the type contains a field that has a custom type, we want to make</em>
+<a class="jxr_linenumber" name="L283" href="#L283">283</a> <em class="jxr_comment">		 * sure that this type gets scanned as well</em>
+<a class="jxr_linenumber" name="L284" href="#L284">284</a> <em class="jxr_comment">		 */</em>
+<a class="jxr_linenumber" name="L285" href="#L285">285</a> 		elementDef.populateScanAlso(myScanAlso);
+<a class="jxr_linenumber" name="L286" href="#L286">286</a> 	}
 <a class="jxr_linenumber" name="L287" href="#L287">287</a> 
-<a class="jxr_linenumber" name="L288" href="#L288">288</a> 	<strong class="jxr_keyword">static</strong> Class&lt;? <strong class="jxr_keyword">extends</strong> Enum&lt;?&gt;&gt; determineEnumTypeForBoundField(Field next) {
-<a class="jxr_linenumber" name="L289" href="#L289">289</a> 		@SuppressWarnings(<span class="jxr_string">"unchecked"</span>)
-<a class="jxr_linenumber" name="L290" href="#L290">290</a> 		Class&lt;? <strong class="jxr_keyword">extends</strong> Enum&lt;?&gt;&gt; enumType = (Class&lt;? <strong class="jxr_keyword">extends</strong> Enum&lt;?&gt;&gt;) ReflectionUtil.getGenericCollectionTypeOfFieldWithSecondOrderForList(next);
-<a class="jxr_linenumber" name="L291" href="#L291">291</a> 		<strong class="jxr_keyword">return</strong> enumType;
-<a class="jxr_linenumber" name="L292" href="#L292">292</a> 	}
-<a class="jxr_linenumber" name="L293" href="#L293">293</a> 
-<a class="jxr_linenumber" name="L294" href="#L294">294</a> 	<strong class="jxr_keyword">private</strong> String scanPrimitiveDatatype(Class&lt;? <strong class="jxr_keyword">extends</strong> IPrimitiveType&lt;?&gt;&gt; theClass, <a href="../../../../ca/uhn/fhir/model/api/annotation/DatatypeDef.html">DatatypeDef</a> theDatatypeDefinition) {
-<a class="jxr_linenumber" name="L295" href="#L295">295</a> 		ourLog.debug(<span class="jxr_string">"Scanning resource class: {}"</span>, theClass.getName());
-<a class="jxr_linenumber" name="L296" href="#L296">296</a> 
-<a class="jxr_linenumber" name="L297" href="#L297">297</a> 		String resourceName = theDatatypeDefinition.name();
-<a class="jxr_linenumber" name="L298" href="#L298">298</a> 		<strong class="jxr_keyword">if</strong> (isBlank(resourceName)) {
-<a class="jxr_linenumber" name="L299" href="#L299">299</a> 			<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../ca/uhn/fhir/context/ConfigurationException.html">ConfigurationException</a>(<span class="jxr_string">"Resource type @"</span> + ResourceDef.<strong class="jxr_keyword">class</strong>.getSimpleName() + <span class="jxr_string">" annotation contains no resource name: "</span> + theClass.getCanonicalName());
-<a class="jxr_linenumber" name="L300" href="#L300">300</a> 		}
-<a class="jxr_linenumber" name="L301" href="#L301">301</a> 
-<a class="jxr_linenumber" name="L302" href="#L302">302</a> 		BaseRuntimeElementDefinition&lt;?&gt; elementDef;
-<a class="jxr_linenumber" name="L303" href="#L303">303</a> 		<strong class="jxr_keyword">if</strong> (theClass.equals(XhtmlDt.<strong class="jxr_keyword">class</strong>)) {
-<a class="jxr_linenumber" name="L304" href="#L304">304</a> 			@SuppressWarnings(<span class="jxr_string">"unchecked"</span>)
-<a class="jxr_linenumber" name="L305" href="#L305">305</a> 			Class&lt;XhtmlDt&gt; clazz = (Class&lt;XhtmlDt&gt;) theClass;
-<a class="jxr_linenumber" name="L306" href="#L306">306</a> 			elementDef = <strong class="jxr_keyword">new</strong> <a href="../../../../ca/uhn/fhir/context/RuntimePrimitiveDatatypeNarrativeDefinition.html">RuntimePrimitiveDatatypeNarrativeDefinition</a>(resourceName, clazz, isStandardType(clazz));
-<a class="jxr_linenumber" name="L307" href="#L307">307</a> 		} <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (IBaseXhtml.<strong class="jxr_keyword">class</strong>.isAssignableFrom(theClass)) {
-<a class="jxr_linenumber" name="L308" href="#L308">308</a> 			@SuppressWarnings(<span class="jxr_string">"unchecked"</span>)
-<a class="jxr_linenumber" name="L309" href="#L309">309</a> 			Class&lt;? <strong class="jxr_keyword">extends</strong> IBaseXhtml&gt; clazz = (Class&lt;? <strong class="jxr_keyword">extends</strong> IBaseXhtml&gt;) theClass;
-<a class="jxr_linenumber" name="L310" href="#L310">310</a> 			elementDef = <strong class="jxr_keyword">new</strong> <a href="../../../../ca/uhn/fhir/context/RuntimePrimitiveDatatypeXhtmlHl7OrgDefinition.html">RuntimePrimitiveDatatypeXhtmlHl7OrgDefinition</a>(resourceName, clazz, isStandardType(clazz));
-<a class="jxr_linenumber" name="L311" href="#L311">311</a> 		} <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (IIdType.<strong class="jxr_keyword">class</strong>.isAssignableFrom(theClass)) {
-<a class="jxr_linenumber" name="L312" href="#L312">312</a> 			elementDef = <strong class="jxr_keyword">new</strong> <a href="../../../../ca/uhn/fhir/context/RuntimeIdDatatypeDefinition.html">RuntimeIdDatatypeDefinition</a>(theDatatypeDefinition, theClass, isStandardType(theClass));
-<a class="jxr_linenumber" name="L313" href="#L313">313</a> 		} <strong class="jxr_keyword">else</strong> {
-<a class="jxr_linenumber" name="L314" href="#L314">314</a> 			elementDef = <strong class="jxr_keyword">new</strong> <a href="../../../../ca/uhn/fhir/context/RuntimePrimitiveDatatypeDefinition.html">RuntimePrimitiveDatatypeDefinition</a>(theDatatypeDefinition, theClass, isStandardType(theClass));
-<a class="jxr_linenumber" name="L315" href="#L315">315</a> 		}
-<a class="jxr_linenumber" name="L316" href="#L316">316</a> 		myClassToElementDefinitions.put(theClass, elementDef);
-<a class="jxr_linenumber" name="L317" href="#L317">317</a> 		<strong class="jxr_keyword">if</strong> (!theDatatypeDefinition.isSpecialization()) {
-<a class="jxr_linenumber" name="L318" href="#L318">318</a> 			<strong class="jxr_keyword">if</strong> (myVersion.isRi() &amp;&amp; IDatatype.<strong class="jxr_keyword">class</strong>.isAssignableFrom(theClass)) {
-<a class="jxr_linenumber" name="L319" href="#L319">319</a> 				ourLog.debug(<span class="jxr_string">"Not adding non RI type {} to RI context"</span>, theClass);
-<a class="jxr_linenumber" name="L320" href="#L320">320</a> 			} <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (!myVersion.isRi() &amp;&amp; !IDatatype.<strong class="jxr_keyword">class</strong>.isAssignableFrom(theClass)) {
-<a class="jxr_linenumber" name="L321" href="#L321">321</a> 				ourLog.debug(<span class="jxr_string">"Not adding RI type {} to non RI context"</span>, theClass);
-<a class="jxr_linenumber" name="L322" href="#L322">322</a> 			} <strong class="jxr_keyword">else</strong> {
-<a class="jxr_linenumber" name="L323" href="#L323">323</a> 				myNameToElementDefinitions.put(resourceName, elementDef);
-<a class="jxr_linenumber" name="L324" href="#L324">324</a> 			}
-<a class="jxr_linenumber" name="L325" href="#L325">325</a> 		}
-<a class="jxr_linenumber" name="L326" href="#L326">326</a> 
-<a class="jxr_linenumber" name="L327" href="#L327">327</a> 		<strong class="jxr_keyword">return</strong> resourceName;
-<a class="jxr_linenumber" name="L328" href="#L328">328</a> 	}
-<a class="jxr_linenumber" name="L329" href="#L329">329</a> 
-<a class="jxr_linenumber" name="L330" href="#L330">330</a> 	<strong class="jxr_keyword">private</strong> String scanResource(Class&lt;? <strong class="jxr_keyword">extends</strong> IBaseResource&gt; theClass, <a href="../../../../ca/uhn/fhir/model/api/annotation/ResourceDef.html">ResourceDef</a> resourceDefinition) {
-<a class="jxr_linenumber" name="L331" href="#L331">331</a> 		ourLog.debug(<span class="jxr_string">"Scanning resource class: {}"</span>, theClass.getName());
-<a class="jxr_linenumber" name="L332" href="#L332">332</a> 
-<a class="jxr_linenumber" name="L333" href="#L333">333</a> 		<strong class="jxr_keyword">boolean</strong> primaryNameProvider = <strong class="jxr_keyword">true</strong>;
-<a class="jxr_linenumber" name="L334" href="#L334">334</a> 		String resourceName = resourceDefinition.name();
-<a class="jxr_linenumber" name="L335" href="#L335">335</a> 		<strong class="jxr_keyword">if</strong> (isBlank(resourceName)) {
-<a class="jxr_linenumber" name="L336" href="#L336">336</a> 			Class&lt;?&gt; parent = theClass.getSuperclass();
-<a class="jxr_linenumber" name="L337" href="#L337">337</a> 			primaryNameProvider = false;
-<a class="jxr_linenumber" name="L338" href="#L338">338</a> 			<strong class="jxr_keyword">while</strong> (parent.equals(Object.<strong class="jxr_keyword">class</strong>) == false &amp;&amp; isBlank(resourceName)) {
-<a class="jxr_linenumber" name="L339" href="#L339">339</a> 				ResourceDef nextDef = pullAnnotation(parent, ResourceDef.<strong class="jxr_keyword">class</strong>);
-<a class="jxr_linenumber" name="L340" href="#L340">340</a> 				<strong class="jxr_keyword">if</strong> (nextDef != <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L341" href="#L341">341</a> 					resourceName = nextDef.name();
-<a class="jxr_linenumber" name="L342" href="#L342">342</a> 				}
-<a class="jxr_linenumber" name="L343" href="#L343">343</a> 				parent = parent.getSuperclass();
-<a class="jxr_linenumber" name="L344" href="#L344">344</a> 			}
-<a class="jxr_linenumber" name="L345" href="#L345">345</a> 			<strong class="jxr_keyword">if</strong> (isBlank(resourceName)) {
-<a class="jxr_linenumber" name="L346" href="#L346">346</a> 				<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../ca/uhn/fhir/context/ConfigurationException.html">ConfigurationException</a>(<span class="jxr_string">"Resource type @"</span> + ResourceDef.<strong class="jxr_keyword">class</strong>.getSimpleName() + <span class="jxr_string">" annotation contains no resource name(): "</span> + theClass.getCanonicalName()
-<a class="jxr_linenumber" name="L347" href="#L347">347</a> 						+ <span class="jxr_string">" - This is only allowed for types that extend other resource types "</span>);
-<a class="jxr_linenumber" name="L348" href="#L348">348</a> 			}
-<a class="jxr_linenumber" name="L349" href="#L349">349</a> 		}
-<a class="jxr_linenumber" name="L350" href="#L350">350</a> 
-<a class="jxr_linenumber" name="L351" href="#L351">351</a> 		String resourceNameLowerCase = resourceName.toLowerCase();
-<a class="jxr_linenumber" name="L352" href="#L352">352</a> 		Class&lt;? <strong class="jxr_keyword">extends</strong> IBaseResource&gt; builtInType = myNameToResourceType.get(resourceNameLowerCase);
-<a class="jxr_linenumber" name="L353" href="#L353">353</a> 		<strong class="jxr_keyword">boolean</strong> standardType = builtInType != <strong class="jxr_keyword">null</strong> &amp;&amp; builtInType.equals(theClass) == <strong class="jxr_keyword">true</strong>;
-<a class="jxr_linenumber" name="L354" href="#L354">354</a> 		<strong class="jxr_keyword">if</strong> (primaryNameProvider) {
-<a class="jxr_linenumber" name="L355" href="#L355">355</a> 			<strong class="jxr_keyword">if</strong> (builtInType != <strong class="jxr_keyword">null</strong> &amp;&amp; builtInType.equals(theClass) == false) {
-<a class="jxr_linenumber" name="L356" href="#L356">356</a> 				primaryNameProvider = false;
-<a class="jxr_linenumber" name="L357" href="#L357">357</a> 			}
-<a class="jxr_linenumber" name="L358" href="#L358">358</a> 		}
-<a class="jxr_linenumber" name="L359" href="#L359">359</a> 		
-<a class="jxr_linenumber" name="L360" href="#L360">360</a> 		String resourceId = resourceDefinition.id();
-<a class="jxr_linenumber" name="L361" href="#L361">361</a> 		<strong class="jxr_keyword">if</strong> (!isBlank(resourceId)) {
-<a class="jxr_linenumber" name="L362" href="#L362">362</a> 			<strong class="jxr_keyword">if</strong> (myIdToResourceDefinition.containsKey(resourceId)) {
-<a class="jxr_linenumber" name="L363" href="#L363">363</a> 				<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../ca/uhn/fhir/context/ConfigurationException.html">ConfigurationException</a>(<span class="jxr_string">"The following resource types have the same ID of '"</span> + resourceId + <span class="jxr_string">"' - "</span> + theClass.getCanonicalName() + <span class="jxr_string">" and "</span>
-<a class="jxr_linenumber" name="L364" href="#L364">364</a> 						+ myIdToResourceDefinition.get(resourceId).getImplementingClass().getCanonicalName());
-<a class="jxr_linenumber" name="L365" href="#L365">365</a> 			}
-<a class="jxr_linenumber" name="L366" href="#L366">366</a> 		}
-<a class="jxr_linenumber" name="L367" href="#L367">367</a> 
-<a class="jxr_linenumber" name="L368" href="#L368">368</a> 		RuntimeResourceDefinition resourceDef = <strong class="jxr_keyword">new</strong> <a href="../../../../ca/uhn/fhir/context/RuntimeResourceDefinition.html">RuntimeResourceDefinition</a>(myContext, resourceName, theClass, resourceDefinition, standardType, myClassToElementDefinitions);
-<a class="jxr_linenumber" name="L369" href="#L369">369</a> 		myClassToElementDefinitions.put(theClass, resourceDef);
-<a class="jxr_linenumber" name="L370" href="#L370">370</a> 		<strong class="jxr_keyword">if</strong> (primaryNameProvider) {
-<a class="jxr_linenumber" name="L371" href="#L371">371</a> 			<strong class="jxr_keyword">if</strong> (resourceDef.getStructureVersion() == myVersion) {
-<a class="jxr_linenumber" name="L372" href="#L372">372</a> 				myNameToResourceDefinitions.put(resourceNameLowerCase, resourceDef);
-<a class="jxr_linenumber" name="L373" href="#L373">373</a> 			}
-<a class="jxr_linenumber" name="L374" href="#L374">374</a> 		}
-<a class="jxr_linenumber" name="L375" href="#L375">375</a> 
-<a class="jxr_linenumber" name="L376" href="#L376">376</a> 		myIdToResourceDefinition.put(resourceId, resourceDef);
+<a class="jxr_linenumber" name="L288" href="#L288">288</a> 
+<a class="jxr_linenumber" name="L289" href="#L289">289</a> 
+<a class="jxr_linenumber" name="L290" href="#L290">290</a> 	<strong class="jxr_keyword">static</strong> Class&lt;? <strong class="jxr_keyword">extends</strong> Enum&lt;?&gt;&gt; determineEnumTypeForBoundField(Field next) {
+<a class="jxr_linenumber" name="L291" href="#L291">291</a> 		@SuppressWarnings(<span class="jxr_string">"unchecked"</span>)
+<a class="jxr_linenumber" name="L292" href="#L292">292</a> 		Class&lt;? <strong class="jxr_keyword">extends</strong> Enum&lt;?&gt;&gt; enumType = (Class&lt;? <strong class="jxr_keyword">extends</strong> Enum&lt;?&gt;&gt;) ReflectionUtil.getGenericCollectionTypeOfFieldWithSecondOrderForList(next);
+<a class="jxr_linenumber" name="L293" href="#L293">293</a> 		<strong class="jxr_keyword">return</strong> enumType;
+<a class="jxr_linenumber" name="L294" href="#L294">294</a> 	}
+<a class="jxr_linenumber" name="L295" href="#L295">295</a> 
+<a class="jxr_linenumber" name="L296" href="#L296">296</a> 	<strong class="jxr_keyword">private</strong> String scanPrimitiveDatatype(Class&lt;? <strong class="jxr_keyword">extends</strong> IPrimitiveType&lt;?&gt;&gt; theClass, <a href="../../../../ca/uhn/fhir/model/api/annotation/DatatypeDef.html">DatatypeDef</a> theDatatypeDefinition) {
+<a class="jxr_linenumber" name="L297" href="#L297">297</a> 		ourLog.debug(<span class="jxr_string">"Scanning resource class: {}"</span>, theClass.getName());
+<a class="jxr_linenumber" name="L298" href="#L298">298</a> 
+<a class="jxr_linenumber" name="L299" href="#L299">299</a> 		String resourceName = theDatatypeDefinition.name();
+<a class="jxr_linenumber" name="L300" href="#L300">300</a> 		<strong class="jxr_keyword">if</strong> (isBlank(resourceName)) {
+<a class="jxr_linenumber" name="L301" href="#L301">301</a> 			<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../ca/uhn/fhir/context/ConfigurationException.html">ConfigurationException</a>(<span class="jxr_string">"Resource type @"</span> + ResourceDef.<strong class="jxr_keyword">class</strong>.getSimpleName() + <span class="jxr_string">" annotation contains no resource name: "</span> + theClass.getCanonicalName());
+<a class="jxr_linenumber" name="L302" href="#L302">302</a> 		}
+<a class="jxr_linenumber" name="L303" href="#L303">303</a> 
+<a class="jxr_linenumber" name="L304" href="#L304">304</a> 		BaseRuntimeElementDefinition&lt;?&gt; elementDef;
+<a class="jxr_linenumber" name="L305" href="#L305">305</a> 		<strong class="jxr_keyword">if</strong> (theClass.equals(XhtmlDt.<strong class="jxr_keyword">class</strong>)) {
+<a class="jxr_linenumber" name="L306" href="#L306">306</a> 			@SuppressWarnings(<span class="jxr_string">"unchecked"</span>)
+<a class="jxr_linenumber" name="L307" href="#L307">307</a> 			Class&lt;XhtmlDt&gt; clazz = (Class&lt;XhtmlDt&gt;) theClass;
+<a class="jxr_linenumber" name="L308" href="#L308">308</a> 			elementDef = <strong class="jxr_keyword">new</strong> <a href="../../../../ca/uhn/fhir/context/RuntimePrimitiveDatatypeNarrativeDefinition.html">RuntimePrimitiveDatatypeNarrativeDefinition</a>(resourceName, clazz, isStandardType(clazz));
+<a class="jxr_linenumber" name="L309" href="#L309">309</a> 		} <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (IBaseXhtml.<strong class="jxr_keyword">class</strong>.isAssignableFrom(theClass)) {
+<a class="jxr_linenumber" name="L310" href="#L310">310</a> 			@SuppressWarnings(<span class="jxr_string">"unchecked"</span>)
+<a class="jxr_linenumber" name="L311" href="#L311">311</a> 			Class&lt;? <strong class="jxr_keyword">extends</strong> IBaseXhtml&gt; clazz = (Class&lt;? <strong class="jxr_keyword">extends</strong> IBaseXhtml&gt;) theClass;
+<a class="jxr_linenumber" name="L312" href="#L312">312</a> 			elementDef = <strong class="jxr_keyword">new</strong> <a href="../../../../ca/uhn/fhir/context/RuntimePrimitiveDatatypeXhtmlHl7OrgDefinition.html">RuntimePrimitiveDatatypeXhtmlHl7OrgDefinition</a>(resourceName, clazz, isStandardType(clazz));
+<a class="jxr_linenumber" name="L313" href="#L313">313</a> 		} <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (IIdType.<strong class="jxr_keyword">class</strong>.isAssignableFrom(theClass)) {
+<a class="jxr_linenumber" name="L314" href="#L314">314</a> 			elementDef = <strong class="jxr_keyword">new</strong> <a href="../../../../ca/uhn/fhir/context/RuntimeIdDatatypeDefinition.html">RuntimeIdDatatypeDefinition</a>(theDatatypeDefinition, theClass, isStandardType(theClass));
+<a class="jxr_linenumber" name="L315" href="#L315">315</a> 		} <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L316" href="#L316">316</a> 			elementDef = <strong class="jxr_keyword">new</strong> <a href="../../../../ca/uhn/fhir/context/RuntimePrimitiveDatatypeDefinition.html">RuntimePrimitiveDatatypeDefinition</a>(theDatatypeDefinition, theClass, isStandardType(theClass));
+<a class="jxr_linenumber" name="L317" href="#L317">317</a> 		}
+<a class="jxr_linenumber" name="L318" href="#L318">318</a> 		myClassToElementDefinitions.put(theClass, elementDef);
+<a class="jxr_linenumber" name="L319" href="#L319">319</a> 		<strong class="jxr_keyword">if</strong> (!theDatatypeDefinition.isSpecialization()) {
+<a class="jxr_linenumber" name="L320" href="#L320">320</a> 			<strong class="jxr_keyword">if</strong> (myVersion.isRi() &amp;&amp; IDatatype.<strong class="jxr_keyword">class</strong>.isAssignableFrom(theClass)) {
+<a class="jxr_linenumber" name="L321" href="#L321">321</a> 				ourLog.debug(<span class="jxr_string">"Not adding non RI type {} to RI context"</span>, theClass);
+<a class="jxr_linenumber" name="L322" href="#L322">322</a> 			} <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (!myVersion.isRi() &amp;&amp; !IDatatype.<strong class="jxr_keyword">class</strong>.isAssignableFrom(theClass)) {
+<a class="jxr_linenumber" name="L323" href="#L323">323</a> 				ourLog.debug(<span class="jxr_string">"Not adding RI type {} to non RI context"</span>, theClass);
+<a class="jxr_linenumber" name="L324" href="#L324">324</a> 			} <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L325" href="#L325">325</a> 				myNameToElementDefinitions.put(resourceName, elementDef);
+<a class="jxr_linenumber" name="L326" href="#L326">326</a> 			}
+<a class="jxr_linenumber" name="L327" href="#L327">327</a> 		}
+<a class="jxr_linenumber" name="L328" href="#L328">328</a> 
+<a class="jxr_linenumber" name="L329" href="#L329">329</a> 		<strong class="jxr_keyword">return</strong> resourceName;
+<a class="jxr_linenumber" name="L330" href="#L330">330</a> 	}
+<a class="jxr_linenumber" name="L331" href="#L331">331</a> 
+<a class="jxr_linenumber" name="L332" href="#L332">332</a> 	<strong class="jxr_keyword">private</strong> String scanResource(Class&lt;? <strong class="jxr_keyword">extends</strong> IBaseResource&gt; theClass, <a href="../../../../ca/uhn/fhir/model/api/annotation/ResourceDef.html">ResourceDef</a> resourceDefinition) {
+<a class="jxr_linenumber" name="L333" href="#L333">333</a> 		ourLog.debug(<span class="jxr_string">"Scanning resource class: {}"</span>, theClass.getName());
+<a class="jxr_linenumber" name="L334" href="#L334">334</a> 
+<a class="jxr_linenumber" name="L335" href="#L335">335</a> 		<strong class="jxr_keyword">boolean</strong> primaryNameProvider = <strong class="jxr_keyword">true</strong>;
+<a class="jxr_linenumber" name="L336" href="#L336">336</a> 		String resourceName = resourceDefinition.name();
+<a class="jxr_linenumber" name="L337" href="#L337">337</a> 		<strong class="jxr_keyword">if</strong> (isBlank(resourceName)) {
+<a class="jxr_linenumber" name="L338" href="#L338">338</a> 			Class&lt;?&gt; parent = theClass.getSuperclass();
+<a class="jxr_linenumber" name="L339" href="#L339">339</a> 			primaryNameProvider = false;
+<a class="jxr_linenumber" name="L340" href="#L340">340</a> 			<strong class="jxr_keyword">while</strong> (parent.equals(Object.<strong class="jxr_keyword">class</strong>) == false &amp;&amp; isBlank(resourceName)) {
+<a class="jxr_linenumber" name="L341" href="#L341">341</a> 				ResourceDef nextDef = pullAnnotation(parent, ResourceDef.<strong class="jxr_keyword">class</strong>);
+<a class="jxr_linenumber" name="L342" href="#L342">342</a> 				<strong class="jxr_keyword">if</strong> (nextDef != <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L343" href="#L343">343</a> 					resourceName = nextDef.name();
+<a class="jxr_linenumber" name="L344" href="#L344">344</a> 				}
+<a class="jxr_linenumber" name="L345" href="#L345">345</a> 				parent = parent.getSuperclass();
+<a class="jxr_linenumber" name="L346" href="#L346">346</a> 			}
+<a class="jxr_linenumber" name="L347" href="#L347">347</a> 			<strong class="jxr_keyword">if</strong> (isBlank(resourceName)) {
+<a class="jxr_linenumber" name="L348" href="#L348">348</a> 				<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../ca/uhn/fhir/context/ConfigurationException.html">ConfigurationException</a>(<span class="jxr_string">"Resource type @"</span> + ResourceDef.<strong class="jxr_keyword">class</strong>.getSimpleName() + <span class="jxr_string">" annotation contains no resource name(): "</span> + theClass.getCanonicalName()
+<a class="jxr_linenumber" name="L349" href="#L349">349</a> 						+ <span class="jxr_string">" - This is only allowed for types that extend other resource types "</span>);
+<a class="jxr_linenumber" name="L350" href="#L350">350</a> 			}
+<a class="jxr_linenumber" name="L351" href="#L351">351</a> 		}
+<a class="jxr_linenumber" name="L352" href="#L352">352</a> 
+<a class="jxr_linenumber" name="L353" href="#L353">353</a> 		String resourceNameLowerCase = resourceName.toLowerCase();
+<a class="jxr_linenumber" name="L354" href="#L354">354</a> 		Class&lt;? <strong class="jxr_keyword">extends</strong> IBaseResource&gt; builtInType = myNameToResourceType.get(resourceNameLowerCase);
+<a class="jxr_linenumber" name="L355" href="#L355">355</a> 		<strong class="jxr_keyword">boolean</strong> standardType = builtInType != <strong class="jxr_keyword">null</strong> &amp;&amp; builtInType.equals(theClass) == <strong class="jxr_keyword">true</strong>;
+<a class="jxr_linenumber" name="L356" href="#L356">356</a> 		<strong class="jxr_keyword">if</strong> (primaryNameProvider) {
+<a class="jxr_linenumber" name="L357" href="#L357">357</a> 			<strong class="jxr_keyword">if</strong> (builtInType != <strong class="jxr_keyword">null</strong> &amp;&amp; builtInType.equals(theClass) == false) {
+<a class="jxr_linenumber" name="L358" href="#L358">358</a> 				primaryNameProvider = false;
+<a class="jxr_linenumber" name="L359" href="#L359">359</a> 			}
+<a class="jxr_linenumber" name="L360" href="#L360">360</a> 		}
+<a class="jxr_linenumber" name="L361" href="#L361">361</a> 		
+<a class="jxr_linenumber" name="L362" href="#L362">362</a> 		String resourceId = resourceDefinition.id();
+<a class="jxr_linenumber" name="L363" href="#L363">363</a> 		<strong class="jxr_keyword">if</strong> (!isBlank(resourceId)) {
+<a class="jxr_linenumber" name="L364" href="#L364">364</a> 			<strong class="jxr_keyword">if</strong> (myIdToResourceDefinition.containsKey(resourceId)) {
+<a class="jxr_linenumber" name="L365" href="#L365">365</a> 				<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../ca/uhn/fhir/context/ConfigurationException.html">ConfigurationException</a>(<span class="jxr_string">"The following resource types have the same ID of '"</span> + resourceId + <span class="jxr_string">"' - "</span> + theClass.getCanonicalName() + <span class="jxr_string">" and "</span>
+<a class="jxr_linenumber" name="L366" href="#L366">366</a> 						+ myIdToResourceDefinition.get(resourceId).getImplementingClass().getCanonicalName());
+<a class="jxr_linenumber" name="L367" href="#L367">367</a> 			}
+<a class="jxr_linenumber" name="L368" href="#L368">368</a> 		}
+<a class="jxr_linenumber" name="L369" href="#L369">369</a> 
+<a class="jxr_linenumber" name="L370" href="#L370">370</a> 		RuntimeResourceDefinition resourceDef = <strong class="jxr_keyword">new</strong> <a href="../../../../ca/uhn/fhir/context/RuntimeResourceDefinition.html">RuntimeResourceDefinition</a>(myContext, resourceName, theClass, resourceDefinition, standardType, myClassToElementDefinitions);
+<a class="jxr_linenumber" name="L371" href="#L371">371</a> 		myClassToElementDefinitions.put(theClass, resourceDef);
+<a class="jxr_linenumber" name="L372" href="#L372">372</a> 		<strong class="jxr_keyword">if</strong> (primaryNameProvider) {
+<a class="jxr_linenumber" name="L373" href="#L373">373</a> 			<strong class="jxr_keyword">if</strong> (resourceDef.getStructureVersion() == myVersion) {
+<a class="jxr_linenumber" name="L374" href="#L374">374</a> 				myNameToResourceDefinitions.put(resourceNameLowerCase, resourceDef);
+<a class="jxr_linenumber" name="L375" href="#L375">375</a> 			}
+<a class="jxr_linenumber" name="L376" href="#L376">376</a> 		}
 <a class="jxr_linenumber" name="L377" href="#L377">377</a> 
-<a class="jxr_linenumber" name="L378" href="#L378">378</a> 		scanResourceForSearchParams(theClass, resourceDef);
+<a class="jxr_linenumber" name="L378" href="#L378">378</a> 		myIdToResourceDefinition.put(resourceId, resourceDef);
 <a class="jxr_linenumber" name="L379" href="#L379">379</a> 
-<a class="jxr_linenumber" name="L380" href="#L380">380</a> 		<em class="jxr_comment">/*</em>
-<a class="jxr_linenumber" name="L381" href="#L381">381</a> <em class="jxr_comment">		 * See #423:</em>
-<a class="jxr_linenumber" name="L382" href="#L382">382</a> <em class="jxr_comment">		 * If the type contains a field that has a custom type, we want to make</em>
-<a class="jxr_linenumber" name="L383" href="#L383">383</a> <em class="jxr_comment">		 * sure that this type gets scanned as well</em>
-<a class="jxr_linenumber" name="L384" href="#L384">384</a> <em class="jxr_comment">		 */</em>
-<a class="jxr_linenumber" name="L385" href="#L385">385</a> 		resourceDef.populateScanAlso(myScanAlso);
-<a class="jxr_linenumber" name="L386" href="#L386">386</a> 		
-<a class="jxr_linenumber" name="L387" href="#L387">387</a> 		<strong class="jxr_keyword">return</strong> resourceName;
-<a class="jxr_linenumber" name="L388" href="#L388">388</a> 	}
-<a class="jxr_linenumber" name="L389" href="#L389">389</a> 
-<a class="jxr_linenumber" name="L390" href="#L390">390</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> scanResourceForSearchParams(Class&lt;? <strong class="jxr_keyword">extends</strong> IBaseResource&gt; theClass, <a href="../../../../ca/uhn/fhir/context/RuntimeResourceDefinition.html">RuntimeResourceDefinition</a> theResourceDef) {
+<a class="jxr_linenumber" name="L380" href="#L380">380</a> 		scanResourceForSearchParams(theClass, resourceDef);
+<a class="jxr_linenumber" name="L381" href="#L381">381</a> 
+<a class="jxr_linenumber" name="L382" href="#L382">382</a> 		<em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L383" href="#L383">383</a> <em class="jxr_comment">		 * See #423:</em>
+<a class="jxr_linenumber" name="L384" href="#L384">384</a> <em class="jxr_comment">		 * If the type contains a field that has a custom type, we want to make</em>
+<a class="jxr_linenumber" name="L385" href="#L385">385</a> <em class="jxr_comment">		 * sure that this type gets scanned as well</em>
+<a class="jxr_linenumber" name="L386" href="#L386">386</a> <em class="jxr_comment">		 */</em>
+<a class="jxr_linenumber" name="L387" href="#L387">387</a> 		resourceDef.populateScanAlso(myScanAlso);
+<a class="jxr_linenumber" name="L388" href="#L388">388</a> 		
+<a class="jxr_linenumber" name="L389" href="#L389">389</a> 		<strong class="jxr_keyword">return</strong> resourceName;
+<a class="jxr_linenumber" name="L390" href="#L390">390</a> 	}
 <a class="jxr_linenumber" name="L391" href="#L391">391</a> 
-<a class="jxr_linenumber" name="L392" href="#L392">392</a> 		Map&lt;String, RuntimeSearchParam&gt; nameToParam = <strong class="jxr_keyword">new</strong> HashMap&lt;String, RuntimeSearchParam&gt;();
-<a class="jxr_linenumber" name="L393" href="#L393">393</a> 		Map&lt;Field, SearchParamDefinition&gt; compositeFields = <strong class="jxr_keyword">new</strong> LinkedHashMap&lt;Field, SearchParamDefinition&gt;();
-<a class="jxr_linenumber" name="L394" href="#L394">394</a> 
-<a class="jxr_linenumber" name="L395" href="#L395">395</a> 		<em class="jxr_comment">/*</em>
-<a class="jxr_linenumber" name="L396" href="#L396">396</a> <em class="jxr_comment">		 * Make sure we pick up fields in interfaces too.. This ensures that we</em>
-<a class="jxr_linenumber" name="L397" href="#L397">397</a> <em class="jxr_comment">		 * grab the _id field which generally gets picked up via interface</em>
-<a class="jxr_linenumber" name="L398" href="#L398">398</a> <em class="jxr_comment">		 */</em>
-<a class="jxr_linenumber" name="L399" href="#L399">399</a> 		Set&lt;Field&gt; fields = <strong class="jxr_keyword">new</strong> HashSet&lt;Field&gt;(Arrays.asList(theClass.getFields()));
-<a class="jxr_linenumber" name="L400" href="#L400">400</a> 		Class&lt;?&gt; nextClass = theClass;
-<a class="jxr_linenumber" name="L401" href="#L401">401</a> 		<strong class="jxr_keyword">do</strong> {
-<a class="jxr_linenumber" name="L402" href="#L402">402</a> 			<strong class="jxr_keyword">for</strong> (Class&lt;?&gt; nextInterface : nextClass.getInterfaces()) {
-<a class="jxr_linenumber" name="L403" href="#L403">403</a> 				fields.addAll(Arrays.asList(nextInterface.getFields()));
-<a class="jxr_linenumber" name="L404" href="#L404">404</a> 			}
-<a class="jxr_linenumber" name="L405" href="#L405">405</a> 			nextClass = nextClass.getSuperclass();
-<a class="jxr_linenumber" name="L406" href="#L406">406</a> 		} <strong class="jxr_keyword">while</strong> (nextClass.equals(Object.<strong class="jxr_keyword">class</strong>) == false);
-<a class="jxr_linenumber" name="L407" href="#L407">407</a> 		
-<a class="jxr_linenumber" name="L408" href="#L408">408</a> 		<em class="jxr_comment">/*</em>
-<a class="jxr_linenumber" name="L409" href="#L409">409</a> <em class="jxr_comment">		 * Now scan the fields for search params</em>
-<a class="jxr_linenumber" name="L410" href="#L410">410</a> <em class="jxr_comment">		 */</em>
-<a class="jxr_linenumber" name="L411" href="#L411">411</a> 		<strong class="jxr_keyword">for</strong> (Field nextField : fields) {
-<a class="jxr_linenumber" name="L412" href="#L412">412</a> 			SearchParamDefinition searchParam = pullAnnotation(nextField, SearchParamDefinition.<strong class="jxr_keyword">class</strong>);
-<a class="jxr_linenumber" name="L413" href="#L413">413</a> 			<strong class="jxr_keyword">if</strong> (searchParam != <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L414" href="#L414">414</a> 				RestSearchParameterTypeEnum paramType = RestSearchParameterTypeEnum.forCode(searchParam.type().toLowerCase());
-<a class="jxr_linenumber" name="L415" href="#L415">415</a> 				<strong class="jxr_keyword">if</strong> (paramType == <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L416" href="#L416">416</a> 					<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../ca/uhn/fhir/context/ConfigurationException.html">ConfigurationException</a>(<span class="jxr_string">"Search param "</span> + searchParam.name() + <span class="jxr_string">" has an invalid type: "</span> + searchParam.type());
-<a class="jxr_linenumber" name="L417" href="#L417">417</a> 				}
-<a class="jxr_linenumber" name="L418" href="#L418">418</a> 				Set&lt;String&gt; providesMembershipInCompartments = <strong class="jxr_keyword">null</strong>;
-<a class="jxr_linenumber" name="L419" href="#L419">419</a> 				providesMembershipInCompartments = <strong class="jxr_keyword">new</strong> HashSet&lt;String&gt;();
-<a class="jxr_linenumber" name="L420" href="#L420">420</a> 				<strong class="jxr_keyword">for</strong> (Compartment next : searchParam.providesMembershipIn()) {
-<a class="jxr_linenumber" name="L421" href="#L421">421</a> 					<strong class="jxr_keyword">if</strong> (paramType != RestSearchParameterTypeEnum.REFERENCE) {
-<a class="jxr_linenumber" name="L422" href="#L422">422</a> 						StringBuilder b = <strong class="jxr_keyword">new</strong> StringBuilder();
-<a class="jxr_linenumber" name="L423" href="#L423">423</a> 						b.append(<span class="jxr_string">"Search param "</span>);
-<a class="jxr_linenumber" name="L424" href="#L424">424</a> 						b.append(searchParam.name());
-<a class="jxr_linenumber" name="L425" href="#L425">425</a> 						b.append(<span class="jxr_string">" on resource type "</span>);
-<a class="jxr_linenumber" name="L426" href="#L426">426</a> 						b.append(theClass.getName());
-<a class="jxr_linenumber" name="L427" href="#L427">427</a> 						b.append(<span class="jxr_string">" provides compartment membership but is not of type 'reference'"</span>);
-<a class="jxr_linenumber" name="L428" href="#L428">428</a> 						ourLog.warn(b.toString());
-<a class="jxr_linenumber" name="L429" href="#L429">429</a> 						<strong class="jxr_keyword">continue</strong>;
-<a class="jxr_linenumber" name="L430" href="#L430">430</a> <em class="jxr_comment">//						throw new ConfigurationException(b.toString());</em>
-<a class="jxr_linenumber" name="L431" href="#L431">431</a> 					}
-<a class="jxr_linenumber" name="L432" href="#L432">432</a> 					providesMembershipInCompartments.add(next.name());
-<a class="jxr_linenumber" name="L433" href="#L433">433</a> 				}
-<a class="jxr_linenumber" name="L434" href="#L434">434</a> 				
-<a class="jxr_linenumber" name="L435" href="#L435">435</a> 				<strong class="jxr_keyword">if</strong> (paramType == RestSearchParameterTypeEnum.COMPOSITE) {
-<a class="jxr_linenumber" name="L436" href="#L436">436</a> 					compositeFields.put(nextField, searchParam);
-<a class="jxr_linenumber" name="L437" href="#L437">437</a> 					<strong class="jxr_keyword">continue</strong>;
-<a class="jxr_linenumber" name="L438" href="#L438">438</a> 				}
-<a class="jxr_linenumber" name="L439" href="#L439">439</a> 
-<a class="jxr_linenumber" name="L440" href="#L440">440</a> 
-<a class="jxr_linenumber" name="L441" href="#L441">441</a> 				RuntimeSearchParam param = <strong class="jxr_keyword">new</strong> <a href="../../../../ca/uhn/fhir/context/RuntimeSearchParam.html">RuntimeSearchParam</a>(searchParam.name(), searchParam.description(), searchParam.path(), paramType, providesMembershipInCompartments, toTargetList(searchParam.target()), RuntimeSearchParamStatusEnum.ACTIVE);
-<a class="jxr_linenumber" name="L442" href="#L442">442</a> 				theResourceDef.addSearchParam(param);
-<a class="jxr_linenumber" name="L443" href="#L443">443</a> 				nameToParam.put(param.getName(), param);
-<a class="jxr_linenumber" name="L444" href="#L444">444</a> 			}
-<a class="jxr_linenumber" name="L445" href="#L445">445</a> 		}
-<a class="jxr_linenumber" name="L446" href="#L446">446</a> 
-<a class="jxr_linenumber" name="L447" href="#L447">447</a> 		<strong class="jxr_keyword">for</strong> (Entry&lt;Field, SearchParamDefinition&gt; nextEntry : compositeFields.entrySet()) {
-<a class="jxr_linenumber" name="L448" href="#L448">448</a> 			SearchParamDefinition searchParam = nextEntry.getValue();
-<a class="jxr_linenumber" name="L449" href="#L449">449</a> 
-<a class="jxr_linenumber" name="L450" href="#L450">450</a> 			List&lt;RuntimeSearchParam&gt; compositeOf = <strong class="jxr_keyword">new</strong> ArrayList&lt;RuntimeSearchParam&gt;();
-<a class="jxr_linenumber" name="L451" href="#L451">451</a> 			<strong class="jxr_keyword">for</strong> (String nextName : searchParam.compositeOf()) {
-<a class="jxr_linenumber" name="L452" href="#L452">452</a> 				RuntimeSearchParam param = nameToParam.get(nextName);
-<a class="jxr_linenumber" name="L453" href="#L453">453</a> 				<strong class="jxr_keyword">if</strong> (param == <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L454" href="#L454">454</a> 					ourLog.warn(<span class="jxr_string">"Search parameter {}.{} declares that it is a composite with compositeOf value '{}' but that is not a valid parametr name itself. Valid values are: {}"</span>,
-<a class="jxr_linenumber" name="L455" href="#L455">455</a> 							<strong class="jxr_keyword">new</strong> Object[] { theResourceDef.getName(), searchParam.name(), nextName, nameToParam.keySet() });
-<a class="jxr_linenumber" name="L456" href="#L456">456</a> 					<strong class="jxr_keyword">continue</strong>;
-<a class="jxr_linenumber" name="L457" href="#L457">457</a> 				}
-<a class="jxr_linenumber" name="L458" href="#L458">458</a> 				compositeOf.add(param);
-<a class="jxr_linenumber" name="L459" href="#L459">459</a> 			}
-<a class="jxr_linenumber" name="L460" href="#L460">460</a> 
-<a class="jxr_linenumber" name="L461" href="#L461">461</a> 			RuntimeSearchParam param = <strong class="jxr_keyword">new</strong> <a href="../../../../ca/uhn/fhir/context/RuntimeSearchParam.html">RuntimeSearchParam</a>(<strong class="jxr_keyword">null</strong>, <strong class="jxr_keyword">null</strong>, searchParam.name(), searchParam.description(), searchParam.path(), RestSearchParameterTypeEnum.COMPOSITE, compositeOf, <strong class="jxr_keyword">null</strong>, toTargetList(searchParam.target()), RuntimeSearchParamStatusEnum.ACTIVE);
-<a class="jxr_linenumber" name="L462" href="#L462">462</a> 			theResourceDef.addSearchParam(param);
-<a class="jxr_linenumber" name="L463" href="#L463">463</a> 		}
-<a class="jxr_linenumber" name="L464" href="#L464">464</a> 	}
-<a class="jxr_linenumber" name="L465" href="#L465">465</a> 
-<a class="jxr_linenumber" name="L466" href="#L466">466</a> 	<strong class="jxr_keyword">private</strong> Set&lt;String&gt; toTargetList(Class&lt;? <strong class="jxr_keyword">extends</strong> IBaseResource&gt;[] theTarget) {
-<a class="jxr_linenumber" name="L467" href="#L467">467</a> 		HashSet&lt;String&gt; retVal = <strong class="jxr_keyword">new</strong> HashSet&lt;String&gt;();
-<a class="jxr_linenumber" name="L468" href="#L468">468</a> 		
-<a class="jxr_linenumber" name="L469" href="#L469">469</a> 		<strong class="jxr_keyword">for</strong> (Class&lt;? <strong class="jxr_keyword">extends</strong> IBaseResource&gt; nextType : theTarget) {
-<a class="jxr_linenumber" name="L470" href="#L470">470</a> 			ResourceDef resourceDef = nextType.getAnnotation(ResourceDef.<strong class="jxr_keyword">class</strong>);
-<a class="jxr_linenumber" name="L471" href="#L471">471</a> 			<strong class="jxr_keyword">if</strong> (resourceDef != <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L472" href="#L472">472</a> 				retVal.add(resourceDef.name());
-<a class="jxr_linenumber" name="L473" href="#L473">473</a> 			}
-<a class="jxr_linenumber" name="L474" href="#L474">474</a> 		}
-<a class="jxr_linenumber" name="L475" href="#L475">475</a> 		
-<a class="jxr_linenumber" name="L476" href="#L476">476</a> 		<strong class="jxr_keyword">return</strong> retVal;
-<a class="jxr_linenumber" name="L477" href="#L477">477</a> 	}
-<a class="jxr_linenumber" name="L478" href="#L478">478</a> 
-<a class="jxr_linenumber" name="L479" href="#L479">479</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> Class&lt;?&gt; getGenericCollectionTypeOfCodedField(Field next) {
-<a class="jxr_linenumber" name="L480" href="#L480">480</a> 		Class&lt;?&gt; type;
-<a class="jxr_linenumber" name="L481" href="#L481">481</a> 		ParameterizedType collectionType = (ParameterizedType) next.getGenericType();
-<a class="jxr_linenumber" name="L482" href="#L482">482</a> 		Type firstArg = collectionType.getActualTypeArguments()[0];
-<a class="jxr_linenumber" name="L483" href="#L483">483</a> 		<strong class="jxr_keyword">if</strong> (ParameterizedType.<strong class="jxr_keyword">class</strong>.isAssignableFrom(firstArg.getClass())) {
-<a class="jxr_linenumber" name="L484" href="#L484">484</a> 			ParameterizedType pt = ((ParameterizedType) firstArg);
-<a class="jxr_linenumber" name="L485" href="#L485">485</a> 			firstArg = pt.getActualTypeArguments()[0];
-<a class="jxr_linenumber" name="L486" href="#L486">486</a> 			type = (Class&lt;?&gt;) firstArg;
-<a class="jxr_linenumber" name="L487" href="#L487">487</a> 		} <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L392" href="#L392">392</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> scanResourceForSearchParams(Class&lt;? <strong class="jxr_keyword">extends</strong> IBaseResource&gt; theClass, <a href="../../../../ca/uhn/fhir/context/RuntimeResourceDefinition.html">RuntimeResourceDefinition</a> theResourceDef) {
+<a class="jxr_linenumber" name="L393" href="#L393">393</a> 
+<a class="jxr_linenumber" name="L394" href="#L394">394</a> 		Map&lt;String, RuntimeSearchParam&gt; nameToParam = <strong class="jxr_keyword">new</strong> HashMap&lt;String, RuntimeSearchParam&gt;();
+<a class="jxr_linenumber" name="L395" href="#L395">395</a> 		Map&lt;Field, SearchParamDefinition&gt; compositeFields = <strong class="jxr_keyword">new</strong> LinkedHashMap&lt;Field, SearchParamDefinition&gt;();
+<a class="jxr_linenumber" name="L396" href="#L396">396</a> 
+<a class="jxr_linenumber" name="L397" href="#L397">397</a> 		<em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L398" href="#L398">398</a> <em class="jxr_comment">		 * Make sure we pick up fields in interfaces too.. This ensures that we</em>
+<a class="jxr_linenumber" name="L399" href="#L399">399</a> <em class="jxr_comment">		 * grab the _id field which generally gets picked up via interface</em>
+<a class="jxr_linenumber" name="L400" href="#L400">400</a> <em class="jxr_comment">		 */</em>
+<a class="jxr_linenumber" name="L401" href="#L401">401</a> 		Set&lt;Field&gt; fields = <strong class="jxr_keyword">new</strong> HashSet&lt;Field&gt;(Arrays.asList(theClass.getFields()));
+<a class="jxr_linenumber" name="L402" href="#L402">402</a> 		Class&lt;?&gt; nextClass = theClass;
+<a class="jxr_linenumber" name="L403" href="#L403">403</a> 		<strong class="jxr_keyword">do</strong> {
+<a class="jxr_linenumber" name="L404" href="#L404">404</a> 			<strong class="jxr_keyword">for</strong> (Class&lt;?&gt; nextInterface : nextClass.getInterfaces()) {
+<a class="jxr_linenumber" name="L405" href="#L405">405</a> 				fields.addAll(Arrays.asList(nextInterface.getFields()));
+<a class="jxr_linenumber" name="L406" href="#L406">406</a> 			}
+<a class="jxr_linenumber" name="L407" href="#L407">407</a> 			nextClass = nextClass.getSuperclass();
+<a class="jxr_linenumber" name="L408" href="#L408">408</a> 		} <strong class="jxr_keyword">while</strong> (nextClass.equals(Object.<strong class="jxr_keyword">class</strong>) == false);
+<a class="jxr_linenumber" name="L409" href="#L409">409</a> 		
+<a class="jxr_linenumber" name="L410" href="#L410">410</a> 		<em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L411" href="#L411">411</a> <em class="jxr_comment">		 * Now scan the fields for search params</em>
+<a class="jxr_linenumber" name="L412" href="#L412">412</a> <em class="jxr_comment">		 */</em>
+<a class="jxr_linenumber" name="L413" href="#L413">413</a> 		<strong class="jxr_keyword">for</strong> (Field nextField : fields) {
+<a class="jxr_linenumber" name="L414" href="#L414">414</a> 			SearchParamDefinition searchParam = pullAnnotation(nextField, SearchParamDefinition.<strong class="jxr_keyword">class</strong>);
+<a class="jxr_linenumber" name="L415" href="#L415">415</a> 			<strong class="jxr_keyword">if</strong> (searchParam != <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L416" href="#L416">416</a> 				RestSearchParameterTypeEnum paramType = RestSearchParameterTypeEnum.forCode(searchParam.type().toLowerCase());
+<a class="jxr_linenumber" name="L417" href="#L417">417</a> 				<strong class="jxr_keyword">if</strong> (paramType == <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L418" href="#L418">418</a> 					<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../ca/uhn/fhir/context/ConfigurationException.html">ConfigurationException</a>(<span class="jxr_string">"Search param "</span> + searchParam.name() + <span class="jxr_string">" has an invalid type: "</span> + searchParam.type());
+<a class="jxr_linenumber" name="L419" href="#L419">419</a> 				}
+<a class="jxr_linenumber" name="L420" href="#L420">420</a> 				Set&lt;String&gt; providesMembershipInCompartments = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L421" href="#L421">421</a> 				providesMembershipInCompartments = <strong class="jxr_keyword">new</strong> HashSet&lt;String&gt;();
+<a class="jxr_linenumber" name="L422" href="#L422">422</a> 				<strong class="jxr_keyword">for</strong> (Compartment next : searchParam.providesMembershipIn()) {
+<a class="jxr_linenumber" name="L423" href="#L423">423</a> 					<strong class="jxr_keyword">if</strong> (paramType != RestSearchParameterTypeEnum.REFERENCE) {
+<a class="jxr_linenumber" name="L424" href="#L424">424</a> 						StringBuilder b = <strong class="jxr_keyword">new</strong> StringBuilder();
+<a class="jxr_linenumber" name="L425" href="#L425">425</a> 						b.append(<span class="jxr_string">"Search param "</span>);
+<a class="jxr_linenumber" name="L426" href="#L426">426</a> 						b.append(searchParam.name());
+<a class="jxr_linenumber" name="L427" href="#L427">427</a> 						b.append(<span class="jxr_string">" on resource type "</span>);
+<a class="jxr_linenumber" name="L428" href="#L428">428</a> 						b.append(theClass.getName());
+<a class="jxr_linenumber" name="L429" href="#L429">429</a> 						b.append(<span class="jxr_string">" provides compartment membership but is not of type 'reference'"</span>);
+<a class="jxr_linenumber" name="L430" href="#L430">430</a> 						ourLog.warn(b.toString());
+<a class="jxr_linenumber" name="L431" href="#L431">431</a> 						<strong class="jxr_keyword">continue</strong>;
+<a class="jxr_linenumber" name="L432" href="#L432">432</a> <em class="jxr_comment">//						throw new ConfigurationException(b.toString());</em>
+<a class="jxr_linenumber" name="L433" href="#L433">433</a> 					}
+<a class="jxr_linenumber" name="L434" href="#L434">434</a> 					providesMembershipInCompartments.add(next.name());
+<a class="jxr_linenumber" name="L435" href="#L435">435</a> 				}
+<a class="jxr_linenumber" name="L436" href="#L436">436</a> 				
+<a class="jxr_linenumber" name="L437" href="#L437">437</a> 				<strong class="jxr_keyword">if</strong> (paramType == RestSearchParameterTypeEnum.COMPOSITE) {
+<a class="jxr_linenumber" name="L438" href="#L438">438</a> 					compositeFields.put(nextField, searchParam);
+<a class="jxr_linenumber" name="L439" href="#L439">439</a> 					<strong class="jxr_keyword">continue</strong>;
+<a class="jxr_linenumber" name="L440" href="#L440">440</a> 				}
+<a class="jxr_linenumber" name="L441" href="#L441">441</a> 
+<a class="jxr_linenumber" name="L442" href="#L442">442</a> 
+<a class="jxr_linenumber" name="L443" href="#L443">443</a> 				RuntimeSearchParam param = <strong class="jxr_keyword">new</strong> <a href="../../../../ca/uhn/fhir/context/RuntimeSearchParam.html">RuntimeSearchParam</a>(searchParam.name(), searchParam.description(), searchParam.path(), paramType, providesMembershipInCompartments, toTargetList(searchParam.target()), RuntimeSearchParamStatusEnum.ACTIVE);
+<a class="jxr_linenumber" name="L444" href="#L444">444</a> 				theResourceDef.addSearchParam(param);
+<a class="jxr_linenumber" name="L445" href="#L445">445</a> 				nameToParam.put(param.getName(), param);
+<a class="jxr_linenumber" name="L446" href="#L446">446</a> 			}
+<a class="jxr_linenumber" name="L447" href="#L447">447</a> 		}
+<a class="jxr_linenumber" name="L448" href="#L448">448</a> 
+<a class="jxr_linenumber" name="L449" href="#L449">449</a> 		<strong class="jxr_keyword">for</strong> (Entry&lt;Field, SearchParamDefinition&gt; nextEntry : compositeFields.entrySet()) {
+<a class="jxr_linenumber" name="L450" href="#L450">450</a> 			SearchParamDefinition searchParam = nextEntry.getValue();
+<a class="jxr_linenumber" name="L451" href="#L451">451</a> 
+<a class="jxr_linenumber" name="L452" href="#L452">452</a> 			List&lt;RuntimeSearchParam&gt; compositeOf = <strong class="jxr_keyword">new</strong> ArrayList&lt;RuntimeSearchParam&gt;();
+<a class="jxr_linenumber" name="L453" href="#L453">453</a> 			<strong class="jxr_keyword">for</strong> (String nextName : searchParam.compositeOf()) {
+<a class="jxr_linenumber" name="L454" href="#L454">454</a> 				RuntimeSearchParam param = nameToParam.get(nextName);
+<a class="jxr_linenumber" name="L455" href="#L455">455</a> 				<strong class="jxr_keyword">if</strong> (param == <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L456" href="#L456">456</a> 					ourLog.warn(<span class="jxr_string">"Search parameter {}.{} declares that it is a composite with compositeOf value '{}' but that is not a valid parametr name itself. Valid values are: {}"</span>,
+<a class="jxr_linenumber" name="L457" href="#L457">457</a> 							<strong class="jxr_keyword">new</strong> Object[] { theResourceDef.getName(), searchParam.name(), nextName, nameToParam.keySet() });
+<a class="jxr_linenumber" name="L458" href="#L458">458</a> 					<strong class="jxr_keyword">continue</strong>;
+<a class="jxr_linenumber" name="L459" href="#L459">459</a> 				}
+<a class="jxr_linenumber" name="L460" href="#L460">460</a> 				compositeOf.add(param);
+<a class="jxr_linenumber" name="L461" href="#L461">461</a> 			}
+<a class="jxr_linenumber" name="L462" href="#L462">462</a> 
+<a class="jxr_linenumber" name="L463" href="#L463">463</a> 			RuntimeSearchParam param = <strong class="jxr_keyword">new</strong> <a href="../../../../ca/uhn/fhir/context/RuntimeSearchParam.html">RuntimeSearchParam</a>(<strong class="jxr_keyword">null</strong>, <strong class="jxr_keyword">null</strong>, searchParam.name(), searchParam.description(), searchParam.path(), RestSearchParameterTypeEnum.COMPOSITE, compositeOf, <strong class="jxr_keyword">null</strong>, toTargetList(searchParam.target()), RuntimeSearchParamStatusEnum.ACTIVE);
+<a class="jxr_linenumber" name="L464" href="#L464">464</a> 			theResourceDef.addSearchParam(param);
+<a class="jxr_linenumber" name="L465" href="#L465">465</a> 		}
+<a class="jxr_linenumber" name="L466" href="#L466">466</a> 	}
+<a class="jxr_linenumber" name="L467" href="#L467">467</a> 
+<a class="jxr_linenumber" name="L468" href="#L468">468</a> 	<strong class="jxr_keyword">private</strong> Set&lt;String&gt; toTargetList(Class&lt;? <strong class="jxr_keyword">extends</strong> IBaseResource&gt;[] theTarget) {
+<a class="jxr_linenumber" name="L469" href="#L469">469</a> 		HashSet&lt;String&gt; retVal = <strong class="jxr_keyword">new</strong> HashSet&lt;String&gt;();
+<a class="jxr_linenumber" name="L470" href="#L470">470</a> 		
+<a class="jxr_linenumber" name="L471" href="#L471">471</a> 		<strong class="jxr_keyword">for</strong> (Class&lt;? <strong class="jxr_keyword">extends</strong> IBaseResource&gt; nextType : theTarget) {
+<a class="jxr_linenumber" name="L472" href="#L472">472</a> 			ResourceDef resourceDef = nextType.getAnnotation(ResourceDef.<strong class="jxr_keyword">class</strong>);
+<a class="jxr_linenumber" name="L473" href="#L473">473</a> 			<strong class="jxr_keyword">if</strong> (resourceDef != <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L474" href="#L474">474</a> 				retVal.add(resourceDef.name());
+<a class="jxr_linenumber" name="L475" href="#L475">475</a> 			}
+<a class="jxr_linenumber" name="L476" href="#L476">476</a> 		}
+<a class="jxr_linenumber" name="L477" href="#L477">477</a> 		
+<a class="jxr_linenumber" name="L478" href="#L478">478</a> 		<strong class="jxr_keyword">return</strong> retVal;
+<a class="jxr_linenumber" name="L479" href="#L479">479</a> 	}
+<a class="jxr_linenumber" name="L480" href="#L480">480</a> 
+<a class="jxr_linenumber" name="L481" href="#L481">481</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> Class&lt;?&gt; getGenericCollectionTypeOfCodedField(Field next) {
+<a class="jxr_linenumber" name="L482" href="#L482">482</a> 		Class&lt;?&gt; type;
+<a class="jxr_linenumber" name="L483" href="#L483">483</a> 		ParameterizedType collectionType = (ParameterizedType) next.getGenericType();
+<a class="jxr_linenumber" name="L484" href="#L484">484</a> 		Type firstArg = collectionType.getActualTypeArguments()[0];
+<a class="jxr_linenumber" name="L485" href="#L485">485</a> 		<strong class="jxr_keyword">if</strong> (ParameterizedType.<strong class="jxr_keyword">class</strong>.isAssignableFrom(firstArg.getClass())) {
+<a class="jxr_linenumber" name="L486" href="#L486">486</a> 			ParameterizedType pt = ((ParameterizedType) firstArg);
+<a class="jxr_linenumber" name="L487" href="#L487">487</a> 			firstArg = pt.getActualTypeArguments()[0];
 <a class="jxr_linenumber" name="L488" href="#L488">488</a> 			type = (Class&lt;?&gt;) firstArg;
-<a class="jxr_linenumber" name="L489" href="#L489">489</a> 		}
-<a class="jxr_linenumber" name="L490" href="#L490">490</a> 		<strong class="jxr_keyword">return</strong> type;
-<a class="jxr_linenumber" name="L491" href="#L491">491</a> 	}
-<a class="jxr_linenumber" name="L492" href="#L492">492</a> 
-<a class="jxr_linenumber" name="L493" href="#L493">493</a> 	<strong class="jxr_keyword">static</strong> Set&lt;Class&lt;? <strong class="jxr_keyword">extends</strong> IBase&gt;&gt; scanVersionPropertyFile(Set&lt;Class&lt;? <strong class="jxr_keyword">extends</strong> IBase&gt;&gt; theDatatypes, Map&lt;String, Class&lt;? <strong class="jxr_keyword">extends</strong> IBaseResource&gt;&gt; theResourceTypes, <a href="../../../../ca/uhn/fhir/context/FhirVersionEnum.html">FhirVersionEnum</a> theVersion, Map&lt;Class&lt;? <strong class="jxr_keyword">extends</strong> IBase&gt;, BaseRuntimeElementDefinition&lt;?&gt;&gt; theExistingElementDefinitions) {
-<a class="jxr_linenumber" name="L494" href="#L494">494</a> 		Set&lt;Class&lt;? <strong class="jxr_keyword">extends</strong> IBase&gt;&gt; retVal = <strong class="jxr_keyword">new</strong> HashSet&lt;Class&lt;? <strong class="jxr_keyword">extends</strong> IBase&gt;&gt;();
-<a class="jxr_linenumber" name="L495" href="#L495">495</a> 
-<a class="jxr_linenumber" name="L496" href="#L496">496</a> 		InputStream str = theVersion.getVersionImplementation().getFhirVersionPropertiesFile();
-<a class="jxr_linenumber" name="L497" href="#L497">497</a> 		Properties prop = <strong class="jxr_keyword">new</strong> Properties();
-<a class="jxr_linenumber" name="L498" href="#L498">498</a> 		<strong class="jxr_keyword">try</strong> {
-<a class="jxr_linenumber" name="L499" href="#L499">499</a> 			prop.load(str);
-<a class="jxr_linenumber" name="L500" href="#L500">500</a> 			<strong class="jxr_keyword">for</strong> (Entry&lt;Object, Object&gt; nextEntry : prop.entrySet()) {
-<a class="jxr_linenumber" name="L501" href="#L501">501</a> 				String nextKey = nextEntry.getKey().toString();
-<a class="jxr_linenumber" name="L502" href="#L502">502</a> 				String nextValue = nextEntry.getValue().toString();
-<a class="jxr_linenumber" name="L503" href="#L503">503</a> 
-<a class="jxr_linenumber" name="L504" href="#L504">504</a> 				<strong class="jxr_keyword">if</strong> (nextKey.startsWith(<span class="jxr_string">"datatype."</span>)) {
-<a class="jxr_linenumber" name="L505" href="#L505">505</a> 					<strong class="jxr_keyword">if</strong> (theDatatypes != <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L506" href="#L506">506</a> 						<strong class="jxr_keyword">try</strong> {
-<a class="jxr_linenumber" name="L507" href="#L507">507</a> 							<em class="jxr_comment">// Datatypes</em>
-<a class="jxr_linenumber" name="L508" href="#L508">508</a> 
-<a class="jxr_linenumber" name="L509" href="#L509">509</a> 							@SuppressWarnings(<span class="jxr_string">"unchecked"</span>)
-<a class="jxr_linenumber" name="L510" href="#L510">510</a> 							Class&lt;? <strong class="jxr_keyword">extends</strong> IBase&gt; dtType = (Class&lt;? <strong class="jxr_keyword">extends</strong> IBase&gt;) Class.forName(nextValue);
-<a class="jxr_linenumber" name="L511" href="#L511">511</a> 							<strong class="jxr_keyword">if</strong> (theExistingElementDefinitions.containsKey(dtType)) {
-<a class="jxr_linenumber" name="L512" href="#L512">512</a> 								<strong class="jxr_keyword">continue</strong>;
-<a class="jxr_linenumber" name="L513" href="#L513">513</a> 							}
-<a class="jxr_linenumber" name="L514" href="#L514">514</a> 							retVal.add(dtType);
-<a class="jxr_linenumber" name="L515" href="#L515">515</a> 
-<a class="jxr_linenumber" name="L516" href="#L516">516</a> 							<strong class="jxr_keyword">if</strong> (IElement.<strong class="jxr_keyword">class</strong>.isAssignableFrom(dtType)) {
-<a class="jxr_linenumber" name="L517" href="#L517">517</a> 								@SuppressWarnings(<span class="jxr_string">"unchecked"</span>)
-<a class="jxr_linenumber" name="L518" href="#L518">518</a> 								Class&lt;? <strong class="jxr_keyword">extends</strong> IElement&gt; nextClass = (Class&lt;? <strong class="jxr_keyword">extends</strong> IElement&gt;) dtType;
-<a class="jxr_linenumber" name="L519" href="#L519">519</a> 								theDatatypes.add(nextClass);
-<a class="jxr_linenumber" name="L520" href="#L520">520</a> 							} <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (IBaseDatatype.<strong class="jxr_keyword">class</strong>.isAssignableFrom(dtType)) {
-<a class="jxr_linenumber" name="L521" href="#L521">521</a> 								@SuppressWarnings(<span class="jxr_string">"unchecked"</span>)
-<a class="jxr_linenumber" name="L522" href="#L522">522</a> 								Class&lt;? <strong class="jxr_keyword">extends</strong> IBaseDatatype&gt; nextClass = (Class&lt;? <strong class="jxr_keyword">extends</strong> IBaseDatatype&gt;) dtType;
-<a class="jxr_linenumber" name="L523" href="#L523">523</a> 								theDatatypes.add(nextClass);
-<a class="jxr_linenumber" name="L524" href="#L524">524</a> 							} <strong class="jxr_keyword">else</strong> {
-<a class="jxr_linenumber" name="L525" href="#L525">525</a> 								ourLog.warn(<span class="jxr_string">"Class is not assignable from "</span> + IElement.<strong class="jxr_keyword">class</strong>.getSimpleName() + <span class="jxr_string">" or "</span> + IBaseDatatype.<strong class="jxr_keyword">class</strong>.getSimpleName() + <span class="jxr_string">": "</span> + nextValue);
-<a class="jxr_linenumber" name="L526" href="#L526">526</a> 								<strong class="jxr_keyword">continue</strong>;
-<a class="jxr_linenumber" name="L527" href="#L527">527</a> 							}
-<a class="jxr_linenumber" name="L528" href="#L528">528</a> 
-<a class="jxr_linenumber" name="L529" href="#L529">529</a> 						} <strong class="jxr_keyword">catch</strong> (ClassNotFoundException e) {
-<a class="jxr_linenumber" name="L530" href="#L530">530</a> 							<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../ca/uhn/fhir/context/ConfigurationException.html">ConfigurationException</a>(<span class="jxr_string">"Unknown class["</span> + nextValue + <span class="jxr_string">"] for data type definition: "</span> + nextKey.substring(<span class="jxr_string">"datatype."</span>.length()), e);
-<a class="jxr_linenumber" name="L531" href="#L531">531</a> 						}
-<a class="jxr_linenumber" name="L532" href="#L532">532</a> 					}
-<a class="jxr_linenumber" name="L533" href="#L533">533</a> 				} <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (nextKey.startsWith(<span class="jxr_string">"resource."</span>)) {
-<a class="jxr_linenumber" name="L534" href="#L534">534</a> 					<em class="jxr_comment">// Resources</em>
-<a class="jxr_linenumber" name="L535" href="#L535">535</a> 					String resName = nextKey.substring(<span class="jxr_string">"resource."</span>.length()).toLowerCase();
-<a class="jxr_linenumber" name="L536" href="#L536">536</a> 					<strong class="jxr_keyword">try</strong> {
-<a class="jxr_linenumber" name="L537" href="#L537">537</a> 						@SuppressWarnings(<span class="jxr_string">"unchecked"</span>)
-<a class="jxr_linenumber" name="L538" href="#L538">538</a> 						Class&lt;? <strong class="jxr_keyword">extends</strong> IBaseResource&gt; nextClass = (Class&lt;? <strong class="jxr_keyword">extends</strong> IBaseResource&gt;) Class.forName(nextValue);
-<a class="jxr_linenumber" name="L539" href="#L539">539</a> 						<strong class="jxr_keyword">if</strong> (theExistingElementDefinitions.containsKey(nextClass)) {
-<a class="jxr_linenumber" name="L540" href="#L540">540</a> 							<strong class="jxr_keyword">continue</strong>;
-<a class="jxr_linenumber" name="L541" href="#L541">541</a> 						}
-<a class="jxr_linenumber" name="L542" href="#L542">542</a> 						<strong class="jxr_keyword">if</strong> (!IBaseResource.<strong class="jxr_keyword">class</strong>.isAssignableFrom(nextClass)) {
-<a class="jxr_linenumber" name="L543" href="#L543">543</a> 							<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../ca/uhn/fhir/context/ConfigurationException.html">ConfigurationException</a>(<span class="jxr_string">"Class is not assignable from "</span> + IBaseResource.<strong class="jxr_keyword">class</strong>.getSimpleName() + <span class="jxr_string">": "</span> + nextValue);
-<a class="jxr_linenumber" name="L544" href="#L544">544</a> 						}
-<a class="jxr_linenumber" name="L545" href="#L545">545</a> 
-<a class="jxr_linenumber" name="L546" href="#L546">546</a> 						theResourceTypes.put(resName, nextClass);
-<a class="jxr_linenumber" name="L547" href="#L547">547</a> 					} <strong class="jxr_keyword">catch</strong> (ClassNotFoundException e) {
-<a class="jxr_linenumber" name="L548" href="#L548">548</a> 						<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../ca/uhn/fhir/context/ConfigurationException.html">ConfigurationException</a>(<span class="jxr_string">"Unknown class["</span> + nextValue + <span class="jxr_string">"] for resource definition: "</span> + nextKey.substring(<span class="jxr_string">"resource."</span>.length()), e);
-<a class="jxr_linenumber" name="L549" href="#L549">549</a> 					}
-<a class="jxr_linenumber" name="L550" href="#L550">550</a> 				} <strong class="jxr_keyword">else</strong> {
-<a class="jxr_linenumber" name="L551" href="#L551">551</a> 					<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../ca/uhn/fhir/context/ConfigurationException.html">ConfigurationException</a>(<span class="jxr_string">"Unexpected property in version property file: "</span> + nextKey + <span class="jxr_string">"="</span> + nextValue);
-<a class="jxr_linenumber" name="L552" href="#L552">552</a> 				}
-<a class="jxr_linenumber" name="L553" href="#L553">553</a> 			}
-<a class="jxr_linenumber" name="L554" href="#L554">554</a> 		} <strong class="jxr_keyword">catch</strong> (IOException e) {
-<a class="jxr_linenumber" name="L555" href="#L555">555</a> 			<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../ca/uhn/fhir/context/ConfigurationException.html">ConfigurationException</a>(<span class="jxr_string">"Failed to load model property file from classpath: "</span> + <span class="jxr_string">"/ca/uhn/fhir/model/dstu/model.properties"</span>);
-<a class="jxr_linenumber" name="L556" href="#L556">556</a> 		} <strong class="jxr_keyword">finally</strong> {
-<a class="jxr_linenumber" name="L557" href="#L557">557</a> 			IOUtils.closeQuietly(str);
-<a class="jxr_linenumber" name="L558" href="#L558">558</a> 		}
-<a class="jxr_linenumber" name="L559" href="#L559">559</a> 
-<a class="jxr_linenumber" name="L560" href="#L560">560</a> 		<strong class="jxr_keyword">return</strong> retVal;
-<a class="jxr_linenumber" name="L561" href="#L561">561</a> 	}
-<a class="jxr_linenumber" name="L562" href="#L562">562</a> 
-<a class="jxr_linenumber" name="L563" href="#L563">563</a> }
+<a class="jxr_linenumber" name="L489" href="#L489">489</a> 		} <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L490" href="#L490">490</a> 			type = (Class&lt;?&gt;) firstArg;
+<a class="jxr_linenumber" name="L491" href="#L491">491</a> 		}
+<a class="jxr_linenumber" name="L492" href="#L492">492</a> 		<strong class="jxr_keyword">return</strong> type;
+<a class="jxr_linenumber" name="L493" href="#L493">493</a> 	}
+<a class="jxr_linenumber" name="L494" href="#L494">494</a> 
+<a class="jxr_linenumber" name="L495" href="#L495">495</a> 	<strong class="jxr_keyword">static</strong> Set&lt;Class&lt;? <strong class="jxr_keyword">extends</strong> IBase&gt;&gt; scanVersionPropertyFile(Set&lt;Class&lt;? <strong class="jxr_keyword">extends</strong> IBase&gt;&gt; theDatatypes, Map&lt;String, Class&lt;? <strong class="jxr_keyword">extends</strong> IBaseResource&gt;&gt; theResourceTypes, <a href="../../../../ca/uhn/fhir/context/FhirVersionEnum.html">FhirVersionEnum</a> theVersion, Map&lt;Class&lt;? <strong class="jxr_keyword">extends</strong> IBase&gt;, BaseRuntimeElementDefinition&lt;?&gt;&gt; theExistingElementDefinitions) {
+<a class="jxr_linenumber" name="L496" href="#L496">496</a> 		Set&lt;Class&lt;? <strong class="jxr_keyword">extends</strong> IBase&gt;&gt; retVal = <strong class="jxr_keyword">new</strong> HashSet&lt;Class&lt;? <strong class="jxr_keyword">extends</strong> IBase&gt;&gt;();
+<a class="jxr_linenumber" name="L497" href="#L497">497</a> 
+<a class="jxr_linenumber" name="L498" href="#L498">498</a> 		InputStream str = theVersion.getVersionImplementation().getFhirVersionPropertiesFile();
+<a class="jxr_linenumber" name="L499" href="#L499">499</a> 		Properties prop = <strong class="jxr_keyword">new</strong> Properties();
+<a class="jxr_linenumber" name="L500" href="#L500">500</a> 		<strong class="jxr_keyword">try</strong> {
+<a class="jxr_linenumber" name="L501" href="#L501">501</a> 			prop.load(str);
+<a class="jxr_linenumber" name="L502" href="#L502">502</a> 			<strong class="jxr_keyword">for</strong> (Entry&lt;Object, Object&gt; nextEntry : prop.entrySet()) {
+<a class="jxr_linenumber" name="L503" href="#L503">503</a> 				String nextKey = nextEntry.getKey().toString();
+<a class="jxr_linenumber" name="L504" href="#L504">504</a> 				String nextValue = nextEntry.getValue().toString();
+<a class="jxr_linenumber" name="L505" href="#L505">505</a> 
+<a class="jxr_linenumber" name="L506" href="#L506">506</a> 				<strong class="jxr_keyword">if</strong> (nextKey.startsWith(<span class="jxr_string">"datatype."</span>)) {
+<a class="jxr_linenumber" name="L507" href="#L507">507</a> 					<strong class="jxr_keyword">if</strong> (theDatatypes != <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L508" href="#L508">508</a> 						<strong class="jxr_keyword">try</strong> {
+<a class="jxr_linenumber" name="L509" href="#L509">509</a> 							<em class="jxr_comment">// Datatypes</em>
+<a class="jxr_linenumber" name="L510" href="#L510">510</a> 
+<a class="jxr_linenumber" name="L511" href="#L511">511</a> 							@SuppressWarnings(<span class="jxr_string">"unchecked"</span>)
+<a class="jxr_linenumber" name="L512" href="#L512">512</a> 							Class&lt;? <strong class="jxr_keyword">extends</strong> IBase&gt; dtType = (Class&lt;? <strong class="jxr_keyword">extends</strong> IBase&gt;) Class.forName(nextValue);
+<a class="jxr_linenumber" name="L513" href="#L513">513</a> 							<strong class="jxr_keyword">if</strong> (theExistingElementDefinitions.containsKey(dtType)) {
+<a class="jxr_linenumber" name="L514" href="#L514">514</a> 								<strong class="jxr_keyword">continue</strong>;
+<a class="jxr_linenumber" name="L515" href="#L515">515</a> 							}
+<a class="jxr_linenumber" name="L516" href="#L516">516</a> 							retVal.add(dtType);
+<a class="jxr_linenumber" name="L517" href="#L517">517</a> 
+<a class="jxr_linenumber" name="L518" href="#L518">518</a> 							<strong class="jxr_keyword">if</strong> (IElement.<strong class="jxr_keyword">class</strong>.isAssignableFrom(dtType)) {
+<a class="jxr_linenumber" name="L519" href="#L519">519</a> 								@SuppressWarnings(<span class="jxr_string">"unchecked"</span>)
+<a class="jxr_linenumber" name="L520" href="#L520">520</a> 								Class&lt;? <strong class="jxr_keyword">extends</strong> IElement&gt; nextClass = (Class&lt;? <strong class="jxr_keyword">extends</strong> IElement&gt;) dtType;
+<a class="jxr_linenumber" name="L521" href="#L521">521</a> 								theDatatypes.add(nextClass);
+<a class="jxr_linenumber" name="L522" href="#L522">522</a> 							} <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (IBaseDatatype.<strong class="jxr_keyword">class</strong>.isAssignableFrom(dtType)) {
+<a class="jxr_linenumber" name="L523" href="#L523">523</a> 								@SuppressWarnings(<span class="jxr_string">"unchecked"</span>)
+<a class="jxr_linenumber" name="L524" href="#L524">524</a> 								Class&lt;? <strong class="jxr_keyword">extends</strong> IBaseDatatype&gt; nextClass = (Class&lt;? <strong class="jxr_keyword">extends</strong> IBaseDatatype&gt;) dtType;
+<a class="jxr_linenumber" name="L525" href="#L525">525</a> 								theDatatypes.add(nextClass);
+<a class="jxr_linenumber" name="L526" href="#L526">526</a> 							} <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L527" href="#L527">527</a> 								ourLog.warn(<span class="jxr_string">"Class is not assignable from "</span> + IElement.<strong class="jxr_keyword">class</strong>.getSimpleName() + <span class="jxr_string">" or "</span> + IBaseDatatype.<strong class="jxr_keyword">class</strong>.getSimpleName() + <span class="jxr_string">": "</span> + nextValue);
+<a class="jxr_linenumber" name="L528" href="#L528">528</a> 								<strong class="jxr_keyword">continue</strong>;
+<a class="jxr_linenumber" name="L529" href="#L529">529</a> 							}
+<a class="jxr_linenumber" name="L530" href="#L530">530</a> 
+<a class="jxr_linenumber" name="L531" href="#L531">531</a> 						} <strong class="jxr_keyword">catch</strong> (ClassNotFoundException e) {
+<a class="jxr_linenumber" name="L532" href="#L532">532</a> 							<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../ca/uhn/fhir/context/ConfigurationException.html">ConfigurationException</a>(<span class="jxr_string">"Unknown class["</span> + nextValue + <span class="jxr_string">"] for data type definition: "</span> + nextKey.substring(<span class="jxr_string">"datatype."</span>.length()), e);
+<a class="jxr_linenumber" name="L533" href="#L533">533</a> 						}
+<a class="jxr_linenumber" name="L534" href="#L534">534</a> 					}
+<a class="jxr_linenumber" name="L535" href="#L535">535</a> 				} <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (nextKey.startsWith(<span class="jxr_string">"resource."</span>)) {
+<a class="jxr_linenumber" name="L536" href="#L536">536</a> 					<em class="jxr_comment">// Resources</em>
+<a class="jxr_linenumber" name="L537" href="#L537">537</a> 					String resName = nextKey.substring(<span class="jxr_string">"resource."</span>.length()).toLowerCase();
+<a class="jxr_linenumber" name="L538" href="#L538">538</a> 					<strong class="jxr_keyword">try</strong> {
+<a class="jxr_linenumber" name="L539" href="#L539">539</a> 						@SuppressWarnings(<span class="jxr_string">"unchecked"</span>)
+<a class="jxr_linenumber" name="L540" href="#L540">540</a> 						Class&lt;? <strong class="jxr_keyword">extends</strong> IBaseResource&gt; nextClass = (Class&lt;? <strong class="jxr_keyword">extends</strong> IBaseResource&gt;) Class.forName(nextValue);
+<a class="jxr_linenumber" name="L541" href="#L541">541</a> 						<strong class="jxr_keyword">if</strong> (theExistingElementDefinitions.containsKey(nextClass)) {
+<a class="jxr_linenumber" name="L542" href="#L542">542</a> 							<strong class="jxr_keyword">continue</strong>;
+<a class="jxr_linenumber" name="L543" href="#L543">543</a> 						}
+<a class="jxr_linenumber" name="L544" href="#L544">544</a> 						<strong class="jxr_keyword">if</strong> (!IBaseResource.<strong class="jxr_keyword">class</strong>.isAssignableFrom(nextClass)) {
+<a class="jxr_linenumber" name="L545" href="#L545">545</a> 							<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../ca/uhn/fhir/context/ConfigurationException.html">ConfigurationException</a>(<span class="jxr_string">"Class is not assignable from "</span> + IBaseResource.<strong class="jxr_keyword">class</strong>.getSimpleName() + <span class="jxr_string">": "</span> + nextValue);
+<a class="jxr_linenumber" name="L546" href="#L546">546</a> 						}
+<a class="jxr_linenumber" name="L547" href="#L547">547</a> 
+<a class="jxr_linenumber" name="L548" href="#L548">548</a> 						theResourceTypes.put(resName, nextClass);
+<a class="jxr_linenumber" name="L549" href="#L549">549</a> 					} <strong class="jxr_keyword">catch</strong> (ClassNotFoundException e) {
+<a class="jxr_linenumber" name="L550" href="#L550">550</a> 						<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../ca/uhn/fhir/context/ConfigurationException.html">ConfigurationException</a>(<span class="jxr_string">"Unknown class["</span> + nextValue + <span class="jxr_string">"] for resource definition: "</span> + nextKey.substring(<span class="jxr_string">"resource."</span>.length()), e);
+<a class="jxr_linenumber" name="L551" href="#L551">551</a> 					}
+<a class="jxr_linenumber" name="L552" href="#L552">552</a> 				} <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L553" href="#L553">553</a> 					<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../ca/uhn/fhir/context/ConfigurationException.html">ConfigurationException</a>(<span class="jxr_string">"Unexpected property in version property file: "</span> + nextKey + <span class="jxr_string">"="</span> + nextValue);
+<a class="jxr_linenumber" name="L554" href="#L554">554</a> 				}
+<a class="jxr_linenumber" name="L555" href="#L555">555</a> 			}
+<a class="jxr_linenumber" name="L556" href="#L556">556</a> 		} <strong class="jxr_keyword">catch</strong> (IOException e) {
+<a class="jxr_linenumber" name="L557" href="#L557">557</a> 			<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../ca/uhn/fhir/context/ConfigurationException.html">ConfigurationException</a>(<span class="jxr_string">"Failed to load model property file from classpath: "</span> + <span class="jxr_string">"/ca/uhn/fhir/model/dstu/model.properties"</span>);
+<a class="jxr_linenumber" name="L558" href="#L558">558</a> 		} <strong class="jxr_keyword">finally</strong> {
+<a class="jxr_linenumber" name="L559" href="#L559">559</a> 			IOUtils.closeQuietly(str);
+<a class="jxr_linenumber" name="L560" href="#L560">560</a> 		}
+<a class="jxr_linenumber" name="L561" href="#L561">561</a> 
+<a class="jxr_linenumber" name="L562" href="#L562">562</a> 		<strong class="jxr_keyword">return</strong> retVal;
+<a class="jxr_linenumber" name="L563" href="#L563">563</a> 	}
+<a class="jxr_linenumber" name="L564" href="#L564">564</a> 
+<a class="jxr_linenumber" name="L565" href="#L565">565</a> }
 </pre>
 <hr/>
 <div id="footer">Copyright &#169; 2014&#x2013;2017 <a href="http://www.uhn.ca">University Health Network</a>. All rights reserved.</div>

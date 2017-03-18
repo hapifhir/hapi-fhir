@@ -183,10 +183,10 @@
 <a class="jxr_linenumber" name="L175" href="#L175">175</a> 	}
 <a class="jxr_linenumber" name="L176" href="#L176">176</a> 
 <a class="jxr_linenumber" name="L177" href="#L177">177</a> 	<strong class="jxr_keyword">private</strong> String delete(String value, <strong class="jxr_keyword">int</strong> offset, <strong class="jxr_keyword">int</strong> length) {
-<a class="jxr_linenumber" name="L178" href="#L178">178</a> 		<strong class="jxr_keyword">if</strong> (offset == 0)
+<a class="jxr_linenumber" name="L178" href="#L178">178</a> 		<strong class="jxr_keyword">if</strong> (offset == 0){
 <a class="jxr_linenumber" name="L179" href="#L179">179</a> 			<strong class="jxr_keyword">return</strong> value.substring(length);
-<a class="jxr_linenumber" name="L180" href="#L180">180</a> 		<strong class="jxr_keyword">else</strong>
-<a class="jxr_linenumber" name="L181" href="#L181">181</a> 			<strong class="jxr_keyword">return</strong> value.substring(0,  offset)+value.substring(offset+length);
+<a class="jxr_linenumber" name="L180" href="#L180">180</a> 		}
+<a class="jxr_linenumber" name="L181" href="#L181">181</a> 		<strong class="jxr_keyword">return</strong> value.substring(0,  offset)+value.substring(offset+length);
 <a class="jxr_linenumber" name="L182" href="#L182">182</a> 	}
 <a class="jxr_linenumber" name="L183" href="#L183">183</a> 	
 <a class="jxr_linenumber" name="L184" href="#L184">184</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> setValueScientific(String value) <strong class="jxr_keyword">throws</strong> UcumException  {
@@ -222,10 +222,10 @@
 <a class="jxr_linenumber" name="L214" href="#L214">214</a>   }
 <a class="jxr_linenumber" name="L215" href="#L215">215</a> 
 <a class="jxr_linenumber" name="L216" href="#L216">216</a> 	<strong class="jxr_keyword">private</strong> String insert(String ins, String value, <strong class="jxr_keyword">int</strong> offset) {
-<a class="jxr_linenumber" name="L217" href="#L217">217</a> 		<strong class="jxr_keyword">if</strong> (offset == 0)
+<a class="jxr_linenumber" name="L217" href="#L217">217</a> 		<strong class="jxr_keyword">if</strong> (offset == 0) {
 <a class="jxr_linenumber" name="L218" href="#L218">218</a> 			<strong class="jxr_keyword">return</strong> ins+value;
-<a class="jxr_linenumber" name="L219" href="#L219">219</a> 		<strong class="jxr_keyword">else</strong>
-<a class="jxr_linenumber" name="L220" href="#L220">220</a> 			<strong class="jxr_keyword">return</strong> value.substring(0, offset)+ins+value.substring(offset);
+<a class="jxr_linenumber" name="L219" href="#L219">219</a> 		}
+<a class="jxr_linenumber" name="L220" href="#L220">220</a> 		<strong class="jxr_keyword">return</strong> value.substring(0, offset)+ins+value.substring(offset);
 <a class="jxr_linenumber" name="L221" href="#L221">221</a>   }
 <a class="jxr_linenumber" name="L222" href="#L222">222</a> 
 <a class="jxr_linenumber" name="L223" href="#L223">223</a> 	@Override
@@ -523,10 +523,10 @@
 <a class="jxr_linenumber" name="L515" href="#L515">515</a> 	    <strong class="jxr_keyword">int</strong> t = c + (dig(s1.charAt(i)) - dig(s2.charAt(i)));
 <a class="jxr_linenumber" name="L516" href="#L516">516</a> 	    <strong class="jxr_keyword">if</strong> (t &lt; 0) {
 <a class="jxr_linenumber" name="L517" href="#L517">517</a> 	      t = t + 10;
-<a class="jxr_linenumber" name="L518" href="#L518">518</a> 	      <strong class="jxr_keyword">if</strong> (i == 0) 
+<a class="jxr_linenumber" name="L518" href="#L518">518</a> 	      <strong class="jxr_keyword">if</strong> (i == 0) {
 <a class="jxr_linenumber" name="L519" href="#L519">519</a> 	        <strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> Error(<span class="jxr_string">"internal logic error"</span>);
-<a class="jxr_linenumber" name="L520" href="#L520">520</a> 	      <strong class="jxr_keyword">else</strong>
-<a class="jxr_linenumber" name="L521" href="#L521">521</a> 	        s1 = replaceChar(s1, i-1, cdig(dig(s1.charAt(i-1))-1));
+<a class="jxr_linenumber" name="L520" href="#L520">520</a> 	      }
+<a class="jxr_linenumber" name="L521" href="#L521">521</a> 	      s1 = replaceChar(s1, i-1, cdig(dig(s1.charAt(i-1))-1));
 <a class="jxr_linenumber" name="L522" href="#L522">522</a> 	    }
 <a class="jxr_linenumber" name="L523" href="#L523">523</a> 	    result[i] = cdig(t);
 <a class="jxr_linenumber" name="L524" href="#L524">524</a> 	  }
@@ -535,10 +535,10 @@
 <a class="jxr_linenumber" name="L527" href="#L527">527</a> 	}
 <a class="jxr_linenumber" name="L528" href="#L528">528</a> 
 <a class="jxr_linenumber" name="L529" href="#L529">529</a> 	<strong class="jxr_keyword">private</strong> String replaceChar(String s, <strong class="jxr_keyword">int</strong> offset, <strong class="jxr_keyword">char</strong> c) {
-<a class="jxr_linenumber" name="L530" href="#L530">530</a> 	  <strong class="jxr_keyword">if</strong> (offset == 0)
+<a class="jxr_linenumber" name="L530" href="#L530">530</a> 	  <strong class="jxr_keyword">if</strong> (offset == 0){
 <a class="jxr_linenumber" name="L531" href="#L531">531</a> 	  	<strong class="jxr_keyword">return</strong> String.valueOf(c)+s.substring(1);
-<a class="jxr_linenumber" name="L532" href="#L532">532</a> 	  <strong class="jxr_keyword">else</strong>
-<a class="jxr_linenumber" name="L533" href="#L533">533</a> 	  	<strong class="jxr_keyword">return</strong> s.substring(0, offset)+c+s.substring(offset+1); 
+<a class="jxr_linenumber" name="L532" href="#L532">532</a> 	  }
+<a class="jxr_linenumber" name="L533" href="#L533">533</a> 	  <strong class="jxr_keyword">return</strong> s.substring(0, offset)+c+s.substring(offset+1); 
 <a class="jxr_linenumber" name="L534" href="#L534">534</a>   }
 <a class="jxr_linenumber" name="L535" href="#L535">535</a> 
 <a class="jxr_linenumber" name="L536" href="#L536">536</a> 
@@ -780,10 +780,10 @@
 <a class="jxr_linenumber" name="L772" href="#L772">772</a> 		<strong class="jxr_keyword">int</strong> i = 0;
 <a class="jxr_linenumber" name="L773" href="#L773">773</a> 		<strong class="jxr_keyword">while</strong> (i &lt; s.length() &amp;&amp; s.charAt(i) == '0') 
 <a class="jxr_linenumber" name="L774" href="#L774">774</a> 			i++;
-<a class="jxr_linenumber" name="L775" href="#L775">775</a> 		<strong class="jxr_keyword">if</strong> (i == s.length())
+<a class="jxr_linenumber" name="L775" href="#L775">775</a> 		<strong class="jxr_keyword">if</strong> (i == s.length()){
 <a class="jxr_linenumber" name="L776" href="#L776">776</a> 			<strong class="jxr_keyword">return</strong> <span class="jxr_string">"0"</span>;
-<a class="jxr_linenumber" name="L777" href="#L777">777</a> 		<strong class="jxr_keyword">else</strong>
-<a class="jxr_linenumber" name="L778" href="#L778">778</a> 		  <strong class="jxr_keyword">return</strong> s.substring(i);
+<a class="jxr_linenumber" name="L777" href="#L777">777</a> 		}
+<a class="jxr_linenumber" name="L778" href="#L778">778</a> 		<strong class="jxr_keyword">return</strong> s.substring(i);
 <a class="jxr_linenumber" name="L779" href="#L779">779</a> 	}
 <a class="jxr_linenumber" name="L780" href="#L780">780</a> 
 <a class="jxr_linenumber" name="L781" href="#L781">781</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../org/hl7/fhir/utilities/ucum/Decimal.html">Decimal</a> divInt(<a href="../../../../../org/hl7/fhir/utilities/ucum/Decimal.html">Decimal</a> other) <strong class="jxr_keyword">throws</strong> UcumException  {

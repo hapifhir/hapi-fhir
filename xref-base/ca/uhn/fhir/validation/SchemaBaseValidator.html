@@ -173,7 +173,7 @@
 <a class="jxr_linenumber" name="L165" href="#L165">165</a> 		baseIs = <strong class="jxr_keyword">new</strong> BOMInputStream(baseIs, false);
 <a class="jxr_linenumber" name="L166" href="#L166">166</a> 		InputStreamReader baseReader = <strong class="jxr_keyword">new</strong> InputStreamReader(baseIs, Charset.forName(<span class="jxr_string">"UTF-8"</span>));
 <a class="jxr_linenumber" name="L167" href="#L167">167</a> 		Source baseSource = <strong class="jxr_keyword">new</strong> StreamSource(baseReader, theSystemId);
-<a class="jxr_linenumber" name="L168" href="#L168">168</a> 
+<a class="jxr_linenumber" name="L168" href="#L168">168</a> 		<em class="jxr_comment">//FIXME resource leak</em>
 <a class="jxr_linenumber" name="L169" href="#L169">169</a> 		<strong class="jxr_keyword">return</strong> baseSource;
 <a class="jxr_linenumber" name="L170" href="#L170">170</a> 	}
 <a class="jxr_linenumber" name="L171" href="#L171">171</a> 
@@ -248,7 +248,7 @@
 <a class="jxr_linenumber" name="L240" href="#L240">240</a> 				}
 <a class="jxr_linenumber" name="L241" href="#L241">241</a> 
 <a class="jxr_linenumber" name="L242" href="#L242">242</a> 				input.setByteStream(baseIs);
-<a class="jxr_linenumber" name="L243" href="#L243">243</a> 
+<a class="jxr_linenumber" name="L243" href="#L243">243</a> 				<em class="jxr_comment">//FIXME resource leak</em>
 <a class="jxr_linenumber" name="L244" href="#L244">244</a> 				<strong class="jxr_keyword">return</strong> input;
 <a class="jxr_linenumber" name="L245" href="#L245">245</a> 
 <a class="jxr_linenumber" name="L246" href="#L246">246</a> 			}

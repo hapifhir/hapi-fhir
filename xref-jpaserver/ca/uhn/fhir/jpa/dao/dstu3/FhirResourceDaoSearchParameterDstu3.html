@@ -81,8 +81,8 @@
 <a class="jxr_linenumber" name="L73" href="#L73">73</a>  			<strong class="jxr_keyword">return</strong>;
 <a class="jxr_linenumber" name="L74" href="#L74">74</a>  		}
 <a class="jxr_linenumber" name="L75" href="#L75">75</a>  
-<a class="jxr_linenumber" name="L76" href="#L76">76</a>  		<strong class="jxr_keyword">int</strong> count = mySystemDao.performReindexingPass(100);
-<a class="jxr_linenumber" name="L77" href="#L77">77</a>  		<strong class="jxr_keyword">for</strong> (<strong class="jxr_keyword">int</strong> i = 0; i &lt; 50 &amp;&amp; count != 0; i++) {
+<a class="jxr_linenumber" name="L76" href="#L76">76</a>  		Integer count = mySystemDao.performReindexingPass(100);
+<a class="jxr_linenumber" name="L77" href="#L77">77</a>  		<strong class="jxr_keyword">for</strong> (<strong class="jxr_keyword">int</strong> i = 0; i &lt; 50 &amp;&amp; count != <strong class="jxr_keyword">null</strong> &amp;&amp; count != 0; i++) {
 <a class="jxr_linenumber" name="L78" href="#L78">78</a>  			count = mySystemDao.performReindexingPass(100);
 <a class="jxr_linenumber" name="L79" href="#L79">79</a>  			<strong class="jxr_keyword">try</strong> {
 <a class="jxr_linenumber" name="L80" href="#L80">80</a>  				Thread.sleep(DateUtils.MILLIS_PER_SECOND);

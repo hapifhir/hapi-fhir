@@ -291,95 +291,97 @@
 <a class="jxr_linenumber" name="L283" href="#L283">283</a> 		<strong class="jxr_keyword">this</strong>.myRequired = required;
 <a class="jxr_linenumber" name="L284" href="#L284">284</a> 	}
 <a class="jxr_linenumber" name="L285" href="#L285">285</a> 
-<a class="jxr_linenumber" name="L286" href="#L286">286</a> 	@SuppressWarnings({ <span class="jxr_string">"unchecked"</span>, <span class="jxr_string">"unused"</span> })
+<a class="jxr_linenumber" name="L286" href="#L286">286</a> 	@SuppressWarnings(<span class="jxr_string">"unchecked"</span>)
 <a class="jxr_linenumber" name="L287" href="#L287">287</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> setType(<a href="../../../../../ca/uhn/fhir/context/FhirContext.html">FhirContext</a> theContext, <strong class="jxr_keyword">final</strong> Class&lt;?&gt; type, Class&lt;? <strong class="jxr_keyword">extends</strong> Collection&lt;?&gt;&gt; theInnerCollectionType, Class&lt;? <strong class="jxr_keyword">extends</strong> Collection&lt;?&gt;&gt; theOuterCollectionType) {
-<a class="jxr_linenumber" name="L288" href="#L288">288</a> 		<strong class="jxr_keyword">this</strong>.myType = type;
-<a class="jxr_linenumber" name="L289" href="#L289">289</a> 		<strong class="jxr_keyword">if</strong> (IQueryParameterType.<strong class="jxr_keyword">class</strong>.isAssignableFrom(type)) {
-<a class="jxr_linenumber" name="L290" href="#L290">290</a> 			myParamBinder = <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/rest/method/QueryParameterTypeBinder.html">QueryParameterTypeBinder</a>((Class&lt;? <strong class="jxr_keyword">extends</strong> IQueryParameterType&gt;) type, myCompositeTypes);
-<a class="jxr_linenumber" name="L291" href="#L291">291</a> 		} <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (IQueryParameterOr.<strong class="jxr_keyword">class</strong>.isAssignableFrom(type)) {
-<a class="jxr_linenumber" name="L292" href="#L292">292</a> 			myParamBinder = <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/rest/method/QueryParameterOrBinder.html">QueryParameterOrBinder</a>((Class&lt;? <strong class="jxr_keyword">extends</strong> IQueryParameterOr&lt;?&gt;&gt;) type, myCompositeTypes);
-<a class="jxr_linenumber" name="L293" href="#L293">293</a> 		} <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (IQueryParameterAnd.<strong class="jxr_keyword">class</strong>.isAssignableFrom(type)) {
-<a class="jxr_linenumber" name="L294" href="#L294">294</a> 			myParamBinder = <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/rest/method/QueryParameterAndBinder.html">QueryParameterAndBinder</a>((Class&lt;? <strong class="jxr_keyword">extends</strong> IQueryParameterAnd&lt;?&gt;&gt;) type, myCompositeTypes);
-<a class="jxr_linenumber" name="L295" href="#L295">295</a> 		} <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (String.<strong class="jxr_keyword">class</strong>.equals(type)) {
-<a class="jxr_linenumber" name="L296" href="#L296">296</a> 			myParamBinder = <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/rest/method/StringBinder.html">StringBinder</a>();
-<a class="jxr_linenumber" name="L297" href="#L297">297</a> 			myParamType = RestSearchParameterTypeEnum.STRING;
-<a class="jxr_linenumber" name="L298" href="#L298">298</a> 		} <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (Date.<strong class="jxr_keyword">class</strong>.equals(type)) {
-<a class="jxr_linenumber" name="L299" href="#L299">299</a> 			myParamBinder = <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/rest/method/DateBinder.html">DateBinder</a>();
-<a class="jxr_linenumber" name="L300" href="#L300">300</a> 			myParamType = RestSearchParameterTypeEnum.DATE;
-<a class="jxr_linenumber" name="L301" href="#L301">301</a> 		} <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (Calendar.<strong class="jxr_keyword">class</strong>.equals(type)) {
-<a class="jxr_linenumber" name="L302" href="#L302">302</a> 			myParamBinder = <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/rest/method/CalendarBinder.html">CalendarBinder</a>();
-<a class="jxr_linenumber" name="L303" href="#L303">303</a> 			myParamType = RestSearchParameterTypeEnum.DATE;
-<a class="jxr_linenumber" name="L304" href="#L304">304</a> 		} <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (IPrimitiveType.<strong class="jxr_keyword">class</strong>.isAssignableFrom(type) &amp;&amp; ReflectionUtil.isInstantiable(type)) {
-<a class="jxr_linenumber" name="L305" href="#L305">305</a> 			RuntimePrimitiveDatatypeDefinition def = (RuntimePrimitiveDatatypeDefinition) theContext.getElementDefinition((Class&lt;? <strong class="jxr_keyword">extends</strong> IPrimitiveType&lt;?&gt;&gt;) type);
-<a class="jxr_linenumber" name="L306" href="#L306">306</a> 			<strong class="jxr_keyword">if</strong> (def.getNativeType() != <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L307" href="#L307">307</a> 				<strong class="jxr_keyword">if</strong> (def.getNativeType().equals(Date.<strong class="jxr_keyword">class</strong>)) {
-<a class="jxr_linenumber" name="L308" href="#L308">308</a> 					myParamBinder = <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/rest/method/FhirPrimitiveBinder.html">FhirPrimitiveBinder</a>((Class&lt;IPrimitiveType&lt;?&gt;&gt;) type);
-<a class="jxr_linenumber" name="L309" href="#L309">309</a> 					myParamType = RestSearchParameterTypeEnum.DATE;
-<a class="jxr_linenumber" name="L310" href="#L310">310</a> 				} <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (def.getNativeType().equals(String.<strong class="jxr_keyword">class</strong>)) {
-<a class="jxr_linenumber" name="L311" href="#L311">311</a> 					myParamBinder = <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/rest/method/FhirPrimitiveBinder.html">FhirPrimitiveBinder</a>((Class&lt;IPrimitiveType&lt;?&gt;&gt;) type);
-<a class="jxr_linenumber" name="L312" href="#L312">312</a> 					myParamType = RestSearchParameterTypeEnum.STRING;
-<a class="jxr_linenumber" name="L313" href="#L313">313</a> 				}
-<a class="jxr_linenumber" name="L314" href="#L314">314</a> 			}
-<a class="jxr_linenumber" name="L315" href="#L315">315</a> 		} <strong class="jxr_keyword">else</strong> {
-<a class="jxr_linenumber" name="L316" href="#L316">316</a> 			<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/context/ConfigurationException.html">ConfigurationException</a>(<span class="jxr_string">"Unsupported data type for parameter: "</span> + type.getCanonicalName());
-<a class="jxr_linenumber" name="L317" href="#L317">317</a> 		}
-<a class="jxr_linenumber" name="L318" href="#L318">318</a> 
-<a class="jxr_linenumber" name="L319" href="#L319">319</a> 		RestSearchParameterTypeEnum typeEnum = ourParamTypes.get(type);
-<a class="jxr_linenumber" name="L320" href="#L320">320</a> 		<strong class="jxr_keyword">if</strong> (typeEnum != <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L321" href="#L321">321</a> 			Set&lt;String&gt; builtInQualifiers = ourParamQualifiers.get(typeEnum);
-<a class="jxr_linenumber" name="L322" href="#L322">322</a> 			<strong class="jxr_keyword">if</strong> (builtInQualifiers != <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L323" href="#L323">323</a> 				<strong class="jxr_keyword">if</strong> (myQualifierWhitelist != <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L324" href="#L324">324</a> 					HashSet&lt;String&gt; qualifierWhitelist = <strong class="jxr_keyword">new</strong> HashSet&lt;String&gt;();
-<a class="jxr_linenumber" name="L325" href="#L325">325</a> 					qualifierWhitelist.addAll(myQualifierWhitelist);
-<a class="jxr_linenumber" name="L326" href="#L326">326</a> 					qualifierWhitelist.addAll(builtInQualifiers);
-<a class="jxr_linenumber" name="L327" href="#L327">327</a> 					myQualifierWhitelist = qualifierWhitelist;
-<a class="jxr_linenumber" name="L328" href="#L328">328</a> 				} <strong class="jxr_keyword">else</strong> {
-<a class="jxr_linenumber" name="L329" href="#L329">329</a> 					myQualifierWhitelist = Collections.unmodifiableSet(builtInQualifiers);
-<a class="jxr_linenumber" name="L330" href="#L330">330</a> 				}
-<a class="jxr_linenumber" name="L331" href="#L331">331</a> 			}
-<a class="jxr_linenumber" name="L332" href="#L332">332</a> 		}
-<a class="jxr_linenumber" name="L333" href="#L333">333</a> 
-<a class="jxr_linenumber" name="L334" href="#L334">334</a> 		<strong class="jxr_keyword">if</strong> (myParamType == <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L335" href="#L335">335</a> 			myParamType = typeEnum;
-<a class="jxr_linenumber" name="L336" href="#L336">336</a> 		}
-<a class="jxr_linenumber" name="L337" href="#L337">337</a> 
-<a class="jxr_linenumber" name="L338" href="#L338">338</a> 		<strong class="jxr_keyword">if</strong> (myParamType != <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L339" href="#L339">339</a> 			<em class="jxr_comment">// ok</em>
-<a class="jxr_linenumber" name="L340" href="#L340">340</a> 		} <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (StringDt.<strong class="jxr_keyword">class</strong>.isAssignableFrom(type)) {
-<a class="jxr_linenumber" name="L341" href="#L341">341</a> 			myParamType = RestSearchParameterTypeEnum.STRING;
-<a class="jxr_linenumber" name="L342" href="#L342">342</a> 		} <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (BaseIdentifierDt.<strong class="jxr_keyword">class</strong>.isAssignableFrom(type)) {
-<a class="jxr_linenumber" name="L343" href="#L343">343</a> 			myParamType = RestSearchParameterTypeEnum.TOKEN;
-<a class="jxr_linenumber" name="L344" href="#L344">344</a> 		} <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (BaseQuantityDt.<strong class="jxr_keyword">class</strong>.isAssignableFrom(type)) {
-<a class="jxr_linenumber" name="L345" href="#L345">345</a> 			myParamType = RestSearchParameterTypeEnum.QUANTITY;
-<a class="jxr_linenumber" name="L346" href="#L346">346</a> 		} <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (ReferenceParam.<strong class="jxr_keyword">class</strong>.isAssignableFrom(type)) {
-<a class="jxr_linenumber" name="L347" href="#L347">347</a> 			myParamType = RestSearchParameterTypeEnum.REFERENCE;
-<a class="jxr_linenumber" name="L348" href="#L348">348</a> 		} <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (HasParam.<strong class="jxr_keyword">class</strong>.isAssignableFrom(type)) {
-<a class="jxr_linenumber" name="L349" href="#L349">349</a> 			myParamType = RestSearchParameterTypeEnum.STRING;
-<a class="jxr_linenumber" name="L350" href="#L350">350</a> 		} <strong class="jxr_keyword">else</strong> {
-<a class="jxr_linenumber" name="L351" href="#L351">351</a> 			<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/context/ConfigurationException.html">ConfigurationException</a>(<span class="jxr_string">"Unknown search parameter type: "</span> + type);
-<a class="jxr_linenumber" name="L352" href="#L352">352</a> 		}
-<a class="jxr_linenumber" name="L353" href="#L353">353</a> 
-<a class="jxr_linenumber" name="L354" href="#L354">354</a> 		<em class="jxr_comment">// NB: Once this is enabled, we should return true from handlesMissing if</em>
-<a class="jxr_linenumber" name="L355" href="#L355">355</a> 		<em class="jxr_comment">// it's a collection type</em>
-<a class="jxr_linenumber" name="L356" href="#L356">356</a> 		<em class="jxr_comment">// if (theInnerCollectionType != null) {</em>
-<a class="jxr_linenumber" name="L357" href="#L357">357</a> 		<em class="jxr_comment">// this.parser = new CollectionBinder(this.parser, theInnerCollectionType);</em>
-<a class="jxr_linenumber" name="L358" href="#L358">358</a> 		<em class="jxr_comment">// }</em>
-<a class="jxr_linenumber" name="L359" href="#L359">359</a> 		<em class="jxr_comment">//</em>
-<a class="jxr_linenumber" name="L360" href="#L360">360</a> 		<em class="jxr_comment">// if (theOuterCollectionType != null) {</em>
-<a class="jxr_linenumber" name="L361" href="#L361">361</a> 		<em class="jxr_comment">// this.parser = new CollectionBinder(this.parser, theOuterCollectionType);</em>
-<a class="jxr_linenumber" name="L362" href="#L362">362</a> 		<em class="jxr_comment">// }</em>
-<a class="jxr_linenumber" name="L363" href="#L363">363</a> 
-<a class="jxr_linenumber" name="L364" href="#L364">364</a> 	}
+<a class="jxr_linenumber" name="L288" href="#L288">288</a> 
+<a class="jxr_linenumber" name="L289" href="#L289">289</a> 		
+<a class="jxr_linenumber" name="L290" href="#L290">290</a> 		<strong class="jxr_keyword">this</strong>.myType = type;
+<a class="jxr_linenumber" name="L291" href="#L291">291</a> 		<strong class="jxr_keyword">if</strong> (IQueryParameterType.<strong class="jxr_keyword">class</strong>.isAssignableFrom(type)) {
+<a class="jxr_linenumber" name="L292" href="#L292">292</a> 			myParamBinder = <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/rest/method/QueryParameterTypeBinder.html">QueryParameterTypeBinder</a>((Class&lt;? <strong class="jxr_keyword">extends</strong> IQueryParameterType&gt;) type, myCompositeTypes);
+<a class="jxr_linenumber" name="L293" href="#L293">293</a> 		} <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (IQueryParameterOr.<strong class="jxr_keyword">class</strong>.isAssignableFrom(type)) {
+<a class="jxr_linenumber" name="L294" href="#L294">294</a> 			myParamBinder = <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/rest/method/QueryParameterOrBinder.html">QueryParameterOrBinder</a>((Class&lt;? <strong class="jxr_keyword">extends</strong> IQueryParameterOr&lt;?&gt;&gt;) type, myCompositeTypes);
+<a class="jxr_linenumber" name="L295" href="#L295">295</a> 		} <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (IQueryParameterAnd.<strong class="jxr_keyword">class</strong>.isAssignableFrom(type)) {
+<a class="jxr_linenumber" name="L296" href="#L296">296</a> 			myParamBinder = <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/rest/method/QueryParameterAndBinder.html">QueryParameterAndBinder</a>((Class&lt;? <strong class="jxr_keyword">extends</strong> IQueryParameterAnd&lt;?&gt;&gt;) type, myCompositeTypes);
+<a class="jxr_linenumber" name="L297" href="#L297">297</a> 		} <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (String.<strong class="jxr_keyword">class</strong>.equals(type)) {
+<a class="jxr_linenumber" name="L298" href="#L298">298</a> 			myParamBinder = <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/rest/method/StringBinder.html">StringBinder</a>();
+<a class="jxr_linenumber" name="L299" href="#L299">299</a> 			myParamType = RestSearchParameterTypeEnum.STRING;
+<a class="jxr_linenumber" name="L300" href="#L300">300</a> 		} <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (Date.<strong class="jxr_keyword">class</strong>.equals(type)) {
+<a class="jxr_linenumber" name="L301" href="#L301">301</a> 			myParamBinder = <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/rest/method/DateBinder.html">DateBinder</a>();
+<a class="jxr_linenumber" name="L302" href="#L302">302</a> 			myParamType = RestSearchParameterTypeEnum.DATE;
+<a class="jxr_linenumber" name="L303" href="#L303">303</a> 		} <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (Calendar.<strong class="jxr_keyword">class</strong>.equals(type)) {
+<a class="jxr_linenumber" name="L304" href="#L304">304</a> 			myParamBinder = <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/rest/method/CalendarBinder.html">CalendarBinder</a>();
+<a class="jxr_linenumber" name="L305" href="#L305">305</a> 			myParamType = RestSearchParameterTypeEnum.DATE;
+<a class="jxr_linenumber" name="L306" href="#L306">306</a> 		} <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (IPrimitiveType.<strong class="jxr_keyword">class</strong>.isAssignableFrom(type) &amp;&amp; ReflectionUtil.isInstantiable(type)) {
+<a class="jxr_linenumber" name="L307" href="#L307">307</a> 			RuntimePrimitiveDatatypeDefinition def = (RuntimePrimitiveDatatypeDefinition) theContext.getElementDefinition((Class&lt;? <strong class="jxr_keyword">extends</strong> IPrimitiveType&lt;?&gt;&gt;) type);
+<a class="jxr_linenumber" name="L308" href="#L308">308</a> 			<strong class="jxr_keyword">if</strong> (def.getNativeType() != <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L309" href="#L309">309</a> 				<strong class="jxr_keyword">if</strong> (def.getNativeType().equals(Date.<strong class="jxr_keyword">class</strong>)) {
+<a class="jxr_linenumber" name="L310" href="#L310">310</a> 					myParamBinder = <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/rest/method/FhirPrimitiveBinder.html">FhirPrimitiveBinder</a>((Class&lt;IPrimitiveType&lt;?&gt;&gt;) type);
+<a class="jxr_linenumber" name="L311" href="#L311">311</a> 					myParamType = RestSearchParameterTypeEnum.DATE;
+<a class="jxr_linenumber" name="L312" href="#L312">312</a> 				} <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (def.getNativeType().equals(String.<strong class="jxr_keyword">class</strong>)) {
+<a class="jxr_linenumber" name="L313" href="#L313">313</a> 					myParamBinder = <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/rest/method/FhirPrimitiveBinder.html">FhirPrimitiveBinder</a>((Class&lt;IPrimitiveType&lt;?&gt;&gt;) type);
+<a class="jxr_linenumber" name="L314" href="#L314">314</a> 					myParamType = RestSearchParameterTypeEnum.STRING;
+<a class="jxr_linenumber" name="L315" href="#L315">315</a> 				}
+<a class="jxr_linenumber" name="L316" href="#L316">316</a> 			}
+<a class="jxr_linenumber" name="L317" href="#L317">317</a> 		} <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L318" href="#L318">318</a> 			<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/context/ConfigurationException.html">ConfigurationException</a>(<span class="jxr_string">"Unsupported data type for parameter: "</span> + type.getCanonicalName());
+<a class="jxr_linenumber" name="L319" href="#L319">319</a> 		}
+<a class="jxr_linenumber" name="L320" href="#L320">320</a> 
+<a class="jxr_linenumber" name="L321" href="#L321">321</a> 		RestSearchParameterTypeEnum typeEnum = ourParamTypes.get(type);
+<a class="jxr_linenumber" name="L322" href="#L322">322</a> 		<strong class="jxr_keyword">if</strong> (typeEnum != <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L323" href="#L323">323</a> 			Set&lt;String&gt; builtInQualifiers = ourParamQualifiers.get(typeEnum);
+<a class="jxr_linenumber" name="L324" href="#L324">324</a> 			<strong class="jxr_keyword">if</strong> (builtInQualifiers != <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L325" href="#L325">325</a> 				<strong class="jxr_keyword">if</strong> (myQualifierWhitelist != <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L326" href="#L326">326</a> 					HashSet&lt;String&gt; qualifierWhitelist = <strong class="jxr_keyword">new</strong> HashSet&lt;String&gt;();
+<a class="jxr_linenumber" name="L327" href="#L327">327</a> 					qualifierWhitelist.addAll(myQualifierWhitelist);
+<a class="jxr_linenumber" name="L328" href="#L328">328</a> 					qualifierWhitelist.addAll(builtInQualifiers);
+<a class="jxr_linenumber" name="L329" href="#L329">329</a> 					myQualifierWhitelist = qualifierWhitelist;
+<a class="jxr_linenumber" name="L330" href="#L330">330</a> 				} <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L331" href="#L331">331</a> 					myQualifierWhitelist = Collections.unmodifiableSet(builtInQualifiers);
+<a class="jxr_linenumber" name="L332" href="#L332">332</a> 				}
+<a class="jxr_linenumber" name="L333" href="#L333">333</a> 			}
+<a class="jxr_linenumber" name="L334" href="#L334">334</a> 		}
+<a class="jxr_linenumber" name="L335" href="#L335">335</a> 
+<a class="jxr_linenumber" name="L336" href="#L336">336</a> 		<strong class="jxr_keyword">if</strong> (myParamType == <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L337" href="#L337">337</a> 			myParamType = typeEnum;
+<a class="jxr_linenumber" name="L338" href="#L338">338</a> 		}
+<a class="jxr_linenumber" name="L339" href="#L339">339</a> 
+<a class="jxr_linenumber" name="L340" href="#L340">340</a> 		<strong class="jxr_keyword">if</strong> (myParamType != <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L341" href="#L341">341</a> 			<em class="jxr_comment">// ok</em>
+<a class="jxr_linenumber" name="L342" href="#L342">342</a> 		} <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (StringDt.<strong class="jxr_keyword">class</strong>.isAssignableFrom(type)) {
+<a class="jxr_linenumber" name="L343" href="#L343">343</a> 			myParamType = RestSearchParameterTypeEnum.STRING;
+<a class="jxr_linenumber" name="L344" href="#L344">344</a> 		} <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (BaseIdentifierDt.<strong class="jxr_keyword">class</strong>.isAssignableFrom(type)) {
+<a class="jxr_linenumber" name="L345" href="#L345">345</a> 			myParamType = RestSearchParameterTypeEnum.TOKEN;
+<a class="jxr_linenumber" name="L346" href="#L346">346</a> 		} <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (BaseQuantityDt.<strong class="jxr_keyword">class</strong>.isAssignableFrom(type)) {
+<a class="jxr_linenumber" name="L347" href="#L347">347</a> 			myParamType = RestSearchParameterTypeEnum.QUANTITY;
+<a class="jxr_linenumber" name="L348" href="#L348">348</a> 		} <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (ReferenceParam.<strong class="jxr_keyword">class</strong>.isAssignableFrom(type)) {
+<a class="jxr_linenumber" name="L349" href="#L349">349</a> 			myParamType = RestSearchParameterTypeEnum.REFERENCE;
+<a class="jxr_linenumber" name="L350" href="#L350">350</a> 		} <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (HasParam.<strong class="jxr_keyword">class</strong>.isAssignableFrom(type)) {
+<a class="jxr_linenumber" name="L351" href="#L351">351</a> 			myParamType = RestSearchParameterTypeEnum.STRING;
+<a class="jxr_linenumber" name="L352" href="#L352">352</a> 		} <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L353" href="#L353">353</a> 			<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/context/ConfigurationException.html">ConfigurationException</a>(<span class="jxr_string">"Unknown search parameter type: "</span> + type);
+<a class="jxr_linenumber" name="L354" href="#L354">354</a> 		}
+<a class="jxr_linenumber" name="L355" href="#L355">355</a> 
+<a class="jxr_linenumber" name="L356" href="#L356">356</a> 		<em class="jxr_comment">// NB: Once this is enabled, we should return true from handlesMissing if</em>
+<a class="jxr_linenumber" name="L357" href="#L357">357</a> 		<em class="jxr_comment">// it's a collection type</em>
+<a class="jxr_linenumber" name="L358" href="#L358">358</a> 		<em class="jxr_comment">// if (theInnerCollectionType != null) {</em>
+<a class="jxr_linenumber" name="L359" href="#L359">359</a> 		<em class="jxr_comment">// this.parser = new CollectionBinder(this.parser, theInnerCollectionType);</em>
+<a class="jxr_linenumber" name="L360" href="#L360">360</a> 		<em class="jxr_comment">// }</em>
+<a class="jxr_linenumber" name="L361" href="#L361">361</a> 		<em class="jxr_comment">//</em>
+<a class="jxr_linenumber" name="L362" href="#L362">362</a> 		<em class="jxr_comment">// if (theOuterCollectionType != null) {</em>
+<a class="jxr_linenumber" name="L363" href="#L363">363</a> 		<em class="jxr_comment">// this.parser = new CollectionBinder(this.parser, theOuterCollectionType);</em>
+<a class="jxr_linenumber" name="L364" href="#L364">364</a> 		<em class="jxr_comment">// }</em>
 <a class="jxr_linenumber" name="L365" href="#L365">365</a> 
-<a class="jxr_linenumber" name="L366" href="#L366">366</a> 	@Override
-<a class="jxr_linenumber" name="L367" href="#L367">367</a> 	<strong class="jxr_keyword">public</strong> String toString() {
-<a class="jxr_linenumber" name="L368" href="#L368">368</a> 		ToStringBuilder retVal = <strong class="jxr_keyword">new</strong> ToStringBuilder(<strong class="jxr_keyword">this</strong>);
-<a class="jxr_linenumber" name="L369" href="#L369">369</a> 		retVal.append(<span class="jxr_string">"name"</span>, myName);
-<a class="jxr_linenumber" name="L370" href="#L370">370</a> 		retVal.append(<span class="jxr_string">"required"</span>, myRequired);
-<a class="jxr_linenumber" name="L371" href="#L371">371</a> 		<strong class="jxr_keyword">return</strong> retVal.toString();
-<a class="jxr_linenumber" name="L372" href="#L372">372</a> 	}
-<a class="jxr_linenumber" name="L373" href="#L373">373</a> 
-<a class="jxr_linenumber" name="L374" href="#L374">374</a> }
+<a class="jxr_linenumber" name="L366" href="#L366">366</a> 	}
+<a class="jxr_linenumber" name="L367" href="#L367">367</a> 
+<a class="jxr_linenumber" name="L368" href="#L368">368</a> 	@Override
+<a class="jxr_linenumber" name="L369" href="#L369">369</a> 	<strong class="jxr_keyword">public</strong> String toString() {
+<a class="jxr_linenumber" name="L370" href="#L370">370</a> 		ToStringBuilder retVal = <strong class="jxr_keyword">new</strong> ToStringBuilder(<strong class="jxr_keyword">this</strong>);
+<a class="jxr_linenumber" name="L371" href="#L371">371</a> 		retVal.append(<span class="jxr_string">"name"</span>, myName);
+<a class="jxr_linenumber" name="L372" href="#L372">372</a> 		retVal.append(<span class="jxr_string">"required"</span>, myRequired);
+<a class="jxr_linenumber" name="L373" href="#L373">373</a> 		<strong class="jxr_keyword">return</strong> retVal.toString();
+<a class="jxr_linenumber" name="L374" href="#L374">374</a> 	}
+<a class="jxr_linenumber" name="L375" href="#L375">375</a> 
+<a class="jxr_linenumber" name="L376" href="#L376">376</a> }
 </pre>
 <hr/>
 <div id="footer">Copyright &#169; 2014&#x2013;2017 <a href="http://www.uhn.ca">University Health Network</a>. All rights reserved.</div>

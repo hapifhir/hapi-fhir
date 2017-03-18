@@ -123,7 +123,7 @@
 <a class="jxr_linenumber" name="L115" href="#L115">115</a> 	}
 <a class="jxr_linenumber" name="L116" href="#L116">116</a> 
 <a class="jxr_linenumber" name="L117" href="#L117">117</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> addExtension(BaseRuntimeElementCompositeDefinition&lt;?&gt; theSourceDef, <a href="../../../../../ca/uhn/fhir/model/api/BaseElement.html">BaseElement</a> theSource, <a href="../../../../../ca/uhn/fhir/model/api/BaseElement.html">BaseElement</a> theTarget, <a href="../../../../../ca/uhn/fhir/context/RuntimeChildDeclaredExtensionDefinition.html">RuntimeChildDeclaredExtensionDefinition</a> nextExt, String url) {
-<a class="jxr_linenumber" name="L118" href="#L118">118</a> 		RuntimeChildDeclaredExtensionDefinition sourceDeclaredExt = theSourceDef.getDeclaredExtension(url);
+<a class="jxr_linenumber" name="L118" href="#L118">118</a> 		RuntimeChildDeclaredExtensionDefinition sourceDeclaredExt = theSourceDef.getDeclaredExtension(url, <span class="jxr_string">""</span>);
 <a class="jxr_linenumber" name="L119" href="#L119">119</a> 		<strong class="jxr_keyword">if</strong> (sourceDeclaredExt == <strong class="jxr_keyword">null</strong>) {
 <a class="jxr_linenumber" name="L120" href="#L120">120</a> 			
 <a class="jxr_linenumber" name="L121" href="#L121">121</a> 			<strong class="jxr_keyword">for</strong> (ExtensionDt next : theSource.getAllUndeclaredExtensions()) {

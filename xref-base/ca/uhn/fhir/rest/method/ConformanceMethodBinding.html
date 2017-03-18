@@ -101,25 +101,24 @@
 <a class="jxr_linenumber" name="L93" href="#L93">93</a>  		<strong class="jxr_keyword">if</strong> (<span class="jxr_string">"metadata"</span>.equals(theRequest.getOperation())) {
 <a class="jxr_linenumber" name="L94" href="#L94">94</a>  			<strong class="jxr_keyword">if</strong> (theRequest.getRequestType() == RequestTypeEnum.GET) {
 <a class="jxr_linenumber" name="L95" href="#L95">95</a>  				<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">true</strong>;
-<a class="jxr_linenumber" name="L96" href="#L96">96</a>  			} <strong class="jxr_keyword">else</strong> {
-<a class="jxr_linenumber" name="L97" href="#L97">97</a>  				<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/rest/server/exceptions/MethodNotAllowedException.html">MethodNotAllowedException</a>(<span class="jxr_string">"/metadata request must use HTTP GET"</span>, RequestTypeEnum.GET);
-<a class="jxr_linenumber" name="L98" href="#L98">98</a>  			}
-<a class="jxr_linenumber" name="L99" href="#L99">99</a>  		}
-<a class="jxr_linenumber" name="L100" href="#L100">100</a> 
-<a class="jxr_linenumber" name="L101" href="#L101">101</a> 		<strong class="jxr_keyword">return</strong> false;
-<a class="jxr_linenumber" name="L102" href="#L102">102</a> 	}
-<a class="jxr_linenumber" name="L103" href="#L103">103</a> 
-<a class="jxr_linenumber" name="L104" href="#L104">104</a> 	@Override
-<a class="jxr_linenumber" name="L105" href="#L105">105</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/api/RestOperationTypeEnum.html">RestOperationTypeEnum</a> getRestOperationType() {
-<a class="jxr_linenumber" name="L106" href="#L106">106</a> 		<strong class="jxr_keyword">return</strong> RestOperationTypeEnum.METADATA;
-<a class="jxr_linenumber" name="L107" href="#L107">107</a> 	}
-<a class="jxr_linenumber" name="L108" href="#L108">108</a> 
-<a class="jxr_linenumber" name="L109" href="#L109">109</a> 	@Override
-<a class="jxr_linenumber" name="L110" href="#L110">110</a> 	<strong class="jxr_keyword">protected</strong> <a href="../../../../../ca/uhn/fhir/model/valueset/BundleTypeEnum.html">BundleTypeEnum</a> getResponseBundleType() {
-<a class="jxr_linenumber" name="L111" href="#L111">111</a> 		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">null</strong>;
-<a class="jxr_linenumber" name="L112" href="#L112">112</a> 	}
-<a class="jxr_linenumber" name="L113" href="#L113">113</a> 
-<a class="jxr_linenumber" name="L114" href="#L114">114</a> }
+<a class="jxr_linenumber" name="L96" href="#L96">96</a>  			}
+<a class="jxr_linenumber" name="L97" href="#L97">97</a>  			<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/rest/server/exceptions/MethodNotAllowedException.html">MethodNotAllowedException</a>(<span class="jxr_string">"/metadata request must use HTTP GET"</span>, RequestTypeEnum.GET);
+<a class="jxr_linenumber" name="L98" href="#L98">98</a>  		}
+<a class="jxr_linenumber" name="L99" href="#L99">99</a>  
+<a class="jxr_linenumber" name="L100" href="#L100">100</a> 		<strong class="jxr_keyword">return</strong> false;
+<a class="jxr_linenumber" name="L101" href="#L101">101</a> 	}
+<a class="jxr_linenumber" name="L102" href="#L102">102</a> 
+<a class="jxr_linenumber" name="L103" href="#L103">103</a> 	@Override
+<a class="jxr_linenumber" name="L104" href="#L104">104</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/api/RestOperationTypeEnum.html">RestOperationTypeEnum</a> getRestOperationType() {
+<a class="jxr_linenumber" name="L105" href="#L105">105</a> 		<strong class="jxr_keyword">return</strong> RestOperationTypeEnum.METADATA;
+<a class="jxr_linenumber" name="L106" href="#L106">106</a> 	}
+<a class="jxr_linenumber" name="L107" href="#L107">107</a> 
+<a class="jxr_linenumber" name="L108" href="#L108">108</a> 	@Override
+<a class="jxr_linenumber" name="L109" href="#L109">109</a> 	<strong class="jxr_keyword">protected</strong> <a href="../../../../../ca/uhn/fhir/model/valueset/BundleTypeEnum.html">BundleTypeEnum</a> getResponseBundleType() {
+<a class="jxr_linenumber" name="L110" href="#L110">110</a> 		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L111" href="#L111">111</a> 	}
+<a class="jxr_linenumber" name="L112" href="#L112">112</a> 
+<a class="jxr_linenumber" name="L113" href="#L113">113</a> }
 </pre>
 <hr/>
 <div id="footer">Copyright &#169; 2014&#x2013;2017 <a href="http://www.uhn.ca">University Health Network</a>. All rights reserved.</div>

@@ -404,7 +404,7 @@
 <a class="jxr_linenumber" name="L396" href="#L396">396</a> 		<strong class="jxr_keyword">if</strong> (theConcept.getId() == <strong class="jxr_keyword">null</strong> || theConcept.getIndexStatus() == <strong class="jxr_keyword">null</strong>) {
 <a class="jxr_linenumber" name="L397" href="#L397">397</a> 			retVal++;
 <a class="jxr_linenumber" name="L398" href="#L398">398</a> 			theConcept.setIndexStatus(BaseHapiFhirDao.INDEX_STATUS_INDEXED);
-<a class="jxr_linenumber" name="L399" href="#L399">399</a> 			myConceptDao.saveAndFlush(theConcept);
+<a class="jxr_linenumber" name="L399" href="#L399">399</a> 			myConceptDao.save(theConcept);
 <a class="jxr_linenumber" name="L400" href="#L400">400</a> 		}
 <a class="jxr_linenumber" name="L401" href="#L401">401</a> 		
 <a class="jxr_linenumber" name="L402" href="#L402">402</a> 		ourLog.trace(<span class="jxr_string">"Saved {} and got PID {}"</span>, theConcept.getCode(), theConcept.getId());

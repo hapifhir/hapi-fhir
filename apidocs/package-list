@@ -37,5 +37,6 @@ org.hl7.fhir.exceptions
 org.hl7.fhir.instance.model.api
 org.hl7.fhir.utilities
 org.hl7.fhir.utilities.ucum
+org.hl7.fhir.utilities.validation
 org.hl7.fhir.utilities.xhtml
 org.hl7.fhir.utilities.xml

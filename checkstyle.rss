@@ -25,9 +25,9 @@ under the License.
     <language>en-us</language>
     <copyright>&#169;2014 - 2017 University Health Network</copyright>
     <item>
-      <title>File: 597,
+      <title>File: 601,
              Errors: 0,
-             Warnings: 4494,
+             Warnings: 4574,
              Infos: 0
       </title>
             <link>http://jamesagnew.github.io/hapi-fhir//checkstyle.html</link>
@@ -136,7 +136,7 @@ under the License.
                   0
                 </td>
                 <td>
-                  373
+                  362
                 </td>
                 <td>
                   0
@@ -290,7 +290,7 @@ under the License.
                   0
                 </td>
                 <td>
-                  0
+                  2
                 </td>
                 <td>
                   0
@@ -430,7 +430,7 @@ under the License.
                   0
                 </td>
                 <td>
-                  27
+                  3
                 </td>
                 <td>
                   0
@@ -500,7 +500,7 @@ under the License.
                   0
                 </td>
                 <td>
-                  4
+                  5
                 </td>
                 <td>
                   0
@@ -1270,7 +1270,7 @@ under the License.
                   0
                 </td>
                 <td>
-                  25
+                  24
                 </td>
                 <td>
                   0
@@ -1886,7 +1886,7 @@ under the License.
                   0
                 </td>
                 <td>
-                  60
+                  5
                 </td>
                 <td>
                   0
@@ -2040,7 +2040,7 @@ under the License.
                   0
                 </td>
                 <td>
-                  4
+                  5
                 </td>
                 <td>
                   0
@@ -2250,7 +2250,7 @@ under the License.
                   0
                 </td>
                 <td>
-                  5
+                  7
                 </td>
                 <td>
                   0
@@ -2390,7 +2390,7 @@ under the License.
                   0
                 </td>
                 <td>
-                  13
+                  4
                 </td>
                 <td>
                   0
@@ -2572,7 +2572,7 @@ under the License.
                   0
                 </td>
                 <td>
-                  11
+                  2
                 </td>
                 <td>
                   0
@@ -2629,6 +2629,20 @@ under the License.
                 </td>
                 <td>
                   1
+                </td>
+                <td>
+                  0
+                </td>
+              </tr>
+                          <tr>
+                <td>
+                  <a href="http://jamesagnew.github.io/hapi-fhir//checkstyle.html#org.hl7.fhir.utilities.validation.ValidationMessage.java">org/hl7/fhir/utilities/validation/ValidationMessage.java</a>
+                </td>
+                <td>
+                  0
+                </td>
+                <td>
+                  551
                 </td>
                 <td>
                   0
@@ -2706,6 +2720,20 @@ under the License.
               </tr>
                           <tr>
                 <td>
+                  <a href="http://jamesagnew.github.io/hapi-fhir//checkstyle.html#ca.uhn.fhir.rest.gclient.IOperationProcessMsg.java">ca/uhn/fhir/rest/gclient/IOperationProcessMsg.java</a>
+                </td>
+                <td>
+                  0
+                </td>
+                <td>
+                  7
+                </td>
+                <td>
+                  0
+                </td>
+              </tr>
+                          <tr>
+                <td>
                   <a href="http://jamesagnew.github.io/hapi-fhir//checkstyle.html#ca.uhn.fhir.rest.method.IClientResponseHandlerHandlesBinary.java">ca/uhn/fhir/rest/method/IClientResponseHandlerHandlesBinary.java</a>
                 </td>
                 <td>
@@ -2754,7 +2782,7 @@ under the License.
                   0
                 </td>
                 <td>
-                  208
+                  203
                 </td>
                 <td>
                   0
@@ -3090,7 +3118,7 @@ under the License.
                   0
                 </td>
                 <td>
-                  127
+                  124
                 </td>
                 <td>
                   0
@@ -3412,7 +3440,7 @@ under the License.
                   0
                 </td>
                 <td>
-                  6
+                  7
                 </td>
                 <td>
                   0
@@ -3804,7 +3832,7 @@ under the License.
                   0
                 </td>
                 <td>
-                  276
+                  331
                 </td>
                 <td>
                   0
@@ -3818,7 +3846,7 @@ under the License.
                   0
                 </td>
                 <td>
-                  7
+                  9
                 </td>
                 <td>
                   0
@@ -3860,7 +3888,7 @@ under the License.
                   0
                 </td>
                 <td>
-                  2
+                  5
                 </td>
                 <td>
                   0
@@ -3889,6 +3917,20 @@ under the License.
                 </td>
                 <td>
                   2
+                </td>
+                <td>
+                  0
+                </td>
+              </tr>
+                          <tr>
+                <td>
+                  <a href="http://jamesagnew.github.io/hapi-fhir//checkstyle.html#org.hl7.fhir.utilities.TranslatingUtilities.java">org/hl7/fhir/utilities/TranslatingUtilities.java</a>
+                </td>
+                <td>
+                  0
+                </td>
+                <td>
+                  31
                 </td>
                 <td>
                   0
@@ -4042,7 +4084,7 @@ under the License.
                   0
                 </td>
                 <td>
-                  18
+                  16
                 </td>
                 <td>
                   0
@@ -4098,7 +4140,7 @@ under the License.
                   0
                 </td>
                 <td>
-                  4
+                  6
                 </td>
                 <td>
                   0
@@ -4406,7 +4448,7 @@ under the License.
                   0
                 </td>
                 <td>
-                  0
+                  1
                 </td>
                 <td>
                   0
@@ -4602,7 +4644,7 @@ under the License.
                   0
                 </td>
                 <td>
-                  3
+                  7
                 </td>
                 <td>
                   0
@@ -4742,7 +4784,7 @@ under the License.
                   0
                 </td>
                 <td>
-                  234
+                  65
                 </td>
                 <td>
                   0
@@ -4868,7 +4910,7 @@ under the License.
                   0
                 </td>
                 <td>
-                  7
+                  8
                 </td>
                 <td>
                   0
@@ -5008,7 +5050,7 @@ under the License.
                   0
                 </td>
                 <td>
-                  595
+                  564
                 </td>
                 <td>
                   0
@@ -5358,7 +5400,7 @@ under the License.
                   0
                 </td>
                 <td>
-                  12
+                  13
                 </td>
                 <td>
                   0
@@ -5582,7 +5624,7 @@ under the License.
                   0
                 </td>
                 <td>
-                  5
+                  6
                 </td>
                 <td>
                   0
@@ -5596,7 +5638,7 @@ under the License.
                   0
                 </td>
                 <td>
-                  3
+                  2
                 </td>
                 <td>
                   0
@@ -6058,7 +6100,7 @@ under the License.
                   0
                 </td>
                 <td>
-                  430
+                  429
                 </td>
                 <td>
                   0
@@ -6324,7 +6366,7 @@ under the License.
                   0
                 </td>
                 <td>
-                  3
+                  5
                 </td>
                 <td>
                   0
@@ -6409,6 +6451,20 @@ under the License.
                 </td>
                 <td>
                   29
+                </td>
+                <td>
+                  0
+                </td>
+              </tr>
+                          <tr>
+                <td>
+                  <a href="http://jamesagnew.github.io/hapi-fhir//checkstyle.html#ca.uhn.fhir.rest.gclient.IOperationProcessMsgMode.java">ca/uhn/fhir/rest/gclient/IOperationProcessMsgMode.java</a>
+                </td>
+                <td>
+                  0
+                </td>
+                <td>
+                  3
                 </td>
                 <td>
                   0
@@ -6520,7 +6576,7 @@ under the License.
                   0
                 </td>
                 <td>
-                  2
+                  5
                 </td>
                 <td>
                   0
@@ -6940,7 +6996,7 @@ under the License.
                   0
                 </td>
                 <td>
-                  327
+                  51
                 </td>
                 <td>
                   0
@@ -7178,7 +7234,7 @@ under the License.
                   0
                 </td>
                 <td>
-                  0
+                  2
                 </td>
                 <td>
                   0
@@ -7668,7 +7724,7 @@ under the License.
                   0
                 </td>
                 <td>
-                  1
+                  2
                 </td>
                 <td>
                   0

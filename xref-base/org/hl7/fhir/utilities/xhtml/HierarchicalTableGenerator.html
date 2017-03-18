@@ -188,28 +188,28 @@
 <a class="jxr_linenumber" name="L180" href="#L180">180</a>       pieces.add(piece);
 <a class="jxr_linenumber" name="L181" href="#L181">181</a>       <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>;
 <a class="jxr_linenumber" name="L182" href="#L182">182</a>     }
-<a class="jxr_linenumber" name="L183" href="#L183">183</a>     <strong class="jxr_keyword">private</strong> List&lt;Piece&gt; htmlToParagraphPieces(String html) {
-<a class="jxr_linenumber" name="L184" href="#L184">184</a>       List&lt;Piece&gt; myPieces = <strong class="jxr_keyword">new</strong> ArrayList&lt;Piece&gt;();
-<a class="jxr_linenumber" name="L185" href="#L185">185</a>       String[] paragraphs = html.replace(<span class="jxr_string">"&lt;p&gt;"</span>, <span class="jxr_string">""</span>).split(<span class="jxr_string">"&lt;&#92;&#92;/p&gt;|&lt;br  &#92;&#92;/&gt;"</span>);
-<a class="jxr_linenumber" name="L186" href="#L186">186</a>       <strong class="jxr_keyword">for</strong> (<strong class="jxr_keyword">int</strong> i=0;i&lt;paragraphs.length;i++) {
-<a class="jxr_linenumber" name="L187" href="#L187">187</a>         <strong class="jxr_keyword">if</strong> (!paragraphs[i].isEmpty()) {
-<a class="jxr_linenumber" name="L188" href="#L188">188</a>           <strong class="jxr_keyword">if</strong> (i!=0) {
-<a class="jxr_linenumber" name="L189" href="#L189">189</a>             myPieces.add(<strong class="jxr_keyword">new</strong> <a href="../../../../../org/hl7/fhir/utilities/xhtml/HierarchicalTableGenerator.html">Piece</a>(<span class="jxr_string">"br"</span>));
-<a class="jxr_linenumber" name="L190" href="#L190">190</a>             myPieces.add(<strong class="jxr_keyword">new</strong> <a href="../../../../../org/hl7/fhir/utilities/xhtml/HierarchicalTableGenerator.html">Piece</a>(<span class="jxr_string">"br"</span>));
-<a class="jxr_linenumber" name="L191" href="#L191">191</a>           }
-<a class="jxr_linenumber" name="L192" href="#L192">192</a>           myPieces.addAll(htmlFormattingToPieces(paragraphs[i]));
-<a class="jxr_linenumber" name="L193" href="#L193">193</a>         }
-<a class="jxr_linenumber" name="L194" href="#L194">194</a>       }
-<a class="jxr_linenumber" name="L195" href="#L195">195</a>       
-<a class="jxr_linenumber" name="L196" href="#L196">196</a>       <strong class="jxr_keyword">return</strong> myPieces;
-<a class="jxr_linenumber" name="L197" href="#L197">197</a>     }
-<a class="jxr_linenumber" name="L198" href="#L198">198</a>     <strong class="jxr_keyword">private</strong> List&lt;Piece&gt; htmlFormattingToPieces(String html) {
-<a class="jxr_linenumber" name="L199" href="#L199">199</a>       List&lt;Piece&gt; myPieces = <strong class="jxr_keyword">new</strong> ArrayList&lt;Piece&gt;();
-<a class="jxr_linenumber" name="L200" href="#L200">200</a>       <em class="jxr_comment">//Todo: At least handle bold and italics and turn them into formatted spans.  (Will need to handle nesting though)</em>
-<a class="jxr_linenumber" name="L201" href="#L201">201</a>       myPieces.add(<strong class="jxr_keyword">new</strong> <a href="../../../../../org/hl7/fhir/utilities/xhtml/HierarchicalTableGenerator.html">Piece</a>(<strong class="jxr_keyword">null</strong>, html, <strong class="jxr_keyword">null</strong>));
-<a class="jxr_linenumber" name="L202" href="#L202">202</a>       
-<a class="jxr_linenumber" name="L203" href="#L203">203</a>       <strong class="jxr_keyword">return</strong> myPieces;
-<a class="jxr_linenumber" name="L204" href="#L204">204</a>     }
+<a class="jxr_linenumber" name="L183" href="#L183">183</a> <em class="jxr_comment">//    private List&lt;Piece&gt; htmlToParagraphPieces(String html) {</em>
+<a class="jxr_linenumber" name="L184" href="#L184">184</a> <em class="jxr_comment">//      List&lt;Piece&gt; myPieces = new ArrayList&lt;Piece&gt;();</em>
+<a class="jxr_linenumber" name="L185" href="#L185">185</a> <em class="jxr_comment">//      String[] paragraphs = html.replace("&lt;p&gt;", "").split("&lt;&#92;&#92;/p&gt;|&lt;br  &#92;&#92;/&gt;");</em>
+<a class="jxr_linenumber" name="L186" href="#L186">186</a> <em class="jxr_comment">//      for (int i=0;i&lt;paragraphs.length;i++) {</em>
+<a class="jxr_linenumber" name="L187" href="#L187">187</a> <em class="jxr_comment">//        if (!paragraphs[i].isEmpty()) {</em>
+<a class="jxr_linenumber" name="L188" href="#L188">188</a> <em class="jxr_comment">//          if (i!=0) {</em>
+<a class="jxr_linenumber" name="L189" href="#L189">189</a> <em class="jxr_comment">//            myPieces.add(new Piece("br"));</em>
+<a class="jxr_linenumber" name="L190" href="#L190">190</a> <em class="jxr_comment">//            myPieces.add(new Piece("br"));</em>
+<a class="jxr_linenumber" name="L191" href="#L191">191</a> <em class="jxr_comment">//          }</em>
+<a class="jxr_linenumber" name="L192" href="#L192">192</a> <em class="jxr_comment">//          myPieces.addAll(htmlFormattingToPieces(paragraphs[i]));</em>
+<a class="jxr_linenumber" name="L193" href="#L193">193</a> <em class="jxr_comment">//        }</em>
+<a class="jxr_linenumber" name="L194" href="#L194">194</a> <em class="jxr_comment">//      }</em>
+<a class="jxr_linenumber" name="L195" href="#L195">195</a> <em class="jxr_comment">//      </em>
+<a class="jxr_linenumber" name="L196" href="#L196">196</a> <em class="jxr_comment">//      return myPieces;</em>
+<a class="jxr_linenumber" name="L197" href="#L197">197</a> <em class="jxr_comment">//    }</em>
+<a class="jxr_linenumber" name="L198" href="#L198">198</a> <em class="jxr_comment">//    private List&lt;Piece&gt; htmlFormattingToPieces(String html) {</em>
+<a class="jxr_linenumber" name="L199" href="#L199">199</a> <em class="jxr_comment">//      List&lt;Piece&gt; myPieces = new ArrayList&lt;Piece&gt;();</em>
+<a class="jxr_linenumber" name="L200" href="#L200">200</a> <em class="jxr_comment">//      //Todo: At least handle bold and italics and turn them into formatted spans.  (Will need to handle nesting though)</em>
+<a class="jxr_linenumber" name="L201" href="#L201">201</a> <em class="jxr_comment">//      myPieces.add(new Piece(null, html, null));</em>
+<a class="jxr_linenumber" name="L202" href="#L202">202</a> <em class="jxr_comment">//      </em>
+<a class="jxr_linenumber" name="L203" href="#L203">203</a> <em class="jxr_comment">//      return myPieces;</em>
+<a class="jxr_linenumber" name="L204" href="#L204">204</a> <em class="jxr_comment">//    }</em>
 <a class="jxr_linenumber" name="L205" href="#L205">205</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> addStyle(String style) {
 <a class="jxr_linenumber" name="L206" href="#L206">206</a>       <strong class="jxr_keyword">for</strong> (Piece p : pieces)
 <a class="jxr_linenumber" name="L207" href="#L207">207</a>         p.addStyle(style);      
@@ -515,8 +515,8 @@
 <a class="jxr_linenumber" name="L507" href="#L507">507</a>       b.append(<strong class="jxr_keyword">new</strong> String(Base64.encodeBase64(bytes)));
 <a class="jxr_linenumber" name="L508" href="#L508">508</a> <em class="jxr_comment">//      files.put(filename, b.toString());</em>
 <a class="jxr_linenumber" name="L509" href="#L509">509</a>       <strong class="jxr_keyword">return</strong> b.toString();
-<a class="jxr_linenumber" name="L510" href="#L510">510</a>     } <strong class="jxr_keyword">else</strong>
-<a class="jxr_linenumber" name="L511" href="#L511">511</a>       <strong class="jxr_keyword">return</strong> corePrefix+filename;
+<a class="jxr_linenumber" name="L510" href="#L510">510</a>     } 
+<a class="jxr_linenumber" name="L511" href="#L511">511</a>     <strong class="jxr_keyword">return</strong> corePrefix+filename;
 <a class="jxr_linenumber" name="L512" href="#L512">512</a>   }
 <a class="jxr_linenumber" name="L513" href="#L513">513</a> 
 <a class="jxr_linenumber" name="L514" href="#L514">514</a> 
@@ -566,22 +566,22 @@
 <a class="jxr_linenumber" name="L558" href="#L558">558</a>       b.append(<strong class="jxr_keyword">new</strong> String(encodeBase64));
 <a class="jxr_linenumber" name="L559" href="#L559">559</a>       files.put(filename, b.toString());
 <a class="jxr_linenumber" name="L560" href="#L560">560</a>       <strong class="jxr_keyword">return</strong> b.toString();
-<a class="jxr_linenumber" name="L561" href="#L561">561</a>     } <strong class="jxr_keyword">else</strong> {
-<a class="jxr_linenumber" name="L562" href="#L562">562</a>       b.append(<span class="jxr_string">"tbl_bck"</span>);
-<a class="jxr_linenumber" name="L563" href="#L563">563</a>       <strong class="jxr_keyword">for</strong> (Boolean i : indents)
-<a class="jxr_linenumber" name="L564" href="#L564">564</a>         b.append(i ? <span class="jxr_string">"0"</span> : <span class="jxr_string">"1"</span>);
-<a class="jxr_linenumber" name="L565" href="#L565">565</a>       <strong class="jxr_keyword">if</strong> (hasChildren)
-<a class="jxr_linenumber" name="L566" href="#L566">566</a>         b.append(<span class="jxr_string">"1"</span>);
-<a class="jxr_linenumber" name="L567" href="#L567">567</a>       <strong class="jxr_keyword">else</strong>
-<a class="jxr_linenumber" name="L568" href="#L568">568</a>         b.append(<span class="jxr_string">"0"</span>);
-<a class="jxr_linenumber" name="L569" href="#L569">569</a>       b.append(<span class="jxr_string">".png"</span>);
-<a class="jxr_linenumber" name="L570" href="#L570">570</a>       String file = Utilities.path(dest, b.toString());
-<a class="jxr_linenumber" name="L571" href="#L571">571</a>       <strong class="jxr_keyword">if</strong> (!<strong class="jxr_keyword">new</strong> File(file).exists()) {
-<a class="jxr_linenumber" name="L572" href="#L572">572</a>         FileOutputStream stream = <strong class="jxr_keyword">new</strong> FileOutputStream(file);
-<a class="jxr_linenumber" name="L573" href="#L573">573</a>         genImage(indents, hasChildren, stream);
-<a class="jxr_linenumber" name="L574" href="#L574">574</a>       }
-<a class="jxr_linenumber" name="L575" href="#L575">575</a>       <strong class="jxr_keyword">return</strong> b.toString();
-<a class="jxr_linenumber" name="L576" href="#L576">576</a>     }
+<a class="jxr_linenumber" name="L561" href="#L561">561</a>     }
+<a class="jxr_linenumber" name="L562" href="#L562">562</a>     b.append(<span class="jxr_string">"tbl_bck"</span>);
+<a class="jxr_linenumber" name="L563" href="#L563">563</a>     <strong class="jxr_keyword">for</strong> (Boolean i : indents)
+<a class="jxr_linenumber" name="L564" href="#L564">564</a>     	b.append(i ? <span class="jxr_string">"0"</span> : <span class="jxr_string">"1"</span>);
+<a class="jxr_linenumber" name="L565" href="#L565">565</a>     <strong class="jxr_keyword">if</strong> (hasChildren)
+<a class="jxr_linenumber" name="L566" href="#L566">566</a>     	b.append(<span class="jxr_string">"1"</span>);
+<a class="jxr_linenumber" name="L567" href="#L567">567</a>     <strong class="jxr_keyword">else</strong>
+<a class="jxr_linenumber" name="L568" href="#L568">568</a>     	b.append(<span class="jxr_string">"0"</span>);
+<a class="jxr_linenumber" name="L569" href="#L569">569</a>     b.append(<span class="jxr_string">".png"</span>);
+<a class="jxr_linenumber" name="L570" href="#L570">570</a>     String file = Utilities.path(dest, b.toString());
+<a class="jxr_linenumber" name="L571" href="#L571">571</a>     <strong class="jxr_keyword">if</strong> (!<strong class="jxr_keyword">new</strong> File(file).exists()) {
+<a class="jxr_linenumber" name="L572" href="#L572">572</a>     	<em class="jxr_comment">//FIXME resource leak</em>
+<a class="jxr_linenumber" name="L573" href="#L573">573</a>     	FileOutputStream stream = <strong class="jxr_keyword">new</strong> FileOutputStream(file);
+<a class="jxr_linenumber" name="L574" href="#L574">574</a>     	genImage(indents, hasChildren, stream);
+<a class="jxr_linenumber" name="L575" href="#L575">575</a>     }
+<a class="jxr_linenumber" name="L576" href="#L576">576</a>     <strong class="jxr_keyword">return</strong> b.toString();
 <a class="jxr_linenumber" name="L577" href="#L577">577</a>   }
 <a class="jxr_linenumber" name="L578" href="#L578">578</a> 
 <a class="jxr_linenumber" name="L579" href="#L579">579</a> 

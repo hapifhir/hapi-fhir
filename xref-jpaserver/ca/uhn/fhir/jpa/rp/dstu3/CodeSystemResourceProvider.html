@@ -75,9 +75,9 @@
 <a class="jxr_linenumber" name="L67" href="#L67">67</a>  			@OptionalParam(name=<span class="jxr_string">"code"</span>)
 <a class="jxr_linenumber" name="L68" href="#L68">68</a>  			TokenAndListParam theCode, 
 <a class="jxr_linenumber" name="L69" href="#L69">69</a>    
-<a class="jxr_linenumber" name="L70" href="#L70">70</a>  			@Description(shortDefinition=<span class="jxr_string">"not-present | examplar | fragment | complete"</span>)
-<a class="jxr_linenumber" name="L71" href="#L71">71</a>  			@OptionalParam(name=<span class="jxr_string">"content"</span>)
-<a class="jxr_linenumber" name="L72" href="#L72">72</a>  			TokenAndListParam theContent, 
+<a class="jxr_linenumber" name="L70" href="#L70">70</a>  			@Description(shortDefinition=<span class="jxr_string">"not-present | example | fragment | complete"</span>)
+<a class="jxr_linenumber" name="L71" href="#L71">71</a>  			@OptionalParam(name=<span class="jxr_string">"content-mode"</span>)
+<a class="jxr_linenumber" name="L72" href="#L72">72</a>  			TokenAndListParam theContent_mode, 
 <a class="jxr_linenumber" name="L73" href="#L73">73</a>    
 <a class="jxr_linenumber" name="L74" href="#L74">74</a>  			@Description(shortDefinition=<span class="jxr_string">"The code system publication date"</span>)
 <a class="jxr_linenumber" name="L75" href="#L75">75</a>  			@OptionalParam(name=<span class="jxr_string">"date"</span>)
@@ -123,7 +123,7 @@
 <a class="jxr_linenumber" name="L115" href="#L115">115</a> 			@OptionalParam(name=<span class="jxr_string">"url"</span>)
 <a class="jxr_linenumber" name="L116" href="#L116">116</a> 			UriAndListParam theUrl, 
 <a class="jxr_linenumber" name="L117" href="#L117">117</a>   
-<a class="jxr_linenumber" name="L118" href="#L118">118</a> 			@Description(shortDefinition=<span class="jxr_string">"The version identifier of the code system"</span>)
+<a class="jxr_linenumber" name="L118" href="#L118">118</a> 			@Description(shortDefinition=<span class="jxr_string">"The business version of the code system"</span>)
 <a class="jxr_linenumber" name="L119" href="#L119">119</a> 			@OptionalParam(name=<span class="jxr_string">"version"</span>)
 <a class="jxr_linenumber" name="L120" href="#L120">120</a> 			TokenAndListParam theVersion, 
 <a class="jxr_linenumber" name="L121" href="#L121">121</a> 
@@ -159,7 +159,7 @@
 <a class="jxr_linenumber" name="L151" href="#L151">151</a> 			paramMap.add(<span class="jxr_string">"_id"</span>, the_id);
 <a class="jxr_linenumber" name="L152" href="#L152">152</a> 			paramMap.add(<span class="jxr_string">"_language"</span>, the_language);
 <a class="jxr_linenumber" name="L153" href="#L153">153</a> 			paramMap.add(<span class="jxr_string">"code"</span>, theCode);
-<a class="jxr_linenumber" name="L154" href="#L154">154</a> 			paramMap.add(<span class="jxr_string">"content"</span>, theContent);
+<a class="jxr_linenumber" name="L154" href="#L154">154</a> 			paramMap.add(<span class="jxr_string">"content-mode"</span>, theContent_mode);
 <a class="jxr_linenumber" name="L155" href="#L155">155</a> 			paramMap.add(<span class="jxr_string">"date"</span>, theDate);
 <a class="jxr_linenumber" name="L156" href="#L156">156</a> 			paramMap.add(<span class="jxr_string">"description"</span>, theDescription);
 <a class="jxr_linenumber" name="L157" href="#L157">157</a> 			paramMap.add(<span class="jxr_string">"identifier"</span>, theIdentifier);
