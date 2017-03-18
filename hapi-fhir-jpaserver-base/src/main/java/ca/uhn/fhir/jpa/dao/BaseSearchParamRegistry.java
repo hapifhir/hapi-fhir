@@ -54,6 +54,16 @@ public abstract class BaseSearchParamRegistry implements ISearchParamRegistry {
 	}
 
 	@Override
+	public RuntimeSearchParam getActiveSearchParam(String theResourceName, String theParamName) {
+		RuntimeSearchParam retVal = null;
+		Map<String, RuntimeSearchParam> params = getActiveSearchParams().get(theResourceName);
+		if (params != null) {
+			retVal = params.get(theParamName);
+		}
+		return retVal;
+	}
+
+	@Override
 	public Map<String, Map<String, RuntimeSearchParam>> getActiveSearchParams() {
 		return myBuiltInSearchParams;
 	}

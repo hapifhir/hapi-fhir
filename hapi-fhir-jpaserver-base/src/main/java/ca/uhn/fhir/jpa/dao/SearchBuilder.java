@@ -41,7 +41,6 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallback;
@@ -96,7 +95,7 @@ public class SearchBuilder {
 	private IFulltextSearchSvc mySearchDao;
 	private Search mySearchEntity;
 	private ISearchResultDao mySearchResultDao;
-	private ISearchParamRegistry mySerarchParamRegistry;
+	private ISearchParamRegistry mySearchParamRegistry;
 
 	private IHapiTerminologySvc myTerminologySvc;
 
@@ -111,7 +110,7 @@ public class SearchBuilder {
 		myResourceIndexedSearchParamUriDao = theResourceIndexedSearchParamUriDao;
 		myForcedIdDao = theForcedIdDao;
 		myTerminologySvc = theTerminologySvc;
-		mySerarchParamRegistry = theSearchParamRegistry;
+		mySearchParamRegistry = theSearchParamRegistry;
 	}
 
 	private void addPredicateComposite(RuntimeSearchParam theParamDef, List<? extends IQueryParameterType> theNextAnd) {
@@ -1816,7 +1815,6 @@ public class SearchBuilder {
 		doInitializeSearch();
 
 //		RuntimeResourceDefinition resourceDef = myContext.getResourceDefinition(myResourceType);
-		Map<String, RuntimeSearchParam> searchParams = mySerarchParamRegistry.getActiveSearchParams(myResourceName);
 
 		for (Entry<String, List<List<? extends IQueryParameterType>>> nextParamEntry : params.entrySet()) {
 			String nextParamName = nextParamEntry.getKey();
@@ -1871,7 +1869,7 @@ public class SearchBuilder {
 
 			} else {
 
-				RuntimeSearchParam nextParamDef = searchParams.get(nextParamName);
+				RuntimeSearchParam nextParamDef = mySearchParamRegistry.getActiveSearchParam(myResourceName, nextParamName);
 				if (nextParamDef != null) {
 					switch (nextParamDef.getParamType()) {
 					case DATE:

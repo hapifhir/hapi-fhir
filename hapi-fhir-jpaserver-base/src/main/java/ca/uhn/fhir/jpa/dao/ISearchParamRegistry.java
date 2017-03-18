@@ -32,4 +32,9 @@ public interface ISearchParamRegistry {
 
 	Map<String,RuntimeSearchParam> getActiveSearchParams(String theResourceName);
 
+	/**
+	 * @return Returns {@literal null} if no match
+	 */
+	RuntimeSearchParam getActiveSearchParam(String theResourceName, String theParamName);
+
 }

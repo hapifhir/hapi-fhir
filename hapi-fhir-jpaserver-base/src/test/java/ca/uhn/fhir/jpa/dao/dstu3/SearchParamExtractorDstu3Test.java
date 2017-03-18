@@ -2,7 +2,6 @@ package ca.uhn.fhir.jpa.dao.dstu3;
 
 import static org.junit.Assert.assertEquals;
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -61,6 +60,11 @@ public class SearchParamExtractorDstu3Test {
 
 			@Override
 			public Map<String, Map<String, RuntimeSearchParam>> getActiveSearchParams() {
+				throw new UnsupportedOperationException();
+			}
+
+			@Override
+			public RuntimeSearchParam getActiveSearchParam(String theResourceName, String theParamName) {
 				throw new UnsupportedOperationException();
 			}
 		};
