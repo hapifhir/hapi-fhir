@@ -154,6 +154,7 @@ public class JpaServerDemo extends RestfulServer {
 		CorsInterceptor corsInterceptor = new CorsInterceptor(config);
 		config.addAllowedHeader("Origin");
 		config.addAllowedHeader("Accept");
+		config.addAllowedHeader("Prefer");
 		config.addAllowedHeader("X-Requested-With");
 		config.addAllowedHeader("Content-Type");
 		config.addAllowedHeader("Access-Control-Request-Method");
