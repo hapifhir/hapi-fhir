@@ -42,6 +42,11 @@ import ca.uhn.fhir.util.FhirTerser;
 public class FhirResourceDaoDstu1<T extends IResource> extends BaseHapiFhirResourceDao<T> {
 
 	@Override
+	public RuntimeResourceDefinition validateCriteriaAndReturnResourceDefinition(String criteria) {
+		return null;
+	}
+
+	@Override
 	protected List<Object> getIncludeValues(FhirTerser t, Include next, IBaseResource nextResource, RuntimeResourceDefinition def) {
 		List<Object> values;
 		if ("*".equals(next.getValue())) {

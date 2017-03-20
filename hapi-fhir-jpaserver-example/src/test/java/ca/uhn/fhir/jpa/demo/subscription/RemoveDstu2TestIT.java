@@ -25,15 +25,17 @@ import ca.uhn.fhir.rest.gclient.IQuery;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
-public class RemoveDstu2Test {
+@Ignore
+public class RemoveDstu2TestIT {
 
-    private static Logger logger = LoggerFactory.getLogger(RemoveDstu2Test.class);
+    private static Logger logger = LoggerFactory.getLogger(RemoveDstu2TestIT.class);
     public static final int NUM_TO_DELETE_PER_QUERY = 100;
 
     @Test

@@ -20,10 +20,8 @@ package ca.uhn.fhir.jpa.demo;
 
 import ca.uhn.fhir.jpa.config.BaseJavaConfigDstu2;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
-import ca.uhn.fhir.jpa.interceptor.Dstu2ToDstu3Interceptor;
 import ca.uhn.fhir.jpa.interceptor.RestHookSubscriptionDstu2Interceptor;
 import ca.uhn.fhir.jpa.interceptor.WebSocketSubscriptionDstu2Interceptor;
-import ca.uhn.fhir.jpa.service.Dstu2ToDstu3Service;
 import ca.uhn.fhir.jpa.subscription.SubscriptionWebsocketReturnResourceHandlerDstu2;
 import ca.uhn.fhir.jpa.util.SpringObjectCaster;
 import ca.uhn.fhir.jpa.util.SubscriptionsRequireManualActivationInterceptorDstu2;
@@ -107,11 +105,8 @@ public class FhirServerConfigWSocket extends BaseJavaConfigDstu2 implements WebS
 	@Bean(name = "subscriptionInterceptors")
 	@DependsOn("daoConfig")
 	public List<IServerInterceptor> afterDaoConfig(DaoConfig daoConfig){
-		dstu2ToDstu3Service();
-
 		IServerInterceptor webSocketInterceptor = webSocketSubscriptionDstu2Interceptor();
 		IServerInterceptor restHookInterceptor = restHookSubscriptionDstu2Interceptor();
-		IServerInterceptor dstu2ToDstu3Interceptor = dstu2ToDstu3Interceptor();
 
 		try {
 			RestHookSubscriptionDstu2Interceptor restHook = SpringObjectCaster.getTargetObject(restHookInterceptor, RestHookSubscriptionDstu2Interceptor.class);
@@ -125,8 +120,6 @@ public class FhirServerConfigWSocket extends BaseJavaConfigDstu2 implements WebS
 
 		daoConfig.getInterceptors().add(restHookInterceptor);
 		daoConfig.getInterceptors().add(webSocketInterceptor);
-		daoConfig.getInterceptors().add(dstu2ToDstu3Interceptor);
-
 		return daoConfig.getInterceptors();
 	}
 
@@ -212,12 +205,6 @@ public class FhirServerConfigWSocket extends BaseJavaConfigDstu2 implements WebS
 
 	@Bean
 	@Lazy
-	public IServerInterceptor dstu2ToDstu3Interceptor(){
-		return new Dstu2ToDstu3Interceptor();
-	}
-
-	@Bean
-	@Lazy
 	public IServerInterceptor webSocketSubscriptionDstu2Interceptor(){
 		return new WebSocketSubscriptionDstu2Interceptor();
 	}
@@ -226,11 +213,5 @@ public class FhirServerConfigWSocket extends BaseJavaConfigDstu2 implements WebS
 	@Lazy
 	public IServerInterceptor restHookSubscriptionDstu2Interceptor(){
 		return new RestHookSubscriptionDstu2Interceptor();
-	}
-
-	@Bean
-	@Lazy
-	public Dstu2ToDstu3Service dstu2ToDstu3Service(){
-		return new Dstu2ToDstu3Service();
 	}
 }

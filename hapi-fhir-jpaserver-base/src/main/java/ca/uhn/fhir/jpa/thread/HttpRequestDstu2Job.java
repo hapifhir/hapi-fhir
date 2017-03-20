@@ -39,11 +39,11 @@ public class HttpRequestDstu2Job implements Runnable{
         try {
             HttpClient client = HttpClientBuilder.create().build();
             client.execute(request);
+            logger.info("sent: "  + request.getURI());
         } catch (IOException e) {
             logger.error("Error sending rest post call from subscription " + subscription.getId() + " with endpoint " + url);
             e.printStackTrace();
         }
 
-        logger.info("sent: "  + url);
     }
 }

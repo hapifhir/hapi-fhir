@@ -24,12 +24,8 @@ import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
-import org.hl7.fhir.convertor.dstu3.formats.IParser;
-import org.hl7.fhir.convertor.dstu3.formats.JsonParser;
-import org.hl7.fhir.convertor.dstu3.model.Resource;
 
 import javax.xml.ws.http.HTTPException;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
@@ -51,40 +47,6 @@ public class RestUtilities {
 	 */
 	public static String getResponse(String url, MethodRequest typeRequest) throws IOException {
 		return getResponse(url, (StringEntity) null, typeRequest);
-	}
-
-	public static String getAsDstu3JsonString(Resource resource) throws IOException{
-		ByteArrayOutputStream out = new ByteArrayOutputStream();
-		JsonParser json1 = new JsonParser();
-		json1.setOutputStyle(IParser.OutputStyle.PRETTY);
-		json1.compose(out, resource);
-		out.close();
-
-		return out.toString();
-	}
-
-	public static String getAsDstu2JsonString(org.hl7.fhir.converter.dstu2.model.Resource resource) throws IOException{
-		ByteArrayOutputStream out = new ByteArrayOutputStream();
-		org.hl7.fhir.converter.dstu2.formats.JsonParser json1 = new org.hl7.fhir.converter.dstu2.formats.JsonParser();
-		json1.setOutputStyle(org.hl7.fhir.converter.dstu2.formats.IParser.OutputStyle.PRETTY);
-		json1.compose(out, resource);
-		out.close();
-
-		return out.toString();
-	}
-
-	public static String getResponse(String url, org.hl7.fhir.converter.dstu2.model.Resource resource, MethodRequest typeRequest) throws IOException {
-		String stringObject = getAsDstu2JsonString(resource);
-		StringEntity parameterEntity = new StringEntity(stringObject);
-
-		return getResponse(url, parameterEntity, typeRequest);
-	}
-
-	public static String getResponse(String url, Resource resource, MethodRequest typeRequest) throws IOException {
-		String stringObject = getAsDstu3JsonString(resource);
-		StringEntity parameterEntity = new StringEntity(stringObject);
-
-		return getResponse(url, parameterEntity, typeRequest);
 	}
 
 	/**

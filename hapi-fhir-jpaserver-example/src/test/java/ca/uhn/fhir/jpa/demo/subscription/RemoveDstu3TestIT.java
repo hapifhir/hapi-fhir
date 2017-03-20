@@ -25,15 +25,17 @@ import org.hl7.fhir.dstu3.model.Subscription;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
-public class RemoveDstu3Test {
+@Ignore
+public class RemoveDstu3TestIT {
 
-    private static Logger logger = LoggerFactory.getLogger(RemoveDstu3Test.class);
+    private static Logger logger = LoggerFactory.getLogger(RemoveDstu3TestIT.class);
     public static final int NUM_TO_DELETE_PER_QUERY = 100;
 
     @Test

@@ -26,16 +26,25 @@ import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.Observation;
 import org.hl7.fhir.dstu3.model.Subscription;
 import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 
 /**
  * Test the rest-hook subscriptions
  */
+@Ignore
 public class RestHookTestDstu3IT {
 
     private static final Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirSubscriptionWithSubscriptionIdDstu3IT.class);
-    public static final String FHIR_URL = "http://localhost:9093/baseDstu3";
+    private IGenericClient client = FhirServiceUtil.getFhirDstu3Client();
+
+    @Before
+    public void clean() {
+        RemoveDstu2TestIT.deleteResources(Subscription.class, null, client);
+        RemoveDstu2TestIT.deleteResources(Observation.class, null, client);
+    }
 
     @Test
     public void testRestHookSubscription() {

@@ -68,7 +68,6 @@ public class RestHookSubscriptionDstu3Interceptor extends InterceptorAdapter imp
     private IFhirResourceDao<Subscription> mySubscriptionDao;
 
     private static volatile ExecutorService executor;
-    private FhirResourceDaoSubscriptionDstu3 myResourceSubscriptionDao;
 
     private static final Logger logger = LoggerFactory.getLogger(RestHookSubscriptionDstu3Interceptor.class);
     private final List<Subscription> restHookSubscriptions = new ArrayList<Subscription>();
@@ -80,7 +79,6 @@ public class RestHookSubscriptionDstu3Interceptor extends InterceptorAdapter imp
     public void postConstruct() {
         try {
             executor = Executors.newFixedThreadPool(MAX_THREADS);
-            myResourceSubscriptionDao = SpringObjectCaster.getTargetObject(mySubscriptionDao, FhirResourceDaoSubscriptionDstu3.class);
         } catch (Exception e) {
             throw new RuntimeException("Unable to get DAO from PROXY");
         }
@@ -246,7 +244,7 @@ public class RestHookSubscriptionDstu3Interceptor extends InterceptorAdapter imp
             request = new HttpPost(url);
         }
         //HTTP put
-        else if (payload.equals("application/xml") || payload.equals("application/fhir+xml")) {
+        else if (EncodingEnum.XML.equals(EncodingEnum.forContentType(payload))) {
             logger.info("XML payload found");
             StringEntity entity = getStringEntity(EncodingEnum.XML, resource);
             HttpPut putRequest = new HttpPut(url);
@@ -255,7 +253,7 @@ public class RestHookSubscriptionDstu3Interceptor extends InterceptorAdapter imp
             request = putRequest;
         }
         //HTTP put
-        else if (payload.equals("application/json") || payload.equals("application/fhir+json")) {
+        else if (EncodingEnum.JSON.equals(EncodingEnum.forContentType(payload))) {
             logger.info("JSON payload found");
             StringEntity entity = getStringEntity(EncodingEnum.JSON, resource);
             HttpPut putRequest = new HttpPut(url);
@@ -323,10 +321,10 @@ public class RestHookSubscriptionDstu3Interceptor extends InterceptorAdapter imp
      * @return
      */
     private IBundleProvider getBundleProvider(String criteria) {
-        RuntimeResourceDefinition responseResourceDef = myResourceSubscriptionDao.validateCriteriaAndReturnResourceDefinition(criteria);
-        SearchParameterMap responseCriteriaUrl = BaseHapiFhirDao.translateMatchUrl(myResourceSubscriptionDao.getContext(), criteria, responseResourceDef);
+        RuntimeResourceDefinition responseResourceDef = mySubscriptionDao.validateCriteriaAndReturnResourceDefinition(criteria);
+        SearchParameterMap responseCriteriaUrl = BaseHapiFhirDao.translateMatchUrl(mySubscriptionDao.getContext(), criteria, responseResourceDef);
 
-        IFhirResourceDao<? extends IBaseResource> responseDao = myResourceSubscriptionDao.getDao(responseResourceDef.getImplementingClass());
+        IFhirResourceDao<? extends IBaseResource> responseDao = mySubscriptionDao.getDao(responseResourceDef.getImplementingClass());
         IBundleProvider responseResults = responseDao.search(responseCriteriaUrl);
         return responseResults;
     }

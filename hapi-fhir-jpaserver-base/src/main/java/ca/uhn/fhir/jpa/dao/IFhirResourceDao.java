@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import org.hl7.fhir.instance.model.api.IBaseMetaType;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -212,6 +213,10 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	MethodOutcome validate(T theResource, IIdType theId, String theRawResource, EncodingEnum theEncoding, ValidationModeEnum theMode, String theProfile, RequestDetails theRequestDetails);
 
 	DaoMethodOutcome patch(IIdType theId, PatchTypeEnum thePatchType, String thePatchBody, RequestDetails theRequestDetails);
+
+	RuntimeResourceDefinition validateCriteriaAndReturnResourceDefinition(String criteria);
+
+	<R extends IBaseResource> IFhirResourceDao<R> getDao(Class<R> theType) ;
 
 //	/**
 //	 * Invoke the everything operation

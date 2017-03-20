@@ -20,13 +20,15 @@ package ca.uhn.fhir.jpa.demo.subscription;
 import ca.uhn.fhir.model.dstu2.resource.Observation;
 import ca.uhn.fhir.model.dstu2.resource.Subscription;
 import ca.uhn.fhir.rest.client.IGenericClient;
-import org.junit.After;
+import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 /**
  * Must have a fhir server and web service endpoint to run these tests which subscribe to the fhir and receive notifications
  */
+@Ignore
 public class ResthookSubscriptionDstu2TestsIT {
 
     private static IGenericClient client;
@@ -36,10 +38,10 @@ public class ResthookSubscriptionDstu2TestsIT {
         client = FhirServiceUtil.getFhirDstu2Client();
     }
 
-    @After
+    @Before
     public void clean() {
-        RemoveDstu2Test.deleteResources(Subscription.class, null, client);
-        RemoveDstu2Test.deleteResources(Observation.class, null, client);
+        RemoveDstu2TestIT.deleteResources(Subscription.class, null, client);
+        RemoveDstu2TestIT.deleteResources(Observation.class, null, client);
     }
 
     @Test
@@ -182,6 +184,4 @@ public class ResthookSubscriptionDstu2TestsIT {
         FhirServiceUtil.createResource(snomedObservation, client); //should trigger one notification
         System.out.println("done");
     }
-
-
 }

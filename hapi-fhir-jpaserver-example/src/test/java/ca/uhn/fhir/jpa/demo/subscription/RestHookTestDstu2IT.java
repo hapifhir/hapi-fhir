@@ -28,24 +28,29 @@ import ca.uhn.fhir.model.dstu2.valueset.SubscriptionStatusEnum;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.IGenericClient;
 import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 
 /**
  * Test the rest-hook subscriptions
  */
+@Ignore
 public class RestHookTestDstu2IT {
 
     private static final Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirSubscriptionWithSubscriptionIdDstu3IT.class);
-
-    public static final String FHIR_URL = "http://localhost:8080/baseDstu2";
-
     private static String code = "1000000012";
+    private IGenericClient client = FhirServiceUtil.getFhirDstu2Client();
+
+    @Before
+    public void clean() {
+        RemoveDstu2TestIT.deleteResources(Subscription.class, null, client);
+        RemoveDstu2TestIT.deleteResources(Observation.class, null, client);
+    }
 
     @Test
     public void testRestHookSubscription() {
-        IGenericClient client = FhirServiceUtil.getFhirDstu2Client();
-
         String payload = "application/json";
         String endpoint = "http://localhost:10080/rest-hook";
 
@@ -85,8 +90,8 @@ public class RestHookTestDstu2IT {
 
         Observation observation3a = client.read(Observation.class, observationTemp1.getId());
         CodeableConceptDt codeableConcept2 = new CodeableConceptDt();
-        observation3a.setCode(codeableConcept);
-        CodingDt coding2 = codeableConcept.addCoding();
+        observation3a.setCode(codeableConcept2);
+        CodingDt coding2 = codeableConcept2.addCoding();
         coding2.setCode(code);
         coding2.setSystem("SNOMED-CT");
         client.update().resource(observation3a).withId(observation3a.getIdElement()).execute();
@@ -106,8 +111,6 @@ public class RestHookTestDstu2IT {
 
     @Test
     public void sendObservation() {
-        IGenericClient client = FhirServiceUtil.getFhirDstu2Client();
-
         Observation observation1 = sendObservation(code, "SNOMED-CT", client);
         //Should see only one subscription notification
     }

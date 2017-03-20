@@ -250,7 +250,7 @@ public class RestHookSubscriptionDstu2Interceptor extends InterceptorAdapter imp
         else if (payload.equals("application/xml") || payload.equals("application/fhir+xml")) {
             logger.info("XML payload found");
             StringEntity entity = getStringEntity(EncodingEnum.XML, resource);
-            HttpPut putRequest = new HttpPut();
+            HttpPut putRequest = new HttpPut(url);
             putRequest.setEntity(entity);
 
             request = putRequest;
@@ -259,7 +259,7 @@ public class RestHookSubscriptionDstu2Interceptor extends InterceptorAdapter imp
         else if (payload.equals("application/json") || payload.equals("application/fhir+json")) {
             logger.info("JSON payload found");
             StringEntity entity = getStringEntity(EncodingEnum.JSON, resource);
-            HttpPut putRequest = new HttpPut();
+            HttpPut putRequest = new HttpPut(url);
             putRequest.setEntity(entity);
 
             request = putRequest;
@@ -275,7 +275,7 @@ public class RestHookSubscriptionDstu2Interceptor extends InterceptorAdapter imp
                 List<IBaseResource> resourcelist = responseResults.getResources(0, responseResults.size());
                 Bundle bundle = createBundle(resourcelist);
                 StringEntity bundleEntity = getStringEntity(encoding, bundle);
-                HttpPost postRequest = new HttpPost();
+                HttpPost postRequest = new HttpPost(url);
                 postRequest.setEntity(bundleEntity);
 
                 request = postRequest;
@@ -283,7 +283,7 @@ public class RestHookSubscriptionDstu2Interceptor extends InterceptorAdapter imp
                 Bundle bundle = new Bundle();
                 bundle.setTotal(0);
                 StringEntity bundleEntity = getStringEntity(encoding, bundle);
-                HttpPost postRequest = new HttpPost();
+                HttpPost postRequest = new HttpPost(url);
                 postRequest.setEntity(bundleEntity);
 
                 request = postRequest;
