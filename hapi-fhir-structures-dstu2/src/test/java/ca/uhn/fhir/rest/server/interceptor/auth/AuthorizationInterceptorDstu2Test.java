@@ -1777,6 +1777,56 @@ public class AuthorizationInterceptorDstu2Test {
 		assertFalse(ourHitMethod);
 
 	}
+	
+	
+	@Test
+	public void testReadByInstance() throws Exception {
+		ourConditionalCreateId = "1";
+
+		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				//@formatter:off
+				return new RuleBuilder()
+					.allow("Rule 1").read().instance("Observation/900").andThen()
+					.allow("Rule 1").read().instance("901").andThen()
+					.build();
+				//@formatter:on
+			}
+		});
+
+		HttpResponse status;
+		String response;
+		HttpGet httpGet;
+
+		ourReturn = Arrays.asList(createObservation(900, "Patient/1"));
+		ourHitMethod = false;
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/Observation/900");
+		status = ourClient.execute(httpGet);
+		response = extractResponseAndClose(status);
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertTrue(ourHitMethod);
+
+		ourReturn = Arrays.asList(createPatient(901));
+		ourHitMethod = false;
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/901");
+		status = ourClient.execute(httpGet);
+		response = extractResponseAndClose(status);
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertTrue(ourHitMethod);
+
+		ourReturn = Arrays.asList(createPatient(1));
+		ourHitMethod = false;
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1?_format=json");
+		status = ourClient.execute(httpGet);
+		response = extractResponseAndClose(status);
+		assertEquals(403, status.getStatusLine().getStatusCode());
+		assertEquals(ERR403, response);
+		assertFalse(ourHitMethod);
+
+	}
+
+	
 	@AfterClass
 	public static void afterClassClearContext() throws Exception {
 		ourServer.stop();

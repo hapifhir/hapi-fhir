@@ -87,6 +87,9 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 				}
 			}
 			appliesToResource = theOutputResource;
+			if (theOutputResource != null) {
+				appliesToResourceId = theOutputResource.getIdElement();
+			}
 			break;
 		case WRITE:
 			if (theInputResource == null && theInputResourceId == null) {
