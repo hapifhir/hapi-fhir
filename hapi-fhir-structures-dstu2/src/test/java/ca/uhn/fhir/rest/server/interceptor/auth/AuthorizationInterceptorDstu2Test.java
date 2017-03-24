@@ -2,10 +2,7 @@ package ca.uhn.fhir.rest.server.interceptor.auth;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.hamcrest.Matchers.containsString;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -1559,7 +1556,7 @@ public class AuthorizationInterceptorDstu2Test {
 		httpPost.setEntity(createFhirResourceEntity(createObservation(10, "Patient/1")));
 		status = ourClient.execute(httpPost);
 		extractResponseAndClose(status);
-		assertEquals(201, status.getStatusLine().getStatusCode());
+		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertTrue(ourHitMethod);
 
 		ourHitMethod = false;
@@ -1684,6 +1681,102 @@ public class AuthorizationInterceptorDstu2Test {
 
 	}
 
+	@Test
+	public void testInvalidInstanceIds() throws Exception {
+		try {
+			new RuleBuilder().allow("Rule 1").write().instance((String)null);
+			fail();
+		} catch (NullPointerException e) {
+			assertEquals("theId must not be null or empty", e.getMessage());
+		}
+		try {
+			new RuleBuilder().allow("Rule 1").write().instance("");
+			fail();
+		} catch (IllegalArgumentException e) {
+			assertEquals("theId must not be null or empty", e.getMessage());
+		}
+		try {
+			new RuleBuilder().allow("Rule 1").write().instance("Observation/");
+			fail();
+		} catch (IllegalArgumentException e) {
+			assertEquals("theId must contain an ID part", e.getMessage());
+		}
+		try {
+			new RuleBuilder().allow("Rule 1").write().instance(new IdDt());
+			fail();
+		} catch (NullPointerException e) {
+			assertEquals("theId.getValue() must not be null or empty", e.getMessage());
+		}
+		try {
+			new RuleBuilder().allow("Rule 1").write().instance(new IdDt(""));
+			fail();
+		} catch (NullPointerException e) {
+			assertEquals("theId.getValue() must not be null or empty", e.getMessage());
+		}
+		try {
+			new RuleBuilder().allow("Rule 1").write().instance(new IdDt("Observation", (String)null));
+			fail();
+		} catch (NullPointerException e) {
+			assertEquals("theId must contain an ID part", e.getMessage());
+		}
+	}
+	
+	
+	@Test
+	public void testWriteByInstance() throws Exception {
+		ourConditionalCreateId = "1";
+
+		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				//@formatter:off
+				return new RuleBuilder()
+					.allow("Rule 1").write().instance("Observation/900").andThen()
+					.allow("Rule 1").write().instance("901").andThen()
+					.build();
+				//@formatter:on
+			}
+		});
+
+		HttpEntityEnclosingRequestBase httpPost;
+		HttpResponse status;
+		String response;
+
+		ourHitMethod = false;
+		httpPost = new HttpPut("http://localhost:" + ourPort + "/Observation/900");
+		httpPost.setEntity(createFhirResourceEntity(createObservation(900, "Patient/12")));
+		status = ourClient.execute(httpPost);
+		response = extractResponseAndClose(status);
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertTrue(ourHitMethod);
+
+		ourHitMethod = false;
+		httpPost = new HttpPut("http://localhost:" + ourPort + "/Observation/901");
+		httpPost.setEntity(createFhirResourceEntity(createObservation(901, "Patient/12")));
+		status = ourClient.execute(httpPost);
+		response = extractResponseAndClose(status);
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertTrue(ourHitMethod);
+
+		ourHitMethod = false;
+		httpPost = new HttpPost("http://localhost:" + ourPort + "/Observation");
+		httpPost.setEntity(createFhirResourceEntity(createObservation(null, "Patient/900")));
+		status = ourClient.execute(httpPost);
+		response = extractResponseAndClose(status);
+		assertEquals(403, status.getStatusLine().getStatusCode());
+		assertEquals(ERR403, response);
+		assertFalse(ourHitMethod);
+
+		ourHitMethod = false;
+		httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient");
+		httpPost.setEntity(createFhirResourceEntity(createPatient(null)));
+		status = ourClient.execute(httpPost);
+		response = extractResponseAndClose(status);
+		assertEquals(403, status.getStatusLine().getStatusCode());
+		assertEquals(ERR403, response);
+		assertFalse(ourHitMethod);
+
+	}
 	@AfterClass
 	public static void afterClassClearContext() throws Exception {
 		ourServer.stop();
@@ -1821,7 +1914,6 @@ public class AuthorizationInterceptorDstu2Test {
 			}
 
 			MethodOutcome retVal = new MethodOutcome();
-			retVal.setCreated(true);
 			retVal.setResource(theResource);
 			return retVal;
 		}

@@ -1,5 +1,7 @@
 package ca.uhn.fhir.rest.server.interceptor.auth;
 
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -41,7 +43,7 @@ import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.BundleUtil.BundleEntryParts;
 import ca.uhn.fhir.util.FhirTerser;
 
-class RuleImplOp extends BaseRule /*implements IAuthRule*/ {
+class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 
 	private AppliesTypeEnum myAppliesTo;
 	private Set<?> myAppliesToTypes;
@@ -50,6 +52,7 @@ class RuleImplOp extends BaseRule /*implements IAuthRule*/ {
 	private ClassifierTypeEnum myClassifierType;
 	private RuleOpEnum myOp;
 	private TransactionAppliesToEnum myTransactionAppliesToOp;
+	private List<IIdType> myAppliesToInstances;
 
 	public RuleImplOp(String theRuleName) {
 		super(theRuleName);
@@ -72,7 +75,7 @@ class RuleImplOp extends BaseRule /*implements IAuthRule*/ {
 					appliesToResourceId = theInputResourceId;
 					appliesToResourceType = theInputResourceId.getResourceType();
 					break;
-//					return new Verdict(PolicyEnum.ALLOW, this);
+				// return new Verdict(PolicyEnum.ALLOW, this);
 				case SEARCH_SYSTEM:
 				case SEARCH_TYPE:
 				case HISTORY_INSTANCE:
@@ -195,6 +198,21 @@ class RuleImplOp extends BaseRule /*implements IAuthRule*/ {
 		}
 
 		switch (myAppliesTo) {
+		case INSTANCES:
+			if (appliesToResourceId != null) {
+				for (IIdType next : myAppliesToInstances) {
+					if (isNotBlank(next.getResourceType())) {
+						if (!next.getResourceType().equals(appliesToResourceId.getResourceType())) {
+							continue;
+						}
+					}
+					if (!next.getIdPart().equals(appliesToResourceId.getIdPart())) {
+						continue;
+					}
+					return newVerdict();
+				}
+			}
+			return null;
 		case ALL_RESOURCES:
 			if (appliesToResourceType != null) {
 				return new Verdict(PolicyEnum.ALLOW, this);
@@ -315,6 +333,10 @@ class RuleImplOp extends BaseRule /*implements IAuthRule*/ {
 
 	public void setTransactionAppliesToOp(TransactionAppliesToEnum theOp) {
 		myTransactionAppliesToOp = theOp;
+	}
+
+	public void setAppliesToInstances(List<IIdType> theAppliesToInstances) {
+		myAppliesToInstances = theAppliesToInstances;
 	}
 
 }
