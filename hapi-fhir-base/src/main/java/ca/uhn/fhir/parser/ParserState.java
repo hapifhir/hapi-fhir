@@ -1056,7 +1056,7 @@ class ParserState<T> {
 			} else if ("fhir_comments".equals(theLocalPart) && myJsonMode) {
 				push(new SwallowChildrenWholeState(getPreResourceState()));
 			} else {
-				throw new DataFormatException("Unexpected element in entry: " + theLocalPart);
+				this.logAndSwallowUnexpectedElement(theLocalPart);
 			}
 		}
 
