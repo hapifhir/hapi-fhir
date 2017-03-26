@@ -297,7 +297,10 @@
 								<baseResourceName>substance</baseResourceName>
 								<baseResourceName>supplydelivery</baseResourceName>
 								<baseResourceName>supplyrequest</baseResourceName>
-								<baseResourceName>supportingdocumentation</baseResourceName>
+								<!--
+									Removed in HAPI 2.4 as this isn't a real resource
+									<baseResourceName>supportingdocumentation</baseResourceName>
+								-->
 								<baseResourceName>test</baseResourceName>
 								<baseResourceName>testscript</baseResourceName>
 								<baseResourceName>user</baseResourceName>

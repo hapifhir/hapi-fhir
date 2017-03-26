@@ -17,6 +17,11 @@
 				AuthorizationInterceptor can now allow make read or write 
 				authorization decisions on a resource by instance ID
 			</action>
+			<action type="fix" issue="208">
+				Remove SupportingDocumentation resource from DSTU2 structures. This isn't
+				actually a resource in FHIR DSTU2 and its inclusion causes errors on clients
+				that don't understand what it is. Thanks to Travis Cummings and Michele Mottini for pointing this out.
+			</action>
 		</release>
 		<release version="2.3" date="2017-03-18">
 			<action type="add">
