@@ -22,6 +22,7 @@ import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
@@ -67,6 +68,16 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 	@AfterClass
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
+	}
+
+	/**
+	 * See #534
+	 */
+	@Test
+	public void testBuiltInLogicalReferences() throws IOException {
+		
+		StructureDefinition sd = loadResourceFromClasspath(StructureDefinition.class, "/issue534/bw_profile_snapshot.xml");
+		myStructureDefinitionDao.create(sd, mySrd);
 	}
 
 

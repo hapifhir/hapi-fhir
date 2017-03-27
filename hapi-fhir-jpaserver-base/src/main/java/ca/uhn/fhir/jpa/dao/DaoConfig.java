@@ -32,6 +32,20 @@ import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 
 public class DaoConfig {
 
+	/**
+	 * Default {@link #getTreatReferencesAsLogical() logical URL bases}. Includes the following
+	 * values:
+	 * <ul>
+	 * <li><code>"http://hl7.org/fhir/valueset-*"</code></li>
+	 * <li><code>"http://hl7.org/fhir/codesystem-*"</code></li>
+	 * <li><code>"http://hl7.org/fhir/StructureDefinition/*"</code></li>
+	 * </ul>
+	 */
+	public static final Set<String> DEFAULT_LOGICAL_BASE_URLS = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(
+			"http://hl7.org/fhir/valueset-*",
+			"http://hl7.org/fhir/codesystem-*",
+			"http://hl7.org/fhir/StructureDefinition/*")));
+
 	// ***
 	// update setter javadoc if default changes
 	// ***
@@ -41,13 +55,13 @@ public class DaoConfig {
 	// update setter javadoc if default changes
 	// ***
 	private boolean myAllowInlineMatchUrlReferences = false;
-
 	private boolean myAllowMultipleDelete;
 	private boolean myDefaultSearchParamsCanBeOverridden = false;
 	// ***
 	// update setter javadoc if default changes
 	// ***
 	private int myDeferIndexingForCodesystemsOfSize = 2000;
+
 	private boolean myDeleteStaleSearches = true;
 
 	// ***
@@ -63,24 +77,19 @@ public class DaoConfig {
 	// update setter javadoc if default changes
 	// ***
 	private boolean myIndexContainedResources = true;
-
 	private List<IServerInterceptor> myInterceptors;
+
 	// ***
 	// update setter javadoc if default changes
 	// ***
 	private int myMaximumExpansionSize = 5000;
-
 	private ResourceEncodingEnum myResourceEncoding = ResourceEncodingEnum.JSONC;
-
 	private boolean mySchedulingDisabled;
-
 	private boolean mySubscriptionEnabled;
-
 	private long mySubscriptionPollDelay = 1000;
-
 	private Long mySubscriptionPurgeInactiveAfterMillis;
-
 	private Set<String> myTreatBaseUrlsAsLocal = new HashSet<String>();
+	private Set<String> myTreatReferencesAsLogical = new HashSet<String>(DEFAULT_LOGICAL_BASE_URLS);
 
 	/**
 	 * When a code system is added that contains more than this number of codes,
@@ -169,9 +178,39 @@ public class DaoConfig {
 	 * <code>http://example.com/base/Patient/1</code>, the server will automatically
 	 * convert this reference to <code>Patient/1</code>
 	 * </p>
+	 * <p>
+	 * Note that this property has different behaviour from {@link DaoConfig#getTreatReferencesAsLogical()}
+	 * </p>
+	 * 
+	 * @see #getTreatReferencesAsLogical()
 	 */
 	public Set<String> getTreatBaseUrlsAsLocal() {
 		return myTreatBaseUrlsAsLocal;
+	}
+
+	/**
+	 * This setting may be used to advise the server that any references found in
+	 * resources that have any of the base URLs given here will be treated as logical
+	 * references instead of being treated as real references.
+	 * <p>
+	 * A logical reference is a reference which is treated as an identifier, and
+	 * does not neccesarily resolve. See {@link http://hl7.org/fhir/references.html} for
+	 * a description of logical references. For example, the valueset
+	 * {@link http://hl7.org/fhir/valueset-quantity-comparator.html} is a logical
+	 * reference.
+	 * </p>
+	 * <p>
+	 * Values for this field may take either of the following forms:
+	 * </p>
+	 * <ul>
+	 * <li><code>http://example.com/some-url</code> <b>(will be matched exactly)</b></li>
+	 * <li><code>http://example.com/some-base*</code> <b>(will match anything beginning with the part before the *)</b></li>
+	 * </ul>
+	 * 
+	 * @see #DEFAULT_LOGICAL_BASE_URLS for a list of default values for this setting
+	 */
+	public Set<String> getTreatReferencesAsLogical() {
+		return myTreatReferencesAsLogical;
 	}
 
 	/**
@@ -495,6 +534,32 @@ public class DaoConfig {
 			treatBaseUrlsAsLocal.add(next);
 		}
 		myTreatBaseUrlsAsLocal = treatBaseUrlsAsLocal;
+	}
+
+	/**
+	 * This setting may be used to advise the server that any references found in
+	 * resources that have any of the base URLs given here will be treated as logical
+	 * references instead of being treated as real references.
+	 * <p>
+	 * A logical reference is a reference which is treated as an identifier, and
+	 * does not neccesarily resolve. See {@link http://hl7.org/fhir/references.html} for
+	 * a description of logical references. For example, the valueset
+	 * {@link http://hl7.org/fhir/valueset-quantity-comparator.html} is a logical
+	 * reference.
+	 * </p>
+	 * <p>
+	 * Values for this field may take either of the following forms:
+	 * </p>
+	 * <ul>
+	 * <li><code>http://example.com/some-url</code> <b>(will be matched exactly)</b></li>
+	 * <li><code>http://example.com/some-base*</code> <b>(will match anything beginning with the part before the *)</b></li>
+	 * </ul>
+	 * 
+	 * @see #DEFAULT_LOGICAL_BASE_URLS for a list of default values for this setting
+	 */
+	public DaoConfig setTreatReferencesAsLogical(Set<String> theTreatReferencesAsLogical) {
+		myTreatReferencesAsLogical = theTreatReferencesAsLogical;
+		return this;
 	}
 
 }

@@ -16,20 +16,13 @@ import org.junit.Test;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
-import ca.uhn.fhir.model.dstu2.resource.Bundle;
+import ca.uhn.fhir.model.dstu2.resource.*;
 import ca.uhn.fhir.model.dstu2.resource.Bundle.Entry;
-import ca.uhn.fhir.model.dstu2.resource.Observation;
-import ca.uhn.fhir.model.dstu2.resource.OperationOutcome;
-import ca.uhn.fhir.model.dstu2.resource.Organization;
-import ca.uhn.fhir.model.dstu2.resource.Patient;
-import ca.uhn.fhir.model.dstu2.resource.StructureDefinition;
-import ca.uhn.fhir.model.dstu2.resource.ValueSet;
 import ca.uhn.fhir.model.dstu2.valueset.ObservationStatusEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.ValidationModeEnum;
 import ca.uhn.fhir.rest.server.EncodingEnum;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
@@ -43,12 +36,11 @@ public class FhirResourceDaoDstu2ValidateTest extends BaseJpaDstu2Test {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
-	
 	@Before
 	public void before() {
 		myDaoConfig.setAllowExternalReferences(true);
 	}
-	
+
 	@After
 	public void after() {
 		myDaoConfig.setAllowExternalReferences(new DaoConfig().isAllowExternalReferences());
@@ -110,21 +102,21 @@ public class FhirResourceDaoDstu2ValidateTest extends BaseJpaDstu2Test {
 		case JSON:
 			encoded = myFhirCtx.newJsonParser().encodeResourceToString(input);
 			try {
-			myObservationDao.validate(input, null, encoded, EncodingEnum.JSON, mode, null, mySrd);
-			fail();
+				myObservationDao.validate(input, null, encoded, EncodingEnum.JSON, mode, null, mySrd);
+				fail();
 			} catch (PreconditionFailedException e) {
 				return (OperationOutcome) e.getOperationOutcome();
 			}
 		case XML:
 			encoded = myFhirCtx.newXmlParser().encodeResourceToString(input);
 			try {
-			myObservationDao.validate(input, null, encoded, EncodingEnum.XML, mode, null, mySrd);
-			fail();
+				myObservationDao.validate(input, null, encoded, EncodingEnum.XML, mode, null, mySrd);
+				fail();
 			} catch (PreconditionFailedException e) {
 				return (OperationOutcome) e.getOperationOutcome();
 			}
 		}
-		
+
 		throw new IllegalStateException(); // shouldn't get here
 	}
 
@@ -144,21 +136,21 @@ public class FhirResourceDaoDstu2ValidateTest extends BaseJpaDstu2Test {
 		ValidationModeEnum mode = ValidationModeEnum.CREATE;
 		String encoded = myFhirCtx.newJsonParser().encodeResourceToString(input);
 		MethodOutcome outcome = myObservationDao.validate(input, null, encoded, EncodingEnum.JSON, mode, null, mySrd);
-		
+
 		String ooString = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome.getOperationOutcome());
 		ourLog.info(ooString);
 		assertThat(ooString, containsString("StructureDefinition reference \\\"" + profileUri + "\\\" could not be resolved"));
 
 	}
-	
+
 	@Test
 	public void testValidateForCreate() {
 		String methodName = "testValidateForCreate";
-		
+
 		Patient pat = new Patient();
 		pat.setId("Patient/123");
 		pat.addName().addFamily(methodName);
-		
+
 		try {
 			myPatientDao.validate(pat, null, null, null, ValidationModeEnum.CREATE, null, mySrd);
 			fail();
@@ -170,18 +162,18 @@ public class FhirResourceDaoDstu2ValidateTest extends BaseJpaDstu2Test {
 		myPatientDao.validate(pat, null, null, null, ValidationModeEnum.CREATE, null, mySrd);
 
 	}
-	
+
 	@Test
 	public void testValidateForUpdate() {
 		String methodName = "testValidateForUpdate";
-		
+
 		Patient pat = new Patient();
 		pat.setId("Patient/123");
 		pat.addName().addFamily(methodName);
 		myPatientDao.validate(pat, null, null, null, ValidationModeEnum.UPDATE, null, mySrd);
 
 		pat.setId("");
-		
+
 		try {
 			myPatientDao.validate(pat, null, null, null, ValidationModeEnum.UPDATE, null, mySrd);
 			fail();
@@ -194,17 +186,17 @@ public class FhirResourceDaoDstu2ValidateTest extends BaseJpaDstu2Test {
 	@Test
 	public void testValidateForUpdateWithContained() {
 		String methodName = "testValidateForUpdate";
-		
+
 		Organization org = new Organization();
 		org.setId("#123");
-		
+
 		Patient pat = new Patient();
 		pat.setId("Patient/123");
 		pat.addName().addFamily(methodName);
 		myPatientDao.validate(pat, null, null, null, ValidationModeEnum.UPDATE, null, mySrd);
 
 		pat.setId("");
-		
+
 		try {
 			myPatientDao.validate(pat, null, null, null, ValidationModeEnum.UPDATE, null, mySrd);
 			fail();
@@ -214,26 +206,25 @@ public class FhirResourceDaoDstu2ValidateTest extends BaseJpaDstu2Test {
 
 	}
 
-	
 	@Test
 	public void testValidateForDelete() {
 		String methodName = "testValidateForDelete";
-		
+
 		Organization org = new Organization();
 		org.setName(methodName);
 		IIdType orgId = myOrganizationDao.create(org, mySrd).getId().toUnqualifiedVersionless();
-		
+
 		Patient pat = new Patient();
 		pat.addName().addFamily(methodName);
 		pat.getManagingOrganization().setReference(orgId);
 		IIdType patId = myPatientDao.create(pat, mySrd).getId().toUnqualifiedVersionless();
-		
-		OperationOutcome outcome=null;
+
+		OperationOutcome outcome = null;
 		try {
 			myOrganizationDao.validate(null, orgId, null, null, ValidationModeEnum.DELETE, null, mySrd);
 			fail();
 		} catch (ResourceVersionConflictException e) {
-			outcome= (OperationOutcome) e.getOperationOutcome();
+			outcome = (OperationOutcome) e.getOperationOutcome();
 		}
 
 		String ooString = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
