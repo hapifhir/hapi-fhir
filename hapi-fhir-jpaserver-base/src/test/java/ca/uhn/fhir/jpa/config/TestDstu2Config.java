@@ -1,21 +1,20 @@
 package ca.uhn.fhir.jpa.config;
 
-import java.util.Properties;
-
-import javax.persistence.EntityManagerFactory;
-import javax.sql.DataSource;
-
+import ca.uhn.fhir.jpa.dao.DaoConfig;
+import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
+import ca.uhn.fhir.validation.ResultSeverityEnum;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.hibernate.jpa.HibernatePersistenceProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Primary;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.dao.DaoConfig;
+import javax.persistence.EntityManagerFactory;
+import javax.sql.DataSource;
+import java.util.Properties;
 
 @Configuration
 @EnableTransactionManagement()
@@ -63,6 +62,21 @@ public class TestDstu2Config extends BaseJavaConfigDstu2 {
 		extraProperties.put("hibernate.search.default.directory_provider", "ram");
 		extraProperties.put("hibernate.search.lucene_version","LUCENE_CURRENT");
 		return extraProperties;
+	}
+
+	/**
+	 * Bean which validates incoming requests
+	 */
+	@Bean
+	@Lazy
+	public RequestValidatingInterceptor requestValidatingInterceptor() {
+		RequestValidatingInterceptor requestValidator = new RequestValidatingInterceptor();
+		requestValidator.setFailOnSeverity(ResultSeverityEnum.ERROR);
+		requestValidator.setAddResponseHeaderOnSeverity(null);
+		requestValidator.setAddResponseOutcomeHeaderOnSeverity(ResultSeverityEnum.INFORMATION);
+		requestValidator.addValidatorModule(instanceValidatorDstu2());
+
+		return requestValidator;
 	}
 
 }

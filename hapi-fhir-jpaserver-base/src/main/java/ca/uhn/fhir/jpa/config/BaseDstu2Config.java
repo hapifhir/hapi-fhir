@@ -20,23 +20,22 @@ package ca.uhn.fhir.jpa.config;
  * #L%
  */
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.dao.*;
+import ca.uhn.fhir.jpa.term.HapiTerminologySvcDstu2;
+import ca.uhn.fhir.jpa.term.IHapiTerminologySvc;
+import ca.uhn.fhir.model.dstu2.composite.MetaDt;
+import ca.uhn.fhir.validation.IValidatorModule;
+import org.hl7.fhir.instance.hapi.validation.DefaultProfileValidationSupport;
+import org.hl7.fhir.instance.hapi.validation.FhirInstanceValidator;
+import org.hl7.fhir.instance.hapi.validation.ValidationSupportChain;
+import org.hl7.fhir.instance.validation.IResourceValidator.BestPracticeWarningLevel;
 import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Primary;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
-
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.dao.FulltextSearchSvcImpl;
-import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
-import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
-import ca.uhn.fhir.jpa.dao.ISearchParamRegistry;
-import ca.uhn.fhir.jpa.dao.SearchParamExtractorDstu2;
-import ca.uhn.fhir.jpa.dao.SearchParamRegistryDstu2;
-import ca.uhn.fhir.jpa.term.HapiTerminologySvcDstu2;
-import ca.uhn.fhir.jpa.term.IHapiTerminologySvc;
-import ca.uhn.fhir.model.dstu2.composite.MetaDt;
 
 @Configuration
 @EnableTransactionManagement
@@ -72,6 +71,15 @@ public class BaseDstu2Config extends BaseConfig {
 	@Bean(name = "myJpaValidationSupportDstu2", autowire = Autowire.BY_NAME)
 	public ca.uhn.fhir.jpa.dao.IJpaValidationSupportDstu2 jpaValidationSupportDstu2() {
 		ca.uhn.fhir.jpa.dao.JpaValidationSupportDstu2 retVal = new ca.uhn.fhir.jpa.dao.JpaValidationSupportDstu2();
+		return retVal;
+	}
+
+	@Bean(name = "myInstanceValidatorDstu2")
+	@Lazy
+	public IValidatorModule instanceValidatorDstu2() {
+		FhirInstanceValidator retVal = new FhirInstanceValidator();
+		retVal.setBestPracticeWarningLevel(BestPracticeWarningLevel.Warning);
+		retVal.setValidationSupport(new ValidationSupportChain(new DefaultProfileValidationSupport(), jpaValidationSupportDstu2()));
 		return retVal;
 	}
 
