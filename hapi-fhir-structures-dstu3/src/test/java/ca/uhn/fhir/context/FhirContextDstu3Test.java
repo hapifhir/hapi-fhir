@@ -1,7 +1,13 @@
 package ca.uhn.fhir.context;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.Reference;
@@ -81,4 +87,41 @@ public class FhirContextDstu3Test {
 		assertEquals(null, genderChild.getBoundEnumType());
 	}
 
+    @Test
+    public void testInitialisationThreadSafety() {
+        final FhirContext ctx = FhirContext.forDstu3();
+
+        final int numThreads = 4;
+        final List<Throwable> exceptions = Collections.synchronizedList(new ArrayList<Throwable>());
+        final ExecutorService threadPool = Executors.newFixedThreadPool(numThreads);
+        try {
+            final CountDownLatch threadsReady = new CountDownLatch(numThreads);
+            final CountDownLatch threadsFinished = new CountDownLatch(numThreads);
+
+            for (int i = 0; i < numThreads; i++) {
+                threadPool.submit(
+                    new Runnable() {
+                        public void run() {
+                            threadsReady.countDown();
+                            try {
+                                threadsReady.await();
+                                ctx.getResourceDefinition("patient");
+                            } catch(final Exception e) {
+                                exceptions.add(e);
+                            }
+                            threadsFinished.countDown();
+                        }
+                    }
+                );
+            }
+
+            threadsFinished.await();
+        } catch(final InterruptedException e) {
+            exceptions.add(e);
+        } finally {
+            threadPool.shutdownNow();
+        }
+
+        assertTrue("failed with exception(s): " + exceptions, exceptions.isEmpty());
+    }
 }
