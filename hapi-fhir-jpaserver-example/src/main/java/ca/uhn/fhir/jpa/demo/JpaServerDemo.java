@@ -46,22 +46,20 @@ public class JpaServerDemo extends RestfulServer {
 	protected void initialize() throws ServletException {
 		super.initialize();
 
-		/* 
+		/*
 		 * We want to support FHIR DSTU2 format. This means that the server
 		 * will use the DSTU2 bundle format and other DSTU2 encoding changes.
 		 *
 		 * If you want to use DSTU1 instead, change the following line, and 
 		 * change the 2 occurrences of dstu2 in web.xml to dstu1
 		 */
-		FhirVersionEnum fhirVersion = FhirVersionEnum.DSTU2;
-		FhirContext context = new FhirContext(fhirVersion);
-		
-		setFhirContext(context);
+		FhirVersionEnum fhirVersion = FhirVersionEnum.DSTU3;
+		setFhirContext(new FhirContext(fhirVersion));
 
 		// Get the spring context from the web container (it's declared in web.xml)
 		myAppCtx = ContextLoaderListener.getCurrentWebApplicationContext();
 
-		/* 
+		/*
 		 * The BaseJavaConfigDstu2.java class is a spring configuration
 		 * file which is automatically generated as a part of hapi-fhir-jpaserver-base and
 		 * contains bean definitions for a resource provider for each resource type
@@ -78,8 +76,8 @@ public class JpaServerDemo extends RestfulServer {
 		}
 		List<IResourceProvider> beans = myAppCtx.getBean(resourceProviderBeanName, List.class);
 		setResourceProviders(beans);
-		
-		/* 
+
+		/*
 		 * The system provider implements non-resource-type methods, such as
 		 * transaction, and global history.
 		 */
@@ -174,15 +172,15 @@ public class JpaServerDemo extends RestfulServer {
 		}
 
 		/*
-		 * If you are hosting this server at a specific DNS name, the server will try to 
+		 * If you are hosting this server at a specific DNS name, the server will try to
 		 * figure out the FHIR base URL based on what the web container tells it, but
 		 * this doesn't always work. If you are setting links in your search bundles that
 		 * just refer to "localhost", you might want to use a server address strategy:
 		 */
 		//setServerAddressStrategy(new HardcodedServerAddressStrategy("http://mydomain.com/fhir/baseDstu2"));
-		
+
 		/*
-		 * If you are using DSTU3+, you may want to add a terminology uploader, which allows 
+		 * If you are using DSTU3+, you may want to add a terminology uploader, which allows
 		 * uploading of external terminologies such as Snomed CT. Note that this uploader
 		 * does not have any security attached (any anonymous user may use it by default)
 		 * so it is a potential security vulnerability. Consider using an AuthorizationInterceptor
