@@ -187,12 +187,6 @@ public interface IServerInterceptor {
 	 *           A bean containing details about the request that is about to be processed, including
 	 * @param theResponseObject
 	 *           The actual object which is being streamed to the client as a response
-	 * @param theServletRequest
-	 *           The incoming request
-	 * @param theServletResponse
-	 *           The response. Note that interceptors may choose to provide a response (i.e. by calling
-	 *           {@link HttpServletResponse#getWriter()}) but in that case it is important to return <code>false</code>
-	 *           to indicate that the server itself should not also provide a response.
 	 * @return Return <code>true</code> if processing should continue normally. This is generally the right thing to do.
 	 *         If your interceptor is providing a response rather than letting HAPI handle the response normally, you
 	 *         must return <code>false</code>. In this case, no further processing will occur and no further interceptors
@@ -201,7 +195,7 @@ public interface IServerInterceptor {
 	 *            This exception may be thrown to indicate that the interceptor has detected an unauthorized access
 	 *            attempt. If thrown, processing will stop and an HTTP 401 will be returned to the client.
 	 */
-	boolean outgoingResponse(RequestDetails theRequest, Bundle bundle);
+	boolean outgoingResponse(RequestDetails theRequest, Bundle theResponseObject);
 
 	/**
 	 * This method is called after the server implementation method has been called, but before any attempt to stream the

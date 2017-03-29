@@ -65,27 +65,11 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoDstu2Test.class);
 
-	@AfterClass
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
+	@After
+	public final void after() {
+		myDaoConfig.setAllowExternalReferences(new DaoConfig().isAllowExternalReferences());
+		myDaoConfig.setTreatReferencesAsLogical(new DaoConfig().getTreatReferencesAsLogical());
 	}
-
-	/**
-	 * See #534
-	 */
-	@Test
-	public void testBuiltInLogicalReferences() throws IOException {
-		myDaoConfig.getTreatReferencesAsLogical().add("http://phr.kanta.fi/fiphr-vs-*");
-		
-		ValueSet vsBodySite = loadResourceFromClasspath(ValueSet.class, "/issue534/fiphr-vs-bodysite.xml");
-		myValueSetDao.create(vsBodySite, mySrd);
-		ValueSet vsObsMethod = loadResourceFromClasspath(ValueSet.class, "/issue534/fiphr-vs-observationmethod.xml");
-		myValueSetDao.create(vsObsMethod, mySrd);
-		
-		StructureDefinition sd = loadResourceFromClasspath(StructureDefinition.class, "/issue534/bw_profile_snapshot.xml");
-		myStructureDefinitionDao.create(sd, mySrd);
-	}
-
 
 	private void assertGone(IIdType theId) {
 		try {
@@ -96,82 +80,13 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 		}
 	}
 
-	@After
-	public final void after() {
-		myDaoConfig.setAllowExternalReferences(new DaoConfig().isAllowExternalReferences());
-		myDaoConfig.setTreatReferencesAsLogical(new DaoConfig().getTreatReferencesAsLogical());
-	}
-	
-	
-	@Test
-	public void testValidateAgainstDstu2Profile() throws Exception {
-		myDaoConfig.setAllowExternalReferences(true);
-		
-		String stream = IOUtils.toString(getClass().getResourceAsStream("/binu_testpatient_structuredefinition_dstu2.xml"), StandardCharsets.UTF_8);
-		
-		StructureDefinition sd = myFhirCtx.newXmlParser().parseResource(StructureDefinition.class, stream);
-		myStructureDefinitionDao.create(sd, mySrd);
-		
-		String rawResource = IOUtils.toString(getClass().getResourceAsStream("/binu_testpatient_resource.json"), StandardCharsets.UTF_8);
-		try {
-			myValueSetDao.validate(null, null, rawResource, EncodingEnum.JSON, ValidationModeEnum.UPDATE, null, mySrd);
-			fail();
-		} catch (PreconditionFailedException e) {
-			ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome()));
-		}
-	}
-	
-	
-	@Test
-	public void testCreateBundleAllowsDocumentAndCollection() {
-		String methodName = "testCreateBundleAllowsDocumentAndCollection";
-
-		Patient p = new Patient();
-		p.addIdentifier().setSystem("urn:system").setValue(methodName);
-		IIdType pid = myPatientDao.create(p, mySrd).getId();
-		p.setId(pid);
-		ourLog.info("Created patient, got it: {}", pid);
-
-		Bundle bundle = new Bundle();
-		bundle.setType((BundleTypeEnum)null);
-		bundle.addEntry().setResource(p).setFullUrl(pid.toUnqualifiedVersionless().getValue());
-		try {
-			myBundleDao.create(bundle, mySrd);
-			fail();
-		} catch (UnprocessableEntityException e) {
-			assertEquals("Unable to store a Bundle resource on this server with a Bundle.type of: (missing)", e.getMessage());
-		}
-
-		bundle = new Bundle();
-		bundle.setType(BundleTypeEnum.BATCH_RESPONSE);
-		bundle.addEntry().setResource(p).setFullUrl(pid.toUnqualifiedVersionless().getValue());
-		try {
-			myBundleDao.create(bundle, mySrd);
-			fail();
-		} catch (UnprocessableEntityException e) {
-			assertEquals("Unable to store a Bundle resource on this server with a Bundle.type of: batch-response", e.getMessage());
-		}
-
-		bundle = new Bundle();
-		bundle.setType(BundleTypeEnum.COLLECTION);
-		bundle.addEntry().setResource(p).setFullUrl(pid.toUnqualifiedVersionless().getValue());
-		myBundleDao.create(bundle, mySrd);
-
-		bundle = new Bundle();
-		bundle.setType(BundleTypeEnum.DOCUMENT);
-		bundle.addEntry().setResource(p).setFullUrl(pid.toUnqualifiedVersionless().getValue());
-		myBundleDao.create(bundle, mySrd);
-
-	}
-
-	
 	/**
 	 * This gets called from assertGone too! Careful about exceptions...
 	 */
 	private void assertNotGone(IIdType theId) {
 		if ("Patient".equals(theId.getResourceType())) {
 			myPatientDao.read(theId, mySrd);
-		} else if ("Organization".equals(theId.getResourceType())){
+		} else if ("Organization".equals(theId.getResourceType())) {
 			myOrganizationDao.read(theId, mySrd);
 		} else {
 			fail("No type");
@@ -188,7 +103,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 	}
 
 	private String log(IBundleProvider theHistory) {
-		StringBuilder b =new StringBuilder(theHistory.size() + " results: ");
+		StringBuilder b = new StringBuilder(theHistory.size() + " results: ");
 		for (IBaseResource next : theHistory.getResources(0, theHistory.size())) {
 			b.append("\n ").append(next.getIdElement().toUnqualified().getValue());
 		}
@@ -231,6 +146,23 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 			}
 		});
 		return retVal;
+	}
+
+	/**
+	 * See #534
+	 */
+	@Test
+	public void testBuiltInLogicalReferences() throws IOException {
+		myDaoConfig.getTreatReferencesAsLogical().add("http://phr.kanta.fi/fiphr-vs-*");
+
+		ValueSet vsBodySite = loadResourceFromClasspath(ValueSet.class, "/issue534/fiphr-vs-bodysite.xml");
+		myValueSetDao.create(vsBodySite, mySrd);
+		ValueSet vsObsMethod = loadResourceFromClasspath(ValueSet.class, "/issue534/fiphr-vs-observationmethod.xml");
+		myValueSetDao.create(vsObsMethod, mySrd);
+
+		// Just make sure this saves
+		StructureDefinition sd = loadResourceFromClasspath(StructureDefinition.class, "/issue534/bw_profile_snapshot.xml");
+		myStructureDefinitionDao.create(sd, mySrd);
 	}
 
 	@Test
@@ -382,6 +314,48 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 			assertEquals(1, found.size());
 			assertEquals(id4, found.getResources(0, 1).get(0).getIdElement());
 		}
+	}
+
+	@Test
+	public void testCreateBundleAllowsDocumentAndCollection() {
+		String methodName = "testCreateBundleAllowsDocumentAndCollection";
+
+		Patient p = new Patient();
+		p.addIdentifier().setSystem("urn:system").setValue(methodName);
+		IIdType pid = myPatientDao.create(p, mySrd).getId();
+		p.setId(pid);
+		ourLog.info("Created patient, got it: {}", pid);
+
+		Bundle bundle = new Bundle();
+		bundle.setType((BundleTypeEnum) null);
+		bundle.addEntry().setResource(p).setFullUrl(pid.toUnqualifiedVersionless().getValue());
+		try {
+			myBundleDao.create(bundle, mySrd);
+			fail();
+		} catch (UnprocessableEntityException e) {
+			assertEquals("Unable to store a Bundle resource on this server with a Bundle.type of: (missing)", e.getMessage());
+		}
+
+		bundle = new Bundle();
+		bundle.setType(BundleTypeEnum.BATCH_RESPONSE);
+		bundle.addEntry().setResource(p).setFullUrl(pid.toUnqualifiedVersionless().getValue());
+		try {
+			myBundleDao.create(bundle, mySrd);
+			fail();
+		} catch (UnprocessableEntityException e) {
+			assertEquals("Unable to store a Bundle resource on this server with a Bundle.type of: batch-response", e.getMessage());
+		}
+
+		bundle = new Bundle();
+		bundle.setType(BundleTypeEnum.COLLECTION);
+		bundle.addEntry().setResource(p).setFullUrl(pid.toUnqualifiedVersionless().getValue());
+		myBundleDao.create(bundle, mySrd);
+
+		bundle = new Bundle();
+		bundle.setType(BundleTypeEnum.DOCUMENT);
+		bundle.addEntry().setResource(p).setFullUrl(pid.toUnqualifiedVersionless().getValue());
+		myBundleDao.create(bundle, mySrd);
+
 	}
 
 	@Test
@@ -818,8 +792,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 		assertThat(found, empty());
 
 	}
-	
-	
+
 	@Test
 	public void testDeleteResource() {
 		int initialHistory = myPatientDao.history(null, null, mySrd).size();
@@ -882,7 +855,6 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 		assertEquals(0, patients.size());
 
 	}
-	
 
 	@Test
 	public void testDeleteThenUndelete() {
@@ -917,7 +889,6 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 		assertEquals(id2, gotId);
 	}
 
-	
 	@Test
 	public void testDeleteWithMatchUrl() {
 		String methodName = "testDeleteWithMatchUrl";
@@ -974,23 +945,24 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 		myPatientDao.deleteByUrl("Patient?organization.identifier=http://example.com|" + methodName, mySrd);
 		assertGone(id);
 		assertNotGone(orgId);
-		
+
 		myOrganizationDao.deleteByUrl("Organization?identifier=http://example.com|" + methodName, mySrd);
 		assertGone(id);
 		assertGone(orgId);
 
 	}
+
 	@Test
 	public void testDeleteWithMatchUrlChainedProfile() {
 		String methodName = "testDeleteWithMatchUrlChainedProfile";
 
 		List<IdDt> profileList = new ArrayList<IdDt>();
 		profileList.add(new IdDt("http://foo"));
-		
+
 		Organization org = new Organization();
 		ResourceMetadataKeyEnum.PROFILES.put(org, profileList);
 		org.setName(methodName);
-		
+
 		IIdType orgId = myOrganizationDao.create(org, mySrd).getId().toUnqualifiedVersionless();
 
 		Patient p = new Patient();
@@ -1002,7 +974,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 
 		myPatientDao.deleteByUrl("Patient?organization._profile=http://foo", mySrd);
 		assertGone(id);
-		
+
 		myOrganizationDao.deleteByUrl("Organization?_profile=http://foo", mySrd);
 		try {
 			myOrganizationDao.read(orgId, mySrd);
@@ -1027,8 +999,6 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 
 	}
 
-	
-	
 	@Test
 	public void testDeleteWithMatchUrlChainedString() {
 		String methodName = "testDeleteWithMatchUrlChainedString";
@@ -1055,11 +1025,11 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 
 		TagList tl = new TagList();
 		tl.addTag("http://foo", "term");
-		
+
 		Organization org = new Organization();
 		ResourceMetadataKeyEnum.TAG_LIST.put(org, tl);
 		org.setName(methodName);
-		
+
 		IIdType orgId = myOrganizationDao.create(org, mySrd).getId().toUnqualifiedVersionless();
 
 		Patient p = new Patient();
@@ -1071,7 +1041,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 
 		myPatientDao.deleteByUrl("Patient?organization._tag=http://foo|term", mySrd);
 		assertGone(id);
-		
+
 		myOrganizationDao.deleteByUrl("Organization?_tag=http://foo|term", mySrd);
 		try {
 			myOrganizationDao.read(orgId, mySrd);
@@ -1116,9 +1086,9 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 		/*
 		 * Org 2 has a name
 		 */
-		
+
 		Organization org2 = new Organization();
-		org2.setName(methodName);		
+		org2.setName(methodName);
 		org2.addIdentifier().setValue(methodName);
 		IIdType org2Id = myOrganizationDao.create(org2, mySrd).getId().toUnqualifiedVersionless();
 
@@ -1131,13 +1101,13 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 		ourLog.info("Org ID 1 : {}", org1Id);
 		ourLog.info("Pat ID 2 : {}", patId2);
 		ourLog.info("Org ID 2 : {}", org2Id);
-		
+
 		myPatientDao.deleteByUrl("Patient?organization.name:missing=true", mySrd);
 		assertGone(patId1);
 		assertNotGone(patId2);
 		assertNotGone(org1Id);
 		assertNotGone(org2Id);
-		
+
 		myOrganizationDao.deleteByUrl("Organization?name:missing=true", mySrd);
 		assertGone(patId1);
 		assertNotGone(patId2);
@@ -1149,7 +1119,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 		assertGone(patId2);
 		assertGone(org1Id);
 		assertNotGone(org2Id);
-		
+
 		myOrganizationDao.deleteByUrl("Organization?name:missing=false", mySrd);
 		assertGone(patId1);
 		assertGone(patId2);
@@ -1186,13 +1156,13 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 		String methodName = "testHistoryOverMultiplePages";
 
 		/*
-		for (int i = 0; i < 1000; i++) {
-			Patient patient = new Patient();
-			patient.addName().addFamily(methodName + "__" + i);
-			myPatientDao.create(patient).getId().toUnqualifiedVersionless();
-		}
-		*/
-		
+		 * for (int i = 0; i < 1000; i++) {
+		 * Patient patient = new Patient();
+		 * patient.addName().addFamily(methodName + "__" + i);
+		 * myPatientDao.create(patient).getId().toUnqualifiedVersionless();
+		 * }
+		 */
+
 		Patient patient = new Patient();
 		patient.addName().addFamily(methodName);
 		IIdType id = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
@@ -2974,6 +2944,29 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 		} catch (InvalidRequestException e) {
 			// ok
 		}
+	}
+
+	@Test
+	public void testValidateAgainstDstu2Profile() throws Exception {
+		myDaoConfig.setAllowExternalReferences(true);
+
+		String stream = IOUtils.toString(getClass().getResourceAsStream("/binu_testpatient_structuredefinition_dstu2.xml"), StandardCharsets.UTF_8);
+
+		StructureDefinition sd = myFhirCtx.newXmlParser().parseResource(StructureDefinition.class, stream);
+		myStructureDefinitionDao.create(sd, mySrd);
+
+		String rawResource = IOUtils.toString(getClass().getResourceAsStream("/binu_testpatient_resource.json"), StandardCharsets.UTF_8);
+		try {
+			myValueSetDao.validate(null, null, rawResource, EncodingEnum.JSON, ValidationModeEnum.UPDATE, null, mySrd);
+			fail();
+		} catch (PreconditionFailedException e) {
+			ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome()));
+		}
+	}
+
+	@AfterClass
+	public static void afterClassClearContext() {
+		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 }

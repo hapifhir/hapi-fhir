@@ -56,7 +56,8 @@ public class DaoConfig {
 	// ***
 	// update setter javadoc if default changes
 	// ***
-	private boolean myAllowInlineMatchUrlReferences = false;
+	private boolean myAllowInlineMatchUrlReferences = true;
+
 	private boolean myAllowMultipleDelete;
 	private boolean myDefaultSearchParamsCanBeOverridden = false;
 	// ***
@@ -94,6 +95,20 @@ public class DaoConfig {
 	private Set<String> myTreatReferencesAsLogical = new HashSet<String>(DEFAULT_LOGICAL_BASE_URLS);
 
 	/**
+	 * Add a value to the {@link #setTreatReferencesAsLogical(Set) logical references list}.
+	 * 
+	 * @see #setTreatReferencesAsLogical(Set)
+	 */
+	public void addTreatReferencesAsLogical(String theTreatReferencesAsLogical) {
+		validateTreatBaseUrlsAsLocal(theTreatReferencesAsLogical);
+
+		if (myTreatReferencesAsLogical == null) {
+			myTreatReferencesAsLogical = new HashSet<String>();
+		}
+		myTreatReferencesAsLogical.add(theTreatReferencesAsLogical);
+	}
+
+	/**
 	 * When a code system is added that contains more than this number of codes,
 	 * the code system will be indexed later in an incremental process in order to
 	 * avoid overwhelming Lucene with a huge number of codes in a single operation.
@@ -115,9 +130,9 @@ public class DaoConfig {
 	 * (next/prev links in search response bundles) will become invalid. Defaults to 1 hour.
 	 * </p>
 	 * <p>
-	 * 
-	 * @see To disable this feature entirely, see {@link #setExpireSearchResults(boolean)}
-	 *      </p>
+	 * <p>
+	 * To disable this feature entirely, see {@link #setExpireSearchResults(boolean)}
+	 * </p>
 	 * 
 	 * @since 1.5
 	 */
@@ -196,9 +211,9 @@ public class DaoConfig {
 	 * references instead of being treated as real references.
 	 * <p>
 	 * A logical reference is a reference which is treated as an identifier, and
-	 * does not neccesarily resolve. See {@link http://hl7.org/fhir/references.html} for
+	 * does not neccesarily resolve. See {@link "http://hl7.org/fhir/references.html"} for
 	 * a description of logical references. For example, the valueset
-	 * {@link http://hl7.org/fhir/valueset-quantity-comparator.html} is a logical
+	 * {@link "http://hl7.org/fhir/valueset-quantity-comparator.html"} is a logical
 	 * reference.
 	 * </p>
 	 * <p>
@@ -209,7 +224,7 @@ public class DaoConfig {
 	 * <li><code>http://example.com/some-base*</code> <b>(will match anything beginning with the part before the *)</b></li>
 	 * </ul>
 	 * 
-	 * @see #DEFAULT_LOGICAL_BASE_URLS for a list of default values for this setting
+	 * @see #DEFAULT_LOGICAL_BASE_URLS Default values for this property
 	 */
 	public Set<String> getTreatReferencesAsLogical() {
 		return myTreatReferencesAsLogical;
@@ -337,7 +352,9 @@ public class DaoConfig {
 	 * to "Patient?identifier=12345", this is reference match URL will be resolved and replaced according
 	 * to the usual match URL rules.
 	 * <p>
-	 * Default is false for now, as this is an experimental feature.
+	 * Default is {@literal true} beginning in HAPI FHIR 2.4, since this
+	 * feature is now specified in the FHIR specification. (Previously it
+	 * was an experimental/rpposed feature)
 	 * </p>
 	 * 
 	 * @since 1.5
@@ -401,8 +418,10 @@ public class DaoConfig {
 	 * </p>
 	 * <p>
 	 * 
-	 * @see To disable this feature entirely, see {@link #setExpireSearchResults(boolean)}
-	 *      </p>
+	 * <p>
+	 * To disable this feature entirely, see {@link #setExpireSearchResults(boolean)}
+	 * </p>
+	 * 
 	 * @since 1.5
 	 */
 	public void setExpireSearchResultsAfterMillis(long theExpireSearchResultsAfterMillis) {
@@ -418,7 +437,7 @@ public class DaoConfig {
 	 *             paging provider instead. Deprecated in HAPI FHIR 2.3 (Jan 2017)
 	 */
 	@Deprecated
-	public void setHardSearchLimit(@SuppressWarnings("unused") int theHardSearchLimit) {
+	public void setHardSearchLimit(int theHardSearchLimit) {
 		// this method does nothing
 	}
 
@@ -528,6 +547,12 @@ public class DaoConfig {
 	 *           means no references will be treated as external
 	 */
 	public void setTreatBaseUrlsAsLocal(Set<String> theTreatBaseUrlsAsLocal) {
+		if (theTreatBaseUrlsAsLocal != null) {
+			for (String next : theTreatBaseUrlsAsLocal) {
+				validateTreatBaseUrlsAsLocal(next);
+			}
+		}
+
 		HashSet<String> treatBaseUrlsAsLocal = new HashSet<String>();
 		for (String next : ObjectUtils.defaultIfNull(theTreatBaseUrlsAsLocal, new HashSet<String>())) {
 			while (next.endsWith("/")) {
@@ -544,9 +569,9 @@ public class DaoConfig {
 	 * references instead of being treated as real references.
 	 * <p>
 	 * A logical reference is a reference which is treated as an identifier, and
-	 * does not neccesarily resolve. See {@link http://hl7.org/fhir/references.html} for
+	 * does not neccesarily resolve. See {@link "http://hl7.org/fhir/references.html"} for
 	 * a description of logical references. For example, the valueset
-	 * {@link http://hl7.org/fhir/valueset-quantity-comparator.html} is a logical
+	 * {@link "http://hl7.org/fhir/valueset-quantity-comparator.html"} is a logical
 	 * reference.
 	 * </p>
 	 * <p>
@@ -557,11 +582,23 @@ public class DaoConfig {
 	 * <li><code>http://example.com/some-base*</code> <b>(will match anything beginning with the part before the *)</b></li>
 	 * </ul>
 	 * 
-	 * @see #DEFAULT_LOGICAL_BASE_URLS for a list of default values for this setting
+	 * @see #DEFAULT_LOGICAL_BASE_URLS Default values for this property
 	 */
 	public DaoConfig setTreatReferencesAsLogical(Set<String> theTreatReferencesAsLogical) {
 		myTreatReferencesAsLogical = theTreatReferencesAsLogical;
 		return this;
+	}
+
+	private static void validateTreatBaseUrlsAsLocal(String theUrl) {
+		Validate.notBlank(theUrl, "Base URL must not be null or empty");
+
+		int starIdx = theUrl.indexOf('*');
+		if (starIdx != -1) {
+			if (starIdx != theUrl.length() - 1) {
+				throw new IllegalArgumentException("Base URL wildcard character (*) can only appear at the end of the string: " + theUrl);
+			}
+		}
+
 	}
 
 }

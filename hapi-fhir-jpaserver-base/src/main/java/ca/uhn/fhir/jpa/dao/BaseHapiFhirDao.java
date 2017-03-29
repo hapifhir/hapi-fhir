@@ -312,29 +312,14 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 					}
 				}
 
-				Set<String> treatReferencesAsLogical = myConfig.getTreatReferencesAsLogical();
-				if (treatReferencesAsLogical != null) {
-					boolean isLogical = false;
-					for (String nextLogicalRef : treatReferencesAsLogical) {
-						nextLogicalRef = trim(nextLogicalRef);
-						if (nextLogicalRef.charAt(nextLogicalRef.length() - 1) == '*') {
-							if (nextId.getValue().startsWith(nextLogicalRef.substring(0, nextLogicalRef.length() -1))) {
-								isLogical = true;
-								break;
-							}
-						} else {
-							if (nextId.getValue().equals(nextLogicalRef)) {
-								isLogical = true;
-								break;
-							}
-						}
+				if (isLogicalReference(nextId)) {
+					ResourceLink resourceLink = new ResourceLink(nextPathAndRef.getPath(), theEntity, nextId, theUpdateTime);
+					if (theLinks.add(resourceLink)) {
+						ourLog.info("Indexing remote resource reference URL: {}", nextId);
 					}
-					
-					if (isLogical) {
-						continue;
-					}
+					continue;
 				}
-				
+
 				String baseUrl = nextId.getBaseUrl();
 				String typeString = nextId.getResourceType();
 				if (isBlank(typeString)) {
@@ -410,6 +395,26 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 
 		theEntity.setHasLinks(theLinks.size() > 0);
 
+	}
+
+	protected boolean isLogicalReference(IIdType theId) {
+		Set<String> treatReferencesAsLogical = myConfig.getTreatReferencesAsLogical();
+		if (treatReferencesAsLogical != null) {
+			for (String nextLogicalRef : treatReferencesAsLogical) {
+				nextLogicalRef = trim(nextLogicalRef);
+				if (nextLogicalRef.charAt(nextLogicalRef.length() - 1) == '*') {
+					if (theId.getValue().startsWith(nextLogicalRef.substring(0, nextLogicalRef.length() - 1))) {
+						return true;
+					}
+				} else {
+					if (theId.getValue().equals(nextLogicalRef)) {
+						return true;
+					}
+				}
+			}
+
+		}
+		return false;
 	}
 
 	protected Set<ResourceIndexedSearchParamCoords> extractSearchParamCoords(ResourceTable theEntity, IBaseResource theResource) {
@@ -959,12 +964,11 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 	 * Subclasses may override to provide behaviour. Called when a resource has been inserted into the database for the first time.
 	 * 
 	 * @param theEntity
-	 *            The entity being updated (Do not modify the entity! Undefined behaviour will occur!)
+	 *           The entity being updated (Do not modify the entity! Undefined behaviour will occur!)
 	 * @param theTag
-	 *            The tag
+	 *           The tag
 	 * @return Returns <code>true</code> if the tag should be removed
 	 */
-	@SuppressWarnings("unused")
 	protected void postPersist(ResourceTable theEntity, T theResource) {
 		// nothing
 	}
@@ -973,9 +977,9 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 	 * Subclasses may override to provide behaviour. Called when a pre-existing resource has been updated in the database
 	 * 
 	 * @param theEntity
-	 *            The resource
+	 *           The resource
 	 * @param theResource
-	 *            The resource being persisted
+	 *           The resource being persisted
 	 */
 	protected void postUpdate(ResourceTable theEntity, T theResource) {
 		// nothing
@@ -998,7 +1002,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		return ids;
 	}
 
-	@SuppressWarnings("unused")
 	@CoverageIgnore
 	public BaseHasResource readEntity(IIdType theValueId) {
 		throw new NotImplementedException("");
@@ -1031,9 +1034,9 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 	 * </p>
 	 * 
 	 * @param theEntity
-	 *            The entity being updated (Do not modify the entity! Undefined behaviour will occur!)
+	 *           The entity being updated (Do not modify the entity! Undefined behaviour will occur!)
 	 * @param theTag
-	 *            The tag
+	 *           The tag
 	 * @return Retturns <code>true</code> if the tag should be removed
 	 */
 	protected boolean shouldDroppedTagBeRemovedOnUpdate(ResourceTable theEntity, ResourceTag theTag) {
@@ -1269,7 +1272,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 				setUpdatedTime(uriParams, theUpdateTime);
 				setUpdatedTime(coordsParams, theUpdateTime);
 				setUpdatedTime(tokenParams, theUpdateTime);
-				
+
 				/*
 				 * Handle references within the resource that are match URLs, for example references like "Patient?identifier=foo". These match URLs are resolved and replaced with the ID of the
 				 * matching
@@ -1531,11 +1534,14 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 
 				for (IBase nextChild : values) {
 					IBaseReference nextRef = (IBaseReference) nextChild;
-					if (!isBlank(nextRef.getReferenceElement().getResourceType())) {
-						if (!nextRef.getReferenceElement().getValue().contains("?")) {
-							if (!validTypes.contains(nextRef.getReferenceElement().getResourceType())) {
-								throw new UnprocessableEntityException(
-										"Invalid reference found at path '" + newPath + "'. Resource type '" + nextRef.getReferenceElement().getResourceType() + "' is not valid for this path");
+					IIdType referencedId = nextRef.getReferenceElement();
+					if (!isBlank(referencedId.getResourceType())) {
+						if (!isLogicalReference(referencedId)) {
+							if (!referencedId.getValue().contains("?")) {
+								if (!validTypes.contains(referencedId.getResourceType())) {
+									throw new UnprocessableEntityException(
+											"Invalid reference found at path '" + newPath + "'. Resource type '" + referencedId.getResourceType() + "' is not valid for this path");
+								}
 							}
 						}
 					}
@@ -1575,9 +1581,9 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 	 * "subsetted" tag and rejects resources which have it. Subclasses should call the superclass implementation to preserve this check.
 	 * 
 	 * @param theResource
-	 *            The resource that is about to be persisted
+	 *           The resource that is about to be persisted
 	 * @param theEntityToSave
-	 *            TODO
+	 *           TODO
 	 */
 	protected void validateResourceForStorage(T theResource, ResourceTable theEntityToSave) {
 		Object tag = null;

@@ -45,7 +45,7 @@ public interface ISort<T> {
 	/**
 	 * Sort descending
 	 * 
-	 * @param A query param - Could be a constant such as <code>Patient.ADDRESS</code> or a custom 
+	 * @param theParam A query param - Could be a constant such as <code>Patient.ADDRESS</code> or a custom 
 	 * param such as <code>new StringClientParam("foo")</code>
 	 */
 	IQuery<T> descending(IParam theParam);
