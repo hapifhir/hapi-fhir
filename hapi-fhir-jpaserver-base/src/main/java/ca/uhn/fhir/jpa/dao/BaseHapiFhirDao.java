@@ -22,6 +22,7 @@ import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
  */
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.trim;
 
 import java.io.UnsupportedEncodingException;
 import java.text.Normalizer;
@@ -311,6 +312,29 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 					}
 				}
 
+				Set<String> treatReferencesAsLogical = myConfig.getTreatReferencesAsLogical();
+				if (treatReferencesAsLogical != null) {
+					boolean isLogical = false;
+					for (String nextLogicalRef : treatReferencesAsLogical) {
+						nextLogicalRef = trim(nextLogicalRef);
+						if (nextLogicalRef.charAt(nextLogicalRef.length() - 1) == '*') {
+							if (nextId.getValue().startsWith(nextLogicalRef.substring(0, nextLogicalRef.length() -1))) {
+								isLogical = true;
+								break;
+							}
+						} else {
+							if (nextId.getValue().equals(nextLogicalRef)) {
+								isLogical = true;
+								break;
+							}
+						}
+					}
+					
+					if (isLogical) {
+						continue;
+					}
+				}
+				
 				String baseUrl = nextId.getBaseUrl();
 				String typeString = nextId.getResourceType();
 				if (isBlank(typeString)) {

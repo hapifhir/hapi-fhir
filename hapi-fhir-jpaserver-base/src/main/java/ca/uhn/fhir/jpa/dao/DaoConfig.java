@@ -42,6 +42,8 @@ public class DaoConfig {
 	 * </ul>
 	 */
 	public static final Set<String> DEFAULT_LOGICAL_BASE_URLS = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(
+			"http://hl7.org/fhir/ValueSet/*",
+			"http://hl7.org/fhir/CodeSystem/*",
 			"http://hl7.org/fhir/valueset-*",
 			"http://hl7.org/fhir/codesystem-*",
 			"http://hl7.org/fhir/StructureDefinition/*")));

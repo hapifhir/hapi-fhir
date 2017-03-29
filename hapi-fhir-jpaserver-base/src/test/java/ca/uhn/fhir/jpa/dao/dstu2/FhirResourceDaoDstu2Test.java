@@ -75,6 +75,12 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 	 */
 	@Test
 	public void testBuiltInLogicalReferences() throws IOException {
+		myDaoConfig.getTreatReferencesAsLogical().add("http://phr.kanta.fi/fiphr-vs-*");
+		
+		ValueSet vsBodySite = loadResourceFromClasspath(ValueSet.class, "/issue534/fiphr-vs-bodysite.xml");
+		myValueSetDao.create(vsBodySite, mySrd);
+		ValueSet vsObsMethod = loadResourceFromClasspath(ValueSet.class, "/issue534/fiphr-vs-observationmethod.xml");
+		myValueSetDao.create(vsObsMethod, mySrd);
 		
 		StructureDefinition sd = loadResourceFromClasspath(StructureDefinition.class, "/issue534/bw_profile_snapshot.xml");
 		myStructureDefinitionDao.create(sd, mySrd);
@@ -93,6 +99,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 	@After
 	public final void after() {
 		myDaoConfig.setAllowExternalReferences(new DaoConfig().isAllowExternalReferences());
+		myDaoConfig.setTreatReferencesAsLogical(new DaoConfig().getTreatReferencesAsLogical());
 	}
 	
 	
