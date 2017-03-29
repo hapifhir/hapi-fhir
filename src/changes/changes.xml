@@ -37,6 +37,10 @@
 				<![CDATA[<code>FhirInstanceValidator</code> bean named <code>"myInstanceValidatorDstu2"</code>]]>
 				for DSTU2. A similar bean for DSTU3 was previously implemented.
 			</action>
+			<action type="add" issue="453">
+				hapi-fhir-jpaserver-example project now defaults to STU3 mode instead of
+				the previous DSTU2. Thanks to Joel Schneider for the pull request!
+			</action>
 		</release>
 		<release version="2.3" date="2017-03-18">
 			<action type="add">
