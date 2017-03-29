@@ -26,6 +26,12 @@
 				Web testing UI displayed an error when a transaction was pasted into the UI
 				for a DSTU2 server. Thanks to Suresh Kumar for reporting!
 			</action>
+			<action type="add">
+				DaoConfig#setAllowInlineMatchUrlReferences() now defaults to
+				<![CDATA[<code>true</code>]]> since inline conditional references
+				are now a part of the FHIR specification. Thanks to Jan Dědek for
+				pointing this out!
+			</action>
 		</release>
 		<release version="2.3" date="2017-03-18">
 			<action type="add">

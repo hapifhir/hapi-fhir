@@ -40,7 +40,7 @@ public class DaoConfig {
 	// ***
 	// update setter javadoc if default changes
 	// ***
-	private boolean myAllowInlineMatchUrlReferences = false;
+	private boolean myAllowInlineMatchUrlReferences = true;
 
 	private boolean myAllowMultipleDelete;
 	private boolean myDefaultSearchParamsCanBeOverridden = false;
@@ -296,7 +296,9 @@ public class DaoConfig {
 	 * to "Patient?identifier=12345", this is reference match URL will be resolved and replaced according
 	 * to the usual match URL rules.
 	 * <p>
-	 * Default is false for now, as this is an experimental feature.
+	 * Default is {@link true} beginning in HAPI FHIR 2.4, since this
+	 * feature is now specified in the FHIR specification. (Previously it
+	 * was an experimental/rpposed feature)
 	 * </p>
 	 * 
 	 * @since 1.5
