@@ -1,5 +1,7 @@
 package ca.uhn.fhir.model.api;
 
+import java.io.Serializable;
+
 import ca.uhn.fhir.context.FhirContext;
 
 /*
@@ -22,7 +24,7 @@ import ca.uhn.fhir.context.FhirContext;
  * #L%
  */
 
-public interface IQueryParameterType {
+public interface IQueryParameterType extends Serializable {
 
 	/**
 	 * This method is generally only called by HAPI itself, and should not need to be called from user code. 

@@ -176,6 +176,8 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 
 	IBundleProvider search(SearchParameterMap theMap);
 
+	IBundleProvider search(SearchParameterMap theParams, RequestDetails theRequestDetails);
+
 	IBundleProvider search(String theParameterName, IQueryParameterType theValue);
 
 	Set<Long> searchForIds(Map<String, IQueryParameterType> theParams);

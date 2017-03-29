@@ -12,7 +12,7 @@ import static org.apache.commons.lang3.StringUtils.defaultString;
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  * 
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -36,6 +36,7 @@ import javax.persistence.TypedQuery;
 import javax.persistence.criteria.*;
 
 import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.SerializationUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.hl7.fhir.instance.model.api.IAnyResource;
@@ -99,7 +100,8 @@ public class SearchBuilder {
 
 	private IHapiTerminologySvc myTerminologySvc;
 
-	public SearchBuilder(FhirContext theFhirContext, EntityManager theEntityManager, PlatformTransactionManager thePlatformTransactionManager, IFulltextSearchSvc theSearchDao, ISearchResultDao theSearchResultDao, BaseHapiFhirDao<?> theDao,
+	public SearchBuilder(FhirContext theFhirContext, EntityManager theEntityManager, PlatformTransactionManager thePlatformTransactionManager, IFulltextSearchSvc theSearchDao,
+			ISearchResultDao theSearchResultDao, BaseHapiFhirDao<?> theDao,
 			IResourceIndexedSearchParamUriDao theResourceIndexedSearchParamUriDao, IForcedIdDao theForcedIdDao, IHapiTerminologySvc theTerminologySvc, ISearchParamRegistry theSearchParamRegistry) {
 		myContext = theFhirContext;
 		myEntityManager = theEntityManager;
@@ -325,7 +327,8 @@ public class SearchBuilder {
 		return;
 	}
 
-	private boolean addPredicateMissingFalseIfPresent(CriteriaBuilder theBuilder, String theParamName, Root<? extends BaseResourceIndexedSearchParam> from, List<Predicate> codePredicates, IQueryParameterType nextOr) {
+	private boolean addPredicateMissingFalseIfPresent(CriteriaBuilder theBuilder, String theParamName, Root<? extends BaseResourceIndexedSearchParam> from, List<Predicate> codePredicates,
+			IQueryParameterType nextOr) {
 		boolean missingFalse = false;
 		if (nextOr.getMissing() != null) {
 			if (nextOr.getMissing().booleanValue() == true) {
@@ -339,7 +342,8 @@ public class SearchBuilder {
 		return missingFalse;
 	}
 
-	private boolean addPredicateMissingFalseIfPresentForResourceLink(CriteriaBuilder theBuilder, String theParamName, Root<? extends ResourceLink> from, List<Predicate> codePredicates, IQueryParameterType nextOr) {
+	private boolean addPredicateMissingFalseIfPresentForResourceLink(CriteriaBuilder theBuilder, String theParamName, Root<? extends ResourceLink> from, List<Predicate> codePredicates,
+			IQueryParameterType nextOr) {
 		boolean missingFalse = false;
 		if (nextOr.getMissing() != null) {
 			if (nextOr.getMissing().booleanValue() == true) {
@@ -522,7 +526,7 @@ public class SearchBuilder {
 
 				if (isBlank(ref.getChain())) {
 					IIdType dt = new IdDt(ref.getBaseUrl(), ref.getResourceType(), ref.getIdPart(), null);
-					
+
 					if (dt.hasBaseUrl()) {
 						if (myCallingDao.getConfig().getTreatBaseUrlsAsLocal().contains(dt.getBaseUrl())) {
 							dt = dt.toUnqualified();
@@ -533,7 +537,7 @@ public class SearchBuilder {
 							continue;
 						}
 					}
-					
+
 					List<Long> targetPid;
 					try {
 						targetPid = myCallingDao.translateForcedIdToPids(dt);
@@ -547,20 +551,20 @@ public class SearchBuilder {
 						codePredicates.add(eq);
 					}
 				} else {
-					
+
 					List<Class<? extends IBaseResource>> resourceTypes;
 					String resourceId;
 					if (!ref.getValue().matches("[a-zA-Z]+\\/.*")) {
-						
+
 						RuntimeResourceDefinition resourceDef = myContext.getResourceDefinition(myResourceType);
 						String paramPath = myCallingDao.getSearchParamByName(resourceDef, theParamName).getPath();
 						if (paramPath.endsWith(".as(Reference)")) {
 							paramPath = paramPath.substring(0, paramPath.length() - ".as(Reference)".length()) + "Reference";
 						}
-						
+
 						BaseRuntimeChildDefinition def = myContext.newTerser().getDefinition(myResourceType, paramPath);
 						if (def instanceof RuntimeChildChoiceDefinition) {
-							RuntimeChildChoiceDefinition choiceDef = (RuntimeChildChoiceDefinition)def;
+							RuntimeChildChoiceDefinition choiceDef = (RuntimeChildChoiceDefinition) def;
 							resourceTypes = choiceDef.getResourceTypes();
 						} else if (def instanceof RuntimeChildResourceDefinition) {
 							RuntimeChildResourceDefinition resDef = (RuntimeChildResourceDefinition) def;
@@ -568,9 +572,9 @@ public class SearchBuilder {
 						} else {
 							throw new ConfigurationException("Property " + paramPath + " of type " + myResourceName + " is not a resource: " + def.getClass());
 						}
-						
+
 						resourceId = ref.getValue();
-						
+
 					} else {
 						RuntimeResourceDefinition resDef = myContext.getResourceDefinition(ref.getResourceType());
 						resourceTypes = new ArrayList<Class<? extends IBaseResource>>(1);
@@ -1132,7 +1136,8 @@ public class SearchBuilder {
 		predicates.addAll(createLastUpdatedPredicates(myParams.getLastUpdatedAndRemove(), builder, from));
 	}
 
-	private Predicate createPredicateNumeric(CriteriaBuilder builder, IQueryParameterType params, ParamPrefixEnum cmpValue, BigDecimal valueValue, final Expression<BigDecimal> path, String invalidMessageName, String theValueString) {
+	private Predicate createPredicateNumeric(CriteriaBuilder builder, IQueryParameterType params, ParamPrefixEnum cmpValue, BigDecimal valueValue, final Expression<BigDecimal> path,
+			String invalidMessageName, String theValueString) {
 		Predicate num;
 		switch (cmpValue) {
 		case GREATERTHAN:
@@ -1230,25 +1235,19 @@ public class SearchBuilder {
 	}
 
 	private void createPredicateResourceId(CriteriaBuilder builder, CriteriaQuery<?> cq, List<Predicate> thePredicates, Expression<Long> theExpression) {
-		if (myParams.isPersistResults()) {
-			if (mySearchEntity.getTotalCount() > -1) {
-				Subquery<Long> subQ = cq.subquery(Long.class);
-				Root<SearchResult> subQfrom = subQ.from(SearchResult.class);
-				subQ.select(subQfrom.get("myResourcePid").as(Long.class));
-				Predicate subQname = builder.equal(subQfrom.get("mySearch"), mySearchEntity);
-				subQ.where(subQname);
+		if (mySearchEntity.getTotalCount() > -1) {
+			Subquery<Long> subQ = cq.subquery(Long.class);
+			Root<SearchResult> subQfrom = subQ.from(SearchResult.class);
+			subQ.select(subQfrom.get("myResourcePid").as(Long.class));
+			Predicate subQname = builder.equal(subQfrom.get("mySearch"), mySearchEntity);
+			subQ.where(subQname);
 
-				thePredicates.add(theExpression.in(subQ));
-			}
-		} else {
-			if (myPids != null) {
-				thePredicates.add(theExpression.in(myPids));
-			}
+			thePredicates.add(theExpression.in(subQ));
 		}
-
 	}
 
-	private Predicate createPredicateString(IQueryParameterType theParameter, String theParamName, CriteriaBuilder theBuilder, From<ResourceIndexedSearchParamString, ResourceIndexedSearchParamString> theFrom) {
+	private Predicate createPredicateString(IQueryParameterType theParameter, String theParamName, CriteriaBuilder theBuilder,
+			From<ResourceIndexedSearchParamString, ResourceIndexedSearchParamString> theFrom) {
 		String rawSearchTerm;
 		if (theParameter instanceof TokenParam) {
 			TokenParam id = (TokenParam) theParameter;
@@ -1267,7 +1266,8 @@ public class SearchBuilder {
 		}
 
 		if (rawSearchTerm.length() > ResourceIndexedSearchParamString.MAX_LENGTH) {
-			throw new InvalidRequestException("Parameter[" + theParamName + "] has length (" + rawSearchTerm.length() + ") that is longer than maximum allowed (" + ResourceIndexedSearchParamString.MAX_LENGTH + "): " + rawSearchTerm);
+			throw new InvalidRequestException("Parameter[" + theParamName + "] has length (" + rawSearchTerm.length() + ") that is longer than maximum allowed ("
+					+ ResourceIndexedSearchParamString.MAX_LENGTH + "): " + rawSearchTerm);
 		}
 
 		String likeExpression = BaseHapiFhirDao.normalizeString(rawSearchTerm);
@@ -1297,7 +1297,8 @@ public class SearchBuilder {
 		return orPredicates;
 	}
 
-	private Predicate createPredicateToken(IQueryParameterType theParameter, String theParamName, CriteriaBuilder theBuilder, From<ResourceIndexedSearchParamToken, ResourceIndexedSearchParamToken> theFrom) {
+	private Predicate createPredicateToken(IQueryParameterType theParameter, String theParamName, CriteriaBuilder theBuilder,
+			From<ResourceIndexedSearchParamToken, ResourceIndexedSearchParamToken> theFrom) {
 		String code;
 		String system;
 		TokenParamModifier modifier = null;
@@ -1319,11 +1320,13 @@ public class SearchBuilder {
 		}
 
 		if (system != null && system.length() > ResourceIndexedSearchParamToken.MAX_LENGTH) {
-			throw new InvalidRequestException("Parameter[" + theParamName + "] has system (" + system.length() + ") that is longer than maximum allowed (" + ResourceIndexedSearchParamToken.MAX_LENGTH + "): " + system);
+			throw new InvalidRequestException(
+					"Parameter[" + theParamName + "] has system (" + system.length() + ") that is longer than maximum allowed (" + ResourceIndexedSearchParamToken.MAX_LENGTH + "): " + system);
 		}
 
 		if (code != null && code.length() > ResourceIndexedSearchParamToken.MAX_LENGTH) {
-			throw new InvalidRequestException("Parameter[" + theParamName + "] has code (" + code.length() + ") that is longer than maximum allowed (" + ResourceIndexedSearchParamToken.MAX_LENGTH + "): " + code);
+			throw new InvalidRequestException(
+					"Parameter[" + theParamName + "] has code (" + code.length() + ") that is longer than maximum allowed (" + ResourceIndexedSearchParamToken.MAX_LENGTH + "): " + code);
 		}
 
 		/*
@@ -1340,7 +1343,7 @@ public class SearchBuilder {
 			system = determineSystemIfMissing(theParamName, code, system);
 			codes = myTerminologySvc.findCodesBelow(system, code);
 		}
-		
+
 		if (codes != null) {
 			if (codes.isEmpty()) {
 				return null;
@@ -1533,25 +1536,16 @@ public class SearchBuilder {
 	}
 
 	public Set<Long> doGetPids() {
-		if (myParams.isPersistResults()) {
-			HashSet<Long> retVal = new HashSet<Long>();
+		HashSet<Long> retVal = new HashSet<Long>();
 
-			for (SearchResult next : mySearchResultDao.findWithSearchUuid(mySearchEntity)) {
-				retVal.add(next.getResourcePid());
-			}
-			return retVal;
-
-		} else {
-			return new HashSet<Long>(myPids);
+		for (SearchResult next : mySearchResultDao.findWithSearchUuid(mySearchEntity)) {
+			retVal.add(next.getResourcePid());
 		}
+		return retVal;
 	}
 
 	private boolean doHaveNoResults() {
-		if (myParams.isPersistResults()) {
-			return mySearchEntity.getTotalCount() == 0;
-		} else {
-			return myPids != null && myPids.isEmpty();
-		}
+		return mySearchEntity.getTotalCount() == 0;
 	}
 
 	private void doInitializeSearch() {
@@ -1561,42 +1555,29 @@ public class SearchBuilder {
 	}
 
 	private IBundleProvider doReturnProvider() {
-		if (myParams.isPersistResults()) {
-			return new PersistedJpaBundleProvider(mySearchEntity.getUuid(), myCallingDao);
-		} else {
-			if (myPids == null) {
-				return new SimpleBundleProvider();
-			} else {
-				return new BundleProviderInMemory(myPids);
-			}
-		}
+		return new PersistedJpaBundleProvider(mySearchEntity.getUuid(), myCallingDao);
 	}
 
 	private void doSetPids(Collection<Long> thePids) {
-		if (myParams.isPersistResults()) {
-			if (mySearchEntity.getTotalCount() != null) {
-				reinitializeSearch();
-			}
-
-			LinkedHashSet<SearchResult> results = new LinkedHashSet<SearchResult>();
-			int index = 0;
-			for (Long next : thePids) {
-				SearchResult nextResult = new SearchResult(mySearchEntity);
-				nextResult.setResourcePid(next);
-				nextResult.setOrder(index);
-				results.add(nextResult);
-				index++;
-			}
-			mySearchResultDao.save(results);
-
-			mySearchEntity.setTotalCount(results.size());
-			mySearchEntity = myEntityManager.merge(mySearchEntity);
-
-			myEntityManager.flush();
-
-		} else {
-			myPids = thePids;
+		if (mySearchEntity.getTotalCount() != null) {
+			reinitializeSearch();
 		}
+
+		LinkedHashSet<SearchResult> results = new LinkedHashSet<SearchResult>();
+		int index = 0;
+		for (Long next : thePids) {
+			SearchResult nextResult = new SearchResult(mySearchEntity);
+			nextResult.setResourcePid(next);
+			nextResult.setOrder(index);
+			results.add(nextResult);
+			index++;
+		}
+		mySearchResultDao.save(results);
+
+		mySearchEntity.setTotalCount(results.size());
+		mySearchEntity = myEntityManager.merge(mySearchEntity);
+
+		myEntityManager.flush();
 	}
 
 	private void filterResourceIdsByLastUpdated(final DateRangeParam theLastUpdated) {
@@ -1675,6 +1656,7 @@ public class SearchBuilder {
 		mySearchEntity.setUuid(UUID.randomUUID().toString());
 		mySearchEntity.setCreated(new Date());
 		mySearchEntity.setTotalCount(-1);
+		mySearchEntity.setSearchParamMap(SerializationUtils.serialize(myParams));
 		mySearchEntity.setPreferredPageSize(myParams.getCount());
 		mySearchEntity.setSearchType(myParams.getEverythingMode() != null ? SearchTypeEnum.EVERYTHING : SearchTypeEnum.SEARCH);
 		mySearchEntity.setLastUpdated(myParams.getLastUpdated());
@@ -1686,11 +1668,9 @@ public class SearchBuilder {
 			mySearchEntity.getIncludes().add(new SearchInclude(mySearchEntity, next.getValue(), true, next.isRecurse()));
 		}
 
-		if (myParams.isPersistResults()) {
-			myEntityManager.persist(mySearchEntity);
-			for (SearchInclude next : mySearchEntity.getIncludes()) {
-				myEntityManager.persist(next);
-			}
+		myEntityManager.persist(mySearchEntity);
+		for (SearchInclude next : mySearchEntity.getIncludes()) {
+			myEntityManager.persist(next);
 		}
 	}
 
@@ -1814,7 +1794,7 @@ public class SearchBuilder {
 
 		doInitializeSearch();
 
-//		RuntimeResourceDefinition resourceDef = myContext.getResourceDefinition(myResourceType);
+		// RuntimeResourceDefinition resourceDef = myContext.getResourceDefinition(myResourceType);
 
 		for (Entry<String, List<List<? extends IQueryParameterType>>> nextParamEntry : params.entrySet()) {
 			String nextParamName = nextParamEntry.getKey();
@@ -1938,7 +1918,7 @@ public class SearchBuilder {
 						break;
 					}
 				}
-			} 
+			}
 
 			if (doHaveNoResults()) {
 				return;
@@ -1947,7 +1927,7 @@ public class SearchBuilder {
 		}
 
 	}
-	
+
 	public void setType(Class<? extends IBaseResource> theResourceType, String theResourceName) {
 		myResourceType = theResourceType;
 		myResourceName = theResourceName;
@@ -2038,7 +2018,8 @@ public class SearchBuilder {
 		return likeExpression.replace("%", "[%]") + "%";
 	}
 
-	private static Predicate createResourceLinkPathPredicate(IDao theCallingDao, FhirContext theContext, String theParamName, Root<? extends ResourceLink> from, Class<? extends IBaseResource> resourceType) {
+	private static Predicate createResourceLinkPathPredicate(IDao theCallingDao, FhirContext theContext, String theParamName, Root<? extends ResourceLink> from,
+			Class<? extends IBaseResource> resourceType) {
 		RuntimeResourceDefinition resourceDef = theContext.getResourceDefinition(resourceType);
 		RuntimeSearchParam param = theCallingDao.getSearchParamByName(resourceDef, theParamName);
 		List<String> path = param.getPathsSplit();
@@ -2062,7 +2043,8 @@ public class SearchBuilder {
 		return resultList;
 	}
 
-	public static void loadResourcesByPid(Collection<Long> theIncludePids, List<IBaseResource> theResourceListToPopulate, Set<Long> theRevIncludedPids, boolean theForHistoryOperation, EntityManager entityManager, FhirContext context, IDao theDao) {
+	public static void loadResourcesByPid(Collection<Long> theIncludePids, List<IBaseResource> theResourceListToPopulate, Set<Long> theRevIncludedPids, boolean theForHistoryOperation,
+			EntityManager entityManager, FhirContext context, IDao theDao) {
 		if (theIncludePids.isEmpty()) {
 			return;
 		}
@@ -2111,7 +2093,8 @@ public class SearchBuilder {
 	 * 
 	 * @param theLastUpdated
 	 */
-	public static HashSet<Long> loadReverseIncludes(IDao theCallingDao, FhirContext theContext, EntityManager theEntityManager, Collection<Long> theMatches, Set<Include> theRevIncludes, boolean theReverseMode, DateRangeParam theLastUpdated) {
+	public static HashSet<Long> loadReverseIncludes(IDao theCallingDao, FhirContext theContext, EntityManager theEntityManager, Collection<Long> theMatches, Set<Include> theRevIncludes,
+			boolean theReverseMode, DateRangeParam theLastUpdated) {
 		if (theMatches.size() == 0) {
 			return new HashSet<Long>();
 		}
@@ -2251,67 +2234,6 @@ public class SearchBuilder {
 
 	static Predicate[] toArray(List<Predicate> thePredicates) {
 		return thePredicates.toArray(new Predicate[thePredicates.size()]);
-	}
-
-	private final class BundleProviderInMemory implements IBundleProvider {
-		private final ArrayList<Long> myPids;
-
-		private BundleProviderInMemory(Collection<Long> thePids) {
-			final ArrayList<Long> pids;
-			if (!(thePids instanceof List)) {
-				pids = new ArrayList<Long>(thePids);
-			} else {
-				pids = (ArrayList<Long>) thePids;
-			}
-			myPids = pids;
-		}
-
-		@Override
-		public InstantDt getPublished() {
-			return new InstantDt(mySearchEntity.getCreated());
-		}
-
-		@Override
-		public List<IBaseResource> getResources(final int theFromIndex, final int theToIndex) {
-			TransactionTemplate template = new TransactionTemplate(myPlatformTransactionManager);
-			return template.execute(new TransactionCallback<List<IBaseResource>>() {
-				@Override
-				public List<IBaseResource> doInTransaction(TransactionStatus theStatus) {
-					List<Long> pidsSubList = myPids.subList(theFromIndex, theToIndex);
-
-					// Load includes
-					pidsSubList = new ArrayList<Long>(pidsSubList);
-
-					Set<Long> revIncludedPids = new HashSet<Long>();
-					if (myParams.getEverythingMode() == null) {
-						revIncludedPids.addAll(loadReverseIncludes(myCallingDao, myContext, myEntityManager, pidsSubList, myParams.getRevIncludes(), true, myParams.getLastUpdated()));
-					}
-					revIncludedPids.addAll(loadReverseIncludes(myCallingDao, myContext, myEntityManager, pidsSubList, myParams.getIncludes(), false, myParams.getLastUpdated()));
-
-					// Execute the query and make sure we return distinct results
-					List<IBaseResource> resources = new ArrayList<IBaseResource>();
-					loadResourcesByPid(pidsSubList, resources, revIncludedPids, false);
-
-					return resources;
-				}
-
-			});
-		}
-
-		@Override
-		public Integer preferredPageSize() {
-			return myParams.getCount();
-		}
-
-		@Override
-		public int size() {
-			return myPids.size();
-		}
-
-		@Override
-		public String getUuid() {
-			return null;
-		}
 	}
 
 }

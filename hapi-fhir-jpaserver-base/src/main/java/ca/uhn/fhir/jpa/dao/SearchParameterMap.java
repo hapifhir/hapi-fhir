@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.dao;
 
+import java.io.Serializable;
+
 /*
  * #%L
  * HAPI FHIR JPA Server
@@ -38,7 +40,7 @@ import ca.uhn.fhir.rest.method.RequestDetails;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.server.Constants;
 
-public class SearchParameterMap extends LinkedHashMap<String, List<List<? extends IQueryParameterType>>> {
+public class SearchParameterMap extends LinkedHashMap<String, List<List<? extends IQueryParameterType>>> implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
@@ -46,8 +48,6 @@ public class SearchParameterMap extends LinkedHashMap<String, List<List<? extend
 	private EverythingModeEnum myEverythingMode = null;
 	private Set<Include> myIncludes;
 	private DateRangeParam myLastUpdated;
-	private boolean myPersistResults = true;
-	private RequestDetails myRequestDetails;
 	private Set<Include> myRevIncludes;
 	private SortSpec mySort;
 
@@ -137,10 +137,6 @@ public class SearchParameterMap extends LinkedHashMap<String, List<List<? extend
 		return retVal;
 	}
 
-	public RequestDetails getRequestDetails() {
-		return myRequestDetails;
-	}
-
 	public Set<Include> getRevIncludes() {
 		if (myRevIncludes == null) {
 			myRevIncludes = new HashSet<Include>();
@@ -150,10 +146,6 @@ public class SearchParameterMap extends LinkedHashMap<String, List<List<? extend
 
 	public SortSpec getSort() {
 		return mySort;
-	}
-
-	public boolean isPersistResults() {
-		return myPersistResults;
 	}
 
 	public void setCount(Integer theCount) {
@@ -173,14 +165,11 @@ public class SearchParameterMap extends LinkedHashMap<String, List<List<? extend
 	}
 
 	/**
-	 * Should results be persisted into a table for paging
+	 * @deprecated As of HAPI FHIR 2.4 this method no longer does anything
 	 */
+	@Deprecated
 	public void setPersistResults(boolean thePersistResults) {
-		myPersistResults = thePersistResults;
-	}
-
-	public void setRequestDetails(RequestDetails theRequestDetails) {
-		myRequestDetails = theRequestDetails;
+		// does nothing as of HAPI FHIR 2.4
 	}
 
 	public void setRevIncludes(Set<Include> theRevIncludes) {

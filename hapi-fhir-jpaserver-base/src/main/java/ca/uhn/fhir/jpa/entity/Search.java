@@ -28,20 +28,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Index;
-import javax.persistence.OneToMany;
-import javax.persistence.SequenceGenerator;
-import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-import javax.persistence.UniqueConstraint;
+import javax.persistence.*;
 
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.param.DateRangeParam;
@@ -91,6 +78,10 @@ public class Search implements Serializable {
 	@OneToMany(mappedBy="mySearch")
 	private Collection<SearchResult> myResults;
 
+	@Lob
+	@Column(name="SEARCH_PARAM_MAP", nullable=true)
+	private byte[] mySearchParamMap;
+
 	@Enumerated(EnumType.ORDINAL)
 	@Column(name="SEARCH_TYPE", nullable=false)
 	private SearchTypeEnum mySearchType;
@@ -115,14 +106,6 @@ public class Search implements Serializable {
 		}
 		return myIncludes;
 	}
-	
-	public Date getLastUpdatedHigh() {
-		return myLastUpdatedHigh;
-	}
-
-	public Date getLastUpdatedLow() {
-		return myLastUpdatedLow;
-	}
 
 	public DateRangeParam getLastUpdated() {
 		if (myLastUpdatedLow == null && myLastUpdatedHigh == null) {
@@ -132,6 +115,14 @@ public class Search implements Serializable {
 		}
 	}
 
+	public Date getLastUpdatedHigh() {
+		return myLastUpdatedHigh;
+	}
+	
+	public Date getLastUpdatedLow() {
+		return myLastUpdatedLow;
+	}
+
 	public Integer getPreferredPageSize() {
 		return myPreferredPageSize;
 	}
@@ -139,19 +130,23 @@ public class Search implements Serializable {
 	public Long getResourceId() {
 		return myResourceId;
 	}
-	
+
 	public String getResourceType() {
 		return myResourceType;
 	}
 
+	public byte[] getSearchParamMap() {
+		return mySearchParamMap;
+	}
+	
 	public SearchTypeEnum getSearchType() {
 		return mySearchType;
 	}
 
-
 	public Integer getTotalCount() {
 		return myTotalCount;
 	}
+
 
 	public String getUuid() {
 		return myUuid;
@@ -160,11 +155,11 @@ public class Search implements Serializable {
 	public void setCreated(Date theCreated) {
 		myCreated = theCreated;
 	}
+
 	public void setLastUpdated(Date theLowerBound, Date theUpperBound) {
 		myLastUpdatedLow = theLowerBound;
 		myLastUpdatedHigh = theUpperBound;
 	}
-	
 	public void setLastUpdated(DateRangeParam theLastUpdated) {
 		if (theLastUpdated == null) {
 			myLastUpdatedLow = null;
@@ -174,18 +169,22 @@ public class Search implements Serializable {
 			myLastUpdatedHigh = theLastUpdated.getUpperBoundAsInstant();
 		}
 	}
-
+	
 	public void setPreferredPageSize(Integer thePreferredPageSize) {
 		myPreferredPageSize = thePreferredPageSize;
 	}
-	
+
 	public void setResourceId(Long theResourceId) {
 		myResourceId = theResourceId;
 	}
-
-
+	
 	public void setResourceType(String theResourceType) {
 		myResourceType = theResourceType;
+	}
+
+
+	public void setSearchParamMap(byte[] theSearchParamMap) {
+		mySearchParamMap = theSearchParamMap;
 	}
 
 	public void setSearchType(SearchTypeEnum theSearchType) {

@@ -1,5 +1,7 @@
 package ca.uhn.fhir.model.api;
 
+import java.io.Serializable;
+
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -25,7 +27,7 @@ import java.util.List;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.method.QualifiedParamList;
 
-public interface IQueryParameterOr<T extends IQueryParameterType> {
+public interface IQueryParameterOr<T extends IQueryParameterType> extends Serializable {
 
 	public void setValuesAsQueryTokens(FhirContext theContext, String theParamName, QualifiedParamList theParameters);
 

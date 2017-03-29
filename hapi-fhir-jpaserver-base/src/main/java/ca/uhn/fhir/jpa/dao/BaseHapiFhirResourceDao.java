@@ -952,8 +952,13 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 	@Override
 	public IBundleProvider search(final SearchParameterMap theParams) {
+		return search(theParams, null);
+	}
+
+	@Override
+	public IBundleProvider search(final SearchParameterMap theParams, RequestDetails theRequestDetails) {
 		// Notify interceptors
-		ActionRequestDetails requestDetails = new ActionRequestDetails(theParams.getRequestDetails(), getContext(), getResourceName(), null);
+		ActionRequestDetails requestDetails = new ActionRequestDetails(theRequestDetails, getContext(), getResourceName(), null);
 		notifyInterceptors(RestOperationTypeEnum.SEARCH_TYPE, requestDetails);
 
 		SearchBuilder builder = new SearchBuilder(getContext(), myEntityManager, myPlatformTransactionManager, mySearchDao, mySearchResultDao, this, myResourceIndexedSearchParamUriDao, myForcedIdDao,
