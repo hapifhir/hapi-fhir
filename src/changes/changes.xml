@@ -32,6 +32,11 @@
 				are now a part of the FHIR specification. Thanks to Jan Dědek for
 				pointing this out!
 			</action>
+			<action type="add" issue="609">
+				hapi-fhir-jpaserver-base now exposes a
+				<![CDATA[<code>FhirInstanceValidator</code> bean named <code>"myInstanceValidatorDstu2"</code>]]>
+				for DSTU2. A similar bean for DSTU3 was previously implemented.
+			</action>
 		</release>
 		<release version="2.3" date="2017-03-18">
 			<action type="add">
