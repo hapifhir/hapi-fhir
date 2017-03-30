@@ -29,6 +29,7 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
+import org.apache.commons.lang3.SerializationUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -41,6 +42,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.IDao;
 import ca.uhn.fhir.jpa.dao.SearchBuilder;
+import ca.uhn.fhir.jpa.dao.SearchParameterMap;
 import ca.uhn.fhir.jpa.dao.data.ISearchDao;
 import ca.uhn.fhir.jpa.dao.data.ISearchResultDao;
 import ca.uhn.fhir.jpa.entity.*;
@@ -113,7 +115,11 @@ public final class PersistedJpaBundleProvider implements IBundleProvider {
 	}
 
 	protected List<IBaseResource> doSearchOrEverythingInTransaction(final int theFromIndex, final int theToIndex) {
-
+		SearchBuilder sb = myDao.newSearchBuilder();
+		
+		SearchParameterMap parameterMap = SerializationUtils.deserialize(mySearchEntity.getSearchParamMap());
+		sb.loadPage(parameterMap, theFromIndex, theToIndex);
+		
 		Pageable page = toPage(theFromIndex, theToIndex);
 		if (page == null) {
 			return Collections.emptyList();
@@ -246,7 +252,7 @@ public final class PersistedJpaBundleProvider implements IBundleProvider {
 		return Math.max(0, mySearchEntity.getTotalCount());
 	}
 
-	public static Pageable toPage(final int theFromIndex, int theToIndex) {
+	static Pageable toPage(final int theFromIndex, int theToIndex) {
 		int pageSize = theToIndex - theFromIndex;
 		if (pageSize < 1) {
 			return null;

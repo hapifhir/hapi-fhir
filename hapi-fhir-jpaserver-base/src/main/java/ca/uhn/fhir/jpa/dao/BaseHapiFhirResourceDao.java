@@ -78,8 +78,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	protected PlatformTransactionManager myPlatformTransactionManager;
 	@Autowired
 	private IResourceHistoryTableDao myResourceHistoryTableDao;
-	@Autowired()
-	protected IResourceIndexedSearchParamUriDao myResourceIndexedSearchParamUriDao;
 	private String myResourceName;
 	@Autowired
 	protected IResourceTableDao myResourceTableDao;
@@ -89,10 +87,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	@Autowired()
 	protected ISearchResultDao mySearchResultDao;
 	private String mySecondaryPrimaryKeyParamName;
-	@Autowired
-	private ISearchParamRegistry mySerarchParamRegistry;
-	@Autowired()
-	protected IHapiTerminologySvc myTerminologySvc;
 
 	@Override
 	public void addTag(IIdType theId, TagTypeEnum theTagType, String theScheme, String theTerm, String theLabel) {
@@ -961,11 +955,11 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		ActionRequestDetails requestDetails = new ActionRequestDetails(theRequestDetails, getContext(), getResourceName(), null);
 		notifyInterceptors(RestOperationTypeEnum.SEARCH_TYPE, requestDetails);
 
-		SearchBuilder builder = new SearchBuilder(getContext(), myEntityManager, myPlatformTransactionManager, mySearchDao, mySearchResultDao, this, myResourceIndexedSearchParamUriDao, myForcedIdDao,
-				myTerminologySvc, mySerarchParamRegistry);
+		SearchBuilder builder = newSearchBuilder();
 		builder.setType(getResourceType(), getResourceName());
 		return builder.search(theParams);
 	}
+
 
 	@Override
 	public IBundleProvider search(String theParameterName, IQueryParameterType theValue) {
@@ -990,8 +984,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	public Set<Long> searchForIdsWithAndOr(SearchParameterMap theParams) {
 		theParams.setPersistResults(false);
 
-		SearchBuilder builder = new SearchBuilder(getContext(), myEntityManager, myPlatformTransactionManager, mySearchDao, mySearchResultDao, this, myResourceIndexedSearchParamUriDao, myForcedIdDao,
-				myTerminologySvc, mySerarchParamRegistry);
+		SearchBuilder builder = newSearchBuilder();
 		builder.setType(getResourceType(), getResourceName());
 		builder.search(theParams);
 		return builder.doGetPids();

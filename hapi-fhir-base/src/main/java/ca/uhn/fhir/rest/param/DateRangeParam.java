@@ -36,6 +36,8 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
 public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 
+	private static final long serialVersionUID = 1L;
+	
 	private DateParam myLowerBound;
 	private DateParam myUpperBound;
 
@@ -202,6 +204,7 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 				break;
 			case LESSTHAN:
 			case LESSTHAN_OR_EQUALS:
+			default:
 				throw new IllegalStateException("Unvalid lower bound comparator: " + myLowerBound.getPrefix());
 			}
 		}
@@ -229,6 +232,7 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 				break;
 			case GREATERTHAN_OR_EQUALS:
 			case GREATERTHAN:
+			default:
 				throw new IllegalStateException("Unvalid upper bound comparator: " + myUpperBound.getPrefix());
 			}
 		}

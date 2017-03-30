@@ -93,20 +93,20 @@ public class SearchBuilder {
 	private IResourceIndexedSearchParamUriDao myResourceIndexedSearchParamUriDao;
 	private String myResourceName;
 	private Class<? extends IBaseResource> myResourceType;
-	private IFulltextSearchSvc mySearchDao;
+	private IFulltextSearchSvc myFulltextSearchSvc;
 	private Search mySearchEntity;
 	private ISearchResultDao mySearchResultDao;
 	private ISearchParamRegistry mySearchParamRegistry;
 
 	private IHapiTerminologySvc myTerminologySvc;
 
-	public SearchBuilder(FhirContext theFhirContext, EntityManager theEntityManager, PlatformTransactionManager thePlatformTransactionManager, IFulltextSearchSvc theSearchDao,
+	public SearchBuilder(FhirContext theFhirContext, EntityManager theEntityManager, PlatformTransactionManager thePlatformTransactionManager, IFulltextSearchSvc theFulltextSearchSvc,
 			ISearchResultDao theSearchResultDao, BaseHapiFhirDao<?> theDao,
 			IResourceIndexedSearchParamUriDao theResourceIndexedSearchParamUriDao, IForcedIdDao theForcedIdDao, IHapiTerminologySvc theTerminologySvc, ISearchParamRegistry theSearchParamRegistry) {
 		myContext = theFhirContext;
 		myEntityManager = theEntityManager;
 		myPlatformTransactionManager = thePlatformTransactionManager;
-		mySearchDao = theSearchDao;
+		myFulltextSearchSvc = theFulltextSearchSvc;
 		mySearchResultDao = theSearchResultDao;
 		myCallingDao = theDao;
 		myResourceIndexedSearchParamUriDao = theResourceIndexedSearchParamUriDao;
@@ -1679,7 +1679,11 @@ public class SearchBuilder {
 		StopWatch w = new StopWatch();
 
 		doInitializeSearch();
+		return doReturnProvider();
+	}
 
+	public IBundleProvider loadPage(SearchParameterMap theParams, int theFromIndex, int theToIndex) {
+		StopWatch sw = new StopWatch();
 		DateRangeParam lu = theParams.getLastUpdated();
 
 		// Collection<Long> loadPids;
@@ -1692,7 +1696,7 @@ public class SearchBuilder {
 			}
 
 			if (theParams.containsKey(Constants.PARAM_CONTENT) || theParams.containsKey(Constants.PARAM_TEXT)) {
-				List<Long> pids = mySearchDao.everything(myResourceName, theParams);
+				List<Long> pids = myFulltextSearchSvc.everything(myResourceName, theParams);
 				if (pids.isEmpty()) {
 					return doReturnProvider();
 				}
@@ -1734,14 +1738,14 @@ public class SearchBuilder {
 
 		} else {
 
-			if (mySearchDao == null) {
+			if (myFulltextSearchSvc == null) {
 				if (theParams.containsKey(Constants.PARAM_TEXT)) {
 					throw new InvalidRequestException("Fulltext search is not enabled on this service, can not process parameter: " + Constants.PARAM_TEXT);
 				} else if (theParams.containsKey(Constants.PARAM_CONTENT)) {
 					throw new InvalidRequestException("Fulltext search is not enabled on this service, can not process parameter: " + Constants.PARAM_CONTENT);
 				}
 			} else {
-				List<Long> searchResultPids = mySearchDao.search(myResourceName, theParams);
+				List<Long> searchResultPids = myFulltextSearchSvc.search(myResourceName, theParams);
 				if (searchResultPids != null) {
 					if (searchResultPids.isEmpty()) {
 						return doReturnProvider();
@@ -1755,15 +1759,6 @@ public class SearchBuilder {
 			}
 
 		}
-
-		// // Load _include and _revinclude before filter and sort in everything mode
-		// if (theParams.getEverythingMode() != null) {
-		// if (theParams.getRevIncludes() != null && theParams.getRevIncludes().isEmpty() == false) {
-		// loadPids.addAll(loadReverseIncludes(loadPids, theParams.getRevIncludes(), true,
-		// theParams.getEverythingMode()));
-		// loadPids.addAll(loadReverseIncludes(loadPids, theParams.getIncludes(), false, theParams.getEverythingMode()));
-		// }
-		// }
 
 		if (doHaveNoResults()) {
 			return doReturnProvider();
@@ -1781,10 +1776,11 @@ public class SearchBuilder {
 		// Handle sorting if any was provided
 		processSort(theParams);
 
-		ourLog.info(" {} on {} in {}ms", new Object[] { myResourceName, theParams, w.getMillisAndRestart() });
+		ourLog.info(" {} on {} in {}ms", new Object[] { myResourceName, theParams, sw.getMillisAndRestart() });
 		return doReturnProvider();
-	}
 
+	}
+	
 	private void searchForIdsWithAndOr(SearchParameterMap theParams, DateRangeParam theLastUpdated) {
 		SearchParameterMap params = theParams;
 		if (params == null) {

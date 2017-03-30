@@ -64,21 +64,23 @@ public interface IDao {
 
 	FhirContext getContext();
 
+	RuntimeSearchParam getSearchParamByName(RuntimeResourceDefinition theResourceDef, String theParamName);
+
+	Collection<RuntimeSearchParam> getSearchParamsByResourceType(RuntimeResourceDefinition theResourceDef);
+
 	/**
 	 * Populate all of the runtime dependencies that a bundle provider requires in order to work
 	 */
 	void injectDependenciesIntoBundleProvider(PersistedJpaBundleProvider theProvider);
+
+	SearchBuilder newSearchBuilder();
+
+	void populateFullTextFields(IBaseResource theResource, ResourceTable theEntity);
 
 	<R extends IBaseResource> Set<Long> processMatchUrl(String theMatchUrl, Class<R> theResourceType);
 
 	IBaseResource toResource(BaseHasResource theEntity, boolean theForHistoryOperation);
 
 	<R extends IBaseResource> R toResource(Class<R> theResourceType, BaseHasResource theEntity, boolean theForHistoryOperation);
-
-	void populateFullTextFields(IBaseResource theResource, ResourceTable theEntity);
-
-	RuntimeSearchParam getSearchParamByName(RuntimeResourceDefinition theResourceDef, String theParamName);
-
-	Collection<RuntimeSearchParam> getSearchParamsByResourceType(RuntimeResourceDefinition theResourceDef);
 
 }
