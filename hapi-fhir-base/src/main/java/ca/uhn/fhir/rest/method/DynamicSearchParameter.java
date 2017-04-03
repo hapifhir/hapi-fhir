@@ -143,6 +143,9 @@ public class DynamicSearchParameter implements IParameter {
 						uriOrListParam.setValuesAsQueryTokens(ctx, unqualifiedParamName, paramList);
 						retVal.add(next, uriOrListParam);
 						break;
+					case HAS:
+						// Should not happen
+						break;
 					}
 				}
 			}

@@ -213,7 +213,7 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 					qualifiedNames = processWhitelistAndBlacklist(qualifiedNames, temp.getQualifierWhitelist(), temp.getQualifierBlacklist());
 					methodParamsTemp.addAll(qualifiedNames);
 				}
-				if (!qualifiedParamNames.contains(name) && !qualifiedParamNames.contains(name)) { 
+				if (!qualifiedParamNames.contains(name)) { 
 					methodParamsTemp.add(name);
 				}
 			}

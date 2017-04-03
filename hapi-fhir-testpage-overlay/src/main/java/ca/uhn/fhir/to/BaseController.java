@@ -162,7 +162,7 @@ public class BaseController {
 						b.append(nextChar);
 						b.append("</span>");
 						inValue = false;
-					} else if (nextChar == '}' || nextChar == '}' || nextChar == ',') {
+					} else if (nextChar == '{' || nextChar == '}' || nextChar == ',') {
 						b.append("<span class='hlControl'>");
 						b.append(nextChar);
 						b.append("</span>");
@@ -321,6 +321,9 @@ public class BaseController {
 			return loadAndAddConfDstu2(theServletRequest, theRequest, theModel);
 		case DSTU3:
 			return loadAndAddConfDstu3(theServletRequest, theRequest, theModel);
+		case DSTU2_1:
+		case DSTU2_HL7ORG:
+			break;
 		}
 		throw new IllegalStateException("Unknown version: " + theRequest.getFhirVersion(myConfig));
 	}
