@@ -195,7 +195,7 @@ public abstract class BaseDateTimeDt extends BasePrimitive<Date> {
 	 */
 	public TimeZone getTimeZone() {
 		if (myTimeZoneZulu) {
-			return TimeZone.getTimeZone("Z");
+			return TimeZone.getTimeZone("GMT");
 		}
 		return myTimeZone;
 	}

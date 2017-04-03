@@ -109,6 +109,10 @@ public class RunServerCommand extends BaseCommand {
 				case DSTU3:
 					theSce.getServletContext().setInitParameter(ContextLoader.CONFIG_LOCATION_PARAM, FhirServerConfigDstu3.class.getName());
 					break;
+				case DSTU1:
+				case DSTU2_1:
+				case DSTU2_HL7ORG:
+					break;
 				}
 				cll.contextInitialized(theSce);
 			}
