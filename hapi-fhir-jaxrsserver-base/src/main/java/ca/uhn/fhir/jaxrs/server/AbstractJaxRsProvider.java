@@ -64,8 +64,6 @@ public abstract class AbstractJaxRsProvider implements IRestfulServerDefaults {
 
     private final FhirContext CTX;
 
-    /** The default exception interceptor */
-    private static final JaxRsExceptionInterceptor DEFAULT_EXCEPTION_HANDLER = new JaxRsExceptionInterceptor();
     private static final String PROCESSING = "processing";
     private static final String ERROR = "error";
 
@@ -260,13 +258,13 @@ public abstract class AbstractJaxRsProvider implements IRestfulServerDefaults {
     public Response handleException(final JaxRsRequest theRequest, final Throwable theException)
             throws IOException {
         if (theException instanceof JaxRsResponseException) {
-            return DEFAULT_EXCEPTION_HANDLER.convertExceptionIntoResponse(theRequest, (JaxRsResponseException) theException);
+            return new JaxRsExceptionInterceptor().convertExceptionIntoResponse(theRequest, (JaxRsResponseException) theException);
         } else if (theException instanceof DataFormatException) {
-            return DEFAULT_EXCEPTION_HANDLER.convertExceptionIntoResponse(theRequest, new JaxRsResponseException(
+            return new JaxRsExceptionInterceptor().convertExceptionIntoResponse(theRequest, new JaxRsResponseException(
                     new InvalidRequestException(theException.getMessage(), createOutcome((DataFormatException) theException))));
         } else {
-            return DEFAULT_EXCEPTION_HANDLER.convertExceptionIntoResponse(theRequest,
-                    DEFAULT_EXCEPTION_HANDLER.convertException(this, theException));
+            return new JaxRsExceptionInterceptor().convertExceptionIntoResponse(theRequest,
+                    new JaxRsExceptionInterceptor().convertException(this, theException));
         }
     }
 
