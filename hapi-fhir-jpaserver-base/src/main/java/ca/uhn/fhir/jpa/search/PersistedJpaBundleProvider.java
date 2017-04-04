@@ -117,6 +117,10 @@ public final class PersistedJpaBundleProvider implements IBundleProvider {
 	protected List<IBaseResource> doSearchOrEverythingInTransaction(final int theFromIndex, final int theToIndex) {
 		SearchBuilder sb = myDao.newSearchBuilder();
 		
+		String resourceName = mySearchEntity.getResourceType();
+		Class<? extends IBaseResource> resourceType = myContext.getResourceDefinition(resourceName).getImplementingClass();
+		sb.setType(resourceType, resourceName);
+		
 		SearchParameterMap parameterMap = SerializationUtils.deserialize(mySearchEntity.getSearchParamMap());
 		List<Long> pidsSubList = sb.loadSearchPage(parameterMap, theFromIndex, theToIndex);
 
