@@ -118,22 +118,7 @@ public final class PersistedJpaBundleProvider implements IBundleProvider {
 		SearchBuilder sb = myDao.newSearchBuilder();
 		
 		SearchParameterMap parameterMap = SerializationUtils.deserialize(mySearchEntity.getSearchParamMap());
-		sb.loadPage(parameterMap, theFromIndex, theToIndex);
-		
-		Pageable page = toPage(theFromIndex, theToIndex);
-		if (page == null) {
-			return Collections.emptyList();
-		}
-
-		Page<SearchResult> search = mySearchResultDao.findWithSearchUuid(mySearchEntity, page);
-
-		List<Long> pidsSubList = new ArrayList<Long>();
-		for (SearchResult next : search) {
-			pidsSubList.add(next.getResourcePid());
-		}
-
-		// Load includes
-		pidsSubList = new ArrayList<Long>(pidsSubList);
+		List<Long> pidsSubList = sb.loadSearchPage(parameterMap, theFromIndex, theToIndex);
 
 		Set<Long> revIncludedPids = new HashSet<Long>();
 		if (mySearchEntity.getSearchType() == SearchTypeEnum.SEARCH) {

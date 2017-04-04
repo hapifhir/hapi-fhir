@@ -39,15 +39,15 @@ import ca.uhn.fhir.rest.server.IPagingProvider;
 public class DatabaseBackedPagingProvider extends BasePagingProvider implements IPagingProvider {
 
 	@Autowired
-	private PlatformTransactionManager thePlatformTransactionManager;
+	private PlatformTransactionManager myPlatformTransactionManager;
 	@Autowired
-	private ISearchResultDao theSearchResultDao;
+	private ISearchResultDao mySearchResultDao;
 	@Autowired
-	private EntityManager theEntityManager;
+	private EntityManager myEntityManager;
 	@Autowired
-	private FhirContext theContext;
+	private FhirContext myContext;
 	@Autowired
-	private IFhirSystemDao<?, ?> theDao;
+	private IFhirSystemDao<?, ?> myDao;
 
 	/**
 	 * Constructor
@@ -67,7 +67,7 @@ public class DatabaseBackedPagingProvider extends BasePagingProvider implements 
 
 	@Override
 	public synchronized IBundleProvider retrieveResultList(String theId) {
-		PersistedJpaBundleProvider provider = new PersistedJpaBundleProvider(theId, theDao);
+		PersistedJpaBundleProvider provider = new PersistedJpaBundleProvider(theId, myDao);
 		if (!provider.ensureSearchEntityLoaded()) {
 			return null;
 		}

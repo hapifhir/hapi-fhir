@@ -522,27 +522,29 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 
 	@Test
 	public void testSearchByIdParam() {
-		IIdType id1;
+		String id1;
 		{
 			Patient patient = new Patient();
 			patient.addIdentifier().setSystem("urn:system").setValue("001");
-			id1 = myPatientDao.create(patient, mySrd).getId();
+			id1 = myPatientDao.create(patient, mySrd).getId().getValue();
 		}
-		IIdType id2;
+		String id2;
 		{
 			Organization patient = new Organization();
 			patient.addIdentifier().setSystem("urn:system").setValue("001");
-			id2 = myOrganizationDao.create(patient, mySrd).getId();
+			id2 = myOrganizationDao.create(patient, mySrd).getId().getValue();
 		}
 
 		Map<String, IQueryParameterType> params = new HashMap<String, IQueryParameterType>();
-		params.put("_id", new StringParam(id1.getIdPart()));
-		assertEquals(1, toList(myPatientDao.search(params)).size());
+		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(params)), contains(id1));
+
+		params.put("_id", new StringParam(id1));
+		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(params)), contains(id1));
 
 		params.put("_id", new StringParam("9999999999999999"));
 		assertEquals(0, toList(myPatientDao.search(params)).size());
 
-		params.put("_id", new StringParam(id2.getIdPart()));
+		params.put("_id", new StringParam(id2));
 		assertEquals(0, toList(myPatientDao.search(params)).size());
 
 	}

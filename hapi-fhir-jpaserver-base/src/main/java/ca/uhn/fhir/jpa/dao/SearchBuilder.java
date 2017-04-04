@@ -282,13 +282,8 @@ public class SearchBuilder {
 		doSetPids(q.getResultList());
 	}
 
-	private void addPredicateLanguage(List<List<? extends IQueryParameterType>> theList) {
+	private void addPredicateLanguage(List<Predicate> thePredicates, Root<ResourceTable> theResourceTableRoot, List<List<? extends IQueryParameterType>> theList) {
 		for (List<? extends IQueryParameterType> nextList : theList) {
-
-			CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
-			CriteriaQuery<Long> cq = builder.createQuery(Long.class);
-			Root<ResourceTable> from = cq.from(ResourceTable.class);
-			cq.select(from.get("myId").as(Long.class));
 
 			Set<String> values = new HashSet<String>();
 			for (IQueryParameterType next : nextList) {
@@ -307,21 +302,8 @@ public class SearchBuilder {
 				continue;
 			}
 
-			List<Predicate> predicates = new ArrayList<Predicate>();
-			predicates.add(builder.equal(from.get("myResourceType"), myResourceName));
-			predicates.add(from.get("myLanguage").as(String.class).in(values));
-			createPredicateResourceId(builder, cq, predicates, from.get("myId").as(Long.class));
-			createPredicateLastUpdatedForResourceTable(builder, from, predicates);
-
-			predicates.add(builder.isNull(from.get("myDeleted")));
-
-			cq.where(toArray(predicates));
-
-			TypedQuery<Long> q = myEntityManager.createQuery(cq);
-			doSetPids(q.getResultList());
-			if (doHaveNoResults()) {
-				return;
-			}
+			Predicate predicate = theResourceTableRoot.get("myLanguage").as(String.class).in(values);
+			thePredicates.add(predicate);
 		}
 
 		return;
@@ -718,24 +700,6 @@ public class SearchBuilder {
 		} else {
 			throw new IllegalArgumentException("Param name: " + theParamName); // shouldn't happen
 		}
-
-		/*
-		 * CriteriaBuilder builder = myEntityManager.getCriteriaBuilder(); CriteriaQuery<Long> cq =
-		 * builder.createQuery(Long.class); Root<ResourceTable> from = cq.from(ResourceTable.class);
-		 * cq.select(from.get("myId").as(Long.class));
-		 * 
-		 * Subquery<Long> subQ = cq.subquery(Long.class); Root<? extends BaseResourceIndexedSearchParam> subQfrom =
-		 * subQ.from(theParamTable); subQ.select(subQfrom.get("myResourcePid").as(Long.class));
-		 * Predicate subQname = builder.equal(subQfrom.get("myParamName"), theParamName); Predicate subQtype =
-		 * builder.equal(subQfrom.get("myResourceType"), myResourceName);
-		 * subQ.where(builder.and(subQtype, subQname));
-		 * 
-		 * List<Predicate> predicates = new ArrayList<Predicate>();
-		 * predicates.add(builder.not(builder.in(from.get("myId")).value(subQ)));
-		 * predicates.add(builder.equal(from.get("myResourceType"),
-		 * myResourceName)); predicates.add(builder.isNull(from.get("myDeleted"))); createPredicateResourceId(builder, cq,
-		 * predicates, from.get("myId").as(Long.class));
-		 */
 
 		List<Pair<String, String>> notTags = Lists.newArrayList();
 		for (List<? extends IQueryParameterType> nextAndParams : theList) {
@@ -1684,10 +1648,79 @@ public class SearchBuilder {
 		myParams = theParams;
 		StopWatch w = new StopWatch();
 
-		doInitializeSearch();
-		return doReturnProvider();
+		mySearchEntity = new Search();
+		mySearchEntity.setUuid(UUID.randomUUID().toString());
+		mySearchEntity.setCreated(new Date());
+		mySearchEntity.setTotalCount(-1);
+		mySearchEntity.setSearchParamMap(SerializationUtils.serialize(myParams));
+		mySearchEntity.setPreferredPageSize(myParams.getCount());
+		mySearchEntity.setSearchType(myParams.getEverythingMode() != null ? SearchTypeEnum.EVERYTHING : SearchTypeEnum.SEARCH);
+		mySearchEntity.setLastUpdated(myParams.getLastUpdated());
+		
+		for (Include next : myParams.getIncludes()) {
+			mySearchEntity.getIncludes().add(new SearchInclude(mySearchEntity, next.getValue(), false, next.isRecurse()));
+		}
+		for (Include next : myParams.getRevIncludes()) {
+			mySearchEntity.getIncludes().add(new SearchInclude(mySearchEntity, next.getValue(), true, next.isRecurse()));
+		}
+		
+		List<Long> firstPage = loadSearchPage(theParams, 0, 999);
+		mySearchEntity.setTotalCount(firstPage.size());
+		
+		myEntityManager.persist(mySearchEntity);
+		for (SearchInclude next : mySearchEntity.getIncludes()) {
+			myEntityManager.persist(next);
+		}
+		
+		IBundleProvider retVal = doReturnProvider();
+		
+		ourLog.info("Search initial phase completed in {}ms", w);
+		return retVal;
 	}
 
+	public List<Long> loadSearchPage(SearchParameterMap theParams, int theFromIndex, int theToIndex) {
+		
+		if (myFulltextSearchSvc == null) {
+			if (theParams.containsKey(Constants.PARAM_TEXT)) {
+				throw new InvalidRequestException("Fulltext search is not enabled on this service, can not process parameter: " + Constants.PARAM_TEXT);
+			} else if (theParams.containsKey(Constants.PARAM_CONTENT)) {
+				throw new InvalidRequestException("Fulltext search is not enabled on this service, can not process parameter: " + Constants.PARAM_CONTENT);
+			}
+		} else {
+			// FIXME: add from and to
+			List<Long> searchResultPids = myFulltextSearchSvc.search(myResourceName, theParams);
+			if (searchResultPids != null) {
+				if (searchResultPids.isEmpty()) {
+					return Collections.emptyList();
+				}
+				return searchResultPids;
+			}
+		}
+
+		CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
+		CriteriaQuery<Tuple> cq = builder.createTupleQuery();
+		Root<ResourceTable> from = cq.from(ResourceTable.class);
+		List<Predicate> predicates = new ArrayList<Predicate>();
+		predicates.add(builder.equal(from.get("myResourceType"), myResourceName));
+		predicates.add(builder.isNull(from.get("myDeleted")));
+		
+		searchForIdsWithAndOr(theParams, predicates, from);
+		
+		cq.where(builder.and(SearchBuilder.toArray(predicates)));
+
+		cq.multiselect(from.get("myId").as(Long.class));
+		TypedQuery<Tuple> query = myEntityManager.createQuery(cq);
+		query.setFirstResult(theFromIndex);
+		query.setMaxResults(theToIndex - theFromIndex);
+		
+		List<Long> pids = new ArrayList<Long>();
+		for (Tuple next : query.getResultList()) {
+			pids.add(next.get(0, Long.class));
+		}
+
+		return pids;		
+	}
+	
 	public IBundleProvider loadPage(SearchParameterMap theParams, int theFromIndex, int theToIndex) {
 		StopWatch sw = new StopWatch();
 		DateRangeParam lu = theParams.getLastUpdated();
@@ -1737,11 +1770,6 @@ public class SearchBuilder {
 
 			}
 
-		} else if (theParams.isEmpty()) {
-
-			TypedQuery<Long> query = createSearchAllByTypeQuery(lu);
-			doSetPids(query.getResultList());
-
 		} else {
 
 			if (myFulltextSearchSvc == null) {
@@ -1760,8 +1788,9 @@ public class SearchBuilder {
 				}
 			}
 
+			
 			if (!theParams.isEmpty()) {
-				searchForIdsWithAndOr(theParams, lu);
+//				searchForIdsWithAndOr(theParams, lu);
 			}
 
 		}
@@ -1787,67 +1816,32 @@ public class SearchBuilder {
 
 	}
 	
-	private void searchForIdsWithAndOr(SearchParameterMap theParams, DateRangeParam theLastUpdated) {
+	private void searchForIdsWithAndOr(SearchParameterMap theParams, List<Predicate> thePredicates, Root<ResourceTable> theResourceTableRoot) {
 		SearchParameterMap params = theParams;
 		if (params == null) {
 			params = new SearchParameterMap();
 		}
 		myParams = theParams;
 
-		doInitializeSearch();
-
-		// RuntimeResourceDefinition resourceDef = myContext.getResourceDefinition(myResourceType);
-
 		for (Entry<String, List<List<? extends IQueryParameterType>>> nextParamEntry : params.entrySet()) {
 			String nextParamName = nextParamEntry.getKey();
 			if (nextParamName.equals(BaseResource.SP_RES_ID)) {
 
-				if (nextParamEntry.getValue().isEmpty()) {
-					continue;
-				} else {
-					for (List<? extends IQueryParameterType> nextValue : nextParamEntry.getValue()) {
-						Set<Long> joinPids = new HashSet<Long>();
-						if (nextValue == null || nextValue.size() == 0) {
-							continue;
-						} else {
-							for (IQueryParameterType next : nextValue) {
-								String value = next.getValueAsQueryToken(myContext);
-								IIdType valueId = new IdDt(value);
-
-								try {
-									BaseHasResource entity = myCallingDao.readEntity(valueId);
-									if (entity.getDeleted() != null) {
-										continue;
-									}
-									joinPids.add(entity.getId());
-								} catch (ResourceNotFoundException e) {
-									// This isn't an error, just means no result found
-								}
-							}
-							if (joinPids.isEmpty()) {
-								doSetPids(new HashSet<Long>());
-								return;
-							}
-						}
-
-						addPredicateId(joinPids);
-						if (doHaveNoResults()) {
-							return;
-						}
-					}
-				}
+				addPredicateResourceId(thePredicates, theResourceTableRoot, nextParamEntry.getValue());
 
 			} else if (nextParamName.equals(BaseResource.SP_RES_LANGUAGE)) {
 
-				addPredicateLanguage(nextParamEntry.getValue());
+				addPredicateLanguage(thePredicates, theResourceTableRoot, nextParamEntry.getValue());
 
 			} else if (nextParamName.equals(Constants.PARAM_HAS)) {
 
-				addPredicateHas(nextParamEntry.getValue(), theLastUpdated);
+				// FIXME
+				addPredicateHas(nextParamEntry.getValue(), null);
 
 			} else if (nextParamName.equals(Constants.PARAM_TAG) || nextParamName.equals(Constants.PARAM_PROFILE) || nextParamName.equals(Constants.PARAM_SECURITY)) {
 
-				addPredicateTag(nextParamEntry.getValue(), nextParamName, theLastUpdated);
+				// FIXME
+				addPredicateTag(nextParamEntry.getValue(), nextParamName, null);
 
 			} else {
 
@@ -1925,12 +1919,42 @@ public class SearchBuilder {
 				}
 			}
 
-			if (doHaveNoResults()) {
-				return;
-			}
-
 		}
 
+	}
+
+	private void addPredicateResourceId(List<Predicate> thePredicates, Root<ResourceTable> theResourceTableRoot, List<List<? extends IQueryParameterType>> theValues) {
+		for (List<? extends IQueryParameterType> nextValue : theValues) {
+			Set<Long> orPids = new HashSet<Long>();
+			for (IQueryParameterType next : nextValue) {
+				String value = next.getValueAsQueryToken(myContext);
+				IdDt valueAsId = new IdDt(value);
+				if (isNotBlank(value)) {
+					if (valueAsId.isIdPartValidLong()) {
+						orPids.add(valueAsId.getIdPartAsLong());
+					} else {
+						try {
+//							BaseHasResource entity = myCallingDao.readEntity(valueId);
+//							if (entity.getDeleted() == null) {
+//								orPids.add(entity.getId());
+//							}
+						} catch (ResourceNotFoundException e) {
+							/* 
+							 * This isn't an error, just means no result found
+							 * that matches the ID the client provided
+							 */
+						}
+					}
+				}
+				
+				if (orPids.size() > 0) {
+					Predicate nextPredicate = theResourceTableRoot.get("myId").as(Long.class).in(orPids);
+					thePredicates.add(nextPredicate);
+				}
+				
+			}
+			
+		}
 	}
 
 	public void setType(Class<? extends IBaseResource> theResourceType, String theResourceName) {
