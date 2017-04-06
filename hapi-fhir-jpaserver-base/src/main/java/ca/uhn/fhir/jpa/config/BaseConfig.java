@@ -40,6 +40,8 @@ import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.IStaleSearchDeletingSvc;
 import ca.uhn.fhir.jpa.search.StaleSearchDeletingSvcImpl;
+import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
+import ca.uhn.fhir.jpa.sp.SearchParamPresenceSvcImpl;
 
 @Configuration
 @EnableScheduling
@@ -63,17 +65,22 @@ public class BaseConfig implements SchedulingConfigurer {
 		DatabaseBackedPagingProvider retVal = new DatabaseBackedPagingProvider();
 		return retVal;
 	}
-
-	@Bean(autowire=Autowire.BY_TYPE)
-	public IStaleSearchDeletingSvc staleSearchDeletingSvc() {
-		return new StaleSearchDeletingSvcImpl();
-	}
-
+	
 	@Bean()
 	public ScheduledExecutorFactoryBean scheduledExecutorService() {
 		ScheduledExecutorFactoryBean b = new ScheduledExecutorFactoryBean();
 		b.setPoolSize(5);
 		return b;
+	}
+
+	@Bean
+	public ISearchParamPresenceSvc searchParamPresenceSvc() {
+		return new SearchParamPresenceSvcImpl();
+	}
+
+	@Bean(autowire=Autowire.BY_TYPE)
+	public IStaleSearchDeletingSvc staleSearchDeletingSvc() {
+		return new StaleSearchDeletingSvcImpl();
 	}
 	
 	@Bean

@@ -2620,6 +2620,10 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 
 		result = myValueSetDao.search(ValueSet.SP_URL, new UriParam("http://hl7.org/fhir/ValueSet/").setQualifier(UriParamQualifierEnum.BELOW));
 		assertThat(toUnqualifiedVersionlessIds(result), contains(id1));
+
+		result = myValueSetDao.search(ValueSet.SP_URL, new UriParam("http://hl7.org/fhir/ValueSet/FOOOOOO"));
+		assertThat(toUnqualifiedVersionlessIds(result), empty());
+
 	}
 
 	@Test
