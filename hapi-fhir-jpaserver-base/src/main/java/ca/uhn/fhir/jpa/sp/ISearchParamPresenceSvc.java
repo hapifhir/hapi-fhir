@@ -8,4 +8,6 @@ public interface ISearchParamPresenceSvc {
 
 	void updatePresence(ResourceTable theResource, Map<String, Boolean> theParamNameToPresence);
 
+	void flushCachesForUnitTest();
+
 }

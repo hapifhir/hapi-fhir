@@ -37,6 +37,7 @@ import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.entity.ResourceTable;
 import ca.uhn.fhir.jpa.provider.dstu3.JpaSystemProviderDstu3;
 import ca.uhn.fhir.jpa.search.IStaleSearchDeletingSvc;
+import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
 import ca.uhn.fhir.jpa.term.IHapiTerminologySvc;
 import ca.uhn.fhir.jpa.validation.JpaValidationSupportChainDstu3;
 import ca.uhn.fhir.parser.IParser;
@@ -191,6 +192,8 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 	protected IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept> myValueSetDao;
 	@Autowired
 	protected PlatformTransactionManager myTransactionMgr;
+	@Autowired
+	protected ISearchParamPresenceSvc mySearchParamPresenceSvc;
 	@After()
 	public void afterGrabCaches() {
 		ourValueSetDao = myValueSetDao;
@@ -219,6 +222,7 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 	public void beforePurgeDatabase() {
 		final EntityManager entityManager = this.myEntityManager;
 		purgeDatabase(entityManager, myTxManager);
+		mySearchParamPresenceSvc.flushCachesForUnitTest();
 	}
 
 	@Before

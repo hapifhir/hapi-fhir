@@ -986,8 +986,12 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		SearchBuilder builder = newSearchBuilder();
 		builder.setType(getResourceType(), getResourceName());
-		builder.search(theParams);
-		return builder.doGetPids();
+		List<Long> result = builder.loadSearchPage(theParams, 0, 100);
+		
+		// FIXME: fail if too many results
+		
+		HashSet<Long> retVal = new HashSet<Long>(result);
+		return retVal;
 	}
 
 	@SuppressWarnings("unchecked")

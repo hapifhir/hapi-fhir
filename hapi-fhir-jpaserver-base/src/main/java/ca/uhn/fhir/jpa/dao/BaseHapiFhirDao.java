@@ -1235,7 +1235,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		Set<ResourceIndexedSearchParamCoords> coordsParams = null;
 		Set<ResourceLink> links = null;
 
-		Set<String> populatedResourceLinkParameters = null;
+		Set<String> populatedResourceLinkParameters = Collections.emptySet();
 		if (theDeletedTimestampOrNull != null) {
 
 			stringParams = Collections.emptySet();

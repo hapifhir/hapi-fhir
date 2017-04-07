@@ -120,33 +120,19 @@ public class SearchBuilder {
 	private void addPredicateComposite(RuntimeSearchParam theParamDef, List<? extends IQueryParameterType> theNextAnd) {
 		// TODO: fail if missing is set for a composite query
 
-		CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
-		CriteriaQuery<Long> cq = builder.createQuery(Long.class);
-		Root<ResourceTable> from = cq.from(ResourceTable.class);
-		cq.select(from.get("myId").as(Long.class));
-
 		IQueryParameterType or = theNextAnd.get(0);
 		if (!(or instanceof CompositeParam<?, ?>)) {
 			throw new InvalidRequestException("Invalid type for composite param (must be " + CompositeParam.class.getSimpleName() + ": " + or.getClass());
 		}
 		CompositeParam<?, ?> cp = (CompositeParam<?, ?>) or;
 
-		List<Predicate> predicates = new ArrayList<Predicate>();
-		predicates.add(builder.equal(from.get("myResourceType"), myResourceName));
-
 		RuntimeSearchParam left = theParamDef.getCompositeOf().get(0);
 		IQueryParameterType leftValue = cp.getLeftValue();
-		predicates.add(createCompositeParamPart(builder, from, left, leftValue));
+		myPredicates.add(createCompositeParamPart(myBuilder, myResourceTableRoot, left, leftValue));
 
 		RuntimeSearchParam right = theParamDef.getCompositeOf().get(1);
 		IQueryParameterType rightValue = cp.getRightValue();
-		predicates.add(createCompositeParamPart(builder, from, right, rightValue));
-
-		createPredicateResourceId(builder, cq, predicates, from.get("myId").as(Long.class));
-		cq.where(builder.and(toArray(predicates)));
-
-		TypedQuery<Long> q = myEntityManager.createQuery(cq);
-		doSetPids(q.getResultList());
+		myPredicates.add(createCompositeParamPart(myBuilder, myResourceTableRoot, right, rightValue));
 
 	}
 
@@ -216,32 +202,14 @@ public class SearchBuilder {
 			Class<? extends IBaseResource> resourceType = targetResourceDefinition.getImplementingClass();
 			Set<Long> match = myCallingDao.processMatchUrl(matchUrl, resourceType);
 			if (match.isEmpty()) {
-				doSetPids(new ArrayList<Long>());
-				return;
+				// Pick a PID that can never match
+				match = Collections.singleton(-1L);
 			}
 
-			CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
-			CriteriaQuery<Long> cq = builder.createQuery(Long.class);
-			Root<ResourceLink> from = cq.from(ResourceLink.class);
-			cq.select(from.get("myTargetResourcePid").as(Long.class));
-
-			List<Predicate> predicates = new ArrayList<Predicate>();
-			predicates.add(builder.equal(from.get("mySourceResourceType"), targetResourceType));
-			predicates.add(from.get("mySourceResourcePid").in(match));
-			predicates.add(createResourceLinkPathPredicate(myCallingDao, myContext, owningParameter, from, resourceType));
-			predicates.add(builder.equal(from.get("myTargetResourceType"), myResourceName));
-			createPredicateResourceId(builder, cq, predicates, from.get("myId").as(Long.class));
-			createPredicateLastUpdatedForResourceLink(builder, from, predicates);
-
-			cq.where(toArray(predicates));
-
-			TypedQuery<Long> q = myEntityManager.createQuery(cq);
-			doSetPids(q.getResultList());
-			if (doHaveNoResults()) {
-				return;
-			}
-
-			return;
+			Join<ResourceTable, ResourceLink> join = myResourceTableRoot.join("myResourceLinksByTarget", JoinType.LEFT);
+			
+			Predicate predicate = join.get("mySourceResourcePid").in(match);
+			myPredicates.add(predicate);
 		}
 	}
 
@@ -403,6 +371,7 @@ public class SearchBuilder {
 						Predicate eq = myBuilder.equal(join.get("myTargetResourcePid"), next);
 						codePredicates.add(eq);
 					}
+					
 				} else {
 
 					List<Class<? extends IBaseResource>> resourceTypes;
@@ -447,6 +416,7 @@ public class SearchBuilder {
 
 					for (Class<? extends IBaseResource> nextType : resourceTypes) {
 						RuntimeResourceDefinition typeDef = myContext.getResourceDefinition(nextType);
+						String subResourceName = typeDef.getName();
 
 						IFhirResourceDao<?> dao = myCallingDao.getDao(nextType);
 						if (dao == null) {
@@ -509,7 +479,11 @@ public class SearchBuilder {
 						myResourceTableRoot = subQfrom;
 						myPredicates = new ArrayList<Predicate>();
 
+						// Create the subquery predicates
+						myPredicates.add(myBuilder.equal(myResourceTableRoot.get("myResourceType"), subResourceName));
+						myPredicates.add(myBuilder.isNull(myResourceTableRoot.get("myDeleted")));
 						searchForIdsWithAndOr(chain, andOrParams);
+						
 						subQ.where(toArray(myPredicates));
 
 						/*
@@ -726,7 +700,6 @@ public class SearchBuilder {
 		}
 
 		Join<ResourceTable, ResourceIndexedSearchParamUri> join = myResourceTableRoot.join("myParamsUri", JoinType.LEFT);
-
 		List<Predicate> codePredicates = new ArrayList<Predicate>();
 		for (IQueryParameterType nextOr : theList) {
 			IQueryParameterType params = nextOr;
@@ -739,7 +712,6 @@ public class SearchBuilder {
 					continue;
 				}
 
-				Path<Object> fromObj = join.get("myUri");
 				Predicate predicate;
 				if (param.getQualifier() == UriParamQualifierEnum.ABOVE) {
 
@@ -769,12 +741,12 @@ public class SearchBuilder {
 						continue;
 					}
 
-					predicate = fromObj.as(String.class).in(toFind);
+					predicate = join.<Object>get("myUri").as(String.class).in(toFind);
 
 				} else if (param.getQualifier() == UriParamQualifierEnum.BELOW) {
-					predicate = myBuilder.like(fromObj.as(String.class), createLeftMatchLikeExpression(value));
+					predicate = myBuilder.like(join.<Object>get("myUri").as(String.class), createLeftMatchLikeExpression(value));
 				} else {
-					predicate = myBuilder.equal(fromObj.as(String.class), value);
+					predicate = myBuilder.equal(join.<Object>get("myUri").as(String.class), value);
 				}
 				codePredicates.add(predicate);
 			} else {
@@ -783,8 +755,13 @@ public class SearchBuilder {
 
 		}
 
+		/*
+		 * If we haven't found any of the requested URIs in the candidates, then we'll
+		 * just add a predicate that can never match
+		 */
 		if (codePredicates.isEmpty()) {
-			doSetPids(new HashSet<Long>());
+			Predicate predicate = myBuilder.isNull(join.<Object>get("myUri").as(String.class));
+			myPredicates.add(predicate);
 			return;
 		}
 
@@ -1005,7 +982,7 @@ public class SearchBuilder {
 		return singleCode;
 	}
 
-	private void createPredicateResourceId(CriteriaBuilder builder, CriteriaQuery<?> cq, List<Predicate> thePredicates, Expression<Long> theExpression) {
+	private void createPredicateResourceId(CriteriaBuilder builder, AbstractQuery<?> cq, List<Predicate> thePredicates, Expression<Long> theExpression) {
 		if (mySearchEntity.getTotalCount() > -1) {
 			Subquery<Long> subQ = cq.subquery(Long.class);
 			Root<SearchResult> subQfrom = subQ.from(SearchResult.class);
@@ -1302,14 +1279,6 @@ public class SearchBuilder {
 		return system;
 	}
 
-	public Set<Long> doGetPids() {
-		HashSet<Long> retVal = new HashSet<Long>();
-
-		for (SearchResult next : mySearchResultDao.findWithSearchUuid(mySearchEntity)) {
-			retVal.add(next.getResourcePid());
-		}
-		return retVal;
-	}
 
 	private boolean doHaveNoResults() {
 		return mySearchEntity.getTotalCount() == 0;
@@ -1387,9 +1356,6 @@ public class SearchBuilder {
 
 			if (orders.size() > 0) {
 
-				// TODO: why do we need the existing list for this join to work?
-				Collection<Long> originalPids = doGetPids();
-
 				LinkedHashSet<Long> loadPids = new LinkedHashSet<Long>();
 				cq.multiselect(from.get("myId").as(Long.class));
 				cq.where(toArray(predicates));
@@ -1406,11 +1372,11 @@ public class SearchBuilder {
 				ArrayList<Long> pids = new ArrayList<Long>(loadPids);
 
 				// Any ressources which weren't matched by the sort get added to the bottom
-				for (Long next : originalPids) {
-					if (loadPids.contains(next) == false) {
-						pids.add(next);
-					}
-				}
+//				for (Long next : originalPids) {
+//					if (loadPids.contains(next) == false) {
+//						pids.add(next);
+//					}
+//				}
 
 				doSetPids(pids);
 			}
@@ -1646,7 +1612,6 @@ public class SearchBuilder {
 
 		} else if (nextParamName.equals(Constants.PARAM_HAS)) {
 
-			// FIXME
 			addPredicateHas(andOrParams, null);
 
 		} else if (nextParamName.equals(Constants.PARAM_TAG) || nextParamName.equals(Constants.PARAM_PROFILE) || nextParamName.equals(Constants.PARAM_SECURITY)) {

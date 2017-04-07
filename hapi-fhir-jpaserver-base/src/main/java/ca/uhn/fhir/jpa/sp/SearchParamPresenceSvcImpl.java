@@ -84,4 +84,9 @@ public class SearchParamPresenceSvcImpl implements ISearchParamPresenceSvc {
 
 	}
 
+	@Override
+	public void flushCachesForUnitTest() {
+		myResourceTypeToSearchParamToEntity.clear();
+	}
+
 }

@@ -229,6 +229,9 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 	@IndexedEmbedded()
 	private Collection<ResourceLink> myResourceLinks;
 
+	@OneToMany(mappedBy = "myTargetResource", cascade = {}, fetch = FetchType.LAZY, orphanRemoval = false)
+	private Collection<ResourceLink> myResourceLinksByTarget;
+
 	@Column(name = "RES_TYPE", length = RESTYPE_LEN)
 	@Field
 	private String myResourceType;
