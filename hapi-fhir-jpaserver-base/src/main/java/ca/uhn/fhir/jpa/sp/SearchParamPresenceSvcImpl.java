@@ -16,23 +16,29 @@ import ca.uhn.fhir.jpa.entity.SearchParamPresent;
 public class SearchParamPresenceSvcImpl implements ISearchParamPresenceSvc {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchParamPresenceSvcImpl.class);
-	
-	private Map<Pair<String, String>, SearchParam> myResourceTypeToSearchParamToEntity = new ConcurrentHashMap<Pair<String,String>, SearchParam>();
-	
+
+	private Map<Pair<String, String>, SearchParam> myResourceTypeToSearchParamToEntity = new ConcurrentHashMap<Pair<String, String>, SearchParam>();
+
 	@Autowired
 	private ISearchParamDao mySearchParamDao;
-	
+
 	@Autowired
 	private ISearchParamPresentDao mySearchParamPresentDao;
 
 	@Override
 	public void updatePresence(ResourceTable theResource, Map<String, Boolean> theParamNameToPresence) {
-		
+
 		Map<String, Boolean> presenceMap = new HashMap<String, Boolean>(theParamNameToPresence);
 		List<SearchParamPresent> entitiesToSave = new ArrayList<SearchParamPresent>();
 		List<SearchParamPresent> entitiesToDelete = new ArrayList<SearchParamPresent>();
-		
-		Collection<SearchParamPresent> existing = mySearchParamPresentDao.findAllForResource(theResource);
+
+		Collection<SearchParamPresent> existing;
+//		if (theResource.getId() != null) {
+			existing = mySearchParamPresentDao.findAllForResource(theResource);
+//		} else {
+//			existing = Collections.emptyList();
+//		}
+
 		for (SearchParamPresent nextExistingEntity : existing) {
 			String nextSearchParamName = nextExistingEntity.getSearchParam().getParamName();
 			Boolean existingValue = presenceMap.remove(nextSearchParamName);
@@ -45,12 +51,12 @@ public class SearchParamPresenceSvcImpl implements ISearchParamPresenceSvc {
 				entitiesToSave.add(nextExistingEntity);
 			}
 		}
-		
+
 		for (Entry<String, Boolean> next : presenceMap.entrySet()) {
-			String resourceType =  theResource.getResourceType();
+			String resourceType = theResource.getResourceType();
 			String paramName = next.getKey();
 			Pair<String, String> key = Pair.of(resourceType, paramName);
-			
+
 			SearchParam searchParam = myResourceTypeToSearchParamToEntity.get(key);
 			if (searchParam == null) {
 				searchParam = mySearchParamDao.findForResource(resourceType, paramName);
@@ -63,19 +69,19 @@ public class SearchParamPresenceSvcImpl implements ISearchParamPresenceSvc {
 					mySearchParamDao.save(searchParam);
 					// Don't add the newly saved entity to the map in case the save fails
 				}
-				
+
 				SearchParamPresent present = new SearchParamPresent();
-				present.setResourceTable(theResource);
+				present.setResource(theResource);
 				present.setSearchParam(searchParam);
 				present.setPresent(next.getValue());
 				entitiesToSave.add(present);
 			}
-			
+
 			mySearchParamPresentDao.deleteInBatch(entitiesToDelete);
 			mySearchParamPresentDao.save(entitiesToSave);
-		
+
 		}
-		
+
 	}
-	
+
 }

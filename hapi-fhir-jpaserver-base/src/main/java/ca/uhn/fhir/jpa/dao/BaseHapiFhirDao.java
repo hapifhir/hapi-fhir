@@ -1235,6 +1235,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		Set<ResourceIndexedSearchParamCoords> coordsParams = null;
 		Set<ResourceLink> links = null;
 
+		Set<String> populatedResourceLinkParameters = null;
 		if (theDeletedTimestampOrNull != null) {
 
 			stringParams = Collections.emptySet();
@@ -1334,7 +1335,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 				}
 
 				links = new HashSet<ResourceLink>();
-				Set<String> populatedResourceLinkParameters = extractResourceLinks(theEntity, theResource, links, theUpdateTime);
+				populatedResourceLinkParameters = extractResourceLinks(theEntity, theResource, links, theUpdateTime);
 
 				/*
 				 * If the existing resource already has links and those match links we still want, use them instead of removing them and re adding them
@@ -1374,28 +1375,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 				theEntity.setIndexStatus(INDEX_STATUS_INDEXED);
 				populateFullTextFields(theResource, theEntity);
 
-				/*
-				 * Update the "search param present" table which is used for the
-				 * ?foo:missing=true queries
-				 */
-				Map<String, Boolean> presentSearchParams = new HashMap<String, Boolean>();
-				for (String nextKey : populatedResourceLinkParameters) {
-					presentSearchParams.put(nextKey, Boolean.TRUE);
-				}
-				updateSearchParamPresent(presentSearchParams, stringParams);
-				updateSearchParamPresent(presentSearchParams, tokenParams);
-				updateSearchParamPresent(presentSearchParams, numberParams);
-				updateSearchParamPresent(presentSearchParams, quantityParams);
-				updateSearchParamPresent(presentSearchParams, dateParams);
-				updateSearchParamPresent(presentSearchParams, uriParams);
-				updateSearchParamPresent(presentSearchParams, coordsParams);
-				Set<String> activeSearchParamNames = mySearchParamRegistry.getActiveSearchParams(theEntity.getResourceType()).keySet();
-				for (String nextSpName : activeSearchParamNames) {
-					if (!presentSearchParams.containsKey(nextSpName)) {
-						presentSearchParams.put(nextSpName, Boolean.FALSE);
-					}
-				}
-				mySearchParamPresenceSvc.updatePresence(theEntity, presentSearchParams);
 				
 			} else {
 
@@ -1426,6 +1405,31 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 			postUpdate(theEntity, (T) theResource);
 		}
 
+		/*
+		 * Update the "search param present" table which is used for the
+		 * ?foo:missing=true queries
+		 */
+		if (thePerformIndexing) {
+			Map<String, Boolean> presentSearchParams = new HashMap<String, Boolean>();
+			for (String nextKey : populatedResourceLinkParameters) {
+				presentSearchParams.put(nextKey, Boolean.TRUE);
+			}
+			updateSearchParamPresent(presentSearchParams, stringParams);
+			updateSearchParamPresent(presentSearchParams, tokenParams);
+			updateSearchParamPresent(presentSearchParams, numberParams);
+			updateSearchParamPresent(presentSearchParams, quantityParams);
+			updateSearchParamPresent(presentSearchParams, dateParams);
+			updateSearchParamPresent(presentSearchParams, uriParams);
+			updateSearchParamPresent(presentSearchParams, coordsParams);
+			Set<String> activeSearchParamNames = mySearchParamRegistry.getActiveSearchParams(theEntity.getResourceType()).keySet();
+			for (String nextSpName : activeSearchParamNames) {
+				if (!presentSearchParams.containsKey(nextSpName)) {
+					presentSearchParams.put(nextSpName, Boolean.FALSE);
+				}
+			}
+			mySearchParamPresenceSvc.updatePresence(theEntity, presentSearchParams);
+		}
+		
 		/*
 		 * Create history entry
 		 */

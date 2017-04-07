@@ -1747,27 +1747,27 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 		String methodName = "testSearchValueQuantity";
 
 		String id1;
-		{		
+		{
 			Observation o = new Observation();
 			o.getCode().addCoding().setSystem("urn:foo").setCode(methodName + "code");
 			Quantity q = new Quantity().setSystem("urn:bar:" + methodName).setCode(methodName + "units").setValue(100);
 			o.setValue(q);
 			id1 = myObservationDao.create(o, mySrd).getId().toUnqualifiedVersionless().getValue();
 		}
-		
+
 		String id2;
-		{		
+		{
 			Observation o = new Observation();
 			o.getCode().addCoding().setSystem("urn:foo").setCode(methodName + "code");
 			Quantity q = new Quantity().setSystem("urn:bar:" + methodName).setCode(methodName + "units").setValue(5);
 			o.setValue(q);
 			id2 = myObservationDao.create(o, mySrd).getId().toUnqualifiedVersionless().getValue();
 		}
-		
+
 		Map<String, IQueryParameterType> map = new HashMap<String, IQueryParameterType>();
 		IBundleProvider found;
 		QuantityParam param;
-		
+
 		param = new QuantityParam(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, new BigDecimal("10"), null, null);
 		map.put(Observation.SP_VALUE_QUANTITY, param);
 		found = myObservationDao.search(map);
@@ -2146,8 +2146,8 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 			param.setMissing(false);
 			params.put(Patient.SP_BIRTHDATE, param);
 			List<IIdType> patients = toUnqualifiedVersionlessIds(myPatientDao.search(params));
-			assertThat(patients, not(containsInRelativeOrder(missing)));
 			assertThat(patients, containsInRelativeOrder(notMissing));
+			assertThat(patients, not(containsInRelativeOrder(missing)));
 		}
 		{
 			Map<String, IQueryParameterType> params = new HashMap<String, IQueryParameterType>();
@@ -2158,6 +2158,14 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 			assertThat(patients, containsInRelativeOrder(missing));
 			assertThat(patients, not(containsInRelativeOrder(notMissing)));
 		}
+		// {
+		// Map<String, IQueryParameterType> params = new HashMap<String, IQueryParameterType>();
+		// DateParam param = new DateParam();
+		// param.setMissing(true);
+		// params.put(Patient.SP_DECEASED, param);
+		// List<IIdType> patients = toUnqualifiedVersionlessIds(myPatientDao.search(params));
+		// assertThat(patients, containsInRelativeOrder(missing, notMissing));
+		// }
 	}
 
 	@Test

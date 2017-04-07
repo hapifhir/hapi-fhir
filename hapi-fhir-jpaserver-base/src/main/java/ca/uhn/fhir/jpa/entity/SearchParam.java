@@ -11,7 +11,7 @@ public class SearchParam {
 	@Id
 	@SequenceGenerator(name = "SEQ_SEARCHPARM_ID", sequenceName = "SEQ_SEARCHPARM_ID")
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_SEARCHPARM_ID")
-	@Column(name = "RES_ID")
+	@Column(name = "PID")
 	private Long myId;
 
 	@Column(name="PARAM_NAME", length=BaseResourceIndexedSearchParam.MAX_SP_NAME, nullable=false, updatable=false)

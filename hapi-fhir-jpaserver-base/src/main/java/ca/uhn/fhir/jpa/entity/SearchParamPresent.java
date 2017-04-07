@@ -25,14 +25,14 @@ public class SearchParamPresent implements Serializable {
 
 	@ManyToOne()
 	@JoinColumn(name = "RES_ID", referencedColumnName = "RES_ID", nullable = false, foreignKey = @ForeignKey(name = "FK_RESPARMPRES_RESID"))
-	private ResourceTable myResourceTable;
+	private ResourceTable myResource;
 
 	@ManyToOne()
 	@JoinColumn(name = "SP_ID", referencedColumnName = "PID", nullable = false, foreignKey = @ForeignKey(name = "FK_RESPARMPRES_SPID"))
 	private SearchParam mySearchParam;
 
-	public ResourceTable getResourceTable() {
-		return myResourceTable;
+	public ResourceTable getResource() {
+		return myResource;
 	}
 
 	public SearchParam getSearchParam() {
@@ -47,8 +47,8 @@ public class SearchParamPresent implements Serializable {
 		myPresent = thePresent;
 	}
 
-	public void setResourceTable(ResourceTable theResourceTable) {
-		myResourceTable = theResourceTable;
+	public void setResource(ResourceTable theResourceTable) {
+		myResource = theResourceTable;
 	}
 
 	public void setSearchParam(SearchParam theSearchParam) {
