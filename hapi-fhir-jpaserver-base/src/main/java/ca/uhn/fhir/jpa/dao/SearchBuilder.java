@@ -128,11 +128,11 @@ public class SearchBuilder {
 
 		RuntimeSearchParam left = theParamDef.getCompositeOf().get(0);
 		IQueryParameterType leftValue = cp.getLeftValue();
-		myPredicates.add(createCompositeParamPart(myBuilder, myResourceTableRoot, left, leftValue));
+		myPredicates.add(createCompositeParamPart(myResourceTableRoot, left, leftValue));
 
 		RuntimeSearchParam right = theParamDef.getCompositeOf().get(1);
 		IQueryParameterType rightValue = cp.getRightValue();
-		myPredicates.add(createCompositeParamPart(myBuilder, myResourceTableRoot, right, rightValue));
+		myPredicates.add(createCompositeParamPart(myResourceTableRoot, right, rightValue));
 
 	}
 
@@ -148,7 +148,7 @@ public class SearchBuilder {
 		List<Predicate> codePredicates = new ArrayList<Predicate>();
 		for (IQueryParameterType nextOr : theList) {
 			IQueryParameterType params = nextOr;
-			Predicate p = createPredicateDate(myBuilder, join, params);
+			Predicate p = createPredicateDate(params, theParamName, myBuilder, join);
 			codePredicates.add(p);
 		}
 
@@ -288,7 +288,7 @@ public class SearchBuilder {
 				String invalidMessageName = "invalidNumberPrefix";
 				String valueAsString = param.getValue().toPlainString();
 
-				Predicate num = createPredicateNumeric(myBuilder, params, prefix, value, fromObj, invalidMessageName, valueAsString);
+				Predicate num = createPredicateNumeric(theParamName, join, myBuilder, params, prefix, value, fromObj, invalidMessageName, valueAsString);
 				codePredicates.add(num);
 
 			} else {
@@ -320,7 +320,7 @@ public class SearchBuilder {
 		List<Predicate> codePredicates = new ArrayList<Predicate>();
 		for (IQueryParameterType nextOr : theList) {
 
-			Predicate singleCode = createPredicateQuantity(myBuilder, join, nextOr);
+			Predicate singleCode = createPredicateQuantity(nextOr, theParamName, myBuilder, join);
 			codePredicates.add(singleCode);
 		}
 
@@ -679,10 +679,6 @@ public class SearchBuilder {
 			}
 
 			Predicate singleCode = createPredicateToken(nextOr, theParamName, myBuilder, join);
-			if (singleCode == null) {
-				doSetPids(new ArrayList<Long>());
-				return;
-			}
 			codePredicates.add(singleCode);
 		}
 
@@ -691,10 +687,7 @@ public class SearchBuilder {
 		}
 
 		Predicate spPredicate = myBuilder.or(toArray(codePredicates));
-
-		Predicate paramNamePredicate = myBuilder.equal(join.get("myParamName"), theParamName);
-		Predicate outerPredicate = myBuilder.and(paramNamePredicate, spPredicate);
-		myPredicates.add(outerPredicate);
+		myPredicates.add(spPredicate);
 	}
 
 	private void addPredicateUri(String theParamName, List<? extends IQueryParameterType> theList) {
@@ -777,27 +770,27 @@ public class SearchBuilder {
 		myPredicates.add(outerPredicate);
 	}
 
-	private Predicate createCompositeParamPart(CriteriaBuilder builder, Root<ResourceTable> from, RuntimeSearchParam left, IQueryParameterType leftValue) {
+	private Predicate createCompositeParamPart(Root<ResourceTable> theRoot, RuntimeSearchParam theParam, IQueryParameterType leftValue) {
 		Predicate retVal = null;
-		switch (left.getParamType()) {
+		switch (theParam.getParamType()) {
 		case STRING: {
-			From<ResourceIndexedSearchParamString, ResourceIndexedSearchParamString> stringJoin = from.join("myParamsString", JoinType.INNER);
-			retVal = createPredicateString(leftValue, left.getName(), builder, stringJoin);
+			From<ResourceIndexedSearchParamString, ResourceIndexedSearchParamString> stringJoin = theRoot.join("myParamsString", JoinType.INNER);
+			retVal = createPredicateString(leftValue, theParam.getName(), myBuilder, stringJoin);
 			break;
 		}
 		case TOKEN: {
-			From<ResourceIndexedSearchParamToken, ResourceIndexedSearchParamToken> tokenJoin = from.join("myParamsToken", JoinType.INNER);
-			retVal = createPredicateToken(leftValue, left.getName(), builder, tokenJoin);
+			From<ResourceIndexedSearchParamToken, ResourceIndexedSearchParamToken> tokenJoin = theRoot.join("myParamsToken", JoinType.INNER);
+			retVal = createPredicateToken(leftValue, theParam.getName(), myBuilder, tokenJoin);
 			break;
 		}
 		case DATE: {
-			From<ResourceIndexedSearchParamDate, ResourceIndexedSearchParamDate> dateJoin = from.join("myParamsDate", JoinType.INNER);
-			retVal = createPredicateDate(builder, dateJoin, leftValue);
+			From<ResourceIndexedSearchParamDate, ResourceIndexedSearchParamDate> dateJoin = theRoot.join("myParamsDate", JoinType.INNER);
+			retVal = createPredicateDate(leftValue, theParam.getName(), myBuilder, dateJoin);
 			break;
 		}
 		case QUANTITY: {
-			From<ResourceIndexedSearchParamQuantity, ResourceIndexedSearchParamQuantity> dateJoin = from.join("myParamsQuantity", JoinType.INNER);
-			retVal = createPredicateQuantity(builder, dateJoin, leftValue);
+			From<ResourceIndexedSearchParamQuantity, ResourceIndexedSearchParamQuantity> dateJoin = theRoot.join("myParamsQuantity", JoinType.INNER);
+			retVal = createPredicateQuantity(leftValue, theParam.getName(), myBuilder, dateJoin);
 			break;
 		}
 		case COMPOSITE:
@@ -809,13 +802,13 @@ public class SearchBuilder {
 		}
 
 		if (retVal == null) {
-			throw new InvalidRequestException("Don't know how to handle composite parameter with type of " + left.getParamType());
+			throw new InvalidRequestException("Don't know how to handle composite parameter with type of " + theParam.getParamType());
 		}
 
 		return retVal;
 	}
 
-	private Predicate createPredicateDate(CriteriaBuilder theBuilder, From<?, ResourceIndexedSearchParamDate> theFrom, IQueryParameterType theParam) {
+	private Predicate createPredicateDate(IQueryParameterType theParam, String theParamName, CriteriaBuilder theBuilder, From<?, ResourceIndexedSearchParamDate> theFrom) {
 		Predicate p;
 		if (theParam instanceof DateParam) {
 			DateParam date = (DateParam) theParam;
@@ -832,7 +825,8 @@ public class SearchBuilder {
 		} else {
 			throw new IllegalArgumentException("Invalid token type: " + theParam.getClass());
 		}
-		return p;
+		
+		return combineParamIndexPredicateWithParamNamePredicate(theParamName, theFrom, p);
 	}
 
 	private Predicate createPredicateDateFromRange(CriteriaBuilder theBuilder, From<?, ResourceIndexedSearchParamDate> theFrom, DateRangeParam theRange) {
@@ -892,50 +886,54 @@ public class SearchBuilder {
 		predicates.addAll(createLastUpdatedPredicates(myParams.getLastUpdatedAndRemove(), builder, from));
 	}
 
-	private Predicate createPredicateNumeric(CriteriaBuilder builder, IQueryParameterType params, ParamPrefixEnum cmpValue, BigDecimal valueValue, final Expression<BigDecimal> path,
+	private Predicate createPredicateNumeric(String theParamName, From<?, ? extends BaseResourceIndexedSearchParam> theFrom, CriteriaBuilder builder, IQueryParameterType theParam, ParamPrefixEnum thePrefix, BigDecimal theValue, final Expression<BigDecimal> thePath,
 			String invalidMessageName, String theValueString) {
 		Predicate num;
-		switch (cmpValue) {
+		switch (thePrefix) {
 		case GREATERTHAN:
-			num = builder.gt(path, valueValue);
+			num = builder.gt(thePath, theValue);
 			break;
 		case GREATERTHAN_OR_EQUALS:
-			num = builder.ge(path, valueValue);
+			num = builder.ge(thePath, theValue);
 			break;
 		case LESSTHAN:
-			num = builder.lt(path, valueValue);
+			num = builder.lt(thePath, theValue);
 			break;
 		case LESSTHAN_OR_EQUALS:
-			num = builder.le(path, valueValue);
+			num = builder.le(thePath, theValue);
 			break;
 		case APPROXIMATE:
 		case EQUAL:
 		case NOT_EQUAL:
-			BigDecimal mul = calculateFuzzAmount(cmpValue, valueValue);
-			BigDecimal low = valueValue.subtract(mul, MathContext.DECIMAL64);
-			BigDecimal high = valueValue.add(mul, MathContext.DECIMAL64);
+			BigDecimal mul = calculateFuzzAmount(thePrefix, theValue);
+			BigDecimal low = theValue.subtract(mul, MathContext.DECIMAL64);
+			BigDecimal high = theValue.add(mul, MathContext.DECIMAL64);
 			Predicate lowPred;
 			Predicate highPred;
-			if (cmpValue != ParamPrefixEnum.NOT_EQUAL) {
-				lowPred = builder.ge(path.as(BigDecimal.class), low);
-				highPred = builder.le(path.as(BigDecimal.class), high);
+			if (thePrefix != ParamPrefixEnum.NOT_EQUAL) {
+				lowPred = builder.ge(thePath.as(BigDecimal.class), low);
+				highPred = builder.le(thePath.as(BigDecimal.class), high);
 				num = builder.and(lowPred, highPred);
 				ourLog.trace("Searching for {} <= val <= {}", low, high);
 			} else {
 				// Prefix was "ne", so reverse it!
-				lowPred = builder.lt(path.as(BigDecimal.class), low);
-				highPred = builder.gt(path.as(BigDecimal.class), high);
+				lowPred = builder.lt(thePath.as(BigDecimal.class), low);
+				highPred = builder.gt(thePath.as(BigDecimal.class), high);
 				num = builder.or(lowPred, highPred);
 			}
 			break;
 		default:
-			String msg = myContext.getLocalizer().getMessage(SearchBuilder.class, invalidMessageName, cmpValue.getValue(), params.getValueAsQueryToken(myContext));
+			String msg = myContext.getLocalizer().getMessage(SearchBuilder.class, invalidMessageName, thePrefix.getValue(), theParam.getValueAsQueryToken(myContext));
 			throw new InvalidRequestException(msg);
 		}
-		return num;
+		
+		if (theParamName == null) {
+			return num;
+		}
+		return combineParamIndexPredicateWithParamNamePredicate(theParamName, theFrom, num);
 	}
 
-	private Predicate createPredicateQuantity(CriteriaBuilder theBuilder, From<?, ResourceIndexedSearchParamQuantity> theFrom, IQueryParameterType theParam) {
+	private Predicate createPredicateQuantity(IQueryParameterType theParam, String theParamName, CriteriaBuilder theBuilder, From<?, ResourceIndexedSearchParamQuantity> theFrom) {
 		String systemValue;
 		String unitsValue;
 		ParamPrefixEnum cmpValue;
@@ -974,7 +972,7 @@ public class SearchBuilder {
 		final Expression<BigDecimal> path = theFrom.get("myValue");
 		String invalidMessageName = "invalidQuantityPrefix";
 
-		Predicate num = createPredicateNumeric(theBuilder, theParam, cmpValue, valueValue, path, invalidMessageName, valueString);
+		Predicate num = createPredicateNumeric(null, theFrom, theBuilder, theParam, cmpValue, valueValue, path, invalidMessageName, valueString);
 
 		Predicate singleCode;
 		if (system == null && code == null) {
@@ -987,7 +985,7 @@ public class SearchBuilder {
 			singleCode = theBuilder.and(system, code, num);
 		}
 
-		return singleCode;
+		return combineParamIndexPredicateWithParamNamePredicate(theParamName, theFrom, singleCode);
 	}
 
 	private void createPredicateResourceId(CriteriaBuilder builder, AbstractQuery<?> cq, List<Predicate> thePredicates, Expression<Long> theExpression) {
@@ -1035,8 +1033,13 @@ public class SearchBuilder {
 			singleCode = theBuilder.and(singleCode, exactCode);
 		}
 		
+		return combineParamIndexPredicateWithParamNamePredicate(theParamName, theFrom, singleCode);
+	}
+
+	private Predicate combineParamIndexPredicateWithParamNamePredicate(String theParamName, From<?, ? extends BaseResourceIndexedSearchParam> theFrom, Predicate thePredicate) {
+		Predicate resourceTypePredicate = myBuilder.equal(theFrom.get("myResourceType"), myResourceName);
 		Predicate paramNamePredicate = myBuilder.equal(theFrom.get("myParamName"), theParamName);
-		Predicate outerPredicate = myBuilder.and(paramNamePredicate, singleCode);
+		Predicate outerPredicate = myBuilder.and(resourceTypePredicate, paramNamePredicate, thePredicate);
 		return outerPredicate;
 	}
 
@@ -1103,25 +1106,33 @@ public class SearchBuilder {
 			codes = myTerminologySvc.findCodesBelow(system, code);
 		}
 
+		ArrayList<Predicate> singleCodePredicates = (new ArrayList<Predicate>());
 		if (codes != null) {
+			
 			if (codes.isEmpty()) {
-				return null;
-			}
-			List<Predicate> orPredicates = new ArrayList<Predicate>();
-			for (VersionIndependentConcept nextCode : codes) {
-				Predicate systemPredicate = theBuilder.equal(theFrom.get("mySystem"), nextCode.getSystem());
-				Predicate codePredicate = theBuilder.equal(theFrom.get("myValue"), nextCode.getCode());
-				orPredicates.add(theBuilder.and(systemPredicate, codePredicate));
-			}
 
-			return theBuilder.or(orPredicates.toArray(new Predicate[orPredicates.size()]));
-		}
+				// This will never match anything
+				Predicate systemPredicate = theBuilder.isNull(theFrom.get("mySystem"));
+				Predicate codePredicate = theBuilder.isNull(theFrom.get("myValue"));
+				singleCodePredicates.add(theBuilder.and(systemPredicate, codePredicate));
+				
+			} else {
+				List<Predicate> orPredicates = new ArrayList<Predicate>();
+				for (VersionIndependentConcept nextCode : codes) {
+					Predicate systemPredicate = theBuilder.equal(theFrom.get("mySystem"), nextCode.getSystem());
+					Predicate codePredicate = theBuilder.equal(theFrom.get("myValue"), nextCode.getCode());
+					orPredicates.add(theBuilder.and(systemPredicate, codePredicate));
+				}
+	
+				singleCodePredicates.add(theBuilder.or(orPredicates.toArray(new Predicate[orPredicates.size()])));
+			}
+			
+		} else {
 
 		/*
 		 * Ok, this is a normal query
 		 */
 
-		ArrayList<Predicate> singleCodePredicates = (new ArrayList<Predicate>());
 		if (StringUtils.isNotBlank(system)) {
 			singleCodePredicates.add(theBuilder.equal(theFrom.get("mySystem"), system));
 		} else if (system == null) {
@@ -1142,9 +1153,10 @@ public class SearchBuilder {
 			 */
 			// singleCodePredicates.add(theBuilder.isNull(theFrom.get("myValue")));
 		}
-
+	}
+		
 		Predicate singleCode = theBuilder.and(toArray(singleCodePredicates));
-		return singleCode;
+		return combineParamIndexPredicateWithParamNamePredicate(theParamName, theFrom, singleCode);
 	}
 
 	private Predicate createResourceLinkPathPredicate(String theParamName, From<?, ? extends ResourceLink> from) {

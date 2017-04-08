@@ -114,6 +114,9 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 	@Autowired
 	@Qualifier("myImmunizationDaoDstu3")
 	protected IFhirResourceDao<Immunization> myImmunizationDao;
+	@Autowired
+	@Qualifier("myImmunizationRecommendationDaoDstu3")
+	protected IFhirResourceDao<ImmunizationRecommendation> myImmunizationRecommendationDao;
 	protected IServerInterceptor myInterceptor;
 	@Autowired
 	private JpaValidationSupportChainDstu3 myJpaValidationSupportChainDstu3;

@@ -31,6 +31,7 @@ import org.hl7.fhir.dstu3.model.ContactPoint.ContactPointSystem;
 import org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.dstu3.model.Subscription.SubscriptionChannelType;
 import org.hl7.fhir.dstu3.model.Subscription.SubscriptionStatus;
+import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -636,6 +637,10 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 		map.put(Subscription.SP_TYPE, new TokenParam(null, SubscriptionChannelType.WEBSOCKET.toCode()));
 		map.put(Subscription.SP_STATUS, new TokenParam(null, SubscriptionStatus.ACTIVE.toCode() + "2"));
 		assertThat(toUnqualifiedVersionlessIds(mySubscriptionDao.search(map)), empty());
+
+		// Wrong param
+		map.put(Subscription.SP_STATUS, new TokenParam(null, SubscriptionChannelType.WEBSOCKET.toCode()));
+		assertThat(toUnqualifiedVersionlessIds(mySubscriptionDao.search(map)), empty());
 	}
 
 	@Test
@@ -733,8 +738,7 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 		IIdType id2 = myObservationDao.create(o2, mySrd).getId().toUnqualifiedVersionless();
 		//@formatter:on
 
-		// Was Observation.SP_COMPONENT_CODE_VALUE_QUANTITY
-		String param = Observation.SP_CODE_VALUE_QUANTITY;
+		String param = Observation.SP_COMPONENT_CODE_VALUE_QUANTITY;
 
 		{
 			TokenParam v0 = new TokenParam("http://foo", "code1");
@@ -764,6 +768,29 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 			IBundleProvider result = myObservationDao.search(param, val);
 			assertThat(toUnqualifiedVersionlessIdValues(result), empty());
 		}
+	}
+
+	@Test
+	public void testSearchDateWrongParam() {
+		Patient p1 = new Patient();
+		p1.getBirthDateElement().setValueAsString("1980-01-01");
+		String id1 = myPatientDao.create(p1).getId().toUnqualifiedVersionless().getValue();
+
+		Patient p2 = new Patient();
+		p2.setDeceased(new DateTimeType("1980-01-01"));
+		String id2 = myPatientDao.create(p2).getId().toUnqualifiedVersionless().getValue();
+
+		{
+			IBundleProvider found = myPatientDao.search(Patient.SP_BIRTHDATE, new DateParam("1980-01-01"));
+			assertThat(toUnqualifiedVersionlessIdValues(found), containsInAnyOrder(id1));
+			assertEquals(1, found.size());
+		}
+		{
+			IBundleProvider found = myPatientDao.search(Patient.SP_DEATH_DATE, new DateParam("1980-01-01"));
+			assertThat(toUnqualifiedVersionlessIdValues(found), containsInAnyOrder(id2));
+			assertEquals(1, found.size());
+		}
+
 	}
 
 	/**
@@ -1171,6 +1198,54 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 	}
 
 	@Test
+	public void testSearchNumberWrongParam() {
+		ImmunizationRecommendation ir1 = new ImmunizationRecommendation();
+		ir1.addRecommendation().setDoseNumber(1);
+		String id1 = myImmunizationRecommendationDao.create(ir1).getId().toUnqualifiedVersionless().getValue();
+
+		ImmunizationRecommendation ir2 = new ImmunizationRecommendation();
+		ir2.addRecommendation().setDoseNumber(2);
+		String id2 = myImmunizationRecommendationDao.create(ir2).getId().toUnqualifiedVersionless().getValue();
+
+		{
+			IBundleProvider found = myImmunizationRecommendationDao.search(ImmunizationRecommendation.SP_DOSE_NUMBER, new NumberParam("1"));
+			assertThat(toUnqualifiedVersionlessIdValues(found), containsInAnyOrder(id1));
+			assertEquals(1, found.size());
+		}
+		{
+			IBundleProvider found = myImmunizationRecommendationDao.search(ImmunizationRecommendation.SP_DOSE_SEQUENCE, new NumberParam("1"));
+			assertThat(toUnqualifiedVersionlessIdValues(found), empty());
+			assertEquals(0, found.size());
+		}
+
+	}
+
+	/**
+	 * When a valueset expansion returns no codes
+	 */
+	@Test
+	public void testSearchOnCodesWithNone() {
+		ValueSet vs = new ValueSet();
+		vs.setUrl("urn:testSearchOnCodesWithNone");
+		myValueSetDao.create(vs);
+
+		Patient p1 = new Patient();
+		p1.setGender(AdministrativeGender.MALE);
+		String id1 = myPatientDao.create(p1).getId().toUnqualifiedVersionless().getValue();
+
+		Patient p2 = new Patient();
+		p2.setGender(AdministrativeGender.FEMALE);
+		String id2 = myPatientDao.create(p2).getId().toUnqualifiedVersionless().getValue();
+
+		{
+			IBundleProvider found = myPatientDao.search(Patient.SP_GENDER, new TokenParam().setModifier(TokenParamModifier.IN).setValue("urn:testSearchOnCodesWithNone"));
+			assertThat(toUnqualifiedVersionlessIdValues(found), empty());
+			assertEquals(0, found.size());
+		}
+
+	}
+
+	@Test
 	public void testSearchPagesExpiry() throws Exception {
 		IIdType pid1;
 		IIdType pid2;
@@ -1307,6 +1382,29 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 		patients = toUnqualifiedVersionlessIds(myPractitionerDao.search(params));
 		assertEquals(1, patients.size());
 		assertThat(patients, containsInAnyOrder(id1));
+
+	}
+
+	@Test
+	public void testSearchQuantityWrongParam() throws Exception {
+		Condition c1 = new Condition();
+		c1.setAbatement(new Range().setLow((SimpleQuantity) new SimpleQuantity().setValue(1L)).setHigh((SimpleQuantity) new SimpleQuantity().setValue(1L)));
+		String id1 = myConditionDao.create(c1).getId().toUnqualifiedVersionless().getValue();
+
+		Condition c2 = new Condition();
+		c2.setOnset(new Range().setLow((SimpleQuantity) new SimpleQuantity().setValue(1L)).setHigh((SimpleQuantity) new SimpleQuantity().setValue(1L)));
+		String id2 = myConditionDao.create(c2).getId().toUnqualifiedVersionless().getValue();
+
+		{
+			IBundleProvider found = myConditionDao.search(Condition.SP_ABATEMENT_AGE, new QuantityParam("1"));
+			assertThat(toUnqualifiedVersionlessIdValues(found), containsInAnyOrder(id1));
+			assertEquals(1, found.size());
+		}
+		{
+			IBundleProvider found = myConditionDao.search(Condition.SP_ONSET_AGE, new QuantityParam("1"));
+			assertThat(toUnqualifiedVersionlessIdValues(found), containsInAnyOrder(id2));
+			assertEquals(1, found.size());
+		}
 
 	}
 
@@ -1611,6 +1709,29 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 	}
 
 	@Test
+	public void testSearchStringWrongParam() throws Exception {
+		Patient p1 = new Patient();
+		p1.getNameFirstRep().setFamily("AAA");
+		String id1 = myPatientDao.create(p1).getId().toUnqualifiedVersionless().getValue();
+
+		Patient p2 = new Patient();
+		p2.getNameFirstRep().addGiven("AAA");
+		String id2 = myPatientDao.create(p2).getId().toUnqualifiedVersionless().getValue();
+
+		{
+			IBundleProvider found = myPatientDao.search(Patient.SP_FAMILY, new StringParam("AAA"));
+			assertThat(toUnqualifiedVersionlessIdValues(found), containsInAnyOrder(id1));
+			assertEquals(1, found.size());
+		}
+		{
+			IBundleProvider found = myPatientDao.search(Patient.SP_GIVEN, new StringParam("AAA"));
+			assertThat(toUnqualifiedVersionlessIdValues(found), containsInAnyOrder(id2));
+			assertEquals(1, found.size());
+		}
+
+	}
+
+	@Test
 	public void testSearchTokenParam() {
 		Patient patient = new Patient();
 		patient.addIdentifier().setSystem("urn:system").setValue("testSearchTokenParam001");
@@ -1718,6 +1839,29 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 	}
 
 	@Test
+	public void testSearchTokenWrongParam() throws Exception {
+		Patient p1 = new Patient();
+		p1.setGender(AdministrativeGender.MALE);
+		String id1 = myPatientDao.create(p1).getId().toUnqualifiedVersionless().getValue();
+
+		Patient p2 = new Patient();
+		p2.addIdentifier().setValue(AdministrativeGender.MALE.toCode());
+		String id2 = myPatientDao.create(p2).getId().toUnqualifiedVersionless().getValue();
+
+		{
+			IBundleProvider found = myPatientDao.search(Patient.SP_GENDER, new TokenParam(null, "male"));
+			assertThat(toUnqualifiedVersionlessIdValues(found), containsInAnyOrder(id1));
+			assertEquals(1, found.size());
+		}
+		{
+			IBundleProvider found = myPatientDao.search(Patient.SP_IDENTIFIER, new TokenParam(null, "male"));
+			assertThat(toUnqualifiedVersionlessIdValues(found), containsInAnyOrder(id2));
+			assertEquals(1, found.size());
+		}
+
+	}
+
+	@Test
 	@Ignore
 	public void testSearchUnknownContentParam() {
 		SearchParameterMap params = new SearchParameterMap();
@@ -1741,6 +1885,29 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 		} catch (InvalidRequestException e) {
 			assertEquals("Fulltext search is not enabled on this service, can not process parameter: _text", e.getMessage());
 		}
+	}
+
+	@Test
+	public void testSearchUriWrongParam() throws Exception {
+		ValueSet v1 = new ValueSet();
+		v1.getUrlElement().setValue("http://foo");
+		String id1 = myValueSetDao.create(v1).getId().toUnqualifiedVersionless().getValue();
+
+		ValueSet v2 = new ValueSet();
+		v2.getExpansion().getIdentifierElement().setValue("http://foo");
+		String id2 = myValueSetDao.create(v2).getId().toUnqualifiedVersionless().getValue();
+
+		{
+			IBundleProvider found = myValueSetDao.search(ValueSet.SP_URL, new UriParam("http://foo"));
+			assertThat(toUnqualifiedVersionlessIdValues(found), containsInAnyOrder(id1));
+			assertEquals(1, found.size());
+		}
+		{
+			IBundleProvider found = myValueSetDao.search(ValueSet.SP_EXPANSION, new UriParam("http://foo"));
+			assertThat(toUnqualifiedVersionlessIdValues(found), containsInAnyOrder(id2));
+			assertEquals(1, found.size());
+		}
+
 	}
 
 	@Test
@@ -1794,6 +1961,50 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 		found = myObservationDao.search(map);
 		assertThat(toUnqualifiedVersionlessIdValues(found), empty());
 
+	}
+
+	@Test
+	public void testSearchWithDate() {
+		IIdType orgId = myOrganizationDao.create(new Organization(), mySrd).getId();
+		IIdType id2;
+		IIdType id1;
+		{
+			Patient patient = new Patient();
+			patient.addIdentifier().setSystem("urn:system").setValue("001");
+			id1 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
+		}
+		{
+			Patient patient = new Patient();
+			patient.addIdentifier().setSystem("urn:system").setValue("002");
+			patient.addName().setFamily("Tester_testSearchStringParam").addGiven("John");
+			patient.setBirthDateElement(new DateType("2011-01-01"));
+			patient.getManagingOrganization().setReferenceElement(orgId);
+			id2 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
+		}
+		{
+			HashMap<String, IQueryParameterType> params = new HashMap<String, IQueryParameterType>();
+			params.put(Patient.SP_BIRTHDATE, new DateParam("2011-01-01"));
+			List<IIdType> patients = toUnqualifiedVersionlessIds(myPatientDao.search(params));
+			assertThat(patients, contains(id2));
+		}
+		{
+			HashMap<String, IQueryParameterType> params = new HashMap<String, IQueryParameterType>();
+			params.put(Patient.SP_BIRTHDATE, new DateParam("2011-01-03"));
+			List<IIdType> patients = toUnqualifiedVersionlessIds(myPatientDao.search(params));
+			assertThat(patients, empty());
+		}
+		{
+			HashMap<String, IQueryParameterType> params = new HashMap<String, IQueryParameterType>();
+			params.put(Patient.SP_BIRTHDATE, new DateParam("2011-01-03").setPrefix(ParamPrefixEnum.LESSTHAN));
+			List<IIdType> patients = toUnqualifiedVersionlessIds(myPatientDao.search(params));
+			assertThat(patients, contains(id2));
+		}
+		{
+			HashMap<String, IQueryParameterType> params = new HashMap<String, IQueryParameterType>();
+			params.put(Patient.SP_BIRTHDATE, new DateParam("2010-01-01").setPrefix(ParamPrefixEnum.LESSTHAN));
+			List<IIdType> patients = toUnqualifiedVersionlessIds(myPatientDao.search(params));
+			assertThat(patients, empty());
+		}
 	}
 
 	@Test
@@ -2167,50 +2378,6 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 		// List<IIdType> patients = toUnqualifiedVersionlessIds(myPatientDao.search(params));
 		// assertThat(patients, containsInRelativeOrder(missing, notMissing));
 		// }
-	}
-
-	@Test
-	public void testSearchWithDate() {
-		IIdType orgId = myOrganizationDao.create(new Organization(), mySrd).getId();
-		IIdType id2;
-		IIdType id1;
-		{
-			Patient patient = new Patient();
-			patient.addIdentifier().setSystem("urn:system").setValue("001");
-			id1 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
-		}
-		{
-			Patient patient = new Patient();
-			patient.addIdentifier().setSystem("urn:system").setValue("002");
-			patient.addName().setFamily("Tester_testSearchStringParam").addGiven("John");
-			patient.setBirthDateElement(new DateType("2011-01-01"));
-			patient.getManagingOrganization().setReferenceElement(orgId);
-			id2 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
-		}
-		{
-			HashMap<String, IQueryParameterType> params = new HashMap<String, IQueryParameterType>();
-			params.put(Patient.SP_BIRTHDATE, new DateParam("2011-01-01"));
-			List<IIdType> patients = toUnqualifiedVersionlessIds(myPatientDao.search(params));
-			assertThat(patients, contains(id2));
-		}
-		{
-			HashMap<String, IQueryParameterType> params = new HashMap<String, IQueryParameterType>();
-			params.put(Patient.SP_BIRTHDATE, new DateParam("2011-01-03"));
-			List<IIdType> patients = toUnqualifiedVersionlessIds(myPatientDao.search(params));
-			assertThat(patients, empty());
-		}
-		{
-			HashMap<String, IQueryParameterType> params = new HashMap<String, IQueryParameterType>();
-			params.put(Patient.SP_BIRTHDATE, new DateParam("2011-01-03").setPrefix(ParamPrefixEnum.LESSTHAN));
-			List<IIdType> patients = toUnqualifiedVersionlessIds(myPatientDao.search(params));
-			assertThat(patients, contains(id2));
-		}
-		{
-			HashMap<String, IQueryParameterType> params = new HashMap<String, IQueryParameterType>();
-			params.put(Patient.SP_BIRTHDATE, new DateParam("2010-01-01").setPrefix(ParamPrefixEnum.LESSTHAN));
-			List<IIdType> patients = toUnqualifiedVersionlessIds(myPatientDao.search(params));
-			assertThat(patients, empty());
-		}
 	}
 
 	@Test
