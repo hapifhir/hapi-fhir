@@ -1284,6 +1284,12 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 
 		params = new HashMap<String, IQueryParameterType>();
 		params.put(Practitioner.SP_FAMILY, new StringParam(methodName));
+		params.put(Practitioner.SP_EMAIL, new TokenParam(null, "123"));
+		patients = toUnqualifiedVersionlessIds(myPractitionerDao.search(params));
+		assertEquals(0, patients.size());
+
+		params = new HashMap<String, IQueryParameterType>();
+		params.put(Practitioner.SP_FAMILY, new StringParam(methodName));
 		patients = toUnqualifiedVersionlessIds(myPractitionerDao.search(params));
 		assertEquals(2, patients.size());
 		assertThat(patients, containsInAnyOrder(id1, id2));
@@ -1294,12 +1300,6 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 		patients = toUnqualifiedVersionlessIds(myPractitionerDao.search(params));
 		assertEquals(1, patients.size());
 		assertThat(patients, containsInAnyOrder(id2));
-
-		params = new HashMap<String, IQueryParameterType>();
-		params.put(Practitioner.SP_FAMILY, new StringParam(methodName));
-		params.put(Practitioner.SP_EMAIL, new TokenParam(null, "123"));
-		patients = toUnqualifiedVersionlessIds(myPractitionerDao.search(params));
-		assertEquals(0, patients.size());
 
 		params = new HashMap<String, IQueryParameterType>();
 		params.put(Practitioner.SP_FAMILY, new StringParam(methodName));
@@ -1441,6 +1441,10 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 		List<IIdType> result;
 		SearchParameterMap params;
 
+		result = toUnqualifiedVersionlessIds(myObservationDao.search(Observation.SP_SUBJECT, new ReferenceParam(Patient.SP_NAME, "testSearchResourceLinkWithChainWithMultipleTypesXX")));
+		assertThat(result, containsInAnyOrder(obsId01));
+		assertEquals(1, result.size());
+
 		result = toUnqualifiedVersionlessIds(myObservationDao.search(Observation.SP_SUBJECT, new ReferenceParam("Patient", Patient.SP_NAME, "testSearchResourceLinkWithChainWithMultipleTypes01")));
 		assertThat(result, containsInAnyOrder(obsId01));
 		assertEquals(1, result.size());
@@ -1457,10 +1461,6 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 		result = toUnqualifiedVersionlessIds(myObservationDao.search(params));
 		assertEquals(1, result.size());
 		assertThat(result, containsInAnyOrder(obsId02));
-
-		result = toUnqualifiedVersionlessIds(myObservationDao.search(Observation.SP_SUBJECT, new ReferenceParam(Patient.SP_NAME, "testSearchResourceLinkWithChainWithMultipleTypesXX")));
-		assertThat(result, containsInAnyOrder(obsId01));
-		assertEquals(1, result.size());
 
 		result = toUnqualifiedVersionlessIds(myObservationDao.search(Observation.SP_SUBJECT, new ReferenceParam(Patient.SP_NAME, "testSearchResourceLinkWithChainWithMultipleTypesYY")));
 		assertEquals(0, result.size());

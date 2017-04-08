@@ -482,7 +482,7 @@ public class SearchBuilder {
 						// Create the subquery predicates
 						myPredicates.add(myBuilder.equal(myResourceTableRoot.get("myResourceType"), subResourceName));
 						myPredicates.add(myBuilder.isNull(myResourceTableRoot.get("myDeleted")));
-						searchForIdsWithAndOr(chain, andOrParams);
+						searchForIdsWithAndOr(subResourceName, chain, andOrParams);
 						
 						subQ.where(toArray(myPredicates));
 
@@ -690,7 +690,11 @@ public class SearchBuilder {
 			return;
 		}
 
-		myPredicates.add(myBuilder.or(toArray(codePredicates)));
+		Predicate spPredicate = myBuilder.or(toArray(codePredicates));
+
+		Predicate paramNamePredicate = myBuilder.equal(join.get("myParamName"), theParamName);
+		Predicate outerPredicate = myBuilder.and(paramNamePredicate, spPredicate);
+		myPredicates.add(outerPredicate);
 	}
 
 	private void addPredicateUri(String theParamName, List<? extends IQueryParameterType> theList) {
@@ -766,7 +770,11 @@ public class SearchBuilder {
 		}
 
 		Predicate orPredicate = myBuilder.or(toArray(codePredicates));
-		myPredicates.add(orPredicate);
+		
+		Predicate paramNamePredicate = myBuilder.equal(join.get("myParamName"), theParamName);
+		Predicate outerPredicate = myBuilder.and(paramNamePredicate, orPredicate);
+
+		myPredicates.add(outerPredicate);
 	}
 
 	private Predicate createCompositeParamPart(CriteriaBuilder builder, Root<ResourceTable> from, RuntimeSearchParam left, IQueryParameterType leftValue) {
@@ -1026,7 +1034,10 @@ public class SearchBuilder {
 			Predicate exactCode = theBuilder.equal(theFrom.get("myValueExact"), rawSearchTerm);
 			singleCode = theBuilder.and(singleCode, exactCode);
 		}
-		return singleCode;
+		
+		Predicate paramNamePredicate = myBuilder.equal(theFrom.get("myParamName"), theParamName);
+		Predicate outerPredicate = myBuilder.and(paramNamePredicate, singleCode);
+		return outerPredicate;
 	}
 
 	private List<Predicate> createPredicateTagList(Path<TagDefinition> theDefJoin, CriteriaBuilder theBuilder, TagTypeEnum theTagType, List<Pair<String, String>> theTokens) {
@@ -1595,79 +1606,81 @@ public class SearchBuilder {
 		for (Entry<String, List<List<? extends IQueryParameterType>>> nextParamEntry : params.entrySet()) {
 			String nextParamName = nextParamEntry.getKey();
 			List<List<? extends IQueryParameterType>> andOrParams = nextParamEntry.getValue();
-			searchForIdsWithAndOr(nextParamName, andOrParams);
+			searchForIdsWithAndOr(myResourceName, nextParamName, andOrParams);
 
 		}
 
 	}
 
-	private void searchForIdsWithAndOr(String nextParamName, List<List<? extends IQueryParameterType>> andOrParams) {
-		if (nextParamName.equals(BaseResource.SP_RES_ID)) {
+	private void searchForIdsWithAndOr(String theResourceName, String theParamName, List<List<? extends IQueryParameterType>> theAndOrParams) {
+		if (theParamName.equals(BaseResource.SP_RES_ID)) {
 
-			addPredicateResourceId(andOrParams);
+			addPredicateResourceId(theAndOrParams);
 
-		} else if (nextParamName.equals(BaseResource.SP_RES_LANGUAGE)) {
+		} else if (theParamName.equals(BaseResource.SP_RES_LANGUAGE)) {
 
-			addPredicateLanguage(andOrParams);
+			addPredicateLanguage(theAndOrParams);
 
-		} else if (nextParamName.equals(Constants.PARAM_HAS)) {
+		} else if (theParamName.equals(Constants.PARAM_HAS)) {
 
-			addPredicateHas(andOrParams, null);
+			addPredicateHas(theAndOrParams, null);
 
-		} else if (nextParamName.equals(Constants.PARAM_TAG) || nextParamName.equals(Constants.PARAM_PROFILE) || nextParamName.equals(Constants.PARAM_SECURITY)) {
+		} else if (theParamName.equals(Constants.PARAM_TAG) || theParamName.equals(Constants.PARAM_PROFILE) || theParamName.equals(Constants.PARAM_SECURITY)) {
 
 			// FIXME
-			addPredicateTag(andOrParams, nextParamName, null);
+			addPredicateTag(theAndOrParams, theParamName, null);
 
 		} else {
 
-			RuntimeSearchParam nextParamDef = mySearchParamRegistry.getActiveSearchParam(myResourceName, nextParamName);
+			RuntimeSearchParam nextParamDef = mySearchParamRegistry.getActiveSearchParam(theResourceName, theParamName);
 			if (nextParamDef != null) {
 				switch (nextParamDef.getParamType()) {
 				case DATE:
-					for (List<? extends IQueryParameterType> nextAnd : andOrParams) {
-						addPredicateDate(nextParamName, nextAnd);
+					for (List<? extends IQueryParameterType> nextAnd : theAndOrParams) {
+						addPredicateDate(theParamName, nextAnd);
 					}
 					break;
 				case QUANTITY:
-					for (List<? extends IQueryParameterType> nextAnd : andOrParams) {
-						addPredicateQuantity(nextParamName, nextAnd);
+					for (List<? extends IQueryParameterType> nextAnd : theAndOrParams) {
+						addPredicateQuantity(theParamName, nextAnd);
 					}
 					break;
 				case REFERENCE:
-					for (List<? extends IQueryParameterType> nextAnd : andOrParams) {
-						addPredicateReference(nextParamName, nextAnd);
+					for (List<? extends IQueryParameterType> nextAnd : theAndOrParams) {
+						addPredicateReference(theParamName, nextAnd);
 					}
 					break;
 				case STRING:
-					for (List<? extends IQueryParameterType> nextAnd : andOrParams) {
-						addPredicateString(nextParamName, nextAnd);
+					for (List<? extends IQueryParameterType> nextAnd : theAndOrParams) {
+						addPredicateString(theParamName, nextAnd);
 					}
 					break;
 				case TOKEN:
-					for (List<? extends IQueryParameterType> nextAnd : andOrParams) {
-						addPredicateToken(nextParamName, nextAnd);
+					for (List<? extends IQueryParameterType> nextAnd : theAndOrParams) {
+						addPredicateToken(theParamName, nextAnd);
 					}
 					break;
 				case NUMBER:
-					for (List<? extends IQueryParameterType> nextAnd : andOrParams) {
-						addPredicateNumber(nextParamName, nextAnd);
+					for (List<? extends IQueryParameterType> nextAnd : theAndOrParams) {
+						addPredicateNumber(theParamName, nextAnd);
 					}
 					break;
 				case COMPOSITE:
-					for (List<? extends IQueryParameterType> nextAnd : andOrParams) {
+					for (List<? extends IQueryParameterType> nextAnd : theAndOrParams) {
 						addPredicateComposite(nextParamDef, nextAnd);
 					}
 					break;
 				case URI:
-					for (List<? extends IQueryParameterType> nextAnd : andOrParams) {
-						addPredicateUri(nextParamName, nextAnd);
+					for (List<? extends IQueryParameterType> nextAnd : theAndOrParams) {
+						addPredicateUri(theParamName, nextAnd);
 					}
 					break;
 				case HAS:
 					// should not happen
 					break;
 				}
+			} else {
+				throw new InternalErrorException("Unknown search parameter " + theParamName + " for reource type " + theResourceName);
 			}
 		}
 	}
