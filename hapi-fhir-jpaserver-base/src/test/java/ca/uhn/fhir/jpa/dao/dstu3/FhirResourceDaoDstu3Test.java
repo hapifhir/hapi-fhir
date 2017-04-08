@@ -2593,6 +2593,103 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 	}
 
 	@Test
+	public void testRemoveTag() {
+
+		String methodName = "testResourceMetaOperation";
+		IIdType id1, id2;
+		{
+			Patient patient = new Patient();
+			patient.addIdentifier().setSystem("urn:system").setValue(methodName);
+			patient.addName().setFamily("Tester").addGiven("Joe");
+			patient.getMeta().addTag(null, "Dog", "Puppies");
+
+			patient.getMeta().addSecurity().setSystem("seclabel:sys:1").setCode("seclabel:code:1").setDisplay("seclabel:dis:1");
+
+			patient.getMeta().addProfile(("http://profile/1"));
+
+			id1 = myPatientDao.create(patient, mySrd).getId();
+		}
+		{
+			Patient patient = new Patient();
+			patient.addIdentifier().setSystem("urn:system").setValue(methodName);
+			patient.addName().setFamily("Tester").addGiven("Joe");
+
+			patient.getMeta().addTag("http://foo", "Cat", "Kittens");
+			patient.getMeta().addSecurity().setSystem("seclabel:sys:2").setCode("seclabel:code:2").setDisplay("seclabel:dis:2");
+			patient.getMeta().addProfile("http://profile/2");
+
+			id2 = myPatientDao.create(patient, mySrd).getId();
+		}
+		{
+			Device device = new Device();
+			device.addIdentifier().setSystem("urn:system").setValue(methodName);
+			device.getMeta().addTag("http://foo", "Foo", "Bars");
+			device.getMeta().addSecurity().setSystem("seclabel:sys:3").setCode("seclabel:code:3").setDisplay("seclabel:dis:3");
+			device.getMeta().addProfile("http://profile/3");
+			myDeviceDao.create(device, mySrd);
+		}
+
+		Meta meta;
+
+		meta = myPatientDao.metaGetOperation(Meta.class, mySrd);
+		List<Coding> published = meta.getTag();
+		assertEquals(2, published.size());
+		assertEquals(null, published.get(0).getSystem());
+		assertEquals("Dog", published.get(0).getCode());
+		assertEquals("Puppies", published.get(0).getDisplay());
+		assertEquals("http://foo", published.get(1).getSystem());
+		assertEquals("Cat", published.get(1).getCode());
+		assertEquals("Kittens", published.get(1).getDisplay());
+		List<Coding> secLabels = meta.getSecurity();
+		assertEquals(2, secLabels.size());
+		assertEquals("seclabel:sys:1", secLabels.get(0).getSystemElement().getValue());
+		assertEquals("seclabel:code:1", secLabels.get(0).getCodeElement().getValue());
+		assertEquals("seclabel:dis:1", secLabels.get(0).getDisplayElement().getValue());
+		assertEquals("seclabel:sys:2", secLabels.get(1).getSystemElement().getValue());
+		assertEquals("seclabel:code:2", secLabels.get(1).getCodeElement().getValue());
+		assertEquals("seclabel:dis:2", secLabels.get(1).getDisplayElement().getValue());
+		List<UriType> profiles = meta.getProfile();
+		assertEquals(2, profiles.size());
+		assertEquals("http://profile/1", profiles.get(0).getValue());
+		assertEquals("http://profile/2", profiles.get(1).getValue());
+
+		meta = myPatientDao.metaGetOperation(Meta.class, id2, mySrd);
+		published = meta.getTag();
+		assertEquals(1, published.size());
+		assertEquals("http://foo", published.get(0).getSystem());
+		assertEquals("Cat", published.get(0).getCode());
+		assertEquals("Kittens", published.get(0).getDisplay());
+		secLabels = meta.getSecurity();
+		assertEquals(1, secLabels.size());
+		assertEquals("seclabel:sys:2", secLabels.get(0).getSystemElement().getValue());
+		assertEquals("seclabel:code:2", secLabels.get(0).getCodeElement().getValue());
+		assertEquals("seclabel:dis:2", secLabels.get(0).getDisplayElement().getValue());
+		profiles = meta.getProfile();
+		assertEquals(1, profiles.size());
+		assertEquals("http://profile/2", profiles.get(0).getValue());
+
+		myPatientDao.removeTag(id1, TagTypeEnum.TAG, null, "Dog");
+		myPatientDao.removeTag(id1, TagTypeEnum.SECURITY_LABEL, "seclabel:sys:1", "seclabel:code:1");
+		myPatientDao.removeTag(id1, TagTypeEnum.PROFILE, BaseHapiFhirDao.NS_JPA_PROFILE, "http://profile/1");
+
+		meta = myPatientDao.metaGetOperation(Meta.class, mySrd);
+		published = meta.getTag();
+		assertEquals(1, published.size());
+		assertEquals("http://foo", published.get(0).getSystem());
+		assertEquals("Cat", published.get(0).getCode());
+		assertEquals("Kittens", published.get(0).getDisplay());
+		secLabels = meta.getSecurity();
+		assertEquals(1, secLabels.size());
+		assertEquals("seclabel:sys:2", secLabels.get(0).getSystemElement().getValue());
+		assertEquals("seclabel:code:2", secLabels.get(0).getCodeElement().getValue());
+		assertEquals("seclabel:dis:2", secLabels.get(0).getDisplayElement().getValue());
+		profiles = meta.getProfile();
+		assertEquals(1, profiles.size());
+		assertEquals("http://profile/2", profiles.get(0).getValue());
+
+	}
+
+	@Test
 	public void testReverseIncludes() {
 		String methodName = "testReverseIncludes";
 		Organization org = new Organization();
