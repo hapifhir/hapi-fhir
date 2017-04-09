@@ -1186,9 +1186,13 @@ public class SearchBuilder {
 		return query;
 	}
 
-	private void createSort(CriteriaBuilder theBuilder, Root<ResourceTable> theFrom, SortSpec theSort, List<Order> theOrders, List<Predicate> thePredicates) {
+	/**
+	 * @return Returns {@literal true} if any search parameter sorts were found, or false if
+	 * no sorts were found, or only non-search parameters ones (e.g. _id, _lastUpdated)
+	 */
+	private boolean createSort(CriteriaBuilder theBuilder, Root<ResourceTable> theFrom, SortSpec theSort, List<Order> theOrders, List<Predicate> thePredicates) {
 		if (theSort == null || isBlank(theSort.getParamName())) {
-			return;
+			return false;
 		}
 
 		if (BaseResource.SP_RES_ID.equals(theSort.getParamName())) {
@@ -1201,8 +1205,7 @@ public class SearchBuilder {
 				theOrders.add(theBuilder.desc(theFrom.get("myId")));
 			}
 
-			createSort(theBuilder, theFrom, theSort.getChain(), theOrders, thePredicates);
-			return;
+			return createSort(theBuilder, theFrom, theSort.getChain(), theOrders, thePredicates);
 		}
 
 		if (Constants.PARAM_LASTUPDATED.equals(theSort.getParamName())) {
@@ -1212,8 +1215,7 @@ public class SearchBuilder {
 				theOrders.add(theBuilder.desc(theFrom.get("myUpdated")));
 			}
 
-			createSort(theBuilder, theFrom, theSort.getChain(), theOrders, thePredicates);
-			return;
+			return createSort(theBuilder, theFrom, theSort.getChain(), theOrders, thePredicates);
 		}
 
 		RuntimeResourceDefinition resourceDef = myContext.getResourceDefinition(myResourceName);
@@ -1276,6 +1278,8 @@ public class SearchBuilder {
 		}
 
 		createSort(theBuilder, theFrom, theSort.getChain(), theOrders, thePredicates);
+		
+		return true;
 	}
 
 	private String determineSystemIfMissing(String theParamName, String code, String system) {
@@ -1577,9 +1581,10 @@ public class SearchBuilder {
 		query.setMaxResults(theToIndex - theFromIndex);
 
 		List<Long> pids = new ArrayList<Long>();
+		Set<Long> pidSet = new HashSet<Long>();
 		
 		for (Long next : query.getResultList()) {
-			if (next != null) {
+			if (next != null && pidSet.add(next)) {
 				pids.add(next);
 			}
 		}

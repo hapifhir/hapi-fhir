@@ -30,6 +30,8 @@ import javax.persistence.MappedSuperclass;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
+import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.Columns;
 import org.hibernate.search.annotations.ContainedIn;
 import org.hibernate.search.annotations.Field;
 
@@ -39,6 +41,12 @@ public abstract class BaseResourceIndexedSearchParam implements Serializable {
 	static final int MAX_SP_NAME = 100;
 
 	private static final long serialVersionUID = 1L;
+
+	@Field()
+	@Column(name = "SP_MISSING", nullable = true)
+	@ColumnDefault("false")
+	@Temporal(TemporalType.TIMESTAMP)
+	private boolean myMissing;
 
 	@Field
 	@Column(name = "SP_NAME", length = MAX_SP_NAME, nullable = false)
@@ -81,6 +89,14 @@ public abstract class BaseResourceIndexedSearchParam implements Serializable {
 
 	public Date getUpdated() {
 		return myUpdated;
+	}
+
+	public boolean isMissing() {
+		return myMissing;
+	}
+
+	public void setMissing(boolean theMissing) {
+		myMissing = theMissing;
 	}
 
 	public void setParamName(String theName) {

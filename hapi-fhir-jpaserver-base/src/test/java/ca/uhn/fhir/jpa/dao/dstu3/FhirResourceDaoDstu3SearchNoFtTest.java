@@ -2863,7 +2863,99 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 	}
 
 	@Test
-	public void testSortOnPopulatedField() throws Exception {
+	public void testSortOnId() throws Exception {
+		// Numeric ID
+		Patient p01 = new Patient();
+		p01.setActive(true);
+		p01.setGender(AdministrativeGender.MALE);
+		p01.addName().setFamily("B").addGiven("A");
+		String id1 = myPatientDao.create(p01).getId().toUnqualifiedVersionless().getValue();
+
+		// Numeric ID
+		Patient p02 = new Patient();
+		p02.setActive(true);
+		p02.setGender(AdministrativeGender.MALE);
+		p02.addName().setFamily("B").addGiven("B");
+		p02.addName().setFamily("Z").addGiven("Z");
+		String id2 = myPatientDao.create(p02).getId().toUnqualifiedVersionless().getValue();
+
+		// Forced ID
+		Patient pAB = new Patient();
+		pAB.setId("AB");
+		pAB.setActive(true);
+		pAB.setGender(AdministrativeGender.MALE);
+		pAB.addName().setFamily("A").addGiven("B");
+		myPatientDao.update(pAB);
+		
+		// Forced ID
+		Patient pAA = new Patient();
+		pAA.setId("AA");
+		pAA.setActive(true);
+		pAA.setGender(AdministrativeGender.MALE);
+		pAA.addName().setFamily("A").addGiven("A");
+		myPatientDao.update(pAA);
+
+		SearchParameterMap map;
+		List<String> ids;
+
+		map = new SearchParameterMap();
+		map.setSort(new SortSpec("_id", SortOrderEnum.ASC));
+		ids = toUnqualifiedVersionlessIdValues(myPatientDao.search(map));
+		assertThat(ids, contains("Patient/AA", "Patient/AB", id1, id2));
+		
+	}
+	
+	@Test
+	public void testSortOnLastUpdated() throws Exception {
+		// Numeric ID
+		Patient p01 = new Patient();
+		p01.setActive(true);
+		p01.setGender(AdministrativeGender.MALE);
+		p01.addName().setFamily("B").addGiven("A");
+		String id1 = myPatientDao.create(p01).getId().toUnqualifiedVersionless().getValue();
+
+		Thread.sleep(10);
+		
+		// Numeric ID
+		Patient p02 = new Patient();
+		p02.setActive(true);
+		p02.setGender(AdministrativeGender.MALE);
+		p02.addName().setFamily("B").addGiven("B");
+		p02.addName().setFamily("Z").addGiven("Z");
+		String id2 = myPatientDao.create(p02).getId().toUnqualifiedVersionless().getValue();
+
+		Thread.sleep(10);
+
+		// Forced ID
+		Patient pAB = new Patient();
+		pAB.setId("AB");
+		pAB.setActive(true);
+		pAB.setGender(AdministrativeGender.MALE);
+		pAB.addName().setFamily("A").addGiven("B");
+		myPatientDao.update(pAB);
+
+		Thread.sleep(10);
+
+		// Forced ID
+		Patient pAA = new Patient();
+		pAA.setId("AA");
+		pAA.setActive(true);
+		pAA.setGender(AdministrativeGender.MALE);
+		pAA.addName().setFamily("A").addGiven("A");
+		myPatientDao.update(pAA);
+
+		SearchParameterMap map;
+		List<String> ids;
+
+		map = new SearchParameterMap();
+		map.setSort(new SortSpec("_lastUpdated", SortOrderEnum.ASC));
+		ids = toUnqualifiedVersionlessIdValues(myPatientDao.search(map));
+		assertThat(ids, contains(id1, id2, "Patient/AB", "Patient/AA"));
+		
+	}
+	
+	@Test
+	public void testSortOnSearchParameterWhereAllResourcesHaveAValue() throws Exception {
 		Patient pBA = new Patient();
 		pBA.setId("BA");
 		pBA.setActive(true);
@@ -2915,7 +3007,7 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 	}
 
 	@Test
-	public void testSort() throws Exception {
+	public void testSortOnSparselyPopulatedSearchParameter() throws Exception {
 		Patient pBA = new Patient();
 		pBA.setId("BA");
 		pBA.setActive(true);
@@ -2947,6 +3039,7 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 		Patient pCA = new Patient();
 		pCA.setId("CA");
 		pCA.setActive(false);
+		pCA.getAddressFirstRep().addLine("A");
 		pCA.addName().setFamily("C").addGiven("A");
 		pCA.addName().setFamily("Z").addGiven("A");
 		myPatientDao.update(pCA);
@@ -2954,13 +3047,6 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 		SearchParameterMap map;
 		List<String> ids;
 
-		// Sort across all resources
-		map = new SearchParameterMap();
-		map.setSort(new SortSpec("family", SortOrderEnum.ASC).setChain(new SortSpec("given", SortOrderEnum.ASC)));
-		ids = toUnqualifiedVersionlessIdValues(myPatientDao.search(map));
-		assertThat(ids, contains("Patient/AA", "Patient/AB", "Patient/BA", "Patient/BB", "Patient/CA"));
-		
-		// A sort on a field that isn't populated in all cases
 		map = new SearchParameterMap();
 		map.setSort(new SortSpec("gender"));
 		ids = toUnqualifiedVersionlessIdValues(myPatientDao.search(map));
@@ -2973,7 +3059,6 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 		ourLog.info("IDS: {}", ids);
 		assertThat(ids, contains("Patient/AA", "Patient/AB", "Patient/BA", "Patient/BB", "Patient/CA"));
 
-		// Sort 
 		map = new SearchParameterMap();
 		map.add(Patient.SP_ACTIVE, new TokenParam(null, "true"));
 		map.setSort(new SortSpec("family", SortOrderEnum.ASC).setChain(new SortSpec("given", SortOrderEnum.ASC)));
