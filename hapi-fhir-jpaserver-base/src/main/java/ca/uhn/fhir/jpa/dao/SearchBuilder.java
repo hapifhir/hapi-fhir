@@ -214,27 +214,27 @@ public class SearchBuilder {
 		}
 	}
 
-	private void addPredicateId(Set<Long> thePids) {
-		if (thePids == null || thePids.isEmpty()) {
-			return;
-		}
-
-		CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
-		CriteriaQuery<Long> cq = builder.createQuery(Long.class);
-		Root<ResourceTable> from = cq.from(ResourceTable.class);
-		cq.select(from.get("myId").as(Long.class));
-
-		List<Predicate> predicates = new ArrayList<Predicate>();
-		predicates.add(builder.equal(from.get("myResourceType"), myResourceName));
-		predicates.add(from.get("myId").in(thePids));
-		createPredicateResourceId(builder, cq, predicates, from.get("myId").as(Long.class));
-		createPredicateLastUpdatedForResourceTable(builder, from, predicates);
-
-		cq.where(toArray(predicates));
-
-		TypedQuery<Long> q = myEntityManager.createQuery(cq);
-		doSetPids(q.getResultList());
-	}
+	// private void addPredicateId(Set<Long> thePids) {
+	// if (thePids == null || thePids.isEmpty()) {
+	// return;
+	// }
+	//
+	// CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
+	// CriteriaQuery<Long> cq = builder.createQuery(Long.class);
+	// Root<ResourceTable> from = cq.from(ResourceTable.class);
+	// cq.select(from.get("myId").as(Long.class));
+	//
+	// List<Predicate> predicates = new ArrayList<Predicate>();
+	// predicates.add(builder.equal(from.get("myResourceType"), myResourceName));
+	// predicates.add(from.get("myId").in(thePids));
+	// createPredicateResourceId(builder, cq, predicates, from.get("myId").as(Long.class));
+	// createPredicateLastUpdatedForResourceTable(builder, from, predicates);
+	//
+	// cq.where(toArray(predicates));
+	//
+	// TypedQuery<Long> q = myEntityManager.createQuery(cq);
+	// doSetPids(q.getResultList());
+	// }
 
 	private void addPredicateLanguage(List<List<? extends IQueryParameterType>> theList) {
 		for (List<? extends IQueryParameterType> nextList : theList) {
@@ -1319,43 +1319,43 @@ public class SearchBuilder {
 		return new PersistedJpaBundleProvider(mySearchEntity.getUuid(), myCallingDao);
 	}
 
-	private void doSetPids(Collection<Long> thePids) {
-		if (mySearchEntity.getTotalCount() != null) {
-			reinitializeSearch();
-		}
+	// private void doSetPids(Collection<Long> thePids) {
+	// if (mySearchEntity.getTotalCount() != null) {
+	// reinitializeSearch();
+	// }
+	//
+	// LinkedHashSet<SearchResult> results = new LinkedHashSet<SearchResult>();
+	// int index = 0;
+	// for (Long next : thePids) {
+	// SearchResult nextResult = new SearchResult(mySearchEntity);
+	// nextResult.setResourcePid(next);
+	// nextResult.setOrder(index);
+	// results.add(nextResult);
+	// index++;
+	// }
+	// mySearchResultDao.save(results);
+	//
+	// mySearchEntity.setTotalCount(results.size());
+	// mySearchEntity = myEntityManager.merge(mySearchEntity);
+	//
+	// myEntityManager.flush();
+	// }
 
-		LinkedHashSet<SearchResult> results = new LinkedHashSet<SearchResult>();
-		int index = 0;
-		for (Long next : thePids) {
-			SearchResult nextResult = new SearchResult(mySearchEntity);
-			nextResult.setResourcePid(next);
-			nextResult.setOrder(index);
-			results.add(nextResult);
-			index++;
-		}
-		mySearchResultDao.save(results);
-
-		mySearchEntity.setTotalCount(results.size());
-		mySearchEntity = myEntityManager.merge(mySearchEntity);
-
-		myEntityManager.flush();
-	}
-
-	private void filterResourceIdsByLastUpdated(final DateRangeParam theLastUpdated) {
-		CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
-		CriteriaQuery<Long> cq = builder.createQuery(Long.class);
-		Root<ResourceTable> from = cq.from(ResourceTable.class);
-		cq.select(from.get("myId").as(Long.class));
-
-		List<Predicate> lastUpdatedPredicates = createLastUpdatedPredicates(theLastUpdated, builder, from);
-		createPredicateResourceId(builder, cq, lastUpdatedPredicates, from.get("myId").as(Long.class));
-
-		cq.where(SearchBuilder.toArray(lastUpdatedPredicates));
-		TypedQuery<Long> query = myEntityManager.createQuery(cq);
-
-		List<Long> resultList = query.getResultList();
-		doSetPids(resultList);
-	}
+	// private void filterResourceIdsByLastUpdated(final DateRangeParam theLastUpdated) {
+	// CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
+	// CriteriaQuery<Long> cq = builder.createQuery(Long.class);
+	// Root<ResourceTable> from = cq.from(ResourceTable.class);
+	// cq.select(from.get("myId").as(Long.class));
+	//
+	// List<Predicate> lastUpdatedPredicates = createLastUpdatedPredicates(theLastUpdated, builder, from);
+	// createPredicateResourceId(builder, cq, lastUpdatedPredicates, from.get("myId").as(Long.class));
+	//
+	// cq.where(SearchBuilder.toArray(lastUpdatedPredicates));
+	// TypedQuery<Long> query = myEntityManager.createQuery(cq);
+	//
+	// List<Long> resultList = query.getResultList();
+	// doSetPids(resultList);
+	// }
 
 	private void loadResourcesByPid(Collection<Long> theIncludePids, List<IBaseResource> theResourceListToPopulate, Set<Long> theRevIncludedPids, boolean theForHistoryOperation) {
 		EntityManager entityManager = myEntityManager;
@@ -1365,49 +1365,49 @@ public class SearchBuilder {
 		loadResourcesByPid(theIncludePids, theResourceListToPopulate, theRevIncludedPids, theForHistoryOperation, entityManager, context, dao);
 	}
 
-	private void processSort(final SearchParameterMap theParams) {
-
-		// Set<Long> loadPids = theLoadPids;
-		if (theParams.getSort() != null && isNotBlank(theParams.getSort().getParamName())) {
-			List<Order> orders = new ArrayList<Order>();
-			List<Predicate> predicates = new ArrayList<Predicate>();
-			CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
-			CriteriaQuery<Tuple> cq = builder.createTupleQuery();
-			Root<ResourceTable> from = cq.from(ResourceTable.class);
-
-			createPredicateResourceId(builder, cq, predicates, from.get("myId").as(Long.class));
-
-			createSort(builder, from, theParams.getSort(), orders, predicates);
-
-			if (orders.size() > 0) {
-
-				LinkedHashSet<Long> loadPids = new LinkedHashSet<Long>();
-				cq.multiselect(from.get("myId").as(Long.class));
-				cq.where(toArray(predicates));
-				cq.orderBy(orders);
-
-				TypedQuery<Tuple> query = myEntityManager.createQuery(cq);
-
-				for (Tuple next : query.getResultList()) {
-					loadPids.add(next.get(0, Long.class));
-				}
-
-				ourLog.debug("Sort PID order is now: {}", loadPids);
-
-				ArrayList<Long> pids = new ArrayList<Long>(loadPids);
-
-				// Any ressources which weren't matched by the sort get added to the bottom
-				// for (Long next : originalPids) {
-				// if (loadPids.contains(next) == false) {
-				// pids.add(next);
-				// }
-				// }
-
-				doSetPids(pids);
-			}
-		}
-
-	}
+	// private void processSort(final SearchParameterMap theParams) {
+	//
+	// // Set<Long> loadPids = theLoadPids;
+	// if (theParams.getSort() != null && isNotBlank(theParams.getSort().getParamName())) {
+	// List<Order> orders = new ArrayList<Order>();
+	// List<Predicate> predicates = new ArrayList<Predicate>();
+	// CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
+	// CriteriaQuery<Tuple> cq = builder.createTupleQuery();
+	// Root<ResourceTable> from = cq.from(ResourceTable.class);
+	//
+	// createPredicateResourceId(builder, cq, predicates, from.get("myId").as(Long.class));
+	//
+	// createSort(builder, from, theParams.getSort(), orders, predicates);
+	//
+	// if (orders.size() > 0) {
+	//
+	// LinkedHashSet<Long> loadPids = new LinkedHashSet<Long>();
+	// cq.multiselect(from.get("myId").as(Long.class));
+	// cq.where(toArray(predicates));
+	// cq.orderBy(orders);
+	//
+	// TypedQuery<Tuple> query = myEntityManager.createQuery(cq);
+	//
+	// for (Tuple next : query.getResultList()) {
+	// loadPids.add(next.get(0, Long.class));
+	// }
+	//
+	// ourLog.debug("Sort PID order is now: {}", loadPids);
+	//
+	// ArrayList<Long> pids = new ArrayList<Long>(loadPids);
+	//
+	// // Any ressources which weren't matched by the sort get added to the bottom
+	// // for (Long next : originalPids) {
+	// // if (loadPids.contains(next) == false) {
+	// // pids.add(next);
+	// // }
+	// // }
+	//
+	// doSetPids(pids);
+	// }
+	// }
+	//
+	// }
 
 	private void reinitializeSearch() {
 		mySearchEntity = new Search();
@@ -1469,23 +1469,23 @@ public class SearchBuilder {
 	}
 
 	public List<Long> loadSearchPage(SearchParameterMap theParams, int theFromIndex, int theToIndex) {
-		
-		if (myFulltextSearchSvc == null) {
-			if (theParams.containsKey(Constants.PARAM_TEXT)) {
-				throw new InvalidRequestException("Fulltext search is not enabled on this service, can not process parameter: " + Constants.PARAM_TEXT);
-			} else if (theParams.containsKey(Constants.PARAM_CONTENT)) {
-				throw new InvalidRequestException("Fulltext search is not enabled on this service, can not process parameter: " + Constants.PARAM_CONTENT);
-			}
-		} else {
-			// FIXME: add from and to
-			List<Long> searchResultPids = myFulltextSearchSvc.search(myResourceName, theParams);
-			if (searchResultPids != null) {
-				if (searchResultPids.isEmpty()) {
-					return Collections.emptyList();
-				}
-				return searchResultPids;
-			}
-		}
+
+		// if (myFulltextSearchSvc == null) {
+		// if (theParams.containsKey(Constants.PARAM_TEXT)) {
+		// throw new InvalidRequestException("Fulltext search is not enabled on this service, can not process parameter: " + Constants.PARAM_TEXT);
+		// } else if (theParams.containsKey(Constants.PARAM_CONTENT)) {
+		// throw new InvalidRequestException("Fulltext search is not enabled on this service, can not process parameter: " + Constants.PARAM_CONTENT);
+		// }
+		// } else {
+		// // FIXME: add from and to
+		// List<Long> searchResultPids = myFulltextSearchSvc.search(myResourceName, theParams);
+		// if (searchResultPids != null) {
+		// if (searchResultPids.isEmpty()) {
+		// return Collections.emptyList();
+		// }
+		// return searchResultPids;
+		// }
+		// }
 
 		myBuilder = myEntityManager.getCriteriaBuilder();
 		myResourceTableQuery = myBuilder.createTupleQuery();
@@ -1502,19 +1502,41 @@ public class SearchBuilder {
 		myPredicates.addAll(lastUpdatedPredicates);
 
 		if (theParams.getEverythingMode() != null) {
+			Join<ResourceTable, ResourceLink> join = myResourceTableRoot.join("myResourceLinks", JoinType.LEFT);
+
 			if (theParams.get(BaseResource.SP_RES_ID) != null) {
 				StringParam idParm = (StringParam) theParams.get(BaseResource.SP_RES_ID).get(0).get(0);
 				Long pid = BaseHapiFhirDao.translateForcedIdToPid(myResourceName, idParm.getValue(), myForcedIdDao);
-				
-				Join<ResourceTable, ResourceLink> join = myResourceTableRoot.join("myResourceLinks", JoinType.LEFT);
 				myPredicates.add(myBuilder.equal(join.get("myTargetResourcePid").as(Long.class), pid));
-				
+			} else {
+				myPredicates.add(myBuilder.equal(join.get("myTargetResourceType").as(String.class), myResourceName));
 			}
+
 		} else {
 			// Normal search
 			searchForIdsWithAndOr(theParams);
 		}
-		
+
+		/*
+		 * Fulltext search
+		 */
+		if (theParams.containsKey(Constants.PARAM_CONTENT) || theParams.containsKey(Constants.PARAM_TEXT)) {
+			if (myFulltextSearchSvc == null) {
+				if (theParams.containsKey(Constants.PARAM_TEXT)) {
+					throw new InvalidRequestException("Fulltext search is not enabled on this service, can not process parameter: " + Constants.PARAM_TEXT);
+				} else if (theParams.containsKey(Constants.PARAM_CONTENT)) {
+					throw new InvalidRequestException("Fulltext search is not enabled on this service, can not process parameter: " + Constants.PARAM_CONTENT);
+				}
+			}
+			List<Long> pids = myFulltextSearchSvc.everything(myResourceName, theParams);
+			if (pids.isEmpty()) {
+				// Will never match
+				pids = Collections.singletonList((Long) null);
+			}
+
+			myPredicates.add(myResourceTableRoot.get("myId").as(Long.class).in(pids));
+		}
+
 		myResourceTableQuery.where(myBuilder.and(SearchBuilder.toArray(myPredicates)));
 
 		myResourceTableQuery.multiselect(myResourceTableRoot.get("myId").as(Long.class));
@@ -1530,99 +1552,99 @@ public class SearchBuilder {
 		return pids;
 	}
 
-	public IBundleProvider loadPage(SearchParameterMap theParams, int theFromIndex, int theToIndex) {
-		StopWatch sw = new StopWatch();
-		DateRangeParam lu = theParams.getLastUpdated();
-
-		// Collection<Long> loadPids;
-		if (theParams.getEverythingMode() != null) {
-
-			Long pid = null;
-			if (theParams.get(BaseResource.SP_RES_ID) != null) {
-				StringParam idParm = (StringParam) theParams.get(BaseResource.SP_RES_ID).get(0).get(0);
-				pid = BaseHapiFhirDao.translateForcedIdToPid(myResourceName, idParm.getValue(), myForcedIdDao);
-			}
-
-			if (theParams.containsKey(Constants.PARAM_CONTENT) || theParams.containsKey(Constants.PARAM_TEXT)) {
-				List<Long> pids = myFulltextSearchSvc.everything(myResourceName, theParams);
-				if (pids.isEmpty()) {
-					return doReturnProvider();
-				}
-
-				doSetPids(pids);
-
-			} else {
-				CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
-				CriteriaQuery<Tuple> cq = builder.createTupleQuery();
-				Root<ResourceTable> from = cq.from(ResourceTable.class);
-				List<Predicate> predicates = new ArrayList<Predicate>();
-				if (pid != null) {
-					predicates.add(builder.equal(from.get("myId"), pid));
-				}
-				predicates.add(builder.equal(from.get("myResourceType"), myResourceName));
-				predicates.add(builder.isNull(from.get("myDeleted")));
-				cq.where(builder.and(SearchBuilder.toArray(predicates)));
-
-				Join<Object, Object> join = from.join("myIncomingResourceLinks", JoinType.LEFT);
-				cq.multiselect(from.get("myId").as(Long.class), join.get("mySourceResourcePid").as(Long.class));
-
-				TypedQuery<Tuple> query = myEntityManager.createQuery(cq);
-				Set<Long> pids = new HashSet<Long>();
-				for (Tuple next : query.getResultList()) {
-					pids.add(next.get(0, Long.class));
-					Long nextLong = next.get(1, Long.class);
-					if (nextLong != null) {
-						pids.add(nextLong);
-					}
-				}
-				doSetPids(pids);
-
-			}
-
-		} else {
-
-			if (myFulltextSearchSvc == null) {
-				if (theParams.containsKey(Constants.PARAM_TEXT)) {
-					throw new InvalidRequestException("Fulltext search is not enabled on this service, can not process parameter: " + Constants.PARAM_TEXT);
-				} else if (theParams.containsKey(Constants.PARAM_CONTENT)) {
-					throw new InvalidRequestException("Fulltext search is not enabled on this service, can not process parameter: " + Constants.PARAM_CONTENT);
-				}
-			} else {
-				List<Long> searchResultPids = myFulltextSearchSvc.search(myResourceName, theParams);
-				if (searchResultPids != null) {
-					if (searchResultPids.isEmpty()) {
-						return doReturnProvider();
-					}
-					doSetPids(searchResultPids);
-				}
-			}
-
-			if (!theParams.isEmpty()) {
-				// searchForIdsWithAndOr(theParams, lu);
-			}
-
-		}
-
-		if (doHaveNoResults()) {
-			return doReturnProvider();
-		}
-
-		// Handle _lastUpdated
-		if (lu != null) {
-			filterResourceIdsByLastUpdated(lu);
-
-			if (doHaveNoResults()) {
-				return doReturnProvider();
-			}
-		}
-
-		// Handle sorting if any was provided
-		processSort(theParams);
-
-		ourLog.info(" {} on {} in {}ms", new Object[] { myResourceName, theParams, sw.getMillisAndRestart() });
-		return doReturnProvider();
-
-	}
+	// public IBundleProvider loadPage(SearchParameterMap theParams, int theFromIndex, int theToIndex) {
+	// StopWatch sw = new StopWatch();
+	// DateRangeParam lu = theParams.getLastUpdated();
+	//
+	// // Collection<Long> loadPids;
+	// if (theParams.getEverythingMode() != null) {
+	//
+	// Long pid = null;
+	// if (theParams.get(BaseResource.SP_RES_ID) != null) {
+	// StringParam idParm = (StringParam) theParams.get(BaseResource.SP_RES_ID).get(0).get(0);
+	// pid = BaseHapiFhirDao.translateForcedIdToPid(myResourceName, idParm.getValue(), myForcedIdDao);
+	// }
+	//
+	// if (theParams.containsKey(Constants.PARAM_CONTENT) || theParams.containsKey(Constants.PARAM_TEXT)) {
+	// List<Long> pids = myFulltextSearchSvc.everything(myResourceName, theParams);
+	// if (pids.isEmpty()) {
+	// return doReturnProvider();
+	// }
+	//
+	// doSetPids(pids);
+	//
+	// } else {
+	// CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
+	// CriteriaQuery<Tuple> cq = builder.createTupleQuery();
+	// Root<ResourceTable> from = cq.from(ResourceTable.class);
+	// List<Predicate> predicates = new ArrayList<Predicate>();
+	// if (pid != null) {
+	// predicates.add(builder.equal(from.get("myId"), pid));
+	// }
+	// predicates.add(builder.equal(from.get("myResourceType"), myResourceName));
+	// predicates.add(builder.isNull(from.get("myDeleted")));
+	// cq.where(builder.and(SearchBuilder.toArray(predicates)));
+	//
+	// Join<Object, Object> join = from.join("myIncomingResourceLinks", JoinType.LEFT);
+	// cq.multiselect(from.get("myId").as(Long.class), join.get("mySourceResourcePid").as(Long.class));
+	//
+	// TypedQuery<Tuple> query = myEntityManager.createQuery(cq);
+	// Set<Long> pids = new HashSet<Long>();
+	// for (Tuple next : query.getResultList()) {
+	// pids.add(next.get(0, Long.class));
+	// Long nextLong = next.get(1, Long.class);
+	// if (nextLong != null) {
+	// pids.add(nextLong);
+	// }
+	// }
+	// doSetPids(pids);
+	//
+	// }
+	//
+	// } else {
+	//
+	// if (myFulltextSearchSvc == null) {
+	// if (theParams.containsKey(Constants.PARAM_TEXT)) {
+	// throw new InvalidRequestException("Fulltext search is not enabled on this service, can not process parameter: " + Constants.PARAM_TEXT);
+	// } else if (theParams.containsKey(Constants.PARAM_CONTENT)) {
+	// throw new InvalidRequestException("Fulltext search is not enabled on this service, can not process parameter: " + Constants.PARAM_CONTENT);
+	// }
+	// } else {
+	// List<Long> searchResultPids = myFulltextSearchSvc.search(myResourceName, theParams);
+	// if (searchResultPids != null) {
+	// if (searchResultPids.isEmpty()) {
+	// return doReturnProvider();
+	// }
+	// doSetPids(searchResultPids);
+	// }
+	// }
+	//
+	// if (!theParams.isEmpty()) {
+	// // searchForIdsWithAndOr(theParams, lu);
+	// }
+	//
+	// }
+	//
+	// if (doHaveNoResults()) {
+	// return doReturnProvider();
+	// }
+	//
+	// // Handle _lastUpdated
+	// if (lu != null) {
+	// filterResourceIdsByLastUpdated(lu);
+	//
+	// if (doHaveNoResults()) {
+	// return doReturnProvider();
+	// }
+	// }
+	//
+	// // Handle sorting if any was provided
+	// processSort(theParams);
+	//
+	// ourLog.info(" {} on {} in {}ms", new Object[] { myResourceName, theParams, sw.getMillisAndRestart() });
+	// return doReturnProvider();
+	//
+	// }
 
 	private void searchForIdsWithAndOr(SearchParameterMap theParams) {
 		SearchParameterMap params = theParams;
@@ -1708,7 +1730,7 @@ public class SearchBuilder {
 					break;
 				}
 			} else {
-				throw new InternalErrorException("Unknown search parameter " + theParamName + " for reource type " + theResourceName);
+				// throw new InternalErrorException("Unknown search parameter " + theParamName + " for reource type " + theResourceName);
 			}
 		}
 	}
