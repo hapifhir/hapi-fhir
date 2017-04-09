@@ -9,6 +9,8 @@ import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -29,6 +31,7 @@ import org.hl7.fhir.dstu3.model.Bundle.BundleType;
 import org.hl7.fhir.dstu3.model.Bundle.HTTPVerb;
 import org.hl7.fhir.dstu3.model.ContactPoint.ContactPointSystem;
 import org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGender;
+import org.hl7.fhir.dstu3.model.Observation.ObservationStatus;
 import org.hl7.fhir.dstu3.model.Subscription.SubscriptionChannelType;
 import org.hl7.fhir.dstu3.model.Subscription.SubscriptionStatus;
 import org.hl7.fhir.exceptions.FHIRException;
@@ -43,12 +46,15 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallback;
+import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
+import ca.uhn.fhir.jpa.dao.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.SearchParameterMap;
 import ca.uhn.fhir.jpa.dao.SearchParameterMap.EverythingModeEnum;
+import ca.uhn.fhir.jpa.dao.data.ISearchDao;
 import ca.uhn.fhir.jpa.entity.*;
 import ca.uhn.fhir.jpa.search.IStaleSearchDeletingSvc;
 import ca.uhn.fhir.model.api.IQueryParameterType;
@@ -66,6 +72,9 @@ import ca.uhn.fhir.util.TestUtil;
 @SuppressWarnings("unchecked")
 public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoDstu3SearchNoFtTest.class);
+
+	@Autowired
+	protected ISearchDao mySearchEntityDao;
 
 	@Autowired
 	protected IStaleSearchDeletingSvc myStaleSearchDeletingSvc;
@@ -321,6 +330,44 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 		assertEquals(2, results.size());
 	}
 
+	@SuppressWarnings("unused")
+	@Test
+	public void testHasAndHas() {
+		Patient p1 = new Patient();
+		p1.setActive(true);
+		IIdType p1id = myPatientDao.create(p1).getId().toUnqualifiedVersionless();
+
+		Patient p2 = new Patient();
+		p2.setActive(true);
+		IIdType p2id = myPatientDao.create(p2).getId().toUnqualifiedVersionless();
+
+		Observation p1o1 = new Observation();
+		p1o1.setStatus(ObservationStatus.FINAL);
+		p1o1.getSubject().setReferenceElement(p1id);
+		IIdType p1o1id = myObservationDao.create(p1o1).getId().toUnqualifiedVersionless();
+
+		Observation p1o2 = new Observation();
+		p1o2.setEffective(new DateTimeType("2001-01-01"));
+		p1o2.getSubject().setReferenceElement(p1id);
+		IIdType p1o2id = myObservationDao.create(p1o2).getId().toUnqualifiedVersionless();
+
+		Observation p2o1 = new Observation();
+		p2o1.setStatus(ObservationStatus.FINAL);
+		p2o1.getSubject().setReferenceElement(p2id);
+		IIdType p2o1id = myObservationDao.create(p2o1).getId().toUnqualifiedVersionless();
+		
+		SearchParameterMap map = new SearchParameterMap();
+		
+		HasAndListParam hasAnd = new HasAndListParam();
+		hasAnd.addValue(new HasOrListParam().add(new HasParam("Observation", "subject", "status", "final")));
+		hasAnd.addValue(new HasOrListParam().add(new HasParam("Observation", "subject", "date", "2001-01-01")));
+		map.add("_has", hasAnd);
+		List<String> actual = toUnqualifiedVersionlessIdValues(myPatientDao.search(map));
+		assertThat(actual, containsInAnyOrder(p1id.getValue()));
+
+	}
+
+	
 	@Test
 	public void testIndexNoDuplicatesNumber() {
 		Immunization res = new Immunization();
@@ -1244,7 +1291,7 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 		}
 
 	}
-
+	
 	@Test
 	public void testSearchPagesExpiry() throws Exception {
 		IIdType pid1;
@@ -1265,16 +1312,29 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 		SearchParameterMap params;
 		params = new SearchParameterMap();
 		params.add(Patient.SP_FAMILY, new StringParam("EXPIRE"));
-		IBundleProvider bundleProvider = myPatientDao.search(params);
+		final IBundleProvider bundleProvider = myPatientDao.search(params);
 		assertThat(toUnqualifiedVersionlessIds(bundleProvider), containsInAnyOrder(pid1, pid2));
 		assertThat(toUnqualifiedVersionlessIds(bundleProvider), containsInAnyOrder(pid1, pid2));
 
 		Thread.sleep(1500);
 
+		TransactionTemplate txTemplate = new TransactionTemplate(myTxManager);
+		txTemplate.execute(new TransactionCallbackWithoutResult() {
+			@Override
+			protected void doInTransactionWithoutResult(TransactionStatus theArg0) {
+				assertNotNull(mySearchEntityDao.findByUuid(bundleProvider.getUuid()));
+			}
+		});
+		
 		myDaoConfig.setExpireSearchResultsAfterMillis(500);
 		myStaleSearchDeletingSvc.pollForStaleSearchesAndDeleteThem();
 
-		assertThat(toUnqualifiedVersionlessIds(bundleProvider), not(containsInAnyOrder(pid1, pid2)));
+		txTemplate.execute(new TransactionCallbackWithoutResult() {
+			@Override
+			protected void doInTransactionWithoutResult(TransactionStatus theArg0) {
+				assertNull(mySearchEntityDao.findByUuid(bundleProvider.getUuid()));
+			}
+		});
 	}
 
 	@Test
