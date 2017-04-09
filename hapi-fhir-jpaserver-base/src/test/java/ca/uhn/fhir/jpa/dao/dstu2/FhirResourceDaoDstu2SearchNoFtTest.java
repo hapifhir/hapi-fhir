@@ -1306,15 +1306,15 @@ public class FhirResourceDaoDstu2SearchNoFtTest extends BaseJpaDstu2Test {
 		}
 
 		SearchParameterMap params;
+		
+		params = new SearchParameterMap();
+		params.add(Patient.SP_ORGANIZATION, new ReferenceParam().setMissing(true));
+		assertThat(toUnqualifiedVersionlessIds(myPatientDao.search(params)), containsInAnyOrder(pid1, pid3));
 
 		params = new SearchParameterMap();
 		params.add(Patient.SP_NAME, new StringParam("FAMILY1"));
 		params.add(Patient.SP_ORGANIZATION, new ReferenceParam().setMissing(true));
 		assertThat(toUnqualifiedVersionlessIds(myPatientDao.search(params)), containsInAnyOrder(pid1));
-
-		params = new SearchParameterMap();
-		params.add(Patient.SP_ORGANIZATION, new ReferenceParam().setMissing(true));
-		assertThat(toUnqualifiedVersionlessIds(myPatientDao.search(params)), containsInAnyOrder(pid1, pid3));
 
 		params = new SearchParameterMap();
 		params.add(Patient.SP_NAME, new StringParam("FAMILY9999"));

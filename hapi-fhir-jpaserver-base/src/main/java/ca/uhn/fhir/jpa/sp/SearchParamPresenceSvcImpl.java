@@ -77,11 +77,11 @@ public class SearchParamPresenceSvcImpl implements ISearchParamPresenceSvc {
 				entitiesToSave.add(present);
 			}
 
-			mySearchParamPresentDao.deleteInBatch(entitiesToDelete);
-			mySearchParamPresentDao.save(entitiesToSave);
-
 		}
 
+		mySearchParamPresentDao.deleteInBatch(entitiesToDelete);
+		mySearchParamPresentDao.save(entitiesToSave);
+		
 	}
 
 	@Override

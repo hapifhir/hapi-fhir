@@ -409,7 +409,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		RequestValidatingInterceptor interceptor = new RequestValidatingInterceptor();
 		assertTrue(interceptor.isAddValidationResultsToResponseOperationOutcome());
 		interceptor.setFailOnSeverity(null);
-		
+
 		ourRestServer.registerInterceptor(interceptor);
 		try {
 			// Missing status, which is mandatory
@@ -421,7 +421,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			ourLog.info(encodedOo);
 			assertThat(encodedOo, containsString("cvc-complex-type.2.4.b"));
 			assertThat(encodedOo, containsString("Successfully created resource \\\"Observation/"));
-			
+
 			interceptor.setAddValidationResultsToResponseOperationOutcome(false);
 			outcome = ourClient.create().resource(obs).execute().getOperationOutcome();
 			encodedOo = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
@@ -1498,7 +1498,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	 */
 	@Test
 	public void testEverythingWithLargeSet() throws Exception {
-		
+
 		String inputString = IOUtils.toString(getClass().getResourceAsStream("/david_big_bundle.json"), StandardCharsets.UTF_8);
 		Bundle inputBundle = myFhirCtx.newJsonParser().parseResource(Bundle.class, inputString);
 		inputBundle.setType(BundleType.TRANSACTION);
@@ -1522,7 +1522,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 				.execute();
 
 		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(responseBundle));
-		
+
 		TreeSet<String> ids = new TreeSet<String>();
 		for (int i = 0; i < responseBundle.getEntry().size(); i++) {
 			for (BundleEntryComponent nextEntry : responseBundle.getEntry()) {
@@ -2168,7 +2168,6 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			assertThat(returned.getEntry().size(), greaterThan(1));
 		}
 	}
-
 
 	@Test
 	public void testSaveAndRetrieveExistingNarrativeJson() {
@@ -3046,42 +3045,38 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		p.addName().addGiven("Sarah").setFamily("Graham");
 		ourClient.create().resource(p).execute();
 
-		//@formatter:off
 		Bundle resp = ourClient
-			.search()
-			.forResource(Patient.class)
-			.where(Patient.IDENTIFIER.exactly().systemAndCode("urn:system", methodName))
-			.sort().ascending(Patient.FAMILY)
-			.sort().ascending(Patient.GIVEN)
-			.count(100)
-			.returnBundle(Bundle.class)
-			.execute();
-		//@formatter:on
+				.search()
+				.forResource(Patient.class)
+				.where(Patient.IDENTIFIER.exactly().systemAndCode("urn:system", methodName))
+				.sort().ascending(Patient.FAMILY)
+				.sort().ascending(Patient.GIVEN)
+				.count(100)
+				.returnBundle(Bundle.class)
+				.execute();
 
 		List<String> names = toNameList(resp);
 
 		ourLog.info(StringUtils.join(names, '\n'));
 
-		//@formatter:off
 		assertThat(names, contains( // this matches in order only
-			"Daniel Adams",
-			"Aaron Alexis",
-			"Carol Allen",
-			"Ruth Black",
-			"Brian Brooks",
-			"Amy Clark",
-			"Susan Clark",
-			"Anthony Coleman",
-			"Lisa Coleman",
-			"Steven Coleman",
-			"Ruth Cook",
-			"Betty Davis",
-			"Joshua Diaz",
-			"Brian Gracia",
-			"Sarah Graham",
-			"Stephan Graham"));
-		//@formatter:om
-			
+				"Daniel Adams",
+				"Aaron Alexis",
+				"Carol Allen",
+				"Ruth Black",
+				"Brian Brooks",
+				"Amy Clark",
+				"Susan Clark",
+				"Anthony Coleman",
+				"Lisa Coleman",
+				"Steven Coleman",
+				"Ruth Cook",
+				"Betty Davis",
+				"Joshua Diaz",
+				"Brian Gracia",
+				"Sarah Graham",
+				"Stephan Graham"));
+
 	}
 
 	/**
@@ -3118,7 +3113,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		CloseableHttpResponse resp = ourHttpClient.execute(post);
 		try {
 			assertEquals(200, resp.getStatusLine().getStatusCode());
-			String output= IOUtils.toString(resp.getEntity().getContent(), StandardCharsets.UTF_8);
+			String output = IOUtils.toString(resp.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(output);
 		} finally {
 			resp.close();
@@ -3157,7 +3152,8 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			ourLog.info(responseString);
 			assertEquals(400, response.getStatusLine().getStatusCode());
 			OperationOutcome oo = myFhirCtx.newXmlParser().parseResource(OperationOutcome.class, responseString);
-			assertThat(oo.getIssue().get(0).getDiagnostics(), containsString("Can not update resource, request URL must contain an ID element for update (PUT) operation (it must be of the form [base]/[resource type]/[id])"));
+			assertThat(oo.getIssue().get(0).getDiagnostics(),
+					containsString("Can not update resource, request URL must contain an ID element for update (PUT) operation (it must be of the form [base]/[resource type]/[id])"));
 		} finally {
 			response.close();
 		}
@@ -3223,10 +3219,10 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		// Try to update with the wrong ID in the resource body
 		p1.setId("FOO");
 		p1.addAddress().addLine("NEWLINE");
-		
+
 		String encoded = myFhirCtx.newJsonParser().encodeResourceToString(p1);
 		ourLog.info(encoded);
-		
+
 		HttpPut put = new HttpPut(ourServerBase + "/Patient/" + p1id.getIdPart());
 		put.setEntity(new StringEntity(encoded, ContentType.create(Constants.CT_FHIR_JSON, "UTF-8")));
 		put.addHeader("Accept", Constants.CT_FHIR_JSON);
@@ -3234,14 +3230,17 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		try {
 			assertEquals(400, response.getStatusLine().getStatusCode());
 			OperationOutcome oo = myFhirCtx.newJsonParser().parseResource(OperationOutcome.class, new InputStreamReader(response.getEntity().getContent()));
-			assertEquals("Can not update resource, resource body must contain an ID element which matches the request URL for update (PUT) operation - Resource body ID of \"FOO\" does not match URL ID of \"" + p1id.getIdPart() + "\"", oo.getIssue().get(0).getDiagnostics());
+			assertEquals(
+					"Can not update resource, resource body must contain an ID element which matches the request URL for update (PUT) operation - Resource body ID of \"FOO\" does not match URL ID of \""
+							+ p1id.getIdPart() + "\"",
+					oo.getIssue().get(0).getDiagnostics());
 		} finally {
 			response.close();
 		}
-		
+
 		// Try to update with the no ID in the resource body
-		p1.setId((String)null);
-		
+		p1.setId((String) null);
+
 		encoded = myFhirCtx.newJsonParser().encodeResourceToString(p1);
 		put = new HttpPut(ourServerBase + "/Patient/" + p1id.getIdPart());
 		put.setEntity(new StringEntity(encoded, ContentType.create(Constants.CT_FHIR_JSON, "UTF-8")));
@@ -3257,7 +3256,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 		// Try to update with the to correct ID in the resource body
 		p1.setId(p1id.getIdPart());
-		
+
 		encoded = myFhirCtx.newJsonParser().encodeResourceToString(p1);
 		put = new HttpPut(ourServerBase + "/Patient/" + p1id.getIdPart());
 		put.setEntity(new StringEntity(encoded, ContentType.create(Constants.CT_FHIR_JSON, "UTF-8")));
@@ -3269,7 +3268,6 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		}
 
 	}
-
 
 	@Test
 	public void testUpdateRejectsInvalidTypes() throws InterruptedException {

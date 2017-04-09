@@ -26,12 +26,14 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.config.TestDstu1Config;
 import ca.uhn.fhir.jpa.entity.TagTypeEnum;
+import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.BundleEntry;
 import ca.uhn.fhir.model.api.IResource;
@@ -61,10 +63,11 @@ public class FhirSystemDaoDstu1Test extends BaseJpaTest {
 	private static IFhirResourceDao<Patient> ourPatientDao;
 	private static IFhirSystemDao<List<IResource>, MetaDt> ourSystemDao;
 	private static PlatformTransactionManager ourTxManager;
+	private static ISearchParamPresenceSvc ourSearchParamPresenceSvc;
 
 	@Before
 	public void before() {
-		super.purgeDatabase(ourEntityManager, ourTxManager);
+		super.purgeDatabase(ourEntityManager, ourTxManager, ourSearchParamPresenceSvc);
 	}
 
 	@Override
@@ -493,6 +496,7 @@ public class FhirSystemDaoDstu1Test extends BaseJpaTest {
 		ourSystemDao = ourCtx.getBean("mySystemDaoDstu1", IFhirSystemDao.class);
 		ourEntityManager = ourCtx.getBean(EntityManager.class);
 		ourTxManager = ourCtx.getBean(PlatformTransactionManager.class);
+		ourSearchParamPresenceSvc = ourCtx.getBean(ISearchParamPresenceSvc.class);
 	}
 
 }

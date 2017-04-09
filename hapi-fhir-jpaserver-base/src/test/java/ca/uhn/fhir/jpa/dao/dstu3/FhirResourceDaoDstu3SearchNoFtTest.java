@@ -108,7 +108,7 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 
 	@Test
 	public void testEverythingTimings() throws Exception {
-		String methodName = "testEverythingIncludesBackReferences";
+		String methodName = "testEverythingTimings";
 
 		Organization org = new Organization();
 		org.setName(methodName);
@@ -124,7 +124,7 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 		IIdType patId = myPatientDao.create(pat, mySrd).getId().toUnqualifiedVersionless();
 
 		Patient pat2 = new Patient();
-		pat2.addAddress().addLine(methodName);
+		pat2.addAddress().addLine(methodName + "2");
 		pat2.getManagingOrganization().setReferenceElement(orgId);
 		IIdType patId2 = myPatientDao.create(pat2, mySrd).getId().toUnqualifiedVersionless();
 
@@ -2860,6 +2860,125 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 		result = myValueSetDao.search(ValueSet.SP_URL, new UriParam("http://hl7.org/fhir/ValueSet/FOOOOOO"));
 		assertThat(toUnqualifiedVersionlessIds(result), empty());
 
+	}
+
+	@Test
+	public void testSortOnPopulatedField() throws Exception {
+		Patient pBA = new Patient();
+		pBA.setId("BA");
+		pBA.setActive(true);
+		pBA.setGender(AdministrativeGender.MALE);
+		pBA.addName().setFamily("B").addGiven("A");
+		myPatientDao.update(pBA);
+
+		Patient pBB = new Patient();
+		pBB.setId("BB");
+		pBB.setActive(true);
+		pBB.setGender(AdministrativeGender.MALE);
+		pBB.addName().setFamily("B").addGiven("B");
+		pBB.addName().setFamily("Z").addGiven("Z");
+		myPatientDao.update(pBB);
+
+		Patient pAB = new Patient();
+		pAB.setId("AB");
+		pAB.setActive(true);
+		pAB.setGender(AdministrativeGender.MALE);
+		pAB.addName().setFamily("A").addGiven("B");
+		myPatientDao.update(pAB);
+		
+		Patient pAA = new Patient();
+		pAA.setId("AA");
+		pAA.setActive(true);
+		pAA.setGender(AdministrativeGender.MALE);
+		pAA.addName().setFamily("A").addGiven("A");
+		myPatientDao.update(pAA);
+
+		SearchParameterMap map;
+		List<String> ids;
+
+		map = new SearchParameterMap();
+		map.setSort(new SortSpec("family", SortOrderEnum.ASC).setChain(new SortSpec("given", SortOrderEnum.ASC)));
+		ids = toUnqualifiedVersionlessIdValues(myPatientDao.search(map));
+		assertThat(ids, contains("Patient/AA", "Patient/AB", "Patient/BA", "Patient/BB"));
+		
+		map = new SearchParameterMap();
+		map.setSort(new SortSpec("gender").setChain(new SortSpec("family", SortOrderEnum.ASC).setChain(new SortSpec("given", SortOrderEnum.ASC))));
+		ids = toUnqualifiedVersionlessIdValues(myPatientDao.search(map));
+		ourLog.info("IDS: {}", ids);
+		assertThat(ids, contains("Patient/AA", "Patient/AB", "Patient/BA", "Patient/BB"));
+
+		map = new SearchParameterMap();
+		map.add(Patient.SP_ACTIVE, new TokenParam(null, "true"));
+		map.setSort(new SortSpec("family", SortOrderEnum.ASC).setChain(new SortSpec("given", SortOrderEnum.ASC)));
+		ids = toUnqualifiedVersionlessIdValues(myPatientDao.search(map));
+		assertThat(ids, contains("Patient/AA", "Patient/AB", "Patient/BA", "Patient/BB"));
+	}
+
+	@Test
+	public void testSort() throws Exception {
+		Patient pBA = new Patient();
+		pBA.setId("BA");
+		pBA.setActive(true);
+		pBA.setGender(AdministrativeGender.MALE);
+		pBA.addName().setFamily("B").addGiven("A");
+		myPatientDao.update(pBA);
+
+		Patient pBB = new Patient();
+		pBB.setId("BB");
+		pBB.setActive(true);
+		pBB.setGender(AdministrativeGender.MALE);
+		pBB.addName().setFamily("B").addGiven("B");
+		myPatientDao.update(pBB);
+
+		Patient pAB = new Patient();
+		pAB.setId("AB");
+		pAB.setActive(true);
+		pAB.setGender(AdministrativeGender.MALE);
+		pAB.addName().setFamily("A").addGiven("B");
+		myPatientDao.update(pAB);
+		
+		Patient pAA = new Patient();
+		pAA.setId("AA");
+		pAA.setActive(true);
+		pAA.setGender(AdministrativeGender.MALE);
+		pAA.addName().setFamily("A").addGiven("A");
+		myPatientDao.update(pAA);
+
+		Patient pCA = new Patient();
+		pCA.setId("CA");
+		pCA.setActive(false);
+		pCA.addName().setFamily("C").addGiven("A");
+		pCA.addName().setFamily("Z").addGiven("A");
+		myPatientDao.update(pCA);
+
+		SearchParameterMap map;
+		List<String> ids;
+
+		// Sort across all resources
+		map = new SearchParameterMap();
+		map.setSort(new SortSpec("family", SortOrderEnum.ASC).setChain(new SortSpec("given", SortOrderEnum.ASC)));
+		ids = toUnqualifiedVersionlessIdValues(myPatientDao.search(map));
+		assertThat(ids, contains("Patient/AA", "Patient/AB", "Patient/BA", "Patient/BB", "Patient/CA"));
+		
+		// A sort on a field that isn't populated in all cases
+		map = new SearchParameterMap();
+		map.setSort(new SortSpec("gender"));
+		ids = toUnqualifiedVersionlessIdValues(myPatientDao.search(map));
+		ourLog.info("IDS: {}", ids);
+		assertThat(ids, containsInAnyOrder("Patient/AA", "Patient/AB", "Patient/BA", "Patient/BB", "Patient/CA"));
+		
+		map = new SearchParameterMap();
+		map.setSort(new SortSpec("gender").setChain(new SortSpec("family", SortOrderEnum.ASC).setChain(new SortSpec("given", SortOrderEnum.ASC))));
+		ids = toUnqualifiedVersionlessIdValues(myPatientDao.search(map));
+		ourLog.info("IDS: {}", ids);
+		assertThat(ids, contains("Patient/AA", "Patient/AB", "Patient/BA", "Patient/BB", "Patient/CA"));
+
+		// Sort 
+		map = new SearchParameterMap();
+		map.add(Patient.SP_ACTIVE, new TokenParam(null, "true"));
+		map.setSort(new SortSpec("family", SortOrderEnum.ASC).setChain(new SortSpec("given", SortOrderEnum.ASC)));
+		ids = toUnqualifiedVersionlessIdValues(myPatientDao.search(map));
+		assertThat(ids, contains("Patient/AA", "Patient/AB", "Patient/BA", "Patient/BB"));
 	}
 
 	@Test

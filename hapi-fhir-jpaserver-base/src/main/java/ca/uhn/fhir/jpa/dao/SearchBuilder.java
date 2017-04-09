@@ -46,6 +46,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionTemplate;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.servlet.ThemeResolver;
 
 import com.google.common.collect.Lists;
@@ -100,7 +101,7 @@ public class SearchBuilder {
 	private Root<ResourceTable> myResourceTableRoot;
 	private ArrayList<Predicate> myPredicates;
 	private CriteriaBuilder myBuilder;
-	private CriteriaQuery<Tuple> myResourceTableQuery;
+	private AbstractQuery<Long> myResourceTableQuery;
 	private PlatformTransactionManager myPlatformTransactionManager;
 
 	public SearchBuilder(FhirContext theFhirContext, EntityManager theEntityManager, PlatformTransactionManager thePlatformTransactionManager, IFulltextSearchSvc theFulltextSearchSvc,
@@ -1257,19 +1258,20 @@ public class SearchBuilder {
 			throw new InvalidRequestException("This server does not support _sort specifications of type " + param.getParamType() + " - Can't serve _sort=" + theSort.getParamName());
 		}
 
-		From<?, ?> stringJoin = theFrom.join(joinAttrName, JoinType.INNER);
+		From<?, ?> join = theFrom.join(joinAttrName, JoinType.LEFT);
 
 		if (param.getParamType() == RestSearchParameterTypeEnum.REFERENCE) {
-			thePredicates.add(stringJoin.get("mySourcePath").as(String.class).in(param.getPathsSplit()));
+			thePredicates.add(join.get("mySourcePath").as(String.class).in(param.getPathsSplit()));
 		} else {
-			thePredicates.add(theBuilder.equal(stringJoin.get("myParamName"), theSort.getParamName()));
+			Predicate joinParam1 = theBuilder.equal(join.get("myParamName"), theSort.getParamName());
+			thePredicates.add(joinParam1);
 		}
 
 		for (String next : sortAttrName) {
 			if (theSort.getOrder() == null || theSort.getOrder() == SortOrderEnum.ASC) {
-				theOrders.add(theBuilder.asc(stringJoin.get(next)));
+				theOrders.add(theBuilder.asc(join.get(next)));
 			} else {
-				theOrders.add(theBuilder.desc(stringJoin.get(next)));
+				theOrders.add(theBuilder.desc(join.get(next)));
 			}
 		}
 
@@ -1470,27 +1472,53 @@ public class SearchBuilder {
 
 	public List<Long> loadSearchPage(SearchParameterMap theParams, int theFromIndex, int theToIndex) {
 
-		// if (myFulltextSearchSvc == null) {
-		// if (theParams.containsKey(Constants.PARAM_TEXT)) {
-		// throw new InvalidRequestException("Fulltext search is not enabled on this service, can not process parameter: " + Constants.PARAM_TEXT);
-		// } else if (theParams.containsKey(Constants.PARAM_CONTENT)) {
-		// throw new InvalidRequestException("Fulltext search is not enabled on this service, can not process parameter: " + Constants.PARAM_CONTENT);
-		// }
-		// } else {
-		// // FIXME: add from and to
-		// List<Long> searchResultPids = myFulltextSearchSvc.search(myResourceName, theParams);
-		// if (searchResultPids != null) {
-		// if (searchResultPids.isEmpty()) {
-		// return Collections.emptyList();
-		// }
-		// return searchResultPids;
-		// }
-		// }
-
 		myBuilder = myEntityManager.getCriteriaBuilder();
-		myResourceTableQuery = myBuilder.createTupleQuery();
+		CriteriaQuery<Long> outerQuery = null;
+		
+		/*
+		 * Sort
+		 * 
+		 * If we have a sort, we wrap the criteria search (the search that actually
+		 * finds the appropriate resources) in an outer search which is then sorted
+		 */
+		if (theParams.getSort() != null) {
+
+			outerQuery = myBuilder.createQuery(Long.class);
+			Root<ResourceTable> outerQueryFrom = outerQuery.from(ResourceTable.class);
+			
+			List<Order> orders = Lists.newArrayList();
+			List<Predicate> predicates = Lists.newArrayList();
+			
+			createSort(myBuilder, outerQueryFrom, theParams.getSort(), orders, predicates);
+			if (orders.size() > 0) {
+				outerQuery.orderBy(orders);
+			}
+			
+			Subquery<Long> subQ = outerQuery.subquery(Long.class);
+			Root<ResourceTable> subQfrom = subQ.from(ResourceTable.class);
+			
+			myResourceTableQuery = subQ;
+			myResourceTableRoot = subQfrom;
+			
+			Expression<Long> selectExpr = subQfrom.get("myId").as(Long.class);
+			subQ.select(selectExpr);
+			
+			predicates.add(0, myBuilder.in(outerQueryFrom.get("myId").as(Long.class)).value(subQ));
+			
+			outerQuery.multiselect(outerQueryFrom.get("myId").as(Long.class));
+			outerQuery.where(predicates.toArray(new Predicate[0]));
+			
+		} else {
+			
+			outerQuery = myBuilder.createQuery(Long.class);
+			myResourceTableQuery = outerQuery;
+			myResourceTableRoot = myResourceTableQuery.from(ResourceTable.class);
+			outerQuery.multiselect(myResourceTableRoot.get("myId").as(Long.class));
+			
+		}
+
+		
 		myResourceTableQuery.distinct(true);
-		myResourceTableRoot = myResourceTableQuery.from(ResourceTable.class);
 		myPredicates = new ArrayList<Predicate>();
 		if (theParams.getEverythingMode() == null) {
 			myPredicates.add(myBuilder.equal(myResourceTableRoot.get("myResourceType"), myResourceName));
@@ -1509,7 +1537,9 @@ public class SearchBuilder {
 				Long pid = BaseHapiFhirDao.translateForcedIdToPid(myResourceName, idParm.getValue(), myForcedIdDao);
 				myPredicates.add(myBuilder.equal(join.get("myTargetResourcePid").as(Long.class), pid));
 			} else {
-				myPredicates.add(myBuilder.equal(join.get("myTargetResourceType").as(String.class), myResourceName));
+				Predicate targetTypePredicate = myBuilder.equal(join.get("myTargetResourceType").as(String.class), myResourceName);
+				Predicate sourceTypePredicate = myBuilder.equal(myResourceTableRoot.get("myResourceType").as(String.class), myResourceName);
+				myPredicates.add(myBuilder.or(sourceTypePredicate, targetTypePredicate));
 			}
 
 		} else {
@@ -1539,14 +1569,19 @@ public class SearchBuilder {
 
 		myResourceTableQuery.where(myBuilder.and(SearchBuilder.toArray(myPredicates)));
 
-		myResourceTableQuery.multiselect(myResourceTableRoot.get("myId").as(Long.class));
-		TypedQuery<Tuple> query = myEntityManager.createQuery(myResourceTableQuery);
+		/*
+		 * Now perform the search
+		 */
+		TypedQuery<Long> query = myEntityManager.createQuery(outerQuery);
 		query.setFirstResult(theFromIndex);
 		query.setMaxResults(theToIndex - theFromIndex);
 
 		List<Long> pids = new ArrayList<Long>();
-		for (Tuple next : query.getResultList()) {
-			pids.add(next.get(0, Long.class));
+		
+		for (Long next : query.getResultList()) {
+			if (next != null) {
+				pids.add(next);
+			}
 		}
 
 		return pids;
@@ -1889,6 +1924,10 @@ public class SearchBuilder {
 			return;
 		}
 
+		// Dupes will cause a crash later anyhow, but this is expensive so only do it
+		// when running asserts
+		assert new HashSet<Long>(theIncludePids).size() == theIncludePids.size() : "PID list contains duplicates: " + theIncludePids;
+		
 		Map<Long, Integer> position = new HashMap<Long, Integer>();
 		for (Long next : theIncludePids) {
 			position.put(next, theResourceListToPopulate.size());
