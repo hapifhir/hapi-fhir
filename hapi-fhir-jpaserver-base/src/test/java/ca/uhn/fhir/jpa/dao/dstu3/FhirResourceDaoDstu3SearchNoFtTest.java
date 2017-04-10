@@ -3008,6 +3008,14 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 
 	@Test
 	public void testSortOnSparselyPopulatedSearchParameter() throws Exception {
+		Patient pCA = new Patient();
+		pCA.setId("CA");
+		pCA.setActive(false);
+		pCA.getAddressFirstRep().addLine("A");
+		pCA.addName().setFamily("C").addGiven("A");
+		pCA.addName().setFamily("Z").addGiven("A");
+		myPatientDao.update(pCA);
+		
 		Patient pBA = new Patient();
 		pBA.setId("BA");
 		pBA.setActive(true);
@@ -3035,14 +3043,6 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 		pAA.setGender(AdministrativeGender.MALE);
 		pAA.addName().setFamily("A").addGiven("A");
 		myPatientDao.update(pAA);
-
-		Patient pCA = new Patient();
-		pCA.setId("CA");
-		pCA.setActive(false);
-		pCA.getAddressFirstRep().addLine("A");
-		pCA.addName().setFamily("C").addGiven("A");
-		pCA.addName().setFamily("Z").addGiven("A");
-		myPatientDao.update(pCA);
 
 		SearchParameterMap map;
 		List<String> ids;

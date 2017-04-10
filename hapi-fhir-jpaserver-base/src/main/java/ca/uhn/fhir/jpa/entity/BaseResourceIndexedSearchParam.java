@@ -45,7 +45,6 @@ public abstract class BaseResourceIndexedSearchParam implements Serializable {
 	@Field()
 	@Column(name = "SP_MISSING", nullable = true)
 	@ColumnDefault("false")
-	@Temporal(TemporalType.TIMESTAMP)
 	private boolean myMissing;
 
 	@Field

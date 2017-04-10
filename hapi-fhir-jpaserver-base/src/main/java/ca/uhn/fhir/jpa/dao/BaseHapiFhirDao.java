@@ -35,6 +35,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
 
@@ -1276,6 +1277,13 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 					}
 				}
 
+				Set<Entry<String, RuntimeSearchParam>> activeSearchParams = mySearchParamRegistry.getActiveSearchParams(theEntity.getResourceType()).entrySet();
+				findMissingSearchParams(theEntity, activeSearchParams, RestSearchParameterTypeEnum.STRING, stringParams);
+				findMissingSearchParams(theEntity, activeSearchParams, RestSearchParameterTypeEnum.NUMBER, numberParams);
+				findMissingSearchParams(theEntity, activeSearchParams, RestSearchParameterTypeEnum.QUANTITY, quantityParams);
+				findMissingSearchParams(theEntity, activeSearchParams, RestSearchParameterTypeEnum.DATE, dateParams);
+				findMissingSearchParams(theEntity, activeSearchParams, RestSearchParameterTypeEnum.URI, uriParams);
+				
 				setUpdatedTime(stringParams, theUpdateTime);
 				setUpdatedTime(numberParams, theUpdateTime);
 				setUpdatedTime(quantityParams, theUpdateTime);
@@ -1518,6 +1526,56 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		}
 
 		return theEntity;
+	}
+
+	@SuppressWarnings("unchecked")
+	private <T extends BaseResourceIndexedSearchParam> void findMissingSearchParams(ResourceTable theEntity, Set<Entry<String, RuntimeSearchParam>> activeSearchParams, RestSearchParameterTypeEnum type,
+			Set<T> paramCollection) {
+		for (Entry<String, RuntimeSearchParam> nextEntry : activeSearchParams) {
+			String nextParamName = nextEntry.getKey();
+			if (nextEntry.getValue().getParamType() == type) {
+				boolean haveParam = false;
+				for (BaseResourceIndexedSearchParam nextParam : paramCollection) {
+					if (nextParam.getParamName().equals(nextParamName)) {
+						haveParam = true;
+						break;
+					}
+				}
+				
+				if (!haveParam) {
+					BaseResourceIndexedSearchParam param;
+					switch (type) {
+					case DATE:
+						param = new ResourceIndexedSearchParamDate();
+						break;
+					case NUMBER:
+						param = new ResourceIndexedSearchParamNumber();
+						break;
+					case QUANTITY:
+						param = new ResourceIndexedSearchParamQuantity();
+						break;
+					case STRING:
+						param = new ResourceIndexedSearchParamString();
+						break;
+					case TOKEN:
+						param = new ResourceIndexedSearchParamToken();
+						break;
+					case URI:
+						param = new ResourceIndexedSearchParamUri();
+						break;
+					case COMPOSITE:
+					case HAS:
+					case REFERENCE:
+					default:
+						continue;
+					}
+					param.setResource(theEntity);
+					param.setMissing(true);
+					param.setParamName(nextParamName);
+					paramCollection.add((T) param);
+				}
+			}
+		}
 	}
 
 	private void updateSearchParamPresent(Map<String, Boolean> presentSearchParams, Set<? extends BaseResourceIndexedSearchParam> params) {
