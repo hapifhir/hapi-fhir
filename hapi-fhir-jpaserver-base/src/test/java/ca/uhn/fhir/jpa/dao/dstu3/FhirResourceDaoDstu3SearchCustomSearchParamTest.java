@@ -20,6 +20,7 @@ import org.junit.Test;
 import ca.uhn.fhir.jpa.dao.SearchParameterMap;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.IBundleProvider;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.TestUtil;
 
@@ -238,8 +239,12 @@ public class FhirResourceDaoDstu3SearchCustomSearchParamTest extends BaseJpaDstu
 		// Try with custom gender SP
 		map = new SearchParameterMap();
 		map.add("foo", new TokenParam(null, "male"));
-		IBundleProvider res = myPatientDao.search(map);
-		assertEquals(0, res.size());
+		try {
+			myPatientDao.search(map);
+			fail();
+		} catch (InvalidRequestException e) {
+			assertEquals("Unknown search parameter foo for resource type Patient", e.getMessage());
+		}
 	}
 
 	@Test
@@ -272,9 +277,12 @@ public class FhirResourceDaoDstu3SearchCustomSearchParamTest extends BaseJpaDstu
 		// Try with custom gender SP (should find nothing)
 		map = new SearchParameterMap();
 		map.add("foo", new TokenParam(null, "male"));
-		results = myPatientDao.search(map);
-		foundResources = toUnqualifiedVersionlessIdValues(results);
-		assertThat(foundResources, empty());
+		try {
+			myPatientDao.search(map);
+			fail();
+		} catch (InvalidRequestException e) {
+			assertEquals("Unknown search parameter foo for resource type Patient", e.getMessage());
+		}
 
 		// Try with normal gender SP
 		map = new SearchParameterMap();

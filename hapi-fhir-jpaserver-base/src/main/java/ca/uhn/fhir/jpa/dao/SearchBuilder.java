@@ -143,7 +143,7 @@ public class SearchBuilder {
 		Join<ResourceTable, ResourceIndexedSearchParamDate> join = myResourceTableRoot.join("myParamsDate", JoinType.LEFT);
 
 		if (theList.get(0).getMissing() != null) {
-			addPredicateParamMissing(theParamName, theList.get(0).getMissing(), join);
+			addPredicateParamMissing(theResourceName, theParamName, theList.get(0).getMissing(), join);
 			return;
 		}
 
@@ -269,7 +269,7 @@ public class SearchBuilder {
 		Join<ResourceTable, ResourceIndexedSearchParamNumber> join = myResourceTableRoot.join("myParamsNumber", JoinType.LEFT);
 
 		if (theList.get(0).getMissing() != null) {
-			addPredicateParamMissing(theParamName, theList.get(0).getMissing(), join);
+			addPredicateParamMissing(theResourceName, theParamName, theList.get(0).getMissing(), join);
 			return;
 		}
 
@@ -302,18 +302,18 @@ public class SearchBuilder {
 		myPredicates.add(myBuilder.or(toArray(codePredicates)));
 	}
 
-	private void addPredicateParamMissing(String theParamName, boolean theMissing, Join<ResourceTable, ? extends BaseResourceIndexedSearchParam> theJoin) {
+	private void addPredicateParamMissing(String theResourceName, String theParamName, boolean theMissing, Join<ResourceTable, ? extends BaseResourceIndexedSearchParam> theJoin) {
 		
-		myPredicates.add(myBuilder.equal(theJoin.get("myResourceType"), myResourceName));
+		myPredicates.add(myBuilder.equal(theJoin.get("myResourceType"), theResourceName));
 		myPredicates.add(myBuilder.equal(theJoin.get("myParamName"), theParamName));
 		myPredicates.add(myBuilder.equal(theJoin.get("myMissing"), theMissing));
 	}
 
-	private void addPredicateParamMissing(String theParamName, boolean theMissing) {
+	private void addPredicateParamMissing(String theResourceName, String theParamName, boolean theMissing) {
 		Join<ResourceTable, SearchParamPresent> paramPresentJoin = myResourceTableRoot.join("mySearchParamPresents", JoinType.LEFT);
 		Join<SearchParamPresent, SearchParam> paramJoin = paramPresentJoin.join("mySearchParam", JoinType.LEFT);
 
-		myPredicates.add(myBuilder.equal(paramJoin.get("myResourceName"), myResourceName));
+		myPredicates.add(myBuilder.equal(paramJoin.get("myResourceName"), theResourceName));
 		myPredicates.add(myBuilder.equal(paramJoin.get("myParamName"), theParamName));
 		myPredicates.add(myBuilder.equal(paramPresentJoin.get("myPresent"), !theMissing));
 	}
@@ -322,7 +322,7 @@ public class SearchBuilder {
 		Join<ResourceTable, ResourceIndexedSearchParamQuantity> join = myResourceTableRoot.join("myParamsQuantity", JoinType.LEFT);
 
 		if (theList.get(0).getMissing() != null) {
-			addPredicateParamMissing(theParamName, theList.get(0).getMissing(), join);
+			addPredicateParamMissing(theResourceName, theParamName, theList.get(0).getMissing(), join);
 			return;
 		}
 
@@ -336,11 +336,14 @@ public class SearchBuilder {
 		myPredicates.add(myBuilder.or(toArray(codePredicates)));
 	}
 
-	private void addPredicateReference(String theParamName, List<? extends IQueryParameterType> theList) {
+	/**
+	 * Add reference predicate to the current search
+	 */
+	private void addPredicateReference(String theResourceName, String theParamName, List<? extends IQueryParameterType> theList) {
 		assert theParamName.contains(".") == false;
 		
 		if (theList.get(0).getMissing() != null) {
-			addPredicateParamMissing(theParamName, theList.get(0).getMissing());
+			addPredicateParamMissing(theResourceName, theParamName, theList.get(0).getMissing());
 			return;
 		}
 		
@@ -377,8 +380,10 @@ public class SearchBuilder {
 					}
 					for (Long next : targetPid) {
 						ourLog.debug("Searching for resource link with target PID: {}", next);
-						Predicate eq = myBuilder.equal(join.get("myTargetResourcePid"), next);
-						codePredicates.add(eq);
+
+						Predicate pathPredicate = createResourceLinkPathPredicate(theResourceName, theParamName, join);
+						Predicate pidPredicate = myBuilder.equal(join.get("myTargetResourcePid"), next);
+						codePredicates.add(myBuilder.and(pathPredicate, pidPredicate));
 					}
 
 				} else {
@@ -469,7 +474,6 @@ public class SearchBuilder {
 						}
 
 						foundChainMatch = true;
-						// Set<Long> pids = dao.searchForIds(chain, chainValue);
 
 						Subquery<Long> subQ = myResourceTableQuery.subquery(Long.class);
 						Root<ResourceTable> subQfrom = subQ.from(ResourceTable.class);
@@ -501,8 +505,9 @@ public class SearchBuilder {
 						myResourceTableRoot = stackRoot;
 						myPredicates = stackPredicates;
 
-						Predicate eq = join.get("myTargetResourcePid").in(subQ);
-						codePredicates.add(eq);
+						Predicate pathPredicate = createResourceLinkPathPredicate(theResourceName, theParamName, join);
+						Predicate pidPredicate = join.get("myTargetResourcePid").in(subQ);
+						codePredicates.add(myBuilder.and(pathPredicate, pidPredicate));
 
 					}
 
@@ -525,7 +530,7 @@ public class SearchBuilder {
 		Join<ResourceTable, ResourceIndexedSearchParamString> join = myResourceTableRoot.join("myParamsString", JoinType.LEFT);
 		
 		if (theList.get(0).getMissing() != null) {
-			addPredicateParamMissing(theParamName, theList.get(0).getMissing(), join);
+			addPredicateParamMissing(theResourceName, theParamName, theList.get(0).getMissing(), join);
 			return;
 		}
 
@@ -673,7 +678,7 @@ public class SearchBuilder {
 		Join<ResourceTable, ResourceIndexedSearchParamToken> join = myResourceTableRoot.join("myParamsToken", JoinType.LEFT);
 
 		if (theList.get(0).getMissing() != null) {
-			addPredicateParamMissing(theParamName, theList.get(0).getMissing(), join);
+			addPredicateParamMissing(theResourceName, theParamName, theList.get(0).getMissing(), join);
 			return;
 		}
 
@@ -700,12 +705,12 @@ public class SearchBuilder {
 		myPredicates.add(spPredicate);
 	}
 
-	private void addPredicateUri(String theParamName, List<? extends IQueryParameterType> theList) {
+	private void addPredicateUri(String theResourceName, String theParamName, List<? extends IQueryParameterType> theList) {
 
 		Join<ResourceTable, ResourceIndexedSearchParamUri> join = myResourceTableRoot.join("myParamsUri", JoinType.LEFT);
 		
 		if (theList.get(0).getMissing() != null) {
-			addPredicateParamMissing(theParamName, theList.get(0).getMissing(), join);
+			addPredicateParamMissing(theResourceName, theParamName, theList.get(0).getMissing(), join);
 			return;
 		}
 
@@ -1172,8 +1177,8 @@ public class SearchBuilder {
 		return combineParamIndexPredicateWithParamNamePredicate(theResourceName, theParamName, theFrom, singleCode);
 	}
 
-	private Predicate createResourceLinkPathPredicate(String theParamName, From<?, ? extends ResourceLink> from) {
-		return createResourceLinkPathPredicate(myCallingDao, myContext, theParamName, from, myResourceType);
+	private Predicate createResourceLinkPathPredicate(String theResourceName, String theParamName, From<?, ? extends ResourceLink> from) {
+		return createResourceLinkPathPredicate(myCallingDao, myContext, theParamName, from, theResourceName);
 	}
 
 	private TypedQuery<Long> createSearchAllByTypeQuery(DateRangeParam theLastUpdated) {
@@ -1750,7 +1755,7 @@ public class SearchBuilder {
 					break;
 				case REFERENCE:
 					for (List<? extends IQueryParameterType> nextAnd : theAndOrParams) {
-						addPredicateReference(theParamName, nextAnd);
+						addPredicateReference(theResourceName, theParamName, nextAnd);
 					}
 					break;
 				case STRING:
@@ -1775,7 +1780,7 @@ public class SearchBuilder {
 					break;
 				case URI:
 					for (List<? extends IQueryParameterType> nextAnd : theAndOrParams) {
-						addPredicateUri(theParamName, nextAnd);
+						addPredicateUri(theResourceName, theParamName, nextAnd);
 					}
 					break;
 				case HAS:
@@ -1915,12 +1920,12 @@ public class SearchBuilder {
 		return likeExpression.replace("%", "[%]") + "%";
 	}
 
-	private static Predicate createResourceLinkPathPredicate(IDao theCallingDao, FhirContext theContext, String theParamName, From<?, ? extends ResourceLink> from,
-			Class<? extends IBaseResource> resourceType) {
-		RuntimeResourceDefinition resourceDef = theContext.getResourceDefinition(resourceType);
+	private static Predicate createResourceLinkPathPredicate(IDao theCallingDao, FhirContext theContext, String theParamName, From<?, ? extends ResourceLink> theFrom,
+			String theResourceType) {
+		RuntimeResourceDefinition resourceDef = theContext.getResourceDefinition(theResourceType);
 		RuntimeSearchParam param = theCallingDao.getSearchParamByName(resourceDef, theParamName);
 		List<String> path = param.getPathsSplit();
-		Predicate type = from.get("mySourcePath").in(path);
+		Predicate type = theFrom.get("mySourcePath").in(path);
 		return type;
 	}
 

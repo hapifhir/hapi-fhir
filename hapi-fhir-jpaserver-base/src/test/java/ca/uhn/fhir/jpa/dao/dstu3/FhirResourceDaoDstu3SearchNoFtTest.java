@@ -85,6 +85,103 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 		myDaoConfig.setExpireSearchResultsAfterMillis(new DaoConfig().getExpireSearchResultsAfterMillis());
 	}
 
+	
+	@SuppressWarnings("unused")
+	@Test
+	public void testSearchResourceReferenceOnlyCorrectPath() {
+		IIdType oid1;
+		{
+			Organization org = new Organization();
+			org.setActive(true);
+			oid1 = myOrganizationDao.create(org, mySrd).getId().toUnqualifiedVersionless();
+		}
+		IIdType tid1;
+		{
+			Task task = new Task();
+			task.getRequester().setOnBehalfOf(new Reference(oid1));
+			tid1 = myTaskDao.create(task, mySrd).getId().toUnqualifiedVersionless();
+		}
+		IIdType tid2;
+		{
+			Task task = new Task();
+			task.setOwner(new Reference(oid1));
+			tid2 = myTaskDao.create(task, mySrd).getId().toUnqualifiedVersionless();
+		}
+		
+		SearchParameterMap map;
+		List<IIdType> ids;
+		
+		map = new SearchParameterMap();
+		map.add(Task.SP_ORGANIZATION, new ReferenceParam(oid1.getValue()));
+		ids = toUnqualifiedVersionlessIds(myTaskDao.search(map));
+		assertThat(ids, contains(tid1)); // NOT tid2
+
+	}
+	
+	@SuppressWarnings("unused")
+	@Test
+	public void testSearchResourceReferenceMissingChain() {
+		IIdType oid1;
+		{
+			Organization org = new Organization();
+			org.setActive(true);
+			oid1 = myOrganizationDao.create(org, mySrd).getId().toUnqualifiedVersionless();
+		}
+		IIdType tid1;
+		{
+			Task task = new Task();
+			task.getRequester().setOnBehalfOf(new Reference(oid1));
+			tid1 = myTaskDao.create(task, mySrd).getId().toUnqualifiedVersionless();
+		}
+		IIdType tid2;
+		{
+			Task task = new Task();
+			task.setOwner(new Reference(oid1));
+			tid2 = myTaskDao.create(task, mySrd).getId().toUnqualifiedVersionless();
+		}
+
+		IIdType oid2;
+		{
+			Organization org = new Organization();
+			org.setActive(true);
+			org.setName("NAME");
+			oid2 = myOrganizationDao.create(org, mySrd).getId().toUnqualifiedVersionless();
+		}
+		IIdType tid3;
+		{
+			Task task = new Task();
+			task.getRequester().setOnBehalfOf(new Reference(oid2));
+			tid3 = myTaskDao.create(task, mySrd).getId().toUnqualifiedVersionless();
+		}
+
+		SearchParameterMap map;
+		List<IIdType> ids;
+		
+		map = new SearchParameterMap();
+		map.add(Organization.SP_NAME, new StringParam().setMissing(true));
+		ids = toUnqualifiedVersionlessIds(myOrganizationDao.search(map));
+		assertThat(ids, contains(oid1));
+		
+		ourLog.info("Starting Search 2");
+		
+		map = new SearchParameterMap();
+		map.add(Task.SP_ORGANIZATION, new ReferenceParam("Organization", "name:missing", "true"));
+		ids = toUnqualifiedVersionlessIds(myTaskDao.search(map));
+		assertThat(ids, contains(tid1)); // NOT tid2
+
+		map = new SearchParameterMap();
+		map.add(Task.SP_ORGANIZATION, new ReferenceParam("Organization", "name:missing", "false"));
+		ids = toUnqualifiedVersionlessIds(myTaskDao.search(map));
+		assertThat(ids, contains(tid3));
+
+		map = new SearchParameterMap();
+		map.add(Task.SP_ORGANIZATION, new ReferenceParam("Organization", "name:missing", "true"));
+		ids = toUnqualifiedVersionlessIds(myPatientDao.search(map));
+		assertThat(ids, empty());
+
+	}
+
+	
 	/**
 	 * See #441
 	 */
