@@ -790,9 +790,19 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 		params.add(Observation.SP_CODE, new TokenParam(URL_MY_CODE_SYSTEM, "childAA").setModifier(TokenParamModifier.ABOVE));
 		assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(params)), empty());
 
-		params.add(Observation.SP_CODE, new TokenParam(null, URL_MY_VALUE_SET).setModifier(TokenParamModifier.IN));
-		assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(params)), empty());
+	}
 
+	@Test
+	public void testSearchCodeInUnknownCodeSystem() {
+
+		SearchParameterMap params = new SearchParameterMap();
+
+		try {
+			params.add(Observation.SP_CODE, new TokenParam(null, URL_MY_VALUE_SET).setModifier(TokenParamModifier.IN));
+			assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(params)), empty());
+		} catch (InvalidRequestException e) {
+			assertEquals("Unable to find imported value set http://example.com/my_value_set", e.getMessage());
+		}
 	}
 
 	@Test

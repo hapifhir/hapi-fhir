@@ -1802,6 +1802,10 @@ public class SearchBuilder {
 			Set<Long> orPids = new HashSet<Long>();
 			for (IQueryParameterType next : nextValue) {
 				String value = next.getValueAsQueryToken(myContext);
+				if (value != null && value.startsWith("|")) {
+					value = value.substring(1);
+				}
+				
 				IdDt valueAsId = new IdDt(value);
 				if (isNotBlank(value)) {
 					if (valueAsId.isIdPartValidLong()) {
@@ -1824,6 +1828,10 @@ public class SearchBuilder {
 
 			if (orPids.size() > 0) {
 				Predicate nextPredicate = myResourceTableRoot.get("myId").as(Long.class).in(orPids);
+				myPredicates.add(nextPredicate);
+			} else {
+				// This will never match
+				Predicate nextPredicate = myBuilder.equal(myResourceTableRoot.get("myId").as(Long.class), -1);
 				myPredicates.add(nextPredicate);
 			}
 
