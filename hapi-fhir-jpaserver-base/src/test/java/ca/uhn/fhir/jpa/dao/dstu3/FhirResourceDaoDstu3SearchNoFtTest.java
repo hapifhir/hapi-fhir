@@ -325,7 +325,7 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 		assertThat(actual, contains(id));
 
 		Class<ResourceIndexedSearchParamDate> type = ResourceIndexedSearchParamDate.class;
-		List<?> results = myEntityManager.createQuery("SELECT i FROM " + type.getSimpleName() + " i", type).getResultList();
+		List<?> results = myEntityManager.createQuery("SELECT i FROM " + type.getSimpleName() + " i WHERE i.myMissing = false", type).getResultList();
 		ourLog.info(toStringMultiline(results));
 		assertEquals(2, results.size());
 	}
@@ -449,7 +449,7 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 		IIdType id = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
 
 		Class<ResourceIndexedSearchParamString> type = ResourceIndexedSearchParamString.class;
-		List<ResourceIndexedSearchParamString> results = myEntityManager.createQuery("SELECT i FROM " + type.getSimpleName() + " i", type).getResultList();
+		List<ResourceIndexedSearchParamString> results = myEntityManager.createQuery("SELECT i FROM " + type.getSimpleName() + " i WHERE i.myMissing = false", type).getResultList();
 		ourLog.info(toStringMultiline(results));
 		assertEquals(2, results.size());
 
@@ -468,7 +468,7 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 		IIdType id = myPatientDao.create(res, mySrd).getId().toUnqualifiedVersionless();
 
 		Class<ResourceIndexedSearchParamToken> type = ResourceIndexedSearchParamToken.class;
-		List<?> results = myEntityManager.createQuery("SELECT i FROM " + type.getSimpleName() + " i", type).getResultList();
+		List<?> results = myEntityManager.createQuery("SELECT i FROM " + type.getSimpleName() + " i WHERE i.myMissing = false", type).getResultList();
 		ourLog.info(toStringMultiline(results));
 
 		// This is 3 for now because the FluentPath for Patient:deceased adds a value.. this should
@@ -492,7 +492,7 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 		IIdType id = myValueSetDao.create(res, mySrd).getId().toUnqualifiedVersionless();
 
 		Class<ResourceIndexedSearchParamUri> type = ResourceIndexedSearchParamUri.class;
-		List<?> results = myEntityManager.createQuery("SELECT i FROM " + type.getSimpleName() + " i", type).getResultList();
+		List<?> results = myEntityManager.createQuery("SELECT i FROM " + type.getSimpleName() + " i WHERE i.myMissing = false", type).getResultList();
 		ourLog.info(toStringMultiline(results));
 		assertEquals(2, results.size());
 

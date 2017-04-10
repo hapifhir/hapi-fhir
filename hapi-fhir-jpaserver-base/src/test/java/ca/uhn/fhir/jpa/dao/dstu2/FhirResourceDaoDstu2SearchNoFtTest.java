@@ -29,9 +29,11 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.AfterClass;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.SearchParameterMap;
+import ca.uhn.fhir.jpa.dao.data.ISearchParamPresentDao;
 import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamDate;
 import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamNumber;
 import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamQuantity;
@@ -170,7 +172,7 @@ public class FhirResourceDaoDstu2SearchNoFtTest extends BaseJpaDstu2Test {
 		assertThat(actual, contains(id));
 
 		Class<ResourceIndexedSearchParamDate> type = ResourceIndexedSearchParamDate.class;
-		List<?> results = myEntityManager.createQuery("SELECT i FROM " + type.getSimpleName() + " i", type).getResultList();
+		List<?> results = myEntityManager.createQuery("SELECT i FROM " + type.getSimpleName() + " i WHERE i.myMissing = false", type).getResultList();
 		ourLog.info(toStringMultiline(results));
 		assertEquals(2, results.size());
 	}
@@ -256,7 +258,7 @@ public class FhirResourceDaoDstu2SearchNoFtTest extends BaseJpaDstu2Test {
 		IIdType id = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
 
 		Class<ResourceIndexedSearchParamString> type = ResourceIndexedSearchParamString.class;
-		List<ResourceIndexedSearchParamString> results = myEntityManager.createQuery("SELECT i FROM " + type.getSimpleName() + " i", type).getResultList();
+		List<ResourceIndexedSearchParamString> results = myEntityManager.createQuery("SELECT i FROM " + type.getSimpleName() + " i WHERE i.myMissing = false", type).getResultList();
 		ourLog.info(toStringMultiline(results));
 		assertEquals(2, results.size());
 
@@ -275,7 +277,7 @@ public class FhirResourceDaoDstu2SearchNoFtTest extends BaseJpaDstu2Test {
 		IIdType id = myPatientDao.create(res, mySrd).getId().toUnqualifiedVersionless();
 
 		Class<ResourceIndexedSearchParamToken> type = ResourceIndexedSearchParamToken.class;
-		List<?> results = myEntityManager.createQuery("SELECT i FROM " + type.getSimpleName() + " i", type).getResultList();
+		List<?> results = myEntityManager.createQuery("SELECT i FROM " + type.getSimpleName() + " i WHERE i.myMissing = false", type).getResultList();
 		ourLog.info(toStringMultiline(results));
 		assertEquals(2, results.size());
 
@@ -294,7 +296,7 @@ public class FhirResourceDaoDstu2SearchNoFtTest extends BaseJpaDstu2Test {
 		IIdType id = myConceptMapDao.create(res, mySrd).getId().toUnqualifiedVersionless();
 
 		Class<ResourceIndexedSearchParamUri> type = ResourceIndexedSearchParamUri.class;
-		List<?> results = myEntityManager.createQuery("SELECT i FROM " + type.getSimpleName() + " i", type).getResultList();
+		List<?> results = myEntityManager.createQuery("SELECT i FROM " + type.getSimpleName() + " i WHERE i.myMissing = false", type).getResultList();
 		ourLog.info(toStringMultiline(results));
 		assertEquals(2, results.size());
 
@@ -1268,6 +1270,9 @@ public class FhirResourceDaoDstu2SearchNoFtTest extends BaseJpaDstu2Test {
 
 	}
 
+	@Autowired
+	private ISearchParamPresentDao mySearchParamPresentDao;
+	
 	@SuppressWarnings("unused")
 	@Test
 	public void testSearchResourceReferenceMissing() {
@@ -1305,8 +1310,10 @@ public class FhirResourceDaoDstu2SearchNoFtTest extends BaseJpaDstu2Test {
 			pid4 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
 		}
 
-		SearchParameterMap params;
+		ourLog.info("" + mySearchParamPresentDao.findAll());
 		
+		SearchParameterMap params;
+
 		params = new SearchParameterMap();
 		params.add(Patient.SP_ORGANIZATION, new ReferenceParam().setMissing(true));
 		assertThat(toUnqualifiedVersionlessIds(myPatientDao.search(params)), containsInAnyOrder(pid1, pid3));

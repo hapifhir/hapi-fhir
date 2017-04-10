@@ -308,7 +308,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 				}
 
 				retVal.add(nextSpDef.getName());
-				
+
 				if (isLogicalReference(nextId)) {
 					ResourceLink resourceLink = new ResourceLink(nextPathAndRef.getPath(), theEntity, nextId, theUpdateTime);
 					if (theLinks.add(resourceLink)) {
@@ -970,9 +970,9 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 	 * Subclasses may override to provide behaviour. Called when a resource has been inserted into the database for the first time.
 	 * 
 	 * @param theEntity
-	 *            The entity being updated (Do not modify the entity! Undefined behaviour will occur!)
+	 *           The entity being updated (Do not modify the entity! Undefined behaviour will occur!)
 	 * @param theTag
-	 *            The tag
+	 *           The tag
 	 */
 	protected void postPersist(ResourceTable theEntity, T theResource) {
 		// nothing
@@ -982,9 +982,9 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 	 * Subclasses may override to provide behaviour. Called when a pre-existing resource has been updated in the database
 	 * 
 	 * @param theEntity
-	 *            The resource
+	 *           The resource
 	 * @param theResource
-	 *            The resource being persisted
+	 *           The resource being persisted
 	 */
 	protected void postUpdate(ResourceTable theEntity, T theResource) {
 		// nothing
@@ -1045,9 +1045,9 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 	 * </p>
 	 * 
 	 * @param theEntity
-	 *            The entity being updated (Do not modify the entity! Undefined behaviour will occur!)
+	 *           The entity being updated (Do not modify the entity! Undefined behaviour will occur!)
 	 * @param theTag
-	 *            The tag
+	 *           The tag
 	 * @return Retturns <code>true</code> if the tag should be removed
 	 */
 	protected boolean shouldDroppedTagBeRemovedOnUpdate(ResourceTable theEntity, ResourceTag theTag) {
@@ -1283,7 +1283,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 				findMissingSearchParams(theEntity, activeSearchParams, RestSearchParameterTypeEnum.QUANTITY, quantityParams);
 				findMissingSearchParams(theEntity, activeSearchParams, RestSearchParameterTypeEnum.DATE, dateParams);
 				findMissingSearchParams(theEntity, activeSearchParams, RestSearchParameterTypeEnum.URI, uriParams);
-				
+				findMissingSearchParams(theEntity, activeSearchParams, RestSearchParameterTypeEnum.TOKEN, tokenParams);
+
 				setUpdatedTime(stringParams, theUpdateTime);
 				setUpdatedTime(numberParams, theUpdateTime);
 				setUpdatedTime(quantityParams, theUpdateTime);
@@ -1383,7 +1384,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 				theEntity.setIndexStatus(INDEX_STATUS_INDEXED);
 				populateFullTextFields(theResource, theEntity);
 
-				
 			} else {
 
 				populateResourceIntoEntity(theResource, theEntity);
@@ -1422,22 +1422,17 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 			for (String nextKey : populatedResourceLinkParameters) {
 				presentSearchParams.put(nextKey, Boolean.TRUE);
 			}
-			updateSearchParamPresent(presentSearchParams, stringParams);
-			updateSearchParamPresent(presentSearchParams, tokenParams);
-			updateSearchParamPresent(presentSearchParams, numberParams);
-			updateSearchParamPresent(presentSearchParams, quantityParams);
-			updateSearchParamPresent(presentSearchParams, dateParams);
-			updateSearchParamPresent(presentSearchParams, uriParams);
-			updateSearchParamPresent(presentSearchParams, coordsParams);
-			Set<String> activeSearchParamNames = mySearchParamRegistry.getActiveSearchParams(theEntity.getResourceType()).keySet();
-			for (String nextSpName : activeSearchParamNames) {
-				if (!presentSearchParams.containsKey(nextSpName)) {
-					presentSearchParams.put(nextSpName, Boolean.FALSE);
+			Set<Entry<String, RuntimeSearchParam>> activeSearchParams = mySearchParamRegistry.getActiveSearchParams(theEntity.getResourceType()).entrySet();
+			for (Entry<String, RuntimeSearchParam> nextSpEntry : activeSearchParams) {
+				if (nextSpEntry.getValue().getParamType() == RestSearchParameterTypeEnum.REFERENCE) {
+					if (!presentSearchParams.containsKey(nextSpEntry.getKey())) {
+						presentSearchParams.put(nextSpEntry.getKey(), Boolean.FALSE);
+					}
 				}
 			}
 			mySearchParamPresenceSvc.updatePresence(theEntity, presentSearchParams);
 		}
-		
+
 		/*
 		 * Create history entry
 		 */
@@ -1541,7 +1536,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 						break;
 					}
 				}
-				
+
 				if (!haveParam) {
 					BaseResourceIndexedSearchParam param;
 					switch (type) {
@@ -1676,9 +1671,9 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 	 * "subsetted" tag and rejects resources which have it. Subclasses should call the superclass implementation to preserve this check.
 	 * 
 	 * @param theResource
-	 *            The resource that is about to be persisted
+	 *           The resource that is about to be persisted
 	 * @param theEntityToSave
-	 *            TODO
+	 *           TODO
 	 */
 	protected void validateResourceForStorage(T theResource, ResourceTable theEntityToSave) {
 		Object tag = null;

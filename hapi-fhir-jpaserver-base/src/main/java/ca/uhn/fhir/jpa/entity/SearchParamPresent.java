@@ -4,6 +4,9 @@ import java.io.Serializable;
 
 import javax.persistence.*;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
+
 @Entity
 @Table(name = "HFJ_RES_PARAM_PRESENT", indexes = {
 		@Index(name = "IDX_RESPARMPRESENT_RESID", columnList = "RES_ID")
@@ -53,6 +56,16 @@ public class SearchParamPresent implements Serializable {
 
 	public void setSearchParam(SearchParam theSearchParam) {
 		mySearchParam = theSearchParam;
+	}
+
+	@Override
+	public String toString() {
+		ToStringBuilder b = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
+		
+		b.append("res_pid", myResource.getIdDt().toUnqualifiedVersionless().getValue());
+		b.append("param", mySearchParam.getParamName());
+		b.append("present", myPresent);
+		return b.build();
 	}
 
 }

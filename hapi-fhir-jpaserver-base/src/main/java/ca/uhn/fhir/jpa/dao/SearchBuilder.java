@@ -140,12 +140,12 @@ public class SearchBuilder {
 
 	private void addPredicateDate(String theResourceName, String theParamName, List<? extends IQueryParameterType> theList) {
 
+		Join<ResourceTable, ResourceIndexedSearchParamDate> join = myResourceTableRoot.join("myParamsDate", JoinType.LEFT);
+
 		if (theList.get(0).getMissing() != null) {
-			addPredicateParamMissing(theParamName, theList.get(0).getMissing());
+			addPredicateParamMissing(theParamName, theList.get(0).getMissing(), join);
 			return;
 		}
-
-		Join<ResourceTable, ResourceIndexedSearchParamDate> join = myResourceTableRoot.join("myParamsDate", JoinType.LEFT);
 
 		List<Predicate> codePredicates = new ArrayList<Predicate>();
 		for (IQueryParameterType nextOr : theList) {
@@ -266,12 +266,12 @@ public class SearchBuilder {
 
 	private void addPredicateNumber(String theResourceName, String theParamName, List<? extends IQueryParameterType> theList) {
 
+		Join<ResourceTable, ResourceIndexedSearchParamNumber> join = myResourceTableRoot.join("myParamsNumber", JoinType.LEFT);
+
 		if (theList.get(0).getMissing() != null) {
-			addPredicateParamMissing(theParamName, theList.get(0).getMissing());
+			addPredicateParamMissing(theParamName, theList.get(0).getMissing(), join);
 			return;
 		}
-
-		Join<ResourceTable, ResourceIndexedSearchParamNumber> join = myResourceTableRoot.join("myParamsNumber", JoinType.LEFT);
 
 		List<Predicate> codePredicates = new ArrayList<Predicate>();
 		for (IQueryParameterType nextOr : theList) {
@@ -302,6 +302,13 @@ public class SearchBuilder {
 		myPredicates.add(myBuilder.or(toArray(codePredicates)));
 	}
 
+	private void addPredicateParamMissing(String theParamName, boolean theMissing, Join<ResourceTable, ? extends BaseResourceIndexedSearchParam> theJoin) {
+		
+		myPredicates.add(myBuilder.equal(theJoin.get("myResourceType"), myResourceName));
+		myPredicates.add(myBuilder.equal(theJoin.get("myParamName"), theParamName));
+		myPredicates.add(myBuilder.equal(theJoin.get("myMissing"), theMissing));
+	}
+
 	private void addPredicateParamMissing(String theParamName, boolean theMissing) {
 		Join<ResourceTable, SearchParamPresent> paramPresentJoin = myResourceTableRoot.join("mySearchParamPresents", JoinType.LEFT);
 		Join<SearchParamPresent, SearchParam> paramJoin = paramPresentJoin.join("mySearchParam", JoinType.LEFT);
@@ -312,12 +319,12 @@ public class SearchBuilder {
 	}
 
 	private void addPredicateQuantity(String theResourceName, String theParamName, List<? extends IQueryParameterType> theList) {
+		Join<ResourceTable, ResourceIndexedSearchParamQuantity> join = myResourceTableRoot.join("myParamsQuantity", JoinType.LEFT);
+
 		if (theList.get(0).getMissing() != null) {
-			addPredicateParamMissing(theParamName, theList.get(0).getMissing());
+			addPredicateParamMissing(theParamName, theList.get(0).getMissing(), join);
 			return;
 		}
-
-		Join<ResourceTable, ResourceIndexedSearchParamQuantity> join = myResourceTableRoot.join("myParamsQuantity", JoinType.LEFT);
 
 		List<Predicate> codePredicates = new ArrayList<Predicate>();
 		for (IQueryParameterType nextOr : theList) {
@@ -331,12 +338,12 @@ public class SearchBuilder {
 
 	private void addPredicateReference(String theParamName, List<? extends IQueryParameterType> theList) {
 		assert theParamName.contains(".") == false;
-
+		
 		if (theList.get(0).getMissing() != null) {
 			addPredicateParamMissing(theParamName, theList.get(0).getMissing());
 			return;
 		}
-
+		
 		Join<ResourceTable, ResourceLink> join = myResourceTableRoot.join("myResourceLinks", JoinType.LEFT);
 
 		List<Predicate> codePredicates = new ArrayList<Predicate>();
@@ -514,12 +521,13 @@ public class SearchBuilder {
 	}
 
 	private void addPredicateString(String theResourceName, String theParamName, List<? extends IQueryParameterType> theList) {
+		
+		Join<ResourceTable, ResourceIndexedSearchParamString> join = myResourceTableRoot.join("myParamsString", JoinType.LEFT);
+		
 		if (theList.get(0).getMissing() != null) {
-			addPredicateParamMissing(theParamName, theList.get(0).getMissing());
+			addPredicateParamMissing(theParamName, theList.get(0).getMissing(), join);
 			return;
 		}
-
-		Join<ResourceTable, ResourceIndexedSearchParamString> join = myResourceTableRoot.join("myParamsString", JoinType.LEFT);
 
 		List<Predicate> codePredicates = new ArrayList<Predicate>();
 		for (IQueryParameterType nextOr : theList) {
@@ -661,13 +669,13 @@ public class SearchBuilder {
 	}
 
 	private void addPredicateToken(String theResourceName, String theParamName, List<? extends IQueryParameterType> theList) {
+		
+		Join<ResourceTable, ResourceIndexedSearchParamToken> join = myResourceTableRoot.join("myParamsToken", JoinType.LEFT);
 
 		if (theList.get(0).getMissing() != null) {
-			addPredicateParamMissing(theParamName, theList.get(0).getMissing());
+			addPredicateParamMissing(theParamName, theList.get(0).getMissing(), join);
 			return;
 		}
-
-		Join<ResourceTable, ResourceIndexedSearchParamToken> join = myResourceTableRoot.join("myParamsToken", JoinType.LEFT);
 
 		List<Predicate> codePredicates = new ArrayList<Predicate>();
 		for (IQueryParameterType nextOr : theList) {
@@ -693,12 +701,14 @@ public class SearchBuilder {
 	}
 
 	private void addPredicateUri(String theParamName, List<? extends IQueryParameterType> theList) {
+
+		Join<ResourceTable, ResourceIndexedSearchParamUri> join = myResourceTableRoot.join("myParamsUri", JoinType.LEFT);
+		
 		if (theList.get(0).getMissing() != null) {
-			addPredicateParamMissing(theParamName, theList.get(0).getMissing());
+			addPredicateParamMissing(theParamName, theList.get(0).getMissing(), join);
 			return;
 		}
 
-		Join<ResourceTable, ResourceIndexedSearchParamUri> join = myResourceTableRoot.join("myParamsUri", JoinType.LEFT);
 		List<Predicate> codePredicates = new ArrayList<Predicate>();
 		for (IQueryParameterType nextOr : theList) {
 			IQueryParameterType params = nextOr;
@@ -759,7 +769,7 @@ public class SearchBuilder {
 		 * just add a predicate that can never match
 		 */
 		if (codePredicates.isEmpty()) {
-			Predicate predicate = myBuilder.isNull(join.<Object> get("myUri").as(String.class));
+			Predicate predicate = myBuilder.isNull(join.<Object> get("myMissing").as(String.class));
 			myPredicates.add(predicate);
 			return;
 		}
@@ -1116,9 +1126,8 @@ public class SearchBuilder {
 			if (codes.isEmpty()) {
 
 				// This will never match anything
-				Predicate systemPredicate = theBuilder.isNull(theFrom.get("mySystem"));
-				Predicate codePredicate = theBuilder.isNull(theFrom.get("myValue"));
-				singleCodePredicates.add(theBuilder.and(systemPredicate, codePredicate));
+				Predicate codePredicate = theBuilder.isNull(theFrom.get("myMissing"));
+				singleCodePredicates.add(codePredicate);
 
 			} else {
 				List<Predicate> orPredicates = new ArrayList<Predicate>();

@@ -33,11 +33,7 @@ public class SearchParamPresenceSvcImpl implements ISearchParamPresenceSvc {
 		List<SearchParamPresent> entitiesToDelete = new ArrayList<SearchParamPresent>();
 
 		Collection<SearchParamPresent> existing;
-//		if (theResource.getId() != null) {
-			existing = mySearchParamPresentDao.findAllForResource(theResource);
-//		} else {
-//			existing = Collections.emptyList();
-//		}
+		existing = mySearchParamPresentDao.findAllForResource(theResource);
 
 		for (SearchParamPresent nextExistingEntity : existing) {
 			String nextSearchParamName = nextExistingEntity.getSearchParam().getParamName();
@@ -69,19 +65,19 @@ public class SearchParamPresenceSvcImpl implements ISearchParamPresenceSvc {
 					mySearchParamDao.save(searchParam);
 					// Don't add the newly saved entity to the map in case the save fails
 				}
-
-				SearchParamPresent present = new SearchParamPresent();
-				present.setResource(theResource);
-				present.setSearchParam(searchParam);
-				present.setPresent(next.getValue());
-				entitiesToSave.add(present);
 			}
+
+			SearchParamPresent present = new SearchParamPresent();
+			present.setResource(theResource);
+			present.setSearchParam(searchParam);
+			present.setPresent(next.getValue());
+			entitiesToSave.add(present);
 
 		}
 
 		mySearchParamPresentDao.deleteInBatch(entitiesToDelete);
 		mySearchParamPresentDao.save(entitiesToSave);
-		
+
 	}
 
 	@Override
