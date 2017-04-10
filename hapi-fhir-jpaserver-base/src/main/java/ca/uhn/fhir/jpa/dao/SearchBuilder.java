@@ -1283,6 +1283,10 @@ public class SearchBuilder {
 				theOrders.add(theBuilder.asc(join.get(next)));
 			} else {
 				theOrders.add(theBuilder.desc(join.get(next)));
+
+				// TODO: Here's one way to get nulls last.. need to test performance of this
+//				Order desc = theBuilder.desc(myBuilder.coalesce(join.get(next), new Date(0)));
+//				theOrders.add(desc);
 			}
 		}
 
@@ -1779,7 +1783,11 @@ public class SearchBuilder {
 					break;
 				}
 			} else {
-				// throw new InternalErrorException("Unknown search parameter " + theParamName + " for reource type " + theResourceName);
+				if (Constants.PARAM_CONTENT.equals(theParamName) || Constants.PARAM_TEXT.equals(theParamName)) {
+					// These are handled later
+				} else {
+					throw new InvalidRequestException("Unknown search parameter " + theParamName + " for resource type " + theResourceName);
+				}
 			}
 		}
 	}

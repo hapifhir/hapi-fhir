@@ -2151,9 +2151,12 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		assertEquals(initialSize2002, found.size());
 
 		// If this throws an exception, that would be an acceptable outcome as well..
-		found = toList(myPatientDao.search(Patient.SP_BIRTHDATE + "AAAA", new DateParam(QuantityCompararatorEnum.GREATERTHAN, "2000-01-01")));
-		assertEquals(0, found.size());
-
+		try {
+			found = toList(myPatientDao.search(Patient.SP_BIRTHDATE + "AAAA", new DateParam(QuantityCompararatorEnum.GREATERTHAN, "2000-01-01")));
+			assertEquals(0, found.size());
+		} catch (InvalidRequestException e) {
+			assertEquals("Unknown search parameter birthdateAAAA for resource type Patient", e.getMessage());
+		}
 	}
 
 	@Test
@@ -2778,7 +2781,9 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		pm.setSort(new SortSpec(Patient.SP_BIRTHDATE).setOrder(SortOrderEnum.DESC));
 		actual = toUnqualifiedVersionlessIds(myPatientDao.search(pm));
 		assertEquals(4, actual.size());
-		assertThat(actual, contains(id3, id2, id1, id4));
+		// The first would be better, but JPA doesn't do NULLS LAST 
+		// assertThat(actual, contains(id3, id2, id1, id4));
+		assertThat(actual, contains(id4, id3, id2, id1));
 
 	}
 
@@ -3060,7 +3065,9 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		pm.setSort(new SortSpec(Patient.SP_FAMILY).setOrder(SortOrderEnum.DESC));
 		actual = toUnqualifiedVersionlessIds(myPatientDao.search(pm));
 		assertEquals(4, actual.size());
-		assertThat(actual, contains(id3, id2, id1, id4));
+		// The first would be better, but JPA doesn't do NULLS LAST 
+		// assertThat(actual, contains(id3, id2, id1, id4));
+		assertThat(actual, contains(id4, id3, id2, id1));
 	}
 
 	/**
