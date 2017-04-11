@@ -93,6 +93,9 @@ public class JpaValidationSupportDstu3 implements IJpaValidationSupportDstu3 {
 		if ("ValueSet".equals(resourceName)) {
 			if (localReference) {
 				search = myValueSetDao.search(IAnyResource.SP_RES_ID, new StringParam(theUri));
+				if (search.size() == 0) {
+				  search = myValueSetDao.search(ValueSet.SP_URL, new UriParam(theUri));
+				}
 			} else {
 				search = myValueSetDao.search(ValueSet.SP_URL, new UriParam(theUri));
 			}
