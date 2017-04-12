@@ -67,7 +67,7 @@ public class CreateDstu2_1Test {
 	public void testCreateReturnsLocationHeader() throws Exception {
 
 		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient");
-		httpPost.setEntity(new StringEntity("{\"resourceType\":\"Patient\", \"status\":\"active\"}", ContentType.parse("application/fhir+json; charset=utf-8")));
+		httpPost.setEntity(new StringEntity("{\"resourceType\":\"Patient\", \"status\":\"active\"}", ContentType.parse(Constants.CT_FHIR_JSON+"; charset=utf-8")));
 		HttpResponse status = ourClient.execute(httpPost);
 
 		String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
@@ -88,7 +88,7 @@ public class CreateDstu2_1Test {
 		ourReturnOo = new OperationOutcome().addIssue(new OperationOutcomeIssueComponent().setDiagnostics("DIAG"));
 		
 		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient");
-		httpPost.setEntity(new StringEntity("{\"resourceType\":\"Patient\", \"status\":\"active\"}", ContentType.parse("application/fhir+json; charset=utf-8")));
+		httpPost.setEntity(new StringEntity("{\"resourceType\":\"Patient\", \"status\":\"active\"}", ContentType.parse(Constants.CT_FHIR_JSON+"; charset=utf-8")));
 		HttpResponse status = ourClient.execute(httpPost);
 
 		String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
@@ -146,7 +146,7 @@ public class CreateDstu2_1Test {
 	public void testCreateWithIncorrectContent2() throws Exception {
 
 		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient");
-		httpPost.setEntity(new StringEntity("{\"foo\":\"bar\"}", ContentType.parse("application/fhir+xml; charset=utf-8")));
+		httpPost.setEntity(new StringEntity("{\"foo\":\"bar\"}", ContentType.parse(Constants.CT_FHIR_XML+"; charset=utf-8")));
 		HttpResponse status = ourClient.execute(httpPost);
 
 		String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
@@ -165,7 +165,7 @@ public class CreateDstu2_1Test {
 	public void testCreateWithIncorrectContent3() throws Exception {
 
 		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient");
-		httpPost.setEntity(new StringEntity("{\"foo\":\"bar\"}", ContentType.parse("application/fhir+json; charset=utf-8")));
+		httpPost.setEntity(new StringEntity("{\"foo\":\"bar\"}", ContentType.parse(Constants.CT_FHIR_JSON+"; charset=utf-8")));
 		HttpResponse status = ourClient.execute(httpPost);
 
 		String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
