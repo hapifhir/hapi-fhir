@@ -1,7 +1,5 @@
 package ca.uhn.fhir.jpa.dao;
 
-import java.io.Serializable;
-
 /*
  * #%L
  * HAPI FHIR JPA Server
@@ -12,7 +10,7 @@ import java.io.Serializable;
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  * 
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,12 +19,7 @@ import java.io.Serializable;
  * limitations under the License.
  * #L%
  */
-
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
@@ -36,11 +29,11 @@ import ca.uhn.fhir.model.api.IQueryParameterOr;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.SortSpec;
-import ca.uhn.fhir.rest.method.RequestDetails;
+import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.server.Constants;
 
-public class SearchParameterMap extends LinkedHashMap<String, List<List<? extends IQueryParameterType>>> implements Serializable {
+public class SearchParameterMap extends LinkedHashMap<String, List<List<? extends IQueryParameterType>>> {
 
 	private static final long serialVersionUID = 1L;
 
@@ -48,8 +41,25 @@ public class SearchParameterMap extends LinkedHashMap<String, List<List<? extend
 	private EverythingModeEnum myEverythingMode = null;
 	private Set<Include> myIncludes;
 	private DateRangeParam myLastUpdated;
+	private Integer myLoadSynchronousUpTo;
 	private Set<Include> myRevIncludes;
 	private SortSpec mySort;
+
+	private boolean myLoadSynchronous;
+
+	/**
+	 * Constructor
+	 */
+	public SearchParameterMap() {
+		// nothing
+	}
+
+	/**
+	 * Constructor
+	 */
+	public SearchParameterMap(String theName, IQueryParameterType theParam) {
+		add(theName, theParam);
+	}
 
 	public void add(String theName, IQueryParameterAnd<?> theAnd) {
 		if (theAnd == null) {
@@ -78,11 +88,16 @@ public class SearchParameterMap extends LinkedHashMap<String, List<List<? extend
 		get(theName).add(theOr.getValuesAsQueryTokens());
 	}
 
-	public void add(String theName, IQueryParameterType theParam) {
-		assert!Constants.PARAM_LASTUPDATED.equals(theName); // this has it's own field in the map
+	public SearchParameterMap add(String theName, DateParam theDateParam) {
+		add(theName, (IQueryParameterOr<?>)theDateParam);
+		return this;
+	}
+
+	public SearchParameterMap add(String theName, IQueryParameterType theParam) {
+		assert !Constants.PARAM_LASTUPDATED.equals(theName); // this has it's own field in the map
 
 		if (theParam == null) {
-			return;
+			return this;
 		}
 		if (!containsKey(theName)) {
 			put(theName, new ArrayList<List<? extends IQueryParameterType>>());
@@ -90,6 +105,8 @@ public class SearchParameterMap extends LinkedHashMap<String, List<List<? extend
 		ArrayList<IQueryParameterType> list = new ArrayList<IQueryParameterType>();
 		list.add(theParam);
 		get(theName).add(list);
+		
+		return this;
 	}
 
 	public void addInclude(Include theInclude) {
@@ -165,6 +182,44 @@ public class SearchParameterMap extends LinkedHashMap<String, List<List<? extend
 	}
 
 	/**
+	 * If set, tells the server to load these results synchronously, and not to load
+	 * more than X results
+	 */
+	public Integer getLoadSynchronousUpTo() {
+		return myLoadSynchronousUpTo;
+	}
+
+	/**
+	 * If set, tells the server to load these results synchronously, and not to load
+	 * more than X results. Note that setting this to a value will also set
+	 * {@link #setLoadSynchronous(boolean)} to true
+	 */
+	public SearchParameterMap setLoadSynchronousUpTo(Integer theLoadSynchronousUpTo) {
+		myLoadSynchronousUpTo = theLoadSynchronousUpTo;
+		if (myLoadSynchronousUpTo != null) {
+			setLoadSynchronous(true);
+		}
+		return this;
+	}
+
+	/**
+	 * If set, tells the server to load these results synchronously, and not to load
+	 * more than X results
+	 */
+	public SearchParameterMap setLoadSynchronous(boolean theLoadSynchronous) {
+		myLoadSynchronous = theLoadSynchronous;
+		return this;
+	}
+
+	/**
+	 * If set, tells the server to load these results synchronously, and not to load
+	 * more than X results
+	 */
+	public boolean isLoadSynchronous() {
+		return myLoadSynchronous;
+	}
+
+	/**
 	 * @deprecated As of HAPI FHIR 2.4 this method no longer does anything
 	 */
 	@Deprecated
@@ -196,10 +251,7 @@ public class SearchParameterMap extends LinkedHashMap<String, List<List<? extend
 		/*
 		 * Don't reorder! We rely on the ordinals
 		 */
-		ENCOUNTER_INSTANCE(false, true, true), 
-		ENCOUNTER_TYPE(false, true, false), 
-		PATIENT_INSTANCE(true, false, true), 
-		PATIENT_TYPE(true, false, false);
+		ENCOUNTER_INSTANCE(false, true, true), ENCOUNTER_TYPE(false, true, false), PATIENT_INSTANCE(true, false, true), PATIENT_TYPE(true, false, false);
 
 		private final boolean myEncounter;
 
@@ -217,6 +269,7 @@ public class SearchParameterMap extends LinkedHashMap<String, List<List<? extend
 		public boolean isEncounter() {
 			return myEncounter;
 		}
+
 		public boolean isInstance() {
 			return myInstance;
 		}

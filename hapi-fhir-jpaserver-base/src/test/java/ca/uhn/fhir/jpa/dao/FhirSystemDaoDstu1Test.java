@@ -123,7 +123,7 @@ public class FhirSystemDaoDstu1Test extends BaseJpaTest {
 		IIdType newpid3 = ourPatientDao.update(patient, mySrd).getId();
 
 		IBundleProvider values = ourSystemDao.history(start, null, mySrd);
-		assertEquals(4, values.size());
+		assertEquals(4, values.size().intValue());
 
 		List<IBaseResource> res = values.getResources(0, 4);
 		assertEquals(newpid3, res.get(0).getIdElement());
@@ -142,10 +142,10 @@ public class FhirSystemDaoDstu1Test extends BaseJpaTest {
 		Thread.sleep(2000);
 
 		values = ourLocationDao.history(start, null, mySrd);
-		assertEquals(2, values.size());
+		assertEquals(2, values.size().intValue());
 
 		values = ourLocationDao.history(lid.toUnqualifiedVersionless(), start, null, mySrd);
-		assertEquals(1, values.size());
+		assertEquals(1, values.size().intValue());
 
 	}
 
@@ -173,10 +173,10 @@ public class FhirSystemDaoDstu1Test extends BaseJpaTest {
 		// Try to search
 
 		IBundleProvider obsResults = ourObservationDao.search(Observation.SP_NAME, new IdentifierDt("urn:system", "testPersistWithSimpleLinkO01"));
-		assertEquals(1, obsResults.size());
+		assertEquals(1, obsResults.size().intValue());
 
 		IBundleProvider patResults = ourPatientDao.search(Patient.SP_IDENTIFIER, new IdentifierDt("urn:system", "testPersistWithSimpleLinkP01"));
-		assertEquals(1, obsResults.size());
+		assertEquals(1, obsResults.size().intValue());
 
 		IIdType foundPatientId = patResults.getResources(0, 1).get(0).getIdElement();
 		ResourceReferenceDt subject = obs.getSubject();

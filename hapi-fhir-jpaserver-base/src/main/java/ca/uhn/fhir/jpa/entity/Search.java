@@ -38,7 +38,8 @@ import ca.uhn.fhir.rest.param.DateRangeParam;
 @Table(name = "HFJ_SEARCH", uniqueConstraints= {
 	@UniqueConstraint(name="IDX_SEARCH_UUID", columnNames="SEARCH_UUID")
 }, indexes= {
-	@Index(name="JDX_SEARCH_CREATED", columnList="CREATED")
+	@Index(name="JDX_SEARCH_CREATED", columnList="CREATED"),
+	@Index(name="JDX_SEARCH_STRING", columnList="SEARCH_STRING")
 })
 //@formatter:on
 public class Search implements Serializable {
@@ -78,9 +79,8 @@ public class Search implements Serializable {
 	@OneToMany(mappedBy="mySearch")
 	private Collection<SearchResult> myResults;
 
-	@Lob
-	@Column(name="SEARCH_PARAM_MAP", nullable=true)
-	private byte[] mySearchParamMap;
+	@Column(name="SEARCH_STRING", length=1000, nullable=true)
+	private String mySearchString;
 
 	@Enumerated(EnumType.ORDINAL)
 	@Column(name="SEARCH_TYPE", nullable=false)
@@ -135,10 +135,6 @@ public class Search implements Serializable {
 		return myResourceType;
 	}
 
-	public byte[] getSearchParamMap() {
-		return mySearchParamMap;
-	}
-	
 	public SearchTypeEnum getSearchType() {
 		return mySearchType;
 	}
@@ -182,10 +178,6 @@ public class Search implements Serializable {
 		myResourceType = theResourceType;
 	}
 
-
-	public void setSearchParamMap(byte[] theSearchParamMap) {
-		mySearchParamMap = theSearchParamMap;
-	}
 
 	public void setSearchType(SearchTypeEnum theSearchType) {
 		mySearchType = theSearchType;

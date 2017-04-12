@@ -375,8 +375,15 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 				if (offsetI == null || offsetI < 0) {
 					offsetI = 0;
 				}
-				int start = Math.max(0, Math.min(offsetI, result.size() - 1));
-
+				
+				Integer resultSize = result.size();
+				int start;
+				if (resultSize != null) {
+					start = Math.max(0, Math.min(offsetI, resultSize - 1));
+				} else {
+					start = offsetI;
+				}
+				
 				IVersionSpecificBundleFactory bundleFactory = theServer.getFhirContext().newBundleFactory();
 
 				ResponseEncoding responseEncoding = RestfulServerUtils.determineResponseEncodingNoDefault(theRequest, theServer.getDefaultResponseEncoding());

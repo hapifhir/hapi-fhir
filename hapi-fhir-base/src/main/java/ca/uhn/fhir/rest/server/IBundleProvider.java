@@ -60,7 +60,7 @@ public interface IBundleProvider {
 	 * Returns the total number of results which match the given query (exclusive of any
 	 * _include's or OperationOutcome)
 	 */
-	int size();
+	Integer size();
 
 	/**
 	 * Returns the instant as of which this result was valid

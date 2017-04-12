@@ -174,13 +174,9 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 
 	void removeTag(IIdType theId, TagTypeEnum theTagType, String theSystem, String theCode);
 
-	IBundleProvider search(Map<String, IQueryParameterType> theParams);
-
-	IBundleProvider search(SearchParameterMap theMap);
+	IBundleProvider search(SearchParameterMap theParams);
 
 	IBundleProvider search(SearchParameterMap theParams, RequestDetails theRequestDetails);
-
-	IBundleProvider search(String theParameterName, IQueryParameterType theValue);
 
 	Set<Long> searchForIds(Map<String, IQueryParameterType> theParams);
 

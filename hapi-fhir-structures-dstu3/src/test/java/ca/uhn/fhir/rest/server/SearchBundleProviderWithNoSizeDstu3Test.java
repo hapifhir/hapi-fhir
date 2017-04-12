@@ -1,6 +1,8 @@
 package ca.uhn.fhir.rest.server;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -16,6 +18,7 @@ import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
+import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.HumanName;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.hl7.fhir.dstu3.model.Patient;
@@ -32,13 +35,14 @@ import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.util.PortUtil;
 import ca.uhn.fhir.util.TestUtil;
 
-public class SearchDstu3Test {
+public class SearchBundleProviderWithNoSizeDstu3Test {
 
 	private static CloseableHttpClient ourClient;
 	private static FhirContext ourCtx = FhirContext.forDstu3();
 	private static TokenAndListParam ourIdentifiers;
+	private static IBundleProvider ourLastBundleProvider;
 	private static String ourLastMethod;
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchDstu3Test.class);
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchBundleProviderWithNoSizeDstu3Test.class);
 	private static int ourPort;
 
 	private static Server ourServer;
@@ -50,37 +54,20 @@ public class SearchDstu3Test {
 	}
 
 	@Test
-	public void testSearchNormal() throws Exception {
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?identifier=foo%7Cbar");
+	public void testBundleProviderReturnsNoSize() throws Exception {
+		Bundle respBundle;
+		
+		ourLastBundleProvider = mock(IBundleProvider.class); 
+		when(ourLastBundleProvider.size()).thenReturn(-1);
+		
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_format=json");
 		CloseableHttpResponse status = ourClient.execute(httpGet);
 		try {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(responseContent);
 			assertEquals(200, status.getStatusLine().getStatusCode());
-
-			assertEquals("search", ourLastMethod);
-
-			assertEquals("foo", ourIdentifiers.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getSystem());
-			assertEquals("bar", ourIdentifiers.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue());
-		} finally {
-			IOUtils.closeQuietly(status.getEntity().getContent());
-		}
-
-	}
-
-	@Test
-	public void testSearchWithInvalidChain() throws Exception {
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?identifier.chain=foo%7Cbar");
-		CloseableHttpResponse status = ourClient.execute(httpGet);
-		try {
-			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-			ourLog.info(responseContent);
-			assertEquals(400, status.getStatusLine().getStatusCode());
-
-			OperationOutcome oo = (OperationOutcome) ourCtx.newXmlParser().parseResource(responseContent);
-			assertEquals(
-					"Invalid search parameter \"identifier.chain\". Parameter contains a chain (.chain) and chains are not supported for this parameter (chaining is only allowed on reference parameters)",
-					oo.getIssueFirstRep().getDiagnostics());
+			assertEquals("searchAll", ourLastMethod);
+			respBundle = ourCtx.newJsonParser().parseResource(Bundle.class, responseContent);
 		} finally {
 			IOUtils.closeQuietly(status.getEntity().getContent());
 		}
@@ -124,17 +111,11 @@ public class SearchDstu3Test {
 			return Patient.class;
 		}
 
-		@SuppressWarnings("rawtypes")
 		@Search()
-		public List search(
-				@RequiredParam(name = Patient.SP_IDENTIFIER) TokenAndListParam theIdentifiers) {
-			ourLastMethod = "search";
-			ourIdentifiers = theIdentifiers;
-			ArrayList<Patient> retVal = new ArrayList<Patient>();
-			retVal.add((Patient) new Patient().addName(new HumanName().setFamily("FAMILY")).setId("1"));
-			return retVal;
+		public IBundleProvider searchAll() {
+			ourLastMethod = "searchAll";
+			return ourLastBundleProvider;
 		}
-
 
 	}
 
