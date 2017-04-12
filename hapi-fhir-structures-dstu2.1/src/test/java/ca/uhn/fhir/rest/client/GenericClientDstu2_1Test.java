@@ -397,7 +397,7 @@ public class GenericClientDstu2_1Test {
 			.execute();
 		//@formatter:on
 		assertEquals("http://example.com/fhir/Device?_format=json", UrlUtil.unescape(capt.getAllValues().get(idx).getURI().toString()));
-		assertEquals(Constants.CT_FHIR_JSON+";q=1.0, application/json+fhir;q=0.9", capt.getAllValues().get(idx).getFirstHeader(Constants.HEADER_ACCEPT).getValue());
+		assertEquals(Constants.CT_FHIR_JSON, capt.getAllValues().get(idx).getFirstHeader(Constants.HEADER_ACCEPT).getValue());
 		idx++;
 
 		//@formatter:off
@@ -408,7 +408,7 @@ public class GenericClientDstu2_1Test {
 			.execute();
 		//@formatter:on
 		assertEquals("http://example.com/fhir/Device?_format=xml", UrlUtil.unescape(capt.getAllValues().get(idx).getURI().toString()));
-		assertEquals(Constants.CT_FHIR_XML+";q=1.0, application/xml+fhir;q=0.9", capt.getAllValues().get(idx).getFirstHeader(Constants.HEADER_ACCEPT).getValue());
+		assertEquals(Constants.CT_FHIR_XML, capt.getAllValues().get(idx).getFirstHeader(Constants.HEADER_ACCEPT).getValue());
 		idx++;
 
 	}
@@ -448,7 +448,7 @@ public class GenericClientDstu2_1Test {
 		validateUserAgent(capt);
 
 		assertEquals("application/xml+fhir;charset=utf-8", capt.getAllValues().get(0).getHeaders("Content-Type")[0].getValue().toLowerCase().replace(" ", ""));
-		assertEquals(Constants.HEADER_ACCEPT_VALUE_XML_NON_LEGACY, capt.getAllValues().get(0).getHeaders("Accept")[0].getValue());
+		assertEquals(Constants.CT_FHIR_XML, capt.getAllValues().get(0).getHeaders("Accept")[0].getValue());
 		Binary output = ourCtx.newXmlParser().parseResource(Binary.class, extractBodyAsString(capt));
 		assertEquals(Constants.CT_FHIR_JSON, output.getContentType());
 
@@ -487,7 +487,7 @@ public class GenericClientDstu2_1Test {
 		validateUserAgent(capt);
 
 		assertEquals("application/xml+fhir;charset=utf-8", capt.getAllValues().get(0).getHeaders("Content-Type")[0].getValue().toLowerCase().replace(" ", ""));
-		assertEquals(Constants.HEADER_ACCEPT_VALUE_XML_NON_LEGACY, capt.getAllValues().get(0).getHeaders("Accept")[0].getValue());
+		assertEquals(Constants.CT_FHIR_XML, capt.getAllValues().get(0).getHeaders("Accept")[0].getValue());
 		assertArrayEquals(new byte[] { 0, 1, 2, 3, 4 }, ourCtx.newXmlParser().parseResource(Binary.class, extractBodyAsString(capt)).getContent());
 
 	}
@@ -1786,7 +1786,7 @@ public class GenericClientDstu2_1Test {
 		validateUserAgent(capt);
 
 		assertEquals("application/xml+fhir;charset=utf-8", capt.getAllValues().get(0).getHeaders("Content-Type")[0].getValue().toLowerCase().replace(" ", ""));
-		assertEquals(Constants.HEADER_ACCEPT_VALUE_XML_NON_LEGACY, capt.getAllValues().get(0).getHeaders("Accept")[0].getValue());
+		assertEquals(Constants.CT_FHIR_XML, capt.getAllValues().get(0).getHeaders("Accept")[0].getValue());
 		String body = extractBodyAsString(capt);
 		assertThat(body, containsString("<id value=\"111\"/>"));
 	}
@@ -1917,7 +1917,7 @@ public class GenericClientDstu2_1Test {
 		validateUserAgent(capt);
 
 		assertEquals("application/foo", capt.getAllValues().get(0).getHeaders("Content-Type")[0].getValue());
-		assertEquals(Constants.HEADER_ACCEPT_VALUE_XML_OR_JSON_NON_LEGACY, capt.getAllValues().get(0).getHeaders("Accept")[0].getValue());
+		assertEquals(Constants.HEADER_ACCEPT_VALUE_XML_OR_JSON_LEGACY, capt.getAllValues().get(0).getHeaders("Accept")[0].getValue());
 		assertArrayEquals(new byte[] { 0, 1, 2, 3, 4 }, extractBodyAsByteArray(capt));
 
 	}
