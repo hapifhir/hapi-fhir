@@ -33,6 +33,16 @@ import ca.uhn.fhir.util.CoverageIgnore;
  * </ul>
  * 
  * <p>
+ * For security failures, you should use
+ * {@link AuthenticationException} if you want to indicate that the
+ * user could not be authenticated (e.g. credential failures), also 
+ * known as an <b>authentication</b> failure. 
+ * You should use {@link ForbiddenOperationException} if you want to 
+ * indicate that the authenticated user does not have permission to
+ * perform the requested operation, also known as an <b>authorization</b>
+ * failure.
+ * </p>
+ * <p>
  * Note that a complete list of RESTful exceptions is available in the <a href="./package-summary.html">Package
  * Summary</a>.
  * </p>

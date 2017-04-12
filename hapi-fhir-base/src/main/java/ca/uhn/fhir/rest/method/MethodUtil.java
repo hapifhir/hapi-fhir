@@ -306,6 +306,7 @@ public class MethodUtil {
 		return index;
 	}
 
+	@SuppressWarnings("GetClassOnAnnotation")
 	public static Integer findParamAnnotationIndex(Method theMethod, Class<?> toFind) {
 		int paramIndex = 0;
 		for (Annotation[] annotations : theMethod.getParameterAnnotations()) {

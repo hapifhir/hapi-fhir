@@ -50,6 +50,7 @@ public class RuleImplConditional extends BaseRule implements IAuthRule {
 		if (theOperation == myOperationType) {
 			switch (myAppliesTo) {
 			case ALL_RESOURCES:
+			case INSTANCES:
 				break;
 			case TYPES:
 				if (theInputResource == null || !myAppliesToTypes.contains(theInputResource.getClass())) {

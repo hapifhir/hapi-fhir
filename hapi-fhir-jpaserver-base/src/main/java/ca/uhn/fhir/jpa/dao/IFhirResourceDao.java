@@ -170,7 +170,9 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	 */
 	void reindex(T theResource, ResourceTable theEntity);
 
-	void removeTag(IIdType theId, TagTypeEnum theTagType, String theScheme, String theTerm, RequestDetails theRequestDetails);
+	void removeTag(IIdType theId, TagTypeEnum theTagType, String theSystem, String theCode, RequestDetails theRequestDetails);
+
+	void removeTag(IIdType theId, TagTypeEnum theTagType, String theSystem, String theCode);
 
 	IBundleProvider search(Map<String, IQueryParameterType> theParams);
 

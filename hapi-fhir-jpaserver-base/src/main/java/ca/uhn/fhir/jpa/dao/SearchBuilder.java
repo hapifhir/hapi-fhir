@@ -1046,6 +1046,12 @@ public class SearchBuilder {
 			retVal = createPredicateQuantity(builder, dateJoin, leftValue);
 			break;
 		}
+		case COMPOSITE:
+		case HAS:
+		case NUMBER:
+		case REFERENCE:
+		case URI:
+			break;
 		}
 
 		if (retVal == null) {
@@ -1935,6 +1941,9 @@ public class SearchBuilder {
 								return;
 							}
 						}
+						break;
+					case HAS: 
+						// should not happen
 						break;
 					}
 				}

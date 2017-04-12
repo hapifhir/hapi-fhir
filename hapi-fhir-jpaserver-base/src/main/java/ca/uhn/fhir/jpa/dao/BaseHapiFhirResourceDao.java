@@ -910,11 +910,18 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	}
 
 	@Override
+	public void removeTag(IIdType theId, TagTypeEnum theTagType, String theScheme, String theTerm) {
+		removeTag(theId, theTagType, theScheme, theTerm, null);
+	}
+	
+	@Override
 	public void removeTag(IIdType theId, TagTypeEnum theTagType, String theScheme, String theTerm, RequestDetails theRequestDetails) {
 		// Notify interceptors
-		ActionRequestDetails requestDetails = new ActionRequestDetails(theRequestDetails, getResourceName(), theId);
-		notifyInterceptors(RestOperationTypeEnum.DELETE_TAGS, requestDetails);
-
+		if (theRequestDetails != null) {
+			ActionRequestDetails requestDetails = new ActionRequestDetails(theRequestDetails, getResourceName(), theId);
+			notifyInterceptors(RestOperationTypeEnum.DELETE_TAGS, requestDetails);
+		}
+		
 		StopWatch w = new StopWatch();
 		BaseHasResource entity = readEntity(theId);
 		if (entity == null) {

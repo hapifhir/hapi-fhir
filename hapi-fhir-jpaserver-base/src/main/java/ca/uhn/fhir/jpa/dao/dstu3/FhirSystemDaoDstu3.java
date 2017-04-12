@@ -455,6 +455,9 @@ public class FhirSystemDaoDstu3 extends BaseHapiFhirSystemDao<Bundle, Meta> {
 				entriesToProcess.put(nextRespEntry, outcome.getEntity());
 				break;
 			}
+			case GET:
+			case NULL:
+				break;
 			}
 		}
 

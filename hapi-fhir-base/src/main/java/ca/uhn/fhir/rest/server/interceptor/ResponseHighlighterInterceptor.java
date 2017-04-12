@@ -110,7 +110,7 @@ public class ResponseHighlighterInterceptor extends InterceptorAdapter {
 						b.append(nextChar);
 						b.append("</span>");
 						inValue = false;
-					} else if (nextChar == '}' || nextChar == '}' || nextChar == ',') {
+					} else if (nextChar == '{' || nextChar == '}' || nextChar == ',') {
 						b.append("<span class='hlControl'>");
 						b.append(nextChar);
 						b.append("</span>");

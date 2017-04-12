@@ -63,6 +63,11 @@
 				of literal ones, meaning that the server will not try to resolve these
 				URLs. Thanks to Eeva Turkka for the suggestion!
 			</action>
+			<action type="add">
+				Add a utility method to JPA server: 
+				<![CDATA[<code>IFhirResourceDao#removeTag(IIdType, TagTypeEnum, String, String)</code>]]>. This allows client code to remove tags
+				from a resource without having a servlet request object in context.
+			</action>
 		</release>
 		<release version="2.3" date="2017-03-18">
 			<action type="add">
