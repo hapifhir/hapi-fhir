@@ -101,7 +101,7 @@ public class SearchPostDstu2_1Test {
 			assertEquals(1, ourLastName.getValuesAsQueryTokens().size());
 			assertEquals(1, ourLastName.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().size());
 			assertEquals("Smith", ourLastName.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue());
-			assertEquals(Constants.CT_FHIR_JSON_NEW, status.getEntity().getContentType().getValue().replaceAll(";.*", ""));
+			assertEquals(Constants.CT_FHIR_JSON, status.getEntity().getContentType().getValue().replaceAll(";.*", ""));
 		} finally {
 			IOUtils.closeQuietly(status.getEntity().getContent());
 		}
@@ -165,7 +165,7 @@ public class SearchPostDstu2_1Test {
 			assertEquals(1, ourLastName.getValuesAsQueryTokens().size());
 			assertEquals(1, ourLastName.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().size());
 			assertEquals("Smith", ourLastName.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue());
-			assertEquals(Constants.CT_FHIR_JSON_NEW, status.getEntity().getContentType().getValue().replaceAll(";.*", ""));
+			assertEquals(Constants.CT_FHIR_JSON, status.getEntity().getContentType().getValue().replaceAll(";.*", ""));
 		} finally {
 			IOUtils.closeQuietly(status.getEntity().getContent());
 		}
