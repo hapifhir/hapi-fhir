@@ -12,6 +12,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
@@ -30,6 +31,7 @@ import org.hamcrest.collection.IsEmptyCollection;
 import org.hamcrest.core.StringContains;
 import org.hamcrest.text.StringContainsInOrder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -65,6 +67,47 @@ public class XmlParserDstu2Test {
 	public void before() {
 		if (ourCtx == null) {
 			ourCtx = FhirContext.forDstu2();
+		}
+	}
+	
+	@Test
+	public void testOverrideResourceIdWithBundleEntryFullUrlDisabled_ConfiguredOnFhirContext() {
+		try {
+			String tmp = "<Bundle xmlns=\"http://hl7.org/fhir\"><entry><fullUrl value=\"http://lalaland.org/patient/pat1\"/><resource><Patient xmlns=\"http://hl7.org/fhir\"><id value=\"patxuzos\"/></Patient></resource></entry></Bundle>";
+			ourCtx.getParserOptions().setOverrideResourceIdWithBundleEntryFullUrl(false);
+			ca.uhn.fhir.model.dstu2.resource.Bundle bundle = (ca.uhn.fhir.model.dstu2.resource.Bundle) ourCtx.newXmlParser().parseResource(tmp);
+			assertEquals(1, bundle.getEntry().size());
+			{
+				Patient o1 = (Patient) bundle.getEntry().get(0).getResource();
+				IIdType o1Id = o1.getIdElement();
+				assertFalse(o1Id.hasBaseUrl());
+				assertEquals("Patient", o1Id.getResourceType());
+				assertEquals("patxuzos", o1Id.getIdPart());
+				assertFalse(o1Id.hasVersionIdPart());
+			}
+		} finally {
+			// ensure we cleanup ourCtx so other tests continue to work
+			ourCtx = null;
+		}
+	}
+	
+	@Test
+	public void testOverrideResourceIdWithBundleEntryFullUrlDisabled_ConfiguredOnParser() {
+		try {
+			String tmp = "<Bundle xmlns=\"http://hl7.org/fhir\"><entry><fullUrl value=\"http://lalaland.org/patient/pat1\"/><resource><Patient xmlns=\"http://hl7.org/fhir\"><id value=\"patxuzos\"/></Patient></resource></entry></Bundle>";
+			ca.uhn.fhir.model.dstu2.resource.Bundle bundle = (ca.uhn.fhir.model.dstu2.resource.Bundle) ourCtx.newXmlParser().setOverrideResourceIdWithBundleEntryFullUrl(false).parseResource(tmp);
+			assertEquals(1, bundle.getEntry().size());
+			{
+				Patient o1 = (Patient) bundle.getEntry().get(0).getResource();
+				IIdType o1Id = o1.getIdElement();
+				assertFalse(o1Id.hasBaseUrl());
+				assertEquals("Patient", o1Id.getResourceType());
+				assertEquals("patxuzos", o1Id.getIdPart());
+				assertFalse(o1Id.hasVersionIdPart());
+			}
+		} finally {
+			// ensure we cleanup ourCtx so other tests continue to work
+			ourCtx = null;
 		}
 	}
 	
