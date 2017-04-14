@@ -195,6 +195,7 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 		if (myLowerBound.getPrefix() != null) {
 			switch (myLowerBound.getPrefix()) {
 			case GREATERTHAN:
+			case STARTS_AFTER:
 				retVal = myLowerBound.getPrecision().add(retVal, 1);
 				break;
 			case EQUAL:
@@ -205,7 +206,6 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 			case LESSTHAN_OR_EQUALS:
 			case ENDS_BEFORE:
 			case NOT_EQUAL:
-			case STARTS_AFTER:
 				throw new IllegalStateException("Unvalid lower bound comparator: " + myLowerBound.getPrefix());
 			}
 		}
@@ -224,6 +224,7 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 		if (myUpperBound.getPrefix() != null) {
 			switch (myUpperBound.getPrefix()) {
 			case LESSTHAN:
+			case ENDS_BEFORE:
 				retVal = new Date(retVal.getTime() - 1L);
 				break;
 			case EQUAL:
@@ -234,7 +235,6 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 			case GREATERTHAN_OR_EQUALS:
 			case GREATERTHAN:
 			case APPROXIMATE:
-			case ENDS_BEFORE:
 			case NOT_EQUAL:
 			case STARTS_AFTER:
 				throw new IllegalStateException("Unvalid upper bound comparator: " + myUpperBound.getPrefix());

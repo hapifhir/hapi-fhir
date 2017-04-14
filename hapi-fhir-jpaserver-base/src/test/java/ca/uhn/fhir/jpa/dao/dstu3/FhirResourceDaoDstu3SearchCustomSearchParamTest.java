@@ -6,6 +6,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
+import java.io.IOException;
 import java.util.List;
 
 import org.hl7.fhir.dstu3.model.CodeType;
@@ -18,6 +19,9 @@ import org.junit.AfterClass;
 import org.junit.Test;
 
 import ca.uhn.fhir.jpa.dao.SearchParameterMap;
+import ca.uhn.fhir.model.dstu.resource.Practitioner;
+import ca.uhn.fhir.parser.DataFormatException;
+import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
@@ -283,6 +287,34 @@ public class FhirResourceDaoDstu3SearchCustomSearchParamTest extends BaseJpaDstu
 		foundResources = toUnqualifiedVersionlessIdValues(results);
 		assertThat(foundResources, contains(patId.getValue()));
 
+	}
+	
+	@Test
+	public void testCustomReferenceParameter() throws Exception {
+		SearchParameter sp = new SearchParameter();
+		sp.addBase("Patient");
+		sp.setCode("myDoctor");
+		sp.setType(org.hl7.fhir.dstu3.model.Enumerations.SearchParamType.REFERENCE);
+		sp.setTitle("My Doctor");
+		sp.setExpression("Patient.extension('http://fmcna.com/myDoctor')");
+		sp.setXpathUsage(org.hl7.fhir.dstu3.model.SearchParameter.XPathUsageType.NORMAL);
+		sp.setStatus(org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus.ACTIVE);
+		mySearchParameterDao.create(sp);
+		
+		org.hl7.fhir.dstu3.model.Practitioner pract = new org.hl7.fhir.dstu3.model.Practitioner();
+		pract.setId("A");
+		pract.addName().setFamily("PRACT");
+		myPractitionerDao.update(pract);
+		
+		Patient pat = myFhirCtx.newJsonParser().parseResource(Patient.class, loadClasspath("/dstu3_custom_resource_patient.json"));
+		IIdType pid = myPatientDao.create(pat, mySrd).getId().toUnqualifiedVersionless();
+		
+		SearchParameterMap params = new SearchParameterMap();
+		params.add("myDoctor", new ReferenceParam("A"));
+		IBundleProvider outcome = myPatientDao.search(params);
+		List<String> ids = toUnqualifiedVersionlessIdValues(outcome);
+		ourLog.info("IDS: " + ids);
+		assertThat(ids, contains(pid.getValue()));
 	}
 
 	@AfterClass

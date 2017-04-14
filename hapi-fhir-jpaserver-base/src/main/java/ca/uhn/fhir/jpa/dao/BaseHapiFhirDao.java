@@ -59,16 +59,7 @@ import org.apache.http.client.utils.URLEncodedUtils;
 import org.hl7.fhir.dstu3.model.Bundle.HTTPVerb;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.StringType;
-import org.hl7.fhir.instance.model.api.IAnyResource;
-import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IBaseBundle;
-import org.hl7.fhir.instance.model.api.IBaseCoding;
-import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
-import org.hl7.fhir.instance.model.api.IBaseReference;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IDomainResource;
-import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.instance.model.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.PlatformTransactionManager;
 
@@ -262,8 +253,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 			return;
 		}
 
-		RuntimeResourceDefinition def = getContext().getResourceDefinition(theResource);
-		for (RuntimeSearchParam nextSpDef : def.getSearchParams()) {
+		Map<String, RuntimeSearchParam> searchParams = mySearchParamRegistry.getActiveSearchParams(toResourceName(theResource.getClass()));
+		for (RuntimeSearchParam nextSpDef : searchParams.values()) {
 
 			if (nextSpDef.getParamType() != RestSearchParameterTypeEnum.REFERENCE) {
 				continue;
@@ -283,6 +274,14 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 			for (PathAndRef nextPathAndRef : refs) {
 				Object nextObject = nextPathAndRef.getRef();
 
+				/*
+				 * A search parameter on an extension field that contains
+				 * references should index those references
+				 */
+				if (nextObject instanceof IBaseExtension<?, ?>) {
+					nextObject = ((IBaseExtension<?, ?>) nextObject).getValue();
+				}
+			
 				IIdType nextId;
 				if (nextObject instanceof IBaseReference) {
 					IBaseReference nextValue = (IBaseReference) nextObject;
