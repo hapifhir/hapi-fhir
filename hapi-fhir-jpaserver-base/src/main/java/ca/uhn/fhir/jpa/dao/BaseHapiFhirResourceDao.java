@@ -943,15 +943,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	}
 
 	@Override
-	public IBundleProvider search(Map<String, IQueryParameterType> theParams) {
-		SearchParameterMap map = new SearchParameterMap();
-		for (Entry<String, IQueryParameterType> nextEntry : theParams.entrySet()) {
-			map.add(nextEntry.getKey(), (nextEntry.getValue()));
-		}
-		return search(map);
-	}
-
-	@Override
 	public IBundleProvider search(final SearchParameterMap theParams) {
 		return search(theParams, null);
 	}
@@ -959,19 +950,16 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	@Override
 	public IBundleProvider search(final SearchParameterMap theParams, RequestDetails theRequestDetails) {
 		// Notify interceptors
-		ActionRequestDetails requestDetails = new ActionRequestDetails(theRequestDetails, getContext(), getResourceName(), null);
-		notifyInterceptors(RestOperationTypeEnum.SEARCH_TYPE, requestDetails);
-
+		if (theRequestDetails != null) {
+			ActionRequestDetails requestDetails = new ActionRequestDetails(theRequestDetails, getContext(), getResourceName(), null);
+			notifyInterceptors(RestOperationTypeEnum.SEARCH_TYPE, requestDetails);
+		}
+		
 		SearchBuilder builder = newSearchBuilder();
 		builder.setType(getResourceType(), getResourceName());
 		return builder.search(theParams);
 	}
 
-
-	@Override
-	public IBundleProvider search(String theParameterName, IQueryParameterType theValue) {
-		return search(Collections.singletonMap(theParameterName, theValue));
-	}
 
 	@Override
 	public Set<Long> searchForIds(Map<String, IQueryParameterType> theParams) {

@@ -51,7 +51,7 @@ public class BundleProviders {
 			}
 
 			@Override
-			public int size() {
+			public Integer size() {
 				return 0;
 			}
 

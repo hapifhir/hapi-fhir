@@ -38,6 +38,7 @@ import javax.persistence.criteria.*;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.tuple.Pair;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -1438,7 +1439,6 @@ public class SearchBuilder {
 		mySearchEntity.setUuid(UUID.randomUUID().toString());
 		mySearchEntity.setCreated(new Date());
 		mySearchEntity.setTotalCount(-1);
-		mySearchEntity.setSearchParamMap(SerializationUtils.serialize(myParams));
 		mySearchEntity.setPreferredPageSize(myParams.getCount());
 		mySearchEntity.setSearchType(myParams.getEverythingMode() != null ? SearchTypeEnum.EVERYTHING : SearchTypeEnum.SEARCH);
 		mySearchEntity.setLastUpdated(myParams.getLastUpdated());
@@ -1457,43 +1457,8 @@ public class SearchBuilder {
 		}
 	}
 
-	public IBundleProvider search(final SearchParameterMap theParams) {
+	public Iterator<Long> createQuery(SearchParameterMap theParams) {
 		myParams = theParams;
-		StopWatch w = new StopWatch();
-
-		mySearchEntity = new Search();
-		mySearchEntity.setUuid(UUID.randomUUID().toString());
-		mySearchEntity.setCreated(new Date());
-		mySearchEntity.setTotalCount(-1);
-		mySearchEntity.setSearchParamMap(SerializationUtils.serialize(myParams));
-		mySearchEntity.setPreferredPageSize(myParams.getCount());
-		mySearchEntity.setSearchType(myParams.getEverythingMode() != null ? SearchTypeEnum.EVERYTHING : SearchTypeEnum.SEARCH);
-		mySearchEntity.setLastUpdated(myParams.getLastUpdated());
-		mySearchEntity.setResourceType(myResourceName);
-
-		for (Include next : myParams.getIncludes()) {
-			mySearchEntity.getIncludes().add(new SearchInclude(mySearchEntity, next.getValue(), false, next.isRecurse()));
-		}
-		for (Include next : myParams.getRevIncludes()) {
-			mySearchEntity.getIncludes().add(new SearchInclude(mySearchEntity, next.getValue(), true, next.isRecurse()));
-		}
-
-		List<Long> firstPage = loadSearchPage(theParams, 0, 999);
-		mySearchEntity.setTotalCount(firstPage.size());
-
-		myEntityManager.persist(mySearchEntity);
-		for (SearchInclude next : mySearchEntity.getIncludes()) {
-			myEntityManager.persist(next);
-		}
-
-		IBundleProvider retVal = doReturnProvider();
-
-		ourLog.info("Search initial phase completed in {}ms", w);
-		return retVal;
-	}
-
-	public List<Long> loadSearchPage(SearchParameterMap theParams, int theFromIndex, int theToIndex) {
-
 		myBuilder = myEntityManager.getCriteriaBuilder();
 		CriteriaQuery<Long> outerQuery = null;
 		
@@ -1503,7 +1468,7 @@ public class SearchBuilder {
 		 * If we have a sort, we wrap the criteria search (the search that actually
 		 * finds the appropriate resources) in an outer search which is then sorted
 		 */
-		if (theParams.getSort() != null) {
+		if (myParams.getSort() != null) {
 
 			outerQuery = myBuilder.createQuery(Long.class);
 			Root<ResourceTable> outerQueryFrom = outerQuery.from(ResourceTable.class);
@@ -1511,7 +1476,7 @@ public class SearchBuilder {
 			List<Order> orders = Lists.newArrayList();
 			List<Predicate> predicates = Lists.newArrayList();
 			
-			createSort(myBuilder, outerQueryFrom, theParams.getSort(), orders, predicates);
+			createSort(myBuilder, outerQueryFrom, myParams.getSort(), orders, predicates);
 			if (orders.size() > 0) {
 				outerQuery.orderBy(orders);
 			}
@@ -1542,20 +1507,20 @@ public class SearchBuilder {
 		
 		myResourceTableQuery.distinct(true);
 		myPredicates = new ArrayList<Predicate>();
-		if (theParams.getEverythingMode() == null) {
+		if (myParams.getEverythingMode() == null) {
 			myPredicates.add(myBuilder.equal(myResourceTableRoot.get("myResourceType"), myResourceName));
 		}
 		myPredicates.add(myBuilder.isNull(myResourceTableRoot.get("myDeleted")));
 
-		DateRangeParam lu = theParams.getLastUpdated();
+		DateRangeParam lu = myParams.getLastUpdated();
 		List<Predicate> lastUpdatedPredicates = createLastUpdatedPredicates(lu, myBuilder, myResourceTableRoot);
 		myPredicates.addAll(lastUpdatedPredicates);
 
-		if (theParams.getEverythingMode() != null) {
+		if (myParams.getEverythingMode() != null) {
 			Join<ResourceTable, ResourceLink> join = myResourceTableRoot.join("myResourceLinks", JoinType.LEFT);
 
-			if (theParams.get(BaseResource.SP_RES_ID) != null) {
-				StringParam idParm = (StringParam) theParams.get(BaseResource.SP_RES_ID).get(0).get(0);
+			if (myParams.get(BaseResource.SP_RES_ID) != null) {
+				StringParam idParm = (StringParam) myParams.get(BaseResource.SP_RES_ID).get(0).get(0);
 				Long pid = BaseHapiFhirDao.translateForcedIdToPid(myResourceName, idParm.getValue(), myForcedIdDao);
 				myPredicates.add(myBuilder.equal(join.get("myTargetResourcePid").as(Long.class), pid));
 			} else {
@@ -1566,21 +1531,21 @@ public class SearchBuilder {
 
 		} else {
 			// Normal search
-			searchForIdsWithAndOr(theParams);
+			searchForIdsWithAndOr(myParams);
 		}
 
 		/*
 		 * Fulltext search
 		 */
-		if (theParams.containsKey(Constants.PARAM_CONTENT) || theParams.containsKey(Constants.PARAM_TEXT)) {
+		if (myParams.containsKey(Constants.PARAM_CONTENT) || myParams.containsKey(Constants.PARAM_TEXT)) {
 			if (myFulltextSearchSvc == null) {
-				if (theParams.containsKey(Constants.PARAM_TEXT)) {
+				if (myParams.containsKey(Constants.PARAM_TEXT)) {
 					throw new InvalidRequestException("Fulltext search is not enabled on this service, can not process parameter: " + Constants.PARAM_TEXT);
-				} else if (theParams.containsKey(Constants.PARAM_CONTENT)) {
+				} else if (myParams.containsKey(Constants.PARAM_CONTENT)) {
 					throw new InvalidRequestException("Fulltext search is not enabled on this service, can not process parameter: " + Constants.PARAM_CONTENT);
 				}
 			}
-			List<Long> pids = myFulltextSearchSvc.everything(myResourceName, theParams);
+			List<Long> pids = myFulltextSearchSvc.everything(myResourceName, myParams);
 			if (pids.isEmpty()) {
 				// Will never match
 				pids = Collections.singletonList((Long) null);
@@ -1595,19 +1560,89 @@ public class SearchBuilder {
 		 * Now perform the search
 		 */
 		TypedQuery<Long> query = myEntityManager.createQuery(outerQuery);
-		query.setFirstResult(theFromIndex);
-		query.setMaxResults(theToIndex - theFromIndex);
-
-		List<Long> pids = new ArrayList<Long>();
-		Set<Long> pidSet = new HashSet<Long>();
+		final Iterator<Long> results = query.getResultList().iterator();
+		final Set<Long> pidSet = new HashSet<Long>();
 		
-		for (Long next : query.getResultList()) {
-			if (next != null && pidSet.add(next)) {
-				pids.add(next);
+		return new Iterator<Long>() {
+			private Long myNext;
+			
+			@Override
+			public boolean hasNext() {
+				if (myNext == null) {
+					fetchNext();
+				}
+				if (myNext == NO_MORE) {
+					return false;
+				}
+				return true;
 			}
+
+			private void fetchNext() {
+				if (myNext == null) {
+					while (results.hasNext()) {
+						Long next = results.next();
+						if (next != null && pidSet.add(next)) {
+							myNext = next;
+							break;
+						}
+					}
+					if (myNext == null) {
+						myNext = NO_MORE;
+					}
+				}
+			}
+
+			@Override
+			public Long next() {
+				fetchNext();
+				Validate.isTrue(myNext != NO_MORE, "No more elements");
+				return myNext;
+			}
+		};
+
+	}
+	private static Long NO_MORE = Long.valueOf(-1);
+	
+	public IBundleProvider search(final SearchParameterMap theParams) {
+		myParams = theParams;
+		StopWatch w = new StopWatch();
+
+		if (theParams.isLoadSynchronous()) {
+			
+		}
+		
+		mySearchEntity = new Search();
+		mySearchEntity.setUuid(UUID.randomUUID().toString());
+		mySearchEntity.setCreated(new Date());
+		mySearchEntity.setTotalCount(-1);
+		mySearchEntity.setPreferredPageSize(myParams.getCount());
+		mySearchEntity.setSearchType(myParams.getEverythingMode() != null ? SearchTypeEnum.EVERYTHING : SearchTypeEnum.SEARCH);
+		mySearchEntity.setLastUpdated(myParams.getLastUpdated());
+		mySearchEntity.setResourceType(myResourceName);
+
+		for (Include next : myParams.getIncludes()) {
+			mySearchEntity.getIncludes().add(new SearchInclude(mySearchEntity, next.getValue(), false, next.isRecurse()));
+		}
+		for (Include next : myParams.getRevIncludes()) {
+			mySearchEntity.getIncludes().add(new SearchInclude(mySearchEntity, next.getValue(), true, next.isRecurse()));
 		}
 
-		return pids;
+		List<Long> firstPage = loadSearchPage(theParams, 0, 999);
+		mySearchEntity.setTotalCount(firstPage.size());
+
+		myEntityManager.persist(mySearchEntity);
+		for (SearchInclude next : mySearchEntity.getIncludes()) {
+			myEntityManager.persist(next);
+		}
+
+		IBundleProvider retVal = doReturnProvider();
+
+		ourLog.info("Search initial phase completed in {}ms", w);
+		return retVal;
+	}
+
+	public List<Long> loadSearchPage(SearchParameterMap theParams, int theFromIndex, int theToIndex) {
+
 	}
 
 	// public IBundleProvider loadPage(SearchParameterMap theParams, int theFromIndex, int theToIndex) {

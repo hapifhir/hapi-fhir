@@ -110,7 +110,10 @@ public class FhirResourceDaoValueSetDstu2 extends FhirResourceDaoDstu2<ValueSet>
 		if (defaultValueSet != null) {
 			source = getContext().newJsonParser().parseResource(ValueSet.class, myRiCtx.newJsonParser().encodeResourceToString(defaultValueSet));
 		} else {
-			IBundleProvider ids = search(ValueSet.SP_URL, new UriParam(theUri));
+			SearchParameterMap params = new SearchParameterMap();
+			params.setLoadSynchronousUpTo(1);
+			params.add(ValueSet.SP_URL, new UriParam(theUri));
+			IBundleProvider ids = search(params);
 			if (ids.size() == 0) {
 				throw new InvalidRequestException("Unknown ValueSet URI: " + theUri);
 			}

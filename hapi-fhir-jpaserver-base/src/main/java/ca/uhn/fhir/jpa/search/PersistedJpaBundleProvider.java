@@ -121,8 +121,9 @@ public final class PersistedJpaBundleProvider implements IBundleProvider {
 		Class<? extends IBaseResource> resourceType = myContext.getResourceDefinition(resourceName).getImplementingClass();
 		sb.setType(resourceType, resourceName);
 		
-		SearchParameterMap parameterMap = SerializationUtils.deserialize(mySearchEntity.getSearchParamMap());
-		List<Long> pidsSubList = sb.loadSearchPage(parameterMap, theFromIndex, theToIndex);
+//		SearchParameterMap parameterMap = SerializationUtils.deserialize(mySearchEntity.getSearchParamMap());
+//		List<Long> pidsSubList = sb.loadSearchPage(parameterMap, theFromIndex, theToIndex);());
+		List<Long> pidsSubList = null;
 
 		Set<Long> revIncludedPids = new HashSet<Long>();
 		if (mySearchEntity.getSearchType() == SearchTypeEnum.SEARCH) {
@@ -236,7 +237,7 @@ public final class PersistedJpaBundleProvider implements IBundleProvider {
 	}
 
 	@Override
-	public int size() {
+	public Integer size() {
 		ensureSearchEntityLoaded();
 		return Math.max(0, mySearchEntity.getTotalCount());
 	}

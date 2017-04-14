@@ -172,10 +172,10 @@ public class FhirSystemDaoDstu1Test extends BaseJpaTest {
 
 		// Try to search
 
-		IBundleProvider obsResults = ourObservationDao.search(Observation.SP_NAME, new IdentifierDt("urn:system", "testPersistWithSimpleLinkO01"));
+		IBundleProvider obsResults = ourObservationDao.search(new SearchParameterMap().setLoadSynchronous(true).add(Observation.SP_NAME, new IdentifierDt("urn:system", "testPersistWithSimpleLinkO01")));
 		assertEquals(1, obsResults.size().intValue());
 
-		IBundleProvider patResults = ourPatientDao.search(Patient.SP_IDENTIFIER, new IdentifierDt("urn:system", "testPersistWithSimpleLinkP01"));
+		IBundleProvider patResults = ourPatientDao.search(new SearchParameterMap().setLoadSynchronous(true).add(Patient.SP_IDENTIFIER, new IdentifierDt("urn:system", "testPersistWithSimpleLinkP01")));
 		assertEquals(1, obsResults.size().intValue());
 
 		IIdType foundPatientId = patResults.getResources(0, 1).get(0).getIdElement();
@@ -446,8 +446,8 @@ public class FhirSystemDaoDstu1Test extends BaseJpaTest {
 		 * Verify
 		 */
 
-		IBundleProvider results = ourPatientDao.search(Patient.SP_IDENTIFIER, new TokenParam("urn:system", "testTransactionWithDelete"));
-		assertEquals(3, results.size());
+		IBundleProvider results = ourPatientDao.search(new SearchParameterMap().setLoadSynchronous(true).add(Patient.SP_IDENTIFIER, new TokenParam("urn:system", "testTransactionWithDelete")));
+		assertEquals(3, results.size().intValue());
 
 		/*
 		 * Now delete 2
@@ -472,8 +472,8 @@ public class FhirSystemDaoDstu1Test extends BaseJpaTest {
 		 * Verify
 		 */
 
-		IBundleProvider results2 = ourPatientDao.search(Patient.SP_IDENTIFIER, new TokenParam("urn:system", "testTransactionWithDelete"));
-		assertEquals(1, results2.size());
+		IBundleProvider results2 = ourPatientDao.search(new SearchParameterMap().setLoadSynchronous(true).add(Patient.SP_IDENTIFIER, new TokenParam("urn:system", "testTransactionWithDelete")));
+		assertEquals(1, results2.size().intValue());
 		List<IBaseResource> existing2 = results2.getResources(0, 1);
 		assertEquals(existing2.get(0).getIdElement(), existing.get(2).getIdElement());
 

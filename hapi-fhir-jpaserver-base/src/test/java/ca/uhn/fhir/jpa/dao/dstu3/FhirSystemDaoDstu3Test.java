@@ -126,7 +126,7 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outputBundle));
 
 		IBundleProvider allPatients = myPatientDao.search(new SearchParameterMap());
-		assertEquals(1, allPatients.size());
+		assertEquals(1, allPatients.size().intValue());
 	}
 
 	@Test
@@ -696,13 +696,13 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 		SearchParameterMap map = new SearchParameterMap();
 		map.add(Organization.SP_PARTOF, new ReferenceParam(id1.toUnqualifiedVersionless().getValue()));
 		IBundleProvider res = myOrganizationDao.search(map);
-		assertEquals(1, res.size());
+		assertEquals(1, res.size().intValue());
 		assertEquals(id2.toUnqualifiedVersionless().getValue(), res.getResources(0, 1).get(0).getIdElement().toUnqualifiedVersionless().getValue());
 
 		map = new SearchParameterMap();
 		map.add(Organization.SP_PARTOF, new ReferenceParam(id2.toUnqualifiedVersionless().getValue()));
 		res = myOrganizationDao.search(map);
-		assertEquals(1, res.size());
+		assertEquals(1, res.size().intValue());
 		assertEquals(id1.toUnqualifiedVersionless().getValue(), res.getResources(0, 1).get(0).getIdElement().toUnqualifiedVersionless().getValue());
 
 		/*
@@ -735,13 +735,13 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 		map = new SearchParameterMap();
 		map.add(Organization.SP_PARTOF, new ReferenceParam(id1.toUnqualifiedVersionless().getValue()));
 		res = myOrganizationDao.search(map);
-		assertEquals(1, res.size());
+		assertEquals(1, res.size().intValue());
 		assertEquals(id1.toUnqualifiedVersionless().getValue(), res.getResources(0, 1).get(0).getIdElement().toUnqualifiedVersionless().getValue());
 
 		map = new SearchParameterMap();
 		map.add(Organization.SP_PARTOF, new ReferenceParam(id2.toUnqualifiedVersionless().getValue()));
 		res = myOrganizationDao.search(map);
-		assertEquals(1, res.size());
+		assertEquals(1, res.size().intValue());
 		assertEquals(id2.toUnqualifiedVersionless().getValue(), res.getResources(0, 1).get(0).getIdElement().toUnqualifiedVersionless().getValue());
 
 	}
@@ -1139,7 +1139,7 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 		}
 
 		IBundleProvider history = myPatientDao.history(id, null, null, mySrd);
-		assertEquals(2, history.size());
+		assertEquals(2, history.size().intValue());
 
 		assertNotNull(ResourceMetadataKeyEnum.DELETED_AT.get((IAnyResource) history.getResources(0, 1).get(0)));
 		assertNotNull(ResourceMetadataKeyEnum.DELETED_AT.get((IAnyResource) history.getResources(0, 1).get(0)).getValue());
