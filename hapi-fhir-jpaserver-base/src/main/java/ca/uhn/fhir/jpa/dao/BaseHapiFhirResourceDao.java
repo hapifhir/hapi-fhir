@@ -977,15 +977,19 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 	@Override
 	public Set<Long> searchForIdsWithAndOr(SearchParameterMap theParams) {
-		theParams.setPersistResults(false);
 
 		SearchBuilder builder = newSearchBuilder();
 		builder.setType(getResourceType(), getResourceName());
-		List<Long> result = builder.loadSearchPage(theParams, 0, 100);
-		
+
 		// FIXME: fail if too many results
 		
-		HashSet<Long> retVal = new HashSet<Long>(result);
+		HashSet<Long> retVal = new HashSet<Long>();
+		
+		Iterator<Long> iter = builder.createQuery(theParams);
+		while (iter.hasNext()) {
+			retVal.add(iter.next());
+		}
+		
 		return retVal;
 	}
 

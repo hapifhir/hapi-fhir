@@ -125,15 +125,15 @@ public final class PersistedJpaBundleProvider implements IBundleProvider {
 //		List<Long> pidsSubList = sb.loadSearchPage(parameterMap, theFromIndex, theToIndex);());
 		List<Long> pidsSubList = null;
 
-		Set<Long> revIncludedPids = new HashSet<Long>();
+		Set<Long> includedPids = new HashSet<Long>();
 		if (mySearchEntity.getSearchType() == SearchTypeEnum.SEARCH) {
-			revIncludedPids.addAll(SearchBuilder.loadReverseIncludes(myDao, myContext, myEntityManager, pidsSubList, mySearchEntity.toRevIncludesList(), true, mySearchEntity.getLastUpdated()));
+			includedPids.addAll(SearchBuilder.loadReverseIncludes(myDao, myContext, myEntityManager, pidsSubList, mySearchEntity.toRevIncludesList(), true, mySearchEntity.getLastUpdated()));
 		}
-		revIncludedPids.addAll(SearchBuilder.loadReverseIncludes(myDao, myContext, myEntityManager, pidsSubList, mySearchEntity.toIncludesList(), false, mySearchEntity.getLastUpdated()));
+		includedPids.addAll(SearchBuilder.loadReverseIncludes(myDao, myContext, myEntityManager, pidsSubList, mySearchEntity.toIncludesList(), false, mySearchEntity.getLastUpdated()));
 
 		// Execute the query and make sure we return distinct results
 		List<IBaseResource> resources = new ArrayList<IBaseResource>();
-		SearchBuilder.loadResourcesByPid(pidsSubList, resources, revIncludedPids, false, myEntityManager, myContext, myDao);
+		SearchBuilder.loadResourcesByPid(pidsSubList, resources, includedPids, false, myEntityManager, myContext, myDao);
 
 		return resources;
 	}

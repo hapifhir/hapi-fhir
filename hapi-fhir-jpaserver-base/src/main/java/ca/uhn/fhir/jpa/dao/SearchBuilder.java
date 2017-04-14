@@ -1559,11 +1559,12 @@ public class SearchBuilder {
 		/*
 		 * Now perform the search
 		 */
-		TypedQuery<Long> query = myEntityManager.createQuery(outerQuery);
-		final Iterator<Long> results = query.getResultList().iterator();
-		final Set<Long> pidSet = new HashSet<Long>();
+		final TypedQuery<Long> query = myEntityManager.createQuery(outerQuery);
 		
 		return new Iterator<Long>() {
+			
+			private final Set<Long> myPidSet = new HashSet<Long>();
+			private Iterator<Long> myResultsIterator;
 			private Long myNext;
 			
 			@Override
@@ -1578,10 +1579,13 @@ public class SearchBuilder {
 			}
 
 			private void fetchNext() {
+				if (myResultsIterator == null) {
+					 myResultsIterator = query.getResultList().iterator();
+				}
 				if (myNext == null) {
-					while (results.hasNext()) {
-						Long next = results.next();
-						if (next != null && pidSet.add(next)) {
+					while (myResultsIterator.hasNext()) {
+						Long next = myResultsIterator.next();
+						if (next != null && myPidSet.add(next)) {
 							myNext = next;
 							break;
 						}
@@ -1604,45 +1608,42 @@ public class SearchBuilder {
 	private static Long NO_MORE = Long.valueOf(-1);
 	
 	public IBundleProvider search(final SearchParameterMap theParams) {
-		myParams = theParams;
-		StopWatch w = new StopWatch();
-
-		if (theParams.isLoadSynchronous()) {
-			
-		}
-		
-		mySearchEntity = new Search();
-		mySearchEntity.setUuid(UUID.randomUUID().toString());
-		mySearchEntity.setCreated(new Date());
-		mySearchEntity.setTotalCount(-1);
-		mySearchEntity.setPreferredPageSize(myParams.getCount());
-		mySearchEntity.setSearchType(myParams.getEverythingMode() != null ? SearchTypeEnum.EVERYTHING : SearchTypeEnum.SEARCH);
-		mySearchEntity.setLastUpdated(myParams.getLastUpdated());
-		mySearchEntity.setResourceType(myResourceName);
-
-		for (Include next : myParams.getIncludes()) {
-			mySearchEntity.getIncludes().add(new SearchInclude(mySearchEntity, next.getValue(), false, next.isRecurse()));
-		}
-		for (Include next : myParams.getRevIncludes()) {
-			mySearchEntity.getIncludes().add(new SearchInclude(mySearchEntity, next.getValue(), true, next.isRecurse()));
-		}
-
-		List<Long> firstPage = loadSearchPage(theParams, 0, 999);
-		mySearchEntity.setTotalCount(firstPage.size());
-
-		myEntityManager.persist(mySearchEntity);
-		for (SearchInclude next : mySearchEntity.getIncludes()) {
-			myEntityManager.persist(next);
-		}
-
-		IBundleProvider retVal = doReturnProvider();
-
-		ourLog.info("Search initial phase completed in {}ms", w);
-		return retVal;
-	}
-
-	public List<Long> loadSearchPage(SearchParameterMap theParams, int theFromIndex, int theToIndex) {
-
+//		myParams = theParams;
+//		StopWatch w = new StopWatch();
+//
+//		if (theParams.isLoadSynchronous()) {
+//			
+//		}
+//		
+//		mySearchEntity = new Search();
+//		mySearchEntity.setUuid(UUID.randomUUID().toString());
+//		mySearchEntity.setCreated(new Date());
+//		mySearchEntity.setTotalCount(-1);
+//		mySearchEntity.setPreferredPageSize(myParams.getCount());
+//		mySearchEntity.setSearchType(myParams.getEverythingMode() != null ? SearchTypeEnum.EVERYTHING : SearchTypeEnum.SEARCH);
+//		mySearchEntity.setLastUpdated(myParams.getLastUpdated());
+//		mySearchEntity.setResourceType(myResourceName);
+//
+//		for (Include next : myParams.getIncludes()) {
+//			mySearchEntity.getIncludes().add(new SearchInclude(mySearchEntity, next.getValue(), false, next.isRecurse()));
+//		}
+//		for (Include next : myParams.getRevIncludes()) {
+//			mySearchEntity.getIncludes().add(new SearchInclude(mySearchEntity, next.getValue(), true, next.isRecurse()));
+//		}
+//
+//		List<Long> firstPage = loadSearchPage(theParams, 0, 999);
+//		mySearchEntity.setTotalCount(firstPage.size());
+//
+//		myEntityManager.persist(mySearchEntity);
+//		for (SearchInclude next : mySearchEntity.getIncludes()) {
+//			myEntityManager.persist(next);
+//		}
+//
+//		IBundleProvider retVal = doReturnProvider();
+//
+//		ourLog.info("Search initial phase completed in {}ms", w);
+//		return retVal;
+		return null;
 	}
 
 	// public IBundleProvider loadPage(SearchParameterMap theParams, int theFromIndex, int theToIndex) {
