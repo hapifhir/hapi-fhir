@@ -1652,7 +1652,7 @@ public class ProfileUtilities {
         if (definition != null && definition.hasShort()) {
           if (!c.getPieces().isEmpty()) c.addPiece(gen.new Piece("br"));
           c.addPiece(checkForNoChange(definition.getShortElement(), gen.new Piece(null, definition.getShort(), null)));
-        } else if (fallback != null && fallback != null && fallback.hasShort()) {
+        } else if (fallback != null && fallback.hasShort()) {
           if (!c.getPieces().isEmpty()) c.addPiece(gen.new Piece("br"));
           c.addPiece(checkForNoChange(fallback.getShortElement(), gen.new Piece(null, fallback.getShort(), null)));
         }
