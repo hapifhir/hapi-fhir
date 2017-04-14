@@ -68,6 +68,11 @@
 				<![CDATA[<code>IFhirResourceDao#removeTag(IIdType, TagTypeEnum, String, String)</code>]]>. This allows client code to remove tags
 				from a resource without having a servlet request object in context.
 			</action>
+			<action type="fix">
+				JPA server was unable to process custom search parameters where
+				the path pointed to an extension containing a reference. Thanks
+				to Ravi Kuchi for reporting!
+			</action>
 		</release>
 		<release version="2.3" date="2017-03-18">
 			<action type="add">

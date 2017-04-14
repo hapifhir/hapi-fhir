@@ -137,10 +137,13 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
 			switch (bpWarnings) {
 			case Error:
 				rule(errors, invalid, line, col, literalPath, test, message);
+				break;
 			case Warning:
 				warning(errors, invalid, line, col, literalPath, test, message);
+				break;
 			case Hint:
 				hint(errors, invalid, line, col, literalPath, test, message);
+				break;
 			default: // do nothing
 			}
 		}
@@ -1606,6 +1609,8 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
 				else if (itemType.equals("time")) checkOption(errors, answer, ns, qsrc, qItem, "time");
 				else if (itemType.equals("integer")) checkOption(errors, answer, ns, qsrc, qItem, "integer");
 				else if (itemType.equals("string")) checkOption(errors, answer, ns, qsrc, qItem, "string", true);
+				break;
+			default:
 				break;
 			}
 			validateQuestionannaireResponseItems(qsrc, qItem.getItem(), errors, answer, stack, inProgress);

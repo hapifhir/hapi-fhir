@@ -93,7 +93,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		return myContext;
 	}
 
-	protected Collection<RuntimeSearchParam> getSearchParams(IBaseResource theResource) {
+	public Collection<RuntimeSearchParam> getSearchParams(IBaseResource theResource) {
 		RuntimeResourceDefinition def = getContext().getResourceDefinition(theResource);
 		Collection<RuntimeSearchParam> retVal = mySearchParamRegistry.getActiveSearchParams(def.getName()).values();
 		List<RuntimeSearchParam> defaultList= Collections.emptyList();
