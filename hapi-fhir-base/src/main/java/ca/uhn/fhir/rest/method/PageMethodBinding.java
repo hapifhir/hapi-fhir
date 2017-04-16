@@ -110,8 +110,12 @@ public class PageMethodBinding extends BaseResourceReturningMethodBinding {
 			offsetI = 0;
 		}
 
-		int start = Math.min(offsetI, resultList.size() - 1);
-
+		Integer totalNum = resultList.size();
+		int start = offsetI;
+		if (totalNum != null) {
+			start = Math.min(start, totalNum - 1);
+		}
+		
 		ResponseEncoding responseEncoding = RestfulServerUtils.determineResponseEncodingNoDefault(theRequest, theServer.getDefaultResponseEncoding());
 		boolean prettyPrint = RestfulServerUtils.prettyPrintResponse(theServer, theRequest);
 

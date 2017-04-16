@@ -58,7 +58,8 @@ public interface IBundleProvider {
 
 	/**
 	 * Returns the total number of results which match the given query (exclusive of any
-	 * _include's or OperationOutcome)
+	 * _include's or OperationOutcome). May return {@literal null} if the total size is not
+	 * known or would be too expensive to calculate.
 	 */
 	Integer size();
 
