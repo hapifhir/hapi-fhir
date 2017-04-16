@@ -4,11 +4,11 @@ import java.util.*;
 import java.util.concurrent.*;
 
 import javax.persistence.EntityManager;
+import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.lang3.time.DateUtils;
-import org.hibernate.id.ResultSetIdentifierConsumer;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -17,9 +17,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.concurrent.CustomizableThreadFactory;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
-import org.springframework.web.servlet.ThemeResolver;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
@@ -41,6 +41,8 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 
 public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
+	static final int DEFAULT_SYNC_SIZE = 250;
+
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchCoordinatorSvcImpl.class);
 
 	@Autowired
@@ -70,16 +72,29 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 	}
 
 	@Override
-	public List<Long> getResources(String theUuid, int theFrom, int theTo) {
-		SearchTask task = myIdToSearchTask.get(theUuid);
-		if (task != null) {
-			return task.getResourcePids(theFrom, theTo);
+	@Transactional(value=TxType.NOT_SUPPORTED)
+	public List<Long> getResources(final String theUuid, int theFrom, int theTo) {
+		if (myNeverUseLocalSearchForUnitTests == false) {
+			SearchTask task = myIdToSearchTask.get(theUuid);
+			if (task != null) {
+				return task.getResourcePids(theFrom, theTo);
+			}
 		}
 
 		Search search;
 		StopWatch sw = new StopWatch();
 		while (true) {
-			search = mySearchDao.findByUuid(theUuid);
+			
+			TransactionTemplate txTemplate = new TransactionTemplate(myTxManager);
+			txTemplate.setPropagationBehavior(TransactionTemplate.PROPAGATION_REQUIRES_NEW);
+			search = txTemplate.execute(new TransactionCallback<Search>() {
+				@Override
+				public Search doInTransaction(TransactionStatus theStatus) {
+					return mySearchDao.findByUuid(theUuid);
+				}
+			});
+
+			
 			if (search == null) {
 				ourLog.info("Client requested unknown paging ID[{}]", theUuid);
 				String msg = myContext.getLocalizer().getMessage(PageMethodBinding.class, "unknownSearchId", theUuid);
@@ -88,9 +103,11 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 
 			verifySearchHasntFailedOrThrowInternalErrorException(search);
 			if (search.getStatus() == SearchStatusEnum.FINISHED) {
+				ourLog.info("Search entity marked as finished");
 				break;
 			}
 			if (search.getNumFound() >= theTo) {
+				ourLog.info("Search entity has {} results so far", search.getNumFound());
 				break;
 			}
 
@@ -180,7 +197,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 		myIdToSearchTask.put(search.getUuid(), task);
 		myExecutor.submit(task);
 
-		PersistedJpaSearchFirstPageBundleProvider retVal = new PersistedJpaSearchFirstPageBundleProvider(search, theCallingDao, task, sb);
+		PersistedJpaSearchFirstPageBundleProvider retVal = new PersistedJpaSearchFirstPageBundleProvider(search, theCallingDao, task, sb, myTxManager);
 		retVal.setContext(myContext);
 		retVal.setEntityManager(myEntityManager);
 		retVal.setPlatformTransactionManager(myTxManager);
@@ -233,9 +250,24 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 		}
 	}
 
+	private int mySyncSize = DEFAULT_SYNC_SIZE;
+
+	@VisibleForTesting
+	void setSyncSizeForUnitTests(int theSyncSize) {
+		mySyncSize = theSyncSize;
+	}
+
+	@VisibleForTesting
+	void setLoadingThrottleForUnitTests(Integer theLoadingThrottleForUnitTests) {
+		myLoadingThrottleForUnitTests = theLoadingThrottleForUnitTests;
+	}
+
+	private Integer myLoadingThrottleForUnitTests = null;
+
+	private boolean myNeverUseLocalSearchForUnitTests;
+
 	public class SearchTask implements Callable<Void> {
 
-		private static final int SYNC_SIZE = 250;
 		private int myCountSaved = 0;
 		private final CountDownLatch myInitialCollectionLatch = new CountDownLatch(1);
 		private final Search mySearch;
@@ -269,7 +301,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 		@Override
 		public Void call() throws Exception {
 			StopWatch sw = new StopWatch();
-			
+
 			try {
 				TransactionTemplate txTemplate = new TransactionTemplate(myTxManager);
 				txTemplate.setPropagationBehavior(TransactionTemplate.PROPAGATION_REQUIRES_NEW);
@@ -279,9 +311,9 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 						doSearch();
 					}
 				});
-				
+
 				ourLog.info("Completed search for {} resources in {}ms", mySyncedPids.size(), sw.getMillis());
-				
+
 			} catch (Throwable t) {
 				ourLog.error("Failed during search loading after {}ms", t, sw.getMillis());
 				myUnsyncedPids.clear();
@@ -290,7 +322,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 				String failureMessage = ExceptionUtils.getRootCauseMessage(t);
 				mySearch.setFailureMessage(failureMessage);
 				saveSearch();
-				
+
 			}
 
 			myIdToSearchTask.remove(mySearch.getUuid());
@@ -305,8 +337,15 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 
 			while (theResultIter.hasNext()) {
 				myUnsyncedPids.add(theResultIter.next());
-				if (myUnsyncedPids.size() >= SYNC_SIZE) {
+				if (myUnsyncedPids.size() >= mySyncSize) {
 					saveUnsynced(theResultIter);
+				}
+				if (myLoadingThrottleForUnitTests != null) {
+					try {
+						Thread.sleep(myLoadingThrottleForUnitTests);
+					} catch (InterruptedException e) {
+						// ignore
+					}
 				}
 			}
 			saveUnsynced(theResultIter);
@@ -447,6 +486,10 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 		};
 
 		return page;
+	}
+
+	void setNeverUseLocalSearchForUnitTests(boolean theNeverUseLocalSearchForUnitTests) {
+		myNeverUseLocalSearchForUnitTests = theNeverUseLocalSearchForUnitTests;
 	}
 
 }

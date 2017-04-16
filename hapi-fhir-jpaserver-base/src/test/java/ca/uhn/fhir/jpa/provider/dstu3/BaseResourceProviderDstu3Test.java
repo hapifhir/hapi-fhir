@@ -31,6 +31,7 @@ import ca.uhn.fhir.jpa.config.dstu3.WebsocketDstu3Config;
 import ca.uhn.fhir.jpa.config.dstu3.WebsocketDstu3DispatcherConfig;
 import ca.uhn.fhir.jpa.dao.dstu3.BaseJpaDstu3Test;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
+import ca.uhn.fhir.jpa.search.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.testutil.RandomServerPortProvider;
 import ca.uhn.fhir.jpa.validation.JpaValidationSupportChainDstu3;
 import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
@@ -53,6 +54,7 @@ public abstract class BaseResourceProviderDstu3Test extends BaseJpaDstu3Test {
 	protected static String ourServerBase;
 	private static GenericWebApplicationContext ourWebApplicationContext;
 	private TerminologyUploaderProviderDstu3 myTerminologyUploaderProvider;
+	protected static ISearchCoordinatorSvc mySearchCoordinatorSvc;
 
 	public BaseResourceProviderDstu3Test() {
 		super();
@@ -138,6 +140,7 @@ public abstract class BaseResourceProviderDstu3Test extends BaseJpaDstu3Test {
 			
 			WebApplicationContext wac = WebApplicationContextUtils.getWebApplicationContext(subsServletHolder.getServlet().getServletConfig().getServletContext());
 			myValidationSupport = wac.getBean(JpaValidationSupportChainDstu3.class);
+			mySearchCoordinatorSvc = wac.getBean(ISearchCoordinatorSvc.class);
 	
 			ourClient = myFhirCtx.newRestfulGenericClient(ourServerBase);
 			ourClient.registerInterceptor(new LoggingInterceptor(true));
