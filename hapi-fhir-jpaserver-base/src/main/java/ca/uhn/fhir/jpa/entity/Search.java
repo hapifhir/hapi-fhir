@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.entity;
 
+import static org.apache.commons.lang3.StringUtils.left;
+
 /*
  * #%L
  * HAPI FHIR JPA Server
@@ -44,11 +46,16 @@ import ca.uhn.fhir.rest.param.DateRangeParam;
 //@formatter:on
 public class Search implements Serializable {
 
+	private static final int FAILURE_MESSAGE_LENGTH = 500;
+
 	private static final long serialVersionUID = 1L;
 
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name="CREATED", nullable=false, updatable=false)
 	private Date myCreated;
+
+	@Column(name="FAILURE_MESSAGE", length=FAILURE_MESSAGE_LENGTH, nullable=true)
+	private String myFailureMessage;
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO, generator="SEQ_SEARCH")
@@ -58,7 +65,7 @@ public class Search implements Serializable {
 
 	@OneToMany(mappedBy="mySearch")
 	private Collection<SearchInclude> myIncludes;
-
+	
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name="LAST_UPDATED_HIGH", nullable=true, insertable=true, updatable=false)
 	private Date myLastUpdatedHigh;
@@ -67,26 +74,33 @@ public class Search implements Serializable {
 	@Column(name="LAST_UPDATED_LOW", nullable=true, insertable=true, updatable=false)
 	private Date myLastUpdatedLow;
 
+	@Column(name="NUM_FOUND", nullable=false)
+	private int myNumFound;
+
 	@Column(name="PREFERRED_PAGE_SIZE", nullable=true)
 	private Integer myPreferredPageSize;
-	
+
 	@Column(name="RESOURCE_ID", nullable=true)
 	private Long myResourceId;
-	
+
 	@Column(name="RESOURCE_TYPE", length=200, nullable=true)
 	private String myResourceType;
 
 	@OneToMany(mappedBy="mySearch")
 	private Collection<SearchResult> myResults;
-
+	
 	@Column(name="SEARCH_STRING", length=1000, nullable=true)
 	private String mySearchString;
-
+	
 	@Enumerated(EnumType.ORDINAL)
 	@Column(name="SEARCH_TYPE", nullable=false)
 	private SearchTypeEnum mySearchType;
 
-	@Column(name="TOTAL_COUNT", nullable=false)
+	@Enumerated(EnumType.STRING)
+	@Column(name="SEARCH_STATUS", nullable=false, length=10)
+	private SearchStatusEnum myStatus;
+
+	@Column(name="TOTAL_COUNT", nullable=true)
 	private Integer myTotalCount;
 
 	@Column(name="SEARCH_UUID", length=40, nullable=false, updatable=false)
@@ -94,6 +108,10 @@ public class Search implements Serializable {
 
 	public Date getCreated() {
 		return myCreated;
+	}
+
+	public String getFailureMessage() {
+		return myFailureMessage;
 	}
 
 	public Long getId() {
@@ -118,9 +136,13 @@ public class Search implements Serializable {
 	public Date getLastUpdatedHigh() {
 		return myLastUpdatedHigh;
 	}
-	
+
 	public Date getLastUpdatedLow() {
 		return myLastUpdatedLow;
+	}
+
+	public int getNumFound() {
+		return myNumFound;
 	}
 
 	public Integer getPreferredPageSize() {
@@ -130,7 +152,7 @@ public class Search implements Serializable {
 	public Long getResourceId() {
 		return myResourceId;
 	}
-
+	
 	public String getResourceType() {
 		return myResourceType;
 	}
@@ -139,10 +161,13 @@ public class Search implements Serializable {
 		return mySearchType;
 	}
 
+	public SearchStatusEnum getStatus() {
+		return myStatus;
+	}
+
 	public Integer getTotalCount() {
 		return myTotalCount;
 	}
-
 
 	public String getUuid() {
 		return myUuid;
@@ -152,10 +177,16 @@ public class Search implements Serializable {
 		myCreated = theCreated;
 	}
 
+
+	public void setFailureMessage(String theFailureMessage) {
+		myFailureMessage = left(theFailureMessage, FAILURE_MESSAGE_LENGTH);
+	}
+
 	public void setLastUpdated(Date theLowerBound, Date theUpperBound) {
 		myLastUpdatedLow = theLowerBound;
 		myLastUpdatedHigh = theUpperBound;
 	}
+
 	public void setLastUpdated(DateRangeParam theLastUpdated) {
 		if (theLastUpdated == null) {
 			myLastUpdatedLow = null;
@@ -164,6 +195,9 @@ public class Search implements Serializable {
 			myLastUpdatedLow = theLastUpdated.getLowerBoundAsInstant();
 			myLastUpdatedHigh = theLastUpdated.getUpperBoundAsInstant();
 		}
+	}
+	public void setNumFound(int theNumFound) {
+		myNumFound = theNumFound;
 	}
 	
 	public void setPreferredPageSize(Integer thePreferredPageSize) {
@@ -181,6 +215,10 @@ public class Search implements Serializable {
 
 	public void setSearchType(SearchTypeEnum theSearchType) {
 		mySearchType = theSearchType;
+	}
+
+	public void setStatus(SearchStatusEnum theStatus) {
+		myStatus = theStatus;
 	}
 
 	public void setTotalCount(Integer theTotalCount) {

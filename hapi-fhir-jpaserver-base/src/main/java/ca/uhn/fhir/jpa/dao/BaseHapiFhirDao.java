@@ -78,6 +78,7 @@ import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.dao.data.*;
 import ca.uhn.fhir.jpa.entity.*;
+import ca.uhn.fhir.jpa.search.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.search.PersistedJpaBundleProvider;
 import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
 import ca.uhn.fhir.jpa.term.IHapiTerminologySvc;
@@ -185,6 +186,9 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 	protected IResourceIndexedSearchParamUriDao myResourceIndexedSearchParamUriDao;
 
 	private Map<Class<? extends IBaseResource>, IFhirResourceDao<?>> myResourceTypeToDao;
+
+	@Autowired
+	protected ISearchCoordinatorSvc mySearchCoordinatorSvc;
 
 	@Autowired
 	private ISearchDao mySearchDao;
@@ -509,6 +513,56 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		}
 	}
 
+	@SuppressWarnings("unchecked")
+	private <T extends BaseResourceIndexedSearchParam> void findMissingSearchParams(ResourceTable theEntity, Set<Entry<String, RuntimeSearchParam>> activeSearchParams, RestSearchParameterTypeEnum type,
+			Set<T> paramCollection) {
+		for (Entry<String, RuntimeSearchParam> nextEntry : activeSearchParams) {
+			String nextParamName = nextEntry.getKey();
+			if (nextEntry.getValue().getParamType() == type) {
+				boolean haveParam = false;
+				for (BaseResourceIndexedSearchParam nextParam : paramCollection) {
+					if (nextParam.getParamName().equals(nextParamName)) {
+						haveParam = true;
+						break;
+					}
+				}
+
+				if (!haveParam) {
+					BaseResourceIndexedSearchParam param;
+					switch (type) {
+					case DATE:
+						param = new ResourceIndexedSearchParamDate();
+						break;
+					case NUMBER:
+						param = new ResourceIndexedSearchParamNumber();
+						break;
+					case QUANTITY:
+						param = new ResourceIndexedSearchParamQuantity();
+						break;
+					case STRING:
+						param = new ResourceIndexedSearchParamString();
+						break;
+					case TOKEN:
+						param = new ResourceIndexedSearchParamToken();
+						break;
+					case URI:
+						param = new ResourceIndexedSearchParamUri();
+						break;
+					case COMPOSITE:
+					case HAS:
+					case REFERENCE:
+					default:
+						continue;
+					}
+					param.setResource(theEntity);
+					param.setMissing(true);
+					param.setParamName(nextParamName);
+					paramCollection.add((T) param);
+				}
+			}
+		}
+	}
+
 	protected DaoConfig getConfig() {
 		return myConfig;
 	}
@@ -591,7 +645,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 			return retVal;
 		}
 	}
-
+	
 	protected TagList getTags(Class<? extends IBaseResource> theResourceType, IIdType theResourceId) {
 		String resourceName = null;
 		if (theResourceType != null) {
@@ -630,7 +684,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 			return retVal;
 		}
 	}
-
+	
 	protected IBundleProvider history(String theResourceName, Long theId, Date theSince, Date theUntil) {
 
 		String resourceName = defaultIfBlank(theResourceName, null);
@@ -672,7 +726,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		theProvider.setEntityManager(myEntityManager);
 		theProvider.setPlatformTransactionManager(myPlatformTransactionManager);
 		theProvider.setSearchDao(mySearchDao);
-		theProvider.setSearchResultDao(mySearchResultDao);
+		theProvider.setSearchCoordinatorSvc(mySearchCoordinatorSvc);
 	}
 
 	protected boolean isLogicalReference(IIdType theId) {
@@ -1522,64 +1576,14 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		return theEntity;
 	}
 
-	@SuppressWarnings("unchecked")
-	private <T extends BaseResourceIndexedSearchParam> void findMissingSearchParams(ResourceTable theEntity, Set<Entry<String, RuntimeSearchParam>> activeSearchParams, RestSearchParameterTypeEnum type,
-			Set<T> paramCollection) {
-		for (Entry<String, RuntimeSearchParam> nextEntry : activeSearchParams) {
-			String nextParamName = nextEntry.getKey();
-			if (nextEntry.getValue().getParamType() == type) {
-				boolean haveParam = false;
-				for (BaseResourceIndexedSearchParam nextParam : paramCollection) {
-					if (nextParam.getParamName().equals(nextParamName)) {
-						haveParam = true;
-						break;
-					}
-				}
-
-				if (!haveParam) {
-					BaseResourceIndexedSearchParam param;
-					switch (type) {
-					case DATE:
-						param = new ResourceIndexedSearchParamDate();
-						break;
-					case NUMBER:
-						param = new ResourceIndexedSearchParamNumber();
-						break;
-					case QUANTITY:
-						param = new ResourceIndexedSearchParamQuantity();
-						break;
-					case STRING:
-						param = new ResourceIndexedSearchParamString();
-						break;
-					case TOKEN:
-						param = new ResourceIndexedSearchParamToken();
-						break;
-					case URI:
-						param = new ResourceIndexedSearchParamUri();
-						break;
-					case COMPOSITE:
-					case HAS:
-					case REFERENCE:
-					default:
-						continue;
-					}
-					param.setResource(theEntity);
-					param.setMissing(true);
-					param.setParamName(nextParamName);
-					paramCollection.add((T) param);
-				}
-			}
-		}
+	protected ResourceTable updateEntity(IBaseResource theResource, ResourceTable entity, Date theDeletedTimestampOrNull, Date theUpdateTime) {
+		return updateEntity(theResource, entity, theDeletedTimestampOrNull, true, true, theUpdateTime);
 	}
 
 	private void updateSearchParamPresent(Map<String, Boolean> presentSearchParams, Set<? extends BaseResourceIndexedSearchParam> params) {
 		for (BaseResourceIndexedSearchParam nextSearchParam : params) {
 			presentSearchParams.put(nextSearchParam.getParamName(), Boolean.TRUE);
 		}
-	}
-
-	protected ResourceTable updateEntity(IBaseResource theResource, ResourceTable entity, Date theDeletedTimestampOrNull, Date theUpdateTime) {
-		return updateEntity(theResource, entity, theDeletedTimestampOrNull, true, true, theUpdateTime);
 	}
 
 	private void validateChildReferences(IBase theElement, String thePath) {

@@ -39,15 +39,22 @@ import ca.uhn.fhir.rest.server.IPagingProvider;
 public class DatabaseBackedPagingProvider extends BasePagingProvider implements IPagingProvider {
 
 	@Autowired
-	private PlatformTransactionManager myPlatformTransactionManager;
-	@Autowired
-	private ISearchResultDao mySearchResultDao;
-	@Autowired
-	private EntityManager myEntityManager;
-	@Autowired
 	private FhirContext myContext;
 	@Autowired
 	private IFhirSystemDao<?, ?> myDao;
+	@Autowired
+	private EntityManager myEntityManager;
+	@Autowired
+	private PlatformTransactionManager myPlatformTransactionManager;
+	@Autowired
+	private ISearchResultDao mySearchResultDao;
+
+	/**
+	 * Constructor
+	 */
+	public DatabaseBackedPagingProvider() {
+		super();
+	}
 
 	/**
 	 * Constructor
@@ -56,13 +63,6 @@ public class DatabaseBackedPagingProvider extends BasePagingProvider implements 
 	@Deprecated
 	public DatabaseBackedPagingProvider(int theSize) {
 		this();
-	}
-
-	/**
-	 * Constructor
-	 */
-	public DatabaseBackedPagingProvider() {
-		super();
 	}
 
 	@Override

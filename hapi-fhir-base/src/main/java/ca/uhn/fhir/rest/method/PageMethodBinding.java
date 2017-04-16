@@ -21,6 +21,7 @@ package ca.uhn.fhir.rest.method;
  */
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.hamcrest.Matchers.emptyCollectionOf;
 
 import java.lang.reflect.Method;
 import java.util.HashSet;
@@ -93,7 +94,8 @@ public class PageMethodBinding extends BaseResourceReturningMethodBinding {
 		IBundleProvider resultList = pagingProvider.retrieveResultList(thePagingAction);
 		if (resultList == null) {
 			ourLog.info("Client requested unknown paging ID[{}]", thePagingAction);
-			throw new ResourceGoneException("Search ID[" + thePagingAction + "] does not exist and may have expired.");
+			String msg = getContext().getLocalizer().getMessage(PageMethodBinding.class, "unknownSearchId", thePagingAction);
+			throw new ResourceGoneException(msg);
 		}
 
 		Integer count = RestfulServerUtils.extractCountParameter(theRequest);

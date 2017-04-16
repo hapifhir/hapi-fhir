@@ -755,7 +755,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	 * Subclasses may override to provide behaviour. Invoked within a delete
 	 * transaction with the resource that is about to be deleted. 
 	 */
-	@SuppressWarnings("unused")
 	protected void preDelete(T theResourceToDelete, ResourceTable theEntityToDelete) {
 		// nothing by default
 	}
@@ -955,9 +954,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			notifyInterceptors(RestOperationTypeEnum.SEARCH_TYPE, requestDetails);
 		}
 		
-		SearchBuilder builder = newSearchBuilder();
-		builder.setType(getResourceType(), getResourceName());
-		return builder.search(theParams);
+		return mySearchCoordinatorSvc.registerSearch(this, theParams, getResourceName());
 	}
 
 

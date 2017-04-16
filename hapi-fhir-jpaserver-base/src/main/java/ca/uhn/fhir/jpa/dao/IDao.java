@@ -73,7 +73,7 @@ public interface IDao {
 	 */
 	void injectDependenciesIntoBundleProvider(PersistedJpaBundleProvider theProvider);
 
-	SearchBuilder newSearchBuilder();
+	ISearchBuilder newSearchBuilder();
 
 	void populateFullTextFields(IBaseResource theResource, ResourceTable theEntity);
 
