@@ -17,12 +17,6 @@ import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
-import org.hl7.fhir.dstu3.model.Bundle;
-import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
-import org.hl7.fhir.dstu3.model.Bundle.BundleLinkComponent;
-import org.hl7.fhir.dstu3.model.HumanName;
-import org.hl7.fhir.dstu3.model.OperationOutcome;
-import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -34,20 +28,23 @@ import org.mockito.stubbing.Answer;
 import com.google.common.collect.Lists;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.dstu2.resource.Bundle;
+import ca.uhn.fhir.model.dstu2.resource.Bundle.Link;
+import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.util.PortUtil;
 import ca.uhn.fhir.util.TestUtil;
 
-public class SearchBundleProviderWithNoSizeDstu3Test {
+public class SearchBundleProviderWithNoSizeDstu2Test {
 
 	private static CloseableHttpClient ourClient;
-	private static FhirContext ourCtx = FhirContext.forDstu3();
+	private static FhirContext ourCtx = FhirContext.forDstu2();
 	private static TokenAndListParam ourIdentifiers;
 	private static IBundleProvider ourLastBundleProvider;
 	private static String ourLastMethod;
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchBundleProviderWithNoSizeDstu3Test.class);
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchBundleProviderWithNoSizeDstu2Test.class);
 	private static int ourPort;
 
 	private static Server ourServer;
@@ -80,7 +77,7 @@ public class SearchBundleProviderWithNoSizeDstu3Test {
 		
 		HttpGet httpGet;
 		CloseableHttpResponse status = null;
-		BundleLinkComponent linkNext;
+		Link linkNext;
 		
 		try {
 			httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_format=json");

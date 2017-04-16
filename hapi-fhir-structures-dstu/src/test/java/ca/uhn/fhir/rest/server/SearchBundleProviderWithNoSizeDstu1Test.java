@@ -17,12 +17,6 @@ import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
-import org.hl7.fhir.dstu3.model.Bundle;
-import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
-import org.hl7.fhir.dstu3.model.Bundle.BundleLinkComponent;
-import org.hl7.fhir.dstu3.model.HumanName;
-import org.hl7.fhir.dstu3.model.OperationOutcome;
-import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -34,20 +28,23 @@ import org.mockito.stubbing.Answer;
 import com.google.common.collect.Lists;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.api.Bundle;
+import ca.uhn.fhir.model.dstu.resource.Patient;
+import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.util.PortUtil;
 import ca.uhn.fhir.util.TestUtil;
 
-public class SearchBundleProviderWithNoSizeDstu3Test {
+public class SearchBundleProviderWithNoSizeDstu1Test {
 
 	private static CloseableHttpClient ourClient;
-	private static FhirContext ourCtx = FhirContext.forDstu3();
+	private static FhirContext ourCtx = FhirContext.forDstu1();
 	private static TokenAndListParam ourIdentifiers;
 	private static IBundleProvider ourLastBundleProvider;
 	private static String ourLastMethod;
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchBundleProviderWithNoSizeDstu3Test.class);
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchBundleProviderWithNoSizeDstu1Test.class);
 	private static int ourPort;
 
 	private static Server ourServer;
@@ -80,7 +77,7 @@ public class SearchBundleProviderWithNoSizeDstu3Test {
 		
 		HttpGet httpGet;
 		CloseableHttpResponse status = null;
-		BundleLinkComponent linkNext;
+		StringDt linkNext;
 		
 		try {
 			httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_format=json");
@@ -89,12 +86,12 @@ public class SearchBundleProviderWithNoSizeDstu3Test {
 			ourLog.info(responseContent);
 			assertEquals(200, status.getStatusLine().getStatusCode());
 			assertEquals("searchAll", ourLastMethod);
-			respBundle = ourCtx.newJsonParser().parseResource(Bundle.class, responseContent);
+			respBundle = ourCtx.newJsonParser().parseBundle(responseContent);
 			
-			assertEquals(10, respBundle.getEntry().size());
-			assertEquals("Patient/0", respBundle.getEntry().get(0).getResource().getIdElement().toUnqualifiedVersionless().getValue());
-			linkNext = respBundle.getLink("next");
-			assertNotNull(linkNext);
+			assertEquals(10, respBundle.getEntries().size());
+			assertEquals("Patient/0", respBundle.getEntries().get(0).getResource().getIdElement().toUnqualifiedVersionless().getValue());
+			linkNext = respBundle.getLinkNext();
+			assertNotNull(linkNext.getValue());
 			
 		} finally {
 			IOUtils.closeQuietly(status.getEntity().getContent());
@@ -104,36 +101,36 @@ public class SearchBundleProviderWithNoSizeDstu3Test {
 		when(ourLastBundleProvider.size()).thenReturn(25);
 
 		try {
-			httpGet = new HttpGet(linkNext.getUrl());
+			httpGet = new HttpGet(linkNext.getValue());
 			status = ourClient.execute(httpGet);
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(responseContent);
 			assertEquals(200, status.getStatusLine().getStatusCode());
 			assertEquals("searchAll", ourLastMethod);
-			respBundle = ourCtx.newJsonParser().parseResource(Bundle.class, responseContent);
+			respBundle = ourCtx.newJsonParser().parseBundle(responseContent);
 			
-			assertEquals(10, respBundle.getEntry().size());
-			assertEquals("Patient/10", respBundle.getEntry().get(0).getResource().getIdElement().toUnqualifiedVersionless().getValue());
-			linkNext = respBundle.getLink("next");
-			assertNotNull(linkNext);
+			assertEquals(10, respBundle.getEntries().size());
+			assertEquals("Patient/10", respBundle.getEntries().get(0).getResource().getIdElement().toUnqualifiedVersionless().getValue());
+			linkNext = respBundle.getLinkNext();
+			assertNotNull(linkNext.getValue());
 
 		} finally {
 			IOUtils.closeQuietly(status.getEntity().getContent());
 		}
 
 		try {
-			httpGet = new HttpGet(linkNext.getUrl());
+			httpGet = new HttpGet(linkNext.getValue());
 			status = ourClient.execute(httpGet);
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(responseContent);
 			assertEquals(200, status.getStatusLine().getStatusCode());
 			assertEquals("searchAll", ourLastMethod);
-			respBundle = ourCtx.newJsonParser().parseResource(Bundle.class, responseContent);
+			respBundle = ourCtx.newJsonParser().parseBundle(responseContent);
 			
-			assertEquals(5, respBundle.getEntry().size());
-			assertEquals("Patient/20", respBundle.getEntry().get(0).getResource().getIdElement().toUnqualifiedVersionless().getValue());
-			linkNext = respBundle.getLink("next");
-			assertNull(linkNext);
+			assertEquals(5, respBundle.getEntries().size());
+			assertEquals("Patient/20", respBundle.getEntries().get(0).getResource().getIdElement().toUnqualifiedVersionless().getValue());
+			linkNext = respBundle.getLinkNext();
+			assertNull(linkNext.getValue());
 
 		} finally {
 			IOUtils.closeQuietly(status.getEntity().getContent());

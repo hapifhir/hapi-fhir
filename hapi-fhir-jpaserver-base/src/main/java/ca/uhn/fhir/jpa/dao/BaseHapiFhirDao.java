@@ -696,7 +696,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		search.setResourceType(resourceName);
 		search.setResourceId(theId);
 		search.setSearchType(SearchTypeEnum.HISTORY);
-
+		search.setStatus(SearchStatusEnum.FINISHED);
+		
 		if (theSince != null) {
 			if (resourceName == null) {
 				search.setTotalCount(myResourceHistoryTableDao.countForAllResourceTypes(theSince));

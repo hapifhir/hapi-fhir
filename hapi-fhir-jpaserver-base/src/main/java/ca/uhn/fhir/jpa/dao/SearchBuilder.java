@@ -1315,8 +1315,10 @@ public class SearchBuilder implements ISearchBuilder {
 			@Override
 			public Long next() {
 				fetchNext();
-				Validate.isTrue(myNext != NO_MORE, "No more elements");
-				return myNext;
+				Long retVal = myNext;
+				myNext = null;
+				Validate.isTrue(retVal != NO_MORE, "No more elements");
+				return retVal;
 			}
 		};
 

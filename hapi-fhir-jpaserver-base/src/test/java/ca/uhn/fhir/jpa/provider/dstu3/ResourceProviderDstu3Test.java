@@ -308,9 +308,6 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 	@Test
 	public void testCountParam() throws Exception {
-		// NB this does not get used- The paging provider has its own limits built in
-		myDaoConfig.setHardSearchLimit(100);
-
 		List<IBaseResource> resources = new ArrayList<IBaseResource>();
 		for (int i = 0; i < 100; i++) {
 			Organization org = new Organization();
@@ -1611,6 +1608,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		assertEquals(77, ids.size());
 	}
 
+	@SuppressWarnings("unused")
 	@Test
 	public void testFullTextSearch() throws RuntimeException, Exception {
 		Observation obs1 = new Observation();
@@ -1920,6 +1918,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		}
 	}
 
+	@SuppressWarnings("unused")
 	@Test
 	public void testMetadataSuperParamsAreIncluded() throws IOException {
 		StructureDefinition p = new StructureDefinition();
@@ -2622,6 +2621,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 	}
 
+	@SuppressWarnings("unused")
 	@Test
 	public void testSearchPagingKeepsOldSearches() throws Exception {
 		String methodName = "testSearchPagingKeepsOldSearches";

@@ -268,6 +268,8 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 
 		@Override
 		public Void call() throws Exception {
+			StopWatch sw = new StopWatch();
+			
 			try {
 				TransactionTemplate txTemplate = new TransactionTemplate(myTxManager);
 				txTemplate.setPropagationBehavior(TransactionTemplate.PROPAGATION_REQUIRES_NEW);
@@ -277,14 +279,18 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 						doSearch();
 					}
 				});
+				
+				ourLog.info("Completed search for {} resources in {}ms", mySyncedPids.size(), sw.getMillis());
+				
 			} catch (Throwable t) {
-				ourLog.error("Failed during search loading", t);
+				ourLog.error("Failed during search loading after {}ms", t, sw.getMillis());
 				myUnsyncedPids.clear();
 
 				mySearch.setStatus(SearchStatusEnum.FAILED);
 				String failureMessage = ExceptionUtils.getRootCauseMessage(t);
 				mySearch.setFailureMessage(failureMessage);
 				saveSearch();
+				
 			}
 
 			myIdToSearchTask.remove(mySearch.getUuid());
