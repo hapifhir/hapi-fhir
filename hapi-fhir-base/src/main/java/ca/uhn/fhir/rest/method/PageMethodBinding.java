@@ -21,7 +21,6 @@ package ca.uhn.fhir.rest.method;
  */
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.hamcrest.Matchers.emptyCollectionOf;
 
 import java.lang.reflect.Method;
 import java.util.HashSet;
