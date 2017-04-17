@@ -73,6 +73,10 @@
 				the path pointed to an extension containing a reference. Thanks
 				to Ravi Kuchi for reporting!
 			</action>
+			<action type="fix" issue="623">
+				Servers in DSTU2.1 mode were incorrectly using the legacy mimetypes instead
+				of the new STU3 ones. Thanks to Michael Lawley for the pull request!
+			</action>
 		</release>
 		<release version="2.3" date="2017-03-18">
 			<action type="add">
