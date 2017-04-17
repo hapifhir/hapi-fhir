@@ -77,6 +77,14 @@
 				Servers in DSTU2.1 mode were incorrectly using the legacy mimetypes instead
 				of the new STU3 ones. Thanks to Michael Lawley for the pull request!
 			</action>
+			<action type="add" issue="624">
+				Add an option to ParserOptions that specifies that when parsing a bundle, the
+				ID found in the Bundle.entry.fullUrl should not override the ID found
+				in the Resource.id field. Technically these fields must always supply the
+				same ID in order for a server to be considered conformant, but this option allows
+				you to deal with servers which are behaving badly. Thanks to
+				GitHub user CarthageKing for the pul request!
+			</action>
 		</release>
 		<release version="2.3" date="2017-03-18">
 			<action type="add">
