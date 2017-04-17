@@ -2679,7 +2679,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		SearchParameterMap pm = new SearchParameterMap();
 		pm.setSort(new SortSpec(Observation.SP_CODE_VALUE_CONCEPT));
 		try {
-			myObservationDao.search(pm);
+			myObservationDao.search(pm).size();
 			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals("This server does not support _sort specifications of type COMPOSITE - Can't serve _sort=code-value-concept", e.getMessage());

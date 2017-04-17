@@ -7,6 +7,7 @@ import javax.persistence.EntityManager;
 import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
 
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -14,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.concurrent.CustomizableThreadFactory;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
@@ -37,8 +39,10 @@ import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.method.PageMethodBinding;
 import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
+import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
+import ca.uhn.fhir.util.ObjectUtil;
 
 public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 	static final int DEFAULT_SYNC_SIZE = 250;
@@ -143,12 +147,13 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 		Class<? extends IBaseResource> resourceTypeClass = myContext.getResourceDefinition(theResourceType).getImplementingClass();
 		ISearchBuilder sb = theCallingDao.newSearchBuilder();
 		sb.setType(resourceTypeClass, theResourceType);
-		Iterator<Long> resultIter = sb.createQuery(theParams);
 
 		if (theParams.isLoadSynchronous()) {
 
 			// Load the results synchronously
 			List<Long> pids = new ArrayList<Long>();
+			
+			Iterator<Long> resultIter = sb.createQuery(theParams);
 			while (resultIter.hasNext()) {
 				pids.add(resultIter.next());
 				if (theParams.getLoadSynchronousUpTo() != null && pids.size() >= theParams.getLoadSynchronousUpTo()) {
@@ -246,7 +251,11 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 
 	static void verifySearchHasntFailedOrThrowInternalErrorException(Search theSearch) {
 		if (theSearch.getStatus() == SearchStatusEnum.FAILED) {
-			throw new InternalErrorException(theSearch.getFailureMessage());
+			Integer status = theSearch.getFailureCode();
+			status = ObjectUtils.defaultIfNull(status, 500);
+			
+			String message = theSearch.getFailureMessage();
+			throw BaseServerResponseException.newInstance(status, message);
 		}
 	}
 
@@ -318,9 +327,20 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 				ourLog.error("Failed during search loading after {}ms", sw.getMillis(), t);
 				myUnsyncedPids.clear();
 
-				mySearch.setStatus(SearchStatusEnum.FAILED);
-				String failureMessage = ExceptionUtils.getRootCauseMessage(t);
+				Throwable rootCause = ExceptionUtils.getRootCause(t);
+				rootCause = ObjectUtils.defaultIfNull(rootCause, t);
+				
+				String failureMessage = rootCause.getMessage();
+				
+				int failureCode = InternalErrorException.STATUS_CODE;
+				if (t instanceof BaseServerResponseException) {
+					failureCode = ((BaseServerResponseException) t).getStatusCode();
+				}
+				
 				mySearch.setFailureMessage(failureMessage);
+				mySearch.setFailureCode(failureCode);
+				mySearch.setStatus(SearchStatusEnum.FAILED);
+				
 				saveSearch();
 
 			}

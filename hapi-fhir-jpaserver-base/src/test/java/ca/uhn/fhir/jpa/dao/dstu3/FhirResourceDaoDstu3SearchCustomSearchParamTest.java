@@ -244,7 +244,7 @@ public class FhirResourceDaoDstu3SearchCustomSearchParamTest extends BaseJpaDstu
 		map = new SearchParameterMap();
 		map.add("foo", new TokenParam(null, "male"));
 		try {
-			myPatientDao.search(map);
+			myPatientDao.search(map).size();
 			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals("Unknown search parameter foo for resource type Patient", e.getMessage());
@@ -282,7 +282,7 @@ public class FhirResourceDaoDstu3SearchCustomSearchParamTest extends BaseJpaDstu
 		map = new SearchParameterMap();
 		map.add("foo", new TokenParam(null, "male"));
 		try {
-			myPatientDao.search(map);
+			myPatientDao.search(map).size();
 			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals("Unknown search parameter foo for resource type Patient", e.getMessage());

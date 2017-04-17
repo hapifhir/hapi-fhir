@@ -1264,19 +1264,23 @@ public class SearchBuilder implements ISearchBuilder {
 			List<Long> pids = myFulltextSearchSvc.everything(myResourceName, myParams);
 			if (pids.isEmpty()) {
 				// Will never match
-				pids = Collections.singletonList((Long) null);
+				pids = Collections.singletonList(-1L);
 			}
 
 			myPredicates.add(myResourceTableRoot.get("myId").as(Long.class).in(pids));
 		}
 
 		myResourceTableQuery.where(myBuilder.and(SearchBuilder.toArray(myPredicates)));
-
+		
 		/*
 		 * Now perform the search
 		 */
 		final TypedQuery<Long> query = myEntityManager.createQuery(outerQuery);
 
+		
+		// FIXME: remove
+		query.getResultList();
+		
 		return new Iterator<Long>() {
 
 			private Long myNext;

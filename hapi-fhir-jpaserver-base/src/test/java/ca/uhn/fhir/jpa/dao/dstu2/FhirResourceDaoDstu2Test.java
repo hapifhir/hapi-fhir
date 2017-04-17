@@ -230,7 +230,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 		Observation o2 = new Observation();
 		o2.getCode().addCoding().setSystem("foo").setCode("testChoiceParamDateAlt02");
 		o2.setEffective(new DateTimeDt("2015-03-08T11:11:11"));
-		IIdType id2 = myObservationDao.create(o2, mySrd).getId();
+		IIdType id2 = myObservationDao.create(o2, mySrd).getId().toUnqualifiedVersionless();
 
 		{
 			IBundleProvider found = myObservationDao.search(new SearchParameterMap().setLoadSynchronous(true).add(Observation.SP_DATE, new DateParam(">2001-01-02")));
@@ -2225,7 +2225,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 		SearchParameterMap pm = new SearchParameterMap();
 		pm.setSort(new SortSpec(Observation.SP_CODE_VALUE_CONCEPT));
 		try {
-			myObservationDao.search(pm);
+			myObservationDao.search(pm).size();
 			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals("This server does not support _sort specifications of type COMPOSITE - Can't serve _sort=code-value-concept", e.getMessage());

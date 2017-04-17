@@ -191,7 +191,7 @@ public class FhirResourceDaoDstu3SearchWithLuceneDisabledTest extends BaseJpaTes
 		SearchParameterMap map = new SearchParameterMap();
 		map.add(Constants.PARAM_CONTENT, new StringParam(methodName));
 		try {
-			myOrganizationDao.search(map);
+			myOrganizationDao.search(map).size();
 			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals("Fulltext search is not enabled on this service, can not process parameter: _content", e.getMessage());
@@ -209,7 +209,7 @@ public class FhirResourceDaoDstu3SearchWithLuceneDisabledTest extends BaseJpaTes
 		SearchParameterMap map = new SearchParameterMap();
 		map.add(Constants.PARAM_TEXT, new StringParam(methodName));
 		try {
-			myOrganizationDao.search(map);
+			myOrganizationDao.search(map).size();
 			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals("Fulltext search is not enabled on this service, can not process parameter: _text", e.getMessage());

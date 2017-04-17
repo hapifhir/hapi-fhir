@@ -33,7 +33,7 @@ public class PersistedJpaSearchFirstPageBundleProvider extends PersistedJpaBundl
 
 	@Override
 	public List<IBaseResource> getResources(int theFromIndex, int theToIndex) {
-		checkForFailedSearch();
+		SearchCoordinatorSvcImpl.verifySearchHasntFailedOrThrowInternalErrorException(mySearch);
 		final List<Long> pids = mySearchTask.getResourcePids(theFromIndex, theToIndex);
 		
 		TransactionTemplate txTemplate = new TransactionTemplate(myTxManager);
@@ -48,15 +48,8 @@ public class PersistedJpaSearchFirstPageBundleProvider extends PersistedJpaBundl
 	@Override
 	public Integer size() {
 		mySearchTask.awaitInitialSync();
-		checkForFailedSearch();
+		SearchCoordinatorSvcImpl.verifySearchHasntFailedOrThrowInternalErrorException(mySearch);
 		return super.size();
 	}
-
-	private void checkForFailedSearch() {
-		if (mySearch.getStatus() == SearchStatusEnum.FAILED) {
-			throw new InternalErrorException("Failure while loading search results");
-		}
-	}
-
 
 }

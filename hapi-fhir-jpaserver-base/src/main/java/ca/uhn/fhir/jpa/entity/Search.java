@@ -54,6 +54,9 @@ public class Search implements Serializable {
 	@Column(name="CREATED", nullable=false, updatable=false)
 	private Date myCreated;
 
+	@Column(name="FAILURE_CODE", nullable=true)
+	private Integer myFailureCode;
+
 	@Column(name="FAILURE_MESSAGE", length=FAILURE_MESSAGE_LENGTH, nullable=true)
 	private String myFailureMessage;
 
@@ -65,7 +68,7 @@ public class Search implements Serializable {
 
 	@OneToMany(mappedBy="mySearch")
 	private Collection<SearchInclude> myIncludes;
-	
+
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name="LAST_UPDATED_HIGH", nullable=true, insertable=true, updatable=false)
 	private Date myLastUpdatedHigh;
@@ -73,7 +76,7 @@ public class Search implements Serializable {
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name="LAST_UPDATED_LOW", nullable=true, insertable=true, updatable=false)
 	private Date myLastUpdatedLow;
-
+	
 	@Column(name="NUM_FOUND", nullable=false)
 	private int myNumFound;
 
@@ -88,18 +91,18 @@ public class Search implements Serializable {
 
 	@OneToMany(mappedBy="mySearch")
 	private Collection<SearchResult> myResults;
-	
+
 	@Column(name="SEARCH_STRING", length=1000, nullable=true)
 	private String mySearchString;
-	
+
 	@Enumerated(EnumType.ORDINAL)
 	@Column(name="SEARCH_TYPE", nullable=false)
 	private SearchTypeEnum mySearchType;
-
+	
 	@Enumerated(EnumType.STRING)
 	@Column(name="SEARCH_STATUS", nullable=false, length=10)
 	private SearchStatusEnum myStatus;
-
+	
 	@Column(name="TOTAL_COUNT", nullable=true)
 	private Integer myTotalCount;
 
@@ -108,6 +111,10 @@ public class Search implements Serializable {
 
 	public Date getCreated() {
 		return myCreated;
+	}
+
+	public Integer getFailureCode() {
+		return myFailureCode;
 	}
 
 	public String getFailureMessage() {
@@ -152,11 +159,11 @@ public class Search implements Serializable {
 	public Long getResourceId() {
 		return myResourceId;
 	}
-	
+
 	public String getResourceType() {
 		return myResourceType;
 	}
-
+	
 	public SearchTypeEnum getSearchType() {
 		return mySearchType;
 	}
@@ -175,6 +182,10 @@ public class Search implements Serializable {
 
 	public void setCreated(Date theCreated) {
 		myCreated = theCreated;
+	}
+
+	public void setFailureCode(Integer theFailureCode) {
+		myFailureCode = theFailureCode;
 	}
 
 

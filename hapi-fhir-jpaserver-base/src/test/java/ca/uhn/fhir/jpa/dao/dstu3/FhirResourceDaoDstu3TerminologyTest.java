@@ -722,7 +722,7 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 		SearchParameterMap params = new SearchParameterMap();
 		params.add(Observation.SP_CODE, new TokenParam(URL_MY_CODE_SYSTEM, "AAA").setModifier(TokenParamModifier.ABOVE));
 		try {
-			myObservationDao.search(params);
+			myObservationDao.search(params).size();
 			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals("Expansion of ValueSet produced too many codes (maximum 1) - Operation aborted!", e.getMessage());

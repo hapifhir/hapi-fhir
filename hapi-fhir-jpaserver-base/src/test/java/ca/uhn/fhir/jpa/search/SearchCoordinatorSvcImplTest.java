@@ -64,7 +64,7 @@ public class SearchCoordinatorSvcImplTest {
 	private IDao myCallingDao;
 	@Mock
 	private EntityManager myEntityManager;
-	private int myExpectedNumberOfSearchBuildersCreated = 1;
+	private int myExpectedNumberOfSearchBuildersCreated = 2;
 	@Mock
 	private ISearchBuilder mySearchBuider;
 	@Mock
@@ -156,7 +156,7 @@ public class SearchCoordinatorSvcImplTest {
 		try {
 			result.getResources(0, 100000);
 		} catch (InternalErrorException e) {
-			assertEquals("NullPointerException: FAILED", e.getMessage());
+			assertEquals("FAILED", e.getMessage());
 		}
 
 	}
@@ -272,7 +272,7 @@ public class SearchCoordinatorSvcImplTest {
 		assertEquals("30", resources.get(0).getIdElement().getValueAsString());
 		assertEquals("799", resources.get(769).getIdElement().getValueAsString());
 
-		myExpectedNumberOfSearchBuildersCreated = 3;
+		myExpectedNumberOfSearchBuildersCreated = 4;
 	}
 
 	@Test

@@ -871,6 +871,12 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		if (theRequestDetails != null) {
 			ActionRequestDetails requestDetails = new ActionRequestDetails(theRequestDetails, getContext(), getResourceName(), null);
 			notifyInterceptors(RestOperationTypeEnum.SEARCH_TYPE, requestDetails);
+		
+			if (theRequestDetails.isSubRequest()) {
+				theParams.setLoadSynchronous(true);
+				theParams.setLoadSynchronousUpTo(myDaoConfig.getMaximumSearchResultCountInTransaction());
+			}
+		
 		}
 		
 		return mySearchCoordinatorSvc.registerSearch(this, theParams, getResourceName());

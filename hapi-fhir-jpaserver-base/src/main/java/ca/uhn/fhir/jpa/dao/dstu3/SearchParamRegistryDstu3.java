@@ -100,7 +100,10 @@ public class SearchParamRegistryDstu3 extends BaseSearchParamRegistry {
 				}
 			}
 
-			IBundleProvider allSearchParamsBp = mySpDao.search(new SearchParameterMap());
+			SearchParameterMap params = new SearchParameterMap();
+			params.setLoadSynchronous(true);
+			
+			IBundleProvider allSearchParamsBp = mySpDao.search(params);
 			int size = allSearchParamsBp.size();
 
 			// Just in case..

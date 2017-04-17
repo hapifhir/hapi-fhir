@@ -48,6 +48,13 @@ public class DaoConfig {
 			"http://hl7.org/fhir/codesystem-*",
 			"http://hl7.org/fhir/StructureDefinition/*")));
 
+	/**
+	 * Default value for {@link #setMaximumSearchResultCountInTransaction(int)}
+	 * 
+	 * @see #setMaximumSearchResultCountInTransaction(int)
+	 */
+	private static final int DEFAULT_MAXIMUM_SEARCH_RESULT_COUNT_IN_TRANSACTION = 500;
+
 	// ***
 	// update setter javadoc if default changes
 	// ***
@@ -86,12 +93,14 @@ public class DaoConfig {
 	// update setter javadoc if default changes
 	// ***
 	private int myMaximumExpansionSize = 5000;
+	private int myMaximumSearchResultCountInTransaction = DEFAULT_MAXIMUM_SEARCH_RESULT_COUNT_IN_TRANSACTION;
 	private ResourceEncodingEnum myResourceEncoding = ResourceEncodingEnum.JSONC;
 	private boolean mySchedulingDisabled;
 	private boolean mySubscriptionEnabled;
 	private long mySubscriptionPollDelay = 1000;
 	private Long mySubscriptionPurgeInactiveAfterMillis;
 	private Set<String> myTreatBaseUrlsAsLocal = new HashSet<String>();
+
 	private Set<String> myTreatReferencesAsLogical = new HashSet<String>(DEFAULT_LOGICAL_BASE_URLS);
 
 	/**
@@ -171,6 +180,18 @@ public class DaoConfig {
 	 */
 	public int getMaximumExpansionSize() {
 		return myMaximumExpansionSize;
+	}
+
+	/**
+	 * Provides the maximum number of results which may be returned by a search within a FHIR <code>transaction</code>
+	 * operation. For example, if this value is set to <code>100</code> and a FHIR transaction is processed with a sub-request
+	 * for <code>Patient?gender=male</code>, the server will throw an error (and the transaction will fail) if there are more than
+	 * 100 resources on the server which match this query.
+	 * 
+	 * @see #DEFAULT_LOGICAL_BASE_URLS The default value for this setting
+	 */
+	public int getMaximumSearchResultCountInTransaction() {
+		return myMaximumSearchResultCountInTransaction;
 	}
 
 	public ResourceEncodingEnum getResourceEncoding() {
@@ -497,6 +518,18 @@ public class DaoConfig {
 	public void setMaximumExpansionSize(int theMaximumExpansionSize) {
 		Validate.isTrue(theMaximumExpansionSize > 0, "theMaximumExpansionSize must be > 0");
 		myMaximumExpansionSize = theMaximumExpansionSize;
+	}
+
+	/**
+	 * Provides the maximum number of results which may be returned by a search within a FHIR <code>transaction</code>
+	 * operation. For example, if this value is set to <code>100</code> and a FHIR transaction is processed with a sub-request
+	 * for <code>Patient?gender=male</code>, the server will throw an error (and the transaction will fail) if there are more than
+	 * 100 resources on the server which match this query.
+	 * 
+	 * @see #DEFAULT_LOGICAL_BASE_URLS The default value for this setting
+	 */
+	public void setMaximumSearchResultCountInTransaction(int theMaximumSearchResultCountInTransaction) {
+		myMaximumSearchResultCountInTransaction = theMaximumSearchResultCountInTransaction;
 	}
 
 	public void setResourceEncoding(ResourceEncodingEnum theResourceEncoding) {
