@@ -91,7 +91,7 @@ public class FhirContextDstu3Test {
     public void testInitialisationThreadSafety() {
         final FhirContext ctx = FhirContext.forDstu3();
 
-        final int numThreads = 4;
+        final int numThreads = 40;
         final List<Throwable> exceptions = Collections.synchronizedList(new ArrayList<Throwable>());
         final ExecutorService threadPool = Executors.newFixedThreadPool(numThreads);
         try {
@@ -105,7 +105,9 @@ public class FhirContextDstu3Test {
                             threadsReady.countDown();
                             try {
                                 threadsReady.await();
-                                ctx.getResourceDefinition("patient");
+                                RuntimeResourceDefinition def = ctx.getResourceDefinition("patient");
+                                ourLog.info(def.toString());
+                                assertNotNull(def);
                             } catch(final Exception e) {
                                 exceptions.add(e);
                             }
