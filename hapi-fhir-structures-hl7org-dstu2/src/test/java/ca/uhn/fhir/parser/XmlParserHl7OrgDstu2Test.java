@@ -5,6 +5,7 @@ import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.stringContainsInOrder;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
@@ -60,6 +61,7 @@ import org.hl7.fhir.instance.model.SimpleQuantity;
 import org.hl7.fhir.instance.model.Specimen;
 import org.hl7.fhir.instance.model.StringType;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.INarrative;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.junit.After;
@@ -97,6 +99,52 @@ public class XmlParserHl7OrgDstu2Test {
   private String fixDivNodeTextJson(String htmlNoNs) {
     return htmlNoNs.replace("<div>", "<div xmlns=\\\"http://www.w3.org/1999/xhtml\\\">");
   }
+  
+	@Test
+	public void testOverrideResourceIdWithBundleEntryFullUrlEnabled() {
+		String tmp = "<Bundle xmlns=\"http://hl7.org/fhir\"><entry><fullUrl value=\"http://lalaland.org/patient/pat1\"/><resource><Patient xmlns=\"http://hl7.org/fhir\"><id value=\"patxuzos\"/></Patient></resource></entry></Bundle>";
+		Bundle bundle = (Bundle) ourCtx.newXmlParser().parseResource(tmp);
+		assertEquals(1, bundle.getEntry().size());
+		{
+			Patient o1 = (Patient) bundle.getEntry().get(0).getResource();
+			IIdType o1Id = o1.getIdElement();
+			assertEquals("http://lalaland.org", o1Id.getBaseUrl());
+			assertEquals("patient", o1Id.getResourceType());
+			assertEquals("pat1", o1Id.getIdPart());
+			assertFalse(o1Id.hasVersionIdPart());
+		}
+	}
+  
+	@Test
+	public void testOverrideResourceIdWithBundleEntryFullUrlDisabled_ConfiguredOnFhirContext() {
+		String tmp = "<Bundle xmlns=\"http://hl7.org/fhir\"><entry><fullUrl value=\"http://lalaland.org/patient/pat1\"/><resource><Patient xmlns=\"http://hl7.org/fhir\"><id value=\"patxuzos\"/></Patient></resource></entry></Bundle>";
+		ourCtx.getParserOptions().setOverrideResourceIdWithBundleEntryFullUrl(false);
+		Bundle bundle = (Bundle) ourCtx.newXmlParser().parseResource(tmp);
+		assertEquals(1, bundle.getEntry().size());
+		{
+			Patient o1 = (Patient) bundle.getEntry().get(0).getResource();
+			IIdType o1Id = o1.getIdElement();
+			assertFalse(o1Id.hasBaseUrl());
+			assertEquals("Patient", o1Id.getResourceType());
+			assertEquals("patxuzos", o1Id.getIdPart());
+			assertFalse(o1Id.hasVersionIdPart());
+		}
+	}
+
+	@Test
+	public void testOverrideResourceIdWithBundleEntryFullUrlDisabled_ConfiguredOnParser() {
+		String tmp = "<Bundle xmlns=\"http://hl7.org/fhir\"><entry><fullUrl value=\"http://lalaland.org/patient/pat1\"/><resource><Patient xmlns=\"http://hl7.org/fhir\"><id value=\"patxuzos\"/></Patient></resource></entry></Bundle>";
+		Bundle bundle = (Bundle) ourCtx.newXmlParser().setOverrideResourceIdWithBundleEntryFullUrl(false).parseResource(tmp);
+		assertEquals(1, bundle.getEntry().size());
+		{
+			Patient o1 = (Patient) bundle.getEntry().get(0).getResource();
+			IIdType o1Id = o1.getIdElement();
+			assertFalse(o1Id.hasBaseUrl());
+			assertEquals("Patient", o1Id.getResourceType());
+			assertEquals("patxuzos", o1Id.getIdPart());
+			assertFalse(o1Id.hasVersionIdPart());
+		}
+	}
 
   @Test
   public void testComposition() {

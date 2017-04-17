@@ -97,6 +97,7 @@ public abstract class BaseParser implements IParser {
 	private List<Class<? extends IBaseResource>> myPreferTypes;
 	private String myServerBaseUrl;
 	private Boolean myStripVersionsFromReferences;
+	private Boolean myOverrideResourceIdWithBundleEntryFullUrl;
 	private boolean mySummaryMode;
 	private boolean mySuppressNarratives;
 	private Set<String> myDontStripVersionsFromReferencesAtPaths;
@@ -345,6 +346,15 @@ public abstract class BaseParser implements IParser {
 		}
 
 		return true;
+	}
+	
+	private boolean isOverrideResourceIdWithBundleEntryFullUrl() {
+		Boolean overrideResourceIdWithBundleEntryFullUrl = myOverrideResourceIdWithBundleEntryFullUrl;
+		if (overrideResourceIdWithBundleEntryFullUrl != null) {
+			return overrideResourceIdWithBundleEntryFullUrl;
+		}
+		
+		return myContext.getParserOptions().isOverrideResourceIdWithBundleEntryFullUrl();
 	}
 
 	protected abstract void doEncodeBundleToWriter(Bundle theBundle, Writer theWriter) throws IOException, DataFormatException;
@@ -596,6 +606,11 @@ public abstract class BaseParser implements IParser {
 	public Boolean getStripVersionsFromReferences() {
 		return myStripVersionsFromReferences;
 	}
+	
+	@Override
+	public Boolean getOverrideResourceIdWithBundleEntryFullUrl() {
+		return myOverrideResourceIdWithBundleEntryFullUrl;
+	}
 
 	@Override
 	public boolean isSummaryMode() {
@@ -658,22 +673,23 @@ public abstract class BaseParser implements IParser {
 					if (fullUrlChild == null) {
 						continue; // TODO: remove this once the data model in tinder plugin catches up to 1.2
 					}
-					List<IBase> fullUrl = fullUrlChild.getAccessor().getValues(nextEntry);
-					if (fullUrl != null && !fullUrl.isEmpty()) {
-						IPrimitiveType<?> value = (IPrimitiveType<?>) fullUrl.get(0);
-						if (value.isEmpty() == false) {
-							List<IBase> entryResources = entryDef.getChildByName("resource").getAccessor().getValues(nextEntry);
-							if (entryResources != null && entryResources.size() > 0) {
-								IBaseResource res = (IBaseResource) entryResources.get(0);
-								String versionId = res.getIdElement().getVersionIdPart();
-								res.setId(value.getValueAsString());
-								if (isNotBlank(versionId) && res.getIdElement().hasVersionIdPart() == false) {
-									res.setId(res.getIdElement().withVersion(versionId));
+					if (isOverrideResourceIdWithBundleEntryFullUrl()) {
+						List<IBase> fullUrl = fullUrlChild.getAccessor().getValues(nextEntry);
+						if (fullUrl != null && !fullUrl.isEmpty()) {
+							IPrimitiveType<?> value = (IPrimitiveType<?>) fullUrl.get(0);
+							if (value.isEmpty() == false) {
+								List<IBase> entryResources = entryDef.getChildByName("resource").getAccessor().getValues(nextEntry);
+								if (entryResources != null && entryResources.size() > 0) {
+									IBaseResource res = (IBaseResource) entryResources.get(0);
+									String versionId = res.getIdElement().getVersionIdPart();
+									res.setId(value.getValueAsString());
+									if (isNotBlank(versionId) && res.getIdElement().hasVersionIdPart() == false) {
+										res.setId(res.getIdElement().withVersion(versionId));
+									}
 								}
 							}
 						}
 					}
-
 				}
 			}
 
@@ -874,6 +890,12 @@ public abstract class BaseParser implements IParser {
 	@Override
 	public IParser setStripVersionsFromReferences(Boolean theStripVersionsFromReferences) {
 		myStripVersionsFromReferences = theStripVersionsFromReferences;
+		return this;
+	}
+	
+	@Override
+	public IParser setOverrideResourceIdWithBundleEntryFullUrl(Boolean theOverrideResourceIdWithBundleEntryFullUrl) {
+		myOverrideResourceIdWithBundleEntryFullUrl = theOverrideResourceIdWithBundleEntryFullUrl;
 		return this;
 	}
 
