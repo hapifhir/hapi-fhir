@@ -82,7 +82,6 @@ public class FhirContext {
 	private Map<String, Class<? extends IBaseResource>> myDefaultTypeForProfile = new HashMap<String, Class<? extends IBaseResource>>();
 	private volatile Map<String, RuntimeResourceDefinition> myIdToResourceDefinition = Collections.emptyMap();
 	private boolean myInitialized;
-	private boolean myInitializing;
 	private HapiLocalizer myLocalizer = new HapiLocalizer();
 	private volatile Map<String, BaseRuntimeElementDefinition<?>> myNameToElementDefinition = Collections.emptyMap();
 	private volatile Map<String, RuntimeResourceDefinition> myNameToResourceDefinition = Collections.emptyMap();
@@ -644,8 +643,6 @@ public class FhirContext {
 	}
 
 	private synchronized Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> scanResourceTypes(Collection<Class<? extends IElement>> theResourceTypes) {
-		myInitializing = true;
-		
 		List<Class<? extends IBase>> typesToScan = new ArrayList<Class<? extends IBase>>();
 		if (theResourceTypes != null) {
 			typesToScan.addAll(theResourceTypes);
@@ -844,8 +841,8 @@ public class FhirContext {
 		return resTypes;
 	}
 
-	private void validateInitialized() {
-		if (!myInitialized && !myInitializing) {
+	private synchronized void validateInitialized() {
+		if (!myInitialized) {
 			scanResourceTypes(toElementList(myResourceTypesToScan));
 		}
 	}
