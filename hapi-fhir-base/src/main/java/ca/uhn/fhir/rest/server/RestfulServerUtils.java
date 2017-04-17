@@ -791,19 +791,19 @@ public class RestfulServerUtils {
 
 	public static void addAcceptHeaderToRequest(EncodingEnum theEncoding, IHttpRequest theHttpRequest, FhirContext theContext) {
 		if (theEncoding == null) {
-			if (theContext.getVersion().getVersion().isNewerThan(FhirVersionEnum.DSTU2) == false) {
+			if (theContext.getVersion().getVersion().isNewerThan(FhirVersionEnum.DSTU2_1) == false) {
 				theHttpRequest.addHeader(Constants.HEADER_ACCEPT, Constants.HEADER_ACCEPT_VALUE_XML_OR_JSON_LEGACY);
 			} else {
 				theHttpRequest.addHeader(Constants.HEADER_ACCEPT, Constants.HEADER_ACCEPT_VALUE_XML_OR_JSON_NON_LEGACY);
 			}
 		} else if (theEncoding == EncodingEnum.JSON) {
-			if (theContext.getVersion().getVersion().isNewerThan(FhirVersionEnum.DSTU2) == false) {
+			if (theContext.getVersion().getVersion().isNewerThan(FhirVersionEnum.DSTU2_1) == false) {
 				theHttpRequest.addHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON);
 			} else {
 				theHttpRequest.addHeader(Constants.HEADER_ACCEPT, Constants.HEADER_ACCEPT_VALUE_JSON_NON_LEGACY);
 			}
 		} else if (theEncoding == EncodingEnum.XML) {
-			if (theContext.getVersion().getVersion().isNewerThan(FhirVersionEnum.DSTU2) == false) {
+			if (theContext.getVersion().getVersion().isNewerThan(FhirVersionEnum.DSTU2_1) == false) {
 				theHttpRequest.addHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_XML);
 			} else {
 				theHttpRequest.addHeader(Constants.HEADER_ACCEPT, Constants.HEADER_ACCEPT_VALUE_XML_NON_LEGACY);
