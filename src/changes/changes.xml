@@ -95,7 +95,11 @@
 				Thanks to Sebastien Riviere for the 
 				pull request!
 			</action>
-	
+			<action type="fix" issue="610">
+				Fix a potential race condition when the FhirContext is being accessed by many threads
+				at the same time right as it is initializing. Thanks to Ben Spencer for the
+				pull request!
+			</action>
 		</release>
 		<release version="2.3" date="2017-03-18">
 			<action type="add">
