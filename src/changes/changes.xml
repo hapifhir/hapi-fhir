@@ -89,6 +89,13 @@
 				Remove unneccesary whitespace in the text areas on the testing
 				web UI. Thanks to GitHub user @elnin0815 for the pull request!
 			</action>
+			<action type="add" issue="613">
+				In JAX-RS server it is now possible to change the server exception handler
+				at runtime without a server restart.
+				Thanks to Sebastien Riviere for the 
+				pull request!
+			</action>
+	
 		</release>
 		<release version="2.3" date="2017-03-18">
 			<action type="add">
