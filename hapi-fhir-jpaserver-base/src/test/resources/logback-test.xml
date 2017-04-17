@@ -34,7 +34,7 @@
 	</logger>
 	
 	<!-- Set to 'trace' to enable SQL logging -->
-	<logger name="org.hibernate.SQL" additivity="false" level="info">
+	<logger name="org.hibernate.SQL" additivity="false" level="trace">
 		<appender-ref ref="STDOUT" />
 	</logger>
 	<!-- Set to 'trace' to enable SQL Value logging -->
