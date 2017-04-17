@@ -17,7 +17,7 @@
  </OfficeDocumentSettings>
  <ExcelWorkbook xmlns="urn:schemas-microsoft-com:office:excel">
   <SupBook>
-   <Path>\work\subversion\fhir\build\source\colorectal\Archive\Invariants</Path>
+   <Path>\\ERICS-AIR-2\ehaas\work\subversion\fhir\build\source\colorectal\Archive\Invariants</Path>
    <SheetName>Invariants</SheetName>
   </SupBook>
   <WindowHeight>9672</WindowHeight>
@@ -25,7 +25,8 @@
   <WindowTopX>0</WindowTopX>
   <WindowTopY>0</WindowTopY>
   <TabRatio>735</TabRatio>
-  <ActiveSheet>3</ActiveSheet>
+  <ActiveSheet>2</ActiveSheet>
+  <FirstVisibleSheet>1</FirstVisibleSheet>
   <RefModeR1C1/>
   <ProtectStructure>False</ProtectStructure>
   <ProtectWindows>False</ProtectWindows>
@@ -1074,7 +1075,7 @@
     <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s91"><Data ss:Type="String">Business Identifer for event</Data><NamedCell
+    <Cell ss:StyleID="s91"><Data ss:Type="String">Business Identifier for event</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s93"><Data ss:Type="String">Identifiers assigned to this event performer or other systems</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
@@ -1128,7 +1129,7 @@
    <Row ss:AutoFitHeight="0" ss:Height="57.45">
     <Cell ss:StyleID="s90"><Data ss:Type="String">Event.basedOn</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s91"><Data ss:Type="String">fufills</Data><NamedCell
+    <Cell ss:StyleID="s91"><Data ss:Type="String">fulfills</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s91"><Data ss:Type="String">0..*</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
@@ -1952,7 +1953,7 @@
   <DataValidation xmlns="urn:schemas-microsoft-com:office:excel">
    <Range>R2C4:R27C4</Range>
    <Type>List</Type>
-   <Value>'\work\subversion\fhir\build\source\colorectal\Archive\[Invariants]Invariants'!#REF!</Value>
+   <Value>'\\ERICS-AIR-2\ehaas\work\subversion\fhir\build\source\colorectal\Archive\[Invariants]Invariants'!#REF!</Value>
    <ErrorHide/>
   </DataValidation>
   <AutoFilter x:Range="R1C1:R27C23"
@@ -2011,7 +2012,7 @@
     <Cell ss:StyleID="s112"><Data ss:Type="String">Event</Data></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">Not Done Reason can only be specified if NotDone is &quot;true&quot;</Data></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">notDone or notDoneReason.exists().not()</Data></Cell>
-    <Cell ss:StyleID="s113"><Data ss:Type="String">f:notDone='true' or not(exists(f:notDoneReason))</Data></Cell>
+    <Cell ss:StyleID="s113"><Data ss:Type="String">f:notDone/@value=true() or not(exists(f:notDoneReason))</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="44.550000000000004">
     <Cell ss:StyleID="s114"><NamedCell ss:Name="Invariantids"/></Cell>
@@ -2248,12 +2249,13 @@
     <HorizontalResolution>600</HorizontalResolution>
     <VerticalResolution>600</VerticalResolution>
    </Print>
+   <Selected/>
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>
    <TopRowBottomPane>1</TopRowBottomPane>
    <SplitVertical>2</SplitVertical>
-   <LeftColumnRightPane>2</LeftColumnRightPane>
+   <LeftColumnRightPane>4</LeftColumnRightPane>
    <ActivePane>0</ActivePane>
    <Panes>
     <Pane>
@@ -2261,12 +2263,14 @@
     </Pane>
     <Pane>
      <Number>1</Number>
+     <ActiveCol>2</ActiveCol>
     </Pane>
     <Pane>
      <Number>2</Number>
     </Pane>
     <Pane>
      <Number>0</Number>
+     <ActiveRow>2</ActiveRow>
      <ActiveCol>6</ActiveCol>
     </Pane>
    </Panes>
@@ -2559,7 +2563,6 @@
     <PageMargins x:Bottom="0.75" x:Left="0.7" x:Right="0.7" x:Top="0.75"/>
    </PageSetup>
    <Unsynced/>
-   <Selected/>
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>

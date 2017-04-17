@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
+// Generated on Mon, Apr 17, 2017 17:38-0400 for FHIR v3.0.1
 
 import java.util.*;
 
@@ -207,14 +207,14 @@ public class MedicationDispense extends DomainResource {
     @Block()
     public static class MedicationDispensePerformerComponent extends BackboneElement implements IBaseBackboneElement {
         /**
-         * The device, practitioner, etc. who performed the action.
+         * The device, practitioner, etc. who performed the action.  It should be assumed that the actor is the dispenser of the medication.
          */
         @Child(name = "actor", type = {Practitioner.class, Organization.class, Patient.class, Device.class, RelatedPerson.class}, order=1, min=1, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Individual who was performing", formalDefinition="The device, practitioner, etc. who performed the action." )
+        @Description(shortDefinition="Individual who was performing", formalDefinition="The device, practitioner, etc. who performed the action.  It should be assumed that the actor is the dispenser of the medication." )
         protected Reference actor;
 
         /**
-         * The actual object that is the target of the reference (The device, practitioner, etc. who performed the action.)
+         * The actual object that is the target of the reference (The device, practitioner, etc. who performed the action.  It should be assumed that the actor is the dispenser of the medication.)
          */
         protected Resource actorTarget;
 
@@ -248,7 +248,7 @@ public class MedicationDispense extends DomainResource {
       }
 
         /**
-         * @return {@link #actor} (The device, practitioner, etc. who performed the action.)
+         * @return {@link #actor} (The device, practitioner, etc. who performed the action.  It should be assumed that the actor is the dispenser of the medication.)
          */
         public Reference getActor() { 
           if (this.actor == null)
@@ -264,7 +264,7 @@ public class MedicationDispense extends DomainResource {
         }
 
         /**
-         * @param value {@link #actor} (The device, practitioner, etc. who performed the action.)
+         * @param value {@link #actor} (The device, practitioner, etc. who performed the action.  It should be assumed that the actor is the dispenser of the medication.)
          */
         public MedicationDispensePerformerComponent setActor(Reference value) { 
           this.actor = value;
@@ -272,14 +272,14 @@ public class MedicationDispense extends DomainResource {
         }
 
         /**
-         * @return {@link #actor} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The device, practitioner, etc. who performed the action.)
+         * @return {@link #actor} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The device, practitioner, etc. who performed the action.  It should be assumed that the actor is the dispenser of the medication.)
          */
         public Resource getActorTarget() { 
           return this.actorTarget;
         }
 
         /**
-         * @param value {@link #actor} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The device, practitioner, etc. who performed the action.)
+         * @param value {@link #actor} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The device, practitioner, etc. who performed the action.  It should be assumed that the actor is the dispenser of the medication.)
          */
         public MedicationDispensePerformerComponent setActorTarget(Resource value) { 
           this.actorTarget = value;
@@ -332,7 +332,7 @@ public class MedicationDispense extends DomainResource {
 
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
-          childrenList.add(new Property("actor", "Reference(Practitioner|Organization|Patient|Device|RelatedPerson)", "The device, practitioner, etc. who performed the action.", 0, java.lang.Integer.MAX_VALUE, actor));
+          childrenList.add(new Property("actor", "Reference(Practitioner|Organization|Patient|Device|RelatedPerson)", "The device, practitioner, etc. who performed the action.  It should be assumed that the actor is the dispenser of the medication.", 0, java.lang.Integer.MAX_VALUE, actor));
           childrenList.add(new Property("onBehalfOf", "Reference(Organization)", "The organization the device or practitioner was acting on behalf of.", 0, java.lang.Integer.MAX_VALUE, onBehalfOf));
         }
 
@@ -924,10 +924,10 @@ public class MedicationDispense extends DomainResource {
 
 
     /**
-     * Indicates who or what performed the event.
+     * Indicates who or what performed the event.  It should be assumed that the performer is the dispenser of the medication.
      */
     @Child(name = "performer", type = {}, order=8, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="Who performed event", formalDefinition="Indicates who or what performed the event." )
+    @Description(shortDefinition="Who performed event", formalDefinition="Indicates who or what performed the event.  It should be assumed that the performer is the dispenser of the medication." )
     protected List<MedicationDispensePerformerComponent> performer;
 
     /**
@@ -1027,7 +1027,7 @@ public class MedicationDispense extends DomainResource {
      * Indicates an actual or potential clinical issue with or between one or more active or proposed clinical actions for a patient; e.g. Drug-drug interaction, duplicate therapy, dosage alert etc.
      */
     @Child(name = "detectedIssue", type = {DetectedIssue.class}, order=20, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="Clinical Issue with action", formalDefinition="Indicates an actual or potential clinical issue with or between one or more active or proposed clinical actions for a patient; e.g. Drug-drug interaction, duplicate therapy, dosage alert etc." )
+    @Description(shortDefinition="Clinical issue with action", formalDefinition="Indicates an actual or potential clinical issue with or between one or more active or proposed clinical actions for a patient; e.g. Drug-drug interaction, duplicate therapy, dosage alert etc." )
     protected List<Reference> detectedIssue;
     /**
      * The actual objects that are the target of the reference (Indicates an actual or potential clinical issue with or between one or more active or proposed clinical actions for a patient; e.g. Drug-drug interaction, duplicate therapy, dosage alert etc.)
@@ -1036,10 +1036,10 @@ public class MedicationDispense extends DomainResource {
 
 
     /**
-     * True if the dispense was not peformed for some reason.
+     * True if the dispense was not performed for some reason.
      */
     @Child(name = "notDone", type = {BooleanType.class}, order=21, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Whether the dispense was or was not performed", formalDefinition="True if the dispense was not peformed for some reason." )
+    @Description(shortDefinition="Whether the dispense was or was not performed", formalDefinition="True if the dispense was not performed for some reason." )
     protected BooleanType notDone;
 
     /**
@@ -1053,7 +1053,7 @@ public class MedicationDispense extends DomainResource {
      * A summary of the events of interest that have occurred, such as when the dispense was verified.
      */
     @Child(name = "eventHistory", type = {Provenance.class}, order=23, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="A list of events of interest in the lifecycle", formalDefinition="A summary of the events of interest that have occurred, such as when the dispense was verified." )
+    @Description(shortDefinition="A list of releveant lifecycle events", formalDefinition="A summary of the events of interest that have occurred, such as when the dispense was verified." )
     protected List<Reference> eventHistory;
     /**
      * The actual objects that are the target of the reference (A summary of the events of interest that have occurred, such as when the dispense was verified.)
@@ -1466,7 +1466,7 @@ public class MedicationDispense extends DomainResource {
     }
 
     /**
-     * @return {@link #performer} (Indicates who or what performed the event.)
+     * @return {@link #performer} (Indicates who or what performed the event.  It should be assumed that the performer is the dispenser of the medication.)
      */
     public List<MedicationDispensePerformerComponent> getPerformer() { 
       if (this.performer == null)
@@ -2076,7 +2076,7 @@ public class MedicationDispense extends DomainResource {
     }
 
     /**
-     * @return {@link #notDone} (True if the dispense was not peformed for some reason.). This is the underlying object with id, value and extensions. The accessor "getNotDone" gives direct access to the value
+     * @return {@link #notDone} (True if the dispense was not performed for some reason.). This is the underlying object with id, value and extensions. The accessor "getNotDone" gives direct access to the value
      */
     public BooleanType getNotDoneElement() { 
       if (this.notDone == null)
@@ -2096,7 +2096,7 @@ public class MedicationDispense extends DomainResource {
     }
 
     /**
-     * @param value {@link #notDone} (True if the dispense was not peformed for some reason.). This is the underlying object with id, value and extensions. The accessor "getNotDone" gives direct access to the value
+     * @param value {@link #notDone} (True if the dispense was not performed for some reason.). This is the underlying object with id, value and extensions. The accessor "getNotDone" gives direct access to the value
      */
     public MedicationDispense setNotDoneElement(BooleanType value) { 
       this.notDone = value;
@@ -2104,14 +2104,14 @@ public class MedicationDispense extends DomainResource {
     }
 
     /**
-     * @return True if the dispense was not peformed for some reason.
+     * @return True if the dispense was not performed for some reason.
      */
     public boolean getNotDone() { 
       return this.notDone == null || this.notDone.isEmpty() ? false : this.notDone.getValue();
     }
 
     /**
-     * @param value True if the dispense was not peformed for some reason.
+     * @param value True if the dispense was not performed for some reason.
      */
     public MedicationDispense setNotDone(boolean value) { 
         if (this.notDone == null)
@@ -2250,7 +2250,7 @@ public class MedicationDispense extends DomainResource {
         childrenList.add(new Property("subject", "Reference(Patient|Group)", "A link to a resource representing the person or the group to whom the medication will be given.", 0, java.lang.Integer.MAX_VALUE, subject));
         childrenList.add(new Property("context", "Reference(Encounter|EpisodeOfCare)", "The encounter or episode of care that establishes the context for this event.", 0, java.lang.Integer.MAX_VALUE, context));
         childrenList.add(new Property("supportingInformation", "Reference(Any)", "Additional information that supports the medication being dispensed.", 0, java.lang.Integer.MAX_VALUE, supportingInformation));
-        childrenList.add(new Property("performer", "", "Indicates who or what performed the event.", 0, java.lang.Integer.MAX_VALUE, performer));
+        childrenList.add(new Property("performer", "", "Indicates who or what performed the event.  It should be assumed that the performer is the dispenser of the medication.", 0, java.lang.Integer.MAX_VALUE, performer));
         childrenList.add(new Property("authorizingPrescription", "Reference(MedicationRequest)", "Indicates the medication order that is being dispensed against.", 0, java.lang.Integer.MAX_VALUE, authorizingPrescription));
         childrenList.add(new Property("type", "CodeableConcept", "Indicates the type of dispensing event that is performed. For example, Trial Fill, Completion of Trial, Partial Fill, Emergency Fill, Samples, etc.", 0, java.lang.Integer.MAX_VALUE, type));
         childrenList.add(new Property("quantity", "SimpleQuantity", "The amount of medication that has been dispensed. Includes unit of measure.", 0, java.lang.Integer.MAX_VALUE, quantity));
@@ -2263,7 +2263,7 @@ public class MedicationDispense extends DomainResource {
         childrenList.add(new Property("dosageInstruction", "Dosage", "Indicates how the medication is to be used by the patient.", 0, java.lang.Integer.MAX_VALUE, dosageInstruction));
         childrenList.add(new Property("substitution", "", "Indicates whether or not substitution was made as part of the dispense.  In some cases substitution will be expected but does not happen, in other cases substitution is not expected but does happen.  This block explains what substitution did or did not happen and why.  If nothing is specified, substitution was not done.", 0, java.lang.Integer.MAX_VALUE, substitution));
         childrenList.add(new Property("detectedIssue", "Reference(DetectedIssue)", "Indicates an actual or potential clinical issue with or between one or more active or proposed clinical actions for a patient; e.g. Drug-drug interaction, duplicate therapy, dosage alert etc.", 0, java.lang.Integer.MAX_VALUE, detectedIssue));
-        childrenList.add(new Property("notDone", "boolean", "True if the dispense was not peformed for some reason.", 0, java.lang.Integer.MAX_VALUE, notDone));
+        childrenList.add(new Property("notDone", "boolean", "True if the dispense was not performed for some reason.", 0, java.lang.Integer.MAX_VALUE, notDone));
         childrenList.add(new Property("notDoneReason[x]", "CodeableConcept|Reference(DetectedIssue)", "Indicates the reason why a dispense was not performed.", 0, java.lang.Integer.MAX_VALUE, notDoneReason));
         childrenList.add(new Property("eventHistory", "Reference(Provenance)", "A summary of the events of interest that have occurred, such as when the dispense was verified.", 0, java.lang.Integer.MAX_VALUE, eventHistory));
       }

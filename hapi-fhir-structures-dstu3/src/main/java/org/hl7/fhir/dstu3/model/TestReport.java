@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
+// Generated on Mon, Apr 17, 2017 17:38-0400 for FHIR v3.0.1
 
 import java.util.*;
 
@@ -44,7 +44,7 @@ import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.exceptions.FHIRException;
 /**
- * TestReport is a resource that includes summary information on the results of executing a TestScript.
+ * A summary of information based on the results of executing a TestScript.
  */
 @ResourceDef(name="TestReport", profile="http://hl7.org/fhir/Profile/TestReport")
 public class TestReport extends DomainResource {
@@ -2706,7 +2706,7 @@ public class TestReport extends DomainResource {
     /**
      * The overall result from the execution of the TestScript.
      */
-    @Child(name = "result", type = {CodeType.class}, order=4, min=1, max=1, modifier=true, summary=true)
+    @Child(name = "result", type = {CodeType.class}, order=4, min=1, max=1, modifier=false, summary=true)
     @Description(shortDefinition="pass | fail | pending", formalDefinition="The overall result from the execution of the TestScript." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/report-result-codes")
     protected Enumeration<TestReportResult> result;

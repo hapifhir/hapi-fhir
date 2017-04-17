@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
+// Generated on Mon, Apr 17, 2017 17:38-0400 for FHIR v3.0.1
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,11 +37,11 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum UdiEntryType {
 
         /**
-         * A Barcode scanner captured the the data from the device label
+         * A Barcode scanner captured the data from the device label
          */
         BARCODE, 
         /**
-         * An RFID chip reader captured the the data from the device label
+         * An RFID chip reader captured the data from the device label
          */
         RFID, 
         /**
@@ -49,11 +49,11 @@ public enum UdiEntryType {
          */
         MANUAL, 
         /**
-         * The data orginated from a patient's implant card and read by an operator.
+         * The data originated from a patient's implant card and read by an operator.
          */
         CARD, 
         /**
-         * The data orginated from a patient source and not directly scanned or read from a label or card.
+         * The data originated from a patient source and not directly scanned or read from a label or card.
          */
         SELFREPORTED, 
         /**
@@ -97,11 +97,11 @@ public enum UdiEntryType {
         }
         public String getDefinition() {
           switch (this) {
-            case BARCODE: return "A Barcode scanner captured the the data from the device label";
-            case RFID: return "An RFID chip reader captured the the data from the device label";
+            case BARCODE: return "A Barcode scanner captured the data from the device label";
+            case RFID: return "An RFID chip reader captured the data from the device label";
             case MANUAL: return "The data was read from the label by a person and manually entered. (e.g.  via a keyboard)";
-            case CARD: return "The data orginated from a patient's implant card and read by an operator.";
-            case SELFREPORTED: return "The data orginated from a patient source and not directly scanned or read from a label or card.";
+            case CARD: return "The data originated from a patient's implant card and read by an operator.";
+            case SELFREPORTED: return "The data originated from a patient source and not directly scanned or read from a label or card.";
             case UNKNOWN: return "The method of data capture has not been determined";
             default: return "?";
           }

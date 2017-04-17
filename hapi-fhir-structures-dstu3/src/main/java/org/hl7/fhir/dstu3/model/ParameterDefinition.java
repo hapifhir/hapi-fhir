@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
+// Generated on Mon, Apr 17, 2017 17:38-0400 for FHIR v3.0.1
 
 import java.util.*;
 
@@ -141,10 +141,10 @@ public class ParameterDefinition extends Type implements ICompositeType {
     }
 
     /**
-     * The name of the parameter.
+     * The name of the parameter used to allow access to the value of the parameter in evaluation contexts.
      */
     @Child(name = "name", type = {CodeType.class}, order=0, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Parameter name", formalDefinition="The name of the parameter." )
+    @Description(shortDefinition="Name used to access the parameter value", formalDefinition="The name of the parameter used to allow access to the value of the parameter in evaluation contexts." )
     protected CodeType name;
 
     /**
@@ -180,7 +180,7 @@ public class ParameterDefinition extends Type implements ICompositeType {
      * The type of the parameter.
      */
     @Child(name = "type", type = {CodeType.class}, order=5, min=1, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Type for the parameter", formalDefinition="The type of the parameter." )
+    @Description(shortDefinition="What type of value", formalDefinition="The type of the parameter." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/all-types")
     protected CodeType type;
 
@@ -188,7 +188,7 @@ public class ParameterDefinition extends Type implements ICompositeType {
      * If specified, this indicates a profile that the input data must conform to, or that the output data will conform to.
      */
     @Child(name = "profile", type = {StructureDefinition.class}, order=6, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="The profile of the parameter, any", formalDefinition="If specified, this indicates a profile that the input data must conform to, or that the output data will conform to." )
+    @Description(shortDefinition="What profile the value is expected to be", formalDefinition="If specified, this indicates a profile that the input data must conform to, or that the output data will conform to." )
     protected Reference profile;
 
     /**
@@ -215,7 +215,7 @@ public class ParameterDefinition extends Type implements ICompositeType {
     }
 
     /**
-     * @return {@link #name} (The name of the parameter.). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
+     * @return {@link #name} (The name of the parameter used to allow access to the value of the parameter in evaluation contexts.). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
      */
     public CodeType getNameElement() { 
       if (this.name == null)
@@ -235,7 +235,7 @@ public class ParameterDefinition extends Type implements ICompositeType {
     }
 
     /**
-     * @param value {@link #name} (The name of the parameter.). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
+     * @param value {@link #name} (The name of the parameter used to allow access to the value of the parameter in evaluation contexts.). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
      */
     public ParameterDefinition setNameElement(CodeType value) { 
       this.name = value;
@@ -243,14 +243,14 @@ public class ParameterDefinition extends Type implements ICompositeType {
     }
 
     /**
-     * @return The name of the parameter.
+     * @return The name of the parameter used to allow access to the value of the parameter in evaluation contexts.
      */
     public String getName() { 
       return this.name == null ? null : this.name.getValue();
     }
 
     /**
-     * @param value The name of the parameter.
+     * @param value The name of the parameter used to allow access to the value of the parameter in evaluation contexts.
      */
     public ParameterDefinition setName(String value) { 
       if (Utilities.noString(value))
@@ -542,7 +542,7 @@ public class ParameterDefinition extends Type implements ICompositeType {
 
       protected void listChildren(List<Property> childrenList) {
         super.listChildren(childrenList);
-        childrenList.add(new Property("name", "code", "The name of the parameter.", 0, java.lang.Integer.MAX_VALUE, name));
+        childrenList.add(new Property("name", "code", "The name of the parameter used to allow access to the value of the parameter in evaluation contexts.", 0, java.lang.Integer.MAX_VALUE, name));
         childrenList.add(new Property("use", "code", "Whether the parameter is input or output for the module.", 0, java.lang.Integer.MAX_VALUE, use));
         childrenList.add(new Property("min", "integer", "The minimum number of times this parameter SHALL appear in the request or response.", 0, java.lang.Integer.MAX_VALUE, min));
         childrenList.add(new Property("max", "string", "The maximum number of times this element is permitted to appear in the request or response.", 0, java.lang.Integer.MAX_VALUE, max));

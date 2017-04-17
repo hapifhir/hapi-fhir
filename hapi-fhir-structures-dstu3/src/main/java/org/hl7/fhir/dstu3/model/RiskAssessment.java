@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
+// Generated on Mon, Apr 17, 2017 17:38-0400 for FHIR v3.0.1
 
 import java.util.*;
 
@@ -79,7 +79,7 @@ public class RiskAssessment extends DomainResource {
          */
         ENTEREDINERROR, 
         /**
-         * The authoring system does not know which of the status values currently applies for this request. Note: This concept is not to be used for "other" - one of the listed statuses is presumed to apply, it's just not known which one.
+         * The authoring system does not know which of the status values currently applies for this request. Note: This concept is not to be used for "other" - one of the listed statuses is presumed to apply, but the authoring system does not know which.
          */
         UNKNOWN, 
         /**
@@ -145,7 +145,7 @@ public class RiskAssessment extends DomainResource {
             case CORRECTED: return "Subsequent to being Final, the observation has been modified to correct an error in the test result.";
             case CANCELLED: return "The observation is unavailable because the measurement was not started or not completed (also sometimes called \"aborted\").";
             case ENTEREDINERROR: return "The observation has been withdrawn following previous final release.  This electronic record should never have existed, though it is possible that real-world decisions were based on it. (If real-world activity has occurred, the status should be \"cancelled\" rather than \"entered-in-error\".)";
-            case UNKNOWN: return "The authoring system does not know which of the status values currently applies for this request. Note: This concept is not to be used for \"other\" - one of the listed statuses is presumed to apply, it's just not known which one.";
+            case UNKNOWN: return "The authoring system does not know which of the status values currently applies for this request. Note: This concept is not to be used for \"other\" - one of the listed statuses is presumed to apply, but the authoring system does not know which.";
             default: return "?";
           }
         }
@@ -879,11 +879,11 @@ public class RiskAssessment extends DomainResource {
     /**
      * Additional comments about the risk assessment.
      */
-    @Child(name = "note", type = {Annotation.class}, order=15, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "comment", type = {StringType.class}, order=15, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Comments on the risk assessment", formalDefinition="Additional comments about the risk assessment." )
-    protected Annotation note;
+    protected StringType comment;
 
-    private static final long serialVersionUID = -1613643505L;
+    private static final long serialVersionUID = -715866284L;
 
   /**
    * Constructor
@@ -1512,26 +1512,51 @@ public class RiskAssessment extends DomainResource {
     }
 
     /**
-     * @return {@link #note} (Additional comments about the risk assessment.)
+     * @return {@link #comment} (Additional comments about the risk assessment.). This is the underlying object with id, value and extensions. The accessor "getComment" gives direct access to the value
      */
-    public Annotation getNote() { 
-      if (this.note == null)
+    public StringType getCommentElement() { 
+      if (this.comment == null)
         if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create RiskAssessment.note");
+          throw new Error("Attempt to auto-create RiskAssessment.comment");
         else if (Configuration.doAutoCreate())
-          this.note = new Annotation(); // cc
-      return this.note;
+          this.comment = new StringType(); // bb
+      return this.comment;
     }
 
-    public boolean hasNote() { 
-      return this.note != null && !this.note.isEmpty();
+    public boolean hasCommentElement() { 
+      return this.comment != null && !this.comment.isEmpty();
+    }
+
+    public boolean hasComment() { 
+      return this.comment != null && !this.comment.isEmpty();
     }
 
     /**
-     * @param value {@link #note} (Additional comments about the risk assessment.)
+     * @param value {@link #comment} (Additional comments about the risk assessment.). This is the underlying object with id, value and extensions. The accessor "getComment" gives direct access to the value
      */
-    public RiskAssessment setNote(Annotation value) { 
-      this.note = value;
+    public RiskAssessment setCommentElement(StringType value) { 
+      this.comment = value;
+      return this;
+    }
+
+    /**
+     * @return Additional comments about the risk assessment.
+     */
+    public String getComment() { 
+      return this.comment == null ? null : this.comment.getValue();
+    }
+
+    /**
+     * @param value Additional comments about the risk assessment.
+     */
+    public RiskAssessment setComment(String value) { 
+      if (Utilities.noString(value))
+        this.comment = null;
+      else {
+        if (this.comment == null)
+          this.comment = new StringType();
+        this.comment.setValue(value);
+      }
       return this;
     }
 
@@ -1552,7 +1577,7 @@ public class RiskAssessment extends DomainResource {
         childrenList.add(new Property("basis", "Reference(Any)", "Indicates the source data considered as part of the assessment (FamilyHistory, Observations, Procedures, Conditions, etc.).", 0, java.lang.Integer.MAX_VALUE, basis));
         childrenList.add(new Property("prediction", "", "Describes the expected outcome for the subject.", 0, java.lang.Integer.MAX_VALUE, prediction));
         childrenList.add(new Property("mitigation", "string", "A description of the steps that might be taken to reduce the identified risk(s).", 0, java.lang.Integer.MAX_VALUE, mitigation));
-        childrenList.add(new Property("note", "Annotation", "Additional comments about the risk assessment.", 0, java.lang.Integer.MAX_VALUE, note));
+        childrenList.add(new Property("comment", "string", "Additional comments about the risk assessment.", 0, java.lang.Integer.MAX_VALUE, comment));
       }
 
       @Override
@@ -1573,7 +1598,7 @@ public class RiskAssessment extends DomainResource {
         case 93508670: /*basis*/ return this.basis == null ? new Base[0] : this.basis.toArray(new Base[this.basis.size()]); // Reference
         case 1161234575: /*prediction*/ return this.prediction == null ? new Base[0] : this.prediction.toArray(new Base[this.prediction.size()]); // RiskAssessmentPredictionComponent
         case 1293793087: /*mitigation*/ return this.mitigation == null ? new Base[0] : new Base[] {this.mitigation}; // StringType
-        case 3387378: /*note*/ return this.note == null ? new Base[0] : new Base[] {this.note}; // Annotation
+        case 950398559: /*comment*/ return this.comment == null ? new Base[0] : new Base[] {this.comment}; // StringType
         default: return super.getProperty(hash, name, checkValid);
         }
 
@@ -1628,8 +1653,8 @@ public class RiskAssessment extends DomainResource {
         case 1293793087: // mitigation
           this.mitigation = castToString(value); // StringType
           return value;
-        case 3387378: // note
-          this.note = castToAnnotation(value); // Annotation
+        case 950398559: // comment
+          this.comment = castToString(value); // StringType
           return value;
         default: return super.setProperty(hash, name, value);
         }
@@ -1669,8 +1694,8 @@ public class RiskAssessment extends DomainResource {
           this.getPrediction().add((RiskAssessmentPredictionComponent) value);
         } else if (name.equals("mitigation")) {
           this.mitigation = castToString(value); // StringType
-        } else if (name.equals("note")) {
-          this.note = castToAnnotation(value); // Annotation
+        } else if (name.equals("comment")) {
+          this.comment = castToString(value); // StringType
         } else
           return super.setProperty(name, value);
         return value;
@@ -1696,7 +1721,7 @@ public class RiskAssessment extends DomainResource {
         case 93508670:  return addBasis(); 
         case 1161234575:  return addPrediction(); 
         case 1293793087:  return getMitigationElement();
-        case 3387378:  return getNote(); 
+        case 950398559:  return getCommentElement();
         default: return super.makeProperty(hash, name);
         }
 
@@ -1720,7 +1745,7 @@ public class RiskAssessment extends DomainResource {
         case 93508670: /*basis*/ return new String[] {"Reference"};
         case 1161234575: /*prediction*/ return new String[] {};
         case 1293793087: /*mitigation*/ return new String[] {"string"};
-        case 3387378: /*note*/ return new String[] {"Annotation"};
+        case 950398559: /*comment*/ return new String[] {"string"};
         default: return super.getTypesForProperty(hash, name);
         }
 
@@ -1792,9 +1817,8 @@ public class RiskAssessment extends DomainResource {
         else if (name.equals("mitigation")) {
           throw new FHIRException("Cannot call addChild on a primitive type RiskAssessment.mitigation");
         }
-        else if (name.equals("note")) {
-          this.note = new Annotation();
-          return this.note;
+        else if (name.equals("comment")) {
+          throw new FHIRException("Cannot call addChild on a primitive type RiskAssessment.comment");
         }
         else
           return super.addChild(name);
@@ -1831,7 +1855,7 @@ public class RiskAssessment extends DomainResource {
             dst.prediction.add(i.copy());
         };
         dst.mitigation = mitigation == null ? null : mitigation.copy();
-        dst.note = note == null ? null : note.copy();
+        dst.comment = comment == null ? null : comment.copy();
         return dst;
       }
 
@@ -1851,7 +1875,7 @@ public class RiskAssessment extends DomainResource {
            && compareDeep(subject, o.subject, true) && compareDeep(context, o.context, true) && compareDeep(occurrence, o.occurrence, true)
            && compareDeep(condition, o.condition, true) && compareDeep(performer, o.performer, true) && compareDeep(reason, o.reason, true)
            && compareDeep(basis, o.basis, true) && compareDeep(prediction, o.prediction, true) && compareDeep(mitigation, o.mitigation, true)
-           && compareDeep(note, o.note, true);
+           && compareDeep(comment, o.comment, true);
       }
 
       @Override
@@ -1861,13 +1885,14 @@ public class RiskAssessment extends DomainResource {
         if (!(other instanceof RiskAssessment))
           return false;
         RiskAssessment o = (RiskAssessment) other;
-        return compareValues(status, o.status, true) && compareValues(mitigation, o.mitigation, true);
+        return compareValues(status, o.status, true) && compareValues(mitigation, o.mitigation, true) && compareValues(comment, o.comment, true)
+          ;
       }
 
       public boolean isEmpty() {
         return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, basedOn, parent
           , status, method, code, subject, context, occurrence, condition, performer, reason
-          , basis, prediction, mitigation, note);
+          , basis, prediction, mitigation, comment);
       }
 
   @Override

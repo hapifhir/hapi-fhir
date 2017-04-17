@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
+// Generated on Mon, Apr 17, 2017 17:38-0400 for FHIR v3.0.1
 
 import java.util.*;
 
@@ -1382,9 +1382,9 @@ public class ElementDefinition extends Type implements ICompositeType {
         /**
          * Minimum cardinality of the base element identified by the path.
          */
-        @Child(name = "min", type = {IntegerType.class}, order=2, min=1, max=1, modifier=false, summary=true)
+        @Child(name = "min", type = {UnsignedIntType.class}, order=2, min=1, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Min cardinality of the base element", formalDefinition="Minimum cardinality of the base element identified by the path." )
-        protected IntegerType min;
+        protected UnsignedIntType min;
 
         /**
          * Maximum cardinality of the base element identified by the path.
@@ -1393,7 +1393,7 @@ public class ElementDefinition extends Type implements ICompositeType {
         @Description(shortDefinition="Max cardinality of the base element", formalDefinition="Maximum cardinality of the base element identified by the path." )
         protected StringType max;
 
-        private static final long serialVersionUID = 232204455L;
+        private static final long serialVersionUID = -1412704221L;
 
     /**
      * Constructor
@@ -1405,7 +1405,7 @@ public class ElementDefinition extends Type implements ICompositeType {
     /**
      * Constructor
      */
-      public ElementDefinitionBaseComponent(StringType path, IntegerType min, StringType max) {
+      public ElementDefinitionBaseComponent(StringType path, UnsignedIntType min, StringType max) {
         super();
         this.path = path;
         this.min = min;
@@ -1460,12 +1460,12 @@ public class ElementDefinition extends Type implements ICompositeType {
         /**
          * @return {@link #min} (Minimum cardinality of the base element identified by the path.). This is the underlying object with id, value and extensions. The accessor "getMin" gives direct access to the value
          */
-        public IntegerType getMinElement() { 
+        public UnsignedIntType getMinElement() { 
           if (this.min == null)
             if (Configuration.errorOnAutoCreate())
               throw new Error("Attempt to auto-create ElementDefinitionBaseComponent.min");
             else if (Configuration.doAutoCreate())
-              this.min = new IntegerType(); // bb
+              this.min = new UnsignedIntType(); // bb
           return this.min;
         }
 
@@ -1480,7 +1480,7 @@ public class ElementDefinition extends Type implements ICompositeType {
         /**
          * @param value {@link #min} (Minimum cardinality of the base element identified by the path.). This is the underlying object with id, value and extensions. The accessor "getMin" gives direct access to the value
          */
-        public ElementDefinitionBaseComponent setMinElement(IntegerType value) { 
+        public ElementDefinitionBaseComponent setMinElement(UnsignedIntType value) { 
           this.min = value;
           return this;
         }
@@ -1497,7 +1497,7 @@ public class ElementDefinition extends Type implements ICompositeType {
          */
         public ElementDefinitionBaseComponent setMin(int value) { 
             if (this.min == null)
-              this.min = new IntegerType();
+              this.min = new UnsignedIntType();
             this.min.setValue(value);
           return this;
         }
@@ -1550,7 +1550,7 @@ public class ElementDefinition extends Type implements ICompositeType {
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
           childrenList.add(new Property("path", "string", "The Path that identifies the base element - this matches the ElementDefinition.path for that element. Across FHIR, there is only one base definition of any element - that is, an element definition on a [[[StructureDefinition]]] without a StructureDefinition.base.", 0, java.lang.Integer.MAX_VALUE, path));
-          childrenList.add(new Property("min", "integer", "Minimum cardinality of the base element identified by the path.", 0, java.lang.Integer.MAX_VALUE, min));
+          childrenList.add(new Property("min", "unsignedInt", "Minimum cardinality of the base element identified by the path.", 0, java.lang.Integer.MAX_VALUE, min));
           childrenList.add(new Property("max", "string", "Maximum cardinality of the base element identified by the path.", 0, java.lang.Integer.MAX_VALUE, max));
         }
 
@@ -1558,7 +1558,7 @@ public class ElementDefinition extends Type implements ICompositeType {
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
         case 3433509: /*path*/ return this.path == null ? new Base[0] : new Base[] {this.path}; // StringType
-        case 108114: /*min*/ return this.min == null ? new Base[0] : new Base[] {this.min}; // IntegerType
+        case 108114: /*min*/ return this.min == null ? new Base[0] : new Base[] {this.min}; // UnsignedIntType
         case 107876: /*max*/ return this.max == null ? new Base[0] : new Base[] {this.max}; // StringType
         default: return super.getProperty(hash, name, checkValid);
         }
@@ -1572,7 +1572,7 @@ public class ElementDefinition extends Type implements ICompositeType {
           this.path = castToString(value); // StringType
           return value;
         case 108114: // min
-          this.min = castToInteger(value); // IntegerType
+          this.min = castToUnsignedInt(value); // UnsignedIntType
           return value;
         case 107876: // max
           this.max = castToString(value); // StringType
@@ -1587,7 +1587,7 @@ public class ElementDefinition extends Type implements ICompositeType {
         if (name.equals("path")) {
           this.path = castToString(value); // StringType
         } else if (name.equals("min")) {
-          this.min = castToInteger(value); // IntegerType
+          this.min = castToUnsignedInt(value); // UnsignedIntType
         } else if (name.equals("max")) {
           this.max = castToString(value); // StringType
         } else
@@ -1610,7 +1610,7 @@ public class ElementDefinition extends Type implements ICompositeType {
       public String[] getTypesForProperty(int hash, String name) throws FHIRException {
         switch (hash) {
         case 3433509: /*path*/ return new String[] {"string"};
-        case 108114: /*min*/ return new String[] {"integer"};
+        case 108114: /*min*/ return new String[] {"unsignedInt"};
         case 107876: /*max*/ return new String[] {"string"};
         default: return super.getTypesForProperty(hash, name);
         }
@@ -1685,17 +1685,17 @@ public class ElementDefinition extends Type implements ICompositeType {
         protected UriType code;
 
         /**
-         * Identifies a profile structure or implementation Guide that SHALL hold for the datatype this element refers to. Can be a local reference - to a contained StructureDefinition, or a reference to another StructureDefinition in another profile. When an implementation guide is specified, the resource SHALL conform to at least one profile defined in the implementation guide.
+         * Identifies a profile structure or implementation Guide that SHALL hold for the datatype this element refers to. Can be a local reference - to a contained StructureDefinition, or a reference to another StructureDefinition or Implementation Guide by a canonical URL. When an implementation guide is specified, the resource SHALL conform to at least one profile defined in the implementation guide.
          */
         @Child(name = "profile", type = {UriType.class}, order=2, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="Profile (StructureDefinition) to apply (or IG)", formalDefinition="Identifies a profile structure or implementation Guide that SHALL hold for the datatype this element refers to. Can be a local reference - to a contained StructureDefinition, or a reference to another StructureDefinition in another profile. When an implementation guide is specified, the resource SHALL conform to at least one profile defined in the implementation guide." )
+        @Description(shortDefinition="Profile (StructureDefinition) to apply (or IG)", formalDefinition="Identifies a profile structure or implementation Guide that SHALL hold for the datatype this element refers to. Can be a local reference - to a contained StructureDefinition, or a reference to another StructureDefinition or Implementation Guide by a canonical URL. When an implementation guide is specified, the resource SHALL conform to at least one profile defined in the implementation guide." )
         protected UriType profile;
 
         /**
-         * Identifies a profile structure or implementation Guide that SHALL hold for the target of the reference this element refers to. Can be a local reference - to a contained StructureDefinition, or a reference to another StructureDefinition in another profile. When an implementation guide is specified, the resource SHALL conform to at least one profile defined in the implementation guide.
+         * Identifies a profile structure or implementation Guide that SHALL hold for the target of the reference this element refers to. Can be a local reference - to a contained StructureDefinition, or a reference to another StructureDefinition or Implementation Guide by a canonical URL. When an implementation guide is specified, the resource SHALL conform to at least one profile defined in the implementation guide.
          */
         @Child(name = "targetProfile", type = {UriType.class}, order=3, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="Profile (StructureDefinition) to apply to reference target (or IG)", formalDefinition="Identifies a profile structure or implementation Guide that SHALL hold for the target of the reference this element refers to. Can be a local reference - to a contained StructureDefinition, or a reference to another StructureDefinition in another profile. When an implementation guide is specified, the resource SHALL conform to at least one profile defined in the implementation guide." )
+        @Description(shortDefinition="Profile (StructureDefinition) to apply to reference target (or IG)", formalDefinition="Identifies a profile structure or implementation Guide that SHALL hold for the target of the reference this element refers to. Can be a local reference - to a contained StructureDefinition, or a reference to another StructureDefinition or Implementation Guide by a canonical URL. When an implementation guide is specified, the resource SHALL conform to at least one profile defined in the implementation guide." )
         protected UriType targetProfile;
 
         /**
@@ -1707,10 +1707,10 @@ public class ElementDefinition extends Type implements ICompositeType {
         protected List<Enumeration<AggregationMode>> aggregation;
 
         /**
-         * Whether this reference needs to be version specific or version independent, or whetehr either can be used.
+         * Whether this reference needs to be version specific or version independent, or whether either can be used.
          */
         @Child(name = "versioning", type = {CodeType.class}, order=5, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="either | independent | specific", formalDefinition="Whether this reference needs to be version specific or version independent, or whetehr either can be used." )
+        @Description(shortDefinition="either | independent | specific", formalDefinition="Whether this reference needs to be version specific or version independent, or whether either can be used." )
         @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/reference-version-rules")
         protected Enumeration<ReferenceVersionRules> versioning;
 
@@ -1777,7 +1777,7 @@ public class ElementDefinition extends Type implements ICompositeType {
         }
 
         /**
-         * @return {@link #profile} (Identifies a profile structure or implementation Guide that SHALL hold for the datatype this element refers to. Can be a local reference - to a contained StructureDefinition, or a reference to another StructureDefinition in another profile. When an implementation guide is specified, the resource SHALL conform to at least one profile defined in the implementation guide.). This is the underlying object with id, value and extensions. The accessor "getProfile" gives direct access to the value
+         * @return {@link #profile} (Identifies a profile structure or implementation Guide that SHALL hold for the datatype this element refers to. Can be a local reference - to a contained StructureDefinition, or a reference to another StructureDefinition or Implementation Guide by a canonical URL. When an implementation guide is specified, the resource SHALL conform to at least one profile defined in the implementation guide.). This is the underlying object with id, value and extensions. The accessor "getProfile" gives direct access to the value
          */
         public UriType getProfileElement() { 
           if (this.profile == null)
@@ -1797,7 +1797,7 @@ public class ElementDefinition extends Type implements ICompositeType {
         }
 
         /**
-         * @param value {@link #profile} (Identifies a profile structure or implementation Guide that SHALL hold for the datatype this element refers to. Can be a local reference - to a contained StructureDefinition, or a reference to another StructureDefinition in another profile. When an implementation guide is specified, the resource SHALL conform to at least one profile defined in the implementation guide.). This is the underlying object with id, value and extensions. The accessor "getProfile" gives direct access to the value
+         * @param value {@link #profile} (Identifies a profile structure or implementation Guide that SHALL hold for the datatype this element refers to. Can be a local reference - to a contained StructureDefinition, or a reference to another StructureDefinition or Implementation Guide by a canonical URL. When an implementation guide is specified, the resource SHALL conform to at least one profile defined in the implementation guide.). This is the underlying object with id, value and extensions. The accessor "getProfile" gives direct access to the value
          */
         public TypeRefComponent setProfileElement(UriType value) { 
           this.profile = value;
@@ -1805,14 +1805,14 @@ public class ElementDefinition extends Type implements ICompositeType {
         }
 
         /**
-         * @return Identifies a profile structure or implementation Guide that SHALL hold for the datatype this element refers to. Can be a local reference - to a contained StructureDefinition, or a reference to another StructureDefinition in another profile. When an implementation guide is specified, the resource SHALL conform to at least one profile defined in the implementation guide.
+         * @return Identifies a profile structure or implementation Guide that SHALL hold for the datatype this element refers to. Can be a local reference - to a contained StructureDefinition, or a reference to another StructureDefinition or Implementation Guide by a canonical URL. When an implementation guide is specified, the resource SHALL conform to at least one profile defined in the implementation guide.
          */
         public String getProfile() { 
           return this.profile == null ? null : this.profile.getValue();
         }
 
         /**
-         * @param value Identifies a profile structure or implementation Guide that SHALL hold for the datatype this element refers to. Can be a local reference - to a contained StructureDefinition, or a reference to another StructureDefinition in another profile. When an implementation guide is specified, the resource SHALL conform to at least one profile defined in the implementation guide.
+         * @param value Identifies a profile structure or implementation Guide that SHALL hold for the datatype this element refers to. Can be a local reference - to a contained StructureDefinition, or a reference to another StructureDefinition or Implementation Guide by a canonical URL. When an implementation guide is specified, the resource SHALL conform to at least one profile defined in the implementation guide.
          */
         public TypeRefComponent setProfile(String value) { 
           if (Utilities.noString(value))
@@ -1826,7 +1826,7 @@ public class ElementDefinition extends Type implements ICompositeType {
         }
 
         /**
-         * @return {@link #targetProfile} (Identifies a profile structure or implementation Guide that SHALL hold for the target of the reference this element refers to. Can be a local reference - to a contained StructureDefinition, or a reference to another StructureDefinition in another profile. When an implementation guide is specified, the resource SHALL conform to at least one profile defined in the implementation guide.). This is the underlying object with id, value and extensions. The accessor "getTargetProfile" gives direct access to the value
+         * @return {@link #targetProfile} (Identifies a profile structure or implementation Guide that SHALL hold for the target of the reference this element refers to. Can be a local reference - to a contained StructureDefinition, or a reference to another StructureDefinition or Implementation Guide by a canonical URL. When an implementation guide is specified, the resource SHALL conform to at least one profile defined in the implementation guide.). This is the underlying object with id, value and extensions. The accessor "getTargetProfile" gives direct access to the value
          */
         public UriType getTargetProfileElement() { 
           if (this.targetProfile == null)
@@ -1846,7 +1846,7 @@ public class ElementDefinition extends Type implements ICompositeType {
         }
 
         /**
-         * @param value {@link #targetProfile} (Identifies a profile structure or implementation Guide that SHALL hold for the target of the reference this element refers to. Can be a local reference - to a contained StructureDefinition, or a reference to another StructureDefinition in another profile. When an implementation guide is specified, the resource SHALL conform to at least one profile defined in the implementation guide.). This is the underlying object with id, value and extensions. The accessor "getTargetProfile" gives direct access to the value
+         * @param value {@link #targetProfile} (Identifies a profile structure or implementation Guide that SHALL hold for the target of the reference this element refers to. Can be a local reference - to a contained StructureDefinition, or a reference to another StructureDefinition or Implementation Guide by a canonical URL. When an implementation guide is specified, the resource SHALL conform to at least one profile defined in the implementation guide.). This is the underlying object with id, value and extensions. The accessor "getTargetProfile" gives direct access to the value
          */
         public TypeRefComponent setTargetProfileElement(UriType value) { 
           this.targetProfile = value;
@@ -1854,14 +1854,14 @@ public class ElementDefinition extends Type implements ICompositeType {
         }
 
         /**
-         * @return Identifies a profile structure or implementation Guide that SHALL hold for the target of the reference this element refers to. Can be a local reference - to a contained StructureDefinition, or a reference to another StructureDefinition in another profile. When an implementation guide is specified, the resource SHALL conform to at least one profile defined in the implementation guide.
+         * @return Identifies a profile structure or implementation Guide that SHALL hold for the target of the reference this element refers to. Can be a local reference - to a contained StructureDefinition, or a reference to another StructureDefinition or Implementation Guide by a canonical URL. When an implementation guide is specified, the resource SHALL conform to at least one profile defined in the implementation guide.
          */
         public String getTargetProfile() { 
           return this.targetProfile == null ? null : this.targetProfile.getValue();
         }
 
         /**
-         * @param value Identifies a profile structure or implementation Guide that SHALL hold for the target of the reference this element refers to. Can be a local reference - to a contained StructureDefinition, or a reference to another StructureDefinition in another profile. When an implementation guide is specified, the resource SHALL conform to at least one profile defined in the implementation guide.
+         * @param value Identifies a profile structure or implementation Guide that SHALL hold for the target of the reference this element refers to. Can be a local reference - to a contained StructureDefinition, or a reference to another StructureDefinition or Implementation Guide by a canonical URL. When an implementation guide is specified, the resource SHALL conform to at least one profile defined in the implementation guide.
          */
         public TypeRefComponent setTargetProfile(String value) { 
           if (Utilities.noString(value))
@@ -1936,7 +1936,7 @@ public class ElementDefinition extends Type implements ICompositeType {
         }
 
         /**
-         * @return {@link #versioning} (Whether this reference needs to be version specific or version independent, or whetehr either can be used.). This is the underlying object with id, value and extensions. The accessor "getVersioning" gives direct access to the value
+         * @return {@link #versioning} (Whether this reference needs to be version specific or version independent, or whether either can be used.). This is the underlying object with id, value and extensions. The accessor "getVersioning" gives direct access to the value
          */
         public Enumeration<ReferenceVersionRules> getVersioningElement() { 
           if (this.versioning == null)
@@ -1956,7 +1956,7 @@ public class ElementDefinition extends Type implements ICompositeType {
         }
 
         /**
-         * @param value {@link #versioning} (Whether this reference needs to be version specific or version independent, or whetehr either can be used.). This is the underlying object with id, value and extensions. The accessor "getVersioning" gives direct access to the value
+         * @param value {@link #versioning} (Whether this reference needs to be version specific or version independent, or whether either can be used.). This is the underlying object with id, value and extensions. The accessor "getVersioning" gives direct access to the value
          */
         public TypeRefComponent setVersioningElement(Enumeration<ReferenceVersionRules> value) { 
           this.versioning = value;
@@ -1964,14 +1964,14 @@ public class ElementDefinition extends Type implements ICompositeType {
         }
 
         /**
-         * @return Whether this reference needs to be version specific or version independent, or whetehr either can be used.
+         * @return Whether this reference needs to be version specific or version independent, or whether either can be used.
          */
         public ReferenceVersionRules getVersioning() { 
           return this.versioning == null ? null : this.versioning.getValue();
         }
 
         /**
-         * @param value Whether this reference needs to be version specific or version independent, or whetehr either can be used.
+         * @param value Whether this reference needs to be version specific or version independent, or whether either can be used.
          */
         public TypeRefComponent setVersioning(ReferenceVersionRules value) { 
           if (value == null)
@@ -1987,10 +1987,10 @@ public class ElementDefinition extends Type implements ICompositeType {
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
           childrenList.add(new Property("code", "uri", "URL of Data type or Resource that is a(or the) type used for this element. References are URLs that are relative to http://hl7.org/fhir/StructureDefinition e.g. \"string\" is a reference to http://hl7.org/fhir/StructureDefinition/string. Absolute URLs are only allowed in logical models.", 0, java.lang.Integer.MAX_VALUE, code));
-          childrenList.add(new Property("profile", "uri", "Identifies a profile structure or implementation Guide that SHALL hold for the datatype this element refers to. Can be a local reference - to a contained StructureDefinition, or a reference to another StructureDefinition in another profile. When an implementation guide is specified, the resource SHALL conform to at least one profile defined in the implementation guide.", 0, java.lang.Integer.MAX_VALUE, profile));
-          childrenList.add(new Property("targetProfile", "uri", "Identifies a profile structure or implementation Guide that SHALL hold for the target of the reference this element refers to. Can be a local reference - to a contained StructureDefinition, or a reference to another StructureDefinition in another profile. When an implementation guide is specified, the resource SHALL conform to at least one profile defined in the implementation guide.", 0, java.lang.Integer.MAX_VALUE, targetProfile));
+          childrenList.add(new Property("profile", "uri", "Identifies a profile structure or implementation Guide that SHALL hold for the datatype this element refers to. Can be a local reference - to a contained StructureDefinition, or a reference to another StructureDefinition or Implementation Guide by a canonical URL. When an implementation guide is specified, the resource SHALL conform to at least one profile defined in the implementation guide.", 0, java.lang.Integer.MAX_VALUE, profile));
+          childrenList.add(new Property("targetProfile", "uri", "Identifies a profile structure or implementation Guide that SHALL hold for the target of the reference this element refers to. Can be a local reference - to a contained StructureDefinition, or a reference to another StructureDefinition or Implementation Guide by a canonical URL. When an implementation guide is specified, the resource SHALL conform to at least one profile defined in the implementation guide.", 0, java.lang.Integer.MAX_VALUE, targetProfile));
           childrenList.add(new Property("aggregation", "code", "If the type is a reference to another resource, how the resource is or can be aggregated - is it a contained resource, or a reference, and if the context is a bundle, is it included in the bundle.", 0, java.lang.Integer.MAX_VALUE, aggregation));
-          childrenList.add(new Property("versioning", "code", "Whether this reference needs to be version specific or version independent, or whetehr either can be used.", 0, java.lang.Integer.MAX_VALUE, versioning));
+          childrenList.add(new Property("versioning", "code", "Whether this reference needs to be version specific or version independent, or whether either can be used.", 0, java.lang.Integer.MAX_VALUE, versioning));
         }
 
       @Override
@@ -3410,7 +3410,14 @@ public class ElementDefinition extends Type implements ICompositeType {
         @Description(shortDefinition="Details of the mapping", formalDefinition="Expresses what part of the target specification corresponds to this element." )
         protected StringType map;
 
-        private static final long serialVersionUID = -669205371L;
+        /**
+         * Comments that provide information about the mapping or its use.
+         */
+        @Child(name = "comment", type = {StringType.class}, order=4, min=0, max=1, modifier=false, summary=true)
+        @Description(shortDefinition="Comments about the mapping or its use", formalDefinition="Comments that provide information about the mapping or its use." )
+        protected StringType comment;
+
+        private static final long serialVersionUID = 1386816887L;
 
     /**
      * Constructor
@@ -3567,11 +3574,61 @@ public class ElementDefinition extends Type implements ICompositeType {
           return this;
         }
 
+        /**
+         * @return {@link #comment} (Comments that provide information about the mapping or its use.). This is the underlying object with id, value and extensions. The accessor "getComment" gives direct access to the value
+         */
+        public StringType getCommentElement() { 
+          if (this.comment == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create ElementDefinitionMappingComponent.comment");
+            else if (Configuration.doAutoCreate())
+              this.comment = new StringType(); // bb
+          return this.comment;
+        }
+
+        public boolean hasCommentElement() { 
+          return this.comment != null && !this.comment.isEmpty();
+        }
+
+        public boolean hasComment() { 
+          return this.comment != null && !this.comment.isEmpty();
+        }
+
+        /**
+         * @param value {@link #comment} (Comments that provide information about the mapping or its use.). This is the underlying object with id, value and extensions. The accessor "getComment" gives direct access to the value
+         */
+        public ElementDefinitionMappingComponent setCommentElement(StringType value) { 
+          this.comment = value;
+          return this;
+        }
+
+        /**
+         * @return Comments that provide information about the mapping or its use.
+         */
+        public String getComment() { 
+          return this.comment == null ? null : this.comment.getValue();
+        }
+
+        /**
+         * @param value Comments that provide information about the mapping or its use.
+         */
+        public ElementDefinitionMappingComponent setComment(String value) { 
+          if (Utilities.noString(value))
+            this.comment = null;
+          else {
+            if (this.comment == null)
+              this.comment = new StringType();
+            this.comment.setValue(value);
+          }
+          return this;
+        }
+
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
           childrenList.add(new Property("identity", "id", "An internal reference to the definition of a mapping.", 0, java.lang.Integer.MAX_VALUE, identity));
           childrenList.add(new Property("language", "code", "Identifies the computable language in which mapping.map is expressed.", 0, java.lang.Integer.MAX_VALUE, language));
           childrenList.add(new Property("map", "string", "Expresses what part of the target specification corresponds to this element.", 0, java.lang.Integer.MAX_VALUE, map));
+          childrenList.add(new Property("comment", "string", "Comments that provide information about the mapping or its use.", 0, java.lang.Integer.MAX_VALUE, comment));
         }
 
       @Override
@@ -3580,6 +3637,7 @@ public class ElementDefinition extends Type implements ICompositeType {
         case -135761730: /*identity*/ return this.identity == null ? new Base[0] : new Base[] {this.identity}; // IdType
         case -1613589672: /*language*/ return this.language == null ? new Base[0] : new Base[] {this.language}; // CodeType
         case 107868: /*map*/ return this.map == null ? new Base[0] : new Base[] {this.map}; // StringType
+        case 950398559: /*comment*/ return this.comment == null ? new Base[0] : new Base[] {this.comment}; // StringType
         default: return super.getProperty(hash, name, checkValid);
         }
 
@@ -3597,6 +3655,9 @@ public class ElementDefinition extends Type implements ICompositeType {
         case 107868: // map
           this.map = castToString(value); // StringType
           return value;
+        case 950398559: // comment
+          this.comment = castToString(value); // StringType
+          return value;
         default: return super.setProperty(hash, name, value);
         }
 
@@ -3610,6 +3671,8 @@ public class ElementDefinition extends Type implements ICompositeType {
           this.language = castToCode(value); // CodeType
         } else if (name.equals("map")) {
           this.map = castToString(value); // StringType
+        } else if (name.equals("comment")) {
+          this.comment = castToString(value); // StringType
         } else
           return super.setProperty(name, value);
         return value;
@@ -3621,6 +3684,7 @@ public class ElementDefinition extends Type implements ICompositeType {
         case -135761730:  return getIdentityElement();
         case -1613589672:  return getLanguageElement();
         case 107868:  return getMapElement();
+        case 950398559:  return getCommentElement();
         default: return super.makeProperty(hash, name);
         }
 
@@ -3632,6 +3696,7 @@ public class ElementDefinition extends Type implements ICompositeType {
         case -135761730: /*identity*/ return new String[] {"id"};
         case -1613589672: /*language*/ return new String[] {"code"};
         case 107868: /*map*/ return new String[] {"string"};
+        case 950398559: /*comment*/ return new String[] {"string"};
         default: return super.getTypesForProperty(hash, name);
         }
 
@@ -3648,6 +3713,9 @@ public class ElementDefinition extends Type implements ICompositeType {
         else if (name.equals("map")) {
           throw new FHIRException("Cannot call addChild on a primitive type ElementDefinition.map");
         }
+        else if (name.equals("comment")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ElementDefinition.comment");
+        }
         else
           return super.addChild(name);
       }
@@ -3658,6 +3726,7 @@ public class ElementDefinition extends Type implements ICompositeType {
         dst.identity = identity == null ? null : identity.copy();
         dst.language = language == null ? null : language.copy();
         dst.map = map == null ? null : map.copy();
+        dst.comment = comment == null ? null : comment.copy();
         return dst;
       }
 
@@ -3669,7 +3738,7 @@ public class ElementDefinition extends Type implements ICompositeType {
           return false;
         ElementDefinitionMappingComponent o = (ElementDefinitionMappingComponent) other;
         return compareDeep(identity, o.identity, true) && compareDeep(language, o.language, true) && compareDeep(map, o.map, true)
-          ;
+           && compareDeep(comment, o.comment, true);
       }
 
       @Override
@@ -3680,12 +3749,12 @@ public class ElementDefinition extends Type implements ICompositeType {
           return false;
         ElementDefinitionMappingComponent o = (ElementDefinitionMappingComponent) other;
         return compareValues(identity, o.identity, true) && compareValues(language, o.language, true) && compareValues(map, o.map, true)
-          ;
+           && compareValues(comment, o.comment, true);
       }
 
       public boolean isEmpty() {
         return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identity, language, map
-          );
+          , comment);
       }
 
   public String fhirType() {
@@ -3699,7 +3768,7 @@ public class ElementDefinition extends Type implements ICompositeType {
      * The path identifies the element and is expressed as a "."-separated list of ancestor elements, beginning with the name of the resource or extension.
      */
     @Child(name = "path", type = {StringType.class}, order=0, min=1, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Path of the element in the heirarchy of elements", formalDefinition="The path identifies the element and is expressed as a \".\"-separated list of ancestor elements, beginning with the name of the resource or extension." )
+    @Description(shortDefinition="Path of the element in the hierarchy of elements", formalDefinition="The path identifies the element and is expressed as a \".\"-separated list of ancestor elements, beginning with the name of the resource or extension." )
     protected StringType path;
 
     /**

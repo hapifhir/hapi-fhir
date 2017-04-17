@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -23,6 +24,7 @@ import org.hl7.fhir.dstu3.model.StructureDefinition;
 import org.hl7.fhir.dstu3.utils.formats.JsonTrackingParser;
 import org.hl7.fhir.dstu3.utils.formats.JsonTrackingParser.LocationData;
 import org.hl7.fhir.exceptions.DefinitionException;
+import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.exceptions.FHIRFormatError;
 import org.hl7.fhir.utilities.TextFile;
 import org.hl7.fhir.utilities.Utilities;
@@ -330,7 +332,7 @@ public class JsonParser extends ParserBase {
 
 
 	@Override
-	public void compose(Element e, OutputStream stream, OutputStyle style, String identity) throws Exception {
+	public void compose(Element e, OutputStream stream, OutputStyle style, String identity) throws FHIRException, IOException {
 		OutputStreamWriter osw = new OutputStreamWriter(stream, "UTF-8");
 		if (style == OutputStyle.CANONICAL)
 			json = new JsonCreatorCanonical(osw);

@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
+// Generated on Mon, Apr 17, 2017 17:38-0400 for FHIR v3.0.1
 
 import java.util.*;
 
@@ -47,7 +47,7 @@ import org.hl7.fhir.exceptions.FHIRException;
  * This resource allows for the definition of various types of plans as a sharable, consumable, and executable artifact. The resource is general enough to support the description of a broad range of clinical artifacts such as clinical decision support rules, order sets and protocols.
  */
 @ResourceDef(name="PlanDefinition", profile="http://hl7.org/fhir/Profile/PlanDefinition")
-@ChildOrder(names={"url", "identifier", "version", "name", "title", "type", "status", "experimental", "date", "publisher", "description", "purpose", "usage", "approvalDate", "lastReviewDate", "effectivePeriod", "useContext", "jurisdiction", "topic", "contributor", "contact", "copyright", "relatedArtifact", "library", "goalDefinition", "actionDefinition"})
+@ChildOrder(names={"url", "identifier", "version", "name", "title", "type", "status", "experimental", "date", "publisher", "description", "purpose", "usage", "approvalDate", "lastReviewDate", "effectivePeriod", "useContext", "jurisdiction", "topic", "contributor", "contact", "copyright", "relatedArtifact", "library", "goal", "action"})
 public class PlanDefinition extends MetadataResource {
 
     public enum ActionConditionKind {
@@ -1027,7 +1027,7 @@ public class PlanDefinition extends MetadataResource {
     }
 
     @Block()
-    public static class PlanDefinitionGoalDefinitionComponent extends BackboneElement implements IBaseBackboneElement {
+    public static class PlanDefinitionGoalComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * Indicates a category the goal falls within.
          */
@@ -1080,21 +1080,21 @@ public class PlanDefinition extends MetadataResource {
          */
         @Child(name = "target", type = {}, order=7, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="Target outcome for the goal", formalDefinition="Indicates what should be done and within what timeframe." )
-        protected List<PlanDefinitionGoalDefinitionTargetComponent> target;
+        protected List<PlanDefinitionGoalTargetComponent> target;
 
-        private static final long serialVersionUID = -1644987147L;
+        private static final long serialVersionUID = -795308926L;
 
     /**
      * Constructor
      */
-      public PlanDefinitionGoalDefinitionComponent() {
+      public PlanDefinitionGoalComponent() {
         super();
       }
 
     /**
      * Constructor
      */
-      public PlanDefinitionGoalDefinitionComponent(CodeableConcept description) {
+      public PlanDefinitionGoalComponent(CodeableConcept description) {
         super();
         this.description = description;
       }
@@ -1105,7 +1105,7 @@ public class PlanDefinition extends MetadataResource {
         public CodeableConcept getCategory() { 
           if (this.category == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create PlanDefinitionGoalDefinitionComponent.category");
+              throw new Error("Attempt to auto-create PlanDefinitionGoalComponent.category");
             else if (Configuration.doAutoCreate())
               this.category = new CodeableConcept(); // cc
           return this.category;
@@ -1118,7 +1118,7 @@ public class PlanDefinition extends MetadataResource {
         /**
          * @param value {@link #category} (Indicates a category the goal falls within.)
          */
-        public PlanDefinitionGoalDefinitionComponent setCategory(CodeableConcept value) { 
+        public PlanDefinitionGoalComponent setCategory(CodeableConcept value) { 
           this.category = value;
           return this;
         }
@@ -1129,7 +1129,7 @@ public class PlanDefinition extends MetadataResource {
         public CodeableConcept getDescription() { 
           if (this.description == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create PlanDefinitionGoalDefinitionComponent.description");
+              throw new Error("Attempt to auto-create PlanDefinitionGoalComponent.description");
             else if (Configuration.doAutoCreate())
               this.description = new CodeableConcept(); // cc
           return this.description;
@@ -1142,7 +1142,7 @@ public class PlanDefinition extends MetadataResource {
         /**
          * @param value {@link #description} (Human-readable and/or coded description of a specific desired objective of care, such as "control blood pressure" or "negotiate an obstacle course" or "dance with child at wedding".)
          */
-        public PlanDefinitionGoalDefinitionComponent setDescription(CodeableConcept value) { 
+        public PlanDefinitionGoalComponent setDescription(CodeableConcept value) { 
           this.description = value;
           return this;
         }
@@ -1153,7 +1153,7 @@ public class PlanDefinition extends MetadataResource {
         public CodeableConcept getPriority() { 
           if (this.priority == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create PlanDefinitionGoalDefinitionComponent.priority");
+              throw new Error("Attempt to auto-create PlanDefinitionGoalComponent.priority");
             else if (Configuration.doAutoCreate())
               this.priority = new CodeableConcept(); // cc
           return this.priority;
@@ -1166,7 +1166,7 @@ public class PlanDefinition extends MetadataResource {
         /**
          * @param value {@link #priority} (Identifies the expected level of importance associated with reaching/sustaining the defined goal.)
          */
-        public PlanDefinitionGoalDefinitionComponent setPriority(CodeableConcept value) { 
+        public PlanDefinitionGoalComponent setPriority(CodeableConcept value) { 
           this.priority = value;
           return this;
         }
@@ -1177,7 +1177,7 @@ public class PlanDefinition extends MetadataResource {
         public CodeableConcept getStart() { 
           if (this.start == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create PlanDefinitionGoalDefinitionComponent.start");
+              throw new Error("Attempt to auto-create PlanDefinitionGoalComponent.start");
             else if (Configuration.doAutoCreate())
               this.start = new CodeableConcept(); // cc
           return this.start;
@@ -1190,7 +1190,7 @@ public class PlanDefinition extends MetadataResource {
         /**
          * @param value {@link #start} (The event after which the goal should begin being pursued.)
          */
-        public PlanDefinitionGoalDefinitionComponent setStart(CodeableConcept value) { 
+        public PlanDefinitionGoalComponent setStart(CodeableConcept value) { 
           this.start = value;
           return this;
         }
@@ -1207,7 +1207,7 @@ public class PlanDefinition extends MetadataResource {
         /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
-        public PlanDefinitionGoalDefinitionComponent setAddresses(List<CodeableConcept> theAddresses) { 
+        public PlanDefinitionGoalComponent setAddresses(List<CodeableConcept> theAddresses) { 
           this.addresses = theAddresses;
           return this;
         }
@@ -1229,7 +1229,7 @@ public class PlanDefinition extends MetadataResource {
           return t;
         }
 
-        public PlanDefinitionGoalDefinitionComponent addAddresses(CodeableConcept t) { //3
+        public PlanDefinitionGoalComponent addAddresses(CodeableConcept t) { //3
           if (t == null)
             return this;
           if (this.addresses == null)
@@ -1260,7 +1260,7 @@ public class PlanDefinition extends MetadataResource {
         /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
-        public PlanDefinitionGoalDefinitionComponent setDocumentation(List<RelatedArtifact> theDocumentation) { 
+        public PlanDefinitionGoalComponent setDocumentation(List<RelatedArtifact> theDocumentation) { 
           this.documentation = theDocumentation;
           return this;
         }
@@ -1282,7 +1282,7 @@ public class PlanDefinition extends MetadataResource {
           return t;
         }
 
-        public PlanDefinitionGoalDefinitionComponent addDocumentation(RelatedArtifact t) { //3
+        public PlanDefinitionGoalComponent addDocumentation(RelatedArtifact t) { //3
           if (t == null)
             return this;
           if (this.documentation == null)
@@ -1304,16 +1304,16 @@ public class PlanDefinition extends MetadataResource {
         /**
          * @return {@link #target} (Indicates what should be done and within what timeframe.)
          */
-        public List<PlanDefinitionGoalDefinitionTargetComponent> getTarget() { 
+        public List<PlanDefinitionGoalTargetComponent> getTarget() { 
           if (this.target == null)
-            this.target = new ArrayList<PlanDefinitionGoalDefinitionTargetComponent>();
+            this.target = new ArrayList<PlanDefinitionGoalTargetComponent>();
           return this.target;
         }
 
         /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
-        public PlanDefinitionGoalDefinitionComponent setTarget(List<PlanDefinitionGoalDefinitionTargetComponent> theTarget) { 
+        public PlanDefinitionGoalComponent setTarget(List<PlanDefinitionGoalTargetComponent> theTarget) { 
           this.target = theTarget;
           return this;
         }
@@ -1321,25 +1321,25 @@ public class PlanDefinition extends MetadataResource {
         public boolean hasTarget() { 
           if (this.target == null)
             return false;
-          for (PlanDefinitionGoalDefinitionTargetComponent item : this.target)
+          for (PlanDefinitionGoalTargetComponent item : this.target)
             if (!item.isEmpty())
               return true;
           return false;
         }
 
-        public PlanDefinitionGoalDefinitionTargetComponent addTarget() { //3
-          PlanDefinitionGoalDefinitionTargetComponent t = new PlanDefinitionGoalDefinitionTargetComponent();
+        public PlanDefinitionGoalTargetComponent addTarget() { //3
+          PlanDefinitionGoalTargetComponent t = new PlanDefinitionGoalTargetComponent();
           if (this.target == null)
-            this.target = new ArrayList<PlanDefinitionGoalDefinitionTargetComponent>();
+            this.target = new ArrayList<PlanDefinitionGoalTargetComponent>();
           this.target.add(t);
           return t;
         }
 
-        public PlanDefinitionGoalDefinitionComponent addTarget(PlanDefinitionGoalDefinitionTargetComponent t) { //3
+        public PlanDefinitionGoalComponent addTarget(PlanDefinitionGoalTargetComponent t) { //3
           if (t == null)
             return this;
           if (this.target == null)
-            this.target = new ArrayList<PlanDefinitionGoalDefinitionTargetComponent>();
+            this.target = new ArrayList<PlanDefinitionGoalTargetComponent>();
           this.target.add(t);
           return this;
         }
@@ -1347,7 +1347,7 @@ public class PlanDefinition extends MetadataResource {
         /**
          * @return The first repetition of repeating field {@link #target}, creating it if it does not already exist
          */
-        public PlanDefinitionGoalDefinitionTargetComponent getTargetFirstRep() { 
+        public PlanDefinitionGoalTargetComponent getTargetFirstRep() { 
           if (getTarget().isEmpty()) {
             addTarget();
           }
@@ -1374,7 +1374,7 @@ public class PlanDefinition extends MetadataResource {
         case 109757538: /*start*/ return this.start == null ? new Base[0] : new Base[] {this.start}; // CodeableConcept
         case 874544034: /*addresses*/ return this.addresses == null ? new Base[0] : this.addresses.toArray(new Base[this.addresses.size()]); // CodeableConcept
         case 1587405498: /*documentation*/ return this.documentation == null ? new Base[0] : this.documentation.toArray(new Base[this.documentation.size()]); // RelatedArtifact
-        case -880905839: /*target*/ return this.target == null ? new Base[0] : this.target.toArray(new Base[this.target.size()]); // PlanDefinitionGoalDefinitionTargetComponent
+        case -880905839: /*target*/ return this.target == null ? new Base[0] : this.target.toArray(new Base[this.target.size()]); // PlanDefinitionGoalTargetComponent
         default: return super.getProperty(hash, name, checkValid);
         }
 
@@ -1402,7 +1402,7 @@ public class PlanDefinition extends MetadataResource {
           this.getDocumentation().add(castToRelatedArtifact(value)); // RelatedArtifact
           return value;
         case -880905839: // target
-          this.getTarget().add((PlanDefinitionGoalDefinitionTargetComponent) value); // PlanDefinitionGoalDefinitionTargetComponent
+          this.getTarget().add((PlanDefinitionGoalTargetComponent) value); // PlanDefinitionGoalTargetComponent
           return value;
         default: return super.setProperty(hash, name, value);
         }
@@ -1424,7 +1424,7 @@ public class PlanDefinition extends MetadataResource {
         } else if (name.equals("documentation")) {
           this.getDocumentation().add(castToRelatedArtifact(value));
         } else if (name.equals("target")) {
-          this.getTarget().add((PlanDefinitionGoalDefinitionTargetComponent) value);
+          this.getTarget().add((PlanDefinitionGoalTargetComponent) value);
         } else
           return super.setProperty(name, value);
         return value;
@@ -1491,8 +1491,8 @@ public class PlanDefinition extends MetadataResource {
           return super.addChild(name);
       }
 
-      public PlanDefinitionGoalDefinitionComponent copy() {
-        PlanDefinitionGoalDefinitionComponent dst = new PlanDefinitionGoalDefinitionComponent();
+      public PlanDefinitionGoalComponent copy() {
+        PlanDefinitionGoalComponent dst = new PlanDefinitionGoalComponent();
         copyValues(dst);
         dst.category = category == null ? null : category.copy();
         dst.description = description == null ? null : description.copy();
@@ -1509,8 +1509,8 @@ public class PlanDefinition extends MetadataResource {
             dst.documentation.add(i.copy());
         };
         if (target != null) {
-          dst.target = new ArrayList<PlanDefinitionGoalDefinitionTargetComponent>();
-          for (PlanDefinitionGoalDefinitionTargetComponent i : target)
+          dst.target = new ArrayList<PlanDefinitionGoalTargetComponent>();
+          for (PlanDefinitionGoalTargetComponent i : target)
             dst.target.add(i.copy());
         };
         return dst;
@@ -1520,9 +1520,9 @@ public class PlanDefinition extends MetadataResource {
       public boolean equalsDeep(Base other) {
         if (!super.equalsDeep(other))
           return false;
-        if (!(other instanceof PlanDefinitionGoalDefinitionComponent))
+        if (!(other instanceof PlanDefinitionGoalComponent))
           return false;
-        PlanDefinitionGoalDefinitionComponent o = (PlanDefinitionGoalDefinitionComponent) other;
+        PlanDefinitionGoalComponent o = (PlanDefinitionGoalComponent) other;
         return compareDeep(category, o.category, true) && compareDeep(description, o.description, true)
            && compareDeep(priority, o.priority, true) && compareDeep(start, o.start, true) && compareDeep(addresses, o.addresses, true)
            && compareDeep(documentation, o.documentation, true) && compareDeep(target, o.target, true);
@@ -1532,9 +1532,9 @@ public class PlanDefinition extends MetadataResource {
       public boolean equalsShallow(Base other) {
         if (!super.equalsShallow(other))
           return false;
-        if (!(other instanceof PlanDefinitionGoalDefinitionComponent))
+        if (!(other instanceof PlanDefinitionGoalComponent))
           return false;
-        PlanDefinitionGoalDefinitionComponent o = (PlanDefinitionGoalDefinitionComponent) other;
+        PlanDefinitionGoalComponent o = (PlanDefinitionGoalComponent) other;
         return true;
       }
 
@@ -1544,14 +1544,14 @@ public class PlanDefinition extends MetadataResource {
       }
 
   public String fhirType() {
-    return "PlanDefinition.goalDefinition";
+    return "PlanDefinition.goal";
 
   }
 
   }
 
     @Block()
-    public static class PlanDefinitionGoalDefinitionTargetComponent extends BackboneElement implements IBaseBackboneElement {
+    public static class PlanDefinitionGoalTargetComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * The parameter whose value is to be tracked, e.g. body weigth, blood pressure, or hemoglobin A1c level.
          */
@@ -1579,7 +1579,7 @@ public class PlanDefinition extends MetadataResource {
     /**
      * Constructor
      */
-      public PlanDefinitionGoalDefinitionTargetComponent() {
+      public PlanDefinitionGoalTargetComponent() {
         super();
       }
 
@@ -1589,7 +1589,7 @@ public class PlanDefinition extends MetadataResource {
         public CodeableConcept getMeasure() { 
           if (this.measure == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create PlanDefinitionGoalDefinitionTargetComponent.measure");
+              throw new Error("Attempt to auto-create PlanDefinitionGoalTargetComponent.measure");
             else if (Configuration.doAutoCreate())
               this.measure = new CodeableConcept(); // cc
           return this.measure;
@@ -1602,7 +1602,7 @@ public class PlanDefinition extends MetadataResource {
         /**
          * @param value {@link #measure} (The parameter whose value is to be tracked, e.g. body weigth, blood pressure, or hemoglobin A1c level.)
          */
-        public PlanDefinitionGoalDefinitionTargetComponent setMeasure(CodeableConcept value) { 
+        public PlanDefinitionGoalTargetComponent setMeasure(CodeableConcept value) { 
           this.measure = value;
           return this;
         }
@@ -1660,7 +1660,7 @@ public class PlanDefinition extends MetadataResource {
         /**
          * @param value {@link #detail} (The target value of the measure to be achieved to signify fulfillment of the goal, e.g. 150 pounds or 7.0%. Either the high or low or both values of the range can be specified. Whan a low value is missing, it indicates that the goal is achieved at any value at or below the high value. Similarly, if the high value is missing, it indicates that the goal is achieved at any value at or above the low value.)
          */
-        public PlanDefinitionGoalDefinitionTargetComponent setDetail(Type value) { 
+        public PlanDefinitionGoalTargetComponent setDetail(Type value) { 
           this.detail = value;
           return this;
         }
@@ -1671,7 +1671,7 @@ public class PlanDefinition extends MetadataResource {
         public Duration getDue() { 
           if (this.due == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create PlanDefinitionGoalDefinitionTargetComponent.due");
+              throw new Error("Attempt to auto-create PlanDefinitionGoalTargetComponent.due");
             else if (Configuration.doAutoCreate())
               this.due = new Duration(); // cc
           return this.due;
@@ -1684,7 +1684,7 @@ public class PlanDefinition extends MetadataResource {
         /**
          * @param value {@link #due} (Indicates the timeframe after the start of the goal in which the goal should be met.)
          */
-        public PlanDefinitionGoalDefinitionTargetComponent setDue(Duration value) { 
+        public PlanDefinitionGoalTargetComponent setDue(Duration value) { 
           this.due = value;
           return this;
         }
@@ -1786,8 +1786,8 @@ public class PlanDefinition extends MetadataResource {
           return super.addChild(name);
       }
 
-      public PlanDefinitionGoalDefinitionTargetComponent copy() {
-        PlanDefinitionGoalDefinitionTargetComponent dst = new PlanDefinitionGoalDefinitionTargetComponent();
+      public PlanDefinitionGoalTargetComponent copy() {
+        PlanDefinitionGoalTargetComponent dst = new PlanDefinitionGoalTargetComponent();
         copyValues(dst);
         dst.measure = measure == null ? null : measure.copy();
         dst.detail = detail == null ? null : detail.copy();
@@ -1799,9 +1799,9 @@ public class PlanDefinition extends MetadataResource {
       public boolean equalsDeep(Base other) {
         if (!super.equalsDeep(other))
           return false;
-        if (!(other instanceof PlanDefinitionGoalDefinitionTargetComponent))
+        if (!(other instanceof PlanDefinitionGoalTargetComponent))
           return false;
-        PlanDefinitionGoalDefinitionTargetComponent o = (PlanDefinitionGoalDefinitionTargetComponent) other;
+        PlanDefinitionGoalTargetComponent o = (PlanDefinitionGoalTargetComponent) other;
         return compareDeep(measure, o.measure, true) && compareDeep(detail, o.detail, true) && compareDeep(due, o.due, true)
           ;
       }
@@ -1810,9 +1810,9 @@ public class PlanDefinition extends MetadataResource {
       public boolean equalsShallow(Base other) {
         if (!super.equalsShallow(other))
           return false;
-        if (!(other instanceof PlanDefinitionGoalDefinitionTargetComponent))
+        if (!(other instanceof PlanDefinitionGoalTargetComponent))
           return false;
-        PlanDefinitionGoalDefinitionTargetComponent o = (PlanDefinitionGoalDefinitionTargetComponent) other;
+        PlanDefinitionGoalTargetComponent o = (PlanDefinitionGoalTargetComponent) other;
         return true;
       }
 
@@ -1821,14 +1821,14 @@ public class PlanDefinition extends MetadataResource {
       }
 
   public String fhirType() {
-    return "PlanDefinition.goalDefinition.target";
+    return "PlanDefinition.goal.target";
 
   }
 
   }
 
     @Block()
-    public static class PlanDefinitionActionDefinitionComponent extends BackboneElement implements IBaseBackboneElement {
+    public static class PlanDefinitionActionComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * A user-visible label for the action.
          */
@@ -1879,10 +1879,10 @@ public class PlanDefinition extends MetadataResource {
         protected List<RelatedArtifact> documentation;
 
         /**
-         * Identifies goals that this action supports. The reference must be to a goalDefinition element defined within this plan definition.
+         * Identifies goals that this action supports. The reference must be to a goal element defined within this plan definition.
          */
         @Child(name = "goalId", type = {IdType.class}, order=8, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-        @Description(shortDefinition="What goals this action supports", formalDefinition="Identifies goals that this action supports. The reference must be to a goalDefinition element defined within this plan definition." )
+        @Description(shortDefinition="What goals this action supports", formalDefinition="Identifies goals that this action supports. The reference must be to a goal element defined within this plan definition." )
         protected List<IdType> goalId;
 
         /**
@@ -1897,7 +1897,7 @@ public class PlanDefinition extends MetadataResource {
          */
         @Child(name = "condition", type = {}, order=10, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="Whether or not the action is applicable", formalDefinition="An expression that describes applicability criteria, or start/stop conditions for the action." )
-        protected List<PlanDefinitionActionDefinitionConditionComponent> condition;
+        protected List<PlanDefinitionActionConditionComponent> condition;
 
         /**
          * Defines input data requirements for the action.
@@ -1918,7 +1918,7 @@ public class PlanDefinition extends MetadataResource {
          */
         @Child(name = "relatedAction", type = {}, order=13, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="Relationship to another action", formalDefinition="A relationship to another action such as \"before\" or \"30-60 minutes after start of\"." )
-        protected List<PlanDefinitionActionDefinitionRelatedActionComponent> relatedAction;
+        protected List<PlanDefinitionActionRelatedActionComponent> relatedAction;
 
         /**
          * An optional value describing when the action should be performed.
@@ -1932,7 +1932,7 @@ public class PlanDefinition extends MetadataResource {
          */
         @Child(name = "participant", type = {}, order=15, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="Who should participate in the action", formalDefinition="Indicates who should participate in performing the action described." )
-        protected List<PlanDefinitionActionDefinitionParticipantComponent> participant;
+        protected List<PlanDefinitionActionParticipantComponent> participant;
 
         /**
          * The type of action to perform (create, update, remove).
@@ -2011,21 +2011,21 @@ public class PlanDefinition extends MetadataResource {
          */
         @Child(name = "dynamicValue", type = {}, order=24, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="Dynamic aspects of the definition", formalDefinition="Customizations that should be applied to the statically defined resource. For example, if the dosage of a medication must be computed based on the patient's weight, a customization would be used to specify an expression that calculated the weight, and the path on the resource that would contain the result." )
-        protected List<PlanDefinitionActionDefinitionDynamicValueComponent> dynamicValue;
+        protected List<PlanDefinitionActionDynamicValueComponent> dynamicValue;
 
         /**
          * Sub actions that are contained within the action. The behavior of this action determines the functionality of the sub-actions. For example, a selection behavior of at-most-one indicates that of the sub-actions, at most one may be chosen as part of realizing the action definition.
          */
-        @Child(name = "actionDefinition", type = {PlanDefinitionActionDefinitionComponent.class}, order=25, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Child(name = "action", type = {PlanDefinitionActionComponent.class}, order=25, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="A sub-action", formalDefinition="Sub actions that are contained within the action. The behavior of this action determines the functionality of the sub-actions. For example, a selection behavior of at-most-one indicates that of the sub-actions, at most one may be chosen as part of realizing the action definition." )
-        protected List<PlanDefinitionActionDefinitionComponent> actionDefinition;
+        protected List<PlanDefinitionActionComponent> action;
 
-        private static final long serialVersionUID = 1839337960L;
+        private static final long serialVersionUID = -1404963512L;
 
     /**
      * Constructor
      */
-      public PlanDefinitionActionDefinitionComponent() {
+      public PlanDefinitionActionComponent() {
         super();
       }
 
@@ -2035,7 +2035,7 @@ public class PlanDefinition extends MetadataResource {
         public StringType getLabelElement() { 
           if (this.label == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create PlanDefinitionActionDefinitionComponent.label");
+              throw new Error("Attempt to auto-create PlanDefinitionActionComponent.label");
             else if (Configuration.doAutoCreate())
               this.label = new StringType(); // bb
           return this.label;
@@ -2052,7 +2052,7 @@ public class PlanDefinition extends MetadataResource {
         /**
          * @param value {@link #label} (A user-visible label for the action.). This is the underlying object with id, value and extensions. The accessor "getLabel" gives direct access to the value
          */
-        public PlanDefinitionActionDefinitionComponent setLabelElement(StringType value) { 
+        public PlanDefinitionActionComponent setLabelElement(StringType value) { 
           this.label = value;
           return this;
         }
@@ -2067,7 +2067,7 @@ public class PlanDefinition extends MetadataResource {
         /**
          * @param value A user-visible label for the action.
          */
-        public PlanDefinitionActionDefinitionComponent setLabel(String value) { 
+        public PlanDefinitionActionComponent setLabel(String value) { 
           if (Utilities.noString(value))
             this.label = null;
           else {
@@ -2084,7 +2084,7 @@ public class PlanDefinition extends MetadataResource {
         public StringType getTitleElement() { 
           if (this.title == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create PlanDefinitionActionDefinitionComponent.title");
+              throw new Error("Attempt to auto-create PlanDefinitionActionComponent.title");
             else if (Configuration.doAutoCreate())
               this.title = new StringType(); // bb
           return this.title;
@@ -2101,7 +2101,7 @@ public class PlanDefinition extends MetadataResource {
         /**
          * @param value {@link #title} (The title of the action displayed to a user.). This is the underlying object with id, value and extensions. The accessor "getTitle" gives direct access to the value
          */
-        public PlanDefinitionActionDefinitionComponent setTitleElement(StringType value) { 
+        public PlanDefinitionActionComponent setTitleElement(StringType value) { 
           this.title = value;
           return this;
         }
@@ -2116,7 +2116,7 @@ public class PlanDefinition extends MetadataResource {
         /**
          * @param value The title of the action displayed to a user.
          */
-        public PlanDefinitionActionDefinitionComponent setTitle(String value) { 
+        public PlanDefinitionActionComponent setTitle(String value) { 
           if (Utilities.noString(value))
             this.title = null;
           else {
@@ -2133,7 +2133,7 @@ public class PlanDefinition extends MetadataResource {
         public StringType getDescriptionElement() { 
           if (this.description == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create PlanDefinitionActionDefinitionComponent.description");
+              throw new Error("Attempt to auto-create PlanDefinitionActionComponent.description");
             else if (Configuration.doAutoCreate())
               this.description = new StringType(); // bb
           return this.description;
@@ -2150,7 +2150,7 @@ public class PlanDefinition extends MetadataResource {
         /**
          * @param value {@link #description} (A short description of the action used to provide a summary to display to the user.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
          */
-        public PlanDefinitionActionDefinitionComponent setDescriptionElement(StringType value) { 
+        public PlanDefinitionActionComponent setDescriptionElement(StringType value) { 
           this.description = value;
           return this;
         }
@@ -2165,7 +2165,7 @@ public class PlanDefinition extends MetadataResource {
         /**
          * @param value A short description of the action used to provide a summary to display to the user.
          */
-        public PlanDefinitionActionDefinitionComponent setDescription(String value) { 
+        public PlanDefinitionActionComponent setDescription(String value) { 
           if (Utilities.noString(value))
             this.description = null;
           else {
@@ -2182,7 +2182,7 @@ public class PlanDefinition extends MetadataResource {
         public StringType getTextEquivalentElement() { 
           if (this.textEquivalent == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create PlanDefinitionActionDefinitionComponent.textEquivalent");
+              throw new Error("Attempt to auto-create PlanDefinitionActionComponent.textEquivalent");
             else if (Configuration.doAutoCreate())
               this.textEquivalent = new StringType(); // bb
           return this.textEquivalent;
@@ -2199,7 +2199,7 @@ public class PlanDefinition extends MetadataResource {
         /**
          * @param value {@link #textEquivalent} (A text equivalent of the action to be performed. This provides a human-interpretable description of the action when the definition is consumed by a system that may not be capable of interpreting it dynamically.). This is the underlying object with id, value and extensions. The accessor "getTextEquivalent" gives direct access to the value
          */
-        public PlanDefinitionActionDefinitionComponent setTextEquivalentElement(StringType value) { 
+        public PlanDefinitionActionComponent setTextEquivalentElement(StringType value) { 
           this.textEquivalent = value;
           return this;
         }
@@ -2214,7 +2214,7 @@ public class PlanDefinition extends MetadataResource {
         /**
          * @param value A text equivalent of the action to be performed. This provides a human-interpretable description of the action when the definition is consumed by a system that may not be capable of interpreting it dynamically.
          */
-        public PlanDefinitionActionDefinitionComponent setTextEquivalent(String value) { 
+        public PlanDefinitionActionComponent setTextEquivalent(String value) { 
           if (Utilities.noString(value))
             this.textEquivalent = null;
           else {
@@ -2237,7 +2237,7 @@ public class PlanDefinition extends MetadataResource {
         /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
-        public PlanDefinitionActionDefinitionComponent setCode(List<CodeableConcept> theCode) { 
+        public PlanDefinitionActionComponent setCode(List<CodeableConcept> theCode) { 
           this.code = theCode;
           return this;
         }
@@ -2259,7 +2259,7 @@ public class PlanDefinition extends MetadataResource {
           return t;
         }
 
-        public PlanDefinitionActionDefinitionComponent addCode(CodeableConcept t) { //3
+        public PlanDefinitionActionComponent addCode(CodeableConcept t) { //3
           if (t == null)
             return this;
           if (this.code == null)
@@ -2290,7 +2290,7 @@ public class PlanDefinition extends MetadataResource {
         /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
-        public PlanDefinitionActionDefinitionComponent setReason(List<CodeableConcept> theReason) { 
+        public PlanDefinitionActionComponent setReason(List<CodeableConcept> theReason) { 
           this.reason = theReason;
           return this;
         }
@@ -2312,7 +2312,7 @@ public class PlanDefinition extends MetadataResource {
           return t;
         }
 
-        public PlanDefinitionActionDefinitionComponent addReason(CodeableConcept t) { //3
+        public PlanDefinitionActionComponent addReason(CodeableConcept t) { //3
           if (t == null)
             return this;
           if (this.reason == null)
@@ -2343,7 +2343,7 @@ public class PlanDefinition extends MetadataResource {
         /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
-        public PlanDefinitionActionDefinitionComponent setDocumentation(List<RelatedArtifact> theDocumentation) { 
+        public PlanDefinitionActionComponent setDocumentation(List<RelatedArtifact> theDocumentation) { 
           this.documentation = theDocumentation;
           return this;
         }
@@ -2365,7 +2365,7 @@ public class PlanDefinition extends MetadataResource {
           return t;
         }
 
-        public PlanDefinitionActionDefinitionComponent addDocumentation(RelatedArtifact t) { //3
+        public PlanDefinitionActionComponent addDocumentation(RelatedArtifact t) { //3
           if (t == null)
             return this;
           if (this.documentation == null)
@@ -2385,7 +2385,7 @@ public class PlanDefinition extends MetadataResource {
         }
 
         /**
-         * @return {@link #goalId} (Identifies goals that this action supports. The reference must be to a goalDefinition element defined within this plan definition.)
+         * @return {@link #goalId} (Identifies goals that this action supports. The reference must be to a goal element defined within this plan definition.)
          */
         public List<IdType> getGoalId() { 
           if (this.goalId == null)
@@ -2396,7 +2396,7 @@ public class PlanDefinition extends MetadataResource {
         /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
-        public PlanDefinitionActionDefinitionComponent setGoalId(List<IdType> theGoalId) { 
+        public PlanDefinitionActionComponent setGoalId(List<IdType> theGoalId) { 
           this.goalId = theGoalId;
           return this;
         }
@@ -2411,7 +2411,7 @@ public class PlanDefinition extends MetadataResource {
         }
 
         /**
-         * @return {@link #goalId} (Identifies goals that this action supports. The reference must be to a goalDefinition element defined within this plan definition.)
+         * @return {@link #goalId} (Identifies goals that this action supports. The reference must be to a goal element defined within this plan definition.)
          */
         public IdType addGoalIdElement() {//2 
           IdType t = new IdType();
@@ -2422,9 +2422,9 @@ public class PlanDefinition extends MetadataResource {
         }
 
         /**
-         * @param value {@link #goalId} (Identifies goals that this action supports. The reference must be to a goalDefinition element defined within this plan definition.)
+         * @param value {@link #goalId} (Identifies goals that this action supports. The reference must be to a goal element defined within this plan definition.)
          */
-        public PlanDefinitionActionDefinitionComponent addGoalId(String value) { //1
+        public PlanDefinitionActionComponent addGoalId(String value) { //1
           IdType t = new IdType();
           t.setValue(value);
           if (this.goalId == null)
@@ -2434,7 +2434,7 @@ public class PlanDefinition extends MetadataResource {
         }
 
         /**
-         * @param value {@link #goalId} (Identifies goals that this action supports. The reference must be to a goalDefinition element defined within this plan definition.)
+         * @param value {@link #goalId} (Identifies goals that this action supports. The reference must be to a goal element defined within this plan definition.)
          */
         public boolean hasGoalId(String value) { 
           if (this.goalId == null)
@@ -2457,7 +2457,7 @@ public class PlanDefinition extends MetadataResource {
         /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
-        public PlanDefinitionActionDefinitionComponent setTriggerDefinition(List<TriggerDefinition> theTriggerDefinition) { 
+        public PlanDefinitionActionComponent setTriggerDefinition(List<TriggerDefinition> theTriggerDefinition) { 
           this.triggerDefinition = theTriggerDefinition;
           return this;
         }
@@ -2479,7 +2479,7 @@ public class PlanDefinition extends MetadataResource {
           return t;
         }
 
-        public PlanDefinitionActionDefinitionComponent addTriggerDefinition(TriggerDefinition t) { //3
+        public PlanDefinitionActionComponent addTriggerDefinition(TriggerDefinition t) { //3
           if (t == null)
             return this;
           if (this.triggerDefinition == null)
@@ -2501,16 +2501,16 @@ public class PlanDefinition extends MetadataResource {
         /**
          * @return {@link #condition} (An expression that describes applicability criteria, or start/stop conditions for the action.)
          */
-        public List<PlanDefinitionActionDefinitionConditionComponent> getCondition() { 
+        public List<PlanDefinitionActionConditionComponent> getCondition() { 
           if (this.condition == null)
-            this.condition = new ArrayList<PlanDefinitionActionDefinitionConditionComponent>();
+            this.condition = new ArrayList<PlanDefinitionActionConditionComponent>();
           return this.condition;
         }
 
         /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
-        public PlanDefinitionActionDefinitionComponent setCondition(List<PlanDefinitionActionDefinitionConditionComponent> theCondition) { 
+        public PlanDefinitionActionComponent setCondition(List<PlanDefinitionActionConditionComponent> theCondition) { 
           this.condition = theCondition;
           return this;
         }
@@ -2518,25 +2518,25 @@ public class PlanDefinition extends MetadataResource {
         public boolean hasCondition() { 
           if (this.condition == null)
             return false;
-          for (PlanDefinitionActionDefinitionConditionComponent item : this.condition)
+          for (PlanDefinitionActionConditionComponent item : this.condition)
             if (!item.isEmpty())
               return true;
           return false;
         }
 
-        public PlanDefinitionActionDefinitionConditionComponent addCondition() { //3
-          PlanDefinitionActionDefinitionConditionComponent t = new PlanDefinitionActionDefinitionConditionComponent();
+        public PlanDefinitionActionConditionComponent addCondition() { //3
+          PlanDefinitionActionConditionComponent t = new PlanDefinitionActionConditionComponent();
           if (this.condition == null)
-            this.condition = new ArrayList<PlanDefinitionActionDefinitionConditionComponent>();
+            this.condition = new ArrayList<PlanDefinitionActionConditionComponent>();
           this.condition.add(t);
           return t;
         }
 
-        public PlanDefinitionActionDefinitionComponent addCondition(PlanDefinitionActionDefinitionConditionComponent t) { //3
+        public PlanDefinitionActionComponent addCondition(PlanDefinitionActionConditionComponent t) { //3
           if (t == null)
             return this;
           if (this.condition == null)
-            this.condition = new ArrayList<PlanDefinitionActionDefinitionConditionComponent>();
+            this.condition = new ArrayList<PlanDefinitionActionConditionComponent>();
           this.condition.add(t);
           return this;
         }
@@ -2544,7 +2544,7 @@ public class PlanDefinition extends MetadataResource {
         /**
          * @return The first repetition of repeating field {@link #condition}, creating it if it does not already exist
          */
-        public PlanDefinitionActionDefinitionConditionComponent getConditionFirstRep() { 
+        public PlanDefinitionActionConditionComponent getConditionFirstRep() { 
           if (getCondition().isEmpty()) {
             addCondition();
           }
@@ -2563,7 +2563,7 @@ public class PlanDefinition extends MetadataResource {
         /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
-        public PlanDefinitionActionDefinitionComponent setInput(List<DataRequirement> theInput) { 
+        public PlanDefinitionActionComponent setInput(List<DataRequirement> theInput) { 
           this.input = theInput;
           return this;
         }
@@ -2585,7 +2585,7 @@ public class PlanDefinition extends MetadataResource {
           return t;
         }
 
-        public PlanDefinitionActionDefinitionComponent addInput(DataRequirement t) { //3
+        public PlanDefinitionActionComponent addInput(DataRequirement t) { //3
           if (t == null)
             return this;
           if (this.input == null)
@@ -2616,7 +2616,7 @@ public class PlanDefinition extends MetadataResource {
         /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
-        public PlanDefinitionActionDefinitionComponent setOutput(List<DataRequirement> theOutput) { 
+        public PlanDefinitionActionComponent setOutput(List<DataRequirement> theOutput) { 
           this.output = theOutput;
           return this;
         }
@@ -2638,7 +2638,7 @@ public class PlanDefinition extends MetadataResource {
           return t;
         }
 
-        public PlanDefinitionActionDefinitionComponent addOutput(DataRequirement t) { //3
+        public PlanDefinitionActionComponent addOutput(DataRequirement t) { //3
           if (t == null)
             return this;
           if (this.output == null)
@@ -2660,16 +2660,16 @@ public class PlanDefinition extends MetadataResource {
         /**
          * @return {@link #relatedAction} (A relationship to another action such as "before" or "30-60 minutes after start of".)
          */
-        public List<PlanDefinitionActionDefinitionRelatedActionComponent> getRelatedAction() { 
+        public List<PlanDefinitionActionRelatedActionComponent> getRelatedAction() { 
           if (this.relatedAction == null)
-            this.relatedAction = new ArrayList<PlanDefinitionActionDefinitionRelatedActionComponent>();
+            this.relatedAction = new ArrayList<PlanDefinitionActionRelatedActionComponent>();
           return this.relatedAction;
         }
 
         /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
-        public PlanDefinitionActionDefinitionComponent setRelatedAction(List<PlanDefinitionActionDefinitionRelatedActionComponent> theRelatedAction) { 
+        public PlanDefinitionActionComponent setRelatedAction(List<PlanDefinitionActionRelatedActionComponent> theRelatedAction) { 
           this.relatedAction = theRelatedAction;
           return this;
         }
@@ -2677,25 +2677,25 @@ public class PlanDefinition extends MetadataResource {
         public boolean hasRelatedAction() { 
           if (this.relatedAction == null)
             return false;
-          for (PlanDefinitionActionDefinitionRelatedActionComponent item : this.relatedAction)
+          for (PlanDefinitionActionRelatedActionComponent item : this.relatedAction)
             if (!item.isEmpty())
               return true;
           return false;
         }
 
-        public PlanDefinitionActionDefinitionRelatedActionComponent addRelatedAction() { //3
-          PlanDefinitionActionDefinitionRelatedActionComponent t = new PlanDefinitionActionDefinitionRelatedActionComponent();
+        public PlanDefinitionActionRelatedActionComponent addRelatedAction() { //3
+          PlanDefinitionActionRelatedActionComponent t = new PlanDefinitionActionRelatedActionComponent();
           if (this.relatedAction == null)
-            this.relatedAction = new ArrayList<PlanDefinitionActionDefinitionRelatedActionComponent>();
+            this.relatedAction = new ArrayList<PlanDefinitionActionRelatedActionComponent>();
           this.relatedAction.add(t);
           return t;
         }
 
-        public PlanDefinitionActionDefinitionComponent addRelatedAction(PlanDefinitionActionDefinitionRelatedActionComponent t) { //3
+        public PlanDefinitionActionComponent addRelatedAction(PlanDefinitionActionRelatedActionComponent t) { //3
           if (t == null)
             return this;
           if (this.relatedAction == null)
-            this.relatedAction = new ArrayList<PlanDefinitionActionDefinitionRelatedActionComponent>();
+            this.relatedAction = new ArrayList<PlanDefinitionActionRelatedActionComponent>();
           this.relatedAction.add(t);
           return this;
         }
@@ -2703,7 +2703,7 @@ public class PlanDefinition extends MetadataResource {
         /**
          * @return The first repetition of repeating field {@link #relatedAction}, creating it if it does not already exist
          */
-        public PlanDefinitionActionDefinitionRelatedActionComponent getRelatedActionFirstRep() { 
+        public PlanDefinitionActionRelatedActionComponent getRelatedActionFirstRep() { 
           if (getRelatedAction().isEmpty()) {
             addRelatedAction();
           }
@@ -2789,7 +2789,7 @@ public class PlanDefinition extends MetadataResource {
         /**
          * @param value {@link #timing} (An optional value describing when the action should be performed.)
          */
-        public PlanDefinitionActionDefinitionComponent setTiming(Type value) { 
+        public PlanDefinitionActionComponent setTiming(Type value) { 
           this.timing = value;
           return this;
         }
@@ -2797,16 +2797,16 @@ public class PlanDefinition extends MetadataResource {
         /**
          * @return {@link #participant} (Indicates who should participate in performing the action described.)
          */
-        public List<PlanDefinitionActionDefinitionParticipantComponent> getParticipant() { 
+        public List<PlanDefinitionActionParticipantComponent> getParticipant() { 
           if (this.participant == null)
-            this.participant = new ArrayList<PlanDefinitionActionDefinitionParticipantComponent>();
+            this.participant = new ArrayList<PlanDefinitionActionParticipantComponent>();
           return this.participant;
         }
 
         /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
-        public PlanDefinitionActionDefinitionComponent setParticipant(List<PlanDefinitionActionDefinitionParticipantComponent> theParticipant) { 
+        public PlanDefinitionActionComponent setParticipant(List<PlanDefinitionActionParticipantComponent> theParticipant) { 
           this.participant = theParticipant;
           return this;
         }
@@ -2814,25 +2814,25 @@ public class PlanDefinition extends MetadataResource {
         public boolean hasParticipant() { 
           if (this.participant == null)
             return false;
-          for (PlanDefinitionActionDefinitionParticipantComponent item : this.participant)
+          for (PlanDefinitionActionParticipantComponent item : this.participant)
             if (!item.isEmpty())
               return true;
           return false;
         }
 
-        public PlanDefinitionActionDefinitionParticipantComponent addParticipant() { //3
-          PlanDefinitionActionDefinitionParticipantComponent t = new PlanDefinitionActionDefinitionParticipantComponent();
+        public PlanDefinitionActionParticipantComponent addParticipant() { //3
+          PlanDefinitionActionParticipantComponent t = new PlanDefinitionActionParticipantComponent();
           if (this.participant == null)
-            this.participant = new ArrayList<PlanDefinitionActionDefinitionParticipantComponent>();
+            this.participant = new ArrayList<PlanDefinitionActionParticipantComponent>();
           this.participant.add(t);
           return t;
         }
 
-        public PlanDefinitionActionDefinitionComponent addParticipant(PlanDefinitionActionDefinitionParticipantComponent t) { //3
+        public PlanDefinitionActionComponent addParticipant(PlanDefinitionActionParticipantComponent t) { //3
           if (t == null)
             return this;
           if (this.participant == null)
-            this.participant = new ArrayList<PlanDefinitionActionDefinitionParticipantComponent>();
+            this.participant = new ArrayList<PlanDefinitionActionParticipantComponent>();
           this.participant.add(t);
           return this;
         }
@@ -2840,7 +2840,7 @@ public class PlanDefinition extends MetadataResource {
         /**
          * @return The first repetition of repeating field {@link #participant}, creating it if it does not already exist
          */
-        public PlanDefinitionActionDefinitionParticipantComponent getParticipantFirstRep() { 
+        public PlanDefinitionActionParticipantComponent getParticipantFirstRep() { 
           if (getParticipant().isEmpty()) {
             addParticipant();
           }
@@ -2853,7 +2853,7 @@ public class PlanDefinition extends MetadataResource {
         public Coding getType() { 
           if (this.type == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create PlanDefinitionActionDefinitionComponent.type");
+              throw new Error("Attempt to auto-create PlanDefinitionActionComponent.type");
             else if (Configuration.doAutoCreate())
               this.type = new Coding(); // cc
           return this.type;
@@ -2866,7 +2866,7 @@ public class PlanDefinition extends MetadataResource {
         /**
          * @param value {@link #type} (The type of action to perform (create, update, remove).)
          */
-        public PlanDefinitionActionDefinitionComponent setType(Coding value) { 
+        public PlanDefinitionActionComponent setType(Coding value) { 
           this.type = value;
           return this;
         }
@@ -2877,7 +2877,7 @@ public class PlanDefinition extends MetadataResource {
         public Enumeration<ActionGroupingBehavior> getGroupingBehaviorElement() { 
           if (this.groupingBehavior == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create PlanDefinitionActionDefinitionComponent.groupingBehavior");
+              throw new Error("Attempt to auto-create PlanDefinitionActionComponent.groupingBehavior");
             else if (Configuration.doAutoCreate())
               this.groupingBehavior = new Enumeration<ActionGroupingBehavior>(new ActionGroupingBehaviorEnumFactory()); // bb
           return this.groupingBehavior;
@@ -2894,7 +2894,7 @@ public class PlanDefinition extends MetadataResource {
         /**
          * @param value {@link #groupingBehavior} (Defines the grouping behavior for the action and its children.). This is the underlying object with id, value and extensions. The accessor "getGroupingBehavior" gives direct access to the value
          */
-        public PlanDefinitionActionDefinitionComponent setGroupingBehaviorElement(Enumeration<ActionGroupingBehavior> value) { 
+        public PlanDefinitionActionComponent setGroupingBehaviorElement(Enumeration<ActionGroupingBehavior> value) { 
           this.groupingBehavior = value;
           return this;
         }
@@ -2909,7 +2909,7 @@ public class PlanDefinition extends MetadataResource {
         /**
          * @param value Defines the grouping behavior for the action and its children.
          */
-        public PlanDefinitionActionDefinitionComponent setGroupingBehavior(ActionGroupingBehavior value) { 
+        public PlanDefinitionActionComponent setGroupingBehavior(ActionGroupingBehavior value) { 
           if (value == null)
             this.groupingBehavior = null;
           else {
@@ -2926,7 +2926,7 @@ public class PlanDefinition extends MetadataResource {
         public Enumeration<ActionSelectionBehavior> getSelectionBehaviorElement() { 
           if (this.selectionBehavior == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create PlanDefinitionActionDefinitionComponent.selectionBehavior");
+              throw new Error("Attempt to auto-create PlanDefinitionActionComponent.selectionBehavior");
             else if (Configuration.doAutoCreate())
               this.selectionBehavior = new Enumeration<ActionSelectionBehavior>(new ActionSelectionBehaviorEnumFactory()); // bb
           return this.selectionBehavior;
@@ -2943,7 +2943,7 @@ public class PlanDefinition extends MetadataResource {
         /**
          * @param value {@link #selectionBehavior} (Defines the selection behavior for the action and its children.). This is the underlying object with id, value and extensions. The accessor "getSelectionBehavior" gives direct access to the value
          */
-        public PlanDefinitionActionDefinitionComponent setSelectionBehaviorElement(Enumeration<ActionSelectionBehavior> value) { 
+        public PlanDefinitionActionComponent setSelectionBehaviorElement(Enumeration<ActionSelectionBehavior> value) { 
           this.selectionBehavior = value;
           return this;
         }
@@ -2958,7 +2958,7 @@ public class PlanDefinition extends MetadataResource {
         /**
          * @param value Defines the selection behavior for the action and its children.
          */
-        public PlanDefinitionActionDefinitionComponent setSelectionBehavior(ActionSelectionBehavior value) { 
+        public PlanDefinitionActionComponent setSelectionBehavior(ActionSelectionBehavior value) { 
           if (value == null)
             this.selectionBehavior = null;
           else {
@@ -2975,7 +2975,7 @@ public class PlanDefinition extends MetadataResource {
         public Enumeration<ActionRequiredBehavior> getRequiredBehaviorElement() { 
           if (this.requiredBehavior == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create PlanDefinitionActionDefinitionComponent.requiredBehavior");
+              throw new Error("Attempt to auto-create PlanDefinitionActionComponent.requiredBehavior");
             else if (Configuration.doAutoCreate())
               this.requiredBehavior = new Enumeration<ActionRequiredBehavior>(new ActionRequiredBehaviorEnumFactory()); // bb
           return this.requiredBehavior;
@@ -2992,7 +2992,7 @@ public class PlanDefinition extends MetadataResource {
         /**
          * @param value {@link #requiredBehavior} (Defines the requiredness behavior for the action.). This is the underlying object with id, value and extensions. The accessor "getRequiredBehavior" gives direct access to the value
          */
-        public PlanDefinitionActionDefinitionComponent setRequiredBehaviorElement(Enumeration<ActionRequiredBehavior> value) { 
+        public PlanDefinitionActionComponent setRequiredBehaviorElement(Enumeration<ActionRequiredBehavior> value) { 
           this.requiredBehavior = value;
           return this;
         }
@@ -3007,7 +3007,7 @@ public class PlanDefinition extends MetadataResource {
         /**
          * @param value Defines the requiredness behavior for the action.
          */
-        public PlanDefinitionActionDefinitionComponent setRequiredBehavior(ActionRequiredBehavior value) { 
+        public PlanDefinitionActionComponent setRequiredBehavior(ActionRequiredBehavior value) { 
           if (value == null)
             this.requiredBehavior = null;
           else {
@@ -3024,7 +3024,7 @@ public class PlanDefinition extends MetadataResource {
         public Enumeration<ActionPrecheckBehavior> getPrecheckBehaviorElement() { 
           if (this.precheckBehavior == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create PlanDefinitionActionDefinitionComponent.precheckBehavior");
+              throw new Error("Attempt to auto-create PlanDefinitionActionComponent.precheckBehavior");
             else if (Configuration.doAutoCreate())
               this.precheckBehavior = new Enumeration<ActionPrecheckBehavior>(new ActionPrecheckBehaviorEnumFactory()); // bb
           return this.precheckBehavior;
@@ -3041,7 +3041,7 @@ public class PlanDefinition extends MetadataResource {
         /**
          * @param value {@link #precheckBehavior} (Defines whether the action should usually be preselected.). This is the underlying object with id, value and extensions. The accessor "getPrecheckBehavior" gives direct access to the value
          */
-        public PlanDefinitionActionDefinitionComponent setPrecheckBehaviorElement(Enumeration<ActionPrecheckBehavior> value) { 
+        public PlanDefinitionActionComponent setPrecheckBehaviorElement(Enumeration<ActionPrecheckBehavior> value) { 
           this.precheckBehavior = value;
           return this;
         }
@@ -3056,7 +3056,7 @@ public class PlanDefinition extends MetadataResource {
         /**
          * @param value Defines whether the action should usually be preselected.
          */
-        public PlanDefinitionActionDefinitionComponent setPrecheckBehavior(ActionPrecheckBehavior value) { 
+        public PlanDefinitionActionComponent setPrecheckBehavior(ActionPrecheckBehavior value) { 
           if (value == null)
             this.precheckBehavior = null;
           else {
@@ -3073,7 +3073,7 @@ public class PlanDefinition extends MetadataResource {
         public Enumeration<ActionCardinalityBehavior> getCardinalityBehaviorElement() { 
           if (this.cardinalityBehavior == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create PlanDefinitionActionDefinitionComponent.cardinalityBehavior");
+              throw new Error("Attempt to auto-create PlanDefinitionActionComponent.cardinalityBehavior");
             else if (Configuration.doAutoCreate())
               this.cardinalityBehavior = new Enumeration<ActionCardinalityBehavior>(new ActionCardinalityBehaviorEnumFactory()); // bb
           return this.cardinalityBehavior;
@@ -3090,7 +3090,7 @@ public class PlanDefinition extends MetadataResource {
         /**
          * @param value {@link #cardinalityBehavior} (Defines whether the action can be selected multiple times.). This is the underlying object with id, value and extensions. The accessor "getCardinalityBehavior" gives direct access to the value
          */
-        public PlanDefinitionActionDefinitionComponent setCardinalityBehaviorElement(Enumeration<ActionCardinalityBehavior> value) { 
+        public PlanDefinitionActionComponent setCardinalityBehaviorElement(Enumeration<ActionCardinalityBehavior> value) { 
           this.cardinalityBehavior = value;
           return this;
         }
@@ -3105,7 +3105,7 @@ public class PlanDefinition extends MetadataResource {
         /**
          * @param value Defines whether the action can be selected multiple times.
          */
-        public PlanDefinitionActionDefinitionComponent setCardinalityBehavior(ActionCardinalityBehavior value) { 
+        public PlanDefinitionActionComponent setCardinalityBehavior(ActionCardinalityBehavior value) { 
           if (value == null)
             this.cardinalityBehavior = null;
           else {
@@ -3122,7 +3122,7 @@ public class PlanDefinition extends MetadataResource {
         public Reference getDefinition() { 
           if (this.definition == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create PlanDefinitionActionDefinitionComponent.definition");
+              throw new Error("Attempt to auto-create PlanDefinitionActionComponent.definition");
             else if (Configuration.doAutoCreate())
               this.definition = new Reference(); // cc
           return this.definition;
@@ -3135,7 +3135,7 @@ public class PlanDefinition extends MetadataResource {
         /**
          * @param value {@link #definition} (A reference to an ActivityDefinition that describes the action to be taken in detail, or a PlanDefinition that describes a series of actions to be taken.)
          */
-        public PlanDefinitionActionDefinitionComponent setDefinition(Reference value) { 
+        public PlanDefinitionActionComponent setDefinition(Reference value) { 
           this.definition = value;
           return this;
         }
@@ -3150,7 +3150,7 @@ public class PlanDefinition extends MetadataResource {
         /**
          * @param value {@link #definition} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (A reference to an ActivityDefinition that describes the action to be taken in detail, or a PlanDefinition that describes a series of actions to be taken.)
          */
-        public PlanDefinitionActionDefinitionComponent setDefinitionTarget(Resource value) { 
+        public PlanDefinitionActionComponent setDefinitionTarget(Resource value) { 
           this.definitionTarget = value;
           return this;
         }
@@ -3161,7 +3161,7 @@ public class PlanDefinition extends MetadataResource {
         public Reference getTransform() { 
           if (this.transform == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create PlanDefinitionActionDefinitionComponent.transform");
+              throw new Error("Attempt to auto-create PlanDefinitionActionComponent.transform");
             else if (Configuration.doAutoCreate())
               this.transform = new Reference(); // cc
           return this.transform;
@@ -3174,7 +3174,7 @@ public class PlanDefinition extends MetadataResource {
         /**
          * @param value {@link #transform} (A reference to a StructureMap resource that defines a transform that can be executed to produce the intent resource using the ActivityDefinition instance as the input.)
          */
-        public PlanDefinitionActionDefinitionComponent setTransform(Reference value) { 
+        public PlanDefinitionActionComponent setTransform(Reference value) { 
           this.transform = value;
           return this;
         }
@@ -3185,7 +3185,7 @@ public class PlanDefinition extends MetadataResource {
         public StructureMap getTransformTarget() { 
           if (this.transformTarget == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create PlanDefinitionActionDefinitionComponent.transform");
+              throw new Error("Attempt to auto-create PlanDefinitionActionComponent.transform");
             else if (Configuration.doAutoCreate())
               this.transformTarget = new StructureMap(); // aa
           return this.transformTarget;
@@ -3194,7 +3194,7 @@ public class PlanDefinition extends MetadataResource {
         /**
          * @param value {@link #transform} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (A reference to a StructureMap resource that defines a transform that can be executed to produce the intent resource using the ActivityDefinition instance as the input.)
          */
-        public PlanDefinitionActionDefinitionComponent setTransformTarget(StructureMap value) { 
+        public PlanDefinitionActionComponent setTransformTarget(StructureMap value) { 
           this.transformTarget = value;
           return this;
         }
@@ -3202,16 +3202,16 @@ public class PlanDefinition extends MetadataResource {
         /**
          * @return {@link #dynamicValue} (Customizations that should be applied to the statically defined resource. For example, if the dosage of a medication must be computed based on the patient's weight, a customization would be used to specify an expression that calculated the weight, and the path on the resource that would contain the result.)
          */
-        public List<PlanDefinitionActionDefinitionDynamicValueComponent> getDynamicValue() { 
+        public List<PlanDefinitionActionDynamicValueComponent> getDynamicValue() { 
           if (this.dynamicValue == null)
-            this.dynamicValue = new ArrayList<PlanDefinitionActionDefinitionDynamicValueComponent>();
+            this.dynamicValue = new ArrayList<PlanDefinitionActionDynamicValueComponent>();
           return this.dynamicValue;
         }
 
         /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
-        public PlanDefinitionActionDefinitionComponent setDynamicValue(List<PlanDefinitionActionDefinitionDynamicValueComponent> theDynamicValue) { 
+        public PlanDefinitionActionComponent setDynamicValue(List<PlanDefinitionActionDynamicValueComponent> theDynamicValue) { 
           this.dynamicValue = theDynamicValue;
           return this;
         }
@@ -3219,25 +3219,25 @@ public class PlanDefinition extends MetadataResource {
         public boolean hasDynamicValue() { 
           if (this.dynamicValue == null)
             return false;
-          for (PlanDefinitionActionDefinitionDynamicValueComponent item : this.dynamicValue)
+          for (PlanDefinitionActionDynamicValueComponent item : this.dynamicValue)
             if (!item.isEmpty())
               return true;
           return false;
         }
 
-        public PlanDefinitionActionDefinitionDynamicValueComponent addDynamicValue() { //3
-          PlanDefinitionActionDefinitionDynamicValueComponent t = new PlanDefinitionActionDefinitionDynamicValueComponent();
+        public PlanDefinitionActionDynamicValueComponent addDynamicValue() { //3
+          PlanDefinitionActionDynamicValueComponent t = new PlanDefinitionActionDynamicValueComponent();
           if (this.dynamicValue == null)
-            this.dynamicValue = new ArrayList<PlanDefinitionActionDefinitionDynamicValueComponent>();
+            this.dynamicValue = new ArrayList<PlanDefinitionActionDynamicValueComponent>();
           this.dynamicValue.add(t);
           return t;
         }
 
-        public PlanDefinitionActionDefinitionComponent addDynamicValue(PlanDefinitionActionDefinitionDynamicValueComponent t) { //3
+        public PlanDefinitionActionComponent addDynamicValue(PlanDefinitionActionDynamicValueComponent t) { //3
           if (t == null)
             return this;
           if (this.dynamicValue == null)
-            this.dynamicValue = new ArrayList<PlanDefinitionActionDefinitionDynamicValueComponent>();
+            this.dynamicValue = new ArrayList<PlanDefinitionActionDynamicValueComponent>();
           this.dynamicValue.add(t);
           return this;
         }
@@ -3245,7 +3245,7 @@ public class PlanDefinition extends MetadataResource {
         /**
          * @return The first repetition of repeating field {@link #dynamicValue}, creating it if it does not already exist
          */
-        public PlanDefinitionActionDefinitionDynamicValueComponent getDynamicValueFirstRep() { 
+        public PlanDefinitionActionDynamicValueComponent getDynamicValueFirstRep() { 
           if (getDynamicValue().isEmpty()) {
             addDynamicValue();
           }
@@ -3253,56 +3253,56 @@ public class PlanDefinition extends MetadataResource {
         }
 
         /**
-         * @return {@link #actionDefinition} (Sub actions that are contained within the action. The behavior of this action determines the functionality of the sub-actions. For example, a selection behavior of at-most-one indicates that of the sub-actions, at most one may be chosen as part of realizing the action definition.)
+         * @return {@link #action} (Sub actions that are contained within the action. The behavior of this action determines the functionality of the sub-actions. For example, a selection behavior of at-most-one indicates that of the sub-actions, at most one may be chosen as part of realizing the action definition.)
          */
-        public List<PlanDefinitionActionDefinitionComponent> getActionDefinition() { 
-          if (this.actionDefinition == null)
-            this.actionDefinition = new ArrayList<PlanDefinitionActionDefinitionComponent>();
-          return this.actionDefinition;
+        public List<PlanDefinitionActionComponent> getAction() { 
+          if (this.action == null)
+            this.action = new ArrayList<PlanDefinitionActionComponent>();
+          return this.action;
         }
 
         /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
-        public PlanDefinitionActionDefinitionComponent setActionDefinition(List<PlanDefinitionActionDefinitionComponent> theActionDefinition) { 
-          this.actionDefinition = theActionDefinition;
+        public PlanDefinitionActionComponent setAction(List<PlanDefinitionActionComponent> theAction) { 
+          this.action = theAction;
           return this;
         }
 
-        public boolean hasActionDefinition() { 
-          if (this.actionDefinition == null)
+        public boolean hasAction() { 
+          if (this.action == null)
             return false;
-          for (PlanDefinitionActionDefinitionComponent item : this.actionDefinition)
+          for (PlanDefinitionActionComponent item : this.action)
             if (!item.isEmpty())
               return true;
           return false;
         }
 
-        public PlanDefinitionActionDefinitionComponent addActionDefinition() { //3
-          PlanDefinitionActionDefinitionComponent t = new PlanDefinitionActionDefinitionComponent();
-          if (this.actionDefinition == null)
-            this.actionDefinition = new ArrayList<PlanDefinitionActionDefinitionComponent>();
-          this.actionDefinition.add(t);
+        public PlanDefinitionActionComponent addAction() { //3
+          PlanDefinitionActionComponent t = new PlanDefinitionActionComponent();
+          if (this.action == null)
+            this.action = new ArrayList<PlanDefinitionActionComponent>();
+          this.action.add(t);
           return t;
         }
 
-        public PlanDefinitionActionDefinitionComponent addActionDefinition(PlanDefinitionActionDefinitionComponent t) { //3
+        public PlanDefinitionActionComponent addAction(PlanDefinitionActionComponent t) { //3
           if (t == null)
             return this;
-          if (this.actionDefinition == null)
-            this.actionDefinition = new ArrayList<PlanDefinitionActionDefinitionComponent>();
-          this.actionDefinition.add(t);
+          if (this.action == null)
+            this.action = new ArrayList<PlanDefinitionActionComponent>();
+          this.action.add(t);
           return this;
         }
 
         /**
-         * @return The first repetition of repeating field {@link #actionDefinition}, creating it if it does not already exist
+         * @return The first repetition of repeating field {@link #action}, creating it if it does not already exist
          */
-        public PlanDefinitionActionDefinitionComponent getActionDefinitionFirstRep() { 
-          if (getActionDefinition().isEmpty()) {
-            addActionDefinition();
+        public PlanDefinitionActionComponent getActionFirstRep() { 
+          if (getAction().isEmpty()) {
+            addAction();
           }
-          return getActionDefinition().get(0);
+          return getAction().get(0);
         }
 
         protected void listChildren(List<Property> childrenList) {
@@ -3314,7 +3314,7 @@ public class PlanDefinition extends MetadataResource {
           childrenList.add(new Property("code", "CodeableConcept", "A code that provides meaning for the action or action group. For example, a section may have a LOINC code for a the section of a documentation template.", 0, java.lang.Integer.MAX_VALUE, code));
           childrenList.add(new Property("reason", "CodeableConcept", "A description of why this action is necessary or appropriate.", 0, java.lang.Integer.MAX_VALUE, reason));
           childrenList.add(new Property("documentation", "RelatedArtifact", "Didactic or other informational resources associated with the action that can be provided to the CDS recipient. Information resources can include inline text commentary and links to web resources.", 0, java.lang.Integer.MAX_VALUE, documentation));
-          childrenList.add(new Property("goalId", "id", "Identifies goals that this action supports. The reference must be to a goalDefinition element defined within this plan definition.", 0, java.lang.Integer.MAX_VALUE, goalId));
+          childrenList.add(new Property("goalId", "id", "Identifies goals that this action supports. The reference must be to a goal element defined within this plan definition.", 0, java.lang.Integer.MAX_VALUE, goalId));
           childrenList.add(new Property("triggerDefinition", "TriggerDefinition", "A description of when the action should be triggered.", 0, java.lang.Integer.MAX_VALUE, triggerDefinition));
           childrenList.add(new Property("condition", "", "An expression that describes applicability criteria, or start/stop conditions for the action.", 0, java.lang.Integer.MAX_VALUE, condition));
           childrenList.add(new Property("input", "DataRequirement", "Defines input data requirements for the action.", 0, java.lang.Integer.MAX_VALUE, input));
@@ -3331,7 +3331,7 @@ public class PlanDefinition extends MetadataResource {
           childrenList.add(new Property("definition", "Reference(ActivityDefinition|PlanDefinition)", "A reference to an ActivityDefinition that describes the action to be taken in detail, or a PlanDefinition that describes a series of actions to be taken.", 0, java.lang.Integer.MAX_VALUE, definition));
           childrenList.add(new Property("transform", "Reference(StructureMap)", "A reference to a StructureMap resource that defines a transform that can be executed to produce the intent resource using the ActivityDefinition instance as the input.", 0, java.lang.Integer.MAX_VALUE, transform));
           childrenList.add(new Property("dynamicValue", "", "Customizations that should be applied to the statically defined resource. For example, if the dosage of a medication must be computed based on the patient's weight, a customization would be used to specify an expression that calculated the weight, and the path on the resource that would contain the result.", 0, java.lang.Integer.MAX_VALUE, dynamicValue));
-          childrenList.add(new Property("actionDefinition", "@PlanDefinition.actionDefinition", "Sub actions that are contained within the action. The behavior of this action determines the functionality of the sub-actions. For example, a selection behavior of at-most-one indicates that of the sub-actions, at most one may be chosen as part of realizing the action definition.", 0, java.lang.Integer.MAX_VALUE, actionDefinition));
+          childrenList.add(new Property("action", "@PlanDefinition.action", "Sub actions that are contained within the action. The behavior of this action determines the functionality of the sub-actions. For example, a selection behavior of at-most-one indicates that of the sub-actions, at most one may be chosen as part of realizing the action definition.", 0, java.lang.Integer.MAX_VALUE, action));
         }
 
       @Override
@@ -3346,12 +3346,12 @@ public class PlanDefinition extends MetadataResource {
         case 1587405498: /*documentation*/ return this.documentation == null ? new Base[0] : this.documentation.toArray(new Base[this.documentation.size()]); // RelatedArtifact
         case -1240658034: /*goalId*/ return this.goalId == null ? new Base[0] : this.goalId.toArray(new Base[this.goalId.size()]); // IdType
         case 1126736171: /*triggerDefinition*/ return this.triggerDefinition == null ? new Base[0] : this.triggerDefinition.toArray(new Base[this.triggerDefinition.size()]); // TriggerDefinition
-        case -861311717: /*condition*/ return this.condition == null ? new Base[0] : this.condition.toArray(new Base[this.condition.size()]); // PlanDefinitionActionDefinitionConditionComponent
+        case -861311717: /*condition*/ return this.condition == null ? new Base[0] : this.condition.toArray(new Base[this.condition.size()]); // PlanDefinitionActionConditionComponent
         case 100358090: /*input*/ return this.input == null ? new Base[0] : this.input.toArray(new Base[this.input.size()]); // DataRequirement
         case -1005512447: /*output*/ return this.output == null ? new Base[0] : this.output.toArray(new Base[this.output.size()]); // DataRequirement
-        case -384107967: /*relatedAction*/ return this.relatedAction == null ? new Base[0] : this.relatedAction.toArray(new Base[this.relatedAction.size()]); // PlanDefinitionActionDefinitionRelatedActionComponent
+        case -384107967: /*relatedAction*/ return this.relatedAction == null ? new Base[0] : this.relatedAction.toArray(new Base[this.relatedAction.size()]); // PlanDefinitionActionRelatedActionComponent
         case -873664438: /*timing*/ return this.timing == null ? new Base[0] : new Base[] {this.timing}; // Type
-        case 767422259: /*participant*/ return this.participant == null ? new Base[0] : this.participant.toArray(new Base[this.participant.size()]); // PlanDefinitionActionDefinitionParticipantComponent
+        case 767422259: /*participant*/ return this.participant == null ? new Base[0] : this.participant.toArray(new Base[this.participant.size()]); // PlanDefinitionActionParticipantComponent
         case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // Coding
         case 586678389: /*groupingBehavior*/ return this.groupingBehavior == null ? new Base[0] : new Base[] {this.groupingBehavior}; // Enumeration<ActionGroupingBehavior>
         case 168639486: /*selectionBehavior*/ return this.selectionBehavior == null ? new Base[0] : new Base[] {this.selectionBehavior}; // Enumeration<ActionSelectionBehavior>
@@ -3360,8 +3360,8 @@ public class PlanDefinition extends MetadataResource {
         case -922577408: /*cardinalityBehavior*/ return this.cardinalityBehavior == null ? new Base[0] : new Base[] {this.cardinalityBehavior}; // Enumeration<ActionCardinalityBehavior>
         case -1014418093: /*definition*/ return this.definition == null ? new Base[0] : new Base[] {this.definition}; // Reference
         case 1052666732: /*transform*/ return this.transform == null ? new Base[0] : new Base[] {this.transform}; // Reference
-        case 572625010: /*dynamicValue*/ return this.dynamicValue == null ? new Base[0] : this.dynamicValue.toArray(new Base[this.dynamicValue.size()]); // PlanDefinitionActionDefinitionDynamicValueComponent
-        case -285031383: /*actionDefinition*/ return this.actionDefinition == null ? new Base[0] : this.actionDefinition.toArray(new Base[this.actionDefinition.size()]); // PlanDefinitionActionDefinitionComponent
+        case 572625010: /*dynamicValue*/ return this.dynamicValue == null ? new Base[0] : this.dynamicValue.toArray(new Base[this.dynamicValue.size()]); // PlanDefinitionActionDynamicValueComponent
+        case -1422950858: /*action*/ return this.action == null ? new Base[0] : this.action.toArray(new Base[this.action.size()]); // PlanDefinitionActionComponent
         default: return super.getProperty(hash, name, checkValid);
         }
 
@@ -3398,7 +3398,7 @@ public class PlanDefinition extends MetadataResource {
           this.getTriggerDefinition().add(castToTriggerDefinition(value)); // TriggerDefinition
           return value;
         case -861311717: // condition
-          this.getCondition().add((PlanDefinitionActionDefinitionConditionComponent) value); // PlanDefinitionActionDefinitionConditionComponent
+          this.getCondition().add((PlanDefinitionActionConditionComponent) value); // PlanDefinitionActionConditionComponent
           return value;
         case 100358090: // input
           this.getInput().add(castToDataRequirement(value)); // DataRequirement
@@ -3407,13 +3407,13 @@ public class PlanDefinition extends MetadataResource {
           this.getOutput().add(castToDataRequirement(value)); // DataRequirement
           return value;
         case -384107967: // relatedAction
-          this.getRelatedAction().add((PlanDefinitionActionDefinitionRelatedActionComponent) value); // PlanDefinitionActionDefinitionRelatedActionComponent
+          this.getRelatedAction().add((PlanDefinitionActionRelatedActionComponent) value); // PlanDefinitionActionRelatedActionComponent
           return value;
         case -873664438: // timing
           this.timing = castToType(value); // Type
           return value;
         case 767422259: // participant
-          this.getParticipant().add((PlanDefinitionActionDefinitionParticipantComponent) value); // PlanDefinitionActionDefinitionParticipantComponent
+          this.getParticipant().add((PlanDefinitionActionParticipantComponent) value); // PlanDefinitionActionParticipantComponent
           return value;
         case 3575610: // type
           this.type = castToCoding(value); // Coding
@@ -3445,10 +3445,10 @@ public class PlanDefinition extends MetadataResource {
           this.transform = castToReference(value); // Reference
           return value;
         case 572625010: // dynamicValue
-          this.getDynamicValue().add((PlanDefinitionActionDefinitionDynamicValueComponent) value); // PlanDefinitionActionDefinitionDynamicValueComponent
+          this.getDynamicValue().add((PlanDefinitionActionDynamicValueComponent) value); // PlanDefinitionActionDynamicValueComponent
           return value;
-        case -285031383: // actionDefinition
-          this.getActionDefinition().add((PlanDefinitionActionDefinitionComponent) value); // PlanDefinitionActionDefinitionComponent
+        case -1422950858: // action
+          this.getAction().add((PlanDefinitionActionComponent) value); // PlanDefinitionActionComponent
           return value;
         default: return super.setProperty(hash, name, value);
         }
@@ -3476,17 +3476,17 @@ public class PlanDefinition extends MetadataResource {
         } else if (name.equals("triggerDefinition")) {
           this.getTriggerDefinition().add(castToTriggerDefinition(value));
         } else if (name.equals("condition")) {
-          this.getCondition().add((PlanDefinitionActionDefinitionConditionComponent) value);
+          this.getCondition().add((PlanDefinitionActionConditionComponent) value);
         } else if (name.equals("input")) {
           this.getInput().add(castToDataRequirement(value));
         } else if (name.equals("output")) {
           this.getOutput().add(castToDataRequirement(value));
         } else if (name.equals("relatedAction")) {
-          this.getRelatedAction().add((PlanDefinitionActionDefinitionRelatedActionComponent) value);
+          this.getRelatedAction().add((PlanDefinitionActionRelatedActionComponent) value);
         } else if (name.equals("timing[x]")) {
           this.timing = castToType(value); // Type
         } else if (name.equals("participant")) {
-          this.getParticipant().add((PlanDefinitionActionDefinitionParticipantComponent) value);
+          this.getParticipant().add((PlanDefinitionActionParticipantComponent) value);
         } else if (name.equals("type")) {
           this.type = castToCoding(value); // Coding
         } else if (name.equals("groupingBehavior")) {
@@ -3509,9 +3509,9 @@ public class PlanDefinition extends MetadataResource {
         } else if (name.equals("transform")) {
           this.transform = castToReference(value); // Reference
         } else if (name.equals("dynamicValue")) {
-          this.getDynamicValue().add((PlanDefinitionActionDefinitionDynamicValueComponent) value);
-        } else if (name.equals("actionDefinition")) {
-          this.getActionDefinition().add((PlanDefinitionActionDefinitionComponent) value);
+          this.getDynamicValue().add((PlanDefinitionActionDynamicValueComponent) value);
+        } else if (name.equals("action")) {
+          this.getAction().add((PlanDefinitionActionComponent) value);
         } else
           return super.setProperty(name, value);
         return value;
@@ -3545,7 +3545,7 @@ public class PlanDefinition extends MetadataResource {
         case -1014418093:  return getDefinition(); 
         case 1052666732:  return getTransform(); 
         case 572625010:  return addDynamicValue(); 
-        case -285031383:  return addActionDefinition(); 
+        case -1422950858:  return addAction(); 
         default: return super.makeProperty(hash, name);
         }
 
@@ -3578,7 +3578,7 @@ public class PlanDefinition extends MetadataResource {
         case -1014418093: /*definition*/ return new String[] {"Reference"};
         case 1052666732: /*transform*/ return new String[] {"Reference"};
         case 572625010: /*dynamicValue*/ return new String[] {};
-        case -285031383: /*actionDefinition*/ return new String[] {"@PlanDefinition.actionDefinition"};
+        case -1422950858: /*action*/ return new String[] {"@PlanDefinition.action"};
         default: return super.getTypesForProperty(hash, name);
         }
 
@@ -3678,15 +3678,15 @@ public class PlanDefinition extends MetadataResource {
         else if (name.equals("dynamicValue")) {
           return addDynamicValue();
         }
-        else if (name.equals("actionDefinition")) {
-          return addActionDefinition();
+        else if (name.equals("action")) {
+          return addAction();
         }
         else
           return super.addChild(name);
       }
 
-      public PlanDefinitionActionDefinitionComponent copy() {
-        PlanDefinitionActionDefinitionComponent dst = new PlanDefinitionActionDefinitionComponent();
+      public PlanDefinitionActionComponent copy() {
+        PlanDefinitionActionComponent dst = new PlanDefinitionActionComponent();
         copyValues(dst);
         dst.label = label == null ? null : label.copy();
         dst.title = title == null ? null : title.copy();
@@ -3718,8 +3718,8 @@ public class PlanDefinition extends MetadataResource {
             dst.triggerDefinition.add(i.copy());
         };
         if (condition != null) {
-          dst.condition = new ArrayList<PlanDefinitionActionDefinitionConditionComponent>();
-          for (PlanDefinitionActionDefinitionConditionComponent i : condition)
+          dst.condition = new ArrayList<PlanDefinitionActionConditionComponent>();
+          for (PlanDefinitionActionConditionComponent i : condition)
             dst.condition.add(i.copy());
         };
         if (input != null) {
@@ -3733,14 +3733,14 @@ public class PlanDefinition extends MetadataResource {
             dst.output.add(i.copy());
         };
         if (relatedAction != null) {
-          dst.relatedAction = new ArrayList<PlanDefinitionActionDefinitionRelatedActionComponent>();
-          for (PlanDefinitionActionDefinitionRelatedActionComponent i : relatedAction)
+          dst.relatedAction = new ArrayList<PlanDefinitionActionRelatedActionComponent>();
+          for (PlanDefinitionActionRelatedActionComponent i : relatedAction)
             dst.relatedAction.add(i.copy());
         };
         dst.timing = timing == null ? null : timing.copy();
         if (participant != null) {
-          dst.participant = new ArrayList<PlanDefinitionActionDefinitionParticipantComponent>();
-          for (PlanDefinitionActionDefinitionParticipantComponent i : participant)
+          dst.participant = new ArrayList<PlanDefinitionActionParticipantComponent>();
+          for (PlanDefinitionActionParticipantComponent i : participant)
             dst.participant.add(i.copy());
         };
         dst.type = type == null ? null : type.copy();
@@ -3752,14 +3752,14 @@ public class PlanDefinition extends MetadataResource {
         dst.definition = definition == null ? null : definition.copy();
         dst.transform = transform == null ? null : transform.copy();
         if (dynamicValue != null) {
-          dst.dynamicValue = new ArrayList<PlanDefinitionActionDefinitionDynamicValueComponent>();
-          for (PlanDefinitionActionDefinitionDynamicValueComponent i : dynamicValue)
+          dst.dynamicValue = new ArrayList<PlanDefinitionActionDynamicValueComponent>();
+          for (PlanDefinitionActionDynamicValueComponent i : dynamicValue)
             dst.dynamicValue.add(i.copy());
         };
-        if (actionDefinition != null) {
-          dst.actionDefinition = new ArrayList<PlanDefinitionActionDefinitionComponent>();
-          for (PlanDefinitionActionDefinitionComponent i : actionDefinition)
-            dst.actionDefinition.add(i.copy());
+        if (action != null) {
+          dst.action = new ArrayList<PlanDefinitionActionComponent>();
+          for (PlanDefinitionActionComponent i : action)
+            dst.action.add(i.copy());
         };
         return dst;
       }
@@ -3768,9 +3768,9 @@ public class PlanDefinition extends MetadataResource {
       public boolean equalsDeep(Base other) {
         if (!super.equalsDeep(other))
           return false;
-        if (!(other instanceof PlanDefinitionActionDefinitionComponent))
+        if (!(other instanceof PlanDefinitionActionComponent))
           return false;
-        PlanDefinitionActionDefinitionComponent o = (PlanDefinitionActionDefinitionComponent) other;
+        PlanDefinitionActionComponent o = (PlanDefinitionActionComponent) other;
         return compareDeep(label, o.label, true) && compareDeep(title, o.title, true) && compareDeep(description, o.description, true)
            && compareDeep(textEquivalent, o.textEquivalent, true) && compareDeep(code, o.code, true) && compareDeep(reason, o.reason, true)
            && compareDeep(documentation, o.documentation, true) && compareDeep(goalId, o.goalId, true) && compareDeep(triggerDefinition, o.triggerDefinition, true)
@@ -3780,16 +3780,16 @@ public class PlanDefinition extends MetadataResource {
            && compareDeep(requiredBehavior, o.requiredBehavior, true) && compareDeep(precheckBehavior, o.precheckBehavior, true)
            && compareDeep(cardinalityBehavior, o.cardinalityBehavior, true) && compareDeep(definition, o.definition, true)
            && compareDeep(transform, o.transform, true) && compareDeep(dynamicValue, o.dynamicValue, true)
-           && compareDeep(actionDefinition, o.actionDefinition, true);
+           && compareDeep(action, o.action, true);
       }
 
       @Override
       public boolean equalsShallow(Base other) {
         if (!super.equalsShallow(other))
           return false;
-        if (!(other instanceof PlanDefinitionActionDefinitionComponent))
+        if (!(other instanceof PlanDefinitionActionComponent))
           return false;
-        PlanDefinitionActionDefinitionComponent o = (PlanDefinitionActionDefinitionComponent) other;
+        PlanDefinitionActionComponent o = (PlanDefinitionActionComponent) other;
         return compareValues(label, o.label, true) && compareValues(title, o.title, true) && compareValues(description, o.description, true)
            && compareValues(textEquivalent, o.textEquivalent, true) && compareValues(goalId, o.goalId, true) && compareValues(groupingBehavior, o.groupingBehavior, true)
            && compareValues(selectionBehavior, o.selectionBehavior, true) && compareValues(requiredBehavior, o.requiredBehavior, true)
@@ -3802,18 +3802,18 @@ public class PlanDefinition extends MetadataResource {
           , textEquivalent, code, reason, documentation, goalId, triggerDefinition, condition
           , input, output, relatedAction, timing, participant, type, groupingBehavior, selectionBehavior
           , requiredBehavior, precheckBehavior, cardinalityBehavior, definition, transform, dynamicValue
-          , actionDefinition);
+          , action);
       }
 
   public String fhirType() {
-    return "PlanDefinition.actionDefinition";
+    return "PlanDefinition.action";
 
   }
 
   }
 
     @Block()
-    public static class PlanDefinitionActionDefinitionConditionComponent extends BackboneElement implements IBaseBackboneElement {
+    public static class PlanDefinitionActionConditionComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * The kind of condition.
          */
@@ -3848,14 +3848,14 @@ public class PlanDefinition extends MetadataResource {
     /**
      * Constructor
      */
-      public PlanDefinitionActionDefinitionConditionComponent() {
+      public PlanDefinitionActionConditionComponent() {
         super();
       }
 
     /**
      * Constructor
      */
-      public PlanDefinitionActionDefinitionConditionComponent(Enumeration<ActionConditionKind> kind) {
+      public PlanDefinitionActionConditionComponent(Enumeration<ActionConditionKind> kind) {
         super();
         this.kind = kind;
       }
@@ -3866,7 +3866,7 @@ public class PlanDefinition extends MetadataResource {
         public Enumeration<ActionConditionKind> getKindElement() { 
           if (this.kind == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create PlanDefinitionActionDefinitionConditionComponent.kind");
+              throw new Error("Attempt to auto-create PlanDefinitionActionConditionComponent.kind");
             else if (Configuration.doAutoCreate())
               this.kind = new Enumeration<ActionConditionKind>(new ActionConditionKindEnumFactory()); // bb
           return this.kind;
@@ -3883,7 +3883,7 @@ public class PlanDefinition extends MetadataResource {
         /**
          * @param value {@link #kind} (The kind of condition.). This is the underlying object with id, value and extensions. The accessor "getKind" gives direct access to the value
          */
-        public PlanDefinitionActionDefinitionConditionComponent setKindElement(Enumeration<ActionConditionKind> value) { 
+        public PlanDefinitionActionConditionComponent setKindElement(Enumeration<ActionConditionKind> value) { 
           this.kind = value;
           return this;
         }
@@ -3898,7 +3898,7 @@ public class PlanDefinition extends MetadataResource {
         /**
          * @param value The kind of condition.
          */
-        public PlanDefinitionActionDefinitionConditionComponent setKind(ActionConditionKind value) { 
+        public PlanDefinitionActionConditionComponent setKind(ActionConditionKind value) { 
             if (this.kind == null)
               this.kind = new Enumeration<ActionConditionKind>(new ActionConditionKindEnumFactory());
             this.kind.setValue(value);
@@ -3911,7 +3911,7 @@ public class PlanDefinition extends MetadataResource {
         public StringType getDescriptionElement() { 
           if (this.description == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create PlanDefinitionActionDefinitionConditionComponent.description");
+              throw new Error("Attempt to auto-create PlanDefinitionActionConditionComponent.description");
             else if (Configuration.doAutoCreate())
               this.description = new StringType(); // bb
           return this.description;
@@ -3928,7 +3928,7 @@ public class PlanDefinition extends MetadataResource {
         /**
          * @param value {@link #description} (A brief, natural language description of the condition that effectively communicates the intended semantics.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
          */
-        public PlanDefinitionActionDefinitionConditionComponent setDescriptionElement(StringType value) { 
+        public PlanDefinitionActionConditionComponent setDescriptionElement(StringType value) { 
           this.description = value;
           return this;
         }
@@ -3943,7 +3943,7 @@ public class PlanDefinition extends MetadataResource {
         /**
          * @param value A brief, natural language description of the condition that effectively communicates the intended semantics.
          */
-        public PlanDefinitionActionDefinitionConditionComponent setDescription(String value) { 
+        public PlanDefinitionActionConditionComponent setDescription(String value) { 
           if (Utilities.noString(value))
             this.description = null;
           else {
@@ -3960,7 +3960,7 @@ public class PlanDefinition extends MetadataResource {
         public StringType getLanguageElement() { 
           if (this.language == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create PlanDefinitionActionDefinitionConditionComponent.language");
+              throw new Error("Attempt to auto-create PlanDefinitionActionConditionComponent.language");
             else if (Configuration.doAutoCreate())
               this.language = new StringType(); // bb
           return this.language;
@@ -3977,7 +3977,7 @@ public class PlanDefinition extends MetadataResource {
         /**
          * @param value {@link #language} (The media type of the language for the expression.). This is the underlying object with id, value and extensions. The accessor "getLanguage" gives direct access to the value
          */
-        public PlanDefinitionActionDefinitionConditionComponent setLanguageElement(StringType value) { 
+        public PlanDefinitionActionConditionComponent setLanguageElement(StringType value) { 
           this.language = value;
           return this;
         }
@@ -3992,7 +3992,7 @@ public class PlanDefinition extends MetadataResource {
         /**
          * @param value The media type of the language for the expression.
          */
-        public PlanDefinitionActionDefinitionConditionComponent setLanguage(String value) { 
+        public PlanDefinitionActionConditionComponent setLanguage(String value) { 
           if (Utilities.noString(value))
             this.language = null;
           else {
@@ -4009,7 +4009,7 @@ public class PlanDefinition extends MetadataResource {
         public StringType getExpressionElement() { 
           if (this.expression == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create PlanDefinitionActionDefinitionConditionComponent.expression");
+              throw new Error("Attempt to auto-create PlanDefinitionActionConditionComponent.expression");
             else if (Configuration.doAutoCreate())
               this.expression = new StringType(); // bb
           return this.expression;
@@ -4026,7 +4026,7 @@ public class PlanDefinition extends MetadataResource {
         /**
          * @param value {@link #expression} (An expression that returns true or false, indicating whether or not the condition is satisfied.). This is the underlying object with id, value and extensions. The accessor "getExpression" gives direct access to the value
          */
-        public PlanDefinitionActionDefinitionConditionComponent setExpressionElement(StringType value) { 
+        public PlanDefinitionActionConditionComponent setExpressionElement(StringType value) { 
           this.expression = value;
           return this;
         }
@@ -4041,7 +4041,7 @@ public class PlanDefinition extends MetadataResource {
         /**
          * @param value An expression that returns true or false, indicating whether or not the condition is satisfied.
          */
-        public PlanDefinitionActionDefinitionConditionComponent setExpression(String value) { 
+        public PlanDefinitionActionConditionComponent setExpression(String value) { 
           if (Utilities.noString(value))
             this.expression = null;
           else {
@@ -4151,8 +4151,8 @@ public class PlanDefinition extends MetadataResource {
           return super.addChild(name);
       }
 
-      public PlanDefinitionActionDefinitionConditionComponent copy() {
-        PlanDefinitionActionDefinitionConditionComponent dst = new PlanDefinitionActionDefinitionConditionComponent();
+      public PlanDefinitionActionConditionComponent copy() {
+        PlanDefinitionActionConditionComponent dst = new PlanDefinitionActionConditionComponent();
         copyValues(dst);
         dst.kind = kind == null ? null : kind.copy();
         dst.description = description == null ? null : description.copy();
@@ -4165,9 +4165,9 @@ public class PlanDefinition extends MetadataResource {
       public boolean equalsDeep(Base other) {
         if (!super.equalsDeep(other))
           return false;
-        if (!(other instanceof PlanDefinitionActionDefinitionConditionComponent))
+        if (!(other instanceof PlanDefinitionActionConditionComponent))
           return false;
-        PlanDefinitionActionDefinitionConditionComponent o = (PlanDefinitionActionDefinitionConditionComponent) other;
+        PlanDefinitionActionConditionComponent o = (PlanDefinitionActionConditionComponent) other;
         return compareDeep(kind, o.kind, true) && compareDeep(description, o.description, true) && compareDeep(language, o.language, true)
            && compareDeep(expression, o.expression, true);
       }
@@ -4176,9 +4176,9 @@ public class PlanDefinition extends MetadataResource {
       public boolean equalsShallow(Base other) {
         if (!super.equalsShallow(other))
           return false;
-        if (!(other instanceof PlanDefinitionActionDefinitionConditionComponent))
+        if (!(other instanceof PlanDefinitionActionConditionComponent))
           return false;
-        PlanDefinitionActionDefinitionConditionComponent o = (PlanDefinitionActionDefinitionConditionComponent) other;
+        PlanDefinitionActionConditionComponent o = (PlanDefinitionActionConditionComponent) other;
         return compareValues(kind, o.kind, true) && compareValues(description, o.description, true) && compareValues(language, o.language, true)
            && compareValues(expression, o.expression, true);
       }
@@ -4189,14 +4189,14 @@ public class PlanDefinition extends MetadataResource {
       }
 
   public String fhirType() {
-    return "PlanDefinition.actionDefinition.condition";
+    return "PlanDefinition.action.condition";
 
   }
 
   }
 
     @Block()
-    public static class PlanDefinitionActionDefinitionRelatedActionComponent extends BackboneElement implements IBaseBackboneElement {
+    public static class PlanDefinitionActionRelatedActionComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * The element id of the related action.
          */
@@ -4224,14 +4224,14 @@ public class PlanDefinition extends MetadataResource {
     /**
      * Constructor
      */
-      public PlanDefinitionActionDefinitionRelatedActionComponent() {
+      public PlanDefinitionActionRelatedActionComponent() {
         super();
       }
 
     /**
      * Constructor
      */
-      public PlanDefinitionActionDefinitionRelatedActionComponent(IdType actionId, Enumeration<ActionRelationshipType> relationship) {
+      public PlanDefinitionActionRelatedActionComponent(IdType actionId, Enumeration<ActionRelationshipType> relationship) {
         super();
         this.actionId = actionId;
         this.relationship = relationship;
@@ -4243,7 +4243,7 @@ public class PlanDefinition extends MetadataResource {
         public IdType getActionIdElement() { 
           if (this.actionId == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create PlanDefinitionActionDefinitionRelatedActionComponent.actionId");
+              throw new Error("Attempt to auto-create PlanDefinitionActionRelatedActionComponent.actionId");
             else if (Configuration.doAutoCreate())
               this.actionId = new IdType(); // bb
           return this.actionId;
@@ -4260,7 +4260,7 @@ public class PlanDefinition extends MetadataResource {
         /**
          * @param value {@link #actionId} (The element id of the related action.). This is the underlying object with id, value and extensions. The accessor "getActionId" gives direct access to the value
          */
-        public PlanDefinitionActionDefinitionRelatedActionComponent setActionIdElement(IdType value) { 
+        public PlanDefinitionActionRelatedActionComponent setActionIdElement(IdType value) { 
           this.actionId = value;
           return this;
         }
@@ -4275,7 +4275,7 @@ public class PlanDefinition extends MetadataResource {
         /**
          * @param value The element id of the related action.
          */
-        public PlanDefinitionActionDefinitionRelatedActionComponent setActionId(String value) { 
+        public PlanDefinitionActionRelatedActionComponent setActionId(String value) { 
             if (this.actionId == null)
               this.actionId = new IdType();
             this.actionId.setValue(value);
@@ -4288,7 +4288,7 @@ public class PlanDefinition extends MetadataResource {
         public Enumeration<ActionRelationshipType> getRelationshipElement() { 
           if (this.relationship == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create PlanDefinitionActionDefinitionRelatedActionComponent.relationship");
+              throw new Error("Attempt to auto-create PlanDefinitionActionRelatedActionComponent.relationship");
             else if (Configuration.doAutoCreate())
               this.relationship = new Enumeration<ActionRelationshipType>(new ActionRelationshipTypeEnumFactory()); // bb
           return this.relationship;
@@ -4305,7 +4305,7 @@ public class PlanDefinition extends MetadataResource {
         /**
          * @param value {@link #relationship} (The relationship of this action to the related action.). This is the underlying object with id, value and extensions. The accessor "getRelationship" gives direct access to the value
          */
-        public PlanDefinitionActionDefinitionRelatedActionComponent setRelationshipElement(Enumeration<ActionRelationshipType> value) { 
+        public PlanDefinitionActionRelatedActionComponent setRelationshipElement(Enumeration<ActionRelationshipType> value) { 
           this.relationship = value;
           return this;
         }
@@ -4320,7 +4320,7 @@ public class PlanDefinition extends MetadataResource {
         /**
          * @param value The relationship of this action to the related action.
          */
-        public PlanDefinitionActionDefinitionRelatedActionComponent setRelationship(ActionRelationshipType value) { 
+        public PlanDefinitionActionRelatedActionComponent setRelationship(ActionRelationshipType value) { 
             if (this.relationship == null)
               this.relationship = new Enumeration<ActionRelationshipType>(new ActionRelationshipTypeEnumFactory());
             this.relationship.setValue(value);
@@ -4367,7 +4367,7 @@ public class PlanDefinition extends MetadataResource {
         /**
          * @param value {@link #offset} (A duration or range of durations to apply to the relationship. For example, 30-60 minutes before.)
          */
-        public PlanDefinitionActionDefinitionRelatedActionComponent setOffset(Type value) { 
+        public PlanDefinitionActionRelatedActionComponent setOffset(Type value) { 
           this.offset = value;
           return this;
         }
@@ -4465,8 +4465,8 @@ public class PlanDefinition extends MetadataResource {
           return super.addChild(name);
       }
 
-      public PlanDefinitionActionDefinitionRelatedActionComponent copy() {
-        PlanDefinitionActionDefinitionRelatedActionComponent dst = new PlanDefinitionActionDefinitionRelatedActionComponent();
+      public PlanDefinitionActionRelatedActionComponent copy() {
+        PlanDefinitionActionRelatedActionComponent dst = new PlanDefinitionActionRelatedActionComponent();
         copyValues(dst);
         dst.actionId = actionId == null ? null : actionId.copy();
         dst.relationship = relationship == null ? null : relationship.copy();
@@ -4478,9 +4478,9 @@ public class PlanDefinition extends MetadataResource {
       public boolean equalsDeep(Base other) {
         if (!super.equalsDeep(other))
           return false;
-        if (!(other instanceof PlanDefinitionActionDefinitionRelatedActionComponent))
+        if (!(other instanceof PlanDefinitionActionRelatedActionComponent))
           return false;
-        PlanDefinitionActionDefinitionRelatedActionComponent o = (PlanDefinitionActionDefinitionRelatedActionComponent) other;
+        PlanDefinitionActionRelatedActionComponent o = (PlanDefinitionActionRelatedActionComponent) other;
         return compareDeep(actionId, o.actionId, true) && compareDeep(relationship, o.relationship, true)
            && compareDeep(offset, o.offset, true);
       }
@@ -4489,9 +4489,9 @@ public class PlanDefinition extends MetadataResource {
       public boolean equalsShallow(Base other) {
         if (!super.equalsShallow(other))
           return false;
-        if (!(other instanceof PlanDefinitionActionDefinitionRelatedActionComponent))
+        if (!(other instanceof PlanDefinitionActionRelatedActionComponent))
           return false;
-        PlanDefinitionActionDefinitionRelatedActionComponent o = (PlanDefinitionActionDefinitionRelatedActionComponent) other;
+        PlanDefinitionActionRelatedActionComponent o = (PlanDefinitionActionRelatedActionComponent) other;
         return compareValues(actionId, o.actionId, true) && compareValues(relationship, o.relationship, true)
           ;
       }
@@ -4502,14 +4502,14 @@ public class PlanDefinition extends MetadataResource {
       }
 
   public String fhirType() {
-    return "PlanDefinition.actionDefinition.relatedAction";
+    return "PlanDefinition.action.relatedAction";
 
   }
 
   }
 
     @Block()
-    public static class PlanDefinitionActionDefinitionParticipantComponent extends BackboneElement implements IBaseBackboneElement {
+    public static class PlanDefinitionActionParticipantComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * The type of participant in the action.
          */
@@ -4531,14 +4531,14 @@ public class PlanDefinition extends MetadataResource {
     /**
      * Constructor
      */
-      public PlanDefinitionActionDefinitionParticipantComponent() {
+      public PlanDefinitionActionParticipantComponent() {
         super();
       }
 
     /**
      * Constructor
      */
-      public PlanDefinitionActionDefinitionParticipantComponent(Enumeration<ActionParticipantType> type) {
+      public PlanDefinitionActionParticipantComponent(Enumeration<ActionParticipantType> type) {
         super();
         this.type = type;
       }
@@ -4549,7 +4549,7 @@ public class PlanDefinition extends MetadataResource {
         public Enumeration<ActionParticipantType> getTypeElement() { 
           if (this.type == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create PlanDefinitionActionDefinitionParticipantComponent.type");
+              throw new Error("Attempt to auto-create PlanDefinitionActionParticipantComponent.type");
             else if (Configuration.doAutoCreate())
               this.type = new Enumeration<ActionParticipantType>(new ActionParticipantTypeEnumFactory()); // bb
           return this.type;
@@ -4566,7 +4566,7 @@ public class PlanDefinition extends MetadataResource {
         /**
          * @param value {@link #type} (The type of participant in the action.). This is the underlying object with id, value and extensions. The accessor "getType" gives direct access to the value
          */
-        public PlanDefinitionActionDefinitionParticipantComponent setTypeElement(Enumeration<ActionParticipantType> value) { 
+        public PlanDefinitionActionParticipantComponent setTypeElement(Enumeration<ActionParticipantType> value) { 
           this.type = value;
           return this;
         }
@@ -4581,7 +4581,7 @@ public class PlanDefinition extends MetadataResource {
         /**
          * @param value The type of participant in the action.
          */
-        public PlanDefinitionActionDefinitionParticipantComponent setType(ActionParticipantType value) { 
+        public PlanDefinitionActionParticipantComponent setType(ActionParticipantType value) { 
             if (this.type == null)
               this.type = new Enumeration<ActionParticipantType>(new ActionParticipantTypeEnumFactory());
             this.type.setValue(value);
@@ -4594,7 +4594,7 @@ public class PlanDefinition extends MetadataResource {
         public CodeableConcept getRole() { 
           if (this.role == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create PlanDefinitionActionDefinitionParticipantComponent.role");
+              throw new Error("Attempt to auto-create PlanDefinitionActionParticipantComponent.role");
             else if (Configuration.doAutoCreate())
               this.role = new CodeableConcept(); // cc
           return this.role;
@@ -4607,7 +4607,7 @@ public class PlanDefinition extends MetadataResource {
         /**
          * @param value {@link #role} (The role the participant should play in performing the described action.)
          */
-        public PlanDefinitionActionDefinitionParticipantComponent setRole(CodeableConcept value) { 
+        public PlanDefinitionActionParticipantComponent setRole(CodeableConcept value) { 
           this.role = value;
           return this;
         }
@@ -4688,8 +4688,8 @@ public class PlanDefinition extends MetadataResource {
           return super.addChild(name);
       }
 
-      public PlanDefinitionActionDefinitionParticipantComponent copy() {
-        PlanDefinitionActionDefinitionParticipantComponent dst = new PlanDefinitionActionDefinitionParticipantComponent();
+      public PlanDefinitionActionParticipantComponent copy() {
+        PlanDefinitionActionParticipantComponent dst = new PlanDefinitionActionParticipantComponent();
         copyValues(dst);
         dst.type = type == null ? null : type.copy();
         dst.role = role == null ? null : role.copy();
@@ -4700,9 +4700,9 @@ public class PlanDefinition extends MetadataResource {
       public boolean equalsDeep(Base other) {
         if (!super.equalsDeep(other))
           return false;
-        if (!(other instanceof PlanDefinitionActionDefinitionParticipantComponent))
+        if (!(other instanceof PlanDefinitionActionParticipantComponent))
           return false;
-        PlanDefinitionActionDefinitionParticipantComponent o = (PlanDefinitionActionDefinitionParticipantComponent) other;
+        PlanDefinitionActionParticipantComponent o = (PlanDefinitionActionParticipantComponent) other;
         return compareDeep(type, o.type, true) && compareDeep(role, o.role, true);
       }
 
@@ -4710,9 +4710,9 @@ public class PlanDefinition extends MetadataResource {
       public boolean equalsShallow(Base other) {
         if (!super.equalsShallow(other))
           return false;
-        if (!(other instanceof PlanDefinitionActionDefinitionParticipantComponent))
+        if (!(other instanceof PlanDefinitionActionParticipantComponent))
           return false;
-        PlanDefinitionActionDefinitionParticipantComponent o = (PlanDefinitionActionDefinitionParticipantComponent) other;
+        PlanDefinitionActionParticipantComponent o = (PlanDefinitionActionParticipantComponent) other;
         return compareValues(type, o.type, true);
       }
 
@@ -4721,14 +4721,14 @@ public class PlanDefinition extends MetadataResource {
       }
 
   public String fhirType() {
-    return "PlanDefinition.actionDefinition.participant";
+    return "PlanDefinition.action.participant";
 
   }
 
   }
 
     @Block()
-    public static class PlanDefinitionActionDefinitionDynamicValueComponent extends BackboneElement implements IBaseBackboneElement {
+    public static class PlanDefinitionActionDynamicValueComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * A brief, natural language description of the intended semantics of the dynamic value.
          */
@@ -4762,7 +4762,7 @@ public class PlanDefinition extends MetadataResource {
     /**
      * Constructor
      */
-      public PlanDefinitionActionDefinitionDynamicValueComponent() {
+      public PlanDefinitionActionDynamicValueComponent() {
         super();
       }
 
@@ -4772,7 +4772,7 @@ public class PlanDefinition extends MetadataResource {
         public StringType getDescriptionElement() { 
           if (this.description == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create PlanDefinitionActionDefinitionDynamicValueComponent.description");
+              throw new Error("Attempt to auto-create PlanDefinitionActionDynamicValueComponent.description");
             else if (Configuration.doAutoCreate())
               this.description = new StringType(); // bb
           return this.description;
@@ -4789,7 +4789,7 @@ public class PlanDefinition extends MetadataResource {
         /**
          * @param value {@link #description} (A brief, natural language description of the intended semantics of the dynamic value.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
          */
-        public PlanDefinitionActionDefinitionDynamicValueComponent setDescriptionElement(StringType value) { 
+        public PlanDefinitionActionDynamicValueComponent setDescriptionElement(StringType value) { 
           this.description = value;
           return this;
         }
@@ -4804,7 +4804,7 @@ public class PlanDefinition extends MetadataResource {
         /**
          * @param value A brief, natural language description of the intended semantics of the dynamic value.
          */
-        public PlanDefinitionActionDefinitionDynamicValueComponent setDescription(String value) { 
+        public PlanDefinitionActionDynamicValueComponent setDescription(String value) { 
           if (Utilities.noString(value))
             this.description = null;
           else {
@@ -4821,7 +4821,7 @@ public class PlanDefinition extends MetadataResource {
         public StringType getPathElement() { 
           if (this.path == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create PlanDefinitionActionDefinitionDynamicValueComponent.path");
+              throw new Error("Attempt to auto-create PlanDefinitionActionDynamicValueComponent.path");
             else if (Configuration.doAutoCreate())
               this.path = new StringType(); // bb
           return this.path;
@@ -4838,7 +4838,7 @@ public class PlanDefinition extends MetadataResource {
         /**
          * @param value {@link #path} (The path to the element to be customized. This is the path on the resource that will hold the result of the calculation defined by the expression.). This is the underlying object with id, value and extensions. The accessor "getPath" gives direct access to the value
          */
-        public PlanDefinitionActionDefinitionDynamicValueComponent setPathElement(StringType value) { 
+        public PlanDefinitionActionDynamicValueComponent setPathElement(StringType value) { 
           this.path = value;
           return this;
         }
@@ -4853,7 +4853,7 @@ public class PlanDefinition extends MetadataResource {
         /**
          * @param value The path to the element to be customized. This is the path on the resource that will hold the result of the calculation defined by the expression.
          */
-        public PlanDefinitionActionDefinitionDynamicValueComponent setPath(String value) { 
+        public PlanDefinitionActionDynamicValueComponent setPath(String value) { 
           if (Utilities.noString(value))
             this.path = null;
           else {
@@ -4870,7 +4870,7 @@ public class PlanDefinition extends MetadataResource {
         public StringType getLanguageElement() { 
           if (this.language == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create PlanDefinitionActionDefinitionDynamicValueComponent.language");
+              throw new Error("Attempt to auto-create PlanDefinitionActionDynamicValueComponent.language");
             else if (Configuration.doAutoCreate())
               this.language = new StringType(); // bb
           return this.language;
@@ -4887,7 +4887,7 @@ public class PlanDefinition extends MetadataResource {
         /**
          * @param value {@link #language} (The media type of the language for the expression.). This is the underlying object with id, value and extensions. The accessor "getLanguage" gives direct access to the value
          */
-        public PlanDefinitionActionDefinitionDynamicValueComponent setLanguageElement(StringType value) { 
+        public PlanDefinitionActionDynamicValueComponent setLanguageElement(StringType value) { 
           this.language = value;
           return this;
         }
@@ -4902,7 +4902,7 @@ public class PlanDefinition extends MetadataResource {
         /**
          * @param value The media type of the language for the expression.
          */
-        public PlanDefinitionActionDefinitionDynamicValueComponent setLanguage(String value) { 
+        public PlanDefinitionActionDynamicValueComponent setLanguage(String value) { 
           if (Utilities.noString(value))
             this.language = null;
           else {
@@ -4919,7 +4919,7 @@ public class PlanDefinition extends MetadataResource {
         public StringType getExpressionElement() { 
           if (this.expression == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create PlanDefinitionActionDefinitionDynamicValueComponent.expression");
+              throw new Error("Attempt to auto-create PlanDefinitionActionDynamicValueComponent.expression");
             else if (Configuration.doAutoCreate())
               this.expression = new StringType(); // bb
           return this.expression;
@@ -4936,7 +4936,7 @@ public class PlanDefinition extends MetadataResource {
         /**
          * @param value {@link #expression} (An expression specifying the value of the customized element.). This is the underlying object with id, value and extensions. The accessor "getExpression" gives direct access to the value
          */
-        public PlanDefinitionActionDefinitionDynamicValueComponent setExpressionElement(StringType value) { 
+        public PlanDefinitionActionDynamicValueComponent setExpressionElement(StringType value) { 
           this.expression = value;
           return this;
         }
@@ -4951,7 +4951,7 @@ public class PlanDefinition extends MetadataResource {
         /**
          * @param value An expression specifying the value of the customized element.
          */
-        public PlanDefinitionActionDefinitionDynamicValueComponent setExpression(String value) { 
+        public PlanDefinitionActionDynamicValueComponent setExpression(String value) { 
           if (Utilities.noString(value))
             this.expression = null;
           else {
@@ -5059,8 +5059,8 @@ public class PlanDefinition extends MetadataResource {
           return super.addChild(name);
       }
 
-      public PlanDefinitionActionDefinitionDynamicValueComponent copy() {
-        PlanDefinitionActionDefinitionDynamicValueComponent dst = new PlanDefinitionActionDefinitionDynamicValueComponent();
+      public PlanDefinitionActionDynamicValueComponent copy() {
+        PlanDefinitionActionDynamicValueComponent dst = new PlanDefinitionActionDynamicValueComponent();
         copyValues(dst);
         dst.description = description == null ? null : description.copy();
         dst.path = path == null ? null : path.copy();
@@ -5073,9 +5073,9 @@ public class PlanDefinition extends MetadataResource {
       public boolean equalsDeep(Base other) {
         if (!super.equalsDeep(other))
           return false;
-        if (!(other instanceof PlanDefinitionActionDefinitionDynamicValueComponent))
+        if (!(other instanceof PlanDefinitionActionDynamicValueComponent))
           return false;
-        PlanDefinitionActionDefinitionDynamicValueComponent o = (PlanDefinitionActionDefinitionDynamicValueComponent) other;
+        PlanDefinitionActionDynamicValueComponent o = (PlanDefinitionActionDynamicValueComponent) other;
         return compareDeep(description, o.description, true) && compareDeep(path, o.path, true) && compareDeep(language, o.language, true)
            && compareDeep(expression, o.expression, true);
       }
@@ -5084,9 +5084,9 @@ public class PlanDefinition extends MetadataResource {
       public boolean equalsShallow(Base other) {
         if (!super.equalsShallow(other))
           return false;
-        if (!(other instanceof PlanDefinitionActionDefinitionDynamicValueComponent))
+        if (!(other instanceof PlanDefinitionActionDynamicValueComponent))
           return false;
-        PlanDefinitionActionDefinitionDynamicValueComponent o = (PlanDefinitionActionDefinitionDynamicValueComponent) other;
+        PlanDefinitionActionDynamicValueComponent o = (PlanDefinitionActionDynamicValueComponent) other;
         return compareValues(description, o.description, true) && compareValues(path, o.path, true) && compareValues(language, o.language, true)
            && compareValues(expression, o.expression, true);
       }
@@ -5097,7 +5097,7 @@ public class PlanDefinition extends MetadataResource {
       }
 
   public String fhirType() {
-    return "PlanDefinition.actionDefinition.dynamicValue";
+    return "PlanDefinition.action.dynamicValue";
 
   }
 
@@ -5119,10 +5119,10 @@ public class PlanDefinition extends MetadataResource {
     protected CodeableConcept type;
 
     /**
-     * Explains why this plan definition is needed and why it has been designed as it has.
+     * Explaination of why this plan definition is needed and why it has been designed as it has.
      */
     @Child(name = "purpose", type = {MarkdownType.class}, order=2, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Why this plan definition is defined", formalDefinition="Explains why this plan definition is needed and why it has been designed as it has." )
+    @Description(shortDefinition="Why this plan definition is defined", formalDefinition="Explaination of why this plan definition is needed and why it has been designed as it has." )
     protected MarkdownType purpose;
 
     /**
@@ -5133,24 +5133,24 @@ public class PlanDefinition extends MetadataResource {
     protected StringType usage;
 
     /**
-     * The date on which the asset content was approved by the publisher. Approval happens once when the content is officially approved for usage.
+     * The date on which the resource content was approved by the publisher. Approval happens once when the content is officially approved for usage.
      */
     @Child(name = "approvalDate", type = {DateType.class}, order=4, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="When the plan definition was approved by publisher", formalDefinition="The date on which the asset content was approved by the publisher. Approval happens once when the content is officially approved for usage." )
+    @Description(shortDefinition="When the plan definition was approved by publisher", formalDefinition="The date on which the resource content was approved by the publisher. Approval happens once when the content is officially approved for usage." )
     protected DateType approvalDate;
 
     /**
-     * The date on which the asset content was last reviewed. Review happens periodically after approval, but doesn't change the original approval date.
+     * The date on which the resource content was last reviewed. Review happens periodically after approval, but doesn't change the original approval date.
      */
     @Child(name = "lastReviewDate", type = {DateType.class}, order=5, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="When the plan definition was last reviewed", formalDefinition="The date on which the asset content was last reviewed. Review happens periodically after approval, but doesn't change the original approval date." )
+    @Description(shortDefinition="When the plan definition was last reviewed", formalDefinition="The date on which the resource content was last reviewed. Review happens periodically after approval, but doesn't change the original approval date." )
     protected DateType lastReviewDate;
 
     /**
-     * The period during which the plan definition content was or is planned to be effective.
+     * The period during which the plan definition content was or is planned to be in active use.
      */
     @Child(name = "effectivePeriod", type = {Period.class}, order=6, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="When the plan definition is effective", formalDefinition="The period during which the plan definition content was or is planned to be effective." )
+    @Description(shortDefinition="When the plan definition is expected to be used", formalDefinition="The period during which the plan definition content was or is planned to be in active use." )
     protected Period effectivePeriod;
 
     /**
@@ -5197,18 +5197,18 @@ public class PlanDefinition extends MetadataResource {
     /**
      * Goals that describe what the activities within the plan are intended to achieve. For example, weight loss, restoring an activity of daily living, obtaining herd immunity via immunization, meeting a process improvement objective, etc.
      */
-    @Child(name = "goalDefinition", type = {}, order=12, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "goal", type = {}, order=12, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="What the plan is trying to accomplish", formalDefinition="Goals that describe what the activities within the plan are intended to achieve. For example, weight loss, restoring an activity of daily living, obtaining herd immunity via immunization, meeting a process improvement objective, etc." )
-    protected List<PlanDefinitionGoalDefinitionComponent> goalDefinition;
+    protected List<PlanDefinitionGoalComponent> goal;
 
     /**
      * An action to be taken as part of the plan.
      */
-    @Child(name = "actionDefinition", type = {}, order=13, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "action", type = {}, order=13, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Action defined by the plan", formalDefinition="An action to be taken as part of the plan." )
-    protected List<PlanDefinitionActionDefinitionComponent> actionDefinition;
+    protected List<PlanDefinitionActionComponent> action;
 
-    private static final long serialVersionUID = -1714944325L;
+    private static final long serialVersionUID = -1191108677L;
 
   /**
    * Constructor
@@ -5226,7 +5226,7 @@ public class PlanDefinition extends MetadataResource {
     }
 
     /**
-     * @return {@link #url} (An absolute URL that is used to identify this plan definition when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this plan definition is (or will be) published. The URL SHOULD include the major version of the plan definition. For more information see [Technical and Business Versions](resource.html#versions).). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
+     * @return {@link #url} (An absolute URI that is used to identify this plan definition when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this plan definition is (or will be) published. The URL SHOULD include the major version of the plan definition. For more information see [Technical and Business Versions](resource.html#versions).). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
      */
     public UriType getUrlElement() { 
       if (this.url == null)
@@ -5246,7 +5246,7 @@ public class PlanDefinition extends MetadataResource {
     }
 
     /**
-     * @param value {@link #url} (An absolute URL that is used to identify this plan definition when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this plan definition is (or will be) published. The URL SHOULD include the major version of the plan definition. For more information see [Technical and Business Versions](resource.html#versions).). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
+     * @param value {@link #url} (An absolute URI that is used to identify this plan definition when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this plan definition is (or will be) published. The URL SHOULD include the major version of the plan definition. For more information see [Technical and Business Versions](resource.html#versions).). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
      */
     public PlanDefinition setUrlElement(UriType value) { 
       this.url = value;
@@ -5254,14 +5254,14 @@ public class PlanDefinition extends MetadataResource {
     }
 
     /**
-     * @return An absolute URL that is used to identify this plan definition when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this plan definition is (or will be) published. The URL SHOULD include the major version of the plan definition. For more information see [Technical and Business Versions](resource.html#versions).
+     * @return An absolute URI that is used to identify this plan definition when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this plan definition is (or will be) published. The URL SHOULD include the major version of the plan definition. For more information see [Technical and Business Versions](resource.html#versions).
      */
     public String getUrl() { 
       return this.url == null ? null : this.url.getValue();
     }
 
     /**
-     * @param value An absolute URL that is used to identify this plan definition when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this plan definition is (or will be) published. The URL SHOULD include the major version of the plan definition. For more information see [Technical and Business Versions](resource.html#versions).
+     * @param value An absolute URI that is used to identify this plan definition when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this plan definition is (or will be) published. The URL SHOULD include the major version of the plan definition. For more information see [Technical and Business Versions](resource.html#versions).
      */
     public PlanDefinition setUrl(String value) { 
       if (Utilities.noString(value))
@@ -5328,7 +5328,7 @@ public class PlanDefinition extends MetadataResource {
     }
 
     /**
-     * @return {@link #version} (The identifier that is used to identify this version of the plan definition when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the plan definition author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions are orderable. To provide a version consistent with the Decision Support Service specification, use the format Major.Minor.Revision (e.g. 1.0.0). For more information on versioning knowledge assets, refer to the Decision Support Service specification. Note that a version is required for non-experimental active artifacts.). This is the underlying object with id, value and extensions. The accessor "getVersion" gives direct access to the value
+     * @return {@link #version} (The identifier that is used to identify this version of the plan definition when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the plan definition author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions can be placed in a lexicographical sequence. To provide a version consistent with the Decision Support Service specification, use the format Major.Minor.Revision (e.g. 1.0.0). For more information on versioning knowledge assets, refer to the Decision Support Service specification. Note that a version is required for non-experimental active artifacts.). This is the underlying object with id, value and extensions. The accessor "getVersion" gives direct access to the value
      */
     public StringType getVersionElement() { 
       if (this.version == null)
@@ -5348,7 +5348,7 @@ public class PlanDefinition extends MetadataResource {
     }
 
     /**
-     * @param value {@link #version} (The identifier that is used to identify this version of the plan definition when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the plan definition author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions are orderable. To provide a version consistent with the Decision Support Service specification, use the format Major.Minor.Revision (e.g. 1.0.0). For more information on versioning knowledge assets, refer to the Decision Support Service specification. Note that a version is required for non-experimental active artifacts.). This is the underlying object with id, value and extensions. The accessor "getVersion" gives direct access to the value
+     * @param value {@link #version} (The identifier that is used to identify this version of the plan definition when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the plan definition author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions can be placed in a lexicographical sequence. To provide a version consistent with the Decision Support Service specification, use the format Major.Minor.Revision (e.g. 1.0.0). For more information on versioning knowledge assets, refer to the Decision Support Service specification. Note that a version is required for non-experimental active artifacts.). This is the underlying object with id, value and extensions. The accessor "getVersion" gives direct access to the value
      */
     public PlanDefinition setVersionElement(StringType value) { 
       this.version = value;
@@ -5356,14 +5356,14 @@ public class PlanDefinition extends MetadataResource {
     }
 
     /**
-     * @return The identifier that is used to identify this version of the plan definition when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the plan definition author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions are orderable. To provide a version consistent with the Decision Support Service specification, use the format Major.Minor.Revision (e.g. 1.0.0). For more information on versioning knowledge assets, refer to the Decision Support Service specification. Note that a version is required for non-experimental active artifacts.
+     * @return The identifier that is used to identify this version of the plan definition when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the plan definition author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions can be placed in a lexicographical sequence. To provide a version consistent with the Decision Support Service specification, use the format Major.Minor.Revision (e.g. 1.0.0). For more information on versioning knowledge assets, refer to the Decision Support Service specification. Note that a version is required for non-experimental active artifacts.
      */
     public String getVersion() { 
       return this.version == null ? null : this.version.getValue();
     }
 
     /**
-     * @param value The identifier that is used to identify this version of the plan definition when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the plan definition author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions are orderable. To provide a version consistent with the Decision Support Service specification, use the format Major.Minor.Revision (e.g. 1.0.0). For more information on versioning knowledge assets, refer to the Decision Support Service specification. Note that a version is required for non-experimental active artifacts.
+     * @param value The identifier that is used to identify this version of the plan definition when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the plan definition author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions can be placed in a lexicographical sequence. To provide a version consistent with the Decision Support Service specification, use the format Major.Minor.Revision (e.g. 1.0.0). For more information on versioning knowledge assets, refer to the Decision Support Service specification. Note that a version is required for non-experimental active artifacts.
      */
     public PlanDefinition setVersion(String value) { 
       if (Utilities.noString(value))
@@ -5544,7 +5544,7 @@ public class PlanDefinition extends MetadataResource {
     }
 
     /**
-     * @return {@link #experimental} (A flag to indicate that this plan definition is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.). This is the underlying object with id, value and extensions. The accessor "getExperimental" gives direct access to the value
+     * @return {@link #experimental} (A boolean value to indicate that this plan definition is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.). This is the underlying object with id, value and extensions. The accessor "getExperimental" gives direct access to the value
      */
     public BooleanType getExperimentalElement() { 
       if (this.experimental == null)
@@ -5564,7 +5564,7 @@ public class PlanDefinition extends MetadataResource {
     }
 
     /**
-     * @param value {@link #experimental} (A flag to indicate that this plan definition is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.). This is the underlying object with id, value and extensions. The accessor "getExperimental" gives direct access to the value
+     * @param value {@link #experimental} (A boolean value to indicate that this plan definition is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.). This is the underlying object with id, value and extensions. The accessor "getExperimental" gives direct access to the value
      */
     public PlanDefinition setExperimentalElement(BooleanType value) { 
       this.experimental = value;
@@ -5572,14 +5572,14 @@ public class PlanDefinition extends MetadataResource {
     }
 
     /**
-     * @return A flag to indicate that this plan definition is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.
+     * @return A boolean value to indicate that this plan definition is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.
      */
     public boolean getExperimental() { 
       return this.experimental == null || this.experimental.isEmpty() ? false : this.experimental.getValue();
     }
 
     /**
-     * @param value A flag to indicate that this plan definition is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.
+     * @param value A boolean value to indicate that this plan definition is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.
      */
     public PlanDefinition setExperimental(boolean value) { 
         if (this.experimental == null)
@@ -5589,7 +5589,7 @@ public class PlanDefinition extends MetadataResource {
     }
 
     /**
-     * @return {@link #date} (The date  (and optionally time) when the plan definition was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the plan definition changes.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
+     * @return {@link #date} (The date  (and optionally time) when the plan definition was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the plan definition changes.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
      */
     public DateTimeType getDateElement() { 
       if (this.date == null)
@@ -5609,7 +5609,7 @@ public class PlanDefinition extends MetadataResource {
     }
 
     /**
-     * @param value {@link #date} (The date  (and optionally time) when the plan definition was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the plan definition changes.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
+     * @param value {@link #date} (The date  (and optionally time) when the plan definition was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the plan definition changes.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
      */
     public PlanDefinition setDateElement(DateTimeType value) { 
       this.date = value;
@@ -5617,14 +5617,14 @@ public class PlanDefinition extends MetadataResource {
     }
 
     /**
-     * @return The date  (and optionally time) when the plan definition was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the plan definition changes.
+     * @return The date  (and optionally time) when the plan definition was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the plan definition changes.
      */
     public Date getDate() { 
       return this.date == null ? null : this.date.getValue();
     }
 
     /**
-     * @param value The date  (and optionally time) when the plan definition was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the plan definition changes.
+     * @param value The date  (and optionally time) when the plan definition was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the plan definition changes.
      */
     public PlanDefinition setDate(Date value) { 
       if (value == null)
@@ -5687,7 +5687,7 @@ public class PlanDefinition extends MetadataResource {
     }
 
     /**
-     * @return {@link #description} (A free text natural language description of the plan definition from the consumer's perspective.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
+     * @return {@link #description} (A free text natural language description of the plan definition from a consumer's perspective.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
      */
     public MarkdownType getDescriptionElement() { 
       if (this.description == null)
@@ -5707,7 +5707,7 @@ public class PlanDefinition extends MetadataResource {
     }
 
     /**
-     * @param value {@link #description} (A free text natural language description of the plan definition from the consumer's perspective.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
+     * @param value {@link #description} (A free text natural language description of the plan definition from a consumer's perspective.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
      */
     public PlanDefinition setDescriptionElement(MarkdownType value) { 
       this.description = value;
@@ -5715,14 +5715,14 @@ public class PlanDefinition extends MetadataResource {
     }
 
     /**
-     * @return A free text natural language description of the plan definition from the consumer's perspective.
+     * @return A free text natural language description of the plan definition from a consumer's perspective.
      */
     public String getDescription() { 
       return this.description == null ? null : this.description.getValue();
     }
 
     /**
-     * @param value A free text natural language description of the plan definition from the consumer's perspective.
+     * @param value A free text natural language description of the plan definition from a consumer's perspective.
      */
     public PlanDefinition setDescription(String value) { 
       if (value == null)
@@ -5736,7 +5736,7 @@ public class PlanDefinition extends MetadataResource {
     }
 
     /**
-     * @return {@link #purpose} (Explains why this plan definition is needed and why it has been designed as it has.). This is the underlying object with id, value and extensions. The accessor "getPurpose" gives direct access to the value
+     * @return {@link #purpose} (Explaination of why this plan definition is needed and why it has been designed as it has.). This is the underlying object with id, value and extensions. The accessor "getPurpose" gives direct access to the value
      */
     public MarkdownType getPurposeElement() { 
       if (this.purpose == null)
@@ -5756,7 +5756,7 @@ public class PlanDefinition extends MetadataResource {
     }
 
     /**
-     * @param value {@link #purpose} (Explains why this plan definition is needed and why it has been designed as it has.). This is the underlying object with id, value and extensions. The accessor "getPurpose" gives direct access to the value
+     * @param value {@link #purpose} (Explaination of why this plan definition is needed and why it has been designed as it has.). This is the underlying object with id, value and extensions. The accessor "getPurpose" gives direct access to the value
      */
     public PlanDefinition setPurposeElement(MarkdownType value) { 
       this.purpose = value;
@@ -5764,14 +5764,14 @@ public class PlanDefinition extends MetadataResource {
     }
 
     /**
-     * @return Explains why this plan definition is needed and why it has been designed as it has.
+     * @return Explaination of why this plan definition is needed and why it has been designed as it has.
      */
     public String getPurpose() { 
       return this.purpose == null ? null : this.purpose.getValue();
     }
 
     /**
-     * @param value Explains why this plan definition is needed and why it has been designed as it has.
+     * @param value Explaination of why this plan definition is needed and why it has been designed as it has.
      */
     public PlanDefinition setPurpose(String value) { 
       if (value == null)
@@ -5834,7 +5834,7 @@ public class PlanDefinition extends MetadataResource {
     }
 
     /**
-     * @return {@link #approvalDate} (The date on which the asset content was approved by the publisher. Approval happens once when the content is officially approved for usage.). This is the underlying object with id, value and extensions. The accessor "getApprovalDate" gives direct access to the value
+     * @return {@link #approvalDate} (The date on which the resource content was approved by the publisher. Approval happens once when the content is officially approved for usage.). This is the underlying object with id, value and extensions. The accessor "getApprovalDate" gives direct access to the value
      */
     public DateType getApprovalDateElement() { 
       if (this.approvalDate == null)
@@ -5854,7 +5854,7 @@ public class PlanDefinition extends MetadataResource {
     }
 
     /**
-     * @param value {@link #approvalDate} (The date on which the asset content was approved by the publisher. Approval happens once when the content is officially approved for usage.). This is the underlying object with id, value and extensions. The accessor "getApprovalDate" gives direct access to the value
+     * @param value {@link #approvalDate} (The date on which the resource content was approved by the publisher. Approval happens once when the content is officially approved for usage.). This is the underlying object with id, value and extensions. The accessor "getApprovalDate" gives direct access to the value
      */
     public PlanDefinition setApprovalDateElement(DateType value) { 
       this.approvalDate = value;
@@ -5862,14 +5862,14 @@ public class PlanDefinition extends MetadataResource {
     }
 
     /**
-     * @return The date on which the asset content was approved by the publisher. Approval happens once when the content is officially approved for usage.
+     * @return The date on which the resource content was approved by the publisher. Approval happens once when the content is officially approved for usage.
      */
     public Date getApprovalDate() { 
       return this.approvalDate == null ? null : this.approvalDate.getValue();
     }
 
     /**
-     * @param value The date on which the asset content was approved by the publisher. Approval happens once when the content is officially approved for usage.
+     * @param value The date on which the resource content was approved by the publisher. Approval happens once when the content is officially approved for usage.
      */
     public PlanDefinition setApprovalDate(Date value) { 
       if (value == null)
@@ -5883,7 +5883,7 @@ public class PlanDefinition extends MetadataResource {
     }
 
     /**
-     * @return {@link #lastReviewDate} (The date on which the asset content was last reviewed. Review happens periodically after approval, but doesn't change the original approval date.). This is the underlying object with id, value and extensions. The accessor "getLastReviewDate" gives direct access to the value
+     * @return {@link #lastReviewDate} (The date on which the resource content was last reviewed. Review happens periodically after approval, but doesn't change the original approval date.). This is the underlying object with id, value and extensions. The accessor "getLastReviewDate" gives direct access to the value
      */
     public DateType getLastReviewDateElement() { 
       if (this.lastReviewDate == null)
@@ -5903,7 +5903,7 @@ public class PlanDefinition extends MetadataResource {
     }
 
     /**
-     * @param value {@link #lastReviewDate} (The date on which the asset content was last reviewed. Review happens periodically after approval, but doesn't change the original approval date.). This is the underlying object with id, value and extensions. The accessor "getLastReviewDate" gives direct access to the value
+     * @param value {@link #lastReviewDate} (The date on which the resource content was last reviewed. Review happens periodically after approval, but doesn't change the original approval date.). This is the underlying object with id, value and extensions. The accessor "getLastReviewDate" gives direct access to the value
      */
     public PlanDefinition setLastReviewDateElement(DateType value) { 
       this.lastReviewDate = value;
@@ -5911,14 +5911,14 @@ public class PlanDefinition extends MetadataResource {
     }
 
     /**
-     * @return The date on which the asset content was last reviewed. Review happens periodically after approval, but doesn't change the original approval date.
+     * @return The date on which the resource content was last reviewed. Review happens periodically after approval, but doesn't change the original approval date.
      */
     public Date getLastReviewDate() { 
       return this.lastReviewDate == null ? null : this.lastReviewDate.getValue();
     }
 
     /**
-     * @param value The date on which the asset content was last reviewed. Review happens periodically after approval, but doesn't change the original approval date.
+     * @param value The date on which the resource content was last reviewed. Review happens periodically after approval, but doesn't change the original approval date.
      */
     public PlanDefinition setLastReviewDate(Date value) { 
       if (value == null)
@@ -5932,7 +5932,7 @@ public class PlanDefinition extends MetadataResource {
     }
 
     /**
-     * @return {@link #effectivePeriod} (The period during which the plan definition content was or is planned to be effective.)
+     * @return {@link #effectivePeriod} (The period during which the plan definition content was or is planned to be in active use.)
      */
     public Period getEffectivePeriod() { 
       if (this.effectivePeriod == null)
@@ -5948,7 +5948,7 @@ public class PlanDefinition extends MetadataResource {
     }
 
     /**
-     * @param value {@link #effectivePeriod} (The period during which the plan definition content was or is planned to be effective.)
+     * @param value {@link #effectivePeriod} (The period during which the plan definition content was or is planned to be in active use.)
      */
     public PlanDefinition setEffectivePeriod(Period value) { 
       this.effectivePeriod = value;
@@ -5956,7 +5956,7 @@ public class PlanDefinition extends MetadataResource {
     }
 
     /**
-     * @return {@link #useContext} (The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching of code system definitions.)
+     * @return {@link #useContext} (The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching for appropriate plan definition instances.)
      */
     public List<UsageContext> getUseContext() { 
       if (this.useContext == null)
@@ -6009,7 +6009,7 @@ public class PlanDefinition extends MetadataResource {
     }
 
     /**
-     * @return {@link #jurisdiction} (A jurisdiction in which the plan definition is intended to be used.)
+     * @return {@link #jurisdiction} (A legal or geographic region in which the plan definition is intended to be used.)
      */
     public List<CodeableConcept> getJurisdiction() { 
       if (this.jurisdiction == null)
@@ -6398,139 +6398,139 @@ public class PlanDefinition extends MetadataResource {
     }
 
     /**
-     * @return {@link #goalDefinition} (Goals that describe what the activities within the plan are intended to achieve. For example, weight loss, restoring an activity of daily living, obtaining herd immunity via immunization, meeting a process improvement objective, etc.)
+     * @return {@link #goal} (Goals that describe what the activities within the plan are intended to achieve. For example, weight loss, restoring an activity of daily living, obtaining herd immunity via immunization, meeting a process improvement objective, etc.)
      */
-    public List<PlanDefinitionGoalDefinitionComponent> getGoalDefinition() { 
-      if (this.goalDefinition == null)
-        this.goalDefinition = new ArrayList<PlanDefinitionGoalDefinitionComponent>();
-      return this.goalDefinition;
+    public List<PlanDefinitionGoalComponent> getGoal() { 
+      if (this.goal == null)
+        this.goal = new ArrayList<PlanDefinitionGoalComponent>();
+      return this.goal;
     }
 
     /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
-    public PlanDefinition setGoalDefinition(List<PlanDefinitionGoalDefinitionComponent> theGoalDefinition) { 
-      this.goalDefinition = theGoalDefinition;
+    public PlanDefinition setGoal(List<PlanDefinitionGoalComponent> theGoal) { 
+      this.goal = theGoal;
       return this;
     }
 
-    public boolean hasGoalDefinition() { 
-      if (this.goalDefinition == null)
+    public boolean hasGoal() { 
+      if (this.goal == null)
         return false;
-      for (PlanDefinitionGoalDefinitionComponent item : this.goalDefinition)
+      for (PlanDefinitionGoalComponent item : this.goal)
         if (!item.isEmpty())
           return true;
       return false;
     }
 
-    public PlanDefinitionGoalDefinitionComponent addGoalDefinition() { //3
-      PlanDefinitionGoalDefinitionComponent t = new PlanDefinitionGoalDefinitionComponent();
-      if (this.goalDefinition == null)
-        this.goalDefinition = new ArrayList<PlanDefinitionGoalDefinitionComponent>();
-      this.goalDefinition.add(t);
+    public PlanDefinitionGoalComponent addGoal() { //3
+      PlanDefinitionGoalComponent t = new PlanDefinitionGoalComponent();
+      if (this.goal == null)
+        this.goal = new ArrayList<PlanDefinitionGoalComponent>();
+      this.goal.add(t);
       return t;
     }
 
-    public PlanDefinition addGoalDefinition(PlanDefinitionGoalDefinitionComponent t) { //3
+    public PlanDefinition addGoal(PlanDefinitionGoalComponent t) { //3
       if (t == null)
         return this;
-      if (this.goalDefinition == null)
-        this.goalDefinition = new ArrayList<PlanDefinitionGoalDefinitionComponent>();
-      this.goalDefinition.add(t);
+      if (this.goal == null)
+        this.goal = new ArrayList<PlanDefinitionGoalComponent>();
+      this.goal.add(t);
       return this;
     }
 
     /**
-     * @return The first repetition of repeating field {@link #goalDefinition}, creating it if it does not already exist
+     * @return The first repetition of repeating field {@link #goal}, creating it if it does not already exist
      */
-    public PlanDefinitionGoalDefinitionComponent getGoalDefinitionFirstRep() { 
-      if (getGoalDefinition().isEmpty()) {
-        addGoalDefinition();
+    public PlanDefinitionGoalComponent getGoalFirstRep() { 
+      if (getGoal().isEmpty()) {
+        addGoal();
       }
-      return getGoalDefinition().get(0);
+      return getGoal().get(0);
     }
 
     /**
-     * @return {@link #actionDefinition} (An action to be taken as part of the plan.)
+     * @return {@link #action} (An action to be taken as part of the plan.)
      */
-    public List<PlanDefinitionActionDefinitionComponent> getActionDefinition() { 
-      if (this.actionDefinition == null)
-        this.actionDefinition = new ArrayList<PlanDefinitionActionDefinitionComponent>();
-      return this.actionDefinition;
+    public List<PlanDefinitionActionComponent> getAction() { 
+      if (this.action == null)
+        this.action = new ArrayList<PlanDefinitionActionComponent>();
+      return this.action;
     }
 
     /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
-    public PlanDefinition setActionDefinition(List<PlanDefinitionActionDefinitionComponent> theActionDefinition) { 
-      this.actionDefinition = theActionDefinition;
+    public PlanDefinition setAction(List<PlanDefinitionActionComponent> theAction) { 
+      this.action = theAction;
       return this;
     }
 
-    public boolean hasActionDefinition() { 
-      if (this.actionDefinition == null)
+    public boolean hasAction() { 
+      if (this.action == null)
         return false;
-      for (PlanDefinitionActionDefinitionComponent item : this.actionDefinition)
+      for (PlanDefinitionActionComponent item : this.action)
         if (!item.isEmpty())
           return true;
       return false;
     }
 
-    public PlanDefinitionActionDefinitionComponent addActionDefinition() { //3
-      PlanDefinitionActionDefinitionComponent t = new PlanDefinitionActionDefinitionComponent();
-      if (this.actionDefinition == null)
-        this.actionDefinition = new ArrayList<PlanDefinitionActionDefinitionComponent>();
-      this.actionDefinition.add(t);
+    public PlanDefinitionActionComponent addAction() { //3
+      PlanDefinitionActionComponent t = new PlanDefinitionActionComponent();
+      if (this.action == null)
+        this.action = new ArrayList<PlanDefinitionActionComponent>();
+      this.action.add(t);
       return t;
     }
 
-    public PlanDefinition addActionDefinition(PlanDefinitionActionDefinitionComponent t) { //3
+    public PlanDefinition addAction(PlanDefinitionActionComponent t) { //3
       if (t == null)
         return this;
-      if (this.actionDefinition == null)
-        this.actionDefinition = new ArrayList<PlanDefinitionActionDefinitionComponent>();
-      this.actionDefinition.add(t);
+      if (this.action == null)
+        this.action = new ArrayList<PlanDefinitionActionComponent>();
+      this.action.add(t);
       return this;
     }
 
     /**
-     * @return The first repetition of repeating field {@link #actionDefinition}, creating it if it does not already exist
+     * @return The first repetition of repeating field {@link #action}, creating it if it does not already exist
      */
-    public PlanDefinitionActionDefinitionComponent getActionDefinitionFirstRep() { 
-      if (getActionDefinition().isEmpty()) {
-        addActionDefinition();
+    public PlanDefinitionActionComponent getActionFirstRep() { 
+      if (getAction().isEmpty()) {
+        addAction();
       }
-      return getActionDefinition().get(0);
+      return getAction().get(0);
     }
 
       protected void listChildren(List<Property> childrenList) {
         super.listChildren(childrenList);
-        childrenList.add(new Property("url", "uri", "An absolute URL that is used to identify this plan definition when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this plan definition is (or will be) published. The URL SHOULD include the major version of the plan definition. For more information see [Technical and Business Versions](resource.html#versions).", 0, java.lang.Integer.MAX_VALUE, url));
+        childrenList.add(new Property("url", "uri", "An absolute URI that is used to identify this plan definition when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this plan definition is (or will be) published. The URL SHOULD include the major version of the plan definition. For more information see [Technical and Business Versions](resource.html#versions).", 0, java.lang.Integer.MAX_VALUE, url));
         childrenList.add(new Property("identifier", "Identifier", "A formal identifier that is used to identify this plan definition when it is represented in other formats, or referenced in a specification, model, design or an instance.", 0, java.lang.Integer.MAX_VALUE, identifier));
-        childrenList.add(new Property("version", "string", "The identifier that is used to identify this version of the plan definition when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the plan definition author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions are orderable. To provide a version consistent with the Decision Support Service specification, use the format Major.Minor.Revision (e.g. 1.0.0). For more information on versioning knowledge assets, refer to the Decision Support Service specification. Note that a version is required for non-experimental active artifacts.", 0, java.lang.Integer.MAX_VALUE, version));
+        childrenList.add(new Property("version", "string", "The identifier that is used to identify this version of the plan definition when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the plan definition author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions can be placed in a lexicographical sequence. To provide a version consistent with the Decision Support Service specification, use the format Major.Minor.Revision (e.g. 1.0.0). For more information on versioning knowledge assets, refer to the Decision Support Service specification. Note that a version is required for non-experimental active artifacts.", 0, java.lang.Integer.MAX_VALUE, version));
         childrenList.add(new Property("name", "string", "A natural language name identifying the plan definition. This name should be usable as an identifier for the module by machine processing applications such as code generation.", 0, java.lang.Integer.MAX_VALUE, name));
         childrenList.add(new Property("title", "string", "A short, descriptive, user-friendly title for the plan definition.", 0, java.lang.Integer.MAX_VALUE, title));
         childrenList.add(new Property("type", "CodeableConcept", "The type of asset the plan definition represents, e.g. an order set, protocol, or event-condition-action rule.", 0, java.lang.Integer.MAX_VALUE, type));
         childrenList.add(new Property("status", "code", "The status of this plan definition. Enables tracking the life-cycle of the content.", 0, java.lang.Integer.MAX_VALUE, status));
-        childrenList.add(new Property("experimental", "boolean", "A flag to indicate that this plan definition is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.", 0, java.lang.Integer.MAX_VALUE, experimental));
-        childrenList.add(new Property("date", "dateTime", "The date  (and optionally time) when the plan definition was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the plan definition changes.", 0, java.lang.Integer.MAX_VALUE, date));
+        childrenList.add(new Property("experimental", "boolean", "A boolean value to indicate that this plan definition is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.", 0, java.lang.Integer.MAX_VALUE, experimental));
+        childrenList.add(new Property("date", "dateTime", "The date  (and optionally time) when the plan definition was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the plan definition changes.", 0, java.lang.Integer.MAX_VALUE, date));
         childrenList.add(new Property("publisher", "string", "The name of the individual or organization that published the plan definition.", 0, java.lang.Integer.MAX_VALUE, publisher));
-        childrenList.add(new Property("description", "markdown", "A free text natural language description of the plan definition from the consumer's perspective.", 0, java.lang.Integer.MAX_VALUE, description));
-        childrenList.add(new Property("purpose", "markdown", "Explains why this plan definition is needed and why it has been designed as it has.", 0, java.lang.Integer.MAX_VALUE, purpose));
+        childrenList.add(new Property("description", "markdown", "A free text natural language description of the plan definition from a consumer's perspective.", 0, java.lang.Integer.MAX_VALUE, description));
+        childrenList.add(new Property("purpose", "markdown", "Explaination of why this plan definition is needed and why it has been designed as it has.", 0, java.lang.Integer.MAX_VALUE, purpose));
         childrenList.add(new Property("usage", "string", "A detailed description of how the asset is used from a clinical perspective.", 0, java.lang.Integer.MAX_VALUE, usage));
-        childrenList.add(new Property("approvalDate", "date", "The date on which the asset content was approved by the publisher. Approval happens once when the content is officially approved for usage.", 0, java.lang.Integer.MAX_VALUE, approvalDate));
-        childrenList.add(new Property("lastReviewDate", "date", "The date on which the asset content was last reviewed. Review happens periodically after approval, but doesn't change the original approval date.", 0, java.lang.Integer.MAX_VALUE, lastReviewDate));
-        childrenList.add(new Property("effectivePeriod", "Period", "The period during which the plan definition content was or is planned to be effective.", 0, java.lang.Integer.MAX_VALUE, effectivePeriod));
-        childrenList.add(new Property("useContext", "UsageContext", "The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching of code system definitions.", 0, java.lang.Integer.MAX_VALUE, useContext));
-        childrenList.add(new Property("jurisdiction", "CodeableConcept", "A jurisdiction in which the plan definition is intended to be used.", 0, java.lang.Integer.MAX_VALUE, jurisdiction));
+        childrenList.add(new Property("approvalDate", "date", "The date on which the resource content was approved by the publisher. Approval happens once when the content is officially approved for usage.", 0, java.lang.Integer.MAX_VALUE, approvalDate));
+        childrenList.add(new Property("lastReviewDate", "date", "The date on which the resource content was last reviewed. Review happens periodically after approval, but doesn't change the original approval date.", 0, java.lang.Integer.MAX_VALUE, lastReviewDate));
+        childrenList.add(new Property("effectivePeriod", "Period", "The period during which the plan definition content was or is planned to be in active use.", 0, java.lang.Integer.MAX_VALUE, effectivePeriod));
+        childrenList.add(new Property("useContext", "UsageContext", "The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching for appropriate plan definition instances.", 0, java.lang.Integer.MAX_VALUE, useContext));
+        childrenList.add(new Property("jurisdiction", "CodeableConcept", "A legal or geographic region in which the plan definition is intended to be used.", 0, java.lang.Integer.MAX_VALUE, jurisdiction));
         childrenList.add(new Property("topic", "CodeableConcept", "Descriptive topics related to the content of the plan definition. Topics provide a high-level categorization of the definition that can be useful for filtering and searching.", 0, java.lang.Integer.MAX_VALUE, topic));
         childrenList.add(new Property("contributor", "Contributor", "A contributor to the content of the asset, including authors, editors, reviewers, and endorsers.", 0, java.lang.Integer.MAX_VALUE, contributor));
         childrenList.add(new Property("contact", "ContactDetail", "Contact details to assist a user in finding and communicating with the publisher.", 0, java.lang.Integer.MAX_VALUE, contact));
         childrenList.add(new Property("copyright", "markdown", "A copyright statement relating to the plan definition and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the plan definition.", 0, java.lang.Integer.MAX_VALUE, copyright));
         childrenList.add(new Property("relatedArtifact", "RelatedArtifact", "Related artifacts such as additional documentation, justification, or bibliographic references.", 0, java.lang.Integer.MAX_VALUE, relatedArtifact));
         childrenList.add(new Property("library", "Reference(Library)", "A reference to a Library resource containing any formal logic used by the plan definition.", 0, java.lang.Integer.MAX_VALUE, library));
-        childrenList.add(new Property("goalDefinition", "", "Goals that describe what the activities within the plan are intended to achieve. For example, weight loss, restoring an activity of daily living, obtaining herd immunity via immunization, meeting a process improvement objective, etc.", 0, java.lang.Integer.MAX_VALUE, goalDefinition));
-        childrenList.add(new Property("actionDefinition", "", "An action to be taken as part of the plan.", 0, java.lang.Integer.MAX_VALUE, actionDefinition));
+        childrenList.add(new Property("goal", "", "Goals that describe what the activities within the plan are intended to achieve. For example, weight loss, restoring an activity of daily living, obtaining herd immunity via immunization, meeting a process improvement objective, etc.", 0, java.lang.Integer.MAX_VALUE, goal));
+        childrenList.add(new Property("action", "", "An action to be taken as part of the plan.", 0, java.lang.Integer.MAX_VALUE, action));
       }
 
       @Override
@@ -6560,8 +6560,8 @@ public class PlanDefinition extends MetadataResource {
         case 1522889671: /*copyright*/ return this.copyright == null ? new Base[0] : new Base[] {this.copyright}; // MarkdownType
         case 666807069: /*relatedArtifact*/ return this.relatedArtifact == null ? new Base[0] : this.relatedArtifact.toArray(new Base[this.relatedArtifact.size()]); // RelatedArtifact
         case 166208699: /*library*/ return this.library == null ? new Base[0] : this.library.toArray(new Base[this.library.size()]); // Reference
-        case 1077023942: /*goalDefinition*/ return this.goalDefinition == null ? new Base[0] : this.goalDefinition.toArray(new Base[this.goalDefinition.size()]); // PlanDefinitionGoalDefinitionComponent
-        case -285031383: /*actionDefinition*/ return this.actionDefinition == null ? new Base[0] : this.actionDefinition.toArray(new Base[this.actionDefinition.size()]); // PlanDefinitionActionDefinitionComponent
+        case 3178259: /*goal*/ return this.goal == null ? new Base[0] : this.goal.toArray(new Base[this.goal.size()]); // PlanDefinitionGoalComponent
+        case -1422950858: /*action*/ return this.action == null ? new Base[0] : this.action.toArray(new Base[this.action.size()]); // PlanDefinitionActionComponent
         default: return super.getProperty(hash, name, checkValid);
         }
 
@@ -6643,11 +6643,11 @@ public class PlanDefinition extends MetadataResource {
         case 166208699: // library
           this.getLibrary().add(castToReference(value)); // Reference
           return value;
-        case 1077023942: // goalDefinition
-          this.getGoalDefinition().add((PlanDefinitionGoalDefinitionComponent) value); // PlanDefinitionGoalDefinitionComponent
+        case 3178259: // goal
+          this.getGoal().add((PlanDefinitionGoalComponent) value); // PlanDefinitionGoalComponent
           return value;
-        case -285031383: // actionDefinition
-          this.getActionDefinition().add((PlanDefinitionActionDefinitionComponent) value); // PlanDefinitionActionDefinitionComponent
+        case -1422950858: // action
+          this.getAction().add((PlanDefinitionActionComponent) value); // PlanDefinitionActionComponent
           return value;
         default: return super.setProperty(hash, name, value);
         }
@@ -6705,10 +6705,10 @@ public class PlanDefinition extends MetadataResource {
           this.getRelatedArtifact().add(castToRelatedArtifact(value));
         } else if (name.equals("library")) {
           this.getLibrary().add(castToReference(value));
-        } else if (name.equals("goalDefinition")) {
-          this.getGoalDefinition().add((PlanDefinitionGoalDefinitionComponent) value);
-        } else if (name.equals("actionDefinition")) {
-          this.getActionDefinition().add((PlanDefinitionActionDefinitionComponent) value);
+        } else if (name.equals("goal")) {
+          this.getGoal().add((PlanDefinitionGoalComponent) value);
+        } else if (name.equals("action")) {
+          this.getAction().add((PlanDefinitionActionComponent) value);
         } else
           return super.setProperty(name, value);
         return value;
@@ -6741,8 +6741,8 @@ public class PlanDefinition extends MetadataResource {
         case 1522889671:  return getCopyrightElement();
         case 666807069:  return addRelatedArtifact(); 
         case 166208699:  return addLibrary(); 
-        case 1077023942:  return addGoalDefinition(); 
-        case -285031383:  return addActionDefinition(); 
+        case 3178259:  return addGoal(); 
+        case -1422950858:  return addAction(); 
         default: return super.makeProperty(hash, name);
         }
 
@@ -6775,8 +6775,8 @@ public class PlanDefinition extends MetadataResource {
         case 1522889671: /*copyright*/ return new String[] {"markdown"};
         case 666807069: /*relatedArtifact*/ return new String[] {"RelatedArtifact"};
         case 166208699: /*library*/ return new String[] {"Reference"};
-        case 1077023942: /*goalDefinition*/ return new String[] {};
-        case -285031383: /*actionDefinition*/ return new String[] {};
+        case 3178259: /*goal*/ return new String[] {};
+        case -1422950858: /*action*/ return new String[] {};
         default: return super.getTypesForProperty(hash, name);
         }
 
@@ -6858,11 +6858,11 @@ public class PlanDefinition extends MetadataResource {
         else if (name.equals("library")) {
           return addLibrary();
         }
-        else if (name.equals("goalDefinition")) {
-          return addGoalDefinition();
+        else if (name.equals("goal")) {
+          return addGoal();
         }
-        else if (name.equals("actionDefinition")) {
-          return addActionDefinition();
+        else if (name.equals("action")) {
+          return addAction();
         }
         else
           return super.addChild(name);
@@ -6932,15 +6932,15 @@ public class PlanDefinition extends MetadataResource {
           for (Reference i : library)
             dst.library.add(i.copy());
         };
-        if (goalDefinition != null) {
-          dst.goalDefinition = new ArrayList<PlanDefinitionGoalDefinitionComponent>();
-          for (PlanDefinitionGoalDefinitionComponent i : goalDefinition)
-            dst.goalDefinition.add(i.copy());
+        if (goal != null) {
+          dst.goal = new ArrayList<PlanDefinitionGoalComponent>();
+          for (PlanDefinitionGoalComponent i : goal)
+            dst.goal.add(i.copy());
         };
-        if (actionDefinition != null) {
-          dst.actionDefinition = new ArrayList<PlanDefinitionActionDefinitionComponent>();
-          for (PlanDefinitionActionDefinitionComponent i : actionDefinition)
-            dst.actionDefinition.add(i.copy());
+        if (action != null) {
+          dst.action = new ArrayList<PlanDefinitionActionComponent>();
+          for (PlanDefinitionActionComponent i : action)
+            dst.action.add(i.copy());
         };
         return dst;
       }
@@ -6960,8 +6960,8 @@ public class PlanDefinition extends MetadataResource {
            && compareDeep(usage, o.usage, true) && compareDeep(approvalDate, o.approvalDate, true) && compareDeep(lastReviewDate, o.lastReviewDate, true)
            && compareDeep(effectivePeriod, o.effectivePeriod, true) && compareDeep(topic, o.topic, true) && compareDeep(contributor, o.contributor, true)
            && compareDeep(copyright, o.copyright, true) && compareDeep(relatedArtifact, o.relatedArtifact, true)
-           && compareDeep(library, o.library, true) && compareDeep(goalDefinition, o.goalDefinition, true)
-           && compareDeep(actionDefinition, o.actionDefinition, true);
+           && compareDeep(library, o.library, true) && compareDeep(goal, o.goal, true) && compareDeep(action, o.action, true)
+          ;
       }
 
       @Override
@@ -6979,7 +6979,7 @@ public class PlanDefinition extends MetadataResource {
       public boolean isEmpty() {
         return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, type, purpose
           , usage, approvalDate, lastReviewDate, effectivePeriod, topic, contributor, copyright
-          , relatedArtifact, library, goalDefinition, actionDefinition);
+          , relatedArtifact, library, goal, action);
       }
 
   @Override
@@ -7010,17 +7010,17 @@ public class PlanDefinition extends MetadataResource {
  /**
    * Search parameter: <b>identifier</b>
    * <p>
-   * Description: <b>External identifiers for the plan definition</b><br>
+   * Description: <b>External identifier for the plan definition</b><br>
    * Type: <b>token</b><br>
    * Path: <b>PlanDefinition.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="PlanDefinition.identifier", description="External identifiers for the plan definition", type="token" )
+  @SearchParamDefinition(name="identifier", path="PlanDefinition.identifier", description="External identifier for the plan definition", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
    * <p>
-   * Description: <b>External identifiers for the plan definition</b><br>
+   * Description: <b>External identifier for the plan definition</b><br>
    * Type: <b>token</b><br>
    * Path: <b>PlanDefinition.identifier</b><br>
    * </p>
@@ -7028,39 +7028,45 @@ public class PlanDefinition extends MetadataResource {
   public static final ca.uhn.fhir.rest.gclient.TokenClientParam IDENTIFIER = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_IDENTIFIER);
 
  /**
-   * Search parameter: <b>effective</b>
+   * Search parameter: <b>successor</b>
    * <p>
-   * Description: <b>Effective time associated with the plan definition</b><br>
-   * Type: <b>date</b><br>
-   * Path: <b>PlanDefinition.effectivePeriod</b><br>
+   * Description: <b>What resource is being referenced</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>PlanDefinition.relatedArtifact.resource</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="effective", path="PlanDefinition.effectivePeriod", description="Effective time associated with the plan definition", type="date" )
-  public static final String SP_EFFECTIVE = "effective";
+  @SearchParamDefinition(name="successor", path="PlanDefinition.relatedArtifact.where(type='successor').resource", description="What resource is being referenced", type="reference" )
+  public static final String SP_SUCCESSOR = "successor";
  /**
-   * <b>Fluent Client</b> search parameter constant for <b>effective</b>
+   * <b>Fluent Client</b> search parameter constant for <b>successor</b>
    * <p>
-   * Description: <b>Effective time associated with the plan definition</b><br>
-   * Type: <b>date</b><br>
-   * Path: <b>PlanDefinition.effectivePeriod</b><br>
+   * Description: <b>What resource is being referenced</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>PlanDefinition.relatedArtifact.resource</b><br>
    * </p>
    */
-  public static final ca.uhn.fhir.rest.gclient.DateClientParam EFFECTIVE = new ca.uhn.fhir.rest.gclient.DateClientParam(SP_EFFECTIVE);
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam SUCCESSOR = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_SUCCESSOR);
+
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>PlanDefinition:successor</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_SUCCESSOR = new ca.uhn.fhir.model.api.Include("PlanDefinition:successor").toLocked();
 
  /**
    * Search parameter: <b>jurisdiction</b>
    * <p>
-   * Description: <b>Intended jurisdiction for plan definition</b><br>
+   * Description: <b>Intended jurisdiction for the plan definition</b><br>
    * Type: <b>token</b><br>
    * Path: <b>PlanDefinition.jurisdiction</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="jurisdiction", path="PlanDefinition.jurisdiction", description="Intended jurisdiction for plan definition", type="token" )
+  @SearchParamDefinition(name="jurisdiction", path="PlanDefinition.jurisdiction", description="Intended jurisdiction for the plan definition", type="token" )
   public static final String SP_JURISDICTION = "jurisdiction";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>jurisdiction</b>
    * <p>
-   * Description: <b>Intended jurisdiction for plan definition</b><br>
+   * Description: <b>Intended jurisdiction for the plan definition</b><br>
    * Type: <b>token</b><br>
    * Path: <b>PlanDefinition.jurisdiction</b><br>
    * </p>
@@ -7068,39 +7074,19 @@ public class PlanDefinition extends MetadataResource {
   public static final ca.uhn.fhir.rest.gclient.TokenClientParam JURISDICTION = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_JURISDICTION);
 
  /**
-   * Search parameter: <b>name</b>
-   * <p>
-   * Description: <b>Name of the plan definition</b><br>
-   * Type: <b>string</b><br>
-   * Path: <b>PlanDefinition.name</b><br>
-   * </p>
-   */
-  @SearchParamDefinition(name="name", path="PlanDefinition.name", description="Name of the plan definition", type="string" )
-  public static final String SP_NAME = "name";
- /**
-   * <b>Fluent Client</b> search parameter constant for <b>name</b>
-   * <p>
-   * Description: <b>Name of the plan definition</b><br>
-   * Type: <b>string</b><br>
-   * Path: <b>PlanDefinition.name</b><br>
-   * </p>
-   */
-  public static final ca.uhn.fhir.rest.gclient.StringClientParam NAME = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_NAME);
-
- /**
    * Search parameter: <b>description</b>
    * <p>
-   * Description: <b>Text search against the description of the plan definition</b><br>
+   * Description: <b>The description of the plan definition</b><br>
    * Type: <b>string</b><br>
    * Path: <b>PlanDefinition.description</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="description", path="PlanDefinition.description", description="Text search against the description of the plan definition", type="string" )
+  @SearchParamDefinition(name="description", path="PlanDefinition.description", description="The description of the plan definition", type="string" )
   public static final String SP_DESCRIPTION = "description";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>description</b>
    * <p>
-   * Description: <b>Text search against the description of the plan definition</b><br>
+   * Description: <b>The description of the plan definition</b><br>
    * Type: <b>string</b><br>
    * Path: <b>PlanDefinition.description</b><br>
    * </p>
@@ -7108,64 +7094,102 @@ public class PlanDefinition extends MetadataResource {
   public static final ca.uhn.fhir.rest.gclient.StringClientParam DESCRIPTION = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_DESCRIPTION);
 
  /**
-   * Search parameter: <b>publisher</b>
+   * Search parameter: <b>derived-from</b>
    * <p>
-   * Description: <b>Name of the publisher of the plan definition</b><br>
-   * Type: <b>string</b><br>
-   * Path: <b>PlanDefinition.publisher</b><br>
+   * Description: <b>What resource is being referenced</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>PlanDefinition.relatedArtifact.resource</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="publisher", path="PlanDefinition.publisher", description="Name of the publisher of the plan definition", type="string" )
-  public static final String SP_PUBLISHER = "publisher";
+  @SearchParamDefinition(name="derived-from", path="PlanDefinition.relatedArtifact.where(type='derived-from').resource", description="What resource is being referenced", type="reference" )
+  public static final String SP_DERIVED_FROM = "derived-from";
  /**
-   * <b>Fluent Client</b> search parameter constant for <b>publisher</b>
+   * <b>Fluent Client</b> search parameter constant for <b>derived-from</b>
    * <p>
-   * Description: <b>Name of the publisher of the plan definition</b><br>
-   * Type: <b>string</b><br>
-   * Path: <b>PlanDefinition.publisher</b><br>
+   * Description: <b>What resource is being referenced</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>PlanDefinition.relatedArtifact.resource</b><br>
    * </p>
    */
-  public static final ca.uhn.fhir.rest.gclient.StringClientParam PUBLISHER = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_PUBLISHER);
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam DERIVED_FROM = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_DERIVED_FROM);
+
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>PlanDefinition:derived-from</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_DERIVED_FROM = new ca.uhn.fhir.model.api.Include("PlanDefinition:derived-from").toLocked();
 
  /**
-   * Search parameter: <b>topic</b>
+   * Search parameter: <b>predecessor</b>
    * <p>
-   * Description: <b>Topics associated with the module</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>PlanDefinition.topic</b><br>
+   * Description: <b>What resource is being referenced</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>PlanDefinition.relatedArtifact.resource</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="topic", path="PlanDefinition.topic", description="Topics associated with the module", type="token" )
-  public static final String SP_TOPIC = "topic";
+  @SearchParamDefinition(name="predecessor", path="PlanDefinition.relatedArtifact.where(type='predecessor').resource", description="What resource is being referenced", type="reference" )
+  public static final String SP_PREDECESSOR = "predecessor";
  /**
-   * <b>Fluent Client</b> search parameter constant for <b>topic</b>
+   * <b>Fluent Client</b> search parameter constant for <b>predecessor</b>
    * <p>
-   * Description: <b>Topics associated with the module</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>PlanDefinition.topic</b><br>
+   * Description: <b>What resource is being referenced</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>PlanDefinition.relatedArtifact.resource</b><br>
    * </p>
    */
-  public static final ca.uhn.fhir.rest.gclient.TokenClientParam TOPIC = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_TOPIC);
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam PREDECESSOR = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_PREDECESSOR);
+
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>PlanDefinition:predecessor</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_PREDECESSOR = new ca.uhn.fhir.model.api.Include("PlanDefinition:predecessor").toLocked();
 
  /**
    * Search parameter: <b>title</b>
    * <p>
-   * Description: <b>Text search against the title of the plan definition</b><br>
+   * Description: <b>The human-friendly name of the plan definition</b><br>
    * Type: <b>string</b><br>
    * Path: <b>PlanDefinition.title</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="title", path="PlanDefinition.title", description="Text search against the title of the plan definition", type="string" )
+  @SearchParamDefinition(name="title", path="PlanDefinition.title", description="The human-friendly name of the plan definition", type="string" )
   public static final String SP_TITLE = "title";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>title</b>
    * <p>
-   * Description: <b>Text search against the title of the plan definition</b><br>
+   * Description: <b>The human-friendly name of the plan definition</b><br>
    * Type: <b>string</b><br>
    * Path: <b>PlanDefinition.title</b><br>
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.StringClientParam TITLE = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_TITLE);
+
+ /**
+   * Search parameter: <b>composed-of</b>
+   * <p>
+   * Description: <b>What resource is being referenced</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>PlanDefinition.relatedArtifact.resource</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="composed-of", path="PlanDefinition.relatedArtifact.where(type='composed-of').resource", description="What resource is being referenced", type="reference" )
+  public static final String SP_COMPOSED_OF = "composed-of";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>composed-of</b>
+   * <p>
+   * Description: <b>What resource is being referenced</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>PlanDefinition.relatedArtifact.resource</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam COMPOSED_OF = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_COMPOSED_OF);
+
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>PlanDefinition:composed-of</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_COMPOSED_OF = new ca.uhn.fhir.model.api.Include("PlanDefinition:composed-of").toLocked();
 
  /**
    * Search parameter: <b>version</b>
@@ -7206,6 +7230,112 @@ public class PlanDefinition extends MetadataResource {
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.UriClientParam URL = new ca.uhn.fhir.rest.gclient.UriClientParam(SP_URL);
+
+ /**
+   * Search parameter: <b>effective</b>
+   * <p>
+   * Description: <b>The time during which the plan definition is intended to be in use</b><br>
+   * Type: <b>date</b><br>
+   * Path: <b>PlanDefinition.effectivePeriod</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="effective", path="PlanDefinition.effectivePeriod", description="The time during which the plan definition is intended to be in use", type="date" )
+  public static final String SP_EFFECTIVE = "effective";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>effective</b>
+   * <p>
+   * Description: <b>The time during which the plan definition is intended to be in use</b><br>
+   * Type: <b>date</b><br>
+   * Path: <b>PlanDefinition.effectivePeriod</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.DateClientParam EFFECTIVE = new ca.uhn.fhir.rest.gclient.DateClientParam(SP_EFFECTIVE);
+
+ /**
+   * Search parameter: <b>depends-on</b>
+   * <p>
+   * Description: <b>What resource is being referenced</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>PlanDefinition.relatedArtifact.resource, PlanDefinition.library</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="depends-on", path="PlanDefinition.relatedArtifact.where(type='depends-on').resource | PlanDefinition.library", description="What resource is being referenced", type="reference" )
+  public static final String SP_DEPENDS_ON = "depends-on";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>depends-on</b>
+   * <p>
+   * Description: <b>What resource is being referenced</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>PlanDefinition.relatedArtifact.resource, PlanDefinition.library</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam DEPENDS_ON = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_DEPENDS_ON);
+
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>PlanDefinition:depends-on</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_DEPENDS_ON = new ca.uhn.fhir.model.api.Include("PlanDefinition:depends-on").toLocked();
+
+ /**
+   * Search parameter: <b>name</b>
+   * <p>
+   * Description: <b>Computationally friendly name of the plan definition</b><br>
+   * Type: <b>string</b><br>
+   * Path: <b>PlanDefinition.name</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="name", path="PlanDefinition.name", description="Computationally friendly name of the plan definition", type="string" )
+  public static final String SP_NAME = "name";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>name</b>
+   * <p>
+   * Description: <b>Computationally friendly name of the plan definition</b><br>
+   * Type: <b>string</b><br>
+   * Path: <b>PlanDefinition.name</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.StringClientParam NAME = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_NAME);
+
+ /**
+   * Search parameter: <b>publisher</b>
+   * <p>
+   * Description: <b>Name of the publisher of the plan definition</b><br>
+   * Type: <b>string</b><br>
+   * Path: <b>PlanDefinition.publisher</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="publisher", path="PlanDefinition.publisher", description="Name of the publisher of the plan definition", type="string" )
+  public static final String SP_PUBLISHER = "publisher";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>publisher</b>
+   * <p>
+   * Description: <b>Name of the publisher of the plan definition</b><br>
+   * Type: <b>string</b><br>
+   * Path: <b>PlanDefinition.publisher</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.StringClientParam PUBLISHER = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_PUBLISHER);
+
+ /**
+   * Search parameter: <b>topic</b>
+   * <p>
+   * Description: <b>Topics associated with the module</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>PlanDefinition.topic</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="topic", path="PlanDefinition.topic", description="Topics associated with the module", type="token" )
+  public static final String SP_TOPIC = "topic";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>topic</b>
+   * <p>
+   * Description: <b>Topics associated with the module</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>PlanDefinition.topic</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam TOPIC = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_TOPIC);
 
  /**
    * Search parameter: <b>status</b>

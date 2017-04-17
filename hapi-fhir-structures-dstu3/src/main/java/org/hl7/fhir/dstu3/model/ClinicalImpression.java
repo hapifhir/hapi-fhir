@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
+// Generated on Mon, Apr 17, 2017 17:38-0400 for FHIR v3.0.1
 
 import java.util.*;
 
@@ -668,10 +668,10 @@ public class ClinicalImpression extends DomainResource {
     protected CodeableConcept code;
 
     /**
-     * A summary of the context and/or cause of the assessment - why / where was it peformed, and what patient events/status prompted it.
+     * A summary of the context and/or cause of the assessment - why / where was it performed, and what patient events/status prompted it.
      */
     @Child(name = "description", type = {StringType.class}, order=3, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Why/how the assessment was performed", formalDefinition="A summary of the context and/or cause of the assessment - why / where was it peformed, and what patient events/status prompted it." )
+    @Description(shortDefinition="Why/how the assessment was performed", formalDefinition="A summary of the context and/or cause of the assessment - why / where was it performed, and what patient events/status prompted it." )
     protected StringType description;
 
     /**
@@ -956,7 +956,7 @@ public class ClinicalImpression extends DomainResource {
     }
 
     /**
-     * @return {@link #description} (A summary of the context and/or cause of the assessment - why / where was it peformed, and what patient events/status prompted it.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
+     * @return {@link #description} (A summary of the context and/or cause of the assessment - why / where was it performed, and what patient events/status prompted it.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
      */
     public StringType getDescriptionElement() { 
       if (this.description == null)
@@ -976,7 +976,7 @@ public class ClinicalImpression extends DomainResource {
     }
 
     /**
-     * @param value {@link #description} (A summary of the context and/or cause of the assessment - why / where was it peformed, and what patient events/status prompted it.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
+     * @param value {@link #description} (A summary of the context and/or cause of the assessment - why / where was it performed, and what patient events/status prompted it.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
      */
     public ClinicalImpression setDescriptionElement(StringType value) { 
       this.description = value;
@@ -984,14 +984,14 @@ public class ClinicalImpression extends DomainResource {
     }
 
     /**
-     * @return A summary of the context and/or cause of the assessment - why / where was it peformed, and what patient events/status prompted it.
+     * @return A summary of the context and/or cause of the assessment - why / where was it performed, and what patient events/status prompted it.
      */
     public String getDescription() { 
       return this.description == null ? null : this.description.getValue();
     }
 
     /**
-     * @param value A summary of the context and/or cause of the assessment - why / where was it peformed, and what patient events/status prompted it.
+     * @param value A summary of the context and/or cause of the assessment - why / where was it performed, and what patient events/status prompted it.
      */
     public ClinicalImpression setDescription(String value) { 
       if (Utilities.noString(value))
@@ -1792,7 +1792,7 @@ public class ClinicalImpression extends DomainResource {
         childrenList.add(new Property("identifier", "Identifier", "A unique identifier assigned to the clinical impression that remains consistent regardless of what server the impression is stored on.", 0, java.lang.Integer.MAX_VALUE, identifier));
         childrenList.add(new Property("status", "code", "Identifies the workflow status of the assessment.", 0, java.lang.Integer.MAX_VALUE, status));
         childrenList.add(new Property("code", "CodeableConcept", "Categorizes the type of clinical assessment performed.", 0, java.lang.Integer.MAX_VALUE, code));
-        childrenList.add(new Property("description", "string", "A summary of the context and/or cause of the assessment - why / where was it peformed, and what patient events/status prompted it.", 0, java.lang.Integer.MAX_VALUE, description));
+        childrenList.add(new Property("description", "string", "A summary of the context and/or cause of the assessment - why / where was it performed, and what patient events/status prompted it.", 0, java.lang.Integer.MAX_VALUE, description));
         childrenList.add(new Property("subject", "Reference(Patient|Group)", "The patient or group of individuals assessed as part of this record.", 0, java.lang.Integer.MAX_VALUE, subject));
         childrenList.add(new Property("context", "Reference(Encounter|EpisodeOfCare)", "The encounter or episode of care this impression was created as part of.", 0, java.lang.Integer.MAX_VALUE, context));
         childrenList.add(new Property("effective[x]", "dateTime|Period", "The point in time or period over which the subject was assessed.", 0, java.lang.Integer.MAX_VALUE, effective));

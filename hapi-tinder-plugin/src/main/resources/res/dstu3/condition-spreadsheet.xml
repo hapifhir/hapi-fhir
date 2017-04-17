@@ -22,6 +22,7 @@
   <WindowTopY>0</WindowTopY>
   <TabRatio>763</TabRatio>
   <ActiveSheet>2</ActiveSheet>
+  <RefModeR1C1/>
   <ProtectStructure>False</ProtectStructure>
   <ProtectWindows>False</ProtectWindows>
  </ExcelWorkbook>
@@ -1120,7 +1121,8 @@
     <Cell ss:StyleID="s89"><Data ss:Type="String">The clinical status of the condition.</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s89"><Data ss:Type="String">This element is labeled as a modifier because the status contains codes that mark the condition as not currently valid or of concern</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s94"><Data ss:Type="String">Observation ACT&#10;.inboundRelationship[typeCode=COMP].source[classCode=OBS, code=&quot;clinicalStatus&quot;, moodCode=EVN].value</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
@@ -1162,7 +1164,7 @@
     <Cell ss:StyleID="s89"><Data ss:Type="String">The verification status to support the clinical status of the condition.</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s89"><Data ss:Type="String">verificationStatus is not required.  For example, when a patient has abdominal pain in the ED, there is not likely going to be a verification status.</Data><NamedCell
+    <Cell ss:StyleID="s89"><Data ss:Type="String">verificationStatus is not required.  For example, when a patient has abdominal pain in the ED, there is not likely going to be a verification status.&#10;&#10;This element is labeled as a modifier because the status contains the code refuted and entered-in-error that mark the Condition as not currently valid</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s94"><Data ss:Type="String">Observation ACT&#10;.inboundRelationship[typeCode=COMP].source[classCode=OBS, code=&quot;verificationStatus&quot;, moodCode=EVN].value</Data><NamedCell
@@ -3849,9 +3851,9 @@
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>
-   <TopRowBottomPane>7</TopRowBottomPane>
+   <TopRowBottomPane>2</TopRowBottomPane>
    <SplitVertical>1</SplitVertical>
-   <LeftColumnRightPane>1</LeftColumnRightPane>
+   <LeftColumnRightPane>5</LeftColumnRightPane>
    <ActivePane>0</ActivePane>
    <Panes>
     <Pane>
@@ -3859,6 +3861,7 @@
     </Pane>
     <Pane>
      <Number>1</Number>
+     <ActiveCol>1</ActiveCol>
     </Pane>
     <Pane>
      <Number>2</Number>
@@ -3866,8 +3869,8 @@
     </Pane>
     <Pane>
      <Number>0</Number>
-     <ActiveRow>12</ActiveRow>
-     <ActiveCol>13</ActiveCol>
+     <ActiveRow>4</ActiveRow>
+     <ActiveCol>16</ActiveCol>
     </Pane>
    </Panes>
    <ProtectObjects>False</ProtectObjects>
@@ -3966,7 +3969,7 @@
     <Cell ss:StyleID="s91"><Data ss:Type="String">Condition</Data></Cell>
     <Cell ss:StyleID="s91"><Data ss:Type="String">If condition is abated, then clinicalStatus must be either inactive, resolved, or remission </Data></Cell>
     <Cell ss:StyleID="s91"><Data ss:Type="String">abatement.empty() or (abatement as boolean).not()  or clinicalStatus='resolved' or clinicalStatus='remission' or clinicalStatus='inactive'</Data></Cell>
-    <Cell ss:StyleID="s110"><Data ss:Type="String">not(f:abatementBoolean='true' or (not(exists(f:abatementBoolean)) and exists(*[starts-with(local-name(.), 'abatement')])) or f:clinicalStatus/@value=('resolved', 'remission', 'inactive'))</Data></Cell>
+    <Cell ss:StyleID="s110"><Data ss:Type="String">not(f:abatementBoolean/@value=true() or (not(exists(f:abatementBoolean)) and exists(*[starts-with(local-name(.), 'abatement')])) or f:clinicalStatus/@value=('resolved', 'remission', 'inactive'))</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s109"><NamedCell ss:Name="Invariantids"/></Cell>
@@ -4393,17 +4396,17 @@
  </Worksheet>
  <Worksheet ss:Name="Search">
   <Names>
-   <NamedRange ss:Name="_FilterDatabase" ss:RefersTo="=Search!R1C1:R1C6"
+   <NamedRange ss:Name="_FilterDatabase" ss:RefersTo="=Search!R1C1:R1C7"
     ss:Hidden="1"/>
   </Names>
-  <Table ss:ExpandedColumnCount="6" ss:ExpandedRowCount="24" x:FullColumns="1"
+  <Table ss:ExpandedColumnCount="7" ss:ExpandedRowCount="24" x:FullColumns="1"
    x:FullRows="1" ss:StyleID="s114" ss:DefaultColumnWidth="64.8"
    ss:DefaultRowHeight="15">
    <Column ss:StyleID="s114" ss:AutoFitWidth="0" ss:Width="114"/>
    <Column ss:StyleID="s114" ss:AutoFitWidth="0" ss:Width="57"/>
    <Column ss:StyleID="s114" ss:AutoFitWidth="0" ss:Width="109.8"/>
-   <Column ss:StyleID="s114" ss:AutoFitWidth="0" ss:Width="210" ss:Span="1"/>
-   <Column ss:Index="6" ss:StyleID="s114" ss:AutoFitWidth="0"
+   <Column ss:StyleID="s114" ss:AutoFitWidth="0" ss:Width="210" ss:Span="2"/>
+   <Column ss:Index="7" ss:StyleID="s114" ss:AutoFitWidth="0"
     ss:Width="382.79999999999995"/>
    <Row ss:AutoFitHeight="0" ss:StyleID="s115">
     <Cell ss:StyleID="s104"><Data ss:Type="String">Name</Data><Comment ss:Author=""><ss:Data
@@ -4423,6 +4426,8 @@
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s116"><Data ss:Type="String">Expression</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s116"><Data ss:Type="String">XPath</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s106"><Data ss:Type="String">Description</Data><Comment
       ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
         html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Explanation of param.  Will default if omitted and Path is specified, otherwise it is required</Font>       </ss:Data></Comment><NamedCell
@@ -4434,6 +4439,7 @@
     <Cell ss:StyleID="s79"/>
     <Cell ss:StyleID="s118"><Data ss:Type="String">Condition.code</Data></Cell>
     <Cell ss:StyleID="s118"/>
+    <Cell ss:StyleID="s118"/>
     <Cell ss:StyleID="s119"><Data ss:Type="String">Code for the condition</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
@@ -4441,6 +4447,7 @@
     <Cell ss:StyleID="s88"><Data ss:Type="String">token</Data></Cell>
     <Cell ss:StyleID="s88"/>
     <Cell ss:StyleID="s121"><Data ss:Type="String">Condition.identifier</Data></Cell>
+    <Cell ss:StyleID="s121"/>
     <Cell ss:StyleID="s121"/>
     <Cell ss:StyleID="s122"><Data ss:Type="String">A unique identifier of the condition record</Data></Cell>
    </Row>
@@ -4450,6 +4457,7 @@
     <Cell ss:StyleID="s88"/>
     <Cell ss:StyleID="s121"><Data ss:Type="String">Condition.clinicalStatus</Data></Cell>
     <Cell ss:StyleID="s121"/>
+    <Cell ss:StyleID="s121"/>
     <Cell ss:StyleID="s122"><Data ss:Type="String">The clinical status of the condition</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
@@ -4457,6 +4465,7 @@
     <Cell ss:StyleID="s88"><Data ss:Type="String">token</Data></Cell>
     <Cell ss:StyleID="s88"/>
     <Cell ss:StyleID="s121"><Data ss:Type="String">Condition.severity</Data></Cell>
+    <Cell ss:StyleID="s121"/>
     <Cell ss:StyleID="s121"/>
     <Cell ss:StyleID="s122"><Data ss:Type="String">The severity of the condition</Data></Cell>
    </Row>
@@ -4466,6 +4475,7 @@
     <Cell ss:StyleID="s88"/>
     <Cell ss:StyleID="s121"><Data ss:Type="String">Condition.category</Data></Cell>
     <Cell ss:StyleID="s121"/>
+    <Cell ss:StyleID="s121"/>
     <Cell ss:StyleID="s122"><Data ss:Type="String">The category of the condition</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="28.8">
@@ -4473,7 +4483,8 @@
     <Cell ss:StyleID="s88"><Data ss:Type="String">quantity</Data></Cell>
     <Cell ss:StyleID="s88"/>
     <Cell ss:StyleID="s121"><Data ss:Type="String">Condition.onset[x]</Data></Cell>
-    <Cell ss:StyleID="s121"><Data ss:Type="String">Condition.onset.as(Quantity) | Condition.onset.as(Range)</Data></Cell>
+    <Cell ss:StyleID="s121"><Data ss:Type="String">Condition.onset.as(Age) | Condition.onset.as(Range)</Data></Cell>
+    <Cell ss:StyleID="s121"><Data ss:Type="String">f:Condition/f:onsetAge | f:Condition/f:onsetRange</Data></Cell>
     <Cell ss:StyleID="s122"><Data ss:Type="String">Onsets as age or age range</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="28.8">
@@ -4482,6 +4493,7 @@
     <Cell ss:StyleID="s88"/>
     <Cell ss:StyleID="s121"><Data ss:Type="String">Condition.onset[x]</Data></Cell>
     <Cell ss:StyleID="s121"><Data ss:Type="String">Condition.onset.as(dateTime) | Condition.onset.as(Period)</Data></Cell>
+    <Cell ss:StyleID="s121"><Data ss:Type="String">f:Condition/f:onsetDateTime | f:Condition/f:onsetPeriod</Data></Cell>
     <Cell ss:StyleID="s122"><Data ss:Type="String">Date related onsets (dateTime and Period)</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="14.55">
@@ -4490,6 +4502,7 @@
     <Cell ss:StyleID="s88"/>
     <Cell ss:StyleID="s121"><Data ss:Type="String">Condition.onset[x]</Data></Cell>
     <Cell ss:StyleID="s121"><Data ss:Type="String">Condition.onset.as(string)</Data></Cell>
+    <Cell ss:StyleID="s121"><Data ss:Type="String">f:Condition/f:onsetString</Data></Cell>
     <Cell ss:StyleID="s122"><Data ss:Type="String">Onsets as a string</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="45">
@@ -4497,7 +4510,8 @@
     <Cell ss:StyleID="s88"><Data ss:Type="String">quantity</Data></Cell>
     <Cell ss:StyleID="s88"/>
     <Cell ss:StyleID="s121"><Data ss:Type="String">Condition.abatement[x]</Data></Cell>
-    <Cell ss:StyleID="s121"><Data ss:Type="String">Condition.abatement.as(Quantity) | Condition.abatement.as(Range) | Condition.abatement.as(Age)</Data></Cell>
+    <Cell ss:StyleID="s121"><Data ss:Type="String">Condition.abatement.as(Age) | Condition.abatement.as(Range) | Condition.abatement.as(Age)</Data></Cell>
+    <Cell ss:StyleID="s121"><Data ss:Type="String">f:Condition/f:abatementAge | f:Condition/f:abatementRange</Data></Cell>
     <Cell ss:StyleID="s122"><Data ss:Type="String">Abatement as age or age range</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="86.550000000000011">
@@ -4506,6 +4520,7 @@
     <Cell ss:StyleID="s88"/>
     <Cell ss:StyleID="s121"><Data ss:Type="String">Condition.abatement[x]</Data></Cell>
     <Cell ss:StyleID="s88"><Data ss:Type="String">Condition.abatement.as(boolean) | Condition.abatement.is(dateTime) | Condition.abatement.is(Age) | Condition.abatement.is(Period) | Condition.abatement.is(Range) | Condition.abatement.is(string)</Data></Cell>
+    <Cell ss:StyleID="s88"/>
     <Cell ss:StyleID="s122"><Data ss:Type="String">Abatement boolean (boolean is true or non-boolean values are present)</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="28.8">
@@ -4514,6 +4529,7 @@
     <Cell ss:StyleID="s88"/>
     <Cell ss:StyleID="s121"><Data ss:Type="String">Condition.abatement[x]</Data></Cell>
     <Cell ss:StyleID="s121"><Data ss:Type="String">Condition.abatement.as(dateTime) | Condition.abatement.as(Period)</Data></Cell>
+    <Cell ss:StyleID="s121"><Data ss:Type="String">f:Condition/f:abatementDateTime | f:Condition/f:abatementPeriod</Data></Cell>
     <Cell ss:StyleID="s122"><Data ss:Type="String">Date-related abatements (dateTime and period)</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="28.8">
@@ -4522,6 +4538,7 @@
     <Cell ss:StyleID="s88"/>
     <Cell ss:StyleID="s121"><Data ss:Type="String">Condition.abatement[x]</Data></Cell>
     <Cell ss:StyleID="s121"><Data ss:Type="String">Condition.abatement.as(string)</Data></Cell>
+    <Cell ss:StyleID="s121"><Data ss:Type="String">f:Condition/f:abatementString</Data></Cell>
     <Cell ss:StyleID="s122"><Data ss:Type="String">Abatement as a string</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
@@ -4529,6 +4546,7 @@
     <Cell ss:StyleID="s88"><Data ss:Type="String">reference</Data></Cell>
     <Cell ss:StyleID="s88"/>
     <Cell ss:StyleID="s121"><Data ss:Type="String">Condition.context</Data></Cell>
+    <Cell ss:StyleID="s121"/>
     <Cell ss:StyleID="s121"/>
     <Cell ss:StyleID="s122"/>
    </Row>
@@ -4538,6 +4556,7 @@
     <Cell ss:StyleID="s88"/>
     <Cell ss:StyleID="s121"><Data ss:Type="String">Condition.asserter</Data></Cell>
     <Cell ss:StyleID="s121"/>
+    <Cell ss:StyleID="s121"/>
     <Cell ss:StyleID="s122"/>
    </Row>
    <Row ss:AutoFitHeight="0">
@@ -4545,6 +4564,7 @@
     <Cell ss:StyleID="s88"><Data ss:Type="String">date</Data></Cell>
     <Cell ss:StyleID="s88"/>
     <Cell ss:StyleID="s121"><Data ss:Type="String">Condition.assertedDate</Data></Cell>
+    <Cell ss:StyleID="s121"/>
     <Cell ss:StyleID="s121"/>
     <Cell ss:StyleID="s122"/>
    </Row>
@@ -4554,6 +4574,7 @@
     <Cell ss:StyleID="s88"/>
     <Cell ss:StyleID="s121"><Data ss:Type="String">Condition.evidence.code</Data></Cell>
     <Cell ss:StyleID="s121"/>
+    <Cell ss:StyleID="s121"/>
     <Cell ss:StyleID="s122"/>
    </Row>
    <Row ss:AutoFitHeight="0">
@@ -4561,6 +4582,7 @@
     <Cell ss:StyleID="s88"><Data ss:Type="String">token</Data></Cell>
     <Cell ss:StyleID="s88"/>
     <Cell ss:StyleID="s121"><Data ss:Type="String">Condition.bodySite</Data></Cell>
+    <Cell ss:StyleID="s121"/>
     <Cell ss:StyleID="s121"/>
     <Cell ss:StyleID="s122"/>
    </Row>
@@ -4570,6 +4592,7 @@
     <Cell ss:StyleID="s88"/>
     <Cell ss:StyleID="s121"><Data ss:Type="String">Condition.stage.summary</Data></Cell>
     <Cell ss:StyleID="s121"/>
+    <Cell ss:StyleID="s121"/>
     <Cell ss:StyleID="s122"/>
    </Row>
    <Row ss:AutoFitHeight="0">
@@ -4577,6 +4600,7 @@
     <Cell ss:StyleID="s88"><Data ss:Type="String">reference</Data></Cell>
     <Cell ss:StyleID="s88"><Data ss:Type="String">Patient</Data></Cell>
     <Cell ss:StyleID="s121"><Data ss:Type="String">Condition.subject</Data></Cell>
+    <Cell ss:StyleID="s121"/>
     <Cell ss:StyleID="s121"/>
     <Cell ss:StyleID="s122"/>
    </Row>
@@ -4586,6 +4610,7 @@
     <Cell ss:StyleID="s88"/>
     <Cell ss:StyleID="s121"><Data ss:Type="String">Condition.subject</Data></Cell>
     <Cell ss:StyleID="s121"/>
+    <Cell ss:StyleID="s121"/>
     <Cell ss:StyleID="s122"/>
    </Row>
    <Row ss:AutoFitHeight="0">
@@ -4593,6 +4618,7 @@
     <Cell ss:StyleID="s88"><Data ss:Type="String">reference</Data></Cell>
     <Cell ss:StyleID="s88"/>
     <Cell ss:StyleID="s121"><Data ss:Type="String">Condition.evidence.detail</Data></Cell>
+    <Cell ss:StyleID="s121"/>
     <Cell ss:StyleID="s121"/>
     <Cell ss:StyleID="s122"/>
    </Row>
@@ -4602,6 +4628,7 @@
     <Cell ss:StyleID="s88"/>
     <Cell ss:StyleID="s121"><Data ss:Type="String">Condition.verificationStatus</Data></Cell>
     <Cell ss:StyleID="s121"/>
+    <Cell ss:StyleID="s121"/>
     <Cell ss:StyleID="s122"/>
    </Row>
    <Row ss:AutoFitHeight="0">
@@ -4609,7 +4636,7 @@
     <Cell><Data ss:Type="String">reference</Data></Cell>
     <Cell><Data ss:Type="String">Encounter</Data></Cell>
     <Cell><Data ss:Type="String">Condition.context</Data></Cell>
-    <Cell ss:Index="6"><Data ss:Type="String">Encounter when condition first asserted</Data></Cell>
+    <Cell ss:Index="7"><Data ss:Type="String">Encounter when condition first asserted</Data></Cell>
    </Row>
   </Table>
   <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">
@@ -4627,7 +4654,7 @@
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>
-   <TopRowBottomPane>18</TopRowBottomPane>
+   <TopRowBottomPane>1</TopRowBottomPane>
    <SplitVertical>1</SplitVertical>
    <LeftColumnRightPane>1</LeftColumnRightPane>
    <ActivePane>0</ActivePane>
@@ -4640,12 +4667,11 @@
     </Pane>
     <Pane>
      <Number>2</Number>
-     <ActiveRow>1</ActiveRow>
     </Pane>
     <Pane>
      <Number>0</Number>
-     <ActiveRow>21</ActiveRow>
-     <ActiveCol>5</ActiveCol>
+     <ActiveRow>9</ActiveRow>
+     <ActiveCol>3</ActiveCol>
     </Pane>
    </Panes>
    <ProtectObjects>False</ProtectObjects>
@@ -4658,7 +4684,7 @@
    <CellRangeList/>
    <Value>&quot;number,date,string,token,reference,composite,quantity&quot;</Value>
   </DataValidation>
-  <AutoFilter x:Range="R1C1:R1C6" xmlns="urn:schemas-microsoft-com:office:excel">
+  <AutoFilter x:Range="R1C1:R1C7" xmlns="urn:schemas-microsoft-com:office:excel">
   </AutoFilter>
  </Worksheet>
  <Worksheet ss:Name="Operations">
@@ -6896,7 +6922,7 @@
     <Cell ss:StyleID="s121"/>
     <Cell ss:StyleID="s157"/>
     <Cell ss:StyleID="s157"><Data ss:Type="String">Differential</Data></Cell>
-    <Cell ss:StyleID="s157"><Data ss:Type="String">One of a set of potential (and typically mutually exclusive) diagnosis asserted to further guide the diagnostic process and preliminary treatment.</Data></Cell>
+    <Cell ss:StyleID="s157"><Data ss:Type="String">One of a set of potential (and typically mutually exclusive) diagnoses asserted to further guide the diagnostic process and preliminary treatment.</Data></Cell>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s144"/>

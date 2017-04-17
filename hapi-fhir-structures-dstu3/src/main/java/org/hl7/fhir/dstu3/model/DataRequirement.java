@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
+// Generated on Mon, Apr 17, 2017 17:38-0400 for FHIR v3.0.1
 
 import java.util.*;
 
@@ -43,7 +43,7 @@ import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.exceptions.FHIRException;
 /**
- * Describes a required data item for evaluation in terms of the type of data, and optional code- or date-based filters of the data.
+ * Describes a required data item for evaluation in terms of the type of data, and optional code or date-based filters of the data.
  */
 @DatatypeDef(name="DataRequirement")
 public class DataRequirement extends Type implements ICompositeType {
@@ -65,24 +65,24 @@ public class DataRequirement extends Type implements ICompositeType {
         protected Type valueSet;
 
         /**
-         * The codes for the code filter. Only one of valueSet, valueCode, valueConding, or valueCodeableConcept may be specified. If values are given, the filter will return only those data items for which the code-valued attribute specified by the path has a value that is one of the specified codes.
+         * The codes for the code filter. Only one of valueSet, valueCode, valueCoding, or valueCodeableConcept may be specified. If values are given, the filter will return only those data items for which the code-valued attribute specified by the path has a value that is one of the specified codes.
          */
         @Child(name = "valueCode", type = {CodeType.class}, order=3, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-        @Description(shortDefinition="Code value of the filter", formalDefinition="The codes for the code filter. Only one of valueSet, valueCode, valueConding, or valueCodeableConcept may be specified. If values are given, the filter will return only those data items for which the code-valued attribute specified by the path has a value that is one of the specified codes." )
+        @Description(shortDefinition="What code is expected", formalDefinition="The codes for the code filter. Only one of valueSet, valueCode, valueCoding, or valueCodeableConcept may be specified. If values are given, the filter will return only those data items for which the code-valued attribute specified by the path has a value that is one of the specified codes." )
         protected List<CodeType> valueCode;
 
         /**
          * The Codings for the code filter. Only one of valueSet, valueCode, valueConding, or valueCodeableConcept may be specified. If values are given, the filter will return only those data items for which the code-valued attribute specified by the path has a value that is one of the specified Codings.
          */
         @Child(name = "valueCoding", type = {Coding.class}, order=4, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-        @Description(shortDefinition="Coding value of the filter", formalDefinition="The Codings for the code filter. Only one of valueSet, valueCode, valueConding, or valueCodeableConcept may be specified. If values are given, the filter will return only those data items for which the code-valued attribute specified by the path has a value that is one of the specified Codings." )
+        @Description(shortDefinition="What Coding is expected", formalDefinition="The Codings for the code filter. Only one of valueSet, valueCode, valueConding, or valueCodeableConcept may be specified. If values are given, the filter will return only those data items for which the code-valued attribute specified by the path has a value that is one of the specified Codings." )
         protected List<Coding> valueCoding;
 
         /**
          * The CodeableConcepts for the code filter. Only one of valueSet, valueCode, valueConding, or valueCodeableConcept may be specified. If values are given, the filter will return only those data items for which the code-valued attribute specified by the path has a value that is one of the specified CodeableConcepts.
          */
         @Child(name = "valueCodeableConcept", type = {CodeableConcept.class}, order=5, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-        @Description(shortDefinition="CodeableConcept value of the filter", formalDefinition="The CodeableConcepts for the code filter. Only one of valueSet, valueCode, valueConding, or valueCodeableConcept may be specified. If values are given, the filter will return only those data items for which the code-valued attribute specified by the path has a value that is one of the specified CodeableConcepts." )
+        @Description(shortDefinition="What CodeableConcept is expected", formalDefinition="The CodeableConcepts for the code filter. Only one of valueSet, valueCode, valueConding, or valueCodeableConcept may be specified. If values are given, the filter will return only those data items for which the code-valued attribute specified by the path has a value that is one of the specified CodeableConcepts." )
         protected List<CodeableConcept> valueCodeableConcept;
 
         private static final long serialVersionUID = -888422840L;
@@ -193,7 +193,7 @@ public class DataRequirement extends Type implements ICompositeType {
         }
 
         /**
-         * @return {@link #valueCode} (The codes for the code filter. Only one of valueSet, valueCode, valueConding, or valueCodeableConcept may be specified. If values are given, the filter will return only those data items for which the code-valued attribute specified by the path has a value that is one of the specified codes.)
+         * @return {@link #valueCode} (The codes for the code filter. Only one of valueSet, valueCode, valueCoding, or valueCodeableConcept may be specified. If values are given, the filter will return only those data items for which the code-valued attribute specified by the path has a value that is one of the specified codes.)
          */
         public List<CodeType> getValueCode() { 
           if (this.valueCode == null)
@@ -219,7 +219,7 @@ public class DataRequirement extends Type implements ICompositeType {
         }
 
         /**
-         * @return {@link #valueCode} (The codes for the code filter. Only one of valueSet, valueCode, valueConding, or valueCodeableConcept may be specified. If values are given, the filter will return only those data items for which the code-valued attribute specified by the path has a value that is one of the specified codes.)
+         * @return {@link #valueCode} (The codes for the code filter. Only one of valueSet, valueCode, valueCoding, or valueCodeableConcept may be specified. If values are given, the filter will return only those data items for which the code-valued attribute specified by the path has a value that is one of the specified codes.)
          */
         public CodeType addValueCodeElement() {//2 
           CodeType t = new CodeType();
@@ -230,7 +230,7 @@ public class DataRequirement extends Type implements ICompositeType {
         }
 
         /**
-         * @param value {@link #valueCode} (The codes for the code filter. Only one of valueSet, valueCode, valueConding, or valueCodeableConcept may be specified. If values are given, the filter will return only those data items for which the code-valued attribute specified by the path has a value that is one of the specified codes.)
+         * @param value {@link #valueCode} (The codes for the code filter. Only one of valueSet, valueCode, valueCoding, or valueCodeableConcept may be specified. If values are given, the filter will return only those data items for which the code-valued attribute specified by the path has a value that is one of the specified codes.)
          */
         public DataRequirementCodeFilterComponent addValueCode(String value) { //1
           CodeType t = new CodeType();
@@ -242,7 +242,7 @@ public class DataRequirement extends Type implements ICompositeType {
         }
 
         /**
-         * @param value {@link #valueCode} (The codes for the code filter. Only one of valueSet, valueCode, valueConding, or valueCodeableConcept may be specified. If values are given, the filter will return only those data items for which the code-valued attribute specified by the path has a value that is one of the specified codes.)
+         * @param value {@link #valueCode} (The codes for the code filter. Only one of valueSet, valueCode, valueCoding, or valueCodeableConcept may be specified. If values are given, the filter will return only those data items for which the code-valued attribute specified by the path has a value that is one of the specified codes.)
          */
         public boolean hasValueCode(String value) { 
           if (this.valueCode == null)
@@ -363,7 +363,7 @@ public class DataRequirement extends Type implements ICompositeType {
           super.listChildren(childrenList);
           childrenList.add(new Property("path", "string", "The code-valued attribute of the filter. The specified path must be resolvable from the type of the required data. The path is allowed to contain qualifiers (.) to traverse sub-elements, as well as indexers ([x]) to traverse multiple-cardinality sub-elements. Note that the index must be an integer constant. The path must resolve to an element of type code, Coding, or CodeableConcept.", 0, java.lang.Integer.MAX_VALUE, path));
           childrenList.add(new Property("valueSet[x]", "string|Reference(ValueSet)", "The valueset for the code filter. The valueSet and value elements are exclusive. If valueSet is specified, the filter will return only those data items for which the value of the code-valued element specified in the path is a member of the specified valueset.", 0, java.lang.Integer.MAX_VALUE, valueSet));
-          childrenList.add(new Property("valueCode", "code", "The codes for the code filter. Only one of valueSet, valueCode, valueConding, or valueCodeableConcept may be specified. If values are given, the filter will return only those data items for which the code-valued attribute specified by the path has a value that is one of the specified codes.", 0, java.lang.Integer.MAX_VALUE, valueCode));
+          childrenList.add(new Property("valueCode", "code", "The codes for the code filter. Only one of valueSet, valueCode, valueCoding, or valueCodeableConcept may be specified. If values are given, the filter will return only those data items for which the code-valued attribute specified by the path has a value that is one of the specified codes.", 0, java.lang.Integer.MAX_VALUE, valueCode));
           childrenList.add(new Property("valueCoding", "Coding", "The Codings for the code filter. Only one of valueSet, valueCode, valueConding, or valueCodeableConcept may be specified. If values are given, the filter will return only those data items for which the code-valued attribute specified by the path has a value that is one of the specified Codings.", 0, java.lang.Integer.MAX_VALUE, valueCoding));
           childrenList.add(new Property("valueCodeableConcept", "CodeableConcept", "The CodeableConcepts for the code filter. Only one of valueSet, valueCode, valueConding, or valueCodeableConcept may be specified. If values are given, the filter will return only those data items for which the code-valued attribute specified by the path has a value that is one of the specified CodeableConcepts.", 0, java.lang.Integer.MAX_VALUE, valueCodeableConcept));
         }
@@ -815,14 +815,14 @@ public class DataRequirement extends Type implements ICompositeType {
      * Code filters specify additional constraints on the data, specifying the value set of interest for a particular element of the data.
      */
     @Child(name = "codeFilter", type = {}, order=3, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-    @Description(shortDefinition="Code filters for the data", formalDefinition="Code filters specify additional constraints on the data, specifying the value set of interest for a particular element of the data." )
+    @Description(shortDefinition="What codes are expected", formalDefinition="Code filters specify additional constraints on the data, specifying the value set of interest for a particular element of the data." )
     protected List<DataRequirementCodeFilterComponent> codeFilter;
 
     /**
      * Date filters specify additional constraints on the data in terms of the applicable date range for specific elements.
      */
     @Child(name = "dateFilter", type = {}, order=4, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-    @Description(shortDefinition="Date filters for the data", formalDefinition="Date filters specify additional constraints on the data in terms of the applicable date range for specific elements." )
+    @Description(shortDefinition="What dates/date ranges are expected", formalDefinition="Date filters specify additional constraints on the data in terms of the applicable date range for specific elements." )
     protected List<DataRequirementDateFilterComponent> dateFilter;
 
     private static final long serialVersionUID = 274786645L;

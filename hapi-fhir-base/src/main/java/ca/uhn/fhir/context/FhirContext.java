@@ -82,6 +82,7 @@ public class FhirContext {
 	private Map<String, Class<? extends IBaseResource>> myDefaultTypeForProfile = new HashMap<String, Class<? extends IBaseResource>>();
 	private volatile Map<String, RuntimeResourceDefinition> myIdToResourceDefinition = Collections.emptyMap();
 	private boolean myInitialized;
+	private boolean myInitializing = false;
 	private HapiLocalizer myLocalizer = new HapiLocalizer();
 	private volatile Map<String, BaseRuntimeElementDefinition<?>> myNameToElementDefinition = Collections.emptyMap();
 	private volatile Map<String, RuntimeResourceDefinition> myNameToResourceDefinition = Collections.emptyMap();
@@ -94,6 +95,7 @@ public class FhirContext {
 	private volatile IRestfulClientFactory myRestfulClientFactory;
 	private volatile RuntimeChildUndeclaredExtensionDefinition myRuntimeChildUndeclaredExtensionDefinition;
 	private IContextValidationSupport<?, ?, ?, ?, ?, ?> myValidationSupport;
+
 	private final IFhirVersion myVersion;
 
 	private Map<FhirVersionEnum, Map<String, Class<? extends IBaseResource>>> myVersionToNameToResourceType = Collections.emptyMap();
@@ -384,15 +386,6 @@ public class FhirContext {
 		return retVal;
 	}
 
-	/**
-	 * Returns the scanned runtime model for the given type. This is an advanced feature which is generally only needed
-	 * for extending the core library.
-	 */
-	public RuntimeResourceDefinition getResourceDefinitionById(String theId) {
-		validateInitialized();
-		return myIdToResourceDefinition.get(theId);
-	}
-
 	// /**
 	// * Return an unmodifiable collection containing all known resource definitions
 	// */
@@ -406,6 +399,15 @@ public class FhirContext {
 	//
 	// return Collections.unmodifiableCollection(myIdToResourceDefinition.values());
 	// }
+
+	/**
+	 * Returns the scanned runtime model for the given type. This is an advanced feature which is generally only needed
+	 * for extending the core library.
+	 */
+	public RuntimeResourceDefinition getResourceDefinitionById(String theId) {
+		validateInitialized();
+		return myIdToResourceDefinition.get(theId);
+	}
 
 	/**
 	 * Returns the scanned runtime models. This is an advanced feature which is generally only needed for extending the
@@ -842,12 +844,13 @@ public class FhirContext {
 		}
 		return resTypes;
 	}
-
+	
 	private void validateInitialized() {
 		// See #610
 		if (!myInitialized) {
 			synchronized (this) {
-				if (!myInitialized) {
+				if (!myInitialized && !myInitializing) {
+					myInitializing = true;
 					scanResourceTypes(toElementList(myResourceTypesToScan));
 				}
 			}

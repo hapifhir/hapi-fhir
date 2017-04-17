@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
+// Generated on Mon, Apr 17, 2017 17:38-0400 for FHIR v3.0.1
 
 import java.util.*;
 
@@ -331,17 +331,17 @@ public class GraphDefinition extends MetadataResource {
         protected StringType sliceName;
 
         /**
-         * Minimum occurences for this link.
+         * Minimum occurrences for this link.
          */
         @Child(name = "min", type = {IntegerType.class}, order=3, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Minimum occurences for this link", formalDefinition="Minimum occurences for this link." )
+        @Description(shortDefinition="Minimum occurrences for this link", formalDefinition="Minimum occurrences for this link." )
         protected IntegerType min;
 
         /**
-         * Maximum occurences for this link.
+         * Maximum occurrences for this link.
          */
         @Child(name = "max", type = {StringType.class}, order=4, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Maximum occurences for this link", formalDefinition="Maximum occurences for this link." )
+        @Description(shortDefinition="Maximum occurrences for this link", formalDefinition="Maximum occurrences for this link." )
         protected StringType max;
 
         /**
@@ -470,7 +470,7 @@ public class GraphDefinition extends MetadataResource {
         }
 
         /**
-         * @return {@link #min} (Minimum occurences for this link.). This is the underlying object with id, value and extensions. The accessor "getMin" gives direct access to the value
+         * @return {@link #min} (Minimum occurrences for this link.). This is the underlying object with id, value and extensions. The accessor "getMin" gives direct access to the value
          */
         public IntegerType getMinElement() { 
           if (this.min == null)
@@ -490,7 +490,7 @@ public class GraphDefinition extends MetadataResource {
         }
 
         /**
-         * @param value {@link #min} (Minimum occurences for this link.). This is the underlying object with id, value and extensions. The accessor "getMin" gives direct access to the value
+         * @param value {@link #min} (Minimum occurrences for this link.). This is the underlying object with id, value and extensions. The accessor "getMin" gives direct access to the value
          */
         public GraphDefinitionLinkComponent setMinElement(IntegerType value) { 
           this.min = value;
@@ -498,14 +498,14 @@ public class GraphDefinition extends MetadataResource {
         }
 
         /**
-         * @return Minimum occurences for this link.
+         * @return Minimum occurrences for this link.
          */
         public int getMin() { 
           return this.min == null || this.min.isEmpty() ? 0 : this.min.getValue();
         }
 
         /**
-         * @param value Minimum occurences for this link.
+         * @param value Minimum occurrences for this link.
          */
         public GraphDefinitionLinkComponent setMin(int value) { 
             if (this.min == null)
@@ -515,7 +515,7 @@ public class GraphDefinition extends MetadataResource {
         }
 
         /**
-         * @return {@link #max} (Maximum occurences for this link.). This is the underlying object with id, value and extensions. The accessor "getMax" gives direct access to the value
+         * @return {@link #max} (Maximum occurrences for this link.). This is the underlying object with id, value and extensions. The accessor "getMax" gives direct access to the value
          */
         public StringType getMaxElement() { 
           if (this.max == null)
@@ -535,7 +535,7 @@ public class GraphDefinition extends MetadataResource {
         }
 
         /**
-         * @param value {@link #max} (Maximum occurences for this link.). This is the underlying object with id, value and extensions. The accessor "getMax" gives direct access to the value
+         * @param value {@link #max} (Maximum occurrences for this link.). This is the underlying object with id, value and extensions. The accessor "getMax" gives direct access to the value
          */
         public GraphDefinitionLinkComponent setMaxElement(StringType value) { 
           this.max = value;
@@ -543,14 +543,14 @@ public class GraphDefinition extends MetadataResource {
         }
 
         /**
-         * @return Maximum occurences for this link.
+         * @return Maximum occurrences for this link.
          */
         public String getMax() { 
           return this.max == null ? null : this.max.getValue();
         }
 
         /**
-         * @param value Maximum occurences for this link.
+         * @param value Maximum occurrences for this link.
          */
         public GraphDefinitionLinkComponent setMax(String value) { 
           if (Utilities.noString(value))
@@ -669,8 +669,8 @@ public class GraphDefinition extends MetadataResource {
           super.listChildren(childrenList);
           childrenList.add(new Property("path", "string", "Path in the resource that contains the link.", 0, java.lang.Integer.MAX_VALUE, path));
           childrenList.add(new Property("sliceName", "string", "Which slice (if profiled).", 0, java.lang.Integer.MAX_VALUE, sliceName));
-          childrenList.add(new Property("min", "integer", "Minimum occurences for this link.", 0, java.lang.Integer.MAX_VALUE, min));
-          childrenList.add(new Property("max", "string", "Maximum occurences for this link.", 0, java.lang.Integer.MAX_VALUE, max));
+          childrenList.add(new Property("min", "integer", "Minimum occurrences for this link.", 0, java.lang.Integer.MAX_VALUE, min));
+          childrenList.add(new Property("max", "string", "Maximum occurrences for this link.", 0, java.lang.Integer.MAX_VALUE, max));
           childrenList.add(new Property("description", "string", "Information about why this link is of interest in this graph definition.", 0, java.lang.Integer.MAX_VALUE, description));
           childrenList.add(new Property("target", "", "Potential target for the link.", 0, java.lang.Integer.MAX_VALUE, target));
         }
@@ -1617,10 +1617,10 @@ public class GraphDefinition extends MetadataResource {
   }
 
     /**
-     * Explains why this graph definition is needed and why it has been designed as it has.
+     * Explaination of why this graph definition is needed and why it has been designed as it has.
      */
     @Child(name = "purpose", type = {MarkdownType.class}, order=0, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Why this graph definition is defined", formalDefinition="Explains why this graph definition is needed and why it has been designed as it has." )
+    @Description(shortDefinition="Why this graph definition is defined", formalDefinition="Explaination of why this graph definition is needed and why it has been designed as it has." )
     protected MarkdownType purpose;
 
     /**
@@ -1665,7 +1665,7 @@ public class GraphDefinition extends MetadataResource {
     }
 
     /**
-     * @return {@link #url} (An absolute URL that is used to identify this graph definition when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this graph definition is (or will be) published. The URL SHOULD include the major version of the graph definition. For more information see [Technical and Business Versions](resource.html#versions).). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
+     * @return {@link #url} (An absolute URI that is used to identify this graph definition when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this graph definition is (or will be) published. The URL SHOULD include the major version of the graph definition. For more information see [Technical and Business Versions](resource.html#versions).). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
      */
     public UriType getUrlElement() { 
       if (this.url == null)
@@ -1685,7 +1685,7 @@ public class GraphDefinition extends MetadataResource {
     }
 
     /**
-     * @param value {@link #url} (An absolute URL that is used to identify this graph definition when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this graph definition is (or will be) published. The URL SHOULD include the major version of the graph definition. For more information see [Technical and Business Versions](resource.html#versions).). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
+     * @param value {@link #url} (An absolute URI that is used to identify this graph definition when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this graph definition is (or will be) published. The URL SHOULD include the major version of the graph definition. For more information see [Technical and Business Versions](resource.html#versions).). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
      */
     public GraphDefinition setUrlElement(UriType value) { 
       this.url = value;
@@ -1693,14 +1693,14 @@ public class GraphDefinition extends MetadataResource {
     }
 
     /**
-     * @return An absolute URL that is used to identify this graph definition when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this graph definition is (or will be) published. The URL SHOULD include the major version of the graph definition. For more information see [Technical and Business Versions](resource.html#versions).
+     * @return An absolute URI that is used to identify this graph definition when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this graph definition is (or will be) published. The URL SHOULD include the major version of the graph definition. For more information see [Technical and Business Versions](resource.html#versions).
      */
     public String getUrl() { 
       return this.url == null ? null : this.url.getValue();
     }
 
     /**
-     * @param value An absolute URL that is used to identify this graph definition when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this graph definition is (or will be) published. The URL SHOULD include the major version of the graph definition. For more information see [Technical and Business Versions](resource.html#versions).
+     * @param value An absolute URI that is used to identify this graph definition when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this graph definition is (or will be) published. The URL SHOULD include the major version of the graph definition. For more information see [Technical and Business Versions](resource.html#versions).
      */
     public GraphDefinition setUrl(String value) { 
       if (Utilities.noString(value))
@@ -1714,7 +1714,7 @@ public class GraphDefinition extends MetadataResource {
     }
 
     /**
-     * @return {@link #version} (The identifier that is used to identify this version of the graph definition when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the graph definition author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions are orderable.). This is the underlying object with id, value and extensions. The accessor "getVersion" gives direct access to the value
+     * @return {@link #version} (The identifier that is used to identify this version of the graph definition when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the graph definition author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions can be placed in a lexicographical sequence.). This is the underlying object with id, value and extensions. The accessor "getVersion" gives direct access to the value
      */
     public StringType getVersionElement() { 
       if (this.version == null)
@@ -1734,7 +1734,7 @@ public class GraphDefinition extends MetadataResource {
     }
 
     /**
-     * @param value {@link #version} (The identifier that is used to identify this version of the graph definition when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the graph definition author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions are orderable.). This is the underlying object with id, value and extensions. The accessor "getVersion" gives direct access to the value
+     * @param value {@link #version} (The identifier that is used to identify this version of the graph definition when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the graph definition author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions can be placed in a lexicographical sequence.). This is the underlying object with id, value and extensions. The accessor "getVersion" gives direct access to the value
      */
     public GraphDefinition setVersionElement(StringType value) { 
       this.version = value;
@@ -1742,14 +1742,14 @@ public class GraphDefinition extends MetadataResource {
     }
 
     /**
-     * @return The identifier that is used to identify this version of the graph definition when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the graph definition author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions are orderable.
+     * @return The identifier that is used to identify this version of the graph definition when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the graph definition author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions can be placed in a lexicographical sequence.
      */
     public String getVersion() { 
       return this.version == null ? null : this.version.getValue();
     }
 
     /**
-     * @param value The identifier that is used to identify this version of the graph definition when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the graph definition author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions are orderable.
+     * @param value The identifier that is used to identify this version of the graph definition when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the graph definition author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions can be placed in a lexicographical sequence.
      */
     public GraphDefinition setVersion(String value) { 
       if (Utilities.noString(value))
@@ -1853,7 +1853,7 @@ public class GraphDefinition extends MetadataResource {
     }
 
     /**
-     * @return {@link #experimental} (A flag to indicate that this graph definition is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.). This is the underlying object with id, value and extensions. The accessor "getExperimental" gives direct access to the value
+     * @return {@link #experimental} (A boolean value to indicate that this graph definition is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.). This is the underlying object with id, value and extensions. The accessor "getExperimental" gives direct access to the value
      */
     public BooleanType getExperimentalElement() { 
       if (this.experimental == null)
@@ -1873,7 +1873,7 @@ public class GraphDefinition extends MetadataResource {
     }
 
     /**
-     * @param value {@link #experimental} (A flag to indicate that this graph definition is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.). This is the underlying object with id, value and extensions. The accessor "getExperimental" gives direct access to the value
+     * @param value {@link #experimental} (A boolean value to indicate that this graph definition is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.). This is the underlying object with id, value and extensions. The accessor "getExperimental" gives direct access to the value
      */
     public GraphDefinition setExperimentalElement(BooleanType value) { 
       this.experimental = value;
@@ -1881,14 +1881,14 @@ public class GraphDefinition extends MetadataResource {
     }
 
     /**
-     * @return A flag to indicate that this graph definition is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.
+     * @return A boolean value to indicate that this graph definition is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.
      */
     public boolean getExperimental() { 
       return this.experimental == null || this.experimental.isEmpty() ? false : this.experimental.getValue();
     }
 
     /**
-     * @param value A flag to indicate that this graph definition is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.
+     * @param value A boolean value to indicate that this graph definition is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.
      */
     public GraphDefinition setExperimental(boolean value) { 
         if (this.experimental == null)
@@ -1898,7 +1898,7 @@ public class GraphDefinition extends MetadataResource {
     }
 
     /**
-     * @return {@link #date} (The date  (and optionally time) when the graph definition was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the graph definition changes.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
+     * @return {@link #date} (The date  (and optionally time) when the graph definition was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the graph definition changes.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
      */
     public DateTimeType getDateElement() { 
       if (this.date == null)
@@ -1918,7 +1918,7 @@ public class GraphDefinition extends MetadataResource {
     }
 
     /**
-     * @param value {@link #date} (The date  (and optionally time) when the graph definition was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the graph definition changes.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
+     * @param value {@link #date} (The date  (and optionally time) when the graph definition was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the graph definition changes.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
      */
     public GraphDefinition setDateElement(DateTimeType value) { 
       this.date = value;
@@ -1926,14 +1926,14 @@ public class GraphDefinition extends MetadataResource {
     }
 
     /**
-     * @return The date  (and optionally time) when the graph definition was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the graph definition changes.
+     * @return The date  (and optionally time) when the graph definition was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the graph definition changes.
      */
     public Date getDate() { 
       return this.date == null ? null : this.date.getValue();
     }
 
     /**
-     * @param value The date  (and optionally time) when the graph definition was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the graph definition changes.
+     * @param value The date  (and optionally time) when the graph definition was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the graph definition changes.
      */
     public GraphDefinition setDate(Date value) { 
       if (value == null)
@@ -2049,7 +2049,7 @@ public class GraphDefinition extends MetadataResource {
     }
 
     /**
-     * @return {@link #description} (A free text natural language description of the graph definition from the consumer's perspective.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
+     * @return {@link #description} (A free text natural language description of the graph definition from a consumer's perspective.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
      */
     public MarkdownType getDescriptionElement() { 
       if (this.description == null)
@@ -2069,7 +2069,7 @@ public class GraphDefinition extends MetadataResource {
     }
 
     /**
-     * @param value {@link #description} (A free text natural language description of the graph definition from the consumer's perspective.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
+     * @param value {@link #description} (A free text natural language description of the graph definition from a consumer's perspective.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
      */
     public GraphDefinition setDescriptionElement(MarkdownType value) { 
       this.description = value;
@@ -2077,14 +2077,14 @@ public class GraphDefinition extends MetadataResource {
     }
 
     /**
-     * @return A free text natural language description of the graph definition from the consumer's perspective.
+     * @return A free text natural language description of the graph definition from a consumer's perspective.
      */
     public String getDescription() { 
       return this.description == null ? null : this.description.getValue();
     }
 
     /**
-     * @param value A free text natural language description of the graph definition from the consumer's perspective.
+     * @param value A free text natural language description of the graph definition from a consumer's perspective.
      */
     public GraphDefinition setDescription(String value) { 
       if (value == null)
@@ -2098,7 +2098,7 @@ public class GraphDefinition extends MetadataResource {
     }
 
     /**
-     * @return {@link #useContext} (The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching of code system definitions.)
+     * @return {@link #useContext} (The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching for appropriate graph definition instances.)
      */
     public List<UsageContext> getUseContext() { 
       if (this.useContext == null)
@@ -2151,7 +2151,7 @@ public class GraphDefinition extends MetadataResource {
     }
 
     /**
-     * @return {@link #jurisdiction} (A jurisdiction in which the graph definition is intended to be used.)
+     * @return {@link #jurisdiction} (A legal or geographic region in which the graph definition is intended to be used.)
      */
     public List<CodeableConcept> getJurisdiction() { 
       if (this.jurisdiction == null)
@@ -2204,7 +2204,7 @@ public class GraphDefinition extends MetadataResource {
     }
 
     /**
-     * @return {@link #purpose} (Explains why this graph definition is needed and why it has been designed as it has.). This is the underlying object with id, value and extensions. The accessor "getPurpose" gives direct access to the value
+     * @return {@link #purpose} (Explaination of why this graph definition is needed and why it has been designed as it has.). This is the underlying object with id, value and extensions. The accessor "getPurpose" gives direct access to the value
      */
     public MarkdownType getPurposeElement() { 
       if (this.purpose == null)
@@ -2224,7 +2224,7 @@ public class GraphDefinition extends MetadataResource {
     }
 
     /**
-     * @param value {@link #purpose} (Explains why this graph definition is needed and why it has been designed as it has.). This is the underlying object with id, value and extensions. The accessor "getPurpose" gives direct access to the value
+     * @param value {@link #purpose} (Explaination of why this graph definition is needed and why it has been designed as it has.). This is the underlying object with id, value and extensions. The accessor "getPurpose" gives direct access to the value
      */
     public GraphDefinition setPurposeElement(MarkdownType value) { 
       this.purpose = value;
@@ -2232,14 +2232,14 @@ public class GraphDefinition extends MetadataResource {
     }
 
     /**
-     * @return Explains why this graph definition is needed and why it has been designed as it has.
+     * @return Explaination of why this graph definition is needed and why it has been designed as it has.
      */
     public String getPurpose() { 
       return this.purpose == null ? null : this.purpose.getValue();
     }
 
     /**
-     * @param value Explains why this graph definition is needed and why it has been designed as it has.
+     * @param value Explaination of why this graph definition is needed and why it has been designed as it has.
      */
     public GraphDefinition setPurpose(String value) { 
       if (value == null)
@@ -2401,18 +2401,18 @@ public class GraphDefinition extends MetadataResource {
 
       protected void listChildren(List<Property> childrenList) {
         super.listChildren(childrenList);
-        childrenList.add(new Property("url", "uri", "An absolute URL that is used to identify this graph definition when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this graph definition is (or will be) published. The URL SHOULD include the major version of the graph definition. For more information see [Technical and Business Versions](resource.html#versions).", 0, java.lang.Integer.MAX_VALUE, url));
-        childrenList.add(new Property("version", "string", "The identifier that is used to identify this version of the graph definition when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the graph definition author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions are orderable.", 0, java.lang.Integer.MAX_VALUE, version));
+        childrenList.add(new Property("url", "uri", "An absolute URI that is used to identify this graph definition when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this graph definition is (or will be) published. The URL SHOULD include the major version of the graph definition. For more information see [Technical and Business Versions](resource.html#versions).", 0, java.lang.Integer.MAX_VALUE, url));
+        childrenList.add(new Property("version", "string", "The identifier that is used to identify this version of the graph definition when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the graph definition author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions can be placed in a lexicographical sequence.", 0, java.lang.Integer.MAX_VALUE, version));
         childrenList.add(new Property("name", "string", "A natural language name identifying the graph definition. This name should be usable as an identifier for the module by machine processing applications such as code generation.", 0, java.lang.Integer.MAX_VALUE, name));
         childrenList.add(new Property("status", "code", "The status of this graph definition. Enables tracking the life-cycle of the content.", 0, java.lang.Integer.MAX_VALUE, status));
-        childrenList.add(new Property("experimental", "boolean", "A flag to indicate that this graph definition is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.", 0, java.lang.Integer.MAX_VALUE, experimental));
-        childrenList.add(new Property("date", "dateTime", "The date  (and optionally time) when the graph definition was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the graph definition changes.", 0, java.lang.Integer.MAX_VALUE, date));
+        childrenList.add(new Property("experimental", "boolean", "A boolean value to indicate that this graph definition is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.", 0, java.lang.Integer.MAX_VALUE, experimental));
+        childrenList.add(new Property("date", "dateTime", "The date  (and optionally time) when the graph definition was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the graph definition changes.", 0, java.lang.Integer.MAX_VALUE, date));
         childrenList.add(new Property("publisher", "string", "The name of the individual or organization that published the graph definition.", 0, java.lang.Integer.MAX_VALUE, publisher));
         childrenList.add(new Property("contact", "ContactDetail", "Contact details to assist a user in finding and communicating with the publisher.", 0, java.lang.Integer.MAX_VALUE, contact));
-        childrenList.add(new Property("description", "markdown", "A free text natural language description of the graph definition from the consumer's perspective.", 0, java.lang.Integer.MAX_VALUE, description));
-        childrenList.add(new Property("useContext", "UsageContext", "The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching of code system definitions.", 0, java.lang.Integer.MAX_VALUE, useContext));
-        childrenList.add(new Property("jurisdiction", "CodeableConcept", "A jurisdiction in which the graph definition is intended to be used.", 0, java.lang.Integer.MAX_VALUE, jurisdiction));
-        childrenList.add(new Property("purpose", "markdown", "Explains why this graph definition is needed and why it has been designed as it has.", 0, java.lang.Integer.MAX_VALUE, purpose));
+        childrenList.add(new Property("description", "markdown", "A free text natural language description of the graph definition from a consumer's perspective.", 0, java.lang.Integer.MAX_VALUE, description));
+        childrenList.add(new Property("useContext", "UsageContext", "The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching for appropriate graph definition instances.", 0, java.lang.Integer.MAX_VALUE, useContext));
+        childrenList.add(new Property("jurisdiction", "CodeableConcept", "A legal or geographic region in which the graph definition is intended to be used.", 0, java.lang.Integer.MAX_VALUE, jurisdiction));
+        childrenList.add(new Property("purpose", "markdown", "Explaination of why this graph definition is needed and why it has been designed as it has.", 0, java.lang.Integer.MAX_VALUE, purpose));
         childrenList.add(new Property("start", "code", "The type of FHIR resource at which instances of this graph start.", 0, java.lang.Integer.MAX_VALUE, start));
         childrenList.add(new Property("profile", "uri", "The profile that describes the use of the base resource.", 0, java.lang.Integer.MAX_VALUE, profile));
         childrenList.add(new Property("link", "", "Links this graph makes rules about.", 0, java.lang.Integer.MAX_VALUE, link));
@@ -2731,17 +2731,17 @@ public class GraphDefinition extends MetadataResource {
  /**
    * Search parameter: <b>jurisdiction</b>
    * <p>
-   * Description: <b>Intended jurisdiction for graph definition</b><br>
+   * Description: <b>Intended jurisdiction for the graph definition</b><br>
    * Type: <b>token</b><br>
    * Path: <b>GraphDefinition.jurisdiction</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="jurisdiction", path="GraphDefinition.jurisdiction", description="Intended jurisdiction for graph definition", type="token" )
+  @SearchParamDefinition(name="jurisdiction", path="GraphDefinition.jurisdiction", description="Intended jurisdiction for the graph definition", type="token" )
   public static final String SP_JURISDICTION = "jurisdiction";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>jurisdiction</b>
    * <p>
-   * Description: <b>Intended jurisdiction for graph definition</b><br>
+   * Description: <b>Intended jurisdiction for the graph definition</b><br>
    * Type: <b>token</b><br>
    * Path: <b>GraphDefinition.jurisdiction</b><br>
    * </p>
@@ -2751,17 +2751,17 @@ public class GraphDefinition extends MetadataResource {
  /**
    * Search parameter: <b>name</b>
    * <p>
-   * Description: <b>Name of the graph definition</b><br>
+   * Description: <b>Computationally friendly name of the graph definition</b><br>
    * Type: <b>string</b><br>
    * Path: <b>GraphDefinition.name</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="name", path="GraphDefinition.name", description="Name of the graph definition", type="string" )
+  @SearchParamDefinition(name="name", path="GraphDefinition.name", description="Computationally friendly name of the graph definition", type="string" )
   public static final String SP_NAME = "name";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>name</b>
    * <p>
-   * Description: <b>Name of the graph definition</b><br>
+   * Description: <b>Computationally friendly name of the graph definition</b><br>
    * Type: <b>string</b><br>
    * Path: <b>GraphDefinition.name</b><br>
    * </p>
@@ -2791,17 +2791,17 @@ public class GraphDefinition extends MetadataResource {
  /**
    * Search parameter: <b>description</b>
    * <p>
-   * Description: <b>Text search against the description of the graph definition</b><br>
+   * Description: <b>The description of the graph definition</b><br>
    * Type: <b>string</b><br>
    * Path: <b>GraphDefinition.description</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="description", path="GraphDefinition.description", description="Text search against the description of the graph definition", type="string" )
+  @SearchParamDefinition(name="description", path="GraphDefinition.description", description="The description of the graph definition", type="string" )
   public static final String SP_DESCRIPTION = "description";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>description</b>
    * <p>
-   * Description: <b>Text search against the description of the graph definition</b><br>
+   * Description: <b>The description of the graph definition</b><br>
    * Type: <b>string</b><br>
    * Path: <b>GraphDefinition.description</b><br>
    * </p>

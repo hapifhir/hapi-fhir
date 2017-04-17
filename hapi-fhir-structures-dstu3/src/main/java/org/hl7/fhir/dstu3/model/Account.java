@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
+// Generated on Mon, Apr 17, 2017 17:38-0400 for FHIR v3.0.1
 
 import java.util.*;
 
@@ -697,10 +697,10 @@ A coverage may only be resposible for specific types of charges, and the sequenc
     protected List<Identifier> identifier;
 
     /**
-     * Indicates whether the account is presently used/useable or not.
+     * Indicates whether the account is presently used/usable or not.
      */
     @Child(name = "status", type = {CodeType.class}, order=1, min=0, max=1, modifier=true, summary=true)
-    @Description(shortDefinition="active | inactive | entered-in-error", formalDefinition="Indicates whether the account is presently used/useable or not." )
+    @Description(shortDefinition="active | inactive | entered-in-error", formalDefinition="Indicates whether the account is presently used/usable or not." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/account-status")
     protected Enumeration<AccountStatus> status;
 
@@ -849,7 +849,7 @@ This period may be different to the coveragePeriod which is the duration of time
     }
 
     /**
-     * @return {@link #status} (Indicates whether the account is presently used/useable or not.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
+     * @return {@link #status} (Indicates whether the account is presently used/usable or not.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
      */
     public Enumeration<AccountStatus> getStatusElement() { 
       if (this.status == null)
@@ -869,7 +869,7 @@ This period may be different to the coveragePeriod which is the duration of time
     }
 
     /**
-     * @param value {@link #status} (Indicates whether the account is presently used/useable or not.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
+     * @param value {@link #status} (Indicates whether the account is presently used/usable or not.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
      */
     public Account setStatusElement(Enumeration<AccountStatus> value) { 
       this.status = value;
@@ -877,14 +877,14 @@ This period may be different to the coveragePeriod which is the duration of time
     }
 
     /**
-     * @return Indicates whether the account is presently used/useable or not.
+     * @return Indicates whether the account is presently used/usable or not.
      */
     public AccountStatus getStatus() { 
       return this.status == null ? null : this.status.getValue();
     }
 
     /**
-     * @param value Indicates whether the account is presently used/useable or not.
+     * @param value Indicates whether the account is presently used/usable or not.
      */
     public Account setStatus(AccountStatus value) { 
       if (value == null)
@@ -1285,7 +1285,7 @@ This period may be different to the coveragePeriod which is the duration of time
       protected void listChildren(List<Property> childrenList) {
         super.listChildren(childrenList);
         childrenList.add(new Property("identifier", "Identifier", "Unique identifier used to reference the account.  May or may not be intended for human use (e.g. credit card number).", 0, java.lang.Integer.MAX_VALUE, identifier));
-        childrenList.add(new Property("status", "code", "Indicates whether the account is presently used/useable or not.", 0, java.lang.Integer.MAX_VALUE, status));
+        childrenList.add(new Property("status", "code", "Indicates whether the account is presently used/usable or not.", 0, java.lang.Integer.MAX_VALUE, status));
         childrenList.add(new Property("type", "CodeableConcept", "Categorizes the account for reporting and searching purposes.", 0, java.lang.Integer.MAX_VALUE, type));
         childrenList.add(new Property("name", "string", "Name used for the account when displaying it to humans in reports, etc.", 0, java.lang.Integer.MAX_VALUE, name));
         childrenList.add(new Property("subject", "Reference(Patient|Device|Practitioner|Location|HealthcareService|Organization)", "Identifies the patient, device, practitioner, location or other object the account is associated with.", 0, java.lang.Integer.MAX_VALUE, subject));

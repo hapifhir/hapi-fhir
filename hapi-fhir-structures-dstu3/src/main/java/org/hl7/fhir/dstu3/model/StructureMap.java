@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
+// Generated on Mon, Apr 17, 2017 17:38-0400 for FHIR v3.0.1
 
 import java.util.*;
 
@@ -768,7 +768,7 @@ public class StructureMap extends MetadataResource {
          */
         REFERENCE, 
         /**
-         * Perform a date operation. Parameters to be documented
+         * Perform a date operation. *Parameters to be documented*
          */
         DATEOP, 
         /**
@@ -776,7 +776,7 @@ public class StructureMap extends MetadataResource {
          */
         UUID, 
         /**
-         * Return the appropriate string to put in a Reference that refers to the resource provided as a parameter
+         * Return the appropriate string to put in a reference that refers to the resource provided as a parameter
          */
         POINTER, 
         /**
@@ -792,7 +792,7 @@ public class StructureMap extends MetadataResource {
          */
         C, 
         /**
-         * Create a quantity. Parameters = (text) or (value, unit, [system, code]) where text =s the natural represenation e.g. [comparator]value[space]unit
+         * Create a quantity. Parameters = (text) or (value, unit, [system, code]) where text is the natural representation e.g. [comparator]value[space]unit
          */
         QTY, 
         /**
@@ -903,13 +903,13 @@ public class StructureMap extends MetadataResource {
             case APPEND: return "append(source...) - source is element or string";
             case TRANSLATE: return "translate(source, uri_of_map) - use the translate operation";
             case REFERENCE: return "reference(source : object) - return a string that references the provided tree properly";
-            case DATEOP: return "Perform a date operation. Parameters to be documented";
+            case DATEOP: return "Perform a date operation. *Parameters to be documented*";
             case UUID: return "Generate a random UUID (in lowercase). No Parameters";
-            case POINTER: return "Return the appropriate string to put in a Reference that refers to the resource provided as a parameter";
+            case POINTER: return "Return the appropriate string to put in a reference that refers to the resource provided as a parameter";
             case EVALUATE: return "Execute the supplied fluentpath expression and use the value returned by that";
             case CC: return "Create a CodeableConcept. Parameters = (text) or (system. Code[, display])";
             case C: return "Create a Coding. Parameters = (system. Code[, display])";
-            case QTY: return "Create a quantity. Parameters = (text) or (value, unit, [system, code]) where text =s the natural represenation e.g. [comparator]value[space]unit";
+            case QTY: return "Create a quantity. Parameters = (text) or (value, unit, [system, code]) where text is the natural representation e.g. [comparator]value[space]unit";
             case ID: return "Create an identifier. Parameters = (system, value[, type]) where type is a code from the identifier type value set";
             case CP: return "Create a contact details. Parameters = (value) or (system, value). If no system is provided, the system should be inferred from the content of the value";
             default: return "?";
@@ -1449,10 +1449,10 @@ public class StructureMap extends MetadataResource {
     @Block()
     public static class StructureMapGroupComponent extends BackboneElement implements IBaseBackboneElement {
         /**
-         * Descriptive name for a user.
+         * A unique name for the group for the convenience of human readers.
          */
         @Child(name = "name", type = {IdType.class}, order=1, min=1, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="Descriptive name for a user", formalDefinition="Descriptive name for a user." )
+        @Description(shortDefinition="Human-readable label", formalDefinition="A unique name for the group for the convenience of human readers." )
         protected IdType name;
 
         /**
@@ -1471,10 +1471,10 @@ public class StructureMap extends MetadataResource {
         protected Enumeration<StructureMapGroupTypeMode> typeMode;
 
         /**
-         * Documentation for this group.
+         * Additional supporting documentation that explains the purpose of the group and the types of mappings within it.
          */
         @Child(name = "documentation", type = {StringType.class}, order=4, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="Documentation for this group", formalDefinition="Documentation for this group." )
+        @Description(shortDefinition="Additional description/explaination for group", formalDefinition="Additional supporting documentation that explains the purpose of the group and the types of mappings within it." )
         protected StringType documentation;
 
         /**
@@ -1510,7 +1510,7 @@ public class StructureMap extends MetadataResource {
       }
 
         /**
-         * @return {@link #name} (Descriptive name for a user.). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
+         * @return {@link #name} (A unique name for the group for the convenience of human readers.). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
          */
         public IdType getNameElement() { 
           if (this.name == null)
@@ -1530,7 +1530,7 @@ public class StructureMap extends MetadataResource {
         }
 
         /**
-         * @param value {@link #name} (Descriptive name for a user.). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
+         * @param value {@link #name} (A unique name for the group for the convenience of human readers.). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
          */
         public StructureMapGroupComponent setNameElement(IdType value) { 
           this.name = value;
@@ -1538,14 +1538,14 @@ public class StructureMap extends MetadataResource {
         }
 
         /**
-         * @return Descriptive name for a user.
+         * @return A unique name for the group for the convenience of human readers.
          */
         public String getName() { 
           return this.name == null ? null : this.name.getValue();
         }
 
         /**
-         * @param value Descriptive name for a user.
+         * @param value A unique name for the group for the convenience of human readers.
          */
         public StructureMapGroupComponent setName(String value) { 
             if (this.name == null)
@@ -1649,7 +1649,7 @@ public class StructureMap extends MetadataResource {
         }
 
         /**
-         * @return {@link #documentation} (Documentation for this group.). This is the underlying object with id, value and extensions. The accessor "getDocumentation" gives direct access to the value
+         * @return {@link #documentation} (Additional supporting documentation that explains the purpose of the group and the types of mappings within it.). This is the underlying object with id, value and extensions. The accessor "getDocumentation" gives direct access to the value
          */
         public StringType getDocumentationElement() { 
           if (this.documentation == null)
@@ -1669,7 +1669,7 @@ public class StructureMap extends MetadataResource {
         }
 
         /**
-         * @param value {@link #documentation} (Documentation for this group.). This is the underlying object with id, value and extensions. The accessor "getDocumentation" gives direct access to the value
+         * @param value {@link #documentation} (Additional supporting documentation that explains the purpose of the group and the types of mappings within it.). This is the underlying object with id, value and extensions. The accessor "getDocumentation" gives direct access to the value
          */
         public StructureMapGroupComponent setDocumentationElement(StringType value) { 
           this.documentation = value;
@@ -1677,14 +1677,14 @@ public class StructureMap extends MetadataResource {
         }
 
         /**
-         * @return Documentation for this group.
+         * @return Additional supporting documentation that explains the purpose of the group and the types of mappings within it.
          */
         public String getDocumentation() { 
           return this.documentation == null ? null : this.documentation.getValue();
         }
 
         /**
-         * @param value Documentation for this group.
+         * @param value Additional supporting documentation that explains the purpose of the group and the types of mappings within it.
          */
         public StructureMapGroupComponent setDocumentation(String value) { 
           if (Utilities.noString(value))
@@ -1805,10 +1805,10 @@ public class StructureMap extends MetadataResource {
 
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
-          childrenList.add(new Property("name", "id", "Descriptive name for a user.", 0, java.lang.Integer.MAX_VALUE, name));
+          childrenList.add(new Property("name", "id", "A unique name for the group for the convenience of human readers.", 0, java.lang.Integer.MAX_VALUE, name));
           childrenList.add(new Property("extends", "id", "Another group that this group adds rules to.", 0, java.lang.Integer.MAX_VALUE, extends_));
           childrenList.add(new Property("typeMode", "code", "If this is the default rule set to apply for thie source type, or this combination of types.", 0, java.lang.Integer.MAX_VALUE, typeMode));
-          childrenList.add(new Property("documentation", "string", "Documentation for this group.", 0, java.lang.Integer.MAX_VALUE, documentation));
+          childrenList.add(new Property("documentation", "string", "Additional supporting documentation that explains the purpose of the group and the types of mappings within it.", 0, java.lang.Integer.MAX_VALUE, documentation));
           childrenList.add(new Property("input", "", "A name assigned to an instance of data. The instance must be provided when the mapping is invoked.", 0, java.lang.Integer.MAX_VALUE, input));
           childrenList.add(new Property("rule", "", "Transform Rule from source to target.", 0, java.lang.Integer.MAX_VALUE, rule));
         }
@@ -2954,7 +2954,7 @@ public class StructureMap extends MetadataResource {
          * Specified type for the element. This works as a condition on the mapping - use for polymorphic elements.
          */
         @Child(name = "type", type = {StringType.class}, order=4, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="Type for this source", formalDefinition="Specified type for the element. This works as a condition on the mapping - use for polymorphic elements." )
+        @Description(shortDefinition="Rule only applies if source has this type", formalDefinition="Specified type for the element. This works as a condition on the mapping - use for polymorphic elements." )
         protected StringType type;
 
         /**
@@ -5026,10 +5026,10 @@ public class StructureMap extends MetadataResource {
     protected List<Identifier> identifier;
 
     /**
-     * Explains why this structure map is needed and why it has been designed as it has.
+     * Explaination of why this structure map is needed and why it has been designed as it has.
      */
     @Child(name = "purpose", type = {MarkdownType.class}, order=1, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Why this structure map is defined", formalDefinition="Explains why this structure map is needed and why it has been designed as it has." )
+    @Description(shortDefinition="Why this structure map is defined", formalDefinition="Explaination of why this structure map is needed and why it has been designed as it has." )
     protected MarkdownType purpose;
 
     /**
@@ -5054,10 +5054,10 @@ public class StructureMap extends MetadataResource {
     protected List<UriType> import_;
 
     /**
-     * Named sections for reader convenience.
+     * Organizes the mapping into managable chunks for human review/ease of maintenance.
      */
     @Child(name = "group", type = {}, order=5, min=1, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-    @Description(shortDefinition="Named sections for reader convenience", formalDefinition="Named sections for reader convenience." )
+    @Description(shortDefinition="Named sections for reader convenience", formalDefinition="Organizes the mapping into managable chunks for human review/ease of maintenance." )
     protected List<StructureMapGroupComponent> group;
 
     private static final long serialVersionUID = 952506557L;
@@ -5080,7 +5080,7 @@ public class StructureMap extends MetadataResource {
     }
 
     /**
-     * @return {@link #url} (An absolute URL that is used to identify this structure map when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this structure map is (or will be) published. The URL SHOULD include the major version of the structure map. For more information see [Technical and Business Versions](resource.html#versions).). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
+     * @return {@link #url} (An absolute URI that is used to identify this structure map when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this structure map is (or will be) published. The URL SHOULD include the major version of the structure map. For more information see [Technical and Business Versions](resource.html#versions).). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
      */
     public UriType getUrlElement() { 
       if (this.url == null)
@@ -5100,7 +5100,7 @@ public class StructureMap extends MetadataResource {
     }
 
     /**
-     * @param value {@link #url} (An absolute URL that is used to identify this structure map when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this structure map is (or will be) published. The URL SHOULD include the major version of the structure map. For more information see [Technical and Business Versions](resource.html#versions).). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
+     * @param value {@link #url} (An absolute URI that is used to identify this structure map when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this structure map is (or will be) published. The URL SHOULD include the major version of the structure map. For more information see [Technical and Business Versions](resource.html#versions).). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
      */
     public StructureMap setUrlElement(UriType value) { 
       this.url = value;
@@ -5108,14 +5108,14 @@ public class StructureMap extends MetadataResource {
     }
 
     /**
-     * @return An absolute URL that is used to identify this structure map when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this structure map is (or will be) published. The URL SHOULD include the major version of the structure map. For more information see [Technical and Business Versions](resource.html#versions).
+     * @return An absolute URI that is used to identify this structure map when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this structure map is (or will be) published. The URL SHOULD include the major version of the structure map. For more information see [Technical and Business Versions](resource.html#versions).
      */
     public String getUrl() { 
       return this.url == null ? null : this.url.getValue();
     }
 
     /**
-     * @param value An absolute URL that is used to identify this structure map when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this structure map is (or will be) published. The URL SHOULD include the major version of the structure map. For more information see [Technical and Business Versions](resource.html#versions).
+     * @param value An absolute URI that is used to identify this structure map when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this structure map is (or will be) published. The URL SHOULD include the major version of the structure map. For more information see [Technical and Business Versions](resource.html#versions).
      */
     public StructureMap setUrl(String value) { 
         if (this.url == null)
@@ -5178,7 +5178,7 @@ public class StructureMap extends MetadataResource {
     }
 
     /**
-     * @return {@link #version} (The identifier that is used to identify this version of the structure map when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the structure map author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions are orderable.). This is the underlying object with id, value and extensions. The accessor "getVersion" gives direct access to the value
+     * @return {@link #version} (The identifier that is used to identify this version of the structure map when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the structure map author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions can be placed in a lexicographical sequence.). This is the underlying object with id, value and extensions. The accessor "getVersion" gives direct access to the value
      */
     public StringType getVersionElement() { 
       if (this.version == null)
@@ -5198,7 +5198,7 @@ public class StructureMap extends MetadataResource {
     }
 
     /**
-     * @param value {@link #version} (The identifier that is used to identify this version of the structure map when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the structure map author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions are orderable.). This is the underlying object with id, value and extensions. The accessor "getVersion" gives direct access to the value
+     * @param value {@link #version} (The identifier that is used to identify this version of the structure map when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the structure map author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions can be placed in a lexicographical sequence.). This is the underlying object with id, value and extensions. The accessor "getVersion" gives direct access to the value
      */
     public StructureMap setVersionElement(StringType value) { 
       this.version = value;
@@ -5206,14 +5206,14 @@ public class StructureMap extends MetadataResource {
     }
 
     /**
-     * @return The identifier that is used to identify this version of the structure map when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the structure map author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions are orderable.
+     * @return The identifier that is used to identify this version of the structure map when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the structure map author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions can be placed in a lexicographical sequence.
      */
     public String getVersion() { 
       return this.version == null ? null : this.version.getValue();
     }
 
     /**
-     * @param value The identifier that is used to identify this version of the structure map when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the structure map author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions are orderable.
+     * @param value The identifier that is used to identify this version of the structure map when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the structure map author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions can be placed in a lexicographical sequence.
      */
     public StructureMap setVersion(String value) { 
       if (Utilities.noString(value))
@@ -5366,7 +5366,7 @@ public class StructureMap extends MetadataResource {
     }
 
     /**
-     * @return {@link #experimental} (A flag to indicate that this structure map is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.). This is the underlying object with id, value and extensions. The accessor "getExperimental" gives direct access to the value
+     * @return {@link #experimental} (A boolean value to indicate that this structure map is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.). This is the underlying object with id, value and extensions. The accessor "getExperimental" gives direct access to the value
      */
     public BooleanType getExperimentalElement() { 
       if (this.experimental == null)
@@ -5386,7 +5386,7 @@ public class StructureMap extends MetadataResource {
     }
 
     /**
-     * @param value {@link #experimental} (A flag to indicate that this structure map is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.). This is the underlying object with id, value and extensions. The accessor "getExperimental" gives direct access to the value
+     * @param value {@link #experimental} (A boolean value to indicate that this structure map is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.). This is the underlying object with id, value and extensions. The accessor "getExperimental" gives direct access to the value
      */
     public StructureMap setExperimentalElement(BooleanType value) { 
       this.experimental = value;
@@ -5394,14 +5394,14 @@ public class StructureMap extends MetadataResource {
     }
 
     /**
-     * @return A flag to indicate that this structure map is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.
+     * @return A boolean value to indicate that this structure map is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.
      */
     public boolean getExperimental() { 
       return this.experimental == null || this.experimental.isEmpty() ? false : this.experimental.getValue();
     }
 
     /**
-     * @param value A flag to indicate that this structure map is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.
+     * @param value A boolean value to indicate that this structure map is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.
      */
     public StructureMap setExperimental(boolean value) { 
         if (this.experimental == null)
@@ -5411,7 +5411,7 @@ public class StructureMap extends MetadataResource {
     }
 
     /**
-     * @return {@link #date} (The date  (and optionally time) when the structure map was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the structure map changes.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
+     * @return {@link #date} (The date  (and optionally time) when the structure map was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the structure map changes.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
      */
     public DateTimeType getDateElement() { 
       if (this.date == null)
@@ -5431,7 +5431,7 @@ public class StructureMap extends MetadataResource {
     }
 
     /**
-     * @param value {@link #date} (The date  (and optionally time) when the structure map was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the structure map changes.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
+     * @param value {@link #date} (The date  (and optionally time) when the structure map was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the structure map changes.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
      */
     public StructureMap setDateElement(DateTimeType value) { 
       this.date = value;
@@ -5439,14 +5439,14 @@ public class StructureMap extends MetadataResource {
     }
 
     /**
-     * @return The date  (and optionally time) when the structure map was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the structure map changes.
+     * @return The date  (and optionally time) when the structure map was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the structure map changes.
      */
     public Date getDate() { 
       return this.date == null ? null : this.date.getValue();
     }
 
     /**
-     * @param value The date  (and optionally time) when the structure map was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the structure map changes.
+     * @param value The date  (and optionally time) when the structure map was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the structure map changes.
      */
     public StructureMap setDate(Date value) { 
       if (value == null)
@@ -5562,7 +5562,7 @@ public class StructureMap extends MetadataResource {
     }
 
     /**
-     * @return {@link #description} (A free text natural language description of the structure map from the consumer's perspective.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
+     * @return {@link #description} (A free text natural language description of the structure map from a consumer's perspective.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
      */
     public MarkdownType getDescriptionElement() { 
       if (this.description == null)
@@ -5582,7 +5582,7 @@ public class StructureMap extends MetadataResource {
     }
 
     /**
-     * @param value {@link #description} (A free text natural language description of the structure map from the consumer's perspective.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
+     * @param value {@link #description} (A free text natural language description of the structure map from a consumer's perspective.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
      */
     public StructureMap setDescriptionElement(MarkdownType value) { 
       this.description = value;
@@ -5590,14 +5590,14 @@ public class StructureMap extends MetadataResource {
     }
 
     /**
-     * @return A free text natural language description of the structure map from the consumer's perspective.
+     * @return A free text natural language description of the structure map from a consumer's perspective.
      */
     public String getDescription() { 
       return this.description == null ? null : this.description.getValue();
     }
 
     /**
-     * @param value A free text natural language description of the structure map from the consumer's perspective.
+     * @param value A free text natural language description of the structure map from a consumer's perspective.
      */
     public StructureMap setDescription(String value) { 
       if (value == null)
@@ -5611,7 +5611,7 @@ public class StructureMap extends MetadataResource {
     }
 
     /**
-     * @return {@link #useContext} (The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching of code system definitions.)
+     * @return {@link #useContext} (The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching for appropriate structure map instances.)
      */
     public List<UsageContext> getUseContext() { 
       if (this.useContext == null)
@@ -5664,7 +5664,7 @@ public class StructureMap extends MetadataResource {
     }
 
     /**
-     * @return {@link #jurisdiction} (A jurisdiction in which the structure map is intended to be used.)
+     * @return {@link #jurisdiction} (A legal or geographic region in which the structure map is intended to be used.)
      */
     public List<CodeableConcept> getJurisdiction() { 
       if (this.jurisdiction == null)
@@ -5717,7 +5717,7 @@ public class StructureMap extends MetadataResource {
     }
 
     /**
-     * @return {@link #purpose} (Explains why this structure map is needed and why it has been designed as it has.). This is the underlying object with id, value and extensions. The accessor "getPurpose" gives direct access to the value
+     * @return {@link #purpose} (Explaination of why this structure map is needed and why it has been designed as it has.). This is the underlying object with id, value and extensions. The accessor "getPurpose" gives direct access to the value
      */
     public MarkdownType getPurposeElement() { 
       if (this.purpose == null)
@@ -5737,7 +5737,7 @@ public class StructureMap extends MetadataResource {
     }
 
     /**
-     * @param value {@link #purpose} (Explains why this structure map is needed and why it has been designed as it has.). This is the underlying object with id, value and extensions. The accessor "getPurpose" gives direct access to the value
+     * @param value {@link #purpose} (Explaination of why this structure map is needed and why it has been designed as it has.). This is the underlying object with id, value and extensions. The accessor "getPurpose" gives direct access to the value
      */
     public StructureMap setPurposeElement(MarkdownType value) { 
       this.purpose = value;
@@ -5745,14 +5745,14 @@ public class StructureMap extends MetadataResource {
     }
 
     /**
-     * @return Explains why this structure map is needed and why it has been designed as it has.
+     * @return Explaination of why this structure map is needed and why it has been designed as it has.
      */
     public String getPurpose() { 
       return this.purpose == null ? null : this.purpose.getValue();
     }
 
     /**
-     * @param value Explains why this structure map is needed and why it has been designed as it has.
+     * @param value Explaination of why this structure map is needed and why it has been designed as it has.
      */
     public StructureMap setPurpose(String value) { 
       if (value == null)
@@ -5929,7 +5929,7 @@ public class StructureMap extends MetadataResource {
     }
 
     /**
-     * @return {@link #group} (Named sections for reader convenience.)
+     * @return {@link #group} (Organizes the mapping into managable chunks for human review/ease of maintenance.)
      */
     public List<StructureMapGroupComponent> getGroup() { 
       if (this.group == null)
@@ -5983,24 +5983,24 @@ public class StructureMap extends MetadataResource {
 
       protected void listChildren(List<Property> childrenList) {
         super.listChildren(childrenList);
-        childrenList.add(new Property("url", "uri", "An absolute URL that is used to identify this structure map when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this structure map is (or will be) published. The URL SHOULD include the major version of the structure map. For more information see [Technical and Business Versions](resource.html#versions).", 0, java.lang.Integer.MAX_VALUE, url));
+        childrenList.add(new Property("url", "uri", "An absolute URI that is used to identify this structure map when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this structure map is (or will be) published. The URL SHOULD include the major version of the structure map. For more information see [Technical and Business Versions](resource.html#versions).", 0, java.lang.Integer.MAX_VALUE, url));
         childrenList.add(new Property("identifier", "Identifier", "A formal identifier that is used to identify this structure map when it is represented in other formats, or referenced in a specification, model, design or an instance.", 0, java.lang.Integer.MAX_VALUE, identifier));
-        childrenList.add(new Property("version", "string", "The identifier that is used to identify this version of the structure map when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the structure map author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions are orderable.", 0, java.lang.Integer.MAX_VALUE, version));
+        childrenList.add(new Property("version", "string", "The identifier that is used to identify this version of the structure map when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the structure map author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions can be placed in a lexicographical sequence.", 0, java.lang.Integer.MAX_VALUE, version));
         childrenList.add(new Property("name", "string", "A natural language name identifying the structure map. This name should be usable as an identifier for the module by machine processing applications such as code generation.", 0, java.lang.Integer.MAX_VALUE, name));
         childrenList.add(new Property("title", "string", "A short, descriptive, user-friendly title for the structure map.", 0, java.lang.Integer.MAX_VALUE, title));
         childrenList.add(new Property("status", "code", "The status of this structure map. Enables tracking the life-cycle of the content.", 0, java.lang.Integer.MAX_VALUE, status));
-        childrenList.add(new Property("experimental", "boolean", "A flag to indicate that this structure map is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.", 0, java.lang.Integer.MAX_VALUE, experimental));
-        childrenList.add(new Property("date", "dateTime", "The date  (and optionally time) when the structure map was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the structure map changes.", 0, java.lang.Integer.MAX_VALUE, date));
+        childrenList.add(new Property("experimental", "boolean", "A boolean value to indicate that this structure map is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.", 0, java.lang.Integer.MAX_VALUE, experimental));
+        childrenList.add(new Property("date", "dateTime", "The date  (and optionally time) when the structure map was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the structure map changes.", 0, java.lang.Integer.MAX_VALUE, date));
         childrenList.add(new Property("publisher", "string", "The name of the individual or organization that published the structure map.", 0, java.lang.Integer.MAX_VALUE, publisher));
         childrenList.add(new Property("contact", "ContactDetail", "Contact details to assist a user in finding and communicating with the publisher.", 0, java.lang.Integer.MAX_VALUE, contact));
-        childrenList.add(new Property("description", "markdown", "A free text natural language description of the structure map from the consumer's perspective.", 0, java.lang.Integer.MAX_VALUE, description));
-        childrenList.add(new Property("useContext", "UsageContext", "The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching of code system definitions.", 0, java.lang.Integer.MAX_VALUE, useContext));
-        childrenList.add(new Property("jurisdiction", "CodeableConcept", "A jurisdiction in which the structure map is intended to be used.", 0, java.lang.Integer.MAX_VALUE, jurisdiction));
-        childrenList.add(new Property("purpose", "markdown", "Explains why this structure map is needed and why it has been designed as it has.", 0, java.lang.Integer.MAX_VALUE, purpose));
+        childrenList.add(new Property("description", "markdown", "A free text natural language description of the structure map from a consumer's perspective.", 0, java.lang.Integer.MAX_VALUE, description));
+        childrenList.add(new Property("useContext", "UsageContext", "The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching for appropriate structure map instances.", 0, java.lang.Integer.MAX_VALUE, useContext));
+        childrenList.add(new Property("jurisdiction", "CodeableConcept", "A legal or geographic region in which the structure map is intended to be used.", 0, java.lang.Integer.MAX_VALUE, jurisdiction));
+        childrenList.add(new Property("purpose", "markdown", "Explaination of why this structure map is needed and why it has been designed as it has.", 0, java.lang.Integer.MAX_VALUE, purpose));
         childrenList.add(new Property("copyright", "markdown", "A copyright statement relating to the structure map and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the structure map.", 0, java.lang.Integer.MAX_VALUE, copyright));
         childrenList.add(new Property("structure", "", "A structure definition used by this map. The structure definition may describe instances that are converted, or the instances that are produced.", 0, java.lang.Integer.MAX_VALUE, structure));
         childrenList.add(new Property("import", "uri", "Other maps used by this map (canonical URLs).", 0, java.lang.Integer.MAX_VALUE, import_));
-        childrenList.add(new Property("group", "", "Named sections for reader convenience.", 0, java.lang.Integer.MAX_VALUE, group));
+        childrenList.add(new Property("group", "", "Organizes the mapping into managable chunks for human review/ease of maintenance.", 0, java.lang.Integer.MAX_VALUE, group));
       }
 
       @Override
@@ -6365,17 +6365,17 @@ public class StructureMap extends MetadataResource {
  /**
    * Search parameter: <b>identifier</b>
    * <p>
-   * Description: <b>External identifiers for the structure map</b><br>
+   * Description: <b>External identifier for the structure map</b><br>
    * Type: <b>token</b><br>
    * Path: <b>StructureMap.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="StructureMap.identifier", description="External identifiers for the structure map", type="token" )
+  @SearchParamDefinition(name="identifier", path="StructureMap.identifier", description="External identifier for the structure map", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
    * <p>
-   * Description: <b>External identifiers for the structure map</b><br>
+   * Description: <b>External identifier for the structure map</b><br>
    * Type: <b>token</b><br>
    * Path: <b>StructureMap.identifier</b><br>
    * </p>
@@ -6385,17 +6385,17 @@ public class StructureMap extends MetadataResource {
  /**
    * Search parameter: <b>jurisdiction</b>
    * <p>
-   * Description: <b>Intended jurisdiction for structure map</b><br>
+   * Description: <b>Intended jurisdiction for the structure map</b><br>
    * Type: <b>token</b><br>
    * Path: <b>StructureMap.jurisdiction</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="jurisdiction", path="StructureMap.jurisdiction", description="Intended jurisdiction for structure map", type="token" )
+  @SearchParamDefinition(name="jurisdiction", path="StructureMap.jurisdiction", description="Intended jurisdiction for the structure map", type="token" )
   public static final String SP_JURISDICTION = "jurisdiction";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>jurisdiction</b>
    * <p>
-   * Description: <b>Intended jurisdiction for structure map</b><br>
+   * Description: <b>Intended jurisdiction for the structure map</b><br>
    * Type: <b>token</b><br>
    * Path: <b>StructureMap.jurisdiction</b><br>
    * </p>
@@ -6405,17 +6405,17 @@ public class StructureMap extends MetadataResource {
  /**
    * Search parameter: <b>name</b>
    * <p>
-   * Description: <b>Name of the structure map</b><br>
+   * Description: <b>Computationally friendly name of the structure map</b><br>
    * Type: <b>string</b><br>
    * Path: <b>StructureMap.name</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="name", path="StructureMap.name", description="Name of the structure map", type="string" )
+  @SearchParamDefinition(name="name", path="StructureMap.name", description="Computationally friendly name of the structure map", type="string" )
   public static final String SP_NAME = "name";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>name</b>
    * <p>
-   * Description: <b>Name of the structure map</b><br>
+   * Description: <b>Computationally friendly name of the structure map</b><br>
    * Type: <b>string</b><br>
    * Path: <b>StructureMap.name</b><br>
    * </p>
@@ -6425,17 +6425,17 @@ public class StructureMap extends MetadataResource {
  /**
    * Search parameter: <b>description</b>
    * <p>
-   * Description: <b>Text search against the description of the structure map</b><br>
+   * Description: <b>The description of the structure map</b><br>
    * Type: <b>string</b><br>
    * Path: <b>StructureMap.description</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="description", path="StructureMap.description", description="Text search against the description of the structure map", type="string" )
+  @SearchParamDefinition(name="description", path="StructureMap.description", description="The description of the structure map", type="string" )
   public static final String SP_DESCRIPTION = "description";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>description</b>
    * <p>
-   * Description: <b>Text search against the description of the structure map</b><br>
+   * Description: <b>The description of the structure map</b><br>
    * Type: <b>string</b><br>
    * Path: <b>StructureMap.description</b><br>
    * </p>
@@ -6465,17 +6465,17 @@ public class StructureMap extends MetadataResource {
  /**
    * Search parameter: <b>title</b>
    * <p>
-   * Description: <b>Text search against the title of the structure map</b><br>
+   * Description: <b>The human-friendly name of the structure map</b><br>
    * Type: <b>string</b><br>
    * Path: <b>StructureMap.title</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="title", path="StructureMap.title", description="Text search against the title of the structure map", type="string" )
+  @SearchParamDefinition(name="title", path="StructureMap.title", description="The human-friendly name of the structure map", type="string" )
   public static final String SP_TITLE = "title";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>title</b>
    * <p>
-   * Description: <b>Text search against the title of the structure map</b><br>
+   * Description: <b>The human-friendly name of the structure map</b><br>
    * Type: <b>string</b><br>
    * Path: <b>StructureMap.title</b><br>
    * </p>

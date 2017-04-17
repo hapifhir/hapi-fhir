@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
+// Generated on Mon, Apr 17, 2017 17:38-0400 for FHIR v3.0.1
 
 import java.util.*;
 
@@ -59,7 +59,7 @@ public class MessageHeader extends DomainResource {
          */
         TRANSIENTERROR, 
         /**
-         * The message was rejected because of some content in it. There is no point in re-sending without change. The response narrative SHALL describe the issue.
+         * The message was rejected because of a problem with the content. There is no point in re-sending without change. The response narrative SHALL describe the issue.
          */
         FATALERROR, 
         /**
@@ -100,7 +100,7 @@ public class MessageHeader extends DomainResource {
           switch (this) {
             case OK: return "The message was accepted and processed without error.";
             case TRANSIENTERROR: return "Some internal unexpected error occurred - wait and try again. Note - this is usually used for things like database unavailable, which may be expected to resolve, though human intervention may be required.";
-            case FATALERROR: return "The message was rejected because of some content in it. There is no point in re-sending without change. The response narrative SHALL describe the issue.";
+            case FATALERROR: return "The message was rejected because of a problem with the content. There is no point in re-sending without change. The response narrative SHALL describe the issue.";
             default: return "?";
           }
         }
@@ -904,7 +904,7 @@ public class MessageHeader extends DomainResource {
         /**
          * Code that identifies the type of response to the message - whether it was successful or not, and whether it should be resent or not.
          */
-        @Child(name = "code", type = {CodeType.class}, order=2, min=1, max=1, modifier=true, summary=true)
+        @Child(name = "code", type = {CodeType.class}, order=2, min=1, max=1, modifier=false, summary=true)
         @Description(shortDefinition="ok | transient-error | fatal-error", formalDefinition="Code that identifies the type of response to the message - whether it was successful or not, and whether it should be resent or not." )
         @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/response-code")
         protected Enumeration<ResponseType> code;
@@ -1206,7 +1206,7 @@ public class MessageHeader extends DomainResource {
     /**
      * Code that identifies the event this message represents and connects it with its definition. Events defined as part of the FHIR specification have the system value "http://hl7.org/fhir/message-events".
      */
-    @Child(name = "event", type = {Coding.class}, order=0, min=1, max=1, modifier=true, summary=true)
+    @Child(name = "event", type = {Coding.class}, order=0, min=1, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Code for the event this message represents", formalDefinition="Code that identifies the event this message represents and connects it with its definition. Events defined as part of the FHIR specification have the system value \"http://hl7.org/fhir/message-events\"." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/message-events")
     protected Coding event;
@@ -1215,7 +1215,7 @@ public class MessageHeader extends DomainResource {
      * The destination application which the message is intended for.
      */
     @Child(name = "destination", type = {}, order=1, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-    @Description(shortDefinition="Message Destination Application(s)", formalDefinition="The destination application which the message is intended for." )
+    @Description(shortDefinition="Message destination application(s)", formalDefinition="The destination application which the message is intended for." )
     protected List<MessageDestinationComponent> destination;
 
     /**
@@ -1250,26 +1250,26 @@ public class MessageHeader extends DomainResource {
     protected InstantType timestamp;
 
     /**
-     * The person or device that performed the data entry leading to this message. Where there is more than one candidate, pick the most proximal to the message. Can provide other enterers in extensions.
+     * The person or device that performed the data entry leading to this message. When there is more than one candidate, pick the most proximal to the message. Can provide other enterers in extensions.
      */
     @Child(name = "enterer", type = {Practitioner.class}, order=5, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="The source of the data entry", formalDefinition="The person or device that performed the data entry leading to this message. Where there is more than one candidate, pick the most proximal to the message. Can provide other enterers in extensions." )
+    @Description(shortDefinition="The source of the data entry", formalDefinition="The person or device that performed the data entry leading to this message. When there is more than one candidate, pick the most proximal to the message. Can provide other enterers in extensions." )
     protected Reference enterer;
 
     /**
-     * The actual object that is the target of the reference (The person or device that performed the data entry leading to this message. Where there is more than one candidate, pick the most proximal to the message. Can provide other enterers in extensions.)
+     * The actual object that is the target of the reference (The person or device that performed the data entry leading to this message. When there is more than one candidate, pick the most proximal to the message. Can provide other enterers in extensions.)
      */
     protected Practitioner entererTarget;
 
     /**
-     * The logical author of the message - the person or device that decided the described event should happen. Where there is more than one candidate, pick the most proximal to the MessageHeader. Can provide other authors in extensions.
+     * The logical author of the message - the person or device that decided the described event should happen. When there is more than one candidate, pick the most proximal to the MessageHeader. Can provide other authors in extensions.
      */
     @Child(name = "author", type = {Practitioner.class}, order=6, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="The source of the decision", formalDefinition="The logical author of the message - the person or device that decided the described event should happen. Where there is more than one candidate, pick the most proximal to the MessageHeader. Can provide other authors in extensions." )
+    @Description(shortDefinition="The source of the decision", formalDefinition="The logical author of the message - the person or device that decided the described event should happen. When there is more than one candidate, pick the most proximal to the MessageHeader. Can provide other authors in extensions." )
     protected Reference author;
 
     /**
-     * The actual object that is the target of the reference (The logical author of the message - the person or device that decided the described event should happen. Where there is more than one candidate, pick the most proximal to the MessageHeader. Can provide other authors in extensions.)
+     * The actual object that is the target of the reference (The logical author of the message - the person or device that decided the described event should happen. When there is more than one candidate, pick the most proximal to the MessageHeader. Can provide other authors in extensions.)
      */
     protected Practitioner authorTarget;
 
@@ -1277,7 +1277,7 @@ public class MessageHeader extends DomainResource {
      * The source application from which this message originated.
      */
     @Child(name = "source", type = {}, order=7, min=1, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Message Source Application", formalDefinition="The source application from which this message originated." )
+    @Description(shortDefinition="Message source application", formalDefinition="The source application from which this message originated." )
     protected MessageSourceComponent source;
 
     /**
@@ -1303,7 +1303,7 @@ public class MessageHeader extends DomainResource {
     /**
      * Information about the message that this message is a response to.  Only present if this message is a response.
      */
-    @Child(name = "response", type = {}, order=10, min=0, max=1, modifier=true, summary=true)
+    @Child(name = "response", type = {}, order=10, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="If this is a reply to prior message", formalDefinition="Information about the message that this message is a response to.  Only present if this message is a response." )
     protected MessageHeaderResponseComponent response;
 
@@ -1539,7 +1539,7 @@ public class MessageHeader extends DomainResource {
     }
 
     /**
-     * @return {@link #enterer} (The person or device that performed the data entry leading to this message. Where there is more than one candidate, pick the most proximal to the message. Can provide other enterers in extensions.)
+     * @return {@link #enterer} (The person or device that performed the data entry leading to this message. When there is more than one candidate, pick the most proximal to the message. Can provide other enterers in extensions.)
      */
     public Reference getEnterer() { 
       if (this.enterer == null)
@@ -1555,7 +1555,7 @@ public class MessageHeader extends DomainResource {
     }
 
     /**
-     * @param value {@link #enterer} (The person or device that performed the data entry leading to this message. Where there is more than one candidate, pick the most proximal to the message. Can provide other enterers in extensions.)
+     * @param value {@link #enterer} (The person or device that performed the data entry leading to this message. When there is more than one candidate, pick the most proximal to the message. Can provide other enterers in extensions.)
      */
     public MessageHeader setEnterer(Reference value) { 
       this.enterer = value;
@@ -1563,7 +1563,7 @@ public class MessageHeader extends DomainResource {
     }
 
     /**
-     * @return {@link #enterer} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The person or device that performed the data entry leading to this message. Where there is more than one candidate, pick the most proximal to the message. Can provide other enterers in extensions.)
+     * @return {@link #enterer} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The person or device that performed the data entry leading to this message. When there is more than one candidate, pick the most proximal to the message. Can provide other enterers in extensions.)
      */
     public Practitioner getEntererTarget() { 
       if (this.entererTarget == null)
@@ -1575,7 +1575,7 @@ public class MessageHeader extends DomainResource {
     }
 
     /**
-     * @param value {@link #enterer} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The person or device that performed the data entry leading to this message. Where there is more than one candidate, pick the most proximal to the message. Can provide other enterers in extensions.)
+     * @param value {@link #enterer} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The person or device that performed the data entry leading to this message. When there is more than one candidate, pick the most proximal to the message. Can provide other enterers in extensions.)
      */
     public MessageHeader setEntererTarget(Practitioner value) { 
       this.entererTarget = value;
@@ -1583,7 +1583,7 @@ public class MessageHeader extends DomainResource {
     }
 
     /**
-     * @return {@link #author} (The logical author of the message - the person or device that decided the described event should happen. Where there is more than one candidate, pick the most proximal to the MessageHeader. Can provide other authors in extensions.)
+     * @return {@link #author} (The logical author of the message - the person or device that decided the described event should happen. When there is more than one candidate, pick the most proximal to the MessageHeader. Can provide other authors in extensions.)
      */
     public Reference getAuthor() { 
       if (this.author == null)
@@ -1599,7 +1599,7 @@ public class MessageHeader extends DomainResource {
     }
 
     /**
-     * @param value {@link #author} (The logical author of the message - the person or device that decided the described event should happen. Where there is more than one candidate, pick the most proximal to the MessageHeader. Can provide other authors in extensions.)
+     * @param value {@link #author} (The logical author of the message - the person or device that decided the described event should happen. When there is more than one candidate, pick the most proximal to the MessageHeader. Can provide other authors in extensions.)
      */
     public MessageHeader setAuthor(Reference value) { 
       this.author = value;
@@ -1607,7 +1607,7 @@ public class MessageHeader extends DomainResource {
     }
 
     /**
-     * @return {@link #author} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The logical author of the message - the person or device that decided the described event should happen. Where there is more than one candidate, pick the most proximal to the MessageHeader. Can provide other authors in extensions.)
+     * @return {@link #author} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The logical author of the message - the person or device that decided the described event should happen. When there is more than one candidate, pick the most proximal to the MessageHeader. Can provide other authors in extensions.)
      */
     public Practitioner getAuthorTarget() { 
       if (this.authorTarget == null)
@@ -1619,7 +1619,7 @@ public class MessageHeader extends DomainResource {
     }
 
     /**
-     * @param value {@link #author} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The logical author of the message - the person or device that decided the described event should happen. Where there is more than one candidate, pick the most proximal to the MessageHeader. Can provide other authors in extensions.)
+     * @param value {@link #author} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The logical author of the message - the person or device that decided the described event should happen. When there is more than one candidate, pick the most proximal to the MessageHeader. Can provide other authors in extensions.)
      */
     public MessageHeader setAuthorTarget(Practitioner value) { 
       this.authorTarget = value;
@@ -1807,8 +1807,8 @@ public class MessageHeader extends DomainResource {
         childrenList.add(new Property("receiver", "Reference(Practitioner|Organization)", "Allows data conveyed by a message to be addressed to a particular person or department when routing to a specific application isn't sufficient.", 0, java.lang.Integer.MAX_VALUE, receiver));
         childrenList.add(new Property("sender", "Reference(Practitioner|Organization)", "Identifies the sending system to allow the use of a trust relationship.", 0, java.lang.Integer.MAX_VALUE, sender));
         childrenList.add(new Property("timestamp", "instant", "The time that the message was sent.", 0, java.lang.Integer.MAX_VALUE, timestamp));
-        childrenList.add(new Property("enterer", "Reference(Practitioner)", "The person or device that performed the data entry leading to this message. Where there is more than one candidate, pick the most proximal to the message. Can provide other enterers in extensions.", 0, java.lang.Integer.MAX_VALUE, enterer));
-        childrenList.add(new Property("author", "Reference(Practitioner)", "The logical author of the message - the person or device that decided the described event should happen. Where there is more than one candidate, pick the most proximal to the MessageHeader. Can provide other authors in extensions.", 0, java.lang.Integer.MAX_VALUE, author));
+        childrenList.add(new Property("enterer", "Reference(Practitioner)", "The person or device that performed the data entry leading to this message. When there is more than one candidate, pick the most proximal to the message. Can provide other enterers in extensions.", 0, java.lang.Integer.MAX_VALUE, enterer));
+        childrenList.add(new Property("author", "Reference(Practitioner)", "The logical author of the message - the person or device that decided the described event should happen. When there is more than one candidate, pick the most proximal to the MessageHeader. Can provide other authors in extensions.", 0, java.lang.Integer.MAX_VALUE, author));
         childrenList.add(new Property("source", "", "The source application from which this message originated.", 0, java.lang.Integer.MAX_VALUE, source));
         childrenList.add(new Property("responsible", "Reference(Practitioner|Organization)", "The person or organization that accepts overall responsibility for the contents of the message. The implication is that the message event happened under the policies of the responsible party.", 0, java.lang.Integer.MAX_VALUE, responsible));
         childrenList.add(new Property("reason", "CodeableConcept", "Coded indication of the cause for the event - indicates  a reason for the occurrence of the event that is a focus of this message.", 0, java.lang.Integer.MAX_VALUE, reason));

@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
+// Generated on Mon, Apr 17, 2017 17:38-0400 for FHIR v3.0.1
 
 import java.util.*;
 
@@ -695,10 +695,10 @@ public class Composition extends DomainResource {
         protected List<Enumeration<CompositionAttestationMode>> mode;
 
         /**
-         * When composition was attested by the party.
+         * When the composition was attested by the party.
          */
         @Child(name = "time", type = {DateTimeType.class}, order=2, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="When composition attested", formalDefinition="When composition was attested by the party." )
+        @Description(shortDefinition="When the composition was attested", formalDefinition="When the composition was attested by the party." )
         protected DateTimeType time;
 
         /**
@@ -784,7 +784,7 @@ public class Composition extends DomainResource {
         }
 
         /**
-         * @return {@link #time} (When composition was attested by the party.). This is the underlying object with id, value and extensions. The accessor "getTime" gives direct access to the value
+         * @return {@link #time} (When the composition was attested by the party.). This is the underlying object with id, value and extensions. The accessor "getTime" gives direct access to the value
          */
         public DateTimeType getTimeElement() { 
           if (this.time == null)
@@ -804,7 +804,7 @@ public class Composition extends DomainResource {
         }
 
         /**
-         * @param value {@link #time} (When composition was attested by the party.). This is the underlying object with id, value and extensions. The accessor "getTime" gives direct access to the value
+         * @param value {@link #time} (When the composition was attested by the party.). This is the underlying object with id, value and extensions. The accessor "getTime" gives direct access to the value
          */
         public CompositionAttesterComponent setTimeElement(DateTimeType value) { 
           this.time = value;
@@ -812,14 +812,14 @@ public class Composition extends DomainResource {
         }
 
         /**
-         * @return When composition was attested by the party.
+         * @return When the composition was attested by the party.
          */
         public Date getTime() { 
           return this.time == null ? null : this.time.getValue();
         }
 
         /**
-         * @param value When composition was attested by the party.
+         * @param value When the composition was attested by the party.
          */
         public CompositionAttesterComponent setTime(Date value) { 
           if (value == null)
@@ -874,7 +874,7 @@ public class Composition extends DomainResource {
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
           childrenList.add(new Property("mode", "code", "The type of attestation the authenticator offers.", 0, java.lang.Integer.MAX_VALUE, mode));
-          childrenList.add(new Property("time", "dateTime", "When composition was attested by the party.", 0, java.lang.Integer.MAX_VALUE, time));
+          childrenList.add(new Property("time", "dateTime", "When the composition was attested by the party.", 0, java.lang.Integer.MAX_VALUE, time));
           childrenList.add(new Property("party", "Reference(Patient|Practitioner|Organization)", "Who attested the composition in the specified way.", 0, java.lang.Integer.MAX_VALUE, party));
         }
 

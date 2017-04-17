@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
+// Generated on Mon, Apr 17, 2017 17:38-0400 for FHIR v3.0.1
 
 import java.util.*;
 
@@ -1472,10 +1472,10 @@ public class Bundle extends Resource implements IBaseBundle {
         protected UriType url;
 
         /**
-         * If the ETag values match, return a 304 Not modified status. See the API documentation for ["Conditional Read"](http.html#cread).
+         * If the ETag values match, return a 304 Not Modified status. See the API documentation for ["Conditional Read"](http.html#cread).
          */
         @Child(name = "ifNoneMatch", type = {StringType.class}, order=3, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="For managing cache currency", formalDefinition="If the ETag values match, return a 304 Not modified status. See the API documentation for [\"Conditional Read\"](http.html#cread)." )
+        @Description(shortDefinition="For managing cache currency", formalDefinition="If the ETag values match, return a 304 Not Modified status. See the API documentation for [\"Conditional Read\"](http.html#cread)." )
         protected StringType ifNoneMatch;
 
         /**
@@ -1608,7 +1608,7 @@ public class Bundle extends Resource implements IBaseBundle {
         }
 
         /**
-         * @return {@link #ifNoneMatch} (If the ETag values match, return a 304 Not modified status. See the API documentation for ["Conditional Read"](http.html#cread).). This is the underlying object with id, value and extensions. The accessor "getIfNoneMatch" gives direct access to the value
+         * @return {@link #ifNoneMatch} (If the ETag values match, return a 304 Not Modified status. See the API documentation for ["Conditional Read"](http.html#cread).). This is the underlying object with id, value and extensions. The accessor "getIfNoneMatch" gives direct access to the value
          */
         public StringType getIfNoneMatchElement() { 
           if (this.ifNoneMatch == null)
@@ -1628,7 +1628,7 @@ public class Bundle extends Resource implements IBaseBundle {
         }
 
         /**
-         * @param value {@link #ifNoneMatch} (If the ETag values match, return a 304 Not modified status. See the API documentation for ["Conditional Read"](http.html#cread).). This is the underlying object with id, value and extensions. The accessor "getIfNoneMatch" gives direct access to the value
+         * @param value {@link #ifNoneMatch} (If the ETag values match, return a 304 Not Modified status. See the API documentation for ["Conditional Read"](http.html#cread).). This is the underlying object with id, value and extensions. The accessor "getIfNoneMatch" gives direct access to the value
          */
         public BundleEntryRequestComponent setIfNoneMatchElement(StringType value) { 
           this.ifNoneMatch = value;
@@ -1636,14 +1636,14 @@ public class Bundle extends Resource implements IBaseBundle {
         }
 
         /**
-         * @return If the ETag values match, return a 304 Not modified status. See the API documentation for ["Conditional Read"](http.html#cread).
+         * @return If the ETag values match, return a 304 Not Modified status. See the API documentation for ["Conditional Read"](http.html#cread).
          */
         public String getIfNoneMatch() { 
           return this.ifNoneMatch == null ? null : this.ifNoneMatch.getValue();
         }
 
         /**
-         * @param value If the ETag values match, return a 304 Not modified status. See the API documentation for ["Conditional Read"](http.html#cread).
+         * @param value If the ETag values match, return a 304 Not Modified status. See the API documentation for ["Conditional Read"](http.html#cread).
          */
         public BundleEntryRequestComponent setIfNoneMatch(String value) { 
           if (Utilities.noString(value))
@@ -1807,7 +1807,7 @@ public class Bundle extends Resource implements IBaseBundle {
           super.listChildren(childrenList);
           childrenList.add(new Property("method", "code", "The HTTP verb for this entry in either a change history, or a transaction/ transaction response.", 0, java.lang.Integer.MAX_VALUE, method));
           childrenList.add(new Property("url", "uri", "The URL for this entry, relative to the root (the address to which the request is posted).", 0, java.lang.Integer.MAX_VALUE, url));
-          childrenList.add(new Property("ifNoneMatch", "string", "If the ETag values match, return a 304 Not modified status. See the API documentation for [\"Conditional Read\"](http.html#cread).", 0, java.lang.Integer.MAX_VALUE, ifNoneMatch));
+          childrenList.add(new Property("ifNoneMatch", "string", "If the ETag values match, return a 304 Not Modified status. See the API documentation for [\"Conditional Read\"](http.html#cread).", 0, java.lang.Integer.MAX_VALUE, ifNoneMatch));
           childrenList.add(new Property("ifModifiedSince", "instant", "Only perform the operation if the last updated date matches. See the API documentation for [\"Conditional Read\"](http.html#cread).", 0, java.lang.Integer.MAX_VALUE, ifModifiedSince));
           childrenList.add(new Property("ifMatch", "string", "Only perform the operation if the Etag value matches. For more information, see the API section [\"Managing Resource Contention\"](http.html#concurrency).", 0, java.lang.Integer.MAX_VALUE, ifMatch));
           childrenList.add(new Property("ifNoneExist", "string", "Instruct the server not to perform the create if a specified resource already exists. For further information, see the API documentation for [\"Conditional Create\"](http.html#ccreate). This is just the query portion of the URL - what follows the \"?\" (not including the \"?\").", 0, java.lang.Integer.MAX_VALUE, ifNoneExist));
@@ -2401,10 +2401,10 @@ public class Bundle extends Resource implements IBaseBundle {
     protected Identifier identifier;
 
     /**
-     * Indicates the purpose of this bundle- how it was intended to be used.
+     * Indicates the purpose of this bundle - how it was intended to be used.
      */
     @Child(name = "type", type = {CodeType.class}, order=1, min=1, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="document | message | transaction | transaction-response | batch | batch-response | history | searchset | collection", formalDefinition="Indicates the purpose of this bundle- how it was intended to be used." )
+    @Description(shortDefinition="document | message | transaction | transaction-response | batch | batch-response | history | searchset | collection", formalDefinition="Indicates the purpose of this bundle - how it was intended to be used." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/bundle-type")
     protected Enumeration<BundleType> type;
 
@@ -2430,10 +2430,10 @@ public class Bundle extends Resource implements IBaseBundle {
     protected List<BundleEntryComponent> entry;
 
     /**
-     * Digital Signature - base64 encoded. XML DigSIg or a JWT.
+     * Digital Signature - base64 encoded. XML-DSIg or a JWT.
      */
     @Child(name = "signature", type = {Signature.class}, order=5, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Digital Signature", formalDefinition="Digital Signature - base64 encoded. XML DigSIg or a JWT." )
+    @Description(shortDefinition="Digital Signature", formalDefinition="Digital Signature - base64 encoded. XML-DSIg or a JWT." )
     protected Signature signature;
 
     private static final long serialVersionUID = 982760501L;
@@ -2478,7 +2478,7 @@ public class Bundle extends Resource implements IBaseBundle {
     }
 
     /**
-     * @return {@link #type} (Indicates the purpose of this bundle- how it was intended to be used.). This is the underlying object with id, value and extensions. The accessor "getType" gives direct access to the value
+     * @return {@link #type} (Indicates the purpose of this bundle - how it was intended to be used.). This is the underlying object with id, value and extensions. The accessor "getType" gives direct access to the value
      */
     public Enumeration<BundleType> getTypeElement() { 
       if (this.type == null)
@@ -2498,7 +2498,7 @@ public class Bundle extends Resource implements IBaseBundle {
     }
 
     /**
-     * @param value {@link #type} (Indicates the purpose of this bundle- how it was intended to be used.). This is the underlying object with id, value and extensions. The accessor "getType" gives direct access to the value
+     * @param value {@link #type} (Indicates the purpose of this bundle - how it was intended to be used.). This is the underlying object with id, value and extensions. The accessor "getType" gives direct access to the value
      */
     public Bundle setTypeElement(Enumeration<BundleType> value) { 
       this.type = value;
@@ -2506,14 +2506,14 @@ public class Bundle extends Resource implements IBaseBundle {
     }
 
     /**
-     * @return Indicates the purpose of this bundle- how it was intended to be used.
+     * @return Indicates the purpose of this bundle - how it was intended to be used.
      */
     public BundleType getType() { 
       return this.type == null ? null : this.type.getValue();
     }
 
     /**
-     * @param value Indicates the purpose of this bundle- how it was intended to be used.
+     * @param value Indicates the purpose of this bundle - how it was intended to be used.
      */
     public Bundle setType(BundleType value) { 
         if (this.type == null)
@@ -2674,7 +2674,7 @@ public class Bundle extends Resource implements IBaseBundle {
     }
 
     /**
-     * @return {@link #signature} (Digital Signature - base64 encoded. XML DigSIg or a JWT.)
+     * @return {@link #signature} (Digital Signature - base64 encoded. XML-DSIg or a JWT.)
      */
     public Signature getSignature() { 
       if (this.signature == null)
@@ -2690,7 +2690,7 @@ public class Bundle extends Resource implements IBaseBundle {
     }
 
     /**
-     * @param value {@link #signature} (Digital Signature - base64 encoded. XML DigSIg or a JWT.)
+     * @param value {@link #signature} (Digital Signature - base64 encoded. XML-DSIg or a JWT.)
      */
     public Bundle setSignature(Signature value) { 
       this.signature = value;
@@ -2747,11 +2747,11 @@ public class Bundle extends Resource implements IBaseBundle {
       protected void listChildren(List<Property> childrenList) {
         super.listChildren(childrenList);
         childrenList.add(new Property("identifier", "Identifier", "A persistent identifier for the batch that won't change as a batch is copied from server to server.", 0, java.lang.Integer.MAX_VALUE, identifier));
-        childrenList.add(new Property("type", "code", "Indicates the purpose of this bundle- how it was intended to be used.", 0, java.lang.Integer.MAX_VALUE, type));
+        childrenList.add(new Property("type", "code", "Indicates the purpose of this bundle - how it was intended to be used.", 0, java.lang.Integer.MAX_VALUE, type));
         childrenList.add(new Property("total", "unsignedInt", "If a set of search matches, this is the total number of matches for the search (as opposed to the number of results in this bundle).", 0, java.lang.Integer.MAX_VALUE, total));
         childrenList.add(new Property("link", "", "A series of links that provide context to this bundle.", 0, java.lang.Integer.MAX_VALUE, link));
         childrenList.add(new Property("entry", "", "An entry in a bundle resource - will either contain a resource, or information about a resource (transactions and history only).", 0, java.lang.Integer.MAX_VALUE, entry));
-        childrenList.add(new Property("signature", "Signature", "Digital Signature - base64 encoded. XML DigSIg or a JWT.", 0, java.lang.Integer.MAX_VALUE, signature));
+        childrenList.add(new Property("signature", "Signature", "Digital Signature - base64 encoded. XML-DSIg or a JWT.", 0, java.lang.Integer.MAX_VALUE, signature));
       }
 
       @Override

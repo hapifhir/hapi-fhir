@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
+// Generated on Mon, Apr 17, 2017 17:38-0400 for FHIR v3.0.1
 
 import java.util.*;
 
@@ -66,15 +66,15 @@ public class DiagnosticReport extends DomainResource {
          */
         FINAL, 
         /**
-         * Subsequent to being Final, the report has been modified.  This includes any change in the results, diagnosis, narrative text, or other content of a report that has been issued.
+         * Subsequent to being final, the report has been modified.  This includes any change in the results, diagnosis, narrative text, or other content of a report that has been issued.
          */
         AMENDED, 
         /**
-         * Subsequent to being Final, the report has been modified  to correct an error in the report or referenced results.
+         * Subsequent to being final, the report has been modified  to correct an error in the report or referenced results.
          */
         CORRECTED, 
         /**
-         * Subsequent to being Final, the report has been modified by adding new content. The existing content is unchanged.
+         * Subsequent to being final, the report has been modified by adding new content. The existing content is unchanged.
          */
         APPENDED, 
         /**
@@ -157,9 +157,9 @@ public class DiagnosticReport extends DomainResource {
             case PARTIAL: return "This is a partial (e.g. initial, interim or preliminary) report: data in the report may be incomplete or unverified.";
             case PRELIMINARY: return "Verified early results are available, but not all  results are final.";
             case FINAL: return "The report is complete and verified by an authorized person.";
-            case AMENDED: return "Subsequent to being Final, the report has been modified.  This includes any change in the results, diagnosis, narrative text, or other content of a report that has been issued.";
-            case CORRECTED: return "Subsequent to being Final, the report has been modified  to correct an error in the report or referenced results.";
-            case APPENDED: return "Subsequent to being Final, the report has been modified by adding new content. The existing content is unchanged.";
+            case AMENDED: return "Subsequent to being final, the report has been modified.  This includes any change in the results, diagnosis, narrative text, or other content of a report that has been issued.";
+            case CORRECTED: return "Subsequent to being final, the report has been modified  to correct an error in the report or referenced results.";
+            case APPENDED: return "Subsequent to being final, the report has been modified by adding new content. The existing content is unchanged.";
             case CANCELLED: return "The report is unavailable because the measurement was not started or not completed (also sometimes called \"aborted\").";
             case ENTEREDINERROR: return "The report has been withdrawn following a previous final release.  This electronic record should never have existed, though it is possible that real-world decisions were based on it. (If real-world activity has occurred, the status should be \"cancelled\" rather than \"entered-in-error\".)";
             case UNKNOWN: return "The authoring system does not know which of the status values currently applies for this request. Note: This concept is not to be used for \"other\" - one of the listed statuses is presumed to apply, it's just not known which one.";
@@ -729,10 +729,10 @@ public class DiagnosticReport extends DomainResource {
   }
 
     /**
-     * Identifiers assigned to this reprot by the performer or other systems.
+     * Identifiers assigned to this report by the performer or other systems.
      */
     @Child(name = "identifier", type = {Identifier.class}, order=0, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-    @Description(shortDefinition="Business Identifer for report", formalDefinition="Identifiers assigned to this reprot by the performer or other systems." )
+    @Description(shortDefinition="Business identifier for report", formalDefinition="Identifiers assigned to this report by the performer or other systems." )
     protected List<Identifier> identifier;
 
     /**
@@ -775,7 +775,7 @@ public class DiagnosticReport extends DomainResource {
      * The subject of the report. Usually, but not always, this is a patient. However diagnostic services also perform analyses on specimens collected from a variety of other sources.
      */
     @Child(name = "subject", type = {Patient.class, Group.class, Device.class, Location.class}, order=5, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="The subject of the report, usually, but not always, the patient", formalDefinition="The subject of the report. Usually, but not always, this is a patient. However diagnostic services also perform analyses on specimens collected from a variety of other sources." )
+    @Description(shortDefinition="The subject of the report - usually, but not always, the patient", formalDefinition="The subject of the report. Usually, but not always, this is a patient. However diagnostic services also perform analyses on specimens collected from a variety of other sources." )
     protected Reference subject;
 
     /**
@@ -799,7 +799,7 @@ public class DiagnosticReport extends DomainResource {
      * The time or time-period the observed values are related to. When the subject of the report is a patient, this is usually either the time of the procedure or of specimen collection(s), but very often the source of the date/time is not known, only the date/time itself.
      */
     @Child(name = "effective", type = {DateTimeType.class, Period.class}, order=7, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Clinically Relevant time/time-period for report", formalDefinition="The time or time-period the observed values are related to. When the subject of the report is a patient, this is usually either the time of the procedure or of specimen collection(s), but very often the source of the date/time is not known, only the date/time itself." )
+    @Description(shortDefinition="Clinically relevant time/time-period for report", formalDefinition="The time or time-period the observed values are related to. When the subject of the report is a patient, this is usually either the time of the procedure or of specimen collection(s), but very often the source of the date/time is not known, only the date/time itself." )
     protected Type effective;
 
     /**
@@ -900,7 +900,7 @@ public class DiagnosticReport extends DomainResource {
     }
 
     /**
-     * @return {@link #identifier} (Identifiers assigned to this reprot by the performer or other systems.)
+     * @return {@link #identifier} (Identifiers assigned to this report by the performer or other systems.)
      */
     public List<Identifier> getIdentifier() { 
       if (this.identifier == null)
@@ -1756,7 +1756,7 @@ public class DiagnosticReport extends DomainResource {
 
       protected void listChildren(List<Property> childrenList) {
         super.listChildren(childrenList);
-        childrenList.add(new Property("identifier", "Identifier", "Identifiers assigned to this reprot by the performer or other systems.", 0, java.lang.Integer.MAX_VALUE, identifier));
+        childrenList.add(new Property("identifier", "Identifier", "Identifiers assigned to this report by the performer or other systems.", 0, java.lang.Integer.MAX_VALUE, identifier));
         childrenList.add(new Property("basedOn", "Reference(CarePlan|ImmunizationRecommendation|MedicationRequest|NutritionOrder|ProcedureRequest|ReferralRequest)", "Details concerning a test or procedure requested.", 0, java.lang.Integer.MAX_VALUE, basedOn));
         childrenList.add(new Property("status", "code", "The status of the diagnostic report as a whole.", 0, java.lang.Integer.MAX_VALUE, status));
         childrenList.add(new Property("category", "CodeableConcept", "A code that classifies the clinical discipline, department or diagnostic service that created the report (e.g. cardiology, biochemistry, hematology, MRI). This is used for searching, sorting and display purposes.", 0, java.lang.Integer.MAX_VALUE, category));

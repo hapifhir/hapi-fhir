@@ -320,7 +320,7 @@ public class FHIRPathEngine {
     if (base != null)
       list.add(base);
     log = new StringBuilder();
-    return execute(new ExecutionContext(null, base.isResource() ? base : null, base, base), list, ExpressionNode, true);
+    return execute(new ExecutionContext(null, base != null && base.isResource() ? base : null, base, null, base), list, ExpressionNode, true);
   }
 
   /**
@@ -338,7 +338,7 @@ public class FHIRPathEngine {
     if (base != null)
       list.add(base);
     log = new StringBuilder();
-    return execute(new ExecutionContext(null, base.isResource() ? base : null, base, base), list, exp, true);
+    return execute(new ExecutionContext(null, base.isResource() ? base : null, base, null, base), list, exp, true);
   }
 
   /**
@@ -355,7 +355,7 @@ public class FHIRPathEngine {
     if (base != null)
       list.add(base);
     log = new StringBuilder();
-    return execute(new ExecutionContext(appContext, resource, base, base), list, ExpressionNode, true);
+    return execute(new ExecutionContext(appContext, resource, base, null, base), list, ExpressionNode, true);
   }
 
   /**
@@ -372,7 +372,7 @@ public class FHIRPathEngine {
     if (base != null)
       list.add(base);
     log = new StringBuilder();
-    return execute(new ExecutionContext(appContext, resource, base, base), list, ExpressionNode, true);
+    return execute(new ExecutionContext(appContext, resource, base, null, base), list, ExpressionNode, true);
   }
 
   /**
@@ -390,7 +390,7 @@ public class FHIRPathEngine {
     if (base != null)
       list.add(base);
     log = new StringBuilder();
-    return execute(new ExecutionContext(appContext, resource, base, base), list, exp, true);
+    return execute(new ExecutionContext(appContext, resource, base, null, base), list, exp, true);
   }
 
   /**
@@ -455,8 +455,12 @@ public class FHIRPathEngine {
 	 * @throws FHIRException 
    * @
    */
-	public String evaluateToString(Base base, String path) throws FHIRException {
+  public String evaluateToString(Base base, String path) throws FHIRException {
     return convertToString(evaluate(base, path));
+  }
+
+  public String evaluateToString(Object appInfo, Base resource, Base base, ExpressionNode node) throws FHIRException {
+    return convertToString(evaluate(appInfo, resource, base, node));
   }
 
   /**
@@ -483,7 +487,7 @@ public class FHIRPathEngine {
     if (item.isPrimitive())
       return item.primitiveValue();
     else 
-      return item.getClass().getName();
+      return item.toString();
   }
 
   /**
@@ -531,10 +535,13 @@ public class FHIRPathEngine {
     private Base resource;
     private Base context;
     private Base thisItem;
-    public ExecutionContext(Object appInfo, Base resource, Base context, Base thisItem) {
+    private Map<String, Base> aliases;
+    
+    public ExecutionContext(Object appInfo, Base resource, Base context, Map<String, Base> aliases, Base thisItem) {
       this.appInfo = appInfo;
       this.context = context;
       this.resource = resource; 
+      this.aliases = aliases;
       this.thisItem = thisItem;
     }
     public Base getResource() {
@@ -542,6 +549,18 @@ public class FHIRPathEngine {
     }
     public Base getThisItem() {
       return thisItem;
+    }
+    public void addAlias(String name, List<Base> focus) throws FHIRException {
+      if (aliases == null)
+        aliases = new HashMap<String, Base>();
+      else
+        aliases = new HashMap<String, Base>(aliases); // clone it, since it's going to change 
+      if (focus.size() > 1)
+        throw new FHIRException("Attempt to alias a collection, not a singleton");
+      aliases.put(name, focus.size() == 0 ? null : focus.get(0));      
+    }
+    public Base getAlias(String name) {
+      return aliases == null ? null : aliases.get(name);
     }
   }
 
@@ -848,6 +867,8 @@ public class FHIRPathEngine {
     case Resolve: return checkParamCount(lexer, location, exp, 0);
     case Extension: return checkParamCount(lexer, location, exp, 1);
     case HasValue: return checkParamCount(lexer, location, exp, 0);
+    case Alias: return checkParamCount(lexer, location, exp, 1);
+    case AliasAs: return checkParamCount(lexer, location, exp, 1);
     case Custom: return checkParamCount(lexer, location, exp, details.getMinParameters(), details.getMaxParameters());
     }
     return false;
@@ -1193,7 +1214,6 @@ public class FHIRPathEngine {
       return result;
     case Concatenate:
       result = new TypeDetails(CollectionStatus.SINGLETON, "");
-      return result;
     case Plus:
       result = new TypeDetails(CollectionStatus.SINGLETON);
       if (left.hasType(worker, "integer") && right.hasType(worker, "integer"))
@@ -1951,6 +1971,12 @@ public class FHIRPathEngine {
     }
     case HasValue : 
       return new TypeDetails(CollectionStatus.SINGLETON, "boolean");
+    case Alias : 
+      checkParamTypes(exp.getFunction().toCode(), paramTypes, new TypeDetails(CollectionStatus.SINGLETON, "string")); 
+      return anything(CollectionStatus.SINGLETON); 
+    case AliasAs : 
+      checkParamTypes(exp.getFunction().toCode(), paramTypes, new TypeDetails(CollectionStatus.SINGLETON, "string")); 
+      return focus; 
     case Custom : {
       return hostServices.checkFunction(context.appInfo, exp.getName(), paramTypes);
     }
@@ -2063,6 +2089,8 @@ public class FHIRPathEngine {
     case Resolve : return funcResolve(context, focus, exp);
     case Extension : return funcExtension(context, focus, exp);
     case HasValue : return funcHasValue(context, focus, exp);
+    case AliasAs : return funcAliasAs(context, focus, exp);
+    case Alias : return funcAlias(context, focus, exp);
     case Custom: { 
       List<List<Base>> params = new ArrayList<List<Base>>();
       for (ExpressionNode p : exp.getParameters()) 
@@ -2074,6 +2102,24 @@ public class FHIRPathEngine {
     }
   }
 
+	private List<Base> funcAliasAs(ExecutionContext context, List<Base> focus, ExpressionNode exp) throws FHIRException {
+    List<Base> nl = execute(context, focus, exp.getParameters().get(0), true);
+    String name = nl.get(0).primitiveValue();
+    context.addAlias(name, focus);
+    return focus;
+  }
+
+  private List<Base> funcAlias(ExecutionContext context, List<Base> focus, ExpressionNode exp) throws FHIRException {
+    List<Base> nl = execute(context, focus, exp.getParameters().get(0), true);
+    String name = nl.get(0).primitiveValue();
+    List<Base> res = new ArrayList<Base>();
+    Base b = context.getAlias(name);
+    if (b != null)
+      res.add(b);
+    return res;
+    
+  }
+
 	private List<Base> funcAll(ExecutionContext context, List<Base> focus, ExpressionNode exp) throws FHIRException {
     if (exp.getParameters().size() == 1) {
       List<Base> result = new ArrayList<Base>();
@@ -2082,7 +2128,7 @@ public class FHIRPathEngine {
       for (Base item : focus) {
         pc.clear();
         pc.add(item);
-        if (!convertToBoolean(execute(changeThis(context, item), pc, exp.getParameters().get(0), false))) {
+        if (!convertToBoolean(execute(changeThis(context, item), pc, exp.getParameters().get(0), true))) {
           all = false;
           break;
         }
@@ -2110,7 +2156,7 @@ public class FHIRPathEngine {
 
 
   private ExecutionContext changeThis(ExecutionContext context, Base newThis) {
-    return new ExecutionContext(context.appInfo, context.resource, context.context, newThis);
+    return new ExecutionContext(context.appInfo, context.resource, context.context, context.aliases, newThis);
   }
 
   private ExecutionTypeContext changeThis(ExecutionTypeContext context, TypeDetails newThis) {

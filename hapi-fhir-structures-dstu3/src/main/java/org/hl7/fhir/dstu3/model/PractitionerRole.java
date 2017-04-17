@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
+// Generated on Mon, Apr 17, 2017 17:38-0400 for FHIR v3.0.1
 
 import java.util.*;
 
@@ -2033,6 +2033,26 @@ public class PractitionerRole extends DomainResource {
    }
 
  /**
+   * Search parameter: <b>date</b>
+   * <p>
+   * Description: <b>The period during which the practitioner is authorized to perform in these role(s)</b><br>
+   * Type: <b>date</b><br>
+   * Path: <b>PractitionerRole.period</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="date", path="PractitionerRole.period", description="The period during which the practitioner is authorized to perform in these role(s)", type="date" )
+  public static final String SP_DATE = "date";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>date</b>
+   * <p>
+   * Description: <b>The period during which the practitioner is authorized to perform in these role(s)</b><br>
+   * Type: <b>date</b><br>
+   * Path: <b>PractitionerRole.period</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.DateClientParam DATE = new ca.uhn.fhir.rest.gclient.DateClientParam(SP_DATE);
+
+ /**
    * Search parameter: <b>identifier</b>
    * <p>
    * Description: <b>A practitioner's Identifier</b><br>
@@ -2071,32 +2091,6 @@ public class PractitionerRole extends DomainResource {
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.TokenClientParam SPECIALTY = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_SPECIALTY);
-
- /**
-   * Search parameter: <b>endpoint</b>
-   * <p>
-   * Description: <b>Technical endpoints providing access to services operated for the practitioner with this role</b><br>
-   * Type: <b>reference</b><br>
-   * Path: <b>PractitionerRole.endpoint</b><br>
-   * </p>
-   */
-  @SearchParamDefinition(name="endpoint", path="PractitionerRole.endpoint", description="Technical endpoints providing access to services operated for the practitioner with this role", type="reference", target={Endpoint.class } )
-  public static final String SP_ENDPOINT = "endpoint";
- /**
-   * <b>Fluent Client</b> search parameter constant for <b>endpoint</b>
-   * <p>
-   * Description: <b>Technical endpoints providing access to services operated for the practitioner with this role</b><br>
-   * Type: <b>reference</b><br>
-   * Path: <b>PractitionerRole.endpoint</b><br>
-   * </p>
-   */
-  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam ENDPOINT = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_ENDPOINT);
-
-/**
-   * Constant for fluent queries to be used to add include statements. Specifies
-   * the path value of "<b>PractitionerRole:endpoint</b>".
-   */
-  public static final ca.uhn.fhir.model.api.Include INCLUDE_ENDPOINT = new ca.uhn.fhir.model.api.Include("PractitionerRole:endpoint").toLocked();
 
  /**
    * Search parameter: <b>role</b>
@@ -2145,6 +2139,52 @@ public class PractitionerRole extends DomainResource {
   public static final ca.uhn.fhir.model.api.Include INCLUDE_PRACTITIONER = new ca.uhn.fhir.model.api.Include("PractitionerRole:practitioner").toLocked();
 
  /**
+   * Search parameter: <b>active</b>
+   * <p>
+   * Description: <b>Whether this practitioner's record is in active use</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>PractitionerRole.active</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="active", path="PractitionerRole.active", description="Whether this practitioner's record is in active use", type="token" )
+  public static final String SP_ACTIVE = "active";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>active</b>
+   * <p>
+   * Description: <b>Whether this practitioner's record is in active use</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>PractitionerRole.active</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam ACTIVE = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_ACTIVE);
+
+ /**
+   * Search parameter: <b>endpoint</b>
+   * <p>
+   * Description: <b>Technical endpoints providing access to services operated for the practitioner with this role</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>PractitionerRole.endpoint</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="endpoint", path="PractitionerRole.endpoint", description="Technical endpoints providing access to services operated for the practitioner with this role", type="reference", target={Endpoint.class } )
+  public static final String SP_ENDPOINT = "endpoint";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>endpoint</b>
+   * <p>
+   * Description: <b>Technical endpoints providing access to services operated for the practitioner with this role</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>PractitionerRole.endpoint</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam ENDPOINT = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_ENDPOINT);
+
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>PractitionerRole:endpoint</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_ENDPOINT = new ca.uhn.fhir.model.api.Include("PractitionerRole:endpoint").toLocked();
+
+ /**
    * Search parameter: <b>phone</b>
    * <p>
    * Description: <b>A value in a phone contact</b><br>
@@ -2163,6 +2203,32 @@ public class PractitionerRole extends DomainResource {
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.TokenClientParam PHONE = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_PHONE);
+
+ /**
+   * Search parameter: <b>service</b>
+   * <p>
+   * Description: <b>The list of healthcare services that this worker provides for this role's Organization/Location(s)</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>PractitionerRole.healthcareService</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="service", path="PractitionerRole.healthcareService", description="The list of healthcare services that this worker provides for this role's Organization/Location(s)", type="reference", target={HealthcareService.class } )
+  public static final String SP_SERVICE = "service";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>service</b>
+   * <p>
+   * Description: <b>The list of healthcare services that this worker provides for this role's Organization/Location(s)</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>PractitionerRole.healthcareService</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam SERVICE = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_SERVICE);
+
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>PractitionerRole:service</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_SERVICE = new ca.uhn.fhir.model.api.Include("PractitionerRole:service").toLocked();
 
  /**
    * Search parameter: <b>organization</b>

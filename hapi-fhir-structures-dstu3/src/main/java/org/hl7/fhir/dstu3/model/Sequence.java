@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
+// Generated on Mon, Apr 17, 2017 17:38-0400 for FHIR v3.0.1
 
 import java.util.*;
 
@@ -267,11 +267,11 @@ public class Sequence extends DomainResource {
 
     public enum RepositoryType {
         /**
-         * When url is clicked, the resource can be seen directly (by webpage or by download link format)
+         * When URL is clicked, the resource can be seen directly (by webpage or by download link format)
          */
         DIRECTLINK, 
         /**
-         * When the api method (e.g. [base_url]/[parameter]) related with the url website is executed, the resource can be seen directly (usually in json or xml format)
+         * When the API method (e.g. [base_url]/[parameter]) related with the URL of the website is executed, the resource can be seen directly (usually in JSON or XML format)
          */
         OPENAPI, 
         /**
@@ -279,11 +279,11 @@ public class Sequence extends DomainResource {
          */
         LOGIN, 
         /**
-         * When logged in and follow the API in the website related with url, the resource can be seen.
+         * When logged in and  follow the API in the website related with URL, the resource can be seen.
          */
         OAUTH, 
         /**
-         * Some other complicated or particular way to get resource from url.
+         * Some other complicated or particular way to get resource from URL.
          */
         OTHER, 
         /**
@@ -330,21 +330,21 @@ public class Sequence extends DomainResource {
         }
         public String getDefinition() {
           switch (this) {
-            case DIRECTLINK: return "When url is clicked, the resource can be seen directly (by webpage or by download link format)";
-            case OPENAPI: return "When the api method (e.g. [base_url]/[parameter]) related with the url website is executed, the resource can be seen directly (usually in json or xml format)";
+            case DIRECTLINK: return "When URL is clicked, the resource can be seen directly (by webpage or by download link format)";
+            case OPENAPI: return "When the API method (e.g. [base_url]/[parameter]) related with the URL of the website is executed, the resource can be seen directly (usually in JSON or XML format)";
             case LOGIN: return "When logged into the website, the resource can be seen.";
-            case OAUTH: return "When logged in and follow the API in the website related with url, the resource can be seen.";
-            case OTHER: return "Some other complicated or particular way to get resource from url.";
+            case OAUTH: return "When logged in and  follow the API in the website related with URL, the resource can be seen.";
+            case OTHER: return "Some other complicated or particular way to get resource from URL.";
             default: return "?";
           }
         }
         public String getDisplay() {
           switch (this) {
             case DIRECTLINK: return "Click and see";
-            case OPENAPI: return "The url is the RESTful or other kind of API that can get access to the result.";
+            case OPENAPI: return "The URL is the RESTful or other kind of API that can access to the result.";
             case LOGIN: return "Result cannot be access unless an account is logged in";
-            case OAUTH: return "Result need to be fetched with API and need LOGIN( or cookies is required when visit the link of resource)";
-            case OTHER: return "Some other complicated or particular way to get resource from url.";
+            case OAUTH: return "Result need to be fetched with API and need LOGIN( or cookies are required when visiting the link of resource)";
+            case OTHER: return "Some other complicated or particular way to get resource from URL.";
             default: return "?";
           }
         }

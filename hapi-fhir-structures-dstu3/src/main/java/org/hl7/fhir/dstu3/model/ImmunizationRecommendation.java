@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
+// Generated on Mon, Apr 17, 2017 17:38-0400 for FHIR v3.0.1
 
 import java.util.*;
 
@@ -74,10 +74,10 @@ public class ImmunizationRecommendation extends DomainResource {
         protected CodeableConcept targetDisease;
 
         /**
-         * This indicates the next recommended dose number (e.g. dose 2 is the next recommended dose).
+         * The next recommended dose number (e.g. dose 2 is the next recommended dose).
          */
         @Child(name = "doseNumber", type = {PositiveIntType.class}, order=4, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="Recommended dose number", formalDefinition="This indicates the next recommended dose number (e.g. dose 2 is the next recommended dose)." )
+        @Description(shortDefinition="Recommended dose number", formalDefinition="The next recommended dose number (e.g. dose 2 is the next recommended dose)." )
         protected PositiveIntType doseNumber;
 
         /**
@@ -238,7 +238,7 @@ public class ImmunizationRecommendation extends DomainResource {
         }
 
         /**
-         * @return {@link #doseNumber} (This indicates the next recommended dose number (e.g. dose 2 is the next recommended dose).). This is the underlying object with id, value and extensions. The accessor "getDoseNumber" gives direct access to the value
+         * @return {@link #doseNumber} (The next recommended dose number (e.g. dose 2 is the next recommended dose).). This is the underlying object with id, value and extensions. The accessor "getDoseNumber" gives direct access to the value
          */
         public PositiveIntType getDoseNumberElement() { 
           if (this.doseNumber == null)
@@ -258,7 +258,7 @@ public class ImmunizationRecommendation extends DomainResource {
         }
 
         /**
-         * @param value {@link #doseNumber} (This indicates the next recommended dose number (e.g. dose 2 is the next recommended dose).). This is the underlying object with id, value and extensions. The accessor "getDoseNumber" gives direct access to the value
+         * @param value {@link #doseNumber} (The next recommended dose number (e.g. dose 2 is the next recommended dose).). This is the underlying object with id, value and extensions. The accessor "getDoseNumber" gives direct access to the value
          */
         public ImmunizationRecommendationRecommendationComponent setDoseNumberElement(PositiveIntType value) { 
           this.doseNumber = value;
@@ -266,14 +266,14 @@ public class ImmunizationRecommendation extends DomainResource {
         }
 
         /**
-         * @return This indicates the next recommended dose number (e.g. dose 2 is the next recommended dose).
+         * @return The next recommended dose number (e.g. dose 2 is the next recommended dose).
          */
         public int getDoseNumber() { 
           return this.doseNumber == null || this.doseNumber.isEmpty() ? 0 : this.doseNumber.getValue();
         }
 
         /**
-         * @param value This indicates the next recommended dose number (e.g. dose 2 is the next recommended dose).
+         * @param value The next recommended dose number (e.g. dose 2 is the next recommended dose).
          */
         public ImmunizationRecommendationRecommendationComponent setDoseNumber(int value) { 
             if (this.doseNumber == null)
@@ -526,7 +526,7 @@ public class ImmunizationRecommendation extends DomainResource {
           childrenList.add(new Property("date", "dateTime", "The date the immunization recommendation was created.", 0, java.lang.Integer.MAX_VALUE, date));
           childrenList.add(new Property("vaccineCode", "CodeableConcept", "Vaccine that pertains to the recommendation.", 0, java.lang.Integer.MAX_VALUE, vaccineCode));
           childrenList.add(new Property("targetDisease", "CodeableConcept", "The targeted disease for the recommendation.", 0, java.lang.Integer.MAX_VALUE, targetDisease));
-          childrenList.add(new Property("doseNumber", "positiveInt", "This indicates the next recommended dose number (e.g. dose 2 is the next recommended dose).", 0, java.lang.Integer.MAX_VALUE, doseNumber));
+          childrenList.add(new Property("doseNumber", "positiveInt", "The next recommended dose number (e.g. dose 2 is the next recommended dose).", 0, java.lang.Integer.MAX_VALUE, doseNumber));
           childrenList.add(new Property("forecastStatus", "CodeableConcept", "Vaccine administration status.", 0, java.lang.Integer.MAX_VALUE, forecastStatus));
           childrenList.add(new Property("dateCriterion", "", "Vaccine date recommendations.  For example, earliest date to administer, latest date to administer, etc.", 0, java.lang.Integer.MAX_VALUE, dateCriterion));
           childrenList.add(new Property("protocol", "", "Contains information about the protocol under which the vaccine was administered.", 0, java.lang.Integer.MAX_VALUE, protocol));
@@ -1344,14 +1344,14 @@ public class ImmunizationRecommendation extends DomainResource {
     protected List<Identifier> identifier;
 
     /**
-     * The patient for whom the recommendations are for.
+     * The patient the recommendations are for.
      */
     @Child(name = "patient", type = {Patient.class}, order=1, min=1, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Who this profile is for", formalDefinition="The patient for whom the recommendations are for." )
+    @Description(shortDefinition="Who this profile is for", formalDefinition="The patient the recommendations are for." )
     protected Reference patient;
 
     /**
-     * The actual object that is the target of the reference (The patient for whom the recommendations are for.)
+     * The actual object that is the target of the reference (The patient the recommendations are for.)
      */
     protected Patient patientTarget;
 
@@ -1433,7 +1433,7 @@ public class ImmunizationRecommendation extends DomainResource {
     }
 
     /**
-     * @return {@link #patient} (The patient for whom the recommendations are for.)
+     * @return {@link #patient} (The patient the recommendations are for.)
      */
     public Reference getPatient() { 
       if (this.patient == null)
@@ -1449,7 +1449,7 @@ public class ImmunizationRecommendation extends DomainResource {
     }
 
     /**
-     * @param value {@link #patient} (The patient for whom the recommendations are for.)
+     * @param value {@link #patient} (The patient the recommendations are for.)
      */
     public ImmunizationRecommendation setPatient(Reference value) { 
       this.patient = value;
@@ -1457,7 +1457,7 @@ public class ImmunizationRecommendation extends DomainResource {
     }
 
     /**
-     * @return {@link #patient} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The patient for whom the recommendations are for.)
+     * @return {@link #patient} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The patient the recommendations are for.)
      */
     public Patient getPatientTarget() { 
       if (this.patientTarget == null)
@@ -1469,7 +1469,7 @@ public class ImmunizationRecommendation extends DomainResource {
     }
 
     /**
-     * @param value {@link #patient} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The patient for whom the recommendations are for.)
+     * @param value {@link #patient} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The patient the recommendations are for.)
      */
     public ImmunizationRecommendation setPatientTarget(Patient value) { 
       this.patientTarget = value;
@@ -1532,7 +1532,7 @@ public class ImmunizationRecommendation extends DomainResource {
       protected void listChildren(List<Property> childrenList) {
         super.listChildren(childrenList);
         childrenList.add(new Property("identifier", "Identifier", "A unique identifier assigned to this particular recommendation record.", 0, java.lang.Integer.MAX_VALUE, identifier));
-        childrenList.add(new Property("patient", "Reference(Patient)", "The patient for whom the recommendations are for.", 0, java.lang.Integer.MAX_VALUE, patient));
+        childrenList.add(new Property("patient", "Reference(Patient)", "The patient the recommendations are for.", 0, java.lang.Integer.MAX_VALUE, patient));
         childrenList.add(new Property("recommendation", "", "Vaccine administration recommendations.", 0, java.lang.Integer.MAX_VALUE, recommendation));
       }
 

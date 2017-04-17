@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
+// Generated on Mon, Apr 17, 2017 17:38-0400 for FHIR v3.0.1
 
 import java.util.*;
 
@@ -235,14 +235,14 @@ public class AdverseEvent extends DomainResource {
     @Block()
     public static class AdverseEventSuspectEntityComponent extends BackboneElement implements IBaseBackboneElement {
         /**
-         * AdverseEvent.suspectEntity.instance.
+         * Identifies the actual instance of what caused the adverse event.  May be a substance, medication, medication administration, medication statement or a device.
          */
         @Child(name = "instance", type = {Substance.class, Medication.class, MedicationAdministration.class, MedicationStatement.class, Device.class}, order=1, min=1, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="AdverseEvent.suspectEntity.instance", formalDefinition="AdverseEvent.suspectEntity.instance." )
+        @Description(shortDefinition="Refers to the specific entity that caused the adverse event", formalDefinition="Identifies the actual instance of what caused the adverse event.  May be a substance, medication, medication administration, medication statement or a device." )
         protected Reference instance;
 
         /**
-         * The actual object that is the target of the reference (AdverseEvent.suspectEntity.instance.)
+         * The actual object that is the target of the reference (Identifies the actual instance of what caused the adverse event.  May be a substance, medication, medication administration, medication statement or a device.)
          */
         protected Resource instanceTarget;
 
@@ -315,7 +315,7 @@ public class AdverseEvent extends DomainResource {
       }
 
         /**
-         * @return {@link #instance} (AdverseEvent.suspectEntity.instance.)
+         * @return {@link #instance} (Identifies the actual instance of what caused the adverse event.  May be a substance, medication, medication administration, medication statement or a device.)
          */
         public Reference getInstance() { 
           if (this.instance == null)
@@ -331,7 +331,7 @@ public class AdverseEvent extends DomainResource {
         }
 
         /**
-         * @param value {@link #instance} (AdverseEvent.suspectEntity.instance.)
+         * @param value {@link #instance} (Identifies the actual instance of what caused the adverse event.  May be a substance, medication, medication administration, medication statement or a device.)
          */
         public AdverseEventSuspectEntityComponent setInstance(Reference value) { 
           this.instance = value;
@@ -339,14 +339,14 @@ public class AdverseEvent extends DomainResource {
         }
 
         /**
-         * @return {@link #instance} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (AdverseEvent.suspectEntity.instance.)
+         * @return {@link #instance} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (Identifies the actual instance of what caused the adverse event.  May be a substance, medication, medication administration, medication statement or a device.)
          */
         public Resource getInstanceTarget() { 
           return this.instanceTarget;
         }
 
         /**
-         * @param value {@link #instance} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (AdverseEvent.suspectEntity.instance.)
+         * @param value {@link #instance} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (Identifies the actual instance of what caused the adverse event.  May be a substance, medication, medication administration, medication statement or a device.)
          */
         public AdverseEventSuspectEntityComponent setInstanceTarget(Resource value) { 
           this.instanceTarget = value;
@@ -564,7 +564,7 @@ public class AdverseEvent extends DomainResource {
 
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
-          childrenList.add(new Property("instance", "Reference(Substance|Medication|MedicationAdministration|MedicationStatement|Device)", "AdverseEvent.suspectEntity.instance.", 0, java.lang.Integer.MAX_VALUE, instance));
+          childrenList.add(new Property("instance", "Reference(Substance|Medication|MedicationAdministration|MedicationStatement|Device)", "Identifies the actual instance of what caused the adverse event.  May be a substance, medication, medication administration, medication statement or a device.", 0, java.lang.Integer.MAX_VALUE, instance));
           childrenList.add(new Property("causality", "code", "causality1 | causality2.", 0, java.lang.Integer.MAX_VALUE, causality));
           childrenList.add(new Property("causalityAssessment", "CodeableConcept", "assess1 | assess2.", 0, java.lang.Integer.MAX_VALUE, causalityAssessment));
           childrenList.add(new Property("causalityProductRelatedness", "string", "AdverseEvent.suspectEntity.causalityProductRelatedness.", 0, java.lang.Integer.MAX_VALUE, causalityProductRelatedness));
@@ -752,96 +752,96 @@ public class AdverseEvent extends DomainResource {
   }
 
     /**
-     * AdverseEvent.identifier.
+     * The identifier(s) of this adverse event that are assigned by business processes and/or used to refer to it when a direct URL reference to the resource itsefl is not appropriate.
      */
     @Child(name = "identifier", type = {Identifier.class}, order=0, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="AdverseEvent.identifier", formalDefinition="AdverseEvent.identifier." )
+    @Description(shortDefinition="Business identifier for the event", formalDefinition="The identifier(s) of this adverse event that are assigned by business processes and/or used to refer to it when a direct URL reference to the resource itsefl is not appropriate." )
     protected Identifier identifier;
 
     /**
-     * The type of event is important to characterize what occurred and caused harm to the subject, or had the potential to cause harm to the subject.
+     * The type of event which is important to characterize what occurred and caused harm to the subject, or had the potential to cause harm to the subject.
      */
     @Child(name = "category", type = {CodeType.class}, order=1, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="AE | PAE \nAn adverse event is an event that caused harm to a patient,  an adverse reaction is a something that is a subject-specific event that is a result of an exposure to a medication, food, device or environmental substance, a potential adverse event is something that occurred and that could have caused harm to a patient but did not", formalDefinition="The type of event is important to characterize what occurred and caused harm to the subject, or had the potential to cause harm to the subject." )
+    @Description(shortDefinition="AE | PAE \rAn adverse event is an event that caused harm to a patient,  an adverse reaction is a something that is a subject-specific event that is a result of an exposure to a medication, food, device or environmental substance, a potential adverse event is something that occurred and that could have caused harm to a patient but did not", formalDefinition="The type of event which is important to characterize what occurred and caused harm to the subject, or had the potential to cause harm to the subject." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/adverse-event-category")
     protected Enumeration<AdverseEventCategory> category;
 
     /**
-     * This element defines the specific type of event that occurred or that was prevented from occuring.
+     * This element defines the specific type of event that occurred or that was prevented from occurring.
      */
     @Child(name = "type", type = {CodeableConcept.class}, order=2, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="actual | potential", formalDefinition="This element defines the specific type of event that occurred or that was prevented from occuring." )
+    @Description(shortDefinition="actual | potential", formalDefinition="This element defines the specific type of event that occurred or that was prevented from occurring." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/adverse-event-type")
     protected CodeableConcept type;
 
     /**
-     * This element defined the subject or group impacted by the event.  With a prospective adverse event, there will be no subject as the adverse event was prevented.
+     * This subject or group impacted by the event.  With a prospective adverse event, there will be no subject as the adverse event was prevented.
      */
     @Child(name = "subject", type = {Patient.class, ResearchSubject.class, Medication.class, Device.class}, order=3, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Subject or group impacted by event", formalDefinition="This element defined the subject or group impacted by the event.  With a prospective adverse event, there will be no subject as the adverse event was prevented." )
+    @Description(shortDefinition="Subject or group impacted by event", formalDefinition="This subject or group impacted by the event.  With a prospective adverse event, there will be no subject as the adverse event was prevented." )
     protected Reference subject;
 
     /**
-     * The actual object that is the target of the reference (This element defined the subject or group impacted by the event.  With a prospective adverse event, there will be no subject as the adverse event was prevented.)
+     * The actual object that is the target of the reference (This subject or group impacted by the event.  With a prospective adverse event, there will be no subject as the adverse event was prevented.)
      */
     protected Resource subjectTarget;
 
     /**
-     * AdverseEvent.date.
+     * The date (and perhaps time) when the adverse event occurred.
      */
     @Child(name = "date", type = {DateTimeType.class}, order=4, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="AdverseEvent.date", formalDefinition="AdverseEvent.date." )
+    @Description(shortDefinition="When the event occurred", formalDefinition="The date (and perhaps time) when the adverse event occurred." )
     protected DateTimeType date;
 
     /**
-     * Adverse Reaction Events linked to exposure to substance.
+     * Includes information about the reaction that occurred as a result of exposure to a substance (for example, a drug or a chemical).
      */
     @Child(name = "reaction", type = {Condition.class}, order=5, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-    @Description(shortDefinition="Adverse Reaction Events linked to exposure to substance", formalDefinition="Adverse Reaction Events linked to exposure to substance." )
+    @Description(shortDefinition="Adverse Reaction Events linked to exposure to substance", formalDefinition="Includes information about the reaction that occurred as a result of exposure to a substance (for example, a drug or a chemical)." )
     protected List<Reference> reaction;
     /**
-     * The actual objects that are the target of the reference (Adverse Reaction Events linked to exposure to substance.)
+     * The actual objects that are the target of the reference (Includes information about the reaction that occurred as a result of exposure to a substance (for example, a drug or a chemical).)
      */
     protected List<Condition> reactionTarget;
 
 
     /**
-     * AdverseEvent.location.
+     * The information about where the adverse event occurred.
      */
     @Child(name = "location", type = {Location.class}, order=6, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="AdverseEvent.location", formalDefinition="AdverseEvent.location." )
+    @Description(shortDefinition="Location where adverse event occurred", formalDefinition="The information about where the adverse event occurred." )
     protected Reference location;
 
     /**
-     * The actual object that is the target of the reference (AdverseEvent.location.)
+     * The actual object that is the target of the reference (The information about where the adverse event occurred.)
      */
     protected Location locationTarget;
 
     /**
-     * Mild | Moderate | Severe.
+     * Describes the seriousness or severity of the adverse event.
      */
     @Child(name = "seriousness", type = {CodeableConcept.class}, order=7, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Mild | Moderate | Severe", formalDefinition="Mild | Moderate | Severe." )
+    @Description(shortDefinition="Mild | Moderate | Severe", formalDefinition="Describes the seriousness or severity of the adverse event." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/adverse-event-seriousness")
     protected CodeableConcept seriousness;
 
     /**
-     * resolved | recovering | ongoing | resolvedWithSequelae | fatal | unknown.
+     * Describes the type of outcome from the adverse event.
      */
     @Child(name = "outcome", type = {CodeableConcept.class}, order=8, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="resolved | recovering | ongoing | resolvedWithSequelae | fatal | unknown", formalDefinition="resolved | recovering | ongoing | resolvedWithSequelae | fatal | unknown." )
+    @Description(shortDefinition="resolved | recovering | ongoing | resolvedWithSequelae | fatal | unknown", formalDefinition="Describes the type of outcome from the adverse event." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/adverse-event-outcome")
     protected CodeableConcept outcome;
 
     /**
-     * AdverseEvent.recorder.
+     * Information on who recorded the adverse event.  May be the patient or a practitioner.
      */
     @Child(name = "recorder", type = {Patient.class, Practitioner.class, RelatedPerson.class}, order=9, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="AdverseEvent.recorder", formalDefinition="AdverseEvent.recorder." )
+    @Description(shortDefinition="Who recorded the adverse event", formalDefinition="Information on who recorded the adverse event.  May be the patient or a practitioner." )
     protected Reference recorder;
 
     /**
-     * The actual object that is the target of the reference (AdverseEvent.recorder.)
+     * The actual object that is the target of the reference (Information on who recorded the adverse event.  May be the patient or a practitioner.)
      */
     protected Resource recorderTarget;
 
@@ -858,17 +858,17 @@ public class AdverseEvent extends DomainResource {
     protected Resource eventParticipantTarget;
 
     /**
-     * AdverseEvent.description.
+     * Describes the adverse event in text.
      */
     @Child(name = "description", type = {StringType.class}, order=11, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="AdverseEvent.description", formalDefinition="AdverseEvent.description." )
+    @Description(shortDefinition="Description of the adverse event", formalDefinition="Describes the adverse event in text." )
     protected StringType description;
 
     /**
-     * AdverseEvent.suspectEntity.
+     * Describes the entity that is suspected to have caused the adverse event.
      */
     @Child(name = "suspectEntity", type = {}, order=12, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-    @Description(shortDefinition="AdverseEvent.suspectEntity", formalDefinition="AdverseEvent.suspectEntity." )
+    @Description(shortDefinition="The suspected agent causing the adverse event", formalDefinition="Describes the entity that is suspected to have caused the adverse event." )
     protected List<AdverseEventSuspectEntityComponent> suspectEntity;
 
     /**
@@ -917,7 +917,7 @@ public class AdverseEvent extends DomainResource {
     }
 
     /**
-     * @return {@link #identifier} (AdverseEvent.identifier.)
+     * @return {@link #identifier} (The identifier(s) of this adverse event that are assigned by business processes and/or used to refer to it when a direct URL reference to the resource itsefl is not appropriate.)
      */
     public Identifier getIdentifier() { 
       if (this.identifier == null)
@@ -933,7 +933,7 @@ public class AdverseEvent extends DomainResource {
     }
 
     /**
-     * @param value {@link #identifier} (AdverseEvent.identifier.)
+     * @param value {@link #identifier} (The identifier(s) of this adverse event that are assigned by business processes and/or used to refer to it when a direct URL reference to the resource itsefl is not appropriate.)
      */
     public AdverseEvent setIdentifier(Identifier value) { 
       this.identifier = value;
@@ -941,7 +941,7 @@ public class AdverseEvent extends DomainResource {
     }
 
     /**
-     * @return {@link #category} (The type of event is important to characterize what occurred and caused harm to the subject, or had the potential to cause harm to the subject.). This is the underlying object with id, value and extensions. The accessor "getCategory" gives direct access to the value
+     * @return {@link #category} (The type of event which is important to characterize what occurred and caused harm to the subject, or had the potential to cause harm to the subject.). This is the underlying object with id, value and extensions. The accessor "getCategory" gives direct access to the value
      */
     public Enumeration<AdverseEventCategory> getCategoryElement() { 
       if (this.category == null)
@@ -961,7 +961,7 @@ public class AdverseEvent extends DomainResource {
     }
 
     /**
-     * @param value {@link #category} (The type of event is important to characterize what occurred and caused harm to the subject, or had the potential to cause harm to the subject.). This is the underlying object with id, value and extensions. The accessor "getCategory" gives direct access to the value
+     * @param value {@link #category} (The type of event which is important to characterize what occurred and caused harm to the subject, or had the potential to cause harm to the subject.). This is the underlying object with id, value and extensions. The accessor "getCategory" gives direct access to the value
      */
     public AdverseEvent setCategoryElement(Enumeration<AdverseEventCategory> value) { 
       this.category = value;
@@ -969,14 +969,14 @@ public class AdverseEvent extends DomainResource {
     }
 
     /**
-     * @return The type of event is important to characterize what occurred and caused harm to the subject, or had the potential to cause harm to the subject.
+     * @return The type of event which is important to characterize what occurred and caused harm to the subject, or had the potential to cause harm to the subject.
      */
     public AdverseEventCategory getCategory() { 
       return this.category == null ? null : this.category.getValue();
     }
 
     /**
-     * @param value The type of event is important to characterize what occurred and caused harm to the subject, or had the potential to cause harm to the subject.
+     * @param value The type of event which is important to characterize what occurred and caused harm to the subject, or had the potential to cause harm to the subject.
      */
     public AdverseEvent setCategory(AdverseEventCategory value) { 
       if (value == null)
@@ -990,7 +990,7 @@ public class AdverseEvent extends DomainResource {
     }
 
     /**
-     * @return {@link #type} (This element defines the specific type of event that occurred or that was prevented from occuring.)
+     * @return {@link #type} (This element defines the specific type of event that occurred or that was prevented from occurring.)
      */
     public CodeableConcept getType() { 
       if (this.type == null)
@@ -1006,7 +1006,7 @@ public class AdverseEvent extends DomainResource {
     }
 
     /**
-     * @param value {@link #type} (This element defines the specific type of event that occurred or that was prevented from occuring.)
+     * @param value {@link #type} (This element defines the specific type of event that occurred or that was prevented from occurring.)
      */
     public AdverseEvent setType(CodeableConcept value) { 
       this.type = value;
@@ -1014,7 +1014,7 @@ public class AdverseEvent extends DomainResource {
     }
 
     /**
-     * @return {@link #subject} (This element defined the subject or group impacted by the event.  With a prospective adverse event, there will be no subject as the adverse event was prevented.)
+     * @return {@link #subject} (This subject or group impacted by the event.  With a prospective adverse event, there will be no subject as the adverse event was prevented.)
      */
     public Reference getSubject() { 
       if (this.subject == null)
@@ -1030,7 +1030,7 @@ public class AdverseEvent extends DomainResource {
     }
 
     /**
-     * @param value {@link #subject} (This element defined the subject or group impacted by the event.  With a prospective adverse event, there will be no subject as the adverse event was prevented.)
+     * @param value {@link #subject} (This subject or group impacted by the event.  With a prospective adverse event, there will be no subject as the adverse event was prevented.)
      */
     public AdverseEvent setSubject(Reference value) { 
       this.subject = value;
@@ -1038,14 +1038,14 @@ public class AdverseEvent extends DomainResource {
     }
 
     /**
-     * @return {@link #subject} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (This element defined the subject or group impacted by the event.  With a prospective adverse event, there will be no subject as the adverse event was prevented.)
+     * @return {@link #subject} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (This subject or group impacted by the event.  With a prospective adverse event, there will be no subject as the adverse event was prevented.)
      */
     public Resource getSubjectTarget() { 
       return this.subjectTarget;
     }
 
     /**
-     * @param value {@link #subject} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (This element defined the subject or group impacted by the event.  With a prospective adverse event, there will be no subject as the adverse event was prevented.)
+     * @param value {@link #subject} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (This subject or group impacted by the event.  With a prospective adverse event, there will be no subject as the adverse event was prevented.)
      */
     public AdverseEvent setSubjectTarget(Resource value) { 
       this.subjectTarget = value;
@@ -1053,7 +1053,7 @@ public class AdverseEvent extends DomainResource {
     }
 
     /**
-     * @return {@link #date} (AdverseEvent.date.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
+     * @return {@link #date} (The date (and perhaps time) when the adverse event occurred.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
      */
     public DateTimeType getDateElement() { 
       if (this.date == null)
@@ -1073,7 +1073,7 @@ public class AdverseEvent extends DomainResource {
     }
 
     /**
-     * @param value {@link #date} (AdverseEvent.date.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
+     * @param value {@link #date} (The date (and perhaps time) when the adverse event occurred.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
      */
     public AdverseEvent setDateElement(DateTimeType value) { 
       this.date = value;
@@ -1081,14 +1081,14 @@ public class AdverseEvent extends DomainResource {
     }
 
     /**
-     * @return AdverseEvent.date.
+     * @return The date (and perhaps time) when the adverse event occurred.
      */
     public Date getDate() { 
       return this.date == null ? null : this.date.getValue();
     }
 
     /**
-     * @param value AdverseEvent.date.
+     * @param value The date (and perhaps time) when the adverse event occurred.
      */
     public AdverseEvent setDate(Date value) { 
       if (value == null)
@@ -1102,7 +1102,7 @@ public class AdverseEvent extends DomainResource {
     }
 
     /**
-     * @return {@link #reaction} (Adverse Reaction Events linked to exposure to substance.)
+     * @return {@link #reaction} (Includes information about the reaction that occurred as a result of exposure to a substance (for example, a drug or a chemical).)
      */
     public List<Reference> getReaction() { 
       if (this.reaction == null)
@@ -1177,7 +1177,7 @@ public class AdverseEvent extends DomainResource {
     }
 
     /**
-     * @return {@link #location} (AdverseEvent.location.)
+     * @return {@link #location} (The information about where the adverse event occurred.)
      */
     public Reference getLocation() { 
       if (this.location == null)
@@ -1193,7 +1193,7 @@ public class AdverseEvent extends DomainResource {
     }
 
     /**
-     * @param value {@link #location} (AdverseEvent.location.)
+     * @param value {@link #location} (The information about where the adverse event occurred.)
      */
     public AdverseEvent setLocation(Reference value) { 
       this.location = value;
@@ -1201,7 +1201,7 @@ public class AdverseEvent extends DomainResource {
     }
 
     /**
-     * @return {@link #location} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (AdverseEvent.location.)
+     * @return {@link #location} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The information about where the adverse event occurred.)
      */
     public Location getLocationTarget() { 
       if (this.locationTarget == null)
@@ -1213,7 +1213,7 @@ public class AdverseEvent extends DomainResource {
     }
 
     /**
-     * @param value {@link #location} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (AdverseEvent.location.)
+     * @param value {@link #location} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The information about where the adverse event occurred.)
      */
     public AdverseEvent setLocationTarget(Location value) { 
       this.locationTarget = value;
@@ -1221,7 +1221,7 @@ public class AdverseEvent extends DomainResource {
     }
 
     /**
-     * @return {@link #seriousness} (Mild | Moderate | Severe.)
+     * @return {@link #seriousness} (Describes the seriousness or severity of the adverse event.)
      */
     public CodeableConcept getSeriousness() { 
       if (this.seriousness == null)
@@ -1237,7 +1237,7 @@ public class AdverseEvent extends DomainResource {
     }
 
     /**
-     * @param value {@link #seriousness} (Mild | Moderate | Severe.)
+     * @param value {@link #seriousness} (Describes the seriousness or severity of the adverse event.)
      */
     public AdverseEvent setSeriousness(CodeableConcept value) { 
       this.seriousness = value;
@@ -1245,7 +1245,7 @@ public class AdverseEvent extends DomainResource {
     }
 
     /**
-     * @return {@link #outcome} (resolved | recovering | ongoing | resolvedWithSequelae | fatal | unknown.)
+     * @return {@link #outcome} (Describes the type of outcome from the adverse event.)
      */
     public CodeableConcept getOutcome() { 
       if (this.outcome == null)
@@ -1261,7 +1261,7 @@ public class AdverseEvent extends DomainResource {
     }
 
     /**
-     * @param value {@link #outcome} (resolved | recovering | ongoing | resolvedWithSequelae | fatal | unknown.)
+     * @param value {@link #outcome} (Describes the type of outcome from the adverse event.)
      */
     public AdverseEvent setOutcome(CodeableConcept value) { 
       this.outcome = value;
@@ -1269,7 +1269,7 @@ public class AdverseEvent extends DomainResource {
     }
 
     /**
-     * @return {@link #recorder} (AdverseEvent.recorder.)
+     * @return {@link #recorder} (Information on who recorded the adverse event.  May be the patient or a practitioner.)
      */
     public Reference getRecorder() { 
       if (this.recorder == null)
@@ -1285,7 +1285,7 @@ public class AdverseEvent extends DomainResource {
     }
 
     /**
-     * @param value {@link #recorder} (AdverseEvent.recorder.)
+     * @param value {@link #recorder} (Information on who recorded the adverse event.  May be the patient or a practitioner.)
      */
     public AdverseEvent setRecorder(Reference value) { 
       this.recorder = value;
@@ -1293,14 +1293,14 @@ public class AdverseEvent extends DomainResource {
     }
 
     /**
-     * @return {@link #recorder} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (AdverseEvent.recorder.)
+     * @return {@link #recorder} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (Information on who recorded the adverse event.  May be the patient or a practitioner.)
      */
     public Resource getRecorderTarget() { 
       return this.recorderTarget;
     }
 
     /**
-     * @param value {@link #recorder} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (AdverseEvent.recorder.)
+     * @param value {@link #recorder} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (Information on who recorded the adverse event.  May be the patient or a practitioner.)
      */
     public AdverseEvent setRecorderTarget(Resource value) { 
       this.recorderTarget = value;
@@ -1347,7 +1347,7 @@ public class AdverseEvent extends DomainResource {
     }
 
     /**
-     * @return {@link #description} (AdverseEvent.description.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
+     * @return {@link #description} (Describes the adverse event in text.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
      */
     public StringType getDescriptionElement() { 
       if (this.description == null)
@@ -1367,7 +1367,7 @@ public class AdverseEvent extends DomainResource {
     }
 
     /**
-     * @param value {@link #description} (AdverseEvent.description.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
+     * @param value {@link #description} (Describes the adverse event in text.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
      */
     public AdverseEvent setDescriptionElement(StringType value) { 
       this.description = value;
@@ -1375,14 +1375,14 @@ public class AdverseEvent extends DomainResource {
     }
 
     /**
-     * @return AdverseEvent.description.
+     * @return Describes the adverse event in text.
      */
     public String getDescription() { 
       return this.description == null ? null : this.description.getValue();
     }
 
     /**
-     * @param value AdverseEvent.description.
+     * @param value Describes the adverse event in text.
      */
     public AdverseEvent setDescription(String value) { 
       if (Utilities.noString(value))
@@ -1396,7 +1396,7 @@ public class AdverseEvent extends DomainResource {
     }
 
     /**
-     * @return {@link #suspectEntity} (AdverseEvent.suspectEntity.)
+     * @return {@link #suspectEntity} (Describes the entity that is suspected to have caused the adverse event.)
      */
     public List<AdverseEventSuspectEntityComponent> getSuspectEntity() { 
       if (this.suspectEntity == null)
@@ -1663,19 +1663,19 @@ public class AdverseEvent extends DomainResource {
 
       protected void listChildren(List<Property> childrenList) {
         super.listChildren(childrenList);
-        childrenList.add(new Property("identifier", "Identifier", "AdverseEvent.identifier.", 0, java.lang.Integer.MAX_VALUE, identifier));
-        childrenList.add(new Property("category", "code", "The type of event is important to characterize what occurred and caused harm to the subject, or had the potential to cause harm to the subject.", 0, java.lang.Integer.MAX_VALUE, category));
-        childrenList.add(new Property("type", "CodeableConcept", "This element defines the specific type of event that occurred or that was prevented from occuring.", 0, java.lang.Integer.MAX_VALUE, type));
-        childrenList.add(new Property("subject", "Reference(Patient|ResearchSubject|Medication|Device)", "This element defined the subject or group impacted by the event.  With a prospective adverse event, there will be no subject as the adverse event was prevented.", 0, java.lang.Integer.MAX_VALUE, subject));
-        childrenList.add(new Property("date", "dateTime", "AdverseEvent.date.", 0, java.lang.Integer.MAX_VALUE, date));
-        childrenList.add(new Property("reaction", "Reference(Condition)", "Adverse Reaction Events linked to exposure to substance.", 0, java.lang.Integer.MAX_VALUE, reaction));
-        childrenList.add(new Property("location", "Reference(Location)", "AdverseEvent.location.", 0, java.lang.Integer.MAX_VALUE, location));
-        childrenList.add(new Property("seriousness", "CodeableConcept", "Mild | Moderate | Severe.", 0, java.lang.Integer.MAX_VALUE, seriousness));
-        childrenList.add(new Property("outcome", "CodeableConcept", "resolved | recovering | ongoing | resolvedWithSequelae | fatal | unknown.", 0, java.lang.Integer.MAX_VALUE, outcome));
-        childrenList.add(new Property("recorder", "Reference(Patient|Practitioner|RelatedPerson)", "AdverseEvent.recorder.", 0, java.lang.Integer.MAX_VALUE, recorder));
+        childrenList.add(new Property("identifier", "Identifier", "The identifier(s) of this adverse event that are assigned by business processes and/or used to refer to it when a direct URL reference to the resource itsefl is not appropriate.", 0, java.lang.Integer.MAX_VALUE, identifier));
+        childrenList.add(new Property("category", "code", "The type of event which is important to characterize what occurred and caused harm to the subject, or had the potential to cause harm to the subject.", 0, java.lang.Integer.MAX_VALUE, category));
+        childrenList.add(new Property("type", "CodeableConcept", "This element defines the specific type of event that occurred or that was prevented from occurring.", 0, java.lang.Integer.MAX_VALUE, type));
+        childrenList.add(new Property("subject", "Reference(Patient|ResearchSubject|Medication|Device)", "This subject or group impacted by the event.  With a prospective adverse event, there will be no subject as the adverse event was prevented.", 0, java.lang.Integer.MAX_VALUE, subject));
+        childrenList.add(new Property("date", "dateTime", "The date (and perhaps time) when the adverse event occurred.", 0, java.lang.Integer.MAX_VALUE, date));
+        childrenList.add(new Property("reaction", "Reference(Condition)", "Includes information about the reaction that occurred as a result of exposure to a substance (for example, a drug or a chemical).", 0, java.lang.Integer.MAX_VALUE, reaction));
+        childrenList.add(new Property("location", "Reference(Location)", "The information about where the adverse event occurred.", 0, java.lang.Integer.MAX_VALUE, location));
+        childrenList.add(new Property("seriousness", "CodeableConcept", "Describes the seriousness or severity of the adverse event.", 0, java.lang.Integer.MAX_VALUE, seriousness));
+        childrenList.add(new Property("outcome", "CodeableConcept", "Describes the type of outcome from the adverse event.", 0, java.lang.Integer.MAX_VALUE, outcome));
+        childrenList.add(new Property("recorder", "Reference(Patient|Practitioner|RelatedPerson)", "Information on who recorded the adverse event.  May be the patient or a practitioner.", 0, java.lang.Integer.MAX_VALUE, recorder));
         childrenList.add(new Property("eventParticipant", "Reference(Practitioner|Device)", "Parties that may or should contribute or have contributed information to the Act. Such information includes information leading to the decision to perform the Act and how to perform the Act (e.g. consultant), information that the Act itself seeks to reveal (e.g. informant of clinical history), or information about what Act was performed (e.g. informant witness).", 0, java.lang.Integer.MAX_VALUE, eventParticipant));
-        childrenList.add(new Property("description", "string", "AdverseEvent.description.", 0, java.lang.Integer.MAX_VALUE, description));
-        childrenList.add(new Property("suspectEntity", "", "AdverseEvent.suspectEntity.", 0, java.lang.Integer.MAX_VALUE, suspectEntity));
+        childrenList.add(new Property("description", "string", "Describes the adverse event in text.", 0, java.lang.Integer.MAX_VALUE, description));
+        childrenList.add(new Property("suspectEntity", "", "Describes the entity that is suspected to have caused the adverse event.", 0, java.lang.Integer.MAX_VALUE, suspectEntity));
         childrenList.add(new Property("subjectMedicalHistory", "Reference(Condition|Observation|AllergyIntolerance|FamilyMemberHistory|Immunization|Procedure)", "AdverseEvent.subjectMedicalHistory.", 0, java.lang.Integer.MAX_VALUE, subjectMedicalHistory));
         childrenList.add(new Property("referenceDocument", "Reference(DocumentReference)", "AdverseEvent.referenceDocument.", 0, java.lang.Integer.MAX_VALUE, referenceDocument));
         childrenList.add(new Property("study", "Reference(ResearchStudy)", "AdverseEvent.study.", 0, java.lang.Integer.MAX_VALUE, study));
@@ -2004,17 +2004,17 @@ public class AdverseEvent extends DomainResource {
  /**
    * Search parameter: <b>date</b>
    * <p>
-   * Description: <b>AdverseEvent.date</b><br>
+   * Description: <b>When the event occurred</b><br>
    * Type: <b>date</b><br>
    * Path: <b>AdverseEvent.date</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="date", path="AdverseEvent.date", description="AdverseEvent.date", type="date" )
+  @SearchParamDefinition(name="date", path="AdverseEvent.date", description="When the event occurred", type="date" )
   public static final String SP_DATE = "date";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>date</b>
    * <p>
-   * Description: <b>AdverseEvent.date</b><br>
+   * Description: <b>When the event occurred</b><br>
    * Type: <b>date</b><br>
    * Path: <b>AdverseEvent.date</b><br>
    * </p>
@@ -2024,17 +2024,17 @@ public class AdverseEvent extends DomainResource {
  /**
    * Search parameter: <b>recorder</b>
    * <p>
-   * Description: <b>AdverseEvent.recorder</b><br>
+   * Description: <b>Who recorded the adverse event</b><br>
    * Type: <b>reference</b><br>
    * Path: <b>AdverseEvent.recorder</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="recorder", path="AdverseEvent.recorder", description="AdverseEvent.recorder", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner"), @ca.uhn.fhir.model.api.annotation.Compartment(name="RelatedPerson") }, target={Patient.class, Practitioner.class, RelatedPerson.class } )
+  @SearchParamDefinition(name="recorder", path="AdverseEvent.recorder", description="Who recorded the adverse event", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner"), @ca.uhn.fhir.model.api.annotation.Compartment(name="RelatedPerson") }, target={Patient.class, Practitioner.class, RelatedPerson.class } )
   public static final String SP_RECORDER = "recorder";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>recorder</b>
    * <p>
-   * Description: <b>AdverseEvent.recorder</b><br>
+   * Description: <b>Who recorded the adverse event</b><br>
    * Type: <b>reference</b><br>
    * Path: <b>AdverseEvent.recorder</b><br>
    * </p>
@@ -2148,17 +2148,17 @@ public class AdverseEvent extends DomainResource {
  /**
    * Search parameter: <b>substance</b>
    * <p>
-   * Description: <b>AdverseEvent.suspectEntity.instance</b><br>
+   * Description: <b>Refers to the specific entity that caused the adverse event</b><br>
    * Type: <b>reference</b><br>
    * Path: <b>AdverseEvent.suspectEntity.instance</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="substance", path="AdverseEvent.suspectEntity.instance", description="AdverseEvent.suspectEntity.instance", type="reference", target={Device.class, Medication.class, MedicationAdministration.class, MedicationStatement.class, Substance.class } )
+  @SearchParamDefinition(name="substance", path="AdverseEvent.suspectEntity.instance", description="Refers to the specific entity that caused the adverse event", type="reference", target={Device.class, Medication.class, MedicationAdministration.class, MedicationStatement.class, Substance.class } )
   public static final String SP_SUBSTANCE = "substance";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>substance</b>
    * <p>
-   * Description: <b>AdverseEvent.suspectEntity.instance</b><br>
+   * Description: <b>Refers to the specific entity that caused the adverse event</b><br>
    * Type: <b>reference</b><br>
    * Path: <b>AdverseEvent.suspectEntity.instance</b><br>
    * </p>
@@ -2174,17 +2174,17 @@ public class AdverseEvent extends DomainResource {
  /**
    * Search parameter: <b>location</b>
    * <p>
-   * Description: <b>AdverseEvent.location</b><br>
+   * Description: <b>Location where adverse event occurred</b><br>
    * Type: <b>reference</b><br>
    * Path: <b>AdverseEvent.location</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="location", path="AdverseEvent.location", description="AdverseEvent.location", type="reference", target={Location.class } )
+  @SearchParamDefinition(name="location", path="AdverseEvent.location", description="Location where adverse event occurred", type="reference", target={Location.class } )
   public static final String SP_LOCATION = "location";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>location</b>
    * <p>
-   * Description: <b>AdverseEvent.location</b><br>
+   * Description: <b>Location where adverse event occurred</b><br>
    * Type: <b>reference</b><br>
    * Path: <b>AdverseEvent.location</b><br>
    * </p>
@@ -2200,19 +2200,17 @@ public class AdverseEvent extends DomainResource {
  /**
    * Search parameter: <b>category</b>
    * <p>
-   * Description: <b>AE | PAE 
-An adverse event is an event that caused harm to a patient,  an adverse reaction is a something that is a subject-specific event that is a result of an exposure to a medication, food, device or environmental substance, a potential adverse event is something that occurred and that could have caused harm to a patient but did not</b><br>
+   * Description: <b>AE | PAE An adverse event is an event that caused harm to a patient,  an adverse reaction is a something that is a subject-specific event that is a result of an exposure to a medication, food, device or environmental substance, a potential adverse event is something that occurred and that could have caused harm to a patient but did not</b><br>
    * Type: <b>token</b><br>
    * Path: <b>AdverseEvent.category</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="category", path="AdverseEvent.category", description="AE | PAE \nAn adverse event is an event that caused harm to a patient,  an adverse reaction is a something that is a subject-specific event that is a result of an exposure to a medication, food, device or environmental substance, a potential adverse event is something that occurred and that could have caused harm to a patient but did not", type="token" )
+  @SearchParamDefinition(name="category", path="AdverseEvent.category", description="AE | PAE \rAn adverse event is an event that caused harm to a patient,  an adverse reaction is a something that is a subject-specific event that is a result of an exposure to a medication, food, device or environmental substance, a potential adverse event is something that occurred and that could have caused harm to a patient but did not", type="token" )
   public static final String SP_CATEGORY = "category";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>category</b>
    * <p>
-   * Description: <b>AE | PAE 
-An adverse event is an event that caused harm to a patient,  an adverse reaction is a something that is a subject-specific event that is a result of an exposure to a medication, food, device or environmental substance, a potential adverse event is something that occurred and that could have caused harm to a patient but did not</b><br>
+   * Description: <b>AE | PAE An adverse event is an event that caused harm to a patient,  an adverse reaction is a something that is a subject-specific event that is a result of an exposure to a medication, food, device or environmental substance, a potential adverse event is something that occurred and that could have caused harm to a patient but did not</b><br>
    * Type: <b>token</b><br>
    * Path: <b>AdverseEvent.category</b><br>
    * </p>

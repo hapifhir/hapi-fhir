@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
+// Generated on Mon, Apr 17, 2017 17:38-0400 for FHIR v3.0.1
 
 import java.util.*;
 
@@ -79,10 +79,10 @@ public class BodySite extends DomainResource {
     protected List<CodeableConcept> qualifier;
 
     /**
-     * Description of anatomical location.
+     * A summary, charactarization or explanation of the anatomic location.
      */
     @Child(name = "description", type = {StringType.class}, order=4, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="The Description of anatomical location", formalDefinition="Description of anatomical location." )
+    @Description(shortDefinition="Anatomical location description", formalDefinition="A summary, charactarization or explanation of the anatomic location." )
     protected StringType description;
 
     /**
@@ -297,7 +297,7 @@ public class BodySite extends DomainResource {
     }
 
     /**
-     * @return {@link #description} (Description of anatomical location.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
+     * @return {@link #description} (A summary, charactarization or explanation of the anatomic location.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
      */
     public StringType getDescriptionElement() { 
       if (this.description == null)
@@ -317,7 +317,7 @@ public class BodySite extends DomainResource {
     }
 
     /**
-     * @param value {@link #description} (Description of anatomical location.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
+     * @param value {@link #description} (A summary, charactarization or explanation of the anatomic location.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
      */
     public BodySite setDescriptionElement(StringType value) { 
       this.description = value;
@@ -325,14 +325,14 @@ public class BodySite extends DomainResource {
     }
 
     /**
-     * @return Description of anatomical location.
+     * @return A summary, charactarization or explanation of the anatomic location.
      */
     public String getDescription() { 
       return this.description == null ? null : this.description.getValue();
     }
 
     /**
-     * @param value Description of anatomical location.
+     * @param value A summary, charactarization or explanation of the anatomic location.
      */
     public BodySite setDescription(String value) { 
       if (Utilities.noString(value))
@@ -448,7 +448,7 @@ public class BodySite extends DomainResource {
         childrenList.add(new Property("active", "boolean", "Whether this body site is in active use.", 0, java.lang.Integer.MAX_VALUE, active));
         childrenList.add(new Property("code", "CodeableConcept", "Named anatomical location - ideally coded where possible.", 0, java.lang.Integer.MAX_VALUE, code));
         childrenList.add(new Property("qualifier", "CodeableConcept", "Qualifier to refine the anatomical location.  These include qualifiers for laterality, relative location, directionality, number, and plane.", 0, java.lang.Integer.MAX_VALUE, qualifier));
-        childrenList.add(new Property("description", "string", "Description of anatomical location.", 0, java.lang.Integer.MAX_VALUE, description));
+        childrenList.add(new Property("description", "string", "A summary, charactarization or explanation of the anatomic location.", 0, java.lang.Integer.MAX_VALUE, description));
         childrenList.add(new Property("image", "Attachment", "Image or images used to identify a location.", 0, java.lang.Integer.MAX_VALUE, image));
         childrenList.add(new Property("patient", "Reference(Patient)", "The person to which the body site belongs.", 0, java.lang.Integer.MAX_VALUE, patient));
       }

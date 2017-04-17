@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
+// Generated on Mon, Apr 17, 2017 17:38-0400 for FHIR v3.0.1
 
 import java.util.*;
 
@@ -544,10 +544,10 @@ public class DocumentReference extends DomainResource {
     @Block()
     public static class DocumentReferenceContentComponent extends BackboneElement implements IBaseBackboneElement {
         /**
-         * The document or url of the document along with critical metadata to prove content has integrity.
+         * The document or URL of the document along with critical metadata to prove content has integrity.
          */
         @Child(name = "attachment", type = {Attachment.class}, order=1, min=1, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="Where to access the document", formalDefinition="The document or url of the document along with critical metadata to prove content has integrity." )
+        @Description(shortDefinition="Where to access the document", formalDefinition="The document or URL of the document along with critical metadata to prove content has integrity." )
         protected Attachment attachment;
 
         /**
@@ -576,7 +576,7 @@ public class DocumentReference extends DomainResource {
       }
 
         /**
-         * @return {@link #attachment} (The document or url of the document along with critical metadata to prove content has integrity.)
+         * @return {@link #attachment} (The document or URL of the document along with critical metadata to prove content has integrity.)
          */
         public Attachment getAttachment() { 
           if (this.attachment == null)
@@ -592,7 +592,7 @@ public class DocumentReference extends DomainResource {
         }
 
         /**
-         * @param value {@link #attachment} (The document or url of the document along with critical metadata to prove content has integrity.)
+         * @param value {@link #attachment} (The document or URL of the document along with critical metadata to prove content has integrity.)
          */
         public DocumentReferenceContentComponent setAttachment(Attachment value) { 
           this.attachment = value;
@@ -625,7 +625,7 @@ public class DocumentReference extends DomainResource {
 
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
-          childrenList.add(new Property("attachment", "Attachment", "The document or url of the document along with critical metadata to prove content has integrity.", 0, java.lang.Integer.MAX_VALUE, attachment));
+          childrenList.add(new Property("attachment", "Attachment", "The document or URL of the document along with critical metadata to prove content has integrity.", 0, java.lang.Integer.MAX_VALUE, attachment));
           childrenList.add(new Property("format", "Coding", "An identifier of the document encoding, structure, and template that the document conforms to beyond the base format indicated in the mimeType.", 0, java.lang.Integer.MAX_VALUE, format));
         }
 
@@ -755,7 +755,7 @@ public class DocumentReference extends DomainResource {
          * This list of codes represents the main clinical acts, such as a colonoscopy or an appendectomy, being documented. In some cases, the event is inherent in the typeCode, such as a "History and Physical Report" in which the procedure being documented is necessarily a "History and Physical" act.
          */
         @Child(name = "event", type = {CodeableConcept.class}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-        @Description(shortDefinition="Main Clinical Acts Documented", formalDefinition="This list of codes represents the main clinical acts, such as a colonoscopy or an appendectomy, being documented. In some cases, the event is inherent in the typeCode, such as a \"History and Physical Report\" in which the procedure being documented is necessarily a \"History and Physical\" act." )
+        @Description(shortDefinition="Main clinical acts documented", formalDefinition="This list of codes represents the main clinical acts, such as a colonoscopy or an appendectomy, being documented. In some cases, the event is inherent in the typeCode, such as a \"History and Physical Report\" in which the procedure being documented is necessarily a \"History and Physical\" act." )
         @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/v3-ActCode")
         protected List<CodeableConcept> event;
 
@@ -1546,7 +1546,7 @@ public class DocumentReference extends DomainResource {
      * When the document reference was created.
      */
     @Child(name = "indexed", type = {InstantType.class}, order=8, min=1, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="When this document reference created", formalDefinition="When the document reference was created." )
+    @Description(shortDefinition="When this document reference was created", formalDefinition="When the document reference was created." )
     protected InstantType indexed;
 
     /**
@@ -2919,17 +2919,17 @@ public class DocumentReference extends DomainResource {
  /**
    * Search parameter: <b>event</b>
    * <p>
-   * Description: <b>Main Clinical Acts Documented</b><br>
+   * Description: <b>Main clinical acts documented</b><br>
    * Type: <b>token</b><br>
    * Path: <b>DocumentReference.context.event</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="event", path="DocumentReference.context.event", description="Main Clinical Acts Documented", type="token" )
+  @SearchParamDefinition(name="event", path="DocumentReference.context.event", description="Main clinical acts documented", type="token" )
   public static final String SP_EVENT = "event";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>event</b>
    * <p>
-   * Description: <b>Main Clinical Acts Documented</b><br>
+   * Description: <b>Main clinical acts documented</b><br>
    * Type: <b>token</b><br>
    * Path: <b>DocumentReference.context.event</b><br>
    * </p>
@@ -3071,17 +3071,17 @@ public class DocumentReference extends DomainResource {
  /**
    * Search parameter: <b>indexed</b>
    * <p>
-   * Description: <b>When this document reference created</b><br>
+   * Description: <b>When this document reference was created</b><br>
    * Type: <b>date</b><br>
    * Path: <b>DocumentReference.indexed</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="indexed", path="DocumentReference.indexed", description="When this document reference created", type="date" )
+  @SearchParamDefinition(name="indexed", path="DocumentReference.indexed", description="When this document reference was created", type="date" )
   public static final String SP_INDEXED = "indexed";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>indexed</b>
    * <p>
-   * Description: <b>When this document reference created</b><br>
+   * Description: <b>When this document reference was created</b><br>
    * Type: <b>date</b><br>
    * Path: <b>DocumentReference.indexed</b><br>
    * </p>

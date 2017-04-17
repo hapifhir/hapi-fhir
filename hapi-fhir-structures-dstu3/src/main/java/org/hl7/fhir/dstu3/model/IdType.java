@@ -1,7 +1,5 @@
 package org.hl7.fhir.dstu3.model;
 
-import static org.apache.commons.lang3.StringUtils.defaultString;
-
 /*
   Copyright (c) 2011+, HL7, Inc.
   All rights reserved.
@@ -41,6 +39,7 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
@@ -244,12 +243,41 @@ public final class IdType extends UriType implements IPrimitiveType<String>, IId
     return new IdType(getValue());
   }
 
+  private String determineLocalPrefix(String theValue) {
+    if (theValue == null || theValue.isEmpty()) {
+      return null;
+    }
+    if (theValue.startsWith("#")) {
+      return "#";
+    }
+    int lastPrefix = -1;
+    for (int i = 0; i < theValue.length(); i++) {
+      char nextChar = theValue.charAt(i);
+      if (nextChar == ':') {
+        lastPrefix = i;
+      } else if (!Character.isLetter(nextChar) || !Character.isLowerCase(nextChar)) {
+        break;
+      }
+    }
+    if (lastPrefix != -1) {
+      String candidate = theValue.substring(0, lastPrefix + 1);
+      if (candidate.startsWith("cid:") || candidate.startsWith("urn:")) {
+        return candidate;
+      } else {
+        return null;
+      }
+    } else {
+      return null;
+    }
+  }
+
   @Override
   public boolean equals(Object theArg0) {
     if (!(theArg0 instanceof IdType)) {
       return false;
     }
-    return StringUtils.equals(getValueAsString(), ((IdType)theArg0).getValueAsString());
+    IdType id = (IdType) theArg0;
+    return StringUtils.equals(getValueAsString(), id.getValueAsString());
   }
 
   /**
@@ -341,8 +369,8 @@ public final class IdType extends UriType implements IPrimitiveType<String>, IId
     String retVal = super.getValue();
     if (retVal == null && myHaveComponentParts) {
 
-      if (isLocal() || isUrn()) {
-        return myUnqualifiedId;
+      if (determineLocalPrefix(myBaseUrl) != null && myResourceType == null && myUnqualifiedVersionId == null) {
+        return myBaseUrl + myUnqualifiedId;
       }
 
       StringBuilder b = new StringBuilder();
@@ -483,11 +511,7 @@ public final class IdType extends UriType implements IPrimitiveType<String>, IId
    */
   @Override
   public boolean isLocal() {
-    return defaultString(myUnqualifiedId).startsWith("#");
-  }
-
-  private boolean isUrn() {
-    return defaultString(myUnqualifiedId).startsWith("urn:");
+    return "#".equals(myBaseUrl);
   }
 
   @Override
@@ -513,6 +537,8 @@ public final class IdType extends UriType implements IPrimitiveType<String>, IId
     super.setValue(theValue);
     myHaveComponentParts = false;
 
+    String localPrefix = determineLocalPrefix(theValue);
+
     if (StringUtils.isBlank(theValue)) {
       myBaseUrl = null;
       super.setValue(null);
@@ -521,17 +547,14 @@ public final class IdType extends UriType implements IPrimitiveType<String>, IId
       myResourceType = null;
     } else if (theValue.charAt(0) == '#' && theValue.length() > 1) {
       super.setValue(theValue);
-      myBaseUrl = null;
-      myUnqualifiedId = theValue;
+      myBaseUrl = "#";
+      myUnqualifiedId = theValue.substring(1);
       myUnqualifiedVersionId = null;
       myResourceType = null;
       myHaveComponentParts = true;
-    } else if (theValue.startsWith("urn:")) {
-      myBaseUrl = null;
-      myUnqualifiedId = theValue;
-      myUnqualifiedVersionId = null;
-      myResourceType = null;
-      myHaveComponentParts = true;
+    } else if (localPrefix != null) {
+      myBaseUrl = localPrefix;
+      myUnqualifiedId = theValue.substring(localPrefix.length());
     } else {
       int vidIndex = theValue.indexOf("/_history/");
       int idIndex;
@@ -596,33 +619,21 @@ public final class IdType extends UriType implements IPrimitiveType<String>, IId
    */
   @Override
   public IdType toUnqualified() {
-    if (isLocal() || isUrn()) {
-       return new IdType(getValueAsString());
-    }
     return new IdType(getResourceType(), getIdPart(), getVersionIdPart());
   }
 
   @Override
   public IdType toUnqualifiedVersionless() {
-    if (isLocal() || isUrn()) {
-       return new IdType(getValueAsString());
-    }
     return new IdType(getResourceType(), getIdPart());
   }
 
   @Override
   public IdType toVersionless() {
-    if (isLocal() || isUrn()) {
-       return new IdType(getValueAsString());
-    }
     return new IdType(getBaseUrl(), getResourceType(), getIdPart(), null);
   }
 
   @Override
   public IdType withResourceType(String theResourceName) {
-    if (isLocal() || isUrn()) {
-       return new IdType(getValueAsString());
-    }
     return new IdType(theResourceName, getIdPart(), getVersionIdPart());
   }
 
@@ -642,9 +653,6 @@ public final class IdType extends UriType implements IPrimitiveType<String>, IId
    */
   @Override
   public IdType withServerBase(String theServerBase, String theResourceType) {
-    if (isLocal() || isUrn()) {
-       return new IdType(getValueAsString());
-    }
     return new IdType(theServerBase, theResourceType, getIdPart(), getVersionIdPart());
   }
 
@@ -657,13 +665,8 @@ public final class IdType extends UriType implements IPrimitiveType<String>, IId
    * @return A new instance of IdType which is identical, but refers to the
    *         specific version of this resource ID noted by theVersion.
    */
-  @Override
   public IdType withVersion(String theVersion) {
     Validate.notBlank(theVersion, "Version may not be null or empty");
-
-    if (isLocal() || isUrn()) {
-       return new IdType(getValueAsString());
-    }
 
     String existingValue = getValue();
 
@@ -758,5 +761,13 @@ public final class IdType extends UriType implements IPrimitiveType<String>, IId
 		
 		return this;
 	}
-	
+
+  @Override
+  public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+    switch (hash) {
+    case 111972721: /*value*/ return new String[] {"id"};
+    default: return super.getTypesForProperty(hash, name);
+    }
+
+  }	
 }

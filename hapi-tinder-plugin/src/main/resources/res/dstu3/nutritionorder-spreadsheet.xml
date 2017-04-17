@@ -16,8 +16,8 @@
   <AllowPNG/>
  </OfficeDocumentSettings>
  <ExcelWorkbook xmlns="urn:schemas-microsoft-com:office:excel">
-  <WindowHeight>9315</WindowHeight>
-  <WindowWidth>21570</WindowWidth>
+  <WindowHeight>13410</WindowHeight>
+  <WindowWidth>28800</WindowWidth>
   <WindowTopX>0</WindowTopX>
   <WindowTopY>0</WindowTopY>
   <TabRatio>644</TabRatio>
@@ -851,7 +851,7 @@
    </Row>
    <Row ss:AutoFitHeight="0">
     <Cell><Data ss:Type="String">proposed-order</Data></Cell>
-    <Cell><Data ss:Type="String">identifier,status,patient,encounter,dateTime,orderer</Data></Cell>
+    <Cell><Data ss:Type="String"></Data></Cell>
    </Row>
   </Table>
   <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">
@@ -1054,7 +1054,7 @@
     <Cell ss:StyleID="s88"><Data ss:Type="String">Identifiers assigned to this order by the order sender or by the order receiver</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s88"><Data ss:Type="String">The Identifier.type element can be to indicate filler vs placer if needed.  This is explained in further detail [here](procedurerequest.html#notes)</Data><NamedCell
+    <Cell ss:StyleID="s88"><Data ss:Type="String">The Identifier.type element can be to indicate filler vs. placer if needed.  This is explained in further detail [here](procedurerequest.html#notes)</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><Data ss:Type="String">.id</Data><NamedCell
@@ -1096,7 +1096,7 @@
     <Cell ss:StyleID="s88"><Data ss:Type="String">The workflow status of the nutrition order/request.</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s88"><Data ss:Type="String">Typically the system placing the order sets the status to &quot;requested&quot;. Thereafter, the order is maintained by the receiver that updates the status as the request is handled.</Data><NamedCell
+    <Cell ss:StyleID="s88"><Data ss:Type="String">Typically the system placing the order sets the status to &quot;requested&quot;. Thereafter, the order is maintained by the receiver that updates the status as the request is handled.&#10;&#10;This element is labeled as a modifier because the status contains codes that mark the resource as not currently valid</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s93"><Data ss:Type="String">.statusCode </Data><NamedCell
@@ -1286,7 +1286,7 @@
     <Cell ss:StyleID="s88"><Data ss:Type="String">A link to a record of allergies or intolerances  which should be included in the nutrition order.</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s88"><Data ss:Type="String">Information on a patient's food allergies and intolerances, inform healthcare personnel about the type of foods that the patient should receive or consume.</Data><NamedCell
+    <Cell ss:StyleID="s88"><Data ss:Type="String">Information on a patient's food allergies and intolerances to inform healthcare personnel about the type of foods that the patient shouldn't receive or consume.</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s94"><Data ss:Type="String">.outboundRelationship[typeCode=RSON].target[classCode=OBS, moodCode=EVN]</Data><NamedCell
@@ -1358,10 +1358,10 @@
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">Order-specific modifier about the type of food that should not be given</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s88"><Data ss:Type="String">This modifier is used to convey order-specific modifiers about the type of food that should NOT be given. These can be derived from patient allergies, intolerances, or preferences such as No Red Meat, No Soy or No Wheat or  Gluten-Free.  While it should not be necessary to repeat allergy or intolerance information captured in the referenced allergyIntolerance resource in the excludeFoodModifier, this element may be used to convey additional specificity related to foods that should be eliminated from the patient’s diet for any reason.  This modifier applies to the entire nutrition order inclusive of the oral diet, nutritional supplements and enteral formula feedings.</Data><NamedCell
+    <Cell ss:StyleID="s88"><Data ss:Type="String">This modifier is used to convey order-specific modifiers about the type of food that should NOT be given. These can be derived from patient allergies, intolerances, or preferences such as No Red Meat, No Soy or No Wheat or  Gluten-Free.  While it should not be necessary to repeat allergy or intolerance information captured in the referenced AllergyIntolerance resource in the excludeFoodModifier, this element may be used to convey additional specificity related to foods that should be eliminated from the patient’s diet for any reason.  This modifier applies to the entire nutrition order inclusive of the oral diet, nutritional supplements and enteral formula feedings.</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell><Data ss:Type="String">Information on a patient's food allergies and intolerances, and preferences inform healthcare personnel about the type  of foods that the patient should receive or consume.</Data><NamedCell
+    <Cell><Data ss:Type="String">Information on a patient's food allergies, intolerances and preferences to inform healthcare personnel about the type  of foods that the patient shouldn't receive or consume.</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s91"><Data ss:Type="String">N/A</Data><NamedCell
@@ -1412,7 +1412,7 @@
    <Row ss:AutoFitHeight="0" ss:Height="21.9375">
     <Cell ss:StyleID="s86"><Data ss:Type="String">!NutritionOrder.item.scheduled[x]</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s87"><Data ss:Type="String">frequency</Data><NamedCell
+    <Cell ss:StyleID="s87"><Data ss:Type="String">Frequency</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">0..1</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
@@ -1558,7 +1558,7 @@
    <Row ss:AutoFitHeight="0" ss:Height="21.9375">
     <Cell ss:StyleID="s86"><Data ss:Type="String">NutritionOrder.oralDiet.schedule</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s87"><Data ss:Type="String">frequency</Data><NamedCell
+    <Cell ss:StyleID="s87"><Data ss:Type="String">Frequency</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">0..*</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
@@ -1996,7 +1996,7 @@
    <Row ss:AutoFitHeight="0" ss:Height="21.9375">
     <Cell ss:StyleID="s86"><Data ss:Type="String">NutritionOrder.supplement.schedule</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s87"><Data ss:Type="String">frequency</Data><NamedCell
+    <Cell ss:StyleID="s87"><Data ss:Type="String">Frequency</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">0..*</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
@@ -2307,7 +2307,7 @@
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">Amount of energy per specified volume that is required</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s88"><Data ss:Type="String">The amount of energy (Calories) that the formula should provide per specified volume, typically per mL or fluid oz.  For example, an infant may require a formula that provides 24 Calories per fluid ounce or an adult may require an enteral formula that provides 1.5 Calorie/mL.</Data><NamedCell
+    <Cell ss:StyleID="s88"><Data ss:Type="String">The amount of energy (calories) that the formula should provide per specified volume, typically per mL or fluid oz.  For example, an infant may require a formula that provides 24 calories per fluid ounce or an adult may require an enteral formula that provides 1.5 calorie/mL.</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -2399,7 +2399,7 @@
    <Row ss:AutoFitHeight="0" ss:Height="21.9375">
     <Cell ss:StyleID="s86"><Data ss:Type="String">NutritionOrder.enteralFormula.administration.schedule</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s87"><Data ss:Type="String">frequency</Data><NamedCell
+    <Cell ss:StyleID="s87"><Data ss:Type="String">Frequency</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">0..1</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
@@ -4314,7 +4314,7 @@
    <SplitHorizontal>1</SplitHorizontal>
    <TopRowBottomPane>1</TopRowBottomPane>
    <SplitVertical>1</SplitVertical>
-   <LeftColumnRightPane>20</LeftColumnRightPane>
+   <LeftColumnRightPane>13</LeftColumnRightPane>
    <ActivePane>0</ActivePane>
    <Panes>
     <Pane>
@@ -4329,8 +4329,8 @@
     </Pane>
     <Pane>
      <Number>0</Number>
-     <ActiveRow>29</ActiveRow>
-     <ActiveCol>21</ActiveCol>
+     <ActiveRow>6</ActiveRow>
+     <ActiveCol>18</ActiveCol>
     </Pane>
    </Panes>
    <ProtectObjects>False</ProtectObjects>
