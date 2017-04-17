@@ -85,6 +85,10 @@
 				you to deal with servers which are behaving badly. Thanks to
 				GitHub user CarthageKing for the pul request!
 			</action>
+			<action type="fix" issue="617">
+				Remove unneccesary whitespace in the text areas on the testing
+				web UI. Thanks to GitHub user @elnin0815 for the pull request!
+			</action>
 		</release>
 		<release version="2.3" date="2017-03-18">
 			<action type="add">
