@@ -8,6 +8,13 @@
 	<body>
 		<release version="2.4" date="">
 			<action type="add">
+				This release brings the DSTU3 structures up to FHIR R3 (FHIR 3.0.1) definitions. Note that
+				there are very few changes between the DSTU3 structures in HAPI FHIR 2.3 and
+				the ones in HAPI FHIR 2.4 since the basis for the DSTU3 structures in HAPI FHIR
+				2.3 was the R3 QA FHIR version (1.9.0) but this is the first release of 
+				HAPI FHIR to support the final/complete R3 release.
+			</action>
+			<action type="add">
 				Bump the version of a few dependencies to the
 				latest versions (dependent HAPI modules listed in brackets):
 				<![CDATA[
