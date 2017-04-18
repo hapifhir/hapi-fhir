@@ -1817,6 +1817,20 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 				 * See #327 
 				 */
 				List<? extends IBase> preProcessedValue = preProcessValues(myDef, theResource, Collections.singletonList(myValue), myChildElem);
+
+//				// Check for undeclared extensions on the declared extension
+//				// (grrrrrr....)
+//				if (myValue instanceof ISupportsUndeclaredExtensions) {
+//					ISupportsUndeclaredExtensions value = (ISupportsUndeclaredExtensions)myValue;
+//					List<ExtensionDt> exts = value.getUndeclaredExtensions();
+//					if (exts.size() > 0) {
+//						ArrayList<IBase> newValueList = new ArrayList<IBase>();
+//						newValueList.addAll(preProcessedValue);
+//						newValueList.addAll(exts);
+//						preProcessedValue = newValueList;
+//					}
+//				}
+				
 				myValue = preProcessedValue.get(0);
 				
 				BaseRuntimeElementDefinition<?> def = myDef.getChildElementDefinitionByDatatype(myValue.getClass());
