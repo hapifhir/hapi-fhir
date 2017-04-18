@@ -74,7 +74,6 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 
 	private long myMaxMillisToWaitForRemoteResults = DateUtils.MILLIS_PER_MINUTE;
 	private boolean myNeverUseLocalSearchForUnitTests;
-	private final List<CountDownLatch> myResultSizeLatch = new ArrayList<CountDownLatch>();
 	@Autowired
 	private ISearchDao mySearchDao;
 	@Autowired
@@ -436,7 +435,6 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 					int latchSize = theToIndex - mySyncedPids.size();
 					ourLog.trace("Registering latch to await {} results (want {} total)", latchSize, theToIndex);
 					latch = new CountDownLatch(latchSize);
-					myResultSizeLatch.add(latch);
 				}
 			}
 
@@ -507,19 +505,6 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 						if (theResultIter.hasNext() == false) {
 							mySearch.setStatus(SearchStatusEnum.FINISHED);
 							mySearch.setTotalCount(myCountSaved);
-							for (CountDownLatch next : myResultSizeLatch) {
-								while (next.getCount() > 0) {
-									next.countDown();
-								}
-							}
-						} else {
-							if (myResultSizeLatch.isEmpty() == false) {
-								for (CountDownLatch next : myResultSizeLatch) {
-									for (int i = 0; i < numSyncedThisPass; i++) {
-										next.countDown();
-									}
-								}
-							}
 						}
 					}
 					mySearch.setNumFound(myCountSaved);
