@@ -4,6 +4,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
@@ -600,7 +601,7 @@ public class Element extends Base {
           remove.add(child);
       }
       children.removeAll(remove);
-      children.sort(new ElementSortComparator(this, this.property));
+      Collections.sort(children, new ElementSortComparator(this, this.property));
     }
   }
 
@@ -619,8 +620,9 @@ public class Element extends Base {
     public int compare(Element e0, Element e1) {
       int i0 = find(e0);
       int i1 = find(e1);
-      return Integer.compare(i0, i1);
+      return (i0 < i1) ? -1 : ((i0 == i1) ? 0 : 1);
     }
+    
     private int find(Element e0) {
       int i =  e0.elementProperty != null ? children.indexOf(e0.elementProperty.getDefinition()) :  children.indexOf(e0.property.getDefinition());
       return i; 

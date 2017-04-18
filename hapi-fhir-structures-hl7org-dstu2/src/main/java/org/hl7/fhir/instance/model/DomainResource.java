@@ -261,6 +261,10 @@ public abstract class DomainResource extends Resource implements IBaseHasExtensi
           ;
       }
 
+      public void addContained(Resource theResource) {
+        getContained().add(theResource);
+      }
+
 
 }
 
