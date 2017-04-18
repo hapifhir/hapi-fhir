@@ -3,6 +3,7 @@ package org.hl7.fhir.dstu3.elementmodel;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -382,7 +383,7 @@ public class XmlParser extends ParserBase {
   }
 
 	@Override
-  public void compose(Element e, OutputStream stream, OutputStyle style, String base) throws Exception {
+  public void compose(Element e, OutputStream stream, OutputStyle style, String base) throws IOException {
     XMLWriter xml = new XMLWriter(stream, "UTF-8");
     xml.setPretty(style == OutputStyle.PRETTY);
     xml.start();

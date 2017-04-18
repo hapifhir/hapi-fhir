@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
+// Generated on Mon, Apr 17, 2017 17:38-0400 for FHIR v3.0.1
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -53,7 +53,7 @@ public enum QuestionnaireAnswersStatus {
          */
         ENTEREDINERROR, 
         /**
-         * This QuestionnaireResponse has been partially filled out with answers, but it is unknown whether changes or additions are expected to be made to it.
+         * This QuestionnaireResponse has been partially filled out with answers, but has been abandoned. It is unknown whether changes or additions are expected to be made to it.
          */
         STOPPED, 
         /**
@@ -94,7 +94,7 @@ public enum QuestionnaireAnswersStatus {
             case COMPLETED: return "This QuestionnaireResponse has been filled out with answers, and the current content is regarded as definitive.";
             case AMENDED: return "This QuestionnaireResponse has been filled out with answers, then marked as complete, yet changes or additions have been made to it afterwards.";
             case ENTEREDINERROR: return "This QuestionnaireResponse was entered in error and voided.";
-            case STOPPED: return "This QuestionnaireResponse has been partially filled out with answers, but it is unknown whether changes or additions are expected to be made to it.";
+            case STOPPED: return "This QuestionnaireResponse has been partially filled out with answers, but has been abandoned. It is unknown whether changes or additions are expected to be made to it.";
             default: return "?";
           }
         }
@@ -103,7 +103,7 @@ public enum QuestionnaireAnswersStatus {
             case INPROGRESS: return "In Progress";
             case COMPLETED: return "Completed";
             case AMENDED: return "Amended";
-            case ENTEREDINERROR: return "Entered In Error";
+            case ENTEREDINERROR: return "Entered in Error";
             case STOPPED: return "Stopped";
             default: return "?";
           }

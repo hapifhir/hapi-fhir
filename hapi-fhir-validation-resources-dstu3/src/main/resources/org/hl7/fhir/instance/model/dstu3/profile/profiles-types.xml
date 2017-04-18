@@ -1,7 +1,7 @@
 <Bundle xmlns="http://hl7.org/fhir">
  <id value="types"/>
  <meta>
-  <lastUpdated value="2017-03-04T06:58:42.085-05:00"/>
+  <lastUpdated value="2017-04-17T17:38:22.515-04:00"/>
  </meta>
  <type value="collection"/>
  <entry>
@@ -10,12 +10,12 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="Element"/>
     <meta>
-     <lastUpdated value="2017-03-04T06:58:42.085-05:00"/>
+     <lastUpdated value="2017-04-17T17:38:22.515-04:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/Element"/>
     <name value="Element"/>
     <status value="draft"/>
-    <date value="2017-03-04T06:58:42-05:00"/>
+    <date value="2017-04-17T17:38:22-04:00"/>
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
@@ -24,7 +24,7 @@
      </telecom>
     </contact>
     <description value="Base StructureDefinition for Element Type"/>
-    <fhirVersion value="1.9.0"/>
+    <fhirVersion value="3.0.1"/>
     <mapping>
      <identity value="rim"/>
      <uri value="http://hl7.org/v3"/>
@@ -45,7 +45,7 @@
        <key value="ele-1"/>
        <severity value="error"/>
        <human value="All FHIR elements must have a @value or children"/>
-       <expression value="children().count() > id.count()"/>
+       <expression value="hasValue() | (children().count() > id.count())"/>
        <xpath value="@value|f:*|h:div"/>
       </constraint>
       <mapping>
@@ -106,7 +106,7 @@
        <key value="ele-1"/>
        <severity value="error"/>
        <human value="All FHIR elements must have a @value or children"/>
-       <expression value="children().count() > id.count()"/>
+       <expression value="hasValue() | (children().count() > id.count())"/>
        <xpath value="@value|f:*|h:div"/>
       </constraint>
       <mapping>
@@ -164,12 +164,12 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="BackboneElement"/>
     <meta>
-     <lastUpdated value="2017-03-04T06:58:42.085-05:00"/>
+     <lastUpdated value="2017-04-17T17:38:22.515-04:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/BackboneElement"/>
     <name value="BackboneElement"/>
     <status value="draft"/>
-    <date value="2017-03-04T06:58:42-05:00"/>
+    <date value="2017-04-17T17:38:22-04:00"/>
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
@@ -178,7 +178,7 @@
      </telecom>
     </contact>
     <description value="Base StructureDefinition for BackboneElement Type"/>
-    <fhirVersion value="1.9.0"/>
+    <fhirVersion value="3.0.1"/>
     <mapping>
      <identity value="rim"/>
      <uri value="http://hl7.org/v3"/>
@@ -201,7 +201,7 @@
        <key value="ele-1"/>
        <severity value="error"/>
        <human value="All FHIR elements must have a @value or children"/>
-       <expression value="children().count() > id.count()"/>
+       <expression value="hasValue() | (children().count() > id.count())"/>
        <xpath value="@value|f:*|h:div"/>
        <source value="Element"/>
       </constraint>
@@ -232,6 +232,14 @@
      </element>
      <element id="BackboneElement.extension">
       <path value="BackboneElement.extension"/>
+      <slicing>
+       <discriminator>
+        <type value="value"/>
+        <path value="url"/>
+       </discriminator>
+       <description value="Extensions are always sliced by (at least) url"/>
+       <rules value="open"/>
+      </slicing>
       <short value="Additional Content defined by implementations"/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <comment value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
@@ -315,12 +323,12 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="base64Binary"/>
     <meta>
-     <lastUpdated value="2017-03-04T06:58:42.085-05:00"/>
+     <lastUpdated value="2017-04-17T17:38:22.515-04:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/base64Binary"/>
     <name value="base64Binary"/>
     <status value="draft"/>
-    <date value="2017-03-04T06:58:42-05:00"/>
+    <date value="2017-04-17T17:38:22-04:00"/>
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
@@ -329,7 +337,7 @@
      </telecom>
     </contact>
     <description value="Base StructureDefinition for base64Binary Type: A stream of bytes"/>
-    <fhirVersion value="1.9.0"/>
+    <fhirVersion value="3.0.1"/>
     <kind value="primitive-type"/>
     <abstract value="false"/>
     <type value="base64Binary"/>
@@ -347,7 +355,7 @@
        <key value="ele-1"/>
        <severity value="error"/>
        <human value="All FHIR elements must have a @value or children"/>
-       <expression value="children().count() > id.count()"/>
+       <expression value="hasValue() | (children().count() > id.count())"/>
        <xpath value="@value|f:*|h:div"/>
        <source value="Element"/>
       </constraint>
@@ -365,7 +373,7 @@
        <max value="1"/>
       </base>
       <type>
-       <code value="id"/>
+       <code value="string"/>
       </type>
      </element>
      <element id="base64Binary.extension">
@@ -450,12 +458,12 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="boolean"/>
     <meta>
-     <lastUpdated value="2017-03-04T06:58:42.085-05:00"/>
+     <lastUpdated value="2017-04-17T17:38:22.515-04:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/boolean"/>
     <name value="boolean"/>
     <status value="draft"/>
-    <date value="2017-03-04T06:58:42-05:00"/>
+    <date value="2017-04-17T17:38:22-04:00"/>
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
@@ -464,7 +472,7 @@
      </telecom>
     </contact>
     <description value="Base StructureDefinition for boolean Type: Value of &quot;true&quot; or &quot;false&quot;"/>
-    <fhirVersion value="1.9.0"/>
+    <fhirVersion value="3.0.1"/>
     <kind value="primitive-type"/>
     <abstract value="false"/>
     <type value="boolean"/>
@@ -481,7 +489,7 @@
        <key value="ele-1"/>
        <severity value="error"/>
        <human value="All FHIR elements must have a @value or children"/>
-       <expression value="children().count() > id.count()"/>
+       <expression value="hasValue() | (children().count() > id.count())"/>
        <xpath value="@value|f:*|h:div"/>
        <source value="Element"/>
       </constraint>
@@ -499,7 +507,7 @@
        <max value="1"/>
       </base>
       <type>
-       <code value="id"/>
+       <code value="string"/>
       </type>
      </element>
      <element id="boolean.extension">
@@ -583,12 +591,12 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="code"/>
     <meta>
-     <lastUpdated value="2017-03-04T06:58:42.085-05:00"/>
+     <lastUpdated value="2017-04-17T17:38:22.515-04:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/code"/>
     <name value="code"/>
     <status value="draft"/>
-    <date value="2017-03-04T06:58:42-05:00"/>
+    <date value="2017-04-17T17:38:22-04:00"/>
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
@@ -597,7 +605,7 @@
      </telecom>
     </contact>
     <description value="Base StructureDefinition for code type: A string which has at least one character and no leading or trailing whitespace and where there is no whitespace other than single spaces in the contents"/>
-    <fhirVersion value="1.9.0"/>
+    <fhirVersion value="3.0.1"/>
     <kind value="primitive-type"/>
     <abstract value="false"/>
     <type value="code"/>
@@ -619,7 +627,7 @@
        <key value="ele-1"/>
        <severity value="error"/>
        <human value="All FHIR elements must have a @value or children"/>
-       <expression value="children().count() > id.count()"/>
+       <expression value="hasValue() | (children().count() > id.count())"/>
        <xpath value="@value|f:*|h:div"/>
        <source value="Element"/>
       </constraint>
@@ -637,7 +645,7 @@
        <max value="1"/>
       </base>
       <type>
-       <code value="id"/>
+       <code value="string"/>
       </type>
      </element>
      <element id="code.extension">
@@ -732,12 +740,12 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="date"/>
     <meta>
-     <lastUpdated value="2017-03-04T06:58:42.085-05:00"/>
+     <lastUpdated value="2017-04-17T17:38:22.515-04:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/date"/>
     <name value="date"/>
     <status value="draft"/>
-    <date value="2017-03-04T06:58:42-05:00"/>
+    <date value="2017-04-17T17:38:22-04:00"/>
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
@@ -746,7 +754,7 @@
      </telecom>
     </contact>
     <description value="Base StructureDefinition for date Type: A date or partial date (e.g. just year or year + month). There is no time zone. The format is a union of the schema types gYear, gYearMonth and date.  Dates SHALL be valid dates."/>
-    <fhirVersion value="1.9.0"/>
+    <fhirVersion value="3.0.1"/>
     <kind value="primitive-type"/>
     <abstract value="false"/>
     <type value="date"/>
@@ -763,7 +771,7 @@
        <key value="ele-1"/>
        <severity value="error"/>
        <human value="All FHIR elements must have a @value or children"/>
-       <expression value="children().count() > id.count()"/>
+       <expression value="hasValue() | (children().count() > id.count())"/>
        <xpath value="@value|f:*|h:div"/>
        <source value="Element"/>
       </constraint>
@@ -781,7 +789,7 @@
        <max value="1"/>
       </base>
       <type>
-       <code value="id"/>
+       <code value="string"/>
       </type>
      </element>
      <element id="date.extension">
@@ -871,12 +879,12 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="dateTime"/>
     <meta>
-     <lastUpdated value="2017-03-04T06:58:42.085-05:00"/>
+     <lastUpdated value="2017-04-17T17:38:22.515-04:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/dateTime"/>
     <name value="dateTime"/>
     <status value="draft"/>
-    <date value="2017-03-04T06:58:42-05:00"/>
+    <date value="2017-04-17T17:38:22-04:00"/>
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
@@ -885,7 +893,7 @@
      </telecom>
     </contact>
     <description value="Base StructureDefinition for dateTime Type: A date, date-time or partial date (e.g. just year or year + month).  If hours and minutes are specified, a time zone SHALL be populated. The format is a union of the schema types gYear, gYearMonth, date and dateTime. Seconds must be provided due to schema type constraints but may be zero-filled and may be ignored.                 Dates SHALL be valid dates."/>
-    <fhirVersion value="1.9.0"/>
+    <fhirVersion value="3.0.1"/>
     <kind value="primitive-type"/>
     <abstract value="false"/>
     <type value="dateTime"/>
@@ -902,7 +910,7 @@
        <key value="ele-1"/>
        <severity value="error"/>
        <human value="All FHIR elements must have a @value or children"/>
-       <expression value="children().count() > id.count()"/>
+       <expression value="hasValue() | (children().count() > id.count())"/>
        <xpath value="@value|f:*|h:div"/>
        <source value="Element"/>
       </constraint>
@@ -920,7 +928,7 @@
        <max value="1"/>
       </base>
       <type>
-       <code value="id"/>
+       <code value="string"/>
       </type>
      </element>
      <element id="dateTime.extension">
@@ -1010,12 +1018,12 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="decimal"/>
     <meta>
-     <lastUpdated value="2017-03-04T06:58:42.085-05:00"/>
+     <lastUpdated value="2017-04-17T17:38:22.515-04:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/decimal"/>
     <name value="decimal"/>
     <status value="draft"/>
-    <date value="2017-03-04T06:58:42-05:00"/>
+    <date value="2017-04-17T17:38:22-04:00"/>
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
@@ -1024,7 +1032,7 @@
      </telecom>
     </contact>
     <description value="Base StructureDefinition for decimal Type: A rational number with implicit precision"/>
-    <fhirVersion value="1.9.0"/>
+    <fhirVersion value="3.0.1"/>
     <kind value="primitive-type"/>
     <abstract value="false"/>
     <type value="decimal"/>
@@ -1042,7 +1050,7 @@
        <key value="ele-1"/>
        <severity value="error"/>
        <human value="All FHIR elements must have a @value or children"/>
-       <expression value="children().count() > id.count()"/>
+       <expression value="hasValue() | (children().count() > id.count())"/>
        <xpath value="@value|f:*|h:div"/>
        <source value="Element"/>
       </constraint>
@@ -1060,7 +1068,7 @@
        <max value="1"/>
       </base>
       <type>
-       <code value="id"/>
+       <code value="string"/>
       </type>
      </element>
      <element id="decimal.extension">
@@ -1151,12 +1159,12 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="id"/>
     <meta>
-     <lastUpdated value="2017-03-04T06:58:42.085-05:00"/>
+     <lastUpdated value="2017-04-17T17:38:22.515-04:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/id"/>
     <name value="id"/>
     <status value="draft"/>
-    <date value="2017-03-04T06:58:42-05:00"/>
+    <date value="2017-04-17T17:38:22-04:00"/>
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
@@ -1165,7 +1173,7 @@
      </telecom>
     </contact>
     <description value="Base StructureDefinition for id type: Any combination of letters, numerals, &quot;-&quot; and &quot;.&quot;, with a length limit of 64 characters.  (This might be an integer, an unprefixed OID, UUID or any other identifier pattern that meets these constraints.)  Ids are case-insensitive."/>
-    <fhirVersion value="1.9.0"/>
+    <fhirVersion value="3.0.1"/>
     <kind value="primitive-type"/>
     <abstract value="false"/>
     <type value="id"/>
@@ -1188,7 +1196,7 @@
        <key value="ele-1"/>
        <severity value="error"/>
        <human value="All FHIR elements must have a @value or children"/>
-       <expression value="children().count() > id.count()"/>
+       <expression value="hasValue() | (children().count() > id.count())"/>
        <xpath value="@value|f:*|h:div"/>
        <source value="Element"/>
       </constraint>
@@ -1206,7 +1214,7 @@
        <max value="1"/>
       </base>
       <type>
-       <code value="id"/>
+       <code value="string"/>
       </type>
      </element>
      <element id="id.extension">
@@ -1302,12 +1310,12 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="instant"/>
     <meta>
-     <lastUpdated value="2017-03-04T06:58:42.085-05:00"/>
+     <lastUpdated value="2017-04-17T17:38:22.515-04:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/instant"/>
     <name value="instant"/>
     <status value="draft"/>
-    <date value="2017-03-04T06:58:42-05:00"/>
+    <date value="2017-04-17T17:38:22-04:00"/>
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
@@ -1316,7 +1324,7 @@
      </telecom>
     </contact>
     <description value="Base StructureDefinition for instant Type: An instant in time - known at least to the second"/>
-    <fhirVersion value="1.9.0"/>
+    <fhirVersion value="3.0.1"/>
     <kind value="primitive-type"/>
     <abstract value="false"/>
     <type value="instant"/>
@@ -1334,7 +1342,7 @@
        <key value="ele-1"/>
        <severity value="error"/>
        <human value="All FHIR elements must have a @value or children"/>
-       <expression value="children().count() > id.count()"/>
+       <expression value="hasValue() | (children().count() > id.count())"/>
        <xpath value="@value|f:*|h:div"/>
        <source value="Element"/>
       </constraint>
@@ -1352,7 +1360,7 @@
        <max value="1"/>
       </base>
       <type>
-       <code value="id"/>
+       <code value="string"/>
       </type>
      </element>
      <element id="instant.extension">
@@ -1437,12 +1445,12 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="integer"/>
     <meta>
-     <lastUpdated value="2017-03-04T06:58:42.085-05:00"/>
+     <lastUpdated value="2017-04-17T17:38:22.515-04:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/integer"/>
     <name value="integer"/>
     <status value="draft"/>
-    <date value="2017-03-04T06:58:42-05:00"/>
+    <date value="2017-04-17T17:38:22-04:00"/>
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
@@ -1451,7 +1459,7 @@
      </telecom>
     </contact>
     <description value="Base StructureDefinition for integer Type: A whole number"/>
-    <fhirVersion value="1.9.0"/>
+    <fhirVersion value="3.0.1"/>
     <kind value="primitive-type"/>
     <abstract value="false"/>
     <type value="integer"/>
@@ -1469,7 +1477,7 @@
        <key value="ele-1"/>
        <severity value="error"/>
        <human value="All FHIR elements must have a @value or children"/>
-       <expression value="children().count() > id.count()"/>
+       <expression value="hasValue() | (children().count() > id.count())"/>
        <xpath value="@value|f:*|h:div"/>
        <source value="Element"/>
       </constraint>
@@ -1487,7 +1495,7 @@
        <max value="1"/>
       </base>
       <type>
-       <code value="id"/>
+       <code value="string"/>
       </type>
      </element>
      <element id="integer.extension">
@@ -1582,12 +1590,12 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="markdown"/>
     <meta>
-     <lastUpdated value="2017-03-04T06:58:42.085-05:00"/>
+     <lastUpdated value="2017-04-17T17:38:22.515-04:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/markdown"/>
     <name value="markdown"/>
     <status value="draft"/>
-    <date value="2017-03-04T06:58:42-05:00"/>
+    <date value="2017-04-17T17:38:22-04:00"/>
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
@@ -1596,7 +1604,7 @@
      </telecom>
     </contact>
     <description value="Base StructureDefinition for markdown type: A string that may contain markdown syntax for optional processing by a mark down presentation engine"/>
-    <fhirVersion value="1.9.0"/>
+    <fhirVersion value="3.0.1"/>
     <kind value="primitive-type"/>
     <abstract value="false"/>
     <type value="markdown"/>
@@ -1619,7 +1627,7 @@
        <key value="ele-1"/>
        <severity value="error"/>
        <human value="All FHIR elements must have a @value or children"/>
-       <expression value="children().count() > id.count()"/>
+       <expression value="hasValue() | (children().count() > id.count())"/>
        <xpath value="@value|f:*|h:div"/>
        <source value="Element"/>
       </constraint>
@@ -1637,7 +1645,7 @@
        <max value="1"/>
       </base>
       <type>
-       <code value="id"/>
+       <code value="string"/>
       </type>
      </element>
      <element id="markdown.extension">
@@ -1727,12 +1735,12 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="oid"/>
     <meta>
-     <lastUpdated value="2017-03-04T06:58:42.085-05:00"/>
+     <lastUpdated value="2017-04-17T17:38:22.515-04:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/oid"/>
     <name value="oid"/>
     <status value="draft"/>
-    <date value="2017-03-04T06:58:42-05:00"/>
+    <date value="2017-04-17T17:38:22-04:00"/>
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
@@ -1740,8 +1748,8 @@
       <value value="http://hl7.org/fhir"/>
      </telecom>
     </contact>
-    <description value="Base StructureDefinition for oid type: An oid represented as a URI"/>
-    <fhirVersion value="1.9.0"/>
+    <description value="Base StructureDefinition for oid type: An OID represented as a URI"/>
+    <fhirVersion value="3.0.1"/>
     <kind value="primitive-type"/>
     <abstract value="false"/>
     <type value="oid"/>
@@ -1751,7 +1759,7 @@
      <element id="oid">
       <path value="oid"/>
       <short value="Primitive Type oid"/>
-      <definition value="An oid represented as a URI"/>
+      <definition value="An OID represented as a URI"/>
       <comment value="RFC 3001. See also ISO/IEC 8824:1990 €"/>
       <min value="0"/>
       <max value="*"/>
@@ -1764,7 +1772,7 @@
        <key value="ele-1"/>
        <severity value="error"/>
        <human value="All FHIR elements must have a @value or children"/>
-       <expression value="children().count() > id.count()"/>
+       <expression value="hasValue() | (children().count() > id.count())"/>
        <xpath value="@value|f:*|h:div"/>
        <source value="Element"/>
       </constraint>
@@ -1782,7 +1790,7 @@
        <max value="1"/>
       </base>
       <type>
-       <code value="id"/>
+       <code value="string"/>
       </type>
      </element>
      <element id="oid.extension">
@@ -1838,7 +1846,7 @@
      <element id="oid">
       <path value="oid"/>
       <short value="Primitive Type oid"/>
-      <definition value="An oid represented as a URI"/>
+      <definition value="An OID represented as a URI"/>
       <comment value="RFC 3001. See also ISO/IEC 8824:1990 €"/>
       <min value="0"/>
       <max value="*"/>
@@ -1878,12 +1886,12 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="positiveInt"/>
     <meta>
-     <lastUpdated value="2017-03-04T06:58:42.085-05:00"/>
+     <lastUpdated value="2017-04-17T17:38:22.515-04:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/positiveInt"/>
     <name value="positiveInt"/>
     <status value="draft"/>
-    <date value="2017-03-04T06:58:42-05:00"/>
+    <date value="2017-04-17T17:38:22-04:00"/>
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
@@ -1892,7 +1900,7 @@
      </telecom>
     </contact>
     <description value="Base StructureDefinition for positiveInt type: An integer with a value that is positive (e.g. >0)"/>
-    <fhirVersion value="1.9.0"/>
+    <fhirVersion value="3.0.1"/>
     <kind value="primitive-type"/>
     <abstract value="false"/>
     <type value="positiveInt"/>
@@ -1914,7 +1922,7 @@
        <key value="ele-1"/>
        <severity value="error"/>
        <human value="All FHIR elements must have a @value or children"/>
-       <expression value="children().count() > id.count()"/>
+       <expression value="hasValue() | (children().count() > id.count())"/>
        <xpath value="@value|f:*|h:div"/>
        <source value="Element"/>
       </constraint>
@@ -1932,7 +1940,7 @@
        <max value="1"/>
       </base>
       <type>
-       <code value="id"/>
+       <code value="string"/>
       </type>
      </element>
      <element id="positiveInt.extension">
@@ -2027,12 +2035,12 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="string"/>
     <meta>
-     <lastUpdated value="2017-03-04T06:58:42.085-05:00"/>
+     <lastUpdated value="2017-04-17T17:38:22.515-04:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/string"/>
     <name value="string"/>
     <status value="draft"/>
-    <date value="2017-03-04T06:58:42-05:00"/>
+    <date value="2017-04-17T17:38:22-04:00"/>
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
@@ -2041,7 +2049,7 @@
      </telecom>
     </contact>
     <description value="Base StructureDefinition for string Type: A sequence of Unicode characters"/>
-    <fhirVersion value="1.9.0"/>
+    <fhirVersion value="3.0.1"/>
     <kind value="primitive-type"/>
     <abstract value="false"/>
     <type value="string"/>
@@ -2059,7 +2067,7 @@
        <key value="ele-1"/>
        <severity value="error"/>
        <human value="All FHIR elements must have a @value or children"/>
-       <expression value="children().count() > id.count()"/>
+       <expression value="hasValue() | (children().count() > id.count())"/>
        <xpath value="@value|f:*|h:div"/>
        <source value="Element"/>
       </constraint>
@@ -2077,7 +2085,7 @@
        <max value="1"/>
       </base>
       <type>
-       <code value="id"/>
+       <code value="string"/>
       </type>
      </element>
      <element id="string.extension">
@@ -2164,12 +2172,12 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="time"/>
     <meta>
-     <lastUpdated value="2017-03-04T06:58:42.085-05:00"/>
+     <lastUpdated value="2017-04-17T17:38:22.515-04:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/time"/>
     <name value="time"/>
     <status value="draft"/>
-    <date value="2017-03-04T06:58:42-05:00"/>
+    <date value="2017-04-17T17:38:22-04:00"/>
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
@@ -2178,7 +2186,7 @@
      </telecom>
     </contact>
     <description value="Base StructureDefinition for time Type: A time during the day, with no date specified"/>
-    <fhirVersion value="1.9.0"/>
+    <fhirVersion value="3.0.1"/>
     <kind value="primitive-type"/>
     <abstract value="false"/>
     <type value="time"/>
@@ -2195,7 +2203,7 @@
        <key value="ele-1"/>
        <severity value="error"/>
        <human value="All FHIR elements must have a @value or children"/>
-       <expression value="children().count() > id.count()"/>
+       <expression value="hasValue() | (children().count() > id.count())"/>
        <xpath value="@value|f:*|h:div"/>
        <source value="Element"/>
       </constraint>
@@ -2213,7 +2221,7 @@
        <max value="1"/>
       </base>
       <type>
-       <code value="id"/>
+       <code value="string"/>
       </type>
      </element>
      <element id="time.extension">
@@ -2303,12 +2311,12 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="unsignedInt"/>
     <meta>
-     <lastUpdated value="2017-03-04T06:58:42.085-05:00"/>
+     <lastUpdated value="2017-04-17T17:38:22.515-04:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/unsignedInt"/>
     <name value="unsignedInt"/>
     <status value="draft"/>
-    <date value="2017-03-04T06:58:42-05:00"/>
+    <date value="2017-04-17T17:38:22-04:00"/>
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
@@ -2317,7 +2325,7 @@
      </telecom>
     </contact>
     <description value="Base StructureDefinition for unsignedInt type: An integer with a value that is not negative (e.g. >= 0)"/>
-    <fhirVersion value="1.9.0"/>
+    <fhirVersion value="3.0.1"/>
     <kind value="primitive-type"/>
     <abstract value="false"/>
     <type value="unsignedInt"/>
@@ -2339,7 +2347,7 @@
        <key value="ele-1"/>
        <severity value="error"/>
        <human value="All FHIR elements must have a @value or children"/>
-       <expression value="children().count() > id.count()"/>
+       <expression value="hasValue() | (children().count() > id.count())"/>
        <xpath value="@value|f:*|h:div"/>
        <source value="Element"/>
       </constraint>
@@ -2357,7 +2365,7 @@
        <max value="1"/>
       </base>
       <type>
-       <code value="id"/>
+       <code value="string"/>
       </type>
      </element>
      <element id="unsignedInt.extension">
@@ -2452,12 +2460,12 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="uri"/>
     <meta>
-     <lastUpdated value="2017-03-04T06:58:42.085-05:00"/>
+     <lastUpdated value="2017-04-17T17:38:22.515-04:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/uri"/>
     <name value="uri"/>
     <status value="draft"/>
-    <date value="2017-03-04T06:58:42-05:00"/>
+    <date value="2017-04-17T17:38:22-04:00"/>
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
@@ -2466,7 +2474,7 @@
      </telecom>
     </contact>
     <description value="Base StructureDefinition for uri Type: String of characters used to identify a name or a resource"/>
-    <fhirVersion value="1.9.0"/>
+    <fhirVersion value="3.0.1"/>
     <kind value="primitive-type"/>
     <abstract value="false"/>
     <type value="uri"/>
@@ -2484,7 +2492,7 @@
        <key value="ele-1"/>
        <severity value="error"/>
        <human value="All FHIR elements must have a @value or children"/>
-       <expression value="children().count() > id.count()"/>
+       <expression value="hasValue() | (children().count() > id.count())"/>
        <xpath value="@value|f:*|h:div"/>
        <source value="Element"/>
       </constraint>
@@ -2502,7 +2510,7 @@
        <max value="1"/>
       </base>
       <type>
-       <code value="id"/>
+       <code value="string"/>
       </type>
      </element>
      <element id="uri.extension">
@@ -2587,12 +2595,12 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="uuid"/>
     <meta>
-     <lastUpdated value="2017-03-04T06:58:42.085-05:00"/>
+     <lastUpdated value="2017-04-17T17:38:22.515-04:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/uuid"/>
     <name value="uuid"/>
     <status value="draft"/>
-    <date value="2017-03-04T06:58:42-05:00"/>
+    <date value="2017-04-17T17:38:22-04:00"/>
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
@@ -2601,7 +2609,7 @@
      </telecom>
     </contact>
     <description value="Base StructureDefinition for uuid type: A UUID, represented as a URI"/>
-    <fhirVersion value="1.9.0"/>
+    <fhirVersion value="3.0.1"/>
     <kind value="primitive-type"/>
     <abstract value="false"/>
     <type value="uuid"/>
@@ -2624,7 +2632,7 @@
        <key value="ele-1"/>
        <severity value="error"/>
        <human value="All FHIR elements must have a @value or children"/>
-       <expression value="children().count() > id.count()"/>
+       <expression value="hasValue() | (children().count() > id.count())"/>
        <xpath value="@value|f:*|h:div"/>
        <source value="Element"/>
       </constraint>
@@ -2642,7 +2650,7 @@
        <max value="1"/>
       </base>
       <type>
-       <code value="id"/>
+       <code value="string"/>
       </type>
      </element>
      <element id="uuid.extension">
@@ -2738,12 +2746,12 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="xhtml"/>
     <meta>
-     <lastUpdated value="2017-03-04T06:58:42.085-05:00"/>
+     <lastUpdated value="2017-04-17T17:38:22.515-04:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/xhtml"/>
     <name value="xhtml"/>
     <status value="draft"/>
-    <date value="2017-03-04T06:58:42-05:00"/>
+    <date value="2017-04-17T17:38:22-04:00"/>
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
@@ -2752,7 +2760,7 @@
      </telecom>
     </contact>
     <description value="Base StructureDefinition for xhtml Type"/>
-    <fhirVersion value="1.9.0"/>
+    <fhirVersion value="3.0.1"/>
     <kind value="primitive-type"/>
     <abstract value="false"/>
     <type value="xhtml"/>
@@ -2779,7 +2787,7 @@
        <max value="1"/>
       </base>
       <type>
-       <code value="id"/>
+       <code value="string"/>
       </type>
      </element>
      <element id="xhtml.extension">
@@ -2867,12 +2875,12 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="Address"/>
     <meta>
-     <lastUpdated value="2017-03-04T06:58:42.085-05:00"/>
+     <lastUpdated value="2017-04-17T17:38:22.515-04:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/Address"/>
     <name value="Address"/>
     <status value="draft"/>
-    <date value="2017-03-04T06:58:42-05:00"/>
+    <date value="2017-04-17T17:38:22-04:00"/>
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
@@ -2882,7 +2890,7 @@
     </contact>
     <description value="Base StructureDefinition for Address Type"/>
     <purpose value="Need to be able to record postal addresses, along with notes about their use."/>
-    <fhirVersion value="1.9.0"/>
+    <fhirVersion value="3.0.1"/>
     <mapping>
      <identity value="v2"/>
      <uri value="http://hl7.org/v2"/>
@@ -2912,7 +2920,7 @@
      <element id="Address">
       <path value="Address"/>
       <short value="An address expressed using postal conventions (as opposed to GPS or other location definition formats)"/>
-      <definition value="An address expressed using postal conventions (as opposed to GPS or other location definition formats).  This data type may be used to convey addresses for use in delivering mail as well as for visiting locations and which might not be valid for mail delivery.  There are a variety of postal address formats defined around the world."/>
+      <definition value="An address expressed using postal conventions (as opposed to GPS or other location definition formats).  This data type may be used to convey addresses for use in delivering mail as well as for visiting locations which might not be valid for mail delivery.  There are a variety of postal address formats defined around the world."/>
       <comment value="Note: address is for postal addresses, not physical locations."/>
       <min value="0"/>
       <max value="*"/>
@@ -2921,7 +2929,7 @@
        <key value="ele-1"/>
        <severity value="error"/>
        <human value="All FHIR elements must have a @value or children"/>
-       <expression value="children().count() > id.count()"/>
+       <expression value="hasValue() | (children().count() > id.count())"/>
        <xpath value="@value|f:*|h:div"/>
        <source value="Element"/>
       </constraint>
@@ -2964,6 +2972,14 @@
      </element>
      <element id="Address.extension">
       <path value="Address.extension"/>
+      <slicing>
+       <discriminator>
+        <type value="value"/>
+        <path value="url"/>
+       </discriminator>
+       <description value="Extensions are always sliced by (at least) url"/>
+       <rules value="open"/>
+      </slicing>
       <short value="Additional Content defined by implementations"/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <comment value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
@@ -3305,7 +3321,7 @@
      <element id="Address">
       <path value="Address"/>
       <short value="An address expressed using postal conventions (as opposed to GPS or other location definition formats)"/>
-      <definition value="An address expressed using postal conventions (as opposed to GPS or other location definition formats).  This data type may be used to convey addresses for use in delivering mail as well as for visiting locations and which might not be valid for mail delivery.  There are a variety of postal address formats defined around the world."/>
+      <definition value="An address expressed using postal conventions (as opposed to GPS or other location definition formats).  This data type may be used to convey addresses for use in delivering mail as well as for visiting locations which might not be valid for mail delivery.  There are a variety of postal address formats defined around the world."/>
       <comment value="Note: address is for postal addresses, not physical locations."/>
       <min value="0"/>
       <max value="*"/>
@@ -3648,12 +3664,12 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="Age"/>
     <meta>
-     <lastUpdated value="2017-03-04T06:58:42.085-05:00"/>
+     <lastUpdated value="2017-04-17T17:38:22.515-04:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/Age"/>
     <name value="Age"/>
     <status value="draft"/>
-    <date value="2017-03-04T06:58:42-05:00"/>
+    <date value="2017-04-17T17:38:22-04:00"/>
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
@@ -3662,7 +3678,7 @@
      </telecom>
     </contact>
     <description value="Base StructureDefinition for Age Type"/>
-    <fhirVersion value="1.9.0"/>
+    <fhirVersion value="3.0.1"/>
     <mapping>
      <identity value="rim"/>
      <uri value="http://hl7.org/v3"/>
@@ -3699,7 +3715,7 @@
        <severity value="error"/>
        <human value="There SHALL be a code if there is a value and it SHALL be an expression of time.  If system is present, it SHALL be UCUM.  If value is present, it SHALL be positive."/>
        <expression value="(code or value.empty()) and (system.empty() or system = %ucum) and (value.empty() or value > 0)"/>
-       <xpath value="(f:code or not(f:value)) and (not(exists(f:system)) or f:system/@value='http://unitsofmeasure.org') and not(contains(f:value/@value, '-'))"/>
+       <xpath value="(f:code or not(f:value)) and (not(exists(f:system)) or f:system/@value='http://unitsofmeasure.org') and (not(f:value/@value) or f:value/@value >=0)"/>
       </constraint>
       <mapping>
        <identity value="v2"/>
@@ -3736,6 +3752,14 @@
      </element>
      <element id="Age.extension">
       <path value="Age.extension"/>
+      <slicing>
+       <discriminator>
+        <type value="value"/>
+        <path value="url"/>
+       </discriminator>
+       <description value="Extensions are always sliced by (at least) url"/>
+       <rules value="open"/>
+      </slicing>
       <short value="Additional Content defined by implementations"/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <comment value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
@@ -3913,7 +3937,7 @@
        <severity value="error"/>
        <human value="There SHALL be a code if there is a value and it SHALL be an expression of time.  If system is present, it SHALL be UCUM.  If value is present, it SHALL be positive."/>
        <expression value="(code or value.empty()) and (system.empty() or system = %ucum) and (value.empty() or value > 0)"/>
-       <xpath value="(f:code or not(f:value)) and (not(exists(f:system)) or f:system/@value='http://unitsofmeasure.org') and not(contains(f:value/@value, '-'))"/>
+       <xpath value="(f:code or not(f:value)) and (not(exists(f:system)) or f:system/@value='http://unitsofmeasure.org') and (not(f:value/@value) or f:value/@value >=0)"/>
       </constraint>
       <mapping>
        <identity value="rim"/>
@@ -3930,12 +3954,12 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="Annotation"/>
     <meta>
-     <lastUpdated value="2017-03-04T06:58:42.085-05:00"/>
+     <lastUpdated value="2017-04-17T17:38:22.515-04:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/Annotation"/>
     <name value="Annotation"/>
     <status value="draft"/>
-    <date value="2017-03-04T06:58:42-05:00"/>
+    <date value="2017-04-17T17:38:22-04:00"/>
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
@@ -3944,7 +3968,7 @@
      </telecom>
     </contact>
     <description value="Base StructureDefinition for Annotation Type"/>
-    <fhirVersion value="1.9.0"/>
+    <fhirVersion value="3.0.1"/>
     <mapping>
      <identity value="v2"/>
      <uri value="http://hl7.org/v2"/>
@@ -3973,7 +3997,7 @@
        <key value="ele-1"/>
        <severity value="error"/>
        <human value="All FHIR elements must have a @value or children"/>
-       <expression value="children().count() > id.count()"/>
+       <expression value="hasValue() | (children().count() > id.count())"/>
        <xpath value="@value|f:*|h:div"/>
        <source value="Element"/>
       </constraint>
@@ -4012,6 +4036,14 @@
      </element>
      <element id="Annotation.extension">
       <path value="Annotation.extension"/>
+      <slicing>
+       <discriminator>
+        <type value="value"/>
+        <path value="url"/>
+       </discriminator>
+       <description value="Extensions are always sliced by (at least) url"/>
+       <rules value="open"/>
+      </slicing>
       <short value="Additional Content defined by implementations"/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <comment value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
@@ -4196,12 +4228,12 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="Attachment"/>
     <meta>
-     <lastUpdated value="2017-03-04T06:58:42.085-05:00"/>
+     <lastUpdated value="2017-04-17T17:38:22.515-04:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/Attachment"/>
     <name value="Attachment"/>
     <status value="draft"/>
-    <date value="2017-03-04T06:58:42-05:00"/>
+    <date value="2017-04-17T17:38:22-04:00"/>
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
@@ -4211,7 +4243,7 @@
     </contact>
     <description value="Base StructureDefinition for Attachment Type"/>
     <purpose value="Many models need to include data defined in other specifications that is complex and opaque to the healthcare model. This includes documents, media recordings, structured data, etc."/>
-    <fhirVersion value="1.9.0"/>
+    <fhirVersion value="3.0.1"/>
     <mapping>
      <identity value="v2"/>
      <uri value="http://hl7.org/v2"/>
@@ -4240,7 +4272,7 @@
        <key value="ele-1"/>
        <severity value="error"/>
        <human value="All FHIR elements must have a @value or children"/>
-       <expression value="children().count() > id.count()"/>
+       <expression value="hasValue() | (children().count() > id.count())"/>
        <xpath value="@value|f:*|h:div"/>
        <source value="Element"/>
       </constraint>
@@ -4286,6 +4318,14 @@
      </element>
      <element id="Attachment.extension">
       <path value="Attachment.extension"/>
+      <slicing>
+       <discriminator>
+        <type value="value"/>
+        <path value="url"/>
+       </discriminator>
+       <description value="Extensions are always sliced by (at least) url"/>
+       <rules value="open"/>
+      </slicing>
       <short value="Additional Content defined by implementations"/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <comment value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
@@ -4723,12 +4763,12 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="CodeableConcept"/>
     <meta>
-     <lastUpdated value="2017-03-04T06:58:42.085-05:00"/>
+     <lastUpdated value="2017-04-17T17:38:22.515-04:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/CodeableConcept"/>
     <name value="CodeableConcept"/>
     <status value="draft"/>
-    <date value="2017-03-04T06:58:42-05:00"/>
+    <date value="2017-04-17T17:38:22-04:00"/>
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
@@ -4738,7 +4778,7 @@
     </contact>
     <description value="Base StructureDefinition for CodeableConcept Type"/>
     <purpose value="This is a common pattern in healthcare - a concept that may be defined by one or more codes from formal definitions including LOINC and SNOMED CT, and/or defined by the provision of text that captures a human sense of the concept."/>
-    <fhirVersion value="1.9.0"/>
+    <fhirVersion value="3.0.1"/>
     <mapping>
      <identity value="v2"/>
      <uri value="http://hl7.org/v2"/>
@@ -4772,7 +4812,7 @@
        <key value="ele-1"/>
        <severity value="error"/>
        <human value="All FHIR elements must have a @value or children"/>
-       <expression value="children().count() > id.count()"/>
+       <expression value="hasValue() | (children().count() > id.count())"/>
        <xpath value="@value|f:*|h:div"/>
        <source value="Element"/>
       </constraint>
@@ -4815,6 +4855,14 @@
      </element>
      <element id="CodeableConcept.extension">
       <path value="CodeableConcept.extension"/>
+      <slicing>
+       <discriminator>
+        <type value="value"/>
+        <path value="url"/>
+       </discriminator>
+       <description value="Extensions are always sliced by (at least) url"/>
+       <rules value="open"/>
+      </slicing>
       <short value="Additional Content defined by implementations"/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <comment value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
@@ -4839,7 +4887,7 @@
       <path value="CodeableConcept.coding"/>
       <short value="Code defined by a terminology system"/>
       <definition value="A reference to a code defined by a terminology system."/>
-      <comment value="Codes may be defined very casually in enumerations, or code lists, up to very formal definitions such as SNOMED CT - see the HL7 v3 Core Principles for more information.  Ordering of codings is undefined and SHALL NOT be used to infer meaning. Generally, at most only one of the coding values will be labelled as UserSelected = true."/>
+      <comment value="Codes may be defined very casually in enumerations, or code lists, up to very formal definitions such as SNOMED CT - see the HL7 v3 Core Principles for more information.  Ordering of codings is undefined and SHALL NOT be used to infer meaning. Generally, at most only one of the coding values will be labeled as UserSelected = true."/>
       <requirements value="Allows for translations and alternate encodings within a code system.  Also supports communication of the same instance to systems requiring different encodings."/>
       <min value="0"/>
       <max value="*"/>
@@ -4914,7 +4962,7 @@
       <path value="CodeableConcept.coding"/>
       <short value="Code defined by a terminology system"/>
       <definition value="A reference to a code defined by a terminology system."/>
-      <comment value="Codes may be defined very casually in enumerations, or code lists, up to very formal definitions such as SNOMED CT - see the HL7 v3 Core Principles for more information.  Ordering of codings is undefined and SHALL NOT be used to infer meaning. Generally, at most only one of the coding values will be labelled as UserSelected = true."/>
+      <comment value="Codes may be defined very casually in enumerations, or code lists, up to very formal definitions such as SNOMED CT - see the HL7 v3 Core Principles for more information.  Ordering of codings is undefined and SHALL NOT be used to infer meaning. Generally, at most only one of the coding values will be labeled as UserSelected = true."/>
       <requirements value="Allows for translations and alternate encodings within a code system.  Also supports communication of the same instance to systems requiring different encodings."/>
       <min value="0"/>
       <max value="*"/>
@@ -4973,12 +5021,12 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="Coding"/>
     <meta>
-     <lastUpdated value="2017-03-04T06:58:42.085-05:00"/>
+     <lastUpdated value="2017-04-17T17:38:22.515-04:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/Coding"/>
     <name value="Coding"/>
     <status value="draft"/>
-    <date value="2017-03-04T06:58:42-05:00"/>
+    <date value="2017-04-17T17:38:22-04:00"/>
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
@@ -4988,7 +5036,7 @@
     </contact>
     <description value="Base StructureDefinition for Coding Type"/>
     <purpose value="References to codes are very common in healthcare models."/>
-    <fhirVersion value="1.9.0"/>
+    <fhirVersion value="3.0.1"/>
     <mapping>
      <identity value="v2"/>
      <uri value="http://hl7.org/v2"/>
@@ -5022,7 +5070,7 @@
        <key value="ele-1"/>
        <severity value="error"/>
        <human value="All FHIR elements must have a @value or children"/>
-       <expression value="children().count() > id.count()"/>
+       <expression value="hasValue() | (children().count() > id.count())"/>
        <xpath value="@value|f:*|h:div"/>
        <source value="Element"/>
       </constraint>
@@ -5065,6 +5113,14 @@
      </element>
      <element id="Coding.extension">
       <path value="Coding.extension"/>
+      <slicing>
+       <discriminator>
+        <type value="value"/>
+        <path value="url"/>
+       </discriminator>
+       <description value="Extensions are always sliced by (at least) url"/>
+       <rules value="open"/>
+      </slicing>
       <short value="Additional Content defined by implementations"/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <comment value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
@@ -5367,12 +5423,12 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="ContactDetail"/>
     <meta>
-     <lastUpdated value="2017-03-04T06:58:42.085-05:00"/>
+     <lastUpdated value="2017-04-17T17:38:22.515-04:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/ContactDetail"/>
     <name value="ContactDetail"/>
     <status value="draft"/>
-    <date value="2017-03-04T06:58:42-05:00"/>
+    <date value="2017-04-17T17:38:22-04:00"/>
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
@@ -5382,7 +5438,7 @@
     </contact>
     <description value="Base StructureDefinition for ContactDetail Type"/>
     <purpose value="Need to track contact information in the same way across multiple resources."/>
-    <fhirVersion value="1.9.0"/>
+    <fhirVersion value="3.0.1"/>
     <mapping>
      <identity value="rim"/>
      <uri value="http://hl7.org/v3"/>
@@ -5405,7 +5461,7 @@
        <key value="ele-1"/>
        <severity value="error"/>
        <human value="All FHIR elements must have a @value or children"/>
-       <expression value="children().count() > id.count()"/>
+       <expression value="hasValue() | (children().count() > id.count())"/>
        <xpath value="@value|f:*|h:div"/>
        <source value="Element"/>
       </constraint>
@@ -5436,6 +5492,14 @@
      </element>
      <element id="ContactDetail.extension">
       <path value="ContactDetail.extension"/>
+      <slicing>
+       <discriminator>
+        <type value="value"/>
+        <path value="url"/>
+       </discriminator>
+       <description value="Extensions are always sliced by (at least) url"/>
+       <rules value="open"/>
+      </slicing>
       <short value="Additional Content defined by implementations"/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <comment value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
@@ -5521,12 +5585,12 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="ContactPoint"/>
     <meta>
-     <lastUpdated value="2017-03-04T06:58:42.085-05:00"/>
+     <lastUpdated value="2017-04-17T17:38:22.515-04:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/ContactPoint"/>
     <name value="ContactPoint"/>
     <status value="draft"/>
-    <date value="2017-03-04T06:58:42-05:00"/>
+    <date value="2017-04-17T17:38:22-04:00"/>
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
@@ -5536,7 +5600,7 @@
     </contact>
     <description value="Base StructureDefinition for ContactPoint Type"/>
     <purpose value="Need to track phone, fax, mobile, sms numbers, email addresses, twitter tags, etc."/>
-    <fhirVersion value="1.9.0"/>
+    <fhirVersion value="3.0.1"/>
     <mapping>
      <identity value="v2"/>
      <uri value="http://hl7.org/v2"/>
@@ -5569,7 +5633,7 @@
        <key value="ele-1"/>
        <severity value="error"/>
        <human value="All FHIR elements must have a @value or children"/>
-       <expression value="children().count() > id.count()"/>
+       <expression value="hasValue() | (children().count() > id.count())"/>
        <xpath value="@value|f:*|h:div"/>
        <source value="Element"/>
       </constraint>
@@ -5619,6 +5683,14 @@
      </element>
      <element id="ContactPoint.extension">
       <path value="ContactPoint.extension"/>
+      <slicing>
+       <discriminator>
+        <type value="value"/>
+        <path value="url"/>
+       </discriminator>
+       <description value="Extensions are always sliced by (at least) url"/>
+       <rules value="open"/>
+      </slicing>
       <short value="Additional Content defined by implementations"/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <comment value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
@@ -5770,7 +5842,7 @@
       </mapping>
       <mapping>
        <identity value="rim"/>
-       <map value="./useablePeriod[type=&quot;IVL&lt;TS>&quot;]"/>
+       <map value="./usablePeriod[type=&quot;IVL&lt;TS>&quot;]"/>
       </mapping>
       <mapping>
        <identity value="servd"/>
@@ -5936,7 +6008,7 @@
       </mapping>
       <mapping>
        <identity value="rim"/>
-       <map value="./useablePeriod[type=&quot;IVL&lt;TS>&quot;]"/>
+       <map value="./usablePeriod[type=&quot;IVL&lt;TS>&quot;]"/>
       </mapping>
       <mapping>
        <identity value="servd"/>
@@ -5953,12 +6025,12 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="Contributor"/>
     <meta>
-     <lastUpdated value="2017-03-04T06:58:42.085-05:00"/>
+     <lastUpdated value="2017-04-17T17:38:22.515-04:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/Contributor"/>
     <name value="Contributor"/>
     <status value="draft"/>
-    <date value="2017-03-04T06:58:42-05:00"/>
+    <date value="2017-04-17T17:38:22-04:00"/>
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
@@ -5968,7 +6040,7 @@
     </contact>
     <description value="Base StructureDefinition for Contributor Type"/>
     <purpose value="Need to track contributor information in the same way across multiple resources."/>
-    <fhirVersion value="1.9.0"/>
+    <fhirVersion value="3.0.1"/>
     <mapping>
      <identity value="rim"/>
      <uri value="http://hl7.org/v3"/>
@@ -5991,7 +6063,7 @@
        <key value="ele-1"/>
        <severity value="error"/>
        <human value="All FHIR elements must have a @value or children"/>
-       <expression value="children().count() > id.count()"/>
+       <expression value="hasValue() | (children().count() > id.count())"/>
        <xpath value="@value|f:*|h:div"/>
        <source value="Element"/>
       </constraint>
@@ -6022,6 +6094,14 @@
      </element>
      <element id="Contributor.extension">
       <path value="Contributor.extension"/>
+      <slicing>
+       <discriminator>
+        <type value="value"/>
+        <path value="url"/>
+       </discriminator>
+       <description value="Extensions are always sliced by (at least) url"/>
+       <rules value="open"/>
+      </slicing>
       <short value="Additional Content defined by implementations"/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <comment value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
@@ -6065,7 +6145,7 @@
      </element>
      <element id="Contributor.name">
       <path value="Contributor.name"/>
-      <short value="Name of the contributor"/>
+      <short value="Who contributed the content"/>
       <definition value="The name of the individual or organization responsible for the contribution."/>
       <min value="1"/>
       <max value="1"/>
@@ -6117,7 +6197,7 @@
      </element>
      <element id="Contributor.name">
       <path value="Contributor.name"/>
-      <short value="Name of the contributor"/>
+      <short value="Who contributed the content"/>
       <definition value="The name of the individual or organization responsible for the contribution."/>
       <min value="1"/>
       <max value="1"/>
@@ -6147,12 +6227,12 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="Count"/>
     <meta>
-     <lastUpdated value="2017-03-04T06:58:42.085-05:00"/>
+     <lastUpdated value="2017-04-17T17:38:22.515-04:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/Count"/>
     <name value="Count"/>
     <status value="draft"/>
-    <date value="2017-03-04T06:58:42-05:00"/>
+    <date value="2017-04-17T17:38:22-04:00"/>
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
@@ -6162,7 +6242,7 @@
     </contact>
     <description value="Base StructureDefinition for Count Type"/>
     <purpose value="Need to able to capture all sorts of measured values, even if the measured value are not precisely quantified. Values include exact measures such as 3.51g, customary units such as 3 tablets, and currencies such as $100.32USD."/>
-    <fhirVersion value="1.9.0"/>
+    <fhirVersion value="3.0.1"/>
     <mapping>
      <identity value="v2"/>
      <uri value="http://hl7.org/v2"/>
@@ -6232,6 +6312,14 @@
      </element>
      <element id="Count.extension">
       <path value="Count.extension"/>
+      <slicing>
+       <discriminator>
+        <type value="value"/>
+        <path value="url"/>
+       </discriminator>
+       <description value="Extensions are always sliced by (at least) url"/>
+       <rules value="open"/>
+      </slicing>
       <short value="Additional Content defined by implementations"/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <comment value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
@@ -6431,12 +6519,12 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="DataRequirement"/>
     <meta>
-     <lastUpdated value="2017-03-04T06:58:42.085-05:00"/>
+     <lastUpdated value="2017-04-17T17:38:22.515-04:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/DataRequirement"/>
     <name value="DataRequirement"/>
     <status value="draft"/>
-    <date value="2017-03-04T06:58:42-05:00"/>
+    <date value="2017-04-17T17:38:22-04:00"/>
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
@@ -6445,7 +6533,7 @@
      </telecom>
     </contact>
     <description value="Base StructureDefinition for DataRequirement Type"/>
-    <fhirVersion value="1.9.0"/>
+    <fhirVersion value="3.0.1"/>
     <mapping>
      <identity value="rim"/>
      <uri value="http://hl7.org/v3"/>
@@ -6460,7 +6548,7 @@
      <element id="DataRequirement">
       <path value="DataRequirement"/>
       <short value="Describes a required data item"/>
-      <definition value="Describes a required data item for evaluation in terms of the type of data, and optional code- or date-based filters of the data."/>
+      <definition value="Describes a required data item for evaluation in terms of the type of data, and optional code or date-based filters of the data."/>
       <min value="0"/>
       <max value="*"/>
       <condition value="ele-1"/>
@@ -6468,7 +6556,7 @@
        <key value="ele-1"/>
        <severity value="error"/>
        <human value="All FHIR elements must have a @value or children"/>
-       <expression value="children().count() > id.count()"/>
+       <expression value="hasValue() | (children().count() > id.count())"/>
        <xpath value="@value|f:*|h:div"/>
        <source value="Element"/>
       </constraint>
@@ -6499,6 +6587,14 @@
      </element>
      <element id="DataRequirement.extension">
       <path value="DataRequirement.extension"/>
+      <slicing>
+       <discriminator>
+        <type value="value"/>
+        <path value="url"/>
+       </discriminator>
+       <description value="Extensions are always sliced by (at least) url"/>
+       <rules value="open"/>
+      </slicing>
       <short value="Additional Content defined by implementations"/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <comment value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
@@ -6567,7 +6663,7 @@
      </element>
      <element id="DataRequirement.codeFilter">
       <path value="DataRequirement.codeFilter"/>
-      <short value="Code filters for the data"/>
+      <short value="What codes are expected"/>
       <definition value="Code filters specify additional constraints on the data, specifying the value set of interest for a particular element of the data."/>
       <min value="0"/>
       <max value="*"/>
@@ -6578,7 +6674,7 @@
        <key value="ele-1"/>
        <severity value="error"/>
        <human value="All FHIR elements must have a @value or children"/>
-       <expression value="children().count() > id.count()"/>
+       <expression value="hasValue() | (children().count() > id.count())"/>
        <xpath value="@value|f:*|h:div"/>
        <source value="Element"/>
       </constraint>
@@ -6606,6 +6702,14 @@
      </element>
      <element id="DataRequirement.codeFilter.extension">
       <path value="DataRequirement.codeFilter.extension"/>
+      <slicing>
+       <discriminator>
+        <type value="value"/>
+        <path value="url"/>
+       </discriminator>
+       <description value="Extensions are always sliced by (at least) url"/>
+       <rules value="open"/>
+      </slicing>
       <short value="Additional Content defined by implementations"/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <comment value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
@@ -6654,8 +6758,8 @@
      </element>
      <element id="DataRequirement.codeFilter.valueCode">
       <path value="DataRequirement.codeFilter.valueCode"/>
-      <short value="Code value of the filter"/>
-      <definition value="The codes for the code filter. Only one of valueSet, valueCode, valueConding, or valueCodeableConcept may be specified. If values are given, the filter will return only those data items for which the code-valued attribute specified by the path has a value that is one of the specified codes."/>
+      <short value="What code is expected"/>
+      <definition value="The codes for the code filter. Only one of valueSet, valueCode, valueCoding, or valueCodeableConcept may be specified. If values are given, the filter will return only those data items for which the code-valued attribute specified by the path has a value that is one of the specified codes."/>
       <min value="0"/>
       <max value="*"/>
       <type>
@@ -6665,7 +6769,7 @@
      </element>
      <element id="DataRequirement.codeFilter.valueCoding">
       <path value="DataRequirement.codeFilter.valueCoding"/>
-      <short value="Coding value of the filter"/>
+      <short value="What Coding is expected"/>
       <definition value="The Codings for the code filter. Only one of valueSet, valueCode, valueConding, or valueCodeableConcept may be specified. If values are given, the filter will return only those data items for which the code-valued attribute specified by the path has a value that is one of the specified Codings."/>
       <min value="0"/>
       <max value="*"/>
@@ -6676,7 +6780,7 @@
      </element>
      <element id="DataRequirement.codeFilter.valueCodeableConcept">
       <path value="DataRequirement.codeFilter.valueCodeableConcept"/>
-      <short value="CodeableConcept value of the filter"/>
+      <short value="What CodeableConcept is expected"/>
       <definition value="The CodeableConcepts for the code filter. Only one of valueSet, valueCode, valueConding, or valueCodeableConcept may be specified. If values are given, the filter will return only those data items for which the code-valued attribute specified by the path has a value that is one of the specified CodeableConcepts."/>
       <min value="0"/>
       <max value="*"/>
@@ -6687,7 +6791,7 @@
      </element>
      <element id="DataRequirement.dateFilter">
       <path value="DataRequirement.dateFilter"/>
-      <short value="Date filters for the data"/>
+      <short value="What dates/date ranges are expected"/>
       <definition value="Date filters specify additional constraints on the data in terms of the applicable date range for specific elements."/>
       <min value="0"/>
       <max value="*"/>
@@ -6698,7 +6802,7 @@
        <key value="ele-1"/>
        <severity value="error"/>
        <human value="All FHIR elements must have a @value or children"/>
-       <expression value="children().count() > id.count()"/>
+       <expression value="hasValue() | (children().count() > id.count())"/>
        <xpath value="@value|f:*|h:div"/>
        <source value="Element"/>
       </constraint>
@@ -6726,6 +6830,14 @@
      </element>
      <element id="DataRequirement.dateFilter.extension">
       <path value="DataRequirement.dateFilter.extension"/>
+      <slicing>
+       <discriminator>
+        <type value="value"/>
+        <path value="url"/>
+       </discriminator>
+       <description value="Extensions are always sliced by (at least) url"/>
+       <rules value="open"/>
+      </slicing>
       <short value="Additional Content defined by implementations"/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <comment value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
@@ -6779,7 +6891,7 @@
      <element id="DataRequirement">
       <path value="DataRequirement"/>
       <short value="Describes a required data item"/>
-      <definition value="Describes a required data item for evaluation in terms of the type of data, and optional code- or date-based filters of the data."/>
+      <definition value="Describes a required data item for evaluation in terms of the type of data, and optional code or date-based filters of the data."/>
       <min value="0"/>
       <max value="*"/>
      </element>
@@ -6831,7 +6943,7 @@
      </element>
      <element id="DataRequirement.codeFilter">
       <path value="DataRequirement.codeFilter"/>
-      <short value="Code filters for the data"/>
+      <short value="What codes are expected"/>
       <definition value="Code filters specify additional constraints on the data, specifying the value set of interest for a particular element of the data."/>
       <min value="0"/>
       <max value="*"/>
@@ -6868,8 +6980,8 @@
      </element>
      <element id="DataRequirement.codeFilter.valueCode">
       <path value="DataRequirement.codeFilter.valueCode"/>
-      <short value="Code value of the filter"/>
-      <definition value="The codes for the code filter. Only one of valueSet, valueCode, valueConding, or valueCodeableConcept may be specified. If values are given, the filter will return only those data items for which the code-valued attribute specified by the path has a value that is one of the specified codes."/>
+      <short value="What code is expected"/>
+      <definition value="The codes for the code filter. Only one of valueSet, valueCode, valueCoding, or valueCodeableConcept may be specified. If values are given, the filter will return only those data items for which the code-valued attribute specified by the path has a value that is one of the specified codes."/>
       <min value="0"/>
       <max value="*"/>
       <type>
@@ -6879,7 +6991,7 @@
      </element>
      <element id="DataRequirement.codeFilter.valueCoding">
       <path value="DataRequirement.codeFilter.valueCoding"/>
-      <short value="Coding value of the filter"/>
+      <short value="What Coding is expected"/>
       <definition value="The Codings for the code filter. Only one of valueSet, valueCode, valueConding, or valueCodeableConcept may be specified. If values are given, the filter will return only those data items for which the code-valued attribute specified by the path has a value that is one of the specified Codings."/>
       <min value="0"/>
       <max value="*"/>
@@ -6890,7 +7002,7 @@
      </element>
      <element id="DataRequirement.codeFilter.valueCodeableConcept">
       <path value="DataRequirement.codeFilter.valueCodeableConcept"/>
-      <short value="CodeableConcept value of the filter"/>
+      <short value="What CodeableConcept is expected"/>
       <definition value="The CodeableConcepts for the code filter. Only one of valueSet, valueCode, valueConding, or valueCodeableConcept may be specified. If values are given, the filter will return only those data items for which the code-valued attribute specified by the path has a value that is one of the specified CodeableConcepts."/>
       <min value="0"/>
       <max value="*"/>
@@ -6901,7 +7013,7 @@
      </element>
      <element id="DataRequirement.dateFilter">
       <path value="DataRequirement.dateFilter"/>
-      <short value="Date filters for the data"/>
+      <short value="What dates/date ranges are expected"/>
       <definition value="Date filters specify additional constraints on the data in terms of the applicable date range for specific elements."/>
       <min value="0"/>
       <max value="*"/>
@@ -6948,12 +7060,12 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="Distance"/>
     <meta>
-     <lastUpdated value="2017-03-04T06:58:42.085-05:00"/>
+     <lastUpdated value="2017-04-17T17:38:22.515-04:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/Distance"/>
     <name value="Distance"/>
     <status value="draft"/>
-    <date value="2017-03-04T06:58:42-05:00"/>
+    <date value="2017-04-17T17:38:22-04:00"/>
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
@@ -6962,7 +7074,7 @@
      </telecom>
     </contact>
     <description value="Base StructureDefinition for Distance Type"/>
-    <fhirVersion value="1.9.0"/>
+    <fhirVersion value="3.0.1"/>
     <mapping>
      <identity value="rim"/>
      <uri value="http://hl7.org/v3"/>
@@ -7036,6 +7148,14 @@
      </element>
      <element id="Distance.extension">
       <path value="Distance.extension"/>
+      <slicing>
+       <discriminator>
+        <type value="value"/>
+        <path value="url"/>
+       </discriminator>
+       <description value="Extensions are always sliced by (at least) url"/>
+       <rules value="open"/>
+      </slicing>
       <short value="Additional Content defined by implementations"/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <comment value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
@@ -7230,12 +7350,12 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="Dosage"/>
     <meta>
-     <lastUpdated value="2017-03-04T06:58:42.085-05:00"/>
+     <lastUpdated value="2017-04-17T17:38:22.515-04:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/Dosage"/>
     <name value="Dosage"/>
     <status value="draft"/>
-    <date value="2017-03-04T06:58:42-05:00"/>
+    <date value="2017-04-17T17:38:22-04:00"/>
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
@@ -7244,7 +7364,7 @@
      </telecom>
     </contact>
     <description value="Base StructureDefinition for Dosage Type"/>
-    <fhirVersion value="1.9.0"/>
+    <fhirVersion value="3.0.1"/>
     <mapping>
      <identity value="rim"/>
      <uri value="http://hl7.org/v3"/>
@@ -7267,7 +7387,7 @@
        <key value="ele-1"/>
        <severity value="error"/>
        <human value="All FHIR elements must have a @value or children"/>
-       <expression value="children().count() > id.count()"/>
+       <expression value="hasValue() | (children().count() > id.count())"/>
        <xpath value="@value|f:*|h:div"/>
        <source value="Element"/>
       </constraint>
@@ -7302,6 +7422,14 @@
      </element>
      <element id="Dosage.extension">
       <path value="Dosage.extension"/>
+      <slicing>
+       <discriminator>
+        <type value="value"/>
+        <path value="url"/>
+       </discriminator>
+       <description value="Extensions are always sliced by (at least) url"/>
+       <rules value="open"/>
+      </slicing>
       <short value="Additional Content defined by implementations"/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <comment value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
@@ -7937,12 +8065,12 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="Duration"/>
     <meta>
-     <lastUpdated value="2017-03-04T06:58:42.085-05:00"/>
+     <lastUpdated value="2017-04-17T17:38:22.515-04:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/Duration"/>
     <name value="Duration"/>
     <status value="draft"/>
-    <date value="2017-03-04T06:58:42-05:00"/>
+    <date value="2017-04-17T17:38:22-04:00"/>
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
@@ -7951,7 +8079,7 @@
      </telecom>
     </contact>
     <description value="Base StructureDefinition for Duration Type"/>
-    <fhirVersion value="1.9.0"/>
+    <fhirVersion value="3.0.1"/>
     <mapping>
      <identity value="rim"/>
      <uri value="http://hl7.org/v3"/>
@@ -8025,6 +8153,14 @@
      </element>
      <element id="Duration.extension">
       <path value="Duration.extension"/>
+      <slicing>
+       <discriminator>
+        <type value="value"/>
+        <path value="url"/>
+       </discriminator>
+       <description value="Extensions are always sliced by (at least) url"/>
+       <rules value="open"/>
+      </slicing>
       <short value="Additional Content defined by implementations"/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <comment value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
@@ -8219,12 +8355,12 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="ElementDefinition"/>
     <meta>
-     <lastUpdated value="2017-03-04T06:58:42.085-05:00"/>
+     <lastUpdated value="2017-04-17T17:38:22.515-04:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/ElementDefinition"/>
     <name value="ElementDefinition"/>
     <status value="draft"/>
-    <date value="2017-03-04T06:58:42-05:00"/>
+    <date value="2017-04-17T17:38:22-04:00"/>
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
@@ -8233,7 +8369,7 @@
      </telecom>
     </contact>
     <description value="Base StructureDefinition for ElementDefinition Type"/>
-    <fhirVersion value="1.9.0"/>
+    <fhirVersion value="3.0.1"/>
     <mapping>
      <identity value="dex"/>
      <uri value="http://wiki.ihe.net/index.php?title=Data_Element_Exchange"/>
@@ -8276,7 +8412,7 @@
        <key value="ele-1"/>
        <severity value="error"/>
        <human value="All FHIR elements must have a @value or children"/>
-       <expression value="children().count() > id.count()"/>
+       <expression value="hasValue() | (children().count() > id.count())"/>
        <xpath value="@value|f:*|h:div"/>
        <source value="Element"/>
       </constraint>
@@ -8393,6 +8529,14 @@
      </element>
      <element id="ElementDefinition.extension">
       <path value="ElementDefinition.extension"/>
+      <slicing>
+       <discriminator>
+        <type value="value"/>
+        <path value="url"/>
+       </discriminator>
+       <description value="Extensions are always sliced by (at least) url"/>
+       <rules value="open"/>
+      </slicing>
       <short value="Additional Content defined by implementations"/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <comment value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
@@ -8415,7 +8559,7 @@
      </element>
      <element id="ElementDefinition.path">
       <path value="ElementDefinition.path"/>
-      <short value="Path of the element in the heirarchy of elements"/>
+      <short value="Path of the element in the hierarchy of elements"/>
       <definition value="The path identifies the element and is expressed as a &quot;.&quot;-separated list of ancestor elements, beginning with the name of the resource or extension."/>
       <min value="1"/>
       <max value="1"/>
@@ -8571,7 +8715,7 @@
        <key value="ele-1"/>
        <severity value="error"/>
        <human value="All FHIR elements must have a @value or children"/>
-       <expression value="children().count() > id.count()"/>
+       <expression value="hasValue() | (children().count() > id.count())"/>
        <xpath value="@value|f:*|h:div"/>
        <source value="Element"/>
       </constraint>
@@ -8614,6 +8758,14 @@
      </element>
      <element id="ElementDefinition.slicing.extension">
       <path value="ElementDefinition.slicing.extension"/>
+      <slicing>
+       <discriminator>
+        <type value="value"/>
+        <path value="url"/>
+       </discriminator>
+       <description value="Extensions are always sliced by (at least) url"/>
+       <rules value="open"/>
+      </slicing>
       <short value="Additional Content defined by implementations"/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <comment value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
@@ -8648,7 +8800,7 @@
        <key value="ele-1"/>
        <severity value="error"/>
        <human value="All FHIR elements must have a @value or children"/>
-       <expression value="children().count() > id.count()"/>
+       <expression value="hasValue() | (children().count() > id.count())"/>
        <xpath value="@value|f:*|h:div"/>
        <source value="Element"/>
       </constraint>
@@ -8684,6 +8836,14 @@
      </element>
      <element id="ElementDefinition.slicing.discriminator.extension">
       <path value="ElementDefinition.slicing.discriminator.extension"/>
+      <slicing>
+       <discriminator>
+        <type value="value"/>
+        <path value="url"/>
+       </discriminator>
+       <description value="Extensions are always sliced by (at least) url"/>
+       <rules value="open"/>
+      </slicing>
       <short value="Additional Content defined by implementations"/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <comment value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
@@ -9033,7 +9193,7 @@
        <key value="ele-1"/>
        <severity value="error"/>
        <human value="All FHIR elements must have a @value or children"/>
-       <expression value="children().count() > id.count()"/>
+       <expression value="hasValue() | (children().count() > id.count())"/>
        <xpath value="@value|f:*|h:div"/>
        <source value="Element"/>
       </constraint>
@@ -9069,6 +9229,14 @@
      </element>
      <element id="ElementDefinition.base.extension">
       <path value="ElementDefinition.base.extension"/>
+      <slicing>
+       <discriminator>
+        <type value="value"/>
+        <path value="url"/>
+       </discriminator>
+       <description value="Extensions are always sliced by (at least) url"/>
+       <rules value="open"/>
+      </slicing>
       <short value="Additional Content defined by implementations"/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <comment value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
@@ -9116,7 +9284,7 @@
       <min value="1"/>
       <max value="1"/>
       <type>
-       <code value="integer"/>
+       <code value="unsignedInt"/>
       </type>
       <isSummary value="true"/>
       <mapping>
@@ -9182,7 +9350,7 @@
        <key value="ele-1"/>
        <severity value="error"/>
        <human value="All FHIR elements must have a @value or children"/>
-       <expression value="children().count() > id.count()"/>
+       <expression value="hasValue() | (children().count() > id.count())"/>
        <xpath value="@value|f:*|h:div"/>
        <source value="Element"/>
       </constraint>
@@ -9237,6 +9405,14 @@
      </element>
      <element id="ElementDefinition.type.extension">
       <path value="ElementDefinition.type.extension"/>
+      <slicing>
+       <discriminator>
+        <type value="value"/>
+        <path value="url"/>
+       </discriminator>
+       <description value="Extensions are always sliced by (at least) url"/>
+       <rules value="open"/>
+      </slicing>
       <short value="Additional Content defined by implementations"/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <comment value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
@@ -9298,7 +9474,7 @@
      <element id="ElementDefinition.type.profile">
       <path value="ElementDefinition.type.profile"/>
       <short value="Profile (StructureDefinition) to apply (or IG)"/>
-      <definition value="Identifies a profile structure or implementation Guide that SHALL hold for the datatype this element refers to. Can be a local reference - to a contained StructureDefinition, or a reference to another StructureDefinition in another profile. When an implementation guide is specified, the resource SHALL conform to at least one profile defined in the implementation guide."/>
+      <definition value="Identifies a profile structure or implementation Guide that SHALL hold for the datatype this element refers to. Can be a local reference - to a contained StructureDefinition, or a reference to another StructureDefinition or Implementation Guide by a canonical URL. When an implementation guide is specified, the resource SHALL conform to at least one profile defined in the implementation guide."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -9317,8 +9493,7 @@
      <element id="ElementDefinition.type.targetProfile">
       <path value="ElementDefinition.type.targetProfile"/>
       <short value="Profile (StructureDefinition) to apply to reference target (or IG)"/>
-      <definition value="Identifies a profile structure or implementation Guide that SHALL hold for the target of the reference this element refers to. Can be a local reference - to a contained StructureDefinition, or a reference to another StructureDefinition in another profile. When an implementation guide is specified, the resource SHALL conform to at least one profile defined in the implementation guide."/>
-      <comment value="NOTE: This element is not used properly by the build tooling at this time - it puts what should go in here in .profile. This will be fixed prior to publication of STU3. When this happens, there will be a constrain that this element must be populated if the value of .code is 'Reference'."/>
+      <definition value="Identifies a profile structure or implementation Guide that SHALL hold for the target of the reference this element refers to. Can be a local reference - to a contained StructureDefinition, or a reference to another StructureDefinition or Implementation Guide by a canonical URL. When an implementation guide is specified, the resource SHALL conform to at least one profile defined in the implementation guide."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -9367,7 +9542,7 @@
      <element id="ElementDefinition.type.versioning">
       <path value="ElementDefinition.type.versioning"/>
       <short value="either | independent | specific"/>
-      <definition value="Whether this reference needs to be version specific or version independent, or whetehr either can be used."/>
+      <definition value="Whether this reference needs to be version specific or version independent, or whether either can be used."/>
       <comment value="The base specification never makes a rule as to which form is allowed, but implementation guides may do this."/>
       <min value="0"/>
       <max value="1"/>
@@ -9381,7 +9556,7 @@
         <valueString value="ReferenceVersionRules"/>
        </extension>
        <strength value="required"/>
-       <description value="Whether a reference needs to be version specific or version independent, or whetehr either can be used"/>
+       <description value="Whether a reference needs to be version specific or version independent, or whether either can be used"/>
        <valueSetReference>
         <reference value="http://hl7.org/fhir/ValueSet/reference-version-rules"/>
        </valueSetReference>
@@ -9833,7 +10008,7 @@
        <key value="ele-1"/>
        <severity value="error"/>
        <human value="All FHIR elements must have a @value or children"/>
-       <expression value="children().count() > id.count()"/>
+       <expression value="hasValue() | (children().count() > id.count())"/>
        <xpath value="@value|f:*|h:div"/>
        <source value="Element"/>
       </constraint>
@@ -9865,6 +10040,14 @@
      </element>
      <element id="ElementDefinition.example.extension">
       <path value="ElementDefinition.example.extension"/>
+      <slicing>
+       <discriminator>
+        <type value="value"/>
+        <path value="url"/>
+       </discriminator>
+       <description value="Extensions are always sliced by (at least) url"/>
+       <rules value="open"/>
+      </slicing>
       <short value="Additional Content defined by implementations"/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <comment value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
@@ -10170,7 +10353,7 @@
        <key value="ele-1"/>
        <severity value="error"/>
        <human value="All FHIR elements must have a @value or children"/>
-       <expression value="children().count() > id.count()"/>
+       <expression value="hasValue() | (children().count() > id.count())"/>
        <xpath value="@value|f:*|h:div"/>
        <source value="Element"/>
       </constraint>
@@ -10206,6 +10389,14 @@
      </element>
      <element id="ElementDefinition.constraint.extension">
       <path value="ElementDefinition.constraint.extension"/>
+      <slicing>
+       <discriminator>
+        <type value="value"/>
+        <path value="url"/>
+       </discriminator>
+       <description value="Extensions are always sliced by (at least) url"/>
+       <rules value="open"/>
+      </slicing>
       <short value="Additional Content defined by implementations"/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <comment value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
@@ -10436,7 +10627,7 @@
        <key value="ele-1"/>
        <severity value="error"/>
        <human value="All FHIR elements must have a @value or children"/>
-       <expression value="children().count() > id.count()"/>
+       <expression value="hasValue() | (children().count() > id.count())"/>
        <xpath value="@value|f:*|h:div"/>
        <source value="Element"/>
       </constraint>
@@ -10494,6 +10685,14 @@
      </element>
      <element id="ElementDefinition.binding.extension">
       <path value="ElementDefinition.binding.extension"/>
+      <slicing>
+       <discriminator>
+        <type value="value"/>
+        <path value="url"/>
+       </discriminator>
+       <description value="Extensions are always sliced by (at least) url"/>
+       <rules value="open"/>
+      </slicing>
       <short value="Additional Content defined by implementations"/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <comment value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
@@ -10625,7 +10824,7 @@
        <key value="ele-1"/>
        <severity value="error"/>
        <human value="All FHIR elements must have a @value or children"/>
-       <expression value="children().count() > id.count()"/>
+       <expression value="hasValue() | (children().count() > id.count())"/>
        <xpath value="@value|f:*|h:div"/>
        <source value="Element"/>
       </constraint>
@@ -10665,6 +10864,14 @@
      </element>
      <element id="ElementDefinition.mapping.extension">
       <path value="ElementDefinition.mapping.extension"/>
+      <slicing>
+       <discriminator>
+        <type value="value"/>
+        <path value="url"/>
+       </discriminator>
+       <description value="Extensions are always sliced by (at least) url"/>
+       <rules value="open"/>
+      </slicing>
       <short value="Additional Content defined by implementations"/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <comment value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
@@ -10745,6 +10952,21 @@
       <mapping>
        <identity value="iso11179"/>
        <map value="ObjectClass, Property (this is one possible data model that can be mapped to - the uri would identify the data model  mappingSpecification.mappingScript"/>
+      </mapping>
+     </element>
+     <element id="ElementDefinition.mapping.comment">
+      <path value="ElementDefinition.mapping.comment"/>
+      <short value="Comments about the mapping or its use"/>
+      <definition value="Comments that provide information about the mapping or its use."/>
+      <min value="0"/>
+      <max value="1"/>
+      <type>
+       <code value="string"/>
+      </type>
+      <isSummary value="true"/>
+      <mapping>
+       <identity value="rim"/>
+       <map value="N/A (MIF territory)"/>
       </mapping>
      </element>
     </snapshot>
@@ -10844,7 +11066,7 @@
      </element>
      <element id="ElementDefinition.path">
       <path value="ElementDefinition.path"/>
-      <short value="Path of the element in the heirarchy of elements"/>
+      <short value="Path of the element in the hierarchy of elements"/>
       <definition value="The path identifies the element and is expressed as a &quot;.&quot;-separated list of ancestor elements, beginning with the name of the resource or extension."/>
       <min value="1"/>
       <max value="1"/>
@@ -11395,7 +11617,7 @@
       <min value="1"/>
       <max value="1"/>
       <type>
-       <code value="integer"/>
+       <code value="unsignedInt"/>
       </type>
       <isSummary value="true"/>
       <mapping>
@@ -11527,7 +11749,7 @@
      <element id="ElementDefinition.type.profile">
       <path value="ElementDefinition.type.profile"/>
       <short value="Profile (StructureDefinition) to apply (or IG)"/>
-      <definition value="Identifies a profile structure or implementation Guide that SHALL hold for the datatype this element refers to. Can be a local reference - to a contained StructureDefinition, or a reference to another StructureDefinition in another profile. When an implementation guide is specified, the resource SHALL conform to at least one profile defined in the implementation guide."/>
+      <definition value="Identifies a profile structure or implementation Guide that SHALL hold for the datatype this element refers to. Can be a local reference - to a contained StructureDefinition, or a reference to another StructureDefinition or Implementation Guide by a canonical URL. When an implementation guide is specified, the resource SHALL conform to at least one profile defined in the implementation guide."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -11546,8 +11768,7 @@
      <element id="ElementDefinition.type.targetProfile">
       <path value="ElementDefinition.type.targetProfile"/>
       <short value="Profile (StructureDefinition) to apply to reference target (or IG)"/>
-      <definition value="Identifies a profile structure or implementation Guide that SHALL hold for the target of the reference this element refers to. Can be a local reference - to a contained StructureDefinition, or a reference to another StructureDefinition in another profile. When an implementation guide is specified, the resource SHALL conform to at least one profile defined in the implementation guide."/>
-      <comment value="NOTE: This element is not used properly by the build tooling at this time - it puts what should go in here in .profile. This will be fixed prior to publication of STU3. When this happens, there will be a constrain that this element must be populated if the value of .code is 'Reference'."/>
+      <definition value="Identifies a profile structure or implementation Guide that SHALL hold for the target of the reference this element refers to. Can be a local reference - to a contained StructureDefinition, or a reference to another StructureDefinition or Implementation Guide by a canonical URL. When an implementation guide is specified, the resource SHALL conform to at least one profile defined in the implementation guide."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -11596,7 +11817,7 @@
      <element id="ElementDefinition.type.versioning">
       <path value="ElementDefinition.type.versioning"/>
       <short value="either | independent | specific"/>
-      <definition value="Whether this reference needs to be version specific or version independent, or whetehr either can be used."/>
+      <definition value="Whether this reference needs to be version specific or version independent, or whether either can be used."/>
       <comment value="The base specification never makes a rule as to which form is allowed, but implementation guides may do this."/>
       <min value="0"/>
       <max value="1"/>
@@ -11610,7 +11831,7 @@
         <valueString value="ReferenceVersionRules"/>
        </extension>
        <strength value="required"/>
-       <description value="Whether a reference needs to be version specific or version independent, or whetehr either can be used"/>
+       <description value="Whether a reference needs to be version specific or version independent, or whether either can be used"/>
        <valueSetReference>
         <reference value="http://hl7.org/fhir/ValueSet/reference-version-rules"/>
        </valueSetReference>
@@ -12776,6 +12997,21 @@
        <map value="ObjectClass, Property (this is one possible data model that can be mapped to - the uri would identify the data model  mappingSpecification.mappingScript"/>
       </mapping>
      </element>
+     <element id="ElementDefinition.mapping.comment">
+      <path value="ElementDefinition.mapping.comment"/>
+      <short value="Comments about the mapping or its use"/>
+      <definition value="Comments that provide information about the mapping or its use."/>
+      <min value="0"/>
+      <max value="1"/>
+      <type>
+       <code value="string"/>
+      </type>
+      <isSummary value="true"/>
+      <mapping>
+       <identity value="rim"/>
+       <map value="N/A (MIF territory)"/>
+      </mapping>
+     </element>
     </differential>
    </StructureDefinition>
   </resource>
@@ -12786,12 +13022,12 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="Extension"/>
     <meta>
-     <lastUpdated value="2017-03-04T06:58:42.085-05:00"/>
+     <lastUpdated value="2017-04-17T17:38:22.515-04:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/Extension"/>
     <name value="Extension"/>
     <status value="draft"/>
-    <date value="2017-03-04T06:58:42-05:00"/>
+    <date value="2017-04-17T17:38:22-04:00"/>
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
@@ -12801,7 +13037,7 @@
     </contact>
     <description value="Base StructureDefinition for Extension Type"/>
     <purpose value="The ability to add extensions in a structured way is what keeps FHIR resources simple."/>
-    <fhirVersion value="1.9.0"/>
+    <fhirVersion value="3.0.1"/>
     <mapping>
      <identity value="rim"/>
      <uri value="http://hl7.org/v3"/>
@@ -12816,7 +13052,7 @@
      <element id="Extension">
       <path value="Extension"/>
       <short value="Optional Extensions Element"/>
-      <definition value="Optional Extensions Element - found in all resources."/>
+      <definition value="Optional Extension Element - found in all resources."/>
       <min value="0"/>
       <max value="*"/>
       <condition value="ele-1"/>
@@ -12824,7 +13060,7 @@
        <key value="ele-1"/>
        <severity value="error"/>
        <human value="All FHIR elements must have a @value or children"/>
-       <expression value="children().count() > id.count()"/>
+       <expression value="hasValue() | (children().count() > id.count())"/>
        <xpath value="@value|f:*|h:div"/>
        <source value="Element"/>
       </constraint>
@@ -12866,6 +13102,14 @@
      </element>
      <element id="Extension.extension">
       <path value="Extension.extension"/>
+      <slicing>
+       <discriminator>
+        <type value="value"/>
+        <path value="url"/>
+       </discriminator>
+       <description value="Extensions are always sliced by (at least) url"/>
+       <rules value="open"/>
+      </slicing>
       <short value="Additional Content defined by implementations"/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <comment value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
@@ -13032,7 +13276,7 @@
      <element id="Extension">
       <path value="Extension"/>
       <short value="Optional Extensions Element"/>
-      <definition value="Optional Extensions Element - found in all resources."/>
+      <definition value="Optional Extension Element - found in all resources."/>
       <min value="0"/>
       <max value="*"/>
       <constraint>
@@ -13198,12 +13442,12 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="HumanName"/>
     <meta>
-     <lastUpdated value="2017-03-04T06:58:42.085-05:00"/>
+     <lastUpdated value="2017-04-17T17:38:22.515-04:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/HumanName"/>
     <name value="HumanName"/>
     <status value="draft"/>
-    <date value="2017-03-04T06:58:42-05:00"/>
+    <date value="2017-04-17T17:38:22-04:00"/>
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
@@ -13213,7 +13457,7 @@
     </contact>
     <description value="Base StructureDefinition for HumanName Type"/>
     <purpose value="Need to be able to record names, along with notes about their use."/>
-    <fhirVersion value="1.9.0"/>
+    <fhirVersion value="3.0.1"/>
     <mapping>
      <identity value="v2"/>
      <uri value="http://hl7.org/v2"/>
@@ -13247,7 +13491,7 @@
        <key value="ele-1"/>
        <severity value="error"/>
        <human value="All FHIR elements must have a @value or children"/>
-       <expression value="children().count() > id.count()"/>
+       <expression value="hasValue() | (children().count() > id.count())"/>
        <xpath value="@value|f:*|h:div"/>
        <source value="Element"/>
       </constraint>
@@ -13290,6 +13534,14 @@
      </element>
      <element id="HumanName.extension">
       <path value="HumanName.extension"/>
+      <slicing>
+       <discriminator>
+        <type value="value"/>
+        <path value="url"/>
+       </discriminator>
+       <description value="Extensions are always sliced by (at least) url"/>
+       <rules value="open"/>
+      </slicing>
       <short value="Additional Content defined by implementations"/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <comment value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
@@ -13404,7 +13656,7 @@
       <type>
        <code value="string"/>
       </type>
-      <orderMeaning value="Given Names appear in the correct order for presenting then name"/>
+      <orderMeaning value="Given Names appear in the correct order for presenting the name"/>
       <isSummary value="true"/>
       <mapping>
        <identity value="v2"/>
@@ -13428,7 +13680,7 @@
       <type>
        <code value="string"/>
       </type>
-      <orderMeaning value="Prefixes appear in the correct order for presenting then name"/>
+      <orderMeaning value="Prefixes appear in the correct order for presenting the name"/>
       <isSummary value="true"/>
       <mapping>
        <identity value="v2"/>
@@ -13452,7 +13704,7 @@
       <type>
        <code value="string"/>
       </type>
-      <orderMeaning value="Suffixes appear in the correct order for presenting then name"/>
+      <orderMeaning value="Suffixes appear in the correct order for presenting the name"/>
       <isSummary value="true"/>
       <mapping>
        <identity value="v2"/>
@@ -13603,7 +13855,7 @@
       <type>
        <code value="string"/>
       </type>
-      <orderMeaning value="Given Names appear in the correct order for presenting then name"/>
+      <orderMeaning value="Given Names appear in the correct order for presenting the name"/>
       <isSummary value="true"/>
       <mapping>
        <identity value="v2"/>
@@ -13627,7 +13879,7 @@
       <type>
        <code value="string"/>
       </type>
-      <orderMeaning value="Prefixes appear in the correct order for presenting then name"/>
+      <orderMeaning value="Prefixes appear in the correct order for presenting the name"/>
       <isSummary value="true"/>
       <mapping>
        <identity value="v2"/>
@@ -13651,7 +13903,7 @@
       <type>
        <code value="string"/>
       </type>
-      <orderMeaning value="Suffixes appear in the correct order for presenting then name"/>
+      <orderMeaning value="Suffixes appear in the correct order for presenting the name"/>
       <isSummary value="true"/>
       <mapping>
        <identity value="v2"/>
@@ -13696,12 +13948,12 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="Identifier"/>
     <meta>
-     <lastUpdated value="2017-03-04T06:58:42.085-05:00"/>
+     <lastUpdated value="2017-04-17T17:38:22.515-04:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/Identifier"/>
     <name value="Identifier"/>
     <status value="draft"/>
-    <date value="2017-03-04T06:58:42-05:00"/>
+    <date value="2017-04-17T17:38:22-04:00"/>
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
@@ -13711,7 +13963,7 @@
     </contact>
     <description value="Base StructureDefinition for Identifier Type"/>
     <purpose value="Need to be able to identify things with confidence and be sure that the identification is not subject to misinterpretation."/>
-    <fhirVersion value="1.9.0"/>
+    <fhirVersion value="3.0.1"/>
     <mapping>
      <identity value="v2"/>
      <uri value="http://hl7.org/v2"/>
@@ -13744,7 +13996,7 @@
        <key value="ele-1"/>
        <severity value="error"/>
        <human value="All FHIR elements must have a @value or children"/>
-       <expression value="children().count() > id.count()"/>
+       <expression value="hasValue() | (children().count() > id.count())"/>
        <xpath value="@value|f:*|h:div"/>
        <source value="Element"/>
       </constraint>
@@ -13787,6 +14039,14 @@
      </element>
      <element id="Identifier.extension">
       <path value="Identifier.extension"/>
+      <slicing>
+       <discriminator>
+        <type value="value"/>
+        <path value="url"/>
+       </discriminator>
+       <description value="Extensions are always sliced by (at least) url"/>
+       <rules value="open"/>
+      </slicing>
       <short value="Additional Content defined by implementations"/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <comment value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
@@ -14178,12 +14438,12 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="Meta"/>
     <meta>
-     <lastUpdated value="2017-03-04T06:58:42.085-05:00"/>
+     <lastUpdated value="2017-04-17T17:38:22.515-04:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/Meta"/>
     <name value="Meta"/>
     <status value="draft"/>
-    <date value="2017-03-04T06:58:42-05:00"/>
+    <date value="2017-04-17T17:38:22-04:00"/>
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
@@ -14192,7 +14452,7 @@
      </telecom>
     </contact>
     <description value="Base StructureDefinition for Meta Type"/>
-    <fhirVersion value="1.9.0"/>
+    <fhirVersion value="3.0.1"/>
     <mapping>
      <identity value="rim"/>
      <uri value="http://hl7.org/v3"/>
@@ -14215,7 +14475,7 @@
        <key value="ele-1"/>
        <severity value="error"/>
        <human value="All FHIR elements must have a @value or children"/>
-       <expression value="children().count() > id.count()"/>
+       <expression value="hasValue() | (children().count() > id.count())"/>
        <xpath value="@value|f:*|h:div"/>
        <source value="Element"/>
       </constraint>
@@ -14250,6 +14510,14 @@
      </element>
      <element id="Meta.extension">
       <path value="Meta.extension"/>
+      <slicing>
+       <discriminator>
+        <type value="value"/>
+        <path value="url"/>
+       </discriminator>
+       <description value="Extensions are always sliced by (at least) url"/>
+       <rules value="open"/>
+      </slicing>
       <short value="Additional Content defined by implementations"/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <comment value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
@@ -14459,12 +14727,12 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="Money"/>
     <meta>
-     <lastUpdated value="2017-03-04T06:58:42.085-05:00"/>
+     <lastUpdated value="2017-04-17T17:38:22.515-04:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/Money"/>
     <name value="Money"/>
     <status value="draft"/>
-    <date value="2017-03-04T06:58:42-05:00"/>
+    <date value="2017-04-17T17:38:22-04:00"/>
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
@@ -14473,7 +14741,7 @@
      </telecom>
     </contact>
     <description value="Base StructureDefinition for Money Type"/>
-    <fhirVersion value="1.9.0"/>
+    <fhirVersion value="3.0.1"/>
     <mapping>
      <identity value="rim"/>
      <uri value="http://hl7.org/v3"/>
@@ -14492,8 +14760,8 @@
     <snapshot>
      <element id="Money">
       <path value="Money"/>
-      <short value="An amount of economic utility in some recognised currency"/>
-      <definition value="An amount of economic utility in some recognised currency."/>
+      <short value="An amount of economic utility in some recognized currency"/>
+      <definition value="An amount of economic utility in some recognized currency."/>
       <comment value="The context of use may frequently define what kind of quantity this is and therefore what kind of units can be used. The context of use may also restrict the values for the comparator."/>
       <min value="0"/>
       <max value="*"/>
@@ -14547,6 +14815,14 @@
      </element>
      <element id="Money.extension">
       <path value="Money.extension"/>
+      <slicing>
+       <discriminator>
+        <type value="value"/>
+        <path value="url"/>
+       </discriminator>
+       <description value="Extensions are always sliced by (at least) url"/>
+       <rules value="open"/>
+      </slicing>
       <short value="Additional Content defined by implementations"/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <comment value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
@@ -14715,8 +14991,8 @@
     <differential>
      <element id="Money">
       <path value="Money"/>
-      <short value="An amount of economic utility in some recognised currency"/>
-      <definition value="An amount of economic utility in some recognised currency."/>
+      <short value="An amount of economic utility in some recognized currency"/>
+      <definition value="An amount of economic utility in some recognized currency."/>
       <min value="0"/>
       <max value="*"/>
       <constraint>
@@ -14741,12 +15017,12 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="Narrative"/>
     <meta>
-     <lastUpdated value="2017-03-04T06:58:42.085-05:00"/>
+     <lastUpdated value="2017-04-17T17:38:22.515-04:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/Narrative"/>
     <name value="Narrative"/>
     <status value="draft"/>
-    <date value="2017-03-04T06:58:42-05:00"/>
+    <date value="2017-04-17T17:38:22-04:00"/>
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
@@ -14755,7 +15031,7 @@
      </telecom>
     </contact>
     <description value="Base StructureDefinition for Narrative Type"/>
-    <fhirVersion value="1.9.0"/>
+    <fhirVersion value="3.0.1"/>
     <mapping>
      <identity value="rim"/>
      <uri value="http://hl7.org/v3"/>
@@ -14778,7 +15054,7 @@
        <key value="ele-1"/>
        <severity value="error"/>
        <human value="All FHIR elements must have a @value or children"/>
-       <expression value="children().count() > id.count()"/>
+       <expression value="hasValue() | (children().count() > id.count())"/>
        <xpath value="@value|f:*|h:div"/>
        <source value="Element"/>
       </constraint>
@@ -14813,6 +15089,14 @@
      </element>
      <element id="Narrative.extension">
       <path value="Narrative.extension"/>
+      <slicing>
+       <discriminator>
+        <type value="value"/>
+        <path value="url"/>
+       </discriminator>
+       <description value="Extensions are always sliced by (at least) url"/>
+       <rules value="open"/>
+      </slicing>
       <short value="Additional Content defined by implementations"/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <comment value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
@@ -14962,12 +15246,12 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="ParameterDefinition"/>
     <meta>
-     <lastUpdated value="2017-03-04T06:58:42.085-05:00"/>
+     <lastUpdated value="2017-04-17T17:38:22.515-04:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/ParameterDefinition"/>
     <name value="ParameterDefinition"/>
     <status value="draft"/>
-    <date value="2017-03-04T06:58:42-05:00"/>
+    <date value="2017-04-17T17:38:22-04:00"/>
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
@@ -14976,7 +15260,7 @@
      </telecom>
     </contact>
     <description value="Base StructureDefinition for ParameterDefinition Type"/>
-    <fhirVersion value="1.9.0"/>
+    <fhirVersion value="3.0.1"/>
     <mapping>
      <identity value="rim"/>
      <uri value="http://hl7.org/v3"/>
@@ -14999,7 +15283,7 @@
        <key value="ele-1"/>
        <severity value="error"/>
        <human value="All FHIR elements must have a @value or children"/>
-       <expression value="children().count() > id.count()"/>
+       <expression value="hasValue() | (children().count() > id.count())"/>
        <xpath value="@value|f:*|h:div"/>
        <source value="Element"/>
       </constraint>
@@ -15030,6 +15314,14 @@
      </element>
      <element id="ParameterDefinition.extension">
       <path value="ParameterDefinition.extension"/>
+      <slicing>
+       <discriminator>
+        <type value="value"/>
+        <path value="url"/>
+       </discriminator>
+       <description value="Extensions are always sliced by (at least) url"/>
+       <rules value="open"/>
+      </slicing>
       <short value="Additional Content defined by implementations"/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <comment value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
@@ -15052,8 +15344,8 @@
      </element>
      <element id="ParameterDefinition.name">
       <path value="ParameterDefinition.name"/>
-      <short value="Parameter name"/>
-      <definition value="The name of the parameter."/>
+      <short value="Name used to access the parameter value"/>
+      <definition value="The name of the parameter used to allow access to the value of the parameter in evaluation contexts."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -15117,7 +15409,7 @@
      </element>
      <element id="ParameterDefinition.type">
       <path value="ParameterDefinition.type"/>
-      <short value="Type for the parameter"/>
+      <short value="What type of value"/>
       <definition value="The type of the parameter."/>
       <min value="1"/>
       <max value="1"/>
@@ -15141,7 +15433,7 @@
      </element>
      <element id="ParameterDefinition.profile">
       <path value="ParameterDefinition.profile"/>
-      <short value="The profile of the parameter, any"/>
+      <short value="What profile the value is expected to be"/>
       <definition value="If specified, this indicates a profile that the input data must conform to, or that the output data will conform to."/>
       <min value="0"/>
       <max value="1"/>
@@ -15162,8 +15454,8 @@
      </element>
      <element id="ParameterDefinition.name">
       <path value="ParameterDefinition.name"/>
-      <short value="Parameter name"/>
-      <definition value="The name of the parameter."/>
+      <short value="Name used to access the parameter value"/>
+      <definition value="The name of the parameter used to allow access to the value of the parameter in evaluation contexts."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -15227,7 +15519,7 @@
      </element>
      <element id="ParameterDefinition.type">
       <path value="ParameterDefinition.type"/>
-      <short value="Type for the parameter"/>
+      <short value="What type of value"/>
       <definition value="The type of the parameter."/>
       <min value="1"/>
       <max value="1"/>
@@ -15251,7 +15543,7 @@
      </element>
      <element id="ParameterDefinition.profile">
       <path value="ParameterDefinition.profile"/>
-      <short value="The profile of the parameter, any"/>
+      <short value="What profile the value is expected to be"/>
       <definition value="If specified, this indicates a profile that the input data must conform to, or that the output data will conform to."/>
       <min value="0"/>
       <max value="1"/>
@@ -15271,12 +15563,12 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="Period"/>
     <meta>
-     <lastUpdated value="2017-03-04T06:58:42.085-05:00"/>
+     <lastUpdated value="2017-04-17T17:38:22.515-04:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/Period"/>
     <name value="Period"/>
     <status value="draft"/>
-    <date value="2017-03-04T06:58:42-05:00"/>
+    <date value="2017-04-17T17:38:22-04:00"/>
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
@@ -15285,7 +15577,7 @@
      </telecom>
     </contact>
     <description value="Base StructureDefinition for Period Type"/>
-    <fhirVersion value="1.9.0"/>
+    <fhirVersion value="3.0.1"/>
     <mapping>
      <identity value="v2"/>
      <uri value="http://hl7.org/v2"/>
@@ -15314,7 +15606,7 @@
        <key value="ele-1"/>
        <severity value="error"/>
        <human value="All FHIR elements must have a @value or children"/>
-       <expression value="children().count() > id.count()"/>
+       <expression value="hasValue() | (children().count() > id.count())"/>
        <xpath value="@value|f:*|h:div"/>
        <source value="Element"/>
       </constraint>
@@ -15360,6 +15652,14 @@
      </element>
      <element id="Period.extension">
       <path value="Period.extension"/>
+      <slicing>
+       <discriminator>
+        <type value="value"/>
+        <path value="url"/>
+       </discriminator>
+       <description value="Extensions are always sliced by (at least) url"/>
+       <rules value="open"/>
+      </slicing>
       <short value="Additional Content defined by implementations"/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <comment value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
@@ -15501,12 +15801,12 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="Quantity"/>
     <meta>
-     <lastUpdated value="2017-03-04T06:58:42.085-05:00"/>
+     <lastUpdated value="2017-04-17T17:38:22.515-04:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/Quantity"/>
     <name value="Quantity"/>
     <status value="draft"/>
-    <date value="2017-03-04T06:58:42-05:00"/>
+    <date value="2017-04-17T17:38:22-04:00"/>
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
@@ -15516,7 +15816,7 @@
     </contact>
     <description value="Base StructureDefinition for Quantity Type"/>
     <purpose value="Need to able to capture all sorts of measured values, even if the measured value are not precisely quantified. Values include exact measures such as 3.51g, customary units such as 3 tablets, and currencies such as $100.32USD."/>
-    <fhirVersion value="1.9.0"/>
+    <fhirVersion value="3.0.1"/>
     <mapping>
      <identity value="v2"/>
      <uri value="http://hl7.org/v2"/>
@@ -15545,7 +15845,7 @@
        <key value="ele-1"/>
        <severity value="error"/>
        <human value="All FHIR elements must have a @value or children"/>
-       <expression value="children().count() > id.count()"/>
+       <expression value="hasValue() | (children().count() > id.count())"/>
        <xpath value="@value|f:*|h:div"/>
        <source value="Element"/>
       </constraint>
@@ -15591,6 +15891,14 @@
      </element>
      <element id="Quantity.extension">
       <path value="Quantity.extension"/>
+      <slicing>
+       <discriminator>
+        <type value="value"/>
+        <path value="url"/>
+       </discriminator>
+       <description value="Extensions are always sliced by (at least) url"/>
+       <rules value="open"/>
+      </slicing>
       <short value="Additional Content defined by implementations"/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <comment value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
@@ -15884,12 +16192,12 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="Range"/>
     <meta>
-     <lastUpdated value="2017-03-04T06:58:42.085-05:00"/>
+     <lastUpdated value="2017-04-17T17:38:22.515-04:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/Range"/>
     <name value="Range"/>
     <status value="draft"/>
-    <date value="2017-03-04T06:58:42-05:00"/>
+    <date value="2017-04-17T17:38:22-04:00"/>
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
@@ -15899,7 +16207,7 @@
     </contact>
     <description value="Base StructureDefinition for Range Type"/>
     <purpose value="Need to be able to specify ranges of values."/>
-    <fhirVersion value="1.9.0"/>
+    <fhirVersion value="3.0.1"/>
     <mapping>
      <identity value="v2"/>
      <uri value="http://hl7.org/v2"/>
@@ -15928,7 +16236,7 @@
        <key value="ele-1"/>
        <severity value="error"/>
        <human value="All FHIR elements must have a @value or children"/>
-       <expression value="children().count() > id.count()"/>
+       <expression value="hasValue() | (children().count() > id.count())"/>
        <xpath value="@value|f:*|h:div"/>
        <source value="Element"/>
       </constraint>
@@ -15974,6 +16282,14 @@
      </element>
      <element id="Range.extension">
       <path value="Range.extension"/>
+      <slicing>
+       <discriminator>
+        <type value="value"/>
+        <path value="url"/>
+       </discriminator>
+       <description value="Extensions are always sliced by (at least) url"/>
+       <rules value="open"/>
+      </slicing>
       <short value="Additional Content defined by implementations"/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <comment value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
@@ -16117,12 +16433,12 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="Ratio"/>
     <meta>
-     <lastUpdated value="2017-03-04T06:58:42.085-05:00"/>
+     <lastUpdated value="2017-04-17T17:38:22.515-04:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/Ratio"/>
     <name value="Ratio"/>
     <status value="draft"/>
-    <date value="2017-03-04T06:58:42-05:00"/>
+    <date value="2017-04-17T17:38:22-04:00"/>
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
@@ -16132,7 +16448,7 @@
     </contact>
     <description value="Base StructureDefinition for Ratio Type"/>
     <purpose value="Need to able to capture ratios for some measurements (titers) and some rates (costs)."/>
-    <fhirVersion value="1.9.0"/>
+    <fhirVersion value="3.0.1"/>
     <mapping>
      <identity value="v2"/>
      <uri value="http://hl7.org/v2"/>
@@ -16160,7 +16476,7 @@
        <key value="ele-1"/>
        <severity value="error"/>
        <human value="All FHIR elements must have a @value or children"/>
-       <expression value="children().count() > id.count()"/>
+       <expression value="hasValue() | (children().count() > id.count())"/>
        <xpath value="@value|f:*|h:div"/>
        <source value="Element"/>
       </constraint>
@@ -16206,6 +16522,14 @@
      </element>
      <element id="Ratio.extension">
       <path value="Ratio.extension"/>
+      <slicing>
+       <discriminator>
+        <type value="value"/>
+        <path value="url"/>
+       </discriminator>
+       <description value="Extensions are always sliced by (at least) url"/>
+       <rules value="open"/>
+      </slicing>
       <short value="Additional Content defined by implementations"/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <comment value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
@@ -16320,12 +16644,12 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="Reference"/>
     <meta>
-     <lastUpdated value="2017-03-04T06:58:42.085-05:00"/>
+     <lastUpdated value="2017-04-17T17:38:22.515-04:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/Reference"/>
     <name value="Reference"/>
     <status value="draft"/>
-    <date value="2017-03-04T06:58:42-05:00"/>
+    <date value="2017-04-17T17:38:22-04:00"/>
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
@@ -16334,7 +16658,7 @@
      </telecom>
     </contact>
     <description value="Base StructureDefinition for Reference Type"/>
-    <fhirVersion value="1.9.0"/>
+    <fhirVersion value="3.0.1"/>
     <mapping>
      <identity value="rim"/>
      <uri value="http://hl7.org/v3"/>
@@ -16358,7 +16682,7 @@
        <key value="ele-1"/>
        <severity value="error"/>
        <human value="All FHIR elements must have a @value or children"/>
-       <expression value="children().count() > id.count()"/>
+       <expression value="hasValue() | (children().count() > id.count())"/>
        <xpath value="@value|f:*|h:div"/>
        <source value="Element"/>
       </constraint>
@@ -16400,6 +16724,14 @@
      </element>
      <element id="Reference.extension">
       <path value="Reference.extension"/>
+      <slicing>
+       <discriminator>
+        <type value="value"/>
+        <path value="url"/>
+       </discriminator>
+       <description value="Extensions are always sliced by (at least) url"/>
+       <rules value="open"/>
+      </slicing>
       <short value="Additional Content defined by implementations"/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <comment value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
@@ -16555,12 +16887,12 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="RelatedArtifact"/>
     <meta>
-     <lastUpdated value="2017-03-04T06:58:42.085-05:00"/>
+     <lastUpdated value="2017-04-17T17:38:22.515-04:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/RelatedArtifact"/>
     <name value="RelatedArtifact"/>
     <status value="draft"/>
-    <date value="2017-03-04T06:58:42-05:00"/>
+    <date value="2017-04-17T17:38:22-04:00"/>
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
@@ -16570,7 +16902,7 @@
     </contact>
     <description value="Base StructureDefinition for RelatedArtifact Type"/>
     <purpose value="Knowledge resources must be able to provide enough information for consumers of the content (and/or interventions or results produced by the content) to be able to determine and understand the justification for and evidence in support of the content."/>
-    <fhirVersion value="1.9.0"/>
+    <fhirVersion value="3.0.1"/>
     <mapping>
      <identity value="rim"/>
      <uri value="http://hl7.org/v3"/>
@@ -16594,7 +16926,7 @@
        <key value="ele-1"/>
        <severity value="error"/>
        <human value="All FHIR elements must have a @value or children"/>
-       <expression value="children().count() > id.count()"/>
+       <expression value="hasValue() | (children().count() > id.count())"/>
        <xpath value="@value|f:*|h:div"/>
        <source value="Element"/>
       </constraint>
@@ -16625,6 +16957,14 @@
      </element>
      <element id="RelatedArtifact.extension">
       <path value="RelatedArtifact.extension"/>
+      <slicing>
+       <discriminator>
+        <type value="value"/>
+        <path value="url"/>
+       </discriminator>
+       <description value="Extensions are always sliced by (at least) url"/>
+       <rules value="open"/>
+      </slicing>
       <short value="Additional Content defined by implementations"/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <comment value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
@@ -16691,7 +17031,7 @@
      </element>
      <element id="RelatedArtifact.url">
       <path value="RelatedArtifact.url"/>
-      <short value="Url for the related artifact"/>
+      <short value="Where the artifact can be accessed"/>
       <definition value="A url for the artifact that can be followed to access the actual content."/>
       <comment value="If a document or resource element is present, this element SHALL NOT be provided (use the url or reference in the Attachment or resource reference)."/>
       <min value="0"/>
@@ -16703,7 +17043,7 @@
      </element>
      <element id="RelatedArtifact.document">
       <path value="RelatedArtifact.document"/>
-      <short value="The related document"/>
+      <short value="What document is being referenced"/>
       <definition value="The document being referenced, represented as an attachment. This is exclusive with the resource element."/>
       <min value="0"/>
       <max value="1"/>
@@ -16714,7 +17054,7 @@
      </element>
      <element id="RelatedArtifact.resource">
       <path value="RelatedArtifact.resource"/>
-      <short value="The related resource"/>
+      <short value="What resource is being referenced"/>
       <definition value="The related resource, such as a library, value set, profile, or other knowledge resource."/>
       <comment value="If the type is predecessor, this is a reference to the succeeding knowledge resource. If the type is successor, this is a reference to the prior knowledge resource."/>
       <min value="0"/>
@@ -16781,7 +17121,7 @@
      </element>
      <element id="RelatedArtifact.url">
       <path value="RelatedArtifact.url"/>
-      <short value="Url for the related artifact"/>
+      <short value="Where the artifact can be accessed"/>
       <definition value="A url for the artifact that can be followed to access the actual content."/>
       <comment value="If a document or resource element is present, this element SHALL NOT be provided (use the url or reference in the Attachment or resource reference)."/>
       <min value="0"/>
@@ -16793,7 +17133,7 @@
      </element>
      <element id="RelatedArtifact.document">
       <path value="RelatedArtifact.document"/>
-      <short value="The related document"/>
+      <short value="What document is being referenced"/>
       <definition value="The document being referenced, represented as an attachment. This is exclusive with the resource element."/>
       <min value="0"/>
       <max value="1"/>
@@ -16804,7 +17144,7 @@
      </element>
      <element id="RelatedArtifact.resource">
       <path value="RelatedArtifact.resource"/>
-      <short value="The related resource"/>
+      <short value="What resource is being referenced"/>
       <definition value="The related resource, such as a library, value set, profile, or other knowledge resource."/>
       <comment value="If the type is predecessor, this is a reference to the succeeding knowledge resource. If the type is successor, this is a reference to the prior knowledge resource."/>
       <min value="0"/>
@@ -16825,12 +17165,12 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="SampledData"/>
     <meta>
-     <lastUpdated value="2017-03-04T06:58:42.085-05:00"/>
+     <lastUpdated value="2017-04-17T17:38:22.515-04:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/SampledData"/>
     <name value="SampledData"/>
     <status value="draft"/>
-    <date value="2017-03-04T06:58:42-05:00"/>
+    <date value="2017-04-17T17:38:22-04:00"/>
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
@@ -16840,7 +17180,7 @@
     </contact>
     <description value="Base StructureDefinition for SampledData Type"/>
     <purpose value="There is a need for a concise way to handle the data produced by devices that sample a physical state at a high frequency."/>
-    <fhirVersion value="1.9.0"/>
+    <fhirVersion value="3.0.1"/>
     <mapping>
      <identity value="v2"/>
      <uri value="http://hl7.org/v2"/>
@@ -16869,7 +17209,7 @@
        <key value="ele-1"/>
        <severity value="error"/>
        <human value="All FHIR elements must have a @value or children"/>
-       <expression value="children().count() > id.count()"/>
+       <expression value="hasValue() | (children().count() > id.count())"/>
        <xpath value="@value|f:*|h:div"/>
        <source value="Element"/>
       </constraint>
@@ -16908,6 +17248,14 @@
      </element>
      <element id="SampledData.extension">
       <path value="SampledData.extension"/>
+      <slicing>
+       <discriminator>
+        <type value="value"/>
+        <path value="url"/>
+       </discriminator>
+       <description value="Extensions are always sliced by (at least) url"/>
+       <rules value="open"/>
+      </slicing>
       <short value="Additional Content defined by implementations"/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <comment value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
@@ -17172,12 +17520,12 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="Signature"/>
     <meta>
-     <lastUpdated value="2017-03-04T06:58:42.085-05:00"/>
+     <lastUpdated value="2017-04-17T17:38:22.515-04:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/Signature"/>
     <name value="Signature"/>
     <status value="draft"/>
-    <date value="2017-03-04T06:58:42-05:00"/>
+    <date value="2017-04-17T17:38:22-04:00"/>
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
@@ -17187,7 +17535,7 @@
     </contact>
     <description value="Base StructureDefinition for Signature Type"/>
     <purpose value="There are a number of places where content must be signed in healthcare."/>
-    <fhirVersion value="1.9.0"/>
+    <fhirVersion value="3.0.1"/>
     <mapping>
      <identity value="rim"/>
      <uri value="http://hl7.org/v3"/>
@@ -17202,7 +17550,7 @@
      <element id="Signature">
       <path value="Signature"/>
       <short value="A digital Signature - XML DigSig, JWT, Graphical image of signature, etc."/>
-      <definition value="A digital signature along with supporting context. The signature may be electronic/cryptographic in nature, or a graphical image representing a hand-written signature, or a signature process. Different Signature approaches have different utilities."/>
+      <definition value="A digital signature along with supporting context. The signature may be electronic/cryptographic in nature, or a graphical image representing a hand-written signature, or a signature process. Different signature approaches have different utilities."/>
       <comment value="The elements of the Signature Resource are for ease of access of these elements. Foro digital signatures (Xml DigSig, JWT), the non-repudiation proof comes from the Signature  validation, which includes validation of the referenced objects (e.g. Resources) (a.k.a., Content) in the XML-Signature Detached form."/>
       <min value="0"/>
       <max value="*"/>
@@ -17211,7 +17559,7 @@
        <key value="ele-1"/>
        <severity value="error"/>
        <human value="All FHIR elements must have a @value or children"/>
-       <expression value="children().count() > id.count()"/>
+       <expression value="hasValue() | (children().count() > id.count())"/>
        <xpath value="@value|f:*|h:div"/>
        <source value="Element"/>
       </constraint>
@@ -17246,6 +17594,14 @@
      </element>
      <element id="Signature.extension">
       <path value="Signature.extension"/>
+      <slicing>
+       <discriminator>
+        <type value="value"/>
+        <path value="url"/>
+       </discriminator>
+       <description value="Extensions are always sliced by (at least) url"/>
+       <rules value="open"/>
+      </slicing>
       <short value="Additional Content defined by implementations"/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <comment value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
@@ -17403,7 +17759,7 @@
      <element id="Signature">
       <path value="Signature"/>
       <short value="A digital Signature - XML DigSig, JWT, Graphical image of signature, etc."/>
-      <definition value="A digital signature along with supporting context. The signature may be electronic/cryptographic in nature, or a graphical image representing a hand-written signature, or a signature process. Different Signature approaches have different utilities."/>
+      <definition value="A digital signature along with supporting context. The signature may be electronic/cryptographic in nature, or a graphical image representing a hand-written signature, or a signature process. Different signature approaches have different utilities."/>
       <comment value="The elements of the Signature Resource are for ease of access of these elements. Foro digital signatures (Xml DigSig, JWT), the non-repudiation proof comes from the Signature  validation, which includes validation of the referenced objects (e.g. Resources) (a.k.a., Content) in the XML-Signature Detached form."/>
       <min value="0"/>
       <max value="*"/>
@@ -17554,12 +17910,12 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="Timing"/>
     <meta>
-     <lastUpdated value="2017-03-04T06:58:42.085-05:00"/>
+     <lastUpdated value="2017-04-17T17:38:22.515-04:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/Timing"/>
     <name value="Timing"/>
     <status value="draft"/>
-    <date value="2017-03-04T06:58:42-05:00"/>
+    <date value="2017-04-17T17:38:22-04:00"/>
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
@@ -17569,7 +17925,7 @@
     </contact>
     <description value="Base StructureDefinition for Timing Type"/>
     <purpose value="Need to able to track proposed timing schedules. There are several different ways to do this: one or more specified times, a simple rules like three times a day, or  before/after meals."/>
-    <fhirVersion value="1.9.0"/>
+    <fhirVersion value="3.0.1"/>
     <mapping>
      <identity value="v2"/>
      <uri value="http://hl7.org/v2"/>
@@ -17598,7 +17954,7 @@
        <key value="ele-1"/>
        <severity value="error"/>
        <human value="All FHIR elements must have a @value or children"/>
-       <expression value="children().count() > id.count()"/>
+       <expression value="hasValue() | (children().count() > id.count())"/>
        <xpath value="@value|f:*|h:div"/>
        <source value="Element"/>
       </constraint>
@@ -17637,6 +17993,14 @@
      </element>
      <element id="Timing.extension">
       <path value="Timing.extension"/>
+      <slicing>
+       <discriminator>
+        <type value="value"/>
+        <path value="url"/>
+       </discriminator>
+       <description value="Extensions are always sliced by (at least) url"/>
+       <rules value="open"/>
+      </slicing>
       <short value="Additional Content defined by implementations"/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <comment value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
@@ -17687,7 +18051,7 @@
        <key value="ele-1"/>
        <severity value="error"/>
        <human value="All FHIR elements must have a @value or children"/>
-       <expression value="children().count() > id.count()"/>
+       <expression value="hasValue() | (children().count() > id.count())"/>
        <xpath value="@value|f:*|h:div"/>
        <source value="Element"/>
       </constraint>
@@ -17738,7 +18102,7 @@
        <severity value="error"/>
        <human value="If there's a timeOfDay, there cannot be be a when, or vice versa"/>
        <expression value="timeOfDay.empty() or when.empty()"/>
-       <xpath value="not(exists(f:timeofDay)) or not(exists(f:when))"/>
+       <xpath value="not(exists(f:timeOfDay)) or not(exists(f:when))"/>
       </constraint>
       <constraint>
        <key value="tim-2"/>
@@ -17782,6 +18146,14 @@
      </element>
      <element id="Timing.repeat.extension">
       <path value="Timing.repeat.extension"/>
+      <slicing>
+       <discriminator>
+        <type value="value"/>
+        <path value="url"/>
+       </discriminator>
+       <description value="Extensions are always sliced by (at least) url"/>
+       <rules value="open"/>
+      </slicing>
       <short value="Additional Content defined by implementations"/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <comment value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
@@ -18058,7 +18430,7 @@
         <valueString value="EventTiming"/>
        </extension>
        <strength value="required"/>
-       <description value="Real world event that the relating to the schedule."/>
+       <description value="Real world event relating to the schedule."/>
        <valueSetReference>
         <reference value="http://hl7.org/fhir/ValueSet/event-timing"/>
        </valueSetReference>
@@ -18200,7 +18572,7 @@
        <severity value="error"/>
        <human value="If there's a timeOfDay, there cannot be be a when, or vice versa"/>
        <expression value="timeOfDay.empty() or when.empty()"/>
-       <xpath value="not(exists(f:timeofDay)) or not(exists(f:when))"/>
+       <xpath value="not(exists(f:timeOfDay)) or not(exists(f:when))"/>
       </constraint>
       <constraint>
        <key value="tim-2"/>
@@ -18478,7 +18850,7 @@
         <valueString value="EventTiming"/>
        </extension>
        <strength value="required"/>
-       <description value="Real world event that the relating to the schedule."/>
+       <description value="Real world event relating to the schedule."/>
        <valueSetReference>
         <reference value="http://hl7.org/fhir/ValueSet/event-timing"/>
        </valueSetReference>
@@ -18539,12 +18911,12 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="TriggerDefinition"/>
     <meta>
-     <lastUpdated value="2017-03-04T06:58:42.085-05:00"/>
+     <lastUpdated value="2017-04-17T17:38:22.515-04:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/TriggerDefinition"/>
     <name value="TriggerDefinition"/>
     <status value="draft"/>
-    <date value="2017-03-04T06:58:42-05:00"/>
+    <date value="2017-04-17T17:38:22-04:00"/>
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
@@ -18553,7 +18925,7 @@
      </telecom>
     </contact>
     <description value="Base StructureDefinition for TriggerDefinition Type"/>
-    <fhirVersion value="1.9.0"/>
+    <fhirVersion value="3.0.1"/>
     <mapping>
      <identity value="rim"/>
      <uri value="http://hl7.org/v3"/>
@@ -18576,7 +18948,7 @@
        <key value="ele-1"/>
        <severity value="error"/>
        <human value="All FHIR elements must have a @value or children"/>
-       <expression value="children().count() > id.count()"/>
+       <expression value="hasValue() | (children().count() > id.count())"/>
        <xpath value="@value|f:*|h:div"/>
        <source value="Element"/>
       </constraint>
@@ -18607,6 +18979,14 @@
      </element>
      <element id="TriggerDefinition.extension">
       <path value="TriggerDefinition.extension"/>
+      <slicing>
+       <discriminator>
+        <type value="value"/>
+        <path value="url"/>
+       </discriminator>
+       <description value="Extensions are always sliced by (at least) url"/>
+       <rules value="open"/>
+      </slicing>
       <short value="Additional Content defined by implementations"/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <comment value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
@@ -18650,7 +19030,7 @@
      </element>
      <element id="TriggerDefinition.eventName">
       <path value="TriggerDefinition.eventName"/>
-      <short value="Name of the event"/>
+      <short value="Triggering event name"/>
       <definition value="The name of the event (if this is a named-event trigger)."/>
       <min value="0"/>
       <max value="1"/>
@@ -18723,7 +19103,7 @@
      </element>
      <element id="TriggerDefinition.eventName">
       <path value="TriggerDefinition.eventName"/>
-      <short value="Name of the event"/>
+      <short value="Triggering event name"/>
       <definition value="The name of the event (if this is a named-event trigger)."/>
       <min value="0"/>
       <max value="1"/>
@@ -18774,12 +19154,12 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="UsageContext"/>
     <meta>
-     <lastUpdated value="2017-03-04T06:58:42.085-05:00"/>
+     <lastUpdated value="2017-04-17T17:38:22.515-04:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/UsageContext"/>
     <name value="UsageContext"/>
     <status value="draft"/>
-    <date value="2017-03-04T06:58:42-05:00"/>
+    <date value="2017-04-17T17:38:22-04:00"/>
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
@@ -18789,7 +19169,7 @@
     </contact>
     <description value="Base StructureDefinition for UsageContext Type"/>
     <purpose value="Consumers of the resource must be able to determine the intended applicability for the resource. Ideally, this information would be used programmatically to determine when and how it should be incorporated or exposed."/>
-    <fhirVersion value="1.9.0"/>
+    <fhirVersion value="3.0.1"/>
     <mapping>
      <identity value="rim"/>
      <uri value="http://hl7.org/v3"/>
@@ -18812,7 +19192,7 @@
        <key value="ele-1"/>
        <severity value="error"/>
        <human value="All FHIR elements must have a @value or children"/>
-       <expression value="children().count() > id.count()"/>
+       <expression value="hasValue() | (children().count() > id.count())"/>
        <xpath value="@value|f:*|h:div"/>
        <source value="Element"/>
       </constraint>
@@ -18843,6 +19223,14 @@
      </element>
      <element id="UsageContext.extension">
       <path value="UsageContext.extension"/>
+      <slicing>
+       <discriminator>
+        <type value="value"/>
+        <path value="url"/>
+       </discriminator>
+       <description value="Extensions are always sliced by (at least) url"/>
+       <rules value="open"/>
+      </slicing>
       <short value="Additional Content defined by implementations"/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <comment value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
@@ -18878,7 +19266,7 @@
         <valueString value="UsageContextType"/>
        </extension>
        <strength value="extensible"/>
-       <description value="A code the specifies a type of context being specified by a usage context"/>
+       <description value="A code that specifies a type of context being specified by a usage context"/>
        <valueSetReference>
         <reference value="http://hl7.org/fhir/ValueSet/usage-context-type"/>
        </valueSetReference>
@@ -18900,6 +19288,16 @@
        <code value="Range"/>
       </type>
       <isSummary value="true"/>
+      <binding>
+       <extension url="http://hl7.org/fhir/StructureDefinition/elementdefinition-bindingName">
+        <valueString value="UsageContextValue"/>
+       </extension>
+       <strength value="example"/>
+       <description value="A code that defines the specific value for the context being specified"/>
+       <valueSetReference>
+        <reference value="http://hl7.org/fhir/ValueSet/use-context"/>
+       </valueSetReference>
+      </binding>
      </element>
     </snapshot>
     <differential>
@@ -18925,7 +19323,7 @@
         <valueString value="UsageContextType"/>
        </extension>
        <strength value="extensible"/>
-       <description value="A code the specifies a type of context being specified by a usage context"/>
+       <description value="A code that specifies a type of context being specified by a usage context"/>
        <valueSetReference>
         <reference value="http://hl7.org/fhir/ValueSet/usage-context-type"/>
        </valueSetReference>
@@ -18947,6 +19345,16 @@
        <code value="Range"/>
       </type>
       <isSummary value="true"/>
+      <binding>
+       <extension url="http://hl7.org/fhir/StructureDefinition/elementdefinition-bindingName">
+        <valueString value="UsageContextValue"/>
+       </extension>
+       <strength value="example"/>
+       <description value="A code that defines the specific value for the context being specified"/>
+       <valueSetReference>
+        <reference value="http://hl7.org/fhir/ValueSet/use-context"/>
+       </valueSetReference>
+      </binding>
      </element>
     </differential>
    </StructureDefinition>
@@ -18958,12 +19366,12 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="SimpleQuantity"/>
     <meta>
-     <lastUpdated value="2017-03-04T06:58:42.085-05:00"/>
+     <lastUpdated value="2017-04-17T17:38:22.515-04:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/SimpleQuantity"/>
     <name value="SimpleQuantity"/>
     <status value="draft"/>
-    <date value="2017-03-04T06:58:42-05:00"/>
+    <date value="2017-04-17T17:38:22-04:00"/>
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
@@ -18972,7 +19380,7 @@
      </telecom>
     </contact>
     <description value="A fixed quantity (no comparator)"/>
-    <fhirVersion value="1.9.0"/>
+    <fhirVersion value="3.0.1"/>
     <mapping>
      <identity value="v2"/>
      <uri value="http://hl7.org/v2"/>
@@ -19007,7 +19415,7 @@
        <key value="ele-1"/>
        <severity value="error"/>
        <human value="All FHIR elements must have a @value or children"/>
-       <expression value="children().count() > id.count()"/>
+       <expression value="hasValue() | (children().count() > id.count())"/>
        <xpath value="@value|f:*|h:div"/>
        <source value="Element"/>
       </constraint>
@@ -19061,6 +19469,14 @@
      </element>
      <element id="Quantity:simplequantity.extension">
       <path value="Quantity.extension"/>
+      <slicing>
+       <discriminator>
+        <type value="value"/>
+        <path value="url"/>
+       </discriminator>
+       <description value="Extensions are always sliced by (at least) url"/>
+       <rules value="open"/>
+      </slicing>
       <short value="Additional Content defined by implementations"/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <comment value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>

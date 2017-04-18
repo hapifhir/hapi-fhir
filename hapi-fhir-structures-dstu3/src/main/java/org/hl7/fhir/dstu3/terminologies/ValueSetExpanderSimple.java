@@ -385,8 +385,10 @@ public class ValueSetExpanderSimple implements ValueSetExpander {
         else
           throw new TerminologyServiceException("unable to find code system " + inc.getSystem().toString());
       }
-      if (cs.getContent() != CodeSystemContentMode.COMPLETE)
-        throw new TerminologyServiceException("Code system " + inc.getSystem().toString() + " is incomplete");
+      if (cs.getContent() != CodeSystemContentMode.COMPLETE) {
+        return;
+      }
+      
       if (cs.hasVersion())
         if (!existsInParams(params, "version", new UriType(cs.getUrl() + "|" + cs.getVersion())))
           params.add(new ValueSetExpansionParameterComponent().setName("version").setValue(new UriType(cs.getUrl() + "|" + cs.getVersion())));

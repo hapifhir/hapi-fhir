@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
+// Generated on Mon, Apr 17, 2017 17:38-0400 for FHIR v3.0.1
 
 import java.util.*;
 
@@ -582,17 +582,17 @@ public class FamilyMemberHistory extends DomainResource {
     protected Enumeration<FamilyHistoryStatus> status;
 
     /**
-     * If true, indicates that the family member history did not actually occur.
+     * If true, indicates the taking of an individual family member's history did not occur. The notDone element should not be used to document negated conditions, such as a family member that did not have a condition.
      */
     @Child(name = "notDone", type = {BooleanType.class}, order=3, min=0, max=1, modifier=true, summary=true)
-    @Description(shortDefinition="Family member history did not occur", formalDefinition="If true, indicates that the family member history did not actually occur." )
+    @Description(shortDefinition="The taking of a family member's history did not occur", formalDefinition="If true, indicates the taking of an individual family member's history did not occur. The notDone element should not be used to document negated conditions, such as a family member that did not have a condition." )
     protected BooleanType notDone;
 
     /**
-     * Describes why the family member history did not occur in coded and/or textual form.
+     * Describes why the family member's history is absent.
      */
     @Child(name = "notDoneReason", type = {CodeableConcept.class}, order=4, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="subject-unknown | withheld | unable-to-obtain | deferred", formalDefinition="Describes why the family member history did not occur in coded and/or textual form." )
+    @Description(shortDefinition="subject-unknown | withheld | unable-to-obtain | deferred", formalDefinition="Describes why the family member's history is absent." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/history-not-done-reason")
     protected CodeableConcept notDoneReason;
 
@@ -881,7 +881,7 @@ public class FamilyMemberHistory extends DomainResource {
     }
 
     /**
-     * @return {@link #notDone} (If true, indicates that the family member history did not actually occur.). This is the underlying object with id, value and extensions. The accessor "getNotDone" gives direct access to the value
+     * @return {@link #notDone} (If true, indicates the taking of an individual family member's history did not occur. The notDone element should not be used to document negated conditions, such as a family member that did not have a condition.). This is the underlying object with id, value and extensions. The accessor "getNotDone" gives direct access to the value
      */
     public BooleanType getNotDoneElement() { 
       if (this.notDone == null)
@@ -901,7 +901,7 @@ public class FamilyMemberHistory extends DomainResource {
     }
 
     /**
-     * @param value {@link #notDone} (If true, indicates that the family member history did not actually occur.). This is the underlying object with id, value and extensions. The accessor "getNotDone" gives direct access to the value
+     * @param value {@link #notDone} (If true, indicates the taking of an individual family member's history did not occur. The notDone element should not be used to document negated conditions, such as a family member that did not have a condition.). This is the underlying object with id, value and extensions. The accessor "getNotDone" gives direct access to the value
      */
     public FamilyMemberHistory setNotDoneElement(BooleanType value) { 
       this.notDone = value;
@@ -909,14 +909,14 @@ public class FamilyMemberHistory extends DomainResource {
     }
 
     /**
-     * @return If true, indicates that the family member history did not actually occur.
+     * @return If true, indicates the taking of an individual family member's history did not occur. The notDone element should not be used to document negated conditions, such as a family member that did not have a condition.
      */
     public boolean getNotDone() { 
       return this.notDone == null || this.notDone.isEmpty() ? false : this.notDone.getValue();
     }
 
     /**
-     * @param value If true, indicates that the family member history did not actually occur.
+     * @param value If true, indicates the taking of an individual family member's history did not occur. The notDone element should not be used to document negated conditions, such as a family member that did not have a condition.
      */
     public FamilyMemberHistory setNotDone(boolean value) { 
         if (this.notDone == null)
@@ -926,7 +926,7 @@ public class FamilyMemberHistory extends DomainResource {
     }
 
     /**
-     * @return {@link #notDoneReason} (Describes why the family member history did not occur in coded and/or textual form.)
+     * @return {@link #notDoneReason} (Describes why the family member's history is absent.)
      */
     public CodeableConcept getNotDoneReason() { 
       if (this.notDoneReason == null)
@@ -942,7 +942,7 @@ public class FamilyMemberHistory extends DomainResource {
     }
 
     /**
-     * @param value {@link #notDoneReason} (Describes why the family member history did not occur in coded and/or textual form.)
+     * @param value {@link #notDoneReason} (Describes why the family member's history is absent.)
      */
     public FamilyMemberHistory setNotDoneReason(CodeableConcept value) { 
       this.notDoneReason = value;
@@ -1636,8 +1636,8 @@ public class FamilyMemberHistory extends DomainResource {
         childrenList.add(new Property("identifier", "Identifier", "This records identifiers associated with this family member history record that are defined by business processes and/ or used to refer to it when a direct URL reference to the resource itself is not appropriate (e.g. in CDA documents, or in written / printed documentation).", 0, java.lang.Integer.MAX_VALUE, identifier));
         childrenList.add(new Property("definition", "Reference(PlanDefinition|Questionnaire)", "A protocol or questionnaire that was adhered to in whole or in part by this event.", 0, java.lang.Integer.MAX_VALUE, definition));
         childrenList.add(new Property("status", "code", "A code specifying the status of the record of the family history of a specific family member.", 0, java.lang.Integer.MAX_VALUE, status));
-        childrenList.add(new Property("notDone", "boolean", "If true, indicates that the family member history did not actually occur.", 0, java.lang.Integer.MAX_VALUE, notDone));
-        childrenList.add(new Property("notDoneReason", "CodeableConcept", "Describes why the family member history did not occur in coded and/or textual form.", 0, java.lang.Integer.MAX_VALUE, notDoneReason));
+        childrenList.add(new Property("notDone", "boolean", "If true, indicates the taking of an individual family member's history did not occur. The notDone element should not be used to document negated conditions, such as a family member that did not have a condition.", 0, java.lang.Integer.MAX_VALUE, notDone));
+        childrenList.add(new Property("notDoneReason", "CodeableConcept", "Describes why the family member's history is absent.", 0, java.lang.Integer.MAX_VALUE, notDoneReason));
         childrenList.add(new Property("patient", "Reference(Patient)", "The person who this history concerns.", 0, java.lang.Integer.MAX_VALUE, patient));
         childrenList.add(new Property("date", "dateTime", "The date (and possibly time) when the family member history was taken.", 0, java.lang.Integer.MAX_VALUE, date));
         childrenList.add(new Property("name", "string", "This will either be a name or a description; e.g. \"Aunt Susan\", \"my cousin with the red hair\".", 0, java.lang.Integer.MAX_VALUE, name));

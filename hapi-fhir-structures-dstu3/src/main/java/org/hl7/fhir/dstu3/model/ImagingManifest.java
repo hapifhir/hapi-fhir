@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
+// Generated on Mon, Apr 17, 2017 17:38-0400 for FHIR v3.0.1
 
 import java.util.*;
 
@@ -1061,10 +1061,10 @@ public class ImagingManifest extends DomainResource {
   }
 
     /**
-     * Unique identifier of the the DICOM Key Object Selection (KOS) that this resource represents.
+     * Unique identifier of the DICOM Key Object Selection (KOS) that this resource represents.
      */
     @Child(name = "identifier", type = {Identifier.class}, order=0, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="SOP Instance UID", formalDefinition="Unique identifier of the the DICOM Key Object Selection (KOS) that this resource represents." )
+    @Description(shortDefinition="SOP Instance UID", formalDefinition="Unique identifier of the DICOM Key Object Selection (KOS) that this resource represents." )
     protected Identifier identifier;
 
     /**
@@ -1131,7 +1131,7 @@ The value may be derived from the DICOM Standard Part 16, CID-7010 descriptions 
     }
 
     /**
-     * @return {@link #identifier} (Unique identifier of the the DICOM Key Object Selection (KOS) that this resource represents.)
+     * @return {@link #identifier} (Unique identifier of the DICOM Key Object Selection (KOS) that this resource represents.)
      */
     public Identifier getIdentifier() { 
       if (this.identifier == null)
@@ -1147,7 +1147,7 @@ The value may be derived from the DICOM Standard Part 16, CID-7010 descriptions 
     }
 
     /**
-     * @param value {@link #identifier} (Unique identifier of the the DICOM Key Object Selection (KOS) that this resource represents.)
+     * @param value {@link #identifier} (Unique identifier of the DICOM Key Object Selection (KOS) that this resource represents.)
      */
     public ImagingManifest setIdentifier(Identifier value) { 
       this.identifier = value;
@@ -1394,7 +1394,7 @@ The value may be derived from the DICOM Standard Part 16, CID-7010 descriptions 
 
       protected void listChildren(List<Property> childrenList) {
         super.listChildren(childrenList);
-        childrenList.add(new Property("identifier", "Identifier", "Unique identifier of the the DICOM Key Object Selection (KOS) that this resource represents.", 0, java.lang.Integer.MAX_VALUE, identifier));
+        childrenList.add(new Property("identifier", "Identifier", "Unique identifier of the DICOM Key Object Selection (KOS) that this resource represents.", 0, java.lang.Integer.MAX_VALUE, identifier));
         childrenList.add(new Property("patient", "Reference(Patient)", "A patient resource reference which is the patient subject of all DICOM SOP Instances in this ImagingManifest.", 0, java.lang.Integer.MAX_VALUE, patient));
         childrenList.add(new Property("authoringTime", "dateTime", "Date and time when the selection of the referenced instances were made. It is (typically) different from the creation date of the selection resource, and from dates associated with the referenced instances (e.g. capture time of the referenced image).", 0, java.lang.Integer.MAX_VALUE, authoringTime));
         childrenList.add(new Property("author", "Reference(Practitioner|Device|Organization|Patient|RelatedPerson)", "Author of ImagingManifest. It can be a human author or a device which made the decision of the SOP instances selected. For example, a radiologist selected a set of imaging SOP instances to attach in a diagnostic report, and a CAD application may author a selection to describe SOP instances it used to generate a detection conclusion.", 0, java.lang.Integer.MAX_VALUE, author));

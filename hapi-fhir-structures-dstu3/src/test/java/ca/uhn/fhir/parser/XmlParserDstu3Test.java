@@ -3185,7 +3185,7 @@ public class XmlParserDstu3Test {
 
     // Check no NPE if base server not configure
     newPatient = ourCtx.newXmlParser().parseResource(MyPatientWithCustomUrlExtension.class, new StringReader(parsedPatient));
-    assertNull("myName", newPatient.getPetName());
+    assertNull("myName", newPatient.getPetName().getValue());
     assertEquals("myName", ((StringType) newPatient.getExtensionsByUrl("http://www.example.com/petname").get(0).getValue()).getValue());
   }
 

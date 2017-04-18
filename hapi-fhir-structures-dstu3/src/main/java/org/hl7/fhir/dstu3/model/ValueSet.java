@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
+// Generated on Mon, Apr 17, 2017 17:38-0400 for FHIR v3.0.1
 
 import java.util.*;
 
@@ -2880,10 +2880,10 @@ public class ValueSet extends MetadataResource {
         protected BooleanType abstract_;
 
         /**
-         * If the concept is inactive in the code system that defines it. Inactive codes are those that are no longer to be used, but are maintained by the code system for understnading legacy data.
+         * If the concept is inactive in the code system that defines it. Inactive codes are those that are no longer to be used, but are maintained by the code system for understanding legacy data.
          */
         @Child(name = "inactive", type = {BooleanType.class}, order=3, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="If concept is inactive in the code system", formalDefinition="If the concept is inactive in the code system that defines it. Inactive codes are those that are no longer to be used, but are maintained by the code system for understnading legacy data." )
+        @Description(shortDefinition="If concept is inactive in the code system", formalDefinition="If the concept is inactive in the code system that defines it. Inactive codes are those that are no longer to be used, but are maintained by the code system for understanding legacy data." )
         protected BooleanType inactive;
 
         /**
@@ -3025,7 +3025,7 @@ public class ValueSet extends MetadataResource {
         }
 
         /**
-         * @return {@link #inactive} (If the concept is inactive in the code system that defines it. Inactive codes are those that are no longer to be used, but are maintained by the code system for understnading legacy data.). This is the underlying object with id, value and extensions. The accessor "getInactive" gives direct access to the value
+         * @return {@link #inactive} (If the concept is inactive in the code system that defines it. Inactive codes are those that are no longer to be used, but are maintained by the code system for understanding legacy data.). This is the underlying object with id, value and extensions. The accessor "getInactive" gives direct access to the value
          */
         public BooleanType getInactiveElement() { 
           if (this.inactive == null)
@@ -3045,7 +3045,7 @@ public class ValueSet extends MetadataResource {
         }
 
         /**
-         * @param value {@link #inactive} (If the concept is inactive in the code system that defines it. Inactive codes are those that are no longer to be used, but are maintained by the code system for understnading legacy data.). This is the underlying object with id, value and extensions. The accessor "getInactive" gives direct access to the value
+         * @param value {@link #inactive} (If the concept is inactive in the code system that defines it. Inactive codes are those that are no longer to be used, but are maintained by the code system for understanding legacy data.). This is the underlying object with id, value and extensions. The accessor "getInactive" gives direct access to the value
          */
         public ValueSetExpansionContainsComponent setInactiveElement(BooleanType value) { 
           this.inactive = value;
@@ -3053,14 +3053,14 @@ public class ValueSet extends MetadataResource {
         }
 
         /**
-         * @return If the concept is inactive in the code system that defines it. Inactive codes are those that are no longer to be used, but are maintained by the code system for understnading legacy data.
+         * @return If the concept is inactive in the code system that defines it. Inactive codes are those that are no longer to be used, but are maintained by the code system for understanding legacy data.
          */
         public boolean getInactive() { 
           return this.inactive == null || this.inactive.isEmpty() ? false : this.inactive.getValue();
         }
 
         /**
-         * @param value If the concept is inactive in the code system that defines it. Inactive codes are those that are no longer to be used, but are maintained by the code system for understnading legacy data.
+         * @param value If the concept is inactive in the code system that defines it. Inactive codes are those that are no longer to be used, but are maintained by the code system for understanding legacy data.
          */
         public ValueSetExpansionContainsComponent setInactive(boolean value) { 
             if (this.inactive == null)
@@ -3326,7 +3326,7 @@ public class ValueSet extends MetadataResource {
           super.listChildren(childrenList);
           childrenList.add(new Property("system", "uri", "An absolute URI which is the code system in which the code for this item in the expansion is defined.", 0, java.lang.Integer.MAX_VALUE, system));
           childrenList.add(new Property("abstract", "boolean", "If true, this entry is included in the expansion for navigational purposes, and the user cannot select the code directly as a proper value.", 0, java.lang.Integer.MAX_VALUE, abstract_));
-          childrenList.add(new Property("inactive", "boolean", "If the concept is inactive in the code system that defines it. Inactive codes are those that are no longer to be used, but are maintained by the code system for understnading legacy data.", 0, java.lang.Integer.MAX_VALUE, inactive));
+          childrenList.add(new Property("inactive", "boolean", "If the concept is inactive in the code system that defines it. Inactive codes are those that are no longer to be used, but are maintained by the code system for understanding legacy data.", 0, java.lang.Integer.MAX_VALUE, inactive));
           childrenList.add(new Property("version", "string", "The version of this code system that defined this code and/or display. This should only be used with code systems that do not enforce concept permanence.", 0, java.lang.Integer.MAX_VALUE, version));
           childrenList.add(new Property("code", "code", "The code for this item in the expansion hierarchy. If this code is missing the entry in the hierarchy is a place holder (abstract) and does not represent a valid code in the value set.", 0, java.lang.Integer.MAX_VALUE, code));
           childrenList.add(new Property("display", "string", "The recommended display for this item in the expansion.", 0, java.lang.Integer.MAX_VALUE, display));
@@ -3540,10 +3540,10 @@ public class ValueSet extends MetadataResource {
     protected BooleanType immutable;
 
     /**
-     * Explains why this value set is needed and why it has been designed as it has.
+     * Explaination of why this value set is needed and why it has been designed as it has.
      */
     @Child(name = "purpose", type = {MarkdownType.class}, order=2, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Why this value set is defined", formalDefinition="Explains why this value set is needed and why it has been designed as it has." )
+    @Description(shortDefinition="Why this value set is defined", formalDefinition="Explaination of why this value set is needed and why it has been designed as it has." )
     protected MarkdownType purpose;
 
     /**
@@ -3592,7 +3592,7 @@ public class ValueSet extends MetadataResource {
     }
 
     /**
-     * @return {@link #url} (An absolute URL that is used to identify this value set when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this value set is (or will be) published. The URL SHOULD include the major version of the value set. For more information see [Technical and Business Versions](resource.html#versions).). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
+     * @return {@link #url} (An absolute URI that is used to identify this value set when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this value set is (or will be) published. The URL SHOULD include the major version of the value set. For more information see [Technical and Business Versions](resource.html#versions).). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
      */
     public UriType getUrlElement() { 
       if (this.url == null)
@@ -3612,7 +3612,7 @@ public class ValueSet extends MetadataResource {
     }
 
     /**
-     * @param value {@link #url} (An absolute URL that is used to identify this value set when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this value set is (or will be) published. The URL SHOULD include the major version of the value set. For more information see [Technical and Business Versions](resource.html#versions).). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
+     * @param value {@link #url} (An absolute URI that is used to identify this value set when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this value set is (or will be) published. The URL SHOULD include the major version of the value set. For more information see [Technical and Business Versions](resource.html#versions).). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
      */
     public ValueSet setUrlElement(UriType value) { 
       this.url = value;
@@ -3620,14 +3620,14 @@ public class ValueSet extends MetadataResource {
     }
 
     /**
-     * @return An absolute URL that is used to identify this value set when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this value set is (or will be) published. The URL SHOULD include the major version of the value set. For more information see [Technical and Business Versions](resource.html#versions).
+     * @return An absolute URI that is used to identify this value set when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this value set is (or will be) published. The URL SHOULD include the major version of the value set. For more information see [Technical and Business Versions](resource.html#versions).
      */
     public String getUrl() { 
       return this.url == null ? null : this.url.getValue();
     }
 
     /**
-     * @param value An absolute URL that is used to identify this value set when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this value set is (or will be) published. The URL SHOULD include the major version of the value set. For more information see [Technical and Business Versions](resource.html#versions).
+     * @param value An absolute URI that is used to identify this value set when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this value set is (or will be) published. The URL SHOULD include the major version of the value set. For more information see [Technical and Business Versions](resource.html#versions).
      */
     public ValueSet setUrl(String value) { 
       if (Utilities.noString(value))
@@ -3694,7 +3694,7 @@ public class ValueSet extends MetadataResource {
     }
 
     /**
-     * @return {@link #version} (The identifier that is used to identify this version of the value set when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the value set author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions are orderable.). This is the underlying object with id, value and extensions. The accessor "getVersion" gives direct access to the value
+     * @return {@link #version} (The identifier that is used to identify this version of the value set when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the value set author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions can be placed in a lexicographical sequence.). This is the underlying object with id, value and extensions. The accessor "getVersion" gives direct access to the value
      */
     public StringType getVersionElement() { 
       if (this.version == null)
@@ -3714,7 +3714,7 @@ public class ValueSet extends MetadataResource {
     }
 
     /**
-     * @param value {@link #version} (The identifier that is used to identify this version of the value set when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the value set author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions are orderable.). This is the underlying object with id, value and extensions. The accessor "getVersion" gives direct access to the value
+     * @param value {@link #version} (The identifier that is used to identify this version of the value set when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the value set author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions can be placed in a lexicographical sequence.). This is the underlying object with id, value and extensions. The accessor "getVersion" gives direct access to the value
      */
     public ValueSet setVersionElement(StringType value) { 
       this.version = value;
@@ -3722,14 +3722,14 @@ public class ValueSet extends MetadataResource {
     }
 
     /**
-     * @return The identifier that is used to identify this version of the value set when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the value set author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions are orderable.
+     * @return The identifier that is used to identify this version of the value set when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the value set author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions can be placed in a lexicographical sequence.
      */
     public String getVersion() { 
       return this.version == null ? null : this.version.getValue();
     }
 
     /**
-     * @param value The identifier that is used to identify this version of the value set when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the value set author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions are orderable.
+     * @param value The identifier that is used to identify this version of the value set when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the value set author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions can be placed in a lexicographical sequence.
      */
     public ValueSet setVersion(String value) { 
       if (Utilities.noString(value))
@@ -3886,7 +3886,7 @@ public class ValueSet extends MetadataResource {
     }
 
     /**
-     * @return {@link #experimental} (A flag to indicate that this value set is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.). This is the underlying object with id, value and extensions. The accessor "getExperimental" gives direct access to the value
+     * @return {@link #experimental} (A boolean value to indicate that this value set is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.). This is the underlying object with id, value and extensions. The accessor "getExperimental" gives direct access to the value
      */
     public BooleanType getExperimentalElement() { 
       if (this.experimental == null)
@@ -3906,7 +3906,7 @@ public class ValueSet extends MetadataResource {
     }
 
     /**
-     * @param value {@link #experimental} (A flag to indicate that this value set is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.). This is the underlying object with id, value and extensions. The accessor "getExperimental" gives direct access to the value
+     * @param value {@link #experimental} (A boolean value to indicate that this value set is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.). This is the underlying object with id, value and extensions. The accessor "getExperimental" gives direct access to the value
      */
     public ValueSet setExperimentalElement(BooleanType value) { 
       this.experimental = value;
@@ -3914,14 +3914,14 @@ public class ValueSet extends MetadataResource {
     }
 
     /**
-     * @return A flag to indicate that this value set is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.
+     * @return A boolean value to indicate that this value set is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.
      */
     public boolean getExperimental() { 
       return this.experimental == null || this.experimental.isEmpty() ? false : this.experimental.getValue();
     }
 
     /**
-     * @param value A flag to indicate that this value set is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.
+     * @param value A boolean value to indicate that this value set is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.
      */
     public ValueSet setExperimental(boolean value) { 
         if (this.experimental == null)
@@ -3931,7 +3931,7 @@ public class ValueSet extends MetadataResource {
     }
 
     /**
-     * @return {@link #date} (The date  (and optionally time) when the value set was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the value set changes. (e.g. the 'content logical definition').). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
+     * @return {@link #date} (The date  (and optionally time) when the value set was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the value set changes. (e.g. the 'content logical definition').). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
      */
     public DateTimeType getDateElement() { 
       if (this.date == null)
@@ -3951,7 +3951,7 @@ public class ValueSet extends MetadataResource {
     }
 
     /**
-     * @param value {@link #date} (The date  (and optionally time) when the value set was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the value set changes. (e.g. the 'content logical definition').). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
+     * @param value {@link #date} (The date  (and optionally time) when the value set was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the value set changes. (e.g. the 'content logical definition').). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
      */
     public ValueSet setDateElement(DateTimeType value) { 
       this.date = value;
@@ -3959,14 +3959,14 @@ public class ValueSet extends MetadataResource {
     }
 
     /**
-     * @return The date  (and optionally time) when the value set was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the value set changes. (e.g. the 'content logical definition').
+     * @return The date  (and optionally time) when the value set was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the value set changes. (e.g. the 'content logical definition').
      */
     public Date getDate() { 
       return this.date == null ? null : this.date.getValue();
     }
 
     /**
-     * @param value The date  (and optionally time) when the value set was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the value set changes. (e.g. the 'content logical definition').
+     * @param value The date  (and optionally time) when the value set was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the value set changes. (e.g. the 'content logical definition').
      */
     public ValueSet setDate(Date value) { 
       if (value == null)
@@ -4082,7 +4082,7 @@ public class ValueSet extends MetadataResource {
     }
 
     /**
-     * @return {@link #description} (A free text natural language description of the value set from the consumer's perspective.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
+     * @return {@link #description} (A free text natural language description of the value set from a consumer's perspective.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
      */
     public MarkdownType getDescriptionElement() { 
       if (this.description == null)
@@ -4102,7 +4102,7 @@ public class ValueSet extends MetadataResource {
     }
 
     /**
-     * @param value {@link #description} (A free text natural language description of the value set from the consumer's perspective.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
+     * @param value {@link #description} (A free text natural language description of the value set from a consumer's perspective.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
      */
     public ValueSet setDescriptionElement(MarkdownType value) { 
       this.description = value;
@@ -4110,14 +4110,14 @@ public class ValueSet extends MetadataResource {
     }
 
     /**
-     * @return A free text natural language description of the value set from the consumer's perspective.
+     * @return A free text natural language description of the value set from a consumer's perspective.
      */
     public String getDescription() { 
       return this.description == null ? null : this.description.getValue();
     }
 
     /**
-     * @param value A free text natural language description of the value set from the consumer's perspective.
+     * @param value A free text natural language description of the value set from a consumer's perspective.
      */
     public ValueSet setDescription(String value) { 
       if (value == null)
@@ -4131,7 +4131,7 @@ public class ValueSet extends MetadataResource {
     }
 
     /**
-     * @return {@link #useContext} (The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching of code system definitions.)
+     * @return {@link #useContext} (The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching for appropriate value set instances.)
      */
     public List<UsageContext> getUseContext() { 
       if (this.useContext == null)
@@ -4184,7 +4184,7 @@ public class ValueSet extends MetadataResource {
     }
 
     /**
-     * @return {@link #jurisdiction} (A jurisdiction in which the value set is intended to be used.)
+     * @return {@link #jurisdiction} (A legal or geographic region in which the value set is intended to be used.)
      */
     public List<CodeableConcept> getJurisdiction() { 
       if (this.jurisdiction == null)
@@ -4282,7 +4282,7 @@ public class ValueSet extends MetadataResource {
     }
 
     /**
-     * @return {@link #purpose} (Explains why this value set is needed and why it has been designed as it has.). This is the underlying object with id, value and extensions. The accessor "getPurpose" gives direct access to the value
+     * @return {@link #purpose} (Explaination of why this value set is needed and why it has been designed as it has.). This is the underlying object with id, value and extensions. The accessor "getPurpose" gives direct access to the value
      */
     public MarkdownType getPurposeElement() { 
       if (this.purpose == null)
@@ -4302,7 +4302,7 @@ public class ValueSet extends MetadataResource {
     }
 
     /**
-     * @param value {@link #purpose} (Explains why this value set is needed and why it has been designed as it has.). This is the underlying object with id, value and extensions. The accessor "getPurpose" gives direct access to the value
+     * @param value {@link #purpose} (Explaination of why this value set is needed and why it has been designed as it has.). This is the underlying object with id, value and extensions. The accessor "getPurpose" gives direct access to the value
      */
     public ValueSet setPurposeElement(MarkdownType value) { 
       this.purpose = value;
@@ -4310,14 +4310,14 @@ public class ValueSet extends MetadataResource {
     }
 
     /**
-     * @return Explains why this value set is needed and why it has been designed as it has.
+     * @return Explaination of why this value set is needed and why it has been designed as it has.
      */
     public String getPurpose() { 
       return this.purpose == null ? null : this.purpose.getValue();
     }
 
     /**
-     * @param value Explains why this value set is needed and why it has been designed as it has.
+     * @param value Explaination of why this value set is needed and why it has been designed as it has.
      */
     public ValueSet setPurpose(String value) { 
       if (value == null)
@@ -4474,21 +4474,21 @@ public class ValueSet extends MetadataResource {
 
       protected void listChildren(List<Property> childrenList) {
         super.listChildren(childrenList);
-        childrenList.add(new Property("url", "uri", "An absolute URL that is used to identify this value set when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this value set is (or will be) published. The URL SHOULD include the major version of the value set. For more information see [Technical and Business Versions](resource.html#versions).", 0, java.lang.Integer.MAX_VALUE, url));
+        childrenList.add(new Property("url", "uri", "An absolute URI that is used to identify this value set when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this value set is (or will be) published. The URL SHOULD include the major version of the value set. For more information see [Technical and Business Versions](resource.html#versions).", 0, java.lang.Integer.MAX_VALUE, url));
         childrenList.add(new Property("identifier", "Identifier", "A formal identifier that is used to identify this value set when it is represented in other formats, or referenced in a specification, model, design or an instance.", 0, java.lang.Integer.MAX_VALUE, identifier));
-        childrenList.add(new Property("version", "string", "The identifier that is used to identify this version of the value set when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the value set author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions are orderable.", 0, java.lang.Integer.MAX_VALUE, version));
+        childrenList.add(new Property("version", "string", "The identifier that is used to identify this version of the value set when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the value set author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions can be placed in a lexicographical sequence.", 0, java.lang.Integer.MAX_VALUE, version));
         childrenList.add(new Property("name", "string", "A natural language name identifying the value set. This name should be usable as an identifier for the module by machine processing applications such as code generation.", 0, java.lang.Integer.MAX_VALUE, name));
         childrenList.add(new Property("title", "string", "A short, descriptive, user-friendly title for the value set.", 0, java.lang.Integer.MAX_VALUE, title));
         childrenList.add(new Property("status", "code", "The status of this value set. Enables tracking the life-cycle of the content.", 0, java.lang.Integer.MAX_VALUE, status));
-        childrenList.add(new Property("experimental", "boolean", "A flag to indicate that this value set is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.", 0, java.lang.Integer.MAX_VALUE, experimental));
-        childrenList.add(new Property("date", "dateTime", "The date  (and optionally time) when the value set was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the value set changes. (e.g. the 'content logical definition').", 0, java.lang.Integer.MAX_VALUE, date));
+        childrenList.add(new Property("experimental", "boolean", "A boolean value to indicate that this value set is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.", 0, java.lang.Integer.MAX_VALUE, experimental));
+        childrenList.add(new Property("date", "dateTime", "The date  (and optionally time) when the value set was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the value set changes. (e.g. the 'content logical definition').", 0, java.lang.Integer.MAX_VALUE, date));
         childrenList.add(new Property("publisher", "string", "The name of the individual or organization that published the value set.", 0, java.lang.Integer.MAX_VALUE, publisher));
         childrenList.add(new Property("contact", "ContactDetail", "Contact details to assist a user in finding and communicating with the publisher.", 0, java.lang.Integer.MAX_VALUE, contact));
-        childrenList.add(new Property("description", "markdown", "A free text natural language description of the value set from the consumer's perspective.", 0, java.lang.Integer.MAX_VALUE, description));
-        childrenList.add(new Property("useContext", "UsageContext", "The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching of code system definitions.", 0, java.lang.Integer.MAX_VALUE, useContext));
-        childrenList.add(new Property("jurisdiction", "CodeableConcept", "A jurisdiction in which the value set is intended to be used.", 0, java.lang.Integer.MAX_VALUE, jurisdiction));
+        childrenList.add(new Property("description", "markdown", "A free text natural language description of the value set from a consumer's perspective.", 0, java.lang.Integer.MAX_VALUE, description));
+        childrenList.add(new Property("useContext", "UsageContext", "The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching for appropriate value set instances.", 0, java.lang.Integer.MAX_VALUE, useContext));
+        childrenList.add(new Property("jurisdiction", "CodeableConcept", "A legal or geographic region in which the value set is intended to be used.", 0, java.lang.Integer.MAX_VALUE, jurisdiction));
         childrenList.add(new Property("immutable", "boolean", "If this is set to 'true', then no new versions of the content logical definition can be created.  Note: Other metadata might still change.", 0, java.lang.Integer.MAX_VALUE, immutable));
-        childrenList.add(new Property("purpose", "markdown", "Explains why this value set is needed and why it has been designed as it has.", 0, java.lang.Integer.MAX_VALUE, purpose));
+        childrenList.add(new Property("purpose", "markdown", "Explaination of why this value set is needed and why it has been designed as it has.", 0, java.lang.Integer.MAX_VALUE, purpose));
         childrenList.add(new Property("copyright", "markdown", "A copyright statement relating to the value set and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the value set.", 0, java.lang.Integer.MAX_VALUE, copyright));
         childrenList.add(new Property("extensible", "boolean", "Whether this is intended to be used with an extensible binding or not.", 0, java.lang.Integer.MAX_VALUE, extensible));
         childrenList.add(new Property("compose", "", "A set of criteria that define the content logical definition of the value set by including or excluding codes from outside this value set. This I also known as the \"Content Logical Definition\" (CLD).", 0, java.lang.Integer.MAX_VALUE, compose));
@@ -4879,17 +4879,17 @@ public class ValueSet extends MetadataResource {
  /**
    * Search parameter: <b>identifier</b>
    * <p>
-   * Description: <b>External identifiers for the value set</b><br>
+   * Description: <b>External identifier for the value set</b><br>
    * Type: <b>token</b><br>
    * Path: <b>ValueSet.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="ValueSet.identifier", description="External identifiers for the value set", type="token" )
+  @SearchParamDefinition(name="identifier", path="ValueSet.identifier", description="External identifier for the value set", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
    * <p>
-   * Description: <b>External identifiers for the value set</b><br>
+   * Description: <b>External identifier for the value set</b><br>
    * Type: <b>token</b><br>
    * Path: <b>ValueSet.identifier</b><br>
    * </p>
@@ -4899,17 +4899,17 @@ public class ValueSet extends MetadataResource {
  /**
    * Search parameter: <b>jurisdiction</b>
    * <p>
-   * Description: <b>Intended jurisdiction for value set</b><br>
+   * Description: <b>Intended jurisdiction for the value set</b><br>
    * Type: <b>token</b><br>
    * Path: <b>ValueSet.jurisdiction</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="jurisdiction", path="ValueSet.jurisdiction", description="Intended jurisdiction for value set", type="token" )
+  @SearchParamDefinition(name="jurisdiction", path="ValueSet.jurisdiction", description="Intended jurisdiction for the value set", type="token" )
   public static final String SP_JURISDICTION = "jurisdiction";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>jurisdiction</b>
    * <p>
-   * Description: <b>Intended jurisdiction for value set</b><br>
+   * Description: <b>Intended jurisdiction for the value set</b><br>
    * Type: <b>token</b><br>
    * Path: <b>ValueSet.jurisdiction</b><br>
    * </p>
@@ -4919,17 +4919,17 @@ public class ValueSet extends MetadataResource {
  /**
    * Search parameter: <b>name</b>
    * <p>
-   * Description: <b>Name of the value set</b><br>
+   * Description: <b>Computationally friendly name of the value set</b><br>
    * Type: <b>string</b><br>
    * Path: <b>ValueSet.name</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="name", path="ValueSet.name", description="Name of the value set", type="string" )
+  @SearchParamDefinition(name="name", path="ValueSet.name", description="Computationally friendly name of the value set", type="string" )
   public static final String SP_NAME = "name";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>name</b>
    * <p>
-   * Description: <b>Name of the value set</b><br>
+   * Description: <b>Computationally friendly name of the value set</b><br>
    * Type: <b>string</b><br>
    * Path: <b>ValueSet.name</b><br>
    * </p>
@@ -4939,17 +4939,17 @@ public class ValueSet extends MetadataResource {
  /**
    * Search parameter: <b>description</b>
    * <p>
-   * Description: <b>Text search against the description of the value set</b><br>
+   * Description: <b>The description of the value set</b><br>
    * Type: <b>string</b><br>
    * Path: <b>ValueSet.description</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="description", path="ValueSet.description", description="Text search against the description of the value set", type="string" )
+  @SearchParamDefinition(name="description", path="ValueSet.description", description="The description of the value set", type="string" )
   public static final String SP_DESCRIPTION = "description";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>description</b>
    * <p>
-   * Description: <b>Text search against the description of the value set</b><br>
+   * Description: <b>The description of the value set</b><br>
    * Type: <b>string</b><br>
    * Path: <b>ValueSet.description</b><br>
    * </p>
@@ -4979,17 +4979,17 @@ public class ValueSet extends MetadataResource {
  /**
    * Search parameter: <b>title</b>
    * <p>
-   * Description: <b>Text search against the title of the value set</b><br>
+   * Description: <b>The human-friendly name of the value set</b><br>
    * Type: <b>string</b><br>
    * Path: <b>ValueSet.title</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="title", path="ValueSet.title", description="Text search against the title of the value set", type="string" )
+  @SearchParamDefinition(name="title", path="ValueSet.title", description="The human-friendly name of the value set", type="string" )
   public static final String SP_TITLE = "title";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>title</b>
    * <p>
-   * Description: <b>Text search against the title of the value set</b><br>
+   * Description: <b>The human-friendly name of the value set</b><br>
    * Type: <b>string</b><br>
    * Path: <b>ValueSet.title</b><br>
    * </p>

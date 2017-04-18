@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
+// Generated on Mon, Apr 17, 2017 17:38-0400 for FHIR v3.0.1
 
 import java.util.*;
 
@@ -43,7 +43,7 @@ import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.exceptions.FHIRException;
 /**
- * An order or request for both supply of the medication and the instructions for administration of the medication to a patient. The resource is called "MedicationRequest" rather than "MedicationPrescription" or "MedicationOrder" to generalize the use across inpatient and outpatient settings as well as for care plans, etc and to harmonize with workflow patterns.
+ * An order or request for both supply of the medication and the instructions for administration of the medication to a patient. The resource is called "MedicationRequest" rather than "MedicationPrescription" or "MedicationOrder" to generalize the use across inpatient and outpatient settings, including care plans, etc., and to harmonize with workflow patterns.
  */
 @ResourceDef(name="MedicationRequest", profile="http://hl7.org/fhir/Profile/MedicationRequest")
 public class MedicationRequest extends DomainResource {
@@ -734,10 +734,10 @@ public class MedicationRequest extends DomainResource {
         protected Period validityPeriod;
 
         /**
-         * An integer indicating the number of times, in addition to the original dispense, (aka refills or repeats) that the patient can receive the prescribed medication. Usage Notes: This integer does NOT include the original order dispense. This means that if an order indicates dispense 30 tablets plus "3 repeats", then the order can be dispensed a total of 4 times and the patient can receive a total of 120 tablets.
+         * An integer indicating the number of times, in addition to the original dispense, (aka refills or repeats) that the patient can receive the prescribed medication. Usage Notes: This integer does not include the original order dispense. This means that if an order indicates dispense 30 tablets plus "3 repeats", then the order can be dispensed a total of 4 times and the patient can receive a total of 120 tablets.
          */
         @Child(name = "numberOfRepeatsAllowed", type = {PositiveIntType.class}, order=2, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Number of refills authorized", formalDefinition="An integer indicating the number of times, in addition to the original dispense, (aka refills or repeats) that the patient can receive the prescribed medication. Usage Notes: This integer does NOT include the original order dispense. This means that if an order indicates dispense 30 tablets plus \"3 repeats\", then the order can be dispensed a total of 4 times and the patient can receive a total of 120 tablets." )
+        @Description(shortDefinition="Number of refills authorized", formalDefinition="An integer indicating the number of times, in addition to the original dispense, (aka refills or repeats) that the patient can receive the prescribed medication. Usage Notes: This integer does not include the original order dispense. This means that if an order indicates dispense 30 tablets plus \"3 repeats\", then the order can be dispensed a total of 4 times and the patient can receive a total of 120 tablets." )
         protected PositiveIntType numberOfRepeatsAllowed;
 
         /**
@@ -800,7 +800,7 @@ public class MedicationRequest extends DomainResource {
         }
 
         /**
-         * @return {@link #numberOfRepeatsAllowed} (An integer indicating the number of times, in addition to the original dispense, (aka refills or repeats) that the patient can receive the prescribed medication. Usage Notes: This integer does NOT include the original order dispense. This means that if an order indicates dispense 30 tablets plus "3 repeats", then the order can be dispensed a total of 4 times and the patient can receive a total of 120 tablets.). This is the underlying object with id, value and extensions. The accessor "getNumberOfRepeatsAllowed" gives direct access to the value
+         * @return {@link #numberOfRepeatsAllowed} (An integer indicating the number of times, in addition to the original dispense, (aka refills or repeats) that the patient can receive the prescribed medication. Usage Notes: This integer does not include the original order dispense. This means that if an order indicates dispense 30 tablets plus "3 repeats", then the order can be dispensed a total of 4 times and the patient can receive a total of 120 tablets.). This is the underlying object with id, value and extensions. The accessor "getNumberOfRepeatsAllowed" gives direct access to the value
          */
         public PositiveIntType getNumberOfRepeatsAllowedElement() { 
           if (this.numberOfRepeatsAllowed == null)
@@ -820,7 +820,7 @@ public class MedicationRequest extends DomainResource {
         }
 
         /**
-         * @param value {@link #numberOfRepeatsAllowed} (An integer indicating the number of times, in addition to the original dispense, (aka refills or repeats) that the patient can receive the prescribed medication. Usage Notes: This integer does NOT include the original order dispense. This means that if an order indicates dispense 30 tablets plus "3 repeats", then the order can be dispensed a total of 4 times and the patient can receive a total of 120 tablets.). This is the underlying object with id, value and extensions. The accessor "getNumberOfRepeatsAllowed" gives direct access to the value
+         * @param value {@link #numberOfRepeatsAllowed} (An integer indicating the number of times, in addition to the original dispense, (aka refills or repeats) that the patient can receive the prescribed medication. Usage Notes: This integer does not include the original order dispense. This means that if an order indicates dispense 30 tablets plus "3 repeats", then the order can be dispensed a total of 4 times and the patient can receive a total of 120 tablets.). This is the underlying object with id, value and extensions. The accessor "getNumberOfRepeatsAllowed" gives direct access to the value
          */
         public MedicationRequestDispenseRequestComponent setNumberOfRepeatsAllowedElement(PositiveIntType value) { 
           this.numberOfRepeatsAllowed = value;
@@ -828,14 +828,14 @@ public class MedicationRequest extends DomainResource {
         }
 
         /**
-         * @return An integer indicating the number of times, in addition to the original dispense, (aka refills or repeats) that the patient can receive the prescribed medication. Usage Notes: This integer does NOT include the original order dispense. This means that if an order indicates dispense 30 tablets plus "3 repeats", then the order can be dispensed a total of 4 times and the patient can receive a total of 120 tablets.
+         * @return An integer indicating the number of times, in addition to the original dispense, (aka refills or repeats) that the patient can receive the prescribed medication. Usage Notes: This integer does not include the original order dispense. This means that if an order indicates dispense 30 tablets plus "3 repeats", then the order can be dispensed a total of 4 times and the patient can receive a total of 120 tablets.
          */
         public int getNumberOfRepeatsAllowed() { 
           return this.numberOfRepeatsAllowed == null || this.numberOfRepeatsAllowed.isEmpty() ? 0 : this.numberOfRepeatsAllowed.getValue();
         }
 
         /**
-         * @param value An integer indicating the number of times, in addition to the original dispense, (aka refills or repeats) that the patient can receive the prescribed medication. Usage Notes: This integer does NOT include the original order dispense. This means that if an order indicates dispense 30 tablets plus "3 repeats", then the order can be dispensed a total of 4 times and the patient can receive a total of 120 tablets.
+         * @param value An integer indicating the number of times, in addition to the original dispense, (aka refills or repeats) that the patient can receive the prescribed medication. Usage Notes: This integer does not include the original order dispense. This means that if an order indicates dispense 30 tablets plus "3 repeats", then the order can be dispensed a total of 4 times and the patient can receive a total of 120 tablets.
          */
         public MedicationRequestDispenseRequestComponent setNumberOfRepeatsAllowed(int value) { 
             if (this.numberOfRepeatsAllowed == null)
@@ -939,7 +939,7 @@ public class MedicationRequest extends DomainResource {
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
           childrenList.add(new Property("validityPeriod", "Period", "This indicates the validity period of a prescription (stale dating the Prescription).", 0, java.lang.Integer.MAX_VALUE, validityPeriod));
-          childrenList.add(new Property("numberOfRepeatsAllowed", "positiveInt", "An integer indicating the number of times, in addition to the original dispense, (aka refills or repeats) that the patient can receive the prescribed medication. Usage Notes: This integer does NOT include the original order dispense. This means that if an order indicates dispense 30 tablets plus \"3 repeats\", then the order can be dispensed a total of 4 times and the patient can receive a total of 120 tablets.", 0, java.lang.Integer.MAX_VALUE, numberOfRepeatsAllowed));
+          childrenList.add(new Property("numberOfRepeatsAllowed", "positiveInt", "An integer indicating the number of times, in addition to the original dispense, (aka refills or repeats) that the patient can receive the prescribed medication. Usage Notes: This integer does not include the original order dispense. This means that if an order indicates dispense 30 tablets plus \"3 repeats\", then the order can be dispensed a total of 4 times and the patient can receive a total of 120 tablets.", 0, java.lang.Integer.MAX_VALUE, numberOfRepeatsAllowed));
           childrenList.add(new Property("quantity", "SimpleQuantity", "The amount that is to be dispensed for one fill.", 0, java.lang.Integer.MAX_VALUE, quantity));
           childrenList.add(new Property("expectedSupplyDuration", "Duration", "Identifies the period time over which the supplied product is expected to be used, or the length of time the dispense is expected to last.", 0, java.lang.Integer.MAX_VALUE, expectedSupplyDuration));
           childrenList.add(new Property("performer", "Reference(Organization)", "Indicates the intended dispensing Organization specified by the prescriber.", 0, java.lang.Integer.MAX_VALUE, performer));
@@ -1311,10 +1311,10 @@ public class MedicationRequest extends DomainResource {
   }
 
     /**
-     * External identifier - one that would be used by another non-FHIR system - for example a re-imbursement system might issue its own id for each prescription that is created.  This is particularly important where FHIR only provides part of an entire workflow process where records have to be tracked through an entire system.
+     * This records identifiers associated with this medication request that are defined by business processes and/or used to refer to it when a direct URL reference to the resource itself is not appropriate. For example a re-imbursement system might issue its own id for each prescription that is created.  This is particularly important where FHIR only provides part of an entire workflow process where records must be tracked through an entire system.
      */
     @Child(name = "identifier", type = {Identifier.class}, order=0, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="External ids for this request", formalDefinition="External identifier - one that would be used by another non-FHIR system - for example a re-imbursement system might issue its own id for each prescription that is created.  This is particularly important where FHIR only provides part of an entire workflow process where records have to be tracked through an entire system." )
+    @Description(shortDefinition="External ids for this request", formalDefinition="This records identifiers associated with this medication request that are defined by business processes and/or used to refer to it when a direct URL reference to the resource itself is not appropriate. For example a re-imbursement system might issue its own id for each prescription that is created.  This is particularly important where FHIR only provides part of an entire workflow process where records must be tracked through an entire system." )
     protected List<Identifier> identifier;
 
     /**
@@ -1342,10 +1342,10 @@ public class MedicationRequest extends DomainResource {
 
 
     /**
-     * A shared identifier common to all requests that were authorized more or less simultaneously by a single author, representing the identifer of the requisition or prescription.
+     * A shared identifier common to all requests that were authorized more or less simultaneously by a single author, representing the identifier of the requisition or prescription.
      */
     @Child(name = "groupIdentifier", type = {Identifier.class}, order=3, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Composite request this is part of", formalDefinition="A shared identifier common to all requests that were authorized more or less simultaneously by a single author, representing the identifer of the requisition or prescription." )
+    @Description(shortDefinition="Composite request this is part of", formalDefinition="A shared identifier common to all requests that were authorized more or less simultaneously by a single author, representing the identifier of the requisition or prescription." )
     protected Identifier groupIdentifier;
 
     /**
@@ -1375,16 +1375,16 @@ public class MedicationRequest extends DomainResource {
     /**
      * Indicates how quickly the Medication Request should be addressed with respect to other requests.
      */
-    @Child(name = "priority", type = {CodeType.class}, order=7, min=0, max=1, modifier=true, summary=true)
+    @Child(name = "priority", type = {CodeType.class}, order=7, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="routine | urgent | stat | asap", formalDefinition="Indicates how quickly the Medication Request should be addressed with respect to other requests." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/medication-request-priority")
     protected Enumeration<MedicationRequestPriority> priority;
 
     /**
-     * Identifies the medication being administered. This is a link to a resource that represents the medication which may be the details of the medication or simply an attribute carrying a code that identifies the medication from a known list of medications.
+     * Identifies the medication being requested. This is a link to a resource that represents the medication which may be the details of the medication or simply an attribute carrying a code that identifies the medication from a known list of medications.
      */
     @Child(name = "medication", type = {CodeableConcept.class, Medication.class}, order=8, min=1, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Medication to be taken", formalDefinition="Identifies the medication being administered. This is a link to a resource that represents the medication which may be the details of the medication or simply an attribute carrying a code that identifies the medication from a known list of medications." )
+    @Description(shortDefinition="Medication to be taken", formalDefinition="Identifies the medication being requested. This is a link to a resource that represents the medication which may be the details of the medication or simply an attribute carrying a code that identifies the medication from a known list of medications." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/medication-codes")
     protected Type medication;
 
@@ -1392,7 +1392,7 @@ public class MedicationRequest extends DomainResource {
      * A link to a resource representing the person or set of individuals to whom the medication will be given.
      */
     @Child(name = "subject", type = {Patient.class, Group.class}, order=9, min=1, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Who or group prescription is for", formalDefinition="A link to a resource representing the person or set of individuals to whom the medication will be given." )
+    @Description(shortDefinition="Who or group medication request is for", formalDefinition="A link to a resource representing the person or set of individuals to whom the medication will be given." )
     protected Reference subject;
 
     /**
@@ -1401,14 +1401,14 @@ public class MedicationRequest extends DomainResource {
     protected Resource subjectTarget;
 
     /**
-     * A link to a resource that identifies the particular occurrence or set occurrences of contact between patient and health care provider.
+     * A link to an encounter, or episode of care, that identifies the particular occurrence or set occurrences of contact between patient and health care provider.
      */
     @Child(name = "context", type = {Encounter.class, EpisodeOfCare.class}, order=10, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Created during encounter/admission/stay", formalDefinition="A link to a resource that identifies the particular occurrence or set occurrences of contact between patient and health care provider." )
+    @Description(shortDefinition="Created during encounter/admission/stay", formalDefinition="A link to an encounter, or episode of care, that identifies the particular occurrence or set occurrences of contact between patient and health care provider." )
     protected Reference context;
 
     /**
-     * The actual object that is the target of the reference (A link to a resource that identifies the particular occurrence or set occurrences of contact between patient and health care provider.)
+     * The actual object that is the target of the reference (A link to an encounter, or episode of care, that identifies the particular occurrence or set occurrences of contact between patient and health care provider.)
      */
     protected Resource contextTarget;
 
@@ -1485,17 +1485,17 @@ public class MedicationRequest extends DomainResource {
     protected List<Dosage> dosageInstruction;
 
     /**
-     * Indicates the specific details for the dispense or medication supply part of a medication request (also known as a Medication Prescription or Medication Order).  Note that this information is NOT always sent with the order.  There may be in some settings (e.g. hospitals) institutional or system support for completing the dispense details in the pharmacy department.
+     * Indicates the specific details for the dispense or medication supply part of a medication request (also known as a Medication Prescription or Medication Order).  Note that this information is not always sent with the order.  There may be in some settings (e.g. hospitals) institutional or system support for completing the dispense details in the pharmacy department.
      */
     @Child(name = "dispenseRequest", type = {}, order=19, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Medication supply authorization", formalDefinition="Indicates the specific details for the dispense or medication supply part of a medication request (also known as a Medication Prescription or Medication Order).  Note that this information is NOT always sent with the order.  There may be in some settings (e.g. hospitals) institutional or system support for completing the dispense details in the pharmacy department." )
+    @Description(shortDefinition="Medication supply authorization", formalDefinition="Indicates the specific details for the dispense or medication supply part of a medication request (also known as a Medication Prescription or Medication Order).  Note that this information is not always sent with the order.  There may be in some settings (e.g. hospitals) institutional or system support for completing the dispense details in the pharmacy department." )
     protected MedicationRequestDispenseRequestComponent dispenseRequest;
 
     /**
-     * Indicates whether or not substitution can or should be part of the dispense. In some cases substitution must happen, in other cases substitution must not happen, and in others it does not matter. This block explains the prescriber's intent. If nothing is specified substitution may be done.
+     * Indicates whether or not substitution can or should be part of the dispense. In some cases substitution must happen, in other cases substitution must not happen. This block explains the prescriber's intent. If nothing is specified substitution may be done.
      */
     @Child(name = "substitution", type = {}, order=20, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Any restrictions on medication substitution", formalDefinition="Indicates whether or not substitution can or should be part of the dispense. In some cases substitution must happen, in other cases substitution must not happen, and in others it does not matter. This block explains the prescriber's intent. If nothing is specified substitution may be done." )
+    @Description(shortDefinition="Any restrictions on medication substitution", formalDefinition="Indicates whether or not substitution can or should be part of the dispense. In some cases substitution must happen, in other cases substitution must not happen. This block explains the prescriber's intent. If nothing is specified substitution may be done." )
     protected MedicationRequestSubstitutionComponent substitution;
 
     /**
@@ -1554,7 +1554,7 @@ public class MedicationRequest extends DomainResource {
     }
 
     /**
-     * @return {@link #identifier} (External identifier - one that would be used by another non-FHIR system - for example a re-imbursement system might issue its own id for each prescription that is created.  This is particularly important where FHIR only provides part of an entire workflow process where records have to be tracked through an entire system.)
+     * @return {@link #identifier} (This records identifiers associated with this medication request that are defined by business processes and/or used to refer to it when a direct URL reference to the resource itself is not appropriate. For example a re-imbursement system might issue its own id for each prescription that is created.  This is particularly important where FHIR only provides part of an entire workflow process where records must be tracked through an entire system.)
      */
     public List<Identifier> getIdentifier() { 
       if (this.identifier == null)
@@ -1733,7 +1733,7 @@ public class MedicationRequest extends DomainResource {
     }
 
     /**
-     * @return {@link #groupIdentifier} (A shared identifier common to all requests that were authorized more or less simultaneously by a single author, representing the identifer of the requisition or prescription.)
+     * @return {@link #groupIdentifier} (A shared identifier common to all requests that were authorized more or less simultaneously by a single author, representing the identifier of the requisition or prescription.)
      */
     public Identifier getGroupIdentifier() { 
       if (this.groupIdentifier == null)
@@ -1749,7 +1749,7 @@ public class MedicationRequest extends DomainResource {
     }
 
     /**
-     * @param value {@link #groupIdentifier} (A shared identifier common to all requests that were authorized more or less simultaneously by a single author, representing the identifer of the requisition or prescription.)
+     * @param value {@link #groupIdentifier} (A shared identifier common to all requests that were authorized more or less simultaneously by a single author, representing the identifier of the requisition or prescription.)
      */
     public MedicationRequest setGroupIdentifier(Identifier value) { 
       this.groupIdentifier = value;
@@ -1924,14 +1924,14 @@ public class MedicationRequest extends DomainResource {
     }
 
     /**
-     * @return {@link #medication} (Identifies the medication being administered. This is a link to a resource that represents the medication which may be the details of the medication or simply an attribute carrying a code that identifies the medication from a known list of medications.)
+     * @return {@link #medication} (Identifies the medication being requested. This is a link to a resource that represents the medication which may be the details of the medication or simply an attribute carrying a code that identifies the medication from a known list of medications.)
      */
     public Type getMedication() { 
       return this.medication;
     }
 
     /**
-     * @return {@link #medication} (Identifies the medication being administered. This is a link to a resource that represents the medication which may be the details of the medication or simply an attribute carrying a code that identifies the medication from a known list of medications.)
+     * @return {@link #medication} (Identifies the medication being requested. This is a link to a resource that represents the medication which may be the details of the medication or simply an attribute carrying a code that identifies the medication from a known list of medications.)
      */
     public CodeableConcept getMedicationCodeableConcept() throws FHIRException { 
       if (!(this.medication instanceof CodeableConcept))
@@ -1944,7 +1944,7 @@ public class MedicationRequest extends DomainResource {
     }
 
     /**
-     * @return {@link #medication} (Identifies the medication being administered. This is a link to a resource that represents the medication which may be the details of the medication or simply an attribute carrying a code that identifies the medication from a known list of medications.)
+     * @return {@link #medication} (Identifies the medication being requested. This is a link to a resource that represents the medication which may be the details of the medication or simply an attribute carrying a code that identifies the medication from a known list of medications.)
      */
     public Reference getMedicationReference() throws FHIRException { 
       if (!(this.medication instanceof Reference))
@@ -1961,7 +1961,7 @@ public class MedicationRequest extends DomainResource {
     }
 
     /**
-     * @param value {@link #medication} (Identifies the medication being administered. This is a link to a resource that represents the medication which may be the details of the medication or simply an attribute carrying a code that identifies the medication from a known list of medications.)
+     * @param value {@link #medication} (Identifies the medication being requested. This is a link to a resource that represents the medication which may be the details of the medication or simply an attribute carrying a code that identifies the medication from a known list of medications.)
      */
     public MedicationRequest setMedication(Type value) { 
       this.medication = value;
@@ -2008,7 +2008,7 @@ public class MedicationRequest extends DomainResource {
     }
 
     /**
-     * @return {@link #context} (A link to a resource that identifies the particular occurrence or set occurrences of contact between patient and health care provider.)
+     * @return {@link #context} (A link to an encounter, or episode of care, that identifies the particular occurrence or set occurrences of contact between patient and health care provider.)
      */
     public Reference getContext() { 
       if (this.context == null)
@@ -2024,7 +2024,7 @@ public class MedicationRequest extends DomainResource {
     }
 
     /**
-     * @param value {@link #context} (A link to a resource that identifies the particular occurrence or set occurrences of contact between patient and health care provider.)
+     * @param value {@link #context} (A link to an encounter, or episode of care, that identifies the particular occurrence or set occurrences of contact between patient and health care provider.)
      */
     public MedicationRequest setContext(Reference value) { 
       this.context = value;
@@ -2032,14 +2032,14 @@ public class MedicationRequest extends DomainResource {
     }
 
     /**
-     * @return {@link #context} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (A link to a resource that identifies the particular occurrence or set occurrences of contact between patient and health care provider.)
+     * @return {@link #context} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (A link to an encounter, or episode of care, that identifies the particular occurrence or set occurrences of contact between patient and health care provider.)
      */
     public Resource getContextTarget() { 
       return this.contextTarget;
     }
 
     /**
-     * @param value {@link #context} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (A link to a resource that identifies the particular occurrence or set occurrences of contact between patient and health care provider.)
+     * @param value {@link #context} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (A link to an encounter, or episode of care, that identifies the particular occurrence or set occurrences of contact between patient and health care provider.)
      */
     public MedicationRequest setContextTarget(Resource value) { 
       this.contextTarget = value;
@@ -2449,7 +2449,7 @@ public class MedicationRequest extends DomainResource {
     }
 
     /**
-     * @return {@link #dispenseRequest} (Indicates the specific details for the dispense or medication supply part of a medication request (also known as a Medication Prescription or Medication Order).  Note that this information is NOT always sent with the order.  There may be in some settings (e.g. hospitals) institutional or system support for completing the dispense details in the pharmacy department.)
+     * @return {@link #dispenseRequest} (Indicates the specific details for the dispense or medication supply part of a medication request (also known as a Medication Prescription or Medication Order).  Note that this information is not always sent with the order.  There may be in some settings (e.g. hospitals) institutional or system support for completing the dispense details in the pharmacy department.)
      */
     public MedicationRequestDispenseRequestComponent getDispenseRequest() { 
       if (this.dispenseRequest == null)
@@ -2465,7 +2465,7 @@ public class MedicationRequest extends DomainResource {
     }
 
     /**
-     * @param value {@link #dispenseRequest} (Indicates the specific details for the dispense or medication supply part of a medication request (also known as a Medication Prescription or Medication Order).  Note that this information is NOT always sent with the order.  There may be in some settings (e.g. hospitals) institutional or system support for completing the dispense details in the pharmacy department.)
+     * @param value {@link #dispenseRequest} (Indicates the specific details for the dispense or medication supply part of a medication request (also known as a Medication Prescription or Medication Order).  Note that this information is not always sent with the order.  There may be in some settings (e.g. hospitals) institutional or system support for completing the dispense details in the pharmacy department.)
      */
     public MedicationRequest setDispenseRequest(MedicationRequestDispenseRequestComponent value) { 
       this.dispenseRequest = value;
@@ -2473,7 +2473,7 @@ public class MedicationRequest extends DomainResource {
     }
 
     /**
-     * @return {@link #substitution} (Indicates whether or not substitution can or should be part of the dispense. In some cases substitution must happen, in other cases substitution must not happen, and in others it does not matter. This block explains the prescriber's intent. If nothing is specified substitution may be done.)
+     * @return {@link #substitution} (Indicates whether or not substitution can or should be part of the dispense. In some cases substitution must happen, in other cases substitution must not happen. This block explains the prescriber's intent. If nothing is specified substitution may be done.)
      */
     public MedicationRequestSubstitutionComponent getSubstitution() { 
       if (this.substitution == null)
@@ -2489,7 +2489,7 @@ public class MedicationRequest extends DomainResource {
     }
 
     /**
-     * @param value {@link #substitution} (Indicates whether or not substitution can or should be part of the dispense. In some cases substitution must happen, in other cases substitution must not happen, and in others it does not matter. This block explains the prescriber's intent. If nothing is specified substitution may be done.)
+     * @param value {@link #substitution} (Indicates whether or not substitution can or should be part of the dispense. In some cases substitution must happen, in other cases substitution must not happen. This block explains the prescriber's intent. If nothing is specified substitution may be done.)
      */
     public MedicationRequest setSubstitution(MedicationRequestSubstitutionComponent value) { 
       this.substitution = value;
@@ -2692,17 +2692,17 @@ public class MedicationRequest extends DomainResource {
 
       protected void listChildren(List<Property> childrenList) {
         super.listChildren(childrenList);
-        childrenList.add(new Property("identifier", "Identifier", "External identifier - one that would be used by another non-FHIR system - for example a re-imbursement system might issue its own id for each prescription that is created.  This is particularly important where FHIR only provides part of an entire workflow process where records have to be tracked through an entire system.", 0, java.lang.Integer.MAX_VALUE, identifier));
+        childrenList.add(new Property("identifier", "Identifier", "This records identifiers associated with this medication request that are defined by business processes and/or used to refer to it when a direct URL reference to the resource itself is not appropriate. For example a re-imbursement system might issue its own id for each prescription that is created.  This is particularly important where FHIR only provides part of an entire workflow process where records must be tracked through an entire system.", 0, java.lang.Integer.MAX_VALUE, identifier));
         childrenList.add(new Property("definition", "Reference(ActivityDefinition|PlanDefinition)", "Protocol or definition followed by this request.", 0, java.lang.Integer.MAX_VALUE, definition));
         childrenList.add(new Property("basedOn", "Reference(CarePlan|MedicationRequest|ProcedureRequest|ReferralRequest)", "A plan or request that is fulfilled in whole or in part by this medication request.", 0, java.lang.Integer.MAX_VALUE, basedOn));
-        childrenList.add(new Property("groupIdentifier", "Identifier", "A shared identifier common to all requests that were authorized more or less simultaneously by a single author, representing the identifer of the requisition or prescription.", 0, java.lang.Integer.MAX_VALUE, groupIdentifier));
+        childrenList.add(new Property("groupIdentifier", "Identifier", "A shared identifier common to all requests that were authorized more or less simultaneously by a single author, representing the identifier of the requisition or prescription.", 0, java.lang.Integer.MAX_VALUE, groupIdentifier));
         childrenList.add(new Property("status", "code", "A code specifying the current state of the order.  Generally this will be active or completed state.", 0, java.lang.Integer.MAX_VALUE, status));
         childrenList.add(new Property("intent", "code", "Whether the request is a proposal, plan, or an original order.", 0, java.lang.Integer.MAX_VALUE, intent));
         childrenList.add(new Property("category", "CodeableConcept", "Indicates the type of medication order and where the medication is expected to be consumed or administered.", 0, java.lang.Integer.MAX_VALUE, category));
         childrenList.add(new Property("priority", "code", "Indicates how quickly the Medication Request should be addressed with respect to other requests.", 0, java.lang.Integer.MAX_VALUE, priority));
-        childrenList.add(new Property("medication[x]", "CodeableConcept|Reference(Medication)", "Identifies the medication being administered. This is a link to a resource that represents the medication which may be the details of the medication or simply an attribute carrying a code that identifies the medication from a known list of medications.", 0, java.lang.Integer.MAX_VALUE, medication));
+        childrenList.add(new Property("medication[x]", "CodeableConcept|Reference(Medication)", "Identifies the medication being requested. This is a link to a resource that represents the medication which may be the details of the medication or simply an attribute carrying a code that identifies the medication from a known list of medications.", 0, java.lang.Integer.MAX_VALUE, medication));
         childrenList.add(new Property("subject", "Reference(Patient|Group)", "A link to a resource representing the person or set of individuals to whom the medication will be given.", 0, java.lang.Integer.MAX_VALUE, subject));
-        childrenList.add(new Property("context", "Reference(Encounter|EpisodeOfCare)", "A link to a resource that identifies the particular occurrence or set occurrences of contact between patient and health care provider.", 0, java.lang.Integer.MAX_VALUE, context));
+        childrenList.add(new Property("context", "Reference(Encounter|EpisodeOfCare)", "A link to an encounter, or episode of care, that identifies the particular occurrence or set occurrences of contact between patient and health care provider.", 0, java.lang.Integer.MAX_VALUE, context));
         childrenList.add(new Property("supportingInformation", "Reference(Any)", "Include additional information (for example, patient height and weight) that supports the ordering of the medication.", 0, java.lang.Integer.MAX_VALUE, supportingInformation));
         childrenList.add(new Property("authoredOn", "dateTime", "The date (and perhaps time) when the prescription was initially written or authored on.", 0, java.lang.Integer.MAX_VALUE, authoredOn));
         childrenList.add(new Property("requester", "", "The individual, organization or device that initiated the request and has responsibility for its activation.", 0, java.lang.Integer.MAX_VALUE, requester));
@@ -2711,8 +2711,8 @@ public class MedicationRequest extends DomainResource {
         childrenList.add(new Property("reasonReference", "Reference(Condition|Observation)", "Condition or observation that supports why the medication was ordered.", 0, java.lang.Integer.MAX_VALUE, reasonReference));
         childrenList.add(new Property("note", "Annotation", "Extra information about the prescription that could not be conveyed by the other attributes.", 0, java.lang.Integer.MAX_VALUE, note));
         childrenList.add(new Property("dosageInstruction", "Dosage", "Indicates how the medication is to be used by the patient.", 0, java.lang.Integer.MAX_VALUE, dosageInstruction));
-        childrenList.add(new Property("dispenseRequest", "", "Indicates the specific details for the dispense or medication supply part of a medication request (also known as a Medication Prescription or Medication Order).  Note that this information is NOT always sent with the order.  There may be in some settings (e.g. hospitals) institutional or system support for completing the dispense details in the pharmacy department.", 0, java.lang.Integer.MAX_VALUE, dispenseRequest));
-        childrenList.add(new Property("substitution", "", "Indicates whether or not substitution can or should be part of the dispense. In some cases substitution must happen, in other cases substitution must not happen, and in others it does not matter. This block explains the prescriber's intent. If nothing is specified substitution may be done.", 0, java.lang.Integer.MAX_VALUE, substitution));
+        childrenList.add(new Property("dispenseRequest", "", "Indicates the specific details for the dispense or medication supply part of a medication request (also known as a Medication Prescription or Medication Order).  Note that this information is not always sent with the order.  There may be in some settings (e.g. hospitals) institutional or system support for completing the dispense details in the pharmacy department.", 0, java.lang.Integer.MAX_VALUE, dispenseRequest));
+        childrenList.add(new Property("substitution", "", "Indicates whether or not substitution can or should be part of the dispense. In some cases substitution must happen, in other cases substitution must not happen. This block explains the prescriber's intent. If nothing is specified substitution may be done.", 0, java.lang.Integer.MAX_VALUE, substitution));
         childrenList.add(new Property("priorPrescription", "Reference(MedicationRequest)", "A link to a resource representing an earlier order related order or prescription.", 0, java.lang.Integer.MAX_VALUE, priorPrescription));
         childrenList.add(new Property("detectedIssue", "Reference(DetectedIssue)", "Indicates an actual or potential clinical issue with or between one or more active or proposed clinical actions for a patient; e.g. Drug-drug interaction, duplicate therapy, dosage alert etc.", 0, java.lang.Integer.MAX_VALUE, detectedIssue));
         childrenList.add(new Property("eventHistory", "Reference(Provenance)", "Links to Provenance records for past versions of this resource or fulfilling request or event resources that identify key state transitions or updates that are likely to be relevant to a user looking at the current version of the resource.", 0, java.lang.Integer.MAX_VALUE, eventHistory));
@@ -3196,6 +3196,26 @@ public class MedicationRequest extends DomainResource {
    * the path value of "<b>MedicationRequest:requester</b>".
    */
   public static final ca.uhn.fhir.model.api.Include INCLUDE_REQUESTER = new ca.uhn.fhir.model.api.Include("MedicationRequest:requester").toLocked();
+
+ /**
+   * Search parameter: <b>date</b>
+   * <p>
+   * Description: <b>Returns medication request to be administered on a specific date</b><br>
+   * Type: <b>date</b><br>
+   * Path: <b>MedicationRequest.dosageInstruction.timing.event</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="date", path="MedicationRequest.dosageInstruction.timing.event", description="Returns medication request to be administered on a specific date", type="date" )
+  public static final String SP_DATE = "date";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>date</b>
+   * <p>
+   * Description: <b>Returns medication request to be administered on a specific date</b><br>
+   * Type: <b>date</b><br>
+   * Path: <b>MedicationRequest.dosageInstruction.timing.event</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.DateClientParam DATE = new ca.uhn.fhir.rest.gclient.DateClientParam(SP_DATE);
 
  /**
    * Search parameter: <b>identifier</b>

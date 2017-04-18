@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
+// Generated on Mon, Apr 17, 2017 17:38-0400 for FHIR v3.0.1
 
 import java.util.*;
 
@@ -207,7 +207,7 @@ public class GuidanceResponse extends DomainResource {
     /**
      * The id of the request associated with this response. If an id was given as part of the request, it will be reproduced here to enable the requester to more easily identify the response in a multi-request scenario.
      */
-    @Child(name = "requestId", type = {IdType.class}, order=0, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "requestId", type = {IdType.class}, order=0, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="The id of the request associated with this response, if any", formalDefinition="The id of the request associated with this response. If an id was given as part of the request, it will be reproduced here to enable the requester to more easily identify the response in a multi-request scenario." )
     protected IdType requestId;
 
@@ -221,7 +221,7 @@ public class GuidanceResponse extends DomainResource {
     /**
      * A reference to the knowledge module that was invoked.
      */
-    @Child(name = "module", type = {ServiceDefinition.class}, order=2, min=1, max=1, modifier=true, summary=true)
+    @Child(name = "module", type = {ServiceDefinition.class}, order=2, min=1, max=1, modifier=false, summary=true)
     @Description(shortDefinition="A reference to a knowledge module", formalDefinition="A reference to the knowledge module that was invoked." )
     protected Reference module;
 

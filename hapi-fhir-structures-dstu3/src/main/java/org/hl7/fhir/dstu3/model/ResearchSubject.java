@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
+// Generated on Mon, Apr 17, 2017 17:38-0400 for FHIR v3.0.1
 
 import java.util.*;
 
@@ -43,7 +43,7 @@ import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.exceptions.FHIRException;
 /**
- * A process where a researcher or organization plans and then executes a series of steps intended to increase the field of healthcare-related knowledge.  This includes studies of safety, efficacy, comparative effectiveness and other information about medications, devices, therapies and other interventional and investigative techniques.  ResearchStudies involve the gathering of information about human or animal subjects.
+ * A process where a researcher or organization plans and then executes a series of steps intended to increase the field of healthcare-related knowledge.  This includes studies of safety, efficacy, comparative effectiveness and other information about medications, devices, therapies and other interventional and investigative techniques.  A ResearchStudy involves the gathering of information about human or animal subjects.
  */
 @ResourceDef(name="ResearchSubject", profile="http://hl7.org/fhir/Profile/ResearchSubject")
 public class ResearchSubject extends DomainResource {
@@ -208,14 +208,14 @@ public class ResearchSubject extends DomainResource {
      * Identifiers assigned to this research study by the sponsor or other systems.
      */
     @Child(name = "identifier", type = {Identifier.class}, order=0, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Business Identifer for event", formalDefinition="Identifiers assigned to this research study by the sponsor or other systems." )
+    @Description(shortDefinition="Business Identifier for research subject", formalDefinition="Identifiers assigned to this research study by the sponsor or other systems." )
     protected Identifier identifier;
 
     /**
-     * The current state of the event.
+     * The current state of the subject.
      */
     @Child(name = "status", type = {CodeType.class}, order=1, min=1, max=1, modifier=true, summary=true)
-    @Description(shortDefinition="candidate | enrolled | active | suspended | withdrawn | completed", formalDefinition="The current state of the event." )
+    @Description(shortDefinition="candidate | enrolled | active | suspended | withdrawn | completed", formalDefinition="The current state of the subject." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/research-subject-status")
     protected Enumeration<ResearchSubjectStatus> status;
 
@@ -320,7 +320,7 @@ public class ResearchSubject extends DomainResource {
     }
 
     /**
-     * @return {@link #status} (The current state of the event.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
+     * @return {@link #status} (The current state of the subject.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
      */
     public Enumeration<ResearchSubjectStatus> getStatusElement() { 
       if (this.status == null)
@@ -340,7 +340,7 @@ public class ResearchSubject extends DomainResource {
     }
 
     /**
-     * @param value {@link #status} (The current state of the event.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
+     * @param value {@link #status} (The current state of the subject.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
      */
     public ResearchSubject setStatusElement(Enumeration<ResearchSubjectStatus> value) { 
       this.status = value;
@@ -348,14 +348,14 @@ public class ResearchSubject extends DomainResource {
     }
 
     /**
-     * @return The current state of the event.
+     * @return The current state of the subject.
      */
     public ResearchSubjectStatus getStatus() { 
       return this.status == null ? null : this.status.getValue();
     }
 
     /**
-     * @param value The current state of the event.
+     * @param value The current state of the subject.
      */
     public ResearchSubject setStatus(ResearchSubjectStatus value) { 
         if (this.status == null)
@@ -621,7 +621,7 @@ public class ResearchSubject extends DomainResource {
       protected void listChildren(List<Property> childrenList) {
         super.listChildren(childrenList);
         childrenList.add(new Property("identifier", "Identifier", "Identifiers assigned to this research study by the sponsor or other systems.", 0, java.lang.Integer.MAX_VALUE, identifier));
-        childrenList.add(new Property("status", "code", "The current state of the event.", 0, java.lang.Integer.MAX_VALUE, status));
+        childrenList.add(new Property("status", "code", "The current state of the subject.", 0, java.lang.Integer.MAX_VALUE, status));
         childrenList.add(new Property("period", "Period", "The dates the subject began and ended their participation in the study.", 0, java.lang.Integer.MAX_VALUE, period));
         childrenList.add(new Property("study", "Reference(ResearchStudy)", "Reference to the study the subject is participating in.", 0, java.lang.Integer.MAX_VALUE, study));
         childrenList.add(new Property("individual", "Reference(Patient)", "The record of the person or animal who is involved in the study.", 0, java.lang.Integer.MAX_VALUE, individual));
@@ -849,17 +849,17 @@ public class ResearchSubject extends DomainResource {
  /**
    * Search parameter: <b>identifier</b>
    * <p>
-   * Description: <b>Business Identifer for event</b><br>
+   * Description: <b>Business Identifier for research subject</b><br>
    * Type: <b>token</b><br>
    * Path: <b>ResearchSubject.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="ResearchSubject.identifier", description="Business Identifer for event", type="token" )
+  @SearchParamDefinition(name="identifier", path="ResearchSubject.identifier", description="Business Identifier for research subject", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
    * <p>
-   * Description: <b>Business Identifer for event</b><br>
+   * Description: <b>Business Identifier for research subject</b><br>
    * Type: <b>token</b><br>
    * Path: <b>ResearchSubject.identifier</b><br>
    * </p>

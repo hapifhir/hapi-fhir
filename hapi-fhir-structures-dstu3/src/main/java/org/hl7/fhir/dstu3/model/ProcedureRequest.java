@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
+// Generated on Mon, Apr 17, 2017 17:38-0400 for FHIR v3.0.1
 
 import java.util.*;
 
@@ -43,7 +43,7 @@ import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.exceptions.FHIRException;
 /**
- * A record of a request for a diagnostic investigation service to be performed.
+ * A record of a request for diagnostic investigations, treatments, or operations to be performed.
  */
 @ResourceDef(name="ProcedureRequest", profile="http://hl7.org/fhir/Profile/ProcedureRequest")
 public class ProcedureRequest extends DomainResource {
@@ -74,7 +74,7 @@ public class ProcedureRequest extends DomainResource {
          */
         ENTEREDINERROR, 
         /**
-         * The authoring system does not know which of the status values currently applies for this request.  Note: This concept is not to be used for "other" - one of the listed statuses is presumed to apply, it's just not known which one.
+         * The authoring system does not know which of the status values currently applies for this request.  Note: This concept is not to be used for "other" . One of the listed statuses is presumed to apply,  but the system creating the request doesn't know.
          */
         UNKNOWN, 
         /**
@@ -135,7 +135,7 @@ public class ProcedureRequest extends DomainResource {
             case CANCELLED: return "The authorization/request to act has been terminated prior to the full completion of the intended actions.  No further activity should occur.";
             case COMPLETED: return "Activity against the request has been sufficiently completed to the satisfaction of the requester";
             case ENTEREDINERROR: return "This electronic record should never have existed, though it is possible that real-world decisions were based on it.  (If real-world activity has occurred, the status should be \"cancelled\" rather than \"entered-in-error\".)";
-            case UNKNOWN: return "The authoring system does not know which of the status values currently applies for this request.  Note: This concept is not to be used for \"other\" - one of the listed statuses is presumed to apply, it's just not known which one.";
+            case UNKNOWN: return "The authoring system does not know which of the status values currently applies for this request.  Note: This concept is not to be used for \"other\" . One of the listed statuses is presumed to apply,  but the system creating the request doesn't know.";
             default: return "?";
           }
         }
@@ -537,14 +537,14 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
     @Block()
     public static class ProcedureRequestRequesterComponent extends BackboneElement implements IBaseBackboneElement {
         /**
-         * The device, practitioner or organization. who initiated the request.
+         * The device, practitioner or organization who initiated the request.
          */
         @Child(name = "agent", type = {Device.class, Practitioner.class, Organization.class}, order=1, min=1, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="Individual making the request", formalDefinition="The device, practitioner or organization. who initiated the request." )
+        @Description(shortDefinition="Individual making the request", formalDefinition="The device, practitioner or organization who initiated the request." )
         protected Reference agent;
 
         /**
-         * The actual object that is the target of the reference (The device, practitioner or organization. who initiated the request.)
+         * The actual object that is the target of the reference (The device, practitioner or organization who initiated the request.)
          */
         protected Resource agentTarget;
 
@@ -578,7 +578,7 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
       }
 
         /**
-         * @return {@link #agent} (The device, practitioner or organization. who initiated the request.)
+         * @return {@link #agent} (The device, practitioner or organization who initiated the request.)
          */
         public Reference getAgent() { 
           if (this.agent == null)
@@ -594,7 +594,7 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
         }
 
         /**
-         * @param value {@link #agent} (The device, practitioner or organization. who initiated the request.)
+         * @param value {@link #agent} (The device, practitioner or organization who initiated the request.)
          */
         public ProcedureRequestRequesterComponent setAgent(Reference value) { 
           this.agent = value;
@@ -602,14 +602,14 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
         }
 
         /**
-         * @return {@link #agent} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The device, practitioner or organization. who initiated the request.)
+         * @return {@link #agent} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The device, practitioner or organization who initiated the request.)
          */
         public Resource getAgentTarget() { 
           return this.agentTarget;
         }
 
         /**
-         * @param value {@link #agent} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The device, practitioner or organization. who initiated the request.)
+         * @param value {@link #agent} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The device, practitioner or organization who initiated the request.)
          */
         public ProcedureRequestRequesterComponent setAgentTarget(Resource value) { 
           this.agentTarget = value;
@@ -662,7 +662,7 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
 
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
-          childrenList.add(new Property("agent", "Reference(Device|Practitioner|Organization)", "The device, practitioner or organization. who initiated the request.", 0, java.lang.Integer.MAX_VALUE, agent));
+          childrenList.add(new Property("agent", "Reference(Device|Practitioner|Organization)", "The device, practitioner or organization who initiated the request.", 0, java.lang.Integer.MAX_VALUE, agent));
           childrenList.add(new Property("onBehalfOf", "Reference(Organization)", "The organization the device or practitioner was acting on behalf of.", 0, java.lang.Integer.MAX_VALUE, onBehalfOf));
         }
 

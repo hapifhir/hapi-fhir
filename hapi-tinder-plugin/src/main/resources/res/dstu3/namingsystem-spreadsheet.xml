@@ -1489,7 +1489,7 @@
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s87"><Data ss:Type="String">If there are multiple ids, and one is labelled &quot;preferred&quot;, then the assumption is that the others are not preferred. In the absence of any id marked as preferred, no inference can be drawn</Data><NamedCell
+    <Cell ss:StyleID="s87"><Data ss:Type="String">If there are multiple ids, and one is labeled &quot;preferred&quot;, then the assumption is that the others are not preferred. In the absence of any id marked as preferred, no inference can be drawn</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">Is this the id that should be used for this type</Data><NamedCell

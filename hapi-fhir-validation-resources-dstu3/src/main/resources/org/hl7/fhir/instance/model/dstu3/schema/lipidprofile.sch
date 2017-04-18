@@ -12,14 +12,6 @@
   <sch:pattern>
     <sch:title>f:DiagnosticReport</sch:title>
     <sch:rule context="f:DiagnosticReport">
-      <sch:assert test="count(f:result) &lt;= 1">result: maximum cardinality of 'result' is 1</sch:assert>
-      <sch:assert test="count(f:result) &gt;= 1">result: minimum cardinality of 'result' is 1</sch:assert>
-      <sch:assert test="count(f:result) &lt;= 1">result: maximum cardinality of 'result' is 1</sch:assert>
-      <sch:assert test="count(f:result) &gt;= 1">result: minimum cardinality of 'result' is 1</sch:assert>
-      <sch:assert test="count(f:result) &lt;= 1">result: maximum cardinality of 'result' is 1</sch:assert>
-      <sch:assert test="count(f:result) &gt;= 1">result: minimum cardinality of 'result' is 1</sch:assert>
-      <sch:assert test="count(f:result) &lt;= 1">result: maximum cardinality of 'result' is 1</sch:assert>
-      <sch:assert test="count(f:result) &lt;= 1">result: maximum cardinality of 'result' is 1</sch:assert>
       <sch:assert test="count(f:codedDiagnosis) &lt;= 0">codedDiagnosis: maximum cardinality of 'codedDiagnosis' is 0</sch:assert>
     </sch:rule>
   </sch:pattern>

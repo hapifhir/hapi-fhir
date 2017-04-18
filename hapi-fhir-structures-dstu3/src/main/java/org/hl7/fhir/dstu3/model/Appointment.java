@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
+// Generated on Mon, Apr 17, 2017 17:38-0400 for FHIR v3.0.1
 
 import java.util.*;
 
@@ -499,10 +499,10 @@ public class Appointment extends DomainResource {
         protected Enumeration<ParticipantRequired> required;
 
         /**
-         * Participation status of the Patient.
+         * Participation status of the actor.
          */
         @Child(name = "status", type = {CodeType.class}, order=4, min=1, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="accepted | declined | tentative | needs-action", formalDefinition="Participation status of the Patient." )
+        @Description(shortDefinition="accepted | declined | tentative | needs-action", formalDefinition="Participation status of the actor." )
         @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/participationstatus")
         protected Enumeration<ParticipationStatus> status;
 
@@ -665,7 +665,7 @@ public class Appointment extends DomainResource {
         }
 
         /**
-         * @return {@link #status} (Participation status of the Patient.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
+         * @return {@link #status} (Participation status of the actor.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
          */
         public Enumeration<ParticipationStatus> getStatusElement() { 
           if (this.status == null)
@@ -685,7 +685,7 @@ public class Appointment extends DomainResource {
         }
 
         /**
-         * @param value {@link #status} (Participation status of the Patient.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
+         * @param value {@link #status} (Participation status of the actor.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
          */
         public AppointmentParticipantComponent setStatusElement(Enumeration<ParticipationStatus> value) { 
           this.status = value;
@@ -693,14 +693,14 @@ public class Appointment extends DomainResource {
         }
 
         /**
-         * @return Participation status of the Patient.
+         * @return Participation status of the actor.
          */
         public ParticipationStatus getStatus() { 
           return this.status == null ? null : this.status.getValue();
         }
 
         /**
-         * @param value Participation status of the Patient.
+         * @param value Participation status of the actor.
          */
         public AppointmentParticipantComponent setStatus(ParticipationStatus value) { 
             if (this.status == null)
@@ -714,7 +714,7 @@ public class Appointment extends DomainResource {
           childrenList.add(new Property("type", "CodeableConcept", "Role of participant in the appointment.", 0, java.lang.Integer.MAX_VALUE, type));
           childrenList.add(new Property("actor", "Reference(Patient|Practitioner|RelatedPerson|Device|HealthcareService|Location)", "A Person, Location/HealthcareService or Device that is participating in the appointment.", 0, java.lang.Integer.MAX_VALUE, actor));
           childrenList.add(new Property("required", "code", "Is this participant required to be present at the meeting. This covers a use-case where 2 doctors need to meet to discuss the results for a specific patient, and the patient is not required to be present.", 0, java.lang.Integer.MAX_VALUE, required));
-          childrenList.add(new Property("status", "code", "Participation status of the Patient.", 0, java.lang.Integer.MAX_VALUE, status));
+          childrenList.add(new Property("status", "code", "Participation status of the actor.", 0, java.lang.Integer.MAX_VALUE, status));
         }
 
       @Override
@@ -1018,10 +1018,10 @@ public class Appointment extends DomainResource {
     protected List<AppointmentParticipantComponent> participant;
 
     /**
-     * A set of date ranges (potentially including times) that the appointment is preferred to be scheduled. When using these values, the minutes duration should be provided to indicate the length of the appointment to fill and populate the start/end times for the actual allocated time.
+     * A set of date ranges (potentially including times) that the appointment is preferred to be scheduled within. When using these values, the minutes duration should be provided to indicate the length of the appointment to fill and populate the start/end times for the actual allocated time.
      */
     @Child(name = "requestedPeriod", type = {Period.class}, order=19, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="Potential date/time interval(s) requested to allocate the appointment during", formalDefinition="A set of date ranges (potentially including times) that the appointment is preferred to be scheduled. When using these values, the minutes duration should be provided to indicate the length of the appointment to fill and populate the start/end times for the actual allocated time." )
+    @Description(shortDefinition="Potential date/time interval(s) requested to allocate the appointment within", formalDefinition="A set of date ranges (potentially including times) that the appointment is preferred to be scheduled within. When using these values, the minutes duration should be provided to indicate the length of the appointment to fill and populate the start/end times for the actual allocated time." )
     protected List<Period> requestedPeriod;
 
     private static final long serialVersionUID = -1589372810L;
@@ -2011,7 +2011,7 @@ public class Appointment extends DomainResource {
     }
 
     /**
-     * @return {@link #requestedPeriod} (A set of date ranges (potentially including times) that the appointment is preferred to be scheduled. When using these values, the minutes duration should be provided to indicate the length of the appointment to fill and populate the start/end times for the actual allocated time.)
+     * @return {@link #requestedPeriod} (A set of date ranges (potentially including times) that the appointment is preferred to be scheduled within. When using these values, the minutes duration should be provided to indicate the length of the appointment to fill and populate the start/end times for the actual allocated time.)
      */
     public List<Period> getRequestedPeriod() { 
       if (this.requestedPeriod == null)
@@ -2084,7 +2084,7 @@ public class Appointment extends DomainResource {
         childrenList.add(new Property("comment", "string", "Additional comments about the appointment.", 0, java.lang.Integer.MAX_VALUE, comment));
         childrenList.add(new Property("incomingReferral", "Reference(ReferralRequest)", "The referral request this appointment is allocated to assess (incoming referral).", 0, java.lang.Integer.MAX_VALUE, incomingReferral));
         childrenList.add(new Property("participant", "", "List of participants involved in the appointment.", 0, java.lang.Integer.MAX_VALUE, participant));
-        childrenList.add(new Property("requestedPeriod", "Period", "A set of date ranges (potentially including times) that the appointment is preferred to be scheduled. When using these values, the minutes duration should be provided to indicate the length of the appointment to fill and populate the start/end times for the actual allocated time.", 0, java.lang.Integer.MAX_VALUE, requestedPeriod));
+        childrenList.add(new Property("requestedPeriod", "Period", "A set of date ranges (potentially including times) that the appointment is preferred to be scheduled within. When using these values, the minutes duration should be provided to indicate the length of the appointment to fill and populate the start/end times for the actual allocated time.", 0, java.lang.Integer.MAX_VALUE, requestedPeriod));
       }
 
       @Override

@@ -2005,7 +2005,7 @@ public class JsonParserDstu2Test {
 
 		//Check no NPE if base server not configure
 		newPatient = ourCtx.newJsonParser().parseResource(MyPatientWithCustomUrlExtension.class, new StringReader(parsedPatient));
-		assertNull("myName", newPatient.getPetName());
+		assertNull("myName", newPatient.getPetName().getValue());
 		assertEquals("myName", ((StringDt) newPatient.getUndeclaredExtensionsByUrl("http://www.example.com/petname").get(0).getValue()).getValue());
 	}
 

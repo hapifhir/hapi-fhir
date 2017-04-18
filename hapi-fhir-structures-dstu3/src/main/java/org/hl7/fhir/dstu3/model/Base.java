@@ -68,7 +68,12 @@ private Map<String, Object> userData;
   }
 
 	public String getUserString(String name) {
-    return (String) getUserData(name);
+    Object ud = getUserData(name);
+    if (ud == null)
+      return null;
+    if (ud instanceof String)
+      return (String) ud;
+    return ud.toString();
   }
 
   public int getUserInt(String name) {

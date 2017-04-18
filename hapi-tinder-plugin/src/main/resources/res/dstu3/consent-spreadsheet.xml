@@ -1,4 +1,4 @@
-﻿<?xml version="1.0"?>
+<?xml version="1.0"?>
 <?mso-application progid="Excel.Sheet"?>
 <Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"
  xmlns:o="urn:schemas-microsoft-com:office:office"
@@ -16,8 +16,8 @@
   <AllowPNG/>
  </OfficeDocumentSettings>
  <ExcelWorkbook xmlns="urn:schemas-microsoft-com:office:excel">
-  <WindowHeight>7932</WindowHeight>
-  <WindowWidth>23040</WindowWidth>
+  <WindowHeight>13410</WindowHeight>
+  <WindowWidth>28800</WindowWidth>
   <WindowTopX>0</WindowTopX>
   <WindowTopY>0</WindowTopY>
   <ActiveSheet>1</ActiveSheet>
@@ -951,29 +951,29 @@
   </Names>
   <Table ss:ExpandedColumnCount="24" ss:ExpandedRowCount="107" x:FullColumns="1"
    x:FullRows="1" ss:StyleID="s68" ss:DefaultRowHeight="15">
-   <Column ss:StyleID="s69" ss:Width="227.39999999999998"/>
-   <Column ss:StyleID="s68" ss:AutoFitWidth="0" ss:Width="77.399999999999991"/>
-   <Column ss:StyleID="s68" ss:Width="29.4"/>
-   <Column ss:StyleID="s68" ss:Width="34.799999999999997"/>
-   <Column ss:StyleID="s68" ss:AutoFitWidth="0" ss:Width="187.8"/>
-   <Column ss:StyleID="s68" ss:AutoFitWidth="0" ss:Width="28.8"/>
+   <Column ss:StyleID="s69" ss:Width="227.25"/>
+   <Column ss:StyleID="s68" ss:AutoFitWidth="0" ss:Width="77.25"/>
+   <Column ss:StyleID="s68" ss:Width="29.25"/>
+   <Column ss:StyleID="s68" ss:Width="34.5"/>
+   <Column ss:StyleID="s68" ss:AutoFitWidth="0" ss:Width="187.5"/>
+   <Column ss:StyleID="s68" ss:AutoFitWidth="0" ss:Width="28.5"/>
    <Column ss:StyleID="s68" ss:AutoFitWidth="0" ss:Width="27"/>
-   <Column ss:StyleID="s68" ss:AutoFitWidth="0" ss:Width="106.80000000000001"/>
+   <Column ss:StyleID="s68" ss:AutoFitWidth="0" ss:Width="106.5"/>
    <Column ss:StyleID="s68" ss:AutoFitWidth="0" ss:Width="138"/>
-   <Column ss:StyleID="s68" ss:AutoFitWidth="0" ss:Width="22.799999999999997"/>
-   <Column ss:StyleID="s68" ss:AutoFitWidth="0" ss:Width="78.599999999999994"/>
-   <Column ss:StyleID="s68" ss:AutoFitWidth="0" ss:Width="21.599999999999998"/>
-   <Column ss:StyleID="s68" ss:AutoFitWidth="0" ss:Width="120.60000000000001"/>
+   <Column ss:StyleID="s68" ss:AutoFitWidth="0" ss:Width="22.5"/>
+   <Column ss:StyleID="s68" ss:AutoFitWidth="0" ss:Width="78.75"/>
+   <Column ss:StyleID="s68" ss:AutoFitWidth="0" ss:Width="21.75"/>
+   <Column ss:StyleID="s68" ss:AutoFitWidth="0" ss:Width="120.75"/>
    <Column ss:StyleID="s68" ss:AutoFitWidth="0" ss:Width="180"/>
-   <Column ss:StyleID="s68" ss:AutoFitWidth="0" ss:Width="407.4"/>
+   <Column ss:StyleID="s68" ss:AutoFitWidth="0" ss:Width="407.25"/>
    <Column ss:StyleID="s68" ss:AutoFitWidth="0" ss:Width="114"/>
-   <Column ss:StyleID="s68" ss:AutoFitWidth="0" ss:Width="389.4"/>
+   <Column ss:StyleID="s68" ss:AutoFitWidth="0" ss:Width="389.25"/>
    <Column ss:StyleID="s68" ss:AutoFitWidth="0" ss:Width="120"/>
    <Column ss:StyleID="s68" ss:AutoFitWidth="0" ss:Width="135"/>
-   <Column ss:Index="21" ss:StyleID="s68" ss:AutoFitWidth="0" ss:Width="103.8"/>
-   <Column ss:StyleID="s68" ss:AutoFitWidth="0" ss:Width="50.4"/>
+   <Column ss:Index="21" ss:StyleID="s68" ss:AutoFitWidth="0" ss:Width="103.5"/>
+   <Column ss:StyleID="s68" ss:AutoFitWidth="0" ss:Width="50.25"/>
    <Column ss:StyleID="s68" ss:AutoFitWidth="0" ss:Width="66"/>
-   <Column ss:StyleID="s68" ss:AutoFitWidth="0" ss:Width="119.4"/>
+   <Column ss:StyleID="s68" ss:AutoFitWidth="0" ss:Width="119.25"/>
    <Row ss:AutoFitHeight="0" ss:Height="75" ss:StyleID="s70">
     <Cell ss:StyleID="s71"><Data ss:Type="String">Element</Data><Comment
       ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
@@ -1166,7 +1166,8 @@
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s102"><Data ss:Type="String">status</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s100"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s100"><Data ss:Type="String">This element is labeled as a modifier because the status contains the codes rejected and entered-in-error that mark the Consent as not currently valid</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s102"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s103"><Data ss:Type="String">.statusCode</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
@@ -1606,7 +1607,8 @@
     <Cell ss:StyleID="s103"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s103"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s103"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s104"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s104"><Data ss:Type="String">400;0</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s103"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s98"><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
@@ -1627,7 +1629,7 @@
     <Cell ss:StyleID="s98"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s98"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s98"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s98"><Data ss:Type="String">Authority of policy</Data><NamedCell
+    <Cell ss:StyleID="s98"><Data ss:Type="String">Enforcement source for policy</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s100"><Data ss:Type="String">Entity or Organization having regulatory jurisdiction or accountability for &#160;enforcing policies pertaining to Consent Directives.</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
@@ -1734,7 +1736,7 @@
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s102"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s102"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s100"><Data ss:Type="String">If the consent specifies a security label of &quot;R&quot; then it applies to all resources that are labelled &quot;R&quot; or lower. E.g. for Confidentiality, it's a high water mark. For other kinds of security labels, subsumption logic applies. Not all of the security labels make sense for use in this element (may define a narrower value set?)</Data><NamedCell
+    <Cell ss:StyleID="s100"><Data ss:Type="String">If the consent specifies a security label of &quot;R&quot; then it applies to all resources that are labeled &quot;R&quot; or lower. E.g. for Confidentiality, it's a high water mark. For other kinds of security labels, subsumption logic applies. Not all of the security labels make sense for use in this element (may define a narrower value set?)</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s102"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s103"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -2161,7 +2163,7 @@
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s102"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s102"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s100"><Data ss:Type="String">If the consent specifies a security label of &quot;R&quot; then it applies to all resources that are labelled &quot;R&quot; or lower. E.g. for Confidentiality, it's a high water mark. For other kinds of security labels, subsumption logic applies. Not all of the security labels make sense for use in this element (may define a narrower value set?)</Data><NamedCell
+    <Cell ss:StyleID="s100"><Data ss:Type="String">If the consent specifies a security label of &quot;R&quot; then it applies to all resources that are labeled &quot;R&quot; or lower. E.g. for Confidentiality, it's a high water mark. For other kinds of security labels, subsumption logic applies. Not all of the security labels make sense for use in this element (may define a narrower value set?)</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s102"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s103"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -4139,9 +4141,9 @@
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>
-   <TopRowBottomPane>36</TopRowBottomPane>
+   <TopRowBottomPane>1</TopRowBottomPane>
    <SplitVertical>1</SplitVertical>
-   <LeftColumnRightPane>1</LeftColumnRightPane>
+   <LeftColumnRightPane>13</LeftColumnRightPane>
    <ActivePane>0</ActivePane>
    <Panes>
     <Pane>
@@ -4149,15 +4151,15 @@
     </Pane>
     <Pane>
      <Number>1</Number>
+     <ActiveCol>1</ActiveCol>
     </Pane>
     <Pane>
      <Number>2</Number>
-     <ActiveRow>1</ActiveRow>
     </Pane>
     <Pane>
      <Number>0</Number>
-     <ActiveRow>39</ActiveRow>
-     <ActiveCol>4</ActiveCol>
+     <ActiveRow>3</ActiveRow>
+     <ActiveCol>16</ActiveCol>
     </Pane>
    </Panes>
    <ProtectObjects>False</ProtectObjects>
@@ -4290,13 +4292,12 @@
   </Names>
   <Table ss:ExpandedColumnCount="7" ss:ExpandedRowCount="51" x:FullColumns="1"
    x:FullRows="1" ss:StyleID="s119" ss:DefaultRowHeight="15">
-   <Column ss:Index="2" ss:StyleID="s119" ss:AutoFitWidth="0"
-    ss:Width="115.80000000000001"/>
-   <Column ss:StyleID="s119" ss:Width="55.800000000000004"/>
+   <Column ss:Index="2" ss:StyleID="s119" ss:AutoFitWidth="0" ss:Width="115.5"/>
+   <Column ss:StyleID="s119" ss:Width="55.5"/>
    <Column ss:StyleID="s119" ss:Width="165"/>
-   <Column ss:StyleID="s119" ss:AutoFitWidth="0" ss:Width="204.60000000000002"/>
-   <Column ss:StyleID="s119" ss:AutoFitWidth="0" ss:Width="198.6"/>
-   <Column ss:StyleID="s119" ss:AutoFitWidth="0" ss:Width="188.4"/>
+   <Column ss:StyleID="s119" ss:AutoFitWidth="0" ss:Width="204.75"/>
+   <Column ss:StyleID="s119" ss:AutoFitWidth="0" ss:Width="198.75"/>
+   <Column ss:StyleID="s119" ss:AutoFitWidth="0" ss:Width="188.25"/>
    <Row ss:AutoFitHeight="0" ss:Height="15.75" ss:StyleID="s70">
     <Cell ss:StyleID="s120"><Data ss:Type="String">Id</Data><Comment ss:Author=""><ss:Data
        xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Face="Tahoma"
@@ -4824,11 +4825,11 @@
   </Names>
   <Table ss:ExpandedColumnCount="5" ss:ExpandedRowCount="23" x:FullColumns="1"
    x:FullRows="1" ss:StyleID="s129" ss:DefaultRowHeight="15">
-   <Column ss:StyleID="s129" ss:AutoFitWidth="0" ss:Width="70.8"/>
+   <Column ss:StyleID="s129" ss:AutoFitWidth="0" ss:Width="70.5"/>
    <Column ss:StyleID="s129" ss:AutoFitWidth="0" ss:Width="57"/>
-   <Column ss:StyleID="s129" ss:AutoFitWidth="0" ss:Width="109.8"/>
+   <Column ss:StyleID="s129" ss:AutoFitWidth="0" ss:Width="109.5"/>
    <Column ss:StyleID="s129" ss:AutoFitWidth="0" ss:Width="336"/>
-   <Column ss:StyleID="s129" ss:AutoFitWidth="0" ss:Width="382.79999999999995"/>
+   <Column ss:StyleID="s129" ss:AutoFitWidth="0" ss:Width="382.5"/>
    <Row ss:AutoFitHeight="0" ss:Height="15.75" ss:StyleID="s130">
     <Cell ss:StyleID="s120"><Data ss:Type="String">Name</Data><Comment ss:Author=""><ss:Data
        xmlns="http://www.w3.org/TR/REC-html40">Unique name for search parameter - required, lower-case, dash-delimited string    </ss:Data></Comment><NamedCell
@@ -5073,16 +5074,13 @@
   </Names>
   <Table ss:ExpandedColumnCount="9" ss:ExpandedRowCount="51" x:FullColumns="1"
    x:FullRows="1" ss:StyleID="s129" ss:DefaultRowHeight="15">
-   <Column ss:StyleID="s129" ss:AutoFitWidth="0" ss:Width="130.80000000000001"/>
-   <Column ss:StyleID="s129" ss:AutoFitWidth="0" ss:Width="124.80000000000001"/>
+   <Column ss:StyleID="s129" ss:AutoFitWidth="0" ss:Width="130.5"/>
+   <Column ss:StyleID="s129" ss:AutoFitWidth="0" ss:Width="124.5"/>
    <Column ss:StyleID="s129" ss:Width="24"/>
-   <Column ss:StyleID="s129" ss:Width="25.8"/>
-   <Column ss:StyleID="s129" ss:AutoFitWidth="0" ss:Width="106.80000000000001"
-    ss:Span="1"/>
-   <Column ss:Index="7" ss:StyleID="s129" ss:AutoFitWidth="0"
-    ss:Width="222.60000000000002"/>
-   <Column ss:StyleID="s129" ss:AutoFitWidth="0" ss:Width="253.79999999999998"
-    ss:Span="1"/>
+   <Column ss:StyleID="s129" ss:Width="25.5"/>
+   <Column ss:StyleID="s129" ss:AutoFitWidth="0" ss:Width="106.5" ss:Span="1"/>
+   <Column ss:Index="7" ss:StyleID="s129" ss:AutoFitWidth="0" ss:Width="222.75"/>
+   <Column ss:StyleID="s129" ss:AutoFitWidth="0" ss:Width="253.5" ss:Span="1"/>
    <Row ss:AutoFitHeight="0" ss:Height="15.75">
     <Cell ss:StyleID="s144"><Data ss:Type="String">Name</Data><Comment ss:Author=""><ss:Data
        xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Face="Tahoma"
@@ -5704,14 +5702,14 @@
   </Names>
   <Table ss:ExpandedColumnCount="9" ss:ExpandedRowCount="21" x:FullColumns="1"
    x:FullRows="1" ss:StyleID="s129" ss:DefaultRowHeight="15">
-   <Column ss:StyleID="s129" ss:AutoFitWidth="0" ss:Width="82.8" ss:Span="1"/>
-   <Column ss:Index="3" ss:StyleID="s129" ss:AutoFitWidth="0" ss:Width="198.6"/>
-   <Column ss:StyleID="s129" ss:AutoFitWidth="0" ss:Width="157.80000000000001"/>
-   <Column ss:StyleID="s129" ss:Width="106.80000000000001"/>
-   <Column ss:StyleID="s129" ss:Width="113.39999999999999"/>
+   <Column ss:StyleID="s129" ss:AutoFitWidth="0" ss:Width="82.5" ss:Span="1"/>
+   <Column ss:Index="3" ss:StyleID="s129" ss:AutoFitWidth="0" ss:Width="198.75"/>
+   <Column ss:StyleID="s129" ss:AutoFitWidth="0" ss:Width="157.5"/>
+   <Column ss:StyleID="s129" ss:Width="106.5"/>
+   <Column ss:StyleID="s129" ss:Width="113.25"/>
    <Column ss:StyleID="s129" ss:Width="120"/>
-   <Column ss:StyleID="s129" ss:Width="127.8"/>
-   <Column ss:StyleID="s129" ss:AutoFitWidth="0" ss:Width="74.400000000000006"/>
+   <Column ss:StyleID="s129" ss:Width="127.5"/>
+   <Column ss:StyleID="s129" ss:AutoFitWidth="0" ss:Width="74.25"/>
    <Row ss:AutoFitHeight="0" ss:Height="15.75">
     <Cell ss:StyleID="s120"><Data ss:Type="String">Event Code</Data><Comment
       ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
@@ -6002,15 +6000,14 @@
   </Names>
   <Table ss:ExpandedColumnCount="12" ss:ExpandedRowCount="13" x:FullColumns="1"
    x:FullRows="1" ss:StyleID="s129" ss:DefaultRowHeight="15">
-   <Column ss:StyleID="s129" ss:Width="114.6"/>
-   <Column ss:StyleID="s129" ss:AutoFitWidth="0" ss:Width="274.8"/>
+   <Column ss:StyleID="s129" ss:Width="114.75"/>
+   <Column ss:StyleID="s129" ss:AutoFitWidth="0" ss:Width="274.5"/>
    <Column ss:StyleID="s129" ss:Width="51"/>
-   <Column ss:StyleID="s129" ss:AutoFitWidth="0" ss:Width="78.599999999999994"/>
+   <Column ss:StyleID="s129" ss:AutoFitWidth="0" ss:Width="78.75"/>
    <Column ss:StyleID="s129" ss:AutoFitWidth="0" ss:Width="273"/>
-   <Column ss:StyleID="s129" ss:Width="172.79999999999998"/>
-   <Column ss:StyleID="s129" ss:AutoFitWidth="0" ss:Width="106.80000000000001"/>
-   <Column ss:StyleID="s129" ss:AutoFitWidth="0" ss:Width="326.39999999999998"
-    ss:Span="4"/>
+   <Column ss:StyleID="s129" ss:Width="172.5"/>
+   <Column ss:StyleID="s129" ss:AutoFitWidth="0" ss:Width="106.5"/>
+   <Column ss:StyleID="s129" ss:AutoFitWidth="0" ss:Width="326.25" ss:Span="4"/>
    <Row ss:AutoFitHeight="0" ss:Height="15.75">
     <Cell ss:StyleID="s120"><Data ss:Type="String">Binding Name</Data><Comment
       ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
@@ -6068,7 +6065,7 @@
    </Row>
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s98"><Data ss:Type="String">ConsentExceptType</Data></Cell>
-    <Cell ss:StyleID="s100"><Data ss:Type="String">How an exception is statement is applied, as adding additional consent, or removing consent</Data></Cell>
+    <Cell ss:StyleID="s100"><Data ss:Type="String">How an exception statement is applied, such as adding additional consent or removing consent</Data></Cell>
     <Cell ss:StyleID="s139"><Data ss:Type="String">code list</Data></Cell>
     <Cell><Data ss:Type="String">required</Data></Cell>
     <Cell ss:StyleID="s139"><Data ss:Type="String">#consent-except-type</Data></Cell>
@@ -6167,7 +6164,7 @@
   <Table ss:ExpandedColumnCount="5" ss:ExpandedRowCount="40" x:FullColumns="1"
    x:FullRows="1" ss:StyleID="s129" ss:DefaultRowHeight="15">
    <Column ss:StyleID="s129" ss:AutoFitWidth="0" ss:Width="114"/>
-   <Column ss:StyleID="s129" ss:AutoFitWidth="0" ss:Width="281.39999999999998"/>
+   <Column ss:StyleID="s129" ss:AutoFitWidth="0" ss:Width="281.25"/>
    <Column ss:StyleID="s129" ss:AutoFitWidth="0" ss:Width="252"/>
    <Column ss:StyleID="s129" ss:Width="63"/>
    <Row ss:AutoFitHeight="0" ss:Height="15.75">
@@ -6462,15 +6459,15 @@
     ss:Hidden="1"/>
   </Names>
   <Table ss:ExpandedColumnCount="7" ss:ExpandedRowCount="43" x:FullColumns="1"
-   x:FullRows="1" ss:StyleID="s89" ss:DefaultColumnWidth="260.39999999999998"
+   x:FullRows="1" ss:StyleID="s89" ss:DefaultColumnWidth="260.25"
    ss:DefaultRowHeight="15">
-   <Column ss:StyleID="s89" ss:AutoFitWidth="0" ss:Width="124.80000000000001"/>
+   <Column ss:StyleID="s89" ss:AutoFitWidth="0" ss:Width="124.5"/>
    <Column ss:StyleID="s89" ss:AutoFitWidth="0" ss:Width="69"/>
-   <Column ss:StyleID="s89" ss:AutoFitWidth="0" ss:Width="483.6"/>
-   <Column ss:StyleID="s89" ss:AutoFitWidth="0" ss:Width="146.39999999999998"/>
-   <Column ss:StyleID="s89" ss:Width="205.8"/>
-   <Column ss:StyleID="s89" ss:AutoFitWidth="0" ss:Width="43.8"/>
-   <Column ss:StyleID="s89" ss:Width="39.6"/>
+   <Column ss:StyleID="s89" ss:AutoFitWidth="0" ss:Width="483.75"/>
+   <Column ss:StyleID="s89" ss:AutoFitWidth="0" ss:Width="146.25"/>
+   <Column ss:StyleID="s89" ss:Width="205.5"/>
+   <Column ss:StyleID="s89" ss:AutoFitWidth="0" ss:Width="43.5"/>
+   <Column ss:StyleID="s89" ss:Width="39.75"/>
    <Row ss:AutoFitHeight="0" ss:Height="15.75">
     <Cell ss:StyleID="s120"><Data ss:Type="String">Name</Data><Comment ss:Author=""><ss:Data
        xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Face="Tahoma"
@@ -6917,8 +6914,8 @@
  <Worksheet ss:Name="consent-except-type">
   <Table ss:ExpandedColumnCount="9" ss:ExpandedRowCount="3" x:FullColumns="1"
    x:FullRows="1" ss:DefaultRowHeight="15">
-   <Column ss:Index="6" ss:AutoFitWidth="0" ss:Width="229.8"/>
-   <Column ss:Index="9" ss:AutoFitWidth="0" ss:Width="178.8"/>
+   <Column ss:Index="6" ss:AutoFitWidth="0" ss:Width="229.5"/>
+   <Column ss:Index="9" ss:AutoFitWidth="0" ss:Width="178.5"/>
    <Row ss:AutoFitHeight="0" ss:Height="15.75" ss:StyleID="s89">
     <Cell ss:StyleID="s120"><Data ss:Type="String">Code</Data><Comment ss:Author=""><ss:Data
        xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Face="Tahoma"
@@ -6986,14 +6983,13 @@
   </Names>
   <Table ss:ExpandedColumnCount="9" ss:ExpandedRowCount="51" x:FullColumns="1"
    x:FullRows="1" ss:StyleID="s89" ss:DefaultRowHeight="15">
-   <Column ss:StyleID="s89" ss:Width="80.400000000000006"/>
-   <Column ss:StyleID="s89" ss:AutoFitWidth="0" ss:Width="34.799999999999997"/>
-   <Column ss:StyleID="s89" ss:AutoFitWidth="0" ss:Width="91.8"/>
-   <Column ss:StyleID="s89" ss:AutoFitWidth="0" ss:Width="80.400000000000006"
-    ss:Span="1"/>
+   <Column ss:StyleID="s89" ss:Width="80.25"/>
+   <Column ss:StyleID="s89" ss:AutoFitWidth="0" ss:Width="34.5"/>
+   <Column ss:StyleID="s89" ss:AutoFitWidth="0" ss:Width="91.5"/>
+   <Column ss:StyleID="s89" ss:AutoFitWidth="0" ss:Width="80.25" ss:Span="1"/>
    <Column ss:Index="6" ss:StyleID="s89" ss:AutoFitWidth="0" ss:Width="429"/>
    <Column ss:StyleID="s89" ss:AutoFitWidth="0" ss:Width="84" ss:Span="1"/>
-   <Column ss:Index="9" ss:StyleID="s89" ss:AutoFitWidth="0" ss:Width="242.4"/>
+   <Column ss:Index="9" ss:StyleID="s89" ss:AutoFitWidth="0" ss:Width="242.25"/>
    <Row ss:AutoFitHeight="0" ss:Height="15.75">
     <Cell ss:StyleID="s120"><Data ss:Type="String">Code</Data><Comment ss:Author=""><ss:Data
        xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Face="Tahoma"
@@ -7616,14 +7612,13 @@
   </Names>
   <Table ss:ExpandedColumnCount="9" ss:ExpandedRowCount="51" x:FullColumns="1"
    x:FullRows="1" ss:StyleID="s89" ss:DefaultRowHeight="15">
-   <Column ss:StyleID="s89" ss:Width="80.400000000000006"/>
-   <Column ss:StyleID="s89" ss:AutoFitWidth="0" ss:Width="34.799999999999997"/>
-   <Column ss:StyleID="s89" ss:AutoFitWidth="0" ss:Width="155.39999999999998"/>
-   <Column ss:StyleID="s89" ss:AutoFitWidth="0" ss:Width="80.400000000000006"
-    ss:Span="1"/>
+   <Column ss:StyleID="s89" ss:Width="80.25"/>
+   <Column ss:StyleID="s89" ss:AutoFitWidth="0" ss:Width="34.5"/>
+   <Column ss:StyleID="s89" ss:AutoFitWidth="0" ss:Width="155.25"/>
+   <Column ss:StyleID="s89" ss:AutoFitWidth="0" ss:Width="80.25" ss:Span="1"/>
    <Column ss:Index="6" ss:StyleID="s89" ss:AutoFitWidth="0" ss:Width="429"/>
    <Column ss:StyleID="s89" ss:AutoFitWidth="0" ss:Width="84" ss:Span="1"/>
-   <Column ss:Index="9" ss:StyleID="s89" ss:AutoFitWidth="0" ss:Width="242.4"/>
+   <Column ss:Index="9" ss:StyleID="s89" ss:AutoFitWidth="0" ss:Width="242.25"/>
    <Row ss:AutoFitHeight="0" ss:Height="15.75">
     <Cell ss:StyleID="s120"><Data ss:Type="String">Code</Data><Comment ss:Author=""><ss:Data
        xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Face="Tahoma"
@@ -7679,7 +7674,7 @@
     <Cell ss:StyleID="s139"/>
     <Cell ss:StyleID="s170"/>
     <Cell ss:StyleID="s170"><Data ss:Type="String">Related</Data></Cell>
-    <Cell ss:StyleID="s170"><Data ss:Type="String">The consent applies directly to the instance of the resource, and instances it refers to </Data></Cell>
+    <Cell ss:StyleID="s170"><Data ss:Type="String">The consent applies directly to the instance of the resource and instances it refers to </Data></Cell>
     <Cell ss:StyleID="s151"/>
     <Cell ss:StyleID="s151"/>
     <Cell ss:StyleID="s165"><Data ss:Type="String">The scope of the references needs to be clarified, but can't be…</Data></Cell>
@@ -7690,7 +7685,7 @@
     <Cell ss:StyleID="s139"/>
     <Cell ss:StyleID="s170"/>
     <Cell ss:StyleID="s170"><Data ss:Type="String">Dependents</Data></Cell>
-    <Cell ss:StyleID="s170"><Data ss:Type="String">The consent applies directly to the instance of the resource, and instances that refer to it</Data></Cell>
+    <Cell ss:StyleID="s170"><Data ss:Type="String">The consent applies directly to the instance of the resource and instances that refer to it</Data></Cell>
     <Cell ss:StyleID="s151"/>
     <Cell ss:StyleID="s151"/>
     <Cell ss:StyleID="s165"><Data ss:Type="String">The scope of the references needs to be clarified, but can't be…</Data></Cell>

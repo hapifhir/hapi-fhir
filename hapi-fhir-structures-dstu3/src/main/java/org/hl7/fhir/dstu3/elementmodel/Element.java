@@ -2,13 +2,25 @@ package org.hl7.fhir.dstu3.elementmodel;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-import java.util.*;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.lang3.Validate;
-import org.hl7.fhir.dstu3.model.*;
+import org.hl7.fhir.dstu3.elementmodel.Element.ElementSortComparator;
+import org.hl7.fhir.dstu3.model.Base;
+import org.hl7.fhir.dstu3.model.ElementDefinition;
 import org.hl7.fhir.dstu3.model.ElementDefinition.TypeRefComponent;
+import org.hl7.fhir.dstu3.model.StringType;
+import org.hl7.fhir.dstu3.model.StructureDefinition;
+import org.hl7.fhir.dstu3.model.Type;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.utilities.Utilities;
+import org.hl7.fhir.utilities.xhtml.XhtmlComposer;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
 
 /**
@@ -282,8 +294,12 @@ public class Element extends Base {
       return this;
     }
     
-    if (!value.isPrimitive() && !(value instanceof Element))
-      throw new FHIRException("Cannot set property "+name+" on "+this.name+" - value is not a primitive type ("+value.fhirType()+") or an ElementModel type");
+    if (!value.isPrimitive() && !(value instanceof Element)) {
+      if (isDataType(value)) 
+        value = convertToElement(property.getChild(name), value);
+      else
+        throw new FHIRException("Cannot set property "+name+" on "+this.name+" - value is not a primitive type ("+value.fhirType()+") or an ElementModel type");
+    }
     
     if (children == null)
       children = new ArrayList<Element>();
@@ -341,6 +357,14 @@ public class Element extends Base {
       }
     }
     return childForValue;
+  }
+
+  private Base convertToElement(Property prop, Base v) throws FHIRException {
+    return new ObjectConverter(property.getContext()).convert(prop, (Type) v);
+  }
+
+  private boolean isDataType(Base v) {
+    return v instanceof Type &&  property.getContext().getTypeNames().contains(v.fhirType());
   }
 
   @Override
@@ -598,6 +622,7 @@ public class Element extends Base {
       int i1 = find(e1);
       return (i0 < i1) ? -1 : ((i0 == i1) ? 0 : 1);
     }
+    
     private int find(Element e0) {
       int i =  e0.elementProperty != null ? children.indexOf(e0.elementProperty.getDefinition()) :  children.indexOf(e0.property.getDefinition());
       return i; 

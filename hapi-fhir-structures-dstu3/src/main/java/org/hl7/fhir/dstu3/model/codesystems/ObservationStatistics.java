@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
+// Generated on Mon, Apr 17, 2017 17:38-0400 for FHIR v3.0.1
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -93,19 +93,19 @@ public enum ObservationStatistics {
          */
         _4DEV, 
         /**
-         * The lowest of four values that divide the N measurementsinto a frequency distribution of five classes with each containing one fifth of the total population
+         * The lowest of four values that divide the N measurements into a frequency distribution of five classes with each containing one fifth of the total population
          */
         _51, 
         /**
-         * The second of four values that divide the N measurementsinto a frequency distribution of five classes with each containing one fifth of the total population
+         * The second of four values that divide the N measurements into a frequency distribution of five classes with each containing one fifth of the total population
          */
         _52, 
         /**
-         * The third of four values that divide the N measurementsinto a frequency distribution of five classes with each containing one fifth of the total population
+         * The third of four values that divide the N measurements into a frequency distribution of five classes with each containing one fifth of the total population
          */
         _53, 
         /**
-         * The fourth of four values that divide the N measurementsinto a frequency distribution of five classes with each containing one fifth of the total population
+         * The fourth of four values that divide the N measurements into a frequency distribution of five classes with each containing one fifth of the total population
          */
         _54, 
         /**
@@ -216,10 +216,10 @@ public enum ObservationStatistics {
             case _4LOWER: return "The lower [Quartile](https://en.wikipedia.org/wiki/Quartile) Boundary of N measurements over the stated period";
             case _4UPPER: return "The upper [Quartile](https://en.wikipedia.org/wiki/Quartile) Boundary of N measurements over the stated period";
             case _4DEV: return "The difference between the upper and lower [Quartiles](https://en.wikipedia.org/wiki/Quartile) is called the Interquartile range. (IQR = Q3-Q1) Quartile deviation or Semi-interquartile range is one-half the difference between the first and the third quartiles.";
-            case _51: return "The lowest of four values that divide the N measurementsinto a frequency distribution of five classes with each containing one fifth of the total population";
-            case _52: return "The second of four values that divide the N measurementsinto a frequency distribution of five classes with each containing one fifth of the total population";
-            case _53: return "The third of four values that divide the N measurementsinto a frequency distribution of five classes with each containing one fifth of the total population";
-            case _54: return "The fourth of four values that divide the N measurementsinto a frequency distribution of five classes with each containing one fifth of the total population";
+            case _51: return "The lowest of four values that divide the N measurements into a frequency distribution of five classes with each containing one fifth of the total population";
+            case _52: return "The second of four values that divide the N measurements into a frequency distribution of five classes with each containing one fifth of the total population";
+            case _53: return "The third of four values that divide the N measurements into a frequency distribution of five classes with each containing one fifth of the total population";
+            case _54: return "The fourth of four values that divide the N measurements into a frequency distribution of five classes with each containing one fifth of the total population";
             case SKEW: return "Skewness is a measure of the asymmetry of the probability distribution of a real-valued random variable about its mean. The skewness value can be positive or negative, or even undefined.  Source: [Wikipedia](https://en.wikipedia.org/wiki/Skewness)";
             case KURTOSIS: return "Kurtosis  is a measure of the \"tailedness\" of the probability distribution of a real-valued random variable.   Source: [Wikipedia](https://en.wikipedia.org/wiki/Kurtosis)";
             case REGRESSION: return "Linear regression is an approach for modeling two-dimensional sample points with one independent variable and one dependent variable (conventionally, the x and y coordinates in a Cartesian coordinate system) and finds a linear function (a non-vertical straight line) that, as accurately as possible, predicts the dependent variable values as a function of the independent variables. Source: [Wikipedia](https://en.wikipedia.org/wiki/Simple_linear_regression)  This Statistic code will return both a gradient and an intercept value.";

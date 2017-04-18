@@ -2,8 +2,8 @@ package example;
 
 import org.hl7.fhir.convertors.NullVersionConverterAdvisor;
 import org.hl7.fhir.convertors.VersionConvertorAdvisor;
-import org.hl7.fhir.convertors.VersionConvertor_10_20;
-import org.hl7.fhir.convertors.VersionConvertor_14_20;
+import org.hl7.fhir.convertors.VersionConvertor_10_30;
+import org.hl7.fhir.convertors.VersionConvertor_14_30;
 import org.hl7.fhir.exceptions.FHIRException;
 
 public class ConverterExamples {
@@ -13,7 +13,7 @@ public class ConverterExamples {
 	//START SNIPPET: 1020
 		// Create a converter
 		VersionConvertorAdvisor advisor = new NullVersionConverterAdvisor();
-		VersionConvertor_10_20 converter = new VersionConvertor_10_20(advisor);
+		VersionConvertor_10_30 converter = new VersionConvertor_10_30(advisor);
 		
 		// Create an input resource to convert
 		org.hl7.fhir.instance.model.Observation input = new org.hl7.fhir.instance.model.Observation();
@@ -33,7 +33,7 @@ public class ConverterExamples {
 		input.setTitle("My title");
 		
 		// Convert the resource
-		org.hl7.fhir.dstu3.model.Questionnaire output = VersionConvertor_14_20.convertQuestionnaire(input);
+		org.hl7.fhir.dstu3.model.Questionnaire output = VersionConvertor_14_30.convertQuestionnaire(input);
 		String context = output.getTitle();
 	//END SNIPPET: 1420
 	}

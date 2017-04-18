@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
+// Generated on Mon, Apr 17, 2017 17:38-0400 for FHIR v3.0.1
 
 import java.util.*;
 
@@ -44,7 +44,7 @@ import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.exceptions.FHIRException;
 /**
- * TestScript is a resource that specifies a suite of tests against a FHIR server implementation to determine compliance against the FHIR specification.
+ * A structured set of tests against a FHIR server implementation to determine compliance against the FHIR specification.
  */
 @ResourceDef(name="TestScript", profile="http://hl7.org/fhir/Profile/TestScript")
 @ChildOrder(names={"url", "identifier", "version", "name", "title", "status", "experimental", "date", "publisher", "contact", "description", "useContext", "jurisdiction", "purpose", "copyright", "origin", "destination", "metadata", "fixture", "profile", "variable", "rule", "ruleset", "setup", "test", "teardown"})
@@ -2458,10 +2458,10 @@ public class TestScript extends MetadataResource {
         protected BooleanType autocreate;
 
         /**
-         * Whether or not to implicitly delete the fixture during teardown If true, the fixture is automatically deleted on each server being tested during teardown, therefore no delete operation is required for this fixture in the TestScript.teardown section.
+         * Whether or not to implicitly delete the fixture during teardown. If true, the fixture is automatically deleted on each server being tested during teardown, therefore no delete operation is required for this fixture in the TestScript.teardown section.
          */
         @Child(name = "autodelete", type = {BooleanType.class}, order=2, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Whether or not to implicitly delete the fixture during teardown", formalDefinition="Whether or not to implicitly delete the fixture during teardown If true, the fixture is automatically deleted on each server being tested during teardown, therefore no delete operation is required for this fixture in the TestScript.teardown section." )
+        @Description(shortDefinition="Whether or not to implicitly delete the fixture during teardown", formalDefinition="Whether or not to implicitly delete the fixture during teardown. If true, the fixture is automatically deleted on each server being tested during teardown, therefore no delete operation is required for this fixture in the TestScript.teardown section." )
         protected BooleanType autodelete;
 
         /**
@@ -2531,7 +2531,7 @@ public class TestScript extends MetadataResource {
         }
 
         /**
-         * @return {@link #autodelete} (Whether or not to implicitly delete the fixture during teardown If true, the fixture is automatically deleted on each server being tested during teardown, therefore no delete operation is required for this fixture in the TestScript.teardown section.). This is the underlying object with id, value and extensions. The accessor "getAutodelete" gives direct access to the value
+         * @return {@link #autodelete} (Whether or not to implicitly delete the fixture during teardown. If true, the fixture is automatically deleted on each server being tested during teardown, therefore no delete operation is required for this fixture in the TestScript.teardown section.). This is the underlying object with id, value and extensions. The accessor "getAutodelete" gives direct access to the value
          */
         public BooleanType getAutodeleteElement() { 
           if (this.autodelete == null)
@@ -2551,7 +2551,7 @@ public class TestScript extends MetadataResource {
         }
 
         /**
-         * @param value {@link #autodelete} (Whether or not to implicitly delete the fixture during teardown If true, the fixture is automatically deleted on each server being tested during teardown, therefore no delete operation is required for this fixture in the TestScript.teardown section.). This is the underlying object with id, value and extensions. The accessor "getAutodelete" gives direct access to the value
+         * @param value {@link #autodelete} (Whether or not to implicitly delete the fixture during teardown. If true, the fixture is automatically deleted on each server being tested during teardown, therefore no delete operation is required for this fixture in the TestScript.teardown section.). This is the underlying object with id, value and extensions. The accessor "getAutodelete" gives direct access to the value
          */
         public TestScriptFixtureComponent setAutodeleteElement(BooleanType value) { 
           this.autodelete = value;
@@ -2559,14 +2559,14 @@ public class TestScript extends MetadataResource {
         }
 
         /**
-         * @return Whether or not to implicitly delete the fixture during teardown If true, the fixture is automatically deleted on each server being tested during teardown, therefore no delete operation is required for this fixture in the TestScript.teardown section.
+         * @return Whether or not to implicitly delete the fixture during teardown. If true, the fixture is automatically deleted on each server being tested during teardown, therefore no delete operation is required for this fixture in the TestScript.teardown section.
          */
         public boolean getAutodelete() { 
           return this.autodelete == null || this.autodelete.isEmpty() ? false : this.autodelete.getValue();
         }
 
         /**
-         * @param value Whether or not to implicitly delete the fixture during teardown If true, the fixture is automatically deleted on each server being tested during teardown, therefore no delete operation is required for this fixture in the TestScript.teardown section.
+         * @param value Whether or not to implicitly delete the fixture during teardown. If true, the fixture is automatically deleted on each server being tested during teardown, therefore no delete operation is required for this fixture in the TestScript.teardown section.
          */
         public TestScriptFixtureComponent setAutodelete(boolean value) { 
             if (this.autodelete == null)
@@ -2617,7 +2617,7 @@ public class TestScript extends MetadataResource {
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
           childrenList.add(new Property("autocreate", "boolean", "Whether or not to implicitly create the fixture during setup. If true, the fixture is automatically created on each server being tested during setup, therefore no create operation is required for this fixture in the TestScript.setup section.", 0, java.lang.Integer.MAX_VALUE, autocreate));
-          childrenList.add(new Property("autodelete", "boolean", "Whether or not to implicitly delete the fixture during teardown If true, the fixture is automatically deleted on each server being tested during teardown, therefore no delete operation is required for this fixture in the TestScript.teardown section.", 0, java.lang.Integer.MAX_VALUE, autodelete));
+          childrenList.add(new Property("autodelete", "boolean", "Whether or not to implicitly delete the fixture during teardown. If true, the fixture is automatically deleted on each server being tested during teardown, therefore no delete operation is required for this fixture in the TestScript.teardown section.", 0, java.lang.Integer.MAX_VALUE, autodelete));
           childrenList.add(new Property("resource", "Reference(Any)", "Reference to the resource (containing the contents of the resource needed for operations).", 0, java.lang.Integer.MAX_VALUE, resource));
         }
 
@@ -3660,10 +3660,10 @@ public class TestScript extends MetadataResource {
         protected StringType name;
 
         /**
-         * The explict or dynamic value for the parameter that will be passed on to the external rule template.
+         * The explicit or dynamic value for the parameter that will be passed on to the external rule template.
          */
         @Child(name = "value", type = {StringType.class}, order=2, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Parameter value defined either explicitly or dynamically", formalDefinition="The explict or dynamic value for the parameter that will be passed on to the external rule template." )
+        @Description(shortDefinition="Parameter value defined either explicitly or dynamically", formalDefinition="The explicit or dynamic value for the parameter that will be passed on to the external rule template." )
         protected StringType value;
 
         private static final long serialVersionUID = 395259392L;
@@ -3729,7 +3729,7 @@ public class TestScript extends MetadataResource {
         }
 
         /**
-         * @return {@link #value} (The explict or dynamic value for the parameter that will be passed on to the external rule template.). This is the underlying object with id, value and extensions. The accessor "getValue" gives direct access to the value
+         * @return {@link #value} (The explicit or dynamic value for the parameter that will be passed on to the external rule template.). This is the underlying object with id, value and extensions. The accessor "getValue" gives direct access to the value
          */
         public StringType getValueElement() { 
           if (this.value == null)
@@ -3749,7 +3749,7 @@ public class TestScript extends MetadataResource {
         }
 
         /**
-         * @param value {@link #value} (The explict or dynamic value for the parameter that will be passed on to the external rule template.). This is the underlying object with id, value and extensions. The accessor "getValue" gives direct access to the value
+         * @param value {@link #value} (The explicit or dynamic value for the parameter that will be passed on to the external rule template.). This is the underlying object with id, value and extensions. The accessor "getValue" gives direct access to the value
          */
         public RuleParamComponent setValueElement(StringType value) { 
           this.value = value;
@@ -3757,14 +3757,14 @@ public class TestScript extends MetadataResource {
         }
 
         /**
-         * @return The explict or dynamic value for the parameter that will be passed on to the external rule template.
+         * @return The explicit or dynamic value for the parameter that will be passed on to the external rule template.
          */
         public String getValue() { 
           return this.value == null ? null : this.value.getValue();
         }
 
         /**
-         * @param value The explict or dynamic value for the parameter that will be passed on to the external rule template.
+         * @param value The explicit or dynamic value for the parameter that will be passed on to the external rule template.
          */
         public RuleParamComponent setValue(String value) { 
           if (Utilities.noString(value))
@@ -3780,7 +3780,7 @@ public class TestScript extends MetadataResource {
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
           childrenList.add(new Property("name", "string", "Descriptive name for this parameter that matches the external assert rule parameter name.", 0, java.lang.Integer.MAX_VALUE, name));
-          childrenList.add(new Property("value", "string", "The explict or dynamic value for the parameter that will be passed on to the external rule template.", 0, java.lang.Integer.MAX_VALUE, value));
+          childrenList.add(new Property("value", "string", "The explicit or dynamic value for the parameter that will be passed on to the external rule template.", 0, java.lang.Integer.MAX_VALUE, value));
         }
 
       @Override
@@ -5063,7 +5063,7 @@ public class TestScript extends MetadataResource {
          * Header elements would be used to set HTTP headers.
          */
         @Child(name = "requestHeader", type = {}, order=11, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-        @Description(shortDefinition="Each operation can have one ore more header elements", formalDefinition="Header elements would be used to set HTTP headers." )
+        @Description(shortDefinition="Each operation can have one or more header elements", formalDefinition="Header elements would be used to set HTTP headers." )
         protected List<SetupActionOperationRequestHeaderComponent> requestHeader;
 
         /**
@@ -10192,10 +10192,10 @@ public class TestScript extends MetadataResource {
     protected Identifier identifier;
 
     /**
-     * Explains why this test script is needed and why it has been designed as it has.
+     * Explaination of why this test script is needed and why it has been designed as it has.
      */
     @Child(name = "purpose", type = {MarkdownType.class}, order=1, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Why this test script is defined", formalDefinition="Explains why this test script is needed and why it has been designed as it has." )
+    @Description(shortDefinition="Why this test script is defined", formalDefinition="Explaination of why this test script is needed and why it has been designed as it has." )
     protected MarkdownType purpose;
 
     /**
@@ -10307,7 +10307,7 @@ public class TestScript extends MetadataResource {
     }
 
     /**
-     * @return {@link #url} (An absolute URL that is used to identify this test script when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this test script is (or will be) published. The URL SHOULD include the major version of the test script. For more information see [Technical and Business Versions](resource.html#versions).). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
+     * @return {@link #url} (An absolute URI that is used to identify this test script when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this test script is (or will be) published. The URL SHOULD include the major version of the test script. For more information see [Technical and Business Versions](resource.html#versions).). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
      */
     public UriType getUrlElement() { 
       if (this.url == null)
@@ -10327,7 +10327,7 @@ public class TestScript extends MetadataResource {
     }
 
     /**
-     * @param value {@link #url} (An absolute URL that is used to identify this test script when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this test script is (or will be) published. The URL SHOULD include the major version of the test script. For more information see [Technical and Business Versions](resource.html#versions).). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
+     * @param value {@link #url} (An absolute URI that is used to identify this test script when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this test script is (or will be) published. The URL SHOULD include the major version of the test script. For more information see [Technical and Business Versions](resource.html#versions).). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
      */
     public TestScript setUrlElement(UriType value) { 
       this.url = value;
@@ -10335,14 +10335,14 @@ public class TestScript extends MetadataResource {
     }
 
     /**
-     * @return An absolute URL that is used to identify this test script when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this test script is (or will be) published. The URL SHOULD include the major version of the test script. For more information see [Technical and Business Versions](resource.html#versions).
+     * @return An absolute URI that is used to identify this test script when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this test script is (or will be) published. The URL SHOULD include the major version of the test script. For more information see [Technical and Business Versions](resource.html#versions).
      */
     public String getUrl() { 
       return this.url == null ? null : this.url.getValue();
     }
 
     /**
-     * @param value An absolute URL that is used to identify this test script when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this test script is (or will be) published. The URL SHOULD include the major version of the test script. For more information see [Technical and Business Versions](resource.html#versions).
+     * @param value An absolute URI that is used to identify this test script when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this test script is (or will be) published. The URL SHOULD include the major version of the test script. For more information see [Technical and Business Versions](resource.html#versions).
      */
     public TestScript setUrl(String value) { 
         if (this.url == null)
@@ -10376,7 +10376,7 @@ public class TestScript extends MetadataResource {
     }
 
     /**
-     * @return {@link #version} (The identifier that is used to identify this version of the test script when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the test script author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions are orderable.). This is the underlying object with id, value and extensions. The accessor "getVersion" gives direct access to the value
+     * @return {@link #version} (The identifier that is used to identify this version of the test script when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the test script author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions can be placed in a lexicographical sequence.). This is the underlying object with id, value and extensions. The accessor "getVersion" gives direct access to the value
      */
     public StringType getVersionElement() { 
       if (this.version == null)
@@ -10396,7 +10396,7 @@ public class TestScript extends MetadataResource {
     }
 
     /**
-     * @param value {@link #version} (The identifier that is used to identify this version of the test script when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the test script author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions are orderable.). This is the underlying object with id, value and extensions. The accessor "getVersion" gives direct access to the value
+     * @param value {@link #version} (The identifier that is used to identify this version of the test script when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the test script author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions can be placed in a lexicographical sequence.). This is the underlying object with id, value and extensions. The accessor "getVersion" gives direct access to the value
      */
     public TestScript setVersionElement(StringType value) { 
       this.version = value;
@@ -10404,14 +10404,14 @@ public class TestScript extends MetadataResource {
     }
 
     /**
-     * @return The identifier that is used to identify this version of the test script when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the test script author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions are orderable.
+     * @return The identifier that is used to identify this version of the test script when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the test script author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions can be placed in a lexicographical sequence.
      */
     public String getVersion() { 
       return this.version == null ? null : this.version.getValue();
     }
 
     /**
-     * @param value The identifier that is used to identify this version of the test script when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the test script author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions are orderable.
+     * @param value The identifier that is used to identify this version of the test script when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the test script author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions can be placed in a lexicographical sequence.
      */
     public TestScript setVersion(String value) { 
       if (Utilities.noString(value))
@@ -10564,7 +10564,7 @@ public class TestScript extends MetadataResource {
     }
 
     /**
-     * @return {@link #experimental} (A flag to indicate that this test script is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.). This is the underlying object with id, value and extensions. The accessor "getExperimental" gives direct access to the value
+     * @return {@link #experimental} (A boolean value to indicate that this test script is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.). This is the underlying object with id, value and extensions. The accessor "getExperimental" gives direct access to the value
      */
     public BooleanType getExperimentalElement() { 
       if (this.experimental == null)
@@ -10584,7 +10584,7 @@ public class TestScript extends MetadataResource {
     }
 
     /**
-     * @param value {@link #experimental} (A flag to indicate that this test script is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.). This is the underlying object with id, value and extensions. The accessor "getExperimental" gives direct access to the value
+     * @param value {@link #experimental} (A boolean value to indicate that this test script is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.). This is the underlying object with id, value and extensions. The accessor "getExperimental" gives direct access to the value
      */
     public TestScript setExperimentalElement(BooleanType value) { 
       this.experimental = value;
@@ -10592,14 +10592,14 @@ public class TestScript extends MetadataResource {
     }
 
     /**
-     * @return A flag to indicate that this test script is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.
+     * @return A boolean value to indicate that this test script is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.
      */
     public boolean getExperimental() { 
       return this.experimental == null || this.experimental.isEmpty() ? false : this.experimental.getValue();
     }
 
     /**
-     * @param value A flag to indicate that this test script is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.
+     * @param value A boolean value to indicate that this test script is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.
      */
     public TestScript setExperimental(boolean value) { 
         if (this.experimental == null)
@@ -10609,7 +10609,7 @@ public class TestScript extends MetadataResource {
     }
 
     /**
-     * @return {@link #date} (The date  (and optionally time) when the test script was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the test script changes.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
+     * @return {@link #date} (The date  (and optionally time) when the test script was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the test script changes.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
      */
     public DateTimeType getDateElement() { 
       if (this.date == null)
@@ -10629,7 +10629,7 @@ public class TestScript extends MetadataResource {
     }
 
     /**
-     * @param value {@link #date} (The date  (and optionally time) when the test script was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the test script changes.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
+     * @param value {@link #date} (The date  (and optionally time) when the test script was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the test script changes.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
      */
     public TestScript setDateElement(DateTimeType value) { 
       this.date = value;
@@ -10637,14 +10637,14 @@ public class TestScript extends MetadataResource {
     }
 
     /**
-     * @return The date  (and optionally time) when the test script was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the test script changes.
+     * @return The date  (and optionally time) when the test script was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the test script changes.
      */
     public Date getDate() { 
       return this.date == null ? null : this.date.getValue();
     }
 
     /**
-     * @param value The date  (and optionally time) when the test script was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the test script changes.
+     * @param value The date  (and optionally time) when the test script was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the test script changes.
      */
     public TestScript setDate(Date value) { 
       if (value == null)
@@ -10760,7 +10760,7 @@ public class TestScript extends MetadataResource {
     }
 
     /**
-     * @return {@link #description} (A free text natural language description of the test script from the consumer's perspective.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
+     * @return {@link #description} (A free text natural language description of the test script from a consumer's perspective.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
      */
     public MarkdownType getDescriptionElement() { 
       if (this.description == null)
@@ -10780,7 +10780,7 @@ public class TestScript extends MetadataResource {
     }
 
     /**
-     * @param value {@link #description} (A free text natural language description of the test script from the consumer's perspective.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
+     * @param value {@link #description} (A free text natural language description of the test script from a consumer's perspective.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
      */
     public TestScript setDescriptionElement(MarkdownType value) { 
       this.description = value;
@@ -10788,14 +10788,14 @@ public class TestScript extends MetadataResource {
     }
 
     /**
-     * @return A free text natural language description of the test script from the consumer's perspective.
+     * @return A free text natural language description of the test script from a consumer's perspective.
      */
     public String getDescription() { 
       return this.description == null ? null : this.description.getValue();
     }
 
     /**
-     * @param value A free text natural language description of the test script from the consumer's perspective.
+     * @param value A free text natural language description of the test script from a consumer's perspective.
      */
     public TestScript setDescription(String value) { 
       if (value == null)
@@ -10809,7 +10809,7 @@ public class TestScript extends MetadataResource {
     }
 
     /**
-     * @return {@link #useContext} (The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching of code system definitions.)
+     * @return {@link #useContext} (The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching for appropriate test script instances.)
      */
     public List<UsageContext> getUseContext() { 
       if (this.useContext == null)
@@ -10862,7 +10862,7 @@ public class TestScript extends MetadataResource {
     }
 
     /**
-     * @return {@link #jurisdiction} (A jurisdiction in which the test script is intended to be used.)
+     * @return {@link #jurisdiction} (A legal or geographic region in which the test script is intended to be used.)
      */
     public List<CodeableConcept> getJurisdiction() { 
       if (this.jurisdiction == null)
@@ -10915,7 +10915,7 @@ public class TestScript extends MetadataResource {
     }
 
     /**
-     * @return {@link #purpose} (Explains why this test script is needed and why it has been designed as it has.). This is the underlying object with id, value and extensions. The accessor "getPurpose" gives direct access to the value
+     * @return {@link #purpose} (Explaination of why this test script is needed and why it has been designed as it has.). This is the underlying object with id, value and extensions. The accessor "getPurpose" gives direct access to the value
      */
     public MarkdownType getPurposeElement() { 
       if (this.purpose == null)
@@ -10935,7 +10935,7 @@ public class TestScript extends MetadataResource {
     }
 
     /**
-     * @param value {@link #purpose} (Explains why this test script is needed and why it has been designed as it has.). This is the underlying object with id, value and extensions. The accessor "getPurpose" gives direct access to the value
+     * @param value {@link #purpose} (Explaination of why this test script is needed and why it has been designed as it has.). This is the underlying object with id, value and extensions. The accessor "getPurpose" gives direct access to the value
      */
     public TestScript setPurposeElement(MarkdownType value) { 
       this.purpose = value;
@@ -10943,14 +10943,14 @@ public class TestScript extends MetadataResource {
     }
 
     /**
-     * @return Explains why this test script is needed and why it has been designed as it has.
+     * @return Explaination of why this test script is needed and why it has been designed as it has.
      */
     public String getPurpose() { 
       return this.purpose == null ? null : this.purpose.getValue();
     }
 
     /**
-     * @param value Explains why this test script is needed and why it has been designed as it has.
+     * @param value Explaination of why this test script is needed and why it has been designed as it has.
      */
     public TestScript setPurpose(String value) { 
       if (value == null)
@@ -11520,20 +11520,20 @@ public class TestScript extends MetadataResource {
 
       protected void listChildren(List<Property> childrenList) {
         super.listChildren(childrenList);
-        childrenList.add(new Property("url", "uri", "An absolute URL that is used to identify this test script when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this test script is (or will be) published. The URL SHOULD include the major version of the test script. For more information see [Technical and Business Versions](resource.html#versions).", 0, java.lang.Integer.MAX_VALUE, url));
+        childrenList.add(new Property("url", "uri", "An absolute URI that is used to identify this test script when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this test script is (or will be) published. The URL SHOULD include the major version of the test script. For more information see [Technical and Business Versions](resource.html#versions).", 0, java.lang.Integer.MAX_VALUE, url));
         childrenList.add(new Property("identifier", "Identifier", "A formal identifier that is used to identify this test script when it is represented in other formats, or referenced in a specification, model, design or an instance.", 0, java.lang.Integer.MAX_VALUE, identifier));
-        childrenList.add(new Property("version", "string", "The identifier that is used to identify this version of the test script when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the test script author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions are orderable.", 0, java.lang.Integer.MAX_VALUE, version));
+        childrenList.add(new Property("version", "string", "The identifier that is used to identify this version of the test script when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the test script author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions can be placed in a lexicographical sequence.", 0, java.lang.Integer.MAX_VALUE, version));
         childrenList.add(new Property("name", "string", "A natural language name identifying the test script. This name should be usable as an identifier for the module by machine processing applications such as code generation.", 0, java.lang.Integer.MAX_VALUE, name));
         childrenList.add(new Property("title", "string", "A short, descriptive, user-friendly title for the test script.", 0, java.lang.Integer.MAX_VALUE, title));
         childrenList.add(new Property("status", "code", "The status of this test script. Enables tracking the life-cycle of the content.", 0, java.lang.Integer.MAX_VALUE, status));
-        childrenList.add(new Property("experimental", "boolean", "A flag to indicate that this test script is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.", 0, java.lang.Integer.MAX_VALUE, experimental));
-        childrenList.add(new Property("date", "dateTime", "The date  (and optionally time) when the test script was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the test script changes.", 0, java.lang.Integer.MAX_VALUE, date));
+        childrenList.add(new Property("experimental", "boolean", "A boolean value to indicate that this test script is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.", 0, java.lang.Integer.MAX_VALUE, experimental));
+        childrenList.add(new Property("date", "dateTime", "The date  (and optionally time) when the test script was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the test script changes.", 0, java.lang.Integer.MAX_VALUE, date));
         childrenList.add(new Property("publisher", "string", "The name of the individual or organization that published the test script.", 0, java.lang.Integer.MAX_VALUE, publisher));
         childrenList.add(new Property("contact", "ContactDetail", "Contact details to assist a user in finding and communicating with the publisher.", 0, java.lang.Integer.MAX_VALUE, contact));
-        childrenList.add(new Property("description", "markdown", "A free text natural language description of the test script from the consumer's perspective.", 0, java.lang.Integer.MAX_VALUE, description));
-        childrenList.add(new Property("useContext", "UsageContext", "The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching of code system definitions.", 0, java.lang.Integer.MAX_VALUE, useContext));
-        childrenList.add(new Property("jurisdiction", "CodeableConcept", "A jurisdiction in which the test script is intended to be used.", 0, java.lang.Integer.MAX_VALUE, jurisdiction));
-        childrenList.add(new Property("purpose", "markdown", "Explains why this test script is needed and why it has been designed as it has.", 0, java.lang.Integer.MAX_VALUE, purpose));
+        childrenList.add(new Property("description", "markdown", "A free text natural language description of the test script from a consumer's perspective.", 0, java.lang.Integer.MAX_VALUE, description));
+        childrenList.add(new Property("useContext", "UsageContext", "The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching for appropriate test script instances.", 0, java.lang.Integer.MAX_VALUE, useContext));
+        childrenList.add(new Property("jurisdiction", "CodeableConcept", "A legal or geographic region in which the test script is intended to be used.", 0, java.lang.Integer.MAX_VALUE, jurisdiction));
+        childrenList.add(new Property("purpose", "markdown", "Explaination of why this test script is needed and why it has been designed as it has.", 0, java.lang.Integer.MAX_VALUE, purpose));
         childrenList.add(new Property("copyright", "markdown", "A copyright statement relating to the test script and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the test script.", 0, java.lang.Integer.MAX_VALUE, copyright));
         childrenList.add(new Property("origin", "", "An abstract server used in operations within this test script in the origin element.", 0, java.lang.Integer.MAX_VALUE, origin));
         childrenList.add(new Property("destination", "", "An abstract server used in operations within this test script in the destination element.", 0, java.lang.Integer.MAX_VALUE, destination));
@@ -12028,17 +12028,17 @@ public class TestScript extends MetadataResource {
  /**
    * Search parameter: <b>identifier</b>
    * <p>
-   * Description: <b>External identifiers for the test script</b><br>
+   * Description: <b>External identifier for the test script</b><br>
    * Type: <b>token</b><br>
    * Path: <b>TestScript.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="TestScript.identifier", description="External identifiers for the test script", type="token" )
+  @SearchParamDefinition(name="identifier", path="TestScript.identifier", description="External identifier for the test script", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
    * <p>
-   * Description: <b>External identifiers for the test script</b><br>
+   * Description: <b>External identifier for the test script</b><br>
    * Type: <b>token</b><br>
    * Path: <b>TestScript.identifier</b><br>
    * </p>
@@ -12048,17 +12048,17 @@ public class TestScript extends MetadataResource {
  /**
    * Search parameter: <b>jurisdiction</b>
    * <p>
-   * Description: <b>Intended jurisdiction for test script</b><br>
+   * Description: <b>Intended jurisdiction for the test script</b><br>
    * Type: <b>token</b><br>
    * Path: <b>TestScript.jurisdiction</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="jurisdiction", path="TestScript.jurisdiction", description="Intended jurisdiction for test script", type="token" )
+  @SearchParamDefinition(name="jurisdiction", path="TestScript.jurisdiction", description="Intended jurisdiction for the test script", type="token" )
   public static final String SP_JURISDICTION = "jurisdiction";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>jurisdiction</b>
    * <p>
-   * Description: <b>Intended jurisdiction for test script</b><br>
+   * Description: <b>Intended jurisdiction for the test script</b><br>
    * Type: <b>token</b><br>
    * Path: <b>TestScript.jurisdiction</b><br>
    * </p>
@@ -12068,17 +12068,17 @@ public class TestScript extends MetadataResource {
  /**
    * Search parameter: <b>name</b>
    * <p>
-   * Description: <b>Name of the test script</b><br>
+   * Description: <b>Computationally friendly name of the test script</b><br>
    * Type: <b>string</b><br>
    * Path: <b>TestScript.name</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="name", path="TestScript.name", description="Name of the test script", type="string" )
+  @SearchParamDefinition(name="name", path="TestScript.name", description="Computationally friendly name of the test script", type="string" )
   public static final String SP_NAME = "name";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>name</b>
    * <p>
-   * Description: <b>Name of the test script</b><br>
+   * Description: <b>Computationally friendly name of the test script</b><br>
    * Type: <b>string</b><br>
    * Path: <b>TestScript.name</b><br>
    * </p>
@@ -12088,17 +12088,17 @@ public class TestScript extends MetadataResource {
  /**
    * Search parameter: <b>description</b>
    * <p>
-   * Description: <b>Text search against the description of the test script</b><br>
+   * Description: <b>The description of the test script</b><br>
    * Type: <b>string</b><br>
    * Path: <b>TestScript.description</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="description", path="TestScript.description", description="Text search against the description of the test script", type="string" )
+  @SearchParamDefinition(name="description", path="TestScript.description", description="The description of the test script", type="string" )
   public static final String SP_DESCRIPTION = "description";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>description</b>
    * <p>
-   * Description: <b>Text search against the description of the test script</b><br>
+   * Description: <b>The description of the test script</b><br>
    * Type: <b>string</b><br>
    * Path: <b>TestScript.description</b><br>
    * </p>
@@ -12148,17 +12148,17 @@ public class TestScript extends MetadataResource {
  /**
    * Search parameter: <b>title</b>
    * <p>
-   * Description: <b>Text search against the title of the test script</b><br>
+   * Description: <b>The human-friendly name of the test script</b><br>
    * Type: <b>string</b><br>
    * Path: <b>TestScript.title</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="title", path="TestScript.title", description="Text search against the title of the test script", type="string" )
+  @SearchParamDefinition(name="title", path="TestScript.title", description="The human-friendly name of the test script", type="string" )
   public static final String SP_TITLE = "title";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>title</b>
    * <p>
-   * Description: <b>Text search against the title of the test script</b><br>
+   * Description: <b>The human-friendly name of the test script</b><br>
    * Type: <b>string</b><br>
    * Path: <b>TestScript.title</b><br>
    * </p>

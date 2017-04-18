@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
+// Generated on Mon, Apr 17, 2017 17:38-0400 for FHIR v3.0.1
 
 import java.util.*;
 
@@ -550,7 +550,7 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
         /**
          * The details of the proposed activity represented in a specific resource.
          */
-        @Child(name = "reference", type = {Appointment.class, CommunicationRequest.class, DeviceRequest.class, MedicationRequest.class, NutritionOrder.class, Task.class, ProcessRequest.class, ReferralRequest.class, VisionPrescription.class, RequestGroup.class}, order=4, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "reference", type = {Appointment.class, CommunicationRequest.class, DeviceRequest.class, MedicationRequest.class, NutritionOrder.class, Task.class, ProcedureRequest.class, ReferralRequest.class, VisionPrescription.class, RequestGroup.class}, order=4, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Activity details defined in specific resource", formalDefinition="The details of the proposed activity represented in a specific resource." )
         protected Reference reference;
 
@@ -812,7 +812,7 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
           childrenList.add(new Property("outcomeCodeableConcept", "CodeableConcept", "Identifies the outcome at the point when the status of the activity is assessed.  For example, the outcome of an education activity could be patient understands (or not).", 0, java.lang.Integer.MAX_VALUE, outcomeCodeableConcept));
           childrenList.add(new Property("outcomeReference", "Reference(Any)", "Details of the outcome or action resulting from the activity.  The reference to an \"event\" resource, such as Procedure or Encounter or Observation, is the result/outcome of the activity itself.  The activity can be conveyed using CarePlan.activity.detail OR using the CarePlan.activity.reference (a reference to a “request” resource).", 0, java.lang.Integer.MAX_VALUE, outcomeReference));
           childrenList.add(new Property("progress", "Annotation", "Notes about the adherence/status/progress of the activity.", 0, java.lang.Integer.MAX_VALUE, progress));
-          childrenList.add(new Property("reference", "Reference(Appointment|CommunicationRequest|DeviceRequest|MedicationRequest|NutritionOrder|Task|ProcessRequest|ReferralRequest|VisionPrescription|RequestGroup)", "The details of the proposed activity represented in a specific resource.", 0, java.lang.Integer.MAX_VALUE, reference));
+          childrenList.add(new Property("reference", "Reference(Appointment|CommunicationRequest|DeviceRequest|MedicationRequest|NutritionOrder|Task|ProcedureRequest|ReferralRequest|VisionPrescription|RequestGroup)", "The details of the proposed activity represented in a specific resource.", 0, java.lang.Integer.MAX_VALUE, reference));
           childrenList.add(new Property("detail", "", "A simple summary of a planned activity suitable for a general care plan system (e.g. form driven) that doesn't know about specific resources such as procedure etc.", 0, java.lang.Integer.MAX_VALUE, detail));
         }
 
@@ -4245,7 +4245,7 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
    * Path: <b>CarePlan.activity.reference</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="activity-reference", path="CarePlan.activity.reference", description="Activity details defined in specific resource", type="reference", target={Appointment.class, CommunicationRequest.class, DeviceRequest.class, MedicationRequest.class, NutritionOrder.class, ProcessRequest.class, ReferralRequest.class, RequestGroup.class, Task.class, VisionPrescription.class } )
+  @SearchParamDefinition(name="activity-reference", path="CarePlan.activity.reference", description="Activity details defined in specific resource", type="reference", target={Appointment.class, CommunicationRequest.class, DeviceRequest.class, MedicationRequest.class, NutritionOrder.class, ProcedureRequest.class, ReferralRequest.class, RequestGroup.class, Task.class, VisionPrescription.class } )
   public static final String SP_ACTIVITY_REFERENCE = "activity-reference";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>activity-reference</b>

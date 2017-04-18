@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
+// Generated on Mon, Apr 17, 2017 17:38-0400 for FHIR v3.0.1
 
 import java.util.*;
 
@@ -1840,7 +1840,7 @@ public class AuditEvent extends DomainResource {
          */
         @Child(name = "type", type = {Coding.class}, order=3, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Type of entity involved", formalDefinition="The type of the object that was involved in this audit event." )
-        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/object-type")
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/audit-entity-type")
         protected Coding type;
 
         /**
@@ -1860,10 +1860,10 @@ public class AuditEvent extends DomainResource {
         protected Coding lifecycle;
 
         /**
-         * Denotes security labels for the identified entity.
+         * Security labels for the identified entity.
          */
         @Child(name = "securityLabel", type = {Coding.class}, order=6, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-        @Description(shortDefinition="Security labels on the entity", formalDefinition="Denotes security labels for the identified entity." )
+        @Description(shortDefinition="Security labels on the entity", formalDefinition="Security labels for the identified entity." )
         @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/security-labels")
         protected List<Coding> securityLabel;
 
@@ -1889,10 +1889,10 @@ public class AuditEvent extends DomainResource {
         protected Base64BinaryType query;
 
         /**
-         * Additional Information about the entity.
+         * Tagged value pairs for conveying additional information about the entity.
          */
         @Child(name = "detail", type = {}, order=10, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-        @Description(shortDefinition="Additional Information about the entity", formalDefinition="Additional Information about the entity." )
+        @Description(shortDefinition="Additional Information about the entity", formalDefinition="Tagged value pairs for conveying additional information about the entity." )
         protected List<AuditEventEntityDetailComponent> detail;
 
         private static final long serialVersionUID = -1393424632L;
@@ -2040,7 +2040,7 @@ public class AuditEvent extends DomainResource {
         }
 
         /**
-         * @return {@link #securityLabel} (Denotes security labels for the identified entity.)
+         * @return {@link #securityLabel} (Security labels for the identified entity.)
          */
         public List<Coding> getSecurityLabel() { 
           if (this.securityLabel == null)
@@ -2240,7 +2240,7 @@ public class AuditEvent extends DomainResource {
         }
 
         /**
-         * @return {@link #detail} (Additional Information about the entity.)
+         * @return {@link #detail} (Tagged value pairs for conveying additional information about the entity.)
          */
         public List<AuditEventEntityDetailComponent> getDetail() { 
           if (this.detail == null)
@@ -2299,11 +2299,11 @@ public class AuditEvent extends DomainResource {
           childrenList.add(new Property("type", "Coding", "The type of the object that was involved in this audit event.", 0, java.lang.Integer.MAX_VALUE, type));
           childrenList.add(new Property("role", "Coding", "Code representing the role the entity played in the event being audited.", 0, java.lang.Integer.MAX_VALUE, role));
           childrenList.add(new Property("lifecycle", "Coding", "Identifier for the data life-cycle stage for the entity.", 0, java.lang.Integer.MAX_VALUE, lifecycle));
-          childrenList.add(new Property("securityLabel", "Coding", "Denotes security labels for the identified entity.", 0, java.lang.Integer.MAX_VALUE, securityLabel));
+          childrenList.add(new Property("securityLabel", "Coding", "Security labels for the identified entity.", 0, java.lang.Integer.MAX_VALUE, securityLabel));
           childrenList.add(new Property("name", "string", "A name of the entity in the audit event.", 0, java.lang.Integer.MAX_VALUE, name));
           childrenList.add(new Property("description", "string", "Text that describes the entity in more detail.", 0, java.lang.Integer.MAX_VALUE, description));
           childrenList.add(new Property("query", "base64Binary", "The query parameters for a query-type entities.", 0, java.lang.Integer.MAX_VALUE, query));
-          childrenList.add(new Property("detail", "", "Additional Information about the entity.", 0, java.lang.Integer.MAX_VALUE, detail));
+          childrenList.add(new Property("detail", "", "Tagged value pairs for conveying additional information about the entity.", 0, java.lang.Integer.MAX_VALUE, detail));
         }
 
       @Override
@@ -2529,17 +2529,17 @@ public class AuditEvent extends DomainResource {
     @Block()
     public static class AuditEventEntityDetailComponent extends BackboneElement implements IBaseBackboneElement {
         /**
-         * Name of the property.
+         * The type of extra detail provided in the value.
          */
         @Child(name = "type", type = {StringType.class}, order=1, min=1, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Name of the property", formalDefinition="Name of the property." )
+        @Description(shortDefinition="Name of the property", formalDefinition="The type of extra detail provided in the value." )
         protected StringType type;
 
         /**
-         * Property value.
+         * The details, base64 encoded. Used to carry bulk information.
          */
         @Child(name = "value", type = {Base64BinaryType.class}, order=2, min=1, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Property value", formalDefinition="Property value." )
+        @Description(shortDefinition="Property value", formalDefinition="The details, base64 encoded. Used to carry bulk information." )
         protected Base64BinaryType value;
 
         private static final long serialVersionUID = 11139504L;
@@ -2561,7 +2561,7 @@ public class AuditEvent extends DomainResource {
       }
 
         /**
-         * @return {@link #type} (Name of the property.). This is the underlying object with id, value and extensions. The accessor "getType" gives direct access to the value
+         * @return {@link #type} (The type of extra detail provided in the value.). This is the underlying object with id, value and extensions. The accessor "getType" gives direct access to the value
          */
         public StringType getTypeElement() { 
           if (this.type == null)
@@ -2581,7 +2581,7 @@ public class AuditEvent extends DomainResource {
         }
 
         /**
-         * @param value {@link #type} (Name of the property.). This is the underlying object with id, value and extensions. The accessor "getType" gives direct access to the value
+         * @param value {@link #type} (The type of extra detail provided in the value.). This is the underlying object with id, value and extensions. The accessor "getType" gives direct access to the value
          */
         public AuditEventEntityDetailComponent setTypeElement(StringType value) { 
           this.type = value;
@@ -2589,14 +2589,14 @@ public class AuditEvent extends DomainResource {
         }
 
         /**
-         * @return Name of the property.
+         * @return The type of extra detail provided in the value.
          */
         public String getType() { 
           return this.type == null ? null : this.type.getValue();
         }
 
         /**
-         * @param value Name of the property.
+         * @param value The type of extra detail provided in the value.
          */
         public AuditEventEntityDetailComponent setType(String value) { 
             if (this.type == null)
@@ -2606,7 +2606,7 @@ public class AuditEvent extends DomainResource {
         }
 
         /**
-         * @return {@link #value} (Property value.). This is the underlying object with id, value and extensions. The accessor "getValue" gives direct access to the value
+         * @return {@link #value} (The details, base64 encoded. Used to carry bulk information.). This is the underlying object with id, value and extensions. The accessor "getValue" gives direct access to the value
          */
         public Base64BinaryType getValueElement() { 
           if (this.value == null)
@@ -2626,7 +2626,7 @@ public class AuditEvent extends DomainResource {
         }
 
         /**
-         * @param value {@link #value} (Property value.). This is the underlying object with id, value and extensions. The accessor "getValue" gives direct access to the value
+         * @param value {@link #value} (The details, base64 encoded. Used to carry bulk information.). This is the underlying object with id, value and extensions. The accessor "getValue" gives direct access to the value
          */
         public AuditEventEntityDetailComponent setValueElement(Base64BinaryType value) { 
           this.value = value;
@@ -2634,14 +2634,14 @@ public class AuditEvent extends DomainResource {
         }
 
         /**
-         * @return Property value.
+         * @return The details, base64 encoded. Used to carry bulk information.
          */
         public byte[] getValue() { 
           return this.value == null ? null : this.value.getValue();
         }
 
         /**
-         * @param value Property value.
+         * @param value The details, base64 encoded. Used to carry bulk information.
          */
         public AuditEventEntityDetailComponent setValue(byte[] value) { 
             if (this.value == null)
@@ -2652,8 +2652,8 @@ public class AuditEvent extends DomainResource {
 
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
-          childrenList.add(new Property("type", "string", "Name of the property.", 0, java.lang.Integer.MAX_VALUE, type));
-          childrenList.add(new Property("value", "base64Binary", "Property value.", 0, java.lang.Integer.MAX_VALUE, value));
+          childrenList.add(new Property("type", "string", "The type of extra detail provided in the value.", 0, java.lang.Integer.MAX_VALUE, type));
+          childrenList.add(new Property("value", "base64Binary", "The details, base64 encoded. Used to carry bulk information.", 0, java.lang.Integer.MAX_VALUE, value));
         }
 
       @Override

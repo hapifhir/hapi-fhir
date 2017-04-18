@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
+// Generated on Mon, Apr 17, 2017 17:38-0400 for FHIR v3.0.1
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -53,15 +53,15 @@ public enum DiagnosticReportStatus {
          */
         FINAL, 
         /**
-         * Subsequent to being Final, the report has been modified.  This includes any change in the results, diagnosis, narrative text, or other content of a report that has been issued.
+         * Subsequent to being final, the report has been modified.  This includes any change in the results, diagnosis, narrative text, or other content of a report that has been issued.
          */
         AMENDED, 
         /**
-         * Subsequent to being Final, the report has been modified  to correct an error in the report or referenced results.
+         * Subsequent to being final, the report has been modified  to correct an error in the report or referenced results.
          */
         CORRECTED, 
         /**
-         * Subsequent to being Final, the report has been modified by adding new content. The existing content is unchanged.
+         * Subsequent to being final, the report has been modified by adding new content. The existing content is unchanged.
          */
         APPENDED, 
         /**
@@ -129,9 +129,9 @@ public enum DiagnosticReportStatus {
             case PARTIAL: return "This is a partial (e.g. initial, interim or preliminary) report: data in the report may be incomplete or unverified.";
             case PRELIMINARY: return "Verified early results are available, but not all  results are final.";
             case FINAL: return "The report is complete and verified by an authorized person.";
-            case AMENDED: return "Subsequent to being Final, the report has been modified.  This includes any change in the results, diagnosis, narrative text, or other content of a report that has been issued.";
-            case CORRECTED: return "Subsequent to being Final, the report has been modified  to correct an error in the report or referenced results.";
-            case APPENDED: return "Subsequent to being Final, the report has been modified by adding new content. The existing content is unchanged.";
+            case AMENDED: return "Subsequent to being final, the report has been modified.  This includes any change in the results, diagnosis, narrative text, or other content of a report that has been issued.";
+            case CORRECTED: return "Subsequent to being final, the report has been modified  to correct an error in the report or referenced results.";
+            case APPENDED: return "Subsequent to being final, the report has been modified by adding new content. The existing content is unchanged.";
             case CANCELLED: return "The report is unavailable because the measurement was not started or not completed (also sometimes called \"aborted\").";
             case ENTEREDINERROR: return "The report has been withdrawn following a previous final release.  This electronic record should never have existed, though it is possible that real-world decisions were based on it. (If real-world activity has occurred, the status should be \"cancelled\" rather than \"entered-in-error\".)";
             case UNKNOWN: return "The authoring system does not know which of the status values currently applies for this request. Note: This concept is not to be used for \"other\" - one of the listed statuses is presumed to apply, it's just not known which one.";

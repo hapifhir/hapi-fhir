@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
+// Generated on Mon, Apr 17, 2017 17:38-0400 for FHIR v3.0.1
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -41,11 +41,11 @@ public enum ConformanceExpectation {
          */
         SHALL, 
         /**
-         * Support for the specified capability is strongly encouraged and failure to support it should only occur after careful consideration.
+         * Support for the specified capability is strongly encouraged, and failure to support it should only occur after careful consideration.
          */
         SHOULD, 
         /**
-         * Support for the specified capability is not necessary to be considered conformant and the requirement should be considered strictly optional.
+         * Support for the specified capability is not necessary to be considered conformant, and the requirement should be considered strictly optional.
          */
         MAY, 
         /**
@@ -84,8 +84,8 @@ public enum ConformanceExpectation {
         public String getDefinition() {
           switch (this) {
             case SHALL: return "Support for the specified capability is required to be considered conformant.";
-            case SHOULD: return "Support for the specified capability is strongly encouraged and failure to support it should only occur after careful consideration.";
-            case MAY: return "Support for the specified capability is not necessary to be considered conformant and the requirement should be considered strictly optional.";
+            case SHOULD: return "Support for the specified capability is strongly encouraged, and failure to support it should only occur after careful consideration.";
+            case MAY: return "Support for the specified capability is not necessary to be considered conformant, and the requirement should be considered strictly optional.";
             case SHOULDNOT: return "Support for the specified capability is strongly discouraged and should occur only after careful consideration.";
             default: return "?";
           }

@@ -20,12 +20,12 @@
    <Path>\\ERICS-AIR-2\ehaas\work\subversion\fhir\build\source\colorectal\Archive\Invariants</Path>
    <SheetName>Invariants</SheetName>
   </SupBook>
-  <WindowHeight>11112</WindowHeight>
-  <WindowWidth>23040</WindowWidth>
+  <WindowHeight>5688</WindowHeight>
+  <WindowWidth>15864</WindowWidth>
   <WindowTopX>0</WindowTopX>
   <WindowTopY>0</WindowTopY>
   <TabRatio>735</TabRatio>
-  <ActiveSheet>3</ActiveSheet>
+  <ActiveSheet>2</ActiveSheet>
   <RefModeR1C1/>
   <ProtectStructure>False</ProtectStructure>
   <ProtectWindows>False</ProtectWindows>
@@ -1142,7 +1142,7 @@
     <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s91"><Data ss:Type="String">Business Identifer for request/order</Data><NamedCell
+    <Cell ss:StyleID="s91"><Data ss:Type="String">Business Identifier for request/order</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s93"><Data ss:Type="String">Identifiers assigned to this request by the requester, performer and other systems</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
@@ -1197,7 +1197,7 @@
    <Row ss:AutoFitHeight="0" ss:Height="57.45">
     <Cell ss:StyleID="s90"><Data ss:Type="String">Request.basedOn</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s91"><Data ss:Type="String">fufills</Data><NamedCell
+    <Cell ss:StyleID="s91"><Data ss:Type="String">fulfills</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s91"><Data ss:Type="String">0..*</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
@@ -2261,7 +2261,7 @@
     <Cell ss:StyleID="s114"><Data ss:Type="String">Request.requester</Data></Cell>
     <Cell ss:StyleID="s95"><Data ss:Type="String">onBehalfOf can only be specified if agent is practitioner or device</Data></Cell>
     <Cell ss:StyleID="s95"><Data ss:Type="String">(agent.resolve().empty()) or (agent.resolve() is Device) or (agent.resolve() is Practitioner) or onBehalfOf.exists().not()</Data></Cell>
-    <Cell ss:StyleID="s115"><Data ss:Type="String">contains(f:agent, '/Practitioner') or contains(f:agent, '/Device') or not(exists(f:onBehalfOf))</Data></Cell>
+    <Cell ss:StyleID="s115"><Data ss:Type="String">contains(f:agent/f:reference/@value, '/Practitioner/') or contains(f:agent/f:reference/@value, '/Device/') or not(exists(f:onBehalfOf))</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="44.550000000000004">
     <Cell ss:StyleID="s116"><NamedCell ss:Name="Invariantids"/></Cell>
@@ -2504,12 +2504,13 @@
     <HorizontalResolution>600</HorizontalResolution>
     <VerticalResolution>600</VerticalResolution>
    </Print>
+   <Selected/>
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>
    <TopRowBottomPane>1</TopRowBottomPane>
    <SplitVertical>2</SplitVertical>
-   <LeftColumnRightPane>2</LeftColumnRightPane>
+   <LeftColumnRightPane>5</LeftColumnRightPane>
    <ActivePane>0</ActivePane>
    <Panes>
     <Pane>
@@ -2517,6 +2518,7 @@
     </Pane>
     <Pane>
      <Number>1</Number>
+     <ActiveCol>2</ActiveCol>
     </Pane>
     <Pane>
      <Number>2</Number>
@@ -2862,7 +2864,6 @@
     <HorizontalResolution>1200</HorizontalResolution>
     <VerticalResolution>1200</VerticalResolution>
    </Print>
-   <Selected/>
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>
@@ -5039,7 +5040,7 @@
     <Cell><Data ss:Type="String">unknown</Data></Cell>
     <Cell><Data ss:Type="Number">7</Data></Cell>
     <Cell ss:Index="5"><Data ss:Type="String">Unknown</Data></Cell>
-    <Cell><Data ss:Type="String">The authoring system does not know which of the status values currently applies for this request.  Note: This concept is not to be used for &quot;other&quot; - one of the listed statuses is presumed to apply, it's just not known which one.</Data></Cell>
+    <Cell><Data ss:Type="String">The authoring system does not know which of the status values currently applies for this request.  Note: This concept is not to be used for &quot;other&quot; . One of the listed statuses is presumed to apply,  but the system creating the request doesn't know.</Data></Cell>
     <Cell ss:Index="8"><Data ss:Type="String" x:Ticked="1">=NullFlavor.unknown</Data></Cell>
    </Row>
   </Table>
@@ -5053,7 +5054,8 @@
    <Panes>
     <Pane>
      <Number>3</Number>
-     <ActiveRow>1</ActiveRow>
+     <ActiveRow>5</ActiveRow>
+     <ActiveCol>5</ActiveCol>
     </Pane>
    </Panes>
    <ProtectObjects>False</ProtectObjects>

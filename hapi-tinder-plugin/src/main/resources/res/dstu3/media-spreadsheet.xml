@@ -10,22 +10,23 @@
   <LastAuthor>lloyd</LastAuthor>
   <Created>2012-03-19T11:12:07Z</Created>
   <LastSaved>2017-02-26T01:38:26Z</LastSaved>
-  <Version>16.00</Version>
+  <Version>12.00</Version>
  </DocumentProperties>
  <OfficeDocumentSettings xmlns="urn:schemas-microsoft-com:office:office">
   <AllowPNG/>
  </OfficeDocumentSettings>
  <ExcelWorkbook xmlns="urn:schemas-microsoft-com:office:excel">
   <SupBook>
-   <Path>\work\subversion\fhir\build\source\colorectal\Archive\Invariants</Path>
+   <Path>\\ERICS-AIR-2\ehaas\work\subversion\fhir\build\source\colorectal\Archive\Invariants</Path>
    <SheetName>Invariants</SheetName>
   </SupBook>
-  <WindowHeight>9672</WindowHeight>
+  <WindowHeight>9675</WindowHeight>
   <WindowWidth>23040</WindowWidth>
   <WindowTopX>0</WindowTopX>
   <WindowTopY>0</WindowTopY>
-  <ActiveSheet>1</ActiveSheet>
-  <FirstVisibleSheet>1</FirstVisibleSheet>
+  <ActiveSheet>8</ActiveSheet>
+  <FirstVisibleSheet>3</FirstVisibleSheet>
+  <RefModeR1C1/>
   <ProtectStructure>False</ProtectStructure>
   <ProtectWindows>False</ProtectWindows>
  </ExcelWorkbook>
@@ -918,30 +919,28 @@
   </Names>
   <Table ss:ExpandedColumnCount="52" ss:ExpandedRowCount="106" x:FullColumns="1"
    x:FullRows="1" ss:StyleID="s68" ss:DefaultRowHeight="15">
-   <Column ss:StyleID="s69" ss:Width="227.39999999999998"/>
-   <Column ss:StyleID="s68" ss:AutoFitWidth="0" ss:Width="77.399999999999991"/>
-   <Column ss:StyleID="s68" ss:Width="29.4"/>
-   <Column ss:StyleID="s68" ss:Width="34.799999999999997"/>
-   <Column ss:StyleID="s68" ss:AutoFitWidth="0" ss:Width="119.4"/>
-   <Column ss:StyleID="s68" ss:AutoFitWidth="0" ss:Width="28.8"/>
+   <Column ss:StyleID="s69" ss:Width="227.25"/>
+   <Column ss:StyleID="s68" ss:AutoFitWidth="0" ss:Width="77.25"/>
+   <Column ss:StyleID="s68" ss:Width="29.25"/>
+   <Column ss:StyleID="s68" ss:Width="34.5"/>
+   <Column ss:StyleID="s68" ss:AutoFitWidth="0" ss:Width="119.25"/>
+   <Column ss:StyleID="s68" ss:AutoFitWidth="0" ss:Width="28.5"/>
    <Column ss:StyleID="s68" ss:AutoFitWidth="0" ss:Width="27"/>
-   <Column ss:StyleID="s68" ss:AutoFitWidth="0" ss:Width="106.80000000000001"
-    ss:Span="1"/>
+   <Column ss:StyleID="s68" ss:AutoFitWidth="0" ss:Width="106.5" ss:Span="1"/>
    <Column ss:Index="10" ss:StyleID="s68" ss:AutoFitWidth="0" ss:Width="81"/>
-   <Column ss:StyleID="s68" ss:Width="51.6" ss:Span="1"/>
-   <Column ss:Index="13" ss:StyleID="s68" ss:AutoFitWidth="0"
-    ss:Width="80.400000000000006"/>
-   <Column ss:StyleID="s68" ss:AutoFitWidth="0" ss:Width="120.60000000000001"/>
-   <Column ss:StyleID="s68" ss:AutoFitWidth="0" ss:Width="161.4"/>
+   <Column ss:StyleID="s68" ss:Width="51.75" ss:Span="1"/>
+   <Column ss:Index="13" ss:StyleID="s68" ss:AutoFitWidth="0" ss:Width="80.25"/>
+   <Column ss:StyleID="s68" ss:AutoFitWidth="0" ss:Width="120.75"/>
+   <Column ss:StyleID="s68" ss:AutoFitWidth="0" ss:Width="161.25"/>
    <Column ss:StyleID="s68" ss:AutoFitWidth="0" ss:Width="114"/>
    <Column ss:StyleID="s68" ss:AutoFitWidth="0" ss:Width="135"/>
    <Column ss:StyleID="s68" ss:AutoFitWidth="0" ss:Width="120"/>
    <Column ss:StyleID="s68" ss:AutoFitWidth="0" ss:Width="135"/>
-   <Column ss:Index="23" ss:StyleID="s68" ss:AutoFitWidth="0" ss:Width="103.8"
+   <Column ss:Index="23" ss:StyleID="s68" ss:AutoFitWidth="0" ss:Width="103.5"
     ss:Span="1"/>
-   <Column ss:Index="25" ss:StyleID="s68" ss:AutoFitWidth="0" ss:Width="50.4"/>
+   <Column ss:Index="25" ss:StyleID="s68" ss:AutoFitWidth="0" ss:Width="50.25"/>
    <Column ss:StyleID="s68" ss:AutoFitWidth="0" ss:Width="66"/>
-   <Column ss:StyleID="s68" ss:AutoFitWidth="0" ss:Width="119.4"/>
+   <Column ss:StyleID="s68" ss:AutoFitWidth="0" ss:Width="119.25"/>
    <Row ss:AutoFitHeight="0" ss:Height="45" ss:StyleID="s70">
     <Cell ss:StyleID="s71"><Data ss:Type="String">Element</Data><Comment
       ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
@@ -1124,10 +1123,10 @@
     <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s93"><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
-   <Row ss:AutoFitHeight="0" ss:Height="57.45">
+   <Row ss:AutoFitHeight="0" ss:Height="57.5625">
     <Cell ss:StyleID="s87"><Data ss:Type="String">Media.basedOn</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s88"><Data ss:Type="String">fufills</Data><NamedCell
+    <Cell ss:StyleID="s88"><Data ss:Type="String">fulfills</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><Data ss:Type="String">0..*</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
@@ -1161,7 +1160,7 @@
     <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s93"><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
-   <Row ss:AutoFitHeight="0" ss:Height="86.550000000000011">
+   <Row ss:AutoFitHeight="0" ss:Height="86.4375">
     <Cell ss:StyleID="s87"><Data ss:Type="String">!Media.partOf</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><Data ss:Type="String">container</Data><NamedCell
@@ -1352,7 +1351,7 @@
     <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s93"><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
-   <Row ss:AutoFitHeight="0" ss:Height="100.8">
+   <Row ss:AutoFitHeight="0" ss:Height="100.6875">
     <Cell ss:StyleID="s87"><Data ss:Type="String">Media.context</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><Data ss:Type="String">encounter</Data><NamedCell
@@ -1391,7 +1390,7 @@
     <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s93"><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
-   <Row ss:AutoFitHeight="0" ss:Height="43.199999999999996">
+   <Row ss:AutoFitHeight="0" ss:Height="43.3125">
     <Cell ss:StyleID="s87"><Data ss:Type="String">Media.occurrence[x]</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><Data ss:Type="String">timing</Data><NamedCell
@@ -1466,7 +1465,7 @@
     <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s93"><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
-   <Row ss:AutoFitHeight="0" ss:Height="28.8">
+   <Row ss:AutoFitHeight="0" ss:Height="28.6875">
     <Cell ss:StyleID="s87"><Data ss:Type="String">Media.reasonCode</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1504,7 +1503,7 @@
     <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s93"><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
-   <Row ss:AutoFitHeight="0" ss:Height="28.05">
+   <Row ss:AutoFitHeight="0" ss:Height="27.9375">
     <Cell ss:StyleID="s87"><Data ss:Type="String">Media.bodySite</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1585,7 +1584,7 @@
     <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s93"><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
-   <Row ss:AutoFitHeight="0" ss:Height="28.05">
+   <Row ss:AutoFitHeight="0" ss:Height="27.9375">
     <Cell ss:StyleID="s87"><Data ss:Type="String">Media.device</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1763,7 +1762,7 @@
     <Cell ss:StyleID="s89"><Data ss:Type="String">The duration of the recording in seconds - for audio and video</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s89"><Data ss:Type="String">The duration might differ from occurencePeriod if recording was paused</Data><NamedCell
+    <Cell ss:StyleID="s89"><Data ss:Type="String">The duration might differ from occurrencePeriod if recording was paused</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s91"><Data ss:Type="String">.outboundRelationship[typeCode=&quot;COMP].target[classCode=&quot;OBS&quot;, moodCode=&quot;EVN&quot;,code=&quot;&lt;CODE&gt;&quot;].value</Data><NamedCell
@@ -4298,7 +4297,6 @@
     <HorizontalResolution>600</HorizontalResolution>
     <VerticalResolution>600</VerticalResolution>
    </Print>
-   <Selected/>
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>
@@ -4329,7 +4327,7 @@
   <DataValidation xmlns="urn:schemas-microsoft-com:office:excel">
    <Range>R4C4:R5C4,R22C4,R10C4:R11C4,R13C4:R14C4</Range>
    <Type>List</Type>
-   <Value>'\work\subversion\fhir\build\source\colorectal\Archive\[Invariants]Invariants'!#REF!</Value>
+   <Value>'\\ERICS-AIR-2\ehaas\work\subversion\fhir\build\source\colorectal\Archive\[Invariants]Invariants'!#REF!</Value>
    <ErrorHide/>
   </DataValidation>
   <DataValidation xmlns="urn:schemas-microsoft-com:office:excel">
@@ -4384,13 +4382,12 @@
   </Names>
   <Table ss:ExpandedColumnCount="7" ss:ExpandedRowCount="51" x:FullColumns="1"
    x:FullRows="1" ss:StyleID="s107" ss:DefaultRowHeight="15">
-   <Column ss:Index="2" ss:StyleID="s107" ss:AutoFitWidth="0"
-    ss:Width="115.80000000000001"/>
-   <Column ss:StyleID="s107" ss:Width="55.800000000000004"/>
+   <Column ss:Index="2" ss:StyleID="s107" ss:AutoFitWidth="0" ss:Width="115.5"/>
+   <Column ss:StyleID="s107" ss:Width="55.5"/>
    <Column ss:StyleID="s107" ss:Width="165"/>
-   <Column ss:StyleID="s107" ss:AutoFitWidth="0" ss:Width="204.60000000000002"/>
-   <Column ss:StyleID="s107" ss:AutoFitWidth="0" ss:Width="198.6"/>
-   <Column ss:StyleID="s107" ss:AutoFitWidth="0" ss:Width="188.4"/>
+   <Column ss:StyleID="s107" ss:AutoFitWidth="0" ss:Width="204.75"/>
+   <Column ss:StyleID="s107" ss:AutoFitWidth="0" ss:Width="198.75"/>
+   <Column ss:StyleID="s107" ss:AutoFitWidth="0" ss:Width="188.25"/>
    <Row ss:AutoFitHeight="0" ss:Height="15.75" ss:StyleID="s70">
     <Cell ss:StyleID="s108"><Data ss:Type="String">Id</Data><Comment ss:Author=""><ss:Data
        xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Face="Tahoma"
@@ -4920,11 +4917,11 @@
   </Names>
   <Table ss:ExpandedColumnCount="5" ss:ExpandedRowCount="31" x:FullColumns="1"
    x:FullRows="1" ss:StyleID="s119" ss:DefaultRowHeight="15">
-   <Column ss:StyleID="s119" ss:AutoFitWidth="0" ss:Width="70.8"/>
+   <Column ss:StyleID="s119" ss:AutoFitWidth="0" ss:Width="70.5"/>
    <Column ss:StyleID="s119" ss:AutoFitWidth="0" ss:Width="57"/>
-   <Column ss:StyleID="s119" ss:AutoFitWidth="0" ss:Width="109.8"/>
+   <Column ss:StyleID="s119" ss:AutoFitWidth="0" ss:Width="109.5"/>
    <Column ss:StyleID="s119" ss:AutoFitWidth="0" ss:Width="210"/>
-   <Column ss:StyleID="s119" ss:AutoFitWidth="0" ss:Width="382.79999999999995"/>
+   <Column ss:StyleID="s119" ss:AutoFitWidth="0" ss:Width="382.5"/>
    <Row ss:AutoFitHeight="0" ss:Height="15.75" ss:StyleID="s120">
     <Cell ss:StyleID="s108"><Data ss:Type="String">Name</Data><Comment ss:Author=""><ss:Data
        xmlns="http://www.w3.org/TR/REC-html40">Unique name for search parameter - required, lower-case, dash-delimited string    </ss:Data></Comment><NamedCell
@@ -5195,16 +5192,13 @@
   </Names>
   <Table ss:ExpandedColumnCount="9" ss:ExpandedRowCount="51" x:FullColumns="1"
    x:FullRows="1" ss:StyleID="s119" ss:DefaultRowHeight="15">
-   <Column ss:StyleID="s119" ss:AutoFitWidth="0" ss:Width="130.80000000000001"/>
-   <Column ss:StyleID="s119" ss:AutoFitWidth="0" ss:Width="124.80000000000001"/>
+   <Column ss:StyleID="s119" ss:AutoFitWidth="0" ss:Width="130.5"/>
+   <Column ss:StyleID="s119" ss:AutoFitWidth="0" ss:Width="124.5"/>
    <Column ss:StyleID="s119" ss:Width="24"/>
-   <Column ss:StyleID="s119" ss:Width="25.8"/>
-   <Column ss:StyleID="s119" ss:AutoFitWidth="0" ss:Width="106.80000000000001"
-    ss:Span="1"/>
-   <Column ss:Index="7" ss:StyleID="s119" ss:AutoFitWidth="0"
-    ss:Width="222.60000000000002"/>
-   <Column ss:StyleID="s119" ss:AutoFitWidth="0" ss:Width="253.79999999999998"
-    ss:Span="1"/>
+   <Column ss:StyleID="s119" ss:Width="25.5"/>
+   <Column ss:StyleID="s119" ss:AutoFitWidth="0" ss:Width="106.5" ss:Span="1"/>
+   <Column ss:Index="7" ss:StyleID="s119" ss:AutoFitWidth="0" ss:Width="222.75"/>
+   <Column ss:StyleID="s119" ss:AutoFitWidth="0" ss:Width="253.5" ss:Span="1"/>
    <Row ss:AutoFitHeight="0" ss:Height="15.75">
     <Cell ss:StyleID="s132"><Data ss:Type="String">Name</Data><Comment ss:Author=""><ss:Data
        xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Face="Tahoma"
@@ -5826,14 +5820,14 @@
   </Names>
   <Table ss:ExpandedColumnCount="9" ss:ExpandedRowCount="21" x:FullColumns="1"
    x:FullRows="1" ss:StyleID="s119" ss:DefaultRowHeight="15">
-   <Column ss:StyleID="s119" ss:AutoFitWidth="0" ss:Width="82.8" ss:Span="1"/>
-   <Column ss:Index="3" ss:StyleID="s119" ss:AutoFitWidth="0" ss:Width="198.6"/>
-   <Column ss:StyleID="s119" ss:AutoFitWidth="0" ss:Width="157.80000000000001"/>
-   <Column ss:StyleID="s119" ss:Width="106.80000000000001"/>
-   <Column ss:StyleID="s119" ss:Width="113.39999999999999"/>
+   <Column ss:StyleID="s119" ss:AutoFitWidth="0" ss:Width="82.5" ss:Span="1"/>
+   <Column ss:Index="3" ss:StyleID="s119" ss:AutoFitWidth="0" ss:Width="198.75"/>
+   <Column ss:StyleID="s119" ss:AutoFitWidth="0" ss:Width="157.5"/>
+   <Column ss:StyleID="s119" ss:Width="106.5"/>
+   <Column ss:StyleID="s119" ss:Width="113.25"/>
    <Column ss:StyleID="s119" ss:Width="120"/>
-   <Column ss:StyleID="s119" ss:Width="127.8"/>
-   <Column ss:StyleID="s119" ss:AutoFitWidth="0" ss:Width="74.400000000000006"/>
+   <Column ss:StyleID="s119" ss:Width="127.5"/>
+   <Column ss:StyleID="s119" ss:AutoFitWidth="0" ss:Width="74.25"/>
    <Row ss:AutoFitHeight="0" ss:Height="15.75">
     <Cell ss:StyleID="s108"><Data ss:Type="String">Event Code</Data><Comment
       ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
@@ -6124,7 +6118,7 @@
   <Table ss:ExpandedColumnCount="4" ss:ExpandedRowCount="41" x:FullColumns="1"
    x:FullRows="1" ss:StyleID="s119" ss:DefaultRowHeight="15">
    <Column ss:StyleID="s119" ss:AutoFitWidth="0" ss:Width="114"/>
-   <Column ss:StyleID="s119" ss:AutoFitWidth="0" ss:Width="281.39999999999998"/>
+   <Column ss:StyleID="s119" ss:AutoFitWidth="0" ss:Width="281.25"/>
    <Column ss:StyleID="s119" ss:AutoFitWidth="0" ss:Width="252"/>
    <Column ss:StyleID="s119" ss:Width="63"/>
    <Row ss:AutoFitHeight="0" ss:Height="15.75">
@@ -6422,14 +6416,14 @@
     ss:Hidden="1"/>
   </Names>
   <Table ss:ExpandedColumnCount="7" ss:ExpandedRowCount="41" x:FullColumns="1"
-   x:FullRows="1" ss:StyleID="s145" ss:DefaultColumnWidth="260.39999999999998"
+   x:FullRows="1" ss:StyleID="s145" ss:DefaultColumnWidth="260.25"
    ss:DefaultRowHeight="15">
-   <Column ss:StyleID="s145" ss:Width="88.800000000000011"/>
-   <Column ss:StyleID="s145" ss:Width="27.6"/>
-   <Column ss:StyleID="s145" ss:Width="327.59999999999997"/>
+   <Column ss:StyleID="s145" ss:Width="88.5"/>
+   <Column ss:StyleID="s145" ss:Width="27.75"/>
+   <Column ss:StyleID="s145" ss:Width="327.75"/>
    <Column ss:StyleID="s145" ss:Width="57"/>
-   <Column ss:StyleID="s145" ss:Width="205.8" ss:Span="1"/>
-   <Column ss:Index="7" ss:StyleID="s145" ss:Width="39.6"/>
+   <Column ss:StyleID="s145" ss:Width="205.5" ss:Span="1"/>
+   <Column ss:Index="7" ss:StyleID="s145" ss:Width="39.75"/>
    <Row ss:AutoFitHeight="0" ss:Height="15.75">
     <Cell ss:StyleID="s108"><Data ss:Type="String">Name</Data><Comment ss:Author=""><ss:Data
        xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Face="Tahoma"
@@ -6861,19 +6855,18 @@
   </Names>
   <Table ss:ExpandedColumnCount="13" ss:ExpandedRowCount="30" x:FullColumns="1"
    x:FullRows="1" ss:StyleID="s119" ss:DefaultRowHeight="15">
-   <Column ss:StyleID="s119" ss:Width="114.6"/>
-   <Column ss:StyleID="s119" ss:AutoFitWidth="0" ss:Width="274.8"/>
+   <Column ss:StyleID="s119" ss:Width="114.75"/>
+   <Column ss:StyleID="s119" ss:AutoFitWidth="0" ss:Width="274.5"/>
    <Column ss:StyleID="s119" ss:Width="51"/>
    <Column ss:StyleID="s119" ss:Width="45"/>
-   <Column ss:StyleID="s119" ss:Width="146.39999999999998"/>
-   <Column ss:StyleID="s119" ss:Width="172.79999999999998"/>
-   <Column ss:StyleID="s119" ss:AutoFitWidth="0" ss:Width="97.800000000000011"/>
-   <Column ss:StyleID="s119" ss:AutoFitWidth="0" ss:Width="88.800000000000011"/>
+   <Column ss:StyleID="s119" ss:Width="146.25"/>
+   <Column ss:StyleID="s119" ss:Width="172.5"/>
+   <Column ss:StyleID="s119" ss:AutoFitWidth="0" ss:Width="97.5"/>
+   <Column ss:StyleID="s119" ss:AutoFitWidth="0" ss:Width="88.5"/>
    <Column ss:StyleID="s119" ss:AutoFitWidth="0" ss:Width="114"/>
-   <Column ss:StyleID="s119" ss:AutoFitWidth="0" ss:Width="172.79999999999998"/>
-   <Column ss:StyleID="s119" ss:AutoFitWidth="0" ss:Width="165.6" ss:Span="1"/>
-   <Column ss:Index="13" ss:StyleID="s119" ss:AutoFitWidth="0"
-    ss:Width="106.80000000000001"/>
+   <Column ss:StyleID="s119" ss:AutoFitWidth="0" ss:Width="172.5"/>
+   <Column ss:StyleID="s119" ss:AutoFitWidth="0" ss:Width="165.75" ss:Span="1"/>
+   <Column ss:Index="13" ss:StyleID="s119" ss:AutoFitWidth="0" ss:Width="106.5"/>
    <Row ss:AutoFitHeight="0" ss:Height="15.75">
     <Cell ss:StyleID="s108"><Data ss:Type="String">Binding Name</Data><Comment
       ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
@@ -6930,7 +6923,7 @@
    </Row>
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s154"><Data ss:Type="String">DigitalMediaType</Data></Cell>
-    <Cell ss:StyleID="s79"><Data ss:Type="String">Whether the Media is a photo, video, or audio</Data></Cell>
+    <Cell ss:StyleID="s79"><Data ss:Type="String">Whether the media is a photo, video, or audio</Data></Cell>
     <Cell ss:StyleID="s122"><Data ss:Type="String">Code List</Data></Cell>
     <Cell ss:StyleID="s125"><Data ss:Type="String">required</Data></Cell>
     <Cell ss:StyleID="s122"><Data ss:Type="String">#digital-media-type</Data></Cell>
@@ -7363,6 +7356,7 @@
     <HorizontalResolution>600</HorizontalResolution>
     <VerticalResolution>600</VerticalResolution>
    </Print>
+   <Selected/>
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>
@@ -7382,7 +7376,7 @@
     </Pane>
     <Pane>
      <Number>0</Number>
-     <ActiveRow>4</ActiveRow>
+     <ActiveRow>8</ActiveRow>
     </Pane>
    </Panes>
    <ProtectObjects>False</ProtectObjects>
@@ -7399,15 +7393,13 @@
   </Names>
   <Table ss:ExpandedColumnCount="9" ss:ExpandedRowCount="51" x:FullColumns="1"
    x:FullRows="1" ss:StyleID="s145" ss:DefaultRowHeight="15">
-   <Column ss:StyleID="s145" ss:Width="80.400000000000006"/>
-   <Column ss:StyleID="s145" ss:AutoFitWidth="0" ss:Width="34.799999999999997"/>
-   <Column ss:StyleID="s145" ss:AutoFitWidth="0" ss:Width="155.39999999999998"/>
-   <Column ss:StyleID="s145" ss:AutoFitWidth="0" ss:Width="80.400000000000006"
-    ss:Span="1"/>
-   <Column ss:Index="6" ss:StyleID="s145" ss:AutoFitWidth="0"
-    ss:Width="244.79999999999998"/>
+   <Column ss:StyleID="s145" ss:Width="80.25"/>
+   <Column ss:StyleID="s145" ss:AutoFitWidth="0" ss:Width="34.5"/>
+   <Column ss:StyleID="s145" ss:AutoFitWidth="0" ss:Width="155.25"/>
+   <Column ss:StyleID="s145" ss:AutoFitWidth="0" ss:Width="80.25" ss:Span="1"/>
+   <Column ss:Index="6" ss:StyleID="s145" ss:AutoFitWidth="0" ss:Width="244.5"/>
    <Column ss:StyleID="s145" ss:AutoFitWidth="0" ss:Width="84" ss:Span="1"/>
-   <Column ss:Index="9" ss:StyleID="s145" ss:AutoFitWidth="0" ss:Width="242.4"/>
+   <Column ss:Index="9" ss:StyleID="s145" ss:AutoFitWidth="0" ss:Width="242.25"/>
    <Row ss:AutoFitHeight="0" ss:Height="15.75">
     <Cell ss:StyleID="s108"><Data ss:Type="String">Code</Data><Comment ss:Author=""><ss:Data
        xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Face="Tahoma"
@@ -7449,7 +7441,7 @@
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s147"><Data ss:Type="String">AR</Data></Cell>
     <Cell ss:StyleID="s136"/>
-    <Cell ss:StyleID="s122"><Data ss:Type="String">http://nema.org/dicom/dicm</Data></Cell>
+    <Cell ss:StyleID="s122"><Data ss:Type="String">http://dicom.nema.org/resources/ontology/DCM</Data></Cell>
     <Cell ss:StyleID="s159"/>
     <Cell ss:StyleID="s159"/>
     <Cell ss:StyleID="s159"/>
@@ -7460,7 +7452,7 @@
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s149"><Data ss:Type="String">BMD </Data></Cell>
     <Cell ss:StyleID="s139"/>
-    <Cell ss:StyleID="s125"><Data ss:Type="String">http://nema.org/dicom/dicm</Data></Cell>
+    <Cell ss:StyleID="s125"><Data ss:Type="String">http://dicom.nema.org/resources/ontology/DCM</Data></Cell>
     <Cell ss:StyleID="s160"/>
     <Cell ss:StyleID="s160"/>
     <Cell ss:StyleID="s160"/>
@@ -7471,7 +7463,7 @@
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s149"><Data ss:Type="String">BDUS</Data></Cell>
     <Cell ss:StyleID="s139"/>
-    <Cell ss:StyleID="s125"><Data ss:Type="String">http://nema.org/dicom/dicm</Data></Cell>
+    <Cell ss:StyleID="s125"><Data ss:Type="String">http://dicom.nema.org/resources/ontology/DCM</Data></Cell>
     <Cell ss:StyleID="s160"/>
     <Cell ss:StyleID="s160"/>
     <Cell ss:StyleID="s160"/>
@@ -7482,7 +7474,7 @@
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s149"><Data ss:Type="String">EPS</Data></Cell>
     <Cell ss:StyleID="s139"/>
-    <Cell ss:StyleID="s125"><Data ss:Type="String">http://nema.org/dicom/dicm</Data></Cell>
+    <Cell ss:StyleID="s125"><Data ss:Type="String">http://dicom.nema.org/resources/ontology/DCM</Data></Cell>
     <Cell ss:StyleID="s160"/>
     <Cell ss:StyleID="s160"/>
     <Cell ss:StyleID="s160"/>
@@ -7493,7 +7485,7 @@
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s149"><Data ss:Type="String">CR</Data></Cell>
     <Cell ss:StyleID="s139"/>
-    <Cell ss:StyleID="s125"><Data ss:Type="String">http://nema.org/dicom/dicm</Data></Cell>
+    <Cell ss:StyleID="s125"><Data ss:Type="String">http://dicom.nema.org/resources/ontology/DCM</Data></Cell>
     <Cell ss:StyleID="s160"/>
     <Cell ss:StyleID="s160"/>
     <Cell ss:StyleID="s160"/>
@@ -7504,7 +7496,7 @@
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s149"><Data ss:Type="String">CT</Data></Cell>
     <Cell ss:StyleID="s139"/>
-    <Cell ss:StyleID="s125"><Data ss:Type="String">http://nema.org/dicom/dicm</Data></Cell>
+    <Cell ss:StyleID="s125"><Data ss:Type="String">http://dicom.nema.org/resources/ontology/DCM</Data></Cell>
     <Cell ss:StyleID="s160"/>
     <Cell ss:StyleID="s160"/>
     <Cell ss:StyleID="s160"/>
@@ -7515,7 +7507,7 @@
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s149"><Data ss:Type="String">DX</Data></Cell>
     <Cell ss:StyleID="s139"/>
-    <Cell ss:StyleID="s125"><Data ss:Type="String">http://nema.org/dicom/dicm</Data></Cell>
+    <Cell ss:StyleID="s125"><Data ss:Type="String">http://dicom.nema.org/resources/ontology/DCM</Data></Cell>
     <Cell ss:StyleID="s160"/>
     <Cell ss:StyleID="s160"/>
     <Cell ss:StyleID="s160"/>
@@ -7526,7 +7518,7 @@
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s149"><Data ss:Type="String">ECG</Data></Cell>
     <Cell ss:StyleID="s139"/>
-    <Cell ss:StyleID="s125"><Data ss:Type="String">http://nema.org/dicom/dicm</Data></Cell>
+    <Cell ss:StyleID="s125"><Data ss:Type="String">http://dicom.nema.org/resources/ontology/DCM</Data></Cell>
     <Cell ss:StyleID="s160"/>
     <Cell ss:StyleID="s160"/>
     <Cell ss:StyleID="s160"/>
@@ -7537,7 +7529,7 @@
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s149"><Data ss:Type="String">ES</Data></Cell>
     <Cell ss:StyleID="s139"/>
-    <Cell ss:StyleID="s125"><Data ss:Type="String">http://nema.org/dicom/dicm</Data></Cell>
+    <Cell ss:StyleID="s125"><Data ss:Type="String">http://dicom.nema.org/resources/ontology/DCM</Data></Cell>
     <Cell ss:StyleID="s160"/>
     <Cell ss:StyleID="s160"/>
     <Cell ss:StyleID="s160"/>
@@ -7548,7 +7540,7 @@
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s149"><Data ss:Type="String">XC</Data></Cell>
     <Cell ss:StyleID="s139"/>
-    <Cell ss:StyleID="s125"><Data ss:Type="String">http://nema.org/dicom/dicm</Data></Cell>
+    <Cell ss:StyleID="s125"><Data ss:Type="String">http://dicom.nema.org/resources/ontology/DCM</Data></Cell>
     <Cell ss:StyleID="s160"/>
     <Cell ss:StyleID="s160"/>
     <Cell ss:StyleID="s160"/>
@@ -7559,7 +7551,7 @@
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s149"><Data ss:Type="String">GM</Data></Cell>
     <Cell ss:StyleID="s139"/>
-    <Cell ss:StyleID="s125"><Data ss:Type="String">http://nema.org/dicom/dicm</Data></Cell>
+    <Cell ss:StyleID="s125"><Data ss:Type="String">http://dicom.nema.org/resources/ontology/DCM</Data></Cell>
     <Cell ss:StyleID="s160"/>
     <Cell ss:StyleID="s160"/>
     <Cell ss:StyleID="s160"/>
@@ -7570,7 +7562,7 @@
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s149"><Data ss:Type="String">HD</Data></Cell>
     <Cell ss:StyleID="s139"/>
-    <Cell ss:StyleID="s125"><Data ss:Type="String">http://nema.org/dicom/dicm</Data></Cell>
+    <Cell ss:StyleID="s125"><Data ss:Type="String">http://dicom.nema.org/resources/ontology/DCM</Data></Cell>
     <Cell ss:StyleID="s160"/>
     <Cell ss:StyleID="s160"/>
     <Cell ss:StyleID="s160"/>
@@ -7581,7 +7573,7 @@
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s149"><Data ss:Type="String">IO</Data></Cell>
     <Cell ss:StyleID="s139"/>
-    <Cell ss:StyleID="s125"><Data ss:Type="String">http://nema.org/dicom/dicm</Data></Cell>
+    <Cell ss:StyleID="s125"><Data ss:Type="String">http://dicom.nema.org/resources/ontology/DCM</Data></Cell>
     <Cell ss:StyleID="s160"/>
     <Cell ss:StyleID="s160"/>
     <Cell ss:StyleID="s160"/>
@@ -7592,7 +7584,7 @@
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s149"><Data ss:Type="String">IVOCT </Data></Cell>
     <Cell ss:StyleID="s139"/>
-    <Cell ss:StyleID="s125"><Data ss:Type="String">http://nema.org/dicom/dicm</Data></Cell>
+    <Cell ss:StyleID="s125"><Data ss:Type="String">http://dicom.nema.org/resources/ontology/DCM</Data></Cell>
     <Cell ss:StyleID="s160"/>
     <Cell ss:StyleID="s160"/>
     <Cell ss:StyleID="s160"/>
@@ -7603,7 +7595,7 @@
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s149"><Data ss:Type="String">IVUS</Data></Cell>
     <Cell ss:StyleID="s139"/>
-    <Cell ss:StyleID="s125"><Data ss:Type="String">http://nema.org/dicom/dicm</Data></Cell>
+    <Cell ss:StyleID="s125"><Data ss:Type="String">http://dicom.nema.org/resources/ontology/DCM</Data></Cell>
     <Cell ss:StyleID="s160"/>
     <Cell ss:StyleID="s160"/>
     <Cell ss:StyleID="s160"/>
@@ -7614,7 +7606,7 @@
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s149"><Data ss:Type="String">KER</Data></Cell>
     <Cell ss:StyleID="s139"/>
-    <Cell ss:StyleID="s125"><Data ss:Type="String">http://nema.org/dicom/dicm</Data></Cell>
+    <Cell ss:StyleID="s125"><Data ss:Type="String">http://dicom.nema.org/resources/ontology/DCM</Data></Cell>
     <Cell ss:StyleID="s160"/>
     <Cell ss:StyleID="s160"/>
     <Cell ss:StyleID="s160"/>
@@ -7625,7 +7617,7 @@
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s149"><Data ss:Type="String">LEN</Data></Cell>
     <Cell ss:StyleID="s139"/>
-    <Cell ss:StyleID="s125"><Data ss:Type="String">http://nema.org/dicom/dicm</Data></Cell>
+    <Cell ss:StyleID="s125"><Data ss:Type="String">http://dicom.nema.org/resources/ontology/DCM</Data></Cell>
     <Cell ss:StyleID="s160"/>
     <Cell ss:StyleID="s160"/>
     <Cell ss:StyleID="s160"/>
@@ -7636,7 +7628,7 @@
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s149"><Data ss:Type="String">MR</Data></Cell>
     <Cell ss:StyleID="s139"/>
-    <Cell ss:StyleID="s125"><Data ss:Type="String">http://nema.org/dicom/dicm</Data></Cell>
+    <Cell ss:StyleID="s125"><Data ss:Type="String">http://dicom.nema.org/resources/ontology/DCM</Data></Cell>
     <Cell ss:StyleID="s160"/>
     <Cell ss:StyleID="s160"/>
     <Cell ss:StyleID="s160"/>
@@ -7647,7 +7639,7 @@
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s149"><Data ss:Type="String">MG</Data></Cell>
     <Cell ss:StyleID="s139"/>
-    <Cell ss:StyleID="s125"><Data ss:Type="String">http://nema.org/dicom/dicm</Data></Cell>
+    <Cell ss:StyleID="s125"><Data ss:Type="String">http://dicom.nema.org/resources/ontology/DCM</Data></Cell>
     <Cell ss:StyleID="s160"/>
     <Cell ss:StyleID="s160"/>
     <Cell ss:StyleID="s160"/>
@@ -7658,7 +7650,7 @@
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s149"><Data ss:Type="String">NM</Data></Cell>
     <Cell ss:StyleID="s139"/>
-    <Cell ss:StyleID="s125"><Data ss:Type="String">http://nema.org/dicom/dicm</Data></Cell>
+    <Cell ss:StyleID="s125"><Data ss:Type="String">http://dicom.nema.org/resources/ontology/DCM</Data></Cell>
     <Cell ss:StyleID="s160"/>
     <Cell ss:StyleID="s160"/>
     <Cell ss:StyleID="s160"/>
@@ -7669,7 +7661,7 @@
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s149"><Data ss:Type="String">OAM </Data></Cell>
     <Cell ss:StyleID="s139"/>
-    <Cell ss:StyleID="s125"><Data ss:Type="String">http://nema.org/dicom/dicm</Data></Cell>
+    <Cell ss:StyleID="s125"><Data ss:Type="String">http://dicom.nema.org/resources/ontology/DCM</Data></Cell>
     <Cell ss:StyleID="s160"/>
     <Cell ss:StyleID="s160"/>
     <Cell ss:StyleID="s160"/>
@@ -7680,7 +7672,7 @@
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s149"><Data ss:Type="String">OCT </Data></Cell>
     <Cell ss:StyleID="s139"/>
-    <Cell ss:StyleID="s125"><Data ss:Type="String">http://nema.org/dicom/dicm</Data></Cell>
+    <Cell ss:StyleID="s125"><Data ss:Type="String">http://dicom.nema.org/resources/ontology/DCM</Data></Cell>
     <Cell ss:StyleID="s160"/>
     <Cell ss:StyleID="s160"/>
     <Cell ss:StyleID="s160"/>
@@ -7691,7 +7683,7 @@
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s149"><Data ss:Type="String">OPM</Data></Cell>
     <Cell ss:StyleID="s139"/>
-    <Cell ss:StyleID="s125"><Data ss:Type="String">http://nema.org/dicom/dicm</Data></Cell>
+    <Cell ss:StyleID="s125"><Data ss:Type="String">http://dicom.nema.org/resources/ontology/DCM</Data></Cell>
     <Cell ss:StyleID="s160"/>
     <Cell ss:StyleID="s160"/>
     <Cell ss:StyleID="s160"/>
@@ -7702,7 +7694,7 @@
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s149"><Data ss:Type="String">OP</Data></Cell>
     <Cell ss:StyleID="s139"/>
-    <Cell ss:StyleID="s125"><Data ss:Type="String">http://nema.org/dicom/dicm</Data></Cell>
+    <Cell ss:StyleID="s125"><Data ss:Type="String">http://dicom.nema.org/resources/ontology/DCM</Data></Cell>
     <Cell ss:StyleID="s160"/>
     <Cell ss:StyleID="s160"/>
     <Cell ss:StyleID="s160"/>
@@ -7713,7 +7705,7 @@
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s149"><Data ss:Type="String">OPR</Data></Cell>
     <Cell ss:StyleID="s139"/>
-    <Cell ss:StyleID="s125"><Data ss:Type="String">http://nema.org/dicom/dicm</Data></Cell>
+    <Cell ss:StyleID="s125"><Data ss:Type="String">http://dicom.nema.org/resources/ontology/DCM</Data></Cell>
     <Cell ss:StyleID="s160"/>
     <Cell ss:StyleID="s160"/>
     <Cell ss:StyleID="s160"/>
@@ -7724,7 +7716,7 @@
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s149"><Data ss:Type="String">OPT</Data></Cell>
     <Cell ss:StyleID="s139"/>
-    <Cell ss:StyleID="s125"><Data ss:Type="String">http://nema.org/dicom/dicm</Data></Cell>
+    <Cell ss:StyleID="s125"><Data ss:Type="String">http://dicom.nema.org/resources/ontology/DCM</Data></Cell>
     <Cell ss:StyleID="s160"/>
     <Cell ss:StyleID="s160"/>
     <Cell ss:StyleID="s160"/>
@@ -7735,7 +7727,7 @@
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s149"><Data ss:Type="String">OPV </Data></Cell>
     <Cell ss:StyleID="s139"/>
-    <Cell ss:StyleID="s125"><Data ss:Type="String">http://nema.org/dicom/dicm</Data></Cell>
+    <Cell ss:StyleID="s125"><Data ss:Type="String">http://dicom.nema.org/resources/ontology/DCM</Data></Cell>
     <Cell ss:StyleID="s160"/>
     <Cell ss:StyleID="s160"/>
     <Cell ss:StyleID="s160"/>
@@ -7746,7 +7738,7 @@
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s149"><Data ss:Type="String">PX</Data></Cell>
     <Cell ss:StyleID="s139"/>
-    <Cell ss:StyleID="s125"><Data ss:Type="String">http://nema.org/dicom/dicm</Data></Cell>
+    <Cell ss:StyleID="s125"><Data ss:Type="String">http://dicom.nema.org/resources/ontology/DCM</Data></Cell>
     <Cell ss:StyleID="s160"/>
     <Cell ss:StyleID="s160"/>
     <Cell ss:StyleID="s160"/>
@@ -7757,7 +7749,7 @@
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s149"><Data ss:Type="String">PT </Data></Cell>
     <Cell ss:StyleID="s139"/>
-    <Cell ss:StyleID="s125"><Data ss:Type="String">http://nema.org/dicom/dicm</Data></Cell>
+    <Cell ss:StyleID="s125"><Data ss:Type="String">http://dicom.nema.org/resources/ontology/DCM</Data></Cell>
     <Cell ss:StyleID="s160"/>
     <Cell ss:StyleID="s160"/>
     <Cell ss:StyleID="s160"/>
@@ -7768,7 +7760,7 @@
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s149"><Data ss:Type="String">RF</Data></Cell>
     <Cell ss:StyleID="s139"/>
-    <Cell ss:StyleID="s125"><Data ss:Type="String">http://nema.org/dicom/dicm</Data></Cell>
+    <Cell ss:StyleID="s125"><Data ss:Type="String">http://dicom.nema.org/resources/ontology/DCM</Data></Cell>
     <Cell ss:StyleID="s160"/>
     <Cell ss:StyleID="s160"/>
     <Cell ss:StyleID="s160"/>
@@ -7779,7 +7771,7 @@
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s149"><Data ss:Type="String">RG</Data></Cell>
     <Cell ss:StyleID="s139"/>
-    <Cell ss:StyleID="s125"><Data ss:Type="String">http://nema.org/dicom/dicm</Data></Cell>
+    <Cell ss:StyleID="s125"><Data ss:Type="String">http://dicom.nema.org/resources/ontology/DCM</Data></Cell>
     <Cell ss:StyleID="s160"/>
     <Cell ss:StyleID="s160"/>
     <Cell ss:StyleID="s160"/>
@@ -7790,7 +7782,7 @@
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s149"><Data ss:Type="String">SM</Data></Cell>
     <Cell ss:StyleID="s139"/>
-    <Cell ss:StyleID="s125"><Data ss:Type="String">http://nema.org/dicom/dicm</Data></Cell>
+    <Cell ss:StyleID="s125"><Data ss:Type="String">http://dicom.nema.org/resources/ontology/DCM</Data></Cell>
     <Cell ss:StyleID="s160"/>
     <Cell ss:StyleID="s160"/>
     <Cell ss:StyleID="s160"/>
@@ -7801,7 +7793,7 @@
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s149"><Data ss:Type="String">SRF</Data></Cell>
     <Cell ss:StyleID="s139"/>
-    <Cell ss:StyleID="s125"><Data ss:Type="String">http://nema.org/dicom/dicm</Data></Cell>
+    <Cell ss:StyleID="s125"><Data ss:Type="String">http://dicom.nema.org/resources/ontology/DCM</Data></Cell>
     <Cell ss:StyleID="s160"/>
     <Cell ss:StyleID="s160"/>
     <Cell ss:StyleID="s160"/>
@@ -7812,7 +7804,7 @@
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s149"><Data ss:Type="String">US</Data></Cell>
     <Cell ss:StyleID="s139"/>
-    <Cell ss:StyleID="s125"><Data ss:Type="String">http://nema.org/dicom/dicm</Data></Cell>
+    <Cell ss:StyleID="s125"><Data ss:Type="String">http://dicom.nema.org/resources/ontology/DCM</Data></Cell>
     <Cell ss:StyleID="s160"/>
     <Cell ss:StyleID="s160"/>
     <Cell ss:StyleID="s160"/>
@@ -7823,7 +7815,7 @@
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s149"><Data ss:Type="String">VA</Data></Cell>
     <Cell ss:StyleID="s139"/>
-    <Cell ss:StyleID="s125"><Data ss:Type="String">http://nema.org/dicom/dicm</Data></Cell>
+    <Cell ss:StyleID="s125"><Data ss:Type="String">http://dicom.nema.org/resources/ontology/DCM</Data></Cell>
     <Cell ss:StyleID="s160"/>
     <Cell ss:StyleID="s160"/>
     <Cell ss:StyleID="s160"/>
@@ -7834,7 +7826,7 @@
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s149"><Data ss:Type="String">XA</Data></Cell>
     <Cell ss:StyleID="s139"/>
-    <Cell ss:StyleID="s125"><Data ss:Type="String">http://nema.org/dicom/dicm</Data></Cell>
+    <Cell ss:StyleID="s125"><Data ss:Type="String">http://dicom.nema.org/resources/ontology/DCM</Data></Cell>
     <Cell ss:StyleID="s160"/>
     <Cell ss:StyleID="s160"/>
     <Cell ss:StyleID="s160"/>
@@ -8029,15 +8021,13 @@
   </Names>
   <Table ss:ExpandedColumnCount="9" ss:ExpandedRowCount="51" x:FullColumns="1"
    x:FullRows="1" ss:StyleID="s145" ss:DefaultRowHeight="15">
-   <Column ss:StyleID="s145" ss:Width="80.400000000000006"/>
-   <Column ss:StyleID="s145" ss:AutoFitWidth="0" ss:Width="34.799999999999997"/>
-   <Column ss:StyleID="s145" ss:AutoFitWidth="0" ss:Width="155.39999999999998"/>
-   <Column ss:StyleID="s145" ss:AutoFitWidth="0" ss:Width="80.400000000000006"
-    ss:Span="1"/>
-   <Column ss:Index="6" ss:StyleID="s145" ss:AutoFitWidth="0"
-    ss:Width="244.79999999999998"/>
+   <Column ss:StyleID="s145" ss:Width="80.25"/>
+   <Column ss:StyleID="s145" ss:AutoFitWidth="0" ss:Width="34.5"/>
+   <Column ss:StyleID="s145" ss:AutoFitWidth="0" ss:Width="155.25"/>
+   <Column ss:StyleID="s145" ss:AutoFitWidth="0" ss:Width="80.25" ss:Span="1"/>
+   <Column ss:Index="6" ss:StyleID="s145" ss:AutoFitWidth="0" ss:Width="244.5"/>
    <Column ss:StyleID="s145" ss:AutoFitWidth="0" ss:Width="84" ss:Span="1"/>
-   <Column ss:Index="9" ss:StyleID="s145" ss:AutoFitWidth="0" ss:Width="242.4"/>
+   <Column ss:Index="9" ss:StyleID="s145" ss:AutoFitWidth="0" ss:Width="242.25"/>
    <Row ss:AutoFitHeight="0" ss:Height="15.75">
     <Cell ss:StyleID="s108"><Data ss:Type="String">Code</Data><Comment ss:Author=""><ss:Data
        xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Face="Tahoma"
@@ -8643,8 +8633,8 @@
     </Pane>
     <Pane>
      <Number>0</Number>
-     <ActiveRow>4</ActiveRow>
-     <ActiveCol>4</ActiveCol>
+     <ActiveRow>2</ActiveRow>
+     <ActiveCol>5</ActiveCol>
     </Pane>
    </Panes>
    <ProtectObjects>False</ProtectObjects>
@@ -8660,15 +8650,13 @@
   </Names>
   <Table ss:ExpandedColumnCount="9" ss:ExpandedRowCount="51" x:FullColumns="1"
    x:FullRows="1" ss:StyleID="s145" ss:DefaultRowHeight="15">
-   <Column ss:StyleID="s145" ss:Width="80.400000000000006"/>
-   <Column ss:StyleID="s145" ss:AutoFitWidth="0" ss:Width="34.799999999999997"/>
-   <Column ss:StyleID="s145" ss:AutoFitWidth="0" ss:Width="155.39999999999998"/>
-   <Column ss:StyleID="s145" ss:AutoFitWidth="0" ss:Width="80.400000000000006"
-    ss:Span="1"/>
-   <Column ss:Index="6" ss:StyleID="s145" ss:AutoFitWidth="0"
-    ss:Width="244.79999999999998"/>
+   <Column ss:StyleID="s145" ss:Width="80.25"/>
+   <Column ss:StyleID="s145" ss:AutoFitWidth="0" ss:Width="34.5"/>
+   <Column ss:StyleID="s145" ss:AutoFitWidth="0" ss:Width="155.25"/>
+   <Column ss:StyleID="s145" ss:AutoFitWidth="0" ss:Width="80.25" ss:Span="1"/>
+   <Column ss:Index="6" ss:StyleID="s145" ss:AutoFitWidth="0" ss:Width="244.5"/>
    <Column ss:StyleID="s145" ss:AutoFitWidth="0" ss:Width="84" ss:Span="1"/>
-   <Column ss:Index="9" ss:StyleID="s145" ss:AutoFitWidth="0" ss:Width="242.4"/>
+   <Column ss:Index="9" ss:StyleID="s145" ss:AutoFitWidth="0" ss:Width="242.25"/>
    <Row ss:AutoFitHeight="0" ss:Height="15.75">
     <Cell ss:StyleID="s108"><Data ss:Type="String">Code</Data><Comment ss:Author=""><ss:Data
        xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Face="Tahoma"

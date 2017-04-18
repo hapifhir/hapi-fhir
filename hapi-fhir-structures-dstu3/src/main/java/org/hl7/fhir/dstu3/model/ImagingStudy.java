@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
+// Generated on Mon, Apr 17, 2017 17:38-0400 for FHIR v3.0.1
 
 import java.util.*;
 
@@ -96,10 +96,10 @@ public class ImagingStudy extends DomainResource {
         }
         public String getSystem() {
           switch (this) {
-            case ONLINE: return "http://nema.org/dicom/dicm";
-            case OFFLINE: return "http://nema.org/dicom/dicm";
-            case NEARLINE: return "http://nema.org/dicom/dicm";
-            case UNAVAILABLE: return "http://nema.org/dicom/dicm";
+            case ONLINE: return "http://dicom.nema.org/resources/ontology/DCM";
+            case OFFLINE: return "http://dicom.nema.org/resources/ontology/DCM";
+            case NEARLINE: return "http://dicom.nema.org/resources/ontology/DCM";
+            case UNAVAILABLE: return "http://dicom.nema.org/resources/ontology/DCM";
             default: return "?";
           }
         }
@@ -182,10 +182,10 @@ public class ImagingStudy extends DomainResource {
         protected OidType uid;
 
         /**
-         * The Numeric identifier of this series in the study.
+         * The numeric identifier of this series in the study.
          */
         @Child(name = "number", type = {UnsignedIntType.class}, order=2, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="Numeric identifier of this series", formalDefinition="The Numeric identifier of this series in the study." )
+        @Description(shortDefinition="Numeric identifier of this series", formalDefinition="The numeric identifier of this series in the study." )
         protected UnsignedIntType number;
 
         /**
@@ -204,10 +204,10 @@ public class ImagingStudy extends DomainResource {
         protected StringType description;
 
         /**
-         * Number of SOP Instances in Study. This value given may be larger than the number of instance elements this Resource contains due to resource availability, security, or other factors. This element should be present if any instance elements are present.
+         * Number of SOP Instances in the Study. The value given may be larger than the number of instance elements this resource contains due to resource availability, security, or other factors. This element should be present if any instance elements are present.
          */
         @Child(name = "numberOfInstances", type = {UnsignedIntType.class}, order=5, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="Number of Series Related Instances", formalDefinition="Number of SOP Instances in Study. This value given may be larger than the number of instance elements this Resource contains due to resource availability, security, or other factors. This element should be present if any instance elements are present." )
+        @Description(shortDefinition="Number of Series Related Instances", formalDefinition="Number of SOP Instances in the Study. The value given may be larger than the number of instance elements this resource contains due to resource availability, security, or other factors. This element should be present if any instance elements are present." )
         protected UnsignedIntType numberOfInstances;
 
         /**
@@ -231,18 +231,18 @@ public class ImagingStudy extends DomainResource {
 
 
         /**
-         * Body part examined. See  DICOM Part 16 Annex L for the mapping from DICOM to Snomed CT.
+         * The anatomic structures examined. See DICOM Part 16 Annex L (http://dicom.nema.org/medical/dicom/current/output/chtml/part16/chapter_L.html) for DICOM to SNOMED-CT mappings. The bodySite may indicate the laterality of body part imaged; if so, it shall be consistent with any content of ImagingStudy.series.laterality.
          */
         @Child(name = "bodySite", type = {Coding.class}, order=8, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="Body part examined", formalDefinition="Body part examined. See  DICOM Part 16 Annex L for the mapping from DICOM to Snomed CT." )
+        @Description(shortDefinition="Body part examined", formalDefinition="The anatomic structures examined. See DICOM Part 16 Annex L (http://dicom.nema.org/medical/dicom/current/output/chtml/part16/chapter_L.html) for DICOM to SNOMED-CT mappings. The bodySite may indicate the laterality of body part imaged; if so, it shall be consistent with any content of ImagingStudy.series.laterality." )
         @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/body-site")
         protected Coding bodySite;
 
         /**
-         * Laterality if body site is paired anatomic structure and laterality is not pre-coordinated in body site code.
+         * The laterality of the (possibly paired) anatomic structures examined. E.g., the left knee, both lungs, or unpaired abdomen. If present, shall be consistent with any laterality information indicated in ImagingStudy.series.bodySite.
          */
         @Child(name = "laterality", type = {Coding.class}, order=9, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="Body part laterality", formalDefinition="Laterality if body site is paired anatomic structure and laterality is not pre-coordinated in body site code." )
+        @Description(shortDefinition="Body part laterality", formalDefinition="The laterality of the (possibly paired) anatomic structures examined. E.g., the left knee, both lungs, or unpaired abdomen. If present, shall be consistent with any laterality information indicated in ImagingStudy.series.bodySite." )
         @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/bodysite-laterality")
         protected Coding laterality;
 
@@ -266,10 +266,10 @@ public class ImagingStudy extends DomainResource {
 
 
         /**
-         * A single SOP Instance within the series, e.g. an image, or presentation state.
+         * A single SOP instance within the series, e.g. an image, or presentation state.
          */
         @Child(name = "instance", type = {}, order=12, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-        @Description(shortDefinition="A single SOP instance from the series", formalDefinition="A single SOP Instance within the series, e.g. an image, or presentation state." )
+        @Description(shortDefinition="A single SOP instance from the series", formalDefinition="A single SOP instance within the series, e.g. an image, or presentation state." )
         protected List<ImagingStudySeriesInstanceComponent> instance;
 
         private static final long serialVersionUID = -1469376087L;
@@ -336,7 +336,7 @@ public class ImagingStudy extends DomainResource {
         }
 
         /**
-         * @return {@link #number} (The Numeric identifier of this series in the study.). This is the underlying object with id, value and extensions. The accessor "getNumber" gives direct access to the value
+         * @return {@link #number} (The numeric identifier of this series in the study.). This is the underlying object with id, value and extensions. The accessor "getNumber" gives direct access to the value
          */
         public UnsignedIntType getNumberElement() { 
           if (this.number == null)
@@ -356,7 +356,7 @@ public class ImagingStudy extends DomainResource {
         }
 
         /**
-         * @param value {@link #number} (The Numeric identifier of this series in the study.). This is the underlying object with id, value and extensions. The accessor "getNumber" gives direct access to the value
+         * @param value {@link #number} (The numeric identifier of this series in the study.). This is the underlying object with id, value and extensions. The accessor "getNumber" gives direct access to the value
          */
         public ImagingStudySeriesComponent setNumberElement(UnsignedIntType value) { 
           this.number = value;
@@ -364,14 +364,14 @@ public class ImagingStudy extends DomainResource {
         }
 
         /**
-         * @return The Numeric identifier of this series in the study.
+         * @return The numeric identifier of this series in the study.
          */
         public int getNumber() { 
           return this.number == null || this.number.isEmpty() ? 0 : this.number.getValue();
         }
 
         /**
-         * @param value The Numeric identifier of this series in the study.
+         * @param value The numeric identifier of this series in the study.
          */
         public ImagingStudySeriesComponent setNumber(int value) { 
             if (this.number == null)
@@ -454,7 +454,7 @@ public class ImagingStudy extends DomainResource {
         }
 
         /**
-         * @return {@link #numberOfInstances} (Number of SOP Instances in Study. This value given may be larger than the number of instance elements this Resource contains due to resource availability, security, or other factors. This element should be present if any instance elements are present.). This is the underlying object with id, value and extensions. The accessor "getNumberOfInstances" gives direct access to the value
+         * @return {@link #numberOfInstances} (Number of SOP Instances in the Study. The value given may be larger than the number of instance elements this resource contains due to resource availability, security, or other factors. This element should be present if any instance elements are present.). This is the underlying object with id, value and extensions. The accessor "getNumberOfInstances" gives direct access to the value
          */
         public UnsignedIntType getNumberOfInstancesElement() { 
           if (this.numberOfInstances == null)
@@ -474,7 +474,7 @@ public class ImagingStudy extends DomainResource {
         }
 
         /**
-         * @param value {@link #numberOfInstances} (Number of SOP Instances in Study. This value given may be larger than the number of instance elements this Resource contains due to resource availability, security, or other factors. This element should be present if any instance elements are present.). This is the underlying object with id, value and extensions. The accessor "getNumberOfInstances" gives direct access to the value
+         * @param value {@link #numberOfInstances} (Number of SOP Instances in the Study. The value given may be larger than the number of instance elements this resource contains due to resource availability, security, or other factors. This element should be present if any instance elements are present.). This is the underlying object with id, value and extensions. The accessor "getNumberOfInstances" gives direct access to the value
          */
         public ImagingStudySeriesComponent setNumberOfInstancesElement(UnsignedIntType value) { 
           this.numberOfInstances = value;
@@ -482,14 +482,14 @@ public class ImagingStudy extends DomainResource {
         }
 
         /**
-         * @return Number of SOP Instances in Study. This value given may be larger than the number of instance elements this Resource contains due to resource availability, security, or other factors. This element should be present if any instance elements are present.
+         * @return Number of SOP Instances in the Study. The value given may be larger than the number of instance elements this resource contains due to resource availability, security, or other factors. This element should be present if any instance elements are present.
          */
         public int getNumberOfInstances() { 
           return this.numberOfInstances == null || this.numberOfInstances.isEmpty() ? 0 : this.numberOfInstances.getValue();
         }
 
         /**
-         * @param value Number of SOP Instances in Study. This value given may be larger than the number of instance elements this Resource contains due to resource availability, security, or other factors. This element should be present if any instance elements are present.
+         * @param value Number of SOP Instances in the Study. The value given may be larger than the number of instance elements this resource contains due to resource availability, security, or other factors. This element should be present if any instance elements are present.
          */
         public ImagingStudySeriesComponent setNumberOfInstances(int value) { 
             if (this.numberOfInstances == null)
@@ -623,7 +623,7 @@ public class ImagingStudy extends DomainResource {
         }
 
         /**
-         * @return {@link #bodySite} (Body part examined. See  DICOM Part 16 Annex L for the mapping from DICOM to Snomed CT.)
+         * @return {@link #bodySite} (The anatomic structures examined. See DICOM Part 16 Annex L (http://dicom.nema.org/medical/dicom/current/output/chtml/part16/chapter_L.html) for DICOM to SNOMED-CT mappings. The bodySite may indicate the laterality of body part imaged; if so, it shall be consistent with any content of ImagingStudy.series.laterality.)
          */
         public Coding getBodySite() { 
           if (this.bodySite == null)
@@ -639,7 +639,7 @@ public class ImagingStudy extends DomainResource {
         }
 
         /**
-         * @param value {@link #bodySite} (Body part examined. See  DICOM Part 16 Annex L for the mapping from DICOM to Snomed CT.)
+         * @param value {@link #bodySite} (The anatomic structures examined. See DICOM Part 16 Annex L (http://dicom.nema.org/medical/dicom/current/output/chtml/part16/chapter_L.html) for DICOM to SNOMED-CT mappings. The bodySite may indicate the laterality of body part imaged; if so, it shall be consistent with any content of ImagingStudy.series.laterality.)
          */
         public ImagingStudySeriesComponent setBodySite(Coding value) { 
           this.bodySite = value;
@@ -647,7 +647,7 @@ public class ImagingStudy extends DomainResource {
         }
 
         /**
-         * @return {@link #laterality} (Laterality if body site is paired anatomic structure and laterality is not pre-coordinated in body site code.)
+         * @return {@link #laterality} (The laterality of the (possibly paired) anatomic structures examined. E.g., the left knee, both lungs, or unpaired abdomen. If present, shall be consistent with any laterality information indicated in ImagingStudy.series.bodySite.)
          */
         public Coding getLaterality() { 
           if (this.laterality == null)
@@ -663,7 +663,7 @@ public class ImagingStudy extends DomainResource {
         }
 
         /**
-         * @param value {@link #laterality} (Laterality if body site is paired anatomic structure and laterality is not pre-coordinated in body site code.)
+         * @param value {@link #laterality} (The laterality of the (possibly paired) anatomic structures examined. E.g., the left knee, both lungs, or unpaired abdomen. If present, shall be consistent with any laterality information indicated in ImagingStudy.series.bodySite.)
          */
         public ImagingStudySeriesComponent setLaterality(Coding value) { 
           this.laterality = value;
@@ -795,7 +795,7 @@ public class ImagingStudy extends DomainResource {
         }
 
         /**
-         * @return {@link #instance} (A single SOP Instance within the series, e.g. an image, or presentation state.)
+         * @return {@link #instance} (A single SOP instance within the series, e.g. an image, or presentation state.)
          */
         public List<ImagingStudySeriesInstanceComponent> getInstance() { 
           if (this.instance == null)
@@ -850,17 +850,17 @@ public class ImagingStudy extends DomainResource {
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
           childrenList.add(new Property("uid", "oid", "Formal identifier for this series.", 0, java.lang.Integer.MAX_VALUE, uid));
-          childrenList.add(new Property("number", "unsignedInt", "The Numeric identifier of this series in the study.", 0, java.lang.Integer.MAX_VALUE, number));
+          childrenList.add(new Property("number", "unsignedInt", "The numeric identifier of this series in the study.", 0, java.lang.Integer.MAX_VALUE, number));
           childrenList.add(new Property("modality", "Coding", "The modality of this series sequence.", 0, java.lang.Integer.MAX_VALUE, modality));
           childrenList.add(new Property("description", "string", "A description of the series.", 0, java.lang.Integer.MAX_VALUE, description));
-          childrenList.add(new Property("numberOfInstances", "unsignedInt", "Number of SOP Instances in Study. This value given may be larger than the number of instance elements this Resource contains due to resource availability, security, or other factors. This element should be present if any instance elements are present.", 0, java.lang.Integer.MAX_VALUE, numberOfInstances));
+          childrenList.add(new Property("numberOfInstances", "unsignedInt", "Number of SOP Instances in the Study. The value given may be larger than the number of instance elements this resource contains due to resource availability, security, or other factors. This element should be present if any instance elements are present.", 0, java.lang.Integer.MAX_VALUE, numberOfInstances));
           childrenList.add(new Property("availability", "code", "Availability of series (online, offline or nearline).", 0, java.lang.Integer.MAX_VALUE, availability));
           childrenList.add(new Property("endpoint", "Reference(Endpoint)", "The network service providing access (e.g., query, view, or retrieval) for this series. See implementation notes for information about using DICOM endpoints. A series-level endpoint, if present, has precedence over a study-level endpoint with the same Endpoint.type.", 0, java.lang.Integer.MAX_VALUE, endpoint));
-          childrenList.add(new Property("bodySite", "Coding", "Body part examined. See  DICOM Part 16 Annex L for the mapping from DICOM to Snomed CT.", 0, java.lang.Integer.MAX_VALUE, bodySite));
-          childrenList.add(new Property("laterality", "Coding", "Laterality if body site is paired anatomic structure and laterality is not pre-coordinated in body site code.", 0, java.lang.Integer.MAX_VALUE, laterality));
+          childrenList.add(new Property("bodySite", "Coding", "The anatomic structures examined. See DICOM Part 16 Annex L (http://dicom.nema.org/medical/dicom/current/output/chtml/part16/chapter_L.html) for DICOM to SNOMED-CT mappings. The bodySite may indicate the laterality of body part imaged; if so, it shall be consistent with any content of ImagingStudy.series.laterality.", 0, java.lang.Integer.MAX_VALUE, bodySite));
+          childrenList.add(new Property("laterality", "Coding", "The laterality of the (possibly paired) anatomic structures examined. E.g., the left knee, both lungs, or unpaired abdomen. If present, shall be consistent with any laterality information indicated in ImagingStudy.series.bodySite.", 0, java.lang.Integer.MAX_VALUE, laterality));
           childrenList.add(new Property("started", "dateTime", "The date and time the series was started.", 0, java.lang.Integer.MAX_VALUE, started));
           childrenList.add(new Property("performer", "Reference(Practitioner)", "The physician or operator (often the radiology technician)  who performed the series. The performer is recorded at the series level, since each series in a study may be performed by a different practitioner, at different times, and using different devices. A series may be performed by multiple practitioners.", 0, java.lang.Integer.MAX_VALUE, performer));
-          childrenList.add(new Property("instance", "", "A single SOP Instance within the series, e.g. an image, or presentation state.", 0, java.lang.Integer.MAX_VALUE, instance));
+          childrenList.add(new Property("instance", "", "A single SOP instance within the series, e.g. an image, or presentation state.", 0, java.lang.Integer.MAX_VALUE, instance));
         }
 
       @Override
@@ -1509,10 +1509,10 @@ public class ImagingStudy extends DomainResource {
     protected List<Identifier> identifier;
 
     /**
-     * Availability of study (online, offline or nearline).
+     * Availability of study (online, offline, or nearline).
      */
     @Child(name = "availability", type = {CodeType.class}, order=3, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="ONLINE | OFFLINE | NEARLINE | UNAVAILABLE", formalDefinition="Availability of study (online, offline or nearline)." )
+    @Description(shortDefinition="ONLINE | OFFLINE | NEARLINE | UNAVAILABLE", formalDefinition="Availability of study (online, offline, or nearline)." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/instance-availability")
     protected Enumeration<InstanceAvailability> availability;
 
@@ -1537,22 +1537,22 @@ public class ImagingStudy extends DomainResource {
     protected Patient patientTarget;
 
     /**
-     * The encounter at which the request is initiated.
+     * The encounter or episode at which the request is initiated.
      */
     @Child(name = "context", type = {Encounter.class, EpisodeOfCare.class}, order=6, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Originating context", formalDefinition="The encounter at which the request is initiated." )
+    @Description(shortDefinition="Originating context", formalDefinition="The encounter or episode at which the request is initiated." )
     protected Reference context;
 
     /**
-     * The actual object that is the target of the reference (The encounter at which the request is initiated.)
+     * The actual object that is the target of the reference (The encounter or episode at which the request is initiated.)
      */
     protected Resource contextTarget;
 
     /**
-     * Date and Time the study started.
+     * Date and time the study started.
      */
     @Child(name = "started", type = {DateTimeType.class}, order=7, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="When the study was started", formalDefinition="Date and Time the study started." )
+    @Description(shortDefinition="When the study was started", formalDefinition="Date and time the study started." )
     protected DateTimeType started;
 
     /**
@@ -1611,17 +1611,17 @@ public class ImagingStudy extends DomainResource {
     protected UnsignedIntType numberOfSeries;
 
     /**
-     * Number of SOP Instances in Study. This value given may be larger than the number of instance elements this Resource contains due to resource availability, security, or other factors. This element should be present if any instance elements are present.
+     * Number of SOP Instances in Study. This value given may be larger than the number of instance elements this resource contains due to resource availability, security, or other factors. This element should be present if any instance elements are present.
      */
     @Child(name = "numberOfInstances", type = {UnsignedIntType.class}, order=13, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Number of Study Related Instances", formalDefinition="Number of SOP Instances in Study. This value given may be larger than the number of instance elements this Resource contains due to resource availability, security, or other factors. This element should be present if any instance elements are present." )
+    @Description(shortDefinition="Number of Study Related Instances", formalDefinition="Number of SOP Instances in Study. This value given may be larger than the number of instance elements this resource contains due to resource availability, security, or other factors. This element should be present if any instance elements are present." )
     protected UnsignedIntType numberOfInstances;
 
     /**
      * A reference to the performed Procedure.
      */
     @Child(name = "procedureReference", type = {Procedure.class}, order=14, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-    @Description(shortDefinition="The performed Procedure Reference", formalDefinition="A reference to the performed Procedure." )
+    @Description(shortDefinition="The performed Procedure reference", formalDefinition="A reference to the performed Procedure." )
     protected List<Reference> procedureReference;
     /**
      * The actual objects that are the target of the reference (A reference to the performed Procedure.)
@@ -1638,10 +1638,10 @@ public class ImagingStudy extends DomainResource {
     protected List<CodeableConcept> procedureCode;
 
     /**
-     * Description of clinical codition indicating why the ImagingStudy was requested.
+     * Description of clinical condition indicating why the ImagingStudy was requested.
      */
     @Child(name = "reason", type = {CodeableConcept.class}, order=16, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Why the study was requested", formalDefinition="Description of clinical codition indicating why the ImagingStudy was requested." )
+    @Description(shortDefinition="Why the study was requested", formalDefinition="Description of clinical condition indicating why the ImagingStudy was requested." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/procedure-reason")
     protected CodeableConcept reason;
 
@@ -1800,7 +1800,7 @@ public class ImagingStudy extends DomainResource {
     }
 
     /**
-     * @return {@link #availability} (Availability of study (online, offline or nearline).). This is the underlying object with id, value and extensions. The accessor "getAvailability" gives direct access to the value
+     * @return {@link #availability} (Availability of study (online, offline, or nearline).). This is the underlying object with id, value and extensions. The accessor "getAvailability" gives direct access to the value
      */
     public Enumeration<InstanceAvailability> getAvailabilityElement() { 
       if (this.availability == null)
@@ -1820,7 +1820,7 @@ public class ImagingStudy extends DomainResource {
     }
 
     /**
-     * @param value {@link #availability} (Availability of study (online, offline or nearline).). This is the underlying object with id, value and extensions. The accessor "getAvailability" gives direct access to the value
+     * @param value {@link #availability} (Availability of study (online, offline, or nearline).). This is the underlying object with id, value and extensions. The accessor "getAvailability" gives direct access to the value
      */
     public ImagingStudy setAvailabilityElement(Enumeration<InstanceAvailability> value) { 
       this.availability = value;
@@ -1828,14 +1828,14 @@ public class ImagingStudy extends DomainResource {
     }
 
     /**
-     * @return Availability of study (online, offline or nearline).
+     * @return Availability of study (online, offline, or nearline).
      */
     public InstanceAvailability getAvailability() { 
       return this.availability == null ? null : this.availability.getValue();
     }
 
     /**
-     * @param value Availability of study (online, offline or nearline).
+     * @param value Availability of study (online, offline, or nearline).
      */
     public ImagingStudy setAvailability(InstanceAvailability value) { 
       if (value == null)
@@ -1946,7 +1946,7 @@ public class ImagingStudy extends DomainResource {
     }
 
     /**
-     * @return {@link #context} (The encounter at which the request is initiated.)
+     * @return {@link #context} (The encounter or episode at which the request is initiated.)
      */
     public Reference getContext() { 
       if (this.context == null)
@@ -1962,7 +1962,7 @@ public class ImagingStudy extends DomainResource {
     }
 
     /**
-     * @param value {@link #context} (The encounter at which the request is initiated.)
+     * @param value {@link #context} (The encounter or episode at which the request is initiated.)
      */
     public ImagingStudy setContext(Reference value) { 
       this.context = value;
@@ -1970,14 +1970,14 @@ public class ImagingStudy extends DomainResource {
     }
 
     /**
-     * @return {@link #context} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The encounter at which the request is initiated.)
+     * @return {@link #context} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The encounter or episode at which the request is initiated.)
      */
     public Resource getContextTarget() { 
       return this.contextTarget;
     }
 
     /**
-     * @param value {@link #context} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The encounter at which the request is initiated.)
+     * @param value {@link #context} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The encounter or episode at which the request is initiated.)
      */
     public ImagingStudy setContextTarget(Resource value) { 
       this.contextTarget = value;
@@ -1985,7 +1985,7 @@ public class ImagingStudy extends DomainResource {
     }
 
     /**
-     * @return {@link #started} (Date and Time the study started.). This is the underlying object with id, value and extensions. The accessor "getStarted" gives direct access to the value
+     * @return {@link #started} (Date and time the study started.). This is the underlying object with id, value and extensions. The accessor "getStarted" gives direct access to the value
      */
     public DateTimeType getStartedElement() { 
       if (this.started == null)
@@ -2005,7 +2005,7 @@ public class ImagingStudy extends DomainResource {
     }
 
     /**
-     * @param value {@link #started} (Date and Time the study started.). This is the underlying object with id, value and extensions. The accessor "getStarted" gives direct access to the value
+     * @param value {@link #started} (Date and time the study started.). This is the underlying object with id, value and extensions. The accessor "getStarted" gives direct access to the value
      */
     public ImagingStudy setStartedElement(DateTimeType value) { 
       this.started = value;
@@ -2013,14 +2013,14 @@ public class ImagingStudy extends DomainResource {
     }
 
     /**
-     * @return Date and Time the study started.
+     * @return Date and time the study started.
      */
     public Date getStarted() { 
       return this.started == null ? null : this.started.getValue();
     }
 
     /**
-     * @param value Date and Time the study started.
+     * @param value Date and time the study started.
      */
     public ImagingStudy setStarted(Date value) { 
       if (value == null)
@@ -2336,7 +2336,7 @@ public class ImagingStudy extends DomainResource {
     }
 
     /**
-     * @return {@link #numberOfInstances} (Number of SOP Instances in Study. This value given may be larger than the number of instance elements this Resource contains due to resource availability, security, or other factors. This element should be present if any instance elements are present.). This is the underlying object with id, value and extensions. The accessor "getNumberOfInstances" gives direct access to the value
+     * @return {@link #numberOfInstances} (Number of SOP Instances in Study. This value given may be larger than the number of instance elements this resource contains due to resource availability, security, or other factors. This element should be present if any instance elements are present.). This is the underlying object with id, value and extensions. The accessor "getNumberOfInstances" gives direct access to the value
      */
     public UnsignedIntType getNumberOfInstancesElement() { 
       if (this.numberOfInstances == null)
@@ -2356,7 +2356,7 @@ public class ImagingStudy extends DomainResource {
     }
 
     /**
-     * @param value {@link #numberOfInstances} (Number of SOP Instances in Study. This value given may be larger than the number of instance elements this Resource contains due to resource availability, security, or other factors. This element should be present if any instance elements are present.). This is the underlying object with id, value and extensions. The accessor "getNumberOfInstances" gives direct access to the value
+     * @param value {@link #numberOfInstances} (Number of SOP Instances in Study. This value given may be larger than the number of instance elements this resource contains due to resource availability, security, or other factors. This element should be present if any instance elements are present.). This is the underlying object with id, value and extensions. The accessor "getNumberOfInstances" gives direct access to the value
      */
     public ImagingStudy setNumberOfInstancesElement(UnsignedIntType value) { 
       this.numberOfInstances = value;
@@ -2364,14 +2364,14 @@ public class ImagingStudy extends DomainResource {
     }
 
     /**
-     * @return Number of SOP Instances in Study. This value given may be larger than the number of instance elements this Resource contains due to resource availability, security, or other factors. This element should be present if any instance elements are present.
+     * @return Number of SOP Instances in Study. This value given may be larger than the number of instance elements this resource contains due to resource availability, security, or other factors. This element should be present if any instance elements are present.
      */
     public int getNumberOfInstances() { 
       return this.numberOfInstances == null || this.numberOfInstances.isEmpty() ? 0 : this.numberOfInstances.getValue();
     }
 
     /**
-     * @param value Number of SOP Instances in Study. This value given may be larger than the number of instance elements this Resource contains due to resource availability, security, or other factors. This element should be present if any instance elements are present.
+     * @param value Number of SOP Instances in Study. This value given may be larger than the number of instance elements this resource contains due to resource availability, security, or other factors. This element should be present if any instance elements are present.
      */
     public ImagingStudy setNumberOfInstances(int value) { 
         if (this.numberOfInstances == null)
@@ -2509,7 +2509,7 @@ public class ImagingStudy extends DomainResource {
     }
 
     /**
-     * @return {@link #reason} (Description of clinical codition indicating why the ImagingStudy was requested.)
+     * @return {@link #reason} (Description of clinical condition indicating why the ImagingStudy was requested.)
      */
     public CodeableConcept getReason() { 
       if (this.reason == null)
@@ -2525,7 +2525,7 @@ public class ImagingStudy extends DomainResource {
     }
 
     /**
-     * @param value {@link #reason} (Description of clinical codition indicating why the ImagingStudy was requested.)
+     * @param value {@link #reason} (Description of clinical condition indicating why the ImagingStudy was requested.)
      */
     public ImagingStudy setReason(CodeableConcept value) { 
       this.reason = value;
@@ -2639,20 +2639,20 @@ public class ImagingStudy extends DomainResource {
         childrenList.add(new Property("uid", "oid", "Formal identifier for the study.", 0, java.lang.Integer.MAX_VALUE, uid));
         childrenList.add(new Property("accession", "Identifier", "Accession Number is an identifier related to some aspect of imaging workflow and data management. Usage may vary across different institutions.  See for instance [IHE Radiology Technical Framework Volume 1 Appendix A](http://www.ihe.net/uploadedFiles/Documents/Radiology/IHE_RAD_TF_Rev13.0_Vol1_FT_2014-07-30.pdf).", 0, java.lang.Integer.MAX_VALUE, accession));
         childrenList.add(new Property("identifier", "Identifier", "Other identifiers for the study.", 0, java.lang.Integer.MAX_VALUE, identifier));
-        childrenList.add(new Property("availability", "code", "Availability of study (online, offline or nearline).", 0, java.lang.Integer.MAX_VALUE, availability));
+        childrenList.add(new Property("availability", "code", "Availability of study (online, offline, or nearline).", 0, java.lang.Integer.MAX_VALUE, availability));
         childrenList.add(new Property("modalityList", "Coding", "A list of all the Series.ImageModality values that are actual acquisition modalities, i.e. those in the DICOM Context Group 29 (value set OID 1.2.840.10008.6.1.19).", 0, java.lang.Integer.MAX_VALUE, modalityList));
         childrenList.add(new Property("patient", "Reference(Patient)", "The patient imaged in the study.", 0, java.lang.Integer.MAX_VALUE, patient));
-        childrenList.add(new Property("context", "Reference(Encounter|EpisodeOfCare)", "The encounter at which the request is initiated.", 0, java.lang.Integer.MAX_VALUE, context));
-        childrenList.add(new Property("started", "dateTime", "Date and Time the study started.", 0, java.lang.Integer.MAX_VALUE, started));
+        childrenList.add(new Property("context", "Reference(Encounter|EpisodeOfCare)", "The encounter or episode at which the request is initiated.", 0, java.lang.Integer.MAX_VALUE, context));
+        childrenList.add(new Property("started", "dateTime", "Date and time the study started.", 0, java.lang.Integer.MAX_VALUE, started));
         childrenList.add(new Property("basedOn", "Reference(ReferralRequest|CarePlan|ProcedureRequest)", "A list of the diagnostic requests that resulted in this imaging study being performed.", 0, java.lang.Integer.MAX_VALUE, basedOn));
         childrenList.add(new Property("referrer", "Reference(Practitioner)", "The requesting/referring physician.", 0, java.lang.Integer.MAX_VALUE, referrer));
         childrenList.add(new Property("interpreter", "Reference(Practitioner)", "Who read the study and interpreted the images or other content.", 0, java.lang.Integer.MAX_VALUE, interpreter));
         childrenList.add(new Property("endpoint", "Reference(Endpoint)", "The network service providing access (e.g., query, view, or retrieval) for the study. See implementation notes for information about using DICOM endpoints. A study-level endpoint applies to each series in the study, unless overridden by a series-level endpoint with the same Endpoint.type.", 0, java.lang.Integer.MAX_VALUE, endpoint));
         childrenList.add(new Property("numberOfSeries", "unsignedInt", "Number of Series in the Study. This value given may be larger than the number of series elements this Resource contains due to resource availability, security, or other factors. This element should be present if any series elements are present.", 0, java.lang.Integer.MAX_VALUE, numberOfSeries));
-        childrenList.add(new Property("numberOfInstances", "unsignedInt", "Number of SOP Instances in Study. This value given may be larger than the number of instance elements this Resource contains due to resource availability, security, or other factors. This element should be present if any instance elements are present.", 0, java.lang.Integer.MAX_VALUE, numberOfInstances));
+        childrenList.add(new Property("numberOfInstances", "unsignedInt", "Number of SOP Instances in Study. This value given may be larger than the number of instance elements this resource contains due to resource availability, security, or other factors. This element should be present if any instance elements are present.", 0, java.lang.Integer.MAX_VALUE, numberOfInstances));
         childrenList.add(new Property("procedureReference", "Reference(Procedure)", "A reference to the performed Procedure.", 0, java.lang.Integer.MAX_VALUE, procedureReference));
         childrenList.add(new Property("procedureCode", "CodeableConcept", "The code for the performed procedure type.", 0, java.lang.Integer.MAX_VALUE, procedureCode));
-        childrenList.add(new Property("reason", "CodeableConcept", "Description of clinical codition indicating why the ImagingStudy was requested.", 0, java.lang.Integer.MAX_VALUE, reason));
+        childrenList.add(new Property("reason", "CodeableConcept", "Description of clinical condition indicating why the ImagingStudy was requested.", 0, java.lang.Integer.MAX_VALUE, reason));
         childrenList.add(new Property("description", "string", "Institution-generated description or classification of the Study performed.", 0, java.lang.Integer.MAX_VALUE, description));
         childrenList.add(new Property("series", "", "Each study has one or more series of images or other content.", 0, java.lang.Integer.MAX_VALUE, series));
       }

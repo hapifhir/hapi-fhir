@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
+// Generated on Mon, Apr 17, 2017 17:38-0400 for FHIR v3.0.1
 
 import java.util.*;
 
@@ -1199,7 +1199,7 @@ public class Measure extends MetadataResource {
          * The criteria for the supplemental data. This must be the name of a valid expression defined within a referenced library, and defines the data to be returned for this element.
          */
         @Child(name = "criteria", type = {StringType.class}, order=3, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Expression describing additional data to be reporrted", formalDefinition="The criteria for the supplemental data. This must be the name of a valid expression defined within a referenced library, and defines the data to be returned for this element." )
+        @Description(shortDefinition="Expression describing additional data to be reported", formalDefinition="The criteria for the supplemental data. This must be the name of a valid expression defined within a referenced library, and defines the data to be returned for this element." )
         protected StringType criteria;
 
         /**
@@ -1546,10 +1546,10 @@ public class Measure extends MetadataResource {
     protected List<Identifier> identifier;
 
     /**
-     * Explains why this measure is needed and why it has been designed as it has.
+     * Explaination of why this measure is needed and why it has been designed as it has.
      */
     @Child(name = "purpose", type = {MarkdownType.class}, order=1, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Why this measure is defined", formalDefinition="Explains why this measure is needed and why it has been designed as it has." )
+    @Description(shortDefinition="Why this measure is defined", formalDefinition="Explaination of why this measure is needed and why it has been designed as it has." )
     protected MarkdownType purpose;
 
     /**
@@ -1560,24 +1560,24 @@ public class Measure extends MetadataResource {
     protected StringType usage;
 
     /**
-     * The date on which the asset content was approved by the publisher. Approval happens once when the content is officially approved for usage.
+     * The date on which the resource content was approved by the publisher. Approval happens once when the content is officially approved for usage.
      */
     @Child(name = "approvalDate", type = {DateType.class}, order=3, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="When the measure was approved by publisher", formalDefinition="The date on which the asset content was approved by the publisher. Approval happens once when the content is officially approved for usage." )
+    @Description(shortDefinition="When the measure was approved by publisher", formalDefinition="The date on which the resource content was approved by the publisher. Approval happens once when the content is officially approved for usage." )
     protected DateType approvalDate;
 
     /**
-     * The date on which the asset content was last reviewed. Review happens periodically after approval, but doesn't change the original approval date.
+     * The date on which the resource content was last reviewed. Review happens periodically after approval, but doesn't change the original approval date.
      */
     @Child(name = "lastReviewDate", type = {DateType.class}, order=4, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="When the measure was last reviewed", formalDefinition="The date on which the asset content was last reviewed. Review happens periodically after approval, but doesn't change the original approval date." )
+    @Description(shortDefinition="When the measure was last reviewed", formalDefinition="The date on which the resource content was last reviewed. Review happens periodically after approval, but doesn't change the original approval date." )
     protected DateType lastReviewDate;
 
     /**
-     * The period during which the measure content was or is planned to be effective.
+     * The period during which the measure content was or is planned to be in active use.
      */
     @Child(name = "effectivePeriod", type = {Period.class}, order=5, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="When the measure is effective", formalDefinition="The period during which the measure content was or is planned to be effective." )
+    @Description(shortDefinition="When the measure is expected to be used", formalDefinition="The period during which the measure content was or is planned to be in active use." )
     protected Period effectivePeriod;
 
     /**
@@ -1740,7 +1740,7 @@ public class Measure extends MetadataResource {
     }
 
     /**
-     * @return {@link #url} (An absolute URL that is used to identify this measure when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this measure is (or will be) published. The URL SHOULD include the major version of the measure. For more information see [Technical and Business Versions](resource.html#versions).). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
+     * @return {@link #url} (An absolute URI that is used to identify this measure when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this measure is (or will be) published. The URL SHOULD include the major version of the measure. For more information see [Technical and Business Versions](resource.html#versions).). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
      */
     public UriType getUrlElement() { 
       if (this.url == null)
@@ -1760,7 +1760,7 @@ public class Measure extends MetadataResource {
     }
 
     /**
-     * @param value {@link #url} (An absolute URL that is used to identify this measure when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this measure is (or will be) published. The URL SHOULD include the major version of the measure. For more information see [Technical and Business Versions](resource.html#versions).). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
+     * @param value {@link #url} (An absolute URI that is used to identify this measure when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this measure is (or will be) published. The URL SHOULD include the major version of the measure. For more information see [Technical and Business Versions](resource.html#versions).). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
      */
     public Measure setUrlElement(UriType value) { 
       this.url = value;
@@ -1768,14 +1768,14 @@ public class Measure extends MetadataResource {
     }
 
     /**
-     * @return An absolute URL that is used to identify this measure when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this measure is (or will be) published. The URL SHOULD include the major version of the measure. For more information see [Technical and Business Versions](resource.html#versions).
+     * @return An absolute URI that is used to identify this measure when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this measure is (or will be) published. The URL SHOULD include the major version of the measure. For more information see [Technical and Business Versions](resource.html#versions).
      */
     public String getUrl() { 
       return this.url == null ? null : this.url.getValue();
     }
 
     /**
-     * @param value An absolute URL that is used to identify this measure when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this measure is (or will be) published. The URL SHOULD include the major version of the measure. For more information see [Technical and Business Versions](resource.html#versions).
+     * @param value An absolute URI that is used to identify this measure when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this measure is (or will be) published. The URL SHOULD include the major version of the measure. For more information see [Technical and Business Versions](resource.html#versions).
      */
     public Measure setUrl(String value) { 
       if (Utilities.noString(value))
@@ -1842,7 +1842,7 @@ public class Measure extends MetadataResource {
     }
 
     /**
-     * @return {@link #version} (The identifier that is used to identify this version of the measure when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the measure author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions are orderable. To provide a version consistent with the Decision Support Service specification, use the format Major.Minor.Revision (e.g. 1.0.0). For more information on versioning knowledge assets, refer to the Decision Support Service specification. Note that a version is required for non-experimental active artifacts.). This is the underlying object with id, value and extensions. The accessor "getVersion" gives direct access to the value
+     * @return {@link #version} (The identifier that is used to identify this version of the measure when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the measure author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions can be placed in a lexicographical sequence. To provide a version consistent with the Decision Support Service specification, use the format Major.Minor.Revision (e.g. 1.0.0). For more information on versioning knowledge assets, refer to the Decision Support Service specification. Note that a version is required for non-experimental active artifacts.). This is the underlying object with id, value and extensions. The accessor "getVersion" gives direct access to the value
      */
     public StringType getVersionElement() { 
       if (this.version == null)
@@ -1862,7 +1862,7 @@ public class Measure extends MetadataResource {
     }
 
     /**
-     * @param value {@link #version} (The identifier that is used to identify this version of the measure when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the measure author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions are orderable. To provide a version consistent with the Decision Support Service specification, use the format Major.Minor.Revision (e.g. 1.0.0). For more information on versioning knowledge assets, refer to the Decision Support Service specification. Note that a version is required for non-experimental active artifacts.). This is the underlying object with id, value and extensions. The accessor "getVersion" gives direct access to the value
+     * @param value {@link #version} (The identifier that is used to identify this version of the measure when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the measure author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions can be placed in a lexicographical sequence. To provide a version consistent with the Decision Support Service specification, use the format Major.Minor.Revision (e.g. 1.0.0). For more information on versioning knowledge assets, refer to the Decision Support Service specification. Note that a version is required for non-experimental active artifacts.). This is the underlying object with id, value and extensions. The accessor "getVersion" gives direct access to the value
      */
     public Measure setVersionElement(StringType value) { 
       this.version = value;
@@ -1870,14 +1870,14 @@ public class Measure extends MetadataResource {
     }
 
     /**
-     * @return The identifier that is used to identify this version of the measure when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the measure author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions are orderable. To provide a version consistent with the Decision Support Service specification, use the format Major.Minor.Revision (e.g. 1.0.0). For more information on versioning knowledge assets, refer to the Decision Support Service specification. Note that a version is required for non-experimental active artifacts.
+     * @return The identifier that is used to identify this version of the measure when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the measure author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions can be placed in a lexicographical sequence. To provide a version consistent with the Decision Support Service specification, use the format Major.Minor.Revision (e.g. 1.0.0). For more information on versioning knowledge assets, refer to the Decision Support Service specification. Note that a version is required for non-experimental active artifacts.
      */
     public String getVersion() { 
       return this.version == null ? null : this.version.getValue();
     }
 
     /**
-     * @param value The identifier that is used to identify this version of the measure when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the measure author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions are orderable. To provide a version consistent with the Decision Support Service specification, use the format Major.Minor.Revision (e.g. 1.0.0). For more information on versioning knowledge assets, refer to the Decision Support Service specification. Note that a version is required for non-experimental active artifacts.
+     * @param value The identifier that is used to identify this version of the measure when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the measure author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions can be placed in a lexicographical sequence. To provide a version consistent with the Decision Support Service specification, use the format Major.Minor.Revision (e.g. 1.0.0). For more information on versioning knowledge assets, refer to the Decision Support Service specification. Note that a version is required for non-experimental active artifacts.
      */
     public Measure setVersion(String value) { 
       if (Utilities.noString(value))
@@ -2034,7 +2034,7 @@ public class Measure extends MetadataResource {
     }
 
     /**
-     * @return {@link #experimental} (A flag to indicate that this measure is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.). This is the underlying object with id, value and extensions. The accessor "getExperimental" gives direct access to the value
+     * @return {@link #experimental} (A boolean value to indicate that this measure is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.). This is the underlying object with id, value and extensions. The accessor "getExperimental" gives direct access to the value
      */
     public BooleanType getExperimentalElement() { 
       if (this.experimental == null)
@@ -2054,7 +2054,7 @@ public class Measure extends MetadataResource {
     }
 
     /**
-     * @param value {@link #experimental} (A flag to indicate that this measure is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.). This is the underlying object with id, value and extensions. The accessor "getExperimental" gives direct access to the value
+     * @param value {@link #experimental} (A boolean value to indicate that this measure is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.). This is the underlying object with id, value and extensions. The accessor "getExperimental" gives direct access to the value
      */
     public Measure setExperimentalElement(BooleanType value) { 
       this.experimental = value;
@@ -2062,14 +2062,14 @@ public class Measure extends MetadataResource {
     }
 
     /**
-     * @return A flag to indicate that this measure is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.
+     * @return A boolean value to indicate that this measure is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.
      */
     public boolean getExperimental() { 
       return this.experimental == null || this.experimental.isEmpty() ? false : this.experimental.getValue();
     }
 
     /**
-     * @param value A flag to indicate that this measure is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.
+     * @param value A boolean value to indicate that this measure is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.
      */
     public Measure setExperimental(boolean value) { 
         if (this.experimental == null)
@@ -2079,7 +2079,7 @@ public class Measure extends MetadataResource {
     }
 
     /**
-     * @return {@link #date} (The date  (and optionally time) when the measure was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the measure changes.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
+     * @return {@link #date} (The date  (and optionally time) when the measure was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the measure changes.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
      */
     public DateTimeType getDateElement() { 
       if (this.date == null)
@@ -2099,7 +2099,7 @@ public class Measure extends MetadataResource {
     }
 
     /**
-     * @param value {@link #date} (The date  (and optionally time) when the measure was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the measure changes.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
+     * @param value {@link #date} (The date  (and optionally time) when the measure was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the measure changes.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
      */
     public Measure setDateElement(DateTimeType value) { 
       this.date = value;
@@ -2107,14 +2107,14 @@ public class Measure extends MetadataResource {
     }
 
     /**
-     * @return The date  (and optionally time) when the measure was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the measure changes.
+     * @return The date  (and optionally time) when the measure was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the measure changes.
      */
     public Date getDate() { 
       return this.date == null ? null : this.date.getValue();
     }
 
     /**
-     * @param value The date  (and optionally time) when the measure was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the measure changes.
+     * @param value The date  (and optionally time) when the measure was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the measure changes.
      */
     public Measure setDate(Date value) { 
       if (value == null)
@@ -2177,7 +2177,7 @@ public class Measure extends MetadataResource {
     }
 
     /**
-     * @return {@link #description} (A free text natural language description of the measure from the consumer's perspective.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
+     * @return {@link #description} (A free text natural language description of the measure from a consumer's perspective.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
      */
     public MarkdownType getDescriptionElement() { 
       if (this.description == null)
@@ -2197,7 +2197,7 @@ public class Measure extends MetadataResource {
     }
 
     /**
-     * @param value {@link #description} (A free text natural language description of the measure from the consumer's perspective.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
+     * @param value {@link #description} (A free text natural language description of the measure from a consumer's perspective.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
      */
     public Measure setDescriptionElement(MarkdownType value) { 
       this.description = value;
@@ -2205,14 +2205,14 @@ public class Measure extends MetadataResource {
     }
 
     /**
-     * @return A free text natural language description of the measure from the consumer's perspective.
+     * @return A free text natural language description of the measure from a consumer's perspective.
      */
     public String getDescription() { 
       return this.description == null ? null : this.description.getValue();
     }
 
     /**
-     * @param value A free text natural language description of the measure from the consumer's perspective.
+     * @param value A free text natural language description of the measure from a consumer's perspective.
      */
     public Measure setDescription(String value) { 
       if (value == null)
@@ -2226,7 +2226,7 @@ public class Measure extends MetadataResource {
     }
 
     /**
-     * @return {@link #purpose} (Explains why this measure is needed and why it has been designed as it has.). This is the underlying object with id, value and extensions. The accessor "getPurpose" gives direct access to the value
+     * @return {@link #purpose} (Explaination of why this measure is needed and why it has been designed as it has.). This is the underlying object with id, value and extensions. The accessor "getPurpose" gives direct access to the value
      */
     public MarkdownType getPurposeElement() { 
       if (this.purpose == null)
@@ -2246,7 +2246,7 @@ public class Measure extends MetadataResource {
     }
 
     /**
-     * @param value {@link #purpose} (Explains why this measure is needed and why it has been designed as it has.). This is the underlying object with id, value and extensions. The accessor "getPurpose" gives direct access to the value
+     * @param value {@link #purpose} (Explaination of why this measure is needed and why it has been designed as it has.). This is the underlying object with id, value and extensions. The accessor "getPurpose" gives direct access to the value
      */
     public Measure setPurposeElement(MarkdownType value) { 
       this.purpose = value;
@@ -2254,14 +2254,14 @@ public class Measure extends MetadataResource {
     }
 
     /**
-     * @return Explains why this measure is needed and why it has been designed as it has.
+     * @return Explaination of why this measure is needed and why it has been designed as it has.
      */
     public String getPurpose() { 
       return this.purpose == null ? null : this.purpose.getValue();
     }
 
     /**
-     * @param value Explains why this measure is needed and why it has been designed as it has.
+     * @param value Explaination of why this measure is needed and why it has been designed as it has.
      */
     public Measure setPurpose(String value) { 
       if (value == null)
@@ -2324,7 +2324,7 @@ public class Measure extends MetadataResource {
     }
 
     /**
-     * @return {@link #approvalDate} (The date on which the asset content was approved by the publisher. Approval happens once when the content is officially approved for usage.). This is the underlying object with id, value and extensions. The accessor "getApprovalDate" gives direct access to the value
+     * @return {@link #approvalDate} (The date on which the resource content was approved by the publisher. Approval happens once when the content is officially approved for usage.). This is the underlying object with id, value and extensions. The accessor "getApprovalDate" gives direct access to the value
      */
     public DateType getApprovalDateElement() { 
       if (this.approvalDate == null)
@@ -2344,7 +2344,7 @@ public class Measure extends MetadataResource {
     }
 
     /**
-     * @param value {@link #approvalDate} (The date on which the asset content was approved by the publisher. Approval happens once when the content is officially approved for usage.). This is the underlying object with id, value and extensions. The accessor "getApprovalDate" gives direct access to the value
+     * @param value {@link #approvalDate} (The date on which the resource content was approved by the publisher. Approval happens once when the content is officially approved for usage.). This is the underlying object with id, value and extensions. The accessor "getApprovalDate" gives direct access to the value
      */
     public Measure setApprovalDateElement(DateType value) { 
       this.approvalDate = value;
@@ -2352,14 +2352,14 @@ public class Measure extends MetadataResource {
     }
 
     /**
-     * @return The date on which the asset content was approved by the publisher. Approval happens once when the content is officially approved for usage.
+     * @return The date on which the resource content was approved by the publisher. Approval happens once when the content is officially approved for usage.
      */
     public Date getApprovalDate() { 
       return this.approvalDate == null ? null : this.approvalDate.getValue();
     }
 
     /**
-     * @param value The date on which the asset content was approved by the publisher. Approval happens once when the content is officially approved for usage.
+     * @param value The date on which the resource content was approved by the publisher. Approval happens once when the content is officially approved for usage.
      */
     public Measure setApprovalDate(Date value) { 
       if (value == null)
@@ -2373,7 +2373,7 @@ public class Measure extends MetadataResource {
     }
 
     /**
-     * @return {@link #lastReviewDate} (The date on which the asset content was last reviewed. Review happens periodically after approval, but doesn't change the original approval date.). This is the underlying object with id, value and extensions. The accessor "getLastReviewDate" gives direct access to the value
+     * @return {@link #lastReviewDate} (The date on which the resource content was last reviewed. Review happens periodically after approval, but doesn't change the original approval date.). This is the underlying object with id, value and extensions. The accessor "getLastReviewDate" gives direct access to the value
      */
     public DateType getLastReviewDateElement() { 
       if (this.lastReviewDate == null)
@@ -2393,7 +2393,7 @@ public class Measure extends MetadataResource {
     }
 
     /**
-     * @param value {@link #lastReviewDate} (The date on which the asset content was last reviewed. Review happens periodically after approval, but doesn't change the original approval date.). This is the underlying object with id, value and extensions. The accessor "getLastReviewDate" gives direct access to the value
+     * @param value {@link #lastReviewDate} (The date on which the resource content was last reviewed. Review happens periodically after approval, but doesn't change the original approval date.). This is the underlying object with id, value and extensions. The accessor "getLastReviewDate" gives direct access to the value
      */
     public Measure setLastReviewDateElement(DateType value) { 
       this.lastReviewDate = value;
@@ -2401,14 +2401,14 @@ public class Measure extends MetadataResource {
     }
 
     /**
-     * @return The date on which the asset content was last reviewed. Review happens periodically after approval, but doesn't change the original approval date.
+     * @return The date on which the resource content was last reviewed. Review happens periodically after approval, but doesn't change the original approval date.
      */
     public Date getLastReviewDate() { 
       return this.lastReviewDate == null ? null : this.lastReviewDate.getValue();
     }
 
     /**
-     * @param value The date on which the asset content was last reviewed. Review happens periodically after approval, but doesn't change the original approval date.
+     * @param value The date on which the resource content was last reviewed. Review happens periodically after approval, but doesn't change the original approval date.
      */
     public Measure setLastReviewDate(Date value) { 
       if (value == null)
@@ -2422,7 +2422,7 @@ public class Measure extends MetadataResource {
     }
 
     /**
-     * @return {@link #effectivePeriod} (The period during which the measure content was or is planned to be effective.)
+     * @return {@link #effectivePeriod} (The period during which the measure content was or is planned to be in active use.)
      */
     public Period getEffectivePeriod() { 
       if (this.effectivePeriod == null)
@@ -2438,7 +2438,7 @@ public class Measure extends MetadataResource {
     }
 
     /**
-     * @param value {@link #effectivePeriod} (The period during which the measure content was or is planned to be effective.)
+     * @param value {@link #effectivePeriod} (The period during which the measure content was or is planned to be in active use.)
      */
     public Measure setEffectivePeriod(Period value) { 
       this.effectivePeriod = value;
@@ -2446,7 +2446,7 @@ public class Measure extends MetadataResource {
     }
 
     /**
-     * @return {@link #useContext} (The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching of code system definitions.)
+     * @return {@link #useContext} (The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching for appropriate measure instances.)
      */
     public List<UsageContext> getUseContext() { 
       if (this.useContext == null)
@@ -2499,7 +2499,7 @@ public class Measure extends MetadataResource {
     }
 
     /**
-     * @return {@link #jurisdiction} (A jurisdiction in which the measure is intended to be used.)
+     * @return {@link #jurisdiction} (A legal or geographic region in which the measure is intended to be used.)
      */
     public List<CodeableConcept> getJurisdiction() { 
       if (this.jurisdiction == null)
@@ -3549,23 +3549,23 @@ public class Measure extends MetadataResource {
 
       protected void listChildren(List<Property> childrenList) {
         super.listChildren(childrenList);
-        childrenList.add(new Property("url", "uri", "An absolute URL that is used to identify this measure when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this measure is (or will be) published. The URL SHOULD include the major version of the measure. For more information see [Technical and Business Versions](resource.html#versions).", 0, java.lang.Integer.MAX_VALUE, url));
+        childrenList.add(new Property("url", "uri", "An absolute URI that is used to identify this measure when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this measure is (or will be) published. The URL SHOULD include the major version of the measure. For more information see [Technical and Business Versions](resource.html#versions).", 0, java.lang.Integer.MAX_VALUE, url));
         childrenList.add(new Property("identifier", "Identifier", "A formal identifier that is used to identify this measure when it is represented in other formats, or referenced in a specification, model, design or an instance.", 0, java.lang.Integer.MAX_VALUE, identifier));
-        childrenList.add(new Property("version", "string", "The identifier that is used to identify this version of the measure when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the measure author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions are orderable. To provide a version consistent with the Decision Support Service specification, use the format Major.Minor.Revision (e.g. 1.0.0). For more information on versioning knowledge assets, refer to the Decision Support Service specification. Note that a version is required for non-experimental active artifacts.", 0, java.lang.Integer.MAX_VALUE, version));
+        childrenList.add(new Property("version", "string", "The identifier that is used to identify this version of the measure when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the measure author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions can be placed in a lexicographical sequence. To provide a version consistent with the Decision Support Service specification, use the format Major.Minor.Revision (e.g. 1.0.0). For more information on versioning knowledge assets, refer to the Decision Support Service specification. Note that a version is required for non-experimental active artifacts.", 0, java.lang.Integer.MAX_VALUE, version));
         childrenList.add(new Property("name", "string", "A natural language name identifying the measure. This name should be usable as an identifier for the module by machine processing applications such as code generation.", 0, java.lang.Integer.MAX_VALUE, name));
         childrenList.add(new Property("title", "string", "A short, descriptive, user-friendly title for the measure.", 0, java.lang.Integer.MAX_VALUE, title));
         childrenList.add(new Property("status", "code", "The status of this measure. Enables tracking the life-cycle of the content.", 0, java.lang.Integer.MAX_VALUE, status));
-        childrenList.add(new Property("experimental", "boolean", "A flag to indicate that this measure is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.", 0, java.lang.Integer.MAX_VALUE, experimental));
-        childrenList.add(new Property("date", "dateTime", "The date  (and optionally time) when the measure was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the measure changes.", 0, java.lang.Integer.MAX_VALUE, date));
+        childrenList.add(new Property("experimental", "boolean", "A boolean value to indicate that this measure is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.", 0, java.lang.Integer.MAX_VALUE, experimental));
+        childrenList.add(new Property("date", "dateTime", "The date  (and optionally time) when the measure was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the measure changes.", 0, java.lang.Integer.MAX_VALUE, date));
         childrenList.add(new Property("publisher", "string", "The name of the individual or organization that published the measure.", 0, java.lang.Integer.MAX_VALUE, publisher));
-        childrenList.add(new Property("description", "markdown", "A free text natural language description of the measure from the consumer's perspective.", 0, java.lang.Integer.MAX_VALUE, description));
-        childrenList.add(new Property("purpose", "markdown", "Explains why this measure is needed and why it has been designed as it has.", 0, java.lang.Integer.MAX_VALUE, purpose));
+        childrenList.add(new Property("description", "markdown", "A free text natural language description of the measure from a consumer's perspective.", 0, java.lang.Integer.MAX_VALUE, description));
+        childrenList.add(new Property("purpose", "markdown", "Explaination of why this measure is needed and why it has been designed as it has.", 0, java.lang.Integer.MAX_VALUE, purpose));
         childrenList.add(new Property("usage", "string", "A detailed description of how the measure is used from a clinical perspective.", 0, java.lang.Integer.MAX_VALUE, usage));
-        childrenList.add(new Property("approvalDate", "date", "The date on which the asset content was approved by the publisher. Approval happens once when the content is officially approved for usage.", 0, java.lang.Integer.MAX_VALUE, approvalDate));
-        childrenList.add(new Property("lastReviewDate", "date", "The date on which the asset content was last reviewed. Review happens periodically after approval, but doesn't change the original approval date.", 0, java.lang.Integer.MAX_VALUE, lastReviewDate));
-        childrenList.add(new Property("effectivePeriod", "Period", "The period during which the measure content was or is planned to be effective.", 0, java.lang.Integer.MAX_VALUE, effectivePeriod));
-        childrenList.add(new Property("useContext", "UsageContext", "The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching of code system definitions.", 0, java.lang.Integer.MAX_VALUE, useContext));
-        childrenList.add(new Property("jurisdiction", "CodeableConcept", "A jurisdiction in which the measure is intended to be used.", 0, java.lang.Integer.MAX_VALUE, jurisdiction));
+        childrenList.add(new Property("approvalDate", "date", "The date on which the resource content was approved by the publisher. Approval happens once when the content is officially approved for usage.", 0, java.lang.Integer.MAX_VALUE, approvalDate));
+        childrenList.add(new Property("lastReviewDate", "date", "The date on which the resource content was last reviewed. Review happens periodically after approval, but doesn't change the original approval date.", 0, java.lang.Integer.MAX_VALUE, lastReviewDate));
+        childrenList.add(new Property("effectivePeriod", "Period", "The period during which the measure content was or is planned to be in active use.", 0, java.lang.Integer.MAX_VALUE, effectivePeriod));
+        childrenList.add(new Property("useContext", "UsageContext", "The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching for appropriate measure instances.", 0, java.lang.Integer.MAX_VALUE, useContext));
+        childrenList.add(new Property("jurisdiction", "CodeableConcept", "A legal or geographic region in which the measure is intended to be used.", 0, java.lang.Integer.MAX_VALUE, jurisdiction));
         childrenList.add(new Property("topic", "CodeableConcept", "Descriptive topics related to the content of the measure. Topics provide a high-level categorization of the type of the measure that can be useful for filtering and searching.", 0, java.lang.Integer.MAX_VALUE, topic));
         childrenList.add(new Property("contributor", "Contributor", "A contributor to the content of the measure, including authors, editors, reviewers, and endorsers.", 0, java.lang.Integer.MAX_VALUE, contributor));
         childrenList.add(new Property("contact", "ContactDetail", "Contact details to assist a user in finding and communicating with the publisher.", 0, java.lang.Integer.MAX_VALUE, contact));
@@ -4217,17 +4217,17 @@ public class Measure extends MetadataResource {
  /**
    * Search parameter: <b>identifier</b>
    * <p>
-   * Description: <b>External identifiers for the measure</b><br>
+   * Description: <b>External identifier for the measure</b><br>
    * Type: <b>token</b><br>
    * Path: <b>Measure.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="Measure.identifier", description="External identifiers for the measure", type="token" )
+  @SearchParamDefinition(name="identifier", path="Measure.identifier", description="External identifier for the measure", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
    * <p>
-   * Description: <b>External identifiers for the measure</b><br>
+   * Description: <b>External identifier for the measure</b><br>
    * Type: <b>token</b><br>
    * Path: <b>Measure.identifier</b><br>
    * </p>
@@ -4235,39 +4235,45 @@ public class Measure extends MetadataResource {
   public static final ca.uhn.fhir.rest.gclient.TokenClientParam IDENTIFIER = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_IDENTIFIER);
 
  /**
-   * Search parameter: <b>effective</b>
+   * Search parameter: <b>successor</b>
    * <p>
-   * Description: <b>Effective time associated with the measure</b><br>
-   * Type: <b>date</b><br>
-   * Path: <b>Measure.effectivePeriod</b><br>
+   * Description: <b>What resource is being referenced</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>Measure.relatedArtifact.resource</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="effective", path="Measure.effectivePeriod", description="Effective time associated with the measure", type="date" )
-  public static final String SP_EFFECTIVE = "effective";
+  @SearchParamDefinition(name="successor", path="Measure.relatedArtifact.where(type='successor').resource", description="What resource is being referenced", type="reference" )
+  public static final String SP_SUCCESSOR = "successor";
  /**
-   * <b>Fluent Client</b> search parameter constant for <b>effective</b>
+   * <b>Fluent Client</b> search parameter constant for <b>successor</b>
    * <p>
-   * Description: <b>Effective time associated with the measure</b><br>
-   * Type: <b>date</b><br>
-   * Path: <b>Measure.effectivePeriod</b><br>
+   * Description: <b>What resource is being referenced</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>Measure.relatedArtifact.resource</b><br>
    * </p>
    */
-  public static final ca.uhn.fhir.rest.gclient.DateClientParam EFFECTIVE = new ca.uhn.fhir.rest.gclient.DateClientParam(SP_EFFECTIVE);
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam SUCCESSOR = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_SUCCESSOR);
+
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>Measure:successor</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_SUCCESSOR = new ca.uhn.fhir.model.api.Include("Measure:successor").toLocked();
 
  /**
    * Search parameter: <b>jurisdiction</b>
    * <p>
-   * Description: <b>Intended jurisdiction for measure</b><br>
+   * Description: <b>Intended jurisdiction for the measure</b><br>
    * Type: <b>token</b><br>
    * Path: <b>Measure.jurisdiction</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="jurisdiction", path="Measure.jurisdiction", description="Intended jurisdiction for measure", type="token" )
+  @SearchParamDefinition(name="jurisdiction", path="Measure.jurisdiction", description="Intended jurisdiction for the measure", type="token" )
   public static final String SP_JURISDICTION = "jurisdiction";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>jurisdiction</b>
    * <p>
-   * Description: <b>Intended jurisdiction for measure</b><br>
+   * Description: <b>Intended jurisdiction for the measure</b><br>
    * Type: <b>token</b><br>
    * Path: <b>Measure.jurisdiction</b><br>
    * </p>
@@ -4275,39 +4281,19 @@ public class Measure extends MetadataResource {
   public static final ca.uhn.fhir.rest.gclient.TokenClientParam JURISDICTION = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_JURISDICTION);
 
  /**
-   * Search parameter: <b>name</b>
-   * <p>
-   * Description: <b>Name of the measure</b><br>
-   * Type: <b>string</b><br>
-   * Path: <b>Measure.name</b><br>
-   * </p>
-   */
-  @SearchParamDefinition(name="name", path="Measure.name", description="Name of the measure", type="string" )
-  public static final String SP_NAME = "name";
- /**
-   * <b>Fluent Client</b> search parameter constant for <b>name</b>
-   * <p>
-   * Description: <b>Name of the measure</b><br>
-   * Type: <b>string</b><br>
-   * Path: <b>Measure.name</b><br>
-   * </p>
-   */
-  public static final ca.uhn.fhir.rest.gclient.StringClientParam NAME = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_NAME);
-
- /**
    * Search parameter: <b>description</b>
    * <p>
-   * Description: <b>Text search against the description of the measure</b><br>
+   * Description: <b>The description of the measure</b><br>
    * Type: <b>string</b><br>
    * Path: <b>Measure.description</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="description", path="Measure.description", description="Text search against the description of the measure", type="string" )
+  @SearchParamDefinition(name="description", path="Measure.description", description="The description of the measure", type="string" )
   public static final String SP_DESCRIPTION = "description";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>description</b>
    * <p>
-   * Description: <b>Text search against the description of the measure</b><br>
+   * Description: <b>The description of the measure</b><br>
    * Type: <b>string</b><br>
    * Path: <b>Measure.description</b><br>
    * </p>
@@ -4315,64 +4301,102 @@ public class Measure extends MetadataResource {
   public static final ca.uhn.fhir.rest.gclient.StringClientParam DESCRIPTION = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_DESCRIPTION);
 
  /**
-   * Search parameter: <b>publisher</b>
+   * Search parameter: <b>derived-from</b>
    * <p>
-   * Description: <b>Name of the publisher of the measure</b><br>
-   * Type: <b>string</b><br>
-   * Path: <b>Measure.publisher</b><br>
+   * Description: <b>What resource is being referenced</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>Measure.relatedArtifact.resource</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="publisher", path="Measure.publisher", description="Name of the publisher of the measure", type="string" )
-  public static final String SP_PUBLISHER = "publisher";
+  @SearchParamDefinition(name="derived-from", path="Measure.relatedArtifact.where(type='derived-from').resource", description="What resource is being referenced", type="reference" )
+  public static final String SP_DERIVED_FROM = "derived-from";
  /**
-   * <b>Fluent Client</b> search parameter constant for <b>publisher</b>
+   * <b>Fluent Client</b> search parameter constant for <b>derived-from</b>
    * <p>
-   * Description: <b>Name of the publisher of the measure</b><br>
-   * Type: <b>string</b><br>
-   * Path: <b>Measure.publisher</b><br>
+   * Description: <b>What resource is being referenced</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>Measure.relatedArtifact.resource</b><br>
    * </p>
    */
-  public static final ca.uhn.fhir.rest.gclient.StringClientParam PUBLISHER = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_PUBLISHER);
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam DERIVED_FROM = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_DERIVED_FROM);
+
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>Measure:derived-from</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_DERIVED_FROM = new ca.uhn.fhir.model.api.Include("Measure:derived-from").toLocked();
 
  /**
-   * Search parameter: <b>topic</b>
+   * Search parameter: <b>predecessor</b>
    * <p>
-   * Description: <b>Topics associated with the module</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>Measure.topic</b><br>
+   * Description: <b>What resource is being referenced</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>Measure.relatedArtifact.resource</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="topic", path="Measure.topic", description="Topics associated with the module", type="token" )
-  public static final String SP_TOPIC = "topic";
+  @SearchParamDefinition(name="predecessor", path="Measure.relatedArtifact.where(type='predecessor').resource", description="What resource is being referenced", type="reference" )
+  public static final String SP_PREDECESSOR = "predecessor";
  /**
-   * <b>Fluent Client</b> search parameter constant for <b>topic</b>
+   * <b>Fluent Client</b> search parameter constant for <b>predecessor</b>
    * <p>
-   * Description: <b>Topics associated with the module</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>Measure.topic</b><br>
+   * Description: <b>What resource is being referenced</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>Measure.relatedArtifact.resource</b><br>
    * </p>
    */
-  public static final ca.uhn.fhir.rest.gclient.TokenClientParam TOPIC = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_TOPIC);
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam PREDECESSOR = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_PREDECESSOR);
+
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>Measure:predecessor</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_PREDECESSOR = new ca.uhn.fhir.model.api.Include("Measure:predecessor").toLocked();
 
  /**
    * Search parameter: <b>title</b>
    * <p>
-   * Description: <b>Text search against the title of the measure</b><br>
+   * Description: <b>The human-friendly name of the measure</b><br>
    * Type: <b>string</b><br>
    * Path: <b>Measure.title</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="title", path="Measure.title", description="Text search against the title of the measure", type="string" )
+  @SearchParamDefinition(name="title", path="Measure.title", description="The human-friendly name of the measure", type="string" )
   public static final String SP_TITLE = "title";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>title</b>
    * <p>
-   * Description: <b>Text search against the title of the measure</b><br>
+   * Description: <b>The human-friendly name of the measure</b><br>
    * Type: <b>string</b><br>
    * Path: <b>Measure.title</b><br>
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.StringClientParam TITLE = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_TITLE);
+
+ /**
+   * Search parameter: <b>composed-of</b>
+   * <p>
+   * Description: <b>What resource is being referenced</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>Measure.relatedArtifact.resource</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="composed-of", path="Measure.relatedArtifact.where(type='composed-of').resource", description="What resource is being referenced", type="reference" )
+  public static final String SP_COMPOSED_OF = "composed-of";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>composed-of</b>
+   * <p>
+   * Description: <b>What resource is being referenced</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>Measure.relatedArtifact.resource</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam COMPOSED_OF = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_COMPOSED_OF);
+
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>Measure:composed-of</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_COMPOSED_OF = new ca.uhn.fhir.model.api.Include("Measure:composed-of").toLocked();
 
  /**
    * Search parameter: <b>version</b>
@@ -4413,6 +4437,112 @@ public class Measure extends MetadataResource {
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.UriClientParam URL = new ca.uhn.fhir.rest.gclient.UriClientParam(SP_URL);
+
+ /**
+   * Search parameter: <b>effective</b>
+   * <p>
+   * Description: <b>The time during which the measure is intended to be in use</b><br>
+   * Type: <b>date</b><br>
+   * Path: <b>Measure.effectivePeriod</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="effective", path="Measure.effectivePeriod", description="The time during which the measure is intended to be in use", type="date" )
+  public static final String SP_EFFECTIVE = "effective";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>effective</b>
+   * <p>
+   * Description: <b>The time during which the measure is intended to be in use</b><br>
+   * Type: <b>date</b><br>
+   * Path: <b>Measure.effectivePeriod</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.DateClientParam EFFECTIVE = new ca.uhn.fhir.rest.gclient.DateClientParam(SP_EFFECTIVE);
+
+ /**
+   * Search parameter: <b>depends-on</b>
+   * <p>
+   * Description: <b>What resource is being referenced</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>Measure.relatedArtifact.resource, Measure.library</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="depends-on", path="Measure.relatedArtifact.where(type='depends-on').resource | Measure.library", description="What resource is being referenced", type="reference" )
+  public static final String SP_DEPENDS_ON = "depends-on";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>depends-on</b>
+   * <p>
+   * Description: <b>What resource is being referenced</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>Measure.relatedArtifact.resource, Measure.library</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam DEPENDS_ON = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_DEPENDS_ON);
+
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>Measure:depends-on</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_DEPENDS_ON = new ca.uhn.fhir.model.api.Include("Measure:depends-on").toLocked();
+
+ /**
+   * Search parameter: <b>name</b>
+   * <p>
+   * Description: <b>Computationally friendly name of the measure</b><br>
+   * Type: <b>string</b><br>
+   * Path: <b>Measure.name</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="name", path="Measure.name", description="Computationally friendly name of the measure", type="string" )
+  public static final String SP_NAME = "name";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>name</b>
+   * <p>
+   * Description: <b>Computationally friendly name of the measure</b><br>
+   * Type: <b>string</b><br>
+   * Path: <b>Measure.name</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.StringClientParam NAME = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_NAME);
+
+ /**
+   * Search parameter: <b>publisher</b>
+   * <p>
+   * Description: <b>Name of the publisher of the measure</b><br>
+   * Type: <b>string</b><br>
+   * Path: <b>Measure.publisher</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="publisher", path="Measure.publisher", description="Name of the publisher of the measure", type="string" )
+  public static final String SP_PUBLISHER = "publisher";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>publisher</b>
+   * <p>
+   * Description: <b>Name of the publisher of the measure</b><br>
+   * Type: <b>string</b><br>
+   * Path: <b>Measure.publisher</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.StringClientParam PUBLISHER = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_PUBLISHER);
+
+ /**
+   * Search parameter: <b>topic</b>
+   * <p>
+   * Description: <b>Topics associated with the module</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Measure.topic</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="topic", path="Measure.topic", description="Topics associated with the module", type="token" )
+  public static final String SP_TOPIC = "topic";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>topic</b>
+   * <p>
+   * Description: <b>Topics associated with the module</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Measure.topic</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam TOPIC = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_TOPIC);
 
  /**
    * Search parameter: <b>status</b>

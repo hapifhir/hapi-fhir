@@ -3,7 +3,6 @@ package org.hl7.fhir.dstu3.elementmodel;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.dstu3.conformance.ProfileUtilities;
 import org.hl7.fhir.dstu3.context.IWorkerContext;
 import org.hl7.fhir.dstu3.formats.FormatUtilities;
@@ -241,13 +240,7 @@ public class Property {
         }
       }
       if (!"xhtml".equals(t)) {
-        final String url;
-        if (StringUtils.isNotBlank(ed.getType().get(0).getProfile())) {
-          url = ed.getType().get(0).getProfile();
-        } else {
-          url = "http://hl7.org/fhir/StructureDefinition/" + t;
-        }
-        sd = context.fetchResource(StructureDefinition.class, url);
+        sd = context.fetchResource(StructureDefinition.class, "http://hl7.org/fhir/StructureDefinition/"+t);
         if (sd == null)
           throw new DefinitionException("Unable to find type '"+t+"' for name '"+elementName+"' on property "+definition.getPath());
         children = ProfileUtilities.getChildMap(sd, sd.getSnapshot().getElement().get(0));

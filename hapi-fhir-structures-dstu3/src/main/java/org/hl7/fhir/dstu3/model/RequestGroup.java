@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
+// Generated on Mon, Apr 17, 2017 17:38-0400 for FHIR v3.0.1
 
 import java.util.*;
 
@@ -47,6 +47,492 @@ import org.hl7.fhir.exceptions.FHIRException;
  */
 @ResourceDef(name="RequestGroup", profile="http://hl7.org/fhir/Profile/RequestGroup")
 public class RequestGroup extends DomainResource {
+
+    public enum RequestStatus {
+        /**
+         * The request has been created but is not yet complete or ready for action
+         */
+        DRAFT, 
+        /**
+         * The request is ready to be acted upon
+         */
+        ACTIVE, 
+        /**
+         * The authorization/request to act has been temporarily withdrawn but is expected to resume in the future
+         */
+        SUSPENDED, 
+        /**
+         * The authorization/request to act has been terminated prior to the full completion of the intended actions.  No further activity should occur.
+         */
+        CANCELLED, 
+        /**
+         * Activity against the request has been sufficiently completed to the satisfaction of the requester
+         */
+        COMPLETED, 
+        /**
+         * This electronic record should never have existed, though it is possible that real-world decisions were based on it.  (If real-world activity has occurred, the status should be "cancelled" rather than "entered-in-error".)
+         */
+        ENTEREDINERROR, 
+        /**
+         * The authoring system does not know which of the status values currently applies for this request.  Note: This concept is not to be used for "other" . One of the listed statuses is presumed to apply,  but the system creating the request doesn't know.
+         */
+        UNKNOWN, 
+        /**
+         * added to help the parsers with the generic types
+         */
+        NULL;
+        public static RequestStatus fromCode(String codeString) throws FHIRException {
+            if (codeString == null || "".equals(codeString))
+                return null;
+        if ("draft".equals(codeString))
+          return DRAFT;
+        if ("active".equals(codeString))
+          return ACTIVE;
+        if ("suspended".equals(codeString))
+          return SUSPENDED;
+        if ("cancelled".equals(codeString))
+          return CANCELLED;
+        if ("completed".equals(codeString))
+          return COMPLETED;
+        if ("entered-in-error".equals(codeString))
+          return ENTEREDINERROR;
+        if ("unknown".equals(codeString))
+          return UNKNOWN;
+        if (Configuration.isAcceptInvalidEnums())
+          return null;
+        else
+          throw new FHIRException("Unknown RequestStatus code '"+codeString+"'");
+        }
+        public String toCode() {
+          switch (this) {
+            case DRAFT: return "draft";
+            case ACTIVE: return "active";
+            case SUSPENDED: return "suspended";
+            case CANCELLED: return "cancelled";
+            case COMPLETED: return "completed";
+            case ENTEREDINERROR: return "entered-in-error";
+            case UNKNOWN: return "unknown";
+            default: return "?";
+          }
+        }
+        public String getSystem() {
+          switch (this) {
+            case DRAFT: return "http://hl7.org/fhir/request-status";
+            case ACTIVE: return "http://hl7.org/fhir/request-status";
+            case SUSPENDED: return "http://hl7.org/fhir/request-status";
+            case CANCELLED: return "http://hl7.org/fhir/request-status";
+            case COMPLETED: return "http://hl7.org/fhir/request-status";
+            case ENTEREDINERROR: return "http://hl7.org/fhir/request-status";
+            case UNKNOWN: return "http://hl7.org/fhir/request-status";
+            default: return "?";
+          }
+        }
+        public String getDefinition() {
+          switch (this) {
+            case DRAFT: return "The request has been created but is not yet complete or ready for action";
+            case ACTIVE: return "The request is ready to be acted upon";
+            case SUSPENDED: return "The authorization/request to act has been temporarily withdrawn but is expected to resume in the future";
+            case CANCELLED: return "The authorization/request to act has been terminated prior to the full completion of the intended actions.  No further activity should occur.";
+            case COMPLETED: return "Activity against the request has been sufficiently completed to the satisfaction of the requester";
+            case ENTEREDINERROR: return "This electronic record should never have existed, though it is possible that real-world decisions were based on it.  (If real-world activity has occurred, the status should be \"cancelled\" rather than \"entered-in-error\".)";
+            case UNKNOWN: return "The authoring system does not know which of the status values currently applies for this request.  Note: This concept is not to be used for \"other\" . One of the listed statuses is presumed to apply,  but the system creating the request doesn't know.";
+            default: return "?";
+          }
+        }
+        public String getDisplay() {
+          switch (this) {
+            case DRAFT: return "Draft";
+            case ACTIVE: return "Active";
+            case SUSPENDED: return "Suspended";
+            case CANCELLED: return "Cancelled";
+            case COMPLETED: return "Completed";
+            case ENTEREDINERROR: return "Entered in Error";
+            case UNKNOWN: return "Unknown";
+            default: return "?";
+          }
+        }
+    }
+
+  public static class RequestStatusEnumFactory implements EnumFactory<RequestStatus> {
+    public RequestStatus fromCode(String codeString) throws IllegalArgumentException {
+      if (codeString == null || "".equals(codeString))
+            if (codeString == null || "".equals(codeString))
+                return null;
+        if ("draft".equals(codeString))
+          return RequestStatus.DRAFT;
+        if ("active".equals(codeString))
+          return RequestStatus.ACTIVE;
+        if ("suspended".equals(codeString))
+          return RequestStatus.SUSPENDED;
+        if ("cancelled".equals(codeString))
+          return RequestStatus.CANCELLED;
+        if ("completed".equals(codeString))
+          return RequestStatus.COMPLETED;
+        if ("entered-in-error".equals(codeString))
+          return RequestStatus.ENTEREDINERROR;
+        if ("unknown".equals(codeString))
+          return RequestStatus.UNKNOWN;
+        throw new IllegalArgumentException("Unknown RequestStatus code '"+codeString+"'");
+        }
+        public Enumeration<RequestStatus> fromType(Base code) throws FHIRException {
+          if (code == null)
+            return null;
+          if (code.isEmpty())
+            return new Enumeration<RequestStatus>(this);
+          String codeString = ((PrimitiveType) code).asStringValue();
+          if (codeString == null || "".equals(codeString))
+            return null;
+        if ("draft".equals(codeString))
+          return new Enumeration<RequestStatus>(this, RequestStatus.DRAFT);
+        if ("active".equals(codeString))
+          return new Enumeration<RequestStatus>(this, RequestStatus.ACTIVE);
+        if ("suspended".equals(codeString))
+          return new Enumeration<RequestStatus>(this, RequestStatus.SUSPENDED);
+        if ("cancelled".equals(codeString))
+          return new Enumeration<RequestStatus>(this, RequestStatus.CANCELLED);
+        if ("completed".equals(codeString))
+          return new Enumeration<RequestStatus>(this, RequestStatus.COMPLETED);
+        if ("entered-in-error".equals(codeString))
+          return new Enumeration<RequestStatus>(this, RequestStatus.ENTEREDINERROR);
+        if ("unknown".equals(codeString))
+          return new Enumeration<RequestStatus>(this, RequestStatus.UNKNOWN);
+        throw new FHIRException("Unknown RequestStatus code '"+codeString+"'");
+        }
+    public String toCode(RequestStatus code) {
+      if (code == RequestStatus.DRAFT)
+        return "draft";
+      if (code == RequestStatus.ACTIVE)
+        return "active";
+      if (code == RequestStatus.SUSPENDED)
+        return "suspended";
+      if (code == RequestStatus.CANCELLED)
+        return "cancelled";
+      if (code == RequestStatus.COMPLETED)
+        return "completed";
+      if (code == RequestStatus.ENTEREDINERROR)
+        return "entered-in-error";
+      if (code == RequestStatus.UNKNOWN)
+        return "unknown";
+      return "?";
+      }
+    public String toSystem(RequestStatus code) {
+      return code.getSystem();
+      }
+    }
+
+    public enum RequestIntent {
+        /**
+         * The request is a suggestion made by someone/something that doesn't have an intention to ensure it occurs and without providing an authorization to act
+         */
+        PROPOSAL, 
+        /**
+         * The request represents an intension to ensure something occurs without providing an authorization for others to act
+         */
+        PLAN, 
+        /**
+         * The request represents a request/demand and authorization for action
+         */
+        ORDER, 
+        /**
+         * The request represents an original authorization for action
+         */
+        ORIGINALORDER, 
+        /**
+         * The request represents an automatically generated supplemental authorization for action based on a parent authorization together with initial results of the action taken against that parent authorization
+         */
+        REFLEXORDER, 
+        /**
+         * The request represents the view of an authorization instantiated by a fulfilling system representing the details of the fulfiller's intention to act upon a submitted order
+         */
+        FILLERORDER, 
+        /**
+         * An order created in fulfillment of a broader order that represents the authorization for a single activity occurrence.  E.g. The administration of a single dose of a drug.
+         */
+        INSTANCEORDER, 
+        /**
+         * The request represents a component or option for a RequestGroup that establishes timing, conditionality and/or other constraints among a set of requests.
+
+Refer to [[[RequestGroup]]] for additional information on how this status is used
+         */
+        OPTION, 
+        /**
+         * added to help the parsers with the generic types
+         */
+        NULL;
+        public static RequestIntent fromCode(String codeString) throws FHIRException {
+            if (codeString == null || "".equals(codeString))
+                return null;
+        if ("proposal".equals(codeString))
+          return PROPOSAL;
+        if ("plan".equals(codeString))
+          return PLAN;
+        if ("order".equals(codeString))
+          return ORDER;
+        if ("original-order".equals(codeString))
+          return ORIGINALORDER;
+        if ("reflex-order".equals(codeString))
+          return REFLEXORDER;
+        if ("filler-order".equals(codeString))
+          return FILLERORDER;
+        if ("instance-order".equals(codeString))
+          return INSTANCEORDER;
+        if ("option".equals(codeString))
+          return OPTION;
+        if (Configuration.isAcceptInvalidEnums())
+          return null;
+        else
+          throw new FHIRException("Unknown RequestIntent code '"+codeString+"'");
+        }
+        public String toCode() {
+          switch (this) {
+            case PROPOSAL: return "proposal";
+            case PLAN: return "plan";
+            case ORDER: return "order";
+            case ORIGINALORDER: return "original-order";
+            case REFLEXORDER: return "reflex-order";
+            case FILLERORDER: return "filler-order";
+            case INSTANCEORDER: return "instance-order";
+            case OPTION: return "option";
+            default: return "?";
+          }
+        }
+        public String getSystem() {
+          switch (this) {
+            case PROPOSAL: return "http://hl7.org/fhir/request-intent";
+            case PLAN: return "http://hl7.org/fhir/request-intent";
+            case ORDER: return "http://hl7.org/fhir/request-intent";
+            case ORIGINALORDER: return "http://hl7.org/fhir/request-intent";
+            case REFLEXORDER: return "http://hl7.org/fhir/request-intent";
+            case FILLERORDER: return "http://hl7.org/fhir/request-intent";
+            case INSTANCEORDER: return "http://hl7.org/fhir/request-intent";
+            case OPTION: return "http://hl7.org/fhir/request-intent";
+            default: return "?";
+          }
+        }
+        public String getDefinition() {
+          switch (this) {
+            case PROPOSAL: return "The request is a suggestion made by someone/something that doesn't have an intention to ensure it occurs and without providing an authorization to act";
+            case PLAN: return "The request represents an intension to ensure something occurs without providing an authorization for others to act";
+            case ORDER: return "The request represents a request/demand and authorization for action";
+            case ORIGINALORDER: return "The request represents an original authorization for action";
+            case REFLEXORDER: return "The request represents an automatically generated supplemental authorization for action based on a parent authorization together with initial results of the action taken against that parent authorization";
+            case FILLERORDER: return "The request represents the view of an authorization instantiated by a fulfilling system representing the details of the fulfiller's intention to act upon a submitted order";
+            case INSTANCEORDER: return "An order created in fulfillment of a broader order that represents the authorization for a single activity occurrence.  E.g. The administration of a single dose of a drug.";
+            case OPTION: return "The request represents a component or option for a RequestGroup that establishes timing, conditionality and/or other constraints among a set of requests.\n\nRefer to [[[RequestGroup]]] for additional information on how this status is used";
+            default: return "?";
+          }
+        }
+        public String getDisplay() {
+          switch (this) {
+            case PROPOSAL: return "Proposal";
+            case PLAN: return "Plan";
+            case ORDER: return "Order";
+            case ORIGINALORDER: return "Original Order";
+            case REFLEXORDER: return "Reflex Order";
+            case FILLERORDER: return "Filler Order";
+            case INSTANCEORDER: return "Instance Order";
+            case OPTION: return "Option";
+            default: return "?";
+          }
+        }
+    }
+
+  public static class RequestIntentEnumFactory implements EnumFactory<RequestIntent> {
+    public RequestIntent fromCode(String codeString) throws IllegalArgumentException {
+      if (codeString == null || "".equals(codeString))
+            if (codeString == null || "".equals(codeString))
+                return null;
+        if ("proposal".equals(codeString))
+          return RequestIntent.PROPOSAL;
+        if ("plan".equals(codeString))
+          return RequestIntent.PLAN;
+        if ("order".equals(codeString))
+          return RequestIntent.ORDER;
+        if ("original-order".equals(codeString))
+          return RequestIntent.ORIGINALORDER;
+        if ("reflex-order".equals(codeString))
+          return RequestIntent.REFLEXORDER;
+        if ("filler-order".equals(codeString))
+          return RequestIntent.FILLERORDER;
+        if ("instance-order".equals(codeString))
+          return RequestIntent.INSTANCEORDER;
+        if ("option".equals(codeString))
+          return RequestIntent.OPTION;
+        throw new IllegalArgumentException("Unknown RequestIntent code '"+codeString+"'");
+        }
+        public Enumeration<RequestIntent> fromType(Base code) throws FHIRException {
+          if (code == null)
+            return null;
+          if (code.isEmpty())
+            return new Enumeration<RequestIntent>(this);
+          String codeString = ((PrimitiveType) code).asStringValue();
+          if (codeString == null || "".equals(codeString))
+            return null;
+        if ("proposal".equals(codeString))
+          return new Enumeration<RequestIntent>(this, RequestIntent.PROPOSAL);
+        if ("plan".equals(codeString))
+          return new Enumeration<RequestIntent>(this, RequestIntent.PLAN);
+        if ("order".equals(codeString))
+          return new Enumeration<RequestIntent>(this, RequestIntent.ORDER);
+        if ("original-order".equals(codeString))
+          return new Enumeration<RequestIntent>(this, RequestIntent.ORIGINALORDER);
+        if ("reflex-order".equals(codeString))
+          return new Enumeration<RequestIntent>(this, RequestIntent.REFLEXORDER);
+        if ("filler-order".equals(codeString))
+          return new Enumeration<RequestIntent>(this, RequestIntent.FILLERORDER);
+        if ("instance-order".equals(codeString))
+          return new Enumeration<RequestIntent>(this, RequestIntent.INSTANCEORDER);
+        if ("option".equals(codeString))
+          return new Enumeration<RequestIntent>(this, RequestIntent.OPTION);
+        throw new FHIRException("Unknown RequestIntent code '"+codeString+"'");
+        }
+    public String toCode(RequestIntent code) {
+      if (code == RequestIntent.PROPOSAL)
+        return "proposal";
+      if (code == RequestIntent.PLAN)
+        return "plan";
+      if (code == RequestIntent.ORDER)
+        return "order";
+      if (code == RequestIntent.ORIGINALORDER)
+        return "original-order";
+      if (code == RequestIntent.REFLEXORDER)
+        return "reflex-order";
+      if (code == RequestIntent.FILLERORDER)
+        return "filler-order";
+      if (code == RequestIntent.INSTANCEORDER)
+        return "instance-order";
+      if (code == RequestIntent.OPTION)
+        return "option";
+      return "?";
+      }
+    public String toSystem(RequestIntent code) {
+      return code.getSystem();
+      }
+    }
+
+    public enum RequestPriority {
+        /**
+         * The request has normal priority
+         */
+        ROUTINE, 
+        /**
+         * The request should be actioned promptly - higher priority than routine
+         */
+        URGENT, 
+        /**
+         * The request should be actioned as soon as possible - higher priority than urgent
+         */
+        ASAP, 
+        /**
+         * The request should be actioned immediately - highest possible priority.  E.g. an emergency
+         */
+        STAT, 
+        /**
+         * added to help the parsers with the generic types
+         */
+        NULL;
+        public static RequestPriority fromCode(String codeString) throws FHIRException {
+            if (codeString == null || "".equals(codeString))
+                return null;
+        if ("routine".equals(codeString))
+          return ROUTINE;
+        if ("urgent".equals(codeString))
+          return URGENT;
+        if ("asap".equals(codeString))
+          return ASAP;
+        if ("stat".equals(codeString))
+          return STAT;
+        if (Configuration.isAcceptInvalidEnums())
+          return null;
+        else
+          throw new FHIRException("Unknown RequestPriority code '"+codeString+"'");
+        }
+        public String toCode() {
+          switch (this) {
+            case ROUTINE: return "routine";
+            case URGENT: return "urgent";
+            case ASAP: return "asap";
+            case STAT: return "stat";
+            default: return "?";
+          }
+        }
+        public String getSystem() {
+          switch (this) {
+            case ROUTINE: return "http://hl7.org/fhir/request-priority";
+            case URGENT: return "http://hl7.org/fhir/request-priority";
+            case ASAP: return "http://hl7.org/fhir/request-priority";
+            case STAT: return "http://hl7.org/fhir/request-priority";
+            default: return "?";
+          }
+        }
+        public String getDefinition() {
+          switch (this) {
+            case ROUTINE: return "The request has normal priority";
+            case URGENT: return "The request should be actioned promptly - higher priority than routine";
+            case ASAP: return "The request should be actioned as soon as possible - higher priority than urgent";
+            case STAT: return "The request should be actioned immediately - highest possible priority.  E.g. an emergency";
+            default: return "?";
+          }
+        }
+        public String getDisplay() {
+          switch (this) {
+            case ROUTINE: return "Routine";
+            case URGENT: return "Urgent";
+            case ASAP: return "ASAP";
+            case STAT: return "STAT";
+            default: return "?";
+          }
+        }
+    }
+
+  public static class RequestPriorityEnumFactory implements EnumFactory<RequestPriority> {
+    public RequestPriority fromCode(String codeString) throws IllegalArgumentException {
+      if (codeString == null || "".equals(codeString))
+            if (codeString == null || "".equals(codeString))
+                return null;
+        if ("routine".equals(codeString))
+          return RequestPriority.ROUTINE;
+        if ("urgent".equals(codeString))
+          return RequestPriority.URGENT;
+        if ("asap".equals(codeString))
+          return RequestPriority.ASAP;
+        if ("stat".equals(codeString))
+          return RequestPriority.STAT;
+        throw new IllegalArgumentException("Unknown RequestPriority code '"+codeString+"'");
+        }
+        public Enumeration<RequestPriority> fromType(Base code) throws FHIRException {
+          if (code == null)
+            return null;
+          if (code.isEmpty())
+            return new Enumeration<RequestPriority>(this);
+          String codeString = ((PrimitiveType) code).asStringValue();
+          if (codeString == null || "".equals(codeString))
+            return null;
+        if ("routine".equals(codeString))
+          return new Enumeration<RequestPriority>(this, RequestPriority.ROUTINE);
+        if ("urgent".equals(codeString))
+          return new Enumeration<RequestPriority>(this, RequestPriority.URGENT);
+        if ("asap".equals(codeString))
+          return new Enumeration<RequestPriority>(this, RequestPriority.ASAP);
+        if ("stat".equals(codeString))
+          return new Enumeration<RequestPriority>(this, RequestPriority.STAT);
+        throw new FHIRException("Unknown RequestPriority code '"+codeString+"'");
+        }
+    public String toCode(RequestPriority code) {
+      if (code == RequestPriority.ROUTINE)
+        return "routine";
+      if (code == RequestPriority.URGENT)
+        return "urgent";
+      if (code == RequestPriority.ASAP)
+        return "asap";
+      if (code == RequestPriority.STAT)
+        return "stat";
+      return "?";
+      }
+    public String toSystem(RequestPriority code) {
+      return code.getSystem();
+      }
+    }
 
     public enum ActionConditionKind {
         /**
@@ -935,14 +1421,14 @@ public class RequestGroup extends DomainResource {
         /**
          * A short description of the action used to provide a summary to display to the user.
          */
-        @Child(name = "description", type = {StringType.class}, order=3, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "description", type = {StringType.class}, order=3, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Short description of the action", formalDefinition="A short description of the action used to provide a summary to display to the user." )
         protected StringType description;
 
         /**
          * A text equivalent of the action to be performed. This provides a human-interpretable description of the action when the definition is consumed by a system that may not be capable of interpreting it dynamically.
          */
-        @Child(name = "textEquivalent", type = {StringType.class}, order=4, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "textEquivalent", type = {StringType.class}, order=4, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Static text equivalent of the action, used if the dynamic aspects cannot be interpreted by the receiving system", formalDefinition="A text equivalent of the action to be performed. This provides a human-interpretable description of the action when the definition is consumed by a system that may not be capable of interpreting it dynamically." )
         protected StringType textEquivalent;
 
@@ -3070,16 +3556,83 @@ public class RequestGroup extends DomainResource {
   }
 
     /**
-     * Allows a service to provide a unique, business identifier for the response.
+     * Allows a service to provide a unique, business identifier for the request.
      */
-    @Child(name = "identifier", type = {Identifier.class}, order=0, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Business identifier", formalDefinition="Allows a service to provide a unique, business identifier for the response." )
-    protected Identifier identifier;
+    @Child(name = "identifier", type = {Identifier.class}, order=0, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Description(shortDefinition="Business identifier", formalDefinition="Allows a service to provide a unique, business identifier for the request." )
+    protected List<Identifier> identifier;
+
+    /**
+     * A protocol, guideline, orderset or other definition that is adhered to in whole or in part by this request.
+     */
+    @Child(name = "definition", type = {Reference.class}, order=1, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Description(shortDefinition="Instantiates protocol or definition", formalDefinition="A protocol, guideline, orderset or other definition that is adhered to in whole or in part by this request." )
+    protected List<Reference> definition;
+    /**
+     * The actual objects that are the target of the reference (A protocol, guideline, orderset or other definition that is adhered to in whole or in part by this request.)
+     */
+    protected List<Resource> definitionTarget;
+
+
+    /**
+     * A plan, proposal or order that is fulfilled in whole or in part by this request.
+     */
+    @Child(name = "basedOn", type = {Reference.class}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Description(shortDefinition="Fulfills plan, proposal, or order", formalDefinition="A plan, proposal or order that is fulfilled in whole or in part by this request." )
+    protected List<Reference> basedOn;
+    /**
+     * The actual objects that are the target of the reference (A plan, proposal or order that is fulfilled in whole or in part by this request.)
+     */
+    protected List<Resource> basedOnTarget;
+
+
+    /**
+     * Completed or terminated request(s) whose function is taken by this new request.
+     */
+    @Child(name = "replaces", type = {Reference.class}, order=3, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Description(shortDefinition="Request(s) replaced by this request", formalDefinition="Completed or terminated request(s) whose function is taken by this new request." )
+    protected List<Reference> replaces;
+    /**
+     * The actual objects that are the target of the reference (Completed or terminated request(s) whose function is taken by this new request.)
+     */
+    protected List<Resource> replacesTarget;
+
+
+    /**
+     * A shared identifier common to all requests that were authorized more or less simultaneously by a single author, representing the identifier of the requisition, prescription or similar form.
+     */
+    @Child(name = "groupIdentifier", type = {Identifier.class}, order=4, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="Composite request this is part of", formalDefinition="A shared identifier common to all requests that were authorized more or less simultaneously by a single author, representing the identifier of the requisition, prescription or similar form." )
+    protected Identifier groupIdentifier;
+
+    /**
+     * The current state of the request. For request groups, the status reflects the status of all the requests in the group.
+     */
+    @Child(name = "status", type = {CodeType.class}, order=5, min=1, max=1, modifier=true, summary=true)
+    @Description(shortDefinition="draft | active | suspended | cancelled | completed | entered-in-error | unknown", formalDefinition="The current state of the request. For request groups, the status reflects the status of all the requests in the group." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/request-status")
+    protected Enumeration<RequestStatus> status;
+
+    /**
+     * Indicates the level of authority/intentionality associated with the request and where the request fits into the workflow chain.
+     */
+    @Child(name = "intent", type = {CodeType.class}, order=6, min=1, max=1, modifier=true, summary=true)
+    @Description(shortDefinition="proposal | plan | order", formalDefinition="Indicates the level of authority/intentionality associated with the request and where the request fits into the workflow chain." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/request-intent")
+    protected Enumeration<RequestIntent> intent;
+
+    /**
+     * Indicates how quickly the request should be addressed with respect to other requests.
+     */
+    @Child(name = "priority", type = {CodeType.class}, order=7, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="routine | urgent | asap | stat", formalDefinition="Indicates how quickly the request should be addressed with respect to other requests." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/request-priority")
+    protected Enumeration<RequestPriority> priority;
 
     /**
      * The subject for which the request group was created.
      */
-    @Child(name = "subject", type = {Patient.class, Group.class}, order=1, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "subject", type = {Patient.class, Group.class}, order=8, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Who the request group is about", formalDefinition="The subject for which the request group was created." )
     protected Reference subject;
 
@@ -3091,7 +3644,7 @@ public class RequestGroup extends DomainResource {
     /**
      * Describes the context of the request group, if any.
      */
-    @Child(name = "context", type = {Encounter.class, EpisodeOfCare.class}, order=2, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "context", type = {Encounter.class, EpisodeOfCare.class}, order=9, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Encounter or Episode for the request group", formalDefinition="Describes the context of the request group, if any." )
     protected Reference context;
 
@@ -3103,14 +3656,14 @@ public class RequestGroup extends DomainResource {
     /**
      * Indicates when the request group was created.
      */
-    @Child(name = "occurrenceDateTime", type = {DateTimeType.class}, order=3, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "authoredOn", type = {DateTimeType.class}, order=10, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="When the request group was authored", formalDefinition="Indicates when the request group was created." )
-    protected DateTimeType occurrenceDateTime;
+    protected DateTimeType authoredOn;
 
     /**
      * Provides a reference to the author of the request group.
      */
-    @Child(name = "author", type = {Device.class, Practitioner.class}, order=4, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "author", type = {Device.class, Practitioner.class}, order=11, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Device or practitioner that authored the request group", formalDefinition="Provides a reference to the author of the request group." )
     protected Reference author;
 
@@ -3122,25 +3675,25 @@ public class RequestGroup extends DomainResource {
     /**
      * Indicates the reason the request group was created. This is typically provided as a parameter to the evaluation and echoed by the service, although for some use cases, such as subscription- or event-based scenarios, it may provide an indication of the cause for the response.
      */
-    @Child(name = "reason", type = {CodeableConcept.class, Reference.class}, order=5, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "reason", type = {CodeableConcept.class, Reference.class}, order=12, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Reason for the request group", formalDefinition="Indicates the reason the request group was created. This is typically provided as a parameter to the evaluation and echoed by the service, although for some use cases, such as subscription- or event-based scenarios, it may provide an indication of the cause for the response." )
     protected Type reason;
 
     /**
      * Provides a mechanism to communicate additional information about the response.
      */
-    @Child(name = "note", type = {Annotation.class}, order=6, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "note", type = {Annotation.class}, order=13, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Additional notes about the response", formalDefinition="Provides a mechanism to communicate additional information about the response." )
     protected List<Annotation> note;
 
     /**
      * The actions, if any, produced by the evaluation of the artifact.
      */
-    @Child(name = "action", type = {}, order=7, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "action", type = {}, order=14, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Proposed actions, if any", formalDefinition="The actions, if any, produced by the evaluation of the artifact." )
     protected List<RequestGroupActionComponent> action;
 
-    private static final long serialVersionUID = 334451815L;
+    private static final long serialVersionUID = -1812083587L;
 
   /**
    * Constructor
@@ -3149,27 +3702,417 @@ public class RequestGroup extends DomainResource {
       super();
     }
 
+  /**
+   * Constructor
+   */
+    public RequestGroup(Enumeration<RequestStatus> status, Enumeration<RequestIntent> intent) {
+      super();
+      this.status = status;
+      this.intent = intent;
+    }
+
     /**
-     * @return {@link #identifier} (Allows a service to provide a unique, business identifier for the response.)
+     * @return {@link #identifier} (Allows a service to provide a unique, business identifier for the request.)
      */
-    public Identifier getIdentifier() { 
+    public List<Identifier> getIdentifier() { 
       if (this.identifier == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create RequestGroup.identifier");
-        else if (Configuration.doAutoCreate())
-          this.identifier = new Identifier(); // cc
+        this.identifier = new ArrayList<Identifier>();
       return this.identifier;
     }
 
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public RequestGroup setIdentifier(List<Identifier> theIdentifier) { 
+      this.identifier = theIdentifier;
+      return this;
+    }
+
     public boolean hasIdentifier() { 
-      return this.identifier != null && !this.identifier.isEmpty();
+      if (this.identifier == null)
+        return false;
+      for (Identifier item : this.identifier)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    public Identifier addIdentifier() { //3
+      Identifier t = new Identifier();
+      if (this.identifier == null)
+        this.identifier = new ArrayList<Identifier>();
+      this.identifier.add(t);
+      return t;
+    }
+
+    public RequestGroup addIdentifier(Identifier t) { //3
+      if (t == null)
+        return this;
+      if (this.identifier == null)
+        this.identifier = new ArrayList<Identifier>();
+      this.identifier.add(t);
+      return this;
     }
 
     /**
-     * @param value {@link #identifier} (Allows a service to provide a unique, business identifier for the response.)
+     * @return The first repetition of repeating field {@link #identifier}, creating it if it does not already exist
      */
-    public RequestGroup setIdentifier(Identifier value) { 
-      this.identifier = value;
+    public Identifier getIdentifierFirstRep() { 
+      if (getIdentifier().isEmpty()) {
+        addIdentifier();
+      }
+      return getIdentifier().get(0);
+    }
+
+    /**
+     * @return {@link #definition} (A protocol, guideline, orderset or other definition that is adhered to in whole or in part by this request.)
+     */
+    public List<Reference> getDefinition() { 
+      if (this.definition == null)
+        this.definition = new ArrayList<Reference>();
+      return this.definition;
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public RequestGroup setDefinition(List<Reference> theDefinition) { 
+      this.definition = theDefinition;
+      return this;
+    }
+
+    public boolean hasDefinition() { 
+      if (this.definition == null)
+        return false;
+      for (Reference item : this.definition)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    public Reference addDefinition() { //3
+      Reference t = new Reference();
+      if (this.definition == null)
+        this.definition = new ArrayList<Reference>();
+      this.definition.add(t);
+      return t;
+    }
+
+    public RequestGroup addDefinition(Reference t) { //3
+      if (t == null)
+        return this;
+      if (this.definition == null)
+        this.definition = new ArrayList<Reference>();
+      this.definition.add(t);
+      return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #definition}, creating it if it does not already exist
+     */
+    public Reference getDefinitionFirstRep() { 
+      if (getDefinition().isEmpty()) {
+        addDefinition();
+      }
+      return getDefinition().get(0);
+    }
+
+    /**
+     * @deprecated Use Reference#setResource(IBaseResource) instead
+     */
+    @Deprecated
+    public List<Resource> getDefinitionTarget() { 
+      if (this.definitionTarget == null)
+        this.definitionTarget = new ArrayList<Resource>();
+      return this.definitionTarget;
+    }
+
+    /**
+     * @return {@link #basedOn} (A plan, proposal or order that is fulfilled in whole or in part by this request.)
+     */
+    public List<Reference> getBasedOn() { 
+      if (this.basedOn == null)
+        this.basedOn = new ArrayList<Reference>();
+      return this.basedOn;
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public RequestGroup setBasedOn(List<Reference> theBasedOn) { 
+      this.basedOn = theBasedOn;
+      return this;
+    }
+
+    public boolean hasBasedOn() { 
+      if (this.basedOn == null)
+        return false;
+      for (Reference item : this.basedOn)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    public Reference addBasedOn() { //3
+      Reference t = new Reference();
+      if (this.basedOn == null)
+        this.basedOn = new ArrayList<Reference>();
+      this.basedOn.add(t);
+      return t;
+    }
+
+    public RequestGroup addBasedOn(Reference t) { //3
+      if (t == null)
+        return this;
+      if (this.basedOn == null)
+        this.basedOn = new ArrayList<Reference>();
+      this.basedOn.add(t);
+      return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #basedOn}, creating it if it does not already exist
+     */
+    public Reference getBasedOnFirstRep() { 
+      if (getBasedOn().isEmpty()) {
+        addBasedOn();
+      }
+      return getBasedOn().get(0);
+    }
+
+    /**
+     * @deprecated Use Reference#setResource(IBaseResource) instead
+     */
+    @Deprecated
+    public List<Resource> getBasedOnTarget() { 
+      if (this.basedOnTarget == null)
+        this.basedOnTarget = new ArrayList<Resource>();
+      return this.basedOnTarget;
+    }
+
+    /**
+     * @return {@link #replaces} (Completed or terminated request(s) whose function is taken by this new request.)
+     */
+    public List<Reference> getReplaces() { 
+      if (this.replaces == null)
+        this.replaces = new ArrayList<Reference>();
+      return this.replaces;
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public RequestGroup setReplaces(List<Reference> theReplaces) { 
+      this.replaces = theReplaces;
+      return this;
+    }
+
+    public boolean hasReplaces() { 
+      if (this.replaces == null)
+        return false;
+      for (Reference item : this.replaces)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    public Reference addReplaces() { //3
+      Reference t = new Reference();
+      if (this.replaces == null)
+        this.replaces = new ArrayList<Reference>();
+      this.replaces.add(t);
+      return t;
+    }
+
+    public RequestGroup addReplaces(Reference t) { //3
+      if (t == null)
+        return this;
+      if (this.replaces == null)
+        this.replaces = new ArrayList<Reference>();
+      this.replaces.add(t);
+      return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #replaces}, creating it if it does not already exist
+     */
+    public Reference getReplacesFirstRep() { 
+      if (getReplaces().isEmpty()) {
+        addReplaces();
+      }
+      return getReplaces().get(0);
+    }
+
+    /**
+     * @deprecated Use Reference#setResource(IBaseResource) instead
+     */
+    @Deprecated
+    public List<Resource> getReplacesTarget() { 
+      if (this.replacesTarget == null)
+        this.replacesTarget = new ArrayList<Resource>();
+      return this.replacesTarget;
+    }
+
+    /**
+     * @return {@link #groupIdentifier} (A shared identifier common to all requests that were authorized more or less simultaneously by a single author, representing the identifier of the requisition, prescription or similar form.)
+     */
+    public Identifier getGroupIdentifier() { 
+      if (this.groupIdentifier == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create RequestGroup.groupIdentifier");
+        else if (Configuration.doAutoCreate())
+          this.groupIdentifier = new Identifier(); // cc
+      return this.groupIdentifier;
+    }
+
+    public boolean hasGroupIdentifier() { 
+      return this.groupIdentifier != null && !this.groupIdentifier.isEmpty();
+    }
+
+    /**
+     * @param value {@link #groupIdentifier} (A shared identifier common to all requests that were authorized more or less simultaneously by a single author, representing the identifier of the requisition, prescription or similar form.)
+     */
+    public RequestGroup setGroupIdentifier(Identifier value) { 
+      this.groupIdentifier = value;
+      return this;
+    }
+
+    /**
+     * @return {@link #status} (The current state of the request. For request groups, the status reflects the status of all the requests in the group.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
+     */
+    public Enumeration<RequestStatus> getStatusElement() { 
+      if (this.status == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create RequestGroup.status");
+        else if (Configuration.doAutoCreate())
+          this.status = new Enumeration<RequestStatus>(new RequestStatusEnumFactory()); // bb
+      return this.status;
+    }
+
+    public boolean hasStatusElement() { 
+      return this.status != null && !this.status.isEmpty();
+    }
+
+    public boolean hasStatus() { 
+      return this.status != null && !this.status.isEmpty();
+    }
+
+    /**
+     * @param value {@link #status} (The current state of the request. For request groups, the status reflects the status of all the requests in the group.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
+     */
+    public RequestGroup setStatusElement(Enumeration<RequestStatus> value) { 
+      this.status = value;
+      return this;
+    }
+
+    /**
+     * @return The current state of the request. For request groups, the status reflects the status of all the requests in the group.
+     */
+    public RequestStatus getStatus() { 
+      return this.status == null ? null : this.status.getValue();
+    }
+
+    /**
+     * @param value The current state of the request. For request groups, the status reflects the status of all the requests in the group.
+     */
+    public RequestGroup setStatus(RequestStatus value) { 
+        if (this.status == null)
+          this.status = new Enumeration<RequestStatus>(new RequestStatusEnumFactory());
+        this.status.setValue(value);
+      return this;
+    }
+
+    /**
+     * @return {@link #intent} (Indicates the level of authority/intentionality associated with the request and where the request fits into the workflow chain.). This is the underlying object with id, value and extensions. The accessor "getIntent" gives direct access to the value
+     */
+    public Enumeration<RequestIntent> getIntentElement() { 
+      if (this.intent == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create RequestGroup.intent");
+        else if (Configuration.doAutoCreate())
+          this.intent = new Enumeration<RequestIntent>(new RequestIntentEnumFactory()); // bb
+      return this.intent;
+    }
+
+    public boolean hasIntentElement() { 
+      return this.intent != null && !this.intent.isEmpty();
+    }
+
+    public boolean hasIntent() { 
+      return this.intent != null && !this.intent.isEmpty();
+    }
+
+    /**
+     * @param value {@link #intent} (Indicates the level of authority/intentionality associated with the request and where the request fits into the workflow chain.). This is the underlying object with id, value and extensions. The accessor "getIntent" gives direct access to the value
+     */
+    public RequestGroup setIntentElement(Enumeration<RequestIntent> value) { 
+      this.intent = value;
+      return this;
+    }
+
+    /**
+     * @return Indicates the level of authority/intentionality associated with the request and where the request fits into the workflow chain.
+     */
+    public RequestIntent getIntent() { 
+      return this.intent == null ? null : this.intent.getValue();
+    }
+
+    /**
+     * @param value Indicates the level of authority/intentionality associated with the request and where the request fits into the workflow chain.
+     */
+    public RequestGroup setIntent(RequestIntent value) { 
+        if (this.intent == null)
+          this.intent = new Enumeration<RequestIntent>(new RequestIntentEnumFactory());
+        this.intent.setValue(value);
+      return this;
+    }
+
+    /**
+     * @return {@link #priority} (Indicates how quickly the request should be addressed with respect to other requests.). This is the underlying object with id, value and extensions. The accessor "getPriority" gives direct access to the value
+     */
+    public Enumeration<RequestPriority> getPriorityElement() { 
+      if (this.priority == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create RequestGroup.priority");
+        else if (Configuration.doAutoCreate())
+          this.priority = new Enumeration<RequestPriority>(new RequestPriorityEnumFactory()); // bb
+      return this.priority;
+    }
+
+    public boolean hasPriorityElement() { 
+      return this.priority != null && !this.priority.isEmpty();
+    }
+
+    public boolean hasPriority() { 
+      return this.priority != null && !this.priority.isEmpty();
+    }
+
+    /**
+     * @param value {@link #priority} (Indicates how quickly the request should be addressed with respect to other requests.). This is the underlying object with id, value and extensions. The accessor "getPriority" gives direct access to the value
+     */
+    public RequestGroup setPriorityElement(Enumeration<RequestPriority> value) { 
+      this.priority = value;
+      return this;
+    }
+
+    /**
+     * @return Indicates how quickly the request should be addressed with respect to other requests.
+     */
+    public RequestPriority getPriority() { 
+      return this.priority == null ? null : this.priority.getValue();
+    }
+
+    /**
+     * @param value Indicates how quickly the request should be addressed with respect to other requests.
+     */
+    public RequestGroup setPriority(RequestPriority value) { 
+      if (value == null)
+        this.priority = null;
+      else {
+        if (this.priority == null)
+          this.priority = new Enumeration<RequestPriority>(new RequestPriorityEnumFactory());
+        this.priority.setValue(value);
+      }
       return this;
     }
 
@@ -3252,50 +4195,50 @@ public class RequestGroup extends DomainResource {
     }
 
     /**
-     * @return {@link #occurrenceDateTime} (Indicates when the request group was created.). This is the underlying object with id, value and extensions. The accessor "getOccurrenceDateTime" gives direct access to the value
+     * @return {@link #authoredOn} (Indicates when the request group was created.). This is the underlying object with id, value and extensions. The accessor "getAuthoredOn" gives direct access to the value
      */
-    public DateTimeType getOccurrenceDateTimeElement() { 
-      if (this.occurrenceDateTime == null)
+    public DateTimeType getAuthoredOnElement() { 
+      if (this.authoredOn == null)
         if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create RequestGroup.occurrenceDateTime");
+          throw new Error("Attempt to auto-create RequestGroup.authoredOn");
         else if (Configuration.doAutoCreate())
-          this.occurrenceDateTime = new DateTimeType(); // bb
-      return this.occurrenceDateTime;
+          this.authoredOn = new DateTimeType(); // bb
+      return this.authoredOn;
     }
 
-    public boolean hasOccurrenceDateTimeElement() { 
-      return this.occurrenceDateTime != null && !this.occurrenceDateTime.isEmpty();
+    public boolean hasAuthoredOnElement() { 
+      return this.authoredOn != null && !this.authoredOn.isEmpty();
     }
 
-    public boolean hasOccurrenceDateTime() { 
-      return this.occurrenceDateTime != null && !this.occurrenceDateTime.isEmpty();
+    public boolean hasAuthoredOn() { 
+      return this.authoredOn != null && !this.authoredOn.isEmpty();
     }
 
     /**
-     * @param value {@link #occurrenceDateTime} (Indicates when the request group was created.). This is the underlying object with id, value and extensions. The accessor "getOccurrenceDateTime" gives direct access to the value
+     * @param value {@link #authoredOn} (Indicates when the request group was created.). This is the underlying object with id, value and extensions. The accessor "getAuthoredOn" gives direct access to the value
      */
-    public RequestGroup setOccurrenceDateTimeElement(DateTimeType value) { 
-      this.occurrenceDateTime = value;
+    public RequestGroup setAuthoredOnElement(DateTimeType value) { 
+      this.authoredOn = value;
       return this;
     }
 
     /**
      * @return Indicates when the request group was created.
      */
-    public Date getOccurrenceDateTime() { 
-      return this.occurrenceDateTime == null ? null : this.occurrenceDateTime.getValue();
+    public Date getAuthoredOn() { 
+      return this.authoredOn == null ? null : this.authoredOn.getValue();
     }
 
     /**
      * @param value Indicates when the request group was created.
      */
-    public RequestGroup setOccurrenceDateTime(Date value) { 
+    public RequestGroup setAuthoredOn(Date value) { 
       if (value == null)
-        this.occurrenceDateTime = null;
+        this.authoredOn = null;
       else {
-        if (this.occurrenceDateTime == null)
-          this.occurrenceDateTime = new DateTimeType();
-        this.occurrenceDateTime.setValue(value);
+        if (this.authoredOn == null)
+          this.authoredOn = new DateTimeType();
+        this.authoredOn.setValue(value);
       }
       return this;
     }
@@ -3492,10 +4435,17 @@ public class RequestGroup extends DomainResource {
 
       protected void listChildren(List<Property> childrenList) {
         super.listChildren(childrenList);
-        childrenList.add(new Property("identifier", "Identifier", "Allows a service to provide a unique, business identifier for the response.", 0, java.lang.Integer.MAX_VALUE, identifier));
+        childrenList.add(new Property("identifier", "Identifier", "Allows a service to provide a unique, business identifier for the request.", 0, java.lang.Integer.MAX_VALUE, identifier));
+        childrenList.add(new Property("definition", "Reference(Any)", "A protocol, guideline, orderset or other definition that is adhered to in whole or in part by this request.", 0, java.lang.Integer.MAX_VALUE, definition));
+        childrenList.add(new Property("basedOn", "Reference(Any)", "A plan, proposal or order that is fulfilled in whole or in part by this request.", 0, java.lang.Integer.MAX_VALUE, basedOn));
+        childrenList.add(new Property("replaces", "Reference(Any)", "Completed or terminated request(s) whose function is taken by this new request.", 0, java.lang.Integer.MAX_VALUE, replaces));
+        childrenList.add(new Property("groupIdentifier", "Identifier", "A shared identifier common to all requests that were authorized more or less simultaneously by a single author, representing the identifier of the requisition, prescription or similar form.", 0, java.lang.Integer.MAX_VALUE, groupIdentifier));
+        childrenList.add(new Property("status", "code", "The current state of the request. For request groups, the status reflects the status of all the requests in the group.", 0, java.lang.Integer.MAX_VALUE, status));
+        childrenList.add(new Property("intent", "code", "Indicates the level of authority/intentionality associated with the request and where the request fits into the workflow chain.", 0, java.lang.Integer.MAX_VALUE, intent));
+        childrenList.add(new Property("priority", "code", "Indicates how quickly the request should be addressed with respect to other requests.", 0, java.lang.Integer.MAX_VALUE, priority));
         childrenList.add(new Property("subject", "Reference(Patient|Group)", "The subject for which the request group was created.", 0, java.lang.Integer.MAX_VALUE, subject));
         childrenList.add(new Property("context", "Reference(Encounter|EpisodeOfCare)", "Describes the context of the request group, if any.", 0, java.lang.Integer.MAX_VALUE, context));
-        childrenList.add(new Property("occurrenceDateTime", "dateTime", "Indicates when the request group was created.", 0, java.lang.Integer.MAX_VALUE, occurrenceDateTime));
+        childrenList.add(new Property("authoredOn", "dateTime", "Indicates when the request group was created.", 0, java.lang.Integer.MAX_VALUE, authoredOn));
         childrenList.add(new Property("author", "Reference(Device|Practitioner)", "Provides a reference to the author of the request group.", 0, java.lang.Integer.MAX_VALUE, author));
         childrenList.add(new Property("reason[x]", "CodeableConcept|Reference(Any)", "Indicates the reason the request group was created. This is typically provided as a parameter to the evaluation and echoed by the service, although for some use cases, such as subscription- or event-based scenarios, it may provide an indication of the cause for the response.", 0, java.lang.Integer.MAX_VALUE, reason));
         childrenList.add(new Property("note", "Annotation", "Provides a mechanism to communicate additional information about the response.", 0, java.lang.Integer.MAX_VALUE, note));
@@ -3505,10 +4455,17 @@ public class RequestGroup extends DomainResource {
       @Override
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
-        case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : new Base[] {this.identifier}; // Identifier
+        case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : this.identifier.toArray(new Base[this.identifier.size()]); // Identifier
+        case -1014418093: /*definition*/ return this.definition == null ? new Base[0] : this.definition.toArray(new Base[this.definition.size()]); // Reference
+        case -332612366: /*basedOn*/ return this.basedOn == null ? new Base[0] : this.basedOn.toArray(new Base[this.basedOn.size()]); // Reference
+        case -430332865: /*replaces*/ return this.replaces == null ? new Base[0] : this.replaces.toArray(new Base[this.replaces.size()]); // Reference
+        case -445338488: /*groupIdentifier*/ return this.groupIdentifier == null ? new Base[0] : new Base[] {this.groupIdentifier}; // Identifier
+        case -892481550: /*status*/ return this.status == null ? new Base[0] : new Base[] {this.status}; // Enumeration<RequestStatus>
+        case -1183762788: /*intent*/ return this.intent == null ? new Base[0] : new Base[] {this.intent}; // Enumeration<RequestIntent>
+        case -1165461084: /*priority*/ return this.priority == null ? new Base[0] : new Base[] {this.priority}; // Enumeration<RequestPriority>
         case -1867885268: /*subject*/ return this.subject == null ? new Base[0] : new Base[] {this.subject}; // Reference
         case 951530927: /*context*/ return this.context == null ? new Base[0] : new Base[] {this.context}; // Reference
-        case -298443636: /*occurrenceDateTime*/ return this.occurrenceDateTime == null ? new Base[0] : new Base[] {this.occurrenceDateTime}; // DateTimeType
+        case -1500852503: /*authoredOn*/ return this.authoredOn == null ? new Base[0] : new Base[] {this.authoredOn}; // DateTimeType
         case -1406328437: /*author*/ return this.author == null ? new Base[0] : new Base[] {this.author}; // Reference
         case -934964668: /*reason*/ return this.reason == null ? new Base[0] : new Base[] {this.reason}; // Type
         case 3387378: /*note*/ return this.note == null ? new Base[0] : this.note.toArray(new Base[this.note.size()]); // Annotation
@@ -3522,7 +4479,31 @@ public class RequestGroup extends DomainResource {
       public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case -1618432855: // identifier
-          this.identifier = castToIdentifier(value); // Identifier
+          this.getIdentifier().add(castToIdentifier(value)); // Identifier
+          return value;
+        case -1014418093: // definition
+          this.getDefinition().add(castToReference(value)); // Reference
+          return value;
+        case -332612366: // basedOn
+          this.getBasedOn().add(castToReference(value)); // Reference
+          return value;
+        case -430332865: // replaces
+          this.getReplaces().add(castToReference(value)); // Reference
+          return value;
+        case -445338488: // groupIdentifier
+          this.groupIdentifier = castToIdentifier(value); // Identifier
+          return value;
+        case -892481550: // status
+          value = new RequestStatusEnumFactory().fromType(castToCode(value));
+          this.status = (Enumeration) value; // Enumeration<RequestStatus>
+          return value;
+        case -1183762788: // intent
+          value = new RequestIntentEnumFactory().fromType(castToCode(value));
+          this.intent = (Enumeration) value; // Enumeration<RequestIntent>
+          return value;
+        case -1165461084: // priority
+          value = new RequestPriorityEnumFactory().fromType(castToCode(value));
+          this.priority = (Enumeration) value; // Enumeration<RequestPriority>
           return value;
         case -1867885268: // subject
           this.subject = castToReference(value); // Reference
@@ -3530,8 +4511,8 @@ public class RequestGroup extends DomainResource {
         case 951530927: // context
           this.context = castToReference(value); // Reference
           return value;
-        case -298443636: // occurrenceDateTime
-          this.occurrenceDateTime = castToDateTime(value); // DateTimeType
+        case -1500852503: // authoredOn
+          this.authoredOn = castToDateTime(value); // DateTimeType
           return value;
         case -1406328437: // author
           this.author = castToReference(value); // Reference
@@ -3553,13 +4534,30 @@ public class RequestGroup extends DomainResource {
       @Override
       public Base setProperty(String name, Base value) throws FHIRException {
         if (name.equals("identifier")) {
-          this.identifier = castToIdentifier(value); // Identifier
+          this.getIdentifier().add(castToIdentifier(value));
+        } else if (name.equals("definition")) {
+          this.getDefinition().add(castToReference(value));
+        } else if (name.equals("basedOn")) {
+          this.getBasedOn().add(castToReference(value));
+        } else if (name.equals("replaces")) {
+          this.getReplaces().add(castToReference(value));
+        } else if (name.equals("groupIdentifier")) {
+          this.groupIdentifier = castToIdentifier(value); // Identifier
+        } else if (name.equals("status")) {
+          value = new RequestStatusEnumFactory().fromType(castToCode(value));
+          this.status = (Enumeration) value; // Enumeration<RequestStatus>
+        } else if (name.equals("intent")) {
+          value = new RequestIntentEnumFactory().fromType(castToCode(value));
+          this.intent = (Enumeration) value; // Enumeration<RequestIntent>
+        } else if (name.equals("priority")) {
+          value = new RequestPriorityEnumFactory().fromType(castToCode(value));
+          this.priority = (Enumeration) value; // Enumeration<RequestPriority>
         } else if (name.equals("subject")) {
           this.subject = castToReference(value); // Reference
         } else if (name.equals("context")) {
           this.context = castToReference(value); // Reference
-        } else if (name.equals("occurrenceDateTime")) {
-          this.occurrenceDateTime = castToDateTime(value); // DateTimeType
+        } else if (name.equals("authoredOn")) {
+          this.authoredOn = castToDateTime(value); // DateTimeType
         } else if (name.equals("author")) {
           this.author = castToReference(value); // Reference
         } else if (name.equals("reason[x]")) {
@@ -3576,10 +4574,17 @@ public class RequestGroup extends DomainResource {
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case -1618432855:  return getIdentifier(); 
+        case -1618432855:  return addIdentifier(); 
+        case -1014418093:  return addDefinition(); 
+        case -332612366:  return addBasedOn(); 
+        case -430332865:  return addReplaces(); 
+        case -445338488:  return getGroupIdentifier(); 
+        case -892481550:  return getStatusElement();
+        case -1183762788:  return getIntentElement();
+        case -1165461084:  return getPriorityElement();
         case -1867885268:  return getSubject(); 
         case 951530927:  return getContext(); 
-        case -298443636:  return getOccurrenceDateTimeElement();
+        case -1500852503:  return getAuthoredOnElement();
         case -1406328437:  return getAuthor(); 
         case -669418564:  return getReason(); 
         case -934964668:  return getReason(); 
@@ -3594,9 +4599,16 @@ public class RequestGroup extends DomainResource {
       public String[] getTypesForProperty(int hash, String name) throws FHIRException {
         switch (hash) {
         case -1618432855: /*identifier*/ return new String[] {"Identifier"};
+        case -1014418093: /*definition*/ return new String[] {"Reference"};
+        case -332612366: /*basedOn*/ return new String[] {"Reference"};
+        case -430332865: /*replaces*/ return new String[] {"Reference"};
+        case -445338488: /*groupIdentifier*/ return new String[] {"Identifier"};
+        case -892481550: /*status*/ return new String[] {"code"};
+        case -1183762788: /*intent*/ return new String[] {"code"};
+        case -1165461084: /*priority*/ return new String[] {"code"};
         case -1867885268: /*subject*/ return new String[] {"Reference"};
         case 951530927: /*context*/ return new String[] {"Reference"};
-        case -298443636: /*occurrenceDateTime*/ return new String[] {"dateTime"};
+        case -1500852503: /*authoredOn*/ return new String[] {"dateTime"};
         case -1406328437: /*author*/ return new String[] {"Reference"};
         case -934964668: /*reason*/ return new String[] {"CodeableConcept", "Reference"};
         case 3387378: /*note*/ return new String[] {"Annotation"};
@@ -3609,8 +4621,29 @@ public class RequestGroup extends DomainResource {
       @Override
       public Base addChild(String name) throws FHIRException {
         if (name.equals("identifier")) {
-          this.identifier = new Identifier();
-          return this.identifier;
+          return addIdentifier();
+        }
+        else if (name.equals("definition")) {
+          return addDefinition();
+        }
+        else if (name.equals("basedOn")) {
+          return addBasedOn();
+        }
+        else if (name.equals("replaces")) {
+          return addReplaces();
+        }
+        else if (name.equals("groupIdentifier")) {
+          this.groupIdentifier = new Identifier();
+          return this.groupIdentifier;
+        }
+        else if (name.equals("status")) {
+          throw new FHIRException("Cannot call addChild on a primitive type RequestGroup.status");
+        }
+        else if (name.equals("intent")) {
+          throw new FHIRException("Cannot call addChild on a primitive type RequestGroup.intent");
+        }
+        else if (name.equals("priority")) {
+          throw new FHIRException("Cannot call addChild on a primitive type RequestGroup.priority");
         }
         else if (name.equals("subject")) {
           this.subject = new Reference();
@@ -3620,8 +4653,8 @@ public class RequestGroup extends DomainResource {
           this.context = new Reference();
           return this.context;
         }
-        else if (name.equals("occurrenceDateTime")) {
-          throw new FHIRException("Cannot call addChild on a primitive type RequestGroup.occurrenceDateTime");
+        else if (name.equals("authoredOn")) {
+          throw new FHIRException("Cannot call addChild on a primitive type RequestGroup.authoredOn");
         }
         else if (name.equals("author")) {
           this.author = new Reference();
@@ -3653,10 +4686,33 @@ public class RequestGroup extends DomainResource {
       public RequestGroup copy() {
         RequestGroup dst = new RequestGroup();
         copyValues(dst);
-        dst.identifier = identifier == null ? null : identifier.copy();
+        if (identifier != null) {
+          dst.identifier = new ArrayList<Identifier>();
+          for (Identifier i : identifier)
+            dst.identifier.add(i.copy());
+        };
+        if (definition != null) {
+          dst.definition = new ArrayList<Reference>();
+          for (Reference i : definition)
+            dst.definition.add(i.copy());
+        };
+        if (basedOn != null) {
+          dst.basedOn = new ArrayList<Reference>();
+          for (Reference i : basedOn)
+            dst.basedOn.add(i.copy());
+        };
+        if (replaces != null) {
+          dst.replaces = new ArrayList<Reference>();
+          for (Reference i : replaces)
+            dst.replaces.add(i.copy());
+        };
+        dst.groupIdentifier = groupIdentifier == null ? null : groupIdentifier.copy();
+        dst.status = status == null ? null : status.copy();
+        dst.intent = intent == null ? null : intent.copy();
+        dst.priority = priority == null ? null : priority.copy();
         dst.subject = subject == null ? null : subject.copy();
         dst.context = context == null ? null : context.copy();
-        dst.occurrenceDateTime = occurrenceDateTime == null ? null : occurrenceDateTime.copy();
+        dst.authoredOn = authoredOn == null ? null : authoredOn.copy();
         dst.author = author == null ? null : author.copy();
         dst.reason = reason == null ? null : reason.copy();
         if (note != null) {
@@ -3683,10 +4739,12 @@ public class RequestGroup extends DomainResource {
         if (!(other instanceof RequestGroup))
           return false;
         RequestGroup o = (RequestGroup) other;
-        return compareDeep(identifier, o.identifier, true) && compareDeep(subject, o.subject, true) && compareDeep(context, o.context, true)
-           && compareDeep(occurrenceDateTime, o.occurrenceDateTime, true) && compareDeep(author, o.author, true)
-           && compareDeep(reason, o.reason, true) && compareDeep(note, o.note, true) && compareDeep(action, o.action, true)
-          ;
+        return compareDeep(identifier, o.identifier, true) && compareDeep(definition, o.definition, true)
+           && compareDeep(basedOn, o.basedOn, true) && compareDeep(replaces, o.replaces, true) && compareDeep(groupIdentifier, o.groupIdentifier, true)
+           && compareDeep(status, o.status, true) && compareDeep(intent, o.intent, true) && compareDeep(priority, o.priority, true)
+           && compareDeep(subject, o.subject, true) && compareDeep(context, o.context, true) && compareDeep(authoredOn, o.authoredOn, true)
+           && compareDeep(author, o.author, true) && compareDeep(reason, o.reason, true) && compareDeep(note, o.note, true)
+           && compareDeep(action, o.action, true);
       }
 
       @Override
@@ -3696,18 +4754,40 @@ public class RequestGroup extends DomainResource {
         if (!(other instanceof RequestGroup))
           return false;
         RequestGroup o = (RequestGroup) other;
-        return compareValues(occurrenceDateTime, o.occurrenceDateTime, true);
+        return compareValues(status, o.status, true) && compareValues(intent, o.intent, true) && compareValues(priority, o.priority, true)
+           && compareValues(authoredOn, o.authoredOn, true);
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, subject, context
-          , occurrenceDateTime, author, reason, note, action);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, definition, basedOn
+          , replaces, groupIdentifier, status, intent, priority, subject, context, authoredOn
+          , author, reason, note, action);
       }
 
   @Override
   public ResourceType getResourceType() {
     return ResourceType.RequestGroup;
    }
+
+ /**
+   * Search parameter: <b>authored</b>
+   * <p>
+   * Description: <b>The date the request group was authored</b><br>
+   * Type: <b>date</b><br>
+   * Path: <b>RequestGroup.authoredOn</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="authored", path="RequestGroup.authoredOn", description="The date the request group was authored", type="date" )
+  public static final String SP_AUTHORED = "authored";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>authored</b>
+   * <p>
+   * Description: <b>The date the request group was authored</b><br>
+   * Type: <b>date</b><br>
+   * Path: <b>RequestGroup.authoredOn</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.DateClientParam AUTHORED = new ca.uhn.fhir.rest.gclient.DateClientParam(SP_AUTHORED);
 
  /**
    * Search parameter: <b>identifier</b>
@@ -3728,32 +4808,6 @@ public class RequestGroup extends DomainResource {
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.TokenClientParam IDENTIFIER = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_IDENTIFIER);
-
- /**
-   * Search parameter: <b>patient</b>
-   * <p>
-   * Description: <b>The identity of a patient to search for request groups</b><br>
-   * Type: <b>reference</b><br>
-   * Path: <b>RequestGroup.subject</b><br>
-   * </p>
-   */
-  @SearchParamDefinition(name="patient", path="RequestGroup.subject", description="The identity of a patient to search for request groups", type="reference", target={Patient.class } )
-  public static final String SP_PATIENT = "patient";
- /**
-   * <b>Fluent Client</b> search parameter constant for <b>patient</b>
-   * <p>
-   * Description: <b>The identity of a patient to search for request groups</b><br>
-   * Type: <b>reference</b><br>
-   * Path: <b>RequestGroup.subject</b><br>
-   * </p>
-   */
-  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam PATIENT = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_PATIENT);
-
-/**
-   * Constant for fluent queries to be used to add include statements. Specifies
-   * the path value of "<b>RequestGroup:patient</b>".
-   */
-  public static final ca.uhn.fhir.model.api.Include INCLUDE_PATIENT = new ca.uhn.fhir.model.api.Include("RequestGroup:patient").toLocked();
 
  /**
    * Search parameter: <b>subject</b>
@@ -3808,32 +4862,6 @@ public class RequestGroup extends DomainResource {
   public static final ca.uhn.fhir.model.api.Include INCLUDE_AUTHOR = new ca.uhn.fhir.model.api.Include("RequestGroup:author").toLocked();
 
  /**
-   * Search parameter: <b>context</b>
-   * <p>
-   * Description: <b>The context the request group applies to</b><br>
-   * Type: <b>reference</b><br>
-   * Path: <b>RequestGroup.context</b><br>
-   * </p>
-   */
-  @SearchParamDefinition(name="context", path="RequestGroup.context", description="The context the request group applies to", type="reference", target={Encounter.class, EpisodeOfCare.class } )
-  public static final String SP_CONTEXT = "context";
- /**
-   * <b>Fluent Client</b> search parameter constant for <b>context</b>
-   * <p>
-   * Description: <b>The context the request group applies to</b><br>
-   * Type: <b>reference</b><br>
-   * Path: <b>RequestGroup.context</b><br>
-   * </p>
-   */
-  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam CONTEXT = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_CONTEXT);
-
-/**
-   * Constant for fluent queries to be used to add include statements. Specifies
-   * the path value of "<b>RequestGroup:context</b>".
-   */
-  public static final ca.uhn.fhir.model.api.Include INCLUDE_CONTEXT = new ca.uhn.fhir.model.api.Include("RequestGroup:context").toLocked();
-
- /**
    * Search parameter: <b>encounter</b>
    * <p>
    * Description: <b>The encounter the request group applies to</b><br>
@@ -3860,6 +4888,46 @@ public class RequestGroup extends DomainResource {
   public static final ca.uhn.fhir.model.api.Include INCLUDE_ENCOUNTER = new ca.uhn.fhir.model.api.Include("RequestGroup:encounter").toLocked();
 
  /**
+   * Search parameter: <b>priority</b>
+   * <p>
+   * Description: <b>The priority of the request group</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>RequestGroup.priority</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="priority", path="RequestGroup.priority", description="The priority of the request group", type="token" )
+  public static final String SP_PRIORITY = "priority";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>priority</b>
+   * <p>
+   * Description: <b>The priority of the request group</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>RequestGroup.priority</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam PRIORITY = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_PRIORITY);
+
+ /**
+   * Search parameter: <b>intent</b>
+   * <p>
+   * Description: <b>The intent of the request group</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>RequestGroup.intent</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="intent", path="RequestGroup.intent", description="The intent of the request group", type="token" )
+  public static final String SP_INTENT = "intent";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>intent</b>
+   * <p>
+   * Description: <b>The intent of the request group</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>RequestGroup.intent</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam INTENT = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_INTENT);
+
+ /**
    * Search parameter: <b>participant</b>
    * <p>
    * Description: <b>The participant in the requests in the group</b><br>
@@ -3884,6 +4952,124 @@ public class RequestGroup extends DomainResource {
    * the path value of "<b>RequestGroup:participant</b>".
    */
   public static final ca.uhn.fhir.model.api.Include INCLUDE_PARTICIPANT = new ca.uhn.fhir.model.api.Include("RequestGroup:participant").toLocked();
+
+ /**
+   * Search parameter: <b>group-identifier</b>
+   * <p>
+   * Description: <b>The group identifier for the request group</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>RequestGroup.groupIdentifier</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="group-identifier", path="RequestGroup.groupIdentifier", description="The group identifier for the request group", type="token" )
+  public static final String SP_GROUP_IDENTIFIER = "group-identifier";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>group-identifier</b>
+   * <p>
+   * Description: <b>The group identifier for the request group</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>RequestGroup.groupIdentifier</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam GROUP_IDENTIFIER = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_GROUP_IDENTIFIER);
+
+ /**
+   * Search parameter: <b>patient</b>
+   * <p>
+   * Description: <b>The identity of a patient to search for request groups</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>RequestGroup.subject</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="patient", path="RequestGroup.subject", description="The identity of a patient to search for request groups", type="reference", target={Patient.class } )
+  public static final String SP_PATIENT = "patient";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>patient</b>
+   * <p>
+   * Description: <b>The identity of a patient to search for request groups</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>RequestGroup.subject</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam PATIENT = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_PATIENT);
+
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>RequestGroup:patient</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_PATIENT = new ca.uhn.fhir.model.api.Include("RequestGroup:patient").toLocked();
+
+ /**
+   * Search parameter: <b>context</b>
+   * <p>
+   * Description: <b>The context the request group applies to</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>RequestGroup.context</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="context", path="RequestGroup.context", description="The context the request group applies to", type="reference", target={Encounter.class, EpisodeOfCare.class } )
+  public static final String SP_CONTEXT = "context";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>context</b>
+   * <p>
+   * Description: <b>The context the request group applies to</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>RequestGroup.context</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam CONTEXT = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_CONTEXT);
+
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>RequestGroup:context</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_CONTEXT = new ca.uhn.fhir.model.api.Include("RequestGroup:context").toLocked();
+
+ /**
+   * Search parameter: <b>definition</b>
+   * <p>
+   * Description: <b>The definition from which the request group is realized</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>RequestGroup.definition</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="definition", path="RequestGroup.definition", description="The definition from which the request group is realized", type="reference" )
+  public static final String SP_DEFINITION = "definition";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>definition</b>
+   * <p>
+   * Description: <b>The definition from which the request group is realized</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>RequestGroup.definition</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam DEFINITION = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_DEFINITION);
+
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>RequestGroup:definition</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_DEFINITION = new ca.uhn.fhir.model.api.Include("RequestGroup:definition").toLocked();
+
+ /**
+   * Search parameter: <b>status</b>
+   * <p>
+   * Description: <b>The status of the request group</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>RequestGroup.status</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="status", path="RequestGroup.status", description="The status of the request group", type="token" )
+  public static final String SP_STATUS = "status";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>status</b>
+   * <p>
+   * Description: <b>The status of the request group</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>RequestGroup.status</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam STATUS = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_STATUS);
 
 
 }

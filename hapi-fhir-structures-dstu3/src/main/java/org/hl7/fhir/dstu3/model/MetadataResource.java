@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
+// Generated on Mon, Apr 17, 2017 17:38-0400 for FHIR v3.0.1
 
 import java.util.*;
 
@@ -49,60 +49,60 @@ import org.hl7.fhir.exceptions.FHIRException;
 public abstract class MetadataResource extends DomainResource {
 
     /**
-     * An absolute URL that is used to identify this metadata resource when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this metadata resource is (or will be) published. The URL SHOULD include the major version of the metadata resource. For more information see [Technical and Business Versions](resource.html#versions).
+     * An absolute URI that is used to identify this metadata resource when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this metadata resource is (or will be) published. The URL SHOULD include the major version of the metadata resource. For more information see [Technical and Business Versions](resource.html#versions).
      */
     @Child(name = "url", type = {UriType.class}, order=0, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Logical uri to reference this metadata resource (globally unique)", formalDefinition="An absolute URL that is used to identify this metadata resource when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this metadata resource is (or will be) published. The URL SHOULD include the major version of the metadata resource. For more information see [Technical and Business Versions](resource.html#versions)." )
+    @Description(shortDefinition="Logical URI to reference this metadata resource (globally unique)", formalDefinition="An absolute URI that is used to identify this metadata resource when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this metadata resource is (or will be) published. The URL SHOULD include the major version of the metadata resource. For more information see [Technical and Business Versions](resource.html#versions)." )
     protected UriType url;
 
     /**
-     * The identifier that is used to identify this version of the metadata resource when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the metadata resource author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions are orderable.
+     * The identifier that is used to identify this version of the metadata resource when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the metadata resource author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions can be placed in a lexicographical sequence.
      */
     @Child(name = "version", type = {StringType.class}, order=1, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Business version of the metadata resource", formalDefinition="The identifier that is used to identify this version of the metadata resource when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the metadata resource author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions are orderable." )
+    @Description(shortDefinition="Business version of the metadata resource", formalDefinition="The identifier that is used to identify this version of the metadata resource when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the metadata resource author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions can be placed in a lexicographical sequence." )
     protected StringType version;
 
     /**
      * A natural language name identifying the metadata resource. This name should be usable as an identifier for the module by machine processing applications such as code generation.
      */
     @Child(name = "name", type = {StringType.class}, order=2, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Name for this metadata resource (Computer friendly)", formalDefinition="A natural language name identifying the metadata resource. This name should be usable as an identifier for the module by machine processing applications such as code generation." )
+    @Description(shortDefinition="Name for this metadata resource (computer friendly)", formalDefinition="A natural language name identifying the metadata resource. This name should be usable as an identifier for the module by machine processing applications such as code generation." )
     protected StringType name;
 
     /**
      * A short, descriptive, user-friendly title for the metadata resource.
      */
     @Child(name = "title", type = {StringType.class}, order=3, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Name for this metadata resource (Human friendly)", formalDefinition="A short, descriptive, user-friendly title for the metadata resource." )
+    @Description(shortDefinition="Name for this metadata resource (human friendly)", formalDefinition="A short, descriptive, user-friendly title for the metadata resource." )
     protected StringType title;
 
     /**
      * The status of this metadata resource. Enables tracking the life-cycle of the content.
      */
     @Child(name = "status", type = {CodeType.class}, order=4, min=1, max=1, modifier=true, summary=true)
-    @Description(shortDefinition="draft | active | retired", formalDefinition="The status of this metadata resource. Enables tracking the life-cycle of the content." )
+    @Description(shortDefinition="draft | active | retired | unknown", formalDefinition="The status of this metadata resource. Enables tracking the life-cycle of the content." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/publication-status")
     protected Enumeration<PublicationStatus> status;
 
     /**
-     * A flag to indicate that this metadata resource is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.
+     * A boolean value to indicate that this metadata resource is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.
      */
     @Child(name = "experimental", type = {BooleanType.class}, order=5, min=0, max=1, modifier=true, summary=true)
-    @Description(shortDefinition="If for testing purposes, not real usage", formalDefinition="A flag to indicate that this metadata resource is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage." )
+    @Description(shortDefinition="For testing purposes, not real usage", formalDefinition="A boolean value to indicate that this metadata resource is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage." )
     protected BooleanType experimental;
 
     /**
-     * The date  (and optionally time) when the metadata resource was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the metadata resource changes.
+     * The date  (and optionally time) when the metadata resource was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the metadata resource changes.
      */
     @Child(name = "date", type = {DateTimeType.class}, order=6, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Date this was last changed", formalDefinition="The date  (and optionally time) when the metadata resource was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the metadata resource changes." )
+    @Description(shortDefinition="Date this was last changed", formalDefinition="The date  (and optionally time) when the metadata resource was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the metadata resource changes." )
     protected DateTimeType date;
 
     /**
      * The name of the individual or organization that published the metadata resource.
      */
     @Child(name = "publisher", type = {StringType.class}, order=7, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Name of the publisher (Organization or individual)", formalDefinition="The name of the individual or organization that published the metadata resource." )
+    @Description(shortDefinition="Name of the publisher (organization or individual)", formalDefinition="The name of the individual or organization that published the metadata resource." )
     protected StringType publisher;
 
     /**
@@ -113,25 +113,25 @@ public abstract class MetadataResource extends DomainResource {
     protected List<ContactDetail> contact;
 
     /**
-     * The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching of code system definitions.
+     * The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching for appropriate metadata resource instances.
      */
     @Child(name = "useContext", type = {UsageContext.class}, order=9, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-    @Description(shortDefinition="Content intends to support these contexts", formalDefinition="The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching of code system definitions." )
+    @Description(shortDefinition="Context the content is intended to support", formalDefinition="The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching for appropriate metadata resource instances." )
     protected List<UsageContext> useContext;
 
     /**
-     * A jurisdiction in which the metadata resource is intended to be used.
+     * A legal or geographic region in which the metadata resource is intended to be used.
      */
     @Child(name = "jurisdiction", type = {CodeableConcept.class}, order=10, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-    @Description(shortDefinition="Intended jurisdiction for metadata resource (if applicable)", formalDefinition="A jurisdiction in which the metadata resource is intended to be used." )
+    @Description(shortDefinition="Intended jurisdiction for metadata resource (if applicable)", formalDefinition="A legal or geographic region in which the metadata resource is intended to be used." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/jurisdiction")
     protected List<CodeableConcept> jurisdiction;
 
     /**
-     * A free text natural language description of the metadata resource from the consumer's perspective.
+     * A free text natural language description of the metadata resource from a consumer's perspective.
      */
     @Child(name = "description", type = {MarkdownType.class}, order=11, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Natural language description of the metadata resource", formalDefinition="A free text natural language description of the metadata resource from the consumer's perspective." )
+    @Description(shortDefinition="Natural language description of the metadata resource", formalDefinition="A free text natural language description of the metadata resource from a consumer's perspective." )
     protected MarkdownType description;
 
     private static final long serialVersionUID = 145908634L;
@@ -152,7 +152,7 @@ public abstract class MetadataResource extends DomainResource {
     }
 
     /**
-     * @return {@link #url} (An absolute URL that is used to identify this metadata resource when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this metadata resource is (or will be) published. The URL SHOULD include the major version of the metadata resource. For more information see [Technical and Business Versions](resource.html#versions).). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
+     * @return {@link #url} (An absolute URI that is used to identify this metadata resource when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this metadata resource is (or will be) published. The URL SHOULD include the major version of the metadata resource. For more information see [Technical and Business Versions](resource.html#versions).). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
      */
     public UriType getUrlElement() { 
       if (this.url == null)
@@ -172,7 +172,7 @@ public abstract class MetadataResource extends DomainResource {
     }
 
     /**
-     * @param value {@link #url} (An absolute URL that is used to identify this metadata resource when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this metadata resource is (or will be) published. The URL SHOULD include the major version of the metadata resource. For more information see [Technical and Business Versions](resource.html#versions).). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
+     * @param value {@link #url} (An absolute URI that is used to identify this metadata resource when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this metadata resource is (or will be) published. The URL SHOULD include the major version of the metadata resource. For more information see [Technical and Business Versions](resource.html#versions).). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
      */
     public MetadataResource setUrlElement(UriType value) { 
       this.url = value;
@@ -180,14 +180,14 @@ public abstract class MetadataResource extends DomainResource {
     }
 
     /**
-     * @return An absolute URL that is used to identify this metadata resource when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this metadata resource is (or will be) published. The URL SHOULD include the major version of the metadata resource. For more information see [Technical and Business Versions](resource.html#versions).
+     * @return An absolute URI that is used to identify this metadata resource when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this metadata resource is (or will be) published. The URL SHOULD include the major version of the metadata resource. For more information see [Technical and Business Versions](resource.html#versions).
      */
     public String getUrl() { 
       return this.url == null ? null : this.url.getValue();
     }
 
     /**
-     * @param value An absolute URL that is used to identify this metadata resource when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this metadata resource is (or will be) published. The URL SHOULD include the major version of the metadata resource. For more information see [Technical and Business Versions](resource.html#versions).
+     * @param value An absolute URI that is used to identify this metadata resource when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this metadata resource is (or will be) published. The URL SHOULD include the major version of the metadata resource. For more information see [Technical and Business Versions](resource.html#versions).
      */
     public MetadataResource setUrl(String value) { 
       if (Utilities.noString(value))
@@ -201,7 +201,7 @@ public abstract class MetadataResource extends DomainResource {
     }
 
     /**
-     * @return {@link #version} (The identifier that is used to identify this version of the metadata resource when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the metadata resource author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions are orderable.). This is the underlying object with id, value and extensions. The accessor "getVersion" gives direct access to the value
+     * @return {@link #version} (The identifier that is used to identify this version of the metadata resource when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the metadata resource author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions can be placed in a lexicographical sequence.). This is the underlying object with id, value and extensions. The accessor "getVersion" gives direct access to the value
      */
     public StringType getVersionElement() { 
       if (this.version == null)
@@ -221,7 +221,7 @@ public abstract class MetadataResource extends DomainResource {
     }
 
     /**
-     * @param value {@link #version} (The identifier that is used to identify this version of the metadata resource when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the metadata resource author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions are orderable.). This is the underlying object with id, value and extensions. The accessor "getVersion" gives direct access to the value
+     * @param value {@link #version} (The identifier that is used to identify this version of the metadata resource when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the metadata resource author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions can be placed in a lexicographical sequence.). This is the underlying object with id, value and extensions. The accessor "getVersion" gives direct access to the value
      */
     public MetadataResource setVersionElement(StringType value) { 
       this.version = value;
@@ -229,14 +229,14 @@ public abstract class MetadataResource extends DomainResource {
     }
 
     /**
-     * @return The identifier that is used to identify this version of the metadata resource when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the metadata resource author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions are orderable.
+     * @return The identifier that is used to identify this version of the metadata resource when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the metadata resource author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions can be placed in a lexicographical sequence.
      */
     public String getVersion() { 
       return this.version == null ? null : this.version.getValue();
     }
 
     /**
-     * @param value The identifier that is used to identify this version of the metadata resource when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the metadata resource author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions are orderable.
+     * @param value The identifier that is used to identify this version of the metadata resource when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the metadata resource author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions can be placed in a lexicographical sequence.
      */
     public MetadataResource setVersion(String value) { 
       if (Utilities.noString(value))
@@ -393,7 +393,7 @@ public abstract class MetadataResource extends DomainResource {
     }
 
     /**
-     * @return {@link #experimental} (A flag to indicate that this metadata resource is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.). This is the underlying object with id, value and extensions. The accessor "getExperimental" gives direct access to the value
+     * @return {@link #experimental} (A boolean value to indicate that this metadata resource is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.). This is the underlying object with id, value and extensions. The accessor "getExperimental" gives direct access to the value
      */
     public BooleanType getExperimentalElement() { 
       if (this.experimental == null)
@@ -413,7 +413,7 @@ public abstract class MetadataResource extends DomainResource {
     }
 
     /**
-     * @param value {@link #experimental} (A flag to indicate that this metadata resource is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.). This is the underlying object with id, value and extensions. The accessor "getExperimental" gives direct access to the value
+     * @param value {@link #experimental} (A boolean value to indicate that this metadata resource is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.). This is the underlying object with id, value and extensions. The accessor "getExperimental" gives direct access to the value
      */
     public MetadataResource setExperimentalElement(BooleanType value) { 
       this.experimental = value;
@@ -421,14 +421,14 @@ public abstract class MetadataResource extends DomainResource {
     }
 
     /**
-     * @return A flag to indicate that this metadata resource is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.
+     * @return A boolean value to indicate that this metadata resource is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.
      */
     public boolean getExperimental() { 
       return this.experimental == null || this.experimental.isEmpty() ? false : this.experimental.getValue();
     }
 
     /**
-     * @param value A flag to indicate that this metadata resource is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.
+     * @param value A boolean value to indicate that this metadata resource is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.
      */
     public MetadataResource setExperimental(boolean value) { 
         if (this.experimental == null)
@@ -438,7 +438,7 @@ public abstract class MetadataResource extends DomainResource {
     }
 
     /**
-     * @return {@link #date} (The date  (and optionally time) when the metadata resource was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the metadata resource changes.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
+     * @return {@link #date} (The date  (and optionally time) when the metadata resource was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the metadata resource changes.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
      */
     public DateTimeType getDateElement() { 
       if (this.date == null)
@@ -458,7 +458,7 @@ public abstract class MetadataResource extends DomainResource {
     }
 
     /**
-     * @param value {@link #date} (The date  (and optionally time) when the metadata resource was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the metadata resource changes.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
+     * @param value {@link #date} (The date  (and optionally time) when the metadata resource was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the metadata resource changes.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
      */
     public MetadataResource setDateElement(DateTimeType value) { 
       this.date = value;
@@ -466,14 +466,14 @@ public abstract class MetadataResource extends DomainResource {
     }
 
     /**
-     * @return The date  (and optionally time) when the metadata resource was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the metadata resource changes.
+     * @return The date  (and optionally time) when the metadata resource was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the metadata resource changes.
      */
     public Date getDate() { 
       return this.date == null ? null : this.date.getValue();
     }
 
     /**
-     * @param value The date  (and optionally time) when the metadata resource was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the metadata resource changes.
+     * @param value The date  (and optionally time) when the metadata resource was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the metadata resource changes.
      */
     public MetadataResource setDate(Date value) { 
       if (value == null)
@@ -589,7 +589,7 @@ public abstract class MetadataResource extends DomainResource {
     }
 
     /**
-     * @return {@link #useContext} (The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching of code system definitions.)
+     * @return {@link #useContext} (The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching for appropriate metadata resource instances.)
      */
     public List<UsageContext> getUseContext() { 
       if (this.useContext == null)
@@ -642,7 +642,7 @@ public abstract class MetadataResource extends DomainResource {
     }
 
     /**
-     * @return {@link #jurisdiction} (A jurisdiction in which the metadata resource is intended to be used.)
+     * @return {@link #jurisdiction} (A legal or geographic region in which the metadata resource is intended to be used.)
      */
     public List<CodeableConcept> getJurisdiction() { 
       if (this.jurisdiction == null)
@@ -695,7 +695,7 @@ public abstract class MetadataResource extends DomainResource {
     }
 
     /**
-     * @return {@link #description} (A free text natural language description of the metadata resource from the consumer's perspective.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
+     * @return {@link #description} (A free text natural language description of the metadata resource from a consumer's perspective.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
      */
     public MarkdownType getDescriptionElement() { 
       if (this.description == null)
@@ -715,7 +715,7 @@ public abstract class MetadataResource extends DomainResource {
     }
 
     /**
-     * @param value {@link #description} (A free text natural language description of the metadata resource from the consumer's perspective.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
+     * @param value {@link #description} (A free text natural language description of the metadata resource from a consumer's perspective.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
      */
     public MetadataResource setDescriptionElement(MarkdownType value) { 
       this.description = value;
@@ -723,14 +723,14 @@ public abstract class MetadataResource extends DomainResource {
     }
 
     /**
-     * @return A free text natural language description of the metadata resource from the consumer's perspective.
+     * @return A free text natural language description of the metadata resource from a consumer's perspective.
      */
     public String getDescription() { 
       return this.description == null ? null : this.description.getValue();
     }
 
     /**
-     * @param value A free text natural language description of the metadata resource from the consumer's perspective.
+     * @param value A free text natural language description of the metadata resource from a consumer's perspective.
      */
     public MetadataResource setDescription(String value) { 
       if (value == null)
@@ -744,18 +744,18 @@ public abstract class MetadataResource extends DomainResource {
     }
 
       protected void listChildren(List<Property> childrenList) {
-        childrenList.add(new Property("url", "uri", "An absolute URL that is used to identify this metadata resource when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this metadata resource is (or will be) published. The URL SHOULD include the major version of the metadata resource. For more information see [Technical and Business Versions](resource.html#versions).", 0, java.lang.Integer.MAX_VALUE, url));
-        childrenList.add(new Property("version", "string", "The identifier that is used to identify this version of the metadata resource when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the metadata resource author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions are orderable.", 0, java.lang.Integer.MAX_VALUE, version));
+        childrenList.add(new Property("url", "uri", "An absolute URI that is used to identify this metadata resource when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this metadata resource is (or will be) published. The URL SHOULD include the major version of the metadata resource. For more information see [Technical and Business Versions](resource.html#versions).", 0, java.lang.Integer.MAX_VALUE, url));
+        childrenList.add(new Property("version", "string", "The identifier that is used to identify this version of the metadata resource when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the metadata resource author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions can be placed in a lexicographical sequence.", 0, java.lang.Integer.MAX_VALUE, version));
         childrenList.add(new Property("name", "string", "A natural language name identifying the metadata resource. This name should be usable as an identifier for the module by machine processing applications such as code generation.", 0, java.lang.Integer.MAX_VALUE, name));
         childrenList.add(new Property("title", "string", "A short, descriptive, user-friendly title for the metadata resource.", 0, java.lang.Integer.MAX_VALUE, title));
         childrenList.add(new Property("status", "code", "The status of this metadata resource. Enables tracking the life-cycle of the content.", 0, java.lang.Integer.MAX_VALUE, status));
-        childrenList.add(new Property("experimental", "boolean", "A flag to indicate that this metadata resource is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.", 0, java.lang.Integer.MAX_VALUE, experimental));
-        childrenList.add(new Property("date", "dateTime", "The date  (and optionally time) when the metadata resource was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the metadata resource changes.", 0, java.lang.Integer.MAX_VALUE, date));
+        childrenList.add(new Property("experimental", "boolean", "A boolean value to indicate that this metadata resource is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.", 0, java.lang.Integer.MAX_VALUE, experimental));
+        childrenList.add(new Property("date", "dateTime", "The date  (and optionally time) when the metadata resource was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the metadata resource changes.", 0, java.lang.Integer.MAX_VALUE, date));
         childrenList.add(new Property("publisher", "string", "The name of the individual or organization that published the metadata resource.", 0, java.lang.Integer.MAX_VALUE, publisher));
         childrenList.add(new Property("contact", "ContactDetail", "Contact details to assist a user in finding and communicating with the publisher.", 0, java.lang.Integer.MAX_VALUE, contact));
-        childrenList.add(new Property("useContext", "UsageContext", "The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching of code system definitions.", 0, java.lang.Integer.MAX_VALUE, useContext));
-        childrenList.add(new Property("jurisdiction", "CodeableConcept", "A jurisdiction in which the metadata resource is intended to be used.", 0, java.lang.Integer.MAX_VALUE, jurisdiction));
-        childrenList.add(new Property("description", "markdown", "A free text natural language description of the metadata resource from the consumer's perspective.", 0, java.lang.Integer.MAX_VALUE, description));
+        childrenList.add(new Property("useContext", "UsageContext", "The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching for appropriate metadata resource instances.", 0, java.lang.Integer.MAX_VALUE, useContext));
+        childrenList.add(new Property("jurisdiction", "CodeableConcept", "A legal or geographic region in which the metadata resource is intended to be used.", 0, java.lang.Integer.MAX_VALUE, jurisdiction));
+        childrenList.add(new Property("description", "markdown", "A free text natural language description of the metadata resource from a consumer's perspective.", 0, java.lang.Integer.MAX_VALUE, description));
       }
 
       @Override
@@ -1005,6 +1005,13 @@ public abstract class MetadataResource extends DomainResource {
           );
       }
 
+// added from java-adornments.txt:
+      @Override
+      public String toString() {
+        return fhirType()+"["+getUrl()+"]";
+      }
+
+// end addition
 
 }
 

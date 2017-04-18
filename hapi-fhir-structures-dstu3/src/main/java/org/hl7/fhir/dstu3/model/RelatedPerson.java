@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
+// Generated on Mon, Apr 17, 2017 17:38-0400 for FHIR v3.0.1
 
 import java.util.*;
 
@@ -999,17 +999,17 @@ public class RelatedPerson extends DomainResource {
  /**
    * Search parameter: <b>gender</b>
    * <p>
-   * Description: <b>Gender of the person</b><br>
+   * Description: <b>Gender of the related person</b><br>
    * Type: <b>token</b><br>
    * Path: <b>RelatedPerson.gender</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="gender", path="RelatedPerson.gender", description="Gender of the person", type="token" )
+  @SearchParamDefinition(name="gender", path="RelatedPerson.gender", description="Gender of the related person", type="token" )
   public static final String SP_GENDER = "gender";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>gender</b>
    * <p>
-   * Description: <b>Gender of the person</b><br>
+   * Description: <b>Gender of the related person</b><br>
    * Type: <b>token</b><br>
    * Path: <b>RelatedPerson.gender</b><br>
    * </p>
@@ -1019,17 +1019,17 @@ public class RelatedPerson extends DomainResource {
  /**
    * Search parameter: <b>active</b>
    * <p>
-   * Description: <b>Wheter the related person record is active</b><br>
+   * Description: <b>Indicates if the related person record is active</b><br>
    * Type: <b>token</b><br>
    * Path: <b>RelatedPerson.active</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="active", path="RelatedPerson.active", description="Wheter the related person record is active", type="token" )
+  @SearchParamDefinition(name="active", path="RelatedPerson.active", description="Indicates if the related person record is active", type="token" )
   public static final String SP_ACTIVE = "active";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>active</b>
    * <p>
-   * Description: <b>Wheter the related person record is active</b><br>
+   * Description: <b>Indicates if the related person record is active</b><br>
    * Type: <b>token</b><br>
    * Path: <b>RelatedPerson.active</b><br>
    * </p>
@@ -1119,17 +1119,17 @@ public class RelatedPerson extends DomainResource {
  /**
    * Search parameter: <b>patient</b>
    * <p>
-   * Description: <b>The patient this person is related to</b><br>
+   * Description: <b>The patient this related person is related to</b><br>
    * Type: <b>reference</b><br>
    * Path: <b>RelatedPerson.patient</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="RelatedPerson.patient", description="The patient this person is related to", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") }, target={Patient.class } )
+  @SearchParamDefinition(name="patient", path="RelatedPerson.patient", description="The patient this related person is related to", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") }, target={Patient.class } )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>
    * <p>
-   * Description: <b>The patient this person is related to</b><br>
+   * Description: <b>The patient this related person is related to</b><br>
    * Type: <b>reference</b><br>
    * Path: <b>RelatedPerson.patient</b><br>
    * </p>

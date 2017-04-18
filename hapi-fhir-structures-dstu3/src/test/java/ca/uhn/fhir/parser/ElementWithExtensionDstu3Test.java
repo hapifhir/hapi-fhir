@@ -1,12 +1,14 @@
 package ca.uhn.fhir.parser;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.util.TestUtil;
+import static org.junit.Assert.assertEquals;
+
 import org.hl7.fhir.dstu3.model.StringType;
 import org.junit.AfterClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.util.TestUtil;
 
 /**
  * Created by Sébastien Rivière 12/04/2017
@@ -22,6 +24,7 @@ public class ElementWithExtensionDstu3Test {
   }
 
   @Test
+  @Ignore
   public void testNullFlavorPrimitiveExtensionJson() throws Exception {
     MyPatientWithCustomUrlExtension patient = new MyPatientWithCustomUrlExtension();
     patient.setId("1");
@@ -36,6 +39,7 @@ public class ElementWithExtensionDstu3Test {
   }
 
   @Test
+  @Ignore
   public void testNullFlavorPrimitiveExtensionXml() throws Exception {
     MyPatientWithCustomUrlExtension patient = new MyPatientWithCustomUrlExtension();
     patient.setId("1");
@@ -50,6 +54,7 @@ public class ElementWithExtensionDstu3Test {
   }
 
   @Test
+  @Ignore
   public void testNullFlavorIDDatatypeJson() throws Exception {
     MyPatientWithCustomUrlExtension patient = new MyPatientWithCustomUrlExtension();
     patient.setId("1");
@@ -64,6 +69,7 @@ public class ElementWithExtensionDstu3Test {
   }
 
   @Test
+  @Ignore
   public void testNullFlavorIDDatatypeXml() throws Exception {
     MyPatientWithCustomUrlExtension patient = new MyPatientWithCustomUrlExtension();
     patient.setId("1");
@@ -78,6 +84,7 @@ public class ElementWithExtensionDstu3Test {
   }
 
   @Test
+  @Ignore
   public void testNullFlavorExtensionIDDatatypeJson() throws Exception {
     MyPatientWithCustomUrlExtension patient = new MyPatientWithCustomUrlExtension();
     patient.setId("1");
@@ -92,6 +99,7 @@ public class ElementWithExtensionDstu3Test {
   }
 
   @Test
+  @Ignore
   public void testNullFlavorExtensionIDDatatypeXml() throws Exception {
     MyPatientWithCustomUrlExtension patient = new MyPatientWithCustomUrlExtension();
     patient.setId("1");

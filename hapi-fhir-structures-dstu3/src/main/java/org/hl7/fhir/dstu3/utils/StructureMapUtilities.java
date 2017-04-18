@@ -106,6 +106,7 @@ public class StructureMapUtilities {
   }
   public static final String MAP_WHERE_CHECK = "map.where.check";
 	public static final String MAP_WHERE_EXPRESSION = "map.where.expression";
+	public static final String MAP_SEARCH_EXPRESSION = "map.search.expression";
 	public static final String MAP_EXPRESSION = "map.transform.expression";
   private static final boolean RENDER_MULTIPLE_TARGETS_ONELINE = true;
   private static final String AUTO_VAR_NAME = "vvv";
@@ -123,7 +124,7 @@ public class StructureMapUtilities {
 		//    Create an instance tree
 		//    Return the correct string format to refer to a tree (input or output)
     public Base resolveReference(Object appContext, String url);
-
+    public List<Base> performSearch(Object appContext, String url);
 	}
 
 	private class FFHIRPathHostServices implements IEvaluationContext{
@@ -480,7 +481,11 @@ public class StructureMapUtilities {
   
 	private static void renderSource(StringBuilder b, StructureMapGroupRuleSourceComponent rs, boolean abbreviate) {
 		b.append(rs.getContext());
-		if (rs.hasElement()) {
+		if (rs.getContext().equals("@search")) {
+      b.append('(');
+      b.append(rs.getElement());
+      b.append(')');
+		} else if (rs.hasElement()) {
 			b.append('.');
 			b.append(rs.getElement());
 		}
@@ -790,7 +795,7 @@ public class StructureMapUtilities {
 		while (!lexer.hasToken("endgroup")) {
 			if (lexer.done())
 				throw lexer.error("premature termination expecting 'endgroup'");
-			parseRule(group.getRule(), lexer);
+			parseRule(result, group.getRule(), lexer);
 		}
 		lexer.next();
 		lexer.skipComments();
@@ -813,7 +818,7 @@ public class StructureMapUtilities {
 		lexer.skipComments();
 	}
 
-	private void parseRule(List<StructureMapGroupRuleComponent> list, FHIRLexer lexer) throws FHIRException {
+	private void parseRule(StructureMap map, List<StructureMapGroupRuleComponent> list, FHIRLexer lexer) throws FHIRException {
 		StructureMapGroupRuleComponent rule = new StructureMapGroupRuleComponent(); 
 		list.add(rule);
 		rule.setName(lexer.takeDottedToken());
@@ -847,7 +852,7 @@ public class StructureMapUtilities {
 				while (!lexer.hasToken("}")) {
 					if (lexer.done())
 						throw lexer.error("premature termination expecting '}' in nested group");
-					parseRule(rule.getRule(), lexer);
+					parseRule(map, rule.getRule(), lexer);
 				}      
 				lexer.token("}");
 			} else {
@@ -874,7 +879,7 @@ public class StructureMapUtilities {
 	private boolean isSimpleSyntax(StructureMapGroupRuleComponent rule) {
     return 
         (rule.getSource().size() == 1 && rule.getSourceFirstRep().hasContext() && rule.getSourceFirstRep().hasElement() && !rule.getSourceFirstRep().hasVariable()) &&
-        (rule.getTarget().size() == 1 && rule.getTargetFirstRep().hasContext() && rule.getTargetFirstRep().hasElement() && !rule.getTargetFirstRep().hasVariable()) &&
+        (rule.getTarget().size() == 1 && rule.getTargetFirstRep().hasContext() && rule.getTargetFirstRep().hasElement() && !rule.getTargetFirstRep().hasVariable() && !rule.getTargetFirstRep().hasParameter()) &&
         (rule.getDependent().size() == 0 && rule.getRule().size() == 0);
   }
 
@@ -895,7 +900,14 @@ public class StructureMapUtilities {
 	private void parseSource(StructureMapGroupRuleComponent rule, FHIRLexer lexer) throws FHIRException {
 		StructureMapGroupRuleSourceComponent source = rule.addSource();
 		source.setContext(lexer.take());
-		if (lexer.hasToken(".")) {
+		if (source.getContext().equals("search") && lexer.hasToken("(")) {
+	    source.setContext("@search");
+      lexer.take();
+      ExpressionNode node = fpe.parse(lexer);
+      source.setUserData(MAP_SEARCH_EXPRESSION, node);
+      source.setElement(node.toString());
+      lexer.token(")");
+		} else if (lexer.hasToken(".")) {
 			lexer.token(".");
 			source.setElement(lexer.take());
 		}
@@ -1467,18 +1479,30 @@ public class StructureMapUtilities {
   }
 
   private List<Variables> processSource(String ruleId, TransformContext context, Variables vars, StructureMapGroupRuleSourceComponent src) throws FHIRException {
-		Base b = vars.get(VariableMode.INPUT, src.getContext());
-		if (b == null)
-			throw new FHIRException("Unknown input variable "+src.getContext());
+    List<Base> items;
+    if (src.getContext().equals("@search")) {
+      ExpressionNode expr = (ExpressionNode) src.getUserData(MAP_SEARCH_EXPRESSION);
+      if (expr == null) {
+        expr = fpe.parse(src.getElement());
+        src.setUserData(MAP_SEARCH_EXPRESSION, expr);
+      }
+      String search = fpe.evaluateToString(vars, null, new StringType(), expr); // string is a holder of nothing to ensure that variables are processed correctly 
+      items = services.performSearch(context.appInfo, search);
+    } else {
+      items = new ArrayList<Base>();
+      Base b = vars.get(VariableMode.INPUT, src.getContext());
+      if (b == null)
+        throw new FHIRException("Unknown input variable "+src.getContext());
 
-		List<Base> items = new ArrayList<Base>();
-		if (!src.hasElement()) 
-			items.add(b);
-		else { 
-			getChildrenByName(b, src.getElement(), items);
-			if (items.size() == 0 && src.hasDefaultValue())
-			  items.add(src.getDefaultValue());
-		}
+      if (!src.hasElement()) 
+        items.add(b);
+      else { 
+        getChildrenByName(b, src.getElement(), items);
+        if (items.size() == 0 && src.hasDefaultValue())
+          items.add(src.getDefaultValue());
+      }
+    }
+    
 		if (src.hasType()) {
 	    List<Base> remove = new ArrayList<Base>();
 	    for (Base item : items) {

@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, Mar 4, 2017 06:58-0500 for FHIR v1.9.0
+// Generated on Mon, Apr 17, 2017 17:38-0400 for FHIR v3.0.1
 
 import java.util.*;
 
@@ -183,7 +183,7 @@ public class Contributor extends Type implements ICompositeType {
      * The name of the individual or organization responsible for the contribution.
      */
     @Child(name = "name", type = {StringType.class}, order=1, min=1, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Name of the contributor", formalDefinition="The name of the individual or organization responsible for the contribution." )
+    @Description(shortDefinition="Who contributed the content", formalDefinition="The name of the individual or organization responsible for the contribution." )
     protected StringType name;
 
     /**
