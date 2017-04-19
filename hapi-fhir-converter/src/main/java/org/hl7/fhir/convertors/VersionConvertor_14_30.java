@@ -1,6 +1,6 @@
 package org.hl7.fhir.convertors;
 
-/*-
+/*
  * #%L
  * HAPI FHIR - Converter
  * %%
