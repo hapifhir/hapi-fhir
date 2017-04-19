@@ -1,11 +1,14 @@
 package ca.uhn.fhir.jpa.provider;
 
+import static java.util.Collections.addAll;
 import static org.junit.Assert.assertEquals;
 
 import org.junit.AfterClass;
 import org.junit.Test;
 
+import ca.uhn.fhir.jpa.dao.SearchParameterMap;
 import ca.uhn.fhir.jpa.dao.SearchParameterMap.EverythingModeEnum;
+import ca.uhn.fhir.rest.param.*;
 import ca.uhn.fhir.util.TestUtil;
 
 public class SearchParameterMapTest {
@@ -16,6 +19,25 @@ public class SearchParameterMapTest {
 	}
 
 
+	@Test
+	public void testToQueryString() {
+		SearchParameterMap map = new SearchParameterMap();
+		
+		StringAndListParam familyAnd = new StringAndListParam()
+				.addAnd(new StringOrListParam().add(new StringParam("ZZZ?").setExact(true)))
+				.addAnd(new StringOrListParam().add(new StringParam("homer")).add(new StringParam("jay")))
+				.addAnd(new StringOrListParam().add(new StringParam("simpson")).add(new StringParam("bouvier")));
+		map.add("name", familyAnd);
+		
+		DateAndListParam birthdateAnd = new DateAndListParam()
+				.addAnd(new DateOrListParam().add(new DateParam(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, "2001")))
+				.addAnd(new DateOrListParam().add(new DateParam(ParamPrefixEnum.LESSTHAN, "2002")));
+		map.add("birthdate", birthdateAnd);
+		
+		String queryString = map.toQueryString();
+	}
+	
+	
 	/**
 	 * {@link Search} uses these ordinals so they shouldn't get out of order
 	 */

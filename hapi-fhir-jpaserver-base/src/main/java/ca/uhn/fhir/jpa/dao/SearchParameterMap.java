@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.dao;
 
+import static java.util.Collections.newSetFromMap;
+
 /*
  * #%L
  * HAPI FHIR JPA Server
@@ -21,9 +23,11 @@ package ca.uhn.fhir.jpa.dao;
  */
 import java.util.*;
 
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
+import ca.uhn.fhir.jpa.dao.SearchParameterMap.QueryParameterTypeComparator;
 import ca.uhn.fhir.model.api.IQueryParameterAnd;
 import ca.uhn.fhir.model.api.IQueryParameterOr;
 import ca.uhn.fhir.model.api.IQueryParameterType;
@@ -32,8 +36,30 @@ import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.server.Constants;
+import ca.uhn.fhir.util.ObjectUtil;
 
 public class SearchParameterMap extends LinkedHashMap<String, List<List<? extends IQueryParameterType>>> {
+
+	public class QueryParameterTypeComparator implements Comparator<IQueryParameterType> {
+
+		@Override
+		public int compare(IQueryParameterType theO1, IQueryParameterType theO2) {
+			int retVal = 0;
+			
+			if (theO1.getMissing() == null && theO2.getMissing() == null) {
+				// neither are missing
+			} else if (theO1.getMissing() == null) {
+				retVal = -1;
+			} else if (theO2.getMissing() == null) {
+				retVal = 1;
+			} else if (!ObjectUtil.equals(theO1.getMissing(), theO2.getMissing())) {
+				
+			}
+			
+			return retVal;
+		}
+
+	}
 
 	private static final long serialVersionUID = 1L;
 
@@ -276,6 +302,26 @@ public class SearchParameterMap extends LinkedHashMap<String, List<List<? extend
 
 		public boolean isPatient() {
 			return myPatient;
+		}
+	}
+
+	public String toQueryString() {
+		StringBuilder b = new StringBuilder();
+		
+		ArrayList<String> keys = new ArrayList<String>(keySet());
+		Collections.sort(keys);
+		for (String nextKey : keys) {
+			
+			List<List<? extends IQueryParameterType>> nextValuesAnds = get(nextKey);
+			for (List<? extends IQueryParameterType> nextValuesAnd : nextValuesAnds) {
+				for (List<? extends IQueryParameterType> nextValuesOrs : nextValuesAnds) {
+					
+					nextValuesOrs = new ArrayList<IQueryParameterType>(nextValuesOrs);
+					Collections.sort(nextValuesOrs, new QueryParameterTypeComparator());
+					
+				}
+			}
+			
 		}
 	}
 
