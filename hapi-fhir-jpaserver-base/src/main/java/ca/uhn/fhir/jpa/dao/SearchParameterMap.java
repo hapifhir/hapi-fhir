@@ -1,6 +1,6 @@
 package ca.uhn.fhir.jpa.dao;
 
-import static java.util.Collections.newSetFromMap;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /*
  * #%L
@@ -23,11 +23,11 @@ import static java.util.Collections.newSetFromMap;
  */
 import java.util.*;
 
-import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
-import ca.uhn.fhir.jpa.dao.SearchParameterMap.QueryParameterTypeComparator;
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IQueryParameterAnd;
 import ca.uhn.fhir.model.api.IQueryParameterOr;
 import ca.uhn.fhir.model.api.IQueryParameterType;
@@ -42,22 +42,56 @@ public class SearchParameterMap extends LinkedHashMap<String, List<List<? extend
 
 	public class QueryParameterTypeComparator implements Comparator<IQueryParameterType> {
 
+		private final FhirContext myCtx;
+
+		public QueryParameterTypeComparator(FhirContext theCtx) {
+			myCtx = theCtx;
+		}
+
 		@Override
 		public int compare(IQueryParameterType theO1, IQueryParameterType theO2) {
-			int retVal = 0;
+			FhirContext ctx = myCtx;
+			int retVal;
 			
 			if (theO1.getMissing() == null && theO2.getMissing() == null) {
-				// neither are missing
+				retVal = 0;
 			} else if (theO1.getMissing() == null) {
 				retVal = -1;
 			} else if (theO2.getMissing() == null) {
 				retVal = 1;
-			} else if (!ObjectUtil.equals(theO1.getMissing(), theO2.getMissing())) {
-				
+			} else if (ObjectUtil.equals(theO1.getMissing(), theO2.getMissing())) {
+				retVal = 0;
+			} else {
+				if (theO1.getMissing().booleanValue()) {
+					retVal = 1;
+				} else {
+					retVal = -1;
+				}
+			}
+			
+			if (retVal == 0) {
+				String q1 = theO1.getQueryParameterQualifier();
+				String q2 = theO2.getQueryParameterQualifier();
+				retVal = StringUtils.compare(q1, q2);
+			}
+			
+			if (retVal == 0) {
+				String v1 = theO1.getValueAsQueryToken(ctx);
 			}
 			
 			return retVal;
 		}
+
+	}
+
+	public class QueryParameterOrComparator implements Comparator<List<IQueryParameterType>> {
+
+		@Override
+		public int compare(List<IQueryParameterType> theO1, List<IQueryParameterType> theO2) {
+			// TODO Auto-generated method stub
+			return 0;
+		}
+
 
 	}
 
@@ -305,22 +339,38 @@ public class SearchParameterMap extends LinkedHashMap<String, List<List<? extend
 		}
 	}
 
-	public String toQueryString() {
+	public String toQueryString(FhirContext theCtx) {
 		StringBuilder b = new StringBuilder();
 		
 		ArrayList<String> keys = new ArrayList<String>(keySet());
 		Collections.sort(keys);
 		for (String nextKey : keys) {
 			
-			List<List<? extends IQueryParameterType>> nextValuesAnds = get(nextKey);
-			for (List<? extends IQueryParameterType> nextValuesAnd : nextValuesAnds) {
-				for (List<? extends IQueryParameterType> nextValuesOrs : nextValuesAnds) {
+			List<List<? extends IQueryParameterType>> nextValuesAndsIn = get(nextKey);
+			List<List<IQueryParameterType>> nextValuesAndsOut = new ArrayList<List<IQueryParameterType>>();
+			
+			for (List<? extends IQueryParameterType> nextValuesAndIn : nextValuesAndsIn) {
+
+				List<IQueryParameterType> nextValuesOrsOut = new ArrayList<IQueryParameterType>();
+				for (List<? extends IQueryParameterType> nextValuesOrsIn : nextValuesAndsIn) {
 					
-					nextValuesOrs = new ArrayList<IQueryParameterType>(nextValuesOrs);
-					Collections.sort(nextValuesOrs, new QueryParameterTypeComparator());
+					nextValuesOrsIn = new ArrayList<IQueryParameterType>(nextValuesOrsIn);
+					Collections.sort(nextValuesOrsIn, new QueryParameterTypeComparator());
+					for (IQueryParameterType nextValueOrIn : nextValuesOrsIn) {
+						if (nextValueOrIn.getMissing() != null || isNotBlank(nextValueOrIn.getValueAsQueryToken(theCtx))) {
+							nextValuesOrsOut.add(nextValueOrIn);
+						}
+					}
 					
+				} // for OR
+				
+				if (nextValuesOrsOut.size() > 0) {
+					nextValuesAndsOut.add(nextValuesOrsOut);
 				}
-			}
+				
+			} // for AND
+			
+			Collections.sort(nextValuesAndsOut, new QueryParameterTypeComparator());
 			
 		}
 	}
