@@ -24,6 +24,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import java.util.*;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
@@ -32,68 +33,16 @@ import ca.uhn.fhir.model.api.IQueryParameterAnd;
 import ca.uhn.fhir.model.api.IQueryParameterOr;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.Include;
+import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.util.ObjectUtil;
+import ca.uhn.fhir.util.UrlUtil;
 
 public class SearchParameterMap extends LinkedHashMap<String, List<List<? extends IQueryParameterType>>> {
-
-	public class QueryParameterTypeComparator implements Comparator<IQueryParameterType> {
-
-		private final FhirContext myCtx;
-
-		public QueryParameterTypeComparator(FhirContext theCtx) {
-			myCtx = theCtx;
-		}
-
-		@Override
-		public int compare(IQueryParameterType theO1, IQueryParameterType theO2) {
-			FhirContext ctx = myCtx;
-			int retVal;
-			
-			if (theO1.getMissing() == null && theO2.getMissing() == null) {
-				retVal = 0;
-			} else if (theO1.getMissing() == null) {
-				retVal = -1;
-			} else if (theO2.getMissing() == null) {
-				retVal = 1;
-			} else if (ObjectUtil.equals(theO1.getMissing(), theO2.getMissing())) {
-				retVal = 0;
-			} else {
-				if (theO1.getMissing().booleanValue()) {
-					retVal = 1;
-				} else {
-					retVal = -1;
-				}
-			}
-			
-			if (retVal == 0) {
-				String q1 = theO1.getQueryParameterQualifier();
-				String q2 = theO2.getQueryParameterQualifier();
-				retVal = StringUtils.compare(q1, q2);
-			}
-			
-			if (retVal == 0) {
-				String v1 = theO1.getValueAsQueryToken(ctx);
-			}
-			
-			return retVal;
-		}
-
-	}
-
-	public class QueryParameterOrComparator implements Comparator<List<IQueryParameterType>> {
-
-		@Override
-		public int compare(List<IQueryParameterType> theO1, List<IQueryParameterType> theO2) {
-			// TODO Auto-generated method stub
-			return 0;
-		}
-
-
-	}
 
 	private static final long serialVersionUID = 1L;
 
@@ -101,11 +50,10 @@ public class SearchParameterMap extends LinkedHashMap<String, List<List<? extend
 	private EverythingModeEnum myEverythingMode = null;
 	private Set<Include> myIncludes;
 	private DateRangeParam myLastUpdated;
+	private boolean myLoadSynchronous;
 	private Integer myLoadSynchronousUpTo;
 	private Set<Include> myRevIncludes;
 	private SortSpec mySort;
-
-	private boolean myLoadSynchronous;
 
 	/**
 	 * Constructor
@@ -119,6 +67,11 @@ public class SearchParameterMap extends LinkedHashMap<String, List<List<? extend
 	 */
 	public SearchParameterMap(String theName, IQueryParameterType theParam) {
 		add(theName, theParam);
+	}
+
+	public SearchParameterMap add(String theName, DateParam theDateParam) {
+		add(theName, (IQueryParameterOr<?>) theDateParam);
+		return this;
 	}
 
 	public void add(String theName, IQueryParameterAnd<?> theAnd) {
@@ -148,11 +101,6 @@ public class SearchParameterMap extends LinkedHashMap<String, List<List<? extend
 		get(theName).add(theOr.getValuesAsQueryTokens());
 	}
 
-	public SearchParameterMap add(String theName, DateParam theDateParam) {
-		add(theName, (IQueryParameterOr<?>)theDateParam);
-		return this;
-	}
-
 	public SearchParameterMap add(String theName, IQueryParameterType theParam) {
 		assert !Constants.PARAM_LASTUPDATED.equals(theName); // this has it's own field in the map
 
@@ -165,7 +113,7 @@ public class SearchParameterMap extends LinkedHashMap<String, List<List<? extend
 		ArrayList<IQueryParameterType> list = new ArrayList<IQueryParameterType>();
 		list.add(theParam);
 		get(theName).add(list);
-		
+
 		return this;
 	}
 
@@ -214,6 +162,14 @@ public class SearchParameterMap extends LinkedHashMap<String, List<List<? extend
 		return retVal;
 	}
 
+	/**
+	 * If set, tells the server to load these results synchronously, and not to load
+	 * more than X results
+	 */
+	public Integer getLoadSynchronousUpTo() {
+		return myLoadSynchronousUpTo;
+	}
+
 	public Set<Include> getRevIncludes() {
 		if (myRevIncludes == null) {
 			myRevIncludes = new HashSet<Include>();
@@ -223,6 +179,14 @@ public class SearchParameterMap extends LinkedHashMap<String, List<List<? extend
 
 	public SortSpec getSort() {
 		return mySort;
+	}
+
+	/**
+	 * If set, tells the server to load these results synchronously, and not to load
+	 * more than X results
+	 */
+	public boolean isLoadSynchronous() {
+		return myLoadSynchronous;
 	}
 
 	public void setCount(Integer theCount) {
@@ -245,8 +209,9 @@ public class SearchParameterMap extends LinkedHashMap<String, List<List<? extend
 	 * If set, tells the server to load these results synchronously, and not to load
 	 * more than X results
 	 */
-	public Integer getLoadSynchronousUpTo() {
-		return myLoadSynchronousUpTo;
+	public SearchParameterMap setLoadSynchronous(boolean theLoadSynchronous) {
+		myLoadSynchronous = theLoadSynchronous;
+		return this;
 	}
 
 	/**
@@ -260,23 +225,6 @@ public class SearchParameterMap extends LinkedHashMap<String, List<List<? extend
 			setLoadSynchronous(true);
 		}
 		return this;
-	}
-
-	/**
-	 * If set, tells the server to load these results synchronously, and not to load
-	 * more than X results
-	 */
-	public SearchParameterMap setLoadSynchronous(boolean theLoadSynchronous) {
-		myLoadSynchronous = theLoadSynchronous;
-		return this;
-	}
-
-	/**
-	 * If set, tells the server to load these results synchronously, and not to load
-	 * more than X results
-	 */
-	public boolean isLoadSynchronous() {
-		return myLoadSynchronous;
 	}
 
 	/**
@@ -295,6 +243,140 @@ public class SearchParameterMap extends LinkedHashMap<String, List<List<? extend
 		mySort = theSort;
 	}
 
+	public String toNormalizedQueryString(FhirContext theCtx) {
+		StringBuilder b = new StringBuilder();
+
+		ArrayList<String> keys = new ArrayList<String>(keySet());
+		Collections.sort(keys);
+		for (String nextKey : keys) {
+
+			List<List<? extends IQueryParameterType>> nextValuesAndsIn = get(nextKey);
+			List<List<IQueryParameterType>> nextValuesAndsOut = new ArrayList<List<IQueryParameterType>>();
+
+			for (List<? extends IQueryParameterType> nextValuesAndIn : nextValuesAndsIn) {
+
+				List<IQueryParameterType> nextValuesOrsOut = new ArrayList<IQueryParameterType>();
+				for (IQueryParameterType nextValueOrIn : nextValuesAndIn) {
+					if (nextValueOrIn.getMissing() != null || isNotBlank(nextValueOrIn.getValueAsQueryToken(theCtx))) {
+						nextValuesOrsOut.add(nextValueOrIn);
+					}
+				}
+				
+				Collections.sort(nextValuesOrsOut, new QueryParameterTypeComparator(theCtx));
+
+				if (nextValuesOrsOut.size() > 0) {
+					nextValuesAndsOut.add(nextValuesOrsOut);
+				}
+
+			} // for AND
+
+			Collections.sort(nextValuesAndsOut, new QueryParameterOrComparator(theCtx));
+			
+			for (List<IQueryParameterType> nextValuesAnd : nextValuesAndsOut) {
+				addUrlParamSeparator(b);
+				IQueryParameterType firstValue = nextValuesAnd.get(0);
+				b.append(UrlUtil.escape(nextKey));
+
+				if (firstValue.getMissing() != null) {
+					b.append(Constants.PARAMQUALIFIER_MISSING);
+					b.append('=');
+					if (firstValue.getMissing()) {
+						b.append(Constants.PARAMQUALIFIER_MISSING_TRUE);
+					}else {
+						b.append(Constants.PARAMQUALIFIER_MISSING_FALSE);
+					}
+					continue;
+				}
+				
+				if (isNotBlank(firstValue.getQueryParameterQualifier())){
+					b.append(firstValue.getQueryParameterQualifier());
+				}
+				
+				b.append('=');
+				
+				for (int i = 0; i < nextValuesAnd.size(); i++) {
+					IQueryParameterType nextValueOr = nextValuesAnd.get(i);
+					if (i > 0) {
+						b.append(',');
+					}
+					b.append(ParameterUtil.escapeAndUrlEncode(nextValueOr.getValueAsQueryToken(theCtx)));
+				}
+			}
+			
+		} // for keys
+		
+		SortSpec sort = getSort();
+		boolean first = true;
+		while (sort != null) {
+			
+			if (isNotBlank(sort.getParamName())) {
+				if (first) {
+					b.append(Constants.PARAM_SORT);
+					b.append('=');
+					first = false;
+				} else {
+					b.append(',');
+				}
+				if (sort.getOrder() == SortOrderEnum.DESC) {
+					b.append('-');
+				}
+				b.append(sort.getParamName());
+			}
+			
+			Validate.isTrue(sort != sort.getChain()); // just in case, shouldn't happen
+			sort = sort.getChain();
+		}
+		
+		addUrlIncludeParams(b, Constants.PARAM_INCLUDE, getIncludes());
+		addUrlIncludeParams(b, Constants.PARAM_REVINCLUDE, getRevIncludes());
+		
+		if (getLastUpdated() != null) {
+			DateParam lb = getLastUpdated().getLowerBound();
+			addLastUpdateParam(b, lb);
+			DateParam ub = getLastUpdated().getUpperBound();
+			addLastUpdateParam(b, ub);
+		}
+		
+		if (getCount() != null) {
+			b.append(Constants.PARAM_COUNT);
+			b.append('=');
+			b.append(getCount());
+		}
+		
+		
+		return b.toString();
+	}
+
+	private void addLastUpdateParam(StringBuilder b, DateParam date) {
+		if (isNotBlank(date.getValueAsString())) {
+			b.append(Constants.PARAM_LASTUPDATED);
+			b.append('=');
+			b.append(date.getValueAsString());
+		}
+	}
+
+	private void addUrlIncludeParams(StringBuilder b, String paramName, Set<Include> list) {
+		for (Include nextInclude : list) {
+			b.append(paramName);
+			b.append('=');
+			b.append(UrlUtil.escape(nextInclude.getParamType()));
+			b.append(':');
+			b.append(UrlUtil.escape(nextInclude.getParamName()));
+			if (isNotBlank(nextInclude.getParamTargetType())) {
+				b.append(':');
+				b.append(nextInclude.getParamTargetType());
+			}
+		}
+	}
+
+	private void addUrlParamSeparator(StringBuilder theB) {
+		if (theB.length() == 0) {
+			theB.append('?');
+		} else {
+			theB.append('&');
+		}
+	}
+
 	@Override
 	public String toString() {
 		ToStringBuilder b = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
@@ -305,6 +387,38 @@ public class SearchParameterMap extends LinkedHashMap<String, List<List<? extend
 			b.append("includes", getIncludes());
 		}
 		return b.toString();
+	}
+
+	static int compare(FhirContext theCtx, IQueryParameterType theO1, IQueryParameterType theO2) {
+		int retVal;
+		if (theO1.getMissing() == null && theO2.getMissing() == null) {
+			retVal = 0;
+		} else if (theO1.getMissing() == null) {
+			retVal = -1;
+		} else if (theO2.getMissing() == null) {
+			retVal = 1;
+		} else if (ObjectUtil.equals(theO1.getMissing(), theO2.getMissing())) {
+			retVal = 0;
+		} else {
+			if (theO1.getMissing().booleanValue()) {
+				retVal = 1;
+			} else {
+				retVal = -1;
+			}
+		}
+
+		if (retVal == 0) {
+			String q1 = theO1.getQueryParameterQualifier();
+			String q2 = theO2.getQueryParameterQualifier();
+			retVal = StringUtils.compare(q1, q2);
+		}
+
+		if (retVal == 0) {
+			String v1 = theO1.getValueAsQueryToken(theCtx);
+			String v2 = theO2.getValueAsQueryToken(theCtx);
+			retVal = StringUtils.compare(v1, v2);
+		}
+		return retVal;
 	}
 
 	public enum EverythingModeEnum {
@@ -339,40 +453,34 @@ public class SearchParameterMap extends LinkedHashMap<String, List<List<? extend
 		}
 	}
 
-	public String toQueryString(FhirContext theCtx) {
-		StringBuilder b = new StringBuilder();
-		
-		ArrayList<String> keys = new ArrayList<String>(keySet());
-		Collections.sort(keys);
-		for (String nextKey : keys) {
-			
-			List<List<? extends IQueryParameterType>> nextValuesAndsIn = get(nextKey);
-			List<List<IQueryParameterType>> nextValuesAndsOut = new ArrayList<List<IQueryParameterType>>();
-			
-			for (List<? extends IQueryParameterType> nextValuesAndIn : nextValuesAndsIn) {
+	public class QueryParameterOrComparator implements Comparator<List<IQueryParameterType>> {
+		private final FhirContext myCtx;
 
-				List<IQueryParameterType> nextValuesOrsOut = new ArrayList<IQueryParameterType>();
-				for (List<? extends IQueryParameterType> nextValuesOrsIn : nextValuesAndsIn) {
-					
-					nextValuesOrsIn = new ArrayList<IQueryParameterType>(nextValuesOrsIn);
-					Collections.sort(nextValuesOrsIn, new QueryParameterTypeComparator());
-					for (IQueryParameterType nextValueOrIn : nextValuesOrsIn) {
-						if (nextValueOrIn.getMissing() != null || isNotBlank(nextValueOrIn.getValueAsQueryToken(theCtx))) {
-							nextValuesOrsOut.add(nextValueOrIn);
-						}
-					}
-					
-				} // for OR
-				
-				if (nextValuesOrsOut.size() > 0) {
-					nextValuesAndsOut.add(nextValuesOrsOut);
-				}
-				
-			} // for AND
-			
-			Collections.sort(nextValuesAndsOut, new QueryParameterTypeComparator());
-			
+		public QueryParameterOrComparator(FhirContext theCtx) {
+			myCtx = theCtx;
 		}
+
+		@Override
+		public int compare(List<IQueryParameterType> theO1, List<IQueryParameterType> theO2) {
+			// These lists will never be empty
+			return SearchParameterMap.compare(myCtx, theO1.get(0), theO2.get(0));
+		}
+
+	}
+
+	public class QueryParameterTypeComparator implements Comparator<IQueryParameterType> {
+
+		private final FhirContext myCtx;
+
+		public QueryParameterTypeComparator(FhirContext theCtx) {
+			myCtx = theCtx;
+		}
+
+		@Override
+		public int compare(IQueryParameterType theO1, IQueryParameterType theO2) {
+			return SearchParameterMap.compare(myCtx, theO1, theO2);
+		}
+
 	}
 
 }

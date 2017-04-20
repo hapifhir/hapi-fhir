@@ -6,6 +6,7 @@ import static org.junit.Assert.assertEquals;
 import org.junit.AfterClass;
 import org.junit.Test;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.SearchParameterMap;
 import ca.uhn.fhir.jpa.dao.SearchParameterMap.EverythingModeEnum;
 import ca.uhn.fhir.rest.param.*;
@@ -18,7 +19,9 @@ public class SearchParameterMapTest {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
-
+	private static FhirContext ourCtx = FhirContext.forDstu3();
+	
+	
 	@Test
 	public void testToQueryString() {
 		SearchParameterMap map = new SearchParameterMap();
@@ -34,10 +37,12 @@ public class SearchParameterMapTest {
 				.addAnd(new DateOrListParam().add(new DateParam(ParamPrefixEnum.LESSTHAN, "2002")));
 		map.add("birthdate", birthdateAnd);
 		
-		String queryString = map.toQueryString();
+		String queryString = map.toNormalizedQueryString(ourCtx);
+		ourLog.info(queryString);
 	}
 	
-	
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchParameterMapTest.class);
+
 	/**
 	 * {@link Search} uses these ordinals so they shouldn't get out of order
 	 */
