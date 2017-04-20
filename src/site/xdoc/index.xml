@@ -69,6 +69,37 @@
 		</section>
 
 		<section name="Announcements">
+		
+			<p>
+				<b>April 19, 2017 - HAPI FHIR 2.4 Released</b> -
+				The next release of HAPI has now been uploaded to the Maven repos and 
+				GitHub's releases section.
+			</p>
+			<p>
+				This release brings the STU3 definitions up to the  
+				final R3 (aka STU3) definitions (FHIR 3.0.1)! Happy R3 everybody!
+			</p>
+			<p>
+				As always, the <a href="./changes-report.html">changelog</a> has the full list
+				of changes in this release. Thanks to everyone who contributed to this release, either
+				by submitting pull requests, suggesting new features, or filing bug requests!
+			</p>
+			<p>
+				We were later than we would have liked in delivering this release, as we
+				are focusing heavily on performance improvements in the JPA module. We
+				were hoping to have our performance branch merged in time for this release,
+				but it needs a bit more time to stabilize. We will be releasing the initial
+				snapshot builds of HAPI FHIR 2.5-SNAPSHOT immediately following this
+				release. Please try these out if you want to test the JPA module with
+				significant performance improvements when searching large datasets, or 
+				under heavy load.
+			</p>
+			<p>
+				- <a href="https://github.com/jamesagnew/">James Agnew</a>
+			</p>
+			<br/><br/>
+		
+		
 			<p>
 				<b>March 17, 2017 - HAPI FHIR 2.3 Released</b> -
 				The next release of HAPI has now been uploaded to the Maven repos and 
@@ -95,6 +126,7 @@
 			</p>
 			<br/><br/>
 
+			<!-- 
 			<p>
 				<b>December 20, 2016 - HAPI FHIR 2.2 Released</b> -
 				The next release of HAPI has now been uploaded to the Maven repos and 
@@ -121,6 +153,7 @@
 				- <a href="https://github.com/jamesagnew/">James Agnew</a>
 			</p>
 			<br/><br/>
+			 -->
 
 			<!-- 
 			<p>
