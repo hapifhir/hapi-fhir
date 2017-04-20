@@ -1210,6 +1210,102 @@ public class AuthorizationInterceptorDstu2Test {
 	}
 
 	@Test
+	public void testReadPageRight() throws Exception {
+		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				return new RuleBuilder()
+					.allow("Rule 1").read().resourcesOfType(Patient.class).inCompartment("Patient", new IdDt("Patient/1"))
+					.build();
+			}
+		});
+
+		HttpGet httpGet;
+		HttpResponse status;
+		String respString;
+		Bundle respBundle;
+
+		ourReturn = new ArrayList<IResource>();
+		for (int i = 0; i < 10; i++) {
+			ourReturn.add(createPatient(1));
+		}
+		
+		ourHitMethod = false;
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_count=5&_format=json");
+		status = ourClient.execute(httpGet);
+		respString = extractResponseAndClose(status);
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertTrue(ourHitMethod);
+		respBundle = ourCtx.newJsonParser().parseResource(Bundle.class, respString);
+		assertEquals(5, respBundle.getEntry().size());
+		assertEquals(10, respBundle.getTotal().intValue());
+		assertEquals("Patient/1", respBundle.getEntry().get(0).getResource().getIdElement().toUnqualifiedVersionless().getValue());
+		assertNotNull(respBundle.getLink("next"));
+		
+		// Load next page
+		
+		ourHitMethod = false;
+		httpGet = new HttpGet(respBundle.getLink("next").getUrl());
+		status = ourClient.execute(httpGet);
+		respString = extractResponseAndClose(status);
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertFalse(ourHitMethod);
+		respBundle = ourCtx.newJsonParser().parseResource(Bundle.class, respString);
+		assertEquals(5, respBundle.getEntry().size());
+		assertEquals(10, respBundle.getTotal().intValue());
+		assertEquals("Patient/1", respBundle.getEntry().get(0).getResource().getIdElement().toUnqualifiedVersionless().getValue());
+		assertNull(respBundle.getLink("next"));
+
+	}
+
+	@Test
+	public void testReadPageWrong() throws Exception {
+		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				return new RuleBuilder()
+					.allow("Rule 1").read().resourcesOfType(Patient.class).inCompartment("Patient", new IdDt("Patient/1"))
+					.build();
+			}
+		});
+
+		HttpGet httpGet;
+		HttpResponse status;
+		String respString;
+		Bundle respBundle;
+
+		ourReturn = new ArrayList<IResource>();
+		for (int i = 0; i < 5; i++) {
+			ourReturn.add(createPatient(1));
+		}
+		for (int i = 0; i < 5; i++) {
+			ourReturn.add(createPatient(2));
+		}
+		
+		ourHitMethod = false;
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_count=5&_format=json");
+		status = ourClient.execute(httpGet);
+		respString = extractResponseAndClose(status);
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertTrue(ourHitMethod);
+		respBundle = ourCtx.newJsonParser().parseResource(Bundle.class, respString);
+		assertEquals(5, respBundle.getEntry().size());
+		assertEquals(10, respBundle.getTotal().intValue());
+		assertEquals("Patient/1", respBundle.getEntry().get(0).getResource().getIdElement().toUnqualifiedVersionless().getValue());
+		assertNotNull(respBundle.getLink("next"));
+		
+		// Load next page
+		
+		ourHitMethod = false;
+		httpGet = new HttpGet(respBundle.getLink("next").getUrl());
+		status = ourClient.execute(httpGet);
+		respString = extractResponseAndClose(status);
+		assertEquals(403, status.getStatusLine().getStatusCode());
+		assertFalse(ourHitMethod);
+
+	}
+
+	@Test
 	public void testReadByCompartmentWrong() throws Exception {
 		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
@@ -1850,6 +1946,7 @@ public class AuthorizationInterceptorDstu2Test {
 		ourServlet.setFhirContext(ourCtx);
 		ourServlet.setResourceProviders(patProvider, obsProv, encProv, cpProv);
 		ourServlet.setPlainProviders(plainProvider);
+		ourServlet.setPagingProvider(new FifoMemoryPagingProvider(100));
 		ServletHolder servletHolder = new ServletHolder(ourServlet);
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
 		ourServer.setHandler(proxyHandler);

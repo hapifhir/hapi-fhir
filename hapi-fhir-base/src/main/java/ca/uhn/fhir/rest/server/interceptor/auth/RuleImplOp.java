@@ -75,7 +75,6 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 					appliesToResourceId = theInputResourceId;
 					appliesToResourceType = theInputResourceId.getResourceType();
 					break;
-				// return new Verdict(PolicyEnum.ALLOW, this);
 				case SEARCH_SYSTEM:
 				case SEARCH_TYPE:
 				case HISTORY_INSTANCE:

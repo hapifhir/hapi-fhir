@@ -6,6 +6,12 @@
 		<title>HAPI FHIR Changelog</title>
 	</properties>
 	<body>
+		<release version="2.5" date="TBD">
+			<action type="fix" issue="590">
+				AuthorizationInterceptor did not correctly handle paging requests
+				(e.g. requests for the second page of results for a search operation). 
+				Thanks to Eeva Turkka for reporting!
+			</action>
 		<release version="2.4" date="2017-04-19">
 			<action type="add">
 				This release brings the DSTU3 structures up to FHIR R3 (FHIR 3.0.1) definitions. Note that

@@ -278,13 +278,12 @@ public class AuthorizationInterceptor extends InterceptorAdapter implements ISer
 		case HISTORY_SYSTEM:
 		case HISTORY_TYPE:
 		case TRANSACTION:
+		case GET_PAGE:
 		case EXTENDED_OPERATION_SERVER:
 		case EXTENDED_OPERATION_TYPE:
 		case EXTENDED_OPERATION_INSTANCE: {
 			if (theResponseObject != null) {
 				if (theResponseObject instanceof IBaseBundle) {
-					// IBaseBundle responseBundle = (IBaseBundle) theResponseObject;
-					// resources = toListOfResources(fhirContext, responseBundle);
 					resources = toListOfResourcesAndExcludeContainer(theResponseObject, fhirContext);
 				} else if (theResponseObject instanceof IBaseParameters) {
 					resources = toListOfResourcesAndExcludeContainer(theResponseObject, fhirContext);
