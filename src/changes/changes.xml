@@ -6,7 +6,7 @@
 		<title>HAPI FHIR Changelog</title>
 	</properties>
 	<body>
-		<release version="2.4" date="">
+		<release version="2.4" date="2017-04-19">
 			<action type="add">
 				This release brings the DSTU3 structures up to FHIR R3 (FHIR 3.0.1) definitions. Note that
 				there are very few changes between the DSTU3 structures in HAPI FHIR 2.3 and
