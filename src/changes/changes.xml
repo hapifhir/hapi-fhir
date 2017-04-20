@@ -26,8 +26,8 @@
 				<![CDATA[
 					<ul>
 						<li>Hibernate (JPA): 5.2.7 -&gt; 5.2.9</li>
-						<li>Hibernate Search (JPA): 5.5.7.CR1 -&gtp; 5.2.7.Final</li>
-						<li>Hibernate Validator (JPA): 5.3.4 -&gtp; 5.4.1</li>
+						<li>Hibernate Search (JPA): 5.5.7.CR1 -&gt; 5.2.7.Final</li>
+						<li>Hibernate Validator (JPA): 5.3.4 -&gt; 5.4.1</li>
 						<li>Spring (JPA): 4.3.6 -&gt; 4.3.7</li>
 						<li>Gson (Core): 2.7 -&gt; 2.8.0</li>
 						<li>Guava (JPA): 19.0 -&gt; 21.0</li>
