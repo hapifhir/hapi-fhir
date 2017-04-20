@@ -62,40 +62,50 @@
 <a class="jxr_linenumber" name="L54" href="#L54">54</a>  	}
 <a class="jxr_linenumber" name="L55" href="#L55">55</a>  
 <a class="jxr_linenumber" name="L56" href="#L56">56</a>  	@Override
-<a class="jxr_linenumber" name="L57" href="#L57">57</a>  	<strong class="jxr_keyword">public</strong> Map&lt;String, Map&lt;String, RuntimeSearchParam&gt;&gt; getActiveSearchParams() {
-<a class="jxr_linenumber" name="L58" href="#L58">58</a>  		<strong class="jxr_keyword">return</strong> myBuiltInSearchParams;
-<a class="jxr_linenumber" name="L59" href="#L59">59</a>  	}
-<a class="jxr_linenumber" name="L60" href="#L60">60</a>  
-<a class="jxr_linenumber" name="L61" href="#L61">61</a>  	@Override
-<a class="jxr_linenumber" name="L62" href="#L62">62</a>  	<strong class="jxr_keyword">public</strong> Map&lt;String, RuntimeSearchParam&gt; getActiveSearchParams(String theResourceName) {
-<a class="jxr_linenumber" name="L63" href="#L63">63</a>  		Validate.notBlank(theResourceName, <span class="jxr_string">"theResourceName must not be blank or null"</span>);
-<a class="jxr_linenumber" name="L64" href="#L64">64</a>  
-<a class="jxr_linenumber" name="L65" href="#L65">65</a>  		<strong class="jxr_keyword">return</strong> myBuiltInSearchParams.get(theResourceName);
-<a class="jxr_linenumber" name="L66" href="#L66">66</a>  	}
-<a class="jxr_linenumber" name="L67" href="#L67">67</a>  
-<a class="jxr_linenumber" name="L68" href="#L68">68</a>  	<strong class="jxr_keyword">public</strong> Map&lt;String, Map&lt;String, RuntimeSearchParam&gt;&gt; getBuiltInSearchParams() {
-<a class="jxr_linenumber" name="L69" href="#L69">69</a>  		<strong class="jxr_keyword">return</strong> myBuiltInSearchParams;
-<a class="jxr_linenumber" name="L70" href="#L70">70</a>  	}
-<a class="jxr_linenumber" name="L71" href="#L71">71</a>  
-<a class="jxr_linenumber" name="L72" href="#L72">72</a>  	@PostConstruct
-<a class="jxr_linenumber" name="L73" href="#L73">73</a>  	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> postConstruct() {
-<a class="jxr_linenumber" name="L74" href="#L74">74</a>  		Map&lt;String, Map&lt;String, RuntimeSearchParam&gt;&gt; resourceNameToSearchParams = <strong class="jxr_keyword">new</strong> HashMap&lt;String, Map&lt;String, RuntimeSearchParam&gt;&gt;();
-<a class="jxr_linenumber" name="L75" href="#L75">75</a>  
-<a class="jxr_linenumber" name="L76" href="#L76">76</a>  		<strong class="jxr_keyword">for</strong> (IFhirResourceDao&lt;?&gt; nextDao : myDaos) {
-<a class="jxr_linenumber" name="L77" href="#L77">77</a>  			RuntimeResourceDefinition nextResDef = myCtx.getResourceDefinition(nextDao.getResourceType());
-<a class="jxr_linenumber" name="L78" href="#L78">78</a>  			String nextResourceName = nextResDef.getName();
-<a class="jxr_linenumber" name="L79" href="#L79">79</a>  			HashMap&lt;String, RuntimeSearchParam&gt; nameToParam = <strong class="jxr_keyword">new</strong> HashMap&lt;String, RuntimeSearchParam&gt;();
-<a class="jxr_linenumber" name="L80" href="#L80">80</a>  			resourceNameToSearchParams.put(nextResourceName, nameToParam);
+<a class="jxr_linenumber" name="L57" href="#L57">57</a>  	<strong class="jxr_keyword">public</strong> RuntimeSearchParam getActiveSearchParam(String theResourceName, String theParamName) {
+<a class="jxr_linenumber" name="L58" href="#L58">58</a>  		RuntimeSearchParam retVal = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L59" href="#L59">59</a>  		Map&lt;String, RuntimeSearchParam&gt; params = getActiveSearchParams().get(theResourceName);
+<a class="jxr_linenumber" name="L60" href="#L60">60</a>  		<strong class="jxr_keyword">if</strong> (params != <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L61" href="#L61">61</a>  			retVal = params.get(theParamName);
+<a class="jxr_linenumber" name="L62" href="#L62">62</a>  		}
+<a class="jxr_linenumber" name="L63" href="#L63">63</a>  		<strong class="jxr_keyword">return</strong> retVal;
+<a class="jxr_linenumber" name="L64" href="#L64">64</a>  	}
+<a class="jxr_linenumber" name="L65" href="#L65">65</a>  
+<a class="jxr_linenumber" name="L66" href="#L66">66</a>  	@Override
+<a class="jxr_linenumber" name="L67" href="#L67">67</a>  	<strong class="jxr_keyword">public</strong> Map&lt;String, Map&lt;String, RuntimeSearchParam&gt;&gt; getActiveSearchParams() {
+<a class="jxr_linenumber" name="L68" href="#L68">68</a>  		<strong class="jxr_keyword">return</strong> myBuiltInSearchParams;
+<a class="jxr_linenumber" name="L69" href="#L69">69</a>  	}
+<a class="jxr_linenumber" name="L70" href="#L70">70</a>  
+<a class="jxr_linenumber" name="L71" href="#L71">71</a>  	@Override
+<a class="jxr_linenumber" name="L72" href="#L72">72</a>  	<strong class="jxr_keyword">public</strong> Map&lt;String, RuntimeSearchParam&gt; getActiveSearchParams(String theResourceName) {
+<a class="jxr_linenumber" name="L73" href="#L73">73</a>  		Validate.notBlank(theResourceName, <span class="jxr_string">"theResourceName must not be blank or null"</span>);
+<a class="jxr_linenumber" name="L74" href="#L74">74</a>  
+<a class="jxr_linenumber" name="L75" href="#L75">75</a>  		<strong class="jxr_keyword">return</strong> myBuiltInSearchParams.get(theResourceName);
+<a class="jxr_linenumber" name="L76" href="#L76">76</a>  	}
+<a class="jxr_linenumber" name="L77" href="#L77">77</a>  
+<a class="jxr_linenumber" name="L78" href="#L78">78</a>  	<strong class="jxr_keyword">public</strong> Map&lt;String, Map&lt;String, RuntimeSearchParam&gt;&gt; getBuiltInSearchParams() {
+<a class="jxr_linenumber" name="L79" href="#L79">79</a>  		<strong class="jxr_keyword">return</strong> myBuiltInSearchParams;
+<a class="jxr_linenumber" name="L80" href="#L80">80</a>  	}
 <a class="jxr_linenumber" name="L81" href="#L81">81</a>  
-<a class="jxr_linenumber" name="L82" href="#L82">82</a>  			<strong class="jxr_keyword">for</strong> (RuntimeSearchParam nextSp : nextResDef.getSearchParams()) {
-<a class="jxr_linenumber" name="L83" href="#L83">83</a>  				nameToParam.put(nextSp.getName(), nextSp);
-<a class="jxr_linenumber" name="L84" href="#L84">84</a>  			}
-<a class="jxr_linenumber" name="L85" href="#L85">85</a>  		}
-<a class="jxr_linenumber" name="L86" href="#L86">86</a>  
-<a class="jxr_linenumber" name="L87" href="#L87">87</a>  		myBuiltInSearchParams = Collections.unmodifiableMap(resourceNameToSearchParams);
-<a class="jxr_linenumber" name="L88" href="#L88">88</a>  	}
-<a class="jxr_linenumber" name="L89" href="#L89">89</a>  
-<a class="jxr_linenumber" name="L90" href="#L90">90</a>  }
+<a class="jxr_linenumber" name="L82" href="#L82">82</a>  	@PostConstruct
+<a class="jxr_linenumber" name="L83" href="#L83">83</a>  	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> postConstruct() {
+<a class="jxr_linenumber" name="L84" href="#L84">84</a>  		Map&lt;String, Map&lt;String, RuntimeSearchParam&gt;&gt; resourceNameToSearchParams = <strong class="jxr_keyword">new</strong> HashMap&lt;String, Map&lt;String, RuntimeSearchParam&gt;&gt;();
+<a class="jxr_linenumber" name="L85" href="#L85">85</a>  
+<a class="jxr_linenumber" name="L86" href="#L86">86</a>  		<strong class="jxr_keyword">for</strong> (IFhirResourceDao&lt;?&gt; nextDao : myDaos) {
+<a class="jxr_linenumber" name="L87" href="#L87">87</a>  			RuntimeResourceDefinition nextResDef = myCtx.getResourceDefinition(nextDao.getResourceType());
+<a class="jxr_linenumber" name="L88" href="#L88">88</a>  			String nextResourceName = nextResDef.getName();
+<a class="jxr_linenumber" name="L89" href="#L89">89</a>  			HashMap&lt;String, RuntimeSearchParam&gt; nameToParam = <strong class="jxr_keyword">new</strong> HashMap&lt;String, RuntimeSearchParam&gt;();
+<a class="jxr_linenumber" name="L90" href="#L90">90</a>  			resourceNameToSearchParams.put(nextResourceName, nameToParam);
+<a class="jxr_linenumber" name="L91" href="#L91">91</a>  
+<a class="jxr_linenumber" name="L92" href="#L92">92</a>  			<strong class="jxr_keyword">for</strong> (RuntimeSearchParam nextSp : nextResDef.getSearchParams()) {
+<a class="jxr_linenumber" name="L93" href="#L93">93</a>  				nameToParam.put(nextSp.getName(), nextSp);
+<a class="jxr_linenumber" name="L94" href="#L94">94</a>  			}
+<a class="jxr_linenumber" name="L95" href="#L95">95</a>  		}
+<a class="jxr_linenumber" name="L96" href="#L96">96</a>  
+<a class="jxr_linenumber" name="L97" href="#L97">97</a>  		myBuiltInSearchParams = Collections.unmodifiableMap(resourceNameToSearchParams);
+<a class="jxr_linenumber" name="L98" href="#L98">98</a>  	}
+<a class="jxr_linenumber" name="L99" href="#L99">99</a>  
+<a class="jxr_linenumber" name="L100" href="#L100">100</a> }
 </pre>
 <hr/>
 <div id="footer">Copyright &#169; 2014&#x2013;2017 <a href="http://www.uhn.ca">University Health Network</a>. All rights reserved.</div>

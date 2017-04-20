@@ -1825,79 +1825,93 @@
 <a class="jxr_linenumber" name="L1817" href="#L1817">1817</a> <em class="jxr_comment">				 * See #327 </em>
 <a class="jxr_linenumber" name="L1818" href="#L1818">1818</a> <em class="jxr_comment">				 */</em>
 <a class="jxr_linenumber" name="L1819" href="#L1819">1819</a> 				List&lt;? <strong class="jxr_keyword">extends</strong> IBase&gt; preProcessedValue = preProcessValues(myDef, theResource, Collections.singletonList(myValue), myChildElem);
-<a class="jxr_linenumber" name="L1820" href="#L1820">1820</a> 				myValue = preProcessedValue.get(0);
-<a class="jxr_linenumber" name="L1821" href="#L1821">1821</a> 				
-<a class="jxr_linenumber" name="L1822" href="#L1822">1822</a> 				BaseRuntimeElementDefinition&lt;?&gt; def = myDef.getChildElementDefinitionByDatatype(myValue.getClass());
-<a class="jxr_linenumber" name="L1823" href="#L1823">1823</a> 				<strong class="jxr_keyword">if</strong> (def.getChildType() == ChildTypeEnum.RESOURCE_BLOCK) {
-<a class="jxr_linenumber" name="L1824" href="#L1824">1824</a> 					extractAndWriteExtensionsAsDirectChild(myValue, theEventWriter, def, theResDef, theResource, myChildElem);
-<a class="jxr_linenumber" name="L1825" href="#L1825">1825</a> 				} <strong class="jxr_keyword">else</strong> {
-<a class="jxr_linenumber" name="L1826" href="#L1826">1826</a> 					String childName = myDef.getChildNameByDatatype(myValue.getClass());
-<a class="jxr_linenumber" name="L1827" href="#L1827">1827</a> 					encodeChildElementToStreamWriter(theResDef, theResource, theEventWriter, myValue, def, childName, false, <strong class="jxr_keyword">null</strong>, false);
-<a class="jxr_linenumber" name="L1828" href="#L1828">1828</a> 				}
-<a class="jxr_linenumber" name="L1829" href="#L1829">1829</a> 
-<a class="jxr_linenumber" name="L1830" href="#L1830">1830</a> 				theEventWriter.endObject();
-<a class="jxr_linenumber" name="L1831" href="#L1831">1831</a> 			}
-<a class="jxr_linenumber" name="L1832" href="#L1832">1832</a> 		}
-<a class="jxr_linenumber" name="L1833" href="#L1833">1833</a> 
-<a class="jxr_linenumber" name="L1834" href="#L1834">1834</a> 		
-<a class="jxr_linenumber" name="L1835" href="#L1835">1835</a> 		<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> writeUndeclaredExtension(<a href="../../../../ca/uhn/fhir/context/RuntimeResourceDefinition.html">RuntimeResourceDefinition</a> theResDef, <a href="../../../../org/hl7/fhir/instance/model/api/IBaseResource.html">IBaseResource</a> theResource, <a href="../../../../ca/uhn/fhir/parser/json/JsonLikeWriter.html">JsonLikeWriter</a> theEventWriter, IBaseExtension&lt;?, ?&gt; ext) <strong class="jxr_keyword">throws</strong> IOException {
-<a class="jxr_linenumber" name="L1836" href="#L1836">1836</a> 			IBase value = ext.getValue();
-<a class="jxr_linenumber" name="L1837" href="#L1837">1837</a> 			<strong class="jxr_keyword">final</strong> String extensionUrl = getExtensionUrl(ext.getUrl());
-<a class="jxr_linenumber" name="L1838" href="#L1838">1838</a> 
-<a class="jxr_linenumber" name="L1839" href="#L1839">1839</a> 			theEventWriter.beginObject();
-<a class="jxr_linenumber" name="L1840" href="#L1840">1840</a> 
-<a class="jxr_linenumber" name="L1841" href="#L1841">1841</a> 			writeCommentsPreAndPost(myUndeclaredExtension, theEventWriter);
-<a class="jxr_linenumber" name="L1842" href="#L1842">1842</a> 
-<a class="jxr_linenumber" name="L1843" href="#L1843">1843</a> 			String elementId = getCompositeElementId(ext);
-<a class="jxr_linenumber" name="L1844" href="#L1844">1844</a> 			<strong class="jxr_keyword">if</strong> (isNotBlank(elementId)) {
-<a class="jxr_linenumber" name="L1845" href="#L1845">1845</a> 				JsonParser.write(theEventWriter, <span class="jxr_string">"id"</span>, getCompositeElementId(ext));
-<a class="jxr_linenumber" name="L1846" href="#L1846">1846</a> 			}
+<a class="jxr_linenumber" name="L1820" href="#L1820">1820</a> 
+<a class="jxr_linenumber" name="L1821" href="#L1821">1821</a> <em class="jxr_comment">//				// Check for undeclared extensions on the declared extension</em>
+<a class="jxr_linenumber" name="L1822" href="#L1822">1822</a> <em class="jxr_comment">//				// (grrrrrr....)</em>
+<a class="jxr_linenumber" name="L1823" href="#L1823">1823</a> <em class="jxr_comment">//				if (myValue instanceof ISupportsUndeclaredExtensions) {</em>
+<a class="jxr_linenumber" name="L1824" href="#L1824">1824</a> <em class="jxr_comment">//					ISupportsUndeclaredExtensions value = (ISupportsUndeclaredExtensions)myValue;</em>
+<a class="jxr_linenumber" name="L1825" href="#L1825">1825</a> <em class="jxr_comment">//					List&lt;ExtensionDt&gt; exts = value.getUndeclaredExtensions();</em>
+<a class="jxr_linenumber" name="L1826" href="#L1826">1826</a> <em class="jxr_comment">//					if (exts.size() &gt; 0) {</em>
+<a class="jxr_linenumber" name="L1827" href="#L1827">1827</a> <em class="jxr_comment">//						ArrayList&lt;IBase&gt; newValueList = new ArrayList&lt;IBase&gt;();</em>
+<a class="jxr_linenumber" name="L1828" href="#L1828">1828</a> <em class="jxr_comment">//						newValueList.addAll(preProcessedValue);</em>
+<a class="jxr_linenumber" name="L1829" href="#L1829">1829</a> <em class="jxr_comment">//						newValueList.addAll(exts);</em>
+<a class="jxr_linenumber" name="L1830" href="#L1830">1830</a> <em class="jxr_comment">//						preProcessedValue = newValueList;</em>
+<a class="jxr_linenumber" name="L1831" href="#L1831">1831</a> <em class="jxr_comment">//					}</em>
+<a class="jxr_linenumber" name="L1832" href="#L1832">1832</a> <em class="jxr_comment">//				}</em>
+<a class="jxr_linenumber" name="L1833" href="#L1833">1833</a> 				
+<a class="jxr_linenumber" name="L1834" href="#L1834">1834</a> 				myValue = preProcessedValue.get(0);
+<a class="jxr_linenumber" name="L1835" href="#L1835">1835</a> 				
+<a class="jxr_linenumber" name="L1836" href="#L1836">1836</a> 				BaseRuntimeElementDefinition&lt;?&gt; def = myDef.getChildElementDefinitionByDatatype(myValue.getClass());
+<a class="jxr_linenumber" name="L1837" href="#L1837">1837</a> 				<strong class="jxr_keyword">if</strong> (def.getChildType() == ChildTypeEnum.RESOURCE_BLOCK) {
+<a class="jxr_linenumber" name="L1838" href="#L1838">1838</a> 					extractAndWriteExtensionsAsDirectChild(myValue, theEventWriter, def, theResDef, theResource, myChildElem);
+<a class="jxr_linenumber" name="L1839" href="#L1839">1839</a> 				} <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L1840" href="#L1840">1840</a> 					String childName = myDef.getChildNameByDatatype(myValue.getClass());
+<a class="jxr_linenumber" name="L1841" href="#L1841">1841</a> 					encodeChildElementToStreamWriter(theResDef, theResource, theEventWriter, myValue, def, childName, false, <strong class="jxr_keyword">null</strong>, false);
+<a class="jxr_linenumber" name="L1842" href="#L1842">1842</a> 				}
+<a class="jxr_linenumber" name="L1843" href="#L1843">1843</a> 
+<a class="jxr_linenumber" name="L1844" href="#L1844">1844</a> 				theEventWriter.endObject();
+<a class="jxr_linenumber" name="L1845" href="#L1845">1845</a> 			}
+<a class="jxr_linenumber" name="L1846" href="#L1846">1846</a> 		}
 <a class="jxr_linenumber" name="L1847" href="#L1847">1847</a> 
-<a class="jxr_linenumber" name="L1848" href="#L1848">1848</a> 			JsonParser.write(theEventWriter, <span class="jxr_string">"url"</span>, extensionUrl);
-<a class="jxr_linenumber" name="L1849" href="#L1849">1849</a> 
-<a class="jxr_linenumber" name="L1850" href="#L1850">1850</a> 			<strong class="jxr_keyword">boolean</strong> noValue = value == <strong class="jxr_keyword">null</strong> || value.isEmpty();
-<a class="jxr_linenumber" name="L1851" href="#L1851">1851</a> 			<strong class="jxr_keyword">if</strong> (noValue &amp;&amp; ext.getExtension().isEmpty()) {
-<a class="jxr_linenumber" name="L1852" href="#L1852">1852</a> 				ourLog.debug(<span class="jxr_string">"Extension with URL[{}] has no value"</span>, extensionUrl);
-<a class="jxr_linenumber" name="L1853" href="#L1853">1853</a> 			} <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (noValue) {
+<a class="jxr_linenumber" name="L1848" href="#L1848">1848</a> 		
+<a class="jxr_linenumber" name="L1849" href="#L1849">1849</a> 		<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> writeUndeclaredExtension(<a href="../../../../ca/uhn/fhir/context/RuntimeResourceDefinition.html">RuntimeResourceDefinition</a> theResDef, <a href="../../../../org/hl7/fhir/instance/model/api/IBaseResource.html">IBaseResource</a> theResource, <a href="../../../../ca/uhn/fhir/parser/json/JsonLikeWriter.html">JsonLikeWriter</a> theEventWriter, IBaseExtension&lt;?, ?&gt; ext) <strong class="jxr_keyword">throws</strong> IOException {
+<a class="jxr_linenumber" name="L1850" href="#L1850">1850</a> 			IBase value = ext.getValue();
+<a class="jxr_linenumber" name="L1851" href="#L1851">1851</a> 			<strong class="jxr_keyword">final</strong> String extensionUrl = getExtensionUrl(ext.getUrl());
+<a class="jxr_linenumber" name="L1852" href="#L1852">1852</a> 
+<a class="jxr_linenumber" name="L1853" href="#L1853">1853</a> 			theEventWriter.beginObject();
 <a class="jxr_linenumber" name="L1854" href="#L1854">1854</a> 
-<a class="jxr_linenumber" name="L1855" href="#L1855">1855</a> 				<strong class="jxr_keyword">if</strong> (myModifier) {
-<a class="jxr_linenumber" name="L1856" href="#L1856">1856</a> 					beginArray(theEventWriter, <span class="jxr_string">"modifierExtension"</span>);
-<a class="jxr_linenumber" name="L1857" href="#L1857">1857</a> 				} <strong class="jxr_keyword">else</strong> {
-<a class="jxr_linenumber" name="L1858" href="#L1858">1858</a> 					beginArray(theEventWriter, <span class="jxr_string">"extension"</span>);
-<a class="jxr_linenumber" name="L1859" href="#L1859">1859</a> 				}
-<a class="jxr_linenumber" name="L1860" href="#L1860">1860</a> 
-<a class="jxr_linenumber" name="L1861" href="#L1861">1861</a> 				<strong class="jxr_keyword">for</strong> (Object next : ext.getExtension()) {
-<a class="jxr_linenumber" name="L1862" href="#L1862">1862</a> 					writeUndeclaredExtension(theResDef, theResource, theEventWriter, (IBaseExtension&lt;?, ?&gt;) next);
-<a class="jxr_linenumber" name="L1863" href="#L1863">1863</a> 				}
-<a class="jxr_linenumber" name="L1864" href="#L1864">1864</a> 				theEventWriter.endArray();
-<a class="jxr_linenumber" name="L1865" href="#L1865">1865</a> 			} <strong class="jxr_keyword">else</strong> {
-<a class="jxr_linenumber" name="L1866" href="#L1866">1866</a> 
-<a class="jxr_linenumber" name="L1867" href="#L1867">1867</a> 				<em class="jxr_comment">/*</em>
-<a class="jxr_linenumber" name="L1868" href="#L1868">1868</a> <em class="jxr_comment">				 * Pre-process value - This is called in case the value is a reference</em>
-<a class="jxr_linenumber" name="L1869" href="#L1869">1869</a> <em class="jxr_comment">				 * since we might modify the text</em>
-<a class="jxr_linenumber" name="L1870" href="#L1870">1870</a> <em class="jxr_comment">				 */</em>
-<a class="jxr_linenumber" name="L1871" href="#L1871">1871</a> 				value = JsonParser.<strong class="jxr_keyword">super</strong>.preProcessValues(myDef, theResource, Collections.singletonList(value), myChildElem).get(0);
-<a class="jxr_linenumber" name="L1872" href="#L1872">1872</a> 
-<a class="jxr_linenumber" name="L1873" href="#L1873">1873</a> 				RuntimeChildUndeclaredExtensionDefinition extDef = myContext.getRuntimeChildUndeclaredExtensionDefinition();
-<a class="jxr_linenumber" name="L1874" href="#L1874">1874</a> 				String childName = extDef.getChildNameByDatatype(value.getClass());
-<a class="jxr_linenumber" name="L1875" href="#L1875">1875</a> 				<strong class="jxr_keyword">if</strong> (childName == <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L1876" href="#L1876">1876</a> 					childName = <span class="jxr_string">"value"</span> + WordUtils.capitalize(myContext.getElementDefinition(value.getClass()).getName());
+<a class="jxr_linenumber" name="L1855" href="#L1855">1855</a> 			writeCommentsPreAndPost(myUndeclaredExtension, theEventWriter);
+<a class="jxr_linenumber" name="L1856" href="#L1856">1856</a> 
+<a class="jxr_linenumber" name="L1857" href="#L1857">1857</a> 			String elementId = getCompositeElementId(ext);
+<a class="jxr_linenumber" name="L1858" href="#L1858">1858</a> 			<strong class="jxr_keyword">if</strong> (isNotBlank(elementId)) {
+<a class="jxr_linenumber" name="L1859" href="#L1859">1859</a> 				JsonParser.write(theEventWriter, <span class="jxr_string">"id"</span>, getCompositeElementId(ext));
+<a class="jxr_linenumber" name="L1860" href="#L1860">1860</a> 			}
+<a class="jxr_linenumber" name="L1861" href="#L1861">1861</a> 
+<a class="jxr_linenumber" name="L1862" href="#L1862">1862</a> 			JsonParser.write(theEventWriter, <span class="jxr_string">"url"</span>, extensionUrl);
+<a class="jxr_linenumber" name="L1863" href="#L1863">1863</a> 
+<a class="jxr_linenumber" name="L1864" href="#L1864">1864</a> 			<strong class="jxr_keyword">boolean</strong> noValue = value == <strong class="jxr_keyword">null</strong> || value.isEmpty();
+<a class="jxr_linenumber" name="L1865" href="#L1865">1865</a> 			<strong class="jxr_keyword">if</strong> (noValue &amp;&amp; ext.getExtension().isEmpty()) {
+<a class="jxr_linenumber" name="L1866" href="#L1866">1866</a> 				ourLog.debug(<span class="jxr_string">"Extension with URL[{}] has no value"</span>, extensionUrl);
+<a class="jxr_linenumber" name="L1867" href="#L1867">1867</a> 			} <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (noValue) {
+<a class="jxr_linenumber" name="L1868" href="#L1868">1868</a> 
+<a class="jxr_linenumber" name="L1869" href="#L1869">1869</a> 				<strong class="jxr_keyword">if</strong> (myModifier) {
+<a class="jxr_linenumber" name="L1870" href="#L1870">1870</a> 					beginArray(theEventWriter, <span class="jxr_string">"modifierExtension"</span>);
+<a class="jxr_linenumber" name="L1871" href="#L1871">1871</a> 				} <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L1872" href="#L1872">1872</a> 					beginArray(theEventWriter, <span class="jxr_string">"extension"</span>);
+<a class="jxr_linenumber" name="L1873" href="#L1873">1873</a> 				}
+<a class="jxr_linenumber" name="L1874" href="#L1874">1874</a> 
+<a class="jxr_linenumber" name="L1875" href="#L1875">1875</a> 				<strong class="jxr_keyword">for</strong> (Object next : ext.getExtension()) {
+<a class="jxr_linenumber" name="L1876" href="#L1876">1876</a> 					writeUndeclaredExtension(theResDef, theResource, theEventWriter, (IBaseExtension&lt;?, ?&gt;) next);
 <a class="jxr_linenumber" name="L1877" href="#L1877">1877</a> 				}
-<a class="jxr_linenumber" name="L1878" href="#L1878">1878</a> 				BaseRuntimeElementDefinition&lt;?&gt; childDef = extDef.getChildElementDefinitionByDatatype(value.getClass());
-<a class="jxr_linenumber" name="L1879" href="#L1879">1879</a> 				<strong class="jxr_keyword">if</strong> (childDef == <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L1880" href="#L1880">1880</a> 					<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../ca/uhn/fhir/context/ConfigurationException.html">ConfigurationException</a>(<span class="jxr_string">"Unable to encode extension, unregognized child element type: "</span> + value.getClass().getCanonicalName());
-<a class="jxr_linenumber" name="L1881" href="#L1881">1881</a> 				}
-<a class="jxr_linenumber" name="L1882" href="#L1882">1882</a> 				encodeChildElementToStreamWriter(theResDef, theResource, theEventWriter, value, childDef, childName, <strong class="jxr_keyword">true</strong>, <strong class="jxr_keyword">null</strong>, false);
-<a class="jxr_linenumber" name="L1883" href="#L1883">1883</a> 			}
-<a class="jxr_linenumber" name="L1884" href="#L1884">1884</a> 
-<a class="jxr_linenumber" name="L1885" href="#L1885">1885</a> 			<em class="jxr_comment">// theEventWriter.name(myUndeclaredExtension.get);</em>
+<a class="jxr_linenumber" name="L1878" href="#L1878">1878</a> 				theEventWriter.endArray();
+<a class="jxr_linenumber" name="L1879" href="#L1879">1879</a> 			} <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L1880" href="#L1880">1880</a> 
+<a class="jxr_linenumber" name="L1881" href="#L1881">1881</a> 				<em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L1882" href="#L1882">1882</a> <em class="jxr_comment">				 * Pre-process value - This is called in case the value is a reference</em>
+<a class="jxr_linenumber" name="L1883" href="#L1883">1883</a> <em class="jxr_comment">				 * since we might modify the text</em>
+<a class="jxr_linenumber" name="L1884" href="#L1884">1884</a> <em class="jxr_comment">				 */</em>
+<a class="jxr_linenumber" name="L1885" href="#L1885">1885</a> 				value = JsonParser.<strong class="jxr_keyword">super</strong>.preProcessValues(myDef, theResource, Collections.singletonList(value), myChildElem).get(0);
 <a class="jxr_linenumber" name="L1886" href="#L1886">1886</a> 
-<a class="jxr_linenumber" name="L1887" href="#L1887">1887</a> 			theEventWriter.endObject();
-<a class="jxr_linenumber" name="L1888" href="#L1888">1888</a> 		}
-<a class="jxr_linenumber" name="L1889" href="#L1889">1889</a> 
-<a class="jxr_linenumber" name="L1890" href="#L1890">1890</a> 	}
-<a class="jxr_linenumber" name="L1891" href="#L1891">1891</a> 
-<a class="jxr_linenumber" name="L1892" href="#L1892">1892</a> }
+<a class="jxr_linenumber" name="L1887" href="#L1887">1887</a> 				RuntimeChildUndeclaredExtensionDefinition extDef = myContext.getRuntimeChildUndeclaredExtensionDefinition();
+<a class="jxr_linenumber" name="L1888" href="#L1888">1888</a> 				String childName = extDef.getChildNameByDatatype(value.getClass());
+<a class="jxr_linenumber" name="L1889" href="#L1889">1889</a> 				<strong class="jxr_keyword">if</strong> (childName == <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L1890" href="#L1890">1890</a> 					childName = <span class="jxr_string">"value"</span> + WordUtils.capitalize(myContext.getElementDefinition(value.getClass()).getName());
+<a class="jxr_linenumber" name="L1891" href="#L1891">1891</a> 				}
+<a class="jxr_linenumber" name="L1892" href="#L1892">1892</a> 				BaseRuntimeElementDefinition&lt;?&gt; childDef = extDef.getChildElementDefinitionByDatatype(value.getClass());
+<a class="jxr_linenumber" name="L1893" href="#L1893">1893</a> 				<strong class="jxr_keyword">if</strong> (childDef == <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L1894" href="#L1894">1894</a> 					<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../ca/uhn/fhir/context/ConfigurationException.html">ConfigurationException</a>(<span class="jxr_string">"Unable to encode extension, unregognized child element type: "</span> + value.getClass().getCanonicalName());
+<a class="jxr_linenumber" name="L1895" href="#L1895">1895</a> 				}
+<a class="jxr_linenumber" name="L1896" href="#L1896">1896</a> 				encodeChildElementToStreamWriter(theResDef, theResource, theEventWriter, value, childDef, childName, <strong class="jxr_keyword">true</strong>, <strong class="jxr_keyword">null</strong>, false);
+<a class="jxr_linenumber" name="L1897" href="#L1897">1897</a> 			}
+<a class="jxr_linenumber" name="L1898" href="#L1898">1898</a> 
+<a class="jxr_linenumber" name="L1899" href="#L1899">1899</a> 			<em class="jxr_comment">// theEventWriter.name(myUndeclaredExtension.get);</em>
+<a class="jxr_linenumber" name="L1900" href="#L1900">1900</a> 
+<a class="jxr_linenumber" name="L1901" href="#L1901">1901</a> 			theEventWriter.endObject();
+<a class="jxr_linenumber" name="L1902" href="#L1902">1902</a> 		}
+<a class="jxr_linenumber" name="L1903" href="#L1903">1903</a> 
+<a class="jxr_linenumber" name="L1904" href="#L1904">1904</a> 	}
+<a class="jxr_linenumber" name="L1905" href="#L1905">1905</a> 
+<a class="jxr_linenumber" name="L1906" href="#L1906">1906</a> }
 </pre>
 <hr/>
 <div id="footer">Copyright &#169; 2014&#x2013;2017 <a href="http://www.uhn.ca">University Health Network</a>. All rights reserved.</div>

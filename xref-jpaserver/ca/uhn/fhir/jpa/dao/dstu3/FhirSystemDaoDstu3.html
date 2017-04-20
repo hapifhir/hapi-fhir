@@ -463,254 +463,257 @@
 <a class="jxr_linenumber" name="L455" href="#L455">455</a> 				entriesToProcess.put(nextRespEntry, outcome.getEntity());
 <a class="jxr_linenumber" name="L456" href="#L456">456</a> 				<strong class="jxr_keyword">break</strong>;
 <a class="jxr_linenumber" name="L457" href="#L457">457</a> 			}
-<a class="jxr_linenumber" name="L458" href="#L458">458</a> 			}
-<a class="jxr_linenumber" name="L459" href="#L459">459</a> 		}
-<a class="jxr_linenumber" name="L460" href="#L460">460</a> 
-<a class="jxr_linenumber" name="L461" href="#L461">461</a> 		<em class="jxr_comment">/*</em>
-<a class="jxr_linenumber" name="L462" href="#L462">462</a> <em class="jxr_comment">		 * Make sure that there are no conflicts from deletions. E.g. we can't delete something</em>
-<a class="jxr_linenumber" name="L463" href="#L463">463</a> <em class="jxr_comment">		 * if something else has a reference to it.. Unless the thing that has a reference to it</em>
-<a class="jxr_linenumber" name="L464" href="#L464">464</a> <em class="jxr_comment">		 * was also deleted as a part of this transaction, which is why we check this now at the</em>
-<a class="jxr_linenumber" name="L465" href="#L465">465</a> <em class="jxr_comment">		 * end.</em>
-<a class="jxr_linenumber" name="L466" href="#L466">466</a> <em class="jxr_comment">		 */</em>
-<a class="jxr_linenumber" name="L467" href="#L467">467</a> 
-<a class="jxr_linenumber" name="L468" href="#L468">468</a> 		<strong class="jxr_keyword">for</strong> (Iterator&lt;DeleteConflict&gt; iter = deleteConflicts.iterator(); iter.hasNext();) {
-<a class="jxr_linenumber" name="L469" href="#L469">469</a> 			DeleteConflict next = iter.next();
-<a class="jxr_linenumber" name="L470" href="#L470">470</a> 			<strong class="jxr_keyword">if</strong> (deletedResources.contains(next.getTargetId().toUnqualifiedVersionless().getValue())) {
-<a class="jxr_linenumber" name="L471" href="#L471">471</a> 				iter.remove();
-<a class="jxr_linenumber" name="L472" href="#L472">472</a> 			}
-<a class="jxr_linenumber" name="L473" href="#L473">473</a> 		}
-<a class="jxr_linenumber" name="L474" href="#L474">474</a> 		validateDeleteConflictsEmptyOrThrowException(deleteConflicts);
-<a class="jxr_linenumber" name="L475" href="#L475">475</a> 
-<a class="jxr_linenumber" name="L476" href="#L476">476</a> 		<em class="jxr_comment">/*</em>
-<a class="jxr_linenumber" name="L477" href="#L477">477</a> <em class="jxr_comment">		 * Perform ID substitutions and then index each resource we have saved</em>
-<a class="jxr_linenumber" name="L478" href="#L478">478</a> <em class="jxr_comment">		 */</em>
-<a class="jxr_linenumber" name="L479" href="#L479">479</a> 
-<a class="jxr_linenumber" name="L480" href="#L480">480</a> 		FhirTerser terser = getContext().newTerser();
-<a class="jxr_linenumber" name="L481" href="#L481">481</a> 		<strong class="jxr_keyword">for</strong> (DaoMethodOutcome nextOutcome : idToPersistedOutcome.values()) {
-<a class="jxr_linenumber" name="L482" href="#L482">482</a> 			IBaseResource nextResource = nextOutcome.getResource();
-<a class="jxr_linenumber" name="L483" href="#L483">483</a> 			<strong class="jxr_keyword">if</strong> (nextResource == <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L484" href="#L484">484</a> 				<strong class="jxr_keyword">continue</strong>;
-<a class="jxr_linenumber" name="L485" href="#L485">485</a> 			}
-<a class="jxr_linenumber" name="L486" href="#L486">486</a> 
-<a class="jxr_linenumber" name="L487" href="#L487">487</a> 			List&lt;IBaseReference&gt; allRefs = terser.getAllPopulatedChildElementsOfType(nextResource, IBaseReference.<strong class="jxr_keyword">class</strong>);
-<a class="jxr_linenumber" name="L488" href="#L488">488</a> 			<strong class="jxr_keyword">for</strong> (IBaseReference nextRef : allRefs) {
-<a class="jxr_linenumber" name="L489" href="#L489">489</a> 				IIdType nextId = nextRef.getReferenceElement();
-<a class="jxr_linenumber" name="L490" href="#L490">490</a> 				<strong class="jxr_keyword">if</strong> (!nextId.hasIdPart()) {
-<a class="jxr_linenumber" name="L491" href="#L491">491</a> 					<strong class="jxr_keyword">continue</strong>;
-<a class="jxr_linenumber" name="L492" href="#L492">492</a> 				}
-<a class="jxr_linenumber" name="L493" href="#L493">493</a> 				<strong class="jxr_keyword">if</strong> (idSubstitutions.containsKey(nextId)) {
-<a class="jxr_linenumber" name="L494" href="#L494">494</a> 					IdType newId = idSubstitutions.get(nextId);
-<a class="jxr_linenumber" name="L495" href="#L495">495</a> 					ourLog.info(<span class="jxr_string">" * Replacing resource ref {} with {}"</span>, nextId, newId);
-<a class="jxr_linenumber" name="L496" href="#L496">496</a> 					nextRef.setReference(newId.getValue());
-<a class="jxr_linenumber" name="L497" href="#L497">497</a> 				} <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (nextId.getValue().startsWith(<span class="jxr_string">"urn:"</span>)) {
-<a class="jxr_linenumber" name="L498" href="#L498">498</a> 					<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> InvalidRequestException(<span class="jxr_string">"Unable to satisfy placeholder ID: "</span> + nextId.getValue());
-<a class="jxr_linenumber" name="L499" href="#L499">499</a> 				} <strong class="jxr_keyword">else</strong> {
-<a class="jxr_linenumber" name="L500" href="#L500">500</a> 					ourLog.debug(<span class="jxr_string">" * Reference [{}] does not exist in bundle"</span>, nextId);
-<a class="jxr_linenumber" name="L501" href="#L501">501</a> 				}
-<a class="jxr_linenumber" name="L502" href="#L502">502</a> 			}
-<a class="jxr_linenumber" name="L503" href="#L503">503</a> 
-<a class="jxr_linenumber" name="L504" href="#L504">504</a> 			IPrimitiveType&lt;Date&gt; deletedInstantOrNull = ResourceMetadataKeyEnum.DELETED_AT.get((IAnyResource) nextResource);
-<a class="jxr_linenumber" name="L505" href="#L505">505</a> 			Date deletedTimestampOrNull = deletedInstantOrNull != <strong class="jxr_keyword">null</strong> ? deletedInstantOrNull.getValue() : <strong class="jxr_keyword">null</strong>;
-<a class="jxr_linenumber" name="L506" href="#L506">506</a> 			<strong class="jxr_keyword">boolean</strong> shouldUpdate = !nonUpdatedEntities.contains(nextOutcome.getEntity());
-<a class="jxr_linenumber" name="L507" href="#L507">507</a> 			<strong class="jxr_keyword">if</strong> (shouldUpdate) {
-<a class="jxr_linenumber" name="L508" href="#L508">508</a> 				updateEntity(nextResource, nextOutcome.getEntity(), deletedTimestampOrNull, shouldUpdate, <strong class="jxr_keyword">true</strong>, updateTime);
-<a class="jxr_linenumber" name="L509" href="#L509">509</a> 			}
-<a class="jxr_linenumber" name="L510" href="#L510">510</a> 		}
-<a class="jxr_linenumber" name="L511" href="#L511">511</a> 
-<a class="jxr_linenumber" name="L512" href="#L512">512</a> 		myEntityManager.flush();
-<a class="jxr_linenumber" name="L513" href="#L513">513</a> 
-<a class="jxr_linenumber" name="L514" href="#L514">514</a> 		<em class="jxr_comment">/*</em>
-<a class="jxr_linenumber" name="L515" href="#L515">515</a> <em class="jxr_comment">		 * Double check we didn't allow any duplicates we shouldn't have</em>
-<a class="jxr_linenumber" name="L516" href="#L516">516</a> <em class="jxr_comment">		 */</em>
-<a class="jxr_linenumber" name="L517" href="#L517">517</a> 		<strong class="jxr_keyword">for</strong> (BundleEntryComponent nextEntry : theRequest.getEntry()) {
-<a class="jxr_linenumber" name="L518" href="#L518">518</a> 			<strong class="jxr_keyword">if</strong> (nextEntry.getRequest().getMethodElement().getValue() == HTTPVerb.POST) {
-<a class="jxr_linenumber" name="L519" href="#L519">519</a> 				String matchUrl = nextEntry.getRequest().getIfNoneExist();
-<a class="jxr_linenumber" name="L520" href="#L520">520</a> 				<strong class="jxr_keyword">if</strong> (isNotBlank(matchUrl)) {
-<a class="jxr_linenumber" name="L521" href="#L521">521</a> 					IFhirResourceDao&lt;?&gt; resourceDao = getDao(nextEntry.getResource().getClass());
-<a class="jxr_linenumber" name="L522" href="#L522">522</a> 					Set&lt;Long&gt; val = resourceDao.processMatchUrl(matchUrl);
-<a class="jxr_linenumber" name="L523" href="#L523">523</a> 					<strong class="jxr_keyword">if</strong> (val.size() &gt; 1) {
-<a class="jxr_linenumber" name="L524" href="#L524">524</a> 						<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> InvalidRequestException(
-<a class="jxr_linenumber" name="L525" href="#L525">525</a> 								<span class="jxr_string">"Unable to process "</span> + theActionName + <span class="jxr_string">" - Request would cause multiple resources to match URL: \&quot;"</span> + matchUrl + <span class="jxr_string">"\&quot;. Does transaction request contain duplicates?"</span>);
-<a class="jxr_linenumber" name="L526" href="#L526">526</a> 					}
-<a class="jxr_linenumber" name="L527" href="#L527">527</a> 				}
-<a class="jxr_linenumber" name="L528" href="#L528">528</a> 			}
-<a class="jxr_linenumber" name="L529" href="#L529">529</a> 		}
-<a class="jxr_linenumber" name="L530" href="#L530">530</a> 
-<a class="jxr_linenumber" name="L531" href="#L531">531</a> 		<strong class="jxr_keyword">for</strong> (IdType next : allIds) {
-<a class="jxr_linenumber" name="L532" href="#L532">532</a> 			IdType replacement = idSubstitutions.get(next);
-<a class="jxr_linenumber" name="L533" href="#L533">533</a> 			<strong class="jxr_keyword">if</strong> (replacement == <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L534" href="#L534">534</a> 				<strong class="jxr_keyword">continue</strong>;
-<a class="jxr_linenumber" name="L535" href="#L535">535</a> 			}
-<a class="jxr_linenumber" name="L536" href="#L536">536</a> 			<strong class="jxr_keyword">if</strong> (replacement.equals(next)) {
+<a class="jxr_linenumber" name="L458" href="#L458">458</a> 			<strong class="jxr_keyword">case</strong> GET:
+<a class="jxr_linenumber" name="L459" href="#L459">459</a> 			<strong class="jxr_keyword">case</strong> NULL:
+<a class="jxr_linenumber" name="L460" href="#L460">460</a> 				<strong class="jxr_keyword">break</strong>;
+<a class="jxr_linenumber" name="L461" href="#L461">461</a> 			}
+<a class="jxr_linenumber" name="L462" href="#L462">462</a> 		}
+<a class="jxr_linenumber" name="L463" href="#L463">463</a> 
+<a class="jxr_linenumber" name="L464" href="#L464">464</a> 		<em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L465" href="#L465">465</a> <em class="jxr_comment">		 * Make sure that there are no conflicts from deletions. E.g. we can't delete something</em>
+<a class="jxr_linenumber" name="L466" href="#L466">466</a> <em class="jxr_comment">		 * if something else has a reference to it.. Unless the thing that has a reference to it</em>
+<a class="jxr_linenumber" name="L467" href="#L467">467</a> <em class="jxr_comment">		 * was also deleted as a part of this transaction, which is why we check this now at the</em>
+<a class="jxr_linenumber" name="L468" href="#L468">468</a> <em class="jxr_comment">		 * end.</em>
+<a class="jxr_linenumber" name="L469" href="#L469">469</a> <em class="jxr_comment">		 */</em>
+<a class="jxr_linenumber" name="L470" href="#L470">470</a> 
+<a class="jxr_linenumber" name="L471" href="#L471">471</a> 		<strong class="jxr_keyword">for</strong> (Iterator&lt;DeleteConflict&gt; iter = deleteConflicts.iterator(); iter.hasNext();) {
+<a class="jxr_linenumber" name="L472" href="#L472">472</a> 			DeleteConflict next = iter.next();
+<a class="jxr_linenumber" name="L473" href="#L473">473</a> 			<strong class="jxr_keyword">if</strong> (deletedResources.contains(next.getTargetId().toUnqualifiedVersionless().getValue())) {
+<a class="jxr_linenumber" name="L474" href="#L474">474</a> 				iter.remove();
+<a class="jxr_linenumber" name="L475" href="#L475">475</a> 			}
+<a class="jxr_linenumber" name="L476" href="#L476">476</a> 		}
+<a class="jxr_linenumber" name="L477" href="#L477">477</a> 		validateDeleteConflictsEmptyOrThrowException(deleteConflicts);
+<a class="jxr_linenumber" name="L478" href="#L478">478</a> 
+<a class="jxr_linenumber" name="L479" href="#L479">479</a> 		<em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L480" href="#L480">480</a> <em class="jxr_comment">		 * Perform ID substitutions and then index each resource we have saved</em>
+<a class="jxr_linenumber" name="L481" href="#L481">481</a> <em class="jxr_comment">		 */</em>
+<a class="jxr_linenumber" name="L482" href="#L482">482</a> 
+<a class="jxr_linenumber" name="L483" href="#L483">483</a> 		FhirTerser terser = getContext().newTerser();
+<a class="jxr_linenumber" name="L484" href="#L484">484</a> 		<strong class="jxr_keyword">for</strong> (DaoMethodOutcome nextOutcome : idToPersistedOutcome.values()) {
+<a class="jxr_linenumber" name="L485" href="#L485">485</a> 			IBaseResource nextResource = nextOutcome.getResource();
+<a class="jxr_linenumber" name="L486" href="#L486">486</a> 			<strong class="jxr_keyword">if</strong> (nextResource == <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L487" href="#L487">487</a> 				<strong class="jxr_keyword">continue</strong>;
+<a class="jxr_linenumber" name="L488" href="#L488">488</a> 			}
+<a class="jxr_linenumber" name="L489" href="#L489">489</a> 
+<a class="jxr_linenumber" name="L490" href="#L490">490</a> 			List&lt;IBaseReference&gt; allRefs = terser.getAllPopulatedChildElementsOfType(nextResource, IBaseReference.<strong class="jxr_keyword">class</strong>);
+<a class="jxr_linenumber" name="L491" href="#L491">491</a> 			<strong class="jxr_keyword">for</strong> (IBaseReference nextRef : allRefs) {
+<a class="jxr_linenumber" name="L492" href="#L492">492</a> 				IIdType nextId = nextRef.getReferenceElement();
+<a class="jxr_linenumber" name="L493" href="#L493">493</a> 				<strong class="jxr_keyword">if</strong> (!nextId.hasIdPart()) {
+<a class="jxr_linenumber" name="L494" href="#L494">494</a> 					<strong class="jxr_keyword">continue</strong>;
+<a class="jxr_linenumber" name="L495" href="#L495">495</a> 				}
+<a class="jxr_linenumber" name="L496" href="#L496">496</a> 				<strong class="jxr_keyword">if</strong> (idSubstitutions.containsKey(nextId)) {
+<a class="jxr_linenumber" name="L497" href="#L497">497</a> 					IdType newId = idSubstitutions.get(nextId);
+<a class="jxr_linenumber" name="L498" href="#L498">498</a> 					ourLog.info(<span class="jxr_string">" * Replacing resource ref {} with {}"</span>, nextId, newId);
+<a class="jxr_linenumber" name="L499" href="#L499">499</a> 					nextRef.setReference(newId.getValue());
+<a class="jxr_linenumber" name="L500" href="#L500">500</a> 				} <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (nextId.getValue().startsWith(<span class="jxr_string">"urn:"</span>)) {
+<a class="jxr_linenumber" name="L501" href="#L501">501</a> 					<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> InvalidRequestException(<span class="jxr_string">"Unable to satisfy placeholder ID: "</span> + nextId.getValue());
+<a class="jxr_linenumber" name="L502" href="#L502">502</a> 				} <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L503" href="#L503">503</a> 					ourLog.debug(<span class="jxr_string">" * Reference [{}] does not exist in bundle"</span>, nextId);
+<a class="jxr_linenumber" name="L504" href="#L504">504</a> 				}
+<a class="jxr_linenumber" name="L505" href="#L505">505</a> 			}
+<a class="jxr_linenumber" name="L506" href="#L506">506</a> 
+<a class="jxr_linenumber" name="L507" href="#L507">507</a> 			IPrimitiveType&lt;Date&gt; deletedInstantOrNull = ResourceMetadataKeyEnum.DELETED_AT.get((IAnyResource) nextResource);
+<a class="jxr_linenumber" name="L508" href="#L508">508</a> 			Date deletedTimestampOrNull = deletedInstantOrNull != <strong class="jxr_keyword">null</strong> ? deletedInstantOrNull.getValue() : <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L509" href="#L509">509</a> 			<strong class="jxr_keyword">boolean</strong> shouldUpdate = !nonUpdatedEntities.contains(nextOutcome.getEntity());
+<a class="jxr_linenumber" name="L510" href="#L510">510</a> 			<strong class="jxr_keyword">if</strong> (shouldUpdate) {
+<a class="jxr_linenumber" name="L511" href="#L511">511</a> 				updateEntity(nextResource, nextOutcome.getEntity(), deletedTimestampOrNull, shouldUpdate, <strong class="jxr_keyword">true</strong>, updateTime);
+<a class="jxr_linenumber" name="L512" href="#L512">512</a> 			}
+<a class="jxr_linenumber" name="L513" href="#L513">513</a> 		}
+<a class="jxr_linenumber" name="L514" href="#L514">514</a> 
+<a class="jxr_linenumber" name="L515" href="#L515">515</a> 		myEntityManager.flush();
+<a class="jxr_linenumber" name="L516" href="#L516">516</a> 
+<a class="jxr_linenumber" name="L517" href="#L517">517</a> 		<em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L518" href="#L518">518</a> <em class="jxr_comment">		 * Double check we didn't allow any duplicates we shouldn't have</em>
+<a class="jxr_linenumber" name="L519" href="#L519">519</a> <em class="jxr_comment">		 */</em>
+<a class="jxr_linenumber" name="L520" href="#L520">520</a> 		<strong class="jxr_keyword">for</strong> (BundleEntryComponent nextEntry : theRequest.getEntry()) {
+<a class="jxr_linenumber" name="L521" href="#L521">521</a> 			<strong class="jxr_keyword">if</strong> (nextEntry.getRequest().getMethodElement().getValue() == HTTPVerb.POST) {
+<a class="jxr_linenumber" name="L522" href="#L522">522</a> 				String matchUrl = nextEntry.getRequest().getIfNoneExist();
+<a class="jxr_linenumber" name="L523" href="#L523">523</a> 				<strong class="jxr_keyword">if</strong> (isNotBlank(matchUrl)) {
+<a class="jxr_linenumber" name="L524" href="#L524">524</a> 					IFhirResourceDao&lt;?&gt; resourceDao = getDao(nextEntry.getResource().getClass());
+<a class="jxr_linenumber" name="L525" href="#L525">525</a> 					Set&lt;Long&gt; val = resourceDao.processMatchUrl(matchUrl);
+<a class="jxr_linenumber" name="L526" href="#L526">526</a> 					<strong class="jxr_keyword">if</strong> (val.size() &gt; 1) {
+<a class="jxr_linenumber" name="L527" href="#L527">527</a> 						<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> InvalidRequestException(
+<a class="jxr_linenumber" name="L528" href="#L528">528</a> 								<span class="jxr_string">"Unable to process "</span> + theActionName + <span class="jxr_string">" - Request would cause multiple resources to match URL: \&quot;"</span> + matchUrl + <span class="jxr_string">"\&quot;. Does transaction request contain duplicates?"</span>);
+<a class="jxr_linenumber" name="L529" href="#L529">529</a> 					}
+<a class="jxr_linenumber" name="L530" href="#L530">530</a> 				}
+<a class="jxr_linenumber" name="L531" href="#L531">531</a> 			}
+<a class="jxr_linenumber" name="L532" href="#L532">532</a> 		}
+<a class="jxr_linenumber" name="L533" href="#L533">533</a> 
+<a class="jxr_linenumber" name="L534" href="#L534">534</a> 		<strong class="jxr_keyword">for</strong> (IdType next : allIds) {
+<a class="jxr_linenumber" name="L535" href="#L535">535</a> 			IdType replacement = idSubstitutions.get(next);
+<a class="jxr_linenumber" name="L536" href="#L536">536</a> 			<strong class="jxr_keyword">if</strong> (replacement == <strong class="jxr_keyword">null</strong>) {
 <a class="jxr_linenumber" name="L537" href="#L537">537</a> 				<strong class="jxr_keyword">continue</strong>;
 <a class="jxr_linenumber" name="L538" href="#L538">538</a> 			}
-<a class="jxr_linenumber" name="L539" href="#L539">539</a> 			ourLog.info(<span class="jxr_string">"Placeholder resource ID \&quot;{}\&quot; was replaced with permanent ID \&quot;{}\&quot;"</span>, next, replacement);
-<a class="jxr_linenumber" name="L540" href="#L540">540</a> 		}
-<a class="jxr_linenumber" name="L541" href="#L541">541</a> 
-<a class="jxr_linenumber" name="L542" href="#L542">542</a> 		<em class="jxr_comment">/*</em>
-<a class="jxr_linenumber" name="L543" href="#L543">543</a> <em class="jxr_comment">		 * Loop through the request and process any entries of type GET</em>
-<a class="jxr_linenumber" name="L544" href="#L544">544</a> <em class="jxr_comment">		 */</em>
-<a class="jxr_linenumber" name="L545" href="#L545">545</a> 		<strong class="jxr_keyword">for</strong> (<strong class="jxr_keyword">int</strong> i = 0; i &lt; getEntries.size(); i++) {
-<a class="jxr_linenumber" name="L546" href="#L546">546</a> 			BundleEntryComponent nextReqEntry = getEntries.get(i);
-<a class="jxr_linenumber" name="L547" href="#L547">547</a> 			Integer originalOrder = originalRequestOrder.get(nextReqEntry);
-<a class="jxr_linenumber" name="L548" href="#L548">548</a> 			BundleEntryComponent nextRespEntry = response.getEntry().get(originalOrder);
-<a class="jxr_linenumber" name="L549" href="#L549">549</a> 
-<a class="jxr_linenumber" name="L550" href="#L550">550</a> 			ServletSubRequestDetails requestDetails = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/jpa/provider/ServletSubRequestDetails.html">ServletSubRequestDetails</a>();
-<a class="jxr_linenumber" name="L551" href="#L551">551</a> 			requestDetails.setServletRequest(theRequestDetails.getServletRequest());
-<a class="jxr_linenumber" name="L552" href="#L552">552</a> 			requestDetails.setRequestType(RequestTypeEnum.GET);
-<a class="jxr_linenumber" name="L553" href="#L553">553</a> 			requestDetails.setServer(theRequestDetails.getServer());
-<a class="jxr_linenumber" name="L554" href="#L554">554</a> 
-<a class="jxr_linenumber" name="L555" href="#L555">555</a> 			String url = extractTransactionUrlOrThrowException(nextReqEntry, HTTPVerb.GET);
-<a class="jxr_linenumber" name="L556" href="#L556">556</a> 
-<a class="jxr_linenumber" name="L557" href="#L557">557</a> 			<strong class="jxr_keyword">int</strong> qIndex = url.indexOf('?');
-<a class="jxr_linenumber" name="L558" href="#L558">558</a> 			ArrayListMultimap&lt;String, String&gt; paramValues = ArrayListMultimap.create();
-<a class="jxr_linenumber" name="L559" href="#L559">559</a> 			requestDetails.setParameters(<strong class="jxr_keyword">new</strong> HashMap&lt;String, String[]&gt;());
-<a class="jxr_linenumber" name="L560" href="#L560">560</a> 			<strong class="jxr_keyword">if</strong> (qIndex != -1) {
-<a class="jxr_linenumber" name="L561" href="#L561">561</a> 				String params = url.substring(qIndex);
-<a class="jxr_linenumber" name="L562" href="#L562">562</a> 				List&lt;NameValuePair&gt; parameters = translateMatchUrl(params);
-<a class="jxr_linenumber" name="L563" href="#L563">563</a> 				<strong class="jxr_keyword">for</strong> (NameValuePair next : parameters) {
-<a class="jxr_linenumber" name="L564" href="#L564">564</a> 					paramValues.put(next.getName(), next.getValue());
-<a class="jxr_linenumber" name="L565" href="#L565">565</a> 				}
-<a class="jxr_linenumber" name="L566" href="#L566">566</a> 				<strong class="jxr_keyword">for</strong> (java.util.Map.Entry&lt;String, Collection&lt;String&gt;&gt; nextParamEntry : paramValues.asMap().entrySet()) {
-<a class="jxr_linenumber" name="L567" href="#L567">567</a> 					String[] nextValue = nextParamEntry.getValue().toArray(<strong class="jxr_keyword">new</strong> String[nextParamEntry.getValue().size()]);
-<a class="jxr_linenumber" name="L568" href="#L568">568</a> 					requestDetails.getParameters().put(nextParamEntry.getKey(), nextValue);
-<a class="jxr_linenumber" name="L569" href="#L569">569</a> 				}
-<a class="jxr_linenumber" name="L570" href="#L570">570</a> 				url = url.substring(0, qIndex);
-<a class="jxr_linenumber" name="L571" href="#L571">571</a> 			}
-<a class="jxr_linenumber" name="L572" href="#L572">572</a> 
-<a class="jxr_linenumber" name="L573" href="#L573">573</a> 			requestDetails.setRequestPath(url);
-<a class="jxr_linenumber" name="L574" href="#L574">574</a> 			requestDetails.setFhirServerBase(theRequestDetails.getFhirServerBase());
+<a class="jxr_linenumber" name="L539" href="#L539">539</a> 			<strong class="jxr_keyword">if</strong> (replacement.equals(next)) {
+<a class="jxr_linenumber" name="L540" href="#L540">540</a> 				<strong class="jxr_keyword">continue</strong>;
+<a class="jxr_linenumber" name="L541" href="#L541">541</a> 			}
+<a class="jxr_linenumber" name="L542" href="#L542">542</a> 			ourLog.info(<span class="jxr_string">"Placeholder resource ID \&quot;{}\&quot; was replaced with permanent ID \&quot;{}\&quot;"</span>, next, replacement);
+<a class="jxr_linenumber" name="L543" href="#L543">543</a> 		}
+<a class="jxr_linenumber" name="L544" href="#L544">544</a> 
+<a class="jxr_linenumber" name="L545" href="#L545">545</a> 		<em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L546" href="#L546">546</a> <em class="jxr_comment">		 * Loop through the request and process any entries of type GET</em>
+<a class="jxr_linenumber" name="L547" href="#L547">547</a> <em class="jxr_comment">		 */</em>
+<a class="jxr_linenumber" name="L548" href="#L548">548</a> 		<strong class="jxr_keyword">for</strong> (<strong class="jxr_keyword">int</strong> i = 0; i &lt; getEntries.size(); i++) {
+<a class="jxr_linenumber" name="L549" href="#L549">549</a> 			BundleEntryComponent nextReqEntry = getEntries.get(i);
+<a class="jxr_linenumber" name="L550" href="#L550">550</a> 			Integer originalOrder = originalRequestOrder.get(nextReqEntry);
+<a class="jxr_linenumber" name="L551" href="#L551">551</a> 			BundleEntryComponent nextRespEntry = response.getEntry().get(originalOrder);
+<a class="jxr_linenumber" name="L552" href="#L552">552</a> 
+<a class="jxr_linenumber" name="L553" href="#L553">553</a> 			ServletSubRequestDetails requestDetails = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/jpa/provider/ServletSubRequestDetails.html">ServletSubRequestDetails</a>();
+<a class="jxr_linenumber" name="L554" href="#L554">554</a> 			requestDetails.setServletRequest(theRequestDetails.getServletRequest());
+<a class="jxr_linenumber" name="L555" href="#L555">555</a> 			requestDetails.setRequestType(RequestTypeEnum.GET);
+<a class="jxr_linenumber" name="L556" href="#L556">556</a> 			requestDetails.setServer(theRequestDetails.getServer());
+<a class="jxr_linenumber" name="L557" href="#L557">557</a> 
+<a class="jxr_linenumber" name="L558" href="#L558">558</a> 			String url = extractTransactionUrlOrThrowException(nextReqEntry, HTTPVerb.GET);
+<a class="jxr_linenumber" name="L559" href="#L559">559</a> 
+<a class="jxr_linenumber" name="L560" href="#L560">560</a> 			<strong class="jxr_keyword">int</strong> qIndex = url.indexOf('?');
+<a class="jxr_linenumber" name="L561" href="#L561">561</a> 			ArrayListMultimap&lt;String, String&gt; paramValues = ArrayListMultimap.create();
+<a class="jxr_linenumber" name="L562" href="#L562">562</a> 			requestDetails.setParameters(<strong class="jxr_keyword">new</strong> HashMap&lt;String, String[]&gt;());
+<a class="jxr_linenumber" name="L563" href="#L563">563</a> 			<strong class="jxr_keyword">if</strong> (qIndex != -1) {
+<a class="jxr_linenumber" name="L564" href="#L564">564</a> 				String params = url.substring(qIndex);
+<a class="jxr_linenumber" name="L565" href="#L565">565</a> 				List&lt;NameValuePair&gt; parameters = translateMatchUrl(params);
+<a class="jxr_linenumber" name="L566" href="#L566">566</a> 				<strong class="jxr_keyword">for</strong> (NameValuePair next : parameters) {
+<a class="jxr_linenumber" name="L567" href="#L567">567</a> 					paramValues.put(next.getName(), next.getValue());
+<a class="jxr_linenumber" name="L568" href="#L568">568</a> 				}
+<a class="jxr_linenumber" name="L569" href="#L569">569</a> 				<strong class="jxr_keyword">for</strong> (java.util.Map.Entry&lt;String, Collection&lt;String&gt;&gt; nextParamEntry : paramValues.asMap().entrySet()) {
+<a class="jxr_linenumber" name="L570" href="#L570">570</a> 					String[] nextValue = nextParamEntry.getValue().toArray(<strong class="jxr_keyword">new</strong> String[nextParamEntry.getValue().size()]);
+<a class="jxr_linenumber" name="L571" href="#L571">571</a> 					requestDetails.getParameters().put(nextParamEntry.getKey(), nextValue);
+<a class="jxr_linenumber" name="L572" href="#L572">572</a> 				}
+<a class="jxr_linenumber" name="L573" href="#L573">573</a> 				url = url.substring(0, qIndex);
+<a class="jxr_linenumber" name="L574" href="#L574">574</a> 			}
 <a class="jxr_linenumber" name="L575" href="#L575">575</a> 
-<a class="jxr_linenumber" name="L576" href="#L576">576</a> 			theRequestDetails.getServer().populateRequestDetailsFromRequestPath(requestDetails, url);
-<a class="jxr_linenumber" name="L577" href="#L577">577</a> 			BaseMethodBinding&lt;?&gt; method = theRequestDetails.getServer().determineResourceMethod(requestDetails, url);
-<a class="jxr_linenumber" name="L578" href="#L578">578</a> 			<strong class="jxr_keyword">if</strong> (method == <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L579" href="#L579">579</a> 				<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> IllegalArgumentException(<span class="jxr_string">"Unable to handle GET "</span> + url);
-<a class="jxr_linenumber" name="L580" href="#L580">580</a> 			}
-<a class="jxr_linenumber" name="L581" href="#L581">581</a> 
-<a class="jxr_linenumber" name="L582" href="#L582">582</a> 			<strong class="jxr_keyword">if</strong> (isNotBlank(nextReqEntry.getRequest().getIfMatch())) {
-<a class="jxr_linenumber" name="L583" href="#L583">583</a> 				requestDetails.addHeader(Constants.HEADER_IF_MATCH, nextReqEntry.getRequest().getIfMatch());
-<a class="jxr_linenumber" name="L584" href="#L584">584</a> 			}
-<a class="jxr_linenumber" name="L585" href="#L585">585</a> 			<strong class="jxr_keyword">if</strong> (isNotBlank(nextReqEntry.getRequest().getIfNoneExist())) {
-<a class="jxr_linenumber" name="L586" href="#L586">586</a> 				requestDetails.addHeader(Constants.HEADER_IF_NONE_EXIST, nextReqEntry.getRequest().getIfNoneExist());
+<a class="jxr_linenumber" name="L576" href="#L576">576</a> 			requestDetails.setRequestPath(url);
+<a class="jxr_linenumber" name="L577" href="#L577">577</a> 			requestDetails.setFhirServerBase(theRequestDetails.getFhirServerBase());
+<a class="jxr_linenumber" name="L578" href="#L578">578</a> 
+<a class="jxr_linenumber" name="L579" href="#L579">579</a> 			theRequestDetails.getServer().populateRequestDetailsFromRequestPath(requestDetails, url);
+<a class="jxr_linenumber" name="L580" href="#L580">580</a> 			BaseMethodBinding&lt;?&gt; method = theRequestDetails.getServer().determineResourceMethod(requestDetails, url);
+<a class="jxr_linenumber" name="L581" href="#L581">581</a> 			<strong class="jxr_keyword">if</strong> (method == <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L582" href="#L582">582</a> 				<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> IllegalArgumentException(<span class="jxr_string">"Unable to handle GET "</span> + url);
+<a class="jxr_linenumber" name="L583" href="#L583">583</a> 			}
+<a class="jxr_linenumber" name="L584" href="#L584">584</a> 
+<a class="jxr_linenumber" name="L585" href="#L585">585</a> 			<strong class="jxr_keyword">if</strong> (isNotBlank(nextReqEntry.getRequest().getIfMatch())) {
+<a class="jxr_linenumber" name="L586" href="#L586">586</a> 				requestDetails.addHeader(Constants.HEADER_IF_MATCH, nextReqEntry.getRequest().getIfMatch());
 <a class="jxr_linenumber" name="L587" href="#L587">587</a> 			}
-<a class="jxr_linenumber" name="L588" href="#L588">588</a> 			<strong class="jxr_keyword">if</strong> (isNotBlank(nextReqEntry.getRequest().getIfNoneMatch())) {
-<a class="jxr_linenumber" name="L589" href="#L589">589</a> 				requestDetails.addHeader(Constants.HEADER_IF_NONE_MATCH, nextReqEntry.getRequest().getIfNoneMatch());
+<a class="jxr_linenumber" name="L588" href="#L588">588</a> 			<strong class="jxr_keyword">if</strong> (isNotBlank(nextReqEntry.getRequest().getIfNoneExist())) {
+<a class="jxr_linenumber" name="L589" href="#L589">589</a> 				requestDetails.addHeader(Constants.HEADER_IF_NONE_EXIST, nextReqEntry.getRequest().getIfNoneExist());
 <a class="jxr_linenumber" name="L590" href="#L590">590</a> 			}
-<a class="jxr_linenumber" name="L591" href="#L591">591</a> 
-<a class="jxr_linenumber" name="L592" href="#L592">592</a> 			<strong class="jxr_keyword">if</strong> (method instanceof BaseResourceReturningMethodBinding) {
-<a class="jxr_linenumber" name="L593" href="#L593">593</a> 				<strong class="jxr_keyword">try</strong> {
-<a class="jxr_linenumber" name="L594" href="#L594">594</a> 					ResourceOrDstu1Bundle responseData = ((BaseResourceReturningMethodBinding) method).doInvokeServer(theRequestDetails.getServer(), requestDetails);
-<a class="jxr_linenumber" name="L595" href="#L595">595</a> 					IBaseResource resource = responseData.getResource();
-<a class="jxr_linenumber" name="L596" href="#L596">596</a> 					<strong class="jxr_keyword">if</strong> (paramValues.containsKey(Constants.PARAM_SUMMARY) || paramValues.containsKey(Constants.PARAM_CONTENT)) {
-<a class="jxr_linenumber" name="L597" href="#L597">597</a> 						resource = filterNestedBundle(requestDetails, resource);
-<a class="jxr_linenumber" name="L598" href="#L598">598</a> 					}
-<a class="jxr_linenumber" name="L599" href="#L599">599</a> 					nextRespEntry.setResource((Resource) resource);
-<a class="jxr_linenumber" name="L600" href="#L600">600</a> 					nextRespEntry.getResponse().setStatus(toStatusString(Constants.STATUS_HTTP_200_OK));
-<a class="jxr_linenumber" name="L601" href="#L601">601</a> 				} <strong class="jxr_keyword">catch</strong> (NotModifiedException e) {
-<a class="jxr_linenumber" name="L602" href="#L602">602</a> 					nextRespEntry.getResponse().setStatus(toStatusString(Constants.STATUS_HTTP_304_NOT_MODIFIED));
-<a class="jxr_linenumber" name="L603" href="#L603">603</a> 				}
-<a class="jxr_linenumber" name="L604" href="#L604">604</a> 			} <strong class="jxr_keyword">else</strong> {
-<a class="jxr_linenumber" name="L605" href="#L605">605</a> 				<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> IllegalArgumentException(<span class="jxr_string">"Unable to handle GET "</span> + url);
-<a class="jxr_linenumber" name="L606" href="#L606">606</a> 			}
-<a class="jxr_linenumber" name="L607" href="#L607">607</a> 
-<a class="jxr_linenumber" name="L608" href="#L608">608</a> 		}
-<a class="jxr_linenumber" name="L609" href="#L609">609</a> 
-<a class="jxr_linenumber" name="L610" href="#L610">610</a> 		<strong class="jxr_keyword">for</strong> (Entry&lt;BundleEntryComponent, ResourceTable&gt; nextEntry : entriesToProcess.entrySet()) {
-<a class="jxr_linenumber" name="L611" href="#L611">611</a> 			nextEntry.getKey().getResponse().setLocation(nextEntry.getValue().getIdDt().toUnqualified().getValue());
-<a class="jxr_linenumber" name="L612" href="#L612">612</a> 			nextEntry.getKey().getResponse().setEtag(nextEntry.getValue().getIdDt().getVersionIdPart());
-<a class="jxr_linenumber" name="L613" href="#L613">613</a> 		}
-<a class="jxr_linenumber" name="L614" href="#L614">614</a> 
-<a class="jxr_linenumber" name="L615" href="#L615">615</a> 		<strong class="jxr_keyword">long</strong> delay = System.currentTimeMillis() - start;
-<a class="jxr_linenumber" name="L616" href="#L616">616</a> 		ourLog.info(theActionName + <span class="jxr_string">" completed in {}ms"</span>, <strong class="jxr_keyword">new</strong> Object[] { delay });
+<a class="jxr_linenumber" name="L591" href="#L591">591</a> 			<strong class="jxr_keyword">if</strong> (isNotBlank(nextReqEntry.getRequest().getIfNoneMatch())) {
+<a class="jxr_linenumber" name="L592" href="#L592">592</a> 				requestDetails.addHeader(Constants.HEADER_IF_NONE_MATCH, nextReqEntry.getRequest().getIfNoneMatch());
+<a class="jxr_linenumber" name="L593" href="#L593">593</a> 			}
+<a class="jxr_linenumber" name="L594" href="#L594">594</a> 
+<a class="jxr_linenumber" name="L595" href="#L595">595</a> 			<strong class="jxr_keyword">if</strong> (method instanceof BaseResourceReturningMethodBinding) {
+<a class="jxr_linenumber" name="L596" href="#L596">596</a> 				<strong class="jxr_keyword">try</strong> {
+<a class="jxr_linenumber" name="L597" href="#L597">597</a> 					ResourceOrDstu1Bundle responseData = ((BaseResourceReturningMethodBinding) method).doInvokeServer(theRequestDetails.getServer(), requestDetails);
+<a class="jxr_linenumber" name="L598" href="#L598">598</a> 					IBaseResource resource = responseData.getResource();
+<a class="jxr_linenumber" name="L599" href="#L599">599</a> 					<strong class="jxr_keyword">if</strong> (paramValues.containsKey(Constants.PARAM_SUMMARY) || paramValues.containsKey(Constants.PARAM_CONTENT)) {
+<a class="jxr_linenumber" name="L600" href="#L600">600</a> 						resource = filterNestedBundle(requestDetails, resource);
+<a class="jxr_linenumber" name="L601" href="#L601">601</a> 					}
+<a class="jxr_linenumber" name="L602" href="#L602">602</a> 					nextRespEntry.setResource((Resource) resource);
+<a class="jxr_linenumber" name="L603" href="#L603">603</a> 					nextRespEntry.getResponse().setStatus(toStatusString(Constants.STATUS_HTTP_200_OK));
+<a class="jxr_linenumber" name="L604" href="#L604">604</a> 				} <strong class="jxr_keyword">catch</strong> (NotModifiedException e) {
+<a class="jxr_linenumber" name="L605" href="#L605">605</a> 					nextRespEntry.getResponse().setStatus(toStatusString(Constants.STATUS_HTTP_304_NOT_MODIFIED));
+<a class="jxr_linenumber" name="L606" href="#L606">606</a> 				}
+<a class="jxr_linenumber" name="L607" href="#L607">607</a> 			} <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L608" href="#L608">608</a> 				<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> IllegalArgumentException(<span class="jxr_string">"Unable to handle GET "</span> + url);
+<a class="jxr_linenumber" name="L609" href="#L609">609</a> 			}
+<a class="jxr_linenumber" name="L610" href="#L610">610</a> 
+<a class="jxr_linenumber" name="L611" href="#L611">611</a> 		}
+<a class="jxr_linenumber" name="L612" href="#L612">612</a> 
+<a class="jxr_linenumber" name="L613" href="#L613">613</a> 		<strong class="jxr_keyword">for</strong> (Entry&lt;BundleEntryComponent, ResourceTable&gt; nextEntry : entriesToProcess.entrySet()) {
+<a class="jxr_linenumber" name="L614" href="#L614">614</a> 			nextEntry.getKey().getResponse().setLocation(nextEntry.getValue().getIdDt().toUnqualified().getValue());
+<a class="jxr_linenumber" name="L615" href="#L615">615</a> 			nextEntry.getKey().getResponse().setEtag(nextEntry.getValue().getIdDt().getVersionIdPart());
+<a class="jxr_linenumber" name="L616" href="#L616">616</a> 		}
 <a class="jxr_linenumber" name="L617" href="#L617">617</a> 
-<a class="jxr_linenumber" name="L618" href="#L618">618</a> 		response.setType(BundleType.TRANSACTIONRESPONSE);
-<a class="jxr_linenumber" name="L619" href="#L619">619</a> 		<strong class="jxr_keyword">return</strong> response;
-<a class="jxr_linenumber" name="L620" href="#L620">620</a> 	}
-<a class="jxr_linenumber" name="L621" href="#L621">621</a> 
-<a class="jxr_linenumber" name="L622" href="#L622">622</a> 	
-<a class="jxr_linenumber" name="L623" href="#L623">623</a> 	
-<a class="jxr_linenumber" name="L624" href="#L624">624</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">void</strong> handleTransactionCreateOrUpdateOutcome(Map&lt;IdType, IdType&gt; idSubstitutions, Map&lt;IdType, DaoMethodOutcome&gt; idToPersistedOutcome, IdType nextResourceId, <a href="../../../../../../ca/uhn/fhir/jpa/dao/DaoMethodOutcome.html">DaoMethodOutcome</a> outcome,
-<a class="jxr_linenumber" name="L625" href="#L625">625</a> 			BundleEntryComponent newEntry, String theResourceType, IBaseResource theRes) {
-<a class="jxr_linenumber" name="L626" href="#L626">626</a> 		IdType newId = (IdType) outcome.getId().toUnqualifiedVersionless();
-<a class="jxr_linenumber" name="L627" href="#L627">627</a> 		IdType resourceId = isPlaceholder(nextResourceId) ? nextResourceId : nextResourceId.toUnqualifiedVersionless();
-<a class="jxr_linenumber" name="L628" href="#L628">628</a> 		<strong class="jxr_keyword">if</strong> (newId.equals(resourceId) == false) {
-<a class="jxr_linenumber" name="L629" href="#L629">629</a> 			idSubstitutions.put(resourceId, newId);
-<a class="jxr_linenumber" name="L630" href="#L630">630</a> 			<strong class="jxr_keyword">if</strong> (isPlaceholder(resourceId)) {
-<a class="jxr_linenumber" name="L631" href="#L631">631</a> 				<em class="jxr_comment">/*</em>
-<a class="jxr_linenumber" name="L632" href="#L632">632</a> <em class="jxr_comment">				 * The correct way for substitution IDs to be is to be with no resource type, but we'll accept the qualified kind too just to be lenient.</em>
-<a class="jxr_linenumber" name="L633" href="#L633">633</a> <em class="jxr_comment">				 */</em>
-<a class="jxr_linenumber" name="L634" href="#L634">634</a> 				idSubstitutions.put(<strong class="jxr_keyword">new</strong> IdType(theResourceType + '/' + resourceId.getValue()), newId);
-<a class="jxr_linenumber" name="L635" href="#L635">635</a> 			}
-<a class="jxr_linenumber" name="L636" href="#L636">636</a> 		}
-<a class="jxr_linenumber" name="L637" href="#L637">637</a> 		idToPersistedOutcome.put(newId, outcome);
-<a class="jxr_linenumber" name="L638" href="#L638">638</a> 		<strong class="jxr_keyword">if</strong> (outcome.getCreated().booleanValue()) {
-<a class="jxr_linenumber" name="L639" href="#L639">639</a> 			newEntry.getResponse().setStatus(toStatusString(Constants.STATUS_HTTP_201_CREATED));
-<a class="jxr_linenumber" name="L640" href="#L640">640</a> 		} <strong class="jxr_keyword">else</strong> {
-<a class="jxr_linenumber" name="L641" href="#L641">641</a> 			newEntry.getResponse().setStatus(toStatusString(Constants.STATUS_HTTP_200_OK));
-<a class="jxr_linenumber" name="L642" href="#L642">642</a> 		}
-<a class="jxr_linenumber" name="L643" href="#L643">643</a> 		newEntry.getResponse().setLastModified(((Resource) theRes).getMeta().getLastUpdated());
-<a class="jxr_linenumber" name="L644" href="#L644">644</a> 	}
-<a class="jxr_linenumber" name="L645" href="#L645">645</a> 
-<a class="jxr_linenumber" name="L646" href="#L646">646</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">boolean</strong> isPlaceholder(IdType theId) {
-<a class="jxr_linenumber" name="L647" href="#L647">647</a> 		<strong class="jxr_keyword">if</strong> (theId != <strong class="jxr_keyword">null</strong> &amp;&amp; theId.getValue() != <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L648" href="#L648">648</a> 			<strong class="jxr_keyword">if</strong> (theId.getValue().startsWith(<span class="jxr_string">"urn:oid:"</span>) || theId.getValue().startsWith(<span class="jxr_string">"urn:uuid:"</span>)) {
-<a class="jxr_linenumber" name="L649" href="#L649">649</a> 				<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">true</strong>;
-<a class="jxr_linenumber" name="L650" href="#L650">650</a> 			}
-<a class="jxr_linenumber" name="L651" href="#L651">651</a> 		}
-<a class="jxr_linenumber" name="L652" href="#L652">652</a> 		<strong class="jxr_keyword">return</strong> false;
-<a class="jxr_linenumber" name="L653" href="#L653">653</a> 	}
-<a class="jxr_linenumber" name="L654" href="#L654">654</a> 
-<a class="jxr_linenumber" name="L655" href="#L655">655</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> String toStatusString(<strong class="jxr_keyword">int</strong> theStatusCode) {
-<a class="jxr_linenumber" name="L656" href="#L656">656</a> 		<strong class="jxr_keyword">return</strong> Integer.toString(theStatusCode) + <span class="jxr_string">" "</span> + defaultString(Constants.HTTP_STATUS_NAMES.get(theStatusCode));
-<a class="jxr_linenumber" name="L657" href="#L657">657</a> 	}
-<a class="jxr_linenumber" name="L658" href="#L658">658</a> 
-<a class="jxr_linenumber" name="L659" href="#L659">659</a> 	<em class="jxr_comment">//@formatter:off</em>
-<a class="jxr_linenumber" name="L660" href="#L660">660</a> 	<em class="jxr_javadoccomment">/**</em>
-<a class="jxr_linenumber" name="L661" href="#L661">661</a> <em class="jxr_javadoccomment">	 * Transaction Order, per the spec:</em>
-<a class="jxr_linenumber" name="L662" href="#L662">662</a> <em class="jxr_javadoccomment">	 * </em>
-<a class="jxr_linenumber" name="L663" href="#L663">663</a> <em class="jxr_javadoccomment">	 * Process any DELETE interactions</em>
-<a class="jxr_linenumber" name="L664" href="#L664">664</a> <em class="jxr_javadoccomment">	 * Process any POST interactions</em>
-<a class="jxr_linenumber" name="L665" href="#L665">665</a> <em class="jxr_javadoccomment">	 * Process any PUT interactions</em>
-<a class="jxr_linenumber" name="L666" href="#L666">666</a> <em class="jxr_javadoccomment">	 * Process any GET interactions</em>
-<a class="jxr_linenumber" name="L667" href="#L667">667</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L668" href="#L668">668</a> 	<em class="jxr_comment">//@formatter:off</em>
-<a class="jxr_linenumber" name="L669" href="#L669">669</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">class</strong> <a href="../../../../../../ca/uhn/fhir/jpa/dao/FhirSystemDaoDstu2.html">TransactionSorter</a> <strong class="jxr_keyword">implements</strong> Comparator&lt;BundleEntryComponent&gt; {
-<a class="jxr_linenumber" name="L670" href="#L670">670</a> 
-<a class="jxr_linenumber" name="L671" href="#L671">671</a> 		@Override
-<a class="jxr_linenumber" name="L672" href="#L672">672</a> 		<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">int</strong> compare(BundleEntryComponent theO1, BundleEntryComponent theO2) {			
-<a class="jxr_linenumber" name="L673" href="#L673">673</a> 			<strong class="jxr_keyword">int</strong> o1 = toOrder(theO1);
-<a class="jxr_linenumber" name="L674" href="#L674">674</a> 			<strong class="jxr_keyword">int</strong> o2 = toOrder(theO2);
-<a class="jxr_linenumber" name="L675" href="#L675">675</a> 
-<a class="jxr_linenumber" name="L676" href="#L676">676</a> 			<strong class="jxr_keyword">return</strong> o1 - o2;
-<a class="jxr_linenumber" name="L677" href="#L677">677</a> 		}
+<a class="jxr_linenumber" name="L618" href="#L618">618</a> 		<strong class="jxr_keyword">long</strong> delay = System.currentTimeMillis() - start;
+<a class="jxr_linenumber" name="L619" href="#L619">619</a> 		ourLog.info(theActionName + <span class="jxr_string">" completed in {}ms"</span>, <strong class="jxr_keyword">new</strong> Object[] { delay });
+<a class="jxr_linenumber" name="L620" href="#L620">620</a> 
+<a class="jxr_linenumber" name="L621" href="#L621">621</a> 		response.setType(BundleType.TRANSACTIONRESPONSE);
+<a class="jxr_linenumber" name="L622" href="#L622">622</a> 		<strong class="jxr_keyword">return</strong> response;
+<a class="jxr_linenumber" name="L623" href="#L623">623</a> 	}
+<a class="jxr_linenumber" name="L624" href="#L624">624</a> 
+<a class="jxr_linenumber" name="L625" href="#L625">625</a> 	
+<a class="jxr_linenumber" name="L626" href="#L626">626</a> 	
+<a class="jxr_linenumber" name="L627" href="#L627">627</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">void</strong> handleTransactionCreateOrUpdateOutcome(Map&lt;IdType, IdType&gt; idSubstitutions, Map&lt;IdType, DaoMethodOutcome&gt; idToPersistedOutcome, IdType nextResourceId, <a href="../../../../../../ca/uhn/fhir/jpa/dao/DaoMethodOutcome.html">DaoMethodOutcome</a> outcome,
+<a class="jxr_linenumber" name="L628" href="#L628">628</a> 			BundleEntryComponent newEntry, String theResourceType, IBaseResource theRes) {
+<a class="jxr_linenumber" name="L629" href="#L629">629</a> 		IdType newId = (IdType) outcome.getId().toUnqualifiedVersionless();
+<a class="jxr_linenumber" name="L630" href="#L630">630</a> 		IdType resourceId = isPlaceholder(nextResourceId) ? nextResourceId : nextResourceId.toUnqualifiedVersionless();
+<a class="jxr_linenumber" name="L631" href="#L631">631</a> 		<strong class="jxr_keyword">if</strong> (newId.equals(resourceId) == false) {
+<a class="jxr_linenumber" name="L632" href="#L632">632</a> 			idSubstitutions.put(resourceId, newId);
+<a class="jxr_linenumber" name="L633" href="#L633">633</a> 			<strong class="jxr_keyword">if</strong> (isPlaceholder(resourceId)) {
+<a class="jxr_linenumber" name="L634" href="#L634">634</a> 				<em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L635" href="#L635">635</a> <em class="jxr_comment">				 * The correct way for substitution IDs to be is to be with no resource type, but we'll accept the qualified kind too just to be lenient.</em>
+<a class="jxr_linenumber" name="L636" href="#L636">636</a> <em class="jxr_comment">				 */</em>
+<a class="jxr_linenumber" name="L637" href="#L637">637</a> 				idSubstitutions.put(<strong class="jxr_keyword">new</strong> IdType(theResourceType + '/' + resourceId.getValue()), newId);
+<a class="jxr_linenumber" name="L638" href="#L638">638</a> 			}
+<a class="jxr_linenumber" name="L639" href="#L639">639</a> 		}
+<a class="jxr_linenumber" name="L640" href="#L640">640</a> 		idToPersistedOutcome.put(newId, outcome);
+<a class="jxr_linenumber" name="L641" href="#L641">641</a> 		<strong class="jxr_keyword">if</strong> (outcome.getCreated().booleanValue()) {
+<a class="jxr_linenumber" name="L642" href="#L642">642</a> 			newEntry.getResponse().setStatus(toStatusString(Constants.STATUS_HTTP_201_CREATED));
+<a class="jxr_linenumber" name="L643" href="#L643">643</a> 		} <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L644" href="#L644">644</a> 			newEntry.getResponse().setStatus(toStatusString(Constants.STATUS_HTTP_200_OK));
+<a class="jxr_linenumber" name="L645" href="#L645">645</a> 		}
+<a class="jxr_linenumber" name="L646" href="#L646">646</a> 		newEntry.getResponse().setLastModified(((Resource) theRes).getMeta().getLastUpdated());
+<a class="jxr_linenumber" name="L647" href="#L647">647</a> 	}
+<a class="jxr_linenumber" name="L648" href="#L648">648</a> 
+<a class="jxr_linenumber" name="L649" href="#L649">649</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">boolean</strong> isPlaceholder(IdType theId) {
+<a class="jxr_linenumber" name="L650" href="#L650">650</a> 		<strong class="jxr_keyword">if</strong> (theId != <strong class="jxr_keyword">null</strong> &amp;&amp; theId.getValue() != <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L651" href="#L651">651</a> 			<strong class="jxr_keyword">if</strong> (theId.getValue().startsWith(<span class="jxr_string">"urn:oid:"</span>) || theId.getValue().startsWith(<span class="jxr_string">"urn:uuid:"</span>)) {
+<a class="jxr_linenumber" name="L652" href="#L652">652</a> 				<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">true</strong>;
+<a class="jxr_linenumber" name="L653" href="#L653">653</a> 			}
+<a class="jxr_linenumber" name="L654" href="#L654">654</a> 		}
+<a class="jxr_linenumber" name="L655" href="#L655">655</a> 		<strong class="jxr_keyword">return</strong> false;
+<a class="jxr_linenumber" name="L656" href="#L656">656</a> 	}
+<a class="jxr_linenumber" name="L657" href="#L657">657</a> 
+<a class="jxr_linenumber" name="L658" href="#L658">658</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> String toStatusString(<strong class="jxr_keyword">int</strong> theStatusCode) {
+<a class="jxr_linenumber" name="L659" href="#L659">659</a> 		<strong class="jxr_keyword">return</strong> Integer.toString(theStatusCode) + <span class="jxr_string">" "</span> + defaultString(Constants.HTTP_STATUS_NAMES.get(theStatusCode));
+<a class="jxr_linenumber" name="L660" href="#L660">660</a> 	}
+<a class="jxr_linenumber" name="L661" href="#L661">661</a> 
+<a class="jxr_linenumber" name="L662" href="#L662">662</a> 	<em class="jxr_comment">//@formatter:off</em>
+<a class="jxr_linenumber" name="L663" href="#L663">663</a> 	<em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L664" href="#L664">664</a> <em class="jxr_javadoccomment">	 * Transaction Order, per the spec:</em>
+<a class="jxr_linenumber" name="L665" href="#L665">665</a> <em class="jxr_javadoccomment">	 * </em>
+<a class="jxr_linenumber" name="L666" href="#L666">666</a> <em class="jxr_javadoccomment">	 * Process any DELETE interactions</em>
+<a class="jxr_linenumber" name="L667" href="#L667">667</a> <em class="jxr_javadoccomment">	 * Process any POST interactions</em>
+<a class="jxr_linenumber" name="L668" href="#L668">668</a> <em class="jxr_javadoccomment">	 * Process any PUT interactions</em>
+<a class="jxr_linenumber" name="L669" href="#L669">669</a> <em class="jxr_javadoccomment">	 * Process any GET interactions</em>
+<a class="jxr_linenumber" name="L670" href="#L670">670</a> <em class="jxr_javadoccomment">	 */</em>
+<a class="jxr_linenumber" name="L671" href="#L671">671</a> 	<em class="jxr_comment">//@formatter:off</em>
+<a class="jxr_linenumber" name="L672" href="#L672">672</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">class</strong> <a href="../../../../../../ca/uhn/fhir/jpa/dao/FhirSystemDaoDstu2.html">TransactionSorter</a> <strong class="jxr_keyword">implements</strong> Comparator&lt;BundleEntryComponent&gt; {
+<a class="jxr_linenumber" name="L673" href="#L673">673</a> 
+<a class="jxr_linenumber" name="L674" href="#L674">674</a> 		@Override
+<a class="jxr_linenumber" name="L675" href="#L675">675</a> 		<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">int</strong> compare(BundleEntryComponent theO1, BundleEntryComponent theO2) {			
+<a class="jxr_linenumber" name="L676" href="#L676">676</a> 			<strong class="jxr_keyword">int</strong> o1 = toOrder(theO1);
+<a class="jxr_linenumber" name="L677" href="#L677">677</a> 			<strong class="jxr_keyword">int</strong> o2 = toOrder(theO2);
 <a class="jxr_linenumber" name="L678" href="#L678">678</a> 
-<a class="jxr_linenumber" name="L679" href="#L679">679</a> 		<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">int</strong> toOrder(BundleEntryComponent theO1) {
-<a class="jxr_linenumber" name="L680" href="#L680">680</a> 			<strong class="jxr_keyword">int</strong> o1 = 0;
-<a class="jxr_linenumber" name="L681" href="#L681">681</a> 			<strong class="jxr_keyword">if</strong> (theO1.getRequest().getMethodElement().getValue() != <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L682" href="#L682">682</a> 			<strong class="jxr_keyword">switch</strong> (theO1.getRequest().getMethodElement().getValue()) {
-<a class="jxr_linenumber" name="L683" href="#L683">683</a> 			<strong class="jxr_keyword">case</strong> DELETE:
-<a class="jxr_linenumber" name="L684" href="#L684">684</a> 				o1 = 1;
-<a class="jxr_linenumber" name="L685" href="#L685">685</a> 				<strong class="jxr_keyword">break</strong>;
-<a class="jxr_linenumber" name="L686" href="#L686">686</a> 			<strong class="jxr_keyword">case</strong> POST:
-<a class="jxr_linenumber" name="L687" href="#L687">687</a> 				o1 = 2;
+<a class="jxr_linenumber" name="L679" href="#L679">679</a> 			<strong class="jxr_keyword">return</strong> o1 - o2;
+<a class="jxr_linenumber" name="L680" href="#L680">680</a> 		}
+<a class="jxr_linenumber" name="L681" href="#L681">681</a> 
+<a class="jxr_linenumber" name="L682" href="#L682">682</a> 		<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">int</strong> toOrder(BundleEntryComponent theO1) {
+<a class="jxr_linenumber" name="L683" href="#L683">683</a> 			<strong class="jxr_keyword">int</strong> o1 = 0;
+<a class="jxr_linenumber" name="L684" href="#L684">684</a> 			<strong class="jxr_keyword">if</strong> (theO1.getRequest().getMethodElement().getValue() != <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L685" href="#L685">685</a> 			<strong class="jxr_keyword">switch</strong> (theO1.getRequest().getMethodElement().getValue()) {
+<a class="jxr_linenumber" name="L686" href="#L686">686</a> 			<strong class="jxr_keyword">case</strong> DELETE:
+<a class="jxr_linenumber" name="L687" href="#L687">687</a> 				o1 = 1;
 <a class="jxr_linenumber" name="L688" href="#L688">688</a> 				<strong class="jxr_keyword">break</strong>;
-<a class="jxr_linenumber" name="L689" href="#L689">689</a> 			<strong class="jxr_keyword">case</strong> PUT:
-<a class="jxr_linenumber" name="L690" href="#L690">690</a> 				o1 = 3;
+<a class="jxr_linenumber" name="L689" href="#L689">689</a> 			<strong class="jxr_keyword">case</strong> POST:
+<a class="jxr_linenumber" name="L690" href="#L690">690</a> 				o1 = 2;
 <a class="jxr_linenumber" name="L691" href="#L691">691</a> 				<strong class="jxr_keyword">break</strong>;
-<a class="jxr_linenumber" name="L692" href="#L692">692</a> 			<strong class="jxr_keyword">case</strong> GET:
-<a class="jxr_linenumber" name="L693" href="#L693">693</a> 				o1 = 4;
+<a class="jxr_linenumber" name="L692" href="#L692">692</a> 			<strong class="jxr_keyword">case</strong> PUT:
+<a class="jxr_linenumber" name="L693" href="#L693">693</a> 				o1 = 3;
 <a class="jxr_linenumber" name="L694" href="#L694">694</a> 				<strong class="jxr_keyword">break</strong>;
-<a class="jxr_linenumber" name="L695" href="#L695">695</a> 			<strong class="jxr_keyword">case</strong> NULL:
-<a class="jxr_linenumber" name="L696" href="#L696">696</a> 				o1 = 0;
+<a class="jxr_linenumber" name="L695" href="#L695">695</a> 			<strong class="jxr_keyword">case</strong> GET:
+<a class="jxr_linenumber" name="L696" href="#L696">696</a> 				o1 = 4;
 <a class="jxr_linenumber" name="L697" href="#L697">697</a> 				<strong class="jxr_keyword">break</strong>;
-<a class="jxr_linenumber" name="L698" href="#L698">698</a> 			}
-<a class="jxr_linenumber" name="L699" href="#L699">699</a> 			}
-<a class="jxr_linenumber" name="L700" href="#L700">700</a> 			<strong class="jxr_keyword">return</strong> o1;
-<a class="jxr_linenumber" name="L701" href="#L701">701</a> 		}
-<a class="jxr_linenumber" name="L702" href="#L702">702</a> 
-<a class="jxr_linenumber" name="L703" href="#L703">703</a> 	}
-<a class="jxr_linenumber" name="L704" href="#L704">704</a> 
-<a class="jxr_linenumber" name="L705" href="#L705">705</a> }
+<a class="jxr_linenumber" name="L698" href="#L698">698</a> 			<strong class="jxr_keyword">case</strong> NULL:
+<a class="jxr_linenumber" name="L699" href="#L699">699</a> 				o1 = 0;
+<a class="jxr_linenumber" name="L700" href="#L700">700</a> 				<strong class="jxr_keyword">break</strong>;
+<a class="jxr_linenumber" name="L701" href="#L701">701</a> 			}
+<a class="jxr_linenumber" name="L702" href="#L702">702</a> 			}
+<a class="jxr_linenumber" name="L703" href="#L703">703</a> 			<strong class="jxr_keyword">return</strong> o1;
+<a class="jxr_linenumber" name="L704" href="#L704">704</a> 		}
+<a class="jxr_linenumber" name="L705" href="#L705">705</a> 
+<a class="jxr_linenumber" name="L706" href="#L706">706</a> 	}
+<a class="jxr_linenumber" name="L707" href="#L707">707</a> 
+<a class="jxr_linenumber" name="L708" href="#L708">708</a> }
 </pre>
 <hr/>
 <div id="footer">Copyright &#169; 2014&#x2013;2017 <a href="http://www.uhn.ca">University Health Network</a>. All rights reserved.</div>
