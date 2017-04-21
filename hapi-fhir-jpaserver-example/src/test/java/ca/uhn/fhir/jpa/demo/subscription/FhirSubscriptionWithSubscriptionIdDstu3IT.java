@@ -58,15 +58,15 @@ public class FhirSubscriptionWithSubscriptionIdDstu3IT {
 
     public static final String WEBSOCKET_LISTENER_URL = "ws://localhost:9093/websocket/dstu3";
 
-    public static final String PATIENT_ID = "1";
-    public static final String SUBSCRIPTION_ID = "2";
+    public static final String PATIENT_ID = "122";
+    public static final String SUBSCRIPTION_ID = "123";
 
     private IGenericClient client = FhirServiceUtil.getFhirDstu3Client();
 
-    @Before
+    @Test
     public void clean() {
-        RemoveDstu2TestIT.deleteResources(Subscription.class, null, client);
-        RemoveDstu2TestIT.deleteResources(Observation.class, null, client);
+        RemoveDstu3TestIT.deleteResources(Subscription.class, null, client);
+        RemoveDstu3TestIT.deleteResources(Observation.class, null, client);
     }
 
     @Test
@@ -86,7 +86,9 @@ public class FhirSubscriptionWithSubscriptionIdDstu3IT {
         Subscription subscription = new Subscription();
         subscription.setReason("Monitor new neonatal function (note, age will be determined by the monitor)");
         subscription.setStatus(Subscription.SubscriptionStatus.ACTIVE);
-        subscription.setCriteria("Observation?subject=Patient/" + PATIENT_ID);
+//        subscription.setCriteria("Observation?subject=Patient/" + PATIENT_ID);
+        subscription.setCriteria("Observation?code=SNOMED-CT|82313006");
+
         Subscription.SubscriptionChannelComponent channel = new Subscription.SubscriptionChannelComponent();
         channel.setType(Subscription.SubscriptionChannelType.WEBSOCKET);
         channel.setPayload("application/json");

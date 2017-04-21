@@ -84,7 +84,7 @@ public class FhirSubscriptionWithSubscriptionIdDstu2IT {
     @Test
     @Ignore
     public void attachWebSocket() throws Exception {
-        String subscriptionId = "105002";
+        String subscriptionId = "34952";
         subscriptionId = subscriptionId + "";
 
         String target = "ws://localhost:9092/websocket/dstu2";
