@@ -529,7 +529,9 @@ public abstract class BaseRuntimeElementCompositeDefinition<T extends IBase> ext
 	protected void validateSealed() {
 		if (!mySealed) {
 			synchronized(myContext) {
-				sealAndInitialize(myContext, myClassToElementDefinitions);
+				if(!mySealed) {
+					sealAndInitialize(myContext, myClassToElementDefinitions);
+				}
 			}
 		}
 	}

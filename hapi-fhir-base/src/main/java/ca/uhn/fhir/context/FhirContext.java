@@ -81,8 +81,8 @@ public class FhirContext {
 	private ArrayList<Class<? extends IBase>> myCustomTypes;
 	private Map<String, Class<? extends IBaseResource>> myDefaultTypeForProfile = new HashMap<String, Class<? extends IBaseResource>>();
 	private volatile Map<String, RuntimeResourceDefinition> myIdToResourceDefinition = Collections.emptyMap();
-	private boolean myInitialized;
-	private boolean myInitializing = false;
+	private volatile boolean myInitialized;
+	private volatile boolean myInitializing = false;
 	private HapiLocalizer myLocalizer = new HapiLocalizer();
 	private volatile Map<String, BaseRuntimeElementDefinition<?>> myNameToElementDefinition = Collections.emptyMap();
 	private volatile Map<String, RuntimeResourceDefinition> myNameToResourceDefinition = Collections.emptyMap();
