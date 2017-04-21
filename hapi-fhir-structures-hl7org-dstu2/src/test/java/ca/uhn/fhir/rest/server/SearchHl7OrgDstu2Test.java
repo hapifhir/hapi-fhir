@@ -157,7 +157,7 @@ public class SearchHl7OrgDstu2Test {
 				}
 				
 				@Override
-				public int size() {
+				public Integer size() {
 					return 0;
 				}
 

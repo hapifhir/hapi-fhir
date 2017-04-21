@@ -52,7 +52,7 @@ public class SimpleBundleProvider implements IBundleProvider {
 	}
 
 	@Override
-	public int size() {
+	public Integer size() {
 		return myList.size();
 	}
 

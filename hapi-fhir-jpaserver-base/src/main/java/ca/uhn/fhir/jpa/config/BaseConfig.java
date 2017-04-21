@@ -37,15 +37,14 @@ import org.springframework.scheduling.concurrent.ConcurrentTaskScheduler;
 import org.springframework.scheduling.concurrent.ScheduledExecutorFactoryBean;
 import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 
-import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
-import ca.uhn.fhir.jpa.search.IStaleSearchDeletingSvc;
-import ca.uhn.fhir.jpa.search.StaleSearchDeletingSvcImpl;
+import ca.uhn.fhir.jpa.search.*;
+import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
+import ca.uhn.fhir.jpa.sp.SearchParamPresenceSvcImpl;
 
 @Configuration
 @EnableScheduling
 @EnableJpaRepositories(basePackages = "ca.uhn.fhir.jpa.dao.data")
 public class BaseConfig implements SchedulingConfigurer {
-
 
 	@Resource
 	private ApplicationContext myAppCtx;
@@ -64,16 +63,26 @@ public class BaseConfig implements SchedulingConfigurer {
 		return retVal;
 	}
 
-	@Bean(autowire=Autowire.BY_TYPE)
-	public IStaleSearchDeletingSvc staleSearchDeletingSvc() {
-		return new StaleSearchDeletingSvcImpl();
-	}
-
 	@Bean()
 	public ScheduledExecutorFactoryBean scheduledExecutorService() {
 		ScheduledExecutorFactoryBean b = new ScheduledExecutorFactoryBean();
 		b.setPoolSize(5);
 		return b;
+	}
+	
+	@Bean(autowire=Autowire.BY_TYPE)
+	public ISearchCoordinatorSvc searchCoordinatorSvc() {
+		return new SearchCoordinatorSvcImpl();
+	}
+
+	@Bean
+	public ISearchParamPresenceSvc searchParamPresenceSvc() {
+		return new SearchParamPresenceSvcImpl();
+	}
+
+	@Bean(autowire=Autowire.BY_TYPE)
+	public IStaleSearchDeletingSvc staleSearchDeletingSvc() {
+		return new StaleSearchDeletingSvcImpl();
 	}
 	
 	@Bean

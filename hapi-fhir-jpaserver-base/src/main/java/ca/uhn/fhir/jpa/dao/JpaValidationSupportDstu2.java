@@ -66,9 +66,11 @@ public class JpaValidationSupportDstu2 implements IJpaValidationSupportDstu2 {
 		String resourceName = myRiCtx.getResourceDefinition(theClass).getName();
 		IBundleProvider search;
 		if ("ValueSet".equals(resourceName)) {
-			search = myValueSetDao.search(ca.uhn.fhir.model.dstu2.resource.ValueSet.SP_URL, new UriParam(theUri));
+			SearchParameterMap params = new SearchParameterMap(ca.uhn.fhir.model.dstu2.resource.ValueSet.SP_URL, new UriParam(theUri));
+			params.setLoadSynchronousUpTo(10);
+			search = myValueSetDao.search(params);
 		} else if ("StructureDefinition".equals(resourceName)) {
-			search = myStructureDefinitionDao.search(ca.uhn.fhir.model.dstu2.resource.StructureDefinition.SP_URL, new UriParam(theUri));
+			search = myStructureDefinitionDao.search(new SearchParameterMap().setLoadSynchronous(true).add(ca.uhn.fhir.model.dstu2.resource.StructureDefinition.SP_URL, new UriParam(theUri)));
 		} else {
 			throw new IllegalArgumentException("Can't fetch resource type: " + resourceName);
 		}

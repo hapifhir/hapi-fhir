@@ -37,6 +37,7 @@ import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.entity.ResourceTable;
 import ca.uhn.fhir.jpa.provider.dstu3.JpaSystemProviderDstu3;
 import ca.uhn.fhir.jpa.search.IStaleSearchDeletingSvc;
+import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
 import ca.uhn.fhir.jpa.term.IHapiTerminologySvc;
 import ca.uhn.fhir.jpa.validation.JpaValidationSupportChainDstu3;
 import ca.uhn.fhir.parser.IParser;
@@ -113,6 +114,9 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 	@Autowired
 	@Qualifier("myImmunizationDaoDstu3")
 	protected IFhirResourceDao<Immunization> myImmunizationDao;
+	@Autowired
+	@Qualifier("myImmunizationRecommendationDaoDstu3")
+	protected IFhirResourceDao<ImmunizationRecommendation> myImmunizationRecommendationDao;
 	protected IServerInterceptor myInterceptor;
 	@Autowired
 	private JpaValidationSupportChainDstu3 myJpaValidationSupportChainDstu3;
@@ -143,6 +147,9 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 	@Autowired
 	@Qualifier("myOrganizationDaoDstu3")
 	protected IFhirResourceDao<Organization> myOrganizationDao;
+	@Autowired
+	@Qualifier("myTaskDaoDstu3")
+	protected IFhirResourceDao<Task> myTaskDao;
 	@Autowired
 	@Qualifier("myPatientDaoDstu3")
 	protected IFhirResourceDaoPatient<Patient> myPatientDao;
@@ -191,6 +198,8 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 	protected IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept> myValueSetDao;
 	@Autowired
 	protected PlatformTransactionManager myTransactionMgr;
+	@Autowired
+	protected ISearchParamPresenceSvc mySearchParamPresenceSvc;
 	@After()
 	public void afterGrabCaches() {
 		ourValueSetDao = myValueSetDao;
@@ -218,7 +227,7 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 	@Transactional()
 	public void beforePurgeDatabase() {
 		final EntityManager entityManager = this.myEntityManager;
-		purgeDatabase(entityManager, myTxManager);
+		purgeDatabase(entityManager, myTxManager, mySearchParamPresenceSvc);
 	}
 
 	@Before

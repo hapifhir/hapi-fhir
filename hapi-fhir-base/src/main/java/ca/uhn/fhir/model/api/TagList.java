@@ -104,9 +104,9 @@ public class TagList implements Set<Tag>, Serializable, IBase {
 	 * Add a new tag instance
 	 * 
 	 * @param theScheme
-	 *           The tag scheme
+	 *           The tag scheme (the system)
 	 * @param theTerm
-	 *           The tag term
+	 *           The tag term (the code)
 	 * @return Returns the newly created tag instance. Note that the tag is added to the list by this method, so you
 	 *         generally do not need to interact directly with the added tag.
 	 */

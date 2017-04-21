@@ -69,9 +69,7 @@ public class FhirResourceDaoPatientDstu3 extends FhirResourceDaoDstu3<Patient>im
 			paramMap.add("_id", new StringParam(theId.getIdPart()));
 		}
 		
-		SearchBuilder builder = new SearchBuilder(getContext(), myEntityManager, myPlatformTransactionManager, mySearchDao, mySearchResultDao, this, myResourceIndexedSearchParamUriDao, myForcedIdDao, myTerminologySvc, mySerarchParamRegistry);
-		builder.setType(getResourceType(), getResourceName());
-		return builder.search(paramMap);
+		return mySearchCoordinatorSvc.registerSearch(this, paramMap, getResourceName());
 	}
 
 	@Override

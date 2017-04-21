@@ -10,7 +10,7 @@ package ca.uhn.fhir.rest.server.servlet;
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  * 
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -94,7 +94,7 @@ public class ServletRequestDetails extends RequestDetails {
 		try {
 			InputStream inputStream = reader.getInputStream(this);
 			requestContents = IOUtils.toByteArray(inputStream);
-			
+
 			if (myServer.isUncompressIncomingContents()) {
 				String contentEncoding = myServletRequest.getHeader(Constants.HEADER_CONTENT_ENCODING);
 				if ("gzip".equals(contentEncoding)) {
@@ -105,7 +105,7 @@ public class ServletRequestDetails extends RequestDetails {
 					}
 				}
 			}
-			//FIXME resource leak
+			// FIXME resource leak
 			return requestContents;
 		} catch (IOException e) {
 			ourLog.error("Could not load request resource", e);
@@ -163,7 +163,6 @@ public class ServletRequestDetails extends RequestDetails {
 	public void setServletResponse(HttpServletResponse myServletResponse) {
 		this.myServletResponse = myServletResponse;
 	}
-
 
 	@Override
 	public Charset getCharset() {

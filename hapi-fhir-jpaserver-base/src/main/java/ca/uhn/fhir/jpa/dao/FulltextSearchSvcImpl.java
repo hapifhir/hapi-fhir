@@ -66,6 +66,13 @@ public class FulltextSearchSvcImpl extends BaseHapiFhirDao<IBaseResource> implem
 	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
 	private EntityManager myEntityManager;
 
+	/**
+	 * Constructor
+	 */
+	public FulltextSearchSvcImpl() {
+		super();
+	}
+	
 	private void addTextSearch(QueryBuilder theQueryBuilder, BooleanJunction<?> theBoolean, List<List<? extends IQueryParameterType>> theTerms, String theFieldName, String theFieldNameEdgeNGram, String theFieldNameNGram) {
 		if (theTerms == null) {
 			return;

@@ -29,6 +29,9 @@ import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.support.TransactionCallbackWithoutResult;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
@@ -72,7 +75,6 @@ public class ResourceProviderCustomSearchParamDstu3Test extends BaseResourceProv
 		}
 	}
 
-	
 	@Test
 	public void testSearchForExtension() {
 		SearchParameter eyeColourSp = new SearchParameter();
@@ -87,12 +89,12 @@ public class ResourceProviderCustomSearchParamDstu3Test extends BaseResourceProv
 		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(eyeColourSp));
 
 		ourClient
-			.create()
-			.resource(eyeColourSp)
-			.execute();
-		
-//		mySearchParamRegsitry.forceRefresh();
-		
+				.create()
+				.resource(eyeColourSp)
+				.execute();
+
+		// mySearchParamRegsitry.forceRefresh();
+
 		Patient p1 = new Patient();
 		p1.setActive(true);
 		p1.addExtension().setUrl("http://acme.org/eyecolour").setValue(new CodeType("blue"));
@@ -106,21 +108,21 @@ public class ResourceProviderCustomSearchParamDstu3Test extends BaseResourceProv
 		IIdType p2id = myPatientDao.create(p2).getId().toUnqualifiedVersionless();
 
 		Bundle bundle = ourClient
-			.search()
-			.forResource(Patient.class)
-			.where(new TokenClientParam("eyecolour").exactly().code("blue"))
-			.returnBundle(Bundle.class)
-			.execute();
+				.search()
+				.forResource(Patient.class)
+				.where(new TokenClientParam("eyecolour").exactly().code("blue"))
+				.returnBundle(Bundle.class)
+				.execute();
 
 		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
-		
+
 		List<String> foundResources = toUnqualifiedVersionlessIdValues(bundle);
 		assertThat(foundResources, contains(p1id.getValue()));
 
 	}
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResourceProviderCustomSearchParamDstu3Test.class);
-	
+
 	@Override
 	@Before
 	public void beforeResetConfig() {
@@ -146,29 +148,45 @@ public class ResourceProviderCustomSearchParamDstu3Test extends BaseResourceProv
 		param = map.get("gender");
 		assertNotNull(param);
 
-		// Add a custom search parameter
-		SearchParameter fooSp = new SearchParameter();
-		fooSp.addBase("Patient");
-		fooSp.setCode("foo");
-		fooSp.setType(org.hl7.fhir.dstu3.model.Enumerations.SearchParamType.TOKEN);
-		fooSp.setTitle("FOO SP");
-		fooSp.setExpression("Patient.gender");
-		fooSp.setXpathUsage(org.hl7.fhir.dstu3.model.SearchParameter.XPathUsageType.NORMAL);
-		fooSp.setStatus(org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus.ACTIVE);
-		mySearchParameterDao.create(fooSp, mySrd);
+		TransactionTemplate txTemplate = newTxTemplate();
+		txTemplate.execute(new TransactionCallbackWithoutResult() {
+			@Override
+			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
+				// Add a custom search parameter
+				SearchParameter fooSp = new SearchParameter();
+				fooSp.addBase("Patient");
+				fooSp.setCode("foo");
+				fooSp.setType(org.hl7.fhir.dstu3.model.Enumerations.SearchParamType.TOKEN);
+				fooSp.setTitle("FOO SP");
+				fooSp.setExpression("Patient.gender");
+				fooSp.setXpathUsage(org.hl7.fhir.dstu3.model.SearchParameter.XPathUsageType.NORMAL);
+				fooSp.setStatus(org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus.ACTIVE);
+				mySearchParameterDao.create(fooSp, mySrd);
+			}
+		});
 
 		// Disable an existing parameter
-		fooSp = new SearchParameter();
-		fooSp.addBase("Patient");
-		fooSp.setCode("gender");
-		fooSp.setType(org.hl7.fhir.dstu3.model.Enumerations.SearchParamType.TOKEN);
-		fooSp.setTitle("Gender");
-		fooSp.setExpression("Patient.gender");
-		fooSp.setXpathUsage(org.hl7.fhir.dstu3.model.SearchParameter.XPathUsageType.NORMAL);
-		fooSp.setStatus(org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus.RETIRED);
-		mySearchParameterDao.create(fooSp, mySrd);
+		txTemplate.execute(new TransactionCallbackWithoutResult() {
+			@Override
+			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
+				SearchParameter fooSp = new SearchParameter();
+				fooSp.addBase("Patient");
+				fooSp.setCode("gender");
+				fooSp.setType(org.hl7.fhir.dstu3.model.Enumerations.SearchParamType.TOKEN);
+				fooSp.setTitle("Gender");
+				fooSp.setExpression("Patient.gender");
+				fooSp.setXpathUsage(org.hl7.fhir.dstu3.model.SearchParameter.XPathUsageType.NORMAL);
+				fooSp.setStatus(org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus.RETIRED);
+				mySearchParameterDao.create(fooSp, mySrd);
+			}
+		});
 
-		mySearchParamRegsitry.forceRefresh();
+		txTemplate.execute(new TransactionCallbackWithoutResult() {
+			@Override
+			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
+				mySearchParamRegsitry.forceRefresh();
+			}
+		});
 
 		conformance = ourClient
 				.fetchConformance()
@@ -187,7 +205,7 @@ public class ResourceProviderCustomSearchParamDstu3Test extends BaseResourceProv
 	@Test
 	public void testConformanceOverrideNotAllowed() {
 		myDaoConfig.setDefaultSearchParamsCanBeOverridden(false);
-		
+
 		CapabilityStatement conformance = ourClient
 				.fetchConformance()
 				.ofType(CapabilityStatement.class)
@@ -288,7 +306,7 @@ public class ResourceProviderCustomSearchParamDstu3Test extends BaseResourceProv
 				.where(new TokenClientParam("foo").exactly().code("male"))
 				.returnBundle(Bundle.class)
 				.execute();
-		
+
 		foundResources = toUnqualifiedVersionlessIdValues(result);
 		assertThat(foundResources, contains(patId.getValue()));
 

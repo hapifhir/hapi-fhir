@@ -39,6 +39,7 @@ import ca.uhn.fhir.jpa.dao.BaseJpaTest;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
+import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
 import ca.uhn.fhir.jpa.testutil.RandomServerPortProvider;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.IResource;
@@ -87,6 +88,7 @@ public class ResourceProviderDstu1Test  extends BaseJpaTest {
 	private static CloseableHttpClient ourHttpClient;
 	private static EntityManager ourEntityManager;
 	private static PlatformTransactionManager ourTxManager;
+	private static ISearchParamPresenceSvc ourSearchParamPresenceSvc;
 
 	@AfterClass
 	public static void afterClassClearContext() throws Exception {
@@ -551,6 +553,7 @@ public class ResourceProviderDstu1Test  extends BaseJpaTest {
 		ourOrganizationDao = (IFhirResourceDao<Organization>) ourAppCtx.getBean("myOrganizationDaoDstu1", IFhirResourceDao.class);
 		ourEntityManager = ourAppCtx.getBean(EntityManager.class);
 		ourTxManager = ourAppCtx.getBean(PlatformTransactionManager.class);
+		ourSearchParamPresenceSvc = ourAppCtx.getBean(ISearchParamPresenceSvc.class);
 		
 		List<IResourceProvider> rpsDev = (List<IResourceProvider>) ourAppCtx.getBean("myResourceProvidersDstu1", List.class);
 		restServer.setResourceProviders(rpsDev);
@@ -593,7 +596,7 @@ public class ResourceProviderDstu1Test  extends BaseJpaTest {
 	
 	@Before
 	public void before() {
-		super.purgeDatabase(ourEntityManager, ourTxManager);
+		super.purgeDatabase(ourEntityManager, ourTxManager, ourSearchParamPresenceSvc);
 	}
 
 }

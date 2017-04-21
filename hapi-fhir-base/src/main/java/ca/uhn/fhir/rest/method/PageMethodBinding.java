@@ -93,7 +93,8 @@ public class PageMethodBinding extends BaseResourceReturningMethodBinding {
 		IBundleProvider resultList = pagingProvider.retrieveResultList(thePagingAction);
 		if (resultList == null) {
 			ourLog.info("Client requested unknown paging ID[{}]", thePagingAction);
-			throw new ResourceGoneException("Search ID[" + thePagingAction + "] does not exist and may have expired.");
+			String msg = getContext().getLocalizer().getMessage(PageMethodBinding.class, "unknownSearchId", thePagingAction);
+			throw new ResourceGoneException(msg);
 		}
 
 		Integer count = RestfulServerUtils.extractCountParameter(theRequest);
@@ -108,8 +109,12 @@ public class PageMethodBinding extends BaseResourceReturningMethodBinding {
 			offsetI = 0;
 		}
 
-		int start = Math.min(offsetI, resultList.size() - 1);
-
+		Integer totalNum = resultList.size();
+		int start = offsetI;
+		if (totalNum != null) {
+			start = Math.min(start, totalNum - 1);
+		}
+		
 		ResponseEncoding responseEncoding = RestfulServerUtils.determineResponseEncodingNoDefault(theRequest, theServer.getDefaultResponseEncoding());
 		boolean prettyPrint = RestfulServerUtils.prettyPrintResponse(theServer, theRequest);
 

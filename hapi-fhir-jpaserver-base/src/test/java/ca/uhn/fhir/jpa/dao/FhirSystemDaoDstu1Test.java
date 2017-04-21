@@ -26,12 +26,14 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.config.TestDstu1Config;
 import ca.uhn.fhir.jpa.entity.TagTypeEnum;
+import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.BundleEntry;
 import ca.uhn.fhir.model.api.IResource;
@@ -61,10 +63,11 @@ public class FhirSystemDaoDstu1Test extends BaseJpaTest {
 	private static IFhirResourceDao<Patient> ourPatientDao;
 	private static IFhirSystemDao<List<IResource>, MetaDt> ourSystemDao;
 	private static PlatformTransactionManager ourTxManager;
+	private static ISearchParamPresenceSvc ourSearchParamPresenceSvc;
 
 	@Before
 	public void before() {
-		super.purgeDatabase(ourEntityManager, ourTxManager);
+		super.purgeDatabase(ourEntityManager, ourTxManager, ourSearchParamPresenceSvc);
 	}
 
 	@Override
@@ -120,7 +123,7 @@ public class FhirSystemDaoDstu1Test extends BaseJpaTest {
 		IIdType newpid3 = ourPatientDao.update(patient, mySrd).getId();
 
 		IBundleProvider values = ourSystemDao.history(start, null, mySrd);
-		assertEquals(4, values.size());
+		assertEquals(4, values.size().intValue());
 
 		List<IBaseResource> res = values.getResources(0, 4);
 		assertEquals(newpid3, res.get(0).getIdElement());
@@ -139,10 +142,10 @@ public class FhirSystemDaoDstu1Test extends BaseJpaTest {
 		Thread.sleep(2000);
 
 		values = ourLocationDao.history(start, null, mySrd);
-		assertEquals(2, values.size());
+		assertEquals(2, values.size().intValue());
 
 		values = ourLocationDao.history(lid.toUnqualifiedVersionless(), start, null, mySrd);
-		assertEquals(1, values.size());
+		assertEquals(1, values.size().intValue());
 
 	}
 
@@ -169,11 +172,11 @@ public class FhirSystemDaoDstu1Test extends BaseJpaTest {
 
 		// Try to search
 
-		IBundleProvider obsResults = ourObservationDao.search(Observation.SP_NAME, new IdentifierDt("urn:system", "testPersistWithSimpleLinkO01"));
-		assertEquals(1, obsResults.size());
+		IBundleProvider obsResults = ourObservationDao.search(new SearchParameterMap().setLoadSynchronous(true).add(Observation.SP_NAME, new IdentifierDt("urn:system", "testPersistWithSimpleLinkO01")));
+		assertEquals(1, obsResults.size().intValue());
 
-		IBundleProvider patResults = ourPatientDao.search(Patient.SP_IDENTIFIER, new IdentifierDt("urn:system", "testPersistWithSimpleLinkP01"));
-		assertEquals(1, obsResults.size());
+		IBundleProvider patResults = ourPatientDao.search(new SearchParameterMap().setLoadSynchronous(true).add(Patient.SP_IDENTIFIER, new IdentifierDt("urn:system", "testPersistWithSimpleLinkP01")));
+		assertEquals(1, obsResults.size().intValue());
 
 		IIdType foundPatientId = patResults.getResources(0, 1).get(0).getIdElement();
 		ResourceReferenceDt subject = obs.getSubject();
@@ -443,8 +446,8 @@ public class FhirSystemDaoDstu1Test extends BaseJpaTest {
 		 * Verify
 		 */
 
-		IBundleProvider results = ourPatientDao.search(Patient.SP_IDENTIFIER, new TokenParam("urn:system", "testTransactionWithDelete"));
-		assertEquals(3, results.size());
+		IBundleProvider results = ourPatientDao.search(new SearchParameterMap().setLoadSynchronous(true).add(Patient.SP_IDENTIFIER, new TokenParam("urn:system", "testTransactionWithDelete")));
+		assertEquals(3, results.size().intValue());
 
 		/*
 		 * Now delete 2
@@ -469,8 +472,8 @@ public class FhirSystemDaoDstu1Test extends BaseJpaTest {
 		 * Verify
 		 */
 
-		IBundleProvider results2 = ourPatientDao.search(Patient.SP_IDENTIFIER, new TokenParam("urn:system", "testTransactionWithDelete"));
-		assertEquals(1, results2.size());
+		IBundleProvider results2 = ourPatientDao.search(new SearchParameterMap().setLoadSynchronous(true).add(Patient.SP_IDENTIFIER, new TokenParam("urn:system", "testTransactionWithDelete")));
+		assertEquals(1, results2.size().intValue());
 		List<IBaseResource> existing2 = results2.getResources(0, 1);
 		assertEquals(existing2.get(0).getIdElement(), existing.get(2).getIdElement());
 
@@ -493,6 +496,7 @@ public class FhirSystemDaoDstu1Test extends BaseJpaTest {
 		ourSystemDao = ourCtx.getBean("mySystemDaoDstu1", IFhirSystemDao.class);
 		ourEntityManager = ourCtx.getBean(EntityManager.class);
 		ourTxManager = ourCtx.getBean(PlatformTransactionManager.class);
+		ourSearchParamPresenceSvc = ourCtx.getBean(ISearchParamPresenceSvc.class);
 	}
 
 }

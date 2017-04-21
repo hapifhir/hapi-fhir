@@ -38,6 +38,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.dao.SearchParameterMap;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.rest.server.IBundleProvider;
@@ -92,19 +93,40 @@ public class JpaValidationSupportDstu3 implements IJpaValidationSupportDstu3 {
 		IBundleProvider search;
 		if ("ValueSet".equals(resourceName)) {
 			if (localReference) {
-				search = myValueSetDao.search(IAnyResource.SP_RES_ID, new StringParam(theUri));
+				SearchParameterMap params = new SearchParameterMap();
+				params.setLoadSynchronousUpTo(1);
+				params.add(IAnyResource.SP_RES_ID, new StringParam(theUri));
+				search = myValueSetDao.search(params);
+				if (search.size() == 0) {
+					params = new SearchParameterMap();
+					params.setLoadSynchronousUpTo(1);
+					params.add(ValueSet.SP_URL, new UriParam(theUri));
+				  search = myValueSetDao.search(params);
+				}
 			} else {
-				search = myValueSetDao.search(ValueSet.SP_URL, new UriParam(theUri));
+				SearchParameterMap params = new SearchParameterMap();
+				params.setLoadSynchronousUpTo(1);
+				params.add(ValueSet.SP_URL, new UriParam(theUri));
+				search = myValueSetDao.search(params);
 			}
 		} else if ("StructureDefinition".equals(resourceName)) {
 			if (theUri.startsWith("http://hl7.org/fhir/StructureDefinition/")) {
 				return null;
 			}
-			search = myStructureDefinitionDao.search(StructureDefinition.SP_URL, new UriParam(theUri));
+			SearchParameterMap params = new SearchParameterMap();
+			params.setLoadSynchronousUpTo(1);
+			params.add(StructureDefinition.SP_URL, new UriParam(theUri));
+			search = myStructureDefinitionDao.search(params);
 		} else if ("Questionnaire".equals(resourceName)) {
-			search = myQuestionnaireDao.search(IAnyResource.SP_RES_ID, new StringParam(id.getIdPart()));
+			SearchParameterMap params = new SearchParameterMap();
+			params.setLoadSynchronousUpTo(1);
+			params.add(IAnyResource.SP_RES_ID, new StringParam(id.getIdPart()));
+			search = myQuestionnaireDao.search(params);
 		} else if ("CodeSystem".equals(resourceName)) {
-			search = myCodeSystemDao.search(CodeSystem.SP_URL, new UriParam(theUri));
+			SearchParameterMap params = new SearchParameterMap();
+			params.setLoadSynchronousUpTo(1);
+			params.add(CodeSystem.SP_URL, new UriParam(theUri));
+			search = myCodeSystemDao.search(params);
 		} else {
 			throw new IllegalArgumentException("Can't fetch resource type: " + resourceName);
 		}

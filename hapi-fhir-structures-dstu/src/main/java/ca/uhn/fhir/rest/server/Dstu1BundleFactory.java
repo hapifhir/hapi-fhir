@@ -60,6 +60,23 @@ public class Dstu1BundleFactory implements IVersionSpecificBundleFactory {
 		myContext = theContext;
 	}
 
+	private void addProfileIfNeeded(IRestfulServer<?> theServer, String theServerBase, IBaseResource nextRes) {
+		RuntimeResourceDefinition def = theServer.getFhirContext().getResourceDefinition(nextRes);
+		if (theServer.getAddProfileTag() == AddProfileTagEnum.ALWAYS || !def.isStandardType()) {
+			TagList tl = ResourceMetadataKeyEnum.TAG_LIST.get((IResource) nextRes);
+			if (tl == null) {
+				tl = new TagList();
+				ResourceMetadataKeyEnum.TAG_LIST.put((IResource) nextRes, tl);
+			}
+
+			RuntimeResourceDefinition nextDef = myContext.getResourceDefinition(nextRes);
+			String profile = nextDef.getResourceProfile(theServerBase);
+			if (isNotBlank(profile)) {
+				tl.add(new Tag(Tag.HL7_ORG_PROFILE_TAG, profile, null));
+			}
+		}
+	}
+
 	@Override
 	public void addResourcesToBundle(List<IBaseResource> theResult, BundleTypeEnum theBundleType, String theServerBase, BundleInclusionRule theBundleInclusionRule, Set<Include> theIncludes) {
 		if (myBundle == null) {
@@ -149,7 +166,7 @@ public class Dstu1BundleFactory implements IVersionSpecificBundleFactory {
 			myBundle.getAuthorName().setValue(theAuthor);
 		}
 
-		if (myBundle.getUpdated().isEmpty() && isNotBlank(theLastUpdated.getValueAsString())) {
+		if (theLastUpdated != null && myBundle.getUpdated().isEmpty() && isNotBlank(theLastUpdated.getValueAsString())) {
 			myBundle.getUpdated().setValueAsString(theLastUpdated.getValueAsString());
 		}
 
@@ -190,27 +207,31 @@ public class Dstu1BundleFactory implements IVersionSpecificBundleFactory {
 		int numToReturn;
 		String searchId = null;
 		List<IBaseResource> resourceList;
+		Integer numTotalResults = theResult.size();
 		if (theServer.getPagingProvider() == null) {
-			numToReturn = theResult.size();
+			numToReturn = numTotalResults;
 			resourceList = theResult.getResources(0, numToReturn);
 			RestfulServerUtils.validateResourceListNotNull(resourceList);
 
 		} else {
 			IPagingProvider pagingProvider = theServer.getPagingProvider();
-			if (theLimit == null) {
+			if (theLimit == null || theLimit.equals(Integer.valueOf(0))) {
 				numToReturn = pagingProvider.getDefaultPageSize();
 			} else {
 				numToReturn = Math.min(pagingProvider.getMaximumPageSize(), theLimit);
 			}
 
-			numToReturn = Math.min(numToReturn, theResult.size() - theOffset);
+			if (numTotalResults != null) {
+				numToReturn = Math.min(numToReturn, numTotalResults - theOffset);
+			}
+			
 			resourceList = theResult.getResources(theOffset, numToReturn + theOffset);
 			RestfulServerUtils.validateResourceListNotNull(resourceList);
 
 			if (theSearchId != null) {
 				searchId = theSearchId;
 			} else {
-				if (theResult.size() > numToReturn) {
+				if (numTotalResults == null || numTotalResults > numToReturn) {
 					searchId = pagingProvider.storeResultList(theResult);
 					Validate.notNull(searchId, "Paging provider returned null searchId");
 				}
@@ -230,7 +251,7 @@ public class Dstu1BundleFactory implements IVersionSpecificBundleFactory {
 
 
 		addResourcesToBundle(new ArrayList<IBaseResource>(resourceList), theBundleType, theServerBase, theServer.getBundleInclusionRule(), theIncludes);
-		addRootPropertiesToBundle(null, theServerBase, theCompleteUrl, theResult.size(), theBundleType, theResult.getPublished());
+		addRootPropertiesToBundle(null, theServerBase, theCompleteUrl, numTotalResults, theBundleType, theResult.getPublished());
 
 		if (theServer.getPagingProvider() != null) {
 			int limit;
@@ -238,7 +259,7 @@ public class Dstu1BundleFactory implements IVersionSpecificBundleFactory {
 			limit = Math.min(limit, theServer.getPagingProvider().getMaximumPageSize());
 
 			if (searchId != null) {
-				if (theOffset + numToReturn < theResult.size()) {
+				if (numTotalResults == null || theOffset + numToReturn < numTotalResults) {
 					myBundle.getLinkNext()
 							.setValue(RestfulServerUtils.createPagingLink(theIncludes, theServerBase, searchId, theOffset + numToReturn, numToReturn, theResponseEncoding, thePrettyPrint, theBundleType));
 				}
@@ -246,23 +267,6 @@ public class Dstu1BundleFactory implements IVersionSpecificBundleFactory {
 					int start = Math.max(0, theOffset - limit);
 					myBundle.getLinkPrevious().setValue(RestfulServerUtils.createPagingLink(theIncludes, theServerBase, searchId, start, limit, theResponseEncoding, thePrettyPrint, theBundleType));
 				}
-			}
-		}
-	}
-
-	private void addProfileIfNeeded(IRestfulServer<?> theServer, String theServerBase, IBaseResource nextRes) {
-		RuntimeResourceDefinition def = theServer.getFhirContext().getResourceDefinition(nextRes);
-		if (theServer.getAddProfileTag() == AddProfileTagEnum.ALWAYS || !def.isStandardType()) {
-			TagList tl = ResourceMetadataKeyEnum.TAG_LIST.get((IResource) nextRes);
-			if (tl == null) {
-				tl = new TagList();
-				ResourceMetadataKeyEnum.TAG_LIST.put((IResource) nextRes, tl);
-			}
-
-			RuntimeResourceDefinition nextDef = myContext.getResourceDefinition(nextRes);
-			String profile = nextDef.getResourceProfile(theServerBase);
-			if (isNotBlank(profile)) {
-				tl.add(new Tag(Tag.HL7_ORG_PROFILE_TAG, profile, null));
 			}
 		}
 	}

@@ -1,8 +1,6 @@
 package ca.uhn.fhir.rest.server;
 
-import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -28,7 +26,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.annotation.OptionalParam;
+import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.util.PortUtil;
@@ -38,11 +36,12 @@ public class SearchDstu3Test {
 
 	private static CloseableHttpClient ourClient;
 	private static FhirContext ourCtx = FhirContext.forDstu3();
+	private static TokenAndListParam ourIdentifiers;
+	private static String ourLastMethod;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchDstu3Test.class);
 	private static int ourPort;
+
 	private static Server ourServer;
-	private static String ourLastMethod;
-	private static TokenAndListParam ourIdentifiers;
 
 	@Before
 	public void before() {
@@ -77,9 +76,11 @@ public class SearchDstu3Test {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(responseContent);
 			assertEquals(400, status.getStatusLine().getStatusCode());
-			
+
 			OperationOutcome oo = (OperationOutcome) ourCtx.newXmlParser().parseResource(responseContent);
-			assertEquals("Invalid search parameter \"identifier.chain\". Parameter contains a chain (.chain) and chains are not supported for this parameter (chaining is only allowed on reference parameters)", oo.getIssueFirstRep().getDiagnostics());
+			assertEquals(
+					"Invalid search parameter \"identifier.chain\". Parameter contains a chain (.chain) and chains are not supported for this parameter (chaining is only allowed on reference parameters)",
+					oo.getIssueFirstRep().getDiagnostics());
 		} finally {
 			IOUtils.closeQuietly(status.getEntity().getContent());
 		}
@@ -123,19 +124,17 @@ public class SearchDstu3Test {
 			return Patient.class;
 		}
 
-		//@formatter:off
 		@SuppressWarnings("rawtypes")
 		@Search()
 		public List search(
-				@OptionalParam(name=Patient.SP_IDENTIFIER) TokenAndListParam theIdentifiers
-				) {
+				@RequiredParam(name = Patient.SP_IDENTIFIER) TokenAndListParam theIdentifiers) {
 			ourLastMethod = "search";
 			ourIdentifiers = theIdentifiers;
 			ArrayList<Patient> retVal = new ArrayList<Patient>();
 			retVal.add((Patient) new Patient().addName(new HumanName().setFamily("FAMILY")).setId("1"));
 			return retVal;
 		}
-		//@formatter:on
+
 
 	}
 

@@ -78,8 +78,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	protected PlatformTransactionManager myPlatformTransactionManager;
 	@Autowired
 	private IResourceHistoryTableDao myResourceHistoryTableDao;
-	@Autowired()
-	protected IResourceIndexedSearchParamUriDao myResourceIndexedSearchParamUriDao;
 	private String myResourceName;
 	@Autowired
 	protected IResourceTableDao myResourceTableDao;
@@ -89,10 +87,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	@Autowired()
 	protected ISearchResultDao mySearchResultDao;
 	private String mySecondaryPrimaryKeyParamName;
-	@Autowired
-	private ISearchParamRegistry mySerarchParamRegistry;
-	@Autowired()
-	protected IHapiTerminologySvc myTerminologySvc;
 
 	@Override
 	public void addTag(IIdType theId, TagTypeEnum theTagType, String theScheme, String theTerm, String theLabel) {
@@ -599,87 +593,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		return retVal;
 	}
 
-	// @Override
-	// public IBundleProvider everything(IIdType theId) {
-	// Search search = new Search();
-	// search.setUuid(UUID.randomUUID().toString());
-	// search.setCreated(new Date());
-	// myEntityManager.persist(search);
-	//
-	// List<SearchResult> results = new ArrayList<SearchResult>();
-	// if (theId != null) {
-	// Long pid = translateForcedIdToPid(theId);
-	// ResourceTable entity = myEntityManager.find(ResourceTable.class, pid);
-	// validateGivenIdIsAppropriateToRetrieveResource(theId, entity);
-	// SearchResult res = new SearchResult(search);
-	// res.setResourcePid(pid);
-	// results.add(res);
-	// } else {
-	// TypedQuery<Tuple> query = createSearchAllByTypeQuery();
-	// for (Tuple next : query.getResultList()) {
-	// SearchResult res = new SearchResult(search);
-	// res.setResourcePid(next.get(0, Long.class));
-	// results.add(res);
-	// }
-	// }
-	//
-	// int totalCount = results.size();
-	// mySearchResultDao.save(results);
-	// mySearchResultDao.flush();
-	//
-	// CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
-	//
-	// // Load _revincludes
-	// CriteriaQuery<Long> cq = builder.createQuery(Long.class);
-	// Root<ResourceLink> from = cq.from(ResourceLink.class);
-	// cq.select(from.get("mySourceResourcePid").as(Long.class));
-	//
-	// Subquery<Long> pidsSubquery = cq.subquery(Long.class);
-	// Root<SearchResult> pidsSubqueryFrom = pidsSubquery.from(SearchResult.class);
-	// pidsSubquery.select(pidsSubqueryFrom.get("myResourcePid").as(Long.class));
-	// pidsSubquery.where(pidsSubqueryFrom.get("mySearch").in(search));
-	//
-	// cq.where(from.get("myTargetResourceId").in(pidsSubquery));
-	// TypedQuery<Long> query = myEntityManager.createQuery(cq);
-	//
-	// results = new ArrayList<SearchResult>();
-	// for (Long next : query.getResultList()) {
-	// SearchResult res = new SearchResult(search);
-	// res.setResourcePid(next);
-	// results.add(res);
-	// }
-	//
-	// // Save _revincludes
-	// totalCount += results.size();
-	// mySearchResultDao.save(results);
-	// mySearchResultDao.flush();
-	//
-	// final int finalTotalCount = totalCount;
-	// return new IBundleProvider() {
-	//
-	// @Override
-	// public int size() {
-	// return finalTotalCount;
-	// }
-	//
-	// @Override
-	// public Integer preferredPageSize() {
-	// return null;
-	// }
-	//
-	// @Override
-	// public List<IBaseResource> getResources(int theFromIndex, int theToIndex) {
-	// // TODO Auto-generated method stub
-	// return null;
-	// }
-	//
-	// @Override
-	// public InstantDt getPublished() {
-	// // TODO Auto-generated method stub
-	// return null;
-	// }
-	// };
-	// }
 
 	@Override
 	public <MT extends IBaseMetaType> MT metaGetOperation(Class<MT> theType, IIdType theId, RequestDetails theRequestDetails) {
@@ -761,7 +674,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	 * Subclasses may override to provide behaviour. Invoked within a delete
 	 * transaction with the resource that is about to be deleted. 
 	 */
-	@SuppressWarnings("unused")
 	protected void preDelete(T theResourceToDelete, ResourceTable theEntityToDelete) {
 		// nothing by default
 	}
@@ -949,30 +861,27 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	}
 
 	@Override
-	public IBundleProvider search(Map<String, IQueryParameterType> theParams) {
-		SearchParameterMap map = new SearchParameterMap();
-		for (Entry<String, IQueryParameterType> nextEntry : theParams.entrySet()) {
-			map.add(nextEntry.getKey(), (nextEntry.getValue()));
-		}
-		return search(map);
-	}
-
-	@Override
 	public IBundleProvider search(final SearchParameterMap theParams) {
-		// Notify interceptors
-		ActionRequestDetails requestDetails = new ActionRequestDetails(theParams.getRequestDetails(), getContext(), getResourceName(), null);
-		notifyInterceptors(RestOperationTypeEnum.SEARCH_TYPE, requestDetails);
-
-		SearchBuilder builder = new SearchBuilder(getContext(), myEntityManager, myPlatformTransactionManager, mySearchDao, mySearchResultDao, this, myResourceIndexedSearchParamUriDao, myForcedIdDao,
-				myTerminologySvc, mySerarchParamRegistry);
-		builder.setType(getResourceType(), getResourceName());
-		return builder.search(theParams);
+		return search(theParams, null);
 	}
 
 	@Override
-	public IBundleProvider search(String theParameterName, IQueryParameterType theValue) {
-		return search(Collections.singletonMap(theParameterName, theValue));
+	public IBundleProvider search(final SearchParameterMap theParams, RequestDetails theRequestDetails) {
+		// Notify interceptors
+		if (theRequestDetails != null) {
+			ActionRequestDetails requestDetails = new ActionRequestDetails(theRequestDetails, getContext(), getResourceName(), null);
+			notifyInterceptors(RestOperationTypeEnum.SEARCH_TYPE, requestDetails);
+		
+			if (theRequestDetails.isSubRequest()) {
+				theParams.setLoadSynchronous(true);
+				theParams.setLoadSynchronousUpTo(myDaoConfig.getMaximumSearchResultCountInTransaction());
+			}
+		
+		}
+		
+		return mySearchCoordinatorSvc.registerSearch(this, theParams, getResourceName());
 	}
+
 
 	@Override
 	public Set<Long> searchForIds(Map<String, IQueryParameterType> theParams) {
@@ -990,13 +899,20 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 	@Override
 	public Set<Long> searchForIdsWithAndOr(SearchParameterMap theParams) {
-		theParams.setPersistResults(false);
 
-		SearchBuilder builder = new SearchBuilder(getContext(), myEntityManager, myPlatformTransactionManager, mySearchDao, mySearchResultDao, this, myResourceIndexedSearchParamUriDao, myForcedIdDao,
-				myTerminologySvc, mySerarchParamRegistry);
+		SearchBuilder builder = newSearchBuilder();
 		builder.setType(getResourceType(), getResourceName());
-		builder.search(theParams);
-		return builder.doGetPids();
+
+		// FIXME: fail if too many results
+		
+		HashSet<Long> retVal = new HashSet<Long>();
+		
+		Iterator<Long> iter = builder.createQuery(theParams);
+		while (iter.hasNext()) {
+			retVal.add(iter.next());
+		}
+		
+		return retVal;
 	}
 
 	@SuppressWarnings("unchecked")

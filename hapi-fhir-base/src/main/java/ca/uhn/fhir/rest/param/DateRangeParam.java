@@ -36,6 +36,8 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
 public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 
+	private static final long serialVersionUID = 1L;
+	
 	private DateParam myLowerBound;
 	private DateParam myUpperBound;
 

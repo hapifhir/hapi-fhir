@@ -20,17 +20,6 @@
 			<version>${project.version}</version>
 		</dependency>
 
-		<!-- 
-		The JPA project uses a newer API but we'll try to hold to this version
-		as much as possible. See #283.
-		-->
-		<dependency>
-			<groupId>javax.servlet</groupId>
-			<artifactId>servlet-api</artifactId>
-			<version>2.5</version>
-			<scope>provided</scope>
-		</dependency>
-
 		<!-- Testing -->
 		<dependency>
 			<groupId>xmlunit</groupId>
@@ -150,6 +139,22 @@
 			<artifactId>guava</artifactId>
 			<scope>test</scope>
 		</dependency>
+		
+		<!-- 
+		The JPA project uses a newer API but we'll try to hold to this version
+		as much as possible. See #283.
+		
+		This dependency comes last so that the newer version brought in by 
+		Jetty for unit tests comes first on the classpath (since jetty
+		needs that newer version. The unit tests are slooooow otherwise. 
+		-->
+		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>servlet-api</artifactId>
+			<version>2.5</version>
+			<scope>provided</scope>
+		</dependency>
+		
 	</dependencies>
 
 	<build>

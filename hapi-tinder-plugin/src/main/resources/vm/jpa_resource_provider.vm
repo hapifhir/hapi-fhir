@@ -152,11 +152,10 @@ public class ${className}ResourceProvider extends
 			paramMap.setIncludes(theIncludes);
 			paramMap.setSort(theSort);
 			paramMap.setCount(theCount);
-			paramMap.setRequestDetails(theRequestDetails);
 
 			getDao().translateRawParameters(theAdditionalRawParams, paramMap);
 
-			ca.uhn.fhir.rest.server.IBundleProvider retVal = getDao().search(paramMap);
+			ca.uhn.fhir.rest.server.IBundleProvider retVal = getDao().search(paramMap, theRequestDetails);
 			return retVal;
 		} finally {
 			endRequest(theServletRequest);

@@ -42,7 +42,6 @@ import org.hibernate.search.annotations.Field;
 
 import ca.uhn.fhir.model.primitive.InstantDt;
 
-//@formatter:off
 @Embeddable
 @Entity
 @Table(name = "HFJ_SPIDX_DATE", indexes= {
@@ -50,7 +49,6 @@ import ca.uhn.fhir.model.primitive.InstantDt;
 	@Index(name = "IDX_SP_DATE_UPDATED", columnList = "SP_UPDATED"), 
 	@Index(name = "IDX_SP_DATE_RESID", columnList = "RES_ID") 
 })
-//@formatter:on
 public class ResourceIndexedSearchParamDate extends BaseResourceIndexedSearchParam {
 
 	private static final long serialVersionUID = 1L;

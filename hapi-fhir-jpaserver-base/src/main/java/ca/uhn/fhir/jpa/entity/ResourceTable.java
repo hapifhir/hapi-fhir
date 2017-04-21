@@ -236,6 +236,9 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 	@OneToMany(mappedBy = "myResource", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
 	private Set<ResourceTag> myTags;
 
+	@OneToMany(mappedBy = "myResource", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+	private Collection<SearchParamPresent> mySearchParamPresents;
+
 	@Column(name = "RES_VER")
 	private long myVersion;
 

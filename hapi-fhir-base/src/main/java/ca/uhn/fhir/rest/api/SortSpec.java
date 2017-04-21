@@ -1,5 +1,7 @@
 package ca.uhn.fhir.rest.api;
 
+import java.io.Serializable;
+
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -24,8 +26,10 @@ package ca.uhn.fhir.rest.api;
  * Represents values for <a href="http://hl7.org/implement/standards/fhir/search.html#sort">sorting</a> resources
  * returned by a server.
  */
-public class SortSpec {
+public class SortSpec implements Serializable {
 
+	private static final long serialVersionUID = 2866833099879713467L;
+	
 	private SortSpec myChain;
 	private String myParamName;
 	private SortOrderEnum myOrder;

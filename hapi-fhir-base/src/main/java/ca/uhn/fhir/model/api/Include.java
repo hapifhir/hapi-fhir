@@ -3,6 +3,8 @@ package ca.uhn.fhir.model.api;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
+import java.io.Serializable;
+
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 /*
@@ -33,8 +35,10 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
  * upgrading servers.
  * </p>
  */
-public class Include {
+public class Include implements Serializable {
 
+	private static final long serialVersionUID = 1L;
+	
 	private final boolean myImmutable;
 	private boolean myRecurse;
 	private String myValue;

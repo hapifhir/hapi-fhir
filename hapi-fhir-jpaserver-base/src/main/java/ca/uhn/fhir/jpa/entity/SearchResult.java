@@ -106,7 +106,8 @@ public class SearchResult implements Serializable {
 		myOrder = theOrder;
 	}
 
-	public void setResourcePid(Long theResourcePid) {
+	public SearchResult setResourcePid(Long theResourcePid) {
 		myResourcePid = theResourcePid;
+		return this;
 	}
 }

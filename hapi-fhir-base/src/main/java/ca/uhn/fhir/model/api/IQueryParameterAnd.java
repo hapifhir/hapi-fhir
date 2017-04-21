@@ -1,5 +1,7 @@
 package ca.uhn.fhir.model.api;
 
+import java.io.Serializable;
+
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -26,7 +28,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.method.QualifiedParamList;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
-public interface IQueryParameterAnd<T extends IQueryParameterOr<?>> {
+public interface IQueryParameterAnd<T extends IQueryParameterOr<?>> extends Serializable {
 
 	/**
 	 * 

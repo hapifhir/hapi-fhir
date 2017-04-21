@@ -23,6 +23,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.config.TestDstu3WithoutLuceneConfig;
 import ca.uhn.fhir.jpa.dao.*;
 import ca.uhn.fhir.jpa.provider.dstu3.JpaSystemProviderDstu3;
+import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -139,6 +140,8 @@ public class FhirResourceDaoDstu3SearchWithLuceneDisabledTest extends BaseJpaTes
 
 	@Autowired
 	protected PlatformTransactionManager myTxManager;
+	@Autowired
+	protected ISearchParamPresenceSvc mySearchParamPresenceSvc;
 
 	@Autowired
 	@Qualifier("myJpaValidationSupportChainDstu3")
@@ -148,7 +151,7 @@ public class FhirResourceDaoDstu3SearchWithLuceneDisabledTest extends BaseJpaTes
 	@Transactional()
 	public void beforePurgeDatabase() {
 		final EntityManager entityManager = this.myEntityManager;
-		purgeDatabase(entityManager, myTxManager);
+		purgeDatabase(entityManager, myTxManager, mySearchParamPresenceSvc);
 	}
 
 	@Before
@@ -188,7 +191,7 @@ public class FhirResourceDaoDstu3SearchWithLuceneDisabledTest extends BaseJpaTes
 		SearchParameterMap map = new SearchParameterMap();
 		map.add(Constants.PARAM_CONTENT, new StringParam(methodName));
 		try {
-			myOrganizationDao.search(map);
+			myOrganizationDao.search(map).size();
 			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals("Fulltext search is not enabled on this service, can not process parameter: _content", e.getMessage());
@@ -206,7 +209,7 @@ public class FhirResourceDaoDstu3SearchWithLuceneDisabledTest extends BaseJpaTes
 		SearchParameterMap map = new SearchParameterMap();
 		map.add(Constants.PARAM_TEXT, new StringParam(methodName));
 		try {
-			myOrganizationDao.search(map);
+			myOrganizationDao.search(map).size();
 			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals("Fulltext search is not enabled on this service, can not process parameter: _text", e.getMessage());

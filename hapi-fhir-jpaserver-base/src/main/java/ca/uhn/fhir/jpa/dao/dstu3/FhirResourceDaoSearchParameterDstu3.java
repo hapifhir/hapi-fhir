@@ -28,6 +28,11 @@ import org.hl7.fhir.dstu3.model.Meta;
 import org.hl7.fhir.dstu3.model.SearchParameter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.support.TransactionCallback;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import ca.uhn.fhir.jpa.dao.BaseSearchParamExtractor;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoSearchParameter;
@@ -51,9 +56,18 @@ public class FhirResourceDaoSearchParameterDstu3 extends FhirResourceDaoDstu3<Se
 	protected void markAffectedResources(SearchParameter theResource) {
 		if (theResource != null) {
 			String expression = theResource.getExpression();
-			String resourceType = expression.substring(0, expression.indexOf('.'));
+			final String resourceType = expression.substring(0, expression.indexOf('.'));
 			ourLog.info("Marking all resources of type {} for reindexing due to updated search parameter with path: {}", expression);
-			int updatedCount = myResourceTableDao.markResourcesOfTypeAsRequiringReindexing(resourceType);
+
+			TransactionTemplate txTemplate = new TransactionTemplate(myPlatformTransactionManager);
+			txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+			int updatedCount = txTemplate.execute(new TransactionCallback<Integer>() {
+				@Override
+				public Integer doInTransaction(TransactionStatus theStatus) {
+					return myResourceTableDao.markResourcesOfTypeAsRequiringReindexing(resourceType);
+				}
+			});
+
 			ourLog.info("Marked {} resources for reindexing", updatedCount);
 		}
 
