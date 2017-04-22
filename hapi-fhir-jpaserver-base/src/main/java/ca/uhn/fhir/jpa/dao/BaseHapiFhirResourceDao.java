@@ -883,22 +883,10 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	}
 
 
-	@Override
-	public Set<Long> searchForIds(Map<String, IQueryParameterType> theParams) {
-		SearchParameterMap map = new SearchParameterMap();
-		for (Entry<String, IQueryParameterType> nextEntry : theParams.entrySet()) {
-			map.add(nextEntry.getKey(), (nextEntry.getValue()));
-		}
-		return searchForIdsWithAndOr(map);
-	}
+
 
 	@Override
-	public Set<Long> searchForIds(String theParameterName, IQueryParameterType theValue) {
-		return searchForIds(Collections.singletonMap(theParameterName, theValue));
-	}
-
-	@Override
-	public Set<Long> searchForIdsWithAndOr(SearchParameterMap theParams) {
+	public Set<Long> searchForIds(SearchParameterMap theParams) {
 
 		SearchBuilder builder = newSearchBuilder();
 		builder.setType(getResourceType(), getResourceName());
@@ -1090,6 +1078,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 					"Invalid resource ID[" + entity.getIdDt().toUnqualifiedVersionless() + "] of type[" + entity.getResourceType() + "] - Does not match expected [" + getResourceName() + "]");
 		}
 
+//		entity.get
+		
 		// Notify interceptors
 		ActionRequestDetails requestDetails = null;
 		if (theRequestDetails != null) {

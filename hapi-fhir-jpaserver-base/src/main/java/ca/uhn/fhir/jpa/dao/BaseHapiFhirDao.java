@@ -146,6 +146,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 	 */
 	static final Map<String, Class<? extends IQueryParameterType>> RESOURCE_META_PARAMS;
 	public static final String UCUM_NS = "http://unitsofmeasure.org";
+	private static final Set<String> EXCLUDE_ELEMENTS_IN_ENCODED;
 
 	static {
 		Map<String, Class<? extends IQueryParameterType>> resourceMetaParams = new HashMap<String, Class<? extends IQueryParameterType>>();
@@ -162,6 +163,11 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		resourceMetaAndParams.put(Constants.PARAM_SECURITY, TokenAndListParam.class);
 		RESOURCE_META_PARAMS = Collections.unmodifiableMap(resourceMetaParams);
 		RESOURCE_META_AND_PARAMS = Collections.unmodifiableMap(resourceMetaAndParams);
+		
+		HashSet<String> excludeElementsInEncoded = new HashSet<String>();
+		excludeElementsInEncoded.add("*.id");
+		excludeElementsInEncoded.add("*.meta");
+		EXCLUDE_ELEMENTS_IN_ENCODED = Collections.unmodifiableSet(excludeElementsInEncoded);
 	}
 
 	@Autowired(required = true)
@@ -833,9 +839,13 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 				}
 			}
 		}
-
-		String encoded = myConfig.getResourceEncoding().newParser(myContext).encodeResourceToString(theResource);
+		
 		ResourceEncodingEnum encoding = myConfig.getResourceEncoding();
+		
+		IParser parser = encoding.newParser(myContext);
+		parser.setDontEncodeElements(EXCLUDE_ELEMENTS_IN_ENCODED);
+		String encoded = parser.encodeResourceToString(theResource);
+		
 		theEntity.setEncoding(encoding);
 		theEntity.setFhirVersion(myContext.getVersion().getVersion());
 		switch (encoding) {
@@ -1057,7 +1067,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		}
 
 		IFhirResourceDao<R> dao = getDao(theResourceType);
-		Set<Long> ids = dao.searchForIdsWithAndOr(paramMap);
+		Set<Long> ids = dao.searchForIds(paramMap);
 
 		return ids;
 	}
@@ -1580,12 +1590,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 
 	protected ResourceTable updateEntity(IBaseResource theResource, ResourceTable entity, Date theDeletedTimestampOrNull, Date theUpdateTime) {
 		return updateEntity(theResource, entity, theDeletedTimestampOrNull, true, true, theUpdateTime);
-	}
-
-	private void updateSearchParamPresent(Map<String, Boolean> presentSearchParams, Set<? extends BaseResourceIndexedSearchParam> params) {
-		for (BaseResourceIndexedSearchParam nextSearchParam : params) {
-			presentSearchParams.put(nextSearchParam.getParamName(), Boolean.TRUE);
-		}
 	}
 
 	private void validateChildReferences(IBase theElement, String thePath) {
