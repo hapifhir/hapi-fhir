@@ -37,6 +37,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 
+import ca.uhn.fhir.jpa.dao.SearchParameterMap;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
@@ -352,7 +353,7 @@ public class FhirResourceDaoDstu3UpdateTest extends BaseJpaDstu3Test {
 		p2.addName().setFamily("Tester").addGiven("testUpdateMaintainsSearchParamsDstu2BBB");
 		myPatientDao.create(p2, mySrd).getId();
 
-		Set<Long> ids = myPatientDao.searchForIds(Patient.SP_GIVEN, new StringParam("testUpdateMaintainsSearchParamsDstu2AAA"));
+		Set<Long> ids = myPatientDao.searchForIds(new SearchParameterMap(Patient.SP_GIVEN, new StringParam("testUpdateMaintainsSearchParamsDstu2AAA")));
 		assertEquals(1, ids.size());
 		assertThat(ids, contains(p1id.getIdPartAsLong()));
 
@@ -361,10 +362,10 @@ public class FhirResourceDaoDstu3UpdateTest extends BaseJpaDstu3Test {
 		MethodOutcome update2 = myPatientDao.update(p1, mySrd);
 		IIdType p1id2 = update2.getId();
 
-		ids = myPatientDao.searchForIds(Patient.SP_GIVEN, new StringParam("testUpdateMaintainsSearchParamsDstu2AAA"));
+		ids = myPatientDao.searchForIds(new SearchParameterMap(Patient.SP_GIVEN, new StringParam("testUpdateMaintainsSearchParamsDstu2AAA")));
 		assertEquals(0, ids.size());
 
-		ids = myPatientDao.searchForIds(Patient.SP_GIVEN, new StringParam("testUpdateMaintainsSearchParamsDstu2BBB"));
+		ids = myPatientDao.searchForIds(new SearchParameterMap(Patient.SP_GIVEN, new StringParam("testUpdateMaintainsSearchParamsDstu2BBB")));
 		assertEquals(2, ids.size());
 
 		// Make sure vreads work

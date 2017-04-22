@@ -1590,7 +1590,7 @@ public class FhirResourceDaoDstu2SearchNoFtTest extends BaseJpaDstu2Test {
 		QuantityParam param;
 		Set<Long> found;
 		param = new QuantityParam(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, new BigDecimal("10"), null, null);
-		found = myObservationDao.searchForIds("value-quantity", param);
+		found = myObservationDao.searchForIds(new SearchParameterMap("value-quantity", param));
 		int initialSize = found.size();
 
 		Observation o = new Observation();
@@ -1601,19 +1601,19 @@ public class FhirResourceDaoDstu2SearchNoFtTest extends BaseJpaDstu2Test {
 		myObservationDao.create(o, mySrd);
 
 		param = new QuantityParam(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, new BigDecimal("10"), null, null);
-		found = myObservationDao.searchForIds("value-quantity", param);
+		found = myObservationDao.searchForIds(new SearchParameterMap("value-quantity", param));
 		assertEquals(1 + initialSize, found.size());
 
 		param = new QuantityParam(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, new BigDecimal("10"), null, methodName + "units");
-		found = myObservationDao.searchForIds("value-quantity", param);
+		found = myObservationDao.searchForIds(new SearchParameterMap("value-quantity", param));
 		assertEquals(1, found.size());
 
 		param = new QuantityParam(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, new BigDecimal("10"), "urn:bar:" + methodName, null);
-		found = myObservationDao.searchForIds("value-quantity", param);
+		found = myObservationDao.searchForIds(new SearchParameterMap("value-quantity", param));
 		assertEquals(1, found.size());
 
 		param = new QuantityParam(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, new BigDecimal("10"), "urn:bar:" + methodName, methodName + "units");
-		found = myObservationDao.searchForIds("value-quantity", param);
+		found = myObservationDao.searchForIds(new SearchParameterMap("value-quantity", param));
 		assertEquals(1, found.size());
 
 	}

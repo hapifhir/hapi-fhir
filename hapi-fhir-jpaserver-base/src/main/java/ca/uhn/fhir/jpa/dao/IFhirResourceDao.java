@@ -178,11 +178,7 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 
 	IBundleProvider search(SearchParameterMap theParams, RequestDetails theRequestDetails);
 
-	Set<Long> searchForIds(Map<String, IQueryParameterType> theParams);
-
-	Set<Long> searchForIds(String theParameterName, IQueryParameterType theValue);
-
-	Set<Long> searchForIdsWithAndOr(SearchParameterMap theParams);
+	Set<Long> searchForIds(SearchParameterMap theParams);
 
 	/**
 	 * Takes a map of incoming raw search parameters and translates/parses them into 
