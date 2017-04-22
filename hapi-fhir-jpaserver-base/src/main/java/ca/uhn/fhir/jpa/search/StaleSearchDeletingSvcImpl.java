@@ -33,6 +33,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import com.google.common.annotations.VisibleForTesting;
+
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.data.ISearchDao;
 import ca.uhn.fhir.jpa.dao.data.ISearchIncludeDao;
@@ -43,62 +45,31 @@ import ca.uhn.fhir.jpa.entity.Search;
  * Deletes old searches
  */
 public class StaleSearchDeletingSvcImpl implements IStaleSearchDeletingSvc {
+	public static final long DEFAULT_CUTOFF_SLACK = 10 * DateUtils.MILLIS_PER_SECOND;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(StaleSearchDeletingSvcImpl.class);
+	
 
-	@Autowired
-	private ISearchDao mySearchDao;
+	/*
+	 * We give a bit of extra leeway just to avoid race conditions where a query result
+	 * is being reused (because a new client request came in with the same params) right before
+	 * the result is to be deleted
+	 */
+	private long myCutoffSlack = DEFAULT_CUTOFF_SLACK;
 
 	@Autowired
 	private DaoConfig myDaoConfig;
 
 	@Autowired
-	private ISearchResultDao mySearchResultDao;
+	private ISearchDao mySearchDao;
 
 	@Autowired
 	private ISearchIncludeDao mySearchIncludeDao;
 
 	@Autowired
+	private ISearchResultDao mySearchResultDao;
+
+	@Autowired
 	private PlatformTransactionManager myTransactionManager;
-
-	@Scheduled(fixedDelay = 10 * DateUtils.MILLIS_PER_SECOND)
-	@Transactional(propagation = Propagation.NOT_SUPPORTED)
-	@Override
-	public synchronized void schedulePollForStaleSearches() {
-		if (!myDaoConfig.isSchedulingDisabled()) {
-			if (myDaoConfig.isExpireSearchResults()) {
-				pollForStaleSearchesAndDeleteThem();
-			}
-		}
-	}
-
-	@Override
-	@Transactional(propagation = Propagation.NOT_SUPPORTED)
-	public void pollForStaleSearchesAndDeleteThem() {
-		
-		/*
-		 * We give a bit of extra leeway just to avoid race conditions where a query result
-		 * is being reused (because a new client request came in with the same params) right before
-		 * the result is to be deleted
-		 */
-		long slack = 10 * DateUtils.MILLIS_PER_SECOND;
-		long cutoffMillis = myDaoConfig.getExpireSearchResultsAfterMillis();
-		if (myDaoConfig.getReuseCachedSearchResultsForMillis() != null) {
-			cutoffMillis = Math.max(cutoffMillis, myDaoConfig.getReuseCachedSearchResultsForMillis());
-		}
-		Date cutoff = new Date((System.currentTimeMillis() - cutoffMillis) - slack);
-		
-		ourLog.debug("Searching for searches which are before {}", cutoff);
-
-		Collection<Search> toDelete = mySearchDao.findWhereLastReturnedBefore(cutoff);
-		if (!toDelete.isEmpty()) {
-
-			for (final Search next : toDelete) {
-				deleteSearch(next);
-			}
-
-			ourLog.info("Deleted {} searches, {} remaining", toDelete.size(), mySearchDao.count());
-		}
-	}
 
 	protected void deleteSearch(final Search next) {
 		TransactionTemplate tt = new TransactionTemplate(myTransactionManager);
@@ -112,6 +83,48 @@ public class StaleSearchDeletingSvcImpl implements IStaleSearchDeletingSvc {
 				mySearchDao.delete(searchToDelete);
 			}
 		});
+	}
+	
+	@Override
+	@Transactional(propagation = Propagation.NOT_SUPPORTED)
+	public void pollForStaleSearchesAndDeleteThem() {
+		
+		long cutoffMillis = myDaoConfig.getExpireSearchResultsAfterMillis();
+		if (myDaoConfig.getReuseCachedSearchResultsForMillis() != null) {
+			cutoffMillis = Math.max(cutoffMillis, myDaoConfig.getReuseCachedSearchResultsForMillis());
+		}
+		Date cutoff = new Date((System.currentTimeMillis() - cutoffMillis) - myCutoffSlack);
+		
+		ourLog.debug("Searching for searches which are before {}", cutoff);
+
+		Collection<Search> toDelete = mySearchDao.findWhereLastReturnedBefore(cutoff);
+		if (!toDelete.isEmpty()) {
+
+			for (final Search next : toDelete) {
+				
+				ourLog.info("Deleting search {} - Created[{}] -- Last returned[{}]", next.getUuid(), next.getCreated(), next.getSearchLastReturned());
+				
+				deleteSearch(next);
+			}
+
+			ourLog.info("Deleted {} searches, {} remaining", toDelete.size(), mySearchDao.count());
+		}
+	}
+
+	@Scheduled(fixedDelay = DEFAULT_CUTOFF_SLACK)
+	@Transactional(propagation = Propagation.NOT_SUPPORTED)
+	@Override
+	public synchronized void schedulePollForStaleSearches() {
+		if (!myDaoConfig.isSchedulingDisabled()) {
+			if (myDaoConfig.isExpireSearchResults()) {
+				pollForStaleSearchesAndDeleteThem();
+			}
+		}
+	}
+
+	@VisibleForTesting
+	public void setCutoffSlackForUnitTest(long theCutoffSlack) {
+		myCutoffSlack = theCutoffSlack;
 	}
 
 }

@@ -62,7 +62,6 @@ public abstract class BaseResourceProviderDstu3Test extends BaseJpaDstu3Test {
 		super();
 	}
 
-
 	@After
 	public void after() throws Exception {
 		myFhirCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.ONCE);
@@ -77,44 +76,44 @@ public abstract class BaseResourceProviderDstu3Test extends BaseJpaDstu3Test {
 
 		if (ourServer == null) {
 			ourPort = RandomServerPortProvider.findFreePort();
-	
+
 			ourRestServer = new RestfulServer(myFhirCtx);
-	
+
 			ourServerBase = "http://localhost:" + ourPort + "/fhir/context";
-	
-			ourRestServer.setResourceProviders((List)myResourceProviders);
-	
+
+			ourRestServer.setResourceProviders((List) myResourceProviders);
+
 			ourRestServer.getFhirContext().setNarrativeGenerator(new DefaultThymeleafNarrativeGenerator());
-	
+
 			myTerminologyUploaderProvider = myAppCtx.getBean(TerminologyUploaderProviderDstu3.class);
-			
+
 			ourRestServer.setPlainProviders(mySystemProvider, myTerminologyUploaderProvider);
-	
+
 			JpaConformanceProviderDstu3 confProvider = new JpaConformanceProviderDstu3(ourRestServer, mySystemDao, myDaoConfig);
 			confProvider.setImplementationDescription("THIS IS THE DESC");
 			ourRestServer.setServerConformanceProvider(confProvider);
-	
+
 			ourRestServer.setPagingProvider(myAppCtx.getBean(DatabaseBackedPagingProvider.class));
-	
+
 			Server server = new Server(ourPort);
-	
+
 			ServletContextHandler proxyHandler = new ServletContextHandler();
 			proxyHandler.setContextPath("/");
-	
+
 			ServletHolder servletHolder = new ServletHolder();
 			servletHolder.setServlet(ourRestServer);
 			proxyHandler.addServlet(servletHolder, "/fhir/context/*");
-	
+
 			ourWebApplicationContext = new GenericWebApplicationContext();
 			ourWebApplicationContext.setParent(myAppCtx);
 			ourWebApplicationContext.refresh();
-//			ContextLoaderListener loaderListener = new ContextLoaderListener(webApplicationContext);
-//			loaderListener.initWebApplicationContext(mock(ServletContext.class));
-//	
-			proxyHandler.getServletContext().setAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE, ourWebApplicationContext); 
-			
+			// ContextLoaderListener loaderListener = new ContextLoaderListener(webApplicationContext);
+			// loaderListener.initWebApplicationContext(mock(ServletContext.class));
+			//
+			proxyHandler.getServletContext().setAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE, ourWebApplicationContext);
+
 			DispatcherServlet dispatcherServlet = new DispatcherServlet();
-//			dispatcherServlet.setApplicationContext(webApplicationContext);
+			// dispatcherServlet.setApplicationContext(webApplicationContext);
 			dispatcherServlet.setContextClass(AnnotationConfigWebApplicationContext.class);
 			ServletHolder subsServletHolder = new ServletHolder();
 			subsServletHolder.setServlet(dispatcherServlet);
@@ -134,25 +133,25 @@ public abstract class BaseResourceProviderDstu3Test extends BaseJpaDstu3Test {
 			config.addAllowedOrigin("*");
 			config.addExposedHeader("Location");
 			config.addExposedHeader("Content-Location");
-			config.setAllowedMethods(Arrays.asList("GET","POST","PUT","DELETE","OPTIONS"));
+			config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
 			ourRestServer.registerInterceptor(corsInterceptor);
 
 			server.setHandler(proxyHandler);
 			server.start();
-			
+
 			WebApplicationContext wac = WebApplicationContextUtils.getWebApplicationContext(subsServletHolder.getServlet().getServletConfig().getServletContext());
 			myValidationSupport = wac.getBean(JpaValidationSupportChainDstu3.class);
 			mySearchCoordinatorSvc = wac.getBean(ISearchCoordinatorSvc.class);
 			mySearchEntityDao = wac.getBean(ISearchDao.class);
-			
+
 			ourClient = myFhirCtx.newRestfulGenericClient(ourServerBase);
 			ourClient.registerInterceptor(new LoggingInterceptor(true));
-	
+
 			PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 			HttpClientBuilder builder = HttpClientBuilder.create();
 			builder.setConnectionManager(connectionManager);
 			ourHttpClient = builder.build();
-	
+
 			ourServer = server;
 		}
 	}

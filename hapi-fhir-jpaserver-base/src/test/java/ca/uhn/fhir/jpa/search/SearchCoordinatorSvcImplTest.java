@@ -39,6 +39,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 import com.google.common.collect.Lists;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.IDao;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
 import ca.uhn.fhir.jpa.dao.SearchParameterMap;
@@ -73,7 +74,6 @@ public class SearchCoordinatorSvcImplTest {
 	private ISearchIncludeDao mySearchIncludeDao;
 	@Mock
 	private ISearchResultDao mySearchResultDao;
-	
 	@Captor
 	ArgumentCaptor<Iterable<SearchResult>> mySearchResultIterCaptor;
 	
@@ -82,6 +82,7 @@ public class SearchCoordinatorSvcImplTest {
 
 	@Mock
 	private PlatformTransactionManager myTxManager;
+	private DaoConfig myDaoConfig;
 
 	@After
 	public void after() {
@@ -97,6 +98,9 @@ public class SearchCoordinatorSvcImplTest {
 		mySvc.setSearchDaoForUnitTest(mySearchDao);
 		mySvc.setSearchDaoIncludeForUnitTest(mySearchIncludeDao);
 		mySvc.setSearchDaoResultForUnitTest(mySearchResultDao);
+
+		myDaoConfig = new DaoConfig();
+		mySvc.setDaoConfigForUnitTest(myDaoConfig);
 		
 		when(myCallingDao.newSearchBuilder()).thenReturn(mySearchBuider);
 		

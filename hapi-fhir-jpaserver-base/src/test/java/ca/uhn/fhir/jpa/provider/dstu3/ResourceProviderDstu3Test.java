@@ -444,14 +444,6 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		assertNotEquals(uuid1, uuid3);
 	}
 	
-	private String toSearchUuidFromLinkNext(Bundle theBundle) {
-		String linkNext = theBundle.getLink("next").getUrl();
-		linkNext = linkNext.substring(linkNext.indexOf('?'));
-		Map<String, String[]> params = UrlUtil.parseQueryString(linkNext);
-		String[] uuidParams = params.get(Constants.PARAM_PAGINGACTION);
-		String uuid = uuidParams[0];
-		return uuid;
-	}
 
 	/**
 	 * See #438
@@ -1586,37 +1578,37 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		}
 
 		/*
-		 * Sorting is not working since the performance enhancements in 2.4 but 
+		 * Sorting is not working since the performance enhancements in 2.4 but
 		 * sorting for lastupdated is non-standard anyhow.. Hopefully at some point
 		 * we can bring this back
 		 */
-//		get = new HttpGet(ourServerBase + "/Patient/" + pId.getIdPart() + "/$everything?_lastUpdated=%3E" + new InstantType(new Date(time1)).getValueAsString() + "&_sort=_lastUpdated");
-//		response = ourHttpClient.execute(get);
-//		try {
-//			assertEquals(200, response.getStatusLine().getStatusCode());
-//			String output = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-//			IOUtils.closeQuietly(response.getEntity().getContent());
-//			ourLog.info(output);
-//			List<IIdType> ids = toUnqualifiedVersionlessIds(myFhirCtx.newXmlParser().parseResource(Bundle.class, output));
-//			ourLog.info(ids.toString());
-//			assertThat(ids, contains(pId, cId));
-//		} finally {
-//			response.close();
-//		}
-//
-//		get = new HttpGet(ourServerBase + "/Patient/" + pId.getIdPart() + "/$everything?_sort:desc=_lastUpdated");
-//		response = ourHttpClient.execute(get);
-//		try {
-//			assertEquals(200, response.getStatusLine().getStatusCode());
-//			String output = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-//			IOUtils.closeQuietly(response.getEntity().getContent());
-//			ourLog.info(output);
-//			List<IIdType> ids = toUnqualifiedVersionlessIds(myFhirCtx.newXmlParser().parseResource(Bundle.class, output));
-//			ourLog.info(ids.toString());
-//			assertThat(ids, contains(cId, pId, oId));
-//		} finally {
-//			response.close();
-//		}
+		// get = new HttpGet(ourServerBase + "/Patient/" + pId.getIdPart() + "/$everything?_lastUpdated=%3E" + new InstantType(new Date(time1)).getValueAsString() + "&_sort=_lastUpdated");
+		// response = ourHttpClient.execute(get);
+		// try {
+		// assertEquals(200, response.getStatusLine().getStatusCode());
+		// String output = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
+		// IOUtils.closeQuietly(response.getEntity().getContent());
+		// ourLog.info(output);
+		// List<IIdType> ids = toUnqualifiedVersionlessIds(myFhirCtx.newXmlParser().parseResource(Bundle.class, output));
+		// ourLog.info(ids.toString());
+		// assertThat(ids, contains(pId, cId));
+		// } finally {
+		// response.close();
+		// }
+		//
+		// get = new HttpGet(ourServerBase + "/Patient/" + pId.getIdPart() + "/$everything?_sort:desc=_lastUpdated");
+		// response = ourHttpClient.execute(get);
+		// try {
+		// assertEquals(200, response.getStatusLine().getStatusCode());
+		// String output = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
+		// IOUtils.closeQuietly(response.getEntity().getContent());
+		// ourLog.info(output);
+		// List<IIdType> ids = toUnqualifiedVersionlessIds(myFhirCtx.newXmlParser().parseResource(Bundle.class, output));
+		// ourLog.info(ids.toString());
+		// assertThat(ids, contains(cId, pId, oId));
+		// } finally {
+		// response.close();
+		// }
 
 	}
 
@@ -1631,7 +1623,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		inputBundle.setType(BundleType.TRANSACTION);
 
 		assertEquals(53, inputBundle.getEntry().size());
-		
+
 		Set<String> allIds = new TreeSet<String>();
 		for (BundleEntryComponent nextEntry : inputBundle.getEntry()) {
 			nextEntry.getRequest().setMethod(HTTPVerb.PUT);
@@ -1655,8 +1647,8 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(responseBundle));
 
 		// FIXME re-enable
-//		assertEquals(50, responseBundle.getEntry().size());
-		
+		// assertEquals(50, responseBundle.getEntry().size());
+
 		TreeSet<String> ids = new TreeSet<String>();
 		for (int i = 0; i < responseBundle.getEntry().size(); i++) {
 			for (BundleEntryComponent nextEntry : responseBundle.getEntry()) {
@@ -1664,13 +1656,13 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			}
 		}
 
-//		String nextUrl = responseBundle.getLink("next").getUrl();
-//		responseBundle = ourClient.fetchResourceFromUrl(Bundle.class, nextUrl);
-//		for (int i = 0; i < responseBundle.getEntry().size(); i++) {
-//			for (BundleEntryComponent nextEntry : responseBundle.getEntry()) {
-//				ids.add(nextEntry.getResource().getIdElement().toUnqualifiedVersionless().getValue());
-//			}
-//		}
+		// String nextUrl = responseBundle.getLink("next").getUrl();
+		// responseBundle = ourClient.fetchResourceFromUrl(Bundle.class, nextUrl);
+		// for (int i = 0; i < responseBundle.getEntry().size(); i++) {
+		// for (BundleEntryComponent nextEntry : responseBundle.getEntry()) {
+		// ids.add(nextEntry.getResource().getIdElement().toUnqualifiedVersionless().getValue());
+		// }
+		// }
 
 		assertThat(ids, hasItem("List/A161444"));
 		assertThat(ids, hasItem("List/A161468"));
@@ -2483,7 +2475,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		}
 
 		Bundle found;
-		
+
 		found = ourClient
 				.search()
 				.forResource(Patient.class)

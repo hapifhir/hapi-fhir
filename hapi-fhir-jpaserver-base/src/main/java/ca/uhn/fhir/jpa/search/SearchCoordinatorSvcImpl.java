@@ -69,19 +69,19 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 	@Autowired
 	private FhirContext myContext;
 	@Autowired
+	private DaoConfig myDaoConfig;
+	@Autowired
 	private EntityManager myEntityManager;
 	private ExecutorService myExecutor;
 	private final ConcurrentHashMap<String, SearchTask> myIdToSearchTask = new ConcurrentHashMap<String, SearchTask>();
-	private Integer myLoadingThrottleForUnitTests = null;
 
+	private Integer myLoadingThrottleForUnitTests = null;
 	private long myMaxMillisToWaitForRemoteResults = DateUtils.MILLIS_PER_MINUTE;
 	private boolean myNeverUseLocalSearchForUnitTests;
 	@Autowired
 	private ISearchDao mySearchDao;
 	@Autowired
 	private ISearchIncludeDao mySearchIncludeDao;
-	@Autowired
-	private DaoConfig myDaoConfig;
 	@Autowired
 	private ISearchResultDao mySearchResultDao;
 
@@ -170,6 +170,14 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 		return retVal;
 	}
 
+	private void populateBundleProvider(PersistedJpaBundleProvider theRetVal) {
+		theRetVal.setContext(myContext);
+		theRetVal.setEntityManager(myEntityManager);
+		theRetVal.setPlatformTransactionManager(myTxManager);
+		theRetVal.setSearchDao(mySearchDao);
+		theRetVal.setSearchCoordinatorSvc(this);
+	}
+
 	@Override
 	public IBundleProvider registerSearch(final IDao theCallingDao, SearchParameterMap theParams, String theResourceType) {
 		StopWatch w = new StopWatch();
@@ -226,6 +234,8 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 					@Override
 					public PersistedJpaBundleProvider doInTransaction(TransactionStatus theStatus) {
 						Search searchToUse = null;
+						
+						
 						Collection<Search> candidates = mySearchDao.find(resourceType, queryString.hashCode(), createdCutoff);
 						for (Search nextCandidateSearch : candidates) {
 							if (queryString.equals(nextCandidateSearch.getSearchQueryString())) {
@@ -283,22 +293,19 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 		PersistedJpaSearchFirstPageBundleProvider retVal = new PersistedJpaSearchFirstPageBundleProvider(search, theCallingDao, task, sb, myTxManager);
 		populateBundleProvider(retVal);
 
-		ourLog.info("Search initial phase completed in {}ms", w);
+		ourLog.info("Search initial phase completed in {}ms", w.getMillis());
 		return retVal;
 
-	}
-
-	private void populateBundleProvider(PersistedJpaBundleProvider theRetVal) {
-		theRetVal.setContext(myContext);
-		theRetVal.setEntityManager(myEntityManager);
-		theRetVal.setPlatformTransactionManager(myTxManager);
-		theRetVal.setSearchDao(mySearchDao);
-		theRetVal.setSearchCoordinatorSvc(this);
 	}
 
 	@VisibleForTesting
 	void setContextForUnitTest(FhirContext theCtx) {
 		myContext = theCtx;
+	}
+
+	@VisibleForTesting
+	void setDaoConfigForUnitTest(DaoConfig theDaoConfig) {
+		myDaoConfig=theDaoConfig;		
 	}
 
 	@VisibleForTesting
