@@ -28,6 +28,7 @@ import org.hl7.fhir.dstu3.model.Task;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.AfterClass;
+import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -107,6 +108,12 @@ import ca.uhn.fhir.util.TestUtil;
 public class FhirResourceDaoDstu2SearchNoFtTest extends BaseJpaDstu2Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoDstu2SearchNoFtTest.class);
 
+	@Before
+	public void beforeDisableResultReuse() {
+		myDaoConfig.setReuseCachedSearchResultsForMillis(null);
+	}
+
+	
 	@Autowired
 	private ISearchParamPresentDao mySearchParamPresentDao;
 

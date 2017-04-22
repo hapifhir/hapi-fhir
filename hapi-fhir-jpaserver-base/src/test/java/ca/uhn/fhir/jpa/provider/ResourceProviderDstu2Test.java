@@ -48,6 +48,7 @@ import org.apache.http.entity.StringEntity;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.AfterClass;
+import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -99,6 +100,11 @@ import ca.uhn.fhir.util.UrlUtil;
 public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResourceProviderDstu2Test.class);
+
+	@Before
+	public void beforeDisableResultReuse() {
+		myDaoConfig.setReuseCachedSearchResultsForMillis(null);
+	}
 
 	@AfterClass
 	public static void afterClassClearContext() {

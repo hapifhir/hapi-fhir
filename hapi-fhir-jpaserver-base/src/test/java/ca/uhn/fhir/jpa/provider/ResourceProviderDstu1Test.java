@@ -101,6 +101,12 @@ public class ResourceProviderDstu1Test  extends BaseJpaTest {
 	protected FhirContext getContext() {
 		return ourCtx;
 	}
+	
+	@Before
+	public void beforeDisableResultReuse() {
+		ourDaoConfig.setReuseCachedSearchResultsForMillis(null);
+	}
+
 
 	// private static JpaConformanceProvider ourConfProvider;
 

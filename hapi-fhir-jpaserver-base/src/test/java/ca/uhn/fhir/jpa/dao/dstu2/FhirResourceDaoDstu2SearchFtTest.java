@@ -15,6 +15,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.AfterClass;
+import org.junit.Before;
 import org.junit.Test;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallback;
@@ -37,6 +38,11 @@ import ca.uhn.fhir.util.TestUtil;
 public class FhirResourceDaoDstu2SearchFtTest extends BaseJpaDstu2Test {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoDstu2SearchFtTest.class);
+
+	@Before
+	public void beforeDisableResultReuse() {
+		myDaoConfig.setReuseCachedSearchResultsForMillis(null);
+	}
 
 	@AfterClass
 	public static void afterClassClearContext() {

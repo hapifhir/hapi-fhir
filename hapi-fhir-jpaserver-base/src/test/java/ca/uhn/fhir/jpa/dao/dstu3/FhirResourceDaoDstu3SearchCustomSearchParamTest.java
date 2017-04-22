@@ -16,6 +16,7 @@ import org.hl7.fhir.dstu3.model.SearchParameter;
 import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.AfterClass;
+import org.junit.Before;
 import org.junit.Test;
 
 import ca.uhn.fhir.jpa.dao.SearchParameterMap;
@@ -30,6 +31,11 @@ import ca.uhn.fhir.util.TestUtil;
 
 public class FhirResourceDaoDstu3SearchCustomSearchParamTest extends BaseJpaDstu3Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoDstu3SearchCustomSearchParamTest.class);
+
+	@Before
+	public void beforeDisableResultReuse() {
+		myDaoConfig.setReuseCachedSearchResultsForMillis(null);
+	}
 
 	@Test
 	public void testCreateInvalidParamInvalidResourceName() {

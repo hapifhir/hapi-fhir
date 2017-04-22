@@ -31,6 +31,12 @@
 						now has a multithreaded search coordinator which returns 
 						results to the client as soon as they are available
 					</li>
+					<li>
+						Search results will be cached and reused (so that if a client
+						does two searches for "get me all patients matching FOO"
+						with the same FOO in short succession, we won't query the DB
+						again but will instead reuse the cached results) 
+					</li>
 				</ul>
 				<br/><br/>
 				Existing users should delete the 

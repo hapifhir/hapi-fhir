@@ -20,6 +20,10 @@ import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.IBundleProvider;
 
 public class FhirResourceDaoDstu3SearchPageExpiryTest extends BaseJpaDstu3Test {
+	@Before
+	public void beforeDisableResultReuse() {
+		myDaoConfig.setReuseCachedSearchResultsForMillis(null);
+	}
 
 	@After()
 	public void after() {
