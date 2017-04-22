@@ -7,6 +7,40 @@
 	</properties>
 	<body>
 		<release version="2.5" date="TBD">
+			<action type="fix">
+				<![CDATA[
+				This release includes significant performance enhancements for the
+				JPA server. Most importantly, the way that searches are performed
+				has been re-written to allow the server to perform better when
+				the database has a large number of results in it.
+				<br/><br/>
+				<ul>
+					<li>
+						Searches with multiple search parameters of different 
+						datatypes (e.g. find patients by name and date of birth) 
+						were previously joined in Java code, now the join is 
+						performed by the database which is faster
+					</li>
+					<li>
+						Searches which returned lots of results previously has all 
+						results streamed into memory before anything was returned to 
+						the client. This is particularly slow if you do a search for
+						(say) "get me all patients" since potentially thousands or 
+						even millions of patients' IDs were loaded into memory 
+						before anything gets returned to the client. HAPI FHIR 
+						now has a multithreaded search coordinator which returns 
+						results to the client as soon as they are available
+					</li>
+				</ul>
+				<br/><br/>
+				Existing users should delete the 
+				<code>HFJ_SEARCH</code>, 
+				<code>HFJ_SEARCH_INCLUDE</code>,
+				and 
+				<code>HFJ_SEARCH_RESULT</code>
+				tables from your database before upgrading.
+				]]>
+			</action>
 			<action type="fix" issue="590">
 				AuthorizationInterceptor did not correctly handle paging requests
 				(e.g. requests for the second page of results for a search operation). 

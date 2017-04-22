@@ -31,6 +31,7 @@ public class ExampleServerIT {
 
 	@Test
 	public void testCreateAndRead() throws IOException {
+		ourLog.info("Base URL is: http://localhost:" + ourPort + "/baseDstu3");
 		String methodName = "testCreateResourceConditional";
 
 		Patient pt = new Patient();

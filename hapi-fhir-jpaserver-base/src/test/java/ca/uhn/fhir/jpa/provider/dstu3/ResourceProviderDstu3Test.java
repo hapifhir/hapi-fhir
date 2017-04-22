@@ -334,117 +334,6 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 
 	
-	@Test
-	public void testSearchReusesResultsEnabled() throws Exception {
-		List<IBaseResource> resources = new ArrayList<IBaseResource>();
-		for (int i = 0; i < 50; i++) {
-			Organization org = new Organization();
-			org.setName("HELLO");
-			resources.add(org);
-		}
-		ourClient.transaction().withResources(resources).prettyPrint().encodedXml().execute();
-
-		myDaoConfig.setReuseCachedSearchResultsForMillis(1000L);
-		
-		Bundle result1 = ourClient
-			.search()
-			.forResource("Organization")
-			.where(Organization.NAME.matches().value("HELLO"))
-			.count(5)
-			.returnBundle(Bundle.class)
-			.execute();
-		
-		final String uuid1 = toSearchUuidFromLinkNext(result1);		
-		Search search1 = newTxTemplate().execute(new TransactionCallback<Search>() {
-			@Override
-			public Search doInTransaction(TransactionStatus theStatus) {
-				return mySearchEntityDao.findByUuid(uuid1);
-			}
-		});
-		Date lastReturned1 = search1.getSearchLastReturned();
-		
-		Bundle result2 = ourClient
-				.search()
-				.forResource("Organization")
-				.where(Organization.NAME.matches().value("HELLO"))
-				.count(5)
-				.returnBundle(Bundle.class)
-				.execute();
-
-		final String uuid2 = toSearchUuidFromLinkNext(result2);
-		Search search2 = newTxTemplate().execute(new TransactionCallback<Search>() {
-			@Override
-			public Search doInTransaction(TransactionStatus theStatus) {
-				return mySearchEntityDao.findByUuid(uuid2);
-			}
-		});
-		Date lastReturned2 = search2.getSearchLastReturned();
-
-		assertTrue(lastReturned2.getTime() > lastReturned1.getTime());
-		
-		Thread.sleep(1500);
-		
-		Bundle result3 = ourClient
-				.search()
-				.forResource("Organization")
-				.where(Organization.NAME.matches().value("HELLO"))
-				.count(5)
-				.returnBundle(Bundle.class)
-				.execute();
-
-		String uuid3 = toSearchUuidFromLinkNext(result3);
-		
-		assertEquals(uuid1, uuid2);
-		assertNotEquals(uuid1, uuid3);
-	}
-
-	@Test
-	public void testSearchReusesResultsDisabled() throws Exception {
-		List<IBaseResource> resources = new ArrayList<IBaseResource>();
-		for (int i = 0; i < 50; i++) {
-			Organization org = new Organization();
-			org.setName("HELLO");
-			resources.add(org);
-		}
-		ourClient.transaction().withResources(resources).prettyPrint().encodedXml().execute();
-
-		myDaoConfig.setReuseCachedSearchResultsForMillis(null);
-		
-		Bundle result1 = ourClient
-			.search()
-			.forResource("Organization")
-			.where(Organization.NAME.matches().value("HELLO"))
-			.count(5)
-			.returnBundle(Bundle.class)
-			.execute();
-		
-		final String uuid1 = toSearchUuidFromLinkNext(result1);		
-		
-		Bundle result2 = ourClient
-				.search()
-				.forResource("Organization")
-				.where(Organization.NAME.matches().value("HELLO"))
-				.count(5)
-				.returnBundle(Bundle.class)
-				.execute();
-
-		final String uuid2 = toSearchUuidFromLinkNext(result2);
-
-		Bundle result3 = ourClient
-				.search()
-				.forResource("Organization")
-				.where(Organization.NAME.matches().value("HELLO"))
-				.count(5)
-				.returnBundle(Bundle.class)
-				.execute();
-
-		String uuid3 = toSearchUuidFromLinkNext(result3);
-		
-		assertNotEquals(uuid1, uuid2);
-		assertNotEquals(uuid1, uuid3);
-	}
-	
-
 	/**
 	 * See #438
 	 */
@@ -517,6 +406,24 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		Validate.notNull(input);
 		ourClient.create().resource(input).execute().getResource();
 	}
+	
+
+	@Test
+	public void testCreateConditional() {
+		Patient patient = new Patient();
+		patient.addIdentifier().setSystem("http://uhn.ca/mrns").setValue("100");
+		patient.addName().setFamily("Tester").addGiven("Raghad");
+
+		MethodOutcome output1 = ourClient.update().resource(patient).conditionalByUrl("Patient?identifier=http://uhn.ca/mrns|100").execute();
+
+		patient = new Patient();
+		patient.addIdentifier().setSystem("http://uhn.ca/mrns").setValue("100");
+		patient.addName().setFamily("Tester").addGiven("Raghad");
+
+		MethodOutcome output2 = ourClient.update().resource(patient).conditionalByUrl("Patient?identifier=http://uhn.ca/mrns|100").execute();
+
+		assertEquals(output1.getId().getIdPart(), output2.getId().getIdPart());
+	}
 
 	@Test
 	public void testCreateIncludesRequestValidatorInterceptorOutcome() throws IOException {
@@ -546,23 +453,6 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		} finally {
 			ourRestServer.unregisterInterceptor(interceptor);
 		}
-	}
-
-	@Test
-	public void testCreateConditional() {
-		Patient patient = new Patient();
-		patient.addIdentifier().setSystem("http://uhn.ca/mrns").setValue("100");
-		patient.addName().setFamily("Tester").addGiven("Raghad");
-
-		MethodOutcome output1 = ourClient.update().resource(patient).conditionalByUrl("Patient?identifier=http://uhn.ca/mrns|100").execute();
-
-		patient = new Patient();
-		patient.addIdentifier().setSystem("http://uhn.ca/mrns").setValue("100");
-		patient.addName().setFamily("Tester").addGiven("Raghad");
-
-		MethodOutcome output2 = ourClient.update().resource(patient).conditionalByUrl("Patient?identifier=http://uhn.ca/mrns|100").execute();
-
-		assertEquals(output1.getId().getIdPart(), output2.getId().getIdPart());
 	}
 
 	@Test
@@ -889,17 +779,6 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	}
 
 	@Test
-	public void testDeleteReturnsOperationOutcome() {
-		Patient p = new Patient();
-		p.addName().setFamily("FAM");
-		IIdType id = ourClient.create().resource(p).execute().getId().toUnqualifiedVersionless();
-
-		IBaseOperationOutcome resp = ourClient.delete().resourceById(id).execute();
-		OperationOutcome oo = (OperationOutcome) resp;
-		assertThat(oo.getIssueFirstRep().getDiagnostics(), startsWith("Successfully deleted 1 resource(s) in "));
-	}
-
-	@Test
 	public void testDeleteResourceConditional1() throws IOException {
 		String methodName = "testDeleteResourceConditional1";
 
@@ -1027,24 +906,15 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 	}
 
-	/**
-	 * See issue #52
-	 */
 	@Test
-	public void testProcedureRequestResources() throws Exception {
-		IGenericClient client = ourClient;
+	public void testDeleteReturnsOperationOutcome() {
+		Patient p = new Patient();
+		p.addName().setFamily("FAM");
+		IIdType id = ourClient.create().resource(p).execute().getId().toUnqualifiedVersionless();
 
-		int initialSize = client.search().forResource(ProcedureRequest.class).returnBundle(Bundle.class).execute().getEntry().size();
-
-		ProcedureRequest res = new ProcedureRequest();
-		res.addIdentifier().setSystem("urn:foo").setValue("123");
-
-		client.create().resource(res).execute();
-
-		int newSize = client.search().forResource(ProcedureRequest.class).returnBundle(Bundle.class).execute().getEntry().size();
-
-		assertEquals(1, newSize - initialSize);
-
+		IBaseOperationOutcome resp = ourClient.delete().resourceById(id).execute();
+		OperationOutcome oo = (OperationOutcome) resp;
+		assertThat(oo.getIssueFirstRep().getDiagnostics(), startsWith("Successfully deleted 1 resource(s) in "));
 	}
 
 	/**
@@ -1285,31 +1155,6 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 	}
 
-	// private void delete(String theResourceType, String theParamName, String theParamValue) {
-	// Bundle resources;
-	// do {
-	// IQuery<Bundle> forResource = ourClient.search().forResource(theResourceType);
-	// if (theParamName != null) {
-	// forResource = forResource.where(new StringClientParam(theParamName).matches().value(theParamValue));
-	// }
-	// resources = forResource.execute();
-	// for (IResource next : resources.toListOfResources()) {
-	// ourLog.info("Deleting resource: {}", next.getId());
-	// ourClient.delete().resource(next).execute();
-	// }
-	// } while (resources.size() > 0);
-	// }
-	//
-	// private void deleteToken(String theResourceType, String theParamName, String theParamSystem, String theParamValue)
-	// {
-	// Bundle resources = ourClient.search().forResource(theResourceType).where(new
-	// TokenClientParam(theParamName).exactly().systemAndCode(theParamSystem, theParamValue)).execute();
-	// for (IResource next : resources.toListOfResources()) {
-	// ourLog.info("Deleting resource: {}", next.getId());
-	// ourClient.delete().resource(next).execute();
-	// }
-	// }
-
 	/**
 	 * See #147"Patient"
 	 */
@@ -1431,6 +1276,31 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		assertThat(ids.toString(), containsString("Condition/"));
 
 	}
+
+	// private void delete(String theResourceType, String theParamName, String theParamValue) {
+	// Bundle resources;
+	// do {
+	// IQuery<Bundle> forResource = ourClient.search().forResource(theResourceType);
+	// if (theParamName != null) {
+	// forResource = forResource.where(new StringClientParam(theParamName).matches().value(theParamValue));
+	// }
+	// resources = forResource.execute();
+	// for (IResource next : resources.toListOfResources()) {
+	// ourLog.info("Deleting resource: {}", next.getId());
+	// ourClient.delete().resource(next).execute();
+	// }
+	// } while (resources.size() > 0);
+	// }
+	//
+	// private void deleteToken(String theResourceType, String theParamName, String theParamSystem, String theParamValue)
+	// {
+	// Bundle resources = ourClient.search().forResource(theResourceType).where(new
+	// TokenClientParam(theParamName).exactly().systemAndCode(theParamSystem, theParamValue)).execute();
+	// for (IResource next : resources.toListOfResources()) {
+	// ourLog.info("Deleting resource: {}", next.getId());
+	// ourClient.delete().resource(next).execute();
+	// }
+	// }
 
 	@Test
 	public void testEverythingPatientOperation() throws Exception {
@@ -2272,6 +2142,26 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	}
 
 	/**
+	 * See issue #52
+	 */
+	@Test
+	public void testProcedureRequestResources() throws Exception {
+		IGenericClient client = ourClient;
+
+		int initialSize = client.search().forResource(ProcedureRequest.class).returnBundle(Bundle.class).execute().getEntry().size();
+
+		ProcedureRequest res = new ProcedureRequest();
+		res.addIdentifier().setSystem("urn:foo").setValue("123");
+
+		client.create().resource(res).execute();
+
+		int newSize = client.search().forResource(ProcedureRequest.class).returnBundle(Bundle.class).execute().getEntry().size();
+
+		assertEquals(1, newSize - initialSize);
+
+	}
+
+	/**
 	 * Test for issue #60
 	 */
 	@Test
@@ -2811,6 +2701,147 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		ourLog.info(before.getTime() + "");
 		assertTrue(value.after(before));
 		assertTrue(new InstantDt(value) + " should be before " + new InstantDt(after), value.before(after));
+	}
+
+	@Test
+	public void testSearchReusesNoParams() throws Exception {
+		List<IBaseResource> resources = new ArrayList<IBaseResource>();
+		for (int i = 0; i < 50; i++) {
+			Organization org = new Organization();
+			org.setName("HELLO");
+			resources.add(org);
+		}
+		ourClient.transaction().withResources(resources).prettyPrint().encodedXml().execute();
+
+		myDaoConfig.setReuseCachedSearchResultsForMillis(1000L);
+
+		Bundle result1 = ourClient
+				.search()
+				.forResource("Organization")
+				.returnBundle(Bundle.class)
+				.execute();
+
+		final String uuid1 = toSearchUuidFromLinkNext(result1);
+
+		Bundle result2 = ourClient
+				.search()
+				.forResource("Organization")
+				.returnBundle(Bundle.class)
+				.execute();
+
+		final String uuid2 = toSearchUuidFromLinkNext(result2);
+
+		assertEquals(uuid1, uuid2);
+	}
+
+	@Test
+	public void testSearchReusesResultsDisabled() throws Exception {
+		List<IBaseResource> resources = new ArrayList<IBaseResource>();
+		for (int i = 0; i < 50; i++) {
+			Organization org = new Organization();
+			org.setName("HELLO");
+			resources.add(org);
+		}
+		ourClient.transaction().withResources(resources).prettyPrint().encodedXml().execute();
+
+		myDaoConfig.setReuseCachedSearchResultsForMillis(null);
+
+		Bundle result1 = ourClient
+				.search()
+				.forResource("Organization")
+				.where(Organization.NAME.matches().value("HELLO"))
+				.count(5)
+				.returnBundle(Bundle.class)
+				.execute();
+
+		final String uuid1 = toSearchUuidFromLinkNext(result1);
+
+		Bundle result2 = ourClient
+				.search()
+				.forResource("Organization")
+				.where(Organization.NAME.matches().value("HELLO"))
+				.count(5)
+				.returnBundle(Bundle.class)
+				.execute();
+
+		final String uuid2 = toSearchUuidFromLinkNext(result2);
+
+		Bundle result3 = ourClient
+				.search()
+				.forResource("Organization")
+				.where(Organization.NAME.matches().value("HELLO"))
+				.count(5)
+				.returnBundle(Bundle.class)
+				.execute();
+
+		String uuid3 = toSearchUuidFromLinkNext(result3);
+
+		assertNotEquals(uuid1, uuid2);
+		assertNotEquals(uuid1, uuid3);
+	}
+
+	@Test
+	public void testSearchReusesResultsEnabled() throws Exception {
+		List<IBaseResource> resources = new ArrayList<IBaseResource>();
+		for (int i = 0; i < 50; i++) {
+			Organization org = new Organization();
+			org.setName("HELLO");
+			resources.add(org);
+		}
+		ourClient.transaction().withResources(resources).prettyPrint().encodedXml().execute();
+
+		myDaoConfig.setReuseCachedSearchResultsForMillis(1000L);
+
+		Bundle result1 = ourClient
+				.search()
+				.forResource("Organization")
+				.where(Organization.NAME.matches().value("HELLO"))
+				.count(5)
+				.returnBundle(Bundle.class)
+				.execute();
+
+		final String uuid1 = toSearchUuidFromLinkNext(result1);
+		Search search1 = newTxTemplate().execute(new TransactionCallback<Search>() {
+			@Override
+			public Search doInTransaction(TransactionStatus theStatus) {
+				return mySearchEntityDao.findByUuid(uuid1);
+			}
+		});
+		Date lastReturned1 = search1.getSearchLastReturned();
+
+		Bundle result2 = ourClient
+				.search()
+				.forResource("Organization")
+				.where(Organization.NAME.matches().value("HELLO"))
+				.count(5)
+				.returnBundle(Bundle.class)
+				.execute();
+
+		final String uuid2 = toSearchUuidFromLinkNext(result2);
+		Search search2 = newTxTemplate().execute(new TransactionCallback<Search>() {
+			@Override
+			public Search doInTransaction(TransactionStatus theStatus) {
+				return mySearchEntityDao.findByUuid(uuid2);
+			}
+		});
+		Date lastReturned2 = search2.getSearchLastReturned();
+
+		assertTrue(lastReturned2.getTime() > lastReturned1.getTime());
+
+		Thread.sleep(1500);
+
+		Bundle result3 = ourClient
+				.search()
+				.forResource("Organization")
+				.where(Organization.NAME.matches().value("HELLO"))
+				.count(5)
+				.returnBundle(Bundle.class)
+				.execute();
+
+		String uuid3 = toSearchUuidFromLinkNext(result3);
+
+		assertEquals(uuid1, uuid2);
+		assertNotEquals(uuid1, uuid3);
 	}
 
 	/**
