@@ -31,19 +31,20 @@ import java.util.HashSet;
 import java.util.Set;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
+
+import org.hibernate.annotations.Fetch;
 
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 
-//@formatter:off
 @Entity
 @Table(name = "HFJ_SEARCH", uniqueConstraints= {
 	@UniqueConstraint(name="IDX_SEARCH_UUID", columnNames="SEARCH_UUID")
 }, indexes= {
-	@Index(name="JDX_SEARCH_CREATED", columnList="CREATED"),
-	@Index(name="JDX_SEARCH_STRING", columnList="SEARCH_STRING")
+	@Index(name="JDX_SEARCH_LASTRETURNED", columnList="SEARCH_LAST_RETURNED"),
+	@Index(name="JDX_SEARCH_RESTYPE_STRINGHASHCREATED", columnList="RESOURCE_TYPE,SEARCH_QUERY_STRING_HASH,CREATED")
 })
-//@formatter:on
 public class Search implements Serializable {
 
 	private static final int FAILURE_MESSAGE_LENGTH = 500;
@@ -56,7 +57,7 @@ public class Search implements Serializable {
 
 	@Column(name="FAILURE_CODE", nullable=true)
 	private Integer myFailureCode;
-
+	
 	@Column(name="FAILURE_MESSAGE", length=FAILURE_MESSAGE_LENGTH, nullable=true)
 	private String myFailureMessage;
 
@@ -76,7 +77,7 @@ public class Search implements Serializable {
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name="LAST_UPDATED_LOW", nullable=true, insertable=true, updatable=false)
 	private Date myLastUpdatedLow;
-	
+
 	@Column(name="NUM_FOUND", nullable=false)
 	private int myNumFound;
 
@@ -85,29 +86,47 @@ public class Search implements Serializable {
 
 	@Column(name="RESOURCE_ID", nullable=true)
 	private Long myResourceId;
-
+	
 	@Column(name="RESOURCE_TYPE", length=200, nullable=true)
 	private String myResourceType;
 
 	@OneToMany(mappedBy="mySearch")
 	private Collection<SearchResult> myResults;
 
-	@Column(name="SEARCH_STRING", length=1000, nullable=true)
-	private String mySearchString;
+	// TODO: change nullable to false after 2.5
+	@NotNull
+	@Temporal(TemporalType.TIMESTAMP)
+	@Column(name="SEARCH_LAST_RETURNED", nullable=true, updatable=false) 
+	private Date mySearchLastReturned;
+
+	@Lob()
+	@Basic(fetch=FetchType.LAZY)	
+	@Column(name="SEARCH_QUERY_STRING", nullable=true, updatable=false)
+	private String mySearchQueryString;
+
+	@Column(name="SEARCH_QUERY_STRING_HASH", nullable=true, updatable=false)
+	private Integer mySearchQueryStringHash;
 
 	@Enumerated(EnumType.ORDINAL)
 	@Column(name="SEARCH_TYPE", nullable=false)
 	private SearchTypeEnum mySearchType;
-	
+
 	@Enumerated(EnumType.STRING)
 	@Column(name="SEARCH_STATUS", nullable=false, length=10)
 	private SearchStatusEnum myStatus;
-	
+
 	@Column(name="TOTAL_COUNT", nullable=true)
 	private Integer myTotalCount;
-
+	
 	@Column(name="SEARCH_UUID", length=40, nullable=false, updatable=false)
 	private String myUuid;
+	
+	/**
+	 * Constructor
+	 */
+	public Search() {
+		super();
+	}
 
 	public Date getCreated() {
 		return myCreated;
@@ -163,7 +182,15 @@ public class Search implements Serializable {
 	public String getResourceType() {
 		return myResourceType;
 	}
+
+	public Date getSearchLastReturned() {
+		return mySearchLastReturned;
+	}
 	
+	public String getSearchQueryString() {
+		return mySearchQueryString;
+	}
+
 	public SearchTypeEnum getSearchType() {
 		return mySearchType;
 	}
@@ -184,10 +211,10 @@ public class Search implements Serializable {
 		myCreated = theCreated;
 	}
 
+
 	public void setFailureCode(Integer theFailureCode) {
 		myFailureCode = theFailureCode;
 	}
-
 
 	public void setFailureMessage(String theFailureMessage) {
 		myFailureMessage = left(theFailureMessage, FAILURE_MESSAGE_LENGTH);
@@ -197,7 +224,6 @@ public class Search implements Serializable {
 		myLastUpdatedLow = theLowerBound;
 		myLastUpdatedHigh = theUpperBound;
 	}
-
 	public void setLastUpdated(DateRangeParam theLastUpdated) {
 		if (theLastUpdated == null) {
 			myLastUpdatedLow = null;
@@ -207,22 +233,35 @@ public class Search implements Serializable {
 			myLastUpdatedHigh = theLastUpdated.getUpperBoundAsInstant();
 		}
 	}
+	
 	public void setNumFound(int theNumFound) {
 		myNumFound = theNumFound;
 	}
-	
+
 	public void setPreferredPageSize(Integer thePreferredPageSize) {
 		myPreferredPageSize = thePreferredPageSize;
 	}
-
+	
 	public void setResourceId(Long theResourceId) {
 		myResourceId = theResourceId;
 	}
-	
+
+
 	public void setResourceType(String theResourceType) {
 		myResourceType = theResourceType;
 	}
 
+	public void setSearchLastReturned(Date theDate) {
+		mySearchLastReturned = theDate;
+	}
+
+	public void setSearchQueryString(String theSearchQueryString) {
+		mySearchQueryString = theSearchQueryString;
+	}
+
+	public void setSearchQueryStringHash(Integer theSearchQueryStringHash) {
+		mySearchQueryStringHash = theSearchQueryStringHash;
+	}
 
 	public void setSearchType(SearchTypeEnum theSearchType) {
 		mySearchType = theSearchType;

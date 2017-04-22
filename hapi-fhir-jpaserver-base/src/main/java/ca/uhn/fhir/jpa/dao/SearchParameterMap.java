@@ -29,6 +29,7 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.dao.SearchParameterMap.IncludeComparator;
 import ca.uhn.fhir.model.api.IQueryParameterAnd;
 import ca.uhn.fhir.model.api.IQueryParameterOr;
 import ca.uhn.fhir.model.api.IQueryParameterType;
@@ -54,7 +55,7 @@ public class SearchParameterMap extends LinkedHashMap<String, List<List<? extend
 	private Integer myLoadSynchronousUpTo;
 	private Set<Include> myRevIncludes;
 	private SortSpec mySort;
-
+	
 	/**
 	 * Constructor
 	 */
@@ -121,8 +122,43 @@ public class SearchParameterMap extends LinkedHashMap<String, List<List<? extend
 		getIncludes().add(theInclude);
 	}
 
+	private void addLastUpdateParam(StringBuilder b, DateParam date) {
+		if (date != null && isNotBlank(date.getValueAsString())) {
+			addUrlParamSeparator(b);
+			b.append(Constants.PARAM_LASTUPDATED);
+			b.append('=');
+			b.append(date.getValueAsString());
+		}
+	}
+
 	public void addRevInclude(Include theInclude) {
 		getRevIncludes().add(theInclude);
+	}
+
+	private void addUrlIncludeParams(StringBuilder b, String paramName, Set<Include> theList) {
+		ArrayList<Include> list = new ArrayList<Include>(theList);
+		
+		Collections.sort(list, new IncludeComparator());
+		for (Include nextInclude : list) {
+			addUrlParamSeparator(b);
+			b.append(paramName);
+			b.append('=');
+			b.append(UrlUtil.escape(nextInclude.getParamType()));
+			b.append(':');
+			b.append(UrlUtil.escape(nextInclude.getParamName()));
+			if (isNotBlank(nextInclude.getParamTargetType())) {
+				b.append(':');
+				b.append(nextInclude.getParamTargetType());
+			}
+		}
+	}
+
+	private void addUrlParamSeparator(StringBuilder theB) {
+		if (theB.length() == 0) {
+			theB.append('?');
+		} else {
+			theB.append('&');
+		}
 	}
 
 	public Integer getCount() {
@@ -299,7 +335,9 @@ public class SearchParameterMap extends LinkedHashMap<String, List<List<? extend
 					if (i > 0) {
 						b.append(',');
 					}
-					b.append(ParameterUtil.escapeAndUrlEncode(nextValueOr.getValueAsQueryToken(theCtx)));
+					String valueAsQueryToken = nextValueOr.getValueAsQueryToken(theCtx);
+//					b.append(ParameterUtil.escapeAndUrlEncode(valueAsQueryToken));
+					b.append(UrlUtil.escape(valueAsQueryToken));
 				}
 			}
 			
@@ -311,6 +349,7 @@ public class SearchParameterMap extends LinkedHashMap<String, List<List<? extend
 			
 			if (isNotBlank(sort.getParamName())) {
 				if (first) {
+					addUrlParamSeparator(b);
 					b.append(Constants.PARAM_SORT);
 					b.append('=');
 					first = false;
@@ -338,6 +377,7 @@ public class SearchParameterMap extends LinkedHashMap<String, List<List<? extend
 		}
 		
 		if (getCount() != null) {
+			addUrlParamSeparator(b);
 			b.append(Constants.PARAM_COUNT);
 			b.append('=');
 			b.append(getCount());
@@ -345,36 +385,6 @@ public class SearchParameterMap extends LinkedHashMap<String, List<List<? extend
 		
 		
 		return b.toString();
-	}
-
-	private void addLastUpdateParam(StringBuilder b, DateParam date) {
-		if (isNotBlank(date.getValueAsString())) {
-			b.append(Constants.PARAM_LASTUPDATED);
-			b.append('=');
-			b.append(date.getValueAsString());
-		}
-	}
-
-	private void addUrlIncludeParams(StringBuilder b, String paramName, Set<Include> list) {
-		for (Include nextInclude : list) {
-			b.append(paramName);
-			b.append('=');
-			b.append(UrlUtil.escape(nextInclude.getParamType()));
-			b.append(':');
-			b.append(UrlUtil.escape(nextInclude.getParamName()));
-			if (isNotBlank(nextInclude.getParamTargetType())) {
-				b.append(':');
-				b.append(nextInclude.getParamTargetType());
-			}
-		}
-	}
-
-	private void addUrlParamSeparator(StringBuilder theB) {
-		if (theB.length() == 0) {
-			theB.append('?');
-		} else {
-			theB.append('&');
-		}
 	}
 
 	@Override
@@ -451,6 +461,22 @@ public class SearchParameterMap extends LinkedHashMap<String, List<List<? extend
 		public boolean isPatient() {
 			return myPatient;
 		}
+	}
+
+	public class IncludeComparator implements Comparator<Include> {
+
+		@Override
+		public int compare(Include theO1, Include theO2) {
+			int retVal = StringUtils.compare(theO1.getParamType(), theO2.getParamType());
+			if (retVal == 0) {
+				retVal = StringUtils.compare(theO1.getParamName(), theO2.getParamName());
+			}
+			if (retVal == 0) {
+				retVal = StringUtils.compare(theO1.getParamTargetType(), theO2.getParamTargetType());
+			}
+			return retVal;
+		}
+
 	}
 
 	public class QueryParameterOrComparator implements Comparator<List<IQueryParameterType>> {

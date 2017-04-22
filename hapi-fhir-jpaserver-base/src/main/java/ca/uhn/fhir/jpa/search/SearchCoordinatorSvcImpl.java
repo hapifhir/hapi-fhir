@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.search;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
@@ -39,6 +40,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.IDao;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
 import ca.uhn.fhir.jpa.dao.SearchParameterMap;
@@ -78,7 +80,8 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 	private ISearchDao mySearchDao;
 	@Autowired
 	private ISearchIncludeDao mySearchIncludeDao;
-
+	@Autowired
+	private DaoConfig myDaoConfig;
 	@Autowired
 	private ISearchResultDao mySearchResultDao;
 
@@ -152,7 +155,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 		}
 
 		final Search foundSearch = search;
-		
+
 		List<Long> retVal = txTemplate.execute(new TransactionCallback<List<Long>>() {
 			@Override
 			public List<Long> doInTransaction(TransactionStatus theStatus) {
@@ -161,13 +164,14 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 				for (SearchResult next : searchResults) {
 					resultPids.add(next.getResourcePid());
 				}
-				return resultPids;				}
+				return resultPids;
+			}
 		});
 		return retVal;
 	}
 
 	@Override
-	public IBundleProvider registerSearch(IDao theCallingDao, SearchParameterMap theParams, String theResourceType) {
+	public IBundleProvider registerSearch(final IDao theCallingDao, SearchParameterMap theParams, String theResourceType) {
 		StopWatch w = new StopWatch();
 
 		Class<? extends IBaseResource> resourceTypeClass = myContext.getResourceDefinition(theResourceType).getImplementingClass();
@@ -206,9 +210,54 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 			return new SimpleBundleProvider(resources);
 		}
 
+		/*
+		 * See if there are any cached searches whose results we can return
+		 * instead
+		 */
+		final String queryString = theParams.toNormalizedQueryString(myContext);
+		if (theParams.getEverythingMode() == null) {
+			if (myDaoConfig.getReuseCachedSearchResultsForMillis() != null) {
+
+				final Date createdCutoff = new Date(System.currentTimeMillis() - myDaoConfig.getReuseCachedSearchResultsForMillis());
+				final String resourceType = theResourceType;
+
+				TransactionTemplate txTemplate = new TransactionTemplate(myTxManager);
+				PersistedJpaBundleProvider foundSearchProvider = txTemplate.execute(new TransactionCallback<PersistedJpaBundleProvider>() {
+					@Override
+					public PersistedJpaBundleProvider doInTransaction(TransactionStatus theStatus) {
+						Search searchToUse = null;
+						Collection<Search> candidates = mySearchDao.find(resourceType, queryString.hashCode(), createdCutoff);
+						for (Search nextCandidateSearch : candidates) {
+							if (queryString.equals(nextCandidateSearch.getSearchQueryString())) {
+								searchToUse = nextCandidateSearch;
+							}
+						}
+
+						PersistedJpaBundleProvider retVal = null;
+						if (searchToUse != null) {
+							ourLog.info("Reusing search {} from cache", searchToUse.getUuid());
+							searchToUse.setSearchLastReturned(new Date());
+							mySearchDao.updateSearchLastReturned(searchToUse.getId(), new Date());
+
+							retVal = new PersistedJpaBundleProvider(searchToUse.getUuid(), theCallingDao);
+							populateBundleProvider(retVal);
+						}
+
+						return retVal;
+					}
+				});
+
+				if (foundSearchProvider != null) {
+					return foundSearchProvider;
+				}
+
+			}
+		}
+
 		Search search = new Search();
 		search.setUuid(UUID.randomUUID().toString());
 		search.setCreated(new Date());
+		search.setSearchLastReturned(new Date());
 		search.setTotalCount(null);
 		search.setNumFound(0);
 		search.setPreferredPageSize(theParams.getCount());
@@ -216,6 +265,9 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 		search.setLastUpdated(theParams.getLastUpdated());
 		search.setResourceType(theResourceType);
 		search.setStatus(SearchStatusEnum.LOADING);
+
+		search.setSearchQueryString(queryString);
+		search.setSearchQueryStringHash(queryString.hashCode());
 
 		for (Include next : theParams.getIncludes()) {
 			search.getIncludes().add(new SearchInclude(search, next.getValue(), false, next.isRecurse()));
@@ -229,15 +281,19 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 		myExecutor.submit(task);
 
 		PersistedJpaSearchFirstPageBundleProvider retVal = new PersistedJpaSearchFirstPageBundleProvider(search, theCallingDao, task, sb, myTxManager);
-		retVal.setContext(myContext);
-		retVal.setEntityManager(myEntityManager);
-		retVal.setPlatformTransactionManager(myTxManager);
-		retVal.setSearchDao(mySearchDao);
-		retVal.setSearchCoordinatorSvc(this);
+		populateBundleProvider(retVal);
 
 		ourLog.info("Search initial phase completed in {}ms", w);
 		return retVal;
 
+	}
+
+	private void populateBundleProvider(PersistedJpaBundleProvider theRetVal) {
+		theRetVal.setContext(myContext);
+		theRetVal.setEntityManager(myEntityManager);
+		theRetVal.setPlatformTransactionManager(myTxManager);
+		theRetVal.setSearchDao(mySearchDao);
+		theRetVal.setSearchCoordinatorSvc(this);
 	}
 
 	@VisibleForTesting

@@ -74,10 +74,22 @@ public class StaleSearchDeletingSvcImpl implements IStaleSearchDeletingSvc {
 	@Override
 	@Transactional(propagation = Propagation.NOT_SUPPORTED)
 	public void pollForStaleSearchesAndDeleteThem() {
-		Date cutoff = new Date(System.currentTimeMillis() - myDaoConfig.getExpireSearchResultsAfterMillis());
+		
+		/*
+		 * We give a bit of extra leeway just to avoid race conditions where a query result
+		 * is being reused (because a new client request came in with the same params) right before
+		 * the result is to be deleted
+		 */
+		long slack = 10 * DateUtils.MILLIS_PER_SECOND;
+		long cutoffMillis = myDaoConfig.getExpireSearchResultsAfterMillis();
+		if (myDaoConfig.getReuseCachedSearchResultsForMillis() != null) {
+			cutoffMillis = Math.max(cutoffMillis, myDaoConfig.getReuseCachedSearchResultsForMillis());
+		}
+		Date cutoff = new Date((System.currentTimeMillis() - cutoffMillis) - slack);
+		
 		ourLog.debug("Searching for searches which are before {}", cutoff);
 
-		Collection<Search> toDelete = mySearchDao.findWhereCreatedBefore(cutoff);
+		Collection<Search> toDelete = mySearchDao.findWhereLastReturnedBefore(cutoff);
 		if (!toDelete.isEmpty()) {
 
 			for (final Search next : toDelete) {

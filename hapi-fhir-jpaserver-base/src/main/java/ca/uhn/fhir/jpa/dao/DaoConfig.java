@@ -55,6 +55,11 @@ public class DaoConfig {
 	 */
 	private static final int DEFAULT_MAXIMUM_SEARCH_RESULT_COUNT_IN_TRANSACTION = 500;
 
+	/**
+	 * Default value for {@link #setReuseCachedSearchResultsForMillis(Long)}: 60000ms (one minute)
+	 */
+	public static final Long DEFAULT_REUSE_CACHED_SEARCH_RESULTS_FOR_MILLIS = DateUtils.MILLIS_PER_MINUTE;
+
 	// ***
 	// update setter javadoc if default changes
 	// ***
@@ -64,9 +69,9 @@ public class DaoConfig {
 	// update setter javadoc if default changes
 	// ***
 	private boolean myAllowInlineMatchUrlReferences = true;
-
 	private boolean myAllowMultipleDelete;
 	private boolean myDefaultSearchParamsCanBeOverridden = false;
+
 	// ***
 	// update setter javadoc if default changes
 	// ***
@@ -82,23 +87,25 @@ public class DaoConfig {
 	private int myHardTagListLimit = 1000;
 
 	private int myIncludeLimit = 2000;
-
 	// ***
 	// update setter javadoc if default changes
 	// ***
 	private boolean myIndexContainedResources = true;
-	private List<IServerInterceptor> myInterceptors;
 
+	private List<IServerInterceptor> myInterceptors;
 	// ***
 	// update setter javadoc if default changes
 	// ***
 	private int myMaximumExpansionSize = 5000;
 	private int myMaximumSearchResultCountInTransaction = DEFAULT_MAXIMUM_SEARCH_RESULT_COUNT_IN_TRANSACTION;
 	private ResourceEncodingEnum myResourceEncoding = ResourceEncodingEnum.JSONC;
+	private Long myReuseCachedSearchResultsForMillis;
 	private boolean mySchedulingDisabled;
 	private boolean mySubscriptionEnabled;
 	private long mySubscriptionPollDelay = 1000;
+
 	private Long mySubscriptionPurgeInactiveAfterMillis;
+
 	private Set<String> myTreatBaseUrlsAsLocal = new HashSet<String>();
 
 	private Set<String> myTreatReferencesAsLogical = new HashSet<String>(DEFAULT_LOGICAL_BASE_URLS);
@@ -196,6 +203,21 @@ public class DaoConfig {
 
 	public ResourceEncodingEnum getResourceEncoding() {
 		return myResourceEncoding;
+	}
+
+	/**
+	 * If set to a non {@literal null} value (default is {@link #DEFAULT_REUSE_CACHED_SEARCH_RESULTS_FOR_MILLIS non null})
+	 * if an identical search is requested multiple times within this window, the same results will be returned
+	 * to multiple queries. For example, if this value is set to 1 minute and a client searches for all
+	 * patients named "smith", and then a second client also performs the same search within 1 minute,
+	 * the same cached results will be returned.
+	 * <p>
+	 * This approach can improve performance, especially under heavy load, but can also mean that
+	 * searches may potentially return slightly out-of-date results.
+	 * </p>
+	 */
+	public Long getReuseCachedSearchResultsForMillis() {
+		return myReuseCachedSearchResultsForMillis;
 	}
 
 	public long getSubscriptionPollDelay() {
@@ -534,6 +556,21 @@ public class DaoConfig {
 
 	public void setResourceEncoding(ResourceEncodingEnum theResourceEncoding) {
 		myResourceEncoding = theResourceEncoding;
+	}
+	
+	/**
+	 * If set to a non {@literal null} value (default is {@link #DEFAULT_REUSE_CACHED_SEARCH_RESULTS_FOR_MILLIS non null})
+	 * if an identical search is requested multiple times within this window, the same results will be returned
+	 * to multiple queries. For example, if this value is set to 1 minute and a client searches for all
+	 * patients named "smith", and then a second client also performs the same search within 1 minute,
+	 * the same cached results will be returned.
+	 * <p>
+	 * This approach can improve performance, especially under heavy load, but can also mean that
+	 * searches may potentially return slightly out-of-date results.
+	 * </p>
+	 */
+	public void setReuseCachedSearchResultsForMillis(Long theReuseCachedSearchResultsForMillis) {
+		myReuseCachedSearchResultsForMillis = theReuseCachedSearchResultsForMillis;
 	}
 
 	public void setSchedulingDisabled(boolean theSchedulingDisabled) {

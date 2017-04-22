@@ -34,6 +34,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -116,10 +117,14 @@ import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.support.TransactionCallback;
+import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 
 import com.google.common.collect.Lists;
 
 import ca.uhn.fhir.jpa.dao.DaoConfig;
+import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.UriDt;
 import ca.uhn.fhir.parser.IParser;
@@ -153,6 +158,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 		myDaoConfig.setAllowMultipleDelete(new DaoConfig().isAllowMultipleDelete());
 		myDaoConfig.setAllowExternalReferences(new DaoConfig().isAllowExternalReferences());
+		myDaoConfig.setReuseCachedSearchResultsForMillis(new DaoConfig().getReuseCachedSearchResultsForMillis());
 	}
 
 	@Override
@@ -316,16 +322,135 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		}
 		ourClient.transaction().withResources(resources).prettyPrint().encodedXml().execute();
 
-		//@formatter:on
 		Bundle found = ourClient.search().forResource(Organization.class).where(Organization.NAME.matches().value("rpdstu2_testCountParam_01")).count(10).returnBundle(Bundle.class).execute();
 		assertEquals(100, found.getTotal());
 		assertEquals(10, found.getEntry().size());
 
 		found = ourClient.search().forResource(Organization.class).where(Organization.NAME.matches().value("rpdstu2_testCountParam_01")).count(999).returnBundle(Bundle.class).execute();
-		//@formatter:on
 		assertEquals(100, found.getTotal());
 		assertEquals(50, found.getEntry().size());
 
+	}
+
+
+	
+	@Test
+	public void testSearchReusesResultsEnabled() throws Exception {
+		List<IBaseResource> resources = new ArrayList<IBaseResource>();
+		for (int i = 0; i < 50; i++) {
+			Organization org = new Organization();
+			org.setName("HELLO");
+			resources.add(org);
+		}
+		ourClient.transaction().withResources(resources).prettyPrint().encodedXml().execute();
+
+		myDaoConfig.setReuseCachedSearchResultsForMillis(1000L);
+		
+		Bundle result1 = ourClient
+			.search()
+			.forResource("Organization")
+			.where(Organization.NAME.matches().value("HELLO"))
+			.count(5)
+			.returnBundle(Bundle.class)
+			.execute();
+		
+		final String uuid1 = toSearchUuidFromLinkNext(result1);		
+		Search search1 = newTxTemplate().execute(new TransactionCallback<Search>() {
+			@Override
+			public Search doInTransaction(TransactionStatus theStatus) {
+				return mySearchEntityDao.findByUuid(uuid1);
+			}
+		});
+		Date lastReturned1 = search1.getSearchLastReturned();
+		
+		Bundle result2 = ourClient
+				.search()
+				.forResource("Organization")
+				.where(Organization.NAME.matches().value("HELLO"))
+				.count(5)
+				.returnBundle(Bundle.class)
+				.execute();
+
+		final String uuid2 = toSearchUuidFromLinkNext(result2);
+		Search search2 = newTxTemplate().execute(new TransactionCallback<Search>() {
+			@Override
+			public Search doInTransaction(TransactionStatus theStatus) {
+				return mySearchEntityDao.findByUuid(uuid2);
+			}
+		});
+		Date lastReturned2 = search2.getSearchLastReturned();
+
+		assertTrue(lastReturned2.getTime() > lastReturned1.getTime());
+		
+		Thread.sleep(1500);
+		
+		Bundle result3 = ourClient
+				.search()
+				.forResource("Organization")
+				.where(Organization.NAME.matches().value("HELLO"))
+				.count(5)
+				.returnBundle(Bundle.class)
+				.execute();
+
+		String uuid3 = toSearchUuidFromLinkNext(result3);
+		
+		assertEquals(uuid1, uuid2);
+		assertNotEquals(uuid1, uuid3);
+	}
+
+	@Test
+	public void testSearchReusesResultsDisabled() throws Exception {
+		List<IBaseResource> resources = new ArrayList<IBaseResource>();
+		for (int i = 0; i < 50; i++) {
+			Organization org = new Organization();
+			org.setName("HELLO");
+			resources.add(org);
+		}
+		ourClient.transaction().withResources(resources).prettyPrint().encodedXml().execute();
+
+		myDaoConfig.setReuseCachedSearchResultsForMillis(null);
+		
+		Bundle result1 = ourClient
+			.search()
+			.forResource("Organization")
+			.where(Organization.NAME.matches().value("HELLO"))
+			.count(5)
+			.returnBundle(Bundle.class)
+			.execute();
+		
+		final String uuid1 = toSearchUuidFromLinkNext(result1);		
+		
+		Bundle result2 = ourClient
+				.search()
+				.forResource("Organization")
+				.where(Organization.NAME.matches().value("HELLO"))
+				.count(5)
+				.returnBundle(Bundle.class)
+				.execute();
+
+		final String uuid2 = toSearchUuidFromLinkNext(result2);
+
+		Bundle result3 = ourClient
+				.search()
+				.forResource("Organization")
+				.where(Organization.NAME.matches().value("HELLO"))
+				.count(5)
+				.returnBundle(Bundle.class)
+				.execute();
+
+		String uuid3 = toSearchUuidFromLinkNext(result3);
+		
+		assertNotEquals(uuid1, uuid2);
+		assertNotEquals(uuid1, uuid3);
+	}
+	
+	private String toSearchUuidFromLinkNext(Bundle theBundle) {
+		String linkNext = theBundle.getLink("next").getUrl();
+		linkNext = linkNext.substring(linkNext.indexOf('?'));
+		Map<String, String[]> params = UrlUtil.parseQueryString(linkNext);
+		String[] uuidParams = params.get(Constants.PARAM_PAGINGACTION);
+		String uuid = uuidParams[0];
+		return uuid;
 	}
 
 	/**
