@@ -1083,8 +1083,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 	 * 
 	 * @param theEntity
 	 *           The entity being updated (Do not modify the entity! Undefined behaviour will occur!)
-	 * @param theTag
-	 *           The tag
+	 * @param theResource
+	 *           The resource being persisted
 	 */
 	protected void postPersist(ResourceTable theEntity, T theResource) {
 		// nothing

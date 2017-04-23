@@ -58,6 +58,11 @@
 				(e.g. requests for the second page of results for a search operation). 
 				Thanks to Eeva Turkka for reporting!
 			</action>
+			<action type="add">
+				Add configuration property to DSTU3 FhirInstanceValidator to
+				allow client code to change unknown extension handling behaviour.
+			</action>
+		</release>
 		<release version="2.4" date="2017-04-19">
 			<action type="add">
 				This release brings the DSTU3 structures up to FHIR R3 (FHIR 3.0.1) definitions. Note that

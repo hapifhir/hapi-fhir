@@ -163,7 +163,6 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	 * @param theId
 	 * @param theRequestDetails
 	 *           TODO
-	 * @return
 	 * @throws ResourceNotFoundException
 	 *            If the ID is not known to the server
 	 */

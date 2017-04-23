@@ -8,21 +8,23 @@ import javax.servlet.ServletException;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
-import org.hl7.fhir.instance.hapi.validation.DefaultProfileValidationSupport;
-import org.hl7.fhir.instance.hapi.validation.FhirInstanceValidator;
-import org.hl7.fhir.instance.hapi.validation.IValidationSupport;
-import org.hl7.fhir.instance.hapi.validation.ValidationSupportChain;
+import org.hl7.fhir.dstu3.hapi.validation.DefaultProfileValidationSupport;
+import org.hl7.fhir.dstu3.hapi.validation.FhirInstanceValidator;
+import org.hl7.fhir.dstu3.hapi.validation.IValidationSupport;
+import org.hl7.fhir.dstu3.hapi.validation.ValidationSupportChain;
+import org.hl7.fhir.dstu3.model.CodeSystem;
+import org.hl7.fhir.dstu3.model.ContactPoint.ContactPointSystem;
+import org.hl7.fhir.dstu3.model.Observation;
+import org.hl7.fhir.dstu3.model.OperationOutcome;
+import org.hl7.fhir.dstu3.model.Patient;
+import org.hl7.fhir.dstu3.model.StringType;
+import org.hl7.fhir.dstu3.model.StructureDefinition;
 import org.hl7.fhir.instance.model.ValueSet;
 import org.hl7.fhir.instance.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.instance.model.ValueSet.ValueSetExpansionComponent;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.dstu2.resource.Observation;
-import ca.uhn.fhir.model.dstu2.resource.OperationOutcome;
-import ca.uhn.fhir.model.dstu2.resource.Patient;
-import ca.uhn.fhir.model.dstu2.valueset.ContactPointSystemEnum;
-import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.rest.client.IGenericClient;
@@ -39,7 +41,7 @@ public class ValidatorExamples {
 
    public void validationIntro() {
    // START SNIPPET: validationIntro
-      FhirContext ctx = FhirContext.forDstu2();
+      FhirContext ctx = FhirContext.forDstu3();
       
       // Ask the context for a validator
       FhirValidator validator = ctx.newValidator();
@@ -74,7 +76,7 @@ public class ValidatorExamples {
          
          // Create a context, set the error handler and instruct
          // the server to use it
-         FhirContext ctx = FhirContext.forDstu2();
+         FhirContext ctx = FhirContext.forDstu3();
          ctx.setParserErrorHandler(new StrictErrorHandler());
          setFhirContext(ctx);
       }
@@ -85,19 +87,19 @@ public class ValidatorExamples {
    @SuppressWarnings("unused")
    public void enableValidation() {
       // START SNIPPET: clientValidation
-      FhirContext ctx = FhirContext.forDstu2();
+      FhirContext ctx = FhirContext.forDstu3();
       
       ctx.setParserErrorHandler(new StrictErrorHandler());
       
       // This client will have strict parser validation enabled
-      IGenericClient client = ctx.newRestfulGenericClient("http://fhirtest.uhn.ca/baseDstu2");
+      IGenericClient client = ctx.newRestfulGenericClient("http://fhirtest.uhn.ca/baseDstu3");
       // END SNIPPET: clientValidation
       
    }
    
    public void parserValidation() {
       // START SNIPPET: parserValidation
-      FhirContext ctx = FhirContext.forDstu2();
+      FhirContext ctx = FhirContext.forDstu3();
       
       // Create a parser and configure it to use the strict error handler
       IParser parser = ctx.newXmlParser();
@@ -114,13 +116,13 @@ public class ValidatorExamples {
    public void validateResource() {
       // START SNIPPET: basicValidation
       // As always, you need a context
-      FhirContext ctx = FhirContext.forDstu2();
+      FhirContext ctx = FhirContext.forDstu3();
 
       // Create and populate a new patient object
       Patient p = new Patient();
-      p.addName().addFamily("Smith").addGiven("John").addGiven("Q");
+      p.addName().setFamily("Smith").addGiven("John").addGiven("Q");
       p.addIdentifier().setSystem("urn:foo:identifiers").setValue("12345");
-      p.addTelecom().setSystem(ContactPointSystemEnum.PHONE).setValue("416 123-4567");
+      p.addTelecom().setSystem(ContactPointSystem.PHONE).setValue("416 123-4567");
 
       // Request a validator and apply it
       FhirValidator val = ctx.newValidator();
@@ -168,7 +170,7 @@ public class ValidatorExamples {
 
    private static void instanceValidator() throws Exception {
       // START SNIPPET: instanceValidator
-      FhirContext ctx = FhirContext.forDstu2();
+      FhirContext ctx = FhirContext.forDstu3();
 
       // Create a FhirInstanceValidator and register it to a validator
       FhirValidator validator = ctx.newValidator();
@@ -176,12 +178,19 @@ public class ValidatorExamples {
       validator.registerValidatorModule(instanceValidator);
       
       /*
+       * If you want, you can configure settings on the validator to adjust
+       * its behaviour during validation
+       */
+      instanceValidator.setAnyExtensionsAllowed(true);
+      
+      
+      /*
        * Let's create a resource to validate. This Observation has some fields
        * populated, but it is missing Observation.status, which is mandatory.
        */
       Observation obs = new Observation();
       obs.getCode().addCoding().setSystem("http://loinc.org").setCode("12345-6");
-      obs.setValue(new StringDt("This is a value"));
+      obs.setValue(new StringType("This is a value"));
       
       // Validate
       ValidationResult result = validator.validateWithResult(obs);
@@ -205,7 +214,7 @@ public class ValidatorExamples {
    
    private static void instanceValidatorCustom() throws Exception {
       // START SNIPPET: instanceValidatorCustom
-      FhirContext ctx = FhirContext.forDstu2();
+      FhirContext ctx = FhirContext.forDstu3();
 
       // Create a FhirInstanceValidator and register it to a validator
       FhirValidator validator = ctx.newValidator();
@@ -213,36 +222,48 @@ public class ValidatorExamples {
       validator.registerValidatorModule(instanceValidator);
       
       IValidationSupport valSupport = new IValidationSupport() {
-         
-         @Override
-         public CodeValidationResult validateCode(FhirContext theContext, String theCodeSystem, String theCode, String theDisplay) {
-            // TODO: Implement
-            return null;
-         }
-         
-         @Override
-         public boolean isCodeSystemSupported(FhirContext theContext, String theSystem) {
-            // TODO: Implement
-            return false;
-         }
-         
-         @Override
-         public <T extends IBaseResource> T fetchResource(FhirContext theContext, Class<T> theClass, String theUri) {
-            // TODO: Implement
-            return null;
-         }
-         
-         @Override
-         public ValueSet fetchCodeSystem(FhirContext theContext, String theSystem) {
-            // TODO: Implement
-            return null;
-         }
 
-         @Override
-         public ValueSetExpansionComponent expandValueSet(FhirContext theContext, ConceptSetComponent theInclude) {
-            // TODO: Implement
-            return null;
-         }
+			@Override
+			public org.hl7.fhir.dstu3.model.ValueSet.ValueSetExpansionComponent expandValueSet(FhirContext theContext, org.hl7.fhir.dstu3.model.ValueSet.ConceptSetComponent theInclude) {
+				// TODO: implement
+				return null;
+			}
+
+			@Override
+			public List<StructureDefinition> fetchAllStructureDefinitions(FhirContext theContext) {
+				// TODO: implement
+				return null;
+			}
+
+			@Override
+			public CodeSystem fetchCodeSystem(FhirContext theContext, String theSystem) {
+				// TODO: implement
+				return null;
+			}
+
+			@Override
+			public <T extends IBaseResource> T fetchResource(FhirContext theContext, Class<T> theClass, String theUri) {
+				// TODO: implement
+				return null;
+			}
+
+			@Override
+			public StructureDefinition fetchStructureDefinition(FhirContext theCtx, String theUrl) {
+				// TODO: implement
+				return null;
+			}
+
+			@Override
+			public boolean isCodeSystemSupported(FhirContext theContext, String theSystem) {
+				// TODO: implement
+				return false;
+			}
+
+			@Override
+			public CodeValidationResult validateCode(FhirContext theContext, String theCodeSystem, String theCode, String theDisplay) {
+				// TODO: implement
+				return null;
+			}
       };
       
       /*
@@ -261,7 +282,7 @@ public class ValidatorExamples {
    @SuppressWarnings("unused")
    private static void validateFiles() throws Exception {
       // START SNIPPET: validateFiles
-      FhirContext ctx = FhirContext.forDstu2();
+      FhirContext ctx = FhirContext.forDstu3();
 
       // Create a validator and configure it
       FhirValidator validator = ctx.newValidator();

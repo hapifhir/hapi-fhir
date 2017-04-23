@@ -7,6 +7,7 @@ import java.util.List;
 import org.hl7.fhir.dstu3.elementmodel.Element;
 import org.hl7.fhir.dstu3.elementmodel.Manager.FhirFormat;
 import org.hl7.fhir.dstu3.model.StructureDefinition;
+import org.hl7.fhir.dstu3.utils.IResourceValidator.ReferenceValidationPolicy;
 import org.hl7.fhir.exceptions.DefinitionException;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.exceptions.FHIRFormatError;
@@ -23,8 +24,26 @@ import com.google.gson.JsonObject;
    */
 public interface IResourceValidator {
 
+  public enum ReferenceValidationPolicy {
+    IGNORE, CHECK_TYPE_IF_EXISTS, CHECK_EXISTS, CHECK_EXISTS_AND_TYPE, CHECK_VALID;
+    
+    public boolean checkExists() {
+      return this == CHECK_EXISTS_AND_TYPE || this == CHECK_EXISTS || this == CHECK_VALID;
+    }
+    
+    public boolean checkType() {
+      return this == CHECK_TYPE_IF_EXISTS || this == CHECK_EXISTS_AND_TYPE || this == CHECK_VALID;
+    }
+    
+    public boolean checkValid() {
+      return this == CHECK_VALID;
+    }
+  }
+  
   public interface IValidatorResourceFetcher {
-    Element fetch(Object appContext, String url) throws FHIRFormatError, DefinitionException, IOException;
+    Element fetch(Object appContext, String url) throws FHIRFormatError, DefinitionException, IOException, FHIRException;
+    ReferenceValidationPolicy validationPolicy(Object appContext, String path, String url);
+    boolean resolveURL(Object appContext, String path, String url) throws IOException, FHIRException; 
   }
   
   public enum BestPracticeWarningLevel {
@@ -45,6 +64,7 @@ public interface IResourceValidator {
   enum IdStatus {
     OPTIONAL, REQUIRED, PROHIBITED
   }
+  
   
 
   /**
@@ -69,20 +89,19 @@ public interface IResourceValidator {
    *  
    */
   BestPracticeWarningLevel getBasePracticeWarningLevel();
-  void setBestPracticeWarningLevel(BestPracticeWarningLevel value);
+  IResourceValidator setBestPracticeWarningLevel(BestPracticeWarningLevel value);
 
   IValidatorResourceFetcher getFetcher();
-  void setFetcher(IValidatorResourceFetcher value);
+  IResourceValidator setFetcher(IValidatorResourceFetcher value);
   
   boolean isNoBindingMsgSuppressed();
-  void setNoBindingMsgSuppressed(boolean noBindingMsgSuppressed);
+  IResourceValidator setNoBindingMsgSuppressed(boolean noBindingMsgSuppressed);
   
   public boolean isNoInvariantChecks();
-  public void setNoInvariantChecks(boolean value) ;
+  public IResourceValidator setNoInvariantChecks(boolean value) ;
   
   public boolean isNoTerminologyChecks();
-  public void setNoTerminologyChecks(boolean noTerminologyChecks);
-
+  public IResourceValidator setNoTerminologyChecks(boolean noTerminologyChecks);
 
   /**
    * Whether being unable to resolve a profile in found in Resource.meta.profile or ElementDefinition.type.profile or targetProfile is an error or just a warning

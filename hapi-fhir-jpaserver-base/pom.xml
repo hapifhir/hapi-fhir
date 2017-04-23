@@ -130,6 +130,16 @@
 			<artifactId>junit</artifactId> <groupId>junit</groupId> </exclusion> <exclusion> <artifactId>jdom</artifactId> <groupId>org.jdom</groupId> </exclusion> <exclusion> <artifactId>gson</artifactId> <groupId>com.google.code.gson</groupId> 
 			</exclusion> </exclusions> </dependency> -->
 
+		<!-- 
+		For some reason JavaDoc crashed during site generation unless we have this dependency
+		-->
+		<dependency>
+		    <groupId>javax.interceptor</groupId>
+		    <artifactId>javax.interceptor-api</artifactId>
+		    <scope>provided</scope>
+		</dependency>
+
+
 
 		<!-- Test Database -->
 		<dependency>
