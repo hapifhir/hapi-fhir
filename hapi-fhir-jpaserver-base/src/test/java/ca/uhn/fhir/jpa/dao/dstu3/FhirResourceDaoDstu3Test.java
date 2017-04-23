@@ -1409,7 +1409,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 				Thread.sleep(fullSize);
 			}
 			patient.setId(id);
-			patient.getName().get(0).getFamilyElement().setValue(methodName + "_i");
+			patient.getName().get(0).getFamilyElement().setValue(methodName + "_i" + i);
 			myPatientDao.update(patient, mySrd);
 		}
 
@@ -1639,7 +1639,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 			preDates.add(new Date());
 			Thread.sleep(100);
 			patient.setId(id);
-			patient.getName().get(0).getFamilyElement().setValue(methodName + "_i");
+			patient.getName().get(0).getFamilyElement().setValue(methodName + "_i"+i);
 			ids.add(myPatientDao.update(patient, mySrd).getId().toUnqualified().getValue());
 		}
 

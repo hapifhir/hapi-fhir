@@ -27,12 +27,32 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.math.BigDecimal;
 import java.math.MathContext;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
-import javax.persistence.criteria.*;
+import javax.persistence.criteria.AbstractQuery;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Expression;
+import javax.persistence.criteria.From;
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.JoinType;
+import javax.persistence.criteria.Order;
+import javax.persistence.criteria.Path;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+import javax.persistence.criteria.Subquery;
 
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -41,20 +61,44 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.springframework.transaction.PlatformTransactionManager;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
-import ca.uhn.fhir.context.*;
+import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
+import ca.uhn.fhir.context.BaseRuntimeDeclaredChildDefinition;
+import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.context.RuntimeChildChoiceDefinition;
+import ca.uhn.fhir.context.RuntimeChildResourceDefinition;
+import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamUriDao;
-import ca.uhn.fhir.jpa.dao.data.ISearchResultDao;
-import ca.uhn.fhir.jpa.entity.*;
+import ca.uhn.fhir.jpa.entity.BaseHasResource;
+import ca.uhn.fhir.jpa.entity.BaseResourceIndexedSearchParam;
+import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamDate;
+import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamNumber;
+import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamQuantity;
+import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamString;
+import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamToken;
+import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamUri;
+import ca.uhn.fhir.jpa.entity.ResourceLink;
+import ca.uhn.fhir.jpa.entity.ResourceTable;
+import ca.uhn.fhir.jpa.entity.ResourceTag;
+import ca.uhn.fhir.jpa.entity.SearchParam;
+import ca.uhn.fhir.jpa.entity.SearchParamPresent;
+import ca.uhn.fhir.jpa.entity.TagDefinition;
+import ca.uhn.fhir.jpa.entity.TagTypeEnum;
 import ca.uhn.fhir.jpa.term.IHapiTerminologySvc;
 import ca.uhn.fhir.jpa.term.VersionIndependentConcept;
 import ca.uhn.fhir.jpa.util.StopWatch;
-import ca.uhn.fhir.model.api.*;
+import ca.uhn.fhir.model.api.IPrimitiveDatatype;
+import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.api.Include;
+import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.base.composite.BaseCodingDt;
 import ca.uhn.fhir.model.base.composite.BaseIdentifierDt;
 import ca.uhn.fhir.model.base.composite.BaseQuantityDt;
@@ -66,17 +110,31 @@ import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.method.RestSearchParameterTypeEnum;
-import ca.uhn.fhir.rest.param.*;
+import ca.uhn.fhir.rest.param.CompositeParam;
+import ca.uhn.fhir.rest.param.DateParam;
+import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.HasParam;
+import ca.uhn.fhir.rest.param.NumberParam;
+import ca.uhn.fhir.rest.param.ParamPrefixEnum;
+import ca.uhn.fhir.rest.param.QuantityParam;
+import ca.uhn.fhir.rest.param.ReferenceParam;
+import ca.uhn.fhir.rest.param.StringParam;
+import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.param.TokenParamModifier;
+import ca.uhn.fhir.rest.param.UriParam;
+import ca.uhn.fhir.rest.param.UriParamQualifierEnum;
 import ca.uhn.fhir.rest.server.Constants;
-import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.UrlUtil;
 
+/**
+ * The SearchBuilder is responsible for actually forming the SQL query that handles
+ * searchs for resources
+ */
 public class SearchBuilder implements ISearchBuilder {
 	private static Long NO_MORE = Long.valueOf(-1);
-
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchBuilder.class);
 	private CriteriaBuilder myBuilder;
 	private BaseHapiFhirDao<?> myCallingDao;
@@ -92,11 +150,13 @@ public class SearchBuilder implements ISearchBuilder {
 	private Root<ResourceTable> myResourceTableRoot;
 	private Class<? extends IBaseResource> myResourceType;
 	private ISearchParamRegistry mySearchParamRegistry;
-
 	private IHapiTerminologySvc myTerminologySvc;
 
-	public SearchBuilder(FhirContext theFhirContext, EntityManager theEntityManager, PlatformTransactionManager thePlatformTransactionManager, IFulltextSearchSvc theFulltextSearchSvc,
-			ISearchResultDao theSearchResultDao, BaseHapiFhirDao<?> theDao,
+	/**
+	 * Constructor
+	 */
+	public SearchBuilder(FhirContext theFhirContext, EntityManager theEntityManager, IFulltextSearchSvc theFulltextSearchSvc,
+			BaseHapiFhirDao<?> theDao,
 			IResourceIndexedSearchParamUriDao theResourceIndexedSearchParamUriDao, IForcedIdDao theForcedIdDao, IHapiTerminologySvc theTerminologySvc, ISearchParamRegistry theSearchParamRegistry) {
 		myContext = theFhirContext;
 		myEntityManager = theEntityManager;
@@ -148,29 +208,7 @@ public class SearchBuilder implements ISearchBuilder {
 
 	}
 
-	// private void addPredicateId(Set<Long> thePids) {
-	// if (thePids == null || thePids.isEmpty()) {
-	// return;
-	// }
-	//
-	// CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
-	// CriteriaQuery<Long> cq = builder.createQuery(Long.class);
-	// Root<ResourceTable> from = cq.from(ResourceTable.class);
-	// cq.select(from.get("myId").as(Long.class));
-	//
-	// List<Predicate> predicates = new ArrayList<Predicate>();
-	// predicates.add(builder.equal(from.get("myResourceType"), myResourceName));
-	// predicates.add(from.get("myId").in(thePids));
-	// createPredicateResourceId(builder, cq, predicates, from.get("myId").as(Long.class));
-	// createPredicateLastUpdatedForResourceTable(builder, from, predicates);
-	//
-	// cq.where(toArray(predicates));
-	//
-	// TypedQuery<Long> q = myEntityManager.createQuery(cq);
-	// doSetPids(q.getResultList());
-	// }
-
-	private void addPredicateHas(List<List<? extends IQueryParameterType>> theHasParameters, DateRangeParam theLastUpdated) {
+	private void addPredicateHas(List<List<? extends IQueryParameterType>> theHasParameters) {
 
 		for (List<? extends IQueryParameterType> nextOrList : theHasParameters) {
 
@@ -226,6 +264,28 @@ public class SearchBuilder implements ISearchBuilder {
 		}
 	}
 
+	// private void addPredicateId(Set<Long> thePids) {
+	// if (thePids == null || thePids.isEmpty()) {
+	// return;
+	// }
+	//
+	// CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
+	// CriteriaQuery<Long> cq = builder.createQuery(Long.class);
+	// Root<ResourceTable> from = cq.from(ResourceTable.class);
+	// cq.select(from.get("myId").as(Long.class));
+	//
+	// List<Predicate> predicates = new ArrayList<Predicate>();
+	// predicates.add(builder.equal(from.get("myResourceType"), myResourceName));
+	// predicates.add(from.get("myId").in(thePids));
+	// createPredicateResourceId(builder, cq, predicates, from.get("myId").as(Long.class));
+	// createPredicateLastUpdatedForResourceTable(builder, from, predicates);
+	//
+	// cq.where(toArray(predicates));
+	//
+	// TypedQuery<Long> q = myEntityManager.createQuery(cq);
+	// doSetPids(q.getResultList());
+	// }
+
 	private void addPredicateLanguage(List<List<? extends IQueryParameterType>> theList) {
 		for (List<? extends IQueryParameterType> nextList : theList) {
 
@@ -277,9 +337,8 @@ public class SearchBuilder implements ISearchBuilder {
 				final Expression<BigDecimal> fromObj = join.get("myValue");
 				ParamPrefixEnum prefix = ObjectUtils.defaultIfNull(param.getPrefix(), ParamPrefixEnum.EQUAL);
 				String invalidMessageName = "invalidNumberPrefix";
-				String valueAsString = param.getValue().toPlainString();
 
-				Predicate num = createPredicateNumeric(theResourceName, theParamName, join, myBuilder, params, prefix, value, fromObj, invalidMessageName, valueAsString);
+				Predicate num = createPredicateNumeric(theResourceName, theParamName, join, myBuilder, params, prefix, value, fromObj, invalidMessageName);
 				codePredicates.add(num);
 
 			} else {
@@ -575,7 +634,7 @@ public class SearchBuilder implements ISearchBuilder {
 
 	}
 
-	private void addPredicateTag(List<List<? extends IQueryParameterType>> theList, String theParamName, DateRangeParam theLastUpdated) {
+	private void addPredicateTag(List<List<? extends IQueryParameterType>> theList, String theParamName) {
 		TagTypeEnum tagType;
 		if (Constants.PARAM_TAG.equals(theParamName)) {
 			tagType = TagTypeEnum.TAG;
@@ -920,7 +979,7 @@ public class SearchBuilder implements ISearchBuilder {
 
 	private Predicate createPredicateNumeric(String theResourceName, String theParamName, From<?, ? extends BaseResourceIndexedSearchParam> theFrom, CriteriaBuilder builder,
 			IQueryParameterType theParam, ParamPrefixEnum thePrefix, BigDecimal theValue, final Expression<BigDecimal> thePath,
-			String invalidMessageName, String theValueString) {
+			String invalidMessageName) {
 		Predicate num;
 		switch (thePrefix) {
 		case GREATERTHAN:
@@ -972,7 +1031,6 @@ public class SearchBuilder implements ISearchBuilder {
 		String unitsValue;
 		ParamPrefixEnum cmpValue;
 		BigDecimal valueValue;
-		String valueString;
 
 		if (theParam instanceof BaseQuantityDt) {
 			BaseQuantityDt param = (BaseQuantityDt) theParam;
@@ -980,14 +1038,12 @@ public class SearchBuilder implements ISearchBuilder {
 			unitsValue = param.getUnitsElement().getValueAsString();
 			cmpValue = ParamPrefixEnum.forDstu1Value(param.getComparatorElement().getValueAsString());
 			valueValue = param.getValueElement().getValue();
-			valueString = param.getValueElement().getValueAsString();
 		} else if (theParam instanceof QuantityParam) {
 			QuantityParam param = (QuantityParam) theParam;
 			systemValue = param.getSystem();
 			unitsValue = param.getUnits();
 			cmpValue = param.getPrefix();
 			valueValue = param.getValue();
-			valueString = param.getValueAsString();
 		} else {
 			throw new IllegalArgumentException("Invalid quantity type: " + theParam.getClass());
 		}
@@ -1006,7 +1062,7 @@ public class SearchBuilder implements ISearchBuilder {
 		final Expression<BigDecimal> path = theFrom.get("myValue");
 		String invalidMessageName = "invalidQuantityPrefix";
 
-		Predicate num = createPredicateNumeric(theResourceName, null, theFrom, theBuilder, theParam, cmpValue, valueValue, path, invalidMessageName, valueString);
+		Predicate num = createPredicateNumeric(theResourceName, null, theFrom, theBuilder, theParam, cmpValue, valueValue, path, invalidMessageName);
 
 		Predicate singleCode;
 		if (system == null && code == null) {
@@ -1177,15 +1233,20 @@ public class SearchBuilder implements ISearchBuilder {
 	public Iterator<Long> createQuery(SearchParameterMap theParams) {
 		myParams = theParams;
 		myBuilder = myEntityManager.getCriteriaBuilder();
-		CriteriaQuery<Long> outerQuery = null;
 
+		return new QueryIterator();
+
+	}
+
+	private TypedQuery<Long> createQuery(SortSpec sort) {
+		CriteriaQuery<Long> outerQuery;
 		/*
 		 * Sort
 		 * 
 		 * If we have a sort, we wrap the criteria search (the search that actually
 		 * finds the appropriate resources) in an outer search which is then sorted
 		 */
-		if (myParams.getSort() != null) {
+		if (sort != null) {
 
 			outerQuery = myBuilder.createQuery(Long.class);
 			Root<ResourceTable> outerQueryFrom = outerQuery.from(ResourceTable.class);
@@ -1193,7 +1254,7 @@ public class SearchBuilder implements ISearchBuilder {
 			List<Order> orders = Lists.newArrayList();
 			List<Predicate> predicates = Lists.newArrayList();
 
-			createSort(myBuilder, outerQueryFrom, myParams.getSort(), orders, predicates);
+			createSort(myBuilder, outerQueryFrom, sort, orders, predicates);
 			if (orders.size() > 0) {
 				outerQuery.orderBy(orders);
 			}
@@ -1271,61 +1332,12 @@ public class SearchBuilder implements ISearchBuilder {
 		}
 
 		myResourceTableQuery.where(myBuilder.and(SearchBuilder.toArray(myPredicates)));
-		
+
 		/*
 		 * Now perform the search
 		 */
 		final TypedQuery<Long> query = myEntityManager.createQuery(outerQuery);
-
-		
-		// FIXME: remove
-		query.getResultList();
-		
-		return new Iterator<Long>() {
-
-			private Long myNext;
-			private final Set<Long> myPidSet = new HashSet<Long>();
-			private Iterator<Long> myResultsIterator;
-
-			private void fetchNext() {
-				if (myResultsIterator == null) {
-					myResultsIterator = query.getResultList().iterator();
-				}
-				if (myNext == null) {
-					while (myResultsIterator.hasNext()) {
-						Long next = myResultsIterator.next();
-						if (next != null && myPidSet.add(next)) {
-							myNext = next;
-							break;
-						}
-					}
-					if (myNext == null) {
-						myNext = NO_MORE;
-					}
-				}
-			}
-
-			@Override
-			public boolean hasNext() {
-				if (myNext == null) {
-					fetchNext();
-				}
-				if (myNext == NO_MORE) {
-					return false;
-				}
-				return true;
-			}
-
-			@Override
-			public Long next() {
-				fetchNext();
-				Long retVal = myNext;
-				myNext = null;
-				Validate.isTrue(retVal != NO_MORE, "No more elements");
-				return retVal;
-			}
-		};
-
+		return query;
 	}
 
 	private Predicate createResourceLinkPathPredicate(String theResourceName, String theParamName, From<?, ? extends ResourceLink> from) {
@@ -1420,10 +1432,6 @@ public class SearchBuilder implements ISearchBuilder {
 				theOrders.add(theBuilder.asc(join.get(next)));
 			} else {
 				theOrders.add(theBuilder.desc(join.get(next)));
-
-				// TODO: Here's one way to get nulls last.. need to test performance of this
-				// Order desc = theBuilder.desc(myBuilder.coalesce(join.get(next), new Date(0)));
-				// theOrders.add(desc);
 			}
 		}
 
@@ -1432,8 +1440,9 @@ public class SearchBuilder implements ISearchBuilder {
 		return true;
 	}
 
-	private String determineSystemIfMissing(String theParamName, String code, String system) {
-		if (system == null) {
+	private String determineSystemIfMissing(String theParamName, String code, String theSystem) {
+		String retVal = theSystem;
+		if (retVal == null) {
 			RuntimeResourceDefinition resourceDef = myContext.getResourceDefinition(myResourceName);
 			RuntimeSearchParam param = myCallingDao.getSearchParamByName(resourceDef, theParamName);
 			if (param != null) {
@@ -1451,14 +1460,14 @@ public class SearchBuilder implements ISearchBuilder {
 					List<VersionIndependentConcept> candidateCodes = myTerminologySvc.expandValueSet(valueSetUris.iterator().next());
 					for (VersionIndependentConcept nextCandidate : candidateCodes) {
 						if (nextCandidate.getCode().equals(code)) {
-							system = nextCandidate.getSystem();
+							retVal = nextCandidate.getSystem();
 							break;
 						}
 					}
 				}
 			}
 		}
-		return system;
+		return retVal;
 	}
 
 	@Override
@@ -1486,7 +1495,7 @@ public class SearchBuilder implements ISearchBuilder {
 
 		for (ResourceTable next : q.getResultList()) {
 			Class<? extends IBaseResource> resourceType = context.getResourceDefinition(next.getResourceType()).getImplementingClass();
-			IBaseResource resource = (IBaseResource) theDao.toResource(resourceType, next, theForHistoryOperation);
+			IBaseResource resource = theDao.toResource(resourceType, next, theForHistoryOperation);
 			Integer index = position.get(next.getId());
 			if (index == null) {
 				ourLog.warn("Got back unexpected resource PID {}", next.getId());
@@ -1683,12 +1692,11 @@ public class SearchBuilder implements ISearchBuilder {
 
 		} else if (theParamName.equals(Constants.PARAM_HAS)) {
 
-			addPredicateHas(theAndOrParams, null);
+			addPredicateHas(theAndOrParams);
 
 		} else if (theParamName.equals(Constants.PARAM_TAG) || theParamName.equals(Constants.PARAM_PROFILE) || theParamName.equals(Constants.PARAM_SECURITY)) {
 
-			// FIXME
-			addPredicateTag(theAndOrParams, theParamName, null);
+			addPredicateTag(theAndOrParams, theParamName);
 
 		} else {
 
@@ -1866,6 +1874,58 @@ public class SearchBuilder implements ISearchBuilder {
 
 	static Predicate[] toArray(List<Predicate> thePredicates) {
 		return thePredicates.toArray(new Predicate[thePredicates.size()]);
+	}
+
+	private final class QueryIterator implements Iterator<Long> {
+		private Long myNext;
+		private final Set<Long> myPidSet = new HashSet<Long>();
+		private Iterator<Long> myResultsIterator;
+		private SortSpec mySort;
+
+		private QueryIterator() {
+			mySort = myParams.getSort();
+		}
+
+		private void fetchNext() {
+			
+			// If we don't have 
+			if (myResultsIterator == null) {
+				final TypedQuery<Long> query = createQuery(mySort);
+				myResultsIterator = query.getResultList().iterator();
+			}
+			if (myNext == null) {
+				while (myResultsIterator.hasNext()) {
+					Long next = myResultsIterator.next();
+					if (next != null && myPidSet.add(next)) {
+						myNext = next;
+						break;
+					}
+				}
+				if (myNext == null) {
+					myNext = NO_MORE;
+				}
+			}
+		}
+
+		@Override
+		public boolean hasNext() {
+			if (myNext == null) {
+				fetchNext();
+			}
+			if (myNext == NO_MORE) {
+				return false;
+			}
+			return true;
+		}
+
+		@Override
+		public Long next() {
+			fetchNext();
+			Long retVal = myNext;
+			myNext = null;
+			Validate.isTrue(retVal != NO_MORE, "No more elements");
+			return retVal;
+		}
 	}
 
 }

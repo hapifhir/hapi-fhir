@@ -83,6 +83,7 @@ import ca.uhn.fhir.jpa.dao.dstu2.FhirResourceDaoDstu2SearchNoFtTest;
 import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.entity.ResourceTable;
 import ca.uhn.fhir.jpa.provider.dstu3.JpaSystemProviderDstu3;
+import ca.uhn.fhir.jpa.search.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.search.IStaleSearchDeletingSvc;
 import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
 import ca.uhn.fhir.jpa.term.IHapiTerminologySvc;
@@ -250,7 +251,9 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 	protected PlatformTransactionManager myTransactionMgr;
 	@Autowired
 	protected ISearchParamPresenceSvc mySearchParamPresenceSvc;
-	
+	@Autowired
+	protected ISearchCoordinatorSvc mySearchCoordinatorSvc;
+
 	@After()
 	public void afterGrabCaches() {
 		ourValueSetDao = myValueSetDao;
@@ -262,6 +265,7 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 		myDaoConfig.setExpireSearchResults(new DaoConfig().isExpireSearchResults());
 		myDaoConfig.setExpireSearchResultsAfterMillis(new DaoConfig().getExpireSearchResultsAfterMillis());
 		myDaoConfig.setReuseCachedSearchResultsForMillis(new DaoConfig().getReuseCachedSearchResultsForMillis());
+		myDaoConfig.setSuppressUpdatesWithNoChange(new DaoConfig().isSuppressUpdatesWithNoChange());
 	}
 
 	@Before
@@ -285,7 +289,7 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 	@Transactional()
 	public void beforePurgeDatabase() {
 		final EntityManager entityManager = this.myEntityManager;
-		purgeDatabase(entityManager, myTxManager, mySearchParamPresenceSvc);
+		purgeDatabase(entityManager, myTxManager, mySearchParamPresenceSvc, mySearchCoordinatorSvc);
 	}
 
 	@Before

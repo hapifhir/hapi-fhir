@@ -1183,7 +1183,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 				Thread.sleep(fullSize);
 			}
 			patient.setId(id);
-			patient.getName().get(0).getFamily().get(0).setValue(methodName + "_i");
+			patient.getName().get(0).getFamily().get(0).setValue(methodName + "_i" + i);
 			myPatientDao.update(patient, mySrd);
 		}
 

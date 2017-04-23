@@ -482,10 +482,6 @@ public class SearchParamExtractorDstu3 extends BaseSearchParamExtractor implemen
 			// needContactPointSystem = "email";
 			// }
 
-			if (nextPath.contains(".where(system='email')")) {
-				ourLog.info("Email"); // FIXME: remove
-			}
-
 			
 			for (Object nextObject : extractValues(nextPath, theResource)) {
 				

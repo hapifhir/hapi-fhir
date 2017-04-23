@@ -69,7 +69,6 @@ import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 
 public class FhirResourceDaoSubscriptionDstu3 extends FhirResourceDaoDstu3<Subscription>implements IFhirResourceDaoSubscription<Subscription> {
 
@@ -279,8 +278,8 @@ public class FhirResourceDaoSubscriptionDstu3 extends FhirResourceDaoDstu3<Subsc
 
 	@Override
 	protected ResourceTable updateEntity(IBaseResource theResource, ResourceTable theEntity, Date theDeletedTimestampOrNull, boolean thePerformIndexing, boolean theUpdateVersion,
-			Date theUpdateTime) {
-		ResourceTable retVal = super.updateEntity(theResource, theEntity, theDeletedTimestampOrNull, thePerformIndexing, theUpdateVersion, theUpdateTime);
+			Date theUpdateTime, boolean theForceUpdate, boolean theCreateNewHistoryEntry) {
+		ResourceTable retVal = super.updateEntity(theResource, theEntity, theDeletedTimestampOrNull, thePerformIndexing, theUpdateVersion, theUpdateTime, theForceUpdate, theCreateNewHistoryEntry);
 
 		Subscription resource = (Subscription) theResource;
 		Long resourceId = theEntity.getId();

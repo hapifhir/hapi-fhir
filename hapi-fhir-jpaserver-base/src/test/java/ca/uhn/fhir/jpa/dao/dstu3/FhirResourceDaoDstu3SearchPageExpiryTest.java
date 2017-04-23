@@ -61,7 +61,7 @@ public class FhirResourceDaoDstu3SearchPageExpiryTest extends BaseJpaDstu3Test {
 		assertThat(toUnqualifiedVersionlessIds(bundleProvider), containsInAnyOrder(pid1, pid2));
 		assertThat(toUnqualifiedVersionlessIds(bundleProvider), containsInAnyOrder(pid1, pid2));
 
-		myDaoConfig.setExpireSearchResultsAfterMillis(250);
+		myDaoConfig.setExpireSearchResultsAfterMillis(500);
 		myStaleSearchDeletingSvc.pollForStaleSearchesAndDeleteThem();
 		TransactionTemplate txTemplate = new TransactionTemplate(myTxManager);
 		txTemplate.execute(new TransactionCallbackWithoutResult() {
@@ -71,7 +71,7 @@ public class FhirResourceDaoDstu3SearchPageExpiryTest extends BaseJpaDstu3Test {
 			}
 		});
 
-		Thread.sleep(500);
+		Thread.sleep(750);
 		myStaleSearchDeletingSvc.pollForStaleSearchesAndDeleteThem();
 		txTemplate.execute(new TransactionCallbackWithoutResult() {
 			@Override

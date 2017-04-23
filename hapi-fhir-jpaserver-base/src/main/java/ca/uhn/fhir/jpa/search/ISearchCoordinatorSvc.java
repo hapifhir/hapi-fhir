@@ -34,4 +34,6 @@ public interface ISearchCoordinatorSvc {
 
 	IBundleProvider registerSearch(IDao theCallingDao, SearchParameterMap theParams, String theResourceType);
 
+	void cancelAllActiveSearches();
+
 }

@@ -137,14 +137,28 @@ public class TagDefinition implements Serializable {
 		}
 		TagDefinition other = (TagDefinition) obj;
 		EqualsBuilder b = new EqualsBuilder();
-		b.append(myId, other.myId);
+		
+		if (myId != null && other.myId != null) {
+			b.append(myId, other.myId);
+		} else {
+			b.append(myTagType, other.myTagType);
+			b.append(mySystem, other.mySystem);
+			b.append(myCode, other.myCode);
+		}
+		
 		return b.isEquals();
 	}
 	
 	@Override
 	public int hashCode() {
 		HashCodeBuilder b = new HashCodeBuilder();
-		b.append(myId);
+		if (myId != null) {
+			b.append(myId);
+		} else {
+			b.append(myTagType);
+			b.append(mySystem);
+			b.append(myCode);
+		}
 		return b.toHashCode();
 	}
 

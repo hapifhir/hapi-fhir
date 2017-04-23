@@ -23,6 +23,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.config.TestDstu3WithoutLuceneConfig;
 import ca.uhn.fhir.jpa.dao.*;
 import ca.uhn.fhir.jpa.provider.dstu3.JpaSystemProviderDstu3;
+import ca.uhn.fhir.jpa.search.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.Constants;
@@ -146,12 +147,14 @@ public class FhirResourceDaoDstu3SearchWithLuceneDisabledTest extends BaseJpaTes
 	@Autowired
 	@Qualifier("myJpaValidationSupportChainDstu3")
 	private IValidationSupport myValidationSupport;
+	@Autowired
+	protected ISearchCoordinatorSvc mySearchCoordinatorSvc;
 
 	@Before
 	@Transactional()
 	public void beforePurgeDatabase() {
 		final EntityManager entityManager = this.myEntityManager;
-		purgeDatabase(entityManager, myTxManager, mySearchParamPresenceSvc);
+		purgeDatabase(entityManager, myTxManager, mySearchParamPresenceSvc, mySearchCoordinatorSvc);
 	}
 
 	@Before

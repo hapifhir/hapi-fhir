@@ -161,7 +161,10 @@ public class FhirSystemDaoDstu1 extends BaseHapiFhirSystemDao<List<IResource>, M
 			BundleEntryTransactionMethodEnum nextResouceOperationOut;
 			if (entity == null) {
 				nextResouceOperationOut = BundleEntryTransactionMethodEnum.POST;
-				entity = toEntity(nextResource);
+//				entity = toEntity(nextResource);
+				entity = new ResourceTable();
+				populateResourceIntoEntity(nextResource, entity, false);
+				entity.setResourceType(resourceName);
 				entity.setUpdated(updateTime);
 				entity.setPublished(updateTime);
 				if (nextId.getIdPart() != null && nextId.getIdPart().startsWith("cid:")) {

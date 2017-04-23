@@ -160,6 +160,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		assertEquals("1", fromDB.getId().getVersionIdPart());
 
 		arr[0] = 2;
+		binary.setContent(arr);
 		HttpPut putRequest = new HttpPut(ourServerBase + "/Binary/" + resource.getIdPart());
 		putRequest.setEntity(new ByteArrayEntity(arr, ContentType.parse("dansk")));
 		CloseableHttpResponse resp = ourHttpClient.execute(putRequest);
@@ -174,6 +175,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		assertEquals("2", fromDB.getId().getVersionIdPart());
 
 		arr[0] = 3;
+		fromDB.setContent(arr);
 		String encoded = myFhirCtx.newJsonParser().encodeResourceToString(fromDB);
 		putRequest = new HttpPut(ourServerBase + "/Binary/" + resource.getIdPart());
 		putRequest.setEntity(new StringEntity(encoded, ContentType.parse("application/json+fhir")));
@@ -191,6 +193,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		// Now an update with the wrong ID in the body
 		
 		arr[0] = 4;
+		binary.setContent(arr);
 		binary.setId("");
 		encoded = myFhirCtx.newJsonParser().encodeResourceToString(binary);
 		putRequest = new HttpPut(ourServerBase + "/Binary/" + resource.getIdPart());
@@ -2282,6 +2285,8 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 			response.close();
 		}
 
+		pt.addName().addFamily(methodName+"2");
+		resource = myFhirCtx.newXmlParser().encodeResourceToString(pt);
 		HttpPut put = new HttpPut(ourServerBase + "/Patient?name=" + methodName);
 		put.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 		response = ourHttpClient.execute(put);
@@ -2321,6 +2326,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		Thread.sleep(100);
 
 		pt.setId(id);
+		pt.addAddress().addLine("AAAAAAAAAAAAAAAAAAAAAA");
 		resource = myFhirCtx.newXmlParser().encodeResourceToString(pt);
 		
 		HttpPut put = new HttpPut(ourServerBase + "/Patient/" + id.getIdPart());

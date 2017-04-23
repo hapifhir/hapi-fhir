@@ -23,19 +23,39 @@ import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.IdentityHashMap;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import javax.persistence.TypedQuery;
 
 import org.apache.http.NameValuePair;
-import org.hl7.fhir.dstu3.model.*;
+import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryResponseComponent;
 import org.hl7.fhir.dstu3.model.Bundle.BundleType;
 import org.hl7.fhir.dstu3.model.Bundle.HTTPVerb;
+import org.hl7.fhir.dstu3.model.IdType;
+import org.hl7.fhir.dstu3.model.Meta;
+import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.hl7.fhir.dstu3.model.OperationOutcome.IssueSeverity;
-import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.dstu3.model.Resource;
+import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.hl7.fhir.instance.model.api.IBaseReference;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
@@ -370,12 +390,6 @@ public class FhirSystemDaoDstu3 extends BaseHapiFhirSystemDao<Bundle, Meta> {
 					}
 				}
 
-//			} else {
-//				
-//				if (isNotBlank(nextReqEntry.getRequest().getUrl())) {
-//					nextResourceId = new IdType(nextReqEntry.getRequest().getUrl());
-//				}
-				
 			}
 
 			HTTPVerb verb = nextReqEntry.getRequest().getMethodElement().getValue();
@@ -508,7 +522,7 @@ public class FhirSystemDaoDstu3 extends BaseHapiFhirSystemDao<Bundle, Meta> {
 			Date deletedTimestampOrNull = deletedInstantOrNull != null ? deletedInstantOrNull.getValue() : null;
 			boolean shouldUpdate = !nonUpdatedEntities.contains(nextOutcome.getEntity());
 			if (shouldUpdate) {
-				updateEntity(nextResource, nextOutcome.getEntity(), deletedTimestampOrNull, shouldUpdate, true, updateTime);
+				updateEntity(nextResource, nextOutcome.getEntity(), deletedTimestampOrNull, shouldUpdate, false, updateTime, false, true);
 			}
 		}
 
@@ -611,8 +625,10 @@ public class FhirSystemDaoDstu3 extends BaseHapiFhirSystemDao<Bundle, Meta> {
 		}
 
 		for (Entry<BundleEntryComponent, ResourceTable> nextEntry : entriesToProcess.entrySet()) {
-			nextEntry.getKey().getResponse().setLocation(nextEntry.getValue().getIdDt().toUnqualified().getValue());
-			nextEntry.getKey().getResponse().setEtag(nextEntry.getValue().getIdDt().getVersionIdPart());
+			String responseLocation = nextEntry.getValue().getIdDt().toUnqualified().getValue();
+			String responseEtag = nextEntry.getValue().getIdDt().getVersionIdPart();
+			nextEntry.getKey().getResponse().setLocation(responseLocation);
+			nextEntry.getKey().getResponse().setEtag(responseEtag);
 		}
 
 		long delay = System.currentTimeMillis() - start;

@@ -30,6 +30,7 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.transaction.PlatformTransactionManager;
 
@@ -39,6 +40,7 @@ import ca.uhn.fhir.jpa.dao.BaseJpaTest;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
+import ca.uhn.fhir.jpa.search.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
 import ca.uhn.fhir.jpa.testutil.RandomServerPortProvider;
 import ca.uhn.fhir.model.api.Bundle;
@@ -543,6 +545,7 @@ public class ResourceProviderDstu1Test  extends BaseJpaTest {
 	}
 
 
+	protected static ISearchCoordinatorSvc ourSearchCoordinatorSvc;
 
 	@SuppressWarnings("unchecked")
 	@BeforeClass
@@ -560,6 +563,7 @@ public class ResourceProviderDstu1Test  extends BaseJpaTest {
 		ourEntityManager = ourAppCtx.getBean(EntityManager.class);
 		ourTxManager = ourAppCtx.getBean(PlatformTransactionManager.class);
 		ourSearchParamPresenceSvc = ourAppCtx.getBean(ISearchParamPresenceSvc.class);
+		ourSearchCoordinatorSvc = ourAppCtx.getBean(ISearchCoordinatorSvc.class);
 		
 		List<IResourceProvider> rpsDev = (List<IResourceProvider>) ourAppCtx.getBean("myResourceProvidersDstu1", List.class);
 		restServer.setResourceProviders(rpsDev);
@@ -602,7 +606,7 @@ public class ResourceProviderDstu1Test  extends BaseJpaTest {
 	
 	@Before
 	public void before() {
-		super.purgeDatabase(ourEntityManager, ourTxManager, ourSearchParamPresenceSvc);
+		super.purgeDatabase(ourEntityManager, ourTxManager, ourSearchParamPresenceSvc, ourSearchCoordinatorSvc);
 	}
 
 }

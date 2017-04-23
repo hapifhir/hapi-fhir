@@ -370,6 +370,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		assertEquals("2", fromDB.getIdElement().getVersionIdPart());
 
 		arr[0] = 3;
+		fromDB.setContent(arr);
 		String encoded = myFhirCtx.newJsonParser().encodeResourceToString(fromDB);
 		putRequest = new HttpPut(ourServerBase + "/Binary/" + resource.getIdPart());
 		putRequest.setEntity(new StringEntity(encoded, ContentType.parse("application/json+fhir")));
@@ -1515,15 +1516,14 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 				.operation()
 				.onInstance(new IdType("Patient/A161443"))
 				.named("everything")
-				.withParameter(Parameters.class, "_count", new IntegerType(50))
+				.withParameter(Parameters.class, "_count", new IntegerType(20))
 				.useHttpGet()
 				.returnResourceType(Bundle.class)
 				.execute();
 
 		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(responseBundle));
 
-		// FIXME re-enable
-		// assertEquals(50, responseBundle.getEntry().size());
+		assertEquals(23, responseBundle.getEntry().size());
 
 		TreeSet<String> ids = new TreeSet<String>();
 		for (int i = 0; i < responseBundle.getEntry().size(); i++) {
@@ -1532,19 +1532,28 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			}
 		}
 
-		// String nextUrl = responseBundle.getLink("next").getUrl();
-		// responseBundle = ourClient.fetchResourceFromUrl(Bundle.class, nextUrl);
-		// for (int i = 0; i < responseBundle.getEntry().size(); i++) {
-		// for (BundleEntryComponent nextEntry : responseBundle.getEntry()) {
-		// ids.add(nextEntry.getResource().getIdElement().toUnqualifiedVersionless().getValue());
-		// }
-		// }
+		String nextUrl = responseBundle.getLink("next").getUrl();
+		responseBundle = ourClient.fetchResourceFromUrl(Bundle.class, nextUrl);
+		for (int i = 0; i < responseBundle.getEntry().size(); i++) {
+			for (BundleEntryComponent nextEntry : responseBundle.getEntry()) {
+				ids.add(nextEntry.getResource().getIdElement().toUnqualifiedVersionless().getValue());
+			}
+		}
 
+		nextUrl = responseBundle.getLink("next").getUrl();
+		responseBundle = ourClient.fetchResourceFromUrl(Bundle.class, nextUrl);
+		for (int i = 0; i < responseBundle.getEntry().size(); i++) {
+			for (BundleEntryComponent nextEntry : responseBundle.getEntry()) {
+				ids.add(nextEntry.getResource().getIdElement().toUnqualifiedVersionless().getValue());
+			}
+		}
+
+		assertEquals(null, responseBundle.getLink("next"));
+		
 		assertThat(ids, hasItem("List/A161444"));
 		assertThat(ids, hasItem("List/A161468"));
 		assertThat(ids, hasItem("List/A161500"));
 
-		assertEquals(null, responseBundle.getLink("next"));
 
 		ourLog.info("Expected {} - {}", allIds.size(), allIds);
 		ourLog.info("Actual   {} - {}", ids.size(), ids);
@@ -1717,7 +1726,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			preDates.add(new Date());
 			Thread.sleep(100);
 			patient.setId(id);
-			patient.getName().get(0).getFamilyElement().setValue(methodName + "_i");
+			patient.getName().get(0).getFamilyElement().setValue(methodName + "_i"+i);
 			ids.add(myPatientDao.update(patient, mySrd).getId().toUnqualified().getValue());
 		}
 
@@ -3494,6 +3503,8 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			response.close();
 		}
 
+		pt.addAddress().addLine("AAAAAAAAAAAAAAAAAAA");
+		resource = myFhirCtx.newXmlParser().encodeResourceToString(pt);
 		HttpPut put = new HttpPut(ourServerBase + "/Patient?name=" + methodName);
 		put.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 		response = ourHttpClient.execute(put);

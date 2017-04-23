@@ -32,6 +32,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.entity.*;
 import ca.uhn.fhir.jpa.provider.SystemProviderDstu2Test;
+import ca.uhn.fhir.jpa.search.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
 import ca.uhn.fhir.jpa.term.VersionIndependentConcept;
 import ca.uhn.fhir.model.dstu2.resource.Bundle;
@@ -191,7 +192,10 @@ public abstract class BaseJpaTest {
 		return bundleStr;
 	}
 
-	public static void purgeDatabase(final EntityManager entityManager, PlatformTransactionManager theTxManager, ISearchParamPresenceSvc theSearchParamPresenceSvc) {
+	public static void purgeDatabase(final EntityManager entityManager, PlatformTransactionManager theTxManager, ISearchParamPresenceSvc theSearchParamPresenceSvc, ISearchCoordinatorSvc theSearchCoordinatorSvc) {
+		
+		theSearchCoordinatorSvc.cancelAllActiveSearches();
+		
 		TransactionTemplate txTemplate = new TransactionTemplate(theTxManager);
 		txTemplate.setPropagationBehavior(TransactionTemplate.PROPAGATION_REQUIRED);
 		txTemplate.execute(new TransactionCallback<Void>() {

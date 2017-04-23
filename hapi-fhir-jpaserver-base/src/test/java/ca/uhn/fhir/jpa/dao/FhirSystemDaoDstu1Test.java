@@ -26,13 +26,13 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.config.TestDstu1Config;
 import ca.uhn.fhir.jpa.entity.TagTypeEnum;
+import ca.uhn.fhir.jpa.search.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.BundleEntry;
@@ -64,10 +64,11 @@ public class FhirSystemDaoDstu1Test extends BaseJpaTest {
 	private static IFhirSystemDao<List<IResource>, MetaDt> ourSystemDao;
 	private static PlatformTransactionManager ourTxManager;
 	private static ISearchParamPresenceSvc ourSearchParamPresenceSvc;
+	private static ISearchCoordinatorSvc ourSearchCoordinatorSvc;
 
 	@Before
 	public void before() {
-		super.purgeDatabase(ourEntityManager, ourTxManager, ourSearchParamPresenceSvc);
+		super.purgeDatabase(ourEntityManager, ourTxManager, ourSearchParamPresenceSvc, ourSearchCoordinatorSvc);
 	}
 
 	@Override
@@ -111,14 +112,17 @@ public class FhirSystemDaoDstu1Test extends BaseJpaTest {
 		IIdType pid = ourPatientDao.create(patient, mySrd).getId().toVersionless();
 
 		Thread.sleep(10);
+		patient.addName().addFamily("A");
 		patient.setId(pid);
 		IIdType newpid = ourPatientDao.update(patient, mySrd).getId();
 
 		Thread.sleep(10);
+		patient.addName().addFamily("B");
 		patient.setId(pid);
 		IIdType newpid2 = ourPatientDao.update(patient, mySrd).getId();
 
 		Thread.sleep(10);
+		patient.addName().addFamily("C");
 		patient.setId(pid);
 		IIdType newpid3 = ourPatientDao.update(patient, mySrd).getId();
 
@@ -282,7 +286,7 @@ public class FhirSystemDaoDstu1Test extends BaseJpaTest {
 
 		tags2 = ourObservationDao.getTags(o1id, mySrd);
 		assertNull(tags2.getTag("testGetAllTagsScheme1", "testGetAllTagsTerm1"));
-		assertNotNull(tags2.getTag("testGetAllTagsScheme2", "testGetAllTagsTerm2"));
+		assertNull(tags2.getTag("testGetAllTagsScheme2", "testGetAllTagsTerm2"));
 
 		/*
 		 * Add a tag
@@ -296,7 +300,7 @@ public class FhirSystemDaoDstu1Test extends BaseJpaTest {
 
 		tags2 = ourObservationDao.getTags(o1id, mySrd);
 		assertNull(tags2.getTag("testGetAllTagsScheme1", "testGetAllTagsTerm1"));
-		assertNotNull(tags2.getTag("testGetAllTagsScheme2", "testGetAllTagsTerm2"));
+		assertNull(tags2.getTag("testGetAllTagsScheme2", "testGetAllTagsTerm2"));
 
 	}
 
@@ -497,6 +501,7 @@ public class FhirSystemDaoDstu1Test extends BaseJpaTest {
 		ourEntityManager = ourCtx.getBean(EntityManager.class);
 		ourTxManager = ourCtx.getBean(PlatformTransactionManager.class);
 		ourSearchParamPresenceSvc = ourCtx.getBean(ISearchParamPresenceSvc.class);
+		ourSearchCoordinatorSvc = ourCtx.getBean(ISearchCoordinatorSvc.class);
 	}
 
 }

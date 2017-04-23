@@ -48,6 +48,7 @@ import org.mockito.ArgumentCaptor;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallback;
+import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
@@ -1251,9 +1252,20 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 
 	@Test
 	public void testTransactionDoesNotLeavePlaceholderIds() throws Exception {
-		String input = IOUtils.toString(getClass().getResourceAsStream("/cdr-bundle.json"), StandardCharsets.UTF_8);
-		Bundle bundle = myFhirCtx.newJsonParser().parseResource(Bundle.class, input);
-		mySystemDao.transaction(mySrd, bundle);
+		newTxTemplate().execute(new TransactionCallbackWithoutResult() {
+			@Override
+			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
+				String input;
+				try {
+					input = IOUtils.toString(getClass().getResourceAsStream("/cdr-bundle.json"), StandardCharsets.UTF_8);
+				} catch (IOException e) {
+					fail(e.toString());
+					return;
+				}
+				Bundle bundle = myFhirCtx.newJsonParser().parseResource(Bundle.class, input);
+				mySystemDao.transaction(mySrd, bundle);
+			}
+		});
 
 		IBundleProvider history = mySystemDao.history(null, null, null);
 		Bundle list = toBundle(history);

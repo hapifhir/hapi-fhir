@@ -200,15 +200,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		ResourceTable savedEntity = updateEntity(null, entity, updateTime, updateTime);
 		resourceToDelete.setId(entity.getIdDt());
 
-//		/* 
-//		 * If we aren't indexing (meaning we're probably executing a sub-operation within a transaction),
-//		 * we'll manually increase the version. This is important because we want the updated version number
-//		 * to be reflected in the resource shared with interceptors
-//		 */
-//		if (!thePerformIndexing) {
-//			incremenetId(resourceToDelete);
-//		}
-
 		// Notify JPA interceptors
 		if (theRequestDetails != null) {
 			ActionRequestDetails requestDetails = new ActionRequestDetails(theRequestDetails, getContext(), theId.getResourceType(), theId);
@@ -373,7 +364,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		}
 
 		// Perform actual DB update
-		updateEntity(theResource, entity, null, thePerformIndexing, thePerformIndexing, theUpdateTime);
+		updateEntity(theResource, entity, null, thePerformIndexing, thePerformIndexing, theUpdateTime, false, thePerformIndexing);
 		theResource.setId(entity.getIdDt());
 
 		
@@ -383,7 +374,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		 * to be reflected in the resource shared with interceptors
 		 */
 		if (!thePerformIndexing) {
-			incremenetId(theResource);
+			incremenetId(theResource, entity, theResource.getIdElement());
 		}
 		
 		// Notify JPA interceptors
@@ -409,10 +400,21 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		return outcome;
 	}
 
-	private void incremenetId(T theResource) {
-		String newVersion = Long.toString(theResource.getIdElement().getVersionIdPartAsLong() + 1);
-		IIdType newId = theResource.getIdElement().withVersion(newVersion);
-		theResource.setId(newId);
+	private void incremenetId(T theResource, ResourceTable theSavedEntity, IIdType theResourceId) {
+		IIdType idType = theResourceId;
+		String newVersion;
+		long newVersionLong;
+		if (idType == null || idType.getVersionIdPart() == null) {
+			newVersion = "1";
+			newVersionLong = 1;
+		} else {
+			newVersionLong = idType.getVersionIdPartAsLong() + 1;
+			newVersion = Long.toString(newVersionLong);
+		}
+		
+		IIdType newId = theResourceId.withVersion(newVersion);
+		theResource.getIdElement().setValue(newId.getValue());
+		theSavedEntity.setVersion(newVersionLong);
 	}
 
 	private <MT extends IBaseMetaType> void doMetaAdd(MT theMetaAdd, BaseHasResource entity) {
@@ -534,9 +536,11 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	@Override
 	public <MT extends IBaseMetaType> MT metaAddOperation(IIdType theResourceId, MT theMetaAdd, RequestDetails theRequestDetails) {
 		// Notify interceptors
-		ActionRequestDetails requestDetails = new ActionRequestDetails(theRequestDetails, getResourceName(), theResourceId);
-		notifyInterceptors(RestOperationTypeEnum.META_ADD, requestDetails);
-
+		if (theRequestDetails != null) {
+			ActionRequestDetails requestDetails = new ActionRequestDetails(theRequestDetails, getResourceName(), theResourceId);
+			notifyInterceptors(RestOperationTypeEnum.META_ADD, requestDetails);
+		}
+		
 		StopWatch w = new StopWatch();
 		BaseHasResource entity = readEntity(theResourceId);
 		if (entity == null) {
@@ -564,9 +568,11 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	@Override
 	public <MT extends IBaseMetaType> MT metaDeleteOperation(IIdType theResourceId, MT theMetaDel, RequestDetails theRequestDetails) {
 		// Notify interceptors
-		ActionRequestDetails requestDetails = new ActionRequestDetails(theRequestDetails, getResourceName(), theResourceId);
-		notifyInterceptors(RestOperationTypeEnum.META_DELETE, requestDetails);
-
+		if (theRequestDetails != null) {
+			ActionRequestDetails requestDetails = new ActionRequestDetails(theRequestDetails, getResourceName(), theResourceId);
+			notifyInterceptors(RestOperationTypeEnum.META_DELETE, requestDetails);
+		}
+		
 		StopWatch w = new StopWatch();
 		BaseHasResource entity = readEntity(theResourceId);
 		if (entity == null) {
@@ -597,9 +603,11 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	@Override
 	public <MT extends IBaseMetaType> MT metaGetOperation(Class<MT> theType, IIdType theId, RequestDetails theRequestDetails) {
 		// Notify interceptors
-		ActionRequestDetails requestDetails = new ActionRequestDetails(theRequestDetails, getResourceName(), theId);
-		notifyInterceptors(RestOperationTypeEnum.META, requestDetails);
-
+		if (theRequestDetails != null) {
+			ActionRequestDetails requestDetails = new ActionRequestDetails(theRequestDetails, getResourceName(), theId);
+			notifyInterceptors(RestOperationTypeEnum.META, requestDetails);
+		}
+		
 		Set<TagDefinition> tagDefs = new HashSet<TagDefinition>();
 		BaseHasResource entity = readEntity(theId);
 		for (BaseTag next : entity.getTags()) {
@@ -616,9 +624,11 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	@Override
 	public <MT extends IBaseMetaType> MT metaGetOperation(Class<MT> theType, RequestDetails theRequestDetails) {
 		// Notify interceptors
-		ActionRequestDetails requestDetails = new ActionRequestDetails(theRequestDetails, getResourceName(), null);
-		notifyInterceptors(RestOperationTypeEnum.META, requestDetails);
-
+		if (theRequestDetails != null) {
+			ActionRequestDetails requestDetails = new ActionRequestDetails(theRequestDetails, getResourceName(), null);
+			notifyInterceptors(RestOperationTypeEnum.META, requestDetails);
+		}
+		
 		String sql = "SELECT d FROM TagDefinition d WHERE d.myId IN (SELECT DISTINCT t.myTagId FROM ResourceTag t WHERE t.myResourceType = :res_type)";
 		TypedQuery<TagDefinition> q = myEntityManager.createQuery(sql, TagDefinition.class);
 		q.setParameter("res_type", myResourceName);
@@ -818,7 +828,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 	@Override
 	public void reindex(T theResource, ResourceTable theEntity) {
-		updateEntity(theResource, theEntity, null, true, false, theEntity.getUpdatedDate());
+		updateEntity(theResource, theEntity, null, true, false, theEntity.getUpdatedDate(), false, false);
 	}
 
 	@Override
@@ -1033,6 +1043,12 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 	@Override
 	public DaoMethodOutcome update(T theResource, String theMatchUrl, boolean thePerformIndexing, RequestDetails theRequestDetails) {
+		return update(theResource, theMatchUrl, thePerformIndexing, false, theRequestDetails);
+	}
+	
+	
+	@Override
+	public DaoMethodOutcome update(T theResource, String theMatchUrl, boolean thePerformIndexing, boolean theForceUpdateVersion, RequestDetails theRequestDetails) {
 		StopWatch w = new StopWatch();
 
 		preProcessResourceForStorage(theResource);
@@ -1078,8 +1094,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 					"Invalid resource ID[" + entity.getIdDt().toUnqualifiedVersionless() + "] of type[" + entity.getResourceType() + "] - Does not match expected [" + getResourceName() + "]");
 		}
 
-//		entity.get
-		
 		// Notify interceptors
 		ActionRequestDetails requestDetails = null;
 		if (theRequestDetails != null) {
@@ -1088,7 +1102,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		}
 
 		// Perform update
-		ResourceTable savedEntity = updateEntity(theResource, entity, null, thePerformIndexing, thePerformIndexing, new Date());
+		ResourceTable savedEntity = updateEntity(theResource, entity, null, thePerformIndexing, thePerformIndexing, new Date(), theForceUpdateVersion, thePerformIndexing);
 
 		/* 
 		 * If we aren't indexing (meaning we're probably executing a sub-operation within a transaction),
@@ -1096,7 +1110,10 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		 * to be reflected in the resource shared with interceptors
 		 */
 		if (!thePerformIndexing) {
-			incremenetId(theResource);
+			if (resourceId.hasVersionIdPart() == false) {
+				resourceId = resourceId.withVersion(Long.toString(savedEntity.getVersion()));
+			}
+			incremenetId(theResource, savedEntity, resourceId);
 		}
 
 		// Notify interceptors
@@ -1121,8 +1138,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		ourLog.info(msg);
 		return outcome;
 	}
-	
-	
+
 	@Override
 	public DaoMethodOutcome update(T theResource, String theMatchUrl, RequestDetails theRequestDetails) {
 		return update(theResource, theMatchUrl, true, theRequestDetails);

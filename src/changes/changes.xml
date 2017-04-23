@@ -12,7 +12,8 @@
 				This release includes significant performance enhancements for the
 				JPA server. Most importantly, the way that searches are performed
 				has been re-written to allow the server to perform better when
-				the database has a large number of results in it.
+				the database has a large number of results in it. The following
+				enhancements have been made:
 				<br/><br/>
 				<ul>
 					<li>
@@ -36,6 +37,11 @@
 						does two searches for "get me all patients matching FOO"
 						with the same FOO in short succession, we won't query the DB
 						again but will instead reuse the cached results) 
+					</li>
+					<li>
+						Updates which do not actually change the contents of the resource
+						can optionally be prevented from creating a new version
+						of the resource in the database
 					</li>
 				</ul>
 				<br/><br/>

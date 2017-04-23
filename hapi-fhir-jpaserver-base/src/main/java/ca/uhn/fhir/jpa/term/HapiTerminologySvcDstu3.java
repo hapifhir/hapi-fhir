@@ -335,7 +335,7 @@ public class HapiTerminologySvcDstu3 extends BaseHapiTerminologySvc implements I
 		IIdType csId = createOutcome.getId().toUnqualifiedVersionless();
 		if (createOutcome.getCreated() != Boolean.TRUE) {
 			CodeSystem existing = myCodeSystemResourceDao.read(csId, theRequestDetails);
-			csId = myCodeSystemResourceDao.update(existing, theRequestDetails).getId();
+			csId = myCodeSystemResourceDao.update(existing, null, false, true, theRequestDetails).getId();
 
 			ourLog.info("Created new version of CodeSystem, got ID: {}", csId.toUnqualified().getValue());
 		}

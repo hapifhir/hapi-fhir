@@ -497,7 +497,7 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle, MetaDt> {
 			Date deletedTimestampOrNull = deletedInstantOrNull != null ? deletedInstantOrNull.getValue() : null;
 			boolean shouldUpdate = !nonUpdatedEntities.contains(nextOutcome.getEntity());
 			if (shouldUpdate) {
-				updateEntity(nextResource, nextOutcome.getEntity(), deletedTimestampOrNull, true, true, updateTime);
+				updateEntity(nextResource, nextOutcome.getEntity(), deletedTimestampOrNull, true, false, updateTime, false, true);
 			}
 		}
 

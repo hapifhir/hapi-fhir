@@ -27,6 +27,7 @@ import static org.apache.commons.lang3.StringUtils.trim;
 import java.io.UnsupportedEncodingException;
 import java.text.Normalizer;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -63,9 +64,13 @@ import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.instance.model.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.web.servlet.theme.ThemeChangeInterceptor;
 
 import com.google.common.base.Charsets;
 import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Sets;
+import com.google.common.hash.HashFunction;
+import com.google.common.hash.Hashing;
 
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
@@ -127,8 +132,9 @@ import ca.uhn.fhir.util.OperationOutcomeUtil;
 
 public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 
-	public static final long INDEX_STATUS_INDEXED = Long.valueOf(1L);
+	static final Set<String> EXCLUDE_ELEMENTS_IN_ENCODED;
 
+	public static final long INDEX_STATUS_INDEXED = Long.valueOf(1L);
 	public static final long INDEX_STATUS_INDEXING_FAILED = Long.valueOf(2L);
 	public static final String NS_JPA_PROFILE = "https://github.com/jamesagnew/hapi-fhir/ns/jpa/profile";
 	public static final String OO_SEVERITY_ERROR = "error";
@@ -146,7 +152,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 	 */
 	static final Map<String, Class<? extends IQueryParameterType>> RESOURCE_META_PARAMS;
 	public static final String UCUM_NS = "http://unitsofmeasure.org";
-	private static final Set<String> EXCLUDE_ELEMENTS_IN_ENCODED;
 
 	static {
 		Map<String, Class<? extends IQueryParameterType>> resourceMetaParams = new HashMap<String, Class<? extends IQueryParameterType>>();
@@ -163,7 +168,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		resourceMetaAndParams.put(Constants.PARAM_SECURITY, TokenAndListParam.class);
 		RESOURCE_META_PARAMS = Collections.unmodifiableMap(resourceMetaParams);
 		RESOURCE_META_AND_PARAMS = Collections.unmodifiableMap(resourceMetaAndParams);
-		
+
 		HashSet<String> excludeElementsInEncoded = new HashSet<String>();
 		excludeElementsInEncoded.add("*.id");
 		excludeElementsInEncoded.add("*.meta");
@@ -286,7 +291,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 				if (nextObject instanceof IBaseExtension<?, ?>) {
 					nextObject = ((IBaseExtension<?, ?>) nextObject).getValue();
 				}
-			
+
 				IIdType nextId;
 				if (nextObject instanceof IBaseReference) {
 					IBaseReference nextValue = (IBaseReference) nextObject;
@@ -651,7 +656,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 			return retVal;
 		}
 	}
-	
+
 	protected TagList getTags(Class<? extends IBaseResource> theResourceType, IIdType theResourceId) {
 		String resourceName = null;
 		if (theResourceType != null) {
@@ -690,7 +695,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 			return retVal;
 		}
 	}
-	
+
 	protected IBundleProvider history(String theResourceName, Long theId, Date theSince, Date theUntil) {
 
 		String resourceName = defaultIfBlank(theResourceName, null);
@@ -704,7 +709,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		search.setResourceId(theId);
 		search.setSearchType(SearchTypeEnum.HISTORY);
 		search.setStatus(SearchStatusEnum.FINISHED);
-		
+
 		if (theSince != null) {
 			if (resourceName == null) {
 				search.setTotalCount(myResourceHistoryTableDao.countForAllResourceTypes(theSince));
@@ -765,7 +770,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 
 	@Override
 	public SearchBuilder newSearchBuilder() {
-		SearchBuilder builder = new SearchBuilder(getContext(), myEntityManager, myPlatformTransactionManager, myFulltextSearchSvc, mySearchResultDao, this, myResourceIndexedSearchParamUriDao,
+		SearchBuilder builder = new SearchBuilder(getContext(), myEntityManager, myFulltextSearchSvc, this, myResourceIndexedSearchParamUriDao,
 				myForcedIdDao,
 				myTerminologySvc, mySerarchParamRegistry);
 		return builder;
@@ -820,7 +825,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		}
 	}
 
-	private void populateResourceId(final IBaseResource theResource, BaseHasResource theEntity) {
+	private void populateResourceIdFromEntity(BaseHasResource theEntity, final IBaseResource theResource) {
 		IIdType id = theEntity.getIdDt();
 		if (getContext().getVersion().getVersion().isRi()) {
 			id = new IdType(id.getValue());
@@ -828,7 +833,10 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		theResource.setId(id);
 	}
 
-	protected void populateResourceIntoEntity(IBaseResource theResource, ResourceTable theEntity) {
+	/**
+	 * Returns true if the resource has changed (either the contents or the tags)
+	 */
+	protected boolean populateResourceIntoEntity(IBaseResource theResource, ResourceTable theEntity, boolean theUpdateHash) {
 		theEntity.setResourceType(toResourceName(theResource));
 
 		List<BaseResourceReferenceDt> refs = myContext.newTerser().getAllPopulatedChildElementsOfType(theResource, BaseResourceReferenceDt.class);
@@ -848,19 +856,44 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		
 		theEntity.setEncoding(encoding);
 		theEntity.setFhirVersion(myContext.getVersion().getVersion());
+		byte[] bytes;
 		switch (encoding) {
 		case JSON:
-			theEntity.setResource(encoded.getBytes(Charsets.UTF_8));
+			bytes = encoded.getBytes(Charsets.UTF_8);
 			break;
+		default:
 		case JSONC:
-			theEntity.setResource(GZipUtil.compress(encoded));
+			bytes = GZipUtil.compress(encoded);
 			break;
 		}
 
+		boolean changed = false;
+
+		if (theUpdateHash) {
+			HashFunction sha256 = Hashing.sha256();
+			String hashSha256 = sha256.hashBytes(bytes).toString();
+			if (hashSha256.equals(theEntity.getHashSha256()) == false) {
+				changed = true;
+			}
+			theEntity.setHashSha256(hashSha256);
+		}
+		
+		if (changed == false) {
+			if (theEntity.getResource() == null) {
+				changed = true;
+			}else {
+				changed = !Arrays.equals(theEntity.getResource(), bytes);
+			}
+		}
+		
+		theEntity.setResource(bytes);
+		
 		Set<TagDefinition> allDefs = new HashSet<TagDefinition>();
 
 		theEntity.setHasTags(false);
 
+		Set<TagDefinition> allTagsOld = getAllTagDefinitions(theEntity); 
+		
 		if (theResource instanceof IResource) {
 			extractTagsHapi((IResource) theResource, theEntity, allDefs);
 		} else {
@@ -891,6 +924,11 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 			}
 		}
 
+		Set<TagDefinition> allTagsNew = getAllTagDefinitions(theEntity);
+		if (!allTagsOld.equals(allTagsNew)) {
+			changed = true;
+		}
+
 		if (theResource instanceof IResource) {
 			String title = ResourceMetadataKeyEnum.TITLE.get((IResource) theResource);
 			if (title != null && title.length() > BaseHasResource.MAX_TITLE_LENGTH) {
@@ -899,6 +937,15 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 			theEntity.setTitle(title);
 		}
 
+		return changed;
+	}
+
+	private Set<TagDefinition> getAllTagDefinitions(ResourceTable theEntity) {
+		HashSet<TagDefinition> retVal = Sets.newHashSet();
+		for (ResourceTag next : theEntity.getTags()) {
+			retVal.add(next.getTag());
+		}
+		return retVal;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -1000,7 +1047,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		res.getMeta().setLastUpdated(null);
 		res.getMeta().setVersionId(null);
 
-		populateResourceId(res, theEntity);
+		populateResourceIdFromEntity(theEntity, res);
 
 		res.getMeta().setLastUpdated(theEntity.getUpdatedDate());
 		IDao.RESOURCE_PID.put(res, theEntity.getId());
@@ -1122,13 +1169,13 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		return false;
 	}
 
-	protected ResourceTable toEntity(IResource theResource) {
-		ResourceTable retVal = new ResourceTable();
-
-		populateResourceIntoEntity(theResource, retVal);
-
-		return retVal;
-	}
+//	protected ResourceTable toEntity(IResource theResource) {
+//		ResourceTable retVal = new ResourceTable();
+//
+//		populateResourceIntoEntity(theResource, retVal, true);
+//
+//		return retVal;
+//	}
 
 	@Override
 	public IBaseResource toResource(BaseHasResource theEntity, boolean theForHistoryOperation) {
@@ -1232,7 +1279,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 
 	@SuppressWarnings("unchecked")
 	protected ResourceTable updateEntity(final IBaseResource theResource, ResourceTable theEntity, Date theDeletedTimestampOrNull, boolean thePerformIndexing,
-			boolean theUpdateVersion, Date theUpdateTime) {
+			boolean theUpdateVersion, Date theUpdateTime, boolean theForceUpdate, boolean theCreateNewHistoryEntry) {
 		ourLog.debug("Starting entity update");
 
 		/*
@@ -1253,10 +1300,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 			ourLog.debug("Entity has published time: {}", new InstantDt(theUpdateTime));
 
 			theEntity.setPublished(theUpdateTime);
-		}
-
-		if (theUpdateVersion) {
-			theEntity.setVersion(theEntity.getVersion() + 1);
 		}
 
 		Collection<ResourceIndexedSearchParamString> paramsString = new ArrayList<ResourceIndexedSearchParamString>();
@@ -1302,6 +1345,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		Set<ResourceLink> links = null;
 
 		Set<String> populatedResourceLinkParameters = Collections.emptySet();
+		boolean changed;
 		if (theDeletedTimestampOrNull != null) {
 
 			stringParams = Collections.emptySet();
@@ -1316,7 +1360,9 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 			theEntity.setUpdated(theDeletedTimestampOrNull);
 			theEntity.setNarrativeTextParsedIntoWords(null);
 			theEntity.setContentTextParsedIntoWords(null);
-
+			theEntity.setHashSha256(null);
+			changed = true;
+			
 		} else {
 
 			theEntity.setDeleted(null);
@@ -1422,7 +1468,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 					}
 				}
 
-				populateResourceIntoEntity(theResource, theEntity);
+				changed = populateResourceIntoEntity(theResource, theEntity, true);
 
 				theEntity.setUpdated(theUpdateTime);
 				if (theResource instanceof IResource) {
@@ -1451,13 +1497,25 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 
 			} else {
 
-				populateResourceIntoEntity(theResource, theEntity);
+				changed = populateResourceIntoEntity(theResource, theEntity, false);
 				theEntity.setUpdated(theUpdateTime);
 				// theEntity.setLanguage(theResource.getLanguage().getValue());
 				theEntity.setIndexStatus(null);
 
 			}
 
+		}
+
+		if (!changed && !theForceUpdate && myConfig.isSuppressUpdatesWithNoChange()) {
+			ourLog.info("Resource {} has not changed", theEntity.getIdDt().toUnqualified().getValue());
+			if (theResource != null) {
+				populateResourceIdFromEntity(theEntity, theResource);
+			}
+			return theEntity;
+		}
+
+		if (theUpdateVersion) {
+			theEntity.setVersion(theEntity.getVersion() + 1);
 		}
 
 		/*
@@ -1501,7 +1559,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		/*
 		 * Create history entry
 		 */
-		if (theUpdateVersion) {
+		if (theCreateNewHistoryEntry) {
 			final ResourceHistoryTable historyEntry = theEntity.toHistory(null);
 
 			ourLog.info("Saving history entry {}", historyEntry.getIdDt());
@@ -1582,14 +1640,14 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		theEntity = myEntityManager.merge(theEntity);
 
 		if (theResource != null) {
-			populateResourceId(theResource, theEntity);
+			populateResourceIdFromEntity(theEntity, theResource);
 		}
 
 		return theEntity;
 	}
 
 	protected ResourceTable updateEntity(IBaseResource theResource, ResourceTable entity, Date theDeletedTimestampOrNull, Date theUpdateTime) {
-		return updateEntity(theResource, entity, theDeletedTimestampOrNull, true, true, theUpdateTime);
+		return updateEntity(theResource, entity, theDeletedTimestampOrNull, true, true, theUpdateTime, false, true);
 	}
 
 	private void validateChildReferences(IBase theElement, String thePath) {

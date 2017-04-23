@@ -58,21 +58,13 @@ public class FhirResourceDaoCodeSystemDstu3 extends FhirResourceDaoDstu3<CodeSys
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoCodeSystemDstu3.class);
 
 	@Autowired
+	private ITermCodeSystemVersionDao myCsvDao;
+
+	@Autowired
 	private IHapiTerminologySvc myTerminologySvc;
 
 	@Autowired
 	private ValidationSupportChain myValidationSupport;
-
-	@Override
-	public List<IIdType> findCodeSystemIdsContainingSystemAndCode(String theCode, String theSystem) {
-		List<IIdType> valueSetIds;
-		Set<Long> ids = searchForIds(new SearchParameterMap(CodeSystem.SP_CODE, new TokenParam(theSystem, theCode)));
-		valueSetIds = new ArrayList<IIdType>();
-		for (Long next : ids) {
-			valueSetIds.add(new IdType("CodeSystem", next));
-		}
-		return valueSetIds;
-	}
 
 //	private LookupCodeResult lookup(List<ValueSetExpansionContainsComponent> theContains, String theSystem, String theCode) {
 //		for (ValueSetExpansionContainsComponent nextCode : theContains) {
@@ -97,6 +89,17 @@ public class FhirResourceDaoCodeSystemDstu3 extends FhirResourceDaoDstu3<CodeSys
 //
 //		return null;
 //	}
+
+	@Override
+	public List<IIdType> findCodeSystemIdsContainingSystemAndCode(String theCode, String theSystem) {
+		List<IIdType> valueSetIds;
+		Set<Long> ids = searchForIds(new SearchParameterMap(CodeSystem.SP_CODE, new TokenParam(theSystem, theCode)));
+		valueSetIds = new ArrayList<IIdType>();
+		for (Long next : ids) {
+			valueSetIds.add(new IdType("CodeSystem", next));
+		}
+		return valueSetIds;
+	}
 
 	@Override
 	public LookupCodeResult lookupCode(IPrimitiveType<String> theCode, IPrimitiveType<String> theSystem, Coding theCoding, RequestDetails theRequestDetails) {
@@ -188,14 +191,11 @@ public class FhirResourceDaoCodeSystemDstu3 extends FhirResourceDaoDstu3<CodeSys
 
 		return retVal;
 	}
-
-	@Autowired
-	private ITermCodeSystemVersionDao myCsvDao;
 	
 	@Override
 	protected ResourceTable updateEntity(IBaseResource theResource, ResourceTable theEntity, Date theDeletedTimestampOrNull, boolean thePerformIndexing,
-			boolean theUpdateVersion, Date theUpdateTime) {
-		ResourceTable retVal = super.updateEntity(theResource, theEntity, theDeletedTimestampOrNull, thePerformIndexing, theUpdateVersion, theUpdateTime);
+			boolean theUpdateVersion, Date theUpdateTime, boolean theForceUpdate, boolean theCreateNewHistoryEntry) {
+		ResourceTable retVal = super.updateEntity(theResource, theEntity, theDeletedTimestampOrNull, thePerformIndexing, theUpdateVersion, theUpdateTime, theForceUpdate, theCreateNewHistoryEntry);
 
 		CodeSystem cs = (CodeSystem) theResource;
 

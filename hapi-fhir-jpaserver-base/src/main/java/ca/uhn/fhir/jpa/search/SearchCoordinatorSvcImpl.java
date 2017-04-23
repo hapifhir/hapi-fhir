@@ -41,6 +41,7 @@ import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
 
 import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -116,6 +117,18 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 	public SearchCoordinatorSvcImpl() {
 		CustomizableThreadFactory threadFactory = new CustomizableThreadFactory("search_coord_");
 		myExecutor = Executors.newCachedThreadPool(threadFactory);
+	}
+
+	@Override
+	public void cancelAllActiveSearches() {
+		for (SearchTask next : myIdToSearchTask.values()) {
+			next.requestImmediateAbort();
+			try {
+				next.getCompletionLatch().await();
+			} catch (InterruptedException e) {
+				ourLog.warn("Failed to wait for completion", e);
+			}
+		}
 	}
 
 	@Override
@@ -254,8 +267,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 					@Override
 					public PersistedJpaBundleProvider doInTransaction(TransactionStatus theStatus) {
 						Search searchToUse = null;
-						
-						
+
 						Collection<Search> candidates = mySearchDao.find(resourceType, queryString.hashCode(), createdCutoff);
 						for (Search nextCandidateSearch : candidates) {
 							if (queryString.equals(nextCandidateSearch.getSearchQueryString())) {
@@ -325,7 +337,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 
 	@VisibleForTesting
 	void setDaoConfigForUnitTest(DaoConfig theDaoConfig) {
-		myDaoConfig=theDaoConfig;		
+		myDaoConfig = theDaoConfig;
 	}
 
 	@VisibleForTesting
@@ -404,7 +416,9 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 
 	public class SearchTask implements Callable<Void> {
 
+		private boolean myAbortRequested;
 		private final IDao myCallingDao;
+		private CountDownLatch myCompletionLatch;
 		private int myCountSaved = 0;
 		private final CountDownLatch myInitialCollectionLatch = new CountDownLatch(1);
 		private SearchParameterMap myParams;
@@ -418,6 +432,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 			myCallingDao = theCallingDao;
 			myParams = theParams;
 			myResourceType = theResourceType;
+			myCompletionLatch = new CountDownLatch(1);
 		}
 
 		public void awaitInitialSync() {
@@ -473,6 +488,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 			}
 
 			myIdToSearchTask.remove(mySearch.getUuid());
+			myCompletionLatch.countDown();
 			return null;
 		}
 
@@ -505,8 +521,13 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 						// ignore
 					}
 				}
+				Validate.isTrue(myAbortRequested == false, "Abort has been requested");
 			}
 			saveUnsynced(theResultIter);
+		}
+
+		public CountDownLatch getCompletionLatch() {
+			return myCompletionLatch;
 		}
 
 		public List<Long> getResourcePids(int theFromIndex, int theToIndex) {
@@ -546,6 +567,13 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 			}
 
 			return retVal;
+		}
+
+		/**
+		 * Request that the task abort as soon as possible
+		 */
+		public void requestImmediateAbort() {
+			myAbortRequested = true;
 		}
 
 		private void saveSearch() {

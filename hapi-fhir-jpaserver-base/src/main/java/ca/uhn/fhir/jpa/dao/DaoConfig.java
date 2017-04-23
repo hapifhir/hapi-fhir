@@ -1,6 +1,11 @@
 package ca.uhn.fhir.jpa.dao;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.Validate;
@@ -103,11 +108,9 @@ public class DaoConfig {
 	private boolean mySchedulingDisabled;
 	private boolean mySubscriptionEnabled;
 	private long mySubscriptionPollDelay = 1000;
-
 	private Long mySubscriptionPurgeInactiveAfterMillis;
-
+	private boolean mySuppressUpdatesWithNoChange = true;
 	private Set<String> myTreatBaseUrlsAsLocal = new HashSet<String>();
-
 	private Set<String> myTreatReferencesAsLogical = new HashSet<String>(DEFAULT_LOGICAL_BASE_URLS);
 
 	/**
@@ -361,6 +364,19 @@ public class DaoConfig {
 	}
 
 	/**
+	 * If set to {@literal true} (default is true), if a client performs an update which does not actually
+	 * result in any chance to a given resource (e.g. an update where the resource body matches the 
+	 * existing resource body in the database) the operation will succeed but a new version (and corresponding history
+	 * entry) will not actually be created. The existing resource version will be returned to the client.
+	 * <p>
+	 * If set to {@literal false}, all updates will result in the creation of a new version
+	 * </p>
+	 */
+	public boolean isSuppressUpdatesWithNoChange() {
+		return mySuppressUpdatesWithNoChange;
+	}
+
+	/**
 	 * If set to <code>true</code> (default is <code>false</code>) the server will allow
 	 * resources to have references to external servers. For example if this server is
 	 * running at <code>http://example.com/fhir</code> and this setting is set to
@@ -553,11 +569,11 @@ public class DaoConfig {
 	public void setMaximumSearchResultCountInTransaction(int theMaximumSearchResultCountInTransaction) {
 		myMaximumSearchResultCountInTransaction = theMaximumSearchResultCountInTransaction;
 	}
-
+	
 	public void setResourceEncoding(ResourceEncodingEnum theResourceEncoding) {
 		myResourceEncoding = theResourceEncoding;
 	}
-	
+
 	/**
 	 * If set to a non {@literal null} value (default is {@link #DEFAULT_REUSE_CACHED_SEARCH_RESULTS_FOR_MILLIS non null})
 	 * if an identical search is requested multiple times within this window, the same results will be returned
@@ -599,6 +615,20 @@ public class DaoConfig {
 
 	public void setSubscriptionPurgeInactiveAfterSeconds(int theSeconds) {
 		setSubscriptionPurgeInactiveAfterMillis(theSeconds * DateUtils.MILLIS_PER_SECOND);
+	}
+
+	/**
+	 * If set to {@literal true} (default is true), if a client performs an update which does not actually
+	 * result in any chance to a given resource (e.g. an update where the resource body matches the 
+	 * existing resource body in the database) the operation will succeed but a new version (and corresponding history
+	 * entry) will not actually be created. The existing resource version will be returned to the client.
+	 * <p>
+	 * If set to {@literal false}, all updates will result in the creation of a new version
+	 * </p>
+	 */
+	public void setSuppressUpdatesWithNoChange(boolean theSuppressUpdatesWithNoChange) {
+		mySuppressUpdatesWithNoChange = theSuppressUpdatesWithNoChange;
+		
 	}
 
 	/**

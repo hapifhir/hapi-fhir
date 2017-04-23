@@ -10,7 +10,7 @@ package ca.uhn.fhir.jpa.dao;
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  * 
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -25,6 +25,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.hl7.fhir.dstu3.model.CodeSystem;
+import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.instance.model.api.IBaseMetaType;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -49,16 +51,16 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	void addTag(IIdType theId, TagTypeEnum theTagType, String theScheme, String theTerm, String theLabel);
 
 	/**
-	 * Create a resource - Note that this variant of the method does not take in a {@link RequestDetails} and 
-	 * therefore can not fire any interceptors. Use only for internal system calls 
+	 * Create a resource - Note that this variant of the method does not take in a {@link RequestDetails} and
+	 * therefore can not fire any interceptors. Use only for internal system calls
 	 */
 	DaoMethodOutcome create(T theResource);
 
 	DaoMethodOutcome create(T theResource, RequestDetails theRequestDetails);
 
 	/**
-	 * Create a resource - Note that this variant of the method does not take in a {@link RequestDetails} and 
-	 * therefore can not fire any interceptors. Use only for internal system calls 
+	 * Create a resource - Note that this variant of the method does not take in a {@link RequestDetails} and
+	 * therefore can not fire any interceptors. Use only for internal system calls
 	 */
 	DaoMethodOutcome create(T theResource, String theIfNoneExist);
 
@@ -66,22 +68,25 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	 * @param thePerformIndexing
 	 *           Use with caution! If you set this to false, you need to manually perform indexing or your resources
 	 *           won't be indexed and searches won't work.
-	 * @param theRequestDetails TODO
+	 * @param theRequestDetails
+	 *           TODO
 	 */
 	DaoMethodOutcome create(T theResource, String theIfNoneExist, boolean thePerformIndexing, RequestDetails theRequestDetails);
 
 	DaoMethodOutcome create(T theResource, String theIfNoneExist, RequestDetails theRequestDetails);
 
 	/**
-	 * Delete a resource - Note that this variant of the method does not take in a {@link RequestDetails} and 
-	 * therefore can not fire any interceptors. Use only for internal system calls 
+	 * Delete a resource - Note that this variant of the method does not take in a {@link RequestDetails} and
+	 * therefore can not fire any interceptors. Use only for internal system calls
 	 */
 	DaoMethodOutcome delete(IIdType theResource);
 
 	/**
 	 * This method does not throw an exception if there are delete conflicts, but populates them
 	 * in the provided list
-	 * @param theRequestDetails TODO
+	 * 
+	 * @param theRequestDetails
+	 *           TODO
 	 */
 	DaoMethodOutcome delete(IIdType theResource, List<DeleteConflict> theDeleteConflictsListToPopulate, RequestDetails theRequestDetails);
 
@@ -113,25 +118,33 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 
 	/**
 	 * Not supported in DSTU1!
-	 * @param theRequestDetails TODO
+	 * 
+	 * @param theRequestDetails
+	 *           TODO
 	 */
 	<MT extends IBaseMetaType> MT metaAddOperation(IIdType theId1, MT theMetaAdd, RequestDetails theRequestDetails);
 
 	/**
 	 * Not supported in DSTU1!
-	 * @param theRequestDetails TODO
+	 * 
+	 * @param theRequestDetails
+	 *           TODO
 	 */
 	<MT extends IBaseMetaType> MT metaDeleteOperation(IIdType theId1, MT theMetaDel, RequestDetails theRequestDetails);
 
 	/**
 	 * Not supported in DSTU1!
-	 * @param theRequestDetails TODO
+	 * 
+	 * @param theRequestDetails
+	 *           TODO
 	 */
 	<MT extends IBaseMetaType> MT metaGetOperation(Class<MT> theType, IIdType theId, RequestDetails theRequestDetails);
 
 	/**
 	 * Not supported in DSTU1!
-	 * @param theRequestDetails TODO
+	 * 
+	 * @param theRequestDetails
+	 *           TODO
 	 */
 	<MT extends IBaseMetaType> MT metaGetOperation(Class<MT> theType, RequestDetails theRequestDetails);
 
@@ -140,15 +153,16 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	Set<Long> processMatchUrl(String theMatchUrl);
 
 	/**
-	 * Read a resource - Note that this variant of the method does not take in a {@link RequestDetails} and 
-	 * therefore can not fire any interceptors. Use only for internal system calls 
+	 * Read a resource - Note that this variant of the method does not take in a {@link RequestDetails} and
+	 * therefore can not fire any interceptors. Use only for internal system calls
 	 */
 	T read(IIdType theId);
 
 	/**
 	 * 
 	 * @param theId
-	 * @param theRequestDetails TODO
+	 * @param theRequestDetails
+	 *           TODO
 	 * @return
 	 * @throws ResourceNotFoundException
 	 *            If the ID is not known to the server
@@ -181,25 +195,26 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	Set<Long> searchForIds(SearchParameterMap theParams);
 
 	/**
-	 * Takes a map of incoming raw search parameters and translates/parses them into 
+	 * Takes a map of incoming raw search parameters and translates/parses them into
 	 * appropriate {@link IQueryParameterType} instances of the appropriate type
 	 * for the given param
 	 * 
-	 * @throws InvalidRequestException If any of the parameters are not known
+	 * @throws InvalidRequestException
+	 *            If any of the parameters are not known
 	 */
 	void translateRawParameters(Map<String, List<String>> theSource, SearchParameterMap theTarget);
 
 	/**
-	 * Update a resource - Note that this variant of the method does not take in a {@link RequestDetails} and 
-	 * therefore can not fire any interceptors. Use only for internal system calls 
+	 * Update a resource - Note that this variant of the method does not take in a {@link RequestDetails} and
+	 * therefore can not fire any interceptors. Use only for internal system calls
 	 */
 	DaoMethodOutcome update(T theResource);
 
 	DaoMethodOutcome update(T theResource, RequestDetails theRequestDetails);
 
 	/**
-	 * Update a resource - Note that this variant of the method does not take in a {@link RequestDetails} and 
-	 * therefore can not fire any interceptors. Use only for internal system calls 
+	 * Update a resource - Note that this variant of the method does not take in a {@link RequestDetails} and
+	 * therefore can not fire any interceptors. Use only for internal system calls
 	 */
 	DaoMethodOutcome update(T theResource, String theMatchUrl);
 
@@ -207,21 +222,31 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	 * @param thePerformIndexing
 	 *           Use with caution! If you set this to false, you need to manually perform indexing or your resources
 	 *           won't be indexed and searches won't work.
-	 * @param theRequestDetails TODO
+	 * @param theRequestDetails
+	 *           TODO
 	 */
 	DaoMethodOutcome update(T theResource, String theMatchUrl, boolean thePerformIndexing, RequestDetails theRequestDetails);
 
 	DaoMethodOutcome update(T theResource, String theMatchUrl, RequestDetails theRequestDetails);
 
 	/**
+	 * @param theForceUpdateVersion
+	 *           Create a new version with the same contents as the current version even if the content hasn't changed (this is mostly useful for
+	 *           resources mapping to external content such as external code systems)
+	 */
+	DaoMethodOutcome update(T theResource, String theMatchUrl, boolean thePerformIndexing, boolean theForceUpdateVersion, RequestDetails theRequestDetails);
+
+	/**
 	 * Not supported in DSTU1!
-	 * @param theRequestDetails TODO
+	 * 
+	 * @param theRequestDetails
+	 *           TODO
 	 */
 	MethodOutcome validate(T theResource, IIdType theId, String theRawResource, EncodingEnum theEncoding, ValidationModeEnum theMode, String theProfile, RequestDetails theRequestDetails);
 
-//	/**
-//	 * Invoke the everything operation
-//	 */
-//	IBundleProvider everything(IIdType theId);
+	// /**
+	// * Invoke the everything operation
+	// */
+	// IBundleProvider everything(IIdType theId);
 
 }
