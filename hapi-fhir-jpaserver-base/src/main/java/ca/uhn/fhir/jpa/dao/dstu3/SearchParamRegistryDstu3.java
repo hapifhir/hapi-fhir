@@ -56,14 +56,16 @@ public class SearchParamRegistryDstu3 extends BaseSearchParamRegistry {
 	@Autowired
 	private DaoConfig myDaoConfig;
 
-	private long myLastRefresh;
+	private volatile long myLastRefresh;
 
 	@Autowired
 	private IFhirResourceDao<SearchParameter> mySpDao;
 
 	@Override
 	public void forceRefresh() {
-		myLastRefresh = 0;
+		synchronized (this) {
+			myLastRefresh = 0;
+		}
 	}
 
 	@Override
@@ -90,77 +92,81 @@ public class SearchParamRegistryDstu3 extends BaseSearchParamRegistry {
 	private void refreshCacheIfNeccesary() {
 		long refreshInterval = 60 * DateUtils.MILLIS_PER_MINUTE;
 		if (System.currentTimeMillis() - refreshInterval > myLastRefresh) {
-			StopWatch sw = new StopWatch();
+			synchronized (this) {
+				if (System.currentTimeMillis() - refreshInterval > myLastRefresh) {
+					StopWatch sw = new StopWatch();
 
-			Map<String, Map<String, RuntimeSearchParam>> searchParams = new HashMap<String, Map<String, RuntimeSearchParam>>();
-			for (Entry<String, Map<String, RuntimeSearchParam>> nextBuiltInEntry : getBuiltInSearchParams().entrySet()) {
-				for (RuntimeSearchParam nextParam : nextBuiltInEntry.getValue().values()) {
-					String nextResourceName = nextBuiltInEntry.getKey();
-					getSearchParamMap(searchParams, nextResourceName).put(nextParam.getName(), nextParam);
-				}
-			}
-
-			SearchParameterMap params = new SearchParameterMap();
-			params.setLoadSynchronous(true);
-			
-			IBundleProvider allSearchParamsBp = mySpDao.search(params);
-			int size = allSearchParamsBp.size();
-
-			// Just in case..
-			if (size > 10000) {
-				ourLog.warn("Unable to support >10000 search params!");
-				size = 10000;
-			}
-
-			List<IBaseResource> allSearchParams = allSearchParamsBp.getResources(0, size);
-			for (IBaseResource nextResource : allSearchParams) {
-				SearchParameter nextSp = (SearchParameter) nextResource;
-				RuntimeSearchParam runtimeSp = toRuntimeSp(nextSp);
-				if (runtimeSp == null) {
-					continue;
-				}
-
-				int dotIdx = runtimeSp.getPath().indexOf('.');
-				if (dotIdx == -1) {
-					ourLog.warn("Can not determine resource type of {}", runtimeSp.getPath());
-					continue;
-				}
-				String resourceType = runtimeSp.getPath().substring(0, dotIdx);
-
-				Map<String, RuntimeSearchParam> searchParamMap = getSearchParamMap(searchParams, resourceType);
-				String name = runtimeSp.getName();
-				if (myDaoConfig.isDefaultSearchParamsCanBeOverridden() || !searchParamMap.containsKey(name)) {
-					searchParamMap.put(name, runtimeSp);
-				}
-			}
-
-			Map<String, Map<String, RuntimeSearchParam>> activeSearchParams = new HashMap<String, Map<String, RuntimeSearchParam>>();
-			for (Entry<String, Map<String, RuntimeSearchParam>> nextEntry : searchParams.entrySet()) {
-				for (RuntimeSearchParam nextSp : nextEntry.getValue().values()) {
-					String nextName = nextSp.getName();
-					if (nextSp.getStatus() != RuntimeSearchParamStatusEnum.ACTIVE) {
-						nextSp = null;
+					Map<String, Map<String, RuntimeSearchParam>> searchParams = new HashMap<String, Map<String, RuntimeSearchParam>>();
+					for (Entry<String, Map<String, RuntimeSearchParam>> nextBuiltInEntry : getBuiltInSearchParams().entrySet()) {
+						for (RuntimeSearchParam nextParam : nextBuiltInEntry.getValue().values()) {
+							String nextResourceName = nextBuiltInEntry.getKey();
+							getSearchParamMap(searchParams, nextResourceName).put(nextParam.getName(), nextParam);
+						}
 					}
 
-					if (!activeSearchParams.containsKey(nextEntry.getKey())) {
-						activeSearchParams.put(nextEntry.getKey(), new HashMap<String, RuntimeSearchParam>());
-					}
-					if (activeSearchParams.containsKey(nextEntry.getKey())) {
-						ourLog.debug("Replacing existing/built in search param {}:{} with new one", nextEntry.getKey(), nextName);
+					SearchParameterMap params = new SearchParameterMap();
+					params.setLoadSynchronous(true);
+
+					IBundleProvider allSearchParamsBp = mySpDao.search(params);
+					int size = allSearchParamsBp.size();
+
+					// Just in case..
+					if (size > 10000) {
+						ourLog.warn("Unable to support >10000 search params!");
+						size = 10000;
 					}
 
-					if (nextSp != null) {
-						activeSearchParams.get(nextEntry.getKey()).put(nextName, nextSp);
-					} else {
-						activeSearchParams.get(nextEntry.getKey()).remove(nextName);
+					List<IBaseResource> allSearchParams = allSearchParamsBp.getResources(0, size);
+					for (IBaseResource nextResource : allSearchParams) {
+						SearchParameter nextSp = (SearchParameter) nextResource;
+						RuntimeSearchParam runtimeSp = toRuntimeSp(nextSp);
+						if (runtimeSp == null) {
+							continue;
+						}
+
+						int dotIdx = runtimeSp.getPath().indexOf('.');
+						if (dotIdx == -1) {
+							ourLog.warn("Can not determine resource type of {}", runtimeSp.getPath());
+							continue;
+						}
+						String resourceType = runtimeSp.getPath().substring(0, dotIdx);
+
+						Map<String, RuntimeSearchParam> searchParamMap = getSearchParamMap(searchParams, resourceType);
+						String name = runtimeSp.getName();
+						if (myDaoConfig.isDefaultSearchParamsCanBeOverridden() || !searchParamMap.containsKey(name)) {
+							searchParamMap.put(name, runtimeSp);
+						}
 					}
+
+					Map<String, Map<String, RuntimeSearchParam>> activeSearchParams = new HashMap<String, Map<String, RuntimeSearchParam>>();
+					for (Entry<String, Map<String, RuntimeSearchParam>> nextEntry : searchParams.entrySet()) {
+						for (RuntimeSearchParam nextSp : nextEntry.getValue().values()) {
+							String nextName = nextSp.getName();
+							if (nextSp.getStatus() != RuntimeSearchParamStatusEnum.ACTIVE) {
+								nextSp = null;
+							}
+
+							if (!activeSearchParams.containsKey(nextEntry.getKey())) {
+								activeSearchParams.put(nextEntry.getKey(), new HashMap<String, RuntimeSearchParam>());
+							}
+							if (activeSearchParams.containsKey(nextEntry.getKey())) {
+								ourLog.debug("Replacing existing/built in search param {}:{} with new one", nextEntry.getKey(), nextName);
+							}
+
+							if (nextSp != null) {
+								activeSearchParams.get(nextEntry.getKey()).put(nextName, nextSp);
+							} else {
+								activeSearchParams.get(nextEntry.getKey()).remove(nextName);
+							}
+						}
+					}
+
+					myActiveSearchParams = activeSearchParams;
+
+					myLastRefresh = System.currentTimeMillis();
+					ourLog.info("Refreshed search parameter cache in {}ms", sw.getMillis());
 				}
 			}
-
-			myActiveSearchParams = activeSearchParams;
-
-			myLastRefresh = System.currentTimeMillis();
-			ourLog.info("Refreshed search parameter cache in {}ms", sw.getMillis());
 		}
 	}
 
