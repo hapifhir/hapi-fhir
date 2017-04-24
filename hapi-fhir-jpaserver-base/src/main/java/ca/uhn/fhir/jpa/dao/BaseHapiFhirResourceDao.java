@@ -828,7 +828,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 	@Override
 	public void reindex(T theResource, ResourceTable theEntity) {
-		updateEntity(theResource, theEntity, null, true, false, theEntity.getUpdatedDate(), false, false);
+		updateEntity(theResource, theEntity, null, true, false, theEntity.getUpdatedDate(), true, false);
 	}
 
 	@Override
