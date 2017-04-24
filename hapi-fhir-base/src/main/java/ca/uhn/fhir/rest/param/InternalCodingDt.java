@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.param;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,8 @@ import ca.uhn.fhir.util.CoverageIgnore;
 
 @CoverageIgnore
 public class InternalCodingDt extends BaseCodingDt implements ICompositeDatatype {
+
+	private static final long serialVersionUID = 993056016725918652L;
 
 	/**
 	 * Constructor
@@ -78,6 +80,7 @@ public class InternalCodingDt extends BaseCodingDt implements ICompositeDatatype
 		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(mySystem, myVersion, myCode, myDisplay, myPrimary);
 	}
 
+	@Deprecated //override deprecated method
 	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, mySystem, myVersion, myCode, myDisplay, myPrimary);
@@ -90,6 +93,7 @@ public class InternalCodingDt extends BaseCodingDt implements ICompositeDatatype
 	 * <b>Definition:</b> The identification of the code system that defines the meaning of the symbol in the code.
 	 * </p>
 	 */
+	@Override
 	public UriDt getSystemElement() {
 		if (mySystem == null) {
 			mySystem = new UriDt();
@@ -116,6 +120,7 @@ public class InternalCodingDt extends BaseCodingDt implements ICompositeDatatype
 	 * <b>Definition:</b> The identification of the code system that defines the meaning of the symbol in the code.
 	 * </p>
 	 */
+	@Override
 	public InternalCodingDt setSystem(String theUri) {
 		mySystem = new UriDt(theUri);
 		return this;
@@ -169,6 +174,7 @@ public class InternalCodingDt extends BaseCodingDt implements ICompositeDatatype
 	 * <b>Definition:</b> A symbol in syntax defined by the system. The symbol may be a predefined code or an expression in a syntax defined by the coding system (e.g. post-coordination)
 	 * </p>
 	 */
+	@Override
 	public CodeDt getCodeElement() {
 		if (myCode == null) {
 			myCode = new CodeDt();
@@ -195,6 +201,7 @@ public class InternalCodingDt extends BaseCodingDt implements ICompositeDatatype
 	 * <b>Definition:</b> A symbol in syntax defined by the system. The symbol may be a predefined code or an expression in a syntax defined by the coding system (e.g. post-coordination)
 	 * </p>
 	 */
+	@Override
 	public InternalCodingDt setCode(String theCode) {
 		myCode = new CodeDt(theCode);
 		return this;
@@ -233,6 +240,7 @@ public class InternalCodingDt extends BaseCodingDt implements ICompositeDatatype
 	 * <b>Definition:</b> A representation of the meaning of the code in the system, following the rules of the system.
 	 * </p>
 	 */
+	@Override
 	public InternalCodingDt setDisplay(String theString) {
 		myDisplay = new StringDt(theString);
 		return this;
@@ -292,11 +300,13 @@ public class InternalCodingDt extends BaseCodingDt implements ICompositeDatatype
 		return getDisplay();
 	}
 
+	@Deprecated //override deprecated method
 	@Override
 	public Boolean getMissing() {
 		throw new UnsupportedOperationException();
 	}
 
+	@Deprecated //override deprecated method
 	@Override
 	public IQueryParameterType setMissing(Boolean theMissing) {
 		throw new UnsupportedOperationException();

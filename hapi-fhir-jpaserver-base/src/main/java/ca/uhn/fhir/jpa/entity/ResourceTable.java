@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.entity;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -77,6 +77,7 @@ import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 	@Index(name = "IDX_RES_DATE", columnList="RES_UPDATED"), 
 	@Index(name = "IDX_RES_LANG", columnList="RES_TYPE,RES_LANGUAGE"), 
 	@Index(name = "IDX_RES_PROFILE", columnList="RES_PROFILE"),
+	@Index(name = "IDX_RES_TYPE", columnList="RES_TYPE"),
 	@Index(name = "IDX_INDEXSTATUS", columnList="SP_INDEX_STATUS")
 })
 @AnalyzerDefs({
@@ -148,6 +149,9 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 	})
 	//@formatter:on
 	private String myContentText;
+
+	@Column(name = "HASH_SHA256", length=64, nullable=true)
+	private String myHashSha256;
 
 	@Column(name = "SP_HAS_LINKS")
 	private boolean myHasLinks;
@@ -233,6 +237,9 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 	private String myResourceType;
 
 	@OneToMany(mappedBy = "myResource", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+	private Collection<SearchParamPresent> mySearchParamPresents;
+
+	@OneToMany(mappedBy = "myResource", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
 	private Set<ResourceTag> myTags;
 
 	@Column(name = "RES_VER")
@@ -243,6 +250,10 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 		ResourceTag tag = new ResourceTag(this, theTag);
 		getTags().add(tag);
 		return tag;
+	}
+
+	public String getHashSha256() {
+		return myHashSha256;
 	}
 
 	@Override
@@ -389,6 +400,10 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 
 	public void setContentTextParsedIntoWords(String theContentText) {
 		myContentText = theContentText;
+	}
+
+	public void setHashSha256(String theHashSha256) {
+		myHashSha256 = theHashSha256;
 	}
 
 	public void setHasLinks(boolean theHasLinks) {

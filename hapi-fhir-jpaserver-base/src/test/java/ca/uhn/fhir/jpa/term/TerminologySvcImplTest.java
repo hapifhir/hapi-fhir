@@ -234,7 +234,7 @@ public class TerminologySvcImplTest extends BaseJpaDstu3Test {
 		cs = new TermCodeSystemVersion();
 		TermConcept parentA = new TermConcept(cs, "ParentA");
 		cs.getConcepts().add(parentA);
-		id = myCodeSystemDao.update(codeSystem, mySrd).getId().toUnqualified();
+		id = myCodeSystemDao.update(codeSystem, null, true, true, mySrd).getId().toUnqualified();
 		table = myResourceTableDao.findOne(id.getIdPartAsLong());
 		cs.setResource(table);
 		cs.setResourceVersionId(table.getVersion());

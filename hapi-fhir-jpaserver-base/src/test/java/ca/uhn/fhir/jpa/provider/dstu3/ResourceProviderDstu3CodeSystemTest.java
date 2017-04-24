@@ -23,6 +23,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.transaction.annotation.Transactional;
 
+import ca.uhn.fhir.jpa.dao.dstu3.FhirResourceDaoDstu3TerminologyTest;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.TestUtil;
@@ -48,10 +49,52 @@ public class ResourceProviderDstu3CodeSystemTest extends BaseResourceProviderDst
 		myExtensionalVsId = myValueSetDao.create(upload, mySrd).getId().toUnqualifiedVersionless();
 	}
 	
+	@Test
+	public void testLookupOnExternalCode() {
+		ResourceProviderDstu3ValueSetTest.createExternalCs(myCodeSystemDao, myResourceTableDao, myTermSvc, mySrd);
+		
+		Parameters respParam = ourClient
+			.operation()
+			.onType(CodeSystem.class)
+			.named("lookup")
+			.withParameter(Parameters.class, "code", new CodeType("ParentA"))
+			.andParameter("system", new UriType(FhirResourceDaoDstu3TerminologyTest.URL_MY_CODE_SYSTEM))
+			.execute();
 
+		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		ourLog.info(resp);
+		
+		assertEquals("name", respParam.getParameter().get(0).getName());
+		assertEquals(("Unknown"), ((StringType)respParam.getParameter().get(0).getValue()).getValue());
+		assertEquals("display", respParam.getParameter().get(1).getName());
+		assertEquals("Parent A", ((StringType)respParam.getParameter().get(1).getValue()).getValue());
+		assertEquals("abstract", respParam.getParameter().get(2).getName());
+		assertEquals(false, ((BooleanType)respParam.getParameter().get(2).getValue()).getValue().booleanValue());
+
+		// With HTTP GET
+		respParam = ourClient
+				.operation()
+				.onType(CodeSystem.class)
+				.named("lookup")
+				.withParameter(Parameters.class, "code", new CodeType("ParentA"))
+				.andParameter("system", new UriType(FhirResourceDaoDstu3TerminologyTest.URL_MY_CODE_SYSTEM))
+				.useHttpGet()
+				.execute();
+
+		resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		ourLog.info(resp);
+		
+		assertEquals("name", respParam.getParameter().get(0).getName());
+		assertEquals(("Unknown"), ((StringType)respParam.getParameter().get(0).getValue()).getValue());
+		assertEquals("display", respParam.getParameter().get(1).getName());
+		assertEquals("Parent A", ((StringType)respParam.getParameter().get(1).getValue()).getValue());
+		assertEquals("abstract", respParam.getParameter().get(2).getName());
+		assertEquals(false, ((BooleanType)respParam.getParameter().get(2).getValue()).getValue().booleanValue());
+
+	}
+	
 	@Test
 	public void testLookupOperationByCodeAndSystemBuiltInCode() {
-		//@formatter:off
 		Parameters respParam = ourClient
 			.operation()
 			.onType(CodeSystem.class)
@@ -59,7 +102,6 @@ public class ResourceProviderDstu3CodeSystemTest extends BaseResourceProviderDst
 			.withParameter(Parameters.class, "code", new CodeType("ACSN"))
 			.andParameter("system", new UriType("http://hl7.org/fhir/v2/0203"))
 			.execute();
-		//@formatter:on
 
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);

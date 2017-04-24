@@ -4,7 +4,7 @@ package ca.uhn.fhir.validation;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -165,7 +165,7 @@ public class SchemaBaseValidator implements IValidatorModule {
 		baseIs = new BOMInputStream(baseIs, false);
 		InputStreamReader baseReader = new InputStreamReader(baseIs, Charset.forName("UTF-8"));
 		Source baseSource = new StreamSource(baseReader, theSystemId);
-
+		//FIXME resource leak
 		return baseSource;
 	}
 
@@ -240,7 +240,7 @@ public class SchemaBaseValidator implements IValidatorModule {
 				}
 
 				input.setByteStream(baseIs);
-
+				//FIXME resource leak
 				return input;
 
 			}

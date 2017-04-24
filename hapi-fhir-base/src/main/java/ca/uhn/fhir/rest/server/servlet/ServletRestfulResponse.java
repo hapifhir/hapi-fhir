@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.server.servlet;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,12 +51,11 @@ public class ServletRestfulResponse extends RestfulResponse<ServletRequestDetail
 		theHttpResponse.setContentType(contentType);
 		if (bin.getContent() == null || bin.getContent().length == 0) {
 			return theHttpResponse.getOutputStream();
-		} else {
-			theHttpResponse.setContentLength(bin.getContent().length);
-			ServletOutputStream oos = theHttpResponse.getOutputStream();
-			oos.write(bin.getContent());
-			return oos;
 		}
+		theHttpResponse.setContentLength(bin.getContent().length);
+		ServletOutputStream oos = theHttpResponse.getOutputStream();
+		oos.write(bin.getContent());
+		return oos;
 	}
 
 	@Override
@@ -69,9 +68,8 @@ public class ServletRestfulResponse extends RestfulResponse<ServletRequestDetail
 		if (theRespondGzip) {
 			theHttpResponse.addHeader(Constants.HEADER_CONTENT_ENCODING, Constants.ENCODING_GZIP);
 			return new OutputStreamWriter(new GZIPOutputStream(theHttpResponse.getOutputStream()), Constants.CHARSET_NAME_UTF8);
-		} else {
-			return theHttpResponse.getWriter();
 		}
+		return theHttpResponse.getWriter();
 	}
 
 	private void addHeaders() {

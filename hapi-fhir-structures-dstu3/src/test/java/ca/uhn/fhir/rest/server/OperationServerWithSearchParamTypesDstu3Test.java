@@ -26,8 +26,8 @@ import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
-import org.hl7.fhir.dstu3.hapi.rest.server.ServerConformanceProvider;
-import org.hl7.fhir.dstu3.model.Conformance;
+import org.hl7.fhir.dstu3.hapi.rest.server.ServerCapabilityStatementProvider;
+import org.hl7.fhir.dstu3.model.CapabilityStatement;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.OperationDefinition;
 import org.hl7.fhir.dstu3.model.Parameters;
@@ -157,16 +157,16 @@ public class OperationServerWithSearchParamTypesDstu3Test {
 	}
 
 	@Test
-	public void testGenerateConformance() throws Exception {
+	public void testGenerateCapabilityStatement() throws Exception {
 		RestfulServer rs = new RestfulServer(ourCtx);
 		rs.setProviders(new PatientProvider());
 
-		ServerConformanceProvider sc = new ServerConformanceProvider(rs);
+		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider(rs);
 		rs.setServerConformanceProvider(sc);
 
 		rs.init(createServletConfig());
 
-		Conformance conformance = sc.getServerConformance(createHttpServletRequest());
+		CapabilityStatement conformance = sc.getServerConformance(createHttpServletRequest());
 
 		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
 		ourLog.info(conf);

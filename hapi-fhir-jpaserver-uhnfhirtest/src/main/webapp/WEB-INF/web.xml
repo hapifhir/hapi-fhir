@@ -29,7 +29,11 @@
 		</init-param>
 		<init-param>
 			<param-name>contextConfigLocation</param-name>
-			<param-value>ca.uhn.fhirtest.config.FhirTesterConfig</param-value>
+			<param-value>
+				ca.uhn.fhirtest.config.FhirTesterConfig
+				ca.uhn.fhir.jpa.config.WebsocketDstu2Config
+				ca.uhn.fhir.jpa.config.dstu3.WebsocketDstu3Config
+			</param-value>
 		</init-param>
 		<load-on-startup>2</load-on-startup>
 	</servlet>

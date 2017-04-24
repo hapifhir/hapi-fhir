@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.server.interceptor.auth;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,6 +42,8 @@ class OperationRule extends BaseRule implements IAuthRule {
 	private HashSet<Class<? extends IBaseResource>> myAppliesToTypes;
 	private List<IIdType> myAppliesToIds;
 	private HashSet<Class<? extends IBaseResource>> myAppliesToInstancesOfType;
+	private boolean myAppliesToAnyType;
+	private boolean myAppliesToAnyInstance;
 
 	/**
 	 * Must include the leading $
@@ -66,7 +68,9 @@ class OperationRule extends BaseRule implements IAuthRule {
 			}
 			break;
 		case EXTENDED_OPERATION_TYPE:
-			if (myAppliesToTypes != null) {
+			if (myAppliesToAnyType) {
+				applies = true;
+			} else if (myAppliesToTypes != null) {
 				// TODO: Convert to a map of strings and keep the result
 				for (Class<? extends IBaseResource> next : myAppliesToTypes) {
 					String resName = ctx.getResourceDefinition(next).getName();
@@ -78,7 +82,9 @@ class OperationRule extends BaseRule implements IAuthRule {
 			}
 			break;
 		case EXTENDED_OPERATION_INSTANCE:
-			if (theInputResourceId != null) {
+			if (myAppliesToAnyInstance) {
+				applies = true;
+			} else if (theInputResourceId != null) {
 				if (myAppliesToIds != null) {
 					String instanceId = theInputResourceId.toUnqualifiedVersionless().getValue();
 					for (IIdType next : myAppliesToIds) {
@@ -129,6 +135,14 @@ class OperationRule extends BaseRule implements IAuthRule {
 
 	public void appliesToInstancesOfType(HashSet<Class<? extends IBaseResource>> theAppliesToTypes) {
 		myAppliesToInstancesOfType = theAppliesToTypes;
+	}
+
+	public void appliesToAnyInstance() {
+		myAppliesToAnyInstance = true;		
+	}
+
+	public void appliesToAnyType() {
+		myAppliesToAnyType = true;
 	}
 
 }

@@ -40,7 +40,7 @@ import ca.uhn.fhir.util.UrlUtil;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -306,6 +306,7 @@ public class MethodUtil {
 		return index;
 	}
 
+	@SuppressWarnings("GetClassOnAnnotation")
 	public static Integer findParamAnnotationIndex(Method theMethod, Class<?> toFind) {
 		int paramIndex = 0;
 		for (Annotation[] annotations : theMethod.getParameterAnnotations()) {
@@ -407,6 +408,8 @@ public class MethodUtil {
 						parameter.setType(theContext, parameterType, innerCollectionType, outerCollectionType);
 						MethodUtil.extractDescription(parameter, annotations);
 						param = parameter;
+					} else if (nextAnnotation instanceof RawParam) {
+						param = new RawParamsParmeter(parameters);
 					} else if (nextAnnotation instanceof IncludeParam) {
 						Class<? extends Collection<Include>> instantiableCollectionType;
 						Class<?> specType;
@@ -480,9 +483,8 @@ public class MethodUtil {
 										OperationParameter.throwInvalidMode(theObject.toString());
 									}
 									return retVal;
-								} else {
-									return null;
 								}
+								return null;
 							}
 							
 							@Override
@@ -669,6 +671,7 @@ public class MethodUtil {
 			break;
 		}
 
+		//FIXME null access
 		return binder.parse(theContext, theUnqualifiedParamName, theParameters);
 	}
 

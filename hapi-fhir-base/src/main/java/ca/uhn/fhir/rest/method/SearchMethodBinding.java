@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.method;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,7 +37,6 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
@@ -131,15 +130,26 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 
 	@Override
 	public ReturnTypeEnum getReturnType() {
-//		if (getContext().getVersion().getVersion() == FhirVersionEnum.DSTU1) {
 			return ReturnTypeEnum.BUNDLE;
-//		} else {
-//			return ReturnTypeEnum.RESOURCE;
-//		}
 	}
 
 	@Override
 	public boolean incomingServerRequestMatchesMethod(RequestDetails theRequest) {
+		
+		String clientPreference = theRequest.getHeader(Constants.HEADER_PREFER);
+		boolean lenientHandling = false;
+		if(clientPreference != null)
+		{
+			String[] preferences = clientPreference.split(";");
+			for( String p : preferences){
+				if("handling:lenient".equalsIgnoreCase(p))
+				{
+					lenientHandling = true;
+					break;
+				}
+			}
+		}
+		
 		if (theRequest.getId() != null && myIdParamIndex == null) {
 			ourLog.trace("Method {} doesn't match because ID is not null: {}", theRequest.getId());
 			return false;
@@ -203,7 +213,7 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 					qualifiedNames = processWhitelistAndBlacklist(qualifiedNames, temp.getQualifierWhitelist(), temp.getQualifierBlacklist());
 					methodParamsTemp.addAll(qualifiedNames);
 				}
-				if (!qualifiedParamNames.contains(name) && !qualifiedParamNames.contains(name)) { 
+				if (!qualifiedParamNames.contains(name)) { 
 					methodParamsTemp.add(name);
 				}
 			}
@@ -215,9 +225,8 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 				if (!myQueryName.equals(queryName)) {
 					ourLog.trace("Query name does not match {}", myQueryName);
 					return false;
-				} else {
-					methodParamsTemp.add(Constants.PARAM_QUERY);
 				}
+				methodParamsTemp.add(Constants.PARAM_QUERY);
 			} else {
 				ourLog.trace("Query name does not match {}", myQueryName);
 				return false;
@@ -235,6 +244,9 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 			}
 		}
 		Set<String> keySet = theRequest.getParameters().keySet();
+		if(lenientHandling == true)
+			return true;
+
 		if (myAllowUnknownParams == false) {
 			for (String next : keySet) {
 				if (!methodParamsTemp.contains(next)) {
@@ -271,7 +283,7 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 	}
 
 	@Override
-	public IBundleProvider invokeServer(IRestfulServer theServer, RequestDetails theRequest, Object[] theMethodParams) throws InvalidRequestException, InternalErrorException {
+	public IBundleProvider invokeServer(IRestfulServer<?> theServer, RequestDetails theRequest, Object[] theMethodParams) throws InvalidRequestException, InternalErrorException {
 		if (myIdParamIndex != null) {
 			theMethodParams[myIdParamIndex] = theRequest.getId();
 		}
@@ -333,9 +345,8 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 			if (theId == null || !theId.hasIdPart()) {
 				String msg = theContext.getLocalizer().getMessage(SearchMethodBinding.class.getName() + ".idNullForCompartmentSearch");
 				throw new InvalidRequestException(msg);
-			} else {
-				compartmentSearch = true;
 			}
+			compartmentSearch = true;
 		}
 
 		/*
@@ -389,14 +400,27 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 			if (dotIdx < colonIdx) {
 				retVal.setDotQualifier(theParamName.substring(dotIdx, colonIdx));
 				retVal.setColonQualifier(theParamName.substring(colonIdx));
+				retVal.setParamName(theParamName.substring(0, dotIdx));
+				retVal.setWholeQualifier(theParamName.substring(dotIdx));
 			} else {
 				retVal.setColonQualifier(theParamName.substring(colonIdx, dotIdx));
 				retVal.setDotQualifier(theParamName.substring(dotIdx));
+				retVal.setParamName(theParamName.substring(0, colonIdx));
+				retVal.setWholeQualifier(theParamName.substring(colonIdx));
 			}
 		} else if (dotIdx != -1) {
 			retVal.setDotQualifier(theParamName.substring(dotIdx));
+			retVal.setParamName(theParamName.substring(0, dotIdx));
+			retVal.setWholeQualifier(theParamName.substring(dotIdx));
 		} else if (colonIdx != -1) {
 			retVal.setColonQualifier(theParamName.substring(colonIdx));
+			retVal.setParamName(theParamName.substring(0, colonIdx));
+			retVal.setWholeQualifier(theParamName.substring(colonIdx));
+		} else {
+			retVal.setParamName(theParamName);
+			retVal.setColonQualifier(null);
+			retVal.setDotQualifier(null);
+			retVal.setWholeQualifier(null);
 		}
 
 		return retVal;
@@ -406,6 +430,8 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 
 		private String myColonQualifier;
 		private String myDotQualifier;
+		private String myParamName;
+		private String myWholeQualifier;
 
 		public boolean passes(Set<String> theQualifierWhitelist, Set<String> theQualifierBlacklist) {
 			if (theQualifierWhitelist != null) {
@@ -451,12 +477,28 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 			return true;
 		}
 
+		public void setParamName(String theParamName) {
+			myParamName = theParamName;
+		}
+
+		public String getParamName() {
+			return myParamName;
+		}
+
 		public void setColonQualifier(String theColonQualifier) {
 			myColonQualifier = theColonQualifier;
 		}
 
 		public void setDotQualifier(String theDotQualifier) {
 			myDotQualifier = theDotQualifier;
+		}
+
+		public String getWholeQualifier() {
+			return myWholeQualifier;
+		}
+
+		public void setWholeQualifier(String theWholeQualifier) {
+			myWholeQualifier = theWholeQualifier;
 		}
 
 	}

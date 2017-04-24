@@ -25,13 +25,13 @@ import org.hl7.fhir.utilities.Utilities;
 public abstract class ParserBase {
 
   interface IErrorNotifier {
-    
+
   }
   public enum ValidationPolicy { NONE, QUICK, EVERYTHING }
 
 	public static boolean isPrimitive(String code) {
-		return Utilities.existsInList(code, 
-				"xhtml", "boolean", "integer", "string", "decimal", "uri", "base64Binary", "instant", "date", "dateTime", 
+		return Utilities.existsInList(code,
+				"xhtml", "boolean", "integer", "string", "decimal", "uri", "base64Binary", "instant", "date", "dateTime",
 				"time", "code", "oid", "id", "markdown", "unsignedInt", "positiveInt", "xhtml", "base64Binary");
 	}
 
@@ -49,12 +49,12 @@ public abstract class ParserBase {
 	  this.policy = policy;
 	  this.errors = errors;
 	}
-	
+
 	public abstract Element parse(InputStream stream) throws Exception;
 
 	public abstract void compose(Element e, OutputStream destination, OutputStyle style, String base)  throws Exception;
 
-	
+
 	public void logError(int line, int col, String path, IssueType type, String message, IssueSeverity level) throws FHIRFormatError {
 	  if (policy == ValidationPolicy.EVERYTHING) {
 	    ValidationMessage msg = new ValidationMessage(Source.InstanceValidator, type, line, col, path, message, level);
@@ -62,8 +62,8 @@ public abstract class ParserBase {
 	  } else if (level == IssueSeverity.FATAL || (level == IssueSeverity.ERROR && policy == ValidationPolicy.QUICK))
 	    throw new FHIRFormatError(message+String.format(" at line %d col %d", line, col));
 	}
-	
-	
+
+
 	protected StructureDefinition getDefinition(int line, int col, String ns, String name) throws FHIRFormatError {
     if (ns == null) {
       logError(line, col, name, IssueType.STRUCTURE, "This cannot be parsed as a FHIR object (no namespace)", IssueSeverity.FATAL);
@@ -74,7 +74,7 @@ public abstract class ParserBase {
       return null;
   	}
 	  for (StructureDefinition sd : context.allStructures()) {
-	    if (name.equals(sd.getId())) {
+	    if (name.equals(sd.getIdElement().getIdPart())) {
 	      if((ns == null || ns.equals(FormatUtilities.FHIR_NS)) && !ToolingExtensions.hasExtension(sd, "http://hl7.org/fhir/StructureDefinition/elementdefinition-namespace"))
 	        return sd;
 	      String sns = ToolingExtensions.readStringExtension(sd, "http://hl7.org/fhir/StructureDefinition/elementdefinition-namespace");
@@ -92,7 +92,7 @@ public abstract class ParserBase {
       return null;
   	}
 	  for (StructureDefinition sd : context.allStructures()) {
-	    if (name.equals(sd.getId())) {
+	    if (name.equals(sd.getIdElement().getIdPart())) {
 	      return sd;
 	    }
 	  }
@@ -100,7 +100,7 @@ public abstract class ParserBase {
 	  return null;
   }
 
-  
+
 	protected List<Property> getChildProperties(Property property, String elementName, String statedType) throws DefinitionException {
 		ElementDefinition ed = property.getDefinition();
 		StructureDefinition sd = property.getStructure();
@@ -128,12 +128,12 @@ public abstract class ParserBase {
 				    if (t == null && ToolingExtensions.hasExtension(ed, "http://hl7.org/fhir/StructureDefinition/elementdefinition-defaultype"))
 				      t = ToolingExtensions.readStringExtension(ed, "http://hl7.org/fhir/StructureDefinition/elementdefinition-defaultype");
 				    boolean ok = false;
-		        for (TypeRefComponent tr : ed.getType()) 
-		          if (tr.getCode().equals(t)) 
+		        for (TypeRefComponent tr : ed.getType())
+		          if (tr.getCode().equals(t))
 		            ok = true;
 		         if (!ok)
 		           throw new DefinitionException("Type '"+t+"' is not an acceptable type for '"+elementName+"' on property "+property.getDefinition().getPath());
-				    
+
 				  } else {
 				    t = elementName.substring(tail(ed.getPath()).length() - 3);
 				    if (isPrimitive(lowFirst(t)))

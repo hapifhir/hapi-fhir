@@ -39,6 +39,8 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
 
+import org.apache.commons.lang3.Validate;
+
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 
 /**
@@ -108,6 +110,10 @@ public class DateType extends BaseDateTimeType {
 
 	/**
 	 * Constructor which accepts a date value and uses the {@link #DEFAULT_PRECISION} for this type.
+	 * <p>
+	 * <b>Use caution when using this constructor</b>: The month is 0-indexed but the day is 1-indexed 
+	 * in order to match the bahaviour of the Java {@link Calendar} type.
+	 * </p>
 	 * 
 	 * @param theYear The year, e.g. 2015
 	 * @param theMonth The month, e.g. 0 for January
@@ -118,6 +124,11 @@ public class DateType extends BaseDateTimeType {
 	}
 
 	private static GregorianCalendar toCalendarZulu(int theYear, int theMonth, int theDay) {
+		Validate.isTrue(theMonth >= 0, "theMonth must be between 0 and 11");
+		Validate.isTrue(theMonth <= 11, "theMonth must be between 0 and 11");
+		Validate.isTrue(theDay >= 1, "theMonth must be between 0 and 11");
+		Validate.isTrue(theDay <= 31, "theMonth must be between 0 and 11");
+		
 		GregorianCalendar retVal = new GregorianCalendar(TimeZone.getTimeZone("GMT"));
 		retVal.set(Calendar.YEAR, theYear);
 		retVal.set(Calendar.MONTH, theMonth);
@@ -165,6 +176,7 @@ public class DateType extends BaseDateTimeType {
 		return retVal;
 	}
 
+	@Override
 	public String fhirType() {
 		return "date";		
 	}

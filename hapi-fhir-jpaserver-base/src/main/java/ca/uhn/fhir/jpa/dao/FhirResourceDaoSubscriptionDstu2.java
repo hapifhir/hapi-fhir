@@ -4,13 +4,13 @@ package ca.uhn.fhir.jpa.dao;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  * 
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -67,7 +67,7 @@ import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 
-public class FhirResourceDaoSubscriptionDstu2 extends FhirResourceDaoDstu2<Subscription>implements IFhirResourceDaoSubscription<Subscription> {
+public class FhirResourceDaoSubscriptionDstu2 extends FhirResourceDaoDstu2<Subscription> implements IFhirResourceDaoSubscription<Subscription> {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoSubscriptionDstu2.class);
 
@@ -99,7 +99,7 @@ public class FhirResourceDaoSubscriptionDstu2 extends FhirResourceDaoDstu2<Subsc
 		}
 		return table.getId();
 	}
-	
+
 	@Override
 	public synchronized List<IBaseResource> getUndeliveredResourcesAndPurge(Long theSubscriptionPid) {
 		List<IBaseResource> retVal = new ArrayList<IBaseResource>();
@@ -208,9 +208,9 @@ public class FhirResourceDaoSubscriptionDstu2 extends FhirResourceDaoDstu2<Subsc
 
 			SubscriptionFlaggedResource nextFlag = new SubscriptionFlaggedResource();
 			Long pid = IDao.RESOURCE_PID.get((IResource) next);
-			
+
 			ourLog.info("New resource for subscription: {}", pid);
-			
+
 			nextFlag.setResource(myEntityManager.find(ResourceTable.class, pid));
 			nextFlag.setSubscription(theSubscriptionTable);
 			nextFlag.setVersion(next.getIdElement().getVersionIdPartAsLong());
@@ -220,10 +220,10 @@ public class FhirResourceDaoSubscriptionDstu2 extends FhirResourceDaoDstu2<Subsc
 		mySubscriptionFlaggedResourceDataDao.save(flags);
 
 		ourLog.debug("Updating most recent match for subcription {} to {}", subscription.getId().getIdPart(), new InstantDt(mostRecentMatch));
-		
+
 		theSubscriptionTable.setMostRecentMatch(mostRecentMatch);
 		mySubscriptionTableDao.save(theSubscriptionTable);
-		
+
 		return results.size();
 	}
 

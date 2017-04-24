@@ -1,10 +1,12 @@
 package ca.uhn.fhir.jpa.dao.data;
 
+import java.util.Collection;
+
 /*
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,5 +34,8 @@ public interface ITermConceptParentChildLinkDao extends JpaRepository<TermConcep
 	@Query("DELETE FROM TermConceptParentChildLink t WHERE t.myCodeSystem.myId = :cs_pid")
 	@Modifying
 	void deleteByCodeSystemVersion(@Param("cs_pid") Long thePid);
+
+	@Query("SELECT t FROM TermConceptParentChildLink t WHERE t.myChildPid = :child_pid")
+	Collection<TermConceptParentChildLink> findAllWithChild(@Param("child_pid") Long theConceptPid);
 	
 }

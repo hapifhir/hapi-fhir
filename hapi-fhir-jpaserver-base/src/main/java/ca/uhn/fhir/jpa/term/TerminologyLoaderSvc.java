@@ -6,7 +6,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,6 +45,7 @@ import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.csv.QuoteMode;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.input.BOMInputStream;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -174,7 +175,7 @@ public class TerminologyLoaderSvc implements IHapiTerminologyLoaderSvc {
 						Reader reader = null;
 						CSVParser parsed = null;
 						try {
-							reader = new InputStreamReader(zis, Charsets.UTF_8);
+							reader = new InputStreamReader(new BOMInputStream(zis), Charsets.UTF_8);
 							CSVFormat format = CSVFormat.newFormat(theDelimiter).withFirstRecordAsHeader();
 							if (theQuoteMode != null) {
 								format = format.withQuote('"').withQuoteMode(theQuoteMode);

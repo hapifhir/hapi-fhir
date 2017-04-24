@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.client.interceptor;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,11 @@ package ca.uhn.fhir.rest.client.interceptor;
 import ca.uhn.fhir.rest.client.IClientInterceptor;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
 import ca.uhn.fhir.rest.client.api.IHttpResponse;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+
+import java.io.IOException;
 
 /**
  * Client interceptor which simply captures request and response objects and stores them so that they can be inspected after a client
@@ -55,8 +60,23 @@ public class CapturingInterceptor implements IClientInterceptor {
 	}
 
 	@Override
-	public void interceptResponse(IHttpResponse theRequest) {
-		myLastResponse = theRequest;
+	public void interceptResponse(IHttpResponse theResponse) {
+		//Buffer the reponse to avoid errors when content has already been read and the entity is not repeatable
+		try {
+			if(theResponse.getResponse() instanceof HttpResponse) {
+				HttpEntity entity = ((HttpResponse) theResponse.getResponse()).getEntity();
+				if( entity != null && !entity.isRepeatable()){
+					theResponse.bufferEntity();
+				}
+			} else {
+				theResponse.bufferEntity();
+			}
+		} catch (IOException e) {
+			throw new InternalErrorException("Unable to buffer the entity for capturing", e);
+		}
+
+
+		myLastResponse = theResponse;
 	}
 
 }

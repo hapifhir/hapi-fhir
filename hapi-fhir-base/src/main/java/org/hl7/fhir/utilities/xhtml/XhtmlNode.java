@@ -25,14 +25,14 @@ WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWIS
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
 POSSIBILITY OF SUCH DAMAGE.
 
-*/
+ */
 package org.hl7.fhir.utilities.xhtml;
 
 /*
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,268 +62,268 @@ import ca.uhn.fhir.model.primitive.XhtmlDt;
 
 @ca.uhn.fhir.model.api.annotation.DatatypeDef(name="xhtml")
 public class XhtmlNode implements IBaseXhtml {
-  private static final long serialVersionUID = -4362547161441436492L;
+	private static final long serialVersionUID = -4362547161441436492L;
 
 
-  public static class Location {
-    private int line;
-    private int column;
-    public Location(int line, int column) {
-      super();
-      this.line = line;
-      this.column = column;
-    }
-    public int getLine() {
-      return line;
-    }
-    public int getColumn() {
-      return column;
-    }
-    @Override
-    public String toString() {
-      return "Line "+Integer.toString(line)+", column "+Integer.toString(column);
-    }
-  }
+	public static class Location {
+		private int line;
+		private int column;
+		public Location(int line, int column) {
+			super();
+			this.line = line;
+			this.column = column;
+		}
+		public int getLine() {
+			return line;
+		}
+		public int getColumn() {
+			return column;
+		}
+		@Override
+		public String toString() {
+			return "Line "+Integer.toString(line)+", column "+Integer.toString(column);
+		}
+	}
 
-  public static final String NBSP = Character.toString((char)0xa0);
+	public static final String NBSP = Character.toString((char)0xa0);
 	private static final String DECL_XMLNS = " xmlns=\"http://www.w3.org/1999/xhtml\"";
 
-  
-  private Location location;
-  private NodeType nodeType;
-  private String name;
-  private Map<String, String> attributes = new HashMap<String, String>();
-  private List<XhtmlNode> childNodes = new ArrayList<XhtmlNode>();
-  private String content;
 
-  public XhtmlNode() {
-    super();
-  }
+	private Location location;
+	private NodeType nodeType;
+	private String name;
+	private Map<String, String> attributes = new HashMap<String, String>();
+	private List<XhtmlNode> childNodes = new ArrayList<XhtmlNode>();
+	private String content;
 
-  
-  public XhtmlNode(NodeType nodeType, String name) {
-    super();
-    this.nodeType = nodeType;
-    this.name = name;
-  }
-
-  public XhtmlNode(NodeType nodeType) {
-    super();
-    this.nodeType = nodeType;
-  }
-
-  public NodeType getNodeType() {
-    return nodeType;
-  }
-
-  public void setNodeType(NodeType nodeType) {
-    this.nodeType = nodeType;
-  }
-
-  public String getName() {
-    return name;
-  }
-
-  public void setName(String name) {
-    assert name.contains(":") == false : "Name should not contain any : but was " + name;
-    this.name = name;
-  }
-
-  public Map<String, String> getAttributes() {
-    return attributes;
-  }
-
-  public List<XhtmlNode> getChildNodes() {
-    return childNodes;
-  }
-
-  public String getContent() {
-    return content;
-  }
-
-  public XhtmlNode setContent(String content) {
-    if (!(nodeType != NodeType.Text || nodeType != NodeType.Comment)) 
-      throw new Error("Wrong node type");
-    this.content = content;
-    return this;
-  }
-
-  public XhtmlNode addTag(String name)
-  {
-
-    if (!(nodeType == NodeType.Element || nodeType == NodeType.Document)) 
-      throw new Error("Wrong node type. is "+nodeType.toString());
-    XhtmlNode node = new XhtmlNode(NodeType.Element);
-    node.setName(name);
-    childNodes.add(node);
-    return node;
-  }
-
-  public XhtmlNode addTag(int index, String name)
-  {
-
-    if (!(nodeType == NodeType.Element || nodeType == NodeType.Document)) 
-      throw new Error("Wrong node type. is "+nodeType.toString());
-    XhtmlNode node = new XhtmlNode(NodeType.Element);
-    node.setName(name);
-    childNodes.add(index, node);
-    return node;
-  }
-
-  public XhtmlNode addComment(String content)
-  {
-    if (!(nodeType == NodeType.Element || nodeType == NodeType.Document)) 
-      throw new Error("Wrong node type");
-    XhtmlNode node = new XhtmlNode(NodeType.Comment);
-    node.setContent(content);
-    childNodes.add(node);
-    return node;
-  }
-
-  public XhtmlNode addDocType(String content)
-  {
-    if (!(nodeType == NodeType.Document)) 
-      throw new Error("Wrong node type");
-    XhtmlNode node = new XhtmlNode(NodeType.DocType);
-    node.setContent(content);
-    childNodes.add(node);
-    return node;
-  }
-
-  public XhtmlNode addInstruction(String content)
-  {
-    if (!(nodeType == NodeType.Document)) 
-      throw new Error("Wrong node type");
-    XhtmlNode node = new XhtmlNode(NodeType.Instruction);
-    node.setContent(content);
-    childNodes.add(node);
-    return node;
-  }
+	public XhtmlNode() {
+		super();
+	}
 
 
+	public XhtmlNode(NodeType nodeType, String name) {
+		super();
+		this.nodeType = nodeType;
+		this.name = name;
+	}
+
+	public XhtmlNode(NodeType nodeType) {
+		super();
+		this.nodeType = nodeType;
+	}
+
+	public NodeType getNodeType() {
+		return nodeType;
+	}
+
+	public void setNodeType(NodeType nodeType) {
+		this.nodeType = nodeType;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		assert name.contains(":") == false : "Name should not contain any : but was " + name;
+		this.name = name;
+	}
+
+	public Map<String, String> getAttributes() {
+		return attributes;
+	}
+
+	public List<XhtmlNode> getChildNodes() {
+		return childNodes;
+	}
+
+	public String getContent() {
+		return content;
+	}
+
+	public XhtmlNode setContent(String content) {
+		if (!(nodeType != NodeType.Text || nodeType != NodeType.Comment)) 
+			throw new Error("Wrong node type");
+		this.content = content;
+		return this;
+	}
+
+	public XhtmlNode addTag(String name)
+	{
+
+		if (!(nodeType == NodeType.Element || nodeType == NodeType.Document)) 
+			throw new Error("Wrong node type. is "+nodeType.toString());
+		XhtmlNode node = new XhtmlNode(NodeType.Element);
+		node.setName(name);
+		childNodes.add(node);
+		return node;
+	}
+
+	public XhtmlNode addTag(int index, String name)
+	{
+
+		if (!(nodeType == NodeType.Element || nodeType == NodeType.Document)) 
+			throw new Error("Wrong node type. is "+nodeType.toString());
+		XhtmlNode node = new XhtmlNode(NodeType.Element);
+		node.setName(name);
+		childNodes.add(index, node);
+		return node;
+	}
+
+	public XhtmlNode addComment(String content)
+	{
+		if (!(nodeType == NodeType.Element || nodeType == NodeType.Document)) 
+			throw new Error("Wrong node type");
+		XhtmlNode node = new XhtmlNode(NodeType.Comment);
+		node.setContent(content);
+		childNodes.add(node);
+		return node;
+	}
+
+	public XhtmlNode addDocType(String content)
+	{
+		if (!(nodeType == NodeType.Document)) 
+			throw new Error("Wrong node type");
+		XhtmlNode node = new XhtmlNode(NodeType.DocType);
+		node.setContent(content);
+		childNodes.add(node);
+		return node;
+	}
+
+	public XhtmlNode addInstruction(String content)
+	{
+		if (!(nodeType == NodeType.Document)) 
+			throw new Error("Wrong node type");
+		XhtmlNode node = new XhtmlNode(NodeType.Instruction);
+		node.setContent(content);
+		childNodes.add(node);
+		return node;
+	}
 
 
-  public XhtmlNode addText(String content)
-  {
-  	if (!(nodeType == NodeType.Element || nodeType == NodeType.Document)) 
-  		throw new Error("Wrong node type");
-  	if (content != null) {
-  		XhtmlNode node = new XhtmlNode(NodeType.Text);
-  		node.setContent(content);
-  		childNodes.add(node);
-  		return node;
-    } else 
-    	return null;
-  }
 
-  public XhtmlNode addText(int index, String content)
-  {
-    if (!(nodeType == NodeType.Element || nodeType == NodeType.Document)) 
-      throw new Error("Wrong node type");
-    if (content == null)
-      throw new Error("Content cannot be null");
-    
-    XhtmlNode node = new XhtmlNode(NodeType.Text);
-    node.setContent(content);
-    childNodes.add(index, node);
-    return node;
-  }
 
-  public boolean allChildrenAreText()
-  {
-    boolean res = true;
-    for (XhtmlNode n : childNodes)
-      res = res && n.getNodeType() == NodeType.Text;
-    return res;
-  }
+	public XhtmlNode addText(String content)
+	{
+		if (!(nodeType == NodeType.Element || nodeType == NodeType.Document)) 
+			throw new Error("Wrong node type");
+		if (content != null) {
+			XhtmlNode node = new XhtmlNode(NodeType.Text);
+			node.setContent(content);
+			childNodes.add(node);
+			return node;
+		}  
+		return null;
+	}
 
-  public XhtmlNode getElement(String name)
-  {
-    for (XhtmlNode n : childNodes)
-      if (n.getNodeType() == NodeType.Element && name.equals(n.getName())) 
-        return n;
-    return null;
-  }
+	public XhtmlNode addText(int index, String content)
+	{
+		if (!(nodeType == NodeType.Element || nodeType == NodeType.Document)) 
+			throw new Error("Wrong node type");
+		if (content == null)
+			throw new Error("Content cannot be null");
 
-  public XhtmlNode getFirstElement()
-  {
-    for (XhtmlNode n : childNodes)
-      if (n.getNodeType() == NodeType.Element) 
-        return n;
-    return null;
-  }
+		XhtmlNode node = new XhtmlNode(NodeType.Text);
+		node.setContent(content);
+		childNodes.add(index, node);
+		return node;
+	}
 
-  public String allText() {
-    StringBuilder b = new StringBuilder();
-    for (XhtmlNode n : childNodes)
-      if (n.getNodeType() == NodeType.Text)
-        b.append(n.getContent());
-      else if (n.getNodeType() == NodeType.Element)
-        b.append(n.allText());
-    return b.toString();
-  }
+	public boolean allChildrenAreText()
+	{
+		boolean res = true;
+		for (XhtmlNode n : childNodes)
+			res = res && n.getNodeType() == NodeType.Text;
+		return res;
+	}
 
-  public XhtmlNode attribute(String name, String value) {
-    if (!(nodeType == NodeType.Element || nodeType == NodeType.Document)) 
-      throw new Error("Wrong node type");
-    if (name == null)
-      throw new Error("name is null");
-    if (value == null)
-      throw new Error("value is null");
-    attributes.put(name, value);
-    return this;
-  }
+	public XhtmlNode getElement(String name)
+	{
+		for (XhtmlNode n : childNodes)
+			if (n.getNodeType() == NodeType.Element && name.equals(n.getName())) 
+				return n;
+		return null;
+	}
 
-  public boolean hasAttribute(String name) {
-    return getAttributes().containsKey(name);
-  }
+	public XhtmlNode getFirstElement()
+	{
+		for (XhtmlNode n : childNodes)
+			if (n.getNodeType() == NodeType.Element) 
+				return n;
+		return null;
+	}
 
-  public String getAttribute(String name) {
-    return getAttributes().get(name);
-  }
+	public String allText() {
+		StringBuilder b = new StringBuilder();
+		for (XhtmlNode n : childNodes)
+			if (n.getNodeType() == NodeType.Text)
+				b.append(n.getContent());
+			else if (n.getNodeType() == NodeType.Element)
+				b.append(n.allText());
+		return b.toString();
+	}
 
-  public XhtmlNode setAttribute(String name, String value) {
-    getAttributes().put(name, value);
-    return this;    
-  }
-  
-  public XhtmlNode copy() {
-  	XhtmlNode dst = new XhtmlNode(nodeType);
-  	dst.name = name;
-  	for (String n : attributes.keySet()) {
-  		dst.attributes.put(n, attributes.get(n));
-  	}
-    for (XhtmlNode n : childNodes)
-    	dst.childNodes.add(n.copy());
-    dst.content = content;
-    return dst;
-  }
+	public XhtmlNode attribute(String name, String value) {
+		if (!(nodeType == NodeType.Element || nodeType == NodeType.Document)) 
+			throw new Error("Wrong node type");
+		if (name == null)
+			throw new Error("name is null");
+		if (value == null)
+			throw new Error("value is null");
+		attributes.put(name, value);
+		return this;
+	}
+
+	public boolean hasAttribute(String name) {
+		return getAttributes().containsKey(name);
+	}
+
+	public String getAttribute(String name) {
+		return getAttributes().get(name);
+	}
+
+	public XhtmlNode setAttribute(String name, String value) {
+		getAttributes().put(name, value);
+		return this;    
+	}
+
+	public XhtmlNode copy() {
+		XhtmlNode dst = new XhtmlNode(nodeType);
+		dst.name = name;
+		for (String n : attributes.keySet()) {
+			dst.attributes.put(n, attributes.get(n));
+		}
+		for (XhtmlNode n : childNodes)
+			dst.childNodes.add(n.copy());
+		dst.content = content;
+		return dst;
+	}
 
 	@Override
 	public boolean isEmpty() {
-	  return (childNodes == null || childNodes.isEmpty()) && content == null;
-  }
+		return (childNodes == null || childNodes.isEmpty()) && content == null;
+	}
 
 	public boolean equalsDeep(XhtmlNode other) {
-    if (other == null) {
-      return false;
-    }
+		if (other == null) {
+			return false;
+		}
 
-    if (!(nodeType == other.nodeType) || !compare(name, other.name) || !compare(content, other.content))
-    	return false;
-    if (attributes.size() != other.attributes.size())
-    	return false;
-    for (String an : attributes.keySet())
-    	if (!attributes.get(an).equals(other.attributes.get(an)))
-    		return false;
-    if (childNodes.size() != other.childNodes.size())
-    	return false;
+		if (!(nodeType == other.nodeType) || !compare(name, other.name) || !compare(content, other.content))
+			return false;
+		if (attributes.size() != other.attributes.size())
+			return false;
+		for (String an : attributes.keySet())
+			if (!attributes.get(an).equals(other.attributes.get(an)))
+				return false;
+		if (childNodes.size() != other.childNodes.size())
+			return false;
 		for (int i = 0; i < childNodes.size(); i++) {
 			if (!compareDeep(childNodes.get(i), other.childNodes.get(i)))
 				return false;
 		}
 		return true;
-  }
+	}
 
 	private boolean compare(String s1, String s2) {
 		if (s1 == null && s2 == null)
@@ -331,7 +331,7 @@ public class XhtmlNode implements IBaseXhtml {
 		if (s1 == null || s2 == null)
 			return false;
 		return s1.equals(s2);
-  }
+	}
 
 	private static boolean compareDeep(XhtmlNode e1, XhtmlNode e2) {
 		if (e1 == null && e2 == null)
@@ -339,18 +339,18 @@ public class XhtmlNode implements IBaseXhtml {
 		if (e1 == null || e2 == null)
 			return false;
 		return e1.equalsDeep(e2);
-  }
-	
-  public String getNsDecl() {
-	 for (String an : attributes.keySet()) {
-		 if (an.equals("xmlns")) {
-			 return attributes.get(an);
-       }
-    }
-    return null;
-  }
-	
-	
+	}
+
+	public String getNsDecl() {
+		for (String an : attributes.keySet()) {
+			if (an.equals("xmlns")) {
+				return attributes.get(an);
+			}
+		}
+		return null;
+	}
+
+
 	@Override
 	public String getValueAsString() {
 		if (isEmpty()) {
@@ -376,9 +376,9 @@ public class XhtmlNode implements IBaseXhtml {
 		if (isBlank(theValue)) {
 			return;
 		}
-		
+
 		String val = theValue.trim();
-		
+
 		if (!val.startsWith("<")) {
 			val = "<div" + DECL_XMLNS +">" + val + "</div>";
 		}
@@ -387,7 +387,7 @@ public class XhtmlNode implements IBaseXhtml {
 		}
 
 		val = XhtmlDt.preprocessXhtmlNamespaceDeclaration(val);
-		
+
 		try {
 			// TODO: this is ugly
 			XhtmlNode fragment = new XhtmlParser().parseFragment(val);
@@ -400,61 +400,64 @@ public class XhtmlNode implements IBaseXhtml {
 			// TODO: composer shouldn't throw exception like this
 			throw new RuntimeException(e);
 		}
-		
+
 	}
 
-  public XhtmlNode getElementByIndex(int i) {
-    int c = 0;
-    for (XhtmlNode n : childNodes)
-      if (n.getNodeType() == NodeType.Element) {
-        if (c == i)
-          return n;
-        else
-          c++;
-      }
-    return null;
-  }
+	public XhtmlNode getElementByIndex(int i) {
+		int c = 0;
+		for (XhtmlNode n : childNodes)
+			if (n.getNodeType() == NodeType.Element) {
+				if (c == i){
+					return n;
+				}
+				c++;
+			}
+		return null;
+	}
 
-@Override
-public String getValue() {
-	return getValueAsString();
-}
+	@Override
+	public String getValue() {
+		return getValueAsString();
+	}
 
-@Override
-public XhtmlNode setValue(String theValue) throws IllegalArgumentException {
-	setValueAsString(theValue);
-	return this;
-}
+	@Override
+	public XhtmlNode setValue(String theValue) throws IllegalArgumentException {
+		setValueAsString(theValue);
+		return this;
+	}
 
-/**
- * Returns false
- */
-public boolean hasFormatComment() {
-	return false;
-}
+	/**
+	 * Returns false
+	 */
+	@Override
+	public boolean hasFormatComment() {
+		return false;
+	}
 
-/**
- * NOT SUPPORTED - Throws {@link UnsupportedOperationException}
- */
-public List<String> getFormatCommentsPre() {
-	throw new UnsupportedOperationException();
-}
+	/**
+	 * NOT SUPPORTED - Throws {@link UnsupportedOperationException}
+	 */
+	@Override
+	public List<String> getFormatCommentsPre() {
+		throw new UnsupportedOperationException();
+	}
 
-/**
- * NOT SUPPORTED - Throws {@link UnsupportedOperationException}
- */
-public List<String> getFormatCommentsPost() {
-	throw new UnsupportedOperationException();
-}
-
-
-public Location getLocation() {
-  return location;
-}
+	/**
+	 * NOT SUPPORTED - Throws {@link UnsupportedOperationException}
+	 */
+	@Override
+	public List<String> getFormatCommentsPost() {
+		throw new UnsupportedOperationException();
+	}
 
 
-public void setLocation(Location location) {
-  this.location = location;
-}
+	public Location getLocation() {
+		return location;
+	}
+
+
+	public void setLocation(Location location) {
+		this.location = location;
+	}
 
 }

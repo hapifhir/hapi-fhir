@@ -33,9 +33,10 @@ import java.text.MessageFormat;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
-import org.hl7.fhir.dstu3.model.OperationOutcome.IssueSeverity;
-import org.hl7.fhir.dstu3.model.OperationOutcome.IssueType;
-import org.hl7.fhir.dstu3.validation.ValidationMessage.Source;
+import org.hl7.fhir.utilities.validation.ValidationMessage;
+import org.hl7.fhir.utilities.validation.ValidationMessage.IssueSeverity;
+import org.hl7.fhir.utilities.validation.ValidationMessage.IssueType;
+import org.hl7.fhir.utilities.validation.ValidationMessage.Source;
 
 public class BaseValidator {
 
@@ -293,6 +294,15 @@ public class BaseValidator {
     if (!thePass) {
       msg = formatMessage(msg, theMessageArguments);
       errors.add(new ValidationMessage(source, type, line, col, path, msg, IssueSeverity.WARNING));
+    }
+    return thePass;
+
+  }
+
+  protected boolean warningOrError(boolean isError, List<ValidationMessage> errors, IssueType type, int line, int col, String path, boolean thePass, String msg, Object... theMessageArguments) {
+    if (!thePass) {
+      msg = formatMessage(msg, theMessageArguments);
+      errors.add(new ValidationMessage(source, type, line, col, path, msg, isError ? IssueSeverity.ERROR : IssueSeverity.WARNING));
     }
     return thePass;
 

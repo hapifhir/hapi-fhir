@@ -1,6 +1,8 @@
 package ca.uhn.fhir.model;
 
+import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 
 import java.util.Calendar;
 import java.util.TimeZone;
@@ -14,18 +16,50 @@ import ca.uhn.fhir.util.TestUtil;
 public class DateTypeTest {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(DateTypeTest.class);
 
-
 	@AfterClass
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
+	@Test
+	public void testDateType() {
+		DateType birthDate = new DateType(1974, 11, 25);
+		assertThat(birthDate.getYear(), is(1974));
+		assertThat(birthDate.getMonth(), is(11));
+		assertThat(birthDate.getDay(), is(25));
+	}
+
+	@SuppressWarnings("unused")
+	@Test
+	public void testDateTypeWithInvalidMonth() {
+		try {
+			new DateType(1974, 12, 25);
+		} catch (IllegalArgumentException e) {
+			assertEquals("theMonth must be between 0 and 11", e.getMessage());
+		}
+		try {
+			new DateType(1974, -1, 25);
+		} catch (IllegalArgumentException e) {
+			assertEquals("theMonth must be between 0 and 11", e.getMessage());
+		}
+		try {
+			new DateType(1974, 2, 0);
+		} catch (IllegalArgumentException e) {
+			assertEquals("theMonth must be between 0 and 11", e.getMessage());
+		}
+		try {
+			new DateType(1974, 2, 32);
+		} catch (IllegalArgumentException e) {
+			assertEquals("theMonth must be between 0 and 11", e.getMessage());
+		}
+		new DateType(1974, 1, 31);
+	}
 
 	@Test
 	public void testPrecision() {
 
-//		ourLog.info(""+ new TreeSet<String>(Arrays.asList(TimeZone.getAvailableIDs())));
-		
+		// ourLog.info(""+ new TreeSet<String>(Arrays.asList(TimeZone.getAvailableIDs())));
+
 		final Calendar cal = Calendar.getInstance();
 		cal.setTimeZone(TimeZone.getTimeZone("GMT"));
 		cal.set(1990, Calendar.JANUARY, 1, 0, 0, 0);
@@ -58,5 +92,5 @@ public class DateTypeTest {
 		dateDt = new DateType(1990, 0, 5);
 		assertEquals("1990-01-05", dateDt.getValueAsString());
 	}
-	
+
 }

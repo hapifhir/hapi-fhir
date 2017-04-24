@@ -4,7 +4,7 @@ package ca.uhn.fhir.narrative;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -85,10 +85,7 @@ public abstract class BaseThymeleafNarrativeGenerator implements INarrativeGener
 			initialize(theContext);
 		}
 
-		String name = null;
-		if (name == null) {
-			name = myClassToName.get(theResource.getClass());
-		}
+		String name = myClassToName.get(theResource.getClass());
 		if (name == null) {
 			name = theContext.getResourceDefinition(theResource).getName().toLowerCase();
 		}
@@ -97,9 +94,8 @@ public abstract class BaseThymeleafNarrativeGenerator implements INarrativeGener
 			if (myIgnoreMissingTemplates) {
 				ourLog.debug("No narrative template available for resorce: {}", name);
 				return;
-			} else {
-				throw new DataFormatException("No narrative template for class " + theResource.getClass().getCanonicalName());
 			}
+			throw new DataFormatException("No narrative template for class " + theResource.getClass().getCanonicalName());
 		}
 
 		try {
@@ -132,10 +128,9 @@ public abstract class BaseThymeleafNarrativeGenerator implements INarrativeGener
 				}
 				theNarrative.setStatusAsString("empty");
 				return;
-			} else {
+			}
 				throw new DataFormatException(e);
 			}
-		}
 	}
 
 	protected abstract List<String> getPropertyFile();
@@ -229,6 +224,7 @@ public abstract class BaseThymeleafNarrativeGenerator implements INarrativeGener
 				String narrativePropName = name + ".narrative";
 				String narrativeName = file.getProperty(narrativePropName);
 				if (isBlank(narrativeName)) {
+					//FIXME resource leak
 					throw new ConfigurationException("Found property '" + nextKey + "' but no corresponding property '" + narrativePropName + "' in file " + propFileName);
 				}
 
@@ -289,6 +285,7 @@ public abstract class BaseThymeleafNarrativeGenerator implements INarrativeGener
 					throw new IOException("Can not find '" + cpName + "' on classpath");
 				}
 			}
+			//FIXME resource leak
 			return resource;
 		} else if (name.startsWith("file:")) {
 			File file = new File(name.substring("file:".length()));
@@ -418,31 +415,30 @@ public abstract class BaseThymeleafNarrativeGenerator implements INarrativeGener
 			context.setVariable("resource", value);
 
 			String name = null;
-			if (value != null) {
-				Class<? extends Object> nextClass = value.getClass();
-				do {
-					name = myClassToName.get(nextClass);
-					nextClass = nextClass.getSuperclass();
-				} while (name == null && nextClass.equals(Object.class) == false);
 
-				if (name == null) {
-					if (value instanceof IBaseResource) {
-						name = myContext.getResourceDefinition((Class<? extends IBaseResource>) value).getName();
-					} else if (value instanceof IDatatype) {
-						name = value.getClass().getSimpleName();
-						name = name.substring(0, name.length() - 2);
-					} else if (value instanceof IBaseDatatype) {
-						name = value.getClass().getSimpleName();
-						if (name.endsWith("Type")) {
-							name = name.substring(0, name.length() - 4);
-						}
-					} else {
-						throw new DataFormatException("Don't know how to determine name for type: " + value.getClass());
+			Class<? extends Object> nextClass = value.getClass();
+			do {
+				name = myClassToName.get(nextClass);
+				nextClass = nextClass.getSuperclass();
+			} while (name == null && nextClass.equals(Object.class) == false);
+
+			if (name == null) {
+				if (value instanceof IBaseResource) {
+					name = myContext.getResourceDefinition((Class<? extends IBaseResource>) value).getName();
+				} else if (value instanceof IDatatype) {
+					name = value.getClass().getSimpleName();
+					name = name.substring(0, name.length() - 2);
+				} else if (value instanceof IBaseDatatype) {
+					name = value.getClass().getSimpleName();
+					if (name.endsWith("Type")) {
+						name = name.substring(0, name.length() - 4);
 					}
-					name = name.toLowerCase();
-					if (!myNameToNarrativeTemplate.containsKey(name)) {
-						name = null;
-					}
+				} else {
+					throw new DataFormatException("Don't know how to determine name for type: " + value.getClass());
+				}
+				name = name.toLowerCase();
+				if (!myNameToNarrativeTemplate.containsKey(name)) {
+					name = null;
 				}
 			}
 
@@ -450,9 +446,8 @@ public abstract class BaseThymeleafNarrativeGenerator implements INarrativeGener
 				if (myIgnoreMissingTemplates) {
 					ourLog.debug("No narrative template available for type: {}", value.getClass());
 					return;
-				} else {
-					throw new DataFormatException("No narrative template for class " + value.getClass());
 				}
+				throw new DataFormatException("No narrative template for class " + value.getClass());
 			}
 
 			String result = myProfileTemplateEngine.process(name, context);

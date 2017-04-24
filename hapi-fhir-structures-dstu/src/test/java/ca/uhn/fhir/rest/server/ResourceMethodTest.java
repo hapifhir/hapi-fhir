@@ -2,11 +2,16 @@ package ca.uhn.fhir.rest.server;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+
+import javax.servlet.http.HttpServletRequest;
 
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -54,7 +59,7 @@ public class ResourceMethodTest {
 		inputParams.add("lastName");
 		inputParams.add("mrn");
 
-		RequestDetails params = ServletRequestDetails.withResourceAndParams("Patient", RequestTypeEnum.GET, inputParams);
+		RequestDetails params = withResourceAndParams("Patient", RequestTypeEnum.GET, inputParams);
 		boolean actual = rm.incomingServerRequestMatchesMethod(params);
 		assertTrue( actual); // True
 	}
@@ -75,7 +80,7 @@ public class ResourceMethodTest {
 		inputParams.add("mrn");
 		inputParams.add("foo");
 
-		assertEquals(false, rm.incomingServerRequestMatchesMethod(ServletRequestDetails.withResourceAndParams("Patient", RequestTypeEnum.GET, inputParams))); // False
+		assertEquals(false, rm.incomingServerRequestMatchesMethod(withResourceAndParams("Patient", RequestTypeEnum.GET, inputParams))); // False
 	}
 	
 	@Test
@@ -92,7 +97,7 @@ public class ResourceMethodTest {
 		inputParams.add("firstName");
 		inputParams.add("mrn");
 
-		assertEquals(true, rm.incomingServerRequestMatchesMethod(ServletRequestDetails.withResourceAndParams("Patient", RequestTypeEnum.GET, inputParams))); // True
+		assertEquals(true, rm.incomingServerRequestMatchesMethod(withResourceAndParams("Patient", RequestTypeEnum.GET, inputParams))); // True
 	}
 
 	@Test
@@ -109,7 +114,7 @@ public class ResourceMethodTest {
 		inputParams.add("firstName");
 		inputParams.add("lastName");
 
-		assertEquals(false, rm.incomingServerRequestMatchesMethod(ServletRequestDetails.withResourceAndParams("Patient", RequestTypeEnum.GET, inputParams))); // False
+		assertEquals(false, rm.incomingServerRequestMatchesMethod(withResourceAndParams("Patient", RequestTypeEnum.GET, inputParams))); // False
 	}
 
 	@Test
@@ -124,7 +129,7 @@ public class ResourceMethodTest {
 
 		Set<String> inputParams = new HashSet<String>();
 		inputParams.add("mrn");
-		assertEquals(true, rm.incomingServerRequestMatchesMethod(ServletRequestDetails.withResourceAndParams("Patient", RequestTypeEnum.GET, inputParams))); // True
+		assertEquals(true, rm.incomingServerRequestMatchesMethod(withResourceAndParams("Patient", RequestTypeEnum.GET, inputParams))); // True
 	}
 
 	@Test(expected=IllegalStateException.class)
@@ -140,6 +145,20 @@ public class ResourceMethodTest {
 	@AfterClass
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
+	}
+
+	
+	public static RequestDetails withResourceAndParams(String theResourceName, RequestTypeEnum theRequestType, Set<String> theParamNames) {
+		ServletRequestDetails retVal = new ServletRequestDetails();
+		retVal.setResourceName(theResourceName);
+		retVal.setRequestType(theRequestType);
+		Map<String, String[]> paramNames = new HashMap<String, String[]>();
+		for (String next : theParamNames) {
+			paramNames.put(next, new String[0]);
+		}
+		retVal.setParameters(paramNames);
+		retVal.setServletRequest(mock(HttpServletRequest.class));
+		return retVal;
 	}
 
 }

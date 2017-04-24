@@ -4,7 +4,7 @@ package ca.uhn.fhir.model.base.composite;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,8 @@ import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.param.TokenParam;
 
 public abstract class BaseCodingDt extends BaseIdentifiableElement implements ICompositeDatatype, IQueryParameterType {
+
+	private static final long serialVersionUID = 4425182816398730643L;
 
 	/**
 	 * Gets the value(s) for <b>code</b> (Symbol in syntax defined by the system). creating it if it does not exist. Will not return <code>null</code>.
@@ -85,9 +87,8 @@ public abstract class BaseCodingDt extends BaseIdentifiableElement implements IC
 	public String getValueAsQueryToken(FhirContext theContext) {
 		if (getSystemElement().getValueAsString() != null) {
 			return ParameterUtil.escape(StringUtils.defaultString(getSystemElement().getValueAsString())) + '|' + ParameterUtil.escape(getCodeElement().getValueAsString());
-		} else {
-			return ParameterUtil.escape(getCodeElement().getValueAsString());
-		}
+		} 
+		return ParameterUtil.escape(getCodeElement().getValueAsString());
 	}
 
 	/**

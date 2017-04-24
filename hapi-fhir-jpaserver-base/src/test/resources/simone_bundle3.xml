@@ -100,11 +100,10 @@
 					</assigner>
 				</identifier>
 				<status value="in-progress"/>
-				<class value="inpatient"/>
-				<patient>
+				<subject>
 					<reference value="urn:uuid:87c8e948-e0d2-4b92-74bd-a824a4769ab4"/>
 					<display value="Connectathon, Ten(*24.05.2015)"/>
-				</patient>
+				</subject>
 				<period>
 					<start value="2015-05-02T09:00:00+01:00"/>
 				</period>
@@ -135,15 +134,14 @@
 					<reference value="urn:uuid:87c8e948-e0d2-4b92-74bd-a824a4769ab4"/>
 					<display value="Connectathon, Ten(*24.05.2015)"/>
 				</patient>
-				<substance>
-					<coding>
-						<code value="1605"/>
-						<display value="L"/>
-					</coding>
-					<text value="acetaminophen"/>
-				</substance>
-				<category value="medication"/>
 				<reaction>
+					<substance>
+						<coding>
+							<code value="1605"/>
+							<display value="L"/>
+						</coding>
+						<text value="acetaminophen"/>
+					</substance>
 					<manifestation>
 						<text value="Muscle Pain"/>
 					</manifestation>
@@ -176,15 +174,14 @@
 					<reference value="urn:uuid:87c8e948-e0d2-4b92-74bd-a824a4769ab4"/>
 					<display value="Connectathon, Ten(*24.05.2015)"/>
 				</patient>
-				<substance>
-					<coding>
-						<code value="1558"/>
-						<display value="L"/>
-					</coding>
-					<text value="Oxycodone"/>
-				</substance>
-				<category value="medication"/>
 				<reaction>
+					<substance>
+						<coding>
+							<code value="1558"/>
+							<display value="L"/>
+						</coding>
+						<text value="Oxycodone"/>
+					</substance>
 					<manifestation>
 						<text value="Muscle Pain"/>
 					</manifestation>
@@ -217,15 +214,14 @@
 					<reference value="urn:uuid:87c8e948-e0d2-4b92-74bd-a824a4769ab4"/>
 					<display value="Connectathon, Ten(*24.05.2015)"/>
 				</patient>
-				<substance>
-					<coding>
-						<code value="2221"/>
-						<display value="L"/>
-					</coding>
-					<text value="Peanuts"/>
-				</substance>
-				<category value="environment"/>
 				<reaction>
+					<substance>
+						<coding>
+							<code value="2221"/>
+							<display value="L"/>
+						</coding>
+						<text value="Peanuts"/>
+					</substance>
 					<manifestation>
 						<text value="Anaphylactic Shock "/>
 					</manifestation>

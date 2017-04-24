@@ -4,7 +4,7 @@ package ca.uhn.fhir.model.base.composite;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,8 @@ import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.param.StringParam;
 
 public abstract class BaseIdentifierDt extends BaseIdentifiableElement implements ICompositeDatatype, IQueryParameterType {
+
+	private static final long serialVersionUID = 4400972469749953077L;
 
 	@Override
 	public String getQueryParameterQualifier() {
@@ -61,13 +63,12 @@ public abstract class BaseIdentifierDt extends BaseIdentifiableElement implement
 	 */
 	@Override
 	public String getValueAsQueryToken(FhirContext theContext) {
-			UriDt system = (UriDt) getSystemElement();
-			StringDt value = (StringDt) getValueElement();
-			if (system.getValueAsString() != null) {
-				return ParameterUtil.escape(StringUtils.defaultString(system.getValueAsString())) + '|' + ParameterUtil.escape(value.getValueAsString());
-			} else {
-				return ParameterUtil.escape(value.getValueAsString());
-			}
+		UriDt system = getSystemElement();
+		StringDt value = getValueElement();
+		if (system.getValueAsString() != null) {
+			return ParameterUtil.escape(StringUtils.defaultString(system.getValueAsString())) + '|' + ParameterUtil.escape(value.getValueAsString());
+		}
+		return ParameterUtil.escape(value.getValueAsString());
 	}
 
 	/**

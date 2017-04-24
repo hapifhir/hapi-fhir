@@ -25,14 +25,14 @@ WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWIS
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
 POSSIBILITY OF SUCH DAMAGE.
 
-*/
+ */
 package org.hl7.fhir.utilities;
 
 /*
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,17 +64,17 @@ public class TextFile {
 	public static List<String> readAllLines(String path) throws IOException
 	{
 		List<String> result = new ArrayList<String>();
-		
+
 		File file = new CSFile(path);
 		BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file),"UTF-8"));
-		
+
 		while( reader.ready() )
 			result.add(reader.readLine());
-		
+
 		reader.close();
 		return result;
 	}
-	
+
 	public static void writeAllLines(String path, List<String> lines) throws IOException
 	{
 		File file = new CSFile(path);
@@ -82,53 +82,54 @@ public class TextFile {
 		OutputStreamWriter sw = new OutputStreamWriter(s, "UTF-8");
 		for( String line : lines )
 			sw.write(line + "\r\n");
-		
+
 		sw.flush();
 		s.close();
 	}
-	
-	
-  public static void stringToFile(String content, String path) throws IOException  {
-    File file = new CSFile(path);
-    OutputStreamWriter sw = new OutputStreamWriter(new FileOutputStream(file), "UTF-8");
-    sw.write('\ufeff');  // Unicode BOM, translates to UTF-8 with the configured outputstreamwriter
-    sw.write(content);
-    sw.flush();
-    sw.close();
-  }
 
-  public static void stringToFileNoPrefix(String content, String path) throws IOException  {
-    File file = new CSFile(path);
-    OutputStreamWriter sw = new OutputStreamWriter(new FileOutputStream(file), "UTF-8");
-    sw.write(content);
-    sw.flush();
-    sw.close();
-  }
 
-  public static String fileToString(String src) throws FileNotFoundException, IOException  {
-    return streamToString(new FileInputStream(new CSFile(src)));
+	public static void stringToFile(String content, String path) throws IOException  {
+		File file = new CSFile(path);
+		OutputStreamWriter sw = new OutputStreamWriter(new FileOutputStream(file), "UTF-8");
+		sw.write('\ufeff');  // Unicode BOM, translates to UTF-8 with the configured outputstreamwriter
+		sw.write(content);
+		sw.flush();
+		sw.close();
 	}
 
-  public static String streamToString(InputStream input) throws IOException  {
-    InputStreamReader sr = new InputStreamReader(input, "UTF-8");    
-    StringBuilder b = new StringBuilder();
-    //while (sr.ready()) { Commented out by Claude Nanjo (1/14/2014) - sr.ready() always returns false - please remove if change does not impact other areas of codebase
-    int i = -1;
-    while((i = sr.read()) > -1) {
-      char c = (char) i;
-      b.append(c);
-    }
-//    sr.close();
-    
-    return  b.toString().replace("\uFEFF", ""); 
-  }
+	public static void stringToFileNoPrefix(String content, String path) throws IOException  {
+		File file = new CSFile(path);
+		OutputStreamWriter sw = new OutputStreamWriter(new FileOutputStream(file), "UTF-8");
+		sw.write(content);
+		sw.flush();
+		sw.close();
+	}
 
-  public static void bytesToFile(byte[] bytes, String path) throws IOException {
-    File file = new CSFile(path);
-    OutputStream sw = new FileOutputStream(file);
-    sw.write(bytes);
-    sw.flush();
-    sw.close();
-    
-  }
+	public static String fileToString(String src) throws FileNotFoundException, IOException  {
+		//FIXME resource leak
+		return streamToString(new FileInputStream(new CSFile(src)));
+	}
+
+	public static String streamToString(InputStream input) throws IOException  {
+		InputStreamReader sr = new InputStreamReader(input, "UTF-8");    
+		StringBuilder b = new StringBuilder();
+		//while (sr.ready()) { Commented out by Claude Nanjo (1/14/2014) - sr.ready() always returns false - please remove if change does not impact other areas of codebase
+		int i = -1;
+		while((i = sr.read()) > -1) {
+			char c = (char) i;
+			b.append(c);
+		}
+		//    sr.close();
+
+		return  b.toString().replace("\uFEFF", ""); 
+	}
+
+	public static void bytesToFile(byte[] bytes, String path) throws IOException {
+		File file = new CSFile(path);
+		OutputStream sw = new FileOutputStream(file);
+		sw.write(bytes);
+		sw.flush();
+		sw.close();
+
+	}
 }

@@ -8,13 +8,13 @@ import ca.uhn.fhir.context.FhirContext;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  * 
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -48,7 +48,7 @@ abstract class BaseParam implements IQueryParameterType {
 	public Boolean getMissing() {
 		return myMissing;
 	}
-	
+
 	@Override
 	public final String getQueryParameterQualifier() {
 		if (myMissing != null && myMissing.booleanValue()) {
@@ -73,8 +73,8 @@ abstract class BaseParam implements IQueryParameterType {
 	}
 
 	/**
-	 * If set to non-null value, indicates that this parameter has been populated 
-	 * with a "[name]:missing=true" or "[name]:missing=false" vale instead of a 
+	 * If set to non-null value, indicates that this parameter has been populated
+	 * with a "[name]:missing=true" or "[name]:missing=false" vale instead of a
 	 * normal value
 	 * 
 	 * @return Returns a reference to <code>this</code> for easier method chaining
@@ -97,10 +97,10 @@ abstract class BaseParam implements IQueryParameterType {
 					throw new InvalidRequestException(msg);
 				}
 			}
-			
+
 			myMissing = null;
 			doSetValueAsQueryToken(theContext, theParamName, theQualifier, theValue);
 		}
 	}
-	
+
 }

@@ -42,10 +42,10 @@ import org.hl7.fhir.instance.model.Resource;
 import org.hl7.fhir.instance.model.ValueSet;
 import org.hl7.fhir.instance.terminologies.ValueSetExpander.ValueSetExpansionOutcome;
 import org.hl7.fhir.instance.utilities.Utilities;
-import org.hl7.fhir.instance.utilities.xhtml.XhtmlComposer;
 import org.hl7.fhir.instance.utils.EOperationOutcome;
 import org.hl7.fhir.instance.utils.IWorkerContext;
 import org.hl7.fhir.instance.utils.ToolingExtensions;
+import org.hl7.fhir.utilities.xhtml.XhtmlComposer;
 
 public class ValueSetExpansionCache implements ValueSetExpanderFactory {
 

@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.server.interceptor.auth;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
+import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 
 public class RuleBuilder implements IAuthRuleBuilder {
@@ -233,6 +234,22 @@ public class RuleBuilder implements IAuthRuleBuilder {
 				private ClassifierTypeEnum myClassifierType;
 				private String myInCompartmentName;
 				private Collection<? extends IIdType> myInCompartmentOwners;
+				private List<IIdType> myAppliesToInstances;
+
+				/**
+				 * Constructor
+				 */
+				public RuleBuilderRuleOpClassifier() {
+					super();
+				}
+
+				/**
+				 * Constructor
+				 */
+				public RuleBuilderRuleOpClassifier(List<IIdType> theAppliesToInstances) {
+					myAppliesToInstances = theAppliesToInstances;
+					myAppliesTo = AppliesTypeEnum.INSTANCES;
+				}
 
 				private IAuthRuleBuilderRuleOpClassifierFinished finished() {
 
@@ -241,6 +258,7 @@ public class RuleBuilder implements IAuthRuleBuilder {
 					rule.setOp(myRuleOp);
 					rule.setAppliesTo(myAppliesTo);
 					rule.setAppliesToTypes(myAppliesToTypes);
+					rule.setAppliesToInstances(myAppliesToInstances);
 					rule.setClassifierType(myClassifierType);
 					rule.setClassifierCompartmentName(myInCompartmentName);
 					rule.setClassifierCompartmentOwners(myInCompartmentOwners);
@@ -283,6 +301,21 @@ public class RuleBuilder implements IAuthRuleBuilder {
 					return finished();
 				}
 
+			}
+
+			@Override
+			public IAuthRuleFinished instance(String theId) {
+				Validate.notBlank(theId, "theId must not be null or empty");
+				return instance(new IdDt(theId));
+			}
+
+			@Override
+			public IAuthRuleFinished instance(IIdType theId) {
+				Validate.notNull(theId, "theId must not be null");
+				Validate.notBlank(theId.getValue(), "theId.getValue() must not be null or empty");
+				Validate.notBlank(theId.getIdPart(), "theId must contain an ID part");
+
+				return new RuleBuilderRuleOpClassifier(Arrays.asList(theId)).finished();
 			}
 
 		}
@@ -369,6 +402,22 @@ public class RuleBuilder implements IAuthRuleBuilder {
 					HashSet<Class<? extends IBaseResource>> appliesToTypes = new HashSet<Class<? extends IBaseResource>>();
 					appliesToTypes.add(theType);
 					return appliesToTypes;
+				}
+
+				@Override
+				public IAuthRuleFinished onAnyType() {
+					OperationRule rule = createRule();
+					rule.appliesToAnyType();
+					myRules.add(rule);
+					return new RuleBuilderFinished();
+				}
+
+				@Override
+				public IAuthRuleFinished onAnyInstance() {
+					OperationRule rule = createRule();
+					rule.appliesToAnyInstance();
+					myRules.add(rule);
+					return new RuleBuilderFinished();
 				}
 
 			}

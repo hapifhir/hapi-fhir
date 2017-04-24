@@ -36,6 +36,12 @@
     </sch:rule>
   </sch:pattern>
   <sch:pattern>
+    <sch:title>DiagnosticReport.performer</sch:title>
+    <sch:rule context="f:DiagnosticReport/f:performer">
+      <sch:assert test="@value|f:*|h:div">All FHIR elements must have a @value or children (inherited)</sch:assert>
+    </sch:rule>
+  </sch:pattern>
+  <sch:pattern>
     <sch:title>DiagnosticReport.image</sch:title>
     <sch:rule context="f:DiagnosticReport/f:image">
       <sch:assert test="@value|f:*|h:div">All FHIR elements must have a @value or children (inherited)</sch:assert>

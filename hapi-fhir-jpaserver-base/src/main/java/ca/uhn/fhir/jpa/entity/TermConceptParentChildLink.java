@@ -4,13 +4,13 @@ package ca.uhn.fhir.jpa.entity;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  * 
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -36,76 +36,37 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
 @Entity
-@Table(name="TRM_CONCEPT_PC_LINK")
+@Table(name = "TRM_CONCEPT_PC_LINK")
 public class TermConceptParentChildLink implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	@ManyToOne()
-	@JoinColumn(name="CHILD_PID", nullable=false, referencedColumnName="PID", foreignKey=@ForeignKey(name="FK_TERM_CONCEPTPC_CHILD"))
+	@JoinColumn(name = "CHILD_PID", nullable = false, referencedColumnName = "PID", foreignKey = @ForeignKey(name = "FK_TERM_CONCEPTPC_CHILD"))
 	private TermConcept myChild;
 
+	@Column(name = "CHILD_PID", insertable = false, updatable = false)
+	private Long myChildPid;
+
 	@ManyToOne()
-	@JoinColumn(name="CODESYSTEM_PID", nullable=false, foreignKey=@ForeignKey(name="FK_TERM_CONCEPTPC_CS"))
+	@JoinColumn(name = "CODESYSTEM_PID", nullable = false, foreignKey = @ForeignKey(name = "FK_TERM_CONCEPTPC_CS"))
 	private TermCodeSystemVersion myCodeSystem;
 
-	@ManyToOne(cascade= {})
-	@JoinColumn(name="PARENT_PID", nullable=false, referencedColumnName="PID", foreignKey=@ForeignKey(name="FK_TERM_CONCEPTPC_PARENT"))
+	@ManyToOne(cascade = {})
+	@JoinColumn(name = "PARENT_PID", nullable = false, referencedColumnName = "PID", foreignKey = @ForeignKey(name = "FK_TERM_CONCEPTPC_PARENT"))
 	private TermConcept myParent;
 
+	@Column(name = "PARENT_PID", insertable = false, updatable = false)
+	private Long myParentPid;
+
 	@Id()
-	@SequenceGenerator(name="SEQ_CONCEPT_PC_PID", sequenceName="SEQ_CONCEPT_PC_PID")
-	@GeneratedValue(strategy=GenerationType.AUTO, generator="SEQ_CONCEPT_PC_PID")
-	@Column(name="PID")
+	@SequenceGenerator(name = "SEQ_CONCEPT_PC_PID", sequenceName = "SEQ_CONCEPT_PC_PID")
+	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_CONCEPT_PC_PID")
+	@Column(name = "PID")
 	private Long myPid;
 
 	@Enumerated(EnumType.ORDINAL)
-	@Column(name="REL_TYPE", length=5, nullable=true)
+	@Column(name = "REL_TYPE", length = 5, nullable = true)
 	private RelationshipTypeEnum myRelationshipType;
-
-	public TermConcept getChild() {
-		return myChild;
-	}
-
-	public RelationshipTypeEnum getRelationshipType() {
-		return myRelationshipType;
-	}
-
-	public TermCodeSystemVersion getCodeSystem() {
-		return myCodeSystem;
-	}
-	
-	public TermConcept getParent() {
-		return myParent;
-	}
-
-	public void setChild(TermConcept theChild) {
-		myChild = theChild;
-	}
-	
-	public void setCodeSystem(TermCodeSystemVersion theCodeSystem) {
-		myCodeSystem = theCodeSystem;
-	}
-
-	public void setParent(TermConcept theParent) {
-		myParent = theParent;
-	}
-	
-	
-	public void setRelationshipType(RelationshipTypeEnum theRelationshipType) {
-		myRelationshipType = theRelationshipType;
-	}
-
-
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((myChild == null) ? 0 : myChild.hashCode());
-		result = prime * result + ((myCodeSystem == null) ? 0 : myCodeSystem.hashCode());
-		result = prime * result + ((myParent == null) ? 0 : myParent.hashCode());
-		result = prime * result + ((myRelationshipType == null) ? 0 : myRelationshipType.hashCode());
-		return result;
-	}
 
 	@Override
 	public boolean equals(Object obj) {
@@ -136,15 +97,64 @@ public class TermConceptParentChildLink implements Serializable {
 		return true;
 	}
 
-
-	public enum RelationshipTypeEnum{
-		// ********************************************
-		// IF YOU ADD HERE MAKE SURE ORDER IS PRESERVED
-		ISA
+	public TermConcept getChild() {
+		return myChild;
 	}
 
+	public Long getChildPid() {
+		return myChildPid;
+	}
+
+	public TermCodeSystemVersion getCodeSystem() {
+		return myCodeSystem;
+	}
 
 	public Long getId() {
 		return myPid;
+	}
+
+	public TermConcept getParent() {
+		return myParent;
+	}
+
+	public Long getParentPid() {
+		return myParentPid;
+	}
+
+	public RelationshipTypeEnum getRelationshipType() {
+		return myRelationshipType;
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((myChild == null) ? 0 : myChild.hashCode());
+		result = prime * result + ((myCodeSystem == null) ? 0 : myCodeSystem.hashCode());
+		result = prime * result + ((myParent == null) ? 0 : myParent.hashCode());
+		result = prime * result + ((myRelationshipType == null) ? 0 : myRelationshipType.hashCode());
+		return result;
+	}
+
+	public void setChild(TermConcept theChild) {
+		myChild = theChild;
+	}
+
+	public void setCodeSystem(TermCodeSystemVersion theCodeSystem) {
+		myCodeSystem = theCodeSystem;
+	}
+
+	public void setParent(TermConcept theParent) {
+		myParent = theParent;
+	}
+
+	public void setRelationshipType(RelationshipTypeEnum theRelationshipType) {
+		myRelationshipType = theRelationshipType;
+	}
+
+	public enum RelationshipTypeEnum {
+		// ********************************************
+		// IF YOU ADD HERE MAKE SURE ORDER IS PRESERVED
+		ISA
 	}
 }

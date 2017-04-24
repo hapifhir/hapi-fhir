@@ -4,13 +4,13 @@ package ca.uhn.fhir.rest.server.servlet;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  * 
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -28,10 +28,7 @@ import java.io.Reader;
 import java.nio.charset.Charset;
 import java.util.Collections;
 import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import java.util.zip.GZIPInputStream;
 
 import javax.servlet.http.HttpServletRequest;
@@ -41,7 +38,6 @@ import org.apache.commons.io.IOUtils;
 import org.apache.http.entity.ContentType;
 
 import ca.uhn.fhir.context.ConfigurationException;
-import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.method.BaseMethodBinding;
 import ca.uhn.fhir.rest.method.BaseMethodBinding.IRequestReader;
 import ca.uhn.fhir.rest.method.RequestDetails;
@@ -98,7 +94,7 @@ public class ServletRequestDetails extends RequestDetails {
 		try {
 			InputStream inputStream = reader.getInputStream(this);
 			requestContents = IOUtils.toByteArray(inputStream);
-			
+
 			if (myServer.isUncompressIncomingContents()) {
 				String contentEncoding = myServletRequest.getHeader(Constants.HEADER_CONTENT_ENCODING);
 				if ("gzip".equals(contentEncoding)) {
@@ -109,7 +105,7 @@ public class ServletRequestDetails extends RequestDetails {
 					}
 				}
 			}
-			
+			// FIXME resource leak
 			return requestContents;
 		} catch (IOException e) {
 			ourLog.error("Could not load request resource", e);
@@ -166,18 +162,6 @@ public class ServletRequestDetails extends RequestDetails {
 
 	public void setServletResponse(HttpServletResponse myServletResponse) {
 		this.myServletResponse = myServletResponse;
-	}
-
-	public static RequestDetails withResourceAndParams(String theResourceName, RequestTypeEnum theRequestType, Set<String> theParamNames) {
-		RequestDetails retVal = new ServletRequestDetails();
-		retVal.setResourceName(theResourceName);
-		retVal.setRequestType(theRequestType);
-		Map<String, String[]> paramNames = new HashMap<String, String[]>();
-		for (String next : theParamNames) {
-			paramNames.put(next, new String[0]);
-		}
-		retVal.setParameters(paramNames);
-		return retVal;
 	}
 
 	@Override

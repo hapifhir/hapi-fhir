@@ -9,7 +9,7 @@ import java.lang.reflect.Modifier;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -216,18 +216,6 @@ public abstract class BaseRuntimeElementCompositeDefinition<T extends IBase> ext
 			orderToElementDef = newOrderToExtensionDef;
 		}
 		
-		// while (orderToElementDef.size() > 0 && orderToElementDef.firstKey() <
-		// 0) {
-		// BaseRuntimeDeclaredChildDefinition elementDef =
-		// orderToElementDef.remove(orderToElementDef.firstKey());
-		// if (elementDef.getElementName().equals("identifier")) {
-		// orderToElementDef.put(theIdentifierOrder, elementDef);
-		// } else {
-		// throw new ConfigurationException("Don't know how to handle element: "
-		// + elementDef.getElementName());
-		// }
-		// }
-
 		TreeSet<Integer> orders = new TreeSet<Integer>();
 		orders.addAll(orderToElementDef.keySet());
 		orders.addAll(orderToExtensionDef.keySet());
@@ -372,7 +360,7 @@ public abstract class BaseRuntimeElementCompositeDefinition<T extends IBase> ext
 				def = new RuntimeChildDirectResource(nextField, childAnnotation, descriptionAnnotation, elementName);
 			} else {
 				childIsChoiceType |= choiceTypes.size() > 1;
-				if (childIsChoiceType && !BaseResourceReferenceDt.class.isAssignableFrom(nextElementType) && !IBaseReference.class.isAssignableFrom(nextElementType)) {
+				if (extensionAttr == null && childIsChoiceType && !BaseResourceReferenceDt.class.isAssignableFrom(nextElementType) && !IBaseReference.class.isAssignableFrom(nextElementType)) {
 					def = new RuntimeChildChoiceDefinition(nextField, elementName, childAnnotation, descriptionAnnotation, choiceTypes);
 				} else if (extensionAttr != null) {
 					/*
@@ -486,9 +474,8 @@ public abstract class BaseRuntimeElementCompositeDefinition<T extends IBase> ext
 			for (String nextName : next.getValidChildNames()) {
 				if (myNameToChild.containsKey(nextName)) {
 					throw new ConfigurationException("Duplicate child name[" + nextName + "] in Element[" + getName() + "]");
-				} else {
-					myNameToChild.put(nextName, next);
 				}
+				myNameToChild.put(nextName, next);
 			}
 		}
 

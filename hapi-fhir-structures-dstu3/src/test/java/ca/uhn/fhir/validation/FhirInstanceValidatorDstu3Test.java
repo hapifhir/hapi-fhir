@@ -36,6 +36,8 @@ import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.dstu3.model.CodeSystem;
 import org.hl7.fhir.dstu3.model.CodeSystem.ConceptDefinitionComponent;
 import org.hl7.fhir.dstu3.model.CodeType;
+import org.hl7.fhir.dstu3.model.ContactPoint;
+import org.hl7.fhir.dstu3.model.Extension;
 import org.hl7.fhir.dstu3.model.Observation;
 import org.hl7.fhir.dstu3.model.Observation.ObservationStatus;
 import org.hl7.fhir.dstu3.model.Patient;
@@ -87,11 +89,27 @@ public class FhirInstanceValidatorDstu3Test {
 	}
 
 	/**
+	 * See #531
+	 */
+	@Test
+	public void testContactPointSystemUrlWorks() {
+		Patient p = new Patient();
+		ContactPoint t = p.addTelecom();
+		t.setSystem(org.hl7.fhir.dstu3.model.ContactPoint.ContactPointSystem.URL);
+		t.setValue("http://infoway-inforoute.ca");
+
+		ValidationResult results = myVal.validateWithResult(p);
+		List<SingleValidationMessage> outcome = logResultsAndReturnNonInformationalOnes(results);
+		assertThat(outcome, empty());
+
+	}
+
+	/**
 	 * See #370
 	 */
 	@Test
 	public void testValidateRelatedPerson() {
-		
+
 		/*
 		 * Try with a code that is in http://hl7.org/fhir/ValueSet/relatedperson-relationshiptype
 		 * and therefore should validate
@@ -99,7 +117,7 @@ public class FhirInstanceValidatorDstu3Test {
 		RelatedPerson rp = new RelatedPerson();
 		rp.getPatient().setReference("Patient/1");
 		rp.getRelationship().addCoding().setSystem("http://hl7.org/fhir/v2/0131").setCode("c");
-		
+
 		ValidationResult results = myVal.validateWithResult(rp);
 		List<SingleValidationMessage> outcome = logResultsAndReturnNonInformationalOnes(results);
 		assertThat(outcome, empty());
@@ -110,25 +128,24 @@ public class FhirInstanceValidatorDstu3Test {
 		rp = new RelatedPerson();
 		rp.getPatient().setReference("Patient/1");
 		rp.getRelationship().addCoding().setSystem("http://hl7.org/fhir/v2/0131").setCode("C");
-		
+
 		results = myVal.validateWithResult(rp);
 		outcome = logResultsAndReturnNonInformationalOnes(results);
 		assertThat(outcome, empty());
 
-		
 		/*
 		 * Now a bad code
 		 */
 		rp = new RelatedPerson();
 		rp.getPatient().setReference("Patient/1");
 		rp.getRelationship().addCoding().setSystem("http://hl7.org/fhir/v2/0131").setCode("GAGAGAGA");
-		
+
 		results = myVal.validateWithResult(rp);
 		outcome = logResultsAndReturnNonInformationalOnes(results);
 		assertThat(outcome, not(empty()));
 
 	}
-	
+
 	@Test
 	// @Ignore
 	public void testValidateBuiltInProfiles() throws Exception {
@@ -146,13 +163,13 @@ public class FhirInstanceValidatorDstu3Test {
 			ids.add(next.getId());
 
 			if (next instanceof StructureDefinition) {
-				StructureDefinition sd = (StructureDefinition)next;
+				StructureDefinition sd = (StructureDefinition) next;
 				if (sd.getKind() == StructureDefinitionKind.LOGICAL) {
 					ourLog.info("Skipping logical type: {}", next.getId());
 					continue;
 				}
 			}
-			
+
 			ourLog.info("Validating {}", next.getId());
 			ourLog.trace(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(next));
 
@@ -196,11 +213,11 @@ public class FhirInstanceValidatorDstu3Test {
 		assertEquals(1, fpOutput.size());
 		bool = (BooleanType) fpOutput.get(0);
 		assertTrue(bool.getValue());
-		//		
-		//		fpOutput = fp.evaluate(bundle, "component.where(code = %resource.code).empty()");
-		//		assertEquals(1, fpOutput.size());
-		//		bool = (BooleanType) fpOutput.get(0);
-		//		assertTrue(bool.getValue());
+		//
+		// fpOutput = fp.evaluate(bundle, "component.where(code = %resource.code).empty()");
+		// assertEquals(1, fpOutput.size());
+		// bool = (BooleanType) fpOutput.get(0);
+		// assertTrue(bool.getValue());
 
 		ValidationResult output = myVal.validateWithResult(inputString);
 		List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
@@ -320,7 +337,8 @@ public class FhirInstanceValidatorDstu3Test {
 
 		int index = 0;
 		for (SingleValidationMessage next : theOutput.getMessages()) {
-			ourLog.info("Result {}: {} - {}:{} {} - {}", new Object[] { index, next.getSeverity(), defaultString(next.getLocationLine()), defaultString(next.getLocationCol()), next.getLocationString(), next.getMessage() });
+			ourLog.info("Result {}: {} - {}:{} {} - {}",
+					new Object[] { index, next.getSeverity(), defaultString(next.getLocationLine()), defaultString(next.getLocationCol()), next.getLocationString(), next.getMessage() });
 			index++;
 
 			retVal.add(next);
@@ -388,6 +406,73 @@ public class FhirInstanceValidatorDstu3Test {
 	}
 
 	@Test
+	public void testValidateRawJsonResourceWithUnknownExtension() {
+
+		Patient patient = new Patient();
+		patient.setId("1");
+
+		Extension ext = patient.addExtension();
+		ext.setUrl("http://hl7.org/fhir/v3/ethnicity");
+		ext.setValue(new CodeType("Hispanic or Latino"));
+
+		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient);
+		ourLog.info(encoded);
+
+		/*
+		 * {
+		 * "resourceType": "Patient",
+		 * "id": "1",
+		 * "extension": [
+		 * {
+		 * "url": "http://hl7.org/fhir/v3/ethnicity",
+		 * "valueCode": "Hispanic or Latino"
+		 * }
+		 * ]
+		 * }
+		 */
+
+		ValidationResult output = myVal.validateWithResult(encoded);
+		assertEquals(output.toString(), 1, output.getMessages().size());
+
+		assertEquals("Unknown extension http://hl7.org/fhir/v3/ethnicity", output.getMessages().get(0).getMessage());
+		assertEquals(ResultSeverityEnum.INFORMATION, output.getMessages().get(0).getSeverity());
+	}
+
+	@Test
+	public void testValidateRawJsonResourceWithUnknownExtensionNotAllowed() {
+
+		Patient patient = new Patient();
+		patient.setId("1");
+
+		Extension ext = patient.addExtension();
+		ext.setUrl("http://hl7.org/fhir/v3/ethnicity");
+		ext.setValue(new CodeType("Hispanic or Latino"));
+
+		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient);
+		ourLog.info(encoded);
+
+		/*
+		 * {
+		 * "resourceType": "Patient",
+		 * "id": "1",
+		 * "extension": [
+		 * {
+		 * "url": "http://hl7.org/fhir/v3/ethnicity",
+		 * "valueCode": "Hispanic or Latino"
+		 * }
+		 * ]
+		 * }
+		 */
+
+		myInstanceVal.setAnyExtensionsAllowed(false);
+		ValidationResult output = myVal.validateWithResult(encoded);
+		assertEquals(output.toString(), 1, output.getMessages().size());
+
+		assertEquals("The extension http://hl7.org/fhir/v3/ethnicity is unknown, and not allowed here", output.getMessages().get(0).getMessage());
+		assertEquals(ResultSeverityEnum.ERROR, output.getMessages().get(0).getSeverity());
+	}
+
+	@Test
 	public void testValidateRawXmlWithMissingRootNamespace() {
 		//@formatter:off
 		String input = ""
@@ -405,13 +490,13 @@ public class FhirInstanceValidatorDstu3Test {
 				+ "    <birthDate value=\"1974-12-25\"/>"
 				+ "</Patient>";
 		//@formatter:on
-		
+
 		ValidationResult output = myVal.validateWithResult(input);
 		assertEquals(output.toString(), 1, output.getMessages().size());
 		assertEquals("This cannot be parsed as a FHIR object (no namespace)", output.getMessages().get(0).getMessage());
 		ourLog.info(output.getMessages().get(0).getLocationString());
 	}
-	
+
 	@Test
 	public void testValidateRawJsonResourceBadAttributes() {
 		//@formatter:off
@@ -463,8 +548,9 @@ public class FhirInstanceValidatorDstu3Test {
 		// @formatter:on
 
 		ValidationResult output = myVal.validateWithResult(input);
-		assertEquals(output.toString(), 1, output.getMessages().size());
+		assertEquals(output.toString(), 2, output.getMessages().size());
 		assertThat(output.getMessages().get(0).getMessage(), containsString("Element must have some content"));
+		assertThat(output.getMessages().get(1).getMessage(), containsString("primitive types must have a value or must have child extensions"));
 	}
 
 	@Test
@@ -474,7 +560,6 @@ public class FhirInstanceValidatorDstu3Test {
 				"                        <id value=\"referralToMentalHealthCare\"/>\n" + 
 				"                        <status value=\"draft\"/>\n" + 
 				"                        <description value=\"refer to primary care mental-health integrated care program for evaluation and treatment of mental health conditions now\"/>\n" + 
-				"                        <category value=\"referral\"/>\n" + 
 				"                        <code>\n" + 
 				"                                <coding>\n" + 
 				"                                        <!-- Error: Connection to http://localhost:960 refused -->\n" + 
@@ -490,7 +575,6 @@ public class FhirInstanceValidatorDstu3Test {
 				"                                        </extension>\n" + 
 				"                                </event>\n" + 
 				"                        </timingTiming>\n" + 
-				"                        <participantType value=\"practitioner\"/>\n" + 
 				"                </ActivityDefinition>";
 		// @formatter:on
 
@@ -522,7 +606,7 @@ public class FhirInstanceValidatorDstu3Test {
 		// input.getMeta().addProfile("http://hl7.org/fhir/StructureDefinition/devicemetricobservation");
 
 		input.addIdentifier().setSystem("http://acme").setValue("12345");
-		input.getEncounter().setReference("http://foo.com/Encounter/9");
+		input.getContext().setReference("http://foo.com/Encounter/9");
 		input.setStatus(ObservationStatus.FINAL);
 		input.getCode().addCoding().setSystem("http://loinc.org").setCode("12345");
 
@@ -542,7 +626,7 @@ public class FhirInstanceValidatorDstu3Test {
 		input.getMeta().addProfile("http://hl7.org/fhir/StructureDefinition/devicemetricobservation");
 
 		input.addIdentifier().setSystem("http://acme").setValue("12345");
-		input.getEncounter().setReference("http://foo.com/Encounter/9");
+		input.getContext().setReference("http://foo.com/Encounter/9");
 		input.setStatus(ObservationStatus.FINAL);
 		input.getCode().addCoding().setSystem("http://loinc.org").setCode("12345");
 
@@ -551,7 +635,7 @@ public class FhirInstanceValidatorDstu3Test {
 		List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
 
 		assertThat(errors.toString(), containsString("Element 'Observation.subject': minimum required = 1, but only found 0"));
-		assertThat(errors.toString(), containsString("Element 'Observation.encounter: max allowed = 0, but found 1"));
+		assertThat(errors.toString(), containsString("Element 'Observation.context: max allowed = 0, but found 1"));
 		assertThat(errors.toString(), containsString("Element 'Observation.device': minimum required = 1, but only found 0"));
 		assertThat(errors.toString(), containsString(""));
 	}
@@ -613,7 +697,9 @@ public class FhirInstanceValidatorDstu3Test {
 		//@formatter:on
 		ValidationResult output = myVal.validateWithResult(input);
 		logResultsAndReturnAll(output);
-		assertEquals("The value provided ('notvalidcode') is not in the value set http://hl7.org/fhir/ValueSet/observation-status (http://hl7.org/fhir/ValueSet/observation-status, and a code is required from this value set)", output.getMessages().get(0).getMessage());
+		assertEquals(
+				"The value provided ('notvalidcode') is not in the value set http://hl7.org/fhir/ValueSet/observation-status (http://hl7.org/fhir/ValueSet/observation-status, and a code is required from this value set) (error message = Unknown code[notvalidcode] in system[null])",
+				output.getMessages().get(0).getMessage());
 	}
 
 	@Test
@@ -695,8 +781,7 @@ public class FhirInstanceValidatorDstu3Test {
 		List<SingleValidationMessage> errors = logResultsAndReturnAll(output);
 		assertThat(errors.toString(), errors.size(), greaterThan(0));
 		assertEquals("Unknown code: http://acme.org / 9988877", errors.get(0).getMessage());
-		
-		
+
 	}
 
 	@Test
@@ -709,7 +794,9 @@ public class FhirInstanceValidatorDstu3Test {
 		List<SingleValidationMessage> all = logResultsAndReturnAll(output);
 		assertEquals(1, all.size());
 		assertEquals("Patient.identifier.type", all.get(0).getLocationString());
-		assertEquals("None of the codes provided are in the value set http://hl7.org/fhir/ValueSet/identifier-type (http://hl7.org/fhir/ValueSet/identifier-type, and a code should come from this value set unless it has no suitable code) (codes = http://example.com/foo/bar#bar)", all.get(0).getMessage());
+		assertEquals(
+				"None of the codes provided are in the value set http://hl7.org/fhir/ValueSet/identifier-type (http://hl7.org/fhir/ValueSet/identifier-type, and a code should come from this value set unless it has no suitable code) (codes = http://example.com/foo/bar#bar)",
+				all.get(0).getMessage());
 		assertEquals(ResultSeverityEnum.WARNING, all.get(0).getSeverity());
 
 	}

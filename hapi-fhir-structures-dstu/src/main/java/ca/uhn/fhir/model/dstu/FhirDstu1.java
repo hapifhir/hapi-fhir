@@ -4,7 +4,7 @@ package ca.uhn.fhir.model.dstu;
  * #%L
  * HAPI FHIR Structures - DSTU1 (FHIR v0.80)
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -375,15 +375,17 @@ public class FhirDstu1 implements IFhirVersion {
 				RuntimeCompositeDatatypeDefinition pdef = (RuntimeCompositeDatatypeDefinition) nextChild.getSingleChildOrThrow();
 				defn.getDefinition().addType().setCode(DataTypeEnum.VALUESET_BINDER.fromCodeString(pdef.getName()));
 			} else {
-				RuntimeResourceBlockDefinition pdef = (RuntimeResourceBlockDefinition) nextChild.getSingleChildOrThrow();
-				scanForExtensions(theProfile, pdef, theExtensionDefToCode);
-
-				for (RuntimeChildDeclaredExtensionDefinition nextChildExt : pdef.getExtensions()) {
-					StructureElementDefinitionType type = defn.getDefinition().addType();
-					type.setCode(DataTypeEnum.EXTENSION);
-					type.setProfile("#" + theExtensionDefToCode.get(nextChildExt));
+				BaseRuntimeElementDefinition<?> singleChildOrThrow = nextChild.getSingleChildOrThrow();
+				if (singleChildOrThrow instanceof RuntimeResourceBlockDefinition) {
+					RuntimeResourceBlockDefinition pdef = (RuntimeResourceBlockDefinition) singleChildOrThrow;
+					scanForExtensions(theProfile, pdef, theExtensionDefToCode);
+	
+					for (RuntimeChildDeclaredExtensionDefinition nextChildExt : pdef.getExtensions()) {
+						StructureElementDefinitionType type = defn.getDefinition().addType();
+						type.setCode(DataTypeEnum.EXTENSION);
+						type.setProfile("#" + theExtensionDefToCode.get(nextChildExt));
+					}
 				}
-
 			}
 		}
 

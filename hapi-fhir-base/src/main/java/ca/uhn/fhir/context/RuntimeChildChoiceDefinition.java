@@ -4,7 +4,7 @@ package ca.uhn.fhir.context;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,6 +38,9 @@ public class RuntimeChildChoiceDefinition extends BaseRuntimeDeclaredChildDefini
 	private String myReferenceSuffix;
 	private List<Class<? extends IBaseResource>> myResourceTypes;
 
+	/**
+	 * Constructor
+	 */
 	public RuntimeChildChoiceDefinition(Field theField, String theElementName, Child theChildAnnotation, Description theDescriptionAnnotation, List<Class<? extends IBase>> theChoiceTypes) {
 		super(theField, theChildAnnotation, theDescriptionAnnotation, theElementName);
 
@@ -45,6 +48,8 @@ public class RuntimeChildChoiceDefinition extends BaseRuntimeDeclaredChildDefini
 	}
 
 	/**
+	 * Constructor
+	 * 
 	 * For extension, if myChoiceTypes will be set some other way
 	 */
 	RuntimeChildChoiceDefinition(Field theField, String theElementName, Child theChildAnnotation, Description theDescriptionAnnotation) {
@@ -143,6 +148,7 @@ public class RuntimeChildChoiceDefinition extends BaseRuntimeDeclaredChildDefini
 			if (IBaseResource.class.isAssignableFrom(next) || IBaseReference.class.isAssignableFrom(next)) {
 				next = theContext.getVersion().getResourceReferenceType();
 				elementName = getElementName() + myReferenceSuffix;
+				myNameToChildDefinition.put(elementName, nextDef);
 			}
 
 			myDatatypeToElementDefinition.put(next, nextDef);

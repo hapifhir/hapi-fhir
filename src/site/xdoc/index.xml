@@ -57,9 +57,76 @@
 				
 			</subsection>
 			
+			<subsection name="Commercial Support">
+			
+				<p>
+					Commercial support for HAPI FHIR is available through
+					<a href="https://smilecdr.com">Smile CDR</a>.
+				</p>
+				
+			</subsection>
+
 		</section>
 
 		<section name="Announcements">
+		
+			<p>
+				<b>April 19, 2017 - HAPI FHIR 2.4 Released</b> -
+				The next release of HAPI has now been uploaded to the Maven repos and 
+				GitHub's releases section.
+			</p>
+			<p>
+				This release brings the STU3 definitions up to the  
+				final R3 (aka STU3) definitions (FHIR 3.0.1)! Happy R3 everybody!
+			</p>
+			<p>
+				As always, the <a href="./changes-report.html">changelog</a> has the full list
+				of changes in this release. Thanks to everyone who contributed to this release, either
+				by submitting pull requests, suggesting new features, or filing bug requests!
+			</p>
+			<p>
+				We were later than we would have liked in delivering this release, as we
+				are focusing heavily on performance improvements in the JPA module. We
+				were hoping to have our performance branch merged in time for this release,
+				but it needs a bit more time to stabilize. We will be releasing the initial
+				snapshot builds of HAPI FHIR 2.5-SNAPSHOT immediately following this
+				release. Please try these out if you want to test the JPA module with
+				significant performance improvements when searching large datasets, or 
+				under heavy load.
+			</p>
+			<p>
+				- <a href="https://github.com/jamesagnew/">James Agnew</a>
+			</p>
+			<br/><br/>
+		
+		
+			<p>
+				<b>March 17, 2017 - HAPI FHIR 2.3 Released</b> -
+				The next release of HAPI has now been uploaded to the Maven repos and 
+				GitHub's releases section.
+			</p>
+			<p>
+				This release brings the STU3 definitions up to the  
+				latest definitions (FHIR 1.9.0 - SVN 11501). It also brings
+				in the latest validator fixes, as well as a number of other
+				useful enhancements and fixes, including:
+			</p>
+			<ul>
+				<li>A new experimental module for <a href="./doc_converter.html">converting from DSTU2/2.1 structures to STU3 structures</a></li>
+				<li>Support in the JPA server for <a href="https://smilecdr.com/blog/20170208_custom_search_parameters">custom search parameters</a> (STU3 only for now)</li>
+				<li>Many other performance fixes, enhancements, and bugfixes</li>
+			</ul>
+			<p>
+				As always, the <a href="./changes-report.html">changelog</a> has the full list
+				of changes in this release. Thanks to everyone who contributed to this release, either
+				by submitting pull requests, suggesting new features, or filing bug requests!
+			</p>
+			<p>
+				- <a href="https://github.com/jamesagnew/">James Agnew</a>
+			</p>
+			<br/><br/>
+
+			<!-- 
 			<p>
 				<b>December 20, 2016 - HAPI FHIR 2.2 Released</b> -
 				The next release of HAPI has now been uploaded to the Maven repos and 
@@ -86,7 +153,9 @@
 				- <a href="https://github.com/jamesagnew/">James Agnew</a>
 			</p>
 			<br/><br/>
-	
+			 -->
+
+			<!-- 
 			<p>
 				<b>November 11, 2016 - HAPI FHIR 2.1 Released</b> -
 				The next release of HAPI has now been uploaded to the Maven repos and 
@@ -133,9 +202,6 @@
 			</p>
 			<br/><br/>
 
-
-
-			<!--
 			<p>
 				<b>August 30, 2016 - HAPI FHIR 2.0 Released</b> -
 				The next release of HAPI has now been uploaded to the Maven repos and 

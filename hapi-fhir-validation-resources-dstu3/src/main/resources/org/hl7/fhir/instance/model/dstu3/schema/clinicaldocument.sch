@@ -25,6 +25,12 @@
     </sch:rule>
   </sch:pattern>
   <sch:pattern>
+    <sch:title>Composition.relatesTo</sch:title>
+    <sch:rule context="f:Composition/f:relatesTo">
+      <sch:assert test="@value|f:*|h:div">All FHIR elements must have a @value or children (inherited)</sch:assert>
+    </sch:rule>
+  </sch:pattern>
+  <sch:pattern>
     <sch:title>Composition.event</sch:title>
     <sch:rule context="f:Composition/f:event">
       <sch:assert test="@value|f:*|h:div">All FHIR elements must have a @value or children (inherited)</sch:assert>

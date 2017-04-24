@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.dao.dstu3;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,6 +41,8 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoCodeSystem;
+import ca.uhn.fhir.jpa.dao.SearchParameterMap;
+import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemVersionDao;
 import ca.uhn.fhir.jpa.entity.ResourceTable;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
@@ -56,21 +58,13 @@ public class FhirResourceDaoCodeSystemDstu3 extends FhirResourceDaoDstu3<CodeSys
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoCodeSystemDstu3.class);
 
 	@Autowired
+	private ITermCodeSystemVersionDao myCsvDao;
+
+	@Autowired
 	private IHapiTerminologySvc myTerminologySvc;
 
 	@Autowired
 	private ValidationSupportChain myValidationSupport;
-
-	@Override
-	public List<IIdType> findCodeSystemIdsContainingSystemAndCode(String theCode, String theSystem) {
-		List<IIdType> valueSetIds;
-		Set<Long> ids = searchForIds(CodeSystem.SP_CODE, new TokenParam(theSystem, theCode));
-		valueSetIds = new ArrayList<IIdType>();
-		for (Long next : ids) {
-			valueSetIds.add(new IdType("CodeSystem", next));
-		}
-		return valueSetIds;
-	}
 
 //	private LookupCodeResult lookup(List<ValueSetExpansionContainsComponent> theContains, String theSystem, String theCode) {
 //		for (ValueSetExpansionContainsComponent nextCode : theContains) {
@@ -97,6 +91,17 @@ public class FhirResourceDaoCodeSystemDstu3 extends FhirResourceDaoDstu3<CodeSys
 //	}
 
 	@Override
+	public List<IIdType> findCodeSystemIdsContainingSystemAndCode(String theCode, String theSystem) {
+		List<IIdType> valueSetIds;
+		Set<Long> ids = searchForIds(new SearchParameterMap(CodeSystem.SP_CODE, new TokenParam(theSystem, theCode)));
+		valueSetIds = new ArrayList<IIdType>();
+		for (Long next : ids) {
+			valueSetIds.add(new IdType("CodeSystem", next));
+		}
+		return valueSetIds;
+	}
+
+	@Override
 	public LookupCodeResult lookupCode(IPrimitiveType<String> theCode, IPrimitiveType<String> theSystem, Coding theCoding, RequestDetails theRequestDetails) {
 		boolean haveCoding = theCoding != null && isNotBlank(theCoding.getSystem()) && isNotBlank(theCoding.getCode());
 		boolean haveCode = theCode != null && theCode.isEmpty() == false;
@@ -119,21 +124,12 @@ public class FhirResourceDaoCodeSystemDstu3 extends FhirResourceDaoDstu3<CodeSys
 			system = theSystem.getValue();
 		}
 
-		// CodeValidationResult validateOutcome = myJpaValidationSupport.validateCode(getContext(), system, code, null);
-		//
-		// LookupCodeResult result = new LookupCodeResult();
-		// result.setSearchedForCode(code);
-		// result.setSearchedForSystem(system);
-		// result.setFound(false);
-		// if (validateOutcome.isOk()) {
-		// result.setFound(true);
-		// result.setCodeIsAbstract(validateOutcome.asConceptDefinition().getAbstract());
-		// result.setCodeDisplay(validateOutcome.asConceptDefinition().getDisplay());
-		// }
-		// return result;
-
+		ourLog.info("Looking up {} / {}", system, code);
+		
 		if (myValidationSupport.isCodeSystemSupported(getContext(), system)) {
-			
+
+			ourLog.info("Code system {} is supported", system);
+
 			CodeValidationResult result = myValidationSupport.validateCode(getContext(), system, code, null);
 			if (result != null) {
 				if (result.isOk()) {
@@ -195,11 +191,11 @@ public class FhirResourceDaoCodeSystemDstu3 extends FhirResourceDaoDstu3<CodeSys
 
 		return retVal;
 	}
-
+	
 	@Override
 	protected ResourceTable updateEntity(IBaseResource theResource, ResourceTable theEntity, Date theDeletedTimestampOrNull, boolean thePerformIndexing,
-			boolean theUpdateVersion, Date theUpdateTime) {
-		ResourceTable retVal = super.updateEntity(theResource, theEntity, theDeletedTimestampOrNull, thePerformIndexing, theUpdateVersion, theUpdateTime);
+			boolean theUpdateVersion, Date theUpdateTime, boolean theForceUpdate, boolean theCreateNewHistoryEntry) {
+		ResourceTable retVal = super.updateEntity(theResource, theEntity, theDeletedTimestampOrNull, thePerformIndexing, theUpdateVersion, theUpdateTime, theForceUpdate, theCreateNewHistoryEntry);
 
 		CodeSystem cs = (CodeSystem) theResource;
 
@@ -207,12 +203,22 @@ public class FhirResourceDaoCodeSystemDstu3 extends FhirResourceDaoDstu3<CodeSys
 			String codeSystemUrl = cs.getUrl();
 			if (cs.getContent() == CodeSystemContentMode.COMPLETE || cs.getContent() == null) {
 				ourLog.info("CodeSystem {} has a status of {}, going to store concepts in terminology tables", retVal.getIdDt().getValue(), cs.getContentElement().getValueAsString());
-				TermCodeSystemVersion persCs = new TermCodeSystemVersion();
-				persCs.setResource(retVal);
-				persCs.setResourceVersionId(retVal.getVersion());
-				persCs.getConcepts().addAll(toPersistedConcepts(cs.getConcept(), persCs));
+				
+				Long codeSystemResourcePid = retVal.getId();
+				TermCodeSystemVersion persCs = myCsvDao.findByCodeSystemResourceAndVersion(codeSystemResourcePid, retVal.getVersion());
+				if (persCs != null) {
+					ourLog.info("Code system version already exists in database");
+				} else {
+					
+					persCs = new TermCodeSystemVersion();
+					persCs.setResource(retVal);
+					persCs.setResourceVersionId(retVal.getVersion());
+					persCs.getConcepts().addAll(toPersistedConcepts(cs.getConcept(), persCs));
+					ourLog.info("Code system has {} concepts", persCs.getConcepts().size());
+					myTerminologySvc.storeNewCodeSystemVersion(codeSystemResourcePid, codeSystemUrl, persCs);
+					
+				}
 
-				myTerminologySvc.storeNewCodeSystemVersion(retVal.getId(), codeSystemUrl, persCs);
 			}
 		}
 

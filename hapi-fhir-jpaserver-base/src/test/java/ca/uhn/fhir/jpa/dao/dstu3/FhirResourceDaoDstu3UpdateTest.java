@@ -26,6 +26,7 @@ import java.util.TimeZone;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.InstantType;
+import org.hl7.fhir.dstu3.model.Meta;
 import org.hl7.fhir.dstu3.model.Organization;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.Resource;
@@ -37,6 +38,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 
+import ca.uhn.fhir.jpa.dao.SearchParameterMap;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
@@ -110,7 +112,7 @@ public class FhirResourceDaoDstu3UpdateTest extends BaseJpaDstu3Test {
 
 		IBundleProvider historyBundle = myPatientDao.history(outcome.getId(), null, null, mySrd);
 
-		assertEquals(2, historyBundle.size());
+		assertEquals(2, historyBundle.size().intValue());
 		
 		List<IBaseResource> history = historyBundle.getResources(0, 2);
 		
@@ -162,14 +164,17 @@ public class FhirResourceDaoDstu3UpdateTest extends BaseJpaDstu3Test {
 		
 		p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(methodName + "2");
+		p.setActive(true);
 		IIdType id2 = myPatientDao.create(p, "Patient?identifier=urn:system|" + methodName + "2").getId().toUnqualified();
 		assertEquals(id.getValue(), id2.getValue());
 		
 		p = new Patient();
 		p.setId(id);
 		p.addIdentifier().setSystem("urn:system").setValue(methodName + "2");
+		p.setActive(false);
 		myPatientDao.update(p).getId();
 
+		p.setActive(true);
 		id2 = myPatientDao.update(p, "Patient?identifier=urn:system|" + methodName + "2").getId().toUnqualified();
 		assertEquals(id.getIdPart(), id2.getIdPart());
 		assertEquals("3", id2.getVersionIdPart());
@@ -352,7 +357,7 @@ public class FhirResourceDaoDstu3UpdateTest extends BaseJpaDstu3Test {
 		p2.addName().setFamily("Tester").addGiven("testUpdateMaintainsSearchParamsDstu2BBB");
 		myPatientDao.create(p2, mySrd).getId();
 
-		Set<Long> ids = myPatientDao.searchForIds(Patient.SP_GIVEN, new StringParam("testUpdateMaintainsSearchParamsDstu2AAA"));
+		Set<Long> ids = myPatientDao.searchForIds(new SearchParameterMap(Patient.SP_GIVEN, new StringParam("testUpdateMaintainsSearchParamsDstu2AAA")));
 		assertEquals(1, ids.size());
 		assertThat(ids, contains(p1id.getIdPartAsLong()));
 
@@ -361,10 +366,10 @@ public class FhirResourceDaoDstu3UpdateTest extends BaseJpaDstu3Test {
 		MethodOutcome update2 = myPatientDao.update(p1, mySrd);
 		IIdType p1id2 = update2.getId();
 
-		ids = myPatientDao.searchForIds(Patient.SP_GIVEN, new StringParam("testUpdateMaintainsSearchParamsDstu2AAA"));
+		ids = myPatientDao.searchForIds(new SearchParameterMap(Patient.SP_GIVEN, new StringParam("testUpdateMaintainsSearchParamsDstu2AAA")));
 		assertEquals(0, ids.size());
 
-		ids = myPatientDao.searchForIds(Patient.SP_GIVEN, new StringParam("testUpdateMaintainsSearchParamsDstu2BBB"));
+		ids = myPatientDao.searchForIds(new SearchParameterMap(Patient.SP_GIVEN, new StringParam("testUpdateMaintainsSearchParamsDstu2BBB")));
 		assertEquals(2, ids.size());
 
 		// Make sure vreads work
@@ -552,6 +557,164 @@ public class FhirResourceDaoDstu3UpdateTest extends BaseJpaDstu3Test {
 		assertEquals("Patient/123abc", p.getIdElement().toUnqualifiedVersionless().getValue());
 		assertEquals("Hello", p.getName().get(0).getFamily());
 
+	}
+
+	
+	@Test
+	public void testUpdateWithNoChangeDetectionUpdateUnchanged() {
+		String name = "testUpdateUnchanged";
+		IIdType id1, id2;
+		{
+			Patient patient = new Patient();
+			patient.addName().setFamily(name);
+			id1 = myPatientDao.create(patient, mySrd).getId().toUnqualified();
+		}
+
+		// Update
+		{
+			Patient patient = new Patient();
+			patient.setId(id1);
+			patient.addName().setFamily(name);
+			id2 = myPatientDao.update(patient, mySrd).getId().toUnqualified();
+		}
+
+		assertEquals(id1.getValue(), id2.getValue());
+	}
+
+	
+	@Test
+	public void testUpdateWithNoChangeDetectionDisabledUpdateUnchanged() {
+		myDaoConfig.setSuppressUpdatesWithNoChange(false);
+		
+		String name = "testUpdateUnchanged";
+		IIdType id1, id2;
+		{
+			Patient patient = new Patient();
+			patient.addName().setFamily(name);
+			id1 = myPatientDao.create(patient, mySrd).getId().toUnqualified();
+		}
+
+		// Update
+		{
+			Patient patient = new Patient();
+			patient.setId(id1);
+			patient.addName().setFamily(name);
+			id2 = myPatientDao.update(patient, mySrd).getId().toUnqualified();
+		}
+
+		assertNotEquals(id1.getValue(), id2.getValue());
+	}
+
+	@Test
+	public void testUpdateWithNoChangeDetectionUpdateTagAdded() {
+		String name = "testUpdateUnchanged";
+		IIdType id1, id2;
+		{
+			Patient patient = new Patient();
+			patient.addName().setFamily(name);
+			id1 = myPatientDao.create(patient, mySrd).getId().toUnqualified();
+		}
+
+		// Update
+		{
+			Patient patient = new Patient();
+			patient.getMeta().addTag().setCode("CODE");
+			patient.setId(id1);
+			patient.addName().setFamily(name);
+			id2 = myPatientDao.update(patient, mySrd).getId().toUnqualified();
+		}
+
+		assertNotEquals(id1.getValue(), id2.getValue());
+	}
+	
+	@Test
+	public void testUpdateWithNoChangeDetectionUpdateTagNoChange() {
+		String name = "testUpdateUnchanged";
+		IIdType id1, id2;
+		{
+			Patient patient = new Patient();
+			patient.addName().setFamily(name);
+			id1 = myPatientDao.create(patient, mySrd).getId().toUnqualified();
+		}
+
+		// Add tag
+		Meta meta = new Meta();
+		meta.addTag().setCode("CODE");
+		myPatientDao.metaAddOperation(id1, meta, null);
+		
+		// Update with tag
+		{
+			Patient patient = new Patient();
+			patient.getMeta().addTag().setCode("CODE");
+			patient.setId(id1);
+			patient.addName().setFamily(name);
+			id2 = myPatientDao.update(patient, mySrd).getId().toUnqualified();
+		}
+
+		assertEquals(id1.getValue(), id2.getValue());
+		
+		meta = myPatientDao.metaGetOperation(Meta.class, id2, null);
+		assertEquals(1, meta.getTag().size());
+		assertEquals("CODE", meta.getTag().get(0).getCode());
+	}
+
+	@Test
+	public void testUpdateWithNoChangeDetectionUpdateTagRemoved() {
+		String name = "testUpdateUnchanged";
+		IIdType id1, id2;
+		{
+			Patient patient = new Patient();
+			patient.getMeta().addTag().setCode("CODE");
+			patient.addName().setFamily(name);
+			id1 = myPatientDao.create(patient, mySrd).getId().toUnqualified();
+		}
+
+		// Update
+		{
+			Patient patient = new Patient();
+			patient.setId(id1);
+			patient.addName().setFamily(name);
+			id2 = myPatientDao.update(patient, mySrd).getId().toUnqualified();
+		}
+
+		assertEquals(id1.getValue(), id2.getValue());
+		
+		Meta meta = myPatientDao.metaGetOperation(Meta.class, id2, null);
+		assertEquals(1, meta.getTag().size());
+		assertEquals("CODE", meta.getTag().get(0).getCode());
+	}
+
+	@Test
+	public void testUpdateWithNoChangeDetectionUpdateTagMetaRemoved() {
+		String name = "testUpdateUnchanged";
+		IIdType id1, id2;
+		{
+			Patient patient = new Patient();
+			patient.getMeta().addTag().setCode("CODE");
+			patient.addName().setFamily(name);
+			id1 = myPatientDao.create(patient, mySrd).getId().toUnqualified();
+		}
+
+		Meta meta = new Meta();
+		meta.addTag().setCode("CODE");
+		myPatientDao.metaDeleteOperation(id1, meta, null);
+
+		
+		meta = myPatientDao.metaGetOperation(Meta.class, id1, null);
+		assertEquals(0, meta.getTag().size());
+
+		// Update
+		{
+			Patient patient = new Patient();
+			patient.setId(id1);
+			patient.addName().setFamily(name);
+			id2 = myPatientDao.update(patient, mySrd).getId().toUnqualified();
+		}
+
+		assertEquals(id1.getValue(), id2.getValue());
+		
+		meta = myPatientDao.metaGetOperation(Meta.class, id2, null);
+		assertEquals(0, meta.getTag().size());
 	}
 
 }

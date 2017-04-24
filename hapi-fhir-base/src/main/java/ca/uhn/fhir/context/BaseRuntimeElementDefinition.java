@@ -4,7 +4,7 @@ package ca.uhn.fhir.context;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,11 +21,8 @@ package ca.uhn.fhir.context;
  */
 
 import java.lang.reflect.Constructor;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import ca.uhn.fhir.util.UrlUtil;
 
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBase;
@@ -104,9 +101,19 @@ public abstract class BaseRuntimeElementDefinition<T extends IBase> {
 	/**
 	 * @return Returns null if none
 	 */
-	public RuntimeChildDeclaredExtensionDefinition getDeclaredExtension(String theExtensionUrl) {
+	public RuntimeChildDeclaredExtensionDefinition getDeclaredExtension(String theExtensionUrl, final String serverBaseUrl) {
 		validateSealed();
-		return myUrlToExtension.get(theExtensionUrl);
+		RuntimeChildDeclaredExtensionDefinition definition = myUrlToExtension.get(theExtensionUrl);
+		if (definition == null && StringUtils.isNotBlank(serverBaseUrl)) {
+			for (final Map.Entry<String, RuntimeChildDeclaredExtensionDefinition> entry : myUrlToExtension.entrySet()) {
+				final String key = (!UrlUtil.isValid(entry.getKey()) && StringUtils.isNotBlank(serverBaseUrl)) ? serverBaseUrl + entry.getKey() : entry.getKey();
+				if (key.equals(theExtensionUrl)) {
+					definition = entry.getValue();
+					break;
+				}
+			}
+		}
+		return definition;
 	}
 
 	public List<RuntimeChildDeclaredExtensionDefinition> getExtensions() {
@@ -136,6 +143,11 @@ public abstract class BaseRuntimeElementDefinition<T extends IBase> {
 		return myName;
 	}
 
+	public boolean hasExtensions() {
+		validateSealed();
+		return myExtensions.size() > 0;
+	}
+
 	public boolean isStandardType() {
 		return myStandardType;
 	}
@@ -147,10 +159,10 @@ public abstract class BaseRuntimeElementDefinition<T extends IBase> {
 	public T newInstance(Object theArgument) {
 		try {
 			if (theArgument == null) {
-				return getConstructor(null).newInstance(null);
-			} else {
-				return getConstructor(theArgument).newInstance(theArgument);
+				return getConstructor(null).newInstance();
 			}
+			return getConstructor(theArgument).newInstance(theArgument);
+
 		} catch (Exception e) {
 			throw new ConfigurationException("Failed to instantiate type:" + getImplementingClass().getName(), e);
 		}
@@ -170,9 +182,8 @@ public abstract class BaseRuntimeElementDefinition<T extends IBase> {
 			String extUrl = next.getExtensionUrl();
 			if (myUrlToExtension.containsKey(extUrl)) {
 				throw new ConfigurationException("Duplicate extension URL[" + extUrl + "] in Element[" + getName() + "]");
-			} else {
-				myUrlToExtension.put(extUrl, next);
 			}
+			myUrlToExtension.put(extUrl, next);
 			if (next.isModifier()) {
 				myExtensionsModifier.add(next);
 			} else {

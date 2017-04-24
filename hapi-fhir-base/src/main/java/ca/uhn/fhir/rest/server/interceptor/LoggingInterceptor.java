@@ -8,7 +8,7 @@ import java.io.IOException;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.io.Charsets;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.text.StrLookup;
@@ -47,7 +46,6 @@ import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.RestfulServerUtils;
 import ca.uhn.fhir.rest.server.RestfulServerUtils.ResponseEncoding;
-import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 
@@ -137,6 +135,13 @@ public class LoggingInterceptor extends InterceptorAdapter {
 	private Logger myLogger = ourLog;
 	private String myMessageFormat = "${operationType} - ${idOrResourceName}";
 
+	/**
+	 * Constructor for server logging interceptor
+	 */
+	public LoggingInterceptor() {
+		super();
+	}
+	
 	/**
 	 * Get the log message format to be used when logging exceptions
 	 */
@@ -252,9 +257,8 @@ public class LoggingInterceptor extends InterceptorAdapter {
 					default:
 						return "";
 					}
-				} else {
-					return "";
 				}
+					return "";
 			} else if ("id".equals(theKey)) {
 				if (myRequestDetails.getId() != null) {
 					return myRequestDetails.getId().getValue();
@@ -298,9 +302,8 @@ public class LoggingInterceptor extends InterceptorAdapter {
 				ResponseEncoding encoding = RestfulServerUtils.determineResponseEncodingNoDefault(myRequestDetails, myRequestDetails.getServer().getDefaultResponseEncoding());
 				if (encoding != null) {
 					return encoding.getEncoding().name();
-				} else {
-					return "";
 				}
+				return "";
 			} else if (theKey.equals("exceptionMessage")) {
 				return myException != null ? myException.getMessage() : null;
 			} else if (theKey.equals("requestUrl")) {

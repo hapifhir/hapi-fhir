@@ -89,6 +89,10 @@
 		<appender-ref ref="SUBSCRIPTION_FILE"/>
 	</logger>
 
+	<logger name="org.eclipse.jetty.websocket" additivity="true" level="debug">
+		<appender-ref ref="SUBSCRIPTION_FILE"/>
+	</logger>
+
 	<logger name="ca.uhn.fhir.jpa.subscription" additivity="true" level="debug">
 		<appender-ref ref="SUBSCRIPTION_FILE"/>
 	</logger>

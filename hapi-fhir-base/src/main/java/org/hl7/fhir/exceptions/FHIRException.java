@@ -4,7 +4,7 @@ package org.hl7.fhir.exceptions;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,8 @@ public class FHIRException extends Exception {
 
 	// Note that the 4-argument constructor has been removed as it is not JDK6 compatible
 	
+	private static final long serialVersionUID = -1793365096090608037L;
+
 	public FHIRException() {
 		super();
 	}

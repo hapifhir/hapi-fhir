@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.client.apache;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,6 +61,7 @@ public class ApacheHttpResponse implements IHttpResponse {
 		this.myResponse = theResponse;
 	}
 
+	@Deprecated //override deprecated method
 	@Override
 	public void bufferEntitity() throws IOException {
 		bufferEntity();
@@ -77,6 +78,7 @@ public class ApacheHttpResponse implements IHttpResponse {
 			try {
 				this.myEntityBytes = IOUtils.toByteArray(respEntity);
 			} catch (IllegalStateException e) {
+				//FIXME resouce leak
 				throw new InternalErrorException(e);
 			}
 		}

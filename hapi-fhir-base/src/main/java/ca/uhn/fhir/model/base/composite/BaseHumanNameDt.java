@@ -4,7 +4,7 @@ package ca.uhn.fhir.model.base.composite;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,8 @@ import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.util.DatatypeUtil;
 
 public abstract class BaseHumanNameDt extends BaseIdentifiableElement {
+
+	private static final long serialVersionUID = 2765500013165698259L;
 
 	/**
 	 * Gets the value(s) for <b>family</b> (Family name (often called 'Surname')). creating it if it does not exist. Will not return <code>null</code>.
@@ -146,9 +148,8 @@ public abstract class BaseHumanNameDt extends BaseIdentifiableElement {
 		nameParts.addAll(getSuffix());
 		if (nameParts.size() > 0) {
 			return ca.uhn.fhir.util.DatatypeUtil.joinStringsSpaceSeparated(nameParts);
-		} else {
-			return getTextElement().getValue();
 		}
+		return getTextElement().getValue();
 	}
 
 }

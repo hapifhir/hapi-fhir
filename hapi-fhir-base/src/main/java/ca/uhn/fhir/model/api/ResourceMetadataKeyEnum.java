@@ -4,7 +4,7 @@ package ca.uhn.fhir.model.api;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -307,21 +307,19 @@ public abstract class ResourceMetadataKeyEnum<T> implements Serializable {
 			Object obj = resource.getResourceMetadata().get(SECURITY_LABELS);
 			if (obj == null) {
 				return null;
-			} else {
-				try {
-					@SuppressWarnings("unchecked")
-					List<BaseCodingDt> securityLabels = (List<BaseCodingDt>) obj;
-					if (securityLabels.isEmpty())
-						return null;
-					else
-						return securityLabels;
-				} catch (ClassCastException e) {
-					throw new InternalErrorException("Found an object of type '" + obj.getClass().getCanonicalName() + "' in resource metadata for key SECURITY_LABELS - Expected "
-							+ BaseCodingDt.class.getCanonicalName());
-
-				}
-
 			}
+			try {
+				@SuppressWarnings("unchecked")
+				List<BaseCodingDt> securityLabels = (List<BaseCodingDt>) obj;
+				if (securityLabels.isEmpty()) {
+					return null;
+				}
+				return securityLabels;
+			} catch (ClassCastException e) {
+				throw new InternalErrorException("Found an object of type '" + obj.getClass().getCanonicalName() + "' in resource metadata for key SECURITY_LABELS - Expected "
+						+ BaseCodingDt.class.getCanonicalName());
+			}
+
 		}
 
 		@Override
@@ -349,9 +347,8 @@ public abstract class ResourceMetadataKeyEnum<T> implements Serializable {
 			} else if (retValObj instanceof TagList) {
 				if (((TagList) retValObj).isEmpty()) {
 					return null;
-				} else {
-					return (TagList) retValObj;
 				}
+				return (TagList) retValObj;
 			}
 			throw new InternalErrorException("Found an object of type '" + retValObj.getClass().getCanonicalName() + "' in resource metadata for key " + TAG_LIST.name() + " - Expected "
 					+ TagList.class.getCanonicalName());
@@ -496,9 +493,8 @@ public abstract class ResourceMetadataKeyEnum<T> implements Serializable {
 		} else if (retValObj instanceof DecimalDt) {
 			if (((DecimalDt) retValObj).isEmpty()) {
 				return null;
-			} else {
-				return (DecimalDt) retValObj;
 			}
+			return (DecimalDt) retValObj;
 		} else if (retValObj instanceof String) {
 			if (StringUtils.isBlank((String) retValObj)) {
 				return null;
@@ -562,9 +558,8 @@ public abstract class ResourceMetadataKeyEnum<T> implements Serializable {
 		} else if (retValObj instanceof InstantDt) {
 			if (((InstantDt) retValObj).isEmpty()) {
 				return null;
-			} else {
-				return (InstantDt) retValObj;
-			}
+			} 
+			return (InstantDt) retValObj;
 		}
 		throw new InternalErrorException("Found an object of type '" + retValObj.getClass().getCanonicalName() + "' in resource metadata for key " + theKey.name() + " - Expected "
 				+ InstantDt.class.getCanonicalName());
@@ -577,9 +572,8 @@ public abstract class ResourceMetadataKeyEnum<T> implements Serializable {
 		} else if (retValObj instanceof String) {
 			if (StringUtils.isBlank(((String) retValObj))) {
 				return null;
-			} else {
-				return (String) retValObj;
-			}
+			} 
+			return (String) retValObj;
 		}
 		throw new InternalErrorException("Found an object of type '" + retValObj.getClass().getCanonicalName() + "' in resource metadata for key " + theKey.name() + " - Expected "
 				+ String.class.getCanonicalName());
@@ -591,15 +585,13 @@ public abstract class ResourceMetadataKeyEnum<T> implements Serializable {
 		} else if (retValObj instanceof String) {
 			if (isNotBlank((String) retValObj)) {
 				return new IdDt((String) retValObj);
-			} else {
-				return null;
 			}
+			return null;
 		} else if (retValObj instanceof IdDt) {
 			if (((IdDt) retValObj).isEmpty()) {
 				return null;
-			} else {
-				return (IdDt) retValObj;
 			}
+			return (IdDt) retValObj;
 		} else if (retValObj instanceof Number) {
 			return new IdDt(((Number) retValObj).toString());
 		}

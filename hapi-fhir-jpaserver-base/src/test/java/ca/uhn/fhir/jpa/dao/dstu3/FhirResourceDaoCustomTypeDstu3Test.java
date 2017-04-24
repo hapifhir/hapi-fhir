@@ -32,7 +32,7 @@ public class FhirResourceDaoCustomTypeDstu3Test extends BaseJpaDstu3Test {
 		assertEquals("blue", read.getEyeColour().getValue());
 		
 		IBundleProvider found = myObservationDao.search(new SearchParameterMap());
-		assertEquals(1, found.size());
+		assertEquals(1, found.size().intValue());
 		CustomObservationDstu3 search = (CustomObservationDstu3) found.getResources(0, 1).get(0);
 		assertEquals("blue", search.getEyeColour().getValue());
 		

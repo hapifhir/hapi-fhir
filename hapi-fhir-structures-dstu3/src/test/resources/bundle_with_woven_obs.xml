@@ -285,9 +285,9 @@
         <subject>
           <reference value="Patient/5556918" />
         </subject>
-        <encounter>
+        <context>
           <reference value="Encounter/5885735" />
-        </encounter>
+        </context>
         <effectiveDateTime value="2014-09-26T11:55:00-04:00" />
         <issued value="2014-09-26T11:55:33.000-04:00" />
         <result>

@@ -4,7 +4,7 @@ package ca.uhn.fhir.parser;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -77,6 +77,7 @@ import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.util.UrlUtil;
 
 public abstract class BaseParser implements IParser {
 
@@ -96,6 +97,7 @@ public abstract class BaseParser implements IParser {
 	private List<Class<? extends IBaseResource>> myPreferTypes;
 	private String myServerBaseUrl;
 	private Boolean myStripVersionsFromReferences;
+	private Boolean myOverrideResourceIdWithBundleEntryFullUrl;
 	private boolean mySummaryMode;
 	private boolean mySuppressNarratives;
 	private Set<String> myDontStripVersionsFromReferencesAtPaths;
@@ -305,24 +307,20 @@ public abstract class BaseParser implements IParser {
 				}
 			}
 			return reference;
-		} else {
-			if (!ref.hasResourceType() && !ref.isLocal() && theRef.getResource() != null) {
-				ref = ref.withResourceType(myContext.getResourceDefinition(theRef.getResource()).getName());
-			}
-			if (isNotBlank(myServerBaseUrl) && StringUtils.equals(myServerBaseUrl, ref.getBaseUrl())) {
-				if (isStripVersionsFromReferences(theCompositeChildElement)) {
-					return ref.toUnqualifiedVersionless().getValue();
-				} else {
-					return ref.toUnqualified().getValue();
-				}
-			} else {
-				if (isStripVersionsFromReferences(theCompositeChildElement)) {
-					return ref.toVersionless().getValue();
-				} else {
-					return ref.getValue();
-				}
-			}
 		}
+		if (!ref.hasResourceType() && !ref.isLocal() && theRef.getResource() != null) {
+			ref = ref.withResourceType(myContext.getResourceDefinition(theRef.getResource()).getName());
+		}
+		if (isNotBlank(myServerBaseUrl) && StringUtils.equals(myServerBaseUrl, ref.getBaseUrl())) {
+			if (isStripVersionsFromReferences(theCompositeChildElement)) {
+				return ref.toUnqualifiedVersionless().getValue();
+			}
+			return ref.toUnqualified().getValue();
+		}
+		if (isStripVersionsFromReferences(theCompositeChildElement)) {
+			return ref.toVersionless().getValue();
+		}
+		return ref.getValue();
 	}
 
 	private boolean isStripVersionsFromReferences(CompositeChildElement theCompositeChildElement) {
@@ -348,6 +346,15 @@ public abstract class BaseParser implements IParser {
 		}
 
 		return true;
+	}
+	
+	private boolean isOverrideResourceIdWithBundleEntryFullUrl() {
+		Boolean overrideResourceIdWithBundleEntryFullUrl = myOverrideResourceIdWithBundleEntryFullUrl;
+		if (overrideResourceIdWithBundleEntryFullUrl != null) {
+			return overrideResourceIdWithBundleEntryFullUrl;
+		}
+		
+		return myContext.getParserOptions().isOverrideResourceIdWithBundleEntryFullUrl();
 	}
 
 	protected abstract void doEncodeBundleToWriter(Bundle theBundle, Writer theWriter) throws IOException, DataFormatException;
@@ -599,6 +606,11 @@ public abstract class BaseParser implements IParser {
 	public Boolean getStripVersionsFromReferences() {
 		return myStripVersionsFromReferences;
 	}
+	
+	@Override
+	public Boolean getOverrideResourceIdWithBundleEntryFullUrl() {
+		return myOverrideResourceIdWithBundleEntryFullUrl;
+	}
 
 	@Override
 	public boolean isSummaryMode() {
@@ -661,22 +673,23 @@ public abstract class BaseParser implements IParser {
 					if (fullUrlChild == null) {
 						continue; // TODO: remove this once the data model in tinder plugin catches up to 1.2
 					}
-					List<IBase> fullUrl = fullUrlChild.getAccessor().getValues(nextEntry);
-					if (fullUrl != null && !fullUrl.isEmpty()) {
-						IPrimitiveType<?> value = (IPrimitiveType<?>) fullUrl.get(0);
-						if (value.isEmpty() == false) {
-							List<IBase> entryResources = entryDef.getChildByName("resource").getAccessor().getValues(nextEntry);
-							if (entryResources != null && entryResources.size() > 0) {
-								IBaseResource res = (IBaseResource) entryResources.get(0);
-								String versionId = res.getIdElement().getVersionIdPart();
-								res.setId(value.getValueAsString());
-								if (isNotBlank(versionId) && res.getIdElement().hasVersionIdPart() == false) {
-									res.setId(res.getIdElement().withVersion(versionId));
+					if (isOverrideResourceIdWithBundleEntryFullUrl()) {
+						List<IBase> fullUrl = fullUrlChild.getAccessor().getValues(nextEntry);
+						if (fullUrl != null && !fullUrl.isEmpty()) {
+							IPrimitiveType<?> value = (IPrimitiveType<?>) fullUrl.get(0);
+							if (value.isEmpty() == false) {
+								List<IBase> entryResources = entryDef.getChildByName("resource").getAccessor().getValues(nextEntry);
+								if (entryResources != null && entryResources.size() > 0) {
+									IBaseResource res = (IBaseResource) entryResources.get(0);
+									String versionId = res.getIdElement().getVersionIdPart();
+									res.setId(value.getValueAsString());
+									if (isNotBlank(versionId) && res.getIdElement().hasVersionIdPart() == false) {
+										res.setId(res.getIdElement().withVersion(versionId));
+									}
 								}
 							}
 						}
 					}
-
 				}
 			}
 
@@ -855,7 +868,17 @@ public abstract class BaseParser implements IParser {
 
 	@Override
 	public void setPreferTypes(List<Class<? extends IBaseResource>> thePreferTypes) {
-		myPreferTypes = thePreferTypes;
+		if (thePreferTypes != null) {
+			ArrayList<Class<? extends IBaseResource>> types = new ArrayList<Class<? extends IBaseResource>>();
+			for (Class<? extends IBaseResource> next : thePreferTypes) {
+				if (Modifier.isAbstract(next.getModifiers()) == false) {
+					types.add(next);
+				}
+			}
+			myPreferTypes = Collections.unmodifiableList(types);
+		} else {
+			myPreferTypes = thePreferTypes;
+		}
 	}
 
 	@Override
@@ -867,6 +890,12 @@ public abstract class BaseParser implements IParser {
 	@Override
 	public IParser setStripVersionsFromReferences(Boolean theStripVersionsFromReferences) {
 		myStripVersionsFromReferences = theStripVersionsFromReferences;
+		return this;
+	}
+	
+	@Override
+	public IParser setOverrideResourceIdWithBundleEntryFullUrl(Boolean theOverrideResourceIdWithBundleEntryFullUrl) {
+		myOverrideResourceIdWithBundleEntryFullUrl = theOverrideResourceIdWithBundleEntryFullUrl;
 		return this;
 	}
 
@@ -931,6 +960,18 @@ public abstract class BaseParser implements IParser {
 		return retVal;
 	}
 
+	protected String getExtensionUrl(final String extensionUrl) {
+		String url = extensionUrl;
+		if (StringUtils.isNotBlank(extensionUrl) && StringUtils.isNotBlank(myServerBaseUrl)) {
+			url = !UrlUtil.isValid(extensionUrl) && extensionUrl.startsWith("/") ? myServerBaseUrl + extensionUrl : extensionUrl;
+		}
+		return url;
+	}
+
+  protected String getServerBaseUrl() {
+		return  myServerBaseUrl;
+	}
+  
 	/**
 	 * Used for DSTU2 only
 	 */
@@ -1112,9 +1153,8 @@ public abstract class BaseParser implements IParser {
 				}
 				if (theElements.contains(thePathBuilder.toString())) {
 					return true;
-				} else {
-					return false;
 				}
+				return false;
 			} else if (myParent != null) {
 				boolean parentCheck;
 				if (theCheckingForWhitelist) {

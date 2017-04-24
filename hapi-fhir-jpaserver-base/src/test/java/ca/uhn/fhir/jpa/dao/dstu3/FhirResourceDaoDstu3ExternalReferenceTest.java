@@ -25,6 +25,11 @@ import ca.uhn.fhir.util.TestUtil;
 
 public class FhirResourceDaoDstu3ExternalReferenceTest extends BaseJpaDstu3Test {
 
+	@Before
+	public void beforeDisableResultReuse() {
+		myDaoConfig.setReuseCachedSearchResultsForMillis(null);
+	}
+
 	@AfterClass
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();

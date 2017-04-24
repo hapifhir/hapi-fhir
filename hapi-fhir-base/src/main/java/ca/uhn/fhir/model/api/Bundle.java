@@ -4,7 +4,7 @@ package ca.uhn.fhir.model.api;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
-import org.hl7.fhir.instance.model.api.IBase;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
@@ -47,8 +46,9 @@ import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.util.UrlUtil;
 
-public class Bundle extends BaseBundle implements IBase /* implements IElement */{
+public class Bundle extends BaseBundle /* implements IBase implements IElement */{
 
+	private static final long serialVersionUID = 5811989173275366745L;
 	private ResourceMetadataMap myResourceMetadata;
 	private BoundCodeDt<BundleTypeEnum> myType;
 	private StringDt myBundleId;
@@ -127,6 +127,7 @@ public class Bundle extends BaseBundle implements IBase /* implements IElement *
 			if (theResource.getId().isAbsolute()) {
 
 				entry.getLinkSelf().setValue(theResource.getId().getValue());
+				//TODO: Use of a deprecated method should be resolved.
 				entry.getId().setValue(theResource.getId().toVersionless().getValue());
 
 			} else if (StringUtils.isNotBlank(theResource.getId().getValue())) {
@@ -141,6 +142,7 @@ public class Bundle extends BaseBundle implements IBase /* implements IElement *
 				String resId = theResource.getId().getIdPart();
 				b.append(resId);
 
+				//TODO: Use of a deprecated method should be resolved.
 				entry.getId().setValue(b.toString());
 
 				if (isNotBlank(theResource.getId().getVersionIdPart())) {
@@ -149,6 +151,7 @@ public class Bundle extends BaseBundle implements IBase /* implements IElement *
 					b.append('/');
 					b.append(theResource.getId().getVersionIdPart());
 				} else {
+					//TODO: Use of a deprecated method should be resolved.
 					IdDt versionId = (IdDt) ResourceMetadataKeyEnum.VERSION_ID.get(theResource);
 					if (versionId != null) {
 						b.append('/');
@@ -176,6 +179,7 @@ public class Bundle extends BaseBundle implements IBase /* implements IElement *
 
 		InstantDt updated = ResourceMetadataKeyEnum.UPDATED.get(theResource);
 		if (updated != null) {
+			//TODO: Use of a deprecated method should be resolved.
 			entry.setUpdated(updated);
 		}
 
@@ -323,6 +327,7 @@ public class Bundle extends BaseBundle implements IBase /* implements IElement *
 		if (map == null) {
 			map = new HashMap<IdDt, IResource>();
 			for (BundleEntry next : this.getEntries()) {
+				//TODO: Use of a deprecated method should be resolved.
 				if (next.getId().isEmpty() == false) {
 					map.put(next.getId().toUnqualified(), next.getResource());
 				}

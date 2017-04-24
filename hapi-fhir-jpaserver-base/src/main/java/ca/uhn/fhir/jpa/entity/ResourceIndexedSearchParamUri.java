@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.entity;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,6 +42,7 @@ import org.hibernate.search.annotations.Field;
 @Table(name = "HFJ_SPIDX_URI", indexes = { 
 	@Index(name = "IDX_SP_URI", columnList = "RES_TYPE,SP_NAME,SP_URI"), 
 	@Index(name = "IDX_SP_URI_RESTYPE_NAME", columnList = "RES_TYPE,SP_NAME"), 
+	@Index(name = "IDX_SP_URI_UPDATED", columnList = "SP_UPDATED"), 
 	@Index(name = "IDX_SP_URI_COORDS", columnList = "RES_ID") 
 })
 //@formatter:on

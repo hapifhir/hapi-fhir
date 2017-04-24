@@ -32,7 +32,7 @@ package org.hl7.fhir.utilities.xml;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -275,38 +275,37 @@ public class XMLUtil {
 	 * @return escape string
 	 */
 	public static String escapeXML(String rawContent, String charset, boolean isNoLines) {
-		if (rawContent == null)
+		if (rawContent == null){
 			return "";
-		else {
-			StringBuffer sb = new StringBuffer();
+		}
+		StringBuffer sb = new StringBuffer();
 
-			for (int i = 0; i < rawContent.length(); i++) {
-				char ch = rawContent.charAt(i);
-				if (ch == '\'')
-					sb.append("&#39;");
-				else if (ch == '&')
-					sb.append("&amp;");
-				else if (ch == '"')
-					sb.append("&quot;");
-				else if (ch == '<')
-					sb.append("&lt;");
-				else if (ch == '>')
-					sb.append("&gt;");
-				else if (ch > '~' && charset != null && charSetImpliesAscii(charset)) 
-					// TODO - why is hashcode the only way to get the unicode number for the character
-					// in jre 5.0?
-					sb.append("&#x"+Integer.toHexString(new Character(ch).hashCode()).toUpperCase()+";");
-				else if (isNoLines) {
-					if (ch == '\r')
-						sb.append("&#xA;");
-					else if (ch != '\n')
-						sb.append(ch);
-				}
-				else
+		for (int i = 0; i < rawContent.length(); i++) {
+			char ch = rawContent.charAt(i);
+			if (ch == '\'')
+				sb.append("&#39;");
+			else if (ch == '&')
+				sb.append("&amp;");
+			else if (ch == '"')
+				sb.append("&quot;");
+			else if (ch == '<')
+				sb.append("&lt;");
+			else if (ch == '>')
+				sb.append("&gt;");
+			else if (ch > '~' && charset != null && charSetImpliesAscii(charset)) 
+				// TODO - why is hashcode the only way to get the unicode number for the character
+				// in jre 5.0?
+				sb.append("&#x"+Integer.toHexString(new Character(ch).hashCode()).toUpperCase()+";");
+			else if (isNoLines) {
+				if (ch == '\r')
+					sb.append("&#xA;");
+				else if (ch != '\n')
 					sb.append(ch);
 			}
-			return sb.toString();
+			else
+				sb.append(ch);
 		}
+		return sb.toString();
 	}
 
   public static Element getFirstChild(Element e) {
@@ -435,6 +434,7 @@ public class XMLUtil {
     DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
     factory.setNamespaceAware(false);
     DocumentBuilder builder = factory.newDocumentBuilder();
+    //FIXME resource leak
     return builder.parse(new FileInputStream(filename));
   }
 

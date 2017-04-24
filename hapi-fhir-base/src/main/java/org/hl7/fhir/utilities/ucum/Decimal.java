@@ -4,7 +4,7 @@ package org.hl7.fhir.utilities.ucum;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -175,10 +175,10 @@ public class Decimal {
 	}
 
 	private String delete(String value, int offset, int length) {
-		if (offset == 0)
+		if (offset == 0){
 			return value.substring(length);
-		else
-			return value.substring(0,  offset)+value.substring(offset+length);
+		}
+		return value.substring(0,  offset)+value.substring(offset+length);
 	}
 	
 	private void setValueScientific(String value) throws UcumException  {
@@ -214,10 +214,10 @@ public class Decimal {
   }
 
 	private String insert(String ins, String value, int offset) {
-		if (offset == 0)
+		if (offset == 0) {
 			return ins+value;
-		else
-			return value.substring(0, offset)+ins+value.substring(offset);
+		}
+		return value.substring(0, offset)+ins+value.substring(offset);
   }
 
 	@Override
@@ -515,10 +515,10 @@ public class Decimal {
 	    int t = c + (dig(s1.charAt(i)) - dig(s2.charAt(i)));
 	    if (t < 0) {
 	      t = t + 10;
-	      if (i == 0) 
+	      if (i == 0) {
 	        throw new Error("internal logic error");
-	      else
-	        s1 = replaceChar(s1, i-1, cdig(dig(s1.charAt(i-1))-1));
+	      }
+	      s1 = replaceChar(s1, i-1, cdig(dig(s1.charAt(i-1))-1));
 	    }
 	    result[i] = cdig(t);
 	  }
@@ -527,10 +527,10 @@ public class Decimal {
 	}
 
 	private String replaceChar(String s, int offset, char c) {
-	  if (offset == 0)
+	  if (offset == 0){
 	  	return String.valueOf(c)+s.substring(1);
-	  else
-	  	return s.substring(0, offset)+c+s.substring(offset+1); 
+	  }
+	  return s.substring(0, offset)+c+s.substring(offset+1); 
   }
 
 
@@ -772,10 +772,10 @@ public class Decimal {
 		int i = 0;
 		while (i < s.length() && s.charAt(i) == '0') 
 			i++;
-		if (i == s.length())
+		if (i == s.length()){
 			return "0";
-		else
-		  return s.substring(i);
+		}
+		return s.substring(i);
 	}
 
 	public Decimal divInt(Decimal other) throws UcumException  {

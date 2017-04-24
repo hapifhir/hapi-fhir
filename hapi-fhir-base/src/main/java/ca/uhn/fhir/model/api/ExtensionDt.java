@@ -4,7 +4,7 @@ package ca.uhn.fhir.model.api;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,8 @@ import ca.uhn.fhir.model.primitive.StringDt;
 
 @DatatypeDef(name = "Extension")
 public class ExtensionDt extends BaseIdentifiableElement implements ICompositeDatatype, IBaseExtension<ExtensionDt, IDatatype> {
+
+	private static final long serialVersionUID = 6399491332783085935L;
 
 	private boolean myModifier;
 	
@@ -75,6 +77,7 @@ public class ExtensionDt extends BaseIdentifiableElement implements ICompositeDa
 	 * since the URL itself can not contain extensions and it was therefore misleading.
 	 * </p>
 	 */
+	@Override
 	public String getUrl() {
 		return myUrl != null ? myUrl.getValue() : null;
 	}
@@ -95,6 +98,7 @@ public class ExtensionDt extends BaseIdentifiableElement implements ICompositeDa
 	 * {@link #getUndeclaredModifierExtensions()} to retrieve the child extensions.
 	 * </p>
 	 */
+	@Override
 	public IBaseDatatype getValue() {
 		return myValue;
 	}
@@ -148,6 +152,7 @@ public class ExtensionDt extends BaseIdentifiableElement implements ICompositeDa
 	}
 
 	@Override
+	@Deprecated //override deprecated method
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return new ArrayList<T>();
 	}

@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.method;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -190,6 +190,7 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 				}
 				return listOfResources;
 			case RESOURCE:
+				//FIXME null access on dstu1bundle
 				List<IResource> list = dstu1bundle.toListOfResources();
 				if (list.size() == 0) {
 					return null;
@@ -272,25 +273,24 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 			return theRequest.getResponse().streamResponseAsResource(responseObject.getResource(), prettyPrint, summaryMode, Constants.STATUS_HTTP_200_OK, null, theRequest.isRespondGzip(),
 					isAddContentLocationHeader());
 
-		} else {
-			// Is this request coming from a browser
-			String uaHeader = theRequest.getHeader("user-agent");
-			boolean requestIsBrowser = false;
-			if (uaHeader != null && uaHeader.contains("Mozilla")) {
-				requestIsBrowser = true;
-			}
-
-			for (int i = theServer.getInterceptors().size() - 1; i >= 0; i--) {
-				IServerInterceptor next = theServer.getInterceptors().get(i);
-				boolean continueProcessing = next.outgoingResponse(theRequest, responseObject.getDstu1Bundle());
-				if (!continueProcessing) {
-					ourLog.debug("Interceptor {} returned false, not continuing processing");
-					return null;
-				}
-			}
-
-			return theRequest.getResponse().streamResponseAsBundle(responseObject.getDstu1Bundle(), summaryMode, theRequest.isRespondGzip(), requestIsBrowser);
+		} 
+		// Is this request coming from a browser
+		String uaHeader = theRequest.getHeader("user-agent");
+		boolean requestIsBrowser = false;
+		if (uaHeader != null && uaHeader.contains("Mozilla")) {
+			requestIsBrowser = true;
 		}
+
+		for (int i = theServer.getInterceptors().size() - 1; i >= 0; i--) {
+			IServerInterceptor next = theServer.getInterceptors().get(i);
+			boolean continueProcessing = next.outgoingResponse(theRequest, responseObject.getDstu1Bundle());
+			if (!continueProcessing) {
+				ourLog.debug("Interceptor {} returned false, not continuing processing");
+				return null;
+			}
+		}
+
+		return theRequest.getResponse().streamResponseAsBundle(responseObject.getDstu1Bundle(), summaryMode, theRequest.isRespondGzip(), requestIsBrowser);
 	}
 
 	public ResourceOrDstu1Bundle doInvokeServer(IRestfulServer<?> theServer, RequestDetails theRequest) {
@@ -363,8 +363,6 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 				bundleFactory.addRootPropertiesToBundle(null, theRequest.getFhirServerBase(), linkSelf, count, getResponseBundleType(), lastUpdated);
 
 				responseObject = new ResourceOrDstu1Bundle(resource);
-				break;
-
 			} else {
 				Set<Include> includes = getRequestIncludesFromParams(params);
 
@@ -377,8 +375,15 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 				if (offsetI == null || offsetI < 0) {
 					offsetI = 0;
 				}
-				int start = Math.max(0, Math.min(offsetI, result.size() - 1));
-
+				
+				Integer resultSize = result.size();
+				int start;
+				if (resultSize != null) {
+					start = Math.max(0, Math.min(offsetI, resultSize - 1));
+				} else {
+					start = offsetI;
+				}
+				
 				IVersionSpecificBundleFactory bundleFactory = theServer.getFhirContext().newBundleFactory();
 
 				ResponseEncoding responseEncoding = RestfulServerUtils.determineResponseEncodingNoDefault(theRequest, theServer.getDefaultResponseEncoding());
@@ -394,9 +399,8 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 					IBaseResource resBundle = bundleFactory.getResourceBundle();
 					responseObject = new ResourceOrDstu1Bundle(resBundle);
 				}
-
-				break;
 			}
+			break;
 		}
 		case RESOURCE: {
 			IBundleProvider result = (IBundleProvider) resultObj;

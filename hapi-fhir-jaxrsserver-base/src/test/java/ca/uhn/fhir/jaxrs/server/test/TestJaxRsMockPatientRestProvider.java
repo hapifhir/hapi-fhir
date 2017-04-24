@@ -17,6 +17,7 @@ import org.mockito.Mockito;
 import ca.uhn.fhir.jaxrs.server.AbstractJaxRsResourceProvider;
 import ca.uhn.fhir.jaxrs.server.interceptor.JaxRsExceptionInterceptor;
 import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.dstu2.resource.OperationOutcome;
 import ca.uhn.fhir.model.dstu2.resource.Parameters;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -32,6 +33,7 @@ import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.annotation.Update;
+import ca.uhn.fhir.rest.annotation.Validate;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
@@ -124,6 +126,13 @@ public class TestJaxRsMockPatientRestProvider extends AbstractJaxRsResourceProvi
 			@OperationParam(name = "return", type = StringDt.class) })
 	public Parameters someCustomOperation(@IdParam IdDt myId, @OperationParam(name = "dummy") StringDt dummyInput) {
 		return mock.someCustomOperation(myId, dummyInput);
+	}
+  
+	@Validate()
+	public MethodOutcome validate(@ResourceParam final Patient resource) {
+		final MethodOutcome mO = new MethodOutcome();
+		mO.setOperationOutcome(new OperationOutcome());
+		return mO;
 	}
 
 	@Override

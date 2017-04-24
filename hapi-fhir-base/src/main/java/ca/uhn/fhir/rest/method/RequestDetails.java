@@ -12,7 +12,7 @@ import java.nio.charset.Charset;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,6 +63,7 @@ public abstract class RequestDetails {
 	private IRestfulResponse myResponse;
 	private RestOperationTypeEnum myRestOperationType;
 	private String mySecondaryOperation;
+	private boolean mySubRequest;
 	private Map<String, List<String>> myUnqualifiedToQualifiedNames;
 	private Map<Object, Object> myUserData;
 	protected abstract byte[] getByteStreamRequestContents();
@@ -71,6 +72,7 @@ public abstract class RequestDetails {
 	 * Return the charset as defined by the header contenttype. Return null if it is not set.
 	 */
 	public abstract Charset getCharset();
+
 	public String getCompartmentName() {
 		return myCompartmentName;
 	}
@@ -78,7 +80,6 @@ public abstract class RequestDetails {
 	public String getCompleteUrl() {
 		return myCompleteUrl;
 	}
-
 	/**
 	 * Returns the <b>conditional URL</b> if this request has one, or <code>null</code> otherwise. For an
 	 * update or delete method, this is the part of the URL after the <code>?</code>. For a create, this
@@ -248,6 +249,19 @@ public abstract class RequestDetails {
 		return myRespondGzip;
 	}
 
+	/**
+	 * Is this request a sub-request (i.e. a request within a batch or transaction)? This 
+	 * flag is used internally by hapi-fhir-jpaserver-base, but not used in the plain server
+	 * library. You may use it in your client code as a hint when implementing transaction logic in the plain
+	 * server.
+	 * <p>
+	 * Defaults to {@literal false}
+	 * </p>
+	 */
+	public boolean isSubRequest() {
+		return mySubRequest;
+	}
+
 	public final byte[] loadRequestContents() {
 		if (myRequestContents == null) {
 			myRequestContents = getByteStreamRequestContents();
@@ -327,9 +341,22 @@ public abstract class RequestDetails {
 	public void setRestOperationType(RestOperationTypeEnum theRestOperationType) {
 		myRestOperationType = theRestOperationType;
 	}
-	
+
 	public void setSecondaryOperation(String theSecondaryOperation) {
 		mySecondaryOperation = theSecondaryOperation;
+	}
+	
+	/**
+	 * Is this request a sub-request (i.e. a request within a batch or transaction)? This 
+	 * flag is used internally by hapi-fhir-jpaserver-base, but not used in the plain server
+	 * library. You may use it in your client code as a hint when implementing transaction logic in the plain
+	 * server.
+	 * <p>
+	 * Defaults to {@literal false}
+	 * </p>
+	 */
+	public void setSubRequest(boolean theSubRequest) {
+		mySubRequest = theSubRequest;
 	}
 
 	private class RequestOperationCallback implements IRequestOperationCallback {

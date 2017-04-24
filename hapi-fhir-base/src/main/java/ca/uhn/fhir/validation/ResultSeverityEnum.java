@@ -4,7 +4,7 @@ package ca.uhn.fhir.validation;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,4 +68,12 @@ public enum ResultSeverityEnum {
 		return ourValues.get(theCode);
 	}
 
+	/**
+	 * Convert from Enum ordinal to Enum type.
+	 *
+	 * Usage:
+	 *
+	 * <code>ResultSeverityEnum resultSeverityEnum = ResultSeverityEnum.values[ordinal];</code>
+	 */
+	public static final ResultSeverityEnum values[] = values();
 }

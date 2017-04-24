@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.entity;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,6 +47,7 @@ import ca.uhn.fhir.jpa.util.BigDecimalNumericFieldBridge;
 @Entity
 @Table(name = "HFJ_SPIDX_NUMBER", indexes= {
 	@Index(name = "IDX_SP_NUMBER", columnList = "RES_TYPE,SP_NAME,SP_VALUE"),
+	@Index(name = "IDX_SP_NUMBER_UPDATED", columnList = "SP_UPDATED"), 
 	@Index(name = "IDX_SP_NUMBER_RESID", columnList = "RES_ID") 
 })
 //@formatter:on

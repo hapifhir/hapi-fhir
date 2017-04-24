@@ -4,7 +4,7 @@ package org.hl7.fhir.utilities;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,7 +48,7 @@ WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWIS
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
 POSSIBILITY OF SUCH DAMAGE.
 
-*/
+ */
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -63,33 +63,34 @@ import javax.xml.transform.stream.StreamSource;
 
 public class MyURIResolver implements URIResolver {
 
-  private String path;
-  private URIResolver alt;  
-  
-  public MyURIResolver(String path, URIResolver alt) {
-    super();
-    this.path = path;
-    this.alt = alt;
-  }
+	private String path;
+	private URIResolver alt;  
+
+	public MyURIResolver(String path, URIResolver alt) {
+		super();
+		this.path = path;
+		this.alt = alt;
+	}
 
 
-  @Override
-  public Source resolve(String href, String base) throws TransformerException {
-    try {
-      if (href.startsWith("http://") || href.startsWith("https://")) {
-        if (alt != null) {
-          Source s = alt.resolve(href, base);
-          if (s != null)
-            return s;
-        }
-        return TransformerFactory.newInstance().getURIResolver().resolve(href, base);
-      } else
-        return new StreamSource(new FileInputStream(href.contains(File.separator) ? href : Utilities.path(path, href)));
-    } catch (FileNotFoundException e) {
-      throw new TransformerException(e);
-    } catch (IOException e) {
-      throw new TransformerException(e);
-    }
-  }
+	@Override
+	public Source resolve(String href, String base) throws TransformerException {
+		try {
+			if (href.startsWith("http://") || href.startsWith("https://")) {
+				if (alt != null) {
+					Source s = alt.resolve(href, base);
+					if (s != null)
+						return s;
+				}
+				return TransformerFactory.newInstance().getURIResolver().resolve(href, base);
+			} else
+				//FIXME resource leak
+				return new StreamSource(new FileInputStream(href.contains(File.separator) ? href : Utilities.path(path, href)));
+		} catch (FileNotFoundException e) {
+			throw new TransformerException(e);
+		} catch (IOException e) {
+			throw new TransformerException(e);
+		}
+	}
 
 }

@@ -33,7 +33,7 @@ package org.hl7.fhir.utilities.xml;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -401,10 +401,10 @@ public class XMLWriter extends OutputStreamWriter implements IXMLWriter {
 	@Override
 	public String getDefaultNamespace() {
 		XMLNamespace ns = findDefaultNamespace();
-		if (ns == null)
+		if (ns == null) {
 			return null;
-		else
-			return ns.getNamespace();
+		}
+		return ns.getNamespace();
 	}
 
 	/* (non-Javadoc)
@@ -519,10 +519,10 @@ public class XMLWriter extends OutputStreamWriter implements IXMLWriter {
 			writePendingComment();
 			pendingClose = false;
 		}
-
-		if (name == null) {
-			throw new IOException("name is null");
-		}
+//death code
+//		if (name == null) {
+//			throw new IOException("name is null");
+//		}
 		newLevelIfRequired();
 		levels.current().setName(name);
 		levels.current().setNamespace(namespace);
@@ -615,23 +615,22 @@ public class XMLWriter extends OutputStreamWriter implements IXMLWriter {
 		checkStarted();
 		if (levels.empty()) {
 			throw new IOException("Called exit one too many times");
+		} 
+		if (pendingClose) { 
+			write("/>");
+			writePendingComment();
+			pendingClose = false;
 		} else {
-			if (pendingClose) { 
-				write("/>");
-				writePendingComment();
-				pendingClose = false;
-			} else {
-				if (levels.current().hasChildren())
-					writePretty();
-				write("</");
-				if (levels.current().getNamespace() == null)
-					write(levels.current().getName());
-				else
-					write(getNSAbbreviation(levels.current().getNamespace())+levels.current().getName());
-				write('>');
-			}
-			levels.pop();
+			if (levels.current().hasChildren())
+				writePretty();
+			write("</");
+			if (levels.current().getNamespace() == null)
+				write(levels.current().getName());
+			else
+				write(getNSAbbreviation(levels.current().getNamespace())+levels.current().getName());
+			write('>');
 		}
+		levels.pop();
 	}
 
 	/* (non-Javadoc)
@@ -830,8 +829,8 @@ public class XMLWriter extends OutputStreamWriter implements IXMLWriter {
 			for (int i = 0; i < levels.size() - 1; i++)
 				write("  ");
 			return (levels.size() - 1) * 2;
-		} else
-			return 0;
+		} 
+		return 0;
 	}
 
 	public int getLineType() {

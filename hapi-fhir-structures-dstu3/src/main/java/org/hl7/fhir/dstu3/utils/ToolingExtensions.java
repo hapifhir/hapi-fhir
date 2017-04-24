@@ -55,7 +55,6 @@ import org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemType;
 import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.dstu3.model.Type;
 import org.hl7.fhir.dstu3.model.UriType;
-import org.hl7.fhir.dstu3.validation.ValidationMessage.Source;
 
 
 public class ToolingExtensions {
@@ -105,15 +104,15 @@ public class ToolingExtensions {
 
   // specific extension helpers
 
-  public static Extension makeIssueSource(Source source) {
-    Extension ex = new Extension();
-    // todo: write this up and get it published with the pack (and handle the redirect?)
-    ex.setUrl(ToolingExtensions.EXT_ISSUE_SOURCE);
-    CodeType c = new CodeType();
-    c.setValue(source.toString());
-    ex.setValue(c);
-    return ex;
-  }
+//  public static Extension makeIssueSource(Source source) {
+//    Extension ex = new Extension();
+//    // todo: write this up and get it published with the pack (and handle the redirect?)
+//    ex.setUrl(ToolingExtensions.EXT_ISSUE_SOURCE);
+//    CodeType c = new CodeType();
+//    c.setValue(source.toString());
+//    ex.setValue(c);
+//    return ex;
+//  }
 
   public static boolean hasExtension(DomainResource de, String url) {
     return getExtension(de, url) != null;

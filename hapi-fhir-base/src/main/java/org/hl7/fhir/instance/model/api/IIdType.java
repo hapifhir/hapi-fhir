@@ -6,7 +6,7 @@ package org.hl7.fhir.instance.model.api;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,6 +64,7 @@ public interface IIdType extends IPrimitiveType<String> {
 	 * 
 	 * @see #getIdPart()
 	 */
+	@Override
 	String getValue();
 
 	String getVersionIdPart();
@@ -93,6 +94,7 @@ public interface IIdType extends IPrimitiveType<String> {
 	 */
 	boolean isAbsolute();
 
+	@Override
 	boolean isEmpty();
 
 	/**
@@ -130,10 +132,41 @@ public interface IIdType extends IPrimitiveType<String> {
 
 	IIdType toVersionless();
 
+	/**
+	 * Returns a copy of this object, but with a different {@link #getResourceType() resource type} 
+	 * (or if this object does not have a resource type currently, returns a copy of this object with
+	 * the given resource type).
+	 * <p>
+	 * Note that if this object represents a local reference (e.g. <code>#foo</code>) or
+	 * a URN (e.g. <code>urn:oid:1.2.3.4</code>) this method will simply return a copy
+	 * of this object with no modifications.
+	 * </p>
+	 */
 	IIdType withResourceType(String theResName);
 	
+	/**
+	 * Returns a copy of this object, but with a different {@link #getResourceType() resource type} 
+	 * and {@link #getBaseUrl() base URL}
+	 * (or if this object does not have a resource type currently, returns a copy of this object with
+	 * the given server base and resource type).
+	 * <p>
+	 * Note that if this object represents a local reference (e.g. <code>#foo</code>) or
+	 * a URN (e.g. <code>urn:oid:1.2.3.4</code>) this method will simply return a copy
+	 * of this object with no modifications.
+	 * </p>
+	 */
 	IIdType withServerBase(String theServerBase, String theResourceName);
 
+	/**
+	 * Returns a copy of this object, but with a different {@link #getVersionIdPart() version ID} 
+	 * (or if this object does not have a resource type currently, returns a copy of this object with
+	 * the given version).
+	 * <p>
+	 * Note that if this object represents a local reference (e.g. <code>#foo</code>) or
+	 * a URN (e.g. <code>urn:oid:1.2.3.4</code>) this method will simply return a copy
+	 * of this object with no modifications.
+	 * </p>
+	 */
 	IIdType withVersion(String theVersion);
 
 	/**

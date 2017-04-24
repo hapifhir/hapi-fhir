@@ -15,7 +15,11 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.AfterClass;
+import org.junit.Before;
 import org.junit.Test;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.support.TransactionCallback;
+import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 
 import ca.uhn.fhir.jpa.dao.FulltextSearchSvcImpl.Suggestion;
 import ca.uhn.fhir.jpa.dao.SearchParameterMap;
@@ -34,6 +38,11 @@ import ca.uhn.fhir.util.TestUtil;
 public class FhirResourceDaoDstu2SearchFtTest extends BaseJpaDstu2Test {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoDstu2SearchFtTest.class);
+
+	@Before
+	public void beforeDisableResultReuse() {
+		myDaoConfig.setReuseCachedSearchResultsForMillis(null);
+	}
 
 	@AfterClass
 	public static void afterClassClearContext() {
@@ -150,13 +159,18 @@ public class FhirResourceDaoDstu2SearchFtTest extends BaseJpaDstu2Test {
 
 	@Test
 	public void testSearchAndReindex() {
-		Patient patient;
 		SearchParameterMap map;
 
-		patient = new Patient();
-		patient.getText().setDiv("<div>DIVAAA</div>");
-		patient.addName().addGiven("NAMEAAA");
-		IIdType pId1 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
+		final IIdType pId1= newTxTemplate().execute(new TransactionCallback<IIdType>() {
+			@Override
+			public IIdType doInTransaction(TransactionStatus theStatus) {
+				// TODO Auto-generated method stub
+				Patient patient = new Patient();
+				patient.getText().setDiv("<div>DIVAAA</div>");
+				patient.addName().addGiven("NAMEAAA");
+				return myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
+			}
+		});
 
 		map = new SearchParameterMap();
 		map.add(Constants.PARAM_CONTENT, new StringParam("NAMEAAA"));
@@ -169,12 +183,21 @@ public class FhirResourceDaoDstu2SearchFtTest extends BaseJpaDstu2Test {
 		/*
 		 * Reindex
 		 */
+		newTxTemplate().execute(new TransactionCallbackWithoutResult() {
+			
+			@Override
+			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
+				Patient patient = new Patient();
+				patient.setId(pId1);
+				patient.getText().setDiv("<div>DIVBBB</div>");
+				patient.addName().addGiven("NAMEBBB");
+				myPatientDao.update(patient, mySrd);
+			}
+		});
 
-		patient = new Patient();
-		patient.setId(pId1);
-		patient.getText().setDiv("<div>DIVBBB</div>");
-		patient.addName().addGiven("NAMEBBB");
-		myPatientDao.update(patient, mySrd);
+		map = new SearchParameterMap();
+		map.add(Patient.SP_NAME, new StringParam("NAMEAAA"));
+		assertThat(toUnqualifiedVersionlessIds(myPatientDao.search(map)), empty());
 
 		map = new SearchParameterMap();
 		map.add(Constants.PARAM_CONTENT, new StringParam("NAMEAAA"));

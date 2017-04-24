@@ -4,7 +4,7 @@ package org.hl7.fhir.utilities;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,12 +26,12 @@ import java.util.List;
 
 public class Table<T> {
 
-	private int rowCount;
+//	private int rowCount;
 	private int colCount;
 	private List<List<T>> rows = new ArrayList<List<T>>();
 	
 	public Table(int rowCount, int colCount) {
-		this.rowCount = rowCount;
+//		this.rowCount = rowCount;
 		this.colCount = colCount;
 		for (int r = 0; r < rowCount; r++) {
 			rows.add(new ArrayList<T>());

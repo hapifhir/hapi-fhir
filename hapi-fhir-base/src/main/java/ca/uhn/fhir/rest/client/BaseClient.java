@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.client;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -323,6 +323,7 @@ public abstract class BaseClient implements IRestfulClient {
 			}
 
 		} catch (DataFormatException e) {
+			//FIXME potential null access on httpResquest
 			String msg = getFhirContext().getLocalizer().getMessage(BaseClient.class, "failedToParseResponse", httpRequest.getHttpVerbName(), httpRequest.getUri(), e.toString());
 			throw new FhirClientConnectionException(msg, e);
 		} catch (IllegalStateException e) {
@@ -482,6 +483,7 @@ public abstract class BaseClient implements IRestfulClient {
 				throw NonFhirResponseException.newInstance(theResponseStatusCode, theResponseMimeType, theResponseReader);
 			}
 			IParser parser = respType.newParser(getFhirContext());
+      parser.setServerBaseUrl(getUrlBase());
 			if (myPreferResponseTypes != null) {
 				parser.setPreferTypes(myPreferResponseTypes);
 			}

@@ -10,13 +10,6 @@
   "status": "draft",
   "experimental": true,
   "description": "Base StructureDefinition for Basic Resource",
-  "requirements": "Need some way to safely (without breaking interoperability) allow implementers to exchange content not supported by the initial set of declared resources.",
-  "code": [
-    {
-      "system": "http://fhir.hl7.org.nz/NamingSystem/application",
-      "code": "clinfhir"
-    }
-  ],
   "kind": "resource",
   "abstract": false,
   "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Basic",
@@ -126,8 +119,6 @@
         "path": "Basic.code",
         "short": "Kind of Resource",
         "definition": "Identifies the 'type' of resource - equivalent to the resource name for other resources.",
-        "comments": "Because resource references will only be able to indicate 'Basic', the type of reference will need to be specified in a Profile identified as part of the resource.  Refer to the resource notes section for information on appropriate terminologies for this code.",
-        "requirements": "Must be able to distinguish different types of \"basic\" resources.",
         "min": 1,
         "max": "1",
         "type": [
@@ -159,8 +150,6 @@
         "path": "Basic.subject",
         "short": "Identifies the focus of this resource",
         "definition": "Identifies the patient, practitioner, device or any other resource that is the \"focus\" of this resource.",
-        "comments": "Optional as not all resources potential resources will have subjects.  Resources associated with multiple subjects can handle this via extension.",
-        "requirements": "Needed for partitioning the resource by Patient.",
         "min": 0,
         "max": "1",
         "type": [
@@ -185,7 +174,6 @@
         "path": "Basic.created",
         "short": "When created",
         "definition": "Identifies when the resource was first created.",
-        "requirements": "Allows ordering resource instances by time.",
         "min": 0,
         "max": "1",
         "type": [
@@ -209,7 +197,6 @@
         "path": "Basic.author",
         "short": "Who created",
         "definition": "Indicates who was responsible for creating the resource instance.",
-        "requirements": "Needed for partitioning the resource.",
         "min": 0,
         "max": "1",
         "type": [

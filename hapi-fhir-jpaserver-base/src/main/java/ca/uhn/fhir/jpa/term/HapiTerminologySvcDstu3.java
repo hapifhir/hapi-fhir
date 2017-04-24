@@ -1,18 +1,19 @@
 package ca.uhn.fhir.jpa.term;
 
+import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /*
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  * 
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -40,7 +41,6 @@ import org.hl7.fhir.dstu3.model.CodeSystem.CodeSystemContentMode;
 import org.hl7.fhir.dstu3.model.CodeSystem.ConceptDefinitionComponent;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
-import org.hl7.fhir.dstu3.model.OperationOutcome.IssueSeverity;
 import org.hl7.fhir.dstu3.model.StructureDefinition;
 import org.hl7.fhir.dstu3.model.ValueSet;
 import org.hl7.fhir.dstu3.model.ValueSet.ConceptReferenceComponent;
@@ -53,6 +53,7 @@ import org.hl7.fhir.dstu3.terminologies.ValueSetExpander;
 import org.hl7.fhir.dstu3.terminologies.ValueSetExpander.ValueSetExpansionOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.utilities.validation.ValidationMessage.IssueSeverity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -64,6 +65,7 @@ import ca.uhn.fhir.jpa.entity.ResourceTable;
 import ca.uhn.fhir.jpa.entity.TermCodeSystem;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
+import ca.uhn.fhir.jpa.util.StopWatch;
 import ca.uhn.fhir.rest.method.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -79,7 +81,7 @@ public class HapiTerminologySvcDstu3 extends BaseHapiTerminologySvc implements I
 
 	@Autowired
 	private IValidationSupport myValidationSupport;
-	
+
 	private void addCodeIfNotAlreadyAdded(String system, ValueSetExpansionComponent retVal, Set<String> addedCodes, TermConcept nextConcept) {
 		if (addedCodes.add(nextConcept.getCode())) {
 			ValueSetExpansionContainsComponent contains = retVal.addContains();
@@ -126,12 +128,12 @@ public class HapiTerminologySvcDstu3 extends BaseHapiTerminologySvc implements I
 		for (ConceptDefinitionComponent nextChild : theNext.getConcept()) {
 			foundCodeInChild |= addTreeIfItContainsCode(theSystemString, nextChild, theCode, theListToPopulate);
 		}
-		
+
 		if (theCode.equals(theNext.getCode()) || foundCodeInChild) {
 			theListToPopulate.add(new VersionIndependentConcept(theSystemString, theNext.getCode()));
 			return true;
 		}
-		
+
 		return false;
 	}
 
@@ -159,17 +161,15 @@ public class HapiTerminologySvcDstu3 extends BaseHapiTerminologySvc implements I
 	}
 
 	private void addDisplayFilterInexact(QueryBuilder qb, BooleanJunction<?> bool, ConceptSetFilterComponent nextFilter) {
-		//@formatter:off
 		Query textQuery = qb
 				.phrase()
 				.withSlop(2)
 				.onField("myDisplay").boostedTo(4.0f)
 				.andField("myDisplayEdgeNGram").boostedTo(2.0f)
-				//.andField("myDisplayNGram").boostedTo(1.0f)
-				//.andField("myDisplayPhonetic").boostedTo(0.5f)
+				// .andField("myDisplayNGram").boostedTo(1.0f)
+				// .andField("myDisplayPhonetic").boostedTo(0.5f)
 				.sentence(nextFilter.getValue().toLowerCase()).createQuery();
 		bool.must(textQuery);
-		//@formatter:on
 	}
 
 	@Override
@@ -216,26 +216,33 @@ public class HapiTerminologySvcDstu3 extends BaseHapiTerminologySvc implements I
 			bool.must(qb.keyword().onField("myCodeSystemVersionPid").matching(csv.getPid()).createQuery());
 
 			for (ConceptSetFilterComponent nextFilter : theInclude.getFilter()) {
-				if (isNotBlank(nextFilter.getValue())) {
-					if (nextFilter.getProperty().equals("display:exact") && nextFilter.getOp() == FilterOperator.EQUAL) {
-						addDisplayFilterExact(qb, bool, nextFilter);
-					} else if (nextFilter.getProperty().equals("display") && nextFilter.getOp() == FilterOperator.EQUAL) {
-						if (nextFilter.getValue().trim().contains(" ")) {
-							addDisplayFilterExact(qb, bool, nextFilter);
-						} else {
-							addDisplayFilterInexact(qb, bool, nextFilter);
-						}
-					} else if ((nextFilter.getProperty().equals("concept") || nextFilter.getProperty().equals("code")) && nextFilter.getOp() == FilterOperator.ISA) {
-						TermConcept code = super.findCode(system, nextFilter.getValue());
-						if (code == null) {
-							throw new InvalidRequestException("Invalid filter criteria - code does not exist: {" + system + "}" + nextFilter.getValue());
-						}
+				if (isBlank(nextFilter.getValue()) && nextFilter.getOp() == null && isBlank(nextFilter.getProperty())) {
+					continue;
+				}
 
-						ourLog.info(" * Filtering on codes with a parent of {}/{}/{}", code.getId(), code.getCode(), code.getDisplay());
-						bool.must(qb.keyword().onField("myParentPids").matching("" + code.getId()).createQuery());
+				if (isBlank(nextFilter.getValue()) || nextFilter.getOp() == null || isBlank(nextFilter.getProperty())) {
+					throw new InvalidRequestException("Invalid filter, must have fields populated: property op value");
+				}
+				
+				
+				if (nextFilter.getProperty().equals("display:exact") && nextFilter.getOp() == FilterOperator.EQUAL) {
+					addDisplayFilterExact(qb, bool, nextFilter);
+				} else if ("display".equals(nextFilter.getProperty()) && nextFilter.getOp() == FilterOperator.EQUAL) {
+					if (nextFilter.getValue().trim().contains(" ")) {
+						addDisplayFilterExact(qb, bool, nextFilter);
 					} else {
-						throw new InvalidRequestException("Unknown filter property[" + nextFilter + "] + op[" + nextFilter.getOpElement().getValueAsString() + "]");
+						addDisplayFilterInexact(qb, bool, nextFilter);
 					}
+				} else if ((nextFilter.getProperty().equals("concept") || nextFilter.getProperty().equals("code")) && nextFilter.getOp() == FilterOperator.ISA) {
+					TermConcept code = super.findCode(system, nextFilter.getValue());
+					if (code == null) {
+						throw new InvalidRequestException("Invalid filter criteria - code does not exist: {" + system + "}" + nextFilter.getValue());
+					}
+
+					ourLog.info(" * Filtering on codes with a parent of {}/{}/{}", code.getId(), code.getCode(), code.getDisplay());
+					bool.must(qb.keyword().onField("myParentPids").matching("" + code.getId()).createQuery());
+				} else {
+					throw new InvalidRequestException("Unknown filter property[" + nextFilter + "] + op[" + nextFilter.getOpElement().getValueAsString() + "]");
 				}
 			}
 
@@ -243,12 +250,17 @@ public class HapiTerminologySvcDstu3 extends BaseHapiTerminologySvc implements I
 			FullTextQuery jpaQuery = em.createFullTextQuery(luceneQuery, TermConcept.class);
 			jpaQuery.setMaxResults(1000);
 
+			StopWatch sw = new StopWatch();
+			
 			@SuppressWarnings("unchecked")
 			List<TermConcept> result = jpaQuery.getResultList();
+			
+			ourLog.info("Expansion completed in {}ms", sw.getMillis());
+			
 			for (TermConcept nextConcept : result) {
 				addCodeIfNotAlreadyAdded(system, retVal, addedCodes, nextConcept);
 			}
-			
+
 			retVal.setTotal(jpaQuery.getResultSize());
 		}
 
@@ -258,7 +270,6 @@ public class HapiTerminologySvcDstu3 extends BaseHapiTerminologySvc implements I
 				addCodeIfNotAlreadyAdded(system, retVal, addedCodes, nextConcept);
 			}
 		}
-
 
 		return retVal;
 	}
@@ -324,7 +335,7 @@ public class HapiTerminologySvcDstu3 extends BaseHapiTerminologySvc implements I
 		IIdType csId = createOutcome.getId().toUnqualifiedVersionless();
 		if (createOutcome.getCreated() != Boolean.TRUE) {
 			CodeSystem existing = myCodeSystemResourceDao.read(csId, theRequestDetails);
-			csId = myCodeSystemResourceDao.update(existing, theRequestDetails).getId();
+			csId = myCodeSystemResourceDao.update(existing, null, false, true, theRequestDetails).getId();
 
 			ourLog.info("Created new version of CodeSystem, got ID: {}", csId.toUnqualified().getValue());
 		}

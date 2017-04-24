@@ -1,10 +1,12 @@
 package ca.uhn.fhir.jpa.provider.dstu3;
 
+import java.util.Collection;
+
 /*
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +22,6 @@ package ca.uhn.fhir.jpa.provider.dstu3;
  * #L%
  */
 
-import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
@@ -28,12 +29,15 @@ import javax.servlet.http.HttpServletRequest;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.dstu3.model.CapabilityStatement.*;
 import org.hl7.fhir.dstu3.model.Enumerations.SearchParamType;
+import org.springframework.beans.factory.annotation.Autowired;
 
+import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
+import ca.uhn.fhir.jpa.dao.ISearchParamRegistry;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.util.CoverageIgnore;
 import ca.uhn.fhir.util.ExtensionConstants;
@@ -65,7 +69,7 @@ public class JpaConformanceProviderDstu3 extends org.hl7.fhir.dstu3.hapi.rest.se
 		myDaoConfig = theDaoConfig;
 		super.setCache(false);
 	}
-
+	
 	@Override
 	public CapabilityStatement getServerConformance(HttpServletRequest theRequest) {
 		CapabilityStatement retVal = myCachedValue;
@@ -92,19 +96,48 @@ public class JpaConformanceProviderDstu3 extends org.hl7.fhir.dstu3.hapi.rest.se
 					nextResource.addExtension(new Extension(ExtensionConstants.CONF_RESOURCE_COUNT, new DecimalType(count)));
 				}
 
-				// Add chained params
-				for (CapabilityStatementRestResourceSearchParamComponent nextParam : nextResource.getSearchParam()) {
-					if (nextParam.getType() == SearchParamType.REFERENCE) {
-//						List<CodeType> targets = nextParam.getTarget();
-//						for (CodeType next : targets) {
-//							RuntimeResourceDefinition def = ctx.getResourceDefinition(next.getValue());
-//							for (RuntimeSearchParam nextChainedParam : def.getSearchParams()) {
-//								nextParam.addChain(nextChainedParam.getName());
-//							}
-//						}
-					}
-				}
+				nextResource.getSearchParam().clear();
+				String resourceName = nextResource.getType();
+				RuntimeResourceDefinition resourceDef = myRestfulServer.getFhirContext().getResourceDefinition(resourceName);
+				Collection<RuntimeSearchParam> searchParams = mySystemDao.getSearchParamsByResourceType(resourceDef);
+				for (RuntimeSearchParam runtimeSp : searchParams) {
+					CapabilityStatementRestResourceSearchParamComponent confSp = nextResource.addSearchParam();
 
+					confSp.setName(runtimeSp.getName());
+					confSp.setDocumentation(runtimeSp.getDescription());
+					confSp.setDefinition(runtimeSp.getUri());
+					switch (runtimeSp.getParamType()) {
+					case COMPOSITE:
+						confSp.setType(SearchParamType.COMPOSITE);
+						break;
+					case DATE:
+						confSp.setType(SearchParamType.DATE);
+						break;
+					case NUMBER:
+						confSp.setType(SearchParamType.NUMBER);
+						break;
+					case QUANTITY:
+						confSp.setType(SearchParamType.QUANTITY);
+						break;
+					case REFERENCE:
+						confSp.setType(SearchParamType.REFERENCE);
+						break;
+					case STRING:
+						confSp.setType(SearchParamType.STRING);
+						break;
+					case TOKEN:
+						confSp.setType(SearchParamType.TOKEN);
+						break;
+					case URI:
+						confSp.setType(SearchParamType.URI);
+						break;
+					case HAS:
+						// Shouldn't happen
+						break;
+					}
+					
+				}
+				
 			}
 		}
 

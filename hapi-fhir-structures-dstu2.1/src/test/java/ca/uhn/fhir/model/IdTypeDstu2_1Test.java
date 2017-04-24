@@ -28,6 +28,70 @@ public class IdTypeDstu2_1Test {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
+	@Test
+	public void testUuid() {
+		IdType id = new IdType("urn:uuid:1234-5678");
+		assertEquals("urn:uuid:1234-5678", id.getValueAsString());
+		assertEquals("urn:uuid:1234-5678", id.getIdPart());
+		assertEquals("urn:uuid:1234-5678", id.toUnqualified().getValueAsString());
+		assertEquals("urn:uuid:1234-5678", id.toUnqualifiedVersionless().getValueAsString());
+		assertEquals(null, id.getVersionIdPart());
+		assertEquals(null, id.getResourceType());
+		assertEquals(null, id.getBaseUrl());
+		
+		assertEquals("urn:uuid:1234-5678", id.withResourceType("Patient").getValue());
+		assertEquals("urn:uuid:1234-5678", id.withServerBase("http://foo", "Patient").getValue());
+		assertEquals("urn:uuid:1234-5678", id.withVersion("2").getValue());
+	}
+	
+	@Test
+	public void testOid() {
+		IdType id = new IdType("urn:oid:1.2.3.4");
+		assertEquals("urn:oid:1.2.3.4", id.getValueAsString());
+		assertEquals("urn:oid:1.2.3.4", id.getIdPart());
+		assertEquals("urn:oid:1.2.3.4", id.toUnqualified().getValueAsString());
+		assertEquals("urn:oid:1.2.3.4", id.toUnqualifiedVersionless().getValueAsString());
+		assertEquals(null, id.getVersionIdPart());
+		assertEquals(null, id.getResourceType());
+		assertEquals(null, id.getBaseUrl());
+		
+		assertEquals("urn:oid:1.2.3.4", id.withResourceType("Patient").getValue());
+		assertEquals("urn:oid:1.2.3.4", id.withServerBase("http://foo", "Patient").getValue());
+		assertEquals("urn:oid:1.2.3.4", id.withVersion("2").getValue());
+	}
+
+	@Test
+	public void testLocal() {
+		IdType id = new IdType("#foo");
+		assertEquals("#foo", id.getValueAsString());
+		assertEquals("#foo", id.getIdPart());
+		assertEquals("#foo", id.toUnqualified().getValueAsString());
+		assertEquals("#foo", id.toUnqualifiedVersionless().getValueAsString());
+		assertEquals(null, id.getVersionIdPart());
+		assertEquals(null, id.getResourceType());
+		assertEquals(null, id.getBaseUrl());
+		
+		assertEquals("#foo", id.withResourceType("Patient").getValue());
+		assertEquals("#foo", id.withServerBase("http://foo", "Patient").getValue());
+		assertEquals("#foo", id.withVersion("2").getValue());
+	}
+
+	@Test
+	public void testNormal() {
+		IdType id = new IdType("foo");
+		assertEquals("foo", id.getValueAsString());
+		assertEquals("foo", id.getIdPart());
+		assertEquals("foo", id.toUnqualified().getValueAsString());
+		assertEquals("foo", id.toUnqualifiedVersionless().getValueAsString());
+		assertEquals(null, id.getVersionIdPart());
+		assertEquals(null, id.getResourceType());
+		assertEquals(null, id.getBaseUrl());
+		
+		assertEquals("Patient/foo", id.withResourceType("Patient").getValue());
+		assertEquals("http://foo/Patient/foo", id.withServerBase("http://foo", "Patient").getValue());
+		assertEquals("foo/_history/2", id.withVersion("2").getValue());
+	}
+
 
 	@Test
 	public void testDetectLocal() {
@@ -55,16 +119,16 @@ public class IdTypeDstu2_1Test {
 	@Test
 	public void testDetectLocalBase() {
 		assertEquals("urn:uuid:180f219f-97a8-486d-99d9-ed631fe4fc57", new IdType("urn:uuid:180f219f-97a8-486d-99d9-ed631fe4fc57").getValue());
-		assertEquals("urn:uuid:", new IdType("urn:uuid:180f219f-97a8-486d-99d9-ed631fe4fc57").getBaseUrl());
-		assertEquals("180f219f-97a8-486d-99d9-ed631fe4fc57", new IdType("urn:uuid:180f219f-97a8-486d-99d9-ed631fe4fc57").getIdPart());
+		assertEquals(null, new IdType("urn:uuid:180f219f-97a8-486d-99d9-ed631fe4fc57").getBaseUrl());
+		assertEquals("urn:uuid:180f219f-97a8-486d-99d9-ed631fe4fc57", new IdType("urn:uuid:180f219f-97a8-486d-99d9-ed631fe4fc57").getIdPart());
 
 		assertEquals("cid:180f219f-97a8-486d-99d9-ed631fe4fc57", new IdType("cid:180f219f-97a8-486d-99d9-ed631fe4fc57").getValue());
-		assertEquals("cid:", new IdType("cid:180f219f-97a8-486d-99d9-ed631fe4fc57").getBaseUrl());
-		assertEquals("180f219f-97a8-486d-99d9-ed631fe4fc57", new IdType("cid:180f219f-97a8-486d-99d9-ed631fe4fc57").getIdPart());
+		assertEquals(null, new IdType("cid:180f219f-97a8-486d-99d9-ed631fe4fc57").getBaseUrl());
+		assertEquals("cid:180f219f-97a8-486d-99d9-ed631fe4fc57", new IdType("cid:180f219f-97a8-486d-99d9-ed631fe4fc57").getIdPart());
 
 		assertEquals("#180f219f-97a8-486d-99d9-ed631fe4fc57", new IdType("#180f219f-97a8-486d-99d9-ed631fe4fc57").getValue());
-		assertEquals("#", new IdType("#180f219f-97a8-486d-99d9-ed631fe4fc57").getBaseUrl());
-		assertEquals("180f219f-97a8-486d-99d9-ed631fe4fc57", new IdType("#180f219f-97a8-486d-99d9-ed631fe4fc57").getIdPart());
+		assertEquals(null, new IdType("#180f219f-97a8-486d-99d9-ed631fe4fc57").getBaseUrl());
+		assertEquals("#180f219f-97a8-486d-99d9-ed631fe4fc57", new IdType("#180f219f-97a8-486d-99d9-ed631fe4fc57").getIdPart());
 	}
 	
 
@@ -75,20 +139,20 @@ public class IdTypeDstu2_1Test {
 	public void testComplicatedLocal() {
 		IdType id = new IdType("#Patient/cid:Patient-72/_history/1");
 		assertTrue(id.isLocal());
-		assertEquals("#", id.getBaseUrl());
+		assertEquals(null, id.getBaseUrl());
 		assertNull(id.getResourceType());
 		assertNull(id.getVersionIdPart());
-		assertEquals("Patient/cid:Patient-72/_history/1", id.getIdPart());
+		assertEquals("#Patient/cid:Patient-72/_history/1", id.getIdPart());
 		
 		IdType id2 = new IdType("#Patient/cid:Patient-72/_history/1");
 		assertEquals(id, id2);
 		
 		id2 = id2.toUnqualified();
-		assertFalse(id2.isLocal());
+		assertTrue(id2.isLocal());
 		assertNull(id2.getBaseUrl());
 		assertNull(id2.getResourceType());
 		assertNull(id2.getVersionIdPart());
-		assertEquals("Patient/cid:Patient-72/_history/1", id2.getIdPart());
+		assertEquals("#Patient/cid:Patient-72/_history/1", id2.getIdPart());
 
 	}
 	

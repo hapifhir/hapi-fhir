@@ -12,7 +12,6 @@ import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.ConceptMap;
 import org.hl7.fhir.dstu3.model.ExpansionProfile;
 import org.hl7.fhir.dstu3.model.MetadataResource;
-import org.hl7.fhir.dstu3.model.OperationOutcome.IssueSeverity;
 import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.dstu3.model.StructureDefinition;
 import org.hl7.fhir.dstu3.model.ValueSet;
@@ -21,9 +20,10 @@ import org.hl7.fhir.dstu3.model.ValueSet.ValueSetExpansionComponent;
 import org.hl7.fhir.dstu3.terminologies.ValueSetExpander.TerminologyServiceErrorClass;
 import org.hl7.fhir.dstu3.terminologies.ValueSetExpander.ValueSetExpansionOutcome;
 import org.hl7.fhir.dstu3.utils.INarrativeGenerator;
-import org.hl7.fhir.dstu3.validation.IResourceValidator;
+import org.hl7.fhir.dstu3.utils.IResourceValidator;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.exceptions.TerminologyServiceException;
+import org.hl7.fhir.utilities.validation.ValidationMessage.IssueSeverity;
 
 
 /**
@@ -105,9 +105,10 @@ public interface IWorkerContext {
    * Get a validator that can check whether a resource is valid 
    * 
    * @return a prepared generator
+   * @throws FHIRException 
    * @
    */
-  public IResourceValidator newValidator();
+  public IResourceValidator newValidator() throws FHIRException;
 
   // -- resource fetchers ---------------------------------------------------
 
@@ -153,6 +154,7 @@ public interface IWorkerContext {
   // -- profile services ---------------------------------------------------------
   
   public List<String> getResourceNames();
+  public List<String> getTypeNames();
   public List<StructureDefinition> allStructures();
   public List<MetadataResource> allConformanceResources();
   
@@ -338,11 +340,15 @@ public interface IWorkerContext {
   public boolean hasCache();
 
   public interface ILoggingService {
+    public enum LogCategory {
+      PROGRESS, TX, INIT, CONTEXT, HTML 
+    }
     public void logMessage(String message); // status messages, always display
-    public void logDebugMessage(String message); // verbose; only when debugging 
+    public void logDebugMessage(LogCategory category, String message); // verbose; only when debugging 
   }
 
   public void setLogger(ILoggingService logger);
 
   public boolean isNoTerminologyServer();
+
 }

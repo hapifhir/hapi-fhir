@@ -4,13 +4,13 @@ package ca.uhn.fhir.rest.server;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  * 
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -25,11 +25,9 @@ import java.util.UUID;
 
 import org.apache.commons.lang3.Validate;
 
-public class FifoMemoryPagingProvider implements IPagingProvider {
+public class FifoMemoryPagingProvider extends BasePagingProvider implements IPagingProvider {
 
 	private LinkedHashMap<String, IBundleProvider> myBundleProviders;
-	private int myDefaultPageSize=10;
-	private int myMaximumPageSize=50;
 	private int mySize;
 
 	public FifoMemoryPagingProvider(int theSize) {
@@ -40,30 +38,8 @@ public class FifoMemoryPagingProvider implements IPagingProvider {
 	}
 
 	@Override
-	public int getDefaultPageSize() {
-		return myDefaultPageSize;
-	}
-
-	@Override
-	public int getMaximumPageSize() {
-		return myMaximumPageSize;
-	}
-
-	@Override
 	public synchronized IBundleProvider retrieveResultList(String theId) {
 		return myBundleProviders.get(theId);
-	}
-
-	public FifoMemoryPagingProvider setDefaultPageSize(int theDefaultPageSize) {
-		Validate.isTrue(theDefaultPageSize > 0, "size must be greater than 0");
-		myDefaultPageSize = theDefaultPageSize;
-		return this;
-	}
-
-	public FifoMemoryPagingProvider setMaximumPageSize(int theMaximumPageSize) {
-		Validate.isTrue(theMaximumPageSize > 0, "size must be greater than 0");
-		myMaximumPageSize = theMaximumPageSize;
-		return this;
 	}
 
 	@Override

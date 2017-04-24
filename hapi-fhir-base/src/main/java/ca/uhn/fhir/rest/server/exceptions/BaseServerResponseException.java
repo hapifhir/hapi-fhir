@@ -3,7 +3,6 @@ package ca.uhn.fhir.rest.server.exceptions;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,7 +16,7 @@ import ca.uhn.fhir.rest.server.IResourceProvider;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -318,9 +317,8 @@ public abstract class BaseServerResponseException extends RuntimeException {
 			} catch (SecurityException e) {
 				throw new InternalErrorException(e);
 			}
-		} else {
-			return new UnclassifiedServerFailureException(theStatusCode, theMessage);
 		}
+		return new UnclassifiedServerFailureException(theStatusCode, theMessage);
 	}
 
 	static void registerExceptionType(int theStatusCode, Class<? extends BaseServerResponseException> theType) {

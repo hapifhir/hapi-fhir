@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.dao;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -38,8 +39,6 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.context.ConfigurationException;
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamCoords;
@@ -79,8 +78,8 @@ public class SearchParamExtractorDstu1 extends BaseSearchParamExtractor implemen
 	public Set<ResourceIndexedSearchParamDate> extractSearchParamDates(ResourceTable theEntity, IBaseResource theResource) {
 		HashSet<ResourceIndexedSearchParamDate> retVal = new HashSet<ResourceIndexedSearchParamDate>();
 
-		RuntimeResourceDefinition def = getContext().getResourceDefinition(theResource);
-		for (RuntimeSearchParam nextSpDef : def.getSearchParams()) {
+		Collection<RuntimeSearchParam> searchParams = getSearchParams(theResource);
+		for (RuntimeSearchParam nextSpDef : searchParams) {
 			if (nextSpDef.getParamType() != RestSearchParameterTypeEnum.DATE) {
 				continue;
 			}
@@ -130,12 +129,13 @@ public class SearchParamExtractorDstu1 extends BaseSearchParamExtractor implemen
 		return retVal;
 	}
 
+
 	@Override
 	public HashSet<ResourceIndexedSearchParamNumber> extractSearchParamNumber(ResourceTable theEntity, IBaseResource theResource) {
 		HashSet<ResourceIndexedSearchParamNumber> retVal = new HashSet<ResourceIndexedSearchParamNumber>();
 
-		RuntimeResourceDefinition def = getContext().getResourceDefinition(theResource);
-		for (RuntimeSearchParam nextSpDef : def.getSearchParams()) {
+		Collection<RuntimeSearchParam> searchParams = getSearchParams(theResource);
+		for (RuntimeSearchParam nextSpDef : searchParams) {
 			if (nextSpDef.getParamType() != RestSearchParameterTypeEnum.NUMBER) {
 				continue;
 			}
@@ -229,8 +229,8 @@ public class SearchParamExtractorDstu1 extends BaseSearchParamExtractor implemen
 	public Set<ResourceIndexedSearchParamQuantity> extractSearchParamQuantity(ResourceTable theEntity, IBaseResource theResource) {
 		HashSet<ResourceIndexedSearchParamQuantity> retVal = new HashSet<ResourceIndexedSearchParamQuantity>();
 
-		RuntimeResourceDefinition def = getContext().getResourceDefinition(theResource);
-		for (RuntimeSearchParam nextSpDef : def.getSearchParams()) {
+		Collection<RuntimeSearchParam> searchParams = getSearchParams(theResource);
+		for (RuntimeSearchParam nextSpDef : searchParams) {
 			if (nextSpDef.getParamType() != RestSearchParameterTypeEnum.QUANTITY) {
 				continue;
 			}
@@ -277,8 +277,8 @@ public class SearchParamExtractorDstu1 extends BaseSearchParamExtractor implemen
 	public Set<ResourceIndexedSearchParamString> extractSearchParamStrings(ResourceTable theEntity, IBaseResource theResource) {
 		HashSet<ResourceIndexedSearchParamString> retVal = new HashSet<ResourceIndexedSearchParamString>();
 
-		RuntimeResourceDefinition def = getContext().getResourceDefinition(theResource);
-		for (RuntimeSearchParam nextSpDef : def.getSearchParams()) {
+		Collection<RuntimeSearchParam> searchParams = getSearchParams(theResource);
+		for (RuntimeSearchParam nextSpDef : searchParams) {
 			if (nextSpDef.getParamType() != RestSearchParameterTypeEnum.STRING) {
 				continue;
 			}
@@ -363,8 +363,8 @@ public class SearchParamExtractorDstu1 extends BaseSearchParamExtractor implemen
 	public Set<BaseResourceIndexedSearchParam> extractSearchParamTokens(ResourceTable theEntity, IBaseResource theResource) {
 		HashSet<BaseResourceIndexedSearchParam> retVal = new HashSet<BaseResourceIndexedSearchParam>();
 
-		RuntimeResourceDefinition def = getContext().getResourceDefinition(theResource);
-		for (RuntimeSearchParam nextSpDef : def.getSearchParams()) {
+		Collection<RuntimeSearchParam> searchParams = getSearchParams(theResource);
+		for (RuntimeSearchParam nextSpDef : searchParams) {
 			if (nextSpDef.getParamType() != RestSearchParameterTypeEnum.TOKEN) {
 				continue;
 			}

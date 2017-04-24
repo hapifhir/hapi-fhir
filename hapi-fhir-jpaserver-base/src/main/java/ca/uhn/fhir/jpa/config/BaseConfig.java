@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.config;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,14 +37,14 @@ import org.springframework.scheduling.concurrent.ConcurrentTaskScheduler;
 import org.springframework.scheduling.concurrent.ScheduledExecutorFactoryBean;
 import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 
-import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
-import ca.uhn.fhir.jpa.search.StaleSearchDeletingSvc;
+import ca.uhn.fhir.jpa.search.*;
+import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
+import ca.uhn.fhir.jpa.sp.SearchParamPresenceSvcImpl;
 
 @Configuration
 @EnableScheduling
 @EnableJpaRepositories(basePackages = "ca.uhn.fhir.jpa.dao.data")
 public class BaseConfig implements SchedulingConfigurer {
-
 
 	@Resource
 	private ApplicationContext myAppCtx;
@@ -59,13 +59,8 @@ public class BaseConfig implements SchedulingConfigurer {
 
 	@Bean(autowire = Autowire.BY_TYPE)
 	public DatabaseBackedPagingProvider databaseBackedPagingProvider() {
-		DatabaseBackedPagingProvider retVal = new DatabaseBackedPagingProvider(10);
+		DatabaseBackedPagingProvider retVal = new DatabaseBackedPagingProvider();
 		return retVal;
-	}
-
-	@Bean(autowire=Autowire.BY_TYPE)
-	public StaleSearchDeletingSvc staleSearchDeletingSvc() {
-		return new StaleSearchDeletingSvc();
 	}
 
 	@Bean()
@@ -73,6 +68,21 @@ public class BaseConfig implements SchedulingConfigurer {
 		ScheduledExecutorFactoryBean b = new ScheduledExecutorFactoryBean();
 		b.setPoolSize(5);
 		return b;
+	}
+	
+	@Bean(autowire=Autowire.BY_TYPE)
+	public ISearchCoordinatorSvc searchCoordinatorSvc() {
+		return new SearchCoordinatorSvcImpl();
+	}
+
+	@Bean
+	public ISearchParamPresenceSvc searchParamPresenceSvc() {
+		return new SearchParamPresenceSvcImpl();
+	}
+
+	@Bean(autowire=Autowire.BY_TYPE)
+	public IStaleSearchDeletingSvc staleSearchDeletingSvc() {
+		return new StaleSearchDeletingSvcImpl();
 	}
 	
 	@Bean

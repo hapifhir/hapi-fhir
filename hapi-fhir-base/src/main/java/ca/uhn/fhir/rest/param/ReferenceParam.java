@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.param;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,11 +29,10 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.util.CoverageIgnore;
 
-public class ReferenceParam extends BaseParam implements IQueryParameterType {
+public class ReferenceParam extends BaseParam /*implements IQueryParameterType*/ {
 
 	private String myChain;
 
@@ -93,9 +92,8 @@ public class ReferenceParam extends BaseParam implements IQueryParameterType {
 	String doGetValueAsQueryToken(FhirContext theContext) {
 		if (isBlank(myId.getResourceType())) {
 			return myId.getValue(); // e.g. urn:asdjd or 123 or cid:wieiuru or #1
-		} else {
-			return myId.getIdPart();
 		}
+		return myId.getIdPart();
 	}
 
 	@Override

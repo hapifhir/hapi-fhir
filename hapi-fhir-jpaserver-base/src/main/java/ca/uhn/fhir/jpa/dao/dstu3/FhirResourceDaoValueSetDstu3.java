@@ -4,13 +4,13 @@ package ca.uhn.fhir.jpa.dao.dstu3;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  * 
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -33,6 +33,7 @@ import org.hl7.fhir.dstu3.model.CodeSystem;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus;
+import org.hl7.fhir.dstu3.model.IntegerType;
 import org.hl7.fhir.dstu3.model.UriType;
 import org.hl7.fhir.dstu3.model.ValueSet;
 import org.hl7.fhir.dstu3.model.ValueSet.ConceptSetComponent;
@@ -60,7 +61,7 @@ public class FhirResourceDaoValueSetDstu3 extends FhirResourceDaoDstu3<ValueSet>
 	private IValidationSupport myValidationSupport;
 
 	@Autowired
-	private IFhirResourceDaoCodeSystem<CodeSystem, CodeableConcept, Coding> myCodeSystemDao;
+	private IFhirResourceDaoCodeSystem<CodeSystem, Coding, CodeableConcept> myCodeSystemDao;
 
 	@Override
 	public ValueSet expand(IIdType theId, String theFilter, RequestDetails theRequestDetails) {
@@ -82,12 +83,12 @@ public class FhirResourceDaoValueSetDstu3 extends FhirResourceDaoDstu3<ValueSet>
 
 		return retVal;
 
-		//		ValueSetExpansionComponent expansion = outcome.getValueset().getExpansion();
+		// ValueSetExpansionComponent expansion = outcome.getValueset().getExpansion();
 		//
-		//		ValueSet retVal = new ValueSet();
-		//		retVal.getMeta().setLastUpdated(new Date());
-		//		retVal.setExpansion(expansion);
-		//		return retVal;
+		// ValueSet retVal = new ValueSet();
+		// retVal.getMeta().setLastUpdated(new Date());
+		// retVal.setExpansion(expansion);
+		// return retVal;
 	}
 
 	private void validateIncludes(String name, List<ConceptSetComponent> listToValidate) {
@@ -137,11 +138,11 @@ public class FhirResourceDaoValueSetDstu3 extends FhirResourceDaoDstu3<ValueSet>
 	public ValueSet expand(ValueSet source, String theFilter) {
 		ValueSet toExpand = new ValueSet();
 
-//		for (UriType next : source.getCompose().getInclude()) {
-//			ConceptSetComponent include = toExpand.getCompose().addInclude();
-//			include.setSystem(next.getValue());
-//			addFilterIfPresent(theFilter, include);
-//		}
+		// for (UriType next : source.getCompose().getInclude()) {
+		// ConceptSetComponent include = toExpand.getCompose().addInclude();
+		// include.setSystem(next.getValue());
+		// addFilterIfPresent(theFilter, include);
+		// }
 
 		for (ConceptSetComponent next : source.getCompose().getInclude()) {
 			toExpand.getCompose().addInclude(next);
@@ -155,18 +156,41 @@ public class FhirResourceDaoValueSetDstu3 extends FhirResourceDaoDstu3<ValueSet>
 		toExpand.getCompose().getExclude().addAll(source.getCompose().getExclude());
 
 		ValueSet retVal = doExpand(toExpand);
+
+		if (isNotBlank(theFilter)) {
+			applyFilter(retVal.getExpansion().getTotalElement(), retVal.getExpansion().getContains(), theFilter);
+		}
+
 		return retVal;
 
 	}
 
+	private void applyFilter(IntegerType theTotalElement, List<ValueSetExpansionContainsComponent> theContains, String theFilter) {
+
+		for (int idx = 0; idx < theContains.size(); idx++) {
+			ValueSetExpansionContainsComponent next = theContains.get(idx);
+			if (isBlank(next.getDisplay()) || !org.apache.commons.lang3.StringUtils.containsIgnoreCase(next.getDisplay(), theFilter)) {
+				theContains.remove(idx);
+				idx--;
+				if (theTotalElement.getValue() != null) {
+					theTotalElement.setValue(theTotalElement.getValue() - 1);
+				}
+			}
+			applyFilter(theTotalElement, next.getContains(), theFilter);
+		}
+	}
+
 	private void addFilterIfPresent(String theFilter, ConceptSetComponent include) {
-		if (isNotBlank(theFilter)) {
-			include.addFilter().setProperty("display").setOp(FilterOperator.EQUAL).setValue(theFilter);
+		if (ElementUtil.isEmpty(include.getConcept())) {
+			if (isNotBlank(theFilter)) {
+				include.addFilter().setProperty("display").setOp(FilterOperator.EQUAL).setValue(theFilter);
+			}
 		}
 	}
 
 	@Override
-	public ca.uhn.fhir.jpa.dao.IFhirResourceDaoValueSet.ValidateCodeResult validateCode(IPrimitiveType<String> theValueSetIdentifier, IIdType theId, IPrimitiveType<String> theCode, IPrimitiveType<String> theSystem, IPrimitiveType<String> theDisplay, Coding theCoding,
+	public ca.uhn.fhir.jpa.dao.IFhirResourceDaoValueSet.ValidateCodeResult validateCode(IPrimitiveType<String> theValueSetIdentifier, IIdType theId, IPrimitiveType<String> theCode,
+			IPrimitiveType<String> theSystem, IPrimitiveType<String> theDisplay, Coding theCoding,
 			CodeableConcept theCodeableConcept, RequestDetails theRequestDetails) {
 
 		List<IIdType> valueSetIds = Collections.emptyList();
@@ -226,7 +250,8 @@ public class FhirResourceDaoValueSetDstu3 extends FhirResourceDaoDstu3<ValueSet>
 		return thePrimitive != null ? thePrimitive.getValue() : null;
 	}
 
-	private ca.uhn.fhir.jpa.dao.IFhirResourceDaoValueSet.ValidateCodeResult validateCodeIsInContains(List<ValueSetExpansionContainsComponent> contains, String theSystem, String theCode, Coding theCoding, CodeableConcept theCodeableConcept) {
+	private ca.uhn.fhir.jpa.dao.IFhirResourceDaoValueSet.ValidateCodeResult validateCodeIsInContains(List<ValueSetExpansionContainsComponent> contains, String theSystem, String theCode,
+			Coding theCoding, CodeableConcept theCodeableConcept) {
 		for (ValueSetExpansionContainsComponent nextCode : contains) {
 			ca.uhn.fhir.jpa.dao.IFhirResourceDaoValueSet.ValidateCodeResult result = validateCodeIsInContains(nextCode.getContains(), theSystem, theCode, theCoding, theCodeableConcept);
 			if (result != null) {

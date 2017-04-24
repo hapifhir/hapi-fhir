@@ -4,7 +4,7 @@ package ca.uhn.fhir.model.base.resource;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,6 +40,8 @@ public interface BaseOperationOutcome extends IResource, IBaseOperationOutcome {
 
 	public static abstract class BaseIssue extends BaseIdentifiableElement implements IResourceBlock {
 	
+		private static final long serialVersionUID = 6700020892151450738L;
+
 		public abstract CodeDt getSeverityElement();
 		
 		public abstract StringDt getDetailsElement();

@@ -6,7 +6,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -233,12 +233,14 @@ public class TermConcept implements Serializable {
 	@PreUpdate
 	@PrePersist
 	public void prePersist() {
-		Set<Long> parentPids = new HashSet<Long>();
-		TermConcept entity = this;
-		parentPids(entity, parentPids);
-		entity.setParentPids(parentPids);
-
-		ourLog.trace("Code {}/{} has parents {}", entity.getId(), entity.getCode(), entity.getParentPidsAsString());
+		if (myParentPids == null) {
+			Set<Long> parentPids = new HashSet<Long>();
+			TermConcept entity = this;
+			parentPids(entity, parentPids);
+			entity.setParentPids(parentPids);
+	
+			ourLog.trace("Code {}/{} has parents {}", entity.getId(), entity.getCode(), entity.getParentPidsAsString());
+		}
 	}
 
 	public void setCode(String theCode) {
@@ -278,6 +280,10 @@ public class TermConcept implements Serializable {
 		}
 
 		myParentPids = b.toString();
+	}
+
+	public void setParentPids(String theParentPids) {
+		myParentPids = theParentPids;
 	}
 
 	@Override

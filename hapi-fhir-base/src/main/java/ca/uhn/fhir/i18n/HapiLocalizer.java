@@ -6,7 +6,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,9 +24,12 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -90,9 +93,20 @@ public class HapiLocalizer {
 			format = new MessageFormat(formatString.trim());
 			myKeyToMessageFormat.put(theQualifiedKey, format);
 			return format.format(theParameters).toString();
-		} else {
-			String retVal = findFormatString(theQualifiedKey);
-			return retVal;
 		}
+		String retVal = findFormatString(theQualifiedKey);
+		return retVal;
 	}
+	
+	public Set<String> getAllKeys(){
+		HashSet<String> retVal = new HashSet<String>();
+		for (ResourceBundle nextBundle : myBundle) {
+			Enumeration<String> keysEnum = nextBundle.getKeys();
+			while (keysEnum.hasMoreElements()) {
+				retVal.add(keysEnum.nextElement());
+			}
+		}
+		return retVal;
+	}
+	
 }

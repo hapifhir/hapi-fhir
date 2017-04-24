@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.param;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -108,8 +108,10 @@ public class ParameterUtil {
 						} else {
 							if (b.length() > 0) {
 								retVal.add(b.toString());
-								b.setLength(0);
+							} else {
+								retVal.add(null);
 							}
+							b.setLength(0);
 						}
 					}
 				} else {
@@ -137,9 +139,8 @@ public class ParameterUtil {
 	public static String escapeWithDefault(Object theValue) {
 		if (theValue == null) {
 			return "";
-		} else {
-			return escape(theValue.toString());
 		}
+		return escape(theValue.toString());
 	}
 
 	/**

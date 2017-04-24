@@ -39,20 +39,12 @@ public class ${className}ResourceProvider extends
 		return ${className}.class;
 	}
 
-	@Search()
+	@Search(allowUnknownParams=true)
 	public ca.uhn.fhir.rest.server.IBundleProvider search(
 			javax.servlet.http.HttpServletRequest theServletRequest,
 			
 			ca.uhn.fhir.rest.method.RequestDetails theRequestDetails,
 			
-			@Description(shortDefinition="The resource identity")
-			@OptionalParam(name="_id")
-			StringAndListParam theId, 
-
-			@Description(shortDefinition="The resource language")
-			@OptionalParam(name="_language")
-			StringAndListParam theResourceLanguage, 
-
 			@Description(shortDefinition="Search the contents of the resource's data using a fulltext search")
 			@OptionalParam(name=ca.uhn.fhir.rest.server.Constants.PARAM_CONTENT)
 			StringAndListParam theFtContent, 
@@ -107,6 +99,9 @@ public class ${className}ResourceProvider extends
 #end
 #end	
 
+			@RawParam
+			Map<String, List<String>> theAdditionalRawParams,
+
 #if ( $version != 'dstu' )
 			@IncludeParam(reverse=true)
 			Set<Include> theRevIncludes,
@@ -141,8 +136,6 @@ public class ${className}ResourceProvider extends
 		startRequest(theServletRequest);
 		try {
 			SearchParameterMap paramMap = new SearchParameterMap();
-			paramMap.add("_id", theId);
-			paramMap.add("_language", theResourceLanguage);
 			paramMap.add(ca.uhn.fhir.rest.server.Constants.PARAM_CONTENT, theFtContent);
 			paramMap.add(ca.uhn.fhir.rest.server.Constants.PARAM_TEXT, theFtText);
 			paramMap.add(ca.uhn.fhir.rest.server.Constants.PARAM_TAG, theSearchForTag);
@@ -159,9 +152,10 @@ public class ${className}ResourceProvider extends
 			paramMap.setIncludes(theIncludes);
 			paramMap.setSort(theSort);
 			paramMap.setCount(theCount);
-			paramMap.setRequestDetails(theRequestDetails);
 
-			ca.uhn.fhir.rest.server.IBundleProvider retVal = getDao().search(paramMap);
+			getDao().translateRawParameters(theAdditionalRawParams, paramMap);
+
+			ca.uhn.fhir.rest.server.IBundleProvider retVal = getDao().search(paramMap, theRequestDetails);
 			return retVal;
 		} finally {
 			endRequest(theServletRequest);

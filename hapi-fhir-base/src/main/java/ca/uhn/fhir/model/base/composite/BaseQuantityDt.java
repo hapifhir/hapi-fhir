@@ -4,7 +4,7 @@ package ca.uhn.fhir.model.base.composite;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.BaseIdentifiableElement;
 import ca.uhn.fhir.model.api.ICompositeDatatype;
 import ca.uhn.fhir.model.api.IQueryParameterType;
+//TODO: Use of a deprecated method should be resolved.
 import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
 import ca.uhn.fhir.model.primitive.BoundCodeDt;
 import ca.uhn.fhir.model.primitive.CodeDt;
@@ -38,7 +39,8 @@ import ca.uhn.fhir.rest.param.QuantityParam;
 
 public abstract class BaseQuantityDt extends BaseIdentifiableElement implements ICompositeDatatype, IQueryParameterType {
 
-	
+	private static final long serialVersionUID = -925486613033086056L;
+
 	/**
 	 * Sets the value(s) for <b>value</b> (Numerical value (with implicit precision))
 	 *
@@ -64,15 +66,19 @@ public abstract class BaseQuantityDt extends BaseIdentifiableElement implements 
 		String[] parts = theValue.split("\\|");
 		if (parts.length > 0 && StringUtils.isNotBlank(parts[0])) {
 			if (parts[0].startsWith("<=")) {
+				//TODO: Use of a deprecated method should be resolved.
 				getComparatorElement().setValue(QuantityCompararatorEnum.LESSTHAN_OR_EQUALS.getCode());
 				setValue(new BigDecimal(parts[0].substring(2)));
 			} else if (parts[0].startsWith("<")) {
+				//TODO: Use of a deprecated method should be resolved.
 				getComparatorElement().setValue(QuantityCompararatorEnum.LESSTHAN.getCode());
 				setValue(new BigDecimal(parts[0].substring(1)));
 			} else if (parts[0].startsWith(">=")) {
+				//TODO: Use of a deprecated method should be resolved.
 				getComparatorElement().setValue(QuantityCompararatorEnum.GREATERTHAN_OR_EQUALS.getCode());
 				setValue(new BigDecimal(parts[0].substring(2)));
 			} else if (parts[0].startsWith(">")) {
+				//TODO: Use of a deprecated method should be resolved.
 				getComparatorElement().setValue(QuantityCompararatorEnum.GREATERTHAN.getCode());
 				setValue(new BigDecimal(parts[0].substring(1)));
 			} else {

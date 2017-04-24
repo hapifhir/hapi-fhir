@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.client.interceptor;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,14 +47,14 @@ public class LoggingInterceptor implements IClientInterceptor {
 	private boolean myLogResponseSummary = true;
 
 	/**
-	 * Constructor
+	 * Constructor for client logging interceptor
 	 */
 	public LoggingInterceptor() {
 		super();
 	}
 
 	/**
-	 * Constructor
+	 * Constructor for client logging interceptor
 	 * 
 	 * @param theVerbose
 	 *            If set to true, all logging is enabled
@@ -120,6 +120,7 @@ public class LoggingInterceptor implements IClientInterceptor {
 		}
 
 		if (myLogResponseBody) {
+			//TODO: Use of a deprecated method should be resolved.
 			theResponse.bufferEntitity();
 			InputStream respEntity = null;
 			try  {

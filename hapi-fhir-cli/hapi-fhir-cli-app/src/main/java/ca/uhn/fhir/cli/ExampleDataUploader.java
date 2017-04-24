@@ -137,7 +137,7 @@ public class ExampleDataUploader extends BaseCommand {
 			specUrl = "http://hl7.org/fhir/dstu2/examples-json.zip";
 			break;
 		case DSTU3:
-			specUrl = "http://hl7-fhir.github.io/examples-json.zip";
+			specUrl = "http://build.fhir.org/examples-json.zip";
 			break;
 		default:
 			throw new ParseException("Invalid spec version for this command: " + ctx.getVersion().getVersion());

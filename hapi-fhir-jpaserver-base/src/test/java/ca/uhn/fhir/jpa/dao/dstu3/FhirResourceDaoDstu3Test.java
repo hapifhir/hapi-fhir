@@ -23,79 +23,38 @@ import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.io.IOException;
+import java.util.*;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.hamcrest.Matchers;
 import org.hamcrest.core.StringContains;
-import org.hl7.fhir.dstu3.model.Age;
-import org.hl7.fhir.dstu3.model.BaseResource;
-import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.dstu3.model.Bundle.BundleType;
 import org.hl7.fhir.dstu3.model.Bundle.HTTPVerb;
-import org.hl7.fhir.dstu3.model.CarePlan;
-import org.hl7.fhir.dstu3.model.CodeSystem;
-import org.hl7.fhir.dstu3.model.CodeType;
-import org.hl7.fhir.dstu3.model.CodeableConcept;
-import org.hl7.fhir.dstu3.model.Coding;
-import org.hl7.fhir.dstu3.model.CompartmentDefinition;
-import org.hl7.fhir.dstu3.model.ConceptMap;
-import org.hl7.fhir.dstu3.model.Condition;
-import org.hl7.fhir.dstu3.model.DateTimeType;
-import org.hl7.fhir.dstu3.model.DateType;
-import org.hl7.fhir.dstu3.model.Device;
-import org.hl7.fhir.dstu3.model.DiagnosticReport;
-import org.hl7.fhir.dstu3.model.Encounter;
 import org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus;
-import org.hl7.fhir.dstu3.model.IdType;
-import org.hl7.fhir.dstu3.model.Meta;
-import org.hl7.fhir.dstu3.model.NamingSystem;
-import org.hl7.fhir.dstu3.model.Observation;
 import org.hl7.fhir.dstu3.model.Observation.ObservationStatus;
-import org.hl7.fhir.dstu3.model.OperationDefinition;
-import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.hl7.fhir.dstu3.model.OperationOutcome.IssueSeverity;
 import org.hl7.fhir.dstu3.model.OperationOutcome.IssueType;
-import org.hl7.fhir.dstu3.model.Organization;
-import org.hl7.fhir.dstu3.model.Patient;
-import org.hl7.fhir.dstu3.model.Period;
-import org.hl7.fhir.dstu3.model.Quantity;
 import org.hl7.fhir.dstu3.model.Quantity.QuantityComparator;
-import org.hl7.fhir.dstu3.model.Questionnaire;
-import org.hl7.fhir.dstu3.model.Range;
-import org.hl7.fhir.dstu3.model.Reference;
-import org.hl7.fhir.dstu3.model.SimpleQuantity;
-import org.hl7.fhir.dstu3.model.StringType;
-import org.hl7.fhir.dstu3.model.StructureDefinition;
-import org.hl7.fhir.dstu3.model.Timing;
-import org.hl7.fhir.dstu3.model.UriType;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.junit.After;
 import org.junit.AfterClass;
+import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 
 import com.google.common.collect.Lists;
 
-import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
-import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
-import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.dao.SearchParameterMap;
+import ca.uhn.fhir.jpa.dao.*;
 import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.entity.TagTypeEnum;
-import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
@@ -106,21 +65,10 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
-import ca.uhn.fhir.rest.param.DateParam;
-import ca.uhn.fhir.rest.param.DateRangeParam;
-import ca.uhn.fhir.rest.param.QuantityParam;
-import ca.uhn.fhir.rest.param.ReferenceParam;
-import ca.uhn.fhir.rest.param.StringParam;
-import ca.uhn.fhir.rest.param.TokenOrListParam;
-import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.param.*;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.IBundleProvider;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
-import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
-import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
-import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import ca.uhn.fhir.rest.server.exceptions.*;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
 import ca.uhn.fhir.util.TestUtil;
 
@@ -128,6 +76,17 @@ import ca.uhn.fhir.util.TestUtil;
 public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoDstu3Test.class);
+
+	@Before
+	public void beforeDisableResultReuse() {
+		myDaoConfig.setReuseCachedSearchResultsForMillis(null);
+	}
+
+	@After
+	public final void after() {
+		myDaoConfig.setAllowExternalReferences(new DaoConfig().isAllowExternalReferences());
+		myDaoConfig.setTreatReferencesAsLogical(new DaoConfig().getTreatReferencesAsLogical());
+	}
 
 	private void assertGone(IIdType theId) {
 		try {
@@ -152,7 +111,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 			fail("Can't handle type: " + theId.getResourceType());
 		}
 	}
-	
+
 	private List<String> extractNames(IBundleProvider theSearch) {
 		ArrayList<String> retVal = new ArrayList<String>();
 		for (IBaseResource next : theSearch.getResources(0, theSearch.size())) {
@@ -167,7 +126,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		retVal.addCoding().setSystem(theSystem).setCode(theCode);
 		return retVal;
 	}
-	
+
 	private void sort(ArrayList<Coding> thePublished) {
 		ArrayList<Coding> tags = new ArrayList<Coding>(thePublished);
 		Collections.sort(tags, new Comparator<Coding>() {
@@ -194,7 +153,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 			}
 		});
 	}
-	
+
 	private List<UriType> sortIds(List<UriType> theProfiles) {
 		ArrayList<UriType> retVal = new ArrayList<UriType>(theProfiles);
 		Collections.sort(retVal, new Comparator<UriType>() {
@@ -221,21 +180,24 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 
 		SearchParameterMap map = new SearchParameterMap();
 		map.add("_language", new StringParam("EN_ca"));
-		assertEquals(1, myOrganizationDao.search(map).size());
+		assertEquals(1, myOrganizationDao.search(map).size().intValue());
 
 		map = new SearchParameterMap();
+		map.setLoadSynchronous(true);
 		map.add("_tag", new TokenParam(methodName, methodName));
-		assertEquals(1, myOrganizationDao.search(map).size());
+		assertEquals(1, myOrganizationDao.search(map).size().intValue());
 
 		myOrganizationDao.delete(orgId, mySrd);
 
 		map = new SearchParameterMap();
+		map.setLoadSynchronous(true);
 		map.add("_language", new StringParam("EN_ca"));
-		assertEquals(0, myOrganizationDao.search(map).size());
+		assertEquals(0, myOrganizationDao.search(map).size().intValue());
 
 		map = new SearchParameterMap();
+		map.setLoadSynchronous(true);
 		map.add("_tag", new TokenParam(methodName, methodName));
-		assertEquals(0, myOrganizationDao.search(map).size());
+		assertEquals(0, myOrganizationDao.search(map).size().intValue());
 	}
 
 	@Test
@@ -246,8 +208,8 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		IIdType id1 = myObservationDao.create(o1, mySrd).getId();
 
 		{
-			IBundleProvider found = myObservationDao.search(Observation.SP_VALUE_CONCEPT, new TokenParam("testChoiceParam01CCS", "testChoiceParam01CCV"));
-			assertEquals(1, found.size());
+			IBundleProvider found = myObservationDao.search(new SearchParameterMap(Observation.SP_VALUE_CONCEPT, new TokenParam("testChoiceParam01CCS", "testChoiceParam01CCV")).setLoadSynchronous(true));
+			assertEquals(1, found.size().intValue());
 			assertEquals(id1, found.getResources(0, 1).get(0).getIdElement());
 		}
 	}
@@ -260,8 +222,8 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		IIdType id2 = myObservationDao.create(o2, mySrd).getId();
 
 		{
-			IBundleProvider found = myObservationDao.search(Observation.SP_VALUE_DATE, new DateParam("2001"));
-			assertEquals(1, found.size());
+			IBundleProvider found = myObservationDao.search(new SearchParameterMap(Observation.SP_VALUE_DATE, new DateParam("2001")).setLoadSynchronous(true));
+			assertEquals(1, found.size().intValue());
 			assertEquals(id2, found.getResources(0, 1).get(0).getIdElement());
 		}
 	}
@@ -274,11 +236,11 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		IIdType id2 = myObservationDao.create(o2, mySrd).getId();
 
 		{
-			Set<Long> found = myObservationDao.searchForIds(Observation.SP_DATE, new DateParam(">2001-01-02"));
+			Set<Long> found = myObservationDao.searchForIds(new SearchParameterMap(Observation.SP_DATE, new DateParam(">2001-01-02")));
 			assertThat(found, hasItem(id2.getIdPartAsLong()));
 		}
 		{
-			Set<Long> found = myObservationDao.searchForIds(Observation.SP_DATE, new DateParam(">2016-01-02"));
+			Set<Long> found = myObservationDao.searchForIds(new SearchParameterMap(Observation.SP_DATE, new DateParam(">2016-01-02")));
 			assertThat(found, not(hasItem(id2.getIdPartAsLong())));
 		}
 	}
@@ -288,25 +250,25 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		Encounter enc = new Encounter();
 		enc.getPeriod().setStartElement(new DateTimeType("2016-05-10")).setEndElement(new DateTimeType("2016-05-20"));
 		String id = myEncounterDao.create(enc, mySrd).getId().toUnqualifiedVersionless().getValue();
-		
+
 		List<String> ids;
-		
+
 		/*
 		 * This should not match, per the definition of eq
 		 */
-		
-		ids = toUnqualifiedVersionlessIdValues(myEncounterDao.search(Encounter.SP_DATE, new DateParam("2016-05-15")));
+
+		ids = toUnqualifiedVersionlessIdValues(myEncounterDao.search(new SearchParameterMap(Encounter.SP_DATE, new DateParam("2016-05-15")).setLoadSynchronous(true)));
 		assertThat(ids, empty());
 
-		ids = toUnqualifiedVersionlessIdValues(myEncounterDao.search(Encounter.SP_DATE, new DateParam("eq2016-05-15")));
+		ids = toUnqualifiedVersionlessIdValues(myEncounterDao.search(new SearchParameterMap(Encounter.SP_DATE, new DateParam("eq2016-05-15")).setLoadSynchronous(true)));
 		assertThat(ids, empty());
-		
+
 		// Should match
-		
-		ids = toUnqualifiedVersionlessIdValues(myEncounterDao.search(Encounter.SP_DATE, new DateParam("eq2016")));
+
+		ids = toUnqualifiedVersionlessIdValues(myEncounterDao.search(new SearchParameterMap(Encounter.SP_DATE, new DateParam("eq2016")).setLoadSynchronous(true)));
 		assertThat(ids, contains(id));
 
-		ids = toUnqualifiedVersionlessIdValues(myEncounterDao.search(Encounter.SP_DATE, new DateParam("2016")));
+		ids = toUnqualifiedVersionlessIdValues(myEncounterDao.search(new SearchParameterMap(Encounter.SP_DATE, new DateParam("2016")).setLoadSynchronous(true)));
 		assertThat(ids, contains(id));
 
 	}
@@ -324,27 +286,27 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		IIdType id2 = myObservationDao.create(o2, mySrd).getId().toUnqualifiedVersionless();
 
 		{
-			IBundleProvider found = myObservationDao.search(Observation.SP_DATE, new DateParam("ge2015-01-02T00:00:00Z"));
+			IBundleProvider found = myObservationDao.search(new SearchParameterMap(Observation.SP_DATE, new DateParam("ge2015-01-02T00:00:00Z")).setLoadSynchronous(true));
 			List<IIdType> list = toUnqualifiedVersionlessIds(found);
 			assertThat(list, containsInAnyOrder(id1, id2));
 		}
 		{
-			IBundleProvider found = myObservationDao.search(Observation.SP_DATE, new DateParam("gt2015-01-02T00:00:00Z"));
+			IBundleProvider found = myObservationDao.search(new SearchParameterMap(Observation.SP_DATE, new DateParam("gt2015-01-02T00:00:00Z")).setLoadSynchronous(true));
 			List<IIdType> list = toUnqualifiedVersionlessIds(found);
 			assertThat(list, containsInAnyOrder(id1, id2));
 		}
 		{
-			IBundleProvider found = myObservationDao.search(Observation.SP_DATE, new DateParam("gt2015-01-10T00:00:00Z"));
+			IBundleProvider found = myObservationDao.search(new SearchParameterMap(Observation.SP_DATE, new DateParam("gt2015-01-10T00:00:00Z")).setLoadSynchronous(true));
 			List<IIdType> list = toUnqualifiedVersionlessIds(found);
 			assertThat(list, containsInAnyOrder(id2));
 		}
 		{
-			IBundleProvider found = myObservationDao.search(Observation.SP_DATE, new DateParam("sa2015-01-02T00:00:00Z"));
+			IBundleProvider found = myObservationDao.search(new SearchParameterMap(Observation.SP_DATE, new DateParam("sa2015-01-02T00:00:00Z")).setLoadSynchronous(true));
 			List<IIdType> list = toUnqualifiedVersionlessIds(found);
 			assertThat(list, containsInAnyOrder(id2));
 		}
 		{
-			IBundleProvider found = myObservationDao.search(Observation.SP_DATE, new DateParam("eb2015-01-13T00:00:00Z"));
+			IBundleProvider found = myObservationDao.search(new SearchParameterMap(Observation.SP_DATE, new DateParam("eb2015-01-13T00:00:00Z")).setLoadSynchronous(true));
 			List<IIdType> list = toUnqualifiedVersionlessIds(found);
 			assertThat(list, containsInAnyOrder(id1));
 		}
@@ -358,54 +320,54 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		IIdType id3 = myObservationDao.create(o3, mySrd).getId();
 
 		{
-			IBundleProvider found = myObservationDao.search(Observation.SP_VALUE_QUANTITY, new QuantityParam(">100", "foo", "bar"));
-			assertEquals(1, found.size());
+			IBundleProvider found = myObservationDao.search(new SearchParameterMap(Observation.SP_VALUE_QUANTITY, new QuantityParam(">100", "foo", "bar")).setLoadSynchronous(true));
+			assertEquals(1, found.size().intValue());
 			assertEquals(id3, found.getResources(0, 1).get(0).getIdElement());
 		}
 		{
-			IBundleProvider found = myObservationDao.search(Observation.SP_VALUE_QUANTITY, new QuantityParam("gt100", "foo", "bar"));
-			assertEquals(1, found.size());
+			IBundleProvider found = myObservationDao.search(new SearchParameterMap(Observation.SP_VALUE_QUANTITY, new QuantityParam("gt100", "foo", "bar")).setLoadSynchronous(true));
+			assertEquals(1, found.size().intValue());
 			assertEquals(id3, found.getResources(0, 1).get(0).getIdElement());
 		}
 		{
-			IBundleProvider found = myObservationDao.search(Observation.SP_VALUE_QUANTITY, new QuantityParam("<100", "foo", "bar"));
-			assertEquals(0, found.size());
+			IBundleProvider found = myObservationDao.search(new SearchParameterMap(Observation.SP_VALUE_QUANTITY, new QuantityParam("<100", "foo", "bar")).setLoadSynchronous(true));
+			assertEquals(0, found.size().intValue());
 		}
 		{
-			IBundleProvider found = myObservationDao.search(Observation.SP_VALUE_QUANTITY, new QuantityParam("lt100", "foo", "bar"));
-			assertEquals(0, found.size());
+			IBundleProvider found = myObservationDao.search(new SearchParameterMap(Observation.SP_VALUE_QUANTITY, new QuantityParam("lt100", "foo", "bar")).setLoadSynchronous(true));
+			assertEquals(0, found.size().intValue());
 		}
 		{
-			IBundleProvider found = myObservationDao.search(Observation.SP_VALUE_QUANTITY, new QuantityParam("123.0001", "foo", "bar"));
-			assertEquals(0, found.size());
+			IBundleProvider found = myObservationDao.search(new SearchParameterMap(Observation.SP_VALUE_QUANTITY, new QuantityParam("123.0001", "foo", "bar")).setLoadSynchronous(true));
+			assertEquals(0, found.size().intValue());
 		}
 		{
-			IBundleProvider found = myObservationDao.search(Observation.SP_VALUE_QUANTITY, new QuantityParam("~120", "foo", "bar"));
-			assertEquals(1, found.size());
+			IBundleProvider found = myObservationDao.search(new SearchParameterMap(Observation.SP_VALUE_QUANTITY, new QuantityParam("~120", "foo", "bar")).setLoadSynchronous(true));
+			assertEquals(1, found.size().intValue());
 			assertEquals(id3, found.getResources(0, 1).get(0).getIdElement());
 		}
 		{
-			IBundleProvider found = myObservationDao.search(Observation.SP_VALUE_QUANTITY, new QuantityParam("ap120", "foo", "bar"));
-			assertEquals(1, found.size());
+			IBundleProvider found = myObservationDao.search(new SearchParameterMap(Observation.SP_VALUE_QUANTITY, new QuantityParam("ap120", "foo", "bar")).setLoadSynchronous(true));
+			assertEquals(1, found.size().intValue());
 			assertEquals(id3, found.getResources(0, 1).get(0).getIdElement());
 		}
 		{
-			IBundleProvider found = myObservationDao.search(Observation.SP_VALUE_QUANTITY, new QuantityParam("eq123", "foo", "bar"));
-			assertEquals(1, found.size());
+			IBundleProvider found = myObservationDao.search(new SearchParameterMap(Observation.SP_VALUE_QUANTITY, new QuantityParam("eq123", "foo", "bar")).setLoadSynchronous(true));
+			assertEquals(1, found.size().intValue());
 			assertEquals(id3, found.getResources(0, 1).get(0).getIdElement());
 		}
 		{
-			IBundleProvider found = myObservationDao.search(Observation.SP_VALUE_QUANTITY, new QuantityParam("eq120", "foo", "bar"));
-			assertEquals(0, found.size());
+			IBundleProvider found = myObservationDao.search(new SearchParameterMap(Observation.SP_VALUE_QUANTITY, new QuantityParam("eq120", "foo", "bar")).setLoadSynchronous(true));
+			assertEquals(0, found.size().intValue());
 		}
 		{
-			IBundleProvider found = myObservationDao.search(Observation.SP_VALUE_QUANTITY, new QuantityParam("ne120", "foo", "bar"));
-			assertEquals(1, found.size());
+			IBundleProvider found = myObservationDao.search(new SearchParameterMap(Observation.SP_VALUE_QUANTITY, new QuantityParam("ne120", "foo", "bar")).setLoadSynchronous(true));
+			assertEquals(1, found.size().intValue());
 			assertEquals(id3, found.getResources(0, 1).get(0).getIdElement());
 		}
 		{
-			IBundleProvider found = myObservationDao.search(Observation.SP_VALUE_QUANTITY, new QuantityParam("ne123", "foo", "bar"));
-			assertEquals(0, found.size());
+			IBundleProvider found = myObservationDao.search(new SearchParameterMap(Observation.SP_VALUE_QUANTITY, new QuantityParam("ne123", "foo", "bar")).setLoadSynchronous(true));
+			assertEquals(0, found.size().intValue());
 		}
 	}
 
@@ -417,32 +379,32 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		IIdType id3 = myObservationDao.create(o3, mySrd).getId().toUnqualifiedVersionless();
 
 		{
-			IBundleProvider found = myObservationDao.search(Observation.SP_VALUE_QUANTITY, new QuantityParam("123", "foo", "bar"));
+			IBundleProvider found = myObservationDao.search(new SearchParameterMap(Observation.SP_VALUE_QUANTITY, new QuantityParam("123", "foo", "bar")).setLoadSynchronous(true));
 			List<IIdType> list = toUnqualifiedVersionlessIds(found);
 			assertThat(list, containsInAnyOrder(id3));
 		}
 		{
-			IBundleProvider found = myObservationDao.search(Observation.SP_VALUE_QUANTITY, new QuantityParam("123.0", "foo", "bar"));
+			IBundleProvider found = myObservationDao.search(new SearchParameterMap(Observation.SP_VALUE_QUANTITY, new QuantityParam("123.0", "foo", "bar")).setLoadSynchronous(true));
 			List<IIdType> list = toUnqualifiedVersionlessIds(found);
 			assertThat(list, containsInAnyOrder(id3));
 		}
 		{
-			IBundleProvider found = myObservationDao.search(Observation.SP_VALUE_QUANTITY, new QuantityParam("123.01", "foo", "bar"));
+			IBundleProvider found = myObservationDao.search(new SearchParameterMap(Observation.SP_VALUE_QUANTITY, new QuantityParam("123.01", "foo", "bar")).setLoadSynchronous(true));
 			List<IIdType> list = toUnqualifiedVersionlessIds(found);
 			assertThat(list, containsInAnyOrder(id3));
 		}
 		{
-			IBundleProvider found = myObservationDao.search(Observation.SP_VALUE_QUANTITY, new QuantityParam("123.010", "foo", "bar"));
+			IBundleProvider found = myObservationDao.search(new SearchParameterMap(Observation.SP_VALUE_QUANTITY, new QuantityParam("123.010", "foo", "bar")).setLoadSynchronous(true));
 			List<IIdType> list = toUnqualifiedVersionlessIds(found);
 			assertThat(list, containsInAnyOrder(id3));
 		}
 		{
-			IBundleProvider found = myObservationDao.search(Observation.SP_VALUE_QUANTITY, new QuantityParam("123.02", "foo", "bar"));
+			IBundleProvider found = myObservationDao.search(new SearchParameterMap(Observation.SP_VALUE_QUANTITY, new QuantityParam("123.02", "foo", "bar")).setLoadSynchronous(true));
 			List<IIdType> list = toUnqualifiedVersionlessIds(found);
 			assertThat(list, containsInAnyOrder());
 		}
 		{
-			IBundleProvider found = myObservationDao.search(Observation.SP_VALUE_QUANTITY, new QuantityParam("123.001", "foo", "bar"));
+			IBundleProvider found = myObservationDao.search(new SearchParameterMap(Observation.SP_VALUE_QUANTITY, new QuantityParam("123.001", "foo", "bar")).setLoadSynchronous(true));
 			List<IIdType> list = toUnqualifiedVersionlessIds(found);
 			assertThat(list, containsInAnyOrder());
 		}
@@ -457,8 +419,8 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		IIdType id4 = myObservationDao.create(o4, mySrd).getId();
 
 		{
-			IBundleProvider found = myObservationDao.search(Observation.SP_VALUE_STRING, new StringParam("testChoiceParam04Str"));
-			assertEquals(1, found.size());
+			IBundleProvider found = myObservationDao.search(new SearchParameterMap(Observation.SP_VALUE_STRING, new StringParam("testChoiceParam04Str")).setLoadSynchronous(true));
+			assertEquals(1, found.size().intValue());
 			assertEquals(id4, found.getResources(0, 1).get(0).getIdElement());
 		}
 	}
@@ -468,9 +430,9 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		CodeSystem cs = new CodeSystem();
 		cs.setStatus(PublicationStatus.DRAFT);
 		IIdType id = myCodeSystemDao.create(cs, mySrd).getId().toUnqualifiedVersionless();
-		
+
 		myCodeSystemDao.delete(id, mySrd);
-		
+
 		assertGone(id.toUnqualifiedVersionless());
 	}
 
@@ -544,7 +506,6 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 
 	}
 
-	
 	@Test
 	public void testCreateDifferentTypesWithSameForcedId() {
 		String idName = "forcedId";
@@ -590,7 +551,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		NamingSystem res = myFhirCtx.newXmlParser().parseResource(NamingSystem.class, input);
 		IIdType id = myNamingSystemDao.create(res, mySrd).getId().toUnqualifiedVersionless();
 
-		assertThat(toUnqualifiedVersionlessIdValues(myNamingSystemDao.search(NamingSystem.SP_NAME, new StringParam("NDF"))), contains(id.getValue()));
+		assertThat(toUnqualifiedVersionlessIdValues(myNamingSystemDao.search(new SearchParameterMap(NamingSystem.SP_NAME, new StringParam("NDF")).setLoadSynchronous(true))), contains(id.getValue()));
 	}
 
 	@Test
@@ -785,8 +746,8 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		IIdType id1 = myObservationDao.create(o1, mySrd).getId();
 
 		{
-			IBundleProvider found = myObservationDao.search(Observation.SP_VALUE_CONCEPT, new TokenParam("testChoiceParam01CCS", "testChoiceParam01CCV"));
-			assertEquals(1, found.size());
+			IBundleProvider found = myObservationDao.search(new SearchParameterMap(Observation.SP_VALUE_CONCEPT, new TokenParam("testChoiceParam01CCS", "testChoiceParam01CCV")).setLoadSynchronous(true));
+			assertEquals(1, found.size().intValue());
 			assertEquals(id1, found.getResources(0, 1).get(0).getIdElement());
 		}
 	}
@@ -1047,7 +1008,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 
 	@Test
 	public void testDeleteResource() {
-		int initialHistory = myPatientDao.history((Date)null, null, mySrd).size();
+		int initialHistory = myPatientDao.history((Date) null, null, mySrd).size();
 
 		IIdType id1;
 		IIdType id2;
@@ -1071,8 +1032,9 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		}
 		ourLog.info("ID1:{}   ID2:{}   ID2b:{}", new Object[] { id1, id2, id2b });
 
-		Map<String, IQueryParameterType> params = new HashMap<String, IQueryParameterType>();
-		params.put(Patient.SP_FAMILY, new StringParam("Tester_testDeleteResource"));
+		SearchParameterMap params = new SearchParameterMap();
+		params.setLoadSynchronous(true);
+		params.add(Patient.SP_FAMILY, new StringParam("Tester_testDeleteResource"));
 		List<Patient> patients = toList(myPatientDao.search(params));
 		assertEquals(2, patients.size());
 
@@ -1089,8 +1051,8 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 			// good
 		}
 
-		IBundleProvider history = myPatientDao.history((Date)null, null, mySrd);
-		assertEquals(4 + initialHistory, history.size());
+		IBundleProvider history = myPatientDao.history((Date) null, null, mySrd);
+		assertEquals(4 + initialHistory, history.size().intValue());
 		List<IBaseResource> resources = history.getResources(0, 4);
 		assertNotNull(ResourceMetadataKeyEnum.DELETED_AT.get((IAnyResource) resources.get(0)));
 
@@ -1146,7 +1108,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		Observation obs1 = new Observation();
 		obs1.setStatus(ObservationStatus.FINAL);
 		IIdType obs1id = myObservationDao.create(obs1).getId().toUnqualifiedVersionless();
-		
+
 		Observation obs2 = new Observation();
 		obs2.setStatus(ObservationStatus.FINAL);
 		IIdType obs2id = myObservationDao.create(obs2).getId().toUnqualifiedVersionless();
@@ -1155,19 +1117,19 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		rpt.addIdentifier().setSystem("foo").setValue("IDENTIFIER");
 		rpt.addResult(new Reference(obs2id));
 		myDiagnosticReportDao.create(rpt).getId().toUnqualifiedVersionless();
-		
+
 		myObservationDao.read(obs1id);
 		myObservationDao.read(obs2id);
-		
+
 		try {
 			myObservationDao.deleteByUrl("Observation?_has:DiagnosticReport:result:identifier=foo|IDENTIFIER", mySrd);
 			fail();
 		} catch (ResourceVersionConflictException e) {
 			assertConflictException(e);
 		}
-		
+
 		myObservationDao.read(obs1id);
-		myObservationDao.read(obs2id);		
+		myObservationDao.read(obs2id);
 	}
 
 	@Test
@@ -1199,7 +1161,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		}
 
 		IBundleProvider history = myPatientDao.history(id, null, null, mySrd);
-		assertEquals(2, history.size());
+		assertEquals(2, history.size().intValue());
 
 		assertNotNull(ResourceMetadataKeyEnum.DELETED_AT.get((IAnyResource) history.getResources(0, 1).get(0)));
 		assertNotNull(ResourceMetadataKeyEnum.DELETED_AT.get((IAnyResource) history.getResources(0, 1).get(0)).getValue());
@@ -1447,13 +1409,13 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 				Thread.sleep(fullSize);
 			}
 			patient.setId(id);
-			patient.getName().get(0).getFamilyElement().setValue(methodName + "_i");
+			patient.getName().get(0).getFamilyElement().setValue(methodName + "_i" + i);
 			myPatientDao.update(patient, mySrd);
 		}
 
 		// By instance
 		IBundleProvider history = myPatientDao.history(id, null, null, mySrd);
-		assertEquals(fullSize + 1, history.size());
+		assertEquals(fullSize + 1, history.size().intValue());
 		for (int i = 0; i < fullSize; i++) {
 			String expected = id.withVersion(Integer.toString(fullSize + 1 - i)).getValue();
 			String actual = history.getResources(i, i + 1).get(0).getIdElement().getValue();
@@ -1461,8 +1423,8 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		}
 
 		// By type
-		history = myPatientDao.history((Date)null, null, mySrd);
-		assertEquals(fullSize + 1, history.size());
+		history = myPatientDao.history((Date) null, null, mySrd);
+		assertEquals(fullSize + 1, history.size().intValue());
 		for (int i = 0; i < fullSize; i++) {
 			String expected = id.withVersion(Integer.toString(fullSize + 1 - i)).getValue();
 			String actual = history.getResources(i, i + 1).get(0).getIdElement().getValue();
@@ -1471,7 +1433,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 
 		// By server
 		history = mySystemDao.history(null, null, mySrd);
-		assertEquals(fullSize + 1, history.size());
+		assertEquals(fullSize + 1, history.size().intValue());
 		for (int i = 0; i < fullSize; i++) {
 			String expected = id.withVersion(Integer.toString(fullSize + 1 - i)).getValue();
 			String actual = history.getResources(i, i + 1).get(0).getIdElement().getValue();
@@ -1484,7 +1446,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 
 		// By instance
 		history = myPatientDao.history(id, middleDate, null, mySrd);
-		assertEquals(halfSize, history.size());
+		assertEquals(halfSize, history.size().intValue());
 		for (int i = 0; i < halfSize; i++) {
 			String expected = id.withVersion(Integer.toString(fullSize + 1 - i)).getValue();
 			String actual = history.getResources(i, i + 1).get(0).getIdElement().getValue();
@@ -1493,7 +1455,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 
 		// By type
 		history = myPatientDao.history(middleDate, null, mySrd);
-		assertEquals(halfSize, history.size());
+		assertEquals(halfSize, history.size().intValue());
 		for (int i = 0; i < halfSize; i++) {
 			String expected = id.withVersion(Integer.toString(fullSize + 1 - i)).getValue();
 			String actual = history.getResources(i, i + 1).get(0).getIdElement().getValue();
@@ -1502,7 +1464,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 
 		// By server
 		history = mySystemDao.history(middleDate, null, mySrd);
-		assertEquals(halfSize, history.size());
+		assertEquals(halfSize, history.size().intValue());
 		for (int i = 0; i < halfSize; i++) {
 			String expected = id.withVersion(Integer.toString(fullSize + 1 - i)).getValue();
 			String actual = history.getResources(i, i + 1).get(0).getIdElement().getValue();
@@ -1520,7 +1482,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 
 		// By instance
 		history = myPatientDao.history(id, null, null, mySrd);
-		assertEquals(fullSize + 1, history.size());
+		assertEquals(fullSize + 1, history.size().intValue());
 		for (int i = 0; i < fullSize; i++) {
 			String expected = id.withVersion(Integer.toString(fullSize + 1 - i)).getValue();
 			String actual = history.getResources(i, i + 1).get(0).getIdElement().getValue();
@@ -1528,8 +1490,8 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		}
 
 		// By type
-		history = myPatientDao.history((Date)null, null, mySrd);
-		assertEquals(fullSize + 1, history.size());
+		history = myPatientDao.history((Date) null, null, mySrd);
+		assertEquals(fullSize + 1, history.size().intValue());
 		for (int i = 0; i < fullSize; i++) {
 			String expected = id.withVersion(Integer.toString(fullSize + 1 - i)).getValue();
 			String actual = history.getResources(i, i + 1).get(0).getIdElement().getValue();
@@ -1538,7 +1500,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 
 		// By server
 		history = mySystemDao.history(null, null, mySrd);
-		assertEquals(fullSize + 1, history.size());
+		assertEquals(fullSize + 1, history.size().intValue());
 		for (int i = 0; i < fullSize; i++) {
 			String expected = id.withVersion(Integer.toString(fullSize + 1 - i)).getValue();
 			String actual = history.getResources(i, i + 1).get(0).getIdElement().getValue();
@@ -1551,7 +1513,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 
 		// By instance
 		history = myPatientDao.history(id, middleDate, null, mySrd);
-		assertEquals(halfSize, history.size());
+		assertEquals(halfSize, history.size().intValue());
 		for (int i = 0; i < halfSize; i++) {
 			String expected = id.withVersion(Integer.toString(fullSize + 1 - i)).getValue();
 			String actual = history.getResources(i, i + 1).get(0).getIdElement().getValue();
@@ -1560,7 +1522,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 
 		// By type
 		history = myPatientDao.history(middleDate, null, mySrd);
-		assertEquals(halfSize, history.size());
+		assertEquals(halfSize, history.size().intValue());
 		for (int i = 0; i < halfSize; i++) {
 			String expected = id.withVersion(Integer.toString(fullSize + 1 - i)).getValue();
 			String actual = history.getResources(i, i + 1).get(0).getIdElement().getValue();
@@ -1569,7 +1531,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 
 		// By server
 		history = mySystemDao.history(middleDate, null, mySrd);
-		assertEquals(halfSize, history.size());
+		assertEquals(halfSize, history.size().intValue());
 		for (int i = 0; i < halfSize; i++) {
 			String expected = id.withVersion(Integer.toString(fullSize + 1 - i)).getValue();
 			String actual = history.getResources(i, i + 1).get(0).getIdElement().getValue();
@@ -1585,8 +1547,8 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		inPatient.getMeta().addProfile("http://example.com/1");
 		IIdType id = myPatientDao.create(inPatient, mySrd).getId().toUnqualifiedVersionless();
 
-		IBundleProvider history = myPatientDao.history((Date)null, null, mySrd);
-		assertEquals(1, history.size());
+		IBundleProvider history = myPatientDao.history((Date) null, null, mySrd);
+		assertEquals(1, history.size().intValue());
 		Patient outPatient = (Patient) history.getResources(0, 1).get(0);
 		assertEquals("version1", inPatient.getName().get(0).getFamily());
 		List<String> profiles = toStringList(outPatient.getMeta().getProfile());
@@ -1599,8 +1561,8 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		inPatient.getMeta().addProfile("http://example.com/2");
 		myPatientDao.metaAddOperation(id, inPatient.getMeta(), mySrd);
 
-		history = myPatientDao.history((Date)null, null, mySrd);
-		assertEquals(1, history.size());
+		history = myPatientDao.history((Date) null, null, mySrd);
+		assertEquals(1, history.size().intValue());
 		outPatient = (Patient) history.getResources(0, 1).get(0);
 		assertEquals("version1", inPatient.getName().get(0).getFamily());
 		profiles = toStringList(outPatient.getMeta().getProfile());
@@ -1615,8 +1577,8 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		inPatient.getName().get(0).setFamily("version2");
 		myPatientDao.update(inPatient, mySrd);
 
-		history = myPatientDao.history((Date)null, null, mySrd);
-		assertEquals(2, history.size());
+		history = myPatientDao.history((Date) null, null, mySrd);
+		assertEquals(2, history.size().intValue());
 		outPatient = (Patient) history.getResources(0, 2).get(0);
 		assertEquals("version2", outPatient.getName().get(0).getFamily());
 		profiles = toStringList(outPatient.getMeta().getProfile());
@@ -1646,7 +1608,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		ourLog.info(((IAnyResource) entries.get(0)).getIdElement() + " - " + ((IAnyResource) entries.get(0)).getMeta().getLastUpdated());
 		ourLog.info(((IAnyResource) entries.get(1)).getIdElement() + " - " + ((IAnyResource) entries.get(1)).getMeta().getLastUpdated());
 		ourLog.info(((IAnyResource) entries.get(2)).getIdElement() + " - " + ((IAnyResource) entries.get(2)).getMeta().getLastUpdated());
-		assertEquals(3, history.size());
+		assertEquals(3, history.size().intValue());
 
 		assertEquals(id.withVersion("3"), entries.get(0).getIdElement());
 		assertEquals(id.withVersion("2"), entries.get(1).getIdElement());
@@ -1677,18 +1639,18 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 			preDates.add(new Date());
 			Thread.sleep(100);
 			patient.setId(id);
-			patient.getName().get(0).getFamilyElement().setValue(methodName + "_i");
+			patient.getName().get(0).getFamilyElement().setValue(methodName + "_i"+i);
 			ids.add(myPatientDao.update(patient, mySrd).getId().toUnqualified().getValue());
 		}
 
 		List<String> idValues;
-		
+
 		idValues = toUnqualifiedIdValues(myPatientDao.history(id, preDates.get(0), preDates.get(3), mySrd));
 		assertThat(idValues, contains(ids.get(2), ids.get(1), ids.get(0)));
-		
+
 		idValues = toUnqualifiedIdValues(myPatientDao.history(preDates.get(0), preDates.get(3), mySrd));
 		assertThat(idValues, contains(ids.get(2), ids.get(1), ids.get(0)));
-		
+
 		idValues = toUnqualifiedIdValues(mySystemDao.history(preDates.get(0), preDates.get(3), mySrd));
 		assertThat(idValues, contains(ids.get(2), ids.get(1), ids.get(0)));
 	}
@@ -1709,8 +1671,8 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 
 		// No since
 
-		IBundleProvider history = myPatientDao.history((Date)null, null, mySrd);
-		assertEquals(1, history.size());
+		IBundleProvider history = myPatientDao.history((Date) null, null, mySrd);
+		assertEquals(1, history.size().intValue());
 		Patient outPatient = (Patient) history.getResources(0, 1).get(0);
 		assertEquals("version1", inPatient.getName().get(0).getFamily());
 		List<String> profiles = toStringList(outPatient.getMeta().getProfile());
@@ -1719,7 +1681,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		// Before since
 
 		history = myPatientDao.history(before, null, mySrd);
-		assertEquals(1, history.size());
+		assertEquals(1, history.size().intValue());
 		outPatient = (Patient) history.getResources(0, 1).get(0);
 		assertEquals("version1", inPatient.getName().get(0).getFamily());
 		profiles = toStringList(outPatient.getMeta().getProfile());
@@ -1728,10 +1690,10 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		// After since
 
 		history = myPatientDao.history(after, null, mySrd);
-		assertEquals(0, history.size());
+		assertEquals(0, history.size().intValue());
 
 	}
-	
+
 	@Test
 	public void testHistoryWithInvalidId() throws Exception {
 		try {
@@ -1815,11 +1777,11 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 	@Test
 	public void testIndexConditionWithAllOnsetTypes() {
 		// DateTimeType.class, Age.class, Period.class, Range.class, StringType.class
-		
+
 		Condition c0 = new Condition();
 		c0.setOnset(new DateTimeType("2011-01-01"));
 		myConditionDao.create(c0, mySrd).getId().toUnqualifiedVersionless();
-		
+
 		Condition c1 = new Condition();
 		c1.setOnset(new Age().setValue(100L).setCode("AGECODE"));
 		myConditionDao.create(c1, mySrd).getId().toUnqualifiedVersionless();
@@ -1835,7 +1797,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		Condition c4 = new Condition();
 		c4.setOnset(new StringType("FOO"));
 		myConditionDao.create(c4, mySrd).getId().toUnqualifiedVersionless();
-}
+	}
 
 	@Test
 	public void testInstanceMetaOperations() {
@@ -1976,17 +1938,17 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		// OK
 		param = new ReferenceParam("999999999999");
 		param.setChain("organization");
-		myLocationDao.search("partof", param);
+		myLocationDao.search(new SearchParameterMap("partof", param).setLoadSynchronous(true));
 
 		// OK
 		param = new ReferenceParam("999999999999");
 		param.setChain("organization.name");
-		myLocationDao.search("partof", param);
+		myLocationDao.search(new SearchParameterMap("partof", param).setLoadSynchronous(true));
 
 		try {
 			param = new ReferenceParam("999999999999");
 			param.setChain("foo");
-			myLocationDao.search("partof", param);
+			myLocationDao.search(new SearchParameterMap("partof", param).setLoadSynchronous(true));
 			fail();
 		} catch (InvalidRequestException e) {
 			assertThat(e.getMessage(), containsString("Invalid parameter chain: partof." + param.getChain()));
@@ -1995,7 +1957,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		try {
 			param = new ReferenceParam("999999999999");
 			param.setChain("organization.foo");
-			myLocationDao.search("partof", param);
+			myLocationDao.search(new SearchParameterMap("partof", param).setLoadSynchronous(true));
 			fail();
 		} catch (InvalidRequestException e) {
 			assertThat(e.getMessage(), containsString("Invalid parameter chain: " + param.getChain()));
@@ -2004,11 +1966,32 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		try {
 			param = new ReferenceParam("999999999999");
 			param.setChain("organization.name.foo");
-			myLocationDao.search("partof", param);
+			myLocationDao.search(new SearchParameterMap("partof", param).setLoadSynchronous(true));
 			fail();
 		} catch (InvalidRequestException e) {
 			assertThat(e.getMessage(), containsString("Invalid parameter chain: " + param.getChain()));
 		}
+	}
+
+	/**
+	 * See #534
+	 */
+	@Test
+	public void testLogicalReferencesAreSearchable() throws IOException {
+		myDaoConfig.setTreatReferencesAsLogical(null);
+		myDaoConfig.addTreatReferencesAsLogical("http://foo.com/identifier*");
+
+		Patient p1 = new Patient();
+		p1.getManagingOrganization().setReference("http://foo.com/identifier/1");
+		String p1id = myPatientDao.create(p1, mySrd).getId().toUnqualifiedVersionless().getValue();
+
+		Patient p2 = new Patient();
+		p2.getManagingOrganization().setReference("http://foo.com/identifier/2");
+		String p2id = myPatientDao.create(p2, mySrd).getId().toUnqualifiedVersionless().getValue();
+
+		IBundleProvider found = myPatientDao.search(new SearchParameterMap(Patient.SP_ORGANIZATION, new ReferenceParam("http://foo.com/identifier/1")).setLoadSynchronous(true));
+		assertThat(toUnqualifiedVersionlessIdValues(found), contains(p1id));
+		assertThat(toUnqualifiedVersionlessIdValues(found), not(contains(p2id)));
 	}
 
 	@Test
@@ -2031,7 +2014,6 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 				"  \"identifier\":[\n" + 
 				"     {\n" + 
 				"       \"use\":\"official\",\n" + 
-				"       \"label\":\"HSP 2.16.840.1.113883.3.239.23.21\",\n" + 
 				"       \"system\":\"urn:cgta:hsp_ids\",\n" + 
 				"       \"value\":\"urn:oid:2.16.840.1.113883.3.239.23.21\"\n" + 
 				"     }\n" + 
@@ -2040,20 +2022,20 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 				"}\n";
 		//@formatter:on
 
-		Set<Long> val = myOrganizationDao.searchForIds("name", new StringParam("P"));
+		Set<Long> val = myOrganizationDao.searchForIds(new SearchParameterMap("name", new StringParam("P")));
 		int initial = val.size();
 
 		Organization org = myFhirCtx.newJsonParser().parseResource(Organization.class, inputStr);
 		myOrganizationDao.create(org, mySrd);
 
-		val = myOrganizationDao.searchForIds("name", new StringParam("P"));
+		val = myOrganizationDao.searchForIds(new SearchParameterMap("name", new StringParam("P")));
 		assertEquals(initial + 1, val.size());
 
 	}
 
 	@Test
 	public void testPersistContactPoint() {
-		List<IAnyResource> found = toList(myPatientDao.search(Patient.SP_TELECOM, new TokenParam(null, "555-123-4567")));
+		List<IAnyResource> found = toList(myPatientDao.search(new SearchParameterMap(Patient.SP_TELECOM, new TokenParam(null, "555-123-4567")).setLoadSynchronous(true)));
 		int initialSize2000 = found.size();
 
 		Patient patient = new Patient();
@@ -2061,7 +2043,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		patient.addTelecom().setValue("555-123-4567");
 		myPatientDao.create(patient, mySrd);
 
-		found = toList(myPatientDao.search(Patient.SP_TELECOM, new TokenParam(null, "555-123-4567")));
+		found = toList(myPatientDao.search(new SearchParameterMap(Patient.SP_TELECOM, new TokenParam(null, "555-123-4567")).setLoadSynchronous(true)));
 		assertEquals(1 + initialSize2000, found.size());
 
 	}
@@ -2093,25 +2075,25 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 
 		ourLog.info("P1[{}] P2[{}] O1[{}] O2[{}] D1[{}]", new Object[] { patientId01, patientId02, obsId01, obsId02, drId01 });
 
-		List<Observation> result = toList(myObservationDao.search(Observation.SP_SUBJECT, new ReferenceParam(patientId01.getIdPart())));
+		List<Observation> result = toList(myObservationDao.search(new SearchParameterMap(Observation.SP_SUBJECT, new ReferenceParam(patientId01.getIdPart())).setLoadSynchronous(true)));
 		assertEquals(1, result.size());
 		assertEquals(obsId01.getIdPart(), result.get(0).getIdElement().getIdPart());
 
-		result = toList(myObservationDao.search(Observation.SP_SUBJECT, new ReferenceParam(patientId02.getIdPart())));
+		result = toList(myObservationDao.search(new SearchParameterMap(Observation.SP_SUBJECT, new ReferenceParam(patientId02.getIdPart())).setLoadSynchronous(true)));
 		assertEquals(1, result.size());
 		assertEquals(obsId02.getIdPart(), result.get(0).getIdElement().getIdPart());
 
-		result = toList(myObservationDao.search(Observation.SP_SUBJECT, new ReferenceParam("999999999999")));
+		result = toList(myObservationDao.search(new SearchParameterMap(Observation.SP_SUBJECT, new ReferenceParam("999999999999")).setLoadSynchronous(true)));;
 		assertEquals(0, result.size());
 
 	}
 
 	@Test
 	public void testPersistSearchParamDate() {
-		List<Patient> found = toList(myPatientDao.search(Patient.SP_BIRTHDATE, new DateParam(QuantityCompararatorEnum.GREATERTHAN, "2000-01-01")));
+		List<Patient> found = toList(myPatientDao.search(new SearchParameterMap(Patient.SP_BIRTHDATE, new DateParam(QuantityCompararatorEnum.GREATERTHAN, "2000-01-01")).setLoadSynchronous(true)));
 		int initialSize2000 = found.size();
 
-		found = toList(myPatientDao.search(Patient.SP_BIRTHDATE, new DateParam(QuantityCompararatorEnum.GREATERTHAN, "2002-01-01")));
+		found = toList(myPatientDao.search(new SearchParameterMap(Patient.SP_BIRTHDATE, new DateParam(QuantityCompararatorEnum.GREATERTHAN, "2002-01-01")).setLoadSynchronous(true)));
 		int initialSize2002 = found.size();
 
 		Patient patient = new Patient();
@@ -2120,16 +2102,19 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 
 		myPatientDao.create(patient, mySrd);
 
-		found = toList(myPatientDao.search(Patient.SP_BIRTHDATE, new DateParam(QuantityCompararatorEnum.GREATERTHAN, "2000-01-01")));
+		found = toList(myPatientDao.search(new SearchParameterMap(Patient.SP_BIRTHDATE, new DateParam(QuantityCompararatorEnum.GREATERTHAN, "2000-01-01")).setLoadSynchronous(true)));
 		assertEquals(1 + initialSize2000, found.size());
 
-		found = toList(myPatientDao.search(Patient.SP_BIRTHDATE, new DateParam(QuantityCompararatorEnum.GREATERTHAN, "2002-01-01")));
+		found = toList(myPatientDao.search(new SearchParameterMap(Patient.SP_BIRTHDATE, new DateParam(QuantityCompararatorEnum.GREATERTHAN, "2002-01-01")).setLoadSynchronous(true)));
 		assertEquals(initialSize2002, found.size());
 
 		// If this throws an exception, that would be an acceptable outcome as well..
-		found = toList(myPatientDao.search(Patient.SP_BIRTHDATE + "AAAA", new DateParam(QuantityCompararatorEnum.GREATERTHAN, "2000-01-01")));
-		assertEquals(0, found.size());
-
+		try {
+			found = toList(myPatientDao.search(new SearchParameterMap(Patient.SP_BIRTHDATE + "AAAA", new DateParam(QuantityCompararatorEnum.GREATERTHAN, "2000-01-01")).setLoadSynchronous(true)));
+			assertEquals(0, found.size());
+		} catch (InvalidRequestException e) {
+			assertEquals("Unknown search parameter birthdateAAAA for resource type Patient", e.getMessage());
+		}
 	}
 
 	@Test
@@ -2140,10 +2125,10 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 
 		myObservationDao.create(obs, mySrd);
 
-		List<Observation> found = toList(myObservationDao.search("value-string", new StringParam("AAAABBBB")));
+		List<Observation> found = toList(myObservationDao.search(new SearchParameterMap("value-string", new StringParam("AAAABBBB")).setLoadSynchronous(true)));
 		assertEquals(1, found.size());
 
-		found = toList(myObservationDao.search("value-string", new StringParam("AAAABBBBCCC")));
+		found = toList(myObservationDao.search(new SearchParameterMap("value-string", new StringParam("AAAABBBBCCC")).setLoadSynchronous(true)));
 		assertEquals(0, found.size());
 
 	}
@@ -2156,13 +2141,13 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 
 		myObservationDao.create(obs, mySrd);
 
-		List<Observation> found = toList(myObservationDao.search("value-quantity", new QuantityParam(111)));
+		List<Observation> found = toList(myObservationDao.search(new SearchParameterMap("value-quantity", new QuantityParam(111)).setLoadSynchronous(true)));
 		assertEquals(1, found.size());
 
-		found = toList(myObservationDao.search("value-quantity", new QuantityParam(112)));
+		found = toList(myObservationDao.search(new SearchParameterMap("value-quantity", new QuantityParam(112)).setLoadSynchronous(true)));
 		assertEquals(0, found.size());
 
-		found = toList(myObservationDao.search("value-quantity", new QuantityParam(212)));
+		found = toList(myObservationDao.search(new SearchParameterMap("value-quantity", new QuantityParam(212)).setLoadSynchronous(true)));
 		assertEquals(0, found.size());
 
 	}
@@ -2181,7 +2166,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		long id = outcome.getId().getIdPartAsLong();
 
 		TokenParam value = new TokenParam("urn:system", "001testPersistSearchParams");
-		List<Patient> found = toList(myPatientDao.search(Patient.SP_IDENTIFIER, value));
+		List<Patient> found = toList(myPatientDao.search(new SearchParameterMap(Patient.SP_IDENTIFIER, value).setLoadSynchronous(true)));;
 		assertEquals(1, found.size());
 		assertEquals(id, found.get(0).getIdElement().getIdPartAsLong().longValue());
 
@@ -2224,8 +2209,8 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		q.setTitle("testQuestionnaireTitleGetsIndexedQ_NOTITLE");
 		IIdType qid2 = myQuestionnaireDao.create(q, mySrd).getId().toUnqualifiedVersionless();
 
-		IBundleProvider results = myQuestionnaireDao.search("title", new StringParam("testQuestionnaireTitleGetsIndexedQ_TITLE"));
-		assertEquals(1, results.size());
+		IBundleProvider results = myQuestionnaireDao.search(new SearchParameterMap("title", new StringParam("testQuestionnaireTitleGetsIndexedQ_TITLE")).setLoadSynchronous(true));
+		assertEquals(1, results.size().intValue());
 		assertEquals(qid1, results.getResources(0, 1).get(0).getIdElement().toUnqualifiedVersionless());
 		assertNotEquals(qid2, results.getResources(0, 1).get(0).getIdElement().toUnqualifiedVersionless());
 
@@ -2569,6 +2554,103 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 	}
 
 	@Test
+	public void testRemoveTag() {
+
+		String methodName = "testResourceMetaOperation";
+		IIdType id1, id2;
+		{
+			Patient patient = new Patient();
+			patient.addIdentifier().setSystem("urn:system").setValue(methodName);
+			patient.addName().setFamily("Tester").addGiven("Joe");
+			patient.getMeta().addTag(null, "Dog", "Puppies");
+
+			patient.getMeta().addSecurity().setSystem("seclabel:sys:1").setCode("seclabel:code:1").setDisplay("seclabel:dis:1");
+
+			patient.getMeta().addProfile(("http://profile/1"));
+
+			id1 = myPatientDao.create(patient, mySrd).getId();
+		}
+		{
+			Patient patient = new Patient();
+			patient.addIdentifier().setSystem("urn:system").setValue(methodName);
+			patient.addName().setFamily("Tester").addGiven("Joe");
+
+			patient.getMeta().addTag("http://foo", "Cat", "Kittens");
+			patient.getMeta().addSecurity().setSystem("seclabel:sys:2").setCode("seclabel:code:2").setDisplay("seclabel:dis:2");
+			patient.getMeta().addProfile("http://profile/2");
+
+			id2 = myPatientDao.create(patient, mySrd).getId();
+		}
+		{
+			Device device = new Device();
+			device.addIdentifier().setSystem("urn:system").setValue(methodName);
+			device.getMeta().addTag("http://foo", "Foo", "Bars");
+			device.getMeta().addSecurity().setSystem("seclabel:sys:3").setCode("seclabel:code:3").setDisplay("seclabel:dis:3");
+			device.getMeta().addProfile("http://profile/3");
+			myDeviceDao.create(device, mySrd);
+		}
+
+		Meta meta;
+
+		meta = myPatientDao.metaGetOperation(Meta.class, mySrd);
+		List<Coding> published = meta.getTag();
+		assertEquals(2, published.size());
+		assertEquals(null, published.get(0).getSystem());
+		assertEquals("Dog", published.get(0).getCode());
+		assertEquals("Puppies", published.get(0).getDisplay());
+		assertEquals("http://foo", published.get(1).getSystem());
+		assertEquals("Cat", published.get(1).getCode());
+		assertEquals("Kittens", published.get(1).getDisplay());
+		List<Coding> secLabels = meta.getSecurity();
+		assertEquals(2, secLabels.size());
+		assertEquals("seclabel:sys:1", secLabels.get(0).getSystemElement().getValue());
+		assertEquals("seclabel:code:1", secLabels.get(0).getCodeElement().getValue());
+		assertEquals("seclabel:dis:1", secLabels.get(0).getDisplayElement().getValue());
+		assertEquals("seclabel:sys:2", secLabels.get(1).getSystemElement().getValue());
+		assertEquals("seclabel:code:2", secLabels.get(1).getCodeElement().getValue());
+		assertEquals("seclabel:dis:2", secLabels.get(1).getDisplayElement().getValue());
+		List<UriType> profiles = meta.getProfile();
+		assertEquals(2, profiles.size());
+		assertEquals("http://profile/1", profiles.get(0).getValue());
+		assertEquals("http://profile/2", profiles.get(1).getValue());
+
+		meta = myPatientDao.metaGetOperation(Meta.class, id2, mySrd);
+		published = meta.getTag();
+		assertEquals(1, published.size());
+		assertEquals("http://foo", published.get(0).getSystem());
+		assertEquals("Cat", published.get(0).getCode());
+		assertEquals("Kittens", published.get(0).getDisplay());
+		secLabels = meta.getSecurity();
+		assertEquals(1, secLabels.size());
+		assertEquals("seclabel:sys:2", secLabels.get(0).getSystemElement().getValue());
+		assertEquals("seclabel:code:2", secLabels.get(0).getCodeElement().getValue());
+		assertEquals("seclabel:dis:2", secLabels.get(0).getDisplayElement().getValue());
+		profiles = meta.getProfile();
+		assertEquals(1, profiles.size());
+		assertEquals("http://profile/2", profiles.get(0).getValue());
+
+		myPatientDao.removeTag(id1, TagTypeEnum.TAG, null, "Dog");
+		myPatientDao.removeTag(id1, TagTypeEnum.SECURITY_LABEL, "seclabel:sys:1", "seclabel:code:1");
+		myPatientDao.removeTag(id1, TagTypeEnum.PROFILE, BaseHapiFhirDao.NS_JPA_PROFILE, "http://profile/1");
+
+		meta = myPatientDao.metaGetOperation(Meta.class, mySrd);
+		published = meta.getTag();
+		assertEquals(1, published.size());
+		assertEquals("http://foo", published.get(0).getSystem());
+		assertEquals("Cat", published.get(0).getCode());
+		assertEquals("Kittens", published.get(0).getDisplay());
+		secLabels = meta.getSecurity();
+		assertEquals(1, secLabels.size());
+		assertEquals("seclabel:sys:2", secLabels.get(0).getSystemElement().getValue());
+		assertEquals("seclabel:code:2", secLabels.get(0).getCodeElement().getValue());
+		assertEquals("seclabel:dis:2", secLabels.get(0).getDisplayElement().getValue());
+		profiles = meta.getProfile();
+		assertEquals(1, profiles.size());
+		assertEquals("http://profile/2", profiles.get(0).getValue());
+
+	}
+
+	@Test
 	public void testReverseIncludes() {
 		String methodName = "testReverseIncludes";
 		Organization org = new Organization();
@@ -2584,7 +2666,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		map.add(Organization.SP_NAME, new StringParam("X" + methodName + "X"));
 		map.setRevIncludes(Collections.singleton(Patient.INCLUDE_ORGANIZATION));
 		IBundleProvider resultsP = myOrganizationDao.search(map);
-		assertEquals(1, resultsP.size());
+		assertEquals(1, resultsP.size().intValue());
 
 		List<IBaseResource> results = resultsP.getResources(0, resultsP.size());
 		assertEquals(2, results.size());
@@ -2603,7 +2685,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		SearchParameterMap pm = new SearchParameterMap();
 		pm.setSort(new SortSpec(Observation.SP_CODE_VALUE_CONCEPT));
 		try {
-			myObservationDao.search(pm);
+			myObservationDao.search(pm).size();
 			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals("This server does not support _sort specifications of type COMPOSITE - Can't serve _sort=code-value-concept", e.getMessage());
@@ -2657,7 +2739,9 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		pm.setSort(new SortSpec(Patient.SP_BIRTHDATE).setOrder(SortOrderEnum.DESC));
 		actual = toUnqualifiedVersionlessIds(myPatientDao.search(pm));
 		assertEquals(4, actual.size());
-		assertThat(actual, contains(id3, id2, id1, id4));
+		// The first would be better, but JPA doesn't do NULLS LAST 
+		// assertThat(actual, contains(id3, id2, id1, id4));
+		assertThat(actual, contains(id4, id3, id2, id1));
 
 	}
 
@@ -2939,7 +3023,9 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		pm.setSort(new SortSpec(Patient.SP_FAMILY).setOrder(SortOrderEnum.DESC));
 		actual = toUnqualifiedVersionlessIds(myPatientDao.search(pm));
 		assertEquals(4, actual.size());
-		assertThat(actual, contains(id3, id2, id1, id4));
+		// The first would be better, but JPA doesn't do NULLS LAST 
+		// assertThat(actual, contains(id3, id2, id1, id4));
+		assertThat(actual, contains(id4, id3, id2, id1));
 	}
 
 	/**
@@ -3157,19 +3243,19 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 
 		assertThat(str.length(), greaterThan(ResourceIndexedSearchParamString.MAX_LENGTH));
 
-		Set<Long> val = myOrganizationDao.searchForIds("name", new StringParam("P"));
+		Set<Long> val = myOrganizationDao.searchForIds(new SearchParameterMap("name", new StringParam("P")));
 		int initial = val.size();
 
 		myOrganizationDao.create(org, mySrd);
 
-		val = myOrganizationDao.searchForIds("name", new StringParam("P"));
+		val = myOrganizationDao.searchForIds(new SearchParameterMap("name", new StringParam("P")));
 		assertEquals(initial + 0, val.size());
 
-		val = myOrganizationDao.searchForIds("name", new StringParam(str.substring(0, ResourceIndexedSearchParamString.MAX_LENGTH)));
+		val = myOrganizationDao.searchForIds(new SearchParameterMap("name", new StringParam(str.substring(0, ResourceIndexedSearchParamString.MAX_LENGTH))));
 		assertEquals(initial + 1, val.size());
 
 		try {
-			myOrganizationDao.searchForIds("name", new StringParam(str.substring(0, ResourceIndexedSearchParamString.MAX_LENGTH + 1)));
+			myOrganizationDao.searchForIds(new SearchParameterMap("name", new StringParam(str.substring(0, ResourceIndexedSearchParamString.MAX_LENGTH + 1))));
 			fail();
 		} catch (InvalidRequestException e) {
 			// ok
@@ -3229,7 +3315,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		assertEquals("http://profile/1", profiles.get(0).getValue());
 		assertEquals("http://profile/2", profiles.get(1).getValue());
 
-		List<Patient> search = toList(myPatientDao.search(Patient.SP_IDENTIFIER, new TokenParam(patient.getIdentifier().get(0).getSystem(), patient.getIdentifier().get(0).getValue())));
+		List<Patient> search = toList(myPatientDao.search(new SearchParameterMap(Patient.SP_IDENTIFIER, new TokenParam(patient.getIdentifier().get(0).getSystem(), patient.getIdentifier().get(0).getValue())).setLoadSynchronous(true)));
 		assertEquals(1, search.size());
 		retrieved = search.get(0);
 
@@ -3298,7 +3384,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		Date before = new DateTimeType("2011-01-01T10:00:00Z").getValue();
 		Date middle = new DateTimeType("2011-01-02T10:00:00Z").getValue();
 		Date after = new DateTimeType("2011-01-03T10:00:00Z").getValue();
-		
+
 		CarePlan cp = new CarePlan();
 		cp.addActivity().getDetail().setScheduled(new Timing().addEvent(before).addEvent(middle).addEvent(after));
 		cp.addActivity().getDetail();
@@ -3308,19 +3394,19 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		cp2.addActivity().getDetail().setScheduled(new StringType("FOO"));
 		cp2.addActivity().getDetail();
 		myCarePlanDao.create(cp2, mySrd).getId().toUnqualifiedVersionless();
-		
+
 		SearchParameterMap params;
-		
+
 		params = new SearchParameterMap();
-		params.add(CarePlan.SP_ACTIVITYDATE, new DateRangeParam("2010-01-01T10:00:00Z", null));
+		params.add(CarePlan.SP_ACTIVITY_DATE, new DateRangeParam("2010-01-01T10:00:00Z", null));
 		assertThat(toUnqualifiedVersionlessIdValues(myCarePlanDao.search(params)), contains(id.getValue()));
 
 		params = new SearchParameterMap();
-		params.add(CarePlan.SP_ACTIVITYDATE, new DateRangeParam("2011-01-01T10:00:00Z", null));
+		params.add(CarePlan.SP_ACTIVITY_DATE, new DateRangeParam("2011-01-01T10:00:00Z", null));
 		assertThat(toUnqualifiedVersionlessIdValues(myCarePlanDao.search(params)), contains(id.getValue()));
-		
+
 		params = new SearchParameterMap();
-		params.add(CarePlan.SP_ACTIVITYDATE, new DateRangeParam("2012-01-01T10:00:00Z", null));
+		params.add(CarePlan.SP_ACTIVITY_DATE, new DateRangeParam("2012-01-01T10:00:00Z", null));
 		assertThat(toUnqualifiedVersionlessIdValues(myCarePlanDao.search(params)), empty());
 	}
 
@@ -3332,27 +3418,27 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 
 		Organization org = new Organization();
 		org.getNameElement().setValue("testTokenParamWhichIsTooLong");
-		org.getType().addCoding().setSystem(longStr1).setCode(longStr2);
+		org.addType().addCoding().setSystem(longStr1).setCode(longStr2);
 
 		String subStr1 = longStr1.substring(0, ResourceIndexedSearchParamString.MAX_LENGTH);
 		String subStr2 = longStr2.substring(0, ResourceIndexedSearchParamString.MAX_LENGTH);
-		Set<Long> val = myOrganizationDao.searchForIds("type", new TokenParam(subStr1, subStr2));
+		Set<Long> val = myOrganizationDao.searchForIds(new SearchParameterMap("type", new TokenParam(subStr1, subStr2)));
 		int initial = val.size();
 
 		myOrganizationDao.create(org, mySrd);
 
-		val = myOrganizationDao.searchForIds("type", new TokenParam(subStr1, subStr2));
+		val = myOrganizationDao.searchForIds(new SearchParameterMap("type", new TokenParam(subStr1, subStr2)));
 		assertEquals(initial + 1, val.size());
 
 		try {
-			myOrganizationDao.searchForIds("type", new TokenParam(longStr1, subStr2));
+			myOrganizationDao.searchForIds(new SearchParameterMap("type", new TokenParam(longStr1, subStr2)));
 			fail();
 		} catch (InvalidRequestException e) {
 			// ok
 		}
 
 		try {
-			myOrganizationDao.searchForIds("type", new TokenParam(subStr1, longStr2));
+			myOrganizationDao.searchForIds(new SearchParameterMap("type", new TokenParam(subStr1, longStr2)));
 			fail();
 		} catch (InvalidRequestException e) {
 			// ok
@@ -3365,7 +3451,8 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 	}
 
 	public static void assertConflictException(ResourceVersionConflictException e) {
-		assertThat(e.getMessage(), matchesPattern("Unable to delete [a-zA-Z]+/[0-9]+ because at least one resource has a reference to this resource. First reference found was resource [a-zA-Z]+/[0-9]+ in path [a-zA-Z]+.[a-zA-Z]+"));
+		assertThat(e.getMessage(), matchesPattern(
+				"Unable to delete [a-zA-Z]+/[0-9]+ because at least one resource has a reference to this resource. First reference found was resource [a-zA-Z]+/[0-9]+ in path [a-zA-Z]+.[a-zA-Z]+"));
 	}
 
 	private static List<String> toStringList(List<UriType> theUriType) {

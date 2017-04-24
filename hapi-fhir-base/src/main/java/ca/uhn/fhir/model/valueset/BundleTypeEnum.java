@@ -5,7 +5,7 @@ package ca.uhn.fhir.model.valueset;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -102,6 +102,9 @@ public enum BundleTypeEnum {
 	 * Converts codes to their respective enumerated values
 	 */
 	public static final IValueSetEnumBinder<BundleTypeEnum> VALUESET_BINDER = new IValueSetEnumBinder<BundleTypeEnum>() {
+
+		private static final long serialVersionUID = -305725916208867517L;
+
 		@Override
 		public String toCodeString(BundleTypeEnum theEnum) {
 			return theEnum.getCode();

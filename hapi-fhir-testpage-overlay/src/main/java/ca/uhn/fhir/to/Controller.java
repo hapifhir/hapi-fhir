@@ -21,9 +21,6 @@ import org.hl7.fhir.dstu3.model.CapabilityStatement.CapabilityStatementRestCompo
 import org.hl7.fhir.dstu3.model.CapabilityStatement.CapabilityStatementRestResourceComponent;
 import org.hl7.fhir.dstu3.model.CapabilityStatement.CapabilityStatementRestResourceSearchParamComponent;
 import org.hl7.fhir.dstu3.model.CodeType;
-import org.hl7.fhir.dstu3.model.Conformance.ConformanceRestComponent;
-import org.hl7.fhir.dstu3.model.Conformance.ConformanceRestResourceComponent;
-import org.hl7.fhir.dstu3.model.Conformance.ConformanceRestResourceSearchParamComponent;
 import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseConformance;
@@ -52,17 +49,9 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.client.GenericClient;
-import ca.uhn.fhir.rest.gclient.ICreateTyped;
-import ca.uhn.fhir.rest.gclient.IHistory;
-import ca.uhn.fhir.rest.gclient.IHistoryTyped;
-import ca.uhn.fhir.rest.gclient.IHistoryUntyped;
-import ca.uhn.fhir.rest.gclient.IQuery;
-import ca.uhn.fhir.rest.gclient.IUntypedQuery;
+import ca.uhn.fhir.rest.gclient.*;
 import ca.uhn.fhir.rest.gclient.NumberClientParam.IMatches;
-import ca.uhn.fhir.rest.gclient.QuantityClientParam;
 import ca.uhn.fhir.rest.gclient.QuantityClientParam.IAndUnits;
-import ca.uhn.fhir.rest.gclient.StringClientParam;
-import ca.uhn.fhir.rest.gclient.TokenClientParam;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.to.model.HomeRequest;
@@ -106,7 +95,7 @@ public class Controller extends BaseController {
 				type = ca.uhn.fhir.model.dstu2.resource.Conformance.class;
 				break;
 			case DSTU3:
-				type = org.hl7.fhir.dstu3.model.Conformance.class;
+				type = org.hl7.fhir.dstu3.model.CapabilityStatement.class;
 				break;
 			}
 			client.fetchConformance().ofType(type).execute();
@@ -351,7 +340,7 @@ public class Controller extends BaseController {
 			haveSearchParams = extractSearchParamsDstu2(conformance, resourceName, includes, revIncludes, sortParams, queries, haveSearchParams, queryIncludes);
 			break;
 		case DSTU3:
-			haveSearchParams = extractSearchParamsDstu3(conformance, resourceName, includes, revIncludes, sortParams, queries, haveSearchParams, queryIncludes);
+			haveSearchParams = extractSearchParamsDstu3CapabilityStatement(conformance, resourceName, includes, revIncludes, sortParams, queries, haveSearchParams, queryIncludes);
 			break;
 		default:
 			throw new IllegalStateException("Unknown FHIR version: " + theRequest.getFhirVersion(myConfig));
@@ -804,46 +793,6 @@ public class Controller extends BaseController {
 					for (ca.uhn.fhir.model.dstu2.resource.Conformance.RestResourceSearchParam next : nextRes.getSearchParam()) {
 						if (next.getTypeElement().getValueAsEnum() == ca.uhn.fhir.model.dstu2.valueset.SearchParamTypeEnum.REFERENCE) {
 							for (BoundCodeDt<ResourceTypeEnum> nextTargetType : next.getTarget()) {
-								if (nextTargetType.getValue().equals(resourceName)) {
-									theRevIncludes.add(nextRes.getTypeElement().getValue() + ":" + next.getName());
-								}
-							}
-						}
-					}
-				}
-			}
-		}
-		return haveSearchParams;
-	}
-
-	private boolean extractSearchParamsDstu3(IBaseResource theConformance, String resourceName, TreeSet<String> includes, TreeSet<String> theRevIncludes, TreeSet<String> sortParams, List<RestQuery> queries, boolean haveSearchParams, List<List<String>> queryIncludes) {
-		if (theConformance instanceof org.hl7.fhir.dstu3.model.CapabilityStatement) {
-			return extractSearchParamsDstu3CapabilityStatement(theConformance, resourceName, includes, theRevIncludes, sortParams, queries, haveSearchParams, queryIncludes);
-		}
-		
-		org.hl7.fhir.dstu3.model.Conformance conformance = (org.hl7.fhir.dstu3.model.Conformance) theConformance;
-		for (ConformanceRestComponent nextRest : conformance.getRest()) {
-			for (ConformanceRestResourceComponent nextRes : nextRest.getResource()) {
-				if (nextRes.getTypeElement().getValue().equals(resourceName)) {
-					for (StringType next : nextRes.getSearchInclude()) {
-						if (next.isEmpty() == false) {
-							includes.add(next.getValue());
-						}
-					}
-					for (ConformanceRestResourceSearchParamComponent next : nextRes.getSearchParam()) {
-						if (next.getTypeElement().getValue() != org.hl7.fhir.dstu3.model.Enumerations.SearchParamType.COMPOSITE) {
-							sortParams.add(next.getNameElement().getValue());
-						}
-					}
-					if (nextRes.getSearchParam().size() > 0) {
-						haveSearchParams = true;
-					}
-				} else {
-					// It's a different resource from the one we're searching, so
-					// scan for revinclude candidates
-					for (ConformanceRestResourceSearchParamComponent next : nextRes.getSearchParam()) {
-						if (next.getTypeElement().getValue() == org.hl7.fhir.dstu3.model.Enumerations.SearchParamType.REFERENCE) {
-							for (CodeType nextTargetType : next.getTarget()) {
 								if (nextTargetType.getValue().equals(resourceName)) {
 									theRevIncludes.add(nextRes.getTypeElement().getValue() + ":" + next.getName());
 								}

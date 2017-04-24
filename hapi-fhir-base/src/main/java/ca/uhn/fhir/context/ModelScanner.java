@@ -4,7 +4,7 @@ package ca.uhn.fhir.context;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,29 +28,13 @@ import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Properties;
-import java.util.Set;
 
 import org.apache.commons.io.IOUtils;
-import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
-import org.hl7.fhir.instance.model.api.IBaseDatatype;
-import org.hl7.fhir.instance.model.api.IBaseDatatypeElement;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IBaseXhtml;
-import org.hl7.fhir.instance.model.api.ICompositeType;
-import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.instance.model.api.*;
 
+import ca.uhn.fhir.context.RuntimeSearchParam.RuntimeSearchParamStatusEnum;
 import ca.uhn.fhir.model.api.ExtensionDt;
 import ca.uhn.fhir.model.api.IDatatype;
 import ca.uhn.fhir.model.api.IElement;
@@ -260,7 +244,9 @@ class ModelScanner {
 			}
 		}
 
-		if (blockDefinition == null && datatypeDefinition == null && resourceDefinition == null) {
+		if (blockDefinition == null
+//Redundant	checking && datatypeDefinition == null && resourceDefinition == null
+				) {
 			throw new ConfigurationException("Resource class[" + theClass.getName() + "] does not contain any valid HAPI-FHIR annotations");
 		}
 	}
@@ -399,7 +385,7 @@ class ModelScanner {
 		 * sure that this type gets scanned as well
 		 */
 		resourceDef.populateScanAlso(myScanAlso);
-
+		
 		return resourceName;
 	}
 
@@ -408,7 +394,23 @@ class ModelScanner {
 		Map<String, RuntimeSearchParam> nameToParam = new HashMap<String, RuntimeSearchParam>();
 		Map<Field, SearchParamDefinition> compositeFields = new LinkedHashMap<Field, SearchParamDefinition>();
 
-		for (Field nextField : theClass.getFields()) {
+		/*
+		 * Make sure we pick up fields in interfaces too.. This ensures that we
+		 * grab the _id field which generally gets picked up via interface
+		 */
+		Set<Field> fields = new HashSet<Field>(Arrays.asList(theClass.getFields()));
+		Class<?> nextClass = theClass;
+		do {
+			for (Class<?> nextInterface : nextClass.getInterfaces()) {
+				fields.addAll(Arrays.asList(nextInterface.getFields()));
+			}
+			nextClass = nextClass.getSuperclass();
+		} while (nextClass.equals(Object.class) == false);
+		
+		/*
+		 * Now scan the fields for search params
+		 */
+		for (Field nextField : fields) {
 			SearchParamDefinition searchParam = pullAnnotation(nextField, SearchParamDefinition.class);
 			if (searchParam != null) {
 				RestSearchParameterTypeEnum paramType = RestSearchParameterTypeEnum.forCode(searchParam.type().toLowerCase());
@@ -438,7 +440,7 @@ class ModelScanner {
 				}
 
 
-				RuntimeSearchParam param = new RuntimeSearchParam(searchParam.name(), searchParam.description(), searchParam.path(), paramType, providesMembershipInCompartments, toTargetList(searchParam.target()));
+				RuntimeSearchParam param = new RuntimeSearchParam(searchParam.name(), searchParam.description(), searchParam.path(), paramType, providesMembershipInCompartments, toTargetList(searchParam.target()), RuntimeSearchParamStatusEnum.ACTIVE);
 				theResourceDef.addSearchParam(param);
 				nameToParam.put(param.getName(), param);
 			}
@@ -458,7 +460,7 @@ class ModelScanner {
 				compositeOf.add(param);
 			}
 
-			RuntimeSearchParam param = new RuntimeSearchParam(searchParam.name(), searchParam.description(), searchParam.path(), RestSearchParameterTypeEnum.COMPOSITE, compositeOf, null, toTargetList(searchParam.target()));
+			RuntimeSearchParam param = new RuntimeSearchParam(null, null, searchParam.name(), searchParam.description(), searchParam.path(), RestSearchParameterTypeEnum.COMPOSITE, compositeOf, null, toTargetList(searchParam.target()), RuntimeSearchParamStatusEnum.ACTIVE);
 			theResourceDef.addSearchParam(param);
 		}
 	}

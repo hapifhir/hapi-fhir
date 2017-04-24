@@ -1,10 +1,12 @@
 package ca.uhn.fhir.rest.server.interceptor.auth;
 
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
 /*
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +26,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -39,7 +43,7 @@ import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.BundleUtil.BundleEntryParts;
 import ca.uhn.fhir.util.FhirTerser;
 
-class RuleImplOp extends BaseRule implements IAuthRule {
+class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 
 	private AppliesTypeEnum myAppliesTo;
 	private Set<?> myAppliesToTypes;
@@ -48,6 +52,7 @@ class RuleImplOp extends BaseRule implements IAuthRule {
 	private ClassifierTypeEnum myClassifierType;
 	private RuleOpEnum myOp;
 	private TransactionAppliesToEnum myTransactionAppliesToOp;
+	private List<IIdType> myAppliesToInstances;
 
 	public RuleImplOp(String theRuleName) {
 		super(theRuleName);
@@ -70,17 +75,20 @@ class RuleImplOp extends BaseRule implements IAuthRule {
 					appliesToResourceId = theInputResourceId;
 					appliesToResourceType = theInputResourceId.getResourceType();
 					break;
-//					return new Verdict(PolicyEnum.ALLOW, this);
 				case SEARCH_SYSTEM:
 				case SEARCH_TYPE:
 				case HISTORY_INSTANCE:
 				case HISTORY_SYSTEM:
+				case HISTORY_TYPE:
 					return new Verdict(PolicyEnum.ALLOW, this);
 				default:
 					return null;
 				}
 			}
 			appliesToResource = theOutputResource;
+			if (theOutputResource != null) {
+				appliesToResourceId = theOutputResource.getIdElement();
+			}
 			break;
 		case WRITE:
 			if (theInputResource == null && theInputResourceId == null) {
@@ -105,9 +113,8 @@ class RuleImplOp extends BaseRule implements IAuthRule {
 			if (theOperation == RestOperationTypeEnum.DELETE) {
 				if (theInputResource == null) {
 					return newVerdict();
-				} else {
-					appliesToResource = theInputResource;
 				}
+				appliesToResource = theInputResource;
 			} else {
 				return null;
 			}
@@ -120,45 +127,44 @@ class RuleImplOp extends BaseRule implements IAuthRule {
 			if (theInputResource != null && requestAppliesToTransaction(ctx, myOp, theInputResource)) {
 				if (getMode() == PolicyEnum.DENY) {
 					return new Verdict(PolicyEnum.DENY, this);
-				} else {
-					List<BundleEntryParts> inputResources = BundleUtil.toListOfEntries(ctx, (IBaseBundle) theInputResource);
-					Verdict verdict = null;
-					for (BundleEntryParts nextPart : inputResources) {
-
-						IBaseResource inputResource = nextPart.getResource();
-						RestOperationTypeEnum operation = null;
-						if (nextPart.getRequestType() == RequestTypeEnum.GET) {
-							continue;
-						}
-						if (nextPart.getRequestType() == RequestTypeEnum.POST) {
-							operation = RestOperationTypeEnum.CREATE;
-						} else if (nextPart.getRequestType() == RequestTypeEnum.PUT) {
-							operation = RestOperationTypeEnum.UPDATE;
-						} else {
-							throw new InvalidRequestException("Can not handle transaction with operation of type " + nextPart.getRequestType());
-						}
-
-						/*
-						 * This is basically just being conservative - Be careful of transactions containing
-						 * nested operations and nested transactions. We block the by default. At some point
-						 * it would be nice to be more nuanced here.
-						 */
-						RuntimeResourceDefinition resourceDef = ctx.getResourceDefinition(nextPart.getResource());
-						if ("Parameters".equals(resourceDef.getName()) || "Bundle".equals(resourceDef.getName())) {
-							throw new InvalidRequestException("Can not handle transaction with nested resource of type " + resourceDef.getName());
-						}
-
-						Verdict newVerdict = theRuleApplier.applyRulesAndReturnDecision(operation, theRequestDetails, inputResource, null, null);
-						if (newVerdict == null) {
-							continue;
-						} else if (verdict == null) {
-							verdict = newVerdict;
-						} else if (verdict.getDecision() == PolicyEnum.ALLOW && newVerdict.getDecision() == PolicyEnum.DENY) {
-							verdict = newVerdict;
-						}
-					}
-					return verdict;
 				}
+				List<BundleEntryParts> inputResources = BundleUtil.toListOfEntries(ctx, (IBaseBundle) theInputResource);
+				Verdict verdict = null;
+				for (BundleEntryParts nextPart : inputResources) {
+
+					IBaseResource inputResource = nextPart.getResource();
+					RestOperationTypeEnum operation = null;
+					if (nextPart.getRequestType() == RequestTypeEnum.GET) {
+						continue;
+					}
+					if (nextPart.getRequestType() == RequestTypeEnum.POST) {
+						operation = RestOperationTypeEnum.CREATE;
+					} else if (nextPart.getRequestType() == RequestTypeEnum.PUT) {
+						operation = RestOperationTypeEnum.UPDATE;
+					} else {
+						throw new InvalidRequestException("Can not handle transaction with operation of type " + nextPart.getRequestType());
+					}
+
+					/*
+					 * This is basically just being conservative - Be careful of transactions containing
+					 * nested operations and nested transactions. We block the by default. At some point
+					 * it would be nice to be more nuanced here.
+					 */
+					RuntimeResourceDefinition resourceDef = ctx.getResourceDefinition(nextPart.getResource());
+					if ("Parameters".equals(resourceDef.getName()) || "Bundle".equals(resourceDef.getName())) {
+						throw new InvalidRequestException("Can not handle transaction with nested resource of type " + resourceDef.getName());
+					}
+
+					Verdict newVerdict = theRuleApplier.applyRulesAndReturnDecision(operation, theRequestDetails, inputResource, null, null);
+					if (newVerdict == null) {
+						continue;
+					} else if (verdict == null) {
+						verdict = newVerdict;
+					} else if (verdict.getDecision() == PolicyEnum.ALLOW && newVerdict.getDecision() == PolicyEnum.DENY) {
+						verdict = newVerdict;
+					}
+				}
+				return verdict;
 			} else if (theOutputResource != null) {
 				List<BundleEntryParts> inputResources = BundleUtil.toListOfEntries(ctx, (IBaseBundle) theInputResource);
 				Verdict verdict = null;
@@ -186,15 +192,29 @@ class RuleImplOp extends BaseRule implements IAuthRule {
 		case METADATA:
 			if (theOperation == RestOperationTypeEnum.METADATA) {
 				return newVerdict();
-			} else {
-				return null;
 			}
+			return null;
 		default:
 			// Should not happen
 			throw new IllegalStateException("Unable to apply security to event of type " + theOperation);
 		}
 
 		switch (myAppliesTo) {
+		case INSTANCES:
+			if (appliesToResourceId != null) {
+				for (IIdType next : myAppliesToInstances) {
+					if (isNotBlank(next.getResourceType())) {
+						if (!next.getResourceType().equals(appliesToResourceId.getResourceType())) {
+							continue;
+						}
+					}
+					if (!next.getIdPart().equals(appliesToResourceId.getIdPart())) {
+						continue;
+					}
+					return newVerdict();
+				}
+			}
+			return null;
 		case ALL_RESOURCES:
 			if (appliesToResourceType != null) {
 				return new Verdict(PolicyEnum.ALLOW, this);
@@ -254,6 +274,19 @@ class RuleImplOp extends BaseRule implements IAuthRule {
 		return newVerdict();
 	}
 
+	@Override
+	public String toString() {
+		ToStringBuilder builder = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
+		builder.append("op", myOp);
+		builder.append("transactionAppliesToOp", myTransactionAppliesToOp);
+		builder.append("appliesTo", myAppliesTo);
+		builder.append("appliesToTypes", myAppliesToTypes);
+		builder.append("classifierCompartmentName", myClassifierCompartmentName);
+		builder.append("classifierCompartmentOwners", myClassifierCompartmentOwners);
+		builder.append("classifierType", myClassifierType);
+		return builder.toString();
+	}
+
 	private boolean requestAppliesToTransaction(FhirContext theContext, RuleOpEnum theOp, IBaseResource theInputResource) {
 		if (!"Bundle".equals(theContext.getResourceDefinition(theInputResource).getName())) {
 			return false;
@@ -302,6 +335,10 @@ class RuleImplOp extends BaseRule implements IAuthRule {
 
 	public void setTransactionAppliesToOp(TransactionAppliesToEnum theOp) {
 		myTransactionAppliesToOp = theOp;
+	}
+
+	public void setAppliesToInstances(List<IIdType> theAppliesToInstances) {
+		myAppliesToInstances = theAppliesToInstances;
 	}
 
 }

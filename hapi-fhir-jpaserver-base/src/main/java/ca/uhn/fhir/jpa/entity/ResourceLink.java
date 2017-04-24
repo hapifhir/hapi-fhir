@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.entity;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.entity;
  */
 
 import java.io.Serializable;
+import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -32,6 +33,8 @@ import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -88,22 +91,29 @@ public class ResourceLink implements Serializable {
 	@Field()
 	private String myTargetResourceUrl;
 
+	@Field()
+	@Column(name = "SP_UPDATED", nullable = true) // TODO: make this false after HAPI 2.3
+	@Temporal(TemporalType.TIMESTAMP)
+	private Date myUpdated;
+
 	public ResourceLink() {
 		super();
 	}
 
-	public ResourceLink(String theSourcePath, ResourceTable theSourceResource, ResourceTable theTargetResource) {
-		super();
-		setSourcePath(theSourcePath);
-		setSourceResource(theSourceResource);
-		setTargetResource(theTargetResource);
-	}
-
-	public ResourceLink(String theSourcePath, ResourceTable theSourceResource, IIdType theTargetResourceUrl) {
+	public ResourceLink(String theSourcePath, ResourceTable theSourceResource, IIdType theTargetResourceUrl, Date theUpdated) {
 		super();
 		setSourcePath(theSourcePath);
 		setSourceResource(theSourceResource);
 		setTargetResourceUrl(theTargetResourceUrl);
+		setUpdated(theUpdated);
+	}
+
+	public ResourceLink(String theSourcePath, ResourceTable theSourceResource, ResourceTable theTargetResource, Date theUpdated) {
+		super();
+		setSourcePath(theSourcePath);
+		setSourceResource(theSourceResource);
+		setTargetResource(theTargetResource);
+		setUpdated(theUpdated);
 	}
 
 	@Override
@@ -150,6 +160,10 @@ public class ResourceLink implements Serializable {
 		return myTargetResourceUrl;
 	}
 
+	public Date getUpdated() {
+		return myUpdated;
+	}
+
 	@Override
 	public int hashCode() {
 		HashCodeBuilder b = new HashCodeBuilder();
@@ -184,6 +198,10 @@ public class ResourceLink implements Serializable {
 		
 		myTargetResourceType = theTargetResourceUrl.getResourceType();
 		myTargetResourceUrl = theTargetResourceUrl.getValue();
+	}
+
+	public void setUpdated(Date theUpdated) {
+		myUpdated = theUpdated;
 	}
 
 	@Override

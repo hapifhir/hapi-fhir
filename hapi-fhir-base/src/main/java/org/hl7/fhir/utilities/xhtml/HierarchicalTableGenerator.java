@@ -4,7 +4,7 @@ package org.hl7.fhir.utilities.xhtml;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -180,28 +180,28 @@ public class HierarchicalTableGenerator  {
       pieces.add(piece);
       return this;
     }
-    private List<Piece> htmlToParagraphPieces(String html) {
-      List<Piece> myPieces = new ArrayList<Piece>();
-      String[] paragraphs = html.replace("<p>", "").split("<\\/p>|<br  \\/>");
-      for (int i=0;i<paragraphs.length;i++) {
-        if (!paragraphs[i].isEmpty()) {
-          if (i!=0) {
-            myPieces.add(new Piece("br"));
-            myPieces.add(new Piece("br"));
-          }
-          myPieces.addAll(htmlFormattingToPieces(paragraphs[i]));
-        }
-      }
-      
-      return myPieces;
-    }
-    private List<Piece> htmlFormattingToPieces(String html) {
-      List<Piece> myPieces = new ArrayList<Piece>();
-      //Todo: At least handle bold and italics and turn them into formatted spans.  (Will need to handle nesting though)
-      myPieces.add(new Piece(null, html, null));
-      
-      return myPieces;
-    }
+//    private List<Piece> htmlToParagraphPieces(String html) {
+//      List<Piece> myPieces = new ArrayList<Piece>();
+//      String[] paragraphs = html.replace("<p>", "").split("<\\/p>|<br  \\/>");
+//      for (int i=0;i<paragraphs.length;i++) {
+//        if (!paragraphs[i].isEmpty()) {
+//          if (i!=0) {
+//            myPieces.add(new Piece("br"));
+//            myPieces.add(new Piece("br"));
+//          }
+//          myPieces.addAll(htmlFormattingToPieces(paragraphs[i]));
+//        }
+//      }
+//      
+//      return myPieces;
+//    }
+//    private List<Piece> htmlFormattingToPieces(String html) {
+//      List<Piece> myPieces = new ArrayList<Piece>();
+//      //Todo: At least handle bold and italics and turn them into formatted spans.  (Will need to handle nesting though)
+//      myPieces.add(new Piece(null, html, null));
+//      
+//      return myPieces;
+//    }
     public void addStyle(String style) {
       for (Piece p : pieces)
         p.addStyle(style);      
@@ -507,8 +507,8 @@ public class HierarchicalTableGenerator  {
       b.append(new String(Base64.encodeBase64(bytes)));
 //      files.put(filename, b.toString());
       return b.toString();
-    } else
-      return corePrefix+filename;
+    } 
+    return corePrefix+filename;
   }
 
 
@@ -558,22 +558,22 @@ public class HierarchicalTableGenerator  {
       b.append(new String(encodeBase64));
       files.put(filename, b.toString());
       return b.toString();
-    } else {
-      b.append("tbl_bck");
-      for (Boolean i : indents)
-        b.append(i ? "0" : "1");
-      if (hasChildren)
-        b.append("1");
-      else
-        b.append("0");
-      b.append(".png");
-      String file = Utilities.path(dest, b.toString());
-      if (!new File(file).exists()) {
-        FileOutputStream stream = new FileOutputStream(file);
-        genImage(indents, hasChildren, stream);
-      }
-      return b.toString();
     }
+    b.append("tbl_bck");
+    for (Boolean i : indents)
+    	b.append(i ? "0" : "1");
+    if (hasChildren)
+    	b.append("1");
+    else
+    	b.append("0");
+    b.append(".png");
+    String file = Utilities.path(dest, b.toString());
+    if (!new File(file).exists()) {
+    	//FIXME resource leak
+    	FileOutputStream stream = new FileOutputStream(file);
+    	genImage(indents, hasChildren, stream);
+    }
+    return b.toString();
   }
 
 

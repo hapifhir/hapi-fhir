@@ -4,13 +4,13 @@ package ca.uhn.fhir.jpa.search;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  * 
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,13 +19,7 @@ package ca.uhn.fhir.jpa.search;
  * limitations under the License.
  * #L%
  */
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
@@ -36,7 +30,6 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -46,26 +39,24 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.IDao;
-import ca.uhn.fhir.jpa.dao.SearchBuilder;
+import ca.uhn.fhir.jpa.dao.ISearchBuilder;
 import ca.uhn.fhir.jpa.dao.data.ISearchDao;
-import ca.uhn.fhir.jpa.dao.data.ISearchResultDao;
 import ca.uhn.fhir.jpa.entity.BaseHasResource;
 import ca.uhn.fhir.jpa.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.entity.Search;
-import ca.uhn.fhir.jpa.entity.SearchResult;
 import ca.uhn.fhir.jpa.entity.SearchTypeEnum;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.rest.server.IBundleProvider;
 
-public final class PersistedJpaBundleProvider implements IBundleProvider {
+public class PersistedJpaBundleProvider implements IBundleProvider {
 
 	private FhirContext myContext;
 	private IDao myDao;
 	private EntityManager myEntityManager;
 	private PlatformTransactionManager myPlatformTransactionManager;
+	private ISearchCoordinatorSvc mySearchCoordinatorSvc;
 	private ISearchDao mySearchDao;
 	private Search mySearchEntity;
-	private ISearchResultDao mySearchResultDao;
 	private String myUuid;
 
 	public PersistedJpaBundleProvider(String theSearchUuid, IDao theDao) {
@@ -80,7 +71,7 @@ public final class PersistedJpaBundleProvider implements IBundleProvider {
 		CriteriaQuery<ResourceHistoryTable> q = cb.createQuery(ResourceHistoryTable.class);
 		Root<ResourceHistoryTable> from = q.from(ResourceHistoryTable.class);
 		List<Predicate> predicates = new ArrayList<Predicate>();
-		
+
 		if (mySearchEntity.getResourceType() == null) {
 			// All resource types
 		} else if (mySearchEntity.getResourceId() == null) {
@@ -95,22 +86,22 @@ public final class PersistedJpaBundleProvider implements IBundleProvider {
 		if (mySearchEntity.getLastUpdatedHigh() != null) {
 			predicates.add(cb.lessThanOrEqualTo(from.get("myUpdated").as(Date.class), mySearchEntity.getLastUpdatedHigh()));
 		}
-		
+
 		if (predicates.size() > 0) {
 			q.where(predicates.toArray(new Predicate[predicates.size()]));
 		}
-		
+
 		q.orderBy(cb.desc(from.get("myUpdated")));
-		
+
 		TypedQuery<ResourceHistoryTable> query = myEntityManager.createQuery(q);
 
 		if (theToIndex - theFromIndex > 0) {
 			query.setFirstResult(theFromIndex);
 			query.setMaxResults(theToIndex - theFromIndex);
 		}
-		
+
 		results = query.getResultList();
-		
+
 		ArrayList<IBaseResource> retVal = new ArrayList<IBaseResource>();
 		for (ResourceHistoryTable next : results) {
 			BaseHasResource resource;
@@ -123,33 +114,21 @@ public final class PersistedJpaBundleProvider implements IBundleProvider {
 	}
 
 	protected List<IBaseResource> doSearchOrEverythingInTransaction(final int theFromIndex, final int theToIndex) {
+		ISearchBuilder sb = myDao.newSearchBuilder();
 
-		Pageable page = toPage(theFromIndex, theToIndex);
-		if (page == null) {
-			return Collections.emptyList();
+		String resourceName = mySearchEntity.getResourceType();
+		Class<? extends IBaseResource> resourceType = myContext.getResourceDefinition(resourceName).getImplementingClass();
+		sb.setType(resourceType, resourceName);
+
+		List<Long> pidsSubList = mySearchCoordinatorSvc.getResources(myUuid, theFromIndex, theToIndex);
+
+		return toResourceList(sb, pidsSubList);
+	}
+
+	private void ensureDependenciesInjected() {
+		if (myPlatformTransactionManager == null) {
+			myDao.injectDependenciesIntoBundleProvider(this);
 		}
-
-		Page<SearchResult> search = mySearchResultDao.findWithSearchUuid(mySearchEntity, page);
-
-		List<Long> pidsSubList = new ArrayList<Long>();
-		for (SearchResult next : search) {
-			pidsSubList.add(next.getResourcePid());
-		}
-
-		// Load includes
-		pidsSubList = new ArrayList<Long>(pidsSubList);
-
-		Set<Long> revIncludedPids = new HashSet<Long>();
-		if (mySearchEntity.getSearchType() == SearchTypeEnum.SEARCH) {
-			revIncludedPids.addAll(SearchBuilder.loadReverseIncludes(myContext, myEntityManager, pidsSubList, mySearchEntity.toRevIncludesList(), true, mySearchEntity.getLastUpdated()));
-		}
-		revIncludedPids.addAll(SearchBuilder.loadReverseIncludes(myContext, myEntityManager, pidsSubList, mySearchEntity.toIncludesList(), false, mySearchEntity.getLastUpdated()));
-
-		// Execute the query and make sure we return distinct results
-		List<IBaseResource> resources = new ArrayList<IBaseResource>();
-		SearchBuilder.loadResourcesByPid(pidsSubList, resources, revIncludedPids, false, myEntityManager, myContext, myDao);
-
-		return resources;
 	}
 
 	/**
@@ -165,7 +144,7 @@ public final class PersistedJpaBundleProvider implements IBundleProvider {
 				@Override
 				public Boolean doInTransaction(TransactionStatus theStatus) {
 					try {
-						mySearchEntity = mySearchDao.findByUuid(myUuid);
+						setSearchEntity(mySearchDao.findByUuid(myUuid));
 
 						if (mySearchEntity == null) {
 							return false;
@@ -182,12 +161,6 @@ public final class PersistedJpaBundleProvider implements IBundleProvider {
 			});
 		}
 		return true;
-	}
-
-	private void ensureDependenciesInjected() {
-		if (myPlatformTransactionManager == null) {
-			myDao.injectDependenciesIntoBundleProvider(this);
-		}
 	}
 
 	@Override
@@ -220,7 +193,7 @@ public final class PersistedJpaBundleProvider implements IBundleProvider {
 		});
 	}
 
-	public String getSearchUuid() {
+	public String getUuid() {
 		return myUuid;
 	}
 
@@ -242,36 +215,40 @@ public final class PersistedJpaBundleProvider implements IBundleProvider {
 		myPlatformTransactionManager = thePlatformTransactionManager;
 	}
 
+	public void setSearchCoordinatorSvc(ISearchCoordinatorSvc theSearchCoordinatorSvc) {
+		mySearchCoordinatorSvc = theSearchCoordinatorSvc;
+	}
+
 	public void setSearchDao(ISearchDao theSearchDao) {
 		mySearchDao = theSearchDao;
 	}
 
-	public void setSearchResultDao(ISearchResultDao theSearchResultDao) {
-		mySearchResultDao = theSearchResultDao;
+	protected void setSearchEntity(Search theSearchEntity) {
+		mySearchEntity = theSearchEntity;
 	}
 
 	@Override
-	public int size() {
+	public Integer size() {
 		ensureSearchEntityLoaded();
-		return Math.max(0, mySearchEntity.getTotalCount());
-	}
-
-	public static Pageable toPage(final int theFromIndex, int theToIndex) {
-		int pageSize = theToIndex - theFromIndex;
-		if (pageSize < 1) {
+		Integer size = mySearchEntity.getTotalCount();
+		if (size == null) {
 			return null;
 		}
-
-		int pageIndex = theFromIndex / pageSize;
-
-		Pageable page = new PageRequest(pageIndex, pageSize) {
-			private static final long serialVersionUID = 1L;
-
-			@Override
-			public int getOffset() {
-				return theFromIndex;
-			}};
-		
-		return page;
+		return Math.max(0, size);
 	}
+
+	protected List<IBaseResource> toResourceList(ISearchBuilder sb, List<Long> pidsSubList) {
+		Set<Long> includedPids = new HashSet<Long>();
+		if (mySearchEntity.getSearchType() == SearchTypeEnum.SEARCH) {
+			includedPids.addAll(sb.loadReverseIncludes(myDao, myContext, myEntityManager, pidsSubList, mySearchEntity.toRevIncludesList(), true, mySearchEntity.getLastUpdated()));
+		}
+		includedPids.addAll(sb.loadReverseIncludes(myDao, myContext, myEntityManager, pidsSubList, mySearchEntity.toIncludesList(), false, mySearchEntity.getLastUpdated()));
+
+		// Execute the query and make sure we return distinct results
+		List<IBaseResource> resources = new ArrayList<IBaseResource>();
+		sb.loadResourcesByPid(pidsSubList, resources, includedPids, false, myEntityManager, myContext, myDao);
+
+		return resources;
+	}
+
 }

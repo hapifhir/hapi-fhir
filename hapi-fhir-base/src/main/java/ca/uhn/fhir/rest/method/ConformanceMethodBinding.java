@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.method;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -93,9 +93,8 @@ public class ConformanceMethodBinding extends BaseResourceReturningMethodBinding
 		if ("metadata".equals(theRequest.getOperation())) {
 			if (theRequest.getRequestType() == RequestTypeEnum.GET) {
 				return true;
-			} else {
-				throw new MethodNotAllowedException("/metadata request must use HTTP GET", RequestTypeEnum.GET);
 			}
+			throw new MethodNotAllowedException("/metadata request must use HTTP GET", RequestTypeEnum.GET);
 		}
 
 		return false;

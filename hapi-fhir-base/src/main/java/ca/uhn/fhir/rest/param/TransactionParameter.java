@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.param;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,7 +48,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
 public class TransactionParameter implements IParameter {
 
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TransactionParameter.class);	
+//	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TransactionParameter.class);	
 	private FhirContext myContext;
 	private ParamStyle myParamStyle;
 	private Class<? extends IBaseResource> myResourceBundleType;
@@ -112,6 +112,7 @@ public class TransactionParameter implements IParameter {
 			case DSTU1_BUNDLE: {
 				Bundle bundle;
 				bundle = parser.parseBundle(reader);
+				//FIXME resource leak
 				return bundle;
 			}
 			case RESOURCE_LIST: {
@@ -122,12 +123,15 @@ public class TransactionParameter implements IParameter {
 						resourceList.add(next.getResource());
 					}
 				}
+				//FIXME resource leak
 				return resourceList;
 			}
 			case RESOURCE_BUNDLE:
+				//FIXME resource leak
 				return parser.parseResource(myResourceBundleType, reader);
 		}
 
+		//FIXME resource leak
 		throw new IllegalStateException("Unknown type: " + myParamStyle); // should not happen
 	}
 

@@ -6,7 +6,7 @@ import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -152,9 +152,8 @@ abstract class BaseOutcomeReturningMethodBindingWithResourceParam extends BaseOu
 	/**
 	 * Subclasses may override
 	 */
-	@SuppressWarnings("unused")
 	protected void validateResourceIdAndUrlIdForNonConditionalOperation(IBaseResource theResource, String theResourceId, String theUrlId, String theMatchUrl) {
-		// nothing by default
+		return;
 	}
 
 }

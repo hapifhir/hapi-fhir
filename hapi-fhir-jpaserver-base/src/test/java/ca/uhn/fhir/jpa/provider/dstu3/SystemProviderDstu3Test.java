@@ -11,6 +11,7 @@ import static org.junit.Assert.fail;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.IOUtils;
@@ -128,7 +129,7 @@ public class SystemProviderDstu3Test extends BaseJpaDstu3Test {
 		
 		CloseableHttpResponse resp = ourHttpClient.execute(req);
 		try {
-			String encoded = IOUtils.toString(resp.getEntity().getContent());
+			String encoded = IOUtils.toString(resp.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(encoded);
 
 			assertThat(encoded, containsString("transaction-response")); 
@@ -161,7 +162,7 @@ public class SystemProviderDstu3Test extends BaseJpaDstu3Test {
 		
 		CloseableHttpResponse resp = ourHttpClient.execute(req);
 		try {
-			String encoded = IOUtils.toString(resp.getEntity().getContent());
+			String encoded = IOUtils.toString(resp.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(encoded);
 
 			assertThat(encoded, containsString("transaction-response"));
@@ -270,14 +271,14 @@ public class SystemProviderDstu3Test extends BaseJpaDstu3Test {
 		try {
 	
 			InputStream bundleRes = SystemProviderDstu2Test.class.getResourceAsStream("/questionnaire-sdc-profile-example-ussg-fht.xml");
-			String bundleStr = IOUtils.toString(bundleRes);
+			String bundleStr = IOUtils.toString(bundleRes, StandardCharsets.UTF_8);
 	
 			HttpPost req = new HttpPost(ourServerBase);
 			req.setEntity(new StringEntity(bundleStr, ContentType.parse(Constants.CT_FHIR_XML + "; charset=utf-8")));
 			
 			CloseableHttpResponse resp = ourHttpClient.execute(req);
 			try {
-				String encoded = IOUtils.toString(resp.getEntity().getContent());
+				String encoded = IOUtils.toString(resp.getEntity().getContent(), StandardCharsets.UTF_8);
 				ourLog.info(encoded);
 	
 				//@formatter:off
@@ -313,7 +314,7 @@ public class SystemProviderDstu3Test extends BaseJpaDstu3Test {
 		CloseableHttpResponse http = ourHttpClient.execute(get);
 
 		try {
-			String response = IOUtils.toString(http.getEntity().getContent());
+			String response = IOUtils.toString(http.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(response);
 			assertThat(response, containsString("_format=json"));
 			assertEquals(200, http.getStatusLine().getStatusCode());
@@ -341,7 +342,7 @@ public class SystemProviderDstu3Test extends BaseJpaDstu3Test {
 		get.addHeader("Accept", "application/xml+fhir");
 		CloseableHttpResponse http = ourHttpClient.execute(get);
 		try {
-			String response = IOUtils.toString(http.getEntity().getContent());
+			String response = IOUtils.toString(http.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(response);
 			assertThat(response, not(containsString("_format")));
 			assertEquals(200, http.getStatusLine().getStatusCode());
@@ -372,7 +373,7 @@ public class SystemProviderDstu3Test extends BaseJpaDstu3Test {
 		HttpGet get = new HttpGet(ourServerBase + "/$mark-all-resources-for-reindexing");
 		CloseableHttpResponse http = ourHttpClient.execute(get);
 		try {
-			String output = IOUtils.toString(http.getEntity().getContent());
+			String output = IOUtils.toString(http.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(output);
 			assertEquals(200, http.getStatusLine().getStatusCode());
 		} finally {
@@ -403,7 +404,7 @@ public class SystemProviderDstu3Test extends BaseJpaDstu3Test {
 		CloseableHttpResponse http = ourHttpClient.execute(get);
 		try {
 			assertEquals(200, http.getStatusLine().getStatusCode());
-			String output = IOUtils.toString(http.getEntity().getContent());
+			String output = IOUtils.toString(http.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(output);
 
 			Parameters parameters = ourCtx.newXmlParser().parseResource(Parameters.class, output);
@@ -433,7 +434,7 @@ public class SystemProviderDstu3Test extends BaseJpaDstu3Test {
 		CloseableHttpResponse http = ourHttpClient.execute(get);
 		try {
 			assertEquals(400, http.getStatusLine().getStatusCode());
-			String output = IOUtils.toString(http.getEntity().getContent());
+			String output = IOUtils.toString(http.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(output);
 			assertThat(output, containsString("Parameter 'context' must be provided"));
 		} finally {
@@ -444,7 +445,7 @@ public class SystemProviderDstu3Test extends BaseJpaDstu3Test {
 		http = ourHttpClient.execute(get);
 		try {
 			assertEquals(400, http.getStatusLine().getStatusCode());
-			String output = IOUtils.toString(http.getEntity().getContent());
+			String output = IOUtils.toString(http.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(output);
 			assertThat(output, containsString("Parameter 'searchParam' must be provided"));
 		} finally {
@@ -455,7 +456,7 @@ public class SystemProviderDstu3Test extends BaseJpaDstu3Test {
 		http = ourHttpClient.execute(get);
 		try {
 			assertEquals(400, http.getStatusLine().getStatusCode());
-			String output = IOUtils.toString(http.getEntity().getContent());
+			String output = IOUtils.toString(http.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(output);
 			assertThat(output, containsString("Parameter 'text' must be provided"));
 		} finally {
@@ -473,7 +474,7 @@ public class SystemProviderDstu3Test extends BaseJpaDstu3Test {
 	@Test
 	public void testTransactionFromBundle() throws Exception {
 		InputStream bundleRes = SystemProviderDstu3Test.class.getResourceAsStream("/transaction_link_patient_eve.xml");
-		String bundle = IOUtils.toString(bundleRes);
+		String bundle = IOUtils.toString(bundleRes, StandardCharsets.UTF_8);
 		String response = ourClient.transaction().withBundle(bundle).prettyPrint().execute();
 		ourLog.info(response);
 	}
@@ -491,7 +492,7 @@ public class SystemProviderDstu3Test extends BaseJpaDstu3Test {
 			ourClient.transaction().withBundle(bundle).prettyPrint().execute();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertThat(e.toString(), containsString(""));
+			assertThat(e.toString(), containsString("missing or invalid HTTP Verb"));
 		}
 	}
 
@@ -499,7 +500,7 @@ public class SystemProviderDstu3Test extends BaseJpaDstu3Test {
 	public void testTransactionFromBundle2() throws Exception {
 
 		InputStream bundleRes = SystemProviderDstu3Test.class.getResourceAsStream("/transaction_link_patient_eve_temp.xml");
-		String bundle = IOUtils.toString(bundleRes);
+		String bundle = IOUtils.toString(bundleRes, StandardCharsets.UTF_8);
 		String response = ourClient.transaction().withBundle(bundle).prettyPrint().execute();
 		ourLog.info(response);
 
@@ -515,7 +516,7 @@ public class SystemProviderDstu3Test extends BaseJpaDstu3Test {
 		 */
 
 		bundleRes = SystemProviderDstu3Test.class.getResourceAsStream("/transaction_link_patient_eve_temp.xml");
-		bundle = IOUtils.toString(bundleRes);
+		bundle = IOUtils.toString(bundleRes, StandardCharsets.UTF_8);
 		response = ourClient.transaction().withBundle(bundle).prettyPrint().execute();
 		ourLog.info(response);
 
@@ -539,7 +540,7 @@ public class SystemProviderDstu3Test extends BaseJpaDstu3Test {
 	public void testTransactionFromBundle3() throws Exception {
 
 		InputStream bundleRes = SystemProviderDstu3Test.class.getResourceAsStream("/grahame-transaction.xml");
-		String bundle = IOUtils.toString(bundleRes);
+		String bundle = IOUtils.toString(bundleRes, StandardCharsets.UTF_8);
 		String response = ourClient.transaction().withBundle(bundle).prettyPrint().execute();
 		ourLog.info(response);
 	}
@@ -547,7 +548,7 @@ public class SystemProviderDstu3Test extends BaseJpaDstu3Test {
 	@Test
 	public void testTransactionFromBundle4() throws Exception {
 		InputStream bundleRes = SystemProviderDstu3Test.class.getResourceAsStream("/simone_bundle.xml");
-		String bundle = IOUtils.toString(bundleRes);
+		String bundle = IOUtils.toString(bundleRes, StandardCharsets.UTF_8);
 		String response = ourClient.transaction().withBundle(bundle).prettyPrint().execute();
 		ourLog.info(response);
 		Bundle bundleResp = ourCtx.newXmlParser().parseResource(Bundle.class, response);
@@ -562,7 +563,7 @@ public class SystemProviderDstu3Test extends BaseJpaDstu3Test {
 	@Test
 	public void testTransactionFromBundle5() throws Exception {
 		InputStream bundleRes = SystemProviderDstu3Test.class.getResourceAsStream("/simone_bundle2.xml");
-		String bundle = IOUtils.toString(bundleRes);
+		String bundle = IOUtils.toString(bundleRes, StandardCharsets.UTF_8);
 		try {
 			ourClient.transaction().withBundle(bundle).prettyPrint().execute();
 			fail();
@@ -576,7 +577,7 @@ public class SystemProviderDstu3Test extends BaseJpaDstu3Test {
 	@Test
 	public void testTransactionFromBundle6() throws Exception {
 		InputStream bundleRes = SystemProviderDstu3Test.class.getResourceAsStream("/simone_bundle3.xml");
-		String bundle = IOUtils.toString(bundleRes);
+		String bundle = IOUtils.toString(bundleRes, StandardCharsets.UTF_8);
 		ourClient.transaction().withBundle(bundle).prettyPrint().execute();
 		// try {
 		// fail();

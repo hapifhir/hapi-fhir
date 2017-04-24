@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.client.apache;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -73,12 +73,14 @@ public class ApacheRestfulClientFactory extends RestfulClientFactory {
 	public synchronized HttpClient getNativeHttpClient() {
 		if (myHttpClient == null) {
 
+			//FIXME potential resoource leak
 			PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000,
 					TimeUnit.MILLISECONDS);
 			connectionManager.setMaxTotal(getPoolMaxTotal());
 			connectionManager.setDefaultMaxPerRoute(getPoolMaxPerRoute());
 
 			// @formatter:off
+			//TODO: Use of a deprecated method should be resolved.
 			RequestConfig defaultRequestConfig = RequestConfig.custom().setSocketTimeout(getSocketTimeout())
 					.setConnectTimeout(getConnectTimeout()).setConnectionRequestTimeout(getConnectionRequestTimeout())
 					.setStaleConnectionCheckEnabled(true).setProxy(myProxy).build();

@@ -4,7 +4,7 @@ package ca.uhn.fhir.jaxrs.server;
  * #%L
  * HAPI FHIR JAX-RS Server
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -286,6 +286,12 @@ implements IRestfulServer<JaxRsRequest>, IResourceProvider {
         return execute(theRequest, compartment);
     }
 
+    @POST
+    @Path("/$validate")
+    public Response validate(final String resource) throws IOException {
+        return customOperation(resource, RequestTypeEnum.POST, null, "$validate", RestOperationTypeEnum.EXTENDED_OPERATION_TYPE);
+    }
+    
     /**
      * Execute the method described by the requestBuilder and methodKey
      * 

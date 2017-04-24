@@ -23,7 +23,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -245,44 +245,44 @@ public class UrlUtil {
 			retVal.setResourceId(id.getIdPart());
 			retVal.setVersionId(id.getVersionIdPart());
 			return retVal;
-		} else {
-			if (url.matches("\\/[a-zA-Z]+\\?.*")) {
-				url = url.substring(1);
-			}
-			int nextStart = 0;
-			boolean nextIsHistory = false;
-
-			for (int idx = 0; idx < url.length(); idx++) {
-				char nextChar = url.charAt(idx);
-				boolean atEnd = (idx + 1) == url.length();
-				if (nextChar == '?' || nextChar == '/' || atEnd) {
-					int endIdx = (atEnd && nextChar != '?') ? idx + 1 : idx;
-					String nextSubstring = url.substring(nextStart, endIdx);
-					if (retVal.getResourceType() == null) {
-						retVal.setResourceType(nextSubstring);
-					} else if (retVal.getResourceId() == null) {
-						retVal.setResourceId(nextSubstring);
-					} else if (nextIsHistory) {
-						retVal.setVersionId(nextSubstring);
-					} else {
-						if (nextSubstring.equals(Constants.URL_TOKEN_HISTORY)) {
-							nextIsHistory = true;
-						} else {
-							throw new InvalidRequestException("Invalid FHIR resource URL: " + url);
-						}
-					}
-					if (nextChar == '?') {
-						if (url.length() > idx + 1) {
-							retVal.setParams(url.substring(idx + 1, url.length()));
-						}
-						break;
-					}
-					nextStart = idx + 1;
-				}
-			}
-
-			return retVal;
 		}
+		if (url.matches("\\/[a-zA-Z]+\\?.*")) {
+			url = url.substring(1);
+		}
+		int nextStart = 0;
+		boolean nextIsHistory = false;
+
+		for (int idx = 0; idx < url.length(); idx++) {
+			char nextChar = url.charAt(idx);
+			boolean atEnd = (idx + 1) == url.length();
+			if (nextChar == '?' || nextChar == '/' || atEnd) {
+				int endIdx = (atEnd && nextChar != '?') ? idx + 1 : idx;
+				String nextSubstring = url.substring(nextStart, endIdx);
+				if (retVal.getResourceType() == null) {
+					retVal.setResourceType(nextSubstring);
+				} else if (retVal.getResourceId() == null) {
+					retVal.setResourceId(nextSubstring);
+				} else if (nextIsHistory) {
+					retVal.setVersionId(nextSubstring);
+				} else {
+					if (nextSubstring.equals(Constants.URL_TOKEN_HISTORY)) {
+						nextIsHistory = true;
+					} else {
+						throw new InvalidRequestException("Invalid FHIR resource URL: " + url);
+					}
+				}
+				if (nextChar == '?') {
+					if (url.length() > idx + 1) {
+						retVal.setParams(url.substring(idx + 1, url.length()));
+					}
+					break;
+				}
+				nextStart = idx + 1;
+			}
+		}
+
+		return retVal;
+
 	}
 
 	public static String unescape(String theString) {

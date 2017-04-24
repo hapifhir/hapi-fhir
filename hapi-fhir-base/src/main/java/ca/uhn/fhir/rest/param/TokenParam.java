@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.param;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,12 +27,11 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.base.composite.BaseCodingDt;
 import ca.uhn.fhir.model.base.composite.BaseIdentifierDt;
 import ca.uhn.fhir.model.primitive.UriDt;
 
-public class TokenParam extends BaseParam implements IQueryParameterType {
+public class TokenParam extends BaseParam /*implements IQueryParameterType*/ {
 
 	private TokenParamModifier myModifier;
 	private String mySystem;
@@ -86,9 +85,8 @@ public class TokenParam extends BaseParam implements IQueryParameterType {
 	String doGetQueryParameterQualifier() {
 		if (getModifier() != null) {
 			return getModifier().getValue();
-		} else {
-			return null;
 		}
+		return null;
 	}
 
 	/**
@@ -98,9 +96,8 @@ public class TokenParam extends BaseParam implements IQueryParameterType {
 	String doGetValueAsQueryToken(FhirContext theContext) {
 		if (getSystem() != null) {
 			return ParameterUtil.escape(StringUtils.defaultString(getSystem())) + '|' + ParameterUtil.escape(getValue());
-		} else {
-			return ParameterUtil.escape(getValue());
 		}
+		return ParameterUtil.escape(getValue());
 	}
 
 	/**

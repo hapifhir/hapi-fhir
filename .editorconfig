@@ -1,0 +1,32 @@
+root = true
+
+[*]
+end_of_line = lf
+insert_final_newline = true
+tab_width = 3
+indent_size = 3
+
+[*.java]
+charset = utf-8
+indent_style = tab
+tab_width = 3
+indent_size = 3
+
+[*.xml]
+charset = utf-8
+indent_style = tab
+tab_width = 3
+indent_size = 3
+
+[*.json]
+charset = utf-8
+indent_style = tab
+tab_width = 3
+indent_size = 3
+
+[*.vm]
+charset = utf-8
+indent_style = tab
+tab_width = 3
+indent_size = 3
+

@@ -145,6 +145,7 @@ public class BaseDateTimeTypeDstu3Test {
 		verifyFails("1974-12-25+10:00");
 
 		// Out of range
+      verifyFails("2015-02-30");
 		verifyFails("1974-13-25");
 		verifyFails("1974-12-32");
 		verifyFails("2015-02-29");
@@ -165,18 +166,18 @@ public class BaseDateTimeTypeDstu3Test {
 	 */
 	@Test
 	public void testDateParsesWithInvalidPrecision() {
-		Condition c = new Condition();
-		c.setAssertedDateElement(new DateType());
-		c.getAssertedDateElement().setValueAsString("2001-01-02T11:13:33");
-		assertEquals(TemporalPrecisionEnum.SECOND, c.getAssertedDateElement().getPrecision());
+		Goal c = new Goal();
+		c.setStatusDateElement(new DateType());
+		c.getStatusDateElement().setValueAsString("2001-01-02T11:13:33");
+		assertEquals(TemporalPrecisionEnum.SECOND, c.getStatusDateElement().getPrecision());
 
 		String encoded = ourCtx.newXmlParser().encodeResourceToString(c);
 		Assert.assertThat(encoded, Matchers.containsString("value=\"2001-01-02T11:13:33\""));
 
-		c = ourCtx.newXmlParser().parseResource(Condition.class, encoded);
+		c = ourCtx.newXmlParser().parseResource(Goal.class, encoded);
 
-		assertEquals("2001-01-02T11:13:33", c.getAssertedDateElement().getValueAsString());
-		assertEquals(TemporalPrecisionEnum.SECOND, c.getAssertedDateElement().getPrecision());
+		assertEquals("2001-01-02T11:13:33", c.getStatusDateElement().getValueAsString());
+		assertEquals(TemporalPrecisionEnum.SECOND, c.getStatusDateElement().getPrecision());
 
 		ValidationResult outcome = ourCtx.newValidator().validateWithResult(c);
 		String outcomeStr = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome.toOperationOutcome());

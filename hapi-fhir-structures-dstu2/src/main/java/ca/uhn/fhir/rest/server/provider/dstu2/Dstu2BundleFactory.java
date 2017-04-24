@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.server.provider.dstu2;
  * #%L
  * HAPI FHIR Structures - DSTU2 (FHIR v1.0.0)
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -306,8 +306,9 @@ public class Dstu2BundleFactory implements IVersionSpecificBundleFactory {
 		int numToReturn;
 		String searchId = null;
 		List<IBaseResource> resourceList;
+		Integer numTotalResults = theResult.size();
 		if (theServer.getPagingProvider() == null) {
-			numToReturn = theResult.size();
+			numToReturn = numTotalResults;
 			if (numToReturn > 0) {
 				resourceList = theResult.getResources(0, numToReturn);
 			} else {
@@ -317,13 +318,16 @@ public class Dstu2BundleFactory implements IVersionSpecificBundleFactory {
 
 		} else {
 			IPagingProvider pagingProvider = theServer.getPagingProvider();
-			if (theLimit == null) {
+			if (theLimit == null || theLimit.equals(Integer.valueOf(0))) {
 				numToReturn = pagingProvider.getDefaultPageSize();
 			} else {
 				numToReturn = Math.min(pagingProvider.getMaximumPageSize(), theLimit);
 			}
 
-			numToReturn = Math.min(numToReturn, theResult.size() - theOffset);
+			if (numTotalResults != null) {
+				numToReturn = Math.min(numToReturn, numTotalResults - theOffset);
+			}
+			
 			if (numToReturn > 0) {
 				resourceList = theResult.getResources(theOffset, numToReturn + theOffset);
 			} else {
@@ -334,7 +338,7 @@ public class Dstu2BundleFactory implements IVersionSpecificBundleFactory {
 			if (theSearchId != null) {
 				searchId = theSearchId;
 			} else {
-				if (theResult.size() > numToReturn) {
+				if (numTotalResults == null || numTotalResults > numToReturn) {
 					searchId = pagingProvider.storeResultList(theResult);
 					Validate.notNull(searchId, "Paging provider returned null searchId");
 				}
@@ -350,7 +354,7 @@ public class Dstu2BundleFactory implements IVersionSpecificBundleFactory {
 		}
 
 		addResourcesToBundle(new ArrayList<IBaseResource>(resourceList), theBundleType, theServerBase, theServer.getBundleInclusionRule(), theIncludes);
-		addRootPropertiesToBundle(null, theServerBase, theCompleteUrl, theResult.size(), theBundleType, theResult.getPublished());
+		addRootPropertiesToBundle(null, theServerBase, theCompleteUrl, numTotalResults, theBundleType, theResult.getPublished());
 
 		if (theServer.getPagingProvider() != null) {
 			int limit;
@@ -358,7 +362,7 @@ public class Dstu2BundleFactory implements IVersionSpecificBundleFactory {
 			limit = Math.min(limit, theServer.getPagingProvider().getMaximumPageSize());
 
 			if (searchId != null) {
-				if (theOffset + numToReturn < theResult.size()) {
+				if (numTotalResults == null || theOffset + numToReturn < numTotalResults) {
 					myBundle.addLink().setRelation(Constants.LINK_NEXT)
 							.setUrl(RestfulServerUtils.createPagingLink(theIncludes, theServerBase, searchId, theOffset + numToReturn, numToReturn, theResponseEncoding, thePrettyPrint, theBundleType));
 				}

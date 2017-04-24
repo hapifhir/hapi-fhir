@@ -6,7 +6,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -136,9 +136,8 @@ public class OperationParameter implements IParameter {
 	public String getSearchParamType() {
 		if (mySearchParameterBinding != null) {
 			return mySearchParameterBinding.getParamType().getCode();
-		} else {
-			return null;
 		}
+		return null;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -326,7 +325,7 @@ public class OperationParameter implements IParameter {
 					} else {
 						for (String nextValue : paramValues) {
 							FhirContext ctx = theRequest.getServer().getFhirContext();
-							RuntimePrimitiveDatatypeDefinition def = (RuntimePrimitiveDatatypeDefinition) ctx.getElementDefinition((Class<? extends IBase>) myParameterType);
+							RuntimePrimitiveDatatypeDefinition def = (RuntimePrimitiveDatatypeDefinition) ctx.getElementDefinition(myParameterType.asSubclass(IBase.class));
 							IPrimitiveType<?> instance = def.newInstance();
 							instance.setValueAsString(nextValue);
 							matchingParamValues.add(instance);

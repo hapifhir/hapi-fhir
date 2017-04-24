@@ -157,7 +157,7 @@ public DaoConfig daoConfig() {
 				<p>
 					On the other hand, if you want the server to be configurable to
 					allow remote references, you can set this with the confguration below.
-					Using the <code>setAllowInlineMatchUrlReferences</code> means that
+					Using the <code>setAllowExternalReferences</code> means that
 					it will be possible to search for references that refer to these
 					external references.
 				</p>
@@ -166,7 +166,7 @@ public DaoConfig daoConfig() {
 public DaoConfig daoConfig() {
 	DaoConfig retVal = new DaoConfig();
 	// Allow external references
-	retVal.setAllowInlineMatchUrlReferences(true);
+	retVal.setAllowExternalReferences(true);
 	
 	// If you are allowing external references, it is recommended to
 	// also tell the server which references actually will be local
@@ -174,16 +174,41 @@ public DaoConfig daoConfig() {
 	return retVal;
 }]]></source>
 			</subsection>
+
+			<subsection name="Logical References">
+				
+				<p>
+					In some cases, you may have references which are <i>Logical References</i>,
+					which means that they act as an identifier and not necessarily as a literal
+					web address.
+				</p>
+				<p>
+					A common use for logical references is in references to conformance
+					resources, such as ValueSets, StructureDefinitions, etc. For example,
+					you might refer to the ValueSet 
+					<code>http://hl7.org/fhir/ValueSet/quantity-comparator</code>
+					from your own resources. In this case, you are not neccesarily telling
+					the server that this is a real address that it should resolve, but
+					rather that this is an identifier for a ValueSet where
+					<code>ValueSet.url</code> has the given URI/URL.
+				</p>
+				<p>
+					HAPI can be configured to treat certain URI/URL patterns as 
+					logical by using the DaoConfig#setTreatReferencesAsLogical property
+					(see <a href="./apidocs-jpaserver/ca/uhn/fhir/jpa/dao/DaoConfig.html#setTreatReferencesAsLogical-java.util.Set-">JavaDoc</a>).
+					For example:
+				</p>
+				<code>
+					// Treat specific URL as logical
+					myDaoConfig.getTreatReferencesAsLogical().add("http://mysystem.com/ValueSet/cats-and-dogs");
+					
+					// Treat all references with given prefix as logical
+					myDaoConfig.getTreatReferencesAsLogical().add("http://mysystem.com/mysystem-vs-*");
+				</code>
+			</subsection>
 			
 		</section>
 		
-		<section name="Not yet complete">
-			<p>
-				The documentation for the JPA server is not yet complete. Please get in touch
-				if you are able to help us complete it!
-			</p>
-		</section>
-
 		<section name="Architecture">
 		
 			<img src="images/jpa_architecture.png" alt="Architecture" align="right"/>

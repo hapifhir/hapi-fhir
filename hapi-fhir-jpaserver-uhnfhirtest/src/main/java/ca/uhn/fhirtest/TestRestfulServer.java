@@ -17,7 +17,9 @@ import org.springframework.web.cors.CorsConfiguration;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.config.WebsocketDstu2Config;
+import ca.uhn.fhir.jpa.config.WebsocketDstu2DispatcherConfig;
 import ca.uhn.fhir.jpa.config.dstu3.WebsocketDstu3Config;
+import ca.uhn.fhir.jpa.config.dstu3.WebsocketDstu3DispatcherConfig;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.provider.JpaConformanceProviderDstu1;
@@ -29,7 +31,11 @@ import ca.uhn.fhir.jpa.provider.dstu3.JpaSystemProviderDstu3;
 import ca.uhn.fhir.jpa.provider.dstu3.TerminologyUploaderProviderDstu3;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
-import ca.uhn.fhir.rest.server.*;
+import ca.uhn.fhir.rest.server.ETagSupportEnum;
+import ca.uhn.fhir.rest.server.EncodingEnum;
+import ca.uhn.fhir.rest.server.HardcodedServerAddressStrategy;
+import ca.uhn.fhir.rest.server.IResourceProvider;
+import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.interceptor.BanUnsupportedHttpMethodsInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.CorsInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
@@ -105,7 +111,7 @@ public class TestRestfulServer extends RestfulServer {
 				myAppCtx.register(TdlDstu2Config.class);
 				baseUrlProperty = FHIR_BASEURL_TDL2;
 			} else {
-				myAppCtx.register(TestDstu2Config.class, WebsocketDstu2Config.class);
+				myAppCtx.register(TestDstu2Config.class, WebsocketDstu2DispatcherConfig.class);
 				baseUrlProperty = FHIR_BASEURL_DSTU2;
 			}
 			myAppCtx.refresh();
@@ -128,7 +134,7 @@ public class TestRestfulServer extends RestfulServer {
 				myAppCtx.register(TdlDstu3Config.class);
 				baseUrlProperty = FHIR_BASEURL_TDL3;
 			} else {
-				myAppCtx.register(TestDstu3Config.class, WebsocketDstu3Config.class);
+				myAppCtx.register(TestDstu3Config.class, WebsocketDstu3DispatcherConfig.class);
 				baseUrlProperty = FHIR_BASEURL_DSTU3;
 			}
 			myAppCtx.refresh();

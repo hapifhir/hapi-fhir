@@ -7,29 +7,24 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
-import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Bundle.BundleLinkComponent;
 import org.hl7.fhir.dstu3.model.Patient;
+import org.junit.After;
 import org.junit.AfterClass;
+import org.junit.Before;
 import org.junit.Test;
+import org.springframework.test.util.AopTestUtils;
 
+import ca.uhn.fhir.jpa.search.StaleSearchDeletingSvcImpl;
 import ca.uhn.fhir.rest.gclient.IClientExecutable;
 import ca.uhn.fhir.rest.gclient.IQuery;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
-import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.TestUtil;
 
 public class StaleSearchDeletingSvcDstu3Test extends BaseResourceProviderDstu3Test {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(StaleSearchDeletingSvcDstu3Test.class);
-
-	@Override
-	public void after() throws Exception {
-		super.after();
-
-		myDaoConfig.setExpireSearchResultsAfterMillis(DateUtils.MILLIS_PER_HOUR);
-	}
 
 	@AfterClass
 	public static void afterClassClearContext() {
@@ -37,6 +32,19 @@ public class StaleSearchDeletingSvcDstu3Test extends BaseResourceProviderDstu3Te
 	}
 
 
+	@After()
+	public void after() throws Exception {
+		super.after();
+		StaleSearchDeletingSvcImpl staleSearchDeletingSvc = AopTestUtils.getTargetObject(myStaleSearchDeletingSvc);
+		staleSearchDeletingSvc.setCutoffSlackForUnitTest(StaleSearchDeletingSvcImpl.DEFAULT_CUTOFF_SLACK);
+	}
+
+	@Before
+	public void before() throws Exception {
+		super.before();
+		StaleSearchDeletingSvcImpl staleSearchDeletingSvc = AopTestUtils.getTargetObject(myStaleSearchDeletingSvc);
+		staleSearchDeletingSvc.setCutoffSlackForUnitTest(0);
+	}
 
 	@Test
 	public void testEverythingInstanceWithContentFilter() throws Exception {
@@ -56,26 +64,27 @@ public class StaleSearchDeletingSvcDstu3Test extends BaseResourceProviderDstu3Te
 		//@formatter:on
 
 		Bundle resp1 = search.execute();
-		
+
 		for (int i = 0; i < 20; i++) {
 			search.execute();
 		}
-		
+
 		BundleLinkComponent nextLink = resp1.getLink("next");
 		assertNotNull(nextLink);
 		String nextLinkUrl = nextLink.getUrl();
 		assertThat(nextLinkUrl, not(blankOrNullString()));
-		
+
 		Bundle resp2 = ourClient.search().byUrl(nextLinkUrl).returnBundle(Bundle.class).execute();
 		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(resp2));
-		
-		myStaleSearchDeletingSvc.pollForStaleSearches();
-		
+
+		myStaleSearchDeletingSvc.pollForStaleSearchesAndDeleteThem();
+
 		ourClient.search().byUrl(nextLinkUrl).returnBundle(Bundle.class).execute();
-		
+
 		Thread.sleep(20);
 		myDaoConfig.setExpireSearchResultsAfterMillis(10);
-		myStaleSearchDeletingSvc.pollForStaleSearches();
+		myDaoConfig.setReuseCachedSearchResultsForMillis(null);
+		myStaleSearchDeletingSvc.pollForStaleSearchesAndDeleteThem();
 
 		try {
 			ourClient.search().byUrl(nextLinkUrl).returnBundle(Bundle.class).execute();

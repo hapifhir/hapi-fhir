@@ -1,13 +1,13 @@
 package org.hl7.fhir.instance.model.api;
 
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
-import ca.uhn.fhir.rest.gclient.StringClientParam;
+import ca.uhn.fhir.rest.gclient.TokenClientParam;
 
 /*
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ public interface IAnyResource extends IBaseResource {
 	/**
 	 * Search parameter constant for <b>_id</b>
 	 */
-	@SearchParamDefinition(name="_id", path="", description="The ID of the resource", type="string"  )
+	@SearchParamDefinition(name="_id", path="", description="The ID of the resource", type="token"  )
 	public static final String SP_RES_ID = "_id";
 
 	/**
@@ -46,7 +46,7 @@ public interface IAnyResource extends IBaseResource {
 	 * Path: <b>Resource._id</b><br>
 	 * </p>
 	 */
-	public static final StringClientParam RES_ID = new StringClientParam(IAnyResource.SP_RES_ID);
+	public static final TokenClientParam RES_ID = new TokenClientParam(IAnyResource.SP_RES_ID);
 
 	String getId();
 

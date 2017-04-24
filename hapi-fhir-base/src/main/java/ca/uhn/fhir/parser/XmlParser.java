@@ -4,7 +4,7 @@ package ca.uhn.fhir.parser;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,17 +45,14 @@ import javax.xml.stream.events.Namespace;
 import javax.xml.stream.events.StartElement;
 import javax.xml.stream.events.XMLEvent;
 
-import ca.uhn.fhir.model.api.BaseBundle;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
-import org.hl7.fhir.instance.model.api.IBaseElement;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.instance.model.api.IBaseHasModifierExtensions;
-import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IBaseXhtml;
 import org.hl7.fhir.instance.model.api.IDomainResource;
@@ -65,17 +62,16 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeDeclaredChildDefinition;
-import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeChildContainedResources;
-import ca.uhn.fhir.context.RuntimeChildDeclaredExtensionDefinition;
 import ca.uhn.fhir.context.RuntimeChildExtension;
 import ca.uhn.fhir.context.RuntimeChildNarrativeDefinition;
 import ca.uhn.fhir.context.RuntimeChildUndeclaredExtensionDefinition;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.model.api.BaseBundle;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.BundleEntry;
 import ca.uhn.fhir.model.api.IResource;
@@ -101,7 +97,7 @@ import ca.uhn.fhir.util.XmlUtil;
  * This class is the FHIR XML parser/encoder. Users should not interact with this class directly, but should use
  * {@link FhirContext#newXmlParser()} to get an instance.
  */
-public class XmlParser extends BaseParser implements IParser {
+public class XmlParser extends BaseParser /*implements IParser */{
 
 	static final String ATOM_NS = "http://www.w3.org/2005/Atom";
 	static final String FHIR_NS = "http://hl7.org/fhir";
@@ -149,10 +145,9 @@ public class XmlParser extends BaseParser implements IParser {
 		if (myPrettyPrint) {
 			PrettyPrintWriterWrapper retVal = new PrettyPrintWriterWrapper(eventWriter);
 			return retVal;
-		} else {
-			NonPrettyPrintWriterWrapper retVal = new NonPrettyPrintWriterWrapper(eventWriter);
-			return retVal;
 		}
+		NonPrettyPrintWriterWrapper retVal = new NonPrettyPrintWriterWrapper(eventWriter);
+		return retVal;
 	}
 
 	@Override
@@ -213,7 +208,7 @@ public class XmlParser extends BaseParser implements IParser {
 							} else {
 								url = urlAttr.getValue();
 							}
-							parserState.enteringNewElementExtension(elem, url, false);
+							parserState.enteringNewElementExtension(elem, url, false, getServerBaseUrl());
 						} else if ("modifierExtension".equals(elem.getName().getLocalPart())) {
 							Attribute urlAttr = elem.getAttributeByName(new QName("url"));
 							String url;
@@ -223,7 +218,7 @@ public class XmlParser extends BaseParser implements IParser {
 							} else {
 								url = urlAttr.getValue();
 							}
-							parserState.enteringNewElementExtension(elem, url, true);
+							parserState.enteringNewElementExtension(elem, url, true, getServerBaseUrl());
 						} else {
 							String elementName = elem.getName().getLocalPart();
 							parserState.enteringNewElement(namespaceURI, elementName);
@@ -330,6 +325,7 @@ public class XmlParser extends BaseParser implements IParser {
 				eventWriter.writeNamespace("at", TOMBSTONES_NS);
 
 				if (nextEntry.getDeletedResourceId().isEmpty()) {
+					//TODO: Use of a deprecated method should be resolved.
 					writeOptionalAttribute(eventWriter, "ref", nextEntry.getId().getValueAsString());
 				} else {
 					writeOptionalAttribute(eventWriter, "ref", nextEntry.getDeletedResourceId().getValueAsString());
@@ -361,12 +357,15 @@ public class XmlParser extends BaseParser implements IParser {
 
 			writeOptionalTagWithTextNode(eventWriter, "title", nextEntry.getTitle());
 			if (!deleted) {
+				//TODO: Use of a deprecated method should be resolved.
 				if (nextEntry.getId().isEmpty() == false) {
+					//TODO: Use of a deprecated method should be resolved.
 					writeTagWithTextNode(eventWriter, "id", nextEntry.getId());
 				} else {
 					writeTagWithTextNode(eventWriter, "id", nextEntry.getResource().getId());
 				}
 			}
+			//TODO: Use of a deprecated method should be resolved.
 			writeOptionalTagWithTextNode(eventWriter, "updated", nextEntry.getUpdated());
 			writeOptionalTagWithTextNode(eventWriter, "published", nextEntry.getPublished());
 
@@ -420,6 +419,7 @@ public class XmlParser extends BaseParser implements IParser {
 		IdDt bundleId = theBundle.getId();
 		if (bundleId != null && isNotBlank(bundleId.getVersionIdPart()) || (updated != null && !updated.isEmpty())) {
 			theEventWriter.writeStartElement("meta");
+			//FIXME potential null acces bundleId may be null at this time due to the OR clause
 			writeOptionalTagWithValue(theEventWriter, "versionId", bundleId.getVersionIdPart());
 			if (updated != null) {
 				writeOptionalTagWithValue(theEventWriter, "lastUpdated", updated.getValueAsString());
@@ -446,7 +446,7 @@ public class XmlParser extends BaseParser implements IParser {
 
 			writeBundleResourceLink(theEventWriter, "alternate", nextEntry.getLinkAlternate());
 
-			if (nextEntry.getResource() != null && nextEntry.getResource().getId().getBaseUrl() != null) {
+			if (nextEntry.getResource() != null && isNotBlank(nextEntry.getResource().getIdElement().getValue()) && (nextEntry.getResource().getId().getBaseUrl() != null || nextEntry.getResource().getId().getValueAsString().startsWith("urn:"))) {
 				writeOptionalTagWithValue(theEventWriter, "fullUrl", nextEntry.getResource().getId().getValue());
 			}
 
@@ -476,8 +476,11 @@ public class XmlParser extends BaseParser implements IParser {
 
 			if (deleted) {
 				theEventWriter.writeStartElement("deleted");
+				//TODO: Use of a deprecated method should be resolved.
 				writeOptionalTagWithValue(theEventWriter, "type", nextEntry.getId().getResourceType());
+				//TODO: Use of a deprecated method should be resolved.
 				writeOptionalTagWithValue(theEventWriter, "id", nextEntry.getId().getIdPart());
+				//TODO: Use of a deprecated method should be resolved.
 				writeOptionalTagWithValue(theEventWriter, "versionId", nextEntry.getId().getVersionIdPart());
 				writeOptionalTagWithValue(theEventWriter, "instant", nextEntry.getDeletedAt().getValueAsString());
 				theEventWriter.writeEndElement();
@@ -504,18 +507,16 @@ public class XmlParser extends BaseParser implements IParser {
 
 		switch (childDef.getChildType()) {
 		case ID_DATATYPE: {
-			IIdType value = (IIdType) theElement;
+			IIdType value = IIdType.class.cast(theElement);
 			String encodedValue = "id".equals(childName) ? value.getIdPart() : value.getValue();
-			if (value != null) {
-				theEventWriter.writeStartElement(childName);
-				theEventWriter.writeAttribute("value", encodedValue);
-				encodeExtensionsIfPresent(theResource, theEventWriter, theElement, theIncludedResource);
-				theEventWriter.writeEndElement();
-			}
+			theEventWriter.writeStartElement(childName);
+			theEventWriter.writeAttribute("value", encodedValue);
+			encodeExtensionsIfPresent(theResource, theEventWriter, theElement, theIncludedResource);
+			theEventWriter.writeEndElement();
 			break;
 		}
 		case PRIMITIVE_DATATYPE: {
-			IPrimitiveType<?> pd = (IPrimitiveType<?>) theElement;
+			IPrimitiveType<?> pd = IPrimitiveType.class.cast(theElement);
 			String value = pd.getValueAsString();
 			if (value != null || super.hasExtensions(pd)) {
 				theEventWriter.writeStartElement(childName);
@@ -568,23 +569,21 @@ public class XmlParser extends BaseParser implements IParser {
 			break;
 		}
 		case PRIMITIVE_XHTML: {
-			XhtmlDt dt = (XhtmlDt) theElement;
+			XhtmlDt dt = XhtmlDt.class.cast(theElement);
 			if (dt.hasContent()) {
 				encodeXhtml(dt, theEventWriter);
 			}
 			break;
 		}
 		case PRIMITIVE_XHTML_HL7ORG: {
-			IBaseXhtml dt = (IBaseXhtml) theElement;
-			if (dt.isEmpty()) {
-				break;
-			} else {
+			IBaseXhtml dt = IBaseXhtml.class.cast(theElement);
+			if (!dt.isEmpty()) {
 				// TODO: this is probably not as efficient as it could be
 				XhtmlDt hdt = new XhtmlDt();
 				hdt.setValueAsString(dt.getValueAsString());
 				encodeXhtml(hdt, theEventWriter);
-				break;
 			}
+			break;
 		}
 		case EXTENSION_DECLARED:
 		case UNDECL_EXT: {
@@ -621,6 +620,7 @@ public class XmlParser extends BaseParser implements IParser {
 				} else {
 					narr = null;
 				}
+				//FIXME potential null access on narr see line 623
 				if (gen != null && narr.isEmpty()) {
 					gen.generateNarrative(myContext, theResource, narr);
 				}
@@ -655,11 +655,11 @@ public class XmlParser extends BaseParser implements IParser {
 					
 					String childName = childNameAndDef.getChildName();
 					BaseRuntimeElementDefinition<?> childDef = childNameAndDef.getChildDef();
-					String extensionUrl = nextChild.getExtensionUrl();
+					String extensionUrl = getExtensionUrl(nextChild.getExtensionUrl());
 					
 					if (nextValue instanceof IBaseExtension && myContext.getVersion().getVersion() == FhirVersionEnum.DSTU1) {
 						// This is called for the Query resource in DSTU1 only
-						extensionUrl = ((IBaseExtension<?, ?>) nextValue).getUrl();
+						extensionUrl = getExtensionUrl(((IBaseExtension<?, ?>) nextValue).getUrl());
 						encodeChildElementToStreamWriter(theResource, theEventWriter, nextValue, childName, childDef, extensionUrl, theContainedResource, nextChildElem);
 
 					} else if (extensionUrl != null && childName.equals("extension") == false) {
@@ -671,7 +671,7 @@ public class XmlParser extends BaseParser implements IParser {
 								continue;
 							}
 						}
-						encodeChildElementToStreamWriter(theResource, theEventWriter, nextValue, childName, childDef, extension.getUrl(), theContainedResource, nextChildElem);
+						encodeChildElementToStreamWriter(theResource, theEventWriter, nextValue, childName, childDef, getExtensionUrl(extension.getUrl()), theContainedResource, nextChildElem);
 					} else if (nextChild instanceof RuntimeChildNarrativeDefinition && theContainedResource) {
 						// suppress narratives from contained resources
 					} else {
@@ -902,7 +902,7 @@ public class XmlParser extends BaseParser implements IParser {
 				theEventWriter.writeAttribute("id", elementId);
 			}
 
-			String url = next.getUrl();
+			String url = getExtensionUrl(next.getUrl());
 			theEventWriter.writeAttribute("url", url);
 
 			if (next.getValue() != null) {
@@ -914,9 +914,8 @@ public class XmlParser extends BaseParser implements IParser {
 					childDef = myContext.getElementDefinition(value.getClass());
 					if (childDef == null) {
 						throw new ConfigurationException("Unable to encode extension, unrecognized child element type: " + value.getClass().getCanonicalName());
-					} else {
-						childName = RuntimeChildUndeclaredExtensionDefinition.createExtensionChildName(childDef);
-					}
+					} 
+					childName = RuntimeChildUndeclaredExtensionDefinition.createExtensionChildName(childDef);
 				} else {
 					childDef = extDef.getChildElementDefinitionByDatatype(value.getClass());
 					if (childDef == null) {

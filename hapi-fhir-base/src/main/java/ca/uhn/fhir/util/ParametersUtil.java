@@ -4,7 +4,7 @@ package ca.uhn.fhir.util;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ package ca.uhn.fhir.util;
 
 import java.util.Collection;
 
+import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
@@ -84,6 +85,7 @@ public class ParametersUtil {
 	}
 
 	public static IBaseParameters newInstance(FhirContext theContext) {
+		Validate.notNull(theContext, "theContext must not be null");
 		return (IBaseParameters) theContext.getResourceDefinition("Parameters").newInstance();
 	}
 }

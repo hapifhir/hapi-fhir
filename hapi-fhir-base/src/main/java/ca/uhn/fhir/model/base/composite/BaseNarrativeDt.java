@@ -11,7 +11,7 @@ import ca.uhn.fhir.model.primitive.XhtmlDt;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,8 @@ import ca.uhn.fhir.model.primitive.XhtmlDt;
  * @param <T> The narrative status enum type  
  */
 public abstract class BaseNarrativeDt<T extends Enum<?>> extends BaseIdentifiableElement implements ICompositeDatatype, INarrative {
+
+	private static final long serialVersionUID = -525238683230100077L;
 
 	public abstract BoundCodeDt<T> getStatus();
 

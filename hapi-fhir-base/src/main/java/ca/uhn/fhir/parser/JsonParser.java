@@ -4,7 +4,7 @@ package ca.uhn.fhir.parser;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,37 +25,74 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.io.IOException;
-import java.io.PushbackReader;
 import java.io.Reader;
 import java.io.Writer;
 import java.math.BigDecimal;
-import java.util.*;
-import java.util.Map.Entry;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.text.WordUtils;
-import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseBinary;
+import org.hl7.fhir.instance.model.api.IBaseBooleanDatatype;
+import org.hl7.fhir.instance.model.api.IBaseDecimalDatatype;
+import org.hl7.fhir.instance.model.api.IBaseExtension;
+import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
+import org.hl7.fhir.instance.model.api.IBaseHasModifierExtensions;
+import org.hl7.fhir.instance.model.api.IBaseIntegerDatatype;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IDomainResource;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.instance.model.api.INarrative;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
-import ca.uhn.fhir.context.*;
+import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
+import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
+import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition.ChildTypeEnum;
-import ca.uhn.fhir.model.api.*;
+import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.context.RuntimeChildContainedResources;
+import ca.uhn.fhir.context.RuntimeChildDeclaredExtensionDefinition;
+import ca.uhn.fhir.context.RuntimeChildNarrativeDefinition;
+import ca.uhn.fhir.context.RuntimeChildUndeclaredExtensionDefinition;
+import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.model.api.BaseBundle;
+import ca.uhn.fhir.model.api.Bundle;
+import ca.uhn.fhir.model.api.BundleEntry;
+import ca.uhn.fhir.model.api.ExtensionDt;
+import ca.uhn.fhir.model.api.IPrimitiveDatatype;
+import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.api.ISupportsUndeclaredExtensions;
+import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
+import ca.uhn.fhir.model.api.Tag;
+import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.base.composite.BaseCodingDt;
 import ca.uhn.fhir.model.base.composite.BaseContainedDt;
-import ca.uhn.fhir.model.primitive.*;
+import ca.uhn.fhir.model.primitive.DecimalDt;
+import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.model.primitive.InstantDt;
+import ca.uhn.fhir.model.primitive.IntegerDt;
+import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.narrative.INarrativeGenerator;
 import ca.uhn.fhir.parser.json.GsonStructure;
 import ca.uhn.fhir.parser.json.JsonLikeArray;
 import ca.uhn.fhir.parser.json.JsonLikeObject;
 import ca.uhn.fhir.parser.json.JsonLikeStructure;
 import ca.uhn.fhir.parser.json.JsonLikeValue;
-import ca.uhn.fhir.parser.json.JsonLikeWriter;
 import ca.uhn.fhir.parser.json.JsonLikeValue.ScalarType;
 import ca.uhn.fhir.parser.json.JsonLikeValue.ValueType;
+import ca.uhn.fhir.parser.json.JsonLikeWriter;
 import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.util.ElementUtil;
 
@@ -110,9 +147,8 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 			}
 			theListToAddTo.get(valueIdx).addAll(theCommentsToAdd);
 			return true;
-		} else {
-			return false;
 		}
+		return false;
 	}
 
 	private boolean addToHeldExtensions(int valueIdx, List<? extends IBaseExtension<?, ?>> ext, ArrayList<ArrayList<HeldExtension>> list, boolean theIsModifier, CompositeChildElement theChildElem) {
@@ -128,9 +164,8 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 				list.get(valueIdx).add(new HeldExtension(next, theIsModifier, theChildElem));
 			}
 			return true;
-		} else {
-			return false;
 		}
+		return false;
 	}
 
 	private void addToHeldIds(int theValueIdx, ArrayList<String> theListToAddTo, String theId) {
@@ -143,7 +178,7 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 		}
 	}
 
-	private void assertObjectOfType(JsonLikeValue theResourceTypeObj, Object theValueType, String thePosition) {
+//	private void assertObjectOfType(JsonLikeValue theResourceTypeObj, Object theValueType, String thePosition) {
 //		if (theResourceTypeObj == null) {
 //			throw new DataFormatException("Invalid JSON content detected, missing required element: '" + thePosition + "'");
 //		}
@@ -151,7 +186,7 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 //		if (theResourceTypeObj.getValueType() != theValueType) {
 //			throw new DataFormatException("Invalid content of element " + thePosition + ", expected " + theValueType);
 //		}
-	}
+//	}
 
 	private void beginArray(JsonLikeWriter theEventWriter, String arrayName) throws IOException {
 		theEventWriter.beginArray(arrayName);
@@ -281,6 +316,7 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 				writeTagWithTextNode(theEventWriter, "deleted", nextEntry.getDeletedAt());
 			}
 			writeTagWithTextNode(theEventWriter, "title", nextEntry.getTitle());
+			//TODO: Use of a deprecated method should be resolved.
 			writeTagWithTextNode(theEventWriter, "id", nextEntry.getId());
 
 			linkStarted = false;
@@ -291,6 +327,7 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 				theEventWriter.endArray();
 			}
 
+			//TODO: Use of a deprecated method should be resolved.
 			writeOptionalTagWithTextNode(theEventWriter, "updated", nextEntry.getUpdated());
 			writeOptionalTagWithTextNode(theEventWriter, "published", nextEntry.getPublished());
 
@@ -347,7 +384,7 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 		for (BundleEntry nextEntry : theBundle.getEntries()) {
 			theEventWriter.beginObject();
 
-			if (nextEntry.getResource() != null && nextEntry.getResource().getId().getBaseUrl() != null) {
+			if (nextEntry.getResource() != null && isNotBlank(nextEntry.getResource().getIdElement().getValue()) && (nextEntry.getResource().getId().getBaseUrl() != null || nextEntry.getResource().getId().getValueAsString().startsWith("urn:"))) {
 				writeOptionalTagWithTextNode(theEventWriter, "fullUrl", nextEntry.getResource().getId().getValue());
 			}
 
@@ -575,7 +612,7 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 					}
 					if (narr != null && narr.isEmpty()) {
 						gen.generateNarrative(myContext, theResource, narr);
-						if (narr != null && !narr.isEmpty()) {
+						if (!narr.isEmpty()) {
 							RuntimeChildNarrativeDefinition child = (RuntimeChildNarrativeDefinition) nextChild;
 							String childName = nextChild.getChildNameByDatatype(child.getDatatype());
 							BaseRuntimeElementDefinition<?> type = child.getChildByName(childName);
@@ -980,7 +1017,7 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 		for (RuntimeChildDeclaredExtensionDefinition nextDef : resDef.getExtensionsNonModifier()) {
 			for (IBase nextValue : nextDef.getAccessor().getValues(theResource)) {
 				if (nextValue != null) {
-					if (nextValue == null || nextValue.isEmpty()) {
+					if (nextValue.isEmpty()) {
 						continue;
 					}
 					extensions.add(new HeldExtension(nextDef, nextValue, theChildElem));
@@ -990,7 +1027,7 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 		for (RuntimeChildDeclaredExtensionDefinition nextDef : resDef.getExtensionsModifier()) {
 			for (IBase nextValue : nextDef.getAccessor().getValues(theResource)) {
 				if (nextValue != null) {
-					if (nextValue == null || nextValue.isEmpty()) {
+					if (nextValue.isEmpty()) {
 						continue;
 					}
 					modifierExtensions.add(new HeldExtension(nextDef, nextValue, theChildElem));
@@ -1106,7 +1143,7 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 		}
 
 		JsonLikeValue alternateVal = theAlternateVal;
-		if (alternateVal != null && alternateVal.isObject() == false) {
+		if (alternateVal.isObject() == false) {
 			getErrorHandler().incorrectJsonType(null, theAlternateName, ValueType.OBJECT, null, alternateVal.getJsonType(), null);
 			return;
 		}
@@ -1405,9 +1442,9 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 				getErrorHandler().missingRequiredElement(new ParseLocation(parentElementName), "url");
 				url = null;
 			} else {
-				url = jsonElement.getAsString();
+				url = getExtensionUrl(jsonElement.getAsString());
 			}
-			theState.enteringNewElementExtension(null, url, theIsModifier);
+			theState.enteringNewElementExtension(null, url, theIsModifier, getServerBaseUrl());
 			for (String next : nextExtObj.keySet()) {
 				if ("url".equals(next)) {
 					continue;
@@ -1758,8 +1795,8 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 		public int compareTo(HeldExtension theArg0) {
 			String url1 = myDef != null ? myDef.getExtensionUrl() : myUndeclaredExtension.getUrl();
 			String url2 = theArg0.myDef != null ? theArg0.myDef.getExtensionUrl() : theArg0.myUndeclaredExtension.getUrl();
-			url1 = defaultString(url1);
-			url2 = defaultString(url2);
+			url1 = defaultString(getExtensionUrl(url1));
+			url2 = defaultString(getExtensionUrl(url2));
 			return url1.compareTo(url2);
 		}
 
@@ -1771,7 +1808,7 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 
 				writeCommentsPreAndPost(myValue, theEventWriter);
 
-				JsonParser.write(theEventWriter, "url", myDef.getExtensionUrl());
+				JsonParser.write(theEventWriter, "url", getExtensionUrl(myDef.getExtensionUrl()));
 
 				/*
 				 * This makes sure that even if the extension contains a reference to a contained
@@ -1780,6 +1817,20 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 				 * See #327 
 				 */
 				List<? extends IBase> preProcessedValue = preProcessValues(myDef, theResource, Collections.singletonList(myValue), myChildElem);
+
+//				// Check for undeclared extensions on the declared extension
+//				// (grrrrrr....)
+//				if (myValue instanceof ISupportsUndeclaredExtensions) {
+//					ISupportsUndeclaredExtensions value = (ISupportsUndeclaredExtensions)myValue;
+//					List<ExtensionDt> exts = value.getUndeclaredExtensions();
+//					if (exts.size() > 0) {
+//						ArrayList<IBase> newValueList = new ArrayList<IBase>();
+//						newValueList.addAll(preProcessedValue);
+//						newValueList.addAll(exts);
+//						preProcessedValue = newValueList;
+//					}
+//				}
+				
 				myValue = preProcessedValue.get(0);
 				
 				BaseRuntimeElementDefinition<?> def = myDef.getChildElementDefinitionByDatatype(myValue.getClass());
@@ -1797,7 +1848,7 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 		
 		private void writeUndeclaredExtension(RuntimeResourceDefinition theResDef, IBaseResource theResource, JsonLikeWriter theEventWriter, IBaseExtension<?, ?> ext) throws IOException {
 			IBase value = ext.getValue();
-			String extensionUrl = ext.getUrl();
+			final String extensionUrl = getExtensionUrl(ext.getUrl());
 
 			theEventWriter.beginObject();
 

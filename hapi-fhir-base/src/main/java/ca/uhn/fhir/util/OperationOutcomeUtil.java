@@ -4,7 +4,7 @@ package ca.uhn.fhir.util;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -90,9 +90,8 @@ public class OperationOutcomeUtil {
 	public static String getFirstIssueDetails(FhirContext theCtx, IBaseOperationOutcome theOutcome) {
 		if (theCtx.getVersion().getVersion().isNewerThan(FhirVersionEnum.DSTU1)) {
 			return getFirstIssueStringPart(theCtx, theOutcome, "diagnostics");
-		} else {
-			return getFirstIssueStringPart(theCtx, theOutcome, "details");
 		}
+		return getFirstIssueStringPart(theCtx, theOutcome, "details");
 	}
 
 	public static String getFirstIssueLocation(FhirContext theCtx, IBaseOperationOutcome theOutcome) {

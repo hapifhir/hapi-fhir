@@ -72,9 +72,9 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
 			codeSystems = new HashMap<String, CodeSystem>();
 			valueSets = new HashMap<String, ValueSet>();
 
-			loadCodeSystems(theContext, codeSystems, valueSets, "/org/hl7/fhir/instance/model/dstu3/valueset/valuesets.xml");
-			loadCodeSystems(theContext, codeSystems, valueSets, "/org/hl7/fhir/instance/model/dstu3/valueset/v2-tables.xml");
-			loadCodeSystems(theContext, codeSystems, valueSets, "/org/hl7/fhir/instance/model/dstu3/valueset/v3-codesystems.xml");
+			loadCodeSystems(theContext, codeSystems, valueSets, "/org/hl7/fhir/dstu2016may/valueset/valuesets.xml");
+			loadCodeSystems(theContext, codeSystems, valueSets, "/org/hl7/fhir/dstu2016may/valueset/v2-tables.xml");
+			loadCodeSystems(theContext, codeSystems, valueSets, "/org/hl7/fhir/dstu2016may/valueset/v3-codesystems.xml");
 
 			myCodeSystems = codeSystems;
 			myValueSets = valueSets;
@@ -91,7 +91,7 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
 	@Override
 	public <T extends IBaseResource> T fetchResource(FhirContext theContext, Class<T> theClass, String theUri) {
 		Validate.notBlank(theUri, "theUri must not be null or blank");
-		
+
 		if (theUri.startsWith("http://hl7.org/fhir/StructureDefinition/")) {
 			return (T) fetchStructureDefinition(theContext, theUri);
 		}
@@ -210,9 +210,9 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
 		if (structureDefinitions == null) {
 			structureDefinitions = new HashMap<String, StructureDefinition>();
 
-			loadStructureDefinitions(theContext, structureDefinitions, "/org/hl7/fhir/instance/model/dstu3/profile/profiles-resources.xml");
-			loadStructureDefinitions(theContext, structureDefinitions, "/org/hl7/fhir/instance/model/dstu3/profile/profiles-types.xml");
-			loadStructureDefinitions(theContext, structureDefinitions, "/org/hl7/fhir/instance/model/dstu3/profile/profiles-others.xml");
+			loadStructureDefinitions(theContext, structureDefinitions, "/org/hl7/fhir/dstu2016may/profile/profiles-resources.xml");
+			loadStructureDefinitions(theContext, structureDefinitions, "/org/hl7/fhir/dstu2016may/profile/profiles-types.xml");
+			loadStructureDefinitions(theContext, structureDefinitions, "/org/hl7/fhir/dstu2016may/profile/profiles-others.xml");
 
 			myStructureDefinitions = structureDefinitions;
 		}
@@ -227,9 +227,9 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
 			if (cs.hasCaseSensitive()) {
 				caseSensitive = cs.getCaseSensitive();
 			}
-			
+
 			CodeValidationResult retVal = testIfConceptIsInList(theCode, cs.getConcept(), caseSensitive);
-			
+
 			if (retVal != null) {
 				return retVal;
 			}
@@ -243,7 +243,7 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
 		if (theCaseSensitive == false) {
 			code = code.toUpperCase();
 		}
-		
+
 		return testIfConceptIsInListInner(conceptList, theCaseSensitive, code);
 	}
 
@@ -265,7 +265,7 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
 				break;
 			}
 		}
-		
+
 		return retVal;
 	}
 

@@ -6,7 +6,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +36,8 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
 public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 
+	private static final long serialVersionUID = 1L;
+	
 	private DateParam myLowerBound;
 	private DateParam myUpperBound;
 
@@ -195,13 +197,17 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 		if (myLowerBound.getPrefix() != null) {
 			switch (myLowerBound.getPrefix()) {
 			case GREATERTHAN:
+			case STARTS_AFTER:
 				retVal = myLowerBound.getPrecision().add(retVal, 1);
 				break;
 			case EQUAL:
 			case GREATERTHAN_OR_EQUALS:
 				break;
 			case LESSTHAN:
+			case APPROXIMATE:
 			case LESSTHAN_OR_EQUALS:
+			case ENDS_BEFORE:
+			case NOT_EQUAL:
 				throw new IllegalStateException("Unvalid lower bound comparator: " + myLowerBound.getPrefix());
 			}
 		}
@@ -220,6 +226,7 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 		if (myUpperBound.getPrefix() != null) {
 			switch (myUpperBound.getPrefix()) {
 			case LESSTHAN:
+			case ENDS_BEFORE:
 				retVal = new Date(retVal.getTime() - 1L);
 				break;
 			case EQUAL:
@@ -229,6 +236,9 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 				break;
 			case GREATERTHAN_OR_EQUALS:
 			case GREATERTHAN:
+			case APPROXIMATE:
+			case NOT_EQUAL:
+			case STARTS_AFTER:
 				throw new IllegalStateException("Unvalid upper bound comparator: " + myUpperBound.getPrefix());
 			}
 		}
@@ -345,6 +355,7 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 	public void setRangeFromDatesInclusive(String theLowerBound, String theUpperBound) {
 		myLowerBound = theLowerBound != null ? new DateParam(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, theLowerBound) : null;
 		myUpperBound = theUpperBound != null ? new DateParam(ParamPrefixEnum.LESSTHAN_OR_EQUALS, theUpperBound) : null;
+		//FIXME potential null access on theLowerBound
 		if (isNotBlank(theLowerBound) && isNotBlank(theUpperBound) && theLowerBound.equals(theUpperBound)) {
 			myLowerBound.setPrefix(ParamPrefixEnum.EQUAL);
 			myUpperBound.setPrefix(ParamPrefixEnum.EQUAL);

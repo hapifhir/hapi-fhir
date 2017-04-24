@@ -6,7 +6,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -200,12 +200,11 @@ abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvoca
 
 		if (myParams != null) {
 			return httpClient.createParamRequest(getContext(), myParams, encoding);
-		} else {
-			encoding = ObjectUtils.defaultIfNull(encoding,  EncodingEnum.XML);
-			String contents = encodeContents(thePrettyPrint, encoding);
-			String contentType = getContentType(encoding);
-			return httpClient.createByteRequest(getContext(), contents, contentType, encoding);
 		}
+		encoding = ObjectUtils.defaultIfNull(encoding,  EncodingEnum.XML);
+		String contents = encodeContents(thePrettyPrint, encoding);
+		String contentType = getContentType(encoding);
+		return httpClient.createByteRequest(getContext(), contents, contentType, encoding);
 	}
 
 	private String getContentType(EncodingEnum encoding) {
@@ -253,10 +252,9 @@ abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvoca
 			Bundle bundle = bundleFactory.getDstu1Bundle();
 			if (bundle != null) {
 				return parser.encodeBundleToString(bundle);
-			} else {
-				IBaseResource bundleRes = bundleFactory.getResourceBundle();
-				return parser.encodeResourceToString(bundleRes);
 			}
+			IBaseResource bundleRes = bundleFactory.getResourceBundle();
+			return parser.encodeResourceToString(bundleRes);
 		} else if (myContents != null) {
 			return myContents;
 		} else {

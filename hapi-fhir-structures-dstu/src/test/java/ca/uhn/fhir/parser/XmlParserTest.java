@@ -561,8 +561,8 @@ public class XmlParserTest {
 		// Re-parse the bundle
 		patient = (Patient) xmlParser.parseResource(xmlParser.encodeResourceToString(patient));
 		assertEquals("#1", patient.getManagingOrganization().getReference().getValue());
-		assertEquals("#", patient.getManagingOrganization().getReference().getBaseUrl());
-		assertEquals("1", patient.getManagingOrganization().getReference().getIdPart());
+		assertEquals(null, patient.getManagingOrganization().getReference().getBaseUrl());
+		assertEquals("#1", patient.getManagingOrganization().getReference().getIdPart());
 
 		assertNotNull(patient.getManagingOrganization().getResource());
 		org = (Organization) patient.getManagingOrganization().getResource();
@@ -1997,6 +1997,69 @@ public class XmlParserTest {
 		assertEquals(15, bundleR.getTotalResults().getValue().intValue());
 	}
 
+	@Test
+	public void testCustomUrlExtension() {
+		final String expected = "<Patient xmlns=\"http://hl7.org/fhir\"><extension url=\"http://www.example.com/petname\"><valueString value=\"myName\"/></extension></Patient>";
+
+		final MyPatientWithCustomUrlExtension patient = new MyPatientWithCustomUrlExtension();
+		patient.setPetName(new StringDt("myName"));
+
+		final IParser xmlParser = ourCtx.newXmlParser();
+		xmlParser.setServerBaseUrl("http://www.example.com");
+
+		final String parsedPatient = xmlParser.encodeResourceToString(patient);
+		System.out.println(parsedPatient);
+		assertEquals(expected, parsedPatient);
+
+		// Parse with string
+		MyPatientWithCustomUrlExtension newPatient = xmlParser.parseResource(MyPatientWithCustomUrlExtension.class, parsedPatient);
+		assertEquals("myName", newPatient.getPetName().getValue());
+
+		// Parse with stream
+		newPatient = xmlParser.parseResource(MyPatientWithCustomUrlExtension.class, new StringReader(parsedPatient));
+		assertEquals("myName", newPatient.getPetName().getValue());
+
+		//Check no NPE if base server not configure
+		newPatient = ourCtx.newXmlParser().parseResource(MyPatientWithCustomUrlExtension.class, new StringReader(parsedPatient));
+		assertNull("myName", newPatient.getPetName());
+		assertEquals("myName", ((StringDt) newPatient.getUndeclaredExtensionsByUrl("http://www.example.com/petname").get(0).getValue()).getValue());
+	}
+
+	@Test
+	public void testCustomUrlExtensioninBundle() {
+		final String expected = "<feed xmlns=\"http://www.w3.org/2005/Atom\"><title/><id/><entry><id/><content type=\"text/xml\"><Patient xmlns=\"http://hl7.org/fhir\"><extension url=\"http://www.example.com/petname\"><valueString value=\"myName\"/></extension></Patient></content></entry></feed>";
+
+		final MyPatientWithCustomUrlExtension patient = new MyPatientWithCustomUrlExtension();
+		patient.setPetName(new StringDt("myName"));
+
+		final Bundle bundle = new Bundle();
+		final BundleEntry entry = new BundleEntry();
+		entry.setResource(patient);
+		bundle.addEntry(entry);
+
+		final IParser xmlParser = ourCtx.newXmlParser();
+		xmlParser.setServerBaseUrl("http://www.example.com");
+
+		final String parsedBundle = xmlParser.encodeBundleToString(bundle);
+		System.out.println(parsedBundle);
+		assertEquals(expected, parsedBundle);
+
+		// Parse with string
+		Bundle newBundle = xmlParser.parseBundle(parsedBundle);
+		assertNotNull(newBundle);
+		assertEquals(1, newBundle.getEntries().size());
+		Patient newPatient =  (Patient) newBundle.getEntries().get(0).getResource();
+		assertEquals("myName", ((StringDt) newPatient.getUndeclaredExtensionsByUrl("http://www.example.com/petname").get(0).getValue()).getValue());
+
+		// Parse with stream
+		newBundle = xmlParser.parseBundle(new StringReader(parsedBundle));
+		assertNotNull(newBundle);
+		assertEquals(1, newBundle.getEntries().size());
+		newPatient =  (Patient) newBundle.getEntries().get(0).getResource();
+		assertEquals("myName", ((StringDt) newPatient.getUndeclaredExtensionsByUrl("http://www.example.com/petname").get(0).getValue()).getValue());
+
+	}
+  
 	@BeforeClass
 	public static void beforeClass() {
 		XMLUnit.setIgnoreAttributeOrder(true);

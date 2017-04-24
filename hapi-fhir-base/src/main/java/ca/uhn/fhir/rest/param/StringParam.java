@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.param;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ package ca.uhn.fhir.rest.param;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
@@ -32,17 +33,26 @@ import ca.uhn.fhir.rest.server.Constants;
 
 public class StringParam extends BaseParam implements IQueryParameterType {
 
+	private boolean myContains;
 	private boolean myExact;
 	private String myValue;
-	private boolean myContains;
-
+	
+	/**
+	 * Constructor
+	 */
 	public StringParam() {
 	}
 
+	/**
+	 * Constructor
+	 */
 	public StringParam(String theValue) {
 		setValue(theValue);
 	}
 
+	/**
+	 * Constructor
+	 */
 	public StringParam(String theValue, boolean theExact) {
 		setValue(theValue);
 		setExact(theExact);
@@ -79,6 +89,29 @@ public class StringParam extends BaseParam implements IQueryParameterType {
 		myValue = ParameterUtil.unescape(theValue);
 	}
 
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null) {
+			return false;
+		}
+		if (!(obj instanceof StringParam)) {
+			return false;
+		}
+
+		StringParam other = (StringParam) obj;
+
+		EqualsBuilder eb = new EqualsBuilder();
+		eb.append(myExact, other.myExact);
+		eb.append(myContains, other.myContains);
+		eb.append(myValue, other.myValue);
+		eb.append(getMissing(), other.getMissing());
+		
+		return eb.isEquals();
+	}
+
 	public String getValue() {
 		return myValue;
 	}
@@ -91,12 +124,31 @@ public class StringParam extends BaseParam implements IQueryParameterType {
 		return defaultString(myValue);
 	}
 
+	/**
+	 * String parameter modifier <code>:contains</code>
+	 */
+	public boolean isContains() {
+		return myContains;
+	}
+
 	public boolean isEmpty() {
 		return StringUtils.isEmpty(myValue);
 	}
 
 	public boolean isExact() {
 		return myExact;
+	}
+
+	/**
+	 * String parameter modifier <code>:contains</code>
+	 */
+	public StringParam setContains(boolean theContains) {
+		myContains = theContains;
+		if (myContains) {
+			setExact(false);
+			setMissing(null);
+		}
+		return this;
 	}
 
 	public StringParam setExact(boolean theExact) {
@@ -106,13 +158,6 @@ public class StringParam extends BaseParam implements IQueryParameterType {
 			setMissing(null);
 		}
 		return this;
-	}
-
-	/**
-	 * String parameter modifier <code>:contains</code>
-	 */
-	public boolean isContains() {
-		return myContains;
 	}
 
 	public StringParam setValue(String theValue) {
@@ -134,18 +179,6 @@ public class StringParam extends BaseParam implements IQueryParameterType {
 			builder.append("missing", getMissing().booleanValue());
 		}
 		return builder.toString();
-	}
-
-	/**
-	 * String parameter modifier <code>:contains</code>
-	 */
-	public StringParam setContains(boolean theContains) {
-		myContains = theContains;
-		if (myContains) {
-			setExact(false);
-			setMissing(null);
-		}
-		return this;
 	}
 
 }

@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.server;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,11 +40,13 @@ public class Constants {
 	public static final String CT_HTML = "text/html";
 	public static final String CT_HTML_WITH_UTF8 = "text/html" + CHARSET_UTF8_CTSUFFIX;
 	public static final String CT_JSON = "application/json";
+	public static final String CT_JSON_PATCH = "application/json-patch+json";
 	public static final String CT_OCTET_STREAM = "application/octet-stream";
 	public static final String CT_TEXT = "text/plain";
 	public static final String CT_TEXT_WITH_UTF8 = CT_TEXT + CHARSET_UTF8_CTSUFFIX;
 	public static final String CT_X_FORM_URLENCODED = "application/x-www-form-urlencoded";
 	public static final String CT_XML = "application/xml";
+	public static final String CT_XML_PATCH = "application/xml-patch+xml";
 	public static final String ENCODING_GZIP = "gzip";
 	public static final String EXTOP_VALIDATE = "$validate";
 	public static final String EXTOP_VALIDATE_MODE = "mode";
@@ -61,10 +63,10 @@ public class Constants {
 	public static final String FORMATS_HTML_XML = "html/xml";
 	public static final String HEADER_ACCEPT = "Accept";
 	public static final String HEADER_ACCEPT_ENCODING = "Accept-Encoding";
+	public static final String HEADER_ACCEPT_VALUE_JSON_NON_LEGACY = CT_FHIR_JSON_NEW + ";q=1.0, " + CT_FHIR_JSON + ";q=0.9";
+	public static final String HEADER_ACCEPT_VALUE_XML_NON_LEGACY = CT_FHIR_XML_NEW + ";q=1.0, " + CT_FHIR_XML + ";q=0.9";
 	public static final String HEADER_ACCEPT_VALUE_XML_OR_JSON_LEGACY = CT_FHIR_XML + ";q=1.0, " + CT_FHIR_JSON + ";q=1.0";
 	public static final String HEADER_ACCEPT_VALUE_XML_OR_JSON_NON_LEGACY = CT_FHIR_XML_NEW + ";q=1.0, " + CT_FHIR_JSON_NEW + ";q=1.0, " + HEADER_ACCEPT_VALUE_XML_OR_JSON_LEGACY.replace("1.0", "0.9");
-	public static final String HEADER_ACCEPT_VALUE_XML_NON_LEGACY = CT_FHIR_XML_NEW + ";q=1.0, " + CT_FHIR_XML + ";q=0.9";
-	public static final String HEADER_ACCEPT_VALUE_JSON_NON_LEGACY = CT_FHIR_JSON_NEW + ";q=1.0, " + CT_FHIR_JSON + ";q=0.9";
 	public static final String HEADER_ALLOW = "Allow";
 	public static final String HEADER_AUTHORIZATION = "Authorization";
 	public static final String HEADER_AUTHORIZATION_VALPREFIX_BASIC = "Basic ";
@@ -127,10 +129,12 @@ public class Constants {
 	public static final String PARAM_PAGINGACTION = "_getpages";
 	public static final String PARAM_PAGINGOFFSET = "_getpagesoffset";
 	public static final String PARAM_PRETTY = "_pretty";
+	public static final String PARAM_PRETTY_VALUE_FALSE = "false";
 	public static final String PARAM_PRETTY_VALUE_TRUE = "true";
 	public static final String PARAM_PROFILE = "_profile";
 	public static final String PARAM_QUERY = "_query";
 	public static final String PARAM_REVINCLUDE = "_revinclude";
+	public static final String PARAM_REVINCLUDE_RECURSE = PARAM_REVINCLUDE+PARAM_INCLUDE_QUALIFIER_RECURSE;
 	public static final String PARAM_SEARCH = "_search";
 	public static final String PARAM_SECURITY = "_security";
 	public static final String PARAM_SINCE = "_since";
@@ -142,6 +146,9 @@ public class Constants {
 	public static final String PARAM_TAGS = "_tags";
 	public static final String PARAM_TEXT = "_text";
 	public static final String PARAM_VALIDATE = "_validate";
+        public static final String PARAM_ASYNC = "async"; //Used in messaging
+        public static final String PARAM_RESPONSE_URL = "response-url"; //Used in messaging
+        public static final String EXTOP_PROCESS_MESSAGE = "$process-message"; //Used in messaging
 	public static final String PARAMQUALIFIER_MISSING = ":missing";
 	public static final String PARAMQUALIFIER_MISSING_FALSE = "false";
 	public static final String PARAMQUALIFIER_MISSING_TRUE = "true";
@@ -156,11 +163,11 @@ public class Constants {
 	public static final int STATUS_HTTP_401_CLIENT_UNAUTHORIZED = 401;
 	public static final int STATUS_HTTP_403_FORBIDDEN = 403;
 	public static final int STATUS_HTTP_404_NOT_FOUND = 404;
+	
 	public static final int STATUS_HTTP_405_METHOD_NOT_ALLOWED = 405;
 	public static final int STATUS_HTTP_409_CONFLICT = 409;
 	public static final int STATUS_HTTP_410_GONE = 410;
 	public static final int STATUS_HTTP_412_PRECONDITION_FAILED = 412;
-	
 	public static final int STATUS_HTTP_422_UNPROCESSABLE_ENTITY = 422;
 	public static final int STATUS_HTTP_500_INTERNAL_ERROR = 500;
 	public static final int STATUS_HTTP_501_NOT_IMPLEMENTED = 501;
@@ -168,9 +175,6 @@ public class Constants {
 	public static final String TAG_SUBSETTED_SYSTEM = "http://hl7.org/fhir/v3/ObservationValue";
 	public static final String URL_TOKEN_HISTORY = "_history";
 	public static final String URL_TOKEN_METADATA = "metadata";
-	public static final String CT_JSON_PATCH = "application/json-patch+json";
-	public static final String CT_XML_PATCH = "application/xml-patch+xml";
-	public static final String PARAM_PRETTY_VALUE_FALSE = "false";
 
 	static {
 		CHARSET_UTF8 = Charset.forName(CHARSET_NAME_UTF8);

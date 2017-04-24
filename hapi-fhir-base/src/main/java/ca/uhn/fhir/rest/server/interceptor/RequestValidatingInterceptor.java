@@ -6,13 +6,13 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  * 
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -26,6 +26,9 @@ import java.nio.charset.Charset;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.rest.method.RequestDetails;
 import ca.uhn.fhir.rest.param.ResourceParameter;
@@ -51,6 +54,19 @@ public class RequestValidatingInterceptor extends BaseValidatingInterceptor<Stri
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(RequestValidatingInterceptor.class);
 
+	/**
+	 * A {@link RequestDetails#getUserData() user data} entry will be created with this
+	 * key which contains the {@link ValidationResult} from validating the request.
+	 */
+	public static final String REQUEST_VALIDATION_RESULT = RequestValidatingInterceptor.class.getName() + "_REQUEST_VALIDATION_RESULT";
+
+	private boolean myAddValidationResultsToResponseOperationOutcome = true;
+
+	@Override
+	ValidationResult doValidate(FhirValidator theValidator, String theRequest) {
+		return theValidator.validateWithResult(theRequest);
+	}
+
 	@Override
 	public boolean incomingRequestPostProcessed(RequestDetails theRequestDetails, HttpServletRequest theRequest, HttpServletResponse theResponse) throws AuthenticationException {
 		EncodingEnum encoding = RestfulServerUtils.determineRequestEncodingNoDefault(theRequestDetails);
@@ -67,11 +83,59 @@ public class RequestValidatingInterceptor extends BaseValidatingInterceptor<Stri
 			return true;
 		}
 
-		validate(requestText, theRequestDetails);
+		ValidationResult validationResult = validate(requestText, theRequestDetails);
+
+		// The JPA server will use this
+		theRequestDetails.getUserData().put(REQUEST_VALIDATION_RESULT, validationResult);
 
 		return true;
 	}
 
+	/**
+	 * If set to {@literal true} (default is true), the validation results
+	 * will be added to the OperationOutcome being returned to the client,
+	 * unless the response being returned is not an OperationOutcome
+	 * to begin with (e.g. if the client has requested 
+	 * <code>Return: prefer=representation</code>)
+	 */
+	public boolean isAddValidationResultsToResponseOperationOutcome() {
+		return myAddValidationResultsToResponseOperationOutcome;
+	}
+
+	@Override
+	public boolean outgoingResponse(RequestDetails theRequestDetails, IBaseResource theResponseObject) {
+		if (myAddValidationResultsToResponseOperationOutcome) {
+			if (theResponseObject instanceof IBaseOperationOutcome) {
+				IBaseOperationOutcome oo = (IBaseOperationOutcome) theResponseObject;
+
+				if (theRequestDetails != null) {
+					ValidationResult validationResult = (ValidationResult) theRequestDetails.getUserData().get(RequestValidatingInterceptor.REQUEST_VALIDATION_RESULT);
+					if (validationResult != null) {
+						validationResult.populateOperationOutcome(oo);
+					}
+				}
+
+			}
+		}
+
+		return true;
+	}
+
+	@Override
+	String provideDefaultResponseHeaderName() {
+		return DEFAULT_RESPONSE_HEADER_NAME;
+	}
+
+	/**
+	 * If set to {@literal true} (default is true), the validation results
+	 * will be added to the OperationOutcome being returned to the client,
+	 * unless the response being returned is not an OperationOutcome
+	 * to begin with (e.g. if the client has requested 
+	 * <code>Return: prefer=representation</code>)
+	 */
+	public void setAddValidationResultsToResponseOperationOutcome(boolean theAddValidationResultsToResponseOperationOutcome) {
+		myAddValidationResultsToResponseOperationOutcome = theAddValidationResultsToResponseOperationOutcome;
+	}
 
 	/**
 	 * Sets the name of the response header to add validation failures to
@@ -83,18 +147,5 @@ public class RequestValidatingInterceptor extends BaseValidatingInterceptor<Stri
 	public void setResponseHeaderName(String theResponseHeaderName) {
 		super.setResponseHeaderName(theResponseHeaderName);
 	}
-
-
-	@Override
-	String provideDefaultResponseHeaderName() {
-		return DEFAULT_RESPONSE_HEADER_NAME;
-	}
-
-
-	@Override
-	ValidationResult doValidate(FhirValidator theValidator, String theRequest) {
-		return theValidator.validateWithResult(theRequest);
-	}
-
 
 }

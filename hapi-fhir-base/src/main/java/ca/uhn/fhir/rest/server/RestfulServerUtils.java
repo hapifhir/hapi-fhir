@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.server;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,7 +61,6 @@ import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.PreferReturnEnum;
 import ca.uhn.fhir.rest.api.SummaryEnum;
-import ca.uhn.fhir.rest.client.apache.ApacheHttpRequest;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
 import ca.uhn.fhir.rest.method.ElementsParameter;
 import ca.uhn.fhir.rest.method.RequestDetails;
@@ -378,7 +377,7 @@ public class RestfulServerUtils {
 						break;
 					}
 				} catch (IllegalArgumentException e) {
-					ourLog.debug("Invalid {} parameger: {}", Constants.PARAM_NARRATIVE, narrative[0]);
+					ourLog.debug("Invalid {} parameter: {}", Constants.PARAM_NARRATIVE, narrative[0]);
 				}
 			}
 		}
@@ -426,9 +425,8 @@ public class RestfulServerUtils {
 		}
 		if (encoding == null) {
 			return null;
-		} else {
-			return new ResponseEncoding(theFhirContext, encoding, theContentType);
 		}
+		return new ResponseEncoding(theFhirContext, encoding, theContentType);
 	}
 
 	public static IParser getNewParser(FhirContext theContext, RequestDetails theRequestDetails) {
@@ -578,6 +576,7 @@ public class RestfulServerUtils {
 		} catch (Exception e) {
 			// always send a response, even if the parsing went wrong
 		}
+		//FIXME resource leak
 		return theRequestDetails.getResponse().sendWriterResponse(status, contentType, charset, writer);
 	}
 
@@ -701,7 +700,7 @@ public class RestfulServerUtils {
 			IParser parser = getNewParser(theServer.getFhirContext(), theRequestDetails);
 			parser.encodeResourceToWriter(theResource, writer);
 		}
-
+		//FIXME resource leak
 		return restUtil.sendWriterResponse(theStausCode, contentType, charset, writer);
 	}
 
@@ -781,9 +780,8 @@ public class RestfulServerUtils {
 		public String getResourceContentType() {
 			if (Boolean.TRUE.equals(isNonLegacy())) {
 				return getEncoding().getResourceContentTypeNonLegacy();
-			} else {
-				return getEncoding().getResourceContentType();
 			}
+			return getEncoding().getResourceContentType();
 		}
 
 		public Boolean isNonLegacy() {
@@ -793,19 +791,19 @@ public class RestfulServerUtils {
 
 	public static void addAcceptHeaderToRequest(EncodingEnum theEncoding, IHttpRequest theHttpRequest, FhirContext theContext) {
 		if (theEncoding == null) {
-			if (theContext.getVersion().getVersion().isNewerThan(FhirVersionEnum.DSTU2) == false) {
+			if (theContext.getVersion().getVersion().isNewerThan(FhirVersionEnum.DSTU2_1) == false) {
 				theHttpRequest.addHeader(Constants.HEADER_ACCEPT, Constants.HEADER_ACCEPT_VALUE_XML_OR_JSON_LEGACY);
 			} else {
 				theHttpRequest.addHeader(Constants.HEADER_ACCEPT, Constants.HEADER_ACCEPT_VALUE_XML_OR_JSON_NON_LEGACY);
 			}
 		} else if (theEncoding == EncodingEnum.JSON) {
-			if (theContext.getVersion().getVersion().isNewerThan(FhirVersionEnum.DSTU2) == false) {
+			if (theContext.getVersion().getVersion().isNewerThan(FhirVersionEnum.DSTU2_1) == false) {
 				theHttpRequest.addHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON);
 			} else {
 				theHttpRequest.addHeader(Constants.HEADER_ACCEPT, Constants.HEADER_ACCEPT_VALUE_JSON_NON_LEGACY);
 			}
 		} else if (theEncoding == EncodingEnum.XML) {
-			if (theContext.getVersion().getVersion().isNewerThan(FhirVersionEnum.DSTU2) == false) {
+			if (theContext.getVersion().getVersion().isNewerThan(FhirVersionEnum.DSTU2_1) == false) {
 				theHttpRequest.addHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_XML);
 			} else {
 				theHttpRequest.addHeader(Constants.HEADER_ACCEPT, Constants.HEADER_ACCEPT_VALUE_XML_NON_LEGACY);

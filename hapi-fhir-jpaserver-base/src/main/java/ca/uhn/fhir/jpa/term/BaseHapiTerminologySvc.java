@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.term;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,9 +23,11 @@ package ca.uhn.fhir.jpa.term;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
@@ -33,6 +35,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceContextType;
 
+import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -45,7 +48,10 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Stopwatch;
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimaps;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
@@ -66,6 +72,7 @@ import ca.uhn.fhir.util.ObjectUtil;
 import ca.uhn.fhir.util.ValidateUtil;
 
 public abstract class BaseHapiTerminologySvc implements IHapiTerminologySvc {
+	private static boolean ourForceSaveDeferredAlwaysForUnitTest;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseHapiTerminologySvc.class);
 	private static final Object PLACEHOLDER_OBJECT = new Object();
 
@@ -94,8 +101,11 @@ public abstract class BaseHapiTerminologySvc implements IHapiTerminologySvc {
 	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
 	protected EntityManager myEntityManager;
 	
-	private boolean myProcessDeferred = true;
 	private long myNextReindexPass;
+	private boolean myProcessDeferred = true;
+
+	@Autowired
+	private PlatformTransactionManager myTransactionMgr;
 
 	private boolean addToSet(Set<TermConcept> theSetToPopulate, TermConcept theConcept) {
 		boolean retVal = theSetToPopulate.add(theConcept);
@@ -105,6 +115,25 @@ public abstract class BaseHapiTerminologySvc implements IHapiTerminologySvc {
 				throw new InvalidRequestException(msg);
 			}
 		}
+		return retVal;
+	}
+
+	private int ensureParentsSaved(Collection<TermConceptParentChildLink> theParents) {
+		ourLog.trace("Checking {} parents", theParents.size());
+		int retVal = 0;
+		
+		for (TermConceptParentChildLink nextLink : theParents) {
+			if (nextLink.getRelationshipType() == RelationshipTypeEnum.ISA) {
+				TermConcept nextParent = nextLink.getParent();
+				retVal += ensureParentsSaved(nextParent.getParents());
+				if (nextParent.getId() == null) {
+					myConceptDao.saveAndFlush(nextParent);
+					retVal++;
+					ourLog.debug("Saved parent code {} and got id {}", nextParent.getCode(), nextParent.getId());
+				}
+			}
+		}
+		
 		return retVal;
 	}
 
@@ -175,6 +204,15 @@ public abstract class BaseHapiTerminologySvc implements IHapiTerminologySvc {
 		return retVal;
 	}
 
+	/**
+	 * Subclasses may override
+	 * @param theSystem The code system
+	 * @param theCode The code
+	 */
+	protected List<VersionIndependentConcept> findCodesAboveUsingBuiltInSystems(String theSystem, String theCode) {
+		return Collections.emptyList();
+	}
+
 	@Transactional(propagation = Propagation.REQUIRED)
 	@Override
 	public Set<TermConcept> findCodesBelow(Long theCodeSystemResourcePid, Long theCodeSystemVersionPid, String theCode) {
@@ -206,7 +244,6 @@ public abstract class BaseHapiTerminologySvc implements IHapiTerminologySvc {
 		ArrayList<VersionIndependentConcept> retVal = toVersionIndependentConcepts(theSystem, codes);
 		return retVal;
 	}
-
 	/**
 	 * Subclasses may override
 	 * @param theSystem The code system
@@ -215,16 +252,7 @@ public abstract class BaseHapiTerminologySvc implements IHapiTerminologySvc {
 	protected List<VersionIndependentConcept> findCodesBelowUsingBuiltInSystems(String theSystem, String theCode) {
 		return Collections.emptyList();
 	}
-
-	/**
-	 * Subclasses may override
-	 * @param theSystem The code system
-	 * @param theCode The code
-	 */
-	protected List<VersionIndependentConcept> findCodesAboveUsingBuiltInSystems(String theSystem, String theCode) {
-		return Collections.emptyList();
-	}
-
+	
 	private TermCodeSystemVersion findCurrentCodeSystemVersionForSystem(String theCodeSystem) {
 		TermCodeSystem cs = getCodeSystem(theCodeSystem);
 		if (cs == null || cs.getCurrentVersion() == null) {
@@ -233,11 +261,12 @@ public abstract class BaseHapiTerminologySvc implements IHapiTerminologySvc {
 		TermCodeSystemVersion csv = cs.getCurrentVersion();
 		return csv;
 	}
+
 	private TermCodeSystem getCodeSystem(String theSystem) {
 		TermCodeSystem cs = myCodeSystemDao.findByCodeSystemUri(theSystem);
 		return cs;
 	}
-	
+
 	private void persistChildren(TermConcept theConcept, TermCodeSystemVersion theCodeSystem, IdentityHashMap<TermConcept, Object> theConceptsStack, int theTotalConcepts) {
 		if (theConceptsStack.put(theConcept, PLACEHOLDER_OBJECT) != null) {
 			return;
@@ -271,44 +300,6 @@ public abstract class BaseHapiTerminologySvc implements IHapiTerminologySvc {
 		
 	}
 
-	private void saveConceptLink(TermConceptParentChildLink next) {
-		if (next.getId() == null) {
-			myConceptParentChildLinkDao.save(next);
-		}
-	}
-
-	private int saveConcept(TermConcept theConcept) {
-		int retVal = 0;
-		retVal += ensureParentsSaved(theConcept.getParents());
-		if (theConcept.getId() == null || theConcept.getIndexStatus() == null) {
-			retVal++;
-			theConcept.setIndexStatus(BaseHapiFhirDao.INDEX_STATUS_INDEXED);
-			myConceptDao.saveAndFlush(theConcept);
-		}
-		
-		ourLog.trace("Saved {} and got PID {}", theConcept.getCode(), theConcept.getId());
-		return retVal;
-	}
-
-	private int ensureParentsSaved(Collection<TermConceptParentChildLink> theParents) {
-		ourLog.trace("Checking {} parents", theParents.size());
-		int retVal = 0;
-		
-		for (TermConceptParentChildLink nextLink : theParents) {
-			if (nextLink.getRelationshipType() == RelationshipTypeEnum.ISA) {
-				TermConcept nextParent = nextLink.getParent();
-				retVal += ensureParentsSaved(nextParent.getParents());
-				if (nextParent.getId() == null) {
-					myConceptDao.saveAndFlush(nextParent);
-					retVal++;
-					ourLog.debug("Saved parent code {} and got id {}", nextParent.getCode(), nextParent.getId());
-				}
-			}
-		}
-		
-		return retVal;
-	}
-
 	private void populateVersion(TermConcept theNext, TermCodeSystemVersion theCodeSystemVersion) {
 		if (theNext.getCodeSystem() != null) {
 			return;
@@ -316,6 +307,105 @@ public abstract class BaseHapiTerminologySvc implements IHapiTerminologySvc {
 		theNext.setCodeSystem(theCodeSystemVersion);
 		for (TermConceptParentChildLink next : theNext.getChildren()) {
 			populateVersion(next.getChild(), theCodeSystemVersion);
+		}
+	}
+
+	private ArrayListMultimap<Long, Long> myChildToParentPidCache;
+	
+	private void processReindexing() {
+		if (System.currentTimeMillis() < myNextReindexPass && !ourForceSaveDeferredAlwaysForUnitTest) {
+			return;
+		}
+		
+		TransactionTemplate tt = new TransactionTemplate(myTransactionMgr);
+		tt.setPropagationBehavior(TransactionTemplate.PROPAGATION_REQUIRES_NEW);
+		tt.execute(new TransactionCallbackWithoutResult() {
+			@Override
+			protected void doInTransactionWithoutResult(TransactionStatus theArg0) {
+				int maxResult = 1000;
+				Page<TermConcept> concepts = myConceptDao.findResourcesRequiringReindexing(new PageRequest(0, maxResult));
+				if (concepts.hasContent() == false) {
+					myNextReindexPass = System.currentTimeMillis() + DateUtils.MILLIS_PER_MINUTE;
+					myChildToParentPidCache = null;
+					return;
+				}
+
+				if (myChildToParentPidCache == null) {
+					myChildToParentPidCache = ArrayListMultimap.create();
+				}
+				
+				ourLog.info("Indexing {} / {} concepts", concepts.getContent().size(), concepts.getTotalElements());
+
+				int count = 0;
+				StopWatch stopwatch = new StopWatch();
+
+				for (TermConcept nextConcept : concepts) {
+					
+					StringBuilder parentsBuilder = new StringBuilder();
+					createParentsString(parentsBuilder, nextConcept.getId());
+					nextConcept.setParentPids(parentsBuilder.toString());
+					
+					saveConcept(nextConcept);
+					count++;
+				}
+				
+				ourLog.info("Indexed {} / {} concepts in {}ms - Avg {}ms / resource", new Object[] { count, concepts.getContent().size(), stopwatch.getMillis(), stopwatch.getMillisPerOperation(count) });
+			}
+
+			private void createParentsString(StringBuilder theParentsBuilder, Long theConceptPid) {
+				Validate.notNull(theConceptPid, "theConceptPid must not be null");
+				List<Long> parents = myChildToParentPidCache.get(theConceptPid);
+				if (parents.contains(-1L)) {
+					return;
+				} else if (parents.isEmpty()) {
+					Collection<TermConceptParentChildLink> parentLinks = myConceptParentChildLinkDao.findAllWithChild(theConceptPid);
+					if (parentLinks.isEmpty()) {
+						myChildToParentPidCache.put(theConceptPid, -1L);
+						return;
+					} else {
+						for (TermConceptParentChildLink next : parentLinks) {
+							myChildToParentPidCache.put(theConceptPid, next.getParentPid());
+						}
+					}
+				}
+				
+				
+				for (Long nextParent : parents) {
+					if (theParentsBuilder.length() > 0) {
+						theParentsBuilder.append(' ');
+					}
+					theParentsBuilder.append(nextParent);
+					createParentsString(theParentsBuilder, nextParent);
+				}
+			}
+		});
+
+	}
+
+	private int saveConcept(TermConcept theConcept) {
+		int retVal = 0;
+	
+		/*
+		 * If the concept has an ID, we're reindexing, so there's no need to
+		 * save parent concepts first (it's way too slow to do that)
+		 */
+		if (theConcept.getId() == null) {
+			retVal += ensureParentsSaved(theConcept.getParents());
+		}
+		
+		if (theConcept.getId() == null || theConcept.getIndexStatus() == null) {
+			retVal++;
+			theConcept.setIndexStatus(BaseHapiFhirDao.INDEX_STATUS_INDEXED);
+			myConceptDao.save(theConcept);
+		}
+		
+		ourLog.trace("Saved {} and got PID {}", theConcept.getCode(), theConcept.getId());
+		return retVal;
+	}
+	
+	private void saveConceptLink(TermConceptParentChildLink next) {
+		if (next.getId() == null) {
+			myConceptParentChildLinkDao.save(next);
 		}
 	}
 
@@ -368,43 +458,7 @@ public abstract class BaseHapiTerminologySvc implements IHapiTerminologySvc {
 			ourLog.info("All deferred concepts and relationships have now been synchronized to the database");
 		}
 	}
-
-	@Autowired
-	private PlatformTransactionManager myTransactionMgr;
 	
-	private void processReindexing() {
-		if (System.currentTimeMillis() < myNextReindexPass) {
-			return;
-		}
-		
-		TransactionTemplate tt = new TransactionTemplate(myTransactionMgr);
-		tt.setPropagationBehavior(TransactionTemplate.PROPAGATION_REQUIRES_NEW);
-		tt.execute(new TransactionCallbackWithoutResult() {
-			@Override
-			protected void doInTransactionWithoutResult(TransactionStatus theArg0) {
-				int maxResult = 1000;
-				Page<TermConcept> resources = myConceptDao.findResourcesRequiringReindexing(new PageRequest(0, maxResult));
-				if (resources.hasContent() == false) {
-					myNextReindexPass = System.currentTimeMillis() + DateUtils.MILLIS_PER_MINUTE;
-					return;
-				}
-
-				ourLog.info("Indexing {} / {} concepts", resources.getContent().size(), resources.getTotalElements());
-
-				int count = 0;
-				StopWatch stopwatch = new StopWatch();
-
-				for (TermConcept resourceTable : resources) {
-					saveConcept(resourceTable);
-					count++;
-				}
-				
-				ourLog.info("Indexed {} / {} concepts in {}ms - Avg {}ms / resource", new Object[] { count, resources.getContent().size(), stopwatch.getMillis(), stopwatch.getMillisPerOperation(count) });
-			}
-		});
-
-	}
-
 	@Override
 	public void setProcessDeferred(boolean theProcessDeferred) {
 		myProcessDeferred = theProcessDeferred;
@@ -470,7 +524,7 @@ public abstract class BaseHapiTerminologySvc implements IHapiTerminologySvc {
 			totalCodeCount += validateConceptForStorage(next, theCodeSystemVersion, conceptsStack, allConcepts);
 		}
 
-		ourLog.info("Saving version");
+		ourLog.info("Saving version containing {} concepts", totalCodeCount);
 
 		TermCodeSystemVersion codeSystemVersion = myCodeSystemVersionDao.saveAndFlush(theCodeSystemVersion);
 
@@ -503,13 +557,13 @@ public abstract class BaseHapiTerminologySvc implements IHapiTerminologySvc {
 			ourLog.info("Note that some concept saving was deferred - still have {} concepts and {} relationships", myConceptsToSaveLater.size(), myConceptLinksToSaveLater.size());
 		}
 	}
-	
+
 	@Override
 	public boolean supportsSystem(String theSystem) {
 		TermCodeSystem cs = getCodeSystem(theSystem);
 		return cs != null;
 	}
-
+	
 	private ArrayList<VersionIndependentConcept> toVersionIndependentConcepts(String theSystem, Set<TermConcept> codes) {
 		ArrayList<VersionIndependentConcept> retVal = new ArrayList<VersionIndependentConcept>(codes.size());
 		for (TermConcept next : codes) {
@@ -545,6 +599,14 @@ public abstract class BaseHapiTerminologySvc implements IHapiTerminologySvc {
 		theConceptsStack.remove(theConceptsStack.size() - 1);
 
 		return retVal;
+	}
+
+	/**
+	 * This method is present only for unit tests, do not call from client code
+	 */
+	@VisibleForTesting
+	public static void setForceSaveDeferredAlwaysForUnitTest(boolean theForceSaveDeferredAlwaysForUnitTest) {
+		ourForceSaveDeferredAlwaysForUnitTest = theForceSaveDeferredAlwaysForUnitTest;
 	}
 
 }

@@ -4,7 +4,7 @@ package ca.uhn.fhir.parser;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -98,8 +98,8 @@ class ParserState<T> {
 		myState.enteringNewElement(theNamespaceUri, theName);
 	}
 
-	public void enteringNewElementExtension(StartElement theElem, String theUrlAttr, boolean theIsModifier) {
-		myState.enteringNewElementExtension(theElem, theUrlAttr, theIsModifier);
+	public void enteringNewElementExtension(StartElement theElem, String theUrlAttr, boolean theIsModifier, final String baseServerUrl) {
+		myState.enteringNewElementExtension(theElem, theUrlAttr, theIsModifier, baseServerUrl);
 	}
 
 	public T getObject() {
@@ -142,6 +142,7 @@ class ParserState<T> {
 		if (entry.getLinkSelf() != null && entry.getLinkSelf().isEmpty() == false) {
 			id = new IdDt(entry.getLinkSelf().getValue());
 		} else {
+			//TODO: Use of a deprecated method should be resolved.
 			id = entry.getId();
 		}
 
@@ -159,6 +160,7 @@ class ParserState<T> {
 
 		if (resource != null) {
 			resource.getResourceMetadata().put(ResourceMetadataKeyEnum.DELETED_AT, entry.getDeletedAt());
+			//TODO: Use of a deprecated method should be resolved.
 			resource.getResourceMetadata().put(ResourceMetadataKeyEnum.VERSION_ID, id);
 		}
 	}
@@ -364,6 +366,7 @@ class ParserState<T> {
 		@Override
 		public void attributeValue(String theName, String theValue) throws DataFormatException {
 			if ("ref".equals(theName)) {
+				//TODO: Use of a deprecated method should be resolved.
 				getEntry().setId(new IdDt(theValue));
 			} else if ("when".equals(theName)) {
 				getEntry().setDeleted(new InstantDt(theValue));
@@ -451,10 +454,12 @@ class ParserState<T> {
 			if ("title".equals(theLocalPart)) {
 				push(new AtomPrimitiveState(myEntry.getTitle()));
 			} else if ("id".equals(theLocalPart)) {
+				//TODO: Use of a deprecated method should be resolved.
 				push(new AtomPrimitiveState(myEntry.getId()));
 			} else if ("link".equals(theLocalPart)) {
 				push(new AtomLinkState(myEntry));
 			} else if ("updated".equals(theLocalPart)) {
+				//TODO: Use of a deprecated method should be resolved.
 				push(new AtomPrimitiveState(myEntry.getUpdated()));
 			} else if ("published".equals(theLocalPart)) {
 				push(new AtomPrimitiveState(myEntry.getPublished()));
@@ -721,7 +726,6 @@ class ParserState<T> {
 			myInstance = theInstance;
 		}
 
-		@SuppressWarnings("unchecked")
 		@Override
 		public void wereBack() {
 
@@ -772,7 +776,7 @@ class ParserState<T> {
 			myErrorHandler.unknownAttribute(null, theName);
 		}
 
-		public boolean elementIsRepeating(@SuppressWarnings("unused") String theChildName) {
+		public boolean elementIsRepeating(String theChildName) {
 			return false;
 		}
 
@@ -792,7 +796,7 @@ class ParserState<T> {
 		 * Default implementation just handles undeclared extensions
 		 */
 		@SuppressWarnings("unused")
-		public void enteringNewElementExtension(StartElement theElement, String theUrlAttr, boolean theIsModifier) {
+		public void enteringNewElementExtension(StartElement theElement, String theUrlAttr, boolean theIsModifier, final String baseServerUrl) {
 			if (myPreResourceState != null && getCurrentElement() instanceof ISupportsUndeclaredExtensions) {
 				ExtensionDt newExtension = new ExtensionDt(theIsModifier);
 				newExtension.setUrl(theUrlAttr);
@@ -1032,6 +1036,7 @@ class ParserState<T> {
 		@Override
 		public void enteringNewElement(String theNamespaceUri, String theLocalPart) throws DataFormatException {
 			if ("base".equals(theLocalPart)) {
+				//TODO: Use of a deprecated method should be resolved.
 				push(new PrimitiveState(getPreResourceState(), myEntry.getLinkBase()));
 			} else if ("request".equals(theLocalPart)) {
 				push(new BundleEntryTransactionState(myEntry));
@@ -1051,7 +1056,7 @@ class ParserState<T> {
 			} else if ("fhir_comments".equals(theLocalPart) && myJsonMode) {
 				push(new SwallowChildrenWholeState(getPreResourceState()));
 			} else {
-				throw new DataFormatException("Unexpected element in entry: " + theLocalPart);
+				this.logAndSwallowUnexpectedElement(theLocalPart);
 			}
 		}
 
@@ -1303,6 +1308,7 @@ class ParserState<T> {
 				}
 
 				String bundleBaseUrl = myInstance.getLinkBase().getValue();
+				//TODO: Use of a deprecated method should be resolved.
 				String entryBaseUrl = nextEntry.getLinkBase().getValue();
 				String version = ResourceMetadataKeyEnum.VERSION.get(nextResource);
 				String resourceName = myContext.getResourceDefinition(nextResource).getName();
@@ -1484,7 +1490,7 @@ class ParserState<T> {
 		}
 
 		@Override
-		public void enteringNewElementExtension(StartElement theElement, String theUrlAttr, boolean theIsModifier) {
+		public void enteringNewElementExtension(StartElement theElement, String theUrlAttr, boolean theIsModifier, final String baseServerUrl) {
 			RuntimeChildDeclaredExtensionDefinition declaredExtension = myDefinition.getChildExtensionForUrl(theUrlAttr);
 			if (declaredExtension != null) {
 				if (myChildInstance == null) {
@@ -1494,7 +1500,7 @@ class ParserState<T> {
 				BaseState newState = new DeclaredExtensionState(getPreResourceState(), declaredExtension, myChildInstance);
 				push(newState);
 			} else {
-				super.enteringNewElementExtension(theElement, theUrlAttr, theIsModifier);
+				super.enteringNewElementExtension(theElement, theUrlAttr, theIsModifier, baseServerUrl);
 			}
 		}
 
@@ -1665,13 +1671,13 @@ class ParserState<T> {
 		}
 
 		@Override
-		public void enteringNewElementExtension(StartElement theElement, String theUrlAttr, boolean theIsModifier) {
-			RuntimeChildDeclaredExtensionDefinition declaredExtension = myDefinition.getDeclaredExtension(theUrlAttr);
+		public void enteringNewElementExtension(StartElement theElement, String theUrlAttr, boolean theIsModifier, final String baseServerUrl) {
+			RuntimeChildDeclaredExtensionDefinition declaredExtension = myDefinition.getDeclaredExtension(theUrlAttr, baseServerUrl);
 			if (declaredExtension != null) {
 				BaseState newState = new DeclaredExtensionState(getPreResourceState(), declaredExtension, myInstance);
 				push(newState);
 			} else {
-				super.enteringNewElementExtension(theElement, theUrlAttr, theIsModifier);
+				super.enteringNewElementExtension(theElement, theUrlAttr, theIsModifier, baseServerUrl);
 			}
 		}
 
@@ -1772,6 +1778,15 @@ class ParserState<T> {
 					push(newState);
 					return;
 				}
+				case CONTAINED_RESOURCES:
+				case CONTAINED_RESOURCE_LIST:
+				case EXTENSION_DECLARED:
+				case PRIMITIVE_XHTML:
+				case PRIMITIVE_XHTML_HL7ORG:
+				case RESOURCE:
+				case RESOURCE_BLOCK:
+				case UNDECL_EXT:
+					break;
 				}
 			}
 
@@ -2031,9 +2046,8 @@ class ParserState<T> {
 		private PreResourceState getRootPreResourceState() {
 			if (getPreResourceState() != null) {
 				return getPreResourceState();
-			} else {
-				return this;
 			}
+			return this;
 		}
 
 		@Override
@@ -2090,17 +2104,32 @@ class ParserState<T> {
 			final boolean bundle = "Bundle".equals(myContext.getResourceDefinition(myInstance).getName());
 			if (bundle) {
 
+				FhirTerser t = myContext.newTerser();
+				
+				Map<String, IBaseResource> idToResource = new HashMap<String, IBaseResource>();
+				if (myContext.getVersion().getVersion().isNewerThan(FhirVersionEnum.DSTU1)) {
+					List<IBase> entries = t.getValues(myInstance, "Bundle.entry", IBase.class);
+					for (IBase nextEntry : entries) {
+						IPrimitiveType<?> fullUrl = t.getSingleValueOrNull(nextEntry, "fullUrl", IPrimitiveType.class);
+						if (fullUrl != null && isNotBlank(fullUrl.getValueAsString())) {
+							IBaseResource resource = t.getSingleValueOrNull(nextEntry, "resource", IBaseResource.class);
+							if (resource != null) {
+								idToResource.put(fullUrl.getValueAsString(), resource);
+							}
+						}
+					}
+				}
+				
 				/*
 				 * Stitch together resource references
 				 */
-				Map<IIdType, IBaseResource> idToResource = new HashMap<IIdType, IBaseResource>();
-				FhirTerser t = myContext.newTerser();
 				List<IBaseResource> resources = t.getAllPopulatedChildElementsOfType(myInstance, IBaseResource.class);
 				for (IBaseResource next : resources) {
 					IIdType id = next.getIdElement();
 					if (id != null && id.isEmpty() == false) {
 						String resName = myContext.getResourceDefinition(next).getName();
-						idToResource.put(id.withResourceType(resName).toUnqualifiedVersionless(), next);
+						IIdType idType = id.withResourceType(resName).toUnqualifiedVersionless();
+						idToResource.put(idType.getValueAsString(), next);
 					}
 				}
 
@@ -2108,7 +2137,8 @@ class ParserState<T> {
 					List<IBaseReference> refs = myContext.newTerser().getAllPopulatedChildElementsOfType(next, IBaseReference.class);
 					for (IBaseReference nextRef : refs) {
 						if (nextRef.isEmpty() == false && nextRef.getReferenceElement() != null) {
-							IBaseResource target = idToResource.get(nextRef.getReferenceElement().toUnqualifiedVersionless());
+							IIdType unqualifiedVersionless = nextRef.getReferenceElement().toUnqualifiedVersionless();
+							IBaseResource target = idToResource.get(unqualifiedVersionless.getValueAsString());
 							if (target != null) {
 								nextRef.setResource(target);
 							}
@@ -2451,7 +2481,7 @@ class ParserState<T> {
 		}
 
 		@Override
-		public void enteringNewElementExtension(StartElement theElement, String theUrlAttr, boolean theIsModifier) {
+		public void enteringNewElementExtension(StartElement theElement, String theUrlAttr, boolean theIsModifier, final String baseServerUrl) {
 			myDepth++;
 		}
 
@@ -2575,8 +2605,7 @@ class ParserState<T> {
 		public void attributeValue(String theName, String theValue) throws DataFormatException {
 			if (myJsonMode) {
 				myDt.setValueAsString(theValue);
-				return;
-			} else {
+			} else {				
 				// IGNORE - don't handle this as an error, we process these as XML events
 			}
 		}

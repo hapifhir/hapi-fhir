@@ -222,8 +222,8 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
 		retVal.setKind(ConformanceStatementKind.INSTANCE);
 		retVal.getSoftware().setName(myServerConfiguration.getServerName());
 		retVal.getSoftware().setVersion(myServerConfiguration.getServerVersion());
-		retVal.addFormat(Constants.CT_FHIR_XML_NEW);
-		retVal.addFormat(Constants.CT_FHIR_JSON_NEW);
+		retVal.addFormat(Constants.CT_FHIR_XML);
+		retVal.addFormat(Constants.CT_FHIR_JSON);
 		retVal.setStatus(ConformanceResourceStatus.ACTIVE);
 
 		ConformanceRestComponent rest = retVal.addRest();

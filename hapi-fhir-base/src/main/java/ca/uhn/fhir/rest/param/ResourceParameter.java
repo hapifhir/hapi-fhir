@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.param;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -150,6 +150,7 @@ public class ResourceParameter implements IParameter {
 			String ctValue = theRequest.getHeader(Constants.HEADER_CONTENT_TYPE);
 			if (ctValue != null) {
 				if (ctValue.startsWith("application/x-www-form-urlencoded")) {
+					//FIXME potential null access theMethodBinding
 					String msg = theRequest.getServer().getFhirContext().getLocalizer().getMessage(ResourceParameter.class, "invalidContentTypeInRequest", ctValue, theMethodBinding.getRestOperationType());
 					throw new InvalidRequestException(msg);
 				}
@@ -169,9 +170,8 @@ public class ResourceParameter implements IParameter {
 				if (encoding == null) {
 					String msg = ctx.getLocalizer().getMessage(ResourceParameter.class, "noContentTypeInRequest", restOperationType);
 					throw new InvalidRequestException(msg);
-				} else {
-					requestReader = new InputStreamReader(new ByteArrayInputStream(theRequest.loadRequestContents()), charset);
 				}
+				requestReader = new InputStreamReader(new ByteArrayInputStream(theRequest.loadRequestContents()), charset);
 			} else {
 				String msg = ctx.getLocalizer().getMessage(ResourceParameter.class, "invalidContentTypeInRequest", ctValue, restOperationType);
 				throw new InvalidRequestException(msg);
@@ -179,7 +179,7 @@ public class ResourceParameter implements IParameter {
 		}
 
 		IParser parser = encoding.newParser(ctx);
-
+    parser.setServerBaseUrl(theRequest.getFhirServerBase());
 		T retVal;
 		try {
 			if (theResourceType != null) {

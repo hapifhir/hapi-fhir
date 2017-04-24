@@ -4,7 +4,7 @@ package ca.uhn.fhir.util;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -139,13 +139,15 @@ public class ElementUtil {
 		return retVal;
 	}
 
-	@SuppressWarnings("unchecked")
+	//@SuppressWarnings("unchecked")
 	private static <T extends IElement> void addElement(ArrayList<T> retVal, IElement next, Class<T> theType) {
+		//FIXME There seems to be an error on theType == null => if (theType != null|| theType.isAssignableFrom
 		if (theType == null|| theType.isAssignableFrom(next.getClass())) {
-			retVal.add((T) next);
+			retVal.add(theType.cast(next));
 		}
 		if (next instanceof ICompositeElement) {
 			ICompositeElement iCompositeElement = (ICompositeElement) next;
+			//TODO: Use of a deprecated method should be resolved.
 			retVal.addAll(iCompositeElement.getAllPopulatedChildElementsOfType(theType));
 		}
 	}

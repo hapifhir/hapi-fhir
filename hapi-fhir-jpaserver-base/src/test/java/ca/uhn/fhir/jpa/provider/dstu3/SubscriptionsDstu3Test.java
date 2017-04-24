@@ -40,6 +40,12 @@ public class SubscriptionsDstu3Test extends BaseResourceProviderDstu3Test {
 
 	private static final String WEBSOCKET_PATH = "/websocket/dstu3";
 
+	@Before
+	public void beforeDisableResultReuse() {
+		myDaoConfig.setReuseCachedSearchResultsForMillis(null);
+	}
+
+	
 	@Override
 	public void beforeCreateInterceptor() {
 		super.beforeCreateInterceptor();

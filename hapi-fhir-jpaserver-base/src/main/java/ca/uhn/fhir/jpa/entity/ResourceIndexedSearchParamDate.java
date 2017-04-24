@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.entity;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,14 +42,13 @@ import org.hibernate.search.annotations.Field;
 
 import ca.uhn.fhir.model.primitive.InstantDt;
 
-//@formatter:off
 @Embeddable
 @Entity
 @Table(name = "HFJ_SPIDX_DATE", indexes= {
 	@Index(name = "IDX_SP_DATE", columnList = "RES_TYPE,SP_NAME,SP_VALUE_LOW,SP_VALUE_HIGH"),
+	@Index(name = "IDX_SP_DATE_UPDATED", columnList = "SP_UPDATED"), 
 	@Index(name = "IDX_SP_DATE_RESID", columnList = "RES_ID") 
 })
-//@formatter:on
 public class ResourceIndexedSearchParamDate extends BaseResourceIndexedSearchParam {
 
 	private static final long serialVersionUID = 1L;

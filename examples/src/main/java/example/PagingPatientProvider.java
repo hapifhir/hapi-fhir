@@ -39,7 +39,7 @@ public class PagingPatientProvider implements IResourceProvider {
       return new IBundleProvider() {
 
          @Override
-         public int size() {
+         public Integer size() {
             return matchingResourceIds.size();
          }
 
@@ -60,6 +60,11 @@ public class PagingPatientProvider implements IResourceProvider {
             // Typically this method just returns null
             return null;
          }
+
+			@Override
+			public String getUuid() {
+				return null;
+			}
       };
    }
 

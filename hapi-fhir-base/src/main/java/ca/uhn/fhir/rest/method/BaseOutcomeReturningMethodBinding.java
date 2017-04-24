@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.method;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -101,16 +101,14 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<Metho
 			}
 			if (response.getCreated() == null || Boolean.TRUE.equals(response.getCreated())) {
 				return Constants.STATUS_HTTP_201_CREATED;
-			} else {
-				return Constants.STATUS_HTTP_200_OK;
 			}
+			return Constants.STATUS_HTTP_200_OK;
 
 		case UPDATE:
 			if (response == null || response.getCreated() == null || Boolean.FALSE.equals(response.getCreated())) {
 				return Constants.STATUS_HTTP_200_OK;
-			} else {
-				return Constants.STATUS_HTTP_201_CREATED;
 			}
+			return Constants.STATUS_HTTP_201_CREATED;
 
 		case VALIDATE:
 		case DELETE:
@@ -120,13 +118,11 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<Metho
 					throw new InternalErrorException("Method " + getMethod().getName() + " in type " + getMethod().getDeclaringClass().getCanonicalName() + " returned null");
 				}
 				return Constants.STATUS_HTTP_204_NO_CONTENT;
-			} else {
-				if (response.getOperationOutcome() == null) {
-					return Constants.STATUS_HTTP_204_NO_CONTENT;
-				} else {
-					return Constants.STATUS_HTTP_200_OK;
-				}
 			}
+			if (response.getOperationOutcome() == null) {
+				return Constants.STATUS_HTTP_204_NO_CONTENT;
+			}
+			return Constants.STATUS_HTTP_200_OK;
 		}
 	}
 
@@ -168,9 +164,8 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<Metho
 			}
 			MethodOutcome retVal = MethodUtil.process2xxResponse(getContext(), theResponseStatusCode, theResponseMimeType, theResponseReader, theHeaders);
 			return retVal;
-		} else {
-			throw processNon2xxResponseAndReturnExceptionToThrow(theResponseStatusCode, theResponseMimeType, theResponseReader);
 		}
+		throw processNon2xxResponseAndReturnExceptionToThrow(theResponseStatusCode, theResponseMimeType, theResponseReader);
 	}
 
 	@Override

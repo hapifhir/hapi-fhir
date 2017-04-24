@@ -10,4 +10,8 @@ public class JsonParser {
 		throw new UnsupportedOperationException();
 	}
 
+  public Resource parse(byte[] theByteArray) {
+    throw new UnsupportedOperationException();
+  }
+
 }

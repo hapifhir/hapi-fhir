@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.gclient;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +19,40 @@ package ca.uhn.fhir.rest.gclient;
  * limitations under the License.
  * #L%
  */
-
 public interface IOperation extends IBaseOn<IOperationUnnamed> {
 
-	
-	
+    /**
+     * This operation is called <b><a href="https://www.hl7.org/fhir/messaging.html">$process-message</a></b> as defined by the FHIR
+     * specification.<br><br>
+     * Usage :<br>
+     * <code>
+     * <pre>
+     * Bundle response = client
+     * .operation()
+     * .processMessage()
+     * .synchronous(Bundle.class)
+     * .setResponseUrlParam("http://myserver/fhir")
+     * .setMessageBundle(msgBundle)
+     * .execute();
+     * 
+     * //if you want to send an async message
+     * 
+     * OperationOutcome response = client
+     * .operation()
+     * .processMessage()
+     * .asynchronous(OperationOutcome.class)
+     * .setResponseUrlParam("http://myserver/fhir")
+     * .setMessageBundle(msgBundle)
+     * .execute();
+     *
+     * </pre>
+     * </code>
+     *
+     * @see <a href="https://www.hl7.org/fhir/messaging.html">2.4 Messaging
+     * using FHIR Resources</a>
+     *
+     * @return An interface that defines the operation related to sending
+     * Messages to a Messaging Server
+     */
+    IOperationProcessMsg processMessage();
 }

@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.server.interceptor;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ package ca.uhn.fhir.rest.server.interceptor;
  */
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -41,7 +42,6 @@ import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.method.RequestDetails;
 import ca.uhn.fhir.rest.server.IRestfulServerDefaults;
-import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
@@ -187,12 +187,6 @@ public interface IServerInterceptor {
 	 *           A bean containing details about the request that is about to be processed, including
 	 * @param theResponseObject
 	 *           The actual object which is being streamed to the client as a response
-	 * @param theServletRequest
-	 *           The incoming request
-	 * @param theServletResponse
-	 *           The response. Note that interceptors may choose to provide a response (i.e. by calling
-	 *           {@link HttpServletResponse#getWriter()}) but in that case it is important to return <code>false</code>
-	 *           to indicate that the server itself should not also provide a response.
 	 * @return Return <code>true</code> if processing should continue normally. This is generally the right thing to do.
 	 *         If your interceptor is providing a response rather than letting HAPI handle the response normally, you
 	 *         must return <code>false</code>. In this case, no further processing will occur and no further interceptors
@@ -201,7 +195,7 @@ public interface IServerInterceptor {
 	 *            This exception may be thrown to indicate that the interceptor has detected an unauthorized access
 	 *            attempt. If thrown, processing will stop and an HTTP 401 will be returned to the client.
 	 */
-	boolean outgoingResponse(RequestDetails theRequest, Bundle bundle);
+	boolean outgoingResponse(RequestDetails theRequest, Bundle theResponseObject);
 
 	/**
 	 * This method is called after the server implementation method has been called, but before any attempt to stream the
@@ -475,6 +469,13 @@ public interface IServerInterceptor {
 		 * Returns the same map which was
 		 */
 		public Map<Object, Object> getUserData() {
+			if (myRequestDetails == null) {
+				/*
+				 * Technically this shouldn't happen.. But some of the unit tests use old IXXXDao methods that don't
+				 * take in a RequestDetails object. Eventually I guess we should clean that up.
+				 */
+				return Collections.emptyMap();
+			}
 			return myRequestDetails.getUserData();
 		}
 

@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Mon, Apr 17, 2017 17:38-0400 for FHIR v3.0.1
 
 import java.util.*;
 
@@ -186,8 +186,10 @@ public class RelatedArtifact extends Type implements ICompositeType {
         throw new IllegalArgumentException("Unknown RelatedArtifactType code '"+codeString+"'");
         }
         public Enumeration<RelatedArtifactType> fromType(Base code) throws FHIRException {
-          if (code == null || code.isEmpty())
+          if (code == null)
             return null;
+          if (code.isEmpty())
+            return new Enumeration<RelatedArtifactType>(this);
           String codeString = ((PrimitiveType) code).asStringValue();
           if (codeString == null || "".equals(codeString))
             return null;
@@ -259,21 +261,21 @@ public class RelatedArtifact extends Type implements ICompositeType {
      * A url for the artifact that can be followed to access the actual content.
      */
     @Child(name = "url", type = {UriType.class}, order=3, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Url for the related artifact", formalDefinition="A url for the artifact that can be followed to access the actual content." )
+    @Description(shortDefinition="Where the artifact can be accessed", formalDefinition="A url for the artifact that can be followed to access the actual content." )
     protected UriType url;
 
     /**
      * The document being referenced, represented as an attachment. This is exclusive with the resource element.
      */
     @Child(name = "document", type = {Attachment.class}, order=4, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="The related document", formalDefinition="The document being referenced, represented as an attachment. This is exclusive with the resource element." )
+    @Description(shortDefinition="What document is being referenced", formalDefinition="The document being referenced, represented as an attachment. This is exclusive with the resource element." )
     protected Attachment document;
 
     /**
      * The related resource, such as a library, value set, profile, or other knowledge resource.
      */
     @Child(name = "resource", type = {Reference.class}, order=5, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="The related resource", formalDefinition="The related resource, such as a library, value set, profile, or other knowledge resource." )
+    @Description(shortDefinition="What resource is being referenced", formalDefinition="The related resource, such as a library, value set, profile, or other knowledge resource." )
     protected Reference resource;
 
     /**
@@ -578,59 +580,76 @@ public class RelatedArtifact extends Type implements ICompositeType {
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case 3575610: // type
-          this.type = new RelatedArtifactTypeEnumFactory().fromType(value); // Enumeration<RelatedArtifactType>
-          break;
+          value = new RelatedArtifactTypeEnumFactory().fromType(castToCode(value));
+          this.type = (Enumeration) value; // Enumeration<RelatedArtifactType>
+          return value;
         case 1671764162: // display
           this.display = castToString(value); // StringType
-          break;
+          return value;
         case -1442706713: // citation
           this.citation = castToString(value); // StringType
-          break;
+          return value;
         case 116079: // url
           this.url = castToUri(value); // UriType
-          break;
+          return value;
         case 861720859: // document
           this.document = castToAttachment(value); // Attachment
-          break;
+          return value;
         case -341064690: // resource
           this.resource = castToReference(value); // Reference
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("type"))
-          this.type = new RelatedArtifactTypeEnumFactory().fromType(value); // Enumeration<RelatedArtifactType>
-        else if (name.equals("display"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("type")) {
+          value = new RelatedArtifactTypeEnumFactory().fromType(castToCode(value));
+          this.type = (Enumeration) value; // Enumeration<RelatedArtifactType>
+        } else if (name.equals("display")) {
           this.display = castToString(value); // StringType
-        else if (name.equals("citation"))
+        } else if (name.equals("citation")) {
           this.citation = castToString(value); // StringType
-        else if (name.equals("url"))
+        } else if (name.equals("url")) {
           this.url = castToUri(value); // UriType
-        else if (name.equals("document"))
+        } else if (name.equals("document")) {
           this.document = castToAttachment(value); // Attachment
-        else if (name.equals("resource"))
+        } else if (name.equals("resource")) {
           this.resource = castToReference(value); // Reference
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 3575610: throw new FHIRException("Cannot make property type as it is not a complex type"); // Enumeration<RelatedArtifactType>
-        case 1671764162: throw new FHIRException("Cannot make property display as it is not a complex type"); // StringType
-        case -1442706713: throw new FHIRException("Cannot make property citation as it is not a complex type"); // StringType
-        case 116079: throw new FHIRException("Cannot make property url as it is not a complex type"); // UriType
-        case 861720859:  return getDocument(); // Attachment
-        case -341064690:  return getResource(); // Reference
+        case 3575610:  return getTypeElement();
+        case 1671764162:  return getDisplayElement();
+        case -1442706713:  return getCitationElement();
+        case 116079:  return getUrlElement();
+        case 861720859:  return getDocument(); 
+        case -341064690:  return getResource(); 
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3575610: /*type*/ return new String[] {"code"};
+        case 1671764162: /*display*/ return new String[] {"string"};
+        case -1442706713: /*citation*/ return new String[] {"string"};
+        case 116079: /*url*/ return new String[] {"uri"};
+        case 861720859: /*document*/ return new String[] {"Attachment"};
+        case -341064690: /*resource*/ return new String[] {"Reference"};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }

@@ -4,7 +4,7 @@ package ca.uhn.fhir.context;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,8 +28,10 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IDomainResource;
 
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.util.UrlUtil;
@@ -203,6 +205,19 @@ public class RuntimeResourceDefinition extends BaseRuntimeElementCompositeDefini
 				myBaseType = (Class<? extends IBaseResource>) target;
 			}
 		} while (target.equals(Object.class) == false);
+		
+		/*
+		 * See #504:
+		 * Bundle types may not have extensions
+		 */
+		if (hasExtensions()) {
+			if (IAnyResource.class.isAssignableFrom(getImplementingClass())) {
+				if (!IDomainResource.class.isAssignableFrom(getImplementingClass())) {
+					throw new ConfigurationException("Class \"" + getImplementingClass() + "\" is invalid. This resource type is not a DomainResource, it must not have extensions");
+				}
+			}
+		}
+
 	}
 
 	@Deprecated
@@ -229,4 +244,5 @@ public class RuntimeResourceDefinition extends BaseRuntimeElementCompositeDefini
 
 		return retVal;
 	}
+
 }

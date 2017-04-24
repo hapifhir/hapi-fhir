@@ -7,23 +7,21 @@
  xmlns:html="http://www.w3.org/TR/REC-html40">
  <DocumentProperties xmlns="urn:schemas-microsoft-com:office:office">
   <Author>Grahame</Author>
-  <LastAuthor>Schlichting, Stefan</LastAuthor>
+  <LastAuthor>Chris Courville</LastAuthor>
   <Created>2012-03-19T11:15:30Z</Created>
-  <LastSaved>2014-11-13T22:25:48Z</LastSaved>
-  <Version>14.00</Version>
+  <LastSaved>2017-03-09T16:09:21Z</LastSaved>
+  <Version>15.00</Version>
  </DocumentProperties>
  <OfficeDocumentSettings xmlns="urn:schemas-microsoft-com:office:office">
   <AllowPNG/>
  </OfficeDocumentSettings>
  <ExcelWorkbook xmlns="urn:schemas-microsoft-com:office:excel">
-  <WindowHeight>12975</WindowHeight>
-  <WindowWidth>28800</WindowWidth>
+  <WindowHeight>4935</WindowHeight>
+  <WindowWidth>20505</WindowWidth>
   <WindowTopX>0</WindowTopX>
   <WindowTopY>0</WindowTopY>
   <TabRatio>674</TabRatio>
-  <ActiveSheet>7</ActiveSheet>
-  <FirstVisibleSheet>3</FirstVisibleSheet>
-  <RefModeR1C1/>
+  <ActiveSheet>1</ActiveSheet>
   <ProtectStructure>False</ProtectStructure>
   <ProtectWindows>False</ProtectWindows>
  </ExcelWorkbook>
@@ -36,15 +34,11 @@
    <NumberFormat/>
    <Protection/>
   </Style>
-  <Style ss:ID="s62" ss:Name="Hyperlink">
-   <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#0066CC"
-    ss:Underline="Single"/>
-  </Style>
-  <Style ss:ID="s63" ss:Name="Hyperlink 2">
+  <Style ss:ID="s62" ss:Name="Hyperlink 2">
    <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#0000FF"
     ss:Underline="Single"/>
   </Style>
-  <Style ss:ID="s64" ss:Name="Normal 2">
+  <Style ss:ID="s63" ss:Name="Normal 2">
    <Alignment ss:Vertical="Bottom"/>
    <Borders/>
    <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#000000"/>
@@ -52,15 +46,15 @@
    <NumberFormat/>
    <Protection/>
   </Style>
-  <Style ss:ID="s65">
+  <Style ss:ID="s64">
    <Alignment ss:Vertical="Bottom" ss:WrapText="1"/>
    <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#000000"
     ss:Bold="1"/>
   </Style>
-  <Style ss:ID="s66">
+  <Style ss:ID="s65">
    <Alignment ss:Vertical="Bottom" ss:WrapText="1"/>
   </Style>
-  <Style ss:ID="s68" ss:Parent="s63">
+  <Style ss:ID="s67" ss:Parent="s62">
    <Interior/>
   </Style>
   <Style ss:ID="s69">
@@ -346,7 +340,7 @@
    </Borders>
    <Interior/>
   </Style>
-  <Style ss:ID="s109" ss:Parent="s64">
+  <Style ss:ID="s108" ss:Parent="s63">
    <Alignment ss:Horizontal="Left" ss:Vertical="Top" ss:WrapText="1"/>
    <Borders>
     <Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="1"/>
@@ -356,7 +350,7 @@
    <NumberFormat/>
    <Protection/>
   </Style>
-  <Style ss:ID="s110" ss:Parent="s64">
+  <Style ss:ID="s109" ss:Parent="s63">
    <Alignment ss:Horizontal="Left" ss:Vertical="Top" ss:WrapText="1"/>
    <Borders/>
    <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#000000"/>
@@ -366,17 +360,22 @@
   </Style>
  </Styles>
  <Worksheet ss:Name="Instructions">
-  <Table ss:ExpandedColumnCount="2" ss:ExpandedRowCount="4" x:FullColumns="1"
-   x:FullRows="1" ss:DefaultRowHeight="15">
+  <Table ss:ExpandedColumnCount="2" ss:ExpandedRowCount="5" x:FullColumns="1"
+   x:FullRows="1" ss:DefaultColumnWidth="60" ss:DefaultRowHeight="15">
+   <Column ss:AutoFitWidth="0" ss:Width="138.75"/>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s65"><Data ss:Type="String">FHIR Resource-authoring Spreadsheet</Data></Cell>
+    <Cell ss:StyleID="s64"><Data ss:Type="String">FHIR Resource-authoring Spreadsheet</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s66"><Data ss:Type="String">This spreadsheet is used to support the definition of resources or data types (structures).  A complete set of instructions on the various tabs, columns and rules associated with populating this spreadsheet can be found here:</Data></Cell>
+    <Cell ss:StyleID="s65"><Data ss:Type="String">This spreadsheet is used to support the definition of resources or data types (structures).  A complete set of instructions on the various tabs, columns and rules associated with populating this spreadsheet can be found here:</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s68" ss:HRef="http://wiki.hl7.org/?title=FHIR_Spreadsheet_Authoring"><Data
+    <Cell ss:StyleID="s67" ss:HRef="http://wiki.hl7.org/?title=FHIR_Spreadsheet_Authoring"><Data
       ss:Type="String">http://wiki.hl7.org?title=FHIR_Spreadsheet_Authoring</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">entered-in-error-status</Data></Cell>
+    <Cell><Data ss:Type="String">.operationalStatus = entered-in-error</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
     <Cell><Data ss:Type="String">fmm</Data></Cell>
@@ -393,7 +392,8 @@
    <Panes>
     <Pane>
      <Number>3</Number>
-     <ActiveRow>4</ActiveRow>
+     <ActiveRow>3</ActiveRow>
+     <RangeSelection>R4C1:R4C2</RangeSelection>
     </Pane>
    </Panes>
    <ProtectObjects>False</ProtectObjects>
@@ -446,16 +446,6 @@
     <Cell><Data ss:Type="String">Describes a measurement, calculation or setting capability of a medical device.</Data></Cell>
     <Cell ss:Index="12" ss:StyleID="s74"><Data ss:Type="String">For the initial scope, this DeviceMetric resource is only applicable to describe a single metric node in the containment tree that is produced by the context scanner in any medical device that implements or derives from the ISO/IEEE 11073 standard.</Data></Cell>
    </Row>
-   <Row ss:AutoFitHeight="0" ss:Height="45">
-    <Cell><Data ss:Type="String">DeviceMetric.type</Data></Cell>
-    <Cell><Data ss:Type="String">1..1</Data></Cell>
-    <Cell ss:Index="6"><Data ss:Type="String">CodeableConcept</Data></Cell>
-    <Cell><Data ss:Type="String">MetricType</Data></Cell>
-    <Cell><Data ss:Type="String">class</Data></Cell>
-    <Cell><Data ss:Type="String">Type of metric</Data></Cell>
-    <Cell><Data ss:Type="String">Describes the type of the metric. For example: Heart Rate, PEEP Setting, etc.</Data></Cell>
-    <Cell ss:Index="12"><Data ss:Type="String">DeviceMetric.type can be referred to either GDMN (nomenclature system supported by FDA Global UDI Database) or preferable RTMMS coding system.</Data></Cell>
-   </Row>
    <Row ss:AutoFitHeight="0" ss:Height="30">
     <Cell><Data ss:Type="String">DeviceMetric.identifier</Data></Cell>
     <Cell><Data ss:Type="String">1..1</Data></Cell>
@@ -464,22 +454,32 @@
     <Cell><Data ss:Type="String">Unique identifier of this DeviceMetric</Data></Cell>
     <Cell><Data ss:Type="String">Describes the unique identification of this metric that has been assigned by the device or gateway software. For example: handle ID.  It should be noted that in order to make the identifier unique, the system element of the identifier should be set to the unique identifier of the device.</Data></Cell>
    </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="45">
+    <Cell><Data ss:Type="String">DeviceMetric.type</Data></Cell>
+    <Cell><Data ss:Type="String">1..1</Data></Cell>
+    <Cell ss:Index="6"><Data ss:Type="String">CodeableConcept</Data></Cell>
+    <Cell><Data ss:Type="String">MetricType</Data></Cell>
+    <Cell><Data ss:Type="String">class</Data></Cell>
+    <Cell><Data ss:Type="String">Identity of metric, for example Heart Rate or PEEP Setting</Data></Cell>
+    <Cell><Data ss:Type="String">Describes the type of the metric. For example: Heart Rate, PEEP Setting, etc.</Data></Cell>
+    <Cell ss:Index="12"><Data ss:Type="String">DeviceMetric.type can be referred to either IEEE 11073-10101 or LOINC.</Data></Cell>
+   </Row>
    <Row ss:AutoFitHeight="0" ss:Height="30">
     <Cell><Data ss:Type="String">DeviceMetric.unit</Data></Cell>
     <Cell ss:StyleID="s75"><Data ss:Type="String">0..1</Data></Cell>
     <Cell ss:Index="6"><Data ss:Type="String">CodeableConcept</Data></Cell>
     <Cell ss:StyleID="s76"><Data ss:Type="String">MetricUnit</Data></Cell>
     <Cell ss:StyleID="s76"/>
-    <Cell><Data ss:Type="String">Unit of metric</Data></Cell>
+    <Cell><Data ss:Type="String">Unit of Measure for the Metric</Data></Cell>
     <Cell><Data ss:Type="String">Describes the unit that an observed value determined for this metric will have. For example: Percent, Seconds, etc.</Data></Cell>
-    <Cell ss:Index="12"><Data ss:Type="String">DeviceMetric.unit can be referred to either UCUM or preferable RTMMS coding system.</Data></Cell>
+    <Cell ss:Index="12"><Data ss:Type="String">DeviceMetric.unit can refer to either UCUM or preferable a RTMMS coding system.</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="30" ss:StyleID="s75">
     <Cell ss:StyleID="s77"><Data ss:Type="String">DeviceMetric.source</Data></Cell>
     <Cell><Data ss:Type="String">0..1</Data></Cell>
     <Cell ss:Index="6"><Data ss:Type="String">Reference(Device)</Data></Cell>
     <Cell ss:Index="9"><Data ss:Type="String">Describes the link to the source Device</Data></Cell>
-    <Cell><Data ss:Type="String">Describes the link to the  Device that this DeviceMetric belongs to and that contains administrative device information such as manufacture, serial number, etc.</Data></Cell>
+    <Cell><Data ss:Type="String">Describes the link to the  Device that this DeviceMetric belongs to and that contains administrative device information such as manufacturer, serial number, etc.</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="45" ss:StyleID="s75">
     <Cell ss:StyleID="s77"><Data ss:Type="String">DeviceMetric.parent</Data></Cell>
@@ -493,7 +493,7 @@
     <Cell><Data ss:Type="String">0..1</Data></Cell>
     <Cell ss:Index="6" ss:StyleID="s75"><Data ss:Type="String">code</Data></Cell>
     <Cell><Data ss:Type="String">DeviceMetricOperationalStatus</Data></Cell>
-    <Cell ss:Index="9"><Data ss:Type="String">on | off | standby</Data></Cell>
+    <Cell ss:Index="9"><Data ss:Type="String">on | off | standby | entered-in-error</Data></Cell>
     <Cell><Data ss:Type="String">Indicates current operational state of the device. For example: On, Off, Standby, etc.</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="101.25" ss:StyleID="s75">
@@ -565,12 +565,13 @@
     <HorizontalResolution>600</HorizontalResolution>
     <VerticalResolution>600</VerticalResolution>
    </Print>
+   <Selected/>
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>
-   <TopRowBottomPane>2</TopRowBottomPane>
+   <TopRowBottomPane>1</TopRowBottomPane>
    <SplitVertical>1</SplitVertical>
-   <LeftColumnRightPane>7</LeftColumnRightPane>
+   <LeftColumnRightPane>9</LeftColumnRightPane>
    <ActivePane>0</ActivePane>
    <Panes>
     <Pane>
@@ -582,12 +583,10 @@
     </Pane>
     <Pane>
      <Number>2</Number>
-     <ActiveRow>1</ActiveRow>
     </Pane>
     <Pane>
      <Number>0</Number>
-     <ActiveRow>10</ActiveRow>
-     <ActiveCol>9</ActiveCol>
+     <ActiveRow>5</ActiveRow>
     </Pane>
    </Panes>
    <ProtectObjects>False</ProtectObjects>
@@ -765,7 +764,8 @@
    <Panes>
     <Pane>
      <Number>3</Number>
-     <ActiveRow>3</ActiveRow>
+     <ActiveRow>5</ActiveRow>
+     <RangeSelection>R6C1:R6C4</RangeSelection>
     </Pane>
    </Panes>
    <ProtectObjects>False</ProtectObjects>
@@ -870,8 +870,8 @@
    <Panes>
     <Pane>
      <Number>3</Number>
-     <ActiveRow>1</ActiveRow>
-     <ActiveCol>3</ActiveCol>
+     <ActiveRow>2</ActiveRow>
+     <ActiveCol>4</ActiveCol>
     </Pane>
    </Panes>
    <ProtectObjects>False</ProtectObjects>
@@ -898,19 +898,17 @@
    <Row ss:AutoFitHeight="0">
     <Cell><Data ss:Type="String">MetricType</Data></Cell>
     <Cell><Data ss:Type="String">Describes the metric type.</Data></Cell>
-    <Cell><Data ss:Type="String">reference</Data></Cell>
+    <Cell><Data ss:Type="String">value set</Data></Cell>
     <Cell><Data ss:Type="String">preferred</Data></Cell>
-    <Cell ss:StyleID="s62" ss:HRef="https://rtmms.nist.gov/rtmms/index.htm#!hrosetta"><Data
-      ss:Type="String">https://rtmms.nist.gov/rtmms/index.htm#!hrosetta</Data></Cell>
+    <Cell ss:StyleID="Default"><Data ss:Type="String">valueset-devicemetric-type</Data></Cell>
     <Cell><Data ss:Type="String">IEEE 11073-10101</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
     <Cell><Data ss:Type="String">MetricUnit</Data></Cell>
     <Cell><Data ss:Type="String">Describes the unit of the metric.</Data></Cell>
-    <Cell><Data ss:Type="String">reference</Data></Cell>
+    <Cell><Data ss:Type="String">value set</Data></Cell>
     <Cell><Data ss:Type="String">preferred</Data></Cell>
-    <Cell ss:StyleID="s62" ss:HRef="https://rtmms.nist.gov/rtmms/index.htm#!units"><Data
-      ss:Type="String">https://rtmms.nist.gov/rtmms/index.htm#!units</Data></Cell>
+    <Cell ss:StyleID="Default"><Data ss:Type="String">valueset-devicemetric-type</Data></Cell>
     <Cell><Data ss:Type="String">IEEE 11073-10101</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
@@ -961,11 +959,11 @@
     <HorizontalResolution>600</HorizontalResolution>
     <VerticalResolution>600</VerticalResolution>
    </Print>
-   <Selected/>
    <Panes>
     <Pane>
      <Number>3</Number>
      <ActiveRow>1</ActiveRow>
+     <ActiveCol>1</ActiveCol>
     </Pane>
    </Panes>
    <ProtectObjects>False</ProtectObjects>
@@ -974,7 +972,7 @@
  </Worksheet>
  <Worksheet ss:Name="metric-color">
   <Table ss:ExpandedColumnCount="9" ss:ExpandedRowCount="9" x:FullColumns="1"
-   x:FullRows="1" ss:DefaultRowHeight="15">
+   x:FullRows="1" ss:DefaultColumnWidth="60" ss:DefaultRowHeight="15">
    <Column ss:Index="5" ss:AutoFitWidth="0" ss:Width="99.75"/>
    <Column ss:Width="170.25"/>
    <Row ss:AutoFitHeight="0" ss:Height="30.75">
@@ -1010,9 +1008,9 @@
     <Cell ss:StyleID="s98"><Data ss:Type="String">black</Data></Cell>
     <Cell ss:StyleID="s86"><Data ss:Type="Number">0</Data></Cell>
     <Cell ss:StyleID="s85"/>
-    <Cell ss:StyleID="s109"/>
-    <Cell ss:StyleID="s109"><Data ss:Type="String">Color Black</Data></Cell>
-    <Cell ss:StyleID="s109"><Data ss:Type="String">Color for representation - black.</Data></Cell>
+    <Cell ss:StyleID="s108"/>
+    <Cell ss:StyleID="s108"><Data ss:Type="String">Color Black</Data></Cell>
+    <Cell ss:StyleID="s108"><Data ss:Type="String">Color for representation - black.</Data></Cell>
     <Cell ss:StyleID="s86"/>
     <Cell ss:StyleID="s86"/>
     <Cell ss:StyleID="s101"/>
@@ -1021,9 +1019,9 @@
     <Cell ss:StyleID="s102"><Data ss:Type="String">red</Data></Cell>
     <Cell ss:StyleID="s104"><Data ss:Type="Number">1</Data></Cell>
     <Cell ss:StyleID="s91"/>
-    <Cell ss:StyleID="s110"/>
-    <Cell ss:StyleID="s110"><Data ss:Type="String">Color Red</Data></Cell>
-    <Cell ss:StyleID="s110"><Data ss:Type="String">Color for representation - red.</Data></Cell>
+    <Cell ss:StyleID="s109"/>
+    <Cell ss:StyleID="s109"><Data ss:Type="String">Color Red</Data></Cell>
+    <Cell ss:StyleID="s109"><Data ss:Type="String">Color for representation - red.</Data></Cell>
     <Cell ss:StyleID="s104"/>
     <Cell ss:StyleID="s104"/>
     <Cell ss:StyleID="s105"/>
@@ -1032,9 +1030,9 @@
     <Cell ss:StyleID="s102"><Data ss:Type="String">green</Data></Cell>
     <Cell ss:StyleID="s104"><Data ss:Type="Number">2</Data></Cell>
     <Cell ss:StyleID="s91"/>
-    <Cell ss:StyleID="s110"/>
-    <Cell ss:StyleID="s110"><Data ss:Type="String">Color Green</Data></Cell>
-    <Cell ss:StyleID="s110"><Data ss:Type="String">Color for representation - green.</Data></Cell>
+    <Cell ss:StyleID="s109"/>
+    <Cell ss:StyleID="s109"><Data ss:Type="String">Color Green</Data></Cell>
+    <Cell ss:StyleID="s109"><Data ss:Type="String">Color for representation - green.</Data></Cell>
     <Cell ss:StyleID="s104"/>
     <Cell ss:StyleID="s104"/>
     <Cell ss:StyleID="s105"/>
@@ -1043,9 +1041,9 @@
     <Cell ss:StyleID="s102"><Data ss:Type="String">yellow</Data></Cell>
     <Cell ss:StyleID="s104"><Data ss:Type="Number">3</Data></Cell>
     <Cell ss:StyleID="s91"/>
-    <Cell ss:StyleID="s110"/>
-    <Cell ss:StyleID="s110"><Data ss:Type="String">Color Yellow</Data></Cell>
-    <Cell ss:StyleID="s110"><Data ss:Type="String">Color for representation - yellow.</Data></Cell>
+    <Cell ss:StyleID="s109"/>
+    <Cell ss:StyleID="s109"><Data ss:Type="String">Color Yellow</Data></Cell>
+    <Cell ss:StyleID="s109"><Data ss:Type="String">Color for representation - yellow.</Data></Cell>
     <Cell ss:StyleID="s104"/>
     <Cell ss:StyleID="s104"/>
     <Cell ss:StyleID="s105"/>
@@ -1054,9 +1052,9 @@
     <Cell ss:StyleID="s102"><Data ss:Type="String">blue</Data></Cell>
     <Cell ss:StyleID="s104"><Data ss:Type="Number">4</Data></Cell>
     <Cell ss:StyleID="s91"/>
-    <Cell ss:StyleID="s110"/>
-    <Cell ss:StyleID="s110"><Data ss:Type="String">Color Blue</Data></Cell>
-    <Cell ss:StyleID="s110"><Data ss:Type="String">Color for representation - blue.</Data></Cell>
+    <Cell ss:StyleID="s109"/>
+    <Cell ss:StyleID="s109"><Data ss:Type="String">Color Blue</Data></Cell>
+    <Cell ss:StyleID="s109"><Data ss:Type="String">Color for representation - blue.</Data></Cell>
     <Cell ss:StyleID="s104"/>
     <Cell ss:StyleID="s104"/>
     <Cell ss:StyleID="s105"/>
@@ -1065,9 +1063,9 @@
     <Cell ss:StyleID="s102"><Data ss:Type="String">magenta</Data></Cell>
     <Cell ss:StyleID="s104"><Data ss:Type="Number">5</Data></Cell>
     <Cell ss:StyleID="s91"/>
-    <Cell ss:StyleID="s110"/>
-    <Cell ss:StyleID="s110"><Data ss:Type="String">Color Magenta</Data></Cell>
-    <Cell ss:StyleID="s110"><Data ss:Type="String">Color for representation - magenta.</Data></Cell>
+    <Cell ss:StyleID="s109"/>
+    <Cell ss:StyleID="s109"><Data ss:Type="String">Color Magenta</Data></Cell>
+    <Cell ss:StyleID="s109"><Data ss:Type="String">Color for representation - magenta.</Data></Cell>
     <Cell ss:StyleID="s104"/>
     <Cell ss:StyleID="s104"/>
     <Cell ss:StyleID="s105"/>
@@ -1076,9 +1074,9 @@
     <Cell ss:StyleID="s102"><Data ss:Type="String">cyan</Data></Cell>
     <Cell ss:StyleID="s104"><Data ss:Type="Number">6</Data></Cell>
     <Cell ss:StyleID="s91"/>
-    <Cell ss:StyleID="s110"/>
-    <Cell ss:StyleID="s110"><Data ss:Type="String">Color Cyan</Data></Cell>
-    <Cell ss:StyleID="s110"><Data ss:Type="String">Color for representation - cyan.</Data></Cell>
+    <Cell ss:StyleID="s109"/>
+    <Cell ss:StyleID="s109"><Data ss:Type="String">Color Cyan</Data></Cell>
+    <Cell ss:StyleID="s109"><Data ss:Type="String">Color for representation - cyan.</Data></Cell>
     <Cell ss:StyleID="s104"/>
     <Cell ss:StyleID="s104"/>
     <Cell ss:StyleID="s105"/>
@@ -1086,8 +1084,8 @@
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s102"><Data ss:Type="String">white</Data></Cell>
     <Cell ss:StyleID="s104"><Data ss:Type="Number">7</Data></Cell>
-    <Cell ss:Index="5" ss:StyleID="s110"><Data ss:Type="String">Color White</Data></Cell>
-    <Cell ss:StyleID="s110"><Data ss:Type="String">Color for representation - white.</Data></Cell>
+    <Cell ss:Index="5" ss:StyleID="s109"><Data ss:Type="String">Color White</Data></Cell>
+    <Cell ss:StyleID="s109"><Data ss:Type="String">Color for representation - white.</Data></Cell>
    </Row>
   </Table>
   <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">
@@ -1144,9 +1142,9 @@
     <Cell ss:StyleID="s98"><Data ss:Type="String">on</Data></Cell>
     <Cell ss:StyleID="s86"><Data ss:Type="Number">1</Data></Cell>
     <Cell ss:StyleID="s85"/>
-    <Cell ss:StyleID="s109"/>
-    <Cell ss:StyleID="s109"><Data ss:Type="String">On</Data></Cell>
-    <Cell ss:StyleID="s109"><Data ss:Type="String">The DeviceMetric is operating and will generate DeviceObservations.</Data></Cell>
+    <Cell ss:StyleID="s108"/>
+    <Cell ss:StyleID="s108"><Data ss:Type="String">On</Data></Cell>
+    <Cell ss:StyleID="s108"><Data ss:Type="String">The DeviceMetric is operating and will generate DeviceObservations.</Data></Cell>
     <Cell ss:StyleID="s86"/>
     <Cell ss:StyleID="s86"/>
     <Cell ss:StyleID="s101"/>
@@ -1155,9 +1153,9 @@
     <Cell ss:StyleID="s102"><Data ss:Type="String">off</Data></Cell>
     <Cell ss:StyleID="s104"><Data ss:Type="Number">2</Data></Cell>
     <Cell ss:StyleID="s91"/>
-    <Cell ss:StyleID="s110"/>
-    <Cell ss:StyleID="s110"><Data ss:Type="String">Off</Data></Cell>
-    <Cell ss:StyleID="s110"><Data ss:Type="String">The DeviceMetric is not operating.</Data></Cell>
+    <Cell ss:StyleID="s109"/>
+    <Cell ss:StyleID="s109"><Data ss:Type="String">Off</Data></Cell>
+    <Cell ss:StyleID="s109"><Data ss:Type="String">The DeviceMetric is not operating.</Data></Cell>
     <Cell ss:StyleID="s104"/>
     <Cell ss:StyleID="s104"/>
     <Cell ss:StyleID="s105"/>
@@ -1166,9 +1164,20 @@
     <Cell ss:StyleID="s102"><Data ss:Type="String">standby</Data></Cell>
     <Cell ss:StyleID="s104"><Data ss:Type="Number">3</Data></Cell>
     <Cell ss:StyleID="s91"/>
-    <Cell ss:StyleID="s110"/>
-    <Cell ss:StyleID="s110"><Data ss:Type="String">Standby</Data></Cell>
-    <Cell ss:StyleID="s110"><Data ss:Type="String">The DeviceMetric is operating, but will not generate any DeviceObservations.</Data></Cell>
+    <Cell ss:StyleID="s109"/>
+    <Cell ss:StyleID="s109"><Data ss:Type="String">Standby</Data></Cell>
+    <Cell ss:StyleID="s109"><Data ss:Type="String">The DeviceMetric is operating, but will not generate any DeviceObservations.</Data></Cell>
+    <Cell ss:StyleID="s104"/>
+    <Cell ss:StyleID="s104"/>
+    <Cell ss:StyleID="s105"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s102"><Data ss:Type="String">entered-in-error</Data></Cell>
+    <Cell ss:StyleID="s104"><Data ss:Type="Number">4</Data></Cell>
+    <Cell ss:StyleID="s91"/>
+    <Cell ss:StyleID="s109"/>
+    <Cell ss:StyleID="s109"><Data ss:Type="String">Entered In Error</Data></Cell>
+    <Cell ss:StyleID="s109"><Data ss:Type="String">The DeviceMetric was entered in error.</Data></Cell>
     <Cell ss:StyleID="s104"/>
     <Cell ss:StyleID="s104"/>
     <Cell ss:StyleID="s105"/>
@@ -1177,9 +1186,9 @@
     <Cell ss:StyleID="s102"/>
     <Cell ss:StyleID="s104"/>
     <Cell ss:StyleID="s91"/>
-    <Cell ss:StyleID="s110"/>
-    <Cell ss:StyleID="s110"/>
-    <Cell ss:StyleID="s110"/>
+    <Cell ss:StyleID="s109"/>
+    <Cell ss:StyleID="s109"/>
+    <Cell ss:StyleID="s109"/>
     <Cell ss:StyleID="s104"/>
     <Cell ss:StyleID="s104"/>
     <Cell ss:StyleID="s105"/>
@@ -1188,9 +1197,9 @@
     <Cell ss:StyleID="s102"/>
     <Cell ss:StyleID="s104"/>
     <Cell ss:StyleID="s91"/>
-    <Cell ss:StyleID="s110"/>
-    <Cell ss:StyleID="s110"/>
-    <Cell ss:StyleID="s110"/>
+    <Cell ss:StyleID="s109"/>
+    <Cell ss:StyleID="s109"/>
+    <Cell ss:StyleID="s109"/>
     <Cell ss:StyleID="s104"/>
     <Cell ss:StyleID="s104"/>
     <Cell ss:StyleID="s105"/>
@@ -1199,20 +1208,9 @@
     <Cell ss:StyleID="s102"/>
     <Cell ss:StyleID="s104"/>
     <Cell ss:StyleID="s91"/>
-    <Cell ss:StyleID="s110"/>
-    <Cell ss:StyleID="s110"/>
-    <Cell ss:StyleID="s110"/>
-    <Cell ss:StyleID="s104"/>
-    <Cell ss:StyleID="s104"/>
-    <Cell ss:StyleID="s105"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s102"/>
-    <Cell ss:StyleID="s104"/>
-    <Cell ss:StyleID="s91"/>
-    <Cell ss:StyleID="s110"/>
-    <Cell ss:StyleID="s110"/>
-    <Cell ss:StyleID="s110"/>
+    <Cell ss:StyleID="s109"/>
+    <Cell ss:StyleID="s109"/>
+    <Cell ss:StyleID="s109"/>
     <Cell ss:StyleID="s104"/>
     <Cell ss:StyleID="s104"/>
     <Cell ss:StyleID="s105"/>
@@ -1229,7 +1227,7 @@
    <Panes>
     <Pane>
      <Number>3</Number>
-     <ActiveRow>1</ActiveRow>
+     <RangeSelection>R1C1:R1C9</RangeSelection>
     </Pane>
    </Panes>
    <ProtectObjects>False</ProtectObjects>
@@ -1274,9 +1272,9 @@
     <Cell ss:StyleID="s98"><Data ss:Type="String">measurement</Data></Cell>
     <Cell ss:StyleID="s86"><Data ss:Type="Number">1</Data></Cell>
     <Cell ss:StyleID="s85"/>
-    <Cell ss:StyleID="s109"/>
-    <Cell ss:StyleID="s109"><Data ss:Type="String">Measurement</Data></Cell>
-    <Cell ss:StyleID="s109"><Data ss:Type="String">DeviceObservations generated for this DeviceMetric are measured.</Data></Cell>
+    <Cell ss:StyleID="s108"/>
+    <Cell ss:StyleID="s108"><Data ss:Type="String">Measurement</Data></Cell>
+    <Cell ss:StyleID="s108"><Data ss:Type="String">DeviceObservations generated for this DeviceMetric are measured.</Data></Cell>
     <Cell ss:StyleID="s86"/>
     <Cell ss:StyleID="s86"/>
     <Cell ss:StyleID="s101"/>
@@ -1285,9 +1283,9 @@
     <Cell ss:StyleID="s102"><Data ss:Type="String">setting</Data></Cell>
     <Cell ss:StyleID="s104"><Data ss:Type="Number">2</Data></Cell>
     <Cell ss:StyleID="s91"/>
-    <Cell ss:StyleID="s110"/>
-    <Cell ss:StyleID="s110"><Data ss:Type="String">Setting</Data></Cell>
-    <Cell ss:StyleID="s110"><Data ss:Type="String">DeviceObservations generated for this DeviceMetric is a setting that will influence the behavior of the Device.</Data></Cell>
+    <Cell ss:StyleID="s109"/>
+    <Cell ss:StyleID="s109"><Data ss:Type="String">Setting</Data></Cell>
+    <Cell ss:StyleID="s109"><Data ss:Type="String">DeviceObservations generated for this DeviceMetric is a setting that will influence the behavior of the Device.</Data></Cell>
     <Cell ss:StyleID="s104"/>
     <Cell ss:StyleID="s104"/>
     <Cell ss:StyleID="s105"/>
@@ -1296,9 +1294,9 @@
     <Cell ss:StyleID="s102"><Data ss:Type="String">calculation</Data></Cell>
     <Cell ss:StyleID="s104"><Data ss:Type="Number">3</Data></Cell>
     <Cell ss:StyleID="s91"/>
-    <Cell ss:StyleID="s110"/>
-    <Cell ss:StyleID="s110"><Data ss:Type="String">Calculation</Data></Cell>
-    <Cell ss:StyleID="s110"><Data ss:Type="String">DeviceObservations generated for this DeviceMetric are calculated.</Data></Cell>
+    <Cell ss:StyleID="s109"/>
+    <Cell ss:StyleID="s109"><Data ss:Type="String">Calculation</Data></Cell>
+    <Cell ss:StyleID="s109"><Data ss:Type="String">DeviceObservations generated for this DeviceMetric are calculated.</Data></Cell>
     <Cell ss:StyleID="s104"/>
     <Cell ss:StyleID="s104"/>
     <Cell ss:StyleID="s105"/>
@@ -1307,9 +1305,9 @@
     <Cell ss:StyleID="s102"><Data ss:Type="String">unspecified</Data></Cell>
     <Cell ss:StyleID="s104"><Data ss:Type="Number">4</Data></Cell>
     <Cell ss:StyleID="s91"/>
-    <Cell ss:StyleID="s110"/>
-    <Cell ss:StyleID="s110"><Data ss:Type="String">Unspecified</Data></Cell>
-    <Cell ss:StyleID="s110"><Data ss:Type="String">The category of this DeviceMetric is unspecified.</Data></Cell>
+    <Cell ss:StyleID="s109"/>
+    <Cell ss:StyleID="s109"><Data ss:Type="String">Unspecified</Data></Cell>
+    <Cell ss:StyleID="s109"><Data ss:Type="String">The category of this DeviceMetric is unspecified.</Data></Cell>
     <Cell ss:StyleID="s104"/>
     <Cell ss:StyleID="s104"/>
     <Cell ss:StyleID="s105"/>
@@ -1318,9 +1316,9 @@
     <Cell ss:StyleID="s102"/>
     <Cell ss:StyleID="s104"/>
     <Cell ss:StyleID="s91"/>
-    <Cell ss:StyleID="s110"/>
-    <Cell ss:StyleID="s110"/>
-    <Cell ss:StyleID="s110"/>
+    <Cell ss:StyleID="s109"/>
+    <Cell ss:StyleID="s109"/>
+    <Cell ss:StyleID="s109"/>
     <Cell ss:StyleID="s104"/>
     <Cell ss:StyleID="s104"/>
     <Cell ss:StyleID="s105"/>
@@ -1329,9 +1327,9 @@
     <Cell ss:StyleID="s102"/>
     <Cell ss:StyleID="s104"/>
     <Cell ss:StyleID="s91"/>
-    <Cell ss:StyleID="s110"/>
-    <Cell ss:StyleID="s110"/>
-    <Cell ss:StyleID="s110"/>
+    <Cell ss:StyleID="s109"/>
+    <Cell ss:StyleID="s109"/>
+    <Cell ss:StyleID="s109"/>
     <Cell ss:StyleID="s104"/>
     <Cell ss:StyleID="s104"/>
     <Cell ss:StyleID="s105"/>
@@ -1340,9 +1338,9 @@
     <Cell ss:StyleID="s102"/>
     <Cell ss:StyleID="s104"/>
     <Cell ss:StyleID="s91"/>
-    <Cell ss:StyleID="s110"/>
-    <Cell ss:StyleID="s110"/>
-    <Cell ss:StyleID="s110"/>
+    <Cell ss:StyleID="s109"/>
+    <Cell ss:StyleID="s109"/>
+    <Cell ss:StyleID="s109"/>
     <Cell ss:StyleID="s104"/>
     <Cell ss:StyleID="s104"/>
     <Cell ss:StyleID="s105"/>
@@ -1359,7 +1357,8 @@
    <Panes>
     <Pane>
      <Number>3</Number>
-     <ActiveRow>1</ActiveRow>
+     <ActiveRow>22</ActiveRow>
+     <ActiveCol>5</ActiveCol>
     </Pane>
    </Panes>
    <ProtectObjects>False</ProtectObjects>
@@ -1369,6 +1368,7 @@
  <Worksheet ss:Name="metric-calibration-type">
   <Table ss:ExpandedColumnCount="9" ss:ExpandedRowCount="5" x:FullColumns="1"
    x:FullRows="1" ss:DefaultColumnWidth="60" ss:DefaultRowHeight="15">
+   <Column ss:Index="6" ss:AutoFitWidth="0" ss:Width="105"/>
    <Row ss:AutoFitHeight="0" ss:Height="30.75">
     <Cell ss:StyleID="s94"><Data ss:Type="String">Code</Data><Comment
       ss:Author="Lloyd"><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
@@ -1402,9 +1402,9 @@
     <Cell ss:StyleID="s98"><Data ss:Type="String">unspecified</Data></Cell>
     <Cell ss:StyleID="s86"><Data ss:Type="Number">1</Data></Cell>
     <Cell ss:StyleID="s85"/>
-    <Cell ss:StyleID="s109"/>
-    <Cell ss:StyleID="s109"><Data ss:Type="String">Unspecified</Data></Cell>
-    <Cell ss:StyleID="s109"><Data ss:Type="String">TODO</Data></Cell>
+    <Cell ss:StyleID="s108"/>
+    <Cell ss:StyleID="s108"><Data ss:Type="String">Unspecified</Data></Cell>
+    <Cell ss:StyleID="s108"><Data ss:Type="String">Metric calibration method has not been identified.</Data></Cell>
     <Cell ss:StyleID="s86"/>
     <Cell ss:StyleID="s86"/>
     <Cell ss:StyleID="s101"/>
@@ -1413,9 +1413,9 @@
     <Cell ss:StyleID="s102"><Data ss:Type="String">offset</Data></Cell>
     <Cell ss:StyleID="s104"><Data ss:Type="Number">2</Data></Cell>
     <Cell ss:StyleID="s91"/>
-    <Cell ss:StyleID="s110"/>
-    <Cell ss:StyleID="s110"><Data ss:Type="String">Offset</Data></Cell>
-    <Cell ss:StyleID="s110"><Data ss:Type="String">TODO</Data></Cell>
+    <Cell ss:StyleID="s109"/>
+    <Cell ss:StyleID="s109"><Data ss:Type="String">Offset</Data></Cell>
+    <Cell ss:StyleID="s109"><Data ss:Type="String">Offset metric calibration method</Data></Cell>
     <Cell ss:StyleID="s104"/>
     <Cell ss:StyleID="s104"/>
     <Cell ss:StyleID="s105"/>
@@ -1424,9 +1424,9 @@
     <Cell ss:StyleID="s102"><Data ss:Type="String">gain</Data></Cell>
     <Cell ss:StyleID="s104"><Data ss:Type="Number">3</Data></Cell>
     <Cell ss:StyleID="s91"/>
-    <Cell ss:StyleID="s110"/>
-    <Cell ss:StyleID="s110"><Data ss:Type="String">Gain</Data></Cell>
-    <Cell ss:StyleID="s110"><Data ss:Type="String">TODO</Data></Cell>
+    <Cell ss:StyleID="s109"/>
+    <Cell ss:StyleID="s109"><Data ss:Type="String">Gain</Data></Cell>
+    <Cell ss:StyleID="s109"><Data ss:Type="String">Gain metric calibration method</Data></Cell>
     <Cell ss:StyleID="s104"/>
     <Cell ss:StyleID="s104"/>
     <Cell ss:StyleID="s105"/>
@@ -1434,8 +1434,8 @@
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s102"><Data ss:Type="String">two-point</Data></Cell>
     <Cell ss:StyleID="s104"><Data ss:Type="Number">4</Data></Cell>
-    <Cell ss:Index="5" ss:StyleID="s110"><Data ss:Type="String">Two Point</Data></Cell>
-    <Cell ss:StyleID="s110"><Data ss:Type="String">TODO</Data></Cell>
+    <Cell ss:Index="5" ss:StyleID="s109"><Data ss:Type="String">Two Point</Data></Cell>
+    <Cell ss:StyleID="s109"><Data ss:Type="String">Two-point metric calibration method</Data></Cell>
    </Row>
   </Table>
   <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">
@@ -1449,8 +1449,8 @@
    <Panes>
     <Pane>
      <Number>3</Number>
-     <ActiveRow>3</ActiveRow>
-     <ActiveCol>3</ActiveCol>
+     <ActiveRow>2</ActiveRow>
+     <ActiveCol>5</ActiveCol>
     </Pane>
    </Panes>
    <ProtectObjects>False</ProtectObjects>
@@ -1460,7 +1460,7 @@
  <Worksheet ss:Name="metric-calibration-state">
   <Table ss:ExpandedColumnCount="9" ss:ExpandedRowCount="5" x:FullColumns="1"
    x:FullRows="1" ss:DefaultColumnWidth="60" ss:DefaultRowHeight="15">
-   <Column ss:Index="6" ss:AutoFitWidth="0" ss:Width="230.25"/>
+   <Column ss:Index="6" ss:AutoFitWidth="0" ss:Width="257.25"/>
    <Row ss:AutoFitHeight="0" ss:Height="30.75">
     <Cell ss:StyleID="s94"><Data ss:Type="String">Code</Data><Comment
       ss:Author="Lloyd"><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
@@ -1494,9 +1494,9 @@
     <Cell ss:StyleID="s98"><Data ss:Type="String">not-calibrated</Data></Cell>
     <Cell ss:StyleID="s86"><Data ss:Type="Number">1</Data></Cell>
     <Cell ss:StyleID="s85"/>
-    <Cell ss:StyleID="s109"/>
-    <Cell ss:StyleID="s109"><Data ss:Type="String">Not Calibrated</Data></Cell>
-    <Cell ss:StyleID="s109"><Data ss:Type="String">The metric has not been calibrated.</Data></Cell>
+    <Cell ss:StyleID="s108"/>
+    <Cell ss:StyleID="s108"><Data ss:Type="String">Not Calibrated</Data></Cell>
+    <Cell ss:StyleID="s108"><Data ss:Type="String">The metric has not been calibrated.</Data></Cell>
     <Cell ss:StyleID="s86"/>
     <Cell ss:StyleID="s86"/>
     <Cell ss:StyleID="s101"/>
@@ -1505,9 +1505,9 @@
     <Cell ss:StyleID="s102"><Data ss:Type="String">calibration-required</Data></Cell>
     <Cell ss:StyleID="s104"><Data ss:Type="Number">2</Data></Cell>
     <Cell ss:StyleID="s91"/>
-    <Cell ss:StyleID="s110"/>
-    <Cell ss:StyleID="s110"><Data ss:Type="String">Calibration Required</Data></Cell>
-    <Cell ss:StyleID="s110"><Data ss:Type="String">The metric needs to be calibrated.</Data></Cell>
+    <Cell ss:StyleID="s109"/>
+    <Cell ss:StyleID="s109"><Data ss:Type="String">Calibration Required</Data></Cell>
+    <Cell ss:StyleID="s109"><Data ss:Type="String">The metric needs to be calibrated.</Data></Cell>
     <Cell ss:StyleID="s104"/>
     <Cell ss:StyleID="s104"/>
     <Cell ss:StyleID="s105"/>
@@ -1516,9 +1516,9 @@
     <Cell ss:StyleID="s102"><Data ss:Type="String">calibrated</Data></Cell>
     <Cell ss:StyleID="s104"><Data ss:Type="Number">3</Data></Cell>
     <Cell ss:StyleID="s91"/>
-    <Cell ss:StyleID="s110"/>
-    <Cell ss:StyleID="s110"><Data ss:Type="String">Calibrated</Data></Cell>
-    <Cell ss:StyleID="s110"><Data ss:Type="String">The metric has been calibrated.</Data></Cell>
+    <Cell ss:StyleID="s109"/>
+    <Cell ss:StyleID="s109"><Data ss:Type="String">Calibrated</Data></Cell>
+    <Cell ss:StyleID="s109"><Data ss:Type="String">The metric has been calibrated.</Data></Cell>
     <Cell ss:StyleID="s104"/>
     <Cell ss:StyleID="s104"/>
     <Cell ss:StyleID="s105"/>
@@ -1526,8 +1526,8 @@
    <Row ss:AutoFitHeight="0" ss:Height="90">
     <Cell ss:StyleID="s102"><Data ss:Type="String">unspecified</Data></Cell>
     <Cell ss:StyleID="s104"><Data ss:Type="Number">4</Data></Cell>
-    <Cell ss:Index="5" ss:StyleID="s110"><Data ss:Type="String">Unspecified</Data></Cell>
-    <Cell ss:StyleID="s110"><Data ss:Type="String">The state of calibration of this metric is unspecified.</Data></Cell>
+    <Cell ss:Index="5" ss:StyleID="s109"><Data ss:Type="String">Unspecified</Data></Cell>
+    <Cell ss:StyleID="s109"><Data ss:Type="String">The state of calibration of this metric is unspecified.</Data></Cell>
    </Row>
   </Table>
   <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">

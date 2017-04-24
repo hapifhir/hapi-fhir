@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.subscription;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,25 +51,23 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 
 public class SubscriptionWebsocketHandlerDstu3 extends TextWebSocketHandler implements ISubscriptionWebsocketHandler, Runnable {
+	private static FhirContext ourCtx;
+
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SubscriptionWebsocketHandlerDstu3.class);
 
-	@Autowired
-	private FhirContext myCtx;
+	private static IFhirResourceDaoSubscription<Subscription> ourSubscriptionDao;
 
 	private ScheduledFuture<?> myScheduleFuture;
 
 	private IState myState = new InitialState();
 
-	@Autowired
-	private IFhirResourceDaoSubscription<Subscription> mySubscriptionDao;
-
 	private IIdType mySubscriptionId;
+
 	private Long mySubscriptionPid;
 
 	@Autowired
-	@Qualifier("websocketTaskScheduler")
+	@Qualifier("websocketTaskSchedulerDstu3")
 	private TaskScheduler myTaskScheduler;
-
 	@Override
 	public void afterConnectionClosed(WebSocketSession theSession, CloseStatus theStatus) throws Exception {
 		super.afterConnectionClosed(theSession, theStatus);
@@ -124,10 +122,18 @@ public class SubscriptionWebsocketHandlerDstu3 extends TextWebSocketHandler impl
 
 		ourLog.debug("Subscription {} websocket handler polling", subscriptionPid);
 
-		List<IBaseResource> results = mySubscriptionDao.getUndeliveredResourcesAndPurge(subscriptionPid);
+		List<IBaseResource> results = ourSubscriptionDao.getUndeliveredResourcesAndPurge(subscriptionPid);
 		if (results.isEmpty() == false) {
 			myState.deliver(results);
 		}
+	}
+
+	public static void setCtx(FhirContext theCtx) {
+		ourCtx = theCtx;
+	}
+
+	public static void setSubscriptionDao(IFhirResourceDaoSubscription<Subscription> theSubscriptionDao) {
+		ourSubscriptionDao = theSubscriptionDao;
 	}
 
 	private class BoundDynamicSubscriptionState implements IState {
@@ -144,7 +150,7 @@ public class SubscriptionWebsocketHandlerDstu3 extends TextWebSocketHandler impl
 		public void closing() {
 			ourLog.info("Deleting subscription {}", mySubscriptionId);
 			try {
-				mySubscriptionDao.delete(mySubscriptionId, null);
+				ourSubscriptionDao.delete(mySubscriptionId, null);
 			} catch (Exception e) {
 				handleFailure(e);
 			}
@@ -155,7 +161,7 @@ public class SubscriptionWebsocketHandlerDstu3 extends TextWebSocketHandler impl
 			try {
 			for (IBaseResource nextResource : theResults) {
 				ourLog.info("Sending WebSocket message for resource: {}", nextResource.getIdElement());
-				String encoded = myEncoding.newParser(myCtx).encodeResourceToString(nextResource);
+				String encoded = myEncoding.newParser(ourCtx).encodeResourceToString(nextResource);
 				String payload = "add " + mySubscriptionId.getIdPart() + '\n' + encoded;
 				mySession.sendMessage(new TextMessage(payload));
 			}
@@ -231,8 +237,8 @@ public class SubscriptionWebsocketHandlerDstu3 extends TextWebSocketHandler impl
 			}
 
 			try {
-				Subscription subscription = mySubscriptionDao.read(id, null);
-				mySubscriptionPid = mySubscriptionDao.getSubscriptionTablePidForSubscriptionResource(id);
+				Subscription subscription = ourSubscriptionDao.read(id, null);
+				mySubscriptionPid = ourSubscriptionDao.getSubscriptionTablePidForSubscriptionResource(id);
 				mySubscriptionId = subscription.getIdElement();
 				myState = new BoundStaticSubscipriptionState(theSession);
 			} catch (ResourceNotFoundException e) {
@@ -268,9 +274,9 @@ public class SubscriptionWebsocketHandlerDstu3 extends TextWebSocketHandler impl
 					}
 				}
 				
-				IIdType id = mySubscriptionDao.create(subscription).getId();
+				IIdType id = ourSubscriptionDao.create(subscription).getId();
 
-				mySubscriptionPid = mySubscriptionDao.getSubscriptionTablePidForSubscriptionResource(id);
+				mySubscriptionPid = ourSubscriptionDao.getSubscriptionTablePidForSubscriptionResource(id);
 				mySubscriptionId = subscription.getIdElement();
 				myState = new BoundDynamicSubscriptionState(theSession, encoding);
 

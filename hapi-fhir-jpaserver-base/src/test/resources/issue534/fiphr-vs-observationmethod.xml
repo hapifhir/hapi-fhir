@@ -1,0 +1,45 @@
+<ValueSet>
+    <meta>
+        <versionId value="5" />
+        <lastUpdated value="2017-03-02T14:04:07.769+00:00" />
+        <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition" />
+    </meta>
+    <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
+        <valueUri value="urn:oid:2.16.840.1.113883.4.642.2.37" />
+    </extension>
+    <url value="http://phr.kanta.fi/ValueSet/fiphr-vs-observationmethod" />
+    <version value="0.01" />
+    <name value="fiphr-vs-observationmethod" />
+    <status value="draft" />
+    <experimental value="true" />
+    <publisher value="Kela" />
+    <contact>
+        <telecom>
+            <system value="email" />
+            <value value="kantakehitys@kanta.fi" />
+        </telecom>
+        <telecom>
+            <system value="other" />
+            <value value="http://www.kanta.fi/en/web/ammattilaisille/omakannan-omatietovarannon-maarittelyt" />
+        </telecom>
+    </contact>
+    <date value="2016-11-23T09:00:00+03:00" />
+    <description value="Observation Method value set" />
+    <codeSystem>
+        <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
+            <valueUri value="urn:oid:2.16.840.1.113883.4.642.1.37" />
+        </extension>
+        <system value="http://phr.kanta.fi/fiphr-vs-observationmethod" />
+        <version value="1.0" />
+        <caseSensitive value="true" />
+        <concept>
+            <code value="1" />
+            <display value="place holder" />
+            <definition value="place holder" />
+            <designation>
+                <language value="en" />
+                <value value="place holder" />
+            </designation>
+        </concept>
+    </codeSystem>
+</ValueSet>

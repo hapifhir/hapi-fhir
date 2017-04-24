@@ -1,8 +1,8 @@
 package org.hl7.fhir.dstu3.utils;
 
-import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.dstu3.model.ExpressionNode;
 import org.hl7.fhir.dstu3.model.ExpressionNode.SourceLocation;
+import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.utilities.Utilities;
 
 // shared lexer for concrete syntaxes 
@@ -29,7 +29,7 @@ public class FHIRLexer {
     }
 
   }
-  private String path;
+  private String source;
   private int cursor;
   private int currentStart;
   private String current;
@@ -38,7 +38,7 @@ public class FHIRLexer {
   private int id;
 
   public FHIRLexer(String source) throws FHIRLexerException {
-    this.path = source;
+    this.source = source;
     currentLocation = new SourceLocation(1, 1);
     next();
   }
@@ -50,7 +50,9 @@ public class FHIRLexer {
   }
 
   public boolean isConstant(boolean incDoubleQuotes) {
-    return current.charAt(0) == '\'' || (incDoubleQuotes && current.charAt(0) == '"') || current.charAt(0) == '@' || current.charAt(0) == '%' || current.charAt(0) == '-' || (current.charAt(0) >= '0' && current.charAt(0) <= '9') || current.equals("true") || current.equals("false") || current.equals("{}");
+    return current.charAt(0) == '\'' || (incDoubleQuotes && current.charAt(0) == '"') || current.charAt(0) == '@' || current.charAt(0) == '%' || 
+        current.charAt(0) == '-' || current.charAt(0) == '+' || (current.charAt(0) >= '0' && current.charAt(0) <= '9') || 
+        current.equals("true") || current.equals("false") || current.equals("{}");
   }
 
   public boolean isStringConstant() {
@@ -61,6 +63,14 @@ public class FHIRLexer {
     String s = current;
     next();
     return s;
+  }
+
+  public int takeInt() throws FHIRLexerException {
+    String s = current;
+    if (!Utilities.isInteger(s))
+      throw error("Found "+current+" expecting an integer");
+    next();
+    return Integer.parseInt(s);
   }
 
   public boolean isToken() {
@@ -88,18 +98,18 @@ public class FHIRLexer {
   }
 
   public FHIRLexerException error(String msg, String location) {
-    return new FHIRLexerException("Error in "+path+" at "+location+": "+msg);
+    return new FHIRLexerException("Error at "+location+": "+msg);
   }
 
   public void next() throws FHIRLexerException {
     current = null;
     boolean last13 = false;
-    while (cursor < path.length() && Character.isWhitespace(path.charAt(cursor))) {
-      if (path.charAt(cursor) == '\r') {
+    while (cursor < source.length() && Character.isWhitespace(source.charAt(cursor))) {
+      if (source.charAt(cursor) == '\r') {
         currentLocation.setLine(currentLocation.getLine() + 1);
         currentLocation.setColumn(1);
         last13 = true;
-      } else if (!last13 && (path.charAt(cursor) == '\n')) {
+      } else if (!last13 && (source.charAt(cursor) == '\n')) {
         currentLocation.setLine(currentLocation.getLine() + 1);
         currentLocation.setColumn(1);
         last13 = false;
@@ -111,99 +121,104 @@ public class FHIRLexer {
     }
     currentStart = cursor;
     currentStartLocation = currentLocation;
-    if (cursor < path.length()) {
-      char ch = path.charAt(cursor);
+    if (cursor < source.length()) {
+      char ch = source.charAt(cursor);
       if (ch == '!' || ch == '>' || ch == '<' || ch == ':' || ch == '-' || ch == '=')  {
         cursor++;
-        if (cursor < path.length() && (path.charAt(cursor) == '=' || path.charAt(cursor) == '~' || path.charAt(cursor) == '-')) 
+        if (cursor < source.length() && (source.charAt(cursor) == '=' || source.charAt(cursor) == '~' || source.charAt(cursor) == '-')) 
           cursor++;
-        current = path.substring(currentStart, cursor);
+        current = source.substring(currentStart, cursor);
+      } else if (ch == '.' ) {
+        cursor++;
+        if (cursor < source.length() && (source.charAt(cursor) == '.')) 
+          cursor++;
+        current = source.substring(currentStart, cursor);
       } else if (ch >= '0' && ch <= '9') {
           cursor++;
         boolean dotted = false;
-        while (cursor < path.length() && ((path.charAt(cursor) >= '0' && path.charAt(cursor) <= '9') || (path.charAt(cursor) == '.') && !dotted)) {
-          if (path.charAt(cursor) == '.')
+        while (cursor < source.length() && ((source.charAt(cursor) >= '0' && source.charAt(cursor) <= '9') || (source.charAt(cursor) == '.') && !dotted)) {
+          if (source.charAt(cursor) == '.')
             dotted = true;
           cursor++;
         }
-        if (path.charAt(cursor-1) == '.')
+        if (source.charAt(cursor-1) == '.')
           cursor--;
-        current = path.substring(currentStart, cursor);
+        current = source.substring(currentStart, cursor);
       }  else if ((ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z')) {
-        while (cursor < path.length() && ((path.charAt(cursor) >= 'A' && path.charAt(cursor) <= 'Z') || (path.charAt(cursor) >= 'a' && path.charAt(cursor) <= 'z') || 
-            (path.charAt(cursor) >= '0' && path.charAt(cursor) <= '9') || path.charAt(cursor) == '_')) 
+        while (cursor < source.length() && ((source.charAt(cursor) >= 'A' && source.charAt(cursor) <= 'Z') || (source.charAt(cursor) >= 'a' && source.charAt(cursor) <= 'z') || 
+            (source.charAt(cursor) >= '0' && source.charAt(cursor) <= '9') || source.charAt(cursor) == '_')) 
           cursor++;
-        current = path.substring(currentStart, cursor);
+        current = source.substring(currentStart, cursor);
       } else if (ch == '%') {
         cursor++;
-        if (cursor < path.length() && (path.charAt(cursor) == '"')) {
+        if (cursor < source.length() && (source.charAt(cursor) == '"')) {
           cursor++;
-          while (cursor < path.length() && (path.charAt(cursor) != '"'))
+          while (cursor < source.length() && (source.charAt(cursor) != '"'))
             cursor++;
           cursor++;
         } else
-        while (cursor < path.length() && ((path.charAt(cursor) >= 'A' && path.charAt(cursor) <= 'Z') || (path.charAt(cursor) >= 'a' && path.charAt(cursor) <= 'z') || 
-            (path.charAt(cursor) >= '0' && path.charAt(cursor) <= '9') || path.charAt(cursor) == ':' || path.charAt(cursor) == '-'))
+        while (cursor < source.length() && ((source.charAt(cursor) >= 'A' && source.charAt(cursor) <= 'Z') || (source.charAt(cursor) >= 'a' && source.charAt(cursor) <= 'z') || 
+            (source.charAt(cursor) >= '0' && source.charAt(cursor) <= '9') || source.charAt(cursor) == ':' || source.charAt(cursor) == '-'))
           cursor++;
-        current = path.substring(currentStart, cursor);
+        current = source.substring(currentStart, cursor);
       } else if (ch == '/') {
         cursor++;
-        if (cursor < path.length() && (path.charAt(cursor) == '/')) {
+        if (cursor < source.length() && (source.charAt(cursor) == '/')) {
           cursor++;
-          while (cursor < path.length() && !((path.charAt(cursor) == '\r') || path.charAt(cursor) == '\n')) 
+          while (cursor < source.length() && !((source.charAt(cursor) == '\r') || source.charAt(cursor) == '\n')) 
             cursor++;
         }
-        current = path.substring(currentStart, cursor);
+        current = source.substring(currentStart, cursor);
       } else if (ch == '$') {
         cursor++;
-        while (cursor < path.length() && (path.charAt(cursor) >= 'a' && path.charAt(cursor) <= 'z'))
+        while (cursor < source.length() && (source.charAt(cursor) >= 'a' && source.charAt(cursor) <= 'z'))
           cursor++;
-        current = path.substring(currentStart, cursor);
+        current = source.substring(currentStart, cursor);
       } else if (ch == '{') {
         cursor++;
-        ch = path.charAt(cursor);
+        ch = source.charAt(cursor);
         if (ch == '}')
           cursor++;
-        current = path.substring(currentStart, cursor);
+        current = source.substring(currentStart, cursor);
       } else if (ch == '"'){
         cursor++;
         boolean escape = false;
-        while (cursor < path.length() && (escape || path.charAt(cursor) != '"')) {
+        while (cursor < source.length() && (escape || source.charAt(cursor) != '"')) {
           if (escape)
             escape = false;
           else 
-            escape = (path.charAt(cursor) == '\\');
+            escape = (source.charAt(cursor) == '\\');
           cursor++;
         }
-        if (cursor == path.length())
+        if (cursor == source.length())
           throw error("Unterminated string");
         cursor++;
-        current = "\""+path.substring(currentStart+1, cursor-1)+"\"";
+        current = "\""+source.substring(currentStart+1, cursor-1)+"\"";
       } else if (ch == '\''){
         cursor++;
         char ech = ch;
         boolean escape = false;
-        while (cursor < path.length() && (escape || path.charAt(cursor) != ech)) {
+        while (cursor < source.length() && (escape || source.charAt(cursor) != ech)) {
           if (escape)
             escape = false;
           else 
-            escape = (path.charAt(cursor) == '\\');
+            escape = (source.charAt(cursor) == '\\');
           cursor++;
         }
-        if (cursor == path.length())
+        if (cursor == source.length())
           throw error("Unterminated string");
         cursor++;
-        current = path.substring(currentStart, cursor);
+        current = source.substring(currentStart, cursor);
         if (ech == '\'')
           current = "\'"+current.substring(1, current.length() - 1)+"\'";
       } else if (ch == '@'){
         cursor++;
-        while (cursor < path.length() && isDateChar(path.charAt(cursor)))
+        while (cursor < source.length() && isDateChar(source.charAt(cursor)))
           cursor++;          
-        current = path.substring(currentStart, cursor);
+        current = source.substring(currentStart, cursor);
       } else { // if CharInSet(ch, ['.', ',', '(', ')', '=', '$']) then
         cursor++;
-        current = path.substring(currentStart, cursor);
+        current = source.substring(currentStart, cursor);
       }
     }
   }
@@ -216,7 +231,7 @@ public class FHIRLexer {
     return ExpressionNode.Operation.fromCode(current) != null;
   }
   public boolean done() {
-    return currentStart >= path.length();
+    return currentStart >= source.length();
   }
   public int nextId() {
     id++;
@@ -237,11 +252,21 @@ public class FHIRLexer {
   public boolean hasToken(String kw) {
     return !done() && kw.equals(current);
   }
+  public boolean hasToken(String... names) {
+    if (done()) 
+      return false;
+    for (String s : names)
+      if (s.equals(current))
+        return true;
+    return false;
+  }
+  
   public void token(String kw) throws FHIRLexerException {
     if (!kw.equals(current)) 
       throw error("Found \""+current+"\" expecting \""+kw+"\"");
     next();
   }
+  
   public String readConstant(String desc) throws FHIRLexerException {
     if (!isStringConstant())
       throw error("Found "+current+" expecting \"["+desc+"]\"");

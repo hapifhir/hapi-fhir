@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.method;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -112,16 +112,15 @@ public class TransactionMethodBinding extends BaseResourceReturningMethodBinding
 		if (theArgs[myTransactionParamIndex] instanceof Bundle) {
 			Bundle bundle = (Bundle) theArgs[myTransactionParamIndex];
 			return createTransactionInvocation(bundle, context);
-		} else {
-			@SuppressWarnings("unchecked")
-			List<IBaseResource> resources = (List<IBaseResource>) theArgs[myTransactionParamIndex];
-			return createTransactionInvocation(resources, context);
 		}
+		@SuppressWarnings("unchecked")
+		List<IBaseResource> resources = (List<IBaseResource>) theArgs[myTransactionParamIndex];
+		return createTransactionInvocation(resources, context);
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public Object invokeServer(IRestfulServer theServer, RequestDetails theRequest, Object[] theMethodParams) throws InvalidRequestException, InternalErrorException {
+	public Object invokeServer(IRestfulServer<?> theServer, RequestDetails theRequest, Object[] theMethodParams) throws InvalidRequestException, InternalErrorException {
 
 		/*
 		 * The design of HAPI's transaction method for DSTU1 support assumed that a transaction was just an update on a

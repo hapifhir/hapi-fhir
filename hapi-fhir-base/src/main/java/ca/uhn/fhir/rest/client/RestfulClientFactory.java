@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.client;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -318,12 +318,13 @@ public abstract class RestfulClientFactory implements IRestfulClientFactory {
 		String serverFhirVersionString = null;
 		Object value = t.getSingleValueOrNull(conformance, "fhirVersion");
 		if (value instanceof IPrimitiveType) {
-			serverFhirVersionString = ((IPrimitiveType<?>) value).getValueAsString();
+			serverFhirVersionString = IPrimitiveType.class.cast(value).getValueAsString();
 		}
 		FhirVersionEnum serverFhirVersionEnum = null;
 		if (StringUtils.isBlank(serverFhirVersionString)) {
 			// we'll be lenient and accept this
 		} else {
+			//FIXME null access on serverFhirVersionString
 			if (serverFhirVersionString.startsWith("0.80") || serverFhirVersionString.startsWith("0.0.8")) {
 				serverFhirVersionEnum = FhirVersionEnum.DSTU1;
 			} else if (serverFhirVersionString.startsWith("0.4")) {
@@ -347,11 +348,13 @@ public abstract class RestfulClientFactory implements IRestfulClientFactory {
 
 	}
 
+	@Deprecated //override deprecated method
 	@Override
 	public ServerValidationModeEnum getServerValidationModeEnum() {
 		return getServerValidationMode();
 	}
 
+	@Deprecated //override deprecated method
 	@Override
 	public void setServerValidationModeEnum(ServerValidationModeEnum theServerValidationMode) {
 		setServerValidationMode(theServerValidationMode);

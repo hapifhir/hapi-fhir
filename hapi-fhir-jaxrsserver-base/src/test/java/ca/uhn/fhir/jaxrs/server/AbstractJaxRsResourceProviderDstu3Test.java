@@ -1,7 +1,9 @@
 package ca.uhn.fhir.jaxrs.server;
 
 import static org.junit.Assert.assertEquals;
+
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -24,10 +26,11 @@ import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
-import org.hl7.fhir.dstu3.model.Conformance;
+import org.hl7.fhir.dstu3.model.CapabilityStatement;
 import org.hl7.fhir.dstu3.model.DateType;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Identifier;
+import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.Resource;
@@ -154,7 +157,7 @@ public class AbstractJaxRsResourceProviderDstu3Test {
 		toCreate.getIdentifier().add(new Identifier().setValue("myIdentifier"));
 		outcome.setResource(toCreate);
 
-		when(mock.create(patientCaptor.capture(), eq("Patient?_format=json&identifier=2"))).thenReturn(outcome);
+		when(mock.create(patientCaptor.capture(), eq("/Patient?_format=json&identifier=2"))).thenReturn(outcome);
 		client.setEncoding(EncodingEnum.JSON);
 
 		MethodOutcome response = client.create().resource(toCreate).conditional()
@@ -168,7 +171,7 @@ public class AbstractJaxRsResourceProviderDstu3Test {
 	/** Conformance - Server */
 	@Test
 	public void testConformance() {
-		final Conformance conf = client.fetchConformance().ofType(Conformance.class).execute();
+		final CapabilityStatement conf = client.fetchConformance().ofType(CapabilityStatement.class).execute();
 		assertEquals(conf.getRest().get(0).getResource().get(0).getType().toString(), "Patient");
 	}
 
@@ -425,6 +428,21 @@ public class AbstractJaxRsResourceProviderDstu3Test {
 			assertEquals(ResourceNotFoundException.STATUS_CODE, e.getStatusCode());
 			assertTrue(e.getMessage().contains("999955541264"));
 		}
+	}
+  
+ 	@Test
+	public void testValidate() {
+		// prepare mock
+		final OperationOutcome oo = new OperationOutcome();
+		final Patient patient = new Patient();
+		patient.addIdentifier((new Identifier().setValue("1")));
+		//invoke
+		final Parameters inParams = new Parameters();
+		inParams.addParameter().setResource(patient);
+
+		final MethodOutcome mO = client.validate().resource(patient).execute();
+		//verify
+		assertNotNull(mO.getOperationOutcome());
 	}
 
 	@BeforeClass

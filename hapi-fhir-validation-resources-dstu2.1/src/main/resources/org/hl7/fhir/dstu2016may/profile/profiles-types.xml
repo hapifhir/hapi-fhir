@@ -4681,7 +4681,7 @@
        <key value="ref-1"/>
        <severity value="error"/>
        <human value="SHALL have a local reference if the resource is provided inline"/>
-       <expression value="reference.startsWith('#').not() or ($context.reference.substring(1).trace('url') in $resource.contained.id.trace('ids'))"/>
+       <expression value="reference.startsWith('#').not() or (reference.substring(1).trace('url') in %resource.contained.id.trace('ids'))"/>
        <xpath value="not(starts-with(f:reference/@value, '#')) or exists(ancestor::*[self::f:entry or self::f:parameter]/f:resource/f:*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')]|/*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')])"/>
       </constraint>
       <mapping>
@@ -4779,7 +4779,7 @@
        <key value="ref-1"/>
        <severity value="error"/>
        <human value="SHALL have a local reference if the resource is provided inline"/>
-       <expression value="reference.startsWith('#').not() or ($context.reference.substring(1).trace('url') in $resource.contained.id.trace('ids'))"/>
+       <expression value="reference.startsWith('#').not() or (reference.substring(1).trace('url') in %resource.contained.id.trace('ids'))"/>
        <xpath value="not(starts-with(f:reference/@value, '#')) or exists(ancestor::*[self::f:entry or self::f:parameter]/f:resource/f:*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')]|/*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')])"/>
       </constraint>
       <mapping>

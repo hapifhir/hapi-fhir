@@ -6,7 +6,7 @@ import static org.apache.commons.lang3.StringUtils.defaultString;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -70,13 +70,11 @@ public class FhirTerser {
 			if (theTarget instanceof IPrimitiveType<?>) {
 				((IPrimitiveType<?>)theTarget).setValueAsString(((IPrimitiveType<?>)theSource).getValueAsString());
 				return;
-			} else {
-				if (theIgnoreMissingFields) {
-					return;
-				} else {
-					throw new DataFormatException("Can not copy value from primitive of type " + theSource.getClass().getName() + " into type " + theTarget.getClass().getName());
-				}
 			}
+			if (theIgnoreMissingFields) {
+				return;
+			}
+			throw new DataFormatException("Can not copy value from primitive of type " + theSource.getClass().getName() + " into type " + theTarget.getClass().getName());
 		}
 		
 		BaseRuntimeElementCompositeDefinition<?> sourceDef = (BaseRuntimeElementCompositeDefinition<?>) myContext.getElementDefinition(theSource.getClass()); 
@@ -94,9 +92,8 @@ public class FhirTerser {
 				if (targetChild == null) {
 					if (theIgnoreMissingFields) {
 						continue;
-					} else {
-						throw new DataFormatException("Type " + theTarget.getClass().getName() + " does not have a child with name " + elementName);
 					}
+					throw new DataFormatException("Type " + theTarget.getClass().getName() + " does not have a child with name " + elementName);
 				}
 				
 				BaseRuntimeElementDefinition<?> childDef = targetChild.getChildByName(elementName);
@@ -166,10 +163,9 @@ public class FhirTerser {
 
 		if (theSubList.size() == 1) {
 			return nextDef;
-		} else {
-			BaseRuntimeElementCompositeDefinition<?> cmp = (BaseRuntimeElementCompositeDefinition<?>) nextDef.getChildByName(theSubList.get(0));
-			return getDefinition(cmp, theSubList.subList(1, theSubList.size()));
 		}
+		BaseRuntimeElementCompositeDefinition<?> cmp = (BaseRuntimeElementCompositeDefinition<?>) nextDef.getChildByName(theSubList.get(0));
+		return getDefinition(cmp, theSubList.subList(1, theSubList.size()));
 	}
 
 	public BaseRuntimeChildDefinition getDefinition(Class<? extends IBaseResource> theResourceType, String thePath) {
@@ -208,9 +204,8 @@ public class FhirTerser {
 		List<T> retVal = getValues(currentDef, currentObj, parts, theWantedType);
 		if (retVal.isEmpty()) {
 			return null;
-		} else {
-			return retVal.get(0);
 		}
+		return retVal.get(0);
 	}
 
 	@SuppressWarnings("unchecked")

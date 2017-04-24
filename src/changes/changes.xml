@@ -6,6 +6,367 @@
 		<title>HAPI FHIR Changelog</title>
 	</properties>
 	<body>
+		<release version="2.5" date="TBD">
+			<action type="fix">
+				<![CDATA[
+				This release includes significant performance enhancements for the
+				JPA server. Most importantly, the way that searches are performed
+				has been re-written to allow the server to perform better when
+				the database has a large number of results in it. The following
+				enhancements have been made:
+				<br/><br/>
+				<ul>
+					<li>
+						Searches with multiple search parameters of different 
+						datatypes (e.g. find patients by name and date of birth) 
+						were previously joined in Java code, now the join is 
+						performed by the database which is faster
+					</li>
+					<li>
+						Searches which returned lots of results previously has all 
+						results streamed into memory before anything was returned to 
+						the client. This is particularly slow if you do a search for
+						(say) "get me all patients" since potentially thousands or 
+						even millions of patients' IDs were loaded into memory 
+						before anything gets returned to the client. HAPI FHIR 
+						now has a multithreaded search coordinator which returns 
+						results to the client as soon as they are available
+					</li>
+					<li>
+						Search results will be cached and reused (so that if a client
+						does two searches for "get me all patients matching FOO"
+						with the same FOO in short succession, we won't query the DB
+						again but will instead reuse the cached results) 
+					</li>
+					<li>
+						Updates which do not actually change the contents of the resource
+						can optionally be prevented from creating a new version
+						of the resource in the database
+					</li>
+				</ul>
+				<br/><br/>
+				Existing users should delete the 
+				<code>HFJ_SEARCH</code>, 
+				<code>HFJ_SEARCH_INCLUDE</code>,
+				and 
+				<code>HFJ_SEARCH_RESULT</code>
+				tables from your database before upgrading.
+				]]>
+			</action>
+			<action type="fix" issue="590">
+				AuthorizationInterceptor did not correctly handle paging requests
+				(e.g. requests for the second page of results for a search operation). 
+				Thanks to Eeva Turkka for reporting!
+			</action>
+			<action type="add">
+				Add configuration property to DSTU3 FhirInstanceValidator to
+				allow client code to change unknown extension handling behaviour.
+			</action>
+		</release>
+		<release version="2.4" date="2017-04-19">
+			<action type="add">
+				This release brings the DSTU3 structures up to FHIR R3 (FHIR 3.0.1) definitions. Note that
+				there are very few changes between the DSTU3 structures in HAPI FHIR 2.3 and
+				the ones in HAPI FHIR 2.4 since the basis for the DSTU3 structures in HAPI FHIR
+				2.3 was the R3 QA FHIR version (1.9.0) but this is the first release of 
+				HAPI FHIR to support the final/complete R3 release.
+			</action>
+			<action type="add">
+				Bump the version of a few dependencies to the
+				latest versions (dependent HAPI modules listed in brackets):
+				<![CDATA[
+					<ul>
+						<li>Hibernate (JPA): 5.2.7 -&gt; 5.2.9</li>
+						<li>Hibernate Search (JPA): 5.5.7.CR1 -&gt; 5.2.7.Final</li>
+						<li>Hibernate Validator (JPA): 5.3.4 -&gt; 5.4.1</li>
+						<li>Spring (JPA): 4.3.6 -&gt; 4.3.7</li>
+						<li>Gson (Core): 2.7 -&gt; 2.8.0</li>
+						<li>Guava (JPA): 19.0 -&gt; 21.0</li>
+						<li>SLF4j (Core): 1.7.21 -&gt; 1.7.25</li>
+						<li>Logback (Core): 1.1.7 -&gt; 1.2.2</li>
+					</ul>
+				]]>
+			</action>
+			<action type="add" issue="602">
+				hapi-fhir-jpaserver-example now includes the 
+				<![CDATA[<code>Prefer</code>]]> header in the list of 
+				CORS headers. Thanks to GitHub user @elnin0815 for
+				the pull request!
+			</action>
+			<action type="add">
+				AuthorizationInterceptor can now allow make read or write 
+				authorization decisions on a resource by instance ID
+			</action>
+			<action type="fix" issue="208">
+				Remove SupportingDocumentation resource from DSTU2 structures. This isn't
+				actually a resource in FHIR DSTU2 and its inclusion causes errors on clients
+				that don't understand what it is. Thanks to Travis Cummings and Michele Mottini for pointing this out.
+			</action>
+			<action type="fix" issue="607">
+				Web testing UI displayed an error when a transaction was pasted into the UI
+				for a DSTU2 server. Thanks to Suresh Kumar for reporting!
+			</action>
+			<action type="add">
+				DaoConfig#setAllowInlineMatchUrlReferences() now defaults to
+				<![CDATA[<code>true</code>]]> since inline conditional references
+				are now a part of the FHIR specification. Thanks to Jan Dědek for
+				pointing this out!
+			</action>
+			<action type="add" issue="609">
+				hapi-fhir-jpaserver-base now exposes a
+				<![CDATA[<code>FhirInstanceValidator</code> bean named <code>"myInstanceValidatorDstu2"</code>]]>
+				for DSTU2. A similar bean for DSTU3 was previously implemented.
+			</action>
+			<action type="add" issue="453">
+				hapi-fhir-jpaserver-example project now defaults to STU3 mode instead of
+				the previous DSTU2. Thanks to Joel Schneider for the pull request!
+			</action>
+			<action type="add" issue="534">
+				JPA server now has a setting on the DaoConfig to force it to treat
+				certain reference URLs or reference URL patterns as logical URLs instead
+				of literal ones, meaning that the server will not try to resolve these
+				URLs. Thanks to Eeva Turkka for the suggestion!
+			</action>
+			<action type="add">
+				Add a utility method to JPA server: 
+				<![CDATA[<code>IFhirResourceDao#removeTag(IIdType, TagTypeEnum, String, String)</code>]]>. This allows client code to remove tags
+				from a resource without having a servlet request object in context.
+			</action>
+			<action type="fix">
+				JPA server was unable to process custom search parameters where
+				the path pointed to an extension containing a reference. Thanks
+				to Ravi Kuchi for reporting!
+			</action>
+			<action type="fix" issue="623">
+				Servers in DSTU2.1 mode were incorrectly using the legacy mimetypes instead
+				of the new STU3 ones. Thanks to Michael Lawley for the pull request!
+			</action>
+			<action type="add" issue="624">
+				Add an option to ParserOptions that specifies that when parsing a bundle, the
+				ID found in the Bundle.entry.fullUrl should not override the ID found
+				in the Resource.id field. Technically these fields must always supply the
+				same ID in order for a server to be considered conformant, but this option allows
+				you to deal with servers which are behaving badly. Thanks to
+				GitHub user CarthageKing for the pul request!
+			</action>
+			<action type="fix" issue="617">
+				Remove unneccesary whitespace in the text areas on the testing
+				web UI. Thanks to GitHub user @elnin0815 for the pull request!
+			</action>
+			<action type="add" issue="613">
+				In JAX-RS server it is now possible to change the server exception handler
+				at runtime without a server restart.
+				Thanks to Sebastien Riviere for the 
+				pull request!
+			</action>
+			<action type="fix" issue="610">
+				Fix a potential race condition when the FhirContext is being accessed by many threads
+				at the same time right as it is initializing. Thanks to Ben Spencer for the
+				pull request!
+			</action>
+		</release>
+		<release version="2.3" date="2017-03-18">
+			<action type="add">
+				Bump the version of a few dependencies to the
+				latest versions (dependent HAPI modules listed in brackets):
+				<![CDATA[
+					<ul>
+						<li>Hibernate (JPA): 5.1.0 -&gt; 5.2.7</li>
+						<li>Hibernate Search (JPA): 5.5.4 -&gtp; 5.7.0.CR1</li>
+						<li>Hibernate Validator (JPA): 5.2.4 -&gtp; 5.3.4</li>
+						<li>Spring (JPA): 4.3.1 -&gt; 4.3.6</li>
+					</ul>
+				]]>
+			</action>
+			<action type="add">
+				The JPA server now supports custom search parameters in DSTU3
+				mode. This allows users to create search parameters which contain
+				custom paths, or even override and disable existing search
+				parameters.
+			</action>
+			<action type="fix">
+				CLI example uploader couldn't find STU3 examples after CI server
+				was moved to build.fhir.org
+			</action>
+			<action type="fix">
+				Fix issue in JPA subscription module that prevented purging stale
+				subscriptions when many were present on Postgres
+			</action>
+			<action type="fix" issue="532">
+				Server interceptor methods were being called twice unnecessarily
+				by the JPA server, and the DaoConfig interceptor registration 
+				framework was not actually useful. Thanks to GitHub user
+				@mattiuusitalo for reporting!
+			</action>
+			<action type="fix" issue="503">
+				AuthorizationInterceptor on JPA server did not correctly
+				apply rules on deleting resources in a specific compartment
+				because the resource metadata was stripped by the JPA server
+				before the interceptor could see it. Thanks to
+				Eeva Turkka for reporting!
+			</action>
+			<action type="fix" issue="519">
+				JPA server exported CapabilityStatement includes 
+				double entries for the _id parameter and uses the
+				wrong type (string instead of token). Thanks to 
+				Robert Lichtenberger for reporting!
+			</action>
+			<action type="add" issue="504">
+				Custom resource types which extend Binary must not
+				have declared extensions since this is invalid in 
+				FHIR (and HAPI would just ignore them anyhow). Thanks 
+				to Thomas S Berg for reporting!
+			</action>
+			<action type="add">
+				Standard HAPI zip/tar distributions did not include the project
+				sources and JavaDoc JARs. Thanks to Keith Boone for pointing
+				this out!
+			</action>
+			<action type="fix">
+				Server AuthorizationInterceptor always rejects history operation 
+				at the type level even if rules should allow it.
+			</action>
+			<action type="fix">
+				JPA server terminology service was not correctly validating or expanding codes 
+				in SNOMED CT or LOINC code systems. Thanks to David Hay for reporting!
+			</action>
+			<action type="fix" issue="539">
+				Attempting to search for an invalid resource type (e.g. GET base/FooResource) should 
+				return an HTTP 404 and not a 400, per the HTTP spec. Thanks to 
+				GitHub user @CarthageKing for the pull request!
+			</action>
+			<action type="fix" issue="544">
+				When parsing a Bundle containing placeholder fullUrls and references
+				(e.g. "urn:uuid:0000-0000") the resource reference targets did not get
+				populated with the given resources. Note that as a part of this
+				change, <![CDATA[<code>IdType</code> and <code>IdDt</code>]]> have been modified
+				so that when parsing a placeholder ID, the complete placeholder including the
+				"urn:uuid:" or "urn:oid:" prefix will be placed into the ID part. Previously,
+				the prefix was treated as the base URL, which led to strange behaviour
+				like the placeholder being treated as a real IDs. Thanks to GitHub
+				user @jodue for reporting!
+			</action>
+			<action type="add">
+				Declared extensions with multiple type() options listed in the @Child
+				annotation caused a crash on startup. Now this is supported.
+			</action>
+			<action type="add">
+				STU3 XHTML parser for narrative choked if the narrative contained
+				an <![CDATA[<code>&amp;rsquot;</code>]]> entity string.
+			</action>
+			<action type="fix" issue="538">
+				When parsing a quantity parameter on the server with a 
+				value and units but no system (e.g. 
+				<![CDATA[<code>GET [base]/Observation?value=5.4||mg</code>]]>)
+				the unit was incorrectly treated as the system. Thanks to
+				@CarthageKing for the pull request!
+			</action>
+			<action type="533">
+				Correct a typo in the JPA ValueSet ResourceProvider which prevented
+				successful operation under Spring 4.3. Thanks to 
+				Robbert van Waveren for the pull request!
+			</action>
+			<action type="remove">
+				Deprecate the method
+				<![CDATA[<code>ICompositeElement#getAllPopulatedChildElementsOfType(Class)</code>]]>
+				as it is no longer used by HAPI and is just an annoying step
+				in creating custom structures. Thanks to Allan Bro Hansen
+				for pointing this out.
+			</action>
+			<action type="fix" issue="547">
+				CapturingInterceptor did not buffer the response meaning
+				that in many circumstances it did not actually capture
+				the response. Thanks to Jenny Syed of Cerner for
+				the pull request and contribution!
+			</action>
+			<action type="fix" issue="548">
+				Clean up dependencies and remove Eclipse project files from git. Thanks to
+				@sekaijin for the pull request!
+			</action>
+			<action type="fix">
+				When performing a conditional create in a transaction in JPA server, 
+				if a resource already existed matching the conditional expression, the 
+				server did not change the version of the resource but did update the body
+				with the passed in body. Thanks to Artem Sopin for reporting and providing a test
+				case for this!
+			</action>
+			<action type="fix">
+				Client revincludes did not include the :recurse modifier. Thanks to
+				Jenny Meinsma for pointing this out on Zulip!
+			</action>
+			<action type="add">
+				JPA server did not return an OperationOutcome in the response for
+				a normal delete operation.
+			</action>
+			<action type="fix">
+				Fix an issue in JPA server where _history results were kept in memory instead
+				of being spooled to the database as they should be. Note that as a part of this fix
+				a new method was added to 
+				<![CDATA[<code>IBundleProvider</code> called <code>getUuid()</code>]]>. This
+				method may return <![CDATA[<code>null</code>]]> in any current cases.
+			</action>
+			<action type="fix">
+				Expanding a ValueSet in JPA server did not correctly apply 
+				<![CDATA[<code>?filter=</code>]]> parameter when the ValueSet
+				being expanded had codes included explicitly (i.e. not by 
+				is-a relationship). Thanks to David Hay for reporting!
+			</action>
+			<action type="fix">
+				JPA validator incorrectly returned an HTTP 400 instead of an HTTP 422 when
+				the resource ID was not present and required, or vice versa. Thanks to 
+				Brian Postlethwaite for reporting!
+			</action>
+			<action type="fix">
+				When using an annotation based client, a ClassCastException would 
+				occur under certain circumstances when the response contained
+				contained resources
+			</action>
+			<action type="fix">
+				JPA server interceptor methods for create/update/delete provided
+				the wrong version ID to the interceptors
+			</action>
+			<action type="add">
+				A post-processing hook for subclasses of BaseValidatingInterceptor is now available.
+			</action>
+			<action type="add" issue="585">
+				AuthorizationInterceptor can now authorize (allow/deny) extended operations
+				on instances and types by wildcard (on any type, or on any instance)
+			</action>
+			<action type="add" issue="595">
+				When RequestValidatingInterceptor is used, the validation results
+				are now populated into the OperationOutcome produced by
+				create and update operations
+			</action>
+			<action type="add" issue="542">
+				Add support for the $process-message operation to fluent client.
+				Thanks to Hugo Soares for the pull request!
+			</action>
+			<action type="add" issue="543">
+				Parser can now be configured when encoding to use a specific
+				base URL for extensions. Thanks to Sebastien Riviere for the 
+				pull request!
+			</action>
+			<action type="fix" issue="568">
+				Correct the resource paths for the DSTU2.1 validation resources,
+				allowing the validator to correctly work against those structures.
+				Thanks to Michael Lawley for the pull request!
+			</action>
+			<action type="fix" issue="551">
+				XML Parser failed to parse large field values (greater than 512 Kb)
+				on certain platforms where the StAX parser was overridden. Thanks to
+				GitHub user @Jodue for the pull request!
+			</action>
+			<action type="add" issue="575">
+				Remove an unneccesary database flush when saving large code systems to
+				the JPA database, improving performance of this operation. Thanks to
+				Joel Schneider for the pull request and analysis!
+			</action>
+			<action type="add">
+				A new post-processing hook for subclasses of BaseValidatingInterceptor is now
+				available. The hook exposes the request details on validation failure prior to throwing an
+				UnprocessableEntityException.
+			</action>
+		</release>
 		<release version="2.2" date="2016-12-20">
 			<action type="add">
 				Bump the version of a few dependencies to the
@@ -170,6 +531,101 @@
 				Fix Web Testing UI to be able to handle STU3 servers which
 				return CapabilityStatement instead of the previously used
 				"Conformance" resource
+			</action>
+			<action type="fix">
+				CLI example uploader couldn't find STU3 examples after CI server
+				was moved to build.fhir.org
+			</action>
+			<action type="fix">
+				Fix issue in JPA subscription module that prevented purging stale
+				subscriptions when many were present on Postgres
+			</action>
+			<action type="fix" issue="532">
+				Server interceptor methods were being called twice unnecessarily
+				by the JPA server, and the DaoConfig interceptor registration 
+				framework was not actually useful. Thanks to GitHub user
+				@mattiuusitalo for reporting!
+			</action>
+			<action type="fix" issue="503">
+				AuthorizationInterceptor on JPA server did not correctly
+				apply rules on deleting resources in a specific compartment
+				because the resource metadata was stripped by the JPA server
+				before the interceptor could see it. Thanks to
+				Eeva Turkka for reporting!
+			</action>
+			<action type="fix" issue="519">
+				JPA server exported CapabilityStatement includes 
+				double entries for the _id parameter and uses the
+				wrong type (string instead of token). Thanks to 
+				Robert Lichtenberger for reporting!
+			</action>
+			<action type="add" issue="504">
+				Custom resource types which extend Binary must not
+				have declared extensions since this is invalid in 
+				FHIR (and HAPI would just ignore them anyhow). Thanks 
+				to Thomas S Berg for reporting!
+			</action>
+			<action type="add">
+				Standard HAPI zip/tar distributions did not include the project
+				sources and JavaDoc JARs. Thanks to Keith Boone for pointing
+				this out!
+			</action>
+			<action type="fix">
+				Server AuthorizationInterceptor always rejects history operation 
+				at the type level even if rules should allow it.
+			</action>
+			<action type="fix">
+				JPA server terminology service was not correctly validating or expanding codes 
+				in SNOMED CT or LOINC code systems. Thanks to David Hay for reporting!
+			</action>
+			<action type="fix" issue="539">
+				Attempting to search for an invalid resource type (e.g. GET base/FooResource) should 
+				return an HTTP 404 and not a 400, per the HTTP spec. Thanks to 
+				GitHub user @CarthageKing for the pull request!
+			</action>
+			<action type="fix" issue="544">
+				When parsing a Bundle containing placeholder fullUrls and references
+				(e.g. "urn:uuid:0000-0000") the resource reference targets did not get
+				populated with the given resources. Note that as a part of this
+				change, <![CDATA[<code>IdType</code> and <code>IdDt</code>]]> have been modified
+				so that when parsing a placeholder ID, the complete placeholder including the
+				"urn:uuid:" or "urn:oid:" prefix will be placed into the ID part. Previously,
+				the prefix was treated as the base URL, which led to strange behaviour
+				like the placeholder being treated as a real IDs. Thanks to GitHub
+				user @jodue for reporting!
+			</action>
+			<action type="add">
+				Declared extensions with multiple type() options listed in the @Child
+				annotation caused a crash on startup. Now this is supported.
+			</action>
+			<action type="add">
+				STU3 XHTML parser for narrative choked if the narrative contained
+				an <![CDATA[<code>&amp;rsquot;</code>]]> entity string.
+			</action>
+			<action type="fix" issue="538">
+				When parsing a quantity parameter on the server with a 
+				value and units but no system (e.g. 
+				<![CDATA[<code>GET [base]/Observation?value=5.4||mg</code>]]>)
+				the unit was incorrectly treated as the system. Thanks to
+				@CarthageKing for the pull request!
+			</action>
+			<action type="533">
+				Correct a typo in the JPA ValueSet ResourceProvider which prevented
+				successful operation under Spring 4.3. Thanks to 
+				Robbert van Waveren for the pull request!
+			</action>
+			<action type="remove">
+				Deprecate the method
+				<![CDATA[<code>ICompositeElement#getAllPopulatedChildElementsOfType(Class)</code>]]>
+				as it is no longer used by HAPI and is just an annoying step
+				in creating custom structures. Thanks to Allan Bro Hansen
+				for pointing this out.
+			</action>
+			<action type="fix" issue="547">
+				CapturingInterceptor did not buffer the response meaning
+				that in many circumstances it did not actually capture
+				the response. Thanks to Jenny Syed of Cerner for
+				the pull request and contribution!
 			</action>
 		</release>
 		<release version="2.1" date="2016-11-11">

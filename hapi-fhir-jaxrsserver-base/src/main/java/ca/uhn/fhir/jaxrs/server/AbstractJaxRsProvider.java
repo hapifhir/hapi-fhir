@@ -5,7 +5,7 @@ import java.io.IOException;
  * #%L
  * HAPI FHIR JAX-RS Server
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,7 @@ import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 
@@ -63,8 +64,6 @@ public abstract class AbstractJaxRsProvider implements IRestfulServerDefaults {
 
     private final FhirContext CTX;
 
-    /** The default exception interceptor */
-    private static final JaxRsExceptionInterceptor DEFAULT_EXCEPTION_HANDLER = new JaxRsExceptionInterceptor();
     private static final String PROCESSING = "processing";
     private static final String ERROR = "error";
 
@@ -125,7 +124,8 @@ public abstract class AbstractJaxRsProvider implements IRestfulServerDefaults {
      * @return the ascii string for the server base
      */
     public String getBaseForServer() {
-        return getUriInfo().getBaseUri().toASCIIString();
+        final String url = getUriInfo().getBaseUri().toASCIIString();
+        return StringUtils.isNotBlank(url) && url.endsWith("/") ? url.substring(0, url.length() - 1) : url;
     }
 
     /**
@@ -258,13 +258,13 @@ public abstract class AbstractJaxRsProvider implements IRestfulServerDefaults {
     public Response handleException(final JaxRsRequest theRequest, final Throwable theException)
             throws IOException {
         if (theException instanceof JaxRsResponseException) {
-            return DEFAULT_EXCEPTION_HANDLER.convertExceptionIntoResponse(theRequest, (JaxRsResponseException) theException);
+            return new JaxRsExceptionInterceptor().convertExceptionIntoResponse(theRequest, (JaxRsResponseException) theException);
         } else if (theException instanceof DataFormatException) {
-            return DEFAULT_EXCEPTION_HANDLER.convertExceptionIntoResponse(theRequest, new JaxRsResponseException(
+            return new JaxRsExceptionInterceptor().convertExceptionIntoResponse(theRequest, new JaxRsResponseException(
                     new InvalidRequestException(theException.getMessage(), createOutcome((DataFormatException) theException))));
         } else {
-            return DEFAULT_EXCEPTION_HANDLER.convertExceptionIntoResponse(theRequest,
-                    DEFAULT_EXCEPTION_HANDLER.convertException(this, theException));
+            return new JaxRsExceptionInterceptor().convertExceptionIntoResponse(theRequest,
+                    new JaxRsExceptionInterceptor().convertException(this, theException));
         }
     }
 

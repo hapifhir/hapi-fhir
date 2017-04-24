@@ -1,12 +1,10 @@
 package ca.uhn.fhir.context;
 
-import java.util.concurrent.Callable;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +28,7 @@ public enum FhirVersionEnum {
 	/*
 	 * ***********************
 	 * Don't auto-sort this type!!!
-	 * 
+	 *
 	 * Or more accurately, entries should be sorted from OLDEST FHIR release
 	 * to NEWEST FHIR release instead of alphabetically
 	 * ***********************
@@ -89,11 +87,11 @@ public enum FhirVersionEnum {
 	}
 
 	public boolean isNewerThan(FhirVersionEnum theVersion) {
-		return ordinal() > theVersion.ordinal();
+		return !isEquivalentTo(theVersion) && ordinal() > theVersion.ordinal();
 	}
 
 	public boolean isOlderThan(FhirVersionEnum theVersion) {
-		return ordinal() < theVersion.ordinal();
+		return !isEquivalentTo(theVersion) && ordinal() < theVersion.ordinal();
 	}
 
 	/**
