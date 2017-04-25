@@ -33,6 +33,7 @@ import org.apache.http.HttpEntity;
 import org.apache.http.HttpEntityEnclosingRequest;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.http.entity.ContentType;
 
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
 import ca.uhn.fhir.rest.client.api.IHttpResponse;
@@ -93,8 +94,9 @@ public class ApacheHttpRequest implements IHttpRequest {
 		if (myRequest instanceof HttpEntityEnclosingRequest) {
 			HttpEntity entity = ((HttpEntityEnclosingRequest) myRequest).getEntity();
 			if (entity.isRepeatable()) {
-				//TODO  verify the charset
-				return IOUtils.toString(entity.getContent(), Charset.defaultCharset());
+				final Header contentTypeHeader = myRequest.getFirstHeader("Content-Type");
+				Charset charset = contentTypeHeader == null ? null : ContentType.parse(contentTypeHeader.getValue()).getCharset();
+				return IOUtils.toString(entity.getContent(), charset);
 			}
 		}
 		return null;
