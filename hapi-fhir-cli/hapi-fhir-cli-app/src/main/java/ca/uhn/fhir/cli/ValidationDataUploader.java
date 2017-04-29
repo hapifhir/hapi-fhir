@@ -14,6 +14,7 @@ import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.dstu3.model.CapabilityStatement;
 import org.hl7.fhir.dstu3.model.IdType;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
@@ -195,9 +196,12 @@ public class ValidationDataUploader extends BaseCommand {
 			org.hl7.fhir.dstu3.model.Resource next = i.getResource();
 			next.setId(next.getIdElement().toUnqualifiedVersionless());
 
-			ourLog.info("Uploading ValueSet {}/{} : {}", new Object[] { count, total, next.getIdElement().getValue() });
+			int bytes = ctx.newXmlParser().encodeResourceToString(next).length();
+			
+			ourLog.info("Uploading ValueSet {}/{} : {} ({} bytes}", new Object[] { count, total, next.getIdElement().getValue(), bytes });
 			try {
-				client.update().resource(next).execute();
+				IIdType id = client.update().resource(next).execute().getId();
+				ourLog.info("  - Got ID: {}", id.getValue());
 			} catch (UnprocessableEntityException e) {
 				ourLog.warn("UnprocessableEntityException: " + e.toString());
 			}

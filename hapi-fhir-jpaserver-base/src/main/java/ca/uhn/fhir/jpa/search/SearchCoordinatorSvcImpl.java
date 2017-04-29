@@ -36,6 +36,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
+import javax.annotation.PostConstruct;
 import javax.persistence.EntityManager;
 import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
@@ -49,6 +50,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.scheduling.concurrent.CustomizableThreadFactory;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
@@ -95,7 +97,6 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 	private EntityManager myEntityManager;
 	private ExecutorService myExecutor;
 	private final ConcurrentHashMap<String, SearchTask> myIdToSearchTask = new ConcurrentHashMap<String, SearchTask>();
-
 	private Integer myLoadingThrottleForUnitTests = null;
 	private long myMaxMillisToWaitForRemoteResults = DateUtils.MILLIS_PER_MINUTE;
 	private boolean myNeverUseLocalSearchForUnitTests;
@@ -105,12 +106,18 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 	private ISearchIncludeDao mySearchIncludeDao;
 	@Autowired
 	private ISearchResultDao mySearchResultDao;
+	@Autowired
+	private PlatformTransactionManager myManagedTxManager;
 
 	private int mySyncSize = DEFAULT_SYNC_SIZE;
 
-	@Autowired
-	private PlatformTransactionManager myTxManager;
-
+//	@Autowired
+//	private DataSource myDataSource;
+//	@PostConstruct
+//	public void start() {
+//		JpaTransactionManager txManager = (JpaTransactionManager) myManagedTxManager;
+//	}
+	
 	/**
 	 * Constructor
 	 */
@@ -141,7 +148,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 			}
 		}
 
-		TransactionTemplate txTemplate = new TransactionTemplate(myTxManager);
+		TransactionTemplate txTemplate = new TransactionTemplate(myManagedTxManager);
 		txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
 
 		Search search;
@@ -206,7 +213,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 	private void populateBundleProvider(PersistedJpaBundleProvider theRetVal) {
 		theRetVal.setContext(myContext);
 		theRetVal.setEntityManager(myEntityManager);
-		theRetVal.setPlatformTransactionManager(myTxManager);
+		theRetVal.setPlatformTransactionManager(myManagedTxManager);
 		theRetVal.setSearchDao(mySearchDao);
 		theRetVal.setSearchCoordinatorSvc(this);
 	}
@@ -262,7 +269,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 				final Date createdCutoff = new Date(System.currentTimeMillis() - myDaoConfig.getReuseCachedSearchResultsForMillis());
 				final String resourceType = theResourceType;
 
-				TransactionTemplate txTemplate = new TransactionTemplate(myTxManager);
+				TransactionTemplate txTemplate = new TransactionTemplate(myManagedTxManager);
 				PersistedJpaBundleProvider foundSearchProvider = txTemplate.execute(new TransactionCallback<PersistedJpaBundleProvider>() {
 					@Override
 					public PersistedJpaBundleProvider doInTransaction(TransactionStatus theStatus) {
@@ -322,7 +329,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 		myIdToSearchTask.put(search.getUuid(), task);
 		myExecutor.submit(task);
 
-		PersistedJpaSearchFirstPageBundleProvider retVal = new PersistedJpaSearchFirstPageBundleProvider(search, theCallingDao, task, sb, myTxManager);
+		PersistedJpaSearchFirstPageBundleProvider retVal = new PersistedJpaSearchFirstPageBundleProvider(search, theCallingDao, task, sb, myManagedTxManager);
 		populateBundleProvider(retVal);
 
 		ourLog.info("Search initial phase completed in {}ms", w.getMillis());
@@ -381,7 +388,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 
 	@VisibleForTesting
 	void setTransactionManagerForUnitTest(PlatformTransactionManager theTxManager) {
-		myTxManager = theTxManager;
+		myManagedTxManager = theTxManager;
 	}
 
 	static Pageable toPage(final int theFromIndex, int theToIndex) {
@@ -418,11 +425,11 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 
 		private boolean myAbortRequested;
 		private final IDao myCallingDao;
-		private CountDownLatch myCompletionLatch;
+		private final CountDownLatch myCompletionLatch;
 		private int myCountSaved = 0;
 		private final CountDownLatch myInitialCollectionLatch = new CountDownLatch(1);
-		private SearchParameterMap myParams;
-		private String myResourceType;
+		private final SearchParameterMap myParams;
+		private final String myResourceType;
 		private final Search mySearch;
 		private final ArrayList<Long> mySyncedPids = new ArrayList<Long>();
 		private final ArrayList<Long> myUnsyncedPids = new ArrayList<Long>();
@@ -454,7 +461,9 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 			StopWatch sw = new StopWatch();
 
 			try {
-				TransactionTemplate txTemplate = new TransactionTemplate(myTxManager);
+				saveSearch();
+				
+				TransactionTemplate txTemplate = new TransactionTemplate(myManagedTxManager);
 				txTemplate.setPropagationBehavior(TransactionTemplate.PROPAGATION_REQUIRES_NEW);
 				txTemplate.execute(new TransactionCallbackWithoutResult() {
 					@Override
@@ -577,7 +586,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 		}
 
 		private void saveSearch() {
-			TransactionTemplate txTemplate = new TransactionTemplate(myTxManager);
+			TransactionTemplate txTemplate = new TransactionTemplate(myManagedTxManager);
 			txTemplate.setPropagationBehavior(TransactionTemplate.PROPAGATION_REQUIRES_NEW);
 			txTemplate.execute(new TransactionCallbackWithoutResult() {
 				@Override
@@ -589,8 +598,8 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 		}
 
 		private void saveUnsynced(final Iterator<Long> theResultIter) {
-			TransactionTemplate txTemplate = new TransactionTemplate(myTxManager);
-			txTemplate.setPropagationBehavior(TransactionTemplate.PROPAGATION_REQUIRES_NEW);
+			TransactionTemplate txTemplate = new TransactionTemplate(myManagedTxManager);
+			txTemplate.setPropagationBehavior(TransactionTemplate.PROPAGATION_REQUIRED);
 			txTemplate.execute(new TransactionCallbackWithoutResult() {
 				@Override
 				protected void doInTransactionWithoutResult(TransactionStatus theArg0) {

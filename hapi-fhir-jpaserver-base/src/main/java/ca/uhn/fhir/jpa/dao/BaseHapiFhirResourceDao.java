@@ -870,11 +870,13 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		ourLog.info("Processed remove tag {}/{} on {} in {}ms", new Object[] { theScheme, theTerm, theId.getValue(), w.getMillisAndRestart() });
 	}
 
+	@Transactional(propagation=Propagation.SUPPORTS)
 	@Override
 	public IBundleProvider search(final SearchParameterMap theParams) {
 		return search(theParams, null);
 	}
 
+	@Transactional(propagation=Propagation.SUPPORTS)
 	@Override
 	public IBundleProvider search(final SearchParameterMap theParams, RequestDetails theRequestDetails) {
 		// Notify interceptors
@@ -993,6 +995,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		return retVal;
 	}
 
+	@Transactional(propagation=Propagation.SUPPORTS)
 	@Override
 	public void translateRawParameters(Map<String, List<String>> theSource, SearchParameterMap theTarget) {
 		if (theSource == null || theSource.isEmpty()) {
