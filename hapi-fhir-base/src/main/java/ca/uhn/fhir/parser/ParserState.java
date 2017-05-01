@@ -1542,12 +1542,11 @@ class ParserState<T> {
 
 		@Override
 		public boolean elementIsRepeating(String theChildName) {
-			try {
-				BaseRuntimeChildDefinition child = myDefinition.getChildByNameOrThrowDataFormatException(theChildName);
-				return child.getMax() > 1 || child.getMax() == Child.MAX_UNLIMITED;
-			} catch (DataFormatException e) {
+			BaseRuntimeChildDefinition child = myDefinition.getChildByName(theChildName);
+			if (child == null) {
 				return false;
 			}
+			return child.getMax() > 1 || child.getMax() == Child.MAX_UNLIMITED;
 		}
 
 		@Override
@@ -1557,10 +1556,8 @@ class ParserState<T> {
 		
 		@Override
 		public void enteringNewElement(String theNamespace, String theChildName) throws DataFormatException {
-			BaseRuntimeChildDefinition child;
-			try {
-				child = myDefinition.getChildByNameOrThrowDataFormatException(theChildName);
-			} catch (DataFormatException e) {
+			BaseRuntimeChildDefinition child = myDefinition.getChildByName(theChildName);
+			if (child == null) {
 				if (theChildName.equals("id")) {
 					if (getCurrentElement() instanceof IIdentifiableElement) {
 						push(new IdentifiableElementIdState(getPreResourceState(), (IIdentifiableElement) getCurrentElement()));
