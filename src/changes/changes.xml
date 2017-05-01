@@ -62,6 +62,11 @@
 				Add configuration property to DSTU3 FhirInstanceValidator to
 				allow client code to change unknown extension handling behaviour.
 			</action>
+			<action type="fix" issue="630">
+				Fix concurrency issues in FhirContext that were causing issues when 
+				starting a context up on Android. Thanks to GitHub issue @Jaypeg85 for
+				the pull request!
+			</action>
 		</release>
 		<release version="2.4" date="2017-04-19">
 			<action type="add">
