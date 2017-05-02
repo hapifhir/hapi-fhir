@@ -77,6 +77,7 @@ public class ResourceValidatorDstu3Test {
 	}
 	
 	@Test
+	@Ignore
 	public void testValidateCareTeamProfile() {
 		
 		CareTeam careTeam = new CareTeam();
