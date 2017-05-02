@@ -75,6 +75,58 @@ public class ResourceValidatorDstu3Test {
 			assertEquals("DataFormatException at [[row,col {unknown-source}]: [2,4]]: Invalid attribute value \"2000-15-31\": Invalid date/time format: \"2000-15-31\"", e.getMessage());
 		}
 	}
+	
+	@Test
+	public void testValidateCareTeamProfile() {
+		
+		CareTeam careTeam = new CareTeam();
+		careTeam
+			.addParticipant()
+				.setMember(new Reference("Practitioner/1647bbb2-3b12-43cc-923c-a475f817e881"))
+				.setOnBehalfOf(new Reference("Organization/5859a28f-01e7-42d8-a8ba-48b31679a828"));
+		
+		IParser parser = ourCtx.newJsonParser().setPrettyPrint(true);
+		String encoded = parser.encodeResourceToString(careTeam);
+		
+		FhirValidator val = ourCtx.newValidator();
+		val.registerValidatorModule(new FhirInstanceValidator());
+
+		
+		ValidationResult result = val.validateWithResult(encoded);
+		String resultString = parser.setPrettyPrint(true).encodeResourceToString(result.toOperationOutcome());
+		ourLog.info(resultString);
+
+		assertEquals(2, ((OperationOutcome) result.toOperationOutcome()).getIssue().size());
+		assertThat(resultString, StringContains.containsString("cvc-pattern-valid"));
+
+	}
+	
+	@Test
+	public void testValidateCareTeamXsd() {
+		
+		CareTeam careTeam = new CareTeam();
+		careTeam
+			.addParticipant()
+				.setMember(new Reference("http://example.com/Practitioner/1647bbb2-3b12-43cc-923c-a475f817e881"))
+				.setOnBehalfOf(new Reference("Organization/5859a28f-01e7-42d8-a8ba-48b31679a828"));
+		
+		IParser parser = ourCtx.newXmlParser().setPrettyPrint(true);
+		String encoded = parser.encodeResourceToString(careTeam);
+		
+		ourLog.info(encoded);
+		
+		FhirValidator val = ourCtx.newValidator();
+		
+		ValidationResult result = val.validateWithResult(encoded);
+		String resultString = parser.setPrettyPrint(true).encodeResourceToString(result.toOperationOutcome());
+		ourLog.info(resultString);
+
+		assertThat(resultString, containsString("No issues detected during validation"));
+		
+		assertEquals(2, ((OperationOutcome) result.toOperationOutcome()).getIssue().size());
+		assertThat(resultString, StringContains.containsString("cvc-pattern-valid"));
+
+	}
 
 	@Test
 	public void testValidateCodeableConceptContainingOnlyGoodCode() {
