@@ -23,6 +23,7 @@ package ca.uhn.fhir.jpa.entity;
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import javax.persistence.Entity;
+import javax.persistence.ForeignKey;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -114,7 +115,7 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 	private Long myId;
 
 	@ManyToOne(optional = false)
-	@JoinColumn(name = "RES_ID", referencedColumnName="RES_ID", insertable=false, updatable=false)
+	@JoinColumn(name = "RES_ID", referencedColumnName="RES_ID", insertable=false, updatable=false, foreignKey=@ForeignKey(name="FK_SPIDXSTR_RESOURCE"))
 	@ContainedIn
 	private ResourceTable myResourceTable;
 

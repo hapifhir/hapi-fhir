@@ -32,6 +32,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
@@ -44,7 +45,9 @@ import ca.uhn.fhir.model.api.Tag;
 
 //@formatter:on
 @Entity
-@Table(name = "HFJ_TAG_DEF", uniqueConstraints = { @UniqueConstraint(columnNames = { "TAG_TYPE", "TAG_SYSTEM", "TAG_CODE" }) })
+@Table(name = "HFJ_TAG_DEF", uniqueConstraints = { 
+	@UniqueConstraint(name="IDX_TAGDEF_TYPESYSCODE", columnNames = { "TAG_TYPE", "TAG_SYSTEM", "TAG_CODE" }) 
+})
 //@formatter:off
 public class TagDefinition implements Serializable {
 
@@ -57,7 +60,8 @@ public class TagDefinition implements Serializable {
 	private String myDisplay;
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
+	@GeneratedValue(strategy = GenerationType.AUTO, generator="SEQ_TAGDEF_ID")
+	@SequenceGenerator(name = "SEQ_TAGDEF_ID", sequenceName = "SEQ_TAGDEF_ID")
 	@Column(name = "TAG_ID")
 	private Long myId;
 

@@ -24,6 +24,7 @@ import java.io.Serializable;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.ForeignKey;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -46,7 +47,7 @@ public class TermCodeSystem implements Serializable {
 	private String myCodeSystemUri;
 
 	@OneToOne()
-	@JoinColumn(name="CURRENT_VERSION_PID", referencedColumnName="PID", nullable=true)
+	@JoinColumn(name="CURRENT_VERSION_PID", referencedColumnName="PID", nullable=true, foreignKey=@ForeignKey(name="FK_TRMCODESYSTEM_CURVER"))
 	private TermCodeSystemVersion myCurrentVersion;
 	
 	@Id()
@@ -56,7 +57,7 @@ public class TermCodeSystem implements Serializable {
 	private Long myPid;
 
 	@OneToOne()
-	@JoinColumn(name = "RES_ID", referencedColumnName = "RES_ID", nullable = false, updatable = false)
+	@JoinColumn(name = "RES_ID", referencedColumnName = "RES_ID", nullable = false, updatable = false, foreignKey=@ForeignKey(name="FK_TRMCODESYSTEM_RES"))
 	private ResourceTable myResource;
 
 	@Column(name = "RES_ID", insertable=false, updatable=false)

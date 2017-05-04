@@ -64,7 +64,7 @@ public class SubscriptionTable {
 	private Collection<SubscriptionFlaggedResource> myFlaggedResources;
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
+	@GeneratedValue(strategy = GenerationType.AUTO, generator="SEQ_SUBSCRIPTION_ID")
 	@SequenceGenerator(name = "SEQ_SUBSCRIPTION_ID", sequenceName = "SEQ_SUBSCRIPTION_ID")
 	@Column(name = "PID", insertable = false, updatable = false)
 	private Long myId;

@@ -36,13 +36,13 @@ import javax.persistence.Table;
 public class SubscriptionFlaggedResource {
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
+	@GeneratedValue(strategy = GenerationType.AUTO, generator="SEQ_SUBSCRIPTION_FLAG_ID")
 	@SequenceGenerator(name = "SEQ_SUBSCRIPTION_FLAG_ID", sequenceName = "SEQ_SUBSCRIPTION_FLAG_ID")
 	@Column(name = "PID", insertable = false, updatable = false)
 	private Long myId;
 
 	@ManyToOne()
-	@JoinColumn(name="RES_ID", nullable=false)
+	@JoinColumn(name="RES_ID", nullable=false, foreignKey=@ForeignKey(name="FK_SUBSFLAGRES_RES"))
 	private ResourceTable myResource;
 	
 	//@formatter:off

@@ -22,11 +22,13 @@ package ca.uhn.fhir.jpa.entity;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.ForeignKey;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -38,13 +40,14 @@ public class ResourceTag extends BaseTag {
 
 	private static final long serialVersionUID = 1L;
 
-	@GeneratedValue(strategy = GenerationType.AUTO)
+	@SequenceGenerator(name = "SEQ_RESTAG_ID", sequenceName = "SEQ_RESTAG_ID")
+	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_RESTAG_ID")
 	@Id
 	@Column(name = "PID")
 	private Long myId;
 
 	@ManyToOne(cascade = {})
-	@JoinColumn(name = "RES_ID", referencedColumnName = "RES_ID")
+	@JoinColumn(name = "RES_ID", referencedColumnName = "RES_ID", foreignKey=@ForeignKey(name="FK_RESTAG_RESOURCE"))
 	private ResourceTable myResource;
 
 	@Column(name = "RES_TYPE", length = ResourceTable.RESTYPE_LEN, nullable = false)
