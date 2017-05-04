@@ -80,9 +80,7 @@ import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.method.PageMethodBinding;
 import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
-import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
+import ca.uhn.fhir.rest.server.exceptions.*;
 
 public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 	static final int DEFAULT_SYNC_SIZE = 250;
@@ -475,7 +473,22 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 				ourLog.info("Completed search for {} resources in {}ms", mySyncedPids.size(), sw.getMillis());
 
 			} catch (Throwable t) {
-				ourLog.error("Failed during search loading after {}ms", sw.getMillis(), t);
+				
+				/*
+				 * Don't print a stack trace for client errors.. that's just noisy
+				 */
+				boolean logged = false;
+				if (t instanceof BaseServerResponseException) {
+					BaseServerResponseException exception = (BaseServerResponseException) t;
+					if (exception.getStatusCode() >= 400 && exception.getStatusCode() < 500) {
+						logged = true;
+						ourLog.warn("Failed during search due to invalid request: {}", t.toString());
+					}
+				} 
+				
+				if (!logged) {
+					ourLog.error("Failed during search loading after {}ms", sw.getMillis(), t);
+				}
 				myUnsyncedPids.clear();
 
 				Throwable rootCause = ExceptionUtils.getRootCause(t);

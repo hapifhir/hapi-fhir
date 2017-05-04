@@ -3094,6 +3094,28 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		checkParamMissing(Observation.SP_DATE);
 	}
 
+	@Test
+	public void testSearchInvalidParam() throws Exception {
+		Patient patient = new Patient();
+		patient.addIdentifier().setSystem("urn:system").setValue("0");
+		patient.addName().setFamily("testSearchWithMixedParams").addGiven("Joe");
+		myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
+
+		// should be subject._id
+		HttpGet httpPost = new HttpGet(ourServerBase + "/Observation?subject.id=FOO"); 
+
+		CloseableHttpResponse resp = ourHttpClient.execute(httpPost);
+		try {
+			String respString = IOUtils.toString(resp.getEntity().getContent(), StandardCharsets.UTF_8);
+			ourLog.info(respString);
+			assertThat(respString, containsString("Invalid parameter chain: subject.id"));
+			assertEquals(400, resp.getStatusLine().getStatusCode());
+		} finally {
+			IOUtils.closeQuietly(resp.getEntity().getContent());
+		}
+		ourLog.info("Outgoing post: {}", httpPost);
+	}
+	
 	/**
 	 * See #411
 	 * 

@@ -1,0 +1,651 @@
+<Bundle xmlns="http://hl7.org/fhir">
+	<meta>
+		<lastUpdated value="2017-05-02T11:15:27.998+01:00" />
+		<profile value="http://fhir.nhs.net/StructureDefinition/NewbornBloodSpotScreeningBundlev1" />
+	</meta>
+	<type value="transaction" />
+	<entry>
+		<fullUrl value="urn:uuid:60c88939-6159-45ee-9f78-122c9b56a5bb" />
+		<resource>
+			<Provenance>
+				<id value="60c88939-6159-45ee-9f78-122c9b56a5bb" />
+				<meta>
+					<profile value="http://fhir.nhs.net/StructureDefinition/PCHRProvenancev1" />
+				</meta>
+				<target>
+					<reference value="urn:uuid:be58eb90-74b3-4db6-9a31-c40a6c97e3dc" />
+				</target>
+				<target>
+					<reference value="urn:uuid:3d1cffec-2f6e-4bca-9945-f1ca77bf8949" />
+				</target>
+				<target>
+					<reference value="urn:uuid:f0b5569d-136b-4be8-b5a3-e5db1feead99" />
+				</target>
+				<target>
+					<reference value="urn:uuid:8a3a8adc-747a-4430-8876-d8b4937928b9" />
+				</target>
+				<target>
+					<reference value="urn:uuid:aee71835-b117-4fe5-ad11-4bff7c9adff3" />
+				</target>
+				<target>
+					<reference value="urn:uuid:116799a0-223e-4708-aa5c-010587fabde8" />
+				</target>
+				<target>
+					<reference value="urn:uuid:8b43b707-cab5-42e7-8dd8-2f664c69dee7" />
+				</target>
+				<target>
+					<reference value="urn:uuid:a947c7d3-ea88-4f45-b6ab-a1db471ccd32" />
+				</target>
+				<target>
+					<reference value="urn:uuid:ed9ca84e-86ba-4a1d-9e6f-4a928be7a89c" />
+				</target>
+				<target>
+					<reference value="urn:uuid:51d6a6de-4263-43b5-9fa0-64a41d1f89a1" />
+				</target>
+				<target>
+					<reference value="urn:uuid:acd1e52b-00bb-49b6-af2c-83c592694e86" />
+				</target>
+				<target>
+					<reference value="urn:uuid:80159cb4-9fc2-434f-9fb5-b4da4beb92dc" />
+				</target>
+				<target>
+					<reference value="urn:uuid:463c6bd8-79c8-4982-acef-5312329bba72" />
+				</target>
+				<target>
+					<reference value="urn:uuid:db24d6f9-6110-4ab2-a694-e4c99f5a5838" />
+				</target>
+				<target>
+					<reference value="urn:uuid:c3e671e6-1402-4993-97fc-3e970fa0e1d4" />
+				</target>
+				<target>
+					<reference value="urn:uuid:f7bb659c-fb86-4aed-90c3-a7957459927f" />
+				</target>
+				<recorded value="2017-05-02T11:15:27.998+01:00" />
+				<agent>
+					<role>
+						<system value="http://hl7.org/fhir/provenance-participant-role" />
+						<code value="author" />
+					</role>
+					<actor>
+						<reference value="urn:uuid:89df119a-409d-4e18-a68c-ab75fcecb9c3" />
+					</actor>
+				</agent>
+			</Provenance>
+		</resource>
+		<request>
+			<method value="POST"/>
+			<url value="Provenance"/>
+		</request>
+	</entry>
+	<entry>
+		<fullUrl value="urn:uuid:89df119a-409d-4e18-a68c-ab75fcecb9c3" />
+		<resource>
+			<Organization>
+				<id value="89df119a-409d-4e18-a68c-ab75fcecb9c3" />
+				<meta>
+					<profile value="http://fhir.nhs.net/StructureDefinition/PCHROrganizationv1" />
+				</meta>
+				<identifier>
+					<system value="urn:ietf:rfc:RNS01" />
+					<value value="2.16.840.1.113883.19.5" />
+				</identifier>
+			</Organization>
+		</resource>
+		<request>
+			<method value="POST"/>
+			<url value="Organization"/>
+		</request>
+	</entry>
+	<entry>
+		<fullUrl value="urn:uuid:be58eb90-74b3-4db6-9a31-c40a6c97e3dc" />
+		<resource>
+			<Organization>
+				<id value="be58eb90-74b3-4db6-9a31-c40a6c97e3dc" />
+				<meta>
+					<profile value="http://fhir.nhs.net/StructureDefinition/PCHROrganizationv1" />
+				</meta>
+				<identifier>
+					<system value="http://fhir.nhs.net/id/gcode" />
+					<value value="M87003" />
+				</identifier>
+			</Organization>
+		</resource>
+		<request>
+			<method value="POST"/>
+			<url value="Organization"/>
+		</request>
+	</entry>
+	<entry>
+		<fullUrl value="urn:uuid:3d1cffec-2f6e-4bca-9945-f1ca77bf8949" />
+		<resource>
+			<Patient>
+				<id value="3d1cffec-2f6e-4bca-9945-f1ca77bf8949" />
+				<meta>
+					<profile value="http://fhir.nhs.net/StructureDefinition/NHSPatientv1" />
+				</meta>
+				<extension url="http://fhir.nhs.net/StructureDefinition/BirthDetailsExtensionv1">
+					<extension url="birthTime">
+						<valueTime value="12:05:00" />
+					</extension>
+				</extension>
+				<identifier>
+					<system value="http://fhir.nhs.net/id/nhs-number" />
+					<value value="1935537156" />
+				</identifier>
+				<name>
+					<family value="Gibson" />
+					<given value="Mike" />
+				</name>
+				<gender value="male" />
+				<birthDate value="2014-05-25" />
+				<careProvider>
+					<reference value="urn:uuid:be58eb90-74b3-4db6-9a31-c40a6c97e3dc" />
+				</careProvider>
+			</Patient>
+		</resource>
+		<request>
+			<method value="POST"/>
+			<url value="Patient"/>
+		</request>
+	</entry>
+	<entry>
+		<fullUrl value="urn:uuid:f0b5569d-136b-4be8-b5a3-e5db1feead99" />
+		<resource>
+			<Encounter>
+				<id value="f0b5569d-136b-4be8-b5a3-e5db1feead99" />
+				<meta>
+					<profile value="http://fhir.nhs.net/StructureDefinition/PCHREncounterv1" />
+				</meta>
+				<status value="finished" />
+				<type>
+					<coding>
+						<system value="http://snomed.info/sct" />
+						<code value="428447008" />
+						<display value="Newborn blood spot screening (procedure)" />
+					</coding>
+				</type>
+				<patient>
+					<reference value="urn:uuid:3d1cffec-2f6e-4bca-9945-f1ca77bf8949" />
+				</patient>
+				<period>
+					<start value="2017-05-02" />
+				</period>
+			</Encounter>
+		</resource>
+		<request>
+			<method value="POST"/>
+			<url value="Encounter"/>
+		</request>
+	</entry>
+	<entry>
+		<fullUrl value="urn:uuid:8a3a8adc-747a-4430-8876-d8b4937928b9" />
+		<resource>
+			<Procedure>
+				<id value="8a3a8adc-747a-4430-8876-d8b4937928b9" />
+				<meta>
+					<profile value="http://fhir.nhs.net/StructureDefinition/NewbornBloodSpotScreeningProcedurev1" />
+				</meta>
+				<subject>
+					<reference value="urn:uuid:3d1cffec-2f6e-4bca-9945-f1ca77bf8949" />
+				</subject>
+				<status value="completed" />
+				<code>
+					<coding>
+						<system value="http://snomed.info/sct" />
+						<code value="77262006" />
+						<display value="Heel stick (procedure)" />
+					</coding>
+				</code>
+				<performer>
+					<actor>
+						<reference value="urn:uuid:f7bb659c-fb86-4aed-90c3-a7957459927f" />
+					</actor>
+				</performer>
+				<performedDate value="2014-06-06" />
+				<encounter>
+					<reference value="urn:uuid:f0b5569d-136b-4be8-b5a3-e5db1feead99" />
+				</encounter>
+				<outcome>
+					<coding>
+						<system value="http://snomed.info/sct" />
+						<code value="15501000000100" />
+						<display value="" />
+					</coding>
+				</outcome>
+			</Procedure>
+		</resource>
+		<request>
+			<method value="POST"/>
+			<url value="Procedure"/>
+		</request>
+	</entry>
+	<entry>
+		<fullUrl value="urn:uuid:aee71835-b117-4fe5-ad11-4bff7c9adff3" />
+		<resource>
+			<DiagnosticReport>
+				<id value="aee71835-b117-4fe5-ad11-4bff7c9adff3" />
+				<meta>
+					<profile value="http://fhir.nhs.net/StructureDefinition/NewbornBloodSpotScreeningDiagnosticReportv1" />
+				</meta>
+				<status value="final" />
+				<code>
+					<coding>
+						<system value="http://snomed.info/sct" />
+						<code value="428447008" />
+						<display value="Newborn blood spot screening (procedure)" />
+					</coding>
+				</code>
+				<subject>
+					<reference value="urn:uuid:3d1cffec-2f6e-4bca-9945-f1ca77bf8949" />
+				</subject>
+				<effectiveDateTime value="2014-06-06" />
+				<issued value="2017-05-02T11:15:27.998+01:00" />
+				<performer>
+					<reference value="urn:uuid:f7bb659c-fb86-4aed-90c3-a7957459927f" />
+				</performer>
+				<result>
+					<reference value="urn:uuid:8b43b707-cab5-42e7-8dd8-2f664c69dee7" />
+					<display value="Cystic fibrosis screening test (observable entity)" />
+				</result>
+				<result>
+					<reference value="urn:uuid:a947c7d3-ea88-4f45-b6ab-a1db471ccd32" />
+					<display value="Congenital hypothyroidism screening test (observable entity)" />
+				</result>
+				<result>
+					<reference value="urn:uuid:ed9ca84e-86ba-4a1d-9e6f-4a928be7a89c" />
+					<display value="Blood spot glutaric aciduria type 1 screening test (observable entity)" />
+				</result>
+				<result>
+					<reference value="urn:uuid:51d6a6de-4263-43b5-9fa0-64a41d1f89a1" />
+					<display value="Blood spot homocystinuria screening test (observable entity)" />
+				</result>
+				<result>
+					<reference value="urn:uuid:acd1e52b-00bb-49b6-af2c-83c592694e86" />
+					<display value="Blood spot isovaleric acidaemia screening test (observable entity)" />
+				</result>
+				<result>
+					<reference value="urn:uuid:80159cb4-9fc2-434f-9fb5-b4da4beb92dc" />
+					<display value="Medium chain acyl coenzyme A dehydrogenase deficiency screening test (observable entity)" />
+				</result>
+				<result>
+					<reference value="urn:uuid:463c6bd8-79c8-4982-acef-5312329bba72" />
+					<display value="Blood spot maple syrup urine disease screening test (observable entity)" />
+				</result>
+				<result>
+					<reference value="urn:uuid:db24d6f9-6110-4ab2-a694-e4c99f5a5838" />
+					<display value="Phenylketonuria screening test (observable entity)" />
+				</result>
+				<result>
+					<reference value="urn:uuid:c3e671e6-1402-4993-97fc-3e970fa0e1d4" />
+					<display value="Sickle cell disease screening test (observable entity)" />
+				</result>
+			</DiagnosticReport>
+		</resource>
+		<request>
+			<method value="POST"/>
+			<url value="DiagnosticReport"/>
+		</request>
+	</entry>
+	<entry>
+		<fullUrl value="urn:uuid:116799a0-223e-4708-aa5c-010587fabde8" />
+		<resource>
+			<Specimen>
+				<id value="116799a0-223e-4708-aa5c-010587fabde8" />
+				<meta>
+					<profile value="http://fhir.nhs.net/StructureDefinition/NewbornBloodSpotScreeningSpecimenv1" />
+				</meta>
+				<status value="available" />
+				<subject>
+					<reference value="urn:uuid:3d1cffec-2f6e-4bca-9945-f1ca77bf8949" />
+				</subject>
+				<container>
+					<identifier>
+						<system value="HPSystem" />
+						<value value="H1DZTGK8GUSLVY36C" />
+					</identifier>
+				</container>
+			</Specimen>
+		</resource>
+		<request>
+			<method value="POST"/>
+			<url value="Specimen"/>
+		</request>
+	</entry>
+	<entry>
+		<fullUrl value="urn:uuid:8b43b707-cab5-42e7-8dd8-2f664c69dee7" />
+		<resource>
+			<Observation>
+				<id value="8b43b707-cab5-42e7-8dd8-2f664c69dee7" />
+				<meta>
+					<profile value="http://fhir.nhs.net/StructureDefinition/NewbornBloodSpotScreeningObservationv1" />
+				</meta>
+				<status value="final" />
+				<code>
+					<coding>
+						<system value="http://snomed.info/sct" />
+						<code value="1028351000000108" />
+						<display value="Cystic fibrosis screening test (observable entity)" />
+					</coding>
+				</code>
+				<subject>
+					<reference value="urn:uuid:3d1cffec-2f6e-4bca-9945-f1ca77bf8949" />
+				</subject>
+				<effectiveDateTime value="2014-06-06" />
+				<valueCodeableConcept>
+					<coding>
+						<system value="http://snomed.info/sct" />
+						<code value="509581000000105" />
+						<display value="Newborn blood spot specimen received (finding)" />
+						<userSelected value="false" />
+					</coding>
+				</valueCodeableConcept>
+			</Observation>
+		</resource>
+		<request>
+			<method value="POST"/>
+			<url value="Observation"/>
+		</request>
+	</entry>
+	<entry>
+		<fullUrl value="urn:uuid:a947c7d3-ea88-4f45-b6ab-a1db471ccd32" />
+		<resource>
+			<Observation>
+				<id value="a947c7d3-ea88-4f45-b6ab-a1db471ccd32" />
+				<meta>
+					<profile value="http://fhir.nhs.net/StructureDefinition/NewbornBloodSpotScreeningObservationv1" />
+				</meta>
+				<status value="final" />
+				<code>
+					<coding>
+						<system value="http://snomed.info/sct" />
+						<code value="1005921000000102" />
+						<display value="Congenital hypothyroidism screening test (observable entity)" />
+					</coding>
+				</code>
+				<subject>
+					<reference value="urn:uuid:3d1cffec-2f6e-4bca-9945-f1ca77bf8949" />
+				</subject>
+				<effectiveDateTime value="2014-06-06" />
+				<valueCodeableConcept>
+					<coding>
+						<system value="http://snomed.info/sct" />
+						<code value="509581000000105" />
+						<display value="Newborn blood spot specimen received (finding)" />
+						<userSelected value="false" />
+					</coding>
+				</valueCodeableConcept>
+			</Observation>
+		</resource>
+		<request>
+			<method value="POST"/>
+			<url value="Observation"/>
+		</request>
+	</entry>
+	<entry>
+		<fullUrl value="urn:uuid:ed9ca84e-86ba-4a1d-9e6f-4a928be7a89c" />
+		<resource>
+			<Observation>
+				<id value="ed9ca84e-86ba-4a1d-9e6f-4a928be7a89c" />
+				<meta>
+					<profile value="http://fhir.nhs.net/StructureDefinition/NewbornBloodSpotScreeningObservationv1" />
+				</meta>
+				<status value="final" />
+				<code>
+					<coding>
+						<system value="http://snomed.info/sct" />
+						<code value="1011391000000103" />
+						<display value="Blood spot glutaric aciduria type 1 screening test (observable entity)" />
+					</coding>
+				</code>
+				<subject>
+					<reference value="urn:uuid:3d1cffec-2f6e-4bca-9945-f1ca77bf8949" />
+				</subject>
+				<effectiveDateTime value="2014-06-06" />
+				<valueCodeableConcept>
+					<coding>
+						<system value="http://snomed.info/sct" />
+						<code value="509581000000105" />
+						<display value="Newborn blood spot specimen received (finding)" />
+						<userSelected value="false" />
+					</coding>
+				</valueCodeableConcept>
+			</Observation>
+		</resource>
+		<request>
+			<method value="POST"/>
+			<url value="Observation"/>
+		</request>
+	</entry>
+	<entry>
+		<fullUrl value="urn:uuid:51d6a6de-4263-43b5-9fa0-64a41d1f89a1" />
+		<resource>
+			<Observation>
+				<id value="51d6a6de-4263-43b5-9fa0-64a41d1f89a1" />
+				<meta>
+					<profile value="http://fhir.nhs.net/StructureDefinition/NewbornBloodSpotScreeningObservationv1" />
+				</meta>
+				<status value="final" />
+				<code>
+					<coding>
+						<system value="http://snomed.info/sct" />
+						<code value="1011371000000102" />
+						<display value="Blood spot homocystinuria screening test (observable entity)" />
+					</coding>
+				</code>
+				<subject>
+					<reference value="urn:uuid:3d1cffec-2f6e-4bca-9945-f1ca77bf8949" />
+				</subject>
+				<effectiveDateTime value="2014-06-06" />
+				<valueCodeableConcept>
+					<coding>
+						<system value="http://snomed.info/sct" />
+						<code value="509581000000105" />
+						<display value="Newborn blood spot specimen received (finding)" />
+						<userSelected value="false" />
+					</coding>
+				</valueCodeableConcept>
+			</Observation>
+		</resource>
+		<request>
+			<method value="POST"/>
+			<url value="Observation"/>
+		</request>
+	</entry>
+	<entry>
+		<fullUrl value="urn:uuid:acd1e52b-00bb-49b6-af2c-83c592694e86" />
+		<resource>
+			<Observation>
+				<id value="acd1e52b-00bb-49b6-af2c-83c592694e86" />
+				<meta>
+					<profile value="http://fhir.nhs.net/StructureDefinition/NewbornBloodSpotScreeningObservationv1" />
+				</meta>
+				<status value="final" />
+				<code>
+					<coding>
+						<system value="http://snomed.info/sct" />
+						<code value="1011381000000100" />
+						<display value="Blood spot isovaleric acidaemia screening test (observable entity)" />
+					</coding>
+				</code>
+				<subject>
+					<reference value="urn:uuid:3d1cffec-2f6e-4bca-9945-f1ca77bf8949" />
+				</subject>
+				<effectiveDateTime value="2014-06-06" />
+				<valueCodeableConcept>
+					<coding>
+						<system value="http://snomed.info/sct" />
+						<code value="509581000000105" />
+						<display value="Newborn blood spot specimen received (finding)" />
+						<userSelected value="false" />
+					</coding>
+				</valueCodeableConcept>
+			</Observation>
+		</resource>
+		<request>
+			<method value="POST"/>
+			<url value="Observation"/>
+		</request>
+	</entry>
+	<entry>
+		<fullUrl value="urn:uuid:80159cb4-9fc2-434f-9fb5-b4da4beb92dc" />
+		<resource>
+			<Observation>
+				<id value="80159cb4-9fc2-434f-9fb5-b4da4beb92dc" />
+				<meta>
+					<profile value="http://fhir.nhs.net/StructureDefinition/NewbornBloodSpotScreeningObservationv1" />
+				</meta>
+				<status value="final" />
+				<code>
+					<coding>
+						<system value="http://snomed.info/sct" />
+						<code value="1005911000000108" />
+						<display value="Medium chain acyl coenzyme A dehydrogenase deficiency screening test (observable entity)" />
+					</coding>
+				</code>
+				<subject>
+					<reference value="urn:uuid:3d1cffec-2f6e-4bca-9945-f1ca77bf8949" />
+				</subject>
+				<effectiveDateTime value="2014-06-06" />
+				<valueCodeableConcept>
+					<coding>
+						<system value="http://snomed.info/sct" />
+						<code value="509581000000105" />
+						<display value="Newborn blood spot specimen received (finding)" />
+						<userSelected value="false" />
+					</coding>
+				</valueCodeableConcept>
+			</Observation>
+		</resource>
+		<request>
+			<method value="POST"/>
+			<url value="Observation"/>
+		</request>
+	</entry>
+	<entry>
+		<fullUrl value="urn:uuid:463c6bd8-79c8-4982-acef-5312329bba72" />
+		<resource>
+			<Observation>
+				<id value="463c6bd8-79c8-4982-acef-5312329bba72" />
+				<meta>
+					<profile value="http://fhir.nhs.net/StructureDefinition/NewbornBloodSpotScreeningObservationv1" />
+				</meta>
+				<status value="final" />
+				<code>
+					<coding>
+						<system value="http://snomed.info/sct" />
+						<code value="1011361000000109" />
+						<display value="Blood spot maple syrup urine disease screening test (observable entity)" />
+					</coding>
+				</code>
+				<subject>
+					<reference value="urn:uuid:3d1cffec-2f6e-4bca-9945-f1ca77bf8949" />
+				</subject>
+				<effectiveDateTime value="2014-06-06" />
+				<valueCodeableConcept>
+					<coding>
+						<system value="http://snomed.info/sct" />
+						<code value="509581000000105" />
+						<display value="Newborn blood spot specimen received (finding)" />
+						<userSelected value="false" />
+					</coding>
+				</valueCodeableConcept>
+			</Observation>
+		</resource>
+		<request>
+			<method value="POST"/>
+			<url value="Observation"/>
+		</request>
+	</entry>
+	<entry>
+		<fullUrl value="urn:uuid:db24d6f9-6110-4ab2-a694-e4c99f5a5838" />
+		<resource>
+			<Observation>
+				<id value="db24d6f9-6110-4ab2-a694-e4c99f5a5838" />
+				<meta>
+					<profile value="http://fhir.nhs.net/StructureDefinition/NewbornBloodSpotScreeningObservationv1" />
+				</meta>
+				<status value="final" />
+				<code>
+					<coding>
+						<system value="http://snomed.info/sct" />
+						<code value="1031241000000109" />
+						<display value="Phenylketonuria screening test (observable entity)" />
+					</coding>
+				</code>
+				<subject>
+					<reference value="urn:uuid:3d1cffec-2f6e-4bca-9945-f1ca77bf8949" />
+				</subject>
+				<effectiveDateTime value="2014-06-06" />
+				<valueCodeableConcept>
+					<coding>
+						<system value="http://snomed.info/sct" />
+						<code value="509581000000105" />
+						<display value="Newborn blood spot specimen received (finding)" />
+						<userSelected value="false" />
+					</coding>
+				</valueCodeableConcept>
+			</Observation>
+		</resource>
+		<request>
+			<method value="POST"/>
+			<url value="Observation"/>
+		</request>
+	</entry>
+	<entry>
+		<fullUrl value="urn:uuid:c3e671e6-1402-4993-97fc-3e970fa0e1d4" />
+		<resource>
+			<Observation>
+				<id value="c3e671e6-1402-4993-97fc-3e970fa0e1d4" />
+				<meta>
+					<profile value="http://fhir.nhs.net/StructureDefinition/NewbornBloodSpotScreeningObservationv1" />
+				</meta>
+				<status value="final" />
+				<code>
+					<coding>
+						<system value="http://snomed.info/sct" />
+						<code value="991891000000102" />
+						<display value="Sickle cell disease screening test (observable entity)" />
+					</coding>
+				</code>
+				<subject>
+					<reference value="urn:uuid:3d1cffec-2f6e-4bca-9945-f1ca77bf8949" />
+				</subject>
+				<effectiveDateTime value="2014-06-06" />
+				<valueCodeableConcept>
+					<coding>
+						<system value="http://snomed.info/sct" />
+						<code value="509581000000105" />
+						<display value="Newborn blood spot specimen received (finding)" />
+						<userSelected value="false" />
+					</coding>
+				</valueCodeableConcept>
+			</Observation>
+		</resource>
+		<request>
+			<method value="POST"/>
+			<url value="Observation"/>
+		</request>
+	</entry>
+	<entry>
+		<fullUrl value="urn:uuid:f7bb659c-fb86-4aed-90c3-a7957459927f" />
+		<resource>
+			<Practitioner>
+				<id value="f7bb659c-fb86-4aed-90c3-a7957459927f" />
+				<meta>
+					<profile value="http://hl7.org/fhir/StructureDefinition/Practitioner" />
+				</meta>
+				<identifier>
+					<system value="HPSystem" />
+					<value value="Lab1" />
+				</identifier>
+				<name>
+					<family value="Laboratory1" />
+				</name>
+			</Practitioner>
+		</resource>
+		<request>
+			<method value="POST"/>
+			<url value="Practitioner"/>
+		</request>
+	</entry>
+</Bundle>

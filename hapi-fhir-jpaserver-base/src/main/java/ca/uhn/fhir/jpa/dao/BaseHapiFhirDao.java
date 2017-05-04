@@ -1539,6 +1539,12 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		/*
 		 * Update the "search param present" table which is used for the
 		 * ?foo:missing=true queries
+		 * 
+		 * Note that we're only populating this for reference params
+		 * because the index tables for all other types have a MISSING column
+		 * right on them for handling the :missing queries. We can't use the
+		 * index table for resource links (reference indexes) because we index
+		 * those by path and not by parameter name.
 		 */
 		if (thePerformIndexing) {
 			Map<String, Boolean> presentSearchParams = new HashMap<String, Boolean>();

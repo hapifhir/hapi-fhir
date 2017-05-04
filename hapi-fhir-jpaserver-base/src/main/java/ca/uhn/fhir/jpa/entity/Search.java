@@ -42,8 +42,8 @@ import ca.uhn.fhir.rest.param.DateRangeParam;
 @Table(name = "HFJ_SEARCH", uniqueConstraints= {
 	@UniqueConstraint(name="IDX_SEARCH_UUID", columnNames="SEARCH_UUID")
 }, indexes= {
-	@Index(name="JDX_SEARCH_LASTRETURNED", columnList="SEARCH_LAST_RETURNED"),
-	@Index(name="JDX_SEARCH_RESTYPE_STRINGHASHCREATED", columnList="RESOURCE_TYPE,SEARCH_QUERY_STRING_HASH,CREATED")
+	@Index(name="IDX_SEARCH_LASTRETURNED", columnList="SEARCH_LAST_RETURNED"),
+	@Index(name="IDX_SEARCH_RESTYPE_HASHS", columnList="RESOURCE_TYPE,SEARCH_QUERY_STRING_HASH,CREATED")
 })
 public class Search implements Serializable {
 

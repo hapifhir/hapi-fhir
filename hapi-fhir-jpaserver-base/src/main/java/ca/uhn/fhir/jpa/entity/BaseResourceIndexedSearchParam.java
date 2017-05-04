@@ -23,15 +23,8 @@ package ca.uhn.fhir.jpa.entity;
 import java.io.Serializable;
 import java.util.Date;
 
-import javax.persistence.Column;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.MappedSuperclass;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
+import javax.persistence.*;
 
-import org.hibernate.annotations.ColumnDefault;
-import org.hibernate.annotations.Columns;
 import org.hibernate.search.annotations.ContainedIn;
 import org.hibernate.search.annotations.Field;
 
@@ -44,7 +37,6 @@ public abstract class BaseResourceIndexedSearchParam implements Serializable {
 
 	@Field()
 	@Column(name = "SP_MISSING", nullable = true)
-	@ColumnDefault("false")
 	private boolean myMissing;
 
 	@Field

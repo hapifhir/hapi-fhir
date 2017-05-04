@@ -52,5 +52,8 @@ public class SearchParam {
 		myResourceName = theResourceName;
 	}
 
+	public Long getId() {
+		return myId;
+	}
 	
 }

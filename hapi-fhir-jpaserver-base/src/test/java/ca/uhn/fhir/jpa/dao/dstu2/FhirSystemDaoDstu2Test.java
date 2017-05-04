@@ -25,6 +25,7 @@ import java.util.List;
 
 import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.dstu3.model.IdType;
+import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.AfterClass;
 import org.junit.Test;
@@ -74,6 +75,21 @@ import ca.uhn.fhir.util.TestUtil;
 public class FhirSystemDaoDstu2Test extends BaseJpaDstu2SystemTest {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirSystemDaoDstu2Test.class);
+
+	/**
+	 * See #638
+	 */
+	@Test
+	public void testTransactionBug638() throws Exception {
+		String input = loadClasspath("/bug638.xml");
+		Bundle request = myFhirCtx.newXmlParser().parseResource(Bundle.class, input);
+		
+		Bundle resp = mySystemDao.transaction(mySrd, request);
+		
+		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(resp));
+		
+		assertEquals(18, resp.getEntry().size());
+	}
 
 	/**
 	 * Per a message on the mailing list

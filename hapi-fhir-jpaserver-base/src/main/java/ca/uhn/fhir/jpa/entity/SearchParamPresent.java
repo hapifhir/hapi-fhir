@@ -54,6 +54,13 @@ public class SearchParamPresent implements Serializable {
 	@JoinColumn(name = "SP_ID", referencedColumnName = "PID", nullable = false, foreignKey = @ForeignKey(name = "FK_RESPARMPRES_SPID"))
 	private SearchParam mySearchParam;
 
+	/**
+	 * Constructor
+	 */
+	public SearchParamPresent() {
+		super();
+	}
+	
 	public ResourceTable getResource() {
 		return myResource;
 	}
