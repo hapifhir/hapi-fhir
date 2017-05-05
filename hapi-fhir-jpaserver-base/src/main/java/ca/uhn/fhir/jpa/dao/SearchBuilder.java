@@ -1487,10 +1487,29 @@ public class SearchBuilder implements ISearchBuilder {
 			theResourceListToPopulate.add(null);
 		}
 
+		/*
+		 * As always, Oracle can't handle things that other databases don't mind.. In this
+		 * case it doesn't like more than ~1000 IDs in a single load, so we break this up
+		 * if it's lots of IDs. I suppose maybe we should be doing this as a join anyhow
+		 * but this should work too. Sigh.
+		 */
+		int maxLoad = 800;
+		List<Long> pids = new ArrayList<Long>(theIncludePids);
+		for (int i = 0; i < pids.size(); i += maxLoad) {
+			int to = i + maxLoad;
+			to = Math.min(to, pids.size());
+			List<Long> pidsSubList = pids.subList(i, to); 
+			doLoadPids(theResourceListToPopulate, theRevIncludedPids, theForHistoryOperation, entityManager, context, theDao, position, pidsSubList);
+		} 
+		
+	}
+
+	private void doLoadPids(List<IBaseResource> theResourceListToPopulate, Set<Long> theRevIncludedPids, boolean theForHistoryOperation, EntityManager entityManager, FhirContext context, IDao theDao,
+			Map<Long, Integer> position, Collection<Long> pids) {
 		CriteriaBuilder builder = entityManager.getCriteriaBuilder();
 		CriteriaQuery<ResourceTable> cq = builder.createQuery(ResourceTable.class);
 		Root<ResourceTable> from = cq.from(ResourceTable.class);
-		cq.where(from.get("myId").in(theIncludePids));
+		cq.where(from.get("myId").in(pids));
 		TypedQuery<ResourceTable> q = entityManager.createQuery(cq);
 
 		for (ResourceTable next : q.getResultList()) {

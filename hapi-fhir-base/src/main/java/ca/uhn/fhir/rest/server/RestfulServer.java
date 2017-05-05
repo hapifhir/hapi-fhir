@@ -22,33 +22,18 @@ package ca.uhn.fhir.rest.server;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-import java.io.Closeable;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.Writer;
+import java.io.*;
 import java.lang.annotation.Annotation;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.lang.reflect.*;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.StringTokenizer;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.jar.Manifest;
 
 import javax.servlet.ServletException;
 import javax.servlet.UnavailableException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.*;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -56,35 +41,17 @@ import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
-import ca.uhn.fhir.context.ConfigurationException;
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.ProvidedResourceScanner;
-import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.context.*;
 import ca.uhn.fhir.parser.IParser;
-import ca.uhn.fhir.rest.annotation.Destroy;
-import ca.uhn.fhir.rest.annotation.IdParam;
-import ca.uhn.fhir.rest.annotation.Initialize;
+import ca.uhn.fhir.rest.annotation.*;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
-import ca.uhn.fhir.rest.method.BaseMethodBinding;
-import ca.uhn.fhir.rest.method.ConformanceMethodBinding;
-import ca.uhn.fhir.rest.method.ParseAction;
-import ca.uhn.fhir.rest.method.RequestDetails;
+import ca.uhn.fhir.rest.method.*;
 import ca.uhn.fhir.rest.server.RestfulServerUtils.ResponseEncoding;
-import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
-import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.rest.server.exceptions.NotModifiedException;
-import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import ca.uhn.fhir.rest.server.interceptor.ExceptionHandlingInterceptor;
-import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
-import ca.uhn.fhir.rest.server.interceptor.ResponseHighlighterInterceptor;
+import ca.uhn.fhir.rest.server.exceptions.*;
+import ca.uhn.fhir.rest.server.interceptor.*;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
-import ca.uhn.fhir.util.CoverageIgnore;
-import ca.uhn.fhir.util.ReflectionUtil;
-import ca.uhn.fhir.util.UrlPathTokenizer;
-import ca.uhn.fhir.util.UrlUtil;
-import ca.uhn.fhir.util.VersionUtil;
+import ca.uhn.fhir.util.*;
 
 public class RestfulServer extends HttpServlet implements IRestfulServer<ServletRequestDetails> {
 
@@ -415,7 +382,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	}
 
 	/**
-	 * Returns a ist of all registered server interceptors
+	 * Returns a list of all registered server interceptors
 	 */
 	@Override
 	public List<IServerInterceptor> getInterceptors() {
