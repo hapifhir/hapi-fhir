@@ -67,6 +67,14 @@
 				starting a context up on Android. Thanks to GitHub issue @Jaypeg85 for
 				the pull request!
 			</action>
+			<action type="fix">
+				Fix an issue in the JPA server if a resource has been previously
+				saved containing vocabulary that is no longer valid. This only really
+				happened if you were using a non-final version of FHIR (e.g. using DSTU3
+				before it was finalized) but if you were in this situation, upgrading HAPI
+				could cause you to have old codes that no longer exist in your database. This
+				fix prevents these from blocking you from accesing those resources.
+			</action>
 		</release>
 		<release version="2.4" date="2017-04-19">
 			<action type="add">

@@ -102,8 +102,7 @@ import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.primitive.XhtmlDt;
 import ca.uhn.fhir.model.valueset.BundleEntryTransactionMethodEnum;
-import ca.uhn.fhir.parser.DataFormatException;
-import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.parser.*;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.method.MethodUtil;
 import ca.uhn.fhir.rest.method.QualifiedParamList;
@@ -1222,6 +1221,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		}
 
 		IParser parser = theEntity.getEncoding().newParser(getContext(theEntity.getFhirVersion()));
+		parser.setParserErrorHandler(new LenientErrorHandler(false).setErrorOnInvalidValue(false));
+		
 		R retVal;
 		try {
 			retVal = parser.parseResource(resourceType, resourceText);

@@ -49,12 +49,14 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.support.*;
 
+import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
 
 import ca.uhn.fhir.jpa.dao.*;
-import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamString;
-import ca.uhn.fhir.jpa.entity.TagTypeEnum;
+import ca.uhn.fhir.jpa.entity.*;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
@@ -245,6 +247,37 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		}
 	}
 
+	/**
+	 * Can we handle content that was previously saved containing vocabulary that
+	 * is no longer valid
+	 */
+	@Test
+	public void testResourceInDatabaseContainsInvalidVocabulary() {
+		final Patient p = new Patient();
+		p.setGender(AdministrativeGender.MALE);
+		final IIdType id = myPatientDao.create(p).getId().toUnqualifiedVersionless();
+		
+		TransactionTemplate tx = new TransactionTemplate(myTxManager);
+		tx.setPropagationBehavior(TransactionTemplate.PROPAGATION_REQUIRES_NEW);
+		tx.execute(new TransactionCallbackWithoutResult() {
+			@Override
+			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
+				ResourceTable table = myResourceTableDao.findOne(id.getIdPartAsLong());
+				String newContent = myFhirCtx.newJsonParser().encodeResourceToString(p);
+				newContent = newContent.replace("male", "foo");
+				table.setResource(newContent.getBytes(Charsets.UTF_8));
+				table.setEncoding(ResourceEncodingEnum.JSON);
+				myResourceTableDao.save(table);
+			}
+		});
+		
+		Patient read = myPatientDao.read(id);
+		String string = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(read);
+		ourLog.info(string);
+		assertThat(string, containsString("value=\"foo\""));
+	}
+	
+	
 	@Test
 	public void testChoiceParamDateEquals() {
 		Encounter enc = new Encounter();
