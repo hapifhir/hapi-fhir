@@ -8,6 +8,7 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import java.io.ByteArrayOutputStream;
@@ -78,8 +79,18 @@ public class TerminologyLoaderSvcTest {
 
 		RequestDetails details = mock(RequestDetails.class);
 		mySvc.loadLoinc(list(bos1.toByteArray(), bos2.toByteArray()), details);
+
+		verify(myTermSvc, times(1)).storeNewCodeSystemVersion(mySystemCaptor.capture(), myCsvCaptor.capture(), any(RequestDetails.class));
+		
+		TermCodeSystemVersion ver = myCsvCaptor.getValue();
+		TermConcept code = ver.getConcepts().iterator().next();
+		assertEquals("10013-1", code.getCode());
+		
 	}
 
+	@Captor
+	private ArgumentCaptor<String> mySystemCaptor;
+	
 	
 	/**
 	 * This is just for trying stuff, it won't run without

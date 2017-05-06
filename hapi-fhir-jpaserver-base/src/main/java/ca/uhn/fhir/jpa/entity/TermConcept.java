@@ -66,7 +66,6 @@ import org.hibernate.search.annotations.TokenizerDef;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink.RelationshipTypeEnum;
 import ca.uhn.fhir.jpa.search.DeferConceptIndexingInterceptor;
 
-//@formatter:off
 @Entity
 @Indexed(interceptor=DeferConceptIndexingInterceptor.class)	
 @Table(name="TRM_CONCEPT", uniqueConstraints= {
@@ -80,7 +79,6 @@ import ca.uhn.fhir.jpa.search.DeferConceptIndexingInterceptor;
 		filters = {
 		})
 })
-//@formatter:on
 public class TermConcept implements Serializable {
 	private static final int MAX_DESC_LENGTH = 400;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TermConcept.class);
@@ -102,7 +100,6 @@ public class TermConcept implements Serializable {
 	@Fields({ @Field(name = "myCodeSystemVersionPid") })
 	private long myCodeSystemVersionPid;
 
-	//@formatter:off
 	@Column(name="DISPLAY", length=MAX_DESC_LENGTH, nullable=true)
 	@Fields({
 		@Field(name = "myDisplay", index = org.hibernate.search.annotations.Index.YES, store = Store.YES, analyze = Analyze.YES, analyzer = @Analyzer(definition = "standardAnalyzer")),
@@ -111,8 +108,10 @@ public class TermConcept implements Serializable {
 		@Field(name = "myDisplayPhonetic", index = org.hibernate.search.annotations.Index.YES, store = Store.NO, analyze = Analyze.YES, analyzer = @Analyzer(definition = "autocompletePhoneticAnalyzer"))
 	})
 	private String myDisplay;
-	//@formatter:on
 
+	@OneToMany(mappedBy="myConcept")
+	private Collection<TermConceptProperty> myProperties;
+	
 	@Id()
 	@SequenceGenerator(name = "SEQ_CONCEPT_PID", sequenceName = "SEQ_CONCEPT_PID")
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_CONCEPT_PID")
