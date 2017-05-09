@@ -84,6 +84,17 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 		myDaoConfig.setAllowMultipleDelete(new DaoConfig().isAllowMultipleDelete());
 	}
 
+	@Test
+	public void testTransactionWithMultiBundle() throws IOException {
+		String inputBundleString = loadClasspath("/batch-error.xml");
+		Bundle bundle = myFhirCtx.newXmlParser().parseResource(Bundle.class, inputBundleString);
+		Bundle resp = mySystemDao.transaction(mySrd, bundle);
+
+		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(resp));
+
+		assertEquals("201 Created", resp.getEntry().get(0).getResponse().getStatus());
+	}
+
 	@SuppressWarnings("unchecked")
 	private <T extends org.hl7.fhir.dstu3.model.Resource> T find(Bundle theBundle, Class<T> theType, int theIndex) {
 		int count = 0;
@@ -396,30 +407,30 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 	public void testTransactionWithPostDoesntUpdate() throws Exception {
 
 		// First bundle (name is Joshua)
-		
+
 		String input = IOUtils.toString(getClass().getResource("/dstu3-post1.xml"), StandardCharsets.UTF_8);
 		Bundle request = myFhirCtx.newXmlParser().parseResource(Bundle.class, input);
 		Bundle response = mySystemDao.transaction(mySrd, request);
 		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(response));
-		
+
 		assertEquals(1, response.getEntry().size());
 		assertEquals("201 Created", response.getEntry().get(0).getResponse().getStatus());
 		assertEquals("1", response.getEntry().get(0).getResponse().getEtag());
 		String id = response.getEntry().get(0).getResponse().getLocation();
-		
+
 		// Now the second (name is Adam, shouldn't get used)
-		
+
 		input = IOUtils.toString(getClass().getResource("/dstu3-post2.xml"), StandardCharsets.UTF_8);
 		request = myFhirCtx.newXmlParser().parseResource(Bundle.class, input);
 		response = mySystemDao.transaction(mySrd, request);
 		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(response));
-		
+
 		assertEquals(1, response.getEntry().size());
 		assertEquals("200 OK", response.getEntry().get(0).getResponse().getStatus());
 		assertEquals("1", response.getEntry().get(0).getResponse().getEtag());
 		String id2 = response.getEntry().get(0).getResponse().getLocation();
 		assertEquals(id, id2);
-		
+
 		Patient patient = myPatientDao.read(new IdType(id), mySrd);
 		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(patient));
 		assertEquals("Joshua", patient.getNameFirstRep().getGivenAsSingleString());
@@ -2194,6 +2205,147 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 		o2 = myObservationDao.read(new IdType(resp.getEntry().get(2).getResponse().getLocation()), mySrd);
 		assertThat(o1.getSubject().getReferenceElement().getValue(), endsWith("Patient/" + p1.getIdElement().getIdPart()));
 		assertThat(o2.getSubject().getReferenceElement().getValue(), endsWith("Patient/" + p1.getIdElement().getIdPart()));
+
+	}
+	
+	
+	@Test
+	public void testTransactionDoubleConditionalCreateOnlyCreatesOne() {
+		Bundle inputBundle = new Bundle();
+		inputBundle.setType(Bundle.BundleType.TRANSACTION);
+
+		Encounter enc1 = new Encounter();
+		enc1.addIdentifier().setSystem("urn:foo").setValue("12345");
+		inputBundle
+				.addEntry()
+				.setResource(enc1)
+				.getRequest()
+				.setMethod(HTTPVerb.POST)
+				.setIfNoneExist("Encounter?identifier=urn:foo|12345");
+		Encounter enc2 = new Encounter();
+		enc2.addIdentifier().setSystem("urn:foo").setValue("12345");
+		inputBundle
+				.addEntry()
+				.setResource(enc2)
+				.getRequest()
+				.setMethod(HTTPVerb.POST)
+				.setIfNoneExist("Encounter?identifier=urn:foo|12345");
+
+		try {
+			mySystemDao.transaction(mySrd, inputBundle);
+			fail();
+		} catch (InvalidRequestException e) {
+			assertEquals("Unable to process Transaction - Request would cause multiple resources to match URL: \"Encounter?identifier=urn:foo|12345\". Does transaction request contain duplicates?", e.getMessage());
+		}
+	}
+	
+
+	@Test
+	public void testTransactionDoubleConditionalUpdateOnlyCreatesOne() {
+		Bundle inputBundle = new Bundle();
+		inputBundle.setType(Bundle.BundleType.TRANSACTION);
+
+		Encounter enc1 = new Encounter();
+		enc1.addIdentifier().setSystem("urn:foo").setValue("12345");
+		inputBundle
+				.addEntry()
+				.setResource(enc1)
+				.getRequest()
+				.setMethod(HTTPVerb.PUT)
+				.setUrl("Encounter?identifier=urn:foo|12345");
+		Encounter enc2 = new Encounter();
+		enc2.addIdentifier().setSystem("urn:foo").setValue("12345");
+		inputBundle
+				.addEntry()
+				.setResource(enc2)
+				.getRequest()
+				.setMethod(HTTPVerb.PUT)
+				.setUrl("Encounter?identifier=urn:foo|12345");
+
+		Bundle response = mySystemDao.transaction(mySrd, inputBundle);
+		
+		IBundleProvider found = myEncounterDao.search(new SearchParameterMap().setLoadSynchronous(true));
+		assertEquals(1, found.size().intValue());
+		
+	}
+
+	@Test
+	public void testCircularCreateAndDelete() {
+		Encounter enc = new Encounter();
+		enc.setId(IdType.newRandomUuid());
+
+		Condition cond = new Condition();
+		cond.setId(IdType.newRandomUuid());
+
+		EpisodeOfCare ep = new EpisodeOfCare();
+		ep.setId(IdType.newRandomUuid());
+
+		enc.getEpisodeOfCareFirstRep().setReference(ep.getId());
+		cond.getContext().setReference(enc.getId());
+		ep.getDiagnosisFirstRep().getCondition().setReference(cond.getId());
+
+		Bundle inputBundle = new Bundle();
+		inputBundle.setType(Bundle.BundleType.TRANSACTION);
+		inputBundle
+				.addEntry()
+				.setResource(ep)
+				.setFullUrl(ep.getId())
+				.getRequest().setMethod(HTTPVerb.POST);
+		inputBundle
+				.addEntry()
+				.setResource(cond)
+				.setFullUrl(cond.getId())
+				.getRequest().setMethod(HTTPVerb.POST);
+		inputBundle
+				.addEntry()
+				.setResource(enc)
+				.setFullUrl(enc.getId())
+				.getRequest().setMethod(HTTPVerb.POST);
+
+		Bundle resp = mySystemDao.transaction(mySrd, inputBundle);
+		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(resp));
+
+		IdType epId = new IdType(resp.getEntry().get(0).getResponse().getLocation());
+		IdType condId = new IdType(resp.getEntry().get(1).getResponse().getLocation());
+		IdType encId = new IdType(resp.getEntry().get(2).getResponse().getLocation());
+
+		// Make sure a single one can't be deleted
+		try {
+			myEncounterDao.delete(encId);
+			fail();
+		} catch (ResourceVersionConflictException e) {
+			// good
+		}
+
+		/*
+		 * Now delete all 3 by transaction
+		 */
+		inputBundle = new Bundle();
+		inputBundle.setType(Bundle.BundleType.TRANSACTION);
+		inputBundle
+				.addEntry()
+				.getRequest().setMethod(HTTPVerb.DELETE)
+				.setUrl(epId.toUnqualifiedVersionless().getValue());
+		inputBundle
+				.addEntry()
+				.getRequest().setMethod(HTTPVerb.DELETE)
+				.setUrl(encId.toUnqualifiedVersionless().getValue());
+		inputBundle
+				.addEntry()
+				.getRequest().setMethod(HTTPVerb.DELETE)
+				.setUrl(condId.toUnqualifiedVersionless().getValue());
+
+		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(inputBundle));
+		resp = mySystemDao.transaction(mySrd, inputBundle);
+		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(resp));
+
+		// They should now be deleted
+		try {
+			myEncounterDao.read(encId.toUnqualifiedVersionless());
+			fail();
+		} catch (ResourceGoneException e) {
+			// good
+		}
 
 	}
 

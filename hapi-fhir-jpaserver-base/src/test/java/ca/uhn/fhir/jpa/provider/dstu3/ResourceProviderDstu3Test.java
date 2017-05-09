@@ -2859,6 +2859,53 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		assertNotEquals(uuid1, uuid3);
 	}
 
+	@Test
+	public void testSearchReusesResultsEnabledNoParams() throws Exception {
+		List<IBaseResource> resources = new ArrayList<IBaseResource>();
+		for (int i = 0; i < 50; i++) {
+			Organization org = new Organization();
+			org.setName("HELLO");
+			resources.add(org);
+		}
+		ourClient.transaction().withResources(resources).prettyPrint().encodedXml().execute();
+
+		myDaoConfig.setReuseCachedSearchResultsForMillis(100000L);
+
+		Bundle result1 = ourClient
+				.search()
+				.forResource("Organization")
+				.returnBundle(Bundle.class)
+				.execute();
+
+		final String uuid1 = toSearchUuidFromLinkNext(result1);
+		Search search1 = newTxTemplate().execute(new TransactionCallback<Search>() {
+			@Override
+			public Search doInTransaction(TransactionStatus theStatus) {
+				return mySearchEntityDao.findByUuid(uuid1);
+			}
+		});
+		Date lastReturned1 = search1.getSearchLastReturned();
+
+		Bundle result2 = ourClient
+				.search()
+				.forResource("Organization")
+				.returnBundle(Bundle.class)
+				.execute();
+
+		final String uuid2 = toSearchUuidFromLinkNext(result2);
+		Search search2 = newTxTemplate().execute(new TransactionCallback<Search>() {
+			@Override
+			public Search doInTransaction(TransactionStatus theStatus) {
+				return mySearchEntityDao.findByUuid(uuid2);
+			}
+		});
+		Date lastReturned2 = search2.getSearchLastReturned();
+
+		assertTrue(lastReturned2.getTime() > lastReturned1.getTime());
+
+		assertEquals(uuid1, uuid2);
+	}
+
 	/**
 	 * See #316
 	 */

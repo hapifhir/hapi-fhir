@@ -273,7 +273,8 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 					public PersistedJpaBundleProvider doInTransaction(TransactionStatus theStatus) {
 						Search searchToUse = null;
 
-						Collection<Search> candidates = mySearchDao.find(resourceType, queryString.hashCode(), createdCutoff);
+						int hashCode = queryString.hashCode();
+						Collection<Search> candidates = mySearchDao.find(resourceType, hashCode, createdCutoff);
 						for (Search nextCandidateSearch : candidates) {
 							if (queryString.equals(nextCandidateSearch.getSearchQueryString())) {
 								searchToUse = nextCandidateSearch;

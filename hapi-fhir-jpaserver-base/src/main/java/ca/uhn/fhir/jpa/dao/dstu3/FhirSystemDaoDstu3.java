@@ -343,6 +343,7 @@ public class FhirSystemDaoDstu3 extends BaseHapiFhirSystemDao<Bundle, Meta> {
 		List<DeleteConflict> deleteConflicts = new ArrayList<DeleteConflict>();
 		Map<BundleEntryComponent, ResourceTable> entriesToProcess = new IdentityHashMap<BundleEntryComponent, ResourceTable>();
 		Set<ResourceTable> nonUpdatedEntities = new HashSet<ResourceTable>();
+		Set<String> conditionalRequestUrls = new HashSet<String>();
 
 		/*
 		 * Loop through the request and process any entries of type
@@ -412,6 +413,10 @@ public class FhirSystemDaoDstu3 extends BaseHapiFhirSystemDao<Bundle, Meta> {
 				entriesToProcess.put(nextRespEntry, outcome.getEntity());
 				if (outcome.getCreated() == false) {
 					nonUpdatedEntities.add(outcome.getEntity());
+				} else {
+					if (isNotBlank(matchUrl)) {
+						conditionalRequestUrls.add(matchUrl);
+					}
 				}
 
 				break;
@@ -462,7 +467,11 @@ public class FhirSystemDaoDstu3 extends BaseHapiFhirSystemDao<Bundle, Meta> {
 					outcome = resourceDao.update(res, null, false, theRequestDetails);
 				} else {
 					res.setId((String) null);
-					outcome = resourceDao.update(res, parts.getResourceType() + '?' + parts.getParams(), false, theRequestDetails);
+					String matchUrl = parts.getResourceType() + '?' + parts.getParams();
+					outcome = resourceDao.update(res, matchUrl, false, theRequestDetails);
+					if (Boolean.TRUE.equals(outcome.getCreated())) {
+						conditionalRequestUrls.add(matchUrl);
+					}
 				}
 
 				handleTransactionCreateOrUpdateOutcome(idSubstitutions, idToPersistedOutcome, nextResourceId, outcome, nextRespEntry, resourceType, res);
