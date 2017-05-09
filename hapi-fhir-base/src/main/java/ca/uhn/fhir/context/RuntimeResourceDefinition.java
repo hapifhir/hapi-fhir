@@ -28,6 +28,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -48,7 +49,9 @@ public class RuntimeResourceDefinition extends BaseRuntimeElementCompositeDefini
 	private List<RuntimeSearchParam> mySearchParams;
 	private final FhirVersionEnum myStructureVersion;
 	private volatile RuntimeResourceDefinition myBaseDefinition;
-	
+
+
+
 	public RuntimeResourceDefinition(FhirContext theContext, String theResourceName, Class<? extends IBaseResource> theClass, ResourceDef theResourceAnnotation, boolean theStandardType, Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
 		super(theResourceName, theClass, theStandardType, theContext, theClassToElementDefinitions);
 		myContext = theContext;
@@ -67,6 +70,7 @@ public class RuntimeResourceDefinition extends BaseRuntimeElementCompositeDefini
 		}
 
 	}
+
 
 	public void addSearchParam(RuntimeSearchParam theParam) {
 		myNameToSearchParam.put(theParam.getName(), theParam);

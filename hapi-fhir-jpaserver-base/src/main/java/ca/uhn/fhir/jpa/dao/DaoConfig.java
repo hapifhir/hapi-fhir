@@ -180,7 +180,7 @@ public class DaoConfig {
 	@Deprecated
 	public List<IServerInterceptor> getInterceptors() {
 		if (myInterceptors == null) {
-			return Collections.emptyList();
+			myInterceptors = new ArrayList<IServerInterceptor>();
 		}
 		return myInterceptors;
 	}

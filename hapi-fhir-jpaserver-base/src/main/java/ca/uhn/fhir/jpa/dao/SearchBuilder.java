@@ -1474,7 +1474,8 @@ public class SearchBuilder implements ISearchBuilder {
 	public void loadResourcesByPid(Collection<Long> theIncludePids, List<IBaseResource> theResourceListToPopulate, Set<Long> theRevIncludedPids, boolean theForHistoryOperation,
 			EntityManager entityManager, FhirContext context, IDao theDao) {
 		if (theIncludePids.isEmpty()) {
-			return;
+			ourLog.info("The include pids are empty");
+			//return;
 		}
 
 		// Dupes will cause a crash later anyhow, but this is expensive so only do it

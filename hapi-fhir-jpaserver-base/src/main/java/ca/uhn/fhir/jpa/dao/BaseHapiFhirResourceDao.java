@@ -886,6 +886,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		
 			if (theRequestDetails.isSubRequest()) {
 				theParams.setLoadSynchronous(true);
+				int max =  myDaoConfig.getMaximumSearchResultCountInTransaction();
 				theParams.setLoadSynchronousUpTo(myDaoConfig.getMaximumSearchResultCountInTransaction());
 			}
 		
