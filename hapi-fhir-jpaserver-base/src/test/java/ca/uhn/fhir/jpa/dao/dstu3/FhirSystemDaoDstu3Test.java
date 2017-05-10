@@ -2262,10 +2262,12 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 				.setMethod(HTTPVerb.PUT)
 				.setUrl("Encounter?identifier=urn:foo|12345");
 
-		Bundle response = mySystemDao.transaction(mySrd, inputBundle);
-		
-		IBundleProvider found = myEncounterDao.search(new SearchParameterMap().setLoadSynchronous(true));
-		assertEquals(1, found.size().intValue());
+		try {
+			mySystemDao.transaction(mySrd, inputBundle);
+			fail();
+		} catch (InvalidRequestException e) {
+			assertEquals("Unable to process Transaction - Request would cause multiple resources to match URL: \"Encounter?identifier=urn:foo|12345\". Does transaction request contain duplicates?", e.getMessage());
+		}
 		
 	}
 
