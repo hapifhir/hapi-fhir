@@ -95,6 +95,17 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 		assertEquals("201 Created", resp.getEntry().get(0).getResponse().getStatus());
 	}
 
+	@Test
+	public void testTransaction1() throws IOException {
+		String inputBundleString = loadClasspath("/david-bundle-error.json");
+		Bundle bundle = myFhirCtx.newJsonParser().parseResource(Bundle.class, inputBundleString);
+		Bundle resp = mySystemDao.transaction(mySrd, bundle);
+
+		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(resp));
+
+		assertEquals("201 Created", resp.getEntry().get(0).getResponse().getStatus());
+	}
+
 	@SuppressWarnings("unchecked")
 	private <T extends org.hl7.fhir.dstu3.model.Resource> T find(Bundle theBundle, Class<T> theType, int theIndex) {
 		int count = 0;

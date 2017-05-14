@@ -31,10 +31,7 @@ import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
-import org.apache.http.impl.client.BasicCredentialsProvider;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.impl.client.ProxyAuthenticationStrategy;
+import org.apache.http.impl.client.*;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -68,6 +65,18 @@ public class ApacheRestfulClientFactory extends RestfulClientFactory {
 	 */
 	public ApacheRestfulClientFactory(FhirContext theContext) {
 		super(theContext);
+	}
+
+	@Override
+	protected ApacheHttpClient getHttpClient(String theServerBase) {
+		return new ApacheHttpClient(getNativeHttpClient(), new StringBuilder(theServerBase), null, null, null, null);
+	}
+
+	@Override
+	public IHttpClient getHttpClient(StringBuilder theUrl, Map<String, List<String>> theIfNoneExistParams,
+			String theIfNoneExistString, RequestTypeEnum theRequestType, List<Header> theHeaders) {
+		return new ApacheHttpClient(getNativeHttpClient(), theUrl, theIfNoneExistParams, theIfNoneExistString, theRequestType,
+				theHeaders);
 	}
 
 	public synchronized HttpClient getNativeHttpClient() {
@@ -105,19 +114,8 @@ public class ApacheRestfulClientFactory extends RestfulClientFactory {
 	}
 
 	@Override
-	public IHttpClient getHttpClient(StringBuilder theUrl, Map<String, List<String>> theIfNoneExistParams,
-			String theIfNoneExistString, RequestTypeEnum theRequestType, List<Header> theHeaders) {
-		return new ApacheHttpClient(getNativeHttpClient(), theUrl, theIfNoneExistParams, theIfNoneExistString, theRequestType,
-				theHeaders);
-	}
-
-	@Override
-	public void setProxy(String theHost, Integer thePort) {
-		if (theHost != null) {
-			myProxy = new HttpHost(theHost, thePort, "http");
-		} else {
-			myProxy = null;
-		}
+	protected void resetHttpClient() {
+		this.myHttpClient = null;
 	}
 
 	/**
@@ -130,13 +128,12 @@ public class ApacheRestfulClientFactory extends RestfulClientFactory {
 	}
 
 	@Override
-	protected ApacheHttpClient getHttpClient(String theServerBase) {
-		return new ApacheHttpClient(getNativeHttpClient(), new StringBuilder(theServerBase), null, null, null, null);
-	}
-
-	@Override
-	protected void resetHttpClient() {
-		this.myHttpClient = null;
+	public void setProxy(String theHost, Integer thePort) {
+		if (theHost != null) {
+			myProxy = new HttpHost(theHost, thePort, "http");
+		} else {
+			myProxy = null;
+		}
 	}
 
 }

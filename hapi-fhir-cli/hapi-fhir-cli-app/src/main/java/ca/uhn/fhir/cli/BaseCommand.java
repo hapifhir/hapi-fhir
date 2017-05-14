@@ -11,7 +11,7 @@ import ca.uhn.fhir.rest.client.IGenericClient;
 
 public abstract class BaseCommand implements Comparable<BaseCommand> {
 
-	private static final String SPEC_DEFAULT_VERSION = "dstu2";
+	private static final String SPEC_DEFAULT_VERSION = "dstu3";
 
 	private FhirContext myFhirCtx;
 

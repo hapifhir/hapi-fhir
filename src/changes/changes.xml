@@ -75,6 +75,9 @@
 				could cause you to have old codes that no longer exist in your database. This
 				fix prevents these from blocking you from accesing those resources.
 			</action>
+			<action type="add">
+				CLI now defaults to DSTU3 mode if no FHIR version is specified
+			</action>
 		</release>
 		<release version="2.4" date="2017-04-19">
 			<action type="add">
