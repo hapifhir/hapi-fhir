@@ -2,10 +2,7 @@ package ca.uhn.fhir.to;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.ArrayList;
@@ -22,11 +19,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.Header;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpEntityEnclosingRequest;
-import org.apache.http.HttpResponse;
 import org.apache.http.entity.ContentType;
-import org.apache.http.entity.HttpEntityWrapper;
 import org.apache.http.message.BasicHeader;
 import org.hl7.fhir.dstu3.model.CapabilityStatement;
 import org.hl7.fhir.dstu3.model.CapabilityStatement.CapabilityStatementRestComponent;
@@ -39,8 +32,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.ui.ModelMap;
 import org.thymeleaf.TemplateEngine;
 
-import com.google.common.base.Charsets;
-
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
@@ -52,13 +43,10 @@ import ca.uhn.fhir.model.dstu.resource.Conformance.Rest;
 import ca.uhn.fhir.model.primitive.DecimalDt;
 import ca.uhn.fhir.rest.client.GenericClient;
 import ca.uhn.fhir.rest.client.IClientInterceptor;
-import ca.uhn.fhir.rest.client.apache.ApacheHttpRequest;
-import ca.uhn.fhir.rest.client.apache.ApacheHttpResponse;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
 import ca.uhn.fhir.rest.client.api.IHttpResponse;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.EncodingEnum;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.to.model.HomeRequest;
 import ca.uhn.fhir.util.ExtensionConstants;
 
@@ -608,7 +596,7 @@ public class BaseController {
 			if (lastResponse != null) {
 				resultStatus = lastResponse.getStatus() + ' ' + lastResponse.getStatusInfo();
 				lastResponse.bufferEntity();
-				resultBody = IOUtils.toString(lastResponse.readEntity(), Charsets.UTF_8);
+				resultBody = IOUtils.toString(lastResponse.readEntity(), Constants.CHARSET_UTF8);
 				
 				List<String> ctStrings = lastResponse.getAllHeaders().get(Constants.HEADER_CONTENT_TYPE);
 				if (ctStrings != null && ctStrings.isEmpty() == false) {
