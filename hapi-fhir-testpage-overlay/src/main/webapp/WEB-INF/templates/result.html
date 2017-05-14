@@ -260,7 +260,7 @@
 																$('#page-prev-btn').click(function() {
 																	var btn = $(this);
 																	handleActionButtonClick($(this));
-																	btn.append($('<input />', { type: 'hidden', name: 'page-url', value: '<th:block th:if="${riBundle.getLink('prev') != null}"  th:text="${riBundle.getLink('prev').url}"/>' }));
+																	btn.append($('<input />', { type: 'hidden', name: 'page-url', value: [[${riBundle.getLinkOrCreate('prev').url}]] }));
 																	$("#outerForm").attr("action", "page").submit();
 	
 																});
@@ -277,7 +277,7 @@
 																$('#page-next-btn').click(function() {
 																	var btn = $(this);
 																	handleActionButtonClick($(this));
-																	btn.append($('<input />', { type: 'hidden', name: 'page-url', value: '<th:block th:if="${riBundle.getLink('next') != null}" th:text="${riBundle.getLink('next').url}"/>' }));
+																	btn.append($('<input />', { type: 'hidden', name: 'page-url', value: [[${riBundle.getLinkOrCreate('next').url}]] }));
 																	$("#outerForm").attr("action", "page").submit();
 																});
 															</script>

@@ -594,7 +594,7 @@ public class BaseController {
 				action = lastRequest.getHttpVerbName();
 			}
 			if (lastResponse != null) {
-				resultStatus = lastResponse.getStatus() + ' ' + lastResponse.getStatusInfo();
+				resultStatus = "HTTP " + lastResponse.getStatus() + " " + lastResponse.getStatusInfo();
 				lastResponse.bufferEntity();
 				resultBody = IOUtils.toString(lastResponse.readEntity(), Constants.CHARSET_UTF8);
 				

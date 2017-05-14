@@ -61,6 +61,8 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
