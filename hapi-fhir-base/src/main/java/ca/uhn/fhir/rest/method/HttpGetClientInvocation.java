@@ -90,7 +90,7 @@ public class HttpGetClientInvocation extends BaseHttpClientInvocation {
 		
 		if (!myUrlPath.contains("://")) {
             b.append(theUrlBase);
-            if (!theUrlBase.endsWith("/")) {
+            if (!theUrlBase.endsWith("/") && !myUrlPath.startsWith("/")) {
                 b.append('/');
             }
         }
