@@ -43,6 +43,8 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.primitive.XhtmlDt;
+import ca.uhn.fhir.parser.json.JsonLikeValue.ScalarType;
+import ca.uhn.fhir.parser.json.JsonLikeValue.ValueType;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.FhirTerser;
@@ -1467,7 +1469,7 @@ class ParserState<T> {
 				BaseRuntimeElementCompositeDefinition<?> compositeTarget = (BaseRuntimeElementCompositeDefinition<?>) target;
 				ICompositeType newChildInstance = (ICompositeType) compositeTarget.newInstance(myDefinition.getInstanceConstructorArguments());
 				myDefinition.getMutator().addValue(myParentInstance, newChildInstance);
-				ElementCompositeState newState = new ElementCompositeState(myPreResourceState, compositeTarget, newChildInstance);
+				ElementCompositeState newState = new ElementCompositeState(myPreResourceState, theLocalPart, compositeTarget, newChildInstance);
 				push(newState);
 				return;
 			}
@@ -1516,11 +1518,13 @@ class ParserState<T> {
 		private BaseRuntimeElementCompositeDefinition<?> myDefinition;
 		private IBase myInstance;
 		private Set<String> myParsedNonRepeatableNames = new HashSet<String>();
+		private String myElementName;
 
-		public ElementCompositeState(PreResourceState thePreResourceState, BaseRuntimeElementCompositeDefinition<?> theDef, IBase theInstance) {
+		public ElementCompositeState(PreResourceState thePreResourceState, String theElementName, BaseRuntimeElementCompositeDefinition<?> theDef, IBase theInstance) {
 			super(thePreResourceState);
 			myDefinition = theDef;
 			myInstance = theInstance;
+			myElementName = theElementName;
 		}
 
 		@Override
@@ -1536,7 +1540,11 @@ class ParserState<T> {
 			} else if ("url".equals(theName) && myInstance instanceof ExtensionDt) {
 				((ExtensionDt) myInstance).setUrl(theValue);
 			} else {
-				super.attributeValue(theName, theValue);
+				if (myJsonMode) {
+					myErrorHandler.incorrectJsonType(null, myElementName, ValueType.OBJECT, null, ValueType.SCALAR, ScalarType.STRING);
+				} else {
+					myErrorHandler.unknownAttribute(null, theName);
+				}
 			}
 		}
 
@@ -1591,7 +1599,7 @@ class ParserState<T> {
 				BaseRuntimeElementCompositeDefinition<?> compositeTarget = (BaseRuntimeElementCompositeDefinition<?>) target;
 				ICompositeType newChildInstance = (ICompositeType) compositeTarget.newInstance(child.getInstanceConstructorArguments());
 				child.getMutator().addValue(myInstance, newChildInstance);
-				ParserState<T>.ElementCompositeState newState = new ElementCompositeState(getPreResourceState(), compositeTarget, newChildInstance);
+				ParserState<T>.ElementCompositeState newState = new ElementCompositeState(getPreResourceState(), theChildName, compositeTarget, newChildInstance);
 				push(newState);
 				return;
 			}
@@ -1609,7 +1617,7 @@ class ParserState<T> {
 				RuntimeResourceBlockDefinition blockTarget = (RuntimeResourceBlockDefinition) target;
 				IBase newBlockInstance = blockTarget.newInstance();
 				child.getMutator().addValue(myInstance, newBlockInstance);
-				ElementCompositeState newState = new ElementCompositeState(getPreResourceState(), blockTarget, newBlockInstance);
+				ElementCompositeState newState = new ElementCompositeState(getPreResourceState(), theChildName, blockTarget, newBlockInstance);
 				push(newState);
 				return;
 			}
@@ -1762,7 +1770,7 @@ class ParserState<T> {
 					BaseRuntimeElementCompositeDefinition<?> compositeTarget = (BaseRuntimeElementCompositeDefinition<?>) target;
 					ICompositeType newChildInstance = (ICompositeType) compositeTarget.newInstance();
 					myExtension.setValue(newChildInstance);
-					ElementCompositeState newState = new ElementCompositeState(getPreResourceState(), compositeTarget, newChildInstance);
+					ElementCompositeState newState = new ElementCompositeState(getPreResourceState(), theLocalPart, compositeTarget, newChildInstance);
 					push(newState);
 					return;
 				}
@@ -2414,7 +2422,7 @@ class ParserState<T> {
 		private IResource myInstance;
 
 		public ResourceStateHapi(PreResourceState thePreResourceState, BaseRuntimeElementCompositeDefinition<?> theDef, IResource theInstance) {
-			super(thePreResourceState, theDef, theInstance);
+			super(thePreResourceState, theDef.getName(), theDef, theInstance);
 			myInstance = theInstance;
 		}
 
@@ -2433,7 +2441,7 @@ class ParserState<T> {
 	private class ResourceStateHl7Org extends ElementCompositeState {
 
 		public ResourceStateHl7Org(PreResourceState thePreResourceState, BaseRuntimeElementCompositeDefinition<?> theDef, IBaseResource theInstance) {
-			super(thePreResourceState, theDef, theInstance);
+			super(thePreResourceState, theDef.getName(), theDef, theInstance);
 		}
 
 	}
@@ -2441,7 +2449,7 @@ class ParserState<T> {
 	private class SecurityLabelElementStateHapi extends ElementCompositeState {
 
 		public SecurityLabelElementStateHapi(ParserState<T>.PreResourceState thePreResourceState, BaseRuntimeElementCompositeDefinition<?> theDef, IBase codingDt) {
-			super(thePreResourceState, theDef, codingDt);
+			super(thePreResourceState, theDef.getName(), theDef, codingDt);
 		}
 
 		@Override

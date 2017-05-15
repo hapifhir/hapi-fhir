@@ -82,6 +82,11 @@
 				Server and annotation-client @History annotation now allows DSTU3+ resource
 				types in the type= property
 			</action>
+			<action type="fix" issue="563">
+				JSON Parser gave a very unhelpful error message (Unknown attribute 'value' found during parse) 
+				when a scalar value was found in a spot where an object is expected. This has been corrected to 
+				include much more information. Thanks to GitHub user @jasminas for reporting!
+			</action>
 		</release>
 		<release version="2.4" date="2017-04-19">
 			<action type="add">

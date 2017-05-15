@@ -82,6 +82,40 @@ public class JsonParserDstu3Test {
 		ourCtx.setNarrativeGenerator(null);
 	}
 	
+	/**
+	 * See #563
+	 */
+	@Test
+	public void testBadMessageForUnknownElement() throws IOException {
+		String input = IOUtils.toString(JsonParserDstu3Test.class.getResourceAsStream("/bad_parse_bundle_1.json"), StandardCharsets.UTF_8);
+		
+		IParser p = ourCtx.newJsonParser();
+		p.setParserErrorHandler(new StrictErrorHandler());
+		try {
+			p.parseResource(input);
+			fail();
+		} catch (DataFormatException e) {
+			assertEquals("Found incorrect type for element subject - Expected OBJECT and found SCALAR (STRING)", e.getMessage());
+		}
+	}
+	
+	/**
+	 * See #563
+	 */
+	@Test
+	public void testBadMessageForUnknownElement2() throws IOException {
+		String input = IOUtils.toString(JsonParserDstu3Test.class.getResourceAsStream("/bad_parse_bundle_2.json"), StandardCharsets.UTF_8);
+		
+		IParser p = ourCtx.newJsonParser();
+		p.setParserErrorHandler(new StrictErrorHandler());
+		try {
+			p.parseResource(input);
+			fail();
+		} catch (DataFormatException e) {
+			assertEquals("Found incorrect type for element context - Expected OBJECT and found SCALAR (STRING)", e.getMessage());
+		}
+	}
+	
 	@Test
 	public void testOverrideResourceIdWithBundleEntryFullUrlDisabled_ConfiguredOnFhirContext() {
 		try {

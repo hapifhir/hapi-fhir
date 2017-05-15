@@ -1,0 +1,57 @@
+{
+  "resourceType": "QuestionnaireResponse",
+  "questionnaire": {
+    "reference" = "symptomsCongestiveHeartFailure"
+  },
+  "status": "in-progress",
+  "subject": "Patient/2",
+  "group": {
+    "question": [
+      { "linkId": "fainted",
+        "answer": [
+           { "valueCoding": {
+              "system": "http://medly.ca/fhir/CodeSystem/yesNo",
+              "code": "NO"
+              }
+           }
+        ]
+      },
+      { "linkId": "worse_night_breathing",
+        "answer": [
+           { "valueCoding": {
+              "system": "http://medly.ca/fhir/CodeSystem/yesNo",
+              "code": "NO"
+              }
+           }
+        ]
+      },
+      { "linkId": "more_chest_pain",
+        "answer": [
+           { "valueCoding": {
+              "system": "http://medly.ca/fhir/CodeSystem/yesNo",
+              "code": "NO"
+              }
+           }
+        ]
+      },
+      { "linkId": "more_tired",
+        "answer": [
+           { "valueCoding": {
+              "system": "http://medly.ca/fhir/CodeSystem/yesNo",
+              "code": "NO"
+              }
+           }
+        ]
+      },
+      { "linkId": "more_short_of_breath",
+        "answer": [
+           { "valueCoding": {
+              "system": "http://medly.ca/fhir/CodeSystem/yesNo",
+              "code": "NO"
+              }
+           }
+        ]
+      }
+    ]
+  }
+}

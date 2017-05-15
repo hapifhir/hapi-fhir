@@ -1,0 +1,188 @@
+{
+	"resourceType": "Observation",
+	"identifier": [
+		{
+			"use": "usual",
+			"type": {
+				"coding": [
+					{
+						"system": "http://hl7.org/fhir/v2/0203",
+						"code": "MR"
+					}
+				]
+			},
+			"system": "urn:oid:1.2.36.146.595.217.0.1",
+			"value": "12345",
+			"period": {
+				"start": "2001-05-06"
+			},
+			"assigner": {
+				"display": "Acme Healthcare"
+			}
+		}
+	],
+	"status": "final",
+	"code": {
+		"coding": [
+			{
+				"system": "http://loinc.org",
+				"code": "55284-4",
+				"display": "Blood pressure systolic & diastolic"
+			}
+		]
+	},
+	"subject": {
+		"reference": "Patient/1",
+		"display": "Patient 1"
+	},
+	"context": "Encounter/1",
+	"specimen": "Specimen/1",
+	"device": "Device/1",
+	"effectiveDateTime": "2012-09-17",
+	"issued": "2013-04-04T14:34:00+01:00",
+	"performer": [
+		{
+			"reference": "Patient/1"
+		}
+	],
+	"valueQuantity": {
+		"value": "222",
+		"comparator": "<",
+		"unit": "m",
+		"system": "http://loinc.org",
+		"code": "222m"
+	},
+	"dataAbsentReason": {
+		"coding": [
+			{
+				"system": "http://hl7.org/fhir/data-absent-reason",
+				"code": "not-asked",
+				"display": "Not Asked"
+			}
+		]
+	},
+	"interpretation": {
+		"coding": [
+			{
+				"system": "http://hl7.org/fhir/v2/0078",
+				"code": "L",
+				"display": "Below low normal"
+			}
+		],
+		"text": "low"
+	},
+	"comments": "Comments",
+	"bodySite": {
+		"coding": [
+			{
+				"system": "http://snomed.info/sct",
+				"code": "368209003",
+				"display": "Right arm"
+			}
+		]
+	},
+	"method": {
+		"coding": [
+			{
+				"system": "http://hl7.org/fhir/v3/ObservationMethod",
+				"version": "Version 1",
+				"code": "ALGM",
+				"display": "algorithm",
+				"userSelected": false
+			}
+		],
+		"text": "Some text for CodeableConcept"
+	},
+	"referenceRange": [
+		{
+			"low": {
+				"value": 3.1,
+				"unit": "mmol/l",
+				"system": "http://unitsofmeasure.org",
+				"code": "mmol/L"
+			},
+			"high": {
+				"value": 6.2,
+				"unit": "mmol/l",
+				"system": "http://unitsofmeasure.org",
+				"code": "mmol/L"
+			},
+			"meaning": {
+				"coding": [
+					{
+						"system": "http://hl7.org/fhir/referencerange-meaning",
+						"version": "Version 1",
+						"code": "type",
+						"display": "type",
+						"userSelected": false
+					}
+				],
+				"text": "Some text for CodeableConcept"
+			},
+			"age": {
+				"low": {
+					"value": 3,
+					"unit": "mmol/l",
+					"system": "http://unitsofmeasure.org",
+					"code": "mmol/L"
+				},
+				"high": {
+					"value": 6,
+					"unit": "mmol/l",
+					"system": "http://unitsofmeasure.org",
+					"code": "mmol/L"
+				}
+			},
+			"text": "Some text"
+		}
+	],
+	"related": {
+		"type": "has-member",
+		"target": "Observation/1"
+	},
+	"component": [
+		{
+			"code": {
+				"coding": [
+					{
+						"system": "http://loinc.org",
+						"code": "1-8",
+						"display": "Systolic blood pressure"
+					},
+					{
+						"system": "http://snomed.info/sct",
+						"code": "10-9",
+						"display": "Systolic blood pressure"
+					},
+					{
+						"system": "http://acme.org/devices/clinical-codes",
+						"code": "100-8",
+						"display": "Systolic Blood pressure"
+					}
+				]
+			},
+			"valueQuantity": {
+				"value": 107,
+				"unit": "mm[Hg]"
+			}
+		},
+		{
+			"code": {
+				"coding": [
+					{
+						"system": "http://loinc.org",
+						"code": "1-8",
+						"display": "Systolic blood pressure"
+					}
+				]
+			},
+			"valueQuantity": {
+				"value": "222",
+				"comparator": "<",
+				"unit": "mm[Hg]",
+				"system": "http://loinc.org",
+				"code": "222m"
+			}
+		}
+	]
+}
