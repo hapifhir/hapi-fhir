@@ -254,13 +254,16 @@
 																Prev Page
 															</button>
 															<script type="text/javascript" th:inline="javascript">
-																if ([[${riBundle.getLink('prev') == null}]]) {
+																if ([[${riBundle.getLink('prev') == null && riBundle.getLink('previous') == null}]]) {
 																	$('#page-prev-btn').prop('disabled', true);
 																}
 																$('#page-prev-btn').click(function() {
 																	var btn = $(this);
 																	handleActionButtonClick($(this));
-																	btn.append($('<input />', { type: 'hidden', name: 'page-url', value: [[${riBundle.getLinkOrCreate('prev').url}]] }));
+																	var prev = [[${riBundle.getLinkOrCreate('prev').url}]];
+																	var previous = [[${riBundle.getLinkOrCreate('previous').url}]];
+																	var url = prev != null ? prev : previous;
+																	btn.append($('<input />', { type: 'hidden', name: 'page-url', value: url }));
 																	$("#outerForm").attr("action", "page").submit();
 	
 																});

@@ -78,6 +78,10 @@
 			<action type="add">
 				CLI now defaults to DSTU3 mode if no FHIR version is specified
 			</action>
+			<action type="add">
+				Server and annotation-client @History annotation now allows DSTU3+ resource
+				types in the type= property
+			</action>
 		</release>
 		<release version="2.4" date="2017-04-19">
 			<action type="add">

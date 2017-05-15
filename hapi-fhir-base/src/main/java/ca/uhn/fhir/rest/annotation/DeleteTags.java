@@ -25,6 +25,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import org.hl7.fhir.instance.model.api.IBaseResource;
+
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -70,6 +72,6 @@ public @interface DeleteTags {
 	 * , this method is expected to return a TagList containing only tags which
 	 * are specific to the given resource type.
 	 */
-	Class<? extends IResource> type() default IResource.class;
+	Class<? extends IBaseResource> type() default IBaseResource.class;
 
 }
