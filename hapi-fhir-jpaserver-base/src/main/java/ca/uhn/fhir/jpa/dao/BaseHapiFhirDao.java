@@ -786,11 +786,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		if (theRequestDetails.getUserData().get(PROCESSING_SUB_REQUEST) == Boolean.TRUE) {
 			theRequestDetails.notifyIncomingRequestPreHandled(theOperationType);
 		}
-
 		List<IServerInterceptor> interceptors = getConfig().getInterceptors();
-		if (interceptors == null) {
-			return;
-		}
 		for (IServerInterceptor next : interceptors) {
 			next.incomingRequestPreHandled(theOperationType, theRequestDetails);
 		}

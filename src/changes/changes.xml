@@ -87,6 +87,12 @@
 				when a scalar value was found in a spot where an object is expected. This has been corrected to 
 				include much more information. Thanks to GitHub user @jasminas for reporting!
 			</action>
+			<action type="add">
+				DaoConfig#setInterceptors() has been un-deprecated. It was previously deprecated as
+				we thought it was not useful, but uses have been identified so it turns out this method
+				will live after all. Interceptors registered to this method will now be treated
+				appropriately if they implement IServerOperationInterceptor too.
+			</action>
 		</release>
 		<release version="2.4" date="2017-04-19">
 			<action type="add">

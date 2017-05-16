@@ -61,6 +61,7 @@ import ca.uhn.fhir.rest.method.SearchMethodBinding.QualifierDetails;
 import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.*;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
+import ca.uhn.fhir.rest.server.interceptor.IServerOperationInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.ObjectUtil;
@@ -208,6 +209,9 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				if (next instanceof IJpaServerInterceptor) {
 					((IJpaServerInterceptor) next).resourceDeleted(requestDetails, entity);
 				}
+				if (next instanceof IServerOperationInterceptor) {
+					((IServerOperationInterceptor) next).resourceDeleted(theRequestDetails, resourceToDelete);
+				}
 			}
 		}
 
@@ -273,6 +277,9 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			for (IServerInterceptor next : getConfig().getInterceptors()) {
 				if (next instanceof IJpaServerInterceptor) {
 					((IJpaServerInterceptor) next).resourceDeleted(requestDetails, entity);
+				}
+				if (next instanceof IServerOperationInterceptor) {
+					((IServerOperationInterceptor) next).resourceDeleted(theRequestDetails, resourceToDelete);
 				}
 			}
 
@@ -384,6 +391,9 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			for (IServerInterceptor next : getConfig().getInterceptors()) {
 				if (next instanceof IJpaServerInterceptor) {
 					((IJpaServerInterceptor) next).resourceCreated(requestDetails, entity);
+				}
+				if (next instanceof IServerOperationInterceptor) {
+					((IServerOperationInterceptor) next).resourceCreated(theRequestDetails, theResource);
 				}
 			}
 		}
@@ -1125,6 +1135,9 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			for (IServerInterceptor next : getConfig().getInterceptors()) {
 				if (next instanceof IJpaServerInterceptor) {
 					((IJpaServerInterceptor) next).resourceUpdated(requestDetails, entity);
+				}
+				if (next instanceof IServerOperationInterceptor) {
+					((IServerOperationInterceptor) next).resourceDeleted(theRequestDetails, theResource);
 				}
 			}
 		}

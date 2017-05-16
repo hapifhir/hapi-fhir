@@ -1,11 +1,6 @@
 package ca.uhn.fhir.jpa.dao;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.Validate;
@@ -32,7 +27,6 @@ import org.apache.commons.lang3.time.DateUtils;
  */
 
 import ca.uhn.fhir.jpa.entity.ResourceEncodingEnum;
-import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 
 public class DaoConfig {
@@ -174,13 +168,10 @@ public class DaoConfig {
 	 * Returns the interceptors which will be notified of operations.
 	 * 
 	 * @see #setInterceptors(List)
-	 * @deprecated As of 2.2 this method is deprecated. There is no good reason to register an interceptor
-	 *             with the DaoConfig and not with the server via {@link RestfulServer#registerInterceptor(IServerInterceptor)}
 	 */
-	@Deprecated
 	public List<IServerInterceptor> getInterceptors() {
 		if (myInterceptors == null) {
-			return Collections.emptyList();
+			return myInterceptors = new ArrayList<IServerInterceptor>();
 		}
 		return myInterceptors;
 	}
@@ -526,11 +517,7 @@ public class DaoConfig {
 
 	/**
 	 * This may be used to optionally register server interceptors directly against the DAOs.
-	 * 
-	 * @deprecated As of 2.2 this method is deprecated. There is no good reason to register an interceptor
-	 *             with the DaoConfig and not with the server via {@link RestfulServer#registerInterceptor(IServerInterceptor)}
 	 */
-	@Deprecated
 	public void setInterceptors(IServerInterceptor... theInterceptor) {
 		setInterceptors(new ArrayList<IServerInterceptor>());
 		if (theInterceptor != null && theInterceptor.length != 0) {
@@ -540,11 +527,7 @@ public class DaoConfig {
 
 	/**
 	 * This may be used to optionally register server interceptors directly against the DAOs.
-	 * 
-	 * @deprecated As of 2.2 this method is deprecated. There is no good reason to register an interceptor
-	 *             with the DaoConfig and not with the server via {@link RestfulServer#registerInterceptor(IServerInterceptor)}
 	 */
-	@Deprecated
 	public void setInterceptors(List<IServerInterceptor> theInterceptors) {
 		myInterceptors = theInterceptors;
 	}
