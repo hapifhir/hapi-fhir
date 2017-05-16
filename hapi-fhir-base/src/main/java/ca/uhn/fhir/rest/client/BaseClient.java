@@ -323,13 +323,24 @@ public abstract class BaseClient implements IRestfulClient {
 			}
 
 		} catch (DataFormatException e) {
-			//FIXME potential null access on httpResquest
-			String msg = getFhirContext().getLocalizer().getMessage(BaseClient.class, "failedToParseResponse", httpRequest.getHttpVerbName(), httpRequest.getUri(), e.toString());
+			String msg;
+			if ( httpRequest != null ) {
+				msg = getFhirContext().getLocalizer().getMessage(BaseClient.class, "failedToParseResponse", httpRequest.getHttpVerbName(), httpRequest.getUri(), e.toString());
+			}
+			else {
+				msg = getFhirContext().getLocalizer().getMessage(BaseClient.class, "failedToParseResponse", "UNKNOWN", "UNKNOWN", e.toString());
+			}
 			throw new FhirClientConnectionException(msg, e);
 		} catch (IllegalStateException e) {
 			throw new FhirClientConnectionException(e);
 		} catch (IOException e) {
-			String msg = getFhirContext().getLocalizer().getMessage(BaseClient.class, "ioExceptionDuringOperation", httpRequest.getHttpVerbName(), httpRequest.getUri(), e.toString());
+			String msg;
+			if ( httpRequest != null ) {
+				msg = getFhirContext().getLocalizer().getMessage(BaseClient.class, "failedToParseResponse", httpRequest.getHttpVerbName(), httpRequest.getUri(), e.toString());
+			}
+			else {
+				msg = getFhirContext().getLocalizer().getMessage(BaseClient.class, "failedToParseResponse", "UNKNOWN", "UNKNOWN", e.toString());
+			}
 			throw new FhirClientConnectionException(msg, e);
 		} catch (RuntimeException e) {
 			throw e;
