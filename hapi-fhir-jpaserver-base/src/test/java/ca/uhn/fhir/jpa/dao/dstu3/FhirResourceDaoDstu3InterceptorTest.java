@@ -27,6 +27,7 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
@@ -48,6 +49,7 @@ public class FhirResourceDaoDstu3InterceptorTest extends BaseJpaDstu3Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoDstu3InterceptorTest.class);
 	private IJpaServerInterceptor myJpaInterceptor;
 	private JpaServerInterceptorAdapter myJpaInterceptorAdapter = new JpaServerInterceptorAdapter();
+	private IServerOperationInterceptor myServerOperationInterceptor;
 
 	@After
 	public void after() {
@@ -59,8 +61,20 @@ public class FhirResourceDaoDstu3InterceptorTest extends BaseJpaDstu3Test {
 	@Before
 	public void before() {
 		myJpaInterceptor = mock(IJpaServerInterceptor.class);
+		
+		myServerOperationInterceptor = mock(IServerOperationInterceptor.class, new Answer<Object>() {
+			@Override
+			public Object answer(InvocationOnMock theInvocation) throws Throwable {
+				if (theInvocation.getMethod().getReturnType().equals(boolean.class)) {
+					return true;
+				}
+				return null;
+			}
+		});
+		
 		myDaoConfig.getInterceptors().add(myJpaInterceptor);
 		myDaoConfig.getInterceptors().add(myJpaInterceptorAdapter);
+		myDaoConfig.getInterceptors().add(myServerOperationInterceptor);
 	}
 
 	@Test
@@ -198,6 +212,52 @@ public class FhirResourceDaoDstu3InterceptorTest extends BaseJpaDstu3Test {
 		
 		verify(myRequestOperationCallback, times(1)).resourceCreated(any(IBaseResource.class));
 		verifyNoMoreInteractions(myRequestOperationCallback);
+	}
+
+	@Test
+	public void testServerOperationCreate() {
+		verify(myServerOperationInterceptor, times(0)).resourceCreated(Mockito.isNull(RequestDetails.class), any(IBaseResource.class));
+
+		Patient p = new Patient();
+		p.addName().setFamily("PATIENT");
+		IIdType id = myPatientDao.create(p, (RequestDetails)null).getId();
+		assertEquals(1L, id.getVersionIdPartAsLong().longValue());
+		
+		verify(myServerOperationInterceptor, times(1)).resourceCreated(Mockito.isNull(RequestDetails.class), any(IBaseResource.class));
+	}
+
+	@Test
+	public void testServerOperationUpdate() {
+		verify(myServerOperationInterceptor, times(0)).resourceCreated(Mockito.isNull(RequestDetails.class), any(IBaseResource.class));
+		verify(myServerOperationInterceptor, times(0)).resourceUpdated(Mockito.isNull(RequestDetails.class), any(IBaseResource.class));
+
+		Patient p = new Patient();
+		p.addName().setFamily("PATIENT");
+		IIdType id = myPatientDao.create(p, (RequestDetails)null).getId();
+		assertEquals(1L, id.getVersionIdPartAsLong().longValue());
+		
+		p.addName().setFamily("2");
+		myPatientDao.update(p);
+		
+		verify(myServerOperationInterceptor, times(1)).resourceCreated(Mockito.isNull(RequestDetails.class), any(IBaseResource.class));
+		verify(myServerOperationInterceptor, times(1)).resourceUpdated(Mockito.isNull(RequestDetails.class), any(IBaseResource.class));
+	}
+
+	@Test
+	public void testServerOperationDelete() {
+		verify(myServerOperationInterceptor, times(0)).resourceCreated(Mockito.isNull(RequestDetails.class), any(IBaseResource.class));
+		verify(myServerOperationInterceptor, times(0)).resourceDeleted(Mockito.isNull(RequestDetails.class), any(IBaseResource.class));
+
+		Patient p = new Patient();
+		p.addName().setFamily("PATIENT");
+		IIdType id = myPatientDao.create(p, (RequestDetails)null).getId();
+		assertEquals(1L, id.getVersionIdPartAsLong().longValue());
+		
+		p.addName().setFamily("2");
+		myPatientDao.delete(p.getIdElement().toUnqualifiedVersionless());
+		
+		verify(myServerOperationInterceptor, times(1)).resourceCreated(Mockito.isNull(RequestDetails.class), any(IBaseResource.class));
+		verify(myServerOperationInterceptor, times(1)).resourceDeleted(Mockito.isNull(RequestDetails.class), any(IBaseResource.class));
 	}
 
 	@Test

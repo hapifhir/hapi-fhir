@@ -209,9 +209,11 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				if (next instanceof IJpaServerInterceptor) {
 					((IJpaServerInterceptor) next).resourceDeleted(requestDetails, entity);
 				}
-				if (next instanceof IServerOperationInterceptor) {
-					((IServerOperationInterceptor) next).resourceDeleted(theRequestDetails, resourceToDelete);
-				}
+			}
+		}
+		for (IServerInterceptor next : getConfig().getInterceptors()) {
+			if (next instanceof IServerOperationInterceptor) {
+				((IServerOperationInterceptor) next).resourceDeleted(theRequestDetails, resourceToDelete);
 			}
 		}
 
@@ -278,11 +280,12 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				if (next instanceof IJpaServerInterceptor) {
 					((IJpaServerInterceptor) next).resourceDeleted(requestDetails, entity);
 				}
+			}
+			for (IServerInterceptor next : getConfig().getInterceptors()) {
 				if (next instanceof IServerOperationInterceptor) {
 					((IServerOperationInterceptor) next).resourceDeleted(theRequestDetails, resourceToDelete);
 				}
 			}
-
 		}
 
 		IBaseOperationOutcome oo;
@@ -392,9 +395,11 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				if (next instanceof IJpaServerInterceptor) {
 					((IJpaServerInterceptor) next).resourceCreated(requestDetails, entity);
 				}
-				if (next instanceof IServerOperationInterceptor) {
-					((IServerOperationInterceptor) next).resourceCreated(theRequestDetails, theResource);
-				}
+			}
+		}
+		for (IServerInterceptor next : getConfig().getInterceptors()) {
+			if (next instanceof IServerOperationInterceptor) {
+				((IServerOperationInterceptor) next).resourceCreated(theRequestDetails, theResource);
 			}
 		}
 
@@ -1136,12 +1141,14 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				if (next instanceof IJpaServerInterceptor) {
 					((IJpaServerInterceptor) next).resourceUpdated(requestDetails, entity);
 				}
-				if (next instanceof IServerOperationInterceptor) {
-					((IServerOperationInterceptor) next).resourceDeleted(theRequestDetails, theResource);
-				}
 			}
 		}
-
+		for (IServerInterceptor next : getConfig().getInterceptors()) {
+			if (next instanceof IServerOperationInterceptor) {
+				((IServerOperationInterceptor) next).resourceUpdated(theRequestDetails, theResource);
+			}
+		}
+		
 		DaoMethodOutcome outcome = toMethodOutcome(savedEntity, theResource).setCreated(false);
 
 		if (!thePerformIndexing) {
