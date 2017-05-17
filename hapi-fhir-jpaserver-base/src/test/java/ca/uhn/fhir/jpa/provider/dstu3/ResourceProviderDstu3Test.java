@@ -175,6 +175,25 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		myDaoConfig.setAllowMultipleDelete(true);
 	}
 
+	@Test
+	public void testSaveAndRetrieveResourceWithExtension() {
+		Patient nextPatient = new Patient();
+		nextPatient.setId("Patient/B");
+		nextPatient
+				.addExtension()
+				.setUrl("http://foo")
+				.setValue(new Reference("Practitioner/A"));
+
+		ourClient.update().resource(nextPatient).execute();
+
+		Patient p = ourClient.read().resource(Patient.class).withId("B").execute();
+		
+		String encoded = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p);
+		ourLog.info(encoded);
+
+		assertThat(encoded, containsString("http://foo"));
+	}
+
 	private void checkParamMissing(String paramName) throws IOException, ClientProtocolException {
 		HttpGet get = new HttpGet(ourServerBase + "/Observation?" + paramName + ":missing=false");
 		CloseableHttpResponse resp = ourHttpClient.execute(get);
@@ -1549,11 +1568,10 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		}
 
 		assertEquals(null, responseBundle.getLink("next"));
-		
+
 		assertThat(ids, hasItem("List/A161444"));
 		assertThat(ids, hasItem("List/A161468"));
 		assertThat(ids, hasItem("List/A161500"));
-
 
 		ourLog.info("Expected {} - {}", allIds.size(), allIds);
 		ourLog.info("Actual   {} - {}", ids.size(), ids);
@@ -1726,7 +1744,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			preDates.add(new Date());
 			Thread.sleep(100);
 			patient.setId(id);
-			patient.getName().get(0).getFamilyElement().setValue(methodName + "_i"+i);
+			patient.getName().get(0).getFamilyElement().setValue(methodName + "_i" + i);
 			ids.add(myPatientDao.update(patient, mySrd).getId().toUnqualified().getValue());
 		}
 
@@ -3149,7 +3167,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
 
 		// should be subject._id
-		HttpGet httpPost = new HttpGet(ourServerBase + "/Observation?subject.id=FOO"); 
+		HttpGet httpPost = new HttpGet(ourServerBase + "/Observation?subject.id=FOO");
 
 		CloseableHttpResponse resp = ourHttpClient.execute(httpPost);
 		try {
@@ -3162,7 +3180,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		}
 		ourLog.info("Outgoing post: {}", httpPost);
 	}
-	
+
 	/**
 	 * See #411
 	 * 

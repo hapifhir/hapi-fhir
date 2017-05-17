@@ -384,7 +384,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		 * to be reflected in the resource shared with interceptors
 		 */
 		if (!thePerformIndexing) {
-			incremenetId(theResource, entity, theResource.getIdElement());
+			incrementId(theResource, entity, theResource.getIdElement());
 		}
 		
 		// Notify JPA interceptors
@@ -415,7 +415,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		return outcome;
 	}
 
-	private void incremenetId(T theResource, ResourceTable theSavedEntity, IIdType theResourceId) {
+	private void incrementId(T theResource, ResourceTable theSavedEntity, IIdType theResourceId) {
 		IIdType idType = theResourceId;
 		String newVersion;
 		long newVersionLong;
@@ -1131,7 +1131,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			if (resourceId.hasVersionIdPart() == false) {
 				resourceId = resourceId.withVersion(Long.toString(savedEntity.getVersion()));
 			}
-			incremenetId(theResource, savedEntity, resourceId);
+			incrementId(theResource, savedEntity, resourceId);
 		}
 
 		// Notify interceptors
