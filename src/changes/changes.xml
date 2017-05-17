@@ -93,6 +93,10 @@
 				will live after all. Interceptors registered to this method will now be treated
 				appropriately if they implement IServerOperationInterceptor too.
 			</action>
+			<action type="fix">
+				JPA server did not correctly support searching on a custom search parameter whose
+				path pointed to an extension, where the client used a chained value.
+			</action>
 		</release>
 		<release version="2.4" date="2017-04-19">
 			<action type="add">

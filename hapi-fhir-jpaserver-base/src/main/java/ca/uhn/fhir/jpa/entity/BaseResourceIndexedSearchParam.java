@@ -38,7 +38,7 @@ public abstract class BaseResourceIndexedSearchParam implements Serializable {
 	// TODO: make this nullable=false and a primitive (written may 2017)
 	@Field()
 	@Column(name = "SP_MISSING", nullable = true)
-	private Boolean myMissing;
+	private Boolean myMissing = Boolean.FALSE;
 
 	@Field
 	@Column(name = "SP_NAME", length = MAX_SP_NAME, nullable = false)

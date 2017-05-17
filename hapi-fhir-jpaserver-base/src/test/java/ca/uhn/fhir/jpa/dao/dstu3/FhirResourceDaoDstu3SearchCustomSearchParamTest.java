@@ -201,35 +201,134 @@ public class FhirResourceDaoDstu3SearchCustomSearchParamTest extends BaseJpaDstu
 	}
 
 	@Test
-	public void testSearchForExtensionReference() {
-		
-		
-		SearchParameter eyeColourSp = new SearchParameter();
-		eyeColourSp.addBase("Patient");
-		eyeColourSp.setCode("sibling");
-		eyeColourSp.setType(org.hl7.fhir.dstu3.model.Enumerations.SearchParamType.REFERENCE);
-		eyeColourSp.setTitle("Sibling");
-		eyeColourSp.setExpression("Patient.extension('http://acme.org/sibling')");
-		eyeColourSp.setXpathUsage(org.hl7.fhir.dstu3.model.SearchParameter.XPathUsageType.NORMAL);
-		eyeColourSp.setStatus(org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus.ACTIVE);
-		mySearchParameterDao.create(eyeColourSp, mySrd);
+	public void testSearchForExtensionReferenceWithNonMatchingTarget() {
+		SearchParameter siblingSp = new SearchParameter();
+		siblingSp.addBase("Patient");
+		siblingSp.setCode("sibling");
+		siblingSp.setType(org.hl7.fhir.dstu3.model.Enumerations.SearchParamType.REFERENCE);
+		siblingSp.setTitle("Sibling");
+		siblingSp.setExpression("Patient.extension('http://acme.org/sibling')");
+		siblingSp.setXpathUsage(org.hl7.fhir.dstu3.model.SearchParameter.XPathUsageType.NORMAL);
+		siblingSp.setStatus(org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus.ACTIVE);
+		siblingSp.getTarget().add(new CodeType("Organization"));
+		mySearchParameterDao.create(siblingSp, mySrd);
 
 		mySearchParamRegsitry.forceRefresh();
 
 		Patient p1 = new Patient();
-		p1.setActive(true);
+		p1.addName().setFamily("P1");
 		IIdType p1id = myPatientDao.create(p1).getId().toUnqualifiedVersionless();
 
 		Patient p2 = new Patient();
-		p2.setActive(true);
+		p2.addName().setFamily("P2");
 		p2.addExtension().setUrl("http://acme.org/sibling").setValue(new Reference(p1id));
 		IIdType p2id = myPatientDao.create(p2).getId().toUnqualifiedVersionless();
 
-		// Try with custom gender SP
-		SearchParameterMap map = new SearchParameterMap();
+		SearchParameterMap map;
+		IBundleProvider results;
+		List<String> foundResources;
+		
+		// Search by ref
+		map = new SearchParameterMap();
 		map.add("sibling", new ReferenceParam(p1id.getValue()));
-		IBundleProvider results = myPatientDao.search(map);
-		List<String> foundResources = toUnqualifiedVersionlessIdValues(results);
+		results = myPatientDao.search(map);
+		foundResources = toUnqualifiedVersionlessIdValues(results);
+		assertThat(foundResources, empty());
+
+		// Search by chain
+		map = new SearchParameterMap();
+		map.add("sibling", new ReferenceParam("name", "P1"));
+		results = myPatientDao.search(map);
+		foundResources = toUnqualifiedVersionlessIdValues(results);
+		assertThat(foundResources, empty());
+
+	}
+
+	
+	
+	@Test
+	public void testSearchForExtensionReferenceWithoutTarget() {
+		SearchParameter siblingSp = new SearchParameter();
+		siblingSp.addBase("Patient");
+		siblingSp.setCode("sibling");
+		siblingSp.setType(org.hl7.fhir.dstu3.model.Enumerations.SearchParamType.REFERENCE);
+		siblingSp.setTitle("Sibling");
+		siblingSp.setExpression("Patient.extension('http://acme.org/sibling')");
+		siblingSp.setXpathUsage(org.hl7.fhir.dstu3.model.SearchParameter.XPathUsageType.NORMAL);
+		siblingSp.setStatus(org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus.ACTIVE);
+		mySearchParameterDao.create(siblingSp, mySrd);
+
+		mySearchParamRegsitry.forceRefresh();
+
+		Patient p1 = new Patient();
+		p1.addName().setFamily("P1");
+		IIdType p1id = myPatientDao.create(p1).getId().toUnqualifiedVersionless();
+
+		Patient p2 = new Patient();
+		p2.addName().setFamily("P2");
+		p2.addExtension().setUrl("http://acme.org/sibling").setValue(new Reference(p1id));
+		IIdType p2id = myPatientDao.create(p2).getId().toUnqualifiedVersionless();
+
+		SearchParameterMap map;
+		IBundleProvider results;
+		List<String> foundResources;
+		
+		// Search by ref
+		map = new SearchParameterMap();
+		map.add("sibling", new ReferenceParam(p1id.getValue()));
+		results = myPatientDao.search(map);
+		foundResources = toUnqualifiedVersionlessIdValues(results);
+		assertThat(foundResources, contains(p2id.getValue()));
+
+		// Search by chain
+		map = new SearchParameterMap();
+		map.add("sibling", new ReferenceParam("name", "P1"));
+		results = myPatientDao.search(map);
+		foundResources = toUnqualifiedVersionlessIdValues(results);
+		assertThat(foundResources, contains(p2id.getValue()));
+
+	}
+
+	@Test
+	public void testSearchForExtensionReferenceWithTarget() {
+		SearchParameter siblingSp = new SearchParameter();
+		siblingSp.addBase("Patient");
+		siblingSp.setCode("sibling");
+		siblingSp.setType(org.hl7.fhir.dstu3.model.Enumerations.SearchParamType.REFERENCE);
+		siblingSp.setTitle("Sibling");
+		siblingSp.setExpression("Patient.extension('http://acme.org/sibling')");
+		siblingSp.setXpathUsage(org.hl7.fhir.dstu3.model.SearchParameter.XPathUsageType.NORMAL);
+		siblingSp.setStatus(org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus.ACTIVE);
+		siblingSp.getTarget().add(new CodeType("Patient"));
+		mySearchParameterDao.create(siblingSp, mySrd);
+
+		mySearchParamRegsitry.forceRefresh();
+
+		Patient p1 = new Patient();
+		p1.addName().setFamily("P1");
+		IIdType p1id = myPatientDao.create(p1).getId().toUnqualifiedVersionless();
+
+		Patient p2 = new Patient();
+		p2.addName().setFamily("P2");
+		p2.addExtension().setUrl("http://acme.org/sibling").setValue(new Reference(p1id));
+		IIdType p2id = myPatientDao.create(p2).getId().toUnqualifiedVersionless();
+
+		SearchParameterMap map;
+		IBundleProvider results;
+		List<String> foundResources;
+		
+		// Search by ref
+		map = new SearchParameterMap();
+		map.add("sibling", new ReferenceParam(p1id.getValue()));
+		results = myPatientDao.search(map);
+		foundResources = toUnqualifiedVersionlessIdValues(results);
+		assertThat(foundResources, contains(p2id.getValue()));
+
+		// Search by chain
+		map = new SearchParameterMap();
+		map.add("sibling", new ReferenceParam("name", "P1"));
+		results = myPatientDao.search(map);
+		foundResources = toUnqualifiedVersionlessIdValues(results);
 		assertThat(foundResources, contains(p2id.getValue()));
 
 	}
