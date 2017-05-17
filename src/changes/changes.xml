@@ -101,6 +101,10 @@
 				Fix issue where the JSON parser sometimes did not encode DSTU3 extensions on the root of a 
 				resource which have a value of type reference.
 			</action>
+			<action type="add">
+				Server now respects the If-Modified-Since header and will return an HTTP 304 if appropriate
+				for read operations.
+			</action>
 		</release>
 		<release version="2.4" date="2017-04-19">
 			<action type="add">

@@ -25,38 +25,25 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
-import org.hl7.fhir.instance.model.api.IBaseBinary;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.instance.model.api.*;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.api.Bundle;
-import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.api.*;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
-import ca.uhn.fhir.rest.annotation.Elements;
-import ca.uhn.fhir.rest.annotation.IdParam;
-import ca.uhn.fhir.rest.annotation.Read;
+import ca.uhn.fhir.rest.annotation.*;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
-import ca.uhn.fhir.rest.server.Constants;
-import ca.uhn.fhir.rest.server.ETagSupportEnum;
-import ca.uhn.fhir.rest.server.IBundleProvider;
-import ca.uhn.fhir.rest.server.IRestfulServer;
-import ca.uhn.fhir.rest.server.SimpleBundleProvider;
-import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.rest.server.exceptions.NotModifiedException;
+import ca.uhn.fhir.rest.server.*;
+import ca.uhn.fhir.rest.server.exceptions.*;
+import ca.uhn.fhir.util.DateUtils;
 
 public class ReadMethodBinding extends BaseResourceReturningMethodBinding implements IClientResponseHandlerHandlesBinary<Object> {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ReadMethodBinding.class);
@@ -220,22 +207,48 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding implem
 		Object response = invokeServerMethod(theServer, theRequest, theMethodParams);
 		IBundleProvider retVal = toResourceList(response);
 
-		if (theRequest.getServer().getETagSupport() == ETagSupportEnum.ENABLED) {
-			String ifNoneMatch = theRequest.getHeader(Constants.HEADER_IF_NONE_MATCH_LC);
-			if (retVal.size() == 1 && StringUtils.isNotBlank(ifNoneMatch)) {
-				List<IBaseResource> responseResources = retVal.getResources(0, 1);
-				IBaseResource responseResource = responseResources.get(0);
 
-				ifNoneMatch = MethodUtil.parseETagValue(ifNoneMatch);
-				if (responseResource.getIdElement() != null && responseResource.getIdElement().hasVersionIdPart()) {
-					if (responseResource.getIdElement().getVersionIdPart().equals(ifNoneMatch)) {
-						ourLog.debug("Returning HTTP 301 because request specified {}={}", Constants.HEADER_IF_NONE_MATCH, ifNoneMatch);
-						throw new NotModifiedException("Not Modified");
+		if (retVal.size() == 1) {
+			List<IBaseResource> responseResources = retVal.getResources(0, 1);
+			IBaseResource responseResource = responseResources.get(0);
+
+			// If-None-Match
+			if (theRequest.getServer().getETagSupport() == ETagSupportEnum.ENABLED) {
+				String ifNoneMatch = theRequest.getHeader(Constants.HEADER_IF_NONE_MATCH_LC);
+				if (StringUtils.isNotBlank(ifNoneMatch)) {
+					ifNoneMatch = MethodUtil.parseETagValue(ifNoneMatch);
+					if (responseResource.getIdElement() != null && responseResource.getIdElement().hasVersionIdPart()) {
+						if (responseResource.getIdElement().getVersionIdPart().equals(ifNoneMatch)) {
+							ourLog.debug("Returning HTTP 301 because request specified {}={}", Constants.HEADER_IF_NONE_MATCH, ifNoneMatch);
+							throw new NotModifiedException("Not Modified");
+						}
 					}
 				}
 			}
-		}
-
+				
+			// If-Modified-Since
+			String ifModifiedSince = theRequest.getHeader(Constants.HEADER_IF_MODIFIED_SINCE_LC);
+			if (isNotBlank(ifModifiedSince)) {
+				Date ifModifiedSinceDate = DateUtils.parseDate(ifModifiedSince);
+				Date lastModified = null;
+				if (responseResource instanceof IResource) {
+					InstantDt lastModifiedDt = ResourceMetadataKeyEnum.UPDATED.get((IResource) responseResource);
+					if (lastModifiedDt != null) {
+						lastModified = lastModifiedDt.getValue();
+					}
+				} else {
+					lastModified = ((IAnyResource)responseResource).getMeta().getLastUpdated();
+				}
+				
+				if (lastModified != null && lastModified.getTime() > ifModifiedSinceDate.getTime()) {
+					ourLog.debug("Returning HTTP 301 because If-Modified-Since does not match");
+					throw new NotModifiedException("Not Modified");
+				}
+			}
+				
+		} // if we have at least 1 result
+		
+		
 		return retVal;
 	}
 

@@ -48,6 +48,7 @@ public class Constants {
 	public static final String CT_XML = "application/xml";
 	public static final String CT_XML_PATCH = "application/xml-patch+xml";
 	public static final String ENCODING_GZIP = "gzip";
+	public static final String EXTOP_PROCESS_MESSAGE = "$process-message"; //Used in messaging
 	public static final String EXTOP_VALIDATE = "$validate";
 	public static final String EXTOP_VALIDATE_MODE = "mode";
 	public static final String EXTOP_VALIDATE_PROFILE = "profile";
@@ -86,6 +87,8 @@ public class Constants {
 	public static final String HEADER_ETAG_LC = HEADER_ETAG.toLowerCase();
 	public static final String HEADER_IF_MATCH = "If-Match";
 	public static final String HEADER_IF_MATCH_LC = HEADER_IF_MATCH.toLowerCase();
+	public static final String HEADER_IF_MODIFIED_SINCE = "If-Modified-Since";
+	public static final String HEADER_IF_MODIFIED_SINCE_LC = HEADER_IF_MODIFIED_SINCE.toLowerCase();
 	public static final String HEADER_IF_NONE_EXIST = "If-None-Exist";
 	public static final String HEADER_IF_NONE_EXIST_LC = HEADER_IF_NONE_EXIST.toLowerCase();
 	public static final String HEADER_IF_NONE_MATCH = "If-None-Match";
@@ -109,6 +112,7 @@ public class Constants {
 	public static final String LINK_PREVIOUS = "previous";
 	public static final String LINK_SELF = "self";
 	public static final String OPENSEARCH_NS_OLDER = "http://purl.org/atompub/tombstones/1.0";
+	public static final String PARAM_ASYNC = "async"; //Used in messaging
 	public static final String PARAM_AT = "_at";
 	/**
 	 * Used in paging links
@@ -133,6 +137,7 @@ public class Constants {
 	public static final String PARAM_PRETTY_VALUE_TRUE = "true";
 	public static final String PARAM_PROFILE = "_profile";
 	public static final String PARAM_QUERY = "_query";
+	public static final String PARAM_RESPONSE_URL = "response-url"; //Used in messaging
 	public static final String PARAM_REVINCLUDE = "_revinclude";
 	public static final String PARAM_REVINCLUDE_RECURSE = PARAM_REVINCLUDE+PARAM_INCLUDE_QUALIFIER_RECURSE;
 	public static final String PARAM_SEARCH = "_search";
@@ -142,13 +147,10 @@ public class Constants {
 	public static final String PARAM_SORT_ASC = "_sort:asc";
 	public static final String PARAM_SORT_DESC = "_sort:desc";
 	public static final String PARAM_SUMMARY = "_summary";
-	public static final String PARAM_TAG = "_tag";
-	public static final String PARAM_TAGS = "_tags";
-	public static final String PARAM_TEXT = "_text";
+        public static final String PARAM_TAG = "_tag";
+        public static final String PARAM_TAGS = "_tags";
+        public static final String PARAM_TEXT = "_text";
 	public static final String PARAM_VALIDATE = "_validate";
-        public static final String PARAM_ASYNC = "async"; //Used in messaging
-        public static final String PARAM_RESPONSE_URL = "response-url"; //Used in messaging
-        public static final String EXTOP_PROCESS_MESSAGE = "$process-message"; //Used in messaging
 	public static final String PARAMQUALIFIER_MISSING = ":missing";
 	public static final String PARAMQUALIFIER_MISSING_FALSE = "false";
 	public static final String PARAMQUALIFIER_MISSING_TRUE = "true";
@@ -162,8 +164,8 @@ public class Constants {
 	public static final int STATUS_HTTP_400_BAD_REQUEST = 400;
 	public static final int STATUS_HTTP_401_CLIENT_UNAUTHORIZED = 401;
 	public static final int STATUS_HTTP_403_FORBIDDEN = 403;
-	public static final int STATUS_HTTP_404_NOT_FOUND = 404;
 	
+	public static final int STATUS_HTTP_404_NOT_FOUND = 404;
 	public static final int STATUS_HTTP_405_METHOD_NOT_ALLOWED = 405;
 	public static final int STATUS_HTTP_409_CONFLICT = 409;
 	public static final int STATUS_HTTP_410_GONE = 410;
