@@ -435,7 +435,7 @@ public class SearchBuilder implements ISearchBuilder {
 					String resourceId;
 					if (!ref.getValue().matches("[a-zA-Z]+\\/.*")) {
 
-						RuntimeSearchParam param = mySearchParamRegistry.getActiveSearchParam(myResourceName, theParamName);
+						RuntimeSearchParam param = mySearchParamRegistry.getActiveSearchParam(theResourceName, theParamName);
 						resourceTypes = new ArrayList<Class<? extends IBaseResource>>();
 						
 						Set<String> targetTypes = param.getTargets();
