@@ -447,8 +447,12 @@ public class SearchBuilder implements ISearchBuilder {
 						}
 
 						if (resourceTypes.isEmpty()) {
-							RuntimeResourceDefinition resourceDef = myContext.getResourceDefinition(myResourceType);
-							String paramPath = myCallingDao.getSearchParamByName(resourceDef, theParamName).getPath();
+							RuntimeResourceDefinition resourceDef = myContext.getResourceDefinition(theResourceName);
+							RuntimeSearchParam searchParamByName = myCallingDao.getSearchParamByName(resourceDef, theParamName);
+							if (searchParamByName == null) {
+								throw new InternalErrorException("Could not find parameter " + theParamName );
+							}
+							String paramPath = searchParamByName.getPath();
 							if (paramPath.endsWith(".as(Reference)")) {
 								paramPath = paramPath.substring(0, paramPath.length() - ".as(Reference)".length()) + "Reference";
 							}
