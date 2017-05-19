@@ -9,9 +9,11 @@ import static org.junit.Assert.fail;
 import java.io.IOException;
 import java.util.List;
 
+import org.hl7.fhir.dstu3.model.Appointment;
 import org.hl7.fhir.dstu3.model.CodeType;
 import org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.dstu3.model.Patient;
+import org.hl7.fhir.dstu3.model.Practitioner;
 import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.SearchParameter;
 import org.hl7.fhir.dstu3.model.StringType;
@@ -21,7 +23,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import ca.uhn.fhir.jpa.dao.SearchParameterMap;
-import ca.uhn.fhir.model.dstu.resource.Practitioner;
+import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenParam;
@@ -330,6 +332,47 @@ public class FhirResourceDaoDstu3SearchCustomSearchParamTest extends BaseJpaDstu
 		results = myPatientDao.search(map);
 		foundResources = toUnqualifiedVersionlessIdValues(results);
 		assertThat(foundResources, contains(p2id.getValue()));
+
+	}
+
+	@Test
+	public void testIncludeExtensionReferenceAsRecurse() {
+		SearchParameter attendingSp = new SearchParameter();
+		attendingSp.addBase("Patient");
+		attendingSp.setCode("attending");
+		attendingSp.setType(org.hl7.fhir.dstu3.model.Enumerations.SearchParamType.REFERENCE);
+		attendingSp.setTitle("Attending");
+		attendingSp.setExpression("Patient.extension('http://acme.org/attending')");
+		attendingSp.setXpathUsage(org.hl7.fhir.dstu3.model.SearchParameter.XPathUsageType.NORMAL);
+		attendingSp.setStatus(org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus.ACTIVE);
+		attendingSp.getTarget().add(new CodeType("Practitioner"));
+		IIdType spId = mySearchParameterDao.create(attendingSp, mySrd).getId().toUnqualifiedVersionless();
+
+		mySearchParamRegsitry.forceRefresh();
+
+		Practitioner p1 = new Practitioner();
+		p1.addName().setFamily("P1");
+		IIdType p1id = myPractitionerDao.create(p1).getId().toUnqualifiedVersionless();
+
+		Patient p2 = new Patient();
+		p2.addName().setFamily("P2");
+		p2.addExtension().setUrl("http://acme.org/attending").setValue(new Reference(p1id));
+		IIdType p2id = myPatientDao.create(p2).getId().toUnqualifiedVersionless();
+
+		Appointment app = new Appointment();
+		app.addParticipant().getActor().setReference(p2id.getValue());
+		IIdType appId = myAppointmentDao.create(app).getId().toUnqualifiedVersionless();
+		
+		SearchParameterMap map;
+		IBundleProvider results;
+		List<String> foundResources;
+		
+		map = new SearchParameterMap();
+		map.addInclude(new Include("Appointment:patient", true));
+		map.addInclude(new Include("Patient:attending", true));
+		results = myAppointmentDao.search(map);
+		foundResources = toUnqualifiedVersionlessIdValues(results);
+		assertThat(foundResources, contains(appId.getValue(), p2id.getValue(), p1id.getValue()));
 
 	}
 
