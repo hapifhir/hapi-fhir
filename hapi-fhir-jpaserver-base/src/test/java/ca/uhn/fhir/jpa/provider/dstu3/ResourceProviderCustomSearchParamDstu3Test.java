@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.provider.dstu3;
 
 import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -12,16 +13,23 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.io.IOUtils;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.hl7.fhir.dstu3.model.Appointment;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.CapabilityStatement;
-import org.hl7.fhir.dstu3.model.CodeType;
 import org.hl7.fhir.dstu3.model.CapabilityStatement.CapabilityStatementRestComponent;
 import org.hl7.fhir.dstu3.model.CapabilityStatement.CapabilityStatementRestResourceComponent;
 import org.hl7.fhir.dstu3.model.CapabilityStatement.CapabilityStatementRestResourceSearchParamComponent;
+import org.hl7.fhir.dstu3.model.CodeType;
 import org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.dstu3.model.Observation;
 import org.hl7.fhir.dstu3.model.Observation.ObservationStatus;
 import org.hl7.fhir.dstu3.model.Patient;
+import org.hl7.fhir.dstu3.model.Practitioner;
+import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.SearchParameter;
 import org.hl7.fhir.dstu3.model.SearchParameter.XPathUsageType;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -37,9 +45,10 @@ import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.SearchParameterMap;
 import ca.uhn.fhir.jpa.entity.ResourceTable;
+import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.gclient.ReferenceClientParam;
 import ca.uhn.fhir.rest.gclient.TokenClientParam;
-import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.TestUtil;
@@ -75,6 +84,52 @@ public class ResourceProviderCustomSearchParamDstu3Test extends BaseResourceProv
 		}
 	}
 
+	@Test
+	public void testIncludeExtensionReferenceAsRecurse() throws Exception, IOException {
+		SearchParameter attendingSp = new SearchParameter();
+		attendingSp.addBase("Patient");
+		attendingSp.setCode("attending");
+		attendingSp.setType(org.hl7.fhir.dstu3.model.Enumerations.SearchParamType.REFERENCE);
+		attendingSp.setTitle("Attending");
+		attendingSp.setExpression("Patient.extension('http://acme.org/attending')");
+		attendingSp.setXpathUsage(org.hl7.fhir.dstu3.model.SearchParameter.XPathUsageType.NORMAL);
+		attendingSp.setStatus(org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus.ACTIVE);
+		attendingSp.getTarget().add(new CodeType("Practitioner"));
+		IIdType spId = mySearchParameterDao.create(attendingSp, mySrd).getId().toUnqualifiedVersionless();
+
+		mySearchParamRegsitry.forceRefresh();
+
+		Practitioner p1 = new Practitioner();
+		p1.addName().setFamily("P1");
+		IIdType p1id = myPractitionerDao.create(p1).getId().toUnqualifiedVersionless();
+
+		Patient p2 = new Patient();
+		p2.addName().setFamily("P2");
+		p2.addExtension().setUrl("http://acme.org/attending").setValue(new Reference(p1id));
+		IIdType p2id = myPatientDao.create(p2).getId().toUnqualifiedVersionless();
+
+		Appointment app = new Appointment();
+		app.addParticipant().getActor().setReference(p2id.getValue());
+		IIdType appId = myAppointmentDao.create(app).getId().toUnqualifiedVersionless();
+		
+		SearchParameterMap map;
+		IBundleProvider results;
+		List<String> foundResources;
+
+		HttpGet get = new HttpGet(ourServerBase + "/Appointment?_include:recurse=Appointment:patient&_include:recurse=Appointment:location&_include:recurse=Patient:attending&_pretty=true");
+		CloseableHttpResponse response = ourHttpClient.execute(get);
+		try {
+			String resp = IOUtils.toString(response.getEntity().getContent(), Constants.CHARSET_UTF8);
+			ourLog.info(resp);
+			assertEquals(200, response.getStatusLine().getStatusCode());
+			
+			assertThat(resp, containsString("<fullUrl value=\"http://localhost:" + ourPort + "/fhir/context/Practitioner/"));
+		} finally {
+			IOUtils.closeQuietly(response);
+		}
+	}
+
+	
 	@Test
 	public void testSearchForExtension() {
 		SearchParameter eyeColourSp = new SearchParameter();
