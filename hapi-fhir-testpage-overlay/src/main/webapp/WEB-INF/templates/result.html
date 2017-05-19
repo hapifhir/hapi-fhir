@@ -245,7 +245,7 @@
 															<span th:unless="${riBundle.totalElement.empty}" th:text="'Bundle contains ' + ${#lists.size(riBundle.entry)} + ' / ' + ${riBundle.totalElement.value} + ' entries'"/>
 														</a>
 
-														<th:block th:if="${riBundle.getLink('next') != null} or ${riBundle.getLink('prev') != null}">
+														<th:block th:if="${riBundle.getLink('next') != null} or ${riBundle.getLink('prev') != null} or ${riBundle.getLink('previous') != null}">
 														
 															<!-- Prev/Next Page Buttons -->
 															<button	class="btn btn-success btn-xs" type="button" id="page-prev-btn"	

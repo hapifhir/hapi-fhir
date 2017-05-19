@@ -234,12 +234,14 @@ public class Controller extends BaseController {
 		GenericClient client = theRequest.newClient(theReq, context, myConfig, interceptor);
 
 		String url = defaultString(theReq.getParameter("page-url"));
-		if (!url.startsWith(theModel.get("base").toString())) {
-			ourLog.warn(logPrefix(theModel) + "Refusing to load page URL: {}", url);
-			theModel.put("errorMsg", "Invalid page URL: " + url);
-			return "result";
+		if (myConfig.isRefuseToFetchThirdPartyUrls()) {
+			if (!url.startsWith(theModel.get("base").toString())) {
+				ourLog.warn(logPrefix(theModel) + "Refusing to load page URL: {}", url);
+				theModel.put("errorMsg", "Invalid page URL: " + url);
+				return "result";
+			}
 		}
-
+		
 		url = url.replace("&amp;", "&");
 
 		ResultType returnsResource = ResultType.BUNDLE;

@@ -24,6 +24,7 @@ public class TesterConfig {
 	private LinkedHashMap<String, FhirVersionEnum> myIdToFhirVersion = new LinkedHashMap<String, FhirVersionEnum>();
 	private LinkedHashMap<String, String> myIdToServerBase = new LinkedHashMap<String, String>();
 	private LinkedHashMap<String, String> myIdToServerName = new LinkedHashMap<String, String>();
+	private boolean myRefuseToFetchThirdPartyUrls = true;
 	private List<ServerBuilder> myServerBuilders = new ArrayList<TesterConfig.ServerBuilder>();
 
 	public IServerBuilderStep1 addServer() {
@@ -71,8 +72,24 @@ public class TesterConfig {
 		return myIdToServerName;
 	}
 
+	/**
+	 * If set to {@literal true} (default is true) the server will refuse to load URLs in
+	 * response payloads the refer to third party servers (e.g. paging URLs etc)
+	 */
+	public boolean isRefuseToFetchThirdPartyUrls() {
+		return myRefuseToFetchThirdPartyUrls;
+	}
+
 	public void setClientFactory(ITestingUiClientFactory theClientFactory) {
 		myClientFactory = theClientFactory;
+	}
+
+	/**
+	 * If set to {@literal true} (default is true) the server will refuse to load URLs in
+	 * response payloads the refer to third party servers (e.g. paging URLs etc)
+	 */
+	public void setRefuseToFetchThirdPartyUrls(boolean theRefuseToFetchThirdPartyUrls) {
+		myRefuseToFetchThirdPartyUrls = theRefuseToFetchThirdPartyUrls;
 	}
 
 	@Required
@@ -137,7 +154,7 @@ public class TesterConfig {
 	public interface IServerBuilderStep5 {
 
 		IServerBuilderStep1 addServer();
-		
+
 		IServerBuilderStep5 allowsApiKey();
 
 	}
