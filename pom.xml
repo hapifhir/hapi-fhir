@@ -47,7 +47,7 @@
 			</snapshots>
 			<id>bintray-dnault-maven</id>
 			<name>bintray</name>
-			<url>http://dl.bintray.com/dnault/maven</url>
+			<url>https://dl.bintray.com/dnault/maven</url>
 		</repository>
 		<repository>
 			<id>jitpack.io</id>
