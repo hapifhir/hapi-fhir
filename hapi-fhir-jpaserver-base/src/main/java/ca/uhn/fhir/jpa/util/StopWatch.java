@@ -93,8 +93,8 @@ public class StopWatch {
 		tgt.append(val);
 	}
 
-	public double getMillisPerOperation(int theNumOperations) {
-		return ((double) getMillis()) / Math.max(1.0, theNumOperations);
+	public int getMillisPerOperation(int theNumOperations) {
+		return (int)(((double) getMillis()) / Math.max(1.0, theNumOperations));
 	}
 
 }

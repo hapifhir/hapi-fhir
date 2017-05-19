@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.dao.dstu3;
 
 import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.empty;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
@@ -17,6 +18,8 @@ import org.hl7.fhir.dstu3.model.Practitioner;
 import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.SearchParameter;
 import org.hl7.fhir.dstu3.model.StringType;
+import org.hl7.fhir.dstu3.model.*;
+import org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -269,7 +272,11 @@ public class FhirResourceDaoDstu3SearchCustomSearchParamTest extends BaseJpaDstu
 		Patient p2 = new Patient();
 		p2.addName().setFamily("P2");
 		p2.addExtension().setUrl("http://acme.org/sibling").setValue(new Reference(p1id));
+
 		IIdType p2id = myPatientDao.create(p2).getId().toUnqualifiedVersionless();
+		Appointment app = new Appointment();
+		app.addParticipant().getActor().setReference(p2id.getValue());
+		IIdType appid = myAppointmentDao.create(app).getId().toUnqualifiedVersionless();
 
 		SearchParameterMap map;
 		IBundleProvider results;
@@ -288,6 +295,14 @@ public class FhirResourceDaoDstu3SearchCustomSearchParamTest extends BaseJpaDstu
 		results = myPatientDao.search(map);
 		foundResources = toUnqualifiedVersionlessIdValues(results);
 		assertThat(foundResources, contains(p2id.getValue()));
+
+		// Search by two level chain
+		map = new SearchParameterMap();
+		map.add("patient", new ReferenceParam("sibling.name", "P1"));
+		results = myAppointmentDao.search(map);
+		foundResources = toUnqualifiedVersionlessIdValues(results);
+		assertThat(foundResources, containsInAnyOrder(appid.getValue()));
+
 
 	}
 
@@ -315,6 +330,10 @@ public class FhirResourceDaoDstu3SearchCustomSearchParamTest extends BaseJpaDstu
 		p2.addExtension().setUrl("http://acme.org/sibling").setValue(new Reference(p1id));
 		IIdType p2id = myPatientDao.create(p2).getId().toUnqualifiedVersionless();
 
+		Appointment app = new Appointment();
+		app.addParticipant().getActor().setReference(p2id.getValue());
+		IIdType appid = myAppointmentDao.create(app).getId().toUnqualifiedVersionless();
+		
 		SearchParameterMap map;
 		IBundleProvider results;
 		List<String> foundResources;
@@ -332,6 +351,13 @@ public class FhirResourceDaoDstu3SearchCustomSearchParamTest extends BaseJpaDstu
 		results = myPatientDao.search(map);
 		foundResources = toUnqualifiedVersionlessIdValues(results);
 		assertThat(foundResources, contains(p2id.getValue()));
+
+		// Search by two level chain
+		map = new SearchParameterMap();
+		map.add("patient", new ReferenceParam("sibling.name", "P1"));
+		results = myAppointmentDao.search(map);
+		foundResources = toUnqualifiedVersionlessIdValues(results);
+		assertThat(foundResources, containsInAnyOrder(appid.getValue()));
 
 	}
 
