@@ -213,7 +213,7 @@ public class ResponseHighlightingInterceptorTest {
 		Patient resource = new Patient();
 		resource.addName().addFamily("FAMILY");
 
-		ServletRequestDetails reqDetails = new ServletRequestDetails();
+		ServletRequestDetails reqDetails = new TestServletRequestDetails();
 		reqDetails.setRequestType(RequestTypeEnum.GET);
 		reqDetails.setServer(new RestfulServer(ourCtx));
 		reqDetails.setServletRequest(req);
@@ -251,7 +251,7 @@ public class ResponseHighlightingInterceptorTest {
 		Patient resource = new Patient();
 		resource.addName().addFamily("FAMILY");
 
-		ServletRequestDetails reqDetails = new ServletRequestDetails();
+		ServletRequestDetails reqDetails = new TestServletRequestDetails();
 		reqDetails.setRequestType(RequestTypeEnum.GET);
 		HashMap<String, String[]> params = new HashMap<String, String[]>();
 		params.put(Constants.PARAM_PRETTY, new String[] { Constants.PARAM_PRETTY_VALUE_TRUE });
@@ -286,7 +286,7 @@ public class ResponseHighlightingInterceptorTest {
 		Patient resource = new Patient();
 		resource.addName().addFamily("FAMILY");
 
-		ServletRequestDetails reqDetails = new ServletRequestDetails();
+		ServletRequestDetails reqDetails = new TestServletRequestDetails();
 		reqDetails.setRequestType(RequestTypeEnum.GET);
 		HashMap<String, String[]> params = new HashMap<String, String[]>();
 		params.put(Constants.PARAM_PRETTY, new String[] { Constants.PARAM_PRETTY_VALUE_TRUE });
@@ -326,7 +326,7 @@ public class ResponseHighlightingInterceptorTest {
 		Patient resource = new Patient();
 		resource.addName().addFamily("FAMILY");
 
-		ServletRequestDetails reqDetails = new ServletRequestDetails();
+		ServletRequestDetails reqDetails = new TestServletRequestDetails();
 		reqDetails.setRequestType(RequestTypeEnum.GET);
 		HashMap<String, String[]> params = new HashMap<String, String[]>();
 		reqDetails.setParameters(params);
@@ -360,7 +360,7 @@ public class ResponseHighlightingInterceptorTest {
 		Patient resource = new Patient();
 		resource.addName().addFamily("FAMILY");
 
-		ServletRequestDetails reqDetails = new ServletRequestDetails();
+		ServletRequestDetails reqDetails = new TestServletRequestDetails();
 		reqDetails.setRequestType(RequestTypeEnum.GET);
 		HashMap<String, String[]> params = new HashMap<String, String[]>();
 		params.put(Constants.PARAM_FORMAT, new String[] { Constants.FORMAT_HTML });
@@ -394,7 +394,7 @@ public class ResponseHighlightingInterceptorTest {
 		Patient resource = new Patient();
 		resource.addName().addFamily("FAMILY");
 
-		ServletRequestDetails reqDetails = new ServletRequestDetails();
+		ServletRequestDetails reqDetails = new TestServletRequestDetails();
 		reqDetails.setRequestType(RequestTypeEnum.GET);
 		HashMap<String, String[]> params = new HashMap<String, String[]>();
 		params.put(Constants.PARAM_FORMAT, new String[] { Constants.CT_HTML });
@@ -425,7 +425,7 @@ public class ResponseHighlightingInterceptorTest {
 		Patient resource = new Patient();
 		resource.addName().addFamily("FAMILY");
 
-		ServletRequestDetails reqDetails = new ServletRequestDetails();
+		ServletRequestDetails reqDetails = new TestServletRequestDetails();
 		reqDetails.setRequestType(RequestTypeEnum.GET);
 		reqDetails.setParameters(new HashMap<String, String[]>());
 		reqDetails.setServer(new RestfulServer(ourCtx));
@@ -463,7 +463,7 @@ public class ResponseHighlightingInterceptorTest {
 		Patient resource = new Patient();
 		resource.addName().addFamily("FAMILY");
 
-		ServletRequestDetails reqDetails = new ServletRequestDetails();
+		ServletRequestDetails reqDetails = new TestServletRequestDetails();
 		reqDetails.setRequestType(RequestTypeEnum.GET);
 		reqDetails.setParameters(new HashMap<String, String[]>());
 		RestfulServer server = new RestfulServer(ourCtx);
@@ -501,7 +501,7 @@ public class ResponseHighlightingInterceptorTest {
 		Patient resource = new Patient();
 		resource.addName().addFamily("FAMILY");
 
-		ServletRequestDetails reqDetails = new ServletRequestDetails();
+		ServletRequestDetails reqDetails = new TestServletRequestDetails();
 		reqDetails.setRequestType(RequestTypeEnum.GET);
 		reqDetails.setParameters(new HashMap<String, String[]>());
 		RestfulServer server = new RestfulServer(ourCtx);
@@ -865,6 +865,13 @@ public class ResponseHighlightingInterceptorTest {
 			return Collections.singletonList(p);
 		}
 
+	}
+
+	class TestServletRequestDetails extends ServletRequestDetails {
+		@Override
+		public String getServerBaseForRequest() {
+			return "/baseDstu3";
+		}
 	}
 
 }
