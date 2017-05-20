@@ -258,7 +258,7 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 	@Override
 	public List<DateParam> getValuesAsQueryTokens() {
 		ArrayList<DateParam> retVal = new ArrayList<DateParam>();
-		if (myLowerBound.getMissing() != null) {
+		if (myLowerBound != null && myLowerBound.getMissing() != null) {
 			retVal.add((myLowerBound));
 		} else {
 			if (myLowerBound != null && !myLowerBound.isEmpty()) {
