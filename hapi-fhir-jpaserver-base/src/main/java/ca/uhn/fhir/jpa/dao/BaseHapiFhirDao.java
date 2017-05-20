@@ -1508,6 +1508,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 			if (theResource != null) {
 				populateResourceIdFromEntity(theEntity, theResource);
 			}
+			theEntity.setUnchangedInCurrentOperation(true);
 			return theEntity;
 		}
 

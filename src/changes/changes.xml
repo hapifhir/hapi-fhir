@@ -36,7 +36,15 @@
 						Search results will be cached and reused (so that if a client
 						does two searches for "get me all patients matching FOO"
 						with the same FOO in short succession, we won't query the DB
-						again but will instead reuse the cached results) 
+						again but will instead reuse the cached results). Note that
+						this can improve performance, but does mean that searches can
+						return slightly out of date results. Essentially what this means
+						is that the latest version of individual resources will always
+						be returned despite this cacheing, but newly created resources
+						that should match may not be returned until the cache
+						expires. By default this cache has been set to one minute, 
+						which should be acceptable for most real-world usage, but
+						this can be changed or disabled entirely.
 					</li>
 					<li>
 						Updates which do not actually change the contents of the resource
@@ -50,7 +58,8 @@
 				<code>HFJ_SEARCH_INCLUDE</code>,
 				and 
 				<code>HFJ_SEARCH_RESULT</code>
-				tables from your database before upgrading.
+				tables from your database before upgrading, as the structure of these tables
+				has changed and old search results can not be reused.
 				]]>
 			</action>
 			<action type="fix" issue="590">

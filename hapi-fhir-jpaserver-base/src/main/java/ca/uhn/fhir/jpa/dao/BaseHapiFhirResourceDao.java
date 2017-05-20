@@ -1127,7 +1127,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		 * we'll manually increase the version. This is important because we want the updated version number
 		 * to be reflected in the resource shared with interceptors
 		 */
-		if (!thePerformIndexing) {
+		if (!thePerformIndexing && !savedEntity.isUnchangedInCurrentOperation()) {
 			if (resourceId.hasVersionIdPart() == false) {
 				resourceId = resourceId.withVersion(Long.toString(savedEntity.getVersion()));
 			}
