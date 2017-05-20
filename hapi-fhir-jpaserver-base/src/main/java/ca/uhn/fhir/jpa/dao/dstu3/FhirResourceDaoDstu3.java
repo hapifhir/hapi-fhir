@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import ca.uhn.fhir.context.FhirContext;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.hl7.fhir.dstu3.model.OperationOutcome.IssueSeverity;
@@ -70,6 +71,9 @@ public class FhirResourceDaoDstu3<T extends IAnyResource> extends BaseHapiFhirRe
 	@Autowired()
 	@Qualifier("myInstanceValidatorDstu3")
 	private IValidatorModule myInstanceValidator;
+
+	@Autowired
+	private FhirContext fhirContext;
 
 	@Override
 	protected IBaseOperationOutcome createOperationOutcome(String theSeverity, String theMessage, String theCode) {
@@ -161,6 +165,26 @@ public class FhirResourceDaoDstu3<T extends IAnyResource> extends BaseHapiFhirRe
 			throw new PreconditionFailedException("Validation failed", result.toOperationOutcome());
 		}
 
+	}
+
+	/**
+	 * Get the resource definition from the criteria which specifies the resource type
+	 * @param criteria
+	 * @return
+	 */
+	@Override
+	public RuntimeResourceDefinition validateCriteriaAndReturnResourceDefinition(String criteria) {
+		String resourceName;
+		if(criteria == null || criteria.trim().isEmpty()){
+			throw new IllegalArgumentException("Criteria cannot be empty");
+		}
+		if(criteria.contains("?")){
+			resourceName = criteria.substring(0, criteria.indexOf("?"));
+		}else{
+			resourceName = criteria;
+		}
+
+		return fhirContext.getResourceDefinition(resourceName);
 	}
 
 	private class IdChecker implements IValidatorModule {
