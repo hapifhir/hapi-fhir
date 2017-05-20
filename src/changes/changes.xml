@@ -105,6 +105,9 @@
 				Server now respects the If-Modified-Since header and will return an HTTP 304 if appropriate
 				for read operations.
 			</action>
+			<action type="fix">
+				JPA server did not correctly process :missing qualifier on date parameters
+			</action>
 		</release>
 		<release version="2.4" date="2017-04-19">
 			<action type="add">

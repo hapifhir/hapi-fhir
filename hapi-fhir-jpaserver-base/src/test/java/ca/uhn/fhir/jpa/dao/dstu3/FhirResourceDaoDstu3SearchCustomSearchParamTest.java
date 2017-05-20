@@ -225,7 +225,6 @@ public class FhirResourceDaoDstu3SearchCustomSearchParamTest extends BaseJpaDstu
 		Extension extParent = patient
 			.addExtension()
 			.setUrl("http://acme.org/foo");
-		
 		extParent
 				.addExtension()
 				.setUrl("http://acme.org/bar")
@@ -244,6 +243,44 @@ public class FhirResourceDaoDstu3SearchCustomSearchParamTest extends BaseJpaDstu
 		assertThat(foundResources, contains(p2id.getValue()));
 	}
 	
+	@Test
+	public void testSearchForExtensionTwoDeepCodeableConcept() {
+		SearchParameter siblingSp = new SearchParameter();
+		siblingSp.addBase("Patient");
+		siblingSp.setCode("foobar");
+		siblingSp.setType(org.hl7.fhir.dstu3.model.Enumerations.SearchParamType.TOKEN);
+		siblingSp.setTitle("FooBar");
+		siblingSp.setExpression("Patient.extension('http://acme.org/foo').extension('http://acme.org/bar')");
+		siblingSp.setXpathUsage(org.hl7.fhir.dstu3.model.SearchParameter.XPathUsageType.NORMAL);
+		siblingSp.setStatus(org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus.ACTIVE);
+		siblingSp.getTarget().add(new CodeType("Organization"));
+		mySearchParameterDao.create(siblingSp, mySrd);
+
+		mySearchParamRegsitry.forceRefresh();
+
+		Patient patient = new Patient();
+		patient.addName().setFamily("P2");
+		Extension extParent = patient
+			.addExtension()
+			.setUrl("http://acme.org/foo");
+		extParent
+				.addExtension()
+				.setUrl("http://acme.org/bar")
+				.setValue(new CodeableConcept().addCoding(new Coding().setSystem("foo").setCode("bar")));
+		
+		IIdType p2id = myPatientDao.create(patient).getId().toUnqualifiedVersionless();
+
+		SearchParameterMap map;
+		IBundleProvider results;
+		List<String> foundResources;
+		
+		map = new SearchParameterMap();
+		map.add("foobar", new TokenParam("foo", "bar"));
+		results = myPatientDao.search(map);
+		foundResources = toUnqualifiedVersionlessIdValues(results);
+		assertThat(foundResources, contains(p2id.getValue()));
+	}
+
 	@Test
 	public void testSearchForExtensionTwoDeepReferenceWrongType() {
 		SearchParameter siblingSp = new SearchParameter();

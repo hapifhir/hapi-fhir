@@ -187,7 +187,8 @@ public class SearchBuilder implements ISearchBuilder {
 		Join<ResourceTable, ResourceIndexedSearchParamDate> join = myResourceTableRoot.join("myParamsDate", JoinType.LEFT);
 
 		if (theList.get(0).getMissing() != null) {
-			addPredicateParamMissing(theResourceName, theParamName, theList.get(0).getMissing(), join);
+			Boolean missing = theList.get(0).getMissing();
+			addPredicateParamMissing(theResourceName, theParamName, missing, join);
 			return;
 		}
 

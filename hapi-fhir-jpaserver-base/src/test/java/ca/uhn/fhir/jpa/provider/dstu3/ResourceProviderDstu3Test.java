@@ -125,6 +125,7 @@ import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import com.google.common.collect.Lists;
 
 import ca.uhn.fhir.jpa.dao.DaoConfig;
+import ca.uhn.fhir.jpa.dao.SearchParameterMap;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.UriDt;
@@ -134,12 +135,14 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.rest.client.IGenericClient;
 import ca.uhn.fhir.rest.gclient.StringClientParam;
+import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.StringOrListParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.Constants;
+import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
@@ -175,6 +178,35 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		myDaoConfig.setAllowMultipleDelete(true);
 	}
 
+	
+	@Test
+	public void testSearchWithMissingDate2() throws Exception {
+		MedicationRequest mr1 = new MedicationRequest();
+		mr1.getCategory().addCoding().setSystem("urn:medicationroute").setCode("oral");
+		mr1.addDosageInstruction().getTiming().addEventElement().setValueAsString("2017-01-01");
+		IIdType id1 = myMedicationRequestDao.create(mr1).getId().toUnqualifiedVersionless();
+		
+		MedicationRequest mr2 = new MedicationRequest();
+		mr2.getCategory().addCoding().setSystem("urn:medicationroute").setCode("oral");
+		IIdType id2 = myMedicationRequestDao.create(mr2).getId().toUnqualifiedVersionless();
+
+		HttpGet get = new HttpGet(ourServerBase + "/MedicationRequest?date:missing=false");
+		CloseableHttpResponse resp = ourHttpClient.execute(get);
+		try {
+			assertEquals(200, resp.getStatusLine().getStatusCode());
+			Bundle bundle = myFhirCtx.newXmlParser().parseResource(Bundle.class, IOUtils.toString(resp.getEntity().getContent(), Constants.CHARSET_UTF8));
+			
+			List<String> ids = toUnqualifiedVersionlessIdValues(bundle);
+			assertThat(ids, contains(id1.getValue()));
+		} finally {
+			IOUtils.closeQuietly(resp);
+		}
+		
+
+		
+	}
+
+	
 	@Test
 	public void testSaveAndRetrieveResourceWithExtension() {
 		Patient nextPatient = new Patient();

@@ -130,6 +130,11 @@ public class SearchParamExtractorDstu3 extends BaseSearchParamExtractor implemen
 				if (nextObject == null) {
 					continue;
 				}
+				
+				if (nextObject instanceof Extension) {
+					Extension nextExtension = (Extension)nextObject;
+					nextObject  = nextExtension.getValue();
+				}
 
 				ResourceIndexedSearchParamDate nextEntity;
 				if (nextObject instanceof BaseDateTimeType) {

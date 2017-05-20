@@ -62,6 +62,7 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 	 *           theUpperBound may both be populated, or one may be null, but it is not valid for both to be null.
 	 */
 	public DateRangeParam(Date theLowerBound, Date theUpperBound) {
+		this();
 		setRangeFromDatesInclusive(theLowerBound, theUpperBound);
 	}
 
@@ -71,6 +72,7 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 	 * or upper bound, with no opposite bound.
 	 */
 	public DateRangeParam(DateParam theDateParam) {
+		this();
 		if (theDateParam == null) {
 			throw new NullPointerException("theDateParam can not be null");
 		}
@@ -117,6 +119,7 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 	 *           theUpperBound may both be populated, or one may be null, but it is not valid for both to be null.
 	 */
 	public DateRangeParam(DateParam theLowerBound, DateParam theUpperBound) {
+		this();
 		setRangeFromDatesInclusive(theLowerBound, theUpperBound);
 	}
 
@@ -133,6 +136,7 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 	 *           theUpperBound may both be populated, or one may be null, but it is not valid for both to be null.
 	 */
 	public DateRangeParam(IPrimitiveType<Date> theLowerBound, IPrimitiveType<Date> theUpperBound) {
+		this();
 		setRangeFromDatesInclusive(theLowerBound, theUpperBound);
 	}
 
@@ -149,6 +153,7 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 	 *           one may be null, but it is not valid for both to be null.
 	 */
 	public DateRangeParam(String theLowerBound, String theUpperBound) {
+		this();
 		setRangeFromDatesInclusive(theLowerBound, theUpperBound);
 	}
 
@@ -158,9 +163,14 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 				throw new InvalidRequestException("Can not have multiple date range parameters for the same param without a qualifier");
 			}
 
-			myLowerBound = new DateParam(ParamPrefixEnum.EQUAL, theParsed.getValueAsString());
-			myUpperBound = new DateParam(ParamPrefixEnum.EQUAL, theParsed.getValueAsString());
-
+			if (theParsed.getMissing() != null) {
+				myLowerBound = theParsed;
+				myUpperBound = theParsed;
+			} else {
+				myLowerBound = new DateParam(ParamPrefixEnum.EQUAL, theParsed.getValueAsString());
+				myUpperBound = new DateParam(ParamPrefixEnum.EQUAL, theParsed.getValueAsString());
+			}
+			
 		} else {
 
 			switch (theParsed.getPrefix()) {
@@ -248,11 +258,15 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 	@Override
 	public List<DateParam> getValuesAsQueryTokens() {
 		ArrayList<DateParam> retVal = new ArrayList<DateParam>();
-		if (myLowerBound != null && !myLowerBound.isEmpty()) {
+		if (myLowerBound.getMissing() != null) {
 			retVal.add((myLowerBound));
-		}
-		if (myUpperBound != null && !myUpperBound.isEmpty()) {
-			retVal.add((myUpperBound));
+		} else {
+			if (myLowerBound != null && !myLowerBound.isEmpty()) {
+				retVal.add((myLowerBound));
+			}
+			if (myUpperBound != null && !myUpperBound.isEmpty()) {
+				retVal.add((myUpperBound));
+			}
 		}
 		return retVal;
 	}
