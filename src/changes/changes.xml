@@ -117,6 +117,10 @@
 			<action type="fix">
 				JPA server did not correctly process :missing qualifier on date parameters
 			</action>
+			<action type="fix" issue="633">
+				AppacheHttpClient did not always respect the charset in the response
+				Content-Type header. Thanks to Gijsbert van den Brink for the pull request!
+			</action>
 		</release>
 		<release version="2.4" date="2017-04-19">
 			<action type="add">
