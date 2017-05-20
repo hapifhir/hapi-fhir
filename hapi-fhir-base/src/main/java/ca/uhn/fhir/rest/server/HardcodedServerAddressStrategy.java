@@ -23,6 +23,8 @@ package ca.uhn.fhir.rest.server;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.lang3.Validate;
+
 /**
  * Server address strategy which simply returns a hardcoded URL
  */
@@ -35,6 +37,7 @@ public class HardcodedServerAddressStrategy implements IServerAddressStrategy {
 	}
 
 	public HardcodedServerAddressStrategy(String theValue) {
+		Validate.notBlank(theValue, "theValue must not be null or empty");
 		myValue = theValue;
 	}
 
@@ -43,6 +46,7 @@ public class HardcodedServerAddressStrategy implements IServerAddressStrategy {
 	}
 
 	public void setValue(String theValue) {
+		Validate.notBlank(theValue, "theValue must not be null or empty");
 		myValue = theValue;
 	}
 

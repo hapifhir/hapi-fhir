@@ -23,23 +23,59 @@ import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
-import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.hamcrest.Matchers;
 import org.hamcrest.core.StringContains;
-import org.hl7.fhir.dstu3.model.*;
+import org.hl7.fhir.dstu3.model.Age;
+import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.dstu3.model.Bundle.BundleType;
 import org.hl7.fhir.dstu3.model.Bundle.HTTPVerb;
+import org.hl7.fhir.dstu3.model.CarePlan;
+import org.hl7.fhir.dstu3.model.CodeSystem;
+import org.hl7.fhir.dstu3.model.CodeType;
+import org.hl7.fhir.dstu3.model.CodeableConcept;
+import org.hl7.fhir.dstu3.model.Coding;
+import org.hl7.fhir.dstu3.model.CompartmentDefinition;
+import org.hl7.fhir.dstu3.model.ConceptMap;
+import org.hl7.fhir.dstu3.model.Condition;
+import org.hl7.fhir.dstu3.model.DateTimeType;
+import org.hl7.fhir.dstu3.model.DateType;
+import org.hl7.fhir.dstu3.model.Device;
+import org.hl7.fhir.dstu3.model.DiagnosticReport;
+import org.hl7.fhir.dstu3.model.Encounter;
 import org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus;
+import org.hl7.fhir.dstu3.model.IdType;
+import org.hl7.fhir.dstu3.model.Meta;
+import org.hl7.fhir.dstu3.model.NamingSystem;
+import org.hl7.fhir.dstu3.model.Observation;
 import org.hl7.fhir.dstu3.model.Observation.ObservationStatus;
+import org.hl7.fhir.dstu3.model.OperationDefinition;
+import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.hl7.fhir.dstu3.model.OperationOutcome.IssueSeverity;
 import org.hl7.fhir.dstu3.model.OperationOutcome.IssueType;
+import org.hl7.fhir.dstu3.model.Organization;
+import org.hl7.fhir.dstu3.model.Patient;
+import org.hl7.fhir.dstu3.model.Period;
+import org.hl7.fhir.dstu3.model.Quantity;
 import org.hl7.fhir.dstu3.model.Quantity.QuantityComparator;
+import org.hl7.fhir.dstu3.model.Questionnaire;
+import org.hl7.fhir.dstu3.model.Range;
+import org.hl7.fhir.dstu3.model.Reference;
+import org.hl7.fhir.dstu3.model.SimpleQuantity;
+import org.hl7.fhir.dstu3.model.StringType;
+import org.hl7.fhir.dstu3.model.StructureDefinition;
+import org.hl7.fhir.dstu3.model.Timing;
+import org.hl7.fhir.dstu3.model.UriType;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -49,11 +85,21 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
+import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.support.TransactionCallbackWithoutResult;
+import org.springframework.transaction.support.TransactionTemplate;
 
+import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
 
-import ca.uhn.fhir.jpa.dao.*;
+import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
+import ca.uhn.fhir.jpa.dao.DaoConfig;
+import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.dao.SearchParameterMap;
+import ca.uhn.fhir.jpa.entity.ResourceEncodingEnum;
 import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamString;
+import ca.uhn.fhir.jpa.entity.ResourceTable;
 import ca.uhn.fhir.jpa.entity.TagTypeEnum;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
@@ -65,10 +111,21 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
-import ca.uhn.fhir.rest.param.*;
+import ca.uhn.fhir.rest.param.DateParam;
+import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.QuantityParam;
+import ca.uhn.fhir.rest.param.ReferenceParam;
+import ca.uhn.fhir.rest.param.StringParam;
+import ca.uhn.fhir.rest.param.TokenOrListParam;
+import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.IBundleProvider;
-import ca.uhn.fhir.rest.server.exceptions.*;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
+import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
 import ca.uhn.fhir.util.TestUtil;
 
@@ -245,6 +302,37 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		}
 	}
 
+	/**
+	 * Can we handle content that was previously saved containing vocabulary that
+	 * is no longer valid
+	 */
+	@Test
+	public void testResourceInDatabaseContainsInvalidVocabulary() {
+		final Patient p = new Patient();
+		p.setGender(AdministrativeGender.MALE);
+		final IIdType id = myPatientDao.create(p).getId().toUnqualifiedVersionless();
+		
+		TransactionTemplate tx = new TransactionTemplate(myTxManager);
+		tx.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+		tx.execute(new TransactionCallbackWithoutResult() {
+			@Override
+			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
+				ResourceTable table = myResourceTableDao.findOne(id.getIdPartAsLong());
+				String newContent = myFhirCtx.newJsonParser().encodeResourceToString(p);
+				newContent = newContent.replace("male", "foo");
+				table.setResource(newContent.getBytes(Charsets.UTF_8));
+				table.setEncoding(ResourceEncodingEnum.JSON);
+				myResourceTableDao.save(table);
+			}
+		});
+		
+		Patient read = myPatientDao.read(id);
+		String string = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(read);
+		ourLog.info(string);
+		assertThat(string, containsString("value=\"foo\""));
+	}
+	
+	
 	@Test
 	public void testChoiceParamDateEquals() {
 		Encounter enc = new Encounter();
@@ -560,15 +648,15 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		 * If any of this ever fails, it means that one of the OperationOutcome issue severity codes has changed code value across versions. We store the string as a constant, so something will need to
 		 * be fixed.
 		 */
-		assertEquals(org.hl7.fhir.instance.model.OperationOutcome.IssueSeverity.ERROR.toCode(), BaseHapiFhirResourceDao.OO_SEVERITY_ERROR);
-		assertEquals(ca.uhn.fhir.model.dstu.valueset.IssueSeverityEnum.ERROR.getCode(), BaseHapiFhirResourceDao.OO_SEVERITY_ERROR);
-		assertEquals(org.hl7.fhir.dstu3.model.OperationOutcome.IssueSeverity.ERROR.toCode(), BaseHapiFhirResourceDao.OO_SEVERITY_ERROR);
-		assertEquals(org.hl7.fhir.instance.model.OperationOutcome.IssueSeverity.INFORMATION.toCode(), BaseHapiFhirResourceDao.OO_SEVERITY_INFO);
-		assertEquals(ca.uhn.fhir.model.dstu.valueset.IssueSeverityEnum.INFORMATION.getCode(), BaseHapiFhirResourceDao.OO_SEVERITY_INFO);
-		assertEquals(org.hl7.fhir.dstu3.model.OperationOutcome.IssueSeverity.INFORMATION.toCode(), BaseHapiFhirResourceDao.OO_SEVERITY_INFO);
-		assertEquals(org.hl7.fhir.instance.model.OperationOutcome.IssueSeverity.WARNING.toCode(), BaseHapiFhirResourceDao.OO_SEVERITY_WARN);
-		assertEquals(ca.uhn.fhir.model.dstu.valueset.IssueSeverityEnum.WARNING.getCode(), BaseHapiFhirResourceDao.OO_SEVERITY_WARN);
-		assertEquals(org.hl7.fhir.dstu3.model.OperationOutcome.IssueSeverity.WARNING.toCode(), BaseHapiFhirResourceDao.OO_SEVERITY_WARN);
+		assertEquals(org.hl7.fhir.instance.model.OperationOutcome.IssueSeverity.ERROR.toCode(), BaseHapiFhirDao.OO_SEVERITY_ERROR);
+		assertEquals(ca.uhn.fhir.model.dstu.valueset.IssueSeverityEnum.ERROR.getCode(), BaseHapiFhirDao.OO_SEVERITY_ERROR);
+		assertEquals(org.hl7.fhir.dstu3.model.OperationOutcome.IssueSeverity.ERROR.toCode(), BaseHapiFhirDao.OO_SEVERITY_ERROR);
+		assertEquals(org.hl7.fhir.instance.model.OperationOutcome.IssueSeverity.INFORMATION.toCode(), BaseHapiFhirDao.OO_SEVERITY_INFO);
+		assertEquals(ca.uhn.fhir.model.dstu.valueset.IssueSeverityEnum.INFORMATION.getCode(), BaseHapiFhirDao.OO_SEVERITY_INFO);
+		assertEquals(org.hl7.fhir.dstu3.model.OperationOutcome.IssueSeverity.INFORMATION.toCode(), BaseHapiFhirDao.OO_SEVERITY_INFO);
+		assertEquals(org.hl7.fhir.instance.model.OperationOutcome.IssueSeverity.WARNING.toCode(), BaseHapiFhirDao.OO_SEVERITY_WARN);
+		assertEquals(ca.uhn.fhir.model.dstu.valueset.IssueSeverityEnum.WARNING.getCode(), BaseHapiFhirDao.OO_SEVERITY_WARN);
+		assertEquals(org.hl7.fhir.dstu3.model.OperationOutcome.IssueSeverity.WARNING.toCode(), BaseHapiFhirDao.OO_SEVERITY_WARN);
 	}
 
 	@Test
@@ -1977,7 +2065,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 	 * See #534
 	 */
 	@Test
-	public void testLogicalReferencesAreSearchable() throws IOException {
+	public void testLogicalReferencesAreSearchable() {
 		myDaoConfig.setTreatReferencesAsLogical(null);
 		myDaoConfig.addTreatReferencesAsLogical("http://foo.com/identifier*");
 
@@ -2255,7 +2343,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 	}
 
 	@Test
-	public void testReadForcedIdVersionHistory() throws InterruptedException {
+	public void testReadForcedIdVersionHistory() {
 		Patient p1 = new Patient();
 		p1.addIdentifier().setSystem("urn:system").setValue("testReadVorcedIdVersionHistory01");
 		p1.setId("testReadVorcedIdVersionHistory");
@@ -2776,21 +2864,21 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 
 		pm = new SearchParameterMap();
 		pm.add(Patient.SP_IDENTIFIER, new TokenParam("urn:system", methodName));
-		pm.setSort(new SortSpec(BaseResource.SP_RES_ID));
+		pm.setSort(new SortSpec(IAnyResource.SP_RES_ID));
 		actual = toUnqualifiedVersionlessIds(myPatientDao.search(pm));
 		assertEquals(5, actual.size());
 		assertThat(actual, contains(idMethodName, id1, id2, id3, id4));
 
 		pm = new SearchParameterMap();
 		pm.add(Patient.SP_IDENTIFIER, new TokenParam("urn:system", methodName));
-		pm.setSort(new SortSpec(BaseResource.SP_RES_ID).setOrder(SortOrderEnum.ASC));
+		pm.setSort(new SortSpec(IAnyResource.SP_RES_ID).setOrder(SortOrderEnum.ASC));
 		actual = toUnqualifiedVersionlessIds(myPatientDao.search(pm));
 		assertEquals(5, actual.size());
 		assertThat(actual, contains(idMethodName, id1, id2, id3, id4));
 
 		pm = new SearchParameterMap();
 		pm.add(Patient.SP_IDENTIFIER, new TokenParam("urn:system", methodName));
-		pm.setSort(new SortSpec(BaseResource.SP_RES_ID).setOrder(SortOrderEnum.DESC));
+		pm.setSort(new SortSpec(IAnyResource.SP_RES_ID).setOrder(SortOrderEnum.DESC));
 		actual = toUnqualifiedVersionlessIds(myPatientDao.search(pm));
 		assertEquals(5, actual.size());
 		assertThat(actual, contains(id4, id3, id2, id1, idMethodName));
@@ -3185,13 +3273,13 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		SearchParameterMap map;
 
 		map = new SearchParameterMap();
-		map.add(BaseResource.SP_RES_ID, new StringParam(id1.getIdPart()));
+		map.add(IAnyResource.SP_RES_ID, new StringParam(id1.getIdPart()));
 		map.setLastUpdated(new DateRangeParam("2001", "2003"));
 		map.setSort(new SortSpec(Constants.PARAM_LASTUPDATED));
 		assertThat(toUnqualifiedVersionlessIds(myPatientDao.search(map)), empty());
 
 		map = new SearchParameterMap();
-		map.add(BaseResource.SP_RES_ID, new StringParam(id1.getIdPart()));
+		map.add(IAnyResource.SP_RES_ID, new StringParam(id1.getIdPart()));
 		map.setLastUpdated(new DateRangeParam("2001", "2003"));
 		map.setSort(new SortSpec(Patient.SP_NAME));
 		assertThat(toUnqualifiedVersionlessIds(myPatientDao.search(map)), empty());
@@ -3328,7 +3416,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		assertEquals("Kittens", published.get(1).getDisplay());
 		assertEquals("http://foo", published.get(1).getSystem());
 
-		secLabels = (ArrayList<Coding>) retrieved.getMeta().getSecurity();
+		secLabels = retrieved.getMeta().getSecurity();
 		sortCodings(secLabels);
 		assertEquals(2, secLabels.size());
 		assertEquals("seclabel:sys:1", secLabels.get(0).getSystemElement().getValue());

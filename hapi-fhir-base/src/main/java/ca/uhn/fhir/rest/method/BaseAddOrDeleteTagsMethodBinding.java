@@ -31,7 +31,6 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.parser.IParser;
@@ -40,12 +39,8 @@ import ca.uhn.fhir.rest.annotation.TagListParam;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.client.BaseHttpClientInvocation;
-import ca.uhn.fhir.rest.server.Constants;
-import ca.uhn.fhir.rest.server.IResourceProvider;
-import ca.uhn.fhir.rest.server.IRestfulServer;
-import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.*;
+import ca.uhn.fhir.rest.server.exceptions.*;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 
 abstract class BaseAddOrDeleteTagsMethodBinding extends BaseMethodBinding<Void> {
@@ -56,7 +51,7 @@ abstract class BaseAddOrDeleteTagsMethodBinding extends BaseMethodBinding<Void> 
 	private String myResourceName;
 	private Integer myTagListParamIndex;
 
-	public BaseAddOrDeleteTagsMethodBinding(Method theMethod, FhirContext theContext, Object theProvider, Class<? extends IResource> theTypeFromMethodAnnotation) {
+	public BaseAddOrDeleteTagsMethodBinding(Method theMethod, FhirContext theContext, Object theProvider, Class<? extends IBaseResource> theTypeFromMethodAnnotation) {
 		super(theMethod, theContext, theProvider);
 
 		if (theProvider instanceof IResourceProvider) {

@@ -464,5 +464,7 @@ function updateSortDirection(value) {
 }
 
 $( document ).ready(function() {
-	addSearchParamRow();
+	if (conformance) {
+		addSearchParamRow();
+	}
 });	

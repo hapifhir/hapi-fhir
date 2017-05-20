@@ -35,9 +35,10 @@ public abstract class BaseResourceIndexedSearchParam implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
+	// TODO: make this nullable=false and a primitive (written may 2017)
 	@Field()
 	@Column(name = "SP_MISSING", nullable = true)
-	private boolean myMissing;
+	private Boolean myMissing = Boolean.FALSE;
 
 	@Field
 	@Column(name = "SP_NAME", length = MAX_SP_NAME, nullable = false)
@@ -83,7 +84,7 @@ public abstract class BaseResourceIndexedSearchParam implements Serializable {
 	}
 
 	public boolean isMissing() {
-		return myMissing;
+		return Boolean.TRUE.equals(myMissing);
 	}
 
 	public void setMissing(boolean theMissing) {

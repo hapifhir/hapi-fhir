@@ -221,13 +221,13 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 		StopWatch w = new StopWatch();
 
 		Class<? extends IBaseResource> resourceTypeClass = myContext.getResourceDefinition(theResourceType).getImplementingClass();
-		ISearchBuilder sb = theCallingDao.newSearchBuilder();
+		final ISearchBuilder sb = theCallingDao.newSearchBuilder();
 		sb.setType(resourceTypeClass, theResourceType);
 
 		if (theParams.isLoadSynchronous()) {
 
 			// Load the results synchronously
-			List<Long> pids = new ArrayList<Long>();
+			final List<Long> pids = new ArrayList<Long>();
 
 			Iterator<Long> resultIter = sb.createQuery(theParams);
 			while (resultIter.hasNext()) {
@@ -246,14 +246,21 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 			 * On the other hand for async queries we load includes/revincludes
 			 * individually for pages as we return them to clients
 			 */
-			Set<Long> includedPids = new HashSet<Long>();
+			final Set<Long> includedPids = new HashSet<Long>();
 			includedPids.addAll(sb.loadReverseIncludes(theCallingDao, myContext, myEntityManager, pids, theParams.getRevIncludes(), true, theParams.getLastUpdated()));
 			includedPids.addAll(sb.loadReverseIncludes(theCallingDao, myContext, myEntityManager, pids, theParams.getIncludes(), false, theParams.getLastUpdated()));
 
 			// Execute the query and make sure we return distinct results
-			List<IBaseResource> resources = new ArrayList<IBaseResource>();
-			sb.loadResourcesByPid(pids, resources, includedPids, false, myEntityManager, myContext, theCallingDao);
-			return new SimpleBundleProvider(resources);
+			TransactionTemplate txTemplate = new TransactionTemplate(myManagedTxManager);
+			txTemplate.setPropagationBehavior(TransactionTemplate.PROPAGATION_REQUIRED);
+			return txTemplate.execute(new TransactionCallback<SimpleBundleProvider>() {
+				@Override
+				public SimpleBundleProvider doInTransaction(TransactionStatus theStatus) {
+					List<IBaseResource> resources = new ArrayList<IBaseResource>();
+					sb.loadResourcesByPid(pids, resources, includedPids, false, myEntityManager, myContext, theCallingDao);
+					return new SimpleBundleProvider(resources);
+				}
+			});
 		}
 
 		/*
@@ -273,7 +280,8 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 					public PersistedJpaBundleProvider doInTransaction(TransactionStatus theStatus) {
 						Search searchToUse = null;
 
-						Collection<Search> candidates = mySearchDao.find(resourceType, queryString.hashCode(), createdCutoff);
+						int hashCode = queryString.hashCode();
+						Collection<Search> candidates = mySearchDao.find(resourceType, hashCode, createdCutoff);
 						for (Search nextCandidateSearch : candidates) {
 							if (queryString.equals(nextCandidateSearch.getSearchQueryString())) {
 								searchToUse = nextCandidateSearch;

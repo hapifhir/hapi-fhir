@@ -1029,7 +1029,8 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		@Override
 		public Object execute() {
 			ResourceResponseHandler binding = new ResourceResponseHandler(myType.getImplementingClass());
-			HttpGetClientInvocation invocation = MethodUtil.createConformanceInvocation(getFhirContext());
+			FhirContext fhirContext = getFhirContext();
+			HttpGetClientInvocation invocation = MethodUtil.createConformanceInvocation(fhirContext);
 			return super.invoke(null, binding, invocation);
 		}
 

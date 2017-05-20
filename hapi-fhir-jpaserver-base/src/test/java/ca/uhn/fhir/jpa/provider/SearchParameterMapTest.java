@@ -53,8 +53,8 @@ public class SearchParameterMapTest {
 		
 		String queryString = map.toNormalizedQueryString(ourCtx);
 		ourLog.info(queryString);
-		assertEquals("", queryString);
-		assertEquals("", UrlUtil.unescape(queryString));
+		assertEquals("?", queryString);
+		assertEquals("?", UrlUtil.unescape(queryString));
 	}
 
 	@Test

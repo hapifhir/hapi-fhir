@@ -24,6 +24,7 @@ import static org.apache.commons.lang3.StringUtils.defaultString;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.substring;
 
 import java.math.BigDecimal;
 import java.math.MathContext;
@@ -61,19 +62,13 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
-import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
-import ca.uhn.fhir.context.BaseRuntimeDeclaredChildDefinition;
-import ca.uhn.fhir.context.ConfigurationException;
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.context.RuntimeChildChoiceDefinition;
-import ca.uhn.fhir.context.RuntimeChildResourceDefinition;
-import ca.uhn.fhir.context.RuntimeResourceDefinition;
-import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.context.*;
 import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamUriDao;
 import ca.uhn.fhir.jpa.entity.BaseHasResource;
@@ -192,7 +187,8 @@ public class SearchBuilder implements ISearchBuilder {
 		Join<ResourceTable, ResourceIndexedSearchParamDate> join = myResourceTableRoot.join("myParamsDate", JoinType.LEFT);
 
 		if (theList.get(0).getMissing() != null) {
-			addPredicateParamMissing(theResourceName, theParamName, theList.get(0).getMissing(), join);
+			Boolean missing = theList.get(0).getMissing();
+			addPredicateParamMissing(theResourceName, theParamName, missing, join);
 			return;
 		}
 
@@ -436,27 +432,61 @@ public class SearchBuilder implements ISearchBuilder {
 
 				} else {
 
-					List<Class<? extends IBaseResource>> resourceTypes;
+					final List<Class<? extends IBaseResource>> resourceTypes;
 					String resourceId;
 					if (!ref.getValue().matches("[a-zA-Z]+\\/.*")) {
 
-						RuntimeResourceDefinition resourceDef = myContext.getResourceDefinition(myResourceType);
-						String paramPath = myCallingDao.getSearchParamByName(resourceDef, theParamName).getPath();
-						if (paramPath.endsWith(".as(Reference)")) {
-							paramPath = paramPath.substring(0, paramPath.length() - ".as(Reference)".length()) + "Reference";
+						RuntimeSearchParam param = mySearchParamRegistry.getActiveSearchParam(theResourceName, theParamName);
+						resourceTypes = new ArrayList<Class<? extends IBaseResource>>();
+						
+						Set<String> targetTypes = param.getTargets();
+						
+						if (targetTypes != null && !targetTypes.isEmpty()) {
+							for (String next : targetTypes) {
+								resourceTypes.add(myContext.getResourceDefinition(next).getImplementingClass());
+							}
 						}
 
-						BaseRuntimeChildDefinition def = myContext.newTerser().getDefinition(myResourceType, paramPath);
-						if (def instanceof RuntimeChildChoiceDefinition) {
-							RuntimeChildChoiceDefinition choiceDef = (RuntimeChildChoiceDefinition) def;
-							resourceTypes = choiceDef.getResourceTypes();
-						} else if (def instanceof RuntimeChildResourceDefinition) {
-							RuntimeChildResourceDefinition resDef = (RuntimeChildResourceDefinition) def;
-							resourceTypes = resDef.getResourceTypes();
-						} else {
-							throw new ConfigurationException("Property " + paramPath + " of type " + myResourceName + " is not a resource: " + def.getClass());
+						if (resourceTypes.isEmpty()) {
+							RuntimeResourceDefinition resourceDef = myContext.getResourceDefinition(theResourceName);
+							RuntimeSearchParam searchParamByName = myCallingDao.getSearchParamByName(resourceDef, theParamName);
+							if (searchParamByName == null) {
+								throw new InternalErrorException("Could not find parameter " + theParamName );
+							}
+							String paramPath = searchParamByName.getPath();
+							if (paramPath.endsWith(".as(Reference)")) {
+								paramPath = paramPath.substring(0, paramPath.length() - ".as(Reference)".length()) + "Reference";
+							}
+	
+							if (paramPath.contains(".extension(")) {
+								int startIdx = paramPath.indexOf(".extension(");
+								int endIdx = paramPath.indexOf(')', startIdx);
+								if (startIdx != -1 && endIdx != -1) {
+									paramPath = paramPath.substring(0, startIdx + 10) + paramPath.substring(endIdx + 1);
+								}
+							}
+	
+							BaseRuntimeChildDefinition def = myContext.newTerser().getDefinition(myResourceType, paramPath);
+							if (def instanceof RuntimeChildChoiceDefinition) {
+								RuntimeChildChoiceDefinition choiceDef = (RuntimeChildChoiceDefinition) def;
+								resourceTypes.addAll(choiceDef.getResourceTypes());
+							} else if (def instanceof RuntimeChildResourceDefinition) {
+								RuntimeChildResourceDefinition resDef = (RuntimeChildResourceDefinition) def;
+								resourceTypes.addAll(resDef.getResourceTypes());
+							} else {
+								throw new ConfigurationException("Property " + paramPath + " of type " + myResourceName + " is not a resource: " + def.getClass());
+							}
 						}
 
+						if (resourceTypes.isEmpty()) {
+							for (BaseRuntimeElementDefinition<?> next : myContext.getElementDefinitions()) {
+								if (next instanceof RuntimeResourceDefinition) {
+									RuntimeResourceDefinition nextResDef = (RuntimeResourceDefinition)next;
+									resourceTypes.add(nextResDef.getImplementingClass());
+								}
+							}
+						}
+						
 						resourceId = ref.getValue();
 
 					} else {
@@ -886,32 +916,32 @@ public class SearchBuilder implements ISearchBuilder {
 	private Predicate createCompositeParamPart(String theResourceName, Root<ResourceTable> theRoot, RuntimeSearchParam theParam, IQueryParameterType leftValue) {
 		Predicate retVal = null;
 		switch (theParam.getParamType()) {
-		case STRING: {
-			From<ResourceIndexedSearchParamString, ResourceIndexedSearchParamString> stringJoin = theRoot.join("myParamsString", JoinType.INNER);
-			retVal = createPredicateString(leftValue, theResourceName, theParam.getName(), myBuilder, stringJoin);
-			break;
-		}
-		case TOKEN: {
-			From<ResourceIndexedSearchParamToken, ResourceIndexedSearchParamToken> tokenJoin = theRoot.join("myParamsToken", JoinType.INNER);
-			retVal = createPredicateToken(leftValue, theResourceName, theParam.getName(), myBuilder, tokenJoin);
-			break;
-		}
-		case DATE: {
-			From<ResourceIndexedSearchParamDate, ResourceIndexedSearchParamDate> dateJoin = theRoot.join("myParamsDate", JoinType.INNER);
-			retVal = createPredicateDate(leftValue, theResourceName, theParam.getName(), myBuilder, dateJoin);
-			break;
-		}
-		case QUANTITY: {
-			From<ResourceIndexedSearchParamQuantity, ResourceIndexedSearchParamQuantity> dateJoin = theRoot.join("myParamsQuantity", JoinType.INNER);
-			retVal = createPredicateQuantity(leftValue, theResourceName, theParam.getName(), myBuilder, dateJoin);
-			break;
-		}
-		case COMPOSITE:
-		case HAS:
-		case NUMBER:
-		case REFERENCE:
-		case URI:
-			break;
+			case STRING: {
+				From<ResourceIndexedSearchParamString, ResourceIndexedSearchParamString> stringJoin = theRoot.join("myParamsString", JoinType.INNER);
+				retVal = createPredicateString(leftValue, theResourceName, theParam.getName(), myBuilder, stringJoin);
+				break;
+			}
+			case TOKEN: {
+				From<ResourceIndexedSearchParamToken, ResourceIndexedSearchParamToken> tokenJoin = theRoot.join("myParamsToken", JoinType.INNER);
+				retVal = createPredicateToken(leftValue, theResourceName, theParam.getName(), myBuilder, tokenJoin);
+				break;
+			}
+			case DATE: {
+				From<ResourceIndexedSearchParamDate, ResourceIndexedSearchParamDate> dateJoin = theRoot.join("myParamsDate", JoinType.INNER);
+				retVal = createPredicateDate(leftValue, theResourceName, theParam.getName(), myBuilder, dateJoin);
+				break;
+			}
+			case QUANTITY: {
+				From<ResourceIndexedSearchParamQuantity, ResourceIndexedSearchParamQuantity> dateJoin = theRoot.join("myParamsQuantity", JoinType.INNER);
+				retVal = createPredicateQuantity(leftValue, theResourceName, theParam.getName(), myBuilder, dateJoin);
+				break;
+			}
+			case COMPOSITE:
+			case HAS:
+			case NUMBER:
+			case REFERENCE:
+			case URI:
+				break;
 		}
 
 		if (retVal == null) {
@@ -982,41 +1012,41 @@ public class SearchBuilder implements ISearchBuilder {
 			String invalidMessageName) {
 		Predicate num;
 		switch (thePrefix) {
-		case GREATERTHAN:
-			num = builder.gt(thePath, theValue);
-			break;
-		case GREATERTHAN_OR_EQUALS:
-			num = builder.ge(thePath, theValue);
-			break;
-		case LESSTHAN:
-			num = builder.lt(thePath, theValue);
-			break;
-		case LESSTHAN_OR_EQUALS:
-			num = builder.le(thePath, theValue);
-			break;
-		case APPROXIMATE:
-		case EQUAL:
-		case NOT_EQUAL:
-			BigDecimal mul = calculateFuzzAmount(thePrefix, theValue);
-			BigDecimal low = theValue.subtract(mul, MathContext.DECIMAL64);
-			BigDecimal high = theValue.add(mul, MathContext.DECIMAL64);
-			Predicate lowPred;
-			Predicate highPred;
-			if (thePrefix != ParamPrefixEnum.NOT_EQUAL) {
-				lowPred = builder.ge(thePath.as(BigDecimal.class), low);
-				highPred = builder.le(thePath.as(BigDecimal.class), high);
-				num = builder.and(lowPred, highPred);
-				ourLog.trace("Searching for {} <= val <= {}", low, high);
-			} else {
-				// Prefix was "ne", so reverse it!
-				lowPred = builder.lt(thePath.as(BigDecimal.class), low);
-				highPred = builder.gt(thePath.as(BigDecimal.class), high);
-				num = builder.or(lowPred, highPred);
-			}
-			break;
-		default:
-			String msg = myContext.getLocalizer().getMessage(SearchBuilder.class, invalidMessageName, thePrefix.getValue(), theParam.getValueAsQueryToken(myContext));
-			throw new InvalidRequestException(msg);
+			case GREATERTHAN:
+				num = builder.gt(thePath, theValue);
+				break;
+			case GREATERTHAN_OR_EQUALS:
+				num = builder.ge(thePath, theValue);
+				break;
+			case LESSTHAN:
+				num = builder.lt(thePath, theValue);
+				break;
+			case LESSTHAN_OR_EQUALS:
+				num = builder.le(thePath, theValue);
+				break;
+			case APPROXIMATE:
+			case EQUAL:
+			case NOT_EQUAL:
+				BigDecimal mul = calculateFuzzAmount(thePrefix, theValue);
+				BigDecimal low = theValue.subtract(mul, MathContext.DECIMAL64);
+				BigDecimal high = theValue.add(mul, MathContext.DECIMAL64);
+				Predicate lowPred;
+				Predicate highPred;
+				if (thePrefix != ParamPrefixEnum.NOT_EQUAL) {
+					lowPred = builder.ge(thePath.as(BigDecimal.class), low);
+					highPred = builder.le(thePath.as(BigDecimal.class), high);
+					num = builder.and(lowPred, highPred);
+					ourLog.trace("Searching for {} <= val <= {}", low, high);
+				} else {
+					// Prefix was "ne", so reverse it!
+					lowPred = builder.lt(thePath.as(BigDecimal.class), low);
+					highPred = builder.gt(thePath.as(BigDecimal.class), high);
+					num = builder.or(lowPred, highPred);
+				}
+				break;
+			default:
+				String msg = myContext.getLocalizer().getMessage(SearchBuilder.class, invalidMessageName, thePrefix.getValue(), theParam.getValueAsQueryToken(myContext));
+				throw new InvalidRequestException(msg);
 		}
 
 		if (theParamName == null) {
@@ -1386,36 +1416,36 @@ public class SearchBuilder implements ISearchBuilder {
 		String[] sortAttrName;
 
 		switch (param.getParamType()) {
-		case STRING:
-			joinAttrName = "myParamsString";
-			sortAttrName = new String[] { "myValueExact" };
-			break;
-		case DATE:
-			joinAttrName = "myParamsDate";
-			sortAttrName = new String[] { "myValueLow" };
-			break;
-		case REFERENCE:
-			joinAttrName = "myResourceLinks";
-			sortAttrName = new String[] { "myTargetResourcePid" };
-			break;
-		case TOKEN:
-			joinAttrName = "myParamsToken";
-			sortAttrName = new String[] { "mySystem", "myValue" };
-			break;
-		case NUMBER:
-			joinAttrName = "myParamsNumber";
-			sortAttrName = new String[] { "myValue" };
-			break;
-		case URI:
-			joinAttrName = "myParamsUri";
-			sortAttrName = new String[] { "myUri" };
-			break;
-		case QUANTITY:
-			joinAttrName = "myParamsQuantity";
-			sortAttrName = new String[] { "myValue" };
-			break;
-		default:
-			throw new InvalidRequestException("This server does not support _sort specifications of type " + param.getParamType() + " - Can't serve _sort=" + theSort.getParamName());
+			case STRING:
+				joinAttrName = "myParamsString";
+				sortAttrName = new String[] { "myValueExact" };
+				break;
+			case DATE:
+				joinAttrName = "myParamsDate";
+				sortAttrName = new String[] { "myValueLow" };
+				break;
+			case REFERENCE:
+				joinAttrName = "myResourceLinks";
+				sortAttrName = new String[] { "myTargetResourcePid" };
+				break;
+			case TOKEN:
+				joinAttrName = "myParamsToken";
+				sortAttrName = new String[] { "mySystem", "myValue" };
+				break;
+			case NUMBER:
+				joinAttrName = "myParamsNumber";
+				sortAttrName = new String[] { "myValue" };
+				break;
+			case URI:
+				joinAttrName = "myParamsUri";
+				sortAttrName = new String[] { "myUri" };
+				break;
+			case QUANTITY:
+				joinAttrName = "myParamsQuantity";
+				sortAttrName = new String[] { "myValue" };
+				break;
+			default:
+				throw new InvalidRequestException("This server does not support _sort specifications of type " + param.getParamType() + " - Can't serve _sort=" + theSort.getParamName());
 		}
 
 		From<?, ?> join = theFrom.join(joinAttrName, JoinType.LEFT);
@@ -1499,10 +1529,10 @@ public class SearchBuilder implements ISearchBuilder {
 		for (int i = 0; i < pids.size(); i += maxLoad) {
 			int to = i + maxLoad;
 			to = Math.min(to, pids.size());
-			List<Long> pidsSubList = pids.subList(i, to); 
+			List<Long> pidsSubList = pids.subList(i, to);
 			doLoadPids(theResourceListToPopulate, theRevIncludedPids, theForHistoryOperation, entityManager, context, theDao, position, pidsSubList);
-		} 
-		
+		}
+
 	}
 
 	private void doLoadPids(List<IBaseResource> theResourceListToPopulate, Set<Long> theRevIncludedPids, boolean theForHistoryOperation, EntityManager entityManager, FhirContext context, IDao theDao,
@@ -1723,49 +1753,49 @@ public class SearchBuilder implements ISearchBuilder {
 			RuntimeSearchParam nextParamDef = mySearchParamRegistry.getActiveSearchParam(theResourceName, theParamName);
 			if (nextParamDef != null) {
 				switch (nextParamDef.getParamType()) {
-				case DATE:
-					for (List<? extends IQueryParameterType> nextAnd : theAndOrParams) {
-						addPredicateDate(theResourceName, theParamName, nextAnd);
-					}
-					break;
-				case QUANTITY:
-					for (List<? extends IQueryParameterType> nextAnd : theAndOrParams) {
-						addPredicateQuantity(theResourceName, theParamName, nextAnd);
-					}
-					break;
-				case REFERENCE:
-					for (List<? extends IQueryParameterType> nextAnd : theAndOrParams) {
-						addPredicateReference(theResourceName, theParamName, nextAnd);
-					}
-					break;
-				case STRING:
-					for (List<? extends IQueryParameterType> nextAnd : theAndOrParams) {
-						addPredicateString(theResourceName, theParamName, nextAnd);
-					}
-					break;
-				case TOKEN:
-					for (List<? extends IQueryParameterType> nextAnd : theAndOrParams) {
-						addPredicateToken(theResourceName, theParamName, nextAnd);
-					}
-					break;
-				case NUMBER:
-					for (List<? extends IQueryParameterType> nextAnd : theAndOrParams) {
-						addPredicateNumber(theResourceName, theParamName, nextAnd);
-					}
-					break;
-				case COMPOSITE:
-					for (List<? extends IQueryParameterType> nextAnd : theAndOrParams) {
-						addPredicateComposite(theResourceName, nextParamDef, nextAnd);
-					}
-					break;
-				case URI:
-					for (List<? extends IQueryParameterType> nextAnd : theAndOrParams) {
-						addPredicateUri(theResourceName, theParamName, nextAnd);
-					}
-					break;
-				case HAS:
-					// should not happen
-					break;
+					case DATE:
+						for (List<? extends IQueryParameterType> nextAnd : theAndOrParams) {
+							addPredicateDate(theResourceName, theParamName, nextAnd);
+						}
+						break;
+					case QUANTITY:
+						for (List<? extends IQueryParameterType> nextAnd : theAndOrParams) {
+							addPredicateQuantity(theResourceName, theParamName, nextAnd);
+						}
+						break;
+					case REFERENCE:
+						for (List<? extends IQueryParameterType> nextAnd : theAndOrParams) {
+							addPredicateReference(theResourceName, theParamName, nextAnd);
+						}
+						break;
+					case STRING:
+						for (List<? extends IQueryParameterType> nextAnd : theAndOrParams) {
+							addPredicateString(theResourceName, theParamName, nextAnd);
+						}
+						break;
+					case TOKEN:
+						for (List<? extends IQueryParameterType> nextAnd : theAndOrParams) {
+							addPredicateToken(theResourceName, theParamName, nextAnd);
+						}
+						break;
+					case NUMBER:
+						for (List<? extends IQueryParameterType> nextAnd : theAndOrParams) {
+							addPredicateNumber(theResourceName, theParamName, nextAnd);
+						}
+						break;
+					case COMPOSITE:
+						for (List<? extends IQueryParameterType> nextAnd : theAndOrParams) {
+							addPredicateComposite(theResourceName, nextParamDef, nextAnd);
+						}
+						break;
+					case URI:
+						for (List<? extends IQueryParameterType> nextAnd : theAndOrParams) {
+							addPredicateUri(theResourceName, theParamName, nextAnd);
+						}
+						break;
+					case HAS:
+						// should not happen
+						break;
 				}
 			} else {
 				if (Constants.PARAM_CONTENT.equals(theParamName) || Constants.PARAM_TEXT.equals(theParamName)) {
@@ -1785,35 +1815,35 @@ public class SearchBuilder implements ISearchBuilder {
 	private IQueryParameterType toParameterType(RuntimeSearchParam theParam) {
 		IQueryParameterType qp;
 		switch (theParam.getParamType()) {
-		case DATE:
-			qp = new DateParam();
-			break;
-		case NUMBER:
-			qp = new NumberParam();
-			break;
-		case QUANTITY:
-			qp = new QuantityParam();
-			break;
-		case STRING:
-			qp = new StringParam();
-			break;
-		case TOKEN:
-			qp = new TokenParam();
-			break;
-		case COMPOSITE:
-			List<RuntimeSearchParam> compositeOf = theParam.getCompositeOf();
-			if (compositeOf.size() != 2) {
-				throw new InternalErrorException("Parameter " + theParam.getName() + " has " + compositeOf.size() + " composite parts. Don't know how handlt this.");
-			}
-			IQueryParameterType leftParam = toParameterType(compositeOf.get(0));
-			IQueryParameterType rightParam = toParameterType(compositeOf.get(1));
-			qp = new CompositeParam<IQueryParameterType, IQueryParameterType>(leftParam, rightParam);
-			break;
-		case REFERENCE:
-			qp = new ReferenceParam();
-			break;
-		default:
-			throw new InternalErrorException("Don't know how to convert param type: " + theParam.getParamType());
+			case DATE:
+				qp = new DateParam();
+				break;
+			case NUMBER:
+				qp = new NumberParam();
+				break;
+			case QUANTITY:
+				qp = new QuantityParam();
+				break;
+			case STRING:
+				qp = new StringParam();
+				break;
+			case TOKEN:
+				qp = new TokenParam();
+				break;
+			case COMPOSITE:
+				List<RuntimeSearchParam> compositeOf = theParam.getCompositeOf();
+				if (compositeOf.size() != 2) {
+					throw new InternalErrorException("Parameter " + theParam.getName() + " has " + compositeOf.size() + " composite parts. Don't know how handlt this.");
+				}
+				IQueryParameterType leftParam = toParameterType(compositeOf.get(0));
+				IQueryParameterType rightParam = toParameterType(compositeOf.get(1));
+				qp = new CompositeParam<IQueryParameterType, IQueryParameterType>(leftParam, rightParam);
+				break;
+			case REFERENCE:
+				qp = new ReferenceParam();
+				break;
+			default:
+				throw new InternalErrorException("Don't know how to convert param type: " + theParam.getParamType());
 		}
 		return qp;
 	}
@@ -1907,8 +1937,8 @@ public class SearchBuilder implements ISearchBuilder {
 		}
 
 		private void fetchNext() {
-			
-			// If we don't have 
+
+			// If we don't have
 			if (myResultsIterator == null) {
 				final TypedQuery<Long> query = createQuery(mySort);
 				myResultsIterator = query.getResultList().iterator();

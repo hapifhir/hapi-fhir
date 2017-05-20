@@ -60,7 +60,7 @@ public class SearchParameterMap extends LinkedHashMap<String, List<List<? extend
 	 * Constructor
 	 */
 	public SearchParameterMap() {
-		// nothing
+		super();
 	}
 
 	/**
@@ -383,6 +383,9 @@ public class SearchParameterMap extends LinkedHashMap<String, List<List<? extend
 			b.append(getCount());
 		}
 		
+		if (b.length() == 0) {
+			b.append('?');
+		}
 		
 		return b.toString();
 	}

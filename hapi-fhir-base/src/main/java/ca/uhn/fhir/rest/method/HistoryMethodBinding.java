@@ -35,15 +35,11 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.rest.annotation.History;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.client.BaseHttpClientInvocation;
-import ca.uhn.fhir.rest.server.Constants;
-import ca.uhn.fhir.rest.server.IBundleProvider;
-import ca.uhn.fhir.rest.server.IResourceProvider;
-import ca.uhn.fhir.rest.server.IRestfulServer;
+import ca.uhn.fhir.rest.server.*;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
@@ -79,7 +75,7 @@ public class HistoryMethodBinding extends BaseResourceReturningMethodBinding {
 			}
 		}
 
-		if (type != IResource.class) {
+		if (type != IBaseResource.class && type != IResource.class) {
 			myResourceName = theContext.getResourceDefinition(type).getName();
 		} else {
 			myResourceName = null;
@@ -245,8 +241,8 @@ public class HistoryMethodBinding extends BaseResourceReturningMethodBinding {
 			return ((IResourceProvider) theProvider).getResourceType();
 		}
 		History historyAnnotation = theMethod.getAnnotation(History.class);
-		Class<? extends IResource> type = historyAnnotation.type();
-		if (type != IResource.class) {
+		Class<? extends IBaseResource> type = historyAnnotation.type();
+		if (type != IBaseResource.class && type != IResource.class) {
 			return type;
 		}
 		return null;

@@ -115,7 +115,7 @@
 	<ul class="nav nav-sidebar" th:unless="${conf.rest.empty}">
 		<th:block th:each="resource, resIterStat : ${conf.rest[0].resource}">
 			<li th:class="${resourceName} == ${resource.typeElement.valueAsString} ? 'active' : ''">
-				<a href="#" th:onclick="'doAction(this, \'resource\', \'' + ${resource.typeElement.valueAsString} + '\');'">
+				<a th:id="'leftResource' + ${resource.typeElement.valueAsString}" href="#" th:onclick="'doAction(this, \'resource\', \'' + ${resource.typeElement.valueAsString} + '\');'">
 					<th:block th:text="${resource.typeElement.valueAsString}" >Patient</th:block>
 					<span class="badge" th:if="${resourceCounts[resource.typeElement.valueAsString]} != null" th:text="${resourceCounts[resource.typeElement.valueAsString]}"/>
 				</a>

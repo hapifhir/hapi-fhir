@@ -152,7 +152,7 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 
 		assertThat(ids, contains(moId.getValue()));
 	}
-
+	
 	@Test
 	public void testEverythingTimings() throws Exception {
 		String methodName = "testEverythingTimings";
@@ -2612,6 +2612,26 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 			assertThat(patients, containsInRelativeOrder(missing));
 			assertThat(patients, not(containsInRelativeOrder(notMissing)));
 		}
+	}
+
+	@Test
+	public void testSearchWithMissingDate2() {
+		MedicationRequest mr1 = new MedicationRequest();
+		mr1.getCategory().addCoding().setSystem("urn:medicationroute").setCode("oral");
+		mr1.addDosageInstruction().getTiming().addEventElement().setValueAsString("2017-01-01");
+		IIdType id1 = myMedicationRequestDao.create(mr1).getId().toUnqualifiedVersionless();
+		
+		MedicationRequest mr2 = new MedicationRequest();
+		mr2.getCategory().addCoding().setSystem("urn:medicationroute").setCode("oral");
+		IIdType id2 = myMedicationRequestDao.create(mr2).getId().toUnqualifiedVersionless();
+
+		SearchParameterMap map = new SearchParameterMap();
+		map.add(MedicationRequest.SP_DATE, new DateParam().setMissing(true));
+		IBundleProvider results = myMedicationRequestDao.search(map);
+		List<String> ids = toUnqualifiedVersionlessIdValues(results);
+
+		assertThat(ids, contains(id2.getValue()));
+		
 	}
 
 	@Test

@@ -125,6 +125,7 @@ import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import com.google.common.collect.Lists;
 
 import ca.uhn.fhir.jpa.dao.DaoConfig;
+import ca.uhn.fhir.jpa.dao.SearchParameterMap;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.UriDt;
@@ -134,12 +135,14 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.rest.client.IGenericClient;
 import ca.uhn.fhir.rest.gclient.StringClientParam;
+import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.StringOrListParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.Constants;
+import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
@@ -173,6 +176,54 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		myFhirCtx.setParserErrorHandler(new StrictErrorHandler());
 
 		myDaoConfig.setAllowMultipleDelete(true);
+	}
+
+	
+	@Test
+	public void testSearchWithMissingDate2() throws Exception {
+		MedicationRequest mr1 = new MedicationRequest();
+		mr1.getCategory().addCoding().setSystem("urn:medicationroute").setCode("oral");
+		mr1.addDosageInstruction().getTiming().addEventElement().setValueAsString("2017-01-01");
+		IIdType id1 = myMedicationRequestDao.create(mr1).getId().toUnqualifiedVersionless();
+		
+		MedicationRequest mr2 = new MedicationRequest();
+		mr2.getCategory().addCoding().setSystem("urn:medicationroute").setCode("oral");
+		IIdType id2 = myMedicationRequestDao.create(mr2).getId().toUnqualifiedVersionless();
+
+		HttpGet get = new HttpGet(ourServerBase + "/MedicationRequest?date:missing=false");
+		CloseableHttpResponse resp = ourHttpClient.execute(get);
+		try {
+			assertEquals(200, resp.getStatusLine().getStatusCode());
+			Bundle bundle = myFhirCtx.newXmlParser().parseResource(Bundle.class, IOUtils.toString(resp.getEntity().getContent(), Constants.CHARSET_UTF8));
+			
+			List<String> ids = toUnqualifiedVersionlessIdValues(bundle);
+			assertThat(ids, contains(id1.getValue()));
+		} finally {
+			IOUtils.closeQuietly(resp);
+		}
+		
+
+		
+	}
+
+	
+	@Test
+	public void testSaveAndRetrieveResourceWithExtension() {
+		Patient nextPatient = new Patient();
+		nextPatient.setId("Patient/B");
+		nextPatient
+				.addExtension()
+				.setUrl("http://foo")
+				.setValue(new Reference("Practitioner/A"));
+
+		ourClient.update().resource(nextPatient).execute();
+
+		Patient p = ourClient.read().resource(Patient.class).withId("B").execute();
+		
+		String encoded = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p);
+		ourLog.info(encoded);
+
+		assertThat(encoded, containsString("http://foo"));
 	}
 
 	private void checkParamMissing(String paramName) throws IOException, ClientProtocolException {
@@ -1549,11 +1600,10 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		}
 
 		assertEquals(null, responseBundle.getLink("next"));
-		
+
 		assertThat(ids, hasItem("List/A161444"));
 		assertThat(ids, hasItem("List/A161468"));
 		assertThat(ids, hasItem("List/A161500"));
-
 
 		ourLog.info("Expected {} - {}", allIds.size(), allIds);
 		ourLog.info("Actual   {} - {}", ids.size(), ids);
@@ -1726,7 +1776,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			preDates.add(new Date());
 			Thread.sleep(100);
 			patient.setId(id);
-			patient.getName().get(0).getFamilyElement().setValue(methodName + "_i"+i);
+			patient.getName().get(0).getFamilyElement().setValue(methodName + "_i" + i);
 			ids.add(myPatientDao.update(patient, mySrd).getId().toUnqualified().getValue());
 		}
 
@@ -2859,6 +2909,53 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		assertNotEquals(uuid1, uuid3);
 	}
 
+	@Test
+	public void testSearchReusesResultsEnabledNoParams() throws Exception {
+		List<IBaseResource> resources = new ArrayList<IBaseResource>();
+		for (int i = 0; i < 50; i++) {
+			Organization org = new Organization();
+			org.setName("HELLO");
+			resources.add(org);
+		}
+		ourClient.transaction().withResources(resources).prettyPrint().encodedXml().execute();
+
+		myDaoConfig.setReuseCachedSearchResultsForMillis(100000L);
+
+		Bundle result1 = ourClient
+				.search()
+				.forResource("Organization")
+				.returnBundle(Bundle.class)
+				.execute();
+
+		final String uuid1 = toSearchUuidFromLinkNext(result1);
+		Search search1 = newTxTemplate().execute(new TransactionCallback<Search>() {
+			@Override
+			public Search doInTransaction(TransactionStatus theStatus) {
+				return mySearchEntityDao.findByUuid(uuid1);
+			}
+		});
+		Date lastReturned1 = search1.getSearchLastReturned();
+
+		Bundle result2 = ourClient
+				.search()
+				.forResource("Organization")
+				.returnBundle(Bundle.class)
+				.execute();
+
+		final String uuid2 = toSearchUuidFromLinkNext(result2);
+		Search search2 = newTxTemplate().execute(new TransactionCallback<Search>() {
+			@Override
+			public Search doInTransaction(TransactionStatus theStatus) {
+				return mySearchEntityDao.findByUuid(uuid2);
+			}
+		});
+		Date lastReturned2 = search2.getSearchLastReturned();
+
+		assertTrue(lastReturned2.getTime() > lastReturned1.getTime());
+
+		assertEquals(uuid1, uuid2);
+	}
+
 	/**
 	 * See #316
 	 */
@@ -3102,7 +3199,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
 
 		// should be subject._id
-		HttpGet httpPost = new HttpGet(ourServerBase + "/Observation?subject.id=FOO"); 
+		HttpGet httpPost = new HttpGet(ourServerBase + "/Observation?subject.id=FOO");
 
 		CloseableHttpResponse resp = ourHttpClient.execute(httpPost);
 		try {
@@ -3115,7 +3212,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		}
 		ourLog.info("Outgoing post: {}", httpPost);
 	}
-	
+
 	/**
 	 * See #411
 	 * 

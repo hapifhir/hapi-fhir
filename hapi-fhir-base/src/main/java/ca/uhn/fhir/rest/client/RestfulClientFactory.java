@@ -188,6 +188,7 @@ public abstract class RestfulClientFactory implements IRestfulClientFactory {
 	public synchronized IGenericClient newGenericClient(String theServerBase) {
 		validateConfigured();
 		IHttpClient httpClient = getHttpClient(theServerBase);
+		
 		return new GenericClient(myContext, httpClient, theServerBase, this);
 	}
 

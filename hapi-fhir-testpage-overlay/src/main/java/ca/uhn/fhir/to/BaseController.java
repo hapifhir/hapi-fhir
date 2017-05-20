@@ -2,10 +2,7 @@ package ca.uhn.fhir.to;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.ArrayList;
@@ -22,11 +19,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.Header;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpEntityEnclosingRequest;
-import org.apache.http.HttpResponse;
 import org.apache.http.entity.ContentType;
-import org.apache.http.entity.HttpEntityWrapper;
 import org.apache.http.message.BasicHeader;
 import org.hl7.fhir.dstu3.model.CapabilityStatement;
 import org.hl7.fhir.dstu3.model.CapabilityStatement.CapabilityStatementRestComponent;
@@ -50,12 +43,10 @@ import ca.uhn.fhir.model.dstu.resource.Conformance.Rest;
 import ca.uhn.fhir.model.primitive.DecimalDt;
 import ca.uhn.fhir.rest.client.GenericClient;
 import ca.uhn.fhir.rest.client.IClientInterceptor;
-import ca.uhn.fhir.rest.client.apache.ApacheHttpRequest;
-import ca.uhn.fhir.rest.client.apache.ApacheHttpResponse;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
 import ca.uhn.fhir.rest.client.api.IHttpResponse;
+import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.EncodingEnum;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.to.model.HomeRequest;
 import ca.uhn.fhir.util.ExtensionConstants;
 
@@ -286,7 +277,7 @@ public class BaseController {
 		FhirVersionEnum version = theRequest.getFhirVersion(myConfig);
 		FhirContext retVal = myContexts.get(version);
 		if (retVal == null) {
-			retVal = new FhirContext(version);
+			retVal = newContext(version);
 			myContexts.put(version, retVal);
 		}
 		return retVal;
@@ -513,6 +504,12 @@ public class BaseController {
 		return "[server=" + theModel.get("serverId") + "] - ";
 	}
 
+	protected FhirContext newContext(FhirVersionEnum version) {
+		FhirContext retVal;
+		retVal = new FhirContext(version);
+		return retVal;
+	}
+
 	private String parseNarrative(HomeRequest theRequest, EncodingEnum theCtEnum, String theResultBody) {
 		try {
 			IBaseResource par = theCtEnum.newParser(getContext(theRequest)).parseResource(theResultBody);
@@ -563,23 +560,51 @@ public class BaseController {
 	protected void processAndAddLastClientInvocation(GenericClient theClient, ResultType theResultType, ModelMap theModelMap, long theLatency, String outcomeDescription,
 			CaptureInterceptor theInterceptor, HomeRequest theRequest) {
 		try {
-			ApacheHttpRequest lastRequest = theInterceptor.getLastRequest();
-			HttpResponse lastResponse = theInterceptor.getLastResponse();
-			String requestBody = null;
-			String requestUrl = lastRequest != null ? lastRequest.getApacheRequest().getURI().toASCIIString() : null;
-			String action = lastRequest != null ? lastRequest.getApacheRequest().getMethod() : null;
-			String resultStatus = lastResponse != null ? lastResponse.getStatusLine().toString() : null;
-			String resultBody = StringUtils.defaultString(theInterceptor.getLastResponseBody());
+//			ApacheHttpRequest lastRequest = theInterceptor.getLastRequest();
+//			HttpResponse lastResponse = theInterceptor.getLastResponse();
+//			String requestBody = null;
+//			String requestUrl = lastRequest != null ? lastRequest.getApacheRequest().getURI().toASCIIString() : null;
+//			String action = lastRequest != null ? lastRequest.getApacheRequest().getMethod() : null;
+//			String resultStatus = lastResponse != null ? lastResponse.getStatusLine().toString() : null;
+//			String resultBody = StringUtils.defaultString(theInterceptor.getLastResponseBody());
+//
+//			if (lastRequest instanceof HttpEntityEnclosingRequest) {
+//				HttpEntity entity = ((HttpEntityEnclosingRequest) lastRequest).getEntity();
+//				if (entity.isRepeatable()) {
+//					requestBody = IOUtils.toString(entity.getContent());
+//				}
+//			}
+//
+//			ContentType ct = lastResponse != null ? ContentType.get(lastResponse.getEntity()) : null;
+//			String mimeType = ct != null ? ct.getMimeType() : null;
 
-			if (lastRequest instanceof HttpEntityEnclosingRequest) {
-				HttpEntity entity = ((HttpEntityEnclosingRequest) lastRequest).getEntity();
-				if (entity.isRepeatable()) {
-					requestBody = IOUtils.toString(entity.getContent());
+			
+			IHttpRequest lastRequest = theInterceptor.getLastRequest();
+			IHttpResponse lastResponse = theInterceptor.getLastResponse();
+			String requestBody = null;
+			String requestUrl = null;
+			String action = null;
+			String resultStatus = null;
+			String resultBody = null;
+			String mimeType = null;
+			ContentType ct = null;
+			if (lastRequest != null) {
+				requestBody = lastRequest.getRequestBodyFromStream();
+				requestUrl = lastRequest.getUri();
+				action = lastRequest.getHttpVerbName();
+			}
+			if (lastResponse != null) {
+				resultStatus = "HTTP " + lastResponse.getStatus() + " " + lastResponse.getStatusInfo();
+				lastResponse.bufferEntity();
+				resultBody = IOUtils.toString(lastResponse.readEntity(), Constants.CHARSET_UTF8);
+				
+				List<String> ctStrings = lastResponse.getAllHeaders().get(Constants.HEADER_CONTENT_TYPE);
+				if (ctStrings != null && ctStrings.isEmpty() == false) {
+					ct = ContentType.parse(ctStrings.get(0));
+					mimeType = ct.getMimeType();
 				}
 			}
 
-			ContentType ct = lastResponse != null ? ContentType.get(lastResponse.getEntity()) : null;
-			String mimeType = ct != null ? ct.getMimeType() : null;
 			EncodingEnum ctEnum = EncodingEnum.forContentType(mimeType);
 			String narrativeString = "";
 
@@ -658,67 +683,69 @@ public class BaseController {
 
 	public static class CaptureInterceptor implements IClientInterceptor {
 
-		private ApacheHttpRequest myLastRequest;
-		private HttpResponse myLastResponse;
-		private String myResponseBody;
+		private IHttpRequest myLastRequest;
+		private IHttpResponse myLastResponse;
+//		private String myResponseBody;
 
-		public ApacheHttpRequest getLastRequest() {
+		public IHttpRequest getLastRequest() {
 			return myLastRequest;
 		}
 
-		public HttpResponse getLastResponse() {
+		public IHttpResponse getLastResponse() {
 			return myLastResponse;
 		}
 
-		public String getLastResponseBody() {
-			return myResponseBody;
-		}
+//		public String getLastResponseBody() {
+//			return myResponseBody;
+//		}
 
 		@Override
 		public void interceptRequest(IHttpRequest theRequest) {
 			assert myLastRequest == null;
-			myLastRequest = (ApacheHttpRequest) theRequest;
+			
+			myLastRequest = theRequest;
 		}
 
 		@Override
 		public void interceptResponse(IHttpResponse theResponse) throws IOException {
 			assert myLastResponse == null;
-			myLastResponse = ((ApacheHttpResponse) theResponse).getResponse();
-
-			HttpEntity respEntity = myLastResponse.getEntity();
-			if (respEntity != null) {
-				final byte[] bytes;
-				try {
-					bytes = IOUtils.toByteArray(respEntity.getContent());
-				} catch (IllegalStateException e) {
-					throw new InternalErrorException(e);
-				}
-
-				myResponseBody = new String(bytes, "UTF-8");
-				myLastResponse.setEntity(new MyEntityWrapper(respEntity, bytes));
-			}
+			myLastResponse = theResponse;
+//			myLastResponse = ((ApacheHttpResponse) theResponse).getResponse();
+//
+//			HttpEntity respEntity = myLastResponse.getEntity();
+//			if (respEntity != null) {
+//				final byte[] bytes;
+//				try {
+//					bytes = IOUtils.toByteArray(respEntity.getContent());
+//				} catch (IllegalStateException e) {
+//					throw new InternalErrorException(e);
+//				}
+//
+//				myResponseBody = new String(bytes, "UTF-8");
+//				myLastResponse.setEntity(new MyEntityWrapper(respEntity, bytes));
+//			}
 		}
 
-		private static class MyEntityWrapper extends HttpEntityWrapper {
-
-			private byte[] myBytes;
-
-			public MyEntityWrapper(HttpEntity theWrappedEntity, byte[] theBytes) {
-				super(theWrappedEntity);
-				myBytes = theBytes;
-			}
-
-			@Override
-			public InputStream getContent() throws IOException {
-				return new ByteArrayInputStream(myBytes);
-			}
-
-			@Override
-			public void writeTo(OutputStream theOutstream) throws IOException {
-				theOutstream.write(myBytes);
-			}
-
-		}
+//		private static class MyEntityWrapper extends HttpEntityWrapper {
+//
+//			private byte[] myBytes;
+//
+//			public MyEntityWrapper(HttpEntity theWrappedEntity, byte[] theBytes) {
+//				super(theWrappedEntity);
+//				myBytes = theBytes;
+//			}
+//
+//			@Override
+//			public InputStream getContent() throws IOException {
+//				return new ByteArrayInputStream(myBytes);
+//			}
+//
+//			@Override
+//			public void writeTo(OutputStream theOutstream) throws IOException {
+//				theOutstream.write(myBytes);
+//			}
+//
+//		}
 
 	}
 

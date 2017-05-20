@@ -61,6 +61,7 @@ import ca.uhn.fhir.rest.method.SearchMethodBinding.QualifierDetails;
 import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.*;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
+import ca.uhn.fhir.rest.server.interceptor.IServerOperationInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.ObjectUtil;
@@ -210,6 +211,11 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				}
 			}
 		}
+		for (IServerInterceptor next : getConfig().getInterceptors()) {
+			if (next instanceof IServerOperationInterceptor) {
+				((IServerOperationInterceptor) next).resourceDeleted(theRequestDetails, resourceToDelete);
+			}
+		}
 
 		DaoMethodOutcome outcome = toMethodOutcome(savedEntity, resourceToDelete).setCreated(true);
 
@@ -275,7 +281,11 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 					((IJpaServerInterceptor) next).resourceDeleted(requestDetails, entity);
 				}
 			}
-
+			for (IServerInterceptor next : getConfig().getInterceptors()) {
+				if (next instanceof IServerOperationInterceptor) {
+					((IServerOperationInterceptor) next).resourceDeleted(theRequestDetails, resourceToDelete);
+				}
+			}
 		}
 
 		IBaseOperationOutcome oo;
@@ -374,7 +384,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		 * to be reflected in the resource shared with interceptors
 		 */
 		if (!thePerformIndexing) {
-			incremenetId(theResource, entity, theResource.getIdElement());
+			incrementId(theResource, entity, theResource.getIdElement());
 		}
 		
 		// Notify JPA interceptors
@@ -385,6 +395,11 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				if (next instanceof IJpaServerInterceptor) {
 					((IJpaServerInterceptor) next).resourceCreated(requestDetails, entity);
 				}
+			}
+		}
+		for (IServerInterceptor next : getConfig().getInterceptors()) {
+			if (next instanceof IServerOperationInterceptor) {
+				((IServerOperationInterceptor) next).resourceCreated(theRequestDetails, theResource);
 			}
 		}
 
@@ -400,7 +415,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		return outcome;
 	}
 
-	private void incremenetId(T theResource, ResourceTable theSavedEntity, IIdType theResourceId) {
+	private void incrementId(T theResource, ResourceTable theSavedEntity, IIdType theResourceId) {
 		IIdType idType = theResourceId;
 		String newVersion;
 		long newVersionLong;
@@ -1113,11 +1128,11 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		 * we'll manually increase the version. This is important because we want the updated version number
 		 * to be reflected in the resource shared with interceptors
 		 */
-		if (!thePerformIndexing) {
+		if (!thePerformIndexing && !savedEntity.isUnchangedInCurrentOperation()) {
 			if (resourceId.hasVersionIdPart() == false) {
 				resourceId = resourceId.withVersion(Long.toString(savedEntity.getVersion()));
 			}
-			incremenetId(theResource, savedEntity, resourceId);
+			incrementId(theResource, savedEntity, resourceId);
 		}
 
 		// Notify interceptors
@@ -1129,7 +1144,12 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				}
 			}
 		}
-
+		for (IServerInterceptor next : getConfig().getInterceptors()) {
+			if (next instanceof IServerOperationInterceptor) {
+				((IServerOperationInterceptor) next).resourceUpdated(theRequestDetails, theResource);
+			}
+		}
+		
 		DaoMethodOutcome outcome = toMethodOutcome(savedEntity, theResource).setCreated(false);
 
 		if (!thePerformIndexing) {

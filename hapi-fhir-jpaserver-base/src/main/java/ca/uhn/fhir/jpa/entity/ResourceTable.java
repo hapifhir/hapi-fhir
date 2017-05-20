@@ -242,6 +242,9 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 	@OneToMany(mappedBy = "myResource", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
 	private Set<ResourceTag> myTags;
 
+	@Transient
+	private transient boolean myUnchangedInCurrentOperation;
+	
 	@Column(name = "RES_VER")
 	private long myVersion;
 
@@ -398,6 +401,14 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 		return myParamsUriPopulated;
 	}
 
+	/**
+	 * Transient (not saved in DB) flag indicating that this resource was found to be unchanged by the current operation
+	 * and was not re-saved in the database
+	 */
+	public boolean isUnchangedInCurrentOperation() {
+		return myUnchangedInCurrentOperation;
+	}
+
 	public void setContentTextParsedIntoWords(String theContentText) {
 		myContentText = theContentText;
 	}
@@ -530,6 +541,14 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 
 	public void setResourceType(String theResourceType) {
 		myResourceType = theResourceType;
+	}
+
+	/**
+	 * Transient (not saved in DB) flag indicating that this resource was found to be unchanged by the current operation
+	 * and was not re-saved in the database
+	 */
+	public void setUnchangedInCurrentOperation(boolean theUnchangedInCurrentOperation) {
+		myUnchangedInCurrentOperation = theUnchangedInCurrentOperation;
 	}
 
 	public void setVersion(long theVersion) {

@@ -36,7 +36,15 @@
 						Search results will be cached and reused (so that if a client
 						does two searches for "get me all patients matching FOO"
 						with the same FOO in short succession, we won't query the DB
-						again but will instead reuse the cached results) 
+						again but will instead reuse the cached results). Note that
+						this can improve performance, but does mean that searches can
+						return slightly out of date results. Essentially what this means
+						is that the latest version of individual resources will always
+						be returned despite this cacheing, but newly created resources
+						that should match may not be returned until the cache
+						expires. By default this cache has been set to one minute, 
+						which should be acceptable for most real-world usage, but
+						this can be changed or disabled entirely.
 					</li>
 					<li>
 						Updates which do not actually change the contents of the resource
@@ -50,7 +58,8 @@
 				<code>HFJ_SEARCH_INCLUDE</code>,
 				and 
 				<code>HFJ_SEARCH_RESULT</code>
-				tables from your database before upgrading.
+				tables from your database before upgrading, as the structure of these tables
+				has changed and old search results can not be reused.
 				]]>
 			</action>
 			<action type="fix" issue="590">
@@ -66,6 +75,55 @@
 				Fix concurrency issues in FhirContext that were causing issues when 
 				starting a context up on Android. Thanks to GitHub issue @Jaypeg85 for
 				the pull request!
+			</action>
+			<action type="fix">
+				Fix an issue in the JPA server if a resource has been previously
+				saved containing vocabulary that is no longer valid. This only really
+				happened if you were using a non-final version of FHIR (e.g. using DSTU3
+				before it was finalized) but if you were in this situation, upgrading HAPI
+				could cause you to have old codes that no longer exist in your database. This
+				fix prevents these from blocking you from accesing those resources.
+			</action>
+			<action type="add">
+				CLI now defaults to DSTU3 mode if no FHIR version is specified
+			</action>
+			<action type="add">
+				Server and annotation-client @History annotation now allows DSTU3+ resource
+				types in the type= property
+			</action>
+			<action type="fix" issue="563">
+				JSON Parser gave a very unhelpful error message (Unknown attribute 'value' found during parse) 
+				when a scalar value was found in a spot where an object is expected. This has been corrected to 
+				include much more information. Thanks to GitHub user @jasminas for reporting!
+			</action>
+			<action type="add">
+				DaoConfig#setInterceptors() has been un-deprecated. It was previously deprecated as
+				we thought it was not useful, but uses have been identified so it turns out this method
+				will live after all. Interceptors registered to this method will now be treated
+				appropriately if they implement IServerOperationInterceptor too.
+			</action>
+			<action type="fix">
+				JPA server did not correctly support searching on a custom search parameter whose
+				path pointed to an extension, where the client used a chained value.
+			</action>
+			<action type="fix">
+				Fix issue where the JSON parser sometimes did not encode DSTU3 extensions on the root of a 
+				resource which have a value of type reference.
+			</action>
+			<action type="add">
+				Server now respects the If-Modified-Since header and will return an HTTP 304 if appropriate
+				for read operations.
+			</action>
+			<action type="fix">
+				JPA server did not correctly process :missing qualifier on date parameters
+			</action>
+			<action type="fix" issue="633">
+				AppacheHttpClient did not always respect the charset in the response
+				Content-Type header. Thanks to Gijsbert van den Brink for the pull request!
+			</action>
+			<action type="fix" issue="636">
+				Fix XhtmlParser to correctly handle hexadecimal escaped literals. Thanks to
+				Gijsbert van den Brink for the Pull Request!
 			</action>
 		</release>
 		<release version="2.4" date="2017-04-19">

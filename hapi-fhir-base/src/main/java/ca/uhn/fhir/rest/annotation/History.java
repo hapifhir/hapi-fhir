@@ -25,6 +25,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import org.hl7.fhir.instance.model.api.IBaseResource;
+
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.primitive.IdDt;
 //import ca.uhn.fhir.testmodel.Patient; // TODO: qualify this correctly
@@ -77,6 +79,6 @@ public @interface History {
 	 * The resource type that this method applies to. See the {@link History History annotation type documentation}
 	 * for information on usage patterns.  
 	 */
-	Class<? extends IResource> type() default IResource.class;
+	Class<? extends IBaseResource> type() default IBaseResource.class;
 	
 }

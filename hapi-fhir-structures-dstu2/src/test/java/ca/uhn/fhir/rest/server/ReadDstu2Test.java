@@ -10,6 +10,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
@@ -17,10 +18,7 @@ import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.*;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IResource;
@@ -28,13 +26,10 @@ import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Read;
-import ca.uhn.fhir.rest.server.AddProfileTagEnum;
-import ca.uhn.fhir.rest.server.IResourceProvider;
-import ca.uhn.fhir.rest.server.RestfulServer;
-import ca.uhn.fhir.util.PortUtil;
-import ca.uhn.fhir.util.TestUtil;
+import ca.uhn.fhir.util.*;
 
 public class ReadDstu2Test {
 
@@ -54,23 +49,48 @@ public class ReadDstu2Test {
 		ourLastId = null;
 	}
 
+	@Test
+	public void testIfModifiedSince() throws Exception {
+
+		CloseableHttpResponse status;
+		HttpGet httpGet;
+
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/2");
+		httpGet.addHeader(Constants.HEADER_IF_MODIFIED_SINCE, DateUtils.formatDate(new InstantDt("2012-01-01T13:00:00Z").getValue()));
+		status = ourClient.execute(httpGet);
+		try {
+			assertEquals(200, status.getStatusLine().getStatusCode());
+		} finally {
+			IOUtils.closeQuietly(status);
+		}
+		
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/2");
+		httpGet.addHeader(Constants.HEADER_IF_MODIFIED_SINCE, DateUtils.formatDate(new InstantDt("2012-01-01T10:00:00Z").getValue()));
+		status = ourClient.execute(httpGet);
+		try {
+			assertEquals(304, status.getStatusLine().getStatusCode());
+		} finally {
+			IOUtils.closeQuietly(status);
+		}
+
+	}
 
 	/**
 	 * See #302
 	 */
 	@Test
 	public void testAddProfile() throws Exception {
-		ourCtx.setAddProfileTagWhenEncoding(AddProfileTagEnum.ALWAYS);
+		ourCtx.setAddProfileTagWhenEncoding(AddProfileTagEnum.ONLY_FOR_CUSTOM);
 		
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/123?_format=xml");
 		HttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		String responseContent = IOUtils.toString(status.getEntity().getContent(), Constants.CHARSET_UTF8);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertThat(responseContent, containsString("p1ReadValue"));
 		assertThat(responseContent, containsString("p1ReadId"));
-		assertEquals("<Patient xmlns=\"http://hl7.org/fhir\"><id value=\"p1ReadId\"/><meta><profile value=\"http://foo_profile\"/></meta><identifier><value value=\"p1ReadValue\"/></identifier></Patient>", responseContent);
+		assertEquals("<Patient xmlns=\"http://hl7.org/fhir\"><id value=\"p1ReadId\"/><meta><lastUpdated value=\"2012-01-01T12:12:12Z\"/><profile value=\"http://foo_profile\"/></meta><identifier><value value=\"p1ReadValue\"/></identifier></Patient>", responseContent);
 		
 		ourLog.info(responseContent);
 		
@@ -87,7 +107,7 @@ public class ReadDstu2Test {
 		
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/123&_format=xml");
 		HttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		String responseContent = IOUtils.toString(status.getEntity().getContent(), Constants.CHARSET_UTF8);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		
 		ourLog.info(responseContent);
@@ -95,7 +115,7 @@ public class ReadDstu2Test {
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertThat(responseContent, containsString("p1ReadValue"));
 		assertThat(responseContent, containsString("p1ReadId"));
-		assertEquals("<Patient xmlns=\"http://hl7.org/fhir\"><id value=\"p1ReadId\"/><meta><profile value=\"http://foo\"/><profile value=\"http://foo_profile\"/></meta><identifier><value value=\"p1ReadValue\"/></identifier></Patient>", responseContent);
+		assertEquals("<Patient xmlns=\"http://hl7.org/fhir\"><id value=\"p1ReadId\"/><meta><lastUpdated value=\"2012-01-01T12:12:12Z\"/><profile value=\"http://foo\"/><profile value=\"http://foo_profile\"/></meta><identifier><value value=\"p1ReadValue\"/></identifier></Patient>", responseContent);
 	}
 
 	/**
@@ -103,18 +123,18 @@ public class ReadDstu2Test {
 	 */
 	@Test
 	public void testReadJson() throws Exception {
-		ourCtx.setAddProfileTagWhenEncoding(AddProfileTagEnum.ALWAYS);
+		ourCtx.setAddProfileTagWhenEncoding(AddProfileTagEnum.ONLY_FOR_CUSTOM);
 		
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/123?_format=json");
 		HttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		String responseContent = IOUtils.toString(status.getEntity().getContent(), Constants.CHARSET_UTF8);
 		ourLog.info(responseContent);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertThat(responseContent, containsString("p1ReadValue"));
 		assertThat(responseContent, containsString("p1ReadId"));
-		assertThat(responseContent, containsString("\"meta\":{\"profile\":[\"http://foo_profile\"]}"));
+		assertThat(responseContent, containsString("\"meta\":{\"lastUpdated\":\"2012-01-01T12:12:12Z\",\"profile\":[\"http://foo_profile\"]}"));
 	}
 	
 	/**
@@ -124,7 +144,7 @@ public class ReadDstu2Test {
 	public void testReadXml() throws Exception {
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/123&_format=xml");
 		HttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		String responseContent = IOUtils.toString(status.getEntity().getContent(), Constants.CHARSET_UTF8);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
@@ -140,13 +160,13 @@ public class ReadDstu2Test {
 
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/123/_history/1");
 		HttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		String responseContent = IOUtils.toString(status.getEntity().getContent(), Constants.CHARSET_UTF8);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertThat(responseContent, containsString("p1ReadValue"));
 		assertThat(responseContent, containsString("p1ReadId"));
-		assertEquals("<Patient xmlns=\"http://hl7.org/fhir\"><id value=\"p1ReadId\"/><meta><profile value=\"http://foo_profile\"/></meta><identifier><value value=\"p1ReadValue\"/></identifier></Patient>", responseContent);
+		assertEquals("<Patient xmlns=\"http://hl7.org/fhir\"><id value=\"p1ReadId\"/><meta><lastUpdated value=\"2012-01-01T12:12:12Z\"/><profile value=\"http://foo_profile\"/></meta><identifier><value value=\"p1ReadValue\"/></identifier></Patient>", responseContent);
 		
 		ourLog.info(responseContent);
 		
@@ -196,6 +216,8 @@ public class ReadDstu2Test {
 		public Patient read(@IdParam IdDt theId) {
 			ourLastId = theId;
 			Patient p1 = new MyPatient();
+			ResourceMetadataKeyEnum.UPDATED.put(p1, new InstantDt("2012-01-01T12:12:12Z"));
+
 			p1.setId("p1ReadId");
 			p1.addIdentifier().setValue("p1ReadValue");
 			if (ourInitializeProfileList) {

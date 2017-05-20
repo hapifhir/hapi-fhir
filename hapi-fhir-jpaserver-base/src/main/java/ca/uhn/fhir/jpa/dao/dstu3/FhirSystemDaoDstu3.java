@@ -343,6 +343,7 @@ public class FhirSystemDaoDstu3 extends BaseHapiFhirSystemDao<Bundle, Meta> {
 		List<DeleteConflict> deleteConflicts = new ArrayList<DeleteConflict>();
 		Map<BundleEntryComponent, ResourceTable> entriesToProcess = new IdentityHashMap<BundleEntryComponent, ResourceTable>();
 		Set<ResourceTable> nonUpdatedEntities = new HashSet<ResourceTable>();
+		Map<String, Class<? extends IBaseResource>> conditionalRequestUrls = new HashMap<String, Class<? extends IBaseResource>>();
 
 		/*
 		 * Loop through the request and process any entries of type
@@ -412,6 +413,10 @@ public class FhirSystemDaoDstu3 extends BaseHapiFhirSystemDao<Bundle, Meta> {
 				entriesToProcess.put(nextRespEntry, outcome.getEntity());
 				if (outcome.getCreated() == false) {
 					nonUpdatedEntities.add(outcome.getEntity());
+				} else {
+					if (isNotBlank(matchUrl)) {
+						conditionalRequestUrls.put(matchUrl, res.getClass());
+					}
 				}
 
 				break;
@@ -462,7 +467,11 @@ public class FhirSystemDaoDstu3 extends BaseHapiFhirSystemDao<Bundle, Meta> {
 					outcome = resourceDao.update(res, null, false, theRequestDetails);
 				} else {
 					res.setId((String) null);
-					outcome = resourceDao.update(res, parts.getResourceType() + '?' + parts.getParams(), false, theRequestDetails);
+					String matchUrl = parts.getResourceType() + '?' + parts.getParams();
+					outcome = resourceDao.update(res, matchUrl, false, theRequestDetails);
+					if (Boolean.TRUE.equals(outcome.getCreated())) {
+						conditionalRequestUrls.put(matchUrl, res.getClass());
+					}
 				}
 
 				handleTransactionCreateOrUpdateOutcome(idSubstitutions, idToPersistedOutcome, nextResourceId, outcome, nextRespEntry, resourceType, res);
@@ -531,16 +540,15 @@ public class FhirSystemDaoDstu3 extends BaseHapiFhirSystemDao<Bundle, Meta> {
 		/*
 		 * Double check we didn't allow any duplicates we shouldn't have
 		 */
-		for (BundleEntryComponent nextEntry : theRequest.getEntry()) {
-			if (nextEntry.getRequest().getMethodElement().getValue() == HTTPVerb.POST) {
-				String matchUrl = nextEntry.getRequest().getIfNoneExist();
-				if (isNotBlank(matchUrl)) {
-					IFhirResourceDao<?> resourceDao = getDao(nextEntry.getResource().getClass());
-					Set<Long> val = resourceDao.processMatchUrl(matchUrl);
-					if (val.size() > 1) {
-						throw new InvalidRequestException(
-								"Unable to process " + theActionName + " - Request would cause multiple resources to match URL: \"" + matchUrl + "\". Does transaction request contain duplicates?");
-					}
+		for (Entry<String, Class<? extends IBaseResource>> nextEntry : conditionalRequestUrls.entrySet()) {
+			String matchUrl = nextEntry.getKey();
+			Class<? extends IBaseResource> resType = nextEntry.getValue();
+			if (isNotBlank(matchUrl)) {
+				IFhirResourceDao<?> resourceDao = getDao(resType);
+				Set<Long> val = resourceDao.processMatchUrl(matchUrl);
+				if (val.size() > 1) {
+					throw new InvalidRequestException(
+							"Unable to process " + theActionName + " - Request would cause multiple resources to match URL: \"" + matchUrl + "\". Does transaction request contain duplicates?");
 				}
 			}
 		}
