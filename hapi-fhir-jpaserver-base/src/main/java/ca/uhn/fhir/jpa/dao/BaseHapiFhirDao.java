@@ -540,29 +540,29 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 				if (!haveParam) {
 					BaseResourceIndexedSearchParam param;
 					switch (type) {
-					case DATE:
-						param = new ResourceIndexedSearchParamDate();
-						break;
-					case NUMBER:
-						param = new ResourceIndexedSearchParamNumber();
-						break;
-					case QUANTITY:
-						param = new ResourceIndexedSearchParamQuantity();
-						break;
-					case STRING:
-						param = new ResourceIndexedSearchParamString();
-						break;
-					case TOKEN:
-						param = new ResourceIndexedSearchParamToken();
-						break;
-					case URI:
-						param = new ResourceIndexedSearchParamUri();
-						break;
-					case COMPOSITE:
-					case HAS:
-					case REFERENCE:
-					default:
-						continue;
+						case DATE:
+							param = new ResourceIndexedSearchParamDate();
+							break;
+						case NUMBER:
+							param = new ResourceIndexedSearchParamNumber();
+							break;
+						case QUANTITY:
+							param = new ResourceIndexedSearchParamQuantity();
+							break;
+						case STRING:
+							param = new ResourceIndexedSearchParamString();
+							break;
+						case TOKEN:
+							param = new ResourceIndexedSearchParamToken();
+							break;
+						case URI:
+							param = new ResourceIndexedSearchParamUri();
+							break;
+						case COMPOSITE:
+						case HAS:
+						case REFERENCE:
+						default:
+							continue;
 					}
 					param.setResource(theEntity);
 					param.setMissing(true);
@@ -842,24 +842,24 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 				}
 			}
 		}
-		
+
 		ResourceEncodingEnum encoding = myConfig.getResourceEncoding();
-		
+
 		IParser parser = encoding.newParser(myContext);
 		parser.setDontEncodeElements(EXCLUDE_ELEMENTS_IN_ENCODED);
 		String encoded = parser.encodeResourceToString(theResource);
-		
+
 		theEntity.setEncoding(encoding);
 		theEntity.setFhirVersion(myContext.getVersion().getVersion());
 		byte[] bytes;
 		switch (encoding) {
-		case JSON:
-			bytes = encoded.getBytes(Charsets.UTF_8);
-			break;
-		default:
-		case JSONC:
-			bytes = GZipUtil.compress(encoded);
-			break;
+			case JSON:
+				bytes = encoded.getBytes(Charsets.UTF_8);
+				break;
+			default:
+			case JSONC:
+				bytes = GZipUtil.compress(encoded);
+				break;
 		}
 
 		boolean changed = false;
@@ -872,23 +872,23 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 			}
 			theEntity.setHashSha256(hashSha256);
 		}
-		
+
 		if (changed == false) {
 			if (theEntity.getResource() == null) {
 				changed = true;
-			}else {
+			} else {
 				changed = !Arrays.equals(theEntity.getResource(), bytes);
 			}
 		}
-		
+
 		theEntity.setResource(bytes);
-		
+
 		Set<TagDefinition> allDefs = new HashSet<TagDefinition>();
 
 		theEntity.setHasTags(false);
 
-		Set<TagDefinition> allTagsOld = getAllTagDefinitions(theEntity); 
-		
+		Set<TagDefinition> allTagsOld = getAllTagDefinitions(theEntity);
+
 		if (theResource instanceof IResource) {
 			extractTagsHapi((IResource) theResource, theEntity, allDefs);
 		} else {
@@ -984,19 +984,19 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 			List<IdDt> profiles = new ArrayList<IdDt>();
 			for (BaseTag next : tags) {
 				switch (next.getTag().getTagType()) {
-				case PROFILE:
-					profiles.add(new IdDt(next.getTag().getCode()));
-					break;
-				case SECURITY_LABEL:
-					IBaseCoding secLabel = (IBaseCoding) myContext.getVersion().newCodingDt();
-					secLabel.setSystem(next.getTag().getSystem());
-					secLabel.setCode(next.getTag().getCode());
-					secLabel.setDisplay(next.getTag().getDisplay());
-					securityLabels.add(secLabel);
-					break;
-				case TAG:
-					tagList.add(new Tag(next.getTag().getSystem(), next.getTag().getCode(), next.getTag().getDisplay()));
-					break;
+					case PROFILE:
+						profiles.add(new IdDt(next.getTag().getCode()));
+						break;
+					case SECURITY_LABEL:
+						IBaseCoding secLabel = (IBaseCoding) myContext.getVersion().newCodingDt();
+						secLabel.setSystem(next.getTag().getSystem());
+						secLabel.setCode(next.getTag().getCode());
+						secLabel.setDisplay(next.getTag().getDisplay());
+						securityLabels.add(secLabel);
+						break;
+					case TAG:
+						tagList.add(new Tag(next.getTag().getSystem(), next.getTag().getCode(), next.getTag().getDisplay()));
+						break;
 				}
 			}
 			if (tagList.size() > 0) {
@@ -1052,21 +1052,21 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		if (theEntity.isHasTags()) {
 			for (BaseTag next : tags) {
 				switch (next.getTag().getTagType()) {
-				case PROFILE:
-					res.getMeta().addProfile(next.getTag().getCode());
-					break;
-				case SECURITY_LABEL:
-					IBaseCoding sec = res.getMeta().addSecurity();
-					sec.setSystem(next.getTag().getSystem());
-					sec.setCode(next.getTag().getCode());
-					sec.setDisplay(next.getTag().getDisplay());
-					break;
-				case TAG:
-					IBaseCoding tag = res.getMeta().addTag();
-					tag.setSystem(next.getTag().getSystem());
-					tag.setCode(next.getTag().getCode());
-					tag.setDisplay(next.getTag().getDisplay());
-					break;
+					case PROFILE:
+						res.getMeta().addProfile(next.getTag().getCode());
+						break;
+					case SECURITY_LABEL:
+						IBaseCoding sec = res.getMeta().addSecurity();
+						sec.setSystem(next.getTag().getSystem());
+						sec.setCode(next.getTag().getCode());
+						sec.setDisplay(next.getTag().getDisplay());
+						break;
+					case TAG:
+						IBaseCoding tag = res.getMeta().addTag();
+						tag.setSystem(next.getTag().getSystem());
+						tag.setCode(next.getTag().getCode());
+						tag.setDisplay(next.getTag().getDisplay());
+						break;
 				}
 			}
 		}
@@ -1164,13 +1164,13 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		return false;
 	}
 
-//	protected ResourceTable toEntity(IResource theResource) {
-//		ResourceTable retVal = new ResourceTable();
-//
-//		populateResourceIntoEntity(theResource, retVal, true);
-//
-//		return retVal;
-//	}
+	// protected ResourceTable toEntity(IResource theResource) {
+	// ResourceTable retVal = new ResourceTable();
+	//
+	// populateResourceIntoEntity(theResource, retVal, true);
+	//
+	// return retVal;
+	// }
 
 	@Override
 	public IBaseResource toResource(BaseHasResource theEntity, boolean theForHistoryOperation) {
@@ -1184,16 +1184,16 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 	public <R extends IBaseResource> R toResource(Class<R> theResourceType, BaseHasResource theEntity, boolean theForHistoryOperation) {
 		String resourceText = null;
 		switch (theEntity.getEncoding()) {
-		case JSON:
-			try {
-				resourceText = new String(theEntity.getResource(), "UTF-8");
-			} catch (UnsupportedEncodingException e) {
-				throw new Error("Should not happen", e);
-			}
-			break;
-		case JSONC:
-			resourceText = GZipUtil.decompress(theEntity.getResource());
-			break;
+			case JSON:
+				try {
+					resourceText = new String(theEntity.getResource(), "UTF-8");
+				} catch (UnsupportedEncodingException e) {
+					throw new Error("Should not happen", e);
+				}
+				break;
+			case JSONC:
+				resourceText = GZipUtil.decompress(theEntity.getResource());
+				break;
 		}
 
 		/*
@@ -1218,7 +1218,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 
 		IParser parser = theEntity.getEncoding().newParser(getContext(theEntity.getFhirVersion()));
 		parser.setParserErrorHandler(new LenientErrorHandler(false).setErrorOnInvalidValue(false));
-		
+
 		R retVal;
 		try {
 			retVal = parser.parseResource(resourceType, resourceText);
@@ -1359,7 +1359,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 			theEntity.setContentTextParsedIntoWords(null);
 			theEntity.setHashSha256(null);
 			changed = true;
-			
+
 		} else {
 
 			theEntity.setDeleted(null);
@@ -1918,12 +1918,12 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 			String qualifier = null;
 			for (int i = 0; i < paramName.length(); i++) {
 				switch (paramName.charAt(i)) {
-				case '.':
-				case ':':
-					qualifier = paramName.substring(i);
-					paramName = paramName.substring(0, i);
-					i = Integer.MAX_VALUE - 1;
-					break;
+					case '.':
+					case ':':
+						qualifier = paramName.substring(i);
+						paramName = paramName.substring(0, i);
+						i = Integer.MAX_VALUE - 1;
+						break;
 				}
 			}
 

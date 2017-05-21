@@ -15,7 +15,7 @@
  *
  *  @author Jeff Chung
  */
-package ca.uhn.fhir.jpa.demo.subscription;
+package ca.uhn.fhir.jpa.subscription;
 
 import ca.uhn.fhir.jpa.service.TMinusService;
 import org.hl7.fhir.dstu3.model.DateTimeType;

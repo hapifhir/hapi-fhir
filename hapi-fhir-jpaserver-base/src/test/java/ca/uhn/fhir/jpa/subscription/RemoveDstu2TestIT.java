@@ -15,7 +15,7 @@
  *
  *  @author Jeff Chung
  */
-package ca.uhn.fhir.jpa.demo.subscription;
+package ca.uhn.fhir.jpa.subscription;
 
 import ca.uhn.fhir.model.dstu2.resource.Bundle;
 import ca.uhn.fhir.model.dstu2.resource.Observation;

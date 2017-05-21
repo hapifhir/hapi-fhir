@@ -22,6 +22,8 @@ package ca.uhn.fhir.jpa.config;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.*;
+import ca.uhn.fhir.jpa.interceptor.RestHookSubscriptionDstu2Interceptor;
+import ca.uhn.fhir.jpa.interceptor.RestHookSubscriptionDstu3Interceptor;
 import ca.uhn.fhir.jpa.term.HapiTerminologySvcDstu2;
 import ca.uhn.fhir.jpa.term.IHapiTerminologySvc;
 import ca.uhn.fhir.model.dstu2.composite.MetaDt;
@@ -116,6 +118,12 @@ public class BaseDstu2Config extends BaseConfig {
 	@Bean(autowire = Autowire.BY_TYPE)
 	public IHapiTerminologySvc terminologyService() {
 		return new HapiTerminologySvcDstu2();
+	}
+
+	@Bean
+	@Lazy
+	public RestHookSubscriptionDstu2Interceptor restHookSubscriptionDstu3Interceptor() {
+		return new RestHookSubscriptionDstu2Interceptor();
 	}
 
 }

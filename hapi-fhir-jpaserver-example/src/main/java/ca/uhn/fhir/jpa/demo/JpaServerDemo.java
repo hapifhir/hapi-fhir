@@ -1,15 +1,20 @@
+/*
+ *  Copyright 2017 Cognitive Medical Systems, Inc (http://www.cognitivemedicine.com).
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
+
 package ca.uhn.fhir.jpa.demo;
-
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-
-import javax.servlet.ServletException;
-
-import org.hl7.fhir.dstu3.model.Meta;
-import org.springframework.web.context.ContextLoaderListener;
-import org.springframework.web.context.WebApplicationContext;
-import org.springframework.web.cors.CorsConfiguration;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
@@ -21,19 +26,23 @@ import ca.uhn.fhir.jpa.provider.JpaSystemProviderDstu1;
 import ca.uhn.fhir.jpa.provider.JpaSystemProviderDstu2;
 import ca.uhn.fhir.jpa.provider.dstu3.JpaConformanceProviderDstu3;
 import ca.uhn.fhir.jpa.provider.dstu3.JpaSystemProviderDstu3;
-import ca.uhn.fhir.jpa.provider.dstu3.TerminologyUploaderProviderDstu3;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu2.composite.MetaDt;
-import ca.uhn.fhir.model.dstu2.resource.Bundle;
 import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
-import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.rest.server.ETagSupportEnum;
 import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
-import ca.uhn.fhir.rest.server.interceptor.CorsInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
+import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.Meta;
+import org.springframework.web.context.ContextLoaderListener;
+import org.springframework.web.context.WebApplicationContext;
+
+import javax.servlet.ServletException;
+import java.util.Collection;
+import java.util.List;
 
 public class JpaServerDemo extends RestfulServer {
 
@@ -46,12 +55,11 @@ public class JpaServerDemo extends RestfulServer {
 	protected void initialize() throws ServletException {
 		super.initialize();
 
-		/*
+		/* 
 		 * We want to support FHIR DSTU2 format. This means that the server
 		 * will use the DSTU2 bundle format and other DSTU2 encoding changes.
 		 *
-		 * If you want to use DSTU1 instead, change the following line, and 
-		 * change the 2 occurrences of dstu2 in web.xml to dstu1
+		 * If you want to use DSTU1 instead, change the following line, and change the 2 occurrences of dstu2 in web.xml to dstu1
 		 */
 		FhirVersionEnum fhirVersion = FhirVersionEnum.DSTU3;
 		setFhirContext(new FhirContext(fhirVersion));
@@ -59,7 +67,7 @@ public class JpaServerDemo extends RestfulServer {
 		// Get the spring context from the web container (it's declared in web.xml)
 		myAppCtx = ContextLoaderListener.getCurrentWebApplicationContext();
 
-		/*
+		/* 
 		 * The BaseJavaConfigDstu2.java class is a spring configuration
 		 * file which is automatically generated as a part of hapi-fhir-jpaserver-base and
 		 * contains bean definitions for a resource provider for each resource type
@@ -76,8 +84,8 @@ public class JpaServerDemo extends RestfulServer {
 		}
 		List<IResourceProvider> beans = myAppCtx.getBean(resourceProviderBeanName, List.class);
 		setResourceProviders(beans);
-
-		/*
+		
+		/* 
 		 * The system provider implements non-resource-type methods, such as
 		 * transaction, and global history.
 		 */
@@ -104,13 +112,13 @@ public class JpaServerDemo extends RestfulServer {
 			confProvider.setImplementationDescription("Example Server");
 			setServerConformanceProvider(confProvider);
 		} else if (fhirVersion == FhirVersionEnum.DSTU2) {
-			IFhirSystemDao<Bundle, MetaDt> systemDao = myAppCtx.getBean("mySystemDaoDstu2", IFhirSystemDao.class);
+			IFhirSystemDao<ca.uhn.fhir.model.dstu2.resource.Bundle, MetaDt> systemDao = myAppCtx.getBean("mySystemDaoDstu2", IFhirSystemDao.class);
 			JpaConformanceProviderDstu2 confProvider = new JpaConformanceProviderDstu2(this, systemDao,
 					myAppCtx.getBean(DaoConfig.class));
 			confProvider.setImplementationDescription("Example Server");
 			setServerConformanceProvider(confProvider);
 		} else if (fhirVersion == FhirVersionEnum.DSTU3) {
-			IFhirSystemDao<org.hl7.fhir.dstu3.model.Bundle, Meta> systemDao = myAppCtx.getBean("mySystemDaoDstu3", IFhirSystemDao.class);
+			IFhirSystemDao<Bundle, Meta> systemDao = myAppCtx.getBean("mySystemDaoDstu3", IFhirSystemDao.class);
 			JpaConformanceProviderDstu3 confProvider = new JpaConformanceProviderDstu3(this, systemDao,
 			myAppCtx.getBean(DaoConfig.class));
 			confProvider.setImplementationDescription("Example Server");
@@ -146,24 +154,6 @@ public class JpaServerDemo extends RestfulServer {
 		setPagingProvider(myAppCtx.getBean(DatabaseBackedPagingProvider.class));
 
 		/*
-		 * Enable CORS
-		 */
-		CorsConfiguration config = new CorsConfiguration();
-		CorsInterceptor corsInterceptor = new CorsInterceptor(config);
-		config.addAllowedHeader("Origin");
-		config.addAllowedHeader("Accept");
-		config.addAllowedHeader("Prefer");
-		config.addAllowedHeader("X-Requested-With");
-		config.addAllowedHeader("Content-Type");
-		config.addAllowedHeader("Access-Control-Request-Method");
-		config.addAllowedHeader("Access-Control-Request-Headers");
-		config.addAllowedOrigin("*");
-		config.addExposedHeader("Location");
-		config.addExposedHeader("Content-Location");
-		config.setAllowedMethods(Arrays.asList("GET","POST","PUT","DELETE","OPTIONS"));
-		registerInterceptor(corsInterceptor);
-
-		/*
 		 * Load interceptors for the server from Spring (these are defined in FhirServerConfig.java)
 		 */
 		Collection<IServerInterceptor> interceptorBeans = myAppCtx.getBeansOfType(IServerInterceptor.class).values();
@@ -172,15 +162,15 @@ public class JpaServerDemo extends RestfulServer {
 		}
 
 		/*
-		 * If you are hosting this server at a specific DNS name, the server will try to
+		 * If you are hosting this server at a specific DNS name, the server will try to 
 		 * figure out the FHIR base URL based on what the web container tells it, but
 		 * this doesn't always work. If you are setting links in your search bundles that
 		 * just refer to "localhost", you might want to use a server address strategy:
 		 */
 		//setServerAddressStrategy(new HardcodedServerAddressStrategy("http://mydomain.com/fhir/baseDstu2"));
-
+		
 		/*
-		 * If you are using DSTU3+, you may want to add a terminology uploader, which allows
+		 * If you are using DSTU3+, you may want to add a terminology uploader, which allows 
 		 * uploading of external terminologies such as Snomed CT. Note that this uploader
 		 * does not have any security attached (any anonymous user may use it by default)
 		 * so it is a potential security vulnerability. Consider using an AuthorizationInterceptor

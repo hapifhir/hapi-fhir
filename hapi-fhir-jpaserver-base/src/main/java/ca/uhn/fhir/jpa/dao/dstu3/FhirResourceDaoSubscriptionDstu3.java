@@ -10,7 +10,7 @@ package ca.uhn.fhir.jpa.dao.dstu3;
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  * 
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -57,7 +57,6 @@ import ca.uhn.fhir.jpa.dao.data.ISubscriptionTableDao;
 import ca.uhn.fhir.jpa.entity.ResourceTable;
 import ca.uhn.fhir.jpa.entity.SubscriptionFlaggedResource;
 import ca.uhn.fhir.jpa.entity.SubscriptionTable;
-import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
 import ca.uhn.fhir.model.dstu2.valueset.SubscriptionStatusEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
@@ -66,11 +65,12 @@ import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 
-public class FhirResourceDaoSubscriptionDstu3 extends FhirResourceDaoDstu3<Subscription>implements IFhirResourceDaoSubscription<Subscription> {
+public class FhirResourceDaoSubscriptionDstu3 extends FhirResourceDaoDstu3<Subscription> implements IFhirResourceDaoSubscription<Subscription> {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoSubscriptionDstu3.class);
 
@@ -102,7 +102,7 @@ public class FhirResourceDaoSubscriptionDstu3 extends FhirResourceDaoDstu3<Subsc
 		}
 		return table.getId();
 	}
-	
+
 	@Override
 	public synchronized List<IBaseResource> getUndeliveredResourcesAndPurge(Long theSubscriptionPid) {
 		List<IBaseResource> retVal = new ArrayList<IBaseResource>();
@@ -120,12 +120,12 @@ public class FhirResourceDaoSubscriptionDstu3 extends FhirResourceDaoDstu3<Subsc
 	}
 
 	public int pollForNewUndeliveredResources() {
-      return pollForNewUndeliveredResources((String) null);
-  }
+		return pollForNewUndeliveredResources((String) null);
+	}
 
 	@Override
 	@Transactional(propagation = Propagation.NOT_SUPPORTED)
-    public synchronized int pollForNewUndeliveredResources(final String resourceType) {
+	public synchronized int pollForNewUndeliveredResources(final String resourceType) {
 		if (getConfig().isSubscriptionEnabled() == false) {
 			return 0;
 		}
@@ -135,7 +135,7 @@ public class FhirResourceDaoSubscriptionDstu3 extends FhirResourceDaoDstu3<Subsc
 
 		TransactionTemplate txTemplate = new TransactionTemplate(myTxManager);
 		txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
-		
+
 		Collection<Long> subscriptions = txTemplate.execute(new TransactionCallback<Collection<Long>>() {
 			@Override
 			public Collection<Long> doInTransaction(TransactionStatus theStatus) {
@@ -149,31 +149,31 @@ public class FhirResourceDaoSubscriptionDstu3 extends FhirResourceDaoDstu3<Subsc
 				@Override
 				public Integer doInTransaction(TransactionStatus theStatus) {
 					SubscriptionTable nextSubscriptionTable = mySubscriptionTableDao.findOne(nextSubscriptionTablePid);
-                    return pollForNewUndeliveredResources(nextSubscriptionTable, resourceType);
+					return pollForNewUndeliveredResources(nextSubscriptionTable, resourceType);
 				}
 			});
 		}
-		
+
 		return retVal;
 	}
 
-    private int pollForNewUndeliveredResources(SubscriptionTable theSubscriptionTable, String resourceType) {
+	private int pollForNewUndeliveredResources(SubscriptionTable theSubscriptionTable, String resourceType) {
 		Subscription subscription = toResource(Subscription.class, theSubscriptionTable.getSubscriptionResource(), false);
-        if (subscription.getChannel().getType() != Subscription.SubscriptionChannelType.WEBSOCKET){
-            ourLog.info("Skipping non web socket subscription");
-            return 0;
-        }
+		if (subscription.getChannel().getType() != Subscription.SubscriptionChannelType.WEBSOCKET) {
+			ourLog.info("Skipping non web socket subscription");
+			return 0;
+		}
 
-        ourLog.info("subscription for " + resourceType + " with criteria " + subscription.getCriteria());
-        if (resourceType != null && subscription.getCriteria() != null && !subscription.getCriteria().startsWith(resourceType)) {
-            ourLog.info("Skipping subscription search for " + resourceType + " because it does not match the criteria " + subscription.getCriteria());
-            return 0;
-        }
+		ourLog.info("subscription for " + resourceType + " with criteria " + subscription.getCriteria());
+		if (resourceType != null && subscription.getCriteria() != null && !subscription.getCriteria().startsWith(resourceType)) {
+			ourLog.info("Skipping subscription search for " + resourceType + " because it does not match the criteria " + subscription.getCriteria());
+			return 0;
+		}
 
 		RuntimeResourceDefinition resourceDef = validateCriteriaAndReturnResourceDefinition(subscription);
 		SearchParameterMap criteriaUrl = translateMatchUrl(this, getContext(), subscription.getCriteria(), resourceDef);
+		criteriaUrl.setLoadSynchronousUpTo(1000);
 
-		criteriaUrl = new SearchParameterMap();
 		long start = theSubscriptionTable.getMostRecentMatch().getTime();
 		long end = System.currentTimeMillis() - getConfig().getSubscriptionPollDelay();
 		if (end <= start) {
@@ -181,11 +181,11 @@ public class FhirResourceDaoSubscriptionDstu3 extends FhirResourceDaoDstu3<Subsc
 			return 0;
 		}
 
-		ourLog.debug("Subscription {} search from {} to {}", new Object[] { subscription.getIdElement().getIdPart(), new InstantDt(new Date(start)), new InstantDt(new Date(end)) });
+		ourLog.info("Subscription {} search from {} to {}", new Object[] { subscription.getIdElement().getIdPart(), new InstantDt(new Date(start)), new InstantDt(new Date(end)) });
 
 		DateRangeParam range = new DateRangeParam();
-		range.setLowerBound(new DateParam(QuantityCompararatorEnum.GREATERTHAN, start));
-		range.setUpperBound(new DateParam(QuantityCompararatorEnum.LESSTHAN, end));
+		range.setLowerBound(new DateParam(ParamPrefixEnum.GREATERTHAN, start));
+		range.setUpperBound(new DateParam(ParamPrefixEnum.LESSTHAN, end));
 		criteriaUrl.setLastUpdated(range);
 		criteriaUrl.setSort(new SortSpec(Constants.PARAM_LASTUPDATED, SortOrderEnum.ASC));
 		IFhirResourceDao<? extends IBaseResource> dao = getDao(resourceDef.getImplementingClass());
@@ -199,7 +199,7 @@ public class FhirResourceDaoSubscriptionDstu3 extends FhirResourceDaoDstu3<Subsc
 		List<SubscriptionFlaggedResource> flags = new ArrayList<SubscriptionFlaggedResource>();
 		Date mostRecentMatch = null;
 		for (IBaseResource nextBase : results.getResources(0, results.size())) {
-			IAnyResource next = (IAnyResource)nextBase;
+			IAnyResource next = (IAnyResource) nextBase;
 
 			Date updated = next.getMeta().getLastUpdated();
 			if (mostRecentMatch == null) {
@@ -214,9 +214,9 @@ public class FhirResourceDaoSubscriptionDstu3 extends FhirResourceDaoDstu3<Subsc
 
 			SubscriptionFlaggedResource nextFlag = new SubscriptionFlaggedResource();
 			Long pid = IDao.RESOURCE_PID.get(next);
-			
+
 			ourLog.info("New resource for subscription: {}", pid);
-			
+
 			nextFlag.setResource(myEntityManager.find(ResourceTable.class, pid));
 			nextFlag.setSubscription(theSubscriptionTable);
 			nextFlag.setVersion(next.getIdElement().getVersionIdPartAsLong());
@@ -226,10 +226,10 @@ public class FhirResourceDaoSubscriptionDstu3 extends FhirResourceDaoDstu3<Subsc
 		mySubscriptionFlaggedResourceDataDao.save(flags);
 
 		ourLog.debug("Updating most recent match for subcription {} to {}", subscription.getIdElement().getIdPart(), new InstantDt(mostRecentMatch));
-		
+
 		theSubscriptionTable.setMostRecentMatch(mostRecentMatch);
 		mySubscriptionTableDao.save(theSubscriptionTable);
-		
+
 		return results.size();
 	}
 
@@ -266,7 +266,7 @@ public class FhirResourceDaoSubscriptionDstu3 extends FhirResourceDaoDstu3<Subsc
 		TransactionTemplate txTemplate = new TransactionTemplate(myTxManager);
 		txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
 		final Date cutoff = new Date(System.currentTimeMillis() - purgeInactiveAfterMillis);
-		
+
 		Collection<SubscriptionTable> toPurge = txTemplate.execute(new TransactionCallback<Collection<SubscriptionTable>>() {
 			@Override
 			public Collection<SubscriptionTable> doInTransaction(TransactionStatus theStatus) {
@@ -275,7 +275,7 @@ public class FhirResourceDaoSubscriptionDstu3 extends FhirResourceDaoDstu3<Subsc
 				return toPurge;
 			}
 		});
-		
+
 		for (SubscriptionTable subscriptionTable : toPurge) {
 
 			final IdDt subscriptionId = subscriptionTable.getSubscriptionResource().getIdDt();

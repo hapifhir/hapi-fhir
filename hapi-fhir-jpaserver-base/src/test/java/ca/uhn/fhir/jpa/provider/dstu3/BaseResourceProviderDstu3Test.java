@@ -31,6 +31,7 @@ import ca.uhn.fhir.jpa.config.dstu3.WebsocketDstu3Config;
 import ca.uhn.fhir.jpa.config.dstu3.WebsocketDstu3DispatcherConfig;
 import ca.uhn.fhir.jpa.dao.data.ISearchDao;
 import ca.uhn.fhir.jpa.dao.dstu3.BaseJpaDstu3Test;
+import ca.uhn.fhir.jpa.interceptor.RestHookSubscriptionDstu3Interceptor;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.testutil.RandomServerPortProvider;
@@ -55,6 +56,7 @@ public abstract class BaseResourceProviderDstu3Test extends BaseJpaDstu3Test {
 	protected static String ourServerBase;
 	private static GenericWebApplicationContext ourWebApplicationContext;
 	private TerminologyUploaderProviderDstu3 myTerminologyUploaderProvider;
+	protected static RestHookSubscriptionDstu3Interceptor ourRestHookSubscriptionInterceptor;
 	protected static ISearchDao mySearchEntityDao;
 	protected static ISearchCoordinatorSvc mySearchCoordinatorSvc;
 
@@ -117,7 +119,10 @@ public abstract class BaseResourceProviderDstu3Test extends BaseJpaDstu3Test {
 			dispatcherServlet.setContextClass(AnnotationConfigWebApplicationContext.class);
 			ServletHolder subsServletHolder = new ServletHolder();
 			subsServletHolder.setServlet(dispatcherServlet);
-			subsServletHolder.setInitParameter(ContextLoader.CONFIG_LOCATION_PARAM, WebsocketDstu3Config.class.getName() + "\n" + WebsocketDstu3DispatcherConfig.class.getName());
+			subsServletHolder.setInitParameter(
+					ContextLoader.CONFIG_LOCATION_PARAM, 
+					WebsocketDstu3Config.class.getName() + "\n" + 
+					WebsocketDstu3DispatcherConfig.class.getName());
 			proxyHandler.addServlet(subsServletHolder, "/*");
 
 			// Register a CORS filter
@@ -143,6 +148,7 @@ public abstract class BaseResourceProviderDstu3Test extends BaseJpaDstu3Test {
 			myValidationSupport = wac.getBean(JpaValidationSupportChainDstu3.class);
 			mySearchCoordinatorSvc = wac.getBean(ISearchCoordinatorSvc.class);
 			mySearchEntityDao = wac.getBean(ISearchDao.class);
+			ourRestHookSubscriptionInterceptor = wac.getBean(RestHookSubscriptionDstu3Interceptor.class);
 
 			ourClient = myFhirCtx.newRestfulGenericClient(ourServerBase);
 			ourClient.registerInterceptor(new LoggingInterceptor(true));

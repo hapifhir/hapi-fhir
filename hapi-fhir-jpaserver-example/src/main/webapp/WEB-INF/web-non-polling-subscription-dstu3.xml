@@ -28,14 +28,14 @@
 		</init-param>
 		<init-param>
 			<param-name>contextConfigLocation</param-name>
-			<param-value>ca.uhn.fhir.jpa.demo.FhirTesterConfigDstu3</param-value>
+			<param-value>ca.uhn.fhir.jpa.demo.FhirTesterConfig</param-value>
 		</init-param>
 		<load-on-startup>2</load-on-startup>
 	</servlet>
 
 	<servlet>
 		<servlet-name>fhirServlet</servlet-name>
-		<servlet-class>ca.uhn.fhir.jpa.demo.JpaServerDemoDstu3</servlet-class>
+		<servlet-class>ca.uhn.fhir.jpa.demo.JpaServerDemo</servlet-class>
 		<init-param>
 			<param-name>ImplementationDescription</param-name>
 			<param-value>FHIR JPA Server</param-value>

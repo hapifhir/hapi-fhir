@@ -145,11 +145,6 @@ public class FhirResourceDaoDstu2<T extends IResource> extends BaseHapiFhirResou
 
 	}
 
-	@Override
-	public RuntimeResourceDefinition validateCriteriaAndReturnResourceDefinition(String criteria) {
-		return null;
-	}
-
 	private class IdChecker implements IValidatorModule {
 
 		private ValidationModeEnum myMode;

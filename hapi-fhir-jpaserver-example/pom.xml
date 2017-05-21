@@ -206,6 +206,15 @@
 			</exclusions>
 		</dependency>
 
+		<!-- 
+		For some reason JavaDoc crashed during site generation unless we have this dependency
+		-->
+		<dependency>
+		    <groupId>javax.interceptor</groupId>
+		    <artifactId>javax.interceptor-api</artifactId>
+		    <scope>provided</scope>
+		</dependency>
+
 	</dependencies>
 
 	<build>

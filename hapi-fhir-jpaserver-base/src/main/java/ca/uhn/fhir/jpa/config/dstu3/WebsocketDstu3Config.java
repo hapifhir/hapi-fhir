@@ -23,6 +23,7 @@ package ca.uhn.fhir.jpa.config.dstu3;
 import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Controller;
@@ -32,7 +33,9 @@ import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
 import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry;
 import org.springframework.web.socket.handler.PerConnectionWebSocketHandler;
 
+import ca.uhn.fhir.jpa.interceptor.WebSocketSubscriptionDstu3Interceptor;
 import ca.uhn.fhir.jpa.subscription.SubscriptionWebsocketHandlerDstu3;
+import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 
 @Configuration
 @EnableWebSocket()
@@ -59,7 +62,6 @@ public class WebsocketDstu3Config implements WebSocketConfigurer {
 			public void afterPropertiesSet() {
 				super.afterPropertiesSet();
 				getScheduledThreadPoolExecutor().setExecuteExistingDelayedTasksAfterShutdownPolicy(false);
-//				getScheduledThreadPoolExecutor().setRemoveOnCancelPolicy(true);
 				getScheduledThreadPoolExecutor().setContinueExistingPeriodicTasksAfterShutdownPolicy(false);
 			}
 		};
@@ -69,4 +71,10 @@ public class WebsocketDstu3Config implements WebSocketConfigurer {
 		return retVal;
 	}
 
+	@Bean
+	public IServerInterceptor webSocketSubscriptionDstu3Interceptor(){
+		return new WebSocketSubscriptionDstu3Interceptor();
+	}
+
+	
 }

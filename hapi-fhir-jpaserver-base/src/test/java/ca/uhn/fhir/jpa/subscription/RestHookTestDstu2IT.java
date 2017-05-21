@@ -16,16 +16,19 @@
  *  @author Jeff Chung
  */
 
-package ca.uhn.fhir.jpa.demo.subscription;
+package ca.uhn.fhir.jpa.subscription;
 
-import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.model.dstu2.composite.CodeableConceptDt;
+import ca.uhn.fhir.model.dstu2.composite.CodingDt;
+import ca.uhn.fhir.model.dstu2.resource.Observation;
+import ca.uhn.fhir.model.dstu2.resource.Subscription;
+import ca.uhn.fhir.model.dstu2.valueset.ObservationStatusEnum;
+import ca.uhn.fhir.model.dstu2.valueset.SubscriptionChannelTypeEnum;
+import ca.uhn.fhir.model.dstu2.valueset.SubscriptionStatusEnum;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.IGenericClient;
-import org.hl7.fhir.dstu3.model.CodeableConcept;
-import org.hl7.fhir.dstu3.model.Coding;
-import org.hl7.fhir.dstu3.model.Observation;
-import org.hl7.fhir.dstu3.model.Subscription;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -34,26 +37,32 @@ import org.slf4j.Logger;
  * Test the rest-hook subscriptions
  */
 @Ignore
-public class RestHookTestDstu3WithSubscriptionResponseCriteriaIT {
+public class RestHookTestDstu2IT {
 
-    private static final Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirSubscriptionWithSubscriptionIdDstu3IT.class);
+    private static final Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirSubscriptionWithSubscriptionIdDstu3Test.class);
+    private static String code = "1000000012";
+    private IGenericClient client = FhirServiceUtil.getFhirDstu2Client();
+
+    @Before
+    public void clean() {
+        RemoveDstu2TestIT.deleteResources(Subscription.class, null, client);
+        RemoveDstu2TestIT.deleteResources(Observation.class, null, client);
+    }
 
     @Test
     public void testRestHookSubscription() {
-        IGenericClient client = FhirServiceUtil.getFhirDstu3Client();
-
         String payload = "application/json";
         String endpoint = "http://localhost:10080/rest-hook";
 
-        String code = "1000000050";
         String criteria1 = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
         String criteria2 = "Observation?code=SNOMED-CT|" + code + "111&_format=xml";
 
-        Subscription subscription1 = createSubscription(criteria1, "Observation?_format=xml", endpoint, client);
+        Subscription subscription1 = createSubscription(criteria1, payload, endpoint, client);
         Subscription subscription2 = createSubscription(criteria2, payload, endpoint, client);
 
-        Observation observation1 = sendObservation(code, "SNOMED-CT", client);
-        //Should see a bundle
+        Observation observationTemp1 = sendObservation(code, "SNOMED-CT", client);
+        Observation observation1 = client.read(Observation.class, observationTemp1.getId());
+        //Should see only one subscription notification
 
         Subscription subscriptionTemp = client.read(Subscription.class, subscription2.getId());
         Assert.assertNotNull(subscriptionTemp);
@@ -61,32 +70,39 @@ public class RestHookTestDstu3WithSubscriptionResponseCriteriaIT {
         subscriptionTemp.setCriteria(criteria1);
         client.update().resource(subscriptionTemp).withId(subscriptionTemp.getIdElement()).execute();
 
-        Observation observation2 = sendObservation(code, "SNOMED-CT", client);
+        Observation observationTemp2 = sendObservation(code, "SNOMED-CT", client);
+        Observation observation2 = client.read(Observation.class, observationTemp2.getId());
         //Should see two subscription notifications
 
-        client.delete().resourceById(new IdDt("Subscription", subscription2.getId())).execute();
+        client.delete().resourceById("Subscription", subscription2.getId().getIdPart()).execute();
 
         Observation observationTemp3 = sendObservation(code, "SNOMED-CT", client);
         //Should see only one subscription notification
 
-        Observation observation3 = client.read(Observation.class, observationTemp3.getId());
-        CodeableConcept codeableConcept = new CodeableConcept();
+        Observation observation3 = client.read(Observation.class, observationTemp1.getId());
+        CodeableConceptDt codeableConcept = new CodeableConceptDt();
         observation3.setCode(codeableConcept);
-        Coding coding = codeableConcept.addCoding();
+        CodingDt coding = codeableConcept.addCoding();
         coding.setCode(code + "111");
         coding.setSystem("SNOMED-CT");
         client.update().resource(observation3).withId(observation3.getIdElement()).execute();
         //Should see no subscription notification
 
-        Observation observation3a = client.read(Observation.class, observationTemp3.getId());
-
-        CodeableConcept codeableConcept1 = new CodeableConcept();
-        observation3a.setCode(codeableConcept1);
-        Coding coding1 = codeableConcept1.addCoding();
-        coding1.setCode(code);
-        coding1.setSystem("SNOMED-CT");
+        Observation observation3a = client.read(Observation.class, observationTemp1.getId());
+        CodeableConceptDt codeableConcept2 = new CodeableConceptDt();
+        observation3a.setCode(codeableConcept2);
+        CodingDt coding2 = codeableConcept2.addCoding();
+        coding2.setCode(code);
+        coding2.setSystem("SNOMED-CT");
         client.update().resource(observation3a).withId(observation3a.getIdElement()).execute();
         //Should see only one subscription notification
+
+        System.out.println("subscription id 1: " + subscription1.getId());
+        System.out.println("subscription id 2: " + subscription2.getId());
+        System.out.println("subscription temp id 2: " + subscriptionTemp.getId());
+        System.out.println("observation id 1: " + observation1.getId());
+        System.out.println("observation id 2: " + observation2.getId());
+        System.out.println("observation id 3: " + observation3.getId());
 
         Assert.assertFalse(subscription1.getId().equals(subscription2.getId()));
         Assert.assertFalse(observation1.getId().isEmpty());
@@ -96,10 +112,11 @@ public class RestHookTestDstu3WithSubscriptionResponseCriteriaIT {
     public Subscription createSubscription(String criteria, String payload, String endpoint, IGenericClient client) {
         Subscription subscription = new Subscription();
         subscription.setReason("Monitor new neonatal function (note, age will be determined by the monitor)");
-        subscription.setStatus(Subscription.SubscriptionStatus.REQUESTED);
+        subscription.setStatus(SubscriptionStatusEnum.REQUESTED);
         subscription.setCriteria(criteria);
-        Subscription.SubscriptionChannelComponent channel = new Subscription.SubscriptionChannelComponent();
-        channel.setType(Subscription.SubscriptionChannelType.RESTHOOK);
+
+        Subscription.Channel channel = new Subscription.Channel();
+        channel.setType(SubscriptionChannelTypeEnum.REST_HOOK);
         channel.setPayload(payload);
         channel.setEndpoint(endpoint);
         subscription.setChannel(channel);
@@ -112,13 +129,13 @@ public class RestHookTestDstu3WithSubscriptionResponseCriteriaIT {
 
     public Observation sendObservation(String code, String system, IGenericClient client) {
         Observation observation = new Observation();
-        CodeableConcept codeableConcept = new CodeableConcept();
+        CodeableConceptDt codeableConcept = new CodeableConceptDt();
         observation.setCode(codeableConcept);
-        Coding coding = codeableConcept.addCoding();
+        CodingDt coding = codeableConcept.addCoding();
         coding.setCode(code);
         coding.setSystem(system);
 
-        observation.setStatus(Observation.ObservationStatus.FINAL);
+        observation.setStatus(ObservationStatusEnum.FINAL);
 
         MethodOutcome methodOutcome = client.create().resource(observation).execute();
 

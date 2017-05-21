@@ -1,19 +1,19 @@
 /*
- *  Copyright 2017 Cognitive Medical Systems, Inc (http://www.cognitivemedicine.com).
+ * Copyright 2017 Cognitive Medical Systems, Inc (http://www.cognitivemedicine.com).
  *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  *
- *  @author Jeff Chung
+ * @author Jeff Chung
  */
 
 package ca.uhn.fhir.jpa.interceptor;
@@ -25,6 +25,7 @@ import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.method.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
+import ca.uhn.fhir.rest.server.interceptor.IServerOperationInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.InterceptorAdapter;
 import org.hl7.fhir.dstu3.model.Subscription;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -37,65 +38,70 @@ import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-public class WebSocketSubscriptionDstu3Interceptor extends InterceptorAdapter implements IJpaServerInterceptor {
+public class WebSocketSubscriptionDstu3Interceptor extends InterceptorAdapter implements IServerOperationInterceptor {
 
-    private static final Logger logger = LoggerFactory.getLogger(WebSocketSubscriptionDstu3Interceptor.class);
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(WebSocketSubscriptionDstu3Interceptor.class);
 
-    @Autowired
-    @Qualifier("mySubscriptionDaoDstu3")
-    private IFhirResourceDao<Subscription> reference;
+	private IFhirResourceDaoSubscription<Subscription> mySubscriptionDaoCasted;
 
-    private IFhirResourceDaoSubscription<Subscription> casted;
+	@Autowired
+	@Qualifier("mySubscriptionDaoDstu3")
+	private IFhirResourceDao<Subscription> mySubscriptionDao;
 
-    @PostConstruct
-    public void postConstruct(){
-        casted = (IFhirResourceDaoSubscription) reference;
-    }
+	@Override
+	public boolean incomingRequestPostProcessed(RequestDetails theRequestDetails, HttpServletRequest theRequest, HttpServletResponse theResponse) throws AuthenticationException {
+		if (theRequestDetails.getRestOperationType().equals(RestOperationTypeEnum.DELETE)) {
+			mySubscriptionDaoCasted.pollForNewUndeliveredResources(theRequestDetails.getResourceName());
+		}
 
-    @Override
-    public void resourceCreated(ActionRequestDetails theDetails, ResourceTable theResourceTable) {
-    }
+		return super.incomingRequestPostProcessed(theRequestDetails, theRequest, theResponse);
+	}
 
-    @Override
-    public void resourceUpdated(ActionRequestDetails theDetails, ResourceTable theResourceTable) {
-    }
+	/**
+	 * Checks for websocket subscriptions
+	 * 
+	 * @param theRequestDetails
+	 *           A bean containing details about the request that is about to be processed, including details such as the
+	 *           resource type and logical ID (if any) and other FHIR-specific aspects of the request which have been
+	 *           pulled out of the {@link HttpServletRequest servlet request}.
+	 * @param theResponseObject
+	 *           The actual object which is being streamed to the client as a response
+	 * @return
+	 */
+	@Override
+	public boolean outgoingResponse(RequestDetails theRequestDetails, IBaseResource theResponseObject) {
+		if (theRequestDetails.getResourceName() == null ||
+				theRequestDetails.getResourceName().isEmpty() ||
+				theRequestDetails.getResourceName().equals("Subscription")) {
+			return super.outgoingResponse(theRequestDetails, theResponseObject);
+		}
 
-    @Override
-    public void resourceDeleted(ActionRequestDetails theDetails, ResourceTable theResourceTable) {
-    }
+		if (theRequestDetails.getRequestType().equals(RequestTypeEnum.POST) || theRequestDetails.getRequestType().equals(RequestTypeEnum.PUT)) {
+			ourLog.info("Found POST or PUT for a non-subscription resource");
+			mySubscriptionDaoCasted.pollForNewUndeliveredResources(theRequestDetails.getResourceName());
+		}
 
-    /**
-     * Checks for websocket subscriptions
-     * @param theRequestDetails
-     *           A bean containing details about the request that is about to be processed, including details such as the
-     *           resource type and logical ID (if any) and other FHIR-specific aspects of the request which have been
-     *           pulled out of the {@link HttpServletRequest servlet request}.
-     * @param theResponseObject
-     *           The actual object which is being streamed to the client as a response
-     * @return
-     */
-    @Override
-    public boolean outgoingResponse(RequestDetails theRequestDetails, IBaseResource theResponseObject) {
-        if (theRequestDetails.getResourceName() == null ||
-                theRequestDetails.getResourceName().isEmpty() ||
-                theRequestDetails.getResourceName().equals("Subscription")) {
-            return super.outgoingResponse(theRequestDetails, theResponseObject);
-        }
+		return super.outgoingResponse(theRequestDetails, theResponseObject);
+	}
 
-        if (theRequestDetails.getRequestType().equals(RequestTypeEnum.POST) || theRequestDetails.getRequestType().equals(RequestTypeEnum.PUT)) {
-            logger.info("Found POST or PUT for a non-subscription resource");
-            casted.pollForNewUndeliveredResources(theRequestDetails.getResourceName());
-        }
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	@PostConstruct
+	public void postConstruct() {
+		mySubscriptionDaoCasted = (IFhirResourceDaoSubscription) mySubscriptionDao;
+	}
 
-        return super.outgoingResponse(theRequestDetails, theResponseObject);
-    }
+	@Override
+	public void resourceCreated(RequestDetails theRequest, IBaseResource theResource) {
+		// nothing
+	}
 
-    @Override
-    public boolean incomingRequestPostProcessed(RequestDetails theRequestDetails, HttpServletRequest theRequest, HttpServletResponse theResponse) throws AuthenticationException {
-        if (theRequestDetails.getRestOperationType().equals(RestOperationTypeEnum.DELETE)) {
-            casted.pollForNewUndeliveredResources(theRequestDetails.getResourceName());
-        }
+	@Override
+	public void resourceDeleted(RequestDetails theRequest, IBaseResource theResource) {
+		// nothing
+	}
 
-        return super.incomingRequestPostProcessed(theRequestDetails, theRequest, theResponse);
-    }
+	@Override
+	public void resourceUpdated(RequestDetails theRequest, IBaseResource theResource) {
+		// nothing
+	}
 }

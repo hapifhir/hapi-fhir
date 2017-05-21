@@ -1,51 +1,33 @@
 /*
- *  Copyright 2017 Cognitive Medical Systems, Inc (http://www.cognitivemedicine.com).
+ * Copyright 2017 Cognitive Medical Systems, Inc (http://www.cognitivemedicine.com).
  *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  *
- *  @author Jeff Chung
+ * @author Jeff Chung
  */
 
 package ca.uhn.fhir.jpa.interceptor;
 
-import ca.uhn.fhir.context.RuntimeResourceDefinition;
-import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
-import ca.uhn.fhir.jpa.dao.FhirResourceDaoSubscriptionDstu2;
-import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.dao.SearchParameterMap;
-import ca.uhn.fhir.jpa.entity.ResourceTable;
-import ca.uhn.fhir.jpa.provider.ServletSubRequestDetails;
-import ca.uhn.fhir.jpa.thread.HttpRequestDstu2Job;
-import ca.uhn.fhir.jpa.util.SpringObjectCaster;
-import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.model.dstu2.resource.Bundle;
-import ca.uhn.fhir.model.dstu2.resource.Observation;
-import ca.uhn.fhir.model.dstu2.resource.Subscription;
-import ca.uhn.fhir.model.dstu2.valueset.SubscriptionChannelTypeEnum;
-import ca.uhn.fhir.model.dstu2.valueset.SubscriptionStatusEnum;
-import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
-import ca.uhn.fhir.rest.method.RequestDetails;
-import ca.uhn.fhir.rest.param.TokenParam;
-import ca.uhn.fhir.rest.server.Constants;
-import ca.uhn.fhir.rest.server.EncodingEnum;
-import ca.uhn.fhir.rest.server.IBundleProvider;
-import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
-import ca.uhn.fhir.rest.server.interceptor.InterceptorAdapter;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpPut;
-import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.client.utils.URLEncodedUtils;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
+import javax.annotation.PostConstruct;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.http.client.methods.*;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -55,375 +37,335 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
-import javax.annotation.PostConstruct;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
+import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.dao.SearchParameterMap;
+import ca.uhn.fhir.jpa.provider.ServletSubRequestDetails;
+import ca.uhn.fhir.jpa.service.TMinusService;
+import ca.uhn.fhir.jpa.thread.HttpRequestDstu2Job;
+import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.dstu2.resource.Subscription;
+import ca.uhn.fhir.model.dstu2.valueset.SubscriptionChannelTypeEnum;
+import ca.uhn.fhir.model.dstu2.valueset.SubscriptionStatusEnum;
+import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
+import ca.uhn.fhir.rest.method.RequestDetails;
+import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.server.*;
+import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
+import ca.uhn.fhir.rest.server.interceptor.IServerOperationInterceptor;
+import ca.uhn.fhir.rest.server.interceptor.InterceptorAdapter;
 
-/**
- * Adds the capability for DSTU2 rest-hook subscriptions.  It is compatible with
- * DSTU2 websocket subscriptions, but not with DSTU3 subscriptions
- */
-public class RestHookSubscriptionDstu2Interceptor extends InterceptorAdapter implements IJpaServerInterceptor {
+public class RestHookSubscriptionDstu2Interceptor extends InterceptorAdapter implements IServerOperationInterceptor {
 
-    @Autowired
-    @Qualifier("mySubscriptionDaoDstu2")
-    private IFhirResourceDao<Subscription> mySubscriptionDao;
+	private static volatile ExecutorService executor;
+	private final static int MAX_THREADS = 1;
 
-    private static volatile ExecutorService executor;
-    private FhirResourceDaoSubscriptionDstu2 myResourceSubscriptionDao;
+	private static final Logger ourLog = LoggerFactory.getLogger(RestHookSubscriptionDstu2Interceptor.class);
 
-    private static final Logger logger = LoggerFactory.getLogger(RestHookSubscriptionDstu2Interceptor.class);
-    private final List<Subscription> restHookSubscriptions = new ArrayList<Subscription>();
-    private boolean notifyOnDelete = false;
+	@Autowired
+	private FhirContext myCtx;
+	private boolean myNotifyOnDelete = false;
 
-    private final static int MAX_THREADS = 1;
+	private final List<Subscription> myRestHookSubscriptions = new ArrayList<Subscription>();
+	@Autowired
+	@Qualifier("mySubscriptionDaoDstu2")
+	private IFhirResourceDao<Subscription> mySubscriptionDao;
 
-    @PostConstruct
-    public void postConstruct() {
-        try {
-            executor = Executors.newFixedThreadPool(MAX_THREADS);
-            myResourceSubscriptionDao = SpringObjectCaster.getTargetObject(mySubscriptionDao, FhirResourceDaoSubscriptionDstu2.class);
-        } catch (Exception e) {
-            throw new RuntimeException("Unable to get DAO from PROXY");
-        }
-    }
+	/**
+	 * Check subscriptions and send notifications or payload
+	 *
+	 * @param idType
+	 * @param resourceType
+	 * @param theOperation
+	 */
+	private void checkSubscriptions(IIdType idType, String resourceType, RestOperationTypeEnum theOperation) {
+		for (Subscription subscription : myRestHookSubscriptions) {
+			// see if the criteria matches the created object
+			ourLog.info("subscription for " + resourceType + " with criteria " + subscription.getCriteria());
+			if (resourceType != null && subscription.getCriteria() != null && !subscription.getCriteria().startsWith(resourceType)) {
+				ourLog.info("Skipping subscription search for " + resourceType + " because it does not match the criteria " + subscription.getCriteria());
+				continue;
+			}
+			// run the subscriptions query and look for matches, add the id as part of the criteria to avoid getting matches of previous resources rather than the recent resource
+			String criteria = subscription.getCriteria();
+			criteria += "&_id=" + idType.getResourceType() + "/" + idType.getIdPart();
+			criteria = TMinusService.parseCriteria(criteria);
 
-    /**
-     * Read the existing subscriptions from the database
-     */
-    public void initSubscriptions() {
-        SearchParameterMap map = new SearchParameterMap();
-        map.add(Subscription.SP_TYPE, new TokenParam(null, SubscriptionChannelTypeEnum.REST_HOOK.getCode()));
-        map.add(Subscription.SP_STATUS, new TokenParam(null, SubscriptionStatusEnum.ACTIVE.getCode()));
+			IBundleProvider results = getBundleProvider(criteria);
 
-		 RequestDetails req = new ServletSubRequestDetails();
-		 req.setSubRequest(true);
+			if (results.size() == 0) {
+				continue;
+			}
 
-        IBundleProvider subscriptionBundleList = mySubscriptionDao.search(map, req);
-        List<IBaseResource> resourceList = subscriptionBundleList.getResources(0, subscriptionBundleList.size());
+			// should just be one resource as it was filtered by the id
+			for (IBaseResource nextBase : results.getResources(0, results.size())) {
+				IResource next = (IResource) nextBase;
+				ourLog.info("Found match: queueing rest-hook notification for resource: {}", next.getIdElement());
+				HttpUriRequest request = createRequest(subscription, next, theOperation);
+				if (request != null) {
+					executor.submit(new HttpRequestDstu2Job(request, subscription));
+				}
+			}
+		}
+	}
 
-        for (IBaseResource resource : resourceList) {
-            restHookSubscriptions.add((Subscription) resource);
-        }
-    }
+	/**
+	 * Creates an HTTP Post for a subscription
+	 */
+	private HttpUriRequest createRequest(Subscription theSubscription, IResource theResource, RestOperationTypeEnum theOperation) {
+		String url = theSubscription.getChannel().getEndpoint();
+		while (url.endsWith("/")) {
+			url = url.substring(0, url.length() - 1);
+		}
 
-    /**
-     * Handles incoming resources.  If the resource is a rest-hook subscription, it adds
-     * it to the rest-hook subscription list.  Otherwise it checks to see if the resource
-     * matches any rest-hook subscriptions.
-     *
-     * @param theDetails       The request details
-     * @param theResourceTable The actual created entity
-     */
-    @Override
-    public void resourceCreated(ActionRequestDetails theDetails, ResourceTable theResourceTable) {
-        String resourceType = theDetails.getResourceType();
-        IIdType idType = theDetails.getId();
-        logger.info("resource created type: " + resourceType);
-        if (resourceType.equals(Subscription.class.getSimpleName())) {
-            Subscription subscription = (Subscription) theDetails.getResource();
-            if (subscription.getChannel() != null
-                    && subscription.getChannel().getType().equals(SubscriptionChannelTypeEnum.REST_HOOK.getCode())
-                    && subscription.getStatus().equals(SubscriptionStatusEnum.REQUESTED.getCode())) {
-                subscription.setStatus(SubscriptionStatusEnum.ACTIVE);
-                mySubscriptionDao.update(subscription);
-                restHookSubscriptions.add(subscription);
-                logger.info("Subscription was added. Id: " + subscription.getId());
-            }
-        } else {
-            checkSubscriptions(idType, resourceType);
-        }
-    }
+		HttpUriRequest request = null;
+		String resourceName = myCtx.getResourceDefinition(theResource).getName();
 
-    /**
-     * Checks for updates to subscriptions or if an update to a resource matches
-     * a rest-hook subscription
-     *
-     * @param theDetails       The request details
-     * @param theResourceTable The actual updated entity
-     */
-    @Override
-    public void resourceUpdated(ActionRequestDetails theDetails, ResourceTable theResourceTable) {
-        String resourceType = theDetails.getResourceType();
-        IIdType idType = theDetails.getId();
+		String payload = theSubscription.getChannel().getPayload();
+		String resourceId = theResource.getIdElement().getIdPart();
 
-        logger.info("resource updated type: " + resourceType);
+		// HTTP put
+		if (theOperation == RestOperationTypeEnum.UPDATE && EncodingEnum.XML.equals(EncodingEnum.forContentType(payload))) {
+			ourLog.info("XML payload found");
+			StringEntity entity = getStringEntity(EncodingEnum.XML, theResource);
+			HttpPut putRequest = new HttpPut(url + "/" + resourceName + "/" + resourceId);
+			putRequest.addHeader(Constants.HEADER_CONTENT_TYPE, Constants.CT_FHIR_XML);
+			putRequest.setEntity(entity);
 
-        if (resourceType.equals(Subscription.class.getSimpleName())) {
-            Subscription subscription = (Subscription) theDetails.getResource();
-            if (subscription.getChannel() != null && subscription.getChannel().getType().equals(SubscriptionChannelTypeEnum.REST_HOOK.getCode())) {
-                removeLocalSubscription(subscription.getId().getIdPart());
+			request = putRequest;
+		}
+		// HTTP put
+		else if (theOperation == RestOperationTypeEnum.UPDATE && EncodingEnum.JSON.equals(EncodingEnum.forContentType(payload))) {
+			ourLog.info("JSON payload found");
+			StringEntity entity = getStringEntity(EncodingEnum.JSON, theResource);
+			HttpPut putRequest = new HttpPut(url + "/" + resourceName + "/" + resourceId);
+			putRequest.addHeader(Constants.HEADER_CONTENT_TYPE, Constants.CT_FHIR_JSON);
+			putRequest.setEntity(entity);
 
-                if (subscription.getStatus().equals(SubscriptionStatusEnum.ACTIVE.getCode())) {
-                    restHookSubscriptions.add(subscription);
-                    logger.info("Subscription was updated. Id: " + subscription.getId());
-                }
-            }
-        } else {
-            checkSubscriptions(idType, resourceType);
-        }
-    }
+			request = putRequest;
+		}
+		// HTTP POST
+		else if (theOperation == RestOperationTypeEnum.CREATE && EncodingEnum.XML.equals(EncodingEnum.forContentType(payload))) {
+			ourLog.info("XML payload found");
 
-    /**
-     * Check subscriptions to see if there is a matching subscription when there is delete
-     *
-     * @param theRequestDetails A bean containing details about the request that is about to be processed, including details such as the
-     *                          resource type and logical ID (if any) and other FHIR-specific aspects of the request which have been
-     *                          pulled out of the {@link HttpServletRequest servlet request}.
-     * @param theRequest        The incoming request
-     * @param theResponse       The response. Note that interceptors may choose to provide a response (i.e. by calling
-     *                          {@link HttpServletResponse#getWriter()}) but in that case it is important to return <code>false</code>
-     *                          to indicate that the server itself should not also provide a response.
-     * @return
-     * @throws AuthenticationException
-     */
-    @Override
-    public boolean incomingRequestPostProcessed(RequestDetails theRequestDetails, HttpServletRequest theRequest, HttpServletResponse theResponse) throws AuthenticationException {
-        if (theRequestDetails.getRestOperationType().equals(RestOperationTypeEnum.DELETE)) {
-            String resourceType = theRequestDetails.getResourceName();
-            IIdType idType = theRequestDetails.getId();
+			IdDt id = theResource.getId();
+			theResource.setId(new IdDt());
+			StringEntity entity = getStringEntity(EncodingEnum.XML, theResource);
+			theResource.setId(id);
+			HttpPost putRequest = new HttpPost(url + "/" + resourceName);
+			putRequest.addHeader(Constants.HEADER_CONTENT_TYPE, Constants.CT_FHIR_XML);
+			putRequest.setEntity(entity);
 
-            if (resourceType.equals(Subscription.class.getSimpleName())) {
-                String id = idType.getIdPart();
-                removeLocalSubscription(id);
-            } else {
-                if (notifyOnDelete) {
-                    checkSubscriptions(idType, resourceType);
-                }
-            }
-        }
+			request = putRequest;
+		}
+		// HTTP POST
+		else if (theOperation == RestOperationTypeEnum.CREATE && EncodingEnum.JSON.equals(EncodingEnum.forContentType(payload))) {
+			ourLog.info("JSON payload found");
+			IdDt id = theResource.getId();
+			theResource.setId(new IdDt());
+			StringEntity entity = getStringEntity(EncodingEnum.JSON, theResource);
+			theResource.setId(id);
+			HttpPost putRequest = new HttpPost(url + "/" + resourceName);
+			putRequest.addHeader(Constants.HEADER_CONTENT_TYPE, Constants.CT_FHIR_JSON);
+			putRequest.setEntity(entity);
 
-        return super.incomingRequestPostProcessed(theRequestDetails, theRequest, theResponse);
-    }
+			request = putRequest;
+		}
 
-    /**
-     * Check subscriptions and send notifications or payload
-     *
-     * @param idType
-     * @param resourceType
-     */
-    private void checkSubscriptions(IIdType idType, String resourceType) {
-        for (Subscription subscription : restHookSubscriptions) {
-            //see if the criteria matches the created object
-            logger.info("subscription for " + resourceType + " with criteria " + subscription.getCriteria());
-            if (resourceType != null && subscription.getCriteria() != null && !subscription.getCriteria().startsWith(resourceType)) {
-                logger.info("Skipping subscription search for " + resourceType + " because it does not match the criteria " + subscription.getCriteria());
-                continue;
-            }
-            //run the subscriptions query and look for matches, add the id as part of the criteria to avoid getting matches of previous resources rather than the recent resource
-            String criteria = subscription.getCriteria();
-            criteria += "&_id=" + idType.getResourceType() + "/" + idType.getIdPart();
-            IBundleProvider results = getBundleProvider(criteria);
+		// request.addHeader("User-Agent", USER_AGENT);
+		return request;
+	}
 
-            if (results.size() == 0) {
-                continue;
-            }
-            Observation aa;
-            //should just be one resource as it was filtered by the id
-            for (IBaseResource nextBase : results.getResources(0, results.size())) {
-                IResource next = (IResource) nextBase;
-                logger.info("Found match: queueing rest-hook notification for resource: {}", next.getIdElement());
-                HttpUriRequest request = createRequest(subscription, next);
-                executor.submit(new HttpRequestDstu2Job(request, subscription));
-            }
-        }
-    }
+	/**
+	 * Search based on a query criteria
+	 *
+	 * @param criteria
+	 * @return
+	 */
+	private IBundleProvider getBundleProvider(String criteria) {
+		RuntimeResourceDefinition responseResourceDef = mySubscriptionDao.validateCriteriaAndReturnResourceDefinition(criteria);
+		SearchParameterMap responseCriteriaUrl = BaseHapiFhirDao.translateMatchUrl(mySubscriptionDao, mySubscriptionDao.getContext(), criteria, responseResourceDef);
 
-    /**
-     * Creates an HTTP Post for a subscription
-     *
-     * @param subscription
-     * @param resource
-     * @return
-     */
-    private HttpUriRequest createRequest(Subscription subscription, IResource resource) {
-        String url = subscription.getChannel().getEndpoint();
-        HttpUriRequest request = null;
-        String payload = subscription.getChannel().getPayload();
-        //HTTP post
-        if (payload == null || payload.trim().length() == 0) {
-            //return an empty response as there is no payload
-            logger.info("No payload found, returning an empty notification");
-            request = new HttpPost(url);
-        }
-        //HTTP put
-        else if (payload.equals("application/xml") || payload.equals("application/fhir+xml")) {
-            logger.info("XML payload found");
-            StringEntity entity = getStringEntity(EncodingEnum.XML, resource);
-            HttpPut putRequest = new HttpPut(url);
-            putRequest.setEntity(entity);
+		RequestDetails req = new ServletSubRequestDetails();
+		req.setSubRequest(true);
 
-            request = putRequest;
-        }
-        //HTTP put
-        else if (payload.equals("application/json") || payload.equals("application/fhir+json")) {
-            logger.info("JSON payload found");
-            StringEntity entity = getStringEntity(EncodingEnum.JSON, resource);
-            HttpPut putRequest = new HttpPut(url);
-            putRequest.setEntity(entity);
+		IFhirResourceDao<? extends IBaseResource> responseDao = mySubscriptionDao.getDao(responseResourceDef.getImplementingClass());
+		IBundleProvider responseResults = responseDao.search(responseCriteriaUrl, req);
+		return responseResults;
+	}
 
-            request = putRequest;
-        }
-        //HTTP post
-        else if (payload.startsWith("application/fhir+query/")) { //custom payload that is a FHIR query
-            logger.info("Custom query payload found");
-            String responseCriteria = subscription.getChannel().getPayload().substring(23);
-            //get the encoding type from payload which is a FHIR query with &_format=
-            EncodingEnum encoding = getEncoding(responseCriteria);
-            IBundleProvider responseResults = getBundleProvider(responseCriteria);
-            if (responseResults.size() != 0) {
-                List<IBaseResource> resourcelist = responseResults.getResources(0, responseResults.size());
-                Bundle bundle = createBundle(resourcelist);
-                StringEntity bundleEntity = getStringEntity(encoding, bundle);
-                HttpPost postRequest = new HttpPost(url);
-                postRequest.setEntity(bundleEntity);
+	/**
+	 * Get subscription from cache
+	 *
+	 * @param id
+	 * @return
+	 */
+	private Subscription getLocalSubscription(String id) {
+		if (id != null && !id.trim().isEmpty()) {
+			int size = myRestHookSubscriptions.size();
+			if (size > 0) {
+				for (Subscription restHookSubscription : myRestHookSubscriptions) {
+					if (id.equals(restHookSubscription.getIdElement().getIdPart())) {
+						return restHookSubscription;
+					}
+				}
+			}
+		}
 
-                request = postRequest;
-            } else {
-                Bundle bundle = new Bundle();
-                bundle.setTotal(0);
-                StringEntity bundleEntity = getStringEntity(encoding, bundle);
-                HttpPost postRequest = new HttpPost(url);
-                postRequest.setEntity(bundleEntity);
+		return null;
+	}
 
-                request = postRequest;
-            }
+	/**
+	 * Convert a resource into a string entity
+	 *
+	 * @param encoding
+	 * @param anyResource
+	 * @return
+	 */
+	private StringEntity getStringEntity(EncodingEnum encoding, IResource anyResource) {
+		String encoded = encoding.newParser(mySubscriptionDao.getContext()).encodeResourceToString(anyResource);
 
-        } else {
-            logger.warn("Unsupported payload " + payload + ". Returning an empty notification");
-            request = new HttpPost(url);
-        }
+		StringEntity entity;
+		if (encoded.equalsIgnoreCase(EncodingEnum.JSON.name())) {
+			entity = new StringEntity(encoded, ContentType.APPLICATION_JSON);
+		} else {
+			entity = new StringEntity(encoded, ContentType.APPLICATION_XML);
+		}
 
-        //request.addHeader("User-Agent", USER_AGENT);
-        return request;
-    }
+		return entity;
+	}
 
-    /**
-     * Get the encoding from the criteria or return JSON encoding if its not found
-     *
-     * @param criteria
-     * @return
-     */
-    private EncodingEnum getEncoding(String criteria) {
-        //check criteria
-        String params = criteria.substring(criteria.indexOf('?') + 1);
-        List<NameValuePair> paramValues = URLEncodedUtils.parse(params, Constants.CHARSET_UTF8, '&');
-        for (NameValuePair nameValuePair : paramValues) {
-            if (Constants.PARAM_FORMAT.equals(nameValuePair.getName())) {
-                return EncodingEnum.forContentType(nameValuePair.getValue());
-            }
-        }
-        return EncodingEnum.JSON;
-    }
+	/**
+	 * Read the existing subscriptions from the database
+	 */
+	public void initSubscriptions() {
+		SearchParameterMap map = new SearchParameterMap();
+		map.add(Subscription.SP_TYPE, new TokenParam(null, SubscriptionChannelTypeEnum.REST_HOOK.getCode()));
+		map.add(Subscription.SP_STATUS, new TokenParam(null, SubscriptionStatusEnum.ACTIVE.getCode()));
 
-    /**
-     * Search based on a query criteria
-     *
-     * @param criteria
-     * @return
-     */
-    private IBundleProvider getBundleProvider(String criteria) {
-        Subscription subscription = new Subscription();
-        subscription.setCriteria(criteria);
+		RequestDetails req = new ServletSubRequestDetails();
+		req.setSubRequest(true);
 
-        RuntimeResourceDefinition responseResourceDef = myResourceSubscriptionDao.validateCriteriaAndReturnResourceDefinition(subscription);
-        SearchParameterMap responseCriteriaUrl = BaseHapiFhirDao.translateMatchUrl(myResourceSubscriptionDao, myResourceSubscriptionDao.getContext(), criteria, responseResourceDef);
+		IBundleProvider subscriptionBundleList = mySubscriptionDao.search(map, req);
+		List<IBaseResource> resourceList = subscriptionBundleList.getResources(0, subscriptionBundleList.size());
 
-		 RequestDetails req = new ServletSubRequestDetails();
-		 req.setSubRequest(true);
+		for (IBaseResource resource : resourceList) {
+			myRestHookSubscriptions.add((Subscription) resource);
+		}
+	}
 
-        IFhirResourceDao<? extends IBaseResource> responseDao = myResourceSubscriptionDao.getDao(responseResourceDef.getImplementingClass());
-        IBundleProvider responseResults = responseDao.search(responseCriteriaUrl, req);
-        return responseResults;
-    }
+	public boolean isNotifyOnDelete() {
+		return myNotifyOnDelete;
+	}
 
-    /**
-     * Create a bundle to return to the client
-     *
-     * @param resourcelist
-     * @return
-     */
-    private Bundle createBundle(List<IBaseResource> resourcelist) {
-        Bundle bundle = new Bundle();
-        for (IBaseResource resource : resourcelist) {
-            Bundle.Entry entry = bundle.addEntry();
-            entry.setResource((IResource) resource);
-        }
-        bundle.setTotal(resourcelist.size());
+	@PostConstruct
+	public void postConstruct() {
+		try {
+			executor = Executors.newFixedThreadPool(MAX_THREADS);
+		} catch (Exception e) {
+			throw new RuntimeException("Unable to get DAO from PROXY");
+		}
+	}
 
-        return bundle;
-    }
+	/**
+	 * Remove subscription from cache
+	 *
+	 * @param subscriptionId
+	 */
+	private void removeLocalSubscription(String subscriptionId) {
+		Subscription localSubscription = getLocalSubscription(subscriptionId);
+		if (localSubscription != null) {
+			myRestHookSubscriptions.remove(localSubscription);
+			ourLog.info("Subscription removed: " + subscriptionId);
+		} else {
+			ourLog.info("Subscription not found in local list. Subscription id: " + subscriptionId);
+		}
+	}
 
-    /**
-     * Convert a resource into a string entity
-     *
-     * @param encoding
-     * @param anyResource
-     * @return
-     */
-    private StringEntity getStringEntity(EncodingEnum encoding, IResource anyResource) {
-        String encoded = encoding.newParser(mySubscriptionDao.getContext()).encodeResourceToString(anyResource);
+	/**
+	 * Handles incoming resources. If the resource is a rest-hook subscription, it adds
+	 * it to the rest-hook subscription list. Otherwise it checks to see if the resource
+	 * matches any rest-hook subscriptions.
+	 */
+	@Override
+	public void resourceCreated(RequestDetails theRequest, IBaseResource theResource) {
+		IIdType idType = theResource.getIdElement();
+		ourLog.info("resource created type: {}", theRequest.getResourceName());
 
-        StringEntity entity;
-        if (encoded.equalsIgnoreCase(EncodingEnum.JSON.name())) {
-            entity = new StringEntity(encoded, ContentType.APPLICATION_JSON);
-        } else {
-            entity = new StringEntity(encoded, ContentType.APPLICATION_XML);
-        }
+		if (theResource instanceof Subscription) {
+			Subscription subscription = (Subscription) theResource;
+			if (subscription.getChannel() != null
+					&& subscription.getChannel().getTypeElement().getValueAsEnum() == SubscriptionChannelTypeEnum.REST_HOOK
+					&& subscription.getStatusElement().getValueAsEnum() == SubscriptionStatusEnum.REQUESTED) {
+				subscription.setStatus(SubscriptionStatusEnum.ACTIVE);
+				mySubscriptionDao.update(subscription);
+				myRestHookSubscriptions.add(subscription);
+				ourLog.info("Subscription was added. Id: " + subscription.getId());
+			}
+		} else {
+			checkSubscriptions(idType, theRequest.getResourceName(), RestOperationTypeEnum.CREATE);
+		}
+	}
 
-        return entity;
-    }
+	/**
+	 * Check subscriptions to see if there is a matching subscription when there is delete
+	 *
+	 * @param theRequestDetails
+	 *           A bean containing details about the request that is about to be processed, including details such as the
+	 *           resource type and logical ID (if any) and other FHIR-specific aspects of the request which have been
+	 *           pulled out of the {@link HttpServletRequest servlet request}.
+	 * @param theRequest
+	 *           The incoming request
+	 * @param theResponse
+	 *           The response. Note that interceptors may choose to provide a response (i.e. by calling
+	 *           {@link HttpServletResponse#getWriter()}) but in that case it is important to return <code>false</code>
+	 *           to indicate that the server itself should not also provide a response.
+	 */
+	@Override
+	public void resourceDeleted(RequestDetails theRequest, IBaseResource theResource) {
+		String resourceType = theRequest.getResourceName();
+		IIdType idType = theResource.getIdElement();
 
-    @Override
-    public void resourceDeleted(ActionRequestDetails theDetails, ResourceTable theResourceTable) {
-    }
+		if (resourceType.equals(Subscription.class.getSimpleName())) {
+			String id = idType.getIdPart();
+			removeLocalSubscription(id);
+		} else {
+			if (myNotifyOnDelete) {
+				checkSubscriptions(idType, resourceType, RestOperationTypeEnum.DELETE);
+			}
+		}
+	}
 
-    /**
-     * Remove subscription from cache
-     *
-     * @param subscriptionId
-     */
-    private void removeLocalSubscription(String subscriptionId) {
-        Subscription localSubscription = getLocalSubscription(subscriptionId);
-        if (localSubscription != null) {
-            restHookSubscriptions.remove(localSubscription);
-            logger.info("Subscription removed: " + subscriptionId);
-        } else {
-            logger.info("Subscription not found in local list. Subscription id: " + subscriptionId);
-        }
-    }
+	/**
+	 * Checks for updates to subscriptions or if an update to a resource matches
+	 * a rest-hook subscription
+	 */
+	@Override
+	public void resourceUpdated(RequestDetails theRequest, IBaseResource theResource) {
+		String resourceType = theRequest.getResourceName();
+		IIdType idType = theResource.getIdElement();
 
-    /**
-     * Get subscription from cache
-     *
-     * @param id
-     * @return
-     */
-    private Subscription getLocalSubscription(String id) {
-        if (id != null && !id.trim().isEmpty()) {
-            int size = restHookSubscriptions.size();
-            if (size > 0) {
-                for (Subscription restHookSubscription : restHookSubscriptions) {
-                    if (id.equals(restHookSubscription.getId().getIdPart())) {
-                        return restHookSubscription;
-                    }
-                }
-            }
-        }
+		ourLog.info("resource updated type: " + resourceType);
 
-        return null;
-    }
+		if (theResource instanceof Subscription) {
+			Subscription subscription = (Subscription) theResource;
+			if (subscription.getChannel() != null && subscription.getChannel().getTypeElement().getValueAsEnum() == SubscriptionChannelTypeEnum.REST_HOOK) {
+				removeLocalSubscription(subscription.getIdElement().getIdPart());
 
-    public boolean isNotifyOnDelete() {
-        return notifyOnDelete;
-    }
+				if (subscription.getStatusElement().getValueAsEnum() == SubscriptionStatusEnum.ACTIVE) {
+					myRestHookSubscriptions.add(subscription);
+					ourLog.info("Subscription was updated. Id: " + subscription.getId());
+				}
+			}
+		} else {
+			checkSubscriptions(idType, resourceType, RestOperationTypeEnum.UPDATE);
+		}
+	}
 
-    public void setNotifyOnDelete(boolean notifyOnDelete) {
-        this.notifyOnDelete = notifyOnDelete;
-    }
+	public void setNotifyOnDelete(boolean notifyOnDelete) {
+		this.myNotifyOnDelete = notifyOnDelete;
+	}
 }
-

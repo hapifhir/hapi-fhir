@@ -24,6 +24,7 @@ import org.springframework.web.servlet.DispatcherServlet;
 import ca.uhn.fhir.jpa.config.WebsocketDstu2Config;
 import ca.uhn.fhir.jpa.config.WebsocketDstu2DispatcherConfig;
 import ca.uhn.fhir.jpa.dao.dstu2.BaseJpaDstu2Test;
+import ca.uhn.fhir.jpa.interceptor.RestHookSubscriptionDstu2Interceptor;
 import ca.uhn.fhir.jpa.testutil.RandomServerPortProvider;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.BundleEntry;
@@ -43,50 +44,16 @@ public abstract class BaseResourceProviderDstu2Test extends BaseJpaDstu2Test {
 	protected static IGenericClient ourClient;
 	protected static CloseableHttpClient ourHttpClient;
 	protected static int ourPort;
+	protected static RestfulServer ourRestServer;
 	private static Server ourServer;
 	protected static String ourServerBase;
 	private static GenericWebApplicationContext ourWebApplicationContext;
-	protected static RestfulServer ourRestServer;
-
-	@AfterClass
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
-
+	protected static RestHookSubscriptionDstu2Interceptor ourRestHookSubscriptionInterceptor;
 
 	public BaseResourceProviderDstu2Test() {
 		super();
 	}
 
-	protected List<IdDt> toIdListUnqualifiedVersionless(Bundle found) {
-		List<IdDt> list = new ArrayList<IdDt>();
-		for (BundleEntry next : found.getEntries()) {
-			list.add(next.getResource().getId().toUnqualifiedVersionless());
-		}
-		return list;
-	}
-
-	protected List<String> toNameList(Bundle resp) {
-		List<String> names = new ArrayList<String>();
-		for (BundleEntry next : resp.getEntries()) {
-			Patient nextPt = (Patient) next.getResource();
-			String nextStr = nextPt.getNameFirstRep().getGivenAsSingleString() + " " + nextPt.getNameFirstRep().getFamilyAsSingleString();
-			if (isNotBlank(nextStr)) {
-				names.add(nextStr);
-			}
-		}
-		return names;
-	}
-
-	@AfterClass
-	public static void afterClass() throws Exception {
-		ourServer.stop();
-		ourHttpClient.close();
-		ourServer = null;
-		ourHttpClient = null;
-		ourWebApplicationContext.close();
-		ourWebApplicationContext = null;
-	}
 
 	@After
 	public void after() throws Exception {
@@ -131,13 +98,18 @@ public abstract class BaseResourceProviderDstu2Test extends BaseJpaDstu2Test {
 			ourWebApplicationContext.setParent(myAppCtx);
 			ourWebApplicationContext.refresh();
 
+			ourRestHookSubscriptionInterceptor = ourWebApplicationContext.getBean(RestHookSubscriptionDstu2Interceptor.class);
+			
 			proxyHandler.getServletContext().setAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE, ourWebApplicationContext); 
 			
 			DispatcherServlet dispatcherServlet = new DispatcherServlet();
 			dispatcherServlet.setContextClass(AnnotationConfigWebApplicationContext.class);
 			ServletHolder subsServletHolder = new ServletHolder();
 			subsServletHolder.setServlet(dispatcherServlet);
-			subsServletHolder.setInitParameter(ContextLoader.CONFIG_LOCATION_PARAM, WebsocketDstu2Config.class.getName() + "\n" + WebsocketDstu2DispatcherConfig.class.getName());
+			subsServletHolder.setInitParameter(
+					ContextLoader.CONFIG_LOCATION_PARAM, 
+					WebsocketDstu2Config.class.getName() + "\n" + 
+					WebsocketDstu2DispatcherConfig.class.getName());
 			proxyHandler.addServlet(subsServletHolder, "/*");
 
 			
@@ -154,6 +126,37 @@ public abstract class BaseResourceProviderDstu2Test extends BaseJpaDstu2Test {
 	
 			ourServer = server;
 		}
+	}
+
+	protected List<IdDt> toIdListUnqualifiedVersionless(Bundle found) {
+		List<IdDt> list = new ArrayList<IdDt>();
+		for (BundleEntry next : found.getEntries()) {
+			list.add(next.getResource().getId().toUnqualifiedVersionless());
+		}
+		return list;
+	}
+
+	protected List<String> toNameList(Bundle resp) {
+		List<String> names = new ArrayList<String>();
+		for (BundleEntry next : resp.getEntries()) {
+			Patient nextPt = (Patient) next.getResource();
+			String nextStr = nextPt.getNameFirstRep().getGivenAsSingleString() + " " + nextPt.getNameFirstRep().getFamilyAsSingleString();
+			if (isNotBlank(nextStr)) {
+				names.add(nextStr);
+			}
+		}
+		return names;
+	}
+
+	@AfterClass
+	public static void afterClassClearContextBaseResourceProviderDstu3Test() throws Exception {
+		ourServer.stop();
+		ourHttpClient.close();
+		ourServer = null;
+		ourHttpClient = null;
+		ourWebApplicationContext.close();
+		ourWebApplicationContext = null;
+		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 }

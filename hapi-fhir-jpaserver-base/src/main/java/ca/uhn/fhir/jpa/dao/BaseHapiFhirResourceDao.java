@@ -117,12 +117,13 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		ourLog.info("Processed addTag {}/{} on {} in {}ms", new Object[] { theScheme, theTerm, theId, w.getMillisAndRestart() });
 	}
+
 	
 	@Override
 	public DaoMethodOutcome create(final T theResource) {
 		return create(theResource, null, true, null);
 	}
-
+	
 	@Override
 	public DaoMethodOutcome create(final T theResource, RequestDetails theRequestDetails) {
 		return create(theResource, null, true, theRequestDetails);
@@ -310,7 +311,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		retVal.setOperationOutcome(oo);
 		return retVal;
 	}
-	
+
 	@Override
 	public DeleteMethodOutcome deleteByUrl(String theUrl, RequestDetails theRequestDetails) {
 		List<DeleteConflict> deleteConflicts = new ArrayList<DeleteConflict>();
@@ -321,7 +322,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		
 		return outcome;
 	}
-
+	
 	@PostConstruct
 	public void detectSearchDaoDisabled() {
 		if (mySearchDao != null && mySearchDao.isDisabled()) {
@@ -413,23 +414,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		ourLog.info(msg);
 		return outcome;
-	}
-
-	private void incrementId(T theResource, ResourceTable theSavedEntity, IIdType theResourceId) {
-		IIdType idType = theResourceId;
-		String newVersion;
-		long newVersionLong;
-		if (idType == null || idType.getVersionIdPart() == null) {
-			newVersion = "1";
-			newVersionLong = 1;
-		} else {
-			newVersionLong = idType.getVersionIdPartAsLong() + 1;
-			newVersion = Long.toString(newVersionLong);
-		}
-		
-		IIdType newId = theResourceId.withVersion(newVersion);
-		theResource.getIdElement().setValue(newId.getValue());
-		theSavedEntity.setVersion(newVersionLong);
 	}
 
 	private <MT extends IBaseMetaType> void doMetaAdd(MT theMetaAdd, BaseHasResource entity) {
@@ -548,6 +532,23 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		return retVal;
 	}
 
+	private void incrementId(T theResource, ResourceTable theSavedEntity, IIdType theResourceId) {
+		IIdType idType = theResourceId;
+		String newVersion;
+		long newVersionLong;
+		if (idType == null || idType.getVersionIdPart() == null) {
+			newVersion = "1";
+			newVersionLong = 1;
+		} else {
+			newVersionLong = idType.getVersionIdPartAsLong() + 1;
+			newVersion = Long.toString(newVersionLong);
+		}
+		
+		IIdType newId = theResourceId.withVersion(newVersion);
+		theResource.getIdElement().setValue(newId.getValue());
+		theSavedEntity.setVersion(newVersionLong);
+	}
+
 	@Override
 	public <MT extends IBaseMetaType> MT metaAddOperation(IIdType theResourceId, MT theMetaAdd, RequestDetails theRequestDetails) {
 		// Notify interceptors
@@ -614,7 +615,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		return retVal;
 	}
 
-
 	@Override
 	public <MT extends IBaseMetaType> MT metaGetOperation(Class<MT> theType, IIdType theId, RequestDetails theRequestDetails) {
 		// Notify interceptors
@@ -635,6 +635,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		return retVal;
 	}
+
 
 	@Override
 	public <MT extends IBaseMetaType> MT metaGetOperation(Class<MT> theType, RequestDetails theRequestDetails) {
@@ -850,7 +851,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	public void removeTag(IIdType theId, TagTypeEnum theTagType, String theScheme, String theTerm) {
 		removeTag(theId, theTagType, theScheme, theTerm, null);
 	}
-	
+
 	@Override
 	public void removeTag(IIdType theId, TagTypeEnum theTagType, String theScheme, String theTerm, RequestDetails theRequestDetails) {
 		// Notify interceptors
@@ -884,7 +885,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		ourLog.info("Processed remove tag {}/{} on {} in {}ms", new Object[] { theScheme, theTerm, theId.getValue(), w.getMillisAndRestart() });
 	}
-
+	
 	@Transactional(propagation=Propagation.SUPPORTS)
 	@Override
 	public IBundleProvider search(final SearchParameterMap theParams) {
@@ -910,9 +911,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		return mySearchCoordinatorSvc.registerSearch(this, theParams, getResourceName());
 	}
 
-
-
-
 	@Override
 	public Set<Long> searchForIds(SearchParameterMap theParams) {
 
@@ -930,6 +928,9 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		
 		return retVal;
 	}
+
+
+
 
 	@SuppressWarnings("unchecked")
 	@Required
@@ -1061,12 +1062,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	}
 
 	@Override
-	public DaoMethodOutcome update(T theResource, String theMatchUrl, boolean thePerformIndexing, RequestDetails theRequestDetails) {
-		return update(theResource, theMatchUrl, thePerformIndexing, false, theRequestDetails);
-	}
-	
-	
-	@Override
 	public DaoMethodOutcome update(T theResource, String theMatchUrl, boolean thePerformIndexing, boolean theForceUpdateVersion, RequestDetails theRequestDetails) {
 		StopWatch w = new StopWatch();
 
@@ -1164,8 +1159,34 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	}
 
 	@Override
+	public DaoMethodOutcome update(T theResource, String theMatchUrl, boolean thePerformIndexing, RequestDetails theRequestDetails) {
+		return update(theResource, theMatchUrl, thePerformIndexing, false, theRequestDetails);
+	}
+	
+	
+	@Override
 	public DaoMethodOutcome update(T theResource, String theMatchUrl, RequestDetails theRequestDetails) {
 		return update(theResource, theMatchUrl, true, theRequestDetails);
+	}
+
+	/**
+	 * Get the resource definition from the criteria which specifies the resource type
+	 * @param criteria
+	 * @return
+	 */
+	@Override
+	public RuntimeResourceDefinition validateCriteriaAndReturnResourceDefinition(String criteria) {
+		String resourceName;
+		if(criteria == null || criteria.trim().isEmpty()){
+			throw new IllegalArgumentException("Criteria cannot be empty");
+		}
+		if(criteria.contains("?")){
+			resourceName = criteria.substring(0, criteria.indexOf("?"));
+		}else{
+			resourceName = criteria;
+		}
+
+		return getContext().getResourceDefinition(resourceName);
 	}
 
 	private void validateGivenIdIsAppropriateToRetrieveResource(IIdType theId, BaseHasResource entity) {

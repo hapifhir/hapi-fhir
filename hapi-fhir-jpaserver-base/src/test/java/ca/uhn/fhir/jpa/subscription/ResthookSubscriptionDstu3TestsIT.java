@@ -15,7 +15,7 @@
  *
  *  @author Jeff Chung
  */
-package ca.uhn.fhir.jpa.demo.subscription;
+package ca.uhn.fhir.jpa.subscription;
 
 import ca.uhn.fhir.rest.client.IGenericClient;
 import org.hl7.fhir.dstu3.model.DateTimeType;

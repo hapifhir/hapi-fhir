@@ -167,26 +167,6 @@ public class FhirResourceDaoDstu3<T extends IAnyResource> extends BaseHapiFhirRe
 
 	}
 
-	/**
-	 * Get the resource definition from the criteria which specifies the resource type
-	 * @param criteria
-	 * @return
-	 */
-	@Override
-	public RuntimeResourceDefinition validateCriteriaAndReturnResourceDefinition(String criteria) {
-		String resourceName;
-		if(criteria == null || criteria.trim().isEmpty()){
-			throw new IllegalArgumentException("Criteria cannot be empty");
-		}
-		if(criteria.contains("?")){
-			resourceName = criteria.substring(0, criteria.indexOf("?"));
-		}else{
-			resourceName = criteria;
-		}
-
-		return fhirContext.getResourceDefinition(resourceName);
-	}
-
 	private class IdChecker implements IValidatorModule {
 
 		private ValidationModeEnum myMode;
