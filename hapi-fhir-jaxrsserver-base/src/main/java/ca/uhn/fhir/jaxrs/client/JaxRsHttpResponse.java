@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
 import java.io.StringReader;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -32,6 +33,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+
+import org.apache.commons.lang3.ObjectUtils;
 
 import ca.uhn.fhir.rest.client.api.IHttpResponse;
 
@@ -115,6 +118,12 @@ public class JaxRsHttpResponse implements IHttpResponse {
 	@Override
 	public InputStream readEntity() {
 		return myResponse.readEntity(java.io.InputStream.class);
+	}
+
+	@Override
+	public List<String> getHeaders(String theName) {
+		List<String> retVal = myResponse.getStringHeaders().get(theName);
+		return retVal;
 	}	
 	
 

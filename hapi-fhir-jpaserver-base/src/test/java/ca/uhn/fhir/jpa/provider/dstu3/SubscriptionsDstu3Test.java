@@ -125,6 +125,8 @@ public class SubscriptionsDstu3Test extends BaseResourceProviderDstu3Test {
 	public void testCreateInvalidNoStatus() {
 		Subscription subs = new Subscription();
 		subs.getChannel().setType(SubscriptionChannelType.RESTHOOK);
+		subs.getChannel().setPayload("application/fhir+json");
+		subs.getChannel().setEndpoint("http://localhost:8888");
 		subs.setCriteria("Observation?identifier=123");
 		try {
 			ourClient.create().resource(subs).execute();
@@ -362,6 +364,8 @@ public class SubscriptionsDstu3Test extends BaseResourceProviderDstu3Test {
 	public void testUpdateFails() {
 		Subscription subs = new Subscription();
 		subs.getChannel().setType(SubscriptionChannelType.RESTHOOK);
+		subs.getChannel().setPayload("application/fhir+json");
+		subs.getChannel().setEndpoint("http://localhost:8888");
 		subs.setStatus(SubscriptionStatus.REQUESTED);
 		subs.setCriteria("Observation?identifier=123");
 		IIdType id = ourClient.create().resource(subs).execute().getId().toUnqualifiedVersionless();
@@ -392,6 +396,8 @@ public class SubscriptionsDstu3Test extends BaseResourceProviderDstu3Test {
 	public void testUpdateToInvalidStatus() {
 		Subscription subs = new Subscription();
 		subs.getChannel().setType(SubscriptionChannelType.RESTHOOK);
+		subs.getChannel().setPayload("application/fhir+json");
+		subs.getChannel().setEndpoint("http://localhost:8888");
 		subs.setCriteria("Observation?identifier=123");
 		subs.setStatus(SubscriptionStatus.REQUESTED);
 		IIdType id = ourClient.create().resource(subs).execute().getId();
