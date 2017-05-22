@@ -29,7 +29,9 @@ import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.http.client.methods.*;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
+import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -45,7 +47,6 @@ import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.SearchParameterMap;
 import ca.uhn.fhir.jpa.provider.ServletSubRequestDetails;
-import ca.uhn.fhir.jpa.service.TMinusService;
 import ca.uhn.fhir.jpa.thread.HttpRequestDstu2Job;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu2.resource.Subscription;
@@ -55,8 +56,9 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.method.RequestDetails;
 import ca.uhn.fhir.rest.param.TokenParam;
-import ca.uhn.fhir.rest.server.*;
-import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
+import ca.uhn.fhir.rest.server.Constants;
+import ca.uhn.fhir.rest.server.EncodingEnum;
+import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.interceptor.IServerOperationInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.InterceptorAdapter;
 
@@ -94,7 +96,7 @@ public class RestHookSubscriptionDstu2Interceptor extends InterceptorAdapter imp
 			// run the subscriptions query and look for matches, add the id as part of the criteria to avoid getting matches of previous resources rather than the recent resource
 			String criteria = subscription.getCriteria();
 			criteria += "&_id=" + idType.getResourceType() + "/" + idType.getIdPart();
-			criteria = TMinusService.parseCriteria(criteria);
+			criteria = massageCriteria(criteria);
 
 			IBundleProvider results = getBundleProvider(criteria);
 
@@ -220,6 +222,10 @@ public class RestHookSubscriptionDstu2Interceptor extends InterceptorAdapter imp
 		return null;
 	}
 
+	private String getResourceName(IBaseResource theResource) {
+		return myCtx.getResourceDefinition(theResource).getName();
+	}
+
 	/**
 	 * Convert a resource into a string entity
 	 *
@@ -263,6 +269,13 @@ public class RestHookSubscriptionDstu2Interceptor extends InterceptorAdapter imp
 		return myNotifyOnDelete;
 	}
 
+	/**
+	 * Subclasses may override
+	 */
+	protected String massageCriteria(String theCriteria) {
+		return theCriteria;
+	}
+
 	@PostConstruct
 	public void postConstruct() {
 		try {
@@ -301,9 +314,8 @@ public class RestHookSubscriptionDstu2Interceptor extends InterceptorAdapter imp
 			Subscription subscription = (Subscription) theResource;
 			if (subscription.getChannel() != null
 					&& subscription.getChannel().getTypeElement().getValueAsEnum() == SubscriptionChannelTypeEnum.REST_HOOK
-					&& subscription.getStatusElement().getValueAsEnum() == SubscriptionStatusEnum.REQUESTED) {
-				subscription.setStatus(SubscriptionStatusEnum.ACTIVE);
-				mySubscriptionDao.update(subscription);
+					&& subscription.getStatusElement().getValueAsEnum() == SubscriptionStatusEnum.ACTIVE) {
+				removeLocalSubscription(subscription.getIdElement().getIdPart());
 				myRestHookSubscriptions.add(subscription);
 				ourLog.info("Subscription was added. Id: " + subscription.getId());
 			}
@@ -328,7 +340,7 @@ public class RestHookSubscriptionDstu2Interceptor extends InterceptorAdapter imp
 	 */
 	@Override
 	public void resourceDeleted(RequestDetails theRequest, IBaseResource theResource) {
-		String resourceType = theRequest.getResourceName();
+		String resourceType = getResourceName(theResource);
 		IIdType idType = theResource.getIdElement();
 
 		if (resourceType.equals(Subscription.class.getSimpleName())) {
@@ -347,7 +359,7 @@ public class RestHookSubscriptionDstu2Interceptor extends InterceptorAdapter imp
 	 */
 	@Override
 	public void resourceUpdated(RequestDetails theRequest, IBaseResource theResource) {
-		String resourceType = theRequest.getResourceName();
+		String resourceType = getResourceName(theResource);
 		IIdType idType = theResource.getIdElement();
 
 		ourLog.info("resource updated type: " + resourceType);

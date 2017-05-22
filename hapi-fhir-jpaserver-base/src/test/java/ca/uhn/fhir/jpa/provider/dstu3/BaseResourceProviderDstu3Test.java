@@ -151,8 +151,10 @@ public abstract class BaseResourceProviderDstu3Test extends BaseJpaDstu3Test {
 			ourRestHookSubscriptionInterceptor = wac.getBean(RestHookSubscriptionDstu3Interceptor.class);
 
 			ourClient = myFhirCtx.newRestfulGenericClient(ourServerBase);
-			ourClient.registerInterceptor(new LoggingInterceptor(true));
-
+			if (shouldLogClient()) {
+				ourClient.registerInterceptor(new LoggingInterceptor(true));
+			}
+			
 			PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 			HttpClientBuilder builder = HttpClientBuilder.create();
 			builder.setConnectionManager(connectionManager);
@@ -160,6 +162,10 @@ public abstract class BaseResourceProviderDstu3Test extends BaseJpaDstu3Test {
 
 			ourServer = server;
 		}
+	}
+
+	protected boolean shouldLogClient() {
+		return true;
 	}
 
 	protected List<String> toNameList(Bundle resp) {

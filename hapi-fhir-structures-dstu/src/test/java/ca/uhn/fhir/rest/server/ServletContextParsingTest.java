@@ -26,7 +26,7 @@ import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Read;
-import ca.uhn.fhir.util.RandomServerPortProvider;
+import ca.uhn.fhir.util.PortUtil;
 import ca.uhn.fhir.util.TestUtil;
 
 public class ServletContextParsingTest {
@@ -53,7 +53,7 @@ public class ServletContextParsingTest {
 
 		HttpGet httpget = new HttpGet(url);
 		HttpResponse status = ourClient.execute(httpget);
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		String responseContent = IOUtils.toString(status.getEntity().getContent(), Constants.CHARSET_UTF8);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		ourLog.info(responseContent);
 	}
@@ -75,7 +75,7 @@ public class ServletContextParsingTest {
 
 	@Test
 	public void testUnderJettyWithContextPathServletRoot() throws Exception {
-		int port = RandomServerPortProvider.findFreePort();
+		int port = PortUtil.findFreePort();
 
 		String contextPath = "/ctx";
 		String servletPath = "/*";
@@ -90,7 +90,7 @@ public class ServletContextParsingTest {
 
 	@Test
 	public void testUnderJettyWithContextPathServletRoot2() throws Exception {
-		int port = RandomServerPortProvider.findFreePort();
+		int port = PortUtil.findFreePort();
 
 		String contextPath = "/ctx";
 		String servletPath = "/foo/bar/*"; // not /* but still this should work
@@ -104,7 +104,7 @@ public class ServletContextParsingTest {
 
 	@Test
 	public void testUnderJettyWithContextPathServletPath() throws Exception {
-		int port = RandomServerPortProvider.findFreePort();
+		int port = PortUtil.findFreePort();
 
 		String contextPath = "/ctx";
 		String servletPath = "/servlet/*";
@@ -117,7 +117,7 @@ public class ServletContextParsingTest {
 
 	@Test
 	public void testUnderJettyWithMultiplePaths() throws Exception {
-		int port = RandomServerPortProvider.findFreePort();
+		int port = PortUtil.findFreePort();
 
 		myServer = new Server(port);
 		
@@ -139,7 +139,7 @@ public class ServletContextParsingTest {
 
 	@Test
 	public void testUnderJettyWithContextRootServletRoot() throws Exception {
-		int port = RandomServerPortProvider.findFreePort();
+		int port = PortUtil.findFreePort();
 
 		String contextPath = "/";
 		String servletPath = "/*";

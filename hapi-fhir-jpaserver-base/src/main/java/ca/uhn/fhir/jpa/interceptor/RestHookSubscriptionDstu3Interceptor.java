@@ -30,14 +30,11 @@ import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.http.NameValuePair;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
-import org.hl7.fhir.dstu3.model.Observation;
 import org.hl7.fhir.dstu3.model.Subscription;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -53,7 +50,6 @@ import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.SearchParameterMap;
 import ca.uhn.fhir.jpa.provider.ServletSubRequestDetails;
-import ca.uhn.fhir.jpa.service.TMinusService;
 import ca.uhn.fhir.jpa.thread.HttpRequestDstu3Job;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.method.RequestDetails;
@@ -67,22 +63,19 @@ import ca.uhn.fhir.rest.server.interceptor.InterceptorAdapter;
 public class RestHookSubscriptionDstu3Interceptor extends InterceptorAdapter implements IServerOperationInterceptor {
 
 	private static volatile ExecutorService executor;
-	private static final Logger ourLog = LoggerFactory.getLogger(RestHookSubscriptionDstu3Interceptor.class);
-
 	private final static int MAX_THREADS = 1;
 
+	private static final Logger ourLog = LoggerFactory.getLogger(RestHookSubscriptionDstu3Interceptor.class);
+
 	@Autowired
-	@Qualifier("myObservationDaoDstu3")
-	private IFhirResourceDao<Observation> myObservationDao;
+	private FhirContext myCtx;
 	@Autowired
 	@Qualifier("mySubscriptionDaoDstu3")
 	private IFhirResourceDao<Subscription> mySubscriptionDao;
-	@Autowired
-	private FhirContext myCtx;
 	
 	private boolean notifyOnDelete = false;
 
-	private final List<Subscription> restHookSubscriptions = new ArrayList<Subscription>();
+	private final List<Subscription> myRestHookSubscriptions = new ArrayList<Subscription>();
 
 	/**
 	 * Check subscriptions and send notifications or payload
@@ -92,34 +85,17 @@ public class RestHookSubscriptionDstu3Interceptor extends InterceptorAdapter imp
 	 * @param theOperation 
 	 */
 	private void checkSubscriptions(IIdType idType, String resourceType, RestOperationTypeEnum theOperation) {
-		/*
-		 * SearchParameterMap map = new SearchParameterMap();
-		 * // map.add("_id", new StringParam("Observation/" + idType.getIdPart()));
-		 * map.add("code", new TokenParam("SNOMED-CT", "1000000050"));
-		 * //map.setLoadSynchronous(true);
-		 * // Include include = new Include("nothing");
-		 * // map.addInclude(include);
-		 * 
-		 * RequestDetails req = new ServletSubRequestDetails();
-		 * req.setSubRequest(true);
-		 * 
-		 * IBundleProvider myBundle = myObservationDao.search(map, req);
-		 * Observation myObservation = myObservationDao.read(idType);
-		 * 
-		 * int mysize = myBundle.size();
-		 * List result = myBundle.getResources(0, myBundle.size());
-		 */
-		for (Subscription subscription : restHookSubscriptions) {
+		for (Subscription subscription : myRestHookSubscriptions) {
 			// see if the criteria matches the created object
-			ourLog.info("subscription for " + resourceType + " with criteria " + subscription.getCriteria());
+			ourLog.info("Checking subscription {} for {} with criteria {}", subscription.getIdElement().getIdPart(), resourceType, subscription.getCriteria());
 			if (resourceType != null && subscription.getCriteria() != null && !subscription.getCriteria().startsWith(resourceType)) {
-				ourLog.info("Skipping subscription search for " + resourceType + " because it does not match the criteria " + subscription.getCriteria());
+				ourLog.info("Skipping subscription search for {} because it does not match the criteria {}", resourceType , subscription.getCriteria());
 				continue;
 			}
 			// run the subscriptions query and look for matches, add the id as part of the criteria to avoid getting matches of previous resources rather than the recent resource
 			String criteria = subscription.getCriteria();
 			criteria += "&_id=" + idType.getResourceType() + "/" + idType.getIdPart();
-			criteria = TMinusService.parseCriteria(criteria);
+			criteria = massageCriteria(criteria);
 
 			IBundleProvider results = getBundleProvider(criteria);
 
@@ -218,24 +194,6 @@ public class RestHookSubscriptionDstu3Interceptor extends InterceptorAdapter imp
 	}
 
 	/**
-	 * Get the encoding from the criteria or return JSON encoding if its not found
-	 *
-	 * @param criteria
-	 * @return
-	 */
-	private EncodingEnum getEncoding(String criteria) {
-		// check criteria
-		String params = criteria.substring(criteria.indexOf('?') + 1);
-		List<NameValuePair> paramValues = URLEncodedUtils.parse(params, Constants.CHARSET_UTF8, '&');
-		for (NameValuePair nameValuePair : paramValues) {
-			if (Constants.PARAM_FORMAT.equals(nameValuePair.getName())) {
-				return EncodingEnum.forContentType(nameValuePair.getValue());
-			}
-		}
-		return EncodingEnum.JSON;
-	}
-
-	/**
 	 * Get subscription from cache
 	 *
 	 * @param id
@@ -243,9 +201,9 @@ public class RestHookSubscriptionDstu3Interceptor extends InterceptorAdapter imp
 	 */
 	private Subscription getLocalSubscription(String id) {
 		if (id != null && !id.trim().isEmpty()) {
-			int size = restHookSubscriptions.size();
+			int size = myRestHookSubscriptions.size();
 			if (size > 0) {
-				for (Subscription restHookSubscription : restHookSubscriptions) {
+				for (Subscription restHookSubscription : myRestHookSubscriptions) {
 					if (id.equals(restHookSubscription.getIdElement().getIdPart())) {
 						return restHookSubscription;
 					}
@@ -254,6 +212,10 @@ public class RestHookSubscriptionDstu3Interceptor extends InterceptorAdapter imp
 		}
 
 		return null;
+	}
+
+	private String getResourceName(IBaseResource theResource) {
+		return myCtx.getResourceDefinition(theResource).getName();
 	}
 
 	/**
@@ -292,12 +254,19 @@ public class RestHookSubscriptionDstu3Interceptor extends InterceptorAdapter imp
 		List<IBaseResource> resourceList = subscriptionBundleList.getResources(0, subscriptionBundleList.size());
 
 		for (IBaseResource resource : resourceList) {
-			restHookSubscriptions.add((Subscription) resource);
+			myRestHookSubscriptions.add((Subscription) resource);
 		}
 	}
 
 	public boolean isNotifyOnDelete() {
 		return notifyOnDelete;
+	}
+
+	/**
+	 * Subclasses may override
+	 */
+	protected String massageCriteria(String theCriteria) {
+		return theCriteria;
 	}
 
 	@PostConstruct
@@ -317,7 +286,7 @@ public class RestHookSubscriptionDstu3Interceptor extends InterceptorAdapter imp
 	private void removeLocalSubscription(String subscriptionId) {
 		Subscription localSubscription = getLocalSubscription(subscriptionId);
 		if (localSubscription != null) {
-			restHookSubscriptions.remove(localSubscription);
+			myRestHookSubscriptions.remove(localSubscription);
 			ourLog.info("Subscription removed: " + subscriptionId);
 		} else {
 			ourLog.info("Subscription not found in local list. Subscription id: " + subscriptionId);
@@ -338,11 +307,10 @@ public class RestHookSubscriptionDstu3Interceptor extends InterceptorAdapter imp
 			Subscription subscription = (Subscription) theResource;
 			if (subscription.getChannel() != null
 					&& subscription.getChannel().getType() == Subscription.SubscriptionChannelType.RESTHOOK
-					&& subscription.getStatus() == Subscription.SubscriptionStatus.REQUESTED) {
-				subscription.setStatus(Subscription.SubscriptionStatus.ACTIVE);
-				mySubscriptionDao.update(subscription);
-				restHookSubscriptions.add(subscription);
-				ourLog.info("Subscription was added. Id: " + subscription.getId());
+					&& subscription.getStatus() == Subscription.SubscriptionStatus.ACTIVE) {
+				removeLocalSubscription(subscription.getIdElement().getIdPart());
+				myRestHookSubscriptions.add(subscription);
+				ourLog.info("Subscription was added, id: {} - Have {}", subscription.getIdElement().getIdPart(), myRestHookSubscriptions.size());
 			}
 		} else {
 			checkSubscriptions(idType, theRequest.getResourceName(), RestOperationTypeEnum.CREATE);
@@ -365,7 +333,7 @@ public class RestHookSubscriptionDstu3Interceptor extends InterceptorAdapter imp
 	 */
 	@Override
 	public void resourceDeleted(RequestDetails theRequest, IBaseResource theResource) {
-		String resourceType = theRequest.getResourceName();
+		String resourceType = getResourceName(theResource);
 		IIdType idType = theResource.getIdElement();
 
 		if (resourceType.equals(Subscription.class.getSimpleName())) {
@@ -384,7 +352,7 @@ public class RestHookSubscriptionDstu3Interceptor extends InterceptorAdapter imp
 	 */
 	@Override
 	public void resourceUpdated(RequestDetails theRequest, IBaseResource theResource) {
-		String resourceType = theRequest.getResourceName();
+		String resourceType = getResourceName(theResource);
 		IIdType idType = theResource.getIdElement();
 
 		ourLog.info("resource updated type: " + resourceType);
@@ -395,8 +363,8 @@ public class RestHookSubscriptionDstu3Interceptor extends InterceptorAdapter imp
 				removeLocalSubscription(subscription.getIdElement().getIdPart());
 
 				if (subscription.getStatus() == Subscription.SubscriptionStatus.ACTIVE) {
-					restHookSubscriptions.add(subscription);
-					ourLog.info("Subscription was updated. Id: " + subscription.getId());
+					myRestHookSubscriptions.add(subscription);
+					ourLog.info("Subscription was updated, id: {} - Have {}", subscription.getIdElement().getIdPart(), myRestHookSubscriptions.size());
 				}
 			}
 		} else {

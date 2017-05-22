@@ -1,13 +1,14 @@
 
 package ca.uhn.fhir.jpa.subscription;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 import java.util.List;
 
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
+import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.*;
 
@@ -15,14 +16,8 @@ import com.google.common.collect.Lists;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
-import ca.uhn.fhir.jpa.provider.BaseResourceProviderDstu2Test;
+import ca.uhn.fhir.jpa.provider.dstu3.BaseResourceProviderDstu3Test;
 import ca.uhn.fhir.jpa.testutil.RandomServerPortProvider;
-import ca.uhn.fhir.model.dstu2.composite.CodeableConceptDt;
-import ca.uhn.fhir.model.dstu2.composite.CodingDt;
-import ca.uhn.fhir.model.dstu2.resource.Observation;
-import ca.uhn.fhir.model.dstu2.resource.Subscription;
-import ca.uhn.fhir.model.dstu2.resource.Subscription.Channel;
-import ca.uhn.fhir.model.dstu2.valueset.*;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.annotation.*;
 import ca.uhn.fhir.rest.api.MethodOutcome;
@@ -32,15 +27,20 @@ import ca.uhn.fhir.rest.server.RestfulServer;
 /**
  * Test the rest-hook subscriptions
  */
-public class RestHookTestDstu2Test extends BaseResourceProviderDstu2Test {
+public class RestHookTestWithInterceptorRegisteredToDaoConfigDstu3Test extends BaseResourceProviderDstu3Test {
 
 	private static List<Observation> ourCreatedObservations = Lists.newArrayList();
 	private static int ourListenerPort;
 	private static RestfulServer ourListenerRestServer;
 	private static Server ourListenerServer;
 	private static String ourListenerServerBase;
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(RestHookTestDstu2Test.class);
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(RestHookTestWithInterceptorRegisteredToDaoConfigDstu3Test.class);
 	private static List<Observation> ourUpdatedObservations = Lists.newArrayList();
+
+	@Override
+	protected boolean shouldLogClient() {
+		return false;
+	}
 
 	@After
 	public void afterUnregisterRestHookListener() {
@@ -50,13 +50,12 @@ public class RestHookTestDstu2Test extends BaseResourceProviderDstu2Test {
 		ourLog.info("Done deleting all subscriptions");
 		myDaoConfig.setAllowMultipleDelete(new DaoConfig().isAllowMultipleDelete());
 		
-		ourRestServer.unregisterInterceptor(ourRestHookSubscriptionInterceptor);
+		myDaoConfig.getInterceptors().remove(ourRestHookSubscriptionInterceptor);
 	}
 
 	@Before
 	public void beforeRegisterRestHookListener() {
-//		ourRestHookSubscriptionInterceptor.set
-		ourRestServer.registerInterceptor(ourRestHookSubscriptionInterceptor);
+		myDaoConfig.getInterceptors().add(ourRestHookSubscriptionInterceptor);
 	}
 
 	@Before
@@ -68,11 +67,11 @@ public class RestHookTestDstu2Test extends BaseResourceProviderDstu2Test {
 	private Subscription createSubscription(String criteria, String payload, String endpoint) {
 		Subscription subscription = new Subscription();
 		subscription.setReason("Monitor new neonatal function (note, age will be determined by the monitor)");
-		subscription.setStatus(SubscriptionStatusEnum.ACTIVE);
+		subscription.setStatus(Subscription.SubscriptionStatus.ACTIVE);
 		subscription.setCriteria(criteria);
 
-		Channel channel = new Channel();
-		channel.setType(SubscriptionChannelTypeEnum.REST_HOOK);
+		Subscription.SubscriptionChannelComponent channel = new Subscription.SubscriptionChannelComponent();
+		channel.setType(Subscription.SubscriptionChannelType.RESTHOOK);
 		channel.setPayload(payload);
 		channel.setEndpoint(endpoint);
 		subscription.setChannel(channel);
@@ -85,13 +84,13 @@ public class RestHookTestDstu2Test extends BaseResourceProviderDstu2Test {
 
 	private Observation sendObservation(String code, String system) {
 		Observation observation = new Observation();
-		CodeableConceptDt codeableConcept = new CodeableConceptDt();
+		CodeableConcept codeableConcept = new CodeableConcept();
 		observation.setCode(codeableConcept);
-		CodingDt coding = codeableConcept.addCoding();
+		Coding coding = codeableConcept.addCoding();
 		coding.setCode(code);
 		coding.setSystem(system);
 
-		observation.setStatus(ObservationStatusEnum.FINAL);
+		observation.setStatus(Observation.ObservationStatus.FINAL);
 
 		MethodOutcome methodOutcome = ourClient.create().resource(observation).execute();
 
@@ -133,7 +132,7 @@ public class RestHookTestDstu2Test extends BaseResourceProviderDstu2Test {
 		assertEquals(3, ourCreatedObservations.size());
 		assertEquals(0, ourUpdatedObservations.size());
 		
-		ourClient.delete().resourceById(new IdDt("Subscription/"+ subscription2.getId())).execute();
+		ourClient.delete().resourceById(new IdDt("Subscription", subscription2.getId())).execute();
 
 		Observation observationTemp3 = sendObservation(code, "SNOMED-CT");
 
@@ -143,9 +142,9 @@ public class RestHookTestDstu2Test extends BaseResourceProviderDstu2Test {
 		assertEquals(0, ourUpdatedObservations.size());
 
 		Observation observation3 = ourClient.read(Observation.class, observationTemp3.getId());
-		CodeableConceptDt codeableConcept = new CodeableConceptDt();
+		CodeableConcept codeableConcept = new CodeableConcept();
 		observation3.setCode(codeableConcept);
-		CodingDt coding = codeableConcept.addCoding();
+		Coding coding = codeableConcept.addCoding();
 		coding.setCode(code + "111");
 		coding.setSystem("SNOMED-CT");
 		ourClient.update().resource(observation3).withId(observation3.getIdElement()).execute();
@@ -157,9 +156,9 @@ public class RestHookTestDstu2Test extends BaseResourceProviderDstu2Test {
 
 		Observation observation3a = ourClient.read(Observation.class, observationTemp3.getId());
 
-		CodeableConceptDt codeableConcept1 = new CodeableConceptDt();
+		CodeableConcept codeableConcept1 = new CodeableConcept();
 		observation3a.setCode(codeableConcept1);
-		CodingDt coding1 = codeableConcept1.addCoding();
+		Coding coding1 = codeableConcept1.addCoding();
 		coding1.setCode(code);
 		coding1.setSystem("SNOMED-CT");
 		ourClient.update().resource(observation3a).withId(observation3a.getIdElement()).execute();
@@ -206,7 +205,7 @@ public class RestHookTestDstu2Test extends BaseResourceProviderDstu2Test {
 		assertEquals(3, ourCreatedObservations.size());
 		assertEquals(0, ourUpdatedObservations.size());
 		
-		ourClient.delete().resourceById(new IdDt("Subscription/"+ subscription2.getId())).execute();
+		ourClient.delete().resourceById(new IdDt("Subscription", subscription2.getId())).execute();
 
 		Observation observationTemp3 = sendObservation(code, "SNOMED-CT");
 
@@ -216,9 +215,9 @@ public class RestHookTestDstu2Test extends BaseResourceProviderDstu2Test {
 		assertEquals(0, ourUpdatedObservations.size());
 
 		Observation observation3 = ourClient.read(Observation.class, observationTemp3.getId());
-		CodeableConceptDt codeableConcept = new CodeableConceptDt();
+		CodeableConcept codeableConcept = new CodeableConcept();
 		observation3.setCode(codeableConcept);
-		CodingDt coding = codeableConcept.addCoding();
+		Coding coding = codeableConcept.addCoding();
 		coding.setCode(code + "111");
 		coding.setSystem("SNOMED-CT");
 		ourClient.update().resource(observation3).withId(observation3.getIdElement()).execute();
@@ -230,9 +229,9 @@ public class RestHookTestDstu2Test extends BaseResourceProviderDstu2Test {
 
 		Observation observation3a = ourClient.read(Observation.class, observationTemp3.getId());
 
-		CodeableConceptDt codeableConcept1 = new CodeableConceptDt();
+		CodeableConcept codeableConcept1 = new CodeableConcept();
 		observation3a.setCode(codeableConcept1);
-		CodingDt coding1 = codeableConcept1.addCoding();
+		Coding coding1 = codeableConcept1.addCoding();
 		coding1.setCode(code);
 		coding1.setSystem("SNOMED-CT");
 		ourClient.update().resource(observation3a).withId(observation3a.getIdElement()).execute();
@@ -247,11 +246,10 @@ public class RestHookTestDstu2Test extends BaseResourceProviderDstu2Test {
 		Assert.assertFalse(observation2.getId().isEmpty());
 	}
 
-	
 	@BeforeClass
 	public static void startListenerServer() throws Exception {
 		ourListenerPort = RandomServerPortProvider.findFreePort();
-		ourListenerRestServer = new RestfulServer(FhirContext.forDstu2());
+		ourListenerRestServer = new RestfulServer(FhirContext.forDstu3());
 		ourListenerServerBase = "http://localhost:" + ourListenerPort + "/fhir/context";
 
 		ObservationListener obsListener = new ObservationListener();
@@ -281,7 +279,7 @@ public class RestHookTestDstu2Test extends BaseResourceProviderDstu2Test {
 		public MethodOutcome create(@ResourceParam Observation theObservation) {
 			ourLog.info("Received Listener Create");
 			ourCreatedObservations.add(theObservation);
-			return new MethodOutcome(new IdDt("Observation/1"), true);
+			return new MethodOutcome(new IdType("Observation/1"), true);
 		}
 
 		@Override
@@ -293,7 +291,7 @@ public class RestHookTestDstu2Test extends BaseResourceProviderDstu2Test {
 		public MethodOutcome update(@ResourceParam Observation theObservation) {
 			ourLog.info("Received Listener Update");
 			ourUpdatedObservations.add(theObservation);
-			return new MethodOutcome(new IdDt("Observation/1"), false);
+			return new MethodOutcome(new IdType("Observation/1"), false);
 		}
 
 	}

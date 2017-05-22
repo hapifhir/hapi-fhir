@@ -50,7 +50,6 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 
 	@Before
 	public void beforeRegisterRestHookListener() {
-//		ourRestHookSubscriptionInterceptor.set
 		ourRestServer.registerInterceptor(ourRestHookSubscriptionInterceptor);
 	}
 
@@ -63,7 +62,7 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 	private Subscription createSubscription(String criteria, String payload, String endpoint) {
 		Subscription subscription = new Subscription();
 		subscription.setReason("Monitor new neonatal function (note, age will be determined by the monitor)");
-		subscription.setStatus(Subscription.SubscriptionStatus.REQUESTED);
+		subscription.setStatus(Subscription.SubscriptionStatus.ACTIVE);
 		subscription.setCriteria(criteria);
 
 		Subscription.SubscriptionChannelComponent channel = new Subscription.SubscriptionChannelComponent();
