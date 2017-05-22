@@ -43,6 +43,7 @@ import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTableDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamUriDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.dao.data.ISearchResultDao;
 import ca.uhn.fhir.jpa.entity.*;
@@ -79,6 +80,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	protected PlatformTransactionManager myPlatformTransactionManager;
 	@Autowired
 	private IResourceHistoryTableDao myResourceHistoryTableDao;
+	@Autowired
+	private IResourceLinkDao myResourceLinkDao;
 	private String myResourceName;
 	@Autowired
 	protected IResourceTableDao myResourceTableDao;
@@ -87,8 +90,10 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	protected IFulltextSearchSvc mySearchDao;
 	@Autowired()
 	protected ISearchResultDao mySearchResultDao;
+
 	private String mySecondaryPrimaryKeyParamName;
 
+	
 	@Override
 	public void addTag(IIdType theId, TagTypeEnum theTagType, String theScheme, String theTerm, String theLabel) {
 		StopWatch w = new StopWatch();
@@ -117,13 +122,12 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		ourLog.info("Processed addTag {}/{} on {} in {}ms", new Object[] { theScheme, theTerm, theId, w.getMillisAndRestart() });
 	}
-
 	
 	@Override
 	public DaoMethodOutcome create(final T theResource) {
 		return create(theResource, null, true, null);
 	}
-	
+
 	@Override
 	public DaoMethodOutcome create(final T theResource, RequestDetails theRequestDetails) {
 		return create(theResource, null, true, theRequestDetails);
@@ -175,7 +179,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	}
 
 	@Override
-	public DaoMethodOutcome delete(IIdType theId, List<DeleteConflict> deleteConflicts, RequestDetails theRequestDetails) {
+	public DaoMethodOutcome delete(IIdType theId, List<DeleteConflict> theDeleteConflicts, RequestDetails theRequestDetails) {
 		if (theId == null || !theId.hasIdPart()) {
 			throw new InvalidRequestException("Can not perform delete, no ID provided");
 		}
@@ -188,7 +192,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		T resourceToDelete = toResource(myResourceType, entity, false);
 
-		validateOkToDelete(deleteConflicts, entity);
+		validateOkToDelete(theDeleteConflicts, entity);
 		
 		preDelete(resourceToDelete, entity);
 		
@@ -311,7 +315,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		retVal.setOperationOutcome(oo);
 		return retVal;
 	}
-
+	
 	@Override
 	public DeleteMethodOutcome deleteByUrl(String theUrl, RequestDetails theRequestDetails) {
 		List<DeleteConflict> deleteConflicts = new ArrayList<DeleteConflict>();
@@ -322,7 +326,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		
 		return outcome;
 	}
-	
+
 	@PostConstruct
 	public void detectSearchDaoDisabled() {
 		if (mySearchDao != null && mySearchDao.isDisabled()) {
@@ -615,6 +619,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		return retVal;
 	}
 
+
 	@Override
 	public <MT extends IBaseMetaType> MT metaGetOperation(Class<MT> theType, IIdType theId, RequestDetails theRequestDetails) {
 		// Notify interceptors
@@ -635,7 +640,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		return retVal;
 	}
-
 
 	@Override
 	public <MT extends IBaseMetaType> MT metaGetOperation(Class<MT> theType, RequestDetails theRequestDetails) {
@@ -851,7 +855,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	public void removeTag(IIdType theId, TagTypeEnum theTagType, String theScheme, String theTerm) {
 		removeTag(theId, theTagType, theScheme, theTerm, null);
 	}
-
+	
 	@Override
 	public void removeTag(IIdType theId, TagTypeEnum theTagType, String theScheme, String theTerm, RequestDetails theRequestDetails) {
 		// Notify interceptors
@@ -885,7 +889,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		ourLog.info("Processed remove tag {}/{} on {} in {}ms", new Object[] { theScheme, theTerm, theId.getValue(), w.getMillisAndRestart() });
 	}
-	
+
 	@Transactional(propagation=Propagation.SUPPORTS)
 	@Override
 	public IBundleProvider search(final SearchParameterMap theParams) {
@@ -911,6 +915,9 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		return mySearchCoordinatorSvc.registerSearch(this, theParams, getResourceName());
 	}
 
+
+
+
 	@Override
 	public Set<Long> searchForIds(SearchParameterMap theParams) {
 
@@ -928,9 +935,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		
 		return retVal;
 	}
-
-
-
 
 	@SuppressWarnings("unchecked")
 	@Required
@@ -1157,13 +1161,13 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		ourLog.info(msg);
 		return outcome;
 	}
-
+	
+	
 	@Override
 	public DaoMethodOutcome update(T theResource, String theMatchUrl, boolean thePerformIndexing, RequestDetails theRequestDetails) {
 		return update(theResource, theMatchUrl, thePerformIndexing, false, theRequestDetails);
 	}
-	
-	
+
 	@Override
 	public DaoMethodOutcome update(T theResource, String theMatchUrl, RequestDetails theRequestDetails) {
 		return update(theResource, theMatchUrl, true, theRequestDetails);
@@ -1200,7 +1204,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			}
 		}
 	}
-
+	
 	protected void validateOkToDelete(List<DeleteConflict> theDeleteConflicts, ResourceTable theEntity) {
 		TypedQuery<ResourceLink> query = myEntityManager.createQuery("SELECT l FROM ResourceLink l WHERE l.myTargetResourcePid = :target_pid", ResourceLink.class);
 		query.setParameter("target_pid", theEntity.getId());
@@ -1210,6 +1214,12 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			return;
 		}
 
+		if (myDaoConfig.isEnforceReferentialIntegrityOnDelete() == false) {
+			ourLog.info("Deleting {} resource dependencies which can no longer be satisfied", resultList.size());
+			myResourceLinkDao.delete(resultList);
+			return;
+		}
+		
 		ResourceLink link = resultList.get(0);
 		IdDt targetId = theEntity.getIdDt();
 		IdDt sourceId = link.getSourceResource().getIdDt();

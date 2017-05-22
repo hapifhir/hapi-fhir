@@ -168,6 +168,8 @@ public class JpaServerDemo extends RestfulServer {
 
 		DaoConfig daoConfig = myAppCtx.getBean(DaoConfig.class);
 		daoConfig.setAllowExternalReferences(ContextHolder.isAllowExternalRefs());
+		daoConfig.setEnforceReferentialIntegrityOnDelete(!ContextHolder.isDisableReferentialIntegrity());
+		daoConfig.setEnforceReferentialIntegrityOnWrite(!ContextHolder.isDisableReferentialIntegrity());
 		
 	}
 

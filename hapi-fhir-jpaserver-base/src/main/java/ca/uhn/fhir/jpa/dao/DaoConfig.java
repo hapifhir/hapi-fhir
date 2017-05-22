@@ -1,6 +1,11 @@
 package ca.uhn.fhir.jpa.dao;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.Validate;
@@ -78,11 +83,14 @@ public class DaoConfig {
 
 	private boolean myDeleteStaleSearches = true;
 
+	private boolean myEnforceReferentialIntegrityOnDelete = true;
+
+	private boolean myEnforceReferentialIntegrityOnWrite = true;
+
 	// ***
 	// update setter javadoc if default changes
 	// ***
 	private long myExpireSearchResultsAfterMillis = DateUtils.MILLIS_PER_HOUR;
-
 	private int myHardTagListLimit = 1000;
 
 	private int myIncludeLimit = 2000;
@@ -90,7 +98,6 @@ public class DaoConfig {
 	// update setter javadoc if default changes
 	// ***
 	private boolean myIndexContainedResources = true;
-
 	private List<IServerInterceptor> myInterceptors;
 	// ***
 	// update setter javadoc if default changes
@@ -324,6 +331,39 @@ public class DaoConfig {
 	}
 
 	/**
+	 * If set to <code>false</code> (default is <code>true</code>) resources will be permitted to be
+	 * deleted even if other resources currently contain references to them.
+	 * <p>
+	 * This property can cause confusing results for clients of the server since searches, includes,
+	 * and other FHIR features may not behave as expected when referential integrity is not
+	 * preserved. Use this feature with caution.
+	 * </p>
+	 * 
+	 * @return
+	 */
+	public boolean isEnforceReferentialIntegrityOnDelete() {
+		return myEnforceReferentialIntegrityOnDelete;
+	}
+
+	/**
+	 * If set to <code>false</code> (default is <code>true</code>) resources will be permitted to be
+	 * created or updated even if they contain references to local resources that do not exist.
+	 * <p>
+	 * For example, if a patient contains a reference to managing organization <code>Organization/FOO</code>
+	 * but FOO is not a valid ID for an organization on the server, the operation will be blocked unless
+	 * this propery has been set to <code>false</code>
+	 * </p>
+	 * <p>
+	 * This property can cause confusing results for clients of the server since searches, includes,
+	 * and other FHIR features may not behave as expected when referential integrity is not
+	 * preserved. Use this feature with caution.
+	 * </p>
+	 */
+	public boolean isEnforceReferentialIntegrityOnWrite() {
+		return myEnforceReferentialIntegrityOnWrite;
+	}
+
+	/**
 	 * If this is set to <code>false</code> (default is <code>true</code>) the stale search deletion
 	 * task will be disabled (meaning that search results will be retained in the database indefinitely). USE WITH CAUTION.
 	 * <p>
@@ -356,7 +396,7 @@ public class DaoConfig {
 
 	/**
 	 * If set to {@literal true} (default is true), if a client performs an update which does not actually
-	 * result in any chance to a given resource (e.g. an update where the resource body matches the 
+	 * result in any chance to a given resource (e.g. an update where the resource body matches the
 	 * existing resource body in the database) the operation will succeed but a new version (and corresponding history
 	 * entry) will not actually be created. The existing resource version will be returned to the client.
 	 * <p>
@@ -443,6 +483,37 @@ public class DaoConfig {
 	 */
 	public void setDeferIndexingForCodesystemsOfSize(int theDeferIndexingForCodesystemsOfSize) {
 		myDeferIndexingForCodesystemsOfSize = theDeferIndexingForCodesystemsOfSize;
+	}
+
+	/**
+	 * If set to <code>false</code> (default is <code>true</code>) resources will be permitted to be
+	 * deleted even if other resources currently contain references to them.
+	 * <p>
+	 * This property can cause confusing results for clients of the server since searches, includes,
+	 * and other FHIR features may not behave as expected when referential integrity is not
+	 * preserved. Use this feature with caution.
+	 * </p>
+	 */
+	public void setEnforceReferentialIntegrityOnDelete(boolean theEnforceReferentialIntegrityOnDelete) {
+		myEnforceReferentialIntegrityOnDelete = theEnforceReferentialIntegrityOnDelete;
+	}
+
+	/**
+	 * If set to <code>false</code> (default is <code>true</code>) resources will be permitted to be
+	 * created or updated even if they contain references to local resources that do not exist.
+	 * <p>
+	 * For example, if a patient contains a reference to managing organization <code>Organization/FOO</code>
+	 * but FOO is not a valid ID for an organization on the server, the operation will be blocked unless
+	 * this propery has been set to <code>false</code>
+	 * </p>
+	 * <p>
+	 * This property can cause confusing results for clients of the server since searches, includes,
+	 * and other FHIR features may not behave as expected when referential integrity is not
+	 * preserved. Use this feature with caution.
+	 * </p>
+	 */
+	public void setEnforceReferentialIntegrityOnWrite(boolean theEnforceReferentialIntegrityOnWrite) {
+		myEnforceReferentialIntegrityOnWrite = theEnforceReferentialIntegrityOnWrite;
 	}
 
 	/**
@@ -552,7 +623,7 @@ public class DaoConfig {
 	public void setMaximumSearchResultCountInTransaction(int theMaximumSearchResultCountInTransaction) {
 		myMaximumSearchResultCountInTransaction = theMaximumSearchResultCountInTransaction;
 	}
-	
+
 	public void setResourceEncoding(ResourceEncodingEnum theResourceEncoding) {
 		myResourceEncoding = theResourceEncoding;
 	}
@@ -602,7 +673,7 @@ public class DaoConfig {
 
 	/**
 	 * If set to {@literal true} (default is true), if a client performs an update which does not actually
-	 * result in any chance to a given resource (e.g. an update where the resource body matches the 
+	 * result in any chance to a given resource (e.g. an update where the resource body matches the
 	 * existing resource body in the database) the operation will succeed but a new version (and corresponding history
 	 * entry) will not actually be created. The existing resource version will be returned to the client.
 	 * <p>
@@ -611,7 +682,7 @@ public class DaoConfig {
 	 */
 	public void setSuppressUpdatesWithNoChange(boolean theSuppressUpdatesWithNoChange) {
 		mySuppressUpdatesWithNoChange = theSuppressUpdatesWithNoChange;
-		
+
 	}
 
 	/**

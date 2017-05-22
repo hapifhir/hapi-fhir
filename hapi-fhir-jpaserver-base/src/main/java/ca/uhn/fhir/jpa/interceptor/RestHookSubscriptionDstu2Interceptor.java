@@ -70,10 +70,11 @@ public class RestHookSubscriptionDstu2Interceptor extends InterceptorAdapter imp
 	private static final Logger ourLog = LoggerFactory.getLogger(RestHookSubscriptionDstu2Interceptor.class);
 
 	@Autowired
-	private FhirContext myCtx;
-	private boolean myNotifyOnDelete = false;
+	private FhirContext myFhirContext;
 
+	private boolean myNotifyOnDelete = false;
 	private final List<Subscription> myRestHookSubscriptions = new ArrayList<Subscription>();
+
 	@Autowired
 	@Qualifier("mySubscriptionDaoDstu2")
 	private IFhirResourceDao<Subscription> mySubscriptionDao;
@@ -126,7 +127,7 @@ public class RestHookSubscriptionDstu2Interceptor extends InterceptorAdapter imp
 		}
 
 		HttpUriRequest request = null;
-		String resourceName = myCtx.getResourceDefinition(theResource).getName();
+		String resourceName = myFhirContext.getResourceDefinition(theResource).getName();
 
 		String payload = theSubscription.getChannel().getPayload();
 		String resourceId = theResource.getIdElement().getIdPart();
@@ -223,7 +224,7 @@ public class RestHookSubscriptionDstu2Interceptor extends InterceptorAdapter imp
 	}
 
 	private String getResourceName(IBaseResource theResource) {
-		return myCtx.getResourceDefinition(theResource).getName();
+		return myFhirContext.getResourceDefinition(theResource).getName();
 	}
 
 	/**
@@ -308,7 +309,7 @@ public class RestHookSubscriptionDstu2Interceptor extends InterceptorAdapter imp
 	@Override
 	public void resourceCreated(RequestDetails theRequest, IBaseResource theResource) {
 		IIdType idType = theResource.getIdElement();
-		ourLog.info("resource created type: {}", theRequest.getResourceName());
+		ourLog.info("resource created type: {}", getResourceName(theResource));
 
 		if (theResource instanceof Subscription) {
 			Subscription subscription = (Subscription) theResource;
@@ -320,7 +321,7 @@ public class RestHookSubscriptionDstu2Interceptor extends InterceptorAdapter imp
 				ourLog.info("Subscription was added. Id: " + subscription.getId());
 			}
 		} else {
-			checkSubscriptions(idType, theRequest.getResourceName(), RestOperationTypeEnum.CREATE);
+			checkSubscriptions(idType, getResourceName(theResource), RestOperationTypeEnum.CREATE);
 		}
 	}
 
@@ -379,7 +380,15 @@ public class RestHookSubscriptionDstu2Interceptor extends InterceptorAdapter imp
 		}
 	}
 
+	public void setFhirContext(FhirContext theFhirContext) {
+		myFhirContext = theFhirContext;
+	}
+
 	public void setNotifyOnDelete(boolean notifyOnDelete) {
 		this.myNotifyOnDelete = notifyOnDelete;
+	}
+
+	public void setSubscriptionDao(IFhirResourceDao<Subscription> theSubscriptionDao) {
+		mySubscriptionDao = theSubscriptionDao;
 	}
 }

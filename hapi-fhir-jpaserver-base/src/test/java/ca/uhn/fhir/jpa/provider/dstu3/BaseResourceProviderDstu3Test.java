@@ -34,7 +34,6 @@ import ca.uhn.fhir.jpa.dao.dstu3.BaseJpaDstu3Test;
 import ca.uhn.fhir.jpa.interceptor.RestHookSubscriptionDstu3Interceptor;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.ISearchCoordinatorSvc;
-import ca.uhn.fhir.jpa.testutil.RandomServerPortProvider;
 import ca.uhn.fhir.jpa.validation.JpaValidationSupportChainDstu3;
 import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
 import ca.uhn.fhir.parser.StrictErrorHandler;
@@ -43,6 +42,7 @@ import ca.uhn.fhir.rest.client.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.interceptor.CorsInterceptor;
+import ca.uhn.fhir.util.PortUtil;
 import ca.uhn.fhir.util.TestUtil;
 
 public abstract class BaseResourceProviderDstu3Test extends BaseJpaDstu3Test {
@@ -77,7 +77,7 @@ public abstract class BaseResourceProviderDstu3Test extends BaseJpaDstu3Test {
 		myFhirCtx.setParserErrorHandler(new StrictErrorHandler());
 
 		if (ourServer == null) {
-			ourPort = RandomServerPortProvider.findFreePort();
+			ourPort = PortUtil.findFreePort();
 
 			ourRestServer = new RestfulServer(myFhirCtx);
 

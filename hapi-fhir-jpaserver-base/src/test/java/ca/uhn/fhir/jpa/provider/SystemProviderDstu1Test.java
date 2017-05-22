@@ -24,7 +24,6 @@ import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.rp.dstu.ObservationResourceProvider;
 import ca.uhn.fhir.jpa.rp.dstu.OrganizationResourceProvider;
 import ca.uhn.fhir.jpa.rp.dstu.PatientResourceProvider;
-import ca.uhn.fhir.jpa.testutil.RandomServerPortProvider;
 import ca.uhn.fhir.model.api.BundleEntry;
 import ca.uhn.fhir.model.dstu.resource.Observation;
 import ca.uhn.fhir.model.dstu.resource.Organization;
@@ -32,6 +31,7 @@ import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.model.dstu.resource.Questionnaire;
 import ca.uhn.fhir.rest.client.IGenericClient;
 import ca.uhn.fhir.rest.server.RestfulServer;
+import ca.uhn.fhir.util.PortUtil;
 import ca.uhn.fhir.util.TestUtil;
 
 public class SystemProviderDstu1Test extends BaseJpaTest {
@@ -100,7 +100,7 @@ public class SystemProviderDstu1Test extends BaseJpaTest {
 		JpaSystemProviderDstu1 systemProv = ourAppCtx.getBean(JpaSystemProviderDstu1.class, "mySystemProviderDstu1");
 		restServer.setPlainProviders(systemProv);
 
-		int myPort = RandomServerPortProvider.findFreePort();
+		int myPort = PortUtil.findFreePort();
 		ourServer = new Server(myPort);
 
 		ServletContextHandler proxyHandler = new ServletContextHandler();

@@ -41,14 +41,14 @@ import ca.uhn.fhir.util.PortUtil;
 /**
  * Test the rest-hook subscriptions
  */
-public class RestHookTestDstu2Test extends BaseResourceProviderDstu2Test {
+public class RestHookTestWithInterceptorRegisteredToDaoConfigDstu2Test extends BaseResourceProviderDstu2Test {
 
 	private static List<Observation> ourCreatedObservations = Lists.newArrayList();
 	private static int ourListenerPort;
 	private static RestfulServer ourListenerRestServer;
 	private static Server ourListenerServer;
 	private static String ourListenerServerBase;
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(RestHookTestDstu2Test.class);
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(RestHookTestWithInterceptorRegisteredToDaoConfigDstu2Test.class);
 	private static List<Observation> ourUpdatedObservations = Lists.newArrayList();
 
 	@After
@@ -58,14 +58,13 @@ public class RestHookTestDstu2Test extends BaseResourceProviderDstu2Test {
 		ourClient.delete().resourceConditionalByUrl("Subscription?status=active").execute();
 		ourLog.info("Done deleting all subscriptions");
 		myDaoConfig.setAllowMultipleDelete(new DaoConfig().isAllowMultipleDelete());
-		
-		ourRestServer.unregisterInterceptor(ourRestHookSubscriptionInterceptor);
+	
+		myDaoConfig.getInterceptors().remove(ourRestHookSubscriptionInterceptor);
 	}
 
 	@Before
 	public void beforeRegisterRestHookListener() {
-//		ourRestHookSubscriptionInterceptor.set
-		ourRestServer.registerInterceptor(ourRestHookSubscriptionInterceptor);
+		myDaoConfig.getInterceptors().add(ourRestHookSubscriptionInterceptor);
 	}
 
 	@Before

@@ -122,7 +122,7 @@ public class BaseDstu2Config extends BaseConfig {
 
 	@Bean
 	@Lazy
-	public RestHookSubscriptionDstu2Interceptor restHookSubscriptionDstu3Interceptor() {
+	public RestHookSubscriptionDstu2Interceptor restHookSubscriptionDstu2Interceptor() {
 		return new RestHookSubscriptionDstu2Interceptor();
 	}
 

@@ -36,6 +36,7 @@ import ca.uhn.fhir.jpa.dao.SearchParameterMap;
 import ca.uhn.fhir.jpa.dao.data.ISubscriptionFlaggedResourceDataDao;
 import ca.uhn.fhir.jpa.dao.data.ISubscriptionTableDao;
 import ca.uhn.fhir.jpa.entity.SubscriptionTable;
+import ca.uhn.fhir.model.dstu2.valueset.SubscriptionChannelTypeEnum;
 import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
@@ -170,6 +171,7 @@ public class FhirResourceDaoDstu3SubscriptionTest extends BaseJpaDstu3Test {
 	public void testCreateSubscriptionInvalidCriteria() {
 		Subscription subs = new Subscription();
 		subs.setStatus(SubscriptionStatus.REQUESTED);
+		subs.getChannel().setType(SubscriptionChannelType.WEBSOCKET);
 		subs.setCriteria("Observation");
 		try {
 			mySubscriptionDao.create(subs, mySrd);
@@ -180,6 +182,7 @@ public class FhirResourceDaoDstu3SubscriptionTest extends BaseJpaDstu3Test {
 
 		subs = new Subscription();
 		subs.setStatus(SubscriptionStatus.REQUESTED);
+		subs.getChannel().setType(SubscriptionChannelType.WEBSOCKET);
 		subs.setCriteria("http://foo.com/Observation?AAA=BBB");
 		try {
 			mySubscriptionDao.create(subs, mySrd);
@@ -190,6 +193,7 @@ public class FhirResourceDaoDstu3SubscriptionTest extends BaseJpaDstu3Test {
 
 		subs = new Subscription();
 		subs.setStatus(SubscriptionStatus.REQUESTED);
+		subs.getChannel().setType(SubscriptionChannelType.WEBSOCKET);
 		subs.setCriteria("ObservationZZZZ?a=b");
 		try {
 			mySubscriptionDao.create(subs, mySrd);
@@ -205,13 +209,56 @@ public class FhirResourceDaoDstu3SubscriptionTest extends BaseJpaDstu3Test {
 			mySubscriptionDao.create(subs, mySrd);
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertThat(e.getMessage(), containsString("Subscription.channel.type must be populated on this server"));
+			assertThat(e.getMessage(), containsString("Subscription.channel.type must be populated"));
 		}
 
 		subs = new Subscription();
 		subs.setStatus(SubscriptionStatus.REQUESTED);
 		subs.setCriteria("Observation?identifier=123");
+		subs.getChannel().setType(SubscriptionChannelType.RESTHOOK);
+		try {
+			mySubscriptionDao.create(subs, mySrd);
+			fail();
+		} catch (UnprocessableEntityException e) {
+			assertThat(e.getMessage(), containsString("Subscription.channel.payload must be populated for rest-hook subscriptions"));
+		}
+
+		subs = new Subscription();
+		subs.setStatus(SubscriptionStatus.REQUESTED);
+		subs.setCriteria("Observation?identifier=123");
+		subs.getChannel().setType(SubscriptionChannelType.RESTHOOK);
+		subs.getChannel().setPayload("text/html");
+		try {
+			mySubscriptionDao.create(subs, mySrd);
+			fail();
+		} catch (UnprocessableEntityException e) {
+			assertThat(e.getMessage(), containsString("Invalid value for Subscription.channel.payload: text/html"));
+		}
+
+		subs = new Subscription();
+		subs.setStatus(SubscriptionStatus.REQUESTED);
+		subs.setCriteria("Observation?identifier=123");
+		subs.getChannel().setType(SubscriptionChannelType.RESTHOOK);
+		subs.getChannel().setPayload("application/fhir+xml");
+		try {
+			mySubscriptionDao.create(subs, mySrd);
+			fail();
+		} catch (UnprocessableEntityException e) {
+			assertThat(e.getMessage(), containsString("Rest-hook subscriptions must have Subscription.channel.endpoint defined"));
+		}
+		
+		subs = new Subscription();
+		subs.setStatus(SubscriptionStatus.REQUESTED);
+		subs.setCriteria("Observation?identifier=123");
 		subs.getChannel().setType(SubscriptionChannelType.WEBSOCKET);
+		assertTrue(mySubscriptionDao.create(subs, mySrd).getId().hasIdPart());
+
+		subs = new Subscription();
+		subs.setStatus(SubscriptionStatus.REQUESTED);
+		subs.setCriteria("Observation?identifier=123");
+		subs.getChannel().setType(SubscriptionChannelType.RESTHOOK);
+		subs.getChannel().setPayload("application/fhir+json");
+		subs.getChannel().setEndpoint("http://localhost:8080");
 		assertTrue(mySubscriptionDao.create(subs, mySrd).getId().hasIdPart());
 
 	}

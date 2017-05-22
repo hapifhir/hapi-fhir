@@ -9,6 +9,7 @@ public class ContextHolder {
 
 	private static boolean ourAllowExternalRefs;
 	private static FhirContext ourCtx;
+	private static boolean ourDisableReferentialIntegrity;
 	private static String ourPath;
 
 	public static FhirContext getCtx() {
@@ -23,6 +24,10 @@ public class ContextHolder {
 
 	public static boolean isAllowExternalRefs() {
 		return ourAllowExternalRefs;
+	}
+
+	public static boolean isDisableReferentialIntegrity() {
+		return ourDisableReferentialIntegrity;
 	}
 
 	public static void setAllowExternalRefs(boolean theAllowExternalRefs) {
@@ -42,6 +47,10 @@ public class ContextHolder {
 		}
 
 		ourCtx = theCtx;
+	}
+
+	public static void setDisableReferentialIntegrity(boolean theDisableReferentialIntegrity) {
+		ourDisableReferentialIntegrity = theDisableReferentialIntegrity;
 	}
 	
 }

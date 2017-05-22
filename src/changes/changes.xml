@@ -125,6 +125,14 @@
 				Fix XhtmlParser to correctly handle hexadecimal escaped literals. Thanks to
 				Gijsbert van den Brink for the Pull Request!
 			</action>
+			<action type="add">
+				JPA server now has configurable properties that allow referential integrity
+				to be disabled for both writes and deletes. This is useful in some cases
+				where data integrity is not wanted or not possible. It can also be useful
+				if you want to delete large amounts of interconnected data quickly.
+				<![CDATA[<br/><br/>]]>
+				A corresponding flag has been added to the CLI tool as well.
+			</action>
 		</release>
 		<release version="2.4" date="2017-04-19">
 			<action type="add">

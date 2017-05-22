@@ -31,6 +31,7 @@ import javax.persistence.Query;
 
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.dstu3.model.Subscription;
+import org.hl7.fhir.dstu3.model.Subscription.SubscriptionChannelType;
 import org.hl7.fhir.dstu3.model.Subscription.SubscriptionStatus;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -67,6 +68,7 @@ import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import ca.uhn.fhir.rest.server.Constants;
+import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 
@@ -331,6 +333,21 @@ public class FhirResourceDaoSubscriptionDstu3 extends FhirResourceDaoDstu3<Subsc
 		String resType = query.substring(0, sep);
 		if (resType.contains("/")) {
 			throw new UnprocessableEntityException("Subscription.criteria must be in the form \"{Resource Type}?[params]\"");
+		}
+
+		if (theResource.getChannel().getType() == null) {
+			throw new UnprocessableEntityException("Subscription.channel.type must be populated");
+		} else if (theResource.getChannel().getType() == SubscriptionChannelType.RESTHOOK) {
+			if (isBlank(theResource.getChannel().getPayload())) {
+				throw new UnprocessableEntityException("Subscription.channel.payload must be populated for rest-hook subscriptions");
+			}
+			
+			if (EncodingEnum.forContentType(theResource.getChannel().getPayload()) == null){
+				throw new UnprocessableEntityException("Invalid value for Subscription.channel.payload: " + theResource.getChannel().getPayload());
+			}
+			if (isBlank(theResource.getChannel().getEndpoint())){
+				throw new UnprocessableEntityException("Rest-hook subscriptions must have Subscription.channel.endpoint defined");
+			}
 		}
 
 		RuntimeResourceDefinition resDef;

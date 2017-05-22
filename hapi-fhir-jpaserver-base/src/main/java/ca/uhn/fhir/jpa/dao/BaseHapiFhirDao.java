@@ -378,6 +378,9 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 				try {
 					valueOf = translateForcedIdToPid(typeString, id);
 				} catch (ResourceNotFoundException e) {
+					if (myConfig.isEnforceReferentialIntegrityOnWrite() == false) {
+						continue;
+					}
 					String resName = getContext().getResourceDefinition(type).getName();
 					throw new InvalidRequestException("Resource " + resName + "/" + id + " not found, specified in path: " + nextPathsUnsplit);
 				}
