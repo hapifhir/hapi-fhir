@@ -31,12 +31,11 @@
 			<artifactId>commons-lang3</artifactId>
 			<version>3.5</version>
 		</dependency>
+-->
 		<dependency>
 			<groupId>net.sf.saxon</groupId>
 			<artifactId>Saxon-HE</artifactId>
-			<version>9.5.1-5</version>
 		</dependency>
--->
 
 		<dependency>
 			<groupId>org.apache.commons</groupId>
