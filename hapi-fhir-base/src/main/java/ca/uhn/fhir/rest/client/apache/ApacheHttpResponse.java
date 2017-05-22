@@ -1,7 +1,5 @@
 package ca.uhn.fhir.rest.client.apache;
 
-import static org.hamcrest.Matchers.array;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -12,7 +10,7 @@ import static org.hamcrest.Matchers.array;
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  * 
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -64,7 +62,7 @@ public class ApacheHttpResponse implements IHttpResponse {
 		this.myResponse = theResponse;
 	}
 
-	@Deprecated //override deprecated method
+	@Deprecated // override deprecated method
 	@Override
 	public void bufferEntitity() throws IOException {
 		bufferEntity();
@@ -81,7 +79,7 @@ public class ApacheHttpResponse implements IHttpResponse {
 			try {
 				this.myEntityBytes = IOUtils.toByteArray(respEntity);
 			} catch (IllegalStateException e) {
-				//FIXME resouce leak
+				// FIXME resouce leak
 				throw new InternalErrorException(e);
 			}
 		}
