@@ -27,7 +27,7 @@ import ca.uhn.fhir.jpa.demo.FhirServerConfigDstu3;
 
 public class RunServerCommand extends BaseCommand {
 
-	private static final String DISABLE_REFERENTIAL_INTEGRITY = "disable-referential-integrity";
+	private static final String OPTION_DISABLE_REFERENTIAL_INTEGRITY = "disable-referential-integrity";
 	private static final String OPTION_LOWMEM = "lowmem";
 	private static final String OPTION_ALLOW_EXTERNAL_REFS = "allow-external-refs";
 	private static final int DEFAULT_PORT = 8080;
@@ -50,7 +50,7 @@ public class RunServerCommand extends BaseCommand {
 		options.addOption(OPTION_P, "port", true, "The port to listen on (default is " + DEFAULT_PORT + ")");
 		options.addOption(null, OPTION_LOWMEM, false, "If this flag is set, the server will operate in low memory mode (some features disabled)");
 		options.addOption(null, OPTION_ALLOW_EXTERNAL_REFS, false, "If this flag is set, the server will allow resources to be persisted contaning external resource references");
-		options.addOption(null, DISABLE_REFERENTIAL_INTEGRITY, false, "If this flag is set, the server will not enforce referential integrity");
+		options.addOption(null, OPTION_DISABLE_REFERENTIAL_INTEGRITY, false, "If this flag is set, the server will not enforce referential integrity");
 		return options;
 	}
 
@@ -74,6 +74,11 @@ public class RunServerCommand extends BaseCommand {
 		if (theCommandLine.hasOption(OPTION_ALLOW_EXTERNAL_REFS)) {
 			ourLog.info("Server is configured to allow external references");
 			ContextHolder.setAllowExternalRefs(true);
+		}
+
+		if (theCommandLine.hasOption(OPTION_DISABLE_REFERENTIAL_INTEGRITY)) {
+			ourLog.info("Server is configured to not enforce referential integrity");
+			ContextHolder.setDisableReferentialIntegrity(true);
 		}
 
 		ContextHolder.setCtx(getSpecVersionContext(theCommandLine));

@@ -32,52 +32,10 @@ import java.util.Map;
 public interface IHttpResponse {
 
 	/**
-	 * Get the status code associated with the response.
-	 * 
-	 * @return the response status code.
+	 * @deprecated This method was deprecated in HAPI FHIR 2.2 because its name has a typo. Use {@link #bufferEntity()} instead.
 	 */
-	public int getStatus();
-
-	/**
-	 * @return the native response, depending on the client library used
-	 */
-	Object getResponse();
-
-	/**
-	 * Extracts {@code Content-Type} value from the response exactly as
-	 * specified by the {@code Content-Type} header. Returns {@code null}
-	 * if not specified.
-	 */
-	public String getMimeType();
-
-	/**
-	 * Get map of the response headers and corresponding string values.
-	 * 
-	 * @return response headers as a map header keys and they values.
-	 */
-	public Map<String, List<String>> getAllHeaders();
-
-	/**
-	 * Get the response status information reason phrase associated with the response.
-	 * 
-	 * @return the reason phrase.
-	 */
-	public String getStatusInfo();
-
-	/**
-	 * Returna reader for the response entity
-	 */
-	public Reader createReader() throws IOException;
-
-	/**
-	 * Read the message entity input stream as an InputStream.
-	 */
-	public InputStream readEntity() throws IOException;
-
-	/**
-	 * Close the response
-	 */
-	public void close();
+	@Deprecated
+	void bufferEntitity() throws IOException;
 
 	/**
 	 * Buffer the message entity data.
@@ -105,9 +63,56 @@ public interface IHttpResponse {
 	void bufferEntity() throws IOException;
 
 	/**
-	 * @deprecated This method was deprecated in HAPI FHIR 2.2 because its name has a typo. Use {@link #bufferEntity()} instead.
+	 * Close the response
 	 */
-	@Deprecated
-	void bufferEntitity() throws IOException;
+	public void close();
+
+	/**
+	 * Returna reader for the response entity
+	 */
+	public Reader createReader() throws IOException;
+
+	/**
+	 * Get map of the response headers and corresponding string values.
+	 * 
+	 * @return response headers as a map header keys and they values.
+	 */
+	public Map<String, List<String>> getAllHeaders();
+
+	/**
+	 * Return all headers in the response with the given type 
+	 */
+	public List<String> getHeaders(String theName);
+
+	/**
+	 * Extracts {@code Content-Type} value from the response exactly as
+	 * specified by the {@code Content-Type} header. Returns {@code null}
+	 * if not specified.
+	 */
+	public String getMimeType();
+
+	/**
+	 * @return the native response, depending on the client library used
+	 */
+	Object getResponse();
+
+	/**
+	 * Get the status code associated with the response.
+	 * 
+	 * @return the response status code.
+	 */
+	public int getStatus();
+
+	/**
+	 * Get the response status information reason phrase associated with the response.
+	 * 
+	 * @return the reason phrase.
+	 */
+	public String getStatusInfo();
+
+	/**
+	 * Read the message entity input stream as an InputStream.
+	 */
+	public InputStream readEntity() throws IOException;
 
 }

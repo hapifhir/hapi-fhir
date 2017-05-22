@@ -87,6 +87,11 @@ public class OkHttpRestfulResponse implements IHttpResponse {
 	}
 
 	@Override
+	public List<String> getHeaders(String theName) {
+		return myResponse.headers(theName);
+	}
+
+	@Override
 	public String getMimeType() {
 		String contentType = myResponse.header(Constants.HEADER_CONTENT_TYPE);
 		MediaType mediaType = null;

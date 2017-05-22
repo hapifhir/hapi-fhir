@@ -137,6 +137,8 @@ public class HomeRequest {
 		} else {
 			retVal = (GenericClient) theContext.newRestfulGenericClient(getServerBase(theRequest, theConfig));
 		}
+		
+		retVal.registerInterceptor(new BufferResponseInterceptor());
 
 		retVal.setKeepResponses(true);
 

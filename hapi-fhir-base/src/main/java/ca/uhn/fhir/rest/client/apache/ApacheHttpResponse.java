@@ -1,5 +1,7 @@
 package ca.uhn.fhir.rest.client.apache;
 
+import static org.hamcrest.Matchers.array;
+
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -28,6 +30,7 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -134,6 +137,19 @@ public class ApacheHttpResponse implements IHttpResponse {
 
 		}
 		return headers;
+	}
+
+	@Override
+	public List<String> getHeaders(String theName) {
+		Header[] headers = myResponse.getHeaders(theName);
+		if (headers == null) {
+			headers = new Header[0];
+		}
+		List<String> retVal = new ArrayList<String>();
+		for (Header next : headers) {
+			retVal.add(next.getValue());
+		}
+		return retVal;
 	}
 
 	@Override

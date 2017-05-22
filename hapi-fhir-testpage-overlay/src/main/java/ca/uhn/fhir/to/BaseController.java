@@ -598,7 +598,7 @@ public class BaseController {
 				lastResponse.bufferEntity();
 				resultBody = IOUtils.toString(lastResponse.readEntity(), Constants.CHARSET_UTF8);
 				
-				List<String> ctStrings = lastResponse.getAllHeaders().get(Constants.HEADER_CONTENT_TYPE);
+				List<String> ctStrings = lastResponse.getHeaders(Constants.HEADER_CONTENT_TYPE);
 				if (ctStrings != null && ctStrings.isEmpty() == false) {
 					ct = ContentType.parse(ctStrings.get(0));
 					mimeType = ct.getMimeType();
