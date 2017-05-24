@@ -205,6 +205,26 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 		
 	}
+	
+	@Test
+	public void testEverythingWithOnlyPatient() {
+		Patient p = new Patient();
+		p.setActive(true);
+		IIdType id = ourClient.create().resource(p).execute().getId().toUnqualifiedVersionless();
+		
+		myFhirCtx.getRestfulClientFactory().setSocketTimeout(300 * 1000);
+		
+		Bundle response = ourClient
+			.operation()
+			.onInstance(id)
+			.named("everything")
+			.withNoParameters(Parameters.class)
+			.returnResourceType(Bundle.class)
+			.execute();
+		
+		assertEquals(1, response.getEntry().size());
+	}
+	
 
 	
 	@Test

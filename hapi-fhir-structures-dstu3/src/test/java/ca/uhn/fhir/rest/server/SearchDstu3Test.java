@@ -1,6 +1,7 @@
 package ca.uhn.fhir.rest.server;
 
-import static org.junit.Assert.assertEquals;
+import static org.hamcrest.Matchers.containsString;
+import static org.junit.Assert.*;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -26,9 +27,15 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
+import ca.uhn.fhir.rest.client.IGenericClient;
+import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
+import ca.uhn.fhir.rest.gclient.StringClientParam;
+import ca.uhn.fhir.rest.method.SearchStyleEnum;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.PortUtil;
 import ca.uhn.fhir.util.TestUtil;
 
@@ -87,6 +94,34 @@ public class SearchDstu3Test {
 
 	}
 
+	@Test
+	public void testSearchWithPostAndInvalidParameters() throws Exception {
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort);
+		LoggingInterceptor interceptor = new LoggingInterceptor();
+		interceptor.setLogRequestSummary(true);
+		interceptor.setLogRequestBody(true);
+		interceptor.setLogRequestHeaders(false);
+		interceptor.setLogResponseBody(false);
+		interceptor.setLogResponseHeaders(false);
+		interceptor.setLogResponseSummary(false);
+		client.registerInterceptor(interceptor);
+		try {
+			client
+					.search()
+					.forResource(Patient.class)
+					.where(new StringClientParam("foo").matches().value("bar"))
+					.encodedJson()
+					.prettyPrint()
+					.usingStyle(SearchStyleEnum.POST)
+					.returnBundle(org.hl7.fhir.dstu3.model.Bundle.class)
+					.execute();
+			fail();
+		} catch (InvalidRequestException e) {
+			assertThat(e.getMessage(), containsString("Invalid request: The FHIR endpoint on this server does not know how to handle POST operation[Patient/_search] with parameters [[_pretty, foo]]"));
+		}
+
+	}
+
 	@AfterClass
 	public static void afterClassClearContext() throws Exception {
 		ourServer.stop();
@@ -134,7 +169,6 @@ public class SearchDstu3Test {
 			retVal.add((Patient) new Patient().addName(new HumanName().setFamily("FAMILY")).setId("1"));
 			return retVal;
 		}
-
 
 	}
 

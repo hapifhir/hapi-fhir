@@ -1268,6 +1268,8 @@ public class SearchBuilder implements ISearchBuilder {
 
 	}
 
+	private List<Long> myAlsoIncludePids;
+	
 	private TypedQuery<Long> createQuery(SortSpec sort) {
 		CriteriaQuery<Long> outerQuery;
 		/*
@@ -1329,6 +1331,10 @@ public class SearchBuilder implements ISearchBuilder {
 			if (myParams.get(BaseResource.SP_RES_ID) != null) {
 				StringParam idParm = (StringParam) myParams.get(BaseResource.SP_RES_ID).get(0).get(0);
 				Long pid = BaseHapiFhirDao.translateForcedIdToPid(myResourceName, idParm.getValue(), myForcedIdDao);
+				if (myAlsoIncludePids == null) {
+					myAlsoIncludePids = new ArrayList<Long>(1);
+				}
+				myAlsoIncludePids.add(pid);
 				myPredicates.add(myBuilder.equal(join.get("myTargetResourcePid").as(Long.class), pid));
 			} else {
 				Predicate targetTypePredicate = myBuilder.equal(join.get("myTargetResourceType").as(String.class), myResourceName);
@@ -1931,6 +1937,7 @@ public class SearchBuilder implements ISearchBuilder {
 		private final Set<Long> myPidSet = new HashSet<Long>();
 		private Iterator<Long> myResultsIterator;
 		private SortSpec mySort;
+		private Iterator<Long> myPreResultsIterator;
 
 		private QueryIterator() {
 			mySort = myParams.getSort();
@@ -1938,19 +1945,39 @@ public class SearchBuilder implements ISearchBuilder {
 
 		private void fetchNext() {
 
-			// If we don't have
+			// If we don't have a query yet, create one
 			if (myResultsIterator == null) {
 				final TypedQuery<Long> query = createQuery(mySort);
 				myResultsIterator = query.getResultList().iterator();
+
+				// If the query resulted in extra results being requested
+				if (myAlsoIncludePids != null) {
+					myPreResultsIterator = myAlsoIncludePids.iterator();
+				}
 			}
+			
 			if (myNext == null) {
-				while (myResultsIterator.hasNext()) {
-					Long next = myResultsIterator.next();
-					if (next != null && myPidSet.add(next)) {
-						myNext = next;
-						break;
+				
+				if (myPreResultsIterator != null && myPreResultsIterator.hasNext()) {
+					while (myPreResultsIterator.hasNext()) {
+						Long next = myPreResultsIterator.next();
+						if (next != null && myPidSet.add(next)) {
+							myNext = next;
+							break;
+						}
+					}
+				} 
+				
+				if (myNext == null) {
+					while (myResultsIterator.hasNext()) {
+						Long next = myResultsIterator.next();
+						if (next != null && myPidSet.add(next)) {
+							myNext = next;
+							break;
+						}
 					}
 				}
+			
 				if (myNext == null) {
 					myNext = NO_MORE;
 				}
