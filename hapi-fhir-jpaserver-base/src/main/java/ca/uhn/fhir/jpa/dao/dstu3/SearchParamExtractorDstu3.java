@@ -60,7 +60,7 @@ public class SearchParamExtractorDstu3 extends BaseSearchParamExtractor implemen
 
 	@Autowired
 	private org.hl7.fhir.dstu3.hapi.validation.IValidationSupport myValidationSupport;
-	
+
 	/**
 	 * Constructor
 	 */
@@ -129,11 +129,6 @@ public class SearchParamExtractorDstu3 extends BaseSearchParamExtractor implemen
 			for (Object nextObject : extractValues(nextPath, theResource)) {
 				if (nextObject == null) {
 					continue;
-				}
-				
-				if (nextObject instanceof Extension) {
-					Extension nextExtension = (Extension)nextObject;
-					nextObject  = nextExtension.getValue();
 				}
 
 				ResourceIndexedSearchParamDate nextEntity;
@@ -314,7 +309,7 @@ public class SearchParamExtractorDstu3 extends BaseSearchParamExtractor implemen
 					Quantity nextValue = (Quantity) nextObject;
 					addQuantity(theEntity, retVal, resourceName, nextValue);
 				} else if (nextObject instanceof Range) {
-					Range nextValue = (Range)nextObject;
+					Range nextValue = (Range) nextObject;
 					addQuantity(theEntity, retVal, resourceName, nextValue.getLow());
 					addQuantity(theEntity, retVal, resourceName, nextValue.getHigh());
 				} else if (nextObject instanceof LocationPositionComponent) {
@@ -365,15 +360,15 @@ public class SearchParamExtractorDstu3 extends BaseSearchParamExtractor implemen
 
 			if (isBlank(nextPath)) {
 
-//				// TODO: implement phonetic, and any others that have no path
-//
-//				// TODO: do we still need this check?
-//				if ("Questionnaire".equals(nextSpName) && nextSpDef.getName().equals("title")) {
-//					Questionnaire q = (Questionnaire) theResource;
-//					String title = "";// q.getGroup().getTitle();
-//					addSearchTerm(theEntity, retVal, nextSpName, title);
-//				}
-				
+				// // TODO: implement phonetic, and any others that have no path
+				//
+				// // TODO: do we still need this check?
+				// if ("Questionnaire".equals(nextSpName) && nextSpDef.getName().equals("title")) {
+				// Questionnaire q = (Questionnaire) theResource;
+				// String title = "";// q.getGroup().getTitle();
+				// addSearchTerm(theEntity, retVal, nextSpName, title);
+				// }
+
 				continue;
 			}
 
@@ -487,18 +482,12 @@ public class SearchParamExtractorDstu3 extends BaseSearchParamExtractor implemen
 			// needContactPointSystem = "email";
 			// }
 
-			
 			for (Object nextObject : extractValues(nextPath, theResource)) {
-				
-				if (nextObject instanceof Extension) {
-					Extension nextExtension = (Extension)nextObject;
-					nextObject  = nextExtension.getValue();
-				}
 
 				if (nextObject == null) {
 					continue;
 				}
-				
+
 				// Patient:language
 				if (nextObject instanceof PatientCommunicationComponent) {
 					PatientCommunicationComponent nextValue = (PatientCommunicationComponent) nextObject;
@@ -707,6 +696,16 @@ public class SearchParamExtractorDstu3 extends BaseSearchParamExtractor implemen
 		} catch (FHIRException e) {
 			throw new InternalErrorException(e);
 		}
+
+		for (int i = 0; i < values.size(); i++) {
+			Object nextObject = values.get(i);
+			if (nextObject instanceof Extension) {
+				Extension nextExtension = (Extension) nextObject;
+				nextObject = nextExtension.getValue();
+				values.set(i, nextObject);
+			}
+		}
+
 		return values;
 	}
 

@@ -1280,7 +1280,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 			ourLog.info(output);
 			List<IdDt> ids = toIdListUnqualifiedVersionless(myFhirCtx.newXmlParser().parseBundle(output));
 			ourLog.info(ids.toString());
-			assertThat(ids, containsInAnyOrder(cId));
+			assertThat(ids, containsInAnyOrder(pId, cId));
 		} finally {
 			response.close();
 		}
