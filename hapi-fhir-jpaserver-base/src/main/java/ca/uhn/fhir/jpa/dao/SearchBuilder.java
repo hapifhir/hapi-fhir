@@ -146,6 +146,7 @@ public class SearchBuilder implements ISearchBuilder {
 	private Class<? extends IBaseResource> myResourceType;
 	private ISearchParamRegistry mySearchParamRegistry;
 	private IHapiTerminologySvc myTerminologySvc;
+	private String mySearchUuid;
 
 	/**
 	 * Constructor
@@ -1260,12 +1261,12 @@ public class SearchBuilder implements ISearchBuilder {
 	}
 
 	@Override
-	public Iterator<Long> createQuery(SearchParameterMap theParams) {
+	public Iterator<Long> createQuery(SearchParameterMap theParams, String theSearchUuid) {
 		myParams = theParams;
 		myBuilder = myEntityManager.getCriteriaBuilder();
+		mySearchUuid = theSearchUuid;
 
 		return new QueryIterator();
-
 	}
 
 	private List<Long> myAlsoIncludePids;
@@ -1938,6 +1939,7 @@ public class SearchBuilder implements ISearchBuilder {
 		private Iterator<Long> myResultsIterator;
 		private SortSpec mySort;
 		private Iterator<Long> myPreResultsIterator;
+		private boolean myFirst = true;
 
 		private QueryIterator() {
 			mySort = myParams.getSort();
@@ -1945,6 +1947,11 @@ public class SearchBuilder implements ISearchBuilder {
 
 		private void fetchNext() {
 
+			StopWatch sw = null;
+			if (myFirst) {
+				sw = new StopWatch();
+			}
+			
 			// If we don't have a query yet, create one
 			if (myResultsIterator == null) {
 				final TypedQuery<Long> query = createQuery(mySort);
@@ -1981,6 +1988,15 @@ public class SearchBuilder implements ISearchBuilder {
 				if (myNext == null) {
 					myNext = NO_MORE;
 				}
+				
+			} // if we need to fetch the next result
+			
+			if (myFirst) {
+				ourLog.info("Initial query result returned in {}ms for query {}", sw, mySearchUuid);
+				myFirst = false;
+			}
+			if (myNext == NO_MORE) {
+				ourLog.info("Query found {} matches in {}ms for query {}", myPidSet.size(), sw, mySearchUuid);
 			}
 		}
 

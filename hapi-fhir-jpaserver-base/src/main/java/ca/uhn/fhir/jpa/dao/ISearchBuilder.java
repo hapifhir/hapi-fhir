@@ -35,7 +35,7 @@ import ca.uhn.fhir.rest.param.DateRangeParam;
 
 public interface ISearchBuilder {
 
-	Iterator<Long> createQuery(SearchParameterMap theParams);
+	Iterator<Long> createQuery(SearchParameterMap theParams, String theSearchUuid);
 
 	void setType(Class<? extends IBaseResource> theResourceType, String theResourceName);
 

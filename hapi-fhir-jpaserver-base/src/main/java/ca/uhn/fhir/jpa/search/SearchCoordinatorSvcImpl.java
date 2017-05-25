@@ -219,6 +219,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 	@Override
 	public IBundleProvider registerSearch(final IDao theCallingDao, SearchParameterMap theParams, String theResourceType) {
 		StopWatch w = new StopWatch();
+		String searchUuid = UUID.randomUUID().toString();
 
 		Class<? extends IBaseResource> resourceTypeClass = myContext.getResourceDefinition(theResourceType).getImplementingClass();
 		final ISearchBuilder sb = theCallingDao.newSearchBuilder();
@@ -229,7 +230,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 			// Load the results synchronously
 			final List<Long> pids = new ArrayList<Long>();
 
-			Iterator<Long> resultIter = sb.createQuery(theParams);
+			Iterator<Long> resultIter = sb.createQuery(theParams, searchUuid);
 			while (resultIter.hasNext()) {
 				pids.add(resultIter.next());
 				if (theParams.getLoadSynchronousUpTo() != null && pids.size() >= theParams.getLoadSynchronousUpTo()) {
@@ -310,7 +311,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 		}
 
 		Search search = new Search();
-		search.setUuid(UUID.randomUUID().toString());
+		search.setUuid(searchUuid);
 		search.setCreated(new Date());
 		search.setSearchLastReturned(new Date());
 		search.setTotalCount(null);
@@ -331,7 +332,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 			search.getIncludes().add(new SearchInclude(search, next.getValue(), true, next.isRecurse()));
 		}
 
-		SearchTask task = new SearchTask(search, theCallingDao, theParams, theResourceType);
+		SearchTask task = new SearchTask(search, theCallingDao, theParams, theResourceType, searchUuid);
 		myIdToSearchTask.put(search.getUuid(), task);
 		myExecutor.submit(task);
 
@@ -439,13 +440,15 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 		private final Search mySearch;
 		private final ArrayList<Long> mySyncedPids = new ArrayList<Long>();
 		private final ArrayList<Long> myUnsyncedPids = new ArrayList<Long>();
+		private String mySearchUuid;
 
-		public SearchTask(Search theSearch, IDao theCallingDao, SearchParameterMap theParams, String theResourceType) {
+		public SearchTask(Search theSearch, IDao theCallingDao, SearchParameterMap theParams, String theResourceType, String theSearchUuid) {
 			mySearch = theSearch;
 			myCallingDao = theCallingDao;
 			myParams = theParams;
 			myResourceType = theResourceType;
 			myCompletionLatch = new CountDownLatch(1);
+			mySearchUuid = theSearchUuid;
 		}
 
 		public void awaitInitialSync() {
@@ -537,7 +540,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 			Class<? extends IBaseResource> resourceTypeClass = myContext.getResourceDefinition(myResourceType).getImplementingClass();
 			ISearchBuilder sb = myCallingDao.newSearchBuilder();
 			sb.setType(resourceTypeClass, myResourceType);
-			Iterator<Long> theResultIter = sb.createQuery(myParams);
+			Iterator<Long> theResultIter = sb.createQuery(myParams, mySearchUuid);
 
 			while (theResultIter.hasNext()) {
 				myUnsyncedPids.add(theResultIter.next());

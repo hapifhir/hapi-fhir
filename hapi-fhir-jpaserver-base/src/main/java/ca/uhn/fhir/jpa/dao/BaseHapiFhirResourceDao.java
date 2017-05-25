@@ -928,7 +928,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		
 		HashSet<Long> retVal = new HashSet<Long>();
 		
-		Iterator<Long> iter = builder.createQuery(theParams);
+		String uuid = UUID.randomUUID().toString();
+		Iterator<Long> iter = builder.createQuery(theParams, uuid);
 		while (iter.hasNext()) {
 			retVal.add(iter.next());
 		}

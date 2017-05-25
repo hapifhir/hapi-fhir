@@ -7,9 +7,10 @@
 	</head>
 
 	<body>
-		<form action="" method="get" id="outerForm">
-		<input type="hidden" id="serverId" name="serverId" th:value="${serverId}"/> 
-
+		<form action="#" method="get" id="outerForm">
+		<input type="hidden" id="serverId" name="serverId" th:value="${serverId}"/>
+		<input th:if="${_csrf} != null" type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+  
 		<div th:replace="tmpl-navbar-top :: top" ></div>
 		
 		<div class="container-fluid">

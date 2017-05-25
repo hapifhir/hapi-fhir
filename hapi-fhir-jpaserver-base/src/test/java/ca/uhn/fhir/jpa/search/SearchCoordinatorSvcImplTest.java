@@ -149,7 +149,7 @@ public class SearchCoordinatorSvcImplTest {
 
 		List<Long> pids = createPidSequence(10, 800);
 		Iterator<Long> iter = new FailAfterNIterator<Long>(new SlowIterator<Long>(pids.iterator(), 2), 300);
-		when(mySearchBuider.createQuery(Mockito.same(params))).thenReturn(iter);
+		when(mySearchBuider.createQuery(Mockito.same(params), any(String.class))).thenReturn(iter);
 
 		doAnswer(loadPids()).when(mySearchBuider).loadResourcesByPid(any(List.class), any(List.class), any(Set.class), anyBoolean(), any(EntityManager.class), any(FhirContext.class), same(myCallingDao));
 
@@ -165,6 +165,9 @@ public class SearchCoordinatorSvcImplTest {
 
 	}
 
+	private String newUuid() {
+		return UUID.randomUUID().toString();
+	}
 	@Test
 	public void testAsyncSearchLargeResultSetBigCountSameCoordinator() {
 		SearchParameterMap params = new SearchParameterMap();
@@ -172,7 +175,7 @@ public class SearchCoordinatorSvcImplTest {
 
 		List<Long> pids = createPidSequence(10, 800);
 		Iterator<Long> iter = new SlowIterator<Long>(pids.iterator(), 2);
-		when(mySearchBuider.createQuery(Mockito.same(params))).thenReturn(iter);
+		when(mySearchBuider.createQuery(Mockito.same(params), any(String.class))).thenReturn(iter);
 
 		doAnswer(loadPids()).when(mySearchBuider).loadResourcesByPid(any(List.class), any(List.class), any(Set.class), anyBoolean(), any(EntityManager.class), any(FhirContext.class), same(myCallingDao));
 
@@ -208,7 +211,7 @@ public class SearchCoordinatorSvcImplTest {
 
 		List<Long> pids = createPidSequence(10, 800);
 		SlowIterator<Long> iter = new SlowIterator<Long>(pids.iterator(), 2);
-		when(mySearchBuider.createQuery(Mockito.same(params))).thenReturn(iter);
+		when(mySearchBuider.createQuery(Mockito.same(params), any(String.class))).thenReturn(iter);
 
 		doAnswer(loadPids()).when(mySearchBuider).loadResourcesByPid(any(List.class), any(List.class), any(Set.class), anyBoolean(), any(EntityManager.class), any(FhirContext.class), same(myCallingDao));
 
@@ -236,7 +239,7 @@ public class SearchCoordinatorSvcImplTest {
 
 		List<Long> pids = createPidSequence(10, 800);
 		Iterator<Long> iter = new SlowIterator<Long>(pids.iterator(), 2);
-		when(mySearchBuider.createQuery(Mockito.same(params))).thenReturn(iter);
+		when(mySearchBuider.createQuery(Mockito.same(params), any(String.class))).thenReturn(iter);
 
 		doAnswer(loadPids()).when(mySearchBuider).loadResourcesByPid(any(List.class), any(List.class), any(Set.class), anyBoolean(), any(EntityManager.class), any(FhirContext.class), same(myCallingDao));
 
@@ -286,7 +289,7 @@ public class SearchCoordinatorSvcImplTest {
 
 		List<Long> pids = createPidSequence(10, 100);
 		SlowIterator<Long> iter = new SlowIterator<Long>(pids.iterator(), 2);
-		when(mySearchBuider.createQuery(Mockito.same(params))).thenReturn(iter);
+		when(mySearchBuider.createQuery(Mockito.same(params), any(String.class))).thenReturn(iter);
 
 		doAnswer(loadPids()).when(mySearchBuider).loadResourcesByPid(any(List.class), any(List.class), any(Set.class), anyBoolean(), any(EntityManager.class), any(FhirContext.class), same(myCallingDao));
 
@@ -374,7 +377,7 @@ public class SearchCoordinatorSvcImplTest {
 		params.add("name", new StringParam("ANAME"));
 
 		List<Long> pids = createPidSequence(10, 800);
-		when(mySearchBuider.createQuery(Mockito.same(params))).thenReturn(pids.iterator());
+		when(mySearchBuider.createQuery(Mockito.same(params), any(String.class))).thenReturn(pids.iterator());
 
 		doAnswer(loadPids()).when(mySearchBuider).loadResourcesByPid(eq(pids), any(List.class), any(Set.class), anyBoolean(), any(EntityManager.class), any(FhirContext.class), same(myCallingDao));
 
@@ -395,7 +398,7 @@ public class SearchCoordinatorSvcImplTest {
 		params.add("name", new StringParam("ANAME"));
 
 		List<Long> pids = createPidSequence(10, 800);
-		when(mySearchBuider.createQuery(Mockito.same(params))).thenReturn(pids.iterator());
+		when(mySearchBuider.createQuery(Mockito.same(params), any(String.class))).thenReturn(pids.iterator());
 
 		pids = createPidSequence(10, 110);
 		doAnswer(loadPids()).when(mySearchBuider).loadResourcesByPid(eq(pids), any(List.class), any(Set.class), anyBoolean(), any(EntityManager.class), any(FhirContext.class), same(myCallingDao));
