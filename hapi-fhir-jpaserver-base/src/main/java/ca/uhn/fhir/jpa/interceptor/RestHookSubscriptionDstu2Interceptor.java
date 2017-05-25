@@ -89,11 +89,19 @@ public class RestHookSubscriptionDstu2Interceptor extends InterceptorAdapter imp
 	private void checkSubscriptions(IIdType idType, String resourceType, RestOperationTypeEnum theOperation) {
 		for (Subscription subscription : myRestHookSubscriptions) {
 			// see if the criteria matches the created object
-			ourLog.info("subscription for " + resourceType + " with criteria " + subscription.getCriteria());
-			if (resourceType != null && subscription.getCriteria() != null && !subscription.getCriteria().startsWith(resourceType)) {
-				ourLog.info("Skipping subscription search for " + resourceType + " because it does not match the criteria " + subscription.getCriteria());
+			ourLog.info("Checking subscription {} for {} with criteria {}", subscription.getIdElement().getIdPart(), resourceType, subscription.getCriteria());
+
+			String criteriaResource = subscription.getCriteria();
+			int index = criteriaResource.indexOf("?");
+			if (index != -1) {
+				criteriaResource = criteriaResource.substring(0, criteriaResource.indexOf("?"));
+			}
+
+			if (resourceType != null && subscription.getCriteria() != null && !criteriaResource.equals(resourceType)) {
+				ourLog.info("Skipping subscription search for {} because it does not match the criteria {}", resourceType , subscription.getCriteria());
 				continue;
 			}
+
 			// run the subscriptions query and look for matches, add the id as part of the criteria to avoid getting matches of previous resources rather than the recent resource
 			String criteria = subscription.getCriteria();
 			criteria += "&_id=" + idType.getResourceType() + "/" + idType.getIdPart();
@@ -328,13 +336,13 @@ public class RestHookSubscriptionDstu2Interceptor extends InterceptorAdapter imp
 	/**
 	 * Check subscriptions to see if there is a matching subscription when there is delete
 	 *
-	 * @param theRequestDetails
+	 * @param theRequest
 	 *           A bean containing details about the request that is about to be processed, including details such as the
 	 *           resource type and logical ID (if any) and other FHIR-specific aspects of the request which have been
 	 *           pulled out of the {@link HttpServletRequest servlet request}.
 	 * @param theRequest
 	 *           The incoming request
-	 * @param theResponse
+	 * @param theResource
 	 *           The response. Note that interceptors may choose to provide a response (i.e. by calling
 	 *           {@link HttpServletResponse#getWriter()}) but in that case it is important to return <code>false</code>
 	 *           to indicate that the server itself should not also provide a response.
