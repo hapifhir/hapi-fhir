@@ -66,7 +66,7 @@ public class Base64BinaryType extends PrimitiveType<byte[]> {
     if (theValue == null) {
       return null;
     }
-    return new String(Base64.encodeBase64Chunked(theValue), Constants.CHARSET_UTF8);
+    return new String(Base64.encodeBase64(theValue), Constants.CHARSET_UTF8);
   }
 
   @Override
