@@ -1940,6 +1940,7 @@ public class SearchBuilder implements ISearchBuilder {
 		private SortSpec mySort;
 		private Iterator<Long> myPreResultsIterator;
 		private boolean myFirst = true;
+		private StopWatch myStopwatch = null;
 
 		private QueryIterator() {
 			mySort = myParams.getSort();
@@ -1947,9 +1948,8 @@ public class SearchBuilder implements ISearchBuilder {
 
 		private void fetchNext() {
 
-			StopWatch sw = null;
 			if (myFirst) {
-				sw = new StopWatch();
+				myStopwatch = new StopWatch();
 			}
 			
 			// If we don't have a query yet, create one
@@ -1992,11 +1992,11 @@ public class SearchBuilder implements ISearchBuilder {
 			} // if we need to fetch the next result
 			
 			if (myFirst) {
-				ourLog.info("Initial query result returned in {}ms for query {}", sw, mySearchUuid);
+				ourLog.info("Initial query result returned in {}ms for query {}", myStopwatch.getMillis(), mySearchUuid);
 				myFirst = false;
 			}
 			if (myNext == NO_MORE) {
-				ourLog.info("Query found {} matches in {}ms for query {}", myPidSet.size(), sw, mySearchUuid);
+				ourLog.info("Query found {} matches in {}ms for query {}", myPidSet.size(), myStopwatch.getMillis(), mySearchUuid);
 			}
 		}
 

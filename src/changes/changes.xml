@@ -137,6 +137,11 @@
 				JPA server did not correctly support searching on a custom search parameter whose
 				path pointed to an extension, where the client used a chained value.
 			</action>
+			<action type="fix">
+				Fix dependency on commons-codec 1.4 in hapi-fhir-structures-dstu3, which was
+				preventing this library from being used on Android because Android includes
+				an older version of commons-codec.
+			</action>
 		</release>
 		<release version="2.4" date="2017-04-19">
 			<action type="add">
