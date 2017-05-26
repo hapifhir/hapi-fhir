@@ -1,9 +1,16 @@
 package org.hl7.fhir.dstu3.model;
 
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.either;
-import static org.hamcrest.Matchers.endsWith;
-import static org.junit.Assert.*;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.parser.DataFormatException;
+import ca.uhn.fhir.util.TestUtil;
+import ca.uhn.fhir.validation.ValidationResult;
+import org.apache.commons.lang3.time.FastDateFormat;
+import org.hamcrest.Matchers;
+import org.junit.AfterClass;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
@@ -14,20 +21,8 @@ import java.util.GregorianCalendar;
 import java.util.Locale;
 import java.util.TimeZone;
 
-import org.apache.commons.lang3.time.FastDateFormat;
-import org.hamcrest.Matchers;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
-
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.parser.DataFormatException;
-import ca.uhn.fhir.parser.IParser;
-import ca.uhn.fhir.util.TestUtil;
-import ca.uhn.fhir.validation.ValidationResult;
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
 
 public class BaseDateTimeTypeDstu3Test {
 	private static FhirContext ourCtx = FhirContext.forDstu3();
@@ -458,7 +453,7 @@ public class BaseDateTimeTypeDstu3Test {
 			dt.setValueAsString("1974-12-25+10:00");
 			fail();
 		} catch (ca.uhn.fhir.parser.DataFormatException e) {
-			assertEquals("Invalid date/time format: \"1974-12-25+10:00\"", e.getMessage());
+			assertEquals("Invalid date/time format: \"1974-12-25+10:00\": Expected character 'T' at index 10 but found +", e.getMessage());
 		}
 		try {
 			DateTimeType dt = new DateTimeType();
@@ -541,6 +536,29 @@ public class BaseDateTimeTypeDstu3Test {
 	}
 
 	@Test
+	public void testParseMinute() throws DataFormatException {
+		DateTimeType dt = new DateTimeType();
+		dt.setValueAsString("2013-02-03T11:22");
+
+		assertEquals("2013-02-03 11:22", myDateInstantParser.format(dt.getValue()).substring(0, 16));
+		assertEquals("2013-02-03T11:22", dt.getValueAsString());
+		assertEquals(false, dt.isTimeZoneZulu());
+		assertNull(dt.getTimeZone());
+		assertEquals(TemporalPrecisionEnum.MINUTE, dt.getPrecision());
+	}
+
+	@Test
+	public void testParseMinuteZulu() throws DataFormatException {
+		DateTimeType dt = new DateTimeType();
+		dt.setValueAsString("2013-02-03T11:22Z");
+
+		assertEquals("2013-02-03T11:22Z", dt.getValueAsString());
+		assertEquals(true, dt.isTimeZoneZulu());
+		assertEquals("GMT", dt.getTimeZone().getID());
+		assertEquals(TemporalPrecisionEnum.MINUTE, dt.getPrecision());
+	}
+
+	@Test
 	public void testParseSecond() throws DataFormatException {
 		DateTimeType dt = new DateTimeType();
 		dt.setValueAsString("2013-02-03T11:22:33");
@@ -553,7 +571,7 @@ public class BaseDateTimeTypeDstu3Test {
 	}
 
 	@Test
-	public void testParseSecondulu() throws DataFormatException {
+	public void testParseSecondZulu() throws DataFormatException {
 		DateTimeType dt = new DateTimeType();
 		dt.setValueAsString("2013-02-03T11:22:33Z");
 
