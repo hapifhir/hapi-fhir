@@ -142,6 +142,10 @@
 				preventing this library from being used on Android because Android includes
 				an older version of commons-codec.
 			</action>
+			<action type="fix">
+				JPA server failed to index search parameters on paths containing a decimal 
+				data type
+			</action>
 		</release>
 		<release version="2.4" date="2017-04-19">
 			<action type="add">

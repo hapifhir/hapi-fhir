@@ -10,14 +10,7 @@ import static org.junit.Assert.fail;
 import java.io.IOException;
 import java.util.List;
 
-import org.hl7.fhir.dstu3.model.Appointment;
-import org.hl7.fhir.dstu3.model.CodeType;
 import org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGender;
-import org.hl7.fhir.dstu3.model.Patient;
-import org.hl7.fhir.dstu3.model.Practitioner;
-import org.hl7.fhir.dstu3.model.Reference;
-import org.hl7.fhir.dstu3.model.SearchParameter;
-import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.dstu3.model.Appointment.AppointmentStatus;
 import org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGender;
@@ -483,6 +476,43 @@ public class FhirResourceDaoDstu3SearchCustomSearchParamTest extends BaseJpaDstu
 		
 		map = new SearchParameterMap();
 		map.add("foobar", new NumberParam("5"));
+		results = myPatientDao.search(map);
+		foundResources = toUnqualifiedVersionlessIdValues(results);
+		assertThat(foundResources, contains(p2id.getValue()));
+	}
+
+	@Test
+	public void testSearchForExtensionTwoDeepDecimal() {
+		SearchParameter siblingSp = new SearchParameter();
+		siblingSp.addBase("Patient");
+		siblingSp.setCode("foobar");
+		siblingSp.setType(org.hl7.fhir.dstu3.model.Enumerations.SearchParamType.NUMBER);
+		siblingSp.setTitle("FooBar");
+		siblingSp.setExpression("Patient.extension('http://acme.org/foo').extension('http://acme.org/bar')");
+		siblingSp.setXpathUsage(org.hl7.fhir.dstu3.model.SearchParameter.XPathUsageType.NORMAL);
+		siblingSp.setStatus(org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus.ACTIVE);
+		mySearchParameterDao.create(siblingSp, mySrd);
+
+		mySearchParamRegsitry.forceRefresh();
+
+		Patient patient = new Patient();
+		patient.addName().setFamily("P2");
+		Extension extParent = patient
+			.addExtension()
+			.setUrl("http://acme.org/foo");
+		extParent
+				.addExtension()
+				.setUrl("http://acme.org/bar")
+				.setValue(new DecimalType("2.1"));
+		
+		IIdType p2id = myPatientDao.create(patient).getId().toUnqualifiedVersionless();
+
+		SearchParameterMap map;
+		IBundleProvider results;
+		List<String> foundResources;
+		
+		map = new SearchParameterMap();
+		map.add("foobar", new NumberParam("2.1"));
 		results = myPatientDao.search(map);
 		foundResources = toUnqualifiedVersionlessIdValues(results);
 		assertThat(foundResources, contains(p2id.getValue()));
