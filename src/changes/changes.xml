@@ -146,6 +146,9 @@
 				JPA server failed to index search parameters on paths containing a decimal 
 				data type
 			</action>
+			<action type="fix">
+				Validator incorrectly rejected references where only an identifier was populated
+			</action>
 		</release>
 		<release version="2.4" date="2017-04-19">
 			<action type="add">

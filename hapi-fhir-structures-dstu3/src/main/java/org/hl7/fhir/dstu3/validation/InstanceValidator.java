@@ -14,7 +14,6 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.dstu3.conformance.ProfileUtilities;
 import org.hl7.fhir.dstu3.context.IWorkerContext;
 import org.hl7.fhir.dstu3.context.IWorkerContext.ValidationResult;
@@ -28,20 +27,9 @@ import org.hl7.fhir.dstu3.elementmodel.ParserBase;
 import org.hl7.fhir.dstu3.elementmodel.ParserBase.ValidationPolicy;
 import org.hl7.fhir.dstu3.elementmodel.XmlParser;
 import org.hl7.fhir.dstu3.formats.FormatUtilities;
-import org.hl7.fhir.dstu3.model.Address;
-import org.hl7.fhir.dstu3.model.Attachment;
-import org.hl7.fhir.dstu3.model.BooleanType;
-import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
-import org.hl7.fhir.dstu3.model.CodeSystem;
 import org.hl7.fhir.dstu3.model.CodeSystem.ConceptDefinitionComponent;
-import org.hl7.fhir.dstu3.model.CodeableConcept;
-import org.hl7.fhir.dstu3.model.Coding;
-import org.hl7.fhir.dstu3.model.ContactPoint;
-import org.hl7.fhir.dstu3.model.DateType;
-import org.hl7.fhir.dstu3.model.DecimalType;
-import org.hl7.fhir.dstu3.model.DomainResource;
-import org.hl7.fhir.dstu3.model.ElementDefinition;
 import org.hl7.fhir.dstu3.model.ElementDefinition.AggregationMode;
 import org.hl7.fhir.dstu3.model.ElementDefinition.ConstraintSeverity;
 import org.hl7.fhir.dstu3.model.ElementDefinition.DiscriminatorType;
@@ -50,35 +38,14 @@ import org.hl7.fhir.dstu3.model.ElementDefinition.ElementDefinitionConstraintCom
 import org.hl7.fhir.dstu3.model.ElementDefinition.ElementDefinitionSlicingDiscriminatorComponent;
 import org.hl7.fhir.dstu3.model.ElementDefinition.PropertyRepresentation;
 import org.hl7.fhir.dstu3.model.ElementDefinition.TypeRefComponent;
-import org.hl7.fhir.dstu3.model.Enumeration;
 import org.hl7.fhir.dstu3.model.Enumerations.BindingStrength;
-import org.hl7.fhir.dstu3.model.ExpressionNode;
-import org.hl7.fhir.dstu3.model.Extension;
-import org.hl7.fhir.dstu3.model.HumanName;
-import org.hl7.fhir.dstu3.model.Identifier;
-import org.hl7.fhir.dstu3.model.IntegerType;
-import org.hl7.fhir.dstu3.model.Period;
-import org.hl7.fhir.dstu3.model.Quantity;
-import org.hl7.fhir.dstu3.model.Questionnaire;
 import org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemComponent;
 import org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemOptionComponent;
 import org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemType;
-import org.hl7.fhir.dstu3.model.Range;
-import org.hl7.fhir.dstu3.model.Ratio;
-import org.hl7.fhir.dstu3.model.Reference;
-import org.hl7.fhir.dstu3.model.Resource;
-import org.hl7.fhir.dstu3.model.SampledData;
-import org.hl7.fhir.dstu3.model.StringType;
-import org.hl7.fhir.dstu3.model.StructureDefinition;
 import org.hl7.fhir.dstu3.model.StructureDefinition.ExtensionContext;
 import org.hl7.fhir.dstu3.model.StructureDefinition.StructureDefinitionKind;
 import org.hl7.fhir.dstu3.model.StructureDefinition.StructureDefinitionSnapshotComponent;
 import org.hl7.fhir.dstu3.model.StructureDefinition.TypeDerivationRule;
-import org.hl7.fhir.dstu3.model.TimeType;
-import org.hl7.fhir.dstu3.model.Timing;
-import org.hl7.fhir.dstu3.model.Type;
-import org.hl7.fhir.dstu3.model.UriType;
-import org.hl7.fhir.dstu3.model.ValueSet;
 import org.hl7.fhir.dstu3.model.ValueSet.ValueSetExpansionContainsComponent;
 import org.hl7.fhir.dstu3.utils.FHIRLexer.FHIRLexerException;
 import org.hl7.fhir.dstu3.utils.FHIRPathEngine;
@@ -105,6 +72,7 @@ import org.w3c.dom.Node;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import com.google.gson.stream.JsonWriter;
 
 import ca.uhn.fhir.util.ObjectUtil;
 
@@ -292,13 +260,12 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
     source = Source.InstanceValidator;
   }
 
-    public InstanceValidator(ValidationEngine engine) {
-	    super();
-	    this.context = engine.getContext();
-		 fpe = engine.getFpe();
-		 source = Source.InstanceValidator;
-    }
-
+  public InstanceValidator(ValidationEngine engine) {
+    super();
+    this.context = engine.getContext();
+    fpe = engine.getFpe();
+    source = Source.InstanceValidator;
+  }
 
   @Override
   public boolean isNoInvariantChecks() {
@@ -786,6 +753,24 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
     c.setCode(item.getNamedChildValue("code"));
     c.setDisplay(item.getNamedChildValue("display"));
     return c;
+  }
+
+  private Reference readAsReference(Element item) {
+    Reference r = new Reference();
+    r.setDisplay(item.getNamedChildValue("display"));
+    r.setReference(item.getNamedChildValue("reference"));
+    List<Element> identifier = item.getChildrenByName("identifier");
+    if (identifier.isEmpty() == false) {
+      r.setIdentifier(readAsIdentifier(identifier.get(0)));
+    }
+    return r;
+  }
+
+  private Identifier readAsIdentifier(Element item) {
+    Identifier r = new Identifier();
+    r.setSystem(item.getNamedChildValue("system"));
+    r.setValue(item.getNamedChildValue("value"));
+    return r;
   }
 
   private void checkCoding(List<ValidationMessage> errors, String path, Element focus, Coding fixed) {
@@ -1365,16 +1350,13 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
   }
 
   private void checkReference(Object appContext, List<ValidationMessage> errors, String path, Element element, StructureDefinition profile, ElementDefinition container, String parentType, NodeStack stack) throws FHIRException, IOException {
-    String ref = null;
-    try {
-      // Do this inside a try because invalid instances might provide more than one reference.
-      ref = element.getNamedChildValue("reference");
-    } catch (Error e) {
-      
-    }
+    Reference reference = readAsReference(element);
+    
+    String ref = reference.getReference();
     if (Utilities.noString(ref)) {
-      // todo - what should we do in this case?
-      warning(errors, IssueType.STRUCTURE, element.line(), element.col(), path, !Utilities.noString(element.getNamedChildValue("display")), "A Reference without an actual reference should have a display");
+      if (Utilities.noString(reference.getIdentifier().getSystem()) && Utilities.noString(reference.getIdentifier().getValue())) {
+        warning(errors, IssueType.STRUCTURE, element.line(), element.col(), path, !Utilities.noString(element.getNamedChildValue("display")), "A Reference without an actual reference or identifier should have a display");
+      }
       return;
     }
 
@@ -1627,12 +1609,10 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
       return element;
     
     List<String> nodes = new ArrayList<String>();
-    Matcher matcher = Pattern.compile("([a-zA-Z0-0]+(\\([^\\(^\\)]*\\))?)(\\.([a-zA-Z0-0]+(\\([^\\(^\\)]*\\))?))*").matcher(discriminator);
+    Matcher matcher = Pattern.compile("\\.([a-zA-Z0-0]+(\\([^\\(^\\)]*\\))?)").matcher("."+discriminator);
     while (matcher.find()) {
       if (!matcher.group(1).startsWith("@"))
         nodes.add(matcher.group(1));
-      if (matcher.groupCount()>4 && matcher.group(4)!= null && !matcher.group(4).startsWith("@"))
-        nodes.add(matcher.group(4));
     }
     
     for (String fullnode : nodes) {
@@ -2269,8 +2249,7 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
             type = criteriaElement.getType().get(0).getCode();
           }
           if (type==null)
-			// Slicer won't ever have a slice name, so this error needs to be reworked
-            throw new DefinitionException("Discriminator (" + discriminator + ") is based on type, but slice " + slicer.getSliceName() + " does not declare a type");
+            throw new DefinitionException("Discriminator (" + discriminator + ") is based on type, but slice " + ed.getId() + " does not declare a type");
           if (discriminator.isEmpty())
             expression = expression + " and this is " + type;
           else
@@ -2293,7 +2272,7 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
           } else if (fixed instanceof BooleanType) {
             expression = expression + ((BooleanType)fixed).asStringValue();
           } else
-            throw new DefinitionException("Unsupported fixed value type for discriminator(" + discriminator + ") for slice " + slicer.getSliceName() + ": " + fixed.getClass().getName());
+            throw new DefinitionException("Unsupported fixed value type for discriminator(" + discriminator + ") for slice " + ed.getId() + ": " + fixed.getClass().getName());
         } else if (criteriaElement.hasBinding() && criteriaElement.getBinding().hasStrength() && criteriaElement.getBinding().getStrength().equals(BindingStrength.REQUIRED) && criteriaElement.getBinding().getValueSetReference()!=null) {
           expression = expression + " and " + discriminator + " in '" + criteriaElement.getBinding().getValueSetReference().getReference() + "'";
         } else if (criteriaElement.hasMin() && criteriaElement.getMin()>0) {
@@ -2301,7 +2280,7 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
         } else if (criteriaElement.hasMax() && criteriaElement.getMax().equals("0")) {
           expression = expression + " and " + discriminator + ".exists().not()";
         } else {
-          throw new DefinitionException("Could not match discriminator (" + discriminator + ") for slice " + slicer.getSliceName() + " - does not have fixed value, binding or existence assertions");
+          throw new DefinitionException("Could not match discriminator (" + discriminator + ") for slice " + ed.getId() + " - does not have fixed value, binding or existence assertions");
         }
       }
 
@@ -3225,12 +3204,12 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
                   if (goodProfiles.size()==1) {
                     errors.addAll(goodProfiles.get(0));
                   } else if (goodProfiles.size()==0) {
-                    rule(errors, IssueType.STRUCTURE, ei.line(), ei.col(), ei.path, false, "Unable to find matching profile among choices: " + StringUtils.join("; ", profiles));
+                    rule(errors, IssueType.STRUCTURE, ei.line(), ei.col(), ei.path, false, "Unable to find matching profile among choices: " + String.join("; ", profiles));
                     for (List<ValidationMessage> messages : badProfiles) {
                       errors.addAll(messages);
                     }
                   } else {
-                    warning(errors, IssueType.STRUCTURE, ei.line(), ei.col(), ei.path, false, "Found multiple matching profiles among choices: " + StringUtils.join("; ", goodProfiles.keySet()));
+                    warning(errors, IssueType.STRUCTURE, ei.line(), ei.col(), ei.path, false, "Found multiple matching profiles among choices: " + String.join("; ", goodProfiles.keySet()));
                     for (List<ValidationMessage> messages : goodProfiles.values()) {
                       errors.addAll(messages);
                     }                    

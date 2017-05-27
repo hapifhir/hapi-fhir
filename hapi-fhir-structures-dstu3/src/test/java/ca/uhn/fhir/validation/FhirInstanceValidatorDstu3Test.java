@@ -234,6 +234,33 @@ public class FhirInstanceValidatorDstu3Test {
 		assertTrue(output.isSuccessful());
 	}
 
+	/**
+	 * A reference with only an identifier should be valid  
+	 */
+	@Test
+	public void testValidateReferenceWithIdentifierValid() throws Exception {
+		Patient p = new Patient();
+		p.getManagingOrganization().getIdentifier().setSystem("http://acme.org");
+		p.getManagingOrganization().getIdentifier().setValue("foo");
+		
+		ValidationResult output = myVal.validateWithResult(p);
+		List<SingleValidationMessage> nonInfo = logResultsAndReturnNonInformationalOnes(output);
+		assertThat(nonInfo, empty());
+	}
+
+	/**
+	 * A reference with only an identifier should be valid  
+	 */
+	@Test
+	public void testValidateReferenceWithDisplayValid() throws Exception {
+		Patient p = new Patient();
+		p.getManagingOrganization().setDisplay("HELLO");
+		
+		ValidationResult output = myVal.validateWithResult(p);
+		List<SingleValidationMessage> nonInfo = logResultsAndReturnNonInformationalOnes(output);
+		assertThat(nonInfo, empty());
+	}
+
 	@SuppressWarnings("unchecked")
 	@Before
 	public void before() {
