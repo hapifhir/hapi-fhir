@@ -118,6 +118,38 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 		return codeSystem;
 	}
 
+	private CodeSystem createExternalCsLarge() {
+		CodeSystem codeSystem = new CodeSystem();
+		codeSystem.setUrl(URL_MY_CODE_SYSTEM);
+		codeSystem.setContent(CodeSystemContentMode.NOTPRESENT);
+		IIdType id = myCodeSystemDao.create(codeSystem, mySrd).getId().toUnqualified();
+
+		ResourceTable table = myResourceTableDao.findOne(id.getIdPartAsLong());
+
+		TermCodeSystemVersion cs = new TermCodeSystemVersion();
+		cs.setResource(table);
+		cs.setResourceVersionId(table.getVersion());
+
+		TermConcept parentA = new TermConcept(cs, "codeA").setDisplay("CodeA");
+		cs.getConcepts().add(parentA);
+
+		for (int i = 0; i < 450; i++) {
+			TermConcept childI = new TermConcept(cs, "subCodeA"+i).setDisplay("Sub-code A"+i);
+			parentA.addChild(childI, RelationshipTypeEnum.ISA);
+		}
+
+		TermConcept parentB = new TermConcept(cs, "codeB").setDisplay("CodeB");
+		cs.getConcepts().add(parentB);
+
+		for (int i = 0; i < 450; i++) {
+			TermConcept childI = new TermConcept(cs, "subCodeB"+i).setDisplay("Sub-code B"+i);
+			parentB.addChild(childI, RelationshipTypeEnum.ISA);
+		}
+
+		myTermSvc.storeNewCodeSystemVersion(table.getId(), URL_MY_CODE_SYSTEM, cs);
+		return codeSystem;
+	}
+
 	private void createExternalCsAndLocalVs() {
 		CodeSystem codeSystem = createExternalCs();
 
@@ -930,6 +962,36 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 
 		params = new SearchParameterMap();
 		params.add(Observation.SP_CODE, new TokenParam(URL_MY_CODE_SYSTEM, "AAA").setModifier(TokenParamModifier.BELOW));
+		assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(params)), empty());
+
+	}
+
+	@Test
+	public void testSearchCodeBelowExternalCodesystemLarge() {
+		createExternalCsLarge();
+
+		Observation obs0 = new Observation();
+		obs0.getCode().addCoding().setSystem(URL_MY_CODE_SYSTEM).setCode("codeA");
+		IIdType id0 = myObservationDao.create(obs0, mySrd).getId().toUnqualifiedVersionless();
+
+		Observation obs1 = new Observation();
+		obs1.getCode().addCoding().setSystem(URL_MY_CODE_SYSTEM).setCode("subCodeA1");
+		IIdType id1 = myObservationDao.create(obs1, mySrd).getId().toUnqualifiedVersionless();
+
+		Observation obs2 = new Observation();
+		obs2.getCode().addCoding().setSystem(URL_MY_CODE_SYSTEM).setCode("subCodeA2");
+		IIdType id2 = myObservationDao.create(obs2, mySrd).getId().toUnqualifiedVersionless();
+
+		Observation obs3 = new Observation();
+		obs3.getCode().addCoding().setSystem(URL_MY_CODE_SYSTEM).setCode("subCodeB3");
+		IIdType id3 = myObservationDao.create(obs3, mySrd).getId().toUnqualifiedVersionless();
+
+		SearchParameterMap params = new SearchParameterMap();
+		params.add(Observation.SP_CODE, new TokenParam(URL_MY_CODE_SYSTEM, "codeA").setModifier(TokenParamModifier.BELOW));
+		assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(params)), containsInAnyOrder(id0.getValue(), id1.getValue(), id2.getValue()));
+
+		params = new SearchParameterMap();
+		params.add(Observation.SP_CODE, new TokenParam(URL_MY_CODE_SYSTEM, "subCodeB1").setModifier(TokenParamModifier.BELOW));
 		assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(params)), empty());
 
 	}

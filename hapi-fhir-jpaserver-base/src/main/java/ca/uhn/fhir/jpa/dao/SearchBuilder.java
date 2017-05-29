@@ -11,9 +11,9 @@ import static org.apache.commons.lang3.StringUtils.defaultString;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -24,7 +24,6 @@ import static org.apache.commons.lang3.StringUtils.defaultString;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
-import static org.apache.commons.lang3.StringUtils.substring;
 
 import java.math.BigDecimal;
 import java.math.MathContext;
@@ -44,6 +43,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.AbstractQuery;
 import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaBuilder.In;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.From;
@@ -62,13 +62,27 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
-import ca.uhn.fhir.context.*;
+import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
+import ca.uhn.fhir.context.BaseRuntimeDeclaredChildDefinition;
+import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
+import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.context.RuntimeChildChoiceDefinition;
+import ca.uhn.fhir.context.RuntimeChildResourceDefinition;
+import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
+import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
+import ca.uhn.fhir.jpa.dao.IDao;
+import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
+import ca.uhn.fhir.jpa.dao.ISearchBuilder;
+import ca.uhn.fhir.jpa.dao.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamUriDao;
 import ca.uhn.fhir.jpa.entity.BaseHasResource;
@@ -439,9 +453,9 @@ public class SearchBuilder implements ISearchBuilder {
 
 						RuntimeSearchParam param = mySearchParamRegistry.getActiveSearchParam(theResourceName, theParamName);
 						resourceTypes = new ArrayList<Class<? extends IBaseResource>>();
-						
+
 						Set<String> targetTypes = param.getTargets();
-						
+
 						if (targetTypes != null && !targetTypes.isEmpty()) {
 							for (String next : targetTypes) {
 								resourceTypes.add(myContext.getResourceDefinition(next).getImplementingClass());
@@ -458,7 +472,7 @@ public class SearchBuilder implements ISearchBuilder {
 							if (paramPath.endsWith(".as(Reference)")) {
 								paramPath = paramPath.substring(0, paramPath.length() - ".as(Reference)".length()) + "Reference";
 							}
-	
+
 							if (paramPath.contains(".extension(")) {
 								int startIdx = paramPath.indexOf(".extension(");
 								int endIdx = paramPath.indexOf(')', startIdx);
@@ -466,7 +480,7 @@ public class SearchBuilder implements ISearchBuilder {
 									paramPath = paramPath.substring(0, startIdx + 10) + paramPath.substring(endIdx + 1);
 								}
 							}
-	
+
 							BaseRuntimeChildDefinition def = myContext.newTerser().getDefinition(myResourceType, paramPath);
 							if (def instanceof RuntimeChildChoiceDefinition) {
 								RuntimeChildChoiceDefinition choiceDef = (RuntimeChildChoiceDefinition) def;
@@ -487,7 +501,7 @@ public class SearchBuilder implements ISearchBuilder {
 								}
 							}
 						}
-						
+
 						resourceId = ref.getValue();
 
 					} else {
@@ -854,10 +868,10 @@ public class SearchBuilder implements ISearchBuilder {
 					 * http://example.com/foo/bar/baz) and that we should match on any URLs that are less
 					 * specific but otherwise the same. For example http://example.com and http://example.com/foo would both
 					 * match.
-					 * 
+					 *
 					 * We do this by querying the DB for all candidate URIs and then manually checking each one. This isn't
 					 * very efficient, but this is also probably not a very common type of query to do.
-					 * 
+					 *
 					 * If we ever need to make this more efficient, lucene could certainly be used as an optimization.
 					 */
 					ourLog.info("Searching for candidate URI:above parameters for Resource[{}] param[{}]", myResourceName, theParamName);
@@ -1219,9 +1233,24 @@ public class SearchBuilder implements ISearchBuilder {
 
 			} else {
 				List<Predicate> orPredicates = new ArrayList<Predicate>();
+				Map<String, List<VersionIndependentConcept>> map = new HashMap<String, List<VersionIndependentConcept>>();
 				for (VersionIndependentConcept nextCode : codes) {
-					Predicate systemPredicate = theBuilder.equal(theFrom.get("mySystem"), nextCode.getSystem());
-					Predicate codePredicate = theBuilder.equal(theFrom.get("myValue"), nextCode.getCode());
+					List<VersionIndependentConcept> systemCodes = map.get(nextCode.getSystem());
+					if (null == systemCodes) {
+						systemCodes = new ArrayList<VersionIndependentConcept>();
+						map.put(nextCode.getSystem(), systemCodes);
+					}
+					systemCodes.add(nextCode);
+				}
+				// Use "in" in case of large numbers of codes due to param modifiers
+				final Path<String> systemExpression = theFrom.get("mySystem");
+				final Path<String> valueExpression = theFrom.get("myValue");
+				for (Map.Entry<String, List<VersionIndependentConcept>> entry: map.entrySet()) {
+					Predicate systemPredicate = theBuilder.equal(systemExpression, entry.getKey());
+					In<String> codePredicate = theBuilder.in(valueExpression);
+					for (VersionIndependentConcept nextCode: entry.getValue()) {
+						codePredicate.value(nextCode.getCode());
+					}
 					orPredicates.add(theBuilder.and(systemPredicate, codePredicate));
 				}
 
@@ -1249,7 +1278,7 @@ public class SearchBuilder implements ISearchBuilder {
 				/*
 				 * As of HAPI FHIR 1.5, if the client searched for a token with a system but no specified value this means to
 				 * match all tokens with the given value.
-				 * 
+				 *
 				 * I'm not sure I agree with this, but hey.. FHIR-I voted and this was the result :)
 				 */
 				// singleCodePredicates.add(theBuilder.isNull(theFrom.get("myValue")));
@@ -1270,12 +1299,12 @@ public class SearchBuilder implements ISearchBuilder {
 	}
 
 	private List<Long> myAlsoIncludePids;
-	
+
 	private TypedQuery<Long> createQuery(SortSpec sort) {
 		CriteriaQuery<Long> outerQuery;
 		/*
 		 * Sort
-		 * 
+		 *
 		 * If we have a sort, we wrap the criteria search (the search that actually
 		 * finds the appropriate resources) in an outer search which is then sorted
 		 */
@@ -1579,7 +1608,7 @@ public class SearchBuilder implements ISearchBuilder {
 
 	/**
 	 * THIS SHOULD RETURN HASHSET and not jsut Set because we add to it later (so it can't be Collections.emptySet())
-	 * 
+	 *
 	 * @param theLastUpdated
 	 */
 	@Override
@@ -1814,7 +1843,8 @@ public class SearchBuilder implements ISearchBuilder {
 		}
 	}
 
-	public void setType(Class<? extends IBaseResource> theResourceType, String theResourceName) {
+	@Override
+    public void setType(Class<? extends IBaseResource> theResourceType, String theResourceName) {
 		myResourceType = theResourceType;
 		myResourceName = theResourceName;
 	}
@@ -1951,7 +1981,7 @@ public class SearchBuilder implements ISearchBuilder {
 			if (myFirst) {
 				myStopwatch = new StopWatch();
 			}
-			
+
 			// If we don't have a query yet, create one
 			if (myResultsIterator == null) {
 				final TypedQuery<Long> query = createQuery(mySort);
@@ -1962,9 +1992,9 @@ public class SearchBuilder implements ISearchBuilder {
 					myPreResultsIterator = myAlsoIncludePids.iterator();
 				}
 			}
-			
+
 			if (myNext == null) {
-				
+
 				if (myPreResultsIterator != null && myPreResultsIterator.hasNext()) {
 					while (myPreResultsIterator.hasNext()) {
 						Long next = myPreResultsIterator.next();
@@ -1973,8 +2003,8 @@ public class SearchBuilder implements ISearchBuilder {
 							break;
 						}
 					}
-				} 
-				
+				}
+
 				if (myNext == null) {
 					while (myResultsIterator.hasNext()) {
 						Long next = myResultsIterator.next();
@@ -1984,13 +2014,13 @@ public class SearchBuilder implements ISearchBuilder {
 						}
 					}
 				}
-			
+
 				if (myNext == null) {
 					myNext = NO_MORE;
 				}
-				
+
 			} // if we need to fetch the next result
-			
+
 			if (myFirst) {
 				ourLog.info("Initial query result returned in {}ms for query {}", myStopwatch.getMillis(), mySearchUuid);
 				myFirst = false;
