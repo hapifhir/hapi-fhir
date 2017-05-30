@@ -1112,6 +1112,10 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		}
 
 		IFhirResourceDao<R> dao = getDao(theResourceType);
+		if (dao == null) {
+			throw new InternalErrorException("No DAO for resource type: " + theResourceType.getName());
+		}
+		
 		Set<Long> ids = dao.searchForIds(paramMap);
 
 		return ids;
