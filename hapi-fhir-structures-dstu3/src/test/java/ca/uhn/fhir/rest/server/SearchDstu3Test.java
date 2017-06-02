@@ -28,6 +28,7 @@ import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
+import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.client.IGenericClient;
@@ -87,6 +88,25 @@ public class SearchDstu3Test {
 			OperationOutcome oo = (OperationOutcome) ourCtx.newXmlParser().parseResource(responseContent);
 			assertEquals(
 					"Invalid search parameter \"identifier.chain\". Parameter contains a chain (.chain) and chains are not supported for this parameter (chaining is only allowed on reference parameters)",
+					oo.getIssueFirstRep().getDiagnostics());
+		} finally {
+			IOUtils.closeQuietly(status.getEntity().getContent());
+		}
+
+	}
+	
+	@Test
+	public void testSearchWithValidChain() throws Exception {
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?general-practitioner.identifier=123");
+		CloseableHttpResponse status = ourClient.execute(httpGet);
+		try {
+			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
+			ourLog.info(responseContent);
+			assertEquals(400, status.getStatusLine().getStatusCode());
+
+			OperationOutcome oo = (OperationOutcome) ourCtx.newXmlParser().parseResource(responseContent);
+			assertNotEquals(
+					"Invalid search parameter \"general-practitioner.identifier\". Parameter contains a chain (.identifier) and chains are not supported for this parameter (chaining is only allowed on reference parameters)",
 					oo.getIssueFirstRep().getDiagnostics());
 		} finally {
 			IOUtils.closeQuietly(status.getEntity().getContent());
@@ -162,7 +182,8 @@ public class SearchDstu3Test {
 		@SuppressWarnings("rawtypes")
 		@Search()
 		public List search(
-				@RequiredParam(name = Patient.SP_IDENTIFIER) TokenAndListParam theIdentifiers) {
+				@OptionalParam(name = Patient.SP_IDENTIFIER) TokenAndListParam theIdentifiers,
+				@OptionalParam(name = Patient.SP_GENERAL_PRACTITIONER) TokenAndListParam theGPIdentifiers) {
 			ourLastMethod = "search";
 			ourIdentifiers = theIdentifiers;
 			ArrayList<Patient> retVal = new ArrayList<Patient>();
