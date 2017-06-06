@@ -29,19 +29,18 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
   public boolean isCodeSystemSupported(FhirContext theContext, String theSystem) {
     return false;
   }
-  
+
   /**
    * Constructor
    */
   public DefaultProfileValidationSupport() {
     super();
   }
-  
+
   public void flush() {
     myDefaultValueSets = null;
     myCodeSystems = null;
   }
-  
 
   @SuppressWarnings("unchecked")
   @Override
@@ -93,18 +92,20 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
 
   @Override
   public ValueSet fetchCodeSystem(FhirContext theContext, String theSystem) {
-    Map<String, ValueSet> codeSystems = myCodeSystems;
-    if (codeSystems == null) {
-      codeSystems = new HashMap<String, ValueSet>();
+    synchronized (this) {
+      Map<String, ValueSet> valueSets = myCodeSystems;
+      if (valueSets == null) {
+        valueSets = new HashMap<String, ValueSet>();
 
-      loadCodeSystems(theContext, codeSystems, "/org/hl7/fhir/instance/model/valueset/valuesets.xml");
-      loadCodeSystems(theContext, codeSystems, "/org/hl7/fhir/instance/model/valueset/v2-tables.xml");
-      loadCodeSystems(theContext, codeSystems, "/org/hl7/fhir/instance/model/valueset/v3-codesystems.xml");
+        loadCodeSystems(theContext, valueSets, "/org/hl7/fhir/instance/model/valueset/valuesets.xml");
+        loadCodeSystems(theContext, valueSets, "/org/hl7/fhir/instance/model/valueset/v2-tables.xml");
+        loadCodeSystems(theContext, valueSets, "/org/hl7/fhir/instance/model/valueset/v3-codesystems.xml");
 
-      myCodeSystems = codeSystems;
+        myCodeSystems = valueSets;
+      }
+
+      return valueSets.get(theSystem);
     }
-
-    return codeSystems.get(theSystem);
   }
 
   private void loadCodeSystems(FhirContext theContext, Map<String, ValueSet> codeSystems, String file) {

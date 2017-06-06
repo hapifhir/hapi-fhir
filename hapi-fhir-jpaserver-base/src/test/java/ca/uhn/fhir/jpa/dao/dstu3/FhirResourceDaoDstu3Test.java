@@ -8,6 +8,7 @@ import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.endsWith;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.matchesPattern;
 import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertEquals;
@@ -152,6 +153,56 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		} catch (ResourceGoneException e) {
 			// good
 		}
+	}
+
+	@Test
+	public void testCreateDuplicateTagsDoesNotCauseDuplicates() {
+		Patient p = new Patient();
+		p.setActive(true);
+		
+		p.getMeta().addTag().setSystem("FOO").setCode("BAR");
+		p.getMeta().addTag().setSystem("FOO").setCode("BAR");
+		p.getMeta().addTag().setSystem("FOO").setCode("BAR");
+		p.getMeta().addTag().setSystem("FOO").setCode("BAR");
+		p.getMeta().addTag().setSystem("FOO").setCode("BAR");
+		p.getMeta().addTag().setSystem("FOO").setCode("BAR");
+		p.getMeta().addTag().setSystem("FOO").setCode("BAR");
+		
+		myPatientDao.create(p);
+		
+		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
+			@Override
+			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
+				assertThat(myResourceTagDao.findAll(), hasSize(1));
+				assertThat(myTagDefinitionDao.findAll(), hasSize(1));
+			}
+		});
+		
+	}
+	
+	@Test
+	public void testCreateEmptyTagsIsIgnored() {
+		Patient p = new Patient();
+		p.setActive(true);
+		
+		// Add an empty tag
+		p.getMeta().addTag();
+		
+		// Add another empty tag
+		p.getMeta().addTag().setSystem("");
+		p.getMeta().addTag().setCode("");
+		p.getMeta().addTag().setDisplay("");
+		
+		myPatientDao.create(p);
+		
+		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
+			@Override
+			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
+				assertThat(myResourceTagDao.findAll(), empty());
+				assertThat(myTagDefinitionDao.findAll(), empty());
+			}
+		});
+		
 	}
 
 	/**

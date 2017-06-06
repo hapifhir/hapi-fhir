@@ -149,6 +149,19 @@
 			<action type="fix">
 				Validator incorrectly rejected references where only an identifier was populated
 			</action>
+			<action type="add">
+				Add a check in JPA server that prevents completely blank tags, profiles, and security labels
+				from being saved to the database. These were filtered out anyhow when the
+				result was returned back to the client but they were persisted which
+				just wasted space.
+			</action>
+			<action type="fix" issue="664">
+				Loading the build-in profile structures (StructureDefinition, ValueSet, etc) is now done in 
+				a synchronized block in order to prevent multiple loads happening if the server processes
+				multiple validations in parallel threads right after startup. Previously a heavy load could
+				cause the server to run out of memory and lock up. Thanks to Karl M Davis
+				for analysis and help fixing this!
+			</action>
 		</release>
 		<release version="2.4" date="2017-04-19">
 			<action type="add">
