@@ -167,6 +167,11 @@
 				cause the server to run out of memory and lock up. Thanks to Karl M Davis
 				for analysis and help fixing this!
 			</action>
+			<action type="fix" issue="652">
+				Fix bad ValueSet URL in DeviceRequest profile definition for STU3 which 
+				was preventing the CLI from uploading definitions correctly. Thanks to
+				Joel Schneider for the Pull Request!
+			</action>
 		</release>
 		<release version="2.4" date="2017-04-19">
 			<action type="add">
