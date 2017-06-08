@@ -177,6 +177,11 @@
 				values with MINUTE precision. Thanks to Christian Ohr for the pull
 				request!
 			</action>
+			<action type="add" issue="656">
+				Improve handling in JPA server when doing code:above and code:below
+				searches to use a disjunction of AND and IN in order to avoid failures
+				under certain conditions. Thanks to Michael Lawley for the pul request!
+			</action>
 		</release>
 		<release version="2.4" date="2017-04-19">
 			<action type="add">
