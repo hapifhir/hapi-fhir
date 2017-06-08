@@ -479,30 +479,36 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		TagList tagList = ResourceMetadataKeyEnum.TAG_LIST.get(theResource);
 		if (tagList != null) {
 			for (Tag next : tagList) {
-				TagDefinition tag = getTag(TagTypeEnum.TAG, next.getScheme(), next.getTerm(), next.getLabel());
-				allDefs.add(tag);
-				theEntity.addTag(tag);
-				theEntity.setHasTags(true);
+				TagDefinition tag = getTagOrNull(TagTypeEnum.TAG, next.getScheme(), next.getTerm(), next.getLabel());
+				if (tag != null) {
+					allDefs.add(tag);
+					theEntity.addTag(tag);
+					theEntity.setHasTags(true);
+				}
 			}
 		}
 
 		List<BaseCodingDt> securityLabels = ResourceMetadataKeyEnum.SECURITY_LABELS.get(theResource);
 		if (securityLabels != null) {
 			for (BaseCodingDt next : securityLabels) {
-				TagDefinition tag = getTag(TagTypeEnum.SECURITY_LABEL, next.getSystemElement().getValue(), next.getCodeElement().getValue(), next.getDisplayElement().getValue());
-				allDefs.add(tag);
-				theEntity.addTag(tag);
-				theEntity.setHasTags(true);
+				TagDefinition tag = getTagOrNull(TagTypeEnum.SECURITY_LABEL, next.getSystemElement().getValue(), next.getCodeElement().getValue(), next.getDisplayElement().getValue());
+				if (tag != null) {
+					allDefs.add(tag);
+					theEntity.addTag(tag);
+					theEntity.setHasTags(true);
+				}
 			}
 		}
 
 		List<IdDt> profiles = ResourceMetadataKeyEnum.PROFILES.get(theResource);
 		if (profiles != null) {
 			for (IIdType next : profiles) {
-				TagDefinition tag = getTag(TagTypeEnum.PROFILE, NS_JPA_PROFILE, next.getValue(), null);
-				allDefs.add(tag);
-				theEntity.addTag(tag);
-				theEntity.setHasTags(true);
+				TagDefinition tag = getTagOrNull(TagTypeEnum.PROFILE, NS_JPA_PROFILE, next.getValue(), null);
+				if (tag != null) {
+					allDefs.add(tag);
+					theEntity.addTag(tag);
+					theEntity.setHasTags(true);
+				}
 			}
 		}
 	}
@@ -511,30 +517,36 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		List<? extends IBaseCoding> tagList = theResource.getMeta().getTag();
 		if (tagList != null) {
 			for (IBaseCoding next : tagList) {
-				TagDefinition tag = getTag(TagTypeEnum.TAG, next.getSystem(), next.getCode(), next.getDisplay());
-				allDefs.add(tag);
-				theEntity.addTag(tag);
-				theEntity.setHasTags(true);
+				TagDefinition tag = getTagOrNull(TagTypeEnum.TAG, next.getSystem(), next.getCode(), next.getDisplay());
+				if (tag != null) {
+					allDefs.add(tag);
+					theEntity.addTag(tag);
+					theEntity.setHasTags(true);
+				}
 			}
 		}
 
 		List<? extends IBaseCoding> securityLabels = theResource.getMeta().getSecurity();
 		if (securityLabels != null) {
 			for (IBaseCoding next : securityLabels) {
-				TagDefinition tag = getTag(TagTypeEnum.SECURITY_LABEL, next.getSystem(), next.getCode(), next.getDisplay());
-				allDefs.add(tag);
-				theEntity.addTag(tag);
-				theEntity.setHasTags(true);
+				TagDefinition tag = getTagOrNull(TagTypeEnum.SECURITY_LABEL, next.getSystem(), next.getCode(), next.getDisplay());
+				if (tag != null) {
+					allDefs.add(tag);
+					theEntity.addTag(tag);
+					theEntity.setHasTags(true);
+				}
 			}
 		}
 
 		List<? extends IPrimitiveType<String>> profiles = theResource.getMeta().getProfile();
 		if (profiles != null) {
 			for (IPrimitiveType<String> next : profiles) {
-				TagDefinition tag = getTag(TagTypeEnum.PROFILE, NS_JPA_PROFILE, next.getValue(), null);
-				allDefs.add(tag);
-				theEntity.addTag(tag);
-				theEntity.setHasTags(true);
+				TagDefinition tag = getTagOrNull(TagTypeEnum.PROFILE, NS_JPA_PROFILE, next.getValue(), null);
+				if (tag != null) {
+					allDefs.add(tag);
+					theEntity.addTag(tag);
+					theEntity.setHasTags(true);
+				}
 			}
 		}
 	}
@@ -662,28 +674,28 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		return mySearchParamRegistry.getActiveSearchParams(theResourceDef.getName()).values();
 	}
 
-	protected TagDefinition getTag(TagTypeEnum theTagType, String theScheme, String theTerm, String theLabel) {
+	protected TagDefinition getTagOrNull(TagTypeEnum theTagType, String theScheme, String theTerm, String theLabel) {
+		if (isBlank(theScheme) && isBlank(theTerm) && isBlank(theLabel)) {
+			return null;
+		}
+		
 		CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
 		CriteriaQuery<TagDefinition> cq = builder.createQuery(TagDefinition.class);
 		Root<TagDefinition> from = cq.from(TagDefinition.class);
 
-		//@formatter:off
 		if (isNotBlank(theScheme)) {
 			cq.where(
-				builder.and(
-					builder.equal(from.get("myTagType"), theTagType), 
-					builder.equal(from.get("mySystem"), theScheme), 
-					builder.equal(from.get("myCode"), theTerm))
-				);
+					builder.and(
+							builder.equal(from.get("myTagType"), theTagType),
+							builder.equal(from.get("mySystem"), theScheme),
+							builder.equal(from.get("myCode"), theTerm)));
 		} else {
 			cq.where(
-				builder.and(
-					builder.equal(from.get("myTagType"), theTagType), 
-					builder.isNull(from.get("mySystem")), 
-					builder.equal(from.get("myCode"), theTerm))
-				);
+					builder.and(
+							builder.equal(from.get("myTagType"), theTagType),
+							builder.isNull(from.get("mySystem")),
+							builder.equal(from.get("myCode"), theTerm)));
 		}
-		//@formatter:on
 
 		TypedQuery<TagDefinition> q = myEntityManager.createQuery(cq);
 		try {
@@ -938,10 +950,12 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		if (def.isStandardType() == false) {
 			String profile = def.getResourceProfile("");
 			if (isNotBlank(profile)) {
-				TagDefinition tag = getTag(TagTypeEnum.PROFILE, NS_JPA_PROFILE, profile, null);
-				allDefs.add(tag);
-				theEntity.addTag(tag);
-				theEntity.setHasTags(true);
+				TagDefinition tag = getTagOrNull(TagTypeEnum.PROFILE, NS_JPA_PROFILE, profile, null);
+				if (tag != null) {
+					allDefs.add(tag);
+					theEntity.addTag(tag);
+					theEntity.setHasTags(true);
+				}
 			}
 		}
 
@@ -1151,7 +1165,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		if (dao == null) {
 			throw new InternalErrorException("No DAO for resource type: " + theResourceType.getName());
 		}
-		
+
 		Set<Long> ids = dao.searchForIds(paramMap);
 
 		return ids;

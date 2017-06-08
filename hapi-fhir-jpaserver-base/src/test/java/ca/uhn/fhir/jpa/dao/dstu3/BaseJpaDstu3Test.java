@@ -77,8 +77,7 @@ import ca.uhn.fhir.jpa.dao.IFhirResourceDaoValueSet;
 import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
 import ca.uhn.fhir.jpa.dao.ISearchParamRegistry;
-import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
-import ca.uhn.fhir.jpa.dao.data.ISearchDao;
+import ca.uhn.fhir.jpa.dao.data.*;
 import ca.uhn.fhir.jpa.dao.dstu2.FhirResourceDaoDstu2SearchNoFtTest;
 import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.entity.ResourceTable;
@@ -105,6 +104,10 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 	private static JpaValidationSupportChainDstu3 ourJpaValidationSupportChainDstu3;
 	private static IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept> ourValueSetDao;
 
+	@Autowired
+	protected ITagDefinitionDao myTagDefinitionDao;
+	@Autowired
+	protected IResourceTagDao myResourceTagDao;	
 	@Autowired
 	protected ISearchDao mySearchEntityDao;
 	@Autowired
