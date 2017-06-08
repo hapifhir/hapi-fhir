@@ -343,7 +343,7 @@ public abstract class BaseDateTimeType extends PrimitiveType<Date> {
 							retVal = ourYearMonthDayTimeMilliFormat.parse(theValue);
 						}
 					} catch (ParseException p2) {
-						throw new IllegalArgumentException("Invalid date/time string (" + p2.getMessage() + "): " + theValue);
+						throw new IllegalArgumentException("Invalid data/time string (" + p2.getMessage() + "): " + theValue);
 					}
 					setTimeZone(theValue, hasMillis);
 					setPrecision(TemporalPrecisionEnum.MILLI);
@@ -357,7 +357,7 @@ public abstract class BaseDateTimeType extends PrimitiveType<Date> {
 							retVal = ourYearMonthDayTimeFormat.parse(theValue);
 						}
 					} catch (ParseException p2) {
-						throw new IllegalArgumentException("Invalid date/time string (" + p2.getMessage() + "): " + theValue);
+						throw new IllegalArgumentException("Invalid data/time string (" + p2.getMessage() + "): " + theValue);
 					}
 
 					setTimeZone(theValue, hasMillis);
@@ -372,7 +372,7 @@ public abstract class BaseDateTimeType extends PrimitiveType<Date> {
 							retVal = ourYearMonthDayTimeMinsFormat.parse(theValue);
 						}
 					} catch (ParseException p2) {
-						throw new IllegalArgumentException("Invalid date/time string (" + p2.getMessage() + "): " + theValue, p2);
+						throw new IllegalArgumentException("Invalid data/time string (" + p2.getMessage() + "): " + theValue, p2);
 					}
 
 					setTimeZone(theValue, hasMillis);

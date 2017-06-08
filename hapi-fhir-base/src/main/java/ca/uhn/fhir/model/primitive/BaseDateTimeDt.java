@@ -285,7 +285,7 @@ public abstract class BaseDateTimeDt extends BasePrimitive<Date> {
 				cal.set(Calendar.DAY_OF_MONTH, parseInt(value, value.substring(8, 10), 1, actualMaximum));
 				precision = TemporalPrecisionEnum.DAY;
 				if (length > 10) {
-					validateLengthIsAtLeast(value, 16);
+					validateLengthIsAtLeast(value, 17);
 					validateCharAtIndexIs(value, 10, 'T'); // yyyy-mm-ddThh:mm:ss
 					int offsetIdx = getOffsetIndex(value);
 					String time;
