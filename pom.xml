@@ -329,6 +329,10 @@
 			<id>dangerousben</id>
 			<name>Ben Spencer</name>
 		</developer>
+		<developer>
+			<id>maclema</id>
+			<name>maclema</name>
+		</developer>
 	</developers>
 
 	<licenses>
@@ -351,7 +355,7 @@
 		<!-- Dependency Versions -->
 		<derby_version>10.13.1.1</derby_version>
 		<jersey_version>2.25.1</jersey_version>
-		<jetty_version>9.4.3.v20170317</jetty_version>
+		<jetty_version>9.4.5.v20170502</jetty_version>
 		<hibernate_version>5.2.9.Final</hibernate_version>
 		<hibernate_validator_version>5.4.1.Final</hibernate_validator_version>
 		<!-- Update lucene version when you update hibernate-search version -->

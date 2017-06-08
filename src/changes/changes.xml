@@ -149,6 +149,11 @@
 			<action type="fix">
 				Validator incorrectly rejected references where only an identifier was populated
 			</action>
+			<action type="fix" issue="649">
+				Make error handler in the client more tolerant of errors where no response has
+				been received by the client when the error happens. Thanks to GitHub
+				user maclema for the pull request!
+			</action>
 		</release>
 		<release version="2.4" date="2017-04-19">
 			<action type="add">
