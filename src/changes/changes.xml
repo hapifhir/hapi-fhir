@@ -182,6 +182,12 @@
 				searches to use a disjunction of AND and IN in order to avoid failures
 				under certain conditions. Thanks to Michael Lawley for the pul request!
 			</action>
+			<action type="fix" issue="660">
+				Fix an error where the JPA server sometimes failed occasional requests
+				with a weird NullPointerException when running under very large concurrent
+				loads. Thanks to Karl M. Davis for reporting, investigating, and ultimately
+				finding a solution!
+			</action>
 		</release>
 		<release version="2.4" date="2017-04-19">
 			<action type="add">
