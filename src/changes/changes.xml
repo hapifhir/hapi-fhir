@@ -6,7 +6,7 @@
 		<title>HAPI FHIR Changelog</title>
 	</properties>
 	<body>
-		<release version="2.5" date="TBD">
+		<release version="2.5" date="2017-06-08">
 			<action type="fix">
 				<![CDATA[
 				This release includes significant performance enhancements for the

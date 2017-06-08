@@ -69,6 +69,31 @@
 		</section>
 
 		<section name="Announcements">
+				<p>
+				<b>June 8, 2017 - HAPI FHIR 2.5 Released</b> -
+				The next release of HAPI has now been uploaded to the Maven repos and 
+				GitHub's releases section.
+			</p>
+			<p>
+				This release brings number of bugfixes and improvements. Most importantly
+				for many users, this release brings a significant performance enhacement
+				to the JPA server for searches. Essentially our search module has been 
+				rewritten to stream results back to the client as soon as they
+				become available, and to reuse previous cached search results for a period of time.
+				This cacheing behaviour in the JPA server is important to consider, 
+				since it does mean that	your clients can see stale search results for
+				a short period of time under some circumstances. The default cache period
+				is 1 minute, but this can be changed or even disabled through configuration.
+			</p>
+			<p>
+				As always, the <a href="./changes-report.html">changelog</a> has the full list
+				of changes in this release. Thanks to everyone who contributed to this release, either
+				by submitting pull requests, suggesting new features, or filing bug requests!
+			</p>
+			<p>
+				- <a href="https://github.com/jamesagnew/">James Agnew</a>
+			</p>
+			<br/><br/>
 		
 			<p>
 				<b>April 19, 2017 - HAPI FHIR 2.4 Released</b> -
