@@ -537,73 +537,75 @@
 <a class="jxr_linenumber" name="L529" href="#L529">529</a> 	<strong class="jxr_keyword">protected</strong> <strong class="jxr_keyword">void</strong> validateSealed() {
 <a class="jxr_linenumber" name="L530" href="#L530">530</a> 		<strong class="jxr_keyword">if</strong> (!mySealed) {
 <a class="jxr_linenumber" name="L531" href="#L531">531</a> 			<strong class="jxr_keyword">synchronized</strong>(myContext) {
-<a class="jxr_linenumber" name="L532" href="#L532">532</a> 				sealAndInitialize(myContext, myClassToElementDefinitions);
-<a class="jxr_linenumber" name="L533" href="#L533">533</a> 			}
-<a class="jxr_linenumber" name="L534" href="#L534">534</a> 		}
-<a class="jxr_linenumber" name="L535" href="#L535">535</a> 	}
-<a class="jxr_linenumber" name="L536" href="#L536">536</a> 
-<a class="jxr_linenumber" name="L537" href="#L537">537</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">int</strong> findIndex(List&lt;BaseRuntimeChildDefinition&gt; theChildren, String theName, <strong class="jxr_keyword">boolean</strong> theDefaultAtEnd) {
-<a class="jxr_linenumber" name="L538" href="#L538">538</a> 		<strong class="jxr_keyword">int</strong> index = theDefaultAtEnd ? theChildren.size() : -1;
-<a class="jxr_linenumber" name="L539" href="#L539">539</a> 		<strong class="jxr_keyword">for</strong> (ListIterator&lt;BaseRuntimeChildDefinition&gt; iter = theChildren.listIterator(); iter.hasNext(); ) {
-<a class="jxr_linenumber" name="L540" href="#L540">540</a> 			<strong class="jxr_keyword">if</strong> (iter.next().getElementName().equals(theName)) {
-<a class="jxr_linenumber" name="L541" href="#L541">541</a> 				index = iter.previousIndex();
-<a class="jxr_linenumber" name="L542" href="#L542">542</a> 				<strong class="jxr_keyword">break</strong>;
-<a class="jxr_linenumber" name="L543" href="#L543">543</a> 			}
-<a class="jxr_linenumber" name="L544" href="#L544">544</a> 		}
-<a class="jxr_linenumber" name="L545" href="#L545">545</a> 		<strong class="jxr_keyword">return</strong> index;
-<a class="jxr_linenumber" name="L546" href="#L546">546</a> 	}
-<a class="jxr_linenumber" name="L547" href="#L547">547</a> 
-<a class="jxr_linenumber" name="L548" href="#L548">548</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">class</strong> <a href="../../../../ca/uhn/fhir/context/BaseRuntimeElementCompositeDefinition.html">ScannedField</a> {
-<a class="jxr_linenumber" name="L549" href="#L549">549</a> 		<strong class="jxr_keyword">private</strong> <a href="../../../../ca/uhn/fhir/model/api/annotation/Child.html">Child</a> myChildAnnotation;
-<a class="jxr_linenumber" name="L550" href="#L550">550</a> 
-<a class="jxr_linenumber" name="L551" href="#L551">551</a> 		<strong class="jxr_keyword">private</strong> List&lt;Class&lt;? <strong class="jxr_keyword">extends</strong> IBase&gt;&gt; myChoiceTypes = <strong class="jxr_keyword">new</strong> ArrayList&lt;Class&lt;? <strong class="jxr_keyword">extends</strong> IBase&gt;&gt;();
-<a class="jxr_linenumber" name="L552" href="#L552">552</a> 		<strong class="jxr_keyword">private</strong> Class&lt;?&gt; myElementType;
-<a class="jxr_linenumber" name="L553" href="#L553">553</a> 		<strong class="jxr_keyword">private</strong> Field myField;
-<a class="jxr_linenumber" name="L554" href="#L554">554</a> 		<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">boolean</strong> myFirstFieldInNewClass;
-<a class="jxr_linenumber" name="L555" href="#L555">555</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../ca/uhn/fhir/context/BaseRuntimeElementCompositeDefinition.html">ScannedField</a>(Field theField, Class&lt;?&gt; theClass, <strong class="jxr_keyword">boolean</strong> theFirstFieldInNewClass) {
-<a class="jxr_linenumber" name="L556" href="#L556">556</a> 			myField = theField;
-<a class="jxr_linenumber" name="L557" href="#L557">557</a> 			myFirstFieldInNewClass = theFirstFieldInNewClass;
-<a class="jxr_linenumber" name="L558" href="#L558">558</a> 
-<a class="jxr_linenumber" name="L559" href="#L559">559</a> 			Child childAnnotation = ModelScanner.pullAnnotation(theField, Child.<strong class="jxr_keyword">class</strong>);
-<a class="jxr_linenumber" name="L560" href="#L560">560</a> 			<strong class="jxr_keyword">if</strong> (childAnnotation == <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L561" href="#L561">561</a> 				ourLog.trace(<span class="jxr_string">"Ignoring non @Child field {} on target type {}"</span>, theField.getName(), theClass);
-<a class="jxr_linenumber" name="L562" href="#L562">562</a> 				<strong class="jxr_keyword">return</strong>;
-<a class="jxr_linenumber" name="L563" href="#L563">563</a> 			}
-<a class="jxr_linenumber" name="L564" href="#L564">564</a> 			<strong class="jxr_keyword">if</strong> (Modifier.isFinal(theField.getModifiers())) {
-<a class="jxr_linenumber" name="L565" href="#L565">565</a> 				ourLog.trace(<span class="jxr_string">"Ignoring constant {} on target type {}"</span>, theField.getName(), theClass);
-<a class="jxr_linenumber" name="L566" href="#L566">566</a> 				<strong class="jxr_keyword">return</strong>;
-<a class="jxr_linenumber" name="L567" href="#L567">567</a> 			}
-<a class="jxr_linenumber" name="L568" href="#L568">568</a> 			
-<a class="jxr_linenumber" name="L569" href="#L569">569</a> 			myChildAnnotation = childAnnotation;
-<a class="jxr_linenumber" name="L570" href="#L570">570</a> 			myElementType = ModelScanner.determineElementType(theField);
-<a class="jxr_linenumber" name="L571" href="#L571">571</a> 			
-<a class="jxr_linenumber" name="L572" href="#L572">572</a> 			<strong class="jxr_keyword">for</strong> (Class&lt;? <strong class="jxr_keyword">extends</strong> IBase&gt; nextChoiceType : childAnnotation.type()) {
-<a class="jxr_linenumber" name="L573" href="#L573">573</a> 				myChoiceTypes.add(nextChoiceType);
-<a class="jxr_linenumber" name="L574" href="#L574">574</a> 			}
-<a class="jxr_linenumber" name="L575" href="#L575">575</a> 		}
-<a class="jxr_linenumber" name="L576" href="#L576">576</a> 		
-<a class="jxr_linenumber" name="L577" href="#L577">577</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../ca/uhn/fhir/model/api/annotation/Child.html">Child</a> getChildAnnotation() {
-<a class="jxr_linenumber" name="L578" href="#L578">578</a> 			<strong class="jxr_keyword">return</strong> myChildAnnotation;
-<a class="jxr_linenumber" name="L579" href="#L579">579</a> 		}
-<a class="jxr_linenumber" name="L580" href="#L580">580</a> 
-<a class="jxr_linenumber" name="L581" href="#L581">581</a> 		<strong class="jxr_keyword">public</strong> List&lt;Class&lt;? <strong class="jxr_keyword">extends</strong> IBase&gt;&gt; getChoiceTypes() {
-<a class="jxr_linenumber" name="L582" href="#L582">582</a> 			<strong class="jxr_keyword">return</strong> myChoiceTypes;
-<a class="jxr_linenumber" name="L583" href="#L583">583</a> 		}
-<a class="jxr_linenumber" name="L584" href="#L584">584</a> 
-<a class="jxr_linenumber" name="L585" href="#L585">585</a> 		<strong class="jxr_keyword">public</strong> Class&lt;?&gt; getElementType() {
-<a class="jxr_linenumber" name="L586" href="#L586">586</a> 			<strong class="jxr_keyword">return</strong> myElementType;
-<a class="jxr_linenumber" name="L587" href="#L587">587</a> 		}
-<a class="jxr_linenumber" name="L588" href="#L588">588</a> 
-<a class="jxr_linenumber" name="L589" href="#L589">589</a> 		<strong class="jxr_keyword">public</strong> Field getField() {
-<a class="jxr_linenumber" name="L590" href="#L590">590</a> 			<strong class="jxr_keyword">return</strong> myField;
-<a class="jxr_linenumber" name="L591" href="#L591">591</a> 		}
-<a class="jxr_linenumber" name="L592" href="#L592">592</a> 
-<a class="jxr_linenumber" name="L593" href="#L593">593</a> 		<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">boolean</strong> isFirstFieldInNewClass() {
-<a class="jxr_linenumber" name="L594" href="#L594">594</a> 			<strong class="jxr_keyword">return</strong> myFirstFieldInNewClass;
-<a class="jxr_linenumber" name="L595" href="#L595">595</a> 		}
-<a class="jxr_linenumber" name="L596" href="#L596">596</a> 	}
-<a class="jxr_linenumber" name="L597" href="#L597">597</a> 
-<a class="jxr_linenumber" name="L598" href="#L598">598</a> }
+<a class="jxr_linenumber" name="L532" href="#L532">532</a> 				<strong class="jxr_keyword">if</strong>(!mySealed) {
+<a class="jxr_linenumber" name="L533" href="#L533">533</a> 					sealAndInitialize(myContext, myClassToElementDefinitions);
+<a class="jxr_linenumber" name="L534" href="#L534">534</a> 				}
+<a class="jxr_linenumber" name="L535" href="#L535">535</a> 			}
+<a class="jxr_linenumber" name="L536" href="#L536">536</a> 		}
+<a class="jxr_linenumber" name="L537" href="#L537">537</a> 	}
+<a class="jxr_linenumber" name="L538" href="#L538">538</a> 
+<a class="jxr_linenumber" name="L539" href="#L539">539</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">int</strong> findIndex(List&lt;BaseRuntimeChildDefinition&gt; theChildren, String theName, <strong class="jxr_keyword">boolean</strong> theDefaultAtEnd) {
+<a class="jxr_linenumber" name="L540" href="#L540">540</a> 		<strong class="jxr_keyword">int</strong> index = theDefaultAtEnd ? theChildren.size() : -1;
+<a class="jxr_linenumber" name="L541" href="#L541">541</a> 		<strong class="jxr_keyword">for</strong> (ListIterator&lt;BaseRuntimeChildDefinition&gt; iter = theChildren.listIterator(); iter.hasNext(); ) {
+<a class="jxr_linenumber" name="L542" href="#L542">542</a> 			<strong class="jxr_keyword">if</strong> (iter.next().getElementName().equals(theName)) {
+<a class="jxr_linenumber" name="L543" href="#L543">543</a> 				index = iter.previousIndex();
+<a class="jxr_linenumber" name="L544" href="#L544">544</a> 				<strong class="jxr_keyword">break</strong>;
+<a class="jxr_linenumber" name="L545" href="#L545">545</a> 			}
+<a class="jxr_linenumber" name="L546" href="#L546">546</a> 		}
+<a class="jxr_linenumber" name="L547" href="#L547">547</a> 		<strong class="jxr_keyword">return</strong> index;
+<a class="jxr_linenumber" name="L548" href="#L548">548</a> 	}
+<a class="jxr_linenumber" name="L549" href="#L549">549</a> 
+<a class="jxr_linenumber" name="L550" href="#L550">550</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">class</strong> <a href="../../../../ca/uhn/fhir/context/BaseRuntimeElementCompositeDefinition.html">ScannedField</a> {
+<a class="jxr_linenumber" name="L551" href="#L551">551</a> 		<strong class="jxr_keyword">private</strong> <a href="../../../../ca/uhn/fhir/model/api/annotation/Child.html">Child</a> myChildAnnotation;
+<a class="jxr_linenumber" name="L552" href="#L552">552</a> 
+<a class="jxr_linenumber" name="L553" href="#L553">553</a> 		<strong class="jxr_keyword">private</strong> List&lt;Class&lt;? <strong class="jxr_keyword">extends</strong> IBase&gt;&gt; myChoiceTypes = <strong class="jxr_keyword">new</strong> ArrayList&lt;Class&lt;? <strong class="jxr_keyword">extends</strong> IBase&gt;&gt;();
+<a class="jxr_linenumber" name="L554" href="#L554">554</a> 		<strong class="jxr_keyword">private</strong> Class&lt;?&gt; myElementType;
+<a class="jxr_linenumber" name="L555" href="#L555">555</a> 		<strong class="jxr_keyword">private</strong> Field myField;
+<a class="jxr_linenumber" name="L556" href="#L556">556</a> 		<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">boolean</strong> myFirstFieldInNewClass;
+<a class="jxr_linenumber" name="L557" href="#L557">557</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../ca/uhn/fhir/context/BaseRuntimeElementCompositeDefinition.html">ScannedField</a>(Field theField, Class&lt;?&gt; theClass, <strong class="jxr_keyword">boolean</strong> theFirstFieldInNewClass) {
+<a class="jxr_linenumber" name="L558" href="#L558">558</a> 			myField = theField;
+<a class="jxr_linenumber" name="L559" href="#L559">559</a> 			myFirstFieldInNewClass = theFirstFieldInNewClass;
+<a class="jxr_linenumber" name="L560" href="#L560">560</a> 
+<a class="jxr_linenumber" name="L561" href="#L561">561</a> 			Child childAnnotation = ModelScanner.pullAnnotation(theField, Child.<strong class="jxr_keyword">class</strong>);
+<a class="jxr_linenumber" name="L562" href="#L562">562</a> 			<strong class="jxr_keyword">if</strong> (childAnnotation == <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L563" href="#L563">563</a> 				ourLog.trace(<span class="jxr_string">"Ignoring non @Child field {} on target type {}"</span>, theField.getName(), theClass);
+<a class="jxr_linenumber" name="L564" href="#L564">564</a> 				<strong class="jxr_keyword">return</strong>;
+<a class="jxr_linenumber" name="L565" href="#L565">565</a> 			}
+<a class="jxr_linenumber" name="L566" href="#L566">566</a> 			<strong class="jxr_keyword">if</strong> (Modifier.isFinal(theField.getModifiers())) {
+<a class="jxr_linenumber" name="L567" href="#L567">567</a> 				ourLog.trace(<span class="jxr_string">"Ignoring constant {} on target type {}"</span>, theField.getName(), theClass);
+<a class="jxr_linenumber" name="L568" href="#L568">568</a> 				<strong class="jxr_keyword">return</strong>;
+<a class="jxr_linenumber" name="L569" href="#L569">569</a> 			}
+<a class="jxr_linenumber" name="L570" href="#L570">570</a> 			
+<a class="jxr_linenumber" name="L571" href="#L571">571</a> 			myChildAnnotation = childAnnotation;
+<a class="jxr_linenumber" name="L572" href="#L572">572</a> 			myElementType = ModelScanner.determineElementType(theField);
+<a class="jxr_linenumber" name="L573" href="#L573">573</a> 			
+<a class="jxr_linenumber" name="L574" href="#L574">574</a> 			<strong class="jxr_keyword">for</strong> (Class&lt;? <strong class="jxr_keyword">extends</strong> IBase&gt; nextChoiceType : childAnnotation.type()) {
+<a class="jxr_linenumber" name="L575" href="#L575">575</a> 				myChoiceTypes.add(nextChoiceType);
+<a class="jxr_linenumber" name="L576" href="#L576">576</a> 			}
+<a class="jxr_linenumber" name="L577" href="#L577">577</a> 		}
+<a class="jxr_linenumber" name="L578" href="#L578">578</a> 		
+<a class="jxr_linenumber" name="L579" href="#L579">579</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../ca/uhn/fhir/model/api/annotation/Child.html">Child</a> getChildAnnotation() {
+<a class="jxr_linenumber" name="L580" href="#L580">580</a> 			<strong class="jxr_keyword">return</strong> myChildAnnotation;
+<a class="jxr_linenumber" name="L581" href="#L581">581</a> 		}
+<a class="jxr_linenumber" name="L582" href="#L582">582</a> 
+<a class="jxr_linenumber" name="L583" href="#L583">583</a> 		<strong class="jxr_keyword">public</strong> List&lt;Class&lt;? <strong class="jxr_keyword">extends</strong> IBase&gt;&gt; getChoiceTypes() {
+<a class="jxr_linenumber" name="L584" href="#L584">584</a> 			<strong class="jxr_keyword">return</strong> myChoiceTypes;
+<a class="jxr_linenumber" name="L585" href="#L585">585</a> 		}
+<a class="jxr_linenumber" name="L586" href="#L586">586</a> 
+<a class="jxr_linenumber" name="L587" href="#L587">587</a> 		<strong class="jxr_keyword">public</strong> Class&lt;?&gt; getElementType() {
+<a class="jxr_linenumber" name="L588" href="#L588">588</a> 			<strong class="jxr_keyword">return</strong> myElementType;
+<a class="jxr_linenumber" name="L589" href="#L589">589</a> 		}
+<a class="jxr_linenumber" name="L590" href="#L590">590</a> 
+<a class="jxr_linenumber" name="L591" href="#L591">591</a> 		<strong class="jxr_keyword">public</strong> Field getField() {
+<a class="jxr_linenumber" name="L592" href="#L592">592</a> 			<strong class="jxr_keyword">return</strong> myField;
+<a class="jxr_linenumber" name="L593" href="#L593">593</a> 		}
+<a class="jxr_linenumber" name="L594" href="#L594">594</a> 
+<a class="jxr_linenumber" name="L595" href="#L595">595</a> 		<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">boolean</strong> isFirstFieldInNewClass() {
+<a class="jxr_linenumber" name="L596" href="#L596">596</a> 			<strong class="jxr_keyword">return</strong> myFirstFieldInNewClass;
+<a class="jxr_linenumber" name="L597" href="#L597">597</a> 		}
+<a class="jxr_linenumber" name="L598" href="#L598">598</a> 	}
+<a class="jxr_linenumber" name="L599" href="#L599">599</a> 
+<a class="jxr_linenumber" name="L600" href="#L600">600</a> }
 </pre>
 <hr/>
 <div id="footer">Copyright &#169; 2014&#x2013;2017 <a href="http://www.uhn.ca">University Health Network</a>. All rights reserved.</div>

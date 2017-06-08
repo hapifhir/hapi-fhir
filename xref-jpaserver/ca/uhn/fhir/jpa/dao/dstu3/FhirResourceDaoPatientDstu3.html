@@ -77,22 +77,20 @@
 <a class="jxr_linenumber" name="L69" href="#L69">69</a>  			paramMap.add(<span class="jxr_string">"_id"</span>, <strong class="jxr_keyword">new</strong> StringParam(theId.getIdPart()));
 <a class="jxr_linenumber" name="L70" href="#L70">70</a>  		}
 <a class="jxr_linenumber" name="L71" href="#L71">71</a>  		
-<a class="jxr_linenumber" name="L72" href="#L72">72</a>  		SearchBuilder builder = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/jpa/dao/SearchBuilder.html">SearchBuilder</a>(getContext(), myEntityManager, myPlatformTransactionManager, mySearchDao, mySearchResultDao, <strong class="jxr_keyword">this</strong>, myResourceIndexedSearchParamUriDao, myForcedIdDao, myTerminologySvc, mySerarchParamRegistry);
-<a class="jxr_linenumber" name="L73" href="#L73">73</a>  		builder.setType(getResourceType(), getResourceName());
-<a class="jxr_linenumber" name="L74" href="#L74">74</a>  		<strong class="jxr_keyword">return</strong> builder.search(paramMap);
-<a class="jxr_linenumber" name="L75" href="#L75">75</a>  	}
-<a class="jxr_linenumber" name="L76" href="#L76">76</a>  
-<a class="jxr_linenumber" name="L77" href="#L77">77</a>  	@Override
-<a class="jxr_linenumber" name="L78" href="#L78">78</a>  	<strong class="jxr_keyword">public</strong> IBundleProvider patientInstanceEverything(HttpServletRequest theServletRequest, IIdType theId, IPrimitiveType&lt;Integer&gt; theCount, DateRangeParam theLastUpdated, SortSpec theSort, StringAndListParam theContent, StringAndListParam theNarrative, RequestDetails theRequestDetails) {
-<a class="jxr_linenumber" name="L79" href="#L79">79</a>  		<strong class="jxr_keyword">return</strong> doEverythingOperation(theId, theCount, theLastUpdated, theSort, theContent, theNarrative);
-<a class="jxr_linenumber" name="L80" href="#L80">80</a>  	}
-<a class="jxr_linenumber" name="L81" href="#L81">81</a>  
-<a class="jxr_linenumber" name="L82" href="#L82">82</a>  	@Override
-<a class="jxr_linenumber" name="L83" href="#L83">83</a>  	<strong class="jxr_keyword">public</strong> IBundleProvider patientTypeEverything(HttpServletRequest theServletRequest, IPrimitiveType&lt;Integer&gt; theCount, DateRangeParam theLastUpdated, SortSpec theSort, StringAndListParam theContent, StringAndListParam theNarrative, RequestDetails theRequestDetails) {
-<a class="jxr_linenumber" name="L84" href="#L84">84</a>  		<strong class="jxr_keyword">return</strong> doEverythingOperation(<strong class="jxr_keyword">null</strong>, theCount, theLastUpdated, theSort, theContent, theNarrative);
-<a class="jxr_linenumber" name="L85" href="#L85">85</a>  	}
-<a class="jxr_linenumber" name="L86" href="#L86">86</a>  
-<a class="jxr_linenumber" name="L87" href="#L87">87</a>  }
+<a class="jxr_linenumber" name="L72" href="#L72">72</a>  		<strong class="jxr_keyword">return</strong> mySearchCoordinatorSvc.registerSearch(<strong class="jxr_keyword">this</strong>, paramMap, getResourceName());
+<a class="jxr_linenumber" name="L73" href="#L73">73</a>  	}
+<a class="jxr_linenumber" name="L74" href="#L74">74</a>  
+<a class="jxr_linenumber" name="L75" href="#L75">75</a>  	@Override
+<a class="jxr_linenumber" name="L76" href="#L76">76</a>  	<strong class="jxr_keyword">public</strong> IBundleProvider patientInstanceEverything(HttpServletRequest theServletRequest, IIdType theId, IPrimitiveType&lt;Integer&gt; theCount, DateRangeParam theLastUpdated, SortSpec theSort, StringAndListParam theContent, StringAndListParam theNarrative, RequestDetails theRequestDetails) {
+<a class="jxr_linenumber" name="L77" href="#L77">77</a>  		<strong class="jxr_keyword">return</strong> doEverythingOperation(theId, theCount, theLastUpdated, theSort, theContent, theNarrative);
+<a class="jxr_linenumber" name="L78" href="#L78">78</a>  	}
+<a class="jxr_linenumber" name="L79" href="#L79">79</a>  
+<a class="jxr_linenumber" name="L80" href="#L80">80</a>  	@Override
+<a class="jxr_linenumber" name="L81" href="#L81">81</a>  	<strong class="jxr_keyword">public</strong> IBundleProvider patientTypeEverything(HttpServletRequest theServletRequest, IPrimitiveType&lt;Integer&gt; theCount, DateRangeParam theLastUpdated, SortSpec theSort, StringAndListParam theContent, StringAndListParam theNarrative, RequestDetails theRequestDetails) {
+<a class="jxr_linenumber" name="L82" href="#L82">82</a>  		<strong class="jxr_keyword">return</strong> doEverythingOperation(<strong class="jxr_keyword">null</strong>, theCount, theLastUpdated, theSort, theContent, theNarrative);
+<a class="jxr_linenumber" name="L83" href="#L83">83</a>  	}
+<a class="jxr_linenumber" name="L84" href="#L84">84</a>  
+<a class="jxr_linenumber" name="L85" href="#L85">85</a>  }
 </pre>
 <hr/>
 <div id="footer">Copyright &#169; 2014&#x2013;2017 <a href="http://www.uhn.ca">University Health Network</a>. All rights reserved.</div>

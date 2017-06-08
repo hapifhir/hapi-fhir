@@ -217,18 +217,17 @@
 <a class="jxr_linenumber" name="L209" href="#L209">209</a> 			paramMap.setIncludes(theIncludes);
 <a class="jxr_linenumber" name="L210" href="#L210">210</a> 			paramMap.setSort(theSort);
 <a class="jxr_linenumber" name="L211" href="#L211">211</a> 			paramMap.setCount(theCount);
-<a class="jxr_linenumber" name="L212" href="#L212">212</a> 			paramMap.setRequestDetails(theRequestDetails);
-<a class="jxr_linenumber" name="L213" href="#L213">213</a> 
-<a class="jxr_linenumber" name="L214" href="#L214">214</a> 			getDao().translateRawParameters(theAdditionalRawParams, paramMap);
-<a class="jxr_linenumber" name="L215" href="#L215">215</a> 
-<a class="jxr_linenumber" name="L216" href="#L216">216</a> 			ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.server.IBundleProvider retVal = getDao().search(paramMap);
-<a class="jxr_linenumber" name="L217" href="#L217">217</a> 			<strong class="jxr_keyword">return</strong> retVal;
-<a class="jxr_linenumber" name="L218" href="#L218">218</a> 		} <strong class="jxr_keyword">finally</strong> {
-<a class="jxr_linenumber" name="L219" href="#L219">219</a> 			endRequest(theServletRequest);
-<a class="jxr_linenumber" name="L220" href="#L220">220</a> 		}
-<a class="jxr_linenumber" name="L221" href="#L221">221</a> 	}
-<a class="jxr_linenumber" name="L222" href="#L222">222</a> 
-<a class="jxr_linenumber" name="L223" href="#L223">223</a> }
+<a class="jxr_linenumber" name="L212" href="#L212">212</a> 
+<a class="jxr_linenumber" name="L213" href="#L213">213</a> 			getDao().translateRawParameters(theAdditionalRawParams, paramMap);
+<a class="jxr_linenumber" name="L214" href="#L214">214</a> 
+<a class="jxr_linenumber" name="L215" href="#L215">215</a> 			ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.server.IBundleProvider retVal = getDao().search(paramMap, theRequestDetails);
+<a class="jxr_linenumber" name="L216" href="#L216">216</a> 			<strong class="jxr_keyword">return</strong> retVal;
+<a class="jxr_linenumber" name="L217" href="#L217">217</a> 		} <strong class="jxr_keyword">finally</strong> {
+<a class="jxr_linenumber" name="L218" href="#L218">218</a> 			endRequest(theServletRequest);
+<a class="jxr_linenumber" name="L219" href="#L219">219</a> 		}
+<a class="jxr_linenumber" name="L220" href="#L220">220</a> 	}
+<a class="jxr_linenumber" name="L221" href="#L221">221</a> 
+<a class="jxr_linenumber" name="L222" href="#L222">222</a> }
 </pre>
 <hr/>
 <div id="footer">Copyright &#169; 2014&#x2013;2017 <a href="http://www.uhn.ca">University Health Network</a>. All rights reserved.</div>

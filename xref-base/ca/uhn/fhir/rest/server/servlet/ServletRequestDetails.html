@@ -18,7 +18,7 @@
 <a class="jxr_linenumber" name="L10" href="#L10">10</a>  <em class="jxr_comment"> * you may not use this file except in compliance with the License.</em>
 <a class="jxr_linenumber" name="L11" href="#L11">11</a>  <em class="jxr_comment"> * You may obtain a copy of the License at</em>
 <a class="jxr_linenumber" name="L12" href="#L12">12</a>  <em class="jxr_comment"> * </em>
-<a class="jxr_linenumber" name="L13" href="#L13">13</a>  <em class="jxr_comment"> *      <a href="http://www.apache.org/licenses/LICENSE-2." target="alexandria_uri">http://www.apache.org/licenses/LICENSE-2.</a>0</em>
+<a class="jxr_linenumber" name="L13" href="#L13">13</a>  <em class="jxr_comment"> * <a href="http://www.apache.org/licenses/LICENSE-2." target="alexandria_uri">http://www.apache.org/licenses/LICENSE-2.</a>0</em>
 <a class="jxr_linenumber" name="L14" href="#L14">14</a>  <em class="jxr_comment"> * </em>
 <a class="jxr_linenumber" name="L15" href="#L15">15</a>  <em class="jxr_comment"> * Unless required by applicable law or agreed to in writing, software</em>
 <a class="jxr_linenumber" name="L16" href="#L16">16</a>  <em class="jxr_comment"> * distributed under the License is distributed on an "AS IS" BASIS,</em>
@@ -102,7 +102,7 @@
 <a class="jxr_linenumber" name="L94" href="#L94">94</a>  		<strong class="jxr_keyword">try</strong> {
 <a class="jxr_linenumber" name="L95" href="#L95">95</a>  			InputStream inputStream = reader.getInputStream(<strong class="jxr_keyword">this</strong>);
 <a class="jxr_linenumber" name="L96" href="#L96">96</a>  			requestContents = IOUtils.toByteArray(inputStream);
-<a class="jxr_linenumber" name="L97" href="#L97">97</a>  			
+<a class="jxr_linenumber" name="L97" href="#L97">97</a>  
 <a class="jxr_linenumber" name="L98" href="#L98">98</a>  			<strong class="jxr_keyword">if</strong> (myServer.isUncompressIncomingContents()) {
 <a class="jxr_linenumber" name="L99" href="#L99">99</a>  				String contentEncoding = myServletRequest.getHeader(Constants.HEADER_CONTENT_ENCODING);
 <a class="jxr_linenumber" name="L100" href="#L100">100</a> 				<strong class="jxr_keyword">if</strong> (<span class="jxr_string">"gzip"</span>.equals(contentEncoding)) {
@@ -113,7 +113,7 @@
 <a class="jxr_linenumber" name="L105" href="#L105">105</a> 					}
 <a class="jxr_linenumber" name="L106" href="#L106">106</a> 				}
 <a class="jxr_linenumber" name="L107" href="#L107">107</a> 			}
-<a class="jxr_linenumber" name="L108" href="#L108">108</a> 			<em class="jxr_comment">//FIXME resource leak</em>
+<a class="jxr_linenumber" name="L108" href="#L108">108</a> 			<em class="jxr_comment">// FIXME resource leak</em>
 <a class="jxr_linenumber" name="L109" href="#L109">109</a> 			<strong class="jxr_keyword">return</strong> requestContents;
 <a class="jxr_linenumber" name="L110" href="#L110">110</a> 		} <strong class="jxr_keyword">catch</strong> (IOException e) {
 <a class="jxr_linenumber" name="L111" href="#L111">111</a> 			ourLog.error(<span class="jxr_string">"Could not load request resource"</span>, e);
@@ -172,20 +172,19 @@
 <a class="jxr_linenumber" name="L164" href="#L164">164</a> 		<strong class="jxr_keyword">this</strong>.myServletResponse = myServletResponse;
 <a class="jxr_linenumber" name="L165" href="#L165">165</a> 	}
 <a class="jxr_linenumber" name="L166" href="#L166">166</a> 
-<a class="jxr_linenumber" name="L167" href="#L167">167</a> 
-<a class="jxr_linenumber" name="L168" href="#L168">168</a> 	@Override
-<a class="jxr_linenumber" name="L169" href="#L169">169</a> 	<strong class="jxr_keyword">public</strong> Charset getCharset() {
-<a class="jxr_linenumber" name="L170" href="#L170">170</a> 		String ct = getHeader(Constants.HEADER_CONTENT_TYPE);
-<a class="jxr_linenumber" name="L171" href="#L171">171</a> 
-<a class="jxr_linenumber" name="L172" href="#L172">172</a> 		Charset charset = <strong class="jxr_keyword">null</strong>;
-<a class="jxr_linenumber" name="L173" href="#L173">173</a> 		<strong class="jxr_keyword">if</strong> (isNotBlank(ct)) {
-<a class="jxr_linenumber" name="L174" href="#L174">174</a> 			ContentType parsedCt = ContentType.parse(ct);
-<a class="jxr_linenumber" name="L175" href="#L175">175</a> 			charset = parsedCt.getCharset();
-<a class="jxr_linenumber" name="L176" href="#L176">176</a> 		}
-<a class="jxr_linenumber" name="L177" href="#L177">177</a> 		<strong class="jxr_keyword">return</strong> charset;
-<a class="jxr_linenumber" name="L178" href="#L178">178</a> 	}
-<a class="jxr_linenumber" name="L179" href="#L179">179</a> 
-<a class="jxr_linenumber" name="L180" href="#L180">180</a> }
+<a class="jxr_linenumber" name="L167" href="#L167">167</a> 	@Override
+<a class="jxr_linenumber" name="L168" href="#L168">168</a> 	<strong class="jxr_keyword">public</strong> Charset getCharset() {
+<a class="jxr_linenumber" name="L169" href="#L169">169</a> 		String ct = getHeader(Constants.HEADER_CONTENT_TYPE);
+<a class="jxr_linenumber" name="L170" href="#L170">170</a> 
+<a class="jxr_linenumber" name="L171" href="#L171">171</a> 		Charset charset = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L172" href="#L172">172</a> 		<strong class="jxr_keyword">if</strong> (isNotBlank(ct)) {
+<a class="jxr_linenumber" name="L173" href="#L173">173</a> 			ContentType parsedCt = ContentType.parse(ct);
+<a class="jxr_linenumber" name="L174" href="#L174">174</a> 			charset = parsedCt.getCharset();
+<a class="jxr_linenumber" name="L175" href="#L175">175</a> 		}
+<a class="jxr_linenumber" name="L176" href="#L176">176</a> 		<strong class="jxr_keyword">return</strong> charset;
+<a class="jxr_linenumber" name="L177" href="#L177">177</a> 	}
+<a class="jxr_linenumber" name="L178" href="#L178">178</a> 
+<a class="jxr_linenumber" name="L179" href="#L179">179</a> }
 </pre>
 <hr/>
 <div id="footer">Copyright &#169; 2014&#x2013;2017 <a href="http://www.uhn.ca">University Health Network</a>. All rights reserved.</div>

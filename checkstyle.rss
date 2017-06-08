@@ -25,9 +25,9 @@ under the License.
     <language>en-us</language>
     <copyright>&#169;2014 - 2017 University Health Network</copyright>
     <item>
-      <title>File: 601,
+      <title>File: 602,
              Errors: 0,
-             Warnings: 4579,
+             Warnings: 4582,
              Infos: 0
       </title>
             <link>http://jamesagnew.github.io/hapi-fhir//checkstyle.html</link>
@@ -1270,7 +1270,7 @@ under the License.
                   0
                 </td>
                 <td>
-                  24
+                  26
                 </td>
                 <td>
                   0
@@ -1634,7 +1634,7 @@ under the License.
                   0
                 </td>
                 <td>
-                  4
+                  5
                 </td>
                 <td>
                   0
@@ -1858,7 +1858,7 @@ under the License.
                   0
                 </td>
                 <td>
-                  3
+                  4
                 </td>
                 <td>
                   0
@@ -2684,7 +2684,7 @@ under the License.
                   0
                 </td>
                 <td>
-                  9
+                  8
                 </td>
                 <td>
                   0
@@ -3846,7 +3846,7 @@ under the License.
                   0
                 </td>
                 <td>
-                  9
+                  11
                 </td>
                 <td>
                   0
@@ -7256,6 +7256,20 @@ under the License.
               </tr>
                           <tr>
                 <td>
+                  <a href="http://jamesagnew.github.io/hapi-fhir//checkstyle.html#ca.uhn.fhir.rest.client.apache.BaseHttpClient.java">ca/uhn/fhir/rest/client/apache/BaseHttpClient.java</a>
+                </td>
+                <td>
+                  0
+                </td>
+                <td>
+                  1
+                </td>
+                <td>
+                  0
+                </td>
+              </tr>
+                          <tr>
+                <td>
                   <a href="http://jamesagnew.github.io/hapi-fhir//checkstyle.html#ca.uhn.fhir.rest.server.interceptor.auth.TransactionAppliesToEnum.java">ca/uhn/fhir/rest/server/interceptor/auth/TransactionAppliesToEnum.java</a>
                 </td>
                 <td>
@@ -7402,7 +7416,7 @@ under the License.
                   0
                 </td>
                 <td>
-                  3
+                  2
                 </td>
                 <td>
                   0
@@ -7696,7 +7710,7 @@ under the License.
                   0
                 </td>
                 <td>
-                  4
+                  3
                 </td>
                 <td>
                   0
@@ -8452,7 +8466,7 @@ under the License.
                   0
                 </td>
                 <td>
-                  2
+                  1
                 </td>
                 <td>
                   0

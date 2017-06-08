@@ -585,8 +585,8 @@
 <a class="jxr_linenumber" name="L577" href="#L577">577</a> 		<strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (c.charAt(0) == '#') {
 <a class="jxr_linenumber" name="L578" href="#L578">578</a> 			<strong class="jxr_keyword">if</strong> (isInteger(c.substring(1), 10))
 <a class="jxr_linenumber" name="L579" href="#L579">579</a> 				s.append((<strong class="jxr_keyword">char</strong>) Integer.parseInt(c.substring(1)));
-<a class="jxr_linenumber" name="L580" href="#L580">580</a> 			<strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (isInteger(c.substring(1), 16))
-<a class="jxr_linenumber" name="L581" href="#L581">581</a> 				s.append((<strong class="jxr_keyword">char</strong>) Integer.parseInt(c.substring(1), 16));
+<a class="jxr_linenumber" name="L580" href="#L580">580</a> 			<strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (c.charAt(1) == 'x' &amp;&amp; isInteger(c.substring(2), 16))
+<a class="jxr_linenumber" name="L581" href="#L581">581</a> 				s.append((<strong class="jxr_keyword">char</strong>) Integer.parseInt(c.substring(2), 16));
 <a class="jxr_linenumber" name="L582" href="#L582">582</a> 		} <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (c.equals(<span class="jxr_string">"fnof"</span>))
 <a class="jxr_linenumber" name="L583" href="#L583">583</a> 			s.append((<strong class="jxr_keyword">char</strong>) 402); <em class="jxr_comment">// latin small f with hook = function = florin, U+0192 ISOtech --&gt;</em>
 <a class="jxr_linenumber" name="L584" href="#L584">584</a> 		<strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (c.equals(<span class="jxr_string">"Alpha"</span>))

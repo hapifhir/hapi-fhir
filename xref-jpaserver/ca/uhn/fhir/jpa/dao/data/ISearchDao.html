@@ -21,7 +21,7 @@
 <a class="jxr_linenumber" name="L13" href="#L13">13</a>  <em class="jxr_comment"> * you may not use this file except in compliance with the License.</em>
 <a class="jxr_linenumber" name="L14" href="#L14">14</a>  <em class="jxr_comment"> * You may obtain a copy of the License at</em>
 <a class="jxr_linenumber" name="L15" href="#L15">15</a>  <em class="jxr_comment"> * </em>
-<a class="jxr_linenumber" name="L16" href="#L16">16</a>  <em class="jxr_comment"> *      <a href="http://www.apache.org/licenses/LICENSE-2." target="alexandria_uri">http://www.apache.org/licenses/LICENSE-2.</a>0</em>
+<a class="jxr_linenumber" name="L16" href="#L16">16</a>  <em class="jxr_comment"> * <a href="http://www.apache.org/licenses/LICENSE-2." target="alexandria_uri">http://www.apache.org/licenses/LICENSE-2.</a>0</em>
 <a class="jxr_linenumber" name="L17" href="#L17">17</a>  <em class="jxr_comment"> * </em>
 <a class="jxr_linenumber" name="L18" href="#L18">18</a>  <em class="jxr_comment"> * Unless required by applicable law or agreed to in writing, software</em>
 <a class="jxr_linenumber" name="L19" href="#L19">19</a>  <em class="jxr_comment"> * distributed under the License is distributed on an "AS IS" BASIS,</em>
@@ -32,20 +32,31 @@
 <a class="jxr_linenumber" name="L24" href="#L24">24</a>  <em class="jxr_comment"> */</em>
 <a class="jxr_linenumber" name="L25" href="#L25">25</a>  
 <a class="jxr_linenumber" name="L26" href="#L26">26</a>  <strong class="jxr_keyword">import</strong> org.springframework.data.jpa.repository.JpaRepository;
-<a class="jxr_linenumber" name="L27" href="#L27">27</a>  <strong class="jxr_keyword">import</strong> org.springframework.data.jpa.repository.Query;
-<a class="jxr_linenumber" name="L28" href="#L28">28</a>  <strong class="jxr_keyword">import</strong> org.springframework.data.repository.query.Param;
-<a class="jxr_linenumber" name="L29" href="#L29">29</a>  
-<a class="jxr_linenumber" name="L30" href="#L30">30</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.jpa.entity.Search;
-<a class="jxr_linenumber" name="L31" href="#L31">31</a>  
-<a class="jxr_linenumber" name="L32" href="#L32">32</a>  <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">interface</strong> <a href="../../../../../../ca/uhn/fhir/jpa/dao/data/ISearchDao.html">ISearchDao</a> <strong class="jxr_keyword">extends</strong> JpaRepository&lt;Search, Long&gt; {
-<a class="jxr_linenumber" name="L33" href="#L33">33</a>  
-<a class="jxr_linenumber" name="L34" href="#L34">34</a>  	@Query(<span class="jxr_string">"SELECT s FROM Search s WHERE s.myUuid = :uuid"</span>)
-<a class="jxr_linenumber" name="L35" href="#L35">35</a>  	<strong class="jxr_keyword">public</strong> <a href="../../../../../../ca/uhn/fhir/jpa/entity/Search.html">Search</a> findByUuid(@Param(<span class="jxr_string">"uuid"</span>) String theUuid);
-<a class="jxr_linenumber" name="L36" href="#L36">36</a>  
-<a class="jxr_linenumber" name="L37" href="#L37">37</a>  	@Query(<span class="jxr_string">"SELECT s FROM Search s WHERE s.myCreated &lt; :cutoff"</span>)
-<a class="jxr_linenumber" name="L38" href="#L38">38</a>  	<strong class="jxr_keyword">public</strong> Collection&lt;Search&gt; findWhereCreatedBefore(@Param(<span class="jxr_string">"cutoff"</span>) Date theCutoff);
-<a class="jxr_linenumber" name="L39" href="#L39">39</a>  
-<a class="jxr_linenumber" name="L40" href="#L40">40</a>  }
+<a class="jxr_linenumber" name="L27" href="#L27">27</a>  <strong class="jxr_keyword">import</strong> org.springframework.data.jpa.repository.Modifying;
+<a class="jxr_linenumber" name="L28" href="#L28">28</a>  <strong class="jxr_keyword">import</strong> org.springframework.data.jpa.repository.Query;
+<a class="jxr_linenumber" name="L29" href="#L29">29</a>  <strong class="jxr_keyword">import</strong> org.springframework.data.repository.query.Param;
+<a class="jxr_linenumber" name="L30" href="#L30">30</a>  
+<a class="jxr_linenumber" name="L31" href="#L31">31</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.jpa.entity.Search;
+<a class="jxr_linenumber" name="L32" href="#L32">32</a>  
+<a class="jxr_linenumber" name="L33" href="#L33">33</a>  <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">interface</strong> <a href="../../../../../../ca/uhn/fhir/jpa/dao/data/ISearchDao.html">ISearchDao</a> <strong class="jxr_keyword">extends</strong> JpaRepository&lt;Search, Long&gt; {
+<a class="jxr_linenumber" name="L34" href="#L34">34</a>  
+<a class="jxr_linenumber" name="L35" href="#L35">35</a>  	@Query(<span class="jxr_string">"SELECT s FROM Search s WHERE s.myUuid = :uuid"</span>)
+<a class="jxr_linenumber" name="L36" href="#L36">36</a>  	<strong class="jxr_keyword">public</strong> <a href="../../../../../../ca/uhn/fhir/jpa/entity/Search.html">Search</a> findByUuid(@Param(<span class="jxr_string">"uuid"</span>) String theUuid);
+<a class="jxr_linenumber" name="L37" href="#L37">37</a>  
+<a class="jxr_linenumber" name="L38" href="#L38">38</a>  	@Query(<span class="jxr_string">"SELECT s FROM Search s WHERE s.mySearchLastReturned &lt; :cutoff"</span>)
+<a class="jxr_linenumber" name="L39" href="#L39">39</a>  	<strong class="jxr_keyword">public</strong> Collection&lt;Search&gt; findWhereLastReturnedBefore(@Param(<span class="jxr_string">"cutoff"</span>) Date theCutoff);
+<a class="jxr_linenumber" name="L40" href="#L40">40</a>  
+<a class="jxr_linenumber" name="L41" href="#L41">41</a>  <em class="jxr_comment">//	@Query("SELECT s FROM Search s WHERE s.myCreated &lt; :cutoff")</em>
+<a class="jxr_linenumber" name="L42" href="#L42">42</a>  <em class="jxr_comment">//	public Collection&lt;Search&gt; findWhereCreatedBefore(@Param("cutoff") Date theCutoff);</em>
+<a class="jxr_linenumber" name="L43" href="#L43">43</a>  
+<a class="jxr_linenumber" name="L44" href="#L44">44</a>  	@Query(<span class="jxr_string">"SELECT s FROM Search s WHERE s.myResourceType = :type AND mySearchQueryStringHash = :hash AND s.myCreated &gt; :cutoff"</span>)
+<a class="jxr_linenumber" name="L45" href="#L45">45</a>  	<strong class="jxr_keyword">public</strong> Collection&lt;Search&gt; find(@Param(<span class="jxr_string">"type"</span>) String theResourceType, @Param(<span class="jxr_string">"hash"</span>) <strong class="jxr_keyword">int</strong> theHashCode, @Param(<span class="jxr_string">"cutoff"</span>) Date theCreatedCutoff);
+<a class="jxr_linenumber" name="L46" href="#L46">46</a>  
+<a class="jxr_linenumber" name="L47" href="#L47">47</a>  	@Modifying
+<a class="jxr_linenumber" name="L48" href="#L48">48</a>  	@Query(<span class="jxr_string">"UPDATE Search s SET s.mySearchLastReturned = :last WHERE s.myId = :pid"</span>)
+<a class="jxr_linenumber" name="L49" href="#L49">49</a>  	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> updateSearchLastReturned(@Param(<span class="jxr_string">"pid"</span>) <strong class="jxr_keyword">long</strong> thePid, @Param(<span class="jxr_string">"last"</span>) Date theDate);
+<a class="jxr_linenumber" name="L50" href="#L50">50</a>  
+<a class="jxr_linenumber" name="L51" href="#L51">51</a>  }
 </pre>
 <hr/>
 <div id="footer">Copyright &#169; 2014&#x2013;2017 <a href="http://www.uhn.ca">University Health Network</a>. All rights reserved.</div>
