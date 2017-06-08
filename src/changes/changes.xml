@@ -172,6 +172,11 @@
 				was preventing the CLI from uploading definitions correctly. Thanks to
 				Joel Schneider for the Pull Request!
 			</action>
+			<action type="fix" issue="655">
+				DateTime datatypes (both DSTU1/2 and RI STU3) did not properly parse
+				values with MINUTE precision. Thanks to Christian Ohr for the pull
+				request!
+			</action>
 		</release>
 		<release version="2.4" date="2017-04-19">
 			<action type="add">

@@ -333,6 +333,10 @@
 			<id>maclema</id>
 			<name>maclema</name>
 		</developer>
+		<developer>
+			<id>ohr</id>
+			<name>Christian Ohr</name>
+		</developer>
 	</developers>
 
 	<licenses>
