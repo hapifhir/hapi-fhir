@@ -648,19 +648,21 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 	@SuppressWarnings("unchecked")
 	public <R extends IBaseResource> IFhirResourceDao<R> getDao(Class<R> theType) {
 		if (myResourceTypeToDao == null) {
-			myResourceTypeToDao = new HashMap<Class<? extends IBaseResource>, IFhirResourceDao<?>>();
+			Map<Class<? extends IBaseResource>, IFhirResourceDao<?>> theResourceTypeToDao = new HashMap<Class<? extends IBaseResource>, IFhirResourceDao<?>>();
 			for (IFhirResourceDao<?> next : myResourceDaos) {
-				myResourceTypeToDao.put(next.getResourceType(), next);
+				theResourceTypeToDao.put(next.getResourceType(), next);
 			}
 
 			if (this instanceof IFhirResourceDao<?>) {
 				IFhirResourceDao<?> thiz = (IFhirResourceDao<?>) this;
-				myResourceTypeToDao.put(thiz.getResourceType(), thiz);
+				theResourceTypeToDao.put(thiz.getResourceType(), thiz);
 			}
 
+			myResourceTypeToDao = theResourceTypeToDao;
 		}
 
-		return (IFhirResourceDao<R>) myResourceTypeToDao.get(theType);
+		IFhirResourceDao<R> dao = (IFhirResourceDao<R>) myResourceTypeToDao.get(theType);
+		return dao;
 	}
 
 	@Override
