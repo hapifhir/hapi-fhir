@@ -570,6 +570,29 @@ public class BaseDateTimeDtDstu2Test {
 	}
 
 	@Test
+	public void testParseMinute() throws DataFormatException {
+		DateTimeDt dt = new DateTimeDt();
+		dt.setValueAsString("2013-02-03T11:22");
+
+		assertEquals("2013-02-03 11:22", myDateInstantParser.format(dt.getValue()).substring(0, 16));
+		assertEquals("2013-02-03T11:22", dt.getValueAsString());
+		assertEquals(false, dt.isTimeZoneZulu());
+		assertNull(dt.getTimeZone());
+		assertEquals(TemporalPrecisionEnum.MINUTE, dt.getPrecision());
+	}
+
+	@Test
+	public void testParseMinuteZulu() throws DataFormatException {
+		DateTimeDt dt = new DateTimeDt();
+		dt.setValueAsString("2013-02-03T11:22Z");
+
+		assertEquals("2013-02-03T11:22Z", dt.getValueAsString());
+		assertEquals(true, dt.isTimeZoneZulu());
+		assertEquals("GMT", dt.getTimeZone().getID());
+		assertEquals(TemporalPrecisionEnum.MINUTE, dt.getPrecision());
+	}
+
+	@Test
 	public void testParseSecond() throws DataFormatException {
 		DateTimeDt dt = new DateTimeDt();
 		dt.setValueAsString("2013-02-03T11:22:33");
@@ -582,7 +605,7 @@ public class BaseDateTimeDtDstu2Test {
 	}
 
 	@Test
-	public void testParseSecondulu() throws DataFormatException {
+	public void testParseSecondZulu() throws DataFormatException {
 		DateTimeDt dt = new DateTimeDt();
 		dt.setValueAsString("2013-02-03T11:22:33Z");
 
