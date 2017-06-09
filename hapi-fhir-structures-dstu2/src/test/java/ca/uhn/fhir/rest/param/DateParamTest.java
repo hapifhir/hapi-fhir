@@ -84,7 +84,7 @@ public class DateParamTest {
 		dt.setTimeZone(TimeZone.getTimeZone("America/Toronto"));
 		ourLog.info("POST: " + dt.getValue());
 		assertThat(dt.getValueAsString(), startsWith("2016-06-09T"));
-		assertThat(dt.getValueAsString(), endsWith(":38:00.000-04:00"));
+		assertThat(dt.getValueAsString(), endsWith("8:00.000-04:00"));
 	}
 
 	@Test
