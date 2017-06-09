@@ -43,13 +43,13 @@ public class BaseDateTimeDtDstu2Test {
 		Date from = Date.from(ldt.toInstant(ZoneOffset.UTC));
 		InstantDt type = (InstantDt) new InstantDt(from).setTimeZoneZulu(true);
 		String encoded = type.getValueAsString();
-		
-		ourLog.info("LDT:      "+ ldt.toString());
-		ourLog.info("Expected: "+"1960-09-07T00:44:25.012");
-		ourLog.info("Actual:   "+encoded);
-		
+
+		ourLog.info("LDT:      " + ldt.toString());
+		ourLog.info("Expected: " + "1960-09-07T00:44:25.012");
+		ourLog.info("Actual:   " + encoded);
+
 		assertEquals("1960-09-07T00:44:25.012Z", encoded);
-		
+
 		type = new InstantDt(encoded);
 		assertEquals(1960, type.getYear().intValue());
 		assertEquals(8, type.getMonth().intValue()); // 0-indexed unlike LocalDateTime.of
@@ -65,11 +65,11 @@ public class BaseDateTimeDtDstu2Test {
 	public void testFromTime() {
 		long millis;
 		InstantDt dt;
-		
+
 		millis = 1466022208001L;
 		String expected = "2016-06-15T20:23:28.001Z";
 		validate(millis, expected);
-		
+
 		millis = 1466022208123L;
 		expected = "2016-06-15T20:23:28.123Z";
 		validate(millis, expected);
@@ -77,13 +77,12 @@ public class BaseDateTimeDtDstu2Test {
 		millis = 1466022208100L;
 		expected = "2016-06-15T20:23:28.100Z";
 		validate(millis, expected);
-		
+
 		millis = 1466022208000L;
 		expected = "2016-06-15T20:23:28.000Z";
 		validate(millis, expected);
-		
-	}
 
+	}
 
 	private void validate(long millis, String expected) {
 		InstantDt dt;
@@ -93,13 +92,12 @@ public class BaseDateTimeDtDstu2Test {
 
 		assertEquals(millis % 1000, dt.getMillis().longValue());
 		assertEquals((millis % 1000) * BaseDateTimeDt.NANOS_PER_MILLIS, dt.getNanos().longValue());
-		
+
 		dt = new InstantDt();
 		dt.setTimeZone(TimeZone.getTimeZone("GMT+0:00"));
 		dt.setValue(new Date(millis));
 		assertEquals(expected.replace("Z", "+00:00"), dt.getValueAsString());
 	}
-	
 
 	@Test
 	public void testSetPartialsYearFromExisting() {
@@ -262,7 +260,6 @@ public class BaseDateTimeDtDstu2Test {
 		verifyFails("1974-A2-25");
 		verifyFails("1974-12-A5");
 
-		
 		// Date shouldn't have a time zone
 		verifyFails("1974-12-25Z");
 		verifyFails("1974-12-25+10:00");
