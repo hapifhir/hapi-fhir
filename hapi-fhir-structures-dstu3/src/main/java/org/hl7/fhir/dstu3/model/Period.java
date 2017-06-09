@@ -30,16 +30,14 @@ package org.hl7.fhir.dstu3.model;
 */
 
 // Generated on Mon, Apr 17, 2017 17:38-0400 for FHIR v3.0.1
+import java.util.Date;
+import java.util.List;
 
-import java.util.*;
-
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.ChildOrder;
-import ca.uhn.fhir.model.api.annotation.Description;
-import ca.uhn.fhir.model.api.annotation.DatatypeDef;
-import ca.uhn.fhir.model.api.annotation.Block;
-import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.instance.model.api.ICompositeType;
+
+import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
+import ca.uhn.fhir.model.api.annotation.*;
 /**
  * A time period defined by a start and end date and optionally time.
  */
