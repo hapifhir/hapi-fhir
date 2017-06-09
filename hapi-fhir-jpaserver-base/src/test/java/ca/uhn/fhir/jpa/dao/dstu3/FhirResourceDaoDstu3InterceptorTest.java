@@ -226,10 +226,12 @@ public class FhirResourceDaoDstu3InterceptorTest extends BaseJpaDstu3Test {
 		verify(myServerOperationInterceptor, times(1)).resourceCreated(Mockito.isNull(RequestDetails.class), any(IBaseResource.class));
 	}
 
+	@SuppressWarnings("deprecation")
 	@Test
 	public void testServerOperationUpdate() {
 		verify(myServerOperationInterceptor, times(0)).resourceCreated(Mockito.isNull(RequestDetails.class), any(IBaseResource.class));
 		verify(myServerOperationInterceptor, times(0)).resourceUpdated(Mockito.isNull(RequestDetails.class), any(IBaseResource.class));
+		verify(myServerOperationInterceptor, times(0)).resourceUpdated(Mockito.isNull(RequestDetails.class), any(IBaseResource.class), any(IBaseResource.class));
 
 		Patient p = new Patient();
 		p.addName().setFamily("PATIENT");
@@ -241,6 +243,7 @@ public class FhirResourceDaoDstu3InterceptorTest extends BaseJpaDstu3Test {
 		
 		verify(myServerOperationInterceptor, times(1)).resourceCreated(Mockito.isNull(RequestDetails.class), any(IBaseResource.class));
 		verify(myServerOperationInterceptor, times(1)).resourceUpdated(Mockito.isNull(RequestDetails.class), any(IBaseResource.class));
+		verify(myServerOperationInterceptor, times(1)).resourceUpdated(Mockito.isNull(RequestDetails.class), any(IBaseResource.class), any(IBaseResource.class));
 	}
 
 	@Test
@@ -429,10 +432,10 @@ public class FhirResourceDaoDstu3InterceptorTest extends BaseJpaDstu3Test {
 		doAnswer(new Answer<Void>() {
 			@Override
 			public Void answer(InvocationOnMock theInvocation) throws Throwable {
-				IBaseResource res = (IBaseResource) theInvocation.getArguments()[0];
+				IBaseResource res = (IBaseResource) theInvocation.getArguments()[1];
 				assertEquals("Patient/" + id + "/_history/2", res.getIdElement().getValue());
 				return null;
-			}}).when(myRequestOperationCallback).resourceUpdated(any(IBaseResource.class));
+			}}).when(myRequestOperationCallback).resourceUpdated(any(IBaseResource.class), any(IBaseResource.class));
 
 		Bundle xactBundle = new Bundle();
 		xactBundle.setType(BundleType.TRANSACTION);
@@ -448,6 +451,7 @@ public class FhirResourceDaoDstu3InterceptorTest extends BaseJpaDstu3Test {
 		assertEquals(2L, newId.getVersionIdPartAsLong().longValue());
 
 		verify(myRequestOperationCallback, times(1)).resourceUpdated(any(IBaseResource.class));
+		verify(myRequestOperationCallback, times(1)).resourceUpdated(any(IBaseResource.class), any(IBaseResource.class));
 		verify(myRequestOperationCallback, times(1)).resourceCreated(any(IBaseResource.class));
 		verifyNoMoreInteractions(myRequestOperationCallback);
 	}
@@ -462,9 +466,11 @@ public class FhirResourceDaoDstu3InterceptorTest extends BaseJpaDstu3Test {
 			@Override
 			public Void answer(InvocationOnMock theInvocation) throws Throwable {
 				IBaseResource res = (IBaseResource) theInvocation.getArguments()[0];
+				assertEquals("Patient/" + id + "/_history/1", res.getIdElement().getValue());
+				res = (IBaseResource) theInvocation.getArguments()[1];
 				assertEquals("Patient/" + id + "/_history/2", res.getIdElement().getValue());
 				return null;
-			}}).when(myRequestOperationCallback).resourceUpdated(any(IBaseResource.class));
+			}}).when(myRequestOperationCallback).resourceUpdated(any(IBaseResource.class), any(IBaseResource.class));
 
 		p = new Patient();
 		p.setId(new IdType("Patient/" + id));
@@ -473,6 +479,7 @@ public class FhirResourceDaoDstu3InterceptorTest extends BaseJpaDstu3Test {
 		assertEquals(2L, newId.getVersionIdPartAsLong().longValue());
 
 		verify(myRequestOperationCallback, times(1)).resourceUpdated(any(IBaseResource.class));
+		verify(myRequestOperationCallback, times(1)).resourceUpdated(any(IBaseResource.class), any(IBaseResource.class));
 		verify(myRequestOperationCallback, times(1)).resourceCreated(any(IBaseResource.class));
 		verifyNoMoreInteractions(myRequestOperationCallback);
 	}

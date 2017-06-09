@@ -39,8 +39,17 @@ public class ServerOperationInterceptorAdapter extends InterceptorAdapter implem
 		// nothing
 	}
 
+	/**
+	 * @deprecated Deprecated in HAPI FHIR 2.6 in favour of {@link #resourceUpdated(RequestDetails, IBaseResource, IBaseResource)}
+	 */
+	@Deprecated
 	@Override
 	public void resourceUpdated(RequestDetails theRequest, IBaseResource theResource) {
+		// nothing
+	}
+
+	@Override
+	public void resourceUpdated(RequestDetails theRequest, IBaseResource theOldResource, IBaseResource theNewResource) {
 		// nothing
 	}
 

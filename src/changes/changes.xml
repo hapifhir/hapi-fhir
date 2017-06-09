@@ -6,6 +6,25 @@
 		<title>HAPI FHIR Changelog</title>
 	</properties>
 	<body>
+		<release version="2.6" date="TBD">
+			<action type="fix" issue="667">
+				When using the AuthorizationInterceptor with the JPA server, when a client is updating a resource
+				from A to B, the user now needs to have write permission for both A and B. This is particularly 
+				important for cases where (for example) an Observation is being updated from having a subject of
+				Patient/A to Patient/B. If the user has write permission for Patient/B's compartment, this would
+				previously have been allowed even if the user did not have access to write to Patient/A's compartment.
+				Thanks to Eeva Turkka for reporting!
+			</action>
+			<action type="add">
+				IServerOperationInterceptor now has a new method 
+				<![CDATA[<code>resourceUpdated(RequestDetails, IBaseResource, IBaseResource)</code>]]>
+				which replaces the previous
+				<![CDATA[<code>resourceUpdated(RequestDetails, IBaseResource)</code>]]>. This allows
+				interceptors to be notified of resource updates, but also see what the resource
+				looked like before the update. This change was made to support the change above, but
+				seems like a useful feature all around.
+			</action>
+		</release>
 		<release version="2.5" date="2017-06-08">
 			<action type="fix">
 				<![CDATA[

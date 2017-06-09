@@ -91,7 +91,7 @@ public class FhirResourceDaoDstu2InterceptorTest extends BaseJpaDstu2Test {
 		tableCapt = ArgumentCaptor.forClass(ResourceTable.class);
 		verify(myJpaInterceptor, times(1)).resourceCreated(detailsCapt.capture(), tableCapt.capture());
 		verify(myJpaInterceptor, times(0)).resourceUpdated(detailsCapt.capture(), tableCapt.capture());
-
+		
 	}
 	
 	@Test
@@ -366,10 +366,10 @@ public class FhirResourceDaoDstu2InterceptorTest extends BaseJpaDstu2Test {
 		doAnswer(new Answer<Void>() {
 			@Override
 			public Void answer(InvocationOnMock theInvocation) throws Throwable {
-				IBaseResource res = (IBaseResource) theInvocation.getArguments()[0];
+				IBaseResource res = (IBaseResource) theInvocation.getArguments()[1];
 				assertEquals("Patient/" + id + "/_history/2", res.getIdElement().getValue());
 				return null;
-			}}).when(myRequestOperationCallback).resourceUpdated(any(IBaseResource.class));
+			}}).when(myRequestOperationCallback).resourceUpdated(any(IBaseResource.class), any(IBaseResource.class));
 
 		Bundle xactBundle = new Bundle();
 		xactBundle.setType(BundleTypeEnum.TRANSACTION);
@@ -385,6 +385,7 @@ public class FhirResourceDaoDstu2InterceptorTest extends BaseJpaDstu2Test {
 		assertEquals(2L, newId.getVersionIdPartAsLong().longValue());
 
 		verify(myRequestOperationCallback, times(1)).resourceUpdated(any(IBaseResource.class));
+		verify(myRequestOperationCallback, times(1)).resourceUpdated(any(IBaseResource.class), any(IBaseResource.class));
 		verify(myRequestOperationCallback, times(1)).resourceCreated(any(IBaseResource.class));
 		verifyNoMoreInteractions(myRequestOperationCallback);
 	}
@@ -398,10 +399,10 @@ public class FhirResourceDaoDstu2InterceptorTest extends BaseJpaDstu2Test {
 		doAnswer(new Answer<Void>() {
 			@Override
 			public Void answer(InvocationOnMock theInvocation) throws Throwable {
-				IBaseResource res = (IBaseResource) theInvocation.getArguments()[0];
+				IBaseResource res = (IBaseResource) theInvocation.getArguments()[1];
 				assertEquals("Patient/" + id + "/_history/2", res.getIdElement().getValue());
 				return null;
-			}}).when(myRequestOperationCallback).resourceUpdated(any(IBaseResource.class));
+			}}).when(myRequestOperationCallback).resourceUpdated(any(IBaseResource.class), any(IBaseResource.class));
 
 		p = new Patient();
 		p.setId(new IdDt("Patient/" + id));
@@ -410,6 +411,7 @@ public class FhirResourceDaoDstu2InterceptorTest extends BaseJpaDstu2Test {
 		assertEquals(2L, newId.getVersionIdPartAsLong().longValue());
 
 		verify(myRequestOperationCallback, times(1)).resourceUpdated(any(IBaseResource.class));
+		verify(myRequestOperationCallback, times(1)).resourceUpdated(any(IBaseResource.class), any(IBaseResource.class));
 		verify(myRequestOperationCallback, times(1)).resourceCreated(any(IBaseResource.class));
 		verifyNoMoreInteractions(myRequestOperationCallback);
 	}

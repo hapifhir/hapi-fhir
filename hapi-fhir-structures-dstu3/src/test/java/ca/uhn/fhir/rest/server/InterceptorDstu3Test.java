@@ -69,12 +69,14 @@ public class InterceptorDstu3Test {
 		ourServlet.setInterceptors(myInterceptor1, myInterceptor2);
 	}
 
+	@SuppressWarnings("deprecation")
 	@Test
 	public void testServerOperationInterceptorAdapterMethods() {
 		ServerOperationInterceptorAdapter i = new ServerOperationInterceptorAdapter();
 		i.resourceCreated(null, null);
 		i.resourceDeleted(null, null);
 		i.resourceUpdated(null, null);
+		i.resourceUpdated(null, null, null);
 	}
 
 	@Test
@@ -172,7 +174,6 @@ public class InterceptorDstu3Test {
 			return Patient.class;
 		}
 
-		@SuppressWarnings("unused")
 		@Validate()
 		public MethodOutcome validate(@ResourceParam Patient theResource) {
 			return new MethodOutcome();

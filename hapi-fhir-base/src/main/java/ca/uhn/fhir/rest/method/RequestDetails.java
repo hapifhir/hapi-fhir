@@ -400,18 +400,35 @@ public abstract class RequestDetails {
 			}
 		}
 
-		@Override
+		/**
+		 * @deprecated Deprecated in HAPI FHIR 2.6 - Use {@link IRequestOperationCallback#resourceUpdated(IBaseResource, IBaseResource)} instead
+		 */
+		@Deprecated
 		public void resourcesUpdated(Collection<? extends IBaseResource> theResource) {
 			for (IBaseResource next : theResource) {
 				resourceUpdated(next);
 			}
 		}
 
+		
+		/**
+		 * @deprecated Deprecated in HAPI FHIR 2.6 - Use {@link IRequestOperationCallback#resourceUpdated(IBaseResource, IBaseResource)} instead
+		 */
+		@Deprecated
 		@Override
 		public void resourceUpdated(IBaseResource theResource) {
 			for (IServerInterceptor next : getInterceptors()) {
 				if (next instanceof IServerOperationInterceptor) {
 					((IServerOperationInterceptor) next).resourceUpdated(RequestDetails.this, theResource);
+				}
+			}
+		}
+
+		@Override
+		public void resourceUpdated(IBaseResource theOldResource, IBaseResource theNewResource) {
+			for (IServerInterceptor next : getInterceptors()) {
+				if (next instanceof IServerOperationInterceptor) {
+					((IServerOperationInterceptor) next).resourceUpdated(RequestDetails.this, theOldResource, theNewResource);
 				}
 			}
 		}

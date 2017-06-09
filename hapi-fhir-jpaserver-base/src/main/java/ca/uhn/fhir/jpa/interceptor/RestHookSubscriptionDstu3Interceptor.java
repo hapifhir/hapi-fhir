@@ -57,10 +57,9 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.rest.server.IBundleProvider;
-import ca.uhn.fhir.rest.server.interceptor.IServerOperationInterceptor;
-import ca.uhn.fhir.rest.server.interceptor.InterceptorAdapter;
+import ca.uhn.fhir.rest.server.interceptor.*;
 
-public class RestHookSubscriptionDstu3Interceptor extends InterceptorAdapter implements IServerOperationInterceptor {
+public class RestHookSubscriptionDstu3Interceptor extends ServerOperationInterceptorAdapter {
 
 	private static volatile ExecutorService executor;
 	private final static int MAX_THREADS = 1;
@@ -368,14 +367,14 @@ public class RestHookSubscriptionDstu3Interceptor extends InterceptorAdapter imp
 	 * a rest-hook subscription
 	 */
 	@Override
-	public void resourceUpdated(RequestDetails theRequest, IBaseResource theResource) {
-		String resourceType = getResourceName(theResource);
-		IIdType idType = theResource.getIdElement();
+	public void resourceUpdated(RequestDetails theRequest, IBaseResource theOldResource, IBaseResource theNewResource) {
+		String resourceType = getResourceName(theNewResource);
+		IIdType idType = theNewResource.getIdElement();
 
 		ourLog.info("resource updated type: " + resourceType);
 
-		if (theResource instanceof Subscription) {
-			Subscription subscription = (Subscription) theResource;
+		if (theNewResource instanceof Subscription) {
+			Subscription subscription = (Subscription) theNewResource;
 			if (subscription.getChannel() != null && subscription.getChannel().getType() == Subscription.SubscriptionChannelType.RESTHOOK) {
 				removeLocalSubscription(subscription.getIdElement().getIdPart());
 

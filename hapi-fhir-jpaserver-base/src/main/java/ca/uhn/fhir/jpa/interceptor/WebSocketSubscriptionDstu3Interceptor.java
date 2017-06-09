@@ -1,6 +1,15 @@
 
 package ca.uhn.fhir.jpa.interceptor;
 
+import javax.annotation.PostConstruct;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.hl7.fhir.dstu3.model.Subscription;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+
 /*-
  * #%L
  * HAPI FHIR JPA Server
@@ -23,25 +32,13 @@ package ca.uhn.fhir.jpa.interceptor;
 
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoSubscription;
-import ca.uhn.fhir.jpa.entity.ResourceTable;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.method.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
-import ca.uhn.fhir.rest.server.interceptor.IServerOperationInterceptor;
-import ca.uhn.fhir.rest.server.interceptor.InterceptorAdapter;
-import org.hl7.fhir.dstu3.model.Subscription;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
+import ca.uhn.fhir.rest.server.interceptor.ServerOperationInterceptorAdapter;
 
-import javax.annotation.PostConstruct;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-public class WebSocketSubscriptionDstu3Interceptor extends InterceptorAdapter implements IServerOperationInterceptor {
+public class WebSocketSubscriptionDstu3Interceptor extends ServerOperationInterceptorAdapter {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(WebSocketSubscriptionDstu3Interceptor.class);
 
@@ -104,7 +101,7 @@ public class WebSocketSubscriptionDstu3Interceptor extends InterceptorAdapter im
 	}
 
 	@Override
-	public void resourceUpdated(RequestDetails theRequest, IBaseResource theResource) {
+	public void resourceUpdated(RequestDetails theRequest, IBaseResource theOldResource, IBaseResource theNewResource) {
 		// nothing
 	}
 }

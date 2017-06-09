@@ -34,7 +34,17 @@ public interface IRequestOperationCallback {
 
 	void resourcesDeleted(Collection<? extends IBaseResource> theResource);
 
+	/**
+	 * @deprecated Deprecated in HAPI FHIR 2.6 - Use {@link IRequestOperationCallback#resourceUpdated(IBaseResource, IBaseResource)} instead
+	 */
+	@Deprecated
 	void resourcesUpdated(Collection<? extends IBaseResource> theResource);
 
+	/**
+	 * @deprecated Deprecated in HAPI FHIR 2.6 - Use {@link IRequestOperationCallback#resourceUpdated(IBaseResource, IBaseResource)} instead
+	 */
+	@Deprecated
 	void resourceUpdated(IBaseResource theResource);
+
+	void resourceUpdated(IBaseResource theOldResource, IBaseResource theNewResource);
 }

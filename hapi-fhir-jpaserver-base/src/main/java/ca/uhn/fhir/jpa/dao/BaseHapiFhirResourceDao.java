@@ -1125,6 +1125,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			notifyInterceptors(RestOperationTypeEnum.UPDATE, requestDetails);
 		}
 
+		IBaseResource oldResource = toResource(entity, false);
+		
 		// Perform update
 		ResourceTable savedEntity = updateEntity(theResource, entity, null, thePerformIndexing, thePerformIndexing, new Date(), theForceUpdateVersion, thePerformIndexing);
 
@@ -1143,6 +1145,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		// Notify interceptors
 		if (theRequestDetails != null) {
 			theRequestDetails.getRequestOperationCallback().resourceUpdated(theResource);
+			theRequestDetails.getRequestOperationCallback().resourceUpdated(oldResource, theResource);
 			for (IServerInterceptor next : getConfig().getInterceptors()) {
 				if (next instanceof IJpaServerInterceptor) {
 					((IJpaServerInterceptor) next).resourceUpdated(requestDetails, entity);
@@ -1152,6 +1155,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		for (IServerInterceptor next : getConfig().getInterceptors()) {
 			if (next instanceof IServerOperationInterceptor) {
 				((IServerOperationInterceptor) next).resourceUpdated(theRequestDetails, theResource);
+				((IServerOperationInterceptor) next).resourceUpdated(theRequestDetails, oldResource, theResource);
 			}
 		}
 		

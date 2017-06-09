@@ -44,8 +44,7 @@ import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.method.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
 import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
-import ca.uhn.fhir.rest.server.interceptor.IServerOperationInterceptor;
-import ca.uhn.fhir.rest.server.interceptor.InterceptorAdapter;
+import ca.uhn.fhir.rest.server.interceptor.*;
 import ca.uhn.fhir.util.CoverageIgnore;
 
 /**
@@ -58,7 +57,7 @@ import ca.uhn.fhir.util.CoverageIgnore;
  * for information on how to use this interceptor.
  * </p>
  */
-public class AuthorizationInterceptor extends InterceptorAdapter implements IServerOperationInterceptor, IRuleApplier {
+public class AuthorizationInterceptor extends ServerOperationInterceptorAdapter implements IRuleApplier {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(AuthorizationInterceptor.class);
 
@@ -330,8 +329,11 @@ public class AuthorizationInterceptor extends InterceptorAdapter implements ISer
 	}
 
 	@Override
-	public void resourceUpdated(RequestDetails theRequest, IBaseResource theResource) {
-		handleUserOperation(theRequest, theResource, RestOperationTypeEnum.UPDATE);
+	public void resourceUpdated(RequestDetails theRequest, IBaseResource theOldResource, IBaseResource theNewResource) {
+		if (theOldResource != null) {
+			handleUserOperation(theRequest, theOldResource, RestOperationTypeEnum.UPDATE);
+		}
+		handleUserOperation(theRequest, theNewResource, RestOperationTypeEnum.UPDATE);
 	}
 
 	/**
@@ -356,19 +358,6 @@ public class AuthorizationInterceptor extends InterceptorAdapter implements ISer
 
 		return resources;
 	}
-
-	// private List<IBaseResource> toListOfResources(FhirContext fhirContext, IBaseBundle responseBundle) {
-	// List<IBaseResource> retVal = BundleUtil.toListOfResources(fhirContext, responseBundle);
-	// for (int i = 0; i < retVal.size(); i++) {
-	// IBaseResource nextResource = retVal.get(i);
-	// if (nextResource instanceof IBaseBundle) {
-	// retVal.addAll(BundleUtil.toListOfResources(fhirContext, (IBaseBundle) nextResource));
-	// retVal.remove(i);
-	// i--;
-	// }
-	// }
-	// return retVal;
-	// }
 
 	private static UnsupportedOperationException failForDstu1() {
 		return new UnsupportedOperationException("Use of this interceptor on DSTU1 servers is not supportd");
