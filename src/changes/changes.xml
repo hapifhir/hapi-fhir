@@ -24,6 +24,10 @@
 				looked like before the update. This change was made to support the change above, but
 				seems like a useful feature all around.
 			</action>
+			<action type="fix">
+				Fix HTTP 500 error in JPA server if a numeric search parameter was supplied with no value, e.g.
+				<![CDATA[<code>GET /Observation?value-quantity=</code>]]>
+			</action>
 		</release>
 		<release version="2.5" date="2017-06-08">
 			<action type="fix">

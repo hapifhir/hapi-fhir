@@ -76,13 +76,6 @@ import ca.uhn.fhir.context.RuntimeChildChoiceDefinition;
 import ca.uhn.fhir.context.RuntimeChildResourceDefinition;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
-import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
-import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
-import ca.uhn.fhir.jpa.dao.IDao;
-import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
-import ca.uhn.fhir.jpa.dao.ISearchBuilder;
-import ca.uhn.fhir.jpa.dao.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamUriDao;
 import ca.uhn.fhir.jpa.entity.BaseHasResource;
@@ -1102,7 +1095,7 @@ public class SearchBuilder implements ISearchBuilder {
 		if (!isBlank(unitsValue)) {
 			code = theBuilder.equal(theFrom.get("myUnits"), unitsValue);
 		}
-
+		
 		cmpValue = ObjectUtils.defaultIfNull(cmpValue, ParamPrefixEnum.EQUAL);
 		final Expression<BigDecimal> path = theFrom.get("myValue");
 		String invalidMessageName = "invalidQuantityPrefix";
@@ -1768,6 +1761,39 @@ public class SearchBuilder implements ISearchBuilder {
 	}
 
 	private void searchForIdsWithAndOr(String theResourceName, String theParamName, List<List<? extends IQueryParameterType>> theAndOrParams) {
+		
+		for (int andListIdx = 0; andListIdx < theAndOrParams.size(); andListIdx++) {
+			List<? extends IQueryParameterType> nextOrList = theAndOrParams.get(andListIdx);
+			
+			for (int orListIdx = 0; orListIdx < nextOrList.size(); orListIdx++) {
+				IQueryParameterType nextOr = nextOrList.get(orListIdx);
+				boolean hasNoValue = false;
+				if (nextOr.getMissing() != null) {
+					continue;
+				}
+				if (nextOr instanceof QuantityParam) {
+					if (isBlank(((QuantityParam) nextOr).getValueAsString())) {
+						hasNoValue = true;
+					}
+				}
+				
+				if (hasNoValue) {
+					ourLog.debug("Ignoring empty parameter: {}", theParamName);
+					nextOrList.remove(orListIdx);
+					orListIdx--;
+				}
+			}
+			
+			if (nextOrList.isEmpty()) {
+				theAndOrParams.remove(andListIdx);
+				andListIdx--;
+			}
+		}
+
+		if (theAndOrParams.isEmpty()) {
+			return;
+		}
+		
 		if (theParamName.equals(BaseResource.SP_RES_ID)) {
 
 			addPredicateResourceId(theAndOrParams);
