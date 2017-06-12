@@ -24,6 +24,10 @@
 				looked like before the update. This change was made to support the change above, but
 				seems like a useful feature all around.
 			</action>
+			<action type="fix" issue="604">
+				Allow DateParam (used in servers) to handle values with MINUTE precision. Thanks to
+				Christian Ohr for the pull request!
+			</action>
 			<action type="fix">
 				Fix HTTP 500 error in JPA server if a numeric search parameter was supplied with no value, e.g.
 				<![CDATA[<code>GET /Observation?value-quantity=</code>]]>
@@ -194,11 +198,6 @@
 				Fix bad ValueSet URL in DeviceRequest profile definition for STU3 which 
 				was preventing the CLI from uploading definitions correctly. Thanks to
 				Joel Schneider for the Pull Request!
-			</action>
-			<action type="fix" issue="655">
-				DateTime datatypes (both DSTU1/2 and RI STU3) did not properly parse
-				values with MINUTE precision. Thanks to Christian Ohr for the pull
-				request!
 			</action>
 			<action type="add" issue="656">
 				Improve handling in JPA server when doing code:above and code:below
