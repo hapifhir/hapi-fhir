@@ -97,14 +97,41 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		myDaoConfig.setAllowMultipleDelete(true);
 	}
 
-	
+	@Test
+	public void testSearchWithEmptyParameter() throws Exception {
+		Observation obs= new Observation();
+		obs.setStatus(ObservationStatus.FINAL);
+		obs.getCode().addCoding().setSystem("foo").setCode("bar");
+		ourClient.create().resource(obs).execute();
+		
+		testSearchWithEmptyParameter("/Observation?value-quantity=");
+		testSearchWithEmptyParameter("/Observation?code=bar&value-quantity=");
+		testSearchWithEmptyParameter("/Observation?value-date=");
+		testSearchWithEmptyParameter("/Observation?code=bar&value-date=");
+		testSearchWithEmptyParameter("/Observation?value-concept=");
+		testSearchWithEmptyParameter("/Observation?code=bar&value-concept=");
+	}
+
+	private void testSearchWithEmptyParameter(String url) throws IOException, ClientProtocolException {
+		HttpGet get = new HttpGet(ourServerBase + url);
+		CloseableHttpResponse resp = ourHttpClient.execute(get);
+		try {
+			assertEquals(200, resp.getStatusLine().getStatusCode());
+			String respString = IOUtils.toString(resp.getEntity().getContent(), Constants.CHARSET_UTF8);
+			Bundle bundle = myFhirCtx.newXmlParser().parseResource(Bundle.class, respString);
+			assertEquals(1, bundle.getEntry().size());
+		} finally {
+			IOUtils.closeQuietly(resp.getEntity().getContent());
+		}
+	}
+
 	@Test
 	public void testSearchWithMissingDate2() throws Exception {
 		MedicationRequest mr1 = new MedicationRequest();
 		mr1.getCategory().addCoding().setSystem("urn:medicationroute").setCode("oral");
 		mr1.addDosageInstruction().getTiming().addEventElement().setValueAsString("2017-01-01");
 		IIdType id1 = myMedicationRequestDao.create(mr1).getId().toUnqualifiedVersionless();
-		
+
 		MedicationRequest mr2 = new MedicationRequest();
 		mr2.getCategory().addCoding().setSystem("urn:medicationroute").setCode("oral");
 		IIdType id2 = myMedicationRequestDao.create(mr2).getId().toUnqualifiedVersionless();
@@ -114,38 +141,34 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		try {
 			assertEquals(200, resp.getStatusLine().getStatusCode());
 			Bundle bundle = myFhirCtx.newXmlParser().parseResource(Bundle.class, IOUtils.toString(resp.getEntity().getContent(), Constants.CHARSET_UTF8));
-			
+
 			List<String> ids = toUnqualifiedVersionlessIdValues(bundle);
 			assertThat(ids, contains(id1.getValue()));
 		} finally {
 			IOUtils.closeQuietly(resp);
 		}
-		
 
-		
 	}
-	
+
 	@Test
 	public void testEverythingWithOnlyPatient() {
 		Patient p = new Patient();
 		p.setActive(true);
 		IIdType id = ourClient.create().resource(p).execute().getId().toUnqualifiedVersionless();
-		
+
 		myFhirCtx.getRestfulClientFactory().setSocketTimeout(300 * 1000);
-		
+
 		Bundle response = ourClient
-			.operation()
-			.onInstance(id)
-			.named("everything")
-			.withNoParameters(Parameters.class)
-			.returnResourceType(Bundle.class)
-			.execute();
-		
+				.operation()
+				.onInstance(id)
+				.named("everything")
+				.withNoParameters(Parameters.class)
+				.returnResourceType(Bundle.class)
+				.execute();
+
 		assertEquals(1, response.getEntry().size());
 	}
-	
 
-	
 	@Test
 	public void testSaveAndRetrieveResourceWithExtension() {
 		Patient nextPatient = new Patient();
@@ -158,7 +181,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		ourClient.update().resource(nextPatient).execute();
 
 		Patient p = ourClient.read().resource(Patient.class).withId("B").execute();
-		
+
 		String encoded = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p);
 		ourLog.info(encoded);
 

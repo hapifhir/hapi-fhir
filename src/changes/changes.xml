@@ -28,6 +28,10 @@
 				Allow DateParam (used in servers) to handle values with MINUTE precision. Thanks to
 				Christian Ohr for the pull request!
 			</action>
+			<action type="fix">
+				Fix HTTP 500 error in JPA server if a numeric search parameter was supplied with no value, e.g.
+				<![CDATA[<code>GET /Observation?value-quantity=</code>]]>
+			</action>
 		</release>
 		<release version="2.5" date="2017-06-08">
 			<action type="fix">
