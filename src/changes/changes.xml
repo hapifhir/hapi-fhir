@@ -24,6 +24,10 @@
 				looked like before the update. This change was made to support the change above, but
 				seems like a useful feature all around.
 			</action>
+			<action type="add">
+				Optimize queries in JPA server remove a few redundant select columns when performing
+				searches. This provides a slight speed increase in some cases.
+			</action>
 		</release>
 		<release version="2.5" date="2017-06-08">
 			<action type="fix">

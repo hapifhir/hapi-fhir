@@ -1828,6 +1828,32 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 	}
 
 	@Test
+	public void testSearchStringParamDoesntMatchWrongType() throws Exception {
+		IIdType pid1;
+		IIdType pid2;
+		{
+			Patient patient = new Patient();
+			patient.addName().setFamily("HELLO");
+			pid1 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
+		}
+		{
+			Practitioner patient = new Practitioner();
+			patient.addName().setFamily("HELLO");
+			pid2 = myPractitionerDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
+		}
+
+		SearchParameterMap params;
+		List<IIdType> patients;
+
+		params = new SearchParameterMap();
+		params.add(Patient.SP_FAMILY, new StringParam("HELLO"));
+		patients = toUnqualifiedVersionlessIds(myPatientDao.search(params));
+		assertThat(patients, containsInAnyOrder(pid1));
+		assertThat(patients, not(containsInAnyOrder(pid2)));
+	}
+	
+	
+	@Test
 	public void testSearchStringParam() throws Exception {
 		IIdType pid1;
 		IIdType pid2;
@@ -3251,7 +3277,22 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 		SearchParameterMap map;
 		List<String> ids;
 
+		// No search param
 		map = new SearchParameterMap();
+		map.setSort(new SortSpec("family", SortOrderEnum.ASC).setChain(new SortSpec("given", SortOrderEnum.ASC)));
+		ids = toUnqualifiedVersionlessIdValues(myPatientDao.search(map));
+		assertThat(ids, contains("Patient/AA", "Patient/AB", "Patient/BA", "Patient/BB"));
+
+		// Same SP as sort
+		map = new SearchParameterMap();
+		map.add(Patient.SP_ACTIVE, new TokenParam(null, "true"));
+		map.setSort(new SortSpec("family", SortOrderEnum.ASC).setChain(new SortSpec("given", SortOrderEnum.ASC)));
+		ids = toUnqualifiedVersionlessIdValues(myPatientDao.search(map));
+		assertThat(ids, contains("Patient/AA", "Patient/AB", "Patient/BA", "Patient/BB"));
+
+		// Different SP from sort
+		map = new SearchParameterMap();
+		map.add(Patient.SP_GENDER, new TokenParam(null, "male"));
 		map.setSort(new SortSpec("family", SortOrderEnum.ASC).setChain(new SortSpec("given", SortOrderEnum.ASC)));
 		ids = toUnqualifiedVersionlessIdValues(myPatientDao.search(map));
 		assertThat(ids, contains("Patient/AA", "Patient/AB", "Patient/BA", "Patient/BB"));
