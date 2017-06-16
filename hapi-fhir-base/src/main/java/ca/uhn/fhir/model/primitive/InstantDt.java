@@ -157,7 +157,7 @@ public class InstantDt extends BaseDateTimeDt {
 	}
 
 	@Override
-	boolean isPrecisionAllowed(TemporalPrecisionEnum thePrecision) {
+	protected boolean isPrecisionAllowed(TemporalPrecisionEnum thePrecision) {
 		switch (thePrecision) {
 		case SECOND:
 		case MILLI:

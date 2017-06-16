@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.config;
 
 import java.util.Properties;
+import java.util.concurrent.TimeUnit;
 
 import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
@@ -17,6 +18,8 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
+import net.ttddyy.dsproxy.listener.logging.SLF4JLogLevel;
+import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
 
 @Configuration
 @EnableTransactionManagement()
@@ -34,7 +37,15 @@ public class TestDstu3Config extends BaseJavaConfigDstu3 {
 		retVal.setUrl("jdbc:derby:memory:myUnitTestDB;create=true");
 		retVal.setUsername("");
 		retVal.setPassword("");
-		return retVal;
+
+		DataSource dataSource = ProxyDataSourceBuilder
+				.create(retVal)
+				.logQueryBySlf4j(SLF4JLogLevel.INFO, "SQL")
+				.logSlowQueryBySlf4j(10, TimeUnit.SECONDS)
+				.countQuery()
+				.build();
+
+		return dataSource;
 	}
 
 	@Bean()

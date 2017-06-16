@@ -24,6 +24,10 @@
 				looked like before the update. This change was made to support the change above, but
 				seems like a useful feature all around.
 			</action>
+			<action type="fix" issue="604">
+				Allow DateParam (used in servers) to handle values with MINUTE precision. Thanks to
+				Christian Ohr for the pull request!
+			</action>
 			<action type="fix">
 				Fix HTTP 500 error in JPA server if a numeric search parameter was supplied with no value, e.g.
 				<![CDATA[<code>GET /Observation?value-quantity=</code>]]>
@@ -32,6 +36,17 @@
 				JPA server transaction processing now honours the Prefer header and includes 
 				created and updated resource bodies in the response bundle if it is set
 				appropriately.
+			</action>
+			<action type="add">
+				Optimize queries in JPA server remove a few redundant select columns when performing
+				searches. This provides a slight speed increase in some cases.
+			</action>
+			<action type="add">
+				Add configuration to JPA server DaoConfig that allows a maximum
+				number of search results to be specified. Queries will never return
+				more than this number, which can be good for avoiding accidental 
+				performance problems in situations where lare queries should not be 
+				needed
 			</action>
 		</release>
 		<release version="2.5" date="2017-06-08">
@@ -199,11 +214,6 @@
 				Fix bad ValueSet URL in DeviceRequest profile definition for STU3 which 
 				was preventing the CLI from uploading definitions correctly. Thanks to
 				Joel Schneider for the Pull Request!
-			</action>
-			<action type="fix" issue="655">
-				DateTime datatypes (both DSTU1/2 and RI STU3) did not properly parse
-				values with MINUTE precision. Thanks to Christian Ohr for the pull
-				request!
 			</action>
 			<action type="add" issue="656">
 				Improve handling in JPA server when doing code:above and code:below
