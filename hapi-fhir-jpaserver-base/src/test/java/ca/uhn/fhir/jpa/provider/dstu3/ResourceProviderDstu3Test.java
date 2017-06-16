@@ -10,6 +10,8 @@ import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.lessThanOrEqualTo;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.startsWith;
 import static org.hamcrest.Matchers.stringContainsInOrder;
@@ -1536,12 +1538,19 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(responseBundle));
 
-		assertEquals(22, responseBundle.getEntry().size());
+		List<String> ids = new ArrayList<String>();
+		for (BundleEntryComponent nextEntry : responseBundle.getEntry()) {
+			ids.add(nextEntry.getResource().getIdElement().toUnqualifiedVersionless().getValue());
+		}
+		Collections.sort(ids);
+		ourLog.info("{} ids: {}", ids.size(), ids);
+		
+		assertThat(responseBundle.getEntry().size(), lessThanOrEqualTo(25));
 
-		TreeSet<String> ids = new TreeSet<String>();
+		TreeSet<String> idsSet = new TreeSet<String>();
 		for (int i = 0; i < responseBundle.getEntry().size(); i++) {
 			for (BundleEntryComponent nextEntry : responseBundle.getEntry()) {
-				ids.add(nextEntry.getResource().getIdElement().toUnqualifiedVersionless().getValue());
+				idsSet.add(nextEntry.getResource().getIdElement().toUnqualifiedVersionless().getValue());
 			}
 		}
 
@@ -1549,7 +1558,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		responseBundle = ourClient.fetchResourceFromUrl(Bundle.class, nextUrl);
 		for (int i = 0; i < responseBundle.getEntry().size(); i++) {
 			for (BundleEntryComponent nextEntry : responseBundle.getEntry()) {
-				ids.add(nextEntry.getResource().getIdElement().toUnqualifiedVersionless().getValue());
+				idsSet.add(nextEntry.getResource().getIdElement().toUnqualifiedVersionless().getValue());
 			}
 		}
 
@@ -1557,19 +1566,19 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		responseBundle = ourClient.fetchResourceFromUrl(Bundle.class, nextUrl);
 		for (int i = 0; i < responseBundle.getEntry().size(); i++) {
 			for (BundleEntryComponent nextEntry : responseBundle.getEntry()) {
-				ids.add(nextEntry.getResource().getIdElement().toUnqualifiedVersionless().getValue());
+				idsSet.add(nextEntry.getResource().getIdElement().toUnqualifiedVersionless().getValue());
 			}
 		}
 
 		assertEquals(null, responseBundle.getLink("next"));
 
-		assertThat(ids, hasItem("List/A161444"));
-		assertThat(ids, hasItem("List/A161468"));
-		assertThat(ids, hasItem("List/A161500"));
+		assertThat(idsSet, hasItem("List/A161444"));
+		assertThat(idsSet, hasItem("List/A161468"));
+		assertThat(idsSet, hasItem("List/A161500"));
 
 		ourLog.info("Expected {} - {}", allIds.size(), allIds);
-		ourLog.info("Actual   {} - {}", ids.size(), ids);
-		assertEquals(allIds, ids);
+		ourLog.info("Actual   {} - {}", idsSet.size(), idsSet);
+		assertEquals(allIds, idsSet);
 
 	}
 
