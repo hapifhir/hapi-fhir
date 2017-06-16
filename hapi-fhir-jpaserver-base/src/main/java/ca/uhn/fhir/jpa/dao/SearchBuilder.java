@@ -43,16 +43,7 @@ import org.hl7.fhir.instance.model.api.*;
 
 import com.google.common.collect.*;
 
-import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
-import ca.uhn.fhir.context.BaseRuntimeDeclaredChildDefinition;
-import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
-import ca.uhn.fhir.context.ConfigurationException;
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.context.RuntimeChildChoiceDefinition;
-import ca.uhn.fhir.context.RuntimeChildResourceDefinition;
-import ca.uhn.fhir.context.RuntimeResourceDefinition;
-import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.context.*;
 import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamUriDao;
 import ca.uhn.fhir.jpa.entity.*;
@@ -1253,7 +1244,7 @@ public class SearchBuilder implements ISearchBuilder {
 		return new QueryIterator();
 	}
 
-	private TypedQuery<Long> createQuery(SortSpec sort) {
+	private TypedQuery<Long> createQuery(SortSpec sort, Integer theMaximumResults) {
 		CriteriaQuery<Long> outerQuery;
 		/*
 		 * Sort
@@ -1366,6 +1357,11 @@ public class SearchBuilder implements ISearchBuilder {
 		 * Now perform the search
 		 */
 		final TypedQuery<Long> query = myEntityManager.createQuery(outerQuery);
+		
+		if (theMaximumResults != null) {
+			query.setMaxResults(theMaximumResults);
+		}
+		
 		return query;
 	}
 
@@ -2031,7 +2027,9 @@ public class SearchBuilder implements ISearchBuilder {
 
 			// If we don't have a query yet, create one
 			if (myResultsIterator == null) {
-				final TypedQuery<Long> query = createQuery(mySort);
+				Integer maximumResults = myCallingDao.getConfig().getFetchSizeDefaultMaximum();
+
+				final TypedQuery<Long> query = createQuery(mySort, maximumResults);
 				myResultsIterator = query.getResultList().iterator();
 
 				// If the query resulted in extra results being requested
