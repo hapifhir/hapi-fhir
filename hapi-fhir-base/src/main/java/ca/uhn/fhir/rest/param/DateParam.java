@@ -34,17 +34,18 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IQueryParameterOr;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
-import ca.uhn.fhir.model.primitive.DateDt;
-import ca.uhn.fhir.model.primitive.DateTimeDt;
-import ca.uhn.fhir.model.primitive.InstantDt;
+import ca.uhn.fhir.model.primitive.*;
 import ca.uhn.fhir.rest.method.QualifiedParamList;
+import ca.uhn.fhir.rest.param.DateParam.DateParamDateTimeHolder;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.ValidateUtil;
 
 @SuppressWarnings("deprecation")
 public class DateParam extends BaseParamWithPrefix<DateParam> implements /*IQueryParameterType , */IQueryParameterOr<DateParam> {
 
-	private final DateTimeDt myValue = new DateTimeDt();
+	private static final long serialVersionUID = 1L;
+	
+	private final DateParamDateTimeHolder myValue = new DateParamDateTimeHolder();
 
 	/**
 	 * Constructor
@@ -223,6 +224,11 @@ public class DateParam extends BaseParamWithPrefix<DateParam> implements /*IQuer
 		return null;
 	}
 
+	@Override
+	public List<DateParam> getValuesAsQueryTokens() {
+		return Collections.singletonList(this);
+	}
+
 	/**
 	 * Returns <code>true</code> if no date/time is specified. Note that this method does not check the comparator, so a
 	 * QualifiedDateParam with only a comparator and no date/time is considered empty.
@@ -267,6 +273,20 @@ public class DateParam extends BaseParamWithPrefix<DateParam> implements /*IQuer
 		}
 	}
 
+	@Override
+	public void  setValuesAsQueryTokens(FhirContext theContext, String theParamName, QualifiedParamList theParameters) {
+		setMissing(null);
+		setPrefix(null);
+		setValueAsString(null);
+		
+		if (theParameters.size() == 1) {
+			setValueAsString(theParameters.get(0));
+		} else if (theParameters.size() > 1) {
+			throw new InvalidRequestException("This server does not support multi-valued dates for this paramater: " + theParameters);
+		}
+		
+	}
+
 	private ParamPrefixEnum toPrefix(QuantityCompararatorEnum theComparator) {
 		if (theComparator != null) {
 			return ParamPrefixEnum.forDstu1Value(theComparator.getCode());
@@ -282,23 +302,17 @@ public class DateParam extends BaseParamWithPrefix<DateParam> implements /*IQuer
 		return b.build();
 	}
 
-	@Override
-	public void  setValuesAsQueryTokens(FhirContext theContext, String theParamName, QualifiedParamList theParameters) {
-		setMissing(null);
-		setPrefix(null);
-		setValueAsString(null);
-		
-		if (theParameters.size() == 1) {
-			setValueAsString(theParameters.get(0));
-		} else if (theParameters.size() > 1) {
-			throw new InvalidRequestException("This server does not support multi-valued dates for this paramater: " + theParameters);
+	public class DateParamDateTimeHolder extends BaseDateTimeDt {
+		@Override
+		protected TemporalPrecisionEnum getDefaultPrecisionForDatatype() {
+			return TemporalPrecisionEnum.SECOND;
 		}
-		
-	}
 
-	@Override
-	public List<DateParam> getValuesAsQueryTokens() {
-		return Collections.singletonList(this);
+		@Override
+		protected boolean isPrecisionAllowed(TemporalPrecisionEnum thePrecision) {
+			return true;
+		}
+
 	}
 
 

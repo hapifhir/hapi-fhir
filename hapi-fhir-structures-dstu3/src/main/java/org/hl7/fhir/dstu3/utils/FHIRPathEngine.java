@@ -1,49 +1,22 @@
 package org.hl7.fhir.dstu3.utils;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.EnumSet;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import org.hl7.fhir.dstu3.context.IWorkerContext;
-import org.hl7.fhir.dstu3.model.Base;
-import org.hl7.fhir.dstu3.model.BooleanType;
-import org.hl7.fhir.dstu3.model.DateTimeType;
-import org.hl7.fhir.dstu3.model.DateType;
-import org.hl7.fhir.dstu3.model.DecimalType;
-import org.hl7.fhir.dstu3.model.ElementDefinition;
+import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.dstu3.model.ElementDefinition.TypeRefComponent;
-import org.hl7.fhir.dstu3.model.ExpressionNode;
-import org.hl7.fhir.dstu3.model.ExpressionNode.CollectionStatus;
-import org.hl7.fhir.dstu3.model.ExpressionNode.Function;
-import org.hl7.fhir.dstu3.model.ExpressionNode.Kind;
-import org.hl7.fhir.dstu3.model.ExpressionNode.Operation;
-import org.hl7.fhir.dstu3.model.ExpressionNode.SourceLocation;
-import org.hl7.fhir.dstu3.model.IntegerType;
-import org.hl7.fhir.dstu3.model.Property;
-import org.hl7.fhir.dstu3.model.Resource;
-import org.hl7.fhir.dstu3.model.StringType;
-import org.hl7.fhir.dstu3.model.StructureDefinition;
+import org.hl7.fhir.dstu3.model.ExpressionNode.*;
 import org.hl7.fhir.dstu3.model.StructureDefinition.StructureDefinitionKind;
 import org.hl7.fhir.dstu3.model.StructureDefinition.TypeDerivationRule;
-import org.hl7.fhir.dstu3.model.TemporalPrecisionEnum;
-import org.hl7.fhir.dstu3.model.TimeType;
-import org.hl7.fhir.dstu3.model.TypeDetails;
 import org.hl7.fhir.dstu3.model.TypeDetails.ProfiledType;
 import org.hl7.fhir.dstu3.utils.FHIRLexer.FHIRLexerException;
 import org.hl7.fhir.dstu3.utils.FHIRPathEngine.IEvaluationContext.FunctionDetails;
-import org.hl7.fhir.exceptions.DefinitionException;
-import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.exceptions.PathEngineException;
-import org.hl7.fhir.exceptions.UcumException;
+import org.hl7.fhir.exceptions.*;
 import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.utilities.ucum.Decimal;
 
+import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.ElementUtil;
 

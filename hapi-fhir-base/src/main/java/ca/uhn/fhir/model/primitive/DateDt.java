@@ -133,7 +133,7 @@ public class DateDt extends BaseDateTimeDt {
 	}
 
 	@Override
-	boolean isPrecisionAllowed(TemporalPrecisionEnum thePrecision) {
+	protected boolean isPrecisionAllowed(TemporalPrecisionEnum thePrecision) {
 		switch (thePrecision) {
 		case YEAR:
 		case MONTH:

@@ -570,6 +570,28 @@ public class BaseDateTimeDtDstu2Test {
 	}
 
 	@Test
+	public void testParseMinuteShouldFail() throws DataFormatException {
+		DateTimeDt dt = new DateTimeDt();
+		try {
+			dt.setValueAsString("2013-02-03T11:22");
+			fail();
+		} catch (DataFormatException e) {
+			assertEquals(e.getMessage(), "Invalid date/time string (datatype DateTimeDt does not support MINUTE precision): 2013-02-03T11:22");
+		}
+	}
+
+	@Test
+	public void testParseMinuteZuluShouldFail() throws DataFormatException {
+		DateTimeDt dt = new DateTimeDt();
+		try {
+			dt.setValueAsString("2013-02-03T11:22Z");
+			fail();
+		} catch (DataFormatException e) {
+			assertEquals(e.getMessage(), "Invalid date/time string (datatype DateTimeDt does not support MINUTE precision): 2013-02-03T11:22Z");
+		}
+	}
+
+	@Test
 	public void testParseSecond() throws DataFormatException {
 		DateTimeDt dt = new DateTimeDt();
 		dt.setValueAsString("2013-02-03T11:22:33");
@@ -582,7 +604,7 @@ public class BaseDateTimeDtDstu2Test {
 	}
 
 	@Test
-	public void testParseSecondulu() throws DataFormatException {
+	public void testParseSecondZulu() throws DataFormatException {
 		DateTimeDt dt = new DateTimeDt();
 		dt.setValueAsString("2013-02-03T11:22:33Z");
 
