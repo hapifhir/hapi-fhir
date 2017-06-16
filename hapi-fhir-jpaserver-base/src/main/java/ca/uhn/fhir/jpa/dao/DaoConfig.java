@@ -64,21 +64,21 @@ public class DaoConfig {
 	 */
 	public static final Long DEFAULT_REUSE_CACHED_SEARCH_RESULTS_FOR_MILLIS = DateUtils.MILLIS_PER_MINUTE;
 
-	// ***
-	// update setter javadoc if default changes
-	// ***
+	/**
+	 * update setter javadoc if default changes
+	 */
 	private boolean myAllowExternalReferences = false;
 
-	// ***
-	// update setter javadoc if default changes
-	// ***
+	/**
+	 * update setter javadoc if default changes
+	 */
 	private boolean myAllowInlineMatchUrlReferences = true;
 	private boolean myAllowMultipleDelete;
 	private boolean myDefaultSearchParamsCanBeOverridden = false;
 
-	// ***
-	// update setter javadoc if default changes
-	// ***
+	/**
+	 * update setter javadoc if default changes
+	 */
 	private int myDeferIndexingForCodesystemsOfSize = 2000;
 
 	private boolean myDeleteStaleSearches = true;
@@ -87,27 +87,34 @@ public class DaoConfig {
 
 	private boolean myEnforceReferentialIntegrityOnWrite = true;
 
-	// ***
-	// update setter javadoc if default changes
-	// ***
+	/**
+	 * update setter javadoc if default changes
+	 */
 	private long myExpireSearchResultsAfterMillis = DateUtils.MILLIS_PER_HOUR;
-	private int myHardTagListLimit = 1000;
+	/**
+	 * update setter javadoc if default changes
+	 */
+	private Integer myFetchSizeDefaultMaximum = null;
 
+	private int myHardTagListLimit = 1000;
 	private int myIncludeLimit = 2000;
-	// ***
-	// update setter javadoc if default changes
-	// ***
+	/**
+	 * update setter javadoc if default changes
+	 */
 	private boolean myIndexContainedResources = true;
 	private List<IServerInterceptor> myInterceptors;
-	// ***
-	// update setter javadoc if default changes
-	// ***
+	/**
+	 * update setter javadoc if default changes
+	 */
 	private int myMaximumExpansionSize = 5000;
 	private int myMaximumSearchResultCountInTransaction = DEFAULT_MAXIMUM_SEARCH_RESULT_COUNT_IN_TRANSACTION;
 	private ResourceEncodingEnum myResourceEncoding = ResourceEncodingEnum.JSONC;
 	private Long myReuseCachedSearchResultsForMillis = DEFAULT_REUSE_CACHED_SEARCH_RESULTS_FOR_MILLIS;
 	private boolean mySchedulingDisabled;
 	private boolean mySubscriptionEnabled;
+	/**
+	 * update setter javadoc if default changes
+	 */
 	private long mySubscriptionPollDelay = 1000;
 	private Long mySubscriptionPurgeInactiveAfterMillis;
 	private boolean mySuppressUpdatesWithNoChange = true;
@@ -158,6 +165,20 @@ public class DaoConfig {
 	 */
 	public long getExpireSearchResultsAfterMillis() {
 		return myExpireSearchResultsAfterMillis;
+	}
+
+	/**
+	 * Gets the default maximum number of results to load in a query.
+	 * <p>
+	 * For example, if the database has a million Patient resources in it, and
+	 * the client requests <code>GET /Patient</code>, if this value is set
+	 * to a non-null value (default is <code>null</code>) only this number
+	 * of results will be fetched. Setting this value appropriately
+	 * can be useful to improve performance in some situations.
+	 * </p>
+	 */
+	public Integer getFetchSizeDefaultMaximum() {
+		return myFetchSizeDefaultMaximum;
 	}
 
 	/**
@@ -547,6 +568,20 @@ public class DaoConfig {
 	 */
 	public void setExpireSearchResultsAfterMillis(long theExpireSearchResultsAfterMillis) {
 		myExpireSearchResultsAfterMillis = theExpireSearchResultsAfterMillis;
+	}
+
+	/**
+	 * Gets the default maximum number of results to load in a query.
+	 * <p>
+	 * For example, if the database has a million Patient resources in it, and
+	 * the client requests <code>GET /Patient</code>, if this value is set
+	 * to a non-null value (default is <code>null</code>) only this number
+	 * of results will be fetched. Setting this value appropriately
+	 * can be useful to improve performance in some situations.
+	 * </p>
+	 */
+	public void setFetchSizeDefaultMaximum(Integer theFetchSizeDefaultMaximum) {
+		myFetchSizeDefaultMaximum = theFetchSizeDefaultMaximum;
 	}
 
 	/**

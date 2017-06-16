@@ -104,7 +104,7 @@ public abstract class BaseHapiFhirSystemDao<T, MT> extends BaseHapiFhirDao<IBase
 
 				TypedQuery<Long> q = myEntityManager.createQuery("SELECT t.myId FROM ResourceTable t WHERE t.myIndexStatus IS NULL", Long.class);
 
-				ourLog.info("Beginning indexing query with maximum {}", maxResult);
+				ourLog.debug("Beginning indexing query with maximum {}", maxResult);
 				q.setMaxResults(maxResult);
 				Collection<Long> resources = q.getResultList();
 
@@ -145,9 +145,14 @@ public abstract class BaseHapiFhirSystemDao<T, MT> extends BaseHapiFhirDao<IBase
 				}
 
 				long delay = System.currentTimeMillis() - start;
-				long avg = count > 0 ? (delay / count) : 0;
-				ourLog.info("Indexed {} resources in {}ms - Avg {}ms / resource", new Object[] { count, delay, avg });
-
+				long avg;
+				if (count > 0) {
+					avg = (delay / count);
+					ourLog.info("Indexed {} resources in {}ms - Avg {}ms / resource", new Object[] { count, delay, avg });
+				} else {
+					ourLog.debug("Indexed 0 resources in {}ms", delay);
+				}
+				
 				return count;
 			}
 		});

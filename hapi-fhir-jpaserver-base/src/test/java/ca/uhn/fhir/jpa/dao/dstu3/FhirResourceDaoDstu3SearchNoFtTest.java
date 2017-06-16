@@ -82,8 +82,7 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
-import ca.uhn.fhir.jpa.dao.SearchParameterMap;
+import ca.uhn.fhir.jpa.dao.*;
 import ca.uhn.fhir.jpa.dao.SearchParameterMap.EverythingModeEnum;
 import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamDate;
 import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamNumber;
@@ -130,6 +129,7 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 	@Before
 	public void beforeDisableResultReuse() {
 		myDaoConfig.setReuseCachedSearchResultsForMillis(null);
+		myDaoConfig.setFetchSizeDefaultMaximum(new DaoConfig().getFetchSizeDefaultMaximum());
 	}
 
 	/**
@@ -1852,6 +1852,22 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 		assertThat(patients, not(containsInAnyOrder(pid2)));
 	}
 	
+	@Test
+	public void testSearchWithFetchSizeDefaultMaximum() {
+		myDaoConfig.setFetchSizeDefaultMaximum(5);
+		
+		for (int i = 0; i < 10; i++) {
+			Patient p = new Patient();
+			p.addName().setFamily("PT" + i);
+			myPatientDao.create(p);
+		}
+		
+		SearchParameterMap map = new SearchParameterMap();
+		map.setLoadSynchronous(true);
+		IBundleProvider values = myPatientDao.search(map);
+		assertEquals(5, values.size().intValue());
+		assertEquals(5, values.getResources(0, 1000).size());
+	}
 	
 	@Test
 	public void testSearchStringParam() throws Exception {
