@@ -1449,6 +1449,53 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	}
 
 	@Test
+	public void testSearchByLastUpdated() throws Exception {
+		String methodName = "testSearchByLastUpdated";
+
+		Patient p = new Patient();
+		p.addName().setFamily(methodName+"1");
+		IIdType pid1 = ourClient.create().resource(p).execute().getId().toUnqualifiedVersionless();
+
+		Thread.sleep(10);
+		long time1 = System.currentTimeMillis();
+		Thread.sleep(10);
+
+		Patient p2 = new Patient();
+		p2.addName().setFamily(methodName+"2");
+		IIdType pid2 = ourClient.create().resource(p2).execute().getId().toUnqualifiedVersionless();
+
+		HttpGet get = new HttpGet(ourServerBase + "/Patient?_lastUpdated=lt" + new InstantType(new Date(time1)).getValueAsString());
+		CloseableHttpResponse response = ourHttpClient.execute(get);
+		try {
+			assertEquals(200, response.getStatusLine().getStatusCode());
+			String output = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
+			IOUtils.closeQuietly(response.getEntity().getContent());
+			ourLog.info(output);
+			List<IIdType> ids = toUnqualifiedVersionlessIds(myFhirCtx.newXmlParser().parseResource(Bundle.class, output));
+			ourLog.info(ids.toString());
+			assertThat(ids, containsInAnyOrder(pid1));
+		} finally {
+			response.close();
+		}
+
+		get = new HttpGet(ourServerBase + "/Patient?_lastUpdated=gt" + new InstantType(new Date(time1)).getValueAsString());
+		response = ourHttpClient.execute(get);
+		try {
+			assertEquals(200, response.getStatusLine().getStatusCode());
+			String output = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
+			IOUtils.closeQuietly(response.getEntity().getContent());
+			ourLog.info(output);
+			List<IIdType> ids = toUnqualifiedVersionlessIds(myFhirCtx.newXmlParser().parseResource(Bundle.class, output));
+			ourLog.info(ids.toString());
+			assertThat(ids, containsInAnyOrder(pid2));
+		} finally {
+			response.close();
+		}
+
+	}
+	
+	
+	@Test
 	public void testEverythingPatientType() throws Exception {
 		String methodName = "testEverythingPatientType";
 

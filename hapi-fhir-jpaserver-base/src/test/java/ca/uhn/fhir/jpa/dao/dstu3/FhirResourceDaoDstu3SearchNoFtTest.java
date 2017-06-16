@@ -1181,6 +1181,23 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 			assertThat(patients, (hasItems(id1a, id1b)));
 			assertThat(patients, not(hasItems(id2)));
 		}
+		
+		
+		{
+			SearchParameterMap params = new SearchParameterMap();
+			params.setLastUpdated(new DateRangeParam(new DateParam(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, beforeR2)));
+			List<IIdType> patients = toUnqualifiedVersionlessIds(myPatientDao.search(params));
+			assertThat(patients, not(hasItems(id1a, id1b)));
+			assertThat(patients, (hasItems(id2)));
+		}
+		{
+			SearchParameterMap params = new SearchParameterMap();
+			params.setLastUpdated(new DateRangeParam(new DateParam(ParamPrefixEnum.LESSTHAN_OR_EQUALS, beforeR2)));
+			List<IIdType> patients = toUnqualifiedVersionlessIds(myPatientDao.search(params));
+			assertThat(patients, (hasItems(id1a, id1b)));
+			assertThat(patients, not(hasItems(id2)));
+		}
+
 	}
 
 	@SuppressWarnings("deprecation")

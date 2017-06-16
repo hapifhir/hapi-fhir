@@ -28,6 +28,11 @@
 				Fix HTTP 500 error in JPA server if a numeric search parameter was supplied with no value, e.g.
 				<![CDATA[<code>GET /Observation?value-quantity=</code>]]>
 			</action>
+			<action type="add">
+				JPA server transaction processing now honours the Prefer header and includes 
+				created and updated resource bodies in the response bundle if it is set
+				appropriately.
+			</action>
 		</release>
 		<release version="2.5" date="2017-06-08">
 			<action type="fix">

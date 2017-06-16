@@ -39,6 +39,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.persistence.TypedQuery;
+import javax.servlet.http.HttpServletRequest;
 
 import org.apache.http.NameValuePair;
 import org.hl7.fhir.dstu3.model.Bundle;
@@ -79,6 +80,7 @@ import ca.uhn.fhir.jpa.util.DeleteConflict;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.rest.api.PreferReturnEnum;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.method.BaseMethodBinding;
@@ -282,7 +284,7 @@ public class FhirSystemDaoDstu3 extends BaseHapiFhirSystemDao<Bundle, Meta> {
 			super.clearRequestAsProcessingSubRequest(theRequestDetails);
 		}
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	private Bundle doTransaction(ServletRequestDetails theRequestDetails, Bundle theRequest, String theActionName) {
 		BundleType transactionType = theRequest.getTypeElement().getValue();
@@ -408,7 +410,7 @@ public class FhirSystemDaoDstu3 extends BaseHapiFhirSystemDao<Bundle, Meta> {
 				String matchUrl = nextReqEntry.getRequest().getIfNoneExist();
 				outcome = resourceDao.create(res, matchUrl, false, theRequestDetails);
 				if (nextResourceId != null) {
-					handleTransactionCreateOrUpdateOutcome(idSubstitutions, idToPersistedOutcome, nextResourceId, outcome, nextRespEntry, resourceType, res);
+					handleTransactionCreateOrUpdateOutcome(idSubstitutions, idToPersistedOutcome, nextResourceId, outcome, nextRespEntry, resourceType, res, theRequestDetails);
 				}
 				entriesToProcess.put(nextRespEntry, outcome.getEntity());
 				if (outcome.getCreated() == false) {
@@ -445,12 +447,12 @@ public class FhirSystemDaoDstu3 extends BaseHapiFhirSystemDao<Bundle, Meta> {
 					if (allDeleted.isEmpty()) {
 						status = Constants.STATUS_HTTP_204_NO_CONTENT;
 					}
-					
+
 					nextRespEntry.getResponse().setOutcome((Resource) deleteOutcome.getOperationOutcome());
 				}
 
 				nextRespEntry.getResponse().setStatus(toStatusString(status));
-				
+
 				break;
 			}
 			case PUT: {
@@ -474,7 +476,7 @@ public class FhirSystemDaoDstu3 extends BaseHapiFhirSystemDao<Bundle, Meta> {
 					}
 				}
 
-				handleTransactionCreateOrUpdateOutcome(idSubstitutions, idToPersistedOutcome, nextResourceId, outcome, nextRespEntry, resourceType, res);
+				handleTransactionCreateOrUpdateOutcome(idSubstitutions, idToPersistedOutcome, nextResourceId, outcome, nextRespEntry, resourceType, res, theRequestDetails);
 				entriesToProcess.put(nextRespEntry, outcome.getEntity());
 				break;
 			}
@@ -646,10 +648,8 @@ public class FhirSystemDaoDstu3 extends BaseHapiFhirSystemDao<Bundle, Meta> {
 		return response;
 	}
 
-	
-	
 	private static void handleTransactionCreateOrUpdateOutcome(Map<IdType, IdType> idSubstitutions, Map<IdType, DaoMethodOutcome> idToPersistedOutcome, IdType nextResourceId, DaoMethodOutcome outcome,
-			BundleEntryComponent newEntry, String theResourceType, IBaseResource theRes) {
+			BundleEntryComponent newEntry, String theResourceType, IBaseResource theRes, ServletRequestDetails theRequestDetails) {
 		IdType newId = (IdType) outcome.getId().toUnqualifiedVersionless();
 		IdType resourceId = isPlaceholder(nextResourceId) ? nextResourceId : nextResourceId.toUnqualifiedVersionless();
 		if (newId.equals(resourceId) == false) {
@@ -668,6 +668,19 @@ public class FhirSystemDaoDstu3 extends BaseHapiFhirSystemDao<Bundle, Meta> {
 			newEntry.getResponse().setStatus(toStatusString(Constants.STATUS_HTTP_200_OK));
 		}
 		newEntry.getResponse().setLastModified(((Resource) theRes).getMeta().getLastUpdated());
+
+		if (theRequestDetails != null) {
+			if (outcome.getResource() != null) {
+				String prefer = theRequestDetails.getHeader(Constants.HEADER_PREFER);
+				PreferReturnEnum preferReturn = RestfulServerUtils.parsePreferHeader(prefer);
+				if (preferReturn != null) {
+					if (preferReturn == PreferReturnEnum.REPRESENTATION) {
+						newEntry.setResource((Resource) outcome.getResource());
+					}
+				}
+			}
+		}
+
 	}
 
 	private static boolean isPlaceholder(IdType theId) {

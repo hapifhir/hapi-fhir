@@ -60,6 +60,7 @@ import ca.uhn.fhir.jpa.rp.dstu3.OrganizationResourceProvider;
 import ca.uhn.fhir.jpa.rp.dstu3.PatientResourceProvider;
 import ca.uhn.fhir.jpa.testutil.RandomServerPortProvider;
 import ca.uhn.fhir.rest.client.IGenericClient;
+import ca.uhn.fhir.rest.client.interceptor.SimpleRequestHeaderInterceptor;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.rest.server.FifoMemoryPagingProvider;
@@ -80,6 +81,7 @@ public class SystemProviderDstu3Test extends BaseJpaDstu3Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SystemProviderDstu3Test.class);
 	private static Server ourServer;
 	private static String ourServerBase;
+	private SimpleRequestHeaderInterceptor mySimpleHeaderInterceptor;
 
 	@Test
 	public void testTransactionWithInlineConditionalUrl() throws Exception {
@@ -237,10 +239,17 @@ public class SystemProviderDstu3Test extends BaseJpaDstu3Test {
 		myRestServer.setDefaultResponseEncoding(EncodingEnum.XML);
 	}
 
+	@Before
+	public void before() {
+		mySimpleHeaderInterceptor = new SimpleRequestHeaderInterceptor();
+		ourClient.registerInterceptor(mySimpleHeaderInterceptor);
+	}
+	
 	@SuppressWarnings("deprecation")
 	@After
 	public void after() {
 		myRestServer.setUseBrowserFriendlyContentTypes(true);
+		ourClient.unregisterInterceptor(mySimpleHeaderInterceptor);
 	}
 	
 	@SuppressWarnings("deprecation")
@@ -630,6 +639,44 @@ public class SystemProviderDstu3Test extends BaseJpaDstu3Test {
 		Bundle respSub = (Bundle) resp.getEntry().get(0).getResource();
 		assertEquals(20, respSub.getTotal());
 		assertEquals(0, respSub.getEntry().size());
+	}
+
+	@Test
+	public void testTransactionCreateWithPreferHeader() throws Exception {
+
+		Patient p = new Patient();
+		p.setActive(true);
+
+		Bundle req;
+		Bundle resp;
+		
+		// No prefer header
+		req = new Bundle();
+		req.setType(BundleType.TRANSACTION);
+		req.addEntry().setResource(p).getRequest().setMethod(HTTPVerb.POST).setUrl("Patient");
+		resp = ourClient.transaction().withBundle(req).execute();
+		assertEquals(null, resp.getEntry().get(0).getResource());
+		assertEquals("201 Created", resp.getEntry().get(0).getResponse().getStatus());
+
+		// Prefer return=minimal
+		mySimpleHeaderInterceptor.setHeaderName(Constants.HEADER_PREFER);
+		mySimpleHeaderInterceptor.setHeaderValue(Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_MINIMAL);
+		req = new Bundle();
+		req.setType(BundleType.TRANSACTION);
+		req.addEntry().setResource(p).getRequest().setMethod(HTTPVerb.POST).setUrl("Patient");
+		resp = ourClient.transaction().withBundle(req).execute();
+		assertEquals(null, resp.getEntry().get(0).getResource());
+		assertEquals("201 Created", resp.getEntry().get(0).getResponse().getStatus());
+		
+		// Prefer return=representation
+		mySimpleHeaderInterceptor.setHeaderName(Constants.HEADER_PREFER);
+		mySimpleHeaderInterceptor.setHeaderValue(Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_REPRESENTATION);
+		req = new Bundle();
+		req.setType(BundleType.TRANSACTION);
+		req.addEntry().setResource(p).getRequest().setMethod(HTTPVerb.POST).setUrl("Patient");
+		resp = ourClient.transaction().withBundle(req).execute();
+		assertEquals(Patient.class, resp.getEntry().get(0).getResource().getClass());
+		assertEquals("201 Created", resp.getEntry().get(0).getResponse().getStatus());
 	}
 
 	@AfterClass
