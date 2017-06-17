@@ -46,6 +46,7 @@ import org.hl7.fhir.dstu3.model.CapabilityStatement.UnknownContentCode;
 import org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.dstu3.model.Identifier.IdentifierUse;
 import org.hl7.fhir.dstu3.model.Observation.ObservationStatus;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
 import org.junit.After;
@@ -56,8 +57,10 @@ import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
+import com.google.common.base.Charsets;
 import com.google.common.collect.Sets;
 
+import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
 import ca.uhn.fhir.parser.IParserErrorHandler.IParseLocation;
@@ -81,14 +84,14 @@ public class JsonParserDstu3Test {
 	public void after() {
 		ourCtx.setNarrativeGenerator(null);
 	}
-	
+
 	/**
 	 * See #563
 	 */
 	@Test
 	public void testBadMessageForUnknownElement() throws IOException {
 		String input = IOUtils.toString(JsonParserDstu3Test.class.getResourceAsStream("/bad_parse_bundle_1.json"), StandardCharsets.UTF_8);
-		
+
 		IParser p = ourCtx.newJsonParser();
 		p.setParserErrorHandler(new StrictErrorHandler());
 		try {
@@ -99,14 +102,13 @@ public class JsonParserDstu3Test {
 		}
 	}
 
-	
 	/**
 	 * See #563
 	 */
 	@Test
 	public void testBadMessageForUnknownElement2() throws IOException {
 		String input = IOUtils.toString(JsonParserDstu3Test.class.getResourceAsStream("/bad_parse_bundle_2.json"), StandardCharsets.UTF_8);
-		
+
 		IParser p = ourCtx.newJsonParser();
 		p.setParserErrorHandler(new StrictErrorHandler());
 		try {
@@ -116,35 +118,35 @@ public class JsonParserDstu3Test {
 			assertEquals("Found incorrect type for element context - Expected OBJECT and found SCALAR (STRING)", e.getMessage());
 		}
 	}
-	
+
 	/**
 	 * See #544
 	 */
 	@Test
 	public void testBundleStitchReferencesByUuid() throws Exception {
 		Bundle bundle = new Bundle();
-		
+
 		DocumentManifest dm = new DocumentManifest();
 		dm.getSubject().setReference("urn:uuid:96e85cca-9797-45d6-834a-c4eb27f331d3");
 		bundle.addEntry().setResource(dm);
-		
+
 		Patient patient = new Patient();
 		patient.addName().setFamily("FAMILY");
 		bundle.addEntry().setResource(patient).setFullUrl("urn:uuid:96e85cca-9797-45d6-834a-c4eb27f331d3");
-		
+
 		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle);
 		ourLog.info(encoded);
-		
+
 		bundle = ourCtx.newJsonParser().parseResource(Bundle.class, encoded);
 		dm = (DocumentManifest) bundle.getEntry().get(0).getResource();
-		
+
 		assertEquals("urn:uuid:96e85cca-9797-45d6-834a-c4eb27f331d3", dm.getSubject().getReference());
-		
+
 		Patient subject = (Patient) dm.getSubject().getResource();
 		assertNotNull(subject);
 		assertEquals("FAMILY", subject.getNameFirstRep().getFamily());
 	}
-	
+
 	/**
 	 * Test for the url generated based on the server config
 	 */
@@ -170,12 +172,12 @@ public class JsonParserDstu3Test {
 		newPatient = jsonParser.parseResource(MyPatientWithCustomUrlExtension.class, new StringReader(parsedPatient));
 		assertEquals("myName", newPatient.getPetName().getValue());
 
-		//Check no NPE if base server not configure
+		// Check no NPE if base server not configure
 		newPatient = ourCtx.newJsonParser().parseResource(MyPatientWithCustomUrlExtension.class, new StringReader(parsedPatient));
 		assertNull("myName", newPatient.getPetName().getValue());
 		assertEquals("myName", ((StringType) newPatient.getExtensionsByUrl("http://www.example.com/petname").get(0).getValue()).getValue());
 	}
-	
+
 	@Test
 	public void testCustomUrlExtensioninBundle() {
 		final String expected = "{\"resourceType\":\"Bundle\",\"entry\":[{\"resource\":{\"resourceType\":\"Patient\",\"extension\":[{\"url\":\"http://www.example.com/petname\",\"valueString\":\"myName\"}]}}]}";
@@ -237,7 +239,6 @@ public class JsonParserDstu3Test {
 		assertEquals(3, countMatches(encoded, "resourceType"));
 	}
 
-	
 	@Test
 	public void testEncodeAndParseExtensions() throws Exception {
 
@@ -323,7 +324,7 @@ public class JsonParserDstu3Test {
 		assertEquals("CHILD", ((StringType) given2ext2.getValue()).getValue());
 
 	}
-	
+
 	@Test
 	public void testEncodeAndParseMetaProfileAndTags() {
 		Patient p = new Patient();
@@ -402,7 +403,6 @@ public class JsonParserDstu3Test {
 		assertEquals("sec_label2", tagList.get(1).getDisplay());
 	}
 
-	
 	/**
 	 * See #336
 	 */
@@ -701,7 +701,7 @@ public class JsonParserDstu3Test {
 				.addExtension()
 				.setUrl("http://foo")
 				.setValue(new Reference("Practitioner/A"));
-		
+
 		IParser parser = ourCtx.newJsonParser().setPrettyPrint(true);
 		parser.setDontEncodeElements(new HashSet<String>(Arrays.asList("*.id", "*.meta")));
 
@@ -1305,9 +1305,25 @@ public class JsonParserDstu3Test {
 		assertEquals("{\"resourceType\":\"Observation\",\"valueQuantity\":{\"value\":0.0000000000000001}}", str);
 	}
 
+	/**
+	 * See #658
+	 */
+	@Test
+	public void testExtraElement() throws Exception {
+		IParser p = ourCtx.newJsonParser();
+		p.setParserErrorHandler(new StrictErrorHandler());
+		try {
+			p.parseResource(IOUtils.toString(JsonParserDstu3Test.class.getResourceAsStream("/Patient.json.txt"), Charsets.UTF_8));
+			fail();
+		} catch (DataFormatException e) {
+			assertEquals("Found incorrect type for element assigner - Expected OBJECT and found SCALAR (STRING)", e.getMessage());
+		}
+
+	}
+
 	@Test
 	public void testIncorrectJsonTypesIdAndArray() {
-		
+
 		// ID should be a String and communication should be an Array
 		String input = "{\"resourceType\": \"Patient\",\n" +
 				"  \"id\": 123,\n" +
@@ -1320,35 +1336,35 @@ public class JsonParserDstu3Test {
 				"}";
 
 		IParser p = ourCtx.newJsonParser();
-		
+
 		IParserErrorHandler errorHandler = mock(IParserErrorHandler.class);
 		p.setParserErrorHandler(errorHandler);
 		Patient patient = (Patient) p.parseResource(input);
-		
+
 		ArgumentCaptor<String> elementName = ArgumentCaptor.forClass(String.class);
 		ArgumentCaptor<ValueType> found = ArgumentCaptor.forClass(ValueType.class);
 		ArgumentCaptor<ValueType> expected = ArgumentCaptor.forClass(ValueType.class);
 		ArgumentCaptor<ScalarType> expectedScalarType = ArgumentCaptor.forClass(ScalarType.class);
 		ArgumentCaptor<ScalarType> foundScalarType = ArgumentCaptor.forClass(ScalarType.class);
 		verify(errorHandler, times(2)).incorrectJsonType(any(IParseLocation.class), elementName.capture(), expected.capture(), expectedScalarType.capture(), found.capture(), foundScalarType.capture());
-		
+
 		assertEquals(ValueType.SCALAR, found.getAllValues().get(0));
 		assertEquals(ValueType.SCALAR, expected.getAllValues().get(0));
 		assertEquals(ScalarType.NUMBER, foundScalarType.getAllValues().get(0));
 		assertEquals(ScalarType.STRING, expectedScalarType.getAllValues().get(0));
-	
+
 		assertEquals(ValueType.OBJECT, found.getAllValues().get(1));
 		assertEquals(ValueType.ARRAY, expected.getAllValues().get(1));
 		assertEquals(null, foundScalarType.getAllValues().get(1));
 		assertEquals(null, expectedScalarType.getAllValues().get(1));
-		
+
 		assertEquals("123", patient.getIdElement().getIdPart());
 		assertEquals("Hindi", patient.getCommunicationFirstRep().getLanguage().getText());
 	}
 
 	@Test
 	public void testIncorrectJsonTypesNone() {
-		
+
 		// ID should be a String and communication should be an Array
 		String input = "{\"resourceType\": \"Patient\",\n" +
 				"  \"id\": \"123\",\n" +
@@ -1361,18 +1377,18 @@ public class JsonParserDstu3Test {
 				"}";
 
 		IParser p = ourCtx.newJsonParser();
-		
+
 		IParserErrorHandler errorHandler = mock(IParserErrorHandler.class);
 		p.setParserErrorHandler(errorHandler);
 		Patient patient = (Patient) p.parseResource(input);
-		
+
 		ArgumentCaptor<String> elementName = ArgumentCaptor.forClass(String.class);
 		ArgumentCaptor<ValueType> found = ArgumentCaptor.forClass(ValueType.class);
 		ArgumentCaptor<ValueType> expected = ArgumentCaptor.forClass(ValueType.class);
 		ArgumentCaptor<ScalarType> expectedScalarType = ArgumentCaptor.forClass(ScalarType.class);
 		ArgumentCaptor<ScalarType> foundScalarType = ArgumentCaptor.forClass(ScalarType.class);
 		verify(errorHandler, times(0)).incorrectJsonType(any(IParseLocation.class), elementName.capture(), expected.capture(), expectedScalarType.capture(), found.capture(), foundScalarType.capture());
-		
+
 		assertEquals("123", patient.getIdElement().getIdPart());
 		assertEquals("Hindi", patient.getCommunicationFirstRep().getLanguage().getText());
 	}
@@ -1380,21 +1396,21 @@ public class JsonParserDstu3Test {
 	@Test
 	public void testInvalidDateTimeValueInvalid() throws Exception {
 		IParserErrorHandler errorHandler = mock(IParserErrorHandler.class);
-		
+
 		String res = "{ \"resourceType\": \"Observation\", \"valueDateTime\": \"foo\" }";
 		IParser parser = ourCtx.newJsonParser();
 		parser.setParserErrorHandler(errorHandler);
 		Observation parsed = parser.parseResource(Observation.class, res);
-		
+
 		assertEquals(null, parsed.getValueDateTimeType().getValue());
 		assertEquals("foo", parsed.getValueDateTimeType().getValueAsString());
-		
+
 		ArgumentCaptor<String> msgCaptor = ArgumentCaptor.forClass(String.class);
 		verify(errorHandler, times(1)).invalidValue(isNull(IParseLocation.class), eq("foo"), msgCaptor.capture());
 		assertEquals("Invalid date/time format: \"foo\"", msgCaptor.getValue());
-		
+
 		String encoded = ourCtx.newJsonParser().encodeResourceToString(parsed);
-		assertEquals("{\"resourceType\":\"Observation\",\"valueDateTime\":\"foo\"}", encoded);		
+		assertEquals("{\"resourceType\":\"Observation\",\"valueDateTime\":\"foo\"}", encoded);
 	}
 
 	/**
@@ -1412,19 +1428,19 @@ public class JsonParserDstu3Test {
 	@Test
 	public void testInvalidEnumValueBlank() {
 		IParserErrorHandler errorHandler = mock(IParserErrorHandler.class);
-		
+
 		String res = "{ \"resourceType\": \"Patient\", \"gender\": \"\" }";
 		IParser parser = ourCtx.newJsonParser();
 		parser.setParserErrorHandler(errorHandler);
 		Patient parsed = parser.parseResource(Patient.class, res);
-		
+
 		assertEquals(null, parsed.getGenderElement().getValue());
 		assertEquals(null, parsed.getGenderElement().getValueAsString());
-		
+
 		ArgumentCaptor<String> msgCaptor = ArgumentCaptor.forClass(String.class);
 		verify(errorHandler, times(1)).invalidValue(isNull(IParseLocation.class), eq(""), msgCaptor.capture());
 		assertEquals("Attribute values must not be empty (\"\")", msgCaptor.getValue());
-		
+
 		String encoded = ourCtx.newJsonParser().encodeResourceToString(parsed);
 		assertEquals("{\"resourceType\":\"Patient\"}", encoded);
 	}
@@ -1432,21 +1448,21 @@ public class JsonParserDstu3Test {
 	@Test
 	public void testInvalidEnumValueInvalid() {
 		IParserErrorHandler errorHandler = mock(IParserErrorHandler.class);
-		
+
 		String res = "{ \"resourceType\": \"Patient\", \"gender\": \"foo\" }";
 		IParser parser = ourCtx.newJsonParser();
 		parser.setParserErrorHandler(errorHandler);
 		Patient parsed = parser.parseResource(Patient.class, res);
-		
+
 		assertEquals(null, parsed.getGenderElement().getValue());
 		assertEquals("foo", parsed.getGenderElement().getValueAsString());
-		
+
 		ArgumentCaptor<String> msgCaptor = ArgumentCaptor.forClass(String.class);
 		verify(errorHandler, times(1)).invalidValue(isNull(IParseLocation.class), eq("foo"), msgCaptor.capture());
 		assertEquals("Unknown AdministrativeGender code 'foo'", msgCaptor.getValue());
-		
+
 		String encoded = ourCtx.newJsonParser().encodeResourceToString(parsed);
-		assertEquals("{\"resourceType\":\"Patient\",\"gender\":\"foo\"}", encoded);		
+		assertEquals("{\"resourceType\":\"Patient\",\"gender\":\"foo\"}", encoded);
 	}
 
 	/**
@@ -1910,10 +1926,10 @@ public class JsonParserDstu3Test {
 	public void testParseEmptyValue() {
 		String input = "{\"resourceType\":\"QuestionnaireResponse\",\"id\":\"123\",\"authored\":\"\",\"group\":{\"linkId\":\"\"}}";
 		IParser parser = ourCtx.newJsonParser();
-		
+
 		parser.setParserErrorHandler(new LenientErrorHandler().setErrorOnInvalidValue(false));
 		QuestionnaireResponse qr = parser.parseResource(QuestionnaireResponse.class, input);
-	
+
 		assertEquals("QuestionnaireResponse/123", qr.getIdElement().getValue());
 		assertEquals(null, qr.getAuthored());
 		assertEquals(null, qr.getAuthoredElement().getValue());
@@ -2298,10 +2314,14 @@ public class JsonParserDstu3Test {
 		ArgumentCaptor<ValueType> actual = ArgumentCaptor.forClass(ValueType.class);
 		ArgumentCaptor<ScalarType> expectedScalar = ArgumentCaptor.forClass(ScalarType.class);
 		ArgumentCaptor<ScalarType> actualScalar = ArgumentCaptor.forClass(ScalarType.class);
-		verify(errorHandler, atLeastOnce()).incorrectJsonType(Mockito.any(IParseLocation.class), elementName.capture(), expected.capture(), expectedScalar.capture(), actual.capture(), actualScalar.capture());
-		verify(errorHandler, atLeastOnce()).incorrectJsonType(Mockito.any(IParseLocation.class), Mockito.eq("_id"), Mockito.eq(ValueType.OBJECT), expectedScalar.capture(), Mockito.eq(ValueType.SCALAR), actualScalar.capture());
-		verify(errorHandler, atLeastOnce()).incorrectJsonType(Mockito.any(IParseLocation.class), Mockito.eq("__v"), Mockito.eq(ValueType.OBJECT), expectedScalar.capture(), Mockito.eq(ValueType.SCALAR), actualScalar.capture());
-		verify(errorHandler, atLeastOnce()).incorrectJsonType(Mockito.any(IParseLocation.class), Mockito.eq("_status"), Mockito.eq(ValueType.OBJECT), expectedScalar.capture(), Mockito.eq(ValueType.SCALAR), actualScalar.capture());
+		verify(errorHandler, atLeastOnce()).incorrectJsonType(Mockito.any(IParseLocation.class), elementName.capture(), expected.capture(), expectedScalar.capture(), actual.capture(),
+				actualScalar.capture());
+		verify(errorHandler, atLeastOnce()).incorrectJsonType(Mockito.any(IParseLocation.class), Mockito.eq("_id"), Mockito.eq(ValueType.OBJECT), expectedScalar.capture(), Mockito.eq(ValueType.SCALAR),
+				actualScalar.capture());
+		verify(errorHandler, atLeastOnce()).incorrectJsonType(Mockito.any(IParseLocation.class), Mockito.eq("__v"), Mockito.eq(ValueType.OBJECT), expectedScalar.capture(), Mockito.eq(ValueType.SCALAR),
+				actualScalar.capture());
+		verify(errorHandler, atLeastOnce()).incorrectJsonType(Mockito.any(IParseLocation.class), Mockito.eq("_status"), Mockito.eq(ValueType.OBJECT), expectedScalar.capture(),
+				Mockito.eq(ValueType.SCALAR), actualScalar.capture());
 
 		assertEquals("_id", elementName.getAllValues().get(0));
 		assertEquals(ValueType.OBJECT, expected.getAllValues().get(0));
