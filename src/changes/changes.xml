@@ -33,6 +33,11 @@
 				<![CDATA[<code>GET /Observation?value-quantity=</code>]]>
 			</action>
 			<action type="add">
+				JPA server transaction processing now honours the Prefer header and includes 
+				created and updated resource bodies in the response bundle if it is set
+				appropriately.
+			</action>
+			<action type="add">
 				Optimize queries in JPA server remove a few redundant select columns when performing
 				searches. This provides a slight speed increase in some cases.
 			</action>
