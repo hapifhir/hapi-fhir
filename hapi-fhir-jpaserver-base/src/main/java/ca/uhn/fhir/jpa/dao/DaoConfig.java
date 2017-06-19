@@ -87,15 +87,16 @@ public class DaoConfig {
 
 	private boolean myEnforceReferentialIntegrityOnWrite = true;
 
+	private int myEverythingIncludesFetchPageSize = 50;
 	/**
 	 * update setter javadoc if default changes
 	 */
 	private long myExpireSearchResultsAfterMillis = DateUtils.MILLIS_PER_HOUR;
+
 	/**
 	 * update setter javadoc if default changes
 	 */
 	private Integer myFetchSizeDefaultMaximum = null;
-
 	private int myHardTagListLimit = 1000;
 	private int myIncludeLimit = 2000;
 	/**
@@ -145,6 +146,22 @@ public class DaoConfig {
 	 */
 	public int getDeferIndexingForCodesystemsOfSize() {
 		return myDeferIndexingForCodesystemsOfSize;
+	}
+
+	/**
+	 * Unlike with normal search queries, $everything queries have their _includes loaded by the main search thread and these included results
+	 * are added to the normal search results instead of being added on as extras in a page. This means that they will not appear multiple times
+	 * as the search results are paged over.
+	 * <p>
+	 * In order to recursively load _includes, we process the original results in batches of this size. Adjust with caution, increasing this
+	 * value may improve performance but may also cause memory issues.
+	 * </p>
+	 * <p>
+	 * The default value is 50
+	 * </p>
+	 */
+	public int getEverythingIncludesFetchPageSize() {
+		return myEverythingIncludesFetchPageSize;
 	}
 
 	/**
@@ -535,6 +552,23 @@ public class DaoConfig {
 	 */
 	public void setEnforceReferentialIntegrityOnWrite(boolean theEnforceReferentialIntegrityOnWrite) {
 		myEnforceReferentialIntegrityOnWrite = theEnforceReferentialIntegrityOnWrite;
+	}
+
+	/**
+	 * Unlike with normal search queries, $everything queries have their _includes loaded by the main search thread and these included results
+	 * are added to the normal search results instead of being added on as extras in a page. This means that they will not appear multiple times
+	 * as the search results are paged over.
+	 * <p>
+	 * In order to recursively load _includes, we process the original results in batches of this size. Adjust with caution, increasing this
+	 * value may improve performance but may also cause memory issues.
+	 * </p>
+	 * <p>
+	 * The default value is 50
+	 * </p>
+	 */
+	public void setEverythingIncludesFetchPageSize(int theEverythingIncludesFetchPageSize) {
+		Validate.inclusiveBetween(1, Integer.MAX_VALUE, theEverythingIncludesFetchPageSize);
+		myEverythingIncludesFetchPageSize = theEverythingIncludesFetchPageSize;
 	}
 
 	/**

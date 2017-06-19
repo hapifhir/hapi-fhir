@@ -47,6 +47,7 @@ import org.hl7.fhir.dstu3.model.Observation.ObservationStatus;
 import org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemType;
 import org.hl7.fhir.dstu3.model.Subscription.SubscriptionChannelType;
 import org.hl7.fhir.dstu3.model.Subscription.SubscriptionStatus;
+import org.hl7.fhir.instance.model.Encounter.EncounterState;
 import org.hl7.fhir.instance.model.api.*;
 import org.junit.*;
 import org.springframework.transaction.TransactionStatus;

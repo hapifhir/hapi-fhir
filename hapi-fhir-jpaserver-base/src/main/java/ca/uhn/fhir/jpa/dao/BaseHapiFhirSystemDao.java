@@ -170,6 +170,7 @@ public abstract class BaseHapiFhirSystemDao<T, MT> extends BaseHapiFhirDao<IBase
 		return retVal;
 	}
 
+	@Transactional(propagation = Propagation.REQUIRED, readOnly=true)
 	@Override
 	public Map<String, Long> getResourceCounts() {
 		CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
