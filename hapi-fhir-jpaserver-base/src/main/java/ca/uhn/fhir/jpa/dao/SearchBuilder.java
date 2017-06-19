@@ -44,6 +44,7 @@ import org.hl7.fhir.instance.model.api.*;
 import com.google.common.collect.*;
 
 import ca.uhn.fhir.context.*;
+import ca.uhn.fhir.jpa.dao.SearchBuilder.IncludesIterator;
 import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamUriDao;
 import ca.uhn.fhir.jpa.entity.*;
@@ -71,6 +72,7 @@ import ca.uhn.fhir.util.UrlUtil;
  */
 public class SearchBuilder implements ISearchBuilder {
 	private static Long NO_MORE = Long.valueOf(-1);
+
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchBuilder.class);
 	private List<Long> myAlsoIncludePids;
 	private CriteriaBuilder myBuilder;
@@ -90,7 +92,6 @@ public class SearchBuilder implements ISearchBuilder {
 	private ISearchParamRegistry mySearchParamRegistry;
 	private String mySearchUuid;
 	private IHapiTerminologySvc myTerminologySvc;
-
 	/**
 	 * Constructor
 	 */
@@ -1048,7 +1049,7 @@ public class SearchBuilder implements ISearchBuilder {
 		if (!isBlank(unitsValue)) {
 			code = theBuilder.equal(theFrom.get("myUnits"), unitsValue);
 		}
-		
+
 		cmpValue = ObjectUtils.defaultIfNull(cmpValue, ParamPrefixEnum.EQUAL);
 		final Expression<BigDecimal> path = theFrom.get("myValue");
 		String invalidMessageName = "invalidQuantityPrefix";
@@ -1357,11 +1358,11 @@ public class SearchBuilder implements ISearchBuilder {
 		 * Now perform the search
 		 */
 		final TypedQuery<Long> query = myEntityManager.createQuery(outerQuery);
-		
+
 		if (theMaximumResults != null) {
 			query.setMaxResults(theMaximumResults);
 		}
-		
+
 		return query;
 	}
 
@@ -1629,12 +1630,6 @@ public class SearchBuilder implements ISearchBuilder {
 					List<ResourceLink> results = q.getResultList();
 					for (ResourceLink resourceLink : results) {
 						if (theReverseMode) {
-							// if (theEverythingModeEnum.isEncounter()) {
-							// if (resourceLink.getSourcePath().equals("Encounter.subject") ||
-							// resourceLink.getSourcePath().equals("Encounter.patient")) {
-							// nextRoundOmit.add(resourceLink.getSourceResourcePid());
-							// }
-							// }
 							pidsToInclude.add(resourceLink.getSourceResourcePid());
 						} else {
 							pidsToInclude.add(resourceLink.getTargetResourcePid());
@@ -1745,10 +1740,10 @@ public class SearchBuilder implements ISearchBuilder {
 	}
 
 	private void searchForIdsWithAndOr(String theResourceName, String theParamName, List<List<? extends IQueryParameterType>> theAndOrParams) {
-		
+
 		for (int andListIdx = 0; andListIdx < theAndOrParams.size(); andListIdx++) {
 			List<? extends IQueryParameterType> nextOrList = theAndOrParams.get(andListIdx);
-			
+
 			for (int orListIdx = 0; orListIdx < nextOrList.size(); orListIdx++) {
 				IQueryParameterType nextOr = nextOrList.get(orListIdx);
 				boolean hasNoValue = false;
@@ -1760,14 +1755,14 @@ public class SearchBuilder implements ISearchBuilder {
 						hasNoValue = true;
 					}
 				}
-				
+
 				if (hasNoValue) {
 					ourLog.debug("Ignoring empty parameter: {}", theParamName);
 					nextOrList.remove(orListIdx);
 					orListIdx--;
 				}
 			}
-			
+
 			if (nextOrList.isEmpty()) {
 				theAndOrParams.remove(andListIdx);
 				andListIdx--;
@@ -1777,7 +1772,7 @@ public class SearchBuilder implements ISearchBuilder {
 		if (theAndOrParams.isEmpty()) {
 			return;
 		}
-		
+
 		if (theParamName.equals(BaseResource.SP_RES_ID)) {
 
 			addPredicateResourceId(theAndOrParams);
@@ -1973,6 +1968,34 @@ public class SearchBuilder implements ISearchBuilder {
 		return thePredicates.toArray(new Predicate[thePredicates.size()]);
 	}
 
+	public class IncludesIterator implements Iterator<Long>{
+
+		private Long myNext;
+
+		@Override
+		public boolean hasNext() {
+			fetchNext();
+			return myNext != NO_MORE;
+		}
+
+		@Override
+		public Long next() {
+			fetchNext();
+			Long retVal = myNext;
+			myNext = null;
+			return retVal;
+		}
+
+		private void fetchNext() {
+			if (myNext == null) {
+				
+				
+				
+			}
+		}
+
+	}
+
 	private enum JoinEnum {
 		DATE, NUMBER, QUANTITY, REFERENCE, STRING, TOKEN, URI
 
@@ -2007,16 +2030,24 @@ public class SearchBuilder implements ISearchBuilder {
 	}
 
 	private final class QueryIterator implements Iterator<Long> {
+
 		private boolean myFirst = true;
+		private IncludesIterator myIncludesIterator;
 		private Long myNext;
 		private final Set<Long> myPidSet = new HashSet<Long>();
 		private Iterator<Long> myPreResultsIterator;
 		private Iterator<Long> myResultsIterator;
 		private SortSpec mySort;
+		private boolean myStillNeedToFetchIncludes;
 		private StopWatch myStopwatch = null;
 
 		private QueryIterator() {
 			mySort = myParams.getSort();
+
+			// Includes are processed inline for $everything query
+			if (myParams.getEverythingMode() != null) {
+				myStillNeedToFetchIncludes = true;
+			}
 		}
 
 		private void fetchNext() {
@@ -2061,7 +2092,24 @@ public class SearchBuilder implements ISearchBuilder {
 				}
 
 				if (myNext == null) {
-					myNext = NO_MORE;
+					if (myStillNeedToFetchIncludes) {
+						myIncludesIterator = new IncludesIterator();
+						myStillNeedToFetchIncludes = false;
+					}
+					if (myIncludesIterator != null) {
+						while (myIncludesIterator.hasNext()) {
+							Long next = myIncludesIterator.next();
+							if (next != null && myPidSet.add(next)) {
+								myNext = next;
+								break;
+							}
+						}
+						if (myNext == null) {
+							myNext = NO_MORE;
+						}
+					} else {
+						myNext = NO_MORE;
+					}
 				}
 
 			} // if we need to fetch the next result
@@ -2070,9 +2118,11 @@ public class SearchBuilder implements ISearchBuilder {
 				ourLog.info("Initial query result returned in {}ms for query {}", myStopwatch.getMillis(), mySearchUuid);
 				myFirst = false;
 			}
+			
 			if (myNext == NO_MORE) {
 				ourLog.info("Query found {} matches in {}ms for query {}", myPidSet.size(), myStopwatch.getMillis(), mySearchUuid);
 			}
+			
 		}
 
 		@Override
