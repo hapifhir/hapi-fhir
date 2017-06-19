@@ -48,6 +48,10 @@
 				performance problems in situations where lare queries should not be 
 				needed
 			</action>
+			<action type="fix" issue="674">
+				Prevent duplicates in $everything query response in JPA server. Thanks to @vlad-ignatov 
+				for reporting!
+			</action>
 		</release>
 		<release version="2.5" date="2017-06-08">
 			<action type="fix">
