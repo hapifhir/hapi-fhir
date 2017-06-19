@@ -1,5 +1,6 @@
 # Use docker-based build environment (instead of openvz)
-sudo: false
+#sudo: false
+sudo: required
 
 language: java
 jdk:
