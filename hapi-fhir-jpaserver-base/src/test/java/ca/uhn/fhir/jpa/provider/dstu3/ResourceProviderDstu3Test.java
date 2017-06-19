@@ -10,6 +10,8 @@ import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.lessThanOrEqualTo;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.startsWith;
 import static org.hamcrest.Matchers.stringContainsInOrder;
@@ -45,6 +47,7 @@ import org.hl7.fhir.dstu3.model.Observation.ObservationStatus;
 import org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemType;
 import org.hl7.fhir.dstu3.model.Subscription.SubscriptionChannelType;
 import org.hl7.fhir.dstu3.model.Subscription.SubscriptionStatus;
+import org.hl7.fhir.instance.model.Encounter.EncounterState;
 import org.hl7.fhir.instance.model.api.*;
 import org.junit.*;
 import org.springframework.transaction.TransactionStatus;
@@ -1368,6 +1371,53 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	}
 
 	@Test
+	public void testSearchByLastUpdated() throws Exception {
+		String methodName = "testSearchByLastUpdated";
+
+		Patient p = new Patient();
+		p.addName().setFamily(methodName+"1");
+		IIdType pid1 = ourClient.create().resource(p).execute().getId().toUnqualifiedVersionless();
+
+		Thread.sleep(10);
+		long time1 = System.currentTimeMillis();
+		Thread.sleep(10);
+
+		Patient p2 = new Patient();
+		p2.addName().setFamily(methodName+"2");
+		IIdType pid2 = ourClient.create().resource(p2).execute().getId().toUnqualifiedVersionless();
+
+		HttpGet get = new HttpGet(ourServerBase + "/Patient?_lastUpdated=lt" + new InstantType(new Date(time1)).getValueAsString());
+		CloseableHttpResponse response = ourHttpClient.execute(get);
+		try {
+			assertEquals(200, response.getStatusLine().getStatusCode());
+			String output = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
+			IOUtils.closeQuietly(response.getEntity().getContent());
+			ourLog.info(output);
+			List<IIdType> ids = toUnqualifiedVersionlessIds(myFhirCtx.newXmlParser().parseResource(Bundle.class, output));
+			ourLog.info(ids.toString());
+			assertThat(ids, containsInAnyOrder(pid1));
+		} finally {
+			response.close();
+		}
+
+		get = new HttpGet(ourServerBase + "/Patient?_lastUpdated=gt" + new InstantType(new Date(time1)).getValueAsString());
+		response = ourHttpClient.execute(get);
+		try {
+			assertEquals(200, response.getStatusLine().getStatusCode());
+			String output = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
+			IOUtils.closeQuietly(response.getEntity().getContent());
+			ourLog.info(output);
+			List<IIdType> ids = toUnqualifiedVersionlessIds(myFhirCtx.newXmlParser().parseResource(Bundle.class, output));
+			ourLog.info(ids.toString());
+			assertThat(ids, containsInAnyOrder(pid2));
+		} finally {
+			response.close();
+		}
+
+	}
+	
+	
+	@Test
 	public void testEverythingPatientType() throws Exception {
 		String methodName = "testEverythingPatientType";
 
@@ -1536,12 +1586,19 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(responseBundle));
 
-		assertEquals(22, responseBundle.getEntry().size());
+		List<String> ids = new ArrayList<String>();
+		for (BundleEntryComponent nextEntry : responseBundle.getEntry()) {
+			ids.add(nextEntry.getResource().getIdElement().toUnqualifiedVersionless().getValue());
+		}
+		Collections.sort(ids);
+		ourLog.info("{} ids: {}", ids.size(), ids);
+		
+		assertThat(responseBundle.getEntry().size(), lessThanOrEqualTo(25));
 
-		TreeSet<String> ids = new TreeSet<String>();
+		TreeSet<String> idsSet = new TreeSet<String>();
 		for (int i = 0; i < responseBundle.getEntry().size(); i++) {
 			for (BundleEntryComponent nextEntry : responseBundle.getEntry()) {
-				ids.add(nextEntry.getResource().getIdElement().toUnqualifiedVersionless().getValue());
+				idsSet.add(nextEntry.getResource().getIdElement().toUnqualifiedVersionless().getValue());
 			}
 		}
 
@@ -1549,7 +1606,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		responseBundle = ourClient.fetchResourceFromUrl(Bundle.class, nextUrl);
 		for (int i = 0; i < responseBundle.getEntry().size(); i++) {
 			for (BundleEntryComponent nextEntry : responseBundle.getEntry()) {
-				ids.add(nextEntry.getResource().getIdElement().toUnqualifiedVersionless().getValue());
+				idsSet.add(nextEntry.getResource().getIdElement().toUnqualifiedVersionless().getValue());
 			}
 		}
 
@@ -1557,19 +1614,19 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		responseBundle = ourClient.fetchResourceFromUrl(Bundle.class, nextUrl);
 		for (int i = 0; i < responseBundle.getEntry().size(); i++) {
 			for (BundleEntryComponent nextEntry : responseBundle.getEntry()) {
-				ids.add(nextEntry.getResource().getIdElement().toUnqualifiedVersionless().getValue());
+				idsSet.add(nextEntry.getResource().getIdElement().toUnqualifiedVersionless().getValue());
 			}
 		}
 
 		assertEquals(null, responseBundle.getLink("next"));
 
-		assertThat(ids, hasItem("List/A161444"));
-		assertThat(ids, hasItem("List/A161468"));
-		assertThat(ids, hasItem("List/A161500"));
+		assertThat(idsSet, hasItem("List/A161444"));
+		assertThat(idsSet, hasItem("List/A161468"));
+		assertThat(idsSet, hasItem("List/A161500"));
 
 		ourLog.info("Expected {} - {}", allIds.size(), allIds);
-		ourLog.info("Actual   {} - {}", ids.size(), ids);
-		assertEquals(allIds, ids);
+		ourLog.info("Actual   {} - {}", idsSet.size(), idsSet);
+		assertEquals(allIds, idsSet);
 
 	}
 

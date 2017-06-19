@@ -33,6 +33,7 @@ import javax.persistence.criteria.Root;
 
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.annotation.Propagation;
@@ -40,8 +41,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
-import ca.uhn.fhir.jpa.dao.data.ITermConceptDao;
+import ca.uhn.fhir.jpa.dao.data.*;
 import ca.uhn.fhir.jpa.entity.ForcedId;
 import ca.uhn.fhir.jpa.entity.ResourceTable;
 import ca.uhn.fhir.jpa.util.ReindexFailureException;
@@ -87,30 +87,33 @@ public abstract class BaseHapiFhirSystemDao<T, MT> extends BaseHapiFhirDao<IBase
 		return retVal;
 	}
 
+	@Autowired
+	private IResourceTableDao myResourceTableDao;
+	
 	private int doPerformReindexingPassForResources(final Integer theCount, TransactionTemplate txTemplate) {
 		return txTemplate.execute(new TransactionCallback<Integer>() {
 			@SuppressWarnings("unchecked")
 			@Override
 			public Integer doInTransaction(TransactionStatus theStatus) {
-				TypedQuery<ResourceTable> q = myEntityManager.createQuery("SELECT t FROM " + ResourceTable.class.getSimpleName() + " t WHERE t.myIndexStatus IS null", ResourceTable.class);
 
 				int maxResult = 500;
 				if (theCount != null) {
 					maxResult = Math.min(theCount, 2000);
 				}
+				maxResult = Math.max(maxResult, 10);
 
+				TypedQuery<Long> q = myEntityManager.createQuery("SELECT t.myId FROM ResourceTable t WHERE t.myIndexStatus IS NULL", Long.class);
+
+				ourLog.debug("Beginning indexing query with maximum {}", maxResult);
 				q.setMaxResults(maxResult);
-				List<ResourceTable> resources = q.getResultList();
-				if (resources.isEmpty()) {
-					return 0;
-				}
-
-				ourLog.info("Indexing {} resources", resources.size());
+				Collection<Long> resources = q.getResultList();
 
 				int count = 0;
 				long start = System.currentTimeMillis();
 
-				for (ResourceTable resourceTable : resources) {
+				for (Long nextId : resources) {
+					ResourceTable resourceTable = myResourceTableDao.findOne(nextId);
+					
 					try {
 						/*
 						 * This part is because from HAPI 1.5 - 1.6 we changed the format of forced ID to be "type/id" instead of just "id"
@@ -135,13 +138,22 @@ public abstract class BaseHapiFhirSystemDao<T, MT> extends BaseHapiFhirDao<IBase
 						throw new ReindexFailureException(resourceTable.getId());
 					}
 					count++;
+					
+					if (count >= maxResult) {
+						break;
+					}
 				}
 
 				long delay = System.currentTimeMillis() - start;
-				long avg = (delay / resources.size());
-				ourLog.info("Indexed {} / {} resources in {}ms - Avg {}ms / resource", new Object[] { count, resources.size(), delay, avg });
-
-				return resources.size();
+				long avg;
+				if (count > 0) {
+					avg = (delay / count);
+					ourLog.info("Indexed {} resources in {}ms - Avg {}ms / resource", new Object[] { count, delay, avg });
+				} else {
+					ourLog.debug("Indexed 0 resources in {}ms", delay);
+				}
+				
+				return count;
 			}
 		});
 	}
@@ -158,6 +170,7 @@ public abstract class BaseHapiFhirSystemDao<T, MT> extends BaseHapiFhirDao<IBase
 		return retVal;
 	}
 
+	@Transactional(propagation = Propagation.REQUIRED, readOnly=true)
 	@Override
 	public Map<String, Long> getResourceCounts() {
 		CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();

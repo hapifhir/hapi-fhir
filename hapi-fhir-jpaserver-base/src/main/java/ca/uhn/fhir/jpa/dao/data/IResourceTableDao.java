@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.dao.data;
 
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 /*
  * #%L
  * HAPI FHIR JPA Server
@@ -19,10 +21,7 @@ package ca.uhn.fhir.jpa.dao.data;
  * limitations under the License.
  * #L%
  */
-
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Modifying;
-import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.jpa.repository.*;
 import org.springframework.data.repository.query.Param;
 
 import ca.uhn.fhir.jpa.entity.ResourceTable;
@@ -32,5 +31,8 @@ public interface IResourceTableDao extends JpaRepository<ResourceTable, Long> {
 	@Modifying
 	@Query("UPDATE ResourceTable r SET r.myIndexStatus = null WHERE r.myResourceType = :restype")
 	int markResourcesOfTypeAsRequiringReindexing(@Param("restype") String theResourceType);
+
+	@Query("SELECT t.myId FROM ResourceTable t WHERE t.myIndexStatus IS NULL")
+	Slice<Long> findUnindexed(Pageable thePageRequest);
 
 }

@@ -100,6 +100,11 @@
 			<artifactId>thymeleaf</artifactId>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>net.ttddyy</groupId>
+			<artifactId>datasource-proxy</artifactId>
+			<scope>test</scope>
+		</dependency>
 
 		<dependency>
 			<groupId>org.javassist</groupId>
@@ -627,13 +632,21 @@
 				</plugins>
 			</build>
 		</profile>
-		<!-- <profile> <id>DIST</id> <build> <plugins> <plugin> <groupId>de.juplo</groupId> <artifactId>hibernate4-maven-plugin</artifactId> <configuration> <force>true</force> <target>SCRIPT</target> <skip>${skip-hib4}</skip> 
-			</configuration> <dependencies> <dependency> <groupId>org.hibernate</groupId> <artifactId>hibernate-core</artifactId> <version>${hibernate_version}</version> </dependency> </dependencies> <executions> 
-			<execution> <id>o10g</id> <goals> <goal>export</goal> </goals> <phase>test</phase> <configuration> <hibernateDialect>org.hibernate.dialect.Oracle10gDialect</hibernateDialect> <outputFile>${project.build.directory}/schema_oracle_10g.sql</outputFile> 
-			</configuration> </execution> <execution> <id>derby</id> <goals> <goal>export</goal> </goals> <phase>test</phase> <configuration> <hibernateDialect>org.hibernate.dialect.DerbyTenSevenDialect</hibernateDialect> 
-			<outputFile>${project.build.directory}/schema_derby.sql</outputFile> </configuration> </execution> <execution> <id>hsql</id> <goals> <goal>export</goal> </goals> <phase>test</phase> <configuration> <hibernateDialect>org.hibernate.dialect.HSQLDialect</hibernateDialect> 
-			<outputFile>${project.build.directory}/schema_hsql.sql</outputFile> </configuration> </execution> <execution> <id>mysql5</id> <goals> <goal>export</goal> </goals> <phase>test</phase> <configuration> <hibernateDialect>org.hibernate.dialect.MySQL5Dialect</hibernateDialect> 
-			<outputFile>${project.build.directory}/schema_mysql_5.sql</outputFile> </configuration> </execution> </executions> </plugin> </plugins> </build> </profile> -->
-	</profiles>
+		<profile>
+			<id>MINPARALLEL</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-surefire-plugin</artifactId>
+						<configuration>
+							<forkCount>2</forkCount>
+							<reuseForks>true</reuseForks>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+</profiles>
 
 </project>

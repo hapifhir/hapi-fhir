@@ -81,8 +81,7 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
-import ca.uhn.fhir.jpa.dao.SearchParameterMap;
+import ca.uhn.fhir.jpa.dao.*;
 import ca.uhn.fhir.jpa.dao.SearchParameterMap.EverythingModeEnum;
 import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamDate;
 import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamNumber;
@@ -130,6 +129,7 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 	@Before
 	public void beforeDisableResultReuse() {
 		myDaoConfig.setReuseCachedSearchResultsForMillis(null);
+		myDaoConfig.setFetchSizeDefaultMaximum(new DaoConfig().getFetchSizeDefaultMaximum());
 	}
 
 	/**
@@ -1181,6 +1181,23 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 			assertThat(patients, (hasItems(id1a, id1b)));
 			assertThat(patients, not(hasItems(id2)));
 		}
+		
+		
+		{
+			SearchParameterMap params = new SearchParameterMap();
+			params.setLastUpdated(new DateRangeParam(new DateParam(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, beforeR2)));
+			List<IIdType> patients = toUnqualifiedVersionlessIds(myPatientDao.search(params));
+			assertThat(patients, not(hasItems(id1a, id1b)));
+			assertThat(patients, (hasItems(id2)));
+		}
+		{
+			SearchParameterMap params = new SearchParameterMap();
+			params.setLastUpdated(new DateRangeParam(new DateParam(ParamPrefixEnum.LESSTHAN_OR_EQUALS, beforeR2)));
+			List<IIdType> patients = toUnqualifiedVersionlessIds(myPatientDao.search(params));
+			assertThat(patients, (hasItems(id1a, id1b)));
+			assertThat(patients, not(hasItems(id2)));
+		}
+
 	}
 
 	@SuppressWarnings("deprecation")
@@ -1827,6 +1844,48 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 
 	}
 
+	@Test
+	public void testSearchStringParamDoesntMatchWrongType() throws Exception {
+		IIdType pid1;
+		IIdType pid2;
+		{
+			Patient patient = new Patient();
+			patient.addName().setFamily("HELLO");
+			pid1 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
+		}
+		{
+			Practitioner patient = new Practitioner();
+			patient.addName().setFamily("HELLO");
+			pid2 = myPractitionerDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
+		}
+
+		SearchParameterMap params;
+		List<IIdType> patients;
+
+		params = new SearchParameterMap();
+		params.add(Patient.SP_FAMILY, new StringParam("HELLO"));
+		patients = toUnqualifiedVersionlessIds(myPatientDao.search(params));
+		assertThat(patients, containsInAnyOrder(pid1));
+		assertThat(patients, not(containsInAnyOrder(pid2)));
+	}
+	
+	@Test
+	public void testSearchWithFetchSizeDefaultMaximum() {
+		myDaoConfig.setFetchSizeDefaultMaximum(5);
+		
+		for (int i = 0; i < 10; i++) {
+			Patient p = new Patient();
+			p.addName().setFamily("PT" + i);
+			myPatientDao.create(p);
+		}
+		
+		SearchParameterMap map = new SearchParameterMap();
+		map.setLoadSynchronous(true);
+		IBundleProvider values = myPatientDao.search(map);
+		assertEquals(5, values.size().intValue());
+		assertEquals(5, values.getResources(0, 1000).size());
+	}
+	
 	@Test
 	public void testSearchStringParam() throws Exception {
 		IIdType pid1;
@@ -3251,7 +3310,22 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 		SearchParameterMap map;
 		List<String> ids;
 
+		// No search param
 		map = new SearchParameterMap();
+		map.setSort(new SortSpec("family", SortOrderEnum.ASC).setChain(new SortSpec("given", SortOrderEnum.ASC)));
+		ids = toUnqualifiedVersionlessIdValues(myPatientDao.search(map));
+		assertThat(ids, contains("Patient/AA", "Patient/AB", "Patient/BA", "Patient/BB"));
+
+		// Same SP as sort
+		map = new SearchParameterMap();
+		map.add(Patient.SP_ACTIVE, new TokenParam(null, "true"));
+		map.setSort(new SortSpec("family", SortOrderEnum.ASC).setChain(new SortSpec("given", SortOrderEnum.ASC)));
+		ids = toUnqualifiedVersionlessIdValues(myPatientDao.search(map));
+		assertThat(ids, contains("Patient/AA", "Patient/AB", "Patient/BA", "Patient/BB"));
+
+		// Different SP from sort
+		map = new SearchParameterMap();
+		map.add(Patient.SP_GENDER, new TokenParam(null, "male"));
 		map.setSort(new SortSpec("family", SortOrderEnum.ASC).setChain(new SortSpec("given", SortOrderEnum.ASC)));
 		ids = toUnqualifiedVersionlessIdValues(myPatientDao.search(map));
 		assertThat(ids, contains("Patient/AA", "Patient/AB", "Patient/BA", "Patient/BB"));
