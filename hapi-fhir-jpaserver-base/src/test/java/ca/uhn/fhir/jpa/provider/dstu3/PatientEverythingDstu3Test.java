@@ -15,13 +15,7 @@ import static org.hamcrest.Matchers.lessThanOrEqualTo;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.startsWith;
 import static org.hamcrest.Matchers.stringContainsInOrder;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 import java.io.*;
 import java.net.*;
@@ -83,6 +77,8 @@ public class PatientEverythingDstu3Test extends BaseResourceProviderDstu3Test {
 	private String encId1;
 	private String encId2;
 	private ArrayList<String> myObsIds;
+	private String myWrongPatId;
+	private String myWrongEnc1;
 
 	@Before
 	public void beforeDisableResultReuse() {
@@ -95,6 +91,7 @@ public class PatientEverythingDstu3Test extends BaseResourceProviderDstu3Test {
 		super.after();
 
 		myDaoConfig.setReuseCachedSearchResultsForMillis(new DaoConfig().getReuseCachedSearchResultsForMillis());
+		myDaoConfig.setEverythingIncludesFetchPageSize(new DaoConfig().getEverythingIncludesFetchPageSize());
 	}
 
 	@Override
@@ -107,6 +104,7 @@ public class PatientEverythingDstu3Test extends BaseResourceProviderDstu3Test {
 		Organization org = new Organization();
 		org.setName("an org");
 		orgId = ourClient.create().resource(org).execute().getId().toUnqualifiedVersionless().getValue();
+		ourLog.info("OrgId: {}", orgId);
 
 		Patient patient = new Patient();
 		patient.getManagingOrganization().setReference(orgId);
@@ -114,17 +112,25 @@ public class PatientEverythingDstu3Test extends BaseResourceProviderDstu3Test {
 
 		Patient patient2 = new Patient();
 		patient2.getManagingOrganization().setReference(orgId);
-		ourClient.create().resource(patient2).execute().getId().toUnqualifiedVersionless().getValue();
+		myWrongPatId = ourClient.create().resource(patient2).execute().getId().toUnqualifiedVersionless().getValue();
 
 		Encounter enc1 = new Encounter();
 		enc1.setStatus(EncounterStatus.CANCELLED);
+		enc1.getSubject().setReference(patId);
 		enc1.getServiceProvider().setReference(orgId);
 		encId1 = ourClient.create().resource(enc1).execute().getId().toUnqualifiedVersionless().getValue();
 
 		Encounter enc2 = new Encounter();
 		enc2.setStatus(EncounterStatus.ARRIVED);
+		enc2.getSubject().setReference(patId);
 		enc2.getServiceProvider().setReference(orgId);
 		encId2 = ourClient.create().resource(enc2).execute().getId().toUnqualifiedVersionless().getValue();
+
+		Encounter wrongEnc1 = new Encounter();
+		wrongEnc1.setStatus(EncounterStatus.ARRIVED);
+		wrongEnc1.getSubject().setReference(myWrongPatId);
+		wrongEnc1.getServiceProvider().setReference(orgId);
+		myWrongEnc1 = ourClient.create().resource(wrongEnc1).execute().getId().toUnqualifiedVersionless().getValue();
 
 		myObsIds = new ArrayList<String>();
 		for (int i = 0; i < 20; i++) {
@@ -137,6 +143,59 @@ public class PatientEverythingDstu3Test extends BaseResourceProviderDstu3Test {
 
 	}
 
+	/**
+	 * See #674
+	 */
+	@Test
+	public void testEverythingReturnsCorrectResources() throws Exception {
+		
+		Bundle bundle = fetchBundle(ourServerBase + "/" + patId + "/$everything?_format=json&_count=100", EncodingEnum.JSON);
+		
+		assertNull(bundle.getLink("next"));
+		
+		Set<String> actual = new TreeSet<String>();
+		for (BundleEntryComponent nextEntry : bundle.getEntry()) {
+			actual.add(nextEntry.getResource().getIdElement().toUnqualifiedVersionless().getValue());
+		}
+		
+		ourLog.info("Found IDs: {}", actual);
+		
+		assertThat(actual, hasItem(patId));
+		assertThat(actual, hasItem(encId1));
+		assertThat(actual, hasItem(encId2));
+		assertThat(actual, hasItem(orgId));
+		assertThat(actual, hasItems(myObsIds.toArray(new String[0])));
+		assertThat(actual, not(hasItem(myWrongPatId)));
+		assertThat(actual, not(hasItem(myWrongEnc1)));
+	}
+
+	/**
+	 * See #674
+	 */
+	@Test
+	public void testEverythingReturnsCorrectResourcesSmallPage() throws Exception {
+		myDaoConfig.setEverythingIncludesFetchPageSize(1);
+		
+		Bundle bundle = fetchBundle(ourServerBase + "/" + patId + "/$everything?_format=json&_count=100", EncodingEnum.JSON);
+		
+		assertNull(bundle.getLink("next"));
+		
+		Set<String> actual = new TreeSet<String>();
+		for (BundleEntryComponent nextEntry : bundle.getEntry()) {
+			actual.add(nextEntry.getResource().getIdElement().toUnqualifiedVersionless().getValue());
+		}
+		
+		ourLog.info("Found IDs: {}", actual);
+		
+		assertThat(actual, hasItem(patId));
+		assertThat(actual, hasItem(encId1));
+		assertThat(actual, hasItem(encId2));
+		assertThat(actual, hasItem(orgId));
+		assertThat(actual, hasItems(myObsIds.toArray(new String[0])));
+		assertThat(actual, not(hasItem(myWrongPatId)));
+		assertThat(actual, not(hasItem(myWrongEnc1)));
+	}
+	
 	/**
 	 * See #674
 	 */
