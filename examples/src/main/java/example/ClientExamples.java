@@ -97,14 +97,15 @@ public class ClientExamples {
       // Create an HTTP basic auth interceptor
       String username = "foobar";
       String password = "boobear";
-      BasicAuthInterceptor authInterceptor = new BasicAuthInterceptor(username, password);
 
-      // Register the interceptor with your client (either style)
+		// If you're usinf an annotation client, use this style to
+		// register it
       IPatientClient annotationClient = ctx.newRestfulClient(IPatientClient.class, "http://localhost:9999/fhir");
       annotationClient.registerInterceptor(authInterceptor);
 
+		// If you're using a generic client, use this instead
       IGenericClient genericClient = ctx.newRestfulGenericClient("http://localhost:9999/fhir");
-      annotationClient.registerInterceptor(authInterceptor);
+      genericClient.registerInterceptor(authInterceptor);
       // END SNIPPET: security
    }
 
