@@ -2046,7 +2046,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		return paramMap;
 	}
 
-	protected static List<NameValuePair> translateMatchUrl(String theMatchUrl) {
+	public static List<NameValuePair> translateMatchUrl(String theMatchUrl) {
 		List<NameValuePair> parameters;
 		String matchUrl = theMatchUrl;
 		int questionMarkIndex = matchUrl.indexOf('?');

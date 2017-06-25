@@ -1,5 +1,5 @@
 <web-app xmlns="http://java.sun.com/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="3.0"
-	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee ./xsd/web-app_3_0.xsd">
+			xsi:schemaLocation="http://java.sun.com/xml/ns/javaee ./xsd/web-app_3_0.xsd">
 
 	<listener>
 		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
@@ -13,7 +13,7 @@
 	<context-param>
 		<param-name>contextConfigLocation</param-name>
 		<param-value>
-			ca.uhn.fhir.jpa.demo.FhirServerConfigWSocket
+			ca.uhn.fhir.jpa.demo.FhirServerConfigDstu2
 		</param-value>
 	</context-param>
 
@@ -28,7 +28,7 @@
 		</init-param>
 		<init-param>
 			<param-name>contextConfigLocation</param-name>
-			<param-value>ca.uhn.fhir.jpa.demo.FhirTesterConfig</param-value>
+			<param-value>ca.uhn.fhir.jpa.demo.FhirTesterConfigDstu2</param-value>
 		</init-param>
 		<load-on-startup>2</load-on-startup>
 	</servlet>
@@ -103,6 +103,4 @@
 		<filter-name>CORS Filter</filter-name>
 		<url-pattern>/*</url-pattern>
 	</filter-mapping>
-
-
 </web-app>
