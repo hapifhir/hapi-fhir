@@ -52,6 +52,11 @@
 				Prevent duplicates in $everything query response in JPA server. Thanks to @vlad-ignatov 
 				for reporting!
 			</action>
+			<action type="fix" issue="678">
+				FIx issue in SubscriptionInterceptor that caused interceptor to only
+				actually notify listeners of the first 10 subscriptions. Thanks to Jeff Chung
+				for the pull request!
+			</action>
 		</release>
 		<release version="2.5" date="2017-06-08">
 			<action type="fix">
