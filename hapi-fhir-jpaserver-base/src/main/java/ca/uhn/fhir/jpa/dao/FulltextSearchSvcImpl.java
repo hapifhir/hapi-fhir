@@ -247,7 +247,6 @@ public class FulltextSearchSvcImpl extends BaseHapiFhirDao<IBaseResource> implem
 
 		QueryBuilder qb = em.getSearchFactory().buildQueryBuilder().forEntity(ResourceTable.class).get();
 
-		//@formatter:off
 		Query textQuery = qb
 				.phrase()
 				.withSlop(2)
@@ -261,7 +260,6 @@ public class FulltextSearchSvcImpl extends BaseHapiFhirDao<IBaseResource> implem
 				.must(qb.keyword().onField("myResourceLinks.myTargetResourcePid").matching(pid).createQuery())
 				.must(textQuery)
 				.createQuery();
-		//@formatter:on
 
 		FullTextQuery ftq = em.createFullTextQuery(query, ResourceTable.class);
 		ftq.setProjection("myContentText");
@@ -289,14 +287,6 @@ public class FulltextSearchSvcImpl extends BaseHapiFhirDao<IBaseResource> implem
 				formatter.setAnalyzer("myContentTextEdgeNGram");
 				highlighter.getBestFragments(analyzer.tokenStream("myContentTextEdgeNGram", nextValue), nextValue, 10);
 
-				// formatter.setAnalyzer("myContentText");
-				// highlighter.getBestFragments(analyzer.tokenStream("myContentText", nextValue), nextValue, 10);
-				// formatter.setAnalyzer("myContentTextNGram");
-				// highlighter.getBestFragments(analyzer.tokenStream("myContentTextNGram", nextValue), nextValue, 10);
-				// formatter.setAnalyzer("myContentTextEdgeNGram");
-				// highlighter.getBestFragments(analyzer.tokenStream("myContentTextEdgeNGram", nextValue), nextValue, 10);
-				// formatter.setAnalyzer("myContentTextPhonetic");
-				// highlighter.getBestFragments(analyzer.tokenStream("myContentTextPhonetic", nextValue), nextValue, 10);
 			} catch (Exception e) {
 				throw new InternalErrorException(e);
 			}
