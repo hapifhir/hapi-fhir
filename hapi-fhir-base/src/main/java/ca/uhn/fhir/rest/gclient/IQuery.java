@@ -25,7 +25,7 @@ import java.util.Collection;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 
 import ca.uhn.fhir.model.api.Include;
-import ca.uhn.fhir.rest.method.SearchStyleEnum;
+import ca.uhn.fhir.rest.api.SearchStyleEnum;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 
 public interface IQuery<T> extends IClientExecutable<IQuery<T>, T>, IBaseQuery<IQuery<T>> {

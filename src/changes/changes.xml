@@ -7,6 +7,20 @@
 	</properties>
 	<body>
 		<release version="2.6" date="TBD">
+			<action type="add">
+				<ul>
+					<li>AddProfileTagEnum moved from package ca.uhn.fhir.rest.server to package ca.uhn.fhir.context.api</li>
+					<li>IVersionSpecificBundleFactory moved from package ca.uhn.fhir.rest.server to package ca.uhn.fhir.context.api</li>
+					<li>BundleInclusionRule moved from package ca.uhn.fhir.rest.server to package ca.uhn.fhir.context.api</li>
+					<li>RestSearchParameterTypeEnum moved from package ca.uhn.fhir.rest.server to package ca.uhn.fhir.rest.api</li>
+					<li>EncodingEnum moved from package ca.uhn.fhir.rest.server to package ca.uhn.fhir.rest.api</li>
+					<li>Constants moved from package ca.uhn.fhir.rest.server to package ca.uhn.fhir.rest.api</li>
+					<li>IClientInterceptor moved from package ca.uhn.fhir.rest.client to package ca.uhn.fhir.rest.client.api</li>
+					<li>IGenericClient moved from package ca.uhn.fhir.rest.client to package ca.uhn.fhir.rest.client.api</li>
+					<li>IRestfulClient moved from package ca.uhn.fhir.rest.client to package ca.uhn.fhir.rest.client.api</li>
+					<li>ITestingUiClientFactory moved from package ca.uhn.fhir.util to package ca.uhn.fhir.rest.server.util</li>
+				</ul>
+			</action>
 			<action type="fix" issue="667">
 				When using the AuthorizationInterceptor with the JPA server, when a client is updating a resource
 				from A to B, the user now needs to have write permission for both A and B. This is particularly 

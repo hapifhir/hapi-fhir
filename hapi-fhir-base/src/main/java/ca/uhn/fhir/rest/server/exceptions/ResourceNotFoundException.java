@@ -26,7 +26,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.base.composite.BaseIdentifierDt;
 import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.rest.server.Constants;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.util.CoverageIgnore;
 
 /**

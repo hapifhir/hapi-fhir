@@ -23,22 +23,15 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  */
 
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.method.BaseMethodBinding;
-import ca.uhn.fhir.rest.method.IParameter;
-import ca.uhn.fhir.rest.method.QualifiedParamList;
-import ca.uhn.fhir.rest.method.RequestDetails;
-import ca.uhn.fhir.rest.method.RestSearchParameterTypeEnum;
-import ca.uhn.fhir.rest.method.SearchMethodBinding;
-import ca.uhn.fhir.rest.method.SearchMethodBinding.QualifierDetails;
+import ca.uhn.fhir.rest.api.QualifiedParamList;
+import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
+import ca.uhn.fhir.rest.api.server.IRequestDetails;
+import ca.uhn.fhir.rest.api.server.IServerMethodBinding;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
@@ -81,8 +74,8 @@ public abstract class BaseQueryParameter implements IParameter {
 
 	public abstract Object parse(FhirContext theContext, List<QualifiedParamList> theString) throws InternalErrorException, InvalidRequestException;
 
-	private void parseParams(RequestDetails theRequest, List<QualifiedParamList> paramList, String theQualifiedParamName, String theQualifier) {
-		QualifierDetails qualifiers = SearchMethodBinding.extractQualifiersFromParameterName(theQualifier);
+	private void parseParams(IRequestDetails theRequest, List<QualifiedParamList> paramList, String theQualifiedParamName, String theQualifier) {
+		QualifierDetails qualifiers = QualifierDetails.extractQualifiersFromParameterName(theQualifier);
 		if (!qualifiers.passes(getQualifierWhitelist(), getQualifierBlacklist())) {
 			return;
 		}
@@ -132,7 +125,7 @@ public abstract class BaseQueryParameter implements IParameter {
 	}
 
 	@Override
-	public Object translateQueryParametersIntoServerArgument(RequestDetails theRequest, BaseMethodBinding<?> theMethodBinding) throws InternalErrorException, InvalidRequestException {
+	public Object translateQueryParametersIntoServerArgument(IRequestDetails theRequest, IServerMethodBinding theMethodBinding) throws InternalErrorException, InvalidRequestException {
 
 		List<QualifiedParamList> paramList = new ArrayList<QualifiedParamList>();
 		String name = getName();

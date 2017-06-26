@@ -27,7 +27,6 @@ import java.lang.annotation.Target;
 
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.rest.api.ValidationModeEnum;
-import ca.uhn.fhir.rest.server.IResourceProvider;
 
 /**
  * RESTful method annotation to be used for the FHIR
@@ -50,7 +49,7 @@ public @interface Validate {
 
 	/**
 	 * The return type for this method. This generally does not need
-	 * to be populated for a server implementation (using a {@link IResourceProvider}, 
+	 * to be populated for a server implementation (using an IResourceProvider, 
 	 * since resource providers will return only one resource type per class, 
 	 * but generally does need to be populated for client implementations. 
 	 */

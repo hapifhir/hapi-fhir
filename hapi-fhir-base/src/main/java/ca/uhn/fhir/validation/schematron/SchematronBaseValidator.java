@@ -22,9 +22,7 @@ package ca.uhn.fhir.validation.schematron;
 
 import java.io.InputStream;
 import java.io.StringReader;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 
 import javax.xml.transform.stream.StreamSource;
 
@@ -41,15 +39,9 @@ import com.phloc.schematron.xslt.SchematronResourceSCH;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.BundleEntry;
-import ca.uhn.fhir.rest.server.EncodingEnum;
+import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import ca.uhn.fhir.validation.FhirValidator;
-import ca.uhn.fhir.validation.IValidationContext;
-import ca.uhn.fhir.validation.IValidatorModule;
-import ca.uhn.fhir.validation.ResultSeverityEnum;
-import ca.uhn.fhir.validation.SchemaBaseValidator;
-import ca.uhn.fhir.validation.SingleValidationMessage;
-import ca.uhn.fhir.validation.ValidationContext;
+import ca.uhn.fhir.validation.*;
 
 /**
  * This class is only used using reflection from {@link SchematronProvider} in order

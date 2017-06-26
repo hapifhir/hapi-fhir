@@ -25,7 +25,7 @@ import ca.uhn.fhir.context.FhirContext;
  */
 
 import ca.uhn.fhir.model.api.IQueryParameterType;
-import ca.uhn.fhir.rest.server.Constants;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
 /**

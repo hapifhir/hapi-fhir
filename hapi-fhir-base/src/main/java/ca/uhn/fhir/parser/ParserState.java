@@ -39,17 +39,11 @@ import ca.uhn.fhir.model.api.*;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.base.composite.BaseResourceReferenceDt;
 import ca.uhn.fhir.model.base.resource.ResourceMetadataMap;
-import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.model.primitive.InstantDt;
-import ca.uhn.fhir.model.primitive.StringDt;
-import ca.uhn.fhir.model.primitive.XhtmlDt;
+import ca.uhn.fhir.model.primitive.*;
 import ca.uhn.fhir.parser.json.JsonLikeValue.ScalarType;
 import ca.uhn.fhir.parser.json.JsonLikeValue.ValueType;
-import ca.uhn.fhir.rest.server.Constants;
-import ca.uhn.fhir.util.BundleUtil;
-import ca.uhn.fhir.util.FhirTerser;
-import ca.uhn.fhir.util.IModelVisitor;
-import ca.uhn.fhir.util.ReflectionUtil;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.util.*;
 
 class ParserState<T> {
 

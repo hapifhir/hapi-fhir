@@ -23,7 +23,7 @@ package ca.uhn.fhir.rest.gclient;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.PreferReturnEnum;
-import ca.uhn.fhir.rest.client.IGenericClient;
+import ca.uhn.fhir.rest.client.api.IGenericClient;
 
 public interface ICreateTyped extends IClientExecutable<ICreateTyped, MethodOutcome> {
 	

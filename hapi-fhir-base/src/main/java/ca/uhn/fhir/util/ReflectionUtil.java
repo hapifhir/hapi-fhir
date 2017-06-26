@@ -19,13 +19,7 @@ package ca.uhn.fhir.util;
  * limitations under the License.
  * #L%
  */
-
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.lang.reflect.TypeVariable;
-import java.lang.reflect.WildcardType;
+import java.lang.reflect.*;
 import java.util.LinkedHashSet;
 import java.util.List;
 
@@ -127,6 +121,20 @@ public class ReflectionUtil {
 		return type;
 	}
 
+	public static boolean isInstantiable(Class<?> theType) {
+		return !theType.isInterface() && !Modifier.isAbstract(theType.getModifiers());
+	}
+
+	public static <T> T newInstance(Class<T> theType, Class<?> theArgumentType, Object theArgument) {
+		Validate.notNull(theType, "theType must not be null");
+		try {
+			Constructor<T> constructor = theType.getConstructor(theArgumentType);
+			return constructor.newInstance(theArgument);
+		} catch (Exception e) {
+			throw new ConfigurationException("Failed to instantiate " + theType.getName(), e);
+		}
+	}
+
 	/**
 	 * Instantiate a class by no-arg constructor, throw {@link ConfigurationException} if we fail to do so
 	 */
@@ -154,10 +162,6 @@ public class ReflectionUtil {
 			ourLog.info("Failed to instantiate {}: {}", theClassName, e.toString());
 			return null;
 		}
-	}
-
-	public static boolean isInstantiable(Class<?> theType) {
-		return !theType.isInterface() && !Modifier.isAbstract(theType.getModifiers());
 	}
 
 }

@@ -27,8 +27,7 @@ import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.parser.LenientErrorHandler;
-import ca.uhn.fhir.rest.method.MethodUtil;
-import ca.uhn.fhir.rest.server.EncodingEnum;
+import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.ObjectUtil;
 
@@ -165,7 +164,7 @@ public class ValidationContext<T> extends BaseValidationContext<T> implements IV
 			@Override
 			public EncodingEnum getResourceAsStringEncoding() {
 				if (myEncoding == null) {
-					myEncoding = MethodUtil.detectEncodingNoDefault(theResourceBody);
+					myEncoding = EncodingEnum.detectEncodingNoDefault(theResourceBody);
 					if (myEncoding == null) {
 						throw new InvalidRequestException(theContext.getLocalizer().getMessage(ValidationContext.class, "unableToDetermineEncoding"));
 					}

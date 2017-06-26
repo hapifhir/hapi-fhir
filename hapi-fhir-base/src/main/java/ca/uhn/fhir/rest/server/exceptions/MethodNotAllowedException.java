@@ -5,8 +5,8 @@ import java.util.Set;
 
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
-import ca.uhn.fhir.rest.server.Constants;
 
 /*
  * #%L

@@ -24,7 +24,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import ca.uhn.fhir.model.primitive.StringDt;
-import ca.uhn.fhir.rest.server.Constants;
+import ca.uhn.fhir.rest.api.Constants;
 
 /**
  * 

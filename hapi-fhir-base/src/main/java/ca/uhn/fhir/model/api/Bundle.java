@@ -21,10 +21,7 @@ package ca.uhn.fhir.model.api;
  */
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
@@ -34,16 +31,9 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.model.base.resource.ResourceMetadataMap;
-import ca.uhn.fhir.model.primitive.BoundCodeDt;
-import ca.uhn.fhir.model.primitive.DecimalDt;
-import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.model.primitive.InstantDt;
-import ca.uhn.fhir.model.primitive.IntegerDt;
-import ca.uhn.fhir.model.primitive.StringDt;
-import ca.uhn.fhir.model.valueset.BundleEntrySearchModeEnum;
-import ca.uhn.fhir.model.valueset.BundleEntryTransactionMethodEnum;
-import ca.uhn.fhir.model.valueset.BundleTypeEnum;
-import ca.uhn.fhir.rest.server.Constants;
+import ca.uhn.fhir.model.primitive.*;
+import ca.uhn.fhir.model.valueset.*;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.util.UrlUtil;
 
 public class Bundle extends BaseBundle /* implements IBase implements IElement */{

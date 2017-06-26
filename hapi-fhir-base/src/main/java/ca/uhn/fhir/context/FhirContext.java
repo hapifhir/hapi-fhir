@@ -27,28 +27,18 @@ import java.util.*;
 import java.util.Map.Entry;
 
 import org.apache.commons.lang3.Validate;
-import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IBaseBundle;
-import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.*;
 
+import ca.uhn.fhir.context.api.AddProfileTagEnum;
 import ca.uhn.fhir.context.support.IContextValidationSupport;
 import ca.uhn.fhir.fluentpath.IFluentPath;
 import ca.uhn.fhir.i18n.HapiLocalizer;
-import ca.uhn.fhir.model.api.IElement;
-import ca.uhn.fhir.model.api.IFhirVersion;
-import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.api.*;
 import ca.uhn.fhir.model.view.ViewGenerator;
 import ca.uhn.fhir.narrative.INarrativeGenerator;
 import ca.uhn.fhir.parser.*;
-import ca.uhn.fhir.rest.client.IGenericClient;
-import ca.uhn.fhir.rest.client.IRestfulClientFactory;
-import ca.uhn.fhir.rest.client.apache.ApacheRestfulClientFactory;
-import ca.uhn.fhir.rest.client.api.IBasicClient;
-import ca.uhn.fhir.rest.client.api.IRestfulClient;
-import ca.uhn.fhir.rest.server.AddProfileTagEnum;
-import ca.uhn.fhir.rest.server.IVersionSpecificBundleFactory;
-import ca.uhn.fhir.util.FhirTerser;
-import ca.uhn.fhir.util.VersionUtil;
+import ca.uhn.fhir.rest.client.api.*;
+import ca.uhn.fhir.util.*;
 import ca.uhn.fhir.validation.FhirValidator;
 
 /**
@@ -426,7 +416,11 @@ public class FhirContext {
 	 */
 	public IRestfulClientFactory getRestfulClientFactory() {
 		if (myRestfulClientFactory == null) {
-			myRestfulClientFactory = new ApacheRestfulClientFactory(this);
+			try {
+				myRestfulClientFactory = (IRestfulClientFactory) ReflectionUtil.newInstance(Class.forName("ca.uhn.fhir.rest.client.apache.ApacheRestfulClientFactory"), FhirContext.class, this);
+			} catch (ClassNotFoundException e) {
+				throw new ConfigurationException("hapi-fhir-client does not appear to be on the classpath");
+			}
 		}
 		return myRestfulClientFactory;
 	}
@@ -464,14 +458,6 @@ public class FhirContext {
 	public boolean hasDefaultTypeForProfile() {
 		validateInitialized();
 		return !myDefaultTypeForProfile.isEmpty();
-	}
-
-	/**
-	 * This method should be considered experimental and will likely change in future releases
-	 * of HAPI. Use with caution!
-	 */
-	public IVersionSpecificBundleFactory newBundleFactory() {
-		return myVersion.newBundleFactory(this);
 	}
 
 	/**

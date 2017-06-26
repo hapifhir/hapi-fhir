@@ -24,9 +24,8 @@ package ca.uhn.fhir.rest.client.api;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.SummaryEnum;
-import ca.uhn.fhir.rest.client.IClientInterceptor;
-import ca.uhn.fhir.rest.server.EncodingEnum;
 
 public interface IRestfulClient {
 

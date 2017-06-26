@@ -21,7 +21,7 @@ package ca.uhn.fhir.validation;
  */
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.server.EncodingEnum;
+import ca.uhn.fhir.rest.api.EncodingEnum;
 
 public interface IValidationContext<T> {
 

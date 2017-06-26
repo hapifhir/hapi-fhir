@@ -22,9 +22,7 @@ package ca.uhn.fhir.rest.param;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
@@ -35,8 +33,7 @@ import ca.uhn.fhir.model.api.IQueryParameterOr;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
 import ca.uhn.fhir.model.primitive.*;
-import ca.uhn.fhir.rest.method.QualifiedParamList;
-import ca.uhn.fhir.rest.param.DateParam.DateParamDateTimeHolder;
+import ca.uhn.fhir.rest.api.QualifiedParamList;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.ValidateUtil;
 
