@@ -154,6 +154,17 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 	}
 	
 	@Test
+	public void testEmptyChain() {
+
+		SearchParameterMap map = new SearchParameterMap();
+		map.add(Encounter.SP_SUBJECT, new ReferenceAndListParam().addAnd(new ReferenceOrListParam().add((ReferenceParam)new ReferenceParam("subject", "04823543").setChain("identifier"))));
+		IBundleProvider results = myMedicationAdministrationDao.search(map);
+		List<String> ids = toUnqualifiedIdValues(results);
+
+		assertThat(ids, empty());
+	}
+
+	@Test
 	public void testEverythingTimings() throws Exception {
 		String methodName = "testEverythingTimings";
 
