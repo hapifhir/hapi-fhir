@@ -334,6 +334,16 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 						continue;
 					}
 					nextId = nextValue.getReferenceElement();
+
+					/*
+					 * This can only really happen if the DAO is being called
+					 * programatically with a Bundle (not through the FHIR REST API)
+					 * but Smile does this 
+					 */
+					if (nextId.isEmpty() && nextValue.getResource() != null) {
+						nextId = nextValue.getResource().getIdElement();
+					}
+					
 					if (nextId.isEmpty() || nextId.getValue().startsWith("#")) {
 						// This is a blank or contained resource reference
 						continue;

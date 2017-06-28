@@ -52,6 +52,11 @@
 				Prevent duplicates in $everything query response in JPA server. Thanks to @vlad-ignatov 
 				for reporting!
 			</action>
+			<action type="fix">
+				Fix issue in calling JPA server transactions programmatically where resources
+				are linked by object reference and not by ID where indexes were not correctly
+				generated. This should not affect most users.
+			</action>
 		</release>
 		<release version="2.5" date="2017-06-08">
 			<action type="fix">

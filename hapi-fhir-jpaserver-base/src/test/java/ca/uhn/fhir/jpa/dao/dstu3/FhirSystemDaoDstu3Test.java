@@ -543,6 +543,60 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 	}
 
 	@Test
+	public void testTransactionWithReferenceUuid() {
+		Bundle request = new Bundle();
+
+		Patient p = new Patient();
+		p.setActive(true);
+		p.setId(IdType.newRandomUuid());
+		request.addEntry().setResource(p).getRequest().setMethod(HTTPVerb.POST).setUrl(p.getId());
+		
+		Observation o = new Observation();
+		o.getCode().setText("Some Observation");
+		o.getSubject().setReference(p.getId());
+		request.addEntry().setResource(o).getRequest().setMethod(HTTPVerb.POST);
+
+		Bundle resp = mySystemDao.transaction(mySrd, request);
+		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(resp));
+		
+		String patientId = new IdType(resp.getEntry().get(0).getResponse().getLocation()).toUnqualifiedVersionless().getValue();
+		assertThat(patientId, startsWith("Patient/"));
+		
+		SearchParameterMap params = new SearchParameterMap();
+		params.setLoadSynchronous(true);
+		params.add("subject", new ReferenceParam(patientId));
+		IBundleProvider found = myObservationDao.search(params);
+		assertEquals(1, found.size().intValue());
+	}
+
+	@Test
+	public void testTransactionWithReferenceResource() {
+		Bundle request = new Bundle();
+
+		Patient p = new Patient();
+		p.setActive(true);
+		p.setId(IdType.newRandomUuid());
+		request.addEntry().setResource(p).getRequest().setMethod(HTTPVerb.POST).setUrl(p.getId());
+		
+		Observation o = new Observation();
+		o.getCode().setText("Some Observation");
+		o.getSubject().setResource(p);
+		request.addEntry().setResource(o).getRequest().setMethod(HTTPVerb.POST);
+
+		Bundle resp = mySystemDao.transaction(mySrd, request);
+		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(resp));
+		
+		String patientId = new IdType(resp.getEntry().get(0).getResponse().getLocation()).toUnqualifiedVersionless().getValue();
+		assertThat(patientId, startsWith("Patient/"));
+		
+		SearchParameterMap params = new SearchParameterMap();
+		params.setLoadSynchronous(true);
+		params.add("subject", new ReferenceParam(patientId));
+		IBundleProvider found = myObservationDao.search(params);
+		assertEquals(1, found.size().intValue());
+	}
+
+	@Test
 	public void testTransactionCreateInlineMatchUrlWithOneMatch() {
 		String methodName = "testTransactionCreateInlineMatchUrlWithOneMatch";
 		Bundle request = new Bundle();
