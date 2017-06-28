@@ -94,10 +94,6 @@ public class DeleteMethodBinding extends BaseOutcomeReturningMethodBindingWithRe
 		return retVal;
 	}
 
-	@Override
-	protected void addParametersForServerRequest(RequestDetails theRequest, Object[] theParams) {
-		theParams[getIdParameterIndex()] = theRequest.getId();
-	}
 
 	@Override
 	protected String getMatchingOperation() {

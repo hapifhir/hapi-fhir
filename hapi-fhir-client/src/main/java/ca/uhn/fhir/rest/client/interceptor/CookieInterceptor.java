@@ -1,7 +1,8 @@
 package ca.uhn.fhir.rest.client.interceptor;
 
-import ca.uhn.fhir.rest.client.api.*;
-import ca.uhn.fhir.rest.server.Constants;
+import ca.uhn.fhir.rest.client.api.IClientInterceptor;
+import ca.uhn.fhir.rest.client.api.IHttpRequest;
+import ca.uhn.fhir.rest.client.api.IHttpResponse;
 
 /**
  * HTTP interceptor to be used for adding Cookie to requests.

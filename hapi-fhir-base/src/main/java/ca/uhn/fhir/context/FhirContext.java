@@ -37,6 +37,7 @@ import ca.uhn.fhir.model.api.*;
 import ca.uhn.fhir.model.view.ViewGenerator;
 import ca.uhn.fhir.narrative.INarrativeGenerator;
 import ca.uhn.fhir.parser.*;
+import ca.uhn.fhir.rest.api.IVersionSpecificBundleFactory;
 import ca.uhn.fhir.rest.client.api.*;
 import ca.uhn.fhir.util.*;
 import ca.uhn.fhir.validation.FhirValidator;
@@ -460,6 +461,10 @@ public class FhirContext {
 		return !myDefaultTypeForProfile.isEmpty();
 	}
 
+	public IVersionSpecificBundleFactory newBundleFactory() {
+		return myVersion.newBundleFactory(this);
+	}
+
 	/**
 	 * Creates a new FluentPath engine which can be used to exvaluate
 	 * path expressions over FHIR resources. Note that this engine will use the
@@ -818,7 +823,7 @@ public class FhirContext {
 	public void setValidationSupport(IContextValidationSupport<?, ?, ?, ?, ?, ?> theValidationSupport) {
 		myValidationSupport = theValidationSupport;
 	}
-
+	
 	@SuppressWarnings({ "cast" })
 	private List<Class<? extends IElement>> toElementList(Collection<Class<? extends IBaseResource>> theResourceTypes) {
 		if (theResourceTypes == null) {
@@ -830,7 +835,7 @@ public class FhirContext {
 		}
 		return resTypes;
 	}
-	
+
 	private void validateInitialized() {
 		// See #610
 		if (!myInitialized) {

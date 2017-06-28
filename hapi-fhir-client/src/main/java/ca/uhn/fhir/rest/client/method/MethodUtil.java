@@ -8,31 +8,79 @@ import java.io.PushbackReader;
 import java.io.Reader;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
-import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.hl7.fhir.instance.model.api.IBaseMetaType;
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 
-import ca.uhn.fhir.context.*;
-import ca.uhn.fhir.model.api.*;
+import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.model.api.IQueryParameterAnd;
+import ca.uhn.fhir.model.api.IQueryParameterOr;
+import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.api.Include;
+import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
+import ca.uhn.fhir.model.api.Tag;
+import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.parser.IParser;
-import ca.uhn.fhir.rest.annotation.*;
-import ca.uhn.fhir.rest.api.*;
+import ca.uhn.fhir.rest.annotation.At;
+import ca.uhn.fhir.rest.annotation.ConditionalUrlParam;
+import ca.uhn.fhir.rest.annotation.Count;
+import ca.uhn.fhir.rest.annotation.Elements;
+import ca.uhn.fhir.rest.annotation.IdParam;
+import ca.uhn.fhir.rest.annotation.IncludeParam;
+import ca.uhn.fhir.rest.annotation.Operation;
+import ca.uhn.fhir.rest.annotation.OperationParam;
+import ca.uhn.fhir.rest.annotation.OptionalParam;
+import ca.uhn.fhir.rest.annotation.RawParam;
+import ca.uhn.fhir.rest.annotation.RequiredParam;
+import ca.uhn.fhir.rest.annotation.ResourceParam;
+import ca.uhn.fhir.rest.annotation.ServerBase;
+import ca.uhn.fhir.rest.annotation.Since;
+import ca.uhn.fhir.rest.annotation.Sort;
+import ca.uhn.fhir.rest.annotation.TagListParam;
+import ca.uhn.fhir.rest.annotation.TransactionParam;
+import ca.uhn.fhir.rest.annotation.Validate;
+import ca.uhn.fhir.rest.annotation.VersionIdParam;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.EncodingEnum;
+import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.api.PatchTypeEnum;
+import ca.uhn.fhir.rest.api.QualifiedParamList;
+import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
+import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
+import ca.uhn.fhir.rest.api.SummaryEnum;
+import ca.uhn.fhir.rest.api.ValidationModeEnum;
 import ca.uhn.fhir.rest.client.impl.BaseHttpClientInvocation;
 import ca.uhn.fhir.rest.client.method.OperationParameter.IOperationParamConverter;
-import ca.uhn.fhir.rest.param.*;
-import ca.uhn.fhir.rest.server.Constants;
-import ca.uhn.fhir.rest.server.EncodingEnum;
-import ca.uhn.fhir.rest.server.IDynamicSearchResourceProvider;
-import ca.uhn.fhir.rest.server.SearchParameterMap;
-import ca.uhn.fhir.rest.server.method.ResourceParameter;
-import ca.uhn.fhir.rest.server.method.TransactionParameter;
-import ca.uhn.fhir.rest.server.method.ResourceParameter.Mode;
+import ca.uhn.fhir.rest.param.CollectionBinder;
+import ca.uhn.fhir.rest.param.DateAndListParam;
+import ca.uhn.fhir.rest.param.HasAndListParam;
+import ca.uhn.fhir.rest.param.NumberAndListParam;
+import ca.uhn.fhir.rest.param.QuantityAndListParam;
+import ca.uhn.fhir.rest.param.ReferenceAndListParam;
+import ca.uhn.fhir.rest.param.StringAndListParam;
+import ca.uhn.fhir.rest.param.TokenAndListParam;
+import ca.uhn.fhir.rest.param.UriAndListParam;
 import ca.uhn.fhir.util.DateUtils;
 import ca.uhn.fhir.util.ParametersUtil;
 import ca.uhn.fhir.util.ReflectionUtil;
@@ -323,14 +371,7 @@ public class MethodUtil {
 			Class<?> parameterType = parameterTypes[paramIndex];
 			Class<? extends java.util.Collection<?>> outerCollectionType = null;
 			Class<? extends java.util.Collection<?>> innerCollectionType = null;
-			if (SearchParameterMap.class.equals(parameterType)) {
-				if (theProvider instanceof IDynamicSearchResourceProvider) {
-					Search searchAnnotation = theMethod.getAnnotation(Search.class);
-					if (searchAnnotation != null && searchAnnotation.dynamic()) {
-						param = new DynamicSearchParameter((IDynamicSearchResourceProvider) theProvider);
-					}
-				}
-			} else if (TagList.class.isAssignableFrom(parameterType)) {
+			if (TagList.class.isAssignableFrom(parameterType)) {
 				// TagList is handled directly within the method bindings
 				param = new NullParameter();
 			} else {
@@ -348,20 +389,7 @@ public class MethodUtil {
 				}
 			}
 			
-			/* 
-			 * Note: for the first two here, we're using strings instead of static binding
-			 * so that we don't need the java.servlet JAR on the classpath in order to use
-			 * this class 
-			 */
-			if (ourServletRequestTypes.contains(parameterType.getName())) {
-				param = new ServletRequestParameter();
-			} else if (ourServletResponseTypes.contains(parameterType.getName())) {
-				param = new ServletResponseParameter();
-			} else if (parameterType.equals(RequestDetails.class)) {
-				param = new RequestDetailsParameter();
-			} else if (parameterType.equals(IRequestOperationCallback.class)) {
-				param = new RequestOperationCallbackParameter();
-			} else if (parameterType.equals(SummaryEnum.class)) {
+			if (parameterType.equals(SummaryEnum.class)) {
 				param = new SummaryEnumParameter();
 			} else if (parameterType.equals(PatchTypeEnum.class)) {
 				param = new PatchTypeParameter();
@@ -407,15 +435,14 @@ public class MethodUtil {
 
 						param = new IncludeParameter((IncludeParam) nextAnnotation, instantiableCollectionType, specType);
 					} else if (nextAnnotation instanceof ResourceParam) {
-						Mode mode;
 						if (IBaseResource.class.isAssignableFrom(parameterType)) {
-							mode = Mode.RESOURCE;
+							// good
 						} else if (String.class.equals(parameterType)) {
-							mode = ResourceParameter.Mode.BODY;
+							// good
 						} else if (byte[].class.equals(parameterType)) {
-							mode = ResourceParameter.Mode.BODY_BYTE_ARRAY;
+							// good
 						} else if (EncodingEnum.class.equals(parameterType)) {
-							mode = Mode.ENCODING;
+							// good
 						} else {
 							StringBuilder b = new StringBuilder();
 							b.append("Method '");
@@ -427,7 +454,7 @@ public class MethodUtil {
 							b.append(" or String or byte[]");
 							throw new ConfigurationException(b.toString());
 						}
-						param = new ResourceParameter((Class<? extends IResource>) parameterType, theProvider, mode);
+						param = new ResourceParameter();
 					} else if (nextAnnotation instanceof IdParam || nextAnnotation instanceof VersionIdParam) {
 						param = new NullParameter();
 					} else if (nextAnnotation instanceof ServerBase) {

@@ -1,4 +1,4 @@
-package ca.uhn.fhir.rest.param;
+package ca.uhn.fhir.rest.client.method;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -23,41 +23,26 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  */
 
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.QualifiedParamList;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
-import ca.uhn.fhir.rest.api.server.IRequestDetails;
-import ca.uhn.fhir.rest.api.server.IServerMethodBinding;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
 public abstract class BaseQueryParameter implements IParameter {
-
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseQueryParameter.class);
 
 	public abstract List<QualifiedParamList> encode(FhirContext theContext, Object theObject) throws InternalErrorException;
 
 	public abstract String getName();
 
 	public abstract RestSearchParameterTypeEnum getParamType();
-
-	/**
-	 * Returns null if blacklist is "none"
-	 */
-	public Set<String> getQualifierBlacklist() {
-		return null;
-	}
-
-	/**
-	 * Returns null if whitelist is "all"
-	 */
-	public Set<String> getQualifierWhitelist() {
-		return null;
-	}
 
 	/**
 	 * Parameter should return true if {@link #parse(FhirContext, List)} should be called even if the query string
@@ -73,24 +58,6 @@ public abstract class BaseQueryParameter implements IParameter {
 	public abstract boolean isRequired();
 
 	public abstract Object parse(FhirContext theContext, List<QualifiedParamList> theString) throws InternalErrorException, InvalidRequestException;
-
-	private void parseParams(IRequestDetails theRequest, List<QualifiedParamList> paramList, String theQualifiedParamName, String theQualifier) {
-		QualifierDetails qualifiers = QualifierDetails.extractQualifiersFromParameterName(theQualifier);
-		if (!qualifiers.passes(getQualifierWhitelist(), getQualifierBlacklist())) {
-			return;
-		}
-
-		String[] value = theRequest.getParameters().get(theQualifiedParamName);
-		if (value != null) {
-			for (String nextParam : value) {
-				if (nextParam.contains(",") == false) {
-					paramList.add(QualifiedParamList.singleton(theQualifier, nextParam));
-				} else {
-					paramList.add(QualifiedParamList.splitQueryStringByCommasIgnoreEscape(theQualifier, nextParam));
-				}
-			}
-		}
-	}
 
 	@Override
 	public void translateClientArgumentIntoQueryArgument(FhirContext theContext, Object theSourceClientArgument, Map<String, List<String>> theTargetQueryArguments, IBaseResource theTargetResource) throws InternalErrorException {
@@ -122,34 +89,6 @@ public abstract class BaseQueryParameter implements IParameter {
 			}
 
 		}
-	}
-
-	@Override
-	public Object translateQueryParametersIntoServerArgument(IRequestDetails theRequest, IServerMethodBinding theMethodBinding) throws InternalErrorException, InvalidRequestException {
-
-		List<QualifiedParamList> paramList = new ArrayList<QualifiedParamList>();
-		String name = getName();
-		parseParams(theRequest, paramList, name, null);
-
-		List<String> qualified = theRequest.getUnqualifiedToQualifiedNames().get(name);
-		if (qualified != null) {
-			for (String nextQualified : qualified) {
-				parseParams(theRequest, paramList, nextQualified, nextQualified.substring(name.length()));
-			}
-		}
-
-		if (paramList.isEmpty()) {
-
-			ourLog.debug("No value for parameter '{}' - Qualified names {} and qualifier whitelist {}", new Object[] { getName(), qualified, getQualifierWhitelist() });
-
-			if (handlesMissing()) {
-				return parse(theRequest.getFhirContext(), paramList);
-			}
-			return null;
-		}
-
-		return parse(theRequest.getFhirContext(), paramList);
-
 	}
 
 }

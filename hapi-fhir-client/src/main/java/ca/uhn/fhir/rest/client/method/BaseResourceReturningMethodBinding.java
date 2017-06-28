@@ -1,61 +1,33 @@
 package ca.uhn.fhir.rest.client.method;
 
-/*
- * #%L
- * HAPI FHIR - Core Library
- * %%
- * Copyright (C) 2014 - 2017 University Health Network
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- * http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
-import java.io.IOException;
 import java.io.Reader;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
-import ca.uhn.fhir.rest.api.RequestTypeEnum;
-import ca.uhn.fhir.rest.api.SummaryEnum;
-import ca.uhn.fhir.rest.api.server.IVersionSpecificBundleFactory;
 import ca.uhn.fhir.rest.client.exceptions.InvalidResponseException;
-import ca.uhn.fhir.rest.server.*;
-import ca.uhn.fhir.rest.server.RestfulServerUtils.ResponseEncoding;
-import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
-import ca.uhn.fhir.rest.server.interceptor.ResponseHighlighterInterceptor;
 import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.ReflectionUtil;
-import ca.uhn.fhir.util.UrlUtil;
 
 public abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Object> {
 	protected static final Set<String> ALLOWED_PARAMS;
@@ -72,7 +44,6 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 		set.add(Constants.PARAM_COUNT);
 		set.add(Constants.PARAM_SUMMARY);
 		set.add(Constants.PARAM_ELEMENTS);
-		set.add(ResponseHighlighterInterceptor.PARAM_RAW);
 		ALLOWED_PARAMS = Collections.unmodifiableSet(set);
 	}
 
@@ -107,8 +78,6 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 			}
 		} else if (Bundle.class.isAssignableFrom(methodReturnType)) {
 			myMethodReturnType = MethodReturnTypeEnum.BUNDLE;
-		} else if (IBundleProvider.class.isAssignableFrom(methodReturnType)) {
-			myMethodReturnType = MethodReturnTypeEnum.BUNDLE_PROVIDER;
 		} else if (MethodOutcome.class.isAssignableFrom(methodReturnType)) {
 			myMethodReturnType = MethodReturnTypeEnum.METHOD_OUTCOME;
 		} else {
@@ -195,8 +164,6 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 				} else {
 					throw new InvalidResponseException(theResponseStatusCode, "FHIR server call returned a bundle with multiple resources, but this method is only able to returns one.");
 				}
-			case BUNDLE_PROVIDER:
-				throw new IllegalStateException("Return type of " + IBundleProvider.class.getSimpleName() + " is not supported in clients");
 			default:
 				break;
 			}
@@ -219,8 +186,6 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 				return Collections.singletonList(resource);
 			case RESOURCE:
 				return resource;
-			case BUNDLE_PROVIDER:
-				throw new IllegalStateException("Return type of " + IBundleProvider.class.getSimpleName() + " is not supported in clients");
 			case BUNDLE_RESOURCE:
 				return resource;
 			case METHOD_OUTCOME:
@@ -248,176 +213,6 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 		return preferTypes;
 	}
 
-	@Override
-	public Object invokeServer(IRestfulServer<?> theServer, RequestDetails theRequest) throws BaseServerResponseException, IOException {
-
-		final ResourceOrDstu1Bundle responseObject = doInvokeServer(theServer, theRequest);
-
-		Set<SummaryEnum> summaryMode = RestfulServerUtils.determineSummaryMode(theRequest);
-		if (responseObject.getResource() != null) {
-
-			for (int i = theServer.getInterceptors().size() - 1; i >= 0; i--) {
-				IServerInterceptor next = theServer.getInterceptors().get(i);
-				boolean continueProcessing = next.outgoingResponse(theRequest, responseObject.getResource());
-				if (!continueProcessing) {
-					return null;
-				}
-			}
-
-			boolean prettyPrint = RestfulServerUtils.prettyPrintResponse(theServer, theRequest);
-
-			return theRequest.getResponse().streamResponseAsResource(responseObject.getResource(), prettyPrint, summaryMode, Constants.STATUS_HTTP_200_OK, null, theRequest.isRespondGzip(),
-					isAddContentLocationHeader());
-
-		} 
-		// Is this request coming from a browser
-		String uaHeader = theRequest.getHeader("user-agent");
-		boolean requestIsBrowser = false;
-		if (uaHeader != null && uaHeader.contains("Mozilla")) {
-			requestIsBrowser = true;
-		}
-
-		for (int i = theServer.getInterceptors().size() - 1; i >= 0; i--) {
-			IServerInterceptor next = theServer.getInterceptors().get(i);
-			boolean continueProcessing = next.outgoingResponse(theRequest, responseObject.getDstu1Bundle());
-			if (!continueProcessing) {
-				ourLog.debug("Interceptor {} returned false, not continuing processing");
-				return null;
-			}
-		}
-
-		return theRequest.getResponse().streamResponseAsBundle(responseObject.getDstu1Bundle(), summaryMode, theRequest.isRespondGzip(), requestIsBrowser);
-	}
-
-	public ResourceOrDstu1Bundle doInvokeServer(IRestfulServer<?> theServer, RequestDetails theRequest) {
-		// Method params
-		Object[] params = new Object[getParameters().size()];
-		for (int i = 0; i < getParameters().size(); i++) {
-			IParameter param = getParameters().get(i);
-			if (param != null) {
-				params[i] = param.translateQueryParametersIntoServerArgument(theRequest, this);
-			}
-		}
-
-		Object resultObj = invokeServer(theServer, theRequest, params);
-
-		Integer count = RestfulServerUtils.extractCountParameter(theRequest);
-
-		final ResourceOrDstu1Bundle responseObject;
-
-		switch (getReturnType()) {
-		case BUNDLE: {
-
-			/*
-			 * Figure out the self-link for this request
-			 */
-			String serverBase = theRequest.getServerBaseForRequest();
-			String linkSelf;
-			StringBuilder b = new StringBuilder();
-			b.append(serverBase);
-			if (isNotBlank(theRequest.getRequestPath())) {
-				b.append('/');
-				b.append(theRequest.getRequestPath());
-			}
-			// For POST the URL parameters get jumbled with the post body parameters so don't include them, they might be huge
-			if (theRequest.getRequestType() == RequestTypeEnum.GET) {
-				boolean first = true;
-				Map<String, String[]> parameters = theRequest.getParameters();
-				for (String nextParamName : new TreeSet<String>(parameters.keySet())) {
-					for (String nextParamValue : parameters.get(nextParamName)) {
-						if (first) {
-							b.append('?');
-							first = false;
-						} else {
-							b.append('&');
-						}
-						b.append(UrlUtil.escape(nextParamName));
-						b.append('=');
-						b.append(UrlUtil.escape(nextParamValue));
-					}
-				}
-			}
-			linkSelf = b.toString();
-
-			if (getMethodReturnType() == MethodReturnTypeEnum.BUNDLE_RESOURCE) {
-				IBaseResource resource;
-				IPrimitiveType<Date> lastUpdated;
-				if (resultObj instanceof IBundleProvider) {
-					IBundleProvider result = (IBundleProvider) resultObj;
-					resource = result.getResources(0, 1).get(0);
-					lastUpdated = result.getPublished();
-				} else {
-					resource = (IBaseResource) resultObj;
-					lastUpdated = theServer.getFhirContext().getVersion().getLastUpdated(resource);
-				}
-
-				/*
-				 * We assume that the bundle we got back from the handling method may not have everything populated (e.g. self links, bundle type, etc) so we do that here.
-				 */
-				IVersionSpecificBundleFactory bundleFactory = theServer.getFhirContext().newBundleFactory();
-				bundleFactory.initializeWithBundleResource(resource);
-				bundleFactory.addRootPropertiesToBundle(null, theRequest.getFhirServerBase(), linkSelf, count, getResponseBundleType(), lastUpdated);
-
-				responseObject = new ResourceOrDstu1Bundle(resource);
-			} else {
-				Set<Include> includes = getRequestIncludesFromParams(params);
-
-				IBundleProvider result = (IBundleProvider) resultObj;
-				if (count == null) {
-					count = result.preferredPageSize();
-				}
-
-				Integer offsetI = RestfulServerUtils.tryToExtractNamedParameter(theRequest, Constants.PARAM_PAGINGOFFSET);
-				if (offsetI == null || offsetI < 0) {
-					offsetI = 0;
-				}
-				
-				Integer resultSize = result.size();
-				int start;
-				if (resultSize != null) {
-					start = Math.max(0, Math.min(offsetI, resultSize - 1));
-				} else {
-					start = offsetI;
-				}
-				
-				IVersionSpecificBundleFactory bundleFactory = theServer.getFhirContext().newBundleFactory();
-
-				ResponseEncoding responseEncoding = RestfulServerUtils.determineResponseEncodingNoDefault(theRequest, theServer.getDefaultResponseEncoding());
-				EncodingEnum linkEncoding = theRequest.getParameters().containsKey(Constants.PARAM_FORMAT) && responseEncoding != null ? responseEncoding.getEncoding() : null;
-
-				boolean prettyPrint = RestfulServerUtils.prettyPrintResponse(theServer, theRequest);
-				bundleFactory.initializeBundleFromBundleProvider(theServer, result, linkEncoding, theRequest.getFhirServerBase(), linkSelf, prettyPrint, start, count, null, getResponseBundleType(),
-						includes);
-				Bundle bundle = bundleFactory.getDstu1Bundle();
-				if (bundle != null) {
-					responseObject = new ResourceOrDstu1Bundle(bundle);
-				} else {
-					IBaseResource resBundle = bundleFactory.getResourceBundle();
-					responseObject = new ResourceOrDstu1Bundle(resBundle);
-				}
-			}
-			break;
-		}
-		case RESOURCE: {
-			IBundleProvider result = (IBundleProvider) resultObj;
-			if (result.size() == 0) {
-				throw new ResourceNotFoundException(theRequest.getId());
-			} else if (result.size() > 1) {
-				throw new InternalErrorException("Method returned multiple resources");
-			}
-
-			IBaseResource resource = result.getResources(0, 1).get(0);
-			responseObject = new ResourceOrDstu1Bundle(resource);
-			break;
-		}
-		default:
-			throw new IllegalStateException(); // should not happen
-		}
-		return responseObject;
-	}
-
-	public abstract Object invokeServer(IRestfulServer<?> theServer, RequestDetails theRequest, Object[] theMethodParams) throws InvalidRequestException, InternalErrorException;
-
 	/**
 	 * Should the response include a Content-Location header. Search method bunding (and any others?) may override this to disable the content-location, since it doesn't make sense
 	 */
@@ -430,7 +225,7 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 	}
 
 	public enum MethodReturnTypeEnum {
-		BUNDLE, BUNDLE_PROVIDER, BUNDLE_RESOURCE, LIST_OF_RESOURCES, METHOD_OUTCOME, RESOURCE
+		BUNDLE, BUNDLE_RESOURCE, LIST_OF_RESOURCES, METHOD_OUTCOME, RESOURCE
 	}
 
 	public static class ResourceOrDstu1Bundle {

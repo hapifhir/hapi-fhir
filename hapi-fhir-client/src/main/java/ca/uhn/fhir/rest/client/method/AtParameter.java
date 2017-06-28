@@ -21,7 +21,7 @@ package ca.uhn.fhir.rest.client.method;
  */
 
 import ca.uhn.fhir.rest.annotation.At;
-import ca.uhn.fhir.rest.server.Constants;
+import ca.uhn.fhir.rest.api.Constants;
 
 class AtParameter extends SinceOrAtParameter {
 

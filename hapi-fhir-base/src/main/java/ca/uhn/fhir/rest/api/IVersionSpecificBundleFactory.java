@@ -1,4 +1,4 @@
-package ca.uhn.fhir.rest.api.server;
+package ca.uhn.fhir.rest.api;
 
 /*
  * #%L
@@ -19,7 +19,9 @@ package ca.uhn.fhir.rest.api.server;
  * limitations under the License.
  * #L%
  */
-import java.util.*;
+import java.util.Date;
+import java.util.List;
+import java.util.Set;
 
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
@@ -28,7 +30,6 @@ import ca.uhn.fhir.context.api.BundleInclusionRule;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
-import ca.uhn.fhir.rest.api.EncodingEnum;
 
 /**
  * This interface should be considered experimental and will likely change in future releases of HAPI. Use with caution!
@@ -39,8 +40,8 @@ public interface IVersionSpecificBundleFactory {
 
 	void addRootPropertiesToBundle(String theAuthor, String theServerBase, String theCompleteUrl, Integer theTotalResults, BundleTypeEnum theBundleType, IPrimitiveType<Date> theLastUpdated);
 
-	void initializeBundleFromBundleProvider(IRestfulServer theServer, IBundleProvider theResult, EncodingEnum theResponseEncoding, String theServerBase, String theCompleteUrl, boolean thePrettyPrint,
-			int theOffset, Integer theCount, String theSearchId, BundleTypeEnum theBundleType, Set<Include> theIncludes);
+//	void initializeBundleFromBundleProvider(IRestfulServer<?> theServer, IBundleProvider theResult, EncodingEnum theResponseEncoding, String theServerBase, String theCompleteUrl, boolean thePrettyPrint,
+//			int theOffset, Integer theCount, String theSearchId, BundleTypeEnum theBundleType, Set<Include> theIncludes);
 
 	Bundle getDstu1Bundle();
 

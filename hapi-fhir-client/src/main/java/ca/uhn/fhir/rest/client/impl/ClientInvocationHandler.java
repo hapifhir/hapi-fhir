@@ -27,7 +27,7 @@ import java.util.Map;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IHttpClient;
 import ca.uhn.fhir.rest.client.impl.ClientInvocationHandlerFactory.ILambda;
-import ca.uhn.fhir.rest.method.BaseMethodBinding;
+import ca.uhn.fhir.rest.client.method.BaseMethodBinding;
 
 public class ClientInvocationHandler extends BaseClient implements InvocationHandler {
 

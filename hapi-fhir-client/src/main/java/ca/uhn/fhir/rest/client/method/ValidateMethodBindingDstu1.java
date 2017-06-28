@@ -33,7 +33,7 @@ import ca.uhn.fhir.rest.annotation.Validate;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.client.impl.BaseHttpClientInvocation;
-import ca.uhn.fhir.rest.server.Constants;
+import ca.uhn.fhir.rest.param.IParameter;
 
 public class ValidateMethodBindingDstu1 extends BaseOutcomeReturningMethodBindingWithResourceParam {
 

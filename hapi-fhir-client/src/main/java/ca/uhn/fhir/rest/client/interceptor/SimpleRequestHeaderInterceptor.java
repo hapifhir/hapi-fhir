@@ -23,14 +23,10 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  */
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 
-import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.lang3.StringUtils;
-
-import ca.uhn.fhir.rest.client.api.*;
-import ca.uhn.fhir.rest.server.Constants;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.rest.client.api.IClientInterceptor;
+import ca.uhn.fhir.rest.client.api.IHttpRequest;
+import ca.uhn.fhir.rest.client.api.IHttpResponse;
 
 /**
  * This interceptor adds an arbitrary header to requests made by this client. Both the

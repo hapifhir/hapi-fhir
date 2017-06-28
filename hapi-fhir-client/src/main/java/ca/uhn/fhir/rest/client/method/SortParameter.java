@@ -26,7 +26,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.StringTokenizer;
 
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
@@ -34,12 +33,11 @@ import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.rest.annotation.Sort;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.param.ParameterUtil;
-import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
 public class SortParameter implements IParameter {
 
@@ -97,81 +95,6 @@ public class SortParameter implements IParameter {
 		}
 	}
 
-	@Override
-	public Object translateQueryParametersIntoServerArgument(RequestDetails theRequest, BaseMethodBinding<?> theMethodBinding) throws InternalErrorException, InvalidRequestException {
-		if (!theRequest.getParameters().containsKey(Constants.PARAM_SORT)) {
-			if (!theRequest.getParameters().containsKey(Constants.PARAM_SORT_ASC)) {
-				if (!theRequest.getParameters().containsKey(Constants.PARAM_SORT_DESC)) {
-					return null;
-				}
-			}
-		}
-
-		SortSpec outerSpec = null;
-		SortSpec innerSpec = null;
-		for (String nextParamName : theRequest.getParameters().keySet()) {
-			SortOrderEnum order;
-			if (Constants.PARAM_SORT.equals(nextParamName)) {
-				order = null;
-			} else if (Constants.PARAM_SORT_ASC.equals(nextParamName)) {
-				order = SortOrderEnum.ASC;
-			} else if (Constants.PARAM_SORT_DESC.equals(nextParamName)) {
-				order = SortOrderEnum.DESC;
-			} else {
-				continue;
-			}
-
-			String[] values = theRequest.getParameters().get(nextParamName);
-			if (values != null) {
-
-				for (String nextValue : values) {
-
-					if (myContext.getVersion().getVersion().isNewerThan(FhirVersionEnum.DSTU2) && order == null) {
-						StringTokenizer tok = new StringTokenizer(nextValue, ",");
-						while (tok.hasMoreTokens()) {
-							String next = tok.nextToken();
-							if (isNotBlank(next) && !next.equals("-")) {
-								order = SortOrderEnum.ASC;
-								if (next.startsWith("-")) {
-									order = SortOrderEnum.DESC;
-									next = next.substring(1);
-								}
-
-								SortSpec spec = new SortSpec();
-								spec.setOrder(order);
-								spec.setParamName(next);
-								if (innerSpec == null) {
-									outerSpec = spec;
-									innerSpec = spec;
-								} else {
-									innerSpec.setChain(spec);
-									innerSpec = spec;
-								}
-
-							}
-						}
-
-					} else {
-
-						if (isNotBlank(nextValue)) {
-							SortSpec spec = new SortSpec();
-							spec.setOrder(order);
-							spec.setParamName(nextValue);
-							if (innerSpec == null) {
-								outerSpec = spec;
-								innerSpec = spec;
-							} else {
-								innerSpec.setChain(spec);
-								innerSpec = spec;
-							}
-						}
-					}
-				}
-			}
-		}
-
-		return outerSpec;
-	}
 
 	public static String createSortStringDstu3(SortSpec ss) {
 		StringBuilder val = new StringBuilder();

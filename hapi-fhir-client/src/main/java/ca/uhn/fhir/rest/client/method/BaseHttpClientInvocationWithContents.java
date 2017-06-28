@@ -38,12 +38,12 @@ import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.rest.api.EncodingEnum;
+import ca.uhn.fhir.rest.api.IVersionSpecificBundleFactory;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
-import ca.uhn.fhir.rest.api.server.IVersionSpecificBundleFactory;
 import ca.uhn.fhir.rest.client.api.IHttpClient;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
 import ca.uhn.fhir.rest.client.impl.BaseHttpClientInvocation;
-import ca.uhn.fhir.rest.server.EncodingEnum;
 
 /**
  * @author James Agnew
@@ -194,7 +194,7 @@ abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvoca
 
 		EncodingEnum encoding = theEncoding;
 		if (myContents != null) {
-			encoding = MethodUtil.detectEncoding(myContents);
+			encoding = EncodingEnum.detectEncoding(myContents);
 		}
 
 

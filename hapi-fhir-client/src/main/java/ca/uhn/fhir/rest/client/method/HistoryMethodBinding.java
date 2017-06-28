@@ -10,7 +10,7 @@ package ca.uhn.fhir.rest.client.method;
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  * 
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -25,23 +25,20 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Date;
-import java.util.List;
 
-import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.rest.annotation.History;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.client.impl.BaseHttpClientInvocation;
-import ca.uhn.fhir.rest.server.*;
+import ca.uhn.fhir.rest.param.IParameter;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
 public class HistoryMethodBinding extends BaseResourceReturningMethodBinding {
 
@@ -57,16 +54,7 @@ public class HistoryMethodBinding extends BaseResourceReturningMethodBinding {
 		History historyAnnotation = theMethod.getAnnotation(History.class);
 		Class<? extends IBaseResource> type = historyAnnotation.type();
 		if (Modifier.isInterface(type.getModifiers())) {
-			if (theProvider instanceof IResourceProvider) {
-				type = ((IResourceProvider) theProvider).getResourceType();
-				if (myIdParamIndex != null) {
-					myResourceOperationType = RestOperationTypeEnum.HISTORY_INSTANCE;
-				} else {
-					myResourceOperationType = RestOperationTypeEnum.HISTORY_TYPE;
-				}
-			} else {
-				myResourceOperationType = RestOperationTypeEnum.HISTORY_SYSTEM;
-			}
+			myResourceOperationType = RestOperationTypeEnum.HISTORY_SYSTEM;
 		} else {
 			if (myIdParamIndex != null) {
 				myResourceOperationType = RestOperationTypeEnum.HISTORY_INSTANCE;
@@ -98,34 +86,6 @@ public class HistoryMethodBinding extends BaseResourceReturningMethodBinding {
 		return ReturnTypeEnum.BUNDLE;
 	}
 
-	// ObjectUtils.equals is replaced by a JDK7 method..
-	@Override
-	public boolean incomingServerRequestMatchesMethod(RequestDetails theRequest) {
-		if (!Constants.PARAM_HISTORY.equals(theRequest.getOperation())) {
-			return false;
-		}
-		if (theRequest.getResourceName() == null) {
-			return myResourceOperationType == RestOperationTypeEnum.HISTORY_SYSTEM;
-		}
-		if (!StringUtils.equals(theRequest.getResourceName(), myResourceName)) {
-			return false;
-		}
-
-		boolean haveIdParam = theRequest.getId() != null && !theRequest.getId().isEmpty();
-		boolean wantIdParam = myIdParamIndex != null;
-		if (haveIdParam != wantIdParam) {
-			return false;
-		}
-
-		if (theRequest.getId() == null) {
-			return myResourceOperationType == RestOperationTypeEnum.HISTORY_TYPE;
-		} else if (theRequest.getId().hasVersionIdPart()) {
-			return false;
-		}
-
-		return true;
-	}
-	
 	@Override
 	public BaseHttpClientInvocation invokeClient(Object[] theArgs) throws InternalErrorException {
 		IdDt id = null;
@@ -148,64 +108,6 @@ public class HistoryMethodBinding extends BaseResourceReturningMethodBinding {
 		}
 
 		return retVal;
-	}
-
-	@Override
-	public IBundleProvider invokeServer(IRestfulServer<?> theServer, RequestDetails theRequest, Object[] theMethodParams) throws InvalidRequestException, InternalErrorException {
-		if (myIdParamIndex != null) {
-			theMethodParams[myIdParamIndex] = theRequest.getId();
-		}
-
-		Object response = invokeServerMethod(theServer, theRequest, theMethodParams);
-
-		final IBundleProvider resources = toResourceList(response);
-		
-		/*
-		 * We wrap the response so we can verify that it has the ID and version set,
-		 * as is the contract for history
-		 */
-		return new IBundleProvider() {
-			
-			@Override
-			public IPrimitiveType<Date> getPublished() {
-				return resources.getPublished();
-			}
-			
-			@Override
-			public List<IBaseResource> getResources(int theFromIndex, int theToIndex) {
-				List<IBaseResource> retVal = resources.getResources(theFromIndex, theToIndex);
-				int index = theFromIndex;
-				for (IBaseResource nextResource : retVal) {
-					if (nextResource.getIdElement() == null || isBlank(nextResource.getIdElement().getIdPart())) {
-						throw new InternalErrorException("Server provided resource at index " + index + " with no ID set (using IResource#setId(IdDt))");
-					}
-					if (isBlank(nextResource.getIdElement().getVersionIdPart()) && nextResource instanceof IResource) {
-						//TODO: Use of a deprecated method should be resolved.
-						IdDt versionId = (IdDt) ResourceMetadataKeyEnum.VERSION_ID.get((IResource) nextResource);
-						if (versionId == null || versionId.isEmpty()) {
-							throw new InternalErrorException("Server provided resource at index " + index + " with no Version ID set (using IResource#setId(IdDt))");
-						}
-					}
-					index++;
-				}
-				return retVal;
-			}
-			
-			@Override
-			public Integer size() {
-				return resources.size();
-			}
-
-			@Override
-			public Integer preferredPageSize() {
-				return resources.preferredPageSize();
-			}
-
-			@Override
-			public String getUuid() {
-				return resources.getUuid();
-			}
-		};
 	}
 
 	public static HttpGetClientInvocation createHistoryInvocation(FhirContext theContext, String theResourceName, String theId, IPrimitiveType<Date> theSince, Integer theLimit) {
@@ -237,9 +139,6 @@ public class HistoryMethodBinding extends BaseResourceReturningMethodBinding {
 	}
 
 	private static Class<? extends IBaseResource> toReturnType(Method theMethod, Object theProvider) {
-		if (theProvider instanceof IResourceProvider) {
-			return ((IResourceProvider) theProvider).getResourceType();
-		}
 		History historyAnnotation = theMethod.getAnnotation(History.class);
 		Class<? extends IBaseResource> type = historyAnnotation.type();
 		if (type != IBaseResource.class && type != IResource.class) {

@@ -23,28 +23,18 @@ package ca.uhn.fhir.rest.client.method;
 import java.lang.reflect.Method;
 
 import org.hl7.fhir.instance.model.api.IBaseConformance;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
-import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
-import ca.uhn.fhir.rest.server.IBundleProvider;
-import ca.uhn.fhir.rest.server.IRestfulServer;
-import ca.uhn.fhir.rest.server.SimpleBundleProvider;
-import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 
 public class ConformanceMethodBinding extends BaseResourceReturningMethodBinding {
 
 	public ConformanceMethodBinding(Method theMethod, FhirContext theContext, Object theProvider) {
 		super(theMethod.getReturnType(), theMethod, theContext, theProvider);
 
-//		if (Modifier.isAbstract(theMethod.getReturnType().getModifiers())) {
-//			throw new ConfigurationException("Conformance resource provider method '" + theMethod.getName() + "' must not be abstract");
-//		}
 		MethodReturnTypeEnum methodReturnType = getMethodReturnType();
 		Class<?> genericReturnType = (Class<?>) theMethod.getGenericReturnType();
 		if (methodReturnType != MethodReturnTypeEnum.RESOURCE || !IBaseConformance.class.isAssignableFrom(genericReturnType)) {
@@ -72,33 +62,6 @@ public class ConformanceMethodBinding extends BaseResourceReturningMethodBinding
 		return retVal;
 	}
 
-	@Override
-	public IBundleProvider invokeServer(IRestfulServer<?> theServer, RequestDetails theRequest, Object[] theMethodParams) throws BaseServerResponseException {
-		IBaseResource conf = (IBaseResource) invokeServerMethod(theServer, theRequest, theMethodParams);
-		return new SimpleBundleProvider(conf);
-	}
-
-	@Override
-	public boolean incomingServerRequestMatchesMethod(RequestDetails theRequest) {
-		if (theRequest.getRequestType() == RequestTypeEnum.OPTIONS) {
-			if (theRequest.getOperation() == null && theRequest.getResourceName() == null) {
-				return true;
-			}
-		}
-
-		if (theRequest.getResourceName() != null) {
-			return false;
-		}
-		
-		if ("metadata".equals(theRequest.getOperation())) {
-			if (theRequest.getRequestType() == RequestTypeEnum.GET) {
-				return true;
-			}
-			throw new MethodNotAllowedException("/metadata request must use HTTP GET", RequestTypeEnum.GET);
-		}
-
-		return false;
-	}
 
 	@Override
 	public RestOperationTypeEnum getRestOperationType() {

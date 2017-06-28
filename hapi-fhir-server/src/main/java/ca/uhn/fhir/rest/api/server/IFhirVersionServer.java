@@ -2,7 +2,6 @@ package ca.uhn.fhir.rest.api.server;
 
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IFhirVersion;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.IServerConformanceProvider;
@@ -17,6 +16,4 @@ public interface IFhirVersionServer {
 	
 	IResourceProvider createServerProfilesProvider(RestfulServer theRestfulServer);
 	
-	IVersionSpecificBundleFactory newBundleFactory(FhirContext theContext);
-
 }

@@ -23,14 +23,11 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -41,24 +38,19 @@ import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.rest.annotation.Search;
-import ca.uhn.fhir.rest.api.RequestTypeEnum;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
+import ca.uhn.fhir.rest.api.SearchStyleEnum;
 import ca.uhn.fhir.rest.client.impl.BaseHttpClientInvocation;
-import ca.uhn.fhir.rest.param.BaseQueryParameter;
-import ca.uhn.fhir.rest.server.Constants;
-import ca.uhn.fhir.rest.server.IBundleProvider;
-import ca.uhn.fhir.rest.server.IRestfulServer;
+import ca.uhn.fhir.rest.param.IParameter;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
 public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchMethodBinding.class);
-
 	private String myCompartmentName;
 	private String myDescription;
 	private Integer myIdParamIndex;
 	private String myQueryName;
-	private boolean myAllowUnknownParams;
 
 	public SearchMethodBinding(Class<? extends IBaseResource> theReturnResourceType, Method theMethod, FhirContext theContext, Object theProvider) {
 		super(theReturnResourceType, theMethod, theContext, theProvider);
@@ -66,7 +58,6 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 		this.myQueryName = StringUtils.defaultIfBlank(search.queryName(), null);
 		this.myCompartmentName = StringUtils.defaultIfBlank(search.compartmentName(), null);
 		this.myIdParamIndex = MethodUtil.findIdParameterIndex(theMethod, getContext());
-		this.myAllowUnknownParams = search.allowUnknownParams();
 
 		Description desc = theMethod.getAnnotation(Description.class);
 		if (desc != null) {
@@ -119,13 +110,13 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 	}
 
 	@Override
-	public RestOperationTypeEnum getRestOperationType() {
-		return RestOperationTypeEnum.SEARCH_TYPE;
+	protected BundleTypeEnum getResponseBundleType() {
+		return BundleTypeEnum.SEARCHSET;
 	}
 
 	@Override
-	protected BundleTypeEnum getResponseBundleType() {
-		return BundleTypeEnum.SEARCHSET;
+	public RestOperationTypeEnum getRestOperationType() {
+		return RestOperationTypeEnum.SEARCH_TYPE;
 	}
 
 	@Override
@@ -133,129 +124,6 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 			return ReturnTypeEnum.BUNDLE;
 	}
 
-	@Override
-	public boolean incomingServerRequestMatchesMethod(RequestDetails theRequest) {
-		
-		String clientPreference = theRequest.getHeader(Constants.HEADER_PREFER);
-		boolean lenientHandling = false;
-		if(clientPreference != null)
-		{
-			String[] preferences = clientPreference.split(";");
-			for( String p : preferences){
-				if("handling:lenient".equalsIgnoreCase(p))
-				{
-					lenientHandling = true;
-					break;
-				}
-			}
-		}
-		
-		if (theRequest.getId() != null && myIdParamIndex == null) {
-			ourLog.trace("Method {} doesn't match because ID is not null: {}", theRequest.getId());
-			return false;
-		}
-		if (theRequest.getRequestType() == RequestTypeEnum.GET && theRequest.getOperation() != null && !Constants.PARAM_SEARCH.equals(theRequest.getOperation())) {
-			ourLog.trace("Method {} doesn't match because request type is GET but operation is not null: {}", theRequest.getId(), theRequest.getOperation());
-			return false;
-		}
-		if (theRequest.getRequestType() == RequestTypeEnum.POST && !Constants.PARAM_SEARCH.equals(theRequest.getOperation())) {
-			ourLog.trace("Method {} doesn't match because request type is POST but operation is not _search: {}", theRequest.getId(), theRequest.getOperation());
-			return false;
-		}
-		if (theRequest.getRequestType() != RequestTypeEnum.GET && theRequest.getRequestType() != RequestTypeEnum.POST) {
-			ourLog.trace("Method {} doesn't match because request type is {}", getMethod());
-			return false;
-		}
-		if (!StringUtils.equals(myCompartmentName, theRequest.getCompartmentName())) {
-			ourLog.trace("Method {} doesn't match because it is for compartment {} but request is compartment {}", new Object[] { getMethod(), myCompartmentName, theRequest.getCompartmentName() });
-			return false;
-		}
-		// This is used to track all the parameters so we can reject queries that
-		// have additional params we don't understand
-		Set<String> methodParamsTemp = new HashSet<String>();
-
-		Set<String> unqualifiedNames = theRequest.getUnqualifiedToQualifiedNames().keySet();
-		Set<String> qualifiedParamNames = theRequest.getParameters().keySet();
-		for (int i = 0; i < this.getParameters().size(); i++) {
-			if (!(getParameters().get(i) instanceof BaseQueryParameter)) {
-				continue;
-			}
-			BaseQueryParameter temp = (BaseQueryParameter) getParameters().get(i);
-			String name = temp.getName();
-			if (temp.isRequired()) {
-
-				if (qualifiedParamNames.contains(name)) {
-					QualifierDetails qualifiers = extractQualifiersFromParameterName(name);
-					if (qualifiers.passes(temp.getQualifierWhitelist(), temp.getQualifierBlacklist())) {
-						methodParamsTemp.add(name);
-					}
-				}
-				if (unqualifiedNames.contains(name)) {
-					List<String> qualifiedNames = theRequest.getUnqualifiedToQualifiedNames().get(name);
-					qualifiedNames = processWhitelistAndBlacklist(qualifiedNames, temp.getQualifierWhitelist(), temp.getQualifierBlacklist());
-					methodParamsTemp.addAll(qualifiedNames);
-				}
-				if (!qualifiedParamNames.contains(name) && !unqualifiedNames.contains(name))
-				{
-					ourLog.trace("Method {} doesn't match param '{}' is not present", getMethod().getName(), name);
-					return false;
-				}
-
-			} else {
-				if (qualifiedParamNames.contains(name)) {
-					QualifierDetails qualifiers = extractQualifiersFromParameterName(name);
-					if (qualifiers.passes(temp.getQualifierWhitelist(), temp.getQualifierBlacklist())) {
-						methodParamsTemp.add(name);
-					}
-				} 
-				if (unqualifiedNames.contains(name)) {
-					List<String> qualifiedNames = theRequest.getUnqualifiedToQualifiedNames().get(name);
-					qualifiedNames = processWhitelistAndBlacklist(qualifiedNames, temp.getQualifierWhitelist(), temp.getQualifierBlacklist());
-					methodParamsTemp.addAll(qualifiedNames);
-				}
-				if (!qualifiedParamNames.contains(name)) { 
-					methodParamsTemp.add(name);
-				}
-			}
-		}
-		if (myQueryName != null) {
-			String[] queryNameValues = theRequest.getParameters().get(Constants.PARAM_QUERY);
-			if (queryNameValues != null && StringUtils.isNotBlank(queryNameValues[0])) {
-				String queryName = queryNameValues[0];
-				if (!myQueryName.equals(queryName)) {
-					ourLog.trace("Query name does not match {}", myQueryName);
-					return false;
-				}
-				methodParamsTemp.add(Constants.PARAM_QUERY);
-			} else {
-				ourLog.trace("Query name does not match {}", myQueryName);
-				return false;
-			}
-		} else {
-			String[] queryNameValues = theRequest.getParameters().get(Constants.PARAM_QUERY);
-			if (queryNameValues != null && StringUtils.isNotBlank(queryNameValues[0])) {
-				ourLog.trace("Query has name");
-				return false;
-			}
-		}
-		for (String next : theRequest.getParameters().keySet()) {
-			if (ALLOWED_PARAMS.contains(next)) {
-				methodParamsTemp.add(next);
-			}
-		}
-		Set<String> keySet = theRequest.getParameters().keySet();
-		if(lenientHandling == true)
-			return true;
-
-		if (myAllowUnknownParams == false) {
-			for (String next : keySet) {
-				if (!methodParamsTemp.contains(next)) {
-					return false;
-				}
-			}
-		}
-		return true;
-	}
 
 	@Override
 	public BaseHttpClientInvocation invokeClient(Object[] theArgs) throws InternalErrorException {
@@ -282,42 +150,22 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 		return retVal;
 	}
 
-	@Override
-	public IBundleProvider invokeServer(IRestfulServer<?> theServer, RequestDetails theRequest, Object[] theMethodParams) throws InvalidRequestException, InternalErrorException {
-		if (myIdParamIndex != null) {
-			theMethodParams[myIdParamIndex] = theRequest.getId();
-		}
-
-		Object response = invokeServerMethod(theServer, theRequest, theMethodParams);
-
-		return toResourceList(response);
-
-	}
 
 	@Override
 	protected boolean isAddContentLocationHeader() {
 		return false;
 	}
 
-	private List<String> processWhitelistAndBlacklist(List<String> theQualifiedNames, Set<String> theQualifierWhitelist, Set<String> theQualifierBlacklist) {
-		if (theQualifierWhitelist == null && theQualifierBlacklist == null) {
-			return theQualifiedNames;
-		}
-		ArrayList<String> retVal = new ArrayList<String>(theQualifiedNames.size());
-		for (String next : theQualifiedNames) {
-			QualifierDetails qualifiers = extractQualifiersFromParameterName(next);
-			if (!qualifiers.passes(theQualifierWhitelist, theQualifierBlacklist)) {
-				continue;
-			}
-			retVal.add(next);
-		}
-		return retVal;
-	}
 
 	@Override
 	public String toString() {
 		return getMethod().toString();
 	}
+
+	public static BaseHttpClientInvocation createSearchInvocation(FhirContext theContext, String theSearchUrl, Map<String, List<String>> theParams) {
+		return new HttpGetClientInvocation(theContext, theParams, theSearchUrl);
+	}
+
 
 	public static BaseHttpClientInvocation createSearchInvocation(FhirContext theContext, String theResourceName, Map<String, List<String>> theParameters, IdDt theId, String theCompartmentName,
 			SearchStyleEnum theSearchStyle) {
@@ -377,11 +225,6 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 		}
 
 		return invocation;
-	}
-
-
-	public static BaseHttpClientInvocation createSearchInvocation(FhirContext theContext, String theSearchUrl, Map<String, List<String>> theParams) {
-		return new HttpGetClientInvocation(theContext, theParams, theSearchUrl);
 	}
 
 }

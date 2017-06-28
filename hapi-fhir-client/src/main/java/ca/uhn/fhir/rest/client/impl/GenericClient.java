@@ -71,15 +71,35 @@ import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.UriDt;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.EncodingEnum;
+import ca.uhn.fhir.rest.api.IVersionSpecificBundleFactory;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.PatchTypeEnum;
 import ca.uhn.fhir.rest.api.PreferReturnEnum;
+import ca.uhn.fhir.rest.api.SearchStyleEnum;
 import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.SummaryEnum;
-import ca.uhn.fhir.rest.client.api.*;
+import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.client.api.IHttpClient;
+import ca.uhn.fhir.rest.client.api.IHttpRequest;
 import ca.uhn.fhir.rest.client.exceptions.NonFhirResponseException;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
+import ca.uhn.fhir.rest.client.method.DeleteMethodBinding;
+import ca.uhn.fhir.rest.client.method.HistoryMethodBinding;
+import ca.uhn.fhir.rest.client.method.HttpDeleteClientInvocation;
+import ca.uhn.fhir.rest.client.method.HttpGetClientInvocation;
+import ca.uhn.fhir.rest.client.method.HttpSimpleGetClientInvocation;
+import ca.uhn.fhir.rest.client.method.IClientResponseHandler;
+import ca.uhn.fhir.rest.client.method.MethodUtil;
+import ca.uhn.fhir.rest.client.method.OperationMethodBinding;
+import ca.uhn.fhir.rest.client.method.ReadMethodBinding;
+import ca.uhn.fhir.rest.client.method.SearchMethodBinding;
+import ca.uhn.fhir.rest.client.method.SortParameter;
+import ca.uhn.fhir.rest.client.method.TransactionMethodBinding;
+import ca.uhn.fhir.rest.client.method.ValidateMethodBindingDstu1;
+import ca.uhn.fhir.rest.client.method.ValidateMethodBindingDstu2Plus;
 import ca.uhn.fhir.rest.gclient.IClientExecutable;
 import ca.uhn.fhir.rest.gclient.ICreate;
 import ca.uhn.fhir.rest.gclient.ICreateTyped;
@@ -133,27 +153,9 @@ import ca.uhn.fhir.rest.gclient.IUpdateWithQuery;
 import ca.uhn.fhir.rest.gclient.IUpdateWithQueryTyped;
 import ca.uhn.fhir.rest.gclient.IValidate;
 import ca.uhn.fhir.rest.gclient.IValidateUntyped;
-import ca.uhn.fhir.rest.method.DeleteMethodBinding;
-import ca.uhn.fhir.rest.method.HistoryMethodBinding;
-import ca.uhn.fhir.rest.method.HttpDeleteClientInvocation;
-import ca.uhn.fhir.rest.method.HttpGetClientInvocation;
-import ca.uhn.fhir.rest.method.HttpSimpleGetClientInvocation;
-import ca.uhn.fhir.rest.method.IClientResponseHandler;
-import ca.uhn.fhir.rest.method.MethodUtil;
-import ca.uhn.fhir.rest.method.OperationMethodBinding;
-import ca.uhn.fhir.rest.method.ReadMethodBinding;
-import ca.uhn.fhir.rest.method.SearchMethodBinding;
-import ca.uhn.fhir.rest.method.SearchStyleEnum;
-import ca.uhn.fhir.rest.method.SortParameter;
-import ca.uhn.fhir.rest.method.TransactionMethodBinding;
-import ca.uhn.fhir.rest.method.ValidateMethodBindingDstu1;
-import ca.uhn.fhir.rest.method.ValidateMethodBindingDstu2Plus;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.TokenParam;
-import ca.uhn.fhir.rest.server.Constants;
-import ca.uhn.fhir.rest.server.EncodingEnum;
-import ca.uhn.fhir.rest.server.IVersionSpecificBundleFactory;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.NotModifiedException;
@@ -216,11 +218,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			myLastRequest = invocation.asHttpRequest(getServerBase(), createExtraParams(), getEncoding(), isPrettyPrint());
 		}
 
-		RuntimeResourceDefinition def = myContext.getResourceDefinition(theResource);
-		final String resourceName = def.getName();
-
-		OutcomeResponseHandler binding = new OutcomeResponseHandler(resourceName);
-
+		OutcomeResponseHandler binding = new OutcomeResponseHandler();
 		MethodOutcome resp = invokeClient(myContext, binding, invocation, myLogRequestAndResponse);
 		return resp;
 
@@ -239,8 +237,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			myLastRequest = invocation.asHttpRequest(getServerBase(), createExtraParams(), getEncoding(), isPrettyPrint());
 		}
 
-		final String resourceName = myContext.getResourceDefinition(theType).getName();
-		OutcomeResponseHandler binding = new OutcomeResponseHandler(resourceName);
+		OutcomeResponseHandler binding = new OutcomeResponseHandler();
 		MethodOutcome resp = invokeClient(myContext, binding, invocation, myLogRequestAndResponse);
 		return resp;
 	}
@@ -555,10 +552,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			myLastRequest = invocation.asHttpRequest(getServerBase(), createExtraParams(), getEncoding(), isPrettyPrint());
 		}
 
-		RuntimeResourceDefinition def = myContext.getResourceDefinition(theResource);
-		final String resourceName = def.getName();
-
-		OutcomeResponseHandler binding = new OutcomeResponseHandler(resourceName);
+		OutcomeResponseHandler binding = new OutcomeResponseHandler();
 		MethodOutcome resp = invokeClient(myContext, binding, invocation, myLogRequestAndResponse);
 		return resp;
 	}
@@ -586,10 +580,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			myLastRequest = invocation.asHttpRequest(getServerBase(), createExtraParams(), getEncoding(), isPrettyPrint());
 		}
 
-		RuntimeResourceDefinition def = myContext.getResourceDefinition(theResource);
-		final String resourceName = def.getName();
-
-		OutcomeResponseHandler binding = new OutcomeResponseHandler(resourceName);
+		OutcomeResponseHandler binding = new OutcomeResponseHandler();
 		MethodOutcome resp = invokeClient(myContext, binding, invocation, myLogRequestAndResponse);
 		return resp;
 	}
@@ -742,7 +733,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		}
 
 		protected IBaseResource parseResourceBody(String theResourceBody) {
-			EncodingEnum encoding = MethodUtil.detectEncodingNoDefault(theResourceBody);
+			EncodingEnum encoding = EncodingEnum.detectEncodingNoDefault(theResourceBody);
 			if (encoding == null) {
 				throw new IllegalArgumentException(myContext.getLocalizer().getMessage(GenericClient.class, "cantDetermineRequestType"));
 			}
@@ -853,9 +844,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			addPreferHeader(myPrefer, invocation);
 
 			RuntimeResourceDefinition def = myContext.getResourceDefinition(myResource);
-			final String resourceName = def.getName();
-
-			OutcomeResponseHandler binding = new OutcomeResponseHandler(resourceName, myPrefer);
+			OutcomeResponseHandler binding = new OutcomeResponseHandler(myPrefer);
 
 			Map<String, List<String>> params = new HashMap<String, List<String>>();
 			return invoke(params, binding, invocation);
@@ -1765,14 +1754,13 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 	private final class OutcomeResponseHandler implements IClientResponseHandler<MethodOutcome> {
 		private PreferReturnEnum myPrefer;
-		// private final String myResourceName;
 
-		private OutcomeResponseHandler(String theResourceName) {
-			// myResourceName = theResourceName;
+		private OutcomeResponseHandler() {
+			super();
 		}
 
-		private OutcomeResponseHandler(String theResourceName, PreferReturnEnum thePrefer) {
-			this(theResourceName);
+		private OutcomeResponseHandler(PreferReturnEnum thePrefer) {
+			this();
 			myPrefer = thePrefer;
 		}
 
@@ -2357,7 +2345,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 		public TransactionExecutable(String theBundle) {
 			myRawBundle = theBundle;
-			myRawBundleEncoding = MethodUtil.detectEncodingNoDefault(myRawBundle);
+			myRawBundleEncoding = EncodingEnum.detectEncodingNoDefault(myRawBundle);
 			if (myRawBundleEncoding == null) {
 				throw new IllegalArgumentException(myContext.getLocalizer().getMessage(GenericClient.class, "cantDetermineRequestType"));
 			}
@@ -2381,7 +2369,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 				 * If the user has explicitly requested a given encoding, we may need to re-encode the raw string
 				 */
 				if (getParamEncoding() != null) {
-					if (MethodUtil.detectEncodingNoDefault(myRawBundle) != getParamEncoding()) {
+					if (EncodingEnum.detectEncodingNoDefault(myRawBundle) != getParamEncoding()) {
 						IBaseResource parsed = parseResourceBody(myRawBundle);
 						myRawBundle = getParamEncoding().newParser(getFhirContext()).encodeResourceToString(parsed);
 					}
@@ -2480,7 +2468,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 			addPreferHeader(myPrefer, invocation);
 
-			OutcomeResponseHandler binding = new OutcomeResponseHandler(null, myPrefer);
+			OutcomeResponseHandler binding = new OutcomeResponseHandler(myPrefer);
 
 			Map<String, List<String>> params = new HashMap<String, List<String>>();
 			return invoke(params, binding, invocation);
@@ -2529,7 +2517,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 			myPatchBody = thePatchBody;
 
-			EncodingEnum encoding = MethodUtil.detectEncodingNoDefault(thePatchBody);
+			EncodingEnum encoding = EncodingEnum.detectEncodingNoDefault(thePatchBody);
 			if (encoding == EncodingEnum.XML) {
 				myPatchType = PatchTypeEnum.XML_PATCH;
 			} else if (encoding == EncodingEnum.JSON) {
@@ -2607,9 +2595,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			addPreferHeader(myPrefer, invocation);
 
 			RuntimeResourceDefinition def = myContext.getResourceDefinition(myResource);
-			final String resourceName = def.getName();
-
-			OutcomeResponseHandler binding = new OutcomeResponseHandler(resourceName, myPrefer);
+			OutcomeResponseHandler binding = new OutcomeResponseHandler(myPrefer);
 
 			Map<String, List<String>> params = new HashMap<String, List<String>>();
 			return invoke(params, binding, invocation);
@@ -2693,7 +2679,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			Validate.notBlank(theResourceRaw, "theResourceRaw must not be null or blank");
 			myResource = parseResourceBody(theResourceRaw);
 
-			EncodingEnum enc = MethodUtil.detectEncodingNoDefault(theResourceRaw);
+			EncodingEnum enc = EncodingEnum.detectEncodingNoDefault(theResourceRaw);
 			if (enc == null) {
 				throw new IllegalArgumentException(myContext.getLocalizer().getMessage(GenericClient.class, "cantDetermineRequestType"));
 			}

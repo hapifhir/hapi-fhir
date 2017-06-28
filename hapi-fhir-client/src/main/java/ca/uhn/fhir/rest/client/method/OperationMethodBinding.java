@@ -22,7 +22,6 @@ package ca.uhn.fhir.rest.client.method;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -49,16 +48,9 @@ import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
-import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.client.impl.BaseHttpClientInvocation;
-import ca.uhn.fhir.rest.server.IBundleProvider;
-import ca.uhn.fhir.rest.server.IRestfulServer;
-import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
-import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
-import ca.uhn.fhir.rest.server.method.ResourceParameter;
 import ca.uhn.fhir.util.FhirTerser;
 
 public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
@@ -134,11 +126,7 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 					+ theMethod.getDeclaringClass().getName());
 		}
 
-		if (theMethod.getReturnType().equals(IBundleProvider.class)) {
-			myReturnType = ReturnTypeEnum.BUNDLE;
-		} else {
-			myReturnType = ReturnTypeEnum.RESOURCE;
-		}
+		myReturnType = ReturnTypeEnum.RESOURCE;
 
 		if (getResourceName() == null) {
 			myOtherOperatiopnType = RestOperationTypeEnum.EXTENDED_OPERATION_SERVER;
@@ -214,40 +202,6 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 	}
 
 	@Override
-	public boolean incomingServerRequestMatchesMethod(RequestDetails theRequest) {
-		if (getResourceName() == null) {
-			if (isNotBlank(theRequest.getResourceName())) {
-				return false;
-			}
-		} else if (!getResourceName().equals(theRequest.getResourceName())) {
-			return false;
-		}
-
-		if (!myName.equals(theRequest.getOperation())) {
-			return false;
-		}
-
-		RequestTypeEnum requestType = theRequest.getRequestType();
-		if (requestType != RequestTypeEnum.GET && requestType != RequestTypeEnum.POST) {
-			// Operations can only be invoked with GET and POST
-			return false;
-		}
-
-		boolean requestHasId = theRequest.getId() != null;
-		if (requestHasId) {
-			if (isCanOperateAtInstanceLevel() == false) {
-				return false;
-			}
-		} else {
-			if (myCanOperateAtTypeLevel == false) {
-				return false;
-			}
-		}
-
-		return true;
-	}
-
-	@Override
 	public BaseHttpClientInvocation invokeClient(Object[] theArgs) throws InternalErrorException {
 		String id = null;
 		if (myIdParamIndex != null) {
@@ -266,42 +220,6 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 		return createOperationInvocation(getContext(), getResourceName(), id, myName, parameters, false);
 	}
 
-	@Override
-	public Object invokeServer(IRestfulServer<?> theServer, RequestDetails theRequest) throws BaseServerResponseException, IOException {
-		if (theRequest.getRequestType() == RequestTypeEnum.POST) {
-			IBaseResource requestContents = ResourceParameter.loadResourceFromRequest(theRequest, this, null);
-			theRequest.getUserData().put(OperationParameter.REQUEST_CONTENTS_USERDATA_KEY, requestContents);
-		}
-		return super.invokeServer(theServer, theRequest);
-	}
-
-	@Override
-	public Object invokeServer(IRestfulServer<?> theServer, RequestDetails theRequest, Object[] theMethodParams) throws BaseServerResponseException {
-		if (theRequest.getRequestType() == RequestTypeEnum.POST) {
-			// all good
-		} else if (theRequest.getRequestType() == RequestTypeEnum.GET) {
-			if (!myIdempotent) {
-				String message = getContext().getLocalizer().getMessage(OperationMethodBinding.class, "methodNotSupported", theRequest.getRequestType(), RequestTypeEnum.POST.name());
-				throw new MethodNotAllowedException(message, RequestTypeEnum.POST);
-			}
-		} else {
-			if (!myIdempotent) {
-				String message = getContext().getLocalizer().getMessage(OperationMethodBinding.class, "methodNotSupported", theRequest.getRequestType(), RequestTypeEnum.POST.name());
-				throw new MethodNotAllowedException(message, RequestTypeEnum.POST);
-			}
-			String message = getContext().getLocalizer().getMessage(OperationMethodBinding.class, "methodNotSupported", theRequest.getRequestType(), RequestTypeEnum.GET.name(), RequestTypeEnum.POST.name());
-			throw new MethodNotAllowedException(message, RequestTypeEnum.GET, RequestTypeEnum.POST);
-		}
-
-		if (myIdParamIndex != null) {
-			theMethodParams[myIdParamIndex] = theRequest.getId();
-		}
-
-		Object response = invokeServerMethod(theServer, theRequest, theMethodParams);
-		IBundleProvider retVal = toResourceList(response);
-		return retVal;
-	}
-
 	public boolean isCanOperateAtInstanceLevel() {
 		return this.myCanOperateAtInstanceLevel;
 	}
@@ -316,12 +234,6 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 
 	public boolean isIdempotent() {
 		return myIdempotent;
-	}
-
-	@Override
-	protected void populateActionRequestDetailsForInterceptor(RequestDetails theRequestDetails, ActionRequestDetails theDetails, Object[] theMethodParams) {
-		super.populateActionRequestDetailsForInterceptor(theRequestDetails, theDetails, theMethodParams);
-		theDetails.setResource((IBaseResource) theRequestDetails.getUserData().get(OperationParameter.REQUEST_CONTENTS_USERDATA_KEY));
 	}
 
 	public void setDescription(String theDescription) {

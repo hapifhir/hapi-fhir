@@ -24,10 +24,10 @@ import java.util.List;
 import java.util.Map;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
 import ca.uhn.fhir.rest.client.impl.BaseHttpClientInvocation;
-import ca.uhn.fhir.rest.server.EncodingEnum;
 
 public class HttpSimpleGetClientInvocation extends BaseHttpClientInvocation {
 

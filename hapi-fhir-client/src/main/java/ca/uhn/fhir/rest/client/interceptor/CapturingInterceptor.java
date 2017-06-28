@@ -1,11 +1,14 @@
 package ca.uhn.fhir.rest.client.interceptor;
 
-import ca.uhn.fhir.rest.client.api.*;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import java.io.IOException;
+
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 
-import java.io.IOException;
+import ca.uhn.fhir.rest.client.api.IClientInterceptor;
+import ca.uhn.fhir.rest.client.api.IHttpRequest;
+import ca.uhn.fhir.rest.client.api.IHttpResponse;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 
 /**
  * Client interceptor which simply captures request and response objects and stores them so that they can be inspected after a client
