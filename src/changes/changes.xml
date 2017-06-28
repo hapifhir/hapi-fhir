@@ -62,6 +62,10 @@
 				actually notify listeners of the first 10 subscriptions. Thanks to Jeff Chung
 				for the pull request!
 			</action>
+			<action type="add">
+				JPA search now uses hibernate ScrollableResults instead of plain JPA List. This
+				should improve performance over large search results.
+			</action>
 		</release>
 		<release version="2.5" date="2017-06-08">
 			<action type="fix">
