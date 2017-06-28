@@ -57,6 +57,11 @@
 				are linked by object reference and not by ID where indexes were not correctly
 				generated. This should not affect most users.
 			</action>
+			<action type="fix" issue="678">
+				FIx issue in SubscriptionInterceptor that caused interceptor to only
+				actually notify listeners of the first 10 subscriptions. Thanks to Jeff Chung
+				for the pull request!
+			</action>
 		</release>
 		<release version="2.5" date="2017-06-08">
 			<action type="fix">
