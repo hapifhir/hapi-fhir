@@ -273,19 +273,24 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 			// Notify interceptors
 			IdDt idToDelete = entity.getIdDt();
-			ActionRequestDetails requestDetails = new ActionRequestDetails(theRequestDetails, idToDelete.getResourceType(), idToDelete);
-			notifyInterceptors(RestOperationTypeEnum.DELETE, requestDetails);
-
+			if (theRequestDetails != null) {
+				ActionRequestDetails requestDetails = new ActionRequestDetails(theRequestDetails, idToDelete.getResourceType(), idToDelete);
+				notifyInterceptors(RestOperationTypeEnum.DELETE, requestDetails);
+			}
+			
 			// Perform delete
 			Date updateTime = new Date();
 			updateEntity(null, entity, updateTime, updateTime);
 
 			// Notify JPA interceptors
 			T resourceToDelete = toResource(myResourceType, entity, false);
-			theRequestDetails.getRequestOperationCallback().resourceDeleted(resourceToDelete);
-			for (IServerInterceptor next : getConfig().getInterceptors()) {
-				if (next instanceof IJpaServerInterceptor) {
-					((IJpaServerInterceptor) next).resourceDeleted(requestDetails, entity);
+			if (theRequestDetails != null) {
+				theRequestDetails.getRequestOperationCallback().resourceDeleted(resourceToDelete);
+				ActionRequestDetails requestDetails = new ActionRequestDetails(theRequestDetails, idToDelete.getResourceType(), idToDelete);
+				for (IServerInterceptor next : getConfig().getInterceptors()) {
+					if (next instanceof IJpaServerInterceptor) {
+						((IJpaServerInterceptor) next).resourceDeleted(requestDetails, entity);
+					}
 				}
 			}
 			for (IServerInterceptor next : getConfig().getInterceptors()) {
