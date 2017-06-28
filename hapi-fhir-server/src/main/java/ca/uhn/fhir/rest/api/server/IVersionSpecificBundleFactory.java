@@ -1,4 +1,4 @@
-package ca.uhn.fhir.context.api;
+package ca.uhn.fhir.rest.api.server;
 
 /*
  * #%L
@@ -24,12 +24,11 @@ import java.util.*;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
+import ca.uhn.fhir.context.api.BundleInclusionRule;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.rest.api.EncodingEnum;
-import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import ca.uhn.fhir.rest.api.server.IRestfulServer;
 
 /**
  * This interface should be considered experimental and will likely change in future releases of HAPI. Use with caution!

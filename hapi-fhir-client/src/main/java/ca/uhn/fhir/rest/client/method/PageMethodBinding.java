@@ -30,12 +30,12 @@ import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.api.IVersionSpecificBundleFactory;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
+import ca.uhn.fhir.rest.api.server.IVersionSpecificBundleFactory;
 import ca.uhn.fhir.rest.client.impl.BaseHttpClientInvocation;
 import ca.uhn.fhir.rest.server.*;
 import ca.uhn.fhir.rest.server.RestfulServerUtils.ResponseEncoding;

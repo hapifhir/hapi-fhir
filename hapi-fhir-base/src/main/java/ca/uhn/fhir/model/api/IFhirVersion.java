@@ -23,23 +23,27 @@ package ca.uhn.fhir.model.api;
 import java.io.InputStream;
 import java.util.Date;
 
-import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
-import ca.uhn.fhir.context.*;
-import ca.uhn.fhir.context.api.IVersionSpecificBundleFactory;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.support.IContextValidationSupport;
 import ca.uhn.fhir.fluentpath.IFluentPath;
-import ca.uhn.fhir.rest.server.IResourceProvider;
-import ca.uhn.fhir.rest.server.IServerConformanceProvider;
-import ca.uhn.fhir.rest.server.RestfulServer;
 
+/**
+ * Each structure version JAR will have an implementation of this interface.
+ * This is used internally by HAPI and subject to change. Do not use this interface
+ * directly in user code.
+ * 
+ * See also IFhirVersionServer for the hapi-fhir-server equivalent.
+ */
 public interface IFhirVersion {
 
 	IFluentPath createFluentPathExecutor(FhirContext theFhirContext);
-	
-	IServerConformanceProvider<? extends IBaseResource> createServerConformanceProvider(RestfulServer theRestfulServer); 
-	
-	IResourceProvider createServerProfilesProvider(RestfulServer theRestfulServer);
 	
 	IContextValidationSupport<?, ?, ?, ?, ?, ?> createValidationSupport();
 
@@ -56,8 +60,6 @@ public interface IFhirVersion {
 	Class<? extends IBase> getResourceReferenceType();
 
 	FhirVersionEnum getVersion();
-
-	IVersionSpecificBundleFactory newBundleFactory(FhirContext theContext);
 
 	IBase newCodingDt();
 
