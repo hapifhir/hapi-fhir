@@ -86,8 +86,7 @@ import ca.uhn.fhir.jpa.dao.dstu2.FhirResourceDaoDstu2SearchNoFtTest;
 import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.entity.ResourceTable;
 import ca.uhn.fhir.jpa.provider.dstu3.JpaSystemProviderDstu3;
-import ca.uhn.fhir.jpa.search.ISearchCoordinatorSvc;
-import ca.uhn.fhir.jpa.search.IStaleSearchDeletingSvc;
+import ca.uhn.fhir.jpa.search.*;
 import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
 import ca.uhn.fhir.jpa.term.IHapiTerminologySvc;
 import ca.uhn.fhir.jpa.validation.JpaValidationSupportChainDstu3;
@@ -108,13 +107,13 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 	private static JpaValidationSupportChainDstu3 ourJpaValidationSupportChainDstu3;
 	private static IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept> ourValueSetDao;
 
-	//	@Autowired
-//	protected HapiWorkerContext myHapiWorkerContext;
+	// @Autowired
+	// protected HapiWorkerContext myHapiWorkerContext;
 	@Autowired
 	@Qualifier("myAllergyIntoleranceDaoDstu3")
 	protected IFhirResourceDao<AllergyIntolerance> myAllergyIntoleranceDao;
 	@Autowired
-	protected ApplicationContext myAppCtx;	
+	protected ApplicationContext myAppCtx;
 	@Autowired
 	@Qualifier("myAppointmentDaoDstu3")
 	protected IFhirResourceDao<Appointment> myAppointmentDao;
@@ -124,7 +123,7 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 	@Autowired
 	@Qualifier("myBundleDaoDstu3")
 	protected IFhirResourceDao<Bundle> myBundleDao;
-@Autowired
+	@Autowired
 	@Qualifier("myCarePlanDaoDstu3")
 	protected IFhirResourceDao<CarePlan> myCarePlanDao;
 	@Autowired
@@ -194,6 +193,8 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 	@Autowired
 	@Qualifier("myOrganizationDaoDstu3")
 	protected IFhirResourceDao<Organization> myOrganizationDao;
+	@Autowired
+	protected DatabaseBackedPagingProvider myPagingProvider;
 	@Autowired
 	@Qualifier("myPatientDaoDstu3")
 	protected IFhirResourceDaoPatient<Patient> myPatientDao;

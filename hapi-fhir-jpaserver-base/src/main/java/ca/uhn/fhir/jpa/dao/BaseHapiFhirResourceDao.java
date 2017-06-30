@@ -29,6 +29,7 @@ import javax.annotation.PostConstruct;
 import javax.persistence.NoResultException;
 import javax.persistence.TypedQuery;
 
+import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.instance.model.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -926,9 +927,11 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			notifyInterceptors(RestOperationTypeEnum.SEARCH_TYPE, requestDetails);
 		
 			if (theRequestDetails.isSubRequest()) {
-				theParams.setLoadSynchronous(true);
-				int max =  myDaoConfig.getMaximumSearchResultCountInTransaction();
-				theParams.setLoadSynchronousUpTo(myDaoConfig.getMaximumSearchResultCountInTransaction());
+				Integer max =  myDaoConfig.getMaximumSearchResultCountInTransaction();
+				if (max != null) {
+					Validate.inclusiveBetween(1, Integer.MAX_VALUE, max.intValue(), "Maximum search result count in transaction ust be a positive integer");
+					theParams.setLoadSynchronousUpTo(myDaoConfig.getMaximumSearchResultCountInTransaction());
+				}
 			}
 
 			if (!isPagingProviderDatabaseBacked(theRequestDetails)) {

@@ -77,7 +77,6 @@ public class DatabaseBackedPagingProvider extends BasePagingProvider implements 
 	@Override
 	public synchronized String storeResultList(IBundleProvider theList) {
 		String uuid = theList.getUuid();
-		Validate.notNull(uuid);
 		return uuid;
 	}
 

@@ -114,8 +114,6 @@ public class FhirSystemDaoDstu3 extends BaseHapiFhirSystemDao<Bundle, Meta> {
 
 		Bundle resp = new Bundle();
 		resp.setType(BundleType.BATCHRESPONSE);
-		OperationOutcome ooResp = new OperationOutcome();
-		resp.addEntry().setResource(ooResp);
 
 		/*
 		 * For batch, we handle each entry as a mini-transaction in its own database transaction so that if one fails, it doesn't prevent others
@@ -171,7 +169,6 @@ public class FhirSystemDaoDstu3 extends BaseHapiFhirSystemDao<Bundle, Meta> {
 
 		long delay = System.currentTimeMillis() - start;
 		ourLog.info("Batch completed in {}ms", new Object[] { delay });
-		ooResp.addIssue().setSeverity(IssueSeverity.INFORMATION).setDiagnostics("Batch completed in " + delay + "ms");
 
 		return resp;
 	}

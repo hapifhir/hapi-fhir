@@ -1,5 +1,6 @@
 package org.hl7.fhir.dstu3.hapi.rest.server;
 
+import static org.apache.commons.lang3.StringUtils.isBlank;
 /*
  * #%L
  * HAPI FHIR Structures - DSTU2 (FHIR v1.0.0)
@@ -44,7 +45,7 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.ResourceReferenceInfo;
 
 public class Dstu3BundleFactory implements IVersionSpecificBundleFactory {
-
+  private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(Dstu3BundleFactory.class);
   private Bundle myBundle;
   private FhirContext myContext;
   private String myBase;
@@ -336,7 +337,9 @@ public class Dstu3BundleFactory implements IVersionSpecificBundleFactory {
       } else {
         if (numTotalResults == null || numTotalResults > numToReturn) {
           searchId = pagingProvider.storeResultList(theResult);
-          Validate.notNull(searchId, "Paging provider returned null searchId");
+          if (isBlank(searchId)) {
+            ourLog.info("Found {} results but paging provider did not provide an ID to use for paging", numTotalResults);
+          }
         }
       }
     }

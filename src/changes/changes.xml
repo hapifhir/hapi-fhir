@@ -85,6 +85,23 @@
 				(tags, profiles, and security labels) on an individual resource. The default
 				is 1000.
 			</action>
+			<action type="add">
+				When executing a search (HTTP GET) as a nested operation in in a transaction or 
+				batch operation, the search now returns a normal page of results with a link to
+				the next page, like any other search would. Previously the search would return
+				a small number of results with no paging performed, so this change brings transaction
+				and batch processing in line with other types of search.
+			</action>
+			<action type="add">
+				JPA server no longer returns an OperationOutcome resource as the first resource
+				in the Bundle for a response to a batch operation. This behaviour was previously
+				present, but was not specified in the FHIR specification so it caused confusion and
+				was inconsistent with behaviour in other servers.
+			</action>
+			<action type="fix">
+				Fix a regression in HAPI FHIR 2.5 JPA server where executing a search in a
+				transaction or batch operation caused an exception.
+			</action>
 		</release>
 		<release version="2.5" date="2017-06-08">
 			<action type="fix">

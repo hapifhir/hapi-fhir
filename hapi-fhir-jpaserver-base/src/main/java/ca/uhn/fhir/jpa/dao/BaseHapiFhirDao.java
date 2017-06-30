@@ -1744,9 +1744,12 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 			TagList tagList = ResourceMetadataKeyEnum.TAG_LIST.get(res);
 			if (tagList != null) {
 				tag = tagList.getTag(Constants.TAG_SUBSETTED_SYSTEM, Constants.TAG_SUBSETTED_CODE);
+				totalMetaCount += tagList.size();
 			}
-			totalMetaCount += tagList.size();
-			totalMetaCount += ResourceMetadataKeyEnum.PROFILES.get(res).size();
+			List<IdDt> profileList = ResourceMetadataKeyEnum.PROFILES.get(res);
+			if (profileList != null) {
+				totalMetaCount += profileList.size();
+			}
 		} else {
 			IAnyResource res = (IAnyResource) theResource;
 			tag = res.getMeta().getTag(Constants.TAG_SUBSETTED_SYSTEM, Constants.TAG_SUBSETTED_CODE);

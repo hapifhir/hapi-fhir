@@ -57,7 +57,7 @@ public class DaoConfig {
 	 * 
 	 * @see #setMaximumSearchResultCountInTransaction(int)
 	 */
-	private static final int DEFAULT_MAXIMUM_SEARCH_RESULT_COUNT_IN_TRANSACTION = 500;
+	private static final Integer DEFAULT_MAXIMUM_SEARCH_RESULT_COUNT_IN_TRANSACTION = null;
 
 	/**
 	 * Default value for {@link #setReuseCachedSearchResultsForMillis(Long)}: 60000ms (one minute)
@@ -110,7 +110,7 @@ public class DaoConfig {
 	 * update setter javadoc if default changes
 	 */
 	private int myMaximumExpansionSize = 5000;
-	private int myMaximumSearchResultCountInTransaction = DEFAULT_MAXIMUM_SEARCH_RESULT_COUNT_IN_TRANSACTION;
+	private Integer myMaximumSearchResultCountInTransaction = DEFAULT_MAXIMUM_SEARCH_RESULT_COUNT_IN_TRANSACTION;
 	private ResourceEncodingEnum myResourceEncoding = ResourceEncodingEnum.JSONC;
 	/**
 	 * update setter javadoc if default changes
@@ -233,14 +233,17 @@ public class DaoConfig {
 	}
 
 	/**
-	 * Provides the maximum number of results which may be returned by a search within a FHIR <code>transaction</code>
-	 * operation. For example, if this value is set to <code>100</code> and a FHIR transaction is processed with a sub-request
-	 * for <code>Patient?gender=male</code>, the server will throw an error (and the transaction will fail) if there are more than
+	 * Provides the maximum number of results which may be returned by a search (HTTP GET) which
+	 * is executed as a sub-operation within within a FHIR <code>transaction</code> or
+	 * <code>batch</code> operation. For example, if this value is set to <code>100</code> and 
+	 * a FHIR transaction is processed with a sub-request for <code>Patient?gender=male</code>,
+	 * the server will throw an error (and the transaction will fail) if there are more than
 	 * 100 resources on the server which match this query.
-	 * 
-	 * @see #DEFAULT_LOGICAL_BASE_URLS The default value for this setting
+	 * <p>
+	 * The default value is <code>null</code>, which means that there is no limit.
+	 * </p>  
 	 */
-	public int getMaximumSearchResultCountInTransaction() {
+	public Integer getMaximumSearchResultCountInTransaction() {
 		return myMaximumSearchResultCountInTransaction;
 	}
 
@@ -699,14 +702,17 @@ public class DaoConfig {
 	}
 
 	/**
-	 * Provides the maximum number of results which may be returned by a search within a FHIR <code>transaction</code>
-	 * operation. For example, if this value is set to <code>100</code> and a FHIR transaction is processed with a sub-request
-	 * for <code>Patient?gender=male</code>, the server will throw an error (and the transaction will fail) if there are more than
+	 * Provides the maximum number of results which may be returned by a search (HTTP GET) which
+	 * is executed as a sub-operation within within a FHIR <code>transaction</code> or
+	 * <code>batch</code> operation. For example, if this value is set to <code>100</code> and 
+	 * a FHIR transaction is processed with a sub-request for <code>Patient?gender=male</code>,
+	 * the server will throw an error (and the transaction will fail) if there are more than
 	 * 100 resources on the server which match this query.
-	 * 
-	 * @see #DEFAULT_LOGICAL_BASE_URLS The default value for this setting
+	 * <p>
+	 * The default value is <code>null</code>, which means that there is no limit.
+	 * </p>  
 	 */
-	public void setMaximumSearchResultCountInTransaction(int theMaximumSearchResultCountInTransaction) {
+	public void setMaximumSearchResultCountInTransaction(Integer theMaximumSearchResultCountInTransaction) {
 		myMaximumSearchResultCountInTransaction = theMaximumSearchResultCountInTransaction;
 	}
 
