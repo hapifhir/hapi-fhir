@@ -45,7 +45,7 @@
 				Add configuration to JPA server DaoConfig that allows a maximum
 				number of search results to be specified. Queries will never return
 				more than this number, which can be good for avoiding accidental 
-				performance problems in situations where lare queries should not be 
+				performance problems in situations where large queries should not be 
 				needed
 			</action>
 			<action type="fix" issue="674">

@@ -40,6 +40,7 @@ public class TestDstu3Config extends BaseJavaConfigDstu3 {
 
 		DataSource dataSource = ProxyDataSourceBuilder
 				.create(retVal)
+				.multiline()
 				.logQueryBySlf4j(SLF4JLogLevel.INFO, "SQL")
 				.logSlowQueryBySlf4j(10, TimeUnit.SECONDS)
 				.countQuery()
