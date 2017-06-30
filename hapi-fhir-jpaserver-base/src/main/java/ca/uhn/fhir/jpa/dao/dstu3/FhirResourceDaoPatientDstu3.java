@@ -50,7 +50,7 @@ public class FhirResourceDaoPatientDstu3 extends FhirResourceDaoDstu3<Patient>im
 	@Autowired
 	private ISearchParamRegistry mySerarchParamRegistry;
 
-	private IBundleProvider doEverythingOperation(IIdType theId, IPrimitiveType<Integer> theCount, DateRangeParam theLastUpdated, SortSpec theSort, StringAndListParam theContent, StringAndListParam theNarrative) {
+	private IBundleProvider doEverythingOperation(IIdType theId, IPrimitiveType<Integer> theCount, DateRangeParam theLastUpdated, SortSpec theSort, StringAndListParam theContent, StringAndListParam theNarrative, RequestDetails theRequestDetails) {
 		SearchParameterMap paramMap = new SearchParameterMap();
 		if (theCount != null) {
 			paramMap.setCount(theCount.getValue());
@@ -69,17 +69,21 @@ public class FhirResourceDaoPatientDstu3 extends FhirResourceDaoDstu3<Patient>im
 			paramMap.add("_id", new StringParam(theId.getIdPart()));
 		}
 		
+		if (!isPagingProviderDatabaseBacked(theRequestDetails)) {
+			paramMap.setLoadSynchronous(true);
+		}
+		
 		return mySearchCoordinatorSvc.registerSearch(this, paramMap, getResourceName());
 	}
 
 	@Override
 	public IBundleProvider patientInstanceEverything(HttpServletRequest theServletRequest, IIdType theId, IPrimitiveType<Integer> theCount, DateRangeParam theLastUpdated, SortSpec theSort, StringAndListParam theContent, StringAndListParam theNarrative, RequestDetails theRequestDetails) {
-		return doEverythingOperation(theId, theCount, theLastUpdated, theSort, theContent, theNarrative);
+		return doEverythingOperation(theId, theCount, theLastUpdated, theSort, theContent, theNarrative, theRequestDetails);
 	}
 
 	@Override
 	public IBundleProvider patientTypeEverything(HttpServletRequest theServletRequest, IPrimitiveType<Integer> theCount, DateRangeParam theLastUpdated, SortSpec theSort, StringAndListParam theContent, StringAndListParam theNarrative, RequestDetails theRequestDetails) {
-		return doEverythingOperation(null, theCount, theLastUpdated, theSort, theContent, theNarrative);
+		return doEverythingOperation(null, theCount, theLastUpdated, theSort, theContent, theNarrative, theRequestDetails);
 	}
 
 }

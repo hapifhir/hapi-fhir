@@ -66,6 +66,15 @@
 				JPA search now uses hibernate ScrollableResults instead of plain JPA List. This
 				should improve performance over large search results.
 			</action>
+			<action type="add">
+				JPA servers with no paging provider configured, or with a paging provider other than
+				DatabaseBackedPagingProvider will load all results in a single pass and keep them 
+				in memory. Using this setup is not a good idea unless you know for sure that you
+				will never have very large queries since it means that all results will be loaded into
+				memory, but there are valid reasons to need this and it will perform better than
+				paging to the database in that case. This fix also resolves a NullPointerException
+				when performing an $everything search. Thanks to Kamal Othman for reporting!
+			</action>
 		</release>
 		<release version="2.5" date="2017-06-08">
 			<action type="fix">
