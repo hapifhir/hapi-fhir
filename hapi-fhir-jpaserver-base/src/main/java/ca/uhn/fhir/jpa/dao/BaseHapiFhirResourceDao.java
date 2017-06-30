@@ -564,7 +564,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	}
 
 	protected boolean isPagingProviderDatabaseBacked(RequestDetails theRequestDetails) {
-		if (theRequestDetails == null) {
+		if (theRequestDetails == null || theRequestDetails.getServer() == null) {
 			return false;
 		}
 		if (theRequestDetails.getServer().getPagingProvider() instanceof DatabaseBackedPagingProvider) {

@@ -27,6 +27,7 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
 /**
  * Test the rest-hook subscriptions
@@ -65,6 +66,21 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 		ourUpdatedObservations.clear();
 		ourContentTypes.clear();
 	}
+	
+	@Test
+	public void testRestHookSubscriptionInvalidCriteria() throws Exception {
+		String payload = "application/xml";
+
+		String criteria1 = "Observation?codeeeee=SNOMED-CT";
+
+		try {
+			createSubscription(criteria1, payload, ourListenerServerBase);
+			fail();
+		} catch (InvalidRequestException e) {
+			assertEquals("HTTP 400 Bad Request: Invalid criteria: Failed to parse match URL[Observation?codeeeee=SNOMED-CT] - Resource type Observation does not have a parameter with name: codeeeee", e.getMessage());
+		}
+	}
+
 
 	private Subscription createSubscription(String theCriteria, String thePayload, String theEndpoint) {
 		Subscription subscription = new Subscription();
