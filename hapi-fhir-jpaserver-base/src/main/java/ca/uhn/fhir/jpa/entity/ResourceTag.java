@@ -19,23 +19,15 @@ package ca.uhn.fhir.jpa.entity;
  * limitations under the License.
  * #L%
  */
-
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.ForeignKey;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.SequenceGenerator;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 @Entity
-@Table(name = "HFJ_RES_TAG")
+@Table(name = "HFJ_RES_TAG", uniqueConstraints= {
+		@UniqueConstraint(name="IDX_RESTAG_TAGID", columnNames= {"RES_ID","TAG_ID"})
+})
 public class ResourceTag extends BaseTag {
 
 	private static final long serialVersionUID = 1L;

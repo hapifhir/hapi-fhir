@@ -33,11 +33,10 @@ import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.dstu3.model.UriType;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.junit.AfterClass;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.*;
 import org.mockito.ArgumentCaptor;
 
+import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.SearchParameterMap;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.rest.api.MethodOutcome;
@@ -119,6 +118,137 @@ public class FhirResourceDaoDstu3UpdateTest extends BaseJpaDstu3Test {
 			List<UriType> tl = patient.getMeta().getProfile();
 			assertEquals(1, tl.size());
 			assertEquals("http://foo/bar", tl.get(0).getValue());
+		}
+
+	}
+
+	@After
+	public void afterResetDao() {
+		myDaoConfig.setResourceMetaCountHardLimit(new DaoConfig().getResourceMetaCountHardLimit());
+	}
+	
+	@Test
+	public void testHardMetaCapIsEnforcedOnCreate() {
+		myDaoConfig.setResourceMetaCountHardLimit(3);
+
+		IIdType id;
+		{
+			Patient patient = new Patient();
+			patient.getMeta().addTag().setSystem("http://foo").setCode("1");
+			patient.getMeta().addTag().setSystem("http://foo").setCode("2");
+			patient.getMeta().addTag().setSystem("http://foo").setCode("3");
+			patient.getMeta().addTag().setSystem("http://foo").setCode("4");
+			patient.setActive(true);
+			try {
+				id = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
+				fail();
+			} catch (UnprocessableEntityException e) {
+				assertEquals("Resource contains 4 meta entries (tag/profile/security label), maximum is 3", e.getMessage());
+			}
+		}
+	}
+	
+	@Test
+	public void testHardMetaCapIsEnforcedOnMetaAdd() {
+		myDaoConfig.setResourceMetaCountHardLimit(3);
+
+		IIdType id;
+		{
+			Patient patient = new Patient();
+			patient.setActive(true);
+			id = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
+		}
+		
+		{
+			Meta meta = new Meta();
+			meta.addTag().setSystem("http://foo").setCode("1");
+			meta.addTag().setSystem("http://foo").setCode("2");
+			meta.addTag().setSystem("http://foo").setCode("3");
+			meta.addTag().setSystem("http://foo").setCode("4");
+			try {
+				myPatientDao.metaAddOperation(id, meta, null);
+				fail();
+			} catch (UnprocessableEntityException e) {
+				assertEquals("Resource contains 4 meta entries (tag/profile/security label), maximum is 3", e.getMessage());
+			}
+
+		}
+	}
+	
+	@Test
+	public void testDuplicateTagsOnAddTagsIgnored() {
+		IIdType id;
+		{
+			Patient patient = new Patient();
+			patient.setActive(true);
+			id = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
+		}
+
+		Meta meta = new Meta();
+		meta.addTag().setSystem("http://foo").setCode("bar").setDisplay("Val1");
+		meta.addTag().setSystem("http://foo").setCode("bar").setDisplay("Val2");
+		meta.addTag().setSystem("http://foo").setCode("bar").setDisplay("Val3");
+		myPatientDao.metaAddOperation(id, meta, null);
+		
+		// Do a read
+		{
+			Patient patient = myPatientDao.read(id, mySrd);
+			List<Coding> tl = patient.getMeta().getTag();
+			assertEquals(1, tl.size());
+			assertEquals("http://foo", tl.get(0).getSystem());
+			assertEquals("bar", tl.get(0).getCode());
+		}
+
+	}
+
+	@Test
+	public void testDuplicateTagsOnUpdateIgnored() {
+		IIdType id;
+		{
+			Patient patient = new Patient();
+			patient.setActive(true);
+			id = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
+		}
+
+		{
+			Patient patient = new Patient();
+			patient.setId(id);
+			patient.setActive(true);
+			patient.getMeta().addTag().setSystem("http://foo").setCode("bar").setDisplay("Val1");
+			patient.getMeta().addTag().setSystem("http://foo").setCode("bar").setDisplay("Val2");
+			patient.getMeta().addTag().setSystem("http://foo").setCode("bar").setDisplay("Val3");
+			myPatientDao.update(patient, mySrd).getId().toUnqualifiedVersionless();
+		}
+		
+		// Do a read on second version
+		{
+			Patient patient = myPatientDao.read(id, mySrd);
+			List<Coding> tl = patient.getMeta().getTag();
+			assertEquals(1, tl.size());
+			assertEquals("http://foo", tl.get(0).getSystem());
+			assertEquals("bar", tl.get(0).getCode());
+		}
+
+		// Do a read on first version
+		{
+			Patient patient = myPatientDao.read(id.withVersion("1"), mySrd);
+			List<Coding> tl = patient.getMeta().getTag();
+			assertEquals(0, tl.size());
+		}
+
+		Meta meta = new Meta();
+		meta.addTag().setSystem("http://foo").setCode("bar").setDisplay("Val1");
+		meta.addTag().setSystem("http://foo").setCode("bar").setDisplay("Val2");
+		meta.addTag().setSystem("http://foo").setCode("bar").setDisplay("Val3");
+		myPatientDao.metaAddOperation(id.withVersion("1"), meta, null);
+
+		// Do a read on first version
+		{
+			Patient patient = myPatientDao.read(id.withVersion("1"), mySrd);
+			List<Coding> tl = patient.getMeta().getTag();
+			assertEquals(1, tl.size());
+			assertEquals("http://foo", tl.get(0).getSystem());
+			assertEquals("bar", tl.get(0).getCode());
 		}
 
 	}

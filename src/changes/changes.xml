@@ -80,6 +80,11 @@
 				were not able to be automatically purged from the database after they were scheduled
 				for deletion. Thanks to Ravi Kuchi for reporting!
 			</action>
+			<action type="add">
+				Add an optional and configurable hard limit on the total number of meta items
+				(tags, profiles, and security labels) on an individual resource. The default
+				is 1000.
+			</action>
 		</release>
 		<release version="2.5" date="2017-06-08">
 			<action type="fix">

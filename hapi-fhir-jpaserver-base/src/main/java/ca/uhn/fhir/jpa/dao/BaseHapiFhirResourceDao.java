@@ -431,7 +431,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	private <MT extends IBaseMetaType> void doMetaAdd(MT theMetaAdd, BaseHasResource entity) {
 		List<TagDefinition> tags = toTagList(theMetaAdd);
 
-		//@formatter:off
 		for (TagDefinition nextDef : tags) {
 			
 			boolean hasTag = false;
@@ -454,8 +453,9 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				}
 			}
 		}
-		//@formatter:on
 
+		validateMetaCount(entity.getTags().size());
+		
 		myEntityManager.merge(entity);
 	}
 
