@@ -5,6 +5,7 @@ import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsInRelativeOrder;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.emptyString;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.not;
@@ -47,11 +48,12 @@ import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.Ignore;
+import org.junit.*;
 import org.junit.Test;
+import org.springframework.test.util.AopTestUtils;
 
+import ca.uhn.fhir.jpa.dao.DaoConfig;
+import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
 import ca.uhn.fhir.model.api.*;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.BundleEntry;
@@ -85,10 +87,7 @@ import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.rest.client.IGenericClient;
-import ca.uhn.fhir.rest.param.DateRangeParam;
-import ca.uhn.fhir.rest.param.StringAndListParam;
-import ca.uhn.fhir.rest.param.StringOrListParam;
-import ca.uhn.fhir.rest.param.StringParam;
+import ca.uhn.fhir.rest.param.*;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
@@ -100,10 +99,27 @@ import ca.uhn.fhir.util.UrlUtil;
 public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResourceProviderDstu2Test.class);
+	private SearchCoordinatorSvcImpl mySearchCoordinatorSvcRaw;
+
+	@Override
+	@After
+	public void after() throws Exception {
+		super.after();
+
+		myDaoConfig.setAllowMultipleDelete(new DaoConfig().isAllowMultipleDelete());
+		myDaoConfig.setAllowExternalReferences(new DaoConfig().isAllowExternalReferences());
+		myDaoConfig.setReuseCachedSearchResultsForMillis(new DaoConfig().getReuseCachedSearchResultsForMillis());
+		
+		mySearchCoordinatorSvcRaw.setLoadingThrottleForUnitTests(null);
+		mySearchCoordinatorSvcRaw.setSyncSizeForUnitTests(SearchCoordinatorSvcImpl.DEFAULT_SYNC_SIZE);
+		mySearchCoordinatorSvcRaw.setNeverUseLocalSearchForUnitTests(false);
+
+	}
 
 	@Before
 	public void beforeDisableResultReuse() {
 		myDaoConfig.setReuseCachedSearchResultsForMillis(null);
+		mySearchCoordinatorSvcRaw = AopTestUtils.getTargetObject(mySearchCoordinatorSvc);
 	}
 
 	@AfterClass
@@ -118,6 +134,58 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		myDaoConfig.setAllowMultipleDelete(true);
 	}
 
+	
+	@Test
+	public void testPagingOverEverythingSet() throws InterruptedException {
+		Patient p = new Patient();
+		p.setActive(true);
+		String pid = myPatientDao.create(p).getId().toUnqualifiedVersionless().getValue();
+		
+		for (int i = 0; i < 20; i++) {
+			Observation o = new Observation();
+			o.getSubject().setReference(pid);
+			o.addIdentifier().setSystem("foo").setValue(Integer.toString(i));
+			myObservationDao.create(o);
+		}
+		
+		mySearchCoordinatorSvcRaw.setLoadingThrottleForUnitTests(50);
+		mySearchCoordinatorSvcRaw.setSyncSizeForUnitTests(10);
+		mySearchCoordinatorSvcRaw.setNeverUseLocalSearchForUnitTests(true);
+
+		ca.uhn.fhir.model.dstu2.resource.Bundle response = ourClient
+			.operation()
+			.onInstance(new IdDt(pid))
+			.named("everything")
+			.withSearchParameter(Parameters.class, "_count", new NumberParam(10))
+			.returnResourceType(ca.uhn.fhir.model.dstu2.resource.Bundle.class)
+			.useHttpGet()
+			.execute();
+		
+		assertEquals(10, response.getEntry().size());
+		assertEquals(null, response.getTotalElement().getValueAsString());
+		assertThat(response.getLink("next").getUrl(), not(emptyString()));
+
+		// Load page 2
+
+		String nextUrl = response.getLink("next").getUrl();
+		response = ourClient.fetchResourceFromUrl(ca.uhn.fhir.model.dstu2.resource.Bundle.class, nextUrl);
+
+		assertEquals(10, response.getEntry().size());
+		assertThat(response.getLink("next").getUrl(), not(emptyString()));
+
+		// Load page 3
+		Thread.sleep(2000);
+		
+		nextUrl = response.getLink("next").getUrl();
+		response = ourClient.fetchResourceFromUrl(ca.uhn.fhir.model.dstu2.resource.Bundle.class, nextUrl);
+
+		assertEquals(1, response.getEntry().size());
+		assertEquals(21, response.getTotal().intValue());
+		assertEquals(null, response.getLink("next"));
+
+	}
+
+	
 	private void checkParamMissing(String paramName) throws IOException, ClientProtocolException {
 		HttpGet get = new HttpGet(ourServerBase + "/Observation?" + paramName + ":missing=false");
 		CloseableHttpResponse resp = ourHttpClient.execute(get);

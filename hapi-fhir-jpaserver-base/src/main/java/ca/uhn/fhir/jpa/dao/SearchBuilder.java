@@ -2099,8 +2099,6 @@ public class SearchBuilder implements ISearchBuilder {
 				ScrollableResults scroll = hibernateQuery.scroll(ScrollMode.FORWARD_ONLY);
 				myResultsIterator = new ScrollableResultsIterator(scroll);
 						
-//				myResultsIterator = query.getResultList().iterator();
-
 				// If the query resulted in extra results being requested
 				if (myAlsoIncludePids != null) {
 					myPreResultsIterator = myAlsoIncludePids.iterator();

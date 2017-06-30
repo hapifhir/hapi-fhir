@@ -19,24 +19,9 @@ package ca.uhn.fhir.jpa.search;
  * limitations under the License.
  * #L%
  */
+import java.util.*;
+import java.util.concurrent.*;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
-
-import javax.annotation.PostConstruct;
 import javax.persistence.EntityManager;
 import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
@@ -47,34 +32,18 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.orm.jpa.JpaTransactionManager;
+import org.springframework.data.domain.*;
 import org.springframework.scheduling.concurrent.CustomizableThreadFactory;
-import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.TransactionDefinition;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.support.TransactionCallback;
-import org.springframework.transaction.support.TransactionCallbackWithoutResult;
-import org.springframework.transaction.support.TransactionTemplate;
+import org.springframework.transaction.*;
+import org.springframework.transaction.support.*;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.dao.DaoConfig;
-import ca.uhn.fhir.jpa.dao.IDao;
-import ca.uhn.fhir.jpa.dao.ISearchBuilder;
-import ca.uhn.fhir.jpa.dao.SearchParameterMap;
-import ca.uhn.fhir.jpa.dao.data.ISearchDao;
-import ca.uhn.fhir.jpa.dao.data.ISearchIncludeDao;
-import ca.uhn.fhir.jpa.dao.data.ISearchResultDao;
-import ca.uhn.fhir.jpa.entity.Search;
-import ca.uhn.fhir.jpa.entity.SearchInclude;
-import ca.uhn.fhir.jpa.entity.SearchResult;
-import ca.uhn.fhir.jpa.entity.SearchStatusEnum;
-import ca.uhn.fhir.jpa.entity.SearchTypeEnum;
+import ca.uhn.fhir.jpa.dao.*;
+import ca.uhn.fhir.jpa.dao.data.*;
+import ca.uhn.fhir.jpa.entity.*;
 import ca.uhn.fhir.jpa.util.StopWatch;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.method.PageMethodBinding;
@@ -83,7 +52,7 @@ import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.*;
 
 public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
-	static final int DEFAULT_SYNC_SIZE = 250;
+	public static final int DEFAULT_SYNC_SIZE = 250;
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchCoordinatorSvcImpl.class);
 
@@ -360,7 +329,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 	}
 
 	@VisibleForTesting
-	void setLoadingThrottleForUnitTests(Integer theLoadingThrottleForUnitTests) {
+	public void setLoadingThrottleForUnitTests(Integer theLoadingThrottleForUnitTests) {
 		myLoadingThrottleForUnitTests = theLoadingThrottleForUnitTests;
 	}
 
@@ -369,7 +338,8 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 		myMaxMillisToWaitForRemoteResults = theMaxMillisToWaitForRemoteResults;
 	}
 
-	void setNeverUseLocalSearchForUnitTests(boolean theNeverUseLocalSearchForUnitTests) {
+	@VisibleForTesting
+	public void setNeverUseLocalSearchForUnitTests(boolean theNeverUseLocalSearchForUnitTests) {
 		myNeverUseLocalSearchForUnitTests = theNeverUseLocalSearchForUnitTests;
 	}
 
@@ -389,7 +359,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 	}
 
 	@VisibleForTesting
-	void setSyncSizeForUnitTests(int theSyncSize) {
+	public void setSyncSizeForUnitTests(int theSyncSize) {
 		mySyncSize = theSyncSize;
 	}
 

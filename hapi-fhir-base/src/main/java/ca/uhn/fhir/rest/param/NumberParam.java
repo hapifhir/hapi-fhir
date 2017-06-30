@@ -32,6 +32,7 @@ import ca.uhn.fhir.model.api.IQueryParameterType;
 
 public class NumberParam extends BaseParamWithPrefix<NumberParam> implements IQueryParameterType {
 
+	private static final long serialVersionUID = 1L;
 	private BigDecimal myQuantity;
 
 	/**
@@ -39,6 +40,16 @@ public class NumberParam extends BaseParamWithPrefix<NumberParam> implements IQu
 	 */
 	public NumberParam() {
 		super();
+	}
+
+	/**
+	 * Constructor
+	 * 
+	 * @param theValue
+	 *            A value, e.g. "10"
+	 */
+	public NumberParam(int theValue) {
+		setValue(new BigDecimal(theValue));
 	}
 
 	/**
@@ -79,21 +90,21 @@ public class NumberParam extends BaseParamWithPrefix<NumberParam> implements IQu
 	}
 	
 	
+	public BigDecimal getValue() {
+		return myQuantity;
+	}
+
+	public NumberParam setValue(BigDecimal theValue) {
+		myQuantity = theValue;
+		return this;
+	}
+	
 	@Override
 	public String toString() {
 		ToStringBuilder b = new ToStringBuilder(this, ToStringStyle.SIMPLE_STYLE);
 		b.append("prefix", getPrefix());
 		b.append("value", myQuantity);
 		return b.build();
-	}
-
-	public BigDecimal getValue() {
-		return myQuantity;
-	}
-	
-	public NumberParam setValue(BigDecimal theValue) {
-		myQuantity = theValue;
-		return this;
 	}
 
 }
