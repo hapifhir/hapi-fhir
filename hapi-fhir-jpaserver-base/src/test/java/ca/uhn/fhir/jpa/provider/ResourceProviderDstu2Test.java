@@ -184,6 +184,40 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		assertEquals(null, response.getLink("next"));
 
 	}
+	
+	@Test
+	public void testPagingOverEverythingSetWithNoPagingProvider() throws InterruptedException {
+		ourRestServer.setPagingProvider(null);
+		
+		Patient p = new Patient();
+		p.setActive(true);
+		String pid = myPatientDao.create(p).getId().toUnqualifiedVersionless().getValue();
+		
+		for (int i = 0; i < 20; i++) {
+			Observation o = new Observation();
+			o.getSubject().setReference(pid);
+			o.addIdentifier().setSystem("foo").setValue(Integer.toString(i));
+			myObservationDao.create(o);
+		}
+		
+		mySearchCoordinatorSvcRaw.setLoadingThrottleForUnitTests(50);
+		mySearchCoordinatorSvcRaw.setSyncSizeForUnitTests(10);
+		mySearchCoordinatorSvcRaw.setNeverUseLocalSearchForUnitTests(true);
+
+		ca.uhn.fhir.model.dstu2.resource.Bundle response = ourClient
+			.operation()
+			.onInstance(new IdDt(pid))
+			.named("everything")
+			.withSearchParameter(Parameters.class, "_count", new NumberParam(10))
+			.returnResourceType(ca.uhn.fhir.model.dstu2.resource.Bundle.class)
+			.useHttpGet()
+			.execute();
+		
+		assertEquals(21, response.getEntry().size());
+		assertEquals(21, response.getTotalElement().getValue().intValue());
+		assertEquals(null, response.getLink("next"));
+
+	}
 
 	
 	private void checkParamMissing(String paramName) throws IOException, ClientProtocolException {

@@ -12,9 +12,7 @@ import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
+import org.junit.*;
 import org.springframework.web.context.ContextLoader;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
@@ -25,17 +23,16 @@ import ca.uhn.fhir.jpa.config.WebsocketDstu2Config;
 import ca.uhn.fhir.jpa.config.WebsocketDstu2DispatcherConfig;
 import ca.uhn.fhir.jpa.dao.dstu2.BaseJpaDstu2Test;
 import ca.uhn.fhir.jpa.interceptor.RestHookSubscriptionDstu2Interceptor;
+import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.testutil.RandomServerPortProvider;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.BundleEntry;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
-import ca.uhn.fhir.parser.LenientErrorHandler;
 import ca.uhn.fhir.rest.client.IGenericClient;
 import ca.uhn.fhir.rest.client.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
-import ca.uhn.fhir.rest.server.FifoMemoryPagingProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.util.TestUtil;
 
@@ -45,10 +42,11 @@ public abstract class BaseResourceProviderDstu2Test extends BaseJpaDstu2Test {
 	protected static CloseableHttpClient ourHttpClient;
 	protected static int ourPort;
 	protected static RestfulServer ourRestServer;
-	private static Server ourServer;
+	protected static Server ourServer;
 	protected static String ourServerBase;
-	private static GenericWebApplicationContext ourWebApplicationContext;
+	protected static GenericWebApplicationContext ourWebApplicationContext;
 	protected static RestHookSubscriptionDstu2Interceptor ourRestHookSubscriptionInterceptor;
+	protected static DatabaseBackedPagingProvider ourPagingProvider;
 
 	public BaseResourceProviderDstu2Test() {
 		super();
@@ -83,7 +81,8 @@ public abstract class BaseResourceProviderDstu2Test extends BaseJpaDstu2Test {
 			confProvider.setImplementationDescription("THIS IS THE DESC");
 			ourRestServer.setServerConformanceProvider(confProvider);
 	
-			ourRestServer.setPagingProvider(new FifoMemoryPagingProvider(10));
+			ourPagingProvider = myAppCtx.getBean(DatabaseBackedPagingProvider.class);
+			ourRestServer.setPagingProvider(ourPagingProvider);
 	
 			Server server = new Server(ourPort);
 	
@@ -126,6 +125,8 @@ public abstract class BaseResourceProviderDstu2Test extends BaseJpaDstu2Test {
 	
 			ourServer = server;
 		}
+		
+		ourRestServer.setPagingProvider(ourPagingProvider);
 	}
 
 	protected List<IdDt> toIdListUnqualifiedVersionless(Bundle found) {

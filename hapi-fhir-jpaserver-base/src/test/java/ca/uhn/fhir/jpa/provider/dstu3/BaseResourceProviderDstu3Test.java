@@ -56,6 +56,7 @@ public abstract class BaseResourceProviderDstu3Test extends BaseJpaDstu3Test {
 	protected static String ourServerBase;
 	private static GenericWebApplicationContext ourWebApplicationContext;
 	private TerminologyUploaderProviderDstu3 myTerminologyUploaderProvider;
+	protected static DatabaseBackedPagingProvider ourPagingProvider;
 	protected static RestHookSubscriptionDstu3Interceptor ourRestHookSubscriptionInterceptor;
 	protected static ISearchDao mySearchEntityDao;
 	protected static ISearchCoordinatorSvc mySearchCoordinatorSvc;
@@ -95,7 +96,7 @@ public abstract class BaseResourceProviderDstu3Test extends BaseJpaDstu3Test {
 			confProvider.setImplementationDescription("THIS IS THE DESC");
 			ourRestServer.setServerConformanceProvider(confProvider);
 
-			ourRestServer.setPagingProvider(myAppCtx.getBean(DatabaseBackedPagingProvider.class));
+			ourPagingProvider = myAppCtx.getBean(DatabaseBackedPagingProvider.class);
 
 			Server server = new Server(ourPort);
 
@@ -162,6 +163,8 @@ public abstract class BaseResourceProviderDstu3Test extends BaseJpaDstu3Test {
 
 			ourServer = server;
 		}
+
+		ourRestServer.setPagingProvider(ourPagingProvider);
 	}
 
 	protected boolean shouldLogClient() {

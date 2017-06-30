@@ -11,7 +11,6 @@ import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.lessThan;
 import static org.hamcrest.Matchers.lessThanOrEqualTo;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.startsWith;
@@ -48,7 +47,6 @@ import org.hl7.fhir.dstu3.model.Observation.ObservationStatus;
 import org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemType;
 import org.hl7.fhir.dstu3.model.Subscription.SubscriptionChannelType;
 import org.hl7.fhir.dstu3.model.Subscription.SubscriptionStatus;
-import org.hl7.fhir.instance.model.Encounter.EncounterState;
 import org.hl7.fhir.instance.model.api.*;
 import org.junit.*;
 import org.springframework.test.util.AopTestUtils;
@@ -58,7 +56,6 @@ import org.springframework.transaction.support.TransactionCallback;
 import com.google.common.collect.Lists;
 
 import ca.uhn.fhir.jpa.dao.DaoConfig;
-import ca.uhn.fhir.jpa.dao.SearchBuilder;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
@@ -2015,6 +2012,40 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 		assertEquals(1, response.getEntry().size());
 		assertEquals(21, response.getTotal());
+		assertEquals(null, response.getLink("next"));
+
+	}
+
+	@Test
+	public void testPagingOverEverythingSetWithNoPagingProvider() throws InterruptedException {
+		ourRestServer.setPagingProvider(null);
+		
+		Patient p = new Patient();
+		p.setActive(true);
+		String pid = myPatientDao.create(p).getId().toUnqualifiedVersionless().getValue();
+		
+		for (int i = 0; i < 20; i++) {
+			Observation o = new Observation();
+			o.getSubject().setReference(pid);
+			o.addIdentifier().setSystem("foo").setValue(Integer.toString(i));
+			myObservationDao.create(o);
+		}
+		
+		mySearchCoordinatorSvcRaw.setLoadingThrottleForUnitTests(50);
+		mySearchCoordinatorSvcRaw.setSyncSizeForUnitTests(10);
+		mySearchCoordinatorSvcRaw.setNeverUseLocalSearchForUnitTests(true);
+
+		Bundle response = ourClient
+			.operation()
+			.onInstance(new IdType(pid))
+			.named("everything")
+			.withSearchParameter(Parameters.class, "_count", new NumberParam(10))
+			.returnResourceType(Bundle.class)
+			.useHttpGet()
+			.execute();
+		
+		assertEquals(21, response.getEntry().size());
+		assertEquals(21, response.getTotalElement().getValue().intValue());
 		assertEquals(null, response.getLink("next"));
 
 	}

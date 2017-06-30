@@ -79,4 +79,9 @@ public interface IRestfulServerDefaults {
 	 */
 	boolean isUseBrowserFriendlyContentTypes();
 
+	/**
+	 * Returns the paging provider for this server
+	 */
+	IPagingProvider getPagingProvider();
+
 }
