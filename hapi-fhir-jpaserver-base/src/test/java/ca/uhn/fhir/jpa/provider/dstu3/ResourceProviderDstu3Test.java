@@ -3320,6 +3320,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 			List<String> ids = toUnqualifiedVersionlessIdValues(bundle);
 			assertThat(ids, contains(id1.getValue()));
+			assertThat(ids, not(contains(id2.getValue())));
 		} finally {
 			IOUtils.closeQuietly(resp);
 		}

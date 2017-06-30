@@ -75,6 +75,11 @@
 				paging to the database in that case. This fix also resolves a NullPointerException
 				when performing an $everything search. Thanks to Kamal Othman for reporting!
 			</action>
+			<action type="fix">
+				Correct an issue in JPA server on Postgres where searches with a long search URL
+				were not able to be automatically purged from the database after they were scheduled
+				for deletion. Thanks to Ravi Kuchi for reporting!
+			</action>
 		</release>
 		<release version="2.5" date="2017-06-08">
 			<action type="fix">
