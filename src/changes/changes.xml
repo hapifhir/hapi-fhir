@@ -100,7 +100,8 @@
 			</action>
 			<action type="fix">
 				Fix a regression in HAPI FHIR 2.5 JPA server where executing a search in a
-				transaction or batch operation caused an exception.
+				transaction or batch operation caused an exception. Thanks to Ravi Kuchi for
+				reporting!
 			</action>
 			<action type="fix">
 				Correct an issue when processing transactions in JPA server where updates and
