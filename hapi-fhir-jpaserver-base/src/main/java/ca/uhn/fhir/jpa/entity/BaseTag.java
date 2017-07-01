@@ -10,7 +10,7 @@ package ca.uhn.fhir.jpa.entity;
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  * 
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -32,12 +32,16 @@ public class BaseTag implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
-	@ManyToOne(cascade= {})
-	@JoinColumn(name="TAG_ID", nullable=false)
+	@ManyToOne(cascade = {})
+	@JoinColumn(name = "TAG_ID", nullable = false)
 	private TagDefinition myTag;
 
-	@Column(name="TAG_ID", insertable=false,updatable=false)
+	@Column(name = "TAG_ID", insertable = false, updatable = false)
 	private Long myTagId;
+
+	public Long getTagId() {
+		return myTagId;
+	}
 
 	public TagDefinition getTag() {
 		return myTag;
@@ -46,6 +50,5 @@ public class BaseTag implements Serializable {
 	public void setTag(TagDefinition theTag) {
 		myTag = theTag;
 	}
-	
-	
+
 }

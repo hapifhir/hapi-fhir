@@ -119,9 +119,10 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		TagDefinition def = getTagOrNull(TagTypeEnum.TAG, theScheme, theTerm, theLabel);
 		if (def != null) {
 			BaseTag newEntity = entity.addTag(def);
-	
-			myEntityManager.persist(newEntity);
-			myEntityManager.merge(entity);
+			if (newEntity.getTagId() == null) {
+				myEntityManager.persist(newEntity);
+				myEntityManager.merge(entity);
+			}
 		}
 		
 		ourLog.info("Processed addTag {}/{} on {} in {}ms", new Object[] { theScheme, theTerm, theId, w.getMillisAndRestart() });
@@ -450,7 +451,9 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				TagDefinition def = getTagOrNull(nextDef.getTagType(), nextDef.getSystem(), nextDef.getCode(), nextDef.getDisplay());
 				if (def != null) {
 					BaseTag newEntity = entity.addTag(def);
-					myEntityManager.persist(newEntity);
+					if (newEntity.getTagId() == null) {
+						myEntityManager.persist(newEntity);
+					}
 				}
 			}
 		}
