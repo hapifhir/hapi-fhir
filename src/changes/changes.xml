@@ -102,6 +102,14 @@
 				Fix a regression in HAPI FHIR 2.5 JPA server where executing a search in a
 				transaction or batch operation caused an exception.
 			</action>
+			<action type="fix">
+				Correct an issue when processing transactions in JPA server where updates and
+				creates to resources with tags caused the tags to be created twice in the
+				database. These duplicates were utomatically filtered upon read so this issue
+				was not user-visible, but it coule occasionally lead to performance issues
+				if a resource containing multiple tags was updated many times via
+				transactions.
+			</action>
 		</release>
 		<release version="2.5" date="2017-06-08">
 			<action type="fix">

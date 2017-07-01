@@ -251,7 +251,9 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 	@Override
 	public ResourceTag addTag(TagDefinition theTag) {
 		ResourceTag tag = new ResourceTag(this, theTag);
-		getTags().add(tag);
+		if (!getTags().contains(tag)) {
+			getTags().add(tag);
+		}
 		return tag;
 	}
 

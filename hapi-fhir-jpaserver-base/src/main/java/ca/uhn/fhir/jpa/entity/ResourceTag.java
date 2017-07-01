@@ -21,8 +21,7 @@ package ca.uhn.fhir.jpa.entity;
  */
 import javax.persistence.*;
 
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.apache.commons.lang3.builder.*;
 
 @Entity
 @Table(name = "HFJ_RES_TAG", uniqueConstraints= {
@@ -106,6 +105,14 @@ public class ResourceTag extends BaseTag {
 		b.append(getResourceId());
 		b.append(getTag());
 		return b.toHashCode();
+	}
+
+	@Override
+	public String toString() {
+		ToStringBuilder b = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
+		b.append("resId", getResourceId());
+		b.append("tag", getTag().getId());
+		return b.build();
 	}
 
 }
