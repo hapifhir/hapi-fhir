@@ -111,6 +111,11 @@
 				if a resource containing multiple tags was updated many times via
 				transactions.
 			</action>
+			<action type="fix">
+				JPA server should not allow creation of resources that have a reference to
+				a resource ID that previously existed but is now deleted. Thanks to Artem
+				Sopin for reporting!
+			</action>
 		</release>
 		<release version="2.5" date="2017-06-08">
 			<action type="fix">

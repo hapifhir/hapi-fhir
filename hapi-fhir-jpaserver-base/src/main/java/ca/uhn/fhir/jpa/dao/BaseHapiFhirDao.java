@@ -353,6 +353,11 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 							"Resource contains reference to " + nextId.getValue() + " but resource with ID " + nextId.getIdPart() + " is actually of type " + target.getResourceType());
 				}
 
+				if (target.getDeleted() != null) {
+					String resName = targetResourceDef.getName();
+					throw new InvalidRequestException("Resource " + resName + "/" + id + " is deleted, specified in path: " + nextPathsUnsplit);
+				}
+				
 				if (nextSpDef.getTargets() != null && !nextSpDef.getTargets().contains(typeString)) {
 					continue;
 				}
