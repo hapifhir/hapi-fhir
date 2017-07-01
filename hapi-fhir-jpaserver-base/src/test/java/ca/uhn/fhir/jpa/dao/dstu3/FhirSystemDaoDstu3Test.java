@@ -23,7 +23,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
-import java.util.List;
+import java.util.*;
 
 import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.dstu3.model.Appointment;
@@ -68,9 +68,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.SearchParameterMap;
-import ca.uhn.fhir.jpa.entity.ResourceEncodingEnum;
-import ca.uhn.fhir.jpa.entity.ResourceTable;
-import ca.uhn.fhir.jpa.entity.TagTypeEnum;
+import ca.uhn.fhir.jpa.entity.*;
 import ca.uhn.fhir.jpa.provider.SystemProviderDstu2Test;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -488,36 +486,31 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 		request.addEntry().getRequest().setMethod(HTTPVerb.GET).setUrl("Patient/THIS_ID_DOESNT_EXIST");
 
 		Bundle resp = mySystemDao.transaction(mySrd, request);
-		assertEquals(3, resp.getEntry().size());
+		assertEquals(2, resp.getEntry().size());
 		assertEquals(BundleType.BATCHRESPONSE, resp.getTypeElement().getValue());
 
 		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(resp));
 		BundleEntryResponseComponent respEntry;
 
-		// Bundle.entry[0] is operation outcome
-		assertEquals(OperationOutcome.class, resp.getEntry().get(0).getResource().getClass());
-		assertEquals(IssueSeverity.INFORMATION, ((OperationOutcome) resp.getEntry().get(0).getResource()).getIssue().get(0).getSeverityElement().getValue());
-		assertThat(((OperationOutcome) resp.getEntry().get(0).getResource()).getIssue().get(0).getDiagnostics(), startsWith("Batch completed in "));
+		// Bundle.entry[0] is create response
+		assertEquals("201 Created", resp.getEntry().get(0).getResponse().getStatus());
+		assertThat(resp.getEntry().get(0).getResponse().getLocation(), startsWith("Patient/"));
 
-		// Bundle.entry[1] is create response
-		assertEquals("201 Created", resp.getEntry().get(1).getResponse().getStatus());
-		assertThat(resp.getEntry().get(1).getResponse().getLocation(), startsWith("Patient/"));
-
-		// Bundle.entry[2] is failed read response
-		assertEquals(OperationOutcome.class, resp.getEntry().get(2).getResource().getClass());
-		assertEquals(IssueSeverity.ERROR, ((OperationOutcome) resp.getEntry().get(2).getResource()).getIssue().get(0).getSeverityElement().getValue());
-		assertEquals("Resource Patient/THIS_ID_DOESNT_EXIST is not known", ((OperationOutcome) resp.getEntry().get(2).getResource()).getIssue().get(0).getDiagnostics());
-		assertEquals("404 Not Found", resp.getEntry().get(2).getResponse().getStatus());
+		// Bundle.entry[1] is failed read response
+		assertEquals(OperationOutcome.class, resp.getEntry().get(1).getResource().getClass());
+		assertEquals(IssueSeverity.ERROR, ((OperationOutcome) resp.getEntry().get(1).getResource()).getIssue().get(0).getSeverityElement().getValue());
+		assertEquals("Resource Patient/THIS_ID_DOESNT_EXIST is not known", ((OperationOutcome) resp.getEntry().get(1).getResource()).getIssue().get(0).getDiagnostics());
+		assertEquals("404 Not Found", resp.getEntry().get(1).getResponse().getStatus());
 
 		// Check POST
-		respEntry = resp.getEntry().get(1).getResponse();
+		respEntry = resp.getEntry().get(0).getResponse();
 		assertEquals("201 Created", respEntry.getStatus());
 		IdType createdId = new IdType(respEntry.getLocation());
 		assertEquals("Patient", createdId.getResourceType());
 		myPatientDao.read(createdId, mySrd); // shouldn't fail
 
 		// Check GET
-		respEntry = resp.getEntry().get(2).getResponse();
+		respEntry = resp.getEntry().get(1).getResponse();
 		assertThat(respEntry.getStatus(), startsWith("404"));
 
 	}
@@ -2081,6 +2074,21 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(resp));
 
 		assertEquals("201 Created", resp.getEntry().get(0).getResponse().getStatus());
+		
+		
+		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
+			@Override
+			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
+				Set<String> values = new HashSet<String>();
+				for (ResourceTag next : myResourceTagDao.findAll()) {
+					if (!values.add(next.toString())) {
+						ourLog.info("Found duplicate tag on resource of type {}", next.getResource().getResourceType());
+						ourLog.info("Tag was: {} / {}", next.getTag().getSystem(), next.getTag().getCode());
+					}
+				}
+			}
+		});
+		
 	}
 
 	@Test
