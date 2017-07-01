@@ -1,7 +1,5 @@
 package ca.uhn.fhir.jpa.provider.dstu3;
 
-import java.util.Collection;
-
 /*
  * #%L
  * HAPI FHIR JPA Server
@@ -21,23 +19,18 @@ import java.util.Collection;
  * limitations under the License.
  * #L%
  */
-
-import java.util.Map;
+import java.util.*;
 
 import javax.servlet.http.HttpServletRequest;
 
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.dstu3.model.CapabilityStatement.*;
 import org.hl7.fhir.dstu3.model.Enumerations.SearchParamType;
-import org.springframework.beans.factory.annotation.Autowired;
 
-import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
-import ca.uhn.fhir.jpa.dao.ISearchParamRegistry;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.util.CoverageIgnore;
 import ca.uhn.fhir.util.ExtensionConstants;
@@ -47,9 +40,10 @@ public class JpaConformanceProviderDstu3 extends org.hl7.fhir.dstu3.hapi.rest.se
 	private volatile CapabilityStatement myCachedValue;
 	private DaoConfig myDaoConfig;
 	private String myImplementationDescription;
+	private boolean myIncludeResourceCounts;
 	private RestfulServer myRestfulServer;
 	private IFhirSystemDao<Bundle, Meta> mySystemDao;
-
+	
 	/**
 	 * Constructor
 	 */
@@ -57,8 +51,9 @@ public class JpaConformanceProviderDstu3 extends org.hl7.fhir.dstu3.hapi.rest.se
 	public JpaConformanceProviderDstu3(){
 		super();
 		super.setCache(false);
+		setIncludeResourceCounts(true);
 	}
-
+	
 	/**
 	 * Constructor
 	 */
@@ -68,15 +63,17 @@ public class JpaConformanceProviderDstu3 extends org.hl7.fhir.dstu3.hapi.rest.se
 		mySystemDao = theSystemDao;
 		myDaoConfig = theDaoConfig;
 		super.setCache(false);
+		setIncludeResourceCounts(true);
 	}
-	
+
 	@Override
 	public CapabilityStatement getServerConformance(HttpServletRequest theRequest) {
 		CapabilityStatement retVal = myCachedValue;
 
-		Map<String, Long> counts = mySystemDao.getResourceCounts();
-
-		FhirContext ctx = myRestfulServer.getFhirContext();
+		Map<String, Long> counts = Collections.emptyMap();
+		if (myIncludeResourceCounts) {
+			counts = mySystemDao.getResourceCounts();
+		}
 
 		retVal = super.getServerConformance(theRequest);
 		for (CapabilityStatementRestComponent nextRest : retVal.getRest()) {
@@ -148,6 +145,10 @@ public class JpaConformanceProviderDstu3 extends org.hl7.fhir.dstu3.hapi.rest.se
 		return retVal;
 	}
 
+	public boolean isIncludeResourceCounts() {
+		return myIncludeResourceCounts;
+	}
+	
 	/**
 	 * Subclasses may override
 	 */
@@ -162,6 +163,10 @@ public class JpaConformanceProviderDstu3 extends org.hl7.fhir.dstu3.hapi.rest.se
 	@CoverageIgnore
 	public void setImplementationDescription(String theImplDesc) {
 		myImplementationDescription = theImplDesc;
+	}
+
+	public void setIncludeResourceCounts(boolean theIncludeResourceCounts) {
+		myIncludeResourceCounts = theIncludeResourceCounts;
 	}
 
 	@Override

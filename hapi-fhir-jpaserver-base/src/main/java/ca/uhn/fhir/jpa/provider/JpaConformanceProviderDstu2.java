@@ -19,9 +19,7 @@ package ca.uhn.fhir.jpa.provider;
  * limitations under the License.
  * #L%
  */
-
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -51,6 +49,7 @@ public class JpaConformanceProviderDstu2 extends ServerConformanceProvider {
 	private volatile Conformance myCachedValue;
 	private DaoConfig myDaoConfig;
 	private String myImplementationDescription;
+	private boolean myIncludeResourceCounts;
 	private RestfulServer myRestfulServer;
 	private IFhirSystemDao<Bundle, MetaDt> mySystemDao;
 
@@ -61,6 +60,7 @@ public class JpaConformanceProviderDstu2 extends ServerConformanceProvider {
 	public JpaConformanceProviderDstu2(){
 		super();
 		super.setCache(false);
+		setIncludeResourceCounts(true);
 	}
 
 	/**
@@ -72,13 +72,17 @@ public class JpaConformanceProviderDstu2 extends ServerConformanceProvider {
 		mySystemDao = theSystemDao;
 		myDaoConfig = theDaoConfig;
 		super.setCache(false);
+		setIncludeResourceCounts(true);
 	}
 
 	@Override
 	public Conformance getServerConformance(HttpServletRequest theRequest) {
 		Conformance retVal = myCachedValue;
 
-		Map<String, Long> counts = mySystemDao.getResourceCounts();
+		Map<String, Long> counts = Collections.emptyMap();
+		if (myIncludeResourceCounts) {
+			counts = mySystemDao.getResourceCounts();
+		}
 
 		FhirContext ctx = myRestfulServer.getFhirContext();
 
@@ -119,6 +123,10 @@ public class JpaConformanceProviderDstu2 extends ServerConformanceProvider {
 		return retVal;
 	}
 
+	public boolean isIncludeResourceCounts() {
+		return myIncludeResourceCounts;
+	}
+
 	public void setDaoConfig(DaoConfig myDaoConfig) {
 		this.myDaoConfig = myDaoConfig;
 	}
@@ -126,6 +134,10 @@ public class JpaConformanceProviderDstu2 extends ServerConformanceProvider {
 	@CoverageIgnore
 	public void setImplementationDescription(String theImplDesc) {
 		myImplementationDescription = theImplDesc;
+	}
+
+	public void setIncludeResourceCounts(boolean theIncludeResourceCounts) {
+		myIncludeResourceCounts = theIncludeResourceCounts;
 	}
 
 	@Override

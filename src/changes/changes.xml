@@ -116,6 +116,10 @@
 				a resource ID that previously existed but is now deleted. Thanks to Artem
 				Sopin for reporting!
 			</action>
+			<action type="add">
+				JpaConformanceProvider now has a configuration setting to enable and 
+				disable adding resource counts to the server metadata.
+			</action>
 		</release>
 		<release version="2.5" date="2017-06-08">
 			<action type="fix">
