@@ -10,7 +10,7 @@ package ca.uhn.fhir.jpa.entity;
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  * 
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -45,8 +45,8 @@ import ca.uhn.fhir.model.api.Tag;
 
 //@formatter:on
 @Entity
-@Table(name = "HFJ_TAG_DEF", uniqueConstraints = { 
-	@UniqueConstraint(name="IDX_TAGDEF_TYPESYSCODE", columnNames = { "TAG_TYPE", "TAG_SYSTEM", "TAG_CODE" }) 
+@Table(name = "HFJ_TAG_DEF", uniqueConstraints = {
+		@UniqueConstraint(name = "IDX_TAGDEF_TYPESYSCODE", columnNames = { "TAG_TYPE", "TAG_SYSTEM", "TAG_CODE" })
 })
 //@formatter:off
 public class TagDefinition implements Serializable {
@@ -77,6 +77,8 @@ public class TagDefinition implements Serializable {
 	@Column(name="TAG_TYPE", nullable=false)
 	@Enumerated(EnumType.ORDINAL)
 	private TagTypeEnum myTagType;
+
+	private Integer myHashCode;
 
 	public TagDefinition() {
 	}
@@ -110,6 +112,7 @@ public class TagDefinition implements Serializable {
 
 	public void setCode(String theCode) {
 		myCode = theCode;
+		myHashCode = null;
 	}
 
 	public void setDisplay(String theDisplay) {
@@ -118,10 +121,12 @@ public class TagDefinition implements Serializable {
 
 	public void setSystem(String theSystem) {
 		mySystem = theSystem;
+		myHashCode = null;
 	}
 
 	public void setTagType(TagTypeEnum theTagType) {
 		myTagType = theTagType;
+		myHashCode = null;
 	}
 
 	public Tag toTag() {
@@ -155,15 +160,14 @@ public class TagDefinition implements Serializable {
 	
 	@Override
 	public int hashCode() {
-		HashCodeBuilder b = new HashCodeBuilder();
-		if (myId != null) {
-			b.append(myId);
-		} else {
+		if (myHashCode == null) {
+			HashCodeBuilder b = new HashCodeBuilder();
 			b.append(myTagType);
 			b.append(mySystem);
 			b.append(myCode);
+			myHashCode = b.toHashCode();
 		}
-		return b.toHashCode();
+		return myHashCode;
 	}
 
 	@Override

@@ -1,7 +1,7 @@
 
 package ca.uhn.fhir.jpa.subscription;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 import java.util.List;
 
@@ -36,6 +36,7 @@ import ca.uhn.fhir.rest.annotation.Update;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.PortUtil;
 
 /**
@@ -58,13 +59,12 @@ public class RestHookTestDstu2Test extends BaseResourceProviderDstu2Test {
 		ourClient.delete().resourceConditionalByUrl("Subscription?status=active").execute();
 		ourLog.info("Done deleting all subscriptions");
 		myDaoConfig.setAllowMultipleDelete(new DaoConfig().isAllowMultipleDelete());
-		
+
 		ourRestServer.unregisterInterceptor(ourRestHookSubscriptionInterceptor);
 	}
 
 	@Before
 	public void beforeRegisterRestHookListener() {
-//		ourRestHookSubscriptionInterceptor.set
 		ourRestServer.registerInterceptor(ourRestHookSubscriptionInterceptor);
 	}
 
@@ -127,13 +127,12 @@ public class RestHookTestDstu2Test extends BaseResourceProviderDstu2Test {
 		Thread.sleep(500);
 		assertEquals(1, ourCreatedObservations.size());
 		assertEquals(0, ourUpdatedObservations.size());
-		
+
 		Subscription subscriptionTemp = ourClient.read(Subscription.class, subscription2.getId());
 		Assert.assertNotNull(subscriptionTemp);
 
 		subscriptionTemp.setCriteria(criteria1);
 		ourClient.update().resource(subscriptionTemp).withId(subscriptionTemp.getIdElement()).execute();
-
 
 		Observation observation2 = sendObservation(code, "SNOMED-CT");
 
@@ -141,8 +140,8 @@ public class RestHookTestDstu2Test extends BaseResourceProviderDstu2Test {
 		Thread.sleep(500);
 		assertEquals(3, ourCreatedObservations.size());
 		assertEquals(0, ourUpdatedObservations.size());
-		
-		ourClient.delete().resourceById(new IdDt("Subscription/"+ subscription2.getId())).execute();
+
+		ourClient.delete().resourceById(new IdDt("Subscription/" + subscription2.getId())).execute();
 
 		Observation observationTemp3 = sendObservation(code, "SNOMED-CT");
 
@@ -184,6 +183,20 @@ public class RestHookTestDstu2Test extends BaseResourceProviderDstu2Test {
 	}
 
 	@Test
+	public void testRestHookSubscriptionInvalidCriteria() throws Exception {
+		String payload = "application/xml";
+
+		String criteria1 = "Observation?codeeeee=SNOMED-CT";
+
+		try {
+			createSubscription(criteria1, payload, ourListenerServerBase);
+			fail();
+		} catch (InvalidRequestException e) {
+			assertEquals("HTTP 400 Bad Request: Invalid criteria: Failed to parse match URL[Observation?codeeeee=SNOMED-CT] - Resource type Observation does not have a parameter with name: codeeeee", e.getMessage());
+		}
+	}
+
+	@Test
 	public void testRestHookSubscriptionXml() throws Exception {
 		String payload = "application/xml";
 
@@ -200,13 +213,12 @@ public class RestHookTestDstu2Test extends BaseResourceProviderDstu2Test {
 		Thread.sleep(500);
 		assertEquals(1, ourCreatedObservations.size());
 		assertEquals(0, ourUpdatedObservations.size());
-		
+
 		Subscription subscriptionTemp = ourClient.read(Subscription.class, subscription2.getId());
 		Assert.assertNotNull(subscriptionTemp);
 
 		subscriptionTemp.setCriteria(criteria1);
 		ourClient.update().resource(subscriptionTemp).withId(subscriptionTemp.getIdElement()).execute();
-
 
 		Observation observation2 = sendObservation(code, "SNOMED-CT");
 
@@ -214,8 +226,8 @@ public class RestHookTestDstu2Test extends BaseResourceProviderDstu2Test {
 		Thread.sleep(500);
 		assertEquals(3, ourCreatedObservations.size());
 		assertEquals(0, ourUpdatedObservations.size());
-		
-		ourClient.delete().resourceById(new IdDt("Subscription/"+ subscription2.getId())).execute();
+
+		ourClient.delete().resourceById(new IdDt("Subscription/" + subscription2.getId())).execute();
 
 		Observation observationTemp3 = sendObservation(code, "SNOMED-CT");
 
@@ -256,7 +268,6 @@ public class RestHookTestDstu2Test extends BaseResourceProviderDstu2Test {
 		Assert.assertFalse(observation2.getId().isEmpty());
 	}
 
-	
 	@BeforeClass
 	public static void startListenerServer() throws Exception {
 		ourListenerPort = PortUtil.findFreePort();

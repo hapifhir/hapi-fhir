@@ -48,6 +48,7 @@ import ca.uhn.fhir.rest.server.AddProfileTagEnum;
 import ca.uhn.fhir.rest.server.ETagSupportEnum;
 import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.rest.server.HardcodedServerAddressStrategy;
+import ca.uhn.fhir.rest.server.IPagingProvider;
 import ca.uhn.fhir.rest.server.IRestfulServerDefaults;
 import ca.uhn.fhir.rest.server.IServerAddressStrategy;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -62,216 +63,246 @@ import ca.uhn.fhir.util.OperationOutcomeUtil;
  */
 public abstract class AbstractJaxRsProvider implements IRestfulServerDefaults {
 
-    private final FhirContext CTX;
+	private static final String ERROR = "error";
 
-    private static final String PROCESSING = "processing";
-    private static final String ERROR = "error";
+	private static final String PROCESSING = "processing";
 
-    /** the uri info */
-    @Context
-    private UriInfo theUriInfo;
-    /** the http headers */
-    @Context
-    private HttpHeaders theHeaders;
+	private final FhirContext CTX;
+	/** the http headers */
+	@Context
+	private HttpHeaders theHeaders;
 
-    @Override
-    public FhirContext getFhirContext() {
-        return CTX;
-    }
+	/** the uri info */
+	@Context
+	private UriInfo theUriInfo;
 
-    /**
-     * Default is DSTU2.  Use {@link AbstractJaxRsProvider#AbstractJaxRsProvider(FhirContext)} to specify a DSTU3 context.
-     */
-    protected AbstractJaxRsProvider() {
-        CTX = FhirContext.forDstu2();
-    }
+	/**
+	 * Default is DSTU2. Use {@link AbstractJaxRsProvider#AbstractJaxRsProvider(FhirContext)} to specify a DSTU3 context.
+	 */
+	protected AbstractJaxRsProvider() {
+		CTX = FhirContext.forDstu2();
+	}
 
-    /**
-     *
-     * @param ctx the {@link FhirContext} to support.
-     */
-    protected AbstractJaxRsProvider(final FhirContext ctx) {
-        CTX = ctx;
-    }
+	/**
+	 *
+	 * @param ctx
+	 *           the {@link FhirContext} to support.
+	 */
+	protected AbstractJaxRsProvider(final FhirContext ctx) {
+		CTX = ctx;
+	}
 
-    /**
-     * This method returns the query parameters
-     * @return the query parameters
-     */
-    public Map<String, String[]> getParameters() {
-        final MultivaluedMap<String, String> queryParameters = getUriInfo().getQueryParameters();
-        final HashMap<String, String[]> params = new HashMap<String, String[]>();
-        for (final Entry<String, List<String>> paramEntry : queryParameters.entrySet()) {
-            params.put(paramEntry.getKey(), paramEntry.getValue().toArray(new String[paramEntry.getValue().size()]));
-        }
-        return params;
-    }
+	private IBaseOperationOutcome createOutcome(final DataFormatException theException) {
+		final IBaseOperationOutcome oo = OperationOutcomeUtil.newInstance(getFhirContext());
+		final String detailsValue = theException.getMessage() + "\n\n" + ExceptionUtils.getStackTrace(theException);
+		OperationOutcomeUtil.addIssue(getFhirContext(), oo, ERROR, detailsValue, null, PROCESSING);
+		return oo;
+	}
 
-    /**
-     * This method returns the default server address strategy. The default strategy return the
-     * base uri for the request {@link AbstractJaxRsProvider#getBaseForRequest() getBaseForRequest()}
-     * @return
-     */
-    public IServerAddressStrategy getServerAddressStrategy() {
-        final HardcodedServerAddressStrategy addressStrategy = new HardcodedServerAddressStrategy();
-        addressStrategy.setValue(getBaseForRequest());
-        return addressStrategy;
-    }
+	/**
+	 * DEFAULT = AddProfileTagEnum.NEVER
+	 */
+	@Override
+	public AddProfileTagEnum getAddProfileTag() {
+		return AddProfileTagEnum.NEVER;
+	}
 
-    /**
-     * This method returns the server base, independent of the request or resource.
-     * @see javax.ws.rs.core.UriInfo#getBaseUri()
-     * @return the ascii string for the server base
-     */
-    public String getBaseForServer() {
-        final String url = getUriInfo().getBaseUri().toASCIIString();
-        return StringUtils.isNotBlank(url) && url.endsWith("/") ? url.substring(0, url.length() - 1) : url;
-    }
+	/**
+	 * This method returns the server base, including the resource path.
+	 * {@link javax.ws.rs.core.UriInfo#getBaseUri() UriInfo#getBaseUri()}
+	 * 
+	 * @return the ascii string for the base resource provider path
+	 */
+	public String getBaseForRequest() {
+		return getBaseForServer();
+	}
 
-    /**
-     * This method returns the server base, including the resource path.
-     * {@link javax.ws.rs.core.UriInfo#getBaseUri() UriInfo#getBaseUri()}
-     * @return the ascii string for the base resource provider path
-     */
-    public String getBaseForRequest() {
-        return getBaseForServer();
-    }
+	/**
+	 * This method returns the server base, independent of the request or resource.
+	 * 
+	 * @see javax.ws.rs.core.UriInfo#getBaseUri()
+	 * @return the ascii string for the server base
+	 */
+	public String getBaseForServer() {
+		final String url = getUriInfo().getBaseUri().toASCIIString();
+		return StringUtils.isNotBlank(url) && url.endsWith("/") ? url.substring(0, url.length() - 1) : url;
+	}
 
-    /**
-     * Default: an empty list of interceptors (Interceptors are not yet supported 
-     * in the JAX-RS server). Please get in touch if you'd like to help!
-     * 
-     * @see ca.uhn.fhir.rest.server.IRestfulServer#getInterceptors()
-     */
-    @Override
-    public List<IServerInterceptor> getInterceptors() {
-        return Collections.emptyList();
-    }
+	/**
+	 * DEFAULT = EncodingEnum.JSON
+	 */
+	@Override
+	public EncodingEnum getDefaultResponseEncoding() {
+		return EncodingEnum.JSON;
+	}
 
-    /**
-     * Get the uriInfo
-     * @return the uri info
-     */
-    public UriInfo getUriInfo() {
-        return this.theUriInfo;
-    }
+	/**
+	 * DEFAULT = ETagSupportEnum.DISABLED
+	 */
+	@Override
+	public ETagSupportEnum getETagSupport() {
+		return ETagSupportEnum.DISABLED;
+	}
 
-    /**
-     * Set the Uri Info
-     * @param uriInfo the uri info
-     */
-    public void setUriInfo(final UriInfo uriInfo) {
-        this.theUriInfo = uriInfo;
-    }
+	@Override
+	public FhirContext getFhirContext() {
+		return CTX;
+	}
 
-    /**
-     * Get the headers
-     * @return the headers
-     */
-    public HttpHeaders getHeaders() {
-        return this.theHeaders;
-    }
+	/**
+	 * Get the headers
+	 * 
+	 * @return the headers
+	 */
+	public HttpHeaders getHeaders() {
+		return this.theHeaders;
+	}
 
-    /**
-     * Set the headers
-     * @param headers the headers to set 
-     */
-    public void setHeaders(final HttpHeaders headers) {
-        this.theHeaders = headers;
-    }
+	/**
+	 * Default: an empty list of interceptors (Interceptors are not yet supported
+	 * in the JAX-RS server). Please get in touch if you'd like to help!
+	 * 
+	 * @see ca.uhn.fhir.rest.server.IRestfulServer#getInterceptors()
+	 */
+	@Override
+	public List<IServerInterceptor> getInterceptors() {
+		return Collections.emptyList();
+	}
 
-    /**
-     * Return the requestbuilder for the server
-     * @param requestType the type of the request
-     * @param restOperation the rest operation type
-     * @param theResourceName the resource name
-     * @return the requestbuilder
-     */
-    public Builder getRequest(final RequestTypeEnum requestType, final RestOperationTypeEnum restOperation, final String theResourceName) {
-        return new JaxRsRequest.Builder(this, requestType, restOperation, theUriInfo.getRequestUri().toString(), theResourceName);
-    }
+	/**
+	 * By default, no paging provider is used
+	 */
+	@Override
+	public IPagingProvider getPagingProvider() {
+		return null;
+	}
 
-    /**
-     * Return the requestbuilder for the server
-     * @param requestType the type of the request
-     * @param restOperation the rest operation type
-     * @return the requestbuilder
-     */
-    public Builder getRequest(final RequestTypeEnum requestType, final RestOperationTypeEnum restOperation) {
-        return getRequest(requestType, restOperation, null);
-    }
+	/**
+	 * This method returns the query parameters
+	 * 
+	 * @return the query parameters
+	 */
+	public Map<String, String[]> getParameters() {
+		final MultivaluedMap<String, String> queryParameters = getUriInfo().getQueryParameters();
+		final HashMap<String, String[]> params = new HashMap<String, String[]>();
+		for (final Entry<String, List<String>> paramEntry : queryParameters.entrySet()) {
+			params.put(paramEntry.getKey(), paramEntry.getValue().toArray(new String[paramEntry.getValue().size()]));
+		}
+		return params;
+	}
 
-    /**
-     * DEFAULT = EncodingEnum.JSON
-     */
-    @Override
-    public EncodingEnum getDefaultResponseEncoding() {
-        return EncodingEnum.JSON;
-    }
+	/**
+	 * Return the requestbuilder for the server
+	 * 
+	 * @param requestType
+	 *           the type of the request
+	 * @param restOperation
+	 *           the rest operation type
+	 * @return the requestbuilder
+	 */
+	public Builder getRequest(final RequestTypeEnum requestType, final RestOperationTypeEnum restOperation) {
+		return getRequest(requestType, restOperation, null);
+	}
 
-    /**
-     * DEFAULT = true
-     */
-    @Override
-    public boolean isDefaultPrettyPrint() {
-        return true;
-    }
+	/**
+	 * Return the requestbuilder for the server
+	 * 
+	 * @param requestType
+	 *           the type of the request
+	 * @param restOperation
+	 *           the rest operation type
+	 * @param theResourceName
+	 *           the resource name
+	 * @return the requestbuilder
+	 */
+	public Builder getRequest(final RequestTypeEnum requestType, final RestOperationTypeEnum restOperation, final String theResourceName) {
+		return new JaxRsRequest.Builder(this, requestType, restOperation, theUriInfo.getRequestUri().toString(), theResourceName);
+	}
 
-    /**
-     * DEFAULT = ETagSupportEnum.DISABLED
-     */
-    @Override
-    public ETagSupportEnum getETagSupport() {
-        return ETagSupportEnum.DISABLED;
-    }
+	/**
+	 * This method returns the default server address strategy. The default strategy return the
+	 * base uri for the request {@link AbstractJaxRsProvider#getBaseForRequest() getBaseForRequest()}
+	 * 
+	 * @return
+	 */
+	public IServerAddressStrategy getServerAddressStrategy() {
+		final HardcodedServerAddressStrategy addressStrategy = new HardcodedServerAddressStrategy();
+		addressStrategy.setValue(getBaseForRequest());
+		return addressStrategy;
+	}
 
-    /**
-     * DEFAULT = AddProfileTagEnum.NEVER
-     */
-    @Override
-    public AddProfileTagEnum getAddProfileTag() {
-        return AddProfileTagEnum.NEVER;
-    }
+	/**
+	 * Get the uriInfo
+	 * 
+	 * @return the uri info
+	 */
+	public UriInfo getUriInfo() {
+		return this.theUriInfo;
+	}
 
-    /**
-     * DEFAULT = false
-     */
-    @Override
-    public boolean isUseBrowserFriendlyContentTypes() {
-        return true;
-    }
+	/**
+	 * Convert an exception to a response
+	 * 
+	 * @param theRequest
+	 *           the incoming request
+	 * @param theException
+	 *           the exception to convert
+	 * @return response
+	 * @throws IOException
+	 */
+	public Response handleException(final JaxRsRequest theRequest, final Throwable theException)
+			throws IOException {
+		if (theException instanceof JaxRsResponseException) {
+			return new JaxRsExceptionInterceptor().convertExceptionIntoResponse(theRequest, (JaxRsResponseException) theException);
+		} else if (theException instanceof DataFormatException) {
+			return new JaxRsExceptionInterceptor().convertExceptionIntoResponse(theRequest, new JaxRsResponseException(
+					new InvalidRequestException(theException.getMessage(), createOutcome((DataFormatException) theException))));
+		} else {
+			return new JaxRsExceptionInterceptor().convertExceptionIntoResponse(theRequest,
+					new JaxRsExceptionInterceptor().convertException(this, theException));
+		}
+	}
 
-    /**
-     * DEFAULT = false
-     */
-    public boolean withStackTrace() {
-        return false;
-    }
+	/**
+	 * DEFAULT = true
+	 */
+	@Override
+	public boolean isDefaultPrettyPrint() {
+		return true;
+	}
 
-    /**
-     * Convert an exception to a response
-     * @param theRequest the incoming request
-     * @param theException the exception to convert
-     * @return response
-     * @throws IOException
-     */
-    public Response handleException(final JaxRsRequest theRequest, final Throwable theException)
-            throws IOException {
-        if (theException instanceof JaxRsResponseException) {
-            return new JaxRsExceptionInterceptor().convertExceptionIntoResponse(theRequest, (JaxRsResponseException) theException);
-        } else if (theException instanceof DataFormatException) {
-            return new JaxRsExceptionInterceptor().convertExceptionIntoResponse(theRequest, new JaxRsResponseException(
-                    new InvalidRequestException(theException.getMessage(), createOutcome((DataFormatException) theException))));
-        } else {
-            return new JaxRsExceptionInterceptor().convertExceptionIntoResponse(theRequest,
-                    new JaxRsExceptionInterceptor().convertException(this, theException));
-        }
-    }
+	/**
+	 * DEFAULT = false
+	 */
+	@Override
+	public boolean isUseBrowserFriendlyContentTypes() {
+		return true;
+	}
 
-    private IBaseOperationOutcome createOutcome(final DataFormatException theException) {
-        final IBaseOperationOutcome oo = OperationOutcomeUtil.newInstance(getFhirContext());
-        final String detailsValue = theException.getMessage() + "\n\n" + ExceptionUtils.getStackTrace(theException);
-        OperationOutcomeUtil.addIssue(getFhirContext(), oo, ERROR, detailsValue, null, PROCESSING);
-        return oo;
-    }
+	/**
+	 * Set the headers
+	 * 
+	 * @param headers
+	 *           the headers to set
+	 */
+	public void setHeaders(final HttpHeaders headers) {
+		this.theHeaders = headers;
+	}
+
+	/**
+	 * Set the Uri Info
+	 * 
+	 * @param uriInfo
+	 *           the uri info
+	 */
+	public void setUriInfo(final UriInfo uriInfo) {
+		this.theUriInfo = uriInfo;
+	}
+
+	/**
+	 * DEFAULT = false
+	 */
+	public boolean withStackTrace() {
+		return false;
+	}
 }

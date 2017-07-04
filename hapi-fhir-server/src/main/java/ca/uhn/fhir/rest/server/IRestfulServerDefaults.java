@@ -28,37 +28,6 @@ import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 
 public interface IRestfulServerDefaults {
-
-	/**
-	 * Returns the list of interceptors registered against this server
-	 */
-	List<IServerInterceptor> getInterceptors();
-
-	/**
-	 * Gets the {@link FhirContext} associated with this server. For efficient processing, resource providers and plain
-	 * providers should generally use this context if one is needed, as opposed to
-	 * creating their own.
-	 */
-	FhirContext getFhirContext();
-
-	/**
-	 * Should the server "pretty print" responses by default (requesting clients can always override this default by
-	 * supplying an <code>Accept</code> header in the request, or a <code>_pretty</code>
-	 * parameter in the request URL.
-	 * <p>
-	 * The default is <code>false</code>
-	 * </p>
-	 * 
-	 * @return Returns the default pretty print setting
-	 */
-	boolean isDefaultPrettyPrint();
-
-	/**
-	 * @return Returns the server support for ETags (will not be <code>null</code>). Default is
-	 *         {@link RestfulServer#DEFAULT_ETAG_SUPPORT}
-	 */
-	ETagSupportEnum getETagSupport();
-
 	/**
 	 * @return Returns the setting for automatically adding profile tags
 	 * @deprecated As of HAPI FHIR 1.5, this property has been moved to
@@ -75,10 +44,46 @@ public interface IRestfulServerDefaults {
 	EncodingEnum getDefaultResponseEncoding();
 
 	/**
+	 * @return Returns the server support for ETags (will not be <code>null</code>). Default is
+	 *         {@link RestfulServer#DEFAULT_ETAG_SUPPORT}
+	 */
+	ETagSupportEnum getETagSupport();
+
+	/**
+	 * Gets the {@link FhirContext} associated with this server. For efficient processing, resource providers and plain
+	 * providers should generally use this context if one is needed, as opposed to
+	 * creating their own.
+	 */
+	FhirContext getFhirContext();
+
+	/**
+	 * Returns the list of interceptors registered against this server
+	 */
+	List<IServerInterceptor> getInterceptors();
+
+	/**
+	 * Returns the paging provider for this server
+	 */
+	IPagingProvider getPagingProvider();
+
+	/**
+	 * Should the server "pretty print" responses by default (requesting clients can always override this default by
+	 * supplying an <code>Accept</code> header in the request, or a <code>_pretty</code>
+	 * parameter in the request URL.
+	 * <p>
+	 * The default is <code>false</code>
+	 * </p>
+	 * 
+	 * @return Returns the default pretty print setting
+	 */
+	boolean isDefaultPrettyPrint();
+
+	/**
 	 * @return If <code>true</code> the server will use browser friendly content-types (instead of standard FHIR ones)
 	 *         when it detects that the request is coming from a browser
 	 *         instead of a FHIR
 	 */
 	boolean isUseBrowserFriendlyContentTypes();
+
 
 }

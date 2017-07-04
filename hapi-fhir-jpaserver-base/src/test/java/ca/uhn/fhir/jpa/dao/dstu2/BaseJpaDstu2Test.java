@@ -37,6 +37,7 @@ import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
 import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.entity.ResourceTable;
 import ca.uhn.fhir.jpa.provider.JpaSystemProviderDstu2;
+import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
 import ca.uhn.fhir.model.dstu2.composite.CodeableConceptDt;
@@ -75,7 +76,6 @@ import ca.uhn.fhir.util.TestUtil;
 @ContextConfiguration(classes= {TestDstu2Config.class, ca.uhn.fhir.jpa.config.WebsocketDstu2DispatcherConfig.class})
 //@formatter:on
 public abstract class BaseJpaDstu2Test extends BaseJpaTest {
-
 	@Autowired
 	protected ApplicationContext myAppCtx;
 	@Autowired
@@ -114,17 +114,17 @@ public abstract class BaseJpaDstu2Test extends BaseJpaTest {
 	@Autowired
 	@Qualifier("myLocationDaoDstu2")
 	protected IFhirResourceDao<Location> myLocationDao;
+	@Autowired
+		@Qualifier("myMediaDaoDstu2")
+		protected IFhirResourceDao<Media> myMediaDao;
 	
 @Autowired
-	@Qualifier("myMediaDaoDstu2")
-	protected IFhirResourceDao<Media> myMediaDao;
+@Qualifier("myMedicationAdministrationDaoDstu2")
+protected IFhirResourceDao<MedicationAdministration> myMedicationAdministrationDao;
 	
 	@Autowired
 	@Qualifier("myMedicationDaoDstu2")
 	protected IFhirResourceDao<Medication> myMedicationDao;
-	@Autowired
-	@Qualifier("myMedicationAdministrationDaoDstu2")
-	protected IFhirResourceDao<MedicationAdministration> myMedicationAdministrationDao;
 	@Autowired
 	@Qualifier("myMedicationOrderDaoDstu2")
 	protected IFhirResourceDao<MedicationOrder> myMedicationOrderDao;
@@ -134,6 +134,8 @@ public abstract class BaseJpaDstu2Test extends BaseJpaTest {
 	@Autowired
 	@Qualifier("myOrganizationDaoDstu2")
 	protected IFhirResourceDao<Organization> myOrganizationDao;
+	@Autowired
+	protected DatabaseBackedPagingProvider myPagingProvider;
 	@Autowired
 	@Qualifier("myPatientDaoDstu2")
 	protected IFhirResourceDaoPatient<Patient> myPatientDao;
@@ -150,7 +152,11 @@ public abstract class BaseJpaDstu2Test extends BaseJpaTest {
 	@Qualifier("myResourceProvidersDstu2")
 	protected Object myResourceProviders;
 	@Autowired
+	protected ISearchCoordinatorSvc mySearchCoordinatorSvc;
+	@Autowired
 	protected IFulltextSearchSvc mySearchDao;
+	@Autowired
+	protected ISearchParamPresenceSvc mySearchParamPresenceSvc;
 	@Autowired
 	@Qualifier("myStructureDefinitionDaoDstu2")
 	protected IFhirResourceDao<StructureDefinition> myStructureDefinitionDao;
@@ -171,10 +177,6 @@ public abstract class BaseJpaDstu2Test extends BaseJpaTest {
 	@Autowired
 	@Qualifier("myValueSetDaoDstu2")
 	protected IFhirResourceDaoValueSet<ValueSet, CodingDt, CodeableConceptDt> myValueSetDao;
-	@Autowired
-	protected ISearchParamPresenceSvc mySearchParamPresenceSvc;
-	@Autowired
-	protected ISearchCoordinatorSvc mySearchCoordinatorSvc;
 
 	@Before
 	public void beforeCreateInterceptor() {

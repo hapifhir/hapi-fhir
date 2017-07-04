@@ -29,6 +29,7 @@ import javax.annotation.PostConstruct;
 import javax.persistence.NoResultException;
 import javax.persistence.TypedQuery;
 
+import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.instance.model.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,6 +49,7 @@ import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.dao.data.ISearchResultDao;
 import ca.uhn.fhir.jpa.entity.*;
 import ca.uhn.fhir.jpa.interceptor.IJpaServerInterceptor;
+import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.term.IHapiTerminologySvc;
 import ca.uhn.fhir.jpa.util.DeleteConflict;
 import ca.uhn.fhir.jpa.util.StopWatch;
@@ -117,9 +119,10 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		TagDefinition def = getTagOrNull(TagTypeEnum.TAG, theScheme, theTerm, theLabel);
 		if (def != null) {
 			BaseTag newEntity = entity.addTag(def);
-	
-			myEntityManager.persist(newEntity);
-			myEntityManager.merge(entity);
+			if (newEntity.getTagId() == null) {
+				myEntityManager.persist(newEntity);
+				myEntityManager.merge(entity);
+			}
 		}
 		
 		ourLog.info("Processed addTag {}/{} on {} in {}ms", new Object[] { theScheme, theTerm, theId, w.getMillisAndRestart() });
@@ -430,7 +433,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	private <MT extends IBaseMetaType> void doMetaAdd(MT theMetaAdd, BaseHasResource entity) {
 		List<TagDefinition> tags = toTagList(theMetaAdd);
 
-		//@formatter:off
 		for (TagDefinition nextDef : tags) {
 			
 			boolean hasTag = false;
@@ -449,12 +451,15 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				TagDefinition def = getTagOrNull(nextDef.getTagType(), nextDef.getSystem(), nextDef.getCode(), nextDef.getDisplay());
 				if (def != null) {
 					BaseTag newEntity = entity.addTag(def);
-					myEntityManager.persist(newEntity);
+					if (newEntity.getTagId() == null) {
+						myEntityManager.persist(newEntity);
+					}
 				}
 			}
 		}
-		//@formatter:on
 
+		validateMetaCount(entity.getTags().size());
+		
 		myEntityManager.merge(entity);
 	}
 
@@ -562,6 +567,16 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		theSavedEntity.setVersion(newVersionLong);
 	}
 
+	protected boolean isPagingProviderDatabaseBacked(RequestDetails theRequestDetails) {
+		if (theRequestDetails == null || theRequestDetails.getServer() == null) {
+			return false;
+		}
+		if (theRequestDetails.getServer().getPagingProvider() instanceof DatabaseBackedPagingProvider) {
+			return true;
+		}
+		return false;
+	}
+
 	@Override
 	public <MT extends IBaseMetaType> MT metaAddOperation(IIdType theResourceId, MT theMetaAdd, RequestDetails theRequestDetails) {
 		// Notify interceptors
@@ -593,6 +608,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		MT retVal = (MT) metaGetOperation(theMetaAdd.getClass(), theResourceId, theRequestDetails);
 		return retVal;
 	}
+
 
 	@Override
 	public <MT extends IBaseMetaType> MT metaDeleteOperation(IIdType theResourceId, MT theMetaDel, RequestDetails theRequestDetails) {
@@ -627,7 +643,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		MT retVal = (MT) metaGetOperation(theMetaDel.getClass(), theResourceId, theRequestDetails);
 		return retVal;
 	}
-
 
 	@Override
 	public <MT extends IBaseMetaType> MT metaGetOperation(Class<MT> theType, IIdType theId, RequestDetails theRequestDetails) {
@@ -860,12 +875,12 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		ourLog.debug("Indexing resource {} - PID {}", theResource.getIdElement().getValue(), theEntity.getId());
 		updateEntity(theResource, theEntity, null, true, false, theEntity.getUpdatedDate(), true, false);
 	}
-
+	
 	@Override
 	public void removeTag(IIdType theId, TagTypeEnum theTagType, String theScheme, String theTerm) {
 		removeTag(theId, theTagType, theScheme, theTerm, null);
 	}
-	
+
 	@Override
 	public void removeTag(IIdType theId, TagTypeEnum theTagType, String theScheme, String theTerm, RequestDetails theRequestDetails) {
 		// Notify interceptors
@@ -915,18 +930,20 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			notifyInterceptors(RestOperationTypeEnum.SEARCH_TYPE, requestDetails);
 		
 			if (theRequestDetails.isSubRequest()) {
-				theParams.setLoadSynchronous(true);
-				int max =  myDaoConfig.getMaximumSearchResultCountInTransaction();
-				theParams.setLoadSynchronousUpTo(myDaoConfig.getMaximumSearchResultCountInTransaction());
+				Integer max =  myDaoConfig.getMaximumSearchResultCountInTransaction();
+				if (max != null) {
+					Validate.inclusiveBetween(1, Integer.MAX_VALUE, max.intValue(), "Maximum search result count in transaction ust be a positive integer");
+					theParams.setLoadSynchronousUpTo(myDaoConfig.getMaximumSearchResultCountInTransaction());
+				}
 			}
-		
+
+			if (!isPagingProviderDatabaseBacked(theRequestDetails)) {
+				theParams.setLoadSynchronous(true);
+			}
 		}
 		
 		return mySearchCoordinatorSvc.registerSearch(this, theParams, getResourceName());
 	}
-
-
-
 
 	@Override
 	public Set<Long> searchForIds(SearchParameterMap theParams) {

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server.provider.dstu2;
 
+import static org.apache.commons.lang3.StringUtils.isBlank;
 /*
  * #%L
  * HAPI FHIR Structures - DSTU2 (FHIR v1.0.0)
@@ -10,7 +11,7 @@ package ca.uhn.fhir.rest.server.provider.dstu2;
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  * 
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -62,6 +63,7 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.ResourceReferenceInfo;
 
 public class Dstu2BundleFactory implements IVersionSpecificBundleFactory {
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(Dstu2BundleFactory.class);
 
 	private Bundle myBundle;
 	private FhirContext myContext;
@@ -223,7 +225,7 @@ public class Dstu2BundleFactory implements IVersionSpecificBundleFactory {
 				entry.getRequest().getMethodElement().setValueAsString(httpVerb.getCode());
 			}
 			populateBundleEntryFullUrl(next, entry);
-			
+
 			BundleEntrySearchModeEnum searchMode = ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.get(next);
 			if (searchMode != null) {
 				entry.getSearch().getModeElement().setValue(searchMode.getCode());
@@ -257,7 +259,7 @@ public class Dstu2BundleFactory implements IVersionSpecificBundleFactory {
 	public void addRootPropertiesToBundle(String theAuthor, String theServerBase, String theCompleteUrl, Integer theTotalResults, BundleTypeEnum theBundleType, IPrimitiveType<Date> theLastUpdated) {
 
 		myBase = theServerBase;
-		
+
 		if (myBundle.getId().isEmpty()) {
 			myBundle.setId(UUID.randomUUID().toString());
 		}
@@ -302,7 +304,7 @@ public class Dstu2BundleFactory implements IVersionSpecificBundleFactory {
 	public void initializeBundleFromBundleProvider(IRestfulServer<?> theServer, IBundleProvider theResult, EncodingEnum theResponseEncoding, String theServerBase, String theCompleteUrl,
 			boolean thePrettyPrint, int theOffset, Integer theLimit, String theSearchId, BundleTypeEnum theBundleType, Set<Include> theIncludes) {
 		myBase = theServerBase;
-		
+
 		int numToReturn;
 		String searchId = null;
 		List<IBaseResource> resourceList;
@@ -327,7 +329,7 @@ public class Dstu2BundleFactory implements IVersionSpecificBundleFactory {
 			if (numTotalResults != null) {
 				numToReturn = Math.min(numToReturn, numTotalResults - theOffset);
 			}
-			
+
 			if (numToReturn > 0) {
 				resourceList = theResult.getResources(theOffset, numToReturn + theOffset);
 			} else {
@@ -340,7 +342,9 @@ public class Dstu2BundleFactory implements IVersionSpecificBundleFactory {
 			} else {
 				if (numTotalResults == null || numTotalResults > numToReturn) {
 					searchId = pagingProvider.storeResultList(theResult);
-					Validate.notNull(searchId, "Paging provider returned null searchId");
+					if (isBlank(searchId)) {
+						ourLog.info("Found {} results but paging provider did not provide an ID to use for paging", numTotalResults);
+					}
 				}
 			}
 		}

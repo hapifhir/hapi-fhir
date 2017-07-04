@@ -71,13 +71,13 @@ public class StaleSearchDeletingSvcImpl implements IStaleSearchDeletingSvc {
 	@Autowired
 	private PlatformTransactionManager myTransactionManager;
 
-	protected void deleteSearch(final Search next) {
+	protected void deleteSearch(final Long theSearchPid) {
 		TransactionTemplate tt = new TransactionTemplate(myTransactionManager);
 		tt.execute(new TransactionCallbackWithoutResult() {
 			@Override
 			protected void doInTransactionWithoutResult(TransactionStatus theArg0) {
-				Search searchToDelete = mySearchDao.findOne(next.getId());
-				ourLog.info("Expiring stale search {} / {}", searchToDelete.getId(), searchToDelete.getUuid());
+				Search searchToDelete = mySearchDao.findOne(theSearchPid);
+				ourLog.info("Deleting search {}/{} - Created[{}] -- Last returned[{}]", searchToDelete.getId(), searchToDelete.getUuid(), searchToDelete.getCreated(), searchToDelete.getSearchLastReturned());
 				mySearchIncludeDao.deleteForSearch(searchToDelete.getId());
 				mySearchResultDao.deleteForSearch(searchToDelete.getId());
 				mySearchDao.delete(searchToDelete);
@@ -97,13 +97,10 @@ public class StaleSearchDeletingSvcImpl implements IStaleSearchDeletingSvc {
 		
 		ourLog.debug("Searching for searches which are before {}", cutoff);
 
-		Collection<Search> toDelete = mySearchDao.findWhereLastReturnedBefore(cutoff);
+		Collection<Long> toDelete = mySearchDao.findWhereLastReturnedBefore(cutoff);
 		if (!toDelete.isEmpty()) {
 
-			for (final Search next : toDelete) {
-				
-				ourLog.info("Deleting search {} - Created[{}] -- Last returned[{}]", next.getUuid(), next.getCreated(), next.getSearchLastReturned());
-				
+			for (final Long next : toDelete) {
 				deleteSearch(next);
 			}
 

@@ -156,6 +156,24 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 	}
 
 	@Test
+	public void testCreateReferenceToDeletedResource() {
+		Organization org = new Organization();
+		org.setActive(true);
+		IIdType orgId = myOrganizationDao.create(org).getId().toUnqualifiedVersionless();
+		
+		myOrganizationDao.delete(orgId);
+		
+		Patient p = new Patient();
+		p.getManagingOrganization().setReferenceElement(orgId);
+		try {
+			myPatientDao.create(p);
+			fail();
+		} catch (InvalidRequestException e) {
+			assertEquals("Resource Organization/" + orgId.getIdPart() + " is deleted, specified in path: Patient.managingOrganization", e.getMessage());
+		}
+	}
+	
+	@Test
 	public void testCreateDuplicateTagsDoesNotCauseDuplicates() {
 		Patient p = new Patient();
 		p.setActive(true);

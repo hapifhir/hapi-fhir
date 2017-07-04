@@ -30,12 +30,9 @@ import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import org.apache.http.NameValuePair;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.hl7.fhir.dstu3.model.Subscription;
@@ -48,8 +45,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.RuntimeResourceDefinition;
-import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.SearchParameterMap;
 import ca.uhn.fhir.jpa.provider.ServletSubRequestDetails;
@@ -60,32 +55,31 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.rest.server.IBundleProvider;
-import ca.uhn.fhir.rest.server.interceptor.*;
 
-public class RestHookSubscriptionDstu3Interceptor extends ServerOperationInterceptorAdapter {
+public class RestHookSubscriptionDstu3Interceptor extends BaseRestHookSubscriptionInterceptor {
 
-	private static final Integer MAX_SUBSCRIPTION_RESULTS = 10000;
 	private static volatile ExecutorService executor;
-	private final static int MAX_THREADS = 1;
 
+	private final static int MAX_THREADS = 1;
 	private static final Logger ourLog = LoggerFactory.getLogger(RestHookSubscriptionDstu3Interceptor.class);
 
 	@Autowired
 	private FhirContext myFhirContext;
 
+	private final List<Subscription> myRestHookSubscriptions = new ArrayList<Subscription>();
+
 	@Autowired
 	@Qualifier("mySubscriptionDaoDstu3")
 	private IFhirResourceDao<Subscription> mySubscriptionDao;
-	
+
 	private boolean notifyOnDelete = false;
-	private final List<Subscription> myRestHookSubscriptions = new ArrayList<Subscription>();
 
 	/**
 	 * Check subscriptions and send notifications or payload
 	 *
 	 * @param idType
 	 * @param resourceType
-	 * @param theOperation 
+	 * @param theOperation
 	 */
 	private void checkSubscriptions(IIdType idType, String resourceType, RestOperationTypeEnum theOperation) {
 		for (Subscription subscription : myRestHookSubscriptions) {
@@ -99,7 +93,7 @@ public class RestHookSubscriptionDstu3Interceptor extends ServerOperationInterce
 			}
 
 			if (resourceType != null && subscription.getCriteria() != null && !criteriaResource.equals(resourceType)) {
-				ourLog.info("Skipping subscription search for {} because it does not match the criteria {}", resourceType , subscription.getCriteria());
+				ourLog.info("Skipping subscription search for {} because it does not match the criteria {}", resourceType, subscription.getCriteria());
 				continue;
 			}
 
@@ -108,7 +102,7 @@ public class RestHookSubscriptionDstu3Interceptor extends ServerOperationInterce
 			criteria += "&_id=" + idType.getResourceType() + "/" + idType.getIdPart();
 			criteria = massageCriteria(criteria);
 
-			IBundleProvider results = getBundleProvider(criteria);
+			IBundleProvider results = getBundleProvider(criteria, false);
 
 			if (results.size() == 0) {
 				continue;
@@ -134,13 +128,13 @@ public class RestHookSubscriptionDstu3Interceptor extends ServerOperationInterce
 		while (url.endsWith("/")) {
 			url = url.substring(0, url.length() - 1);
 		}
-		
+
 		HttpUriRequest request = null;
-		String resourceName = myFhirContext.getResourceDefinition(theResource).getName(); 
+		String resourceName = myFhirContext.getResourceDefinition(theResource).getName();
 
 		String payload = theSubscription.getChannel().getPayload();
 		String resourceId = theResource.getIdElement().getIdPart();
-		
+
 		// HTTP put
 		if (theOperation == RestOperationTypeEnum.UPDATE && EncodingEnum.XML.equals(EncodingEnum.forContentType(payload))) {
 			ourLog.info("XML payload found");
@@ -184,25 +178,6 @@ public class RestHookSubscriptionDstu3Interceptor extends ServerOperationInterce
 
 		// request.addHeader("User-Agent", USER_AGENT);
 		return request;
-	}
-
-	/**
-	 * Search based on a query criteria
-	 *
-	 * @param criteria
-	 * @return
-	 */
-	private IBundleProvider getBundleProvider(String criteria) {
-		RuntimeResourceDefinition responseResourceDef = mySubscriptionDao.validateCriteriaAndReturnResourceDefinition(criteria);
-		SearchParameterMap responseCriteriaUrl = BaseHapiFhirDao.translateMatchUrl(mySubscriptionDao, mySubscriptionDao.getContext(), criteria, responseResourceDef);
-
-		RequestDetails req = new ServletSubRequestDetails();
-		req.setSubRequest(true);
-
-		IFhirResourceDao<? extends IBaseResource> responseDao = mySubscriptionDao.getDao(responseResourceDef.getImplementingClass());
-		responseCriteriaUrl.setCount(MAX_SUBSCRIPTION_RESULTS);
-		IBundleProvider responseResults = responseDao.search(responseCriteriaUrl, req);
-		return responseResults;
 	}
 
 	/**
@@ -250,6 +225,27 @@ public class RestHookSubscriptionDstu3Interceptor extends ServerOperationInterce
 		return entity;
 	}
 
+	@Override
+	protected IFhirResourceDao<?> getSubscriptionDao() {
+		return mySubscriptionDao;
+	}
+
+	@Override
+	public void incomingRequestPreHandled(RestOperationTypeEnum theOperation, ActionRequestDetails theDetails) {
+		// check the subscription criteria to see if its valid before creating or updating a subscription
+		if (RestOperationTypeEnum.CREATE.equals(theOperation) || RestOperationTypeEnum.UPDATE.equals(theOperation)) {
+			String resourceType = theDetails.getResourceType();
+			ourLog.info("prehandled resource type: " + resourceType);
+			if (resourceType != null && resourceType.equals(Subscription.class.getSimpleName())) {
+				Subscription subscription = (Subscription) theDetails.getResource();
+				if (subscription != null) {
+					checkSubscriptionCriterias(subscription.getCriteria());
+				}
+			}
+		}
+		super.incomingRequestPreHandled(theOperation, theDetails);
+	}
+
 	/**
 	 * Read the existing subscriptions from the database
 	 */
@@ -264,7 +260,7 @@ public class RestHookSubscriptionDstu3Interceptor extends ServerOperationInterce
 		map.setCount(MAX_SUBSCRIPTION_RESULTS);
 		IBundleProvider subscriptionBundleList = mySubscriptionDao.search(map, req);
 		if (subscriptionBundleList.size() >= MAX_SUBSCRIPTION_RESULTS) {
-			ourLog.error("Currently over "+MAX_SUBSCRIPTION_RESULTS+" subscriptions.  Some subscriptions have not been loaded.");
+			ourLog.error("Currently over " + MAX_SUBSCRIPTION_RESULTS + " subscriptions.  Some subscriptions have not been loaded.");
 		}
 
 		List<IBaseResource> resourceList = subscriptionBundleList.getResources(0, subscriptionBundleList.size());
@@ -398,59 +394,6 @@ public class RestHookSubscriptionDstu3Interceptor extends ServerOperationInterce
 
 	public void setSubscriptionDao(IFhirResourceDao<Subscription> theSubscriptionDao) {
 		mySubscriptionDao = theSubscriptionDao;
-	}
-
-	@Override
-	public void incomingRequestPreHandled(RestOperationTypeEnum theOperation, ActionRequestDetails theDetails) {
-		//check the subscription criteria to see if its valid before creating or updating a subscription
-		if (RestOperationTypeEnum.CREATE.equals(theOperation) || RestOperationTypeEnum.UPDATE.equals(theOperation)) {
-			String resourceType = theDetails.getResourceType();
-			ourLog.info("prehandled resource type: " + resourceType);
-			if (resourceType != null && resourceType.equals(Subscription.class.getSimpleName())) {
-				Subscription subscription = (Subscription) theDetails.getResource();
-				if (subscription != null) {
-					checkSubscriptionCriterias(subscription);
-				}
-			}
-		}
-		super.incomingRequestPreHandled(theOperation, theDetails);
-	}
-
-	private void checkSubscriptionCriterias(Subscription subscription){
-		try {
-			IBundleProvider results = executeSubscriptionCriteria(subscription, null);
-		}catch (Exception e){
-			throw new InvalidRequestException("Invalid criteria");
-		}
-	}
-
-	private IBundleProvider executeSubscriptionCriteria(Subscription subscription, IIdType idType){
-		//run the subscriptions query and look for matches, add the id as part of the criteria to avoid getting matches of previous resources rather than the recent resource
-		String criteria = subscription.getCriteria();
-		if(idType != null) {
-			criteria += "&_id=" + idType.getResourceType() + "/" + idType.getIdPart();
-		}
-
-		IBundleProvider results = getBundleProvider(criteria);
-		return results;
-	}
-
-	/**
-	 * Get the encoding from the criteria or return JSON encoding if its not found
-	 *
-	 * @param criteria
-	 * @return
-	 */
-	private EncodingEnum getEncoding(String criteria) {
-		//check criteria
-		String params = criteria.substring(criteria.indexOf('?') + 1);
-		List<NameValuePair> paramValues = URLEncodedUtils.parse(params, Constants.CHARSET_UTF8, '&');
-		for (NameValuePair nameValuePair : paramValues) {
-			if (Constants.PARAM_FORMAT.equals(nameValuePair.getName())) {
-				return EncodingEnum.forContentType(nameValuePair.getValue());
-			}
-		}
-		return EncodingEnum.JSON;
 	}
 
 }

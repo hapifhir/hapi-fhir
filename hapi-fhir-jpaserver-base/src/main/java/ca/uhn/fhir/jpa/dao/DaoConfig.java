@@ -57,7 +57,7 @@ public class DaoConfig {
 	 * 
 	 * @see #setMaximumSearchResultCountInTransaction(int)
 	 */
-	private static final int DEFAULT_MAXIMUM_SEARCH_RESULT_COUNT_IN_TRANSACTION = 500;
+	private static final Integer DEFAULT_MAXIMUM_SEARCH_RESULT_COUNT_IN_TRANSACTION = null;
 
 	/**
 	 * Default value for {@link #setReuseCachedSearchResultsForMillis(Long)}: 60000ms (one minute)
@@ -103,13 +103,19 @@ public class DaoConfig {
 	 * update setter javadoc if default changes
 	 */
 	private boolean myIndexContainedResources = true;
+
 	private List<IServerInterceptor> myInterceptors;
+
 	/**
 	 * update setter javadoc if default changes
 	 */
 	private int myMaximumExpansionSize = 5000;
-	private int myMaximumSearchResultCountInTransaction = DEFAULT_MAXIMUM_SEARCH_RESULT_COUNT_IN_TRANSACTION;
+	private Integer myMaximumSearchResultCountInTransaction = DEFAULT_MAXIMUM_SEARCH_RESULT_COUNT_IN_TRANSACTION;
 	private ResourceEncodingEnum myResourceEncoding = ResourceEncodingEnum.JSONC;
+	/**
+	 * update setter javadoc if default changes
+	 */
+	private Integer myResourceMetaCountHardLimit = 1000;
 	private Long myReuseCachedSearchResultsForMillis = DEFAULT_REUSE_CACHED_SEARCH_RESULTS_FOR_MILLIS;
 	private boolean mySchedulingDisabled;
 	private boolean mySubscriptionEnabled;
@@ -121,7 +127,6 @@ public class DaoConfig {
 	private boolean mySuppressUpdatesWithNoChange = true;
 	private Set<String> myTreatBaseUrlsAsLocal = new HashSet<String>();
 	private Set<String> myTreatReferencesAsLogical = new HashSet<String>(DEFAULT_LOGICAL_BASE_URLS);
-
 	/**
 	 * Add a value to the {@link #setTreatReferencesAsLogical(Set) logical references list}.
 	 * 
@@ -135,7 +140,6 @@ public class DaoConfig {
 		}
 		myTreatReferencesAsLogical.add(theTreatReferencesAsLogical);
 	}
-
 	/**
 	 * When a code system is added that contains more than this number of codes,
 	 * the code system will be indexed later in an incremental process in order to
@@ -229,19 +233,37 @@ public class DaoConfig {
 	}
 
 	/**
-	 * Provides the maximum number of results which may be returned by a search within a FHIR <code>transaction</code>
-	 * operation. For example, if this value is set to <code>100</code> and a FHIR transaction is processed with a sub-request
-	 * for <code>Patient?gender=male</code>, the server will throw an error (and the transaction will fail) if there are more than
+	 * Provides the maximum number of results which may be returned by a search (HTTP GET) which
+	 * is executed as a sub-operation within within a FHIR <code>transaction</code> or
+	 * <code>batch</code> operation. For example, if this value is set to <code>100</code> and 
+	 * a FHIR transaction is processed with a sub-request for <code>Patient?gender=male</code>,
+	 * the server will throw an error (and the transaction will fail) if there are more than
 	 * 100 resources on the server which match this query.
-	 * 
-	 * @see #DEFAULT_LOGICAL_BASE_URLS The default value for this setting
+	 * <p>
+	 * The default value is <code>null</code>, which means that there is no limit.
+	 * </p>  
 	 */
-	public int getMaximumSearchResultCountInTransaction() {
+	public Integer getMaximumSearchResultCountInTransaction() {
 		return myMaximumSearchResultCountInTransaction;
 	}
 
 	public ResourceEncodingEnum getResourceEncoding() {
 		return myResourceEncoding;
+	}
+
+	/**
+	 * If set, an individual resource will not be allowed to have more than the
+	 * given number of tags, profiles, and security labels (the limit is for the combined
+	 * total for all of these things on an individual resource).
+	 * <p>
+	 * If set to <code>null</code>, no limit will be applied.
+	 * </p>
+	 * <p>
+	 * The default value for this setting is 1000.
+	 * </p>
+	 */
+	public Integer getResourceMetaCountHardLimit() {
+		return myResourceMetaCountHardLimit;
 	}
 
 	/**
@@ -376,8 +398,6 @@ public class DaoConfig {
 	 * and other FHIR features may not behave as expected when referential integrity is not
 	 * preserved. Use this feature with caution.
 	 * </p>
-	 * 
-	 * @return
 	 */
 	public boolean isEnforceReferentialIntegrityOnDelete() {
 		return myEnforceReferentialIntegrityOnDelete;
@@ -682,19 +702,37 @@ public class DaoConfig {
 	}
 
 	/**
-	 * Provides the maximum number of results which may be returned by a search within a FHIR <code>transaction</code>
-	 * operation. For example, if this value is set to <code>100</code> and a FHIR transaction is processed with a sub-request
-	 * for <code>Patient?gender=male</code>, the server will throw an error (and the transaction will fail) if there are more than
+	 * Provides the maximum number of results which may be returned by a search (HTTP GET) which
+	 * is executed as a sub-operation within within a FHIR <code>transaction</code> or
+	 * <code>batch</code> operation. For example, if this value is set to <code>100</code> and 
+	 * a FHIR transaction is processed with a sub-request for <code>Patient?gender=male</code>,
+	 * the server will throw an error (and the transaction will fail) if there are more than
 	 * 100 resources on the server which match this query.
-	 * 
-	 * @see #DEFAULT_LOGICAL_BASE_URLS The default value for this setting
+	 * <p>
+	 * The default value is <code>null</code>, which means that there is no limit.
+	 * </p>  
 	 */
-	public void setMaximumSearchResultCountInTransaction(int theMaximumSearchResultCountInTransaction) {
+	public void setMaximumSearchResultCountInTransaction(Integer theMaximumSearchResultCountInTransaction) {
 		myMaximumSearchResultCountInTransaction = theMaximumSearchResultCountInTransaction;
 	}
 
 	public void setResourceEncoding(ResourceEncodingEnum theResourceEncoding) {
 		myResourceEncoding = theResourceEncoding;
+	}
+
+	/**
+	 * If set, an individual resource will not be allowed to have more than the
+	 * given number of tags, profiles, and security labels (the limit is for the combined
+	 * total for all of these things on an individual resource).
+	 * <p>
+	 * If set to <code>null</code>, no limit will be applied.
+	 * </p>
+	 * <p>
+	 * The default value for this setting is 1000.
+	 * </p>
+	 */
+	public void setResourceMetaCountHardLimit(Integer theResourceMetaCountHardLimit) {
+		myResourceMetaCountHardLimit = theResourceMetaCountHardLimit;
 	}
 
 	/**

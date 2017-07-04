@@ -303,36 +303,31 @@ public class FhirSystemDaoDstu2Test extends BaseJpaDstu2SystemTest {
 		request.addEntry().getRequest().setMethod(HTTPVerbEnum.GET).setUrl("Patient/THIS_ID_DOESNT_EXIST");
 
 		Bundle resp = mySystemDao.transaction(mySrd, request);
-		assertEquals(3, resp.getEntry().size());
+		assertEquals(2, resp.getEntry().size());
 		assertEquals(BundleTypeEnum.BATCH_RESPONSE, resp.getTypeElement().getValueAsEnum());
 
 		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(resp));
 		EntryResponse respEntry;
 
-		// Bundle.entry[0] is operation outcome
-		assertEquals(OperationOutcome.class, resp.getEntry().get(0).getResource().getClass());
-		assertEquals(IssueSeverityEnum.INFORMATION, ((OperationOutcome) resp.getEntry().get(0).getResource()).getIssue().get(0).getSeverityElement().getValueAsEnum());
-		assertThat(((OperationOutcome) resp.getEntry().get(0).getResource()).getIssue().get(0).getDiagnostics(), startsWith("Batch completed in "));
-
 		// Bundle.entry[1] is create response
-		assertEquals("201 Created", resp.getEntry().get(1).getResponse().getStatus());
-		assertThat(resp.getEntry().get(1).getResponse().getLocation(), startsWith("Patient/"));
+		assertEquals("201 Created", resp.getEntry().get(0).getResponse().getStatus());
+		assertThat(resp.getEntry().get(0).getResponse().getLocation(), startsWith("Patient/"));
 
 		// Bundle.entry[2] is failed read response
-		assertEquals(OperationOutcome.class, resp.getEntry().get(2).getResource().getClass());
-		assertEquals(IssueSeverityEnum.ERROR, ((OperationOutcome) resp.getEntry().get(2).getResource()).getIssue().get(0).getSeverityElement().getValueAsEnum());
-		assertEquals("Resource Patient/THIS_ID_DOESNT_EXIST is not known", ((OperationOutcome) resp.getEntry().get(2).getResource()).getIssue().get(0).getDiagnostics());
-		assertEquals("404 Not Found", resp.getEntry().get(2).getResponse().getStatus());
+		assertEquals(OperationOutcome.class, resp.getEntry().get(1).getResource().getClass());
+		assertEquals(IssueSeverityEnum.ERROR, ((OperationOutcome) resp.getEntry().get(1).getResource()).getIssue().get(0).getSeverityElement().getValueAsEnum());
+		assertEquals("Resource Patient/THIS_ID_DOESNT_EXIST is not known", ((OperationOutcome) resp.getEntry().get(1).getResource()).getIssue().get(0).getDiagnostics());
+		assertEquals("404 Not Found", resp.getEntry().get(1).getResponse().getStatus());
 
 		// Check POST
-		respEntry = resp.getEntry().get(1).getResponse();
+		respEntry = resp.getEntry().get(0).getResponse();
 		assertEquals("201 Created", respEntry.getStatus());
 		IdDt createdId = new IdDt(respEntry.getLocation());
 		assertEquals("Patient", createdId.getResourceType());
 		myPatientDao.read(createdId, mySrd); // shouldn't fail
 
 		// Check GET
-		respEntry = resp.getEntry().get(2).getResponse();
+		respEntry = resp.getEntry().get(1).getResponse();
 		assertThat(respEntry.getStatus(), startsWith("404"));
 
 	}

@@ -58,6 +58,7 @@ import ca.uhn.fhir.jpa.provider.SystemProviderDstu2Test;
 import ca.uhn.fhir.jpa.rp.dstu3.ObservationResourceProvider;
 import ca.uhn.fhir.jpa.rp.dstu3.OrganizationResourceProvider;
 import ca.uhn.fhir.jpa.rp.dstu3.PatientResourceProvider;
+import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.testutil.RandomServerPortProvider;
 import ca.uhn.fhir.rest.client.IGenericClient;
 import ca.uhn.fhir.rest.client.interceptor.SimpleRequestHeaderInterceptor;
@@ -202,7 +203,6 @@ public class SystemProviderDstu3Test extends BaseJpaDstu3Test {
 			organizationRp.setDao(myOrganizationDao);
 
 			RestfulServer restServer = new RestfulServer(ourCtx);
-			restServer.setPagingProvider(new FifoMemoryPagingProvider(10).setDefaultPageSize(10));
 			restServer.setResourceProviders(patientRp, questionnaireRp, observationRp, organizationRp);
 
 			restServer.setPlainProviders(mySystemProvider);
@@ -237,6 +237,7 @@ public class SystemProviderDstu3Test extends BaseJpaDstu3Test {
 		}
 		
 		myRestServer.setDefaultResponseEncoding(EncodingEnum.XML);
+		myRestServer.setPagingProvider(myPagingProvider);
 	}
 
 	@Before

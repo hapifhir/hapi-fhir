@@ -173,12 +173,14 @@ public class ReferenceParam extends BaseParam /*implements IQueryParameterType*/
 		return true;
 	}
 
-	public void setChain(String theChain) {
+	public ReferenceParam setChain(String theChain) {
 		myChain = theChain;
+		return this;
 	}
 
-	public void setValue(String theValue) {
+	public ReferenceParam setValue(String theValue) {
 		myId.setValue(theValue);
+		return this;
 	}
 
 	/**

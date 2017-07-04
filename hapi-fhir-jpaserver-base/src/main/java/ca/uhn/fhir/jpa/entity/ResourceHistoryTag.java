@@ -22,21 +22,13 @@ package ca.uhn.fhir.jpa.entity;
 
 import java.io.Serializable;
 
-import javax.persistence.Column;
-import javax.persistence.Embeddable;
-import javax.persistence.Entity;
-import javax.persistence.ForeignKey;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.SequenceGenerator;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 @Embeddable
 @Entity
-@Table(name = "HFJ_HISTORY_TAG")
+@Table(name = "HFJ_HISTORY_TAG", uniqueConstraints= {
+		@UniqueConstraint(name="IDX_RESHISTTAG_TAGID", columnNames= {"RES_VER_PID","TAG_ID"})
+})
 public class ResourceHistoryTag extends BaseTag implements Serializable {
 
 	private static final long serialVersionUID = 1L;
