@@ -1,5 +1,7 @@
 package ca.uhn.fhir.rest.param;
 
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -10,7 +12,7 @@ package ca.uhn.fhir.rest.param;
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  * 
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,14 +21,15 @@ package ca.uhn.fhir.rest.param;
  * limitations under the License.
  * #L%
  */
+import java.util.*;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import org.hl7.fhir.instance.model.api.IIdType;
 
+import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.IntegerDt;
+import ca.uhn.fhir.rest.annotation.*;
 import ca.uhn.fhir.util.UrlUtil;
 
 public class ParameterUtil {
@@ -45,17 +48,96 @@ public class ParameterUtil {
 	// return findParamIndex(theMethod, Since.class);
 	// }
 
-	public static int nonEscapedIndexOf(String theString, char theCharacter) {
-		for (int i = 0; i < theString.length(); i++) {
-			if (theString.charAt(i) == theCharacter) {
-				if (i == 0 || theString.charAt(i - 1) != '\\') {
-					return i;
-				}
-			}
+	/**
+	 * Escapes a string according to the rules for parameter escaping specified in the <a href="http://www.hl7.org/implement/standards/fhir/search.html#escaping">FHIR Specification Escaping
+	 * Section</a>
+	 */
+	public static String escape(String theValue) {
+		if (theValue == null) {
+			return null;
 		}
-		return -1;
+		StringBuilder b = new StringBuilder();
+
+		for (int i = 0; i < theValue.length(); i++) {
+			char next = theValue.charAt(i);
+			switch (next) {
+				case '$':
+				case ',':
+				case '|':
+				case '\\':
+					b.append('\\');
+					break;
+				default:
+					break;
+			}
+			b.append(next);
+		}
+
+		return b.toString();
 	}
 
+	/**
+	 * Escapes a string according to the rules for parameter escaping specified in the <a href="http://www.hl7.org/implement/standards/fhir/search.html#escaping">FHIR Specification Escaping
+	 * Section</a>
+	 */
+	public static String escapeAndUrlEncode(String theValue) {
+		if (theValue == null) {
+			return null;
+		}
+
+		String escaped = escape(theValue);
+		return UrlUtil.escape(escaped);
+	}
+
+	/**
+	 * Escapes a string according to the rules for parameter escaping specified in the <a href="http://www.hl7.org/implement/standards/fhir/search.html#escaping">FHIR Specification Escaping
+	 * Section</a>
+	 */
+	public static String escapeWithDefault(Object theValue) {
+		if (theValue == null) {
+			return "";
+		}
+		return escape(theValue.toString());
+	}
+
+	public static Integer findIdParameterIndex(Method theMethod, FhirContext theContext) {
+		Integer index = findParamAnnotationIndex(theMethod, IdParam.class);
+		if (index != null) {
+			Class<?> paramType = theMethod.getParameterTypes()[index];
+			if (IIdType.class.equals(paramType)) {
+				return index;
+			}
+			boolean isRi = theContext.getVersion().getVersion().isRi();
+			boolean usesHapiId = IdDt.class.equals(paramType);
+			if (isRi == usesHapiId) {
+				throw new ConfigurationException("Method uses the wrong Id datatype (IdDt / IdType) for the given context FHIR version: " + theMethod.toString());
+			}
+		}
+		return index;
+	}
+
+	public static Integer findParamAnnotationIndex(Method theMethod, Class<?> toFind) {
+		int paramIndex = 0;
+		for (Annotation[] annotations : theMethod.getParameterAnnotations()) {
+			for (int annotationIndex = 0; annotationIndex < annotations.length; annotationIndex++) {
+				Annotation nextAnnotation = annotations[annotationIndex];
+				Class<? extends Annotation> class1 = nextAnnotation.getClass();
+				if (toFind.isAssignableFrom(class1)) {
+					return paramIndex;
+				}
+			}
+			paramIndex++;
+		}
+		return null;
+	}
+
+	public static Integer findTagListParameterIndex(Method theMethod) {
+		return findParamAnnotationIndex(theMethod, TagListParam.class);
+	}
+
+	public static Integer findVersionIdParameterIndex(Method theMethod) {
+		return findParamAnnotationIndex(theMethod, VersionIdParam.class);
+	}
 
 	public static Object fromInteger(Class<?> theType, IntegerDt theArgument) {
 		if (theType.equals(IntegerDt.class)) {
@@ -77,15 +159,15 @@ public class ParameterUtil {
 		return BINDABLE_INTEGER_TYPES;
 	}
 
-
-	public static IntegerDt toInteger(Object theArgument) {
-		if (theArgument instanceof IntegerDt) {
-			return (IntegerDt) theArgument;
+	public static int nonEscapedIndexOf(String theString, char theCharacter) {
+		for (int i = 0; i < theString.length(); i++) {
+			if (theString.charAt(i) == theCharacter) {
+				if (i == 0 || theString.charAt(i - 1) != '\\') {
+					return i;
+				}
+			}
 		}
-		if (theArgument instanceof Integer) {
-			return new IntegerDt((Integer) theArgument);
-		}
-		return null;
+		return -1;
 	}
 
 	static List<String> splitParameterString(String theInput, boolean theUnescapeComponents) {
@@ -132,56 +214,14 @@ public class ParameterUtil {
 		return retVal;
 	}
 
-	/**
-	 * Escapes a string according to the rules for parameter escaping specified in the <a href="http://www.hl7.org/implement/standards/fhir/search.html#escaping">FHIR Specification Escaping
-	 * Section</a>
-	 */
-	public static String escapeWithDefault(Object theValue) {
-		if (theValue == null) {
-			return "";
+	public static IntegerDt toInteger(Object theArgument) {
+		if (theArgument instanceof IntegerDt) {
+			return (IntegerDt) theArgument;
 		}
-		return escape(theValue.toString());
-	}
-
-	/**
-	 * Escapes a string according to the rules for parameter escaping specified in the <a href="http://www.hl7.org/implement/standards/fhir/search.html#escaping">FHIR Specification Escaping
-	 * Section</a>
-	 */
-	public static String escape(String theValue) {
-		if (theValue == null) {
-			return null;
+		if (theArgument instanceof Integer) {
+			return new IntegerDt((Integer) theArgument);
 		}
-		StringBuilder b = new StringBuilder();
-
-		for (int i = 0; i < theValue.length(); i++) {
-			char next = theValue.charAt(i);
-			switch (next) {
-			case '$':
-			case ',':
-			case '|':
-			case '\\':
-				b.append('\\');
-				break;
-			default:
-				break;
-			}
-			b.append(next);
-		}
-
-		return b.toString();
-	}
-
-	/**
-	 * Escapes a string according to the rules for parameter escaping specified in the <a href="http://www.hl7.org/implement/standards/fhir/search.html#escaping">FHIR Specification Escaping
-	 * Section</a>
-	 */
-	public static String escapeAndUrlEncode(String theValue) {
-		if (theValue == null) {
-			return null;
-		}
-		
-		String escaped = escape(theValue);
-		return UrlUtil.escape(escaped);
+		return null;
 	}
 
 	/**
@@ -205,13 +245,13 @@ public class ParameterUtil {
 					b.append(next);
 				} else {
 					switch (theValue.charAt(i + 1)) {
-					case '$':
-					case ',':
-					case '|':
-					case '\\':
-						continue;
-					default:
-						b.append(next);
+						case '$':
+						case ',':
+						case '|':
+						case '\\':
+							continue;
+						default:
+							b.append(next);
 					}
 				}
 			} else {

@@ -21,16 +21,12 @@ package ca.uhn.fhir.rest.client.method;
  */
 
 import java.lang.reflect.Method;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.param.IParameter;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
 class ServerBaseParamBinder implements IParameter {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ServerBaseParamBinder.class);
@@ -41,11 +37,6 @@ class ServerBaseParamBinder implements IParameter {
 		 * Does nothing, since we just ignore serverbase arguments
 		 */
 		ourLog.trace("Ignoring server base argument: {}", theSourceClientArgument);
-	}
-
-	@Override
-	public Object translateQueryParametersIntoServerArgument(RequestDetails theRequest, BaseMethodBinding<?> theMethodBinding) throws InternalErrorException, InvalidRequestException {
-		return theRequest.getFhirServerBase();
 	}
 
 	@Override

@@ -142,10 +142,7 @@ public abstract class BaseClient implements IRestfulClient {
 		myFactory.validateServerBase(myUrlBase, myClient, this);
 	}
 
-	/**
-	 * Returns the encoding that will be used on requests. Default is <code>null</code>, which means the client will not
-	 * explicitly request an encoding. (This is standard behaviour according to the FHIR specification)
-	 */
+	@Override
 	public EncodingEnum getEncoding() {
 		return myEncoding;
 	}
@@ -158,6 +155,10 @@ public abstract class BaseClient implements IRestfulClient {
 		return myClient;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
 	public List<IClientInterceptor> getInterceptors() {
 		return Collections.unmodifiableList(myInterceptors);
 	}
@@ -352,12 +353,7 @@ public abstract class BaseClient implements IRestfulClient {
 			throw new FhirClientConnectionException(e);
 		} catch (IOException e) {
 			String msg;
-			if ( httpRequest != null ) {
-				msg = getFhirContext().getLocalizer().getMessage(BaseClient.class, "failedToParseResponse", httpRequest.getHttpVerbName(), httpRequest.getUri(), e.toString());
-			}
-			else {
-				msg = getFhirContext().getLocalizer().getMessage(BaseClient.class, "failedToParseResponse", "UNKNOWN", "UNKNOWN", e.toString());
-			}
+			msg = getFhirContext().getLocalizer().getMessage(BaseClient.class, "failedToParseResponse", httpRequest.getHttpVerbName(), httpRequest.getUri(), e.toString());
 			throw new FhirClientConnectionException(msg, e);
 		} catch (RuntimeException e) {
 			throw e;

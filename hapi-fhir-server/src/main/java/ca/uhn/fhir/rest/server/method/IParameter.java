@@ -21,11 +21,8 @@ package ca.uhn.fhir.rest.server.method;
  */
 
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.Collection;
 
-import org.hl7.fhir.instance.model.api.IBaseResource;
-
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.rest.api.server.IRequestDetails;
 import ca.uhn.fhir.rest.api.server.IServerMethodBinding;
@@ -48,8 +45,5 @@ public interface IParameter {
 	Object translateQueryParametersIntoServerArgument(IRequestDetails theRequest, IServerMethodBinding theMethodBinding) throws InternalErrorException, InvalidRequestException;
 
 	void initializeTypes(Method theMethod, Class<? extends Collection<?>> theOuterCollectionType, Class<? extends Collection<?>> theInnerCollectionType, Class<?> theParameterType);
-
-	void translateClientArgumentIntoQueryArgument(FhirContext theContext, Object theSourceClientArgument, Map<String, List<String>> theTargetQueryArguments, IBaseResource theTargetResource)
-			throws InternalErrorException;
 
 }

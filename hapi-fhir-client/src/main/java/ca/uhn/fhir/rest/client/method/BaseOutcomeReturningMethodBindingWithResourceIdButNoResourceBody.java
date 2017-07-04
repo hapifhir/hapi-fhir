@@ -24,14 +24,9 @@ import java.lang.reflect.Method;
 
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
-import ca.uhn.fhir.context.ConfigurationException;
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.RuntimeResourceDefinition;
-import ca.uhn.fhir.rest.annotation.Delete;
-import ca.uhn.fhir.rest.annotation.IdParam;
+import ca.uhn.fhir.context.*;
 //TODO Use of a deprecated method should be resolved
-import ca.uhn.fhir.rest.annotation.VersionIdParam;
-import ca.uhn.fhir.rest.server.IResourceProvider;
+import ca.uhn.fhir.rest.annotation.*;
 
 public abstract class BaseOutcomeReturningMethodBindingWithResourceIdButNoResourceBody extends BaseOutcomeReturningMethodBinding {
 
@@ -46,13 +41,8 @@ public abstract class BaseOutcomeReturningMethodBindingWithResourceIdButNoResour
 			RuntimeResourceDefinition def = theContext.getResourceDefinition(resourceType);
 			myResourceName = def.getName();
 		} else {
-			if (theProvider != null && theProvider instanceof IResourceProvider) {
-				RuntimeResourceDefinition def = theContext.getResourceDefinition(((IResourceProvider) theProvider).getResourceType());
-				myResourceName = def.getName();
-			} else {
 				throw new ConfigurationException(
 						"Can not determine resource type for method '" + theMethod.getName() + "' on type " + theMethod.getDeclaringClass().getCanonicalName() + " - Did you forget to include the resourceType() value on the @" + Delete.class.getSimpleName() + " method annotation?");
-			}
 		}
 
 		myIdParameterIndex = MethodUtil.findIdParameterIndex(theMethod, getContext());

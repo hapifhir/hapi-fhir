@@ -10,7 +10,7 @@ package ca.uhn.fhir.rest.client.method;
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  * 
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,12 +22,7 @@ package ca.uhn.fhir.rest.client.method;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.ListIterator;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import org.hl7.fhir.instance.model.api.IIdType;
 
@@ -36,11 +31,8 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.rest.annotation.Patch;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
-import ca.uhn.fhir.rest.api.PatchTypeEnum;
-import ca.uhn.fhir.rest.api.RequestTypeEnum;
-import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
+import ca.uhn.fhir.rest.api.*;
 import ca.uhn.fhir.rest.client.impl.BaseHttpClientInvocation;
-import ca.uhn.fhir.rest.param.IParameter;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
@@ -76,15 +68,6 @@ public class PatchMethodBinding extends BaseOutcomeReturningMethodBindingWithRes
 		if (myResourceParamIndex == -1) {
 			throw new ConfigurationException("Method has no parameter with @" + ResourceParam.class.getSimpleName() + " annotation - " + theMethod.toString());
 		}
-	}
-
-	@Override
-	public boolean incomingServerRequestMatchesMethod(RequestDetails theRequest) {
-		boolean retVal = super.incomingServerRequestMatchesMethod(theRequest);
-		if (retVal) {
-			PatchTypeParameter.getTypeForRequestOrThrowInvalidRequestException(theRequest);
-		}
-		return retVal;
 	}
 
 	@Override
@@ -144,13 +127,6 @@ public class PatchMethodBinding extends BaseOutcomeReturningMethodBindingWithRes
 	public static HttpPatchClientInvocation createPatchInvocation(FhirContext theContext, String theUrlPath, PatchTypeEnum thePatchType, String theBody) {
 		HttpPatchClientInvocation retVal = new HttpPatchClientInvocation(theContext, theUrlPath, thePatchType.getContentType(), theBody);
 		return retVal;
-	}
-
-	@Override
-	protected void addParametersForServerRequest(RequestDetails theRequest, Object[] theParams) {
-		IIdType id = theRequest.getId();
-		id = UpdateMethodBinding.applyETagAsVersion(theRequest, id);
-		theParams[getIdParameterIndex()] = id;
 	}
 
 	@Override

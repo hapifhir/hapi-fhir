@@ -21,6 +21,7 @@ package ca.uhn.fhir.rest.client.method;
  */
 
 import ca.uhn.fhir.rest.annotation.Since;
+import ca.uhn.fhir.rest.api.Constants;
 
 class SinceParameter extends SinceOrAtParameter {
 

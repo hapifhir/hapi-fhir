@@ -25,7 +25,7 @@ import java.io.*;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.nio.charset.Charset;
-import java.util.*;
+import java.util.Collection;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.Validate;
@@ -38,9 +38,7 @@ import ca.uhn.fhir.model.api.*;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.*;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.method.MethodUtil;
-import ca.uhn.fhir.rest.param.IParameter;
+import ca.uhn.fhir.rest.api.server.*;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServerUtils;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -82,14 +80,9 @@ public class ResourceParameter implements IParameter {
 		// ignore for now
 	}
 
-	@Override
-	public void translateClientArgumentIntoQueryArgument(FhirContext theContext, Object theSourceClientArgument, Map<String, List<String>> theTargetQueryArguments, IBaseResource theTargetResource) throws InternalErrorException {
-		// TODO Auto-generated method stub
-
-	}
 
 	@Override
-	public Object translateQueryParametersIntoServerArgument(RequestDetails theRequest, BaseMethodBinding<?> theMethodBinding) throws InternalErrorException, InvalidRequestException {
+	public Object translateQueryParametersIntoServerArgument(IRequestDetails theRequest, IServerMethodBinding theMethodBinding) throws InternalErrorException, InvalidRequestException {
 		switch (myMode) {
 		case BODY:
 			try {
@@ -156,7 +149,7 @@ public class ResourceParameter implements IParameter {
 					// This shouldn't happen since we're reading from a byte array..
 					throw new InternalErrorException(e);
 				}
-				encoding = MethodUtil.detectEncodingNoDefault(body);
+				encoding = EncodingEnum.detectEncodingNoDefault(body);
 				if (encoding == null) {
 					String msg = ctx.getLocalizer().getMessage(ResourceParameter.class, "noContentTypeInRequest", restOperationType);
 					throw new InvalidRequestException(msg);

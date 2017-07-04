@@ -26,13 +26,13 @@ import java.util.Map;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.api.EncodingEnum;
-import ca.uhn.fhir.rest.api.RequestTypeEnum;
+import ca.uhn.fhir.rest.api.*;
 import ca.uhn.fhir.rest.client.api.Header;
 import ca.uhn.fhir.rest.client.api.HttpClientUtil;
 import ca.uhn.fhir.rest.client.api.IHttpClient;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
 import ca.uhn.fhir.rest.client.impl.BaseHttpClientInvocation;
+import ca.uhn.fhir.rest.client.method.MethodUtil;
 
 public abstract class BaseHttpClient implements IHttpClient {
 
@@ -81,7 +81,7 @@ public abstract class BaseHttpClient implements IHttpClient {
 
 		addHeaderIfNoneExist(theHttpRequest);
 
-		RestfulServerUtils.addAcceptHeaderToRequest(theEncoding, theHttpRequest, theContext);
+		MethodUtil.addAcceptHeaderToRequest(theEncoding, theHttpRequest, theContext);
 	}
 
 	@Override

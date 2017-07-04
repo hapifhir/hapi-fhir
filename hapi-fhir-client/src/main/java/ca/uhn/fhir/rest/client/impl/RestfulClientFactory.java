@@ -19,29 +19,30 @@ package ca.uhn.fhir.rest.client.impl;
  * limitations under the License.
  * #L%
  */
+import java.lang.reflect.*;
+import java.util.*;
 
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Method;
-import java.lang.reflect.Proxy;
-import java.util.HashMap;
-import java.util.Map;
-
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
-import ca.uhn.fhir.context.ConfigurationException;
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.client.api.IGenericClient;
-import ca.uhn.fhir.rest.client.api.IHttpClient;
-import ca.uhn.fhir.rest.client.api.IRestfulClient;
-import ca.uhn.fhir.rest.client.api.IRestfulClientFactory;
-import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
+import ca.uhn.fhir.context.*;
+import ca.uhn.fhir.parser.DataFormatException;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.client.api.*;
+import ca.uhn.fhir.rest.client.exceptions.FhirClientConnectionException;
+import ca.uhn.fhir.rest.client.exceptions.FhirClientInappropriateForServerException;
 import ca.uhn.fhir.rest.client.method.BaseMethodBinding;
+import ca.uhn.fhir.util.FhirTerser;
 
 /**
  * Base class for a REST client factory implementation
  */
 public abstract class RestfulClientFactory implements IRestfulClientFactory {
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(RestfulClientFactory.class);
 
+	private Set<String> myValidatedServerBaseUrls = Collections.synchronizedSet(new HashSet<String>());
 	private int myConnectionRequestTimeout = DEFAULT_CONNECTION_REQUEST_TIMEOUT;
 	private int myConnectTimeout = DEFAULT_CONNECT_TIMEOUT;
 	private FhirContext myContext;
@@ -256,6 +257,102 @@ public abstract class RestfulClientFactory implements IRestfulClientFactory {
 	public void setServerValidationModeEnum(ServerValidationModeEnum theServerValidationMode) {
 		setServerValidationMode(theServerValidationMode);
 	}
+	
+	@Override
+	public void validateServerBaseIfConfiguredToDoSo(String theServerBase, IHttpClient theHttpClient, IRestfulClient theClient) {
+		String serverBase = normalizeBaseUrlForMap(theServerBase);
+
+		switch (getServerValidationMode()) {
+		case NEVER:
+			break;
+		case ONCE:
+			if (!myValidatedServerBaseUrls.contains(serverBase)) {
+				validateServerBase(serverBase, theHttpClient, theClient);
+			}
+			break;
+		}
+
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public void validateServerBase(String theServerBase, IHttpClient theHttpClient, IRestfulClient theClient) {
+		GenericClient client = new GenericClient(myContext, theHttpClient, theServerBase, this);
+		client.setEncoding(theClient.getEncoding());
+		for (IClientInterceptor interceptor : theClient.getInterceptors()) {
+			client.registerInterceptor(interceptor);
+		}
+		client.setDontValidateConformance(true);
+		
+		IBaseResource conformance;
+		try {
+			String capabilityStatementResourceName = "CapabilityStatement";
+			if (myContext.getVersion().getVersion().isOlderThan(FhirVersionEnum.DSTU3)) {
+				capabilityStatementResourceName = "Conformance";
+			}
+			
+			@SuppressWarnings("rawtypes")
+			Class implementingClass;
+			try {
+				implementingClass = myContext.getResourceDefinition(capabilityStatementResourceName).getImplementingClass();
+			} catch (DataFormatException e) {
+				if (!myContext.getVersion().getVersion().isOlderThan(FhirVersionEnum.DSTU3)) {
+					capabilityStatementResourceName = "Conformance";
+					implementingClass = myContext.getResourceDefinition(capabilityStatementResourceName).getImplementingClass();
+				} else {
+					throw e;
+				}
+			}
+			try {
+				conformance = (IBaseResource) client.fetchConformance().ofType(implementingClass).execute();
+			} catch (FhirClientConnectionException e) {
+				if (!myContext.getVersion().getVersion().isOlderThan(FhirVersionEnum.DSTU3) && e.getCause() instanceof DataFormatException) {
+					capabilityStatementResourceName = "Conformance";
+					implementingClass = myContext.getResourceDefinition(capabilityStatementResourceName).getImplementingClass();
+					conformance = (IBaseResource) client.fetchConformance().ofType(implementingClass).execute();
+				} else {
+					throw e;
+				}
+			}
+		} catch (FhirClientConnectionException e) {
+			String msg = myContext.getLocalizer().getMessage(RestfulClientFactory.class, "failedToRetrieveConformance", theServerBase + Constants.URL_TOKEN_METADATA);
+			throw new FhirClientConnectionException(msg, e);
+		}
+
+		FhirTerser t = myContext.newTerser();
+		String serverFhirVersionString = null;
+		Object value = t.getSingleValueOrNull(conformance, "fhirVersion");
+		if (value instanceof IPrimitiveType) {
+			serverFhirVersionString = IPrimitiveType.class.cast(value).getValueAsString();
+		}
+		FhirVersionEnum serverFhirVersionEnum = null;
+		if (StringUtils.isBlank(serverFhirVersionString)) {
+			// we'll be lenient and accept this
+		} else {
+			//FIXME null access on serverFhirVersionString
+			if (serverFhirVersionString.startsWith("0.80") || serverFhirVersionString.startsWith("0.0.8")) {
+				serverFhirVersionEnum = FhirVersionEnum.DSTU1;
+			} else if (serverFhirVersionString.startsWith("0.4")) {
+				serverFhirVersionEnum = FhirVersionEnum.DSTU2;
+			} else if (serverFhirVersionString.startsWith("0.5")) {
+				serverFhirVersionEnum = FhirVersionEnum.DSTU2;
+			} else {
+				// we'll be lenient and accept this
+				ourLog.debug("Server conformance statement indicates unknown FHIR version: {}", serverFhirVersionString);
+			}
+		}
+
+		if (serverFhirVersionEnum != null) {
+			FhirVersionEnum contextFhirVersion = myContext.getVersion().getVersion();
+			if (!contextFhirVersion.isEquivalentTo(serverFhirVersionEnum)) {
+				throw new FhirClientInappropriateForServerException(myContext.getLocalizer().getMessage(RestfulClientFactory.class, "wrongVersionInConformance", theServerBase + Constants.URL_TOKEN_METADATA, serverFhirVersionString, serverFhirVersionEnum, contextFhirVersion));
+			}
+		}
+		
+		myValidatedServerBaseUrls.add(normalizeBaseUrlForMap(theServerBase));
+
+	}
+
 	
 	/**
 	 * Get the http client for the given server base

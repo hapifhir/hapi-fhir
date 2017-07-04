@@ -25,7 +25,6 @@ import java.util.Map;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
-import ca.uhn.fhir.rest.client.api.*;
 
 public interface IRestfulClientFactory {
 

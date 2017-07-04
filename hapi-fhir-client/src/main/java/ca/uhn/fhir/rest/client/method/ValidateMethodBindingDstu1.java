@@ -30,10 +30,8 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.annotation.Validate;
-import ca.uhn.fhir.rest.api.RequestTypeEnum;
-import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
+import ca.uhn.fhir.rest.api.*;
 import ca.uhn.fhir.rest.client.impl.BaseHttpClientInvocation;
-import ca.uhn.fhir.rest.param.IParameter;
 
 public class ValidateMethodBindingDstu1 extends BaseOutcomeReturningMethodBindingWithResourceParam {
 
@@ -50,13 +48,7 @@ public class ValidateMethodBindingDstu1 extends BaseOutcomeReturningMethodBindin
 		return RestOperationTypeEnum.VALIDATE;
 	}
 
-	@Override
-	protected void addParametersForServerRequest(RequestDetails theRequest, Object[] theParams) {
-		if (myIdParameterIndex != null) {
-			theParams[myIdParameterIndex] = theRequest.getId();
-		}
-	}
-
+	
 	@Override
 	protected BaseHttpClientInvocation createClientInvocation(Object[] theArgs, IResource theResource) {
 		FhirContext context = getContext();
