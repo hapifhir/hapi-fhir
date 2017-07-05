@@ -3,11 +3,10 @@ package ca.uhn.fhir.jpa.dao.dstu3;
 import java.util.Collections;
 import java.util.List;
 
-import org.hl7.fhir.dstu3.model.CodeSystem;
-import org.hl7.fhir.dstu3.model.IdType;
-import org.hl7.fhir.dstu3.model.Questionnaire;
-import org.hl7.fhir.dstu3.model.StructureDefinition;
-import org.hl7.fhir.dstu3.model.ValueSet;
+import javax.transaction.Transactional;
+import javax.transaction.Transactional.TxType;
+
+import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.dstu3.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.dstu3.model.ValueSet.ValueSetExpansionComponent;
 import org.hl7.fhir.instance.model.api.IAnyResource;
@@ -43,6 +42,7 @@ import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.rest.server.IBundleProvider;
 
+@Transactional(value=TxType.REQUIRED)
 public class JpaValidationSupportDstu3 implements IJpaValidationSupportDstu3 {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(JpaValidationSupportDstu3.class);
@@ -72,6 +72,7 @@ public class JpaValidationSupportDstu3 implements IJpaValidationSupportDstu3 {
 	
 	
 	@Override
+	@Transactional(value=TxType.SUPPORTS)
 	public ValueSetExpansionComponent expandValueSet(FhirContext theCtx, ConceptSetComponent theInclude) {
 		return null;
 	}
@@ -81,6 +82,7 @@ public class JpaValidationSupportDstu3 implements IJpaValidationSupportDstu3 {
 		return fetchResource(theCtx, CodeSystem.class, theSystem);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public <T extends IBaseResource> T fetchResource(FhirContext theContext, Class<T> theClass, String theUri) {
 		IdType id = new IdType(theUri);
@@ -143,11 +145,13 @@ public class JpaValidationSupportDstu3 implements IJpaValidationSupportDstu3 {
 	}
 
 	@Override
+	@Transactional(value=TxType.SUPPORTS)
 	public boolean isCodeSystemSupported(FhirContext theCtx, String theSystem) {
 		return false;
 	}
 
 	@Override
+	@Transactional(value=TxType.SUPPORTS)
 	public CodeValidationResult validateCode(FhirContext theCtx, String theCodeSystem, String theCode, String theDisplay) {
 		return null;
 	}
@@ -160,6 +164,7 @@ public class JpaValidationSupportDstu3 implements IJpaValidationSupportDstu3 {
 
 
 	@Override
+	@Transactional(value=TxType.SUPPORTS)
 	public List<StructureDefinition> fetchAllStructureDefinitions(FhirContext theContext) {
 		return Collections.emptyList();
 	}

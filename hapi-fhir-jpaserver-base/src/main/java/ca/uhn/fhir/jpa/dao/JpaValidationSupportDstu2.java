@@ -1,5 +1,8 @@
 package ca.uhn.fhir.jpa.dao;
 
+import javax.transaction.Transactional;
+import javax.transaction.Transactional.TxType;
+
 /*
  * #%L
  * HAPI FHIR JPA Server
@@ -31,6 +34,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.rest.server.IBundleProvider;
 
+@Transactional(value=TxType.REQUIRED)
 public class JpaValidationSupportDstu2 implements IJpaValidationSupportDstu2 {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(JpaValidationSupportDstu2.class);
@@ -52,11 +56,13 @@ public class JpaValidationSupportDstu2 implements IJpaValidationSupportDstu2 {
 	private FhirContext myDstu2Ctx;
 
 	@Override
+	@Transactional(value=TxType.SUPPORTS)
 	public ValueSetExpansionComponent expandValueSet(FhirContext theCtx, ConceptSetComponent theInclude) {
 		return null;
 	}
 
 	@Override
+	@Transactional(value=TxType.SUPPORTS)
 	public ValueSet fetchCodeSystem(FhirContext theCtx, String theSystem) {
 		return null;
 	}
@@ -95,11 +101,13 @@ public class JpaValidationSupportDstu2 implements IJpaValidationSupportDstu2 {
 	}
 
 	@Override
+	@Transactional(value=TxType.SUPPORTS)
 	public boolean isCodeSystemSupported(FhirContext theCtx, String theSystem) {
 		return false;
 	}
 
 	@Override
+	@Transactional(value=TxType.SUPPORTS)
 	public CodeValidationResult validateCode(FhirContext theCtx, String theCodeSystem, String theCode, String theDisplay) {
 		return null;
 	}

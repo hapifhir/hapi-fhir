@@ -37,6 +37,7 @@ public class TestDstu3Config extends BaseJavaConfigDstu3 {
 		retVal.setUrl("jdbc:derby:memory:myUnitTestDB;create=true");
 		retVal.setUsername("");
 		retVal.setPassword("");
+		retVal.setMaxTotal(4);
 
 		DataSource dataSource = ProxyDataSourceBuilder
 				.create(retVal)
