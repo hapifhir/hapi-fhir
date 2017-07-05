@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.provider.dstu3;
+package ca.uhn.fhir.jpa.stresstest;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
@@ -17,6 +17,7 @@ import org.junit.*;
 
 import com.google.common.collect.Lists;
 
+import ca.uhn.fhir.jpa.provider.dstu3.BaseResourceProviderDstu3Test;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
 import ca.uhn.fhir.util.TestUtil;
 
@@ -107,6 +108,10 @@ public class StressTestDstu3Test extends BaseResourceProviderDstu3Test {
 	public class BaseTask extends Thread  {
 		protected Throwable myError;
 		protected int myTaskCount = 0;
+		
+		public BaseTask() {
+			setDaemon(true);
+		}
 		
 		public Throwable getError() {
 			return myError;

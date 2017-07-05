@@ -627,6 +627,9 @@
 						<artifactId>maven-surefire-plugin</artifactId>
 						<configuration>
 							<forkCount>1</forkCount>
+							<excludes>
+								<exclude>**/stresstest/*</exclude>
+							</excludes>
 						</configuration>
 					</plugin>
 				</plugins>
@@ -642,6 +645,9 @@
 						<configuration>
 							<forkCount>2</forkCount>
 							<reuseForks>true</reuseForks>
+							<excludes>
+								<exclude>**/stresstest/*</exclude>
+							</excludes>
 						</configuration>
 					</plugin>
 				</plugins>
