@@ -37,6 +37,7 @@ import ca.uhn.fhir.rest.annotation.History;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.client.impl.BaseHttpClientInvocation;
+import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 
 public class HistoryMethodBinding extends BaseResourceReturningMethodBinding {
@@ -48,7 +49,7 @@ public class HistoryMethodBinding extends BaseResourceReturningMethodBinding {
 	public HistoryMethodBinding(Method theMethod, FhirContext theContext, Object theProvider) {
 		super(toReturnType(theMethod, theProvider), theMethod, theContext, theProvider);
 
-		myIdParamIndex = MethodUtil.findIdParameterIndex(theMethod, getContext());
+		myIdParamIndex = ParameterUtil.findIdParameterIndex(theMethod, getContext());
 
 		History historyAnnotation = theMethod.getAnnotation(History.class);
 		Class<? extends IBaseResource> type = historyAnnotation.type();

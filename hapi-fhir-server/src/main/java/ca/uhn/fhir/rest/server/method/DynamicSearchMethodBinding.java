@@ -10,7 +10,7 @@ package ca.uhn.fhir.rest.server.method;
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  * 
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -31,20 +31,25 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
-import ca.uhn.fhir.rest.api.*;
-import ca.uhn.fhir.rest.api.server.*;
-import ca.uhn.fhir.rest.client.impl.BaseHttpClientInvocation;
-import ca.uhn.fhir.rest.param.IParameter;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.RequestTypeEnum;
+import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.IRestfulServer;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.server.IDynamicSearchResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
 public class DynamicSearchMethodBinding extends BaseResourceReturningMethodBinding {
 
-	private IDynamicSearchResourceProvider myProvider;
-	private List<RuntimeSearchParam> mySearchParameters;
-	private HashSet<String> myParamNames;
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(DynamicSearchMethodBinding.class);
 	private Integer myIdParamIndex;
+	private HashSet<String> myParamNames;
+	private IDynamicSearchResourceProvider myProvider;
+
+	private List<RuntimeSearchParam> mySearchParameters;
 
 	public DynamicSearchMethodBinding(Class<? extends IBaseResource> theReturnResourceType, Method theMethod, FhirContext theContext, IDynamicSearchResourceProvider theProvider) {
 		super(theReturnResourceType, theMethod, theContext, theProvider);
@@ -57,8 +62,19 @@ public class DynamicSearchMethodBinding extends BaseResourceReturningMethodBindi
 			myParamNames.add(next.getName());
 		}
 
-		myIdParamIndex = MethodUtil.findIdParameterIndex(theMethod, getContext());
+		myIdParamIndex = ParameterUtil.findIdParameterIndex(theMethod, getContext());
 
+	}
+
+	@Override
+	public List<IParameter> getParameters() {
+		List<IParameter> retVal = new ArrayList<IParameter>(super.getParameters());
+
+		for (RuntimeSearchParam next : mySearchParameters) {
+			// TODO: what is this?
+		}
+
+		return retVal;
 	}
 
 	@Override
@@ -66,16 +82,9 @@ public class DynamicSearchMethodBinding extends BaseResourceReturningMethodBindi
 		return BundleTypeEnum.SEARCHSET;
 	}
 
-
 	@Override
-	public List<IParameter> getParameters() {
-		List<IParameter> retVal = new ArrayList<IParameter>(super.getParameters());
-		
-		for (RuntimeSearchParam next : mySearchParameters) {
-			// TODO: what is this?
-		}
-		
-		return retVal;
+	public RestOperationTypeEnum getRestOperationType() {
+		return RestOperationTypeEnum.SEARCH_TYPE;
 	}
 
 	@Override
@@ -83,27 +92,14 @@ public class DynamicSearchMethodBinding extends BaseResourceReturningMethodBindi
 		return ReturnTypeEnum.BUNDLE;
 	}
 
-	@Override
-	public IBundleProvider invokeServer(IRestfulServer<?> theServer, RequestDetails theRequest, Object[] theMethodParams) throws InvalidRequestException, InternalErrorException {
-		if (myIdParamIndex != null) {
-			theMethodParams[myIdParamIndex] = theRequest.getId();
-		}
-
-		Object response = invokeServerMethod(theServer, theRequest, theMethodParams);
-		return toResourceList(response);
+	public Collection<? extends RuntimeSearchParam> getSearchParams() {
+		return mySearchParameters;
 	}
-
-	@Override
-	public RestOperationTypeEnum getRestOperationType() {
-		return RestOperationTypeEnum.SEARCH_TYPE;
-	}
-
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(DynamicSearchMethodBinding.class);
 
 	@Override
 	public boolean incomingServerRequestMatchesMethod(RequestDetails theRequest) {
 		if (!theRequest.getResourceName().equals(getResourceName())) {
-			ourLog.trace("Method {} doesn't match because resource name {} != {}", new Object[] { getMethod().getName(), theRequest.getResourceName(), getResourceName() } );
+			ourLog.trace("Method {} doesn't match because resource name {} != {}", new Object[] { getMethod().getName(), theRequest.getResourceName(), getResourceName() });
 			return false;
 		}
 		if (theRequest.getId() != null && myIdParamIndex == null) {
@@ -153,13 +149,13 @@ public class DynamicSearchMethodBinding extends BaseResourceReturningMethodBindi
 	}
 
 	@Override
-	public BaseHttpClientInvocation invokeClient(Object[] theArgs) throws InternalErrorException {
-		// there should be no way to call this....
-		throw new UnsupportedOperationException("Dynamic search methods are only used for server implementations");
-	}
+	public IBundleProvider invokeServer(IRestfulServer<?> theServer, RequestDetails theRequest, Object[] theMethodParams) throws InvalidRequestException, InternalErrorException {
+		if (myIdParamIndex != null) {
+			theMethodParams[myIdParamIndex] = theRequest.getId();
+		}
 
-	public Collection<? extends RuntimeSearchParam> getSearchParams() {
-		return mySearchParameters;
+		Object response = invokeServerMethod(theServer, theRequest, theMethodParams);
+		return toResourceList(response);
 	}
 
 }

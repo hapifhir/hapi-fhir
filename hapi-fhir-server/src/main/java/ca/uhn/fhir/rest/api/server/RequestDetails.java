@@ -2,9 +2,11 @@ package ca.uhn.fhir.rest.api.server;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.Reader;
+import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -24,18 +26,101 @@ import java.nio.charset.Charset;
  * limitations under the License.
  * #L%
  */
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
-import ca.uhn.fhir.rest.api.*;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.RequestTypeEnum;
+import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.server.IRestfulServerDefaults;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.IServerOperationInterceptor;
 
-public abstract class RequestDetails implements IRequestDetails {
+public abstract class RequestDetails {
 
+	private class RequestOperationCallback implements IRequestOperationCallback {
+
+		private List<IServerInterceptor> getInterceptors() {
+			if (getServer() == null) {
+				return Collections.emptyList();
+			}
+			return getServer().getInterceptors();
+		}
+
+		@Override
+		public void resourceCreated(IBaseResource theResource) {
+			for (IServerInterceptor next : getInterceptors()) {
+				if (next instanceof IServerOperationInterceptor) {
+					((IServerOperationInterceptor) next).resourceCreated(RequestDetails.this, theResource);
+				}
+			}
+		}
+
+		@Override
+		public void resourceDeleted(IBaseResource theResource) {
+			for (IServerInterceptor next : getInterceptors()) {
+				if (next instanceof IServerOperationInterceptor) {
+					((IServerOperationInterceptor) next).resourceDeleted(RequestDetails.this, theResource);
+				}
+			}
+		}
+
+		@Override
+		public void resourcesCreated(Collection<? extends IBaseResource> theResource) {
+			for (IBaseResource next : theResource) {
+				resourceCreated(next);
+			}
+		}
+
+		@Override
+		public void resourcesDeleted(Collection<? extends IBaseResource> theResource) {
+			for (IBaseResource next : theResource) {
+				resourceDeleted(next);
+			}
+		}
+
+		/**
+		 * @deprecated Deprecated in HAPI FHIR 2.6 - Use {@link IRequestOperationCallback#resourceUpdated(IBaseResource, IBaseResource)} instead
+		 */
+		@Deprecated
+		public void resourcesUpdated(Collection<? extends IBaseResource> theResource) {
+			for (IBaseResource next : theResource) {
+				resourceUpdated(next);
+			}
+		}
+
+		
+		/**
+		 * @deprecated Deprecated in HAPI FHIR 2.6 - Use {@link IRequestOperationCallback#resourceUpdated(IBaseResource, IBaseResource)} instead
+		 */
+		@Deprecated
+		@Override
+		public void resourceUpdated(IBaseResource theResource) {
+			for (IServerInterceptor next : getInterceptors()) {
+				if (next instanceof IServerOperationInterceptor) {
+					((IServerOperationInterceptor) next).resourceUpdated(RequestDetails.this, theResource);
+				}
+			}
+		}
+
+		@Override
+		public void resourceUpdated(IBaseResource theOldResource, IBaseResource theNewResource) {
+			for (IServerInterceptor next : getInterceptors()) {
+				if (next instanceof IServerOperationInterceptor) {
+					((IServerOperationInterceptor) next).resourceUpdated(RequestDetails.this, theOldResource, theNewResource);
+				}
+			}
+		}
+
+	}
 	private String myCompartmentName;
 	private String myCompleteUrl;
 	private String myFhirServerBase;
@@ -54,8 +139,9 @@ public abstract class RequestDetails implements IRequestDetails {
 	private boolean mySubRequest;
 	private Map<String, List<String>> myUnqualifiedToQualifiedNames;
 	private Map<Object, Object> myUserData;
-	protected abstract byte[] getByteStreamRequestContents();
 	
+	protected abstract byte[] getByteStreamRequestContents();
+
 	/**
 	 * Return the charset as defined by the header contenttype. Return null if it is not set.
 	 */
@@ -64,10 +150,10 @@ public abstract class RequestDetails implements IRequestDetails {
 	public String getCompartmentName() {
 		return myCompartmentName;
 	}
-
 	public String getCompleteUrl() {
 		return myCompleteUrl;
 	}
+
 	/**
 	 * Returns the <b>conditional URL</b> if this request has one, or <code>null</code> otherwise. For an
 	 * update or delete method, this is the part of the URL after the <code>?</code>. For a create, this
@@ -101,6 +187,11 @@ public abstract class RequestDetails implements IRequestDetails {
 		
 		return this.getResourceName() + this.getCompleteUrl().substring(questionMarkIndex);
 	}
+
+	/**
+	 * Returns the HAPI FHIR Context associated with this request 
+	 */
+	public abstract FhirContext getFhirContext();
 
 	/**
 	 * The fhir server base url, independant of the query being executed
@@ -325,7 +416,7 @@ public abstract class RequestDetails implements IRequestDetails {
 	public void setResponse(IRestfulResponse theResponse) {
 		this.myResponse = theResponse;
 	}
-
+	
 	public void setRestOperationType(RestOperationTypeEnum theRestOperationType) {
 		myRestOperationType = theRestOperationType;
 	}
@@ -333,7 +424,7 @@ public abstract class RequestDetails implements IRequestDetails {
 	public void setSecondaryOperation(String theSecondaryOperation) {
 		mySecondaryOperation = theSecondaryOperation;
 	}
-	
+
 	/**
 	 * Is this request a sub-request (i.e. a request within a batch or transaction)? This 
 	 * flag is used internally by hapi-fhir-jpaserver-base, but not used in the plain server
@@ -345,82 +436,6 @@ public abstract class RequestDetails implements IRequestDetails {
 	 */
 	public void setSubRequest(boolean theSubRequest) {
 		mySubRequest = theSubRequest;
-	}
-
-	private class RequestOperationCallback implements IRequestOperationCallback {
-
-		private List<IServerInterceptor> getInterceptors() {
-			if (getServer() == null) {
-				return Collections.emptyList();
-			}
-			return getServer().getInterceptors();
-		}
-
-		@Override
-		public void resourceCreated(IBaseResource theResource) {
-			for (IServerInterceptor next : getInterceptors()) {
-				if (next instanceof IServerOperationInterceptor) {
-					((IServerOperationInterceptor) next).resourceCreated(RequestDetails.this, theResource);
-				}
-			}
-		}
-
-		@Override
-		public void resourceDeleted(IBaseResource theResource) {
-			for (IServerInterceptor next : getInterceptors()) {
-				if (next instanceof IServerOperationInterceptor) {
-					((IServerOperationInterceptor) next).resourceDeleted(RequestDetails.this, theResource);
-				}
-			}
-		}
-
-		@Override
-		public void resourcesCreated(Collection<? extends IBaseResource> theResource) {
-			for (IBaseResource next : theResource) {
-				resourceCreated(next);
-			}
-		}
-
-		@Override
-		public void resourcesDeleted(Collection<? extends IBaseResource> theResource) {
-			for (IBaseResource next : theResource) {
-				resourceDeleted(next);
-			}
-		}
-
-		/**
-		 * @deprecated Deprecated in HAPI FHIR 2.6 - Use {@link IRequestOperationCallback#resourceUpdated(IBaseResource, IBaseResource)} instead
-		 */
-		@Deprecated
-		public void resourcesUpdated(Collection<? extends IBaseResource> theResource) {
-			for (IBaseResource next : theResource) {
-				resourceUpdated(next);
-			}
-		}
-
-		
-		/**
-		 * @deprecated Deprecated in HAPI FHIR 2.6 - Use {@link IRequestOperationCallback#resourceUpdated(IBaseResource, IBaseResource)} instead
-		 */
-		@Deprecated
-		@Override
-		public void resourceUpdated(IBaseResource theResource) {
-			for (IServerInterceptor next : getInterceptors()) {
-				if (next instanceof IServerOperationInterceptor) {
-					((IServerOperationInterceptor) next).resourceUpdated(RequestDetails.this, theResource);
-				}
-			}
-		}
-
-		@Override
-		public void resourceUpdated(IBaseResource theOldResource, IBaseResource theNewResource) {
-			for (IServerInterceptor next : getInterceptors()) {
-				if (next instanceof IServerOperationInterceptor) {
-					((IServerOperationInterceptor) next).resourceUpdated(RequestDetails.this, theOldResource, theNewResource);
-				}
-			}
-		}
-
 	}
 
 }

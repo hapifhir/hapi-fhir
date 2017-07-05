@@ -19,6 +19,7 @@ import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.client.impl.BaseHttpClientInvocation;
+import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 
@@ -38,8 +39,8 @@ public class GetTagsMethodBinding extends BaseMethodBinding<TagList> {
 			myResourceName = theContext.getResourceDefinition(myType).getName();
 		}
 
-		myIdParamIndex = MethodUtil.findIdParameterIndex(theMethod, getContext());
-		myVersionIdParamIndex = MethodUtil.findVersionIdParameterIndex(theMethod);
+		myIdParamIndex = ParameterUtil.findIdParameterIndex(theMethod, getContext());
+		myVersionIdParamIndex = ParameterUtil.findVersionIdParameterIndex(theMethod);
 
 		if (myIdParamIndex != null && myType.equals(IResource.class)) {
 			throw new ConfigurationException("Method '" + theMethod.getName() + "' does not specify a resource type, but has an @" + IdParam.class.getSimpleName()

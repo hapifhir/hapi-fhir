@@ -21,13 +21,10 @@ package ca.uhn.fhir.rest.server.method;
  */
 
 import java.io.IOException;
-import java.io.Reader;
 import java.io.Writer;
 import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.EnumSet;
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import javax.servlet.http.HttpServletResponse;
@@ -39,12 +36,19 @@ import org.hl7.fhir.instance.model.api.IIdType;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.parser.IParser;
-import ca.uhn.fhir.rest.api.*;
-import ca.uhn.fhir.rest.api.server.*;
-import ca.uhn.fhir.rest.client.impl.BaseHttpClientInvocation;
-import ca.uhn.fhir.rest.server.*;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.EncodingEnum;
+import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.api.PreferReturnEnum;
+import ca.uhn.fhir.rest.api.RequestTypeEnum;
+import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
+import ca.uhn.fhir.rest.api.SummaryEnum;
+import ca.uhn.fhir.rest.api.server.IRestfulResponse;
+import ca.uhn.fhir.rest.api.server.IRestfulServer;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.RestfulServer;
+import ca.uhn.fhir.rest.server.RestfulServerUtils;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
@@ -76,8 +80,6 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<Metho
 	protected boolean allowVoidReturnType() {
 		return false;
 	}
-
-	protected abstract BaseHttpClientInvocation createClientInvocation(Object[] theArgs, IResource resource);
 
 	/**
 	 * For servers, this method will match only incoming requests that match the given operation, or which have no
@@ -146,18 +148,6 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<Metho
 		 */
 		
 		return true;
-	}
-
-	@Override
-	public MethodOutcome invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws BaseServerResponseException {
-		if (theResponseStatusCode >= 200 && theResponseStatusCode < 300) {
-			if (myReturnVoid) {
-				return null;
-			}
-			MethodOutcome retVal = MethodUtil.process2xxResponse(getContext(), theResponseStatusCode, theResponseMimeType, theResponseReader, theHeaders);
-			return retVal;
-		}
-		throw processNon2xxResponseAndReturnExceptionToThrow(theResponseStatusCode, theResponseMimeType, theResponseReader);
 	}
 
 	@Override

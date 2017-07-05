@@ -10,7 +10,7 @@ package ca.uhn.fhir.rest.server.method;
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  * 
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -28,12 +28,13 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
-import ca.uhn.fhir.rest.api.*;
-import ca.uhn.fhir.rest.api.server.*;
-import ca.uhn.fhir.rest.param.IParameter;
+import ca.uhn.fhir.rest.api.RequestTypeEnum;
+import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.IRestfulServer;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 
 public class ConformanceMethodBinding extends BaseResourceReturningMethodBinding {
@@ -41,9 +42,9 @@ public class ConformanceMethodBinding extends BaseResourceReturningMethodBinding
 	public ConformanceMethodBinding(Method theMethod, FhirContext theContext, Object theProvider) {
 		super(theMethod.getReturnType(), theMethod, theContext, theProvider);
 
-//		if (Modifier.isAbstract(theMethod.getReturnType().getModifiers())) {
-//			throw new ConfigurationException("Conformance resource provider method '" + theMethod.getName() + "' must not be abstract");
-//		}
+		// if (Modifier.isAbstract(theMethod.getReturnType().getModifiers())) {
+		// throw new ConfigurationException("Conformance resource provider method '" + theMethod.getName() + "' must not be abstract");
+		// }
 		MethodReturnTypeEnum methodReturnType = getMethodReturnType();
 		Class<?> genericReturnType = (Class<?>) theMethod.getGenericReturnType();
 		if (methodReturnType != MethodReturnTypeEnum.RESOURCE || !IBaseConformance.class.isAssignableFrom(genericReturnType)) {
@@ -55,20 +56,6 @@ public class ConformanceMethodBinding extends BaseResourceReturningMethodBinding
 	@Override
 	public ReturnTypeEnum getReturnType() {
 		return ReturnTypeEnum.RESOURCE;
-	}
-
-	@Override
-	public HttpGetClientInvocation invokeClient(Object[] theArgs) throws InternalErrorException {
-		HttpGetClientInvocation retVal = MethodUtil.createConformanceInvocation(getContext());
-
-		if (theArgs != null) {
-			for (int idx = 0; idx < theArgs.length; idx++) {
-				IParameter nextParam = getParameters().get(idx);
-				nextParam.translateClientArgumentIntoQueryArgument(getContext(), theArgs[idx], null, null);
-			}
-		}
-
-		return retVal;
 	}
 
 	@Override
@@ -88,7 +75,7 @@ public class ConformanceMethodBinding extends BaseResourceReturningMethodBinding
 		if (theRequest.getResourceName() != null) {
 			return false;
 		}
-		
+
 		if ("metadata".equals(theRequest.getOperation())) {
 			if (theRequest.getRequestType() == RequestTypeEnum.GET) {
 				return true;

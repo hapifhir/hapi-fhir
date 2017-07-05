@@ -3,7 +3,6 @@ package ca.uhn.fhir.rest.api.server;
 import ca.uhn.fhir.context.api.BundleInclusionRule;
 import ca.uhn.fhir.rest.server.IPagingProvider;
 import ca.uhn.fhir.rest.server.IRestfulServerDefaults;
-import ca.uhn.fhir.rest.server.method.RequestDetails;
 
 /*
  * #%L
@@ -26,6 +25,7 @@ import ca.uhn.fhir.rest.server.method.RequestDetails;
  */
 public interface IRestfulServer<T extends RequestDetails> extends IRestfulServerDefaults {
 
+	@Override
 	IPagingProvider getPagingProvider();
 
 	BundleInclusionRule getBundleInclusionRule();

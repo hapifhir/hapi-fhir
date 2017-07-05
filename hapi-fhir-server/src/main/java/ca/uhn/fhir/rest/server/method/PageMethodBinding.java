@@ -33,15 +33,20 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
-import ca.uhn.fhir.rest.api.*;
-import ca.uhn.fhir.rest.api.server.*;
-import ca.uhn.fhir.rest.client.impl.BaseHttpClientInvocation;
-import ca.uhn.fhir.rest.server.*;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.EncodingEnum;
+import ca.uhn.fhir.rest.api.IVersionSpecificBundleFactory;
+import ca.uhn.fhir.rest.api.RequestTypeEnum;
+import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.IRestfulServer;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.IPagingProvider;
+import ca.uhn.fhir.rest.server.RestfulServerUtils;
 import ca.uhn.fhir.rest.server.RestfulServerUtils.ResponseEncoding;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
-import ca.uhn.fhir.util.CoverageIgnore;
 
 public class PageMethodBinding extends BaseResourceReturningMethodBinding {
 
@@ -144,31 +149,6 @@ public class PageMethodBinding extends BaseResourceReturningMethodBinding {
 			return bundle;
 		}
 		return bundleFactory.getResourceBundle();
-		// if (bundle != null) {
-		// for (int i = getInterceptors().size() - 1; i >= 0; i--) {
-		// IServerInterceptor next = getInterceptors().get(i);
-		// boolean continueProcessing = next.outgoingResponse(theRequest, bundle, theRequest.getServletRequest(),
-		// theRequest.getServletResponse());
-		// if (!continueProcessing) {
-		// ourLog.debug("Interceptor {} returned false, not continuing processing");
-		// return;
-		// }
-		// }
-		// theRequest.getResponse().streamResponseAsBundle(bundle, summaryMode, respondGzip, requestIsBrowser);
-		// } else {
-		// IBaseResource resBundle = bundleFactory.getResourceBundle();
-		// for (int i = getInterceptors().size() - 1; i >= 0; i--) {
-		// IServerInterceptor next = getInterceptors().get(i);
-		// boolean continueProcessing = next.outgoingResponse(theRequest, resBundle, theRequest.getServletRequest(),
-		// theRequest.getServletResponse());
-		// if (!continueProcessing) {
-		// ourLog.debug("Interceptor {} returned false, not continuing processing");
-		// return;
-		// }
-		// }
-		// theRequest.getResponse().streamResponseAsResource(resBundle, prettyPrint, summaryMode,
-		// Constants.STATUS_HTTP_200_OK, theRequest.isRespondGzip(), false);
-		// }
 	}
 
 	@Override
@@ -188,10 +168,5 @@ public class PageMethodBinding extends BaseResourceReturningMethodBinding {
 		return true;
 	}
 
-	@CoverageIgnore
-	@Override
-	public BaseHttpClientInvocation invokeClient(Object[] theArgs) throws InternalErrorException {
-		throw new UnsupportedOperationException();
-	}
 
 }

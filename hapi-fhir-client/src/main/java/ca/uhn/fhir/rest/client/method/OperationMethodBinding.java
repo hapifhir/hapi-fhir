@@ -50,6 +50,7 @@ import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.client.impl.BaseHttpClientInvocation;
+import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.FhirTerser;
 
@@ -75,7 +76,7 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 
 		myBundleType = theBundleType;
 		myIdempotent = theIdempotent;
-		myIdParamIndex = MethodUtil.findIdParameterIndex(theMethod, getContext());
+		myIdParamIndex = ParameterUtil.findIdParameterIndex(theMethod, getContext());
 		if (myIdParamIndex != null) {
 			for (Annotation next : theMethod.getParameterAnnotations()[myIdParamIndex]) {
 				if (next instanceof IdParam) {

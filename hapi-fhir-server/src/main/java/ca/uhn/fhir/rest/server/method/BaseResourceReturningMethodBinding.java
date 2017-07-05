@@ -22,37 +22,24 @@ package ca.uhn.fhir.rest.server.method;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.io.IOException;
-import java.io.Reader;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.*;
 
-import org.hl7.fhir.instance.model.api.IBaseBundle;
-import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.model.api.Bundle;
-import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.model.api.Include;
+import ca.uhn.fhir.model.api.*;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
-import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.*;
 import ca.uhn.fhir.rest.api.server.*;
-import ca.uhn.fhir.rest.client.exceptions.InvalidResponseException;
-import ca.uhn.fhir.rest.param.IParameter;
-import ca.uhn.fhir.rest.server.*;
+import ca.uhn.fhir.rest.server.RestfulServerUtils;
 import ca.uhn.fhir.rest.server.RestfulServerUtils.ResponseEncoding;
-import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.rest.server.exceptions.*;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.ResponseHighlighterInterceptor;
-import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.ReflectionUtil;
 import ca.uhn.fhir.util.UrlUtil;
 
@@ -76,10 +63,8 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 	}
 
 	private MethodReturnTypeEnum myMethodReturnType;
-	private Class<?> myResourceListCollectionType;
 	private String myResourceName;
 	private Class<? extends IBaseResource> myResourceType;
-	private List<Class<? extends IBaseResource>> myPreferTypesList;
 
 	@SuppressWarnings("unchecked")
 	public BaseResourceReturningMethodBinding(Class<?> theReturnResourceType, Method theMethod, FhirContext theContext, Object theProvider) {
@@ -96,7 +81,6 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 							"Method " + theMethod.getDeclaringClass().getSimpleName() + "#" + theMethod.getName() + " returns an invalid collection generic type: " + collectionType);
 				}
 			}
-			myResourceListCollectionType = collectionType;
 
 		} else if (IBaseResource.class.isAssignableFrom(methodReturnType)) {
 			if (Modifier.isAbstract(methodReturnType.getModifiers()) == false && theContext.getResourceDefinition((Class<? extends IBaseResource>) methodReturnType).isBundle()) {
@@ -126,7 +110,6 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 			}
 		}
 
-		myPreferTypesList = createPreferTypesList();
 	}
 
 	public MethodReturnTypeEnum getMethodReturnType() {
@@ -144,19 +127,6 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 	protected abstract BundleTypeEnum getResponseBundleType();
 
 	public abstract ReturnTypeEnum getReturnType();
-
-	@SuppressWarnings("unchecked")
-	private List<Class<? extends IBaseResource>> createPreferTypesList() {
-		List<Class<? extends IBaseResource>> preferTypes = null;
-		if (myResourceListCollectionType != null && IBaseResource.class.isAssignableFrom(myResourceListCollectionType)) {
-			preferTypes = new ArrayList<Class<? extends IBaseResource>>(1);
-			preferTypes.add((Class<? extends IBaseResource>) myResourceListCollectionType);
-			// } else if (myResourceType != null) {
-			// preferTypes = new ArrayList<Class<? extends IBaseResource>>(1);
-			// preferTypes.add((Class<? extends IBaseResource>) myResourceListCollectionType);
-		}
-		return preferTypes;
-	}
 
 	@Override
 	public Object invokeServer(IRestfulServer<?> theServer, RequestDetails theRequest) throws BaseServerResponseException, IOException {

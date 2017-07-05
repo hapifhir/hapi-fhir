@@ -1,7 +1,5 @@
 package ca.uhn.fhir.rest.server.method;
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -23,15 +21,17 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  */
 
 import java.lang.reflect.Method;
-import java.util.*;
-
-import org.hl7.fhir.instance.model.api.IBaseResource;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Set;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.QualifiedParamList;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.api.server.IRequestDetails;
-import ca.uhn.fhir.rest.api.server.IServerMethodBinding;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.param.QualifierDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
@@ -74,7 +74,7 @@ public abstract class BaseQueryParameter implements IParameter {
 
 	public abstract Object parse(FhirContext theContext, List<QualifiedParamList> theString) throws InternalErrorException, InvalidRequestException;
 
-	private void parseParams(IRequestDetails theRequest, List<QualifiedParamList> paramList, String theQualifiedParamName, String theQualifier) {
+	private void parseParams(RequestDetails theRequest, List<QualifiedParamList> paramList, String theQualifiedParamName, String theQualifier) {
 		QualifierDetails qualifiers = QualifierDetails.extractQualifiersFromParameterName(theQualifier);
 		if (!qualifiers.passes(getQualifierWhitelist(), getQualifierBlacklist())) {
 			return;
@@ -92,40 +92,9 @@ public abstract class BaseQueryParameter implements IParameter {
 		}
 	}
 
-	@Override
-	public void translateClientArgumentIntoQueryArgument(FhirContext theContext, Object theSourceClientArgument, Map<String, List<String>> theTargetQueryArguments, IBaseResource theTargetResource) throws InternalErrorException {
-		if (theSourceClientArgument == null) {
-			if (isRequired()) {
-				throw new NullPointerException("SearchParameter '" + getName() + "' is required and may not be null");
-			}
-		} else {
-			List<QualifiedParamList> value = encode(theContext, theSourceClientArgument);
-
-			for (QualifiedParamList nextParamEntry : value) {
-				StringBuilder b = new StringBuilder();
-				for (String str : nextParamEntry) {
-					if (b.length() > 0) {
-						b.append(",");
-					}
-					b.append(str);
-				}
-
-				String qualifier = nextParamEntry.getQualifier();
-				String paramName = isNotBlank(qualifier) ? getName() + qualifier : getName();
-				List<String> paramValues = theTargetQueryArguments.get(paramName);
-				if (paramValues == null) {
-					paramValues = new ArrayList<String>(value.size());
-					theTargetQueryArguments.put(paramName, paramValues);
-				}
-
-				paramValues.add(b.toString());
-			}
-
-		}
-	}
 
 	@Override
-	public Object translateQueryParametersIntoServerArgument(IRequestDetails theRequest, IServerMethodBinding theMethodBinding) throws InternalErrorException, InvalidRequestException {
+	public Object translateQueryParametersIntoServerArgument(RequestDetails theRequest, BaseMethodBinding<?> theMethodBinding) throws InternalErrorException, InvalidRequestException {
 
 		List<QualifiedParamList> paramList = new ArrayList<QualifiedParamList>();
 		String name = getName();

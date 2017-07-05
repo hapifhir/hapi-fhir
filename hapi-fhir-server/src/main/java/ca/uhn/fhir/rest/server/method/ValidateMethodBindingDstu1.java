@@ -24,16 +24,13 @@ import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.Set;
 
-import org.hl7.fhir.instance.model.api.IBaseResource;
-
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.annotation.Validate;
-import ca.uhn.fhir.rest.api.*;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.RequestTypeEnum;
+import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.client.impl.BaseHttpClientInvocation;
-import ca.uhn.fhir.rest.param.IParameter;
+import ca.uhn.fhir.rest.param.ParameterUtil;
 
 public class ValidateMethodBindingDstu1 extends BaseOutcomeReturningMethodBindingWithResourceParam {
 
@@ -42,7 +39,7 @@ public class ValidateMethodBindingDstu1 extends BaseOutcomeReturningMethodBindin
 	public ValidateMethodBindingDstu1(Method theMethod, FhirContext theContext, Object theProvider) {
 		super(theMethod, theContext, Validate.class, theProvider);
 
-		myIdParameterIndex = MethodUtil.findIdParameterIndex(theMethod, getContext());
+		myIdParameterIndex = ParameterUtil.findIdParameterIndex(theMethod, getContext());
 	}
 
 	@Override
@@ -57,40 +54,6 @@ public class ValidateMethodBindingDstu1 extends BaseOutcomeReturningMethodBindin
 		}
 	}
 
-	@Override
-	protected BaseHttpClientInvocation createClientInvocation(Object[] theArgs, IResource theResource) {
-		FhirContext context = getContext();
-		
-		IdDt idDt=null;
-		if (myIdParameterIndex != null) {
-			idDt = (IdDt) theArgs[myIdParameterIndex];
-		}
-
-		HttpPostClientInvocation retVal = createValidateInvocation(theResource, idDt, context);
-		
-		for (int idx = 0; idx < theArgs.length; idx++) {
-			IParameter nextParam = getParameters().get(idx);
-			nextParam.translateClientArgumentIntoQueryArgument(getContext(), theArgs[idx], null, null);
-		}
-
-		return retVal;
-	}
-
-	public static HttpPostClientInvocation createValidateInvocation(IBaseResource theResource, IdDt theId, FhirContext theContext) {
-		StringBuilder urlExtension = new StringBuilder();
-		urlExtension.append(theContext.getResourceDefinition(theResource).getName());
-		urlExtension.append('/');
-		urlExtension.append(Constants.PARAM_VALIDATE);
-
-		if (theId != null && theId.isEmpty() == false) {
-			String id = theId.getValue();
-			urlExtension.append('/');
-			urlExtension.append(id);
-		}
-		// TODO: is post correct here?
-		HttpPostClientInvocation retVal = new HttpPostClientInvocation(theContext, theResource, urlExtension.toString());
-		return retVal;
-	}
 
 
 	@Override

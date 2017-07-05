@@ -28,6 +28,7 @@ import java.util.List;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IQueryParameterOr;
 import ca.uhn.fhir.rest.api.QualifiedParamList;
+import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -49,7 +50,7 @@ abstract class BaseJavaPrimitiveBinder<T>implements IParamBinder<T> {
 		if (isBlank(retVal)) {
 			return Collections.emptyList();
 		}
-		List<?> retValList = Collections.singletonList(MethodUtil.singleton(new StringParam(retVal), null));
+		List<?> retValList = Collections.singletonList(ParameterUtil.singleton(new StringParam(retVal), null));
 		return (List<IQueryParameterOr<?>>) retValList;
 	}
 

@@ -22,22 +22,13 @@ package ca.uhn.fhir.rest.server.method;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import org.hl7.fhir.instance.model.api.IBaseResource;
+import java.util.*;
 
 import ca.uhn.fhir.context.ConfigurationException;
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.api.*;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.CollectionBinder;
-import ca.uhn.fhir.rest.param.IParameter;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
@@ -46,24 +37,6 @@ public class SummaryEnumParameter implements IParameter {
 	@SuppressWarnings("rawtypes")
 	private Class<? extends Collection> myInnerCollectionType;
 
-	@SuppressWarnings("unchecked")
-	@Override
-	public void translateClientArgumentIntoQueryArgument(FhirContext theContext, Object theSourceClientArgument, Map<String, List<String>> theTargetQueryArguments, IBaseResource theTargetResource) throws InternalErrorException {
-		if (theSourceClientArgument instanceof Collection) {
-			List<String> values = new ArrayList<String>();
-			for (SummaryEnum next : (Collection<SummaryEnum>) theSourceClientArgument) {
-				if (next != null) {
-					values.add(next.getCode());
-				}
-			}
-			theTargetQueryArguments.put(Constants.PARAM_SUMMARY, values);
-		} else {
-			SummaryEnum ss = (SummaryEnum) theSourceClientArgument;
-			if (ss != null) {
-				theTargetQueryArguments.put(Constants.PARAM_SUMMARY, Collections.singletonList(ss.getCode()));
-			}
-		}
-	}
 
 	@Override
 	@SuppressWarnings({ "rawtypes", "unchecked" })

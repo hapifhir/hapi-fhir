@@ -23,7 +23,10 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 
 import org.apache.commons.lang3.StringUtils;
@@ -35,8 +38,11 @@ import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.rest.annotation.Search;
-import ca.uhn.fhir.rest.api.*;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
+import ca.uhn.fhir.rest.api.SearchStyleEnum;
 import ca.uhn.fhir.rest.client.impl.BaseHttpClientInvocation;
+import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
@@ -51,7 +57,7 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 		Search search = theMethod.getAnnotation(Search.class);
 		this.myQueryName = StringUtils.defaultIfBlank(search.queryName(), null);
 		this.myCompartmentName = StringUtils.defaultIfBlank(search.compartmentName(), null);
-		this.myIdParamIndex = MethodUtil.findIdParameterIndex(theMethod, getContext());
+		this.myIdParamIndex = ParameterUtil.findIdParameterIndex(theMethod, getContext());
 
 		Description desc = theMethod.getAnnotation(Description.class);
 		if (desc != null) {

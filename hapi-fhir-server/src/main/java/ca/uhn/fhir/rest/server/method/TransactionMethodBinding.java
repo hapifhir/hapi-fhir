@@ -10,7 +10,7 @@ package ca.uhn.fhir.rest.server.method;
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  * 
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -25,7 +25,6 @@ import java.lang.reflect.Method;
 import java.util.IdentityHashMap;
 import java.util.List;
 
-import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.context.ConfigurationException;
@@ -38,10 +37,11 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.rest.annotation.Transaction;
 import ca.uhn.fhir.rest.annotation.TransactionParam;
-import ca.uhn.fhir.rest.api.*;
-import ca.uhn.fhir.rest.api.server.*;
-import ca.uhn.fhir.rest.client.impl.BaseHttpClientInvocation;
-import ca.uhn.fhir.rest.param.*;
+import ca.uhn.fhir.rest.api.RequestTypeEnum;
+import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.IRestfulServer;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
@@ -60,7 +60,8 @@ public class TransactionMethodBinding extends BaseResourceReturningMethodBinding
 		for (IParameter next : getParameters()) {
 			if (next instanceof TransactionParameter) {
 				if (myTransactionParamIndex != -1) {
-					throw new ConfigurationException("Method '" + theMethod.getName() + "' in type " + theMethod.getDeclaringClass().getCanonicalName() + " has multiple parameters annotated with the @" + TransactionParam.class + " annotation, exactly one is required for @" + Transaction.class
+					throw new ConfigurationException("Method '" + theMethod.getName() + "' in type " + theMethod.getDeclaringClass().getCanonicalName() + " has multiple parameters annotated with the @"
+							+ TransactionParam.class + " annotation, exactly one is required for @" + Transaction.class
 							+ " methods");
 				}
 				myTransactionParamIndex = index;
@@ -70,7 +71,8 @@ public class TransactionMethodBinding extends BaseResourceReturningMethodBinding
 		}
 
 		if (myTransactionParamIndex == -1) {
-			throw new ConfigurationException("Method '" + theMethod.getName() + "' in type " + theMethod.getDeclaringClass().getCanonicalName() + " does not have a parameter annotated with the @" + TransactionParam.class + " annotation");
+			throw new ConfigurationException("Method '" + theMethod.getName() + "' in type " + theMethod.getDeclaringClass().getCanonicalName() + " does not have a parameter annotated with the @"
+					+ TransactionParam.class + " annotation");
 		}
 	}
 
@@ -101,18 +103,6 @@ public class TransactionMethodBinding extends BaseResourceReturningMethodBinding
 			return false;
 		}
 		return true;
-	}
-
-	@Override
-	public BaseHttpClientInvocation invokeClient(Object[] theArgs) throws InternalErrorException {
-		FhirContext context = getContext();
-		if (theArgs[myTransactionParamIndex] instanceof Bundle) {
-			Bundle bundle = (Bundle) theArgs[myTransactionParamIndex];
-			return createTransactionInvocation(bundle, context);
-		}
-		@SuppressWarnings("unchecked")
-		List<IBaseResource> resources = (List<IBaseResource>) theArgs[myTransactionParamIndex];
-		return createTransactionInvocation(resources, context);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -166,7 +156,7 @@ public class TransactionMethodBinding extends BaseResourceReturningMethodBinding
 
 			if (oldId != null && !oldId.isEmpty()) {
 				if (!oldId.equals(newRes.getIdElement()) && newRes instanceof IResource) {
-					((IResource)newRes).getResourceMetadata().put(ResourceMetadataKeyEnum.PREVIOUS_ID, oldId);
+					((IResource) newRes).getResourceMetadata().put(ResourceMetadataKeyEnum.PREVIOUS_ID, oldId);
 				}
 			}
 		}
@@ -174,11 +164,10 @@ public class TransactionMethodBinding extends BaseResourceReturningMethodBinding
 		return retVal;
 	}
 
-	
 	@Override
 	protected void populateActionRequestDetailsForInterceptor(RequestDetails theRequestDetails, ActionRequestDetails theDetails, Object[] theMethodParams) {
 		super.populateActionRequestDetailsForInterceptor(theRequestDetails, theDetails, theMethodParams);
-		
+
 		/*
 		 * If the method has no parsed resource parameter, we parse here in order to have something for the interceptor.
 		 */
@@ -189,22 +178,6 @@ public class TransactionMethodBinding extends BaseResourceReturningMethodBinding
 			theDetails.setResource(ResourceParameter.parseResourceFromRequest(theRequestDetails, this, resourceType));
 		}
 
-	}
-
-	public static BaseHttpClientInvocation createTransactionInvocation(Bundle theBundle, FhirContext theContext) {
-		return new HttpPostClientInvocation(theContext, theBundle);
-	}
-
-	public static BaseHttpClientInvocation createTransactionInvocation(IBaseBundle theBundle, FhirContext theContext) {
-		return new HttpPostClientInvocation(theContext, theBundle);
-	}
-
-	public static BaseHttpClientInvocation createTransactionInvocation(List<? extends IBaseResource> theResources, FhirContext theContext) {
-		return new HttpPostClientInvocation(theContext, theResources, BundleTypeEnum.TRANSACTION);
-	}
-
-	public static BaseHttpClientInvocation createTransactionInvocation(String theRawBundle, FhirContext theContext) {
-		return new HttpPostClientInvocation(theContext, theRawBundle, true, "");
 	}
 
 }

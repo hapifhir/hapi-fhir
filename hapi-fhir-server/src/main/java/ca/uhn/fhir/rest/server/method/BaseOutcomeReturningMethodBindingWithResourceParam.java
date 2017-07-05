@@ -31,13 +31,10 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.client.impl.BaseHttpClientInvocation;
-import ca.uhn.fhir.rest.param.IParameter;
+import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.server.IResourceProvider;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
 
 abstract class BaseOutcomeReturningMethodBindingWithResourceParam extends BaseOutcomeReturningMethodBinding {
@@ -82,7 +79,7 @@ abstract class BaseOutcomeReturningMethodBindingWithResourceParam extends BaseOu
 		}
 
 		myResourceName = theContext.getResourceDefinition(myResourceType).getName();
-		myIdParamIndex = MethodUtil.findIdParameterIndex(theMethod, getContext());
+		myIdParamIndex = ParameterUtil.findIdParameterIndex(theMethod, getContext());
 		if (myIdParamIndex != null) {
 			myIdParamType = (Class<? extends IIdType>) theMethod.getParameterTypes()[myIdParamIndex];
 		}
@@ -96,7 +93,7 @@ abstract class BaseOutcomeReturningMethodBindingWithResourceParam extends BaseOu
 	@Override
 	protected void addParametersForServerRequest(RequestDetails theRequest, Object[] theParams) {
 		if (myIdParamIndex != null) {
-			theParams[myIdParamIndex] = MethodUtil.convertIdToType(theRequest.getId(), myIdParamType);
+			theParams[myIdParamIndex] = ParameterUtil.convertIdToType(theRequest.getId(), myIdParamType);
 		}
 		if (myResourceParameterIndex != -1) {
 			IBaseResource resource = ((IBaseResource) theParams[myResourceParameterIndex]);
@@ -122,17 +119,6 @@ abstract class BaseOutcomeReturningMethodBindingWithResourceParam extends BaseOu
 	@Override
 	public String getResourceName() {
 		return myResourceName;
-	}
-
-	@Override
-	public BaseHttpClientInvocation invokeClient(Object[] theArgs) throws InternalErrorException {
-		IResource resource = (IResource) theArgs[myResourceParameterIndex]; // TODO: use IBaseResource
-		if (resource == null) {
-			throw new NullPointerException("Resource can not be null");
-		}
-
-		BaseHttpClientInvocation retVal = createClientInvocation(theArgs, resource);
-		return retVal;
 	}
 
 	@Override
