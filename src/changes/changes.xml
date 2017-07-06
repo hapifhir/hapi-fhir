@@ -125,6 +125,12 @@
 				used and a large number of resources are being created by clients at
 				the same time.
 			</action>
+			<action type="fix">
+				Testpage Overlay's transaction method did not work if the response
+				Bundle contained any entries that did not contain a resource (which
+				is often the case in more recent versions of HAPI). Thanks to Sujay R
+				for reporting!
+			</action>
 		</release>
 		<release version="2.5" date="2017-06-08">
 			<action type="fix">
