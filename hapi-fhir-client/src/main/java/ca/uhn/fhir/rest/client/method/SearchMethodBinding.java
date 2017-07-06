@@ -37,6 +37,7 @@ import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.*;
 import ca.uhn.fhir.rest.client.impl.BaseHttpClientInvocation;
+import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
@@ -51,7 +52,7 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 		Search search = theMethod.getAnnotation(Search.class);
 		this.myQueryName = StringUtils.defaultIfBlank(search.queryName(), null);
 		this.myCompartmentName = StringUtils.defaultIfBlank(search.compartmentName(), null);
-		this.myIdParamIndex = MethodUtil.findIdParameterIndex(theMethod, getContext());
+		this.myIdParamIndex = ParameterUtil.findIdParameterIndex(theMethod, getContext());
 
 		Description desc = theMethod.getAnnotation(Description.class);
 		if (desc != null) {

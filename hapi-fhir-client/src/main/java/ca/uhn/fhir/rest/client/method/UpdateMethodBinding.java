@@ -16,6 +16,7 @@ import ca.uhn.fhir.rest.annotation.Update;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.client.impl.BaseHttpClientInvocation;
+import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
 public class UpdateMethodBinding extends BaseOutcomeReturningMethodBindingWithResourceParam {
@@ -25,7 +26,7 @@ public class UpdateMethodBinding extends BaseOutcomeReturningMethodBindingWithRe
 	public UpdateMethodBinding(Method theMethod, FhirContext theContext, Object theProvider) {
 		super(theMethod, theContext, Update.class, theProvider);
 
-		myIdParameterIndex = MethodUtil.findIdParameterIndex(theMethod, getContext());
+		myIdParameterIndex = ParameterUtil.findIdParameterIndex(theMethod, getContext());
 	}
 
 

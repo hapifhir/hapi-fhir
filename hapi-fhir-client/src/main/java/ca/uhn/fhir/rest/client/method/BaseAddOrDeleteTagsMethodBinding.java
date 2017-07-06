@@ -17,6 +17,7 @@ import ca.uhn.fhir.rest.annotation.TagListParam;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.client.impl.BaseHttpClientInvocation;
+import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.server.exceptions.*;
 
 abstract class BaseAddOrDeleteTagsMethodBinding extends BaseMethodBinding<Void> {
@@ -38,9 +39,9 @@ abstract class BaseAddOrDeleteTagsMethodBinding extends BaseMethodBinding<Void> 
 		
 		myResourceName = theContext.getResourceDefinition(myType).getName();
 
-		myIdParamIndex = MethodUtil.findIdParameterIndex(theMethod, getContext());
-		myVersionIdParamIndex = MethodUtil.findVersionIdParameterIndex(theMethod);
-		myTagListParamIndex = MethodUtil.findTagListParameterIndex(theMethod);
+		myIdParamIndex = ParameterUtil.findIdParameterIndex(theMethod, getContext());
+		myVersionIdParamIndex = ParameterUtil.findVersionIdParameterIndex(theMethod);
+		myTagListParamIndex = ParameterUtil.findTagListParameterIndex(theMethod);
 
 		if (myIdParamIndex == null) {
 			throw new ConfigurationException("Method '" + theMethod.getName() + "' does not have an @" + IdParam.class.getSimpleName() + " parameter.");

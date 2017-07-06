@@ -37,6 +37,7 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.rest.annotation.*;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
+import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 
 public class ReadMethodBinding extends BaseResourceReturningMethodBinding implements IClientResponseHandlerHandlesBinary<Object> {
@@ -51,8 +52,8 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding implem
 
 		Validate.notNull(theMethod, "Method must not be null");
 
-		Integer idIndex = MethodUtil.findIdParameterIndex(theMethod, getContext());
-		Integer versionIdIndex = MethodUtil.findVersionIdParameterIndex(theMethod);
+		Integer idIndex = ParameterUtil.findIdParameterIndex(theMethod, getContext());
+		Integer versionIdIndex = ParameterUtil.findVersionIdParameterIndex(theMethod);
 
 		Class<?>[] parameterTypes = theMethod.getParameterTypes();
 

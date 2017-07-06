@@ -27,6 +27,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import ca.uhn.fhir.context.*;
 //TODO Use of a deprecated method should be resolved
 import ca.uhn.fhir.rest.annotation.*;
+import ca.uhn.fhir.rest.param.ParameterUtil;
 
 public abstract class BaseOutcomeReturningMethodBindingWithResourceIdButNoResourceBody extends BaseOutcomeReturningMethodBinding {
 
@@ -45,12 +46,12 @@ public abstract class BaseOutcomeReturningMethodBindingWithResourceIdButNoResour
 						"Can not determine resource type for method '" + theMethod.getName() + "' on type " + theMethod.getDeclaringClass().getCanonicalName() + " - Did you forget to include the resourceType() value on the @" + Delete.class.getSimpleName() + " method annotation?");
 		}
 
-		myIdParameterIndex = MethodUtil.findIdParameterIndex(theMethod, getContext());
+		myIdParameterIndex = ParameterUtil.findIdParameterIndex(theMethod, getContext());
 		if (myIdParameterIndex == null) {
 			throw new ConfigurationException("Method '" + theMethod.getName() + "' on type '" + theMethod.getDeclaringClass().getCanonicalName() + "' has no parameter annotated with the @" + IdParam.class.getSimpleName() + " annotation");
 		}
 
-		Integer versionIdParameterIndex = MethodUtil.findVersionIdParameterIndex(theMethod);
+		Integer versionIdParameterIndex = ParameterUtil.findVersionIdParameterIndex(theMethod);
 		if (versionIdParameterIndex != null) {
 			//TODO Use of a deprecated method should be resolved
 			throw new ConfigurationException("Method '" + theMethod.getName() + "' on type '" + theMethod.getDeclaringClass().getCanonicalName() + "' has a parameter annotated with the @" + VersionIdParam.class.getSimpleName() + " annotation but delete methods may not have this annotation");
