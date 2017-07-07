@@ -22,7 +22,7 @@ package ca.uhn.fhir.jpa.term;
 
 import java.util.List;
 
-import ca.uhn.fhir.rest.method.RequestDetails;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 
 public interface IHapiTerminologyLoaderSvc {
 

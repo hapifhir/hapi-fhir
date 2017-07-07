@@ -24,33 +24,19 @@ import java.io.InputStream;
 import java.util.Date;
 
 import org.apache.commons.lang3.StringUtils;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.instance.model.api.*;
 
-import ca.uhn.fhir.context.ConfigurationException;
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.context.*;
 import ca.uhn.fhir.context.support.IContextValidationSupport;
 import ca.uhn.fhir.fluentpath.IFluentPath;
-import ca.uhn.fhir.model.api.IFhirVersion;
-import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
-import ca.uhn.fhir.model.base.composite.BaseCodingDt;
-import ca.uhn.fhir.model.base.composite.BaseContainedDt;
-import ca.uhn.fhir.model.base.composite.BaseResourceReferenceDt;
-import ca.uhn.fhir.model.dstu2.composite.CodingDt;
-import ca.uhn.fhir.model.dstu2.composite.ContainedDt;
-import ca.uhn.fhir.model.dstu2.composite.ResourceReferenceDt;
+import ca.uhn.fhir.model.api.*;
+import ca.uhn.fhir.model.base.composite.*;
+import ca.uhn.fhir.model.dstu2.composite.*;
 import ca.uhn.fhir.model.dstu2.resource.StructureDefinition;
 import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.rest.server.IResourceProvider;
-import ca.uhn.fhir.rest.server.IVersionSpecificBundleFactory;
-import ca.uhn.fhir.rest.server.RestfulServer;
+import ca.uhn.fhir.rest.api.IVersionSpecificBundleFactory;
 import ca.uhn.fhir.rest.server.provider.dstu2.Dstu2BundleFactory;
-import ca.uhn.fhir.rest.server.provider.dstu2.ServerConformanceProvider;
-import ca.uhn.fhir.rest.server.provider.dstu2.ServerProfileProvider;
+import ca.uhn.fhir.util.ReflectionUtil;
 
 public class FhirDstu2 implements IFhirVersion {
 
@@ -61,15 +47,6 @@ public class FhirDstu2 implements IFhirVersion {
 		throw new UnsupportedOperationException("FluentPath is not supported in DSTU2 contexts");
 	}
 
-	@Override
-	public ServerConformanceProvider createServerConformanceProvider(RestfulServer theServer) {
-		return new ServerConformanceProvider(theServer);
-	}
-
-	@Override
-	public IResourceProvider createServerProfilesProvider(RestfulServer theRestfulServer) {
-		return new ServerProfileProvider(theRestfulServer);
-	}
 
 	@Override
 	public IContextValidationSupport<?, ?, ?, ?, ?, ?> createValidationSupport() {
@@ -141,6 +118,14 @@ public class FhirDstu2 implements IFhirVersion {
 	@Override
 	public IIdType newIdType() {
 		return new IdDt();
+	}
+
+
+	
+
+	@Override
+	public Object getServerVersion() {
+		return ReflectionUtil.newInstanceOfFhirServerType("ca.uhn.fhir.model.dstu2.FhirServerDstu2");
 	}
 
 
