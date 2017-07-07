@@ -485,7 +485,8 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	}
 
 	public IResourceProvider getServerProfilesProvider() {
-		return getFhirContext().getVersion().createServerProfilesProvider(this);
+		IFhirVersionServer versionServer = (IFhirVersionServer) getFhirContext().getVersion().getServerVersion();
+		return versionServer.createServerProfilesProvider(this);
 	}
 
 	/**
@@ -762,7 +763,8 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 
 				confProvider = getServerConformanceProvider();
 				if (confProvider == null) {
-					confProvider = getFhirContext().getVersion().createServerConformanceProvider(this);
+					IFhirVersionServer versionServer = (IFhirVersionServer) getFhirContext().getVersion().getServerVersion();
+					confProvider = versionServer.createServerConformanceProvider(this);
 				}
 				// findSystemMethods(confProvider);
 				findResourceMethods(confProvider);

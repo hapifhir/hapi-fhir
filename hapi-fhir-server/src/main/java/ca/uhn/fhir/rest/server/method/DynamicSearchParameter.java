@@ -49,11 +49,6 @@ public class DynamicSearchParameter implements IParameter {
 		}
 	}
 
-	@Override
-	public void translateClientArgumentIntoQueryArgument(FhirContext theContext, Object theSourceClientArgument, Map<String, List<String>> theTargetQueryArguments, IBaseResource theTargetResource) throws InternalErrorException {
-		throw new UnsupportedOperationException("Dynamic search is not supported in client mode (use fluent client for dynamic-like searches)");
-	}
-
 	@SuppressWarnings("unchecked")
 	@Override
 	public Object translateQueryParametersIntoServerArgument(RequestDetails theRequest, BaseMethodBinding<?> theMethodBinding) throws InternalErrorException, InvalidRequestException {

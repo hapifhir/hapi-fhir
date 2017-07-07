@@ -26,22 +26,17 @@ import java.lang.reflect.Method;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.rest.api.*;
 import ca.uhn.fhir.rest.api.server.*;
-import ca.uhn.fhir.rest.client.impl.BaseHttpClientInvocation;
-import ca.uhn.fhir.rest.server.*;
+import ca.uhn.fhir.rest.server.IPagingProvider;
+import ca.uhn.fhir.rest.server.RestfulServerUtils;
 import ca.uhn.fhir.rest.server.RestfulServerUtils.ResponseEncoding;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
-import ca.uhn.fhir.util.CoverageIgnore;
+import ca.uhn.fhir.rest.server.exceptions.*;
 
 public class PageMethodBinding extends BaseResourceReturningMethodBinding {
 
@@ -71,15 +66,11 @@ public class PageMethodBinding extends BaseResourceReturningMethodBinding {
 	}
 
 	@Override
-	public ResourceOrDstu1Bundle doInvokeServer(IRestfulServer<?> theServer, RequestDetails theRequest) {
-		IBase bundle = handlePagingRequest(theServer, theRequest, theRequest.getParameters().get(Constants.PARAM_PAGINGACTION)[0]);
-		if (bundle instanceof Bundle) {
-			return new ResourceOrDstu1Bundle((Bundle) bundle);
-		}
-		return new ResourceOrDstu1Bundle((IBaseResource) bundle);
+	public IBaseResource doInvokeServer(IRestfulServer<?> theServer, RequestDetails theRequest) {
+		return handlePagingRequest(theServer, theRequest, theRequest.getParameters().get(Constants.PARAM_PAGINGACTION)[0]);
 	}
 	
-	private IBase handlePagingRequest(IRestfulServer<?> theServer, RequestDetails theRequest, String thePagingAction) {
+	private IBaseResource handlePagingRequest(IRestfulServer<?> theServer, RequestDetails theRequest, String thePagingAction) {
 		IPagingProvider pagingProvider = theServer.getPagingProvider();
 		if (pagingProvider == null) {
 			throw new InvalidRequestException("This server does not support paging");
@@ -110,9 +101,6 @@ public class PageMethodBinding extends BaseResourceReturningMethodBinding {
 		}
 		
 		ResponseEncoding responseEncoding = RestfulServerUtils.determineResponseEncodingNoDefault(theRequest, theServer.getDefaultResponseEncoding());
-		boolean prettyPrint = RestfulServerUtils.prettyPrintResponse(theServer, theRequest);
-
-		IVersionSpecificBundleFactory bundleFactory = theServer.getFhirContext().newBundleFactory();
 
 		Set<Include> includes = new HashSet<Include>();
 		String[] reqIncludes = theRequest.getParameters().get(Constants.PARAM_INCLUDE);
@@ -137,38 +125,8 @@ public class PageMethodBinding extends BaseResourceReturningMethodBinding {
 		if (responseEncoding != null) {
 			encodingEnum = responseEncoding.getEncoding();
 		}
-		bundleFactory.initializeBundleFromBundleProvider(theServer, resultList, encodingEnum, theRequest.getFhirServerBase(), linkSelf, prettyPrint, start, count, thePagingAction, bundleType, includes);
-
-		Bundle bundle = bundleFactory.getDstu1Bundle();
-		if (bundle != null) {
-			return bundle;
-		}
-		return bundleFactory.getResourceBundle();
-		// if (bundle != null) {
-		// for (int i = getInterceptors().size() - 1; i >= 0; i--) {
-		// IServerInterceptor next = getInterceptors().get(i);
-		// boolean continueProcessing = next.outgoingResponse(theRequest, bundle, theRequest.getServletRequest(),
-		// theRequest.getServletResponse());
-		// if (!continueProcessing) {
-		// ourLog.debug("Interceptor {} returned false, not continuing processing");
-		// return;
-		// }
-		// }
-		// theRequest.getResponse().streamResponseAsBundle(bundle, summaryMode, respondGzip, requestIsBrowser);
-		// } else {
-		// IBaseResource resBundle = bundleFactory.getResourceBundle();
-		// for (int i = getInterceptors().size() - 1; i >= 0; i--) {
-		// IServerInterceptor next = getInterceptors().get(i);
-		// boolean continueProcessing = next.outgoingResponse(theRequest, resBundle, theRequest.getServletRequest(),
-		// theRequest.getServletResponse());
-		// if (!continueProcessing) {
-		// ourLog.debug("Interceptor {} returned false, not continuing processing");
-		// return;
-		// }
-		// }
-		// theRequest.getResponse().streamResponseAsResource(resBundle, prettyPrint, summaryMode,
-		// Constants.STATUS_HTTP_200_OK, theRequest.isRespondGzip(), false);
-		// }
+		
+		return createBundleFromBundleProvider(theServer, theRequest, count, linkSelf, includes, resultList, start, bundleType, encodingEnum, thePagingAction);
 	}
 
 	@Override
@@ -188,10 +146,5 @@ public class PageMethodBinding extends BaseResourceReturningMethodBinding {
 		return true;
 	}
 
-	@CoverageIgnore
-	@Override
-	public BaseHttpClientInvocation invokeClient(Object[] theArgs) throws InternalErrorException {
-		throw new UnsupportedOperationException();
-	}
 
 }

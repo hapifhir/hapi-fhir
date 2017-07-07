@@ -28,17 +28,10 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IBaseBundle;
-import org.hl7.fhir.instance.model.api.IBaseDatatype;
-import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
@@ -49,15 +42,15 @@ import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
-import ca.uhn.fhir.rest.api.*;
-import ca.uhn.fhir.rest.api.server.*;
-import ca.uhn.fhir.rest.client.impl.BaseHttpClientInvocation;
-import ca.uhn.fhir.rest.param.IParameter;
+import ca.uhn.fhir.rest.api.RequestTypeEnum;
+import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.IRestfulServer;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
-import ca.uhn.fhir.util.FhirTerser;
 
 public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 
@@ -81,7 +74,7 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 
 		myBundleType = theBundleType;
 		myIdempotent = theIdempotent;
-		myIdParamIndex = MethodUtil.findIdParameterIndex(theMethod, getContext());
+		myIdParamIndex = ParameterUtil.findIdParameterIndex(theMethod, getContext());
 		if (myIdParamIndex != null) {
 			for (Annotation next : theMethod.getParameterAnnotations()[myIdParamIndex]) {
 				if (next instanceof IdParam) {
@@ -245,24 +238,6 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 		return true;
 	}
 
-	@Override
-	public BaseHttpClientInvocation invokeClient(Object[] theArgs) throws InternalErrorException {
-		String id = null;
-		if (myIdParamIndex != null) {
-			IIdType idDt = (IIdType) theArgs[myIdParamIndex];
-			id = idDt.getValue();
-		}
-		IBaseParameters parameters = (IBaseParameters) getContext().getResourceDefinition("Parameters").newInstance();
-
-		if (theArgs != null) {
-			for (int idx = 0; idx < theArgs.length; idx++) {
-				IParameter nextParam = getParameters().get(idx);
-				nextParam.translateClientArgumentIntoQueryArgument(getContext(), theArgs[idx], null, parameters);
-			}
-		}
-
-		return createOperationInvocation(getContext(), getResourceName(), id, myName, parameters, false);
-	}
 
 	@Override
 	public Object invokeServer(IRestfulServer<?> theServer, RequestDetails theRequest) throws BaseServerResponseException, IOException {

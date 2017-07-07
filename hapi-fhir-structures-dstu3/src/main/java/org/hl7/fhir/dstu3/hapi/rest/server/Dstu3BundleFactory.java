@@ -1,6 +1,5 @@
 package org.hl7.fhir.dstu3.hapi.rest.server;
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
 /*
  * #%L
  * HAPI FHIR Structures - DSTU2 (FHIR v1.0.0)
@@ -24,24 +23,17 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.util.*;
 
-import org.apache.commons.lang3.Validate;
-import org.hl7.fhir.dstu3.model.Bundle;
-import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
-import org.hl7.fhir.dstu3.model.Bundle.BundleLinkComponent;
-import org.hl7.fhir.dstu3.model.Bundle.HTTPVerb;
-import org.hl7.fhir.dstu3.model.Bundle.SearchEntryMode;
-import org.hl7.fhir.dstu3.model.DomainResource;
-import org.hl7.fhir.dstu3.model.IdType;
-import org.hl7.fhir.dstu3.model.Resource;
+import org.hl7.fhir.dstu3.model.*;
+import org.hl7.fhir.dstu3.model.Bundle.*;
 import org.hl7.fhir.instance.model.api.*;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.api.BundleInclusionRule;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
-import ca.uhn.fhir.model.base.resource.BaseOperationOutcome;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
-import ca.uhn.fhir.rest.server.*;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.IVersionSpecificBundleFactory;
 import ca.uhn.fhir.util.ResourceReferenceInfo;
 
 public class Dstu3BundleFactory implements IVersionSpecificBundleFactory {
@@ -251,7 +243,7 @@ public class Dstu3BundleFactory implements IVersionSpecificBundleFactory {
   }
 
   @Override
-  public void addRootPropertiesToBundle(String theAuthor, String theServerBase, String theCompleteUrl, Integer theTotalResults, BundleTypeEnum theBundleType, IPrimitiveType<Date> theLastUpdated) {
+  public void addRootPropertiesToBundle(String theAuthor, String theServerBase, String theLinkSelf, String theLinkPrev, String theLinkNext, Integer theTotalResults, BundleTypeEnum theBundleType, IPrimitiveType<Date> theLastUpdated) {
 
     myBase = theServerBase;
 
@@ -263,8 +255,14 @@ public class Dstu3BundleFactory implements IVersionSpecificBundleFactory {
       myBundle.getMeta().getLastUpdatedElement().setValueAsString(theLastUpdated.getValueAsString());
     }
 
-    if (!hasLink(Constants.LINK_SELF, myBundle) && isNotBlank(theCompleteUrl)) {
-      myBundle.addLink().setRelation("self").setUrl(theCompleteUrl);
+    if (!hasLink(Constants.LINK_SELF, myBundle) && isNotBlank(theLinkSelf)) {
+      myBundle.addLink().setRelation(Constants.LINK_SELF).setUrl(theLinkSelf);
+    }
+    if (!hasLink(Constants.LINK_NEXT, myBundle) && isNotBlank(theLinkNext)) {
+      myBundle.addLink().setRelation(Constants.LINK_NEXT).setUrl(theLinkNext);
+    }
+    if (!hasLink(Constants.LINK_PREVIOUS, myBundle) && isNotBlank(theLinkPrev)) {
+      myBundle.addLink().setRelation(Constants.LINK_PREVIOUS).setUrl(theLinkPrev);
     }
 
     if (myBundle.getTypeElement().isEmpty() && theBundleType != null) {
@@ -295,84 +293,6 @@ public class Dstu3BundleFactory implements IVersionSpecificBundleFactory {
     return false;
   }
 
-  @Override
-  public void initializeBundleFromBundleProvider(IRestfulServer<?> theServer, IBundleProvider theResult, EncodingEnum theResponseEncoding, String theServerBase, String theCompleteUrl,
-      boolean thePrettyPrint, int theOffset, Integer theLimit, String theSearchId, BundleTypeEnum theBundleType, Set<Include> theIncludes) {
-    myBase = theServerBase;
-
-    int numToReturn;
-    String searchId = null;
-    List<IBaseResource> resourceList;
-    Integer numTotalResults = theResult.size();
-    if (theServer.getPagingProvider() == null) {
-      numToReturn = numTotalResults;
-      if (numToReturn > 0) {
-        resourceList = theResult.getResources(0, numToReturn);
-      } else {
-        resourceList = Collections.emptyList();
-      }
-      RestfulServerUtils.validateResourceListNotNull(resourceList);
-
-    } else {
-      IPagingProvider pagingProvider = theServer.getPagingProvider();
-      if (theLimit == null || theLimit.equals(Integer.valueOf(0))) {
-        numToReturn = pagingProvider.getDefaultPageSize();
-      } else {
-        numToReturn = Math.min(pagingProvider.getMaximumPageSize(), theLimit);
-      }
-
-      if (numTotalResults != null) {
-        numToReturn = Math.min(numToReturn, numTotalResults - theOffset);
-      }
-
-      if (numToReturn > 0) {
-        resourceList = theResult.getResources(theOffset, numToReturn + theOffset);
-      } else {
-        resourceList = Collections.emptyList();
-      }
-      RestfulServerUtils.validateResourceListNotNull(resourceList);
-
-      if (theSearchId != null) {
-        searchId = theSearchId;
-      } else {
-        if (numTotalResults == null || numTotalResults > numToReturn) {
-          searchId = pagingProvider.storeResultList(theResult);
-          if (isBlank(searchId)) {
-            ourLog.info("Found {} results but paging provider did not provide an ID to use for paging", numTotalResults);
-          }
-        }
-      }
-    }
-
-    for (IBaseResource next : resourceList) {
-      if (next.getIdElement() == null || next.getIdElement().isEmpty()) {
-        if (!(next instanceof BaseOperationOutcome)) {
-          throw new InternalErrorException("Server method returned resource of type[" + next.getClass().getSimpleName() + "] with no ID specified (IResource#setId(IdDt) must be called)");
-        }
-      }
-    }
-
-    addResourcesToBundle(new ArrayList<IBaseResource>(resourceList), theBundleType, theServerBase, theServer.getBundleInclusionRule(), theIncludes);
-    addRootPropertiesToBundle(null, theServerBase, theCompleteUrl, theResult.size(), theBundleType, theResult.getPublished());
-
-    if (theServer.getPagingProvider() != null) {
-      int limit;
-      limit = theLimit != null ? theLimit : theServer.getPagingProvider().getDefaultPageSize();
-      limit = Math.min(limit, theServer.getPagingProvider().getMaximumPageSize());
-
-      if (searchId != null) {
-        if (numTotalResults == null || theOffset + numToReturn < numTotalResults) {
-          myBundle.addLink().setRelation(Constants.LINK_NEXT)
-              .setUrl(RestfulServerUtils.createPagingLink(theIncludes, theServerBase, searchId, theOffset + numToReturn, numToReturn, theResponseEncoding, thePrettyPrint, theBundleType));
-        }
-        if (theOffset > 0) {
-          int start = Math.max(0, theOffset - limit);
-          myBundle.addLink().setRelation(Constants.LINK_PREVIOUS)
-              .setUrl(RestfulServerUtils.createPagingLink(theIncludes, theServerBase, searchId, start, limit, theResponseEncoding, thePrettyPrint, theBundleType));
-        }
-      }
-    }
-  }
 
   @Override
   public void initializeBundleFromResourceList(String theAuthor, List<? extends IBaseResource> theResources, String theServerBase, String theCompleteUrl, int theTotalResults,

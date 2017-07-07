@@ -20,7 +20,6 @@ package ca.uhn.fhir.rest.server.method;
  * #L%
  */
 import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -37,11 +36,13 @@ import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.rest.annotation.History;
-import ca.uhn.fhir.rest.api.*;
-import ca.uhn.fhir.rest.api.server.*;
-import ca.uhn.fhir.rest.client.impl.BaseHttpClientInvocation;
-import ca.uhn.fhir.rest.param.IParameter;
-import ca.uhn.fhir.rest.server.*;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.IRestfulServer;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.param.ParameterUtil;
+import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
@@ -54,7 +55,7 @@ public class HistoryMethodBinding extends BaseResourceReturningMethodBinding {
 	public HistoryMethodBinding(Method theMethod, FhirContext theContext, Object theProvider) {
 		super(toReturnType(theMethod, theProvider), theMethod, theContext, theProvider);
 
-		myIdParamIndex = MethodUtil.findIdParameterIndex(theMethod, getContext());
+		myIdParamIndex = ParameterUtil.findIdParameterIndex(theMethod, getContext());
 
 		History historyAnnotation = theMethod.getAnnotation(History.class);
 		Class<? extends IBaseResource> type = historyAnnotation.type();
@@ -128,29 +129,6 @@ public class HistoryMethodBinding extends BaseResourceReturningMethodBinding {
 		return true;
 	}
 	
-	@Override
-	public BaseHttpClientInvocation invokeClient(Object[] theArgs) throws InternalErrorException {
-		IdDt id = null;
-		String resourceName = myResourceName;
-		if (myIdParamIndex != null) {
-			id = (IdDt) theArgs[myIdParamIndex];
-			if (id == null || isBlank(id.getValue())) {
-				throw new NullPointerException("ID can not be null");
-			}
-		}
-
-		String historyId = id != null ? id.getIdPart() : null;
-		HttpGetClientInvocation retVal = createHistoryInvocation(getContext(), resourceName, historyId, null, null);
-
-		if (theArgs != null) {
-			for (int idx = 0; idx < theArgs.length; idx++) {
-				IParameter nextParam = getParameters().get(idx);
-				nextParam.translateClientArgumentIntoQueryArgument(getContext(), theArgs[idx], retVal.getParameters(), null);
-			}
-		}
-
-		return retVal;
-	}
 
 	@Override
 	public IBundleProvider invokeServer(IRestfulServer<?> theServer, RequestDetails theRequest, Object[] theMethodParams) throws InvalidRequestException, InternalErrorException {
@@ -208,34 +186,6 @@ public class HistoryMethodBinding extends BaseResourceReturningMethodBinding {
 				return resources.getUuid();
 			}
 		};
-	}
-
-	public static HttpGetClientInvocation createHistoryInvocation(FhirContext theContext, String theResourceName, String theId, IPrimitiveType<Date> theSince, Integer theLimit) {
-		StringBuilder b = new StringBuilder();
-		if (theResourceName != null) {
-			b.append(theResourceName);
-			if (isNotBlank(theId)) {
-				b.append('/');
-				b.append(theId);
-			}
-		}
-		if (b.length() > 0) {
-			b.append('/');
-		}
-		b.append(Constants.PARAM_HISTORY);
-
-		boolean haveParam = false;
-		if (theSince != null && !theSince.isEmpty()) {
-			haveParam = true;
-			b.append('?').append(Constants.PARAM_SINCE).append('=').append(theSince.getValueAsString());
-		}
-		if (theLimit != null) {
-			b.append(haveParam ? '&' : '?');
-			b.append(Constants.PARAM_COUNT).append('=').append(theLimit);
-		}
-
-		HttpGetClientInvocation retVal = new HttpGetClientInvocation(theContext, b.toString());
-		return retVal;
 	}
 
 	private static Class<? extends IBaseResource> toReturnType(Method theMethod, Object theProvider) {

@@ -31,34 +31,15 @@ import org.hl7.fhir.instance.model.api.IIdType;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
-import ca.uhn.fhir.rest.client.impl.BaseHttpClientInvocation;
-import ca.uhn.fhir.rest.param.IParameter;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
 public class CreateMethodBinding extends BaseOutcomeReturningMethodBindingWithResourceParam {
 
 	public CreateMethodBinding(Method theMethod, FhirContext theContext, Object theProvider) {
 		super(theMethod, theContext, Create.class, theProvider);
-	}
-
-	@Override
-	protected BaseHttpClientInvocation createClientInvocation(Object[] theArgs, IResource theResource) {
-		FhirContext context = getContext();
-
-		BaseHttpClientInvocation retVal = MethodUtil.createCreateInvocation(theResource, context);
-
-		if (theArgs != null) {
-			for (int idx = 0; idx < theArgs.length; idx++) {
-				IParameter nextParam = getParameters().get(idx);
-				nextParam.translateClientArgumentIntoQueryArgument(getContext(), theArgs[idx], null, null);
-			}
-		}
-
-		return retVal;
 	}
 
 	@Override
@@ -77,18 +58,21 @@ public class CreateMethodBinding extends BaseOutcomeReturningMethodBindingWithRe
 	}
 
 	@Override
-	protected void validateResourceIdAndUrlIdForNonConditionalOperation(IBaseResource theResource, String theResourceId, String theUrlId, String theMatchUrl) {
+	protected void validateResourceIdAndUrlIdForNonConditionalOperation(IBaseResource theResource, String theResourceId,
+			String theUrlId, String theMatchUrl) {
 		if (isNotBlank(theUrlId)) {
-			String msg = getContext().getLocalizer().getMessage(BaseOutcomeReturningMethodBindingWithResourceParam.class, "idInUrlForCreate", theUrlId);
+			String msg = getContext().getLocalizer()
+					.getMessage(BaseOutcomeReturningMethodBindingWithResourceParam.class, "idInUrlForCreate", theUrlId);
 			throw new InvalidRequestException(msg);
 		}
 		if (getContext().getVersion().getVersion().isOlderThan(FhirVersionEnum.DSTU3)) {
 			if (isNotBlank(theResourceId)) {
-				String msg = getContext().getLocalizer().getMessage(BaseOutcomeReturningMethodBindingWithResourceParam.class, "idInBodyForCreate", theResourceId);
+				String msg = getContext().getLocalizer().getMessage(
+						BaseOutcomeReturningMethodBindingWithResourceParam.class, "idInBodyForCreate", theResourceId);
 				throw new InvalidRequestException(msg);
 			}
 		} else {
-			theResource.setId((IIdType)null);
+			theResource.setId((IIdType) null);
 		}
 	}
 

@@ -10,7 +10,7 @@ package ca.uhn.fhir.rest.server.method;
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  * 
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,11 +21,8 @@ package ca.uhn.fhir.rest.server.method;
  */
 
 import java.io.IOException;
-import java.io.Reader;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.List;
-import java.util.Map;
 
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
@@ -33,17 +30,17 @@ import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.TagList;
-import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.annotation.GetTags;
 import ca.uhn.fhir.rest.annotation.IdParam;
-import ca.uhn.fhir.rest.api.*;
-import ca.uhn.fhir.rest.api.server.*;
-import ca.uhn.fhir.rest.client.impl.BaseHttpClientInvocation;
-import ca.uhn.fhir.rest.param.IParameter;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.RequestTypeEnum;
+import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
+import ca.uhn.fhir.rest.api.server.IRestfulServer;
+import ca.uhn.fhir.rest.api.server.ParseAction;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 
 public class GetTagsMethodBinding extends BaseMethodBinding<TagList> {
@@ -66,8 +63,8 @@ public class GetTagsMethodBinding extends BaseMethodBinding<TagList> {
 			myResourceName = theContext.getResourceDefinition(myType).getName();
 		}
 
-		myIdParamIndex = MethodUtil.findIdParameterIndex(theMethod, getContext());
-		myVersionIdParamIndex = MethodUtil.findVersionIdParameterIndex(theMethod);
+		myIdParamIndex = ParameterUtil.findIdParameterIndex(theMethod, getContext());
+		myVersionIdParamIndex = ParameterUtil.findVersionIdParameterIndex(theMethod);
 
 		if (myIdParamIndex != null && myType.equals(IResource.class)) {
 			throw new ConfigurationException("Method '" + theMethod.getName() + "' does not specify a resource type, but has an @" + IdParam.class.getSimpleName()
@@ -104,60 +101,9 @@ public class GetTagsMethodBinding extends BaseMethodBinding<TagList> {
 		if ((myIdParamIndex != null) != (theRequest.getId() != null)) {
 			return false;
 		}
-		// if ((myVersionIdParamIndex != null) != (theRequest.getVersionId() != null)) {
-		// return false;
-		// }
 		return true;
 	}
 
-	@Override
-	public BaseHttpClientInvocation invokeClient(Object[] theArgs) throws InternalErrorException {
-		HttpGetClientInvocation retVal;
-
-		IdDt id = null;
-		IdDt versionId = null;
-		if (myIdParamIndex != null) {
-			id = (IdDt) theArgs[myIdParamIndex];
-			if (myVersionIdParamIndex != null) {
-				versionId = (IdDt) theArgs[myVersionIdParamIndex];
-			}
-		}
-
-		if (myType != IResource.class) {
-			if (id != null) {
-				if (versionId != null) {
-					retVal = new HttpGetClientInvocation(getContext(), getResourceName(), id.getIdPart(), Constants.PARAM_HISTORY, versionId.getValue(), Constants.PARAM_TAGS);
-				} else if (id.hasVersionIdPart()) {
-					retVal = new HttpGetClientInvocation(getContext(), getResourceName(), id.getIdPart(), Constants.PARAM_HISTORY, id.getVersionIdPart(), Constants.PARAM_TAGS);
-				} else {
-					retVal = new HttpGetClientInvocation(getContext(), getResourceName(), id.getIdPart(), Constants.PARAM_TAGS);
-				}
-			} else {
-				retVal = new HttpGetClientInvocation(getContext(), getResourceName(), Constants.PARAM_TAGS);
-			}
-		} else {
-			retVal = new HttpGetClientInvocation(getContext(), Constants.PARAM_TAGS);
-		}
-
-		if (theArgs != null) {
-			for (int idx = 0; idx < theArgs.length; idx++) {
-				IParameter nextParam = getParameters().get(idx);
-				nextParam.translateClientArgumentIntoQueryArgument(getContext(), theArgs[idx], null, null);
-			}
-		}
-
-		return retVal;
-	}
-
-	@Override
-	public TagList invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws BaseServerResponseException {
-		if (theResponseStatusCode == Constants.STATUS_HTTP_200_OK) {
-			IParser parser = createAppropriateParserForParsingResponse(theResponseMimeType, theResponseReader, theResponseStatusCode, null);
-			TagList retVal = parser.parseTagList(theResponseReader);
-			return retVal;
-		}
-		throw processNon2xxResponseAndReturnExceptionToThrow(theResponseStatusCode, theResponseMimeType, theResponseReader);
-	}
 	@Override
 	public Object invokeServer(IRestfulServer<?> theServer, RequestDetails theRequest) throws BaseServerResponseException, IOException {
 		Object[] params = createParametersForServerRequest(theRequest);

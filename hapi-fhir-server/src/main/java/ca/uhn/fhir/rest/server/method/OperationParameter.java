@@ -24,43 +24,21 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import org.apache.commons.lang3.Validate;
-import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IBaseDatatype;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.instance.model.api.*;
 
-import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
+import ca.uhn.fhir.context.*;
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition.IAccessor;
-import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
-import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
-import ca.uhn.fhir.context.ConfigurationException;
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.IRuntimeDatatypeDefinition;
-import ca.uhn.fhir.context.RuntimeChildPrimitiveDatatypeDefinition;
-import ca.uhn.fhir.context.RuntimePrimitiveDatatypeDefinition;
-import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.i18n.HapiLocalizer;
-import ca.uhn.fhir.model.api.IDatatype;
-import ca.uhn.fhir.model.api.IQueryParameterAnd;
-import ca.uhn.fhir.model.api.IQueryParameterOr;
-import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.model.api.*;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.*;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.*;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
+import ca.uhn.fhir.rest.server.exceptions.*;
 import ca.uhn.fhir.util.FhirTerser;
-import ca.uhn.fhir.util.ParametersUtil;
 import ca.uhn.fhir.util.ReflectionUtil;
 
 public class OperationParameter implements IParameter {
@@ -217,21 +195,6 @@ public class OperationParameter implements IParameter {
 
 	private void throwWrongParamType(Object nextValue) {
 		throw new InvalidRequestException("Request has parameter " + myName + " of type " + nextValue.getClass().getSimpleName() + " but method expects type " + myParameterType.getSimpleName());
-	}
-
-	@Override
-	public void translateClientArgumentIntoQueryArgument(FhirContext theContext, Object theSourceClientArgument, Map<String, List<String>> theTargetQueryArguments, IBaseResource theTargetResource) throws InternalErrorException {
-		assert theTargetResource != null;
-		Object sourceClientArgument = theSourceClientArgument;
-		if (sourceClientArgument == null) {
-			return;
-		}
-
-		if (myConverter != null) {
-			sourceClientArgument = myConverter.outgoingClient(sourceClientArgument);
-		}
-
-		ParametersUtil.addParameterToParameters(theContext, theTargetResource, sourceClientArgument, myName);
 	}
 
 	@SuppressWarnings("unchecked")

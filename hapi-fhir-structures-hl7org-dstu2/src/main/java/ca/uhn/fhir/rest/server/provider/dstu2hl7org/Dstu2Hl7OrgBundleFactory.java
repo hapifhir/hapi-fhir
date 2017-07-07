@@ -22,43 +22,18 @@ package ca.uhn.fhir.rest.server.provider.dstu2hl7org;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
-import org.apache.commons.lang3.Validate;
-import org.hl7.fhir.instance.model.Bundle;
-import org.hl7.fhir.instance.model.Bundle.BundleEntryComponent;
-import org.hl7.fhir.instance.model.Bundle.BundleLinkComponent;
-import org.hl7.fhir.instance.model.Bundle.HTTPVerb;
-import org.hl7.fhir.instance.model.Bundle.SearchEntryMode;
-import org.hl7.fhir.instance.model.IdType;
-import org.hl7.fhir.instance.model.InstantType;
-import org.hl7.fhir.instance.model.OperationOutcome;
-import org.hl7.fhir.instance.model.Resource;
-import org.hl7.fhir.instance.model.api.IAnyResource;
-import org.hl7.fhir.instance.model.api.IBaseReference;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IDomainResource;
-import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.instance.model.*;
+import org.hl7.fhir.instance.model.Bundle.*;
+import org.hl7.fhir.instance.model.api.*;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.api.BundleInclusionRule;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
-import ca.uhn.fhir.rest.server.BundleInclusionRule;
-import ca.uhn.fhir.rest.server.Constants;
-import ca.uhn.fhir.rest.server.EncodingEnum;
-import ca.uhn.fhir.rest.server.IBundleProvider;
-import ca.uhn.fhir.rest.server.IPagingProvider;
-import ca.uhn.fhir.rest.server.IRestfulServer;
-import ca.uhn.fhir.rest.server.IVersionSpecificBundleFactory;
-import ca.uhn.fhir.rest.server.RestfulServerUtils;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.IVersionSpecificBundleFactory;
 import ca.uhn.fhir.util.ResourceReferenceInfo;
 
 public class Dstu2Hl7OrgBundleFactory implements IVersionSpecificBundleFactory {
@@ -251,7 +226,7 @@ public class Dstu2Hl7OrgBundleFactory implements IVersionSpecificBundleFactory {
   }
 
   @Override
-  public void addRootPropertiesToBundle(String theAuthor, String theServerBase, String theCompleteUrl,
+  public void addRootPropertiesToBundle(String theAuthor, String theServerBase, String theLinkSelf, String theLinkPrev, String theLinkNext,
       Integer theTotalResults, BundleTypeEnum theBundleType, IPrimitiveType<Date> theLastUpdated) {
 
     if (isBlank(myBundle.getId())) {
@@ -264,8 +239,14 @@ public class Dstu2Hl7OrgBundleFactory implements IVersionSpecificBundleFactory {
       myBundle.getMeta().setLastUpdatedElement(instantType);
     }
 
-    if (!hasLink(Constants.LINK_SELF, myBundle) && isNotBlank(theCompleteUrl)) {
-      myBundle.addLink().setRelation("self").setUrl(theCompleteUrl);
+    if (!hasLink(Constants.LINK_SELF, myBundle) && isNotBlank(theLinkSelf)) {
+      myBundle.addLink().setRelation(Constants.LINK_SELF).setUrl(theLinkSelf);
+    }
+    if (!hasLink(Constants.LINK_NEXT, myBundle) && isNotBlank(theLinkNext)) {
+      myBundle.addLink().setRelation(Constants.LINK_NEXT).setUrl(theLinkNext);
+    }
+    if (!hasLink(Constants.LINK_SELF, myBundle) && isNotBlank(theLinkPrev)) {
+      myBundle.addLink().setRelation(Constants.LINK_PREVIOUS).setUrl(theLinkPrev);
     }
 
     myBase = theServerBase;
@@ -296,77 +277,6 @@ public class Dstu2Hl7OrgBundleFactory implements IVersionSpecificBundleFactory {
       }
     }
     return false;
-  }
-
-  @Override
-  public void initializeBundleFromBundleProvider(IRestfulServer<?> theServer, IBundleProvider theResult,
-      EncodingEnum theResponseEncoding, String theServerBase, String theCompleteUrl, boolean thePrettyPrint,
-      int theOffset, Integer theLimit, String theSearchId, BundleTypeEnum theBundleType, Set<Include> theIncludes) {
-    myBase = theServerBase;
-    int numToReturn;
-    String searchId = null;
-    List<IBaseResource> resourceList;
-    if (theServer.getPagingProvider() == null) {
-      numToReturn = theResult.size();
-      if (numToReturn == 0) {
-        resourceList = Collections.emptyList();
-      } else {
-        resourceList = theResult.getResources(0, numToReturn);
-        RestfulServerUtils.validateResourceListNotNull(resourceList);
-      }
-    } else {
-      IPagingProvider pagingProvider = theServer.getPagingProvider();
-      if (theLimit == null) {
-        numToReturn = pagingProvider.getDefaultPageSize();
-      } else {
-        numToReturn = Math.min(pagingProvider.getMaximumPageSize(), theLimit);
-      }
-
-      numToReturn = Math.min(numToReturn, theResult.size() - theOffset);
-      resourceList = theResult.getResources(theOffset, numToReturn + theOffset);
-      RestfulServerUtils.validateResourceListNotNull(resourceList);
-
-      if (theSearchId != null) {
-        searchId = theSearchId;
-      } else {
-        if (theResult.size() > numToReturn) {
-          searchId = pagingProvider.storeResultList(theResult);
-          Validate.notNull(searchId, "Paging provider returned null searchId");
-        }
-      }
-    }
-
-    for (IBaseResource next : resourceList) {
-      if (next.getIdElement() == null || next.getIdElement().isEmpty()) {
-        if (!(next instanceof OperationOutcome)) {
-          throw new InternalErrorException("Server method returned resource of type[" + next.getClass().getSimpleName()
-              + "] with no ID specified (IBaseResource#setId(IdDt) must be called)");
-        }
-      }
-    }
-
-    addResourcesToBundle(resourceList, theBundleType, theServerBase, theServer.getBundleInclusionRule(), theIncludes);
-    addRootPropertiesToBundle(null, theServerBase, theCompleteUrl, theResult.size(), theBundleType,
-        theResult.getPublished());
-
-    if (theServer.getPagingProvider() != null) {
-      int limit;
-      limit = theLimit != null ? theLimit : theServer.getPagingProvider().getDefaultPageSize();
-      limit = Math.min(limit, theServer.getPagingProvider().getMaximumPageSize());
-
-      if (searchId != null) {
-        if (theOffset + numToReturn < theResult.size()) {
-          myBundle.addLink().setRelation(Constants.LINK_NEXT)
-              .setUrl(RestfulServerUtils.createPagingLink(theIncludes, theServerBase, searchId, theOffset + numToReturn,
-                  numToReturn, theResponseEncoding, thePrettyPrint, theBundleType));
-        }
-        if (theOffset > 0) {
-          int start = Math.max(0, theOffset - limit);
-          myBundle.addLink().setRelation(Constants.LINK_PREVIOUS).setUrl(RestfulServerUtils.createPagingLink(
-              theIncludes, theServerBase, searchId, start, limit, theResponseEncoding, thePrettyPrint, theBundleType));
-        }
-      }
-    }
   }
 
   @Override

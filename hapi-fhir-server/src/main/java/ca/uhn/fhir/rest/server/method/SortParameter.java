@@ -10,7 +10,7 @@ package ca.uhn.fhir.rest.server.method;
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  * 
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,21 +22,13 @@ package ca.uhn.fhir.rest.server.method;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
-import java.util.Map;
 import java.util.StringTokenizer;
 
-import org.hl7.fhir.instance.model.api.IBaseResource;
-
-import ca.uhn.fhir.context.ConfigurationException;
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.context.*;
 import ca.uhn.fhir.rest.annotation.Sort;
 import ca.uhn.fhir.rest.api.*;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.param.IParameter;
 import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -52,49 +44,14 @@ public class SortParameter implements IParameter {
 	@Override
 	public void initializeTypes(Method theMethod, Class<? extends Collection<?>> theOuterCollectionType, Class<? extends Collection<?>> theInnerCollectionType, Class<?> theParameterType) {
 		if (theOuterCollectionType != null || theInnerCollectionType != null) {
-			throw new ConfigurationException("Method '" + theMethod.getName() + "' in type '" + theMethod.getDeclaringClass().getCanonicalName() + "' is annotated with @" + Sort.class.getName() + " but can not be of collection type");
+			throw new ConfigurationException("Method '" + theMethod.getName() + "' in type '" + theMethod.getDeclaringClass().getCanonicalName() + "' is annotated with @" + Sort.class.getName()
+					+ " but can not be of collection type");
 		}
 		if (!theParameterType.equals(SortSpec.class)) {
-			throw new ConfigurationException("Method '" + theMethod.getName() + "' in type '" + theMethod.getDeclaringClass().getCanonicalName() + "' is annotated with @" + Sort.class.getName() + " but is an invalid type, must be: " + SortSpec.class.getCanonicalName());
+			throw new ConfigurationException("Method '" + theMethod.getName() + "' in type '" + theMethod.getDeclaringClass().getCanonicalName() + "' is annotated with @" + Sort.class.getName()
+					+ " but is an invalid type, must be: " + SortSpec.class.getCanonicalName());
 		}
 
-	}
-
-	@Override
-	public void translateClientArgumentIntoQueryArgument(FhirContext theContext, Object theSourceClientArgument, Map<String, List<String>> theTargetQueryArguments, IBaseResource theTargetResource) throws InternalErrorException {
-		SortSpec ss = (SortSpec) theSourceClientArgument;
-
-		if (myContext.getVersion().getVersion().isNewerThan(FhirVersionEnum.DSTU2)) {
-			String string = createSortStringDstu3(ss);
-			if (string.length() > 0) {
-				if (!theTargetQueryArguments.containsKey(Constants.PARAM_SORT)) {
-					theTargetQueryArguments.put(Constants.PARAM_SORT, new ArrayList<String>());
-				}
-				theTargetQueryArguments.get(Constants.PARAM_SORT).add(string);
-			}
-
-		} else {
-
-			while (ss != null) {
-				String name;
-				if (ss.getOrder() == null) {
-					name = Constants.PARAM_SORT;
-				} else if (ss.getOrder() == SortOrderEnum.ASC) {
-					name = Constants.PARAM_SORT_ASC;
-				} else {
-					name = Constants.PARAM_SORT_DESC;
-				}
-
-				if (ss.getParamName() != null) {
-					if (!theTargetQueryArguments.containsKey(name)) {
-						theTargetQueryArguments.put(name, new ArrayList<String>());
-					}
-
-					theTargetQueryArguments.get(name).add(ss.getParamName());
-				}
-				ss = ss.getChain();
-			}
-		}
 	}
 
 	@Override

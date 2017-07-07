@@ -20,26 +20,28 @@
 			<artifactId>hapi-fhir-base</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+
+		<!--
+		Test dependencies on other optional parts of HAPI 
+		-->
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-validation-resources-dstu2</artifactId>
 			<version>${project.version}</version>
 			<scope>test</scope>
 		</dependency>
-
-		<!-- 
-		The JPA project uses a newer API but we'll try to hold to this version
-		as much as possible. See #283.
-		-->
 		<dependency>
-			<groupId>javax.servlet</groupId>
-			<artifactId>servlet-api</artifactId>
-			<version>2.5</version>
-			<scope>provided</scope>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-client</artifactId>
+			<version>${project.version}</version>
+			<scope>test</scope>
 		</dependency>
-
-		<!-- <dependency> <groupId>net.sf.saxon</groupId> <artifactId>saxon</artifactId> 
-			<version>8.7</version> </dependency> -->
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-server</artifactId>
+			<version>${project.version}</version>
+			<scope>test</scope>
+		</dependency>
 
 		<dependency>
 			<groupId>xpp3</groupId>
@@ -49,7 +51,6 @@
 		<dependency>
 			<groupId>net.sf.saxon</groupId>
 			<artifactId>Saxon-HE</artifactId>
-			<version>9.6.0-4</version>
 		</dependency>
 
 		<!-- Testing -->

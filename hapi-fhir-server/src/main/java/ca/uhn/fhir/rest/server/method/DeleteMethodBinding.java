@@ -22,21 +22,13 @@ package ca.uhn.fhir.rest.server.method;
 
 import java.lang.reflect.Method;
 import java.util.Collections;
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
-import org.hl7.fhir.instance.model.api.IIdType;
-
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.rest.annotation.Delete;
-import ca.uhn.fhir.rest.api.*;
+import ca.uhn.fhir.rest.api.RequestTypeEnum;
+import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.client.impl.BaseHttpClientInvocation;
-import ca.uhn.fhir.rest.param.IParameter;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
 public class DeleteMethodBinding extends BaseOutcomeReturningMethodBindingWithResourceIdButNoResourceBody {
 
@@ -55,44 +47,8 @@ public class DeleteMethodBinding extends BaseOutcomeReturningMethodBindingWithRe
 	}
 
 	@Override
-	protected BaseHttpClientInvocation createClientInvocation(Object[] theArgs, IResource theResource) {
-		StringBuilder urlExtension = new StringBuilder();
-		urlExtension.append(getContext().getResourceDefinition(theResource).getName());
-
-		return new HttpPostClientInvocation(getContext(), theResource, urlExtension.toString());
-	}
-
-	@Override
 	protected boolean allowVoidReturnType() {
 		return true;
-	}
-
-	@Override
-	public BaseHttpClientInvocation invokeClient(Object[] theArgs) throws InternalErrorException {
-		IIdType idDt = (IIdType) theArgs[getIdParameterIndex()];
-		if (idDt == null) {
-			throw new NullPointerException("ID can not be null");
-		}
-
-		if (idDt.hasResourceType() == false) {
-			idDt = idDt.withResourceType(getResourceName());
-		} else if (getResourceName().equals(idDt.getResourceType()) == false) {
-			throw new InvalidRequestException("ID parameter has the wrong resource type, expected '" + getResourceName() + "', found: " + idDt.getResourceType());
-		}
-
-		HttpDeleteClientInvocation retVal = createDeleteInvocation(getContext(), idDt);
-
-		for (int idx = 0; idx < theArgs.length; idx++) {
-			IParameter nextParam = getParameters().get(idx);
-			nextParam.translateClientArgumentIntoQueryArgument(getContext(), theArgs[idx], null, null);
-		}
-
-		return retVal;
-	}
-
-	public static HttpDeleteClientInvocation createDeleteInvocation(FhirContext theContext, IIdType theId) {
-		HttpDeleteClientInvocation retVal = new HttpDeleteClientInvocation(theContext, theId);
-		return retVal;
 	}
 
 	@Override
@@ -103,15 +59,6 @@ public class DeleteMethodBinding extends BaseOutcomeReturningMethodBindingWithRe
 	@Override
 	protected String getMatchingOperation() {
 		return null;
-	}
-
-	public static HttpDeleteClientInvocation createDeleteInvocation(FhirContext theContext, String theSearchUrl) {
-		HttpDeleteClientInvocation retVal = new HttpDeleteClientInvocation(theContext, theSearchUrl);
-		return retVal;
-	}
-
-	public static HttpDeleteClientInvocation createDeleteInvocation(FhirContext theContext, String theResourceType, Map<String, List<String>> theParams) {
-		return new HttpDeleteClientInvocation(theContext, theResourceType, theParams);
 	}
 
 }

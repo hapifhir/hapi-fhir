@@ -1,5 +1,7 @@
 package ca.uhn.fhir.rest.param;
 
+import static org.apache.commons.lang3.StringUtils.isBlank;
+
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 /*
@@ -27,14 +29,22 @@ import org.hl7.fhir.instance.model.api.IIdType;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.api.*;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.IntegerDt;
 import ca.uhn.fhir.rest.annotation.*;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.QualifiedParamList;
+import ca.uhn.fhir.util.ReflectionUtil;
 import ca.uhn.fhir.util.UrlUtil;
 
 public class ParameterUtil {
 
 	private static final Set<Class<?>> BINDABLE_INTEGER_TYPES;
+	private static final String LABEL = "label=\"";
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ParameterUtil.class);
+
+	private static final String SCHEME = "scheme=\"";
 
 	static {
 		HashSet<Class<?>> intTypes = new HashSet<Class<?>>();
@@ -44,9 +54,15 @@ public class ParameterUtil {
 
 	}
 
-	// public static Integer findSinceParameterIndex(Method theMethod) {
-	// return findParamIndex(theMethod, Since.class);
-	// }
+	@SuppressWarnings("unchecked")
+	public static <T extends IIdType> T convertIdToType(IIdType value, Class<T> theIdParamType) {
+		if (value != null && !theIdParamType.isAssignableFrom(value.getClass())) {
+			IIdType newValue = ReflectionUtil.newInstance(theIdParamType);
+			newValue.setValue(value.getValue());
+			value = newValue;
+		}
+		return (T) value;
+	}
 
 	/**
 	 * Escapes a string according to the rules for parameter escaping specified in the <a href="http://www.hl7.org/implement/standards/fhir/search.html#escaping">FHIR Specification Escaping
@@ -61,14 +77,14 @@ public class ParameterUtil {
 		for (int i = 0; i < theValue.length(); i++) {
 			char next = theValue.charAt(i);
 			switch (next) {
-				case '$':
-				case ',':
-				case '|':
-				case '\\':
-					b.append('\\');
-					break;
-				default:
-					break;
+			case '$':
+			case ',':
+			case '|':
+			case '\\':
+				b.append('\\');
+				break;
+			default:
+				break;
 			}
 			b.append(next);
 		}
@@ -115,6 +131,10 @@ public class ParameterUtil {
 		}
 		return index;
 	}
+
+	// public static Integer findSinceParameterIndex(Method theMethod) {
+	// return findParamIndex(theMethod, Since.class);
+	// }
 
 	public static Integer findParamAnnotationIndex(Method theMethod, Class<?> toFind) {
 		int paramIndex = 0;
@@ -168,6 +188,134 @@ public class ParameterUtil {
 			}
 		}
 		return -1;
+	}
+
+	public static String parseETagValue(String value) {
+		String eTagVersion;
+		value = value.trim();
+		if (value.length() > 1) {
+			if (value.charAt(value.length() - 1) == '"') {
+				if (value.charAt(0) == '"') {
+					eTagVersion = value.substring(1, value.length() - 1);
+				} else if (value.length() > 3 && value.charAt(0) == 'W' && value.charAt(1) == '/'
+						&& value.charAt(2) == '"') {
+					eTagVersion = value.substring(3, value.length() - 1);
+				} else {
+					eTagVersion = value;
+				}
+			} else {
+				eTagVersion = value;
+			}
+		} else {
+			eTagVersion = value;
+		}
+		return eTagVersion;
+	}
+
+	@Deprecated
+	public static void parseTagValue(TagList tagList, String nextTagComplete) {
+		StringBuilder next = new StringBuilder(nextTagComplete);
+		parseTagValue(tagList, nextTagComplete, next);
+	}
+
+	@Deprecated
+	private static void parseTagValue(TagList theTagList, String theCompleteHeaderValue, StringBuilder theBuffer) {
+		int firstSemicolon = theBuffer.indexOf(";");
+		int deleteTo;
+		if (firstSemicolon == -1) {
+			firstSemicolon = theBuffer.indexOf(",");
+			if (firstSemicolon == -1) {
+				firstSemicolon = theBuffer.length();
+				deleteTo = theBuffer.length();
+			} else {
+				deleteTo = firstSemicolon;
+			}
+		} else {
+			deleteTo = firstSemicolon + 1;
+		}
+
+		String term = theBuffer.substring(0, firstSemicolon);
+		String scheme = null;
+		String label = null;
+		if (isBlank(term)) {
+			return;
+		}
+
+		theBuffer.delete(0, deleteTo);
+		while (theBuffer.length() > 0 && theBuffer.charAt(0) == ' ') {
+			theBuffer.deleteCharAt(0);
+		}
+
+		while (theBuffer.length() > 0) {
+			boolean foundSomething = false;
+			if (theBuffer.length() > SCHEME.length() && theBuffer.substring(0, SCHEME.length()).equals(SCHEME)) {
+				int closeIdx = theBuffer.indexOf("\"", SCHEME.length());
+				scheme = theBuffer.substring(SCHEME.length(), closeIdx);
+				theBuffer.delete(0, closeIdx + 1);
+				foundSomething = true;
+			}
+			if (theBuffer.length() > LABEL.length() && theBuffer.substring(0, LABEL.length()).equals(LABEL)) {
+				int closeIdx = theBuffer.indexOf("\"", LABEL.length());
+				label = theBuffer.substring(LABEL.length(), closeIdx);
+				theBuffer.delete(0, closeIdx + 1);
+				foundSomething = true;
+			}
+			// TODO: support enc2231-string as described in
+			// http://tools.ietf.org/html/draft-johnston-http-category-header-02
+			// TODO: support multiple tags in one header as described in
+			// http://hl7.org/implement/standards/fhir/http.html#tags
+
+			while (theBuffer.length() > 0 && (theBuffer.charAt(0) == ' ' || theBuffer.charAt(0) == ';')) {
+				theBuffer.deleteCharAt(0);
+			}
+
+			if (!foundSomething) {
+				break;
+			}
+		}
+
+		if (theBuffer.length() > 0 && theBuffer.charAt(0) == ',') {
+			theBuffer.deleteCharAt(0);
+			while (theBuffer.length() > 0 && theBuffer.charAt(0) == ' ') {
+				theBuffer.deleteCharAt(0);
+			}
+			theTagList.add(new Tag(scheme, term, label));
+			parseTagValue(theTagList, theCompleteHeaderValue, theBuffer);
+		} else {
+			theTagList.add(new Tag(scheme, term, label));
+		}
+
+		if (theBuffer.length() > 0) {
+			ourLog.warn("Ignoring extra text at the end of " + Constants.HEADER_CATEGORY + " tag '"
+					+ theBuffer.toString() + "' - Complete tag value was: " + theCompleteHeaderValue);
+		}
+
+	}
+
+	public static IQueryParameterOr<?> singleton(final IQueryParameterType theParam, final String theParamName) {
+		return new IQueryParameterOr<IQueryParameterType>() {
+
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public List<IQueryParameterType> getValuesAsQueryTokens() {
+				return Collections.singletonList(theParam);
+			}
+
+			@Override
+			public void setValuesAsQueryTokens(FhirContext theContext, String theParamName,
+					QualifiedParamList theParameters) {
+				if (theParameters.isEmpty()) {
+					return;
+				}
+				if (theParameters.size() > 1) {
+					throw new IllegalArgumentException(
+							"Type " + theParam.getClass().getCanonicalName() + " does not support multiple values");
+				}
+				theParam.setValueAsQueryToken(theContext, theParamName, theParameters.getQualifier(),
+						theParameters.get(0));
+			}
+		};
 	}
 
 	static List<String> splitParameterString(String theInput, boolean theUnescapeComponents) {
@@ -245,13 +393,13 @@ public class ParameterUtil {
 					b.append(next);
 				} else {
 					switch (theValue.charAt(i + 1)) {
-						case '$':
-						case ',':
-						case '|':
-						case '\\':
-							continue;
-						default:
-							b.append(next);
+					case '$':
+					case ',':
+					case '|':
+					case '\\':
+						continue;
+					default:
+						b.append(next);
 					}
 				}
 			} else {

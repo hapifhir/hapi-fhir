@@ -23,14 +23,9 @@ package ca.uhn.fhir.model.api;
 import java.io.InputStream;
 import java.util.Date;
 
-import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.instance.model.api.*;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.context.*;
 import ca.uhn.fhir.context.support.IContextValidationSupport;
 import ca.uhn.fhir.fluentpath.IFluentPath;
 import ca.uhn.fhir.rest.api.IVersionSpecificBundleFactory;
@@ -67,5 +62,12 @@ public interface IFhirVersion {
 	IBase newCodingDt();
 
 	IIdType newIdType();
+
+	/**
+	 * Returns an instance of <code>IFhirVersionServer<code> for this version.
+	 * Note that this method may only be called if the <code>hapi-fhir-server</code>
+	 * JAR is on the classpath. Otherwise it will result in a {@link ClassNotFoundException}
+	 */
+	Object getServerVersion();
 
 }

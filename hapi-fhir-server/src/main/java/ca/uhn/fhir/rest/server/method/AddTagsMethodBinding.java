@@ -1,5 +1,7 @@
 package ca.uhn.fhir.rest.server.method;
 
+import java.io.IOException;
+
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -25,6 +27,9 @@ import java.lang.reflect.Method;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.annotation.AddTags;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
+import ca.uhn.fhir.rest.api.server.IRestfulServer;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 
 class AddTagsMethodBinding extends BaseAddOrDeleteTagsMethodBinding {
 
@@ -40,6 +45,11 @@ class AddTagsMethodBinding extends BaseAddOrDeleteTagsMethodBinding {
 	@Override
 	public RestOperationTypeEnum getRestOperationType() {
 		return RestOperationTypeEnum.ADD_TAGS;
+	}
+
+	@Override
+	public Object invokeServer(IRestfulServer<?> theServer, RequestDetails theRequest) throws BaseServerResponseException, IOException {
+		return null;
 	}
 
 }

@@ -29,6 +29,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IQueryParameterOr;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.QualifiedParamList;
+import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
@@ -42,7 +43,7 @@ final class QueryParameterTypeBinder extends BaseBinder<IQueryParameterType> imp
 	@Override
 	public List<IQueryParameterOr<?>> encode(FhirContext theContext, IQueryParameterType theValue) throws InternalErrorException {
 		IQueryParameterType param = theValue;
-		List<?> retVal = Collections.singletonList(MethodUtil.singleton(param, null));
+		List<?> retVal = Collections.singletonList(ParameterUtil.singleton(param, null));
 		return (List<IQueryParameterOr<?>>) retVal;
 	}
 

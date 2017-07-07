@@ -21,7 +21,10 @@ package ca.uhn.fhir.rest.server.method;
  */
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.nio.charset.Charset;
@@ -34,11 +37,16 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.model.api.*;
+import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
+import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
-import ca.uhn.fhir.rest.api.*;
-import ca.uhn.fhir.rest.api.server.*;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.EncodingEnum;
+import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServerUtils;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -49,7 +57,7 @@ public class ResourceParameter implements IParameter {
 	private Mode myMode;
 	private Class<? extends IBaseResource> myResourceType;
 
-	public ResourceParameter(Class<? extends IResource> theParameterType, Object theProvider, Mode theMode) {
+	public ResourceParameter(Class<? extends IBaseResource> theParameterType, Object theProvider, Mode theMode) {
 		Validate.notNull(theParameterType, "theParameterType can not be null");
 		Validate.notNull(theMode, "theMode can not be null");
 
@@ -82,7 +90,7 @@ public class ResourceParameter implements IParameter {
 
 
 	@Override
-	public Object translateQueryParametersIntoServerArgument(IRequestDetails theRequest, IServerMethodBinding theMethodBinding) throws InternalErrorException, InvalidRequestException {
+	public Object translateQueryParametersIntoServerArgument(RequestDetails theRequest, BaseMethodBinding<?> theMethodBinding) throws InternalErrorException, InvalidRequestException {
 		switch (myMode) {
 		case BODY:
 			try {
@@ -178,7 +186,7 @@ public class ResourceParameter implements IParameter {
 		if (theRequest.getServer().getFhirContext().getVersion().getVersion().equals(FhirVersionEnum.DSTU1)) {
 			TagList tagList = new TagList();
 			for (String nextTagComplete : theRequest.getHeaders(Constants.HEADER_CATEGORY)) {
-				MethodUtil.parseTagValue(tagList, nextTagComplete);
+				ParameterUtil.parseTagValue(tagList, nextTagComplete);
 			}
 			if (tagList.isEmpty() == false) {
 				((IResource) retVal).getResourceMetadata().put(ResourceMetadataKeyEnum.TAG_LIST, tagList);

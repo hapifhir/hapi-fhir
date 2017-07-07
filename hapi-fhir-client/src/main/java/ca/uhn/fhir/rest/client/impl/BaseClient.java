@@ -78,7 +78,7 @@ public abstract class BaseClient implements IRestfulClient {
 	 * as it may change at any time. If you want to capture responses in a reliable
 	 * way in your own code, just use client interceptors
 	 */
-	static final String HAPI_CLIENT_KEEPRESPONSES = "hapi.client.keepresponses";
+	public static final String HAPI_CLIENT_KEEPRESPONSES = "hapi.client.keepresponses";
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseClient.class);
 

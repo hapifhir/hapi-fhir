@@ -7,9 +7,7 @@ import static org.mockito.Mockito.when;
 import java.io.InputStream;
 import java.io.StringReader;
 import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.ReaderInputStream;
@@ -20,10 +18,7 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicStatusLine;
-import org.hl7.fhir.instance.model.IdType;
-import org.hl7.fhir.instance.model.Parameters;
-import org.hl7.fhir.instance.model.Patient;
-import org.hl7.fhir.instance.model.StringType;
+import org.hl7.fhir.instance.model.*;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -32,11 +27,10 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.annotation.IdParam;
-import ca.uhn.fhir.rest.annotation.Operation;
-import ca.uhn.fhir.rest.annotation.OperationParam;
+import ca.uhn.fhir.rest.annotation.*;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.client.api.IBasicClient;
-import ca.uhn.fhir.rest.server.Constants;
+import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 
 public class OperationClientTest {
 

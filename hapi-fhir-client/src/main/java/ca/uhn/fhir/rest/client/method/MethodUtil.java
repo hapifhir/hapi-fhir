@@ -1,6 +1,5 @@
 package ca.uhn.fhir.rest.client.method;
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.io.*;
@@ -49,12 +48,10 @@ import ca.uhn.fhir.util.*;
 @SuppressWarnings("deprecation")
 public class MethodUtil {
 
-	private static final String LABEL = "label=\"";
-
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(MethodUtil.class);
 	private static final Set<String> ourServletRequestTypes = new HashSet<String>();
 	private static final Set<String> ourServletResponseTypes = new HashSet<String>();
-	private static final String SCHEME = "scheme=\"";
+
 	static {
 		ourServletRequestTypes.add("javax.servlet.ServletRequest");
 		ourServletResponseTypes.add("javax.servlet.ServletResponse");
@@ -80,16 +77,6 @@ public class MethodUtil {
 		}
 	}
 
-	@SuppressWarnings("unchecked")
-	public static <T extends IIdType> T convertIdToType(IIdType value, Class<T> theIdParamType) {
-		if (value != null && !theIdParamType.isAssignableFrom(value.getClass())) {
-			IIdType newValue = ReflectionUtil.newInstance(theIdParamType);
-			newValue.setValue(value.getValue());
-			value = newValue;
-		}
-		return (T) value;
-	}
-
 	public static HttpGetClientInvocation createConformanceInvocation(FhirContext theContext) {
 		return new HttpGetClientInvocation(theContext, "metadata");
 	}
@@ -98,7 +85,8 @@ public class MethodUtil {
 		return createCreateInvocation(theResource, null, null, theContext);
 	}
 
-	public static HttpPostClientInvocation createCreateInvocation(IBaseResource theResource, String theResourceBody, String theId, FhirContext theContext) {
+	public static HttpPostClientInvocation createCreateInvocation(IBaseResource theResource, String theResourceBody,
+			String theId, FhirContext theContext) {
 		RuntimeResourceDefinition def = theContext.getResourceDefinition(theResource);
 		String resourceName = def.getName();
 
@@ -132,32 +120,38 @@ public class MethodUtil {
 		return retVal;
 	}
 
-	public static HttpPostClientInvocation createCreateInvocation(IBaseResource theResource, String theResourceBody, String theId, FhirContext theContext,
-			Map<String, List<String>> theIfNoneExistParams) {
+	public static HttpPostClientInvocation createCreateInvocation(IBaseResource theResource, String theResourceBody,
+			String theId, FhirContext theContext, Map<String, List<String>> theIfNoneExistParams) {
 		HttpPostClientInvocation retVal = createCreateInvocation(theResource, theResourceBody, theId, theContext);
 		retVal.setIfNoneExistParams(theIfNoneExistParams);
 		return retVal;
 	}
 
-	public static HttpPostClientInvocation createCreateInvocation(IBaseResource theResource, String theResourceBody, String theId, FhirContext theContext, String theIfNoneExistUrl) {
+	public static HttpPostClientInvocation createCreateInvocation(IBaseResource theResource, String theResourceBody,
+			String theId, FhirContext theContext, String theIfNoneExistUrl) {
 		HttpPostClientInvocation retVal = createCreateInvocation(theResource, theResourceBody, theId, theContext);
 		retVal.setIfNoneExistString(theIfNoneExistUrl);
 		return retVal;
 	}
 
-	public static HttpPatchClientInvocation createPatchInvocation(FhirContext theContext, IIdType theId, PatchTypeEnum thePatchType, String theBody) {
+	public static HttpPatchClientInvocation createPatchInvocation(FhirContext theContext, IIdType theId,
+			PatchTypeEnum thePatchType, String theBody) {
 		return PatchMethodBinding.createPatchInvocation(theContext, theId, thePatchType, theBody);
 	}
 
-	public static HttpPatchClientInvocation createPatchInvocation(FhirContext theContext, String theUrl, PatchTypeEnum thePatchType, String theBody) {
+	public static HttpPatchClientInvocation createPatchInvocation(FhirContext theContext, String theUrl,
+			PatchTypeEnum thePatchType, String theBody) {
 		return PatchMethodBinding.createPatchInvocation(theContext, theUrl, thePatchType, theBody);
 	}
 
-	public static HttpPatchClientInvocation createPatchInvocation(FhirContext theContext, PatchTypeEnum thePatchType, String theBody, String theResourceType, Map<String, List<String>> theMatchParams) {
-		return PatchMethodBinding.createPatchInvocation(theContext, thePatchType, theBody, theResourceType, theMatchParams);
+	public static HttpPatchClientInvocation createPatchInvocation(FhirContext theContext, PatchTypeEnum thePatchType,
+			String theBody, String theResourceType, Map<String, List<String>> theMatchParams) {
+		return PatchMethodBinding.createPatchInvocation(theContext, thePatchType, theBody, theResourceType,
+				theMatchParams);
 	}
 
-	public static HttpPutClientInvocation createUpdateInvocation(FhirContext theContext, IBaseResource theResource, String theResourceBody, Map<String, List<String>> theMatchParams) {
+	public static HttpPutClientInvocation createUpdateInvocation(FhirContext theContext, IBaseResource theResource,
+			String theResourceBody, Map<String, List<String>> theMatchParams) {
 		String resourceType = theContext.getResourceDefinition(theResource).getName();
 
 		StringBuilder b = createUrl(resourceType, theMatchParams);
@@ -192,7 +186,8 @@ public class MethodUtil {
 		return b;
 	}
 
-	public static HttpPutClientInvocation createUpdateInvocation(FhirContext theContext, IBaseResource theResource, String theResourceBody, String theMatchUrl) {
+	public static HttpPutClientInvocation createUpdateInvocation(FhirContext theContext, IBaseResource theResource,
+			String theResourceBody, String theMatchUrl) {
 		HttpPutClientInvocation retVal;
 		if (StringUtils.isBlank(theResourceBody)) {
 			retVal = new HttpPutClientInvocation(theContext, theResource, theMatchUrl);
@@ -205,7 +200,8 @@ public class MethodUtil {
 		return retVal;
 	}
 
-	public static HttpPutClientInvocation createUpdateInvocation(IBaseResource theResource, String theResourceBody, IIdType theId, FhirContext theContext) {
+	public static HttpPutClientInvocation createUpdateInvocation(IBaseResource theResource, String theResourceBody,
+			IIdType theId, FhirContext theContext) {
 		String resourceName = theContext.getResourceDefinition(theResource).getName();
 		StringBuilder urlBuilder = new StringBuilder();
 		urlBuilder.append(resourceName);
@@ -257,7 +253,8 @@ public class MethodUtil {
 	}
 
 	@SuppressWarnings("unchecked")
-	public static List<IParameter> getResourceParameters(final FhirContext theContext, Method theMethod, Object theProvider, RestOperationTypeEnum theRestfulOperationTypeEnum) {
+	public static List<IParameter> getResourceParameters(final FhirContext theContext, Method theMethod,
+			Object theProvider, RestOperationTypeEnum theRestfulOperationTypeEnum) {
 		List<IParameter> parameters = new ArrayList<IParameter>();
 
 		Class<?>[] parameterTypes = theMethod.getParameterTypes();
@@ -282,7 +279,8 @@ public class MethodUtil {
 					parameterType = ReflectionUtil.getGenericCollectionTypeOfMethodParameter(theMethod, paramIndex);
 				}
 				if (Collection.class.isAssignableFrom(parameterType)) {
-					throw new ConfigurationException("Argument #" + paramIndex + " of Method '" + theMethod.getName() + "' in type '" + theMethod.getDeclaringClass().getCanonicalName()
+					throw new ConfigurationException("Argument #" + paramIndex + " of Method '" + theMethod.getName()
+							+ "' in type '" + theMethod.getDeclaringClass().getCanonicalName()
 							+ "' is of an invalid generic type (can not be a collection of a collection of a collection)");
 				}
 			}
@@ -301,7 +299,8 @@ public class MethodUtil {
 						parameter.setRequired(true);
 						parameter.setDeclaredTypes(((RequiredParam) nextAnnotation).targetTypes());
 						parameter.setCompositeTypes(((RequiredParam) nextAnnotation).compositeTypes());
-						parameter.setChainlists(((RequiredParam) nextAnnotation).chainWhitelist(), ((RequiredParam) nextAnnotation).chainBlacklist());
+						parameter.setChainlists(((RequiredParam) nextAnnotation).chainWhitelist(),
+								((RequiredParam) nextAnnotation).chainBlacklist());
 						parameter.setType(theContext, parameterType, innerCollectionType, outerCollectionType);
 						MethodUtil.extractDescription(parameter, annotations);
 						param = parameter;
@@ -311,7 +310,8 @@ public class MethodUtil {
 						parameter.setRequired(false);
 						parameter.setDeclaredTypes(((OptionalParam) nextAnnotation).targetTypes());
 						parameter.setCompositeTypes(((OptionalParam) nextAnnotation).compositeTypes());
-						parameter.setChainlists(((OptionalParam) nextAnnotation).chainWhitelist(), ((OptionalParam) nextAnnotation).chainBlacklist());
+						parameter.setChainlists(((OptionalParam) nextAnnotation).chainWhitelist(),
+								((OptionalParam) nextAnnotation).chainBlacklist());
 						parameter.setType(theContext, parameterType, innerCollectionType, outerCollectionType);
 						MethodUtil.extractDescription(parameter, annotations);
 						param = parameter;
@@ -324,15 +324,20 @@ public class MethodUtil {
 						if (parameterType == String.class) {
 							instantiableCollectionType = null;
 							specType = String.class;
-						} else if ((parameterType != Include.class) || innerCollectionType == null || outerCollectionType != null) {
-							throw new ConfigurationException("Method '" + theMethod.getName() + "' is annotated with @" + IncludeParam.class.getSimpleName() + " but has a type other than Collection<"
+						} else if ((parameterType != Include.class) || innerCollectionType == null
+								|| outerCollectionType != null) {
+							throw new ConfigurationException("Method '" + theMethod.getName() + "' is annotated with @"
+									+ IncludeParam.class.getSimpleName() + " but has a type other than Collection<"
 									+ Include.class.getSimpleName() + ">");
 						} else {
-							instantiableCollectionType = (Class<? extends Collection<Include>>) CollectionBinder.getInstantiableCollectionType(innerCollectionType, "Method '" + theMethod.getName() + "'");
+							instantiableCollectionType = (Class<? extends Collection<Include>>) CollectionBinder
+									.getInstantiableCollectionType(innerCollectionType,
+											"Method '" + theMethod.getName() + "'");
 							specType = parameterType;
 						}
 
-						param = new IncludeParameter((IncludeParam) nextAnnotation, instantiableCollectionType, specType);
+						param = new IncludeParameter((IncludeParam) nextAnnotation, instantiableCollectionType,
+								specType);
 					} else if (nextAnnotation instanceof ResourceParam) {
 						if (IBaseResource.class.isAssignableFrom(parameterType)) {
 							// good
@@ -362,10 +367,12 @@ public class MethodUtil {
 						param = new ElementsParameter();
 					} else if (nextAnnotation instanceof Since) {
 						param = new SinceParameter();
-						((SinceParameter) param).setType(theContext, parameterType, innerCollectionType, outerCollectionType);
+						((SinceParameter) param).setType(theContext, parameterType, innerCollectionType,
+								outerCollectionType);
 					} else if (nextAnnotation instanceof At) {
 						param = new AtParameter();
-						((AtParameter) param).setType(theContext, parameterType, innerCollectionType, outerCollectionType);
+						((AtParameter) param).setType(theContext, parameterType, innerCollectionType,
+								outerCollectionType);
 					} else if (nextAnnotation instanceof Count) {
 						param = new CountParameter();
 					} else if (nextAnnotation instanceof Sort) {
@@ -373,49 +380,56 @@ public class MethodUtil {
 					} else if (nextAnnotation instanceof TransactionParam) {
 						param = new TransactionParameter(theContext);
 					} else if (nextAnnotation instanceof ConditionalUrlParam) {
-						param = new ConditionalParamBinder(theRestfulOperationTypeEnum, ((ConditionalUrlParam) nextAnnotation).supportsMultiple());
+						param = new ConditionalParamBinder(theRestfulOperationTypeEnum,
+								((ConditionalUrlParam) nextAnnotation).supportsMultiple());
 					} else if (nextAnnotation instanceof OperationParam) {
 						Operation op = theMethod.getAnnotation(Operation.class);
 						param = new OperationParameter(theContext, op.name(), ((OperationParam) nextAnnotation));
 					} else if (nextAnnotation instanceof Validate.Mode) {
 						if (parameterType.equals(ValidationModeEnum.class) == false) {
-							throw new ConfigurationException(
-									"Parameter annotated with @" + Validate.class.getSimpleName() + "." + Validate.Mode.class.getSimpleName() + " must be of type " + ValidationModeEnum.class.getName());
+							throw new ConfigurationException("Parameter annotated with @"
+									+ Validate.class.getSimpleName() + "." + Validate.Mode.class.getSimpleName()
+									+ " must be of type " + ValidationModeEnum.class.getName());
 						}
-						param = new OperationParameter(theContext, Constants.EXTOP_VALIDATE, Constants.EXTOP_VALIDATE_MODE, 0, 1).setConverter(new IOperationParamConverter() {
-							@Override
-							public Object incomingServer(Object theObject) {
-								if (isNotBlank(theObject.toString())) {
-									ValidationModeEnum retVal = ValidationModeEnum.forCode(theObject.toString());
-									if (retVal == null) {
-										OperationParameter.throwInvalidMode(theObject.toString());
+						param = new OperationParameter(theContext, Constants.EXTOP_VALIDATE,
+								Constants.EXTOP_VALIDATE_MODE, 0, 1).setConverter(new IOperationParamConverter() {
+									@Override
+									public Object incomingServer(Object theObject) {
+										if (isNotBlank(theObject.toString())) {
+											ValidationModeEnum retVal = ValidationModeEnum
+													.forCode(theObject.toString());
+											if (retVal == null) {
+												OperationParameter.throwInvalidMode(theObject.toString());
+											}
+											return retVal;
+										}
+										return null;
 									}
-									return retVal;
-								}
-								return null;
-							}
 
-							@Override
-							public Object outgoingClient(Object theObject) {
-								return ParametersUtil.createString(theContext, ((ValidationModeEnum) theObject).getCode());
-							}
-						});
+									@Override
+									public Object outgoingClient(Object theObject) {
+										return ParametersUtil.createString(theContext,
+												((ValidationModeEnum) theObject).getCode());
+									}
+								});
 					} else if (nextAnnotation instanceof Validate.Profile) {
 						if (parameterType.equals(String.class) == false) {
-							throw new ConfigurationException(
-									"Parameter annotated with @" + Validate.class.getSimpleName() + "." + Validate.Profile.class.getSimpleName() + " must be of type " + String.class.getName());
+							throw new ConfigurationException("Parameter annotated with @"
+									+ Validate.class.getSimpleName() + "." + Validate.Profile.class.getSimpleName()
+									+ " must be of type " + String.class.getName());
 						}
-						param = new OperationParameter(theContext, Constants.EXTOP_VALIDATE, Constants.EXTOP_VALIDATE_PROFILE, 0, 1).setConverter(new IOperationParamConverter() {
-							@Override
-							public Object incomingServer(Object theObject) {
-								return theObject.toString();
-							}
+						param = new OperationParameter(theContext, Constants.EXTOP_VALIDATE,
+								Constants.EXTOP_VALIDATE_PROFILE, 0, 1).setConverter(new IOperationParamConverter() {
+									@Override
+									public Object incomingServer(Object theObject) {
+										return theObject.toString();
+									}
 
-							@Override
-							public Object outgoingClient(Object theObject) {
-								return ParametersUtil.createString(theContext, theObject.toString());
-							}
-						});
+									@Override
+									public Object outgoingClient(Object theObject) {
+										return ParametersUtil.createString(theContext, theObject.toString());
+									}
+								});
 					} else {
 						continue;
 					}
@@ -425,9 +439,10 @@ public class MethodUtil {
 			}
 
 			if (param == null) {
-				throw new ConfigurationException(
-						"Parameter #" + ((paramIndex + 1)) + "/" + (parameterTypes.length) + " of method '" + theMethod.getName() + "' on type '" + theMethod.getDeclaringClass().getCanonicalName()
-								+ "' has no recognized FHIR interface parameter annotations. Don't know how to handle this parameter");
+				throw new ConfigurationException("Parameter #" + ((paramIndex + 1)) + "/" + (parameterTypes.length)
+						+ " of method '" + theMethod.getName() + "' on type '"
+						+ theMethod.getDeclaringClass().getCanonicalName()
+						+ "' has no recognized FHIR interface parameter annotations. Don't know how to handle this parameter");
 			}
 
 			param.initializeTypes(theMethod, outerCollectionType, innerCollectionType, parameterType);
@@ -438,7 +453,8 @@ public class MethodUtil {
 		return parameters;
 	}
 
-	public static void parseClientRequestResourceHeaders(IIdType theRequestedId, Map<String, List<String>> theHeaders, IBaseResource resource) {
+	public static void parseClientRequestResourceHeaders(IIdType theRequestedId, Map<String, List<String>> theHeaders,
+			IBaseResource resource) {
 		List<String> lmHeaders = theHeaders.get(Constants.HEADER_LAST_MODIFIED_LOWERCASE);
 		if (lmHeaders != null && lmHeaders.size() > 0 && StringUtils.isNotBlank(lmHeaders.get(0))) {
 			String headerValue = lmHeaders.get(0);
@@ -484,7 +500,7 @@ public class MethodUtil {
 		List<String> eTagHeaders = theHeaders.get(Constants.HEADER_ETAG_LC);
 		String eTagVersion = null;
 		if (eTagHeaders != null && eTagHeaders.size() > 0) {
-			eTagVersion = parseETagValue(eTagHeaders.get(0));
+			eTagVersion = ParameterUtil.parseETagValue(eTagHeaders.get(0));
 		}
 		if (isNotBlank(eTagVersion)) {
 			if (existing == null || existing.isEmpty()) {
@@ -504,7 +520,7 @@ public class MethodUtil {
 		if (categoryHeaders != null && categoryHeaders.size() > 0 && StringUtils.isNotBlank(categoryHeaders.get(0))) {
 			TagList tagList = new TagList();
 			for (String header : categoryHeaders) {
-				parseTagValue(tagList, header);
+				ParameterUtil.parseTagValue(tagList, header);
 			}
 			if (resource instanceof IResource) {
 				ResourceMetadataKeyEnum.TAG_LIST.put((IResource) resource, tagList);
@@ -517,31 +533,11 @@ public class MethodUtil {
 		}
 	}
 
-	public static String parseETagValue(String value) {
-		String eTagVersion;
-		value = value.trim();
-		if (value.length() > 1) {
-			if (value.charAt(value.length() - 1) == '"') {
-				if (value.charAt(0) == '"') {
-					eTagVersion = value.substring(1, value.length() - 1);
-				} else if (value.length() > 3 && value.charAt(0) == 'W' && value.charAt(1) == '/' && value.charAt(2) == '"') {
-					eTagVersion = value.substring(3, value.length() - 1);
-				} else {
-					eTagVersion = value;
-				}
-			} else {
-				eTagVersion = value;
-			}
-		} else {
-			eTagVersion = value;
-		}
-		return eTagVersion;
-	}
-
 	/**
 	 * This is a utility method intended provided to help the JPA module.
 	 */
-	public static IQueryParameterAnd<?> parseQueryParams(FhirContext theContext, RuntimeSearchParam theParamDef, String theUnqualifiedParamName, List<QualifiedParamList> theParameters) {
+	public static IQueryParameterAnd<?> parseQueryParams(FhirContext theContext, RuntimeSearchParam theParamDef,
+			String theUnqualifiedParamName, List<QualifiedParamList> theParameters) {
 		RestSearchParameterTypeEnum paramType = theParamDef.getParamType();
 		return parseQueryParams(theContext, paramType, theUnqualifiedParamName, theParameters);
 	}
@@ -549,119 +545,52 @@ public class MethodUtil {
 	/**
 	 * This is a utility method intended provided to help the JPA module.
 	 */
-	public static IQueryParameterAnd<?> parseQueryParams(FhirContext theContext, RestSearchParameterTypeEnum paramType, String theUnqualifiedParamName, List<QualifiedParamList> theParameters) {
+	public static IQueryParameterAnd<?> parseQueryParams(FhirContext theContext, RestSearchParameterTypeEnum paramType,
+			String theUnqualifiedParamName, List<QualifiedParamList> theParameters) {
 		QueryParameterAndBinder binder = null;
 		switch (paramType) {
-			case COMPOSITE:
-				throw new UnsupportedOperationException();
-			case DATE:
-				binder = new QueryParameterAndBinder(DateAndListParam.class, Collections.<Class<? extends IQueryParameterType>> emptyList());
-				break;
-			case NUMBER:
-				binder = new QueryParameterAndBinder(NumberAndListParam.class, Collections.<Class<? extends IQueryParameterType>> emptyList());
-				break;
-			case QUANTITY:
-				binder = new QueryParameterAndBinder(QuantityAndListParam.class, Collections.<Class<? extends IQueryParameterType>> emptyList());
-				break;
-			case REFERENCE:
-				binder = new QueryParameterAndBinder(ReferenceAndListParam.class, Collections.<Class<? extends IQueryParameterType>> emptyList());
-				break;
-			case STRING:
-				binder = new QueryParameterAndBinder(StringAndListParam.class, Collections.<Class<? extends IQueryParameterType>> emptyList());
-				break;
-			case TOKEN:
-				binder = new QueryParameterAndBinder(TokenAndListParam.class, Collections.<Class<? extends IQueryParameterType>> emptyList());
-				break;
-			case URI:
-				binder = new QueryParameterAndBinder(UriAndListParam.class, Collections.<Class<? extends IQueryParameterType>> emptyList());
-				break;
-			case HAS:
-				binder = new QueryParameterAndBinder(HasAndListParam.class, Collections.<Class<? extends IQueryParameterType>> emptyList());
-				break;
+		case COMPOSITE:
+			throw new UnsupportedOperationException();
+		case DATE:
+			binder = new QueryParameterAndBinder(DateAndListParam.class,
+					Collections.<Class<? extends IQueryParameterType>> emptyList());
+			break;
+		case NUMBER:
+			binder = new QueryParameterAndBinder(NumberAndListParam.class,
+					Collections.<Class<? extends IQueryParameterType>> emptyList());
+			break;
+		case QUANTITY:
+			binder = new QueryParameterAndBinder(QuantityAndListParam.class,
+					Collections.<Class<? extends IQueryParameterType>> emptyList());
+			break;
+		case REFERENCE:
+			binder = new QueryParameterAndBinder(ReferenceAndListParam.class,
+					Collections.<Class<? extends IQueryParameterType>> emptyList());
+			break;
+		case STRING:
+			binder = new QueryParameterAndBinder(StringAndListParam.class,
+					Collections.<Class<? extends IQueryParameterType>> emptyList());
+			break;
+		case TOKEN:
+			binder = new QueryParameterAndBinder(TokenAndListParam.class,
+					Collections.<Class<? extends IQueryParameterType>> emptyList());
+			break;
+		case URI:
+			binder = new QueryParameterAndBinder(UriAndListParam.class,
+					Collections.<Class<? extends IQueryParameterType>> emptyList());
+			break;
+		case HAS:
+			binder = new QueryParameterAndBinder(HasAndListParam.class,
+					Collections.<Class<? extends IQueryParameterType>> emptyList());
+			break;
 		}
 
 		// FIXME null access
 		return binder.parse(theContext, theUnqualifiedParamName, theParameters);
 	}
 
-	public static void parseTagValue(TagList tagList, String nextTagComplete) {
-		StringBuilder next = new StringBuilder(nextTagComplete);
-		parseTagValue(tagList, nextTagComplete, next);
-	}
-
-	private static void parseTagValue(TagList theTagList, String theCompleteHeaderValue, StringBuilder theBuffer) {
-		int firstSemicolon = theBuffer.indexOf(";");
-		int deleteTo;
-		if (firstSemicolon == -1) {
-			firstSemicolon = theBuffer.indexOf(",");
-			if (firstSemicolon == -1) {
-				firstSemicolon = theBuffer.length();
-				deleteTo = theBuffer.length();
-			} else {
-				deleteTo = firstSemicolon;
-			}
-		} else {
-			deleteTo = firstSemicolon + 1;
-		}
-
-		String term = theBuffer.substring(0, firstSemicolon);
-		String scheme = null;
-		String label = null;
-		if (isBlank(term)) {
-			return;
-		}
-
-		theBuffer.delete(0, deleteTo);
-		while (theBuffer.length() > 0 && theBuffer.charAt(0) == ' ') {
-			theBuffer.deleteCharAt(0);
-		}
-
-		while (theBuffer.length() > 0) {
-			boolean foundSomething = false;
-			if (theBuffer.length() > SCHEME.length() && theBuffer.substring(0, SCHEME.length()).equals(SCHEME)) {
-				int closeIdx = theBuffer.indexOf("\"", SCHEME.length());
-				scheme = theBuffer.substring(SCHEME.length(), closeIdx);
-				theBuffer.delete(0, closeIdx + 1);
-				foundSomething = true;
-			}
-			if (theBuffer.length() > LABEL.length() && theBuffer.substring(0, LABEL.length()).equals(LABEL)) {
-				int closeIdx = theBuffer.indexOf("\"", LABEL.length());
-				label = theBuffer.substring(LABEL.length(), closeIdx);
-				theBuffer.delete(0, closeIdx + 1);
-				foundSomething = true;
-			}
-			// TODO: support enc2231-string as described in
-			// http://tools.ietf.org/html/draft-johnston-http-category-header-02
-			// TODO: support multiple tags in one header as described in
-			// http://hl7.org/implement/standards/fhir/http.html#tags
-
-			while (theBuffer.length() > 0 && (theBuffer.charAt(0) == ' ' || theBuffer.charAt(0) == ';')) {
-				theBuffer.deleteCharAt(0);
-			}
-
-			if (!foundSomething) {
-				break;
-			}
-		}
-
-		if (theBuffer.length() > 0 && theBuffer.charAt(0) == ',') {
-			theBuffer.deleteCharAt(0);
-			while (theBuffer.length() > 0 && theBuffer.charAt(0) == ' ') {
-				theBuffer.deleteCharAt(0);
-			}
-			theTagList.add(new Tag(scheme, term, label));
-			parseTagValue(theTagList, theCompleteHeaderValue, theBuffer);
-		} else {
-			theTagList.add(new Tag(scheme, term, label));
-		}
-
-		if (theBuffer.length() > 0) {
-			ourLog.warn("Ignoring extra text at the end of " + Constants.HEADER_CATEGORY + " tag '" + theBuffer.toString() + "' - Complete tag value was: " + theCompleteHeaderValue);
-		}
-
-	}
-
-	public static MethodOutcome process2xxResponse(FhirContext theContext, int theResponseStatusCode, String theResponseMimeType, Reader theResponseReader, Map<String, List<String>> theHeaders) {
+	public static MethodOutcome process2xxResponse(FhirContext theContext, int theResponseStatusCode,
+			String theResponseMimeType, Reader theResponseReader, Map<String, List<String>> theHeaders) {
 		List<String> locationHeaders = new ArrayList<String>();
 		List<String> lh = theHeaders.get(Constants.HEADER_LOCATION_LC);
 		if (lh != null) {
@@ -706,34 +635,16 @@ public class MethodUtil {
 				}
 
 			} else {
-				BaseOutcomeReturningMethodBinding.ourLog.debug("Ignoring response content of type: {}", theResponseMimeType);
+				BaseOutcomeReturningMethodBinding.ourLog.debug("Ignoring response content of type: {}",
+						theResponseMimeType);
 			}
 		}
 		return retVal;
 	}
 
-	public static IQueryParameterOr<?> singleton(final IQueryParameterType theParam, final String theParamName) {
-		return new IQueryParameterOr<IQueryParameterType>() {
 
-			@Override
-			public List<IQueryParameterType> getValuesAsQueryTokens() {
-				return Collections.singletonList(theParam);
-			}
-
-			@Override
-			public void setValuesAsQueryTokens(FhirContext theContext, String theParamName, QualifiedParamList theParameters) {
-				if (theParameters.isEmpty()) {
-					return;
-				}
-				if (theParameters.size() > 1) {
-					throw new IllegalArgumentException("Type " + theParam.getClass().getCanonicalName() + " does not support multiple values");
-				}
-				theParam.setValueAsQueryToken(theContext, theParamName, theParameters.getQualifier(), theParameters.get(0));
-			}
-		};
-	}
-
-	public static void addAcceptHeaderToRequest(EncodingEnum theEncoding, IHttpRequest theHttpRequest, FhirContext theContext) {
+	public static void addAcceptHeaderToRequest(EncodingEnum theEncoding, IHttpRequest theHttpRequest,
+			FhirContext theContext) {
 		if (theEncoding == null) {
 			if (theContext.getVersion().getVersion().isNewerThan(FhirVersionEnum.DSTU2_1) == false) {
 				theHttpRequest.addHeader(Constants.HEADER_ACCEPT, Constants.HEADER_ACCEPT_VALUE_XML_OR_JSON_LEGACY);

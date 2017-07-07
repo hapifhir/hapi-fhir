@@ -10,7 +10,7 @@ package ca.uhn.fhir.util;
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  * 
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,13 +22,17 @@ package ca.uhn.fhir.util;
 import java.lang.reflect.*;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.lang3.Validate;
 
 import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.model.api.IFhirVersion;
 import javassist.Modifier;
 
 public class ReflectionUtil {
+
+	private static final ConcurrentHashMap<String, Object> ourFhirServerVersions = new ConcurrentHashMap<String, Object>();
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ReflectionUtil.class);
 
@@ -67,7 +71,7 @@ public class ReflectionUtil {
 		if (!List.class.isAssignableFrom(next.getType())) {
 			return getGenericCollectionTypeOfField(next);
 		}
-		
+
 		Class<?> type;
 		ParameterizedType collectionType = (ParameterizedType) next.getGenericType();
 		Type firstArg = collectionType.getActualTypeArguments()[0];
@@ -125,16 +129,6 @@ public class ReflectionUtil {
 		return !theType.isInterface() && !Modifier.isAbstract(theType.getModifiers());
 	}
 
-	public static <T> T newInstance(Class<T> theType, Class<?> theArgumentType, Object theArgument) {
-		Validate.notNull(theType, "theType must not be null");
-		try {
-			Constructor<T> constructor = theType.getConstructor(theArgumentType);
-			return constructor.newInstance(theArgument);
-		} catch (Exception e) {
-			throw new ConfigurationException("Failed to instantiate " + theType.getName(), e);
-		}
-	}
-
 	/**
 	 * Instantiate a class by no-arg constructor, throw {@link ConfigurationException} if we fail to do so
 	 */
@@ -146,6 +140,33 @@ public class ReflectionUtil {
 		} catch (Exception e) {
 			throw new ConfigurationException("Failed to instantiate " + theType.getName(), e);
 		}
+	}
+
+	public static <T> T newInstance(Class<T> theType, Class<?> theArgumentType, Object theArgument) {
+		Validate.notNull(theType, "theType must not be null");
+		try {
+			Constructor<T> constructor = theType.getConstructor(theArgumentType);
+			return constructor.newInstance(theArgument);
+		} catch (Exception e) {
+			throw new ConfigurationException("Failed to instantiate " + theType.getName(), e);
+		}
+	}
+
+	public static Object newInstanceOfFhirServerType(String theType) {
+		Object fhirServerVersion = ourFhirServerVersions.get(theType);
+		if (fhirServerVersion == null) {
+			try {
+				Class<?> type = Class.forName(theType);
+				Validate.isTrue(IFhirVersion.class.isAssignableFrom(type));
+				fhirServerVersion = type.newInstance();
+			} catch (Exception e) {
+				throw new ConfigurationException("Unable to instantiate server framework. Please make sure that hapi-fhir-server library is on your classpath!", e);
+			}
+			
+			ourFhirServerVersions.put(theType, fhirServerVersion);
+		}
+		
+		return fhirServerVersion;
 	}
 
 	@SuppressWarnings("unchecked")

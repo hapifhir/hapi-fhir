@@ -24,8 +24,7 @@ import java.lang.reflect.Method;
 import java.util.Collection;
 
 import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.rest.api.server.IRequestDetails;
-import ca.uhn.fhir.rest.api.server.IServerMethodBinding;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
@@ -42,7 +41,7 @@ public interface IParameter {
 	 * @param theMethodBinding TODO
 	 * @return Returns the argument object as it will be passed to the IResourceProvider method.
 	 */
-	Object translateQueryParametersIntoServerArgument(IRequestDetails theRequest, IServerMethodBinding theMethodBinding) throws InternalErrorException, InvalidRequestException;
+	Object translateQueryParametersIntoServerArgument(RequestDetails theRequest, BaseMethodBinding<?> theMethodBinding) throws InternalErrorException, InvalidRequestException;
 
 	void initializeTypes(Method theMethod, Class<? extends Collection<?>> theOuterCollectionType, Class<? extends Collection<?>> theInnerCollectionType, Class<?> theParameterType);
 

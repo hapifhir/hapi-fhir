@@ -10,27 +10,17 @@ import static org.junit.Assert.assertThat;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.hl7.fhir.dstu2016may.model.Bundle;
-import org.hl7.fhir.dstu2016may.model.DateTimeType;
+import org.hl7.fhir.dstu2016may.model.*;
 import org.hl7.fhir.dstu2016may.model.Extension;
-import org.hl7.fhir.dstu2016may.model.Medication;
-import org.hl7.fhir.dstu2016may.model.Patient;
-import org.hl7.fhir.dstu2016may.model.Quantity;
-import org.hl7.fhir.dstu2016may.model.StringType;
-import org.hl7.fhir.dstu2016may.model.MedicationOrder;
 import org.hl7.fhir.instance.model.api.IBase;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.*;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
-import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.context.api.AddProfileTagEnum;
+import ca.uhn.fhir.model.api.annotation.*;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.parser.CustomResource364Dstu21.CustomResource364CustomDate;
-import ca.uhn.fhir.rest.server.AddProfileTagEnum;
 import ca.uhn.fhir.util.ElementUtil;
 import ca.uhn.fhir.util.TestUtil;
 
