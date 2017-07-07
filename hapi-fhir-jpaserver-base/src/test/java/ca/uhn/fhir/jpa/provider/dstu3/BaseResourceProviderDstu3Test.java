@@ -31,6 +31,7 @@ import ca.uhn.fhir.jpa.config.dstu3.WebsocketDstu3Config;
 import ca.uhn.fhir.jpa.config.dstu3.WebsocketDstu3DispatcherConfig;
 import ca.uhn.fhir.jpa.dao.data.ISearchDao;
 import ca.uhn.fhir.jpa.dao.dstu3.BaseJpaDstu3Test;
+import ca.uhn.fhir.jpa.dao.dstu3.SearchParamRegistryDstu3;
 import ca.uhn.fhir.jpa.interceptor.RestHookSubscriptionDstu3Interceptor;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.ISearchCoordinatorSvc;
@@ -47,7 +48,7 @@ import ca.uhn.fhir.util.TestUtil;
 
 public abstract class BaseResourceProviderDstu3Test extends BaseJpaDstu3Test {
 
-	private static JpaValidationSupportChainDstu3 myValidationSupport;
+	protected static JpaValidationSupportChainDstu3 myValidationSupport;
 	protected static IGenericClient ourClient;
 	protected static CloseableHttpClient ourHttpClient;
 	protected static int ourPort;
@@ -56,6 +57,7 @@ public abstract class BaseResourceProviderDstu3Test extends BaseJpaDstu3Test {
 	protected static String ourServerBase;
 	private static GenericWebApplicationContext ourWebApplicationContext;
 	private TerminologyUploaderProviderDstu3 myTerminologyUploaderProvider;
+	protected static SearchParamRegistryDstu3 ourSearchParamRegistry;
 	protected static DatabaseBackedPagingProvider ourPagingProvider;
 	protected static RestHookSubscriptionDstu3Interceptor ourRestHookSubscriptionInterceptor;
 	protected static ISearchDao mySearchEntityDao;
@@ -150,7 +152,9 @@ public abstract class BaseResourceProviderDstu3Test extends BaseJpaDstu3Test {
 			mySearchCoordinatorSvc = wac.getBean(ISearchCoordinatorSvc.class);
 			mySearchEntityDao = wac.getBean(ISearchDao.class);
 			ourRestHookSubscriptionInterceptor = wac.getBean(RestHookSubscriptionDstu3Interceptor.class);
+			ourSearchParamRegistry = wac.getBean(SearchParamRegistryDstu3.class);
 
+			myFhirCtx.getRestfulClientFactory().setSocketTimeout(5000000);
 			ourClient = myFhirCtx.newRestfulGenericClient(ourServerBase);
 			if (shouldLogClient()) {
 				ourClient.registerInterceptor(new LoggingInterceptor(true));
@@ -159,6 +163,7 @@ public abstract class BaseResourceProviderDstu3Test extends BaseJpaDstu3Test {
 			PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 			HttpClientBuilder builder = HttpClientBuilder.create();
 			builder.setConnectionManager(connectionManager);
+			builder.setMaxConnPerRoute(99);
 			ourHttpClient = builder.build();
 
 			ourServer = server;
