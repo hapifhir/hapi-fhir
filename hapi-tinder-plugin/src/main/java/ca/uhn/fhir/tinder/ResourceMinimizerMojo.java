@@ -1,26 +1,16 @@
 package ca.uhn.fhir.tinder;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.Writer;
+import java.io.*;
 import java.net.URL;
 import java.util.Collection;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.maven.plugin.AbstractMojo;
-import org.apache.maven.plugin.MojoExecutionException;
-import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugin.*;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
-import org.hl7.fhir.instance.model.Bundle.BundleEntryComponent;
-import org.hl7.fhir.instance.model.DomainResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -28,7 +18,7 @@ import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu2.resource.Bundle;
 import ca.uhn.fhir.model.dstu2.resource.Bundle.Entry;
 import ca.uhn.fhir.parser.IParser;
-import ca.uhn.fhir.rest.method.MethodUtil;
+import ca.uhn.fhir.rest.api.EncodingEnum;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.core.joran.util.ConfigurationWatchListUtil;
 
@@ -80,7 +70,7 @@ public class ResourceMinimizerMojo extends AbstractMojo {
 				throw new MojoFailureException("Failed to read file: " + nextFile, e);
 			}
 
-			IParser parser = MethodUtil.detectEncoding(inputString).newParser(myCtx);
+			IParser parser = EncodingEnum.detectEncoding(inputString).newParser(myCtx);
 			IBaseResource input = parser.parseResource(inputString);
 
 			if (input instanceof IResource) {

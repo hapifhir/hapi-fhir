@@ -1,12 +1,13 @@
 package ca.uhn.fhir.jaxrs.server;
 
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
+
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 
-import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
+import javax.ws.rs.core.*;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -14,21 +15,13 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
 import ca.uhn.fhir.jaxrs.server.interceptor.JaxRsResponseException;
 import ca.uhn.fhir.jaxrs.server.util.JaxRsRequest;
 import ca.uhn.fhir.jaxrs.server.util.JaxRsResponse;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.parser.DataFormatException;
-import ca.uhn.fhir.rest.server.Constants;
-import ca.uhn.fhir.rest.server.IRestfulResponse;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.server.IRestfulResponse;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 
 @SuppressWarnings("javadoc")

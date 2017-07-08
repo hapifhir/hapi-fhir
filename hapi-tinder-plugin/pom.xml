@@ -21,6 +21,11 @@
 			<artifactId>hapi-fhir-base</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-server</artifactId>
+			<version>${project.version}</version>
+		</dependency>
 		<!-- 
 		Because Tinder is a part of the HAPI FHIR build process (it generates
 		a bunch of the actual HAPI structure code), but also uses HAPI FHIR 

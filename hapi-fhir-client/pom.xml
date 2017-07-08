@@ -11,7 +11,7 @@
 	<artifactId>hapi-fhir-client</artifactId>
 	<packaging>jar</packaging>
 
-	<name>HAPI FHIR Client</name>
+	<name>HAPI FHIR - Client Framework</name>
 
 	<dependencies>
 		<dependency>
@@ -62,150 +62,7 @@
 					</execution>
 				</executions>
 			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-surefire-plugin</artifactId>
-				<configuration>
-					<argLine>${argLine} -Dfile.encoding=UTF-8 -Xmx712m</argLine>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>ca.uhn.hapi.fhir</groupId>
-				<artifactId>hapi-tinder-plugin</artifactId>
-				<version>${project.version}</version>
-				<executions>
-					<execution>
-						<goals>
-							<goal>generate-structures</goal>
-						</goals>
-					</execution>
-				</executions>
-				<configuration>
-					<package>ca.uhn.fhir.model.dstu</package>
-					<baseResourceNames>
-						<baseResourceName>adversereaction</baseResourceName>
-						<baseResourceName>alert</baseResourceName>
-						<baseResourceName>allergyintolerance</baseResourceName>
-						<baseResourceName>appointmentresponse</baseResourceName>
-						<baseResourceName>appointment</baseResourceName>
-						<baseResourceName>availability</baseResourceName>
-						<baseResourceName>careplan</baseResourceName>
-						<baseResourceName>claim</baseResourceName>
-						<baseResourceName>composition</baseResourceName>
-						<baseResourceName>conceptmap</baseResourceName>
-						<baseResourceName>condition</baseResourceName>
-						<baseResourceName>conformance</baseResourceName>
-						<baseResourceName>coverage</baseResourceName>
-						<baseResourceName>deviceobservationreport</baseResourceName>
-						<baseResourceName>device</baseResourceName>
-						<baseResourceName>diagnosticorder</baseResourceName>
-						<baseResourceName>diagnosticreport</baseResourceName>
-						<baseResourceName>documentmanifest</baseResourceName>
-						<baseResourceName>documentreference</baseResourceName>
-						<baseResourceName>encounter</baseResourceName>
-						<baseResourceName>familyhistory</baseResourceName>
-						<baseResourceName>geneexpression</baseResourceName>
-						<baseResourceName>geneticanalysis</baseResourceName>
-						<baseResourceName>group</baseResourceName>
-						<baseResourceName>gvfmeta</baseResourceName>
-						<baseResourceName>gvfvariant</baseResourceName>
-						<baseResourceName>imagingstudy</baseResourceName>
-						<baseResourceName>immunizationrecommendation</baseResourceName>
-						<baseResourceName>immunization</baseResourceName>
-						<baseResourceName>list</baseResourceName>
-						<baseResourceName>location</baseResourceName>
-						<baseResourceName>media</baseResourceName>
-						<baseResourceName>medicationadministration</baseResourceName>
-						<baseResourceName>medicationdispense</baseResourceName>
-						<baseResourceName>medicationprescription</baseResourceName>
-						<baseResourceName>medication</baseResourceName>
-						<baseResourceName>medicationstatement</baseResourceName>
-						<baseResourceName>messageheader</baseResourceName>
-						<baseResourceName>microarray</baseResourceName>
-						<baseResourceName>observation</baseResourceName>
-						<baseResourceName>operationoutcome</baseResourceName>
-						<baseResourceName>orderresponse</baseResourceName>
-						<baseResourceName>order</baseResourceName>
-						<baseResourceName>organization</baseResourceName>
-						<baseResourceName>other</baseResourceName>
-						<baseResourceName>patient</baseResourceName>
-						<baseResourceName>practitioner</baseResourceName>
-						<baseResourceName>procedure</baseResourceName>
-						<baseResourceName>profile</baseResourceName>
-						<baseResourceName>provenance</baseResourceName>
-						<baseResourceName>query</baseResourceName>
-						<baseResourceName>questionnaire</baseResourceName>
-						<baseResourceName>relatedperson</baseResourceName>
-						<baseResourceName>remittance</baseResourceName>
-						<baseResourceName>securityevent</baseResourceName>
-						<baseResourceName>sequencinganalysis</baseResourceName>
-						<baseResourceName>sequencinglab</baseResourceName>
-						<baseResourceName>slot</baseResourceName>
-						<baseResourceName>specimen</baseResourceName>
-						<baseResourceName>substance</baseResourceName>
-						<baseResourceName>supply</baseResourceName>
-						<baseResourceName>user</baseResourceName>
-						<baseResourceName>valueset</baseResourceName>
-					</baseResourceNames>
-					<buildDatatypes>true</buildDatatypes>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>build-helper-maven-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>add-source</id>
-						<phase>generate-sources</phase>
-						<goals>
-							<goal>add-source</goal>
-						</goals>
-						<configuration>
-							<sources>
-								<source>target/generated-sources/tinder</source>
-							</sources>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
 		</plugins>
-		<pluginManagement>
-			<plugins>
-				<!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself. -->
-				<plugin>
-					<groupId>org.eclipse.m2e</groupId>
-					<artifactId>lifecycle-mapping</artifactId>
-					<version>1.0.0</version>
-					<configuration>
-						<lifecycleMappingMetadata>
-							<pluginExecutions>
-								<pluginExecution>
-									<pluginExecutionFilter>
-										<groupId>ca.uhn.hapi.fhir</groupId>
-										<artifactId>hapi-tinder-plugin</artifactId>
-										<versionRange>[0.4-SNAPSHOT,)</versionRange>
-										<goals>
-											<goal>generate-structures</goal>
-										</goals>
-									</pluginExecutionFilter>
-									<action>
-										<ignore></ignore>
-									</action>
-								</pluginExecution>
-							</pluginExecutions>
-						</lifecycleMappingMetadata>
-					</configuration>
-				</plugin>
-			</plugins>
-		</pluginManagement>
-		<resources>
-			<resource>
-				<directory>${basedir}/src/main/resources</directory>
-			</resource>
-			<resource>
-				<directory>${basedir}/target/generated-resources/tinder</directory>
-			</resource>
-		</resources>
 	</build>
 
 </project>

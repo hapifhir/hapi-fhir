@@ -18,8 +18,8 @@ import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.dstu2.resource.Binary;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.SummaryEnum;
-import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.RestfulServerUtils;
 
 public class JaxRsResponseTest {

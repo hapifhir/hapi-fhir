@@ -21,11 +21,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * limitations under the License.
  * #L%
  */
-
-import java.io.IOException;
-import java.io.StringWriter;
-import java.io.UnsupportedEncodingException;
-import java.io.Writer;
+import java.io.*;
 import java.util.Map.Entry;
 
 import javax.ws.rs.core.MediaType;
@@ -37,10 +33,8 @@ import org.hl7.fhir.instance.model.api.IBaseBinary;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
-import ca.uhn.fhir.rest.api.MethodOutcome;
-import ca.uhn.fhir.rest.method.ParseAction;
-import ca.uhn.fhir.rest.server.Constants;
-import ca.uhn.fhir.rest.server.EncodingEnum;
+import ca.uhn.fhir.rest.api.*;
+import ca.uhn.fhir.rest.api.server.ParseAction;
 import ca.uhn.fhir.rest.server.RestfulResponse;
 import ca.uhn.fhir.rest.server.RestfulServerUtils;
 

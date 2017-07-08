@@ -1,28 +1,13 @@
 package ca.uhn.fhir.tinder;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Properties;
-import java.util.TreeSet;
+import java.io.*;
+import java.util.*;
 
 import org.apache.commons.lang.WordUtils;
-import org.apache.http.ParseException;
 import org.apache.maven.model.Resource;
-import org.apache.maven.plugin.AbstractMojo;
-import org.apache.maven.plugin.MojoExecutionException;
-import org.apache.maven.plugin.MojoFailureException;
-import org.apache.maven.plugins.annotations.Component;
-import org.apache.maven.plugins.annotations.LifecyclePhase;
+import org.apache.maven.plugin.*;
+import org.apache.maven.plugins.annotations.*;
 import org.apache.maven.plugins.annotations.Mojo;
-import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
@@ -30,9 +15,7 @@ import org.apache.velocity.tools.generic.EscapeTool;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.tinder.parser.BaseStructureSpreadsheetParser;
-import ca.uhn.fhir.tinder.parser.ResourceGeneratorUsingModel;
-import ca.uhn.fhir.tinder.parser.ResourceGeneratorUsingSpreadsheet;
+import ca.uhn.fhir.tinder.parser.*;
 
 @Mojo(name = "generate-jparest-server", defaultPhase = LifecyclePhase.GENERATE_SOURCES)
 public class TinderJpaRestServerMojo extends AbstractMojo {
@@ -217,7 +200,7 @@ public class TinderJpaRestServerMojo extends AbstractMojo {
 		}
 	}
 
-	public static void main(String[] args) throws ParseException, IOException, MojoFailureException, MojoExecutionException {
+	public static void main(String[] args) throws IOException, MojoFailureException, MojoExecutionException {
 
 		// PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 		// HttpClientBuilder builder = HttpClientBuilder.create();

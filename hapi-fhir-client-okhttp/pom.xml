@@ -34,15 +34,9 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
-		<!-- conformance profile -->
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
-			<artifactId>hapi-fhir-structures-dstu2</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>ca.uhn.hapi.fhir</groupId>
-			<artifactId>hapi-fhir-structures-dstu3</artifactId>
+			<artifactId>hapi-fhir-client</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 
@@ -50,6 +44,20 @@
 			<groupId>com.squareup.okhttp3</groupId>
 			<artifactId>okhttp</artifactId>
 			<version>3.4.1</version>
+		</dependency>
+
+		<!-- conformance profile -->
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-structures-dstu2</artifactId>
+			<version>${project.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-structures-dstu3</artifactId>
+			<version>${project.version}</version>
+			<scope>test</scope>
 		</dependency>
 
 		<!-- Unit test dependencies -->

@@ -4,25 +4,17 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
-import org.apache.http.ParseException;
 import org.apache.maven.model.Resource;
-import org.apache.maven.plugin.AbstractMojo;
-import org.apache.maven.plugin.MojoExecutionException;
-import org.apache.maven.plugin.MojoFailureException;
-import org.apache.maven.plugins.annotations.Component;
-import org.apache.maven.plugins.annotations.LifecyclePhase;
+import org.apache.maven.plugin.*;
+import org.apache.maven.plugins.annotations.*;
 import org.apache.maven.plugins.annotations.Mojo;
-import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 
 import ca.uhn.fhir.tinder.AbstractGenerator.ExecutionException;
 import ca.uhn.fhir.tinder.AbstractGenerator.FailureException;
 import ca.uhn.fhir.tinder.GeneratorContext.ProfileFileDefinition;
 import ca.uhn.fhir.tinder.TinderStructuresMojo.ValueSetFileDefinition;
-import ca.uhn.fhir.tinder.parser.DatatypeGeneratorUsingSpreadsheet;
-import ca.uhn.fhir.tinder.parser.ProfileParser;
-import ca.uhn.fhir.tinder.parser.ResourceGeneratorUsingSpreadsheet;
-import ca.uhn.fhir.tinder.parser.TargetType;
+import ca.uhn.fhir.tinder.parser.*;
 
 /**
  * Generate files from FHIR resource/composite metadata using Velocity templates.
@@ -397,7 +389,7 @@ public class TinderGenericMultiFileMojo extends AbstractMojo {
 
 	}
 
-	public static void main(String[] args) throws ParseException, IOException, MojoFailureException, MojoExecutionException {
+	public static void main(String[] args) throws IOException, MojoFailureException, MojoExecutionException {
 
 		// PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 		// HttpClientBuilder builder = HttpClientBuilder.create();

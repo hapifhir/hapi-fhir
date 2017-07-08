@@ -40,9 +40,6 @@ public interface IVersionSpecificBundleFactory {
 
 	void addRootPropertiesToBundle(String theAuthor, String theServerBase, String theLinkSelf, String theLinkPrev, String theLinkNext, Integer theTotalResults, BundleTypeEnum theBundleType, IPrimitiveType<Date> theLastUpdated);
 
-//	void initializeBundleFromBundleProvider(IRestfulServer<?> theServer, IBundleProvider theResult, EncodingEnum theResponseEncoding, String theServerBase, String theCompleteUrl, boolean thePrettyPrint,
-//			int theOffset, Integer theCount, String theSearchId, BundleTypeEnum theBundleType, Set<Include> theIncludes);
-
 	Bundle getDstu1Bundle();
 
 	IBaseResource getResourceBundle();

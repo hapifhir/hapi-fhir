@@ -1,9 +1,6 @@
 package ca.uhn.fhir.jaxrs.server.example;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 import java.util.Arrays;
 import java.util.List;
@@ -12,31 +9,20 @@ import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Ignore;
+import org.junit.*;
 import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jaxrs.client.JaxRsRestfulClientFactory;
 import ca.uhn.fhir.model.api.BundleEntry;
 import ca.uhn.fhir.model.dstu2.composite.HumanNameDt;
-import ca.uhn.fhir.model.dstu2.resource.Bundle;
-import ca.uhn.fhir.model.dstu2.resource.Conformance;
-import ca.uhn.fhir.model.dstu2.resource.Parameters;
-import ca.uhn.fhir.model.dstu2.resource.Patient;
-import ca.uhn.fhir.model.primitive.BoundCodeDt;
-import ca.uhn.fhir.model.primitive.DateDt;
-import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.model.primitive.StringDt;
+import ca.uhn.fhir.model.dstu2.resource.*;
+import ca.uhn.fhir.model.primitive.*;
 import ca.uhn.fhir.model.valueset.BundleEntryTransactionMethodEnum;
-import ca.uhn.fhir.rest.api.MethodOutcome;
-import ca.uhn.fhir.rest.api.PreferReturnEnum;
-import ca.uhn.fhir.rest.client.IGenericClient;
-import ca.uhn.fhir.rest.client.ServerValidationModeEnum;
+import ca.uhn.fhir.rest.api.*;
+import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
-import ca.uhn.fhir.rest.method.SearchStyleEnum;
-import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.util.TestUtil;
 
 public class JaxRsPatientProviderTest {

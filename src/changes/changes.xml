@@ -6,6 +6,14 @@
 		<title>HAPI FHIR Changelog</title>
 	</properties>
 	<body>
+		<release version="3.0" date="TBD">
+			<action type="fix">
+				hapi-fhir-client-okhttp project POM had dependencies on both
+				hapi-fhir-structures-dstu2 and hapi-fhir-structures-dstu3, which 
+				meant that any project using ookhttp would import both structures
+				JARs. This has been removed.
+			</action>
+		</release
 		<release version="2.6" date="TBD">
 			<action type="add">
 				<ul>

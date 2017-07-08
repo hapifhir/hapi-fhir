@@ -10,9 +10,7 @@ import java.util.Arrays;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.ws.rs.HttpMethod;
-import javax.ws.rs.core.MultivaluedHashMap;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
+import javax.ws.rs.core.*;
 
 import org.glassfish.jersey.internal.MapPropertiesDelegate;
 import org.glassfish.jersey.server.ContainerRequest;
@@ -22,7 +20,7 @@ import org.junit.Test;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jaxrs.server.test.TestJaxRsDummyPatientProvider;
 import ca.uhn.fhir.jaxrs.server.test.TestJaxRsMockPatientRestProviderDstu3;
-import ca.uhn.fhir.rest.server.Constants;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 
 public class AbstractJaxRsConformanceProviderDstu3Test {

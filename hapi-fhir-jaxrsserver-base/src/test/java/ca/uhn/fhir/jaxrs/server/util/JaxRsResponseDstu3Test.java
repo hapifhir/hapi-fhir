@@ -10,21 +10,14 @@ import java.util.Set;
 
 import javax.ws.rs.core.Response;
 
-import org.hl7.fhir.dstu3.model.Binary;
-import org.hl7.fhir.dstu3.model.Bundle;
-import org.hl7.fhir.dstu3.model.IdType;
-import org.hl7.fhir.dstu3.model.Patient;
+import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.Before;
 import org.junit.Test;
 
-import ca.uhn.fhir.jaxrs.server.util.JaxRsRequest;
-import ca.uhn.fhir.jaxrs.server.util.JaxRsResponse;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.SummaryEnum;
-import ca.uhn.fhir.rest.method.ParseAction;
-import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.RestfulServerUtils;
 
 public class JaxRsResponseDstu3Test {

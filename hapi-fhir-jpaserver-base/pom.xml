@@ -514,6 +514,7 @@
 				<artifactId>hapi-tinder-plugin</artifactId>
 				<version>${project.version}</version>
 				<executions>
+					<!-- 
 					<execution>
 						<id>build_dstu1</id>
 						<goals>
@@ -527,6 +528,7 @@
 							<baseResourceNames></baseResourceNames>
 						</configuration>
 					</execution>
+					-->
 					<execution>
 						<id>build_dstu2</id>
 						<goals>

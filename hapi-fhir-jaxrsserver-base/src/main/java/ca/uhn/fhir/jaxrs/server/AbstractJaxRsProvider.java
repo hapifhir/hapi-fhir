@@ -20,37 +20,24 @@ import java.io.IOException;
  * limitations under the License.
  * #L%
  */
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
 
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
+import javax.ws.rs.core.*;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.api.AddProfileTagEnum;
 import ca.uhn.fhir.jaxrs.server.interceptor.JaxRsExceptionInterceptor;
 import ca.uhn.fhir.jaxrs.server.interceptor.JaxRsResponseException;
 import ca.uhn.fhir.jaxrs.server.util.JaxRsRequest;
 import ca.uhn.fhir.jaxrs.server.util.JaxRsRequest.Builder;
 import ca.uhn.fhir.parser.DataFormatException;
-import ca.uhn.fhir.rest.api.RequestTypeEnum;
-import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
-import ca.uhn.fhir.rest.server.AddProfileTagEnum;
-import ca.uhn.fhir.rest.server.ETagSupportEnum;
-import ca.uhn.fhir.rest.server.EncodingEnum;
-import ca.uhn.fhir.rest.server.HardcodedServerAddressStrategy;
-import ca.uhn.fhir.rest.server.IPagingProvider;
-import ca.uhn.fhir.rest.server.IRestfulServerDefaults;
-import ca.uhn.fhir.rest.server.IServerAddressStrategy;
+import ca.uhn.fhir.rest.api.*;
+import ca.uhn.fhir.rest.server.*;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.util.OperationOutcomeUtil;
