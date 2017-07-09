@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-fhir</artifactId>
-		<version>2.6-SNAPSHOT</version>
+		<version>3.0.0-SNAPSHOT</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
@@ -64,12 +64,12 @@
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
-			<artifactId>hapi-fhir-structures-dstu</artifactId>
+			<artifactId>hapi-fhir-client</artifactId>
 			<version>${project.version}</version>
 			<exclusions>
 				<exclusion>
-					<artifactId>woodstox-core-asl</artifactId>
-					<groupId>org.codehaus.woodstox</groupId>
+					<groupId>ca.uhn.hapi.fhir</groupId>
+					<artifactId>hapi-fhir-base</artifactId>
 				</exclusion>
 			</exclusions>
 		</dependency>

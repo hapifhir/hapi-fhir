@@ -559,14 +559,6 @@ public class OperationServerDstu2Test {
 
 	}
 
-	public static void main(String[] theValue) {
-		Parameters p = new Parameters();
-		p.addParameter().setName("start").setValue(new DateTimeDt("2001-01-02"));
-		p.addParameter().setName("end").setValue(new DateTimeDt("2015-07-10"));
-		String inParamsStr = FhirContext.forDstu2().newXmlParser().encodeResourceToString(p);
-		ourLog.info(inParamsStr.replace("\"", "\\\""));
-	}
-
 	public static class PatientProvider implements IResourceProvider {
 
 		@Override

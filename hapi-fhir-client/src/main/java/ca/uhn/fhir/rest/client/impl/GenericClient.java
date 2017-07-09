@@ -169,9 +169,9 @@ import ca.uhn.fhir.util.UrlUtil;
  */
 public class GenericClient extends BaseClient implements IGenericClient {
 
-	private static final String I18N_CANNOT_DETEMINE_RESOURCE_TYPE = "ca.uhn.fhir.rest.client.GenericClient.cannotDetermineResourceTypeFromUri";
-	private static final String I18N_INCOMPLETE_URI_FOR_READ = "ca.uhn.fhir.rest.client.GenericClient.incompleteUriForRead";
-	private static final String I18N_NO_VERSION_ID_FOR_VREAD = "ca.uhn.fhir.rest.client.GenericClient.noVersionIdForVread";
+	private static final String I18N_CANNOT_DETEMINE_RESOURCE_TYPE = GenericClient.class.getName() + ".cannotDetermineResourceTypeFromUri";
+	private static final String I18N_INCOMPLETE_URI_FOR_READ = GenericClient.class.getName() + ".incompleteUriForRead";
+	private static final String I18N_NO_VERSION_ID_FOR_VREAD = GenericClient.class.getName() + ".noVersionIdForVread";
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(GenericClient.class);
 	private FhirContext myContext;
 	private IHttpRequest myLastRequest;

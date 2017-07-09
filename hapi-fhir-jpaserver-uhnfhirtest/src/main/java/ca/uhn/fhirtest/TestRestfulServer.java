@@ -1,9 +1,6 @@
 package ca.uhn.fhirtest;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -16,34 +13,19 @@ import org.springframework.web.context.support.AnnotationConfigWebApplicationCon
 import org.springframework.web.cors.CorsConfiguration;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.config.WebsocketDstu2Config;
 import ca.uhn.fhir.jpa.config.WebsocketDstu2DispatcherConfig;
-import ca.uhn.fhir.jpa.config.dstu3.WebsocketDstu3Config;
 import ca.uhn.fhir.jpa.config.dstu3.WebsocketDstu3DispatcherConfig;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
-import ca.uhn.fhir.jpa.provider.JpaConformanceProviderDstu1;
 import ca.uhn.fhir.jpa.provider.JpaConformanceProviderDstu2;
-import ca.uhn.fhir.jpa.provider.JpaSystemProviderDstu1;
 import ca.uhn.fhir.jpa.provider.JpaSystemProviderDstu2;
-import ca.uhn.fhir.jpa.provider.dstu3.JpaConformanceProviderDstu3;
-import ca.uhn.fhir.jpa.provider.dstu3.JpaSystemProviderDstu3;
-import ca.uhn.fhir.jpa.provider.dstu3.TerminologyUploaderProviderDstu3;
+import ca.uhn.fhir.jpa.provider.dstu3.*;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
-import ca.uhn.fhir.rest.server.ETagSupportEnum;
-import ca.uhn.fhir.rest.server.EncodingEnum;
-import ca.uhn.fhir.rest.server.HardcodedServerAddressStrategy;
-import ca.uhn.fhir.rest.server.IResourceProvider;
-import ca.uhn.fhir.rest.server.RestfulServer;
-import ca.uhn.fhir.rest.server.interceptor.BanUnsupportedHttpMethodsInterceptor;
-import ca.uhn.fhir.rest.server.interceptor.CorsInterceptor;
-import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
-import ca.uhn.fhir.rest.server.interceptor.ResponseHighlighterInterceptor;
-import ca.uhn.fhirtest.config.TdlDstu2Config;
-import ca.uhn.fhirtest.config.TdlDstu3Config;
-import ca.uhn.fhirtest.config.TestDstu2Config;
-import ca.uhn.fhirtest.config.TestDstu3Config;
+import ca.uhn.fhir.rest.api.EncodingEnum;
+import ca.uhn.fhir.rest.server.*;
+import ca.uhn.fhir.rest.server.interceptor.*;
+import ca.uhn.fhirtest.config.*;
 
 public class TestRestfulServer extends RestfulServer {
 
@@ -85,23 +67,6 @@ public class TestRestfulServer extends RestfulServer {
 		List<Object> plainProviders = new ArrayList<Object>();
 		
 		switch (fhirVersionParam.trim().toUpperCase()) {
-		case "DSTU1": {
-			myAppCtx = new AnnotationConfigWebApplicationContext();
-			myAppCtx.setServletConfig(getServletConfig());
-			myAppCtx.setParent(parentAppCtx);
-			myAppCtx.register(ca.uhn.fhirtest.config.TestDstu1Config.class);
-			myAppCtx.refresh();
-			setFhirContext(FhirContext.forDstu1());
-			beans = myAppCtx.getBean("myResourceProvidersDstu1", List.class);
-			plainProviders.add(myAppCtx.getBean("mySystemProviderDstu1", JpaSystemProviderDstu1.class));
-			systemDao = myAppCtx.getBean("mySystemDaoDstu1", IFhirSystemDao.class);
-			etagSupport = ETagSupportEnum.DISABLED;
-			JpaConformanceProviderDstu1 confProvider = new JpaConformanceProviderDstu1(this, systemDao);
-			confProvider.setImplementationDescription(implDesc);
-			setServerConformanceProvider(confProvider);
-			baseUrlProperty = FHIR_BASEURL_DSTU1;
-			break;
-		}
 		case "TDL2":
 		case "DSTU2": {
 			myAppCtx = new AnnotationConfigWebApplicationContext();

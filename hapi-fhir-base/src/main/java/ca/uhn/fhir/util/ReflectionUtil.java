@@ -157,7 +157,8 @@ public class ReflectionUtil {
 		if (fhirServerVersion == null) {
 			try {
 				Class<?> type = Class.forName(theType);
-				Validate.isTrue(IFhirVersion.class.isAssignableFrom(type));
+				Class<?> serverType = Class.forName("ca.uhn.fhir.rest.api.server.IFhirVersionServer");
+				Validate.isTrue(serverType.isAssignableFrom(type));
 				fhirServerVersion = type.newInstance();
 			} catch (Exception e) {
 				throw new ConfigurationException("Unable to instantiate server framework. Please make sure that hapi-fhir-server library is on your classpath!", e);

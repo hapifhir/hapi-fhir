@@ -42,9 +42,9 @@ import ca.uhn.fhir.rest.api.IVersionSpecificBundleFactory;
 import ca.uhn.fhir.util.ResourceReferenceInfo;
 
 public class Dstu2BundleFactory implements IVersionSpecificBundleFactory {
+	private String myBase;
 	private Bundle myBundle;
 	private FhirContext myContext;
-	private String myBase;
 
 	public Dstu2BundleFactory(FhirContext theContext) {
 		myContext = theContext;
@@ -132,9 +132,7 @@ public class Dstu2BundleFactory implements IVersionSpecificBundleFactory {
 
 	@Override
 	public void addResourcesToBundle(List<IBaseResource> theResult, BundleTypeEnum theBundleType, String theServerBase, BundleInclusionRule theBundleInclusionRule, Set<Include> theIncludes) {
-		if (myBundle == null) {
-			myBundle = new Bundle();
-		}
+		ensureBundle();
 
 		List<IResource> includedResources = new ArrayList<IResource>();
 		Set<IdDt> addedResourceIds = new HashSet<IdDt>();
@@ -220,21 +218,10 @@ public class Dstu2BundleFactory implements IVersionSpecificBundleFactory {
 
 	}
 
-	private void populateBundleEntryFullUrl(IResource next, Entry entry) {
-		if (next.getId().hasBaseUrl()) {
-			entry.setFullUrl(next.getId().toVersionless().getValue());
-		} else {
-			if (isNotBlank(myBase) && next.getId().hasIdPart()) {
-				IdDt id = next.getId().toVersionless();
-				id = id.withServerBase(myBase, myContext.getResourceDefinition(next).getName());
-				entry.setFullUrl(id.getValue());
-			}
-		}
-	}
-
 	@Override
 	public void addRootPropertiesToBundle(String theAuthor, String theServerBase, String theLinkSelf, String theLinkPrev, String theLinkNext, Integer theTotalResults, BundleTypeEnum theBundleType,
 			IPrimitiveType<Date> theLastUpdated) {
+		ensureBundle();
 
 		myBase = theServerBase;
 
@@ -265,6 +252,12 @@ public class Dstu2BundleFactory implements IVersionSpecificBundleFactory {
 		}
 	}
 
+	private void ensureBundle() {
+		if (myBundle == null) {
+			myBundle = new Bundle();
+		}
+	}
+
 	@Override
 	public ca.uhn.fhir.model.api.Bundle getDstu1Bundle() {
 		return null;
@@ -287,7 +280,7 @@ public class Dstu2BundleFactory implements IVersionSpecificBundleFactory {
 	@Override
 	public void initializeBundleFromResourceList(String theAuthor, List<? extends IBaseResource> theResources, String theServerBase, String theCompleteUrl, int theTotalResults,
 			BundleTypeEnum theBundleType) {
-		myBundle = new Bundle();
+		ensureBundle();
 
 		myBundle.setId(UUID.randomUUID().toString());
 
@@ -325,6 +318,18 @@ public class Dstu2BundleFactory implements IVersionSpecificBundleFactory {
 	@Override
 	public void initializeWithBundleResource(IBaseResource theBundle) {
 		myBundle = (Bundle) theBundle;
+	}
+
+	private void populateBundleEntryFullUrl(IResource next, Entry entry) {
+		if (next.getId().hasBaseUrl()) {
+			entry.setFullUrl(next.getId().toVersionless().getValue());
+		} else {
+			if (isNotBlank(myBase) && next.getId().hasIdPart()) {
+				IdDt id = next.getId().toVersionless();
+				id = id.withServerBase(myBase, myContext.getResourceDefinition(next).getName());
+				entry.setFullUrl(id.getValue());
+			}
+		}
 	}
 
 	@Override

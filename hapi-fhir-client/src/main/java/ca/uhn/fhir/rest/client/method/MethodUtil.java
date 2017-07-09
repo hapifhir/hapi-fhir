@@ -22,7 +22,8 @@ import ca.uhn.fhir.rest.api.*;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
 import ca.uhn.fhir.rest.client.impl.BaseHttpClientInvocation;
 import ca.uhn.fhir.rest.client.method.OperationParameter.IOperationParamConverter;
-import ca.uhn.fhir.rest.param.*;
+import ca.uhn.fhir.rest.param.ParameterUtil;
+import ca.uhn.fhir.rest.param.binder.CollectionBinder;
 import ca.uhn.fhir.util.*;
 
 /*
@@ -533,62 +534,6 @@ public class MethodUtil {
 		}
 	}
 
-	/**
-	 * This is a utility method intended provided to help the JPA module.
-	 */
-	public static IQueryParameterAnd<?> parseQueryParams(FhirContext theContext, RuntimeSearchParam theParamDef,
-			String theUnqualifiedParamName, List<QualifiedParamList> theParameters) {
-		RestSearchParameterTypeEnum paramType = theParamDef.getParamType();
-		return parseQueryParams(theContext, paramType, theUnqualifiedParamName, theParameters);
-	}
-
-	/**
-	 * This is a utility method intended provided to help the JPA module.
-	 */
-	public static IQueryParameterAnd<?> parseQueryParams(FhirContext theContext, RestSearchParameterTypeEnum paramType,
-			String theUnqualifiedParamName, List<QualifiedParamList> theParameters) {
-		QueryParameterAndBinder binder = null;
-		switch (paramType) {
-		case COMPOSITE:
-			throw new UnsupportedOperationException();
-		case DATE:
-			binder = new QueryParameterAndBinder(DateAndListParam.class,
-					Collections.<Class<? extends IQueryParameterType>> emptyList());
-			break;
-		case NUMBER:
-			binder = new QueryParameterAndBinder(NumberAndListParam.class,
-					Collections.<Class<? extends IQueryParameterType>> emptyList());
-			break;
-		case QUANTITY:
-			binder = new QueryParameterAndBinder(QuantityAndListParam.class,
-					Collections.<Class<? extends IQueryParameterType>> emptyList());
-			break;
-		case REFERENCE:
-			binder = new QueryParameterAndBinder(ReferenceAndListParam.class,
-					Collections.<Class<? extends IQueryParameterType>> emptyList());
-			break;
-		case STRING:
-			binder = new QueryParameterAndBinder(StringAndListParam.class,
-					Collections.<Class<? extends IQueryParameterType>> emptyList());
-			break;
-		case TOKEN:
-			binder = new QueryParameterAndBinder(TokenAndListParam.class,
-					Collections.<Class<? extends IQueryParameterType>> emptyList());
-			break;
-		case URI:
-			binder = new QueryParameterAndBinder(UriAndListParam.class,
-					Collections.<Class<? extends IQueryParameterType>> emptyList());
-			break;
-		case HAS:
-			binder = new QueryParameterAndBinder(HasAndListParam.class,
-					Collections.<Class<? extends IQueryParameterType>> emptyList());
-			break;
-		}
-
-		// FIXME null access
-		return binder.parse(theContext, theUnqualifiedParamName, theParameters);
-	}
-
 	public static MethodOutcome process2xxResponse(FhirContext theContext, int theResponseStatusCode,
 			String theResponseMimeType, Reader theResponseReader, Map<String, List<String>> theHeaders) {
 		List<String> locationHeaders = new ArrayList<String>();
@@ -641,7 +586,6 @@ public class MethodUtil {
 		}
 		return retVal;
 	}
-
 
 	public static void addAcceptHeaderToRequest(EncodingEnum theEncoding, IHttpRequest theHttpRequest,
 			FhirContext theContext) {

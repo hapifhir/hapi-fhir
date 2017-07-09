@@ -27,14 +27,13 @@ import java.util.*;
 
 import org.hl7.fhir.instance.model.api.IIdType;
 
-import ca.uhn.fhir.context.ConfigurationException;
-import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.*;
 import ca.uhn.fhir.model.api.*;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.IntegerDt;
 import ca.uhn.fhir.rest.annotation.*;
-import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.api.QualifiedParamList;
+import ca.uhn.fhir.rest.api.*;
+import ca.uhn.fhir.rest.param.binder.QueryParameterAndBinder;
 import ca.uhn.fhir.util.ReflectionUtil;
 import ca.uhn.fhir.util.UrlUtil;
 
@@ -64,6 +63,64 @@ public class ParameterUtil {
 		return (T) value;
 	}
 
+	/**
+	 * This is a utility method intended provided to help the JPA module.
+	 */
+	public static IQueryParameterAnd<?> parseQueryParams(FhirContext theContext, RestSearchParameterTypeEnum paramType,
+			String theUnqualifiedParamName, List<QualifiedParamList> theParameters) {
+		QueryParameterAndBinder binder = null;
+		switch (paramType) {
+		case COMPOSITE:
+			throw new UnsupportedOperationException();
+		case DATE:
+			binder = new QueryParameterAndBinder(DateAndListParam.class,
+					Collections.<Class<? extends IQueryParameterType>> emptyList());
+			break;
+		case NUMBER:
+			binder = new QueryParameterAndBinder(NumberAndListParam.class,
+					Collections.<Class<? extends IQueryParameterType>> emptyList());
+			break;
+		case QUANTITY:
+			binder = new QueryParameterAndBinder(QuantityAndListParam.class,
+					Collections.<Class<? extends IQueryParameterType>> emptyList());
+			break;
+		case REFERENCE:
+			binder = new QueryParameterAndBinder(ReferenceAndListParam.class,
+					Collections.<Class<? extends IQueryParameterType>> emptyList());
+			break;
+		case STRING:
+			binder = new QueryParameterAndBinder(StringAndListParam.class,
+					Collections.<Class<? extends IQueryParameterType>> emptyList());
+			break;
+		case TOKEN:
+			binder = new QueryParameterAndBinder(TokenAndListParam.class,
+					Collections.<Class<? extends IQueryParameterType>> emptyList());
+			break;
+		case URI:
+			binder = new QueryParameterAndBinder(UriAndListParam.class,
+					Collections.<Class<? extends IQueryParameterType>> emptyList());
+			break;
+		case HAS:
+			binder = new QueryParameterAndBinder(HasAndListParam.class,
+					Collections.<Class<? extends IQueryParameterType>> emptyList());
+			break;
+		}
+
+		// FIXME null access
+		return binder.parse(theContext, theUnqualifiedParamName, theParameters);
+	}
+	
+	/**
+	 * This is a utility method intended provided to help the JPA module.
+	 */
+	public static IQueryParameterAnd<?> parseQueryParams(FhirContext theContext, RuntimeSearchParam theParamDef,
+			String theUnqualifiedParamName, List<QualifiedParamList> theParameters) {
+		RestSearchParameterTypeEnum paramType = theParamDef.getParamType();
+		return parseQueryParams(theContext, paramType, theUnqualifiedParamName, theParameters);
+	}
+
+
+	
 	/**
 	 * Escapes a string according to the rules for parameter escaping specified in the <a href="http://www.hl7.org/implement/standards/fhir/search.html#escaping">FHIR Specification Escaping
 	 * Section</a>

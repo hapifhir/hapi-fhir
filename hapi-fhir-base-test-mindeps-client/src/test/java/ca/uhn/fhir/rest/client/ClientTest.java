@@ -6,13 +6,14 @@ import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
-import ca.uhn.fhir.model.dstu.resource.Patient;
+import ca.uhn.fhir.model.dstu2.resource.Patient;
+import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.exceptions.FhirClientConnectionException;
 import ca.uhn.fhir.rest.gclient.ITransactionTyped;
 
 public class ClientTest {
 
-	private static FhirContext ctx = FhirContext.forDstu1();
+	private static FhirContext ctx = FhirContext.forDstu2();
 
 	@Test
 	public void testTransaction() {

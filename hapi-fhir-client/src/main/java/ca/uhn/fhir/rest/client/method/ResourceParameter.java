@@ -20,8 +20,9 @@ public class ResourceParameter implements IParameter {
 	 */
 	@SuppressWarnings("unchecked")
 	public ResourceParameter(Class<?> theParameterType) {
-		Validate.isTrue(IBaseResource.class.isAssignableFrom(theParameterType));
-		myResourceType = (Class<? extends IBaseResource>) theParameterType;
+		if (IBaseResource.class.isAssignableFrom(theParameterType)) {
+			myResourceType = (Class<? extends IBaseResource>) theParameterType;
+		}
 	}
 
 	@Override

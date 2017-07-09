@@ -31,13 +31,14 @@ import ca.uhn.fhirtest.interceptor.PublicSecurityInterceptor;
 @Import(CommonConfig.class)
 @EnableTransactionManagement()
 public class TestDstu3Config extends BaseJavaConfigDstu3 {
-
+	public static final String FHIR_DB_USERNAME = "${fhir.db.username}";
+	public  static final String FHIR_DB_PASSWORD = "${fhir.db.password}";
 	public static final String FHIR_LUCENE_LOCATION_DSTU3 = "${fhir.lucene.location.dstu3}";
 
-	@Value(TestDstu1Config.FHIR_DB_USERNAME)
+	@Value(TestDstu3Config.FHIR_DB_USERNAME)
 	private String myDbUsername;
 
-	@Value(TestDstu1Config.FHIR_DB_PASSWORD)
+	@Value(TestDstu3Config.FHIR_DB_PASSWORD)
 	private String myDbPassword;
 
 	@Value(FHIR_LUCENE_LOCATION_DSTU3)

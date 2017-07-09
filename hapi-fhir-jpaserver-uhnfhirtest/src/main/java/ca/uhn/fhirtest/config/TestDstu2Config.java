@@ -31,10 +31,10 @@ public class TestDstu2Config extends BaseJavaConfigDstu2 {
 
 	public static final String FHIR_LUCENE_LOCATION_DSTU2 = "${fhir.lucene.location.dstu2}";
 
-	@Value(TestDstu1Config.FHIR_DB_USERNAME)
+	@Value(TestDstu3Config.FHIR_DB_USERNAME)
 	private String myDbUsername;
 
-	@Value(TestDstu1Config.FHIR_DB_PASSWORD)
+	@Value(TestDstu3Config.FHIR_DB_PASSWORD)
 	private String myDbPassword;
 
 	@Value(FHIR_LUCENE_LOCATION_DSTU2)

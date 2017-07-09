@@ -6,6 +6,9 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.*;
 
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.context.ConfigurationException;
@@ -15,14 +18,16 @@ import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.rest.annotation.*;
 import ca.uhn.fhir.rest.api.*;
-import ca.uhn.fhir.rest.param.CollectionBinder;
+import ca.uhn.fhir.rest.api.server.IRequestOperationCallback;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.param.binder.CollectionBinder;
 import ca.uhn.fhir.rest.server.method.OperationParameter.IOperationParamConverter;
 import ca.uhn.fhir.rest.server.method.ResourceParameter.Mode;
 import ca.uhn.fhir.util.ParametersUtil;
 import ca.uhn.fhir.util.ReflectionUtil;
 
 public class MethodUtil {
-
+	
 	public static void extractDescription(SearchParameter theParameter, Annotation[] theAnnotations) {
 		for (Annotation annotation : theAnnotations) {
 			if (annotation instanceof Description) {
@@ -68,7 +73,15 @@ public class MethodUtil {
 				}
 			}
 
-			if (parameterType.equals(SummaryEnum.class)) {
+			if (ServletRequest.class.isAssignableFrom(parameterType)) {
+				param = new ServletRequestParameter();
+			} else if (ServletResponse.class.isAssignableFrom(parameterType)) {
+				param = new ServletResponseParameter();
+			} else if (parameterType.equals(RequestDetails.class)) {
+				param = new RequestDetailsParameter();
+			} else if (parameterType.equals(IRequestOperationCallback.class)) {
+				param = new RequestOperationCallbackParameter();
+			} else if (parameterType.equals(SummaryEnum.class)) {
 				param = new SummaryEnumParameter();
 			} else if (parameterType.equals(PatchTypeEnum.class)) {
 				param = new PatchTypeParameter();

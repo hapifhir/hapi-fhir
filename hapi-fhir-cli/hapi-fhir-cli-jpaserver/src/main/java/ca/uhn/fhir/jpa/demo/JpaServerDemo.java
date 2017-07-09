@@ -1,13 +1,9 @@
 package ca.uhn.fhir.jpa.demo;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 
 import javax.servlet.ServletException;
 
-import org.hl7.fhir.dstu3.model.Meta;
 import org.springframework.web.context.ContextLoaderListener;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.cors.CorsConfiguration;
@@ -16,22 +12,14 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
-import ca.uhn.fhir.jpa.provider.JpaConformanceProviderDstu1;
 import ca.uhn.fhir.jpa.provider.JpaConformanceProviderDstu2;
-import ca.uhn.fhir.jpa.provider.JpaSystemProviderDstu1;
 import ca.uhn.fhir.jpa.provider.JpaSystemProviderDstu2;
-import ca.uhn.fhir.jpa.provider.dstu3.JpaConformanceProviderDstu3;
-import ca.uhn.fhir.jpa.provider.dstu3.JpaSystemProviderDstu3;
-import ca.uhn.fhir.jpa.provider.dstu3.TerminologyUploaderProviderDstu3;
-import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.jpa.provider.dstu3.*;
 import ca.uhn.fhir.model.dstu2.composite.MetaDt;
 import ca.uhn.fhir.model.dstu2.resource.Bundle;
 import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
-import ca.uhn.fhir.rest.server.ETagSupportEnum;
-import ca.uhn.fhir.rest.server.EncodingEnum;
-import ca.uhn.fhir.rest.server.FifoMemoryPagingProvider;
-import ca.uhn.fhir.rest.server.IResourceProvider;
-import ca.uhn.fhir.rest.server.RestfulServer;
+import ca.uhn.fhir.rest.api.EncodingEnum;
+import ca.uhn.fhir.rest.server.*;
 import ca.uhn.fhir.rest.server.interceptor.CorsInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 
@@ -80,9 +68,7 @@ public class JpaServerDemo extends RestfulServer {
 		 * transaction, and global history.
 		 */
 		List<Object> systemProvider = new ArrayList<Object>();
-		if (fhirVersion == FhirVersionEnum.DSTU1) {
-			systemProvider.add(myAppCtx.getBean("mySystemProviderDstu1", JpaSystemProviderDstu1.class));
-		} else if (fhirVersion == FhirVersionEnum.DSTU2) {
+		if (fhirVersion == FhirVersionEnum.DSTU2) {
 			systemProvider.add(myAppCtx.getBean("mySystemProviderDstu2", JpaSystemProviderDstu2.class));
 		} else if (fhirVersion == FhirVersionEnum.DSTU3) {
 			systemProvider.add(myAppCtx.getBean("mySystemProviderDstu3", JpaSystemProviderDstu3.class));
@@ -97,13 +83,7 @@ public class JpaServerDemo extends RestfulServer {
 		 * this server. The JPA version adds resource counts to the exported statement, so it
 		 * is a nice addition.
 		 */
-		if (fhirVersion == FhirVersionEnum.DSTU1) {
-			IFhirSystemDao<List<IResource>, MetaDt> systemDao = myAppCtx.getBean("mySystemDaoDstu1",
-					IFhirSystemDao.class);
-			JpaConformanceProviderDstu1 confProvider = new JpaConformanceProviderDstu1(this, systemDao);
-			confProvider.setImplementationDescription("Example Server");
-			setServerConformanceProvider(confProvider);
-		} else if (fhirVersion == FhirVersionEnum.DSTU2) {
+		if (fhirVersion == FhirVersionEnum.DSTU2) {
 			IFhirSystemDao<Bundle, MetaDt> systemDao = myAppCtx.getBean("mySystemDaoDstu2", IFhirSystemDao.class);
 			JpaConformanceProviderDstu2 confProvider = new JpaConformanceProviderDstu2(this, systemDao,
 					myAppCtx.getBean(DaoConfig.class));

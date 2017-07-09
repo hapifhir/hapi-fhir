@@ -4,11 +4,10 @@ import org.hl7.fhir.dstu3.model.Bundle;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.okhttp.client.OkHttpRestfulClientFactory;
-import ca.uhn.fhir.rest.client.*;
+import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.client.apache.GZipContentInterceptor;
-import ca.uhn.fhir.rest.client.api.IBasicClient;
+import ca.uhn.fhir.rest.client.api.*;
 import ca.uhn.fhir.rest.client.interceptor.*;
-import ca.uhn.fhir.rest.server.EncodingEnum;
 
 public class ClientExamples {
 

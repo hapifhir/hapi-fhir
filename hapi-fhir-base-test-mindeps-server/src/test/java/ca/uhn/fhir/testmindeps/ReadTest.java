@@ -6,28 +6,25 @@ import static org.junit.Assert.assertNotNull;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.*;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.servlet.ServletHandler;
 import org.mortbay.jetty.servlet.ServletHolder;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
-import ca.uhn.fhir.model.dstu.resource.Binary;
-import ca.uhn.fhir.model.dstu.resource.Patient;
+import ca.uhn.fhir.model.dstu2.composite.IdentifierDt;
+import ca.uhn.fhir.model.dstu2.resource.Binary;
+import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Read;
-import ca.uhn.fhir.rest.server.Constants;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.util.PortUtil;
@@ -53,10 +50,10 @@ public class ReadTest {
 			assertEquals(200, status.getStatusLine().getStatusCode());
 			IdentifierDt dt = ourCtx.newXmlParser().parseResource(Patient.class,responseContent).getIdentifierFirstRep();
 			
-			assertEquals("1", dt.getSystem().getValueAsString());
-			assertEquals(null, dt.getValue().getValueAsString());
+			assertEquals("1", dt.getSystemElement().getValueAsString());
+			assertEquals(null, dt.getValueElement().getValueAsString());
 			
-			Header cl = status.getFirstHeader(Constants.HEADER_CONTENT_LOCATION_LC);
+			org.apache.http.Header cl = status.getFirstHeader(Constants.HEADER_CONTENT_LOCATION_LC);
 			assertNotNull(cl);
 			assertEquals("http://localhost:" + ourPort + "/Patient/1/_history/1", cl.getValue());
 			
@@ -77,11 +74,11 @@ public class ReadTest {
 			assertEquals(200, status.getStatusLine().getStatusCode());
 			assertEquals("application/x-foo", status.getEntity().getContentType().getValue());
 			
-			Header cl = status.getFirstHeader(Constants.HEADER_CONTENT_LOCATION_LC);
+			org.apache.http.Header cl = status.getFirstHeader(Constants.HEADER_CONTENT_LOCATION_LC);
 			assertNotNull(cl);
 			assertEquals("http://localhost:" + ourPort + "/Binary/1/_history/1", cl.getValue());
 			
-			Header cd = status.getFirstHeader("content-disposition");
+			org.apache.http.Header cd = status.getFirstHeader("content-disposition");
 			assertNotNull(cd);
 			assertEquals("Attachment;", cd.getValue());
 			
@@ -104,10 +101,10 @@ public class ReadTest {
 
 			assertEquals(200, status.getStatusLine().getStatusCode());
 			IdentifierDt dt = ourCtx.newXmlParser().parseResource(Patient.class,responseContent).getIdentifierFirstRep();
-			assertEquals("1", dt.getSystem().getValueAsString());
-			assertEquals("2", dt.getValue().getValueAsString());
+			assertEquals("1", dt.getSystemElement().getValueAsString());
+			assertEquals("2", dt.getValueElement().getValueAsString());
 
-			Header cl = status.getFirstHeader(Constants.HEADER_CONTENT_LOCATION_LC);
+			org.apache.http.Header cl = status.getFirstHeader(Constants.HEADER_CONTENT_LOCATION_LC);
 			assertNotNull(cl);
 			assertEquals("http://localhost:" + ourPort + "/Patient/1/_history/1", cl.getValue());
 		}
@@ -149,7 +146,7 @@ public class ReadTest {
 		@Read(version = true)
 		public Patient findPatient(@IdParam IdDt theId) {
 			Patient patient = new Patient();
-			patient.addIdentifier(theId.getIdPart(), theId.getVersionIdPart());
+			patient.addIdentifier().setSystem(theId.getIdPart()).setValue(theId.getVersionIdPart());
 			patient.setId("Patient/1/_history/1");
 			return patient;
 		}

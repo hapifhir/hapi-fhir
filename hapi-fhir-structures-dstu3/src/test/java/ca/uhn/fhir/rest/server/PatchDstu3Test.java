@@ -167,7 +167,6 @@ public class PatchDstu3Test {
 			return Patient.class;
 		}
 
-		//@formatter:off
 		@Patch
 		public OperationOutcome patientPatch(@IdParam IdType theId, PatchTypeEnum thePatchType, @ResourceParam String theBody) {
 			ourLastMethod = "patientPatch";
@@ -178,7 +177,6 @@ public class PatchDstu3Test {
 			retVal.getText().setDivAsString("<div>OK</div>");
 			return retVal;
 		}
-		//@formatter:on
 
 	}
 

@@ -1,9 +1,6 @@
 package ca.uhn.fhir.to;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.List;
+import java.util.*;
 
 import javax.annotation.PostConstruct;
 
@@ -12,7 +9,7 @@ import org.apache.commons.lang3.Validate;
 import org.springframework.beans.factory.annotation.Required;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.util.ITestingUiClientFactory;
+import ca.uhn.fhir.rest.server.util.ITestingUiClientFactory;
 
 public class TesterConfig {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TesterConfig.class);

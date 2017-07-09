@@ -85,11 +85,13 @@ public class HistoryDstu2Test {
 	@Test
 	public void testInstanceHistory() throws Exception {
 		{
-			HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/123/_history");
+			HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/123/_history?_pretty=true");
 			HttpResponse status = ourClient.execute(httpGet);
 			String responseContent = IOUtils.toString(status.getEntity().getContent());
 			IOUtils.closeQuietly(status.getEntity().getContent());
 
+			ourLog.info(responseContent);
+			
 			assertEquals(200, status.getStatusLine().getStatusCode());
 
 			Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
@@ -98,7 +100,7 @@ public class HistoryDstu2Test {
 			assertEquals("http://localhost:" + ourPort + "/Patient/ih1/_history/2", bundle.getEntry().get(1).getResource().getId().getValue());
 
 		}
-	}
+	}private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(HistoryDstu2Test.class);
 
 	@Test
 	public void testServerHistory() throws Exception {
