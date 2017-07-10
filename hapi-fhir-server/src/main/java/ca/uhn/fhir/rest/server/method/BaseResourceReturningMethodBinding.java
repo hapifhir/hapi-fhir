@@ -138,37 +138,36 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 
 		Set<SummaryEnum> summaryMode = RestfulServerUtils.determineSummaryMode(theRequest);
 
-			for (int i = theServer.getInterceptors().size() - 1; i >= 0; i--) {
-				IServerInterceptor next = theServer.getInterceptors().get(i);
-				boolean continueProcessing = next.outgoingResponse(theRequest, response);
-				if (!continueProcessing) {
-					return null;
-				}
+		for (int i = theServer.getInterceptors().size() - 1; i >= 0; i--) {
+			IServerInterceptor next = theServer.getInterceptors().get(i);
+			boolean continueProcessing = next.outgoingResponse(theRequest, response);
+			if (!continueProcessing) {
+				return null;
 			}
+		}
 
-			boolean prettyPrint = RestfulServerUtils.prettyPrintResponse(theServer, theRequest);
+		boolean prettyPrint = RestfulServerUtils.prettyPrintResponse(theServer, theRequest);
 
-			return theRequest.getResponse().streamResponseAsResource(response, prettyPrint, summaryMode, Constants.STATUS_HTTP_200_OK, null, theRequest.isRespondGzip(), isAddContentLocationHeader());
-
+		return theRequest.getResponse().streamResponseAsResource(response, prettyPrint, summaryMode, Constants.STATUS_HTTP_200_OK, null, theRequest.isRespondGzip(), isAddContentLocationHeader());
 
 		// DSTU1 Bundle
-//		// Is this request coming from a browser
-//		String uaHeader = theRequest.getHeader("user-agent");
-//		boolean requestIsBrowser = false;
-//		if (uaHeader != null && uaHeader.contains("Mozilla")) {
-//			requestIsBrowser = true;
-//		}
-//
-//		for (int i = theServer.getInterceptors().size() - 1; i >= 0; i--) {
-//			IServerInterceptor next = theServer.getInterceptors().get(i);
-//			boolean continueProcessing = next.outgoingResponse(theRequest, responseObject.getDstu1Bundle());
-//			if (!continueProcessing) {
-//				ourLog.debug("Interceptor {} returned false, not continuing processing");
-//				return null;
-//			}
-//		}
-//
-//		return theRequest.getResponse().streamResponseAsBundle(responseObject.getDstu1Bundle(), summaryMode, theRequest.isRespondGzip(), requestIsBrowser);
+		// // Is this request coming from a browser
+		// String uaHeader = theRequest.getHeader("user-agent");
+		// boolean requestIsBrowser = false;
+		// if (uaHeader != null && uaHeader.contains("Mozilla")) {
+		// requestIsBrowser = true;
+		// }
+		//
+		// for (int i = theServer.getInterceptors().size() - 1; i >= 0; i--) {
+		// IServerInterceptor next = theServer.getInterceptors().get(i);
+		// boolean continueProcessing = next.outgoingResponse(theRequest, responseObject.getDstu1Bundle());
+		// if (!continueProcessing) {
+		// ourLog.debug("Interceptor {} returned false, not continuing processing");
+		// return null;
+		// }
+		// }
+		//
+		// return theRequest.getResponse().streamResponseAsBundle(responseObject.getDstu1Bundle(), summaryMode, theRequest.isRespondGzip(), requestIsBrowser);
 	}
 
 	public IBaseResource doInvokeServer(IRestfulServer<?> theServer, RequestDetails theRequest) {
@@ -188,195 +187,188 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 		final IBaseResource responseObject;
 
 		switch (getReturnType()) {
-			case BUNDLE: {
+		case BUNDLE: {
+
+			/*
+			 * Figure out the self-link for this request
+			 */
+			String serverBase = theRequest.getServerBaseForRequest();
+			String linkSelf;
+			StringBuilder b = new StringBuilder();
+			b.append(serverBase);
+			if (isNotBlank(theRequest.getRequestPath())) {
+				b.append('/');
+				b.append(theRequest.getRequestPath());
+			}
+			// For POST the URL parameters get jumbled with the post body parameters so don't include them, they might be huge
+			if (theRequest.getRequestType() == RequestTypeEnum.GET) {
+				boolean first = true;
+				Map<String, String[]> parameters = theRequest.getParameters();
+				for (String nextParamName : new TreeSet<String>(parameters.keySet())) {
+					for (String nextParamValue : parameters.get(nextParamName)) {
+						if (first) {
+							b.append('?');
+							first = false;
+						} else {
+							b.append('&');
+						}
+						b.append(UrlUtil.escape(nextParamName));
+						b.append('=');
+						b.append(UrlUtil.escape(nextParamValue));
+					}
+				}
+			}
+			linkSelf = b.toString();
+
+			if (getMethodReturnType() == MethodReturnTypeEnum.BUNDLE_RESOURCE) {
+				IBaseResource resource;
+				IPrimitiveType<Date> lastUpdated;
+				if (resultObj instanceof IBundleProvider) {
+					IBundleProvider result = (IBundleProvider) resultObj;
+					resource = result.getResources(0, 1).get(0);
+					lastUpdated = result.getPublished();
+				} else {
+					resource = (IBaseResource) resultObj;
+					lastUpdated = theServer.getFhirContext().getVersion().getLastUpdated(resource);
+				}
 
 				/*
-				 * Figure out the self-link for this request
+				 * We assume that the bundle we got back from the handling method may not have everything populated (e.g. self links, bundle type, etc) so we do that here.
 				 */
-				String serverBase = theRequest.getServerBaseForRequest();
-				String linkSelf;
-				StringBuilder b = new StringBuilder();
-				b.append(serverBase);
-				if (isNotBlank(theRequest.getRequestPath())) {
-					b.append('/');
-					b.append(theRequest.getRequestPath());
-				}
-				// For POST the URL parameters get jumbled with the post body parameters so don't include them, they might be huge
-				if (theRequest.getRequestType() == RequestTypeEnum.GET) {
-					boolean first = true;
-					Map<String, String[]> parameters = theRequest.getParameters();
-					for (String nextParamName : new TreeSet<String>(parameters.keySet())) {
-						for (String nextParamValue : parameters.get(nextParamName)) {
-							if (first) {
-								b.append('?');
-								first = false;
-							} else {
-								b.append('&');
-							}
-							b.append(UrlUtil.escape(nextParamName));
-							b.append('=');
-							b.append(UrlUtil.escape(nextParamValue));
-						}
-					}
-				}
-				linkSelf = b.toString();
+				IVersionSpecificBundleFactory bundleFactory = theServer.getFhirContext().newBundleFactory();
+				bundleFactory.initializeWithBundleResource(resource);
+				bundleFactory.addRootPropertiesToBundle(null, theRequest.getFhirServerBase(), linkSelf, null, null, count, getResponseBundleType(), lastUpdated);
 
-				if (getMethodReturnType() == MethodReturnTypeEnum.BUNDLE_RESOURCE) {
-					IBaseResource resource;
-					IPrimitiveType<Date> lastUpdated;
-					if (resultObj instanceof IBundleProvider) {
-						IBundleProvider result = (IBundleProvider) resultObj;
-						resource = result.getResources(0, 1).get(0);
-						lastUpdated = result.getPublished();
-					} else {
-						resource = (IBaseResource) resultObj;
-						lastUpdated = theServer.getFhirContext().getVersion().getLastUpdated(resource);
-					}
-
-					/*
-					 * We assume that the bundle we got back from the handling method may not have everything populated (e.g. self links, bundle type, etc) so we do that here.
-					 */
-					IVersionSpecificBundleFactory bundleFactory = theServer.getFhirContext().newBundleFactory();
-					bundleFactory.initializeWithBundleResource(resource);
-					bundleFactory.addRootPropertiesToBundle(null, theRequest.getFhirServerBase(), linkSelf, null, null, count, getResponseBundleType(), lastUpdated);
-
-					responseObject = resource;
-				} else {
-					Set<Include> includes = getRequestIncludesFromParams(params);
-
-					IBundleProvider result = (IBundleProvider) resultObj;
-					if (count == null) {
-						count = result.preferredPageSize();
-					}
-
-					Integer offsetI = RestfulServerUtils.tryToExtractNamedParameter(theRequest, Constants.PARAM_PAGINGOFFSET);
-					if (offsetI == null || offsetI < 0) {
-						offsetI = 0;
-					}
-
-					Integer resultSize = result.size();
-					int start;
-					if (resultSize != null) {
-						start = Math.max(0, Math.min(offsetI, resultSize - 1));
-					} else {
-						start = offsetI;
-					}
-
-					ResponseEncoding responseEncoding = RestfulServerUtils.determineResponseEncodingNoDefault(theRequest, theServer.getDefaultResponseEncoding());
-					EncodingEnum linkEncoding = theRequest.getParameters().containsKey(Constants.PARAM_FORMAT) && responseEncoding != null ? responseEncoding.getEncoding() : null;
-
-					responseObject = createBundleFromBundleProvider(theServer, theRequest, count, linkSelf, includes, result, start, getResponseBundleType(), linkEncoding, null);
-				}
-				break;
-			}
-			case RESOURCE: {
-				IBundleProvider result = (IBundleProvider) resultObj;
-				if (result.size() == 0) {
-					throw new ResourceNotFoundException(theRequest.getId());
-				} else if (result.size() > 1) {
-					throw new InternalErrorException("Method returned multiple resources");
-				}
-
-				IBaseResource resource = result.getResources(0, 1).get(0);
 				responseObject = resource;
-				break;
+			} else {
+				Set<Include> includes = getRequestIncludesFromParams(params);
+
+				IBundleProvider result = (IBundleProvider) resultObj;
+				if (count == null) {
+					count = result.preferredPageSize();
+				}
+
+				Integer offsetI = RestfulServerUtils.tryToExtractNamedParameter(theRequest, Constants.PARAM_PAGINGOFFSET);
+				if (offsetI == null || offsetI < 0) {
+					offsetI = 0;
+				}
+
+				Integer resultSize = result.size();
+				int start;
+				if (resultSize != null) {
+					start = Math.max(0, Math.min(offsetI, resultSize - 1));
+				} else {
+					start = offsetI;
+				}
+
+				ResponseEncoding responseEncoding = RestfulServerUtils.determineResponseEncodingNoDefault(theRequest, theServer.getDefaultResponseEncoding());
+				EncodingEnum linkEncoding = theRequest.getParameters().containsKey(Constants.PARAM_FORMAT) && responseEncoding != null ? responseEncoding.getEncoding() : null;
+
+				responseObject = createBundleFromBundleProvider(theServer, theRequest, count, linkSelf, includes, result, start, getResponseBundleType(), linkEncoding, null);
 			}
-			default:
-				throw new IllegalStateException(); // should not happen
+			break;
+		}
+		case RESOURCE: {
+			IBundleProvider result = (IBundleProvider) resultObj;
+			if (result.size() == 0) {
+				throw new ResourceNotFoundException(theRequest.getId());
+			} else if (result.size() > 1) {
+				throw new InternalErrorException("Method returned multiple resources");
+			}
+
+			IBaseResource resource = result.getResources(0, 1).get(0);
+			responseObject = resource;
+			break;
+		}
+		default:
+			throw new IllegalStateException(); // should not happen
 		}
 		return responseObject;
 	}
 
-	protected IBaseResource createBundleFromBundleProvider(IRestfulServer<?> theServer, RequestDetails theRequest, Integer theLimit, String theLinkSelf, Set<Include> theIncludes, IBundleProvider theResult, int theOffset, BundleTypeEnum theBundleType, EncodingEnum theLinkEncoding, String theSearchId) {
+	protected IBaseResource createBundleFromBundleProvider(IRestfulServer<?> theServer, RequestDetails theRequest, Integer theLimit, String theLinkSelf, Set<Include> theIncludes,
+			IBundleProvider theResult, int theOffset, BundleTypeEnum theBundleType, EncodingEnum theLinkEncoding, String theSearchId) {
 		IVersionSpecificBundleFactory bundleFactory = theServer.getFhirContext().newBundleFactory();
 
-	    int numToReturn;
-	    String searchId = null;
-	    List<IBaseResource> resourceList;
-	    Integer numTotalResults = theResult.size();
-	    if (theServer.getPagingProvider() == null) {
-	      numToReturn = numTotalResults;
-	      if (numToReturn > 0) {
-	        resourceList = theResult.getResources(0, numToReturn);
-	      } else {
-	        resourceList = Collections.emptyList();
-	      }
-	      RestfulServerUtils.validateResourceListNotNull(resourceList);
+		int numToReturn;
+		String searchId = null;
+		List<IBaseResource> resourceList;
+		Integer numTotalResults = theResult.size();
+		if (theServer.getPagingProvider() == null) {
+			numToReturn = numTotalResults;
+			if (numToReturn > 0) {
+				resourceList = theResult.getResources(0, numToReturn);
+			} else {
+				resourceList = Collections.emptyList();
+			}
+			RestfulServerUtils.validateResourceListNotNull(resourceList);
 
-	    } else {
-	      IPagingProvider pagingProvider = theServer.getPagingProvider();
-	      if (theLimit == null || theLimit.equals(Integer.valueOf(0))) {
-	        numToReturn = pagingProvider.getDefaultPageSize();
-	      } else {
-	        numToReturn = Math.min(pagingProvider.getMaximumPageSize(), theLimit);
-	      }
+		} else {
+			IPagingProvider pagingProvider = theServer.getPagingProvider();
+			if (theLimit == null || theLimit.equals(Integer.valueOf(0))) {
+				numToReturn = pagingProvider.getDefaultPageSize();
+			} else {
+				numToReturn = Math.min(pagingProvider.getMaximumPageSize(), theLimit);
+			}
 
-	      if (numTotalResults != null) {
-	        numToReturn = Math.min(numToReturn, numTotalResults - theOffset);
-	      }
+			if (numTotalResults != null) {
+				numToReturn = Math.min(numToReturn, numTotalResults - theOffset);
+			}
 
-	      if (numToReturn > 0) {
-	        resourceList = theResult.getResources(theOffset, numToReturn + theOffset);
-	      } else {
-	        resourceList = Collections.emptyList();
-	      }
-	      RestfulServerUtils.validateResourceListNotNull(resourceList);
+			if (numToReturn > 0) {
+				resourceList = theResult.getResources(theOffset, numToReturn + theOffset);
+			} else {
+				resourceList = Collections.emptyList();
+			}
+			RestfulServerUtils.validateResourceListNotNull(resourceList);
 
-	      if (theSearchId != null) {
-	        searchId = theSearchId;
-	      } else {
-	        if (numTotalResults == null || numTotalResults > numToReturn) {
-	          searchId = pagingProvider.storeResultList(theResult);
-	          if (isBlank(searchId)) {
-	            ourLog.info("Found {} results but paging provider did not provide an ID to use for paging", numTotalResults);
-	          }
-	        }
-	      }
-	    }
+			if (theSearchId != null) {
+				searchId = theSearchId;
+			} else {
+				if (numTotalResults == null || numTotalResults > numToReturn) {
+					searchId = pagingProvider.storeResultList(theResult);
+					if (isBlank(searchId)) {
+						ourLog.info("Found {} results but paging provider did not provide an ID to use for paging", numTotalResults);
+					}
+				}
+			}
+		}
 
-	    for (IBaseResource next : resourceList) {
-	      if (next.getIdElement() == null || next.getIdElement().isEmpty()) {
-	        if (!(next instanceof BaseOperationOutcome)) {
-	          throw new InternalErrorException("Server method returned resource of type[" + next.getClass().getSimpleName() + "] with no ID specified (IResource#setId(IdDt) must be called)");
-	        }
-	      }
-	    }
+		for (IBaseResource next : resourceList) {
+			if (next.getIdElement() == null || next.getIdElement().isEmpty()) {
+				if (!(next instanceof BaseOperationOutcome)) {
+					throw new InternalErrorException("Server method returned resource of type[" + next.getClass().getSimpleName() + "] with no ID specified (IResource#setId(IdDt) must be called)");
+				}
+			}
+		}
 
-	    String serverBase = theRequest.getFhirServerBase();
-	    boolean prettyPrint = RestfulServerUtils.prettyPrintResponse(theServer, theRequest);
-	    
-	    String linkPrev= null;
-	    String linkNext = null;
-	      if (searchId != null) {
-		        if (numTotalResults == null || theOffset + numToReturn < numTotalResults) {
-						linkNext = (RestfulServerUtils.createPagingLink(theIncludes, serverBase, searchId, theOffset + numToReturn, numToReturn, theLinkEncoding, prettyPrint, theBundleType));
-		        }
-		        if (theOffset > 0) {
-		          int start = Math.max(0, theOffset - theLimit);
-						linkPrev = RestfulServerUtils.createPagingLink(theIncludes, serverBase, searchId, start, theLimit, theLinkEncoding, prettyPrint, theBundleType);
-		        }
-		      }
+		String serverBase = theRequest.getFhirServerBase();
+		boolean prettyPrint = RestfulServerUtils.prettyPrintResponse(theServer, theRequest);
 
-	    
-	    
-	      bundleFactory.addRootPropertiesToBundle(null, serverBase, theLinkSelf, linkPrev, linkNext, theResult.size(), theBundleType, theResult.getPublished());
-	    bundleFactory.addResourcesToBundle(new ArrayList<IBaseResource>(resourceList), theBundleType, serverBase, theServer.getBundleInclusionRule(), theIncludes);
+		String linkPrev = null;
+		String linkNext = null;
+		if (searchId != null) {
+			if (numTotalResults == null || theOffset + numToReturn < numTotalResults) {
+				linkNext = (RestfulServerUtils.createPagingLink(theIncludes, serverBase, searchId, theOffset + numToReturn, numToReturn, theLinkEncoding, prettyPrint, theBundleType));
+			}
+			if (theOffset > 0) {
+				int start = Math.max(0, theOffset - theLimit);
+				linkPrev = RestfulServerUtils.createPagingLink(theIncludes, serverBase, searchId, start, theLimit, theLinkEncoding, prettyPrint, theBundleType);
+			}
+		}
 
-	    if (theServer.getPagingProvider() != null) {
-	      int limit;
-	      limit = theLimit != null ? theLimit : theServer.getPagingProvider().getDefaultPageSize();
-	      limit = Math.min(limit, theServer.getPagingProvider().getMaximumPageSize());
+		bundleFactory.addRootPropertiesToBundle(null, serverBase, theLinkSelf, linkPrev, linkNext, theResult.size(), theBundleType, theResult.getPublished());
+		bundleFactory.addResourcesToBundle(new ArrayList<IBaseResource>(resourceList), theBundleType, serverBase, theServer.getBundleInclusionRule(), theIncludes);
 
-	    }
+		if (theServer.getPagingProvider() != null) {
+			int limit;
+			limit = theLimit != null ? theLimit : theServer.getPagingProvider().getDefaultPageSize();
+			limit = Math.min(limit, theServer.getPagingProvider().getMaximumPageSize());
+
+		}
 
 		return bundleFactory.getResourceBundle();
-		
-		
-		
-		
-		
-		
-		
+
 	}
 
 	public abstract Object invokeServer(IRestfulServer<?> theServer, RequestDetails theRequest, Object[] theMethodParams) throws InvalidRequestException, InternalErrorException;
@@ -393,12 +385,17 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 	}
 
 	public enum MethodReturnTypeEnum {
-		BUNDLE, BUNDLE_PROVIDER, BUNDLE_RESOURCE, LIST_OF_RESOURCES, METHOD_OUTCOME, RESOURCE
+		BUNDLE,
+		BUNDLE_PROVIDER,
+		BUNDLE_RESOURCE,
+		LIST_OF_RESOURCES,
+		METHOD_OUTCOME,
+		RESOURCE
 	}
 
-	
 	public enum ReturnTypeEnum {
-		BUNDLE, RESOURCE
+		BUNDLE,
+		RESOURCE
 	}
 
 }

@@ -21,11 +21,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import com.google.gson.stream.JsonWriter;
 
 import ca.uhn.fhir.context.*;
-import ca.uhn.fhir.model.api.ExtensionDt;
 import ca.uhn.fhir.model.api.Include;
-import ca.uhn.fhir.model.dstu.resource.Conformance;
-import ca.uhn.fhir.model.dstu.resource.Conformance.*;
-import ca.uhn.fhir.model.dstu.valueset.SearchParamTypeEnum;
+import ca.uhn.fhir.model.dstu2.resource.Conformance;
 import ca.uhn.fhir.model.dstu2.valueset.ResourceTypeEnum;
 import ca.uhn.fhir.model.primitive.*;
 import ca.uhn.fhir.parser.DataFormatException;
@@ -36,7 +33,6 @@ import ca.uhn.fhir.rest.gclient.*;
 import ca.uhn.fhir.rest.gclient.NumberClientParam.IMatches;
 import ca.uhn.fhir.rest.gclient.QuantityClientParam.IAndUnits;
 import ca.uhn.fhir.to.model.*;
-import ca.uhn.fhir.util.ExtensionConstants;
 
 @org.springframework.stereotype.Controller()
 public class Controller extends BaseController {
@@ -309,19 +305,15 @@ public class Controller extends BaseController {
 		TreeSet<String> includes = new TreeSet<String>();
 		TreeSet<String> revIncludes = new TreeSet<String>();
 		TreeSet<String> sortParams = new TreeSet<String>();
-		List<RestQuery> queries = new ArrayList<Conformance.RestQuery>();
 		boolean haveSearchParams = false;
 		List<List<String>> queryIncludes = new ArrayList<List<String>>();
 
 		switch (theRequest.getFhirVersion(myConfig)) {
-		case DSTU1:
-			haveSearchParams = extractSearchParamsDstu1(conformance, resourceName, includes, sortParams, queries, haveSearchParams, queryIncludes);
-			break;
 		case DSTU2:
-			haveSearchParams = extractSearchParamsDstu2(conformance, resourceName, includes, revIncludes, sortParams, queries, haveSearchParams, queryIncludes);
+			haveSearchParams = extractSearchParamsDstu2(conformance, resourceName, includes, revIncludes, sortParams, haveSearchParams, queryIncludes);
 			break;
 		case DSTU3:
-			haveSearchParams = extractSearchParamsDstu3CapabilityStatement(conformance, resourceName, includes, revIncludes, sortParams, queries, haveSearchParams, queryIncludes);
+			haveSearchParams = extractSearchParamsDstu3CapabilityStatement(conformance, resourceName, includes, revIncludes, sortParams, haveSearchParams, queryIncludes);
 			break;
 		default:
 			throw new IllegalStateException("Unknown FHIR version: " + theRequest.getFhirVersion(myConfig));
@@ -329,7 +321,7 @@ public class Controller extends BaseController {
 
 		theModel.put("includes", includes);
 		theModel.put("revincludes", revIncludes);
-		theModel.put("queries", queries);
+		theModel.put("queries", Collections.emptyList()); //TODO: remove this, it does nothing
 		theModel.put("haveSearchParams", haveSearchParams);
 		theModel.put("queryIncludes", queryIncludes);
 		theModel.put("sortParams", sortParams);
@@ -702,55 +694,8 @@ public class Controller extends BaseController {
 
 	}
 
-	private boolean extractSearchParamsDstu1(IBaseResource theConformance, String resourceName, TreeSet<String> includes, TreeSet<String> sortParams, List<RestQuery> queries, boolean haveSearchParams, List<List<String>> queryIncludes) {
-		Conformance conformance = (Conformance) theConformance;
-		for (Rest nextRest : conformance.getRest()) {
-			for (RestResource nextRes : nextRest.getResource()) {
-				if (nextRes.getType().getValue().equals(resourceName)) {
-					for (StringDt next : nextRes.getSearchInclude()) {
-						if (next.isEmpty() == false) {
-							includes.add(next.getValue());
-						}
-					}
-					for (RestResourceSearchParam next : nextRes.getSearchParam()) {
-						if (next.getType().getValueAsEnum() != SearchParamTypeEnum.COMPOSITE) {
-							sortParams.add(next.getName().getValue());
-						}
-					}
-					if (nextRes.getSearchParam().size() > 0) {
-						haveSearchParams = true;
-					}
-				}
-			}
-			for (RestQuery nextQuery : nextRest.getQuery()) {
-				boolean queryMatchesResource = false;
-				List<ExtensionDt> returnTypeExt = nextQuery.getUndeclaredExtensionsByUrl(ExtensionConstants.QUERY_RETURN_TYPE);
-				if (returnTypeExt != null) {
-					for (ExtensionDt nextExt : returnTypeExt) {
-						if (resourceName.equals(nextExt.getValueAsPrimitive().getValueAsString())) {
-							queries.add(nextQuery);
-							queryMatchesResource = true;
-							break;
-						}
-					}
-				}
 
-				if (queryMatchesResource) {
-					ArrayList<String> nextQueryIncludes = new ArrayList<String>();
-					queryIncludes.add(nextQueryIncludes);
-					List<ExtensionDt> includesExt = nextQuery.getUndeclaredExtensionsByUrl(ExtensionConstants.QUERY_ALLOWED_INCLUDE);
-					if (includesExt != null) {
-						for (ExtensionDt nextExt : includesExt) {
-							nextQueryIncludes.add(nextExt.getValueAsPrimitive().getValueAsString());
-						}
-					}
-				}
-			}
-		}
-		return haveSearchParams;
-	}
-
-	private boolean extractSearchParamsDstu2(IBaseResource theConformance, String resourceName, TreeSet<String> includes, TreeSet<String> theRevIncludes, TreeSet<String> sortParams, List<RestQuery> queries, boolean haveSearchParams, List<List<String>> queryIncludes) {
+	private boolean extractSearchParamsDstu2(IBaseResource theConformance, String resourceName, TreeSet<String> includes, TreeSet<String> theRevIncludes, TreeSet<String> sortParams, boolean haveSearchParams, List<List<String>> queryIncludes) {
 		ca.uhn.fhir.model.dstu2.resource.Conformance conformance = (ca.uhn.fhir.model.dstu2.resource.Conformance) theConformance;
 		for (ca.uhn.fhir.model.dstu2.resource.Conformance.Rest nextRest : conformance.getRest()) {
 			for (ca.uhn.fhir.model.dstu2.resource.Conformance.RestResource nextRes : nextRest.getResource()) {
@@ -786,7 +731,7 @@ public class Controller extends BaseController {
 		return haveSearchParams;
 	}
 
-	private boolean extractSearchParamsDstu3CapabilityStatement(IBaseResource theConformance, String resourceName, TreeSet<String> includes, TreeSet<String> theRevIncludes, TreeSet<String> sortParams, List<RestQuery> queries, boolean haveSearchParams, List<List<String>> queryIncludes) {
+	private boolean extractSearchParamsDstu3CapabilityStatement(IBaseResource theConformance, String resourceName, TreeSet<String> includes, TreeSet<String> theRevIncludes, TreeSet<String> sortParams, boolean haveSearchParams, List<List<String>> queryIncludes) {
 		CapabilityStatement conformance = (org.hl7.fhir.dstu3.model.CapabilityStatement) theConformance;
 		for (CapabilityStatementRestComponent nextRest : conformance.getRest()) {
 			for (CapabilityStatementRestResourceComponent nextRes : nextRest.getResource()) {

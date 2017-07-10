@@ -11,9 +11,9 @@ import ca.uhn.fhir.model.dstu2.resource.Patient;
 public class FhirContextTest {
 
 	@Test
-	public void testWrongVersionDoesntGetInContext1() {
+	public void testWrongVersionDoesntGetInContext2() {
 
-		FhirContext ctx = FhirContext.forDstu1();
+		FhirContext ctx = FhirContext.forDstu2();
 		RuntimeResourceDefinition def = ctx.getResourceDefinition("Patient");
 		assertEquals(Patient.class, def.getImplementingClass());
 	}

@@ -35,14 +35,14 @@ public class MultiVersionXmlParserTest {
 		String str;
 		str = ourCtxDstu2.newXmlParser().encodeResourceToString(p);
 		ourLog.info(str);
-		assertThat(str, Matchers.stringContainsInOrder("<extension url=\"http://foo#ext\"><valueQuantity><value value=\"2.2\"", "<comparator value=\"&lt;\"", "<units value=\"g/L\"",
+		assertThat(str, Matchers.stringContainsInOrder("<extension url=\"http://foo#ext\"><valueQuantity><value value=\"2.2\"", "<comparator value=\"&lt;\"", "<unit value=\"g/L\"",
 				"</valueQuantity></extension>"));
 
 		try {
-			FhirContext.forDstu2().newXmlParser().encodeResourceToString(p);
+			FhirContext.forDstu3().newXmlParser().encodeResourceToString(p);
 			fail();
 		} catch (IllegalArgumentException e) {
-			assertEquals("This parser is for FHIR version DSTU2 - Can not encode a structure for version DSTU1", e.getMessage());
+			assertEquals("This parser is for FHIR version DSTU3 - Can not encode a structure for version DSTU2", e.getMessage());
 		}
 	}
 
@@ -61,16 +61,16 @@ public class MultiVersionXmlParserTest {
 		String res = ourCtxDstu2.newXmlParser().encodeResourceToString(p);
 		
 		try {
-			ourCtxDstu2.newXmlParser().parseResource(ca.uhn.fhir.model.dstu2.resource.Patient.class, res);
+			ourCtxDstu3.newXmlParser().parseResource(ca.uhn.fhir.model.dstu2.resource.Patient.class, res);
 			fail();
 		} catch (ConfigurationException e) {
-			assertEquals("This context is for FHIR version \"DSTU1\" but the class \"ca.uhn.fhir.model.dstu2.resource.Patient\" is for version \"DSTU2\"", e.getMessage());
+			assertEquals("This context is for FHIR version \"DSTU3\" but the class \"ca.uhn.fhir.model.dstu2.resource.Patient\" is for version \"DSTU2\"", e.getMessage());
 		}
 		try {
 			ourCtxDstu3.newXmlParser().parseResource(Patient.class, res);
 			fail();
 		} catch (ConfigurationException e) {
-			assertEquals("This context is for FHIR version \"DSTU2\" but the class \"ca.uhn.fhir.model.dstu.resource.Patient\" is for version \"DSTU1\"", e.getMessage());
+			assertEquals("This context is for FHIR version \"DSTU3\" but the class \"ca.uhn.fhir.model.dstu2.resource.Patient\" is for version \"DSTU2\"", e.getMessage());
 		}
 		
 	}

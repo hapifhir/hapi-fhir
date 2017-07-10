@@ -503,27 +503,6 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		obs = myObservationDao.read(obsId.toUnqualifiedVersionless(), mySrd);
 	}
 
-	@Test
-	public void testCreateDuplicateIdFails() {
-		String methodName = "testCreateDuplocateIdFailsText";
-
-		Patient p = new Patient();
-		p.addIdentifier().setSystem("urn:system").setValue(methodName);
-		p.setId("Patient/" + methodName);
-		IIdType id = myPatientDao.create(p, mySrd).getId();
-		ourLog.info("Created patient, got it: {}", id);
-
-		p = new Patient();
-		p.addIdentifier().setSystem("urn:system").setValue(methodName);
-		p.addName().setFamily("Hello");
-		p.setId("Patient/" + methodName);
-		try {
-			myPatientDao.create(p, mySrd);
-			fail();
-		} catch (UnprocessableEntityException e) {
-			assertThat(e.getMessage(), containsString("Can not create entity with ID[" + methodName + "], a resource with this ID already exists"));
-		}
-	}
 
 	@Test
 	public void testCreateDuplicateTagsDoesNotCauseDuplicates() {
@@ -608,9 +587,9 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		Patient p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue("testCreateNumericIdFails");
 		p.addName().setFamily("Hello");
-		p.setId("Patient/123");
+		p.setId("Patient/9999999999999");
 		try {
-			myPatientDao.create(p, mySrd);
+			myPatientDao.update(p, mySrd);
 			fail();
 		} catch (InvalidRequestException e) {
 			assertThat(e.getMessage(), containsString("clients may only assign IDs which contain at least one non-numeric"));
@@ -624,13 +603,13 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		 * be fixed.
 		 */
 		assertEquals(org.hl7.fhir.instance.model.OperationOutcome.IssueSeverity.ERROR.toCode(), BaseHapiFhirDao.OO_SEVERITY_ERROR);
-		assertEquals(ca.uhn.fhir.model.dstu.valueset.IssueSeverityEnum.ERROR.getCode(), BaseHapiFhirDao.OO_SEVERITY_ERROR);
+		assertEquals(org.hl7.fhir.dstu3.model.OperationOutcome.IssueSeverity.ERROR.toCode(), BaseHapiFhirResourceDao.OO_SEVERITY_ERROR);
 		assertEquals(org.hl7.fhir.dstu3.model.OperationOutcome.IssueSeverity.ERROR.toCode(), BaseHapiFhirDao.OO_SEVERITY_ERROR);
 		assertEquals(org.hl7.fhir.instance.model.OperationOutcome.IssueSeverity.INFORMATION.toCode(), BaseHapiFhirDao.OO_SEVERITY_INFO);
-		assertEquals(ca.uhn.fhir.model.dstu.valueset.IssueSeverityEnum.INFORMATION.getCode(), BaseHapiFhirDao.OO_SEVERITY_INFO);
+		assertEquals(org.hl7.fhir.dstu3.model.OperationOutcome.IssueSeverity.INFORMATION.toCode(), BaseHapiFhirResourceDao.OO_SEVERITY_INFO);
 		assertEquals(org.hl7.fhir.dstu3.model.OperationOutcome.IssueSeverity.INFORMATION.toCode(), BaseHapiFhirDao.OO_SEVERITY_INFO);
 		assertEquals(org.hl7.fhir.instance.model.OperationOutcome.IssueSeverity.WARNING.toCode(), BaseHapiFhirDao.OO_SEVERITY_WARN);
-		assertEquals(ca.uhn.fhir.model.dstu.valueset.IssueSeverityEnum.WARNING.getCode(), BaseHapiFhirDao.OO_SEVERITY_WARN);
+		assertEquals(org.hl7.fhir.dstu3.model.OperationOutcome.IssueSeverity.WARNING.toCode(), BaseHapiFhirResourceDao.OO_SEVERITY_WARN);
 		assertEquals(org.hl7.fhir.dstu3.model.OperationOutcome.IssueSeverity.WARNING.toCode(), BaseHapiFhirDao.OO_SEVERITY_WARN);
 	}
 
@@ -3563,7 +3542,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		p1.addIdentifier().setSystem("urn:system").setValue("testUpdateRejectsIdWhichPointsToForcedId01");
 		p1.addName().setFamily("Tester").addGiven("testUpdateRejectsIdWhichPointsToForcedId01");
 		p1.setId("ABABA");
-		IIdType p1id = myPatientDao.create(p1, mySrd).getId();
+		IIdType p1id = myPatientDao.update(p1, mySrd).getId();
 		assertEquals("ABABA", p1id.getIdPart());
 
 		Patient p2 = new Patient();

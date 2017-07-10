@@ -221,10 +221,14 @@
 					<classFolders>
 						<classFolder>${basedir}/target/classes</classFolder>
 						<classFolder>${basedir}/../hapi-fhir-base/target/classes</classFolder>
+						<classFolder>${basedir}/../hapi-fhir-client/target/classes</classFolder>
+						<classFolder>${basedir}/../hapi-fhir-server/target/classes</classFolder>
 					</classFolders>
 					<sourceFolders>
 						<sourceFolder>${basedir}/src/main/java</sourceFolder>
 						<sourceFolder>${basedir}/../hapi-fhir-base/src/main/java</sourceFolder>
+						<sourceFolder>${basedir}/../hapi-fhir-client/src/main/java</sourceFolder>
+						<sourceFolder>${basedir}/../hapi-fhir-server/src/main/java</sourceFolder>
 					</sourceFolders>
 					<dumpOnExit>true</dumpOnExit>
 				</configuration>

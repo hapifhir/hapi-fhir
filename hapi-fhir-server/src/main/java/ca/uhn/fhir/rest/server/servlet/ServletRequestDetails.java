@@ -109,6 +109,23 @@ public class ServletRequestDetails extends RequestDetails {
 	}
 
 	@Override
+	public Charset getCharset() {
+		Charset charset = null;
+
+		String charsetString = myServletRequest.getCharacterEncoding();
+		if (isNotBlank(charsetString)) {
+			charset = Charset.forName(charsetString);
+		}
+
+		return charset;
+	}
+
+	@Override
+	public FhirContext getFhirContext() {
+		return getServer().getFhirContext();
+	}
+
+	@Override
 	public String getHeader(String name) {
 		return getServletRequest().getHeader(name);
 	}
@@ -157,30 +174,6 @@ public class ServletRequestDetails extends RequestDetails {
 
 	public void setServletResponse(HttpServletResponse myServletResponse) {
 		this.myServletResponse = myServletResponse;
-	}
-
-	@Override
-	public Charset getCharset() {
-		Charset charset = null;
-
-		String charsetString = myServletResponse.getCharacterEncoding();
-		if (isNotBlank(charsetString)) {
-			charset = Charset.forName(charsetString);
-		}
-		
-//		String ct = getHeader(Constants.HEADER_CONTENT_TYPE);
-//
-//		if (isNotBlank(ct)) {
-//			ContentType parsedCt = ContentType.parse(ct);
-//			charset = parsedCt.getCharset();
-//		}
-		
-		return charset;
-	}
-
-	@Override
-	public FhirContext getFhirContext() {
-		return getServer().getFhirContext();
 	}
 
 }

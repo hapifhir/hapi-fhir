@@ -73,6 +73,11 @@ public class PatchMethodBinding extends BaseOutcomeReturningMethodBindingWithRes
 	}
 
 	@Override
+	protected boolean allowVoidReturnType() {
+		return true;
+	}
+
+	@Override
 	public boolean incomingServerRequestMatchesMethod(RequestDetails theRequest) {
 		boolean retVal = super.incomingServerRequestMatchesMethod(theRequest);
 		if (retVal) {

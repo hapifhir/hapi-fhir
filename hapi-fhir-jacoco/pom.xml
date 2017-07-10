@@ -23,11 +23,6 @@
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
-			<artifactId>hapi-fhir-structures-dstu</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-structures-dstu2</artifactId>
 			<version>${project.version}</version>
 		</dependency>
@@ -264,6 +259,8 @@
 									<directory>${basedir}/..</directory>
 									<includes>
 										<include>hapi-fhir-base/target/jacoco.exec</include>
+										<include>hapi-fhir-client/target/jacoco.exec</include>
+										<include>hapi-fhir-server/target/jacoco.exec</include>
 										<include>hapi-fhir-structures-dstu/target/jacoco.exec</include>
 										<include>hapi-fhir-structures-dstu2/target/jacoco.exec</include>
 										<include>hapi-fhir-structures-hl7org-dstu2/target/jacoco.exec</include>
@@ -287,6 +284,8 @@
 					<serviceJobId>${env.TRAVIS_JOB_ID}</serviceJobId>
 					<sourceDirectories>
 						<sourceDirectory>../hapi-fhir-base/src/main/java</sourceDirectory>
+						<sourceDirectory>../hapi-fhir-client/src/main/java</sourceDirectory>
+						<sourceDirectory>../hapi-fhir-server/src/main/java</sourceDirectory>
 						<sourceDirectory>../hapi-fhir-structures-dstu/src/test/java</sourceDirectory>
 						<sourceDirectory>../hapi-fhir-structures-dstu2/src/test/java</sourceDirectory>
 						<sourceDirectory>../hapi-fhir-structures-hl7org-dstu2/src/test/java</sourceDirectory>
@@ -309,6 +308,8 @@
 						<configuration>
 							<sources>
 								<source>../hapi-fhir-base/src/main/java</source>
+								<source>../hapi-fhir-client/src/main/java</source>
+								<source>../hapi-fhir-server/src/main/java</source>
 								<source>../hapi-fhir-jpaserver-base/src/main/java</source>
 							</sources>
 						</configuration>

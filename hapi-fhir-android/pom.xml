@@ -39,12 +39,6 @@
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
-			<artifactId>hapi-fhir-structures-dstu</artifactId>
-			<version>${project.version}</version>
-			<optional>true</optional>
-		</dependency>
-		<dependency>
-			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-structures-dstu2</artifactId>
 			<version>${project.version}</version>
 			<optional>true</optional>
@@ -229,31 +223,6 @@
  						<goals> 
  							<goal>shade</goal> 
  						</goals>
-					</execution>
-					<!-- dstu jar -->
-					<execution>
-						<id>dstu</id>
-						<phase>package</phase> 
- 						<goals> 
- 							<goal>shade</goal> 
- 						</goals>
-						<configuration>
-							<shadedClassifierName>dstu</shadedClassifierName>
-							<artifactSet>
-								<includes>
-									<include>ca.uhn.hapi.fhir:hapi-fhir-structures-dstu</include>
-								</includes>
-							</artifactSet>
-							<!-- Exclude server side stuff, except exceptions which are used clientside -->
-							<!--filters>
-								<filter>
-									<artifact>ca.uhn.hapi.fhir:hapi-fhir-structures-dstu</artifact>
-									<excludes>
-										<exclude>ca/uhn/fhir/rest/server/**</exclude>
-									</excludes>
-								</filter>
-							</filters-->
-						</configuration>
 					</execution>
 					<!-- dstu2 jar -->
 					<execution>
