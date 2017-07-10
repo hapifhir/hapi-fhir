@@ -63,6 +63,7 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
 import org.junit.After;
 import org.junit.AfterClass;
+import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.xml.sax.SAXException;
@@ -1382,6 +1383,26 @@ public class JsonParserHl7OrgDstu2Test {
     assertEquals(expected, encoded);
 
   }
+
+	@Test
+	public void testBaseUrlFooResourceCorrectlySerializedInExtensionValueReference() {
+		String refVal = "http://my.org/FooBar";
+
+		Patient fhirPat = new Patient();
+		fhirPat.addExtension().setUrl("x1").setValue(new Reference(refVal));
+
+		IParser parser = ourCtx.newJsonParser();
+
+		String output = parser.encodeResourceToString(fhirPat);
+		System.out.println("output: " + output);
+
+		// Deserialize then check that valueReference value is still correct
+		fhirPat = parser.parseResource(Patient.class, output);
+
+		List<Extension> extlst = fhirPat.getExtension();
+		Assert.assertEquals(1, extlst.size());
+		Assert.assertEquals(refVal, ((Reference) extlst.get(0).getValue()).getReference());
+	}
 
   @ResourceDef(name = "Patient")
   public static class MyPatientWithOneDeclaredAddressExtension extends Patient {

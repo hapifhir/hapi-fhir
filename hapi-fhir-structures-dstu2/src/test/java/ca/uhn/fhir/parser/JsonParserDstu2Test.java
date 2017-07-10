@@ -2043,4 +2043,24 @@ public class JsonParserDstu2Test {
 		assertEquals("myName", ((StringDt) newPatient.getUndeclaredExtensionsByUrl("http://www.example.com/petname").get(0).getValue()).getValue());
 
 	}  
+
+	@Test
+	public void testBaseUrlFooResourceCorrectlySerializedInExtensionValueReference() {
+		String refVal = "http://my.org/FooBar";
+
+		Patient fhirPat = new Patient();
+		fhirPat.addUndeclaredExtension(false, "x1").setValue(new ResourceReferenceDt(refVal));
+
+		IParser parser = ourCtx.newJsonParser();
+
+		String output = parser.encodeResourceToString(fhirPat);
+		System.out.println("output: " + output);
+
+		// Deserialize then check that valueReference value is still correct
+		fhirPat = parser.parseResource(Patient.class, output);
+
+		List<ExtensionDt> extlst = fhirPat.getUndeclaredExtensionsByUrl("x1");
+		Assert.assertEquals(1, extlst.size());
+		Assert.assertEquals(refVal, ((ResourceReferenceDt) extlst.get(0).getValue()).getReference().getValue());
+	}
 }

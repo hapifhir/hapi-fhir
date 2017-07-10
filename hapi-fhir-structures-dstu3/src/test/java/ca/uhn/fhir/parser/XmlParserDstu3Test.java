@@ -3242,6 +3242,26 @@ public class XmlParserDstu3Test {
 
 	}
 
+	@Test
+	public void testBaseUrlFooResourceCorrectlySerializedInExtensionValueReference() {
+		String refVal = "http://my.org/FooBar";
+
+		Patient fhirPat = new Patient();
+		fhirPat.addExtension().setUrl("x1").setValue(new Reference(refVal));
+
+		IParser parser = ourCtx.newXmlParser();
+
+		String output = parser.encodeResourceToString(fhirPat);
+		System.out.println("output: " + output);
+
+		// Deserialize then check that valueReference value is still correct
+		fhirPat = parser.parseResource(Patient.class, output);
+
+		List<Extension> extlst = fhirPat.getExtensionsByUrl("x1");
+		Assert.assertEquals(1, extlst.size());
+		Assert.assertEquals(refVal, ((Reference) extlst.get(0).getValue()).getReference());
+	}
+
 	@AfterClass
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
