@@ -131,6 +131,11 @@
 				is often the case in more recent versions of HAPI). Thanks to Sujay R
 				for reporting!
 			</action>
+			<action type="add" issue="651">
+				Enhancement to ResponseHighlighterInterceptor where links in the resource 
+				body are now converted to actual clickable hyperlinks. Thanks to GitHub user
+				@eug48 for the pull request!
+			</action>
 		</release>
 		<release version="2.5" date="2017-06-08">
 			<action type="fix">

@@ -337,6 +337,10 @@
 			<id>ohr</id>
 			<name>Christian Ohr</name>
 		</developer>
+		<developer>
+			<id>eug48</id>
+			<name>eug48</name>
+		</developer>
 	</developers>
 
 	<licenses>
