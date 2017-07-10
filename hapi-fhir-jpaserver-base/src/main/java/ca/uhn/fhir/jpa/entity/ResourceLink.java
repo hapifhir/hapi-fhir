@@ -197,8 +197,16 @@ public class ResourceLink implements Serializable {
 	public void setTargetResourceUrl(IIdType theTargetResourceUrl) {
 		Validate.isTrue(theTargetResourceUrl.hasBaseUrl());
 		Validate.isTrue(theTargetResourceUrl.hasResourceType());
-		Validate.isTrue(theTargetResourceUrl.hasIdPart());
-		
+
+		if (theTargetResourceUrl.hasIdPart()) {
+			// do nothing
+		} else {
+			// Must have set an url like http://example.org/something
+			// We treat 'something' as the resource type because of fix for #659. Prior to #659 fix, 'something' was
+			// treated as the id and 'example.org' was treated as the resource type
+			// TODO: log a warning?
+		}
+
 		myTargetResourceType = theTargetResourceUrl.getResourceType();
 		myTargetResourceUrl = theTargetResourceUrl.getValue();
 	}
