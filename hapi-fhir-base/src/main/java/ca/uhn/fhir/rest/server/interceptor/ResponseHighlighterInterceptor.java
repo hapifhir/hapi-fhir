@@ -24,6 +24,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  */
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Date;
 import java.util.Map;
 import java.util.Set;
@@ -33,6 +34,7 @@ import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
@@ -325,8 +327,13 @@ public class ResponseHighlighterInterceptor extends InterceptorAdapter {
 			b.append("	<head>\n");
 			b.append("		<meta charset=\"utf-8\" />\n");
 			b.append("       <style>\n");
-			b.append(".hlQuot {\n");
-			b.append("  color: #88F;\n");
+			b.append(".hlQuot { color: #88F; }\n");
+			b.append(".hlQuot a { text-decoration: none; color: #88F; }\n");
+			b.append(".hlQuot .uuid, .hlQuot .dateTime {\n");
+			b.append("  user-select: all;\n");
+			b.append("  -moz-user-select: all;\n");
+			b.append("  -webkit-user-select: all;\n");
+			b.append("  -ms-user-select: element;\n");
 			b.append("}\n");
 			b.append(".hlAttr {\n");
 			b.append("  color: #888;\n");
@@ -409,7 +416,16 @@ public class ResponseHighlighterInterceptor extends InterceptorAdapter {
 			b.append("<pre>");
 			b.append(format(encoded, encoding));
 			b.append("</pre>");
-			b.append("   </body>");
+			b.append("\n");
+			
+			InputStream jsStream = ResponseHighlighterInterceptor.class.getResourceAsStream("ResponseHighlighter.js");
+			String jsStr = jsStream != null ? IOUtils.toString(jsStream, "UTF-8") : "console.log('ResponseHighlighterInterceptor: javascript resource not found')";
+			jsStr = jsStr.replace("FHIR_BASE", theRequestDetails.getServerBaseForRequest());
+			b.append("<script type=\"text/javascript\">");
+			b.append(jsStr);
+			b.append("</script>\n");
+
+			b.append("</body>");
 			b.append("</html>");
 		//@formatter:off
 		String out = b.toString();
