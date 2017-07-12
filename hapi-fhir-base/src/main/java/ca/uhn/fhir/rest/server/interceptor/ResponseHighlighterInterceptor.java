@@ -133,9 +133,9 @@ public class ResponseHighlighterInterceptor extends InterceptorAdapter {
 				lineCount++;
 				theTarget.append("</div><div id=\"line");
 				theTarget.append(lineCount);
-				theTarget.append("\" onclick=\"window.location.hash='L");
+				theTarget.append("\" onclick=\"updateHighlightedLineTo('#L");
 				theTarget.append(lineCount);
-				theTarget.append("';\">");
+				theTarget.append("');\">");
 				continue;
 			}
 

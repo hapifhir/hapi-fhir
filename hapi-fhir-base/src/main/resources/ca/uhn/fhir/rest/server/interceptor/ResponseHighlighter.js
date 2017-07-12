@@ -1,6 +1,10 @@
 
 var selectedLines = new Array();
 function updateHighlightedLine() {
+	updateHighlightedLineTo(window.location.hash);
+}
+
+function updateHighlightedLineTo(theNewHash) {
 	
 	for (var next in selectedLines) {
 		document.getElementById('line' + selectedLines[next]).className = '';
@@ -9,15 +13,15 @@ function updateHighlightedLine() {
 	selectedLines = new Array();
 	
 	var line = -1;
-	if (window.location.hash && window.location.hash.match('L[0-9]+-L[0-9]+')) {
-		var dashIndex = window.location.hash.indexOf('-');
-		var start = parseInt(window.location.hash.substring(2, dashIndex));
-		var end = parseInt(window.location.hash.substring(dashIndex+2));
+	if (theNewHash && theNewHash.match('L[0-9]+-L[0-9]+')) {
+		var dashIndex = theNewHash.indexOf('-');
+		var start = parseInt(theNewHash.substring(2, dashIndex));
+		var end = parseInt(theNewHash.substring(dashIndex+2));
 		for (var i = start; i <= end; i++) {
 			selectedLines.push(i);
 		}
-	} else if (window.location.hash && window.location.hash.match('L[0-9]+')) {
-		var line = parseInt(window.location.hash.substring(2));
+	} else if (theNewHash && theNewHash.match('L[0-9]+')) {
+		var line = parseInt(theNewHash.substring(2));
 		selectedLines.push(line);
 	}
 
