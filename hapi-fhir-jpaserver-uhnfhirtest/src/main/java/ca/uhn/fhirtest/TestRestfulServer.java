@@ -190,7 +190,7 @@ public class TestRestfulServer extends RestfulServer {
 		config.addAllowedOrigin("*");
 		config.addExposedHeader("Location");
 		config.addExposedHeader("Content-Location");
-		config.setAllowedMethods(Arrays.asList("GET","POST","PUT","DELETE","OPTIONS"));
+		config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
 		registerInterceptor(corsInterceptor);
 
 		/*
