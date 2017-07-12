@@ -149,6 +149,9 @@ public class ResponseHighlightingInterceptorTest {
 
 	@Test
 	public void testShowNeither() throws Exception {
+		ourInterceptor.setShowRequestHeaders(false);
+		ourInterceptor.setShowResponseHeaders(false);
+		
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1?_format=html/json");
 		
 		HttpResponse status = ourClient.execute(httpGet);
@@ -180,6 +183,7 @@ public class ResponseHighlightingInterceptorTest {
 	@Test
 	public void testShowRequest() throws Exception {
 		ourInterceptor.setShowRequestHeaders(true);
+		ourInterceptor.setShowResponseHeaders(false);
 		
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1?_format=html/json");
 		
