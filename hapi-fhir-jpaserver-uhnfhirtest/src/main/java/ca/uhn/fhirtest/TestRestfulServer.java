@@ -197,7 +197,11 @@ public class TestRestfulServer extends RestfulServer {
 		 * We want to format the response using nice HTML if it's a browser, since this
 		 * makes things a little easier for testers.
 		 */
-		registerInterceptor(new ResponseHighlighterInterceptor());
+		ResponseHighlighterInterceptor responseHighlighterInterceptor = new ResponseHighlighterInterceptor();
+		responseHighlighterInterceptor.setShowRequestHeaders(true);
+		responseHighlighterInterceptor.setShowResponseHeaders(true);
+		registerInterceptor(responseHighlighterInterceptor);
+		
 		registerInterceptor(new BanUnsupportedHttpMethodsInterceptor());
 		
 		/*

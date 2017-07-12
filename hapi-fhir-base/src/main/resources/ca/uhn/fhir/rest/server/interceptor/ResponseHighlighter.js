@@ -1,7 +1,42 @@
 
+var selectedLines = new Array();
+function updateHighlightedLine() {
+	
+	for (var next in selectedLines) {
+		document.getElementById('line' + selectedLines[next]).className = '';
+		document.getElementById('anchor' + selectedLines[next]).className = 'lineAnchor';
+	}
+	selectedLines = new Array();
+	
+	var line = -1;
+	if (window.location.hash && window.location.hash.match('L[0-9]+-L[0-9]+')) {
+		var dashIndex = window.location.hash.indexOf('-');
+		var start = parseInt(window.location.hash.substring(2, dashIndex));
+		var end = parseInt(window.location.hash.substring(dashIndex+2));
+		for (var i = start; i <= end; i++) {
+			selectedLines.push(i);
+		}
+	} else if (window.location.hash && window.location.hash.match('L[0-9]+')) {
+		var line = parseInt(window.location.hash.substring(2));
+		selectedLines.push(line);
+	}
+
+
+	for (var next in selectedLines) {
+		document.getElementById('line' + selectedLines[next]).className = 'selectedLine';
+		document.getElementById('anchor' + selectedLines[next]).className = 'lineAnchor selectedLine';
+	}
+		
+	selectedLine = line;
+}
+
+
 (function() {
     'use strict';
-
+    
+    updateHighlightedLine();
+    window.onhashchange = updateHighlightedLine;
+    
     /* bail out if user is testing a version of this script via Greasemonkey or Tampermonkey */
     if (window.HAPI_ResponseHighlighter_userscript) {
         console.log("HAPI ResponseHighlighter: userscript detected - not executing embedded script");

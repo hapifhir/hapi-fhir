@@ -136,6 +136,15 @@
 				body are now converted to actual clickable hyperlinks. Thanks to Eugene Lubarsky
 				for the pull request!
 			</action>
+			<action type="add">
+				BanUnsupportedHttpMethodsInterceptor has been modified so that it now allows
+				HTTP PATCH to proceed.
+			</action>
+			<action type="add" issue="651">
+				Enhancement to ResponseHighlighterInterceptor so that it now can be configured
+				to display the request headers and response headers, and individual lines
+				may be highlighted.
+			</action>
 		</release>
 		<release version="2.5" date="2017-06-08">
 			<action type="fix">

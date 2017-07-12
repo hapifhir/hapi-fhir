@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server.interceptor;
 
+import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -25,9 +26,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Date;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
@@ -41,13 +40,9 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.method.RequestDetails;
-import ca.uhn.fhir.rest.server.Constants;
-import ca.uhn.fhir.rest.server.EncodingEnum;
-import ca.uhn.fhir.rest.server.RestfulServer;
-import ca.uhn.fhir.rest.server.RestfulServerUtils;
-import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
-import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.rest.server.*;
+import ca.uhn.fhir.rest.server.RestfulServerUtils.ResponseEncoding;
+import ca.uhn.fhir.rest.server.exceptions.*;
 import ca.uhn.fhir.util.UrlUtil;
 
 /**
@@ -67,120 +62,165 @@ public class ResponseHighlighterInterceptor extends InterceptorAdapter {
 	 * requesting _format=json or xml so eventually this parameter should be removed
 	 */
 	public static final String PARAM_RAW = "_raw";
-
 	public static final String PARAM_RAW_TRUE = "true";
-
 	public static final String PARAM_TRUE = "true";
 
-	private String format(String theResultBody, EncodingEnum theEncodingEnum) {
+	private boolean myShowRequestHeaders;
+	private boolean myShowResponseHeaders;
+
+	/**
+	 * Constructor
+	 */
+	public ResponseHighlighterInterceptor() {
+		super();
+	}
+
+	private String createLinkHref(Map<String, String[]> parameters, String formatValue) {
+		StringBuilder rawB = new StringBuilder();
+		for (String next : parameters.keySet()) {
+			if (Constants.PARAM_FORMAT.equals(next)) {
+				continue;
+			}
+			for (String nextValue : parameters.get(next)) {
+				if (isBlank(nextValue)) {
+					continue;
+				}
+				if (rawB.length() == 0) {
+					rawB.append('?');
+				} else {
+					rawB.append('&');
+				}
+				rawB.append(UrlUtil.escape(next));
+				rawB.append('=');
+				rawB.append(UrlUtil.escape(nextValue));
+			}
+		}
+		if (rawB.length() == 0) {
+			rawB.append('?');
+		} else {
+			rawB.append('&');
+		}
+		rawB.append(Constants.PARAM_FORMAT).append('=').append(formatValue);
+
+		String link = rawB.toString();
+		return link;
+	}
+
+	private int format(String theResultBody, StringBuilder theTarget, EncodingEnum theEncodingEnum) {
 		String str = StringEscapeUtils.escapeHtml4(theResultBody);
 		if (str == null || theEncodingEnum == null) {
-			return str;
+			theTarget.append(str);
+			return 0;
 		}
 
-		StringBuilder b = new StringBuilder();
+		theTarget.append("<div id=\"line1\">");
 
-		if (theEncodingEnum == EncodingEnum.JSON) {
+		boolean inValue = false;
+		boolean inQuote = false;
+		boolean inTag = false;
+		int lineCount = 1;
 
-			boolean inValue = false;
-			boolean inQuote = false;
-			for (int i = 0; i < str.length(); i++) {
-				char prevChar = (i > 0) ? str.charAt(i - 1) : ' ';
-				char nextChar = str.charAt(i);
-				char nextChar2 = (i + 1) < str.length() ? str.charAt(i + 1) : ' ';
-				char nextChar3 = (i + 2) < str.length() ? str.charAt(i + 2) : ' ';
-				char nextChar4 = (i + 3) < str.length() ? str.charAt(i + 3) : ' ';
-				char nextChar5 = (i + 4) < str.length() ? str.charAt(i + 4) : ' ';
-				char nextChar6 = (i + 5) < str.length() ? str.charAt(i + 5) : ' ';
+		for (int i = 0; i < str.length(); i++) {
+			char prevChar = (i > 0) ? str.charAt(i - 1) : ' ';
+			char nextChar = str.charAt(i);
+			char nextChar2 = (i + 1) < str.length() ? str.charAt(i + 1) : ' ';
+			char nextChar3 = (i + 2) < str.length() ? str.charAt(i + 2) : ' ';
+			char nextChar4 = (i + 3) < str.length() ? str.charAt(i + 3) : ' ';
+			char nextChar5 = (i + 4) < str.length() ? str.charAt(i + 4) : ' ';
+			char nextChar6 = (i + 5) < str.length() ? str.charAt(i + 5) : ' ';
+
+			if (nextChar == '\n') {
+				lineCount++;
+				theTarget.append("</div><div id=\"line");
+				theTarget.append(lineCount);
+				theTarget.append("\" onclick=\"window.location.hash='L");
+				theTarget.append(lineCount);
+				theTarget.append("';\">");
+				continue;
+			}
+
+			if (theEncodingEnum == EncodingEnum.JSON) {
+
 				if (inQuote) {
-					b.append(nextChar);
+					theTarget.append(nextChar);
 					if (prevChar != '\\' && nextChar == '&' && nextChar2 == 'q' && nextChar3 == 'u' && nextChar4 == 'o' && nextChar5 == 't' && nextChar6 == ';') {
-						b.append("quot;</span>");
+						theTarget.append("quot;</span>");
 						i += 5;
 						inQuote = false;
 					} else if (nextChar == '\\' && nextChar2 == '"') {
-						b.append("quot;</span>");
+						theTarget.append("quot;</span>");
 						i += 5;
 						inQuote = false;
 					}
 				} else {
 					if (nextChar == ':') {
 						inValue = true;
-						b.append(nextChar);
+						theTarget.append(nextChar);
 					} else if (nextChar == '[' || nextChar == '{') {
-						b.append("<span class='hlControl'>");
-						b.append(nextChar);
-						b.append("</span>");
+						theTarget.append("<span class='hlControl'>");
+						theTarget.append(nextChar);
+						theTarget.append("</span>");
 						inValue = false;
 					} else if (nextChar == '{' || nextChar == '}' || nextChar == ',') {
-						b.append("<span class='hlControl'>");
-						b.append(nextChar);
-						b.append("</span>");
+						theTarget.append("<span class='hlControl'>");
+						theTarget.append(nextChar);
+						theTarget.append("</span>");
 						inValue = false;
 					} else if (nextChar == '&' && nextChar2 == 'q' && nextChar3 == 'u' && nextChar4 == 'o' && nextChar5 == 't' && nextChar6 == ';') {
 						if (inValue) {
-							b.append("<span class='hlQuot'>&quot;");
+							theTarget.append("<span class='hlQuot'>&quot;");
 						} else {
-							b.append("<span class='hlTagName'>&quot;");
+							theTarget.append("<span class='hlTagName'>&quot;");
 						}
 						inQuote = true;
 						i += 5;
 					} else if (nextChar == ':') {
-						b.append("<span class='hlControl'>");
-						b.append(nextChar);
-						b.append("</span>");
+						theTarget.append("<span class='hlControl'>");
+						theTarget.append(nextChar);
+						theTarget.append("</span>");
 						inValue = true;
 					} else {
-						b.append(nextChar);
+						theTarget.append(nextChar);
 					}
 				}
-			}
 
-		} else {
-			boolean inQuote = false;
-			boolean inTag = false;
-			for (int i = 0; i < str.length(); i++) {
-				char nextChar = str.charAt(i);
-				char nextChar2 = (i + 1) < str.length() ? str.charAt(i + 1) : ' ';
-				char nextChar3 = (i + 2) < str.length() ? str.charAt(i + 2) : ' ';
-				char nextChar4 = (i + 3) < str.length() ? str.charAt(i + 3) : ' ';
-				char nextChar5 = (i + 4) < str.length() ? str.charAt(i + 4) : ' ';
-				char nextChar6 = (i + 5) < str.length() ? str.charAt(i + 5) : ' ';
+			} else {
 				if (inQuote) {
-					b.append(nextChar);
+					theTarget.append(nextChar);
 					if (nextChar == '&' && nextChar2 == 'q' && nextChar3 == 'u' && nextChar4 == 'o' && nextChar5 == 't' && nextChar6 == ';') {
-						b.append("quot;</span>");
+						theTarget.append("quot;</span>");
 						i += 5;
 						inQuote = false;
 					}
 				} else if (inTag) {
 					if (nextChar == '&' && nextChar2 == 'g' && nextChar3 == 't' && nextChar4 == ';') {
-						b.append("</span><span class='hlControl'>&gt;</span>");
+						theTarget.append("</span><span class='hlControl'>&gt;</span>");
 						inTag = false;
 						i += 3;
 					} else if (nextChar == ' ') {
-						b.append("</span><span class='hlAttr'>");
-						b.append(nextChar);
+						theTarget.append("</span><span class='hlAttr'>");
+						theTarget.append(nextChar);
 					} else if (nextChar == '&' && nextChar2 == 'q' && nextChar3 == 'u' && nextChar4 == 'o' && nextChar5 == 't' && nextChar6 == ';') {
-						b.append("<span class='hlQuot'>&quot;");
+						theTarget.append("<span class='hlQuot'>&quot;");
 						inQuote = true;
 						i += 5;
 					} else {
-						b.append(nextChar);
+						theTarget.append(nextChar);
 					}
 				} else {
 					if (nextChar == '&' && nextChar2 == 'l' && nextChar3 == 't' && nextChar4 == ';') {
-						b.append("<span class='hlControl'>&lt;</span><span class='hlTagName'>");
+						theTarget.append("<span class='hlControl'>&lt;</span><span class='hlTagName'>");
 						inTag = true;
 						i += 3;
 					} else {
-						b.append(nextChar);
+						theTarget.append(nextChar);
 					}
 				}
 			}
 		}
 
-		return b.toString();
+		theTarget.append("</div>");
+		return lineCount;
 	}
 
 	@Override
@@ -216,6 +256,22 @@ public class ResponseHighlighterInterceptor extends InterceptorAdapter {
 		streamResponse(theRequestDetails, theServletResponse, theException.getOperationOutcome(), theServletRequest, theException.getStatusCode());
 
 		return false;
+	}
+
+	/**
+	 * If set to <code>true</code> (default is <code>false</code>) response will include the
+	 * request headers
+	 */
+	public boolean isShowRequestHeaders() {
+		return myShowRequestHeaders;
+	}
+
+	/**
+	 * If set to <code>true</code> (default is <code>false</code>) response will include the
+	 * response headers
+	 */
+	public boolean isShowResponseHeaders() {
+		return myShowResponseHeaders;
 	}
 
 	@Override
@@ -288,7 +344,56 @@ public class ResponseHighlighterInterceptor extends InterceptorAdapter {
 		return false;
 	}
 
+	/**
+	 * If set to <code>true</code> (default is <code>false</code>) response will include the
+	 * request headers
+	 * 
+	 * @return Returns a reference to this for easy method chaining
+	 */
+	public ResponseHighlighterInterceptor setShowRequestHeaders(boolean theShowRequestHeaders) {
+		myShowRequestHeaders = theShowRequestHeaders;
+		return this;
+	}
+
+	/**
+	 * If set to <code>true</code> (default is <code>false</code>) response will include the
+	 * response headers
+	 * 
+	 * @return Returns a reference to this for easy method chaining
+	 */
+	public ResponseHighlighterInterceptor setShowResponseHeaders(boolean theShowResponseHeaders) {
+		myShowResponseHeaders = theShowResponseHeaders;
+		return this;
+	}
+
+	private void streamRequestHeaders(ServletRequest theServletRequest, StringBuilder b) {
+		if (theServletRequest instanceof HttpServletRequest) {
+			HttpServletRequest sr = (HttpServletRequest) theServletRequest;
+			b.append("<h1>Request</h1>");
+			b.append("<div class=\"headersDiv\">");
+			Enumeration<String> headerNamesEnum = sr.getHeaderNames();
+			while (headerNamesEnum.hasMoreElements()) {
+				String nextHeaderName = headerNamesEnum.nextElement();
+				Enumeration<String> headerValuesEnum = sr.getHeaders(nextHeaderName);
+				while (headerValuesEnum.hasMoreElements()) {
+					String nextHeaderValue = headerValuesEnum.nextElement();
+					b.append("<div class=\"headersRow\">");
+					b.append("<span class=\"headerName\">").append(nextHeaderName).append(": ").append("</span>");
+					b.append("<span class=\"headerValue\">").append(nextHeaderValue).append("</span>");
+					b.append("</div>");
+				}
+			}
+			b.append("</div>");
+		}
+	}
+
 	private void streamResponse(RequestDetails theRequestDetails, HttpServletResponse theServletResponse, IBaseResource resource, ServletRequest theServletRequest, int theStatusCode) {
+
+		if (theRequestDetails.getServer() instanceof RestfulServer) {
+			RestfulServer rs = (RestfulServer) theRequestDetails.getServer();
+			rs.addHeadersToResponse(theServletResponse);
+		}
+
 		IParser p;
 		Map<String, String[]> parameters = theRequestDetails.getParameters();
 		if (parameters.containsKey(Constants.PARAM_FORMAT)) {
@@ -327,6 +432,10 @@ public class ResponseHighlighterInterceptor extends InterceptorAdapter {
 			b.append("	<head>\n");
 			b.append("		<meta charset=\"utf-8\" />\n");
 			b.append("       <style>\n");
+			b.append(".httpStatusDiv {");
+			b.append("  font-size: 1.2em;");
+			b.append("  font-weight: bold;");
+			b.append("}");
 			b.append(".hlQuot { color: #88F; }\n");
 			b.append(".hlQuot a { text-decoration: none; color: #88F; }\n");
 			b.append(".hlQuot .uuid, .hlQuot .dateTime {\n");
@@ -350,7 +459,12 @@ public class ResponseHighlighterInterceptor extends InterceptorAdapter {
 			b.append(".hlUrlBase {\n");
 			b.append("}");
 			b.append(".headersDiv {\n");
-			b.append("  background: #EEE;");
+			b.append("  padding: 10px;");
+			b.append("  margin-left: 10px;");
+			b.append("  border: 1px solid #CCC;");
+			b.append("  border-radius: 10px;");
+			b.append("}");
+			b.append(".headersRow {\n");
 			b.append("}");
 			b.append(".headerName {\n");
 			b.append("  color: #888;\n");
@@ -359,6 +473,32 @@ public class ResponseHighlighterInterceptor extends InterceptorAdapter {
 			b.append(".headerValue {\n");
 			b.append("  color: #88F;\n");
 			b.append("  font-family: monospace;\n");
+			b.append("}");
+			b.append(".responseBodyTable {");
+			b.append("  width: 100%;");
+			b.append("  margin-left: 0px;");
+			b.append("  margin-top: 20px;");
+			b.append("}");
+			b.append(".responseBodyTableFirstColumn {");
+			b.append("}");
+			b.append(".responseBodyTableSecondColumn {");
+			b.append("  width: 100%;");
+			b.append("}");
+			b.append(".lineAnchor A {");
+			b.append("  text-decoration: none;");
+			b.append("  padding-left: 20px;");
+			b.append("}");
+			b.append(".lineAnchor {");
+			b.append("  display: block;");
+			b.append("  padding-right: 20px;");
+			b.append("}");
+			b.append(".selectedLine {");
+			b.append("  background-color: #EEF;");
+			b.append("  font-weight: bold;");
+			b.append("}");
+			b.append("H1 {");
+			b.append("  font-size: 1.1em;");
+			b.append("  color: #666;");
 			b.append("}");
 			b.append("BODY {\n");
 			b.append("  font-family: Arial;\n");
@@ -403,21 +543,65 @@ public class ResponseHighlighterInterceptor extends InterceptorAdapter {
 
 			b.append("\n");
 
-			// if (isEncodeHeaders()) {
-			// b.append("<h1>Request Headers</h1>");
-			// b.append("<div class=\"headersDiv\">");
-			// for (int next : theRequestDetails.get)
-			// b.append("</div>");
-			// b.append("<h1>Response Headers</h1>");
-			// b.append("<div class=\"headersDiv\">");
-			// b.append("</div>");
-			// b.append("<h1>Response Body</h1>");
-			// }
-			b.append("<pre>");
-			b.append(format(encoded, encoding));
-			b.append("</pre>");
+			// status (e.g. HTTP 200 OK)
+			String statusName = Constants.HTTP_STATUS_NAMES.get(theServletResponse.getStatus());
+			statusName = defaultString(statusName);
+			b.append("<div class=\"httpStatusDiv\">");
+			b.append("HTTP ");
+			b.append(theServletResponse.getStatus());
+			b.append(" ");
+			b.append(statusName);
+			b.append("</div>");
+
 			b.append("\n");
-			
+			b.append("\n");
+
+			if (true) {
+				try {
+					if (isShowRequestHeaders()) {
+						streamRequestHeaders(theServletRequest, b);
+					}
+					if (isShowResponseHeaders()) {
+						streamResponseHeaders(theRequestDetails, theServletResponse, b);
+					}
+				} catch (Throwable t) {
+					// ignore (this will hit if we're running in a servlet 2.5 environment)
+				}
+			}
+
+			StringBuilder target = new StringBuilder();
+			int linesCount = format(encoded, target, encoding);
+
+			b.append("<table class=\"responseBodyTable\" cellspacing=\"0\">");
+			b.append("<tr>");
+
+			b.append("<td class=\"responseBodyTableFirstColumn\"><pre>");
+			for (int i = 1; i <= linesCount; i++) {
+				b.append("<div class=\"lineAnchor\" id=\"anchor");
+				b.append(i);
+				b.append("\">");
+				;
+
+				b.append("<a href=\"#L");
+				b.append(i);
+				b.append("\" name=\"L");
+				b.append(i);
+				b.append("\">");
+				b.append(i);
+				b.append("</a></div>");
+			}
+			b.append("</pre></td>");
+
+			// Response Body
+			b.append("<td class=\"responseBodyTableSecondColumn\"><pre>");
+			b.append(target);
+			b.append("</pre></td>");
+
+			b.append("</tr>");
+			b.append("</table>");
+
+			b.append("\n");
+
 			InputStream jsStream = ResponseHighlighterInterceptor.class.getResourceAsStream("ResponseHighlighter.js");
 			String jsStr = jsStream != null ? IOUtils.toString(jsStream, "UTF-8") : "console.log('ResponseHighlighterInterceptor: javascript resource not found')";
 			jsStr = jsStr.replace("FHIR_BASE", theRequestDetails.getServerBaseForRequest());
@@ -438,35 +622,31 @@ public class ResponseHighlighterInterceptor extends InterceptorAdapter {
 		}
 	}
 
-	private String createLinkHref(Map<String, String[]> parameters, String formatValue) {
-		StringBuilder rawB = new StringBuilder();
-		for (String next : parameters.keySet()) {
-			if (Constants.PARAM_FORMAT.equals(next)) {
-				continue;
-			}
-			for (String nextValue : parameters.get(next)) {
-				if (isBlank(nextValue)) {
-					continue;
-				}
-				if (rawB.length() == 0) {
-					rawB.append('?');
-				} else {
-					rawB.append('&');
-				}
-				rawB.append(UrlUtil.escape(next));
-				rawB.append('=');
-				rawB.append(UrlUtil.escape(nextValue));
-			}
-		}
-		if (rawB.length() == 0) {
-			rawB.append('?');
-		} else {
-			rawB.append('&');
-		}
-		rawB.append(Constants.PARAM_FORMAT).append('=').append(formatValue);
+	private void streamResponseHeaders(RequestDetails theRequestDetails, HttpServletResponse theServletResponse, StringBuilder b) {
+		if (theServletResponse.getHeaderNames().isEmpty() == false) {
+			b.append("<h1>Response</h1>");
 
-		String link = rawB.toString();
-		return link;
+			b.append("<div class=\"headersDiv\">");
+			for (String nextHeaderName : theServletResponse.getHeaderNames()) {
+				for (String nextHeaderValue : theServletResponse.getHeaders(nextHeaderName)) {
+					/*
+					 * Let's pretend we're returning a FHIR content type even though we're
+					 * actually returning an HTML one
+					 */
+					if (nextHeaderName.equalsIgnoreCase(Constants.HEADER_CONTENT_TYPE)) {
+						ResponseEncoding responseEncoding = RestfulServerUtils.determineResponseEncodingNoDefault(theRequestDetails, theRequestDetails.getServer().getDefaultResponseEncoding());
+						if (responseEncoding != null && isNotBlank(responseEncoding.getResourceContentType())) {
+							nextHeaderValue = responseEncoding.getResourceContentType() + ";charset=utf-8";
+						}
+					}
+					b.append("<div class=\"headersRow\">");
+					b.append("<span class=\"headerName\">").append(nextHeaderName).append(": ").append("</span>");
+					b.append("<span class=\"headerValue\">").append(nextHeaderValue).append("</span>");
+					b.append("</div>");
+				}
+			}
+			b.append("</div>");
+		}
 	}
 
 }
