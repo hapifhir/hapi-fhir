@@ -149,6 +149,13 @@
 				AuthorizationInterceptor did not permit PATCH operations to proceed even
 				if the user had write access for the resource being patched.
 			</action>
+			<action type="fix" issue="682">
+				Fix an issue in HapiWorkerContext where structure definitions are
+				not able to be retrieved if they are referred to by their 
+				relative or logical ID. This affects profile tooling such as
+				StructureMapUtilities. Thanks to Travis Lukach for reporting and
+				providing a test case!
+			</action>
 		</release>
 		<release version="2.5" date="2017-06-08">
 			<action type="fix">
