@@ -145,6 +145,10 @@
 				to display the request headers and response headers, and individual lines
 				may be highlighted.
 			</action>
+			<action type="fix">
+				AuthorizationInterceptor did not permit PATCH operations to proceed even
+				if the user had write access for the resource being patched.
+			</action>
 		</release>
 		<release version="2.5" date="2017-06-08">
 			<action type="fix">
