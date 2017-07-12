@@ -94,7 +94,7 @@ public class ResponseHighlightingInterceptorTest {
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		ourLog.info(responseContent);
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertThat(responseContent, (stringContainsInOrder("<body>", "<pre>", "\n", "</pre>")));
+		assertThat(responseContent, (stringContainsInOrder("<body>", "<pre>", "<div", "</pre>")));
 	}
 
 	/**
@@ -112,7 +112,7 @@ public class ResponseHighlightingInterceptorTest {
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		ourLog.info(responseContent);
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertThat(responseContent, (stringContainsInOrder("<body>", "<pre>", "\n", "</pre>")));
+		assertThat(responseContent, (stringContainsInOrder("<body>", "<pre>", "<div", "</pre>")));
 	}
 
 	/**
@@ -326,7 +326,7 @@ public class ResponseHighlightingInterceptorTest {
 		String output = sw.getBuffer().toString();
 		ourLog.info(output);
 		assertThat(output, containsString("<span class='hlTagName'>Patient</span>"));
-		assertThat(output, stringContainsInOrder("<body>", "<pre>", "\n", "</pre>"));
+		assertThat(output, stringContainsInOrder("<body>", "<pre>", "<div", "</pre>"));
 	}
 
 	@Test
@@ -498,7 +498,7 @@ public class ResponseHighlightingInterceptorTest {
 		String output = sw.getBuffer().toString();
 		ourLog.info(output);
 		assertThat(output, containsString("<span class='hlTagName'>Patient</span>"));
-		assertThat(output, stringContainsInOrder("<body>", "<pre>", "\n", "</pre>"));
+		assertThat(output, stringContainsInOrder("<body>", "<pre>", "<div", "</pre>"));
 		assertThat(output, containsString("<a href=\"?_format=json\">"));
 	}
 

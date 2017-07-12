@@ -27,6 +27,13 @@
 			<scope>test</scope>
 		</dependency>
 
+		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>javax.servlet-api</artifactId>
+			<scope>provided</scope>
+		</dependency>
+
+
 		<!-- Testing -->
 		<!-- <dependency> <groupId>ca.uhn.hapi.fhir</groupId> <artifactId>hapi-fhir-structures-dstu</artifactId> <version>0.8</version> <scope>test</scope> </dependency> -->
 		<dependency>
