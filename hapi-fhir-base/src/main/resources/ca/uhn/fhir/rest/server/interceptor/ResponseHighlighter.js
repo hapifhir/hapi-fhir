@@ -23,7 +23,11 @@ function updateHighlightedLine() {
 
 
 	for (var next in selectedLines) {
+		// Prevent us from scrolling to the selected line
+		document.getElementById('L' + selectedLines[next]).name = '';
+		// Select the line number column
 		document.getElementById('line' + selectedLines[next]).className = 'selectedLine';
+		// Select the response body column
 		document.getElementById('anchor' + selectedLines[next]).className = 'lineAnchor selectedLine';
 	}
 		

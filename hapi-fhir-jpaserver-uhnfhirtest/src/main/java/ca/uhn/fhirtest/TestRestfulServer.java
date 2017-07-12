@@ -198,7 +198,7 @@ public class TestRestfulServer extends RestfulServer {
 		 * makes things a little easier for testers.
 		 */
 		ResponseHighlighterInterceptor responseHighlighterInterceptor = new ResponseHighlighterInterceptor();
-		responseHighlighterInterceptor.setShowRequestHeaders(true);
+		responseHighlighterInterceptor.setShowRequestHeaders(false);
 		responseHighlighterInterceptor.setShowResponseHeaders(true);
 		registerInterceptor(responseHighlighterInterceptor);
 		

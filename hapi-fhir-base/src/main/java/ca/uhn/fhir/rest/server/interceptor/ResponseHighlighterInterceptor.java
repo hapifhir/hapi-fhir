@@ -65,8 +65,8 @@ public class ResponseHighlighterInterceptor extends InterceptorAdapter {
 	public static final String PARAM_RAW_TRUE = "true";
 	public static final String PARAM_TRUE = "true";
 
-	private boolean myShowRequestHeaders;
-	private boolean myShowResponseHeaders;
+	private boolean myShowRequestHeaders = false;
+	private boolean myShowResponseHeaders = true;
 
 	/**
 	 * Constructor
@@ -267,7 +267,7 @@ public class ResponseHighlighterInterceptor extends InterceptorAdapter {
 	}
 
 	/**
-	 * If set to <code>true</code> (default is <code>false</code>) response will include the
+	 * If set to <code>true</code> (default is <code>true</code>) response will include the
 	 * response headers
 	 */
 	public boolean isShowResponseHeaders() {
@@ -356,7 +356,7 @@ public class ResponseHighlighterInterceptor extends InterceptorAdapter {
 	}
 
 	/**
-	 * If set to <code>true</code> (default is <code>false</code>) response will include the
+	 * If set to <code>true</code> (default is <code>true</code>) response will include the
 	 * response headers
 	 * 
 	 * @return Returns a reference to this for easy method chaining
@@ -437,7 +437,8 @@ public class ResponseHighlighterInterceptor extends InterceptorAdapter {
 			b.append("  font-weight: bold;");
 			b.append("}");
 			b.append(".hlQuot { color: #88F; }\n");
-			b.append(".hlQuot a { text-decoration: none; color: #88F; }\n");
+			b.append(".hlQuot a { text-decoration: underline; text-decoration-color: #CCC; }\n");
+			b.append(".hlQuot a:HOVER { text-decoration: underline; text-decoration-color: #008; }\n");
 			b.append(".hlQuot .uuid, .hlQuot .dateTime {\n");
 			b.append("  user-select: all;\n");
 			b.append("  -moz-user-select: all;\n");
@@ -580,11 +581,12 @@ public class ResponseHighlighterInterceptor extends InterceptorAdapter {
 				b.append("<div class=\"lineAnchor\" id=\"anchor");
 				b.append(i);
 				b.append("\">");
-				;
 
 				b.append("<a href=\"#L");
 				b.append(i);
 				b.append("\" name=\"L");
+				b.append(i);
+				b.append("\" id=\"L");
 				b.append(i);
 				b.append("\">");
 				b.append(i);
