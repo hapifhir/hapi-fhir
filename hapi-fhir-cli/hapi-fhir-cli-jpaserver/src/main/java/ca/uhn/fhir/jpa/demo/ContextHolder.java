@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.demo;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.lang3.Validate;
 
+import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.context.FhirContext;
 
 public class ContextHolder {
@@ -11,6 +12,11 @@ public class ContextHolder {
 	private static FhirContext ourCtx;
 	private static boolean ourDisableReferentialIntegrity;
 	private static String ourPath;
+	private static Long ourReuseSearchResultsMillis;
+
+	static {
+		ourReuseSearchResultsMillis = DaoConfig.DEFAULT_REUSE_CACHED_SEARCH_RESULTS_FOR_MILLIS;
+	}
 
 	public static FhirContext getCtx() {
 		Validate.notNull(ourPath, "Context not set");
@@ -53,4 +59,11 @@ public class ContextHolder {
 		ourDisableReferentialIntegrity = theDisableReferentialIntegrity;
 	}
 	
+	public static void setReuseCachedSearchResultsForMillis(Long reuseSearchResultsMillis) {
+		ourReuseSearchResultsMillis = reuseSearchResultsMillis;
+	}
+
+	public static Long getReuseCachedSearchResultsForMillis() {
+		return ourReuseSearchResultsMillis;
+	}
 }
