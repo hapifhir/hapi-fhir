@@ -1,37 +1,5 @@
 package ca.uhn.fhir.to;
 
-import static org.apache.commons.lang3.StringUtils.defaultString;
-
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.StringEscapeUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.http.Header;
-import org.apache.http.entity.ContentType;
-import org.apache.http.message.BasicHeader;
-import org.hl7.fhir.dstu3.model.CapabilityStatement;
-import org.hl7.fhir.dstu3.model.CapabilityStatement.CapabilityStatementRestComponent;
-import org.hl7.fhir.dstu3.model.CapabilityStatement.CapabilityStatementRestResourceComponent;
-import org.hl7.fhir.dstu3.model.DecimalType;
-import org.hl7.fhir.dstu3.model.Extension;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IDomainResource;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.ui.ModelMap;
-import org.thymeleaf.TemplateEngine;
-
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
@@ -49,6 +17,31 @@ import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.to.model.HomeRequest;
 import ca.uhn.fhir.util.ExtensionConstants;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringEscapeUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.http.Header;
+import org.apache.http.entity.ContentType;
+import org.apache.http.message.BasicHeader;
+import org.hl7.fhir.dstu3.model.CapabilityStatement;
+import org.hl7.fhir.dstu3.model.CapabilityStatement.CapabilityStatementRestComponent;
+import org.hl7.fhir.dstu3.model.CapabilityStatement.CapabilityStatementRestResourceComponent;
+import org.hl7.fhir.dstu3.model.DecimalType;
+import org.hl7.fhir.dstu3.model.Extension;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IDomainResource;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.ui.ModelMap;
+import org.thymeleaf.TemplateEngine;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.util.*;
+
+import static org.apache.commons.lang3.StringUtils.defaultString;
 
 public class BaseController {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseController.class);
@@ -298,7 +291,7 @@ public class BaseController {
 		ourLog.warn("Failed to invoke server", e);
 
 		if (e != null) {
-			theModel.put("errorMsg", "Error: " + e.getMessage());
+			theModel.put("errorMsg", toDisplayError("Error: " + e.getMessage(), e));
 		}
 
 		return returnsResource;
@@ -328,7 +321,7 @@ public class BaseController {
 			conformance = (Conformance) client.conformance();
 		} catch (Exception e) {
 			ourLog.warn("Failed to load conformance statement", e);
-			theModel.put("errorMsg", "Failed to load conformance statement, error was: " + e.toString());
+			theModel.put("errorMsg", toDisplayError("Failed to load conformance statement, error was: " + e.toString(), e));
 			conformance = new Conformance();
 		}
 
@@ -388,7 +381,7 @@ public class BaseController {
 			conformance = (ca.uhn.fhir.model.dstu2.resource.Conformance) client.conformance();
 		} catch (Exception e) {
 			ourLog.warn("Failed to load conformance statement", e);
-			theModel.put("errorMsg", "Failed to load conformance statement, error was: " + e.toString());
+			theModel.put("errorMsg", toDisplayError("Failed to load conformance statement, error was: " + e.toString(), e));
 			conformance = new ca.uhn.fhir.model.dstu2.resource.Conformance();
 		}
 
@@ -448,7 +441,7 @@ public class BaseController {
 			capabilityStatement = client.fetchConformance().ofType(org.hl7.fhir.dstu3.model.CapabilityStatement.class).execute();
 		} catch (Exception ex) {
 			ourLog.warn("Failed to load conformance statement", ex);
-			theModel.put("errorMsg", "Failed to load conformance statement, error was: " + ex.toString());
+			theModel.put("errorMsg", toDisplayError("Failed to load conformance statement, error was: " + ex.toString(), ex));
 		}
 
 		theModel.put("jsonEncodedConf", getContext(theRequest).newJsonParser().encodeResourceToString(capabilityStatement));
@@ -676,7 +669,7 @@ public class BaseController {
 
 		} catch (Exception e) {
 			ourLog.error("Failure during processing", e);
-			theModelMap.put("errorMsg", "Error during processing: " + e.getMessage());
+			theModelMap.put("errorMsg", toDisplayError("Error during processing: " + e.getMessage(), e));
 		}
 
 	}
@@ -751,6 +744,18 @@ public class BaseController {
 
 	protected enum ResultType {
 		BUNDLE, NONE, RESOURCE, TAGLIST
+	}
+
+	/**
+	 * A hook to be overridden by subclasses. The overriding method can modify the error message
+	 * based on its content and/or the related exception.
+	 *
+	 * @param theErrorMsg The original error message to be displayed to the user.
+	 * @param theException The exception that occurred. May be null.
+	 * @return The modified error message to be displayed to the user.
+	 */
+	protected String toDisplayError(String theErrorMsg, Exception theException) {
+		return theErrorMsg;
 	}
 
 }

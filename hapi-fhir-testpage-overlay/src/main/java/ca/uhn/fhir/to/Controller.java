@@ -1,36 +1,5 @@
 package ca.uhn.fhir.to;
 
-import static org.apache.commons.lang3.StringUtils.defaultIfEmpty;
-import static org.apache.commons.lang3.StringUtils.defaultString;
-import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
-import java.io.IOException;
-import java.io.StringWriter;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.TreeSet;
-
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-
-import org.apache.commons.lang3.StringUtils;
-import org.hl7.fhir.dstu3.model.CapabilityStatement;
-import org.hl7.fhir.dstu3.model.CapabilityStatement.CapabilityStatementRestComponent;
-import org.hl7.fhir.dstu3.model.CapabilityStatement.CapabilityStatementRestResourceComponent;
-import org.hl7.fhir.dstu3.model.CapabilityStatement.CapabilityStatementRestResourceSearchParamComponent;
-import org.hl7.fhir.dstu3.model.CodeType;
-import org.hl7.fhir.dstu3.model.StringType;
-import org.hl7.fhir.instance.model.api.IBaseBundle;
-import org.hl7.fhir.instance.model.api.IBaseConformance;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.springframework.ui.ModelMap;
-import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.RequestMapping;
-
-import com.google.gson.stream.JsonWriter;
-
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
@@ -58,6 +27,30 @@ import ca.uhn.fhir.to.model.HomeRequest;
 import ca.uhn.fhir.to.model.ResourceRequest;
 import ca.uhn.fhir.to.model.TransactionRequest;
 import ca.uhn.fhir.util.ExtensionConstants;
+import com.google.gson.stream.JsonWriter;
+import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.dstu3.model.CapabilityStatement;
+import org.hl7.fhir.dstu3.model.CapabilityStatement.CapabilityStatementRestComponent;
+import org.hl7.fhir.dstu3.model.CapabilityStatement.CapabilityStatementRestResourceComponent;
+import org.hl7.fhir.dstu3.model.CapabilityStatement.CapabilityStatementRestResourceSearchParamComponent;
+import org.hl7.fhir.dstu3.model.StringType;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
+import org.hl7.fhir.instance.model.api.IBaseConformance;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.springframework.ui.ModelMap;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
+import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.TreeSet;
+
+import static org.apache.commons.lang3.StringUtils.*;
 
 @org.springframework.stereotype.Controller()
 public class Controller extends BaseController {
@@ -128,13 +121,13 @@ public class Controller extends BaseController {
 		try {
 			def = getResourceType(theRequest, theReq);
 		} catch (ServletException e) {
-			theModel.put("errorMsg", e.toString());
+			theModel.put("errorMsg", toDisplayError(e.toString(), e));
 			return "resource";
 		}
 
 		String id = StringUtils.defaultString(theReq.getParameter("resource-delete-id"));
 		if (StringUtils.isBlank(id)) {
-			theModel.put("errorMsg", "No ID specified");
+			theModel.put("errorMsg", toDisplayError("No ID specified", null));
 			return "resource";
 		}
 
@@ -173,7 +166,7 @@ public class Controller extends BaseController {
 				try {
 					def = getResourceType(theRequest, theReq);
 				} catch (ServletException e) {
-					theModel.put("errorMsg", e.toString());
+					theModel.put("errorMsg", toDisplayError(e.toString(), e));
 					return "resource";
 				}
 
@@ -237,7 +230,7 @@ public class Controller extends BaseController {
 		if (myConfig.isRefuseToFetchThirdPartyUrls()) {
 			if (!url.startsWith(theModel.get("base").toString())) {
 				ourLog.warn(logPrefix(theModel) + "Refusing to load page URL: {}", url);
-				theModel.put("errorMsg", "Invalid page URL: " + url);
+				theModel.put("errorMsg", toDisplayError("Invalid page URL: " + url, null));
 				return "result";
 			}
 		}
@@ -279,12 +272,12 @@ public class Controller extends BaseController {
 		try {
 			def = getResourceType(theRequest, theReq);
 		} catch (ServletException e) {
-			theModel.put("errorMsg", e.toString());
+			theModel.put("errorMsg", toDisplayError(e.toString(), e));
 			return "resource";
 		}
 		String id = StringUtils.defaultString(theReq.getParameter("id"));
 		if (StringUtils.isBlank(id)) {
-			theModel.put("errorMsg", "No ID specified");
+			theModel.put("errorMsg", toDisplayError("No ID specified", null));
 			return "resource";
 		}
 		ResultType returnsResource = ResultType.RESOURCE;
@@ -391,7 +384,7 @@ public class Controller extends BaseController {
 			try {
 				query = search.forResource((Class<? extends IBaseResource>) getResourceType(theRequest, theReq).getImplementingClass());
 			} catch (ServletException e) {
-				theModel.put("errorMsg", e.toString());
+				theModel.put("errorMsg", toDisplayError(e.toString(), e));
 				return "resource";
 			}
 			clientCodeJsonWriter.name("resource");
@@ -463,7 +456,7 @@ public class Controller extends BaseController {
 		String limit = theReq.getParameter("resource-search-limit");
 		if (isNotBlank(limit)) {
 			if (!limit.matches("[0-9]+")) {
-				theModel.put("errorMsg", "Search limit must be a numeric value.");
+				theModel.put("errorMsg", toDisplayError("Search limit must be a numeric value.", null));
 				return "resource";
 			}
 			int limitInt = Integer.parseInt(limit);
@@ -534,12 +527,12 @@ public class Controller extends BaseController {
 			} else if (body.startsWith("<")) {
 				// XML content
 			} else {
-				theModel.put("errorMsg", "Message body does not appear to be a valid FHIR resource instance document. Body should start with '<' (for XML encoding) or '{' (for JSON encoding).");
+				theModel.put("errorMsg", toDisplayError("Message body does not appear to be a valid FHIR resource instance document. Body should start with '<' (for XML encoding) or '{' (for JSON encoding).", null));
 				return "home";
 			}
 		} catch (DataFormatException e) {
 			ourLog.warn("Failed to parse bundle", e);
-			theModel.put("errorMsg", "Failed to parse transaction bundle body. Error was: " + e.getMessage());
+			theModel.put("errorMsg", toDisplayError("Failed to parse transaction bundle body. Error was: " + e.getMessage(), e));
 			return "home";
 		}
 
@@ -587,7 +580,7 @@ public class Controller extends BaseController {
 
 		String body = validate ? theReq.getParameter("resource-validate-body") : theReq.getParameter("resource-create-body");
 		if (isBlank(body)) {
-			theModel.put("errorMsg", "No message body specified");
+			theModel.put("errorMsg", toDisplayError("No message body specified", null));
 			return;
 		}
 
@@ -602,12 +595,12 @@ public class Controller extends BaseController {
 				resource = getContext(theRequest).newXmlParser().parseResource(type, body);
 				client.setEncoding(EncodingEnum.XML);
 			} else {
-				theModel.put("errorMsg", "Message body does not appear to be a valid FHIR resource instance document. Body should start with '<' (for XML encoding) or '{' (for JSON encoding).");
+				theModel.put("errorMsg", toDisplayError("Message body does not appear to be a valid FHIR resource instance document. Body should start with '<' (for XML encoding) or '{' (for JSON encoding).", null));
 				return;
 			}
 		} catch (DataFormatException e) {
 			ourLog.warn("Failed to parse resource", e);
-			theModel.put("errorMsg", "Failed to parse message body. Error was: " + e.getMessage());
+			theModel.put("errorMsg", toDisplayError("Failed to parse message body. Error was: " + e.getMessage(), e));
 			return;
 		}
 
