@@ -160,6 +160,10 @@
 				Add link to DSTU3 JavaDocs from documentation index. Thanks
 				to Vadim Peretokin for the pull request!
 			</action>
+			<action type="fix" issue="680">
+				Fix a typo in the documentation. Thanks to Saren Currie
+				for the pull request!
+			</action>
 		</release>
 		<release version="2.5" date="2017-06-08">
 			<action type="fix">

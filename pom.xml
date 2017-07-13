@@ -342,6 +342,10 @@
 			<id>eug48</id>
 			<name>Eugene Lubarsky</name>
 		</developer>
+		<developer>
+			<id>SarenCurrie</id>
+			<name>Saren Currie</name>
+		</developer>
 	</developers>
 
 	<licenses>
