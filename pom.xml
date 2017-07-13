@@ -47,7 +47,7 @@
 			</snapshots>
 			<id>bintray-dnault-maven</id>
 			<name>bintray</name>
-			<url>http://dl.bintray.com/dnault/maven</url>
+			<url>https://dl.bintray.com/dnault/maven</url>
 		</repository>
 		<repository>
 			<id>jitpack.io</id>
@@ -336,6 +336,10 @@
 		<developer>
 			<id>ohr</id>
 			<name>Christian Ohr</name>
+		</developer>
+		<developer>
+			<id>eug48</id>
+			<name>Eugene Lubarsky</name>
 		</developer>
 	</developers>
 

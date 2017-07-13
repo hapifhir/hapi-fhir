@@ -105,7 +105,7 @@ public class AuthorizationInterceptorDstu2Test {
 		retVal.addName().addFamily("FAM");
 		return retVal;
 	}
-	
+
 	private IResource createPatient(Integer theId, int theVersion) {
 		IResource retVal = createPatient(theId);
 		retVal.setId(retVal.getId().withVersion(Integer.toString(theVersion)));
@@ -512,7 +512,7 @@ public class AuthorizationInterceptorDstu2Test {
 		HttpResponse status;
 
 		ourReturn = Arrays.asList(createPatient(2, 1));
-		
+
 		ourHitMethod = false;
 		httpGet = new HttpGet("http://localhost:" + ourPort + "/_history");
 		status = ourClient.execute(httpGet);
@@ -791,8 +791,8 @@ public class AuthorizationInterceptorDstu2Test {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
 				return new RuleBuilder()
-					.allow("RULE 1").operation().named("opName").onAnyInstance().andThen()
-					.build();
+						.allow("RULE 1").operation().named("opName").onAnyInstance().andThen()
+						.build();
 			}
 		});
 
@@ -1101,7 +1101,7 @@ public class AuthorizationInterceptorDstu2Test {
 		assertEquals(403, status.getStatusLine().getStatusCode());
 		assertFalse(ourHitMethod);
 	}
-	
+
 	@Test
 	public void testReadByAnyId() throws Exception {
 		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
@@ -1216,8 +1216,8 @@ public class AuthorizationInterceptorDstu2Test {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
 				return new RuleBuilder()
-					.allow("Rule 1").read().resourcesOfType(Patient.class).inCompartment("Patient", new IdDt("Patient/1"))
-					.build();
+						.allow("Rule 1").read().resourcesOfType(Patient.class).inCompartment("Patient", new IdDt("Patient/1"))
+						.build();
 			}
 		});
 
@@ -1230,7 +1230,7 @@ public class AuthorizationInterceptorDstu2Test {
 		for (int i = 0; i < 10; i++) {
 			ourReturn.add(createPatient(1));
 		}
-		
+
 		ourHitMethod = false;
 		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_count=5&_format=json");
 		status = ourClient.execute(httpGet);
@@ -1242,9 +1242,9 @@ public class AuthorizationInterceptorDstu2Test {
 		assertEquals(10, respBundle.getTotal().intValue());
 		assertEquals("Patient/1", respBundle.getEntry().get(0).getResource().getIdElement().toUnqualifiedVersionless().getValue());
 		assertNotNull(respBundle.getLink("next"));
-		
+
 		// Load next page
-		
+
 		ourHitMethod = false;
 		httpGet = new HttpGet(respBundle.getLink("next").getUrl());
 		status = ourClient.execute(httpGet);
@@ -1265,8 +1265,8 @@ public class AuthorizationInterceptorDstu2Test {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
 				return new RuleBuilder()
-					.allow("Rule 1").read().resourcesOfType(Patient.class).inCompartment("Patient", new IdDt("Patient/1"))
-					.build();
+						.allow("Rule 1").read().resourcesOfType(Patient.class).inCompartment("Patient", new IdDt("Patient/1"))
+						.build();
 			}
 		});
 
@@ -1282,7 +1282,7 @@ public class AuthorizationInterceptorDstu2Test {
 		for (int i = 0; i < 5; i++) {
 			ourReturn.add(createPatient(2));
 		}
-		
+
 		ourHitMethod = false;
 		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_count=5&_format=json");
 		status = ourClient.execute(httpGet);
@@ -1294,9 +1294,9 @@ public class AuthorizationInterceptorDstu2Test {
 		assertEquals(10, respBundle.getTotal().intValue());
 		assertEquals("Patient/1", respBundle.getEntry().get(0).getResource().getIdElement().toUnqualifiedVersionless().getValue());
 		assertNotNull(respBundle.getLink("next"));
-		
+
 		// Load next page
-		
+
 		ourHitMethod = false;
 		httpGet = new HttpGet(respBundle.getLink("next").getUrl());
 		status = ourClient.execute(httpGet);
@@ -1781,7 +1781,7 @@ public class AuthorizationInterceptorDstu2Test {
 	@Test
 	public void testInvalidInstanceIds() throws Exception {
 		try {
-			new RuleBuilder().allow("Rule 1").write().instance((String)null);
+			new RuleBuilder().allow("Rule 1").write().instance((String) null);
 			fail();
 		} catch (NullPointerException e) {
 			assertEquals("theId must not be null or empty", e.getMessage());
@@ -1811,14 +1811,51 @@ public class AuthorizationInterceptorDstu2Test {
 			assertEquals("theId.getValue() must not be null or empty", e.getMessage());
 		}
 		try {
-			new RuleBuilder().allow("Rule 1").write().instance(new IdDt("Observation", (String)null));
+			new RuleBuilder().allow("Rule 1").write().instance(new IdDt("Observation", (String) null));
 			fail();
 		} catch (NullPointerException e) {
 			assertEquals("theId must contain an ID part", e.getMessage());
 		}
 	}
-	
-	
+
+	@Test
+	public void testWritePatchByInstance() throws Exception {
+		ourConditionalCreateId = "1";
+
+		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				//@formatter:off
+				return new RuleBuilder()
+					.allow("Rule 1").write().instance("Patient/900").andThen()
+					.build();
+				//@formatter:on
+			}
+		});
+
+		HttpEntityEnclosingRequestBase httpPost;
+		HttpResponse status;
+		String response;
+
+		String input = "[ { \"op\": \"replace\", \"path\": \"/gender\", \"value\": \"male\" }  ]";
+
+		ourHitMethod = false;
+		httpPost = new HttpPatch("http://localhost:" + ourPort + "/Patient/900");
+		httpPost.setEntity(new StringEntity(input, ContentType.parse("application/json-patch+json")));
+		status = ourClient.execute(httpPost);
+		response = extractResponseAndClose(status);
+		assertEquals(204, status.getStatusLine().getStatusCode());
+		assertTrue(ourHitMethod);
+
+		ourHitMethod = false;
+		httpPost = new HttpPatch("http://localhost:" + ourPort + "/Patient/999");
+		httpPost.setEntity(new StringEntity(input, ContentType.parse("application/json-patch+json")));
+		status = ourClient.execute(httpPost);
+		response = extractResponseAndClose(status);
+		assertEquals(403, status.getStatusLine().getStatusCode());
+		assertFalse(ourHitMethod);
+	}
+
 	@Test
 	public void testWriteByInstance() throws Exception {
 		ourConditionalCreateId = "1";
@@ -1874,8 +1911,7 @@ public class AuthorizationInterceptorDstu2Test {
 		assertFalse(ourHitMethod);
 
 	}
-	
-	
+
 	@Test
 	public void testReadByInstance() throws Exception {
 		ourConditionalCreateId = "1";
@@ -1923,7 +1959,6 @@ public class AuthorizationInterceptorDstu2Test {
 
 	}
 
-	
 	@AfterClass
 	public static void afterClassClearContext() throws Exception {
 		ourServer.stop();
@@ -2110,7 +2145,6 @@ public class AuthorizationInterceptorDstu2Test {
 			return retVal;
 		}
 
-		
 		@Override
 		public Class<? extends IResource> getResourceType() {
 			return Patient.class;
@@ -2184,6 +2218,14 @@ public class AuthorizationInterceptorDstu2Test {
 			return retVal;
 		}
 
+		@Patch()
+		public MethodOutcome patch(@IdParam IdDt theId, @ResourceParam String theResource, PatchTypeEnum thePatchType) {
+			ourHitMethod = true;
+
+			MethodOutcome retVal = new MethodOutcome();
+			return retVal;
+		}
+
 		@Validate
 		public MethodOutcome validate(@ResourceParam Patient theResource, @IdParam IdDt theId, @ResourceParam String theRawResource, @ResourceParam EncodingEnum theEncoding,
 				@Validate.Mode ValidationModeEnum theMode, @Validate.Profile String theProfile, RequestDetails theRequestDetails) {
@@ -2225,6 +2267,5 @@ public class AuthorizationInterceptorDstu2Test {
 		}
 
 	}
-
 
 }

@@ -141,7 +141,7 @@ public class ServletExamples {
 
          config.addExposedHeader("Location");
          config.addExposedHeader("Content-Location");
-         config.setAllowedMethods(Arrays.asList("GET","POST","PUT","DELETE","OPTIONS"));
+         config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
 
          // Create the interceptor and register it
          CorsInterceptor interceptor = new CorsInterceptor(config);

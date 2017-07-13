@@ -7,6 +7,7 @@ import java.io.InputStreamReader;
 import java.util.*;
 
 import org.apache.commons.io.Charsets;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
@@ -21,6 +22,10 @@ import org.hl7.fhir.utilities.validation.ValidationMessage.IssueSeverity;
 import ca.uhn.fhir.context.FhirContext;
 
 public class DefaultProfileValidationSupport implements IValidationSupport {
+
+  private static final String URL_PREFIX_VALUE_SET = "http://hl7.org/fhir/ValueSet/";
+  private static final String URL_PREFIX_STRUCTURE_DEFINITION = "http://hl7.org/fhir/StructureDefinition/";
+  private static final String URL_PREFIX_STRUCTURE_DEFINITION_BASE = "http://hl7.org/fhir/";
 
   private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(DefaultProfileValidationSupport.class);
 
@@ -86,51 +91,28 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
   public <T extends IBaseResource> T fetchResource(FhirContext theContext, Class<T> theClass, String theUri) {
     Validate.notBlank(theUri, "theUri must not be null or blank");
 
-    if (theUri.startsWith("http://hl7.org/fhir/StructureDefinition/")) {
+    if (theClass.equals(StructureDefinition.class)) {
       return (T) fetchStructureDefinition(theContext, theUri);
     }
-    if (theUri.startsWith("http://hl7.org/fhir/ValueSet/")) {
+    
+    if (theClass.equals(ValueSet.class) || theUri.startsWith(URL_PREFIX_VALUE_SET)) {
       return (T) fetchValueSet(theContext, theUri);
     }
-    // if (theUri.startsWith("http://hl7.org/fhir/ValueSet/")) {
-    // Map<String, ValueSet> defaultValueSets = myDefaultValueSets;
-    // if (defaultValueSets == null) {
-    // String path = theContext.getVersion().getPathToSchemaDefinitions().replace("/schema", "/valueset") + "/valuesets.xml";
-    // InputStream valuesetText = DefaultProfileValidationSupport.class.getResourceAsStream(path);
-    // if (valuesetText == null) {
-    // return null;
-    // }
-    // InputStreamReader reader;
-    // try {
-    // reader = new InputStreamReader(valuesetText, "UTF-8");
-    // } catch (UnsupportedEncodingException e) {
-    // // Shouldn't happen!
-    // throw new InternalErrorException("UTF-8 encoding not supported on this platform", e);
-    // }
-    //
-    // defaultValueSets = new HashMap<String, ValueSet>();
-    //
-    // Bundle bundle = theContext.newXmlParser().parseResource(Bundle.class, reader);
-    // for (BundleEntryComponent next : bundle.getEntry()) {
-    // IdType nextId = new IdType(next.getFullUrl());
-    // if (nextId.isEmpty() || !nextId.getValue().startsWith("http://hl7.org/fhir/ValueSet/")) {
-    // continue;
-    // }
-    // defaultValueSets.put(nextId.toVersionless().getValue(), (ValueSet) next.getResource());
-    // }
-    //
-    // myDefaultValueSets = defaultValueSets;
-    // }
-    //
-    // return (T) defaultValueSets.get(theUri);
-    // }
 
     return null;
   }
 
   @Override
   public StructureDefinition fetchStructureDefinition(FhirContext theContext, String theUrl) {
-    return provideStructureDefinitionMap(theContext).get(theUrl);
+    String url = theUrl;
+    if (url.startsWith(URL_PREFIX_STRUCTURE_DEFINITION)) {
+      // no change
+    } else if (url.indexOf('/') == -1) {
+      url = URL_PREFIX_STRUCTURE_DEFINITION + url;
+    } else if (StringUtils.countMatches(url, '/') == 1) {
+      url = URL_PREFIX_STRUCTURE_DEFINITION_BASE + url;
+    }
+    return provideStructureDefinitionMap(theContext).get(url);
   }
 
   ValueSet fetchValueSet(FhirContext theContext, String theSystem) {

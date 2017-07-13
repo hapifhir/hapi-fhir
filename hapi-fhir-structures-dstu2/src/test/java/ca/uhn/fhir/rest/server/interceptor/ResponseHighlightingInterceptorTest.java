@@ -1,6 +1,7 @@
 package ca.uhn.fhir.rest.server.interceptor;
 
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.containsStringIgnoringCase;
 import static org.hamcrest.Matchers.matchesPattern;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.stringContainsInOrder;
@@ -32,8 +33,7 @@ import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
+import org.junit.*;
 import org.junit.Test;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
@@ -53,14 +53,14 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.UriDt;
 import ca.uhn.fhir.rest.annotation.*;
 import ca.uhn.fhir.rest.api.*;
-import ca.uhn.fhir.rest.server.IResourceProvider;
-import ca.uhn.fhir.rest.server.RestfulServer;
+import ca.uhn.fhir.rest.server.*;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.*;
 
 public class ResponseHighlightingInterceptorTest {
 
+	private static ResponseHighlighterInterceptor ourInterceptor = new ResponseHighlighterInterceptor();
 	private static CloseableHttpClient ourClient;
 	private static FhirContext ourCtx = FhirContext.forDstu2();
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResponseHighlightingInterceptorTest.class);
@@ -74,6 +74,12 @@ public class ResponseHighlightingInterceptorTest {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
+	@Before
+	public void before() {
+		ourInterceptor.setShowRequestHeaders(new ResponseHighlighterInterceptor().isShowRequestHeaders());
+		ourInterceptor.setShowResponseHeaders(new ResponseHighlighterInterceptor().isShowResponseHeaders());
+	}
+	
 	/**
 	 * See #464
 	 */
@@ -89,7 +95,7 @@ public class ResponseHighlightingInterceptorTest {
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		ourLog.info(responseContent);
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertThat(responseContent, (stringContainsInOrder("<body>", "<pre>", "\n", "</pre>")));
+		assertThat(responseContent, (stringContainsInOrder("<body>", "<pre>", "<div", "</pre>")));
 	}
 
 	/**
@@ -107,7 +113,7 @@ public class ResponseHighlightingInterceptorTest {
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		ourLog.info(responseContent);
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertThat(responseContent, (stringContainsInOrder("<body>", "<pre>", "\n", "</pre>")));
+		assertThat(responseContent, (stringContainsInOrder("<body>", "<pre>", "<div", "</pre>")));
 	}
 
 	/**
@@ -140,6 +146,73 @@ public class ResponseHighlightingInterceptorTest {
 		assertEquals("text/html;charset=utf-8", status.getFirstHeader("content-type").getValue().replace(" ", "").toLowerCase());
 		assertThat(responseContent.replace('\n', ' ').replace('\r', ' '), matchesPattern(".*Response generated in [0-9]+ms.*"));
 		
+	}
+
+	@Test
+	public void testShowNeither() throws Exception {
+		ourInterceptor.setShowRequestHeaders(false);
+		ourInterceptor.setShowResponseHeaders(false);
+		
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1?_format=html/json");
+		
+		HttpResponse status = ourClient.execute(httpGet);
+		String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
+		IOUtils.closeQuietly(status.getEntity().getContent());
+		ourLog.info(responseContent);
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertEquals("text/html;charset=utf-8", status.getFirstHeader("content-type").getValue().replace(" ", "").toLowerCase());
+		assertThat(responseContent, not(containsStringIgnoringCase("Accept")));
+		assertThat(responseContent, not(containsStringIgnoringCase("Content-Type")));
+	}
+
+	@Test
+	public void testShowResponse() throws Exception {
+		ourInterceptor.setShowResponseHeaders(true);
+		
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1?_format=html/json");
+		
+		HttpResponse status = ourClient.execute(httpGet);
+		String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
+		IOUtils.closeQuietly(status.getEntity().getContent());
+		ourLog.info(responseContent);
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertEquals("text/html;charset=utf-8", status.getFirstHeader("content-type").getValue().replace(" ", "").toLowerCase());
+		assertThat(responseContent, not(containsStringIgnoringCase("Accept")));
+		assertThat(responseContent, (containsStringIgnoringCase("Content-Type")));
+	}
+
+	@Test
+	public void testShowRequest() throws Exception {
+		ourInterceptor.setShowRequestHeaders(true);
+		ourInterceptor.setShowResponseHeaders(false);
+		
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1?_format=html/json");
+		
+		HttpResponse status = ourClient.execute(httpGet);
+		String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
+		IOUtils.closeQuietly(status.getEntity().getContent());
+		ourLog.info(responseContent);
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertEquals("text/html;charset=utf-8", status.getFirstHeader("content-type").getValue().replace(" ", "").toLowerCase());
+		assertThat(responseContent, (containsStringIgnoringCase("Accept")));
+		assertThat(responseContent, not(containsStringIgnoringCase("Content-Type")));
+	}
+
+	@Test
+	public void testShowRequestAndResponse() throws Exception {
+		ourInterceptor.setShowRequestHeaders(true);
+		ourInterceptor.setShowResponseHeaders(true);
+		
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1?_format=html/json");
+		
+		HttpResponse status = ourClient.execute(httpGet);
+		String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
+		IOUtils.closeQuietly(status.getEntity().getContent());
+		ourLog.info(responseContent);
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertEquals("text/html;charset=utf-8", status.getFirstHeader("content-type").getValue().replace(" ", "").toLowerCase());
+		assertThat(responseContent, (containsStringIgnoringCase("Accept")));
+		assertThat(responseContent, (containsStringIgnoringCase("Content-Type")));
 	}
 
 	@Test
@@ -190,7 +263,7 @@ public class ResponseHighlightingInterceptorTest {
 
 	@Test
 	public void testHighlightException() throws Exception {
-		ResponseHighlighterInterceptor ic = new ResponseHighlighterInterceptor();
+		ResponseHighlighterInterceptor ic = ourInterceptor;
 
 		HttpServletRequest req = mock(HttpServletRequest.class);
 		when(req.getHeaders(Constants.HEADER_ACCEPT)).thenAnswer(new Answer<Enumeration<String>>() {
@@ -207,7 +280,7 @@ public class ResponseHighlightingInterceptorTest {
 		Patient resource = new Patient();
 		resource.addName().addFamily("FAMILY");
 
-		ServletRequestDetails reqDetails = new ServletRequestDetails();
+		ServletRequestDetails reqDetails = new TestServletRequestDetails();
 		reqDetails.setRequestType(RequestTypeEnum.GET);
 		reqDetails.setServer(new RestfulServer(ourCtx));
 		reqDetails.setServletRequest(req);
@@ -228,7 +301,7 @@ public class ResponseHighlightingInterceptorTest {
 
 	@Test
 	public void testHighlightNormalResponseForcePrettyPrint() throws Exception {
-		ResponseHighlighterInterceptor ic = new ResponseHighlighterInterceptor();
+		ResponseHighlighterInterceptor ic = ourInterceptor;
 
 		HttpServletRequest req = mock(HttpServletRequest.class);
 		when(req.getHeaders(Constants.HEADER_ACCEPT)).thenAnswer(new Answer<Enumeration<String>>() {
@@ -245,7 +318,7 @@ public class ResponseHighlightingInterceptorTest {
 		Patient resource = new Patient();
 		resource.addName().addFamily("FAMILY");
 
-		ServletRequestDetails reqDetails = new ServletRequestDetails();
+		ServletRequestDetails reqDetails = new TestServletRequestDetails();
 		reqDetails.setRequestType(RequestTypeEnum.GET);
 		HashMap<String, String[]> params = new HashMap<String, String[]>();
 		params.put(Constants.PARAM_PRETTY, new String[] { Constants.PARAM_PRETTY_VALUE_TRUE });
@@ -258,12 +331,12 @@ public class ResponseHighlightingInterceptorTest {
 		String output = sw.getBuffer().toString();
 		ourLog.info(output);
 		assertThat(output, containsString("<span class='hlTagName'>Patient</span>"));
-		assertThat(output, stringContainsInOrder("<body>", "<pre>", "\n", "</pre>"));
+		assertThat(output, stringContainsInOrder("<body>", "<pre>", "<div", "</pre>"));
 	}
 
 	@Test
 	public void testHighlightForceRaw() throws Exception {
-		ResponseHighlighterInterceptor ic = new ResponseHighlighterInterceptor();
+		ResponseHighlighterInterceptor ic = ourInterceptor;
 
 		HttpServletRequest req = mock(HttpServletRequest.class);
 		when(req.getHeaders(Constants.HEADER_ACCEPT)).thenAnswer(new Answer<Enumeration<String>>() {
@@ -280,7 +353,7 @@ public class ResponseHighlightingInterceptorTest {
 		Patient resource = new Patient();
 		resource.addName().addFamily("FAMILY");
 
-		ServletRequestDetails reqDetails = new ServletRequestDetails();
+		ServletRequestDetails reqDetails = new TestServletRequestDetails();
 		reqDetails.setRequestType(RequestTypeEnum.GET);
 		HashMap<String, String[]> params = new HashMap<String, String[]>();
 		params.put(Constants.PARAM_PRETTY, new String[] { Constants.PARAM_PRETTY_VALUE_TRUE });
@@ -297,7 +370,7 @@ public class ResponseHighlightingInterceptorTest {
 	
 	@Test
 	public void testDontHighlightWhenOriginHeaderPresent() throws Exception {
-		ResponseHighlighterInterceptor ic = new ResponseHighlighterInterceptor();
+		ResponseHighlighterInterceptor ic = ourInterceptor;
 
 		HttpServletRequest req = mock(HttpServletRequest.class);
 		when(req.getHeaders(Constants.HEADER_ACCEPT)).thenAnswer(new Answer<Enumeration<String>>() {
@@ -320,7 +393,7 @@ public class ResponseHighlightingInterceptorTest {
 		Patient resource = new Patient();
 		resource.addName().addFamily("FAMILY");
 
-		ServletRequestDetails reqDetails = new ServletRequestDetails();
+		ServletRequestDetails reqDetails = new TestServletRequestDetails();
 		reqDetails.setRequestType(RequestTypeEnum.GET);
 		HashMap<String, String[]> params = new HashMap<String, String[]>();
 		reqDetails.setParameters(params);
@@ -337,7 +410,7 @@ public class ResponseHighlightingInterceptorTest {
 	 */
 	@Test
 	public void testHighlightForceHtmlCt() throws Exception {
-		ResponseHighlighterInterceptor ic = new ResponseHighlighterInterceptor();
+		ResponseHighlighterInterceptor ic = ourInterceptor;
 
 		HttpServletRequest req = mock(HttpServletRequest.class);
 		when(req.getHeaders(Constants.HEADER_ACCEPT)).thenAnswer(new Answer<Enumeration<String>>() {
@@ -354,7 +427,7 @@ public class ResponseHighlightingInterceptorTest {
 		Patient resource = new Patient();
 		resource.addName().addFamily("FAMILY");
 
-		ServletRequestDetails reqDetails = new ServletRequestDetails();
+		ServletRequestDetails reqDetails = new TestServletRequestDetails();
 		reqDetails.setRequestType(RequestTypeEnum.GET);
 		HashMap<String, String[]> params = new HashMap<String, String[]>();
 		params.put(Constants.PARAM_FORMAT, new String[] { Constants.FORMAT_HTML });
@@ -371,7 +444,7 @@ public class ResponseHighlightingInterceptorTest {
 	 */
 	@Test
 	public void testHighlightForceHtmlFormat() throws Exception {
-		ResponseHighlighterInterceptor ic = new ResponseHighlighterInterceptor();
+		ResponseHighlighterInterceptor ic = ourInterceptor;
 
 		HttpServletRequest req = mock(HttpServletRequest.class);
 		when(req.getHeaders(Constants.HEADER_ACCEPT)).thenAnswer(new Answer<Enumeration<String>>() {
@@ -388,7 +461,7 @@ public class ResponseHighlightingInterceptorTest {
 		Patient resource = new Patient();
 		resource.addName().addFamily("FAMILY");
 
-		ServletRequestDetails reqDetails = new ServletRequestDetails();
+		ServletRequestDetails reqDetails = new TestServletRequestDetails();
 		reqDetails.setRequestType(RequestTypeEnum.GET);
 		HashMap<String, String[]> params = new HashMap<String, String[]>();
 		params.put(Constants.PARAM_FORMAT, new String[] { Constants.CT_HTML });
@@ -402,7 +475,7 @@ public class ResponseHighlightingInterceptorTest {
 
 	@Test
 	public void testHighlightNormalResponse() throws Exception {
-		ResponseHighlighterInterceptor ic = new ResponseHighlighterInterceptor();
+		ResponseHighlighterInterceptor ic = ourInterceptor;
 
 		HttpServletRequest req = mock(HttpServletRequest.class);
 		when(req.getHeaders(Constants.HEADER_ACCEPT)).thenAnswer(new Answer<Enumeration<String>>() {
@@ -419,7 +492,7 @@ public class ResponseHighlightingInterceptorTest {
 		Patient resource = new Patient();
 		resource.addName().addFamily("FAMILY");
 
-		ServletRequestDetails reqDetails = new ServletRequestDetails();
+		ServletRequestDetails reqDetails = new TestServletRequestDetails();
 		reqDetails.setRequestType(RequestTypeEnum.GET);
 		reqDetails.setParameters(new HashMap<String, String[]>());
 		reqDetails.setServer(new RestfulServer(ourCtx));
@@ -430,7 +503,7 @@ public class ResponseHighlightingInterceptorTest {
 		String output = sw.getBuffer().toString();
 		ourLog.info(output);
 		assertThat(output, containsString("<span class='hlTagName'>Patient</span>"));
-		assertThat(output, stringContainsInOrder("<body>", "<pre>", "\n", "</pre>"));
+		assertThat(output, stringContainsInOrder("<body>", "<pre>", "<div", "</pre>"));
 		assertThat(output, containsString("<a href=\"?_format=json\">"));
 	}
 
@@ -439,7 +512,7 @@ public class ResponseHighlightingInterceptorTest {
 	 */
 	@Test
 	public void testHighlightProducesDefaultJsonWithBrowserRequest() throws Exception {
-		ResponseHighlighterInterceptor ic = new ResponseHighlighterInterceptor();
+		ResponseHighlighterInterceptor ic = ourInterceptor;
 
 		HttpServletRequest req = mock(HttpServletRequest.class);
 
@@ -457,7 +530,7 @@ public class ResponseHighlightingInterceptorTest {
 		Patient resource = new Patient();
 		resource.addName().addFamily("FAMILY");
 
-		ServletRequestDetails reqDetails = new ServletRequestDetails();
+		ServletRequestDetails reqDetails = new TestServletRequestDetails();
 		reqDetails.setRequestType(RequestTypeEnum.GET);
 		reqDetails.setParameters(new HashMap<String, String[]>());
 		RestfulServer server = new RestfulServer(ourCtx);
@@ -477,7 +550,7 @@ public class ResponseHighlightingInterceptorTest {
 	
 	@Test
 	public void testHighlightProducesDefaultJsonWithBrowserRequest2() throws Exception {
-		ResponseHighlighterInterceptor ic = new ResponseHighlighterInterceptor();
+		ResponseHighlighterInterceptor ic = ourInterceptor;
 
 		HttpServletRequest req = mock(HttpServletRequest.class);
 
@@ -495,7 +568,7 @@ public class ResponseHighlightingInterceptorTest {
 		Patient resource = new Patient();
 		resource.addName().addFamily("FAMILY");
 
-		ServletRequestDetails reqDetails = new ServletRequestDetails();
+		ServletRequestDetails reqDetails = new TestServletRequestDetails();
 		reqDetails.setRequestType(RequestTypeEnum.GET);
 		reqDetails.setParameters(new HashMap<String, String[]>());
 		RestfulServer server = new RestfulServer(ourCtx);
@@ -712,7 +785,7 @@ public class ResponseHighlightingInterceptorTest {
 		config.setAllowedMethods(Arrays.asList("GET","POST","PUT","DELETE","OPTIONS"));
 		ourServlet.registerInterceptor(corsInterceptor);
 		
-		ourServlet.registerInterceptor(new ResponseHighlighterInterceptor());
+		ourServlet.registerInterceptor(ourInterceptor);
 		ourServlet.setResourceProviders(patientProvider, new DummyBinaryResourceProvider());
 		ourServlet.setBundleInclusionRule(BundleInclusionRule.BASED_ON_RESOURCE_PRESENCE);
 		ServletHolder servletHolder = new ServletHolder(ourServlet);
@@ -756,9 +829,6 @@ public class ResponseHighlightingInterceptorTest {
 	}
 
 
-	/**
-	 * Created by dsotnikov on 2/25/2014.
-	 */
 	public static class DummyPatientResourceProvider implements IResourceProvider {
 
 		private Patient createPatient1() {
@@ -859,6 +929,13 @@ public class ResponseHighlightingInterceptorTest {
 			return Collections.singletonList(p);
 		}
 
+	}
+
+	class TestServletRequestDetails extends ServletRequestDetails {
+		@Override
+		public String getServerBaseForRequest() {
+			return "/baseDstu3";
+		}
 	}
 
 }

@@ -42,13 +42,12 @@
 			<optional>true</optional>
 		</dependency>
 
-		<!-- The JPA project uses a newer API but we'll try to hold to this version as much as possible. See #283. -->
 		<dependency>
 			<groupId>javax.servlet</groupId>
-			<artifactId>servlet-api</artifactId>
-			<version>2.5</version>
+			<artifactId>javax.servlet-api</artifactId>
 			<scope>provided</scope>
 		</dependency>
+
 
 		<!-- Testing -->
 		<!-- <dependency> <groupId>ca.uhn.hapi.fhir</groupId> <artifactId>hapi-fhir-structures-dstu</artifactId> <version>0.8</version> <scope>test</scope> </dependency> -->

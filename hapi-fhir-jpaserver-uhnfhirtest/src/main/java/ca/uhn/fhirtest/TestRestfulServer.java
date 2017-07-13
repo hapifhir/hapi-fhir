@@ -155,14 +155,18 @@ public class TestRestfulServer extends RestfulServer {
 		config.addAllowedOrigin("*");
 		config.addExposedHeader("Location");
 		config.addExposedHeader("Content-Location");
-		config.setAllowedMethods(Arrays.asList("GET","POST","PUT","DELETE","OPTIONS"));
+		config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
 		registerInterceptor(corsInterceptor);
 
 		/*
 		 * We want to format the response using nice HTML if it's a browser, since this
 		 * makes things a little easier for testers.
 		 */
-		registerInterceptor(new ResponseHighlighterInterceptor());
+		ResponseHighlighterInterceptor responseHighlighterInterceptor = new ResponseHighlighterInterceptor();
+		responseHighlighterInterceptor.setShowRequestHeaders(false);
+		responseHighlighterInterceptor.setShowResponseHeaders(true);
+		registerInterceptor(responseHighlighterInterceptor);
+		
 		registerInterceptor(new BanUnsupportedHttpMethodsInterceptor());
 		
 		/*

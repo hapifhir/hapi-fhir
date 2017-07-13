@@ -154,6 +154,7 @@ public class AuthorizationInterceptor extends ServerOperationInterceptorAdapter 
 
 		case CREATE:
 		case UPDATE:
+		case PATCH:
 			// if (theRequestResource != null) {
 			// if (theRequestResource.getIdElement() != null) {
 			// if (theRequestResource.getIdElement().hasIdPart() == false) {

@@ -161,6 +161,31 @@
 				XML encoding because of the browser Accept header even though
 				this was not what the client wanted.
 			</action>
+			<action type="add" issue="651">
+				Enhancement to ResponseHighlighterInterceptor where links in the resource 
+				body are now converted to actual clickable hyperlinks. Thanks to Eugene Lubarsky
+				for the pull request!
+			</action>
+			<action type="add">
+				BanUnsupportedHttpMethodsInterceptor has been modified so that it now allows
+				HTTP PATCH to proceed.
+			</action>
+			<action type="add" issue="651">
+				Enhancement to ResponseHighlighterInterceptor so that it now can be configured
+				to display the request headers and response headers, and individual lines
+				may be highlighted.
+			</action>
+			<action type="fix">
+				AuthorizationInterceptor did not permit PATCH operations to proceed even
+				if the user had write access for the resource being patched.
+			</action>
+			<action type="fix" issue="682">
+				Fix an issue in HapiWorkerContext where structure definitions are
+				not able to be retrieved if they are referred to by their 
+				relative or logical ID. This affects profile tooling such as
+				StructureMapUtilities. Thanks to Travis Lukach for reporting and
+				providing a test case!
+			</action>
 		</release>
 		<release version="2.5" date="2017-06-08">
 			<action type="fix">

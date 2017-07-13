@@ -43,7 +43,8 @@ public class BanUnsupportedHttpMethodsInterceptor extends InterceptorAdapter {
 		myAllowedMethods.add(RequestTypeEnum.OPTIONS);
 		myAllowedMethods.add(RequestTypeEnum.DELETE);
 		myAllowedMethods.add(RequestTypeEnum.PUT);
-		myAllowedMethods.add(RequestTypeEnum.POST);
+ 		myAllowedMethods.add(RequestTypeEnum.POST);
+		myAllowedMethods.add(RequestTypeEnum.PATCH);
 		myAllowedMethods.add(RequestTypeEnum.HEAD);
 	}
 	
