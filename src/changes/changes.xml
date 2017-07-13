@@ -156,6 +156,10 @@
 				StructureMapUtilities. Thanks to Travis Lukach for reporting and
 				providing a test case!
 			</action>
+			<action type="fix" issue="679">
+				Add link to DSTU3 JavaDocs from documentation index. Thanks
+				to Vadim Peretokin for the pull request!
+			</action>
 		</release>
 		<release version="2.5" date="2017-06-08">
 			<action type="fix">
