@@ -320,7 +320,7 @@ public class BaseController {
 		try {
 			conformance = (Conformance) client.conformance();
 		} catch (Exception e) {
-			ourLog.warn("Failed to load conformance statement, error was: " + e.toString());
+			ourLog.warn("Failed to load conformance statement, error was: {}", e.toString());
 			theModel.put("errorMsg", toDisplayError("Failed to load conformance statement, error was: " + e.toString(), e));
 			conformance = new Conformance();
 		}
@@ -380,7 +380,7 @@ public class BaseController {
 		try {
 			conformance = (ca.uhn.fhir.model.dstu2.resource.Conformance) client.conformance();
 		} catch (Exception e) {
-			ourLog.warn("Failed to load conformance statement, error was: " + e.toString());
+			ourLog.warn("Failed to load conformance statement, error was: {}", e.toString());
 			theModel.put("errorMsg", toDisplayError("Failed to load conformance statement, error was: " + e.toString(), e));
 			conformance = new ca.uhn.fhir.model.dstu2.resource.Conformance();
 		}
@@ -440,7 +440,7 @@ public class BaseController {
 		try {
 			capabilityStatement = client.fetchConformance().ofType(org.hl7.fhir.dstu3.model.CapabilityStatement.class).execute();
 		} catch (Exception ex) {
-			ourLog.warn("Failed to load conformance statement, error was: " + ex.toString());
+			ourLog.warn("Failed to load conformance statement, error was: {}", ex.toString());
 			theModel.put("errorMsg", toDisplayError("Failed to load conformance statement, error was: " + ex.toString(), ex));
 		}
 
