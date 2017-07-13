@@ -153,6 +153,14 @@
 				is often the case in more recent versions of HAPI). Thanks to Sujay R
 				for reporting!
 			</action>
+			<action type="fix">
+				When the server was returning a multi-page search result where the
+				client did not explicitly request an encoding via the _format 
+				parameter, a _format parameter was incorrectly added to the paging
+				links in the response Bundle. This would often explicitly request
+				XML encoding because of the browser Accept header even though
+				this was not what the client wanted.
+			</action>
 		</release>
 		<release version="2.5" date="2017-06-08">
 			<action type="fix">

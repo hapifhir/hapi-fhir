@@ -21,6 +21,7 @@ package ca.uhn.fhir.rest.server;
  */
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.replace;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -70,6 +71,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.method.ElementsParameter;
 import ca.uhn.fhir.rest.server.method.SummaryEnumParameter;
 import ca.uhn.fhir.util.DateUtils;
+import ca.uhn.fhir.util.UrlUtil;
 
 public class RestfulServerUtils {
 	static final Pattern ACCEPT_HEADER_PATTERN = Pattern.compile("\\s*([a-zA-Z0-9+.*/-]+)\\s*(;\\s*([a-zA-Z]+)\\s*=\\s*([a-zA-Z0-9.]+)\\s*)?(,?)");
@@ -118,7 +120,7 @@ public class RestfulServerUtils {
 		}
 	}
 
-	public static String createPagingLink(Set<Include> theIncludes, String theServerBase, String theSearchId, int theOffset, int theCount, EncodingEnum theResponseEncoding, boolean thePrettyPrint,
+	public static String createPagingLink(Set<Include> theIncludes, String theServerBase, String theSearchId, int theOffset, int theCount, Map<String, String[]> theRequestParameters, boolean thePrettyPrint,
 			BundleTypeEnum theBundleType) {
 		try {
 			StringBuilder b = new StringBuilder();
@@ -136,11 +138,14 @@ public class RestfulServerUtils {
 			b.append(Constants.PARAM_COUNT);
 			b.append('=');
 			b.append(theCount);
-			if (theResponseEncoding != null) {
+			String[] strings = theRequestParameters.get(Constants.PARAM_FORMAT);
+			if (strings != null && strings.length > 0) {
 				b.append('&');
 				b.append(Constants.PARAM_FORMAT);
 				b.append('=');
-				b.append(theResponseEncoding.getRequestContentType());
+				String format = strings[0];
+				format = replace(format, " ", "+");
+				b.append(UrlUtil.escape(format));
 			}
 			if (thePrettyPrint) {
 				b.append('&');
