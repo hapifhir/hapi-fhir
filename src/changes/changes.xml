@@ -13,6 +13,11 @@
 				meant that any project using ookhttp would import both structures
 				JARs. This has been removed.
 			</action>
+			<action type="add">
+				JPA server is now able to handle placeholder IDs (e.g. urn:uuid:00....000)
+				being used in Bundle.entry.request.url as a part of the conditional URL 
+				within transactions.
+			</action>
 		</release
 		<release version="2.6" date="TBD">
 			<action type="add">

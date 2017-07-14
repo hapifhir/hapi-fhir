@@ -86,6 +86,8 @@ import ca.uhn.fhir.model.api.annotation.DatatypeDef;
  */
 @DatatypeDef(name = "id", profileOf=StringType.class)
 public final class IdType extends UriType implements IPrimitiveType<String>, IIdType {
+  public static final String URN_PREFIX = "urn:";
+
   /**
    * This is the maximum length for the ID
    */
@@ -486,8 +488,8 @@ public final class IdType extends UriType implements IPrimitiveType<String>, IId
     return defaultString(myUnqualifiedId).startsWith("#");
   }
 
-  private boolean isUrn() {
-    return defaultString(myUnqualifiedId).startsWith("urn:");
+  public boolean isUrn() {
+    return defaultString(myUnqualifiedId).startsWith(URN_PREFIX);
   }
 
   @Override
@@ -526,7 +528,7 @@ public final class IdType extends UriType implements IPrimitiveType<String>, IId
       myUnqualifiedVersionId = null;
       myResourceType = null;
       myHaveComponentParts = true;
-    } else if (theValue.startsWith("urn:")) {
+    } else if (theValue.startsWith(URN_PREFIX)) {
       myBaseUrl = null;
       myUnqualifiedId = theValue;
       myUnqualifiedVersionId = null;

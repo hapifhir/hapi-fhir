@@ -7,12 +7,21 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.dstu3.model.Bundle.*;
+import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
+import org.hl7.fhir.dstu3.model.Bundle.BundleEntryRequestComponent;
+import org.hl7.fhir.dstu3.model.Bundle.BundleEntryResponseComponent;
+import org.hl7.fhir.dstu3.model.Bundle.BundleType;
+import org.hl7.fhir.dstu3.model.Bundle.HTTPVerb;
 import org.hl7.fhir.dstu3.model.Observation.ObservationStatus;
 import org.hl7.fhir.dstu3.model.OperationOutcome.IssueSeverity;
 import org.hl7.fhir.instance.model.api.IAnyResource;
@@ -49,6 +58,100 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 	@Before
 	public void beforeDisableResultReuse() {
 		myDaoConfig.setReuseCachedSearchResultsForMillis(null);
+	}
+
+	private Bundle createInputTransactionWithPlaceholderIdInMatchUrl(HTTPVerb theVerb) {
+
+		Patient pat = new Patient();
+		pat
+				.addIdentifier()
+				.setSystem("http://acme.org")
+				.setValue("ID1");
+
+		Observation obs = new Observation();
+		obs
+				.getCode()
+				.addCoding()
+				.setSystem("http://loinc.org")
+				.setCode("29463-7");
+		obs.setEffective(new DateTimeType("2011-09-03T11:13:00-04:00"));
+		obs.setValue(new Quantity()
+				.setValue(new BigDecimal("123.4"))
+				.setCode("kg")
+				.setSystem("http://unitsofmeasure.org")
+				.setUnit("kg"));
+		obs.getSubject().setReference("urn:uuid:0001");
+
+		Observation obs2 = new Observation();
+		obs2
+				.getCode()
+				.addCoding()
+				.setSystem("http://loinc.org")
+				.setCode("29463-7");
+		obs2.setEffective(new DateTimeType("2017-09-03T11:13:00-04:00"));
+		obs2.setValue(new Quantity()
+				.setValue(new BigDecimal("123.4"))
+				.setCode("kg")
+				.setSystem("http://unitsofmeasure.org")
+				.setUnit("kg"));
+		obs2.getSubject().setReference("urn:uuid:0001");
+
+		/*
+		 * Put one observation before the patient it references, and
+		 * one after it just to make sure that order doesn't matter
+		 */
+		Bundle input = new Bundle();
+		input.setType(BundleType.TRANSACTION);
+
+		if (theVerb == HTTPVerb.PUT) {
+			input
+					.addEntry()
+					.setFullUrl("urn:uuid:0002")
+					.setResource(obs)
+					.getRequest()
+					.setMethod(HTTPVerb.PUT)
+					.setUrl("Observation?subject=urn:uuid:0001&code=http%3A%2F%2Floinc.org|29463-7&date=2011-09-03T11:13:00-04:00");
+			input
+					.addEntry()
+					.setFullUrl("urn:uuid:0001")
+					.setResource(pat)
+					.getRequest()
+					.setMethod(HTTPVerb.PUT)
+					.setUrl("Patient?identifier=http%3A%2F%2Facme.org|ID1");
+			input
+					.addEntry()
+					.setFullUrl("urn:uuid:0003")
+					.setResource(obs2)
+					.getRequest()
+					.setMethod(HTTPVerb.PUT)
+					.setUrl("Observation?subject=urn:uuid:0001&code=http%3A%2F%2Floinc.org|29463-7&date=2017-09-03T11:13:00-04:00");
+		} else if (theVerb == HTTPVerb.POST) {
+			input
+					.addEntry()
+					.setFullUrl("urn:uuid:0002")
+					.setResource(obs)
+					.getRequest()
+					.setMethod(HTTPVerb.POST)
+					.setUrl("Observation")
+					.setIfNoneExist("Observation?subject=urn:uuid:0001&code=http%3A%2F%2Floinc.org|29463-7&date=2011-09-03T11:13:00-04:00");
+			input
+					.addEntry()
+					.setFullUrl("urn:uuid:0001")
+					.setResource(pat)
+					.getRequest()
+					.setMethod(HTTPVerb.POST)
+					.setUrl("Patient")
+					.setIfNoneExist("Patient?identifier=http%3A%2F%2Facme.org|ID1");
+			input
+					.addEntry()
+					.setFullUrl("urn:uuid:0003")
+					.setResource(obs2)
+					.getRequest()
+					.setMethod(HTTPVerb.POST)
+					.setUrl("Observation")
+					.setIfNoneExist("Observation?subject=urn:uuid:0001&code=http%3A%2F%2Floinc.org|29463-7&date=2017-09-03T11:13:00-04:00");
+		}
+		return input;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -200,36 +303,36 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 		rpt = myDiagnosticReportDao.read(rptId);
 		assertThat(rpt.getResult(), empty());
 	}
-	
+
 	@Test
 	public void testMultipleUpdatesWithNoChangesDoesNotResultInAnUpdateForTransaction() {
 		Bundle bundle;
-		
+
 		// First time
 		Patient p = new Patient();
 		p.setActive(true);
 		bundle = new Bundle();
 		bundle.setType(BundleType.TRANSACTION);
 		bundle
-			.addEntry()
-			.setResource(p)
-			.setFullUrl("Patient/A")
-			.getRequest()
+				.addEntry()
+				.setResource(p)
+				.setFullUrl("Patient/A")
+				.getRequest()
 				.setMethod(HTTPVerb.PUT)
 				.setUrl("Patient/A");
 		Bundle resp = mySystemDao.transaction(mySrd, bundle);
 		assertThat(resp.getEntry().get(0).getResponse().getLocation(), endsWith("Patient/A/_history/1"));
-		
+
 		// Second time should not result in an update
 		p = new Patient();
 		p.setActive(true);
 		bundle = new Bundle();
 		bundle.setType(BundleType.TRANSACTION);
 		bundle
-			.addEntry()
-			.setResource(p)
-			.setFullUrl("Patient/A")
-			.getRequest()
+				.addEntry()
+				.setResource(p)
+				.setFullUrl("Patient/A")
+				.getRequest()
 				.setMethod(HTTPVerb.PUT)
 				.setUrl("Patient/A");
 		resp = mySystemDao.transaction(mySrd, bundle);
@@ -241,10 +344,10 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 		bundle = new Bundle();
 		bundle.setType(BundleType.TRANSACTION);
 		bundle
-			.addEntry()
-			.setResource(p)
-			.setFullUrl("Patient/A")
-			.getRequest()
+				.addEntry()
+				.setResource(p)
+				.setFullUrl("Patient/A")
+				.getRequest()
 				.setMethod(HTTPVerb.PUT)
 				.setUrl("Patient/A");
 		resp = mySystemDao.transaction(mySrd, bundle);
@@ -256,13 +359,13 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 			myPatientDao.read(new IdType("Patient/A/_history/2"));
 			fail();
 		} catch (ResourceNotFoundException e) {
-			//good
+			// good
 		}
 		try {
 			myPatientDao.read(new IdType("Patient/A/_history/3"));
 			fail();
 		} catch (ResourceNotFoundException e) {
-			//good
+			// good
 		}
 	}
 
@@ -485,60 +588,6 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 		} catch (ResourceNotFoundException e) {
 			assertEquals("Invalid match URL \"Patient?identifier=urn%3Asystem%7CtestTransactionCreateInlineMatchUrlWithNoMatches\" - No resources match this search", e.getMessage());
 		}
-	}
-
-	@Test
-	public void testTransactionWithReferenceUuid() {
-		Bundle request = new Bundle();
-
-		Patient p = new Patient();
-		p.setActive(true);
-		p.setId(IdType.newRandomUuid());
-		request.addEntry().setResource(p).getRequest().setMethod(HTTPVerb.POST).setUrl(p.getId());
-		
-		Observation o = new Observation();
-		o.getCode().setText("Some Observation");
-		o.getSubject().setReference(p.getId());
-		request.addEntry().setResource(o).getRequest().setMethod(HTTPVerb.POST);
-
-		Bundle resp = mySystemDao.transaction(mySrd, request);
-		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(resp));
-		
-		String patientId = new IdType(resp.getEntry().get(0).getResponse().getLocation()).toUnqualifiedVersionless().getValue();
-		assertThat(patientId, startsWith("Patient/"));
-		
-		SearchParameterMap params = new SearchParameterMap();
-		params.setLoadSynchronous(true);
-		params.add("subject", new ReferenceParam(patientId));
-		IBundleProvider found = myObservationDao.search(params);
-		assertEquals(1, found.size().intValue());
-	}
-
-	@Test
-	public void testTransactionWithReferenceResource() {
-		Bundle request = new Bundle();
-
-		Patient p = new Patient();
-		p.setActive(true);
-		p.setId(IdType.newRandomUuid());
-		request.addEntry().setResource(p).getRequest().setMethod(HTTPVerb.POST).setUrl(p.getId());
-		
-		Observation o = new Observation();
-		o.getCode().setText("Some Observation");
-		o.getSubject().setResource(p);
-		request.addEntry().setResource(o).getRequest().setMethod(HTTPVerb.POST);
-
-		Bundle resp = mySystemDao.transaction(mySrd, request);
-		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(resp));
-		
-		String patientId = new IdType(resp.getEntry().get(0).getResponse().getLocation()).toUnqualifiedVersionless().getValue();
-		assertThat(patientId, startsWith("Patient/"));
-		
-		SearchParameterMap params = new SearchParameterMap();
-		params.setLoadSynchronous(true);
-		params.add("subject", new ReferenceParam(patientId));
-		IBundleProvider found = myObservationDao.search(params);
-		assertEquals(1, found.size().intValue());
 	}
 
 	@Test
@@ -1335,7 +1384,8 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 			mySystemDao.transaction(mySrd, inputBundle);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("Unable to process Transaction - Request would cause multiple resources to match URL: \"Encounter?identifier=urn:foo|12345\". Does transaction request contain duplicates?", e.getMessage());
+			assertEquals("Unable to process Transaction - Request would cause multiple resources to match URL: \"Encounter?identifier=urn:foo|12345\". Does transaction request contain duplicates?",
+					e.getMessage());
 		}
 	}
 
@@ -1365,9 +1415,10 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 			mySystemDao.transaction(mySrd, inputBundle);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("Unable to process Transaction - Request would cause multiple resources to match URL: \"Encounter?identifier=urn:foo|12345\". Does transaction request contain duplicates?", e.getMessage());
+			assertEquals("Unable to process Transaction - Request would cause multiple resources to match URL: \"Encounter?identifier=urn:foo|12345\". Does transaction request contain duplicates?",
+					e.getMessage());
 		}
-		
+
 	}
 
 	@Test(expected = InvalidRequestException.class)
@@ -2026,8 +2077,7 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(resp));
 
 		assertEquals("201 Created", resp.getEntry().get(0).getResponse().getStatus());
-		
-		
+
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
 			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
@@ -2040,7 +2090,7 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 				}
 			}
 		});
-		
+
 	}
 
 	@Test
@@ -2101,6 +2151,66 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 		assertEquals(id0.toUnqualifiedVersionless().getValue(), app2.getParticipant().get(1).getActor().getReference());
 	}
 
+	/*
+	 * Make sure we are able to handle placeholder IDs in match URLs, e.g.
+	 * 
+	 * "request": {
+	 * "method": "PUT",
+	 * "url": "Observation?subject=urn:uuid:8dba64a8-2aca-48fe-8b4e-8c7bf2ab695a&code=http%3A%2F%2Floinc.org|29463-7&date=2011-09-03T11:13:00-04:00"
+	 * }
+	 * </pre>
+	 */
+	@Test
+	public void testTransactionWithPlaceholderIdInMatchUrlPut() {
+
+		Bundle input = createInputTransactionWithPlaceholderIdInMatchUrl(HTTPVerb.PUT);
+		Bundle output = mySystemDao.transaction(null, input);
+
+		assertEquals("201 Created", output.getEntry().get(0).getResponse().getStatus());
+		assertEquals("201 Created", output.getEntry().get(1).getResponse().getStatus());
+		assertEquals("201 Created", output.getEntry().get(2).getResponse().getStatus());
+
+		Bundle input2 = createInputTransactionWithPlaceholderIdInMatchUrl(HTTPVerb.PUT);
+		Bundle output2 = mySystemDao.transaction(null, input2);
+
+		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(output2));
+
+		assertEquals("200 OK", output2.getEntry().get(0).getResponse().getStatus());
+		assertEquals("200 OK", output2.getEntry().get(1).getResponse().getStatus());
+		assertEquals("200 OK", output2.getEntry().get(2).getResponse().getStatus());
+
+	}
+
+	/*
+	 * Make sure we are able to handle placeholder IDs in match URLs, e.g.
+	 * 
+	 * "request": {
+	 * "method": "PUT",
+	 * "url": "Observation?subject=urn:uuid:8dba64a8-2aca-48fe-8b4e-8c7bf2ab695a&code=http%3A%2F%2Floinc.org|29463-7&date=2011-09-03T11:13:00-04:00"
+	 * }
+	 * </pre>
+	 */
+	@Test
+	public void testTransactionWithPlaceholderIdInMatchUrlPost() {
+
+		Bundle input = createInputTransactionWithPlaceholderIdInMatchUrl(HTTPVerb.POST);
+		Bundle output = mySystemDao.transaction(null, input);
+
+		assertEquals("201 Created", output.getEntry().get(0).getResponse().getStatus());
+		assertEquals("201 Created", output.getEntry().get(1).getResponse().getStatus());
+		assertEquals("201 Created", output.getEntry().get(2).getResponse().getStatus());
+
+		Bundle input2 = createInputTransactionWithPlaceholderIdInMatchUrl(HTTPVerb.POST);
+		Bundle output2 = mySystemDao.transaction(null, input2);
+
+		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(output2));
+
+		assertEquals("200 OK", output2.getEntry().get(0).getResponse().getStatus());
+		assertEquals("200 OK", output2.getEntry().get(1).getResponse().getStatus());
+		assertEquals("200 OK", output2.getEntry().get(2).getResponse().getStatus());
+
+	}
+
 	/**
 	 * Per a message on the mailing list
 	 */
@@ -2135,6 +2245,86 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 		Patient patient = myPatientDao.read(new IdType(id), mySrd);
 		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(patient));
 		assertEquals("Joshua", patient.getNameFirstRep().getGivenAsSingleString());
+	}
+
+	@Test
+	public void testTransactionWithReferenceResource() {
+		Bundle request = new Bundle();
+
+		Patient p = new Patient();
+		p.setActive(true);
+		p.setId(IdType.newRandomUuid());
+		request.addEntry().setResource(p).getRequest().setMethod(HTTPVerb.POST).setUrl(p.getId());
+
+		Observation o = new Observation();
+		o.getCode().setText("Some Observation");
+		o.getSubject().setResource(p);
+		request.addEntry().setResource(o).getRequest().setMethod(HTTPVerb.POST);
+
+		Bundle resp = mySystemDao.transaction(mySrd, request);
+		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(resp));
+
+		String patientId = new IdType(resp.getEntry().get(0).getResponse().getLocation()).toUnqualifiedVersionless().getValue();
+		assertThat(patientId, startsWith("Patient/"));
+
+		SearchParameterMap params = new SearchParameterMap();
+		params.setLoadSynchronous(true);
+		params.add("subject", new ReferenceParam(patientId));
+		IBundleProvider found = myObservationDao.search(params);
+		assertEquals(1, found.size().intValue());
+	}
+
+	@Test
+	public void testTransactionWithReferenceToCreateIfNoneExist() {
+		Bundle bundle = new Bundle();
+		bundle.setType(BundleType.TRANSACTION);
+
+		Medication med = new Medication();
+		IdType medId = IdType.newRandomUuid();
+		med.setId(medId);
+		med.getCode().addCoding().setSystem("billscodes").setCode("theCode");
+		bundle.addEntry().setResource(med).setFullUrl(medId.getValue()).getRequest().setMethod(HTTPVerb.POST).setIfNoneExist("Medication?code=billscodes|theCode");
+
+		MedicationRequest mo = new MedicationRequest();
+		mo.setMedication(new Reference(medId));
+		bundle.addEntry().setResource(mo).setFullUrl(mo.getIdElement().getValue()).getRequest().setMethod(HTTPVerb.POST);
+
+		ourLog.info("Request:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
+
+		Bundle outcome = mySystemDao.transaction(mySrd, bundle);
+		ourLog.info("Response:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
+
+		IdType medId1 = new IdType(outcome.getEntry().get(0).getResponse().getLocation());
+		IdType medOrderId1 = new IdType(outcome.getEntry().get(1).getResponse().getLocation());
+
+		/*
+		 * Again!
+		 */
+
+		bundle = new Bundle();
+		bundle.setType(BundleType.TRANSACTION);
+
+		med = new Medication();
+		medId = IdType.newRandomUuid();
+		med.getCode().addCoding().setSystem("billscodes").setCode("theCode");
+		bundle.addEntry().setResource(med).setFullUrl(medId.getValue()).getRequest().setMethod(HTTPVerb.POST).setIfNoneExist("Medication?code=billscodes|theCode");
+
+		mo = new MedicationRequest();
+		mo.setMedication(new Reference(medId));
+		bundle.addEntry().setResource(mo).setFullUrl(mo.getIdElement().getValue()).getRequest().setMethod(HTTPVerb.POST);
+
+		outcome = mySystemDao.transaction(mySrd, bundle);
+
+		IdType medId2 = new IdType(outcome.getEntry().get(0).getResponse().getLocation());
+		IdType medOrderId2 = new IdType(outcome.getEntry().get(1).getResponse().getLocation());
+
+		assertTrue(medId1.isIdPartValidLong());
+		assertTrue(medId2.isIdPartValidLong());
+		assertTrue(medOrderId1.isIdPartValidLong());
+		assertTrue(medOrderId2.isIdPartValidLong());
+
+		assertEquals(medId1, medId2);
+		assertNotEquals(medOrderId1, medOrderId2);
 	}
 
 	//
@@ -2240,59 +2430,32 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 	// }
 
 	@Test
-	public void testTransactionWithReferenceToCreateIfNoneExist() {
-		Bundle bundle = new Bundle();
-		bundle.setType(BundleType.TRANSACTION);
+	public void testTransactionWithReferenceUuid() {
+		Bundle request = new Bundle();
 
-		Medication med = new Medication();
-		IdType medId = IdType.newRandomUuid();
-		med.setId(medId);
-		med.getCode().addCoding().setSystem("billscodes").setCode("theCode");
-		bundle.addEntry().setResource(med).setFullUrl(medId.getValue()).getRequest().setMethod(HTTPVerb.POST).setIfNoneExist("Medication?code=billscodes|theCode");
+		Patient p = new Patient();
+		p.setActive(true);
+		p.setId(IdType.newRandomUuid());
+		request.addEntry().setResource(p).getRequest().setMethod(HTTPVerb.POST).setUrl(p.getId());
 
-		MedicationRequest mo = new MedicationRequest();
-		mo.setMedication(new Reference(medId));
-		bundle.addEntry().setResource(mo).setFullUrl(mo.getIdElement().getValue()).getRequest().setMethod(HTTPVerb.POST);
+		Observation o = new Observation();
+		o.getCode().setText("Some Observation");
+		o.getSubject().setReference(p.getId());
+		request.addEntry().setResource(o).getRequest().setMethod(HTTPVerb.POST);
 
-		ourLog.info("Request:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
+		Bundle resp = mySystemDao.transaction(mySrd, request);
+		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(resp));
 
-		Bundle outcome = mySystemDao.transaction(mySrd, bundle);
-		ourLog.info("Response:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
+		String patientId = new IdType(resp.getEntry().get(0).getResponse().getLocation()).toUnqualifiedVersionless().getValue();
+		assertThat(patientId, startsWith("Patient/"));
 
-		IdType medId1 = new IdType(outcome.getEntry().get(0).getResponse().getLocation());
-		IdType medOrderId1 = new IdType(outcome.getEntry().get(1).getResponse().getLocation());
-
-		/*
-		 * Again!
-		 */
-
-		bundle = new Bundle();
-		bundle.setType(BundleType.TRANSACTION);
-
-		med = new Medication();
-		medId = IdType.newRandomUuid();
-		med.getCode().addCoding().setSystem("billscodes").setCode("theCode");
-		bundle.addEntry().setResource(med).setFullUrl(medId.getValue()).getRequest().setMethod(HTTPVerb.POST).setIfNoneExist("Medication?code=billscodes|theCode");
-
-		mo = new MedicationRequest();
-		mo.setMedication(new Reference(medId));
-		bundle.addEntry().setResource(mo).setFullUrl(mo.getIdElement().getValue()).getRequest().setMethod(HTTPVerb.POST);
-
-		outcome = mySystemDao.transaction(mySrd, bundle);
-
-		IdType medId2 = new IdType(outcome.getEntry().get(0).getResponse().getLocation());
-		IdType medOrderId2 = new IdType(outcome.getEntry().get(1).getResponse().getLocation());
-
-		assertTrue(medId1.isIdPartValidLong());
-		assertTrue(medId2.isIdPartValidLong());
-		assertTrue(medOrderId1.isIdPartValidLong());
-		assertTrue(medOrderId2.isIdPartValidLong());
-
-		assertEquals(medId1, medId2);
-		assertNotEquals(medOrderId1, medOrderId2);
+		SearchParameterMap params = new SearchParameterMap();
+		params.setLoadSynchronous(true);
+		params.add("subject", new ReferenceParam(patientId));
+		IBundleProvider found = myObservationDao.search(params);
+		assertEquals(1, found.size().intValue());
 	}
-	
-	
+
 	@Test
 	public void testTransactionWithRelativeOidIds() throws Exception {
 		Bundle res = new Bundle();
@@ -2330,7 +2493,6 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 		assertThat(o2.getSubject().getReferenceElement().getValue(), endsWith("Patient/" + p1.getIdElement().getIdPart()));
 
 	}
-	
 
 	/**
 	 * This is not the correct way to do it, but we'll allow it to be lenient
