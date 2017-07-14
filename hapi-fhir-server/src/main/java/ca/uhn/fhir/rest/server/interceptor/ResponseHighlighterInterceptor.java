@@ -38,9 +38,10 @@ import org.apache.commons.lang3.StringEscapeUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.parser.IParser;
-import ca.uhn.fhir.rest.api.RequestTypeEnum;
-import ca.uhn.fhir.rest.method.RequestDetails;
-import ca.uhn.fhir.rest.server.*;
+import ca.uhn.fhir.rest.api.*;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.RestfulServer;
+import ca.uhn.fhir.rest.server.RestfulServerUtils;
 import ca.uhn.fhir.rest.server.RestfulServerUtils.ResponseEncoding;
 import ca.uhn.fhir.rest.server.exceptions.*;
 import ca.uhn.fhir.util.UrlUtil;
