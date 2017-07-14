@@ -86,8 +86,69 @@ public class XmlParserDstu3Test {
 		ourCtx.setNarrativeGenerator(null);
 	}
 	
+	/**
+	 * See #544
+	 */
 	@Test
-	public void testActivityDefinitionElementsOrder() throws Exception {
+	public void testBundleStitchReferencesByUuid() throws Exception {
+		Bundle bundle = new Bundle();
+
+		DocumentManifest dm = new DocumentManifest();
+		dm.getSubject().setReference("urn:uuid:96e85cca-9797-45d6-834a-c4eb27f331d3");
+		bundle.addEntry().setResource(dm);
+
+		Patient patient = new Patient();
+		patient.addName().setFamily("FAMILY");
+		bundle.addEntry().setResource(patient).setFullUrl("urn:uuid:96e85cca-9797-45d6-834a-c4eb27f331d3");
+
+		String encoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(bundle);
+		ourLog.info(encoded);
+
+		bundle = ourCtx.newXmlParser().parseResource(Bundle.class, encoded);
+		dm = (DocumentManifest) bundle.getEntry().get(0).getResource();
+
+		assertEquals("urn:uuid:96e85cca-9797-45d6-834a-c4eb27f331d3", dm.getSubject().getReference());
+
+		Patient subject = (Patient) dm.getSubject().getResource();
+		assertNotNull(subject);
+		assertEquals("FAMILY", subject.getNameFirstRep().getFamily());
+	}
+	
+	@Test
+	public void testBundleWithBinary() {
+
+		String bundle = "<Bundle xmlns=\"http://hl7.org/fhir\">\n" +
+				"   <base value=\"http://localhost:52788\"/>\n" +
+				"   <total value=\"1\"/>\n" +
+				"   <link>\n" +
+				"      <relation value=\"self\"/>\n" +
+				"      <url value=\"http://localhost:52788/Binary?_pretty=true\"/>\n" +
+				"   </link>\n" +
+				"   <entry>\n" +
+				"      <resource>\n" +
+				"         <Binary xmlns=\"http://hl7.org/fhir\">\n" +
+				"            <id value=\"1\"/>\n" +
+				"            <meta/>\n" +
+				"            <contentType value=\"text/plain\"/>\n" +
+				"            <content value=\"AQIDBA==\"/>\n" +
+				"         </Binary>\n" +
+				"      </resource>\n" +
+				"   </entry>\n" +
+				"</Bundle>";
+
+		Bundle b = ourCtx.newXmlParser().parseResource(Bundle.class, bundle);
+		assertEquals(1, b.getEntry().size());
+
+		Binary bin = (Binary) b.getEntry().get(0).getResource();
+		assertArrayEquals(new byte[] { 1, 2, 3, 4 }, bin.getContent());
+
+	}
+
+	/**
+	 * See #683
+	 */
+	@Test
+	public void testChildOrderWithChoiceType() throws Exception {
 		final String origContent = "<ActivityDefinition xmlns=\"http://hl7.org/fhir\"><id value=\"x1\"/><url value=\"http://testing.org\"/><status value=\"draft\"/><timingDateTime value=\"2011-02-03\"/></ActivityDefinition>";
 		final IParser parser = ourCtx.newXmlParser();
 		DefaultProfileValidationSupport validationSupport = new DefaultProfileValidationSupport();
@@ -121,7 +182,7 @@ public class XmlParserDstu3Test {
 		// verify that the original and newly serialized match
 		Assert.assertEquals(origContent, content);
 	}
-	
+
 	@Test
 	public void testConceptMapElementsOrder() throws Exception {
 		final String origContent = "<ConceptMap xmlns=\"http://hl7.org/fhir\"><id value=\"x1\"/><url value=\"http://testing.org\"/><status value=\"draft\"/><sourceUri value=\"http://url1\"/></ConceptMap>";
@@ -156,64 +217,6 @@ public class XmlParserDstu3Test {
 
 		// verify that the original and newly serialized match
 		Assert.assertEquals(origContent, content);
-	}
-
-	/**
-	 * See #544
-	 */
-	@Test
-	public void testBundleStitchReferencesByUuid() throws Exception {
-		Bundle bundle = new Bundle();
-
-		DocumentManifest dm = new DocumentManifest();
-		dm.getSubject().setReference("urn:uuid:96e85cca-9797-45d6-834a-c4eb27f331d3");
-		bundle.addEntry().setResource(dm);
-
-		Patient patient = new Patient();
-		patient.addName().setFamily("FAMILY");
-		bundle.addEntry().setResource(patient).setFullUrl("urn:uuid:96e85cca-9797-45d6-834a-c4eb27f331d3");
-
-		String encoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(bundle);
-		ourLog.info(encoded);
-
-		bundle = ourCtx.newXmlParser().parseResource(Bundle.class, encoded);
-		dm = (DocumentManifest) bundle.getEntry().get(0).getResource();
-
-		assertEquals("urn:uuid:96e85cca-9797-45d6-834a-c4eb27f331d3", dm.getSubject().getReference());
-
-		Patient subject = (Patient) dm.getSubject().getResource();
-		assertNotNull(subject);
-		assertEquals("FAMILY", subject.getNameFirstRep().getFamily());
-	}
-
-	@Test
-	public void testBundleWithBinary() {
-
-		String bundle = "<Bundle xmlns=\"http://hl7.org/fhir\">\n" +
-				"   <base value=\"http://localhost:52788\"/>\n" +
-				"   <total value=\"1\"/>\n" +
-				"   <link>\n" +
-				"      <relation value=\"self\"/>\n" +
-				"      <url value=\"http://localhost:52788/Binary?_pretty=true\"/>\n" +
-				"   </link>\n" +
-				"   <entry>\n" +
-				"      <resource>\n" +
-				"         <Binary xmlns=\"http://hl7.org/fhir\">\n" +
-				"            <id value=\"1\"/>\n" +
-				"            <meta/>\n" +
-				"            <contentType value=\"text/plain\"/>\n" +
-				"            <content value=\"AQIDBA==\"/>\n" +
-				"         </Binary>\n" +
-				"      </resource>\n" +
-				"   </entry>\n" +
-				"</Bundle>";
-
-		Bundle b = ourCtx.newXmlParser().parseResource(Bundle.class, bundle);
-		assertEquals(1, b.getEntry().size());
-
-		Binary bin = (Binary) b.getEntry().get(0).getResource();
-		assertArrayEquals(new byte[] { 1, 2, 3, 4 }, bin.getContent());
-
 	}
 
 	@Test
