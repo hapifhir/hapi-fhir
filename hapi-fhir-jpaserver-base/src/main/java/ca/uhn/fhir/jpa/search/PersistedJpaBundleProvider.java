@@ -113,15 +113,22 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 	}
 
 	protected List<IBaseResource> doSearchOrEverything(final int theFromIndex, final int theToIndex) {
-		ISearchBuilder sb = myDao.newSearchBuilder();
+		final ISearchBuilder sb = myDao.newSearchBuilder();
 
 		String resourceName = mySearchEntity.getResourceType();
 		Class<? extends IBaseResource> resourceType = myContext.getResourceDefinition(resourceName).getImplementingClass();
 		sb.setType(resourceType, resourceName);
 
-		List<Long> pidsSubList = mySearchCoordinatorSvc.getResources(myUuid, theFromIndex, theToIndex);
+		final List<Long> pidsSubList = mySearchCoordinatorSvc.getResources(myUuid, theFromIndex, theToIndex);
 
-		return toResourceList(sb, pidsSubList);
+		TransactionTemplate template = new TransactionTemplate(myPlatformTransactionManager);
+		template.setPropagationBehavior(TransactionTemplate.PROPAGATION_REQUIRED);
+		return template.execute(new TransactionCallback<List<IBaseResource>>() {
+			@Override
+			public List<IBaseResource> doInTransaction(TransactionStatus theStatus) {
+				return toResourceList(sb, pidsSubList);
+			}
+		});
 	}
 
 	private void ensureDependenciesInjected() {
