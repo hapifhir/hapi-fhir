@@ -176,6 +176,9 @@
 				elements are a choice type (i.e. named "foo[x]"). Thanks to
 				GitHub user @CarthageKing for the pull request!
 			</action>
+			<action type="fix">
+				Fix potential deadlock in stale search deleting task in JPA server
+			</action>
 		</release>
 		<release version="2.5" date="2017-06-08">
 			<action type="fix">
