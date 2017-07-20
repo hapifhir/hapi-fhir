@@ -37,7 +37,14 @@ public class TestDstu3Config extends BaseJavaConfigDstu3 {
 		retVal.setUrl("jdbc:derby:memory:myUnitTestDB;create=true");
 		retVal.setUsername("");
 		retVal.setPassword("");
-		retVal.setMaxTotal((int)(Math.random() * 6) + 1);
+
+		/*
+		 * We use a randomized number of maximum threads in order to try
+		 * and catch any potential deadlocks caused by database connection
+		 * starvation
+		 */
+		int maxThreads = (int)(Math.random() * 6) + 1;
+		retVal.setMaxTotal(maxThreads);
 
 		DataSource dataSource = ProxyDataSourceBuilder
 				.create(retVal)

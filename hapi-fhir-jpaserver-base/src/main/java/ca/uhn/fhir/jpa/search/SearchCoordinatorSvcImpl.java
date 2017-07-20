@@ -23,8 +23,6 @@ import java.util.*;
 import java.util.concurrent.*;
 
 import javax.persistence.EntityManager;
-import javax.transaction.Transactional;
-import javax.transaction.Transactional.TxType;
 
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.Validate;
@@ -35,6 +33,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
 import org.springframework.scheduling.concurrent.CustomizableThreadFactory;
 import org.springframework.transaction.*;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.*;
 
 import com.google.common.annotations.VisibleForTesting;
@@ -106,7 +106,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 	}
 
 	@Override
-	@Transactional(value = TxType.NOT_SUPPORTED)
+	@Transactional(propagation=Propagation.SUPPORTS)
 	public List<Long> getResources(final String theUuid, int theFrom, int theTo) {
 		if (myNeverUseLocalSearchForUnitTests == false) {
 			SearchTask task = myIdToSearchTask.get(theUuid);
@@ -116,7 +116,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 		}
 
 		TransactionTemplate txTemplate = new TransactionTemplate(myManagedTxManager);
-		txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+		txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
 
 		Search search;
 		StopWatch sw = new StopWatch();
