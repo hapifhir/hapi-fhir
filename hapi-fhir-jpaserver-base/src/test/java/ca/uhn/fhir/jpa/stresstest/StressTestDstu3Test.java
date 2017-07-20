@@ -106,12 +106,12 @@ public class StressTestDstu3Test extends BaseResourceProviderDstu3Test {
 
 		List<BaseTask> tasks = Lists.newArrayList();
 		try {
-			for (int threadIndex = 0; threadIndex < 8; threadIndex++) {
+			for (int threadIndex = 0; threadIndex < 5; threadIndex++) {
 				SearchTask task = new SearchTask();
 				tasks.add(task);
 				task.start();
 			}
-			for (int threadIndex = 0; threadIndex < 8; threadIndex++) {
+			for (int threadIndex = 0; threadIndex < 5; threadIndex++) {
 				CreateTask task = new CreateTask();
 				tasks.add(task);
 				task.start();
@@ -165,7 +165,7 @@ public class StressTestDstu3Test extends BaseResourceProviderDstu3Test {
 		@Override
 		public void run() {
 			CloseableHttpResponse getResp = null;
-			for (int i = 0; i < 20; i++) {
+			for (int i = 0; i < 10; i++) {
 				try {
 					Bundle respBundle;
 					
