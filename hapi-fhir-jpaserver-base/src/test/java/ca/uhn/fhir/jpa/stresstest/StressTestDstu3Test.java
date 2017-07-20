@@ -42,6 +42,37 @@ public class StressTestDstu3Test extends BaseResourceProviderDstu3Test {
 		
 		ourRestServer.unregisterInterceptor(myRequestValidatingInterceptor);
 	}
+
+	
+	@Test
+	public void testMultithreadedSearch() throws Exception {
+		Bundle input = new Bundle();
+		input.setType(BundleType.TRANSACTION);
+		for (int i = 0; i < 500; i++) {
+			Patient p = new Patient();
+			p.addIdentifier().setSystem("http://test").setValue("BAR");
+			input.addEntry().setResource(p).getRequest().setMethod(HTTPVerb.POST).setUrl("Patient");
+		}
+		ourClient.transaction().withBundle(input).execute();
+		
+		
+		List<BaseTask> tasks = Lists.newArrayList();
+		try {
+			for (int threadIndex = 0; threadIndex < 10; threadIndex++) {
+				SearchTask task = new SearchTask();
+				tasks.add(task);
+				task.start();
+			}
+		} finally {
+			for (BaseTask next : tasks) {
+				next.join();
+			}
+		}
+
+		validateNoErrors(tasks);
+
+	}
+	
 	
 	/**
 	 * This test prevents a deadlock that was detected with a large number of 
@@ -89,6 +120,10 @@ public class StressTestDstu3Test extends BaseResourceProviderDstu3Test {
 			}
 		}
 
+		validateNoErrors(tasks);
+	}
+
+	private void validateNoErrors(List<BaseTask> tasks) {
 		int total = 0;
 		for (BaseTask next : tasks) {
 			if (next.getError() != null) {
