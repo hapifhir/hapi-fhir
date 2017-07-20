@@ -164,6 +164,18 @@
 				Fix a typo in the documentation. Thanks to Saren Currie
 				for the pull request!
 			</action>
+			<action type="add" issue="689">
+				Add a command line flag to the CLI tool to allow configuration of the
+				server search result cache timeout period. Thanks to Eugene Lubarsky
+				for the pull request!
+			</action>
+			<action type="fix" issue="683">
+				Correct an issue with the model classes for STU3 where any classes 
+				containing the @ChildOrder annotation (basically the conformance
+				resources) will not correctly set the order if any of the
+				elements are a choice type (i.e. named "foo[x]"). Thanks to
+				GitHub user @CarthageKing for the pull request!
+			</action>
 		</release>
 		<release version="2.5" date="2017-06-08">
 			<action type="fix">

@@ -21,6 +21,7 @@ import org.springframework.web.context.ContextLoader;
 import org.springframework.web.context.ContextLoaderListener;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 
+import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.demo.ContextHolder;
 import ca.uhn.fhir.jpa.demo.FhirServerConfig;
 import ca.uhn.fhir.jpa.demo.FhirServerConfigDstu3;
@@ -30,6 +31,7 @@ public class RunServerCommand extends BaseCommand {
 	private static final String OPTION_DISABLE_REFERENTIAL_INTEGRITY = "disable-referential-integrity";
 	private static final String OPTION_LOWMEM = "lowmem";
 	private static final String OPTION_ALLOW_EXTERNAL_REFS = "allow-external-refs";
+	private static final String OPTION_REUSE_SEARCH_RESULTS_MILLIS = "reuse-search-results-milliseconds";
 	private static final int DEFAULT_PORT = 8080;
 	private static final String OPTION_P = "p";
 
@@ -51,6 +53,10 @@ public class RunServerCommand extends BaseCommand {
 		options.addOption(null, OPTION_LOWMEM, false, "If this flag is set, the server will operate in low memory mode (some features disabled)");
 		options.addOption(null, OPTION_ALLOW_EXTERNAL_REFS, false, "If this flag is set, the server will allow resources to be persisted contaning external resource references");
 		options.addOption(null, OPTION_DISABLE_REFERENTIAL_INTEGRITY, false, "If this flag is set, the server will not enforce referential integrity");
+
+		Long defaultReuseSearchResults = DaoConfig.DEFAULT_REUSE_CACHED_SEARCH_RESULTS_FOR_MILLIS;
+		String defaultReuseSearchResultsStr = defaultReuseSearchResults == null ? "off" : String.valueOf(defaultReuseSearchResults);
+		options.addOption(null, OPTION_REUSE_SEARCH_RESULTS_MILLIS, true, "The time in milliseconds within which the same results will be returned for multiple identical searches, or \"off\" (default is " + defaultReuseSearchResultsStr + ")");
 		return options;
 	}
 
@@ -58,7 +64,7 @@ public class RunServerCommand extends BaseCommand {
 		try {
 			return Integer.parseInt(theCommandLine.getOptionValue(opt, Integer.toString(defaultPort)));
 		} catch (NumberFormatException e) {
-			throw new ParseException("Invalid value '" + theCommandLine.getOptionValue(opt) + " (must be numeric)");
+			throw new ParseException("Invalid value '" + theCommandLine.getOptionValue(opt) + "' (must be numeric)");
 		}
 	}
 
@@ -79,6 +85,25 @@ public class RunServerCommand extends BaseCommand {
 		if (theCommandLine.hasOption(OPTION_DISABLE_REFERENTIAL_INTEGRITY)) {
 			ourLog.info("Server is configured to not enforce referential integrity");
 			ContextHolder.setDisableReferentialIntegrity(true);
+		}
+
+		String reuseSearchResults = theCommandLine.getOptionValue(OPTION_REUSE_SEARCH_RESULTS_MILLIS);
+		if (reuseSearchResults != null) {
+			if (reuseSearchResults.equals("off")) {
+				ourLog.info("Server is configured to not reuse search results");
+				ContextHolder.setReuseCachedSearchResultsForMillis(null);
+			} else {
+				try {
+					long reuseSearchResultsMillis = Long.parseLong(reuseSearchResults);
+					if (reuseSearchResultsMillis < 0) {
+						throw new NumberFormatException("expected a positive integer");
+					}
+					ourLog.info("Server is configured to reuse search results for " + String.valueOf(reuseSearchResultsMillis) + " milliseconds");
+					ContextHolder.setReuseCachedSearchResultsForMillis(reuseSearchResultsMillis);
+				} catch (NumberFormatException e) {
+					throw new ParseException("Invalid value '" + reuseSearchResults + "' (must be a positive integer)");
+				}
+			}
 		}
 
 		ContextHolder.setCtx(getSpecVersionContext(theCommandLine));
