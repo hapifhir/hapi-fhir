@@ -34,8 +34,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.support.TransactionCallback;
-import org.springframework.transaction.support.TransactionTemplate;
+import org.springframework.transaction.support.*;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.IDao;
@@ -113,7 +112,7 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 		return retVal;
 	}
 
-	protected List<IBaseResource> doSearchOrEverythingInTransaction(final int theFromIndex, final int theToIndex) {
+	protected List<IBaseResource> doSearchOrEverything(final int theFromIndex, final int theToIndex) {
 		ISearchBuilder sb = myDao.newSearchBuilder();
 
 		String resourceName = mySearchEntity.getResourceType();
@@ -175,22 +174,26 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 
 		TransactionTemplate template = new TransactionTemplate(myPlatformTransactionManager);
 
-		return template.execute(new TransactionCallback<List<IBaseResource>>() {
+		template.execute(new TransactionCallbackWithoutResult() {
 			@Override
-			public List<IBaseResource> doInTransaction(TransactionStatus theStatus) {
+			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
 				ensureSearchEntityLoaded();
-
-				switch (mySearchEntity.getSearchType()) {
-				case HISTORY:
-					return doHistoryInTransaction(theFromIndex, theToIndex);
-				case SEARCH:
-				case EVERYTHING:
-				default:
-					return doSearchOrEverythingInTransaction(theFromIndex, theToIndex);
-				}
 			}
-
 		});
+
+		switch (mySearchEntity.getSearchType()) {
+		case HISTORY:
+			return template.execute(new TransactionCallback<List<IBaseResource>>() {
+				@Override
+				public List<IBaseResource> doInTransaction(TransactionStatus theStatus) {
+					return doHistoryInTransaction(theFromIndex, theToIndex);
+				}
+			});
+		case SEARCH:
+		case EVERYTHING:
+		default:
+			return doSearchOrEverything(theFromIndex, theToIndex);
+		}
 	}
 
 	public String getUuid() {

@@ -106,7 +106,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 	}
 
 	@Override
-	@Transactional(propagation=Propagation.SUPPORTS)
+	@Transactional(propagation=Propagation.NEVER)
 	public List<Long> getResources(final String theUuid, int theFrom, int theTo) {
 		if (myNeverUseLocalSearchForUnitTests == false) {
 			SearchTask task = myIdToSearchTask.get(theUuid);
