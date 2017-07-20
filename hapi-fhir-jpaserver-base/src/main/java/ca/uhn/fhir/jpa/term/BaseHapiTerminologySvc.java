@@ -440,7 +440,7 @@ public abstract class BaseHapiTerminologySvc implements IHapiTerminologySvc {
 	}
 
 	@Scheduled(fixedRate = 5000)
-	@Transactional(propagation = Propagation.NOT_SUPPORTED)
+	@Transactional(propagation = Propagation.NEVER)
 	@Override
 	public synchronized void saveDeferred() {
 		if (!myProcessDeferred) {

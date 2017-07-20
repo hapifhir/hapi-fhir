@@ -81,14 +81,15 @@ public class StaleSearchDeletingSvcImpl implements IStaleSearchDeletingSvc {
 			}
 		});
 
-		long total = tt.execute(new TransactionCallback<Long>() {
-			@Override
-			public Long doInTransaction(TransactionStatus theStatus) {
-				return mySearchDao.count();
-			}
-		});
-
-		ourLog.info("Deleted {} searches, {} remaining", count, total);
+		if (count > 0) {
+			long total = tt.execute(new TransactionCallback<Long>() {
+				@Override
+				public Long doInTransaction(TransactionStatus theStatus) {
+					return mySearchDao.count();
+				}
+			});
+			ourLog.info("Deleted {} searches, {} remaining", count, total);
+		}
 
 	}
 
