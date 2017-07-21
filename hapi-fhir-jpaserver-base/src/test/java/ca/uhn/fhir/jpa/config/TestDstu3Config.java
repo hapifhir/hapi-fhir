@@ -43,8 +43,7 @@ public class TestDstu3Config extends BaseJavaConfigDstu3 {
 		 * and catch any potential deadlocks caused by database connection
 		 * starvation
 		 */
-		int maxThreads = (int)(Math.random() * 6) + 2;
-		maxThreads = 2;
+		int maxThreads = (int)(Math.random() * 6) + 1;
 		retVal.setMaxTotal(maxThreads);
 
 		DataSource dataSource = ProxyDataSourceBuilder
