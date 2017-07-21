@@ -177,8 +177,17 @@
 				GitHub user @CarthageKing for the pull request!
 			</action>
 			<action type="fix">
-				Fix potential deadlock in stale search deleting task in JPA server
+				Fix potential deadlock in stale search deleting task in JPA server, as well
+				as potential deadlock when executing transactions containing nested
+				searches when operating under extremely heavy load.
 			</action>
+			<action type="add">
+				JPA server transaction operations now put OperationOutcome resources resulting
+				from actions in 
+				<![CDATA[<code>Bundle.entry.response.outcome</code>]]>
+				instead of the previous
+				<![CDATA[<code>Bundle.entry.resource</code>]]>
+			<action>
 		</release>
 		<release version="2.5" date="2017-06-08">
 			<action type="fix">

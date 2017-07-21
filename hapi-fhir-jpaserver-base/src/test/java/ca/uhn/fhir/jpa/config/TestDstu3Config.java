@@ -44,6 +44,7 @@ public class TestDstu3Config extends BaseJavaConfigDstu3 {
 		 * starvation
 		 */
 		int maxThreads = (int)(Math.random() * 6) + 2;
+		maxThreads = 2;
 		retVal.setMaxTotal(maxThreads);
 
 		DataSource dataSource = ProxyDataSourceBuilder
