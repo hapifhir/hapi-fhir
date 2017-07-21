@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.config;
 
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
@@ -8,9 +10,7 @@ import javax.sql.DataSource;
 
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.hibernate.jpa.HibernatePersistenceProvider;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Lazy;
+import org.springframework.context.annotation.*;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
@@ -18,21 +18,51 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
-import net.ttddyy.dsproxy.listener.logging.SLF4JLogLevel;
 import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
 
 @Configuration
 @EnableTransactionManagement()
 public class TestDstu3Config extends BaseJavaConfigDstu3 {
 
+	static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TestDstu3Config.class);
+
 	@Bean()
 	public DaoConfig daoConfig() {
 		return new DaoConfig();
 	}
 
+	private boolean myLogConnection = false;
+
 	@Bean()
 	public DataSource dataSource() {
-		BasicDataSource retVal = new BasicDataSource();
+		BasicDataSource retVal = new BasicDataSource() {
+
+			@Override
+			public Connection getConnection() throws SQLException {
+				if (myLogConnection) {
+					logGetConnectionStackTrace();
+					return new ConnectionWrapper(super.getConnection());
+				} else {
+					return super.getConnection();
+				}
+			}
+
+			private void logGetConnectionStackTrace() {
+				try {
+					throw new Exception();
+				} catch (Exception e) {
+					StringBuilder b = new StringBuilder();
+					b.append("New connection request:");
+					for (StackTraceElement next : e.getStackTrace()) {
+						if (next.getClassName().contains("fhir")) {
+							b.append("\n   ").append(next.getClassName()).append(" ").append(next.getFileName()).append(":").append(next.getLineNumber());
+						}
+					}
+					ourLog.info(b.toString());
+				}
+			}
+
+		};
 		retVal.setDriver(new org.apache.derby.jdbc.EmbeddedDriver());
 		retVal.setUrl("jdbc:derby:memory:myUnitTestDB;create=true");
 		retVal.setUsername("");
@@ -43,24 +73,17 @@ public class TestDstu3Config extends BaseJavaConfigDstu3 {
 		 * and catch any potential deadlocks caused by database connection
 		 * starvation
 		 */
-		int maxThreads = (int)(Math.random() * 6) + 1;
+		int maxThreads = (int) (Math.random() * 6) + 1;
 		retVal.setMaxTotal(maxThreads);
 
 		DataSource dataSource = ProxyDataSourceBuilder
 				.create(retVal)
-//				.logQueryBySlf4j(SLF4JLogLevel.INFO, "SQL")
+				// .logQueryBySlf4j(SLF4JLogLevel.INFO, "SQL")
 				.logSlowQueryBySlf4j(10, TimeUnit.SECONDS)
 				.countQuery()
 				.build();
 
 		return dataSource;
-	}
-
-	@Bean()
-	public JpaTransactionManager transactionManager(EntityManagerFactory entityManagerFactory) {
-		JpaTransactionManager retVal = new JpaTransactionManager();
-		retVal.setEntityManagerFactory(entityManagerFactory);
-		return retVal;
 	}
 
 	@Bean()
@@ -100,6 +123,13 @@ public class TestDstu3Config extends BaseJavaConfigDstu3 {
 		requestValidator.addValidatorModule(instanceValidatorDstu3());
 
 		return requestValidator;
+	}
+
+	@Bean()
+	public JpaTransactionManager transactionManager(EntityManagerFactory entityManagerFactory) {
+		JpaTransactionManager retVal = new JpaTransactionManager();
+		retVal.setEntityManagerFactory(entityManagerFactory);
+		return retVal;
 	}
 
 }

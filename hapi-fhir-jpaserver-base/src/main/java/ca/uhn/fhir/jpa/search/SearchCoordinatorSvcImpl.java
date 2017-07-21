@@ -78,13 +78,13 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 
 	private int mySyncSize = DEFAULT_SYNC_SIZE;
 
-//	@Autowired
-//	private DataSource myDataSource;
-//	@PostConstruct
-//	public void start() {
-//		JpaTransactionManager txManager = (JpaTransactionManager) myManagedTxManager;
-//	}
-	
+	// @Autowired
+	// private DataSource myDataSource;
+	// @PostConstruct
+	// public void start() {
+	// JpaTransactionManager txManager = (JpaTransactionManager) myManagedTxManager;
+	// }
+
 	/**
 	 * Constructor
 	 */
@@ -106,7 +106,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 	}
 
 	@Override
-	@Transactional(propagation=Propagation.NEVER)
+	@Transactional(propagation = Propagation.NEVER)
 	public List<Long> getResources(final String theUuid, int theFrom, int theTo) {
 		if (myNeverUseLocalSearchForUnitTests == false) {
 			SearchTask task = myIdToSearchTask.get(theUuid);
@@ -186,9 +186,9 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 	}
 
 	@Override
-	public IBundleProvider registerSearch(final IDao theCallingDao, SearchParameterMap theParams, String theResourceType) {
+	public IBundleProvider registerSearch(final IDao theCallingDao, final SearchParameterMap theParams, String theResourceType) {
 		StopWatch w = new StopWatch();
-		String searchUuid = UUID.randomUUID().toString();
+		final String searchUuid = UUID.randomUUID().toString();
 
 		Class<? extends IBaseResource> resourceTypeClass = myContext.getResourceDefinition(theResourceType).getImplementingClass();
 		final ISearchBuilder sb = theCallingDao.newSearchBuilder();
@@ -196,36 +196,37 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 
 		if (theParams.isLoadSynchronous()) {
 
-			// Load the results synchronously
-			final List<Long> pids = new ArrayList<Long>();
-
-			Iterator<Long> resultIter = sb.createQuery(theParams, searchUuid);
-			while (resultIter.hasNext()) {
-				pids.add(resultIter.next());
-				if (theParams.getLoadSynchronousUpTo() != null && pids.size() >= theParams.getLoadSynchronousUpTo()) {
-					break;
-				}
-			}
-
-			/*
-			 * For synchronous queries, we load all the includes right away
-			 * since we're returning a static bundle with all the results
-			 * pre-loaded. This is ok because syncronous requests are not
-			 * expected to be paged
-			 * 
-			 * On the other hand for async queries we load includes/revincludes
-			 * individually for pages as we return them to clients
-			 */
-			final Set<Long> includedPids = new HashSet<Long>();
-			includedPids.addAll(sb.loadReverseIncludes(theCallingDao, myContext, myEntityManager, pids, theParams.getRevIncludes(), true, theParams.getLastUpdated()));
-			includedPids.addAll(sb.loadReverseIncludes(theCallingDao, myContext, myEntityManager, pids, theParams.getIncludes(), false, theParams.getLastUpdated()));
-
 			// Execute the query and make sure we return distinct results
 			TransactionTemplate txTemplate = new TransactionTemplate(myManagedTxManager);
 			txTemplate.setPropagationBehavior(TransactionTemplate.PROPAGATION_REQUIRED);
 			return txTemplate.execute(new TransactionCallback<SimpleBundleProvider>() {
 				@Override
 				public SimpleBundleProvider doInTransaction(TransactionStatus theStatus) {
+
+					// Load the results synchronously
+					final List<Long> pids = new ArrayList<Long>();
+
+					Iterator<Long> resultIter = sb.createQuery(theParams, searchUuid);
+					while (resultIter.hasNext()) {
+						pids.add(resultIter.next());
+						if (theParams.getLoadSynchronousUpTo() != null && pids.size() >= theParams.getLoadSynchronousUpTo()) {
+							break;
+						}
+					}
+
+					/*
+					 * For synchronous queries, we load all the includes right away
+					 * since we're returning a static bundle with all the results
+					 * pre-loaded. This is ok because syncronous requests are not
+					 * expected to be paged
+					 * 
+					 * On the other hand for async queries we load includes/revincludes
+					 * individually for pages as we return them to clients
+					 */
+					final Set<Long> includedPids = new HashSet<Long>();
+					includedPids.addAll(sb.loadReverseIncludes(theCallingDao, myContext, myEntityManager, pids, theParams.getRevIncludes(), true, theParams.getLastUpdated()));
+					includedPids.addAll(sb.loadReverseIncludes(theCallingDao, myContext, myEntityManager, pids, theParams.getIncludes(), false, theParams.getLastUpdated()));
+
 					List<IBaseResource> resources = new ArrayList<IBaseResource>();
 					sb.loadResourcesByPid(pids, resources, includedPids, false, myEntityManager, myContext, theCallingDao);
 					return new SimpleBundleProvider(resources);
@@ -441,7 +442,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 
 			try {
 				saveSearch();
-				
+
 				TransactionTemplate txTemplate = new TransactionTemplate(myManagedTxManager);
 				txTemplate.setPropagationBehavior(TransactionTemplate.PROPAGATION_REQUIRES_NEW);
 				txTemplate.execute(new TransactionCallbackWithoutResult() {
@@ -454,7 +455,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 				ourLog.info("Completed search for {} resources in {}ms", mySyncedPids.size(), sw.getMillis());
 
 			} catch (Throwable t) {
-				
+
 				/*
 				 * Don't print a stack trace for client errors.. that's just noisy
 				 */
@@ -465,8 +466,8 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 						logged = true;
 						ourLog.warn("Failed during search due to invalid request: {}", t.toString());
 					}
-				} 
-				
+				}
+
 				if (!logged) {
 					ourLog.error("Failed during search loading after {}ms", sw.getMillis(), t);
 				}
