@@ -1,20 +1,7 @@
 package ca.uhn.fhir.jpa.provider.dstu3;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.containsInRelativeOrder;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.emptyString;
-import static org.hamcrest.Matchers.greaterThan;
-import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.hasItems;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.lessThanOrEqualTo;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.startsWith;
-import static org.hamcrest.Matchers.stringContainsInOrder;
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
@@ -1992,7 +1979,9 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			.execute();
 		
 		assertEquals(10, response.getEntry().size());
-		assertEquals(null, response.getTotalElement().getValueAsString());
+		if (response.getTotalElement().getValueAsString() != null) {
+			assertEquals("21", response.getTotalElement().getValueAsString());
+		}
 		assertThat(response.getLink("next").getUrl(), not(emptyString()));
 
 		// Load page 2
@@ -2001,7 +1990,9 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		response = ourClient.fetchResourceFromUrl(Bundle.class, nextUrl);
 
 		assertEquals(10, response.getEntry().size());
-		assertEquals(null, response.getTotalElement().getValueAsString());
+		if (response.getTotalElement().getValueAsString() != null) {
+			assertEquals("21", response.getTotalElement().getValueAsString());
+		}
 		assertThat(response.getLink("next").getUrl(), not(emptyString()));
 
 		// Load page 3
@@ -2011,7 +2002,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		response = ourClient.fetchResourceFromUrl(Bundle.class, nextUrl);
 
 		assertEquals(1, response.getEntry().size());
-		assertEquals(21, response.getTotal());
+		assertEquals("21", response.getTotalElement().getValueAsString());
 		assertEquals(null, response.getLink("next"));
 
 	}

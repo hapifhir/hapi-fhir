@@ -10,7 +10,7 @@ package ca.uhn.fhir.util;
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  * 
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -41,24 +41,6 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
  */
 public class OperationOutcomeUtil {
 
-//	/**
-//	 * Add an issue to an OperationOutcome
-//	 * 
-//	 * @param theCtx
-//	 *           The fhir context
-//	 * @param theOperationOutcome
-//	 *           The OO resource to add to
-//	 * @param theSeverity
-//	 *           The severity (e.g. "error")
-//	 * @param theDetails
-//	 *           The details string
-//	 * @param theCode 
-//	 */
-//	public static void addIssue(FhirContext theCtx, IBaseOperationOutcome theOperationOutcome, String theSeverity, String theDetails, String theCode) {
-//		IBase issue = createIssue(theCtx, theOperationOutcome);
-//		populateDetails(theCtx, issue, theSeverity, theDetails, null, theCode);
-//	}
-
 	/**
 	 * Add an issue to an OperationOutcome
 	 * 
@@ -67,10 +49,10 @@ public class OperationOutcomeUtil {
 	 * @param theOperationOutcome
 	 *           The OO resource to add to
 	 * @param theSeverity
-	 *           The severity (e.g. "error")
+	 *           The severity (fatal | error | warning | information)
 	 * @param theDetails
 	 *           The details string
-	 * @param theCode 
+	 * @param theCode
 	 */
 	public static void addIssue(FhirContext theCtx, IBaseOperationOutcome theOperationOutcome, String theSeverity, String theDetails, String theLocation, String theCode) {
 		IBase issue = createIssue(theCtx, theOperationOutcome);
@@ -150,7 +132,7 @@ public class OperationOutcomeUtil {
 		BaseRuntimeChildDefinition detailsChild;
 		if (theCtx.getVersion().getVersion().isNewerThan(FhirVersionEnum.DSTU1)) {
 			detailsChild = issueElement.getChildByName("diagnostics");
-			
+
 			BaseRuntimeChildDefinition codeChild = issueElement.getChildByName("code");
 			IPrimitiveType<?> codeElem = (IPrimitiveType<?>) codeChild.getChildByName("code").newInstance(codeChild.getInstanceConstructorArguments());
 			codeElem.setValueAsString(theCode);
@@ -158,7 +140,7 @@ public class OperationOutcomeUtil {
 		} else {
 			detailsChild = issueElement.getChildByName("details");
 		}
-		
+
 		BaseRuntimeElementDefinition<?> stringDef = detailsChild.getChildByName(detailsChild.getElementName());
 		BaseRuntimeChildDefinition severityChild = issueElement.getChildByName("severity");
 		BaseRuntimeChildDefinition locationChild = issueElement.getChildByName("location");

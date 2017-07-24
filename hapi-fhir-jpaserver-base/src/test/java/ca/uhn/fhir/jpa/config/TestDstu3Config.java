@@ -31,40 +31,55 @@ public class TestDstu3Config extends BaseJavaConfigDstu3 {
 		return new DaoConfig();
 	}
 
-	private boolean myLogConnection = false;
-
+	private Exception myLastStackTrace;
+	
 	@Bean()
 	public DataSource dataSource() {
 		BasicDataSource retVal = new BasicDataSource() {
 
+
 			@Override
 			public Connection getConnection() throws SQLException {
-				if (myLogConnection) {
+				ConnectionWrapper retVal;
+				try {
+					retVal = new ConnectionWrapper(super.getConnection());
+				} catch (Exception e) {
+					ourLog.error("Exceeded maximum wait for connection", e);
 					logGetConnectionStackTrace();
-					return new ConnectionWrapper(super.getConnection());
-				} else {
-					return super.getConnection();
+					System.exit(1);
+					retVal = null;
 				}
-			}
-
-			private void logGetConnectionStackTrace() {
+				
 				try {
 					throw new Exception();
 				} catch (Exception e) {
+					myLastStackTrace = e;
+				}
+				
+				return retVal;
+			}
+
+			private void logGetConnectionStackTrace() {
 					StringBuilder b = new StringBuilder();
-					b.append("New connection request:");
-					for (StackTraceElement next : e.getStackTrace()) {
-						if (next.getClassName().contains("fhir")) {
-							b.append("\n   ").append(next.getClassName()).append(" ").append(next.getFileName()).append(":").append(next.getLineNumber());
-						}
+					b.append("Last connection request stack trace:");
+					for (StackTraceElement next : myLastStackTrace.getStackTrace()) {
+							b.append("\n   ");
+							b.append(next.getClassName());
+							b.append(".");
+							b.append(next.getMethodName());
+							b.append("(");
+							b.append(next.getFileName());
+							b.append(":");
+							b.append(next.getLineNumber());
+							b.append(")");
 					}
 					ourLog.info(b.toString());
-				}
 			}
 
 		};
 		retVal.setDriver(new org.apache.derby.jdbc.EmbeddedDriver());
 		retVal.setUrl("jdbc:derby:memory:myUnitTestDB;create=true");
+		retVal.setMaxWaitMillis(10000);
 		retVal.setUsername("");
 		retVal.setPassword("");
 
