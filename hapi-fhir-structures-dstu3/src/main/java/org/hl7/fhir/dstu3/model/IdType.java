@@ -437,7 +437,7 @@ public final class IdType extends UriType implements IPrimitiveType<String>, IId
 
   @Override
   public boolean isEmpty() {
-    return isBlank(getValue());
+    return super.isEmpty() && isBlank(getValue());
   }
 
   @Override

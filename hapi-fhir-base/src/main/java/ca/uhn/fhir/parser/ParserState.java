@@ -1473,6 +1473,7 @@ class ParserState<T> {
 				push(newState);
 				return;
 			}
+      case ID_DATATYPE:
 			case PRIMITIVE_DATATYPE: {
 				RuntimePrimitiveDatatypeDefinition primitiveTarget = (RuntimePrimitiveDatatypeDefinition) target;
 				IPrimitiveType<?> newChildInstance = primitiveTarget.newInstance(myDefinition.getInstanceConstructorArguments());
@@ -2261,13 +2262,19 @@ class ParserState<T> {
 			String resourceName = myContext.getResourceDefinition(nextResource).getName();
 			String bundleIdPart = nextResource.getId().getIdPart();
 			if (isNotBlank(bundleIdPart)) {
-				// if (isNotBlank(entryBaseUrl)) {
-				// nextResource.setId(new IdDt(entryBaseUrl, resourceName, bundleIdPart, version));
-				// } else {
-				nextResource.setId(new IdDt(null, resourceName, bundleIdPart, version));
-				// }
+        // if (isNotBlank(entryBaseUrl)) {
+        // nextResource.setId(new IdDt(entryBaseUrl, resourceName, bundleIdPart, version));
+        // } else {
+        IdDt previousId = nextResource.getId();
+        nextResource.setId(new IdDt(null, resourceName, bundleIdPart, version));
+        // Copy extensions
+        if (!previousId.getAllUndeclaredExtensions().isEmpty()) {
+          for (final ExtensionDt ext : previousId.getAllUndeclaredExtensions()) {
+            nextResource.getId().addUndeclaredExtension(ext);
+          }
+        }
+       // }
 			}
-
 		}
 
 	}
