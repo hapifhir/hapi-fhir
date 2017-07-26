@@ -58,9 +58,13 @@
 				generated. This should not affect most users.
 			</action>
 			<action type="fix" issue="678">
-				FIx issue in SubscriptionInterceptor that caused interceptor to only
+				Fix issue in SubscriptionInterceptor that caused interceptor to only
 				actually notify listeners of the first 10 subscriptions. Thanks to Jeff Chung
 				for the pull request!
+			</action>
+			<action type="fix" issue="693">
+				Fix potential ConcurrentModificationException when adding subscriptions while
+				running under heavy load. Thanks to Jeff Chung for the pull request!
 			</action>
 			<action type="add">
 				JPA search now uses hibernate ScrollableResults instead of plain JPA List. This
