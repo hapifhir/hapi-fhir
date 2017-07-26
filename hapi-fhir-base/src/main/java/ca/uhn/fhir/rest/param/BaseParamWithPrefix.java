@@ -10,7 +10,7 @@ package ca.uhn.fhir.rest.param;
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  * 
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -44,8 +44,13 @@ public abstract class BaseParamWithPrefix<T extends BaseParam> extends BaseParam
 	String extractPrefixAndReturnRest(String theString) {
 		int offset = 0;
 		while (true) {
-			if (theString.length() == offset || Character.isDigit(theString.charAt(offset))) {
+			if (theString.length() == offset) {
 				break;
+			} else {
+				char nextChar = theString.charAt(offset);
+				if (nextChar == '-' || Character.isDigit(nextChar)) {
+					break;
+				}
 			}
 			offset++;
 		}
@@ -60,7 +65,7 @@ public abstract class BaseParamWithPrefix<T extends BaseParam> extends BaseParam
 	}
 
 	/**
-	 * @deprecated Use {@link #getPrefix() instead}
+	 * @deprecated Use {@link #getPrefix()} instead
 	 */
 	@Deprecated
 	public QuantityCompararatorEnum getComparator() {
@@ -68,7 +73,7 @@ public abstract class BaseParamWithPrefix<T extends BaseParam> extends BaseParam
 		if (prefix == null) {
 			return null;
 		}
-		
+
 		return QuantityCompararatorEnum.forCode(prefix.getDstu1Value());
 	}
 

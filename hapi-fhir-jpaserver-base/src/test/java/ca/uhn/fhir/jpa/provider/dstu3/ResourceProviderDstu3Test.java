@@ -11,6 +11,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.*;
+import java.math.BigDecimal;
 import java.net.*;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -3195,6 +3196,31 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		} catch (InvalidRequestException e) {
 			assertThat(e.getMessage(), containsString("Unable to handle quantity prefix \"eb\" for value: eb100||"));
 		}
+	}
+
+	@Test()
+	public void testSearchNegativeNumbers() throws Exception {
+		Observation o = new Observation();
+		o.setValue(new Quantity().setValue(new BigDecimal("-10")));
+		String oid1 = myObservationDao.create(o, mySrd).getId().toUnqualifiedVersionless().getValue();
+		
+		Observation o2 = new Observation();
+		o2.setValue(new Quantity().setValue(new BigDecimal("-20")));
+		String oid2 = myObservationDao.create(o2, mySrd).getId().toUnqualifiedVersionless().getValue();
+
+		HttpGet get = new HttpGet(ourServerBase + "/Observation?value-quantity=gt-15");
+		CloseableHttpResponse resp = ourHttpClient.execute(get);
+		try {
+			assertEquals(200, resp.getStatusLine().getStatusCode());
+			Bundle bundle = myFhirCtx.newXmlParser().parseResource(Bundle.class, IOUtils.toString(resp.getEntity().getContent(), Constants.CHARSET_UTF8));
+
+			List<String> ids = toUnqualifiedVersionlessIdValues(bundle);
+			assertThat(ids, contains(oid1));
+			assertThat(ids, not(contains(oid2)));
+		} finally {
+			IOUtils.closeQuietly(resp);
+		}
+
 	}
 
 	@Test(expected = InvalidRequestException.class)
