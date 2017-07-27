@@ -70,4 +70,7 @@ public class MarkdownType extends StringType implements Comparable<MarkdownType>
 		return new MarkdownType(getValue());
 	}
 
+	public String fhirType() {
+		return "markdown";		
+	}
 }

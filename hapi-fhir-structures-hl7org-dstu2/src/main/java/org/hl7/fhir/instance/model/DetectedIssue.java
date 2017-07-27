@@ -29,19 +29,14 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Wed, Jul 13, 2016 05:32+1000 for FHIR v1.0.2
+import java.util.*;
 
+import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
-import org.hl7.fhir.instance.utilities.Utilities;
+import org.hl7.fhir.utilities.Utilities;
 
-import ca.uhn.fhir.model.api.annotation.Block;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
-import ca.uhn.fhir.model.api.annotation.ResourceDef;
-import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.*;
 /**
  * Indicates an actual or potential clinical issue with or between one or more active or proposed clinical actions for a patient; e.g. Drug-drug interaction, Ineffective treatment frequency, Procedure-condition conflict, etc.
  */
@@ -65,7 +60,7 @@ public class DetectedIssue extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static DetectedIssueSeverity fromCode(String codeString) throws Exception {
+        public static DetectedIssueSeverity fromCode(String codeString) throws FHIRException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("high".equals(codeString))
@@ -74,7 +69,7 @@ public class DetectedIssue extends DomainResource {
           return MODERATE;
         if ("low".equals(codeString))
           return LOW;
-        throw new Exception("Unknown DetectedIssueSeverity code '"+codeString+"'");
+        throw new FHIRException("Unknown DetectedIssueSeverity code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -122,6 +117,20 @@ public class DetectedIssue extends DomainResource {
         if ("low".equals(codeString))
           return DetectedIssueSeverity.LOW;
         throw new IllegalArgumentException("Unknown DetectedIssueSeverity code '"+codeString+"'");
+        }
+        public Enumeration<DetectedIssueSeverity> fromType(Base code) throws FHIRException {
+          if (code == null || code.isEmpty())
+            return null;
+          String codeString = ((PrimitiveType) code).asStringValue();
+          if (codeString == null || "".equals(codeString))
+            return null;
+        if ("high".equals(codeString))
+          return new Enumeration<DetectedIssueSeverity>(this, DetectedIssueSeverity.HIGH);
+        if ("moderate".equals(codeString))
+          return new Enumeration<DetectedIssueSeverity>(this, DetectedIssueSeverity.MODERATE);
+        if ("low".equals(codeString))
+          return new Enumeration<DetectedIssueSeverity>(this, DetectedIssueSeverity.LOW);
+        throw new FHIRException("Unknown DetectedIssueSeverity code '"+codeString+"'");
         }
     public String toCode(DetectedIssueSeverity code) {
       if (code == DetectedIssueSeverity.HIGH)
@@ -303,6 +312,35 @@ public class DetectedIssue extends DomainResource {
           childrenList.add(new Property("author", "Reference(Practitioner)", "Identifies the practitioner who determined the mitigation and takes responsibility for the mitigation step occurring.", 0, java.lang.Integer.MAX_VALUE, author));
         }
 
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("action"))
+          this.action = castToCodeableConcept(value); // CodeableConcept
+        else if (name.equals("date"))
+          this.date = castToDateTime(value); // DateTimeType
+        else if (name.equals("author"))
+          this.author = castToReference(value); // Reference
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("action")) {
+          this.action = new CodeableConcept();
+          return this.action;
+        }
+        else if (name.equals("date")) {
+          throw new FHIRException("Cannot call addChild on a primitive type DetectedIssue.date");
+        }
+        else if (name.equals("author")) {
+          this.author = new Reference();
+          return this.author;
+        }
+        else
+          return super.addChild(name);
+      }
+
       public DetectedIssueMitigationComponent copy() {
         DetectedIssueMitigationComponent dst = new DetectedIssueMitigationComponent();
         copyValues(dst);
@@ -337,6 +375,11 @@ public class DetectedIssue extends DomainResource {
         return super.isEmpty() && (action == null || action.isEmpty()) && (date == null || date.isEmpty())
            && (author == null || author.isEmpty());
       }
+
+  public String fhirType() {
+    return "DetectedIssue.mitigation";
+
+  }
 
   }
 
@@ -863,6 +906,77 @@ public class DetectedIssue extends DomainResource {
         childrenList.add(new Property("reference", "uri", "The literature, knowledge-base or similar reference that describes the propensity for the detected issue identified.", 0, java.lang.Integer.MAX_VALUE, reference));
         childrenList.add(new Property("mitigation", "", "Indicates an action that has been taken or is committed to to reduce or eliminate the likelihood of the risk identified by the detected issue from manifesting.  Can also reflect an observation of known mitigating factors that may reduce/eliminate the need for any action.", 0, java.lang.Integer.MAX_VALUE, mitigation));
       }
+
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("patient"))
+          this.patient = castToReference(value); // Reference
+        else if (name.equals("category"))
+          this.category = castToCodeableConcept(value); // CodeableConcept
+        else if (name.equals("severity"))
+          this.severity = new DetectedIssueSeverityEnumFactory().fromType(value); // Enumeration<DetectedIssueSeverity>
+        else if (name.equals("implicated"))
+          this.getImplicated().add(castToReference(value));
+        else if (name.equals("detail"))
+          this.detail = castToString(value); // StringType
+        else if (name.equals("date"))
+          this.date = castToDateTime(value); // DateTimeType
+        else if (name.equals("author"))
+          this.author = castToReference(value); // Reference
+        else if (name.equals("identifier"))
+          this.identifier = castToIdentifier(value); // Identifier
+        else if (name.equals("reference"))
+          this.reference = castToUri(value); // UriType
+        else if (name.equals("mitigation"))
+          this.getMitigation().add((DetectedIssueMitigationComponent) value);
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("patient")) {
+          this.patient = new Reference();
+          return this.patient;
+        }
+        else if (name.equals("category")) {
+          this.category = new CodeableConcept();
+          return this.category;
+        }
+        else if (name.equals("severity")) {
+          throw new FHIRException("Cannot call addChild on a primitive type DetectedIssue.severity");
+        }
+        else if (name.equals("implicated")) {
+          return addImplicated();
+        }
+        else if (name.equals("detail")) {
+          throw new FHIRException("Cannot call addChild on a primitive type DetectedIssue.detail");
+        }
+        else if (name.equals("date")) {
+          throw new FHIRException("Cannot call addChild on a primitive type DetectedIssue.date");
+        }
+        else if (name.equals("author")) {
+          this.author = new Reference();
+          return this.author;
+        }
+        else if (name.equals("identifier")) {
+          this.identifier = new Identifier();
+          return this.identifier;
+        }
+        else if (name.equals("reference")) {
+          throw new FHIRException("Cannot call addChild on a primitive type DetectedIssue.reference");
+        }
+        else if (name.equals("mitigation")) {
+          return addMitigation();
+        }
+        else
+          return super.addChild(name);
+      }
+
+  public String fhirType() {
+    return "DetectedIssue";
+
+  }
 
       public DetectedIssue copy() {
         DetectedIssue dst = new DetectedIssue();

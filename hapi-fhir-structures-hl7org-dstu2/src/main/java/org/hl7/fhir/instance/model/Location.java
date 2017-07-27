@@ -31,18 +31,15 @@ import java.math.BigDecimal;
   
 */
 
-// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
+// Generated on Wed, Jul 13, 2016 05:32+1000 for FHIR v1.0.2
 import java.util.ArrayList;
 import java.util.List;
 
+import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
-import org.hl7.fhir.instance.utilities.Utilities;
+import org.hl7.fhir.utilities.Utilities;
 
-import ca.uhn.fhir.model.api.annotation.Block;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
-import ca.uhn.fhir.model.api.annotation.ResourceDef;
-import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.*;
 /**
  * Details and position information for a physical place where services are provided  and resources and participants may be stored, found, contained or accommodated.
  */
@@ -66,7 +63,7 @@ public class Location extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static LocationStatus fromCode(String codeString) throws Exception {
+        public static LocationStatus fromCode(String codeString) throws FHIRException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("active".equals(codeString))
@@ -75,7 +72,7 @@ public class Location extends DomainResource {
           return SUSPENDED;
         if ("inactive".equals(codeString))
           return INACTIVE;
-        throw new Exception("Unknown LocationStatus code '"+codeString+"'");
+        throw new FHIRException("Unknown LocationStatus code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -124,6 +121,20 @@ public class Location extends DomainResource {
           return LocationStatus.INACTIVE;
         throw new IllegalArgumentException("Unknown LocationStatus code '"+codeString+"'");
         }
+        public Enumeration<LocationStatus> fromType(Base code) throws FHIRException {
+          if (code == null || code.isEmpty())
+            return null;
+          String codeString = ((PrimitiveType) code).asStringValue();
+          if (codeString == null || "".equals(codeString))
+            return null;
+        if ("active".equals(codeString))
+          return new Enumeration<LocationStatus>(this, LocationStatus.ACTIVE);
+        if ("suspended".equals(codeString))
+          return new Enumeration<LocationStatus>(this, LocationStatus.SUSPENDED);
+        if ("inactive".equals(codeString))
+          return new Enumeration<LocationStatus>(this, LocationStatus.INACTIVE);
+        throw new FHIRException("Unknown LocationStatus code '"+codeString+"'");
+        }
     public String toCode(LocationStatus code) {
       if (code == LocationStatus.ACTIVE)
         return "active";
@@ -148,14 +159,14 @@ public class Location extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static LocationMode fromCode(String codeString) throws Exception {
+        public static LocationMode fromCode(String codeString) throws FHIRException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("instance".equals(codeString))
           return INSTANCE;
         if ("kind".equals(codeString))
           return KIND;
-        throw new Exception("Unknown LocationMode code '"+codeString+"'");
+        throw new FHIRException("Unknown LocationMode code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -197,6 +208,18 @@ public class Location extends DomainResource {
         if ("kind".equals(codeString))
           return LocationMode.KIND;
         throw new IllegalArgumentException("Unknown LocationMode code '"+codeString+"'");
+        }
+        public Enumeration<LocationMode> fromType(Base code) throws FHIRException {
+          if (code == null || code.isEmpty())
+            return null;
+          String codeString = ((PrimitiveType) code).asStringValue();
+          if (codeString == null || "".equals(codeString))
+            return null;
+        if ("instance".equals(codeString))
+          return new Enumeration<LocationMode>(this, LocationMode.INSTANCE);
+        if ("kind".equals(codeString))
+          return new Enumeration<LocationMode>(this, LocationMode.KIND);
+        throw new FHIRException("Unknown LocationMode code '"+codeString+"'");
         }
     public String toCode(LocationMode code) {
       if (code == LocationMode.INSTANCE)
@@ -394,6 +417,33 @@ public class Location extends DomainResource {
           childrenList.add(new Property("altitude", "decimal", "Altitude. The value domain and the interpretation are the same as for the text of the altitude element in KML (see notes below).", 0, java.lang.Integer.MAX_VALUE, altitude));
         }
 
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("longitude"))
+          this.longitude = castToDecimal(value); // DecimalType
+        else if (name.equals("latitude"))
+          this.latitude = castToDecimal(value); // DecimalType
+        else if (name.equals("altitude"))
+          this.altitude = castToDecimal(value); // DecimalType
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("longitude")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Location.longitude");
+        }
+        else if (name.equals("latitude")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Location.latitude");
+        }
+        else if (name.equals("altitude")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Location.altitude");
+        }
+        else
+          return super.addChild(name);
+      }
+
       public LocationPositionComponent copy() {
         LocationPositionComponent dst = new LocationPositionComponent();
         copyValues(dst);
@@ -429,6 +479,11 @@ public class Location extends DomainResource {
         return super.isEmpty() && (longitude == null || longitude.isEmpty()) && (latitude == null || latitude.isEmpty())
            && (altitude == null || altitude.isEmpty());
       }
+
+  public String fhirType() {
+    return "Location.position";
+
+  }
 
   }
 
@@ -1010,6 +1065,89 @@ public class Location extends DomainResource {
         childrenList.add(new Property("managingOrganization", "Reference(Organization)", "The organization responsible for the provisioning and upkeep of the location.", 0, java.lang.Integer.MAX_VALUE, managingOrganization));
         childrenList.add(new Property("partOf", "Reference(Location)", "Another Location which this Location is physically part of.", 0, java.lang.Integer.MAX_VALUE, partOf));
       }
+
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("identifier"))
+          this.getIdentifier().add(castToIdentifier(value));
+        else if (name.equals("status"))
+          this.status = new LocationStatusEnumFactory().fromType(value); // Enumeration<LocationStatus>
+        else if (name.equals("name"))
+          this.name = castToString(value); // StringType
+        else if (name.equals("description"))
+          this.description = castToString(value); // StringType
+        else if (name.equals("mode"))
+          this.mode = new LocationModeEnumFactory().fromType(value); // Enumeration<LocationMode>
+        else if (name.equals("type"))
+          this.type = castToCodeableConcept(value); // CodeableConcept
+        else if (name.equals("telecom"))
+          this.getTelecom().add(castToContactPoint(value));
+        else if (name.equals("address"))
+          this.address = castToAddress(value); // Address
+        else if (name.equals("physicalType"))
+          this.physicalType = castToCodeableConcept(value); // CodeableConcept
+        else if (name.equals("position"))
+          this.position = (LocationPositionComponent) value; // LocationPositionComponent
+        else if (name.equals("managingOrganization"))
+          this.managingOrganization = castToReference(value); // Reference
+        else if (name.equals("partOf"))
+          this.partOf = castToReference(value); // Reference
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("identifier")) {
+          return addIdentifier();
+        }
+        else if (name.equals("status")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Location.status");
+        }
+        else if (name.equals("name")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Location.name");
+        }
+        else if (name.equals("description")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Location.description");
+        }
+        else if (name.equals("mode")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Location.mode");
+        }
+        else if (name.equals("type")) {
+          this.type = new CodeableConcept();
+          return this.type;
+        }
+        else if (name.equals("telecom")) {
+          return addTelecom();
+        }
+        else if (name.equals("address")) {
+          this.address = new Address();
+          return this.address;
+        }
+        else if (name.equals("physicalType")) {
+          this.physicalType = new CodeableConcept();
+          return this.physicalType;
+        }
+        else if (name.equals("position")) {
+          this.position = new LocationPositionComponent();
+          return this.position;
+        }
+        else if (name.equals("managingOrganization")) {
+          this.managingOrganization = new Reference();
+          return this.managingOrganization;
+        }
+        else if (name.equals("partOf")) {
+          this.partOf = new Reference();
+          return this.partOf;
+        }
+        else
+          return super.addChild(name);
+      }
+
+  public String fhirType() {
+    return "Location";
+
+  }
 
       public Location copy() {
         Location dst = new Location();

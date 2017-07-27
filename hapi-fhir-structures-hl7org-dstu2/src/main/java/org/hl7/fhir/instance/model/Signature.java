@@ -29,16 +29,13 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Wed, Jul 13, 2016 05:32+1000 for FHIR v1.0.2
+import java.util.*;
 
+import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.DatatypeDef;
-import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.*;
 /**
  * A digital signature along with supporting context. The signature may be electronic/cryptographic in nature, or a graphical image representing a hand-written signature, or a signature process. Different Signature approaches have different utilities.
  */
@@ -195,26 +192,26 @@ public class Signature extends Type implements ICompositeType {
     /**
      * @return {@link #who} (A reference to an application-usable description of the person that signed the certificate (e.g. the signature used their private key).)
      */
-    public UriType getWhoUriType() throws Exception { 
+    public UriType getWhoUriType() throws FHIRException { 
       if (!(this.who instanceof UriType))
-        throw new Exception("Type mismatch: the type UriType was expected, but "+this.who.getClass().getName()+" was encountered");
+        throw new FHIRException("Type mismatch: the type UriType was expected, but "+this.who.getClass().getName()+" was encountered");
       return (UriType) this.who;
     }
 
-    public boolean hasWhoUriType() throws Exception { 
+    public boolean hasWhoUriType() { 
       return this.who instanceof UriType;
     }
 
     /**
      * @return {@link #who} (A reference to an application-usable description of the person that signed the certificate (e.g. the signature used their private key).)
      */
-    public Reference getWhoReference() throws Exception { 
+    public Reference getWhoReference() throws FHIRException { 
       if (!(this.who instanceof Reference))
-        throw new Exception("Type mismatch: the type Reference was expected, but "+this.who.getClass().getName()+" was encountered");
+        throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.who.getClass().getName()+" was encountered");
       return (Reference) this.who;
     }
 
-    public boolean hasWhoReference() throws Exception { 
+    public boolean hasWhoReference() { 
       return this.who instanceof Reference;
     }
 
@@ -328,6 +325,53 @@ public class Signature extends Type implements ICompositeType {
         childrenList.add(new Property("contentType", "code", "A mime type that indicates the technical format of the signature. Important mime types are application/signature+xml for X ML DigSig, application/jwt for JWT, and image/* for a graphical image of a signature.", 0, java.lang.Integer.MAX_VALUE, contentType));
         childrenList.add(new Property("blob", "base64Binary", "The base64 encoding of the Signature content.", 0, java.lang.Integer.MAX_VALUE, blob));
       }
+
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("type"))
+          this.getType().add(castToCoding(value));
+        else if (name.equals("when"))
+          this.when = castToInstant(value); // InstantType
+        else if (name.equals("who[x]"))
+          this.who = (Type) value; // Type
+        else if (name.equals("contentType"))
+          this.contentType = castToCode(value); // CodeType
+        else if (name.equals("blob"))
+          this.blob = castToBase64Binary(value); // Base64BinaryType
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("type")) {
+          return addType();
+        }
+        else if (name.equals("when")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Signature.when");
+        }
+        else if (name.equals("whoUri")) {
+          this.who = new UriType();
+          return this.who;
+        }
+        else if (name.equals("whoReference")) {
+          this.who = new Reference();
+          return this.who;
+        }
+        else if (name.equals("contentType")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Signature.contentType");
+        }
+        else if (name.equals("blob")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Signature.blob");
+        }
+        else
+          return super.addChild(name);
+      }
+
+  public String fhirType() {
+    return "Signature";
+
+  }
 
       public Signature copy() {
         Signature dst = new Signature();

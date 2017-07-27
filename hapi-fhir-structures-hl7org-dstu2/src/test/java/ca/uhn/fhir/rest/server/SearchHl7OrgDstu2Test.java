@@ -92,7 +92,8 @@ public class SearchHl7OrgDstu2Test {
 	@Test
 	public void testResultBundleHasUpdateTime() throws Exception {
 		ourReturnPublished = new InstantDt("2011-02-03T11:22:33Z");
-		
+		assertEquals(ourReturnPublished.getValueAsString(), "2011-02-03T11:22:33Z");
+      
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_query=searchWithBundleProvider&_pretty=true");
 		HttpResponse status = ourClient.execute(httpGet);
 		String responseContent = IOUtils.toString(status.getEntity().getContent());

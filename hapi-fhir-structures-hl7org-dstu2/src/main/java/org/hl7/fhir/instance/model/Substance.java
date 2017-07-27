@@ -29,19 +29,14 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Wed, Jul 13, 2016 05:32+1000 for FHIR v1.0.2
+import java.util.*;
 
+import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
-import org.hl7.fhir.instance.utilities.Utilities;
+import org.hl7.fhir.utilities.Utilities;
 
-import ca.uhn.fhir.model.api.annotation.Block;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
-import ca.uhn.fhir.model.api.annotation.ResourceDef;
-import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.*;
 /**
  * A homogeneous material with a definite composition.
  */
@@ -184,6 +179,35 @@ public class Substance extends DomainResource {
           childrenList.add(new Property("quantity", "SimpleQuantity", "The amount of the substance.", 0, java.lang.Integer.MAX_VALUE, quantity));
         }
 
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("identifier"))
+          this.identifier = castToIdentifier(value); // Identifier
+        else if (name.equals("expiry"))
+          this.expiry = castToDateTime(value); // DateTimeType
+        else if (name.equals("quantity"))
+          this.quantity = castToSimpleQuantity(value); // SimpleQuantity
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("identifier")) {
+          this.identifier = new Identifier();
+          return this.identifier;
+        }
+        else if (name.equals("expiry")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Substance.expiry");
+        }
+        else if (name.equals("quantity")) {
+          this.quantity = new SimpleQuantity();
+          return this.quantity;
+        }
+        else
+          return super.addChild(name);
+      }
+
       public SubstanceInstanceComponent copy() {
         SubstanceInstanceComponent dst = new SubstanceInstanceComponent();
         copyValues(dst);
@@ -218,6 +242,11 @@ public class Substance extends DomainResource {
         return super.isEmpty() && (identifier == null || identifier.isEmpty()) && (expiry == null || expiry.isEmpty())
            && (quantity == null || quantity.isEmpty());
       }
+
+  public String fhirType() {
+    return "Substance.instance";
+
+  }
 
   }
 
@@ -333,6 +362,30 @@ public class Substance extends DomainResource {
           childrenList.add(new Property("substance", "Reference(Substance)", "Another substance that is a component of this substance.", 0, java.lang.Integer.MAX_VALUE, substance));
         }
 
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("quantity"))
+          this.quantity = castToRatio(value); // Ratio
+        else if (name.equals("substance"))
+          this.substance = castToReference(value); // Reference
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("quantity")) {
+          this.quantity = new Ratio();
+          return this.quantity;
+        }
+        else if (name.equals("substance")) {
+          this.substance = new Reference();
+          return this.substance;
+        }
+        else
+          return super.addChild(name);
+      }
+
       public SubstanceIngredientComponent copy() {
         SubstanceIngredientComponent dst = new SubstanceIngredientComponent();
         copyValues(dst);
@@ -365,6 +418,11 @@ public class Substance extends DomainResource {
         return super.isEmpty() && (quantity == null || quantity.isEmpty()) && (substance == null || substance.isEmpty())
           ;
       }
+
+  public String fhirType() {
+    return "Substance.ingredient";
+
+  }
 
   }
 
@@ -669,6 +727,54 @@ public class Substance extends DomainResource {
         childrenList.add(new Property("instance", "", "Substance may be used to describe a kind of substance, or a specific package/container of the substance: an instance.", 0, java.lang.Integer.MAX_VALUE, instance));
         childrenList.add(new Property("ingredient", "", "A substance can be composed of other substances.", 0, java.lang.Integer.MAX_VALUE, ingredient));
       }
+
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("identifier"))
+          this.getIdentifier().add(castToIdentifier(value));
+        else if (name.equals("category"))
+          this.getCategory().add(castToCodeableConcept(value));
+        else if (name.equals("code"))
+          this.code = castToCodeableConcept(value); // CodeableConcept
+        else if (name.equals("description"))
+          this.description = castToString(value); // StringType
+        else if (name.equals("instance"))
+          this.getInstance().add((SubstanceInstanceComponent) value);
+        else if (name.equals("ingredient"))
+          this.getIngredient().add((SubstanceIngredientComponent) value);
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("identifier")) {
+          return addIdentifier();
+        }
+        else if (name.equals("category")) {
+          return addCategory();
+        }
+        else if (name.equals("code")) {
+          this.code = new CodeableConcept();
+          return this.code;
+        }
+        else if (name.equals("description")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Substance.description");
+        }
+        else if (name.equals("instance")) {
+          return addInstance();
+        }
+        else if (name.equals("ingredient")) {
+          return addIngredient();
+        }
+        else
+          return super.addChild(name);
+      }
+
+  public String fhirType() {
+    return "Substance";
+
+  }
 
       public Substance copy() {
         Substance dst = new Substance();

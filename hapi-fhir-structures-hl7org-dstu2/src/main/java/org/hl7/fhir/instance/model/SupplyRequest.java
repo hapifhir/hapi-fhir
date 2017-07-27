@@ -29,18 +29,13 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Wed, Jul 13, 2016 05:32+1000 for FHIR v1.0.2
+import java.util.*;
 
+import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 
-import ca.uhn.fhir.model.api.annotation.Block;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
-import ca.uhn.fhir.model.api.annotation.ResourceDef;
-import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.*;
 /**
  * A record of a request for a medication, substance or device used in the healthcare setting.
  */
@@ -68,7 +63,7 @@ public class SupplyRequest extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static SupplyRequestStatus fromCode(String codeString) throws Exception {
+        public static SupplyRequestStatus fromCode(String codeString) throws FHIRException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("requested".equals(codeString))
@@ -79,7 +74,7 @@ public class SupplyRequest extends DomainResource {
           return FAILED;
         if ("cancelled".equals(codeString))
           return CANCELLED;
-        throw new Exception("Unknown SupplyRequestStatus code '"+codeString+"'");
+        throw new FHIRException("Unknown SupplyRequestStatus code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -133,6 +128,22 @@ public class SupplyRequest extends DomainResource {
         if ("cancelled".equals(codeString))
           return SupplyRequestStatus.CANCELLED;
         throw new IllegalArgumentException("Unknown SupplyRequestStatus code '"+codeString+"'");
+        }
+        public Enumeration<SupplyRequestStatus> fromType(Base code) throws FHIRException {
+          if (code == null || code.isEmpty())
+            return null;
+          String codeString = ((PrimitiveType) code).asStringValue();
+          if (codeString == null || "".equals(codeString))
+            return null;
+        if ("requested".equals(codeString))
+          return new Enumeration<SupplyRequestStatus>(this, SupplyRequestStatus.REQUESTED);
+        if ("completed".equals(codeString))
+          return new Enumeration<SupplyRequestStatus>(this, SupplyRequestStatus.COMPLETED);
+        if ("failed".equals(codeString))
+          return new Enumeration<SupplyRequestStatus>(this, SupplyRequestStatus.FAILED);
+        if ("cancelled".equals(codeString))
+          return new Enumeration<SupplyRequestStatus>(this, SupplyRequestStatus.CANCELLED);
+        throw new FHIRException("Unknown SupplyRequestStatus code '"+codeString+"'");
         }
     public String toCode(SupplyRequestStatus code) {
       if (code == SupplyRequestStatus.REQUESTED)
@@ -226,6 +237,30 @@ public class SupplyRequest extends DomainResource {
           childrenList.add(new Property("schedule", "Timing", "Formal fulfillment schedule.", 0, java.lang.Integer.MAX_VALUE, schedule));
         }
 
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("code"))
+          this.code = castToCodeableConcept(value); // CodeableConcept
+        else if (name.equals("schedule"))
+          this.schedule = castToTiming(value); // Timing
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("code")) {
+          this.code = new CodeableConcept();
+          return this.code;
+        }
+        else if (name.equals("schedule")) {
+          this.schedule = new Timing();
+          return this.schedule;
+        }
+        else
+          return super.addChild(name);
+      }
+
       public SupplyRequestWhenComponent copy() {
         SupplyRequestWhenComponent dst = new SupplyRequestWhenComponent();
         copyValues(dst);
@@ -258,6 +293,11 @@ public class SupplyRequest extends DomainResource {
         return super.isEmpty() && (code == null || code.isEmpty()) && (schedule == null || schedule.isEmpty())
           ;
       }
+
+  public String fhirType() {
+    return "SupplyRequest.when";
+
+  }
 
   }
 
@@ -699,26 +739,26 @@ public class SupplyRequest extends DomainResource {
     /**
      * @return {@link #reason} (Why the supply item was requested.)
      */
-    public CodeableConcept getReasonCodeableConcept() throws Exception { 
+    public CodeableConcept getReasonCodeableConcept() throws FHIRException { 
       if (!(this.reason instanceof CodeableConcept))
-        throw new Exception("Type mismatch: the type CodeableConcept was expected, but "+this.reason.getClass().getName()+" was encountered");
+        throw new FHIRException("Type mismatch: the type CodeableConcept was expected, but "+this.reason.getClass().getName()+" was encountered");
       return (CodeableConcept) this.reason;
     }
 
-    public boolean hasReasonCodeableConcept() throws Exception { 
+    public boolean hasReasonCodeableConcept() { 
       return this.reason instanceof CodeableConcept;
     }
 
     /**
      * @return {@link #reason} (Why the supply item was requested.)
      */
-    public Reference getReasonReference() throws Exception { 
+    public Reference getReasonReference() throws FHIRException { 
       if (!(this.reason instanceof Reference))
-        throw new Exception("Type mismatch: the type Reference was expected, but "+this.reason.getClass().getName()+" was encountered");
+        throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.reason.getClass().getName()+" was encountered");
       return (Reference) this.reason;
     }
 
-    public boolean hasReasonReference() throws Exception { 
+    public boolean hasReasonReference() { 
       return this.reason instanceof Reference;
     }
 
@@ -771,6 +811,84 @@ public class SupplyRequest extends DomainResource {
         childrenList.add(new Property("reason[x]", "CodeableConcept|Reference(Any)", "Why the supply item was requested.", 0, java.lang.Integer.MAX_VALUE, reason));
         childrenList.add(new Property("when", "", "When the request should be fulfilled.", 0, java.lang.Integer.MAX_VALUE, when));
       }
+
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("patient"))
+          this.patient = castToReference(value); // Reference
+        else if (name.equals("source"))
+          this.source = castToReference(value); // Reference
+        else if (name.equals("date"))
+          this.date = castToDateTime(value); // DateTimeType
+        else if (name.equals("identifier"))
+          this.identifier = castToIdentifier(value); // Identifier
+        else if (name.equals("status"))
+          this.status = new SupplyRequestStatusEnumFactory().fromType(value); // Enumeration<SupplyRequestStatus>
+        else if (name.equals("kind"))
+          this.kind = castToCodeableConcept(value); // CodeableConcept
+        else if (name.equals("orderedItem"))
+          this.orderedItem = castToReference(value); // Reference
+        else if (name.equals("supplier"))
+          this.getSupplier().add(castToReference(value));
+        else if (name.equals("reason[x]"))
+          this.reason = (Type) value; // Type
+        else if (name.equals("when"))
+          this.when = (SupplyRequestWhenComponent) value; // SupplyRequestWhenComponent
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("patient")) {
+          this.patient = new Reference();
+          return this.patient;
+        }
+        else if (name.equals("source")) {
+          this.source = new Reference();
+          return this.source;
+        }
+        else if (name.equals("date")) {
+          throw new FHIRException("Cannot call addChild on a primitive type SupplyRequest.date");
+        }
+        else if (name.equals("identifier")) {
+          this.identifier = new Identifier();
+          return this.identifier;
+        }
+        else if (name.equals("status")) {
+          throw new FHIRException("Cannot call addChild on a primitive type SupplyRequest.status");
+        }
+        else if (name.equals("kind")) {
+          this.kind = new CodeableConcept();
+          return this.kind;
+        }
+        else if (name.equals("orderedItem")) {
+          this.orderedItem = new Reference();
+          return this.orderedItem;
+        }
+        else if (name.equals("supplier")) {
+          return addSupplier();
+        }
+        else if (name.equals("reasonCodeableConcept")) {
+          this.reason = new CodeableConcept();
+          return this.reason;
+        }
+        else if (name.equals("reasonReference")) {
+          this.reason = new Reference();
+          return this.reason;
+        }
+        else if (name.equals("when")) {
+          this.when = new SupplyRequestWhenComponent();
+          return this.when;
+        }
+        else
+          return super.addChild(name);
+      }
+
+  public String fhirType() {
+    return "SupplyRequest";
+
+  }
 
       public SupplyRequest copy() {
         SupplyRequest dst = new SupplyRequest();

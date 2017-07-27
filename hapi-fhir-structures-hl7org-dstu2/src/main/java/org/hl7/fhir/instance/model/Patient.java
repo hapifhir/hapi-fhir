@@ -29,20 +29,15 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Wed, Jul 13, 2016 05:32+1000 for FHIR v1.0.2
+import java.util.*;
 
+import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.instance.model.Enumerations.AdministrativeGenderEnumFactory;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 
-import ca.uhn.fhir.model.api.annotation.Block;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
-import ca.uhn.fhir.model.api.annotation.ResourceDef;
-import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.*;
 /**
  * Demographics and other administrative information about an individual or animal receiving care or other health-related services.
  */
@@ -66,7 +61,7 @@ public class Patient extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static LinkType fromCode(String codeString) throws Exception {
+        public static LinkType fromCode(String codeString) throws FHIRException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("replace".equals(codeString))
@@ -75,7 +70,7 @@ public class Patient extends DomainResource {
           return REFER;
         if ("seealso".equals(codeString))
           return SEEALSO;
-        throw new Exception("Unknown LinkType code '"+codeString+"'");
+        throw new FHIRException("Unknown LinkType code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -123,6 +118,20 @@ public class Patient extends DomainResource {
         if ("seealso".equals(codeString))
           return LinkType.SEEALSO;
         throw new IllegalArgumentException("Unknown LinkType code '"+codeString+"'");
+        }
+        public Enumeration<LinkType> fromType(Base code) throws FHIRException {
+          if (code == null || code.isEmpty())
+            return null;
+          String codeString = ((PrimitiveType) code).asStringValue();
+          if (codeString == null || "".equals(codeString))
+            return null;
+        if ("replace".equals(codeString))
+          return new Enumeration<LinkType>(this, LinkType.REPLACE);
+        if ("refer".equals(codeString))
+          return new Enumeration<LinkType>(this, LinkType.REFER);
+        if ("seealso".equals(codeString))
+          return new Enumeration<LinkType>(this, LinkType.SEEALSO);
+        throw new FHIRException("Unknown LinkType code '"+codeString+"'");
         }
     public String toCode(LinkType code) {
       if (code == LinkType.REPLACE)
@@ -456,6 +465,57 @@ public class Patient extends DomainResource {
           childrenList.add(new Property("period", "Period", "The period during which this contact person or organization is valid to be contacted relating to this patient.", 0, java.lang.Integer.MAX_VALUE, period));
         }
 
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("relationship"))
+          this.getRelationship().add(castToCodeableConcept(value));
+        else if (name.equals("name"))
+          this.name = castToHumanName(value); // HumanName
+        else if (name.equals("telecom"))
+          this.getTelecom().add(castToContactPoint(value));
+        else if (name.equals("address"))
+          this.address = castToAddress(value); // Address
+        else if (name.equals("gender"))
+          this.gender = new AdministrativeGenderEnumFactory().fromType(value); // Enumeration<AdministrativeGender>
+        else if (name.equals("organization"))
+          this.organization = castToReference(value); // Reference
+        else if (name.equals("period"))
+          this.period = castToPeriod(value); // Period
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("relationship")) {
+          return addRelationship();
+        }
+        else if (name.equals("name")) {
+          this.name = new HumanName();
+          return this.name;
+        }
+        else if (name.equals("telecom")) {
+          return addTelecom();
+        }
+        else if (name.equals("address")) {
+          this.address = new Address();
+          return this.address;
+        }
+        else if (name.equals("gender")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Patient.gender");
+        }
+        else if (name.equals("organization")) {
+          this.organization = new Reference();
+          return this.organization;
+        }
+        else if (name.equals("period")) {
+          this.period = new Period();
+          return this.period;
+        }
+        else
+          return super.addChild(name);
+      }
+
       public ContactComponent copy() {
         ContactComponent dst = new ContactComponent();
         copyValues(dst);
@@ -505,6 +565,11 @@ public class Patient extends DomainResource {
            && (organization == null || organization.isEmpty()) && (period == null || period.isEmpty())
           ;
       }
+
+  public String fhirType() {
+    return "Patient.contact";
+
+  }
 
   }
 
@@ -627,6 +692,36 @@ public class Patient extends DomainResource {
           childrenList.add(new Property("genderStatus", "CodeableConcept", "Indicates the current state of the animal's reproductive organs.", 0, java.lang.Integer.MAX_VALUE, genderStatus));
         }
 
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("species"))
+          this.species = castToCodeableConcept(value); // CodeableConcept
+        else if (name.equals("breed"))
+          this.breed = castToCodeableConcept(value); // CodeableConcept
+        else if (name.equals("genderStatus"))
+          this.genderStatus = castToCodeableConcept(value); // CodeableConcept
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("species")) {
+          this.species = new CodeableConcept();
+          return this.species;
+        }
+        else if (name.equals("breed")) {
+          this.breed = new CodeableConcept();
+          return this.breed;
+        }
+        else if (name.equals("genderStatus")) {
+          this.genderStatus = new CodeableConcept();
+          return this.genderStatus;
+        }
+        else
+          return super.addChild(name);
+      }
+
       public AnimalComponent copy() {
         AnimalComponent dst = new AnimalComponent();
         copyValues(dst);
@@ -661,6 +756,11 @@ public class Patient extends DomainResource {
         return super.isEmpty() && (species == null || species.isEmpty()) && (breed == null || breed.isEmpty())
            && (genderStatus == null || genderStatus.isEmpty());
       }
+
+  public String fhirType() {
+    return "Patient.animal";
+
+  }
 
   }
 
@@ -772,6 +872,29 @@ public class Patient extends DomainResource {
           childrenList.add(new Property("preferred", "boolean", "Indicates whether or not the patient prefers this language (over other languages he masters up a certain level).", 0, java.lang.Integer.MAX_VALUE, preferred));
         }
 
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("language"))
+          this.language = castToCodeableConcept(value); // CodeableConcept
+        else if (name.equals("preferred"))
+          this.preferred = castToBoolean(value); // BooleanType
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("language")) {
+          this.language = new CodeableConcept();
+          return this.language;
+        }
+        else if (name.equals("preferred")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Patient.preferred");
+        }
+        else
+          return super.addChild(name);
+      }
+
       public PatientCommunicationComponent copy() {
         PatientCommunicationComponent dst = new PatientCommunicationComponent();
         copyValues(dst);
@@ -804,6 +927,11 @@ public class Patient extends DomainResource {
         return super.isEmpty() && (language == null || language.isEmpty()) && (preferred == null || preferred.isEmpty())
           ;
       }
+
+  public String fhirType() {
+    return "Patient.communication";
+
+  }
 
   }
 
@@ -941,6 +1069,29 @@ public class Patient extends DomainResource {
           childrenList.add(new Property("type", "code", "The type of link between this patient resource and another patient resource.", 0, java.lang.Integer.MAX_VALUE, type));
         }
 
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("other"))
+          this.other = castToReference(value); // Reference
+        else if (name.equals("type"))
+          this.type = new LinkTypeEnumFactory().fromType(value); // Enumeration<LinkType>
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("other")) {
+          this.other = new Reference();
+          return this.other;
+        }
+        else if (name.equals("type")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Patient.type");
+        }
+        else
+          return super.addChild(name);
+      }
+
       public PatientLinkComponent copy() {
         PatientLinkComponent dst = new PatientLinkComponent();
         copyValues(dst);
@@ -973,6 +1124,11 @@ public class Patient extends DomainResource {
         return super.isEmpty() && (other == null || other.isEmpty()) && (type == null || type.isEmpty())
           ;
       }
+
+  public String fhirType() {
+    return "Patient.link";
+
+  }
 
   }
 
@@ -1387,26 +1543,26 @@ public class Patient extends DomainResource {
     /**
      * @return {@link #deceased} (Indicates if the individual is deceased or not.)
      */
-    public BooleanType getDeceasedBooleanType() throws Exception { 
+    public BooleanType getDeceasedBooleanType() throws FHIRException { 
       if (!(this.deceased instanceof BooleanType))
-        throw new Exception("Type mismatch: the type BooleanType was expected, but "+this.deceased.getClass().getName()+" was encountered");
+        throw new FHIRException("Type mismatch: the type BooleanType was expected, but "+this.deceased.getClass().getName()+" was encountered");
       return (BooleanType) this.deceased;
     }
 
-    public boolean hasDeceasedBooleanType() throws Exception { 
+    public boolean hasDeceasedBooleanType() { 
       return this.deceased instanceof BooleanType;
     }
 
     /**
      * @return {@link #deceased} (Indicates if the individual is deceased or not.)
      */
-    public DateTimeType getDeceasedDateTimeType() throws Exception { 
+    public DateTimeType getDeceasedDateTimeType() throws FHIRException { 
       if (!(this.deceased instanceof DateTimeType))
-        throw new Exception("Type mismatch: the type DateTimeType was expected, but "+this.deceased.getClass().getName()+" was encountered");
+        throw new FHIRException("Type mismatch: the type DateTimeType was expected, but "+this.deceased.getClass().getName()+" was encountered");
       return (DateTimeType) this.deceased;
     }
 
-    public boolean hasDeceasedDateTimeType() throws Exception { 
+    public boolean hasDeceasedDateTimeType() { 
       return this.deceased instanceof DateTimeType;
     }
 
@@ -1496,26 +1652,26 @@ public class Patient extends DomainResource {
     /**
      * @return {@link #multipleBirth} (Indicates whether the patient is part of a multiple or indicates the actual birth order.)
      */
-    public BooleanType getMultipleBirthBooleanType() throws Exception { 
+    public BooleanType getMultipleBirthBooleanType() throws FHIRException { 
       if (!(this.multipleBirth instanceof BooleanType))
-        throw new Exception("Type mismatch: the type BooleanType was expected, but "+this.multipleBirth.getClass().getName()+" was encountered");
+        throw new FHIRException("Type mismatch: the type BooleanType was expected, but "+this.multipleBirth.getClass().getName()+" was encountered");
       return (BooleanType) this.multipleBirth;
     }
 
-    public boolean hasMultipleBirthBooleanType() throws Exception { 
+    public boolean hasMultipleBirthBooleanType() { 
       return this.multipleBirth instanceof BooleanType;
     }
 
     /**
      * @return {@link #multipleBirth} (Indicates whether the patient is part of a multiple or indicates the actual birth order.)
      */
-    public IntegerType getMultipleBirthIntegerType() throws Exception { 
+    public IntegerType getMultipleBirthIntegerType() throws FHIRException { 
       if (!(this.multipleBirth instanceof IntegerType))
-        throw new Exception("Type mismatch: the type IntegerType was expected, but "+this.multipleBirth.getClass().getName()+" was encountered");
+        throw new FHIRException("Type mismatch: the type IntegerType was expected, but "+this.multipleBirth.getClass().getName()+" was encountered");
       return (IntegerType) this.multipleBirth;
     }
 
-    public boolean hasMultipleBirthIntegerType() throws Exception { 
+    public boolean hasMultipleBirthIntegerType() { 
       return this.multipleBirth instanceof IntegerType;
     }
 
@@ -1829,6 +1985,121 @@ public class Patient extends DomainResource {
         childrenList.add(new Property("link", "", "Link to another patient resource that concerns the same actual patient.", 0, java.lang.Integer.MAX_VALUE, link));
       }
 
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("identifier"))
+          this.getIdentifier().add(castToIdentifier(value));
+        else if (name.equals("active"))
+          this.active = castToBoolean(value); // BooleanType
+        else if (name.equals("name"))
+          this.getName().add(castToHumanName(value));
+        else if (name.equals("telecom"))
+          this.getTelecom().add(castToContactPoint(value));
+        else if (name.equals("gender"))
+          this.gender = new AdministrativeGenderEnumFactory().fromType(value); // Enumeration<AdministrativeGender>
+        else if (name.equals("birthDate"))
+          this.birthDate = castToDate(value); // DateType
+        else if (name.equals("deceased[x]"))
+          this.deceased = (Type) value; // Type
+        else if (name.equals("address"))
+          this.getAddress().add(castToAddress(value));
+        else if (name.equals("maritalStatus"))
+          this.maritalStatus = castToCodeableConcept(value); // CodeableConcept
+        else if (name.equals("multipleBirth[x]"))
+          this.multipleBirth = (Type) value; // Type
+        else if (name.equals("photo"))
+          this.getPhoto().add(castToAttachment(value));
+        else if (name.equals("contact"))
+          this.getContact().add((ContactComponent) value);
+        else if (name.equals("animal"))
+          this.animal = (AnimalComponent) value; // AnimalComponent
+        else if (name.equals("communication"))
+          this.getCommunication().add((PatientCommunicationComponent) value);
+        else if (name.equals("careProvider"))
+          this.getCareProvider().add(castToReference(value));
+        else if (name.equals("managingOrganization"))
+          this.managingOrganization = castToReference(value); // Reference
+        else if (name.equals("link"))
+          this.getLink().add((PatientLinkComponent) value);
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("identifier")) {
+          return addIdentifier();
+        }
+        else if (name.equals("active")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Patient.active");
+        }
+        else if (name.equals("name")) {
+          return addName();
+        }
+        else if (name.equals("telecom")) {
+          return addTelecom();
+        }
+        else if (name.equals("gender")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Patient.gender");
+        }
+        else if (name.equals("birthDate")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Patient.birthDate");
+        }
+        else if (name.equals("deceasedBoolean")) {
+          this.deceased = new BooleanType();
+          return this.deceased;
+        }
+        else if (name.equals("deceasedDateTime")) {
+          this.deceased = new DateTimeType();
+          return this.deceased;
+        }
+        else if (name.equals("address")) {
+          return addAddress();
+        }
+        else if (name.equals("maritalStatus")) {
+          this.maritalStatus = new CodeableConcept();
+          return this.maritalStatus;
+        }
+        else if (name.equals("multipleBirthBoolean")) {
+          this.multipleBirth = new BooleanType();
+          return this.multipleBirth;
+        }
+        else if (name.equals("multipleBirthInteger")) {
+          this.multipleBirth = new IntegerType();
+          return this.multipleBirth;
+        }
+        else if (name.equals("photo")) {
+          return addPhoto();
+        }
+        else if (name.equals("contact")) {
+          return addContact();
+        }
+        else if (name.equals("animal")) {
+          this.animal = new AnimalComponent();
+          return this.animal;
+        }
+        else if (name.equals("communication")) {
+          return addCommunication();
+        }
+        else if (name.equals("careProvider")) {
+          return addCareProvider();
+        }
+        else if (name.equals("managingOrganization")) {
+          this.managingOrganization = new Reference();
+          return this.managingOrganization;
+        }
+        else if (name.equals("link")) {
+          return addLink();
+        }
+        else
+          return super.addChild(name);
+      }
+
+  public String fhirType() {
+    return "Patient";
+
+  }
+
       public Patient copy() {
         Patient dst = new Patient();
         copyValues(dst);
@@ -1961,7 +2232,7 @@ public class Patient extends DomainResource {
   public static final String SP_TELECOM = "telecom";
   @SearchParamDefinition(name="address-city", path="Patient.address.city", description="A city specified in an address", type="string" )
   public static final String SP_ADDRESSCITY = "address-city";
-  @SearchParamDefinition(name="email", path="Patient.telecom(system=email)", description="A value in an email contact", type="token" )
+  @SearchParamDefinition(name="email", path="Patient.telecom.where(system='email')", description="A value in an email contact", type="token" )
   public static final String SP_EMAIL = "email";
   @SearchParamDefinition(name="identifier", path="Patient.identifier", description="A patient identifier", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
@@ -1975,7 +2246,7 @@ public class Patient extends DomainResource {
   public static final String SP_ADDRESSPOSTALCODE = "address-postalcode";
   @SearchParamDefinition(name="careprovider", path="Patient.careProvider", description="Patient's nominated care provider, could be a care manager, not the organization that manages the record", type="reference" )
   public static final String SP_CAREPROVIDER = "careprovider";
-  @SearchParamDefinition(name="phone", path="Patient.telecom(system=phone)", description="A value in a phone contact", type="token" )
+  @SearchParamDefinition(name="phone", path="Patient.telecom.where(system='phone')", description="A value in a phone contact", type="token" )
   public static final String SP_PHONE = "phone";
   @SearchParamDefinition(name="organization", path="Patient.managingOrganization", description="The organization at which this person is a patient", type="reference" )
   public static final String SP_ORGANIZATION = "organization";

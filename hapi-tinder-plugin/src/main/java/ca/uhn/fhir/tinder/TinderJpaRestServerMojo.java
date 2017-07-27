@@ -64,6 +64,9 @@ public class TinderJpaRestServerMojo extends AbstractMojo {
 		} else if ("dstu3".equals(version)) {
 			fhirContext = FhirContext.forDstu3();
 			packageSuffix = ".dstu3";
+		} else if ("r4".equals(version)) {
+			fhirContext = FhirContext.forR4();
+			packageSuffix = ".r4";
 		} else {
 			throw new MojoFailureException("Unknown version configured: " + version);
 		}

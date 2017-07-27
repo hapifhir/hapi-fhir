@@ -29,21 +29,16 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Wed, Jul 13, 2016 05:32+1000 for FHIR v1.0.2
+import java.util.*;
 
+import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.Enumerations.RemittanceOutcome;
 import org.hl7.fhir.instance.model.Enumerations.RemittanceOutcomeEnumFactory;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
-import org.hl7.fhir.instance.utilities.Utilities;
+import org.hl7.fhir.utilities.Utilities;
 
-import ca.uhn.fhir.model.api.annotation.Block;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
-import ca.uhn.fhir.model.api.annotation.ResourceDef;
-import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.*;
 /**
  * This resource provides payment details and claim references supporting a bulk payment.
  */
@@ -412,6 +407,59 @@ public class PaymentReconciliation extends DomainResource {
           childrenList.add(new Property("amount", "Money", "Amount paid for this detail.", 0, java.lang.Integer.MAX_VALUE, amount));
         }
 
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("type"))
+          this.type = castToCoding(value); // Coding
+        else if (name.equals("request"))
+          this.request = castToReference(value); // Reference
+        else if (name.equals("responce"))
+          this.responce = castToReference(value); // Reference
+        else if (name.equals("submitter"))
+          this.submitter = castToReference(value); // Reference
+        else if (name.equals("payee"))
+          this.payee = castToReference(value); // Reference
+        else if (name.equals("date"))
+          this.date = castToDate(value); // DateType
+        else if (name.equals("amount"))
+          this.amount = castToMoney(value); // Money
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("type")) {
+          this.type = new Coding();
+          return this.type;
+        }
+        else if (name.equals("request")) {
+          this.request = new Reference();
+          return this.request;
+        }
+        else if (name.equals("responce")) {
+          this.responce = new Reference();
+          return this.responce;
+        }
+        else if (name.equals("submitter")) {
+          this.submitter = new Reference();
+          return this.submitter;
+        }
+        else if (name.equals("payee")) {
+          this.payee = new Reference();
+          return this.payee;
+        }
+        else if (name.equals("date")) {
+          throw new FHIRException("Cannot call addChild on a primitive type PaymentReconciliation.date");
+        }
+        else if (name.equals("amount")) {
+          this.amount = new Money();
+          return this.amount;
+        }
+        else
+          return super.addChild(name);
+      }
+
       public DetailsComponent copy() {
         DetailsComponent dst = new DetailsComponent();
         copyValues(dst);
@@ -453,6 +501,11 @@ public class PaymentReconciliation extends DomainResource {
            && (payee == null || payee.isEmpty()) && (date == null || date.isEmpty()) && (amount == null || amount.isEmpty())
           ;
       }
+
+  public String fhirType() {
+    return "PaymentReconciliation.detail";
+
+  }
 
   }
 
@@ -560,6 +613,29 @@ public class PaymentReconciliation extends DomainResource {
           childrenList.add(new Property("text", "string", "The note text.", 0, java.lang.Integer.MAX_VALUE, text));
         }
 
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("type"))
+          this.type = castToCoding(value); // Coding
+        else if (name.equals("text"))
+          this.text = castToString(value); // StringType
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("type")) {
+          this.type = new Coding();
+          return this.type;
+        }
+        else if (name.equals("text")) {
+          throw new FHIRException("Cannot call addChild on a primitive type PaymentReconciliation.text");
+        }
+        else
+          return super.addChild(name);
+      }
+
       public NotesComponent copy() {
         NotesComponent dst = new NotesComponent();
         copyValues(dst);
@@ -592,6 +668,11 @@ public class PaymentReconciliation extends DomainResource {
         return super.isEmpty() && (type == null || type.isEmpty()) && (text == null || text.isEmpty())
           ;
       }
+
+  public String fhirType() {
+    return "PaymentReconciliation.note";
+
+  }
 
   }
 
@@ -1318,6 +1399,107 @@ public class PaymentReconciliation extends DomainResource {
         childrenList.add(new Property("total", "Money", "Total payment amount.", 0, java.lang.Integer.MAX_VALUE, total));
         childrenList.add(new Property("note", "", "Suite of notes.", 0, java.lang.Integer.MAX_VALUE, note));
       }
+
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("identifier"))
+          this.getIdentifier().add(castToIdentifier(value));
+        else if (name.equals("request"))
+          this.request = castToReference(value); // Reference
+        else if (name.equals("outcome"))
+          this.outcome = new RemittanceOutcomeEnumFactory().fromType(value); // Enumeration<RemittanceOutcome>
+        else if (name.equals("disposition"))
+          this.disposition = castToString(value); // StringType
+        else if (name.equals("ruleset"))
+          this.ruleset = castToCoding(value); // Coding
+        else if (name.equals("originalRuleset"))
+          this.originalRuleset = castToCoding(value); // Coding
+        else if (name.equals("created"))
+          this.created = castToDateTime(value); // DateTimeType
+        else if (name.equals("period"))
+          this.period = castToPeriod(value); // Period
+        else if (name.equals("organization"))
+          this.organization = castToReference(value); // Reference
+        else if (name.equals("requestProvider"))
+          this.requestProvider = castToReference(value); // Reference
+        else if (name.equals("requestOrganization"))
+          this.requestOrganization = castToReference(value); // Reference
+        else if (name.equals("detail"))
+          this.getDetail().add((DetailsComponent) value);
+        else if (name.equals("form"))
+          this.form = castToCoding(value); // Coding
+        else if (name.equals("total"))
+          this.total = castToMoney(value); // Money
+        else if (name.equals("note"))
+          this.getNote().add((NotesComponent) value);
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("identifier")) {
+          return addIdentifier();
+        }
+        else if (name.equals("request")) {
+          this.request = new Reference();
+          return this.request;
+        }
+        else if (name.equals("outcome")) {
+          throw new FHIRException("Cannot call addChild on a primitive type PaymentReconciliation.outcome");
+        }
+        else if (name.equals("disposition")) {
+          throw new FHIRException("Cannot call addChild on a primitive type PaymentReconciliation.disposition");
+        }
+        else if (name.equals("ruleset")) {
+          this.ruleset = new Coding();
+          return this.ruleset;
+        }
+        else if (name.equals("originalRuleset")) {
+          this.originalRuleset = new Coding();
+          return this.originalRuleset;
+        }
+        else if (name.equals("created")) {
+          throw new FHIRException("Cannot call addChild on a primitive type PaymentReconciliation.created");
+        }
+        else if (name.equals("period")) {
+          this.period = new Period();
+          return this.period;
+        }
+        else if (name.equals("organization")) {
+          this.organization = new Reference();
+          return this.organization;
+        }
+        else if (name.equals("requestProvider")) {
+          this.requestProvider = new Reference();
+          return this.requestProvider;
+        }
+        else if (name.equals("requestOrganization")) {
+          this.requestOrganization = new Reference();
+          return this.requestOrganization;
+        }
+        else if (name.equals("detail")) {
+          return addDetail();
+        }
+        else if (name.equals("form")) {
+          this.form = new Coding();
+          return this.form;
+        }
+        else if (name.equals("total")) {
+          this.total = new Money();
+          return this.total;
+        }
+        else if (name.equals("note")) {
+          return addNote();
+        }
+        else
+          return super.addChild(name);
+      }
+
+  public String fhirType() {
+    return "PaymentReconciliation";
+
+  }
 
       public PaymentReconciliation copy() {
         PaymentReconciliation dst = new PaymentReconciliation();

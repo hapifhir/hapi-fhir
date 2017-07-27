@@ -69,4 +69,8 @@ public class TimeType extends PrimitiveType<String> {
 		return new TimeType(getValue());
 	}
 
+	public String fhirType() {
+		return "time";
+	}
+
 }

@@ -29,19 +29,14 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Wed, Jul 13, 2016 05:32+1000 for FHIR v1.0.2
+import java.util.*;
 
+import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
-import org.hl7.fhir.instance.utilities.Utilities;
+import org.hl7.fhir.utilities.Utilities;
 
-import ca.uhn.fhir.model.api.annotation.Block;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
-import ca.uhn.fhir.model.api.annotation.ResourceDef;
-import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.*;
 /**
  * Representation of the content produced in a DICOM imaging study. A study comprises a set of series, each of which includes a set of Service-Object Pair Instances (SOP Instances - images or other data) acquired or produced in a common context.  A series is of only one modality (e.g. X-ray, CT, MR, ultrasound), but a study may have multiple series of different modalities.
  */
@@ -69,7 +64,7 @@ public class ImagingStudy extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static InstanceAvailability fromCode(String codeString) throws Exception {
+        public static InstanceAvailability fromCode(String codeString) throws FHIRException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("ONLINE".equals(codeString))
@@ -80,7 +75,7 @@ public class ImagingStudy extends DomainResource {
           return NEARLINE;
         if ("UNAVAILABLE".equals(codeString))
           return UNAVAILABLE;
-        throw new Exception("Unknown InstanceAvailability code '"+codeString+"'");
+        throw new FHIRException("Unknown InstanceAvailability code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -134,6 +129,22 @@ public class ImagingStudy extends DomainResource {
         if ("UNAVAILABLE".equals(codeString))
           return InstanceAvailability.UNAVAILABLE;
         throw new IllegalArgumentException("Unknown InstanceAvailability code '"+codeString+"'");
+        }
+        public Enumeration<InstanceAvailability> fromType(Base code) throws FHIRException {
+          if (code == null || code.isEmpty())
+            return null;
+          String codeString = ((PrimitiveType) code).asStringValue();
+          if (codeString == null || "".equals(codeString))
+            return null;
+        if ("ONLINE".equals(codeString))
+          return new Enumeration<InstanceAvailability>(this, InstanceAvailability.ONLINE);
+        if ("OFFLINE".equals(codeString))
+          return new Enumeration<InstanceAvailability>(this, InstanceAvailability.OFFLINE);
+        if ("NEARLINE".equals(codeString))
+          return new Enumeration<InstanceAvailability>(this, InstanceAvailability.NEARLINE);
+        if ("UNAVAILABLE".equals(codeString))
+          return new Enumeration<InstanceAvailability>(this, InstanceAvailability.UNAVAILABLE);
+        throw new FHIRException("Unknown InstanceAvailability code '"+codeString+"'");
         }
     public String toCode(InstanceAvailability code) {
       if (code == InstanceAvailability.ONLINE)
@@ -704,6 +715,76 @@ public class ImagingStudy extends DomainResource {
           childrenList.add(new Property("instance", "", "A single SOP Instance within the series, e.g. an image, or presentation state.", 0, java.lang.Integer.MAX_VALUE, instance));
         }
 
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("number"))
+          this.number = castToUnsignedInt(value); // UnsignedIntType
+        else if (name.equals("modality"))
+          this.modality = castToCoding(value); // Coding
+        else if (name.equals("uid"))
+          this.uid = castToOid(value); // OidType
+        else if (name.equals("description"))
+          this.description = castToString(value); // StringType
+        else if (name.equals("numberOfInstances"))
+          this.numberOfInstances = castToUnsignedInt(value); // UnsignedIntType
+        else if (name.equals("availability"))
+          this.availability = new InstanceAvailabilityEnumFactory().fromType(value); // Enumeration<InstanceAvailability>
+        else if (name.equals("url"))
+          this.url = castToUri(value); // UriType
+        else if (name.equals("bodySite"))
+          this.bodySite = castToCoding(value); // Coding
+        else if (name.equals("laterality"))
+          this.laterality = castToCoding(value); // Coding
+        else if (name.equals("started"))
+          this.started = castToDateTime(value); // DateTimeType
+        else if (name.equals("instance"))
+          this.getInstance().add((ImagingStudySeriesInstanceComponent) value);
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("number")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ImagingStudy.number");
+        }
+        else if (name.equals("modality")) {
+          this.modality = new Coding();
+          return this.modality;
+        }
+        else if (name.equals("uid")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ImagingStudy.uid");
+        }
+        else if (name.equals("description")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ImagingStudy.description");
+        }
+        else if (name.equals("numberOfInstances")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ImagingStudy.numberOfInstances");
+        }
+        else if (name.equals("availability")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ImagingStudy.availability");
+        }
+        else if (name.equals("url")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ImagingStudy.url");
+        }
+        else if (name.equals("bodySite")) {
+          this.bodySite = new Coding();
+          return this.bodySite;
+        }
+        else if (name.equals("laterality")) {
+          this.laterality = new Coding();
+          return this.laterality;
+        }
+        else if (name.equals("started")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ImagingStudy.started");
+        }
+        else if (name.equals("instance")) {
+          return addInstance();
+        }
+        else
+          return super.addChild(name);
+      }
+
       public ImagingStudySeriesComponent copy() {
         ImagingStudySeriesComponent dst = new ImagingStudySeriesComponent();
         copyValues(dst);
@@ -758,6 +839,11 @@ public class ImagingStudy extends DomainResource {
            && (laterality == null || laterality.isEmpty()) && (started == null || started.isEmpty())
            && (instance == null || instance.isEmpty());
       }
+
+  public String fhirType() {
+    return "ImagingStudy.series";
+
+  }
 
   }
 
@@ -1106,6 +1192,48 @@ public class ImagingStudy extends DomainResource {
           childrenList.add(new Property("content", "Attachment", "Content of the instance or a rendering thereof (e.g. a JPEG of an image, or an XML of a structured report). May be represented for example by inline encoding; by a URL reference to a WADO-RS service that makes the instance available; or to a FHIR Resource (e.g. Media, Document, etc.). Multiple content attachments may be used for alternate representations of the instance.", 0, java.lang.Integer.MAX_VALUE, content));
         }
 
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("number"))
+          this.number = castToUnsignedInt(value); // UnsignedIntType
+        else if (name.equals("uid"))
+          this.uid = castToOid(value); // OidType
+        else if (name.equals("sopClass"))
+          this.sopClass = castToOid(value); // OidType
+        else if (name.equals("type"))
+          this.type = castToString(value); // StringType
+        else if (name.equals("title"))
+          this.title = castToString(value); // StringType
+        else if (name.equals("content"))
+          this.getContent().add(castToAttachment(value));
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("number")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ImagingStudy.number");
+        }
+        else if (name.equals("uid")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ImagingStudy.uid");
+        }
+        else if (name.equals("sopClass")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ImagingStudy.sopClass");
+        }
+        else if (name.equals("type")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ImagingStudy.type");
+        }
+        else if (name.equals("title")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ImagingStudy.title");
+        }
+        else if (name.equals("content")) {
+          return addContent();
+        }
+        else
+          return super.addChild(name);
+      }
+
       public ImagingStudySeriesInstanceComponent copy() {
         ImagingStudySeriesInstanceComponent dst = new ImagingStudySeriesInstanceComponent();
         copyValues(dst);
@@ -1150,6 +1278,11 @@ public class ImagingStudy extends DomainResource {
            && (sopClass == null || sopClass.isEmpty()) && (type == null || type.isEmpty()) && (title == null || title.isEmpty())
            && (content == null || content.isEmpty());
       }
+
+  public String fhirType() {
+    return "ImagingStudy.series.instance";
+
+  }
 
   }
 
@@ -2058,6 +2191,107 @@ public class ImagingStudy extends DomainResource {
         childrenList.add(new Property("description", "string", "Institution-generated description or classification of the Study performed.", 0, java.lang.Integer.MAX_VALUE, description));
         childrenList.add(new Property("series", "", "Each study has one or more series of images or other content.", 0, java.lang.Integer.MAX_VALUE, series));
       }
+
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("started"))
+          this.started = castToDateTime(value); // DateTimeType
+        else if (name.equals("patient"))
+          this.patient = castToReference(value); // Reference
+        else if (name.equals("uid"))
+          this.uid = castToOid(value); // OidType
+        else if (name.equals("accession"))
+          this.accession = castToIdentifier(value); // Identifier
+        else if (name.equals("identifier"))
+          this.getIdentifier().add(castToIdentifier(value));
+        else if (name.equals("order"))
+          this.getOrder().add(castToReference(value));
+        else if (name.equals("modalityList"))
+          this.getModalityList().add(castToCoding(value));
+        else if (name.equals("referrer"))
+          this.referrer = castToReference(value); // Reference
+        else if (name.equals("availability"))
+          this.availability = new InstanceAvailabilityEnumFactory().fromType(value); // Enumeration<InstanceAvailability>
+        else if (name.equals("url"))
+          this.url = castToUri(value); // UriType
+        else if (name.equals("numberOfSeries"))
+          this.numberOfSeries = castToUnsignedInt(value); // UnsignedIntType
+        else if (name.equals("numberOfInstances"))
+          this.numberOfInstances = castToUnsignedInt(value); // UnsignedIntType
+        else if (name.equals("procedure"))
+          this.getProcedure().add(castToReference(value));
+        else if (name.equals("interpreter"))
+          this.interpreter = castToReference(value); // Reference
+        else if (name.equals("description"))
+          this.description = castToString(value); // StringType
+        else if (name.equals("series"))
+          this.getSeries().add((ImagingStudySeriesComponent) value);
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("started")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ImagingStudy.started");
+        }
+        else if (name.equals("patient")) {
+          this.patient = new Reference();
+          return this.patient;
+        }
+        else if (name.equals("uid")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ImagingStudy.uid");
+        }
+        else if (name.equals("accession")) {
+          this.accession = new Identifier();
+          return this.accession;
+        }
+        else if (name.equals("identifier")) {
+          return addIdentifier();
+        }
+        else if (name.equals("order")) {
+          return addOrder();
+        }
+        else if (name.equals("modalityList")) {
+          return addModalityList();
+        }
+        else if (name.equals("referrer")) {
+          this.referrer = new Reference();
+          return this.referrer;
+        }
+        else if (name.equals("availability")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ImagingStudy.availability");
+        }
+        else if (name.equals("url")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ImagingStudy.url");
+        }
+        else if (name.equals("numberOfSeries")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ImagingStudy.numberOfSeries");
+        }
+        else if (name.equals("numberOfInstances")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ImagingStudy.numberOfInstances");
+        }
+        else if (name.equals("procedure")) {
+          return addProcedure();
+        }
+        else if (name.equals("interpreter")) {
+          this.interpreter = new Reference();
+          return this.interpreter;
+        }
+        else if (name.equals("description")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ImagingStudy.description");
+        }
+        else if (name.equals("series")) {
+          return addSeries();
+        }
+        else
+          return super.addChild(name);
+      }
+
+  public String fhirType() {
+    return "ImagingStudy";
+
+  }
 
       public ImagingStudy copy() {
         ImagingStudy dst = new ImagingStudy();

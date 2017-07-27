@@ -40,14 +40,11 @@ import org.hl7.fhir.instance.terminologies.ValueSetExpander.ValueSetExpansionOut
  }
  return result;
  }
-
  private static final String TEST_PROFILE = "C:\\work\\org.hl7.fhir\\build\\publish\\namespace.profile.xml";
  private static final String PROFILES = "C:\\work\\org.hl7.fhir\\build\\publish\\profiles-resources.xml";
-
  igtodo - things to add: 
  - version
  - list of resource names
-
  */
 public class WorkerContext implements NameResolver {
 
@@ -167,8 +164,8 @@ public class WorkerContext implements NameResolver {
     valueSets.put(vs.getId(), vs);
     valueSets.put(url, vs);
     valueSets.put(vs.getUrl(), vs);
-	  if (vs.hasCodeSystem()) {
-	    codeSystems.put(vs.getCodeSystem().getSystem().toString(), vs);
+     if (vs.hasCodeSystem()) {
+       codeSystems.put(vs.getCodeSystem().getSystem().toString(), vs);
     }
   }
 

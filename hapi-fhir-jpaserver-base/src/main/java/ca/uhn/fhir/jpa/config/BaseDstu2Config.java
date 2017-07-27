@@ -1,5 +1,11 @@
 package ca.uhn.fhir.jpa.config;
 
+import org.hl7.fhir.instance.hapi.validation.*;
+import org.hl7.fhir.instance.utils.IResourceValidator.BestPracticeWarningLevel;
+import org.springframework.beans.factory.annotation.Autowire;
+import org.springframework.context.annotation.*;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
+
 /*
  * #%L
  * HAPI FHIR JPA Server
@@ -23,21 +29,10 @@ package ca.uhn.fhir.jpa.config;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.*;
 import ca.uhn.fhir.jpa.interceptor.RestHookSubscriptionDstu2Interceptor;
-import ca.uhn.fhir.jpa.interceptor.RestHookSubscriptionDstu3Interceptor;
 import ca.uhn.fhir.jpa.term.HapiTerminologySvcDstu2;
 import ca.uhn.fhir.jpa.term.IHapiTerminologySvc;
 import ca.uhn.fhir.model.dstu2.composite.MetaDt;
 import ca.uhn.fhir.validation.IValidatorModule;
-import org.hl7.fhir.instance.hapi.validation.DefaultProfileValidationSupport;
-import org.hl7.fhir.instance.hapi.validation.FhirInstanceValidator;
-import org.hl7.fhir.instance.hapi.validation.ValidationSupportChain;
-import org.hl7.fhir.instance.validation.IResourceValidator.BestPracticeWarningLevel;
-import org.springframework.beans.factory.annotation.Autowire;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.context.annotation.Primary;
-import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 @Configuration
 @EnableTransactionManagement

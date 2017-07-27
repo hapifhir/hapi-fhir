@@ -29,19 +29,14 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Wed, Jul 13, 2016 05:32+1000 for FHIR v1.0.2
+import java.util.*;
 
+import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
-import org.hl7.fhir.instance.utilities.Utilities;
+import org.hl7.fhir.utilities.Utilities;
 
-import ca.uhn.fhir.model.api.annotation.Block;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
-import ca.uhn.fhir.model.api.annotation.ResourceDef;
-import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.*;
 /**
  * The header for a message exchange that is either requesting or responding to an action.  The reference(s) that are the subject of the action as well as other information related to the action are typically transmitted in a bundle in which the MessageHeader resource instance is the first resource in the bundle.
  */
@@ -65,7 +60,7 @@ public class MessageHeader extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static ResponseType fromCode(String codeString) throws Exception {
+        public static ResponseType fromCode(String codeString) throws FHIRException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("ok".equals(codeString))
@@ -74,7 +69,7 @@ public class MessageHeader extends DomainResource {
           return TRANSIENTERROR;
         if ("fatal-error".equals(codeString))
           return FATALERROR;
-        throw new Exception("Unknown ResponseType code '"+codeString+"'");
+        throw new FHIRException("Unknown ResponseType code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -122,6 +117,20 @@ public class MessageHeader extends DomainResource {
         if ("fatal-error".equals(codeString))
           return ResponseType.FATALERROR;
         throw new IllegalArgumentException("Unknown ResponseType code '"+codeString+"'");
+        }
+        public Enumeration<ResponseType> fromType(Base code) throws FHIRException {
+          if (code == null || code.isEmpty())
+            return null;
+          String codeString = ((PrimitiveType) code).asStringValue();
+          if (codeString == null || "".equals(codeString))
+            return null;
+        if ("ok".equals(codeString))
+          return new Enumeration<ResponseType>(this, ResponseType.OK);
+        if ("transient-error".equals(codeString))
+          return new Enumeration<ResponseType>(this, ResponseType.TRANSIENTERROR);
+        if ("fatal-error".equals(codeString))
+          return new Enumeration<ResponseType>(this, ResponseType.FATALERROR);
+        throw new FHIRException("Unknown ResponseType code '"+codeString+"'");
         }
     public String toCode(ResponseType code) {
       if (code == ResponseType.OK)
@@ -321,6 +330,34 @@ public class MessageHeader extends DomainResource {
           childrenList.add(new Property("details", "Reference(OperationOutcome)", "Full details of any issues found in the message.", 0, java.lang.Integer.MAX_VALUE, details));
         }
 
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("identifier"))
+          this.identifier = castToId(value); // IdType
+        else if (name.equals("code"))
+          this.code = new ResponseTypeEnumFactory().fromType(value); // Enumeration<ResponseType>
+        else if (name.equals("details"))
+          this.details = castToReference(value); // Reference
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("identifier")) {
+          throw new FHIRException("Cannot call addChild on a primitive type MessageHeader.identifier");
+        }
+        else if (name.equals("code")) {
+          throw new FHIRException("Cannot call addChild on a primitive type MessageHeader.code");
+        }
+        else if (name.equals("details")) {
+          this.details = new Reference();
+          return this.details;
+        }
+        else
+          return super.addChild(name);
+      }
+
       public MessageHeaderResponseComponent copy() {
         MessageHeaderResponseComponent dst = new MessageHeaderResponseComponent();
         copyValues(dst);
@@ -355,6 +392,11 @@ public class MessageHeader extends DomainResource {
         return super.isEmpty() && (identifier == null || identifier.isEmpty()) && (code == null || code.isEmpty())
            && (details == null || details.isEmpty());
       }
+
+  public String fhirType() {
+    return "MessageHeader.response";
+
+  }
 
   }
 
@@ -637,6 +679,44 @@ public class MessageHeader extends DomainResource {
           childrenList.add(new Property("endpoint", "uri", "Identifies the routing target to send acknowledgements to.", 0, java.lang.Integer.MAX_VALUE, endpoint));
         }
 
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("name"))
+          this.name = castToString(value); // StringType
+        else if (name.equals("software"))
+          this.software = castToString(value); // StringType
+        else if (name.equals("version"))
+          this.version = castToString(value); // StringType
+        else if (name.equals("contact"))
+          this.contact = castToContactPoint(value); // ContactPoint
+        else if (name.equals("endpoint"))
+          this.endpoint = castToUri(value); // UriType
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("name")) {
+          throw new FHIRException("Cannot call addChild on a primitive type MessageHeader.name");
+        }
+        else if (name.equals("software")) {
+          throw new FHIRException("Cannot call addChild on a primitive type MessageHeader.software");
+        }
+        else if (name.equals("version")) {
+          throw new FHIRException("Cannot call addChild on a primitive type MessageHeader.version");
+        }
+        else if (name.equals("contact")) {
+          this.contact = new ContactPoint();
+          return this.contact;
+        }
+        else if (name.equals("endpoint")) {
+          throw new FHIRException("Cannot call addChild on a primitive type MessageHeader.endpoint");
+        }
+        else
+          return super.addChild(name);
+      }
+
       public MessageSourceComponent copy() {
         MessageSourceComponent dst = new MessageSourceComponent();
         copyValues(dst);
@@ -675,6 +755,11 @@ public class MessageHeader extends DomainResource {
            && (version == null || version.isEmpty()) && (contact == null || contact.isEmpty()) && (endpoint == null || endpoint.isEmpty())
           ;
       }
+
+  public String fhirType() {
+    return "MessageHeader.source";
+
+  }
 
   }
 
@@ -868,6 +953,34 @@ public class MessageHeader extends DomainResource {
           childrenList.add(new Property("endpoint", "uri", "Indicates where the message should be routed to.", 0, java.lang.Integer.MAX_VALUE, endpoint));
         }
 
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("name"))
+          this.name = castToString(value); // StringType
+        else if (name.equals("target"))
+          this.target = castToReference(value); // Reference
+        else if (name.equals("endpoint"))
+          this.endpoint = castToUri(value); // UriType
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("name")) {
+          throw new FHIRException("Cannot call addChild on a primitive type MessageHeader.name");
+        }
+        else if (name.equals("target")) {
+          this.target = new Reference();
+          return this.target;
+        }
+        else if (name.equals("endpoint")) {
+          throw new FHIRException("Cannot call addChild on a primitive type MessageHeader.endpoint");
+        }
+        else
+          return super.addChild(name);
+      }
+
       public MessageDestinationComponent copy() {
         MessageDestinationComponent dst = new MessageDestinationComponent();
         copyValues(dst);
@@ -902,6 +1015,11 @@ public class MessageHeader extends DomainResource {
         return super.isEmpty() && (name == null || name.isEmpty()) && (target == null || target.isEmpty())
            && (endpoint == null || endpoint.isEmpty());
       }
+
+  public String fhirType() {
+    return "MessageHeader.destination";
+
+  }
 
   }
 
@@ -1436,6 +1554,86 @@ public class MessageHeader extends DomainResource {
         childrenList.add(new Property("reason", "CodeableConcept", "Coded indication of the cause for the event - indicates  a reason for the occurrence of the event that is a focus of this message.", 0, java.lang.Integer.MAX_VALUE, reason));
         childrenList.add(new Property("data", "Reference(Any)", "The actual data of the message - a reference to the root/focus class of the event.", 0, java.lang.Integer.MAX_VALUE, data));
       }
+
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("timestamp"))
+          this.timestamp = castToInstant(value); // InstantType
+        else if (name.equals("event"))
+          this.event = castToCoding(value); // Coding
+        else if (name.equals("response"))
+          this.response = (MessageHeaderResponseComponent) value; // MessageHeaderResponseComponent
+        else if (name.equals("source"))
+          this.source = (MessageSourceComponent) value; // MessageSourceComponent
+        else if (name.equals("destination"))
+          this.getDestination().add((MessageDestinationComponent) value);
+        else if (name.equals("enterer"))
+          this.enterer = castToReference(value); // Reference
+        else if (name.equals("author"))
+          this.author = castToReference(value); // Reference
+        else if (name.equals("receiver"))
+          this.receiver = castToReference(value); // Reference
+        else if (name.equals("responsible"))
+          this.responsible = castToReference(value); // Reference
+        else if (name.equals("reason"))
+          this.reason = castToCodeableConcept(value); // CodeableConcept
+        else if (name.equals("data"))
+          this.getData().add(castToReference(value));
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("timestamp")) {
+          throw new FHIRException("Cannot call addChild on a primitive type MessageHeader.timestamp");
+        }
+        else if (name.equals("event")) {
+          this.event = new Coding();
+          return this.event;
+        }
+        else if (name.equals("response")) {
+          this.response = new MessageHeaderResponseComponent();
+          return this.response;
+        }
+        else if (name.equals("source")) {
+          this.source = new MessageSourceComponent();
+          return this.source;
+        }
+        else if (name.equals("destination")) {
+          return addDestination();
+        }
+        else if (name.equals("enterer")) {
+          this.enterer = new Reference();
+          return this.enterer;
+        }
+        else if (name.equals("author")) {
+          this.author = new Reference();
+          return this.author;
+        }
+        else if (name.equals("receiver")) {
+          this.receiver = new Reference();
+          return this.receiver;
+        }
+        else if (name.equals("responsible")) {
+          this.responsible = new Reference();
+          return this.responsible;
+        }
+        else if (name.equals("reason")) {
+          this.reason = new CodeableConcept();
+          return this.reason;
+        }
+        else if (name.equals("data")) {
+          return addData();
+        }
+        else
+          return super.addChild(name);
+      }
+
+  public String fhirType() {
+    return "MessageHeader";
+
+  }
 
       public MessageHeader copy() {
         MessageHeader dst = new MessageHeader();

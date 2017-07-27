@@ -29,21 +29,16 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Wed, Jul 13, 2016 05:32+1000 for FHIR v1.0.2
+import java.util.*;
 
+import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.Enumerations.DocumentReferenceStatus;
 import org.hl7.fhir.instance.model.Enumerations.DocumentReferenceStatusEnumFactory;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
-import org.hl7.fhir.instance.utilities.Utilities;
+import org.hl7.fhir.utilities.Utilities;
 
-import ca.uhn.fhir.model.api.annotation.Block;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
-import ca.uhn.fhir.model.api.annotation.ResourceDef;
-import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.*;
 /**
  * A reference to a document .
  */
@@ -71,7 +66,7 @@ public class DocumentReference extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static DocumentRelationshipType fromCode(String codeString) throws Exception {
+        public static DocumentRelationshipType fromCode(String codeString) throws FHIRException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("replaces".equals(codeString))
@@ -82,7 +77,7 @@ public class DocumentReference extends DomainResource {
           return SIGNS;
         if ("appends".equals(codeString))
           return APPENDS;
-        throw new Exception("Unknown DocumentRelationshipType code '"+codeString+"'");
+        throw new FHIRException("Unknown DocumentRelationshipType code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -136,6 +131,22 @@ public class DocumentReference extends DomainResource {
         if ("appends".equals(codeString))
           return DocumentRelationshipType.APPENDS;
         throw new IllegalArgumentException("Unknown DocumentRelationshipType code '"+codeString+"'");
+        }
+        public Enumeration<DocumentRelationshipType> fromType(Base code) throws FHIRException {
+          if (code == null || code.isEmpty())
+            return null;
+          String codeString = ((PrimitiveType) code).asStringValue();
+          if (codeString == null || "".equals(codeString))
+            return null;
+        if ("replaces".equals(codeString))
+          return new Enumeration<DocumentRelationshipType>(this, DocumentRelationshipType.REPLACES);
+        if ("transforms".equals(codeString))
+          return new Enumeration<DocumentRelationshipType>(this, DocumentRelationshipType.TRANSFORMS);
+        if ("signs".equals(codeString))
+          return new Enumeration<DocumentRelationshipType>(this, DocumentRelationshipType.SIGNS);
+        if ("appends".equals(codeString))
+          return new Enumeration<DocumentRelationshipType>(this, DocumentRelationshipType.APPENDS);
+        throw new FHIRException("Unknown DocumentRelationshipType code '"+codeString+"'");
         }
     public String toCode(DocumentRelationshipType code) {
       if (code == DocumentRelationshipType.REPLACES)
@@ -284,6 +295,29 @@ public class DocumentReference extends DomainResource {
           childrenList.add(new Property("target", "Reference(DocumentReference)", "The target document of this relationship.", 0, java.lang.Integer.MAX_VALUE, target));
         }
 
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("code"))
+          this.code = new DocumentRelationshipTypeEnumFactory().fromType(value); // Enumeration<DocumentRelationshipType>
+        else if (name.equals("target"))
+          this.target = castToReference(value); // Reference
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("code")) {
+          throw new FHIRException("Cannot call addChild on a primitive type DocumentReference.code");
+        }
+        else if (name.equals("target")) {
+          this.target = new Reference();
+          return this.target;
+        }
+        else
+          return super.addChild(name);
+      }
+
       public DocumentReferenceRelatesToComponent copy() {
         DocumentReferenceRelatesToComponent dst = new DocumentReferenceRelatesToComponent();
         copyValues(dst);
@@ -316,6 +350,11 @@ public class DocumentReference extends DomainResource {
         return super.isEmpty() && (code == null || code.isEmpty()) && (target == null || target.isEmpty())
           ;
       }
+
+  public String fhirType() {
+    return "DocumentReference.relatesTo";
+
+  }
 
   }
 
@@ -422,6 +461,29 @@ public class DocumentReference extends DomainResource {
           childrenList.add(new Property("format", "Coding", "An identifier of the document encoding, structure, and template that the document conforms to beyond the base format indicated in the mimeType.", 0, java.lang.Integer.MAX_VALUE, format));
         }
 
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("attachment"))
+          this.attachment = castToAttachment(value); // Attachment
+        else if (name.equals("format"))
+          this.getFormat().add(castToCoding(value));
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("attachment")) {
+          this.attachment = new Attachment();
+          return this.attachment;
+        }
+        else if (name.equals("format")) {
+          return addFormat();
+        }
+        else
+          return super.addChild(name);
+      }
+
       public DocumentReferenceContentComponent copy() {
         DocumentReferenceContentComponent dst = new DocumentReferenceContentComponent();
         copyValues(dst);
@@ -458,6 +520,11 @@ public class DocumentReference extends DomainResource {
         return super.isEmpty() && (attachment == null || attachment.isEmpty()) && (format == null || format.isEmpty())
           ;
       }
+
+  public String fhirType() {
+    return "DocumentReference.content";
+
+  }
 
   }
 
@@ -782,6 +849,58 @@ public class DocumentReference extends DomainResource {
           childrenList.add(new Property("related", "", "Related identifiers or resources associated with the DocumentReference.", 0, java.lang.Integer.MAX_VALUE, related));
         }
 
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("encounter"))
+          this.encounter = castToReference(value); // Reference
+        else if (name.equals("event"))
+          this.getEvent().add(castToCodeableConcept(value));
+        else if (name.equals("period"))
+          this.period = castToPeriod(value); // Period
+        else if (name.equals("facilityType"))
+          this.facilityType = castToCodeableConcept(value); // CodeableConcept
+        else if (name.equals("practiceSetting"))
+          this.practiceSetting = castToCodeableConcept(value); // CodeableConcept
+        else if (name.equals("sourcePatientInfo"))
+          this.sourcePatientInfo = castToReference(value); // Reference
+        else if (name.equals("related"))
+          this.getRelated().add((DocumentReferenceContextRelatedComponent) value);
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("encounter")) {
+          this.encounter = new Reference();
+          return this.encounter;
+        }
+        else if (name.equals("event")) {
+          return addEvent();
+        }
+        else if (name.equals("period")) {
+          this.period = new Period();
+          return this.period;
+        }
+        else if (name.equals("facilityType")) {
+          this.facilityType = new CodeableConcept();
+          return this.facilityType;
+        }
+        else if (name.equals("practiceSetting")) {
+          this.practiceSetting = new CodeableConcept();
+          return this.practiceSetting;
+        }
+        else if (name.equals("sourcePatientInfo")) {
+          this.sourcePatientInfo = new Reference();
+          return this.sourcePatientInfo;
+        }
+        else if (name.equals("related")) {
+          return addRelated();
+        }
+        else
+          return super.addChild(name);
+      }
+
       public DocumentReferenceContextComponent copy() {
         DocumentReferenceContextComponent dst = new DocumentReferenceContextComponent();
         copyValues(dst);
@@ -832,6 +951,11 @@ public class DocumentReference extends DomainResource {
            && (practiceSetting == null || practiceSetting.isEmpty()) && (sourcePatientInfo == null || sourcePatientInfo.isEmpty())
            && (related == null || related.isEmpty());
       }
+
+  public String fhirType() {
+    return "DocumentReference.context";
+
+  }
 
   }
 
@@ -934,6 +1058,30 @@ public class DocumentReference extends DomainResource {
           childrenList.add(new Property("ref", "Reference(Any)", "Related Resource to this DocumentReference. If both id and ref are present they shall refer to the same thing.", 0, java.lang.Integer.MAX_VALUE, ref));
         }
 
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("identifier"))
+          this.identifier = castToIdentifier(value); // Identifier
+        else if (name.equals("ref"))
+          this.ref = castToReference(value); // Reference
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("identifier")) {
+          this.identifier = new Identifier();
+          return this.identifier;
+        }
+        else if (name.equals("ref")) {
+          this.ref = new Reference();
+          return this.ref;
+        }
+        else
+          return super.addChild(name);
+      }
+
       public DocumentReferenceContextRelatedComponent copy() {
         DocumentReferenceContextRelatedComponent dst = new DocumentReferenceContextRelatedComponent();
         copyValues(dst);
@@ -966,6 +1114,11 @@ public class DocumentReference extends DomainResource {
         return super.isEmpty() && (identifier == null || identifier.isEmpty()) && (ref == null || ref.isEmpty())
           ;
       }
+
+  public String fhirType() {
+    return "DocumentReference.context.related";
+
+  }
 
   }
 
@@ -1787,6 +1940,116 @@ public class DocumentReference extends DomainResource {
         childrenList.add(new Property("context", "", "The clinical context in which the document was prepared.", 0, java.lang.Integer.MAX_VALUE, context));
       }
 
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("masterIdentifier"))
+          this.masterIdentifier = castToIdentifier(value); // Identifier
+        else if (name.equals("identifier"))
+          this.getIdentifier().add(castToIdentifier(value));
+        else if (name.equals("subject"))
+          this.subject = castToReference(value); // Reference
+        else if (name.equals("type"))
+          this.type = castToCodeableConcept(value); // CodeableConcept
+        else if (name.equals("class"))
+          this.class_ = castToCodeableConcept(value); // CodeableConcept
+        else if (name.equals("author"))
+          this.getAuthor().add(castToReference(value));
+        else if (name.equals("custodian"))
+          this.custodian = castToReference(value); // Reference
+        else if (name.equals("authenticator"))
+          this.authenticator = castToReference(value); // Reference
+        else if (name.equals("created"))
+          this.created = castToDateTime(value); // DateTimeType
+        else if (name.equals("indexed"))
+          this.indexed = castToInstant(value); // InstantType
+        else if (name.equals("status"))
+          this.status = new DocumentReferenceStatusEnumFactory().fromType(value); // Enumeration<DocumentReferenceStatus>
+        else if (name.equals("docStatus"))
+          this.docStatus = castToCodeableConcept(value); // CodeableConcept
+        else if (name.equals("relatesTo"))
+          this.getRelatesTo().add((DocumentReferenceRelatesToComponent) value);
+        else if (name.equals("description"))
+          this.description = castToString(value); // StringType
+        else if (name.equals("securityLabel"))
+          this.getSecurityLabel().add(castToCodeableConcept(value));
+        else if (name.equals("content"))
+          this.getContent().add((DocumentReferenceContentComponent) value);
+        else if (name.equals("context"))
+          this.context = (DocumentReferenceContextComponent) value; // DocumentReferenceContextComponent
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("masterIdentifier")) {
+          this.masterIdentifier = new Identifier();
+          return this.masterIdentifier;
+        }
+        else if (name.equals("identifier")) {
+          return addIdentifier();
+        }
+        else if (name.equals("subject")) {
+          this.subject = new Reference();
+          return this.subject;
+        }
+        else if (name.equals("type")) {
+          this.type = new CodeableConcept();
+          return this.type;
+        }
+        else if (name.equals("class")) {
+          this.class_ = new CodeableConcept();
+          return this.class_;
+        }
+        else if (name.equals("author")) {
+          return addAuthor();
+        }
+        else if (name.equals("custodian")) {
+          this.custodian = new Reference();
+          return this.custodian;
+        }
+        else if (name.equals("authenticator")) {
+          this.authenticator = new Reference();
+          return this.authenticator;
+        }
+        else if (name.equals("created")) {
+          throw new FHIRException("Cannot call addChild on a primitive type DocumentReference.created");
+        }
+        else if (name.equals("indexed")) {
+          throw new FHIRException("Cannot call addChild on a primitive type DocumentReference.indexed");
+        }
+        else if (name.equals("status")) {
+          throw new FHIRException("Cannot call addChild on a primitive type DocumentReference.status");
+        }
+        else if (name.equals("docStatus")) {
+          this.docStatus = new CodeableConcept();
+          return this.docStatus;
+        }
+        else if (name.equals("relatesTo")) {
+          return addRelatesTo();
+        }
+        else if (name.equals("description")) {
+          throw new FHIRException("Cannot call addChild on a primitive type DocumentReference.description");
+        }
+        else if (name.equals("securityLabel")) {
+          return addSecurityLabel();
+        }
+        else if (name.equals("content")) {
+          return addContent();
+        }
+        else if (name.equals("context")) {
+          this.context = new DocumentReferenceContextComponent();
+          return this.context;
+        }
+        else
+          return super.addChild(name);
+      }
+
+  public String fhirType() {
+    return "DocumentReference";
+
+  }
+
       public DocumentReference copy() {
         DocumentReference dst = new DocumentReference();
         copyValues(dst);
@@ -1892,7 +2155,7 @@ public class DocumentReference extends DomainResource {
   public static final String SP_SETTING = "setting";
   @SearchParamDefinition(name="patient", path="DocumentReference.subject", description="Who/what is the subject of the document", type="reference" )
   public static final String SP_PATIENT = "patient";
-  @SearchParamDefinition(name="relationship", path="", description="Combination of relation and relatesTo", type="composite" )
+  @SearchParamDefinition(name="relationship", path="null", description="Combination of relation and relatesTo", type="composite" )
   public static final String SP_RELATIONSHIP = "relationship";
   @SearchParamDefinition(name="event", path="DocumentReference.context.event", description="Main Clinical Acts Documented", type="token" )
   public static final String SP_EVENT = "event";
@@ -1900,7 +2163,7 @@ public class DocumentReference extends DomainResource {
   public static final String SP_CLASS = "class";
   @SearchParamDefinition(name="authenticator", path="DocumentReference.authenticator", description="Who/what authenticated the document", type="reference" )
   public static final String SP_AUTHENTICATOR = "authenticator";
-  @SearchParamDefinition(name="identifier", path="DocumentReference.masterIdentifier|DocumentReference.identifier", description="Master Version Specific Identifier", type="token" )
+  @SearchParamDefinition(name="identifier", path="DocumentReference.masterIdentifier | DocumentReference.identifier", description="Master Version Specific Identifier", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
   @SearchParamDefinition(name="period", path="DocumentReference.context.period", description="Time of service that is being documented", type="date" )
   public static final String SP_PERIOD = "period";

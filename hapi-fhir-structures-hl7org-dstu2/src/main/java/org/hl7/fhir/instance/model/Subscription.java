@@ -29,19 +29,14 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Wed, Jul 13, 2016 05:32+1000 for FHIR v1.0.2
+import java.util.*;
 
+import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
-import org.hl7.fhir.instance.utilities.Utilities;
+import org.hl7.fhir.utilities.Utilities;
 
-import ca.uhn.fhir.model.api.annotation.Block;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
-import ca.uhn.fhir.model.api.annotation.ResourceDef;
-import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.*;
 /**
  * The subscription resource is used to define a push based subscription from a server to another system. Once a subscription is registered with the server, the server checks every resource that is created or updated, and if the resource matches the given criteria, it sends a message on the defined "channel" so that another system is able to take an appropriate action.
  */
@@ -69,7 +64,7 @@ public class Subscription extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static SubscriptionStatus fromCode(String codeString) throws Exception {
+        public static SubscriptionStatus fromCode(String codeString) throws FHIRException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("requested".equals(codeString))
@@ -80,7 +75,7 @@ public class Subscription extends DomainResource {
           return ERROR;
         if ("off".equals(codeString))
           return OFF;
-        throw new Exception("Unknown SubscriptionStatus code '"+codeString+"'");
+        throw new FHIRException("Unknown SubscriptionStatus code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -135,6 +130,22 @@ public class Subscription extends DomainResource {
           return SubscriptionStatus.OFF;
         throw new IllegalArgumentException("Unknown SubscriptionStatus code '"+codeString+"'");
         }
+        public Enumeration<SubscriptionStatus> fromType(Base code) throws FHIRException {
+          if (code == null || code.isEmpty())
+            return null;
+          String codeString = ((PrimitiveType) code).asStringValue();
+          if (codeString == null || "".equals(codeString))
+            return null;
+        if ("requested".equals(codeString))
+          return new Enumeration<SubscriptionStatus>(this, SubscriptionStatus.REQUESTED);
+        if ("active".equals(codeString))
+          return new Enumeration<SubscriptionStatus>(this, SubscriptionStatus.ACTIVE);
+        if ("error".equals(codeString))
+          return new Enumeration<SubscriptionStatus>(this, SubscriptionStatus.ERROR);
+        if ("off".equals(codeString))
+          return new Enumeration<SubscriptionStatus>(this, SubscriptionStatus.OFF);
+        throw new FHIRException("Unknown SubscriptionStatus code '"+codeString+"'");
+        }
     public String toCode(SubscriptionStatus code) {
       if (code == SubscriptionStatus.REQUESTED)
         return "requested";
@@ -173,7 +184,7 @@ public class Subscription extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static SubscriptionChannelType fromCode(String codeString) throws Exception {
+        public static SubscriptionChannelType fromCode(String codeString) throws FHIRException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("rest-hook".equals(codeString))
@@ -186,7 +197,7 @@ public class Subscription extends DomainResource {
           return SMS;
         if ("message".equals(codeString))
           return MESSAGE;
-        throw new Exception("Unknown SubscriptionChannelType code '"+codeString+"'");
+        throw new FHIRException("Unknown SubscriptionChannelType code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -246,6 +257,24 @@ public class Subscription extends DomainResource {
         if ("message".equals(codeString))
           return SubscriptionChannelType.MESSAGE;
         throw new IllegalArgumentException("Unknown SubscriptionChannelType code '"+codeString+"'");
+        }
+        public Enumeration<SubscriptionChannelType> fromType(Base code) throws FHIRException {
+          if (code == null || code.isEmpty())
+            return null;
+          String codeString = ((PrimitiveType) code).asStringValue();
+          if (codeString == null || "".equals(codeString))
+            return null;
+        if ("rest-hook".equals(codeString))
+          return new Enumeration<SubscriptionChannelType>(this, SubscriptionChannelType.RESTHOOK);
+        if ("websocket".equals(codeString))
+          return new Enumeration<SubscriptionChannelType>(this, SubscriptionChannelType.WEBSOCKET);
+        if ("email".equals(codeString))
+          return new Enumeration<SubscriptionChannelType>(this, SubscriptionChannelType.EMAIL);
+        if ("sms".equals(codeString))
+          return new Enumeration<SubscriptionChannelType>(this, SubscriptionChannelType.SMS);
+        if ("message".equals(codeString))
+          return new Enumeration<SubscriptionChannelType>(this, SubscriptionChannelType.MESSAGE);
+        throw new FHIRException("Unknown SubscriptionChannelType code '"+codeString+"'");
         }
     public String toCode(SubscriptionChannelType code) {
       if (code == SubscriptionChannelType.RESTHOOK)
@@ -506,6 +535,38 @@ public class Subscription extends DomainResource {
           childrenList.add(new Property("header", "string", "Additional headers / information to send as part of the notification.", 0, java.lang.Integer.MAX_VALUE, header));
         }
 
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("type"))
+          this.type = new SubscriptionChannelTypeEnumFactory().fromType(value); // Enumeration<SubscriptionChannelType>
+        else if (name.equals("endpoint"))
+          this.endpoint = castToUri(value); // UriType
+        else if (name.equals("payload"))
+          this.payload = castToString(value); // StringType
+        else if (name.equals("header"))
+          this.header = castToString(value); // StringType
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("type")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Subscription.type");
+        }
+        else if (name.equals("endpoint")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Subscription.endpoint");
+        }
+        else if (name.equals("payload")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Subscription.payload");
+        }
+        else if (name.equals("header")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Subscription.header");
+        }
+        else
+          return super.addChild(name);
+      }
+
       public SubscriptionChannelComponent copy() {
         SubscriptionChannelComponent dst = new SubscriptionChannelComponent();
         copyValues(dst);
@@ -542,6 +603,11 @@ public class Subscription extends DomainResource {
         return super.isEmpty() && (type == null || type.isEmpty()) && (endpoint == null || endpoint.isEmpty())
            && (payload == null || payload.isEmpty()) && (header == null || header.isEmpty());
       }
+
+  public String fhirType() {
+    return "Subscription.channel";
+
+  }
 
   }
 
@@ -969,6 +1035,64 @@ public class Subscription extends DomainResource {
         childrenList.add(new Property("end", "instant", "The time for the server to turn the subscription off.", 0, java.lang.Integer.MAX_VALUE, end));
         childrenList.add(new Property("tag", "Coding", "A tag to add to any resource that matches the criteria, after the subscription is processed.", 0, java.lang.Integer.MAX_VALUE, tag));
       }
+
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("criteria"))
+          this.criteria = castToString(value); // StringType
+        else if (name.equals("contact"))
+          this.getContact().add(castToContactPoint(value));
+        else if (name.equals("reason"))
+          this.reason = castToString(value); // StringType
+        else if (name.equals("status"))
+          this.status = new SubscriptionStatusEnumFactory().fromType(value); // Enumeration<SubscriptionStatus>
+        else if (name.equals("error"))
+          this.error = castToString(value); // StringType
+        else if (name.equals("channel"))
+          this.channel = (SubscriptionChannelComponent) value; // SubscriptionChannelComponent
+        else if (name.equals("end"))
+          this.end = castToInstant(value); // InstantType
+        else if (name.equals("tag"))
+          this.getTag().add(castToCoding(value));
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("criteria")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Subscription.criteria");
+        }
+        else if (name.equals("contact")) {
+          return addContact();
+        }
+        else if (name.equals("reason")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Subscription.reason");
+        }
+        else if (name.equals("status")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Subscription.status");
+        }
+        else if (name.equals("error")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Subscription.error");
+        }
+        else if (name.equals("channel")) {
+          this.channel = new SubscriptionChannelComponent();
+          return this.channel;
+        }
+        else if (name.equals("end")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Subscription.end");
+        }
+        else if (name.equals("tag")) {
+          return addTag();
+        }
+        else
+          return super.addChild(name);
+      }
+
+  public String fhirType() {
+    return "Subscription";
+
+  }
 
       public Subscription copy() {
         Subscription dst = new Subscription();

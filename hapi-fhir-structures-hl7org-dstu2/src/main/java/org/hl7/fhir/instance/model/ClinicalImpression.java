@@ -29,19 +29,14 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Wed, Jul 13, 2016 05:32+1000 for FHIR v1.0.2
+import java.util.*;
 
+import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
-import org.hl7.fhir.instance.utilities.Utilities;
+import org.hl7.fhir.utilities.Utilities;
 
-import ca.uhn.fhir.model.api.annotation.Block;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
-import ca.uhn.fhir.model.api.annotation.ResourceDef;
-import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.*;
 /**
  * A record of a clinical assessment performed to determine what problem(s) may affect the patient and before planning the treatments or management strategies that are best to manage a patient's condition. Assessments are often 1:1 with a clinical consultation / encounter,  but this varies greatly depending on the clinical workflow. This resource is called "ClinicalImpression" rather than "ClinicalAssessment" to avoid confusion with the recording of assessment tools such as Apgar score.
  */
@@ -65,7 +60,7 @@ public class ClinicalImpression extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static ClinicalImpressionStatus fromCode(String codeString) throws Exception {
+        public static ClinicalImpressionStatus fromCode(String codeString) throws FHIRException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("in-progress".equals(codeString))
@@ -74,7 +69,7 @@ public class ClinicalImpression extends DomainResource {
           return COMPLETED;
         if ("entered-in-error".equals(codeString))
           return ENTEREDINERROR;
-        throw new Exception("Unknown ClinicalImpressionStatus code '"+codeString+"'");
+        throw new FHIRException("Unknown ClinicalImpressionStatus code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -122,6 +117,20 @@ public class ClinicalImpression extends DomainResource {
         if ("entered-in-error".equals(codeString))
           return ClinicalImpressionStatus.ENTEREDINERROR;
         throw new IllegalArgumentException("Unknown ClinicalImpressionStatus code '"+codeString+"'");
+        }
+        public Enumeration<ClinicalImpressionStatus> fromType(Base code) throws FHIRException {
+          if (code == null || code.isEmpty())
+            return null;
+          String codeString = ((PrimitiveType) code).asStringValue();
+          if (codeString == null || "".equals(codeString))
+            return null;
+        if ("in-progress".equals(codeString))
+          return new Enumeration<ClinicalImpressionStatus>(this, ClinicalImpressionStatus.INPROGRESS);
+        if ("completed".equals(codeString))
+          return new Enumeration<ClinicalImpressionStatus>(this, ClinicalImpressionStatus.COMPLETED);
+        if ("entered-in-error".equals(codeString))
+          return new Enumeration<ClinicalImpressionStatus>(this, ClinicalImpressionStatus.ENTEREDINERROR);
+        throw new FHIRException("Unknown ClinicalImpressionStatus code '"+codeString+"'");
         }
     public String toCode(ClinicalImpressionStatus code) {
       if (code == ClinicalImpressionStatus.INPROGRESS)
@@ -251,6 +260,29 @@ public class ClinicalImpression extends DomainResource {
           childrenList.add(new Property("item", "Reference(Observation|QuestionnaireResponse|FamilyMemberHistory|DiagnosticReport)", "A record of a specific investigation that was undertaken.", 0, java.lang.Integer.MAX_VALUE, item));
         }
 
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("code"))
+          this.code = castToCodeableConcept(value); // CodeableConcept
+        else if (name.equals("item"))
+          this.getItem().add(castToReference(value));
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("code")) {
+          this.code = new CodeableConcept();
+          return this.code;
+        }
+        else if (name.equals("item")) {
+          return addItem();
+        }
+        else
+          return super.addChild(name);
+      }
+
       public ClinicalImpressionInvestigationsComponent copy() {
         ClinicalImpressionInvestigationsComponent dst = new ClinicalImpressionInvestigationsComponent();
         copyValues(dst);
@@ -287,6 +319,11 @@ public class ClinicalImpression extends DomainResource {
         return super.isEmpty() && (code == null || code.isEmpty()) && (item == null || item.isEmpty())
           ;
       }
+
+  public String fhirType() {
+    return "ClinicalImpression.investigations";
+
+  }
 
   }
 
@@ -402,6 +439,29 @@ public class ClinicalImpression extends DomainResource {
           childrenList.add(new Property("cause", "string", "Which investigations support finding or diagnosis.", 0, java.lang.Integer.MAX_VALUE, cause));
         }
 
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("item"))
+          this.item = castToCodeableConcept(value); // CodeableConcept
+        else if (name.equals("cause"))
+          this.cause = castToString(value); // StringType
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("item")) {
+          this.item = new CodeableConcept();
+          return this.item;
+        }
+        else if (name.equals("cause")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ClinicalImpression.cause");
+        }
+        else
+          return super.addChild(name);
+      }
+
       public ClinicalImpressionFindingComponent copy() {
         ClinicalImpressionFindingComponent dst = new ClinicalImpressionFindingComponent();
         copyValues(dst);
@@ -434,6 +494,11 @@ public class ClinicalImpression extends DomainResource {
         return super.isEmpty() && (item == null || item.isEmpty()) && (cause == null || cause.isEmpty())
           ;
       }
+
+  public String fhirType() {
+    return "ClinicalImpression.finding";
+
+  }
 
   }
 
@@ -549,6 +614,29 @@ public class ClinicalImpression extends DomainResource {
           childrenList.add(new Property("reason", "string", "Grounds for elimination.", 0, java.lang.Integer.MAX_VALUE, reason));
         }
 
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("item"))
+          this.item = castToCodeableConcept(value); // CodeableConcept
+        else if (name.equals("reason"))
+          this.reason = castToString(value); // StringType
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("item")) {
+          this.item = new CodeableConcept();
+          return this.item;
+        }
+        else if (name.equals("reason")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ClinicalImpression.reason");
+        }
+        else
+          return super.addChild(name);
+      }
+
       public ClinicalImpressionRuledOutComponent copy() {
         ClinicalImpressionRuledOutComponent dst = new ClinicalImpressionRuledOutComponent();
         copyValues(dst);
@@ -581,6 +669,11 @@ public class ClinicalImpression extends DomainResource {
         return super.isEmpty() && (item == null || item.isEmpty()) && (reason == null || reason.isEmpty())
           ;
       }
+
+  public String fhirType() {
+    return "ClinicalImpression.ruledOut";
+
+  }
 
   }
 
@@ -1085,26 +1178,26 @@ public class ClinicalImpression extends DomainResource {
     /**
      * @return {@link #trigger} (The request or event that necessitated this assessment. This may be a diagnosis, a Care Plan, a Request Referral, or some other resource.)
      */
-    public CodeableConcept getTriggerCodeableConcept() throws Exception { 
+    public CodeableConcept getTriggerCodeableConcept() throws FHIRException { 
       if (!(this.trigger instanceof CodeableConcept))
-        throw new Exception("Type mismatch: the type CodeableConcept was expected, but "+this.trigger.getClass().getName()+" was encountered");
+        throw new FHIRException("Type mismatch: the type CodeableConcept was expected, but "+this.trigger.getClass().getName()+" was encountered");
       return (CodeableConcept) this.trigger;
     }
 
-    public boolean hasTriggerCodeableConcept() throws Exception { 
+    public boolean hasTriggerCodeableConcept() { 
       return this.trigger instanceof CodeableConcept;
     }
 
     /**
      * @return {@link #trigger} (The request or event that necessitated this assessment. This may be a diagnosis, a Care Plan, a Request Referral, or some other resource.)
      */
-    public Reference getTriggerReference() throws Exception { 
+    public Reference getTriggerReference() throws FHIRException { 
       if (!(this.trigger instanceof Reference))
-        throw new Exception("Type mismatch: the type Reference was expected, but "+this.trigger.getClass().getName()+" was encountered");
+        throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.trigger.getClass().getName()+" was encountered");
       return (Reference) this.trigger;
     }
 
-    public boolean hasTriggerReference() throws Exception { 
+    public boolean hasTriggerReference() { 
       return this.trigger instanceof Reference;
     }
 
@@ -1545,6 +1638,116 @@ public class ClinicalImpression extends DomainResource {
         childrenList.add(new Property("plan", "Reference(CarePlan|Appointment|CommunicationRequest|DeviceUseRequest|DiagnosticOrder|MedicationOrder|NutritionOrder|Order|ProcedureRequest|ProcessRequest|ReferralRequest|SupplyRequest|VisionPrescription)", "Plan of action after assessment.", 0, java.lang.Integer.MAX_VALUE, plan));
         childrenList.add(new Property("action", "Reference(ReferralRequest|ProcedureRequest|Procedure|MedicationOrder|DiagnosticOrder|NutritionOrder|SupplyRequest|Appointment)", "Actions taken during assessment.", 0, java.lang.Integer.MAX_VALUE, action));
       }
+
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("patient"))
+          this.patient = castToReference(value); // Reference
+        else if (name.equals("assessor"))
+          this.assessor = castToReference(value); // Reference
+        else if (name.equals("status"))
+          this.status = new ClinicalImpressionStatusEnumFactory().fromType(value); // Enumeration<ClinicalImpressionStatus>
+        else if (name.equals("date"))
+          this.date = castToDateTime(value); // DateTimeType
+        else if (name.equals("description"))
+          this.description = castToString(value); // StringType
+        else if (name.equals("previous"))
+          this.previous = castToReference(value); // Reference
+        else if (name.equals("problem"))
+          this.getProblem().add(castToReference(value));
+        else if (name.equals("trigger[x]"))
+          this.trigger = (Type) value; // Type
+        else if (name.equals("investigations"))
+          this.getInvestigations().add((ClinicalImpressionInvestigationsComponent) value);
+        else if (name.equals("protocol"))
+          this.protocol = castToUri(value); // UriType
+        else if (name.equals("summary"))
+          this.summary = castToString(value); // StringType
+        else if (name.equals("finding"))
+          this.getFinding().add((ClinicalImpressionFindingComponent) value);
+        else if (name.equals("resolved"))
+          this.getResolved().add(castToCodeableConcept(value));
+        else if (name.equals("ruledOut"))
+          this.getRuledOut().add((ClinicalImpressionRuledOutComponent) value);
+        else if (name.equals("prognosis"))
+          this.prognosis = castToString(value); // StringType
+        else if (name.equals("plan"))
+          this.getPlan().add(castToReference(value));
+        else if (name.equals("action"))
+          this.getAction().add(castToReference(value));
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("patient")) {
+          this.patient = new Reference();
+          return this.patient;
+        }
+        else if (name.equals("assessor")) {
+          this.assessor = new Reference();
+          return this.assessor;
+        }
+        else if (name.equals("status")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ClinicalImpression.status");
+        }
+        else if (name.equals("date")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ClinicalImpression.date");
+        }
+        else if (name.equals("description")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ClinicalImpression.description");
+        }
+        else if (name.equals("previous")) {
+          this.previous = new Reference();
+          return this.previous;
+        }
+        else if (name.equals("problem")) {
+          return addProblem();
+        }
+        else if (name.equals("triggerCodeableConcept")) {
+          this.trigger = new CodeableConcept();
+          return this.trigger;
+        }
+        else if (name.equals("triggerReference")) {
+          this.trigger = new Reference();
+          return this.trigger;
+        }
+        else if (name.equals("investigations")) {
+          return addInvestigations();
+        }
+        else if (name.equals("protocol")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ClinicalImpression.protocol");
+        }
+        else if (name.equals("summary")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ClinicalImpression.summary");
+        }
+        else if (name.equals("finding")) {
+          return addFinding();
+        }
+        else if (name.equals("resolved")) {
+          return addResolved();
+        }
+        else if (name.equals("ruledOut")) {
+          return addRuledOut();
+        }
+        else if (name.equals("prognosis")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ClinicalImpression.prognosis");
+        }
+        else if (name.equals("plan")) {
+          return addPlan();
+        }
+        else if (name.equals("action")) {
+          return addAction();
+        }
+        else
+          return super.addChild(name);
+      }
+
+  public String fhirType() {
+    return "ClinicalImpression";
+
+  }
 
       public ClinicalImpression copy() {
         ClinicalImpression dst = new ClinicalImpression();

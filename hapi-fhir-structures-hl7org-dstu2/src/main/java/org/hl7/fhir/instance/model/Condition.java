@@ -29,19 +29,14 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Wed, Jul 13, 2016 05:32+1000 for FHIR v1.0.2
+import java.util.*;
 
+import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
-import org.hl7.fhir.instance.utilities.Utilities;
+import org.hl7.fhir.utilities.Utilities;
 
-import ca.uhn.fhir.model.api.annotation.Block;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
-import ca.uhn.fhir.model.api.annotation.ResourceDef;
-import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.*;
 /**
  * Use to record detailed information about conditions, problems or diagnoses recognized by a clinician. There are many uses including: recording a diagnosis during an encounter; populating a problem list or a summary statement, such as a discharge summary.
  */
@@ -77,7 +72,7 @@ public class Condition extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static ConditionVerificationStatus fromCode(String codeString) throws Exception {
+        public static ConditionVerificationStatus fromCode(String codeString) throws FHIRException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("provisional".equals(codeString))
@@ -92,7 +87,7 @@ public class Condition extends DomainResource {
           return ENTEREDINERROR;
         if ("unknown".equals(codeString))
           return UNKNOWN;
-        throw new Exception("Unknown ConditionVerificationStatus code '"+codeString+"'");
+        throw new FHIRException("Unknown ConditionVerificationStatus code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -158,6 +153,26 @@ public class Condition extends DomainResource {
         if ("unknown".equals(codeString))
           return ConditionVerificationStatus.UNKNOWN;
         throw new IllegalArgumentException("Unknown ConditionVerificationStatus code '"+codeString+"'");
+        }
+        public Enumeration<ConditionVerificationStatus> fromType(Base code) throws FHIRException {
+          if (code == null || code.isEmpty())
+            return null;
+          String codeString = ((PrimitiveType) code).asStringValue();
+          if (codeString == null || "".equals(codeString))
+            return null;
+        if ("provisional".equals(codeString))
+          return new Enumeration<ConditionVerificationStatus>(this, ConditionVerificationStatus.PROVISIONAL);
+        if ("differential".equals(codeString))
+          return new Enumeration<ConditionVerificationStatus>(this, ConditionVerificationStatus.DIFFERENTIAL);
+        if ("confirmed".equals(codeString))
+          return new Enumeration<ConditionVerificationStatus>(this, ConditionVerificationStatus.CONFIRMED);
+        if ("refuted".equals(codeString))
+          return new Enumeration<ConditionVerificationStatus>(this, ConditionVerificationStatus.REFUTED);
+        if ("entered-in-error".equals(codeString))
+          return new Enumeration<ConditionVerificationStatus>(this, ConditionVerificationStatus.ENTEREDINERROR);
+        if ("unknown".equals(codeString))
+          return new Enumeration<ConditionVerificationStatus>(this, ConditionVerificationStatus.UNKNOWN);
+        throw new FHIRException("Unknown ConditionVerificationStatus code '"+codeString+"'");
         }
     public String toCode(ConditionVerificationStatus code) {
       if (code == ConditionVerificationStatus.PROVISIONAL)
@@ -285,6 +300,29 @@ public class Condition extends DomainResource {
           childrenList.add(new Property("assessment", "Reference(ClinicalImpression|DiagnosticReport|Observation)", "Reference to a formal record of the evidence on which the staging assessment is based.", 0, java.lang.Integer.MAX_VALUE, assessment));
         }
 
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("summary"))
+          this.summary = castToCodeableConcept(value); // CodeableConcept
+        else if (name.equals("assessment"))
+          this.getAssessment().add(castToReference(value));
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("summary")) {
+          this.summary = new CodeableConcept();
+          return this.summary;
+        }
+        else if (name.equals("assessment")) {
+          return addAssessment();
+        }
+        else
+          return super.addChild(name);
+      }
+
       public ConditionStageComponent copy() {
         ConditionStageComponent dst = new ConditionStageComponent();
         copyValues(dst);
@@ -321,6 +359,11 @@ public class Condition extends DomainResource {
         return super.isEmpty() && (summary == null || summary.isEmpty()) && (assessment == null || assessment.isEmpty())
           ;
       }
+
+  public String fhirType() {
+    return "Condition.stage";
+
+  }
 
   }
 
@@ -433,6 +476,29 @@ public class Condition extends DomainResource {
           childrenList.add(new Property("detail", "Reference(Any)", "Links to other relevant information, including pathology reports.", 0, java.lang.Integer.MAX_VALUE, detail));
         }
 
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("code"))
+          this.code = castToCodeableConcept(value); // CodeableConcept
+        else if (name.equals("detail"))
+          this.getDetail().add(castToReference(value));
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("code")) {
+          this.code = new CodeableConcept();
+          return this.code;
+        }
+        else if (name.equals("detail")) {
+          return addDetail();
+        }
+        else
+          return super.addChild(name);
+      }
+
       public ConditionEvidenceComponent copy() {
         ConditionEvidenceComponent dst = new ConditionEvidenceComponent();
         copyValues(dst);
@@ -469,6 +535,11 @@ public class Condition extends DomainResource {
         return super.isEmpty() && (code == null || code.isEmpty()) && (detail == null || detail.isEmpty())
           ;
       }
+
+  public String fhirType() {
+    return "Condition.evidence";
+
+  }
 
   }
 
@@ -1010,65 +1081,65 @@ public class Condition extends DomainResource {
     /**
      * @return {@link #onset} (Estimated or actual date or date-time  the condition began, in the opinion of the clinician.)
      */
-    public DateTimeType getOnsetDateTimeType() throws Exception { 
+    public DateTimeType getOnsetDateTimeType() throws FHIRException { 
       if (!(this.onset instanceof DateTimeType))
-        throw new Exception("Type mismatch: the type DateTimeType was expected, but "+this.onset.getClass().getName()+" was encountered");
+        throw new FHIRException("Type mismatch: the type DateTimeType was expected, but "+this.onset.getClass().getName()+" was encountered");
       return (DateTimeType) this.onset;
     }
 
-    public boolean hasOnsetDateTimeType() throws Exception { 
+    public boolean hasOnsetDateTimeType() { 
       return this.onset instanceof DateTimeType;
     }
 
     /**
      * @return {@link #onset} (Estimated or actual date or date-time  the condition began, in the opinion of the clinician.)
      */
-    public Age getOnsetAge() throws Exception { 
+    public Age getOnsetAge() throws FHIRException { 
       if (!(this.onset instanceof Age))
-        throw new Exception("Type mismatch: the type Age was expected, but "+this.onset.getClass().getName()+" was encountered");
+        throw new FHIRException("Type mismatch: the type Age was expected, but "+this.onset.getClass().getName()+" was encountered");
       return (Age) this.onset;
     }
 
-    public boolean hasOnsetAge() throws Exception { 
+    public boolean hasOnsetAge() { 
       return this.onset instanceof Age;
     }
 
     /**
      * @return {@link #onset} (Estimated or actual date or date-time  the condition began, in the opinion of the clinician.)
      */
-    public Period getOnsetPeriod() throws Exception { 
+    public Period getOnsetPeriod() throws FHIRException { 
       if (!(this.onset instanceof Period))
-        throw new Exception("Type mismatch: the type Period was expected, but "+this.onset.getClass().getName()+" was encountered");
+        throw new FHIRException("Type mismatch: the type Period was expected, but "+this.onset.getClass().getName()+" was encountered");
       return (Period) this.onset;
     }
 
-    public boolean hasOnsetPeriod() throws Exception { 
+    public boolean hasOnsetPeriod() { 
       return this.onset instanceof Period;
     }
 
     /**
      * @return {@link #onset} (Estimated or actual date or date-time  the condition began, in the opinion of the clinician.)
      */
-    public Range getOnsetRange() throws Exception { 
+    public Range getOnsetRange() throws FHIRException { 
       if (!(this.onset instanceof Range))
-        throw new Exception("Type mismatch: the type Range was expected, but "+this.onset.getClass().getName()+" was encountered");
+        throw new FHIRException("Type mismatch: the type Range was expected, but "+this.onset.getClass().getName()+" was encountered");
       return (Range) this.onset;
     }
 
-    public boolean hasOnsetRange() throws Exception { 
+    public boolean hasOnsetRange() { 
       return this.onset instanceof Range;
     }
 
     /**
      * @return {@link #onset} (Estimated or actual date or date-time  the condition began, in the opinion of the clinician.)
      */
-    public StringType getOnsetStringType() throws Exception { 
+    public StringType getOnsetStringType() throws FHIRException { 
       if (!(this.onset instanceof StringType))
-        throw new Exception("Type mismatch: the type StringType was expected, but "+this.onset.getClass().getName()+" was encountered");
+        throw new FHIRException("Type mismatch: the type StringType was expected, but "+this.onset.getClass().getName()+" was encountered");
       return (StringType) this.onset;
     }
 
-    public boolean hasOnsetStringType() throws Exception { 
+    public boolean hasOnsetStringType() { 
       return this.onset instanceof StringType;
     }
 
@@ -1094,78 +1165,78 @@ public class Condition extends DomainResource {
     /**
      * @return {@link #abatement} (The date or estimated date that the condition resolved or went into remission. This is called "abatement" because of the many overloaded connotations associated with "remission" or "resolution" - Conditions are never really resolved, but they can abate.)
      */
-    public DateTimeType getAbatementDateTimeType() throws Exception { 
+    public DateTimeType getAbatementDateTimeType() throws FHIRException { 
       if (!(this.abatement instanceof DateTimeType))
-        throw new Exception("Type mismatch: the type DateTimeType was expected, but "+this.abatement.getClass().getName()+" was encountered");
+        throw new FHIRException("Type mismatch: the type DateTimeType was expected, but "+this.abatement.getClass().getName()+" was encountered");
       return (DateTimeType) this.abatement;
     }
 
-    public boolean hasAbatementDateTimeType() throws Exception { 
+    public boolean hasAbatementDateTimeType() { 
       return this.abatement instanceof DateTimeType;
     }
 
     /**
      * @return {@link #abatement} (The date or estimated date that the condition resolved or went into remission. This is called "abatement" because of the many overloaded connotations associated with "remission" or "resolution" - Conditions are never really resolved, but they can abate.)
      */
-    public Age getAbatementAge() throws Exception { 
+    public Age getAbatementAge() throws FHIRException { 
       if (!(this.abatement instanceof Age))
-        throw new Exception("Type mismatch: the type Age was expected, but "+this.abatement.getClass().getName()+" was encountered");
+        throw new FHIRException("Type mismatch: the type Age was expected, but "+this.abatement.getClass().getName()+" was encountered");
       return (Age) this.abatement;
     }
 
-    public boolean hasAbatementAge() throws Exception { 
+    public boolean hasAbatementAge() { 
       return this.abatement instanceof Age;
     }
 
     /**
      * @return {@link #abatement} (The date or estimated date that the condition resolved or went into remission. This is called "abatement" because of the many overloaded connotations associated with "remission" or "resolution" - Conditions are never really resolved, but they can abate.)
      */
-    public BooleanType getAbatementBooleanType() throws Exception { 
+    public BooleanType getAbatementBooleanType() throws FHIRException { 
       if (!(this.abatement instanceof BooleanType))
-        throw new Exception("Type mismatch: the type BooleanType was expected, but "+this.abatement.getClass().getName()+" was encountered");
+        throw new FHIRException("Type mismatch: the type BooleanType was expected, but "+this.abatement.getClass().getName()+" was encountered");
       return (BooleanType) this.abatement;
     }
 
-    public boolean hasAbatementBooleanType() throws Exception { 
+    public boolean hasAbatementBooleanType() { 
       return this.abatement instanceof BooleanType;
     }
 
     /**
      * @return {@link #abatement} (The date or estimated date that the condition resolved or went into remission. This is called "abatement" because of the many overloaded connotations associated with "remission" or "resolution" - Conditions are never really resolved, but they can abate.)
      */
-    public Period getAbatementPeriod() throws Exception { 
+    public Period getAbatementPeriod() throws FHIRException { 
       if (!(this.abatement instanceof Period))
-        throw new Exception("Type mismatch: the type Period was expected, but "+this.abatement.getClass().getName()+" was encountered");
+        throw new FHIRException("Type mismatch: the type Period was expected, but "+this.abatement.getClass().getName()+" was encountered");
       return (Period) this.abatement;
     }
 
-    public boolean hasAbatementPeriod() throws Exception { 
+    public boolean hasAbatementPeriod() { 
       return this.abatement instanceof Period;
     }
 
     /**
      * @return {@link #abatement} (The date or estimated date that the condition resolved or went into remission. This is called "abatement" because of the many overloaded connotations associated with "remission" or "resolution" - Conditions are never really resolved, but they can abate.)
      */
-    public Range getAbatementRange() throws Exception { 
+    public Range getAbatementRange() throws FHIRException { 
       if (!(this.abatement instanceof Range))
-        throw new Exception("Type mismatch: the type Range was expected, but "+this.abatement.getClass().getName()+" was encountered");
+        throw new FHIRException("Type mismatch: the type Range was expected, but "+this.abatement.getClass().getName()+" was encountered");
       return (Range) this.abatement;
     }
 
-    public boolean hasAbatementRange() throws Exception { 
+    public boolean hasAbatementRange() { 
       return this.abatement instanceof Range;
     }
 
     /**
      * @return {@link #abatement} (The date or estimated date that the condition resolved or went into remission. This is called "abatement" because of the many overloaded connotations associated with "remission" or "resolution" - Conditions are never really resolved, but they can abate.)
      */
-    public StringType getAbatementStringType() throws Exception { 
+    public StringType getAbatementStringType() throws FHIRException { 
       if (!(this.abatement instanceof StringType))
-        throw new Exception("Type mismatch: the type StringType was expected, but "+this.abatement.getClass().getName()+" was encountered");
+        throw new FHIRException("Type mismatch: the type StringType was expected, but "+this.abatement.getClass().getName()+" was encountered");
       return (StringType) this.abatement;
     }
 
-    public boolean hasAbatementStringType() throws Exception { 
+    public boolean hasAbatementStringType() { 
       return this.abatement instanceof StringType;
     }
 
@@ -1353,6 +1424,148 @@ public class Condition extends DomainResource {
         childrenList.add(new Property("bodySite", "CodeableConcept", "The anatomical location where this condition manifests itself.", 0, java.lang.Integer.MAX_VALUE, bodySite));
         childrenList.add(new Property("notes", "string", "Additional information about the Condition. This is a general notes/comments entry  for description of the Condition, its diagnosis and prognosis.", 0, java.lang.Integer.MAX_VALUE, notes));
       }
+
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("identifier"))
+          this.getIdentifier().add(castToIdentifier(value));
+        else if (name.equals("patient"))
+          this.patient = castToReference(value); // Reference
+        else if (name.equals("encounter"))
+          this.encounter = castToReference(value); // Reference
+        else if (name.equals("asserter"))
+          this.asserter = castToReference(value); // Reference
+        else if (name.equals("dateRecorded"))
+          this.dateRecorded = castToDate(value); // DateType
+        else if (name.equals("code"))
+          this.code = castToCodeableConcept(value); // CodeableConcept
+        else if (name.equals("category"))
+          this.category = castToCodeableConcept(value); // CodeableConcept
+        else if (name.equals("clinicalStatus"))
+          this.clinicalStatus = castToCode(value); // CodeType
+        else if (name.equals("verificationStatus"))
+          this.verificationStatus = new ConditionVerificationStatusEnumFactory().fromType(value); // Enumeration<ConditionVerificationStatus>
+        else if (name.equals("severity"))
+          this.severity = castToCodeableConcept(value); // CodeableConcept
+        else if (name.equals("onset[x]"))
+          this.onset = (Type) value; // Type
+        else if (name.equals("abatement[x]"))
+          this.abatement = (Type) value; // Type
+        else if (name.equals("stage"))
+          this.stage = (ConditionStageComponent) value; // ConditionStageComponent
+        else if (name.equals("evidence"))
+          this.getEvidence().add((ConditionEvidenceComponent) value);
+        else if (name.equals("bodySite"))
+          this.getBodySite().add(castToCodeableConcept(value));
+        else if (name.equals("notes"))
+          this.notes = castToString(value); // StringType
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("identifier")) {
+          return addIdentifier();
+        }
+        else if (name.equals("patient")) {
+          this.patient = new Reference();
+          return this.patient;
+        }
+        else if (name.equals("encounter")) {
+          this.encounter = new Reference();
+          return this.encounter;
+        }
+        else if (name.equals("asserter")) {
+          this.asserter = new Reference();
+          return this.asserter;
+        }
+        else if (name.equals("dateRecorded")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Condition.dateRecorded");
+        }
+        else if (name.equals("code")) {
+          this.code = new CodeableConcept();
+          return this.code;
+        }
+        else if (name.equals("category")) {
+          this.category = new CodeableConcept();
+          return this.category;
+        }
+        else if (name.equals("clinicalStatus")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Condition.clinicalStatus");
+        }
+        else if (name.equals("verificationStatus")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Condition.verificationStatus");
+        }
+        else if (name.equals("severity")) {
+          this.severity = new CodeableConcept();
+          return this.severity;
+        }
+        else if (name.equals("onsetDateTime")) {
+          this.onset = new DateTimeType();
+          return this.onset;
+        }
+        else if (name.equals("onsetAge")) {
+          this.onset = new Age();
+          return this.onset;
+        }
+        else if (name.equals("onsetPeriod")) {
+          this.onset = new Period();
+          return this.onset;
+        }
+        else if (name.equals("onsetRange")) {
+          this.onset = new Range();
+          return this.onset;
+        }
+        else if (name.equals("onsetString")) {
+          this.onset = new StringType();
+          return this.onset;
+        }
+        else if (name.equals("abatementDateTime")) {
+          this.abatement = new DateTimeType();
+          return this.abatement;
+        }
+        else if (name.equals("abatementAge")) {
+          this.abatement = new Age();
+          return this.abatement;
+        }
+        else if (name.equals("abatementBoolean")) {
+          this.abatement = new BooleanType();
+          return this.abatement;
+        }
+        else if (name.equals("abatementPeriod")) {
+          this.abatement = new Period();
+          return this.abatement;
+        }
+        else if (name.equals("abatementRange")) {
+          this.abatement = new Range();
+          return this.abatement;
+        }
+        else if (name.equals("abatementString")) {
+          this.abatement = new StringType();
+          return this.abatement;
+        }
+        else if (name.equals("stage")) {
+          this.stage = new ConditionStageComponent();
+          return this.stage;
+        }
+        else if (name.equals("evidence")) {
+          return addEvidence();
+        }
+        else if (name.equals("bodySite")) {
+          return addBodySite();
+        }
+        else if (name.equals("notes")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Condition.notes");
+        }
+        else
+          return super.addChild(name);
+      }
+
+  public String fhirType() {
+    return "Condition";
+
+  }
 
       public Condition copy() {
         Condition dst = new Condition();

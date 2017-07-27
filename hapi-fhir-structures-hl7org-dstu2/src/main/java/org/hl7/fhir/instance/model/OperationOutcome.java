@@ -29,18 +29,16 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
+// Generated on Wed, Jul 13, 2016 05:32+1000 for FHIR v1.0.2
 import java.util.ArrayList;
 import java.util.List;
 
+import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
-import org.hl7.fhir.instance.utilities.Utilities;
+import org.hl7.fhir.utilities.Utilities;
 
-import ca.uhn.fhir.model.api.annotation.Block;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
-import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.api.annotation.*;
 /**
  * A collection of error, warning or information messages that result from a system action.
  */
@@ -68,7 +66,7 @@ public class OperationOutcome extends DomainResource implements IBaseOperationOu
          * added to help the parsers
          */
         NULL;
-        public static IssueSeverity fromCode(String codeString) throws Exception {
+        public static IssueSeverity fromCode(String codeString) throws FHIRException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("fatal".equals(codeString))
@@ -79,7 +77,7 @@ public class OperationOutcome extends DomainResource implements IBaseOperationOu
           return WARNING;
         if ("information".equals(codeString))
           return INFORMATION;
-        throw new Exception("Unknown IssueSeverity code '"+codeString+"'");
+        throw new FHIRException("Unknown IssueSeverity code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -133,6 +131,22 @@ public class OperationOutcome extends DomainResource implements IBaseOperationOu
         if ("information".equals(codeString))
           return IssueSeverity.INFORMATION;
         throw new IllegalArgumentException("Unknown IssueSeverity code '"+codeString+"'");
+        }
+        public Enumeration<IssueSeverity> fromType(Base code) throws FHIRException {
+          if (code == null || code.isEmpty())
+            return null;
+          String codeString = ((PrimitiveType) code).asStringValue();
+          if (codeString == null || "".equals(codeString))
+            return null;
+        if ("fatal".equals(codeString))
+          return new Enumeration<IssueSeverity>(this, IssueSeverity.FATAL);
+        if ("error".equals(codeString))
+          return new Enumeration<IssueSeverity>(this, IssueSeverity.ERROR);
+        if ("warning".equals(codeString))
+          return new Enumeration<IssueSeverity>(this, IssueSeverity.WARNING);
+        if ("information".equals(codeString))
+          return new Enumeration<IssueSeverity>(this, IssueSeverity.INFORMATION);
+        throw new FHIRException("Unknown IssueSeverity code '"+codeString+"'");
         }
     public String toCode(IssueSeverity code) {
       if (code == IssueSeverity.FATAL)
@@ -268,7 +282,7 @@ public class OperationOutcome extends DomainResource implements IBaseOperationOu
          * added to help the parsers
          */
         NULL;
-        public static IssueType fromCode(String codeString) throws Exception {
+        public static IssueType fromCode(String codeString) throws FHIRException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("invalid".equals(codeString))
@@ -329,7 +343,7 @@ public class OperationOutcome extends DomainResource implements IBaseOperationOu
           return THROTTLED;
         if ("informational".equals(codeString))
           return INFORMATIONAL;
-        throw new Exception("Unknown IssueType code '"+codeString+"'");
+        throw new FHIRException("Unknown IssueType code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -533,6 +547,72 @@ public class OperationOutcome extends DomainResource implements IBaseOperationOu
         if ("informational".equals(codeString))
           return IssueType.INFORMATIONAL;
         throw new IllegalArgumentException("Unknown IssueType code '"+codeString+"'");
+        }
+        public Enumeration<IssueType> fromType(Base code) throws FHIRException {
+          if (code == null || code.isEmpty())
+            return null;
+          String codeString = ((PrimitiveType) code).asStringValue();
+          if (codeString == null || "".equals(codeString))
+            return null;
+        if ("invalid".equals(codeString))
+          return new Enumeration<IssueType>(this, IssueType.INVALID);
+        if ("structure".equals(codeString))
+          return new Enumeration<IssueType>(this, IssueType.STRUCTURE);
+        if ("required".equals(codeString))
+          return new Enumeration<IssueType>(this, IssueType.REQUIRED);
+        if ("value".equals(codeString))
+          return new Enumeration<IssueType>(this, IssueType.VALUE);
+        if ("invariant".equals(codeString))
+          return new Enumeration<IssueType>(this, IssueType.INVARIANT);
+        if ("security".equals(codeString))
+          return new Enumeration<IssueType>(this, IssueType.SECURITY);
+        if ("login".equals(codeString))
+          return new Enumeration<IssueType>(this, IssueType.LOGIN);
+        if ("unknown".equals(codeString))
+          return new Enumeration<IssueType>(this, IssueType.UNKNOWN);
+        if ("expired".equals(codeString))
+          return new Enumeration<IssueType>(this, IssueType.EXPIRED);
+        if ("forbidden".equals(codeString))
+          return new Enumeration<IssueType>(this, IssueType.FORBIDDEN);
+        if ("suppressed".equals(codeString))
+          return new Enumeration<IssueType>(this, IssueType.SUPPRESSED);
+        if ("processing".equals(codeString))
+          return new Enumeration<IssueType>(this, IssueType.PROCESSING);
+        if ("not-supported".equals(codeString))
+          return new Enumeration<IssueType>(this, IssueType.NOTSUPPORTED);
+        if ("duplicate".equals(codeString))
+          return new Enumeration<IssueType>(this, IssueType.DUPLICATE);
+        if ("not-found".equals(codeString))
+          return new Enumeration<IssueType>(this, IssueType.NOTFOUND);
+        if ("too-long".equals(codeString))
+          return new Enumeration<IssueType>(this, IssueType.TOOLONG);
+        if ("code-invalid".equals(codeString))
+          return new Enumeration<IssueType>(this, IssueType.CODEINVALID);
+        if ("extension".equals(codeString))
+          return new Enumeration<IssueType>(this, IssueType.EXTENSION);
+        if ("too-costly".equals(codeString))
+          return new Enumeration<IssueType>(this, IssueType.TOOCOSTLY);
+        if ("business-rule".equals(codeString))
+          return new Enumeration<IssueType>(this, IssueType.BUSINESSRULE);
+        if ("conflict".equals(codeString))
+          return new Enumeration<IssueType>(this, IssueType.CONFLICT);
+        if ("incomplete".equals(codeString))
+          return new Enumeration<IssueType>(this, IssueType.INCOMPLETE);
+        if ("transient".equals(codeString))
+          return new Enumeration<IssueType>(this, IssueType.TRANSIENT);
+        if ("lock-error".equals(codeString))
+          return new Enumeration<IssueType>(this, IssueType.LOCKERROR);
+        if ("no-store".equals(codeString))
+          return new Enumeration<IssueType>(this, IssueType.NOSTORE);
+        if ("exception".equals(codeString))
+          return new Enumeration<IssueType>(this, IssueType.EXCEPTION);
+        if ("timeout".equals(codeString))
+          return new Enumeration<IssueType>(this, IssueType.TIMEOUT);
+        if ("throttled".equals(codeString))
+          return new Enumeration<IssueType>(this, IssueType.THROTTLED);
+        if ("informational".equals(codeString))
+          return new Enumeration<IssueType>(this, IssueType.INFORMATIONAL);
+        throw new FHIRException("Unknown IssueType code '"+codeString+"'");
         }
     public String toCode(IssueType code) {
       if (code == IssueType.INVALID)
@@ -878,6 +958,44 @@ public class OperationOutcome extends DomainResource implements IBaseOperationOu
           childrenList.add(new Property("location", "string", "A simple XPath limited to element names, repetition indicators and the default child access that identifies one of the elements in the resource that caused this issue to be raised.", 0, java.lang.Integer.MAX_VALUE, location));
         }
 
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("severity"))
+          this.severity = new IssueSeverityEnumFactory().fromType(value); // Enumeration<IssueSeverity>
+        else if (name.equals("code"))
+          this.code = new IssueTypeEnumFactory().fromType(value); // Enumeration<IssueType>
+        else if (name.equals("details"))
+          this.details = castToCodeableConcept(value); // CodeableConcept
+        else if (name.equals("diagnostics"))
+          this.diagnostics = castToString(value); // StringType
+        else if (name.equals("location"))
+          this.getLocation().add(castToString(value));
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("severity")) {
+          throw new FHIRException("Cannot call addChild on a primitive type OperationOutcome.severity");
+        }
+        else if (name.equals("code")) {
+          throw new FHIRException("Cannot call addChild on a primitive type OperationOutcome.code");
+        }
+        else if (name.equals("details")) {
+          this.details = new CodeableConcept();
+          return this.details;
+        }
+        else if (name.equals("diagnostics")) {
+          throw new FHIRException("Cannot call addChild on a primitive type OperationOutcome.diagnostics");
+        }
+        else if (name.equals("location")) {
+          throw new FHIRException("Cannot call addChild on a primitive type OperationOutcome.location");
+        }
+        else
+          return super.addChild(name);
+      }
+
       public OperationOutcomeIssueComponent copy() {
         OperationOutcomeIssueComponent dst = new OperationOutcomeIssueComponent();
         copyValues(dst);
@@ -920,6 +1038,11 @@ public class OperationOutcome extends DomainResource implements IBaseOperationOu
            && (details == null || details.isEmpty()) && (diagnostics == null || diagnostics.isEmpty())
            && (location == null || location.isEmpty());
       }
+
+  public String fhirType() {
+    return "OperationOutcome.issue";
+
+  }
 
   }
 
@@ -983,6 +1106,28 @@ public class OperationOutcome extends DomainResource implements IBaseOperationOu
         super.listChildren(childrenList);
         childrenList.add(new Property("issue", "", "An error, warning or information message that results from a system action.", 0, java.lang.Integer.MAX_VALUE, issue));
       }
+
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("issue"))
+          this.getIssue().add((OperationOutcomeIssueComponent) value);
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("issue")) {
+          return addIssue();
+        }
+        else
+          return super.addChild(name);
+      }
+
+  public String fhirType() {
+    return "OperationOutcome";
+
+  }
 
       public OperationOutcome copy() {
         OperationOutcome dst = new OperationOutcome();

@@ -29,19 +29,14 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Wed, Jul 13, 2016 05:32+1000 for FHIR v1.0.2
+import java.util.*;
 
+import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
-import org.hl7.fhir.instance.utilities.Utilities;
+import org.hl7.fhir.utilities.Utilities;
 
-import ca.uhn.fhir.model.api.annotation.Block;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
-import ca.uhn.fhir.model.api.annotation.ResourceDef;
-import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.*;
 /**
  * A structured set of questions and their answers. The questions are ordered and grouped into coherent subsets, corresponding to the structure of the grouping of the underlying questions.
  */
@@ -65,7 +60,7 @@ public class QuestionnaireResponse extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static QuestionnaireResponseStatus fromCode(String codeString) throws Exception {
+        public static QuestionnaireResponseStatus fromCode(String codeString) throws FHIRException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("in-progress".equals(codeString))
@@ -74,7 +69,7 @@ public class QuestionnaireResponse extends DomainResource {
           return COMPLETED;
         if ("amended".equals(codeString))
           return AMENDED;
-        throw new Exception("Unknown QuestionnaireResponseStatus code '"+codeString+"'");
+        throw new FHIRException("Unknown QuestionnaireResponseStatus code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -122,6 +117,20 @@ public class QuestionnaireResponse extends DomainResource {
         if ("amended".equals(codeString))
           return QuestionnaireResponseStatus.AMENDED;
         throw new IllegalArgumentException("Unknown QuestionnaireResponseStatus code '"+codeString+"'");
+        }
+        public Enumeration<QuestionnaireResponseStatus> fromType(Base code) throws FHIRException {
+          if (code == null || code.isEmpty())
+            return null;
+          String codeString = ((PrimitiveType) code).asStringValue();
+          if (codeString == null || "".equals(codeString))
+            return null;
+        if ("in-progress".equals(codeString))
+          return new Enumeration<QuestionnaireResponseStatus>(this, QuestionnaireResponseStatus.INPROGRESS);
+        if ("completed".equals(codeString))
+          return new Enumeration<QuestionnaireResponseStatus>(this, QuestionnaireResponseStatus.COMPLETED);
+        if ("amended".equals(codeString))
+          return new Enumeration<QuestionnaireResponseStatus>(this, QuestionnaireResponseStatus.AMENDED);
+        throw new FHIRException("Unknown QuestionnaireResponseStatus code '"+codeString+"'");
         }
     public String toCode(QuestionnaireResponseStatus code) {
       if (code == QuestionnaireResponseStatus.INPROGRESS)
@@ -468,6 +477,49 @@ public class QuestionnaireResponse extends DomainResource {
           childrenList.add(new Property("question", "", "Set of questions within this group. The order of questions within the group is relevant.", 0, java.lang.Integer.MAX_VALUE, question));
         }
 
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("linkId"))
+          this.linkId = castToString(value); // StringType
+        else if (name.equals("title"))
+          this.title = castToString(value); // StringType
+        else if (name.equals("text"))
+          this.text = castToString(value); // StringType
+        else if (name.equals("subject"))
+          this.subject = castToReference(value); // Reference
+        else if (name.equals("group"))
+          this.getGroup().add((GroupComponent) value);
+        else if (name.equals("question"))
+          this.getQuestion().add((QuestionComponent) value);
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("linkId")) {
+          throw new FHIRException("Cannot call addChild on a primitive type QuestionnaireResponse.linkId");
+        }
+        else if (name.equals("title")) {
+          throw new FHIRException("Cannot call addChild on a primitive type QuestionnaireResponse.title");
+        }
+        else if (name.equals("text")) {
+          throw new FHIRException("Cannot call addChild on a primitive type QuestionnaireResponse.text");
+        }
+        else if (name.equals("subject")) {
+          this.subject = new Reference();
+          return this.subject;
+        }
+        else if (name.equals("group")) {
+          return addGroup();
+        }
+        else if (name.equals("question")) {
+          return addQuestion();
+        }
+        else
+          return super.addChild(name);
+      }
+
       public GroupComponent copy() {
         GroupComponent dst = new GroupComponent();
         copyValues(dst);
@@ -516,6 +568,11 @@ public class QuestionnaireResponse extends DomainResource {
            && (text == null || text.isEmpty()) && (subject == null || subject.isEmpty()) && (group == null || group.isEmpty())
            && (question == null || question.isEmpty());
       }
+
+  public String fhirType() {
+    return "QuestionnaireResponse.group";
+
+  }
 
   }
 
@@ -696,6 +753,33 @@ public class QuestionnaireResponse extends DomainResource {
           childrenList.add(new Property("answer", "", "The respondent's answer(s) to the question.", 0, java.lang.Integer.MAX_VALUE, answer));
         }
 
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("linkId"))
+          this.linkId = castToString(value); // StringType
+        else if (name.equals("text"))
+          this.text = castToString(value); // StringType
+        else if (name.equals("answer"))
+          this.getAnswer().add((QuestionAnswerComponent) value);
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("linkId")) {
+          throw new FHIRException("Cannot call addChild on a primitive type QuestionnaireResponse.linkId");
+        }
+        else if (name.equals("text")) {
+          throw new FHIRException("Cannot call addChild on a primitive type QuestionnaireResponse.text");
+        }
+        else if (name.equals("answer")) {
+          return addAnswer();
+        }
+        else
+          return super.addChild(name);
+      }
+
       public QuestionComponent copy() {
         QuestionComponent dst = new QuestionComponent();
         copyValues(dst);
@@ -735,6 +819,11 @@ public class QuestionnaireResponse extends DomainResource {
            && (answer == null || answer.isEmpty());
       }
 
+  public String fhirType() {
+    return "QuestionnaireResponse.group.question";
+
+  }
+
   }
 
     @Block()
@@ -772,169 +861,169 @@ public class QuestionnaireResponse extends DomainResource {
         /**
          * @return {@link #value} (The answer (or one of the answers) provided by the respondent to the question.)
          */
-        public BooleanType getValueBooleanType() throws Exception { 
+        public BooleanType getValueBooleanType() throws FHIRException { 
           if (!(this.value instanceof BooleanType))
-            throw new Exception("Type mismatch: the type BooleanType was expected, but "+this.value.getClass().getName()+" was encountered");
+            throw new FHIRException("Type mismatch: the type BooleanType was expected, but "+this.value.getClass().getName()+" was encountered");
           return (BooleanType) this.value;
         }
 
-        public boolean hasValueBooleanType() throws Exception { 
+        public boolean hasValueBooleanType() { 
           return this.value instanceof BooleanType;
         }
 
         /**
          * @return {@link #value} (The answer (or one of the answers) provided by the respondent to the question.)
          */
-        public DecimalType getValueDecimalType() throws Exception { 
+        public DecimalType getValueDecimalType() throws FHIRException { 
           if (!(this.value instanceof DecimalType))
-            throw new Exception("Type mismatch: the type DecimalType was expected, but "+this.value.getClass().getName()+" was encountered");
+            throw new FHIRException("Type mismatch: the type DecimalType was expected, but "+this.value.getClass().getName()+" was encountered");
           return (DecimalType) this.value;
         }
 
-        public boolean hasValueDecimalType() throws Exception { 
+        public boolean hasValueDecimalType() { 
           return this.value instanceof DecimalType;
         }
 
         /**
          * @return {@link #value} (The answer (or one of the answers) provided by the respondent to the question.)
          */
-        public IntegerType getValueIntegerType() throws Exception { 
+        public IntegerType getValueIntegerType() throws FHIRException { 
           if (!(this.value instanceof IntegerType))
-            throw new Exception("Type mismatch: the type IntegerType was expected, but "+this.value.getClass().getName()+" was encountered");
+            throw new FHIRException("Type mismatch: the type IntegerType was expected, but "+this.value.getClass().getName()+" was encountered");
           return (IntegerType) this.value;
         }
 
-        public boolean hasValueIntegerType() throws Exception { 
+        public boolean hasValueIntegerType() { 
           return this.value instanceof IntegerType;
         }
 
         /**
          * @return {@link #value} (The answer (or one of the answers) provided by the respondent to the question.)
          */
-        public DateType getValueDateType() throws Exception { 
+        public DateType getValueDateType() throws FHIRException { 
           if (!(this.value instanceof DateType))
-            throw new Exception("Type mismatch: the type DateType was expected, but "+this.value.getClass().getName()+" was encountered");
+            throw new FHIRException("Type mismatch: the type DateType was expected, but "+this.value.getClass().getName()+" was encountered");
           return (DateType) this.value;
         }
 
-        public boolean hasValueDateType() throws Exception { 
+        public boolean hasValueDateType() { 
           return this.value instanceof DateType;
         }
 
         /**
          * @return {@link #value} (The answer (or one of the answers) provided by the respondent to the question.)
          */
-        public DateTimeType getValueDateTimeType() throws Exception { 
+        public DateTimeType getValueDateTimeType() throws FHIRException { 
           if (!(this.value instanceof DateTimeType))
-            throw new Exception("Type mismatch: the type DateTimeType was expected, but "+this.value.getClass().getName()+" was encountered");
+            throw new FHIRException("Type mismatch: the type DateTimeType was expected, but "+this.value.getClass().getName()+" was encountered");
           return (DateTimeType) this.value;
         }
 
-        public boolean hasValueDateTimeType() throws Exception { 
+        public boolean hasValueDateTimeType() { 
           return this.value instanceof DateTimeType;
         }
 
         /**
          * @return {@link #value} (The answer (or one of the answers) provided by the respondent to the question.)
          */
-        public InstantType getValueInstantType() throws Exception { 
+        public InstantType getValueInstantType() throws FHIRException { 
           if (!(this.value instanceof InstantType))
-            throw new Exception("Type mismatch: the type InstantType was expected, but "+this.value.getClass().getName()+" was encountered");
+            throw new FHIRException("Type mismatch: the type InstantType was expected, but "+this.value.getClass().getName()+" was encountered");
           return (InstantType) this.value;
         }
 
-        public boolean hasValueInstantType() throws Exception { 
+        public boolean hasValueInstantType() { 
           return this.value instanceof InstantType;
         }
 
         /**
          * @return {@link #value} (The answer (or one of the answers) provided by the respondent to the question.)
          */
-        public TimeType getValueTimeType() throws Exception { 
+        public TimeType getValueTimeType() throws FHIRException { 
           if (!(this.value instanceof TimeType))
-            throw new Exception("Type mismatch: the type TimeType was expected, but "+this.value.getClass().getName()+" was encountered");
+            throw new FHIRException("Type mismatch: the type TimeType was expected, but "+this.value.getClass().getName()+" was encountered");
           return (TimeType) this.value;
         }
 
-        public boolean hasValueTimeType() throws Exception { 
+        public boolean hasValueTimeType() { 
           return this.value instanceof TimeType;
         }
 
         /**
          * @return {@link #value} (The answer (or one of the answers) provided by the respondent to the question.)
          */
-        public StringType getValueStringType() throws Exception { 
+        public StringType getValueStringType() throws FHIRException { 
           if (!(this.value instanceof StringType))
-            throw new Exception("Type mismatch: the type StringType was expected, but "+this.value.getClass().getName()+" was encountered");
+            throw new FHIRException("Type mismatch: the type StringType was expected, but "+this.value.getClass().getName()+" was encountered");
           return (StringType) this.value;
         }
 
-        public boolean hasValueStringType() throws Exception { 
+        public boolean hasValueStringType() { 
           return this.value instanceof StringType;
         }
 
         /**
          * @return {@link #value} (The answer (or one of the answers) provided by the respondent to the question.)
          */
-        public UriType getValueUriType() throws Exception { 
+        public UriType getValueUriType() throws FHIRException { 
           if (!(this.value instanceof UriType))
-            throw new Exception("Type mismatch: the type UriType was expected, but "+this.value.getClass().getName()+" was encountered");
+            throw new FHIRException("Type mismatch: the type UriType was expected, but "+this.value.getClass().getName()+" was encountered");
           return (UriType) this.value;
         }
 
-        public boolean hasValueUriType() throws Exception { 
+        public boolean hasValueUriType() { 
           return this.value instanceof UriType;
         }
 
         /**
          * @return {@link #value} (The answer (or one of the answers) provided by the respondent to the question.)
          */
-        public Attachment getValueAttachment() throws Exception { 
+        public Attachment getValueAttachment() throws FHIRException { 
           if (!(this.value instanceof Attachment))
-            throw new Exception("Type mismatch: the type Attachment was expected, but "+this.value.getClass().getName()+" was encountered");
+            throw new FHIRException("Type mismatch: the type Attachment was expected, but "+this.value.getClass().getName()+" was encountered");
           return (Attachment) this.value;
         }
 
-        public boolean hasValueAttachment() throws Exception { 
+        public boolean hasValueAttachment() { 
           return this.value instanceof Attachment;
         }
 
         /**
          * @return {@link #value} (The answer (or one of the answers) provided by the respondent to the question.)
          */
-        public Coding getValueCoding() throws Exception { 
+        public Coding getValueCoding() throws FHIRException { 
           if (!(this.value instanceof Coding))
-            throw new Exception("Type mismatch: the type Coding was expected, but "+this.value.getClass().getName()+" was encountered");
+            throw new FHIRException("Type mismatch: the type Coding was expected, but "+this.value.getClass().getName()+" was encountered");
           return (Coding) this.value;
         }
 
-        public boolean hasValueCoding() throws Exception { 
+        public boolean hasValueCoding() { 
           return this.value instanceof Coding;
         }
 
         /**
          * @return {@link #value} (The answer (or one of the answers) provided by the respondent to the question.)
          */
-        public Quantity getValueQuantity() throws Exception { 
+        public Quantity getValueQuantity() throws FHIRException { 
           if (!(this.value instanceof Quantity))
-            throw new Exception("Type mismatch: the type Quantity was expected, but "+this.value.getClass().getName()+" was encountered");
+            throw new FHIRException("Type mismatch: the type Quantity was expected, but "+this.value.getClass().getName()+" was encountered");
           return (Quantity) this.value;
         }
 
-        public boolean hasValueQuantity() throws Exception { 
+        public boolean hasValueQuantity() { 
           return this.value instanceof Quantity;
         }
 
         /**
          * @return {@link #value} (The answer (or one of the answers) provided by the respondent to the question.)
          */
-        public Reference getValueReference() throws Exception { 
+        public Reference getValueReference() throws FHIRException { 
           if (!(this.value instanceof Reference))
-            throw new Exception("Type mismatch: the type Reference was expected, but "+this.value.getClass().getName()+" was encountered");
+            throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.value.getClass().getName()+" was encountered");
           return (Reference) this.value;
         }
 
-        public boolean hasValueReference() throws Exception { 
+        public boolean hasValueReference() { 
           return this.value instanceof Reference;
         }
 
@@ -996,6 +1085,77 @@ public class QuestionnaireResponse extends DomainResource {
           childrenList.add(new Property("group", "@QuestionnaireResponse.group", "Nested group, containing nested question for this question. The order of groups within the question is relevant.", 0, java.lang.Integer.MAX_VALUE, group));
         }
 
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("value[x]"))
+          this.value = (Type) value; // Type
+        else if (name.equals("group"))
+          this.getGroup().add((GroupComponent) value);
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("valueBoolean")) {
+          this.value = new BooleanType();
+          return this.value;
+        }
+        else if (name.equals("valueDecimal")) {
+          this.value = new DecimalType();
+          return this.value;
+        }
+        else if (name.equals("valueInteger")) {
+          this.value = new IntegerType();
+          return this.value;
+        }
+        else if (name.equals("valueDate")) {
+          this.value = new DateType();
+          return this.value;
+        }
+        else if (name.equals("valueDateTime")) {
+          this.value = new DateTimeType();
+          return this.value;
+        }
+        else if (name.equals("valueInstant")) {
+          this.value = new InstantType();
+          return this.value;
+        }
+        else if (name.equals("valueTime")) {
+          this.value = new TimeType();
+          return this.value;
+        }
+        else if (name.equals("valueString")) {
+          this.value = new StringType();
+          return this.value;
+        }
+        else if (name.equals("valueUri")) {
+          this.value = new UriType();
+          return this.value;
+        }
+        else if (name.equals("valueAttachment")) {
+          this.value = new Attachment();
+          return this.value;
+        }
+        else if (name.equals("valueCoding")) {
+          this.value = new Coding();
+          return this.value;
+        }
+        else if (name.equals("valueQuantity")) {
+          this.value = new Quantity();
+          return this.value;
+        }
+        else if (name.equals("valueReference")) {
+          this.value = new Reference();
+          return this.value;
+        }
+        else if (name.equals("group")) {
+          return addGroup();
+        }
+        else
+          return super.addChild(name);
+      }
+
       public QuestionAnswerComponent copy() {
         QuestionAnswerComponent dst = new QuestionAnswerComponent();
         copyValues(dst);
@@ -1032,6 +1192,11 @@ public class QuestionnaireResponse extends DomainResource {
         return super.isEmpty() && (value == null || value.isEmpty()) && (group == null || group.isEmpty())
           ;
       }
+
+  public String fhirType() {
+    return "QuestionnaireResponse.group.question.answer";
+
+  }
 
   }
 
@@ -1499,6 +1664,75 @@ public class QuestionnaireResponse extends DomainResource {
         childrenList.add(new Property("encounter", "Reference(Encounter)", "Encounter during which this set of questionnaire response were collected. When there were multiple encounters, this is the one considered most relevant to the context of the answers.", 0, java.lang.Integer.MAX_VALUE, encounter));
         childrenList.add(new Property("group", "", "A group of questions to a possibly similarly grouped set of questions in the questionnaire response.", 0, java.lang.Integer.MAX_VALUE, group));
       }
+
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("identifier"))
+          this.identifier = castToIdentifier(value); // Identifier
+        else if (name.equals("questionnaire"))
+          this.questionnaire = castToReference(value); // Reference
+        else if (name.equals("status"))
+          this.status = new QuestionnaireResponseStatusEnumFactory().fromType(value); // Enumeration<QuestionnaireResponseStatus>
+        else if (name.equals("subject"))
+          this.subject = castToReference(value); // Reference
+        else if (name.equals("author"))
+          this.author = castToReference(value); // Reference
+        else if (name.equals("authored"))
+          this.authored = castToDateTime(value); // DateTimeType
+        else if (name.equals("source"))
+          this.source = castToReference(value); // Reference
+        else if (name.equals("encounter"))
+          this.encounter = castToReference(value); // Reference
+        else if (name.equals("group"))
+          this.group = (GroupComponent) value; // GroupComponent
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("identifier")) {
+          this.identifier = new Identifier();
+          return this.identifier;
+        }
+        else if (name.equals("questionnaire")) {
+          this.questionnaire = new Reference();
+          return this.questionnaire;
+        }
+        else if (name.equals("status")) {
+          throw new FHIRException("Cannot call addChild on a primitive type QuestionnaireResponse.status");
+        }
+        else if (name.equals("subject")) {
+          this.subject = new Reference();
+          return this.subject;
+        }
+        else if (name.equals("author")) {
+          this.author = new Reference();
+          return this.author;
+        }
+        else if (name.equals("authored")) {
+          throw new FHIRException("Cannot call addChild on a primitive type QuestionnaireResponse.authored");
+        }
+        else if (name.equals("source")) {
+          this.source = new Reference();
+          return this.source;
+        }
+        else if (name.equals("encounter")) {
+          this.encounter = new Reference();
+          return this.encounter;
+        }
+        else if (name.equals("group")) {
+          this.group = new GroupComponent();
+          return this.group;
+        }
+        else
+          return super.addChild(name);
+      }
+
+  public String fhirType() {
+    return "QuestionnaireResponse";
+
+  }
 
       public QuestionnaireResponse copy() {
         QuestionnaireResponse dst = new QuestionnaireResponse();

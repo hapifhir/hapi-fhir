@@ -69,7 +69,7 @@ public abstract class BaseStructureSpreadsheetParser extends BaseStructureParser
 			FhirContext ctx = FhirContext.forDstu2();
 			String path = ctx.getVersion().getPathToSchemaDefinitions().replace("/schema", "/valueset") + "/valuesets.xml";
 
-			InputStream valuesetText = DefaultProfileValidationSupport.class.getResourceAsStream(path);
+			InputStream valuesetText = BaseStructureSpreadsheetParser.class.getResourceAsStream(path);
 			Bundle bundle = ctx.newXmlParser().parseResource(Bundle.class, new InputStreamReader(valuesetText));
 			for (Entry next : bundle.getEntry()) {
 				ValueSet nextVs = (ValueSet) next.getResource();

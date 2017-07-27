@@ -93,7 +93,7 @@ public class FhirContext {
 
 	/**
 	 * @deprecated It is recommended that you use one of the static initializer methods instead
-	 *             of this method, e.g. {@link #forDstu2()} or {@link #forDstu3()}
+	 *             of this method, e.g. {@link #forDstu2()} or {@link #forDstu3()} or {@link #forR4()}
 	 */
 	@Deprecated
 	public FhirContext() {
@@ -102,7 +102,7 @@ public class FhirContext {
 
 	/**
 	 * @deprecated It is recommended that you use one of the static initializer methods instead
-	 *             of this method, e.g. {@link #forDstu2()} or {@link #forDstu3()}
+	 *             of this method, e.g. {@link #forDstu2()} or {@link #forDstu3()} or {@link #forR4()}
 	 */
 	@Deprecated
 	public FhirContext(Class<? extends IBaseResource> theResourceType) {
@@ -111,7 +111,7 @@ public class FhirContext {
 
 	/**
 	 * @deprecated It is recommended that you use one of the static initializer methods instead
-	 *             of this method, e.g. {@link #forDstu2()} or {@link #forDstu3()}
+	 *             of this method, e.g. {@link #forDstu2()} or {@link #forDstu3()} or {@link #forR4()}
 	 */
 	@Deprecated
 	public FhirContext(Class<?>... theResourceTypes) {
@@ -120,7 +120,7 @@ public class FhirContext {
 
 	/**
 	 * @deprecated It is recommended that you use one of the static initializer methods instead
-	 *             of this method, e.g. {@link #forDstu2()} or {@link #forDstu3()}
+	 *             of this method, e.g. {@link #forDstu2()} or {@link #forDstu3()} or {@link #forR4()}
 	 */
 	@Deprecated
 	public FhirContext(Collection<Class<? extends IBaseResource>> theResourceTypes) {
@@ -129,7 +129,7 @@ public class FhirContext {
 
 	/**
 	 * In most cases it is recommended that you use one of the static initializer methods instead
-	 * of this method, e.g. {@link #forDstu2()} or {@link #forDstu3()}, but
+	 * of this method, e.g. {@link #forDstu2()} or {@link #forDstu3()} or {@link #forR4()}, but
 	 * this method can also be used if you wish to supply the version programmatically.
 	 */
 	public FhirContext(FhirVersionEnum theVersion) {
@@ -885,6 +885,16 @@ public class FhirContext {
 	public static FhirContext forDstu3() {
 		return new FhirContext(FhirVersionEnum.DSTU3);
 	}
+
+	/**
+	 * Creates and returns a new FhirContext with version {@link FhirVersionEnum#DSTU3 DSTU3}
+	 * 
+	 * @since 3.0.0
+	 */
+	public static FhirContext forR4() {
+		return new FhirContext(FhirVersionEnum.R4);
+	}
+
 
 	private static Collection<Class<? extends IBaseResource>> toCollection(Class<? extends IBaseResource> theResourceType) {
 		ArrayList<Class<? extends IBaseResource>> retVal = new ArrayList<Class<? extends IBaseResource>>(1);

@@ -29,21 +29,16 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Wed, Jul 13, 2016 05:32+1000 for FHIR v1.0.2
+import java.util.*;
 
+import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.Enumerations.ConformanceResourceStatus;
 import org.hl7.fhir.instance.model.Enumerations.ConformanceResourceStatusEnumFactory;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
-import org.hl7.fhir.instance.utilities.Utilities;
+import org.hl7.fhir.utilities.Utilities;
 
-import ca.uhn.fhir.model.api.annotation.Block;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
-import ca.uhn.fhir.model.api.annotation.ResourceDef;
-import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.*;
 /**
  * The formal description of a single piece of information that can be gathered and reported.
  */
@@ -79,7 +74,7 @@ public class DataElement extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static DataElementStringency fromCode(String codeString) throws Exception {
+        public static DataElementStringency fromCode(String codeString) throws FHIRException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("comparable".equals(codeString))
@@ -94,7 +89,7 @@ public class DataElement extends DomainResource {
           return SCALEABLE;
         if ("flexible".equals(codeString))
           return FLEXIBLE;
-        throw new Exception("Unknown DataElementStringency code '"+codeString+"'");
+        throw new FHIRException("Unknown DataElementStringency code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -160,6 +155,26 @@ public class DataElement extends DomainResource {
         if ("flexible".equals(codeString))
           return DataElementStringency.FLEXIBLE;
         throw new IllegalArgumentException("Unknown DataElementStringency code '"+codeString+"'");
+        }
+        public Enumeration<DataElementStringency> fromType(Base code) throws FHIRException {
+          if (code == null || code.isEmpty())
+            return null;
+          String codeString = ((PrimitiveType) code).asStringValue();
+          if (codeString == null || "".equals(codeString))
+            return null;
+        if ("comparable".equals(codeString))
+          return new Enumeration<DataElementStringency>(this, DataElementStringency.COMPARABLE);
+        if ("fully-specified".equals(codeString))
+          return new Enumeration<DataElementStringency>(this, DataElementStringency.FULLYSPECIFIED);
+        if ("equivalent".equals(codeString))
+          return new Enumeration<DataElementStringency>(this, DataElementStringency.EQUIVALENT);
+        if ("convertable".equals(codeString))
+          return new Enumeration<DataElementStringency>(this, DataElementStringency.CONVERTABLE);
+        if ("scaleable".equals(codeString))
+          return new Enumeration<DataElementStringency>(this, DataElementStringency.SCALEABLE);
+        if ("flexible".equals(codeString))
+          return new Enumeration<DataElementStringency>(this, DataElementStringency.FLEXIBLE);
+        throw new FHIRException("Unknown DataElementStringency code '"+codeString+"'");
         }
     public String toCode(DataElementStringency code) {
       if (code == DataElementStringency.COMPARABLE)
@@ -298,6 +313,28 @@ public class DataElement extends DomainResource {
           childrenList.add(new Property("telecom", "ContactPoint", "Contact details for individual (if a name was provided) or the publisher.", 0, java.lang.Integer.MAX_VALUE, telecom));
         }
 
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("name"))
+          this.name = castToString(value); // StringType
+        else if (name.equals("telecom"))
+          this.getTelecom().add(castToContactPoint(value));
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("name")) {
+          throw new FHIRException("Cannot call addChild on a primitive type DataElement.name");
+        }
+        else if (name.equals("telecom")) {
+          return addTelecom();
+        }
+        else
+          return super.addChild(name);
+      }
+
       public DataElementContactComponent copy() {
         DataElementContactComponent dst = new DataElementContactComponent();
         copyValues(dst);
@@ -334,6 +371,11 @@ public class DataElement extends DomainResource {
         return super.isEmpty() && (name == null || name.isEmpty()) && (telecom == null || telecom.isEmpty())
           ;
       }
+
+  public String fhirType() {
+    return "DataElement.contact";
+
+  }
 
   }
 
@@ -584,6 +626,38 @@ public class DataElement extends DomainResource {
           childrenList.add(new Property("comments", "string", "Comments about this mapping, including version notes, issues, scope limitations, and other important notes for usage.", 0, java.lang.Integer.MAX_VALUE, comments));
         }
 
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("identity"))
+          this.identity = castToId(value); // IdType
+        else if (name.equals("uri"))
+          this.uri = castToUri(value); // UriType
+        else if (name.equals("name"))
+          this.name = castToString(value); // StringType
+        else if (name.equals("comments"))
+          this.comments = castToString(value); // StringType
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("identity")) {
+          throw new FHIRException("Cannot call addChild on a primitive type DataElement.identity");
+        }
+        else if (name.equals("uri")) {
+          throw new FHIRException("Cannot call addChild on a primitive type DataElement.uri");
+        }
+        else if (name.equals("name")) {
+          throw new FHIRException("Cannot call addChild on a primitive type DataElement.name");
+        }
+        else if (name.equals("comments")) {
+          throw new FHIRException("Cannot call addChild on a primitive type DataElement.comments");
+        }
+        else
+          return super.addChild(name);
+      }
+
       public DataElementMappingComponent copy() {
         DataElementMappingComponent dst = new DataElementMappingComponent();
         copyValues(dst);
@@ -620,6 +694,11 @@ public class DataElement extends DomainResource {
         return super.isEmpty() && (identity == null || identity.isEmpty()) && (uri == null || uri.isEmpty())
            && (name == null || name.isEmpty()) && (comments == null || comments.isEmpty());
       }
+
+  public String fhirType() {
+    return "DataElement.mapping";
+
+  }
 
   }
 
@@ -1388,6 +1467,93 @@ public class DataElement extends DomainResource {
         childrenList.add(new Property("mapping", "", "Identifies a specification (other than a terminology) that the elements which make up the DataElement have some correspondence with.", 0, java.lang.Integer.MAX_VALUE, mapping));
         childrenList.add(new Property("element", "ElementDefinition", "Defines the structure, type, allowed values and other constraining characteristics of the data element.", 0, java.lang.Integer.MAX_VALUE, element));
       }
+
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("url"))
+          this.url = castToUri(value); // UriType
+        else if (name.equals("identifier"))
+          this.getIdentifier().add(castToIdentifier(value));
+        else if (name.equals("version"))
+          this.version = castToString(value); // StringType
+        else if (name.equals("name"))
+          this.name = castToString(value); // StringType
+        else if (name.equals("status"))
+          this.status = new ConformanceResourceStatusEnumFactory().fromType(value); // Enumeration<ConformanceResourceStatus>
+        else if (name.equals("experimental"))
+          this.experimental = castToBoolean(value); // BooleanType
+        else if (name.equals("publisher"))
+          this.publisher = castToString(value); // StringType
+        else if (name.equals("contact"))
+          this.getContact().add((DataElementContactComponent) value);
+        else if (name.equals("date"))
+          this.date = castToDateTime(value); // DateTimeType
+        else if (name.equals("useContext"))
+          this.getUseContext().add(castToCodeableConcept(value));
+        else if (name.equals("copyright"))
+          this.copyright = castToString(value); // StringType
+        else if (name.equals("stringency"))
+          this.stringency = new DataElementStringencyEnumFactory().fromType(value); // Enumeration<DataElementStringency>
+        else if (name.equals("mapping"))
+          this.getMapping().add((DataElementMappingComponent) value);
+        else if (name.equals("element"))
+          this.getElement().add(castToElementDefinition(value));
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("url")) {
+          throw new FHIRException("Cannot call addChild on a primitive type DataElement.url");
+        }
+        else if (name.equals("identifier")) {
+          return addIdentifier();
+        }
+        else if (name.equals("version")) {
+          throw new FHIRException("Cannot call addChild on a primitive type DataElement.version");
+        }
+        else if (name.equals("name")) {
+          throw new FHIRException("Cannot call addChild on a primitive type DataElement.name");
+        }
+        else if (name.equals("status")) {
+          throw new FHIRException("Cannot call addChild on a primitive type DataElement.status");
+        }
+        else if (name.equals("experimental")) {
+          throw new FHIRException("Cannot call addChild on a primitive type DataElement.experimental");
+        }
+        else if (name.equals("publisher")) {
+          throw new FHIRException("Cannot call addChild on a primitive type DataElement.publisher");
+        }
+        else if (name.equals("contact")) {
+          return addContact();
+        }
+        else if (name.equals("date")) {
+          throw new FHIRException("Cannot call addChild on a primitive type DataElement.date");
+        }
+        else if (name.equals("useContext")) {
+          return addUseContext();
+        }
+        else if (name.equals("copyright")) {
+          throw new FHIRException("Cannot call addChild on a primitive type DataElement.copyright");
+        }
+        else if (name.equals("stringency")) {
+          throw new FHIRException("Cannot call addChild on a primitive type DataElement.stringency");
+        }
+        else if (name.equals("mapping")) {
+          return addMapping();
+        }
+        else if (name.equals("element")) {
+          return addElement();
+        }
+        else
+          return super.addChild(name);
+      }
+
+  public String fhirType() {
+    return "DataElement";
+
+  }
 
       public DataElement copy() {
         DataElement dst = new DataElement();

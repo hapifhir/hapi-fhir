@@ -29,15 +29,14 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
+// Generated on Wed, Jul 13, 2016 05:32+1000 for FHIR v1.0.2
 import java.util.Date;
 import java.util.List;
 
+import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.DatatypeDef;
-import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.*;
 /**
  * A  text note which also  contains information about who made the statement and when.
  */
@@ -92,26 +91,26 @@ public class Annotation extends Type implements ICompositeType {
     /**
      * @return {@link #author} (The individual responsible for making the annotation.)
      */
-    public Reference getAuthorReference() throws Exception { 
+    public Reference getAuthorReference() throws FHIRException { 
       if (!(this.author instanceof Reference))
-        throw new Exception("Type mismatch: the type Reference was expected, but "+this.author.getClass().getName()+" was encountered");
+        throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.author.getClass().getName()+" was encountered");
       return (Reference) this.author;
     }
 
-    public boolean hasAuthorReference() throws Exception { 
+    public boolean hasAuthorReference() { 
       return this.author instanceof Reference;
     }
 
     /**
      * @return {@link #author} (The individual responsible for making the annotation.)
      */
-    public StringType getAuthorStringType() throws Exception { 
+    public StringType getAuthorStringType() throws FHIRException { 
       if (!(this.author instanceof StringType))
-        throw new Exception("Type mismatch: the type StringType was expected, but "+this.author.getClass().getName()+" was encountered");
+        throw new FHIRException("Type mismatch: the type StringType was expected, but "+this.author.getClass().getName()+" was encountered");
       return (StringType) this.author;
     }
 
-    public boolean hasAuthorStringType() throws Exception { 
+    public boolean hasAuthorStringType() { 
       return this.author instanceof StringType;
     }
 
@@ -227,6 +226,43 @@ public class Annotation extends Type implements ICompositeType {
         childrenList.add(new Property("time", "dateTime", "Indicates when this particular annotation was made.", 0, java.lang.Integer.MAX_VALUE, time));
         childrenList.add(new Property("text", "string", "The text of the annotation.", 0, java.lang.Integer.MAX_VALUE, text));
       }
+
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("author[x]"))
+          this.author = (Type) value; // Type
+        else if (name.equals("time"))
+          this.time = castToDateTime(value); // DateTimeType
+        else if (name.equals("text"))
+          this.text = castToString(value); // StringType
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("authorReference")) {
+          this.author = new Reference();
+          return this.author;
+        }
+        else if (name.equals("authorString")) {
+          this.author = new StringType();
+          return this.author;
+        }
+        else if (name.equals("time")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Annotation.time");
+        }
+        else if (name.equals("text")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Annotation.text");
+        }
+        else
+          return super.addChild(name);
+      }
+
+  public String fhirType() {
+    return "Annotation";
+
+  }
 
       public Annotation copy() {
         Annotation dst = new Annotation();

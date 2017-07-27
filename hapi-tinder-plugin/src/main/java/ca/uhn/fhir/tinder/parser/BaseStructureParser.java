@@ -81,7 +81,9 @@ public abstract class BaseStructureParser {
 		myBaseDir = theBaseDir;
 		myIsRi = myVersion.equals("dstu3");
 
-		if (myVersion.equals("dstu3")) {
+		if (myVersion.equals("r4")) {
+			myCtx = FhirContext.forR4();
+		} else if (myVersion.equals("dstu3")) {
 			myCtx = FhirContext.forDstu3();
 		} else if (myVersion.equals("dstu2")) {
 			myCtx = FhirContext.forDstu2();
@@ -693,6 +695,8 @@ public abstract class BaseStructureParser {
 			versionEnum = FhirVersionEnum.DSTU2;
 		} else if ("dstu3".equals(version)) {
 			versionEnum = FhirVersionEnum.DSTU3;
+		} else if ("r4".equals(version)) {
+			versionEnum = FhirVersionEnum.R4;
 		} else {
 			throw new MojoFailureException("Unknown version: " + version);
 		}

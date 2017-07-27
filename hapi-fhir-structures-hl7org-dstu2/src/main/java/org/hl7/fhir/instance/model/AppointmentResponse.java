@@ -29,17 +29,13 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Wed, Jul 13, 2016 05:32+1000 for FHIR v1.0.2
+import java.util.*;
 
-import org.hl7.fhir.instance.utilities.Utilities;
+import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.utilities.Utilities;
 
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
-import ca.uhn.fhir.model.api.annotation.ResourceDef;
-import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.*;
 /**
  * A reply to an appointment request for a patient and/or practitioner(s), such as a confirmation or rejection.
  */
@@ -75,7 +71,7 @@ public class AppointmentResponse extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static ParticipantStatus fromCode(String codeString) throws Exception {
+        public static ParticipantStatus fromCode(String codeString) throws FHIRException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("accepted".equals(codeString))
@@ -90,7 +86,7 @@ public class AppointmentResponse extends DomainResource {
           return COMPLETED;
         if ("needs-action".equals(codeString))
           return NEEDSACTION;
-        throw new Exception("Unknown ParticipantStatus code '"+codeString+"'");
+        throw new FHIRException("Unknown ParticipantStatus code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -156,6 +152,26 @@ public class AppointmentResponse extends DomainResource {
         if ("needs-action".equals(codeString))
           return ParticipantStatus.NEEDSACTION;
         throw new IllegalArgumentException("Unknown ParticipantStatus code '"+codeString+"'");
+        }
+        public Enumeration<ParticipantStatus> fromType(Base code) throws FHIRException {
+          if (code == null || code.isEmpty())
+            return null;
+          String codeString = ((PrimitiveType) code).asStringValue();
+          if (codeString == null || "".equals(codeString))
+            return null;
+        if ("accepted".equals(codeString))
+          return new Enumeration<ParticipantStatus>(this, ParticipantStatus.ACCEPTED);
+        if ("declined".equals(codeString))
+          return new Enumeration<ParticipantStatus>(this, ParticipantStatus.DECLINED);
+        if ("tentative".equals(codeString))
+          return new Enumeration<ParticipantStatus>(this, ParticipantStatus.TENTATIVE);
+        if ("in-process".equals(codeString))
+          return new Enumeration<ParticipantStatus>(this, ParticipantStatus.INPROCESS);
+        if ("completed".equals(codeString))
+          return new Enumeration<ParticipantStatus>(this, ParticipantStatus.COMPLETED);
+        if ("needs-action".equals(codeString))
+          return new Enumeration<ParticipantStatus>(this, ParticipantStatus.NEEDSACTION);
+        throw new FHIRException("Unknown ParticipantStatus code '"+codeString+"'");
         }
     public String toCode(ParticipantStatus code) {
       if (code == ParticipantStatus.ACCEPTED)
@@ -624,6 +640,65 @@ public class AppointmentResponse extends DomainResource {
         childrenList.add(new Property("participantStatus", "code", "Participation status of the participant. When the status is declined or tentative if the start/end times are different to the appointment, then these times should be interpreted as a requested time change. When the status is accepted, the times can either be the time of the appointment (as a confirmation of the time) or can be empty.", 0, java.lang.Integer.MAX_VALUE, participantStatus));
         childrenList.add(new Property("comment", "string", "Additional comments about the appointment.", 0, java.lang.Integer.MAX_VALUE, comment));
       }
+
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("identifier"))
+          this.getIdentifier().add(castToIdentifier(value));
+        else if (name.equals("appointment"))
+          this.appointment = castToReference(value); // Reference
+        else if (name.equals("start"))
+          this.start = castToInstant(value); // InstantType
+        else if (name.equals("end"))
+          this.end = castToInstant(value); // InstantType
+        else if (name.equals("participantType"))
+          this.getParticipantType().add(castToCodeableConcept(value));
+        else if (name.equals("actor"))
+          this.actor = castToReference(value); // Reference
+        else if (name.equals("participantStatus"))
+          this.participantStatus = new ParticipantStatusEnumFactory().fromType(value); // Enumeration<ParticipantStatus>
+        else if (name.equals("comment"))
+          this.comment = castToString(value); // StringType
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("identifier")) {
+          return addIdentifier();
+        }
+        else if (name.equals("appointment")) {
+          this.appointment = new Reference();
+          return this.appointment;
+        }
+        else if (name.equals("start")) {
+          throw new FHIRException("Cannot call addChild on a primitive type AppointmentResponse.start");
+        }
+        else if (name.equals("end")) {
+          throw new FHIRException("Cannot call addChild on a primitive type AppointmentResponse.end");
+        }
+        else if (name.equals("participantType")) {
+          return addParticipantType();
+        }
+        else if (name.equals("actor")) {
+          this.actor = new Reference();
+          return this.actor;
+        }
+        else if (name.equals("participantStatus")) {
+          throw new FHIRException("Cannot call addChild on a primitive type AppointmentResponse.participantStatus");
+        }
+        else if (name.equals("comment")) {
+          throw new FHIRException("Cannot call addChild on a primitive type AppointmentResponse.comment");
+        }
+        else
+          return super.addChild(name);
+      }
+
+  public String fhirType() {
+    return "AppointmentResponse";
+
+  }
 
       public AppointmentResponse copy() {
         AppointmentResponse dst = new AppointmentResponse();

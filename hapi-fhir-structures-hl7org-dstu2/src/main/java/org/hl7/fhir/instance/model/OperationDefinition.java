@@ -29,23 +29,15 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Wed, Jul 13, 2016 05:32+1000 for FHIR v1.0.2
+import java.util.*;
 
-import org.hl7.fhir.instance.model.Enumerations.BindingStrength;
-import org.hl7.fhir.instance.model.Enumerations.BindingStrengthEnumFactory;
-import org.hl7.fhir.instance.model.Enumerations.ConformanceResourceStatus;
-import org.hl7.fhir.instance.model.Enumerations.ConformanceResourceStatusEnumFactory;
+import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.instance.model.Enumerations.*;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
-import org.hl7.fhir.instance.utilities.Utilities;
+import org.hl7.fhir.utilities.Utilities;
 
-import ca.uhn.fhir.model.api.annotation.Block;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
-import ca.uhn.fhir.model.api.annotation.ResourceDef;
-import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.*;
 /**
  * A formal computable definition of an operation (on the RESTful interface) or a named query (using the search interaction).
  */
@@ -65,14 +57,14 @@ public class OperationDefinition extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static OperationKind fromCode(String codeString) throws Exception {
+        public static OperationKind fromCode(String codeString) throws FHIRException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("operation".equals(codeString))
           return OPERATION;
         if ("query".equals(codeString))
           return QUERY;
-        throw new Exception("Unknown OperationKind code '"+codeString+"'");
+        throw new FHIRException("Unknown OperationKind code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -115,6 +107,18 @@ public class OperationDefinition extends DomainResource {
           return OperationKind.QUERY;
         throw new IllegalArgumentException("Unknown OperationKind code '"+codeString+"'");
         }
+        public Enumeration<OperationKind> fromType(Base code) throws FHIRException {
+          if (code == null || code.isEmpty())
+            return null;
+          String codeString = ((PrimitiveType) code).asStringValue();
+          if (codeString == null || "".equals(codeString))
+            return null;
+        if ("operation".equals(codeString))
+          return new Enumeration<OperationKind>(this, OperationKind.OPERATION);
+        if ("query".equals(codeString))
+          return new Enumeration<OperationKind>(this, OperationKind.QUERY);
+        throw new FHIRException("Unknown OperationKind code '"+codeString+"'");
+        }
     public String toCode(OperationKind code) {
       if (code == OperationKind.OPERATION)
         return "operation";
@@ -137,14 +141,14 @@ public class OperationDefinition extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static OperationParameterUse fromCode(String codeString) throws Exception {
+        public static OperationParameterUse fromCode(String codeString) throws FHIRException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("in".equals(codeString))
           return IN;
         if ("out".equals(codeString))
           return OUT;
-        throw new Exception("Unknown OperationParameterUse code '"+codeString+"'");
+        throw new FHIRException("Unknown OperationParameterUse code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -186,6 +190,18 @@ public class OperationDefinition extends DomainResource {
         if ("out".equals(codeString))
           return OperationParameterUse.OUT;
         throw new IllegalArgumentException("Unknown OperationParameterUse code '"+codeString+"'");
+        }
+        public Enumeration<OperationParameterUse> fromType(Base code) throws FHIRException {
+          if (code == null || code.isEmpty())
+            return null;
+          String codeString = ((PrimitiveType) code).asStringValue();
+          if (codeString == null || "".equals(codeString))
+            return null;
+        if ("in".equals(codeString))
+          return new Enumeration<OperationParameterUse>(this, OperationParameterUse.IN);
+        if ("out".equals(codeString))
+          return new Enumeration<OperationParameterUse>(this, OperationParameterUse.OUT);
+        throw new FHIRException("Unknown OperationParameterUse code '"+codeString+"'");
         }
     public String toCode(OperationParameterUse code) {
       if (code == OperationParameterUse.IN)
@@ -316,6 +332,28 @@ public class OperationDefinition extends DomainResource {
           childrenList.add(new Property("telecom", "ContactPoint", "Contact details for individual (if a name was provided) or the publisher.", 0, java.lang.Integer.MAX_VALUE, telecom));
         }
 
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("name"))
+          this.name = castToString(value); // StringType
+        else if (name.equals("telecom"))
+          this.getTelecom().add(castToContactPoint(value));
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("name")) {
+          throw new FHIRException("Cannot call addChild on a primitive type OperationDefinition.name");
+        }
+        else if (name.equals("telecom")) {
+          return addTelecom();
+        }
+        else
+          return super.addChild(name);
+      }
+
       public OperationDefinitionContactComponent copy() {
         OperationDefinitionContactComponent dst = new OperationDefinitionContactComponent();
         copyValues(dst);
@@ -352,6 +390,11 @@ public class OperationDefinition extends DomainResource {
         return super.isEmpty() && (name == null || name.isEmpty()) && (telecom == null || telecom.isEmpty())
           ;
       }
+
+  public String fhirType() {
+    return "OperationDefinition.contact";
+
+  }
 
   }
 
@@ -844,6 +887,65 @@ public class OperationDefinition extends DomainResource {
           childrenList.add(new Property("part", "@OperationDefinition.parameter", "The parts of a Tuple Parameter.", 0, java.lang.Integer.MAX_VALUE, part));
         }
 
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("name"))
+          this.name = castToCode(value); // CodeType
+        else if (name.equals("use"))
+          this.use = new OperationParameterUseEnumFactory().fromType(value); // Enumeration<OperationParameterUse>
+        else if (name.equals("min"))
+          this.min = castToInteger(value); // IntegerType
+        else if (name.equals("max"))
+          this.max = castToString(value); // StringType
+        else if (name.equals("documentation"))
+          this.documentation = castToString(value); // StringType
+        else if (name.equals("type"))
+          this.type = castToCode(value); // CodeType
+        else if (name.equals("profile"))
+          this.profile = castToReference(value); // Reference
+        else if (name.equals("binding"))
+          this.binding = (OperationDefinitionParameterBindingComponent) value; // OperationDefinitionParameterBindingComponent
+        else if (name.equals("part"))
+          this.getPart().add((OperationDefinitionParameterComponent) value);
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("name")) {
+          throw new FHIRException("Cannot call addChild on a primitive type OperationDefinition.name");
+        }
+        else if (name.equals("use")) {
+          throw new FHIRException("Cannot call addChild on a primitive type OperationDefinition.use");
+        }
+        else if (name.equals("min")) {
+          throw new FHIRException("Cannot call addChild on a primitive type OperationDefinition.min");
+        }
+        else if (name.equals("max")) {
+          throw new FHIRException("Cannot call addChild on a primitive type OperationDefinition.max");
+        }
+        else if (name.equals("documentation")) {
+          throw new FHIRException("Cannot call addChild on a primitive type OperationDefinition.documentation");
+        }
+        else if (name.equals("type")) {
+          throw new FHIRException("Cannot call addChild on a primitive type OperationDefinition.type");
+        }
+        else if (name.equals("profile")) {
+          this.profile = new Reference();
+          return this.profile;
+        }
+        else if (name.equals("binding")) {
+          this.binding = new OperationDefinitionParameterBindingComponent();
+          return this.binding;
+        }
+        else if (name.equals("part")) {
+          return addPart();
+        }
+        else
+          return super.addChild(name);
+      }
+
       public OperationDefinitionParameterComponent copy() {
         OperationDefinitionParameterComponent dst = new OperationDefinitionParameterComponent();
         copyValues(dst);
@@ -894,6 +996,11 @@ public class OperationDefinition extends DomainResource {
            && (type == null || type.isEmpty()) && (profile == null || profile.isEmpty()) && (binding == null || binding.isEmpty())
            && (part == null || part.isEmpty());
       }
+
+  public String fhirType() {
+    return "OperationDefinition.parameter";
+
+  }
 
   }
 
@@ -986,26 +1093,26 @@ public class OperationDefinition extends DomainResource {
         /**
          * @return {@link #valueSet} (Points to the value set or external definition (e.g. implicit value set) that identifies the set of codes to be used.)
          */
-        public UriType getValueSetUriType() throws Exception { 
+        public UriType getValueSetUriType() throws FHIRException { 
           if (!(this.valueSet instanceof UriType))
-            throw new Exception("Type mismatch: the type UriType was expected, but "+this.valueSet.getClass().getName()+" was encountered");
+            throw new FHIRException("Type mismatch: the type UriType was expected, but "+this.valueSet.getClass().getName()+" was encountered");
           return (UriType) this.valueSet;
         }
 
-        public boolean hasValueSetUriType() throws Exception { 
+        public boolean hasValueSetUriType() { 
           return this.valueSet instanceof UriType;
         }
 
         /**
          * @return {@link #valueSet} (Points to the value set or external definition (e.g. implicit value set) that identifies the set of codes to be used.)
          */
-        public Reference getValueSetReference() throws Exception { 
+        public Reference getValueSetReference() throws FHIRException { 
           if (!(this.valueSet instanceof Reference))
-            throw new Exception("Type mismatch: the type Reference was expected, but "+this.valueSet.getClass().getName()+" was encountered");
+            throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.valueSet.getClass().getName()+" was encountered");
           return (Reference) this.valueSet;
         }
 
-        public boolean hasValueSetReference() throws Exception { 
+        public boolean hasValueSetReference() { 
           return this.valueSet instanceof Reference;
         }
 
@@ -1026,6 +1133,33 @@ public class OperationDefinition extends DomainResource {
           childrenList.add(new Property("strength", "code", "Indicates the degree of conformance expectations associated with this binding - that is, the degree to which the provided value set must be adhered to in the instances.", 0, java.lang.Integer.MAX_VALUE, strength));
           childrenList.add(new Property("valueSet[x]", "uri|Reference(ValueSet)", "Points to the value set or external definition (e.g. implicit value set) that identifies the set of codes to be used.", 0, java.lang.Integer.MAX_VALUE, valueSet));
         }
+
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("strength"))
+          this.strength = new BindingStrengthEnumFactory().fromType(value); // Enumeration<BindingStrength>
+        else if (name.equals("valueSet[x]"))
+          this.valueSet = (Type) value; // Type
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("strength")) {
+          throw new FHIRException("Cannot call addChild on a primitive type OperationDefinition.strength");
+        }
+        else if (name.equals("valueSetUri")) {
+          this.valueSet = new UriType();
+          return this.valueSet;
+        }
+        else if (name.equals("valueSetReference")) {
+          this.valueSet = new Reference();
+          return this.valueSet;
+        }
+        else
+          return super.addChild(name);
+      }
 
       public OperationDefinitionParameterBindingComponent copy() {
         OperationDefinitionParameterBindingComponent dst = new OperationDefinitionParameterBindingComponent();
@@ -1059,6 +1193,11 @@ public class OperationDefinition extends DomainResource {
         return super.isEmpty() && (strength == null || strength.isEmpty()) && (valueSet == null || valueSet.isEmpty())
           ;
       }
+
+  public String fhirType() {
+    return "OperationDefinition.parameter.binding";
+
+  }
 
   }
 
@@ -2125,6 +2264,119 @@ public class OperationDefinition extends DomainResource {
         childrenList.add(new Property("instance", "boolean", "Indicates whether this operation can be invoked on a particular instance of one of the given types.", 0, java.lang.Integer.MAX_VALUE, instance));
         childrenList.add(new Property("parameter", "", "The parameters for the operation/query.", 0, java.lang.Integer.MAX_VALUE, parameter));
       }
+
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("url"))
+          this.url = castToUri(value); // UriType
+        else if (name.equals("version"))
+          this.version = castToString(value); // StringType
+        else if (name.equals("name"))
+          this.name = castToString(value); // StringType
+        else if (name.equals("status"))
+          this.status = new ConformanceResourceStatusEnumFactory().fromType(value); // Enumeration<ConformanceResourceStatus>
+        else if (name.equals("kind"))
+          this.kind = new OperationKindEnumFactory().fromType(value); // Enumeration<OperationKind>
+        else if (name.equals("experimental"))
+          this.experimental = castToBoolean(value); // BooleanType
+        else if (name.equals("publisher"))
+          this.publisher = castToString(value); // StringType
+        else if (name.equals("contact"))
+          this.getContact().add((OperationDefinitionContactComponent) value);
+        else if (name.equals("date"))
+          this.date = castToDateTime(value); // DateTimeType
+        else if (name.equals("description"))
+          this.description = castToString(value); // StringType
+        else if (name.equals("requirements"))
+          this.requirements = castToString(value); // StringType
+        else if (name.equals("idempotent"))
+          this.idempotent = castToBoolean(value); // BooleanType
+        else if (name.equals("code"))
+          this.code = castToCode(value); // CodeType
+        else if (name.equals("notes"))
+          this.notes = castToString(value); // StringType
+        else if (name.equals("base"))
+          this.base = castToReference(value); // Reference
+        else if (name.equals("system"))
+          this.system = castToBoolean(value); // BooleanType
+        else if (name.equals("type"))
+          this.getType().add(castToCode(value));
+        else if (name.equals("instance"))
+          this.instance = castToBoolean(value); // BooleanType
+        else if (name.equals("parameter"))
+          this.getParameter().add((OperationDefinitionParameterComponent) value);
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("url")) {
+          throw new FHIRException("Cannot call addChild on a primitive type OperationDefinition.url");
+        }
+        else if (name.equals("version")) {
+          throw new FHIRException("Cannot call addChild on a primitive type OperationDefinition.version");
+        }
+        else if (name.equals("name")) {
+          throw new FHIRException("Cannot call addChild on a primitive type OperationDefinition.name");
+        }
+        else if (name.equals("status")) {
+          throw new FHIRException("Cannot call addChild on a primitive type OperationDefinition.status");
+        }
+        else if (name.equals("kind")) {
+          throw new FHIRException("Cannot call addChild on a primitive type OperationDefinition.kind");
+        }
+        else if (name.equals("experimental")) {
+          throw new FHIRException("Cannot call addChild on a primitive type OperationDefinition.experimental");
+        }
+        else if (name.equals("publisher")) {
+          throw new FHIRException("Cannot call addChild on a primitive type OperationDefinition.publisher");
+        }
+        else if (name.equals("contact")) {
+          return addContact();
+        }
+        else if (name.equals("date")) {
+          throw new FHIRException("Cannot call addChild on a primitive type OperationDefinition.date");
+        }
+        else if (name.equals("description")) {
+          throw new FHIRException("Cannot call addChild on a primitive type OperationDefinition.description");
+        }
+        else if (name.equals("requirements")) {
+          throw new FHIRException("Cannot call addChild on a primitive type OperationDefinition.requirements");
+        }
+        else if (name.equals("idempotent")) {
+          throw new FHIRException("Cannot call addChild on a primitive type OperationDefinition.idempotent");
+        }
+        else if (name.equals("code")) {
+          throw new FHIRException("Cannot call addChild on a primitive type OperationDefinition.code");
+        }
+        else if (name.equals("notes")) {
+          throw new FHIRException("Cannot call addChild on a primitive type OperationDefinition.notes");
+        }
+        else if (name.equals("base")) {
+          this.base = new Reference();
+          return this.base;
+        }
+        else if (name.equals("system")) {
+          throw new FHIRException("Cannot call addChild on a primitive type OperationDefinition.system");
+        }
+        else if (name.equals("type")) {
+          throw new FHIRException("Cannot call addChild on a primitive type OperationDefinition.type");
+        }
+        else if (name.equals("instance")) {
+          throw new FHIRException("Cannot call addChild on a primitive type OperationDefinition.instance");
+        }
+        else if (name.equals("parameter")) {
+          return addParameter();
+        }
+        else
+          return super.addChild(name);
+      }
+
+  public String fhirType() {
+    return "OperationDefinition";
+
+  }
 
       public OperationDefinition copy() {
         OperationDefinition dst = new OperationDefinition();

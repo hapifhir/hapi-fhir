@@ -91,4 +91,7 @@ public class Enumeration<T extends Enum<?>> extends PrimitiveType<T> implements 
 	}
 
 
+	public String fhirType() {
+		return "code";		
+	}
 }

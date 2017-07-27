@@ -29,11 +29,13 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
+// Generated on Wed, Jul 13, 2016 05:32+1000 for FHIR v1.0.2
+
+import org.hl7.fhir.exceptions.FHIRException;
 
 public class ResourceFactory extends Factory {
 
-    public static Resource createReference(String name) throws Exception {
+    public static Resource createResource(String name) throws FHIRException {
         if ("Appointment".equals(name))
             return new Appointment();
         if ("ReferralRequest".equals(name))
@@ -223,10 +225,10 @@ public class ResourceFactory extends Factory {
         if ("BodySite".equals(name))
             return new BodySite();
         else
-            throw new Exception("Unknown Resource Name '"+name+"'");
+            throw new FHIRException("Unknown Resource Name '"+name+"'");
     }
 
-    public static Element createType(String name) throws Exception {
+    public static Element createType(String name) throws FHIRException {
         if ("Meta".equals(name))
             return new Meta();
         if ("Address".equals(name))
@@ -280,7 +282,7 @@ public class ResourceFactory extends Factory {
         if ("CodeableConcept".equals(name))
             return new CodeableConcept();
         else
-            throw new Exception("Unknown Type Name '"+name+"'");
+            throw new FHIRException("Unknown Type Name '"+name+"'");
     }
 
 }

@@ -20,6 +20,11 @@
 			<artifactId>hapi-fhir-base</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-utilities</artifactId>
+			<version>${project.version}</version>
+		</dependency>
 
 		<!--
 		Test dependencies on other optional parts of HAPI 

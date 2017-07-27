@@ -29,23 +29,15 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Wed, Jul 13, 2016 05:32+1000 for FHIR v1.0.2
+import java.util.*;
 
-import org.hl7.fhir.instance.model.Enumerations.ConformanceResourceStatus;
-import org.hl7.fhir.instance.model.Enumerations.ConformanceResourceStatusEnumFactory;
-import org.hl7.fhir.instance.model.Enumerations.SearchParamType;
-import org.hl7.fhir.instance.model.Enumerations.SearchParamTypeEnumFactory;
+import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.instance.model.Enumerations.*;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
-import org.hl7.fhir.instance.utilities.Utilities;
+import org.hl7.fhir.utilities.Utilities;
 
-import ca.uhn.fhir.model.api.annotation.Block;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
-import ca.uhn.fhir.model.api.annotation.ResourceDef;
-import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.*;
 /**
  * A search parameter that defines a named search item that can be used to search/filter on a resource.
  */
@@ -77,7 +69,7 @@ public class SearchParameter extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static XPathUsageType fromCode(String codeString) throws Exception {
+        public static XPathUsageType fromCode(String codeString) throws FHIRException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("normal".equals(codeString))
@@ -90,7 +82,7 @@ public class SearchParameter extends DomainResource {
           return DISTANCE;
         if ("other".equals(codeString))
           return OTHER;
-        throw new Exception("Unknown XPathUsageType code '"+codeString+"'");
+        throw new FHIRException("Unknown XPathUsageType code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -150,6 +142,24 @@ public class SearchParameter extends DomainResource {
         if ("other".equals(codeString))
           return XPathUsageType.OTHER;
         throw new IllegalArgumentException("Unknown XPathUsageType code '"+codeString+"'");
+        }
+        public Enumeration<XPathUsageType> fromType(Base code) throws FHIRException {
+          if (code == null || code.isEmpty())
+            return null;
+          String codeString = ((PrimitiveType) code).asStringValue();
+          if (codeString == null || "".equals(codeString))
+            return null;
+        if ("normal".equals(codeString))
+          return new Enumeration<XPathUsageType>(this, XPathUsageType.NORMAL);
+        if ("phonetic".equals(codeString))
+          return new Enumeration<XPathUsageType>(this, XPathUsageType.PHONETIC);
+        if ("nearby".equals(codeString))
+          return new Enumeration<XPathUsageType>(this, XPathUsageType.NEARBY);
+        if ("distance".equals(codeString))
+          return new Enumeration<XPathUsageType>(this, XPathUsageType.DISTANCE);
+        if ("other".equals(codeString))
+          return new Enumeration<XPathUsageType>(this, XPathUsageType.OTHER);
+        throw new FHIRException("Unknown XPathUsageType code '"+codeString+"'");
         }
     public String toCode(XPathUsageType code) {
       if (code == XPathUsageType.NORMAL)
@@ -286,6 +296,28 @@ public class SearchParameter extends DomainResource {
           childrenList.add(new Property("telecom", "ContactPoint", "Contact details for individual (if a name was provided) or the publisher.", 0, java.lang.Integer.MAX_VALUE, telecom));
         }
 
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("name"))
+          this.name = castToString(value); // StringType
+        else if (name.equals("telecom"))
+          this.getTelecom().add(castToContactPoint(value));
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("name")) {
+          throw new FHIRException("Cannot call addChild on a primitive type SearchParameter.name");
+        }
+        else if (name.equals("telecom")) {
+          return addTelecom();
+        }
+        else
+          return super.addChild(name);
+      }
+
       public SearchParameterContactComponent copy() {
         SearchParameterContactComponent dst = new SearchParameterContactComponent();
         copyValues(dst);
@@ -322,6 +354,11 @@ public class SearchParameter extends DomainResource {
         return super.isEmpty() && (name == null || name.isEmpty()) && (telecom == null || telecom.isEmpty())
           ;
       }
+
+  public String fhirType() {
+    return "SearchParameter.contact";
+
+  }
 
   }
 
@@ -1173,6 +1210,98 @@ public class SearchParameter extends DomainResource {
         childrenList.add(new Property("xpathUsage", "code", "How the search parameter relates to the set of elements returned by evaluating the xpath query.", 0, java.lang.Integer.MAX_VALUE, xpathUsage));
         childrenList.add(new Property("target", "code", "Types of resource (if a resource is referenced).", 0, java.lang.Integer.MAX_VALUE, target));
       }
+
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("url"))
+          this.url = castToUri(value); // UriType
+        else if (name.equals("name"))
+          this.name = castToString(value); // StringType
+        else if (name.equals("status"))
+          this.status = new ConformanceResourceStatusEnumFactory().fromType(value); // Enumeration<ConformanceResourceStatus>
+        else if (name.equals("experimental"))
+          this.experimental = castToBoolean(value); // BooleanType
+        else if (name.equals("publisher"))
+          this.publisher = castToString(value); // StringType
+        else if (name.equals("contact"))
+          this.getContact().add((SearchParameterContactComponent) value);
+        else if (name.equals("date"))
+          this.date = castToDateTime(value); // DateTimeType
+        else if (name.equals("requirements"))
+          this.requirements = castToString(value); // StringType
+        else if (name.equals("code"))
+          this.code = castToCode(value); // CodeType
+        else if (name.equals("base"))
+          this.base = castToCode(value); // CodeType
+        else if (name.equals("type"))
+          this.type = new SearchParamTypeEnumFactory().fromType(value); // Enumeration<SearchParamType>
+        else if (name.equals("description"))
+          this.description = castToString(value); // StringType
+        else if (name.equals("xpath"))
+          this.xpath = castToString(value); // StringType
+        else if (name.equals("xpathUsage"))
+          this.xpathUsage = new XPathUsageTypeEnumFactory().fromType(value); // Enumeration<XPathUsageType>
+        else if (name.equals("target"))
+          this.getTarget().add(castToCode(value));
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("url")) {
+          throw new FHIRException("Cannot call addChild on a primitive type SearchParameter.url");
+        }
+        else if (name.equals("name")) {
+          throw new FHIRException("Cannot call addChild on a primitive type SearchParameter.name");
+        }
+        else if (name.equals("status")) {
+          throw new FHIRException("Cannot call addChild on a primitive type SearchParameter.status");
+        }
+        else if (name.equals("experimental")) {
+          throw new FHIRException("Cannot call addChild on a primitive type SearchParameter.experimental");
+        }
+        else if (name.equals("publisher")) {
+          throw new FHIRException("Cannot call addChild on a primitive type SearchParameter.publisher");
+        }
+        else if (name.equals("contact")) {
+          return addContact();
+        }
+        else if (name.equals("date")) {
+          throw new FHIRException("Cannot call addChild on a primitive type SearchParameter.date");
+        }
+        else if (name.equals("requirements")) {
+          throw new FHIRException("Cannot call addChild on a primitive type SearchParameter.requirements");
+        }
+        else if (name.equals("code")) {
+          throw new FHIRException("Cannot call addChild on a primitive type SearchParameter.code");
+        }
+        else if (name.equals("base")) {
+          throw new FHIRException("Cannot call addChild on a primitive type SearchParameter.base");
+        }
+        else if (name.equals("type")) {
+          throw new FHIRException("Cannot call addChild on a primitive type SearchParameter.type");
+        }
+        else if (name.equals("description")) {
+          throw new FHIRException("Cannot call addChild on a primitive type SearchParameter.description");
+        }
+        else if (name.equals("xpath")) {
+          throw new FHIRException("Cannot call addChild on a primitive type SearchParameter.xpath");
+        }
+        else if (name.equals("xpathUsage")) {
+          throw new FHIRException("Cannot call addChild on a primitive type SearchParameter.xpathUsage");
+        }
+        else if (name.equals("target")) {
+          throw new FHIRException("Cannot call addChild on a primitive type SearchParameter.target");
+        }
+        else
+          return super.addChild(name);
+      }
+
+  public String fhirType() {
+    return "SearchParameter";
+
+  }
 
       public SearchParameter copy() {
         SearchParameter dst = new SearchParameter();
