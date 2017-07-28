@@ -3,6 +3,9 @@ package ca.uhn.fhir.jpa.dao.data;
 import java.util.Collection;
 import java.util.Date;
 
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
+
 /*
  * #%L
  * HAPI FHIR JPA Server
@@ -36,7 +39,7 @@ public interface ISearchDao extends JpaRepository<Search, Long> {
 	public Search findByUuid(@Param("uuid") String theUuid);
 
 	@Query("SELECT s.myId FROM Search s WHERE s.mySearchLastReturned < :cutoff")
-	public Collection<Long> findWhereLastReturnedBefore(@Param("cutoff") Date theCutoff);
+	public Slice<Long> findWhereLastReturnedBefore(@Param("cutoff") Date theCutoff, Pageable thePage);
 
 //	@Query("SELECT s FROM Search s WHERE s.myCreated < :cutoff")
 //	public Collection<Search> findWhereCreatedBefore(@Param("cutoff") Date theCutoff);

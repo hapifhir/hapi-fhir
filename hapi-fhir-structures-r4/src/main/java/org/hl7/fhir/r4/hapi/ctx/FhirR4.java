@@ -28,7 +28,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.r4.hapi.fluentpath.FluentPathR4;
 import org.hl7.fhir.r4.hapi.rest.server.R4BundleFactory;
-import org.hl7.fhir.r4.hapi.validation.DefaultProfileValidationSupport;
 import org.hl7.fhir.r4.model.*;
 
 import ca.uhn.fhir.context.*;
@@ -41,89 +40,90 @@ import ca.uhn.fhir.util.ReflectionUtil;
 
 public class FhirR4 implements IFhirVersion {
 
-  private String myId;
+	private String myId;
 
-  @Override
-  public IFluentPath createFluentPathExecutor(FhirContext theFhirContext) {
-    return new FluentPathR4(theFhirContext);
-  }
+	@Override
+	public IFluentPath createFluentPathExecutor(FhirContext theFhirContext) {
+		return new FluentPathR4(theFhirContext);
+	}
 
-  @Override
-  public IContextValidationSupport<?, ?, ?, ?, ?, ?> createValidationSupport() {
-    return new DefaultProfileValidationSupport();
-  }
+	@Override
+	public IContextValidationSupport<?, ?, ?, ?, ?, ?> createValidationSupport() {
+		return ReflectionUtil.newInstanceOfFhirProfileValidationSupport("org.hl7.fhir.r4.hapi.validation.DefaultProfileValidationSupport");
+	}
 
-  @Override
-  public IBaseResource generateProfile(RuntimeResourceDefinition theRuntimeResourceDefinition, String theServerBase) {
-    StructureDefinition retVal = new StructureDefinition();
+	@Override
+	public IBaseResource generateProfile(RuntimeResourceDefinition theRuntimeResourceDefinition, String theServerBase) {
+		StructureDefinition retVal = new StructureDefinition();
 
-    RuntimeResourceDefinition def = theRuntimeResourceDefinition;
+		RuntimeResourceDefinition def = theRuntimeResourceDefinition;
 
-    myId = def.getId();
-    if (StringUtils.isBlank(myId)) {
-      myId = theRuntimeResourceDefinition.getName().toLowerCase();
-    }
+		myId = def.getId();
+		if (StringUtils.isBlank(myId)) {
+			myId = theRuntimeResourceDefinition.getName().toLowerCase();
+		}
 
-    retVal.setId(new IdDt(myId));
-    return retVal;
-  }
+		retVal.setId(new IdDt(myId));
+		return retVal;
+	}
 
-  @SuppressWarnings("rawtypes")
-  @Override
-  public Class<List> getContainedType() {
-    return List.class;
-  }
+	@SuppressWarnings("rawtypes")
+	@Override
+	public Class<List> getContainedType() {
+		return List.class;
+	}
 
-  @Override
-  public InputStream getFhirVersionPropertiesFile() {
-    InputStream str = FhirR4.class.getResourceAsStream("/org/hl7/fhir/r4/model/fhirversion.properties");
-    if (str == null) {
-      str = FhirR4.class.getResourceAsStream("/org/hl7/fhir/r4/model/fhirversion.properties");
-    }
-    if (str == null) {
-      throw new ConfigurationException("Can not find model property file on classpath: " + "/ca/uhn/fhir/model/r4/fhirversion.properties");
-    }
-    return str;
-  }
+	@Override
+	public InputStream getFhirVersionPropertiesFile() {
+		String path = "org/hl7/fhir/r4/model/fhirversion.properties";
+		InputStream str = FhirR4.class.getResourceAsStream("/" + path);
+		if (str == null) {
+			str = FhirR4.class.getResourceAsStream(path);
+		}
+		if (str == null) {
+			throw new ConfigurationException("Can not find model property file on classpath: " + path);
+		}
+		return str;
+	}
 
-  @Override
-  public IPrimitiveType<Date> getLastUpdated(IBaseResource theResource) {
-    return ((Resource) theResource).getMeta().getLastUpdatedElement();
-  }
+	@Override
+	public IPrimitiveType<Date> getLastUpdated(IBaseResource theResource) {
+		return ((Resource) theResource).getMeta().getLastUpdatedElement();
+	}
 
-  @Override
-  public String getPathToSchemaDefinitions() {
-    return "/org/hl7/fhir/instance/model/dstu3/schema";
-  }
+	@Override
+	public String getPathToSchemaDefinitions() {
+		return "/org/hl7/fhir/r4/model/schema";
+	}
 
-  @Override
-  public Class<? extends IBaseReference> getResourceReferenceType() {
-    return Reference.class;
-  }
+	@Override
+	public Class<? extends IBaseReference> getResourceReferenceType() {
+		return Reference.class;
+	}
 
-  @Override
-  public Object getServerVersion() {
-    return ReflectionUtil.newInstanceOfFhirServerType("org.hl7.fhir.dstu3.hapi.ctx.FhirServerDstu3");
-  }
+	@Override
+	public Object getServerVersion() {
+		return ReflectionUtil.newInstanceOfFhirServerType("org.hl7.fhir.r4.hapi.ctx.FhirServerR4");
+	}
 
-  @Override
-  public FhirVersionEnum getVersion() {
-    return FhirVersionEnum.R4;
-  }
+	@Override
+	public FhirVersionEnum getVersion() {
+		return FhirVersionEnum.R4;
+	}
 
-  @Override
-  public IVersionSpecificBundleFactory newBundleFactory(FhirContext theContext) {
-    return new R4BundleFactory(theContext);
-  }
+	@Override
+	public IVersionSpecificBundleFactory newBundleFactory(FhirContext theContext) {
+		return new R4BundleFactory(theContext);
+	}
 
-  @Override
-  public IBaseCoding newCodingDt() {
-    return new Coding();
-  }
+	@Override
+	public IBaseCoding newCodingDt() {
+		return new Coding();
+	}
 
-  @Override
-  public IIdType newIdType() {
-    return new IdType();
-  }
+	@Override
+	public IIdType newIdType() {
+		return new IdType();
+	}
 
 }

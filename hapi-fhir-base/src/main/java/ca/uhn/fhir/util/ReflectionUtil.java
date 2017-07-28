@@ -27,7 +27,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.apache.commons.lang3.Validate;
 
 import ca.uhn.fhir.context.ConfigurationException;
-import ca.uhn.fhir.model.api.IFhirVersion;
+import ca.uhn.fhir.context.support.IContextValidationSupport;
 import javassist.Modifier;
 
 public class ReflectionUtil {
@@ -153,20 +153,35 @@ public class ReflectionUtil {
 	}
 
 	public static Object newInstanceOfFhirServerType(String theType) {
+		String errorMessage = "Unable to instantiate server framework. Please make sure that hapi-fhir-server library is on your classpath!";
+		String wantedType = "ca.uhn.fhir.rest.api.server.IFhirVersionServer";
+		Object fhirServerVersion = newInstanceOfType(theType, errorMessage, wantedType);
+		return fhirServerVersion;
+	}
+
+	@SuppressWarnings("unchecked")
+	public static <EVS_IN, EVS_OUT, SDT, CST, CDCT, IST> ca.uhn.fhir.context.support.IContextValidationSupport<EVS_IN, EVS_OUT, SDT, CST, CDCT, IST> newInstanceOfFhirProfileValidationSupport(
+			String theType) {
+		String errorMessage = "Unable to instantiate validation support! Please make sure that hapi-fhir-validation and the appropriate structures JAR are on your classpath!";
+		String wantedType = "ca.uhn.fhir.context.support.IContextValidationSupport";
+		Object fhirServerVersion = newInstanceOfType(theType, errorMessage, wantedType);
+		return (IContextValidationSupport<EVS_IN, EVS_OUT, SDT, CST, CDCT, IST>) fhirServerVersion;
+	}
+
+	private static Object newInstanceOfType(String theType, String errorMessage, String wantedType) {
 		Object fhirServerVersion = ourFhirServerVersions.get(theType);
 		if (fhirServerVersion == null) {
 			try {
 				Class<?> type = Class.forName(theType);
-				Class<?> serverType = Class.forName("ca.uhn.fhir.rest.api.server.IFhirVersionServer");
+				Class<?> serverType = Class.forName(wantedType);
 				Validate.isTrue(serverType.isAssignableFrom(type));
 				fhirServerVersion = type.newInstance();
 			} catch (Exception e) {
-				throw new ConfigurationException("Unable to instantiate server framework. Please make sure that hapi-fhir-server library is on your classpath!", e);
+				throw new ConfigurationException(errorMessage, e);
 			}
-			
+
 			ourFhirServerVersions.put(theType, fhirServerVersion);
 		}
-		
 		return fhirServerVersion;
 	}
 

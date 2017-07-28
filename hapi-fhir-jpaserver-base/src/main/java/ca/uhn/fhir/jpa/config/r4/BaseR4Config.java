@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.config.r4;
 
+import org.hl7.fhir.r4.hapi.ctx.IValidationSupport;
 import org.hl7.fhir.r4.hapi.validation.FhirInstanceValidator;
-import org.hl7.fhir.r4.hapi.validation.IValidationSupport;
 import org.hl7.fhir.r4.utils.IResourceValidator.BestPracticeWarningLevel;
 
 /*

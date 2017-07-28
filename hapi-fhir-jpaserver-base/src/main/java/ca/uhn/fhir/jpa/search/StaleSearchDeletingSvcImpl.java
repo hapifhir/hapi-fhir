@@ -1,6 +1,6 @@
 package ca.uhn.fhir.jpa.search;
 
-/*
+/*-
  * #%L
  * HAPI FHIR JPA Server
  * %%
@@ -10,7 +10,7 @@ package ca.uhn.fhir.jpa.search;
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  * 
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,25 +20,24 @@ package ca.uhn.fhir.jpa.search;
  * #L%
  */
 
-import java.util.Collection;
 import java.util.Date;
 
 import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Slice;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionCallbackWithoutResult;
+import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import com.google.common.annotations.VisibleForTesting;
 
 import ca.uhn.fhir.jpa.dao.DaoConfig;
-import ca.uhn.fhir.jpa.dao.data.ISearchDao;
-import ca.uhn.fhir.jpa.dao.data.ISearchIncludeDao;
-import ca.uhn.fhir.jpa.dao.data.ISearchResultDao;
+import ca.uhn.fhir.jpa.dao.data.*;
 import ca.uhn.fhir.jpa.entity.Search;
 
 /**
@@ -47,7 +46,6 @@ import ca.uhn.fhir.jpa.entity.Search;
 public class StaleSearchDeletingSvcImpl implements IStaleSearchDeletingSvc {
 	public static final long DEFAULT_CUTOFF_SLACK = 10 * DateUtils.MILLIS_PER_SECOND;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(StaleSearchDeletingSvcImpl.class);
-	
 
 	/*
 	 * We give a bit of extra leeway just to avoid race conditions where a query result
@@ -71,41 +69,48 @@ public class StaleSearchDeletingSvcImpl implements IStaleSearchDeletingSvc {
 	@Autowired
 	private PlatformTransactionManager myTransactionManager;
 
-	protected void deleteSearch(final Long theSearchPid) {
-		TransactionTemplate tt = new TransactionTemplate(myTransactionManager);
-		tt.execute(new TransactionCallbackWithoutResult() {
-			@Override
-			protected void doInTransactionWithoutResult(TransactionStatus theArg0) {
-				Search searchToDelete = mySearchDao.findOne(theSearchPid);
-				ourLog.info("Deleting search {}/{} - Created[{}] -- Last returned[{}]", searchToDelete.getId(), searchToDelete.getUuid(), searchToDelete.getCreated(), searchToDelete.getSearchLastReturned());
-				mySearchIncludeDao.deleteForSearch(searchToDelete.getId());
-				mySearchResultDao.deleteForSearch(searchToDelete.getId());
-				mySearchDao.delete(searchToDelete);
-			}
-		});
+	private void deleteSearch(final Long theSearchPid) {
+		Search searchToDelete = mySearchDao.findOne(theSearchPid);
+		ourLog.info("Deleting search {}/{} - Created[{}] -- Last returned[{}]", searchToDelete.getId(), searchToDelete.getUuid(), searchToDelete.getCreated(), searchToDelete.getSearchLastReturned());
+		mySearchIncludeDao.deleteForSearch(searchToDelete.getId());
+		mySearchResultDao.deleteForSearch(searchToDelete.getId());
+		mySearchDao.delete(searchToDelete);
 	}
-	
+
 	@Override
 	@Transactional(propagation = Propagation.NOT_SUPPORTED)
 	public void pollForStaleSearchesAndDeleteThem() {
-		
+
 		long cutoffMillis = myDaoConfig.getExpireSearchResultsAfterMillis();
 		if (myDaoConfig.getReuseCachedSearchResultsForMillis() != null) {
 			cutoffMillis = Math.max(cutoffMillis, myDaoConfig.getReuseCachedSearchResultsForMillis());
 		}
-		Date cutoff = new Date((System.currentTimeMillis() - cutoffMillis) - myCutoffSlack);
-		
+		final Date cutoff = new Date((System.currentTimeMillis() - cutoffMillis) - myCutoffSlack);
+
 		ourLog.debug("Searching for searches which are before {}", cutoff);
 
-		Collection<Long> toDelete = mySearchDao.findWhereLastReturnedBefore(cutoff);
-		if (!toDelete.isEmpty()) {
-
-			for (final Long next : toDelete) {
-				deleteSearch(next);
+		TransactionTemplate tt = new TransactionTemplate(myTransactionManager);
+		int count = tt.execute(new TransactionCallback<Integer>() {
+			@Override
+			public Integer doInTransaction(TransactionStatus theStatus) {
+				Slice<Long> toDelete = mySearchDao.findWhereLastReturnedBefore(cutoff, new PageRequest(0, 1000));
+				for (final Long next : toDelete) {
+					deleteSearch(next);
+				}
+				return toDelete.getContent().size();
 			}
+		});
 
-			ourLog.info("Deleted {} searches, {} remaining", toDelete.size(), mySearchDao.count());
+		if (count > 0) {
+			long total = tt.execute(new TransactionCallback<Long>() {
+				@Override
+				public Long doInTransaction(TransactionStatus theStatus) {
+					return mySearchDao.count();
+				}
+			});
+			ourLog.info("Deleted {} searches, {} remaining", count, total);
 		}
+
 	}
 
 	@Scheduled(fixedDelay = DEFAULT_CUTOFF_SLACK)

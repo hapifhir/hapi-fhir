@@ -79,7 +79,12 @@ public class RestHookSubscriptionDstu2Interceptor extends BaseRestHookSubscripti
 	 * @param theOperation
 	 */
 	private void checkSubscriptions(IIdType idType, String resourceType, RestOperationTypeEnum theOperation) {
-		for (Subscription subscription : myRestHookSubscriptions) {
+		//avoid a ConcurrentModificationException by copying to an array
+		for (Object object : myRestHookSubscriptions.toArray()) {
+			if (object == null) {
+				continue;
+			}
+			Subscription subscription = (Subscription) object;
 			// see if the criteria matches the created object
 			ourLog.info("Checking subscription {} for {} with criteria {}", subscription.getIdElement().getIdPart(), resourceType, subscription.getCriteria());
 
@@ -116,6 +121,8 @@ public class RestHookSubscriptionDstu2Interceptor extends BaseRestHookSubscripti
 			}
 		}
 	}
+
+
 
 	/**
 	 * Creates an HTTP Post for a subscription

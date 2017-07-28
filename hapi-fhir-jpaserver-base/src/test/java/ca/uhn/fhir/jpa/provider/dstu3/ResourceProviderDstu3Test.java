@@ -2,9 +2,16 @@ package ca.uhn.fhir.jpa.provider.dstu3;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.*;
+import java.math.BigDecimal;
 import java.net.*;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -1973,7 +1980,9 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			.execute();
 		
 		assertEquals(10, response.getEntry().size());
-		assertEquals(null, response.getTotalElement().getValueAsString());
+		if (response.getTotalElement().getValueAsString() != null) {
+			assertEquals("21", response.getTotalElement().getValueAsString());
+		}
 		assertThat(response.getLink("next").getUrl(), not(emptyString()));
 
 		// Load page 2
@@ -1982,7 +1991,9 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		response = ourClient.fetchResourceFromUrl(Bundle.class, nextUrl);
 
 		assertEquals(10, response.getEntry().size());
-		assertEquals(null, response.getTotalElement().getValueAsString());
+		if (response.getTotalElement().getValueAsString() != null) {
+			assertEquals("21", response.getTotalElement().getValueAsString());
+		}
 		assertThat(response.getLink("next").getUrl(), not(emptyString()));
 
 		// Load page 3
@@ -1992,7 +2003,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		response = ourClient.fetchResourceFromUrl(Bundle.class, nextUrl);
 
 		assertEquals(1, response.getEntry().size());
-		assertEquals(21, response.getTotal());
+		assertEquals("21", response.getTotalElement().getValueAsString());
 		assertEquals(null, response.getLink("next"));
 
 	}
@@ -3185,6 +3196,31 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		} catch (InvalidRequestException e) {
 			assertThat(e.getMessage(), containsString("Unable to handle quantity prefix \"eb\" for value: eb100||"));
 		}
+	}
+
+	@Test()
+	public void testSearchNegativeNumbers() throws Exception {
+		Observation o = new Observation();
+		o.setValue(new Quantity().setValue(new BigDecimal("-10")));
+		String oid1 = myObservationDao.create(o, mySrd).getId().toUnqualifiedVersionless().getValue();
+		
+		Observation o2 = new Observation();
+		o2.setValue(new Quantity().setValue(new BigDecimal("-20")));
+		String oid2 = myObservationDao.create(o2, mySrd).getId().toUnqualifiedVersionless().getValue();
+
+		HttpGet get = new HttpGet(ourServerBase + "/Observation?value-quantity=gt-15");
+		CloseableHttpResponse resp = ourHttpClient.execute(get);
+		try {
+			assertEquals(200, resp.getStatusLine().getStatusCode());
+			Bundle bundle = myFhirCtx.newXmlParser().parseResource(Bundle.class, IOUtils.toString(resp.getEntity().getContent(), Constants.CHARSET_UTF8));
+
+			List<String> ids = toUnqualifiedVersionlessIdValues(bundle);
+			assertThat(ids, contains(oid1));
+			assertThat(ids, not(contains(oid2)));
+		} finally {
+			IOUtils.closeQuietly(resp);
+		}
+
 	}
 
 	@Test(expected = InvalidRequestException.class)

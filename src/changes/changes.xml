@@ -85,9 +85,13 @@
 				generated. This should not affect most users.
 			</action>
 			<action type="fix" issue="678">
-				FIx issue in SubscriptionInterceptor that caused interceptor to only
+				Fix issue in SubscriptionInterceptor that caused interceptor to only
 				actually notify listeners of the first 10 subscriptions. Thanks to Jeff Chung
 				for the pull request!
+			</action>
+			<action type="fix" issue="693">
+				Fix potential ConcurrentModificationException when adding subscriptions while
+				running under heavy load. Thanks to Jeff Chung for the pull request!
 			</action>
 			<action type="add">
 				JPA search now uses hibernate ScrollableResults instead of plain JPA List. This
@@ -190,6 +194,43 @@
 				relative or logical ID. This affects profile tooling such as
 				StructureMapUtilities. Thanks to Travis Lukach for reporting and
 				providing a test case!
+			</action>
+			<action type="fix" issue="679">
+				Add link to DSTU3 JavaDocs from documentation index. Thanks
+				to Vadim Peretokin for the pull request!
+			</action>
+			<action type="fix" issue="680">
+				Fix a typo in the documentation. Thanks to Saren Currie
+				for the pull request!
+			</action>
+			<action type="add" issue="689">
+				Add a command line flag to the CLI tool to allow configuration of the
+				server search result cache timeout period. Thanks to Eugene Lubarsky
+				for the pull request!
+			</action>
+			<action type="fix" issue="683">
+				Correct an issue with the model classes for STU3 where any classes 
+				containing the @ChildOrder annotation (basically the conformance
+				resources) will not correctly set the order if any of the
+				elements are a choice type (i.e. named "foo[x]"). Thanks to
+				GitHub user @CarthageKing for the pull request!
+			</action>
+			<action type="fix">
+				Fix potential deadlock in stale search deleting task in JPA server, as well
+				as potential deadlock when executing transactions containing nested
+				searches when operating under extremely heavy load.
+			</action>
+			<action type="add">
+				JPA server transaction operations now put OperationOutcome resources resulting
+				from actions in 
+				<![CDATA[<code>Bundle.entry.response.outcome</code>]]>
+				instead of the previous
+				<![CDATA[<code>Bundle.entry.resource</code>]]>
+			<action>
+			<action type="fix" issue="696">
+				An issue was corrected where search parameters containing negative numbers
+				were sometimes treated as positive numbers when processing the search. Thanks
+				to Keith Boone for reporting and suggesting a fix!
 			</action>
 		</release>
 		<release version="2.5" date="2017-06-08">

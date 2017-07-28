@@ -31,6 +31,8 @@ import java.util.*;
 import org.apache.commons.io.IOUtils;
 import org.hamcrest.Matchers;
 import org.hamcrest.core.StringContains;
+import org.hl7.fhir.dstu3.hapi.validation.DefaultProfileValidationSupport;
+import org.hl7.fhir.dstu3.hapi.validation.FhirInstanceValidator;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.dstu3.model.Address.AddressUse;
 import org.hl7.fhir.dstu3.model.Address.AddressUseEnumFactory;
@@ -42,6 +44,7 @@ import org.hl7.fhir.dstu3.model.Enumeration;
 import org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.dstu3.model.Identifier.IdentifierUse;
 import org.hl7.fhir.dstu3.model.Observation.ObservationStatus;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
 import org.junit.*;
@@ -59,8 +62,7 @@ import ca.uhn.fhir.parser.XmlParserDstu3Test.TestPatientFor327;
 import ca.uhn.fhir.parser.json.JsonLikeValue.ScalarType;
 import ca.uhn.fhir.parser.json.JsonLikeValue.ValueType;
 import ca.uhn.fhir.util.TestUtil;
-import ca.uhn.fhir.validation.FhirValidator;
-import ca.uhn.fhir.validation.ValidationResult;
+import ca.uhn.fhir.validation.*;
 import net.sf.json.*;
 
 public class JsonParserDstu3Test {
@@ -70,6 +72,78 @@ public class JsonParserDstu3Test {
 	@After
 	public void after() {
 		ourCtx.setNarrativeGenerator(null);
+	}
+	
+	@Test
+	public void testActivityDefinitionElementsOrder() throws Exception {
+		final String origContent = "{\"resourceType\":\"ActivityDefinition\",\"id\":\"x1\",\"url\":\"http://testing.org\",\"status\":\"draft\",\"timingDateTime\":\"2011-02-03\"}";
+		final IParser parser = ourCtx.newJsonParser();
+		DefaultProfileValidationSupport validationSupport = new DefaultProfileValidationSupport();
+
+		// verify that InstanceValidator likes the format
+		{
+			IValidationContext<IBaseResource> validationCtx = ValidationContext.forText(ourCtx, origContent);
+			new FhirInstanceValidator(validationSupport).validateResource(validationCtx);
+			ValidationResult result = validationCtx.toResult();
+			for (SingleValidationMessage msg : result.getMessages()) {
+				ourLog.info("{}", msg);
+			}
+			Assert.assertEquals(0, result.getMessages().size());
+		}
+
+		ActivityDefinition fhirObj = parser.parseResource(ActivityDefinition.class, origContent);
+		String content = parser.encodeResourceToString(fhirObj);
+		ourLog.info("Serialized form: {}", content);
+
+		// verify that InstanceValidator still likes the format
+		{
+			IValidationContext<IBaseResource> validationCtx = ValidationContext.forText(ourCtx, content);
+			new FhirInstanceValidator(validationSupport).validateResource(validationCtx);
+			ValidationResult result = validationCtx.toResult();
+			for (SingleValidationMessage msg : result.getMessages()) {
+				ourLog.info("{}", msg);
+			}
+			Assert.assertEquals(0, result.getMessages().size());
+		}
+
+		// verify that the original and newly serialized match
+		Assert.assertEquals(origContent, content);
+	}
+	
+	@Test
+	public void testConceptMapElementsOrder() throws Exception {
+		final String origContent = "{\"resourceType\":\"ConceptMap\",\"id\":\"x1\",\"url\":\"http://testing.org\",\"status\":\"draft\",\"sourceUri\":\"http://y1\"}";
+		final IParser parser = ourCtx.newJsonParser();
+		DefaultProfileValidationSupport validationSupport = new DefaultProfileValidationSupport();
+
+		// verify that InstanceValidator likes the format
+		{
+			IValidationContext<IBaseResource> validationCtx = ValidationContext.forText(ourCtx, origContent);
+			new FhirInstanceValidator(validationSupport).validateResource(validationCtx);
+			ValidationResult result = validationCtx.toResult();
+			for (SingleValidationMessage msg : result.getMessages()) {
+				ourLog.info("{}", msg);
+			}
+			Assert.assertEquals(0, result.getMessages().size());
+		}
+
+		ConceptMap fhirObj = parser.parseResource(ConceptMap.class, origContent);
+		String content = parser.encodeResourceToString(fhirObj);
+		ourLog.info("Serialized form: {}", content);
+
+		// verify that InstanceValidator still likes the format
+		{
+			IValidationContext<IBaseResource> validationCtx = ValidationContext.forText(ourCtx, content);
+			new FhirInstanceValidator(validationSupport).validateResource(validationCtx);
+			ValidationResult result = validationCtx.toResult();
+			for (SingleValidationMessage msg : result.getMessages()) {
+				ourLog.info("{}", msg);
+			}
+			Assert.assertEquals(0, result.getMessages().size());
+		}
+
+		// verify that the original and newly serialized match
+		Assert.assertEquals(origContent, content);
 	}
 
 	/**

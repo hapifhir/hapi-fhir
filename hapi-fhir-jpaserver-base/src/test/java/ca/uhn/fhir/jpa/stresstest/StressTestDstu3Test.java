@@ -6,6 +6,7 @@ import static org.junit.Assert.fail;
 import java.util.List;
 import java.util.UUID;
 
+import ca.uhn.fhir.rest.api.Constants;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -15,6 +16,7 @@ import org.hl7.fhir.dstu3.model.Bundle.BundleType;
 import org.hl7.fhir.dstu3.model.Bundle.HTTPVerb;
 import org.junit.*;
 
+import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
 
 import ca.uhn.fhir.jpa.provider.dstu3.BaseResourceProviderDstu3Test;
@@ -42,6 +44,37 @@ public class StressTestDstu3Test extends BaseResourceProviderDstu3Test {
 		
 		ourRestServer.unregisterInterceptor(myRequestValidatingInterceptor);
 	}
+
+	
+	@Test
+	public void testMultithreadedSearch() throws Exception {
+		Bundle input = new Bundle();
+		input.setType(BundleType.TRANSACTION);
+		for (int i = 0; i < 500; i++) {
+			Patient p = new Patient();
+			p.addIdentifier().setSystem("http://test").setValue("BAR");
+			input.addEntry().setResource(p).getRequest().setMethod(HTTPVerb.POST).setUrl("Patient");
+		}
+		ourClient.transaction().withBundle(input).execute();
+		
+		
+		List<BaseTask> tasks = Lists.newArrayList();
+		try {
+			for (int threadIndex = 0; threadIndex < 10; threadIndex++) {
+				SearchTask task = new SearchTask();
+				tasks.add(task);
+				task.start();
+			}
+		} finally {
+			for (BaseTask next : tasks) {
+				next.join();
+			}
+		}
+
+		validateNoErrors(tasks);
+
+	}
+	
 	
 	/**
 	 * This test prevents a deadlock that was detected with a large number of 
@@ -73,12 +106,12 @@ public class StressTestDstu3Test extends BaseResourceProviderDstu3Test {
 
 		List<BaseTask> tasks = Lists.newArrayList();
 		try {
-			for (int threadIndex = 0; threadIndex < 8; threadIndex++) {
+			for (int threadIndex = 0; threadIndex < 5; threadIndex++) {
 				SearchTask task = new SearchTask();
 				tasks.add(task);
 				task.start();
 			}
-			for (int threadIndex = 0; threadIndex < 8; threadIndex++) {
+			for (int threadIndex = 0; threadIndex < 5; threadIndex++) {
 				CreateTask task = new CreateTask();
 				tasks.add(task);
 				task.start();
@@ -89,6 +122,10 @@ public class StressTestDstu3Test extends BaseResourceProviderDstu3Test {
 			}
 		}
 
+		validateNoErrors(tasks);
+	}
+
+	private void validateNoErrors(List<BaseTask> tasks) {
 		int total = 0;
 		for (BaseTask next : tasks) {
 			if (next.getError() != null) {
@@ -127,16 +164,37 @@ public class StressTestDstu3Test extends BaseResourceProviderDstu3Test {
 
 		@Override
 		public void run() {
-			CloseableHttpResponse get = null;
-			for (int i = 0; i < 20; i++) {
+			CloseableHttpResponse getResp = null;
+			for (int i = 0; i < 10; i++) {
 				try {
-					get = ourHttpClient.execute(new HttpGet(ourServerBase + "/Patient?identifier=http%3A%2F%2Ftest%7CBAR," + UUID.randomUUID().toString()));
+					Bundle respBundle;
+					
+					// Load search
+					HttpGet get = new HttpGet(ourServerBase + "/Patient?identifier=http%3A%2F%2Ftest%7CBAR," + UUID.randomUUID().toString());
+					get.addHeader(Constants.HEADER_CONTENT_TYPE, Constants.CT_FHIR_JSON_NEW);
+					getResp = ourHttpClient.execute(get);
 					try {
-						assertEquals(200, get.getStatusLine().getStatusCode());
+						assertEquals(200, getResp.getStatusLine().getStatusCode());
+						String respBundleString = IOUtils.toString(getResp.getEntity().getContent(), Charsets.UTF_8);
+						respBundle = myFhirCtx.newJsonParser().parseResource(Bundle.class, respBundleString);
 						myTaskCount++;
 					} finally {
-						IOUtils.closeQuietly(get);
+						IOUtils.closeQuietly(getResp);
 					}
+					
+					// Load page 2
+					get = new HttpGet(respBundle.getLink("next").getUrl());
+					get.addHeader(Constants.HEADER_CONTENT_TYPE, Constants.CT_FHIR_JSON_NEW);
+					getResp = ourHttpClient.execute(get);
+					try {
+						assertEquals(200, getResp.getStatusLine().getStatusCode());
+						String respBundleString = IOUtils.toString(getResp.getEntity().getContent(), Charsets.UTF_8);
+						respBundle = myFhirCtx.newJsonParser().parseResource(Bundle.class, respBundleString);
+						myTaskCount++;
+					} finally {
+						IOUtils.closeQuietly(getResp);
+					}
+					
 				} catch (Throwable e) {
 					ourLog.error("Failure during search", e);
 					myError = e;

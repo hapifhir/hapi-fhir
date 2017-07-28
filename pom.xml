@@ -275,6 +275,7 @@
 		<developer>
 			<id>vadi2</id>
 			<name>Vadim Peretokin</name>
+			<organization>Furore Informatica</organization>
 		</developer>
 		<developer>
 			<id>lawley</id>
@@ -340,6 +341,10 @@
 		<developer>
 			<id>eug48</id>
 			<name>Eugene Lubarsky</name>
+		</developer>
+		<developer>
+			<id>SarenCurrie</id>
+			<name>Saren Currie</name>
 		</developer>
 	</developers>
 

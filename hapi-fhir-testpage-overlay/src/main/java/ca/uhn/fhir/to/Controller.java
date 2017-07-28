@@ -1,6 +1,9 @@
 package ca.uhn.fhir.to;
 
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.defaultIfEmpty;
+import static org.apache.commons.lang3.StringUtils.defaultString;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.io.IOException;
 import java.io.StringWriter;
@@ -63,14 +66,14 @@ public class Controller extends BaseController {
 			Class<? extends IBaseConformance> type;
 			switch (getContext(theRequest).getVersion().getVersion()) {
 			default:
-			case DSTU1:
-				type = Conformance.class;
-				break;
 			case DSTU2:
 				type = ca.uhn.fhir.model.dstu2.resource.Conformance.class;
 				break;
 			case DSTU3:
 				type = org.hl7.fhir.dstu3.model.CapabilityStatement.class;
+				break;
+			case R4:
+				type = org.hl7.fhir.r4.model.CapabilityStatement.class;
 				break;
 			}
 			client.fetchConformance().ofType(type).execute();
@@ -103,13 +106,13 @@ public class Controller extends BaseController {
 		try {
 			def = getResourceType(theRequest, theReq);
 		} catch (ServletException e) {
-			theModel.put("errorMsg", e.toString());
+			theModel.put("errorMsg", toDisplayError(e.toString(), e));
 			return "resource";
 		}
 
 		String id = StringUtils.defaultString(theReq.getParameter("resource-delete-id"));
 		if (StringUtils.isBlank(id)) {
-			theModel.put("errorMsg", "No ID specified");
+			theModel.put("errorMsg", toDisplayError("No ID specified", null));
 			return "resource";
 		}
 
@@ -148,7 +151,7 @@ public class Controller extends BaseController {
 				try {
 					def = getResourceType(theRequest, theReq);
 				} catch (ServletException e) {
-					theModel.put("errorMsg", e.toString());
+					theModel.put("errorMsg", toDisplayError(e.toString(), e));
 					return "resource";
 				}
 
@@ -212,11 +215,11 @@ public class Controller extends BaseController {
 		if (myConfig.isRefuseToFetchThirdPartyUrls()) {
 			if (!url.startsWith(theModel.get("base").toString())) {
 				ourLog.warn(logPrefix(theModel) + "Refusing to load page URL: {}", url);
-				theModel.put("errorMsg", "Invalid page URL: " + url);
+				theModel.put("errorMsg", toDisplayError("Invalid page URL: " + url, null));
 				return "result";
 			}
 		}
-		
+
 		url = url.replace("&amp;", "&");
 
 		ResultType returnsResource = ResultType.BUNDLE;
@@ -224,13 +227,9 @@ public class Controller extends BaseController {
 		long start = System.currentTimeMillis();
 		try {
 			ourLog.info(logPrefix(theModel) + "Loading paging URL: {}", url);
-			if (context.getVersion().getVersion() == FhirVersionEnum.DSTU1) {
-				client.loadPage().byUrl(url).andReturnDstu1Bundle().execute();
-			} else {
-				@SuppressWarnings("unchecked")
-				Class<? extends IBaseBundle> bundleType = (Class<? extends IBaseBundle>) context.getResourceDefinition("Bundle").getImplementingClass();
-				client.loadPage().byUrl(url).andReturnBundle(bundleType).execute();
-			}
+			@SuppressWarnings("unchecked")
+			Class<? extends IBaseBundle> bundleType = (Class<? extends IBaseBundle>) context.getResourceDefinition("Bundle").getImplementingClass();
+			client.loadPage().byUrl(url).andReturnBundle(bundleType).execute();
 		} catch (Exception e) {
 			returnsResource = handleClientException(client, e, theModel);
 		}
@@ -254,12 +253,12 @@ public class Controller extends BaseController {
 		try {
 			def = getResourceType(theRequest, theReq);
 		} catch (ServletException e) {
-			theModel.put("errorMsg", e.toString());
+			theModel.put("errorMsg", toDisplayError(e.toString(), e));
 			return "resource";
 		}
 		String id = StringUtils.defaultString(theReq.getParameter("id"));
 		if (StringUtils.isBlank(id)) {
-			theModel.put("errorMsg", "No ID specified");
+			theModel.put("errorMsg", toDisplayError("No ID specified", null));
 			return "resource";
 		}
 		ResultType returnsResource = ResultType.RESOURCE;
@@ -315,13 +314,16 @@ public class Controller extends BaseController {
 		case DSTU3:
 			haveSearchParams = extractSearchParamsDstu3CapabilityStatement(conformance, resourceName, includes, revIncludes, sortParams, haveSearchParams, queryIncludes);
 			break;
+		case R4:
+			haveSearchParams = extractSearchParamsR4CapabilityStatement(conformance, resourceName, includes, revIncludes, sortParams, haveSearchParams, queryIncludes);
+			break;
 		default:
 			throw new IllegalStateException("Unknown FHIR version: " + theRequest.getFhirVersion(myConfig));
 		}
 
 		theModel.put("includes", includes);
 		theModel.put("revincludes", revIncludes);
-		theModel.put("queries", Collections.emptyList()); //TODO: remove this, it does nothing
+		theModel.put("queries", Collections.emptyList()); // TODO: remove this, it does nothing
 		theModel.put("haveSearchParams", haveSearchParams);
 		theModel.put("queryIncludes", queryIncludes);
 		theModel.put("sortParams", sortParams);
@@ -362,7 +364,7 @@ public class Controller extends BaseController {
 			try {
 				query = search.forResource((Class<? extends IBaseResource>) getResourceType(theRequest, theReq).getImplementingClass());
 			} catch (ServletException e) {
-				theModel.put("errorMsg", e.toString());
+				theModel.put("errorMsg", toDisplayError(e.toString(), e));
 				return "resource";
 			}
 			clientCodeJsonWriter.name("resource");
@@ -434,7 +436,7 @@ public class Controller extends BaseController {
 		String limit = theReq.getParameter("resource-search-limit");
 		if (isNotBlank(limit)) {
 			if (!limit.matches("[0-9]+")) {
-				theModel.put("errorMsg", "Search limit must be a numeric value.");
+				theModel.put("errorMsg", toDisplayError("Search limit must be a numeric value.", null));
 				return "resource";
 			}
 			int limitInt = Integer.parseInt(limit);
@@ -463,9 +465,7 @@ public class Controller extends BaseController {
 			}
 		}
 
-		if (client.getFhirContext().getVersion().getVersion() != FhirVersionEnum.DSTU1) {
-			query.returnBundle(client.getFhirContext().getResourceDefinition("Bundle").getImplementingClass());
-		}
+		query.returnBundle(client.getFhirContext().getResourceDefinition("Bundle").getImplementingClass());
 
 		long start = System.currentTimeMillis();
 		ResultType returnsResource;
@@ -505,12 +505,13 @@ public class Controller extends BaseController {
 			} else if (body.startsWith("<")) {
 				// XML content
 			} else {
-				theModel.put("errorMsg", "Message body does not appear to be a valid FHIR resource instance document. Body should start with '<' (for XML encoding) or '{' (for JSON encoding).");
+				theModel.put("errorMsg",
+						toDisplayError("Message body does not appear to be a valid FHIR resource instance document. Body should start with '<' (for XML encoding) or '{' (for JSON encoding).", null));
 				return "home";
 			}
 		} catch (DataFormatException e) {
 			ourLog.warn("Failed to parse bundle", e);
-			theModel.put("errorMsg", "Failed to parse transaction bundle body. Error was: " + e.getMessage());
+			theModel.put("errorMsg", toDisplayError("Failed to parse transaction bundle body. Error was: " + e.getMessage(), e));
 			return "home";
 		}
 
@@ -558,7 +559,7 @@ public class Controller extends BaseController {
 
 		String body = validate ? theReq.getParameter("resource-validate-body") : theReq.getParameter("resource-create-body");
 		if (isBlank(body)) {
-			theModel.put("errorMsg", "No message body specified");
+			theModel.put("errorMsg", toDisplayError("No message body specified", null));
 			return;
 		}
 
@@ -573,12 +574,13 @@ public class Controller extends BaseController {
 				resource = getContext(theRequest).newXmlParser().parseResource(type, body);
 				client.setEncoding(EncodingEnum.XML);
 			} else {
-				theModel.put("errorMsg", "Message body does not appear to be a valid FHIR resource instance document. Body should start with '<' (for XML encoding) or '{' (for JSON encoding).");
+				theModel.put("errorMsg",
+						toDisplayError("Message body does not appear to be a valid FHIR resource instance document. Body should start with '<' (for XML encoding) or '{' (for JSON encoding).", null));
 				return;
 			}
 		} catch (DataFormatException e) {
 			ourLog.warn("Failed to parse resource", e);
-			theModel.put("errorMsg", "Failed to parse message body. Error was: " + e.getMessage());
+			theModel.put("errorMsg", toDisplayError("Failed to parse message body. Error was: " + e.getMessage(), e));
 			return;
 		}
 
@@ -671,11 +673,7 @@ public class Controller extends BaseController {
 			}
 
 			IHistoryTyped<?> hist2;
-			if (client.getFhirContext().getVersion().getVersion() == FhirVersionEnum.DSTU1) {
-				hist2 = hist1.andReturnDstu1Bundle();
-			} else {
-				hist2 = hist1.andReturnBundle(client.getFhirContext().getResourceDefinition("Bundle").getImplementingClass(IBaseBundle.class));
-			}
+			hist2 = hist1.andReturnBundle(client.getFhirContext().getResourceDefinition("Bundle").getImplementingClass(IBaseBundle.class));
 
 			if (since != null) {
 				hist2.since(since);
@@ -694,8 +692,8 @@ public class Controller extends BaseController {
 
 	}
 
-
-	private boolean extractSearchParamsDstu2(IBaseResource theConformance, String resourceName, TreeSet<String> includes, TreeSet<String> theRevIncludes, TreeSet<String> sortParams, boolean haveSearchParams, List<List<String>> queryIncludes) {
+	private boolean extractSearchParamsDstu2(IBaseResource theConformance, String resourceName, TreeSet<String> includes, TreeSet<String> theRevIncludes, TreeSet<String> sortParams,
+			boolean haveSearchParams, List<List<String>> queryIncludes) {
 		ca.uhn.fhir.model.dstu2.resource.Conformance conformance = (ca.uhn.fhir.model.dstu2.resource.Conformance) theConformance;
 		for (ca.uhn.fhir.model.dstu2.resource.Conformance.Rest nextRest : conformance.getRest()) {
 			for (ca.uhn.fhir.model.dstu2.resource.Conformance.RestResource nextRes : nextRest.getResource()) {
@@ -731,7 +729,8 @@ public class Controller extends BaseController {
 		return haveSearchParams;
 	}
 
-	private boolean extractSearchParamsDstu3CapabilityStatement(IBaseResource theConformance, String resourceName, TreeSet<String> includes, TreeSet<String> theRevIncludes, TreeSet<String> sortParams, boolean haveSearchParams, List<List<String>> queryIncludes) {
+	private boolean extractSearchParamsDstu3CapabilityStatement(IBaseResource theConformance, String resourceName, TreeSet<String> includes, TreeSet<String> theRevIncludes, TreeSet<String> sortParams,
+			boolean haveSearchParams, List<List<String>> queryIncludes) {
 		CapabilityStatement conformance = (org.hl7.fhir.dstu3.model.CapabilityStatement) theConformance;
 		for (CapabilityStatementRestComponent nextRest : conformance.getRest()) {
 			for (CapabilityStatementRestResourceComponent nextRes : nextRest.getResource()) {
@@ -754,11 +753,38 @@ public class Controller extends BaseController {
 					// scan for revinclude candidates
 					for (CapabilityStatementRestResourceSearchParamComponent next : nextRes.getSearchParam()) {
 						if (next.getTypeElement().getValue() == org.hl7.fhir.dstu3.model.Enumerations.SearchParamType.REFERENCE) {
-//							for (CodeType nextTargetType : next.getTarget()) {
-//								if (nextTargetType.getValue().equals(resourceName)) {
-//									theRevIncludes.add(nextRes.getTypeElement().getValue() + ":" + next.getName());
-//								}
-//							}
+						}
+					}
+				}
+			}
+		}
+		return haveSearchParams;
+	}
+
+	private boolean extractSearchParamsR4CapabilityStatement(IBaseResource theConformance, String resourceName, TreeSet<String> includes, TreeSet<String> theRevIncludes, TreeSet<String> sortParams,
+			boolean haveSearchParams, List<List<String>> queryIncludes) {
+		org.hl7.fhir.r4.model.CapabilityStatement conformance = (org.hl7.fhir.r4.model.CapabilityStatement) theConformance;
+		for (org.hl7.fhir.r4.model.CapabilityStatement.CapabilityStatementRestComponent nextRest : conformance.getRest()) {
+			for (org.hl7.fhir.r4.model.CapabilityStatement.CapabilityStatementRestResourceComponent nextRes : nextRest.getResource()) {
+				if (nextRes.getTypeElement().getValue().equals(resourceName)) {
+					for (org.hl7.fhir.r4.model.StringType next : nextRes.getSearchInclude()) {
+						if (next.isEmpty() == false) {
+							includes.add(next.getValue());
+						}
+					}
+					for (org.hl7.fhir.r4.model.CapabilityStatement.CapabilityStatementRestResourceSearchParamComponent next : nextRes.getSearchParam()) {
+						if (next.getTypeElement().getValue() != org.hl7.fhir.r4.model.Enumerations.SearchParamType.COMPOSITE) {
+							sortParams.add(next.getNameElement().getValue());
+						}
+					}
+					if (nextRes.getSearchParam().size() > 0) {
+						haveSearchParams = true;
+					}
+				} else {
+					// It's a different resource from the one we're searching, so
+					// scan for revinclude candidates
+					for (org.hl7.fhir.r4.model.CapabilityStatement.CapabilityStatementRestResourceSearchParamComponent next : nextRes.getSearchParam()) {
+						if (next.getTypeElement().getValue() == org.hl7.fhir.r4.model.Enumerations.SearchParamType.REFERENCE) {
 						}
 					}
 				}

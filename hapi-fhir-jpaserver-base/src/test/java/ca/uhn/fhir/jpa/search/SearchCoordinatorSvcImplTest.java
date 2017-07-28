@@ -24,6 +24,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.*;
 import ca.uhn.fhir.jpa.dao.data.*;
 import ca.uhn.fhir.jpa.entity.*;
+import ca.uhn.fhir.jpa.util.BaseIterator;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.StringParam;
@@ -139,9 +140,6 @@ public class SearchCoordinatorSvcImplTest {
 
 	}
 
-	private String newUuid() {
-		return UUID.randomUUID().toString();
-	}
 	@Test
 	public void testAsyncSearchLargeResultSetBigCountSameCoordinator() {
 		SearchParameterMap params = new SearchParameterMap();
@@ -392,7 +390,7 @@ public class SearchCoordinatorSvcImplTest {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
-	public static class FailAfterNIterator<T> implements Iterator<T> {
+	public static class FailAfterNIterator<T> extends BaseIterator<T> implements Iterator<T> {
 
 		private int myCount;
 		private Iterator<T> myWrap;
@@ -419,7 +417,7 @@ public class SearchCoordinatorSvcImplTest {
 	}
 
 	
-	public static class SlowIterator<T> implements Iterator<T> {
+	public static class SlowIterator<T> extends BaseIterator<T> implements Iterator<T> {
 
 		private int myDelay;
 		private Iterator<T> myWrap;

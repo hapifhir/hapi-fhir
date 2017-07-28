@@ -34,6 +34,8 @@ import org.custommonkey.xmlunit.XMLUnit;
 import org.hamcrest.collection.IsEmptyCollection;
 import org.hamcrest.core.StringContains;
 import org.hamcrest.text.StringContainsInOrder;
+import org.hl7.fhir.dstu3.hapi.validation.DefaultProfileValidationSupport;
+import org.hl7.fhir.dstu3.hapi.validation.FhirInstanceValidator;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.dstu3.model.Address.AddressUse;
 import org.hl7.fhir.dstu3.model.Address.AddressUseEnumFactory;
@@ -64,6 +66,10 @@ import ca.uhn.fhir.parser.IParserErrorHandler.IParseLocation;
 import ca.uhn.fhir.parser.PatientWithCustomCompositeExtension.FooParentExtension;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.util.TestUtil;
+import ca.uhn.fhir.validation.IValidationContext;
+import ca.uhn.fhir.validation.SingleValidationMessage;
+import ca.uhn.fhir.validation.ValidationContext;
+import ca.uhn.fhir.validation.ValidationResult;
 
 public class XmlParserDstu3Test {
 	private static FhirContext ourCtx = FhirContext.forDstu3();
@@ -76,7 +82,7 @@ public class XmlParserDstu3Test {
 		}
 		ourCtx.setNarrativeGenerator(null);
 	}
-
+	
 	/**
 	 * See #544
 	 */
@@ -104,7 +110,7 @@ public class XmlParserDstu3Test {
 		assertNotNull(subject);
 		assertEquals("FAMILY", subject.getNameFirstRep().getFamily());
 	}
-
+	
 	@Test
 	public void testBundleWithBinary() {
 
@@ -133,6 +139,81 @@ public class XmlParserDstu3Test {
 		Binary bin = (Binary) b.getEntry().get(0).getResource();
 		assertArrayEquals(new byte[] { 1, 2, 3, 4 }, bin.getContent());
 
+	}
+
+	/**
+	 * See #683
+	 */
+	@Test
+	public void testChildOrderWithChoiceType() throws Exception {
+		final String origContent = "<ActivityDefinition xmlns=\"http://hl7.org/fhir\"><id value=\"x1\"/><url value=\"http://testing.org\"/><status value=\"draft\"/><timingDateTime value=\"2011-02-03\"/></ActivityDefinition>";
+		final IParser parser = ourCtx.newXmlParser();
+		DefaultProfileValidationSupport validationSupport = new DefaultProfileValidationSupport();
+
+		// verify that InstanceValidator likes the format
+		{
+			IValidationContext<IBaseResource> validationCtx = ValidationContext.forText(ourCtx, origContent);
+			new FhirInstanceValidator(validationSupport).validateResource(validationCtx);
+			ValidationResult result = validationCtx.toResult();
+			for (SingleValidationMessage msg : result.getMessages()) {
+				ourLog.info("{}", msg);
+			}
+			Assert.assertEquals(0, result.getMessages().size());
+		}
+
+		ActivityDefinition fhirObj = parser.parseResource(ActivityDefinition.class, origContent);
+		String content = parser.encodeResourceToString(fhirObj);
+		ourLog.info("Serialized form: {}", content);
+
+		// verify that InstanceValidator still likes the format
+		{
+			IValidationContext<IBaseResource> validationCtx = ValidationContext.forText(ourCtx, content);
+			new FhirInstanceValidator(validationSupport).validateResource(validationCtx);
+			ValidationResult result = validationCtx.toResult();
+			for (SingleValidationMessage msg : result.getMessages()) {
+				ourLog.info("{}", msg);
+			}
+			Assert.assertEquals(0, result.getMessages().size());
+		}
+
+		// verify that the original and newly serialized match
+		Assert.assertEquals(origContent, content);
+	}
+
+	@Test
+	public void testConceptMapElementsOrder() throws Exception {
+		final String origContent = "<ConceptMap xmlns=\"http://hl7.org/fhir\"><id value=\"x1\"/><url value=\"http://testing.org\"/><status value=\"draft\"/><sourceUri value=\"http://url1\"/></ConceptMap>";
+		final IParser parser = ourCtx.newXmlParser();
+		DefaultProfileValidationSupport validationSupport = new DefaultProfileValidationSupport();
+
+		// verify that InstanceValidator likes the format
+		{
+			IValidationContext<IBaseResource> validationCtx = ValidationContext.forText(ourCtx, origContent);
+			new FhirInstanceValidator(validationSupport).validateResource(validationCtx);
+			ValidationResult result = validationCtx.toResult();
+			for (SingleValidationMessage msg : result.getMessages()) {
+				ourLog.info("{}", msg);
+			}
+			Assert.assertEquals(0, result.getMessages().size());
+		}
+
+		ConceptMap fhirObj = parser.parseResource(ConceptMap.class, origContent);
+		String content = parser.encodeResourceToString(fhirObj);
+		ourLog.info("Serialized form: {}", content);
+
+		// verify that InstanceValidator still likes the format
+		{
+			IValidationContext<IBaseResource> validationCtx = ValidationContext.forText(ourCtx, content);
+			new FhirInstanceValidator(validationSupport).validateResource(validationCtx);
+			ValidationResult result = validationCtx.toResult();
+			for (SingleValidationMessage msg : result.getMessages()) {
+				ourLog.info("{}", msg);
+			}
+			Assert.assertEquals(0, result.getMessages().size());
+		}
+
+		// verify that the original and newly serialized match
+		Assert.assertEquals(origContent, content);
 	}
 
 	@Test

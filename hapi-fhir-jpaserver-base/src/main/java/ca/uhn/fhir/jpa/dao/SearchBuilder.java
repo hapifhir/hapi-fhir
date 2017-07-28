@@ -49,6 +49,7 @@ import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamUriDao;
 import ca.uhn.fhir.jpa.entity.*;
 import ca.uhn.fhir.jpa.term.IHapiTerminologySvc;
 import ca.uhn.fhir.jpa.term.VersionIndependentConcept;
+import ca.uhn.fhir.jpa.util.BaseIterator;
 import ca.uhn.fhir.jpa.util.StopWatch;
 import ca.uhn.fhir.model.api.*;
 import ca.uhn.fhir.model.base.composite.*;
@@ -1965,7 +1966,7 @@ public class SearchBuilder implements ISearchBuilder {
 		return thePredicates.toArray(new Predicate[thePredicates.size()]);
 	}
 
-	public class IncludesIterator implements Iterator<Long>{
+	public class IncludesIterator extends BaseIterator<Long> implements Iterator<Long>{
 
 		private Iterator<Long> myCurrentIterator;
 		private int myCurrentOffset;
@@ -2055,7 +2056,7 @@ public class SearchBuilder implements ISearchBuilder {
 		}
 	}
 
-	private final class QueryIterator implements Iterator<Long> {
+	private final class QueryIterator extends BaseIterator<Long> implements Iterator<Long> {
 
 		private boolean myFirst = true;
 		private IncludesIterator myIncludesIterator;
@@ -2175,7 +2176,7 @@ public class SearchBuilder implements ISearchBuilder {
 		}
 	}
 
-	public class ScrollableResultsIterator implements Iterator<Long> {
+	public class ScrollableResultsIterator extends BaseIterator<Long> implements Iterator<Long> {
 
 		private Long myNext;
 		private ScrollableResults myScroll;
