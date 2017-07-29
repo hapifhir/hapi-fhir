@@ -179,7 +179,7 @@ public class ValidationDataUploader extends BaseCommand {
 		
 		try {
 			ctx.getVersion().getPathToSchemaDefinitions();
-			vsContents = IOUtils.toString(ValidationDataUploader.class.getResourceAsStream("/org/hl7/fhir/instance/model/dstu3/valueset/"+"valuesets.xml"), "UTF-8");
+			vsContents = IOUtils.toString(ValidationDataUploader.class.getResourceAsStream("/org/hl7/fhir/dstu3/model/valueset/"+"valuesets.xml"), "UTF-8");
 		} catch (IOException e) {
 			throw new CommandFailureException(e.toString());
 		}
@@ -204,7 +204,7 @@ public class ValidationDataUploader extends BaseCommand {
 		}
 
 		try {
-			vsContents = IOUtils.toString(ValidationDataUploader.class.getResourceAsStream("/org/hl7/fhir/instance/model/dstu3/valueset/"+"v3-codesystems.xml"), "UTF-8");
+			vsContents = IOUtils.toString(ValidationDataUploader.class.getResourceAsStream("/org/hl7/fhir/dstu3/model/valueset/"+"v3-codesystems.xml"), "UTF-8");
 		} catch (IOException e) {
 			throw new CommandFailureException(e.toString());
 		}
@@ -223,7 +223,7 @@ public class ValidationDataUploader extends BaseCommand {
 		}
 
 		try {
-			vsContents = IOUtils.toString(ValidationDataUploader.class.getResourceAsStream("/org/hl7/fhir/instance/model/dstu3/valueset/"+"v2-tables.xml"), "UTF-8");
+			vsContents = IOUtils.toString(ValidationDataUploader.class.getResourceAsStream("/org/hl7/fhir/dstu3/model/valueset/"+"v2-tables.xml"), "UTF-8");
 		} catch (IOException e) {
 			throw new CommandFailureException(e.toString());
 		}
@@ -263,7 +263,7 @@ public class ValidationDataUploader extends BaseCommand {
 		ourLog.info("Uploading " + name);
 		String vsContents;
 		try {
-			vsContents = IOUtils.toString(ValidationDataUploader.class.getResourceAsStream("/org/hl7/fhir/instance/model/dstu3/profile/" + name + ".xml"), "UTF-8");
+			vsContents = IOUtils.toString(ValidationDataUploader.class.getResourceAsStream("/org/hl7/fhir/dstu3/model/profile/" + name + ".xml"), "UTF-8");
 		} catch (IOException e) {
 			throw new CommandFailureException(e.toString());
 		}

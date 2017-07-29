@@ -10,7 +10,7 @@
    <value value="http://hl7.org/fhir"/>
   </telecom>
  </contact>
- <date value="2015-11-11T10:54:01-05:00"/>
+ <date value="2017-07-27T08:19:05-04:00"/>
  <description value="Base StructureDefinition for instant Type: An instant in time - known at least to the second"/>
  <fhirVersion value="1.0.2"/>
  <kind value="datatype"/>
@@ -65,8 +65,8 @@
    <min value="0"/>
    <max value="1"/>
    <!-- Note: primitive values do not have an assigned type
-e.g. this is compiler magic
-XML and JSON types provided by extension -->
+  e.g. this is compiler magic
+  XML and JSON types provided by extension -->
    <type>
     <code>
      <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-json-type">
@@ -99,8 +99,8 @@ XML and JSON types provided by extension -->
    <min value="0"/>
    <max value="1"/>
    <!-- Note: primitive values do not have an assigned type
-e.g. this is compiler magic
-XML and JSON types provided by extension -->
+  e.g. this is compiler magic
+  XML and JSON types provided by extension -->
    <type>
     <code>
      <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-json-type">

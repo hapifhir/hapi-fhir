@@ -774,9 +774,6 @@
     <profile value="http://hl7.org/fhir/StructureDefinition/SimpleQuantity"/>
    </type>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="code.empty() or system"/>
-    </extension>
     <key value="qty-3"/>
     <severity value="error"/>
     <human value="If a code for the unit is present, the system SHALL also be present"/>
@@ -816,9 +813,6 @@
     <profile value="http://hl7.org/fhir/StructureDefinition/Money"/>
    </type>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="code.empty() or system"/>
-    </extension>
     <key value="qty-3"/>
     <severity value="error"/>
     <human value="If a code for the unit is present, the system SHALL also be present"/>
@@ -910,9 +904,6 @@
     <profile value="http://hl7.org/fhir/StructureDefinition/Money"/>
    </type>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="code.empty() or system"/>
-    </extension>
     <key value="qty-3"/>
     <severity value="error"/>
     <human value="If a code for the unit is present, the system SHALL also be present"/>
@@ -1680,9 +1671,6 @@
     <profile value="http://hl7.org/fhir/StructureDefinition/SimpleQuantity"/>
    </type>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="code.empty() or system"/>
-    </extension>
     <key value="qty-3"/>
     <severity value="error"/>
     <human value="If a code for the unit is present, the system SHALL also be present"/>
@@ -1722,9 +1710,6 @@
     <profile value="http://hl7.org/fhir/StructureDefinition/Money"/>
    </type>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="code.empty() or system"/>
-    </extension>
     <key value="qty-3"/>
     <severity value="error"/>
     <human value="If a code for the unit is present, the system SHALL also be present"/>
@@ -1804,9 +1789,6 @@
     <profile value="http://hl7.org/fhir/StructureDefinition/Money"/>
    </type>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="code.empty() or system"/>
-    </extension>
     <key value="qty-3"/>
     <severity value="error"/>
     <human value="If a code for the unit is present, the system SHALL also be present"/>

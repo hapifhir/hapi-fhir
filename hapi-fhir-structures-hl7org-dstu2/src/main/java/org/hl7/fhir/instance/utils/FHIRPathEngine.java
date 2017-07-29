@@ -176,6 +176,7 @@ public class FHIRPathEngine {
 	 * @throws Exception
 	 */
   public ExpressionNode parse(String path) throws FHIRLexerException {
+    path = path.replace("$.", "$this.");
     FHIRLexer lexer = new FHIRLexer(path);
 		if (lexer.done())
 			throw lexer.error("Path cannot be empty");
@@ -1490,12 +1491,12 @@ public class FHIRPathEngine {
       return makeBoolean(false);
 	}
 
-	private List<Base> opXor(List<Base> left, List<Base> right) {
-    if (left.isEmpty() || right.isEmpty())
-      return new ArrayList<Base>();
+  private List<Base> opXor(List<Base> left, List<Base> right) {
+    if (left.isEmpty() && right.isEmpty())
+      return makeBoolean(false);
     else 
-		return makeBoolean(convertToBoolean(left) ^ convertToBoolean(right));
-	}
+      return makeBoolean(convertToBoolean(left) ^ convertToBoolean(right));
+   }
 
 	private List<Base> opImplies(List<Base> left, List<Base> right) {
     if (!convertToBoolean(left)) 

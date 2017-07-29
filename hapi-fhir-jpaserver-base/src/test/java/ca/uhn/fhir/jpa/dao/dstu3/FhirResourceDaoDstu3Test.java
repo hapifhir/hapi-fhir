@@ -419,7 +419,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		String name = "profiles-resources";
 		ourLog.info("Uploading " + name);
 		String vsContents;
-		vsContents = IOUtils.toString(FhirResourceDaoDstu3Test.class.getResourceAsStream("/org/hl7/fhir/instance/model/dstu3/profile/" + name + ".xml"), "UTF-8");
+		vsContents = IOUtils.toString(FhirResourceDaoDstu3Test.class.getResourceAsStream("/org/hl7/fhir/dstu3/model/profile/" + name + ".xml"), "UTF-8");
 
 		bundle = myFhirCtx.newXmlParser().parseResource(org.hl7.fhir.dstu3.model.Bundle.class, vsContents);
 		for (BundleEntryComponent i : bundle.getEntry()) {

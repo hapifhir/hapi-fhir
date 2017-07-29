@@ -2070,7 +2070,7 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
 		} else if (isParametersEntry(ei.path))
 			return IdStatus.OPTIONAL; 
 		else
-			return IdStatus.REQUIRED; 
+			return this.getResourceIdRule(); 
 	}
 
 	private void checkInvariants(List<ValidationMessage> errors, String path, StructureDefinition profile, ElementDefinition ed, String typename, String typeProfile, WrapperElement resource, WrapperElement element) throws FHIRException {

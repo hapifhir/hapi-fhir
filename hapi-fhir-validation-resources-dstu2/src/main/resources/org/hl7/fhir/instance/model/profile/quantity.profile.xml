@@ -10,7 +10,7 @@
    <value value="http://hl7.org/fhir"/>
   </telecom>
  </contact>
- <date value="2015-11-11T10:54:01-05:00"/>
+ <date value="2017-07-27T08:19:05-04:00"/>
  <description value="Base StructureDefinition for Quantity Type"/>
  <requirements value="Need to able to capture all sorts of measured values, even if the measured value are not precisely quantified. Values include exact measures such as 3.51g, customary units such as 3 tablets, and currencies such as $100.32USD."/>
  <fhirVersion value="1.0.2"/>
@@ -39,9 +39,6 @@
     <code value="Element"/>
    </type>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="code.empty() or system"/>
-    </extension>
     <key value="qty-3"/>
     <severity value="error"/>
     <human value="If a code for the unit is present, the system SHALL also be present"/>
@@ -215,9 +212,6 @@
     <code value="Element"/>
    </type>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="code.empty() or system"/>
-    </extension>
     <key value="qty-3"/>
     <severity value="error"/>
     <human value="If a code for the unit is present, the system SHALL also be present"/>

@@ -94,7 +94,8 @@ public class FhirResourceDaoDstu2ValidateTest extends BaseJpaDstu2Test {
 		ValidationModeEnum mode = ValidationModeEnum.CREATE;
 		switch (enc) {
 		case JSON:
-			encoded = myFhirCtx.newJsonParser().encodeResourceToString(input);
+			encoded = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input);
+			ourLog.info(encoded);
 			try {
 				myObservationDao.validate(input, null, encoded, EncodingEnum.JSON, mode, null, mySrd);
 				fail();

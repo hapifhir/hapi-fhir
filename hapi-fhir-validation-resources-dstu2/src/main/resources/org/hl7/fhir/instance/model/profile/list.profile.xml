@@ -1,7 +1,7 @@
 <StructureDefinition xmlns="http://hl7.org/fhir">
  <id value="List"/>
  <meta>
-  <lastUpdated value="2015-11-11T10:54:01.813-05:00"/>
+  <lastUpdated value="2017-07-27T08:19:05.564-04:00"/>
  </meta>
  <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
   <valueInteger value="1"/>
@@ -22,7 +22,7 @@
    <value value="http://www.hl7.org/Special/committees/fiwg/index.cfm"/>
   </telecom>
  </contact>
- <date value="2015-11-11T10:54:01-05:00"/>
+ <date value="2017-07-27T08:19:05-04:00"/>
  <description value="Base StructureDefinition for List Resource"/>
  <fhirVersion value="1.0.2"/>
  <mapping>
@@ -52,18 +52,12 @@
     <code value="DomainResource"/>
    </type>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="mode = 'changes' or entry.deleted.empty()"/>
-    </extension>
     <key value="lst-2"/>
     <severity value="error"/>
     <human value="The deleted flag can only be used if the mode of the list is &quot;changes&quot;"/>
     <xpath value="(f:mode/@value = 'changes') or not(exists(f:entry/f:deleted))"/>
    </constraint>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="emptyReason.empty() or enty.empty()"/>
-    </extension>
     <key value="lst-1"/>
     <severity value="error"/>
     <human value="A list can only have an emptyReason if it is empty"/>
@@ -630,18 +624,12 @@
     <code value="DomainResource"/>
    </type>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="mode = 'changes' or entry.deleted.empty()"/>
-    </extension>
     <key value="lst-2"/>
     <severity value="error"/>
     <human value="The deleted flag can only be used if the mode of the list is &quot;changes&quot;"/>
     <xpath value="(f:mode/@value = 'changes') or not(exists(f:entry/f:deleted))"/>
    </constraint>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="emptyReason.empty() or enty.empty()"/>
-    </extension>
     <key value="lst-1"/>
     <severity value="error"/>
     <human value="A list can only have an emptyReason if it is empty"/>

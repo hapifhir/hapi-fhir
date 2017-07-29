@@ -30,7 +30,7 @@ private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger
 	public static void main(String[] args) throws Exception {
 		
 		
-		Collection<File> xml = FileUtils.listFiles(new File("../hapi-fhir-validation-resources-dstu3/src/main/resources/org/hl7/fhir/instance/model/dstu3/profile"), new String[] {"xml"}, false);
+		Collection<File> xml = FileUtils.listFiles(new File("../hapi-fhir-validation-resources-dstu3/src/main/resources/org/hl7/fhir/dstu3/model/profile"), new String[] {"xml"}, false);
 		for (File next : xml) {
 			ourLog.info("Checking: {}", next.getAbsoluteFile());
 			

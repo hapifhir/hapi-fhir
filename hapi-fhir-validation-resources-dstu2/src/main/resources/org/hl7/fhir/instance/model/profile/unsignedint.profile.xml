@@ -10,7 +10,7 @@
    <value value="http://hl7.org/fhir"/>
   </telecom>
  </contact>
- <date value="2015-11-11T10:54:01-05:00"/>
+ <date value="2017-07-27T08:19:05-04:00"/>
  <description value="Base StructureDefinition for unsignedInt type: An integer with a value that is not negative (e.g. >= 0)"/>
  <fhirVersion value="1.0.2"/>
  <kind value="datatype"/>
@@ -64,8 +64,8 @@
     <max value="1"/>
    </base>
    <!-- Note: primitive values do not have an assigned type
-e.g. this is compiler magic
-XML and JSON types provided by extension -->
+  e.g. this is compiler magic
+  XML and JSON types provided by extension -->
    <type>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-regex">
      <valueString value="[0]|([1-9][0-9]*)"/>
@@ -100,8 +100,8 @@ XML and JSON types provided by extension -->
    <min value="0"/>
    <max value="1"/>
    <!-- Note: primitive values do not have an assigned type
-e.g. this is compiler magic
-XML and JSON types provided by extension -->
+  e.g. this is compiler magic
+  XML and JSON types provided by extension -->
    <type>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-regex">
      <valueString value="[0]|([1-9][0-9]*)"/>

@@ -98,11 +98,9 @@ public class JpaResourceProviderDstu2<T extends IResource> extends BaseJpaResour
 		return parameters;
 	}
 
-	//@formatter:off
 	@Operation(name=OPERATION_NAME_META_ADD, idempotent=true, returnParameters= {
 		@OperationParam(name="return", type=MetaDt.class)
 	})
-	//@formatter:on
 	public Parameters metaAdd(@IdParam IdDt theId, @OperationParam(name = "meta") MetaDt theMeta, RequestDetails theRequestDetails) {
 		if (theMeta == null) {
 			throw new InvalidRequestException("Input contains no parameter with name 'meta'");
@@ -113,11 +111,9 @@ public class JpaResourceProviderDstu2<T extends IResource> extends BaseJpaResour
 		return parameters;
 	}
 
-	//@formatter:off
 	@Operation(name=OPERATION_NAME_META_DELETE, idempotent=true, returnParameters= {
 		@OperationParam(name="return", type=MetaDt.class)
 	})
-	//@formatter:on
 	public Parameters metaDelete(@IdParam IdDt theId, @OperationParam(name = "meta") MetaDt theMeta, RequestDetails theRequestDetails) {
 		if (theMeta == null) {
 			throw new InvalidRequestException("Input contains no parameter with name 'meta'");

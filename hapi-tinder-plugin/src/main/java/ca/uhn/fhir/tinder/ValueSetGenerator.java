@@ -117,7 +117,7 @@ public class ValueSetGenerator {
 			name = "/org/hl7/fhir/instance/model/valueset/valuesets.xml";
 		}
 		if (version.equals("dstu3")) {
-			name = "/org/hl7/fhir/instance/model/dstu3/valueset/valuesets.xml";
+			name = "/org/hl7/fhir/dstu3/model/valueset/valuesets.xml";
 		}
 		ourLog.info("Loading valuesets from: {}", name);
 		InputStream is = ValueSetGenerator.class.getResourceAsStream(name);

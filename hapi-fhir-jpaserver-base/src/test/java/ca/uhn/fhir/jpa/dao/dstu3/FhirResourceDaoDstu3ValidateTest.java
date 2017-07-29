@@ -97,7 +97,7 @@ public class FhirResourceDaoDstu3ValidateTest extends BaseJpaDstu3Test {
 	}
 
 	private OperationOutcome doTestValidateResourceContainingProfileDeclaration(String methodName, EncodingEnum enc) throws IOException {
-		Bundle vss = loadResourceFromClasspath(Bundle.class, "/org/hl7/fhir/instance/model/dstu3/valueset/valuesets.xml");
+		Bundle vss = loadResourceFromClasspath(Bundle.class, "/org/hl7/fhir/dstu3/model/valueset/valuesets.xml");
 		myValueSetDao.update((ValueSet) findResourceByIdInBundle(vss, "observation-status"), mySrd);
 		myValueSetDao.update((ValueSet) findResourceByIdInBundle(vss, "observation-category"), mySrd);
 		myValueSetDao.update((ValueSet) findResourceByIdInBundle(vss, "observation-codes"), mySrd);
@@ -108,7 +108,7 @@ public class FhirResourceDaoDstu3ValidateTest extends BaseJpaDstu3Test {
 		myValueSetDao.update((ValueSet) findResourceByIdInBundle(vss, "referencerange-meaning"), mySrd);
 		myValueSetDao.update((ValueSet) findResourceByIdInBundle(vss, "observation-relationshiptypes"), mySrd);
 
-		StructureDefinition sd = loadResourceFromClasspath(StructureDefinition.class, "/org/hl7/fhir/instance/model/dstu3/profile/devicemetricobservation.profile.xml");
+		StructureDefinition sd = loadResourceFromClasspath(StructureDefinition.class, "/org/hl7/fhir/dstu3/model/profile/devicemetricobservation.profile.xml");
 		sd.setId(new IdType());
 		sd.setUrl("http://example.com/foo/bar/" + methodName);
 		myStructureDefinitionDao.create(sd, mySrd);

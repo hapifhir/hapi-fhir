@@ -39,21 +39,15 @@
     <code value="Observation"/>
    </type>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="component.where(code = $.code).empty()"/>
-    </extension>
     <key value="obs-7"/>
     <severity value="error"/>
     <human value="Component code SHALL not be same as observation code"/>
     <xpath value="not(exists(f:component/f:code)) or count(for $coding in f:code/f:coding return parent::*/f:component/f:code/f:coding[f:code/@value=$coding/f:code/@value and f:system/@value=$coding/f:system/@value])=0"/>
    </constraint>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="dataAbsentReason.empty() or value[x].empty()"/>
-    </extension>
     <key value="obs-6"/>
     <severity value="error"/>
-    <human value="dataAbsentReason SHALL only be present if Observation.value[x] is not present"/>
+    <human value="SHALL only be present if Observation.value[x] is not present"/>
     <xpath value="not(exists(f:dataAbsentReason)) or (not(exists(*[starts-with(local-name(.), 'value')])))"/>
    </constraint>
    <mapping>
@@ -993,9 +987,6 @@
     <code value="BackboneElement"/>
    </type>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="low or high or text"/>
-    </extension>
     <key value="obs-3"/>
     <severity value="error"/>
     <human value="Must have at least a low or a high or text"/>
@@ -1122,9 +1113,6 @@
     <value value="4.5"/>
    </fixedQuantity>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="code.empty() or system"/>
-    </extension>
     <key value="qty-3"/>
     <severity value="error"/>
     <human value="If a code for the unit is present, the system SHALL also be present"/>
