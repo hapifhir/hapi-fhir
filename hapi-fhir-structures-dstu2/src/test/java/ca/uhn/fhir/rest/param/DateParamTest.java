@@ -1,6 +1,5 @@
 package ca.uhn.fhir.rest.param;
 
-import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.endsWith;
 import static org.hamcrest.Matchers.startsWith;
 import static org.junit.Assert.assertEquals;
@@ -11,7 +10,6 @@ import java.util.TimeZone;
 
 import org.junit.Test;
 
-import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 
@@ -28,10 +26,6 @@ public class DateParamTest {
 		new DateParam(ParamPrefixEnum.GREATERTHAN, InstantDt.withCurrentTime());
 		new DateParam(ParamPrefixEnum.GREATERTHAN, "2011-01-02");
 
-		new DateParam(QuantityCompararatorEnum.GREATERTHAN, new Date());
-		new DateParam(QuantityCompararatorEnum.GREATERTHAN, new DateTimeDt("2011-01-02"));
-		new DateParam(QuantityCompararatorEnum.GREATERTHAN, InstantDt.withCurrentTime());
-		new DateParam(QuantityCompararatorEnum.GREATERTHAN, "2011-01-02");
 	}
 
 	@Test

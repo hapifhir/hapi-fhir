@@ -519,9 +519,6 @@ public abstract class BaseMethodBinding<T> {
 		} else if (history != null) {
 			return new HistoryMethodBinding(theMethod, theContext, theProvider);
 		} else if (validate != null) {
-			if (theContext.getVersion().getVersion() == FhirVersionEnum.DSTU1) {
-				return new ValidateMethodBindingDstu1(theMethod, theContext, theProvider);
-			}
 			return new ValidateMethodBindingDstu2Plus(returnType, returnTypeFromRp, theMethod, theContext, theProvider, validate);
 		} else if (getTags != null) {
 			return new GetTagsMethodBinding(theMethod, theContext, theProvider, getTags);

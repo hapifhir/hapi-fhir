@@ -95,7 +95,7 @@ public class DateClientParam  extends BaseClientParam implements IParam {
 					b.append(',');
 				}
 				if (myPrefix != null && myPrefix != ParamPrefixEnum.EQUAL) {
-					b.append(myPrefix.getValueForContext(theContext));
+					b.append(myPrefix.getValue());
 				}
 				b.append(myValue);
 			}

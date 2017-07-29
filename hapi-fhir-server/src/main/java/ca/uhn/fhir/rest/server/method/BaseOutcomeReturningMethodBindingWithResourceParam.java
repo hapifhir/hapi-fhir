@@ -12,7 +12,7 @@ import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  * 
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -85,7 +85,8 @@ abstract class BaseOutcomeReturningMethodBindingWithResourceParam extends BaseOu
 		}
 
 		if (resourceParameter == null) {
-			throw new ConfigurationException("Method " + theMethod.getName() + " in type " + theMethod.getDeclaringClass().getCanonicalName() + " does not have a resource parameter annotated with @" + ResourceParam.class.getSimpleName());
+			throw new ConfigurationException("Method " + theMethod.getName() + " in type " + theMethod.getDeclaringClass().getCanonicalName() + " does not have a resource parameter annotated with @"
+					+ ResourceParam.class.getSimpleName());
 		}
 
 	}
@@ -99,20 +100,16 @@ abstract class BaseOutcomeReturningMethodBindingWithResourceParam extends BaseOu
 			IBaseResource resource = ((IBaseResource) theParams[myResourceParameterIndex]);
 			String resourceId = resource.getIdElement().getIdPart();
 			String urlId = theRequest.getId() != null ? theRequest.getId().getIdPart() : null;
-			if (getContext().getVersion().getVersion() == FhirVersionEnum.DSTU1) {
-				resource.setId(urlId);
-			} else {
-				if (getContext().getVersion().getVersion().isOlderThan(FhirVersionEnum.DSTU3) == false) {
-					resource.setId(theRequest.getId());
-				}
-
-				String matchUrl = null;
-				if (myConditionalUrlIndex != -1) {
-					matchUrl = (String) theParams[myConditionalUrlIndex];
-					matchUrl = defaultIfBlank(matchUrl, null);
-				}
-				validateResourceIdAndUrlIdForNonConditionalOperation(resource, resourceId, urlId, matchUrl);
+			if (getContext().getVersion().getVersion().isOlderThan(FhirVersionEnum.DSTU3) == false) {
+				resource.setId(theRequest.getId());
 			}
+
+			String matchUrl = null;
+			if (myConditionalUrlIndex != -1) {
+				matchUrl = (String) theParams[myConditionalUrlIndex];
+				matchUrl = defaultIfBlank(matchUrl, null);
+			}
+			validateResourceIdAndUrlIdForNonConditionalOperation(resource, resourceId, urlId, matchUrl);
 		}
 	}
 

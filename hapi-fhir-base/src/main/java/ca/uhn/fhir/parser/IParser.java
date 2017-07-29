@@ -10,7 +10,7 @@ package ca.uhn.fhir.parser;
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  * 
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -25,7 +25,7 @@ import java.util.*;
 import org.hl7.fhir.instance.model.api.*;
 
 import ca.uhn.fhir.context.*;
-import ca.uhn.fhir.model.api.*;
+import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 
 /**
@@ -38,34 +38,9 @@ import ca.uhn.fhir.rest.api.EncodingEnum;
  */
 public interface IParser {
 
-	String encodeBundleToString(Bundle theBundle) throws DataFormatException;
-
-	void encodeBundleToWriter(Bundle theBundle, Writer theWriter) throws IOException, DataFormatException;
-
 	String encodeResourceToString(IBaseResource theResource) throws DataFormatException;
 
 	void encodeResourceToWriter(IBaseResource theResource, Writer theWriter) throws IOException, DataFormatException;
-
-	/**
-	 * Encodes a tag list, as defined in the <a href="http://hl7.org/implement/standards/fhir/http.html#tags">FHIR
-	 * Specification</a>.
-	 * 
-	 * @param theTagList
-	 *           The tag list to encode. Must not be null.
-	 * @return An encoded tag list
-	 */
-	String encodeTagListToString(TagList theTagList);
-
-	/**
-	 * Encodes a tag list, as defined in the <a href="http://hl7.org/implement/standards/fhir/http.html#tags">FHIR
-	 * Specification</a>.
-	 * 
-	 * @param theTagList
-	 *           The tag list to encode. Must not be null.
-	 * @param theWriter
-	 *           The writer to encode to
-	 */
-	void encodeTagListToWriter(TagList theTagList, Writer theWriter) throws IOException;
 
 	/**
 	 * See {@link #setEncodeElements(Set)}
@@ -117,7 +92,7 @@ public interface IParser {
 	 * @see ParserOptions
 	 */
 	Boolean getStripVersionsFromReferences();
-	
+
 	/**
 	 * If set to <code>true</code> (which is the default), the Bundle.entry.fullUrl will override the Bundle.entry.resource's
 	 * resource id if the fullUrl is defined. This behavior happens when parsing the source data into a Bundle object. Set this
@@ -137,27 +112,6 @@ public interface IParser {
 	 * @see {@link #setSummaryMode(boolean)} for information
 	 */
 	boolean isSummaryMode();
-
-	/**
-	 * Parse a DSTU1 style Atom Bundle. Note that as of DSTU2, Bundle is a resource so you should use
-	 * {@link #parseResource(Class, Reader)} with the Bundle class found in the
-	 * <code>ca.uhn.hapi.fhir.model.[version].resource</code> package instead.
-	 */
-	<T extends IBaseResource> Bundle parseBundle(Class<T> theResourceType, Reader theReader);
-
-	/**
-	 * Parse a DSTU1 style Atom Bundle. Note that as of DSTU2, Bundle is a resource so you should use
-	 * {@link #parseResource(Class, Reader)} with the Bundle class found in the
-	 * <code>ca.uhn.hapi.fhir.model.[version].resource</code> package instead.
-	 */
-	Bundle parseBundle(Reader theReader);
-
-	/**
-	 * Parse a DSTU1 style Atom Bundle. Note that as of DSTU2, Bundle is a resource so you should use
-	 * {@link #parseResource(Class, String)} with the Bundle class found in the
-	 * <code>ca.uhn.hapi.fhir.model.[version].resource</code> package instead.
-	 */
-	Bundle parseBundle(String theMessageString) throws ConfigurationException, DataFormatException;
 
 	/**
 	 * Parses a resource
@@ -210,26 +164,6 @@ public interface IParser {
 	 *            If the resource can not be parsed because the data is not recognized or invalid for any reason
 	 */
 	IBaseResource parseResource(String theMessageString) throws ConfigurationException, DataFormatException;
-
-	/**
-	 * Parses a tag list, as defined in the <a href="http://hl7.org/implement/standards/fhir/http.html#tags">FHIR
-	 * Specification</a>.
-	 * 
-	 * @param theReader
-	 *           A reader which will supply a tag list
-	 * @return A parsed tag list
-	 */
-	TagList parseTagList(Reader theReader);
-
-	/**
-	 * Parses a tag list, as defined in the <a href="http://hl7.org/implement/standards/fhir/http.html#tags">FHIR
-	 * Specification</a>.
-	 * 
-	 * @param theString
-	 *           A string containing a tag list
-	 * @return A parsed tag list
-	 */
-	TagList parseTagList(String theString);
 
 	/**
 	 * If provided, specifies the elements which should NOT be encoded. Valid values for this
@@ -356,6 +290,7 @@ public interface IParser {
 	 * This method provides the ability to globally disable reference encoding. If finer-grained
 	 * control is needed, use {@link #setDontStripVersionsFromReferencesAtPaths(String...)}
 	 * </p>
+	 * 
 	 * @param theStripVersionsFromReferences
 	 *           Set this to <code>false<code> to prevent the parser from removing resource versions from references (or <code>null</code> to apply the default setting from the {@link ParserOptions}
 	 * @see #setDontStripVersionsFromReferencesAtPaths(String...)
@@ -363,7 +298,7 @@ public interface IParser {
 	 * @return Returns a reference to <code>this</code> parser so that method calls can be chained together
 	 */
 	IParser setStripVersionsFromReferences(Boolean theStripVersionsFromReferences);
-	
+
 	/**
 	 * If set to <code>true</code> (which is the default), the Bundle.entry.fullUrl will override the Bundle.entry.resource's
 	 * resource id if the fullUrl is defined. This behavior happens when parsing the source data into a Bundle object. Set this
@@ -415,7 +350,7 @@ public interface IParser {
 	 * @return Returns a reference to <code>this</code> parser so that method calls can be chained together
 	 */
 	IParser setDontStripVersionsFromReferencesAtPaths(String... thePaths);
-	
+
 	/**
 	 * If supplied value(s), any resource references at the specified paths will have their
 	 * resource versions encoded instead of being automatically stripped during the encoding
@@ -440,7 +375,7 @@ public interface IParser {
 
 	/**
 	 * Returns the value supplied to {@link IParser#setDontStripVersionsFromReferencesAtPaths(String...)}
-	 * or <code>null</code> if no value has been set for this parser (in which case the default from 
+	 * or <code>null</code> if no value has been set for this parser (in which case the default from
 	 * the {@link ParserOptions} will be used}
 	 * 
 	 * @see #setDontStripVersionsFromReferencesAtPaths(String...)

@@ -19,19 +19,13 @@ package ca.uhn.fhir.validation;
  * limitations under the License.
  * #L%
  */
-
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 import org.apache.commons.lang3.Validate;
-import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.util.OperationOutcomeUtil;
 import ca.uhn.fhir.validation.schematron.SchematronProvider;
 
 /**
@@ -165,35 +159,6 @@ public class FhirValidator {
 		myValidators = newValidators;
 	}
 
-	/**
-	 * Validates a bundle instance, throwing a {@link ValidationFailureException} if the validation fails. This validation includes validation of all resources in the bundle.
-	 * 
-	 * @param theBundle
-	 *           The resource to validate
-	 * @throws ValidationFailureException
-	 *            If the validation fails
-	 * @deprecated use {@link #validateWithResult(ca.uhn.fhir.model.api.Bundle)} instead
-	 */
-	@Deprecated
-	public void validate(Bundle theBundle) {
-		Validate.notNull(theBundle, "theBundle must not be null");
-		
-		applyDefaultValidators();
-		
-		IValidationContext<Bundle> ctx = ValidationContext.forBundle(myContext, theBundle);
-
-		for (IValidatorModule next : myValidators) {
-			next.validateBundle(ctx);
-		}
-
-		if (ctx.toResult().isSuccessful() == false ) {
-			IBaseOperationOutcome oo = ctx.toResult().toOperationOutcome();
-			if (oo != null && OperationOutcomeUtil.hasIssues(myContext, oo)) {
-				throw new ValidationFailureException(myContext, oo);
-			}
-		}
-		
-	}
 
 	private void applyDefaultValidators() {
 		if (myValidators.isEmpty()) {
@@ -224,27 +189,6 @@ public class FhirValidator {
 		}
 	}
 
-	/**
-	 * Validates a bundle instance returning a {@link ca.uhn.fhir.validation.ValidationResult} which contains the results. This validation includes validation of all resources in the bundle.
-	 *
-	 * @param theBundle
-	 *           the bundle to validate
-	 * @return the results of validation
-	 * @since 0.7
-	 */
-	public ValidationResult validateWithResult(Bundle theBundle) {
-		Validate.notNull(theBundle, "theBundle must not be null");
-		
-		applyDefaultValidators();
-		
-		IValidationContext<Bundle> ctx = ValidationContext.forBundle(myContext, theBundle);
-
-		for (IValidatorModule next : myValidators) {
-			next.validateBundle(ctx);
-		}
-
-		return ctx.toResult();
-	}
 
 	/**
 	 * Validates a resource instance returning a {@link ca.uhn.fhir.validation.ValidationResult} which contains the results.

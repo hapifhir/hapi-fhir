@@ -183,15 +183,6 @@ public class ResourceParameter implements IParameter {
 			throw new InvalidRequestException(msg);
 		}
 		
-		if (theRequest.getServer().getFhirContext().getVersion().getVersion().equals(FhirVersionEnum.DSTU1)) {
-			TagList tagList = new TagList();
-			for (String nextTagComplete : theRequest.getHeaders(Constants.HEADER_CATEGORY)) {
-				ParameterUtil.parseTagValue(tagList, nextTagComplete);
-			}
-			if (tagList.isEmpty() == false) {
-				((IResource) retVal).getResourceMetadata().put(ResourceMetadataKeyEnum.TAG_LIST, tagList);
-			}
-		}
 		return retVal;
 	}
 

@@ -1,13 +1,10 @@
 package ca.uhn.fhir.rest.server.interceptor;
 
-import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-
-import junit.framework.AssertionFailedError;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
@@ -19,39 +16,30 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.hamcrest.core.StringContains;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.hl7.fhir.r4.model.*;
+import org.junit.*;
+
+import com.google.common.base.Charsets;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.model.dstu.resource.OperationOutcome;
-import ca.uhn.fhir.model.dstu.resource.Patient;
-import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.rest.annotation.IdParam;
-import ca.uhn.fhir.rest.annotation.Read;
-import ca.uhn.fhir.rest.annotation.RequiredParam;
-import ca.uhn.fhir.rest.annotation.Search;
+import ca.uhn.fhir.rest.annotation.*;
 import ca.uhn.fhir.rest.param.StringParam;
-import ca.uhn.fhir.rest.server.ExceptionTest;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import ca.uhn.fhir.rest.server.exceptions.*;
 import ca.uhn.fhir.util.PortUtil;
 import ca.uhn.fhir.util.TestUtil;
+import junit.framework.AssertionFailedError;
 
 public class ExceptionHandlingInterceptorTest {
 
 	private static ExceptionHandlingInterceptor myInterceptor;
 	private static final String OPERATION_OUTCOME_DETAILS = "OperationOutcomeDetails";
 	private static CloseableHttpClient ourClient;
-	private static FhirContext ourCtx = FhirContext.forDstu1();
+	private static FhirContext ourCtx = FhirContext.forR4();
 	private static Class<? extends Exception> ourExceptionType;
 	private static boolean ourGenerateOperationOutcome;
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ExceptionTest.class);
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ExceptionHandlingInterceptorTest.class);
 	private static int ourPort;
 	private static Server ourServer;
 	private static RestfulServer servlet;
@@ -70,13 +58,13 @@ public class ExceptionHandlingInterceptorTest {
 		{
 			HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?throwInternalError=aaa");
 			HttpResponse status = ourClient.execute(httpGet);
-			String responseContent = IOUtils.toString(status.getEntity().getContent());
+			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 			IOUtils.closeQuietly(status.getEntity().getContent());
 			ourLog.info(responseContent);
 			assertEquals(500, status.getStatusLine().getStatusCode());
 			OperationOutcome oo = (OperationOutcome) servlet.getFhirContext().newXmlParser().parseResource(responseContent);
-			assertThat(oo.getIssueFirstRep().getDetails().getValue(), StringContains.containsString("Exception Text"));
-			assertThat(oo.getIssueFirstRep().getDetails().getValue(), (StringContains.containsString("InternalErrorException: Exception Text")));
+			assertThat(oo.getIssueFirstRep().getDiagnosticsElement().getValue(), StringContains.containsString("Exception Text"));
+			assertThat(oo.getIssueFirstRep().getDiagnosticsElement().getValue(), (StringContains.containsString("InternalErrorException: Exception Text")));
 		}
 	}
 
@@ -86,13 +74,13 @@ public class ExceptionHandlingInterceptorTest {
 		{
 			HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?throwInternalError=aaa&_format=true");
 			HttpResponse status = ourClient.execute(httpGet);
-			String responseContent = IOUtils.toString(status.getEntity().getContent());
+			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 			IOUtils.closeQuietly(status.getEntity().getContent());
 			ourLog.info(responseContent);
 			assertEquals(500, status.getStatusLine().getStatusCode());
 			OperationOutcome oo = (OperationOutcome) servlet.getFhirContext().newXmlParser().parseResource(responseContent);
-			assertThat(oo.getIssueFirstRep().getDetails().getValue(), StringContains.containsString("Exception Text"));
-			assertThat(oo.getIssueFirstRep().getDetails().getValue(), (StringContains.containsString("InternalErrorException: Exception Text")));
+			assertThat(oo.getIssueFirstRep().getDiagnosticsElement().getValue(), StringContains.containsString("Exception Text"));
+			assertThat(oo.getIssueFirstRep().getDiagnosticsElement().getValue(), (StringContains.containsString("InternalErrorException: Exception Text")));
 		}
 	}
 
@@ -135,16 +123,16 @@ public class ExceptionHandlingInterceptorTest {
 
 
 		@Override
-		public Class<? extends IResource> getResourceType() {
+		public Class<Patient> getResourceType() {
 			return Patient.class;
 		}
 
 		@Read
-		public Patient read(@IdParam IdDt theId) {
+		public Patient read(@IdParam IdType theId) {
 			OperationOutcome oo = null;
 			if (ourGenerateOperationOutcome) {
 				oo = new OperationOutcome();
-				oo.addIssue().setDetails(OPERATION_OUTCOME_DETAILS);
+				oo.addIssue().setDiagnostics(OPERATION_OUTCOME_DETAILS);
 			}
 			
 			if (ourExceptionType == ResourceNotFoundException.class) {

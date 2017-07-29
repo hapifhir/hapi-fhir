@@ -105,13 +105,6 @@ public class TesterConfig {
 
 			if (nextSplit.length < 3) {
 				throw new IllegalArgumentException("Invalid serveer line '" + nextRaw + "' - Must be comma separated");
-			} else if (nextSplit.length == 3) {
-				Validate.notBlank(nextSplit[0], "theId can not be blank");
-				Validate.notBlank(nextSplit[1], "theDisplayName can not be blank");
-				Validate.notBlank(nextSplit[2], "theServerBase can not be blank");
-				myIdToServerName.put(nextSplit[0].trim(), nextSplit[1].trim());
-				myIdToServerBase.put(nextSplit[0].trim(), nextSplit[2].trim());
-				myIdToFhirVersion.put(nextSplit[0].trim(), FhirVersionEnum.DSTU1);
 			} else {
 				Validate.notBlank(nextSplit[0], "theId can not be blank");
 				Validate.notBlank(nextSplit[1], "theVersion can not be blank");

@@ -1,40 +1,37 @@
 package ca.uhn.fhir.util;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 
 import java.util.List;
 
+import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.r4.model.Enumerations.AdministrativeGender;
 import org.junit.AfterClass;
 import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.dstu.composite.QuantityDt;
-import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
-import ca.uhn.fhir.model.dstu.resource.Observation;
-import ca.uhn.fhir.model.dstu.resource.Patient;
-import ca.uhn.fhir.model.dstu.valueset.AdministrativeGenderCodesEnum;
-import ca.uhn.fhir.model.primitive.StringDt;
 
 public class FhirTerserTest {
 
-	private static FhirContext ourCtx = FhirContext.forDstu1();
+	private static FhirContext ourCtx = FhirContext.forR4();
 
 	@Test
 	public void testGetAllPopulatedChildElementsOfType() {
 
 		Patient p = new Patient();
-		p.setGender(AdministrativeGenderCodesEnum.M);
+		p.setGender(AdministrativeGender.MALE);
 		p.addIdentifier().setSystem("urn:foo");
 		p.addAddress().addLine("Line1");
 		p.addAddress().addLine("Line2");
-		p.addName().addFamily("Line3");
+		p.addName().setFamily("Line3");
 
 		FhirTerser t = ourCtx.newTerser();
-		List<StringDt> strings = t.getAllPopulatedChildElementsOfType(p, StringDt.class);
+		List<StringType> strings = t.getAllPopulatedChildElementsOfType(p, StringType.class);
 
 		assertEquals(3, strings.size());
-		assertThat(strings, containsInAnyOrder(new StringDt("Line1"), new StringDt("Line2"), new StringDt("Line3")));
+		assertThat(strings, containsInAnyOrder(new StringType("Line1"), new StringType("Line2"), new StringType("Line3")));
 
 	}
 
@@ -42,7 +39,7 @@ public class FhirTerserTest {
 	public void testMultiValueTypes() {
 
 		Observation obs = new Observation();
-		obs.setValue(new QuantityDt(123L));
+		obs.setValue(new Quantity(123L));
 
 		FhirTerser t = ourCtx.newTerser();
 
@@ -56,8 +53,8 @@ public class FhirTerserTest {
 		{
 			List<Object> values = t.getValues(obs, "Observation.valueQuantity");
 			assertEquals(1, values.size());
-			QuantityDt actual = (QuantityDt) values.get(0);
-			assertEquals("123", actual.getValue().getValueAsString());
+			Quantity actual = (Quantity) values.get(0);
+			assertEquals("123", actual.getValueElement().getValueAsString());
 		}
 	}
 
@@ -98,10 +95,10 @@ public class FhirTerserTest {
 		Observation parsed = ourCtx.newXmlParser().parseResource(Observation.class, msg);
 		FhirTerser t = ourCtx.newTerser();
 
-		List<ResourceReferenceDt> elems = t.getAllPopulatedChildElementsOfType(parsed, ResourceReferenceDt.class);
+		List<Reference> elems = t.getAllPopulatedChildElementsOfType(parsed, Reference.class);
 		assertEquals(2, elems.size());
-		assertEquals("cid:patient@bundle", elems.get(0).getReference().getValue());
-		assertEquals("cid:device@bundle", elems.get(1).getReference().getValue());
+		assertEquals("cid:patient@bundle", elems.get(0).getReferenceElement().getValue());
+		assertEquals("cid:device@bundle", elems.get(1).getReferenceElement().getValue());
 	}
 
 	@AfterClass

@@ -25,8 +25,6 @@ import java.util.List;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
-import ca.uhn.fhir.model.api.Bundle;
-
 public interface ITransaction {
 
 	/**
@@ -35,12 +33,7 @@ public interface ITransaction {
 	ITransactionTyped<List<IBaseResource>> withResources(List<? extends IBaseResource> theResources);
 	
 	/**
-	 * Use a DSTU1 Bundle (Atom) as the transaction input
-	 */
-	ITransactionTyped<Bundle> withBundle(Bundle theBundle);
-
-	/**
-	 * Use a DSTU2+ Bundle resource as the transaction input
+	 * Use the given Bundle resource as the transaction input
 	 */
 	<T extends IBaseBundle> ITransactionTyped<T> withBundle(T theBundleResource);
 

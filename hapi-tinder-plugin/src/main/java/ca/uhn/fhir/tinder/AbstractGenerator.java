@@ -49,9 +49,7 @@ public abstract class AbstractGenerator {
 		 */
 		FhirContext fhirContext;
 		String packageSuffix = "";
-		if ("dstu".equals(context.getVersion())) {
-			fhirContext = FhirContext.forDstu1();
-		} else if ("dstu2".equals(context.getVersion())) {
+		if ("dstu2".equals(context.getVersion())) {
 			fhirContext = FhirContext.forDstu2();
 		} else if ("dstu3".equals(context.getVersion())) {
 			fhirContext = FhirContext.forDstu3();
@@ -91,14 +89,6 @@ public abstract class AbstractGenerator {
 				}
 			}
 			
-			/*
-			 * No spreadsheet existed for Binary in DSTU1 so we don't generate it.. this
-			 * is something we could work around, but at this point why bother since it's 
-			 * only an issue for DSTU1
-			 */
-			if (fhirContext.getVersion().getVersion() == FhirVersionEnum.DSTU1) {
-				includeResources.remove("binary");
-			}
 			if (fhirContext.getVersion().getVersion() == FhirVersionEnum.DSTU3) {
 				includeResources.remove("conformance");
 			}

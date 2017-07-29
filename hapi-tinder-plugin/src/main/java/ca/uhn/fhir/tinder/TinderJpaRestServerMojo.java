@@ -57,9 +57,7 @@ public class TinderJpaRestServerMojo extends AbstractMojo {
 
 		FhirContext fhirContext;
 		String packageSuffix = "";
-		if ("dstu".equals(version)) {
-			fhirContext = FhirContext.forDstu1();
-		} else if ("dstu2".equals(version)) {
+		if ("dstu2".equals(version)) {
 			fhirContext = FhirContext.forDstu2();
 		} else if ("dstu3".equals(version)) {
 			fhirContext = FhirContext.forDstu3();
@@ -95,14 +93,6 @@ public class TinderJpaRestServerMojo extends AbstractMojo {
 				}
 			}
 			
-			/*
-			 * No spreadsheet existed for Binary in DSTU1 so we don't generate it.. this
-			 * is something we could work around, but at this point why bother since it's 
-			 * only an issue for DSTU1
-			 */
-			if (fhirContext.getVersion().getVersion() == FhirVersionEnum.DSTU1) {
-				baseResourceNames.remove("binary");
-			}
 			if (fhirContext.getVersion().getVersion() == FhirVersionEnum.DSTU3) {
 				baseResourceNames.remove("conformance");
 			}

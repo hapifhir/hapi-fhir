@@ -71,7 +71,7 @@ public class NumberParam extends BaseParamWithPrefix<NumberParam> implements IQu
 	String doGetValueAsQueryToken(FhirContext theContext) {
 		StringBuilder b = new StringBuilder();
 		if (getPrefix() != null) {
-			b.append(ParameterUtil.escapeWithDefault(getPrefix().getValueForContext(theContext)));
+			b.append(ParameterUtil.escapeWithDefault(getPrefix().getValue()));
 		}
 		b.append(ParameterUtil.escapeWithDefault(myQuantity.toPlainString()));
 		return b.toString();

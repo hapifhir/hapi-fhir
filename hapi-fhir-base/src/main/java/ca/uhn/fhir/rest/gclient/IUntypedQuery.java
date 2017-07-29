@@ -22,15 +22,13 @@ package ca.uhn.fhir.rest.gclient;
 
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
-import ca.uhn.fhir.model.api.Bundle;
-
 public interface IUntypedQuery {
 
-	IQuery<Bundle> forAllResources();
+	IQuery forAllResources();
 
-	IQuery<Bundle> forResource(String theResourceName);
+	IQuery forResource(String theResourceName);
 
-	IQuery<Bundle> forResource(Class<? extends IBaseResource> theClass);
+	IQuery forResource(Class<? extends IBaseResource> theClass);
 
 	/**
 	 * Perform a search directly by URL. It is usually better to construct the URL using the {@link #forAllResources()}, {@link #forResource(Class)} etc, but sometimes it is useful to simply search by
@@ -40,6 +38,6 @@ public interface IUntypedQuery {
 	 *           The URL to search for. Note that this URL may be complete (e.g. "http://example.com/base/Patient?name=foo") in which case the client's base URL will be ignored. Or it can be relative
 	 *           (e.g. "Patient?name=foo") in which case the client's base URL will be used.
 	 */
-	IQuery<Bundle> byUrl(String theSearchUrl);
+	IQuery byUrl(String theSearchUrl);
 
 }

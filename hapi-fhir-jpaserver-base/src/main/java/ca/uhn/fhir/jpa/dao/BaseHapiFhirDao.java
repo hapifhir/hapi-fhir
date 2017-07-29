@@ -562,12 +562,12 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 	}
 
 	public FhirContext getContext(FhirVersionEnum theVersion) {
-		FhirVersionEnum ver = theVersion != null ? theVersion : FhirVersionEnum.DSTU1;
+		Validate.notNull(theVersion, "theVersion must not be null");
 		synchronized (ourRetrievalContexts) {
-			FhirContext retVal = ourRetrievalContexts.get(ver);
+			FhirContext retVal = ourRetrievalContexts.get(theVersion);
 			if (retVal == null) {
-				retVal = new FhirContext(ver);
-				ourRetrievalContexts.put(ver, retVal);
+				retVal = new FhirContext(theVersion);
+				ourRetrievalContexts.put(theVersion, retVal);
 			}
 			return retVal;
 		}

@@ -10,7 +10,7 @@ package ca.uhn.fhir.validation;
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  * 
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -23,8 +23,6 @@ package ca.uhn.fhir.validation;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.api.Bundle;
-import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.parser.LenientErrorHandler;
 import ca.uhn.fhir.rest.api.EncodingEnum;
@@ -67,20 +65,6 @@ public class ValidationContext<T> extends BaseValidationContext<T> implements IV
 		return myResourceAsStringEncoding;
 	}
 
-	public static IValidationContext<Bundle> forBundle(final FhirContext theContext, final Bundle theBundle) {
-		return new ValidationContext<Bundle>(theContext, theBundle, new IEncoder() {
-			@Override
-			public String encode() {
-				return theContext.newXmlParser().encodeBundleToString(theBundle);
-			}
-
-			@Override
-			public EncodingEnum getEncoding() {
-				return EncodingEnum.XML;
-			}
-		});
-	}
-
 	public static <T extends IBaseResource> IValidationContext<T> forResource(final FhirContext theContext, final T theResource) {
 		return new ValidationContext<T>(theContext, theResource, new IEncoder() {
 			@Override
@@ -93,41 +77,6 @@ public class ValidationContext<T> extends BaseValidationContext<T> implements IV
 				return EncodingEnum.XML;
 			}
 		});
-	}
-
-	public static IValidationContext<IBaseResource> newChild(final IValidationContext<Bundle> theContext, final IResource theResource) {
-		return new IValidationContext<IBaseResource>() {
-
-			@Override
-			public void addValidationMessage(SingleValidationMessage theMessage) {
-				theContext.addValidationMessage(theMessage);
-			}
-
-			@Override
-			public FhirContext getFhirContext() {
-				return theContext.getFhirContext();
-			}
-
-			@Override
-			public IBaseResource getResource() {
-				return theResource;
-			}
-
-			@Override
-			public String getResourceAsString() {
-				return theContext.getFhirContext().newXmlParser().encodeResourceToString(theResource);
-			}
-
-			@Override
-			public EncodingEnum getResourceAsStringEncoding() {
-				return EncodingEnum.XML;
-			}
-
-			@Override
-			public ValidationResult toResult() {
-				return theContext.toResult();
-			}
-		};
 	}
 
 	private interface IEncoder {

@@ -329,10 +329,7 @@ public abstract class RestfulClientFactory implements IRestfulClientFactory {
 		if (StringUtils.isBlank(serverFhirVersionString)) {
 			// we'll be lenient and accept this
 		} else {
-			//FIXME null access on serverFhirVersionString
-			if (serverFhirVersionString.startsWith("0.80") || serverFhirVersionString.startsWith("0.0.8")) {
-				serverFhirVersionEnum = FhirVersionEnum.DSTU1;
-			} else if (serverFhirVersionString.startsWith("0.4")) {
+			if (serverFhirVersionString.startsWith("0.4")) {
 				serverFhirVersionEnum = FhirVersionEnum.DSTU2;
 			} else if (serverFhirVersionString.startsWith("0.5")) {
 				serverFhirVersionEnum = FhirVersionEnum.DSTU2;

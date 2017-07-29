@@ -51,7 +51,6 @@ import ca.uhn.fhir.rest.client.impl.BaseHttpClientInvocation;
  */
 abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvocation {
 
-	private final Bundle myBundle;
 	private final BundleTypeEnum myBundleType;
 	private final String myContents;
 	private boolean myContentsIsBundle;
@@ -65,16 +64,6 @@ abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvoca
 	private final String myUrlPath;
 	private IIdType myForceResourceId;
 
-	public BaseHttpClientInvocationWithContents(FhirContext theContext, Bundle theBundle) {
-		super(theContext);
-		myResource = null;
-		myTagList = null;
-		myUrlPath = null;
-		myResources = null;
-		myBundle = theBundle;
-		myContents = null;
-		myBundleType = null;
-	}
 
 	
 	public BaseHttpClientInvocationWithContents(FhirContext theContext, IBaseResource theResource, Map<String, List<String>> theParams, String... theUrlPath) {
@@ -83,7 +72,6 @@ abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvoca
 		myTagList = null;
 		myUrlPath = StringUtils.join(theUrlPath, '/');
 		myResources = null;
-		myBundle = null;
 		myContents = null;
 		myContentsIsBundle = false;
 		myParams = theParams;
@@ -96,7 +84,6 @@ abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvoca
 		myUrlPath = theUrlPath;
 		myTagList = null;
 		myResources = null;
-		myBundle = null;
 		myContents = null;
 		myBundleType = null;
 	}
@@ -107,7 +94,6 @@ abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvoca
 		myTagList = null;
 		myUrlPath = null;
 		myResources = theResources;
-		myBundle = null;
 		myContents = null;
 		myBundleType = theBundleType;
 	}
@@ -118,7 +104,6 @@ abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvoca
 		myTagList = null;
 		myUrlPath = StringUtils.join(theUrlPath, '/');
 		myResources = null;
-		myBundle = null;
 		myContents = null;
 		myContentsIsBundle = false;
 		myParams = theParams;
@@ -131,7 +116,6 @@ abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvoca
 		myTagList = null;
 		myUrlPath = theUrlPath;
 		myResources = null;
-		myBundle = null;
 		myContents = theContents;
 		myContentsIsBundle = theIsBundle;
 		myBundleType = null;
@@ -143,7 +127,6 @@ abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvoca
 		myTagList = null;
 		myUrlPath = StringUtils.join(theUrlPath, '/');
 		myResources = null;
-		myBundle = null;
 		myContents = theContents;
 		myContentsIsBundle = false;
 		myParams = theParams;
@@ -208,9 +191,7 @@ abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvoca
 	}
 
 	private String getContentType(EncodingEnum encoding) {
-		if (myBundle != null || (getContext().getVersion().getVersion() == FhirVersionEnum.DSTU1 && ((myContents != null && myContentsIsBundle) || myResources != null))) {
-			return encoding.getBundleContentType();
-		} else if (getContext().getVersion().getVersion().isOlderThan(FhirVersionEnum.DSTU3)) {
+		if (getContext().getVersion().getVersion().isOlderThan(FhirVersionEnum.DSTU3)) {
 			// application/xml+fhir
 			return encoding.getResourceContentType();
 		} else {
@@ -242,16 +223,12 @@ abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvoca
 		}
 		
 		parser.setOmitResourceId(myOmitResourceId);
-		if (myTagList != null) {
-			return parser.encodeTagListToString(myTagList);
-		} else if (myBundle != null) {
-			return parser.encodeBundleToString(myBundle);
-		} else if (myResources != null) {
+		if (myResources != null) {
 			IVersionSpecificBundleFactory bundleFactory = getContext().newBundleFactory();
 			bundleFactory.initializeBundleFromResourceList("", myResources, "", "", myResources.size(), myBundleType);
-			Bundle bundle = bundleFactory.getDstu1Bundle();
+			IBaseResource bundle = bundleFactory.getResourceBundle();
 			if (bundle != null) {
-				return parser.encodeBundleToString(bundle);
+				return parser.encodeResourceToString(bundle);
 			}
 			IBaseResource bundleRes = bundleFactory.getResourceBundle();
 			return parser.encodeResourceToString(bundleRes);

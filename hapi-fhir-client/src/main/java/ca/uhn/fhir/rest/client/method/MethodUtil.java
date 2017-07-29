@@ -20,7 +20,6 @@ import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.annotation.*;
 import ca.uhn.fhir.rest.api.*;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
-import ca.uhn.fhir.rest.client.impl.BaseHttpClientInvocation;
 import ca.uhn.fhir.rest.client.method.OperationParameter.IOperationParamConverter;
 import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.param.binder.CollectionBinder;
@@ -65,19 +64,6 @@ public class MethodUtil {
 		// nothing
 	}
 
-	static void addTagsToPostOrPut(FhirContext theContext, IBaseResource resource, BaseHttpClientInvocation retVal) {
-		if (theContext.getVersion().getVersion().equals(FhirVersionEnum.DSTU1)) {
-			TagList list = (TagList) ((IResource) resource).getResourceMetadata().get(ResourceMetadataKeyEnum.TAG_LIST);
-			if (list != null) {
-				for (Tag tag : list) {
-					if (StringUtils.isNotBlank(tag.getTerm())) {
-						retVal.addHeader(Constants.HEADER_CATEGORY, tag.toHeaderValue());
-					}
-				}
-			}
-		}
-	}
-
 	public static HttpGetClientInvocation createConformanceInvocation(FhirContext theContext) {
 		return new HttpGetClientInvocation(theContext, "metadata");
 	}
@@ -94,29 +80,14 @@ public class MethodUtil {
 		StringBuilder urlExtension = new StringBuilder();
 		urlExtension.append(resourceName);
 
-		boolean dstu1 = theContext.getVersion().getVersion().equals(FhirVersionEnum.DSTU1);
-		if (dstu1) {
-			/*
-			 * This was allowable at one point, but as of DSTU2 it isn't.
-			 */
-			if (StringUtils.isNotBlank(theId)) {
-				urlExtension.append('/');
-				urlExtension.append(theId);
-			}
-		}
-
 		HttpPostClientInvocation retVal;
 		if (StringUtils.isBlank(theResourceBody)) {
 			retVal = new HttpPostClientInvocation(theContext, theResource, urlExtension.toString());
 		} else {
 			retVal = new HttpPostClientInvocation(theContext, theResourceBody, false, urlExtension.toString());
 		}
-		addTagsToPostOrPut(theContext, theResource, retVal);
 
-		if (!dstu1) {
-			retVal.setOmitResourceId(true);
-		}
-		// addContentTypeHeaderBasedOnDetectedType(retVal, theResourceBody);
+		retVal.setOmitResourceId(true);
 
 		return retVal;
 	}
@@ -164,8 +135,6 @@ public class MethodUtil {
 			retVal = new HttpPutClientInvocation(theContext, theResourceBody, false, b.toString());
 		}
 
-		addTagsToPostOrPut(theContext, theResource, retVal);
-
 		return retVal;
 	}
 
@@ -196,8 +165,6 @@ public class MethodUtil {
 			retVal = new HttpPutClientInvocation(theContext, theResourceBody, false, theMatchUrl);
 		}
 
-		addTagsToPostOrPut(theContext, theResource, retVal);
-
 		return retVal;
 	}
 
@@ -220,22 +187,8 @@ public class MethodUtil {
 		retVal.setForceResourceId(theId);
 
 		if (theId.hasVersionIdPart()) {
-			if (theContext.getVersion().getVersion().isNewerThan(FhirVersionEnum.DSTU1)) {
-				retVal.addHeader(Constants.HEADER_IF_MATCH, '"' + theId.getVersionIdPart() + '"');
-			} else {
-				String versionId = theId.getVersionIdPart();
-				if (StringUtils.isNotBlank(versionId)) {
-					urlBuilder.append('/');
-					urlBuilder.append(Constants.PARAM_HISTORY);
-					urlBuilder.append('/');
-					urlBuilder.append(versionId);
-					retVal.addHeader(Constants.HEADER_CONTENT_LOCATION, urlBuilder.toString());
-				}
-			}
+			retVal.addHeader(Constants.HEADER_IF_MATCH, '"' + theId.getVersionIdPart() + '"');
 		}
-
-		addTagsToPostOrPut(theContext, theResource, retVal);
-		// addContentTypeHeaderBasedOnDetectedType(retVal, theResourceBody);
 
 		return retVal;
 	}

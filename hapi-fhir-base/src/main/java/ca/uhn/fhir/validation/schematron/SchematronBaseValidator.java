@@ -10,7 +10,7 @@ package ca.uhn.fhir.validation.schematron;
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  * 
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -37,8 +37,6 @@ import com.phloc.schematron.SchematronHelper;
 import com.phloc.schematron.xslt.SchematronResourceSCH;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.api.Bundle;
-import ca.uhn.fhir.model.api.BundleEntry;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.validation.*;
@@ -124,11 +122,13 @@ public class SchematronBaseValidator implements IValidatorModule {
 				return retVal;
 			}
 
-			String pathToBase = myCtx.getVersion().getPathToSchemaDefinitions() + '/' + theCtx.getFhirContext().getResourceDefinition(theCtx.getResource()).getBaseDefinition().getName().toLowerCase() + ".sch";
+			String pathToBase = myCtx.getVersion().getPathToSchemaDefinitions() + '/' + theCtx.getFhirContext().getResourceDefinition(theCtx.getResource()).getBaseDefinition().getName().toLowerCase()
+					+ ".sch";
 			InputStream baseIs = FhirValidator.class.getResourceAsStream(pathToBase);
 			try {
 				if (baseIs == null) {
-					throw new InternalErrorException("Failed to load schematron for resource '" + theCtx.getFhirContext().getResourceDefinition(theCtx.getResource()).getBaseDefinition().getName() + "'. " + SchemaBaseValidator.RESOURCES_JAR_NOTE);
+					throw new InternalErrorException("Failed to load schematron for resource '" + theCtx.getFhirContext().getResourceDefinition(theCtx.getResource()).getBaseDefinition().getName() + "'. "
+							+ SchemaBaseValidator.RESOURCES_JAR_NOTE);
 				}
 			} finally {
 				IOUtils.closeQuietly(baseIs);
@@ -137,16 +137,6 @@ public class SchematronBaseValidator implements IValidatorModule {
 			retVal = SchematronResourceSCH.fromClassPath(pathToBase);
 			myClassToSchematron.put(theClass, retVal);
 			return retVal;
-		}
-	}
-
-	@Override
-	public void validateBundle(IValidationContext<Bundle> theContext) {
-		for (BundleEntry next : theContext.getResource().getEntries()) {
-			if (next.getResource() != null) {
-				IValidationContext<IBaseResource> ctx = ValidationContext.newChild(theContext, next.getResource());
-				validateResource(ctx);
-			}
 		}
 	}
 

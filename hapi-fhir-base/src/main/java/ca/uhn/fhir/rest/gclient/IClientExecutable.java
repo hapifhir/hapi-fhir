@@ -49,6 +49,9 @@ public interface IClientExecutable<T extends IClientExecutable<?,?>, Y> {
 
 	T encodedXml();
 
+	/**
+	 * Actually execute the client operation
+	 */
 	Y execute();
 
 	T prettyPrint();

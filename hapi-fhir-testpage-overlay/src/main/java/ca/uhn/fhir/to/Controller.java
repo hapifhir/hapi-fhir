@@ -440,7 +440,7 @@ public class Controller extends BaseController {
 				return "resource";
 			}
 			int limitInt = Integer.parseInt(limit);
-			query.limitTo(limitInt);
+			query.count(limitInt);
 			clientCodeJsonWriter.name("limit");
 			clientCodeJsonWriter.value(limit);
 		} else {
@@ -465,14 +465,16 @@ public class Controller extends BaseController {
 			}
 		}
 
-		query.returnBundle(client.getFhirContext().getResourceDefinition("Bundle").getImplementingClass());
+		Class<? extends IBaseBundle> bundleType;
+		bundleType = (Class<? extends IBaseBundle>) client.getFhirContext().getResourceDefinition("Bundle").getImplementingClass();
+		IQueryTyped<? extends IBaseBundle> queryTyped = query.returnBundle(bundleType);
 
 		long start = System.currentTimeMillis();
 		ResultType returnsResource;
 		try {
 			ourLog.info(logPrefix(theModel) + "Executing a search");
 
-			query.execute();
+			queryTyped.execute();
 			returnsResource = ResultType.BUNDLE;
 		} catch (Exception e) {
 			returnsResource = handleClientException(client, e, theModel);
@@ -793,7 +795,7 @@ public class Controller extends BaseController {
 		return haveSearchParams;
 	}
 
-	private boolean handleSearchParam(String paramIdxString, HttpServletRequest theReq, IQuery<?> theQuery, JsonWriter theClientCodeJsonWriter) throws IOException {
+	private boolean handleSearchParam(String paramIdxString, HttpServletRequest theReq, IQuery theQuery, JsonWriter theClientCodeJsonWriter) throws IOException {
 		String nextName = theReq.getParameter("param." + paramIdxString + ".name");
 		if (isBlank(nextName)) {
 			return false;

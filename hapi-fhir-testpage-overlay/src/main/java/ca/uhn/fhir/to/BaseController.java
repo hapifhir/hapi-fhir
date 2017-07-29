@@ -1,9 +1,31 @@
 package ca.uhn.fhir.to;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.context.RuntimeResourceDefinition;
-import ca.uhn.fhir.model.api.Bundle;
+import static org.apache.commons.lang3.StringUtils.defaultString;
+
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.util.*;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringEscapeUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.http.Header;
+import org.apache.http.entity.ContentType;
+import org.apache.http.message.BasicHeader;
+import org.hl7.fhir.dstu3.model.*;
+import org.hl7.fhir.dstu3.model.CapabilityStatement.CapabilityStatementRestComponent;
+import org.hl7.fhir.dstu3.model.CapabilityStatement.CapabilityStatementRestResourceComponent;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IDomainResource;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.ui.ModelMap;
+import org.thymeleaf.TemplateEngine;
+
+import ca.uhn.fhir.context.*;
 import ca.uhn.fhir.model.api.ExtensionDt;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.primitive.DecimalDt;
@@ -13,31 +35,6 @@ import ca.uhn.fhir.rest.client.api.*;
 import ca.uhn.fhir.rest.client.impl.GenericClient;
 import ca.uhn.fhir.to.model.HomeRequest;
 import ca.uhn.fhir.util.ExtensionConstants;
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.StringEscapeUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.http.Header;
-import org.apache.http.entity.ContentType;
-import org.apache.http.message.BasicHeader;
-import org.hl7.fhir.dstu3.model.CapabilityStatement;
-import org.hl7.fhir.dstu3.model.CapabilityStatement.CapabilityStatementRestComponent;
-import org.hl7.fhir.dstu3.model.CapabilityStatement.CapabilityStatementRestResourceComponent;
-import org.hl7.fhir.dstu3.model.DecimalType;
-import org.hl7.fhir.dstu3.model.Extension;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IDomainResource;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.ui.ModelMap;
-import org.thymeleaf.TemplateEngine;
-
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
-import java.util.*;
-
-import static org.apache.commons.lang3.StringUtils.defaultString;
 
 public class BaseController {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseController.class);
@@ -537,7 +534,6 @@ public class BaseController {
 			String narrativeString = "";
 
 			StringBuilder resultDescription = new StringBuilder();
-			Bundle bundle = null;
 			IBaseResource riBundle = null;
 
 			FhirContext context = getContext(theRequest);
@@ -551,11 +547,7 @@ public class BaseController {
 						resultDescription.append("JSON resource");
 					} else if (theResultType == ResultType.BUNDLE) {
 						resultDescription.append("JSON bundle");
-						if (context.getVersion().getVersion().isRi()) {
-							riBundle = context.newJsonParser().parseResource(resultBody);
-						} else {
-							bundle = context.newJsonParser().parseBundle(resultBody);
-						}
+						riBundle = context.newJsonParser().parseResource(resultBody);
 					}
 					break;
 				case XML:
@@ -565,11 +557,7 @@ public class BaseController {
 						resultDescription.append("XML resource");
 					} else if (theResultType == ResultType.BUNDLE) {
 						resultDescription.append("XML bundle");
-						if (context.getVersion().getVersion().isRi()) {
-							riBundle = context.newXmlParser().parseResource(resultBody);
-						} else {
-							bundle = context.newXmlParser().parseBundle(resultBody);
-						}
+						riBundle = context.newXmlParser().parseResource(resultBody);
 					}
 					break;
 				}
@@ -583,7 +571,6 @@ public class BaseController {
 			theModelMap.put("outcomeDescription", outcomeDescription);
 			theModelMap.put("resultDescription", resultDescription.toString());
 			theModelMap.put("action", action);
-			theModelMap.put("bundle", bundle);
 			theModelMap.put("riBundle", riBundle);
 			theModelMap.put("resultStatus", resultStatus);
 

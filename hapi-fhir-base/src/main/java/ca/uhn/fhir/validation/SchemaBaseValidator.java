@@ -35,8 +35,8 @@ import org.w3c.dom.ls.LSInput;
 import org.w3c.dom.ls.LSResourceResolver;
 import org.xml.sax.*;
 
-import ca.uhn.fhir.context.*;
-import ca.uhn.fhir.model.api.Bundle;
+import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 
@@ -153,15 +153,6 @@ public class SchemaBaseValidator implements IValidatorModule {
 		Source baseSource = new StreamSource(baseReader, theSystemId);
 		//FIXME resource leak
 		return baseSource;
-	}
-
-	@Override
-	public void validateBundle(IValidationContext<Bundle> theContext) {
-		if (myCtx.getVersion().getVersion().isNewerThan(FhirVersionEnum.DSTU1)) {
-			doValidate(theContext, "fhir-single.xsd");
-		} else {
-			doValidate(theContext, "fhir-atom-single.xsd");
-		}
 	}
 
 	@Override

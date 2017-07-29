@@ -144,8 +144,6 @@ public class FhirContext {
 				throw new IllegalStateException(getLocalizer().getMessage(FhirContext.class, "noStructuresForSpecifiedVersion", theVersion.name()));
 			}
 			myVersion = theVersion.getVersionImplementation();
-		} else if (FhirVersionEnum.DSTU1.isPresentOnClasspath()) {
-			myVersion = FhirVersionEnum.DSTU1.getVersionImplementation();
 		} else if (FhirVersionEnum.DSTU2.isPresentOnClasspath()) {
 			myVersion = FhirVersionEnum.DSTU2.getVersionImplementation();
 		} else if (FhirVersionEnum.DSTU2_HL7ORG.isPresentOnClasspath()) {
@@ -846,13 +844,6 @@ public class FhirContext {
 				}
 			}
 		}
-	}
-
-	/**
-	 * Creates and returns a new FhirContext with version {@link FhirVersionEnum#DSTU1 DSTU1}
-	 */
-	public static FhirContext forDstu1() {
-		return new FhirContext(FhirVersionEnum.DSTU1);
 	}
 
 	/**

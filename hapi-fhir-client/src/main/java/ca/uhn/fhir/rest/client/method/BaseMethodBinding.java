@@ -197,8 +197,6 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 			}
 		} else if (MethodOutcome.class.isAssignableFrom(returnTypeFromMethod)) {
 			// returns a method outcome
-		} else if (Bundle.class.equals(returnTypeFromMethod)) {
-			// returns a bundle
 		} else if (void.class.equals(returnTypeFromMethod)) {
 			// returns a bundle
 		} else if (Collection.class.isAssignableFrom(returnTypeFromMethod)) {
@@ -213,7 +211,7 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 		} else {
 			if (!isResourceInterface(returnTypeFromMethod) && !verifyIsValidResourceReturnType(returnTypeFromMethod)) {
 				throw new ConfigurationException("Method '" + theMethod.getName() + "' from client type " + theMethod.getDeclaringClass().getCanonicalName()
-						+ " returns " + toLogString(returnTypeFromMethod) + " - Must return a resource type (eg Patient, " + Bundle.class.getSimpleName()
+						+ " returns " + toLogString(returnTypeFromMethod) + " - Must return a resource type (eg Patient, Bundle"
 						+ ", etc., see the documentation for more details)");
 			}
 		}
@@ -277,9 +275,6 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 		} else if (history != null) {
 			return new HistoryMethodBinding(theMethod, theContext, theProvider);
 		} else if (validate != null) {
-			if (theContext.getVersion().getVersion() == FhirVersionEnum.DSTU1) {
-				return new ValidateMethodBindingDstu1(theMethod, theContext, theProvider);
-			}
 			return new ValidateMethodBindingDstu2Plus(returnType, returnTypeFromRp, theMethod, theContext, theProvider, validate);
 		} else if (getTags != null) {
 			return new GetTagsMethodBinding(theMethod, theContext, theProvider, getTags);

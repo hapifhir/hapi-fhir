@@ -102,7 +102,7 @@ public class ValueSetGenerator {
 	}
 
 	public void parse() throws FileNotFoundException, IOException {
-		FhirContext ctx = "dstu".equals(myVersion) ? FhirContext.forDstu1() : FhirContext.forDstu2();
+		FhirContext ctx = FhirContext.forDstu2();
 		IParser newXmlParser = ctx.newXmlParser();
 		newXmlParser.setParserErrorHandler(new LenientErrorHandler(false));
 

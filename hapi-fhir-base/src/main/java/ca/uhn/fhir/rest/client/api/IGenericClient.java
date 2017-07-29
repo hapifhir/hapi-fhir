@@ -10,7 +10,7 @@ package ca.uhn.fhir.rest.client.api;
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  * 
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,13 +21,13 @@ package ca.uhn.fhir.rest.client.api;
  */
 
 import java.util.List;
-import java.util.Map;
 
 import org.hl7.fhir.instance.model.api.IBaseConformance;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
-import ca.uhn.fhir.model.api.*;
-import ca.uhn.fhir.model.primitive.*;
+import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.model.primitive.UriDt;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.exceptions.FhirClientConnectionException;
 import ca.uhn.fhir.rest.client.exceptions.FhirClientInappropriateForServerException;
@@ -47,12 +47,12 @@ public interface IGenericClient extends IRestfulClient {
 	 * Fluent method for the "create" operation, which creates a new resource instance on the server
 	 */
 	ICreate create();
-	
+
 	/**
 	 * Implementation of the "type create" method.
 	 * 
 	 * @param theResource
-	 *            The resource to create
+	 *           The resource to create
 	 * @return An outcome
 	 * @deprecated Use {@link #create() fluent method instead}. This method will be removed.
 	 * 
@@ -69,9 +69,9 @@ public interface IGenericClient extends IRestfulClient {
 	 * Implementation of the "delete instance" method.
 	 * 
 	 * @param theType
-	 *            The type of resource to delete
+	 *           The type of resource to delete
 	 * @param theId
-	 *            the ID of the resource to delete
+	 *           the ID of the resource to delete
 	 * @return An outcome
 	 * @deprecated Use {@link #delete()} instead
 	 */
@@ -82,9 +82,9 @@ public interface IGenericClient extends IRestfulClient {
 	 * Implementation of the "delete instance" method.
 	 * 
 	 * @param theType
-	 *            The type of resource to delete
+	 *           The type of resource to delete
 	 * @param theId
-	 *            the ID of the resource to delete
+	 *           the ID of the resource to delete
 	 * @return An outcome
 	 * @deprecated Use {@link #delete()} instead
 	 */
@@ -100,9 +100,9 @@ public interface IGenericClient extends IRestfulClient {
 	 * Force the client to fetch the server's conformance statement and validate that it is appropriate for this client.
 	 * 
 	 * @throws FhirClientConnectionException
-	 *             if the conformance statement cannot be read, or if the client
+	 *            if the conformance statement cannot be read, or if the client
 	 * @throws FhirClientInappropriateForServerException
-	 *             If the conformance statement indicates that the server is inappropriate for this client (e.g. it implements the wrong version of FHIR)
+	 *            If the conformance statement indicates that the server is inappropriate for this client (e.g. it implements the wrong version of FHIR)
 	 */
 	void forceConformanceCheck() throws FhirClientConnectionException;
 
@@ -115,44 +115,6 @@ public interface IGenericClient extends IRestfulClient {
 	 * Implementation of the "history" method
 	 */
 	IHistory history();
-
-	/**
-	 * Implementation of the "history instance" method.
-	 * 
-	 * @param theType
-	 *            The type of resource to return the history for, or <code>null</code> to search for history across all resources
-	 * @param theId
-	 *            The ID of the resource to return the history for, or <code>null</code> to search for all resource instances. Note that if this param is not null, <code>theType</code> must also not
-	 *            be null
-	 * @param theSince
-	 *            If not null, request that the server only return resources updated since this time
-	 * @param theLimit
-	 *            If not null, request that the server return no more than this number of resources. Note that the server may return less even if more are available, but should not return more
-	 *            according to the FHIR specification.
-	 * @return A bundle containing returned resources
-	 * @deprecated As of 0.9, use the fluent {@link #history()} method instead
-	 */
-	@Deprecated
-	<T extends IBaseResource> Bundle history(Class<T> theType, IdDt theId, DateTimeDt theSince, Integer theLimit);
-
-	/**
-	 * Implementation of the "history instance" method.
-	 * 
-	 * @param theType
-	 *            The type of resource to return the history for, or <code>null</code> to search for history across all resources
-	 * @param theId
-	 *            The ID of the resource to return the history for, or <code>null</code> to search for all resource instances. Note that if this param is not null, <code>theType</code> must also not
-	 *            be null
-	 * @param theSince
-	 *            If not null, request that the server only return resources updated since this time
-	 * @param theLimit
-	 *            If not null, request that the server return no more than this number of resources. Note that the server may return less even if more are available, but should not return more
-	 *            according to the FHIR specification.
-	 * @return A bundle containing returned resources
-	 * @deprecated As of 0.9, use the fluent {@link #history()} method instead
-	 */
-	@Deprecated
-	<T extends IBaseResource> Bundle history(Class<T> theType, String theId, DateTimeDt theSince, Integer theLimit);
 
 	/**
 	 * Loads the previous/next bundle of resources from a paged set, using the link specified in the "link type=next" tag within the atom bundle.
@@ -201,9 +163,9 @@ public interface IGenericClient extends IRestfulClient {
 	 * Implementation of the "instance read" method.
 	 * 
 	 * @param theType
-	 *            The type of resource to load
+	 *           The type of resource to load
 	 * @param theId
-	 *            The ID to load
+	 *           The ID to load
 	 * @return The resource
 	 */
 	<T extends IBaseResource> T read(Class<T> theType, String theId);
@@ -212,9 +174,9 @@ public interface IGenericClient extends IRestfulClient {
 	 * Perform the "read" operation (retrieve the latest version of a resource instance by ID) using an absolute URL.
 	 * 
 	 * @param theType
-	 *            The resource type that is being retrieved
+	 *           The resource type that is being retrieved
 	 * @param theUrl
-	 *            The absolute URL, e.g. "http://example.com/fhir/Patient/123"
+	 *           The absolute URL, e.g. "http://example.com/fhir/Patient/123"
 	 * @return The returned resource from the server
 	 */
 	<T extends IBaseResource> T read(Class<T> theType, UriDt theUrl);
@@ -223,7 +185,7 @@ public interface IGenericClient extends IRestfulClient {
 	 * Perform the "read" operation (retrieve the latest version of a resource instance by ID) using an absolute URL.
 	 * 
 	 * @param theUrl
-	 *            The absolute URL, e.g. "http://example.com/fhir/Patient/123"
+	 *           The absolute URL, e.g. "http://example.com/fhir/Patient/123"
 	 * @return The returned resource from the server
 	 */
 	IBaseResource read(UriDt theUrl);
@@ -241,43 +203,21 @@ public interface IGenericClient extends IRestfulClient {
 
 	/**
 	 * Search for resources matching a given set of criteria. Searching is a very powerful
-	 * feature in FHIR with many features for specifying exactly what should be seaerched for 
+	 * feature in FHIR with many features for specifying exactly what should be seaerched for
 	 * and how it should be returned. See the <a href="http://www.hl7.org/fhir/search.html">specification on search</a>
 	 * for more information.
 	 */
 	IUntypedQuery search();
 
 	/**
-	 * Implementation of the "instance search" method.
-	 * 
-	 * @param theType
-	 *            The type of resource to load
-	 * @param theParams
-	 */
-	<T extends IBaseResource> Bundle search(Class<T> theType, Map<String, List<IQueryParameterType>> theParams);
-
-	/**
-	 * Perform the "search" operation using an absolute URL.
-	 * 
-	 * @param theType
-	 *            The primary resource type that is being retrieved
-	 * @param theUrl
-	 *            The absolute URL, e.g. "http://example.com/fhir/Patient/123"
-	 * @return The returned bundle from the server
-	 */
-	<T extends IBaseResource> Bundle search(Class<T> theType, UriDt theUrl);
-
-	Bundle search(UriDt theUrl);
-
-	/**
 	 * If set to <code>true</code>, the client will log all requests and all responses. This is probably not a good production setting since it will result in a lot of extra logging, but it can be
 	 * useful for troubleshooting.
 	 * 
 	 * @param theLogRequestAndResponse
-	 *            Should requests and responses be logged
+	 *           Should requests and responses be logged
 	 * @deprecated Use LoggingInterceptor as a client interceptor registered to your
-	 * client instead, as this provides much more fine-grained control over what is logged. This
-	 * method will be removed at some point (deprecated in HAPI 1.6 - 2016-06-16) 
+	 *             client instead, as this provides much more fine-grained control over what is logged. This
+	 *             method will be removed at some point (deprecated in HAPI 1.6 - 2016-06-16)
 	 */
 	@Deprecated
 	void setLogRequestAndResponse(boolean theLogRequestAndResponse);
@@ -291,7 +231,7 @@ public interface IGenericClient extends IRestfulClient {
 	 * Implementation of the "transaction" method.
 	 * 
 	 * @param theResources
-	 *            The resources to create/update in a single transaction
+	 *           The resources to create/update in a single transaction
 	 * @return A list of resource stubs (<b>these will not be fully populated</b>) containing IDs and other {@link IResource#getResourceMetadata() metadata}
 	 * @deprecated Use {@link #transaction()}
 	 * 
@@ -314,9 +254,9 @@ public interface IGenericClient extends IRestfulClient {
 	 * Implementation of the "instance update" method.
 	 * 
 	 * @param theId
-	 *            The ID to update
+	 *           The ID to update
 	 * @param theResource
-	 *            The new resource body
+	 *           The new resource body
 	 * @return An outcome containing the results and possibly the new version ID
 	 */
 	MethodOutcome update(IdDt theId, IBaseResource theResource);
@@ -325,9 +265,9 @@ public interface IGenericClient extends IRestfulClient {
 	 * Implementation of the "instance update" method.
 	 * 
 	 * @param theId
-	 *            The ID to update
+	 *           The ID to update
 	 * @param theResource
-	 *            The new resource body
+	 *           The new resource body
 	 * @return An outcome containing the results and possibly the new version ID
 	 */
 	MethodOutcome update(String theId, IBaseResource theResource);
@@ -341,7 +281,7 @@ public interface IGenericClient extends IRestfulClient {
 	 * Implementation of the "type validate" method.
 	 * 
 	 * @param theResource
-	 *            The resource to validate
+	 *           The resource to validate
 	 * @return An outcome containing any validation issues
 	 */
 	MethodOutcome validate(IBaseResource theResource);
@@ -354,9 +294,9 @@ public interface IGenericClient extends IRestfulClient {
 	 * </p>
 	 * 
 	 * @param theType
-	 *            The type of resource to load
+	 *           The type of resource to load
 	 * @param theId
-	 *            The ID to load, including the resource ID and the resource version ID. Valid values include "Patient/123/_history/222", or "http://example.com/fhir/Patient/123/_history/222"
+	 *           The ID to load, including the resource ID and the resource version ID. Valid values include "Patient/123/_history/222", or "http://example.com/fhir/Patient/123/_history/222"
 	 * @return The resource
 	 */
 	<T extends IBaseResource> T vread(Class<T> theType, IdDt theId);
@@ -365,11 +305,11 @@ public interface IGenericClient extends IRestfulClient {
 	 * Implementation of the "instance vread" method.
 	 * 
 	 * @param theType
-	 *            The type of resource to load
+	 *           The type of resource to load
 	 * @param theId
-	 *            The ID to load
+	 *           The ID to load
 	 * @param theVersionId
-	 *            The version ID
+	 *           The version ID
 	 * @return The resource
 	 * @deprecated Deprecated in 0.7 - IdDt can contain an ID and a version, so this class doesn't make a lot of sense
 	 */
@@ -380,15 +320,13 @@ public interface IGenericClient extends IRestfulClient {
 	 * Implementation of the "instance vread" method.
 	 * 
 	 * @param theType
-	 *            The type of resource to load
+	 *           The type of resource to load
 	 * @param theId
-	 *            The ID to load
+	 *           The ID to load
 	 * @param theVersionId
-	 *            The version ID
+	 *           The version ID
 	 * @return The resource
 	 */
 	<T extends IBaseResource> T vread(Class<T> theType, String theId, String theVersionId);
 
-
-	
 }

@@ -25,15 +25,12 @@ import java.util.Set;
 
 import org.hl7.fhir.instance.model.api.*;
 
-import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.SummaryEnum;
 
 public interface IRestfulResponse {
 
 	Object streamResponseAsResource(IBaseResource theActualResourceToReturn, boolean thePrettyPrint, Set<SummaryEnum> theSummaryMode, int theStatusCode, String theStatusMessage, boolean theRespondGzip, boolean theAddContentLocation) throws IOException;
-
-	Object streamResponseAsBundle(Bundle bundle, Set<SummaryEnum> summaryMode, boolean respondGzip, boolean requestIsBrowser) throws IOException;
 
 	/**
 	 * This is only used for DSTU1 getTags operations, so it can be removed at some point when we

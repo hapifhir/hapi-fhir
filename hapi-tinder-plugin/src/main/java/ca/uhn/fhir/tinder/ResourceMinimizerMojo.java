@@ -43,8 +43,6 @@ public class ResourceMinimizerMojo extends AbstractMojo {
 
 		if (myCtx != null) {
 			// nothing
-		} else if ("DSTU".equals(fhirVersion)) {
-			myCtx = FhirContext.forDstu1();
 		} else if ("DSTU2".equals(fhirVersion)) {
 			myCtx = FhirContext.forDstu2();
 		} else if ("HL7ORG_DSTU2".equals(fhirVersion)) {

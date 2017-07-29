@@ -137,8 +137,6 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding implem
 		resource.setContent(contents);
 
 		switch (getMethodReturnType()) {
-		case BUNDLE:
-			return Bundle.withSingleResource((IResource) resource);
 		case LIST_OF_RESOURCES:
 			return Collections.singletonList(resource);
 		case RESOURCE:

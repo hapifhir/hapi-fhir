@@ -1,12 +1,13 @@
-package ca.uhn.fhir.rest.method;
+package ca.uhn.fhir.rest.api;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import java.util.List;
 
 import org.junit.AfterClass;
 import org.junit.Test;
 
+import ca.uhn.fhir.rest.api.QualifiedParamList;
 import ca.uhn.fhir.util.TestUtil;
 
 public class QualifiedParamListTest {

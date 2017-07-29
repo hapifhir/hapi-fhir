@@ -306,43 +306,19 @@ public abstract class BaseParser implements IParser {
 
 		return true;
 	}
-	
+
 	private boolean isOverrideResourceIdWithBundleEntryFullUrl() {
 		Boolean overrideResourceIdWithBundleEntryFullUrl = myOverrideResourceIdWithBundleEntryFullUrl;
 		if (overrideResourceIdWithBundleEntryFullUrl != null) {
 			return overrideResourceIdWithBundleEntryFullUrl;
 		}
-		
+
 		return myContext.getParserOptions().isOverrideResourceIdWithBundleEntryFullUrl();
 	}
-
-	protected abstract void doEncodeBundleToWriter(Bundle theBundle, Writer theWriter) throws IOException, DataFormatException;
 
 	protected abstract void doEncodeResourceToWriter(IBaseResource theResource, Writer theWriter) throws IOException, DataFormatException;
 
 	protected abstract <T extends IBaseResource> T doParseResource(Class<T> theResourceType, Reader theReader) throws DataFormatException;
-
-	@Override
-	public String encodeBundleToString(Bundle theBundle) throws DataFormatException {
-		if (theBundle == null) {
-			throw new NullPointerException("Bundle can not be null");
-		}
-		StringWriter stringWriter = new StringWriter();
-		try {
-			encodeBundleToWriter(theBundle, stringWriter);
-		} catch (IOException e) {
-			throw new Error("Encountered IOException during write to string - This should not happen!");
-		}
-
-		return stringWriter.toString();
-	}
-
-	@Override
-	public final void encodeBundleToWriter(Bundle theBundle, Writer theWriter) throws IOException, DataFormatException {
-		Validate.notNull(theBundle, "theBundle must not be null");
-		Validate.notNull(theWriter, "theWriter must not be null");
-		doEncodeBundleToWriter(theBundle, theWriter);
-	}
 
 	@Override
 	public String encodeResourceToString(IBaseResource theResource) throws DataFormatException {
@@ -366,17 +342,6 @@ public abstract class BaseParser implements IParser {
 		}
 
 		doEncodeResourceToWriter(theResource, theWriter);
-	}
-
-	@Override
-	public String encodeTagListToString(TagList theTagList) {
-		Writer stringWriter = new StringWriter();
-		try {
-			encodeTagListToWriter(theTagList, stringWriter);
-		} catch (IOException e) {
-			throw new Error("Encountered IOException during write to string - This should not happen!");
-		}
-		return stringWriter.toString();
 	}
 
 	private void filterCodingsWithNoCodeOrSystem(List<? extends IBaseCoding> tagList) {
@@ -514,27 +479,25 @@ public abstract class BaseParser implements IParser {
 			break;
 		}
 
-		if (myContext.getVersion().getVersion().isNewerThan(FhirVersionEnum.DSTU1)) {
-			RuntimeResourceDefinition nextDef = myContext.getResourceDefinition(theResource);
-			String profile = nextDef.getResourceProfile(myServerBaseUrl);
-			if (isNotBlank(profile)) {
-				for (T next : theProfiles) {
-					if (profile.equals(next.getValue())) {
-						return theProfiles;
-					}
+		RuntimeResourceDefinition nextDef = myContext.getResourceDefinition(theResource);
+		String profile = nextDef.getResourceProfile(myServerBaseUrl);
+		if (isNotBlank(profile)) {
+			for (T next : theProfiles) {
+				if (profile.equals(next.getValue())) {
+					return theProfiles;
 				}
-
-				List<T> newList = new ArrayList<T>();
-				newList.addAll(theProfiles);
-
-				BaseRuntimeElementDefinition<?> idElement = myContext.getElementDefinition("id");
-				@SuppressWarnings("unchecked")
-				T newId = (T) idElement.newInstance();
-				newId.setValue(profile);
-
-				newList.add(newId);
-				return newList;
 			}
+
+			List<T> newList = new ArrayList<T>();
+			newList.addAll(theProfiles);
+
+			BaseRuntimeElementDefinition<?> idElement = myContext.getElementDefinition("id");
+			@SuppressWarnings("unchecked")
+			T newId = (T) idElement.newInstance();
+			newId.setValue(profile);
+
+			newList.add(newId);
+			return newList;
 		}
 
 		return theProfiles;
@@ -565,7 +528,7 @@ public abstract class BaseParser implements IParser {
 	public Boolean getStripVersionsFromReferences() {
 		return myStripVersionsFromReferences;
 	}
-	
+
 	@Override
 	public Boolean getOverrideResourceIdWithBundleEntryFullUrl() {
 		return myOverrideResourceIdWithBundleEntryFullUrl;
@@ -584,20 +547,6 @@ public abstract class BaseParser implements IParser {
 	 */
 	public boolean isSuppressNarratives() {
 		return mySuppressNarratives;
-	}
-
-	@Override
-	public Bundle parseBundle(Reader theReader) {
-		if (myContext.getVersion().getVersion() == FhirVersionEnum.DSTU2_HL7ORG) {
-			throw new IllegalStateException("Can't parse DSTU1 (Atom) bundle in HL7.org DSTU2 mode. Use parseResource(Bundle.class, foo) instead.");
-		}
-		return parseBundle(null, theReader);
-	}
-
-	@Override
-	public Bundle parseBundle(String theXml) throws ConfigurationException, DataFormatException {
-		StringReader reader = new StringReader(theXml);
-		return parseBundle(reader);
 	}
 
 	@Override
@@ -674,10 +623,6 @@ public abstract class BaseParser implements IParser {
 		return parseResource(null, theMessageString);
 	}
 
-	@Override
-	public TagList parseTagList(String theString) {
-		return parseTagList(new StringReader(theString));
-	}
 
 	protected List<? extends IBase> preProcessValues(BaseRuntimeChildDefinition theMetaChildUncast, IBaseResource theResource, List<? extends IBase> theValues,
 			CompositeChildElement theCompositeChildElement) {
@@ -851,7 +796,7 @@ public abstract class BaseParser implements IParser {
 		myStripVersionsFromReferences = theStripVersionsFromReferences;
 		return this;
 	}
-	
+
 	@Override
 	public IParser setOverrideResourceIdWithBundleEntryFullUrl(Boolean theOverrideResourceIdWithBundleEntryFullUrl) {
 		myOverrideResourceIdWithBundleEntryFullUrl = theOverrideResourceIdWithBundleEntryFullUrl;
@@ -927,10 +872,10 @@ public abstract class BaseParser implements IParser {
 		return url;
 	}
 
-  protected String getServerBaseUrl() {
-		return  myServerBaseUrl;
+	protected String getServerBaseUrl() {
+		return myServerBaseUrl;
 	}
-  
+
 	/**
 	 * Used for DSTU2 only
 	 */

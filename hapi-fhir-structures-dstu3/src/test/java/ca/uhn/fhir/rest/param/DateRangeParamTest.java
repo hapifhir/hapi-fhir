@@ -12,7 +12,6 @@ import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
-import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.rest.api.QualifiedParamList;
@@ -114,23 +113,23 @@ public class DateRangeParamTest {
 	public void testRange() {
 		InstantDt start = new InstantDt("2015-09-23T07:43:34.811-04:00");
 		InstantDt end = new InstantDt("2015-09-23T07:43:34.899-04:00");
-		DateParam lowerBound = new DateParam(QuantityCompararatorEnum.GREATERTHAN, start.getValue());
-		DateParam upperBound = new DateParam(QuantityCompararatorEnum.LESSTHAN, end.getValue());
-		assertEquals(QuantityCompararatorEnum.GREATERTHAN, lowerBound.getComparator());
-		assertEquals(QuantityCompararatorEnum.LESSTHAN, upperBound.getComparator());
+		DateParam lowerBound = new DateParam(ParamPrefixEnum.GREATERTHAN, start.getValue());
+		DateParam upperBound = new DateParam(ParamPrefixEnum.LESSTHAN, end.getValue());
+		assertEquals(ParamPrefixEnum.GREATERTHAN, lowerBound.getPrefix());
+		assertEquals(ParamPrefixEnum.LESSTHAN, upperBound.getPrefix());
 
 		/*
 		 * When DateParam (which extends DateTimeDt) gets passed in, make sure we preserve the comparators..
 		 */
 		DateRangeParam param = new DateRangeParam(lowerBound, upperBound);
 		ourLog.info(param.toString());
-		assertEquals(QuantityCompararatorEnum.GREATERTHAN, param.getLowerBound().getComparator());
-		assertEquals(QuantityCompararatorEnum.LESSTHAN, param.getUpperBound().getComparator());
+		assertEquals(ParamPrefixEnum.GREATERTHAN, param.getLowerBound().getPrefix());
+		assertEquals(ParamPrefixEnum.LESSTHAN, param.getUpperBound().getPrefix());
 
 		param = new DateRangeParam(new DateTimeDt(lowerBound.getValue()), new DateTimeDt(upperBound.getValue()));
 		ourLog.info(param.toString());
-		assertEquals(QuantityCompararatorEnum.GREATERTHAN_OR_EQUALS, param.getLowerBound().getComparator());
-		assertEquals(QuantityCompararatorEnum.LESSTHAN_OR_EQUALS, param.getUpperBound().getComparator());
+		assertEquals(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, param.getLowerBound().getPrefix());
+		assertEquals(ParamPrefixEnum.LESSTHAN_OR_EQUALS, param.getUpperBound().getPrefix());
 
 	}
 

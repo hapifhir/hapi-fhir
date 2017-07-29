@@ -76,8 +76,6 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 			} else {
 				myMethodReturnType = MethodReturnTypeEnum.RESOURCE;
 			}
-		} else if (Bundle.class.isAssignableFrom(methodReturnType)) {
-			myMethodReturnType = MethodReturnTypeEnum.BUNDLE;
 		} else if (MethodOutcome.class.isAssignableFrom(methodReturnType)) {
 			myMethodReturnType = MethodReturnTypeEnum.METHOD_OUTCOME;
 		} else {
@@ -95,7 +93,7 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 				}
 			}
 		}
-		
+
 		myPreferTypesList = createPreferTypesList();
 	}
 
@@ -122,25 +120,13 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 		switch (getReturnType()) {
 		case BUNDLE: {
 
-			Bundle dstu1bundle = null;
 			IBaseBundle dstu2bundle = null;
 			List<? extends IBaseResource> listOfResources = null;
-			if (getMethodReturnType() == MethodReturnTypeEnum.BUNDLE || getContext().getVersion().getVersion() == FhirVersionEnum.DSTU1) {
-				if (myResourceType != null) {
-					dstu1bundle = parser.parseBundle(myResourceType, theResponseReader);
-				} else {
-					dstu1bundle = parser.parseBundle(theResponseReader);
-				}
-				listOfResources = dstu1bundle.toListOfResources();
-			} else {
-				Class<? extends IBaseResource> type = getContext().getResourceDefinition("Bundle").getImplementingClass();
-				dstu2bundle = (IBaseBundle) parser.parseResource(type, theResponseReader);
-				listOfResources = BundleUtil.toListOfResources(getContext(), dstu2bundle);
-			}
+			Class<? extends IBaseResource> type = getContext().getResourceDefinition("Bundle").getImplementingClass();
+			dstu2bundle = (IBaseBundle) parser.parseResource(type, theResponseReader);
+			listOfResources = BundleUtil.toListOfResources(getContext(), dstu2bundle);
 
 			switch (getMethodReturnType()) {
-			case BUNDLE:
-				return dstu1bundle;
 			case BUNDLE_RESOURCE:
 				return dstu2bundle;
 			case LIST_OF_RESOURCES:
@@ -155,7 +141,7 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 				}
 				return listOfResources;
 			case RESOURCE:
-				//FIXME null access on dstu1bundle
+				// FIXME null access on dstu1bundle
 				List<IResource> list = dstu1bundle.toListOfResources();
 				if (list.size() == 0) {
 					return null;
@@ -180,8 +166,6 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 			MethodUtil.parseClientRequestResourceHeaders(null, theHeaders, resource);
 
 			switch (getMethodReturnType()) {
-			case BUNDLE:
-				return Bundle.withSingleResource((IResource) resource);
 			case LIST_OF_RESOURCES:
 				return Collections.singletonList(resource);
 			case RESOURCE:
@@ -206,9 +190,9 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 		if (myResourceListCollectionType != null && IBaseResource.class.isAssignableFrom(myResourceListCollectionType)) {
 			preferTypes = new ArrayList<Class<? extends IBaseResource>>(1);
 			preferTypes.add((Class<? extends IBaseResource>) myResourceListCollectionType);
-//		} else if (myResourceType != null) {
-//			preferTypes = new ArrayList<Class<? extends IBaseResource>>(1);
-//			preferTypes.add((Class<? extends IBaseResource>) myResourceListCollectionType);
+			// } else if (myResourceType != null) {
+			// preferTypes = new ArrayList<Class<? extends IBaseResource>>(1);
+			// preferTypes.add((Class<? extends IBaseResource>) myResourceListCollectionType);
 		}
 		return preferTypes;
 	}
@@ -225,26 +209,18 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 	}
 
 	public enum MethodReturnTypeEnum {
-		BUNDLE, BUNDLE_RESOURCE, LIST_OF_RESOURCES, METHOD_OUTCOME, RESOURCE
+		BUNDLE_RESOURCE,
+		LIST_OF_RESOURCES,
+		METHOD_OUTCOME,
+		RESOURCE
 	}
 
 	public static class ResourceOrDstu1Bundle {
 
-		private final Bundle myDstu1Bundle;
 		private final IBaseResource myResource;
-
-		public ResourceOrDstu1Bundle(Bundle theBundle) {
-			myDstu1Bundle = theBundle;
-			myResource = null;
-		}
 
 		public ResourceOrDstu1Bundle(IBaseResource theResource) {
 			myResource = theResource;
-			myDstu1Bundle = null;
-		}
-
-		public Bundle getDstu1Bundle() {
-			return myDstu1Bundle;
 		}
 
 		public IBaseResource getResource() {

@@ -25,11 +25,8 @@ import java.util.Date;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.instance.model.api.*;
 
-import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.rest.api.server.IRestfulResponse;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -82,12 +79,6 @@ public abstract class RestfulResponse<T extends RequestDetails> implements IRest
 	 */
 	public void setRequestDetails(T requestDetails) {
 		this.theRequestDetails = requestDetails;
-	}
-
-	@Override
-	public Object streamResponseAsBundle(Bundle bundle, Set<SummaryEnum> summaryMode, boolean respondGzip, boolean requestIsBrowser)
-					throws IOException {
-		return RestfulServerUtils.streamResponseAsBundle(theRequestDetails.getServer(), bundle, summaryMode, respondGzip, getRequestDetails());
 	}
 
 	@Override
