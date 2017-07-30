@@ -21,17 +21,10 @@ package ca.uhn.fhir.rest.server.method;
  */
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.Reader;
+import java.io.*;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 
 import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.instance.model.api.IAnyResource;
@@ -39,48 +32,15 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.model.api.Bundle;
-import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.model.api.Include;
-import ca.uhn.fhir.model.api.TagList;
+import ca.uhn.fhir.model.api.*;
 import ca.uhn.fhir.model.base.resource.BaseOperationOutcome;
 import ca.uhn.fhir.parser.IParser;
-import ca.uhn.fhir.rest.annotation.AddTags;
-import ca.uhn.fhir.rest.annotation.Create;
-import ca.uhn.fhir.rest.annotation.Delete;
-import ca.uhn.fhir.rest.annotation.DeleteTags;
-import ca.uhn.fhir.rest.annotation.GetPage;
-import ca.uhn.fhir.rest.annotation.GetTags;
-import ca.uhn.fhir.rest.annotation.History;
-import ca.uhn.fhir.rest.annotation.Metadata;
-import ca.uhn.fhir.rest.annotation.Operation;
-import ca.uhn.fhir.rest.annotation.Patch;
-import ca.uhn.fhir.rest.annotation.Read;
-import ca.uhn.fhir.rest.annotation.Search;
-import ca.uhn.fhir.rest.annotation.Transaction;
-import ca.uhn.fhir.rest.annotation.Update;
-import ca.uhn.fhir.rest.annotation.Validate;
-import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.api.EncodingEnum;
-import ca.uhn.fhir.rest.api.MethodOutcome;
-import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
-import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import ca.uhn.fhir.rest.api.server.IRestfulServer;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.annotation.*;
+import ca.uhn.fhir.rest.api.*;
+import ca.uhn.fhir.rest.api.server.*;
 import ca.uhn.fhir.rest.client.exceptions.NonFhirResponseException;
-import ca.uhn.fhir.rest.server.BundleProviders;
-import ca.uhn.fhir.rest.server.IDynamicSearchResourceProvider;
-import ca.uhn.fhir.rest.server.IResourceProvider;
-import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
-import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
-import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
-import ca.uhn.fhir.rest.server.exceptions.UnclassifiedServerFailureException;
-import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import ca.uhn.fhir.rest.server.*;
+import ca.uhn.fhir.rest.server.exceptions.*;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
@@ -379,7 +339,6 @@ public abstract class BaseMethodBinding<T> {
 		Delete delete = theMethod.getAnnotation(Delete.class);
 		History history = theMethod.getAnnotation(History.class);
 		Validate validate = theMethod.getAnnotation(Validate.class);
-		GetTags getTags = theMethod.getAnnotation(GetTags.class);
 		AddTags addTags = theMethod.getAnnotation(AddTags.class);
 		DeleteTags deleteTags = theMethod.getAnnotation(DeleteTags.class);
 		Transaction transaction = theMethod.getAnnotation(Transaction.class);
@@ -388,7 +347,7 @@ public abstract class BaseMethodBinding<T> {
 		Patch patch = theMethod.getAnnotation(Patch.class);
 
 		// ** if you add another annotation above, also add it to the next line:
-		if (!verifyMethodHasZeroOrOneOperationAnnotation(theMethod, read, search, conformance, create, update, delete, history, validate, getTags, addTags, deleteTags, transaction, operation, getPage, patch)) {
+		if (!verifyMethodHasZeroOrOneOperationAnnotation(theMethod, read, search, conformance, create, update, delete, history, validate, addTags, deleteTags, transaction, operation, getPage, patch)) {
 			return null;
 		}
 
@@ -408,17 +367,10 @@ public abstract class BaseMethodBinding<T> {
 		}
 
 		Class<?> returnTypeFromMethod = theMethod.getReturnType();
-		if (getTags != null) {
-			if (!TagList.class.equals(returnTypeFromMethod)) {
-				throw new ConfigurationException("Method '" + theMethod.getName() + "' from type " + theMethod.getDeclaringClass().getCanonicalName() + " is annotated with @"
-						+ GetTags.class.getSimpleName() + " but does not return type " + TagList.class.getName());
-			}
-		} else if (MethodOutcome.class.isAssignableFrom(returnTypeFromMethod)) {
+		if (MethodOutcome.class.isAssignableFrom(returnTypeFromMethod)) {
 			// returns a method outcome
 		} else if (IBundleProvider.class.equals(returnTypeFromMethod)) {
 			// returns a bundle provider
-		} else if (Bundle.class.equals(returnTypeFromMethod)) {
-			// returns a bundle
 		} else if (void.class.equals(returnTypeFromMethod)) {
 			// returns a bundle
 		} else if (Collection.class.isAssignableFrom(returnTypeFromMethod)) {
@@ -433,7 +385,7 @@ public abstract class BaseMethodBinding<T> {
 		} else {
 			if (!isResourceInterface(returnTypeFromMethod) && !verifyIsValidResourceReturnType(returnTypeFromMethod)) {
 				throw new ConfigurationException("Method '" + theMethod.getName() + "' from " + IResourceProvider.class.getSimpleName() + " type " + theMethod.getDeclaringClass().getCanonicalName()
-						+ " returns " + toLogString(returnTypeFromMethod) + " - Must return a resource type (eg Patient, " + Bundle.class.getSimpleName() + ", " + IBundleProvider.class.getSimpleName()
+						+ " returns " + toLogString(returnTypeFromMethod) + " - Must return a resource type (eg Patient, Bundle, " + IBundleProvider.class.getSimpleName()
 						+ ", etc., see the documentation for more details)");
 			}
 		}
@@ -455,8 +407,6 @@ public abstract class BaseMethodBinding<T> {
 			returnTypeFromAnnotation = update.type();
 		} else if (validate != null) {
 			returnTypeFromAnnotation = validate.type();
-		} else if (getTags != null) {
-			returnTypeFromAnnotation = getTags.type();
 		} else if (addTags != null) {
 			returnTypeFromAnnotation = addTags.type();
 		} else if (deleteTags != null) {
@@ -520,8 +470,6 @@ public abstract class BaseMethodBinding<T> {
 			return new HistoryMethodBinding(theMethod, theContext, theProvider);
 		} else if (validate != null) {
 			return new ValidateMethodBindingDstu2Plus(returnType, returnTypeFromRp, theMethod, theContext, theProvider, validate);
-		} else if (getTags != null) {
-			return new GetTagsMethodBinding(theMethod, theContext, theProvider, getTags);
 		} else if (addTags != null) {
 			return new AddTagsMethodBinding(theMethod, theContext, theProvider, addTags);
 		} else if (deleteTags != null) {

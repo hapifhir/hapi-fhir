@@ -138,4 +138,6 @@ public interface IQuery extends IBaseQuery<IQuery> {
 	@Override
 	IQuery and(ICriterion<?> theCriterion);
 
+//	<T extends IBaseBundle> T execute();
+
 }

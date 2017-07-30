@@ -25,7 +25,6 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import java.io.IOException;
 import java.io.Reader;
 import java.util.*;
-import java.util.Map.Entry;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -33,7 +32,8 @@ import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.*;
 
 import ca.uhn.fhir.context.*;
-import ca.uhn.fhir.model.api.*;
+import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.base.resource.BaseConformance;
 import ca.uhn.fhir.model.base.resource.BaseOperationOutcome;
 import ca.uhn.fhir.model.primitive.*;
@@ -217,10 +217,6 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		return theResource.getIdElement().getIdPart();
 	}
 
-	@Override
-	public IGetTags getTags() {
-		return new GetTagsInternal();
-	}
 
 	@Override
 	public IHistory history() {
@@ -228,36 +224,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 	}
 
 
-	private Class<? extends IBaseResource> inferResourceClass(UriDt theUrl) {
-		String urlString = theUrl.getValueAsString();
-		int i = urlString.indexOf('?');
-
-		if (i >= 0) {
-			urlString = urlString.substring(0, i);
-		}
-
-		i = urlString.indexOf("://");
-
-		if (i >= 0) {
-			urlString = urlString.substring(i + 3);
-		}
-
-		String[] pcs = urlString.split("\\/");
-
-		for (i = pcs.length - 1; i >= 0; i--) {
-			String s = pcs[i].trim();
-
-			if (!s.isEmpty()) {
-				RuntimeResourceDefinition def = myContext.getResourceDefinition(s);
-				if (def != null) {
-					return def.getImplementingClass();
-				}
-			}
-		}
-
-		throw new IllegalArgumentException(myContext.getLocalizer().getMessage(I18N_CANNOT_DETEMINE_RESOURCE_TYPE, theUrl.getValueAsString()));
-
-	}
+	
 
 	// @Override
 	// public <T extends IBaseResource> T read(final Class<T> theType, IdDt theId) {
@@ -324,40 +291,6 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		return new SearchInternal();
 	}
 
-	@Override
-	public <T extends IBaseResource> Bundle search(final Class<T> theType, Map<String, List<IQueryParameterType>> theParams) {
-		LinkedHashMap<String, List<String>> params = new LinkedHashMap<String, List<String>>();
-		for (Entry<String, List<IQueryParameterType>> nextEntry : theParams.entrySet()) {
-			ArrayList<String> valueList = new ArrayList<String>();
-			String qualifier = null;
-			for (IQueryParameterType nextValue : nextEntry.getValue()) {
-				valueList.add(nextValue.getValueAsQueryToken(myContext));
-				qualifier = nextValue.getQueryParameterQualifier();
-			}
-			qualifier = StringUtils.defaultString(qualifier);
-			params.put(nextEntry.getKey() + qualifier, valueList);
-		}
-
-		BaseHttpClientInvocation invocation = SearchMethodBinding.createSearchInvocation(myContext, toResourceName(theType), params, null, null, null);
-		if (isKeepResponses()) {
-			myLastRequest = invocation.asHttpRequest(getServerBase(), createExtraParams(), getEncoding(), isPrettyPrint());
-		}
-
-		BundleResponseHandler binding = new BundleResponseHandler(theType);
-		Bundle resp = invokeClient(myContext, binding, invocation, myLogRequestAndResponse);
-		return resp;
-	}
-
-	@Override
-	public <T extends IBaseResource> Bundle search(final Class<T> theType, UriDt theUrl) {
-		BaseHttpClientInvocation invocation = new HttpGetClientInvocation(getFhirContext(), theUrl.getValueAsString());
-		return invokeClient(myContext, new BundleResponseHandler(theType), invocation);
-	}
-
-	@Override
-	public Bundle search(UriDt theUrl) {
-		return search(inferResourceClass(theUrl), theUrl);
-	}
 
 	/**
 	 * For now, this is a part of the internal API of HAPI - Use with caution as this method may change!
@@ -381,18 +314,6 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		return new TransactionInternal();
 	}
 
-	@Deprecated // override deprecated method
-	@Override
-	public List<IBaseResource> transaction(List<IBaseResource> theResources) {
-		BaseHttpClientInvocation invocation = TransactionMethodBinding.createTransactionInvocation(theResources, myContext);
-		if (isKeepResponses()) {
-			myLastRequest = invocation.asHttpRequest(getServerBase(), createExtraParams(), getEncoding(), isPrettyPrint());
-		}
-
-		Bundle resp = invokeClient(myContext, new BundleResponseHandler(null), invocation, myLogRequestAndResponse);
-
-		return new ArrayList<IBaseResource>(resp.toListOfResources());
-	}
 
 	@Override
 	public IPatch patch() {
@@ -680,7 +601,6 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 			addPreferHeader(myPrefer, invocation);
 
-			RuntimeResourceDefinition def = myContext.getResourceDefinition(myResource);
 			OutcomeResponseHandler binding = new OutcomeResponseHandler(myPrefer);
 
 			Map<String, List<String>> params = new HashMap<String, List<String>>();
@@ -877,10 +797,6 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		private Class<? extends IBaseBundle> myBundleType;
 		private String myUrl;
 
-		public GetPageInternal(String theUrl) {
-			myUrl = theUrl;
-		}
-
 		public GetPageInternal(String theUrl, Class<? extends IBaseBundle> theBundleType) {
 			myUrl = theUrl;
 			myBundleType = theBundleType;
@@ -889,11 +805,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		@Override
 		public Object execute() {
 			IClientResponseHandler binding;
-			if (myBundleType == null) {
-				binding = new BundleResponseHandler(null);
-			} else {
-				binding = new ResourceResponseHandler(myBundleType, getPreferResponseTypes());
-			}
+			binding = new ResourceResponseHandler(myBundleType, getPreferResponseTypes());
 			HttpSimpleGetClientInvocation invocation = new HttpSimpleGetClientInvocation(myContext, myUrl);
 
 			Map<String, List<String>> params = null;
@@ -902,71 +814,6 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 	}
 
-	private class GetTagsInternal extends BaseClientExecutable<IGetTags, TagList> implements IGetTags {
-
-		private String myId;
-		private String myResourceName;
-		private String myVersionId;
-
-		@Override
-		public TagList execute() {
-
-			Map<String, List<String>> params = new LinkedHashMap<String, List<String>>();
-			Map<String, List<String>> initial = createExtraParams();
-			if (initial != null) {
-				params.putAll(initial);
-			}
-
-			TagListResponseHandler binding = new TagListResponseHandler();
-			List<String> urlFragments = new ArrayList<String>();
-			if (isNotBlank(myResourceName)) {
-				urlFragments.add(myResourceName);
-				if (isNotBlank(myId)) {
-					urlFragments.add(myId);
-					if (isNotBlank(myVersionId)) {
-						urlFragments.add(Constants.PARAM_HISTORY);
-						urlFragments.add(myVersionId);
-					}
-				}
-			}
-			urlFragments.add(Constants.PARAM_TAGS);
-
-			HttpGetClientInvocation invocation = new HttpGetClientInvocation(myContext, params, urlFragments);
-
-			return invoke(params, binding, invocation);
-
-		}
-
-		@Override
-		public IGetTags forResource(Class<? extends IBaseResource> theClass) {
-			setResourceClass(theClass);
-			return this;
-		}
-
-		@Override
-		public IGetTags forResource(Class<? extends IBaseResource> theClass, String theId) {
-			setResourceClass(theClass);
-			myId = theId;
-			return this;
-		}
-
-		@Override
-		public IGetTags forResource(Class<? extends IBaseResource> theClass, String theId, String theVersionId) {
-			setResourceClass(theClass);
-			myId = theId;
-			myVersionId = theVersionId;
-			return this;
-		}
-
-		private void setResourceClass(Class<? extends IBaseResource> theClass) {
-			if (theClass != null) {
-				myResourceName = myContext.getResourceDefinition(theClass).getName();
-			} else {
-				myResourceName = null;
-			}
-		}
-
-	}
 
 	@SuppressWarnings("rawtypes")
 	private class HistoryInternal extends BaseClientExecutable implements IHistory, IHistoryUntyped, IHistoryTyped {
@@ -980,13 +827,8 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		@SuppressWarnings("unchecked")
 		@Override
 		public IHistoryTyped andReturnBundle(Class theType) {
+			Validate.notNull(theType, "theType must not be null on method andReturnBundle(Class)");
 			myReturnType = theType;
-			return this;
-		}
-
-		@SuppressWarnings("unchecked")
-		@Override
-		public IHistoryTyped andReturnDstu1Bundle() {
 			return this;
 		}
 
@@ -1015,11 +857,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			HttpGetClientInvocation invocation = HistoryMethodBinding.createHistoryInvocation(myContext, resourceName, id, mySince, myCount);
 
 			IClientResponseHandler handler;
-			if (myReturnType != null) {
-				handler = new ResourceResponseHandler(myReturnType, getPreferResponseTypes(myType));
-			} else {
-				handler = new BundleResponseHandler(null);
-			}
+			handler = new ResourceResponseHandler(myReturnType, getPreferResponseTypes(myType));
 
 			return invoke(null, handler, invocation);
 		}
@@ -1075,10 +913,6 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			return new GetPageInternal(myPageUrl, theBundleType);
 		}
 
-		@Override
-		public IGetPageTyped andReturnDstu1Bundle() {
-			return new GetPageInternal(myPageUrl);
-		}
 
 		@Override
 		public IGetPageUntyped byUrl(String thePageUrl) {
@@ -1089,10 +923,6 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			return this;
 		}
 
-		@Override
-		public IGetPageTyped next(Bundle theBundle) {
-			return new GetPageInternal(theBundle.getLinkNext().getValue());
-		}
 
 		@Override
 		public <T extends IBaseBundle> IGetPageTyped<T> next(T theBundle) {
@@ -1127,21 +957,12 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			throw new IllegalArgumentException(myContext.getLocalizer().getMessage(GenericClient.class, "noPagingLinkFoundInBundle", theWantRel));
 		}
 
-		@Override
-		public IGetPageTyped previous(Bundle theBundle) {
-			return new GetPageInternal(theBundle.getLinkPrevious().getValue());
-		}
 
 		@Override
 		public <T extends IBaseBundle> IGetPageTyped<T> previous(T theBundle) {
 			return nextOrPrevious(PREVIOUS, theBundle);
 		}
 
-		@Deprecated // override deprecated method
-		@Override
-		public IGetPageTyped url(String thePageUrl) {
-			return new GetPageInternal(thePageUrl);
-		}
 
 	}
 
@@ -1757,12 +1578,6 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 	private final class ResourceListResponseHandler implements IClientResponseHandler<List<IBaseResource>> {
 
-		private Class<? extends IBaseResource> myType;
-
-		public ResourceListResponseHandler(Class<? extends IBaseResource> theType) {
-			myType = theType;
-		}
-
 		@SuppressWarnings("unchecked")
 		@Override
 		public List<IBaseResource> invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders)
@@ -2141,18 +1956,6 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		}
 	}
 
-	private final class TagListResponseHandler implements IClientResponseHandler<TagList> {
-
-		@Override
-		public TagList invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws BaseServerResponseException {
-			EncodingEnum respType = EncodingEnum.forContentType(theResponseMimeType);
-			if (respType == null) {
-				throw NonFhirResponseException.newInstance(theResponseStatusCode, theResponseMimeType, theResponseReader);
-			}
-			IParser parser = respType.newParser(myContext);
-			return parser.parseTagList(theResponseReader);
-		}
-	}
 
 	private final class TransactionExecutable<T> extends BaseClientExecutable<ITransactionTyped<T>, T> implements ITransactionTyped<T> {
 
@@ -2182,14 +1985,15 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		public T execute() {
 			Map<String, List<String>> params = new HashMap<String, List<String>>();
 			if (myResources != null) {
-				ResourceListResponseHandler binding = new ResourceListResponseHandler(null);
+				ResourceListResponseHandler binding = new ResourceListResponseHandler();
 				BaseHttpClientInvocation invocation = TransactionMethodBinding.createTransactionInvocation(myResources, myContext);
 				return (T) invoke(params, binding, invocation);
 			} else if (myBaseBundle != null) {
 				ResourceResponseHandler binding = new ResourceResponseHandler(myBaseBundle.getClass(), getPreferResponseTypes());
 				BaseHttpClientInvocation invocation = TransactionMethodBinding.createTransactionInvocation(myBaseBundle, myContext);
 				return (T) invoke(params, binding, invocation);
-			} else if (myRawBundle != null) {
+//			} else if (myRawBundle != null) {
+			} else {
 				StringResponseHandler binding = new StringResponseHandler();
 				/*
 				 * If the user has explicitly requested a given encoding, we may need to re-encode the raw string
@@ -2202,10 +2006,6 @@ public class GenericClient extends BaseClient implements IGenericClient {
 				}
 				BaseHttpClientInvocation invocation = TransactionMethodBinding.createTransactionInvocation(myRawBundle, myContext);
 				return (T) invoke(params, binding, invocation);
-			} else {
-				BundleResponseHandler binding = new BundleResponseHandler(null);
-				BaseHttpClientInvocation invocation = TransactionMethodBinding.createTransactionInvocation(myBundle, myContext);
-				return (T) invoke(params, binding, invocation);
 			}
 		}
 
@@ -2213,11 +2013,6 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 	private final class TransactionInternal implements ITransaction {
 
-		@Override
-		public ITransactionTyped<Bundle> withBundle(Bundle theBundle) {
-			Validate.notNull(theBundle, "theBundle must not be null");
-			return new TransactionExecutable<Bundle>(theBundle);
-		}
 
 		@Override
 		public ITransactionTyped<String> withBundle(String theBundle) {
@@ -2420,7 +2215,6 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 			addPreferHeader(myPrefer, invocation);
 
-			RuntimeResourceDefinition def = myContext.getResourceDefinition(myResource);
 			OutcomeResponseHandler binding = new OutcomeResponseHandler(myPrefer);
 
 			Map<String, List<String>> params = new HashMap<String, List<String>>();

@@ -10,7 +10,7 @@ package ca.uhn.fhir.rest.api.server;
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  * 
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -29,25 +29,17 @@ import ca.uhn.fhir.parser.IParser;
 /**
  * @author Peter Van Houte
  *
- * @param <T> A functional class that parses an outcome
+ * @param <T>
+ *           A functional class that parses an outcome
  */
 public abstract class ParseAction<T> {
 
-    protected T theOutcome;
-    
-    protected ParseAction(T outcome) {
-        this.theOutcome = outcome;
-    }
+	protected T theOutcome;
 
-    public abstract void execute(IParser parser, Writer writer) throws IOException;
+	protected ParseAction(T outcome) {
+		this.theOutcome = outcome;
+	}
 
-    public static ParseAction<TagList> create(TagList outcome) {
-        return outcome == null ? null : new ParseAction<TagList>(outcome) {
-            @Override
-            public void execute(IParser theParser, Writer theWriter) throws IOException {
-                theParser.encodeTagListToWriter(this.theOutcome, theWriter);
-            }
-        };
-    }
-    
+	public abstract void execute(IParser parser, Writer writer) throws IOException;
+
 }

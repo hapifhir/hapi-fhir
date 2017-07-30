@@ -19,10 +19,11 @@ import org.junit.*;
 import org.junit.Test;
 import org.springframework.test.util.AopTestUtils;
 
+import com.google.common.base.Charsets;
+
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
 import ca.uhn.fhir.model.api.*;
-import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.dstu2.composite.*;
 import ca.uhn.fhir.model.dstu2.resource.*;
 import ca.uhn.fhir.model.dstu2.resource.Bundle.Entry;
@@ -33,10 +34,10 @@ import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.*;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.gclient.*;
 import ca.uhn.fhir.rest.param.*;
 import ca.uhn.fhir.rest.server.exceptions.*;
-import ca.uhn.fhir.util.TestUtil;
-import ca.uhn.fhir.util.UrlUtil;
+import ca.uhn.fhir.util.*;
 
 public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 
@@ -451,13 +452,23 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		}
 		ourClient.transaction().withResources(resources).prettyPrint().encodedXml().execute();
 
-		Bundle found = ourClient.search().forResource(Organization.class).where(Organization.NAME.matches().value("rpdstu2_testCountParam_01")).count(10).execute();
-		assertEquals(100, found.getTotalResults().getValue().intValue());
-		assertEquals(10, found.getEntries().size());
+		Bundle found = ourClient
+				.search()
+				.forResource(Organization.class)
+				.where(Organization.NAME.matches().value("rpdstu2_testCountParam_01"))
+				.count(10)
+				.execute();
+		assertEquals(100, found.getTotalElement().getValue().intValue());
+		assertEquals(10, found.getEntry().size());
 
-		found = ourClient.search().forResource(Organization.class).where(Organization.NAME.matches().value("rpdstu2_testCountParam_01")).count(999).execute();
-		assertEquals(100, found.getTotalResults().getValue().intValue());
-		assertEquals(50, found.getEntries().size());
+		found = ourClient
+				.search()
+				.forResource(Organization.class)
+				.where(Organization.NAME.matches().value("rpdstu2_testCountParam_01"))
+				.count(999)
+				.execute();
+		assertEquals(100, found.getTotalElement().getValue().intValue());
+		assertEquals(50, found.getEntry().size());
 
 	}
 
@@ -688,18 +699,16 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		location.setPeriod(new PeriodDt().setStartWithSecondsPrecision(new Date()).setEndWithSecondsPrecision(new Date()));
 		IIdType e1id = ourClient.create().resource(e1).execute().getId();
 
-		//@formatter:off
 		Bundle res = ourClient.search()
 			.forResource(Encounter.class)
 			.where(Encounter.IDENTIFIER.exactly().systemAndCode("urn:foo", "testDeepChainingE1"))
 			.include(Encounter.INCLUDE_LOCATION.asRecursive())
 			.include(Location.INCLUDE_PARTOF.asRecursive())
 			.execute();
-		//@formatter:on
 
-		assertEquals(3, res.size());
-		assertEquals(1, res.getResources(Encounter.class).size());
-		assertEquals(e1id.toUnqualifiedVersionless(), res.getResources(Encounter.class).get(0).getId().toUnqualifiedVersionless());
+		assertEquals(3, res.getEntry().size());
+		assertEquals(1, BundleUtil.toListOfResourcesOfType(myFhirCtx, res, Encounter.class).size());
+		assertEquals(e1id.toUnqualifiedVersionless(), BundleUtil.toListOfResourcesOfType(myFhirCtx, res, Encounter.class).get(0).getIdElement().toUnqualifiedVersionless());
 
 	}
 
@@ -889,14 +898,26 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 	public void testDiagnosticOrderResources() throws Exception {
 		IGenericClient client = ourClient;
 
-		int initialSize = client.search().forResource(DiagnosticOrder.class).execute().size();
+		int initialSize = client
+				.search()
+				.forResource(DiagnosticOrder.class)
+				.returnBundle(Bundle.class)
+				.execute()
+				.getEntry()
+				.size();
 
 		DiagnosticOrder res = new DiagnosticOrder();
 		res.addIdentifier().setSystem("urn:foo").setValue("123");
 
 		client.create().resource(res).execute();
 
-		int newSize = client.search().forResource(DiagnosticOrder.class).execute().size();
+		int newSize = client
+				.search()
+				.forResource(DiagnosticOrder.class)
+				.returnBundle(Bundle.class)
+				.execute()
+				.getEntry()
+				.size();
 
 		assertEquals(1, newSize - initialSize);
 
@@ -912,12 +933,24 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 
 		IGenericClient client = ourClient;
 
-		int initialSize = client.search().forResource(DocumentManifest.class).execute().size();
+		int initialSize = client
+				.search()
+				.forResource(DocumentManifest.class)
+				.returnBundle(Bundle.class)
+				.execute()
+				.getEntry()
+				.size();
 
 		String resBody = IOUtils.toString(ResourceProviderDstu2Test.class.getResource("/documentmanifest.json"), StandardCharsets.UTF_8);
 		client.create().resource(resBody).execute();
 
-		int newSize = client.search().forResource(DocumentManifest.class).execute().size();
+		int newSize = client
+				.search()
+				.forResource(DocumentManifest.class)
+				.returnBundle(Bundle.class)
+				.execute()
+				.getEntry()
+				.size();
 
 		assertEquals(1, newSize - initialSize);
 
@@ -930,12 +963,24 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 	public void testDocumentReferenceResources() throws Exception {
 		IGenericClient client = ourClient;
 
-		int initialSize = client.search().forResource(DocumentReference.class).execute().size();
+		int initialSize = client
+				.search()
+				.forResource(DocumentReference.class)
+				.returnBundle(Bundle.class)
+				.execute()
+				.getEntry()
+				.size();
 
-		String resBody = IOUtils.toString(ResourceProviderDstu2Test.class.getResource("/documentreference.json"));
+		String resBody = IOUtils.toString(ResourceProviderDstu2Test.class.getResource("/documentreference.json"), Charsets.UTF_8);
 		client.create().resource(resBody).execute();
 
-		int newSize = client.search().forResource(DocumentReference.class).execute().size();
+		int newSize = client
+				.search()
+				.forResource(DocumentReference.class)
+				.returnBundle(Bundle.class)
+				.execute()
+				.getEntry()
+				.size();
 
 		assertEquals(1, newSize - initialSize);
 
@@ -1307,7 +1352,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 			String output = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			IOUtils.closeQuietly(response.getEntity().getContent());
 			ourLog.info(output);
-			List<IdDt> ids = toIdListUnqualifiedVersionless(myFhirCtx.newXmlParser().parseBundle(output));
+			List<IdDt> ids = toIdListUnqualifiedVersionless(myFhirCtx.newXmlParser().parseResource(Bundle.class, output));
 			ourLog.info(ids.toString());
 			assertThat(ids, containsInAnyOrder(pId, cId));
 		} finally {
@@ -1322,7 +1367,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 			String output = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			IOUtils.closeQuietly(response.getEntity().getContent());
 			ourLog.info(output);
-			List<IdDt> ids = toIdListUnqualifiedVersionless(myFhirCtx.newXmlParser().parseBundle(output));
+			List<IdDt> ids = toIdListUnqualifiedVersionless(myFhirCtx.newXmlParser().parseResource(Bundle.class, output));
 			ourLog.info(ids.toString());
 			assertThat(ids, containsInAnyOrder(pId, cId));
 		} finally {
@@ -1417,12 +1462,24 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 	public void testImagingStudyResources() throws Exception {
 		IGenericClient client = ourClient;
 
-		int initialSize = client.search().forResource(ImagingStudy.class).execute().size();
+		int initialSize = client
+				.search()
+				.forResource(ImagingStudy.class)
+				.returnBundle(Bundle.class)
+				.execute()
+				.getEntry()
+				.size();
 
 		String resBody = IOUtils.toString(ResourceProviderDstu2Test.class.getResource("/imagingstudy.json"), StandardCharsets.UTF_8);
 		client.create().resource(resBody).execute();
 
-		int newSize = client.search().forResource(ImagingStudy.class).execute().size();
+		int newSize = client
+				.search()
+				.forResource(ImagingStudy.class)
+				.returnBundle(Bundle.class)
+				.execute()
+				.getEntry()
+				.size();
 
 		assertEquals(1, newSize - initialSize);
 
@@ -1524,15 +1581,28 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		pat = new Patient();
 		pat.addIdentifier().setSystem("urn:system").setValue("testReadAllInstancesOfType_02");
 		ourClient.create().resource(pat).prettyPrint().encodedXml().execute().getId();
-
 		{
-			Bundle returned = ourClient.search().forResource(Patient.class).encodedXml().execute();
-			assertThat(returned.size(), greaterThan(1));
+			IQuery a = ourClient
+					.search()
+					.forResource(Patient.class);
+			IQueryTyped<Bundle> b = a.returnBundle(Bundle.class);
+			IClientExecutable<?, ?> x = b.encodedXml();
+			x.execute();
+			
+		}
+		{
+			Bundle returned = ourClient
+					.search()
+					.forResource(Patient.class)
+					.returnBundle(Bundle.class)
+					.encodedXml()
+					.execute();
+			assertThat(returned.getEntry().size(), greaterThan(1));
 			assertEquals(BundleTypeEnum.SEARCHSET, returned.getType().getValueAsEnum());
 		}
 		{
 			Bundle returned = ourClient.search().forResource(Patient.class).encodedJson().execute();
-			assertThat(returned.size(), greaterThan(1));
+			assertThat(returned.getEntry().size(), greaterThan(1));
 		}
 	}
 
@@ -1579,7 +1649,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		assertThat(actual.getText().getDiv().getValueAsString(), containsString("<td>Identifier</td><td>testSaveAndRetrieveWithContained01</td>"));
 
 		Bundle b = ourClient.search().forResource("Patient").where(Patient.IDENTIFIER.exactly().systemAndCode("urn:system:rpdstu2", "testSaveAndRetrieveWithContained01")).prettyPrint().execute();
-		assertEquals(1, b.size());
+		assertEquals(1, b.getEntry().size());
 
 	}
 
@@ -1646,8 +1716,8 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 
 		Bundle actual = ourClient.search().forResource(Patient.class).where(Patient.IDENTIFIER.exactly().systemAndCode(null, "testSearchByIdentifierWithoutSystem01")).encodedJson().prettyPrint()
 				.execute();
-		assertEquals(1, actual.size());
-		assertEquals(p1Id.getIdPart(), actual.getEntries().get(0).getResource().getId().getIdPart());
+		assertEquals(1, actual.getEntry().size());
+		assertEquals(p1Id.getIdPart(), actual.getEntry().get(0).getResource().getId().getIdPart());
 
 	}
 
@@ -1697,8 +1767,8 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 				.where(Patient.ORGANIZATION.hasId(o1id.getIdPart()))
 				.encodedJson().prettyPrint().execute();
 		//@formatter:on
-		assertEquals(1, actual.size());
-		assertEquals(p1Id.getIdPart(), actual.getEntries().get(0).getResource().getId().getIdPart());
+		assertEquals(1, actual.getEntry().size());
+		assertEquals(p1Id.getIdPart(), actual.getEntry().get(0).getResource().getId().getIdPart());
 
 		//@formatter:off
 		actual = ourClient.search()
@@ -1706,8 +1776,8 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 				.where(Patient.ORGANIZATION.hasId(o1id.getValue()))
 				.encodedJson().prettyPrint().execute();
 		//@formatter:on
-		assertEquals(1, actual.size());
-		assertEquals(p1Id.getIdPart(), actual.getEntries().get(0).getResource().getId().getIdPart());
+		assertEquals(1, actual.getEntry().size());
+		assertEquals(p1Id.getIdPart(), actual.getEntry().get(0).getResource().getId().getIdPart());
 
 	}
 
@@ -1742,7 +1812,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		expectedIds.add(p1Id.getIdPart());
 		expectedIds.add(p2Id.getIdPart());
 		Set<String> actualIds = new HashSet<String>();
-		for (BundleEntry ele : actual.getEntries()) {
+		for (BundleEntry ele : actual.getEntry()) {
 			actualIds.add(ele.getResource().getId().getIdPart());
 		}
 		assertEquals("Expects to retrieve the 2 patients which reference the two different organizations", expectedIds, actualIds);
@@ -1765,7 +1835,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 				.withProfile("http://profileX")
 				.encodedJson().prettyPrint().execute();
 		//@formatter:on
-		assertEquals("nothing matches profile x", Collections.emptyList(), actual.getEntries());
+		assertEquals("nothing matches profile x", Collections.emptyList(), actual.getEntry());
 		//@formatter:off
 		actual = ourClient.search()
 				.forResource(Organization.class)
@@ -1776,7 +1846,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		Set<String> expectedIds = new HashSet<String>();
 		expectedIds.add(o1id.getIdPart());
 		Set<String> actualIds = new HashSet<String>();
-		for (BundleEntry ele : actual.getEntries()) {
+		for (BundleEntry ele : actual.getEntry()) {
 			actualIds.add(ele.getResource().getId().getIdPart());
 		}
 		assertEquals("Expects to retrieve the 1 orgination matching on Org1's profiles", expectedIds, actualIds);
@@ -1791,7 +1861,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		expectedIds.add(o1id.getIdPart());
 		expectedIds.add(o2id.getIdPart());
 		actualIds = new HashSet<String>();
-		for (BundleEntry ele : actual.getEntries()) {
+		for (BundleEntry ele : actual.getEntry()) {
 			actualIds.add(ele.getResource().getId().getIdPart());
 		}
 		assertEquals("Expects to retrieve the 2 orginations, since we match on (the common profile AND (Org1's second profile OR org2's second profile))", expectedIds, actualIds);
@@ -1958,14 +2028,14 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 				.execute();
 		//@formatter:on
 
-		assertEquals(2, found.size());
-		assertEquals(Patient.class, found.getEntries().get(0).getResource().getClass());
-		assertEquals(BundleEntrySearchModeEnum.MATCH, found.getEntries().get(0).getSearchMode().getValueAsEnum());
-		assertEquals(BundleEntrySearchModeEnum.MATCH, found.getEntries().get(0).getResource().getResourceMetadata().get(ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE));
-		assertThat(found.getEntries().get(0).getResource().getText().getDiv().getValueAsString(), containsString("<table class=\"hapiPropertyTable"));
-		assertEquals(Organization.class, found.getEntries().get(1).getResource().getClass());
-		assertEquals(BundleEntrySearchModeEnum.INCLUDE, found.getEntries().get(1).getSearchMode().getValueAsEnum());
-		assertEquals(BundleEntrySearchModeEnum.INCLUDE, found.getEntries().get(1).getResource().getResourceMetadata().get(ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE));
+		assertEquals(2, found.getEntry().size());
+		assertEquals(Patient.class, found.getEntry().get(0).getResource().getClass());
+		assertEquals(BundleEntrySearchModeEnum.MATCH, found.getEntry().get(0).getSearchMode().getValueAsEnum());
+		assertEquals(BundleEntrySearchModeEnum.MATCH, found.getEntry().get(0).getResource().getResourceMetadata().get(ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE));
+		assertThat(found.getEntry().get(0).getResource().getText().getDiv().getValueAsString(), containsString("<table class=\"hapiPropertyTable"));
+		assertEquals(Organization.class, found.getEntry().get(1).getResource().getClass());
+		assertEquals(BundleEntrySearchModeEnum.INCLUDE, found.getEntry().get(1).getSearchMode().getValueAsEnum());
+		assertEquals(BundleEntrySearchModeEnum.INCLUDE, found.getEntry().get(1).getResource().getResourceMetadata().get(ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE));
 	}
 
 	@Test(expected = InvalidRequestException.class)
@@ -2405,8 +2475,8 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		assertThat(p1Id.getValue(), containsString("Patient/testUpdateWithClientSuppliedIdWhichDoesntExistRpDstu2/_history"));
 
 		Bundle actual = ourClient.search().forResource(Patient.class).where(Patient.IDENTIFIER.exactly().systemAndCode("urn:system", "testUpdateWithClientSuppliedIdWhichDoesntExistRpDstu2")).encodedJson().prettyPrint().execute();
-		assertEquals(1, actual.size());
-		assertEquals(p1Id.getIdPart(), actual.getEntries().get(0).getResource().getId().getIdPart());
+		assertEquals(1, actual.getEntry().size());
+		assertEquals(p1Id.getIdPart(), actual.getEntry().get(0).getResource().getId().getIdPart());
 
 	}
 

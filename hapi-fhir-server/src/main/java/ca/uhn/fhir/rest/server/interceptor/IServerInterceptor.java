@@ -21,9 +21,7 @@ package ca.uhn.fhir.rest.server.interceptor;
  */
 
 import java.io.IOException;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -33,12 +31,9 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.base.resource.BaseOperationOutcome;
-import ca.uhn.fhir.rest.annotation.Read;
-import ca.uhn.fhir.rest.annotation.ResourceParam;
-import ca.uhn.fhir.rest.annotation.Search;
+import ca.uhn.fhir.rest.annotation.*;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.IRestfulServerDefaults;
@@ -178,48 +173,6 @@ public interface IServerInterceptor {
 	 *            attempt. If thrown, processing will stop and an HTTP 401 will be returned to the client.
 	 */
 	boolean outgoingResponse(RequestDetails theRequestDetails);
-
-	/**
-	 * This method is called after the server implementation method has been called, but before any attempt to stream the
-	 * response back to the client
-	 * 
-	 * @param theRequestDetails
-	 *           A bean containing details about the request that is about to be processed, including
-	 * @param theResponseObject
-	 *           The actual object which is being streamed to the client as a response
-	 * @return Return <code>true</code> if processing should continue normally. This is generally the right thing to do.
-	 *         If your interceptor is providing a response rather than letting HAPI handle the response normally, you
-	 *         must return <code>false</code>. In this case, no further processing will occur and no further interceptors
-	 *         will be called.
-	 * @throws AuthenticationException
-	 *            This exception may be thrown to indicate that the interceptor has detected an unauthorized access
-	 *            attempt. If thrown, processing will stop and an HTTP 401 will be returned to the client.
-	 */
-	boolean outgoingResponse(RequestDetails theRequest, Bundle theResponseObject);
-
-	/**
-	 * This method is called after the server implementation method has been called, but before any attempt to stream the
-	 * response back to the client
-	 * 
-	 * @param theRequestDetails
-	 *           A bean containing details about the request that is about to be processed, including
-	 * @param theResponseObject
-	 *           The actual object which is being streamed to the client as a response
-	 * @param theServletRequest
-	 *           The incoming request
-	 * @param theServletResponse
-	 *           The response. Note that interceptors may choose to provide a response (i.e. by calling
-	 *           {@link HttpServletResponse#getWriter()}) but in that case it is important to return <code>false</code>
-	 *           to indicate that the server itself should not also provide a response.
-	 * @return Return <code>true</code> if processing should continue normally. This is generally the right thing to do.
-	 *         If your interceptor is providing a response rather than letting HAPI handle the response normally, you
-	 *         must return <code>false</code>. In this case, no further processing will occur and no further interceptors
-	 *         will be called.
-	 * @throws AuthenticationException
-	 *            This exception may be thrown to indicate that the interceptor has detected an unauthorized access
-	 *            attempt. If thrown, processing will stop and an HTTP 401 will be returned to the client.
-	 */
-	boolean outgoingResponse(RequestDetails theRequestDetails, Bundle theResponseObject, HttpServletRequest theServletRequest, HttpServletResponse theServletResponse) throws AuthenticationException;
 
 	/**
 	 * This method is called after the server implementation method has been called, but before any attempt to stream the
@@ -366,9 +319,10 @@ public interface IServerInterceptor {
 	 * This method is called after all processing is completed for a request, but only if the
 	 * request completes normally (i.e. no exception is thrown).
 	 * <p>
-	 * Note that this individual interceptors will have this method called in the reverse order from the order in 
-	 * which the interceptors were registered with the server. 
+	 * Note that this individual interceptors will have this method called in the reverse order from the order in
+	 * which the interceptors were registered with the server.
 	 * </p>
+	 * 
 	 * @param theRequestDetails
 	 *           The request itself
 	 */

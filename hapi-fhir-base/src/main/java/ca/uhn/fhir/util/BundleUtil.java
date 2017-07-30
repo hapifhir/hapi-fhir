@@ -26,15 +26,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IBaseBundle;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.instance.model.api.*;
 
-import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
-import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.context.*;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 
 /**
@@ -143,6 +137,13 @@ public class BundleUtil {
 	 * Extract all of the resources from a given bundle
 	 */
 	public static List<IBaseResource> toListOfResources(FhirContext theContext, IBaseBundle theBundle) {
+		return toListOfResourcesOfType(theContext, theBundle, null);
+	}
+
+	/**
+	 * Extract all of the resources of a given type from a given bundle 
+	 */
+	public static List<IBaseResource> toListOfResourcesOfType(FhirContext theContext, IBaseBundle theBundle, Class<? extends IBaseResource> theTypeToInclude) {
 		List<IBaseResource> retVal = new ArrayList<IBaseResource>();
 
 		RuntimeResourceDefinition def = theContext.getResourceDefinition(theBundle);
@@ -153,6 +154,9 @@ public class BundleUtil {
 		BaseRuntimeChildDefinition resourceChild = entryChildElem.getChildByName("resource");
 		for (IBase nextEntry : entries) {
 			for (IBase next : resourceChild.getAccessor().getValues(nextEntry)) {
+				if (theTypeToInclude != null && !theTypeToInclude.isAssignableFrom(next.getClass())) {
+					continue;
+				}
 				retVal.add((IBaseResource) next);
 			}
 		}

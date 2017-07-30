@@ -29,7 +29,6 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.base.resource.BaseOperationOutcome;
@@ -39,9 +38,7 @@ import ca.uhn.fhir.rest.annotation.Transaction;
 import ca.uhn.fhir.rest.annotation.TransactionParam;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
-import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import ca.uhn.fhir.rest.api.server.IRestfulServer;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.*;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
@@ -122,11 +119,7 @@ public class TransactionMethodBinding extends BaseResourceReturningMethodBinding
 
 		// Grab the IDs of all of the resources in the transaction
 		List<IResource> resources;
-		if (theMethodParams[myTransactionParamIndex] instanceof Bundle) {
-			resources = ((Bundle) theMethodParams[myTransactionParamIndex]).toListOfResources();
-		} else {
-			resources = (List<IResource>) theMethodParams[myTransactionParamIndex];
-		}
+		resources = (List<IResource>) theMethodParams[myTransactionParamIndex];
 
 		IdentityHashMap<IResource, IdDt> oldIds = new IdentityHashMap<IResource, IdDt>();
 		for (IResource next : resources) {

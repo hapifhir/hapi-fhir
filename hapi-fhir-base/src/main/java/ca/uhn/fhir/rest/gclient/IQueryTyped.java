@@ -1,11 +1,7 @@
 package ca.uhn.fhir.rest.gclient;
 
-public interface IQueryTyped<T> extends IQuery, IClientExecutable<IClientExecutable<?,?>, T> {
+import org.hl7.fhir.instance.model.api.IBaseBundle;
 
-	/**
-	 * Actually execute the client operation
-	 */
-	@Override
-	T execute();
+public interface IQueryTyped<T extends IBaseBundle> extends IQuery, IClientExecutable<IClientExecutable<?,?>, T> {
 
 }

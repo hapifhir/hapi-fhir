@@ -28,7 +28,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
-import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -67,18 +66,6 @@ public class InterceptorAdapter implements IServerInterceptor {
 	public boolean outgoingResponse(RequestDetails theRequestDetails) {
 		ServletRequestDetails details = (ServletRequestDetails) theRequestDetails;
 		return outgoingResponse(theRequestDetails, details.getServletRequest(), details.getServletResponse());
-	}
-
-	@Override
-	public boolean outgoingResponse(RequestDetails theRequestDetails, Bundle bundle) {
-		ServletRequestDetails details = (ServletRequestDetails) theRequestDetails;
-		return outgoingResponse(details, bundle, details.getServletRequest(), details.getServletResponse());
-	}
-
-	@Override
-	public boolean outgoingResponse(RequestDetails theRequestDetails, Bundle theResponseObject, HttpServletRequest theServletRequest, HttpServletResponse theServletResponse)
-			throws AuthenticationException {
-		return true;
 	}
 
 	@Override

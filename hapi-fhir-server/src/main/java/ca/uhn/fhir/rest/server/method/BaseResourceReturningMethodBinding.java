@@ -32,7 +32,8 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.api.*;
+import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.base.resource.BaseOperationOutcome;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.rest.api.*;
@@ -91,8 +92,6 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 			} else {
 				myMethodReturnType = MethodReturnTypeEnum.RESOURCE;
 			}
-		} else if (Bundle.class.isAssignableFrom(methodReturnType)) {
-			myMethodReturnType = MethodReturnTypeEnum.BUNDLE;
 		} else if (IBundleProvider.class.isAssignableFrom(methodReturnType)) {
 			myMethodReturnType = MethodReturnTypeEnum.BUNDLE_PROVIDER;
 		} else if (MethodOutcome.class.isAssignableFrom(methodReturnType)) {

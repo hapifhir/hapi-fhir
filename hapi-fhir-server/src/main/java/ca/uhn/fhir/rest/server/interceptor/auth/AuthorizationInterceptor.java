@@ -22,9 +22,7 @@ package ca.uhn.fhir.rest.server.interceptor.auth;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -32,19 +30,15 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
-import org.hl7.fhir.instance.model.api.IBaseBundle;
-import org.hl7.fhir.instance.model.api.IBaseParameters;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.instance.model.api.*;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
 import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
-import ca.uhn.fhir.rest.server.interceptor.*;
+import ca.uhn.fhir.rest.server.interceptor.ServerOperationInterceptorAdapter;
 import ca.uhn.fhir.util.CoverageIgnore;
 
 /**
@@ -245,19 +239,6 @@ public class AuthorizationInterceptor extends ServerOperationInterceptorAdapter 
 	}
 
 	@Override
-	@CoverageIgnore
-	public boolean outgoingResponse(RequestDetails theRequestDetails, Bundle theBundle) {
-		throw failForDstu1();
-	}
-
-	@Override
-	@CoverageIgnore
-	public boolean outgoingResponse(RequestDetails theRequestDetails, Bundle theResponseObject, HttpServletRequest theServletRequest, HttpServletResponse theServletResponse)
-			throws AuthenticationException {
-		throw failForDstu1();
-	}
-
-	@Override
 	public boolean outgoingResponse(RequestDetails theRequestDetails, IBaseResource theResponseObject) {
 		switch (determineOperationDirection(theRequestDetails.getRestOperationType(), null)) {
 		case IN:
@@ -365,7 +346,10 @@ public class AuthorizationInterceptor extends ServerOperationInterceptorAdapter 
 	}
 
 	private enum OperationExamineDirection {
-		BOTH, IN, NONE, OUT,
+		BOTH,
+		IN,
+		NONE,
+		OUT,
 	}
 
 	public static class Verdict {

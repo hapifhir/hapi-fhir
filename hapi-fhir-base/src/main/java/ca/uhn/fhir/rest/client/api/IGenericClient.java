@@ -22,7 +22,6 @@ package ca.uhn.fhir.rest.client.api;
 
 import java.util.List;
 
-import org.hl7.fhir.instance.model.api.IBaseConformance;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.model.api.IResource;
@@ -35,61 +34,21 @@ import ca.uhn.fhir.rest.gclient.*;
 
 public interface IGenericClient extends IRestfulClient {
 
-	/**
-	 * Retrieves and returns the server conformance statement
-	 * 
-	 * @deprecated Use {@link #fetchConformance()} instead
-	 */
-	@Deprecated
-	IBaseConformance conformance();
 
 	/**
 	 * Fluent method for the "create" operation, which creates a new resource instance on the server
 	 */
 	ICreate create();
 
-	/**
-	 * Implementation of the "type create" method.
-	 * 
-	 * @param theResource
-	 *           The resource to create
-	 * @return An outcome
-	 * @deprecated Use {@link #create() fluent method instead}. This method will be removed.
-	 * 
-	 */
-	@Deprecated
-	MethodOutcome create(IBaseResource theResource);
 
 	/**
 	 * Fluent method for the "delete" operation, which performs a logical delete on a server resource
 	 */
 	IDelete delete();
 
-	/**
-	 * Implementation of the "delete instance" method.
-	 * 
-	 * @param theType
-	 *           The type of resource to delete
-	 * @param theId
-	 *           the ID of the resource to delete
-	 * @return An outcome
-	 * @deprecated Use {@link #delete()} instead
-	 */
-	@Deprecated
-	MethodOutcome delete(Class<? extends IBaseResource> theType, IdDt theId);
+	
 
-	/**
-	 * Implementation of the "delete instance" method.
-	 * 
-	 * @param theType
-	 *           The type of resource to delete
-	 * @param theId
-	 *           the ID of the resource to delete
-	 * @return An outcome
-	 * @deprecated Use {@link #delete()} instead
-	 */
-	@Deprecated
-	MethodOutcome delete(Class<? extends IBaseResource> theType, String theId);
+	
 
 	/**
 	 * Retrieves the server's conformance statement
@@ -107,19 +66,12 @@ public interface IGenericClient extends IRestfulClient {
 	void forceConformanceCheck() throws FhirClientConnectionException;
 
 	/**
-	 * Fluent method for the "get tags" operation
-	 */
-	IGetTags getTags();
-
-	/**
 	 * Implementation of the "history" method
 	 */
 	IHistory history();
 
 	/**
 	 * Loads the previous/next bundle of resources from a paged set, using the link specified in the "link type=next" tag within the atom bundle.
-	 * 
-	 * @see Bundle#getLinkNext()
 	 */
 	IGetPage loadPage();
 
