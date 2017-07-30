@@ -41,7 +41,6 @@ import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 public class ReadMethodBinding extends BaseResourceReturningMethodBinding implements IClientResponseHandlerHandlesBinary<Object> {
 	private Integer myIdIndex;
 	private boolean mySupportsVersion;
-	private Integer myVersionIdIndex;
 	private Class<? extends IIdType> myIdParameterType;
 
 	@SuppressWarnings("unchecked")
@@ -51,13 +50,11 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding implem
 		Validate.notNull(theMethod, "Method must not be null");
 
 		Integer idIndex = ParameterUtil.findIdParameterIndex(theMethod, getContext());
-		Integer versionIdIndex = ParameterUtil.findVersionIdParameterIndex(theMethod);
 
 		Class<?>[] parameterTypes = theMethod.getParameterTypes();
 
 		mySupportsVersion = theMethod.getAnnotation(Read.class).version();
 		myIdIndex = idIndex;
-		myVersionIdIndex = versionIdIndex;
 
 		if (myIdIndex == null) {
 			throw new ConfigurationException("@" + Read.class.getSimpleName() + " method " + theMethod.getName() + " on type \"" + theMethod.getDeclaringClass().getName()
@@ -67,9 +64,6 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding implem
 
 		if (!IIdType.class.isAssignableFrom(myIdParameterType)) {
 			throw new ConfigurationException("ID parameter must be of type IdDt or IdType - Found: " + myIdParameterType);
-		}
-		if (myVersionIdIndex != null && !IdDt.class.equals(parameterTypes[myVersionIdIndex])) {
-			throw new ConfigurationException("Version ID parameter must be of type: " + IdDt.class.getCanonicalName() + " - Found: " + parameterTypes[myVersionIdIndex]);
 		}
 
 	}
@@ -96,18 +90,11 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding implem
 	public HttpGetClientInvocation invokeClient(Object[] theArgs) {
 		HttpGetClientInvocation retVal;
 		IIdType id = ((IIdType) theArgs[myIdIndex]);
-		if (myVersionIdIndex == null) {
-			String resourceName = getResourceName();
-			if (id.hasVersionIdPart()) {
-				retVal = createVReadInvocation(getContext(), new IdDt(resourceName, id.getIdPart(), id.getVersionIdPart()), resourceName);
-			} else {
-				retVal = createReadInvocation(getContext(), id, resourceName);
-			}
+		String resourceName = getResourceName();
+		if (id.hasVersionIdPart()) {
+			retVal = createVReadInvocation(getContext(), new IdDt(resourceName, id.getIdPart(), id.getVersionIdPart()), resourceName);
 		} else {
-			IdDt vid = ((IdDt) theArgs[myVersionIdIndex]);
-			String resourceName = getResourceName();
-
-			retVal = createVReadInvocation(getContext(), new IdDt(resourceName, id.getIdPart(), vid.getVersionIdPart()), resourceName);
+			retVal = createReadInvocation(getContext(), id, resourceName);
 		}
 
 		for (int idx = 0; idx < theArgs.length; idx++) {
@@ -146,7 +133,7 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding implem
 	}
 
 	public boolean isVread() {
-		return mySupportsVersion || myVersionIdIndex != null;
+		return mySupportsVersion;
 	}
 
 	public static HttpGetClientInvocation createAbsoluteReadInvocation(FhirContext theContext, IIdType theId) {

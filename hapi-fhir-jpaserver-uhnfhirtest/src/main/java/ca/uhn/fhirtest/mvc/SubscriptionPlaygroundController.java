@@ -19,6 +19,7 @@ import ca.uhn.fhir.to.model.HomeRequest;
 public class SubscriptionPlaygroundController extends BaseController {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SubscriptionPlaygroundController.class);
 
+	@SuppressWarnings("unchecked")
 	@RequestMapping(value = { "/subscriptions" })
 	public String subscriptionsHome(final HttpServletRequest theServletRequest, HomeRequest theRequest, final ModelMap theModel) {
 		addCommonParams(theServletRequest, theRequest, theModel);
@@ -31,8 +32,7 @@ public class SubscriptionPlaygroundController extends BaseController {
 		CaptureInterceptor interceptor = new CaptureInterceptor();
 		GenericClient client = theRequest.newClient(theServletRequest, getContext(theRequest), myConfig, interceptor);
 
-		//@formatter:off
-		Bundle resp = client
+		Bundle resp = (Bundle) client
 			.search()
 			.forResource(Subscription.class)
 //			.where(Subscription.TYPE.exactly().code(SubscriptionChannelTypeEnum.WEBSOCKET.getCode()))
@@ -41,7 +41,6 @@ public class SubscriptionPlaygroundController extends BaseController {
 			.sort().ascending(Subscription.STATUS)
 			.returnBundle(Bundle.class)
 			.execute();
-		//@formatter:off
 		
 		List<Subscription> subscriptions = new ArrayList<Subscription>();
 		for (Entry next : resp.getEntry()) {

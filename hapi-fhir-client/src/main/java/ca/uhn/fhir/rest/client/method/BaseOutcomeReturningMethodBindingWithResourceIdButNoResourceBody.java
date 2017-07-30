@@ -51,12 +51,6 @@ public abstract class BaseOutcomeReturningMethodBindingWithResourceIdButNoResour
 			throw new ConfigurationException("Method '" + theMethod.getName() + "' on type '" + theMethod.getDeclaringClass().getCanonicalName() + "' has no parameter annotated with the @" + IdParam.class.getSimpleName() + " annotation");
 		}
 
-		Integer versionIdParameterIndex = ParameterUtil.findVersionIdParameterIndex(theMethod);
-		if (versionIdParameterIndex != null) {
-			//TODO Use of a deprecated method should be resolved
-			throw new ConfigurationException("Method '" + theMethod.getName() + "' on type '" + theMethod.getDeclaringClass().getCanonicalName() + "' has a parameter annotated with the @" + VersionIdParam.class.getSimpleName() + " annotation but delete methods may not have this annotation");
-		}
-
 	}
 
 	@Override

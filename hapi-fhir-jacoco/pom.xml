@@ -23,12 +23,27 @@
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-server</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-client</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-structures-dstu2</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-structures-dstu3</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-structures-r4</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
@@ -265,9 +280,11 @@
 										<include>hapi-fhir-structures-dstu2/target/jacoco.exec</include>
 										<include>hapi-fhir-structures-hl7org-dstu2/target/jacoco.exec</include>
 										<include>hapi-fhir-structures-dstu3/target/jacoco.exec</include>
+										<include>hapi-fhir-structures-r4/target/jacoco.exec</include>
 										<include>hapi-fhir-jpaserver-base/target/jacoco.exec</include>
 										<include>hapi-fhir-client-okhttp/target/jacoco.exec</include>
 										<include>hapi-fhir-android/target/jacoco.exec</include>
+										<include>hapi-fhir-validation/target/jacoco.exec</include>
 									</includes>
 								</fileSet>
 							</fileSets>
@@ -290,6 +307,7 @@
 						<sourceDirectory>../hapi-fhir-structures-dstu2/src/test/java</sourceDirectory>
 						<sourceDirectory>../hapi-fhir-structures-hl7org-dstu2/src/test/java</sourceDirectory>
 						<sourceDirectory>../hapi-fhir-structures-dstu3/src/test/java</sourceDirectory>
+						<sourceDirectory>../hapi-fhir-structures-r4/src/test/java</sourceDirectory>
 						<sourceDirectory>../hapi-fhir-jpaserver-base/src/main/java</sourceDirectory>
 						<sourceDirectory>../hapi-fhir-client-okhttp/src/main/java</sourceDirectory>
 					</sourceDirectories>
@@ -359,22 +377,6 @@
 	</build>
 	<reporting>
 		<plugins>
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>cobertura-maven-plugin</artifactId>
-				<reportSets>
-					<reportSet>
-						<reports>
-							<report>cobertura</report>
-						</reports>
-						<configuration>
-							<check>
-								<haltOnFailure>true</haltOnFailure>
-							</check>
-						</configuration>
-					</reportSet>
-				</reportSets>
-			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-project-info-reports-plugin</artifactId>

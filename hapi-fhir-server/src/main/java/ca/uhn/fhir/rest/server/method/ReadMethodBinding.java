@@ -3,15 +3,11 @@ package ca.uhn.fhir.rest.server.method;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
-import org.hl7.fhir.instance.model.api.IAnyResource;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.instance.model.api.*;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
@@ -20,20 +16,12 @@ import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
-import ca.uhn.fhir.rest.annotation.Elements;
-import ca.uhn.fhir.rest.annotation.IdParam;
-import ca.uhn.fhir.rest.annotation.Read;
-import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.api.RequestTypeEnum;
-import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
-import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import ca.uhn.fhir.rest.api.server.IRestfulServer;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.annotation.*;
+import ca.uhn.fhir.rest.api.*;
+import ca.uhn.fhir.rest.api.server.*;
 import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.server.ETagSupportEnum;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.rest.server.exceptions.NotModifiedException;
+import ca.uhn.fhir.rest.server.exceptions.*;
 import ca.uhn.fhir.util.DateUtils;
 
 public class ReadMethodBinding extends BaseResourceReturningMethodBinding {
@@ -41,7 +29,6 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding {
 
 	private Integer myIdIndex;
 	private boolean mySupportsVersion;
-	private Integer myVersionIdIndex;
 	private Class<? extends IIdType> myIdParameterType;
 
 	@SuppressWarnings("unchecked")
@@ -51,13 +38,11 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding {
 		Validate.notNull(theMethod, "Method must not be null");
 
 		Integer idIndex = ParameterUtil.findIdParameterIndex(theMethod, getContext());
-		Integer versionIdIndex = ParameterUtil.findVersionIdParameterIndex(theMethod);
 
 		Class<?>[] parameterTypes = theMethod.getParameterTypes();
 
 		mySupportsVersion = theMethod.getAnnotation(Read.class).version();
 		myIdIndex = idIndex;
-		myVersionIdIndex = versionIdIndex;
 
 		if (myIdIndex == null) {
 			throw new ConfigurationException("@" + Read.class.getSimpleName() + " method " + theMethod.getName() + " on type \"" + theMethod.getDeclaringClass().getName() + "\" does not have a parameter annotated with @" + IdParam.class.getSimpleName());
@@ -66,9 +51,6 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding {
 
 		if (!IIdType.class.isAssignableFrom(myIdParameterType)) {
 			throw new ConfigurationException("ID parameter must be of type IdDt or IdType - Found: " + myIdParameterType);
-		}
-		if (myVersionIdIndex != null && !IdDt.class.equals(parameterTypes[myVersionIdIndex])) {
-			throw new ConfigurationException("Version ID parameter must be of type: " + IdDt.class.getCanonicalName() + " - Found: " + parameterTypes[myVersionIdIndex]);
 		}
 
 	}
@@ -125,7 +107,7 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding {
 			return false;
 		}
 		if (Constants.PARAM_HISTORY.equals(theRequest.getOperation())) {
-			if (mySupportsVersion == false && myVersionIdIndex == null) {
+			if (mySupportsVersion == false) {
 				return false;
 			}
 			if (theRequest.getId().hasVersionIdPart() == false) {
@@ -141,9 +123,6 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding {
 	@Override
 	public IBundleProvider invokeServer(IRestfulServer<?> theServer, RequestDetails theRequest, Object[] theMethodParams) throws InvalidRequestException, InternalErrorException {
 		theMethodParams[myIdIndex] = ParameterUtil.convertIdToType(theRequest.getId(), myIdParameterType);
-		if (myVersionIdIndex != null) {
-			theMethodParams[myVersionIdIndex] = new IdDt(theRequest.getId().getVersionIdPart());
-		}
 
 		Object response = invokeServerMethod(theServer, theRequest, theMethodParams);
 		IBundleProvider retVal = toResourceList(response);
@@ -193,13 +172,8 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding {
 		return retVal;
 	}
 
-//	@Override
-//	public boolean isBinary() {
-//		return "Binary".equals(getResourceName());
-//	}
-
 	public boolean isVread() {
-		return mySupportsVersion || myVersionIdIndex != null;
+		return mySupportsVersion;
 	}
 
 	@Override

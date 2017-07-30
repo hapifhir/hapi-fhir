@@ -149,7 +149,7 @@ public class MethodUtil {
 							throw new ConfigurationException(b.toString());
 						}
 						param = new ResourceParameter((Class<? extends IBaseResource>) parameterType, theProvider, mode);
-					} else if (nextAnnotation instanceof IdParam || nextAnnotation instanceof VersionIdParam) {
+					} else if (nextAnnotation instanceof IdParam) {
 						param = new NullParameter();
 					} else if (nextAnnotation instanceof ServerBase) {
 						param = new ServerBaseParamBinder();

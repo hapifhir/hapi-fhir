@@ -7,7 +7,7 @@ import javax.sql.DataSource;
 
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.apache.commons.lang3.time.DateUtils;
-import org.hibernate.dialect.PostgreSQL94Dialect;
+import org.hibernate.dialect.PostgreSQL95Dialect;
 import org.hibernate.jpa.HibernatePersistenceProvider;
 import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.beans.factory.annotation.Value;
@@ -17,7 +17,7 @@ import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
-import ca.uhn.fhir.jpa.config.BaseJavaConfigDstu3;
+import ca.uhn.fhir.jpa.config.BaseJavaConfigR4;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
@@ -28,18 +28,18 @@ import ca.uhn.fhirtest.interceptor.PublicSecurityInterceptor;
 @Configuration
 @Import(CommonConfig.class)
 @EnableTransactionManagement()
-public class TestDstu3Config extends BaseJavaConfigDstu3 {
+public class TestR4Config extends BaseJavaConfigR4 {
 	public static final String FHIR_DB_USERNAME = "${fhir.db.username}";
 	public  static final String FHIR_DB_PASSWORD = "${fhir.db.password}";
-	public static final String FHIR_LUCENE_LOCATION_DSTU3 = "${fhir.lucene.location.dstu3}";
+	public static final String FHIR_LUCENE_LOCATION_R4 = "${fhir.lucene.location.r4}";
 
-	@Value(TestDstu3Config.FHIR_DB_USERNAME)
+	@Value(TestR4Config.FHIR_DB_USERNAME)
 	private String myDbUsername;
 
-	@Value(TestDstu3Config.FHIR_DB_PASSWORD)
+	@Value(TestR4Config.FHIR_DB_PASSWORD)
 	private String myDbPassword;
 
-	@Value(FHIR_LUCENE_LOCATION_DSTU3)
+	@Value(FHIR_LUCENE_LOCATION_R4)
 	private String myFhirLuceneLocation;
 
 	@Bean()
@@ -51,8 +51,8 @@ public class TestDstu3Config extends BaseJavaConfigDstu3 {
 		retVal.setAllowMultipleDelete(true);
 		retVal.setAllowInlineMatchUrlReferences(true);
 		retVal.setAllowExternalReferences(true);
-		retVal.getTreatBaseUrlsAsLocal().add("http://fhirtest.uhn.ca/baseDstu3");
-		retVal.getTreatBaseUrlsAsLocal().add("https://fhirtest.uhn.ca/baseDstu3");
+		retVal.getTreatBaseUrlsAsLocal().add("http://fhirtest.uhn.ca/baseR4");
+		retVal.getTreatBaseUrlsAsLocal().add("https://fhirtest.uhn.ca/baseR4");
 		return retVal;
 	}
 
@@ -71,11 +71,11 @@ public class TestDstu3Config extends BaseJavaConfigDstu3 {
 		return new PublicSecurityInterceptor();
 	}
 
-	@Bean(name = "myPersistenceDataSourceDstu3", destroyMethod = "close")
+	@Bean(name = "myPersistenceDataSourceR4", destroyMethod = "close")
 	public DataSource dataSource() {
 		BasicDataSource retVal = new BasicDataSource();
 		retVal.setDriver(new org.postgresql.Driver());
-		retVal.setUrl("jdbc:postgresql://localhost/fhirtest_dstu3");
+		retVal.setUrl("jdbc:postgresql://localhost/fhirtest_r4");
 		retVal.setUsername(myDbUsername);
 		retVal.setPassword(myDbPassword);
 		return retVal;
@@ -84,7 +84,7 @@ public class TestDstu3Config extends BaseJavaConfigDstu3 {
 	@Bean()
 	public LocalContainerEntityManagerFactoryBean entityManagerFactory() {
 		LocalContainerEntityManagerFactoryBean retVal = new LocalContainerEntityManagerFactoryBean();
-		retVal.setPersistenceUnitName("PU_HapiFhirJpaDstu3");
+		retVal.setPersistenceUnitName("PU_HapiFhirJpaR4");
 		retVal.setDataSource(dataSource());
 		retVal.setPackagesToScan("ca.uhn.fhir.jpa.entity");
 		retVal.setPersistenceProvider(new HibernatePersistenceProvider());
@@ -94,7 +94,7 @@ public class TestDstu3Config extends BaseJavaConfigDstu3 {
 
 	private Properties jpaProperties() {
 		Properties extraProperties = new Properties();
-		extraProperties.put("hibernate.dialect", PostgreSQL94Dialect.class.getName());
+		extraProperties.put("hibernate.dialect", PostgreSQL95Dialect.class.getName());
 		extraProperties.put("hibernate.format_sql", "false");
 		extraProperties.put("hibernate.show_sql", "false");
 		extraProperties.put("hibernate.hbm2ddl.auto", "update");
@@ -119,16 +119,12 @@ public class TestDstu3Config extends BaseJavaConfigDstu3 {
 		requestValidator.setFailOnSeverity(null);
 		requestValidator.setAddResponseHeaderOnSeverity(null);
 		requestValidator.setAddResponseOutcomeHeaderOnSeverity(ResultSeverityEnum.INFORMATION);
-		requestValidator.addValidatorModule(instanceValidatorDstu3());
+		requestValidator.addValidatorModule(instanceValidatorR4());
 		requestValidator.setIgnoreValidatorExceptions(true);
 
 		return requestValidator;
 	}
 
-//	@Bean(autowire = Autowire.BY_TYPE)
-//	public IServerInterceptor subscriptionSecurityInterceptor() {
-//		return new SubscriptionsRequireManualActivationInterceptorDstu3();
-//	}
 
 	@Bean()
 	public JpaTransactionManager transactionManager(EntityManagerFactory entityManagerFactory) {

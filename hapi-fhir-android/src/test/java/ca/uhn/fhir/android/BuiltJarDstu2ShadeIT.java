@@ -61,11 +61,12 @@ public class BuiltJarDstu2ShadeIT {
 	 * Disabled for now - TODO: add the old version of the apache client (the one that
 	 * android uses) and see if this passes
 	 */
+	@Test
 	public void testClient() {
 		FhirContext ctx = FhirContext.forDstu2();
 		try {
 			IGenericClient client = ctx.newRestfulGenericClient("http://127.0.0.1:44442/SomeBase");
-			client.capabilities().ofType(Conformance.class).execute()
+			client.capabilities().ofType(Conformance.class).execute();
 		} catch (FhirClientConnectionException e) {
 			// this is good
 		}

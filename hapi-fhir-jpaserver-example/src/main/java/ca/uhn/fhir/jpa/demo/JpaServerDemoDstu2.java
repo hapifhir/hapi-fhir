@@ -56,9 +56,7 @@ public class JpaServerDemoDstu2 extends RestfulServer {
 		 * contains bean definitions for a resource provider for each resource type
 		 */
 		String resourceProviderBeanName;
-		if (fhirVersion == FhirVersionEnum.DSTU1) {
-			resourceProviderBeanName = "myResourceProvidersDstu1";
-		} else if (fhirVersion == FhirVersionEnum.DSTU2) {
+		if (fhirVersion == FhirVersionEnum.DSTU2) {
 			resourceProviderBeanName = "myResourceProvidersDstu2";
 		} else if (fhirVersion == FhirVersionEnum.DSTU3) {
 			resourceProviderBeanName = "myResourceProvidersDstu3";

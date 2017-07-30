@@ -19,7 +19,6 @@ abstract class BaseAddOrDeleteTagsMethodBinding extends BaseMethodBinding<Void> 
 
 	private Class<? extends IBaseResource> myType;
 	private Integer myIdParamIndex;
-	private Integer myVersionIdParamIndex;
 	private String myResourceName;
 	private Integer myTagListParamIndex;
 
@@ -40,7 +39,6 @@ abstract class BaseAddOrDeleteTagsMethodBinding extends BaseMethodBinding<Void> 
 		myResourceName = theContext.getResourceDefinition(myType).getName();
 
 		myIdParamIndex = ParameterUtil.findIdParameterIndex(theMethod, getContext());
-		myVersionIdParamIndex = ParameterUtil.findVersionIdParameterIndex(theMethod);
 		myTagListParamIndex = ParameterUtil.findTagListParameterIndex(theMethod);
 
 		if (myIdParamIndex == null) {

@@ -212,10 +212,6 @@ public class ParameterUtil {
 		return findParamAnnotationIndex(theMethod, TagListParam.class);
 	}
 
-	public static Integer findVersionIdParameterIndex(Method theMethod) {
-		return findParamAnnotationIndex(theMethod, VersionIdParam.class);
-	}
-
 	public static Object fromInteger(Class<?> theType, IntegerDt theArgument) {
 		if (theType.equals(IntegerDt.class)) {
 			if (theArgument == null) {

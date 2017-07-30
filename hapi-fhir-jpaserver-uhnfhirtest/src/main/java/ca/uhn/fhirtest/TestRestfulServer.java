@@ -15,11 +15,13 @@ import org.springframework.web.cors.CorsConfiguration;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.config.WebsocketDstu2DispatcherConfig;
 import ca.uhn.fhir.jpa.config.dstu3.WebsocketDstu3DispatcherConfig;
+import ca.uhn.fhir.jpa.config.r4.WebsocketR4DispatcherConfig;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.provider.JpaConformanceProviderDstu2;
 import ca.uhn.fhir.jpa.provider.JpaSystemProviderDstu2;
 import ca.uhn.fhir.jpa.provider.dstu3.*;
+import ca.uhn.fhir.jpa.provider.r4.TerminologyUploaderProviderR4;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
 import ca.uhn.fhir.rest.api.EncodingEnum;
@@ -29,7 +31,7 @@ import ca.uhn.fhirtest.config.*;
 
 public class TestRestfulServer extends RestfulServer {
 
-	public static final String FHIR_BASEURL_DSTU1 = "fhir.baseurl.dstu1";
+	public static final String FHIR_BASEURL_R4 = "fhir.baseurl.r4";
 	public static final String FHIR_BASEURL_DSTU2 = "fhir.baseurl.dstu2";
 	public static final String FHIR_BASEURL_DSTU3 = "fhir.baseurl.dstu3";
 	public static final String FHIR_BASEURL_TDL2 = "fhir.baseurl.tdl2";
@@ -112,6 +114,24 @@ public class TestRestfulServer extends RestfulServer {
 			confProvider.setImplementationDescription(implDesc);
 			setServerConformanceProvider(confProvider);
 			plainProviders.add(myAppCtx.getBean(TerminologyUploaderProviderDstu3.class));
+			break;
+		}
+		case "R4": {
+			myAppCtx = new AnnotationConfigWebApplicationContext();
+			myAppCtx.setServletConfig(getServletConfig());
+			myAppCtx.setParent(parentAppCtx);
+			myAppCtx.register(TestR4Config.class, WebsocketR4DispatcherConfig.class);
+			baseUrlProperty = FHIR_BASEURL_R4;
+			myAppCtx.refresh();
+			setFhirContext(FhirContext.forR4());
+			beans = myAppCtx.getBean("myResourceProvidersR4", List.class);
+			plainProviders.add(myAppCtx.getBean("mySystemProviderR4", JpaSystemProviderDstu3.class));
+			systemDao = myAppCtx.getBean("mySystemDaoR4", IFhirSystemDao.class);
+			etagSupport = ETagSupportEnum.ENABLED;
+			JpaConformanceProviderDstu3 confProvider = new JpaConformanceProviderDstu3(this, systemDao, myAppCtx.getBean(DaoConfig.class));
+			confProvider.setImplementationDescription(implDesc);
+			setServerConformanceProvider(confProvider);
+			plainProviders.add(myAppCtx.getBean(TerminologyUploaderProviderR4.class));
 			break;
 		}
 		default:
