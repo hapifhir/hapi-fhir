@@ -13,7 +13,8 @@ import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.entity.ResourceTable;
 import ca.uhn.fhir.jpa.util.DeleteConflict;
-import ca.uhn.fhir.model.api.*;
+import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.base.composite.BaseResourceReferenceDt;
 import ca.uhn.fhir.model.dstu2.resource.OperationOutcome;
 import ca.uhn.fhir.model.dstu2.valueset.IssueSeverityEnum;
@@ -22,7 +23,6 @@ import ca.uhn.fhir.rest.api.*;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.*;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
-import ca.uhn.fhir.util.CoverageIgnore;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.validation.*;
 
@@ -36,7 +36,7 @@ import ca.uhn.fhir.validation.*;
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  * 
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -55,7 +55,7 @@ public class FhirResourceDaoDstu2<T extends IResource> extends BaseHapiFhirResou
 	@Autowired()
 	@Qualifier("myInstanceValidatorDstu2")
 	private IValidatorModule myInstanceValidator;
-	
+
 	@Override
 	protected List<Object> getIncludeValues(FhirTerser theTerser, Include theInclude, IBaseResource theResource, RuntimeResourceDefinition theResourceDef) {
 		List<Object> values;
@@ -100,7 +100,7 @@ public class FhirResourceDaoDstu2<T extends IResource> extends BaseHapiFhirResou
 			List<DeleteConflict> deleteConflicts = new ArrayList<DeleteConflict>();
 			validateOkToDelete(deleteConflicts, entity);
 			validateDeleteConflictsEmptyOrThrowException(deleteConflicts);
-				
+
 			OperationOutcome oo = new OperationOutcome();
 			oo.addIssue().setSeverity(IssueSeverityEnum.INFORMATION).setDiagnostics("Ok to delete");
 			return new MethodOutcome(new IdDt(theId.getValue()), oo);
@@ -153,12 +153,6 @@ public class FhirResourceDaoDstu2<T extends IResource> extends BaseHapiFhirResou
 				}
 			}
 
-		}
-
-		@CoverageIgnore
-		@Override
-		public void validateBundle(IValidationContext<Bundle> theContext) {
-			throw new UnsupportedOperationException();
 		}
 
 	}

@@ -5,7 +5,6 @@ import java.util.List;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.utilities.validation.ValidationMessage;
 
-import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.validation.*;
 
 /**
@@ -38,11 +37,6 @@ abstract class BaseValidatorBridge implements IValidatorModule {
 	}
 
 	protected abstract List<ValidationMessage> validate(IValidationContext<?> theCtx);
-
-	@Override
-	public void validateBundle(IValidationContext<Bundle> theCtx) {
-		doValidate(theCtx);
-	}
 
 	@Override
 	public void validateResource(IValidationContext<IBaseResource> theCtx) {

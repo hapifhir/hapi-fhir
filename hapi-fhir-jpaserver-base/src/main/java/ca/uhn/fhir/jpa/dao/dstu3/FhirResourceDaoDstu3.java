@@ -10,7 +10,7 @@ package ca.uhn.fhir.jpa.dao.dstu3;
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  * 
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -33,19 +33,18 @@ import org.hl7.fhir.instance.model.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
-import ca.uhn.fhir.context.*;
+import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.entity.ResourceTable;
 import ca.uhn.fhir.jpa.util.DeleteConflict;
-import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.base.composite.BaseResourceReferenceDt;
 import ca.uhn.fhir.rest.api.*;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.*;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
-import ca.uhn.fhir.util.CoverageIgnore;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.validation.*;
 
@@ -56,9 +55,6 @@ public class FhirResourceDaoDstu3<T extends IAnyResource> extends BaseHapiFhirRe
 	@Autowired()
 	@Qualifier("myInstanceValidatorDstu3")
 	private IValidatorModule myInstanceValidator;
-
-	@Autowired
-	private FhirContext fhirContext;
 
 	@Override
 	protected IBaseOperationOutcome createOperationOutcome(String theSeverity, String theMessage, String theCode) {
@@ -127,7 +123,7 @@ public class FhirResourceDaoDstu3<T extends IAnyResource> extends BaseHapiFhirRe
 			IFhirResourceDao<? extends IBaseResource> dao = getDao(type);
 			resourceToValidateById = dao.read(theId, theRequestDetails);
 		}
-		
+
 		ValidationResult result;
 		if (theResource == null) {
 			if (resourceToValidateById != null) {
@@ -158,12 +154,6 @@ public class FhirResourceDaoDstu3<T extends IAnyResource> extends BaseHapiFhirRe
 
 		public IdChecker(ValidationModeEnum theMode) {
 			myMode = theMode;
-		}
-
-		@CoverageIgnore
-		@Override
-		public void validateBundle(IValidationContext<Bundle> theContext) {
-			throw new UnsupportedOperationException();
 		}
 
 		@Override

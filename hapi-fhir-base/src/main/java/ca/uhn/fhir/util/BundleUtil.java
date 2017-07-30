@@ -143,8 +143,9 @@ public class BundleUtil {
 	/**
 	 * Extract all of the resources of a given type from a given bundle 
 	 */
-	public static List<IBaseResource> toListOfResourcesOfType(FhirContext theContext, IBaseBundle theBundle, Class<? extends IBaseResource> theTypeToInclude) {
-		List<IBaseResource> retVal = new ArrayList<IBaseResource>();
+	@SuppressWarnings("unchecked")
+	public static <T extends IBaseResource> List<T> toListOfResourcesOfType(FhirContext theContext, IBaseBundle theBundle, Class<T> theTypeToInclude) {
+		List<T> retVal = new ArrayList<T>();
 
 		RuntimeResourceDefinition def = theContext.getResourceDefinition(theBundle);
 		BaseRuntimeChildDefinition entryChild = def.getChildByName("entry");
@@ -157,7 +158,7 @@ public class BundleUtil {
 				if (theTypeToInclude != null && !theTypeToInclude.isAssignableFrom(next.getClass())) {
 					continue;
 				}
-				retVal.add((IBaseResource) next);
+				retVal.add((T) next);
 			}
 		}
 

@@ -36,7 +36,6 @@ import com.google.common.collect.Sets;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.*;
-import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.base.composite.BaseCodingDt;
 import ca.uhn.fhir.model.dstu2.composite.*;
 import ca.uhn.fhir.model.dstu2.resource.*;
@@ -74,7 +73,7 @@ public class JsonParserDstu2Test {
 			ourCtx = FhirContext.forDstu2();
 		}
 	}
-	
+
 	@Test
 	public void testOverrideResourceIdWithBundleEntryFullUrlDisabled_ConfiguredOnParser() {
 		try {
@@ -94,30 +93,30 @@ public class JsonParserDstu2Test {
 			ourCtx = FhirContext.forDstu2();
 		}
 	}
-	
+
 	/**
 	 * See #544
 	 */
 	@Test
 	public void testBundleStitchReferencesByUuid() throws Exception {
 		ca.uhn.fhir.model.dstu2.resource.Bundle bundle = new ca.uhn.fhir.model.dstu2.resource.Bundle();
-		
+
 		DocumentManifest dm = new DocumentManifest();
 		dm.getSubject().setReference("urn:uuid:96e85cca-9797-45d6-834a-c4eb27f331d3");
 		bundle.addEntry().setResource(dm);
-		
+
 		Patient patient = new Patient();
 		patient.addName().addFamily("FAMILY");
 		bundle.addEntry().setResource(patient).setFullUrl("urn:uuid:96e85cca-9797-45d6-834a-c4eb27f331d3");
-		
+
 		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle);
 		ourLog.info(encoded);
-		
+
 		bundle = ourCtx.newJsonParser().parseResource(ca.uhn.fhir.model.dstu2.resource.Bundle.class, encoded);
 		dm = (DocumentManifest) bundle.getEntry().get(0).getResource();
-		
+
 		assertEquals("urn:uuid:96e85cca-9797-45d6-834a-c4eb27f331d3", dm.getSubject().getReference().getValue());
-		
+
 		Patient subject = (Patient) dm.getSubject().getResource();
 		assertNotNull(subject);
 		assertEquals("FAMILY", subject.getNameFirstRep().getFamilyAsSingleString());
@@ -145,21 +144,6 @@ public class JsonParserDstu2Test {
 		assertEquals("ORG", o.getName());
 	}
 
-	@Test
-	public void testEncodeBundleOldStyleContainingResourceWithUuidBase() {
-		Patient p = new Patient();
-		p.setId(IdDt.newRandomUuid());
-		p.addName().addFamily("PATIENT");
-
-		Bundle b = new Bundle();
-		b.addEntry().setResource(p);
-
-		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeBundleToString(b);
-		ourLog.info(encoded);
-		assertThat(encoded, stringContainsInOrder("fullUrl", p.getId().getValue(), "Patient"));
-	}
-
-	
 	/**
 	 * See #308
 	 */
@@ -536,43 +520,6 @@ public class JsonParserDstu2Test {
 
 	}
 
-	@Test
-	public void testEncodeBundleOldBundleNoText() {
-
-		Bundle b = new Bundle();
-
-		BundleEntry e = b.addEntry();
-		e.setResource(new Patient());
-		b.addCategory("scheme", "term", "label");
-
-		String val = ourCtx.newJsonParser().setPrettyPrint(false).encodeBundleToString(b);
-		ourLog.info(val);
-
-		assertThat(val, not(containsString("text")));
-
-		b = ourCtx.newJsonParser().parseBundle(val);
-		assertEquals(1, b.getEntries().size());
-
-	}
-
-	/**
-	 * Fixing #89
-	 */
-	@Test
-	public void testEncodeBundleWithDeletedEntry() throws ConfigurationException, DataFormatException, IOException {
-		Bundle b = ourCtx.newXmlParser().parseBundle(IOUtils.toString(JsonParserDstu2Test.class.getResourceAsStream("/xml-bundle.xml")));
-		String val = ourCtx.newJsonParser().encodeBundleToString(b);
-
-		ourLog.info(val);
-
-		//@formatter:off
-		assertThat(val, containsString("\"deleted\":{" + 
-				"\"type\":\"Patient\"," + 
-				"\"resourceId\":\"4384\"," + 
-				"\"instant\":\"2015-01-15T11:04:43.054-05:00\"" + 
-				"}"));
-		//@formatter:on
-	}
 
 	@Test
 	public void testEncodeDoesntIncludeUuidId() {
@@ -1055,28 +1002,28 @@ public class JsonParserDstu2Test {
 	public void testParseAndEncodeBundle() throws Exception {
 		String content = IOUtils.toString(JsonParserDstu2Test.class.getResourceAsStream("/bundle-example.json"));
 
-		Bundle parsed = ourCtx.newJsonParser().parseBundle(content);
+		Bundle parsed = ourCtx.newJsonParser().parseResource(Bundle.class, content);
 		assertEquals("Bundle/example/_history/1", parsed.getId().getValue());
 		assertEquals("1", parsed.getResourceMetadata().get(ResourceMetadataKeyEnum.VERSION));
 		assertEquals("1", parsed.getId().getVersionIdPart());
 		assertEquals(new InstantDt("2014-08-18T01:43:30Z"), parsed.getResourceMetadata().get(ResourceMetadataKeyEnum.UPDATED));
-		assertEquals("searchset", parsed.getType().getValue());
-		assertEquals(3, parsed.getTotalResults().getValue().intValue());
-		assertEquals("https://example.com/base/MedicationOrder?patient=347&searchId=ff15fd40-ff71-4b48-b366-09c706bed9d0&page=2", parsed.getLinkNext().getValue());
-		assertEquals("https://example.com/base/MedicationOrder?patient=347&_include=MedicationOrder.medication", parsed.getLinkSelf().getValue());
+		assertEquals("searchset", parsed.getTypeElement().getValueAsString());
+		assertEquals(3, parsed.getTotalElement().getValue().intValue());
+		assertEquals("https://example.com/base/MedicationOrder?patient=347&searchId=ff15fd40-ff71-4b48-b366-09c706bed9d0&page=2", parsed.getLink("next").getUrl());
+		assertEquals("https://example.com/base/MedicationOrder?patient=347&_include=MedicationOrder.medication", parsed.getLink("self").getUrl());
 
-		assertEquals(2, parsed.getEntries().size());
+		assertEquals(2, parsed.getEntry().size());
 
-		MedicationOrder p = (MedicationOrder) parsed.getEntries().get(0).getResource();
+		MedicationOrder p = (MedicationOrder) parsed.getEntry().get(0).getResource();
 		assertEquals("Patient/347", p.getPatient().getReference().getValue());
 		assertEquals("2014-08-16T05:31:17Z", ResourceMetadataKeyEnum.UPDATED.get(p).getValueAsString());
 		assertEquals("http://example.com/base/MedicationOrder/3123/_history/1", p.getId().getValue());
 
-		Medication m = (Medication) parsed.getEntries().get(1).getResource();
+		Medication m = (Medication) parsed.getEntry().get(1).getResource();
 		assertEquals("http://example.com/base/Medication/example", m.getId().getValue());
 		assertSame(((ResourceReferenceDt) p.getMedication()).getResource(), m);
 
-		String reencoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeBundleToString(parsed);
+		String reencoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(parsed);
 		ourLog.info(reencoded);
 
 		JsonConfig cfg = new JsonConfig();
@@ -1130,7 +1077,7 @@ public class JsonParserDstu2Test {
 		assertEquals("1", parsed.getResourceMetadata().get(ResourceMetadataKeyEnum.VERSION));
 		assertEquals("1", parsed.getId().getVersionIdPart());
 		assertEquals(new InstantDt("2014-08-18T01:43:30Z"), parsed.getResourceMetadata().get(ResourceMetadataKeyEnum.UPDATED));
-		assertEquals("searchset", parsed.getType());
+		assertEquals("searchset", parsed.getTypeElement().getValue());
 		assertEquals(3, parsed.getTotal().intValue());
 		assertEquals("https://example.com/base/MedicationOrder?patient=347&searchId=ff15fd40-ff71-4b48-b366-09c706bed9d0&page=2", parsed.getLink().get(0).getUrlElement().getValueAsString());
 		assertEquals("https://example.com/base/MedicationOrder?patient=347&_include=MedicationOrder.medication", parsed.getLink().get(1).getUrlElement().getValueAsString());
@@ -1169,25 +1116,25 @@ public class JsonParserDstu2Test {
 	public void testParseAndEncodeBundleOldStyle() throws Exception {
 		String content = IOUtils.toString(JsonParserDstu2Test.class.getResourceAsStream("/bundle-example.json"));
 
-		Bundle parsed = ourCtx.newJsonParser().parseBundle(content);
+		Bundle parsed = ourCtx.newJsonParser().parseResource(Bundle.class, content);
 
 		assertEquals(new InstantDt("2014-08-18T01:43:30Z"), parsed.getResourceMetadata().get(ResourceMetadataKeyEnum.UPDATED));
-		assertEquals("searchset", parsed.getType().getValue());
-		assertEquals(3, parsed.getTotalResults().getValue().intValue());
+		assertEquals("searchset", parsed.getTypeElement().getValue());
+		assertEquals(3, parsed.getTotalElement().getValue().intValue());
 
-		assertEquals(2, parsed.getEntries().size());
+		assertEquals(2, parsed.getEntry().size());
 
-		MedicationOrder p = (MedicationOrder) parsed.getEntries().get(0).getResource();
+		MedicationOrder p = (MedicationOrder) parsed.getEntry().get(0).getResource();
 		assertEquals("Patient/347", p.getPatient().getReference().getValue());
 		assertEquals("2014-08-16T05:31:17Z", ResourceMetadataKeyEnum.UPDATED.get(p).getValueAsString());
 		assertEquals("http://example.com/base/MedicationOrder/3123/_history/1", p.getId().getValue());
 
-		Medication m = (Medication) parsed.getEntries().get(1).getResource();
+		Medication m = (Medication) parsed.getEntry().get(1).getResource();
 		assertEquals("http://example.com/base/Medication/example", m.getId().getValue());
 		assertEquals("Medication/example", ((ResourceReferenceDt) p.getMedication()).getReference().getValue());
 		assertSame(((ResourceReferenceDt) p.getMedication()).getResource(), m);
 
-		String reencoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeBundleToString(parsed);
+		String reencoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(parsed);
 		ourLog.info(reencoded);
 
 		JsonConfig cfg = new JsonConfig();
@@ -1211,29 +1158,11 @@ public class JsonParserDstu2Test {
 	public void testParseAndEncodeBundleResourceWithComments() throws Exception {
 		String content = IOUtils.toString(JsonParserDstu2Test.class.getResourceAsStream("/bundle-transaction2.json"));
 
-		ourCtx.newJsonParser().parseBundle(content);
+		ourCtx.newJsonParser().parseResource(Bundle.class, content);
 
 		ca.uhn.fhir.model.dstu2.resource.Bundle parsed = ourCtx.newJsonParser().parseResource(ca.uhn.fhir.model.dstu2.resource.Bundle.class, content);
 
 		// TODO: preserve comments
-	}
-
-	@Test
-	public void testParseAndEncodeBundleWithDeletedEntry() {
-
-		Patient res = new Patient();
-		res.setId(new IdDt("Patient", "111", "222"));
-		ResourceMetadataKeyEnum.DELETED_AT.put(res, new InstantDt("2011-01-01T12:12:22Z"));
-
-		Bundle bundle = new Bundle();
-		bundle.addResource(res, ourCtx, "http://foo/base");
-
-		String actual = ourCtx.newJsonParser().encodeBundleToString(bundle);
-		ourLog.info(actual);
-
-		String expected = "{\"resourceType\":\"Bundle\",\"entry\":[{\"deleted\":{\"type\":\"Patient\",\"resourceId\":\"111\",\"versionId\":\"222\",\"instant\":\"2011-01-01T12:12:22Z\"}}]}";
-		assertEquals(expected, actual);
-
 	}
 
 	@Test
@@ -1531,38 +1460,32 @@ public class JsonParserDstu2Test {
 			"            \"lastUpdated\" : \"2001-02-22T11:22:33-05:00\"\n" +
 			"         },\n" + 
 			"         \"birthDate\" : \"2012-01-02\"\n" + 
-			"      },\n" + 
-			"      \"search\" : {\n" +
-			"         \"mode\" : \"match\",\n" +
-			"         \"score\" : 0.123\n" +
-			"      },\n" +
-			"      \"request\" : {\n" +
-			"         \"method\" : \"POST\",\n" +
-			"         \"url\" : \"http://foo/Patient?identifier=value\"\n" +
-			"      }\n" +
+			"      }\n" + 
 			"   }]\n" + 
 			"}";
 		//@formatter:on
 
-		Bundle b = ourCtx.newJsonParser().parseBundle(bundle);
-		assertEquals(1, b.getEntries().size());
+		Bundle b = ourCtx.newJsonParser().parseResource(Bundle.class, bundle);
+		assertEquals(1, b.getEntry().size());
 
-		Patient pt = (Patient) b.getEntries().get(0).getResource();
+		Patient pt = (Patient) b.getEntry().get(0).getResource();
 		assertEquals("http://foo/fhirBase2/Patient/1/_history/2", pt.getId().getValue());
 		assertEquals("2012-01-02", pt.getBirthDateElement().getValueAsString());
-		assertEquals("0.123", ResourceMetadataKeyEnum.ENTRY_SCORE.get(pt).getValueAsString());
-		assertEquals("match", ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.get(pt).getCode());
-		assertEquals("POST", ResourceMetadataKeyEnum.ENTRY_TRANSACTION_METHOD.get(pt).getCode());
-		assertEquals("http://foo/Patient?identifier=value", ResourceMetadataKeyEnum.LINK_SEARCH.get(pt));
-		assertEquals("2001-02-22T11:22:33-05:00", ResourceMetadataKeyEnum.UPDATED.get(pt).getValueAsString());
+//		assertEquals("match", ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.get(pt).getCode());
+//		assertEquals("POST", ResourceMetadataKeyEnum.ENTRY_TRANSACTION_METHOD.get(pt).getCode());
+//		assertEquals("http://foo/Patient?identifier=value", ResourceMetadataKeyEnum.LINK_SEARCH.get(pt));
+//		assertEquals("2001-02-22T11:22:33-05:00", ResourceMetadataKeyEnum.UPDATED.get(pt).getValueAsString());
 
 		Bundle toBundle = new Bundle();
-		toBundle.getLinkBase().setValue("http://foo/fhirBase1");
-		toBundle.getTotalResults().setValue(1);
-		toBundle.getLinkSelf().setValue("http://localhost:52788/Binary?_pretty=true");
+		toBundle.getTotalElement().setValue(1);
+//		toBundle.getLinkOrCreate("base").setUrl("http://foo/fhirBase1");
+		toBundle.getLinkOrCreate("self").setUrl("http://localhost:52788/Binary?_pretty=true");
 
-		toBundle.addResource(pt, ourCtx, "http://foo/fhirBase1");
-		String reEncoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeBundleToString(toBundle);
+		toBundle
+				.addEntry()
+				.setFullUrl("http://foo/fhirBase2/Patient/1/_history/2")
+				.setResource(pt);
+		String reEncoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(toBundle);
 
 		JsonConfig cfg = new JsonConfig();
 
@@ -1692,9 +1615,9 @@ public class JsonParserDstu2Test {
 
 		String text = "{\"resourceType\":\"Bundle\",\"id\":null,\"base\":\"http://localhost:57931/fhir/contextDev\",\"total\":1,\"link\":[{\"relation\":\"self\",\"url\":\"http://localhost:57931/fhir/contextDev/Patient?identifier=urn%3AMultiFhirVersionTest%7CtestSubmitPatient01&_format=json\"}],\"entry\":[{\"resource\":{\"resourceType\":\"Patient\",\"id\":\"1\",\"meta\":{\"versionId\":\"1\",\"lastUpdated\":\"2014-12-20T18:41:29.706-05:00\"},\"identifier\":[{\"system\":\"urn:MultiFhirVersionTest\",\"value\":\"testSubmitPatient01\"}]}}]}";
 		FhirContext ctx = FhirContext.forDstu2();
-		Bundle b = ctx.newJsonParser().parseBundle(text);
+		Bundle b = ctx.newJsonParser().parseResource(Bundle.class, text);
 
-		IResource patient = b.getEntries().get(0).getResource();
+		IResource patient = b.getEntry().get(0).getResource();
 		assertEquals(Patient.class, patient.getClass());
 
 		assertNull(ResourceMetadataKeyEnum.TAG_LIST.get(patient));
@@ -1999,29 +1922,29 @@ public class JsonParserDstu2Test {
 		patient.setPetName(new StringDt("myName"));
 
 		final Bundle bundle = new Bundle();
-		final BundleEntry entry = new BundleEntry();
+		final Entry entry = new Entry();
 		entry.setResource(patient);
 		bundle.addEntry(entry);
 
 		final IParser jsonParser = ourCtx.newJsonParser();
 		jsonParser.setServerBaseUrl("http://www.example.com");
 
-		final String parsedBundle = jsonParser.encodeBundleToString(bundle);
+		final String parsedBundle = jsonParser.encodeResourceToString(bundle);
 		System.out.println(parsedBundle);
 		assertEquals(expected, parsedBundle);
 
 		// Parse with string
-		Bundle newBundle = jsonParser.parseBundle(parsedBundle);
+		Bundle newBundle = jsonParser.parseResource(Bundle.class, parsedBundle);
 		assertNotNull(newBundle);
-		assertEquals(1, newBundle.getEntries().size());
-		Patient newPatient = (Patient) newBundle.getEntries().get(0).getResource();
+		assertEquals(1, newBundle.getEntry().size());
+		Patient newPatient = (Patient) newBundle.getEntry().get(0).getResource();
 		assertEquals("myName", ((StringDt) newPatient.getUndeclaredExtensionsByUrl("http://www.example.com/petname").get(0).getValue()).getValue());
 
 		// Parse with stream
-		newBundle = jsonParser.parseBundle(new StringReader(parsedBundle));
+		newBundle = jsonParser.parseResource(Bundle.class, new StringReader(parsedBundle));
 		assertNotNull(newBundle);
-		assertEquals(1, newBundle.getEntries().size());
-		newPatient = (Patient) newBundle.getEntries().get(0).getResource();
+		assertEquals(1, newBundle.getEntry().size());
+		newPatient = (Patient) newBundle.getEntry().get(0).getResource();
 		assertEquals("myName", ((StringDt) newPatient.getUndeclaredExtensionsByUrl("http://www.example.com/petname").get(0).getValue()).getValue());
 
 	}  

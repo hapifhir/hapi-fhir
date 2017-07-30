@@ -18,6 +18,10 @@
 				being used in Bundle.entry.request.url as a part of the conditional URL 
 				within transactions.
 			</action>
+			<action type="fix">
+				Schematron validator now applies invariants to resources within a Bundle, not
+				just to the outer Bundle resource itself
+			</action>
 		</release
 		<release version="2.6" date="TBD">
 			<action type="add">

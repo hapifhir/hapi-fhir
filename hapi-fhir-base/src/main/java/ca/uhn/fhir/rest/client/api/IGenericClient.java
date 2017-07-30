@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.client.api;
 
+import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -121,7 +122,7 @@ public interface IGenericClient extends IRestfulClient {
 	 * and how it should be returned. See the <a href="http://www.hl7.org/fhir/search.html">specification on search</a>
 	 * for more information.
 	 */
-	IUntypedQuery search();
+	<T extends IBaseBundle> IUntypedQuery<T> search();
 
 	/**
 	 * If set to <code>true</code>, the client will log all requests and all responses. This is probably not a good production setting since it will result in a lot of extra logging, but it can be

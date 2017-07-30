@@ -25,7 +25,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.internal.stubbing.defaultanswers.ReturnsDeepStubs;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.api.Bundle;
+import ca.uhn.fhir.model.dstu2.resource.Bundle;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.rest.api.Constants;
@@ -62,7 +62,7 @@ public class BundleTypeDstu2Test {
 
 	@Test
 	public void testTransaction() throws Exception {
-		String retVal = ourCtx.newXmlParser().encodeBundleToString(new Bundle());
+		String retVal = ourCtx.newXmlParser().encodeResourceToString(new Bundle());
 
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
 		when(ourHttpClient.execute(capt.capture())).thenReturn(ourHttpResponse);
@@ -94,9 +94,9 @@ public class BundleTypeDstu2Test {
 		IGenericClient client = ctx.newRestfulGenericClient("http://54.165.58.158:8081/FHIRServer/fhir");
 		client.registerInterceptor(new BearerTokenAuthInterceptor("AN3uCTC5B"));
 		client.registerInterceptor(new LoggingInterceptor(true));
-		Bundle result = client.search().forResource(Patient.class).where(Patient.NAME.matches().value("Alice")).execute();
+		Bundle result = client.search().forResource(Patient.class).where(Patient.NAME.matches().value("Alice")).returnBundle(Bundle.class).execute();
 		
-		System.out.println(result.getEntries().size());
+		System.out.println(result.getEntry().size());
 		
 	}
 	

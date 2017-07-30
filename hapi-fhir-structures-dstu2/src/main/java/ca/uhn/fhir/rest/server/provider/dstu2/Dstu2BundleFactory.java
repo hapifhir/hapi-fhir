@@ -259,11 +259,6 @@ public class Dstu2BundleFactory implements IVersionSpecificBundleFactory {
 	}
 
 	@Override
-	public ca.uhn.fhir.model.api.Bundle getDstu1Bundle() {
-		return null;
-	}
-
-	@Override
 	public IResource getResourceBundle() {
 		return myBundle;
 	}

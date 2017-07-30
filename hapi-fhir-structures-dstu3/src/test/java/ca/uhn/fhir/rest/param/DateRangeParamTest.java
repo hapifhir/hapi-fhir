@@ -67,9 +67,13 @@ public class DateRangeParamTest {
 	public void testDay() throws Exception {
 		assertEquals(parse("2011-01-01 00:00:00.0000"), create(">=2011-01-01", "<2011-01-02").getLowerBoundAsInstant());
 		assertEquals(parseM1("2011-01-02 00:00:00.0000"), create(">=2011-01-01", "<2011-01-02").getUpperBoundAsInstant());
-
 		assertEquals(parse("2011-01-02 00:00:00.0000"), create(">2011-01-01", "<=2011-01-02").getLowerBoundAsInstant());
 		assertEquals(parseM1("2011-01-03 00:00:00.0000"), create(">2011-01-01", "<=2011-01-02").getUpperBoundAsInstant());
+		
+		assertEquals(parse("2011-01-01 00:00:00.0000"), create("ge2011-01-01", "lt2011-01-02").getLowerBoundAsInstant());
+		assertEquals(parseM1("2011-01-02 00:00:00.0000"), create("ge2011-01-01", "lt2011-01-02").getUpperBoundAsInstant());
+		assertEquals(parse("2011-01-02 00:00:00.0000"), create("gt2011-01-01", "le2011-01-02").getLowerBoundAsInstant());
+		assertEquals(parseM1("2011-01-03 00:00:00.0000"), create("gt2011-01-01", "le2011-01-02").getUpperBoundAsInstant());
 	}
 
 	@Test
@@ -77,20 +81,20 @@ public class DateRangeParamTest {
 		assertEquals(parse("2011-01-01 00:00:00.0000"), create("2011-01-01").getLowerBoundAsInstant());
 		assertEquals(parseM1("2011-01-02 00:00:00.0000"), create("2011-01-01").getUpperBoundAsInstant());
 
-		assertEquals(parse("2011-01-01 00:00:00.0000"), create(">=2011-01-01").getLowerBoundAsInstant());
-		assertEquals(null, create(">=2011-01-01").getUpperBoundAsInstant());
+		assertEquals(parse("2011-01-01 00:00:00.0000"), create("ge2011-01-01").getLowerBoundAsInstant());
+		assertEquals(null, create("ge2011-01-01").getUpperBoundAsInstant());
 
-		assertEquals(null, create("<=2011-01-01").getLowerBoundAsInstant());
-		assertEquals(parseM1("2011-01-02 00:00:00.0000"), create("<=2011-01-01").getUpperBoundAsInstant());
+		assertEquals(null, create("le2011-01-01").getLowerBoundAsInstant());
+		assertEquals(parseM1("2011-01-02 00:00:00.0000"), create("le2011-01-01").getUpperBoundAsInstant());
 	}
 
 	@Test
 	public void testMonth() throws Exception {
-		assertEquals(parse("2011-01-01 00:00:00.0000"), create(">=2011-01", "<2011-02").getLowerBoundAsInstant());
-		assertEquals(parseM1("2011-02-01 00:00:00.0000"), create(">=2011-01", "<2011-02").getUpperBoundAsInstant());
+		assertEquals(parse("2011-01-01 00:00:00.0000"), create("ge2011-01", "lt2011-02").getLowerBoundAsInstant());
+		assertEquals(parseM1("2011-02-01 00:00:00.0000"), create("ge2011-01", "lt2011-02").getUpperBoundAsInstant());
 
-		assertEquals(parse("2011-02-01 00:00:00.0000"), create(">2011-01", "<=2011-02").getLowerBoundAsInstant());
-		assertEquals(parseM1("2011-03-01 00:00:00.0000"), create(">2011-01", "<=2011-02").getUpperBoundAsInstant());
+		assertEquals(parse("2011-02-01 00:00:00.0000"), create("gt2011-01", "le2011-02").getLowerBoundAsInstant());
+		assertEquals(parseM1("2011-03-01 00:00:00.0000"), create("gt2011-01", "le2011-02").getUpperBoundAsInstant());
 	}
 
 	@Test
@@ -159,20 +163,20 @@ public class DateRangeParamTest {
 
 	@Test
 	public void testSecond() throws Exception {
-		assertEquals(parse("2011-01-01 00:00:00.0000"), create(">=2011-01-01T00:00:00", "<2011-01-01T01:00:00").getLowerBoundAsInstant());
-		assertEquals(parseM1("2011-01-01 02:00:00.0000"), create(">=2011-01-01T00:00:00", "<2011-01-01T02:00:00").getUpperBoundAsInstant());
+		assertEquals(parse("2011-01-01 00:00:00.0000"), create("ge2011-01-01T00:00:00", "lt2011-01-01T01:00:00").getLowerBoundAsInstant());
+		assertEquals(parseM1("2011-01-01 02:00:00.0000"), create("ge2011-01-01T00:00:00", "lt2011-01-01T02:00:00").getUpperBoundAsInstant());
 
-		assertEquals(parse("2011-01-01 00:00:01.0000"), create(">2011-01-01T00:00:00", "<=2011-01-01T02:00:00").getLowerBoundAsInstant());
-		assertEquals(parseM1("2011-01-01 02:00:01.0000"), create(">2011-01-01T00:00:00", "<=2011-01-01T02:00:00").getUpperBoundAsInstant());
+		assertEquals(parse("2011-01-01 00:00:01.0000"), create("gt2011-01-01T00:00:00", "le2011-01-01T02:00:00").getLowerBoundAsInstant());
+		assertEquals(parseM1("2011-01-01 02:00:01.0000"), create("gt2011-01-01T00:00:00", "le2011-01-01T02:00:00").getUpperBoundAsInstant());
 	}
 
 	@Test
 	public void testYear() throws Exception {
-		assertEquals(parse("2011-01-01 00:00:00.0000"), create(">=2011", "<2012").getLowerBoundAsInstant());
-		assertEquals(parseM1("2012-01-01 00:00:00.0000"), create(">=2011", "<2012").getUpperBoundAsInstant());
+		assertEquals(parse("2011-01-01 00:00:00.0000"), create("ge2011", "lt2012").getLowerBoundAsInstant());
+		assertEquals(parseM1("2012-01-01 00:00:00.0000"), create("ge2011", "lt2012").getUpperBoundAsInstant());
 
-		assertEquals(parse("2012-01-01 00:00:00.0000"), create(">2011", "<=2012").getLowerBoundAsInstant());
-		assertEquals(parseM1("2014-01-01 00:00:00.0000"), create(">2011", "<=2013").getUpperBoundAsInstant());
+		assertEquals(parse("2012-01-01 00:00:00.0000"), create("gt2011", "le2012").getLowerBoundAsInstant());
+		assertEquals(parseM1("2014-01-01 00:00:00.0000"), create("gt2011", "le2013").getUpperBoundAsInstant());
 	}
 
 	@AfterClass

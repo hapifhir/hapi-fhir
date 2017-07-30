@@ -1,5 +1,8 @@
 package ca.uhn.fhir.validation;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -37,7 +40,11 @@ public class ValidationContext<T> extends BaseValidationContext<T> implements IV
 	private final EncodingEnum myResourceAsStringEncoding;
 
 	private ValidationContext(FhirContext theContext, T theResource, IEncoder theEncoder) {
-		super(theContext);
+		this(theContext, theResource, theEncoder, new ArrayList<SingleValidationMessage>());
+	}
+	
+	private ValidationContext(FhirContext theContext, T theResource, IEncoder theEncoder, List<SingleValidationMessage> theMessages) {
+		super(theContext, theMessages);
 		myResource = theResource;
 		myEncoder = theEncoder;
 		if (theEncoder != null) {
@@ -122,5 +129,19 @@ public class ValidationContext<T> extends BaseValidationContext<T> implements IV
 			}
 
 		};
+	}
+
+	public static IValidationContext<IBaseResource> subContext(final IValidationContext<IBaseResource> theCtx, final IBaseResource theResource) {
+		return new ValidationContext<IBaseResource>(theCtx.getFhirContext(), theResource, new IEncoder() {
+			@Override
+			public String encode() {
+				return theCtx.getFhirContext().newXmlParser().encodeResourceToString(theResource);
+			}
+
+			@Override
+			public EncodingEnum getEncoding() {
+				return EncodingEnum.XML;
+			}
+		}, theCtx.getMessages());
 	}
 }

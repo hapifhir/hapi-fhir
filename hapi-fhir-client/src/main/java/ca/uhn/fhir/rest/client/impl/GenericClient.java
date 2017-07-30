@@ -25,6 +25,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import java.io.IOException;
 import java.io.Reader;
 import java.util.*;
+import java.util.Map.Entry;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -75,12 +76,10 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		return new CreateInternal();
 	}
 
-
 	@Override
 	public IDelete delete() {
 		return new DeleteInternal();
 	}
-
 
 	private <T extends IBaseResource> T doReadOrVRead(final Class<T> theType, IIdType theId, boolean theVRead, ICallable<T> theNotModifiedHandler, String theIfVersionMatches, Boolean thePrettyPrint,
 			SummaryEnum theSummary, EncodingEnum theEncoding, Set<String> theSubsetElements) {
@@ -165,14 +164,10 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		return theResource.getIdElement().getIdPart();
 	}
 
-
 	@Override
 	public IHistory history() {
 		return new HistoryInternal();
 	}
-
-
-	
 
 	// @Override
 	// public <T extends IBaseResource> T read(final Class<T> theType, IdDt theId) {
@@ -205,6 +200,11 @@ public class GenericClient extends BaseClient implements IGenericClient {
 	}
 
 	@Override
+	public IPatch patch() {
+		return new PatchInternal();
+	}
+
+	@Override
 	public IRead read() {
 		return new ReadInternal();
 	}
@@ -234,11 +234,11 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		return read(def.getImplementingClass(), id);
 	}
 
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Override
 	public IUntypedQuery search() {
 		return new SearchInternal();
 	}
-
 
 	/**
 	 * For now, this is a part of the internal API of HAPI - Use with caution as this method may change!
@@ -260,12 +260,6 @@ public class GenericClient extends BaseClient implements IGenericClient {
 	@Override
 	public ITransaction transaction() {
 		return new TransactionInternal();
-	}
-
-
-	@Override
-	public IPatch patch() {
-		return new PatchInternal();
 	}
 
 	@Override
@@ -366,18 +360,13 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		return b.toString();
 	}
 
-	private abstract class BaseClientExecutable<T extends IClientExecutable<?, ?>, Y> implements IClientExecutable<T, Y> {
+	private abstract class BaseClientExecutable<T extends IClientExecutable<?, Y>, Y> implements IClientExecutable<T, Y> {
 
 		protected EncodingEnum myParamEncoding;
-
 		private List<Class<? extends IBaseResource>> myPreferResponseTypes;
-
 		protected Boolean myPrettyPrint;
-
 		private boolean myQueryLogRequestAndResponse;
-
 		private HashSet<String> mySubsetElements;
-
 		protected SummaryEnum mySummaryMode;
 
 		@Deprecated // override deprecated method
@@ -491,10 +480,52 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 	}
 
+	private abstract class BaseSearch<EXEC extends IClientExecutable<?, OUTPUT>, QUERY extends IBaseQuery<QUERY>, OUTPUT> extends BaseClientExecutable<EXEC, OUTPUT> implements IBaseQuery<QUERY> {
 
-	private class CreateInternal extends BaseClientExecutable<ICreateTyped, MethodOutcome> implements ICreate, ICreateTyped, ICreateWithQuery, ICreateWithQueryTyped {
+		private Map<String, List<String>> myParams = new LinkedHashMap<>();
 
-		private CriterionList myCriterionList;
+		@Override
+		public QUERY and(ICriterion<?> theCriterion) {
+			return where(theCriterion);
+		}
+
+		public Map<String, List<String>> getParamMap() {
+			return myParams;
+		}
+
+		@SuppressWarnings("unchecked")
+		@Override
+		public QUERY where(ICriterion<?> theCriterion) {
+			ICriterionInternal criterion = (ICriterionInternal) theCriterion;
+
+			String parameterName = criterion.getParameterName();
+			String parameterValue = criterion.getParameterValue(myContext);
+			if (isNotBlank(parameterValue)) {
+				addParam(myParams, parameterName, parameterValue);
+			}
+
+			return (QUERY) this;
+		}
+
+		@SuppressWarnings("unchecked")
+		@Override
+		public QUERY where(Map<String, List<IQueryParameterType>> theCriterion) {
+			Validate.notNull(theCriterion, "theCriterion must not be null");
+			for (Entry<String, List<IQueryParameterType>> nextEntry : theCriterion.entrySet()) {
+				String nextKey = nextEntry.getKey();
+				List<IQueryParameterType> nextValues = nextEntry.getValue();
+				for (IQueryParameterType nextValue : nextValues) {
+					addParam(myParams, nextKey, nextValue.getValueAsQueryToken(myContext));
+				}
+			}
+			return (QUERY) this;
+		}
+
+	}
+
+	private class CreateInternal extends BaseSearch<ICreateTyped, ICreateWithQueryTyped, MethodOutcome> implements ICreate, ICreateTyped, ICreateWithQuery, ICreateWithQueryTyped {
+
+		private boolean myConditional;
 		private String myId;
 		private PreferReturnEnum myPrefer;
 		private IBaseResource myResource;
@@ -502,14 +533,8 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		private String mySearchUrl;
 
 		@Override
-		public ICreateWithQueryTyped and(ICriterion<?> theCriterion) {
-			myCriterionList.add((ICriterionInternal) theCriterion);
-			return this;
-		}
-
-		@Override
 		public ICreateWithQuery conditional() {
-			myCriterionList = new CriterionList();
+			myConditional = true;
 			return this;
 		}
 
@@ -534,8 +559,8 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			BaseHttpClientInvocation invocation;
 			if (mySearchUrl != null) {
 				invocation = MethodUtil.createCreateInvocation(myResource, myResourceBody, myId, myContext, mySearchUrl);
-			} else if (myCriterionList != null) {
-				invocation = MethodUtil.createCreateInvocation(myResource, myResourceBody, myId, myContext, myCriterionList.toParamList());
+			} else if (myConditional) {
+				invocation = MethodUtil.createCreateInvocation(myResource, myResourceBody, myId, myContext, getParamMap());
 			} else {
 				invocation = MethodUtil.createCreateInvocation(myResource, myResourceBody, myId, myContext);
 			}
@@ -570,12 +595,6 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		}
 
 		@Override
-		public ICreateWithQueryTyped where(ICriterion<?> theCriterion) {
-			myCriterionList.add((ICriterionInternal) theCriterion);
-			return this;
-		}
-
-		@Override
 		public CreateInternal withId(IdDt theId) {
 			myId = theId.getIdPart();
 			return this;
@@ -589,49 +608,20 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 	}
 
-	private class CriterionList extends ArrayList<ICriterionInternal> {
+	private class DeleteInternal extends BaseSearch<IDeleteTyped, IDeleteWithQueryTyped, IBaseOperationOutcome> implements IDelete, IDeleteTyped, IDeleteWithQuery, IDeleteWithQueryTyped {
 
-		private static final long serialVersionUID = 1L;
-
-		public void populateParamList(Map<String, List<String>> theParams) {
-			for (ICriterionInternal next : this) {
-				String parameterName = next.getParameterName();
-				String parameterValue = next.getParameterValue(myContext);
-				if (isNotBlank(parameterValue)) {
-					addParam(theParams, parameterName, parameterValue);
-				}
-			}
-		}
-
-		public Map<String, List<String>> toParamList() {
-			LinkedHashMap<String, List<String>> retVal = new LinkedHashMap<String, List<String>>();
-			populateParamList(retVal);
-			return retVal;
-		}
-
-	}
-
-	private class DeleteInternal extends BaseClientExecutable<IDeleteTyped, IBaseOperationOutcome> implements IDelete, IDeleteTyped, IDeleteWithQuery, IDeleteWithQueryTyped {
-
-		private CriterionList myCriterionList;
+		private boolean myConditional;
 		private IIdType myId;
 		private String myResourceType;
 		private String mySearchUrl;
-
-		@Override
-		public IDeleteWithQueryTyped and(ICriterion<?> theCriterion) {
-			myCriterionList.add((ICriterionInternal) theCriterion);
-			return this;
-		}
 
 		@Override
 		public IBaseOperationOutcome execute() {
 			HttpDeleteClientInvocation invocation;
 			if (myId != null) {
 				invocation = DeleteMethodBinding.createDeleteInvocation(getFhirContext(), myId);
-			} else if (myCriterionList != null) {
-				Map<String, List<String>> params = myCriterionList.toParamList();
-				invocation = DeleteMethodBinding.createDeleteInvocation(getFhirContext(), myResourceType, params);
+			} else if (myConditional) {
+				invocation = DeleteMethodBinding.createDeleteInvocation(getFhirContext(), myResourceType, getParamMap());
 			} else {
 				invocation = DeleteMethodBinding.createDeleteInvocation(getFhirContext(), mySearchUrl);
 			}
@@ -679,7 +669,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		@Override
 		public IDeleteWithQuery resourceConditionalByType(Class<? extends IBaseResource> theResourceType) {
 			Validate.notNull(theResourceType, "theResourceType can not be null");
-			myCriterionList = new CriterionList();
+			myConditional = true;
 			myResourceType = myContext.getResourceDefinition(theResourceType).getName();
 			return this;
 		}
@@ -691,7 +681,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 				throw new IllegalArgumentException("Unknown resource type: " + theResourceType);
 			}
 			myResourceType = theResourceType;
-			myCriterionList = new CriterionList();
+			myConditional = true;
 			return this;
 		}
 
@@ -701,11 +691,6 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			return this;
 		}
 
-		@Override
-		public IDeleteWithQueryTyped where(ICriterion<?> theCriterion) {
-			myCriterionList.add((ICriterionInternal) theCriterion);
-			return this;
-		}
 	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
@@ -754,7 +739,6 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		}
 
 	}
-
 
 	@SuppressWarnings("rawtypes")
 	private class HistoryInternal extends BaseClientExecutable implements IHistory, IHistoryUntyped, IHistoryTyped {
@@ -854,7 +838,6 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			return new GetPageInternal(myPageUrl, theBundleType);
 		}
 
-
 		@Override
 		public IGetPageUntyped byUrl(String thePageUrl) {
 			if (isBlank(thePageUrl)) {
@@ -863,7 +846,6 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			myPageUrl = thePageUrl;
 			return this;
 		}
-
 
 		@Override
 		public <T extends IBaseBundle> IGetPageTyped<T> next(T theBundle) {
@@ -898,12 +880,10 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			throw new IllegalArgumentException(myContext.getLocalizer().getMessage(GenericClient.class, "noPagingLinkFoundInBundle", theWantRel));
 		}
 
-
 		@Override
 		public <T extends IBaseBundle> IGetPageTyped<T> previous(T theBundle) {
 			return nextOrPrevious(PREVIOUS, theBundle);
 		}
-
 
 	}
 
@@ -993,7 +973,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 		@SuppressWarnings("unchecked")
 		@Override
-		public <T extends IBaseMetaType> IClientExecutable<IClientExecutable<?, ?>, T> meta(T theMeta) {
+		public <T extends IBaseMetaType> IClientExecutable<IClientExecutable<?, T>, T> meta(T theMeta) {
 			Validate.notNull(theMeta, "theMeta must not be null");
 			myMeta = theMeta;
 			myMetaType = myMeta.getClass();
@@ -1062,56 +1042,15 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			implements IOperation, IOperationUnnamed, IOperationUntyped, IOperationUntypedWithInput, IOperationUntypedWithInputAndPartialOutput, IOperationProcessMsg, IOperationProcessMsgMode {
 
 		private IIdType myId;
+		private Boolean myIsAsync;
+		private IBaseBundle myMsgBundle;
 		private String myOperationName;
 		private IBaseParameters myParameters;
 		private RuntimeResourceDefinition myParametersDef;
+		private String myResponseUrl;
+		private Class myReturnResourceType;
 		private Class<? extends IBaseResource> myType;
 		private boolean myUseHttpGet;
-		private Class myReturnResourceType;
-		private IBaseBundle myMsgBundle;
-		private String myResponseUrl;
-		private Boolean myIsAsync;
-
-		@SuppressWarnings("unchecked")
-		@Override
-		public IOperationProcessMsgMode setMessageBundle(IBaseBundle theMsgBundle) {
-
-			Validate.notNull(theMsgBundle, "theMsgBundle must not be null");
-			/*
-			 * Validate.isTrue(theMsgBundle.getType().getValueAsEnum() == BundleTypeEnum.MESSAGE);
-			 * Validate.isTrue(theMsgBundle.getEntries().size() > 0);
-			 * Validate.notNull(theMsgBundle.getEntries().get(0).getResource(), "Message Bundle first entry must be a MessageHeader resource");
-			 * Validate.isTrue(theMsgBundle.getEntries().get(0).getResource().getResourceName().equals("MessageHeader"), "Message Bundle first entry must be a MessageHeader resource");
-			 */
-			myMsgBundle = theMsgBundle;
-			return this;
-		}
-
-		@Override
-		public IOperationProcessMsg setResponseUrlParam(String responseUrl) {
-			Validate.notEmpty(responseUrl, "responseUrl must not be null");
-			Validate.matchesPattern(responseUrl, "^(https?)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]", "responseUrl must be a valid URL");
-			myResponseUrl = responseUrl;
-			return this;
-		}
-
-		@Override
-		public IOperationProcessMsgMode asynchronous(Class theResponseClass) {
-			myIsAsync = true;
-			Validate.notNull(theResponseClass, "theReturnType must not be null");
-			Validate.isTrue(IBaseResource.class.isAssignableFrom(theResponseClass), "theReturnType must be a class which extends from IBaseResource");
-			myReturnResourceType = theResponseClass;
-			return this;
-		}
-
-		@Override
-		public IOperationProcessMsgMode synchronous(Class theResponseClass) {
-			myIsAsync = false;
-			Validate.notNull(theResponseClass, "theReturnType must not be null");
-			Validate.isTrue(IBaseResource.class.isAssignableFrom(theResponseClass), "theReturnType must be a class which extends from IBaseResource");
-			myReturnResourceType = theResponseClass;
-			return this;
-		}
 
 		@SuppressWarnings("unchecked")
 		private void addParam(String theName, IBase theValue) {
@@ -1143,12 +1082,6 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			}
 		}
 
-		@Override
-		public IOperationProcessMsg processMessage() {
-			myOperationName = Constants.EXTOP_PROCESS_MESSAGE;
-			return this;
-		}
-
 		private void addParam(String theName, IQueryParameterType theValue) {
 			IPrimitiveType<?> stringType = ParametersUtil.createString(myContext, theValue.getValueAsQueryToken(myContext));
 			addParam(theName, stringType);
@@ -1166,6 +1099,15 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		public IOperationUntypedWithInputAndPartialOutput andSearchParameter(String theName, IQueryParameterType theValue) {
 			addParam(theName, theValue);
 
+			return this;
+		}
+
+		@Override
+		public IOperationProcessMsgMode asynchronous(Class theResponseClass) {
+			myIsAsync = true;
+			Validate.notNull(theResponseClass, "theReturnType must not be null");
+			Validate.isTrue(IBaseResource.class.isAssignableFrom(theResponseClass), "theReturnType must be a class which extends from IBaseResource");
+			myReturnResourceType = theResponseClass;
 			return this;
 		}
 
@@ -1260,6 +1202,52 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		}
 
 		@Override
+		public IOperationProcessMsg processMessage() {
+			myOperationName = Constants.EXTOP_PROCESS_MESSAGE;
+			return this;
+		}
+
+		@Override
+		public IOperationUntypedWithInput returnResourceType(Class theReturnType) {
+			Validate.notNull(theReturnType, "theReturnType must not be null");
+			Validate.isTrue(IBaseResource.class.isAssignableFrom(theReturnType), "theReturnType must be a class which extends from IBaseResource");
+			myReturnResourceType = theReturnType;
+			return this;
+		}
+
+		@SuppressWarnings("unchecked")
+		@Override
+		public IOperationProcessMsgMode setMessageBundle(IBaseBundle theMsgBundle) {
+
+			Validate.notNull(theMsgBundle, "theMsgBundle must not be null");
+			/*
+			 * Validate.isTrue(theMsgBundle.getType().getValueAsEnum() == BundleTypeEnum.MESSAGE);
+			 * Validate.isTrue(theMsgBundle.getEntries().size() > 0);
+			 * Validate.notNull(theMsgBundle.getEntries().get(0).getResource(), "Message Bundle first entry must be a MessageHeader resource");
+			 * Validate.isTrue(theMsgBundle.getEntries().get(0).getResource().getResourceName().equals("MessageHeader"), "Message Bundle first entry must be a MessageHeader resource");
+			 */
+			myMsgBundle = theMsgBundle;
+			return this;
+		}
+
+		@Override
+		public IOperationProcessMsg setResponseUrlParam(String responseUrl) {
+			Validate.notEmpty(responseUrl, "responseUrl must not be null");
+			Validate.matchesPattern(responseUrl, "^(https?)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]", "responseUrl must be a valid URL");
+			myResponseUrl = responseUrl;
+			return this;
+		}
+
+		@Override
+		public IOperationProcessMsgMode synchronous(Class theResponseClass) {
+			myIsAsync = false;
+			Validate.notNull(theResponseClass, "theReturnType must not be null");
+			Validate.isTrue(IBaseResource.class.isAssignableFrom(theResponseClass), "theReturnType must be a class which extends from IBaseResource");
+			myReturnResourceType = theResponseClass;
+			return this;
+		}
+
+		@Override
 		public IOperationUntypedWithInput useHttpGet() {
 			myUseHttpGet = true;
 			return this;
@@ -1316,14 +1304,6 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 			addParam(theName, theValue);
 
-			return this;
-		}
-
-		@Override
-		public IOperationUntypedWithInput returnResourceType(Class theReturnType) {
-			Validate.notNull(theReturnType, "theReturnType must not be null");
-			Validate.isTrue(IBaseResource.class.isAssignableFrom(theReturnType), "theReturnType must be a class which extends from IBaseResource");
-			myReturnResourceType = theReturnType;
 			return this;
 		}
 
@@ -1384,6 +1364,119 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 			return response;
 		}
+	}
+
+	private class PatchInternal extends BaseSearch<IPatchExecutable, IPatchWithQueryTyped, MethodOutcome> implements IPatch, IPatchWithBody, IPatchExecutable, IPatchWithQuery, IPatchWithQueryTyped {
+
+		private boolean myConditional;
+		private IIdType myId;
+		private String myPatchBody;
+		private PatchTypeEnum myPatchType;
+		private PreferReturnEnum myPrefer;
+		private String myResourceType;
+		private String mySearchUrl;
+
+		@Override
+		public IPatchWithQuery conditional(Class<? extends IBaseResource> theClass) {
+			Validate.notNull(theClass, "theClass must not be null");
+			String resourceType = myContext.getResourceDefinition(theClass).getName();
+			return conditional(resourceType);
+		}
+
+		@Override
+		public IPatchWithQuery conditional(String theResourceType) {
+			Validate.notBlank(theResourceType, "theResourceType must not be null");
+			myResourceType = theResourceType;
+			myConditional = true;
+			return this;
+		}
+
+		// TODO: This is not longer used.. Deprecate it or just remove it?
+		@Override
+		public IPatchWithBody conditionalByUrl(String theSearchUrl) {
+			mySearchUrl = validateAndEscapeConditionalUrl(theSearchUrl);
+			return this;
+		}
+
+		@Override
+		public MethodOutcome execute() {
+
+			if (myPatchType == null) {
+				throw new InvalidRequestException("No patch type supplied, cannot invoke server");
+			}
+			if (myPatchBody == null) {
+				throw new InvalidRequestException("No patch body supplied, cannot invoke server");
+			}
+
+			BaseHttpClientInvocation invocation;
+			if (isNotBlank(mySearchUrl)) {
+				invocation = MethodUtil.createPatchInvocation(myContext, mySearchUrl, myPatchType, myPatchBody);
+			} else if (myConditional) {
+				invocation = MethodUtil.createPatchInvocation(myContext, myPatchType, myPatchBody, myResourceType, getParamMap());
+			} else {
+				if (myId == null || myId.hasIdPart() == false) {
+					throw new InvalidRequestException("No ID supplied for resource to patch, can not invoke server");
+				}
+				invocation = MethodUtil.createPatchInvocation(myContext, myId, myPatchType, myPatchBody);
+			}
+
+			addPreferHeader(myPrefer, invocation);
+
+			OutcomeResponseHandler binding = new OutcomeResponseHandler(myPrefer);
+
+			Map<String, List<String>> params = new HashMap<String, List<String>>();
+			return invoke(params, binding, invocation);
+
+		}
+
+		@Override
+		public IPatchExecutable prefer(PreferReturnEnum theReturn) {
+			myPrefer = theReturn;
+			return this;
+		}
+
+		@Override
+		public IPatchWithBody withBody(String thePatchBody) {
+			Validate.notBlank(thePatchBody, "thePatchBody must not be blank");
+
+			myPatchBody = thePatchBody;
+
+			EncodingEnum encoding = EncodingEnum.detectEncodingNoDefault(thePatchBody);
+			if (encoding == EncodingEnum.XML) {
+				myPatchType = PatchTypeEnum.XML_PATCH;
+			} else if (encoding == EncodingEnum.JSON) {
+				myPatchType = PatchTypeEnum.JSON_PATCH;
+			} else {
+				throw new IllegalArgumentException("Unable to determine encoding of patch");
+			}
+
+			return this;
+		}
+
+		@Override
+		public IPatchExecutable withId(IIdType theId) {
+			if (theId == null) {
+				throw new NullPointerException("theId can not be null");
+			}
+			if (theId.hasIdPart() == false) {
+				throw new NullPointerException("theId must not be blank and must contain an ID, found: " + theId.getValue());
+			}
+			myId = theId;
+			return this;
+		}
+
+		@Override
+		public IPatchExecutable withId(String theId) {
+			if (theId == null) {
+				throw new NullPointerException("theId can not be null");
+			}
+			if (isBlank(theId)) {
+				throw new NullPointerException("theId must not be blank and must contain an ID, found: " + theId);
+			}
+			myId = new IdDt(theId);
+			return this;
+		}
+
 	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
@@ -1533,10 +1626,9 @@ public class GenericClient extends BaseClient implements IGenericClient {
 	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	private class SearchInternal extends BaseClientExecutable implements IQuery, IUntypedQuery, IQueryTyped {
+	private class SearchInternal<OUTPUT> extends BaseSearch<IQuery<OUTPUT>, IQuery<OUTPUT>, OUTPUT> implements IQuery<OUTPUT>, IUntypedQuery<IQuery<OUTPUT>> {
 
 		private String myCompartmentName;
-		private CriterionList myCriterion = new CriterionList();
 		private List<Include> myInclude = new ArrayList<Include>();
 		private DateRangeParam myLastUpdated;
 		private Integer myParamLimit;
@@ -1556,12 +1648,6 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			myResourceType = null;
 			myResourceName = null;
 			mySearchUrl = null;
-		}
-
-		@Override
-		public IQuery and(ICriterion<?> theCriterion) {
-			myCriterion.add((ICriterionInternal) theCriterion);
-			return this;
 		}
 
 		@Override
@@ -1603,15 +1689,9 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		}
 
 		@Override
-		public Object execute() {
+		public OUTPUT execute() {
 
-			Map<String, List<String>> params = new LinkedHashMap<String, List<String>>();
-			// Map<String, List<String>> initial = createExtraParams();
-			// if (initial != null) {
-			// params.putAll(initial);
-			// }
-
-			myCriterion.populateParamList(params);
+			Map<String, List<String>> params = getParamMap();
 
 			for (TokenParam next : myTags) {
 				addParam(params, Constants.PARAM_TAG, next.getValueAsQueryToken(myContext));
@@ -1701,7 +1781,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 				invocation = SearchMethodBinding.createSearchInvocation(myContext, myResourceName, params, resourceId, myCompartmentName, mySearchStyle);
 			}
 
-			return invoke(params, binding, invocation);
+			return (OUTPUT) invoke(params, binding, invocation);
 
 		}
 
@@ -1711,7 +1791,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		}
 
 		@Override
-		public IQuery forResource(Class<? extends IBaseResource> theResourceType) {
+		public IQuery forResource(Class theResourceType) {
 			setType(theResourceType);
 			return this;
 		}
@@ -1741,7 +1821,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		}
 
 		@Override
-		public IQueryTyped returnBundle(Class theClass) {
+		public IQuery returnBundle(Class theClass) {
 			if (theClass == null) {
 				throw new NullPointerException("theClass must not be null");
 			}
@@ -1780,8 +1860,9 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		}
 
 		@Override
-		public IQuery where(ICriterion<?> theCriterion) {
-			myCriterion.add((ICriterionInternal) theCriterion);
+		public IQuery withAnyProfile(Collection theProfileUris) {
+			Validate.notEmpty(theProfileUris, "theProfileUris must not be null or empty");
+			myProfiles.add(theProfileUris);
 			return this;
 		}
 
@@ -1796,13 +1877,6 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		public IQuery withProfile(String theProfileUri) {
 			Validate.notBlank(theProfileUri, "theProfileUri must not be null or empty");
 			myProfiles.add(Collections.singletonList(theProfileUri));
-			return this;
-		}
-
-		@Override
-		public IQuery withAnyProfile(Collection<String> theProfileUris) {
-			Validate.notEmpty(theProfileUris, "theProfileUris must not be null or empty");
-			myProfiles.add(theProfileUris);
 			return this;
 		}
 
@@ -1822,12 +1896,13 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 	}
 
+	@SuppressWarnings("rawtypes")
 	private static class SortInternal implements ISort {
 
+		private SortOrderEnum myDirection;
 		private SearchInternal myFor;
 		private String myParamName;
 		private String myParamValue;
-		private SortOrderEnum myDirection;
 
 		public SortInternal(SearchInternal theFor) {
 			myFor = theFor;
@@ -1896,7 +1971,6 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		}
 	}
 
-
 	private final class TransactionExecutable<T> extends BaseClientExecutable<ITransactionTyped<T>, T> implements ITransactionTyped<T> {
 
 		private IBaseBundle myBaseBundle;
@@ -1932,7 +2006,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 				ResourceResponseHandler binding = new ResourceResponseHandler(myBaseBundle.getClass(), getPreferResponseTypes());
 				BaseHttpClientInvocation invocation = TransactionMethodBinding.createTransactionInvocation(myBaseBundle, myContext);
 				return (T) invoke(params, binding, invocation);
-//			} else if (myRawBundle != null) {
+				// } else if (myRawBundle != null) {
 			} else {
 				StringResponseHandler binding = new StringResponseHandler();
 				/*
@@ -1952,7 +2026,6 @@ public class GenericClient extends BaseClient implements IGenericClient {
 	}
 
 	private final class TransactionInternal implements ITransaction {
-
 
 		@Override
 		public ITransactionTyped<String> withBundle(String theBundle) {
@@ -1974,134 +2047,10 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 	}
 
-	private class PatchInternal extends BaseClientExecutable<IPatchExecutable, MethodOutcome> implements IPatch, IPatchWithBody, IPatchExecutable, IPatchWithQuery, IPatchWithQueryTyped {
+	private class UpdateInternal extends BaseSearch<IUpdateExecutable, IUpdateWithQueryTyped, MethodOutcome>
+			implements IUpdate, IUpdateTyped, IUpdateExecutable, IUpdateWithQuery, IUpdateWithQueryTyped {
 
-		private CriterionList myCriterionList;
-		private IIdType myId;
-		private PreferReturnEnum myPrefer;
-		private PatchTypeEnum myPatchType;
-		private String myPatchBody;
-		private String mySearchUrl;
-		private String myResourceType;
-
-		@Override
-		public IPatchWithQueryTyped and(ICriterion<?> theCriterion) {
-			myCriterionList.add((ICriterionInternal) theCriterion);
-			return this;
-		}
-
-		@Override
-		public IPatchWithQuery conditional(String theResourceType) {
-			Validate.notBlank(theResourceType, "theResourceType must not be null");
-			myResourceType = theResourceType;
-			myCriterionList = new CriterionList();
-			return this;
-		}
-
-		// TODO: This is not longer used.. Deprecate it or just remove it?
-		@Override
-		public IPatchWithBody conditionalByUrl(String theSearchUrl) {
-			mySearchUrl = validateAndEscapeConditionalUrl(theSearchUrl);
-			return this;
-		}
-
-		@Override
-		public MethodOutcome execute() {
-
-			if (myPatchType == null) {
-				throw new InvalidRequestException("No patch type supplied, cannot invoke server");
-			}
-			if (myPatchBody == null) {
-				throw new InvalidRequestException("No patch body supplied, cannot invoke server");
-			}
-
-			BaseHttpClientInvocation invocation;
-			if (isNotBlank(mySearchUrl)) {
-				invocation = MethodUtil.createPatchInvocation(myContext, mySearchUrl, myPatchType, myPatchBody);
-			} else if (myCriterionList != null) {
-				invocation = MethodUtil.createPatchInvocation(myContext, myPatchType, myPatchBody, myResourceType, myCriterionList.toParamList());
-			} else {
-				if (myId == null || myId.hasIdPart() == false) {
-					throw new InvalidRequestException("No ID supplied for resource to patch, can not invoke server");
-				}
-				invocation = MethodUtil.createPatchInvocation(myContext, myId, myPatchType, myPatchBody);
-			}
-
-			addPreferHeader(myPrefer, invocation);
-
-			OutcomeResponseHandler binding = new OutcomeResponseHandler(myPrefer);
-
-			Map<String, List<String>> params = new HashMap<String, List<String>>();
-			return invoke(params, binding, invocation);
-
-		}
-
-		@Override
-		public IPatchExecutable prefer(PreferReturnEnum theReturn) {
-			myPrefer = theReturn;
-			return this;
-		}
-
-		@Override
-		public IPatchWithQueryTyped where(ICriterion<?> theCriterion) {
-			myCriterionList.add((ICriterionInternal) theCriterion);
-			return this;
-		}
-
-		@Override
-		public IPatchExecutable withId(IIdType theId) {
-			if (theId == null) {
-				throw new NullPointerException("theId can not be null");
-			}
-			if (theId.hasIdPart() == false) {
-				throw new NullPointerException("theId must not be blank and must contain an ID, found: " + theId.getValue());
-			}
-			myId = theId;
-			return this;
-		}
-
-		@Override
-		public IPatchExecutable withId(String theId) {
-			if (theId == null) {
-				throw new NullPointerException("theId can not be null");
-			}
-			if (isBlank(theId)) {
-				throw new NullPointerException("theId must not be blank and must contain an ID, found: " + theId);
-			}
-			myId = new IdDt(theId);
-			return this;
-		}
-
-		@Override
-		public IPatchWithBody withBody(String thePatchBody) {
-			Validate.notBlank(thePatchBody, "thePatchBody must not be blank");
-
-			myPatchBody = thePatchBody;
-
-			EncodingEnum encoding = EncodingEnum.detectEncodingNoDefault(thePatchBody);
-			if (encoding == EncodingEnum.XML) {
-				myPatchType = PatchTypeEnum.XML_PATCH;
-			} else if (encoding == EncodingEnum.JSON) {
-				myPatchType = PatchTypeEnum.JSON_PATCH;
-			} else {
-				throw new IllegalArgumentException("Unable to determine encoding of patch");
-			}
-
-			return this;
-		}
-
-		@Override
-		public IPatchWithQuery conditional(Class<? extends IBaseResource> theClass) {
-			Validate.notNull(theClass, "theClass must not be null");
-			String resourceType = myContext.getResourceDefinition(theClass).getName();
-			return conditional(resourceType);
-		}
-
-	}
-
-	private class UpdateInternal extends BaseClientExecutable<IUpdateExecutable, MethodOutcome> implements IUpdate, IUpdateTyped, IUpdateExecutable, IUpdateWithQuery, IUpdateWithQueryTyped {
-
-		private CriterionList myCriterionList;
+		private boolean myConditional;
 		private IIdType myId;
 		private PreferReturnEnum myPrefer;
 		private IBaseResource myResource;
@@ -2109,14 +2058,8 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		private String mySearchUrl;
 
 		@Override
-		public IUpdateWithQueryTyped and(ICriterion<?> theCriterion) {
-			myCriterionList.add((ICriterionInternal) theCriterion);
-			return this;
-		}
-
-		@Override
 		public IUpdateWithQuery conditional() {
-			myCriterionList = new CriterionList();
+			myConditional = true;
 			return this;
 		}
 
@@ -2140,8 +2083,8 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			BaseHttpClientInvocation invocation;
 			if (mySearchUrl != null) {
 				invocation = MethodUtil.createUpdateInvocation(myContext, myResource, myResourceBody, mySearchUrl);
-			} else if (myCriterionList != null) {
-				invocation = MethodUtil.createUpdateInvocation(myContext, myResource, myResourceBody, myCriterionList.toParamList());
+			} else if (myConditional) {
+				invocation = MethodUtil.createUpdateInvocation(myContext, myResource, myResourceBody, getParamMap());
 			} else {
 				if (myId == null) {
 					myId = myResource.getIdElement();
@@ -2179,12 +2122,6 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		public IUpdateTyped resource(String theResourceBody) {
 			Validate.notBlank(theResourceBody, "Body can not be null or blank");
 			myResourceBody = theResourceBody;
-			return this;
-		}
-
-		@Override
-		public IUpdateWithQueryTyped where(ICriterion<?> theCriterion) {
-			myCriterionList.add((ICriterionInternal) theCriterion);
 			return this;
 		}
 

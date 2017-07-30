@@ -20,19 +20,19 @@ package ca.uhn.fhir.rest.gclient;
  * #L%
  */
 
-public interface ISort {
+public interface ISort<T> {
 
 	/**
 	 * Sort ascending 
 	 */
-	IQuery ascending(IParam theParam);
+	IQuery<T> ascending(IParam theParam);
 
 	/**
 	 * Sort ascending 
 	 * 
 	 * @param theParam The param name, e.g. "address"
 	 */
-	IQuery ascending(String theParam);
+	IQuery<T> ascending(String theParam);
 
 	/**
 	 * Sort by the default order. Note that as of STU3, there is no longer
@@ -40,7 +40,7 @@ public interface ISort {
 	 * technically implies "ascending" but it makes more sense to use 
 	 * {@link #ascending(IParam)}
 	 */
-	IQuery defaultOrder(IParam theParam);
+	IQuery<T> defaultOrder(IParam theParam);
 
 	/**
 	 * Sort descending
@@ -48,13 +48,13 @@ public interface ISort {
 	 * @param theParam A query param - Could be a constant such as <code>Patient.ADDRESS</code> or a custom 
 	 * param such as <code>new StringClientParam("foo")</code>
 	 */
-	IQuery descending(IParam theParam);
+	IQuery<T> descending(IParam theParam);
 	
 	/**
 	 * Sort ascending 
 	 * 
 	 * @param theParam The param name, e.g. "address"
 	 */
-	IQuery descending(String theParam);
+	IQuery<T> descending(String theParam);
 
 }

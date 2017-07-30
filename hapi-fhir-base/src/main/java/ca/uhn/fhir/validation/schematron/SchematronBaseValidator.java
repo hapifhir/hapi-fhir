@@ -27,6 +27,7 @@ import java.util.*;
 import javax.xml.transform.stream.StreamSource;
 
 import org.apache.commons.io.IOUtils;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.oclc.purl.dsdl.svrl.SchematronOutputType;
 
@@ -39,6 +40,7 @@ import com.phloc.schematron.xslt.SchematronResourceSCH;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.validation.*;
 
 /**
@@ -57,6 +59,14 @@ public class SchematronBaseValidator implements IValidatorModule {
 	@Override
 	public void validateResource(IValidationContext<IBaseResource> theCtx) {
 
+		if (theCtx.getResource() instanceof IBaseBundle) {
+			IBaseBundle bundle = (IBaseBundle) theCtx.getResource();
+			List<IBaseResource> subResources = BundleUtil.toListOfResources(myCtx, bundle);
+			for (IBaseResource nextSubResource : subResources) {
+				validateResource(ValidationContext.subContext(theCtx, nextSubResource));
+			}
+		}
+		
 		ISchematronResource sch = getSchematron(theCtx);
 		String resourceAsString;
 		if (theCtx.getResourceAsStringEncoding() == EncodingEnum.XML) {

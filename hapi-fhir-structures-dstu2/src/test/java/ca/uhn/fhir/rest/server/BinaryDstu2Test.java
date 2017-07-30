@@ -25,9 +25,9 @@ import org.eclipse.jetty.servlet.ServletHolder;
 import org.junit.*;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu2.resource.Binary;
+import ca.uhn.fhir.model.dstu2.resource.Bundle;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.annotation.*;
 import ca.uhn.fhir.rest.api.Constants;
@@ -183,8 +183,8 @@ public class BinaryDstu2Test {
 
 		ourLog.info(responseContent);
 
-		Bundle bundle = ourCtx.newJsonParser().parseBundle(responseContent);
-		Binary bin = (Binary) bundle.getEntries().get(0).getResource();
+		Bundle bundle = ourCtx.newJsonParser().parseResource(Bundle.class, responseContent);
+		Binary bin = (Binary) bundle.getEntry().get(0).getResource();
 
 		assertEquals("text/plain", bin.getContentType());
 		assertArrayEquals(new byte[] { 1, 2, 3, 4 }, bin.getContent());
@@ -201,8 +201,8 @@ public class BinaryDstu2Test {
 
 		ourLog.info(responseContent);
 
-		Bundle bundle = ourCtx.newXmlParser().parseBundle(responseContent);
-		Binary bin = (Binary) bundle.getEntries().get(0).getResource();
+		Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
+		Binary bin = (Binary) bundle.getEntry().get(0).getResource();
 
 		assertEquals("text/plain", bin.getContentType());
 		assertArrayEquals(new byte[] { 1, 2, 3, 4 }, bin.getContent());

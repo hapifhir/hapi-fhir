@@ -29,10 +29,15 @@ import ca.uhn.fhir.util.ObjectUtil;
 abstract class BaseValidationContext<T> implements IValidationContext<T> {
 
 	protected final FhirContext myFhirContext;
-	private List<SingleValidationMessage> myMessages = new ArrayList<SingleValidationMessage>();
 
+	private List<SingleValidationMessage> myMessages;
 	BaseValidationContext(FhirContext theFhirContext) {
+		this(theFhirContext, new ArrayList<SingleValidationMessage>());
+	}
+
+	BaseValidationContext(FhirContext theFhirContext, List<SingleValidationMessage> theMessages) {
 		myFhirContext = theFhirContext;
+		myMessages = theMessages;
 	}
 
 	@Override
@@ -44,6 +49,11 @@ abstract class BaseValidationContext<T> implements IValidationContext<T> {
 	@Override
 	public FhirContext getFhirContext() {
 		return myFhirContext;
+	}
+
+	@Override
+	public List<SingleValidationMessage> getMessages() {
+		return myMessages;
 	}
 
 	@Override

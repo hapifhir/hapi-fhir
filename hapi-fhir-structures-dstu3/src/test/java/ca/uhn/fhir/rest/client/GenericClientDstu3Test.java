@@ -114,8 +114,13 @@ public class GenericClientDstu3Test {
 				.returnBundle(Bundle.class)
 				.execute();
 
-		assertEquals("http://example.com/fhir/EpisodeOfCare?patient=123&_revinclude=Encounter%3Aepisodeofcare&_revinclude%3Arecurse=Observation%3Aencounter",
-				capt.getAllValues().get(idx).getURI().toString());
+		String expected = "http://example.com/fhir/EpisodeOfCare?patient=123&_revinclude=Encounter%3Aepisodeofcare&_revinclude%3Arecurse=Observation%3Aencounter";
+		String actual = capt.getAllValues().get(idx).getURI().toString();
+
+		ourLog.info("EXP: {}", expected);
+		ourLog.info("ACT: {}", actual);
+
+		assertEquals(expected, actual);
 		idx++;
 
 	}
@@ -1524,17 +1529,6 @@ public class GenericClientDstu3Test {
 		assertEquals("http://example.com/fhir/Device?url=http://foo.com", UrlUtil.unescape(capt.getAllValues().get(idx).getURI().toString()));
 		idx++;
 
-	}
-
-	@Test
-	public void testSearchForUnknownType() throws Exception {
-		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
-		try {
-			client.search(new UriDt("?aaaa"));
-			fail();
-		} catch (IllegalArgumentException e) {
-			assertEquals("Unable to determine the resource type from the given URI: ?aaaa", e.getMessage());
-		}
 	}
 
 	@Test
