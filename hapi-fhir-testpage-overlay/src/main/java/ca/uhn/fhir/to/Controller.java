@@ -121,7 +121,7 @@ public class Controller extends BaseController {
 
 		long start = System.currentTimeMillis();
 		try {
-			client.delete((Class<? extends IBaseResource>) def.getImplementingClass(), new IdDt(id));
+			client.delete().resourceById(new IdDt(id)).execute();
 		} catch (Exception e) {
 			returnsResource = handleClientException(client, e, theModel);
 		}
@@ -129,57 +129,6 @@ public class Controller extends BaseController {
 		processAndAddLastClientInvocation(client, returnsResource, theModel, delay, outcomeDescription, interceptor, theRequest);
 
 		ourLog.info(logPrefix(theModel) + "Deleted resource of type " + def.getName());
-
-		return "result";
-	}
-
-	@RequestMapping(value = { "/get-tags" })
-	public String actionGetTags(HttpServletRequest theReq, HomeRequest theRequest, BindingResult theBindingResult, ModelMap theModel) {
-		addCommonParams(theReq, theRequest, theModel);
-
-		CaptureInterceptor interceptor = new CaptureInterceptor();
-		GenericClient client = theRequest.newClient(theReq, getContext(theRequest), myConfig, interceptor);
-
-		Class<? extends IBaseResource> resType = null;
-		ResultType returnsResource = ResultType.TAGLIST;
-		String outcomeDescription = "Tag List";
-
-		long start = System.currentTimeMillis();
-		try {
-			if (isNotBlank(theReq.getParameter(PARAM_RESOURCE))) {
-				RuntimeResourceDefinition def;
-				try {
-					def = getResourceType(theRequest, theReq);
-				} catch (ServletException e) {
-					theModel.put("errorMsg", toDisplayError(e.toString(), e));
-					return "resource";
-				}
-
-				resType = (Class<? extends IBaseResource>) def.getImplementingClass();
-				String id = theReq.getParameter("resource-tags-id");
-				if (isNotBlank(id)) {
-					String vid = theReq.getParameter("resource-tags-vid");
-					if (isNotBlank(vid)) {
-						client.getTags().forResource(resType, id, vid).execute();
-						ourLog.info(logPrefix(theModel) + "Got tags for type " + def.getName() + " ID " + id + " version" + vid);
-					} else {
-						client.getTags().forResource(resType, id).execute();
-						ourLog.info(logPrefix(theModel) + "Got tags for type " + def.getName() + " ID " + id);
-					}
-				} else {
-					client.getTags().forResource(resType).execute();
-					ourLog.info(logPrefix(theModel) + "Got tags for type " + def.getName());
-				}
-			} else {
-				client.getTags().execute();
-				ourLog.info(logPrefix(theModel) + "Got tags for server");
-			}
-		} catch (Exception e) {
-			returnsResource = handleClientException(client, e, theModel);
-		}
-		long delay = System.currentTimeMillis() - start;
-
-		processAndAddLastClientInvocation(client, returnsResource, theModel, delay, outcomeDescription, interceptor, theRequest);
 
 		return "result";
 	}
@@ -467,7 +416,7 @@ public class Controller extends BaseController {
 
 		Class<? extends IBaseBundle> bundleType;
 		bundleType = (Class<? extends IBaseBundle>) client.getFhirContext().getResourceDefinition("Bundle").getImplementingClass();
-		IQueryTyped<? extends IBaseBundle> queryTyped = query.returnBundle(bundleType);
+		IQuery<?> queryTyped = query.returnBundle(bundleType);
 
 		long start = System.currentTimeMillis();
 		ResultType returnsResource;

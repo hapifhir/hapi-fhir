@@ -21,7 +21,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu2.resource.Bundle;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
-import ca.uhn.fhir.model.valueset.BundleTypeEnum;
+import ca.uhn.fhir.model.dstu2.valueset.BundleTypeEnum;
 import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.util.PortUtil;
@@ -51,7 +51,7 @@ public class BundleTypeInResponseTest {
 		
 		Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
 		assertEquals(1, bundle.getEntry().size());
-		assertEquals(BundleTypeEnum.SEARCHSET, bundle.getTypeElement().getValueAsEnum());
+		assertEquals(BundleTypeEnum.SEARCH_RESULTS, bundle.getTypeElement().getValueAsEnum());
 	}
 
 

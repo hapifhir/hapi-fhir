@@ -4,7 +4,8 @@ import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.model.Enumerations.AdministrativeGender;
@@ -15,53 +16,61 @@ import ca.uhn.fhir.context.FhirContext;
 
 public class FhirTerserTest {
 
-	private static FhirContext ourCtx = FhirContext.forR4();
+  private static FhirContext ourCtx = FhirContext.forR4();
 
-	@Test
-	public void testGetAllPopulatedChildElementsOfType() {
+  private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirTerserTest.class);
 
-		Patient p = new Patient();
-		p.setGender(AdministrativeGender.MALE);
-		p.addIdentifier().setSystem("urn:foo");
-		p.addAddress().addLine("Line1");
-		p.addAddress().addLine("Line2");
-		p.addName().setFamily("Line3");
+  @Test
+  public void testGetAllPopulatedChildElementsOfType() {
 
-		FhirTerser t = ourCtx.newTerser();
-		List<StringType> strings = t.getAllPopulatedChildElementsOfType(p, StringType.class);
+    Patient p = new Patient();
+    p.setGender(AdministrativeGender.MALE);
+    p.addIdentifier().setSystem("urn:foo");
+    p.addAddress().addLine("Line1");
+    p.addAddress().addLine("Line2");
+    p.addName().setFamily("Line3");
 
-		assertEquals(3, strings.size());
-		assertThat(strings, containsInAnyOrder(new StringType("Line1"), new StringType("Line2"), new StringType("Line3")));
+    FhirTerser t = ourCtx.newTerser();
+    List<StringType> strings = t.getAllPopulatedChildElementsOfType(p, StringType.class);
 
-	}
+    assertEquals(3, strings.size());
 
-	@Test
-	public void testMultiValueTypes() {
+    Set<String> allStrings = new HashSet<>();
+    for (StringType next : strings) {
+      allStrings.add(next.getValue());
+    }
 
-		Observation obs = new Observation();
-		obs.setValue(new Quantity(123L));
+    assertThat(allStrings, containsInAnyOrder("Line1", "Line2", "Line3"));
 
-		FhirTerser t = ourCtx.newTerser();
+  }
 
-		// As string
-		{
-			List<Object> values = t.getValues(obs, "Observation.valueString");
-			assertEquals(0, values.size());
-		}
+  @Test
+  public void testMultiValueTypes() {
 
-		// As quantity
-		{
-			List<Object> values = t.getValues(obs, "Observation.valueQuantity");
-			assertEquals(1, values.size());
-			Quantity actual = (Quantity) values.get(0);
-			assertEquals("123", actual.getValueElement().getValueAsString());
-		}
-	}
+    Observation obs = new Observation();
+    obs.setValue(new Quantity(123L));
 
-	@Test
-	public void testTerser() {
+    FhirTerser t = ourCtx.newTerser();
 
-		//@formatter:off
+    // As string
+    {
+      List<Object> values = t.getValues(obs, "Observation.valueString");
+      assertEquals(0, values.size());
+    }
+
+    // As quantity
+    {
+      List<Object> values = t.getValues(obs, "Observation.valueQuantity");
+      assertEquals(1, values.size());
+      Quantity actual = (Quantity) values.get(0);
+      assertEquals("123", actual.getValueElement().getValueAsString());
+    }
+  }
+
+  @Test
+  public void testTerser() {
+
+    //@formatter:off
 		String msg = "<Observation xmlns=\"http://hl7.org/fhir\">\n" + 
 			"    <text>\n" + 
 			"        <status value=\"empty\"/>\n" + 
@@ -92,18 +101,18 @@ public class FhirTerserTest {
 			"</Observation>";
 		//@formatter:on
 
-		Observation parsed = ourCtx.newXmlParser().parseResource(Observation.class, msg);
-		FhirTerser t = ourCtx.newTerser();
+    Observation parsed = ourCtx.newXmlParser().parseResource(Observation.class, msg);
+    FhirTerser t = ourCtx.newTerser();
 
-		List<Reference> elems = t.getAllPopulatedChildElementsOfType(parsed, Reference.class);
-		assertEquals(2, elems.size());
-		assertEquals("cid:patient@bundle", elems.get(0).getReferenceElement().getValue());
-		assertEquals("cid:device@bundle", elems.get(1).getReferenceElement().getValue());
-	}
+    List<Reference> elems = t.getAllPopulatedChildElementsOfType(parsed, Reference.class);
+    assertEquals(2, elems.size());
+    assertEquals("cid:patient@bundle", elems.get(0).getReferenceElement().getValue());
+    assertEquals("cid:device@bundle", elems.get(1).getReferenceElement().getValue());
+  }
 
-	@AfterClass
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
+  @AfterClass
+  public static void afterClassClearContext() {
+    TestUtil.clearAllStaticFieldsForUnitTest();
+  }
 
 }

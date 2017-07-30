@@ -296,10 +296,10 @@ public class SearchR4Test {
 					.search()
 					.forResource(Patient.class)
 					.where(new StringClientParam("foo").matches().value("bar"))
-					.encodedJson()
 					.prettyPrint()
 					.usingStyle(SearchStyleEnum.POST)
 					.returnBundle(org.hl7.fhir.r4.model.Bundle.class)
+					.encodedJson()
 					.execute();
 			fail();
 		} catch (InvalidRequestException e) {

@@ -288,9 +288,8 @@ public class GenericJaxRsClientDstu3Test {
 
 	}
 
-	@SuppressWarnings("deprecation")
 	@Test
-	public void testCreateNonFluent() throws Exception {
+	public void testCreate2() throws Exception {
 		ourResponseStatus = Constants.STATUS_HTTP_204_NO_CONTENT;
 
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort + "/fhir");
@@ -300,7 +299,7 @@ public class GenericJaxRsClientDstu3Test {
 		Patient p = new Patient();
 		p.addName().setFamily("FOOFAMILY");
 
-		client.create(p);
+		client.create().resource(p).execute();
 
 		assertEquals(1, ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE).size());
 		assertEquals(EncodingEnum.XML.getResourceContentTypeNonLegacy() + Constants.HEADER_SUFFIX_CT_UTF_8, ourRequestFirstHeaders.get(Constants.HEADER_CONTENT_TYPE).getValue().replace(";char", "; char"));
@@ -392,16 +391,10 @@ public class GenericJaxRsClientDstu3Test {
 
 		
 
-		client.delete(Patient.class, new IdType("Patient/123").getValue());
+		client.delete().resourceById(new IdType("Patient/123")).execute();
 		assertEquals("DELETE", ourRequestMethod);
 		assertEquals("http://localhost:" + ourPort + "/fhir/Patient/123", ourRequestUri);
 		
-
-		client.delete(Patient.class, "123");
-		assertEquals("DELETE", ourRequestMethod);
-		assertEquals("http://localhost:" + ourPort + "/fhir/Patient/123", ourRequestUri);
-		
-
 	}
 
 	@Test

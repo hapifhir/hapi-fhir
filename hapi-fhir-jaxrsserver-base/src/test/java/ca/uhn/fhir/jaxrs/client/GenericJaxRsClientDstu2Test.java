@@ -23,7 +23,6 @@ import com.google.common.collect.*;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jaxrs.server.test.RandomServerPortProvider;
-import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.dstu2.composite.IdentifierDt;
@@ -61,7 +60,7 @@ public class GenericJaxRsClientDstu2Test {
 	}
 
 	private String getPatientFeedWithOneResult() {
-		//@formatter:off
+		
 		String msg = "<Bundle xmlns=\"http://hl7.org/fhir\">\n" + 
 				"<id>d039f91a-cc3c-4013-988e-af4d8d0614bd</id>\n" + 
 				"<entry>\n" + 
@@ -77,7 +76,7 @@ public class GenericJaxRsClientDstu2Test {
 				+ "</resource>\n"  
 				+ "   </entry>\n"  
 				+ "</Bundle>";
-		//@formatter:on
+		
 		return msg;
 	}
 
@@ -189,12 +188,8 @@ public class GenericJaxRsClientDstu2Test {
 
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort + "/fhir");
 
-		
+		Conformance resp = client.capabilities().ofType(Conformance.class).execute();
 
-		//@formatter:off
-		Conformance resp = (Conformance)client.conformance();
-
-		//@formatter:on
 		assertEquals("http://localhost:" + ourPort + "/fhir/metadata", ourRequestUri);
 		assertEquals("COPY", resp.getCopyright());
 		assertEquals("GET", ourRequestMethod);
@@ -292,27 +287,7 @@ public class GenericJaxRsClientDstu2Test {
 
 	}
 
-	@SuppressWarnings("deprecation")
-	@Test
-	public void testCreateNonFluent() throws Exception {
-		ourResponseStatus = Constants.STATUS_HTTP_204_NO_CONTENT;
 
-		IGenericClient client = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort + "/fhir");
-
-		
-
-		Patient p = new Patient();
-		p.addName().addFamily("FOOFAMILY");
-
-		client.create(p);
-
-		assertEquals(1, ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE).size());
-		assertEquals(EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, ourRequestFirstHeaders.get(Constants.HEADER_CONTENT_TYPE).getValue().replace(";char", "; char"));
-		assertThat(ourRequestBodyString, containsString("<family value=\"FOOFAMILY\"/>"));
-		assertEquals("http://localhost:" + ourPort + "/fhir/Patient", ourRequestUri);
-		assertEquals("POST", ourRequestMethod);
-		
-	}
 
 	@Test
 	public void testCreatePrefer() throws Exception {
@@ -387,25 +362,18 @@ public class GenericJaxRsClientDstu2Test {
 
 	}
 
-	@SuppressWarnings("deprecation")
 	@Test
-	public void testDeleteNonFluent() throws Exception {
+	public void testDelete() throws Exception {
 		ourResponseStatus = Constants.STATUS_HTTP_204_NO_CONTENT;
 		
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort + "/fhir");
 
 		
 
-		client.delete(Patient.class, new IdDt("Patient/123"));
+		client.delete().resourceById(new IdDt("Patient/123")).execute();
 		assertEquals("DELETE", ourRequestMethod);
 		assertEquals("http://localhost:" + ourPort + "/fhir/Patient/123", ourRequestUri);
 		
-
-		client.delete(Patient.class, "123");
-		assertEquals("DELETE", ourRequestMethod);
-		assertEquals("http://localhost:" + ourPort + "/fhir/Patient/123", ourRequestUri);
-		
-
 	}
 
 	@Test
@@ -421,18 +389,18 @@ public class GenericJaxRsClientDstu2Test {
 		
 		ca.uhn.fhir.model.dstu2.resource.Bundle response;
 
-		//@formatter:off
+		
 		response = client
 				.history()
 				.onServer()
 				.andReturnBundle(ca.uhn.fhir.model.dstu2.resource.Bundle.class)
 				.execute();
-		//@formatter:on
+		
 		assertEquals("http://localhost:" + ourPort + "/fhir/_history", ourRequestUri);
 		assertEquals(1, response.getEntry().size());
 		
 
-		//@formatter:off
+		
 		response = client
 				.history()
 				.onServer()
@@ -440,46 +408,46 @@ public class GenericJaxRsClientDstu2Test {
 				.since((Date)null)
 				.count(null)
 				.execute();
-		//@formatter:on
+		
 		assertEquals("http://localhost:" + ourPort + "/fhir/_history", ourRequestUri);
 		assertEquals(1, response.getEntry().size());
 		
 
-		//@formatter:off
+		
 		response = client
 				.history()
 				.onServer()
 				.andReturnBundle(ca.uhn.fhir.model.dstu2.resource.Bundle.class)
 				.since(new InstantDt())
 				.execute();
-		//@formatter:on
+		
 		assertEquals("http://localhost:" + ourPort + "/fhir/_history", ourRequestUri);
 		assertEquals(1, response.getEntry().size());
 		
 
-		//@formatter:off
+		
 		response = client
 				.history()
 				.onType(Patient.class)
 				.andReturnBundle(ca.uhn.fhir.model.dstu2.resource.Bundle.class)
 				.execute();
-		//@formatter:on
+		
 		assertEquals("http://localhost:" + ourPort + "/fhir/Patient/_history", ourRequestUri);
 		assertEquals(1, response.getEntry().size());
 		
 
-		//@formatter:off
+		
 		response = client
 				.history()
 				.onInstance(new IdDt("Patient", "123"))
 				.andReturnBundle(ca.uhn.fhir.model.dstu2.resource.Bundle.class)
 				.execute();
-		//@formatter:on
+		
 		assertEquals("http://localhost:" + ourPort + "/fhir/Patient/123/_history", ourRequestUri);
 		assertEquals(1, response.getEntry().size());
 		
 
-		//@formatter:off
+		
 		response = client
 				.history()
 				.onInstance(new IdDt("Patient", "123"))
@@ -487,19 +455,19 @@ public class GenericJaxRsClientDstu2Test {
 				.count(123)
 				.since(new InstantDt("2001-01-02T11:22:33Z"))
 				.execute();
-		//@formatter:on
+		
 		assertThat(ourRequestUri, either(equalTo("http://localhost:" + ourPort + "/fhir/Patient/123/_history?_since=2001-01-02T11:22:33Z&_count=123")).or(equalTo("http://localhost:" + ourPort + "/fhir/Patient/123/_history?_count=123&_since=2001-01-02T11:22:33Z")));
 		assertEquals(1, response.getEntry().size());
 		
 
-		//@formatter:off
+		
 		response = client
 				.history()
 				.onInstance(new IdDt("Patient", "123"))
 				.andReturnBundle(ca.uhn.fhir.model.dstu2.resource.Bundle.class)
 				.since(new InstantDt("2001-01-02T11:22:33Z").getValue())
 				.execute();
-		//@formatter:on
+		
 		assertThat(ourRequestUri, containsString("_since=2001-01"));
 		assertEquals(1, response.getEntry().size());
 		
@@ -522,14 +490,14 @@ public class GenericJaxRsClientDstu2Test {
 
 		
 
-		//@formatter:off
+		
 		MetaDt resp = client
 				.meta()
 				.add()
 				.onResource(new IdDt("Patient/123"))
 				.meta(inMeta)
 				.execute();
-		//@formatter:on
+		
 		assertEquals("http://localhost:" + ourPort + "/fhir/Patient/123/$meta-add", ourRequestUri);
 		assertEquals("urn:profile:out", resp.getProfile().get(0).getValue());
 		assertEquals("POST", ourRequestMethod);
@@ -556,37 +524,37 @@ public class GenericJaxRsClientDstu2Test {
 
 		
 
-		//@formatter:off
+		
 		MetaDt resp = client
 				.meta()
 				.get(MetaDt.class)
 				.fromServer()
 				.execute();
-		//@formatter:on
+		
 		assertEquals("http://localhost:" + ourPort + "/fhir/$meta", ourRequestUri);
 		assertEquals("urn:profile:out", resp.getProfile().get(0).getValue());
 		assertEquals("GET", ourRequestMethod);
 		
 
-		//@formatter:off
+		
 		resp = client
 				.meta()
 				.get(MetaDt.class)
 				.fromType("Patient")
 				.execute();
-		//@formatter:on
+		
 		assertEquals("http://localhost:" + ourPort + "/fhir/Patient/$meta", ourRequestUri);
 		assertEquals("urn:profile:out", resp.getProfile().get(0).getValue());
 		assertEquals("GET", ourRequestMethod);
 		
 
-		//@formatter:off
+		
 		resp = client
 				.meta()
 				.get(MetaDt.class)
 				.fromResource(new IdDt("Patient/123"))
 				.execute();
-		//@formatter:on
+		
 		assertEquals("http://localhost:" + ourPort + "/fhir/Patient/123/$meta", ourRequestUri);
 		assertEquals("urn:profile:out", resp.getProfile().get(0).getValue());
 		assertEquals("GET", ourRequestMethod);
@@ -618,7 +586,7 @@ public class GenericJaxRsClientDstu2Test {
 
 		
 
-		//@formatter:off
+		
 		Parameters resp = client
 				.operation()
 				.onServer()
@@ -626,13 +594,13 @@ public class GenericJaxRsClientDstu2Test {
 				.withParameters(inParams)
 				.useHttpGet()
 				.execute();
-		//@formatter:on
+		
 		assertEquals("http://localhost:" + ourPort + "/fhir/$SOMEOPERATION?param1=STRINGVALIN1&param1=STRINGVALIN1b&param2=STRINGVALIN2", ourRequestUri);
 		assertEquals(respString, p.encodeResourceToString(resp));
 		assertEquals("GET", ourRequestMethod);
 		
 
-		//@formatter:off
+		
 		resp = client
 				.operation()
 				.onType(Patient.class)
@@ -640,13 +608,13 @@ public class GenericJaxRsClientDstu2Test {
 				.withParameters(inParams)
 				.useHttpGet()
 				.execute();
-		//@formatter:on		
+				
 		assertEquals("http://localhost:" + ourPort + "/fhir/Patient/$SOMEOPERATION?param1=STRINGVALIN1&param1=STRINGVALIN1b&param2=STRINGVALIN2", ourRequestUri);
 		assertEquals(respString, p.encodeResourceToString(resp));
 		assertEquals("GET", ourRequestMethod);
 		
 
-		//@formatter:off
+		
 		resp = client
 				.operation()
 				.onInstance(new IdDt("Patient", "123"))
@@ -654,7 +622,7 @@ public class GenericJaxRsClientDstu2Test {
 				.withParameters(inParams)
 				.useHttpGet()
 				.execute();
-		//@formatter:on		
+				
 		assertEquals("http://localhost:" + ourPort + "/fhir/Patient/123/$SOMEOPERATION?param1=STRINGVALIN1&param1=STRINGVALIN1b&param2=STRINGVALIN2", ourRequestUri);
 		assertEquals(respString, p.encodeResourceToString(resp));
 		assertEquals("GET", ourRequestMethod);
@@ -689,7 +657,7 @@ public class GenericJaxRsClientDstu2Test {
 
 		
 
-		//@formatter:off
+		
 		Parameters resp = client
 				.operation()
 				.onServer()
@@ -697,13 +665,13 @@ public class GenericJaxRsClientDstu2Test {
 				.withNoParameters(Parameters.class)
 				.useHttpGet()
 				.execute();
-		//@formatter:on
+		
 		assertEquals("http://localhost:" + ourPort + "/fhir/$SOMEOPERATION", ourRequestUri);
 		assertEquals(respString, p.encodeResourceToString(resp));
 		assertEquals("GET", ourRequestMethod);
 		
 
-		//@formatter:off
+		
 		resp = client
 				.operation()
 				.onType(Patient.class)
@@ -711,13 +679,13 @@ public class GenericJaxRsClientDstu2Test {
 				.withNoParameters(Parameters.class)
 				.useHttpGet()
 				.execute();
-		//@formatter:on		
+				
 		assertEquals("http://localhost:" + ourPort + "/fhir/Patient/$SOMEOPERATION", ourRequestUri);
 		assertEquals(respString, p.encodeResourceToString(resp));
 		assertEquals("GET", ourRequestMethod);
 		
 
-		//@formatter:off
+		
 		resp = client
 				.operation()
 				.onInstance(new IdDt("Patient", "123"))
@@ -725,7 +693,7 @@ public class GenericJaxRsClientDstu2Test {
 				.withNoParameters(Parameters.class)
 				.useHttpGet()
 				.execute();
-		//@formatter:on		
+				
 		assertEquals("http://localhost:" + ourPort + "/fhir/Patient/123/$SOMEOPERATION", ourRequestUri);
 		assertEquals(respString, p.encodeResourceToString(resp));
 		assertEquals("GET", ourRequestMethod);
@@ -794,13 +762,13 @@ public class GenericJaxRsClientDstu2Test {
 
 		
 
-		//@formatter:off
+		
 		Parameters resp = client
 				.operation()
 				.onServer()
 				.named("$SOMEOPERATION")
 				.withParameters(inParams).execute();
-		//@formatter:on
+		
 		assertEquals("http://localhost:" + ourPort + "/fhir/$SOMEOPERATION", ourRequestUri);
 		assertEquals(1, ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE).size());
 		assertEquals(EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, ourRequestFirstHeaders.get(Constants.HEADER_CONTENT_TYPE).getValue().replace(";char", "; char"));
@@ -827,7 +795,7 @@ public class GenericJaxRsClientDstu2Test {
 
 		
 
-		//@formatter:off
+		
 		Parameters resp = client
 				.operation()
 				.onServer()
@@ -835,7 +803,7 @@ public class GenericJaxRsClientDstu2Test {
 				.withParameter(Parameters.class, "name1", new StringDt("value1"))
 				.andParameter("name2", new StringDt("value1"))
 				.execute();
-		//@formatter:on
+		
 		assertEquals("http://localhost:" + ourPort + "/fhir/$SOMEOPERATION", ourRequestUri);
 		assertEquals(respString, p.encodeResourceToString(resp));
 		assertEquals(1, ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE).size());
@@ -848,7 +816,7 @@ public class GenericJaxRsClientDstu2Test {
 		 * Composite type
 		 */
 
-		//@formatter:off
+		
 		resp = client
 				.operation()
 				.onServer()
@@ -856,7 +824,7 @@ public class GenericJaxRsClientDstu2Test {
 				.withParameter(Parameters.class, "name1", new IdentifierDt("system1", "value1"))
 				.andParameter("name2", new StringDt("value1"))
 				.execute();
-		//@formatter:on
+		
 		assertEquals("http://localhost:" + ourPort + "/fhir/$SOMEOPERATION", ourRequestUri);
 		assertEquals(respString, p.encodeResourceToString(resp));
 		assertEquals(1, ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE).size());
@@ -870,7 +838,7 @@ public class GenericJaxRsClientDstu2Test {
 		 * Resource
 		 */
 
-		//@formatter:off
+		
 		resp = client
 				.operation()
 				.onServer()
@@ -878,7 +846,7 @@ public class GenericJaxRsClientDstu2Test {
 				.withParameter(Parameters.class, "name1", new IdentifierDt("system1", "value1"))
 				.andParameter("name2", new Patient().setActive(true))
 				.execute();
-		//@formatter:on
+		
 		assertEquals("http://localhost:" + ourPort + "/fhir/$SOMEOPERATION", ourRequestUri);
 		assertEquals(respString, p.encodeResourceToString(resp));
 		assertEquals(1, ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE).size());
@@ -920,14 +888,14 @@ public class GenericJaxRsClientDstu2Test {
 			}
 		};
 
-		//@formatter:off
+		
 		client
 				.operation()
 				.onServer()
 				.named("$SOMEOPERATION")
 				.withParameter(Parameters.class, "name1", weirdBase)
 				.execute();
-		//@formatter:on
+		
 	}
 
 	@Test
@@ -949,7 +917,7 @@ public class GenericJaxRsClientDstu2Test {
 
 		
 
-		//@formatter:off
+		
 		client
 				.operation()
 				.onInstance(new IdDt("http://foo/Patient/1"))
@@ -958,11 +926,11 @@ public class GenericJaxRsClientDstu2Test {
 				.andParameter("system", new UriDt("http://loinc.org"))
 				.useHttpGet()
 				.execute();
-		//@formatter:off
+		
 		
 		assertEquals("http://localhost:" + ourPort + "/fhir/Patient/1/$validate-code?code=8495-4&system=http%3A%2F%2Floinc.org", ourRequestUri);
 
-		//@formatter:off
+		
 		
 		client
 				.operation()
@@ -971,7 +939,7 @@ public class GenericJaxRsClientDstu2Test {
 				.withParameter(Parameters.class, "code", new CodeDt("8495-4"))
 				.andParameter("system", new UriDt("http://loinc.org"))
 				.execute();
-		//@formatter:off
+		
 		
 		assertEquals("http://localhost:" + ourPort + "/fhir/Patient/1/$validate-code", ourRequestUri);
 		ourLog.info(ourRequestBodyString);
@@ -1003,13 +971,13 @@ public class GenericJaxRsClientDstu2Test {
 
 		
 
-		//@formatter:off
+		
 		Parameters resp = client
 				.operation()
 				.onServer()
 				.named("$SOMEOPERATION")
 				.withParameters(inParams).execute();
-		//@formatter:on
+		
 		assertEquals("http://localhost:" + ourPort + "/fhir/$SOMEOPERATION", ourRequestUri);
 		assertEquals(respString, p.encodeResourceToString(resp));
 		assertEquals(1, ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE).size());
@@ -1018,13 +986,13 @@ public class GenericJaxRsClientDstu2Test {
 		assertEquals("POST", ourRequestMethod);
 		
 
-		//@formatter:off
+		
 		resp = client
 				.operation()
 				.onType(Patient.class)
 				.named("$SOMEOPERATION")
 				.withParameters(inParams).execute();
-		//@formatter:on		
+				
 		assertEquals("http://localhost:" + ourPort + "/fhir/Patient/$SOMEOPERATION", ourRequestUri);
 		assertEquals(respString, p.encodeResourceToString(resp));
 		assertEquals(1, ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE).size());
@@ -1033,13 +1001,13 @@ public class GenericJaxRsClientDstu2Test {
 		assertEquals("POST", ourRequestMethod);
 		
 
-		//@formatter:off
+		
 		resp = client
 				.operation()
 				.onInstance(new IdDt("Patient", "123"))
 				.named("$SOMEOPERATION")
 				.withParameters(inParams).execute();
-		//@formatter:on		
+				
 		assertEquals("http://localhost:" + ourPort + "/fhir/Patient/123/$SOMEOPERATION", ourRequestUri);
 		assertEquals(respString, p.encodeResourceToString(resp));
 		assertEquals(1, ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE).size());
@@ -1076,13 +1044,13 @@ public class GenericJaxRsClientDstu2Test {
 
 		
 
-		//@formatter:off
+		
 		Parameters resp = client
 				.operation()
 				.onServer()
 				.named("$SOMEOPERATION")
 				.withNoParameters(Parameters.class).execute();
-		//@formatter:on
+		
 		assertEquals("http://localhost:" + ourPort + "/fhir/$SOMEOPERATION", ourRequestUri);
 		assertEquals(respString, p.encodeResourceToString(resp));
 		assertEquals(1, ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE).size());
@@ -1091,13 +1059,13 @@ public class GenericJaxRsClientDstu2Test {
 		assertEquals("POST", ourRequestMethod);
 		
 
-		//@formatter:off
+		
 		resp = client
 				.operation()
 				.onType(Patient.class)
 				.named("$SOMEOPERATION")
 				.withNoParameters(Parameters.class).execute();
-		//@formatter:on		
+				
 		assertEquals("http://localhost:" + ourPort + "/fhir/Patient/$SOMEOPERATION", ourRequestUri);
 		assertEquals(respString, p.encodeResourceToString(resp));
 		assertEquals(1, ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE).size());
@@ -1106,13 +1074,13 @@ public class GenericJaxRsClientDstu2Test {
 		assertEquals("POST", ourRequestMethod);
 		
 
-		//@formatter:off
+		
 		resp = client
 				.operation()
 				.onInstance(new IdDt("Patient", "123"))
 				.named("$SOMEOPERATION")
 				.withNoParameters(Parameters.class).execute();
-		//@formatter:on		
+				
 		assertEquals("http://localhost:" + ourPort + "/fhir/Patient/123/$SOMEOPERATION", ourRequestUri);
 		assertEquals(respString, p.encodeResourceToString(resp));
 		assertEquals(1, ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE).size());
@@ -1147,12 +1115,12 @@ public class GenericJaxRsClientDstu2Test {
 		sourceBundle.getLinkOrCreate(IBaseBundle.LINK_PREV).setUrl("http://localhost:" + ourPort + "/fhir/prev");
 		sourceBundle.getLinkOrCreate(IBaseBundle.LINK_NEXT).setUrl("http://localhost:" + ourPort + "/fhir/next");
 
-		//@formatter:off
+		
 		ca.uhn.fhir.model.dstu2.resource.Bundle resp = client
 				.loadPage()
 				.next(sourceBundle)
 				.execute();
-		//@formatter:on
+		
 
 		assertEquals(1, resp.getEntry().size());
 		assertEquals("http://localhost:" + ourPort + "/fhir/next", ourRequestUri);
@@ -1187,12 +1155,12 @@ public class GenericJaxRsClientDstu2Test {
 		ca.uhn.fhir.model.dstu2.resource.Bundle sourceBundle = new ca.uhn.fhir.model.dstu2.resource.Bundle();
 		sourceBundle.getLinkOrCreate("previous").setUrl("http://localhost:" + ourPort + "/fhir/prev");
 
-		//@formatter:off
+		
 		ca.uhn.fhir.model.dstu2.resource.Bundle resp = client
 				.loadPage()
 				.previous(sourceBundle)
 				.execute();
-		//@formatter:on
+		
 
 		assertEquals(1, resp.getEntry().size());
 		assertEquals("http://localhost:" + ourPort + "/fhir/prev", ourRequestUri);
@@ -1205,12 +1173,12 @@ public class GenericJaxRsClientDstu2Test {
 		sourceBundle = new ca.uhn.fhir.model.dstu2.resource.Bundle();
 		sourceBundle.getLinkOrCreate("prev").setUrl("http://localhost:" + ourPort + "/fhir/prev");
 
-		//@formatter:off
+		
 		resp = client
 				.loadPage()
 				.previous(sourceBundle)
 				.execute();
-		//@formatter:on
+		
 
 		assertEquals(1, resp.getEntry().size());
 		assertEquals("http://localhost:" + ourPort + "/fhir/prev", ourRequestUri);
@@ -1260,7 +1228,7 @@ public class GenericJaxRsClientDstu2Test {
 	@Test
 	public void testReadUpdatedHeaderDoesntOverwriteResourceValue() throws Exception {
 
-		//@formatter:off
+		
 		final String input = "<Bundle xmlns=\"http://hl7.org/fhir\">\n" + 
 				"   <id value=\"e2ee823b-ee4d-472d-b79d-495c23f16b99\"/>\n" + 
 				"   <meta>\n" + 
@@ -1274,7 +1242,7 @@ public class GenericJaxRsClientDstu2Test {
 				"      <url value=\"http://localhost:58109/fhir/context/Patient?_pretty=true\"/>\n" + 
 				"   </link>\n" + 
 				"</Bundle>";
-		//@formatter:on
+		
 
 		
 		
@@ -1286,13 +1254,11 @@ public class GenericJaxRsClientDstu2Test {
 
 		ca.uhn.fhir.model.dstu2.resource.Bundle response;
 
-		//@formatter:off
 		response = client
 				.search()
 				.forResource(Patient.class)
 				.returnBundle(ca.uhn.fhir.model.dstu2.resource.Bundle.class)
 				.execute();
-		//@formatter:on
 
 		assertEquals("2015-06-22T15:48:57.554-04:00", ResourceMetadataKeyEnum.UPDATED.get(response).getValueAsString());
 	}
@@ -1309,13 +1275,11 @@ public class GenericJaxRsClientDstu2Test {
 
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort + "/fhir");
 
-		//@formatter:off
 		IBaseResource response = client.read()
 			.resource("Patient")
 			.withId("123")
 			.elementsSubset("name", "identifier")
 			.execute();
-		//@formatter:on
 
 		assertThat(ourRequestUri, either(equalTo("http://localhost:" + ourPort + "/fhir/Patient/123?_elements=name%2Cidentifier")).or(equalTo("http://localhost:" + ourPort + "/fhir/Patient/123?_elements=identifier%2Cname")));
 		assertEquals(Patient.class, response.getClass());
@@ -1335,7 +1299,7 @@ public class GenericJaxRsClientDstu2Test {
 
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort + "/fhir");
 
-		//@formatter:off
+		
 		try {
 			client.read()
 				.resource(Patient.class)
@@ -1346,7 +1310,6 @@ public class GenericJaxRsClientDstu2Test {
 		} catch (InvalidResponseException e) {
 			assertThat(e.getMessage(), containsString("String does not appear to be valid"));
 		}
-		//@formatter:on
 	}
 
 	@Test
@@ -1362,13 +1325,11 @@ public class GenericJaxRsClientDstu2Test {
 
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort + "/fhir");
 
-		//@formatter:off
 		Patient response = client.read()
 			.resource(Patient.class)
 			.withId("123")
 			.summaryMode(SummaryEnum.TEXT)
 			.execute();
-		//@formatter:on
 
 		assertEquals("http://localhost:" + ourPort + "/fhir/Patient/123?_summary=text", ourRequestUri);
 		assertEquals(Patient.class, response.getClass());
@@ -1389,15 +1350,14 @@ public class GenericJaxRsClientDstu2Test {
 
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort + "/fhir");
 
-		//@formatter:off
         Bundle response = client.search()
                 .forResource("Patient")
                 .where(Patient.NAME.matches().value("james"))
+                .returnBundle(Bundle.class)
                 .execute();
-        //@formatter:on
 
 		assertEquals("http://localhost:" + ourPort + "/fhir/Patient?name=james", ourRequestUri);
-		assertEquals(Patient.class, response.getEntries().get(0).getResource().getClass());
+		assertEquals(Patient.class, response.getEntry().get(0).getResource().getClass());
 
 	}
 
@@ -1415,55 +1375,55 @@ public class GenericJaxRsClientDstu2Test {
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort + "/fhir");
 		
 
-		//@formatter:off
+		
 		ca.uhn.fhir.model.dstu2.resource.Bundle response = client.search()
 				.byUrl("http://localhost:" + ourPort + "/AAA?name=http://foo|bar")
 				.encodedJson()
 				.returnBundle(ca.uhn.fhir.model.dstu2.resource.Bundle.class)
 				.execute();
-		//@formatter:on
+		
 		assertEquals("http://localhost:" + ourPort + "/AAA?name=http%3A//foo%7Cbar&_format=json", ourRequestUri);
 		assertNotNull(response);
 		
 
-		//@formatter:off
+		
 		response = client.search()
 				.byUrl("Patient?name=http://foo|bar")
 				.encodedJson()
 				.returnBundle(ca.uhn.fhir.model.dstu2.resource.Bundle.class)
 				.execute();
-		//@formatter:on
+		
 		assertEquals("http://localhost:" + ourPort + "/fhir/Patient?name=http%3A//foo%7Cbar&_format=json", ourRequestUri);
 		assertNotNull(response);
 		
 
-		//@formatter:off
+		
 		response = client.search()
 				.byUrl("/Patient?name=http://foo|bar")
 				.encodedJson()
 				.returnBundle(ca.uhn.fhir.model.dstu2.resource.Bundle.class)
 				.execute();
-		//@formatter:on
+		
 		assertEquals("http://localhost:" + ourPort + "/fhir/Patient?name=http%3A//foo%7Cbar&_format=json", ourRequestUri);
 		assertNotNull(response);
 		
 
-		//@formatter:off
+		
 		response = client.search()
 				.byUrl("Patient")
 				.returnBundle(ca.uhn.fhir.model.dstu2.resource.Bundle.class)
 				.execute();
-		//@formatter:on
+		
 		assertEquals("http://localhost:" + ourPort + "/fhir/Patient", ourRequestUri);
 		assertNotNull(response);
 		
 
-		//@formatter:off
+		
 		response = client.search()
 				.byUrl("Patient?")
 				.returnBundle(ca.uhn.fhir.model.dstu2.resource.Bundle.class)
 				.execute();
-		//@formatter:on
+		
 		assertEquals("http://localhost:" + ourPort + "/fhir/Patient", ourRequestUri);
 		assertNotNull(response);
 		
@@ -1490,13 +1450,13 @@ public class GenericJaxRsClientDstu2Test {
 
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort + "/fhir");
 
-		//@formatter:off
+		
 		ca.uhn.fhir.model.dstu2.resource.Bundle response = client.search()
 			.forResource("Observation")
 			.where(Patient.NAME.matches().value("FOO"))
 			.returnBundle(ca.uhn.fhir.model.dstu2.resource.Bundle.class)
 			.execute();
-		//@formatter:on
+		
 
 		Link link = response.getLink().get(0);
 		assertEquals("just trying add link", link.getRelation());
@@ -1521,16 +1481,17 @@ public class GenericJaxRsClientDstu2Test {
 
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort + "/fhir");
 
-		//@formatter:off
+		
         Bundle response = client.search()
                 .forResource("Patient")
                 .where(Patient.NAME.matches().value("james"))
                 .elementsSubset("name", "identifier")
+                .returnBundle(Bundle.class)
                 .execute();
-        //@formatter:on
+        
 
 		assertThat(ourRequestUri, either(equalTo("http://localhost:" + ourPort + "/fhir/Patient?name=james&_elements=name%2Cidentifier")).or(equalTo("http://localhost:" + ourPort + "/fhir/Patient?name=james&_elements=identifier%2Cname")));
-		assertEquals(Patient.class, response.getEntries().get(0).getResource().getClass());
+		assertEquals(Patient.class, response.getEntry().get(0).getResource().getClass());
 
 	}
 
@@ -1547,21 +1508,22 @@ public class GenericJaxRsClientDstu2Test {
 
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort + "/fhir");
 
-		//@formatter:off
+		
 		Bundle response = client.search()
 			.forResource("Patient")
 			.where(Patient.NAME.matches().value("james"))
 			.elementsSubset("name", "identifier")
 			.usingStyle(SearchStyleEnum.POST)
+         .returnBundle(Bundle.class)
 			.execute();
-		//@formatter:on
+		
 
 		assertEquals("http://localhost:" + ourPort + "/fhir/Patient/_search?_elements=identifier%2Cname", ourRequestUri);
 
 		//		assertThat(ourRequestUri,
 		//				either(equalTo("http://localhost:" + ourPort + "/fhir/Patient?name=james&_elements=name%2Cidentifier")).or(equalTo("http://localhost:" + ourPort + "/fhir/Patient?name=james&_elements=identifier%2Cname")));
 
-		assertEquals(Patient.class, response.getEntries().get(0).getResource().getClass());
+		assertEquals(Patient.class, response.getEntry().get(0).getResource().getClass());
 
 		assertEquals("name=james", ourRequestBodyString);
 
@@ -1583,15 +1545,16 @@ public class GenericJaxRsClientDstu2Test {
 
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort + "/fhir");
 
-		//@formatter:off
+		
 		Bundle response = client.search()
 			.forResource("Patient")
 			.where(Patient.NAME.matches().value("james"))
 			.elementsSubset("name", "identifier")
 			.usingStyle(SearchStyleEnum.POST)
 			.encodedJson()
+         .returnBundle(Bundle.class)
 			.execute();
-		//@formatter:on
+		
 
 		assertThat(ourRequestUri, containsString("http://localhost:" + ourPort + "/fhir/Patient/_search?"));
 		assertThat(ourRequestUri, containsString("_elements=identifier%2Cname"));
@@ -1599,7 +1562,7 @@ public class GenericJaxRsClientDstu2Test {
 		//		assertThat(ourRequestUri,
 		//				either(equalTo("http://localhost:" + ourPort + "/fhir/Patient?name=james&_elements=name%2Cidentifier")).or(equalTo("http://localhost:" + ourPort + "/fhir/Patient?name=james&_elements=identifier%2Cname")));
 
-		assertEquals(Patient.class, response.getEntries().get(0).getResource().getClass());
+		assertEquals(Patient.class, response.getEntry().get(0).getResource().getClass());
 
 		assertEquals("name=james", ourRequestBodyString);
 
@@ -1620,16 +1583,17 @@ public class GenericJaxRsClientDstu2Test {
 
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort + "/fhir");
 
-		//@formatter:off
+		
         Bundle response = client.search()
                 .forResource("Patient")
                 .where(Patient.NAME.matches().value("james"))
+                .returnBundle(Bundle.class)
                 .lastUpdated(new DateRangeParam("2011-01-01", "2012-01-01"))
                 .execute();
-        //@formatter:on
+        
 
 		assertEquals("http://localhost:" + ourPort + "/fhir/Patient?name=james&_lastUpdated=ge2011-01-01&_lastUpdated=le2012-01-01", ourRequestUri);
-		assertEquals(Patient.class, response.getEntries().get(0).getResource().getClass());
+		assertEquals(Patient.class, response.getEntry().get(0).getResource().getClass());
 
 	}
 
@@ -1646,18 +1610,19 @@ public class GenericJaxRsClientDstu2Test {
 
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort + "/fhir");
 
-		//@formatter:off
+		
         Bundle response = client.search()
                 .forResource("Patient")
                 .withProfile("http://foo1")
                 .withProfile("http://foo2")
                 .withSecurity("system1", "code1")
                 .withSecurity("system2", "code2")
+                .returnBundle(Bundle.class)
                 .execute();
-        //@formatter:on
+        
 
 		assertEquals("http://localhost:" + ourPort + "/fhir/Patient?_security=system1%7Ccode1&_security=system2%7Ccode2&_profile=http%3A%2F%2Ffoo1&_profile=http%3A%2F%2Ffoo2", ourRequestUri);
-		assertEquals(Patient.class, response.getEntries().get(0).getResource().getClass());
+		assertEquals(Patient.class, response.getEntry().get(0).getResource().getClass());
 
 	}
 
@@ -1676,13 +1641,14 @@ public class GenericJaxRsClientDstu2Test {
 
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort + "/fhir");
 
-		//@formatter:off
+		
 		Bundle response = client.search()
 				.forResource(Patient.class)
 				.encodedJson()
 				.revInclude(new Include("Provenance:target"))
+            .returnBundle(Bundle.class)
 				.execute();
-		//@formatter:on
+		
 
 		assertEquals("http://localhost:" + ourPort + "/fhir/Patient?_revinclude=Provenance%3Atarget&_format=json", ourRequestUri);
 
@@ -1701,16 +1667,17 @@ public class GenericJaxRsClientDstu2Test {
 
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort + "/fhir");
 
-		//@formatter:off
+		
         Bundle response = client.search()
                 .forResource("Patient")
                 .where(Patient.NAME.matches().value("james"))
                 .summaryMode(SummaryEnum.FALSE)
+                .returnBundle(Bundle.class)
                 .execute();
-        //@formatter:on
+        
 
 		assertEquals("http://localhost:" + ourPort + "/fhir/Patient?name=james&_summary=false", ourRequestUri);
-		assertEquals(Patient.class, response.getEntries().get(0).getResource().getClass());
+		assertEquals(Patient.class, response.getEntry().get(0).getResource().getClass());
 
 	}
 
@@ -1741,12 +1708,12 @@ public class GenericJaxRsClientDstu2Test {
 		p2.setId("Patient/2");
 		input.add(p2);
 
-		//@formatter:off
+		
         List<IBaseResource> response = client.transaction()
                 .withResources(input)
                 .encodedJson()
                 .execute();
-        //@formatter:on
+        
 
 		assertEquals("http://localhost:" + ourPort + "/fhir", ourRequestUri);
 		assertEquals(2, response.size());
@@ -1791,22 +1758,22 @@ public class GenericJaxRsClientDstu2Test {
 
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort + "/fhir");
 
-		//@formatter:off
+		
 		String response = client.transaction()
 			.withBundle(reqString)
 			.execute();
-		//@formatter:on
+		
 
 		assertEquals("http://localhost:" + ourPort + "/fhir/", ourRequestUri);
 		assertThat(response, containsString("\"Bundle\""));
 		assertEquals("application/json+fhir;charset=UTF-8", ourRequestFirstHeaders.get("Content-Type").getValue());
 
-		//@formatter:off
+		
         response = client.transaction()
                 .withBundle(reqString)
                 .encodedXml()
                 .execute();
-        //@formatter:on
+        
 
 		assertEquals("http://localhost:" + ourPort + "/fhir/", ourRequestUri);
 		assertEquals("application/xml+fhir;charset=UTF-8", ourRequestFirstHeaders.get("Content-Type").getValue());
@@ -1840,12 +1807,12 @@ public class GenericJaxRsClientDstu2Test {
 		p2.setId("Patient/2");
 		input.addEntry().setResource(p2);
 
-		//@formatter:off
+		
         ca.uhn.fhir.model.dstu2.resource.Bundle response = client.transaction()
                 .withBundle(input)
                 .encodedJson()
                 .execute();
-        //@formatter:on
+        
 
 		assertEquals("http://localhost:" + ourPort + "/fhir", ourRequestUri);
 		assertEquals(2, response.getEntry().size());
@@ -2059,9 +2026,9 @@ public class GenericJaxRsClientDstu2Test {
 		
 		MethodOutcome response;
 
-		//@formatter:off
+		
 		response = client.validate(p);
-		//@formatter:on
+		
 
 		assertEquals("http://localhost:" + ourPort + "/fhir/Patient/$validate", ourRequestUri);
 		assertEquals("POST", ourRequestMethod);

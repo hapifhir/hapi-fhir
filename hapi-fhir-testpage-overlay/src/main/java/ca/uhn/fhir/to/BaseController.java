@@ -28,6 +28,7 @@ import org.thymeleaf.TemplateEngine;
 import ca.uhn.fhir.context.*;
 import ca.uhn.fhir.model.api.ExtensionDt;
 import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.dstu2.resource.Conformance;
 import ca.uhn.fhir.model.primitive.DecimalDt;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
@@ -310,7 +311,7 @@ public class BaseController {
 
 		ca.uhn.fhir.model.dstu2.resource.Conformance conformance;
 		try {
-			conformance = (ca.uhn.fhir.model.dstu2.resource.Conformance) client.conformance();
+			conformance = (ca.uhn.fhir.model.dstu2.resource.Conformance) client.fetchConformance().ofType(Conformance.class).execute();
 		} catch (Exception e) {
 			ourLog.warn("Failed to load conformance statement, error was: {}", e.toString());
 			theModel.put("errorMsg", toDisplayError("Failed to load conformance statement, error was: " + e.toString(), e));

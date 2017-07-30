@@ -203,9 +203,9 @@ public class JaxRsPatientProviderDstu3Test {
         final MethodOutcome results = client.create().resource(existing).prefer(PreferReturnEnum.REPRESENTATION).execute();
         System.out.println(results.getId());
         final Patient patient = (Patient) results.getResource();
-        client.delete(Patient.class, patient.getId());
+        client.delete().resourceById(patient.getIdElement()).execute();
         try {
-            client.read(Patient.class, patient.getId());
+            client.read().resource(Patient.class).withId(patient.getId()).execute();
             fail();
         }
         catch (final Exception e) {

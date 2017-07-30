@@ -72,6 +72,11 @@ public class GenericClient extends BaseClient implements IGenericClient {
 	}
 
 	@Override
+	public IFetchConformanceUntyped capabilities() {
+		return new FetchConformanceInternal();
+	}
+
+	@Override
 	public ICreate create() {
 		return new CreateInternal();
 	}
@@ -125,11 +130,6 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 	}
 
-	@Override
-	public IFetchConformanceUntyped fetchConformance() {
-		return new FetchConformanceInternal();
-	}
-
 	// public IResource read(UriDt url) {
 	// return read(inferResourceClass(url), url);
 	// }
@@ -142,6 +142,11 @@ public class GenericClient extends BaseClient implements IGenericClient {
 	// public Bundle search(UriDt url) {
 	// return search(inferResourceClass(url), url);
 	// }
+
+	@Override
+	public IFetchConformanceUntyped fetchConformance() {
+		return new FetchConformanceInternal();
+	}
 
 	@Override
 	public void forceConformanceCheck() {
@@ -164,15 +169,15 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		return theResource.getIdElement().getIdPart();
 	}
 
-	@Override
-	public IHistory history() {
-		return new HistoryInternal();
-	}
-
 	// @Override
 	// public <T extends IBaseResource> T read(final Class<T> theType, IdDt theId) {
 	// return doReadOrVRead(theType, theId, false, null, null);
 	// }
+
+	@Override
+	public IHistory history() {
+		return new HistoryInternal();
+	}
 
 	/**
 	 * @deprecated Use {@link LoggingInterceptor} as a client interceptor registered to your

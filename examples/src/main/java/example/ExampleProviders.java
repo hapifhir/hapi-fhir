@@ -3,7 +3,8 @@ package example;
 import java.util.ArrayList;
 import java.util.List;
 
-import ca.uhn.fhir.model.api.Bundle;
+import org.hl7.fhir.dstu3.model.Bundle;
+
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.rest.annotation.RequiredParam;

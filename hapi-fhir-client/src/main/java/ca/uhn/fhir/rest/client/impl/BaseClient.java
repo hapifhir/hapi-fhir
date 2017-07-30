@@ -10,7 +10,7 @@ package ca.uhn.fhir.rest.client.impl;
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  * 
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -99,7 +99,7 @@ public abstract class BaseClient implements IRestfulClient {
 		myClient = theClient;
 		myUrlBase = theUrlBase;
 		myFactory = theFactory;
-		
+
 		/*
 		 * This property is used by unit tests - do not rely on it in production code
 		 * as it may change at any time. If you want to capture responses in a reliable
@@ -108,11 +108,11 @@ public abstract class BaseClient implements IRestfulClient {
 		if ("true".equals(System.getProperty(HAPI_CLIENT_KEEPRESPONSES))) {
 			setKeepResponses(true);
 		}
-		
+
 		if (XmlUtil.isStaxPresent() == false) {
 			myEncoding = EncodingEnum.JSON;
 		}
-		
+
 	}
 
 	protected Map<String, List<String>> createExtraParams() {
@@ -201,7 +201,8 @@ public abstract class BaseClient implements IRestfulClient {
 		return invokeClient(theContext, binding, clientInvocation, null, null, theLogRequestAndResponse, null, null);
 	}
 
-	<T> T invokeClient(FhirContext theContext, IClientResponseHandler<T> binding, BaseHttpClientInvocation clientInvocation, EncodingEnum theEncoding, Boolean thePrettyPrint, boolean theLogRequestAndResponse, SummaryEnum theSummaryMode, Set<String> theSubsetElements) {
+	<T> T invokeClient(FhirContext theContext, IClientResponseHandler<T> binding, BaseHttpClientInvocation clientInvocation, EncodingEnum theEncoding, Boolean thePrettyPrint,
+			boolean theLogRequestAndResponse, SummaryEnum theSummaryMode, Set<String> theSubsetElements) {
 
 		if (!myDontValidateConformance) {
 			myFactory.validateServerBaseIfConfiguredToDoSo(myUrlBase, myClient, this);
@@ -221,7 +222,7 @@ public abstract class BaseClient implements IRestfulClient {
 					params.put(Constants.PARAM_FORMAT, Collections.singletonList("json"));
 				}
 			}
-			
+
 			if (theSummaryMode != null) {
 				params.put(Constants.PARAM_SUMMARY, Collections.singletonList(theSummaryMode.getCode()));
 			} else if (mySummary != null) {
@@ -342,10 +343,9 @@ public abstract class BaseClient implements IRestfulClient {
 
 		} catch (DataFormatException e) {
 			String msg;
-			if ( httpRequest != null ) {
+			if (httpRequest != null) {
 				msg = getFhirContext().getLocalizer().getMessage(BaseClient.class, "failedToParseResponse", httpRequest.getHttpVerbName(), httpRequest.getUri(), e.toString());
-			}
-			else {
+			} else {
 				msg = getFhirContext().getLocalizer().getMessage(BaseClient.class, "failedToParseResponse", "UNKNOWN", "UNKNOWN", e.toString());
 			}
 			throw new FhirClientConnectionException(msg, e);
@@ -453,6 +453,7 @@ public abstract class BaseClient implements IRestfulClient {
 		Validate.notNull(theInterceptor, "Interceptor can not be null");
 		myInterceptors.remove(theInterceptor);
 	}
+
 	static ArrayList<Class<? extends IBaseResource>> toTypeList(Class<? extends IBaseResource> thePreferResponseType) {
 		ArrayList<Class<? extends IBaseResource>> preferResponseTypes = null;
 		if (thePreferResponseType != null) {
@@ -489,7 +490,6 @@ public abstract class BaseClient implements IRestfulClient {
 			this(theClass, thePreferResponseTypes, null, false);
 		}
 
-		
 		public ResourceResponseHandler(Class<T> theReturnType, List<Class<? extends IBaseResource>> thePreferResponseTypes, IIdType theId, boolean theAllowHtmlResponse) {
 			myReturnType = theReturnType;
 			myId = theId;
@@ -507,7 +507,7 @@ public abstract class BaseClient implements IRestfulClient {
 				throw NonFhirResponseException.newInstance(theResponseStatusCode, theResponseMimeType, theResponseReader);
 			}
 			IParser parser = respType.newParser(getFhirContext());
-      parser.setServerBaseUrl(getUrlBase());
+			parser.setServerBaseUrl(getUrlBase());
 			if (myPreferResponseTypes != null) {
 				parser.setPreferTypes(myPreferResponseTypes);
 			}

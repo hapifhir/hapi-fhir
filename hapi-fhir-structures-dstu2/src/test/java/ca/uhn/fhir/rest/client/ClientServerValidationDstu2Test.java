@@ -257,7 +257,7 @@ public class ClientServerValidationDstu2Test {
 	@Test
 	public void testServerReturnsWrongVersionForDstu2() throws Exception {
 		Conformance conf = new Conformance();
-		conf.setFhirVersion("0.80");
+		conf.setFhirVersion("3.0.1");
 		String msg = myCtx.newXmlParser().encodeResourceToString(conf);
 
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
@@ -274,7 +274,7 @@ public class ClientServerValidationDstu2Test {
 			fail();
 		} catch (FhirClientInappropriateForServerException e) {
 			String out = e.toString();
-			String want = "The server at base URL \"http://foo/metadata\" returned a conformance statement indicating that it supports FHIR version \"0.80\" which corresponds to DSTU1, but this client is configured to use DSTU2 (via the FhirContext)";
+			String want = "The server at base URL \"http://foo/metadata\" returned a conformance statement indicating that it supports FHIR version \"3.0.1\" which corresponds to DSTU3, but this client is configured to use DSTU2 (via the FhirContext)";
 			ourLog.info(out);
 			ourLog.info(want);
 			assertThat(out, containsString(want));

@@ -13,8 +13,7 @@ import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.dstu2.composite.QuantityDt;
-import ca.uhn.fhir.model.dstu2.resource.Observation;
-import ca.uhn.fhir.model.dstu2.resource.Patient;
+import ca.uhn.fhir.model.dstu2.resource.*;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.exceptions.FhirClientConnectionException;
 
@@ -66,7 +65,7 @@ public class BuiltJarDstu2ShadeIT {
 		FhirContext ctx = FhirContext.forDstu2();
 		try {
 			IGenericClient client = ctx.newRestfulGenericClient("http://127.0.0.1:44442/SomeBase");
-			client.conformance();
+			client.capabilities().ofType(Conformance.class).execute()
 		} catch (FhirClientConnectionException e) {
 			// this is good
 		}

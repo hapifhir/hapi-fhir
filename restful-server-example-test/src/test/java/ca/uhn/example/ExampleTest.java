@@ -11,7 +11,7 @@ import org.hamcrest.core.StringContains;
 import org.junit.*;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.api.Bundle;
+import ca.uhn.fhir.model.dstu2.resource.Bundle;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 
@@ -45,8 +45,8 @@ public class ExampleTest {
 			return;
 		}
 
-		Bundle results = ourClient.search().forResource(Patient.class).execute();
-		assertEquals(1, results.size());
+		Bundle results = ourClient.search().forResource(Patient.class).returnBundle(Bundle.class).execute();
+		assertEquals(1, results.getEntry().size());
 	}
 
 	@Test

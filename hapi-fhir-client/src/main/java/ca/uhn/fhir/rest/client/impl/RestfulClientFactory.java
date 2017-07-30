@@ -10,7 +10,7 @@ package ca.uhn.fhir.rest.client.impl;
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  * 
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -50,10 +50,10 @@ public abstract class RestfulClientFactory implements IRestfulClientFactory {
 	private ServerValidationModeEnum myServerValidationMode = DEFAULT_SERVER_VALIDATION_MODE;
 	private int mySocketTimeout = DEFAULT_SOCKET_TIMEOUT;
 	private String myProxyUsername;
-	private String myProxyPassword;	
+	private String myProxyPassword;
 	private int myPoolMaxTotal = DEFAULT_POOL_MAX;
 	private int myPoolMaxPerRoute = DEFAULT_POOL_MAX_PER_ROUTE;
-	
+
 	/**
 	 * Constructor
 	 */
@@ -64,7 +64,7 @@ public abstract class RestfulClientFactory implements IRestfulClientFactory {
 	 * Constructor
 	 * 
 	 * @param theFhirContext
-	 *            The context
+	 *           The context
 	 */
 	public RestfulClientFactory(FhirContext theFhirContext) {
 		myContext = theFhirContext;
@@ -82,26 +82,30 @@ public abstract class RestfulClientFactory implements IRestfulClientFactory {
 
 	/**
 	 * Return the proxy username to authenticate with the HTTP proxy
-	 * @param The proxy username
-	 */	
+	 * 
+	 * @param The
+	 *           proxy username
+	 */
 	protected String getProxyUsername() {
 		return myProxyUsername;
 	}
-	
+
 	/**
 	 * Return the proxy password to authenticate with the HTTP proxy
-	 * @param The proxy password
-	 */	
+	 * 
+	 * @param The
+	 *           proxy password
+	 */
 	protected String getProxyPassword() {
 		return myProxyPassword;
 	}
 
 	@Override
 	public void setProxyCredentials(String theUsername, String thePassword) {
-		myProxyUsername=theUsername;
-		myProxyPassword=thePassword;
+		myProxyUsername = theUsername;
+		myProxyPassword = thePassword;
 	}
-	
+
 	@Override
 	public ServerValidationModeEnum getServerValidationMode() {
 		return myServerValidationMode;
@@ -132,21 +136,21 @@ public abstract class RestfulClientFactory implements IRestfulClientFactory {
 	 * Instantiates a new client instance
 	 * 
 	 * @param theClientType
-	 *            The client type, which is an interface type to be instantiated
+	 *           The client type, which is an interface type to be instantiated
 	 * @param theServerBase
-	 *            The URL of the base for the restful FHIR server to connect to
+	 *           The URL of the base for the restful FHIR server to connect to
 	 * @return A newly created client
 	 * @throws ConfigurationException
-	 *             If the interface type is not an interface
+	 *            If the interface type is not an interface
 	 */
 	@Override
 	public synchronized <T extends IRestfulClient> T newClient(Class<T> theClientType, String theServerBase) {
 		validateConfigured();
-		
+
 		if (!theClientType.isInterface()) {
 			throw new ConfigurationException(theClientType.getCanonicalName() + " is not an interface");
 		}
-		
+
 		ClientInvocationHandlerFactory invocationHandler = myInvocationHandlers.get(theClientType);
 		if (invocationHandler == null) {
 			IHttpClient httpClient = getHttpClient(theServerBase);
@@ -165,7 +169,7 @@ public abstract class RestfulClientFactory implements IRestfulClientFactory {
 
 	/**
 	 * Called automatically before the first use of this factory to ensure that
-	 * the configuration is sane. Subclasses may override, but should also call 
+	 * the configuration is sane. Subclasses may override, but should also call
 	 * <code>super.validateConfigured()</code>
 	 */
 	protected void validateConfigured() {
@@ -178,10 +182,9 @@ public abstract class RestfulClientFactory implements IRestfulClientFactory {
 	public synchronized IGenericClient newGenericClient(String theServerBase) {
 		validateConfigured();
 		IHttpClient httpClient = getHttpClient(theServerBase);
-		
+
 		return new GenericClient(myContext, httpClient, theServerBase, this);
 	}
-
 
 	private String normalizeBaseUrlForMap(String theServerBase) {
 		String serverBase = theServerBase;
@@ -212,10 +215,11 @@ public abstract class RestfulClientFactory implements IRestfulClientFactory {
 		}
 		myContext = theContext;
 	}
-	
+
 	/**
 	 * Return the fhir context
-	 * @return the fhir context 
+	 * 
+	 * @return the fhir context
 	 */
 	public FhirContext getFhirContext() {
 		return myContext;
@@ -245,19 +249,18 @@ public abstract class RestfulClientFactory implements IRestfulClientFactory {
 		resetHttpClient();
 	}
 
-
-	@Deprecated //override deprecated method
+	@Deprecated // override deprecated method
 	@Override
 	public ServerValidationModeEnum getServerValidationModeEnum() {
 		return getServerValidationMode();
 	}
 
-	@Deprecated //override deprecated method
+	@Deprecated // override deprecated method
 	@Override
 	public void setServerValidationModeEnum(ServerValidationModeEnum theServerValidationMode) {
 		setServerValidationMode(theServerValidationMode);
 	}
-	
+
 	@Override
 	public void validateServerBaseIfConfiguredToDoSo(String theServerBase, IHttpClient theHttpClient, IRestfulClient theClient) {
 		String serverBase = normalizeBaseUrlForMap(theServerBase);
@@ -283,14 +286,14 @@ public abstract class RestfulClientFactory implements IRestfulClientFactory {
 			client.registerInterceptor(interceptor);
 		}
 		client.setDontValidateConformance(true);
-		
+
 		IBaseResource conformance;
 		try {
 			String capabilityStatementResourceName = "CapabilityStatement";
 			if (myContext.getVersion().getVersion().isOlderThan(FhirVersionEnum.DSTU3)) {
 				capabilityStatementResourceName = "Conformance";
 			}
-			
+
 			@SuppressWarnings("rawtypes")
 			Class implementingClass;
 			try {
@@ -329,10 +332,10 @@ public abstract class RestfulClientFactory implements IRestfulClientFactory {
 		if (StringUtils.isBlank(serverFhirVersionString)) {
 			// we'll be lenient and accept this
 		} else {
-			if (serverFhirVersionString.startsWith("0.4")) {
+			if (serverFhirVersionString.startsWith("0.4") || serverFhirVersionString.startsWith("0.5") || serverFhirVersionString.startsWith("1.0.")) {
 				serverFhirVersionEnum = FhirVersionEnum.DSTU2;
-			} else if (serverFhirVersionString.startsWith("0.5")) {
-				serverFhirVersionEnum = FhirVersionEnum.DSTU2;
+			} else if (serverFhirVersionString.startsWith("3.")) {
+				serverFhirVersionEnum = FhirVersionEnum.DSTU3;
 			} else {
 				// we'll be lenient and accept this
 				ourLog.debug("Server conformance statement indicates unknown FHIR version: {}", serverFhirVersionString);
@@ -342,22 +345,24 @@ public abstract class RestfulClientFactory implements IRestfulClientFactory {
 		if (serverFhirVersionEnum != null) {
 			FhirVersionEnum contextFhirVersion = myContext.getVersion().getVersion();
 			if (!contextFhirVersion.isEquivalentTo(serverFhirVersionEnum)) {
-				throw new FhirClientInappropriateForServerException(myContext.getLocalizer().getMessage(RestfulClientFactory.class, "wrongVersionInConformance", theServerBase + Constants.URL_TOKEN_METADATA, serverFhirVersionString, serverFhirVersionEnum, contextFhirVersion));
+				throw new FhirClientInappropriateForServerException(myContext.getLocalizer().getMessage(RestfulClientFactory.class, "wrongVersionInConformance",
+						theServerBase + Constants.URL_TOKEN_METADATA, serverFhirVersionString, serverFhirVersionEnum, contextFhirVersion));
 			}
 		}
-		
+
 		myValidatedServerBaseUrls.add(normalizeBaseUrlForMap(theServerBase));
 
 	}
 
-	
 	/**
 	 * Get the http client for the given server base
-	 * @param theServerBase the server base
+	 * 
+	 * @param theServerBase
+	 *           the server base
 	 * @return the http client
 	 */
 	protected abstract IHttpClient getHttpClient(String theServerBase);
-	
+
 	/**
 	 * Reset the http client. This method is used when parameters have been set and a
 	 * new http client needs to be created

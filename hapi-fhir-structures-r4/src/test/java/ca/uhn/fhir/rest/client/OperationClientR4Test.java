@@ -142,7 +142,8 @@ public class OperationClientR4Test {
 		assertEquals("sys|val", ((StringType) request.getParameter().get(1).getValue()).getValue());
 	}
 
-	public interface IOpClient extends IBasicClient {
+
+   public interface IOpClient extends IBasicClient {
 
 		@Operation(name = "$andlist", idempotent = true)
 		public Parameters andlist(

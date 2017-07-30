@@ -1,23 +1,7 @@
 package ca.uhn.fhir.jpa.provider;
 
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.containsInRelativeOrder;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.emptyString;
-import static org.hamcrest.Matchers.greaterThan;
-import static org.hamcrest.Matchers.hasItems;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.startsWith;
-import static org.hamcrest.Matchers.stringContainsInOrder;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
 
 import java.io.*;
 import java.net.*;
@@ -45,7 +29,6 @@ import ca.uhn.fhir.model.dstu2.resource.*;
 import ca.uhn.fhir.model.dstu2.resource.Bundle.Entry;
 import ca.uhn.fhir.model.dstu2.valueset.*;
 import ca.uhn.fhir.model.primitive.*;
-import ca.uhn.fhir.model.valueset.BundleEntrySearchModeEnum;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.*;
@@ -1607,7 +1590,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 					.encodedXml()
 					.execute();
 			assertThat(returned.getEntry().size(), greaterThan(1));
-			assertEquals(BundleTypeEnum.SEARCHSET, returned.getTypeElement().getValueAsEnum());
+			assertEquals(ca.uhn.fhir.model.dstu2.valueset.BundleTypeEnum.SEARCH_RESULTS, returned.getTypeElement().getValueAsEnum());
 		}
 		{
 			Bundle returned = ourClient
@@ -2064,13 +2047,12 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 
 		assertEquals(2, found.getEntry().size());
 		assertEquals(Patient.class, found.getEntry().get(0).getResource().getClass());
-		assertEquals(BundleEntrySearchModeEnum.MATCH, found.getEntry().get(0).getSearch().getModeElement().getValueAsEnum());
-		assertEquals(BundleEntrySearchModeEnum.MATCH, found.getEntry().get(0).getResource().getResourceMetadata().get(ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE));
+		assertEquals(SearchEntryModeEnum.MATCH, found.getEntry().get(0).getSearch().getModeElement().getValueAsEnum());
 		assertThat(found.getEntry().get(0).getResource().getText().getDiv().getValueAsString(), containsString("<table class=\"hapiPropertyTable"));
 		assertEquals(Organization.class, found.getEntry().get(1).getResource().getClass());
-		assertEquals(BundleEntrySearchModeEnum.INCLUDE, found.getEntry().get(1).getSearch().getModeElement().getValueAsEnum());
-		assertEquals(BundleEntrySearchModeEnum.INCLUDE, found.getEntry().get(1).getResource().getResourceMetadata().get(ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE));
+		assertEquals(SearchEntryModeEnum.INCLUDE, found.getEntry().get(1).getSearch().getModeElement().getValueAsEnum());
 	}
+	
 
 	@Test(expected = InvalidRequestException.class)
 	public void testSearchWithInvalidSort() throws Exception {

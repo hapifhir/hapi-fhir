@@ -12,20 +12,25 @@ import ca.uhn.fhir.rest.gclient.*;
 
 public interface IGenericClient extends IRestfulClient {
 
+	/**
+	 * Fetch the capability statement for the server
+	 */
+	IFetchConformanceUntyped capabilities();
 
 	/**
 	 * Fluent method for the "create" operation, which creates a new resource instance on the server
 	 */
 	ICreate create();
 
-
 	/**
 	 * Fluent method for the "delete" operation, which performs a logical delete on a server resource
 	 */
 	IDelete delete();
-	
+
 	/**
 	 * Retrieves the server's conformance statement
+	 * 
+	 * @deprecated As of HAPI 3.0.0 this method has been deprecated, as the operation is now called "capabilities". Use {@link #capabilities()} instead
 	 */
 	IFetchConformanceUntyped fetchConformance();
 
@@ -61,6 +66,11 @@ public interface IGenericClient extends IRestfulClient {
 	 * Implementation of the FHIR "extended operations" action
 	 */
 	IOperation operation();
+
+	/**
+	 * Fluent method for the "patch" operation, which performs a logical patch on a server resource
+	 */
+	IPatch patch();
 
 	/**
 	 * Fluent method for "read" and "vread" methods.
@@ -112,11 +122,6 @@ public interface IGenericClient extends IRestfulClient {
 	void registerInterceptor(IClientInterceptor theInterceptor);
 
 	/**
-	 * Fluent method for the "patch" operation, which performs a logical patch on a server resource
-	 */
-	IPatch patch();
-
-	/**
 	 * Search for resources matching a given set of criteria. Searching is a very powerful
 	 * feature in FHIR with many features for specifying exactly what should be seaerched for
 	 * and how it should be returned. See the <a href="http://www.hl7.org/fhir/search.html">specification on search</a>
@@ -141,7 +146,6 @@ public interface IGenericClient extends IRestfulClient {
 	 * Send a transaction (collection of resources) to the server to be executed as a single unit
 	 */
 	ITransaction transaction();
-
 
 	/**
 	 * Remove an intercaptor that was previously registered using {@link IRestfulClient#registerInterceptor(IClientInterceptor)}

@@ -1017,60 +1017,6 @@ public MethodOutcome createPatientResource(@ResourceParam Patient thePatient) {
 }
 //END SNIPPET: createTags
 
-//START SNIPPET: tagMethodProvider
-public class TagMethodProvider 
-{
-  /** Return a list of all tags that exist on the server */
-  @GetTags
-  public TagList getAllTagsOnServer() {
-    return new TagList(); // populate this
-  }
-
-  /** Return a list of all tags that exist on at least one instance
-   *  of the given resource type */
-  @GetTags(type=Patient.class)
-  public TagList getTagsForAllResourcesOfResourceType() {
-    return new TagList(); // populate this
-  }
-
-  /** Return a list of all tags that exist on a specific instance
-   *  of the given resource type */
-  @GetTags(type=Patient.class)
-  public TagList getTagsForResources(@IdParam IdType theId) {
-    return new TagList(); // populate this
-  }
-
-  /** Return a list of all tags that exist on a specific version
-   *  of the given resource type */
-  @GetTags(type=Patient.class)
-  public TagList getTagsForResourceVersion(@IdParam IdType theId) {
-    return new TagList(); // populate this
-  }
-
-  /** Add tags to a resource */
-  @AddTags(type=Patient.class)
-  public void getTagsForResourceVersion(@IdParam IdType theId, 
-                                        @TagListParam TagList theTagList) {
-    // add tags
-  }
-
-  /** Add tags to a resource version */
-  @AddTags(type=Patient.class)
-  public void addTagsToResourceVersion(@IdParam IdType theId,
-                                       @TagListParam TagList theTagList) {
-    // add tags
-  }
-
-  /** Remove tags from a resource */
-  @DeleteTags(type=Patient.class)
-  public void deleteTagsFromResourceVersion(@IdParam IdType theId,
-                                            @TagListParam TagList theTagList) {
-    // add tags
-  }
-
-}
-//END SNIPPET: tagMethodProvider
-
 //START SNIPPET: transaction
 @Transaction
 public Bundle transaction(@TransactionParam Bundle theInput) {

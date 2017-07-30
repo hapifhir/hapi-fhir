@@ -409,16 +409,6 @@ public class GenericClientExample {
    public static void history() {
       IGenericClient client = FhirContext.forDstu2().newRestfulGenericClient("");
       {
-         ca.uhn.fhir.model.api.Bundle response;
-         // START SNIPPET: historyDstu1
-         response = client
-            .history()
-            .onServer()
-            .andReturnDstu1Bundle()
-            .execute();
-         // END SNIPPET: historyDstu1
-      }
-      {
          ca.uhn.fhir.model.dstu2.resource.Bundle response;
          // START SNIPPET: historyDstu2
          response = client
