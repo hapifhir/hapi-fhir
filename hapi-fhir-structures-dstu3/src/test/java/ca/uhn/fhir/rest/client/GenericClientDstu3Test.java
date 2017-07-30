@@ -923,18 +923,6 @@ public class GenericClientDstu3Test {
 
 	}
 
-	@SuppressWarnings("deprecation")
-	@Test
-	public void testInvalidConformanceCall() {
-		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
-		try {
-			client.conformance();
-			fail();
-		} catch (IllegalArgumentException e) {
-			assertEquals("Must call fetchConformance() instead of conformance() for RI/STU3+ structures", e.getMessage());
-		}
-	}
-
 	/**
 	 * See #150
 	 */

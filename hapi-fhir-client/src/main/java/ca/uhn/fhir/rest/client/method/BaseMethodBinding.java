@@ -167,7 +167,6 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 		Delete delete = theMethod.getAnnotation(Delete.class);
 		History history = theMethod.getAnnotation(History.class);
 		Validate validate = theMethod.getAnnotation(Validate.class);
-		GetTags getTags = theMethod.getAnnotation(GetTags.class);
 		AddTags addTags = theMethod.getAnnotation(AddTags.class);
 		DeleteTags deleteTags = theMethod.getAnnotation(DeleteTags.class);
 		Transaction transaction = theMethod.getAnnotation(Transaction.class);
@@ -176,7 +175,7 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 		Patch patch = theMethod.getAnnotation(Patch.class);
 
 		// ** if you add another annotation above, also add it to the next line:
-		if (!verifyMethodHasZeroOrOneOperationAnnotation(theMethod, read, search, conformance, create, update, delete, history, validate, getTags, addTags, deleteTags, transaction, operation, getPage,
+		if (!verifyMethodHasZeroOrOneOperationAnnotation(theMethod, read, search, conformance, create, update, delete, history, validate, addTags, deleteTags, transaction, operation, getPage,
 				patch)) {
 			return null;
 		}
@@ -190,12 +189,7 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 		Class<? extends IBaseResource> returnTypeFromRp = null;
 
 		Class<?> returnTypeFromMethod = theMethod.getReturnType();
-		if (getTags != null) {
-			if (!TagList.class.equals(returnTypeFromMethod)) {
-				throw new ConfigurationException("Method '" + theMethod.getName() + "' from type " + theMethod.getDeclaringClass().getCanonicalName() + " is annotated with @"
-						+ GetTags.class.getSimpleName() + " but does not return type " + TagList.class.getName());
-			}
-		} else if (MethodOutcome.class.isAssignableFrom(returnTypeFromMethod)) {
+		if (MethodOutcome.class.isAssignableFrom(returnTypeFromMethod)) {
 			// returns a method outcome
 		} else if (void.class.equals(returnTypeFromMethod)) {
 			// returns a bundle
@@ -233,8 +227,6 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 			returnTypeFromAnnotation = update.type();
 		} else if (validate != null) {
 			returnTypeFromAnnotation = validate.type();
-		} else if (getTags != null) {
-			returnTypeFromAnnotation = getTags.type();
 		} else if (addTags != null) {
 			returnTypeFromAnnotation = addTags.type();
 		} else if (deleteTags != null) {
@@ -276,12 +268,6 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 			return new HistoryMethodBinding(theMethod, theContext, theProvider);
 		} else if (validate != null) {
 			return new ValidateMethodBindingDstu2Plus(returnType, returnTypeFromRp, theMethod, theContext, theProvider, validate);
-		} else if (getTags != null) {
-			return new GetTagsMethodBinding(theMethod, theContext, theProvider, getTags);
-		} else if (addTags != null) {
-			return new AddTagsMethodBinding(theMethod, theContext, theProvider, addTags);
-		} else if (deleteTags != null) {
-			return new DeleteTagsMethodBinding(theMethod, theContext, theProvider, deleteTags);
 		} else if (transaction != null) {
 			return new TransactionMethodBinding(theMethod, theContext, theProvider);
 		} else if (operation != null) {

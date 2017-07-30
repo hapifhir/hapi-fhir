@@ -27,20 +27,14 @@ import java.util.Map;
 
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.hl7.fhir.instance.model.api.IBaseBinary;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.instance.model.api.*;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.model.api.Bundle;
-import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
-import ca.uhn.fhir.rest.api.EncodingEnum;
-import ca.uhn.fhir.rest.api.IVersionSpecificBundleFactory;
-import ca.uhn.fhir.rest.api.RequestTypeEnum;
+import ca.uhn.fhir.rest.api.*;
 import ca.uhn.fhir.rest.client.api.IHttpClient;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
 import ca.uhn.fhir.rest.client.impl.BaseHttpClientInvocation;
@@ -53,14 +47,12 @@ abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvoca
 
 	private final BundleTypeEnum myBundleType;
 	private final String myContents;
-	private boolean myContentsIsBundle;
 	private Map<String, List<String>> myIfNoneExistParams;
 	private String myIfNoneExistString;
 	private boolean myOmitResourceId = false;
 	private Map<String, List<String>> myParams;
 	private final IBaseResource myResource;
 	private final List<? extends IBaseResource> myResources;
-	private final TagList myTagList;
 	private final String myUrlPath;
 	private IIdType myForceResourceId;
 
@@ -69,11 +61,9 @@ abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvoca
 	public BaseHttpClientInvocationWithContents(FhirContext theContext, IBaseResource theResource, Map<String, List<String>> theParams, String... theUrlPath) {
 		super(theContext);
 		myResource = theResource;
-		myTagList = null;
 		myUrlPath = StringUtils.join(theUrlPath, '/');
 		myResources = null;
 		myContents = null;
-		myContentsIsBundle = false;
 		myParams = theParams;
 		myBundleType = null;
 	}
@@ -82,7 +72,6 @@ abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvoca
 		super(theContext);
 		myResource = theResource;
 		myUrlPath = theUrlPath;
-		myTagList = null;
 		myResources = null;
 		myContents = null;
 		myBundleType = null;
@@ -91,7 +80,6 @@ abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvoca
 	public BaseHttpClientInvocationWithContents(FhirContext theContext, List<? extends IBaseResource> theResources, BundleTypeEnum theBundleType) {
 		super(theContext);
 		myResource = null;
-		myTagList = null;
 		myUrlPath = null;
 		myResources = theResources;
 		myContents = null;
@@ -101,11 +89,9 @@ abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvoca
 	public BaseHttpClientInvocationWithContents(FhirContext theContext, Map<String, List<String>> theParams, String... theUrlPath) {
 		super(theContext);
 		myResource = null;
-		myTagList = null;
 		myUrlPath = StringUtils.join(theUrlPath, '/');
 		myResources = null;
 		myContents = null;
-		myContentsIsBundle = false;
 		myParams = theParams;
 		myBundleType = null;
 	}
@@ -113,41 +99,22 @@ abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvoca
 	public BaseHttpClientInvocationWithContents(FhirContext theContext, String theContents, boolean theIsBundle, String theUrlPath) {
 		super(theContext);
 		myResource = null;
-		myTagList = null;
 		myUrlPath = theUrlPath;
 		myResources = null;
 		myContents = theContents;
-		myContentsIsBundle = theIsBundle;
 		myBundleType = null;
 	}
 
 	public BaseHttpClientInvocationWithContents(FhirContext theContext, String theContents, Map<String, List<String>> theParams, String... theUrlPath) {
 		super(theContext);
 		myResource = null;
-		myTagList = null;
 		myUrlPath = StringUtils.join(theUrlPath, '/');
 		myResources = null;
 		myContents = theContents;
-		myContentsIsBundle = false;
 		myParams = theParams;
 		myBundleType = null;
 	}
 
-	public BaseHttpClientInvocationWithContents(FhirContext theContext, TagList theTagList, String... theUrlPath) {
-		super(theContext);
-		if (theTagList == null) {
-			throw new NullPointerException("Tag list must not be null");
-		}
-
-		myResource = null;
-		myTagList = theTagList;
-		myResources = null;
-		myBundle = null;
-		myContents = null;
-		myBundleType = null;
-
-		myUrlPath = StringUtils.join(theUrlPath, '/');
-	}
 
 	@Override
 	public IHttpRequest asHttpRequest(String theUrlBase, Map<String, List<String>> theExtraParams, EncodingEnum theEncoding, Boolean thePrettyPrint) throws DataFormatException {

@@ -3,23 +3,12 @@ package ca.uhn.fhir.rest.client.method;
 import java.io.Reader;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
-import org.hl7.fhir.instance.model.api.IBaseBundle;
-import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
-import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.*;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.parser.IParser;
@@ -120,15 +109,15 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 		switch (getReturnType()) {
 		case BUNDLE: {
 
-			IBaseBundle dstu2bundle = null;
+			IBaseBundle bundle = null;
 			List<? extends IBaseResource> listOfResources = null;
 			Class<? extends IBaseResource> type = getContext().getResourceDefinition("Bundle").getImplementingClass();
-			dstu2bundle = (IBaseBundle) parser.parseResource(type, theResponseReader);
-			listOfResources = BundleUtil.toListOfResources(getContext(), dstu2bundle);
+			bundle = (IBaseBundle) parser.parseResource(type, theResponseReader);
+			listOfResources = BundleUtil.toListOfResources(getContext(), bundle);
 
 			switch (getMethodReturnType()) {
 			case BUNDLE_RESOURCE:
-				return dstu2bundle;
+				return bundle;
 			case LIST_OF_RESOURCES:
 				if (myResourceListCollectionType != null) {
 					for (Iterator<? extends IBaseResource> iter = listOfResources.iterator(); iter.hasNext();) {
@@ -141,8 +130,7 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 				}
 				return listOfResources;
 			case RESOURCE:
-				// FIXME null access on dstu1bundle
-				List<IResource> list = dstu1bundle.toListOfResources();
+				List<IBaseResource> list = BundleUtil.toListOfResources(getContext(), bundle);
 				if (list.size() == 0) {
 					return null;
 				} else if (list.size() == 1) {

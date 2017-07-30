@@ -29,8 +29,8 @@ import java.util.*;
 
 import org.hl7.fhir.instance.model.api.*;
 
-import ca.uhn.fhir.context.*;
-import ca.uhn.fhir.model.api.Bundle;
+import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.rest.annotation.*;
@@ -101,11 +101,6 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 			} else {
 				setResourceName(null);
 			}
-		}
-
-		if (theMethod.getReturnType().isAssignableFrom(Bundle.class)) {
-			throw new ConfigurationException("Can not return a DSTU1 bundle from an @" + Operation.class.getSimpleName() + " method. Found in method " + theMethod.getName() + " defined in type "
-					+ theMethod.getDeclaringClass().getName());
 		}
 
 		myReturnType = ReturnTypeEnum.RESOURCE;

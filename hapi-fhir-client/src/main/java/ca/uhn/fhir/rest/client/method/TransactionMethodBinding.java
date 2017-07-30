@@ -8,7 +8,6 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.rest.annotation.Transaction;
 import ca.uhn.fhir.rest.annotation.TransactionParam;
@@ -60,19 +59,11 @@ public class TransactionMethodBinding extends BaseResourceReturningMethodBinding
 	@Override
 	public BaseHttpClientInvocation invokeClient(Object[] theArgs) throws InternalErrorException {
 		FhirContext context = getContext();
-		if (theArgs[myTransactionParamIndex] instanceof Bundle) {
-			Bundle bundle = (Bundle) theArgs[myTransactionParamIndex];
-			return createTransactionInvocation(bundle, context);
-		}
 		@SuppressWarnings("unchecked")
 		List<IBaseResource> resources = (List<IBaseResource>) theArgs[myTransactionParamIndex];
 		return createTransactionInvocation(resources, context);
 	}
 
-
-	public static BaseHttpClientInvocation createTransactionInvocation(Bundle theBundle, FhirContext theContext) {
-		return new HttpPostClientInvocation(theContext, theBundle);
-	}
 
 	public static BaseHttpClientInvocation createTransactionInvocation(IBaseBundle theBundle, FhirContext theContext) {
 		return new HttpPostClientInvocation(theContext, theBundle);

@@ -26,8 +26,6 @@ import java.util.Map;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.api.Bundle;
-import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 
@@ -42,16 +40,8 @@ public class HttpPostClientInvocation extends BaseHttpClientInvocationWithConten
 		super(theContext, theResource, null);
 	}
 
-	public HttpPostClientInvocation(FhirContext theContext, TagList theTagList, String... theUrlExtension) {
-		super(theContext, theTagList, theUrlExtension);
-	}
-
 	public HttpPostClientInvocation(FhirContext theContext, List<? extends IBaseResource> theResources, BundleTypeEnum theBundleType) {
 		super(theContext, theResources, theBundleType);
-	}
-
-	public HttpPostClientInvocation(FhirContext theContext, Bundle theBundle) {
-		super(theContext, theBundle);
 	}
 
 	public HttpPostClientInvocation(FhirContext theContext, String theContents, boolean theIsBundle, String theUrlExtension) {

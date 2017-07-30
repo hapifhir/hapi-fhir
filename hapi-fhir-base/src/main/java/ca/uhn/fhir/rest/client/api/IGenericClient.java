@@ -1,30 +1,7 @@
 package ca.uhn.fhir.rest.client.api;
 
-/*
- * #%L
- * HAPI FHIR - Core Library
- * %%
- * Copyright (C) 2014 - 2017 University Health Network
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- * http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
-import java.util.List;
-
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
-import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.UriDt;
 import ca.uhn.fhir.rest.api.MethodOutcome;
@@ -45,11 +22,7 @@ public interface IGenericClient extends IRestfulClient {
 	 * Fluent method for the "delete" operation, which performs a logical delete on a server resource
 	 */
 	IDelete delete();
-
 	
-
-	
-
 	/**
 	 * Retrieves the server's conformance statement
 	 */
@@ -74,24 +47,6 @@ public interface IGenericClient extends IRestfulClient {
 	 * Loads the previous/next bundle of resources from a paged set, using the link specified in the "link type=next" tag within the atom bundle.
 	 */
 	IGetPage loadPage();
-
-	// /**
-	// * Implementation of the "instance read" method. This method will only ever do a "read" for the latest version of a
-	// * given resource instance, even if the ID passed in contains a version. If you wish to request a specific version
-	// * of a resource (the "vread" operation), use {@link #vread(Class, IdDt)} instead.
-	// * <p>
-	// * Note that if an absolute resource ID is passed in (i.e. a URL containing a protocol and host as well as the
-	// * resource type and ID) the server base for the client will be ignored, and the URL passed in will be queried.
-	// * </p>
-	// *
-	// * @param theType
-	// * The type of resource to load
-	// * @param theId
-	// * The ID to load, including the resource ID and the resource version ID. Valid values include
-	// * "Patient/123/_history/222", or "http://example.com/fhir/Patient/123/_history/222"
-	// * @return The resource
-	// */
-	// <T extends IBaseResource> T read(Class<T> theType, IdDt theId);
 
 	/**
 	 * Fluent method for the "meta" operations, which can be used to get, add and remove tags and other
@@ -119,7 +74,10 @@ public interface IGenericClient extends IRestfulClient {
 	 * @param theId
 	 *           The ID to load
 	 * @return The resource
+	 * 
+	 * @deprecated Use {@link #read() read() fluent method} instead (deprecated in HAPI FHIR 3.0.0)
 	 */
+	@Deprecated
 	<T extends IBaseResource> T read(Class<T> theType, String theId);
 
 	/**
@@ -130,7 +88,9 @@ public interface IGenericClient extends IRestfulClient {
 	 * @param theUrl
 	 *           The absolute URL, e.g. "http://example.com/fhir/Patient/123"
 	 * @return The returned resource from the server
+	 * @deprecated Use {@link #read() read() fluent method} instead (deprecated in HAPI FHIR 3.0.0)
 	 */
+	@Deprecated
 	<T extends IBaseResource> T read(Class<T> theType, UriDt theUrl);
 
 	/**
@@ -139,7 +99,9 @@ public interface IGenericClient extends IRestfulClient {
 	 * @param theUrl
 	 *           The absolute URL, e.g. "http://example.com/fhir/Patient/123"
 	 * @return The returned resource from the server
+	 * @deprecated Use {@link #read() read() fluent method} instead (deprecated in HAPI FHIR 3.0.0)
 	 */
+	@Deprecated
 	IBaseResource read(UriDt theUrl);
 
 	/**
@@ -179,17 +141,6 @@ public interface IGenericClient extends IRestfulClient {
 	 */
 	ITransaction transaction();
 
-	/**
-	 * Implementation of the "transaction" method.
-	 * 
-	 * @param theResources
-	 *           The resources to create/update in a single transaction
-	 * @return A list of resource stubs (<b>these will not be fully populated</b>) containing IDs and other {@link IResource#getResourceMetadata() metadata}
-	 * @deprecated Use {@link #transaction()}
-	 * 
-	 */
-	@Deprecated
-	List<IBaseResource> transaction(List<IBaseResource> theResources);
 
 	/**
 	 * Remove an intercaptor that was previously registered using {@link IRestfulClient#registerInterceptor(IClientInterceptor)}
@@ -210,7 +161,9 @@ public interface IGenericClient extends IRestfulClient {
 	 * @param theResource
 	 *           The new resource body
 	 * @return An outcome containing the results and possibly the new version ID
+	 * @deprecated Use {@link #update() update() fluent method} instead (deprecated in HAPI FHIR 3.0.0)
 	 */
+	@Deprecated
 	MethodOutcome update(IdDt theId, IBaseResource theResource);
 
 	/**
@@ -221,7 +174,9 @@ public interface IGenericClient extends IRestfulClient {
 	 * @param theResource
 	 *           The new resource body
 	 * @return An outcome containing the results and possibly the new version ID
+	 * @deprecated Use {@link #update() update() fluent method} instead (deprecated in HAPI FHIR 3.0.0)
 	 */
+	@Deprecated
 	MethodOutcome update(String theId, IBaseResource theResource);
 
 	/**
@@ -235,7 +190,9 @@ public interface IGenericClient extends IRestfulClient {
 	 * @param theResource
 	 *           The resource to validate
 	 * @return An outcome containing any validation issues
+	 * @deprecated Use {@link #validate() validate() fluent method} instead (deprecated in HAPI FHIR 3.0.0)
 	 */
+	@Deprecated
 	MethodOutcome validate(IBaseResource theResource);
 
 	/**
@@ -250,7 +207,9 @@ public interface IGenericClient extends IRestfulClient {
 	 * @param theId
 	 *           The ID to load, including the resource ID and the resource version ID. Valid values include "Patient/123/_history/222", or "http://example.com/fhir/Patient/123/_history/222"
 	 * @return The resource
+	 * @deprecated Use {@link #read() read() fluent method} instead (deprecated in HAPI FHIR 3.0.0)
 	 */
+	@Deprecated
 	<T extends IBaseResource> T vread(Class<T> theType, IdDt theId);
 
 	/**
@@ -263,22 +222,9 @@ public interface IGenericClient extends IRestfulClient {
 	 * @param theVersionId
 	 *           The version ID
 	 * @return The resource
-	 * @deprecated Deprecated in 0.7 - IdDt can contain an ID and a version, so this class doesn't make a lot of sense
+	 * @deprecated Use {@link #read() read() fluent method} instead (deprecated in HAPI FHIR 3.0.0)
 	 */
 	@Deprecated
-	<T extends IBaseResource> T vread(Class<T> theType, IdDt theId, IdDt theVersionId);
-
-	/**
-	 * Implementation of the "instance vread" method.
-	 * 
-	 * @param theType
-	 *           The type of resource to load
-	 * @param theId
-	 *           The ID to load
-	 * @param theVersionId
-	 *           The version ID
-	 * @return The resource
-	 */
 	<T extends IBaseResource> T vread(Class<T> theType, String theId, String theVersionId);
 
 }

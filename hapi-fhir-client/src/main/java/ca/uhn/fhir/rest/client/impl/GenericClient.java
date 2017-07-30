@@ -34,7 +34,6 @@ import org.hl7.fhir.instance.model.api.*;
 import ca.uhn.fhir.context.*;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.Include;
-import ca.uhn.fhir.model.base.resource.BaseConformance;
 import ca.uhn.fhir.model.base.resource.BaseOperationOutcome;
 import ca.uhn.fhir.model.primitive.*;
 import ca.uhn.fhir.parser.DataFormatException;
@@ -71,68 +70,17 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		myContext = theContext;
 	}
 
-	@Deprecated // override deprecated method
-	@Override
-	public IBaseConformance conformance() {
-		if (myContext.getVersion().getVersion().isRi()) {
-			throw new IllegalArgumentException("Must call fetchConformance() instead of conformance() for RI/STU3+ structures");
-		}
-
-		HttpGetClientInvocation invocation = MethodUtil.createConformanceInvocation(getFhirContext());
-		if (isKeepResponses()) {
-			myLastRequest = invocation.asHttpRequest(getServerBase(), createExtraParams(), getEncoding(), isPrettyPrint());
-		}
-
-		@SuppressWarnings("unchecked")
-		Class<BaseConformance> conformance = (Class<BaseConformance>) myContext.getResourceDefinition("Conformance").getImplementingClass();
-
-		ResourceResponseHandler<? extends BaseConformance> binding = new ResourceResponseHandler<BaseConformance>(conformance);
-		IBaseConformance resp = invokeClient(myContext, binding, invocation, myLogRequestAndResponse);
-		return resp;
-	}
-
 	@Override
 	public ICreate create() {
 		return new CreateInternal();
 	}
 
-	@Deprecated // overide deprecated method
-	@Override
-	public MethodOutcome create(IBaseResource theResource) {
-		BaseHttpClientInvocation invocation = MethodUtil.createCreateInvocation(theResource, myContext);
-		if (isKeepResponses()) {
-			myLastRequest = invocation.asHttpRequest(getServerBase(), createExtraParams(), getEncoding(), isPrettyPrint());
-		}
-
-		OutcomeResponseHandler binding = new OutcomeResponseHandler();
-		MethodOutcome resp = invokeClient(myContext, binding, invocation, myLogRequestAndResponse);
-		return resp;
-
-	}
 
 	@Override
 	public IDelete delete() {
 		return new DeleteInternal();
 	}
 
-	@Deprecated // override deprecated method
-	@Override
-	public MethodOutcome delete(final Class<? extends IBaseResource> theType, IdDt theId) {
-		HttpDeleteClientInvocation invocation = DeleteMethodBinding.createDeleteInvocation(getFhirContext(), theId.withResourceType(toResourceName(theType)));
-		if (isKeepResponses()) {
-			myLastRequest = invocation.asHttpRequest(getServerBase(), createExtraParams(), getEncoding(), isPrettyPrint());
-		}
-
-		OutcomeResponseHandler binding = new OutcomeResponseHandler();
-		MethodOutcome resp = invokeClient(myContext, binding, invocation, myLogRequestAndResponse);
-		return resp;
-	}
-
-	@Deprecated // override deprecated method
-	@Override
-	public MethodOutcome delete(Class<? extends IBaseResource> theType, String theId) {
-		return delete(theType, new IdDt(theId));
-	}
 
 	private <T extends IBaseResource> T doReadOrVRead(final Class<T> theType, IIdType theId, boolean theVRead, ICallable<T> theNotModifiedHandler, String theIfVersionMatches, Boolean thePrettyPrint,
 			SummaryEnum theSummary, EncodingEnum theEncoding, Set<String> theSubsetElements) {
@@ -367,13 +315,6 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			throw new IllegalArgumentException(myContext.getLocalizer().getMessage(I18N_NO_VERSION_ID_FOR_VREAD, theId.getValue()));
 		}
 		return doReadOrVRead(theType, theId, true, null, null, false, null, null, null);
-	}
-
-	/* also deprecated in interface */
-	@Deprecated
-	@Override
-	public <T extends IBaseResource> T vread(final Class<T> theType, IdDt theId, IdDt theVersionId) {
-		return vread(theType, theId.withVersion(theVersionId.getIdPart()));
 	}
 
 	@Override
@@ -1881,7 +1822,6 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 	}
 
-	@SuppressWarnings("rawtypes")
 	private static class SortInternal implements ISort {
 
 		private SearchInternal myFor;
