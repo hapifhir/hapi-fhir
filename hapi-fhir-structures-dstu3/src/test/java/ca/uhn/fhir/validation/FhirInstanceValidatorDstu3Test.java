@@ -7,6 +7,7 @@ import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertFalse;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -837,6 +838,13 @@ public class FhirInstanceValidatorDstu3Test {
 		List<SingleValidationMessage> all = logResultsAndReturnAll(output);
 		assertEquals(0, all.size());
 	}
+
+  @Test
+  public void testIsNoTerminologyChecks() {
+    assertFalse(myInstanceVal.isNoTerminologyChecks());
+    myInstanceVal.setNoTerminologyChecks(true);
+    assertTrue(myInstanceVal.isNoTerminologyChecks());
+  }
 
 	@Test
 	@Ignore

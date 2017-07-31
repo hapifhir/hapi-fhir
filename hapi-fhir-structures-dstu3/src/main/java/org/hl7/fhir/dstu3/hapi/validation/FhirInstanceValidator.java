@@ -44,6 +44,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
   private DocumentBuilderFactory myDocBuilderFactory;
   private StructureDefinition myStructureDefintion;
   private IValidationSupport myValidationSupport;
+  private boolean noTerminologyChecks = false;
 
   /**
    * Constructor
@@ -128,6 +129,21 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
   }
 
   /**
+  * If set to {@literal true} (default is false) the valueSet will not be validate
+  */
+  public boolean isNoTerminologyChecks() {
+    return noTerminologyChecks;
+  }
+
+  /**
+  * If set to {@literal true} (default is false) the valueSet will not be validate
+  */
+  public void setNoTerminologyChecks(final boolean theNoTerminologyChecks) {
+    noTerminologyChecks = theNoTerminologyChecks;
+  }
+  
+
+  /**
    * Sets the "best practice warning level". When validating, any deviations from best practices will be reported at
    * this level.
    * <p>
@@ -171,6 +187,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
     v.setBestPracticeWarningLevel(getBestPracticeWarningLevel());
     v.setAnyExtensionsAllowed(isAnyExtensionsAllowed());
     v.setResourceIdRule(IdStatus.OPTIONAL);
+    v.setNoTerminologyChecks(isNoTerminologyChecks());
 
     List<ValidationMessage> messages = new ArrayList<ValidationMessage>();
 
