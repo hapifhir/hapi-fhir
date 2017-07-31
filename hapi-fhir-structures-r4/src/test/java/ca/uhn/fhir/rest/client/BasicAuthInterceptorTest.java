@@ -8,30 +8,23 @@ import java.io.StringReader;
 import java.nio.charset.Charset;
 
 import org.apache.commons.io.input.ReaderInputStream;
-import org.apache.http.Header;
-import org.apache.http.HttpResponse;
-import org.apache.http.ProtocolVersion;
+import org.apache.http.*;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicStatusLine;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.hl7.fhir.r4.model.IdType;
+import org.junit.*;
 import org.mockito.ArgumentCaptor;
 import org.mockito.internal.stubbing.defaultanswers.ReturnsDeepStubs;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.rest.client.interceptor.BearerTokenAuthInterceptor;
-import ca.uhn.fhir.rest.server.Constants;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
+import ca.uhn.fhir.rest.client.interceptor.BasicAuthInterceptor;
 import ca.uhn.fhir.util.TestUtil;
 
-/**
- * Created by dsotnikov on 2/25/2014.
- */
-public class BearerTokenAuthInterceptorTest {
+public class BasicAuthInterceptorTest {
 
 	private static FhirContext ourCtx;
 	private HttpClient myHttpClient;
@@ -75,16 +68,31 @@ public class BearerTokenAuthInterceptorTest {
 		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
 
 		ITestClient client = ourCtx.newRestfulClient(ITestClient.class, "http://foo");
-		client.registerInterceptor(new BearerTokenAuthInterceptor("mytoken"));
-		client.getPatientById(new IdDt("111"));
+		client.registerInterceptor(new BasicAuthInterceptor("myuser", "mypass"));
+		client.getPatientById(new IdType("111"));
 
-		HttpUriRequest req = capt.getValue();
-		assertEquals("Bearer mytoken", req.getFirstHeader("Authorization").getValue());
+		assertEquals(1, capt.getAllValues().size());
+		HttpUriRequest req = capt.getAllValues().get(0);
+		assertEquals(1, req.getHeaders("Authorization").length);
+		assertEquals("Basic bXl1c2VyOm15cGFzcw==", req.getFirstHeader("Authorization").getValue());
+
+		// Create a second client and make sure we get the same results
+
+		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
+		client = ourCtx.newRestfulClient(ITestClient.class, "http://foo");
+		client.registerInterceptor(new BasicAuthInterceptor("myuser", "mypass"));
+		client.getPatientById(new IdType("111"));
+
+		assertEquals(2, capt.getAllValues().size());
+		req = capt.getAllValues().get(1);
+		assertEquals(1, req.getHeaders("Authorization").length);
+		assertEquals("Basic bXl1c2VyOm15cGFzcw==", req.getFirstHeader("Authorization").getValue());
+
 	}
 
 	@BeforeClass
 	public static void beforeClass() {
-		ourCtx = FhirContext.forDstu1();
+		ourCtx = FhirContext.forR4();
 	}
 
 

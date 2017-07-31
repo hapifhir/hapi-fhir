@@ -11,29 +11,21 @@ import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.ProtocolVersion;
 import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.client.methods.*;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicStatusLine;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.Test;
+import org.hl7.fhir.r4.model.Binary;
+import org.junit.*;
 import org.mockito.ArgumentCaptor;
 import org.mockito.internal.stubbing.defaultanswers.ReturnsDeepStubs;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.dstu.resource.Binary;
-import ca.uhn.fhir.model.dstu.resource.Conformance;
-import ca.uhn.fhir.model.dstu.resource.Patient;
-import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.rest.annotation.Create;
-import ca.uhn.fhir.rest.annotation.IdParam;
-import ca.uhn.fhir.rest.annotation.Read;
-import ca.uhn.fhir.rest.annotation.ResourceParam;
+import ca.uhn.fhir.model.primitive.IdType;
+import ca.uhn.fhir.rest.annotation.*;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IBasicClient;
-import ca.uhn.fhir.rest.server.Constants;
+import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import ca.uhn.fhir.util.TestUtil;
 
 public class BinaryClientTest {
@@ -46,7 +38,7 @@ public class BinaryClientTest {
 
 	@Before
 	public void before() {
-		mtCtx = FhirContext.forDstu1();
+		mtCtx = FhirContext.forR4();
 
 		myHttpClient = mock(HttpClient.class, new ReturnsDeepStubs());
 		mtCtx.getRestfulClientFactory().setHttpClient(myHttpClient);
@@ -64,7 +56,7 @@ public class BinaryClientTest {
 		when(httpResponse.getEntity().getContent()).thenReturn(new ByteArrayInputStream(new byte[] { 1, 2, 3, 4 }));
 
 		IClient client = mtCtx.newRestfulClient(IClient.class, "http://foo");
-		Binary resp = client.read(new IdDt("http://foo/Patient/123"));
+		Binary resp = client.read(new IdType("http://foo/Patient/123"));
 
 		assertEquals(HttpGet.class, capt.getValue().getClass());
 		HttpGet get = (HttpGet) capt.getValue();
@@ -101,7 +93,7 @@ public class BinaryClientTest {
 	private interface IClient extends IBasicClient {
 
 		@Read(type = Binary.class)
-		public Binary read(@IdParam IdDt theBinary);
+		public Binary read(@IdParam IdType theBinary);
 
 		@Create(type = Binary.class)
 		public MethodOutcome create(@ResourceParam Binary theBinary);

@@ -28,7 +28,7 @@ import org.junit.Test;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu.resource.Patient;
-import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.model.primitive.IdType;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.server.IResourceProvider;
@@ -111,7 +111,7 @@ public class HttpProxyTest {
 			String baseUri = "http://99.99.99.99:" + port + "/rootctx/rcp2/fhirctx/fcp2";
 			IGenericClient client = ourCtx.newRestfulGenericClient(baseUri);
 
-			IdDt id = new IdDt("Patient", "123");
+			IdType id = new IdType("Patient", "123");
 			client.read(Patient.class, id);
 
 			assertEquals("Basic dXNlcm5hbWU6cGFzc3dvcmQ=", myAuthHeader);
@@ -135,7 +135,7 @@ public class HttpProxyTest {
 		}
 
 		@Read
-		public Patient read(@IdParam IdDt theId, HttpServletRequest theRequest) {
+		public Patient read(@IdParam IdType theId, HttpServletRequest theRequest) {
 			Patient retVal = new Patient();
 			retVal.setId(theId);
 			ourRequest = theRequest;

@@ -6,12 +6,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.IOUtils;
@@ -23,35 +18,20 @@ import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.hl7.fhir.r4.model.*;
+import org.junit.*;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.api.Bundle;
+import ca.uhn.fhir.context.api.BundleInclusionRule;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Extension;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
-import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
-import ca.uhn.fhir.model.dstu.resource.DiagnosticReport;
-import ca.uhn.fhir.model.dstu.resource.Observation;
-import ca.uhn.fhir.model.dstu.resource.Organization;
-import ca.uhn.fhir.model.dstu.resource.Patient;
-import ca.uhn.fhir.model.dstu.resource.Practitioner;
-import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.StringDt;
-import ca.uhn.fhir.rest.annotation.IncludeParam;
-import ca.uhn.fhir.rest.annotation.RequiredParam;
-import ca.uhn.fhir.rest.annotation.Search;
-import ca.uhn.fhir.util.ElementUtil;
-import ca.uhn.fhir.util.PortUtil;
-import ca.uhn.fhir.util.TestUtil;
+import ca.uhn.fhir.rest.annotation.*;
+import ca.uhn.fhir.util.*;
 
-/**
- * Created by dsotnikov on 2/25/2014.
- */
 public class IncludeTest {
 
 	private static CloseableHttpClient ourClient;
@@ -80,20 +60,21 @@ public class IncludeTest {
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		Bundle bundle = ourCtx.newXmlParser().parseBundle(responseContent);
+		Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
 
 		ourLog.info(responseContent);
 
-		assertEquals(3, bundle.size());
-		assertEquals(new IdDt("Patient/p1"), bundle.toListOfResources().get(0).getId().toUnqualifiedVersionless());
-		assertEquals(new IdDt("Patient/p2"), bundle.toListOfResources().get(1).getId().toUnqualifiedVersionless());
-		assertEquals(new IdDt("Organization/o1"), bundle.toListOfResources().get(2).getId().toUnqualifiedVersionless());
+		assertEquals(3, bundle.getEntry().size());
+		
+		assertEquals(new IdType("Patient/p1"), bundle.getEntry().get(0).getResource().getIdElement().toUnqualifiedVersionless().getValue());
+		assertEquals(new IdType("Patient/p2"), bundle.getEntry().get(1).getResource().getIdElement().toUnqualifiedVersionless().getValue());
+		assertEquals(new IdType("Organization/o1"), bundle.getEntry().get(2).getResource().getIdElement().toUnqualifiedVersionless().getValue());
 
-		Patient p1 = (Patient) bundle.toListOfResources().get(0);
-		assertEquals(0, p1.getContained().getContainedResources().size());
+		Patient p1 = (Patient) bundle.getEntry().get(0).getResource();
+		assertEquals(0, p1.getContained().size());
 
-		Patient p2 = (Patient) bundle.toListOfResources().get(1);
-		assertEquals(0, p2.getContained().getContainedResources().size());
+		Patient p2 = (Patient) bundle.getEntry().get(1).getResource();
+		assertEquals(0, p2.getContained().size());
 
 	}
 
@@ -105,21 +86,21 @@ public class IncludeTest {
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		Bundle bundle = ourCtx.newXmlParser().parseBundle(responseContent);
+		Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
 
 		ourLog.info(responseContent);
 
-		assertEquals(4, bundle.size());
-		assertEquals(new IdDt("Patient/p1"), bundle.toListOfResources().get(0).getId().toUnqualifiedVersionless());
-		assertEquals(new IdDt("Patient/p2"), bundle.toListOfResources().get(1).getId().toUnqualifiedVersionless());
-		assertEquals(new IdDt("Organization/o1"), bundle.toListOfResources().get(2).getId().toUnqualifiedVersionless());
-		assertEquals(new IdDt("Organization/o2"), bundle.toListOfResources().get(3).getId().toUnqualifiedVersionless());
+		assertEquals(4, bundle.getEntry().size());
+		assertEquals(("Patient/p1"), bundle.getEntry().get(0).getResource().getIdElement().toUnqualifiedVersionless().getValue());
+		assertEquals(("Patient/p2"), bundle.getEntry().get(1).getResource().getIdElement().toUnqualifiedVersionless().getValue());
+		assertEquals(("Organization/o1"), bundle.getEntry().get(2).getResource().getIdElement().toUnqualifiedVersionless().getValue());
+		assertEquals(("Organization/o2"), bundle.getEntry().get(3).getResource().getIdElement().toUnqualifiedVersionless().getValue());
 
-		Patient p1 = (Patient) bundle.toListOfResources().get(0);
-		assertEquals(0, p1.getContained().getContainedResources().size());
+		Patient p1 = (Patient) bundle.getEntry().get(0).getResource();
+		assertEquals(0, p1.getContained().size());
 
-		Patient p2 = (Patient) bundle.toListOfResources().get(1);
-		assertEquals(0, p2.getContained().getContainedResources().size());
+		Patient p2 = (Patient) bundle.getEntry().get(1).getResource();
+		assertEquals(0, p2.getContained().size());
 
 	}
 
@@ -131,20 +112,20 @@ public class IncludeTest {
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		Bundle bundle = ourCtx.newXmlParser().parseBundle(responseContent);
+		Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
 
 		ourLog.info(responseContent);
 
-		assertEquals(3, bundle.size());
-		assertEquals(new IdDt("Patient/p1"), bundle.toListOfResources().get(0).getId().toUnqualifiedVersionless());
-		assertEquals(new IdDt("Patient/p2"), bundle.toListOfResources().get(1).getId().toUnqualifiedVersionless());
-		assertEquals(new IdDt("Organization/o1"), bundle.toListOfResources().get(2).getId().toUnqualifiedVersionless());
+		assertEquals(3, bundle.getEntry().size());
+		assertEquals(("Patient/p1"), bundle.getEntry().get(0).getResource().getIdElement().toUnqualifiedVersionless().getValue());
+		assertEquals(("Patient/p2"), bundle.getEntry().get(1).getResource().getIdElement().toUnqualifiedVersionless().getValue());
+		assertEquals(("Organization/o1"), bundle.getEntry().get(2).getResource().getIdElement().toUnqualifiedVersionless().getValue());
 
-		Patient p1 = (Patient) bundle.toListOfResources().get(0);
-		assertEquals(0, p1.getContained().getContainedResources().size());
+		Patient p1 = (Patient) bundle.getEntry().get(0).getResource();
+		assertEquals(0, p1.getContained().size());
 
-		Patient p2 = (Patient) bundle.toListOfResources().get(1);
-		assertEquals(0, p2.getContained().getContainedResources().size());
+		Patient p2 = (Patient) bundle.getEntry().get(1).getResource();
+		assertEquals(0, p2.getContained().size());
 
 	}
 
@@ -156,20 +137,20 @@ public class IncludeTest {
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		Bundle bundle = ourCtx.newJsonParser().parseBundle(responseContent);
+		Bundle bundle = ourCtx.newJsonParser().parseResource(Bundle.class, responseContent);
 
 		ourLog.info(responseContent);
 
-		assertEquals(3, bundle.size());
-		assertEquals(new IdDt("Patient/p1"), bundle.toListOfResources().get(0).getId().toUnqualifiedVersionless());
-		assertEquals(new IdDt("Patient/p2"), bundle.toListOfResources().get(1).getId().toUnqualifiedVersionless());
-		assertEquals(new IdDt("Organization/o1"), bundle.toListOfResources().get(2).getId().toUnqualifiedVersionless());
+		assertEquals(3, bundle.getEntry().size());
+		assertEquals("Patient/p1", bundle.getEntry().get(0).getResource().getIdElement().toUnqualifiedVersionless().getValue());
+		assertEquals("Patient/p2", bundle.getEntry().get(1).getResource().getIdElement().toUnqualifiedVersionless().getValue());
+		assertEquals("Organization/o1", bundle.getEntry().get(2).getResource().getIdElement().toUnqualifiedVersionless().getValue());
 
-		Patient p1 = (Patient) bundle.toListOfResources().get(0);
-		assertEquals(0, p1.getContained().getContainedResources().size());
+		Patient p1 = (Patient) bundle.getEntry().get(0).getResource();
+		assertEquals(0, p1.getContained().size());
 
-		Patient p2 = (Patient) bundle.toListOfResources().get(1);
-		assertEquals(0, p2.getContained().getContainedResources().size());
+		Patient p2 = (Patient) bundle.getEntry().get(1).getResource();
+		assertEquals(0, p2.getContained().size());
 
 	}
 
@@ -214,8 +195,8 @@ public class IncludeTest {
 		ourLog.info(responseContent);
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		Bundle bundle = ourCtx.newXmlParser().parseBundle(responseContent);
-		assertEquals(4, bundle.size());
+		Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
+		assertEquals(4, bundle.getEntry().size());
 	}
 
 	@Test
@@ -226,12 +207,12 @@ public class IncludeTest {
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		Bundle bundle = ourCtx.newXmlParser().parseBundle(responseContent);
-		assertEquals(1, bundle.size());
+		Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
+		assertEquals(1, bundle.getEntry().size());
 
-		Patient p = bundle.getResources(Patient.class).get(0);
+		Patient p = BundleUtil.toListOfResourcesOfType(ourCtx, bundle, Patient.class).get(0);
 		assertEquals(0, p.getName().size());
-		assertEquals("Hello", p.getId().getIdPart());
+		assertEquals("Hello", p.getIdElement().getIdPart());
 	}
 
 	@Test
@@ -242,13 +223,13 @@ public class IncludeTest {
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		Bundle bundle = ourCtx.newXmlParser().parseBundle(responseContent);
-		assertEquals(1, bundle.size());
+		Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
+		assertEquals(1, bundle.getEntry().size());
 
-		Patient p = bundle.getResources(Patient.class).get(0);
+		Patient p = BundleUtil.toListOfResourcesOfType(ourCtx, bundle, Patient.class).get(0);
 		assertEquals(1, p.getName().size());
-		assertEquals("Hello", p.getId().getIdPart());
-		assertEquals("foo", p.getName().get(0).getFamilyFirstRep().getValue());
+		assertEquals("Hello", p.getIdElement().getIdPart());
+		assertEquals("foo", p.getName().get(0).getFamily());
 	}
 
 	@Test
@@ -259,16 +240,16 @@ public class IncludeTest {
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		Bundle bundle = ourCtx.newXmlParser().parseBundle(responseContent);
-		assertEquals(1, bundle.size());
+		Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
+		assertEquals(1, bundle.getEntry().size());
 
-		Patient p = bundle.getResources(Patient.class).get(0);
+		Patient p = BundleUtil.toListOfResourcesOfType(ourCtx, bundle, Patient.class).get(0);
 		assertEquals(2, p.getName().size());
-		assertEquals("Hello", p.getId().getIdPart());
+		assertEquals("Hello", p.getIdElement().getIdPart());
 
 		Set<String> values = new HashSet<String>();
-		values.add(p.getName().get(0).getFamilyFirstRep().getValue());
-		values.add(p.getName().get(1).getFamilyFirstRep().getValue());
+		values.add(p.getName().get(0).getFamily());
+		values.add(p.getName().get(1).getFamily());
 		assertThat(values, containsInAnyOrder("foo", "bar"));
 
 	}
@@ -283,7 +264,7 @@ public class IncludeTest {
 	@BeforeClass
 	public static void beforeClass() throws Exception {
 
-		ourCtx = FhirContext.forDstu1();
+		ourCtx = FhirContext.forR4();
 		ourPort = PortUtil.findFreePort();
 		ourServer = new Server(ourPort);
 
@@ -309,14 +290,14 @@ public class IncludeTest {
 
 		Organization org = new Organization();
 		org.setId("Organization/65546");
-		org.getName().setValue("Contained Test Organization");
+		org.getNameElement().setValue("Contained Test Organization");
 
 		Patient patient = new Patient();
 		patient.setId("Patient/1333");
-		patient.addIdentifier("urn:mrns", "253345");
+		patient.addIdentifier().setSystem("urn:mrns").setValue("253345");
 		patient.getManagingOrganization().setResource(patient);
 
-		System.out.println(FhirContext.forDstu1().newXmlParser().setPrettyPrint(true).encodeResourceToString(patient));
+		System.out.println(FhirContext.forR4().newXmlParser().setPrettyPrint(true).encodeResourceToString(patient));
 
 		patient.getManagingOrganization().getReference();
 
@@ -328,7 +309,7 @@ public class IncludeTest {
 	public static class DummyDiagnosticReportResourceProvider implements IResourceProvider {
 
 		@Override
-		public Class<? extends IResource> getResourceType() {
+		public Class<DiagnosticReport> getResourceType() {
 			return DiagnosticReport.class;
 		}
 
@@ -336,31 +317,31 @@ public class IncludeTest {
 		public List<DiagnosticReport> stitchedInclude() {
 			Practitioner pr1 = new Practitioner();
 			pr1.setId("Practitioner/001");
-			pr1.getName().addFamily("Pract1");
+			pr1.addName().setFamily("Pract1");
 
 			Practitioner pr2 = new Practitioner();
 			pr2.setId("Practitioner/002");
-			pr2.getName().addFamily("Pract2");
+			pr2.addName().setFamily("Pract2");
 
 			Practitioner pr3 = new Practitioner();
 			pr3.setId("Practitioner/003");
-			pr3.getName().addFamily("Pract3");
+			pr3.addName().setFamily("Pract3");
 
 			Observation o1 = new Observation();
-			o1.getName().setText("Obs1");
+			o1.getCode().setText("Obs1");
 			o1.addPerformer().setResource(pr1);
 
 			Observation o2 = new Observation();
-			o2.getName().setText("Obs2");
+			o2.getCode().setText("Obs2");
 			o2.addPerformer().setResource(pr2);
 
 			Observation o3 = new Observation();
-			o3.getName().setText("Obs3");
+			o3.getCode().setText("Obs3");
 			o3.addPerformer().setResource(pr3);
 
 			DiagnosticReport rep = new DiagnosticReport();
 			rep.setId("DiagnosticReport/999");
-			rep.getName().setText("Rep");
+			rep.getCode().setText("Rep");
 			rep.addResult().setResource(o1);
 			rep.addResult().setResource(o2);
 			rep.addResult().setResource(o3);
@@ -370,24 +351,21 @@ public class IncludeTest {
 
 	}
 
-	/**
-	 * Created by dsotnikov on 2/25/2014.
-	 */
 	public static class DummyPatientResourceProvider implements IResourceProvider {
 
 		@Search(queryName = "containedInclude")
 		public List<Patient> containedInclude() {
 			Organization o1 = new Organization();
-			o1.getName().setValue("o1");
+			o1.getNameElement().setValue("o1");
 
 			Patient p1 = new Patient();
 			p1.setId("p1");
-			p1.addIdentifier().setLabel("p1");
+			p1.addIdentifier().setValue("p1");
 			p1.getManagingOrganization().setResource(o1);
 
 			Patient p2 = new Patient();
 			p2.setId("p2");
-			p2.addIdentifier().setLabel("p2");
+			p2.addIdentifier().setValue("p2");
 			p2.getManagingOrganization().setResource(o1);
 
 			return Arrays.asList(p1, p2);
@@ -396,22 +374,22 @@ public class IncludeTest {
 		@Search(queryName = "declaredExtInclude")
 		public List<ExtPatient> declaredExtInclude() {
 			Organization o1 = new Organization();
-			o1.getName().setValue("o1");
+			o1.getNameElement().setValue("o1");
 			o1.setId("o1");
 
 			Organization o2 = new Organization();
-			o2.getName().setValue("o2");
+			o2.getNameElement().setValue("o2");
 			o2.setId("o2");
 			o1.getPartOf().setResource(o2);
 
 			ExtPatient p1 = new ExtPatient();
 			p1.setId("p1");
-			p1.addIdentifier().setLabel("p1");
+			p1.addIdentifier().setValue("p1");
 			p1.getSecondOrg().setResource(o1);
 
 			ExtPatient p2 = new ExtPatient();
 			p2.setId("p2");
-			p2.addIdentifier().setLabel("p2");
+			p2.addIdentifier().setValue("p2");
 			p2.getSecondOrg().setResource(o1);
 
 			return Arrays.asList(p1, p2);
@@ -420,18 +398,18 @@ public class IncludeTest {
 		@Search(queryName = "extInclude")
 		public List<Patient> extInclude() {
 			Organization o1 = new Organization();
-			o1.getName().setValue("o1");
+			o1.getNameElement().setValue("o1");
 			o1.setId("o1");
 
 			Patient p1 = new Patient();
 			p1.setId("p1");
-			p1.addIdentifier().setLabel("p1");
-			p1.addUndeclaredExtension(false, "http://foo", new ResourceReferenceDt(o1));
+			p1.addIdentifier().setValue("p1");
+			p1.addUndeclaredExtension(false, "http://foo", new Reference(o1));
 
 			Patient p2 = new Patient();
 			p2.setId("p2");
-			p2.addIdentifier().setLabel("p2");
-			p2.addUndeclaredExtension(false, "http://foo", new ResourceReferenceDt(o1));
+			p2.addIdentifier().setValue("p2");
+			p2.addUndeclaredExtension(false, "http://foo", new Reference(o1));
 
 			return Arrays.asList(p1, p2);
 		}
@@ -447,7 +425,7 @@ public class IncludeTest {
 
 			if (theIncludes != null) {
 				for (Include next : theIncludes) {
-					p.addName().addFamily().setValue(next.getValue());
+					p.addName().setFamily().setValue(next.getValue());
 				}
 			}
 			retVal.add(p);
@@ -463,17 +441,17 @@ public class IncludeTest {
 		@Search(queryName = "normalInclude")
 		public List<Patient> normalInclude() {
 			Organization o1 = new Organization();
-			o1.getName().setValue("o1");
+			o1.getNameElement().setValue("o1");
 			o1.setId("o1");
 
 			Patient p1 = new Patient();
 			p1.setId("p1");
-			p1.addIdentifier().setLabel("p1");
+			p1.addIdentifier().setValue("p1");
 			p1.getManagingOrganization().setResource(o1);
 
 			Patient p2 = new Patient();
 			p2.setId("p2");
-			p2.addIdentifier().setLabel("p2");
+			p2.addIdentifier().setValue("p2");
 			p2.getManagingOrganization().setResource(o1);
 
 			return Arrays.asList(p1, p2);
@@ -484,13 +462,15 @@ public class IncludeTest {
 
 	@ResourceDef(name = "Patient")
 	public static class ExtPatient extends Patient {
+		private static final long serialVersionUID = 1L;
+		
 		@Child(name = "secondOrg")
 		@Extension(url = "http://foo#secondOrg", definedLocally = false, isModifier = false)
-		private ResourceReferenceDt mySecondOrg;
+		private Reference mySecondOrg;
 
-		public ResourceReferenceDt getSecondOrg() {
+		public Reference getSecondOrg() {
 			if (mySecondOrg == null) {
-				mySecondOrg = new ResourceReferenceDt();
+				mySecondOrg = new Reference();
 			}
 			return mySecondOrg;
 		}
@@ -500,7 +480,7 @@ public class IncludeTest {
 			return super.isEmpty() && ElementUtil.isEmpty(mySecondOrg);
 		}
 
-		public void setSecondOrg(ResourceReferenceDt theSecondOrg) {
+		public void setSecondOrg(Reference theSecondOrg) {
 			mySecondOrg = theSecondOrg;
 		}
 

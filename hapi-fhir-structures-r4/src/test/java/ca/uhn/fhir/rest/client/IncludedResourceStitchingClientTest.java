@@ -1,7 +1,9 @@
 package ca.uhn.fhir.rest.client;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.io.StringReader;
 import java.nio.charset.Charset;
@@ -15,20 +17,17 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicStatusLine;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.Test;
+import org.hl7.fhir.r4.model.*;
+import org.junit.*;
 import org.mockito.ArgumentCaptor;
 import org.mockito.internal.stubbing.defaultanswers.ReturnsDeepStubs;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.ExtensionDt;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
-import ca.uhn.fhir.model.dstu.resource.Conformance;
-import ca.uhn.fhir.model.dstu.resource.Organization;
-import ca.uhn.fhir.model.dstu.resource.Patient;
-import ca.uhn.fhir.rest.server.Constants;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.server.IncludeTest;
 import ca.uhn.fhir.rest.server.IncludeTest.ExtPatient;
 import ca.uhn.fhir.util.TestUtil;
@@ -43,11 +42,11 @@ public class IncludedResourceStitchingClientTest {
 
 	@Before
 	public void before() {
-		ctx = new FhirContext(Patient.class, Conformance.class);
+		ctx = FhirContext.forR4();
 
 		httpClient = mock(HttpClient.class, new ReturnsDeepStubs());
 		ctx.getRestfulClientFactory().setHttpClient(httpClient);
-		ctx.getRestfulClientFactory().setServerValidationModeEnum(ServerValidationModeEnum.NEVER);
+		ctx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
 
 		httpResponse = mock(HttpResponse.class, new ReturnsDeepStubs());
 	}
@@ -61,20 +60,24 @@ public class IncludedResourceStitchingClientTest {
 		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(createBundle()), Charset.forName("UTF-8")));
 
 		IGenericClient client = ctx.newRestfulGenericClient( "http://foo");
-		Bundle bundle = client.search().forResource("Patient").execute();
+		Bundle bundle = client
+		    .search()
+		    .forResource("Patient")
+		    .returnBundle(Bundle.class)
+		    .execute();
 
 		assertEquals(HttpGet.class, capt.getValue().getClass());
 		HttpGet get = (HttpGet) capt.getValue();
 		assertEquals("http://foo/Patient", get.getURI().toString());
 		
-		assertEquals(3, bundle.size());
+		assertEquals(3, bundle.getEntry().size());
 		
-		Patient p = (Patient) bundle.getEntries().get(0).getResource();
-		List<ExtensionDt> exts = p.getUndeclaredExtensionsByUrl("http://foo");
+		Patient p = (Patient) bundle.getEntry().get(0).getResource();
+		List<Extension> exts = p.getExtensionsByUrl("http://foo");
 		assertEquals(1,exts.size());
-		ExtensionDt ext = exts.get(0);
-		ResourceReferenceDt ref = (ResourceReferenceDt) ext.getValue();
-		assertEquals("Organization/o1", ref.getReference().getValue());
+		Extension ext = exts.get(0);
+		Reference ref = (Reference) ext.getValue();
+		assertEquals("Organization/o1", ref.getReferenceElement().getValue());
 		assertNotNull(ref.getResource());
 		
 	}
@@ -97,7 +100,7 @@ public class IncludedResourceStitchingClientTest {
 		
 		assertEquals(4, bundle.size());
 		
-		ExtPatient p = (ExtPatient) bundle.getEntries().get(0).getResource();
+		ExtPatient p = (ExtPatient) bundle.getEntry().get(0).getResource();
 		ResourceReferenceDt ref = (ResourceReferenceDt) p.getSecondOrg();
 		assertEquals("Organization/o1", ref.getReference().getValue());
 		assertNotNull(ref.getResource());

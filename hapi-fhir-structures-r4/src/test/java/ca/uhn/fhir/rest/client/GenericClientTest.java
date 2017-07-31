@@ -10,60 +10,41 @@ import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.StringReader;
+import java.io.*;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.ReaderInputStream;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.http.Header;
-import org.apache.http.HttpResponse;
-import org.apache.http.ProtocolVersion;
+import org.apache.http.*;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpPut;
-import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.client.methods.*;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicStatusLine;
 import org.hamcrest.Matchers;
 import org.hamcrest.core.StringContains;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.hl7.fhir.r4.model.*;
+import org.junit.*;
 import org.mockito.ArgumentCaptor;
 import org.mockito.internal.stubbing.defaultanswers.ReturnsDeepStubs;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.api.Bundle;
-import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
-import ca.uhn.fhir.model.api.Tag;
-import ca.uhn.fhir.model.api.TagList;
-import ca.uhn.fhir.model.dstu.resource.Encounter;
-import ca.uhn.fhir.model.dstu.resource.Observation;
-import ca.uhn.fhir.model.dstu.resource.OperationOutcome;
-import ca.uhn.fhir.model.dstu.resource.Organization;
-import ca.uhn.fhir.model.dstu.resource.Patient;
-import ca.uhn.fhir.model.dstu.resource.Provenance;
-import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.model.api.*;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.UriDt;
-import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.api.*;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.client.exceptions.NonFhirResponseException;
-import ca.uhn.fhir.rest.method.SearchStyleEnum;
-import ca.uhn.fhir.rest.server.Constants;
-import ca.uhn.fhir.rest.server.EncodingEnum;
+import ca.uhn.fhir.rest.client.impl.BaseClient;
+import ca.uhn.fhir.rest.client.impl.GenericClient;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.TestUtil;
@@ -368,7 +349,7 @@ public class GenericClientTest {
 		assertEquals("testDelete01", outcome.getIssueFirstRep().getLocationFirstRep().getValue());
 
 		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader("LKJHLKJGLKJKLL"), Charset.forName("UTF-8")));
-		outcome = (OperationOutcome) client.delete().resourceById(new IdDt("Location", "123", "456")).prettyPrint().encodedJson().execute();
+		outcome = (OperationOutcome) client.delete().resourceById(new IdType("Location", "123", "456")).prettyPrint().encodedJson().execute();
 
 		assertEquals("http://example.com/fhir/Location/123?_pretty=true", capt.getAllValues().get(1).getURI().toString());
 		assertEquals("DELETE", capt.getValue().getMethod());
@@ -460,7 +441,7 @@ public class GenericClientTest {
 		//@formatter:off
 		response = client
 				.history()
-				.onInstance(new IdDt("Patient", "123"))
+				.onInstance(new IdType("Patient", "123"))
 				.andReturnDstu1Bundle()
 				.execute();
 		//@formatter:on
@@ -511,7 +492,7 @@ public class GenericClientTest {
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
 
 		//@formatter:off
-		Patient response = client.read(Patient.class, new IdDt("Patient/1234"));
+		Patient response = client.read(Patient.class, new IdType("Patient/1234"));
 		//@formatter:on
 
 		assertThat(response.getNameFirstRep().getFamilyAsSingleString(), StringContains.containsString("Cardinal"));
@@ -549,7 +530,7 @@ public class GenericClientTest {
 
 		int count = 0;
 
-		Patient response = client.read().resource(Patient.class).withId(new IdDt("Patient/1234")).execute();
+		Patient response = client.read().resource(Patient.class).withId(new IdType("Patient/1234")).execute();
 		assertThat(response.getNameFirstRep().getFamilyAsSingleString(), StringContains.containsString("Cardinal"));
 		assertEquals("http://example.com/fhir/Patient/1234", capt.getAllValues().get(count++).getURI().toString());
 
@@ -591,12 +572,12 @@ public class GenericClientTest {
 
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
 
-		Patient response = client.read(Patient.class, new IdDt("http://somebase.com/path/to/base/Patient/1234"));
+		Patient response = client.read(Patient.class, new IdType("http://somebase.com/path/to/base/Patient/1234"));
 		assertThat(response.getNameFirstRep().getFamilyAsSingleString(), StringContains.containsString("Cardinal"));
 		assertEquals("http://somebase.com/path/to/base/Patient/1234", capt.getAllValues().get(0).getURI().toString());
 
 		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
-		response = client.read(Patient.class, new IdDt("http://somebase.com/path/to/base/Patient/1234/_history/2222"));
+		response = client.read(Patient.class, new IdType("http://somebase.com/path/to/base/Patient/1234/_history/2222"));
 		assertThat(response.getNameFirstRep().getFamilyAsSingleString(), StringContains.containsString("Cardinal"));
 		assertEquals("http://somebase.com/path/to/base/Patient/1234", capt.getAllValues().get(1).getURI().toString());
 
@@ -1478,7 +1459,7 @@ public class GenericClientTest {
 		(client).setEncoding(EncodingEnum.JSON);
 		int count = 0;
 
-		client.read(Patient.class, new IdDt("Patient/1234"));
+		client.read(Patient.class, new IdType("Patient/1234"));
 		assertEquals("http://example.com/fhir/Patient/1234?_format=json", capt.getAllValues().get(count).getURI().toString());
 		count++;
 
@@ -1716,12 +1697,12 @@ public class GenericClientTest {
 
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
 
-		Patient response = client.vread(Patient.class, new IdDt("http://somebase.com/path/to/base/Patient/1234/_history/2222"));
+		Patient response = client.vread(Patient.class, new IdType("http://somebase.com/path/to/base/Patient/1234/_history/2222"));
 		assertThat(response.getNameFirstRep().getFamilyAsSingleString(), StringContains.containsString("Cardinal"));
 		assertEquals("http://somebase.com/path/to/base/Patient/1234/_history/2222", capt.getAllValues().get(0).getURI().toString());
 
 		try {
-			client.vread(Patient.class, new IdDt("http://somebase.com/path/to/base/Patient/1234"));
+			client.vread(Patient.class, new IdType("http://somebase.com/path/to/base/Patient/1234"));
 			fail();
 		} catch (IllegalArgumentException e) {
 			assertThat(e.getMessage(), containsString("No version specified in URL"));

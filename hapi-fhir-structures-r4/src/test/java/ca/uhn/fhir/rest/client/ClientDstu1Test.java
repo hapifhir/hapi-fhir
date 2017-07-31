@@ -55,7 +55,7 @@ import ca.uhn.fhir.model.dstu.resource.OperationOutcome;
 import ca.uhn.fhir.model.dstu.resource.Organization;
 import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
-import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.model.primitive.IdType;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.IntegerDt;
 import ca.uhn.fhir.rest.annotation.Elements;
@@ -246,7 +246,7 @@ public class ClientDstu1Test {
 		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(resp), Charset.forName("UTF-8")));
 
 		ITestClient client = ourCtx.newRestfulClient(ITestClient.class, "http://foo");
-		MethodOutcome response = client.deletePatient(new IdDt("1234"));
+		MethodOutcome response = client.deletePatient(new IdType("1234"));
 
 		assertEquals(HttpDelete.class, capt.getValue().getClass());
 		assertEquals("http://foo/Patient/1234", capt.getValue().getURI().toString());
@@ -263,7 +263,7 @@ public class ClientDstu1Test {
 		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(""), Charset.forName("UTF-8")));
 
 		ITestClient client = ourCtx.newRestfulClient(ITestClient.class, "http://foo");
-		client.deleteDiagnosticReport(new IdDt("1234"));
+		client.deleteDiagnosticReport(new IdType("1234"));
 
 		assertEquals(HttpDelete.class, capt.getValue().getClass());
 		assertEquals("http://foo/DiagnosticReport/1234", capt.getValue().getURI().toString());
@@ -321,7 +321,7 @@ public class ClientDstu1Test {
 		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
 
 		ITestClient client = ourCtx.newRestfulClient(ITestClient.class, "http://foo");
-		Bundle response = client.getHistoryPatientInstance(new IdDt("111"));
+		Bundle response = client.getHistoryPatientInstance(new IdType("111"));
 
 		assertEquals("http://foo/Patient/111/_history", capt.getValue().getURI().toString());
 
@@ -530,26 +530,26 @@ public class ClientDstu1Test {
 		String expectedDateString = new InstantDt(new InstantDt("2012-01-02T12:01:02").getValue()).getValueAsString();
 		expectedDateString = expectedDateString.replace(":", "%3A").replace("+", "%2B");
 
-		client.getHistoryPatientInstance(new IdDt("111"), new InstantDt("2012-01-02T12:01:02"), new IntegerDt(12));
+		client.getHistoryPatientInstance(new IdType("111"), new InstantDt("2012-01-02T12:01:02"), new IntegerDt(12));
 		assertThat(capt.getAllValues().get(0).getURI().toString(), containsString("http://foo/Patient/111/_history?"));
 		assertThat(capt.getAllValues().get(0).getURI().toString(), containsString("_since=" + expectedDateString.replaceAll("\\..*", "")));
 		assertThat(capt.getAllValues().get(0).getURI().toString(), containsString("_count=12"));
 
-		client.getHistoryPatientInstance(new IdDt("111"), new InstantDt("2012-01-02T12:01:02").getValue(), new IntegerDt(12).getValue());
+		client.getHistoryPatientInstance(new IdType("111"), new InstantDt("2012-01-02T12:01:02").getValue(), new IntegerDt(12).getValue());
 		assertThat(capt.getAllValues().get(1).getURI().toString(), containsString("http://foo/Patient/111/_history?"));
 		assertThat(capt.getAllValues().get(1).getURI().toString(), containsString("_since=" + expectedDateString));
 		assertThat(capt.getAllValues().get(1).getURI().toString(), containsString("_count=12"));
 
-		client.getHistoryPatientInstance(new IdDt("111"), null, new IntegerDt(12));
+		client.getHistoryPatientInstance(new IdType("111"), null, new IntegerDt(12));
 		assertEquals("http://foo/Patient/111/_history?_count=12", capt.getAllValues().get(2).getURI().toString());
 
-		client.getHistoryPatientInstance(new IdDt("111"), new InstantDt("2012-01-02T00:01:02"), null);
+		client.getHistoryPatientInstance(new IdType("111"), new InstantDt("2012-01-02T00:01:02"), null);
 		assertEquals("http://foo/Patient/111/_history?_since=2012-01-02T00%3A01%3A02", capt.getAllValues().get(3).getURI().toString());
 
-		client.getHistoryPatientInstance(new IdDt("111"), new InstantDt(), new IntegerDt(12));
+		client.getHistoryPatientInstance(new IdType("111"), new InstantDt(), new IntegerDt(12));
 		assertEquals("http://foo/Patient/111/_history?_count=12", capt.getAllValues().get(4).getURI().toString());
 
-		client.getHistoryPatientInstance(new IdDt("111"), new InstantDt("2012-01-02T00:01:02"), new IntegerDt());
+		client.getHistoryPatientInstance(new IdType("111"), new InstantDt("2012-01-02T00:01:02"), new IntegerDt());
 		assertEquals("http://foo/Patient/111/_history?_since=2012-01-02T00%3A01%3A02", capt.getAllValues().get(5).getURI().toString());
 
 	}
@@ -565,7 +565,7 @@ public class ClientDstu1Test {
 		ClientWithoutAnnotation client = ctx.newRestfulClient(ClientWithoutAnnotation.class, "http://wildfhir.aegis.net/fhir");
 
 		try {
-			client.read(new IdDt("8"));
+			client.read(new IdType("8"));
 			fail();
 		} catch (UnsupportedOperationException e) {
 			assertThat(e.getMessage(), containsString("annotation"));
@@ -601,7 +601,7 @@ public class ClientDstu1Test {
 		ITestClient client = ourCtx.newRestfulClient(ITestClient.class, "http://foo");
 		// Patient response = client.findPatientByMrn(new
 		// IdentifierDt("urn:foo", "123"));
-		Patient response = client.getPatientById(new IdDt("111"));
+		Patient response = client.getPatientById(new IdType("111"));
 
 		assertEquals("http://foo/Patient/111", capt.getValue().getURI().toString());
 		assertEquals("PRP1660", response.getIdentifier().get(0).getValue().getValue());
@@ -645,7 +645,7 @@ public class ClientDstu1Test {
 		ITestClient client = ourCtx.newRestfulClient(ITestClient.class, "http://foo");
 		// Patient response = client.findPatientByMrn(new
 		// IdentifierDt("urn:foo", "123"));
-		Patient response = client.getPatientById(new IdDt("111"));
+		Patient response = client.getPatientById(new IdType("111"));
 
 		assertEquals("http://foo/Patient/111", capt.getValue().getURI().toString());
 		assertEquals("PRP1660", response.getIdentifier().get(0).getValue().getValue());
@@ -666,7 +666,7 @@ public class ClientDstu1Test {
 
 		ITestClient client = ourCtx.newRestfulClient(ITestClient.class, "http://foo");
 		try {
-			client.getPatientById(new IdDt("111"));
+			client.getPatientById(new IdType("111"));
 			fail();
 		} catch (InternalErrorException e) {
 			assertThat(e.getMessage(), containsString("INTERNAL"));
@@ -693,7 +693,7 @@ public class ClientDstu1Test {
 
 		ITestClient client = ourCtx.newRestfulClient(ITestClient.class, "http://foo");
 		try {
-			client.getPatientById(new IdDt("111"));
+			client.getPatientById(new IdType("111"));
 			fail();
 		} catch (ResourceNotFoundException e) {
 			// good
@@ -728,7 +728,7 @@ public class ClientDstu1Test {
 		ITestClient client = ourCtx.newRestfulClient(ITestClient.class, "http://foo");
 		// Patient response = client.findPatientByMrn(new
 		// IdentifierDt("urn:foo", "123"));
-		Patient response = client.getPatientById(new IdDt("111"));
+		Patient response = client.getPatientById(new IdType("111"));
 
 		assertEquals("http://foo/Patient/111", capt.getValue().getURI().toString());
 		assertEquals("PRP1660", response.getIdentifier().get(0).getValue().getValue());
@@ -922,13 +922,13 @@ public class ClientDstu1Test {
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
 
 		ITestClient client = ourCtx.newRestfulClient(ITestClient.class, "http://foo");
-		List<Patient> response = client.getPatientByCompartmentAndDob(new IdDt("123"), new DateParam(QuantityCompararatorEnum.GREATERTHAN_OR_EQUALS, "2011-01-02"));
+		List<Patient> response = client.getPatientByCompartmentAndDob(new IdType("123"), new DateParam(QuantityCompararatorEnum.GREATERTHAN_OR_EQUALS, "2011-01-02"));
 
 		assertEquals("http://foo/Patient/123/compartmentName?birthdate=%3E%3D2011-01-02", capt.getValue().getURI().toString());
 		assertEquals("PRP1660", response.get(0).getIdentifier().get(0).getValue().getValue());
 
 		try {
-			client.getPatientByCompartmentAndDob(new IdDt(""), new DateParam(QuantityCompararatorEnum.GREATERTHAN_OR_EQUALS, "2011-01-02"));
+			client.getPatientByCompartmentAndDob(new IdType(""), new DateParam(QuantityCompararatorEnum.GREATERTHAN_OR_EQUALS, "2011-01-02"));
 			fail();
 		} catch (InvalidRequestException e) {
 			assertThat(e.toString(), containsString("null or empty for compartment"));
@@ -1246,7 +1246,7 @@ public class ClientDstu1Test {
 		when(myHttpResponse.getAllHeaders()).thenReturn(toHeaderArray("Location", "http://example.com/fhir/Patient/100/_history/200"));
 
 		ITestClient client = ourCtx.newRestfulClient(ITestClient.class, "http://foo");
-		MethodOutcome response = client.updatePatient(new IdDt("100"), patient);
+		MethodOutcome response = client.updatePatient(new IdType("100"), patient);
 
 		assertEquals(HttpPut.class, capt.getValue().getClass());
 		HttpPut post = (HttpPut) capt.getValue();
@@ -1274,7 +1274,7 @@ public class ClientDstu1Test {
 		when(myHttpResponse.getAllHeaders()).thenReturn(toHeaderArray("Content-Location", "http://example.com/fhir/Patient/100/_history/200"));
 
 		ITestClient client = ourCtx.newRestfulClient(ITestClient.class, "http://foo");
-		client.updatePatient(new IdDt("Patient/100/_history/200"), patient);
+		client.updatePatient(new IdType("Patient/100/_history/200"), patient);
 
 		assertEquals(HttpPut.class, capt.getValue().getClass());
 		HttpPut post = (HttpPut) capt.getValue();
@@ -1298,7 +1298,7 @@ public class ClientDstu1Test {
 		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), Constants.STATUS_HTTP_409_CONFLICT, "Conflict"));
 
 		ITestClient client = ourCtx.newRestfulClient(ITestClient.class, "http://foo");
-		client.updatePatient(new IdDt("Patient/100/_history/200"), patient);
+		client.updatePatient(new IdType("Patient/100/_history/200"), patient);
 	}
 
 	@Test
@@ -1315,7 +1315,7 @@ public class ClientDstu1Test {
 		when(myHttpResponse.getAllHeaders()).thenReturn(toHeaderArray("Location", "http://example.com/fhir/Patient/100/_history/200"));
 
 		ITestClient client = ourCtx.newRestfulClient(ITestClient.class, "http://foo");
-		MethodOutcome response = client.updatePatient(new IdDt("Patient/100/_history/200"), patient);
+		MethodOutcome response = client.updatePatient(new IdType("Patient/100/_history/200"), patient);
 
 		assertEquals(HttpPut.class, capt.getValue().getClass());
 		HttpPut post = (HttpPut) capt.getValue();
@@ -1375,7 +1375,7 @@ public class ClientDstu1Test {
 		ITestClient client = ourCtx.newRestfulClient(ITestClient.class, "http://foo");
 		// Patient response = client.findPatientByMrn(new
 		// IdentifierDt("urn:foo", "123"));
-		Patient response = client.getPatientById(new IdDt("Patient/111/_history/999"));
+		Patient response = client.getPatientById(new IdType("Patient/111/_history/999"));
 
 		assertEquals("http://foo/Patient/111/_history/999", capt.getValue().getURI().toString());
 		assertEquals("PRP1660", response.getIdentifier().get(0).getValue().getValue());
@@ -1387,7 +1387,7 @@ public class ClientDstu1Test {
 	}
 
 	private interface ClientWithoutAnnotation extends IBasicClient {
-		Patient read(@IdParam IdDt theId);
+		Patient read(@IdParam IdType theId);
 	}
 
 	@ResourceDef(name = "Patient")

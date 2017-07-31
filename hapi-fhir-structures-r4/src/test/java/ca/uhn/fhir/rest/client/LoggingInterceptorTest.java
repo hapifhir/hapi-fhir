@@ -13,16 +13,17 @@ import java.net.URL;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
+import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Patient;
 import org.junit.*;
 import org.mockito.ArgumentMatcher;
 import org.slf4j.LoggerFactory;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.model.dstu.resource.Patient;
-import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Read;
+import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
@@ -37,7 +38,7 @@ import ch.qos.logback.core.Appender;
 
 public class LoggingInterceptorTest {
 
-	private static FhirContext ourCtx = FhirContext.forDstu1();
+	private static FhirContext ourCtx = FhirContext.forR4();
 	private static int ourPort;
 	private static Server ourServer;
 	private Logger myLoggerRoot;
@@ -135,21 +136,18 @@ public class LoggingInterceptorTest {
 	}
 
 
-	/**
-	 * Created by dsotnikov on 2/25/2014.
-	 */
 	public static class DummyProvider implements IResourceProvider {
 
 		@Read(version = true)
-		public Patient findPatient(@IdParam IdDt theId) {
+		public Patient findPatient(@IdParam IdType theId) {
 			Patient patient = new Patient();
-			patient.addIdentifier(theId.getIdPart(), theId.getVersionIdPart());
+			patient.addIdentifier().setSystem(theId.getIdPart()).setValue(theId.getVersionIdPart());
 			patient.setId("Patient/1/_history/1");
 			return patient;
 		}
 
 		@Override
-		public Class<? extends IResource> getResourceType() {
+		public Class<Patient> getResourceType() {
 			return Patient.class;
 		}
 

@@ -25,7 +25,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.base.resource.BaseOperationOutcome;
 import ca.uhn.fhir.model.dstu.resource.OperationOutcome;
 import ca.uhn.fhir.model.dstu.resource.Patient;
-import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.model.primitive.IdType;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.client.api.IRestfulClient;
@@ -68,7 +68,7 @@ public class ExceptionHandlingTest {
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
 
 		try {
-			client.read(Patient.class, new IdDt("Patient/1234"));
+			client.read(Patient.class, new IdType("Patient/1234"));
 			fail();
 		} catch (InternalErrorException e) {
 			assertThat(e.getMessage(), StringContains.containsString("HTTP 500 Internal Error"));
@@ -93,7 +93,7 @@ public class ExceptionHandlingTest {
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
 
 		try {
-			client.read(Patient.class, new IdDt("Patient/1234"));
+			client.read(Patient.class, new IdType("Patient/1234"));
 			fail();
 		} catch (InternalErrorException e) {
 			assertThat(e.getMessage(), StringContains.containsString("HTTP 500 Internal Error"));
@@ -118,7 +118,7 @@ public class ExceptionHandlingTest {
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
 
 		try {
-			client.read(Patient.class, new IdDt("Patient/1234"));
+			client.read(Patient.class, new IdType("Patient/1234"));
 			fail();
 		} catch (InternalErrorException e) {
 			assertEquals("HTTP 500 Internal Error", e.getMessage());
@@ -142,7 +142,7 @@ public class ExceptionHandlingTest {
 
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
 		try {
-			client.read(Patient.class, new IdDt("Patient/1234"));
+			client.read(Patient.class, new IdType("Patient/1234"));
 			fail();
 		} catch (InternalErrorException e) {
 			assertThat(e.getMessage(), StringContains.containsString("HTTP 500 Internal Error"));
@@ -168,7 +168,7 @@ public class ExceptionHandlingTest {
 
 		IMyClient client = ourCtx.newRestfulClient(IMyClient.class, "http://example.com/fhir");
 		try {
-			client.read(new IdDt("Patient/1234"));
+			client.read(new IdType("Patient/1234"));
 			fail();
 		} catch (InternalErrorException e) {
 			assertThat(e.getMessage(), StringContains.containsString("HTTP 500 Internal Error"));
@@ -181,7 +181,7 @@ public class ExceptionHandlingTest {
 
 	public interface IMyClient extends IRestfulClient {
 		@Read
-		Patient read(@IdParam IdDt theId);
+		Patient read(@IdParam IdType theId);
 	}
 
 
