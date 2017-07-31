@@ -59,8 +59,14 @@ public class TransactionMethodBinding extends BaseResourceReturningMethodBinding
 	@Override
 	public BaseHttpClientInvocation invokeClient(Object[] theArgs) throws InternalErrorException {
 		FhirContext context = getContext();
+		Object arg = theArgs[myTransactionParamIndex];
+		
+		if (arg instanceof IBaseBundle) {
+			return createTransactionInvocation((IBaseBundle) arg, context);
+		}
+		
 		@SuppressWarnings("unchecked")
-		List<IBaseResource> resources = (List<IBaseResource>) theArgs[myTransactionParamIndex];
+		List<IBaseResource> resources = (List<IBaseResource>) arg;
 		return createTransactionInvocation(resources, context);
 	}
 

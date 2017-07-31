@@ -139,11 +139,6 @@
 			<artifactId>jetty-util</artifactId>
 			<scope>test</scope>
 		</dependency>
-		<dependency>
-			<groupId>xmlunit</groupId>
-			<artifactId>xmlunit</artifactId>
-			<scope>test</scope>
-		</dependency>
 		
 		<dependency>
 			<groupId>net.sf.json-lib</groupId>
@@ -290,6 +285,19 @@
 							</fileSets>
 						</configuration>
 					</execution>
+<execution>
+            <id>post-integration-test</id>
+					<phase>install</phase>
+            <goals>
+					<goal>report</goal>
+            </goals>
+            <configuration>
+					<dataFile>${project.build.directory}/jacoco.exec</dataFile>
+               <outputDirectory>${project.reporting.outputDirectory}/jacoco-report</outputDirectory>
+            </configuration>
+        </execution>
+
+
 				</executions>
 			</plugin>
 			<plugin>

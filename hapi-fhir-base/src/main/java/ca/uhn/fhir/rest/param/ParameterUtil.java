@@ -26,6 +26,7 @@ import java.lang.reflect.Method;
 import java.util.*;
 
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import ca.uhn.fhir.context.*;
 import ca.uhn.fhir.model.api.*;
@@ -39,19 +40,10 @@ import ca.uhn.fhir.util.UrlUtil;
 
 public class ParameterUtil {
 
-	private static final Set<Class<?>> BINDABLE_INTEGER_TYPES;
 	private static final String LABEL = "label=\"";
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ParameterUtil.class);
-
 	private static final String SCHEME = "scheme=\"";
 
-	static {
-		HashSet<Class<?>> intTypes = new HashSet<Class<?>>();
-		intTypes.add(IntegerDt.class);
-		intTypes.add(Integer.class);
-		BINDABLE_INTEGER_TYPES = Collections.unmodifiableSet(intTypes);
-
-	}
 
 	@SuppressWarnings("unchecked")
 	public static <T extends IIdType> T convertIdToType(IIdType value, Class<T> theIdParamType) {
@@ -213,23 +205,20 @@ public class ParameterUtil {
 	}
 
 	public static Object fromInteger(Class<?> theType, IntegerDt theArgument) {
-		if (theType.equals(IntegerDt.class)) {
-			if (theArgument == null) {
-				return null;
-			}
-			return theArgument;
-		}
 		if (theType.equals(Integer.class)) {
 			if (theArgument == null) {
 				return null;
 			}
 			return theArgument.getValue();
 		}
-		throw new IllegalArgumentException("Invalid Integer type:" + theType);
+		IPrimitiveType<?> retVal = (IPrimitiveType<?>) ReflectionUtil.newInstance(theType);
+		retVal.setValueAsString(theArgument.getValueAsString());
+		return retVal;
 	}
 
-	public static Set<Class<?>> getBindableIntegerTypes() {
-		return BINDABLE_INTEGER_TYPES;
+	public static boolean isBindableIntegerType(Class<?> theClass) {
+		return Integer.class.isAssignableFrom(theClass)
+				|| IPrimitiveType.class.isAssignableFrom(theClass);
 	}
 
 	public static int nonEscapedIndexOf(String theString, char theCharacter) {
@@ -421,6 +410,10 @@ public class ParameterUtil {
 		}
 		if (theArgument instanceof Integer) {
 			return new IntegerDt((Integer) theArgument);
+		}
+		if (theArgument instanceof IPrimitiveType) {
+			IPrimitiveType<?> pt = (IPrimitiveType<?>)theArgument;
+			return new IntegerDt(pt.getValueAsString());
 		}
 		return null;
 	}

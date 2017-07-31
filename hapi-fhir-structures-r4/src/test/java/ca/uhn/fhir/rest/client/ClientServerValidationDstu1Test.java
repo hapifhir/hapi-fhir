@@ -1,6 +1,6 @@
 package ca.uhn.fhir.rest.client;
 
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
@@ -15,9 +15,9 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicStatusLine;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.Test;
+import org.hl7.fhir.r4.model.CapabilityStatement;
+import org.hl7.fhir.r4.model.Patient;
+import org.junit.*;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Matchers;
 import org.mockito.internal.stubbing.defaultanswers.ReturnsDeepStubs;
@@ -25,11 +25,11 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.dstu.resource.Conformance;
-import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.model.primitive.UriDt;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.client.exceptions.FhirClientInappropriateForServerException;
-import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.util.TestUtil;
 
 public class ClientServerValidationDstu1Test {
@@ -45,13 +45,13 @@ public class ClientServerValidationDstu1Test {
 		myHttpResponse = mock(HttpResponse.class, new ReturnsDeepStubs());
 		myFirstResponse = true;
 
-		myCtx = FhirContext.forDstu1();
+		myCtx = FhirContext.forR4();
 		myCtx.getRestfulClientFactory().setHttpClient(myHttpClient);
 	}
 
 	@Test
 	public void testServerReturnsAppropriateVersionDstu() throws Exception {
-		Conformance conf = new Conformance();
+		CapabilityStatement conf = new CapabilityStatement();
 		conf.setFhirVersion("0.0.8");
 		final String confResource = myCtx.newXmlParser().encodeResourceToString(conf);
 
@@ -88,7 +88,7 @@ public class ClientServerValidationDstu1Test {
 
 	@Test
 	public void testServerReturnsWrongVersionDstu() throws Exception {
-		Conformance conf = new Conformance();
+		CapabilityStatement conf = new CapabilityStatement();
 		conf.setFhirVersion("0.4.0");
 		String msg = myCtx.newXmlParser().encodeResourceToString(conf);
 
@@ -105,7 +105,7 @@ public class ClientServerValidationDstu1Test {
 			myCtx.newRestfulGenericClient("http://foo").read(new UriDt("http://foo/Patient/1"));
 			fail();
 		} catch (FhirClientInappropriateForServerException e) {
-			assertThat(e.toString(), containsString("The server at base URL \"http://foo/metadata\" returned a conformance statement indicating that it supports FHIR version \"0.4.0\" which corresponds to DSTU2, but this client is configured to use DSTU1 (via the FhirContext)"));
+			assertThat(e.toString(), containsString("The server at base URL \"http://foo/metadata\" returned a conformance statement indicating that it supports FHIR version \"0.4.0\" which corresponds to DSTU2, but this client is configured to use R4 (via the FhirContext)"));
 		}
 	}
 

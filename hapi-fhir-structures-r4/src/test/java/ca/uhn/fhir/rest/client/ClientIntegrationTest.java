@@ -1,6 +1,6 @@
 package ca.uhn.fhir.rest.client;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import java.util.Collections;
 import java.util.List;
@@ -14,18 +14,15 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.Test;
+import org.hl7.fhir.r4.model.Patient;
+import org.junit.*;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.client.api.IBasicClient;
+import ca.uhn.fhir.rest.client.impl.HttpBasicAuthInterceptor;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.util.PortUtil;
@@ -36,7 +33,7 @@ public class ClientIntegrationTest {
 	private int myPort;
 	private Server myServer;
 	private MyPatientResourceProvider myPatientProvider;
-	private static FhirContext ourCtx = FhirContext.forDstu1();
+	private static FhirContext ourCtx = FhirContext.forR4();
 
 	@Before
 	public void before() {
@@ -60,7 +57,7 @@ public class ClientIntegrationTest {
 
 		myServer.start();
 
-		FhirContext ctx = FhirContext.forDstu1();
+		FhirContext ctx = FhirContext.forR4();
 
 		HttpClientBuilder builder = HttpClientBuilder.create();
 		// PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
@@ -74,7 +71,7 @@ public class ClientIntegrationTest {
 
 		List<Patient> actualPatients = client.searchForPatients(new StringDt("AAAABBBB"));
 		assertEquals(1, actualPatients.size());
-		assertEquals("AAAABBBB", actualPatients.get(0).getNameFirstRep().getFamilyAsSingleString());
+		assertEquals("AAAABBBB", actualPatients.get(0).getNameFirstRep().getFamily());
 
 		assertEquals("Basic Zm9vYmFyOmJvb2JlYXI=", myPatientProvider.getAuthorizationHeader());
 	}
@@ -92,7 +89,7 @@ public class ClientIntegrationTest {
 		}
 
 		@Override
-		public Class<? extends IResource> getResourceType() {
+		public Class<Patient> getResourceType() {
 			return Patient.class;
 		}
 
@@ -105,7 +102,7 @@ public class ClientIntegrationTest {
 
 			Patient retVal = new Patient();
 			retVal.setId("1");
-			retVal.addName().addFamily(theFooParam.getValue());
+			retVal.addName().setFamily(theFooParam.getValue());
 			return Collections.singletonList(retVal);
 		}
 

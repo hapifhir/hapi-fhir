@@ -1,6 +1,6 @@
 package ca.uhn.fhir.rest.client;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
 
@@ -9,28 +9,18 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.collections.EnumerationUtils;
-import org.apache.http.HttpHost;
-import org.apache.http.auth.AuthScope;
-import org.apache.http.auth.UsernamePasswordCredentials;
-import org.apache.http.client.CredentialsProvider;
-import org.apache.http.impl.client.BasicCredentialsProvider;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.client.ProxyAuthenticationStrategy;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.ContextHandlerCollection;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Patient;
+import org.junit.*;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.model.dstu.resource.Patient;
-import ca.uhn.fhir.model.primitive.IdType;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Read;
+import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.util.PortUtil;
@@ -112,7 +102,7 @@ public class HttpProxyTest {
 			IGenericClient client = ourCtx.newRestfulGenericClient(baseUri);
 
 			IdType id = new IdType("Patient", "123");
-			client.read(Patient.class, id);
+			client.read().resource(Patient.class).withId(id).execute();
 
 			assertEquals("Basic dXNlcm5hbWU6cGFzc3dvcmQ=", myAuthHeader);
 			
@@ -124,13 +114,13 @@ public class HttpProxyTest {
 
 	@BeforeClass
 	public static void beforeClass() throws Exception {
-		ourCtx = FhirContext.forDstu1();
+		ourCtx = FhirContext.forR4();
 	}
 
 	public static class PatientResourceProvider implements IResourceProvider {
 
 		@Override
-		public Class<? extends IResource> getResourceType() {
+		public Class<Patient> getResourceType() {
 			return Patient.class;
 		}
 

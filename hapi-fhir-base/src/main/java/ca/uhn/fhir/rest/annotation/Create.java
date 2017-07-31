@@ -23,7 +23,7 @@ package ca.uhn.fhir.rest.annotation;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
-import ca.uhn.fhir.model.api.IResource;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 
 @Retention(RetentionPolicy.RUNTIME)
 
@@ -44,7 +44,7 @@ public @interface Create {
 	 * for client implementations. 
 	 */
 	// NB: Read, Search (maybe others) share this annotation, so update the javadocs everywhere
-	Class<? extends IResource> type() default IResource.class;
+	Class<? extends IBaseResource> type() default IBaseResource.class;
 	
 
 }

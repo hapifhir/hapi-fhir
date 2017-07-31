@@ -404,12 +404,12 @@ public class IncludeTest {
 			Patient p1 = new Patient();
 			p1.setId("p1");
 			p1.addIdentifier().setValue("p1");
-			p1.addUndeclaredExtension(false, "http://foo", new Reference(o1));
+			p1.addExtension(new org.hl7.fhir.r4.model.Extension("http://foo", new Reference(o1)));
 
 			Patient p2 = new Patient();
 			p2.setId("p2");
 			p2.addIdentifier().setValue("p2");
-			p2.addUndeclaredExtension(false, "http://foo", new Reference(o1));
+			p2.addExtension(new org.hl7.fhir.r4.model.Extension( "http://foo", new Reference(o1)));
 
 			return Arrays.asList(p1, p2);
 		}
@@ -419,13 +419,13 @@ public class IncludeTest {
 			ArrayList<Patient> retVal = new ArrayList<Patient>();
 
 			Patient p = new Patient();
-			p.addIdentifier("Mr", "Test");
+			p.addIdentifier().setSystem("Mr").setValue("Test");
 
 			p.setId(theName.getValue());
 
 			if (theIncludes != null) {
 				for (Include next : theIncludes) {
-					p.addName().setFamily().setValue(next.getValue());
+					p.addName().setFamily(next.getValue());
 				}
 			}
 			retVal.add(p);
@@ -434,7 +434,7 @@ public class IncludeTest {
 		}
 
 		@Override
-		public Class<? extends IResource> getResourceType() {
+		public Class<Patient> getResourceType() {
 			return Patient.class;
 		}
 

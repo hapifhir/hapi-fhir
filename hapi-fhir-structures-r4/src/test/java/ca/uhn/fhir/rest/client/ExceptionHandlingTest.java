@@ -1,7 +1,8 @@
 package ca.uhn.fhir.rest.client;
 
 import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.io.StringReader;
 import java.nio.charset.Charset;
@@ -14,22 +15,17 @@ import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicStatusLine;
 import org.hamcrest.core.StringContains;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.hl7.fhir.r4.model.*;
+import org.junit.*;
 import org.mockito.ArgumentCaptor;
 import org.mockito.internal.stubbing.defaultanswers.ReturnsDeepStubs;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.base.resource.BaseOperationOutcome;
-import ca.uhn.fhir.model.dstu.resource.OperationOutcome;
-import ca.uhn.fhir.model.dstu.resource.Patient;
-import ca.uhn.fhir.model.primitive.IdType;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Read;
-import ca.uhn.fhir.rest.client.api.IRestfulClient;
-import ca.uhn.fhir.rest.server.Constants;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.client.api.*;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.TestUtil;
 
@@ -41,7 +37,7 @@ public class ExceptionHandlingTest {
 
 	@BeforeClass
 	public static void beforeClass() {
-		ourCtx = FhirContext.forDstu1();
+		ourCtx = FhirContext.forR4();
 	}
 
 	@Before
@@ -49,7 +45,7 @@ public class ExceptionHandlingTest {
 
 		myHttpClient = mock(HttpClient.class, new ReturnsDeepStubs());
 		ourCtx.getRestfulClientFactory().setHttpClient(myHttpClient);
-		ourCtx.getRestfulClientFactory().setServerValidationModeEnum(ServerValidationModeEnum.NEVER);
+		ourCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
 
 		myHttpResponse = mock(HttpResponse.class, new ReturnsDeepStubs());
 	}
@@ -68,7 +64,7 @@ public class ExceptionHandlingTest {
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
 
 		try {
-			client.read(Patient.class, new IdType("Patient/1234"));
+			client.read().resource(Patient.class).withId(new IdType("Patient/1234")).execute();
 			fail();
 		} catch (InternalErrorException e) {
 			assertThat(e.getMessage(), StringContains.containsString("HTTP 500 Internal Error"));
@@ -80,7 +76,7 @@ public class ExceptionHandlingTest {
 	@Test
 	public void testFail500WithOperationOutcomeMessage() throws Exception {
 		OperationOutcome oo = new OperationOutcome();
-		oo.getIssueFirstRep().getDetails().setValue("Help I'm a bug");
+		oo.getIssueFirstRep().getDiagnosticsElement().setValue("Help I'm a bug");
 		String msg = ourCtx.newXmlParser().encodeResourceToString(oo);
 		String contentType = Constants.CT_FHIR_XML;
 
@@ -93,7 +89,7 @@ public class ExceptionHandlingTest {
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
 
 		try {
-			client.read(Patient.class, new IdType("Patient/1234"));
+        client.read().resource(Patient.class).withId(new IdType("Patient/1234")).execute();
 			fail();
 		} catch (InternalErrorException e) {
 			assertThat(e.getMessage(), StringContains.containsString("HTTP 500 Internal Error"));
@@ -118,7 +114,7 @@ public class ExceptionHandlingTest {
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
 
 		try {
-			client.read(Patient.class, new IdType("Patient/1234"));
+        client.read().resource(Patient.class).withId(new IdType("Patient/1234")).execute();
 			fail();
 		} catch (InternalErrorException e) {
 			assertEquals("HTTP 500 Internal Error", e.getMessage());
@@ -130,7 +126,7 @@ public class ExceptionHandlingTest {
 	@Test
 	public void testFail500WithOperationOutcomeMessageJson() throws Exception {
 		OperationOutcome oo = new OperationOutcome();
-		oo.getIssueFirstRep().getDetails().setValue("Help I'm a bug");
+		oo.getIssueFirstRep().getDiagnosticsElement().setValue("Help I'm a bug");
 		String msg = ourCtx.newJsonParser().encodeResourceToString(oo);
 		String contentType = Constants.CT_FHIR_JSON;
 
@@ -142,7 +138,7 @@ public class ExceptionHandlingTest {
 
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
 		try {
-			client.read(Patient.class, new IdType("Patient/1234"));
+        client.read().resource(Patient.class).withId(new IdType("Patient/1234")).execute();
 			fail();
 		} catch (InternalErrorException e) {
 			assertThat(e.getMessage(), StringContains.containsString("HTTP 500 Internal Error"));
@@ -156,7 +152,7 @@ public class ExceptionHandlingTest {
 	@Test
 	public void testFail500WithOperationOutcomeMessageGeneric() throws Exception {
 		OperationOutcome oo = new OperationOutcome();
-		oo.getIssueFirstRep().getDetails().setValue("Help I'm a bug");
+		oo.getIssueFirstRep().getDiagnosticsElement().setValue("Help I'm a bug");
 		String msg = ourCtx.newJsonParser().encodeResourceToString(oo);
 		String contentType = Constants.CT_FHIR_JSON;
 

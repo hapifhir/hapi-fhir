@@ -3,11 +3,11 @@ package ca.uhn.fhir.rest.client;
 import java.util.Date;
 import java.util.List;
 
+import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.*;
 
-import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.Include;
-import ca.uhn.fhir.model.primitive.*;
 import ca.uhn.fhir.rest.annotation.*;
 import ca.uhn.fhir.rest.annotation.Count;
 import ca.uhn.fhir.rest.api.MethodOutcome;
@@ -29,9 +29,12 @@ public interface ITestClient extends IBasicClient {
 	public List<Patient> getPatientByDob(@RequiredParam(name=Patient.SP_BIRTHDATE) DateParam theBirthDate);
 
 	@Search(type=ExtendedPatient.class)
-	public List<IResource> getPatientByDobWithGenericResourceReturnType(@RequiredParam(name=Patient.SP_BIRTHDATE) DateParam theBirthDate);
+	public List<IBaseResource> getPatientByDobWithGenericResourceReturnType(@RequiredParam(name=Patient.SP_BIRTHDATE) DateParam theBirthDate);
 
-	@Search()
+   @Search(type=ExtendedPatient.class)
+   public List<IAnyResource> getPatientByDobWithGenericResourceReturnType2(@RequiredParam(name=Patient.SP_BIRTHDATE) DateParam theBirthDate);
+
+   @Search()
 	public List<Patient> getPatientMultipleIdentifiers(@RequiredParam(name = "ids") TokenOrListParam theIdentifiers);
 
 	@Search(queryName="someQueryNoParams")
@@ -65,7 +68,7 @@ public interface ITestClient extends IBasicClient {
 	Bundle getHistoryPatientInstance(@IdParam IdType theId);
 
 	@History(type=Patient.class)
-	Bundle getHistoryPatientInstance(@IdParam IdType theId, @Since InstantDt theSince, @Count IntegerDt theCount);
+	Bundle getHistoryPatientInstance(@IdParam IdType theId, @Since InstantType theSince, @Count IntegerType theCount);
 	
 	@History(type=Patient.class)
 	Bundle getHistoryPatientInstance(@IdParam IdType theId, @Since Date theSince, @Count Integer theCount);
@@ -83,7 +86,7 @@ public interface ITestClient extends IBasicClient {
 	 MethodOutcome validatePatient(@ResourceParam Patient thePatient);
 
 	@Search(type=Patient.class)
-	Patient findPatientQuantity(@RequiredParam(name="quantityParam") QuantityParam theQuantityDt);
+	Patient findPatientQuantity(@RequiredParam(name="quantityParam") QuantityParam theQuantityType);
 
 	@Search(compartmentName="compartmentName")
 	public List<Patient> getPatientByCompartmentAndDob(@IdParam IdType theIdType, @RequiredParam(name=Patient.SP_BIRTHDATE) DateParam theBirthDate);
