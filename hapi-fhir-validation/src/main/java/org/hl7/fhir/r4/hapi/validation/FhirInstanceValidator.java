@@ -32,235 +32,252 @@ import ca.uhn.fhir.validation.IValidatorModule;
 
 public class FhirInstanceValidator extends BaseValidatorBridge implements IValidatorModule {
 
-  private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirInstanceValidator.class);
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirInstanceValidator.class);
 
-  private boolean myAnyExtensionsAllowed = true;
-  private BestPracticeWarningLevel myBestPracticeWarningLevel;
-  private DocumentBuilderFactory myDocBuilderFactory;
-  private StructureDefinition myStructureDefintion;
-  private IValidationSupport myValidationSupport;
+	private boolean myAnyExtensionsAllowed = true;
+	private BestPracticeWarningLevel myBestPracticeWarningLevel;
+	private DocumentBuilderFactory myDocBuilderFactory;
+	private boolean myNoTerminologyChecks;
+	private StructureDefinition myStructureDefintion;
 
-  /**
-   * Constructor
-   * 
-   * Uses {@link DefaultProfileValidationSupport} for {@link IValidationSupport validation support}
-   */
-  public FhirInstanceValidator() {
-    this(new DefaultProfileValidationSupport());
-  }
+	private IValidationSupport myValidationSupport;
 
-  /**
-   * Constructor which uses the given validation support
-   * 
-   * @param theValidationSupport
-   *          The validation support
-   */
-  public FhirInstanceValidator(IValidationSupport theValidationSupport) {
-    myDocBuilderFactory = DocumentBuilderFactory.newInstance();
-    myDocBuilderFactory.setNamespaceAware(true);
-    myValidationSupport = theValidationSupport;
-  }
+	/**
+	 * Constructor
+	 * 
+	 * Uses {@link DefaultProfileValidationSupport} for {@link IValidationSupport validation support}
+	 */
+	public FhirInstanceValidator() {
+		this(new DefaultProfileValidationSupport());
+	}
 
-  private String determineResourceName(Document theDocument) {
-    Element root = null;
+	/**
+	 * Constructor which uses the given validation support
+	 * 
+	 * @param theValidationSupport
+	 *           The validation support
+	 */
+	public FhirInstanceValidator(IValidationSupport theValidationSupport) {
+		myDocBuilderFactory = DocumentBuilderFactory.newInstance();
+		myDocBuilderFactory.setNamespaceAware(true);
+		myValidationSupport = theValidationSupport;
+	}
 
-    NodeList list = theDocument.getChildNodes();
-    for (int i = 0; i < list.getLength(); i++) {
-      if (list.item(i) instanceof Element) {
-        root = (Element) list.item(i);
-        break;
-      }
-    }
-    root = theDocument.getDocumentElement();
-    return root.getLocalName();
-  }
+	private String determineResourceName(Document theDocument) {
+		Element root = null;
 
-  private StructureDefinition findStructureDefinitionForResourceName(final FhirContext theCtx, String resourceName) {
-    String sdName = "http://hl7.org/fhir/StructureDefinition/" + resourceName;
-    StructureDefinition profile = myStructureDefintion != null ? myStructureDefintion : myValidationSupport.fetchStructureDefinition(theCtx, sdName);
-    return profile;
-  }
+		NodeList list = theDocument.getChildNodes();
+		for (int i = 0; i < list.getLength(); i++) {
+			if (list.item(i) instanceof Element) {
+				root = (Element) list.item(i);
+				break;
+			}
+		}
+		root = theDocument.getDocumentElement();
+		return root.getLocalName();
+	}
 
-  /**
-   * Returns the "best practice" warning level (default is {@link BestPracticeWarningLevel#Hint}).
-   * <p>
-   * The FHIR Instance Validator has a number of checks for best practices in terms of FHIR usage. If this setting is
-   * set to {@link BestPracticeWarningLevel#Error}, any resource data which does not meet these best practices will be
-   * reported at the ERROR level. If this setting is set to {@link BestPracticeWarningLevel#Ignore}, best practice
-   * guielines will be ignored.
-   * </p>
-   * 
-   * @see {@link #setBestPracticeWarningLevel(BestPracticeWarningLevel)}
-   */
-  public BestPracticeWarningLevel getBestPracticeWarningLevel() {
-    return myBestPracticeWarningLevel;
-  }
+	private StructureDefinition findStructureDefinitionForResourceName(final FhirContext theCtx, String resourceName) {
+		String sdName = "http://hl7.org/fhir/StructureDefinition/" + resourceName;
+		StructureDefinition profile = myStructureDefintion != null ? myStructureDefintion : myValidationSupport.fetchStructureDefinition(theCtx, sdName);
+		return profile;
+	}
 
-  /**
-   * Returns the {@link IValidationSupport validation support} in use by this validator. Default is an instance of
-   * {@link DefaultProfileValidationSupport} if the no-arguments constructor for this object was used.
-   */
-  public IValidationSupport getValidationSupport() {
-    return myValidationSupport;
-  }
+	/**
+	 * Returns the "best practice" warning level (default is {@link BestPracticeWarningLevel#Hint}).
+	 * <p>
+	 * The FHIR Instance Validator has a number of checks for best practices in terms of FHIR usage. If this setting is
+	 * set to {@link BestPracticeWarningLevel#Error}, any resource data which does not meet these best practices will be
+	 * reported at the ERROR level. If this setting is set to {@link BestPracticeWarningLevel#Ignore}, best practice
+	 * guielines will be ignored.
+	 * </p>
+	 * 
+	 * @see {@link #setBestPracticeWarningLevel(BestPracticeWarningLevel)}
+	 */
+	public BestPracticeWarningLevel getBestPracticeWarningLevel() {
+		return myBestPracticeWarningLevel;
+	}
 
-  /**
-   * If set to {@literal true} (default is true) extensions which are not known to the 
-   * validator (e.g. because they have not been explicitly declared in a profile) will
-   * be validated but will not cause an error.
-   */
-  public boolean isAnyExtensionsAllowed() {
-    return myAnyExtensionsAllowed;
-  }
+	/**
+	 * Returns the {@link IValidationSupport validation support} in use by this validator. Default is an instance of
+	 * {@link DefaultProfileValidationSupport} if the no-arguments constructor for this object was used.
+	 */
+	public IValidationSupport getValidationSupport() {
+		return myValidationSupport;
+	}
 
-  /**
-   * If set to {@literal true} (default is true) extensions which are not known to the 
-   * validator (e.g. because they have not been explicitly declared in a profile) will
-   * be validated but will not cause an error.
-   */
-  public void setAnyExtensionsAllowed(boolean theAnyExtensionsAllowed) {
-    myAnyExtensionsAllowed = theAnyExtensionsAllowed;
-  }
+	/**
+	 * If set to {@literal true} (default is true) extensions which are not known to the
+	 * validator (e.g. because they have not been explicitly declared in a profile) will
+	 * be validated but will not cause an error.
+	 */
+	public boolean isAnyExtensionsAllowed() {
+		return myAnyExtensionsAllowed;
+	}
 
-  /**
-   * Sets the "best practice warning level". When validating, any deviations from best practices will be reported at
-   * this level.
-   * <p>
-   * The FHIR Instance Validator has a number of checks for best practices in terms of FHIR usage. If this setting is
-   * set to {@link BestPracticeWarningLevel#Error}, any resource data which does not meet these best practices will be
-   * reported at the ERROR level. If this setting is set to {@link BestPracticeWarningLevel#Ignore}, best practice
-   * guielines will be ignored.
-   * </p>
-   * 
-   * @param theBestPracticeWarningLevel
-   *          The level, must not be <code>null</code>
-   */
-  public void setBestPracticeWarningLevel(BestPracticeWarningLevel theBestPracticeWarningLevel) {
-    Validate.notNull(theBestPracticeWarningLevel);
-    myBestPracticeWarningLevel = theBestPracticeWarningLevel;
-  }
+	/**
+	 * If set to {@literal true} (default is false) the valueSet will not be validate
+	 */
+	public boolean isNoTerminologyChecks() {
+		return myNoTerminologyChecks;
+	}
 
-  public void setStructureDefintion(StructureDefinition theStructureDefintion) {
-    myStructureDefintion = theStructureDefintion;
-  }
+	/**
+	 * If set to {@literal true} (default is true) extensions which are not known to the
+	 * validator (e.g. because they have not been explicitly declared in a profile) will
+	 * be validated but will not cause an error.
+	 */
+	public void setAnyExtensionsAllowed(boolean theAnyExtensionsAllowed) {
+		myAnyExtensionsAllowed = theAnyExtensionsAllowed;
+	}
 
-  /**
-   * Sets the {@link IValidationSupport validation support} in use by this validator. Default is an instance of
-   * {@link DefaultProfileValidationSupport} if the no-arguments constructor for this object was used.
-   */
-  public void setValidationSupport(IValidationSupport theValidationSupport) {
-    myValidationSupport = theValidationSupport;
-  }
+	/**
+	 * Sets the "best practice warning level". When validating, any deviations from best practices will be reported at
+	 * this level.
+	 * <p>
+	 * The FHIR Instance Validator has a number of checks for best practices in terms of FHIR usage. If this setting is
+	 * set to {@link BestPracticeWarningLevel#Error}, any resource data which does not meet these best practices will be
+	 * reported at the ERROR level. If this setting is set to {@link BestPracticeWarningLevel#Ignore}, best practice
+	 * guielines will be ignored.
+	 * </p>
+	 * 
+	 * @param theBestPracticeWarningLevel
+	 *           The level, must not be <code>null</code>
+	 */
+	public void setBestPracticeWarningLevel(BestPracticeWarningLevel theBestPracticeWarningLevel) {
+		Validate.notNull(theBestPracticeWarningLevel);
+		myBestPracticeWarningLevel = theBestPracticeWarningLevel;
+	}
 
-  protected List<ValidationMessage> validate(final FhirContext theCtx, String theInput, EncodingEnum theEncoding) {
-    HapiWorkerContext workerContext = new HapiWorkerContext(theCtx, myValidationSupport);
+	/**
+	 * If set to {@literal true} (default is false) the valueSet will not be validate
+	 */
+	public void setNoTerminologyChecks(final boolean theNoTerminologyChecks) {
+		myNoTerminologyChecks = theNoTerminologyChecks;
+	}
 
-    InstanceValidator v;
-    IEvaluationContext evaluationCtx = new NullEvaluationContext();
-    try {
-      v = new InstanceValidator(workerContext, evaluationCtx);
-    } catch (Exception e) {
-      throw new ConfigurationException(e);
-    }
+	public void setStructureDefintion(StructureDefinition theStructureDefintion) {
+		myStructureDefintion = theStructureDefintion;
+	}
 
-    v.setBestPracticeWarningLevel(getBestPracticeWarningLevel());
-    v.setAnyExtensionsAllowed(isAnyExtensionsAllowed());
-    v.setResourceIdRule(IdStatus.OPTIONAL);
+	/**
+	 * Sets the {@link IValidationSupport validation support} in use by this validator. Default is an instance of
+	 * {@link DefaultProfileValidationSupport} if the no-arguments constructor for this object was used.
+	 */
+	public void setValidationSupport(IValidationSupport theValidationSupport) {
+		myValidationSupport = theValidationSupport;
+	}
 
-    List<ValidationMessage> messages = new ArrayList<ValidationMessage>();
+	protected List<ValidationMessage> validate(final FhirContext theCtx, String theInput, EncodingEnum theEncoding) {
+		HapiWorkerContext workerContext = new HapiWorkerContext(theCtx, myValidationSupport);
 
-    if (theEncoding == EncodingEnum.XML) {
-      Document document;
-      try {
-        DocumentBuilder builder = myDocBuilderFactory.newDocumentBuilder();
-        InputSource src = new InputSource(new StringReader(theInput));
-        document = builder.parse(src);
-      } catch (Exception e2) {
-        ourLog.error("Failure to parse XML input", e2);
-        ValidationMessage m = new ValidationMessage();
-        m.setLevel(IssueSeverity.FATAL);
-        m.setMessage("Failed to parse input, it does not appear to be valid XML:" + e2.getMessage());
-        return Collections.singletonList(m);
-      }
+		InstanceValidator v;
+		IEvaluationContext evaluationCtx = new NullEvaluationContext();
+		try {
+			v = new InstanceValidator(workerContext, evaluationCtx);
+		} catch (Exception e) {
+			throw new ConfigurationException(e);
+		}
 
-      String resourceName = determineResourceName(document);
-      StructureDefinition profile = findStructureDefinitionForResourceName(theCtx, resourceName);
-      if (profile != null) {
-        try {
-          v.validate(null, messages, document, profile);
-        } catch (Exception e) {
-          throw new InternalErrorException("Unexpected failure while validating resource", e);
-        }
-      }
-    } else if (theEncoding == EncodingEnum.JSON) {
-      Gson gson = new GsonBuilder().create();
-      JsonObject json = gson.fromJson(theInput, JsonObject.class);
+		v.setBestPracticeWarningLevel(getBestPracticeWarningLevel());
+		v.setAnyExtensionsAllowed(isAnyExtensionsAllowed());
+		v.setResourceIdRule(IdStatus.OPTIONAL);
+		v.setNoTerminologyChecks(isNoTerminologyChecks());
 
-      String resourceName = json.get("resourceType").getAsString();
-      StructureDefinition profile = findStructureDefinitionForResourceName(theCtx, resourceName);
-      if (profile != null) {
-        try {
-          v.validate(null, messages, json, profile);
-        } catch (Exception e) {
-          throw new InternalErrorException("Unexpected failure while validating resource", e);
-        }
-      }
-    } else {
-      throw new IllegalArgumentException("Unknown encoding: " + theEncoding);
-    }
+		List<ValidationMessage> messages = new ArrayList<ValidationMessage>();
 
-    for (int i = 0; i < messages.size(); i++) {
-      ValidationMessage next = messages.get(i);
-      if ("Binding has no source, so can't be checked".equals(next.getMessage())) {
-        messages.remove(i);
-        i--;
-      }
-    }
-    return messages;
-  }
+		if (theEncoding == EncodingEnum.XML) {
+			Document document;
+			try {
+				DocumentBuilder builder = myDocBuilderFactory.newDocumentBuilder();
+				InputSource src = new InputSource(new StringReader(theInput));
+				document = builder.parse(src);
+			} catch (Exception e2) {
+				ourLog.error("Failure to parse XML input", e2);
+				ValidationMessage m = new ValidationMessage();
+				m.setLevel(IssueSeverity.FATAL);
+				m.setMessage("Failed to parse input, it does not appear to be valid XML:" + e2.getMessage());
+				return Collections.singletonList(m);
+			}
 
-  @Override
-  protected List<ValidationMessage> validate(IValidationContext<?> theCtx) {
-    return validate(theCtx.getFhirContext(), theCtx.getResourceAsString(), theCtx.getResourceAsStringEncoding());
-  }
+			String resourceName = determineResourceName(document);
+			StructureDefinition profile = findStructureDefinitionForResourceName(theCtx, resourceName);
+			if (profile != null) {
+				try {
+					v.validate(null, messages, document, profile);
+				} catch (Exception e) {
+					throw new InternalErrorException("Unexpected failure while validating resource", e);
+				}
+			}
+		} else if (theEncoding == EncodingEnum.JSON) {
+			Gson gson = new GsonBuilder().create();
+			JsonObject json = gson.fromJson(theInput, JsonObject.class);
 
-  public class NullEvaluationContext implements IEvaluationContext {
+			String resourceName = json.get("resourceType").getAsString();
+			StructureDefinition profile = findStructureDefinitionForResourceName(theCtx, resourceName);
+			if (profile != null) {
+				try {
+					v.validate(null, messages, json, profile);
+				} catch (Exception e) {
+					throw new InternalErrorException("Unexpected failure while validating resource", e);
+				}
+			}
+		} else {
+			throw new IllegalArgumentException("Unknown encoding: " + theEncoding);
+		}
 
-    @Override
-    public TypeDetails checkFunction(Object theAppContext, String theFunctionName, List<TypeDetails> theParameters) throws PathEngineException {
-      return null;
-    }
+		for (int i = 0; i < messages.size(); i++) {
+			ValidationMessage next = messages.get(i);
+			if ("Binding has no source, so can't be checked".equals(next.getMessage())) {
+				messages.remove(i);
+				i--;
+			}
+		}
+		return messages;
+	}
 
-    @Override
-    public List<Base> executeFunction(Object theAppContext, String theFunctionName, List<List<Base>> theParameters) {
-      return null;
-    }
+	@Override
+	protected List<ValidationMessage> validate(IValidationContext<?> theCtx) {
+		return validate(theCtx.getFhirContext(), theCtx.getResourceAsString(), theCtx.getResourceAsStringEncoding());
+	}
 
-    @Override
-    public boolean log(String theArgument, List<Base> theFocus) {
-      return false;
-    }
+	public class NullEvaluationContext implements IEvaluationContext {
 
-    @Override
-    public Base resolveConstant(Object theAppContext, String theName) throws PathEngineException {
-      return null;
-    }
+		@Override
+		public TypeDetails checkFunction(Object theAppContext, String theFunctionName, List<TypeDetails> theParameters) throws PathEngineException {
+			return null;
+		}
 
-    @Override
-    public TypeDetails resolveConstantType(Object theAppContext, String theName) throws PathEngineException {
-      return null;
-    }
+		@Override
+		public List<Base> executeFunction(Object theAppContext, String theFunctionName, List<List<Base>> theParameters) {
+			return null;
+		}
 
-    @Override
-    public FunctionDetails resolveFunction(String theFunctionName) {
-      return null;
-    }
+		@Override
+		public boolean log(String theArgument, List<Base> theFocus) {
+			return false;
+		}
 
-    @Override
-    public Base resolveReference(Object theAppContext, String theUrl) {
-      return null;
-    }
+		@Override
+		public Base resolveConstant(Object theAppContext, String theName) throws PathEngineException {
+			return null;
+		}
 
-  }
+		@Override
+		public TypeDetails resolveConstantType(Object theAppContext, String theName) throws PathEngineException {
+			return null;
+		}
+
+		@Override
+		public FunctionDetails resolveFunction(String theFunctionName) {
+			return null;
+		}
+
+		@Override
+		public Base resolveReference(Object theAppContext, String theUrl) {
+			return null;
+		}
+
+	}
 
 }

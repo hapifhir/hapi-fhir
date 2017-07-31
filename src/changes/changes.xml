@@ -22,7 +22,7 @@
 				Schematron validator now applies invariants to resources within a Bundle, not
 				just to the outer Bundle resource itself
 			</action>
-		</release
+		</release>
 		<release version="2.6" date="TBD">
 			<action type="add">
 				<ul>
@@ -239,6 +239,11 @@
 			<action type="fix" issue="699">
 				Fix an unfortunate typo in the custom structures documentation. Thanks to
 				Jason Owen for the PR!
+			</action>
+			<action type="fix" issue="686">
+				Correct an issue in the validator (DSTU3/R4) where elements were not always
+				correctly validated if the element contained only a profiled extension. Thanks
+				to Sébastien Rivière for the pull request!
 			</action>
 		</release>
 		<release version="2.5" date="2017-06-08">
