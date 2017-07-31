@@ -5,7 +5,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.model.Enumerations.AdministrativeGender;
