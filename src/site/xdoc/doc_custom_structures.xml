@@ -12,7 +12,7 @@
 			<p>
 				Typically, when working with FHIR the right way to provide your
 				own extensions is to work with existing resource types and simply
-				ass your own extensions and/or constrain out fields you don't
+				add your own extensions and/or constrain out fields you don't
 				need.
 			</p>
 			<p>

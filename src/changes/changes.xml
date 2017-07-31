@@ -236,6 +236,10 @@
 				were sometimes treated as positive numbers when processing the search. Thanks
 				to Keith Boone for reporting and suggesting a fix!
 			</action>
+			<action type="fix" issue="699">
+				Fix an unfortunate typo in the custom structures documentation. Thanks to
+				Jason Owen for the PR!
+			</action>
 		</release>
 		<release version="2.5" date="2017-06-08">
 			<action type="fix">
