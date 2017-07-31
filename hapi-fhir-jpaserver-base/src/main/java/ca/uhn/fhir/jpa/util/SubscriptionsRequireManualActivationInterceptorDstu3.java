@@ -32,13 +32,11 @@ import org.springframework.beans.factory.annotation.Qualifier;
 
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.dstu3.FhirResourceDaoSubscriptionDstu3;
-import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.interceptor.InterceptorAdapter;
-import ca.uhn.fhir.util.CoverageIgnore;
 
 /**
  * Interceptor which requires newly created {@link Subscription subscriptions} to be in
@@ -46,22 +44,8 @@ import ca.uhn.fhir.util.CoverageIgnore;
  */
 public class SubscriptionsRequireManualActivationInterceptorDstu3 extends InterceptorAdapter {
 
-	public static final ResourceMetadataKeyEnum<Object> ALLOW_STATUS_CHANGE = new ResourceMetadataKeyEnum<Object>(FhirResourceDaoSubscriptionDstu3.class.getName() + "_ALLOW_STATUS_CHANGE") {
-		private static final long serialVersionUID = 1;
-
-		@CoverageIgnore
-		@Override
-		public Object get(IResource theResource) {
-			throw new UnsupportedOperationException();
-		}
-
-		@CoverageIgnore
-		@Override
-		public void put(IResource theResource, Object theObject) {
-			throw new UnsupportedOperationException();
-		}
-	};
-
+	public static final ResourceMetadataKeyEnum<Object> ALLOW_STATUS_CHANGE = new AllowStatusChangeMetadata(FhirResourceDaoSubscriptionDstu3.class.getName() + "_ALLOW_STATUS_CHANGE");
+	
 	@Autowired
 	@Qualifier("mySubscriptionDaoDstu3")
 	private IFhirResourceDao<Subscription> myDao;

@@ -2,10 +2,6 @@ package ca.uhn.fhir.jpa.util;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-import org.hl7.fhir.r4.model.Subscription;
-import org.hl7.fhir.r4.model.Subscription.SubscriptionChannelType;
-import org.hl7.fhir.r4.model.Subscription.SubscriptionStatus;
-
 /*
  * #%L
  * HAPI FHIR JPA Server
@@ -27,18 +23,19 @@ import org.hl7.fhir.r4.model.Subscription.SubscriptionStatus;
  */
 
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.Subscription;
+import org.hl7.fhir.r4.model.Subscription.SubscriptionChannelType;
+import org.hl7.fhir.r4.model.Subscription.SubscriptionStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.r4.FhirResourceDaoSubscriptionR4;
-import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.interceptor.InterceptorAdapter;
-import ca.uhn.fhir.util.CoverageIgnore;
 
 /**
  * Interceptor which requires newly created {@link Subscription subscriptions} to be in
@@ -46,22 +43,7 @@ import ca.uhn.fhir.util.CoverageIgnore;
  */
 public class SubscriptionsRequireManualActivationInterceptorR4 extends InterceptorAdapter {
 
-	public static final ResourceMetadataKeyEnum<Object> ALLOW_STATUS_CHANGE = new ResourceMetadataKeyEnum<Object>(FhirResourceDaoSubscriptionR4.class.getName() + "_ALLOW_STATUS_CHANGE") {
-		private static final long serialVersionUID = 1;
-
-		@CoverageIgnore
-		@Override
-		public Object get(IResource theResource) {
-			throw new UnsupportedOperationException();
-		}
-
-		@CoverageIgnore
-		@Override
-		public void put(IResource theResource, Object theObject) {
-			throw new UnsupportedOperationException();
-		}
-	};
-
+	public static final ResourceMetadataKeyEnum<Object> ALLOW_STATUS_CHANGE = new AllowStatusChangeMetadata(FhirResourceDaoSubscriptionR4.class.getName() + "_ALLOW_STATUS_CHANGE");
 	@Autowired
 	@Qualifier("mySubscriptionDaoR4")
 	private IFhirResourceDao<Subscription> myDao;
