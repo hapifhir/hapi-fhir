@@ -33,13 +33,15 @@ import java.util.Map;
 
 /**
  * A Restful Client Factory, based on Jax Rs
- * 
+ * Default Jax-Rs client is NOT thread safe in static context, you should create a new factory every time or
+ * use a specific Jax-Rs client implementation which managed connection pool. 
  * @author Peter Van Houte | peter.vanhoute@agfa.com | Agfa Healthcare
  */
 public class JaxRsRestfulClientFactory extends RestfulClientFactory {
 
 	private Client myNativeClient;
-
+  private List<Class<?>> registeredComponents;
+  
 	/**
 	 * Constructor. Note that you must set the {@link FhirContext} manually using {@link #setFhirContext(FhirContext)} if this constructor is used!
 	 */
@@ -63,6 +65,12 @@ public class JaxRsRestfulClientFactory extends RestfulClientFactory {
 			myNativeClient = builder.build();
 		}
 
+    if (registeredComponents != null && !registeredComponents.isEmpty()) {
+      for (Class<?> c : registeredComponents) {
+        myNativeClient = myNativeClient.register(c);
+      }
+    }
+
 		return myNativeClient;
 	}
 
@@ -72,20 +80,35 @@ public class JaxRsRestfulClientFactory extends RestfulClientFactory {
 		return new JaxRsHttpClient(client, url, theIfNoneExistParams, theIfNoneExistString, theRequestType, theHeaders);
 	}
 
+  /***
+  * Not supported with default Jax-Rs client implementation
+  * @param theHost
+  *            The host (or null to disable proxying, as is the default)
+  * @param thePort
+  */
 	@Override
 	public void setProxy(String theHost, Integer thePort) {
 		throw new UnsupportedOperationException("Proxies are not supported yet in JAX-RS client");
 	}
-
-	/**
-	 * Only accept clients of type javax.ws.rs.client.Client
-	 * 
-	 * @param theHttpClient
-	 */
+  
+  /**
+  * Only accept clients of type javax.ws.rs.client.Client
+  * Can be used to set a specific Client implementation
+  * @param theHttpClient
+  */
 	@Override
 	public synchronized void setHttpClient(Object theHttpClient) {
 		this.myNativeClient = (Client) theHttpClient;
 	}
+
+  /**
+  * Register a list of Jax-Rs component (provider, filter...)
+  * @param components list of Jax-Rs components to register
+  */
+  public void register(List<Class<?>> components) {
+    registeredComponents = components;
+  }
+
 
 	@Override
 	protected JaxRsHttpClient getHttpClient(String theServerBase) {
@@ -96,5 +119,12 @@ public class JaxRsRestfulClientFactory extends RestfulClientFactory {
 	protected void resetHttpClient() {
 		this.myNativeClient = null;
 	}
+  
+  @Override
+  protected void resetHttpClient() {
+    if (myNativeClient != null) 
+      myNativeClient.close(); // close client to avoid memory leak
+    myNativeClient = null;
+  }
 
 }
