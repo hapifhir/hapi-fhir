@@ -64,16 +64,40 @@ public class MethodUtil {
 		// nothing
 	}
 
+	public static void addAcceptHeaderToRequest(EncodingEnum theEncoding, IHttpRequest theHttpRequest,
+			FhirContext theContext) {
+		if (theEncoding == null) {
+			if (theContext.getVersion().getVersion().isNewerThan(FhirVersionEnum.DSTU2_1) == false) {
+				theHttpRequest.addHeader(Constants.HEADER_ACCEPT, Constants.HEADER_ACCEPT_VALUE_XML_OR_JSON_LEGACY);
+			} else {
+				theHttpRequest.addHeader(Constants.HEADER_ACCEPT, Constants.HEADER_ACCEPT_VALUE_XML_OR_JSON_NON_LEGACY);
+			}
+		} else if (theEncoding == EncodingEnum.JSON) {
+			if (theContext.getVersion().getVersion().isNewerThan(FhirVersionEnum.DSTU2_1) == false) {
+				theHttpRequest.addHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON);
+			} else {
+				theHttpRequest.addHeader(Constants.HEADER_ACCEPT, Constants.HEADER_ACCEPT_VALUE_JSON_NON_LEGACY);
+			}
+		} else if (theEncoding == EncodingEnum.XML) {
+			if (theContext.getVersion().getVersion().isNewerThan(FhirVersionEnum.DSTU2_1) == false) {
+				theHttpRequest.addHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_XML);
+			} else {
+				theHttpRequest.addHeader(Constants.HEADER_ACCEPT, Constants.HEADER_ACCEPT_VALUE_XML_NON_LEGACY);
+			}
+		}
+
+	}
+
 	public static HttpGetClientInvocation createConformanceInvocation(FhirContext theContext) {
 		return new HttpGetClientInvocation(theContext, "metadata");
 	}
 
 	public static HttpPostClientInvocation createCreateInvocation(IBaseResource theResource, FhirContext theContext) {
-		return createCreateInvocation(theResource, null, null, theContext);
+		return createCreateInvocation(theResource, null, theContext);
 	}
 
 	public static HttpPostClientInvocation createCreateInvocation(IBaseResource theResource, String theResourceBody,
-			String theId, FhirContext theContext) {
+			FhirContext theContext) {
 		RuntimeResourceDefinition def = theContext.getResourceDefinition(theResource);
 		String resourceName = def.getName();
 
@@ -93,15 +117,15 @@ public class MethodUtil {
 	}
 
 	public static HttpPostClientInvocation createCreateInvocation(IBaseResource theResource, String theResourceBody,
-			String theId, FhirContext theContext, Map<String, List<String>> theIfNoneExistParams) {
-		HttpPostClientInvocation retVal = createCreateInvocation(theResource, theResourceBody, theId, theContext);
+			FhirContext theContext, Map<String, List<String>> theIfNoneExistParams) {
+		HttpPostClientInvocation retVal = createCreateInvocation(theResource, theResourceBody, theContext);
 		retVal.setIfNoneExistParams(theIfNoneExistParams);
 		return retVal;
 	}
 
 	public static HttpPostClientInvocation createCreateInvocation(IBaseResource theResource, String theResourceBody,
-			String theId, FhirContext theContext, String theIfNoneExistUrl) {
-		HttpPostClientInvocation retVal = createCreateInvocation(theResource, theResourceBody, theId, theContext);
+			FhirContext theContext, String theIfNoneExistUrl) {
+		HttpPostClientInvocation retVal = createCreateInvocation(theResource, theResourceBody, theContext);
 		retVal.setIfNoneExistString(theIfNoneExistUrl);
 		return retVal;
 	}
@@ -111,15 +135,15 @@ public class MethodUtil {
 		return PatchMethodBinding.createPatchInvocation(theContext, theId, thePatchType, theBody);
 	}
 
-	public static HttpPatchClientInvocation createPatchInvocation(FhirContext theContext, String theUrl,
-			PatchTypeEnum thePatchType, String theBody) {
-		return PatchMethodBinding.createPatchInvocation(theContext, theUrl, thePatchType, theBody);
-	}
-
 	public static HttpPatchClientInvocation createPatchInvocation(FhirContext theContext, PatchTypeEnum thePatchType,
 			String theBody, String theResourceType, Map<String, List<String>> theMatchParams) {
 		return PatchMethodBinding.createPatchInvocation(theContext, thePatchType, theBody, theResourceType,
 				theMatchParams);
+	}
+
+	public static HttpPatchClientInvocation createPatchInvocation(FhirContext theContext, String theUrl,
+			PatchTypeEnum thePatchType, String theBody) {
+		return PatchMethodBinding.createPatchInvocation(theContext, theUrl, thePatchType, theBody);
 	}
 
 	public static HttpPutClientInvocation createUpdateInvocation(FhirContext theContext, IBaseResource theResource,
@@ -136,24 +160,6 @@ public class MethodUtil {
 		}
 
 		return retVal;
-	}
-
-	public static StringBuilder createUrl(String theResourceType, Map<String, List<String>> theMatchParams) {
-		StringBuilder b = new StringBuilder();
-
-		b.append(theResourceType);
-
-		boolean haveQuestionMark = false;
-		for (Entry<String, List<String>> nextEntry : theMatchParams.entrySet()) {
-			for (String nextValue : nextEntry.getValue()) {
-				b.append(haveQuestionMark ? '&' : '?');
-				haveQuestionMark = true;
-				b.append(UrlUtil.escape(nextEntry.getKey()));
-				b.append('=');
-				b.append(UrlUtil.escape(nextValue));
-			}
-		}
-		return b;
 	}
 
 	public static HttpPutClientInvocation createUpdateInvocation(FhirContext theContext, IBaseResource theResource,
@@ -191,6 +197,24 @@ public class MethodUtil {
 		}
 
 		return retVal;
+	}
+
+	public static StringBuilder createUrl(String theResourceType, Map<String, List<String>> theMatchParams) {
+		StringBuilder b = new StringBuilder();
+
+		b.append(theResourceType);
+
+		boolean haveQuestionMark = false;
+		for (Entry<String, List<String>> nextEntry : theMatchParams.entrySet()) {
+			for (String nextValue : nextEntry.getValue()) {
+				b.append(haveQuestionMark ? '&' : '?');
+				haveQuestionMark = true;
+				b.append(UrlUtil.escape(nextEntry.getKey()));
+				b.append('=');
+				b.append(UrlUtil.escape(nextValue));
+			}
+		}
+		return b;
 	}
 
 	public static void extractDescription(SearchParameter theParameter, Annotation[] theAnnotations) {
@@ -538,30 +562,6 @@ public class MethodUtil {
 			}
 		}
 		return retVal;
-	}
-
-	public static void addAcceptHeaderToRequest(EncodingEnum theEncoding, IHttpRequest theHttpRequest,
-			FhirContext theContext) {
-		if (theEncoding == null) {
-			if (theContext.getVersion().getVersion().isNewerThan(FhirVersionEnum.DSTU2_1) == false) {
-				theHttpRequest.addHeader(Constants.HEADER_ACCEPT, Constants.HEADER_ACCEPT_VALUE_XML_OR_JSON_LEGACY);
-			} else {
-				theHttpRequest.addHeader(Constants.HEADER_ACCEPT, Constants.HEADER_ACCEPT_VALUE_XML_OR_JSON_NON_LEGACY);
-			}
-		} else if (theEncoding == EncodingEnum.JSON) {
-			if (theContext.getVersion().getVersion().isNewerThan(FhirVersionEnum.DSTU2_1) == false) {
-				theHttpRequest.addHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON);
-			} else {
-				theHttpRequest.addHeader(Constants.HEADER_ACCEPT, Constants.HEADER_ACCEPT_VALUE_JSON_NON_LEGACY);
-			}
-		} else if (theEncoding == EncodingEnum.XML) {
-			if (theContext.getVersion().getVersion().isNewerThan(FhirVersionEnum.DSTU2_1) == false) {
-				theHttpRequest.addHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_XML);
-			} else {
-				theHttpRequest.addHeader(Constants.HEADER_ACCEPT, Constants.HEADER_ACCEPT_VALUE_XML_NON_LEGACY);
-			}
-		}
-
 	}
 
 }

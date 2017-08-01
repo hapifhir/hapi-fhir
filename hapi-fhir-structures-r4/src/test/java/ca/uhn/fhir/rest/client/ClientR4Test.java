@@ -49,11 +49,10 @@ public class ClientR4Test {
 
   private HttpClient myHttpClient;
   private HttpResponse myHttpResponse;
-  private FhirContext ourCtx;
+  private static FhirContext ourCtx = FhirContext.forR4();
 
   @Before
   public void before() {
-    ourCtx = FhirContext.forR4();
 
     myHttpClient = mock(HttpClient.class, new ReturnsDeepStubs());
     ourCtx.getRestfulClientFactory().setHttpClient(myHttpClient);
@@ -120,12 +119,13 @@ public class ClientR4Test {
     return msg;
   }
 
-  private String getPatientFeedWithOneResult() {
+  static String getPatientFeedWithOneResult() {
 
     Bundle retVal = new Bundle();
 
     Patient p = new Patient();
     p.addName().setFamily("Cardinal").addGiven("John");
+    p.addIdentifier().setValue("PRP1660");
     retVal.addEntry().setResource(p);
 
     return ourCtx.newXmlParser().encodeResourceToString(retVal);
@@ -295,7 +295,7 @@ public class ClientR4Test {
     ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
     when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
     when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
-    when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_ATOM_XML + "; charset=UTF-8"));
+    when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML_NEW + "; charset=UTF-8"));
     when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
 
     ITestClient client = ourCtx.newRestfulClient(ITestClient.class, "http://foo");
@@ -316,7 +316,7 @@ public class ClientR4Test {
     ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
     when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
     when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
-    when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_ATOM_XML + "; charset=UTF-8"));
+    when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML_NEW + "; charset=UTF-8"));
     when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
 
     ITestClient client = ourCtx.newRestfulClient(ITestClient.class, "http://foo");
@@ -335,7 +335,7 @@ public class ClientR4Test {
     ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
     when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
     when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
-    when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_ATOM_XML + "; charset=UTF-8"));
+    when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML_NEW + "; charset=UTF-8"));
     when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
 
     ITestClient client = ourCtx.newRestfulClient(ITestClient.class, "http://foo");
@@ -356,7 +356,7 @@ public class ClientR4Test {
     ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
     when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
     when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
-    when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_ATOM_XML + "; charset=UTF-8"));
+    when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML_NEW + "; charset=UTF-8"));
     when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<InputStream>() {
       @Override
       public InputStream answer(InvocationOnMock theInvocation) throws Throwable {

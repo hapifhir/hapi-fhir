@@ -77,6 +77,7 @@ public class GenericClientTest {
 	}
 
 	@Test
+	@Ignore
 	public void testInvalidCalls() {
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
 		
@@ -95,30 +96,31 @@ public class GenericClientTest {
 	}
 	
 	private String getPatientFeedWithOneResult() {
-		//@formatter:off
-		String msg = "<feed xmlns=\"http://www.w3.org/2005/Atom\">\n" + 
-				"<title/>\n" + 
-				"<id>d039f91a-cc3c-4013-988e-af4d8d0614bd</id>\n" + 
-				"<os:totalResults xmlns:os=\"http://a9.com/-/spec/opensearch/1.1/\">1</os:totalResults>\n" + 
-				"<author>\n" +
-				"<name>ca.uhn.fhir.rest.server.DummyRestfulServer</name>\n" + 
-				"</author>\n" + 
-				"<entry>\n" + 
-				"<content type=\"text/xml\">" 
-				+ "<Patient xmlns=\"http://hl7.org/fhir\">" 
-				+ "<text><status value=\"generated\" /><div xmlns=\"http://www.w3.org/1999/xhtml\">John Cardinal:            444333333        </div></text>"
-				+ "<identifier><label value=\"SSN\" /><system value=\"http://orionhealth.com/mrn\" /><value value=\"PRP1660\" /></identifier>"
-				+ "<name><use value=\"official\" /><family value=\"Cardinal\" /><given value=\"John\" /></name>"
-				+ "<name><family value=\"Kramer\" /><given value=\"Doe\" /></name>"
-				+ "<telecom><system value=\"phone\" /><value value=\"555-555-2004\" /><use value=\"work\" /></telecom>"
-				+ "<gender><coding><system value=\"http://hl7.org/fhir/v3/AdministrativeGender\" /><code value=\"M\" /></coding></gender>"
-				+ "<address><use value=\"home\" /><line value=\"2222 Home Street\" /></address><active value=\"true\" />"
-				+ "</Patient>"
-				+ "</content>\n"  
-				+ "   </entry>\n"  
-				+ "</feed>";
-		//@formatter:on
-		return msg;
+	  return ClientR4Test.getPatientFeedWithOneResult();
+//		//@formatter:off
+//		String msg = "<feed xmlns=\"http://www.w3.org/2005/Atom\">\n" + 
+//				"<title/>\n" + 
+//				"<id>d039f91a-cc3c-4013-988e-af4d8d0614bd</id>\n" + 
+//				"<os:totalResults xmlns:os=\"http://a9.com/-/spec/opensearch/1.1/\">1</os:totalResults>\n" + 
+//				"<author>\n" +
+//				"<name>ca.uhn.fhir.rest.server.DummyRestfulServer</name>\n" + 
+//				"</author>\n" + 
+//				"<entry>\n" + 
+//				"<content type=\"text/xml\">" 
+//				+ "<Patient xmlns=\"http://hl7.org/fhir\">" 
+//				+ "<text><status value=\"generated\" /><div xmlns=\"http://www.w3.org/1999/xhtml\">John Cardinal:            444333333        </div></text>"
+//				+ "<identifier><label value=\"SSN\" /><system value=\"http://orionhealth.com/mrn\" /><value value=\"PRP1660\" /></identifier>"
+//				+ "<name><use value=\"official\" /><family value=\"Cardinal\" /><given value=\"John\" /></name>"
+//				+ "<name><family value=\"Kramer\" /><given value=\"Doe\" /></name>"
+//				+ "<telecom><system value=\"phone\" /><value value=\"555-555-2004\" /><use value=\"work\" /></telecom>"
+//				+ "<gender><coding><system value=\"http://hl7.org/fhir/v3/AdministrativeGender\" /><code value=\"M\" /></coding></gender>"
+//				+ "<address><use value=\"home\" /><line value=\"2222 Home Street\" /></address><active value=\"true\" />"
+//				+ "</Patient>"
+//				+ "</content>\n"  
+//				+ "   </entry>\n"  
+//				+ "</feed>";
+//		//@formatter:on
+//		return msg;
 	}
 
 	private String getResourceResult() {
@@ -187,7 +189,7 @@ public class GenericClientTest {
 		int count = 0;
 		client.create().resource(ourCtx.newXmlParser().encodeResourceToString(p1)).execute();
 		assertEquals(1, capt.getAllValues().get(count).getHeaders(Constants.HEADER_CONTENT_TYPE).length);
-		assertEquals(EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(count).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
+		assertEquals(EncodingEnum.XML.getResourceContentTypeNonLegacy() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(count).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
 		assertThat(extractBody(capt, count), containsString("value=\"John\""));
 		count++;
 
@@ -198,7 +200,7 @@ public class GenericClientTest {
 			.execute();
 		
 		assertEquals(1, capt.getAllValues().get(count).getHeaders(Constants.HEADER_CONTENT_TYPE).length);
-		assertEquals(EncodingEnum.JSON.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(count).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
+		assertEquals(EncodingEnum.JSON.getResourceContentTypeNonLegacy() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(count).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
 		assertThat(extractBody(capt, count), containsString("[\"John\"]"));
 		count++;
 
@@ -208,13 +210,13 @@ public class GenericClientTest {
 
 		client.create().resource(ourCtx.newXmlParser().encodeResourceToString(p1)).encodedJson().execute();
 		assertEquals(1, capt.getAllValues().get(count).getHeaders(Constants.HEADER_CONTENT_TYPE).length);
-		assertEquals(EncodingEnum.JSON.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(count).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
+		assertEquals(EncodingEnum.JSON.getResourceContentTypeNonLegacy() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(count).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
 		assertThat(extractBody(capt, count), containsString("[\"John\"]"));
 		count++;
 
 		client.create().resource(ourCtx.newJsonParser().encodeResourceToString(p1)).encodedXml().execute();
 		assertEquals(1, capt.getAllValues().get(count).getHeaders(Constants.HEADER_CONTENT_TYPE).length);
-		assertEquals(EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(count).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
+		assertEquals(EncodingEnum.XML.getResourceContentTypeNonLegacy() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(count).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
 		assertThat(extractBody(capt, count), containsString("value=\"John\""));
 		count++;
 
@@ -243,26 +245,26 @@ public class GenericClientTest {
 		assertEquals("http://example.com/fhir/Patient", capt.getValue().getURI().toString());
 		assertEquals("POST", capt.getValue().getMethod());
 		assertEquals(1, capt.getAllValues().get(count).getHeaders(Constants.HEADER_CONTENT_TYPE).length);
-		assertEquals(EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(count).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
+		assertEquals(EncodingEnum.XML.getResourceContentTypeNonLegacy() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(count).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
 		count++;
 
 		/*
 		 * Try fluent options
 		 */
 		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(""), Charset.forName("UTF-8")));
-		client.create().resource(p1).withId("123").execute();
-		assertEquals("http://example.com/fhir/Patient/123", capt.getAllValues().get(1).getURI().toString());
+		client.create().resource(p1).execute();
+		assertEquals("http://example.com/fhir/Patient", capt.getAllValues().get(1).getURI().toString());
 		assertEquals(1, capt.getAllValues().get(count).getHeaders(Constants.HEADER_CONTENT_TYPE).length);
-		assertEquals(EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(count).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
+		assertEquals(EncodingEnum.XML.getResourceContentTypeNonLegacy() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(count).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
 		count++;
 
 		String resourceText = "<Patient xmlns=\"http://hl7.org/fhir\">    </Patient>";
 		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(""), Charset.forName("UTF-8")));
-		client.create().resource(resourceText).withId("123").execute();
-		assertEquals("http://example.com/fhir/Patient/123", capt.getAllValues().get(2).getURI().toString());
+		client.create().resource(resourceText).execute();
+		assertEquals("http://example.com/fhir/Patient", capt.getAllValues().get(2).getURI().toString());
 		assertEquals(resourceText, IOUtils.toString(((HttpPost) capt.getAllValues().get(2)).getEntity().getContent()));
 		assertEquals(1, capt.getAllValues().get(count).getHeaders(Constants.HEADER_CONTENT_TYPE).length);
-		assertEquals(EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(count).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
+		assertEquals(EncodingEnum.XML.getResourceContentTypeNonLegacy() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(count).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
 		count++;
 	}
 
@@ -313,7 +315,7 @@ public class GenericClientTest {
 		int count = 0;
 		client.create().resource(org).prettyPrint().encodedXml().execute();
 		assertEquals(1, capt.getAllValues().get(count).getHeaders(Constants.HEADER_CONTENT_TYPE).length);
-		assertEquals(EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(count).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
+		assertEquals(EncodingEnum.XML.getResourceContentTypeNonLegacy() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(count).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
 		assertThat(extractBody(capt, count), containsString("<name value=\"測試醫院\"/>"));
 		count++;
 
@@ -338,7 +340,7 @@ public class GenericClientTest {
 
 		assertEquals("http://example.com/fhir/Patient/123", capt.getValue().getURI().toString());
 		assertEquals("DELETE", capt.getValue().getMethod());
-		assertEquals("testDelete01", outcome.getIssueFirstRep().getLocation());
+		assertEquals("testDelete01", outcome.getIssueFirstRep().getLocation().get(0).getValue());
 
 		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader("LKJHLKJGLKJKLL"), Charset.forName("UTF-8")));
 		outcome = (OperationOutcome) client.delete().resourceById(new IdType("Location", "123", "456")).prettyPrint().encodedJson().execute();
@@ -417,10 +419,10 @@ public class GenericClientTest {
 
 		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 201, "OK"));
 
-		client.search().forResource("Patient").where(Patient.NAME.isMissing(true)).execute();
+		client.search().forResource("Patient").where(Patient.NAME.isMissing(true)).returnBundle(Bundle.class).execute();
 		assertEquals("http://example.com/fhir/Patient?name%3Amissing=true", capt.getValue().getRequestLine().getUri());
 
-		client.search().forResource("Patient").where(Patient.NAME.isMissing(false)).execute();
+		client.search().forResource("Patient").where(Patient.NAME.isMissing(false)).returnBundle(Bundle.class).execute();
 		assertEquals("http://example.com/fhir/Patient?name%3Amissing=false", capt.getValue().getRequestLine().getUri());
 	}
 
@@ -643,7 +645,9 @@ public class GenericClientTest {
          .returnBundle(Bundle.class)
 			.execute();
 
-		assertEquals("http://foo/Patient/123/fooCompartment?birthdate=%3E%3D2011-01-02", capt.getValue().getURI().toString());
+		assertEquals("http://foo/Patient/123/fooCompartment?birthdate=ge2011-01-02", capt.getValue().getURI().toString());
+		
+		ourLog.info(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
 		
 		assertEquals("PRP1660", BundleUtil.toListOfResourcesOfType(ourCtx, response, Patient.class).get(0).getIdentifier().get(0).getValue());
 
@@ -723,7 +727,7 @@ public class GenericClientTest {
             .returnBundle(Bundle.class)
 				.execute();
 
-		assertEquals("http://example.com/fhir/Patient?birthdate=%3C%3D2012-01-22&birthdate=%3E2011-01-01&_include=Patient.managingOrganization&_sort%3Aasc=birthdate&_sort%3Adesc=name&_sort=address&_count=123&_format=json", capt.getAllValues().get(idx++).getURI().toString());
+		assertEquals("http://example.com/fhir/Patient?birthdate=le2012-01-22&birthdate=gt2011-01-01&_include=Patient%3Aorganization&_sort=birthdate%2C-name%2Caddress&_count=123&_format=json", capt.getAllValues().get(idx++).getURI().toString());
 
 		response = client.search()
 				.forResource(Patient.class)
@@ -738,7 +742,7 @@ public class GenericClientTest {
             .returnBundle(Bundle.class)
 				.execute();
 
-		assertEquals("http://example.com/fhir/Patient?birthdate=%3C%3D2012-01-22&birthdate=%3E2011-01-01&_include=Patient.managingOrganization&_sort%3Aasc=birthdate&_sort%3Adesc=name&_sort=address&_count=123&_format=json", capt.getAllValues().get(idx++).getURI().toString());
+		assertEquals("http://example.com/fhir/Patient?birthdate=le2012-01-22&birthdate=gt2011-01-01&_include=Patient%3Aorganization&_sort=birthdate%2C-name%2Caddress&_count=123&_format=json", capt.getAllValues().get(idx++).getURI().toString());
 
 		response = client.search()
 				.forResource(Patient.class)
@@ -749,7 +753,7 @@ public class GenericClientTest {
 				.execute();
 
 		String comma = "%2C";
-		assertEquals("http://example.com/fhir/Patient?birthdate=%3C%3D2012-01-22" + comma + "%3E2020-01-01&birthdate=%3E2011-01-01&_format=json", capt.getAllValues().get(idx++).getURI().toString());
+		assertEquals("http://example.com/fhir/Patient?birthdate=le2012-01-22" + comma + "gt2020-01-01&birthdate=gt2011-01-01&_format=json", capt.getAllValues().get(idx++).getURI().toString());
 	}
 	
 	@SuppressWarnings("unused")
@@ -772,7 +776,7 @@ public class GenericClientTest {
 				.returnBundle(Bundle.class)
 				.execute();
 
-		assertEquals("http://example.com/fhir/Observation?value-quantity=%3E123%7Cfoo%7Cbar", capt.getValue().getURI().toString());
+		assertEquals("http://example.com/fhir/Observation?value-quantity=gt123%7Cfoo%7Cbar", capt.getValue().getURI().toString());
 	}
 
 	@SuppressWarnings("unused")
@@ -1136,8 +1140,8 @@ public class GenericClientTest {
 .execute();
 
 		assertThat(capt.getValue().getURI().toString(), containsString("http://example.com/fhir/Patient?"));
-		assertThat(capt.getValue().getURI().toString(), containsString("_include=" + Patient.INCLUDE_ORGANIZATION.getValue()));
-		assertThat(capt.getValue().getURI().toString(), containsString("_include%3Arecurse=" + Patient.INCLUDE_LINK.getValue()));
+		assertThat(capt.getValue().getURI().toString(), containsString("_include=" + UrlUtil.escape( Patient.INCLUDE_ORGANIZATION.getValue())));
+		assertThat(capt.getValue().getURI().toString(), containsString("_include%3Arecurse=" + UrlUtil.escape(Patient.INCLUDE_LINK.getValue())));
 		assertThat(capt.getValue().getURI().toString(), containsString("_include=*"));
 
 	}
@@ -1211,7 +1215,7 @@ public class GenericClientTest {
 
 		Bundle response = client
 		    .search()
-		    .byUrl("http://example.com/fhir/Patient?birthdate=%3C%3D2012-01-22&birthdate=%3E2011-01-01&_include=Patient.managingOrganization&_sort%3Aasc=birthdate&_sort%3Adesc=name&_count=123&_format=json")
+		    .byUrl("http://example.com/fhir/Patient?birthdate=le2012-01-22&birthdate=gt2011-01-01&_include=Patient%3Aorganization&_sort%3Aasc=birthdate&_sort%3Adesc=name&_count=123&_format=json")
           .returnBundle(Bundle.class)
           .execute();
 
@@ -1286,7 +1290,11 @@ public class GenericClientTest {
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
 
 		try {
-			client.search().forResource(Patient.class).execute();
+			client
+			  .search()
+			  .forResource(Patient.class)
+			  .returnBundle(Bundle.class)
+			  .execute();
 			fail();
 		} catch (InternalErrorException e) {
 			assertEquals(e.getMessage(), "HTTP 500 INTERNAL ERRORS: Server Issues!");
@@ -1310,7 +1318,7 @@ public class GenericClientTest {
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
 
 		try {
-			client.search().forResource(Patient.class).execute();
+			client.search().forResource(Patient.class).returnBundle(Bundle.class).execute();
 			fail();
 		} catch (NonFhirResponseException e) {
 			assertThat(e.getMessage(), StringContains.containsString("Server Issues!"));
@@ -1339,7 +1347,7 @@ public class GenericClientTest {
             .returnBundle(Bundle.class)
 				.execute();
 
-		assertEquals("http://example.com/fhir/Patient?_revinclude=Provenance.target&_format=json", capt.getValue().getURI().toString());
+		assertEquals("http://example.com/fhir/Patient?_revinclude=Provenance%3Atarget&_format=json", capt.getValue().getURI().toString());
 
 	}
 
@@ -1396,7 +1404,7 @@ public class GenericClientTest {
 
 		assertEquals("http://example.com/fhir", capt.getValue().getURI().toString());
 		assertEquals(input.getEntry().get(0).getResource().getId(), response.getEntry().get(0).getResource().getId());
-		assertEquals(EncodingEnum.XML.getBundleContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(0).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
+		assertEquals(EncodingEnum.XML.getResourceContentTypeNonLegacy() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(0).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
 
 	}
 
@@ -1421,7 +1429,7 @@ public class GenericClientTest {
 
       assertEquals("http://example.com/fhir", capt.getValue().getURI().toString());
       assertEquals(input.getEntry().get(0).getResource().getId(), response.getEntry().get(0).getResource().getId());
-      assertEquals(EncodingEnum.XML.getBundleContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(0).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
+      assertEquals(EncodingEnum.XML.getResourceContentTypeNonLegacy() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(0).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
 
    }
 
@@ -1481,7 +1489,7 @@ public class GenericClientTest {
 
 		assertEquals(1, capt.getAllValues().size());
 		assertEquals(1, capt.getAllValues().get(count).getHeaders(Constants.HEADER_CONTENT_TYPE).length);
-		assertEquals(EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(count).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
+		assertEquals(EncodingEnum.XML.getResourceContentTypeNonLegacy() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(count).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
 		count++;
 
 		MethodOutcome outcome = client.update().resource(p1).execute();
@@ -1492,11 +1500,6 @@ public class GenericClientTest {
 
 		assertEquals("http://example.com/fhir/Patient/44", capt.getValue().getURI().toString());
 		assertEquals("PUT", capt.getValue().getMethod());
-		Header catH = capt.getValue().getFirstHeader("Category");
-		assertNotNull(Arrays.asList(capt.getValue().getAllHeaders()).toString(), catH);
-		assertEquals("urn:happytag; label=\"This is a happy resource\"; scheme=\"http://hl7.org/fhir/tag\"", catH.getValue());
-		assertEquals(1, capt.getAllValues().get(count).getHeaders(Constants.HEADER_CONTENT_TYPE).length);
-		assertEquals(EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(count).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
 
 		/*
 		 * Try fluent options
@@ -1534,13 +1537,13 @@ public class GenericClientTest {
 		int count = 0;
 		client.update().resource(ourCtx.newXmlParser().encodeResourceToString(p1)).withId("1").execute();
 		assertEquals(1, capt.getAllValues().get(count).getHeaders(Constants.HEADER_CONTENT_TYPE).length);
-		assertEquals(EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(count).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
+		assertEquals(EncodingEnum.XML.getResourceContentTypeNonLegacy() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(count).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
 		assertThat(extractBody(capt, count), containsString("value=\"John\""));
 		count++;
 
 		client.update().resource(ourCtx.newJsonParser().encodeResourceToString(p1)).withId("1").execute();
 		assertEquals(1, capt.getAllValues().get(count).getHeaders(Constants.HEADER_CONTENT_TYPE).length);
-		assertEquals(EncodingEnum.JSON.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(count).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
+		assertEquals(EncodingEnum.JSON.getResourceContentTypeNonLegacy() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(count).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
 		assertThat(extractBody(capt, count), containsString("[\"John\"]"));
 		count++;
 
@@ -1550,13 +1553,13 @@ public class GenericClientTest {
 
 		client.update().resource(ourCtx.newXmlParser().encodeResourceToString(p1)).withId("1").encodedJson().execute();
 		assertEquals(1, capt.getAllValues().get(count).getHeaders(Constants.HEADER_CONTENT_TYPE).length);
-		assertEquals(EncodingEnum.JSON.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(count).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
+		assertEquals(EncodingEnum.JSON.getResourceContentTypeNonLegacy() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(count).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
 		assertThat(extractBody(capt, count), containsString("[\"John\"]"));
 		count++;
 
 		client.update().resource(ourCtx.newJsonParser().encodeResourceToString(p1)).withId("1").encodedXml().execute();
 		assertEquals(1, capt.getAllValues().get(count).getHeaders(Constants.HEADER_CONTENT_TYPE).length);
-		assertEquals(EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(count).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
+		assertEquals(EncodingEnum.XML.getResourceContentTypeNonLegacy() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(count).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
 		assertThat(extractBody(capt, count), containsString("value=\"John\""));
 		count++;
 	}
@@ -1581,7 +1584,7 @@ public class GenericClientTest {
       p1.addName().setFamily("Smith").addGiven("John");
 		
 		MethodOutcome resp = client.validate(p1);
-		assertEquals("http://example.com/fhir/Patient/_validate", capt.getValue().getURI().toString());
+		assertEquals("http://example.com/fhir/Patient/$validate", capt.getValue().getURI().toString());
 		oo = (OperationOutcome) resp.getOperationOutcome();
 		assertEquals("OOOK", oo.getIssueFirstRep().getDiagnostics());
 

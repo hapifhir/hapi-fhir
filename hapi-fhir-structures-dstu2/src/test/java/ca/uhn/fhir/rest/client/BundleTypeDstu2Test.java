@@ -67,7 +67,7 @@ public class BundleTypeDstu2Test {
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
 		when(ourHttpClient.execute(capt.capture())).thenReturn(ourHttpResponse);
 		when(ourHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
-		when(ourHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_ATOM_XML + "; charset=UTF-8"));
+		when(ourHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
 		when(ourHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(retVal), Charset.forName("UTF-8")));
 
 		Patient p1 = new Patient();

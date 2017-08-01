@@ -531,7 +531,6 @@ public class GenericClient extends BaseClient implements IGenericClient {
 	private class CreateInternal extends BaseSearch<ICreateTyped, ICreateWithQueryTyped, MethodOutcome> implements ICreate, ICreateTyped, ICreateWithQuery, ICreateWithQueryTyped {
 
 		private boolean myConditional;
-		private String myId;
 		private PreferReturnEnum myPrefer;
 		private IBaseResource myResource;
 		private String myResourceBody;
@@ -554,7 +553,6 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			if (myResource == null) {
 				myResource = parseResourceBody(myResourceBody);
 			}
-			myId = getPreferredId(myResource, myId);
 
 			// If an explicit encoding is chosen, we will re-serialize to ensure the right encoding
 			if (getParamEncoding() != null) {
@@ -563,11 +561,11 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 			BaseHttpClientInvocation invocation;
 			if (mySearchUrl != null) {
-				invocation = MethodUtil.createCreateInvocation(myResource, myResourceBody, myId, myContext, mySearchUrl);
+				invocation = MethodUtil.createCreateInvocation(myResource, myResourceBody, myContext, mySearchUrl);
 			} else if (myConditional) {
-				invocation = MethodUtil.createCreateInvocation(myResource, myResourceBody, myId, myContext, getParamMap());
+				invocation = MethodUtil.createCreateInvocation(myResource, myResourceBody, myContext, getParamMap());
 			} else {
-				invocation = MethodUtil.createCreateInvocation(myResource, myResourceBody, myId, myContext);
+				invocation = MethodUtil.createCreateInvocation(myResource, myResourceBody, myContext);
 			}
 
 			addPreferHeader(myPrefer, invocation);
@@ -596,18 +594,6 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		public ICreateTyped resource(String theResourceBody) {
 			Validate.notBlank(theResourceBody, "Body can not be null or blank");
 			myResourceBody = theResourceBody;
-			return this;
-		}
-
-		@Override
-		public CreateInternal withId(IdDt theId) {
-			myId = theId.getIdPart();
-			return this;
-		}
-
-		@Override
-		public CreateInternal withId(String theId) {
-			myId = theId;
 			return this;
 		}
 

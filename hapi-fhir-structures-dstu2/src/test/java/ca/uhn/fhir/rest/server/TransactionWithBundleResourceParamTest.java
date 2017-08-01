@@ -141,8 +141,8 @@ public class TransactionWithBundleResourceParamTest {
 
 		String base = "http://localhost:" + ourPort + "/";
 		HttpPost httpPost = new HttpPost(base);
-		httpPost.addHeader("Accept", Constants.CT_ATOM_XML + "; pretty=true");
-		httpPost.setEntity(new StringEntity(bundleString, ContentType.create(Constants.CT_ATOM_XML, "UTF-8")));
+		httpPost.addHeader("Accept", Constants.CT_FHIR_XML + "; pretty=true");
+		httpPost.setEntity(new StringEntity(bundleString, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 		HttpResponse status = ourClient.execute(httpPost);
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());

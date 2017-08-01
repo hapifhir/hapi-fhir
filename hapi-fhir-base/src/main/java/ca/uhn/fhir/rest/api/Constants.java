@@ -21,18 +21,13 @@ package ca.uhn.fhir.rest.api;
  */
 
 import java.nio.charset.Charset;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class Constants {
 
 	public static final String CHARSET_NAME_UTF8 = "UTF-8";
 	public static final Charset CHARSET_UTF8;
 	public static final String CHARSET_UTF8_CTSUFFIX = "; charset=" + CHARSET_NAME_UTF8;
-	public static final String CT_ATOM_XML = "application/atom+xml";
 	public static final String CT_FHIR_JSON = "application/json+fhir";
 	public static final String CT_FHIR_JSON_NEW = "application/fhir+json";
 	public static final String CT_FHIR_XML = "application/xml+fhir";

@@ -28,14 +28,14 @@ import ca.uhn.fhir.parser.IParser;
 
 public enum EncodingEnum {
 
-	JSON(Constants.CT_FHIR_JSON, Constants.CT_FHIR_JSON_NEW, Constants.CT_FHIR_JSON, Constants.FORMAT_JSON) {
+	JSON(Constants.CT_FHIR_JSON, Constants.CT_FHIR_JSON_NEW, Constants.FORMAT_JSON) {
 		@Override
 		public IParser newParser(FhirContext theContext) {
 			return theContext.newJsonParser();
 		}
 	},
 
-	XML(Constants.CT_FHIR_XML, Constants.CT_FHIR_XML_NEW, Constants.CT_ATOM_XML, Constants.FORMAT_XML) {
+	XML(Constants.CT_FHIR_XML, Constants.CT_FHIR_XML_NEW, Constants.FORMAT_XML) {
 		@Override
 		public IParser newParser(FhirContext theContext) {
 			return theContext.newXmlParser();
@@ -58,7 +58,6 @@ public enum EncodingEnum {
 		ourContentTypeToEncodingNonLegacy = new HashMap<String, EncodingEnum>();
 		
 		for (EncodingEnum next : values()) {
-			ourContentTypeToEncoding.put(next.getBundleContentType(), next);
 			ourContentTypeToEncoding.put(next.myResourceContentTypeNonLegacy, next);
 			ourContentTypeToEncoding.put(next.myResourceContentTypeLegacy, next);
 			ourContentTypeToEncodingNonLegacy.put(next.myResourceContentTypeNonLegacy, next);
@@ -94,20 +93,14 @@ public enum EncodingEnum {
 
 	}
 
-	private String myBundleContentType;
 	private String myFormatContentType;
 	private String myResourceContentTypeLegacy;
 	private String myResourceContentTypeNonLegacy;
 
-	EncodingEnum(String theResourceContentTypeLegacy, String theResourceContentType, String theBundleContentType, String theFormatContentType) {
+	EncodingEnum(String theResourceContentTypeLegacy, String theResourceContentType, String theFormatContentType) {
 		myResourceContentTypeLegacy = theResourceContentTypeLegacy;
 		myResourceContentTypeNonLegacy = theResourceContentType;
-		myBundleContentType = theBundleContentType;
 		myFormatContentType = theFormatContentType;
-	}
-
-	public String getBundleContentType() {
-		return myBundleContentType;
 	}
 
 	public String getFormatContentType() {
