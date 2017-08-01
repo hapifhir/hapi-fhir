@@ -50,7 +50,6 @@ public class ETagClientDstu2Test {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
-
 	@Before
 	public void before() {
 
@@ -95,7 +94,6 @@ public class ETagClientDstu2Test {
 		Header[] headers = new Header[] { 
 				new BasicHeader(Constants.HEADER_LAST_MODIFIED, "Wed, 15 Nov 1995 04:58:08 GMT"),
 				new BasicHeader(Constants.HEADER_CONTENT_LOCATION, "http://foo.com/Patient/123/_history/2333"),
-				new BasicHeader(Constants.HEADER_CATEGORY, "http://foo/tagdefinition.html; scheme=\"http://hl7.org/fhir/tag\"; label=\"Some tag\""),
 				new BasicHeader(Constants.HEADER_ETAG, "\"9999\"")
 				};
 		//@formatter:on
@@ -257,8 +255,10 @@ public class ETagClientDstu2Test {
 		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
-		Header[] headers = new Header[] { new BasicHeader(Constants.HEADER_LAST_MODIFIED, "Wed, 15 Nov 1995 04:58:08 GMT"), new BasicHeader(Constants.HEADER_CONTENT_LOCATION, "http://foo.com/Patient/123/_history/2333"),
-				new BasicHeader(Constants.HEADER_CATEGORY, "http://foo/tagdefinition.html; scheme=\"http://hl7.org/fhir/tag\"; label=\"Some tag\"") };
+		Header[] headers = new Header[] {
+				new BasicHeader(Constants.HEADER_LAST_MODIFIED, "Wed, 15 Nov 1995 04:58:08 GMT"),
+				new BasicHeader(Constants.HEADER_CONTENT_LOCATION, "http://foo.com/Patient/123/_history/2333"),
+		};
 		when(myHttpResponse.getAllHeaders()).thenReturn(headers);
 
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");

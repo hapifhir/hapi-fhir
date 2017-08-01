@@ -26,7 +26,6 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.client.impl.BaseHttpClientInvocation;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -76,7 +75,7 @@ abstract class BaseOutcomeReturningMethodBindingWithResourceParam extends BaseOu
 
 	@Override
 	public BaseHttpClientInvocation invokeClient(Object[] theArgs) throws InternalErrorException {
-		IResource resource = (IResource) theArgs[myResourceParameterIndex]; // TODO: use IBaseResource
+		IBaseResource resource = (IBaseResource) theArgs[myResourceParameterIndex];
 		if (resource == null) {
 			throw new NullPointerException("Resource can not be null");
 		}

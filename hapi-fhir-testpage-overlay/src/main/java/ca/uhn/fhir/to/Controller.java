@@ -554,9 +554,6 @@ public class Controller extends BaseController {
 				} else {
 					outcomeDescription = "Create Resource";
 					ICreateTyped create = client.create().resource(body);
-					if (isNotBlank(id)) {
-						create.withId(id);
-					}
 					create.execute();
 				}
 			}

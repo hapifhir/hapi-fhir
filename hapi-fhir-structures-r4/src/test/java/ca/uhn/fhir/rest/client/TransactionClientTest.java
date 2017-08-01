@@ -64,7 +64,7 @@ public class TransactionClientTest {
     obs.getCode().addCoding().setSystem("urn:system").setCode("testPersistWithSimpleLinkO01");
     obs.setSubject(new Reference("Patient/testPersistWithSimpleLinkP01"));
 
-    List<IBaseResource> resources = Arrays.asList((IResource) patient, obs);
+    List<IBaseResource> resources = Arrays.asList((IBaseResource) patient, obs);
 
     IClient client = ctx.newRestfulClient(IClient.class, "http://foo");
 
@@ -123,7 +123,7 @@ public class TransactionClientTest {
     ourLog.info(ctx.newXmlParser().setPrettyPrint(true).encodeResourceToString(bundle));
 
     assertEquals(2, bundle.getEntry().size());
-    assertEquals("http://foo/Patient/testPersistWithSimpleLinkP01", bundle.getEntry().get(0).getIdElement().getValue());
+    assertEquals("http://foo/Patient/testPersistWithSimpleLinkP01", bundle.getEntry().get(0).getResource().getIdElement().getValue());
 
     assertTrue(bundle.getEntry().get(1).getId().isEmpty());
 

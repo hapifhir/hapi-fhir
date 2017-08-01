@@ -298,7 +298,7 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 		// return sm;
 	}
 
-	private static boolean isResourceInterface(Class<?> theReturnTypeFromMethod) {
+	public static boolean isResourceInterface(Class<?> theReturnTypeFromMethod) {
 		return theReturnTypeFromMethod.equals(IBaseResource.class) || theReturnTypeFromMethod.equals(IResource.class) || theReturnTypeFromMethod.equals(IAnyResource.class);
 	}
 

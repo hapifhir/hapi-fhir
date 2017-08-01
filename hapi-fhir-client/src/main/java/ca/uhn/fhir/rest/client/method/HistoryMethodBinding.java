@@ -26,12 +26,10 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Date;
 
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.instance.model.api.*;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.rest.annotation.History;
 import ca.uhn.fhir.rest.api.Constants;
@@ -88,10 +86,10 @@ public class HistoryMethodBinding extends BaseResourceReturningMethodBinding {
 
 	@Override
 	public BaseHttpClientInvocation invokeClient(Object[] theArgs) throws InternalErrorException {
-		IdDt id = null;
+		IIdType id = null;
 		String resourceName = myResourceName;
 		if (myIdParamIndex != null) {
-			id = (IdDt) theArgs[myIdParamIndex];
+			id = (IIdType) theArgs[myIdParamIndex];
 			if (id == null || isBlank(id.getValue())) {
 				throw new NullPointerException("ID can not be null");
 			}

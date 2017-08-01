@@ -494,21 +494,6 @@ public class MethodUtil {
 			}
 		}
 
-		List<String> categoryHeaders = theHeaders.get(Constants.HEADER_CATEGORY_LC);
-		if (categoryHeaders != null && categoryHeaders.size() > 0 && StringUtils.isNotBlank(categoryHeaders.get(0))) {
-			TagList tagList = new TagList();
-			for (String header : categoryHeaders) {
-				ParameterUtil.parseTagValue(tagList, header);
-			}
-			if (resource instanceof IResource) {
-				ResourceMetadataKeyEnum.TAG_LIST.put((IResource) resource, tagList);
-			} else if (resource instanceof IAnyResource) {
-				IBaseMetaType meta = ((IAnyResource) resource).getMeta();
-				for (Tag next : tagList) {
-					meta.addTag().setSystem(next.getScheme()).setCode(next.getTerm()).setDisplay(next.getLabel());
-				}
-			}
-		}
 	}
 
 	public static MethodOutcome process2xxResponse(FhirContext theContext, int theResponseStatusCode,

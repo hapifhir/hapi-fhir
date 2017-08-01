@@ -10,7 +10,6 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.annotation.Update;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
@@ -31,8 +30,8 @@ public class UpdateMethodBinding extends BaseOutcomeReturningMethodBindingWithRe
 
 
 	@Override
-	protected BaseHttpClientInvocation createClientInvocation(Object[] theArgs, IResource theResource) {
-		IdDt idDt = (IdDt) theArgs[myIdParameterIndex];
+	protected BaseHttpClientInvocation createClientInvocation(Object[] theArgs, IBaseResource theResource) {
+		IIdType idDt = (IIdType) theArgs[myIdParameterIndex];
 		if (idDt == null) {
 			throw new NullPointerException("ID can not be null");
 		}

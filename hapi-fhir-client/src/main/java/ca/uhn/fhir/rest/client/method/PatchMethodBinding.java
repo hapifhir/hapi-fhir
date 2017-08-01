@@ -24,11 +24,11 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.*;
 
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.rest.annotation.Patch;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.api.*;
@@ -81,7 +81,7 @@ public class PatchMethodBinding extends BaseOutcomeReturningMethodBindingWithRes
 	}
 
 	@Override
-	protected BaseHttpClientInvocation createClientInvocation(Object[] theArgs, IResource theResource) {
+	protected BaseHttpClientInvocation createClientInvocation(Object[] theArgs, IBaseResource theResource) {
 		StringBuilder urlExtension = new StringBuilder();
 		urlExtension.append(getContext().getResourceDefinition(theResource).getName());
 

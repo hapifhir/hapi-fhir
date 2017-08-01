@@ -175,12 +175,12 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 	@SuppressWarnings("unchecked")
 	private List<Class<? extends IBaseResource>> createPreferTypesList() {
 		List<Class<? extends IBaseResource>> preferTypes = null;
-		if (myResourceListCollectionType != null && IBaseResource.class.isAssignableFrom(myResourceListCollectionType)) {
+		if (myResourceType != null && !BaseMethodBinding.isResourceInterface(myResourceType)) {
+			preferTypes = new ArrayList<Class<? extends IBaseResource>>(1);
+			preferTypes.add((Class<? extends IBaseResource>) myResourceType);
+		} else if (myResourceListCollectionType != null && IBaseResource.class.isAssignableFrom(myResourceListCollectionType) && !BaseMethodBinding.isResourceInterface(myResourceListCollectionType)) {
 			preferTypes = new ArrayList<Class<? extends IBaseResource>>(1);
 			preferTypes.add((Class<? extends IBaseResource>) myResourceListCollectionType);
-			// } else if (myResourceType != null) {
-			// preferTypes = new ArrayList<Class<? extends IBaseResource>>(1);
-			// preferTypes.add((Class<? extends IBaseResource>) myResourceListCollectionType);
 		}
 		return preferTypes;
 	}
@@ -218,7 +218,8 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 	}
 
 	public enum ReturnTypeEnum {
-		BUNDLE, RESOURCE
+		BUNDLE,
+		RESOURCE
 	}
 
 }

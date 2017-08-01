@@ -45,7 +45,7 @@ public class CreateMethodBinding extends BaseOutcomeReturningMethodBindingWithRe
 	}
 
 	@Override
-	protected BaseHttpClientInvocation createClientInvocation(Object[] theArgs, IResource theResource) {
+	protected BaseHttpClientInvocation createClientInvocation(Object[] theArgs, IBaseResource theResource) {
 		FhirContext context = getContext();
 
 		BaseHttpClientInvocation retVal = MethodUtil.createCreateInvocation(theResource, context);

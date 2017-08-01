@@ -21,15 +21,12 @@ package ca.uhn.fhir.rest.client.method;
  */
 
 import java.lang.reflect.Method;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.rest.annotation.Delete;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
@@ -54,7 +51,7 @@ public class DeleteMethodBinding extends BaseOutcomeReturningMethodBindingWithRe
 	}
 
 	@Override
-	protected BaseHttpClientInvocation createClientInvocation(Object[] theArgs, IResource theResource) {
+	protected BaseHttpClientInvocation createClientInvocation(Object[] theArgs, IBaseResource theResource) {
 		StringBuilder urlExtension = new StringBuilder();
 		urlExtension.append(getContext().getResourceDefinition(theResource).getName());
 

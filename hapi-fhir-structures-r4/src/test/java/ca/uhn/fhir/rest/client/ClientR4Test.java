@@ -47,9 +47,13 @@ import ca.uhn.fhir.util.UrlUtil;
 
 public class ClientR4Test {
 
-  private HttpClient myHttpClient;
-  private HttpResponse myHttpResponse;
   private static FhirContext ourCtx = FhirContext.forR4();
+  private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ClientR4Test.class);
+  private HttpClient myHttpClient;
+
+  private HttpResponse myHttpResponse;
+
+  // atom-document-large.xml
 
   @Before
   public void before() {
@@ -60,8 +64,6 @@ public class ClientR4Test {
 
     myHttpResponse = mock(HttpResponse.class, new ReturnsDeepStubs());
   }
-
-  // atom-document-large.xml
 
   public String getHistoryBundleWithTwoResults() {
     /*
@@ -115,43 +117,9 @@ public class ClientR4Test {
 
     p.setId("http://foo.com/Patient/123/_history/2333");
     p.addName().setFamily("Kramer").addGiven("Doe");
+    p.addIdentifier().setValue("PRP1660");
     String msg = EncodingEnum.XML.newParser(ourCtx).setPrettyPrint(true).encodeResourceToString(p);
     return msg;
-  }
-
-  static String getPatientFeedWithOneResult() {
-
-    Bundle retVal = new Bundle();
-
-    Patient p = new Patient();
-    p.addName().setFamily("Cardinal").addGiven("John");
-    p.addIdentifier().setValue("PRP1660");
-    retVal.addEntry().setResource(p);
-
-    return ourCtx.newXmlParser().encodeResourceToString(retVal);
-
-    // String msg = "<feed xmlns=\"http://www.w3.org/2005/Atom\">\n" +
-    // "<title/>\n" +
-    // "<id>d039f91a-cc3c-4013-988e-af4d8d0614bd</id>\n" +
-    // "<os:totalResults xmlns:os=\"http://a9.com/-/spec/opensearch/1.1/\">1</os:totalResults>\n" +
-    // "<author>\n" +
-    // "<name>ca.uhn.fhir.rest.server.DummyRestfulServer</name>\n" +
-    // "</author>\n" +
-    // "<entry>\n" +
-    // "<content type=\"text/xml\">"
-    // + "<Patient xmlns=\"http://hl7.org/fhir\">"
-    // + "<text><status value=\"generated\" /><div xmlns=\"http://www.w3.org/1999/xhtml\">John Cardinal: 444333333 </div></text>"
-    // + "<identifier><label value=\"SSN\" /><system value=\"http://orionhealth.com/mrn\" /><value value=\"PRP1660\" /></identifier>"
-    // + "<name><use value=\"official\" /><family value=\"Cardinal\" /><given value=\"John\" /></name>"
-    // + "<name><family value=\"Kramer\" /><given value=\"Doe\" /></name>"
-    // + "<telecom><system value=\"phone\" /><value value=\"555-555-2004\" /><use value=\"work\" /></telecom>"
-    // + "<gender><coding><system value=\"http://hl7.org/fhir/v3/AdministrativeGender\" /><code value=\"M\" /></coding></gender>"
-    // + "<address><use value=\"home\" /><line value=\"2222 Home Street\" /></address><active value=\"true\" />"
-    // + "</Patient>"
-    // + "</content>\n"
-    // + " </entry>\n"
-    // + "</feed>";
-    // return msg;
   }
 
   @Test
@@ -270,7 +238,10 @@ public class ClientR4Test {
   @Test
   public void testGetConformance() throws Exception {
 
-    String msg = IOUtils.toString(ClientR4Test.class.getResourceAsStream("/example-metadata.xml"));
+    CapabilityStatement cs = new CapabilityStatement();
+    cs.getPublisherElement().setValue("Health Intersections");
+    String msg = ourCtx.newXmlParser().encodeResourceToString(cs);
+   
 
     ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
     when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
@@ -418,12 +389,15 @@ public class ClientR4Test {
 
     String msg = getPatient();
 
+    ourLog.info(msg);
+    
     ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
     when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
     when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
-    Header[] headers = new Header[] { new BasicHeader(Constants.HEADER_LAST_MODIFIED, "Wed, 15 Nov 1995 04:58:08 GMT"),
-        new BasicHeader(Constants.HEADER_CONTENT_LOCATION, "http://foo.com/Patient/123/_history/2333"),
-        new BasicHeader(Constants.HEADER_CATEGORY, "http://foo/tagdefinition.html; scheme=\"http://hl7.org/fhir/tag\"; label=\"Some tag\"") };
+    Header[] headers = new Header[] { 
+        new BasicHeader(Constants.HEADER_LAST_MODIFIED, "Wed, 15 Nov 1995 04:58:08 GMT"),
+        new BasicHeader(Constants.HEADER_CONTENT_LOCATION, "http://foo.com/Patient/123/_history/2333")
+    };
 
     when(myHttpResponse.getAllHeaders()).thenReturn(headers);
     when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
@@ -442,6 +416,8 @@ public class ClientR4Test {
     InstantType lm = (InstantType) response.getMeta().getLastUpdatedElement();
     lm.setTimeZoneZulu(true);
     assertEquals("1995-11-15T04:58:08.000Z", lm.getValueAsString());
+
+    ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(response));
 
     List<Coding> tags = response.getMeta().getTag();
     assertNotNull(tags);
@@ -478,9 +454,9 @@ public class ClientR4Test {
   @Test
   public void testReadFailureNoCharset() throws Exception {
 
-    //@formatter:off
-		String msg = "<OperationOutcome xmlns=\"http://hl7.org/fhir\"></OperationOutcome>";
-		//@formatter:on
+  //@formatter:off
+	String msg = "<OperationOutcome xmlns=\"http://hl7.org/fhir\"></OperationOutcome>";
+	//@formatter:on
 
     ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
     when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
@@ -615,7 +591,7 @@ public class ClientR4Test {
     param.setUpperBound(new DateParam(ParamPrefixEnum.LESSTHAN_OR_EQUALS, "2021-01-01"));
     client.getPatientByDateRange(param);
 
-    assertEquals("http://foo/Patient?dateRange=ge2011-01-01&dateRange=%3C%3D2021-01-01", capt.getValue().getURI().toString());
+    assertEquals("http://foo/Patient?dateRange=ge2011-01-01&dateRange=le2021-01-01", capt.getValue().getURI().toString());
 
   }
 
@@ -655,7 +631,7 @@ public class ClientR4Test {
     ITestClient client = ourCtx.newRestfulClient(ITestClient.class, "http://foo");
     Patient response = client.findPatientQuantity(new QuantityParam(ParamPrefixEnum.GREATERTHAN, 123L, "foo", "bar"));
 
-    assertEquals("http://foo/Patient?quantityParam=%3E123%7Cfoo%7Cbar", capt.getValue().getURI().toString());
+    assertEquals("http://foo/Patient?quantityParam=gt123%7Cfoo%7Cbar", capt.getValue().getURI().toString());
     assertEquals("PRP1660", response.getIdentifier().get(0).getValueElement().getValue());
 
   }
@@ -1080,7 +1056,7 @@ public class ClientR4Test {
     when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 201, "OK"));
     when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
     when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(""), Charset.forName("UTF-8")));
-    when(myHttpResponse.getAllHeaders()).thenReturn(toHeaderArray("Content-Location", "http://example.com/fhir/Patient/100/_history/200"));
+    when(myHttpResponse.getAllHeaders()).thenReturn(toHeaderArray(Constants.HEADER_LOCATION, "http://example.com/fhir/Patient/100/_history/200"));
 
     ITestClient client = ourCtx.newRestfulClient(ITestClient.class, "http://foo");
     client.updatePatient(new IdType("Patient/100/_history/200"), patient);
@@ -1089,7 +1065,7 @@ public class ClientR4Test {
     HttpPut post = (HttpPut) capt.getValue();
     assertEquals("http://foo/Patient/100", post.getURI().toASCIIString());
 
-    Header h = post.getFirstHeader("content-location");
+    Header h = post.getFirstHeader(Constants.HEADER_LOCATION);
     assertEquals("Patient/100/_history/200", h.getValue());
 
   }
@@ -1130,7 +1106,7 @@ public class ClientR4Test {
     HttpPut post = (HttpPut) capt.getValue();
     assertThat(post.getURI().toASCIIString(), StringEndsWith.endsWith("/Patient/100"));
     assertThat(IOUtils.toString(post.getEntity().getContent()), StringContains.containsString("<Patient"));
-    assertThat(post.getFirstHeader("Content-Location").getValue(), StringEndsWith.endsWith("Patient/100/_history/200"));
+    assertThat(post.getFirstHeader(Constants.HEADER_LOCATION).getValue(), StringEndsWith.endsWith("Patient/100/_history/200"));
     assertEquals("http://example.com/fhir/Patient/100/_history/200", response.getId().getValue());
     assertEquals("200", response.getId().getVersionIdPart());
   }
@@ -1212,6 +1188,45 @@ public class ClientR4Test {
   @AfterClass
   public static void afterClassClearContext() {
     TestUtil.clearAllStaticFieldsForUnitTest();
+  }
+
+  private static String getPatientFeedWithOneResult() {
+    return getPatientFeedWithOneResult(ourCtx);
+  }
+
+  static String getPatientFeedWithOneResult(FhirContext theCtx) {
+
+    Bundle retVal = new Bundle();
+
+    Patient p = new Patient();
+    p.addName().setFamily("Cardinal").addGiven("John");
+    p.addIdentifier().setValue("PRP1660");
+    retVal.addEntry().setResource(p);
+
+    return theCtx.newXmlParser().encodeResourceToString(retVal);
+
+    // String msg = "<feed xmlns=\"http://www.w3.org/2005/Atom\">\n" +
+    // "<title/>\n" +
+    // "<id>d039f91a-cc3c-4013-988e-af4d8d0614bd</id>\n" +
+    // "<os:totalResults xmlns:os=\"http://a9.com/-/spec/opensearch/1.1/\">1</os:totalResults>\n" +
+    // "<author>\n" +
+    // "<name>ca.uhn.fhir.rest.server.DummyRestfulServer</name>\n" +
+    // "</author>\n" +
+    // "<entry>\n" +
+    // "<content type=\"text/xml\">"
+    // + "<Patient xmlns=\"http://hl7.org/fhir\">"
+    // + "<text><status value=\"generated\" /><div xmlns=\"http://www.w3.org/1999/xhtml\">John Cardinal: 444333333 </div></text>"
+    // + "<identifier><label value=\"SSN\" /><system value=\"http://orionhealth.com/mrn\" /><value value=\"PRP1660\" /></identifier>"
+    // + "<name><use value=\"official\" /><family value=\"Cardinal\" /><given value=\"John\" /></name>"
+    // + "<name><family value=\"Kramer\" /><given value=\"Doe\" /></name>"
+    // + "<telecom><system value=\"phone\" /><value value=\"555-555-2004\" /><use value=\"work\" /></telecom>"
+    // + "<gender><coding><system value=\"http://hl7.org/fhir/v3/AdministrativeGender\" /><code value=\"M\" /></coding></gender>"
+    // + "<address><use value=\"home\" /><line value=\"2222 Home Street\" /></address><active value=\"true\" />"
+    // + "</Patient>"
+    // + "</content>\n"
+    // + " </entry>\n"
+    // + "</feed>";
+    // return msg;
   }
 
   private interface ClientWithoutAnnotation extends IBasicClient {
