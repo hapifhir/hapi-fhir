@@ -23,24 +23,19 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.lang.reflect.Method;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
 
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.annotation.Description;
-import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.rest.annotation.Search;
-import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
-import ca.uhn.fhir.rest.api.SearchStyleEnum;
+import ca.uhn.fhir.rest.api.*;
 import ca.uhn.fhir.rest.client.impl.BaseHttpClientInvocation;
 import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -135,7 +130,7 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 			queryStringArgs.put(Constants.PARAM_QUERY, Collections.singletonList(myQueryName));
 		}
 
-		IdDt id = (IdDt) (myIdParamIndex != null ? theArgs[myIdParamIndex] : null);
+		IIdType id = (IIdType) (myIdParamIndex != null ? theArgs[myIdParamIndex] : null);
 
 		String resourceName = getResourceName();
 		if (theArgs != null) {
@@ -167,7 +162,7 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 	}
 
 
-	public static BaseHttpClientInvocation createSearchInvocation(FhirContext theContext, String theResourceName, Map<String, List<String>> theParameters, IdDt theId, String theCompartmentName,
+	public static BaseHttpClientInvocation createSearchInvocation(FhirContext theContext, String theResourceName, Map<String, List<String>> theParameters, IIdType theId, String theCompartmentName,
 			SearchStyleEnum theSearchStyle) {
 		SearchStyleEnum searchStyle = theSearchStyle;
 		if (searchStyle == null) {

@@ -45,7 +45,7 @@ public class TransactionParameter implements IParameter {
 			if (theInnerCollectionType.equals(List.class) == false) {
 				throw new ConfigurationException(createParameterTypeError(theMethod));
 			}
-			if (theParameterType.equals(IResource.class) == false) {
+			if (theParameterType.equals(IResource.class) == false && theParameterType.equals(IBaseResource.class) == false) {
 				throw new ConfigurationException(createParameterTypeError(theMethod));
 			}
 			myParamStyle = ParamStyle.RESOURCE_LIST;

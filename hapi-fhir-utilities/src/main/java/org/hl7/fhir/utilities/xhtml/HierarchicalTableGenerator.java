@@ -167,7 +167,7 @@ public class HierarchicalTableGenerator extends TranslatingUtilities {
         String html = Processor.process("[$PROFILE$]: extended\n" + md);
         pieces.addAll(htmlToParagraphPieces(html));
       } catch (Exception e) {
-        e = e;
+        e.printStackTrace();
       }
       return this;
     }

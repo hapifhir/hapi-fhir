@@ -29,8 +29,6 @@ import java.util.*;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
-import org.custommonkey.xmlunit.Diff;
-import org.custommonkey.xmlunit.XMLUnit;
 import org.hamcrest.collection.IsEmptyCollection;
 import org.hamcrest.core.StringContains;
 import org.hamcrest.text.StringContainsInOrder;
@@ -54,6 +52,9 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.*;
 import org.mockito.ArgumentCaptor;
+import org.xmlunit.builder.DiffBuilder;
+import org.xmlunit.builder.Input;
+import org.xmlunit.diff.*;
 
 import com.google.common.collect.Sets;
 
@@ -82,7 +83,7 @@ public class XmlParserDstu3Test {
 		}
 		ourCtx.setNarrativeGenerator(null);
 	}
-	
+
 	/**
 	 * See #544
 	 */
@@ -110,7 +111,7 @@ public class XmlParserDstu3Test {
 		assertNotNull(subject);
 		assertEquals("FAMILY", subject.getNameFirstRep().getFamily());
 	}
-	
+
 	@Test
 	public void testBundleWithBinary() {
 
@@ -1571,7 +1572,8 @@ public class XmlParserDstu3Test {
 		ourLog.info(encoded);
 
 		assertThat(encoded, containsString("<Patient"));
-		assertThat(encoded, stringContainsInOrder("<tag>", "<system value=\"" + ca.uhn.fhir.rest.api.Constants.TAG_SUBSETTED_SYSTEM + "\"/>", "<code value=\"" + ca.uhn.fhir.rest.api.Constants.TAG_SUBSETTED_CODE + "\"/>", "</tag>"));
+		assertThat(encoded, stringContainsInOrder("<tag>", "<system value=\"" + ca.uhn.fhir.rest.api.Constants.TAG_SUBSETTED_SYSTEM + "\"/>",
+				"<code value=\"" + ca.uhn.fhir.rest.api.Constants.TAG_SUBSETTED_CODE + "\"/>", "</tag>"));
 		assertThat(encoded, not(containsString("text")));
 		assertThat(encoded, not(containsString("THE DIV")));
 		assertThat(encoded, containsString("family"));
@@ -1717,7 +1719,8 @@ public class XmlParserDstu3Test {
 		ourLog.info(encoded);
 
 		assertThat(encoded, containsString("<Patient"));
-		assertThat(encoded, stringContainsInOrder("<tag>", "<system value=\"" + ca.uhn.fhir.rest.api.Constants.TAG_SUBSETTED_SYSTEM + "\"/>", "<code value=\"" + ca.uhn.fhir.rest.api.Constants.TAG_SUBSETTED_CODE + "\"/>", "</tag>"));
+		assertThat(encoded, stringContainsInOrder("<tag>", "<system value=\"" + ca.uhn.fhir.rest.api.Constants.TAG_SUBSETTED_SYSTEM + "\"/>",
+				"<code value=\"" + ca.uhn.fhir.rest.api.Constants.TAG_SUBSETTED_CODE + "\"/>", "</tag>"));
 		assertThat(encoded, not(containsString("THE DIV")));
 		assertThat(encoded, containsString("family"));
 		assertThat(encoded, not(containsString("maritalStatus")));
@@ -1738,7 +1741,8 @@ public class XmlParserDstu3Test {
 
 		assertThat(encoded, containsString("<Patient"));
 		assertThat(encoded, stringContainsInOrder("<tag>", "<system value=\"foo\"/>", "<code value=\"bar\"/>", "</tag>"));
-		assertThat(encoded, stringContainsInOrder("<tag>", "<system value=\"" + ca.uhn.fhir.rest.api.Constants.TAG_SUBSETTED_SYSTEM + "\"/>", "<code value=\"" + ca.uhn.fhir.rest.api.Constants.TAG_SUBSETTED_CODE + "\"/>", "</tag>"));
+		assertThat(encoded, stringContainsInOrder("<tag>", "<system value=\"" + ca.uhn.fhir.rest.api.Constants.TAG_SUBSETTED_SYSTEM + "\"/>",
+				"<code value=\"" + ca.uhn.fhir.rest.api.Constants.TAG_SUBSETTED_CODE + "\"/>", "</tag>"));
 		assertThat(encoded, not(containsString("THE DIV")));
 		assertThat(encoded, containsString("family"));
 		assertThat(encoded, not(containsString("maritalStatus")));
@@ -2130,8 +2134,7 @@ public class XmlParserDstu3Test {
 		String reencoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(parsed);
 		ourLog.info(reencoded);
 
-		Diff d = new Diff(new StringReader(content), new StringReader(reencoded));
-		assertTrue(d.toString(), d.identical());
+		compareXml(content, reencoded);
 
 	}
 
@@ -2168,8 +2171,7 @@ public class XmlParserDstu3Test {
 		String reencoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(parsed);
 		ourLog.info(reencoded);
 
-		Diff d = new Diff(new StringReader(content), new StringReader(reencoded));
-		assertTrue(d.toString(), d.identical());
+		compareXml(content, reencoded);
 
 	}
 
@@ -2994,7 +2996,7 @@ public class XmlParserDstu3Test {
 	@Test
 	public void testParseMetadata() throws Exception {
 
-		String bundle = "<Bundle xmlns=\"http://hl7.org/fhir\">\n" +
+		String content = "<Bundle xmlns=\"http://hl7.org/fhir\">\n" +
 				"   <total value=\"1\"/>\n" +
 				"   <link>\n" +
 				"      <relation value=\"self\"/>\n" +
@@ -3023,7 +3025,7 @@ public class XmlParserDstu3Test {
 				"   </entry>\n" +
 				"</Bundle>";
 
-		Bundle b = ourCtx.newXmlParser().parseResource(Bundle.class, bundle);
+		Bundle b = ourCtx.newXmlParser().parseResource(Bundle.class, content);
 		assertEquals(1, b.getEntry().size());
 
 		BundleEntryComponent entry = b.getEntry().get(0);
@@ -3040,9 +3042,21 @@ public class XmlParserDstu3Test {
 		String reEncoded = p.encodeResourceToString(b);
 		ourLog.info(reEncoded);
 
-		Diff d = new Diff(new StringReader(bundle), new StringReader(reEncoded));
-		assertTrue(d.toString(), d.identical());
+		compareXml(content, reEncoded);
 
+	}
+
+	public static void compareXml(String content, String reEncoded) {
+		Diff d = DiffBuilder.compare(Input.fromString(content))
+				.withTest(Input.fromString(reEncoded))
+				.withNodeMatcher(new DefaultNodeMatcher(ElementSelectors.byNameAndText))
+				.checkForSimilar()
+				.ignoreWhitespace() // this is working with newest Saxon 9.8.0-2 (not worked with 9.7.0-15
+				.ignoreComments() // this is not working even with newest Saxon 9.8.0-2
+				.withComparisonController(ComparisonControllers.Default)
+				.build();
+
+		assertTrue(d.toString(), !d.hasDifferences());
 	}
 
 	@Test
@@ -3323,13 +3337,6 @@ public class XmlParserDstu3Test {
 	@AfterClass
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
-
-	@BeforeClass
-	public static void beforeClass() {
-		XMLUnit.setIgnoreAttributeOrder(true);
-		XMLUnit.setIgnoreComments(true);
-		XMLUnit.setIgnoreWhitespace(true);
 	}
 
 	public static void main(String[] args) {

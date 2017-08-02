@@ -1,23 +1,9 @@
 package ca.uhn.fhir.parser;
 
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.emptyOrNullString;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.stringContainsInOrder;
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
 import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 import java.io.IOException;
 import java.io.StringReader;
@@ -25,17 +11,19 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 import org.apache.commons.io.IOUtils;
-import org.custommonkey.xmlunit.Diff;
-import org.custommonkey.xmlunit.XMLUnit;
 import org.hamcrest.collection.IsEmptyCollection;
 import org.hamcrest.core.StringContains;
 import org.hamcrest.text.StringContainsInOrder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.junit.*;
+import org.junit.AfterClass;
+import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.internal.stubbing.answers.ThrowsException;
+import org.xmlunit.builder.DiffBuilder;
+import org.xmlunit.builder.Input;
+import org.xmlunit.diff.*;
 
 import com.google.common.collect.Sets;
 
@@ -1933,8 +1921,7 @@ public class XmlParserDstu2Test {
 		String reencoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(parsed);
 		ourLog.info(reencoded);
 
-		Diff d = new Diff(new StringReader(content), new StringReader(reencoded));
-		assertTrue(d.toString(), d.identical());
+		compareXml(content, reencoded);
 
 	}
 
@@ -1970,8 +1957,7 @@ public class XmlParserDstu2Test {
 		String reencoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(parsed);
 		ourLog.info(reencoded);
 
-		Diff d = new Diff(new StringReader(content), new StringReader(reencoded));
-		assertTrue(d.toString(), d.identical());
+		compareXml(content, reencoded);
 
 	}
 
@@ -2624,9 +2610,7 @@ public class XmlParserDstu2Test {
 
 		ourLog.info(reEncoded);
 
-		Diff d = new Diff(new StringReader(bundle), new StringReader(reEncoded));
-		assertTrue(d.toString(), d.identical());
-
+		compareXml(bundle, reEncoded);
 	}
 
 	@Test
@@ -2811,12 +2795,6 @@ public class XmlParserDstu2Test {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
-	@BeforeClass
-	public static void beforeClass() {
-		XMLUnit.setIgnoreAttributeOrder(true);
-		XMLUnit.setIgnoreComments(true);
-		XMLUnit.setIgnoreWhitespace(true);
-	}
 
 	public static void main(String[] args) {
 		IGenericClient c = ourCtx.newRestfulGenericClient("http://fhir-dev.healthintersections.com.au/open");
@@ -2856,6 +2834,19 @@ public class XmlParserDstu2Test {
 		public void setCondition(List<ResourceReferenceDt> ref) {
 			this.testConditions = ref;
 		}
+	}
+
+	public static void compareXml(String content, String reEncoded) {
+		Diff d = DiffBuilder.compare(Input.fromString(content))
+				.withTest(Input.fromString(reEncoded))
+				.withNodeMatcher(new DefaultNodeMatcher(ElementSelectors.byNameAndText))
+				.checkForSimilar()
+				.ignoreWhitespace()
+				.ignoreComments()
+				.withComparisonController(ComparisonControllers.Default)
+				.build();
+
+		assertTrue(d.toString(), !d.hasDifferences());
 	}
 
 }

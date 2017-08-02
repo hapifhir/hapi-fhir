@@ -84,9 +84,9 @@ public class TransactionClientTest {
     ourLog.info(ctx.newXmlParser().setPrettyPrint(true).encodeResourceToString(bundle));
 
     assertEquals(2, bundle.getEntry().size());
-    assertEquals("Patient/testPersistWithSimpleLinkP01", bundle.getEntry().get(0).getIdElement().getValue());
+    assertEquals("Patient/testPersistWithSimpleLinkP01", bundle.getEntry().get(0).getResource().getIdElement().getValue());
 
-    assertTrue(bundle.getEntry().get(1).getId().isEmpty());
+    assertTrue(bundle.getEntry().get(1).getResource().getIdElement().isEmpty());
 
   }
 
@@ -102,7 +102,7 @@ public class TransactionClientTest {
     obs.setSubject(new Reference("Patient/testPersistWithSimpleLinkP01"));
 
     Bundle transactionBundle = new Bundle();
-    transactionBundle.addEntry().setResource(patient);
+    transactionBundle.addEntry().setResource(patient).setFullUrl("http://foo/Patient/testPersistWithSimpleLinkP01");
     transactionBundle.addEntry().setResource(obs);
 
     IBundleClient client = ctx.newRestfulClient(IBundleClient.class, "http://foo");
@@ -125,7 +125,7 @@ public class TransactionClientTest {
     assertEquals(2, bundle.getEntry().size());
     assertEquals("http://foo/Patient/testPersistWithSimpleLinkP01", bundle.getEntry().get(0).getResource().getIdElement().getValue());
 
-    assertTrue(bundle.getEntry().get(1).getId().isEmpty());
+    assertTrue(bundle.getEntry().get(1).getResource().getIdElement().isEmpty());
 
   }
 

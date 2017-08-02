@@ -343,7 +343,7 @@ public class BaseDateTimeTypeDstu3Test {
 	public void testLargePrecision() {
 		DateTimeType dt = new DateTimeType("2014-03-06T22:09:58.9121174+04:30");
 
-		myDateInstantParser.setTimeZone(TimeZone.getTimeZone("Z"));
+		myDateInstantParser.setTimeZone(TimeZone.getTimeZone("GMT"));
 		assertEquals("2014-03-06 17:39:58.912", myDateInstantParser.format(dt.getValue()));
 	}
 

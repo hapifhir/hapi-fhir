@@ -187,7 +187,7 @@ public class ParameterUtil {
 		for (Annotation[] annotations : theMethod.getParameterAnnotations()) {
 			for (int annotationIndex = 0; annotationIndex < annotations.length; annotationIndex++) {
 				Annotation nextAnnotation = annotations[annotationIndex];
-				Class<? extends Annotation> class1 = nextAnnotation.getClass();
+				Class<? extends Annotation> class1 = nextAnnotation.annotationType();
 				if (toFind.isAssignableFrom(class1)) {
 					return paramIndex;
 				}

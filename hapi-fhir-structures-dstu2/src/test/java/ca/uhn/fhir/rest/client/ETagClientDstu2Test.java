@@ -109,12 +109,6 @@ public class ETagClientDstu2Test {
 		lm.setTimeZoneZulu(true);
 		assertEquals("1995-11-15T04:58:08.000Z", lm.getValueAsString());
 
-		TagList tags = ResourceMetadataKeyEnum.TAG_LIST.get(response);
-		assertNotNull(tags);
-		assertEquals(1, tags.size());
-		assertEquals("http://foo/tagdefinition.html", tags.get(0).getTerm());
-		assertEquals("http://hl7.org/fhir/tag", tags.get(0).getScheme());
-		assertEquals("Some tag", tags.get(0).getLabel());
 	}
 
 	@Test

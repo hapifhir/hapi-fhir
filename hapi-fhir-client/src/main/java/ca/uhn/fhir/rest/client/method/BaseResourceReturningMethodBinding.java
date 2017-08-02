@@ -104,6 +104,11 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 
 	@Override
 	public Object invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders) {
+		
+		if (Constants.STATUS_HTTP_204_NO_CONTENT == theResponseStatusCode) {
+			return toReturnType(null);
+		}
+		
 		IParser parser = createAppropriateParserForParsingResponse(theResponseMimeType, theResponseReader, theResponseStatusCode, myPreferTypesList);
 
 		switch (getReturnType()) {
@@ -153,23 +158,36 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 
 			MethodUtil.parseClientRequestResourceHeaders(null, theHeaders, resource);
 
-			switch (getMethodReturnType()) {
-			case LIST_OF_RESOURCES:
-				return Collections.singletonList(resource);
-			case RESOURCE:
-				return resource;
-			case BUNDLE_RESOURCE:
-				return resource;
-			case METHOD_OUTCOME:
-				MethodOutcome retVal = new MethodOutcome();
-				retVal.setOperationOutcome((IBaseOperationOutcome) resource);
-				return retVal;
-			}
-			break;
+			return toReturnType(resource);
 		}
 		}
 
 		throw new IllegalStateException("Should not get here!");
+	}
+
+	private Object toReturnType(IBaseResource resource) {
+		Object retVal = null;
+		
+		switch (getMethodReturnType()) {
+		case LIST_OF_RESOURCES:
+			retVal = Collections.emptyList();
+			if (resource != null) {
+				retVal = Collections.singletonList(resource);
+			}
+			break;
+		case RESOURCE:
+			retVal = resource;
+			break;
+		case BUNDLE_RESOURCE:
+			retVal = resource;
+			break;
+		case METHOD_OUTCOME:
+			MethodOutcome outcome = new MethodOutcome();
+			outcome.setOperationOutcome((IBaseOperationOutcome) resource);
+			retVal = outcome;
+			break;
+		}
+		return retVal;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -177,7 +195,7 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 		List<Class<? extends IBaseResource>> preferTypes = null;
 		if (myResourceType != null && !BaseMethodBinding.isResourceInterface(myResourceType)) {
 			preferTypes = new ArrayList<Class<? extends IBaseResource>>(1);
-			preferTypes.add((Class<? extends IBaseResource>) myResourceType);
+			preferTypes.add(myResourceType);
 		} else if (myResourceListCollectionType != null && IBaseResource.class.isAssignableFrom(myResourceListCollectionType) && !BaseMethodBinding.isResourceInterface(myResourceListCollectionType)) {
 			preferTypes = new ArrayList<Class<? extends IBaseResource>>(1);
 			preferTypes.add((Class<? extends IBaseResource>) myResourceListCollectionType);

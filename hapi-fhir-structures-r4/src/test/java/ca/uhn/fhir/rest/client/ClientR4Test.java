@@ -29,6 +29,8 @@ import org.mockito.internal.stubbing.defaultanswers.ReturnsDeepStubs;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
+import com.google.common.base.Charsets;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
@@ -145,7 +147,7 @@ public class ClientR4Test {
 
     assertEquals(HttpPost.class, capt.getValue().getClass());
     HttpPost post = (HttpPost) capt.getValue();
-    assertThat(IOUtils.toString(post.getEntity().getContent()), StringContains.containsString("<Patient"));
+    assertThat(IOUtils.toString(post.getEntity().getContent(), Charsets.UTF_8), StringContains.containsString("<Patient"));
     assertEquals("http://example.com/fhir/Patient/100/_history/200", response.getId().getValue());
     assertEquals(EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(0).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
     assertEquals("200", response.getId().getVersionIdPart());
@@ -193,7 +195,7 @@ public class ClientR4Test {
 
     assertEquals(HttpPost.class, capt.getValue().getClass());
     HttpPost post = (HttpPost) capt.getValue();
-    assertThat(IOUtils.toString(post.getEntity().getContent()), StringContains.containsString("<Patient"));
+    assertThat(IOUtils.toString(post.getEntity().getContent(), Charsets.UTF_8), StringContains.containsString("<Patient"));
     assertEquals("http://example.com/fhir/Patient/100/_history/200", response.getId().getValue());
     assertEquals("200", response.getId().getVersionIdPart());
   }
@@ -250,14 +252,13 @@ public class ClientR4Test {
     when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
 
     ITestClient client = ourCtx.newRestfulClient(ITestClient.class, "http://foo");
-    BaseConformance response = client.getServerConformanceStatement();
+    CapabilityStatement response = (CapabilityStatement) client.getServerConformanceStatement();
 
     assertEquals("http://foo/metadata", capt.getValue().getURI().toString());
     assertEquals("Health Intersections", response.getPublisherElement().getValue());
 
   }
 
-  @SuppressWarnings("deprecation")
   @Test
   public void testHistoryResourceInstance() throws Exception {
 
@@ -279,7 +280,6 @@ public class ClientR4Test {
     verifyHistoryBundleWithTwoResults(response);
   }
 
-  @SuppressWarnings("deprecation")
   @Test
   public void testHistoryResourceType() throws Exception {
 
@@ -298,7 +298,6 @@ public class ClientR4Test {
     verifyHistoryBundleWithTwoResults(response);
   }
 
-  @SuppressWarnings("deprecation")
   @Test
   public void testHistoryServer() throws Exception {
     String msg = getHistoryBundleWithTwoResults();
@@ -1036,7 +1035,7 @@ public class ClientR4Test {
     assertEquals(HttpPut.class, capt.getValue().getClass());
     HttpPut post = (HttpPut) capt.getValue();
     assertThat(post.getURI().toASCIIString(), StringEndsWith.endsWith("/Patient/100"));
-    assertThat(IOUtils.toString(post.getEntity().getContent()), StringContains.containsString("<Patient"));
+    assertThat(IOUtils.toString(post.getEntity().getContent(), Charsets.UTF_8), StringContains.containsString("<Patient"));
     assertEquals("http://example.com/fhir/Patient/100/_history/200", response.getId().getValue());
     assertEquals("200", response.getId().getVersionIdPart());
     assertEquals(EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(0).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
@@ -1105,21 +1104,21 @@ public class ClientR4Test {
     assertEquals(HttpPut.class, capt.getValue().getClass());
     HttpPut post = (HttpPut) capt.getValue();
     assertThat(post.getURI().toASCIIString(), StringEndsWith.endsWith("/Patient/100"));
-    assertThat(IOUtils.toString(post.getEntity().getContent()), StringContains.containsString("<Patient"));
+    assertThat(IOUtils.toString(post.getEntity().getContent(), Charsets.UTF_8), StringContains.containsString("<Patient"));
     assertThat(post.getFirstHeader(Constants.HEADER_LOCATION).getValue(), StringEndsWith.endsWith("Patient/100/_history/200"));
     assertEquals("http://example.com/fhir/Patient/100/_history/200", response.getId().getValue());
     assertEquals("200", response.getId().getVersionIdPart());
   }
 
   @Test
-  public void testValidate() throws Exception {
+  public void testValidateNoContentResponse() throws Exception {
 
     Patient patient = new Patient();
     patient.addIdentifier().setSystem("urn:foo").setValue("123");
 
     ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
     when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
-    when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 201, "OK"));
+    when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), Constants.STATUS_HTTP_204_NO_CONTENT, "OK"));
     when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_TEXT + "; charset=UTF-8"));
     when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(""), Charset.forName("UTF-8")));
     when(myHttpResponse.getAllHeaders()).thenReturn(toHeaderArray("Location", "http://example.com/fhir/Patient/100/_history/200"));
@@ -1129,13 +1128,42 @@ public class ClientR4Test {
 
     assertEquals(HttpPost.class, capt.getValue().getClass());
     HttpPost post = (HttpPost) capt.getValue();
-    assertThat(post.getURI().toASCIIString(), StringEndsWith.endsWith("/Patient/_validate"));
-    assertThat(IOUtils.toString(post.getEntity().getContent()), StringContains.containsString("<Patient"));
-    assertEquals("http://example.com/fhir/Patient/100/_history/200", response.getId().getValue());
-    assertEquals("200", response.getId().getVersionIdPart());
-
+    assertThat(post.getURI().toASCIIString(), StringEndsWith.endsWith("/Patient/$validate"));
+    assertThat(IOUtils.toString(post.getEntity().getContent(), Charsets.UTF_8), StringContains.containsString("<Patient"));
+    assertNull(response.getOperationOutcome());
+    assertNull(response.getResource());
   }
 
+  @Test
+  public void testValidateOutcomeResponse() throws Exception {
+
+    OperationOutcome oo = new OperationOutcome();
+    oo.addIssue().setDiagnostics("ALL GOOD");
+    String resp = ourCtx.newJsonParser().encodeResourceToString(oo);
+    
+    Patient patient = new Patient();
+    patient.addIdentifier().setSystem("urn:foo").setValue("123");
+
+    ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+    when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
+    when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+    when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_JSON_NEW + "; charset=UTF-8"));
+    when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(resp), Charset.forName("UTF-8")));
+    when(myHttpResponse.getAllHeaders()).thenReturn(toHeaderArray("Location", "http://example.com/fhir/Patient/100/_history/200"));
+
+    ITestClient client = ourCtx.newRestfulClient(ITestClient.class, "http://foo");
+    MethodOutcome response = client.validatePatient(patient);
+
+    assertEquals(HttpPost.class, capt.getValue().getClass());
+    HttpPost post = (HttpPost) capt.getValue();
+    assertThat(post.getURI().toASCIIString(), StringEndsWith.endsWith("/Patient/$validate"));
+    assertThat(IOUtils.toString(post.getEntity().getContent(), Charsets.UTF_8), StringContains.containsString("<Patient"));
+    assertNotNull(response.getOperationOutcome());
+    assertEquals("ALL GOOD", ((OperationOutcome)response.getOperationOutcome()).getIssueFirstRep().getDiagnostics());
+    assertNull(response.getResource());
+  }
+
+  
   @Test
   public void testVRead() throws Exception {
 

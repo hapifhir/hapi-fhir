@@ -40,7 +40,7 @@ public class ValidateMethodBindingDstu2Plus extends OperationMethodBinding {
 
 	public ValidateMethodBindingDstu2Plus(Class<?> theReturnResourceType, Class<? extends IBaseResource> theReturnTypeFromRp, Method theMethod, FhirContext theContext, Object theProvider,
 			Validate theAnnotation) {
-		super(theReturnResourceType, theReturnTypeFromRp, theMethod, theContext, theProvider, true, Constants.EXTOP_VALIDATE, theAnnotation.type(), new OperationParam[0], BundleTypeEnum.COLLECTION);
+		super(null, theReturnTypeFromRp, theMethod, theContext, theProvider, true, Constants.EXTOP_VALIDATE, theAnnotation.type(), new OperationParam[0], BundleTypeEnum.COLLECTION);
 
 		List<IParameter> newParams = new ArrayList<IParameter>();
 		int idx = 0;

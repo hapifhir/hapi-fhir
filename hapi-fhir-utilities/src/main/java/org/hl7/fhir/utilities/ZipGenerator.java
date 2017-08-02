@@ -114,7 +114,7 @@ public class ZipGenerator {
 
 	public void addFiles(String actualDir, String statedDir, String ext, String noExt) throws FileNotFoundException, IOException {
 		byte data[] = new byte[BUFFER];
-		statedDir.replace("\\", "/");
+		statedDir = statedDir.replace("\\", "/");
 		File f = new CSFile(actualDir);
 
 		String files[] = f.list();
@@ -136,7 +136,7 @@ public class ZipGenerator {
 
   public void addFilesFiltered(String actualDir, String statedDir, String ext, String[] noExt) throws FileNotFoundException, IOException {
     byte data[] = new byte[BUFFER];
-    statedDir.replace("\\", "/");
+    statedDir = statedDir.replace("\\", "/");
     File f = new CSFile(actualDir);
 
     String files[] = f.list();

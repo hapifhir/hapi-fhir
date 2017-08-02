@@ -21,7 +21,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.internal.stubbing.defaultanswers.ReturnsDeepStubs;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.base.resource.BaseOperationOutcome;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.api.Constants;
@@ -144,7 +143,7 @@ public class ExceptionHandlingTest {
 			assertThat(e.getMessage(), StringContains.containsString("HTTP 500 Internal Error"));
 			assertThat(e.getMessage(), StringContains.containsString("Help I'm a bug"));
 			assertNotNull(e.getOperationOutcome());
-			assertEquals("Help I'm a bug", ((BaseOperationOutcome) e.getOperationOutcome()).getIssueFirstRep().getDetailsElement().getValue());
+			assertEquals("Help I'm a bug", ((OperationOutcome) e.getOperationOutcome()).getIssueFirstRep().getDiagnosticsElement().getValue());
 		}
 
 	}
@@ -170,7 +169,7 @@ public class ExceptionHandlingTest {
 			assertThat(e.getMessage(), StringContains.containsString("HTTP 500 Internal Error"));
 			assertThat(e.getMessage(), StringContains.containsString("Help I'm a bug"));
 			assertNotNull(e.getOperationOutcome());
-			assertEquals("Help I'm a bug", ((BaseOperationOutcome) e.getOperationOutcome()).getIssueFirstRep().getDetailsElement().getValue());
+			assertEquals("Help I'm a bug", ((OperationOutcome) e.getOperationOutcome()).getIssueFirstRep().getDiagnosticsElement().getValue());
 		}
 
 	}

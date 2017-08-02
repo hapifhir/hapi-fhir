@@ -1,23 +1,13 @@
 package ca.uhn.fhir.parser;
 
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.stringContainsInOrder;
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
 
 import java.io.*;
 import java.nio.charset.Charset;
 import java.util.*;
 
 import org.apache.commons.io.IOUtils;
-import org.custommonkey.xmlunit.Diff;
-import org.custommonkey.xmlunit.XMLUnit;
 import org.hamcrest.core.IsNot;
 import org.hamcrest.core.StringContains;
 import org.hamcrest.text.StringContainsInOrder;
@@ -32,6 +22,9 @@ import org.hl7.fhir.instance.model.Narrative.NarrativeStatus;
 import org.hl7.fhir.instance.model.api.*;
 import org.junit.*;
 import org.xml.sax.SAXException;
+import org.xmlunit.builder.DiffBuilder;
+import org.xmlunit.builder.Input;
+import org.xmlunit.diff.*;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
@@ -1352,12 +1345,10 @@ public class XmlParserHl7OrgDstu2Test {
 
     ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(patient));
 
-    Diff d = new Diff(new StringReader(msg), new StringReader(encoded));
-
     ourLog.info("Expected: {}", msg);
     ourLog.info("Actual:   {}", encoded);
 
-    assertTrue(d.toString(), d.identical());
+    compareXml(msg, encoded);
 
   }
 
@@ -1396,8 +1387,7 @@ public class XmlParserHl7OrgDstu2Test {
     String encoded = p.setPrettyPrint(true).encodeResourceToString(resource);
     ourLog.info(encoded);
 
-    Diff d = new Diff(new StringReader(msg), new StringReader(encoded));
-    assertTrue(d.toString(), d.identical());
+    compareXml(msg, encoded);
   }
 
   @Test
@@ -1437,8 +1427,7 @@ public class XmlParserHl7OrgDstu2Test {
     String encoded = p.encodeResourceToString(resource);
     ourLog.info(encoded);
 
-    Diff d = new Diff(new StringReader(msg), new StringReader(encoded));
-    assertTrue(d.toString(), d.identical());
+    compareXml(msg, encoded);
   }
 
   @Test
@@ -1679,9 +1668,7 @@ public class XmlParserHl7OrgDstu2Test {
     ourLog.info("Expected: {}", msg);
     ourLog.info("Actual:   {}", encoded1);
 
-    Diff d = new Diff(new StringReader(msg), new StringReader(encoded1));
-    assertTrue(d.toString(), d.identical());
-
+    compareXml(msg, encoded1);
   }
 
   @Test
@@ -1709,9 +1696,7 @@ public class XmlParserHl7OrgDstu2Test {
     String expected = (jsonString);
     String actual = (encoded.trim());
 
-    Diff d = new Diff(new StringReader(expected), new StringReader(actual));
-    assertTrue(d.toString(), d.identical());
-
+    compareXml(expected, actual);
   }
 
   @Test
@@ -1755,9 +1740,6 @@ public class XmlParserHl7OrgDstu2Test {
 
   @BeforeClass
   public static void beforeClass() {
-    XMLUnit.setIgnoreAttributeOrder(true);
-    XMLUnit.setIgnoreComments(true);
-    XMLUnit.setIgnoreWhitespace(true);
     ourCtx = FhirContext.forDstu2Hl7Org();
   }
 
@@ -1783,5 +1765,18 @@ public class XmlParserHl7OrgDstu2Test {
       this.testConditions = ref;
     }
   }
+
+  public static void compareXml(String content, String reEncoded) {
+    Diff d = DiffBuilder.compare(Input.fromString(content))
+          .withTest(Input.fromString(reEncoded))
+          .withNodeMatcher(new DefaultNodeMatcher(ElementSelectors.byNameAndText))
+          .checkForSimilar()
+          .ignoreWhitespace()
+          .ignoreComments()
+          .withComparisonController(ComparisonControllers.Default)
+          .build();
+
+    assertTrue(d.toString(), !d.hasDifferences());
+ }
 
 }

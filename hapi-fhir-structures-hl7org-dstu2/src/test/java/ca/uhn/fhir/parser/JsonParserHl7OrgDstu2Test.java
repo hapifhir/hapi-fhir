@@ -1,16 +1,7 @@
 package ca.uhn.fhir.parser;
 
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.stringContainsInOrder;
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
 
 import java.io.*;
 import java.nio.charset.Charset;
@@ -18,7 +9,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.io.IOUtils;
-import org.custommonkey.xmlunit.Diff;
 import org.hamcrest.core.IsNot;
 import org.hamcrest.core.StringContains;
 import org.hamcrest.text.StringContainsInOrder;
@@ -38,7 +28,6 @@ import org.junit.*;
 import org.xml.sax.SAXException;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.narrative.INarrativeGenerator;
@@ -1281,9 +1270,7 @@ public class JsonParserHl7OrgDstu2Test {
 		String expected = (xmlString);
 		String actual = (encoded.trim());
 
-		Diff d = new Diff(new StringReader(expected), new StringReader(actual));
-		assertTrue(d.toString(), d.identical());
-
+		XmlParserHl7OrgDstu2Test.compareXml(expected, actual);
 	}
 
 
