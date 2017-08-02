@@ -31,7 +31,7 @@ public class PropertyTest {
 
     @Before
     public void setUp() throws IOException {
-        final String sdString = IOUtils.toString(getClass().getResourceAsStream("/customPatientSd.xml"), StandardCharsets.UTF_8);
+        final String sdString = IOUtils.toString(PropertyTest.class.getResourceAsStream("/customPatientSd.xml"), StandardCharsets.UTF_8);
         final IParser parser = ourCtx.newXmlParser();
         sd = parser.parseResource(StructureDefinition.class, sdString);
         workerContext = new HapiWorkerContext(ourCtx, new DefaultProfileValidationSupport());

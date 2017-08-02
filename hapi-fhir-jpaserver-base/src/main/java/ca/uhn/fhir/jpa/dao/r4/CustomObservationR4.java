@@ -30,7 +30,7 @@ import ca.uhn.fhir.model.api.annotation.ResourceDef;
 @ResourceDef(name = "Observation", profile = CustomObservationR4.PROFILE)
 public class CustomObservationR4 extends Observation {
 
-	public static final String PROFILE = "http://custom_ObservationDstu3";
+	public static final String PROFILE = "http://custom_ObservationR4";
 	
 	private static final long serialVersionUID = 1L;
 

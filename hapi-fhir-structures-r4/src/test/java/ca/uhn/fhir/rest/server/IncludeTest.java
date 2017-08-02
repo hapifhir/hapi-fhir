@@ -66,9 +66,9 @@ public class IncludeTest {
 
 		assertEquals(3, bundle.getEntry().size());
 		
-		assertEquals(new IdType("Patient/p1"), bundle.getEntry().get(0).getResource().getIdElement().toUnqualifiedVersionless().getValue());
-		assertEquals(new IdType("Patient/p2"), bundle.getEntry().get(1).getResource().getIdElement().toUnqualifiedVersionless().getValue());
-		assertEquals(new IdType("Organization/o1"), bundle.getEntry().get(2).getResource().getIdElement().toUnqualifiedVersionless().getValue());
+		assertEquals(("Patient/p1"), bundle.getEntry().get(0).getResource().getIdElement().toUnqualifiedVersionless().getValue());
+		assertEquals(("Patient/p2"), bundle.getEntry().get(1).getResource().getIdElement().toUnqualifiedVersionless().getValue());
+		assertEquals(("Organization/o1"), bundle.getEntry().get(2).getResource().getIdElement().toUnqualifiedVersionless().getValue());
 
 		Patient p1 = (Patient) bundle.getEntry().get(0).getResource();
 		assertEquals(0, p1.getContained().size());

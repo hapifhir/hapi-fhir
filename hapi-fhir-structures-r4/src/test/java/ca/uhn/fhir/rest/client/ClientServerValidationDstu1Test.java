@@ -109,7 +109,25 @@ public class ClientServerValidationDstu1Test {
 		}
 	}
 
-	@AfterClass
+   @Test
+   public void testServerReturnsRightVersionDstu() throws Exception {
+      CapabilityStatement conf = new CapabilityStatement();
+      conf.setFhirVersion("3.1.0");
+      String msg = myCtx.newXmlParser().encodeResourceToString(conf);
+
+      ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+
+      when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+      when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+      when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
+
+      when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
+
+      myCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.ONCE);
+      myCtx.newRestfulGenericClient("http://foo").forceConformanceCheck();
+   }
+
+   @AfterClass
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}

@@ -40,7 +40,7 @@ public class FhirResourceDaoQuestionnaireResponseR4 extends FhirResourceDaoR4<Qu
 //		val.setValidateAgainstStandardSchema(false);
 //		val.setValidateAgainstStandardSchematron(false);
 //
-//		val.registerValidatorModule(myQuestionnaireResponseValidatorDstu3);
+//		val.registerValidatorModule(myQuestionnaireResponseValidatorR4);
 //
 //		ValidationResult result = val.validateWithResult(getContext().newJsonParser().parseResource(getContext().newJsonParser().encodeResourceToString(theResource)));
 //		if (!result.isSuccessful()) {

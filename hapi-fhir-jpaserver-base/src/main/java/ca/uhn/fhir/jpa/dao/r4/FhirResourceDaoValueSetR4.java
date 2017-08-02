@@ -49,7 +49,7 @@ import ca.uhn.fhir.util.ElementUtil;
 public class FhirResourceDaoValueSetR4 extends FhirResourceDaoR4<ValueSet> implements IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept> {
 
 	@Autowired
-	@Qualifier("myJpaValidationSupportChainDstu3")
+	@Qualifier("myJpaValidationSupportChainR4")
 	private IValidationSupport myValidationSupport;
 
 	@Autowired

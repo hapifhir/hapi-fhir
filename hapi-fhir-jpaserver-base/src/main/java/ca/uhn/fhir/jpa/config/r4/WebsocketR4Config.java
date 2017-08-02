@@ -23,18 +23,15 @@ package ca.uhn.fhir.jpa.config.r4;
 import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.socket.WebSocketHandler;
-import org.springframework.web.socket.config.annotation.EnableWebSocket;
-import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
-import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry;
+import org.springframework.web.socket.config.annotation.*;
 import org.springframework.web.socket.handler.PerConnectionWebSocketHandler;
 
-import ca.uhn.fhir.jpa.interceptor.WebSocketSubscriptionDstu3Interceptor;
-import ca.uhn.fhir.jpa.subscription.SubscriptionWebsocketHandlerDstu3;
+import ca.uhn.fhir.jpa.interceptor.r4.WebSocketSubscriptionR4Interceptor;
+import ca.uhn.fhir.jpa.subscription.r4.SubscriptionWebsocketHandlerR4;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 
 @Configuration
@@ -44,17 +41,17 @@ public class WebsocketR4Config implements WebSocketConfigurer {
 
 	@Override
 	public void registerWebSocketHandlers(WebSocketHandlerRegistry theRegistry) {
-		theRegistry.addHandler(subscriptionWebSocketHandler(), "/websocket/dstu3").setAllowedOrigins("*");
+		theRegistry.addHandler(subscriptionWebSocketHandler(), "/websocket/r4").setAllowedOrigins("*");
 	}
 
 	@Bean(autowire = Autowire.BY_TYPE)
 	public WebSocketHandler subscriptionWebSocketHandler() {
-		PerConnectionWebSocketHandler retVal = new PerConnectionWebSocketHandler(SubscriptionWebsocketHandlerDstu3.class);
+		PerConnectionWebSocketHandler retVal = new PerConnectionWebSocketHandler(SubscriptionWebsocketHandlerR4.class);
 		return retVal;
 	}
 
 	@Bean(destroyMethod="destroy")
-	public TaskScheduler websocketTaskSchedulerDstu3() {
+	public TaskScheduler websocketTaskSchedulerR4() {
 		final ThreadPoolTaskScheduler retVal = new ThreadPoolTaskScheduler() {
 			private static final long serialVersionUID = 1L;
 
@@ -65,15 +62,15 @@ public class WebsocketR4Config implements WebSocketConfigurer {
 				getScheduledThreadPoolExecutor().setContinueExistingPeriodicTasksAfterShutdownPolicy(false);
 			}
 		};
-		retVal.setThreadNamePrefix("ws-dstu3-");
+		retVal.setThreadNamePrefix("ws-r4-");
 		retVal.setPoolSize(5);
 		
 		return retVal;
 	}
 
 	@Bean
-	public IServerInterceptor webSocketSubscriptionDstu3Interceptor(){
-		return new WebSocketSubscriptionDstu3Interceptor();
+	public IServerInterceptor webSocketSubscriptionR4Interceptor(){
+		return new WebSocketSubscriptionR4Interceptor();
 	}
 
 	

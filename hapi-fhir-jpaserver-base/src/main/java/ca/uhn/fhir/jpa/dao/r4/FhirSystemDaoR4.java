@@ -194,7 +194,7 @@ public class FhirSystemDaoR4 extends BaseHapiFhirSystemDao<Bundle, Meta> {
 		}
 
 		/*
-		 * See FhirSystemDaoDstu3Test#testTransactionWithPlaceholderIdInMatchUrl
+		 * See FhirSystemDaoR4Test#testTransactionWithPlaceholderIdInMatchUrl
 		 * Basically if the resource has a match URL that references a placeholder,
 		 * we try to handle the resource with the placeholder first.
 		 */

@@ -1,5 +1,5 @@
 
-package ca.uhn.fhir.jpa.interceptor;
+package ca.uhn.fhir.jpa.interceptor.r4;
 
 /*-
  * #%L
@@ -43,6 +43,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.SearchParameterMap;
+import ca.uhn.fhir.jpa.interceptor.BaseRestHookSubscriptionInterceptor;
 import ca.uhn.fhir.jpa.provider.ServletSubRequestDetails;
 import ca.uhn.fhir.jpa.thread.HttpRequestR4Job;
 import ca.uhn.fhir.rest.api.*;
@@ -63,7 +64,7 @@ public class RestHookSubscriptionR4Interceptor extends BaseRestHookSubscriptionI
 	private final List<Subscription> myRestHookSubscriptions = new ArrayList<Subscription>();
 
 	@Autowired
-	@Qualifier("mySubscriptionDaoDstu3")
+	@Qualifier("mySubscriptionDaoR4")
 	private IFhirResourceDao<Subscription> mySubscriptionDao;
 
 	private boolean notifyOnDelete = false;

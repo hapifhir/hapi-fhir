@@ -80,7 +80,7 @@ public class SortClientTest {
 
 		assertEquals(HttpGet.class, capt.getValue().getClass());
 		HttpGet get = (HttpGet) capt.getValue();
-		assertEquals("http://foo/Patient?name=hello&_sort%3Adesc=given&_sort%3Aasc=family", get.getURI().toString());
+		assertEquals("http://foo/Patient?name=hello&_sort=-given%2Cfamily", get.getURI().toString());
 	}
 
 	private String createBundle() {

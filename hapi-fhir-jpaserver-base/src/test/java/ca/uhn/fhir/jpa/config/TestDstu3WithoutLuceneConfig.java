@@ -19,6 +19,7 @@ public class TestDstu3WithoutLuceneConfig extends TestDstu3Config {
 	/**
 	 * Disable fulltext searching
 	 */
+	@Override
 	public IFulltextSearchSvc searchDaoDstu3() {
 		return null;
 	}

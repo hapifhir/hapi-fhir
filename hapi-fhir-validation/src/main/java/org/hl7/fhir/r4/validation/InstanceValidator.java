@@ -8,6 +8,7 @@ import java.io.InputStream;
 import java.util.*;
 
 import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.exceptions.*;
 import org.hl7.fhir.r4.conformance.ProfileUtilities;
 import org.hl7.fhir.r4.context.IWorkerContext;
@@ -329,15 +330,6 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
     this.context = theContext;
     this.externalHostServices = hostServices;
     fpe = new FHIRPathEngine(context);
-    fpe.setHostServices(new ValidatorHostServices());
-    source = Source.InstanceValidator;
-  }
-
-  public InstanceValidator(ValidationEngine engine) {
-    super();
-    this.context = engine.getContext();
-    fpe = engine.getFpe();
-    this.externalHostServices = fpe.getHostServices();
     fpe.setHostServices(new ValidatorHostServices());
     source = Source.InstanceValidator;
   }
@@ -1427,16 +1419,13 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
   }
 
   private void checkReference(ValidatorHostContext hostContext, List<ValidationMessage> errors, String path, Element element, StructureDefinition profile, ElementDefinition container, String parentType, NodeStack stack) throws FHIRException, IOException {
-    String ref = null;
-    try {
-      // Do this inside a try because invalid instances might provide more than one reference.
-      ref = element.getNamedChildValue("reference");
-    } catch (Error e) {
-      
-    }
+    Reference reference = ObjectConverter.readAsReference(element);
+    
+    String ref = reference.getReference();
     if (Utilities.noString(ref)) {
-      // todo - what should we do in this case?
-      warning(errors, IssueType.STRUCTURE, element.line(), element.col(), path, !Utilities.noString(element.getNamedChildValue("display")), "A Reference without an actual reference should have a display");
+      if (Utilities.noString(reference.getIdentifier().getSystem()) && Utilities.noString(reference.getIdentifier().getValue())) {
+        warning(errors, IssueType.STRUCTURE, element.line(), element.col(), path, !Utilities.noString(element.getNamedChildValue("display")), "A Reference without an actual reference or identifier should have a display");
+      }
       return;
     }
 

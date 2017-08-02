@@ -42,7 +42,7 @@ import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 public class JpaSystemProviderR4 extends BaseJpaSystemProviderDstu2Plus<Bundle, Meta> {
 
 	@Autowired()
-	@Qualifier("mySystemDaoDstu3")
+	@Qualifier("mySystemDaoR4")
 	private IFhirSystemDao<Bundle, Meta> mySystemDao;
 
 	@Autowired

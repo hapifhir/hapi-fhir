@@ -53,7 +53,7 @@ public class FhirResourceDaoR4<T extends IAnyResource> extends BaseHapiFhirResou
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoR4.class);
 
 	@Autowired()
-	@Qualifier("myInstanceValidatorDstu3")
+	@Qualifier("myInstanceValidatorR4")
 	private IValidatorModule myInstanceValidator;
 
 	@Override

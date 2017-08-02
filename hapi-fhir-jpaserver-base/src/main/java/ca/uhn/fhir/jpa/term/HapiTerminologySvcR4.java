@@ -40,12 +40,12 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.utilities.validation.ValidationMessage.IssueSeverity;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.dao.DaoMethodOutcome;
-import ca.uhn.fhir.jpa.dao.IFhirResourceDaoCodeSystem;
+import ca.uhn.fhir.jpa.dao.*;
 import ca.uhn.fhir.jpa.entity.*;
 import ca.uhn.fhir.jpa.util.StopWatch;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -57,7 +57,8 @@ public class HapiTerminologySvcR4 extends BaseHapiTerminologySvc implements IVal
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(HapiTerminologySvcR4.class);
 
 	@Autowired
-	private IFhirResourceDaoCodeSystem<CodeSystem, Coding, CodeableConcept> myCodeSystemResourceDao;
+	@Qualifier("myCodeSystemDaoR4")
+	private IFhirResourceDao<CodeSystem> myCodeSystemResourceDao;
 
 	@Autowired
 	private IValidationSupport myValidationSupport;

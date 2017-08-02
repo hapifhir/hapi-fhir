@@ -149,7 +149,7 @@ public class ClientR4Test {
     HttpPost post = (HttpPost) capt.getValue();
     assertThat(IOUtils.toString(post.getEntity().getContent(), Charsets.UTF_8), StringContains.containsString("<Patient"));
     assertEquals("http://example.com/fhir/Patient/100/_history/200", response.getId().getValue());
-    assertEquals(EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(0).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
+    assertEquals(EncodingEnum.XML.getResourceContentTypeNonLegacy() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(0).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
     assertEquals("200", response.getId().getVersionIdPart());
   }
 
@@ -1038,7 +1038,7 @@ public class ClientR4Test {
     assertThat(IOUtils.toString(post.getEntity().getContent(), Charsets.UTF_8), StringContains.containsString("<Patient"));
     assertEquals("http://example.com/fhir/Patient/100/_history/200", response.getId().getValue());
     assertEquals("200", response.getId().getVersionIdPart());
-    assertEquals(EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(0).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
+    assertEquals(EncodingEnum.XML.getResourceContentTypeNonLegacy() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(0).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
   }
 
   /**
@@ -1058,14 +1058,13 @@ public class ClientR4Test {
     when(myHttpResponse.getAllHeaders()).thenReturn(toHeaderArray(Constants.HEADER_LOCATION, "http://example.com/fhir/Patient/100/_history/200"));
 
     ITestClient client = ourCtx.newRestfulClient(ITestClient.class, "http://foo");
-    client.updatePatient(new IdType("Patient/100/_history/200"), patient);
+    MethodOutcome resp = client.updatePatient(new IdType("Patient/100/_history/200"), patient);
+    assertNull(resp.getResource());
+    assertNull(resp.getOperationOutcome());
 
     assertEquals(HttpPut.class, capt.getValue().getClass());
     HttpPut post = (HttpPut) capt.getValue();
     assertEquals("http://foo/Patient/100", post.getURI().toASCIIString());
-
-    Header h = post.getFirstHeader(Constants.HEADER_LOCATION);
-    assertEquals("Patient/100/_history/200", h.getValue());
 
   }
 
@@ -1105,7 +1104,6 @@ public class ClientR4Test {
     HttpPut post = (HttpPut) capt.getValue();
     assertThat(post.getURI().toASCIIString(), StringEndsWith.endsWith("/Patient/100"));
     assertThat(IOUtils.toString(post.getEntity().getContent(), Charsets.UTF_8), StringContains.containsString("<Patient"));
-    assertThat(post.getFirstHeader(Constants.HEADER_LOCATION).getValue(), StringEndsWith.endsWith("Patient/100/_history/200"));
     assertEquals("http://example.com/fhir/Patient/100/_history/200", response.getId().getValue());
     assertEquals("200", response.getId().getVersionIdPart());
   }
@@ -1204,12 +1202,12 @@ public class ClientR4Test {
     // Older resource
     {
       BundleEntryComponent olderEntry = response.getEntry().get(0);
-      assertEquals("http://acme.com/Patient/111", olderEntry.getId());
+      assertEquals("http://acme.com/Patient/111", olderEntry.getResource().getId());
     }
     // Newer resource
     {
       BundleEntryComponent newerEntry = response.getEntry().get(1);
-      assertEquals("http://acme.com/Patient/222", newerEntry.getId());
+      assertEquals("http://acme.com/Patient/222", newerEntry.getResource().getId());
     }
   }
 

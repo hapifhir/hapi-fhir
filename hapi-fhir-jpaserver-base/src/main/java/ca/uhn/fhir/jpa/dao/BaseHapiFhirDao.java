@@ -34,9 +34,9 @@ import javax.xml.stream.events.XMLEvent;
 import org.apache.commons.lang3.*;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
-import org.hl7.fhir.dstu3.model.*;
-import org.hl7.fhir.dstu3.model.Bundle.HTTPVerb;
 import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.r4.model.BaseResource;
+import org.hl7.fhir.r4.model.Bundle.HTTPVerb;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.PlatformTransactionManager;
 
@@ -779,7 +779,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		List<IPrimitiveType> childElements = getContext().newTerser().getAllPopulatedChildElementsOfType(theResource, IPrimitiveType.class);
 		for (@SuppressWarnings("rawtypes")
 		IPrimitiveType nextType : childElements) {
-			if (nextType instanceof StringDt || nextType.getClass().equals(StringType.class)) {
+			if (nextType instanceof StringDt || nextType.getClass().getSimpleName().equals("StringType")) {
 				String nextValue = nextType.getValueAsString();
 				if (isNotBlank(nextValue)) {
 					retVal.append(nextValue.replace("\n", " ").replace("\r", " "));
@@ -804,7 +804,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 	private void populateResourceIdFromEntity(BaseHasResource theEntity, final IBaseResource theResource) {
 		IIdType id = theEntity.getIdDt();
 		if (getContext().getVersion().getVersion().isRi()) {
-			id = new IdType(id.getValue());
+			id = getContext().getVersion().newIdType().setValue(id.getValue());
 		}
 		theResource.setId(id);
 	}

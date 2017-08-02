@@ -458,13 +458,6 @@ public class GenericClientTest {
     lm.setTimeZoneZulu(true);
     assertEquals("1995-11-15T04:58:08.000Z", lm.getValueAsString());
 
-    List<Coding> tags = response.getMeta().getTag();
-    assertNotNull(tags);
-    assertEquals(1, tags.size());
-    assertEquals("http://hl7.org/fhir/tag", tags.get(0).getSystem());
-    assertEquals("http://foo/tagdefinition.html", tags.get(0).getCode());
-    assertEquals("Some tag", tags.get(0).getDisplay());
-
   }
 
   @Test

@@ -67,6 +67,14 @@ public abstract class BaseJpaTest {
 		return bundle;
 	}
 
+	protected org.hl7.fhir.r4.model.Bundle toBundleR4(IBundleProvider theSearch) {
+		org.hl7.fhir.r4.model.Bundle bundle = new org.hl7.fhir.r4.model.Bundle();
+		for (IBaseResource next : theSearch.getResources(0, theSearch.size())) {
+			bundle.addEntry().setResource((org.hl7.fhir.r4.model.Resource) next);
+		}
+		return bundle;
+	}
+
 	protected abstract FhirContext getContext();
 	
 	protected List<String> toUnqualifiedVersionlessIdValues(IBaseBundle theFound) {
@@ -125,6 +133,16 @@ public abstract class BaseJpaTest {
 	protected List<IIdType> toUnqualifiedVersionlessIds(org.hl7.fhir.dstu3.model.Bundle theFound) {
 		List<IIdType> retVal = new ArrayList<IIdType>();
 		for (BundleEntryComponent next : theFound.getEntry()) {
+			// if (next.getResource()!= null) {
+			retVal.add(next.getResource().getIdElement().toUnqualifiedVersionless());
+			// }
+		}
+		return retVal;
+	}
+
+	protected List<IIdType> toUnqualifiedVersionlessIds(org.hl7.fhir.r4.model.Bundle theFound) {
+		List<IIdType> retVal = new ArrayList<IIdType>();
+		for (org.hl7.fhir.r4.model.Bundle.BundleEntryComponent next : theFound.getEntry()) {
 			// if (next.getResource()!= null) {
 			retVal.add(next.getResource().getIdElement().toUnqualifiedVersionless());
 			// }

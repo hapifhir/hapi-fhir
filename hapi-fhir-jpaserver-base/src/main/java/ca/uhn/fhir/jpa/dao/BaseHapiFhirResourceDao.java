@@ -29,7 +29,6 @@ import javax.persistence.NoResultException;
 import javax.persistence.TypedQuery;
 
 import org.apache.commons.lang3.Validate;
-import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.instance.model.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Required;
@@ -990,7 +989,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		IIdType id = theEntity.getIdDt();
 		if (getContext().getVersion().getVersion().isRi()) {
-			id = new IdType(id.getValue());
+			id = getContext().getVersion().newIdType().setValue(id.getValue());
 		}
 
 		outcome.setId(id);

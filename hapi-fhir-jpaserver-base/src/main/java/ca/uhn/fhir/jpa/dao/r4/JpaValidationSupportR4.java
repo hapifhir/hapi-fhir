@@ -48,23 +48,23 @@ public class JpaValidationSupportR4 implements IJpaValidationSupportR4 {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(JpaValidationSupportR4.class);
 
 	@Autowired
-	@Qualifier("myStructureDefinitionDaoDstu3")
+	@Qualifier("myStructureDefinitionDaoR4")
 	private IFhirResourceDao<StructureDefinition> myStructureDefinitionDao;
 
 	@Autowired
-	@Qualifier("myValueSetDaoDstu3")
+	@Qualifier("myValueSetDaoR4")
 	private IFhirResourceDao<ValueSet> myValueSetDao;
 
 	@Autowired
-	@Qualifier("myQuestionnaireDaoDstu3")
+	@Qualifier("myQuestionnaireDaoR4")
 	private IFhirResourceDao<Questionnaire> myQuestionnaireDao;
 
 	@Autowired
-	@Qualifier("myCodeSystemDaoDstu3")
+	@Qualifier("myCodeSystemDaoR4")
 	private IFhirResourceDao<CodeSystem> myCodeSystemDao;
 
 	@Autowired
-	private FhirContext myDstu3Ctx;
+	private FhirContext myR4Ctx;
 
 	public JpaValidationSupportR4() {
 		super();
@@ -91,7 +91,7 @@ public class JpaValidationSupportR4 implements IJpaValidationSupportR4 {
 			localReference = true;
 		}
 
-		String resourceName = myDstu3Ctx.getResourceDefinition(theClass).getName();
+		String resourceName = myR4Ctx.getResourceDefinition(theClass).getName();
 		IBundleProvider search;
 		if ("ValueSet".equals(resourceName)) {
 			if (localReference) {

@@ -334,8 +334,10 @@ public abstract class RestfulClientFactory implements IRestfulClientFactory {
 		} else {
 			if (serverFhirVersionString.startsWith("0.4") || serverFhirVersionString.startsWith("0.5") || serverFhirVersionString.startsWith("1.0.")) {
 				serverFhirVersionEnum = FhirVersionEnum.DSTU2;
-			} else if (serverFhirVersionString.startsWith("3.")) {
+			} else if (serverFhirVersionString.startsWith("3.0.")) {
 				serverFhirVersionEnum = FhirVersionEnum.DSTU3;
+			} else if (serverFhirVersionString.startsWith("3.1.")) {
+				serverFhirVersionEnum = FhirVersionEnum.R4;
 			} else {
 				// we'll be lenient and accept this
 				ourLog.debug("Server conformance statement indicates unknown FHIR version: {}", serverFhirVersionString);

@@ -81,7 +81,7 @@ public class LoggingInterceptorTest {
 			public boolean matches(final Object argument) {
 				String formattedMessage = ((LoggingEvent) argument).getFormattedMessage();
 				System.out.println("Verifying: " + formattedMessage);
-				return formattedMessage.replace("; ", ";").toLowerCase().contains("Content-Type: application/xml+fhir;charset=utf-8".toLowerCase());
+				return formattedMessage.replace("; ", ";").toLowerCase().contains("Content-Type: application/fhir+xml;charset=utf-8".toLowerCase());
 			}
 		}));
 
@@ -96,7 +96,7 @@ public class LoggingInterceptorTest {
 			public boolean matches(final Object argument) {
 				String formattedMessage = ((LoggingEvent) argument).getFormattedMessage();
 				System.out.println("Verifying: " + formattedMessage);
-				return formattedMessage.replace("; ", ";").toLowerCase().contains("Content-Type: application/xml+fhir;charset=utf-8".toLowerCase());
+				return formattedMessage.replace("; ", ";").toLowerCase().contains("Content-Type: application/fhir+xml;charset=utf-8".toLowerCase());
 			}
 		}));
 
