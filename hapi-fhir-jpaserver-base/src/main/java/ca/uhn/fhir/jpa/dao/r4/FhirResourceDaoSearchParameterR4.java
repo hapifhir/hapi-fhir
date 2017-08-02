@@ -60,7 +60,7 @@ public class FhirResourceDaoSearchParameterR4 extends FhirResourceDaoR4<SearchPa
 			ourLog.info("Marking all resources of type {} for reindexing due to updated search parameter with path: {}", expression);
 
 			TransactionTemplate txTemplate = new TransactionTemplate(myPlatformTransactionManager);
-			txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+			txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
 			int updatedCount = txTemplate.execute(new TransactionCallback<Integer>() {
 				@Override
 				public Integer doInTransaction(TransactionStatus theStatus) {

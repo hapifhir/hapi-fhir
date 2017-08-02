@@ -10,6 +10,8 @@ import org.hl7.fhir.r4.model.Appointment.AppointmentStatus;
 import org.hl7.fhir.r4.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.*;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.support.*;
 
 import ca.uhn.fhir.jpa.dao.SearchParameterMap;
 import ca.uhn.fhir.model.api.Include;
@@ -207,26 +209,26 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		Patient patient = new Patient();
 		patient.addName().setFamily("P2");
 		Extension extParent = patient
-			.addExtension()
-			.setUrl("http://acme.org/foo");
+				.addExtension()
+				.setUrl("http://acme.org/foo");
 		extParent
 				.addExtension()
 				.setUrl("http://acme.org/bar")
 				.setValue(new Coding().setSystem("foo").setCode("bar"));
-		
+
 		IIdType p2id = myPatientDao.create(patient).getId().toUnqualifiedVersionless();
 
 		SearchParameterMap map;
 		IBundleProvider results;
 		List<String> foundResources;
-		
+
 		map = new SearchParameterMap();
 		map.add("foobar", new TokenParam("foo", "bar"));
 		results = myPatientDao.search(map);
 		foundResources = toUnqualifiedVersionlessIdValues(results);
 		assertThat(foundResources, contains(p2id.getValue()));
 	}
-	
+
 	@Test
 	public void testSearchForExtensionTwoDeepCodeableConcept() {
 		SearchParameter siblingSp = new SearchParameter();
@@ -245,19 +247,19 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		Patient patient = new Patient();
 		patient.addName().setFamily("P2");
 		Extension extParent = patient
-			.addExtension()
-			.setUrl("http://acme.org/foo");
+				.addExtension()
+				.setUrl("http://acme.org/foo");
 		extParent
 				.addExtension()
 				.setUrl("http://acme.org/bar")
 				.setValue(new CodeableConcept().addCoding(new Coding().setSystem("foo").setCode("bar")));
-		
+
 		IIdType p2id = myPatientDao.create(patient).getId().toUnqualifiedVersionless();
 
 		SearchParameterMap map;
 		IBundleProvider results;
 		List<String> foundResources;
-		
+
 		map = new SearchParameterMap();
 		map.add("foobar", new TokenParam("foo", "bar"));
 		results = myPatientDao.search(map);
@@ -283,24 +285,24 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		Appointment apt = new Appointment();
 		apt.setStatus(AppointmentStatus.ARRIVED);
 		IIdType aptId = myAppointmentDao.create(apt).getId().toUnqualifiedVersionless();
-		
+
 		Patient patient = new Patient();
 		patient.addName().setFamily("P2");
 		Extension extParent = patient
-			.addExtension()
-			.setUrl("http://acme.org/foo");
-		
+				.addExtension()
+				.setUrl("http://acme.org/foo");
+
 		extParent
 				.addExtension()
 				.setUrl("http://acme.org/bar")
 				.setValue(new Reference(aptId.getValue()));
-		
+
 		IIdType p2id = myPatientDao.create(patient).getId().toUnqualifiedVersionless();
 
 		SearchParameterMap map;
 		IBundleProvider results;
 		List<String> foundResources;
-		
+
 		map = new SearchParameterMap();
 		map.add("foobar", new ReferenceParam(aptId.getValue()));
 		results = myPatientDao.search(map);
@@ -325,31 +327,31 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		Appointment apt = new Appointment();
 		apt.setStatus(AppointmentStatus.ARRIVED);
 		IIdType aptId = myAppointmentDao.create(apt).getId().toUnqualifiedVersionless();
-		
+
 		Patient patient = new Patient();
 		patient.addName().setFamily("P2");
 		Extension extParent = patient
-			.addExtension()
-			.setUrl("http://acme.org/foo");
-		
+				.addExtension()
+				.setUrl("http://acme.org/foo");
+
 		extParent
 				.addExtension()
 				.setUrl("http://acme.org/bar")
 				.setValue(new Reference(aptId.getValue()));
-		
+
 		IIdType p2id = myPatientDao.create(patient).getId().toUnqualifiedVersionless();
 
 		SearchParameterMap map;
 		IBundleProvider results;
 		List<String> foundResources;
-		
+
 		map = new SearchParameterMap();
 		map.add("foobar", new ReferenceParam(aptId.getValue()));
 		results = myPatientDao.search(map);
 		foundResources = toUnqualifiedVersionlessIdValues(results);
 		assertThat(foundResources, contains(p2id.getValue()));
 	}
-	
+
 	@Test
 	public void testSearchForExtensionTwoDeepReference() {
 		SearchParameter siblingSp = new SearchParameter();
@@ -368,24 +370,24 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		Appointment apt = new Appointment();
 		apt.setStatus(AppointmentStatus.ARRIVED);
 		IIdType aptId = myAppointmentDao.create(apt).getId().toUnqualifiedVersionless();
-		
+
 		Patient patient = new Patient();
 		patient.addName().setFamily("P2");
 		Extension extParent = patient
-			.addExtension()
-			.setUrl("http://acme.org/foo");
-		
+				.addExtension()
+				.setUrl("http://acme.org/foo");
+
 		extParent
 				.addExtension()
 				.setUrl("http://acme.org/bar")
 				.setValue(new Reference(aptId.getValue()));
-		
+
 		IIdType p2id = myPatientDao.create(patient).getId().toUnqualifiedVersionless();
 
 		SearchParameterMap map;
 		IBundleProvider results;
 		List<String> foundResources;
-		
+
 		map = new SearchParameterMap();
 		map.add("foobar", new ReferenceParam(aptId.getValue()));
 		results = myPatientDao.search(map);
@@ -410,24 +412,24 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		Appointment apt = new Appointment();
 		apt.setStatus(AppointmentStatus.ARRIVED);
 		IIdType aptId = myAppointmentDao.create(apt).getId().toUnqualifiedVersionless();
-		
+
 		Patient patient = new Patient();
 		patient.addName().setFamily("P2");
 		Extension extParent = patient
-			.addExtension()
-			.setUrl("http://acme.org/foo");
-		
+				.addExtension()
+				.setUrl("http://acme.org/foo");
+
 		extParent
 				.addExtension()
 				.setUrl("http://acme.org/bar")
 				.setValue(new DateType("2012-01-02"));
-		
+
 		IIdType p2id = myPatientDao.create(patient).getId().toUnqualifiedVersionless();
 
 		SearchParameterMap map;
 		IBundleProvider results;
 		List<String> foundResources;
-		
+
 		map = new SearchParameterMap();
 		map.add("foobar", new DateParam("2012-01-02"));
 		results = myPatientDao.search(map);
@@ -452,19 +454,19 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		Patient patient = new Patient();
 		patient.addName().setFamily("P2");
 		Extension extParent = patient
-			.addExtension()
-			.setUrl("http://acme.org/foo");
+				.addExtension()
+				.setUrl("http://acme.org/foo");
 		extParent
 				.addExtension()
 				.setUrl("http://acme.org/bar")
 				.setValue(new IntegerType(5));
-		
+
 		IIdType p2id = myPatientDao.create(patient).getId().toUnqualifiedVersionless();
 
 		SearchParameterMap map;
 		IBundleProvider results;
 		List<String> foundResources;
-		
+
 		map = new SearchParameterMap();
 		map.add("foobar", new NumberParam("5"));
 		results = myPatientDao.search(map);
@@ -474,7 +476,7 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 
 	@Test
 	public void testSearchForExtensionTwoDeepDecimal() {
-		SearchParameter siblingSp = new SearchParameter();
+		final SearchParameter siblingSp = new SearchParameter();
 		siblingSp.addBase("Patient");
 		siblingSp.setCode("foobar");
 		siblingSp.setType(org.hl7.fhir.r4.model.Enumerations.SearchParamType.NUMBER);
@@ -482,26 +484,38 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		siblingSp.setExpression("Patient.extension('http://acme.org/foo').extension('http://acme.org/bar')");
 		siblingSp.setXpathUsage(org.hl7.fhir.r4.model.SearchParameter.XPathUsageType.NORMAL);
 		siblingSp.setStatus(org.hl7.fhir.r4.model.Enumerations.PublicationStatus.ACTIVE);
-		mySearchParameterDao.create(siblingSp, mySrd);
 
-		mySearchParamRegsitry.forceRefresh();
+		TransactionTemplate txTemplate = new TransactionTemplate(myTxManager);
+		txTemplate.setPropagationBehavior(TransactionTemplate.PROPAGATION_REQUIRES_NEW);
+		txTemplate.execute(new TransactionCallbackWithoutResult() {
+			@Override
+			protected void doInTransactionWithoutResult(TransactionStatus theArg0) {
+				mySearchParameterDao.create(siblingSp, mySrd);
+				mySearchParamRegsitry.forceRefresh();
+			}
+		});
 
-		Patient patient = new Patient();
+		final Patient patient = new Patient();
 		patient.addName().setFamily("P2");
 		Extension extParent = patient
-			.addExtension()
-			.setUrl("http://acme.org/foo");
+				.addExtension()
+				.setUrl("http://acme.org/foo");
 		extParent
 				.addExtension()
 				.setUrl("http://acme.org/bar")
 				.setValue(new DecimalType("2.1"));
-		
-		IIdType p2id = myPatientDao.create(patient).getId().toUnqualifiedVersionless();
+
+		IIdType p2id = txTemplate.execute(new TransactionCallback<IIdType>() {
+			@Override
+			public IIdType doInTransaction(TransactionStatus theArg0) {
+				return myPatientDao.create(patient).getId().toUnqualifiedVersionless();
+			}
+		});
 
 		SearchParameterMap map;
 		IBundleProvider results;
 		List<String> foundResources;
-		
+
 		map = new SearchParameterMap();
 		map.add("foobar", new NumberParam("2.1"));
 		results = myPatientDao.search(map);
@@ -526,19 +540,19 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		Patient patient = new Patient();
 		patient.addName().setFamily("P2");
 		Extension extParent = patient
-			.addExtension()
-			.setUrl("http://acme.org/foo");
+				.addExtension()
+				.setUrl("http://acme.org/foo");
 		extParent
 				.addExtension()
 				.setUrl("http://acme.org/bar")
 				.setValue(new StringType("HELLOHELLO"));
-		
+
 		IIdType p2id = myPatientDao.create(patient).getId().toUnqualifiedVersionless();
 
 		SearchParameterMap map;
 		IBundleProvider results;
 		List<String> foundResources;
-		
+
 		map = new SearchParameterMap();
 		map.add("foobar", new StringParam("hello"));
 		results = myPatientDao.search(map);
@@ -573,7 +587,7 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		SearchParameterMap map;
 		IBundleProvider results;
 		List<String> foundResources;
-		
+
 		// Search by ref
 		map = new SearchParameterMap();
 		map.add("sibling", new ReferenceParam(p1id.getValue()));
@@ -590,8 +604,6 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 
 	}
 
-	
-	
 	@Test
 	public void testSearchForExtensionReferenceWithoutTarget() {
 		SearchParameter siblingSp = new SearchParameter();
@@ -622,7 +634,7 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		SearchParameterMap map;
 		IBundleProvider results;
 		List<String> foundResources;
-		
+
 		// Search by ref
 		map = new SearchParameterMap();
 		map.add("sibling", new ReferenceParam(p1id.getValue()));
@@ -643,7 +655,6 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		results = myAppointmentDao.search(map);
 		foundResources = toUnqualifiedVersionlessIdValues(results);
 		assertThat(foundResources, containsInAnyOrder(appid.getValue()));
-
 
 	}
 
@@ -674,11 +685,11 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		Appointment app = new Appointment();
 		app.addParticipant().getActor().setReference(p2id.getValue());
 		IIdType appid = myAppointmentDao.create(app).getId().toUnqualifiedVersionless();
-		
+
 		SearchParameterMap map;
 		IBundleProvider results;
 		List<String> foundResources;
-		
+
 		// Search by ref
 		map = new SearchParameterMap();
 		map.add("sibling", new ReferenceParam(p1id.getValue()));
@@ -729,11 +740,11 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		Appointment app = new Appointment();
 		app.addParticipant().getActor().setReference(p2id.getValue());
 		IIdType appId = myAppointmentDao.create(app).getId().toUnqualifiedVersionless();
-		
+
 		SearchParameterMap map;
 		IBundleProvider results;
 		List<String> foundResources;
-		
+
 		map = new SearchParameterMap();
 		map.addInclude(new Include("Appointment:patient", true));
 		map.addInclude(new Include("Patient:attending", true));
@@ -846,7 +857,7 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		assertThat(foundResources, contains(patId.getValue()));
 
 	}
-	
+
 	@Test
 	public void testCustomReferenceParameter() throws Exception {
 		SearchParameter sp = new SearchParameter();
@@ -858,15 +869,15 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		sp.setXpathUsage(org.hl7.fhir.r4.model.SearchParameter.XPathUsageType.NORMAL);
 		sp.setStatus(org.hl7.fhir.r4.model.Enumerations.PublicationStatus.ACTIVE);
 		mySearchParameterDao.create(sp);
-		
+
 		org.hl7.fhir.r4.model.Practitioner pract = new org.hl7.fhir.r4.model.Practitioner();
 		pract.setId("A");
 		pract.addName().setFamily("PRACT");
 		myPractitionerDao.update(pract);
-		
+
 		Patient pat = myFhirCtx.newJsonParser().parseResource(Patient.class, loadClasspath("/r4/custom_resource_patient.json"));
 		IIdType pid = myPatientDao.create(pat, mySrd).getId().toUnqualifiedVersionless();
-		
+
 		SearchParameterMap params = new SearchParameterMap();
 		params.add("myDoctor", new ReferenceParam("A"));
 		IBundleProvider outcome = myPatientDao.search(params);
