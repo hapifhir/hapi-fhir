@@ -201,6 +201,10 @@
 				Fix an unfortunate typo in the custom structures documentation. Thanks to
 				Jason Owen for the PR!
 			</action>
+			<action type="add" issue="701">
+				Testing UI now has a dropdown for modifiers on token search. Thanks 
+				to GitHub user @dconlan for the pull request!
+			</action>
 		</release>
 		<release version="2.5" date="2017-06-08">
 			<action type="fix">
