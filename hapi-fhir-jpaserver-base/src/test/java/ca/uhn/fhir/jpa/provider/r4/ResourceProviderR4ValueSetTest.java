@@ -349,7 +349,7 @@ public class ResourceProviderR4ValueSetTest extends BaseResourceProviderR4Test {
 
 		//@formatter:off
 		try {
-			ValueSet toExpand = loadResourceFromClasspath(ValueSet.class, "/extensional-case-r4.xml");
+			ValueSet toExpand = loadResourceFromClasspath(ValueSet.class, "/r4/extensional-case.xml");
 			ourClient
 				.operation()
 				.onInstance(myExtensionalVsId)
