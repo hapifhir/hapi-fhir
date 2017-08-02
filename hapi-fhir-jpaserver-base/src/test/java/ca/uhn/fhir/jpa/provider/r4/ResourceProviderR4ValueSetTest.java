@@ -252,7 +252,6 @@ public class ResourceProviderR4ValueSetTest extends BaseResourceProviderR4Test {
 	public void testExpandByValueSet() throws IOException {
 		ValueSet toExpand = loadResourceFromClasspath(ValueSet.class, "/extensional-case-3-vs.xml");
 		
-		//@formatter:off
 		Parameters respParam = ourClient
 			.operation()
 			.onType(ValueSet.class)
@@ -260,15 +259,12 @@ public class ResourceProviderR4ValueSetTest extends BaseResourceProviderR4Test {
 			.withParameter(Parameters.class, "valueSet", toExpand)
 			.execute();
 		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
-		//@formatter:on
 
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
-		//@formatter:off
 		assertThat(resp, stringContainsInOrder(
 				"<code value=\"11378-7\"/>", 
 				"<display value=\"Systolic blood pressure at First encounter\"/>"));
-		//@formatter:on
 
 	}
 
@@ -337,7 +333,7 @@ public class ResourceProviderR4ValueSetTest extends BaseResourceProviderR4Test {
 
 		//@formatter:off
 		try {
-			ValueSet toExpand = loadResourceFromClasspath(ValueSet.class, "/extensional-case-r4.xml");
+			ValueSet toExpand = loadResourceFromClasspath(ValueSet.class, "/r4/extensional-case-r4.xml");
 			ourClient
 				.operation()
 				.onType(ValueSet.class)

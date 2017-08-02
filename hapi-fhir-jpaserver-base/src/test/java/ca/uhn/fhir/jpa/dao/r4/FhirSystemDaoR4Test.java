@@ -1162,8 +1162,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 	@Test
 	public void testTransactionCreateWithPutUsingUrl2() throws Exception {
-		String req = IOUtils.toString(FhirSystemDaoR4Test.class.getResourceAsStream("/bundle-r4.xml"), StandardCharsets.UTF_8);
-		Bundle request = myFhirCtx.newXmlParser().parseResource(Bundle.class, req);
+		String req = IOUtils.toString(FhirSystemDaoR4Test.class.getResourceAsStream("/r4/bundle.xml"), StandardCharsets.UTF_8);		Bundle request = myFhirCtx.newXmlParser().parseResource(Bundle.class, req);
 		mySystemDao.transaction(mySrd, request);
 	}
 
@@ -2351,7 +2350,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 		// First bundle (name is Joshua)
 
-		String input = IOUtils.toString(getClass().getResource("/r4-post1.xml"), StandardCharsets.UTF_8);
+		String input = IOUtils.toString(getClass().getResource("/r4/post1.xml"), StandardCharsets.UTF_8);
 		Bundle request = myFhirCtx.newXmlParser().parseResource(Bundle.class, input);
 		Bundle response = mySystemDao.transaction(mySrd, request);
 		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(response));
@@ -2363,7 +2362,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 		// Now the second (name is Adam, shouldn't get used)
 
-		input = IOUtils.toString(getClass().getResource("/r4-post2.xml"), StandardCharsets.UTF_8);
+		input = IOUtils.toString(getClass().getResource("/r4/post2.xml"), StandardCharsets.UTF_8);
 		request = myFhirCtx.newXmlParser().parseResource(Bundle.class, input);
 		response = mySystemDao.transaction(mySrd, request);
 		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(response));

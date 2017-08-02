@@ -55,7 +55,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 	
 	@Test
 	public void testValidateDocument() throws Exception {
-		String input = IOUtils.toString(getClass().getResourceAsStream("/document-bundle-r4.json"), StandardCharsets.UTF_8);
+		String input = IOUtils.toString(getClass().getResourceAsStream("/r4/document-bundle.json"), StandardCharsets.UTF_8);
 		Bundle document = myFhirCtx.newJsonParser().parseResource(Bundle.class, input);
 		
 		

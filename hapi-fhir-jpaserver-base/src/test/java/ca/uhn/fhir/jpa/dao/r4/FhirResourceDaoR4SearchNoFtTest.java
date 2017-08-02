@@ -23,8 +23,7 @@ import org.hl7.fhir.r4.model.Subscription.SubscriptionStatus;
 import org.hl7.fhir.instance.model.api.*;
 import org.junit.*;
 import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.support.TransactionCallback;
-import org.springframework.transaction.support.TransactionTemplate;
+import org.springframework.transaction.support.*;
 
 import ca.uhn.fhir.jpa.dao.*;
 import ca.uhn.fhir.jpa.dao.SearchParameterMap.EverythingModeEnum;
@@ -447,31 +446,38 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 
 	@Test
 	public void testIndexNoDuplicatesReference() {
-		Practitioner pract = new Practitioner();
-		pract.setId("Practitioner/somepract");
-		pract.addName().setFamily("SOME PRACT");
-		myPractitionerDao.update(pract, mySrd);
-		Practitioner pract2 = new Practitioner();
-		pract2.setId("Practitioner/somepract2");
-		pract2.addName().setFamily("SOME PRACT2");
-		myPractitionerDao.update(pract2, mySrd);
+		ProcedureRequest pr = new ProcedureRequest();
+		pr.setId("ProcedureRequest/somepract");
+		pr.getAuthoredOnElement().setValue(new Date());
+		myProcedureRequestDao.update(pr, mySrd);
+		ProcedureRequest pr2 = new ProcedureRequest();
+		pr2.setId("ProcedureRequest/somepract2");
+		pr2.getAuthoredOnElement().setValue(new Date());
+		myProcedureRequestDao.update(pr2, mySrd);
 
 		ProcedureRequest res = new ProcedureRequest();
-		res.addReplaces(new Reference("Practitioner/somepract"));
-		res.addReplaces(new Reference("Practitioner/somepract"));
-		res.addReplaces(new Reference("Practitioner/somepract2"));
-		res.addReplaces(new Reference("Practitioner/somepract2"));
+		res.addReplaces(new Reference("ProcedureRequest/somepract"));
+		res.addReplaces(new Reference("ProcedureRequest/somepract"));
+		res.addReplaces(new Reference("ProcedureRequest/somepract2"));
+		res.addReplaces(new Reference("ProcedureRequest/somepract2"));
 
-		IIdType id = myProcedureRequestDao.create(res, mySrd).getId().toUnqualifiedVersionless();
+		final IIdType id = myProcedureRequestDao.create(res, mySrd).getId().toUnqualifiedVersionless();
 
-		Class<ResourceLink> type = ResourceLink.class;
-		List<?> results = myEntityManager.createQuery("SELECT i FROM " + type.getSimpleName() + " i", type).getResultList();
-		ourLog.info(toStringMultiline(results));
-		assertEquals(2, results.size());
-
-		List<IIdType> actual = toUnqualifiedVersionlessIds(
-				myProcedureRequestDao.search(new SearchParameterMap().setLoadSynchronous(true).add(ProcedureRequest.SP_REPLACES, new ReferenceParam("Practitioner/somepract"))));
-		assertThat(actual, contains(id));
+		TransactionTemplate txTemplate = new TransactionTemplate(myTransactionMgr);
+		txTemplate.setPropagationBehavior(TransactionTemplate.PROPAGATION_REQUIRES_NEW);
+		txTemplate.execute(new TransactionCallbackWithoutResult() {
+			@Override
+			protected void doInTransactionWithoutResult(TransactionStatus theArg0) {
+				Class<ResourceLink> type = ResourceLink.class;
+				List<?> results = myEntityManager.createQuery("SELECT i FROM " + type.getSimpleName() + " i", type).getResultList();
+				ourLog.info(toStringMultiline(results));
+				assertEquals(2, results.size());
+				List<IIdType> actual = toUnqualifiedVersionlessIds(
+						myProcedureRequestDao.search(new SearchParameterMap().setLoadSynchronous(true).add(ProcedureRequest.SP_REPLACES, new ReferenceParam("ProcedureRequest/somepract"))));
+				assertThat(actual, contains(id));
+			}
+		});
+		
 	}
 
 	@Test

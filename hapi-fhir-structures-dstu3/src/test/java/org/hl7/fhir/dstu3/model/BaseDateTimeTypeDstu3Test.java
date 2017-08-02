@@ -47,14 +47,13 @@ public class BaseDateTimeTypeDstu3Test {
 		assertEquals("1995-11-15T04:58:08Z", dt.getValueAsString());
 	}
 
-	
 	@Test
 	public void testAfter() {
 		assertTrue(new DateTimeType("2011-01-01T12:12:12Z").after(new DateTimeType("2011-01-01T12:12:11Z")));
 		assertFalse(new DateTimeType("2011-01-01T12:12:11Z").after(new DateTimeType("2011-01-01T12:12:12Z")));
 		assertFalse(new DateTimeType("2011-01-01T12:12:12Z").after(new DateTimeType("2011-01-01T12:12:12Z")));
 	}
-	
+
 	@Test
 	public void testBefore() {
 		assertFalse(new DateTimeType("2011-01-01T12:12:12Z").before(new DateTimeType("2011-01-01T12:12:11Z")));
@@ -84,7 +83,6 @@ public class BaseDateTimeTypeDstu3Test {
 		}
 	}
 
-	
 	@Test()
 	public void testAfterNull() {
 		try {
@@ -164,7 +162,7 @@ public class BaseDateTimeTypeDstu3Test {
 		verifyFails("1974-12-25+10:00");
 
 		// Out of range
-      verifyFails("2015-02-30");
+		verifyFails("2015-02-30");
 		verifyFails("1974-13-25");
 		verifyFails("1974-12-32");
 		verifyFails("2015-02-29");
@@ -204,7 +202,7 @@ public class BaseDateTimeTypeDstu3Test {
 
 		assertThat(outcomeStr, containsString("date-primitive"));
 	}
-	
+
 	@Test
 	public void testDateTimeFormatsInvalid() {
 		// Bad timezone
@@ -236,7 +234,7 @@ public class BaseDateTimeTypeDstu3Test {
 		verifyFails("1974-12-25T22:11:Z");
 		verifyFails("1974-12-25T22:11:1Z");
 	}
-	
+
 	@Test
 	public void testDateTimeFormatsInvalidMillis() {
 		verifyFails("1974-12-01T00:00:00.AZ");
@@ -352,7 +350,7 @@ public class BaseDateTimeTypeDstu3Test {
 		Calendar cal = Calendar.getInstance();
 		cal.setTimeZone(TimeZone.getTimeZone("Europe/Berlin"));
 		cal.set(1990, Calendar.JANUARY, 3, 3, 22, 11);
-		
+
 		DateTimeType date = new DateTimeType();
 		date.setValue(cal.getTime(), ca.uhn.fhir.model.api.TemporalPrecisionEnum.MINUTE);
 		date.setTimeZone(TimeZone.getTimeZone("EST"));
@@ -370,8 +368,6 @@ public class BaseDateTimeTypeDstu3Test {
 		assertTrue(now.getValue().before(then.getValue()));
 	}
 
-
-
 	/**
 	 * See #444
 	 */
@@ -381,13 +377,13 @@ public class BaseDateTimeTypeDstu3Test {
 		Date from = Date.from(ldt.toInstant(ZoneOffset.UTC));
 		InstantType type = (InstantType) new InstantType(from).setTimeZoneZulu(true);
 		String encoded = type.asStringValue();
-		
-		ourLog.info("LDT:      "+ ldt.toString());
-		ourLog.info("Expected: "+"1960-09-07T00:44:25.012");
-		ourLog.info("Actual:   "+encoded);
-		
+
+		ourLog.info("LDT:      " + ldt.toString());
+		ourLog.info("Expected: " + "1960-09-07T00:44:25.012");
+		ourLog.info("Actual:   " + encoded);
+
 		assertEquals("1960-09-07T00:44:25.012Z", encoded);
-		
+
 		type = new InstantType(encoded);
 		assertEquals(1960, type.getYear().intValue());
 		assertEquals(8, type.getMonth().intValue()); // 0-indexed unlike LocalDateTime.of
@@ -467,8 +463,6 @@ public class BaseDateTimeTypeDstu3Test {
 		DateTimeType dt = new DateTimeType("  2014-10-11T12:11:00Z      ");
 		assertEquals("2014-10-11 10:11:00.000-0200", myDateInstantZoneParser.format(dt.getValue()));
 	}
-
-
 
 	@Test
 	public void testParseInvalid() {
@@ -746,8 +740,6 @@ public class BaseDateTimeTypeDstu3Test {
 		assertEquals("2012-01-02", date.getValueAsString());
 	}
 
-
-
 	/**
 	 * See HAPI #101 - https://github.com/jamesagnew/hapi-fhir/issues/101
 	 */
@@ -763,8 +755,6 @@ public class BaseDateTimeTypeDstu3Test {
 		date.setValue(time, ca.uhn.fhir.model.api.TemporalPrecisionEnum.DAY);
 		assertEquals("2012-01-02", date.getValueAsString());
 	}
-
-	
 
 	@Test
 	public void testSetPartialsDayFromExisting() {
@@ -872,8 +862,6 @@ public class BaseDateTimeTypeDstu3Test {
 		assertEquals("2014-06-20T20:22:09Z", i.getValueAsString());
 	}
 
-	
-
 	@Test
 	public void testToHumanDisplay() {
 		DateTimeType dt = new DateTimeType("2012-01-05T12:00:00-08:00");
@@ -916,7 +904,6 @@ public class BaseDateTimeTypeDstu3Test {
 		}
 	}
 
-	
 	public static void afterClass() {
 		Locale.setDefault(ourDefaultLocale);
 	}
@@ -925,8 +912,6 @@ public class BaseDateTimeTypeDstu3Test {
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
-
-
 
 	@BeforeClass
 	public static void beforeClass() {

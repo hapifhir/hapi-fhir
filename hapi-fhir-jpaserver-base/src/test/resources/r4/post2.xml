@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Bundle xmlns="http://hl7.org/fhir">
+    <type value="transaction"/>
+    <entry>
+        <resource>
+           <Patient>
+                <id value="ID613876"/>
+                <identifier>
+                    <value value="ID613876"/>
+                </identifier>
+                <name>
+                    <given value="Adam"/>
+                </name>
+            </Patient>
+        </resource>      
+	<request>
+		<method value="POST"/>
+		<url value="Patient/ID613876"/>
+		<ifNoneExist value="identifier=ID613876"/>
+	</request>
+    </entry>
+</Bundle>

@@ -864,7 +864,7 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		pract.addName().setFamily("PRACT");
 		myPractitionerDao.update(pract);
 		
-		Patient pat = myFhirCtx.newJsonParser().parseResource(Patient.class, loadClasspath("/r4_custom_resource_patient.json"));
+		Patient pat = myFhirCtx.newJsonParser().parseResource(Patient.class, loadClasspath("/r4/custom_resource_patient.json"));
 		IIdType pid = myPatientDao.create(pat, mySrd).getId().toUnqualifiedVersionless();
 		
 		SearchParameterMap params = new SearchParameterMap();

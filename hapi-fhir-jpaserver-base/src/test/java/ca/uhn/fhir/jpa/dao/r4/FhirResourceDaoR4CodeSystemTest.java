@@ -26,7 +26,7 @@ public class FhirResourceDaoR4CodeSystemTest extends BaseJpaR4Test {
 	public void testIndexContained() throws Exception {
 		BaseHapiTerminologySvc.setForceSaveDeferredAlwaysForUnitTest(true);
 		
-		String input = IOUtils.toString(getClass().getResource("/r4_codesystem_complete.json"), StandardCharsets.UTF_8);
+		String input = IOUtils.toString(getClass().getResource("/r4/codesystem_complete.json"), StandardCharsets.UTF_8);
 		CodeSystem cs = myFhirCtx.newJsonParser().parseResource(CodeSystem.class, input);
 		myCodeSystemDao.create(cs, mySrd);
 

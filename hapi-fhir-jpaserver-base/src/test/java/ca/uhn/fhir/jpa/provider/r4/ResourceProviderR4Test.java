@@ -170,7 +170,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	public void testBundleCreate() throws Exception {
 		IGenericClient client = ourClient;
 
-		String resBody = IOUtils.toString(ResourceProviderR4Test.class.getResource("/document-father-r4.json"), StandardCharsets.UTF_8);
+		String resBody = IOUtils.toString(ResourceProviderR4Test.class.getResource("/r4/document-father.json"), StandardCharsets.UTF_8);
 		IIdType id = client.create().resource(resBody).execute().getId();
 
 		ourLog.info("Created: {}", id);
@@ -184,7 +184,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	public void testBundleCreateWithTypeTransaction() throws Exception {
 		IGenericClient client = ourClient;
 
-		String resBody = IOUtils.toString(ResourceProviderR4Test.class.getResource("/document-father-r4.json"), StandardCharsets.UTF_8);
+		String resBody = IOUtils.toString(ResourceProviderR4Test.class.getResource("/r4/document-father.json"), StandardCharsets.UTF_8);
 		resBody = resBody.replace("\"type\": \"document\"", "\"type\": \"transaction\"");
 		try {
 			client.create().resource(resBody).execute().getId();
@@ -1085,13 +1085,13 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	}
 
 	/**
-	 * See #147"Patient"
+	 * See #147
 	 */
 	@Test
 	public void testEverythingPatientDoesntRepeatPatient() throws Exception {
 		Bundle b;
 		IParser parser = myFhirCtx.newJsonParser();
-		b = parser.parseResource(Bundle.class, new InputStreamReader(ResourceProviderR4Test.class.getResourceAsStream("/bug147-bundle-r4.json")));
+		b = parser.parseResource(Bundle.class, new InputStreamReader(ResourceProviderR4Test.class.getResourceAsStream("/r4/bug147-bundle.json")));
 
 		Bundle resp = ourClient.transaction().withBundle(b).execute();
 		List<IdType> ids = new ArrayList<IdType>();
