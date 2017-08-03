@@ -30,13 +30,13 @@ public class UhnFhirTestApp {
 		System.setProperty("fhir.lucene.location.tdl2", "./target/testlucene_tdl2");
 		System.setProperty("fhir.db.location.tdl3", "./target/testdb_tdl3");
 		System.setProperty("fhir.lucene.location.tdl3", "./target/testlucene_tdl3");
-		System.setProperty("fhir.baseurl.dstu1", base.replace("Dstu2", "Dstu1"));
 		System.setProperty("fhir.baseurl.dstu2", base);
+		System.setProperty("fhir.baseurl.dstu1", base.replace("Dstu2", "Dstu1"));
 		System.setProperty("fhir.baseurl.dstu3", base.replace("Dstu2", "Dstu3"));
 		System.setProperty("fhir.baseurl.tdl2", base.replace("baseDstu2", "testDataLibraryDstu2"));
 		System.setProperty("fhir.baseurl.tdl3", base.replace("baseDstu2", "testDataLibraryStu3"));
 		System.setProperty("fhir.tdlpass", "aa,bb");
-		
+
 		Server server = new Server(myPort);
 
 		WebAppContext root = new WebAppContext();
