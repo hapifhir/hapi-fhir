@@ -57,6 +57,8 @@ public abstract class BaseCommand implements Comparable<BaseCommand> {
 				version = FhirVersionEnum.DSTU2;
 			} else if ("dstu3".equals(specVersion)) {
 				version = FhirVersionEnum.DSTU3;
+			} else if ("r4".equals(specVersion)) {
+				version = FhirVersionEnum.R4;
 			} else {
 				throw new ParseException("Unknown spec version: " + specVersion);
 			}
