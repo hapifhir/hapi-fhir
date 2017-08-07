@@ -329,6 +329,8 @@ public abstract class RestfulClientFactory implements IRestfulClientFactory {
 				serverFhirVersionEnum = FhirVersionEnum.DSTU1;
 			} else if (serverFhirVersionString.equals(FhirVersionEnum.DSTU2.getFhirVersionString())) {
 				serverFhirVersionEnum = FhirVersionEnum.DSTU2;
+			} else if (serverFhirVersionString.equals(FhirVersionEnum.DSTU2_1.getFhirVersionString())) {
+				serverFhirVersionEnum = FhirVersionEnum.DSTU2_1;
 			} else if (serverFhirVersionString.equals(FhirVersionEnum.DSTU3.getFhirVersionString())) {
 				serverFhirVersionEnum = FhirVersionEnum.DSTU3;
 			} else {
