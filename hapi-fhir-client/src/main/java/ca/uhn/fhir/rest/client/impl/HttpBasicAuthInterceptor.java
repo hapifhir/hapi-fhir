@@ -18,7 +18,7 @@ import ca.uhn.fhir.rest.client.api.IGenericClient;
 
 /*
  * #%L
- * HAPI FHIR - Core Library
+ * HAPI FHIR - Client Framework
  * %%
  * Copyright (C) 2014 - 2017 University Health Network
  * %%

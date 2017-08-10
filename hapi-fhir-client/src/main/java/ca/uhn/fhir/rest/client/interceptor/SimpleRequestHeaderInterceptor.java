@@ -4,7 +4,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /*
  * #%L
- * HAPI FHIR - Core Library
+ * HAPI FHIR - Client Framework
  * %%
  * Copyright (C) 2014 - 2017 University Health Network
  * %%

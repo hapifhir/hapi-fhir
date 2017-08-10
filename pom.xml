@@ -949,7 +949,7 @@
 				<plugin>
 					<groupId>org.apache.felix</groupId>
 					<artifactId>maven-bundle-plugin</artifactId>
-					<version>3.0.1</version>
+					<version>3.3.0</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -1694,7 +1694,7 @@
 		<profile>
 			<id>DIST</id>
 			<modules>
-				<module>hapi-fhir-osgi-core</module>
+				<!--<module>hapi-fhir-osgi-core</module>-->
 			</modules>
 		</profile>
 		<profile>
@@ -1812,6 +1812,7 @@
 				<module>example-projects/hapi-fhir-base-example-embedded-ws</module>
 				<module>example-projects/hapi-fhir-standalone-overlay-example</module>
 				<module>hapi-fhir-jacoco</module>
+				<!--<module>hapi-fhir-osgi-core</module>-->
 			</modules>
 		</profile>
 		<profile>

@@ -3,7 +3,7 @@ package ca.uhn.fhir.rest.server.method;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 /*
  * #%L
- * HAPI FHIR - Core Library
+ * HAPI FHIR - Server Framework
  * %%
  * Copyright (C) 2014 - 2017 University Health Network
  * %%
