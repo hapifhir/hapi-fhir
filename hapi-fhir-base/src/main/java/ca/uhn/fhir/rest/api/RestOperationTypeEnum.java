@@ -38,6 +38,14 @@ public enum RestOperationTypeEnum {
 	GET_PAGE("get-page"),
 
 	/**
+	 * <b>
+	 * Use this value with caution, this may
+	 * change as the GraphQL interface matures
+	 * </b>
+	 */
+	GRAPHQL_REQUEST("graphql-request"),
+
+	/**
 	 * E.g. $everything, $validate, etc.
 	 */
 	EXTENDED_OPERATION_SERVER("extended-operation-server"),

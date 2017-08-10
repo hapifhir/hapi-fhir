@@ -171,6 +171,7 @@ public class Constants {
 	public static final String URL_TOKEN_HISTORY = "_history";
 	public static final String URL_TOKEN_METADATA = "metadata";
 	public static final String OO_INFOSTATUS_PROCESSING = "processing";
+	public static final String PARAM_GRAPHQL_QUERY = "query";
 
 	static {
 		CHARSET_UTF8 = Charset.forName(CHARSET_NAME_UTF8);

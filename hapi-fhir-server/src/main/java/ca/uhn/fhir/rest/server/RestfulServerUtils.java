@@ -543,7 +543,7 @@ public class RestfulServerUtils {
 	public static Object streamResponseAsResource(IRestfulServerDefaults theServer, IBaseResource theResource, Set<SummaryEnum> theSummaryMode, int theStausCode, String theStatusMessage,
 			boolean theAddContentLocationHeader, boolean respondGzip, RequestDetails theRequestDetails, IIdType theOperationResourceId, IPrimitiveType<Date> theOperationResourceLastUpdated)
 			throws IOException {
-		IRestfulResponse restUtil = theRequestDetails.getResponse();
+		IRestfulResponse response = theRequestDetails.getResponse();
 
 		// Determine response encoding
 		ResponseEncoding responseEncoding = RestfulServerUtils.determineResponseEncodingNoDefault(theRequestDetails, theServer.getDefaultResponseEncoding());
@@ -561,14 +561,14 @@ public class RestfulServerUtils {
 
 		if (theAddContentLocationHeader && fullId != null) {
 			if (theServer.getFhirContext().getVersion().getVersion().isOlderThan(FhirVersionEnum.DSTU3)) {
-				restUtil.addHeader(Constants.HEADER_CONTENT_LOCATION, fullId.getValue());
+				response.addHeader(Constants.HEADER_CONTENT_LOCATION, fullId.getValue());
 			}
-			restUtil.addHeader(Constants.HEADER_LOCATION, fullId.getValue());
+			response.addHeader(Constants.HEADER_LOCATION, fullId.getValue());
 		}
 
 		if (theServer.getETagSupport() == ETagSupportEnum.ENABLED) {
 			if (fullId != null && fullId.hasVersionIdPart()) {
-				restUtil.addHeader(Constants.HEADER_ETAG, "W/\"" + fullId.getVersionIdPart() + '"');
+				response.addHeader(Constants.HEADER_ETAG, "W/\"" + fullId.getVersionIdPart() + '"');
 			}
 		}
 
@@ -582,9 +582,9 @@ public class RestfulServerUtils {
 			}
 			// Force binary resources to download - This is a security measure to prevent
 			// malicious images or HTML blocks being served up as content.
-			restUtil.addHeader(Constants.HEADER_CONTENT_DISPOSITION, "Attachment;");
+			response.addHeader(Constants.HEADER_CONTENT_DISPOSITION, "Attachment;");
 
-			return restUtil.sendAttachmentResponse(bin, theStausCode, contentType);
+			return response.sendAttachmentResponse(bin, theStausCode, contentType);
 		}
 
 		// Ok, we're not serving a binary resource, so apply default encoding
@@ -615,7 +615,7 @@ public class RestfulServerUtils {
 			lastUpdated = extractLastUpdatedFromResource(theResource);
 		}
 		if (lastUpdated != null && lastUpdated.isEmpty() == false) {
-			restUtil.addHeader(Constants.HEADER_LAST_MODIFIED, DateUtils.formatDate(lastUpdated.getValue()));
+			response.addHeader(Constants.HEADER_LAST_MODIFIED, DateUtils.formatDate(lastUpdated.getValue()));
 		}
 
 		/*
@@ -631,7 +631,7 @@ public class RestfulServerUtils {
 		}
 		String charset = Constants.CHARSET_NAME_UTF8;
 
-		Writer writer = restUtil.getResponseWriter(theStausCode, theStatusMessage, contentType, charset, respondGzip);
+		Writer writer = response.getResponseWriter(theStausCode, theStatusMessage, contentType, charset, respondGzip);
 		if (theResource == null) {
 			// No response is being returned
 		} else if (encodingDomainResourceAsText && theResource instanceof IResource) {
@@ -641,7 +641,7 @@ public class RestfulServerUtils {
 			parser.encodeResourceToWriter(theResource, writer);
 		}
 		//FIXME resource leak
-		return restUtil.sendWriterResponse(theStausCode, contentType, charset, writer);
+		return response.sendWriterResponse(theStausCode, contentType, charset, writer);
 	}
 
 	public static Integer tryToExtractNamedParameter(RequestDetails theRequest, String theParamName) {

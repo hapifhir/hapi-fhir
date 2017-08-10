@@ -92,25 +92,15 @@ public abstract class BaseMethodBinding<T> {
 		return parser;
 	}
 
-	protected IParser createAppropriateParserForParsingServerRequest(RequestDetails theRequest) {
-		String contentTypeHeader = theRequest.getHeader(Constants.HEADER_CONTENT_TYPE);
-		EncodingEnum encoding;
-		if (isBlank(contentTypeHeader)) {
-			encoding = EncodingEnum.XML;
-		} else {
-			int semicolon = contentTypeHeader.indexOf(';');
-			if (semicolon != -1) {
-				contentTypeHeader = contentTypeHeader.substring(0, semicolon);
+	protected Object[] createMethodParams(RequestDetails theRequest) {
+		Object[] params = new Object[getParameters().size()];
+		for (int i = 0; i < getParameters().size(); i++) {
+			IParameter param = getParameters().get(i);
+			if (param != null) {
+				params[i] = param.translateQueryParametersIntoServerArgument(theRequest, this);
 			}
-			encoding = EncodingEnum.forContentType(contentTypeHeader);
 		}
-
-		if (encoding == null) {
-			throw new InvalidRequestException("Request contins non-FHIR conent-type header value: " + contentTypeHeader);
-		}
-
-		IParser parser = encoding.newParser(getContext());
-		return parser;
+		return params;
 	}
 
 	protected Object[] createParametersForServerRequest(RequestDetails theRequest) {
@@ -345,16 +335,21 @@ public abstract class BaseMethodBinding<T> {
 		Operation operation = theMethod.getAnnotation(Operation.class);
 		GetPage getPage = theMethod.getAnnotation(GetPage.class);
 		Patch patch = theMethod.getAnnotation(Patch.class);
+		GraphQL graphQL = theMethod.getAnnotation(GraphQL.class);
 
 		// ** if you add another annotation above, also add it to the next line:
-		if (!verifyMethodHasZeroOrOneOperationAnnotation(theMethod, read, search, conformance, create, update, delete, history, validate, addTags, deleteTags, transaction, operation, getPage, patch)) {
+		if (!verifyMethodHasZeroOrOneOperationAnnotation(theMethod, read, search, conformance, create, update, delete, history, validate, addTags, deleteTags, transaction, operation, getPage, patch, graphQL)) {
 			return null;
 		}
 
 		if (getPage != null) {
 			return new PageMethodBinding(theContext, theMethod);
 		}
-		
+
+		if (graphQL != null) {
+			return new GraphQLMethodBinding(theMethod, theContext, theProvider);
+		}
+
 		Class<? extends IBaseResource> returnType;
 
 		Class<? extends IBaseResource> returnTypeFromRp = null;

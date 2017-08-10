@@ -163,6 +163,8 @@ public class MethodUtil {
 						((AtParameter) param).setType(theContext, parameterType, innerCollectionType, outerCollectionType);
 					} else if (nextAnnotation instanceof Count) {
 						param = new CountParameter();
+					} else if (nextAnnotation instanceof GraphQLQuery) {
+						param = new GraphQLQueryParameter();
 					} else if (nextAnnotation instanceof Sort) {
 						param = new SortParameter(theContext);
 					} else if (nextAnnotation instanceof TransactionParam) {

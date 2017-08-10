@@ -170,14 +170,7 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 	}
 
 	public IBaseResource doInvokeServer(IRestfulServer<?> theServer, RequestDetails theRequest) {
-		// Method params
-		Object[] params = new Object[getParameters().size()];
-		for (int i = 0; i < getParameters().size(); i++) {
-			IParameter param = getParameters().get(i);
-			if (param != null) {
-				params[i] = param.translateQueryParametersIntoServerArgument(theRequest, this);
-			}
-		}
+		Object[] params = createMethodParams(theRequest);
 
 		Object resultObj = invokeServer(theServer, theRequest, params);
 
