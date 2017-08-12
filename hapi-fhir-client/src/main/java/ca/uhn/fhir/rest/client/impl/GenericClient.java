@@ -1681,6 +1681,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 		@Override
 		public OUTPUT execute() {
+			Validate.notNull(myReturnBundleType, "Return bundle type mustbe specified");
 
 			Map<String, List<String>> params = getParamMap();
 
@@ -1753,11 +1754,6 @@ public class GenericClient extends BaseClient implements IGenericClient {
 				for (DateParam next : myLastUpdated.getValuesAsQueryTokens()) {
 					addParam(params, Constants.PARAM_LASTUPDATED, next.getValueAsQueryToken(myContext));
 				}
-			}
-
-			if (myReturnBundleType == null && myContext.getVersion().getVersion().isRi()) {
-				throw new IllegalArgumentException("When using the client with HL7.org structures, you must specify "
-						+ "the bundle return type for the client by adding \".returnBundle(org.hl7.fhir.instance.model.Bundle.class)\" to your search method call before the \".execute()\" method");
 			}
 
 			IClientResponseHandler<? extends IBase> binding;
