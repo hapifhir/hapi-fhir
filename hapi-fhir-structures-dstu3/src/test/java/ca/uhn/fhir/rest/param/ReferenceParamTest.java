@@ -30,7 +30,7 @@ public class ReferenceParamTest {
 		
 	}
 	
-	private FhirContext ourCtx = FhirContext.forDstu1();
+	private FhirContext ourCtx = FhirContext.forDstu3();
 
 	@AfterClass
 	public static void afterClassClearContext() {
