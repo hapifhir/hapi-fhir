@@ -346,6 +346,10 @@
 			<id>SarenCurrie</id>
 			<name>Saren Currie</name>
 		</developer>
+		<developer>
+			<id>dconlan</id>
+			<name>dconlan</name>
+		</developer>
 	</developers>
 
 	<licenses>
