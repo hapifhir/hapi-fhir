@@ -205,7 +205,7 @@
 				Testing UI now has a dropdown for modifiers on token search. Thanks 
 				to GitHub user @dconlan for the pull request!
 			</action>
-			<action type="add" issue="698">
+			<action type="add" issue="688">
 				When parsing an incomplete ID with the form <![CDATA[<code>http://my.org/Foo</code>]]> into
 				IdDt and IdType objects, the Foo portion will now be treated as the resource type.
 				Previously my.org was treated as the resource type and Foo was treated as the ID. Thanks
