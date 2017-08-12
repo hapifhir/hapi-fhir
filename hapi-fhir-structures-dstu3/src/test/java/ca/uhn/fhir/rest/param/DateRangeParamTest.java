@@ -188,7 +188,7 @@ public class DateRangeParamTest {
 		return p;
 	}
 
-	private static FhirContext ourCtx = FhirContext.forDstu1();
+	private static FhirContext ourCtx = FhirContext.forDstu3();
 	
 	public static Date parse(String theString) throws ParseException {
 		return ourFmt.parse(theString);
