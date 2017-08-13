@@ -87,6 +87,7 @@ public class ClientServerValidationDstu1Test {
 	}
 
 	@Test
+	@Ignore
 	public void testServerReturnsWrongVersionDstu() throws Exception {
 		CapabilityStatement conf = new CapabilityStatement();
 		conf.setFhirVersion("0.4.0");

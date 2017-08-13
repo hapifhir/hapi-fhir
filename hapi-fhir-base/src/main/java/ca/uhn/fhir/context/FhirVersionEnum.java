@@ -140,6 +140,11 @@ public enum FhirVersionEnum {
 		String provideVersion();
 	}
 
+	/**
+	 * This class attempts to read the FHIR version from the actual model
+	 * classes in order to supply an accurate version string even over time
+	 *
+	 */
 	private static class Dstu3Version implements IVersionProvider {
 
 		public Dstu3Version() {
@@ -147,7 +152,7 @@ public enum FhirVersionEnum {
 				Class<?> c = Class.forName("org.hl7.fhir.dstu3.model.Constants");
 				myVersion = (String) c.getDeclaredField("VERSION").get(null);
 			} catch (Exception e) {
-				myVersion = "UNKNOWN";
+				myVersion = "3.0.1";
 			}
 		}
 
@@ -167,7 +172,7 @@ public enum FhirVersionEnum {
 				Class<?> c = Class.forName("org.hl7.fhir.r4.model.Constants");
 				myVersion = (String) c.getDeclaredField("VERSION").get(null);
 			} catch (Exception e) {
-				myVersion = "UNKNOWN";
+				myVersion = "4.0.0";
 			}
 		}
 

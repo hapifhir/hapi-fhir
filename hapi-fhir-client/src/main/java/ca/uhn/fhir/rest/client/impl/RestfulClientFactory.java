@@ -46,7 +46,7 @@ public abstract class RestfulClientFactory implements IRestfulClientFactory {
 	private int myConnectionRequestTimeout = DEFAULT_CONNECTION_REQUEST_TIMEOUT;
 	private int myConnectTimeout = DEFAULT_CONNECT_TIMEOUT;
 	private FhirContext myContext;
-	private Map<Class<? extends IRestfulClient>, ClientInvocationHandlerFactory> myInvocationHandlers = new HashMap<Class<? extends IRestfulClient>, ClientInvocationHandlerFactory>();
+	private Map<Class<? extends IRestfulClient>, ClientInvocationHandlerFactory> myInvocationHandlers = new HashMap<>();
 	private ServerValidationModeEnum myServerValidationMode = DEFAULT_SERVER_VALIDATION_MODE;
 	private int mySocketTimeout = DEFAULT_SOCKET_TIMEOUT;
 	private String myProxyUsername;
@@ -82,9 +82,6 @@ public abstract class RestfulClientFactory implements IRestfulClientFactory {
 
 	/**
 	 * Return the proxy username to authenticate with the HTTP proxy
-	 * 
-	 * @param The
-	 *           proxy username
 	 */
 	protected String getProxyUsername() {
 		return myProxyUsername;
@@ -92,9 +89,6 @@ public abstract class RestfulClientFactory implements IRestfulClientFactory {
 
 	/**
 	 * Return the proxy password to authenticate with the HTTP proxy
-	 * 
-	 * @param The
-	 *           proxy password
 	 */
 	protected String getProxyPassword() {
 		return myProxyPassword;
@@ -128,8 +122,7 @@ public abstract class RestfulClientFactory implements IRestfulClientFactory {
 
 	@SuppressWarnings("unchecked")
 	private <T extends IRestfulClient> T instantiateProxy(Class<T> theClientType, InvocationHandler theInvocationHandler) {
-		T proxy = (T) Proxy.newProxyInstance(theClientType.getClassLoader(), new Class[] { theClientType }, theInvocationHandler);
-		return proxy;
+		return (T) Proxy.newProxyInstance(theClientType.getClassLoader(), new Class[] { theClientType }, theInvocationHandler);
 	}
 
 	/**
@@ -162,9 +155,7 @@ public abstract class RestfulClientFactory implements IRestfulClientFactory {
 			myInvocationHandlers.put(theClientType, invocationHandler);
 		}
 
-		T proxy = instantiateProxy(theClientType, invocationHandler.newInvocationHandler(this));
-
-		return proxy;
+		return instantiateProxy(theClientType, invocationHandler.newInvocationHandler(this));
 	}
 
 	/**
@@ -331,13 +322,14 @@ public abstract class RestfulClientFactory implements IRestfulClientFactory {
 		FhirVersionEnum serverFhirVersionEnum = null;
 		if (StringUtils.isBlank(serverFhirVersionString)) {
 			// we'll be lenient and accept this
+			ourLog.debug("Server conformance statement does not indicate the FHIR version");
 		} else {
-			if (serverFhirVersionString.startsWith("0.4") || serverFhirVersionString.startsWith("0.5") || serverFhirVersionString.startsWith("1.0.")) {
+			if (serverFhirVersionString.equals(FhirVersionEnum.DSTU2.getFhirVersionString())) {
 				serverFhirVersionEnum = FhirVersionEnum.DSTU2;
-			} else if (serverFhirVersionString.startsWith("3.0.")) {
+			} else if (serverFhirVersionString.equals(FhirVersionEnum.DSTU2_1.getFhirVersionString())) {
+				serverFhirVersionEnum = FhirVersionEnum.DSTU2_1;
+			} else if (serverFhirVersionString.equals(FhirVersionEnum.DSTU3.getFhirVersionString())) {
 				serverFhirVersionEnum = FhirVersionEnum.DSTU3;
-			} else if (serverFhirVersionString.startsWith("3.1.")) {
-				serverFhirVersionEnum = FhirVersionEnum.R4;
 			} else {
 				// we'll be lenient and accept this
 				ourLog.debug("Server conformance statement indicates unknown FHIR version: {}", serverFhirVersionString);
