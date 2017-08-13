@@ -20,25 +20,6 @@ package ca.uhn.fhir.jpa.interceptor;
  * #L%
  */
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
-import javax.annotation.PostConstruct;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import org.apache.http.client.methods.*;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.StringEntity;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.SearchParameterMap;
@@ -49,24 +30,36 @@ import ca.uhn.fhir.model.dstu2.resource.Subscription;
 import ca.uhn.fhir.model.dstu2.valueset.SubscriptionChannelTypeEnum;
 import ca.uhn.fhir.model.dstu2.valueset.SubscriptionStatusEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.rest.api.*;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.EncodingEnum;
+import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.TokenParam;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
+import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.StringEntity;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.util.ArrayList;
+import java.util.List;
 
 public class RestHookSubscriptionDstu2Interceptor extends BaseRestHookSubscriptionInterceptor {
 
-	private static volatile ExecutorService executor;
-	private final static int MAX_THREADS = 1;
-
 	private static final Logger ourLog = LoggerFactory.getLogger(RestHookSubscriptionDstu2Interceptor.class);
-
+	private final List<Subscription> myRestHookSubscriptions = new ArrayList<>();
 	@Autowired
 	private FhirContext myFhirContext;
-
 	private boolean myNotifyOnDelete = false;
-
-	private final List<Subscription> myRestHookSubscriptions = new ArrayList<Subscription>();
 	@Autowired
 	@Qualifier("mySubscriptionDaoDstu2")
 	private IFhirResourceDao<Subscription> mySubscriptionDao;
@@ -117,12 +110,11 @@ public class RestHookSubscriptionDstu2Interceptor extends BaseRestHookSubscripti
 				ourLog.info("Found match: queueing rest-hook notification for resource: {}", next.getIdElement());
 				HttpUriRequest request = createRequest(subscription, next, theOperation);
 				if (request != null) {
-					executor.submit(new HttpRequestDstu2Job(request, subscription));
+					myExecutor.submit(new HttpRequestDstu2Job(request, subscription));
 				}
 			}
 		}
 	}
-
 
 
 	/**
@@ -242,6 +234,10 @@ public class RestHookSubscriptionDstu2Interceptor extends BaseRestHookSubscripti
 		return mySubscriptionDao;
 	}
 
+	public void setSubscriptionDao(IFhirResourceDao<Subscription> theSubscriptionDao) {
+		mySubscriptionDao = theSubscriptionDao;
+	}
+
 	@Override
 	public void incomingRequestPreHandled(RestOperationTypeEnum theOperation, ActionRequestDetails theDetails) {
 		// check the subscription criteria to see if its valid before creating or updating a subscription
@@ -286,20 +282,15 @@ public class RestHookSubscriptionDstu2Interceptor extends BaseRestHookSubscripti
 		return myNotifyOnDelete;
 	}
 
+	public void setNotifyOnDelete(boolean notifyOnDelete) {
+		this.myNotifyOnDelete = notifyOnDelete;
+	}
+
 	/**
 	 * Subclasses may override
 	 */
 	protected String massageCriteria(String theCriteria) {
 		return theCriteria;
-	}
-
-	@PostConstruct
-	public void postConstruct() {
-		try {
-			executor = Executors.newFixedThreadPool(MAX_THREADS);
-		} catch (Exception e) {
-			throw new RuntimeException("Unable to get DAO from PROXY");
-		}
 	}
 
 	/**
@@ -330,8 +321,8 @@ public class RestHookSubscriptionDstu2Interceptor extends BaseRestHookSubscripti
 		if (theResource instanceof Subscription) {
 			Subscription subscription = (Subscription) theResource;
 			if (subscription.getChannel() != null
-					&& subscription.getChannel().getTypeElement().getValueAsEnum() == SubscriptionChannelTypeEnum.REST_HOOK
-					&& subscription.getStatusElement().getValueAsEnum() == SubscriptionStatusEnum.REQUESTED) {
+				&& subscription.getChannel().getTypeElement().getValueAsEnum() == SubscriptionChannelTypeEnum.REST_HOOK
+				&& subscription.getStatusElement().getValueAsEnum() == SubscriptionStatusEnum.REQUESTED) {
 				removeLocalSubscription(subscription.getIdElement().getIdPart());
 				subscription.setStatus(SubscriptionStatusEnum.ACTIVE);
 				myRestHookSubscriptions.add(subscription);
@@ -345,16 +336,13 @@ public class RestHookSubscriptionDstu2Interceptor extends BaseRestHookSubscripti
 	/**
 	 * Check subscriptions to see if there is a matching subscription when there is delete
 	 *
-	 * @param theRequest
-	 *           A bean containing details about the request that is about to be processed, including details such as the
-	 *           resource type and logical ID (if any) and other FHIR-specific aspects of the request which have been
-	 *           pulled out of the {@link HttpServletRequest servlet request}.
-	 * @param theRequest
-	 *           The incoming request
-	 * @param theResource
-	 *           The response. Note that interceptors may choose to provide a response (i.e. by calling
-	 *           {@link HttpServletResponse#getWriter()}) but in that case it is important to return <code>false</code>
-	 *           to indicate that the server itself should not also provide a response.
+	 * @param theRequest  A bean containing details about the request that is about to be processed, including details such as the
+	 *                    resource type and logical ID (if any) and other FHIR-specific aspects of the request which have been
+	 *                    pulled out of the {@link HttpServletRequest servlet request}.
+	 * @param theRequest  The incoming request
+	 * @param theResource The response. Note that interceptors may choose to provide a response (i.e. by calling
+	 *                    {@link HttpServletResponse#getWriter()}) but in that case it is important to return <code>false</code>
+	 *                    to indicate that the server itself should not also provide a response.
 	 */
 	@Override
 	public void resourceDeleted(RequestDetails theRequest, IBaseResource theResource) {
@@ -399,14 +387,6 @@ public class RestHookSubscriptionDstu2Interceptor extends BaseRestHookSubscripti
 
 	public void setFhirContext(FhirContext theFhirContext) {
 		myFhirContext = theFhirContext;
-	}
-
-	public void setNotifyOnDelete(boolean notifyOnDelete) {
-		this.myNotifyOnDelete = notifyOnDelete;
-	}
-
-	public void setSubscriptionDao(IFhirResourceDao<Subscription> theSubscriptionDao) {
-		mySubscriptionDao = theSubscriptionDao;
 	}
 
 }

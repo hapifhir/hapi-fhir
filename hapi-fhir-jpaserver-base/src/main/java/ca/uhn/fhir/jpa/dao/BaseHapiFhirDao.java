@@ -1077,7 +1077,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		RuntimeResourceDefinition resourceDef = getContext().getResourceDefinition(theResourceType);
 
 		SearchParameterMap paramMap = translateMatchUrl(this, myContext, theMatchUrl, resourceDef);
-		paramMap.setPersistResults(false);
+		paramMap.setLoadSynchronous(true);
 
 		if (paramMap.isEmpty() && paramMap.getLastUpdated() == null) {
 			throw new InvalidRequestException("Invalid match URL[" + theMatchUrl + "] - URL has no search parameters");

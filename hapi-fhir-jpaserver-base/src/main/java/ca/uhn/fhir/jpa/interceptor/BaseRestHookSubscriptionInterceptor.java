@@ -20,21 +20,26 @@ package ca.uhn.fhir.jpa.interceptor;
  * #L%
  */
 
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
-
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
-import ca.uhn.fhir.jpa.dao.*;
+import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
+import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.dao.SearchParameterMap;
 import ca.uhn.fhir.jpa.provider.ServletSubRequestDetails;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.interceptor.ServerOperationInterceptorAdapter;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
+
+import javax.annotation.PostConstruct;
+import java.util.concurrent.*;
 
 public abstract class BaseRestHookSubscriptionInterceptor extends ServerOperationInterceptorAdapter {
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseRestHookSubscriptionInterceptor.class);
-
 	protected static final Integer MAX_SUBSCRIPTION_RESULTS = 10000;
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseRestHookSubscriptionInterceptor.class);
+	protected ExecutorService myExecutor;
+	private int myExecutorThreadCount = 1;
 
 	protected abstract IFhirResourceDao<?> getSubscriptionDao();
 
@@ -44,6 +49,18 @@ public abstract class BaseRestHookSubscriptionInterceptor extends ServerOperatio
 		} catch (Exception e) {
 			ourLog.warn("Invalid criteria when creating subscription", e);
 			throw new InvalidRequestException("Invalid criteria: " + e.getMessage());
+		}
+	}
+
+	@PostConstruct
+	public void postConstruct() {
+		try {
+			myExecutor = new ThreadPoolExecutor(myExecutorThreadCount, myExecutorThreadCount,
+				0L, TimeUnit.MILLISECONDS,	new LinkedBlockingQueue<Runnable>(1000));
+
+			myExecutor = Executors.newFixedThreadPool(myExecutorThreadCount);
+		} catch (Exception e) {
+			throw new RuntimeException("Unable to get DAO from PROXY");
 		}
 	}
 
@@ -64,7 +81,7 @@ public abstract class BaseRestHookSubscriptionInterceptor extends ServerOperatio
 
 	/**
 	 * Search based on a query criteria
-	 * 
+	 *
 	 * @param theCheckOnly Is this just a test that the search works
 	 */
 	protected IBundleProvider getBundleProvider(String theCriteria, boolean theCheckOnly) {
@@ -75,13 +92,13 @@ public abstract class BaseRestHookSubscriptionInterceptor extends ServerOperatio
 		req.setSubRequest(true);
 
 		IFhirResourceDao<? extends IBaseResource> responseDao = getSubscriptionDao().getDao(responseResourceDef.getImplementingClass());
-		
+
 		if (theCheckOnly) {
 			responseCriteriaUrl.setLoadSynchronousUpTo(1);
 		} else {
 			responseCriteriaUrl.setLoadSynchronousUpTo(MAX_SUBSCRIPTION_RESULTS);
 		}
-		
+
 		IBundleProvider responseResults = responseDao.search(responseCriteriaUrl, req);
 		return responseResults;
 	}

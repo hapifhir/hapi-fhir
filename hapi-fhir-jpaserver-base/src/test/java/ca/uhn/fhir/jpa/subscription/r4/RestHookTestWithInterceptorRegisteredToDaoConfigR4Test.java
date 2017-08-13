@@ -1,40 +1,39 @@
-
 package ca.uhn.fhir.jpa.subscription.r4;
-
-import static org.junit.Assert.*;
-
-import java.util.List;
-
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.servlet.ServletContextHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
-import org.hl7.fhir.r4.model.*;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.junit.*;
-
-import com.google.common.collect.Lists;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.provider.r4.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.testutil.RandomServerPortProvider;
 import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.rest.annotation.*;
+import ca.uhn.fhir.rest.annotation.Create;
+import ca.uhn.fhir.rest.annotation.ResourceParam;
+import ca.uhn.fhir.rest.annotation.Update;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
+import com.google.common.collect.Lists;
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.servlet.ServletContextHandler;
+import org.eclipse.jetty.servlet.ServletHolder;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.*;
+import org.junit.*;
+
+import java.util.List;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * Test the rest-hook subscriptions
  */
 public class RestHookTestWithInterceptorRegisteredToDaoConfigR4Test extends BaseResourceProviderR4Test {
 
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(RestHookTestWithInterceptorRegisteredToDaoConfigR4Test.class);
 	private static List<Observation> ourCreatedObservations = Lists.newArrayList();
 	private static int ourListenerPort;
 	private static RestfulServer ourListenerRestServer;
 	private static Server ourListenerServer;
 	private static String ourListenerServerBase;
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(RestHookTestWithInterceptorRegisteredToDaoConfigR4Test.class);
 	private static List<Observation> ourUpdatedObservations = Lists.newArrayList();
 
 	@Override
@@ -46,10 +45,10 @@ public class RestHookTestWithInterceptorRegisteredToDaoConfigR4Test extends Base
 	public void afterUnregisterRestHookListener() {
 		myDaoConfig.setAllowMultipleDelete(true);
 		ourLog.info("Deleting all subscriptions");
+		ourClient.delete().resourceConditionalByUrl("Subscription?status=requested").execute();// TODO: this shouldn't be neccesary
 		ourClient.delete().resourceConditionalByUrl("Subscription?status=active").execute();
 		ourLog.info("Done deleting all subscriptions");
 		myDaoConfig.setAllowMultipleDelete(new DaoConfig().isAllowMultipleDelete());
-		
 		myDaoConfig.getInterceptors().remove(ourRestHookSubscriptionInterceptor);
 	}
 
@@ -67,7 +66,7 @@ public class RestHookTestWithInterceptorRegisteredToDaoConfigR4Test extends Base
 	private Subscription createSubscription(String criteria, String payload, String endpoint) {
 		Subscription subscription = new Subscription();
 		subscription.setReason("Monitor new neonatal function (note, age will be determined by the monitor)");
-		subscription.setStatus(Subscription.SubscriptionStatus.ACTIVE);
+		subscription.setStatus(Subscription.SubscriptionStatus.REQUESTED);
 		subscription.setCriteria(criteria);
 
 		Subscription.SubscriptionChannelComponent channel = new Subscription.SubscriptionChannelComponent();
@@ -117,7 +116,7 @@ public class RestHookTestWithInterceptorRegisteredToDaoConfigR4Test extends Base
 		Thread.sleep(500);
 		assertEquals(1, ourCreatedObservations.size());
 		assertEquals(0, ourUpdatedObservations.size());
-		
+
 		Subscription subscriptionTemp = ourClient.read(Subscription.class, subscription2.getId());
 		Assert.assertNotNull(subscriptionTemp);
 
@@ -129,16 +128,16 @@ public class RestHookTestWithInterceptorRegisteredToDaoConfigR4Test extends Base
 
 		// Should see two subscription notifications
 		Thread.sleep(500);
-		assertEquals(3, ourCreatedObservations.size());
+		assertEquals(2, ourCreatedObservations.size());
 		assertEquals(0, ourUpdatedObservations.size());
-		
+
 		ourClient.delete().resourceById(new IdDt("Subscription", subscription2.getId())).execute();
 
 		Observation observationTemp3 = sendObservation(code, "SNOMED-CT");
 
 		// Should see only one subscription notification
 		Thread.sleep(500);
-		assertEquals(4, ourCreatedObservations.size());
+		assertEquals(3, ourCreatedObservations.size());
 		assertEquals(0, ourUpdatedObservations.size());
 
 		Observation observation3 = ourClient.read(Observation.class, observationTemp3.getId());
@@ -151,7 +150,7 @@ public class RestHookTestWithInterceptorRegisteredToDaoConfigR4Test extends Base
 
 		// Should see no subscription notification
 		Thread.sleep(500);
-		assertEquals(4, ourCreatedObservations.size());
+		assertEquals(3, ourCreatedObservations.size());
 		assertEquals(0, ourUpdatedObservations.size());
 
 		Observation observation3a = ourClient.read(Observation.class, observationTemp3.getId());
@@ -165,7 +164,7 @@ public class RestHookTestWithInterceptorRegisteredToDaoConfigR4Test extends Base
 
 		// Should see only one subscription notification
 		Thread.sleep(500);
-		assertEquals(4, ourCreatedObservations.size());
+		assertEquals(3, ourCreatedObservations.size());
 		assertEquals(1, ourUpdatedObservations.size());
 
 		Assert.assertFalse(subscription1.getId().equals(subscription2.getId()));
@@ -190,7 +189,7 @@ public class RestHookTestWithInterceptorRegisteredToDaoConfigR4Test extends Base
 		Thread.sleep(500);
 		assertEquals(1, ourCreatedObservations.size());
 		assertEquals(0, ourUpdatedObservations.size());
-		
+
 		Subscription subscriptionTemp = ourClient.read(Subscription.class, subscription2.getId());
 		Assert.assertNotNull(subscriptionTemp);
 
@@ -202,16 +201,16 @@ public class RestHookTestWithInterceptorRegisteredToDaoConfigR4Test extends Base
 
 		// Should see two subscription notifications
 		Thread.sleep(500);
-		assertEquals(3, ourCreatedObservations.size());
+		assertEquals(2, ourCreatedObservations.size());
 		assertEquals(0, ourUpdatedObservations.size());
-		
+
 		ourClient.delete().resourceById(new IdDt("Subscription", subscription2.getId())).execute();
 
 		Observation observationTemp3 = sendObservation(code, "SNOMED-CT");
 
 		// Should see only one subscription notification
 		Thread.sleep(500);
-		assertEquals(4, ourCreatedObservations.size());
+		assertEquals(3, ourCreatedObservations.size());
 		assertEquals(0, ourUpdatedObservations.size());
 
 		Observation observation3 = ourClient.read(Observation.class, observationTemp3.getId());
@@ -224,7 +223,7 @@ public class RestHookTestWithInterceptorRegisteredToDaoConfigR4Test extends Base
 
 		// Should see no subscription notification
 		Thread.sleep(500);
-		assertEquals(4, ourCreatedObservations.size());
+		assertEquals(3, ourCreatedObservations.size());
 		assertEquals(0, ourUpdatedObservations.size());
 
 		Observation observation3a = ourClient.read(Observation.class, observationTemp3.getId());
@@ -238,7 +237,7 @@ public class RestHookTestWithInterceptorRegisteredToDaoConfigR4Test extends Base
 
 		// Should see only one subscription notification
 		Thread.sleep(500);
-		assertEquals(4, ourCreatedObservations.size());
+		assertEquals(3, ourCreatedObservations.size());
 		assertEquals(1, ourUpdatedObservations.size());
 
 		Assert.assertFalse(subscription1.getId().equals(subscription2.getId()));

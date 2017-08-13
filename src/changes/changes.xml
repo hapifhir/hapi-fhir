@@ -6,7 +6,23 @@
 		<title>HAPI FHIR Changelog</title>
 	</properties>
 	<body>
-		<release version="3.0" date="TBD">
+		<release version="3.0.0" date="TBD">
+			<action type="add">
+				<![CDATA[
+				<ul>
+					<li>AddProfileTagEnum moved from package ca.uhn.fhir.rest.server to package ca.uhn.fhir.context.api</li>
+					<li>IVersionSpecificBundleFactory moved from package ca.uhn.fhir.rest.server to package ca.uhn.fhir.context.api</li>
+					<li>BundleInclusionRule moved from package ca.uhn.fhir.rest.server to package ca.uhn.fhir.context.api</li>
+					<li>RestSearchParameterTypeEnum moved from package ca.uhn.fhir.rest.server to package ca.uhn.fhir.rest.api</li>
+					<li>EncodingEnum moved from package ca.uhn.fhir.rest.server to package ca.uhn.fhir.rest.api</li>
+					<li>Constants moved from package ca.uhn.fhir.rest.server to package ca.uhn.fhir.rest.api</li>
+					<li>IClientInterceptor moved from package ca.uhn.fhir.rest.client to package ca.uhn.fhir.rest.client.api</li>
+					<li>IGenericClient moved from package ca.uhn.fhir.rest.client to package ca.uhn.fhir.rest.client.api</li>
+					<li>IRestfulClient moved from package ca.uhn.fhir.rest.client to package ca.uhn.fhir.rest.client.api</li>
+					<li>ITestingUiClientFactory moved from package ca.uhn.fhir.util to package ca.uhn.fhir.rest.server.util</li>
+				</ul>
+				]]>
+			</action>
 			<action type="add">
 				Bump the version of a few dependencies to the
 				latest versions (dependent HAPI modules listed in brackets):
@@ -45,22 +61,6 @@
 				this feature was only present in FHIR DSTU1 and was removed from the specification in
 				FHIR DSTU2. The presence of these headers sometimes caused parsed resource instances
 				to contain duplicate tags
-			</action>
-		</release>
-		<release version="2.6" date="TBD">
-			<action type="add">
-				<ul>
-					<li>AddProfileTagEnum moved from package ca.uhn.fhir.rest.server to package ca.uhn.fhir.context.api</li>
-					<li>IVersionSpecificBundleFactory moved from package ca.uhn.fhir.rest.server to package ca.uhn.fhir.context.api</li>
-					<li>BundleInclusionRule moved from package ca.uhn.fhir.rest.server to package ca.uhn.fhir.context.api</li>
-					<li>RestSearchParameterTypeEnum moved from package ca.uhn.fhir.rest.server to package ca.uhn.fhir.rest.api</li>
-					<li>EncodingEnum moved from package ca.uhn.fhir.rest.server to package ca.uhn.fhir.rest.api</li>
-					<li>Constants moved from package ca.uhn.fhir.rest.server to package ca.uhn.fhir.rest.api</li>
-					<li>IClientInterceptor moved from package ca.uhn.fhir.rest.client to package ca.uhn.fhir.rest.client.api</li>
-					<li>IGenericClient moved from package ca.uhn.fhir.rest.client to package ca.uhn.fhir.rest.client.api</li>
-					<li>IRestfulClient moved from package ca.uhn.fhir.rest.client to package ca.uhn.fhir.rest.client.api</li>
-					<li>ITestingUiClientFactory moved from package ca.uhn.fhir.util to package ca.uhn.fhir.rest.server.util</li>
-				</ul>
 			</action>
 			<action type="fix" issue="667">
 				When using the AuthorizationInterceptor with the JPA server, when a client is updating a resource
@@ -254,7 +254,7 @@
 				<![CDATA[<code>Bundle.entry.response.outcome</code>]]>
 				instead of the previous
 				<![CDATA[<code>Bundle.entry.resource</code>]]>
-			<action>
+			</action>
 			<action type="fix" issue="696">
 				An issue was corrected where search parameters containing negative numbers
 				were sometimes treated as positive numbers when processing the search. Thanks
