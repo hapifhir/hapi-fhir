@@ -65,8 +65,8 @@
    <min value="0"/>
    <max value="1"/>
    <!-- Note: primitive values do not have an assigned type
-  e.g. this is compiler magic
-  XML and JSON types provided by extension -->
+e.g. this is compiler magic
+XML and JSON types provided by extension -->
    <type>
     <code>
      <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-json-type">
@@ -100,8 +100,8 @@
    <min value="0"/>
    <max value="1"/>
    <!-- Note: primitive values do not have an assigned type
-  e.g. this is compiler magic
-  XML and JSON types provided by extension -->
+e.g. this is compiler magic
+XML and JSON types provided by extension -->
    <type>
     <code>
      <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-json-type">

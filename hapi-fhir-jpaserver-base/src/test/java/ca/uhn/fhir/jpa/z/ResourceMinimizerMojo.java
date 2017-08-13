@@ -1,49 +1,37 @@
-package ca.uhn.fhir.tinder;
-
-import java.io.*;
-import java.net.URL;
-import java.util.Collection;
+package ca.uhn.fhir.jpa.z;
 
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
-import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
-import ca.uhn.fhir.util.BundleUtil;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.maven.plugin.*;
-import org.apache.maven.plugins.annotations.LifecyclePhase;
-import org.apache.maven.plugins.annotations.Mojo;
-import org.apache.maven.plugins.annotations.Parameter;
-import org.hl7.fhir.instance.model.api.IBaseBundle;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu2.resource.Bundle;
 import ca.uhn.fhir.model.dstu2.resource.Bundle.Entry;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.EncodingEnum;
+import ca.uhn.fhir.util.BundleUtil;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.core.joran.util.ConfigurationWatchListUtil;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 
-@Mojo(name = "minimize-resources", defaultPhase = LifecyclePhase.GENERATE_SOURCES)
-public class ResourceMinimizerMojo extends AbstractMojo {
+import java.io.*;
+import java.net.URL;
+import java.util.Collection;
+
+public class ResourceMinimizerMojo {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResourceMinimizerMojo.class);
 
-	@Parameter(required = true)
 	private String fhirVersion;
-
 	private long myByteCount;
 	private FhirContext myCtx;
 	private int myFileCount;
-
-	@Parameter(required = true)
 	private File targetDirectory;
 
-	@Override
-	public void execute() throws MojoExecutionException, MojoFailureException {
+	public void execute() throws Exception {
 		ourLog.info("Starting resource minimizer");
 
 		if (myCtx != null) {
@@ -59,12 +47,12 @@ public class ResourceMinimizerMojo extends AbstractMojo {
 		} else if ("R4".equals(fhirVersion)) {
 			myCtx = FhirContext.forR4();
 		} else {
-			throw new MojoFailureException("Unknown version: " + fhirVersion);
+			throw new Exception("Unknown version: " + fhirVersion);
 		}
 
 		ourLog.info("Looking for files in directory: {}", targetDirectory.getAbsolutePath());
-		
-		Collection<File> files = FileUtils.listFiles(targetDirectory, new String[] { "xml", "json" }, true);
+
+		Collection<File> files = FileUtils.listFiles(targetDirectory, new String[]{"xml", "json"}, true);
 		for (File nextFile : files) {
 			ourLog.debug("Checking file: {}", nextFile);
 
@@ -72,7 +60,7 @@ public class ResourceMinimizerMojo extends AbstractMojo {
 			try {
 				inputString = IOUtils.toString(new FileInputStream(nextFile), "UTF-8");
 			} catch (IOException e) {
-				throw new MojoFailureException("Failed to read file: " + nextFile, e);
+				throw new Exception("Failed to read file: " + nextFile, e);
 			}
 
 			IParser parser = EncodingEnum.detectEncoding(inputString).newParser(myCtx);
@@ -90,7 +78,7 @@ public class ResourceMinimizerMojo extends AbstractMojo {
 					}
 				}
 			} else {
-				minimizeResource((IBaseResource)input);
+				minimizeResource((IBaseResource) input);
 			}
 
 			String outputString = parser.setPrettyPrint(true).encodeResourceToString(input);
@@ -120,7 +108,7 @@ public class ResourceMinimizerMojo extends AbstractMojo {
 					w.append(outputString);
 					w.close();
 				} catch (IOException e) {
-					throw new MojoFailureException("Failed to write " + nextFile, e);
+					throw new Exception("Failed to write " + nextFile, e);
 				}
 
 			}
@@ -152,7 +140,7 @@ public class ResourceMinimizerMojo extends AbstractMojo {
 
 	public static void main(String[] args) throws Exception {
 		FhirContext ctxDstu2 = FhirContext.forDstu2();
-		FhirContext ctxDstu2_1 = FhirContext.forDstu2_1();
+//		FhirContext ctxDstu2_1 = FhirContext.forDstu2_1();
 		FhirContext ctxDstu3 = FhirContext.forDstu3();
 		FhirContext ctxR4 = FhirContext.forR4();
 
@@ -164,7 +152,7 @@ public class ResourceMinimizerMojo extends AbstractMojo {
 
 		int fileCount = 0;
 		long byteCount = 0;
-		
+
 		ResourceMinimizerMojo m = new ResourceMinimizerMojo();
 
 		m.myCtx = ctxDstu2;
@@ -205,24 +193,24 @@ public class ResourceMinimizerMojo extends AbstractMojo {
 		m.execute();
 		byteCount += m.getByteCount();
 
-		m = new ResourceMinimizerMojo();
-		m.myCtx = ctxDstu2_1;
-		m.targetDirectory = new File("./hapi-fhir-validation-resources-dstu2.1/src/main/resources/org/hl7/fhir/dstu2016may/model/profile");
-		m.fhirVersion = "DSTU2_1";
-		m.execute();
-		byteCount += m.getByteCount();
-		fileCount += m.getFileCount();
+//		m = new ResourceMinimizerMojo();
+//		m.myCtx = ctxDstu2_1;
+//		m.targetDirectory = new File("./hapi-fhir-validation-resources-dstu2.1/src/main/resources/org/hl7/fhir/dstu2016may/model/profile");
+//		m.fhirVersion = "DSTU2_1";
+//		m.execute();
+//		byteCount += m.getByteCount();
+//		fileCount += m.getFileCount();
+//
+//		m = new ResourceMinimizerMojo();
+//		m.myCtx = ctxDstu2_1;
+//		m.targetDirectory = new File("./hapi-fhir-validation-resources-dstu2.1/src/main/resources/org/hl7/fhir/dstu2016may/model/valueset");
+//		m.fhirVersion = "DSTU2_1";
+//		m.execute();
+//		byteCount += m.getByteCount();
+//		fileCount += m.getFileCount();
 
 		m = new ResourceMinimizerMojo();
-		m.myCtx = ctxDstu2_1;
-		m.targetDirectory = new File("./hapi-fhir-validation-resources-dstu2.1/src/main/resources/org/hl7/fhir/dstu2016may/model/valueset");
-		m.fhirVersion = "DSTU2_1";
-		m.execute();
-		byteCount += m.getByteCount();
-		fileCount += m.getFileCount();
-
-		m = new ResourceMinimizerMojo();
-		m.myCtx = ctxDstu2_1;
+		m.myCtx = ctxR4;
 		m.targetDirectory = new File("./hapi-fhir-validation-resources-r4/src/main/resources/org/hl7/fhir/r4/model/profile");
 		m.fhirVersion = "R4";
 		m.execute();
@@ -230,7 +218,7 @@ public class ResourceMinimizerMojo extends AbstractMojo {
 		fileCount += m.getFileCount();
 
 		m = new ResourceMinimizerMojo();
-		m.myCtx = ctxDstu2_1;
+		m.myCtx = ctxR4;
 		m.targetDirectory = new File("./hapi-fhir-validation-resources-r4/src/main/resources/org/hl7/fhir/r4/model/valueset");
 		m.fhirVersion = "R4";
 		m.execute();
