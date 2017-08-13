@@ -350,6 +350,10 @@
 			<id>dconlan</id>
 			<name>dconlan</name>
 		</developer>
+		<developer>
+			<id>psbrandt</id>
+			<name>Pascal Brandt</name>
+		</developer>
 	</developers>
 
 	<licenses>

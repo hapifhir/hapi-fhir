@@ -219,6 +219,10 @@
 				Fix a bug in REST Hook Subscription interceptors which prevented subscriptions
 				from being activated. Thanks to Jeff Chung for the pull request!
 			</action>
+			<action type="fix" issue="708">
+				Fix broken links in usage pattern diagram on website. Thanks to
+				Pascal Brandt for the pull request!
+			</action>
 		</release>
 		<release version="2.5" date="2017-06-08">
 			<action type="fix">
