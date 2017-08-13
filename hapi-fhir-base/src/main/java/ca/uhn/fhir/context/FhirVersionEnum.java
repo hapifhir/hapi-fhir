@@ -42,7 +42,7 @@ public enum FhirVersionEnum {
 
 	DSTU2_1("org.hl7.fhir.dstu2016may.hapi.ctx.FhirDstu2_1", null, true, new Version("1.4.0")),
 
-	DSTU3("org.hl7.fhir.dstu3.hapi.ctx.FhirDstu3", null, true, new Version("3.0.1"));
+	DSTU3("org.hl7.fhir.dstu3.hapi.ctx.FhirDstu3", null, true, new Dstu3Version());
 
 	private final FhirVersionEnum myEquivalent;
 	private final boolean myIsRi;
@@ -136,6 +136,26 @@ public enum FhirVersionEnum {
 
 	private interface IVersionProvider {
 		String provideVersion();
+	}
+
+	private static class Dstu3Version implements IVersionProvider {
+
+		public Dstu3Version() {
+			try {
+				Class<?> c = Class.forName("org.hl7.fhir.dstu3.model.Constants");
+				myVersion = (String) c.getDeclaredField("VERSION").get(null);
+			} catch (Exception e) {
+				myVersion = "UNKNOWN";
+			}
+		}
+
+		private String myVersion;
+
+		@Override
+		public String provideVersion() {
+			return myVersion;
+		}
+
 	}
 
 }
