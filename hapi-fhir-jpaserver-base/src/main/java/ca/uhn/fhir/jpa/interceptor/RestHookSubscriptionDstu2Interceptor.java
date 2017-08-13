@@ -84,7 +84,8 @@ public class RestHookSubscriptionDstu2Interceptor extends BaseRestHookSubscripti
 	 */
 	private void checkSubscriptions(IIdType idType, String resourceType, RestOperationTypeEnum theOperation) {
 		//avoid a ConcurrentModificationException by copying to an array
-		for (Object object : myRestHookSubscriptions.toArray()) {
+		Object[] subscriptions = myRestHookSubscriptions.toArray();
+		for (Object object : subscriptions) {
 			if (object == null) {
 				continue;
 			}
