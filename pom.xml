@@ -354,6 +354,10 @@
 			<id>psbrandt</id>
 			<name>Pascal Brandt</name>
 		</developer>
+		<developer>
+			<id>InfiniteLoop90</id>
+			<name>Clayton Bodendein</name>
+		</developer>
 	</developers>
 
 	<licenses>

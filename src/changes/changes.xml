@@ -223,6 +223,11 @@
 				Fix broken links in usage pattern diagram on website. Thanks to
 				Pascal Brandt for the pull request!
 			</action>
+			<action type="fix" issue="706">
+				Fix incorrect FHIR Version Strings that were being outputted and verified in the 
+				client for some versions of FHIR. Thanks to Clayton Bodendein for the
+				pull request!
+			</action>
 		</release>
 		<release version="2.5" date="2017-06-08">
 			<action type="fix">
