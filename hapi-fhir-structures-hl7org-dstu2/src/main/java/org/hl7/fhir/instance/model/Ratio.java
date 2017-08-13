@@ -29,14 +29,13 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
+// Generated on Wed, Jul 13, 2016 05:32+1000 for FHIR v1.0.2
 import java.util.List;
 
+import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.DatatypeDef;
-import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.*;
 /**
  * A relationship of two Quantity values - expressed as a numerator and a denominator.
  */
@@ -119,6 +118,35 @@ public class Ratio extends Type implements ICompositeType {
         childrenList.add(new Property("numerator", "Quantity", "The value of the numerator.", 0, java.lang.Integer.MAX_VALUE, numerator));
         childrenList.add(new Property("denominator", "Quantity", "The value of the denominator.", 0, java.lang.Integer.MAX_VALUE, denominator));
       }
+
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("numerator"))
+          this.numerator = castToQuantity(value); // Quantity
+        else if (name.equals("denominator"))
+          this.denominator = castToQuantity(value); // Quantity
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("numerator")) {
+          this.numerator = new Quantity();
+          return this.numerator;
+        }
+        else if (name.equals("denominator")) {
+          this.denominator = new Quantity();
+          return this.denominator;
+        }
+        else
+          return super.addChild(name);
+      }
+
+  public String fhirType() {
+    return "Ratio";
+
+  }
 
       public Ratio copy() {
         Ratio dst = new Ratio();

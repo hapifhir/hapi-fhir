@@ -29,15 +29,14 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
+// Generated on Wed, Jul 13, 2016 05:32+1000 for FHIR v1.0.2
 import java.util.Date;
 import java.util.List;
 
+import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.DatatypeDef;
-import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.*;
 /**
  * A time period defined by a start and end date and optionally time.
  */
@@ -170,6 +169,33 @@ public class Period extends Type implements ICompositeType {
         childrenList.add(new Property("start", "dateTime", "The start of the period. The boundary is inclusive.", 0, java.lang.Integer.MAX_VALUE, start));
         childrenList.add(new Property("end", "dateTime", "The end of the period. If the end of the period is missing, it means that the period is ongoing. The start may be in the past, and the end date in the future, which means that period is expected/planned to end at that time.", 0, java.lang.Integer.MAX_VALUE, end));
       }
+
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("start"))
+          this.start = castToDateTime(value); // DateTimeType
+        else if (name.equals("end"))
+          this.end = castToDateTime(value); // DateTimeType
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("start")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Period.start");
+        }
+        else if (name.equals("end")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Period.end");
+        }
+        else
+          return super.addChild(name);
+      }
+
+  public String fhirType() {
+    return "Period";
+
+  }
 
       public Period copy() {
         Period dst = new Period();

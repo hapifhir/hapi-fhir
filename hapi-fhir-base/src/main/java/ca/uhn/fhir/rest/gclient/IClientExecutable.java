@@ -27,7 +27,7 @@ import ca.uhn.fhir.rest.api.SummaryEnum;
  */
 
 
-public interface IClientExecutable<T extends IClientExecutable<?,?>, Y> {
+public interface IClientExecutable<T extends IClientExecutable<?,Y>, Y> {
 
 	/**
 	 * If set to true, the client will log the request and response to the SLF4J logger. This can be useful for
@@ -49,6 +49,9 @@ public interface IClientExecutable<T extends IClientExecutable<?,?>, Y> {
 
 	T encodedXml();
 
+	/**
+	 * Actually execute the client operation
+	 */
 	Y execute();
 
 	T prettyPrint();

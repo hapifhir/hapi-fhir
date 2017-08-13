@@ -104,4 +104,7 @@ public class IntegerType extends PrimitiveType<Integer> implements IBaseIntegerD
 		return new IntegerType(getValue());
 	}
 
+	public String fhirType() {
+		return "integer";		
+	}
 }

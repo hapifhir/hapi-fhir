@@ -26,7 +26,6 @@ public class NumberParamTest {
 	public void testApproximateLegacy() {
 		NumberParam p = new NumberParam();
 		p.setValueAsQueryToken(ourCtx, null, null, "~5.4");
-		assertEquals(null,p.getComparator());
 		assertEquals(ParamPrefixEnum.APPROXIMATE, p.getPrefix());
 		assertEquals("5.4", p.getValue().toPlainString());
 		assertEquals("ap5.4", p.getValueAsQueryToken(ourCtx));
@@ -36,7 +35,6 @@ public class NumberParamTest {
 	public void testApproximate() {
 		NumberParam p = new NumberParam();
 		p.setValueAsQueryToken(ourCtx, null, null, "ap5.4");
-		assertEquals(null,p.getComparator());
 		assertEquals(ParamPrefixEnum.APPROXIMATE, p.getPrefix());
 		assertEquals("5.4", p.getValue().toPlainString());
 		assertEquals("ap5.4", p.getValueAsQueryToken(ourCtx));
@@ -46,7 +44,6 @@ public class NumberParamTest {
 	public void testNoQualifier() {
 		NumberParam p = new NumberParam();
 		p.setValueAsQueryToken(ourCtx, null, null, "5.4");
-		assertEquals(null, p.getComparator());
 		assertEquals(null, p.getPrefix());
 		assertEquals("5.4", p.getValue().toPlainString());
 		assertEquals("5.4", p.getValueAsQueryToken(ourCtx));
@@ -60,7 +57,6 @@ public class NumberParamTest {
 	public void testNegativeNumber() {
 		NumberParam p = new NumberParam();
 		p.setValueAsQueryToken(ourCtx, null, null, "-5.4");
-		assertEquals(null, p.getComparator());
 		assertEquals(null, p.getPrefix());
 		assertEquals("-5.4", p.getValue().toPlainString());
 		assertEquals(new BigDecimal("-5.4"), p.getValue());

@@ -1,7 +1,7 @@
 <StructureDefinition xmlns="http://hl7.org/fhir">
  <id value="Bundle"/>
  <meta>
-  <lastUpdated value="2015-11-11T10:54:01.813-05:00"/>
+  <lastUpdated value="2017-07-27T08:19:05.564-04:00"/>
  </meta>
  <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
   <valueInteger value="2"/>
@@ -22,7 +22,7 @@
    <value value="http://www.hl7.org/Special/committees/fiwg/index.cfm"/>
   </telecom>
  </contact>
- <date value="2015-11-11T10:54:01-05:00"/>
+ <date value="2017-07-27T08:19:05-04:00"/>
  <description value="Base StructureDefinition for Bundle Resource"/>
  <fhirVersion value="1.0.2"/>
  <mapping>
@@ -54,45 +54,30 @@
     <code value="Resource"/>
    </type>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="entry.fullURL.distinct(value,resource.meta.versionId)"/>
-    </extension>
     <key value="bdl-7"/>
     <severity value="error"/>
     <human value="FullUrl must be unique in a bundle, or else entries with the same fullUrl must have different meta.versionId"/>
     <xpath value="count(for $entry in f:entry[f:resource] return $entry[count(parent::f:Bundle/f:entry[f:fullUrl/@value=$entry/f:fullUrl/@value and ((not(f:resource/*/f:meta/f:versionId/@value) and not($entry/f:resource/*/f:meta/f:versionId/@value)) or f:resource/*/f:meta/f:versionId/@value=$entry/f:resource/*/f:meta/f:versionId/@value)])!=1])=0"/>
    </constraint>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="entry.request.empty() or type = 'batch' or type = 'transaction' or type = 'history'"/>
-    </extension>
     <key value="bdl-3"/>
     <severity value="error"/>
     <human value="entry.request only for some types of bundles"/>
     <xpath value="not(f:entry/f:request) or (f:type/@value = 'batch') or (f:type/@value = 'transaction') or (f:type/@value = 'history')"/>
    </constraint>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="entry.response.empty() or type = 'batch-response' or type = 'transaction-response'"/>
-    </extension>
     <key value="bdl-4"/>
     <severity value="error"/>
     <human value="entry.response only for some types of bundles"/>
     <xpath value="not(f:entry/f:response) or (f:type/@value = 'batch-response') or (f:type/@value = 'transaction-response')"/>
    </constraint>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="total or (type = ' searchset') or (type = 'history')"/>
-    </extension>
     <key value="bdl-1"/>
     <severity value="error"/>
     <human value="total only when a search or history"/>
     <xpath value="not(f:total) or (f:type/@value = 'searchset') or (f:type/@value = 'history')"/>
    </constraint>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="entry.search.empty() or (type = 'searchset')"/>
-    </extension>
     <key value="bdl-2"/>
     <severity value="error"/>
     <human value="entry.search only when a search"/>
@@ -295,18 +280,12 @@
     <code value="BackboneElement"/>
    </type>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="resource or request or response"/>
-    </extension>
     <key value="bdl-5"/>
     <severity value="error"/>
     <human value="must be a resource unless there's a request or response"/>
     <xpath value="f:resource or f:request or f:response"/>
    </constraint>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="fullUrl.empty() xor resource"/>
-    </extension>
     <key value="bdl-6"/>
     <severity value="error"/>
     <human value="The fullUrl element must be present when a resource is present, and not present otherwise"/>
@@ -762,45 +741,30 @@
     <code value="Resource"/>
    </type>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="entry.fullURL.distinct(value,resource.meta.versionId)"/>
-    </extension>
     <key value="bdl-7"/>
     <severity value="error"/>
     <human value="FullUrl must be unique in a bundle, or else entries with the same fullUrl must have different meta.versionId"/>
     <xpath value="count(for $entry in f:entry[f:resource] return $entry[count(parent::f:Bundle/f:entry[f:fullUrl/@value=$entry/f:fullUrl/@value and ((not(f:resource/*/f:meta/f:versionId/@value) and not($entry/f:resource/*/f:meta/f:versionId/@value)) or f:resource/*/f:meta/f:versionId/@value=$entry/f:resource/*/f:meta/f:versionId/@value)])!=1])=0"/>
    </constraint>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="entry.request.empty() or type = 'batch' or type = 'transaction' or type = 'history'"/>
-    </extension>
     <key value="bdl-3"/>
     <severity value="error"/>
     <human value="entry.request only for some types of bundles"/>
     <xpath value="not(f:entry/f:request) or (f:type/@value = 'batch') or (f:type/@value = 'transaction') or (f:type/@value = 'history')"/>
    </constraint>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="entry.response.empty() or type = 'batch-response' or type = 'transaction-response'"/>
-    </extension>
     <key value="bdl-4"/>
     <severity value="error"/>
     <human value="entry.response only for some types of bundles"/>
     <xpath value="not(f:entry/f:response) or (f:type/@value = 'batch-response') or (f:type/@value = 'transaction-response')"/>
    </constraint>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="total or (type = ' searchset') or (type = 'history')"/>
-    </extension>
     <key value="bdl-1"/>
     <severity value="error"/>
     <human value="total only when a search or history"/>
     <xpath value="not(f:total) or (f:type/@value = 'searchset') or (f:type/@value = 'history')"/>
    </constraint>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="entry.search.empty() or (type = 'searchset')"/>
-    </extension>
     <key value="bdl-2"/>
     <severity value="error"/>
     <human value="entry.search only when a search"/>
@@ -900,18 +864,12 @@
     <code value="BackboneElement"/>
    </type>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="resource or request or response"/>
-    </extension>
     <key value="bdl-5"/>
     <severity value="error"/>
     <human value="must be a resource unless there's a request or response"/>
     <xpath value="f:resource or f:request or f:response"/>
    </constraint>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="fullUrl.empty() xor resource"/>
-    </extension>
     <key value="bdl-6"/>
     <severity value="error"/>
     <human value="The fullUrl element must be present when a resource is present, and not present otherwise"/>

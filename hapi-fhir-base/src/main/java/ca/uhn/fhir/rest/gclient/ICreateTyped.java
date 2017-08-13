@@ -1,6 +1,6 @@
 package ca.uhn.fhir.rest.gclient;
 
-/*
+/*-
  * #%L
  * HAPI FHIR - Core Library
  * %%
@@ -20,10 +20,8 @@ package ca.uhn.fhir.rest.gclient;
  * #L%
  */
 
-import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.PreferReturnEnum;
-import ca.uhn.fhir.rest.client.IGenericClient;
 
 public interface ICreateTyped extends IClientExecutable<ICreateTyped, MethodOutcome> {
 	
@@ -50,27 +48,5 @@ public interface ICreateTyped extends IClientExecutable<ICreateTyped, MethodOutc
 	 * @since HAPI 1.1
 	 */
 	ICreateTyped prefer(PreferReturnEnum theReturn);
-
-	/**
-	 * If you want the explicitly state an ID for your created resource, put that ID here. You generally do not
-	 * need to invoke this method, so that the server will assign the ID itself.
-	 * 
-	 * <p>
-	 * Note that creating a resource by ID is no longer supported as of FHIR DSTU2. You should use the {@link IGenericClient#update()} operation
-	 * to create-by-ID in DSTU2.
-	 * </p>
-	 */
-	ICreateTyped withId(IdDt theId);
-
-	/**
-	 * If you want the explicitly state an ID for your created resource, put that ID here. You generally do not
-	 * need to invoke this method, so that the server will assign the ID itself.
-	 * 
-	 * <p>
-	 * Note that creating a resource by ID is no longer supported as of FHIR DSTU2. You should use the {@link IGenericClient#update()} operation
-	 * to create-by-ID in DSTU2.
-	 * </p>
-	 */
-	ICreateTyped withId(String theId);
 
 }

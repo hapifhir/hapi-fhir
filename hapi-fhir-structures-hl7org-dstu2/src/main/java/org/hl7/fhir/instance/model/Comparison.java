@@ -2,7 +2,9 @@ package org.hl7.fhir.instance.model;
 
 import java.util.List;
 
-import org.hl7.fhir.instance.utilities.Utilities;
+import org.apache.commons.lang3.NotImplementedException;
+import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.utilities.Utilities;
 
 /**
  * See http://www.healthintersections.com.au/?p=1941
@@ -30,9 +32,9 @@ public class Comparison {
 	  return e1.getValue().equals(e2.getValue());
 	}
 
-	public static boolean matches(CodeableConcept c1, CodeableConcept c2, MatchProfile profile) throws Exception {
+	public static boolean matches(CodeableConcept c1, CodeableConcept c2, MatchProfile profile) throws FHIRException {
 	  if (profile != null) 
-	  	throw new Exception("Not Implemented Yet");
+	  	throw new NotImplementedException("Not Implemented Yet");
 	  
 	  if (c1.getCoding().isEmpty() && c2.getCoding().isEmpty()) {
 	  	return matches(c1.getText(), c2.getText(), null);
@@ -55,7 +57,7 @@ public class Comparison {
   }
 
 	
-	public static boolean inList(List<Coding> list, Coding c, MatchProfile profile) throws Exception {
+	public static boolean inList(List<Coding> list, Coding c, MatchProfile profile) {
 	  for (Coding item : list) {
 	  	if (matches(item, c, profile))
 	  		return true;
@@ -63,17 +65,17 @@ public class Comparison {
 	  return false;
   }
 
-	public static boolean matches(Coding c1, Coding c2, MatchProfile profile) throws Exception {
+	public static boolean matches(Coding c1, Coding c2, MatchProfile profile) {
 	  if (profile != null) 
-	  	throw new Exception("Not Implemented Yet");
+	  	throw new NotImplementedException("Not Implemented Yet");
 		
 	  // in the absence of a profile, we ignore version
 	  return matches(c1.getSystem(), c2.getSystem(), null) && matches(c1.getCode(), c2.getCode(), null);
   }
 
-	public static boolean matches(Identifier i1, Identifier i2, MatchProfile profile) throws Exception {
+	public static boolean matches(Identifier i1, Identifier i2, MatchProfile profile) {
 	  if (profile != null) 
-	  	throw new Exception("Not Implemented Yet");
+	  	throw new NotImplementedException("Not Implemented Yet");
 		
 	  // in the absence of a profile, we ignore version
 	  return matches(i1.getSystem(), i2.getSystem(), null) && matches(i1.getValue(), i2.getValue(), null);
@@ -90,9 +92,9 @@ public class Comparison {
 			dst.setAssigner(src.getAssigner());  
   }
 
-	public static boolean matches(ContactPoint c1, ContactPoint c2, Object profile) throws Exception {
+	public static boolean matches(ContactPoint c1, ContactPoint c2, Object profile) {
 	  if (profile != null) 
-	  	throw new Exception("Not Implemented Yet");
+	  	throw new NotImplementedException("Not Implemented Yet");
 		
 	  // in the absence of a profile, we insist on system
 	  return matches(c1.getSystemElement(), c2.getSystemElement(), null) && matches(c1.getValue(), c2.getValue(), null);

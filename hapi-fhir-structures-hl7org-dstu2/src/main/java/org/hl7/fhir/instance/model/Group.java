@@ -29,18 +29,15 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
+// Generated on Wed, Jul 13, 2016 05:32+1000 for FHIR v1.0.2
 import java.util.ArrayList;
 import java.util.List;
 
+import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
-import org.hl7.fhir.instance.utilities.Utilities;
+import org.hl7.fhir.utilities.Utilities;
 
-import ca.uhn.fhir.model.api.annotation.Block;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
-import ca.uhn.fhir.model.api.annotation.ResourceDef;
-import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.*;
 /**
  * Represents a defined collection of entities that may be discussed or acted upon collectively but which are not expected to act collectively and are not formally or legally recognized; i.e. a collection of entities that isn't an Organization.
  */
@@ -76,7 +73,7 @@ public class Group extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static GroupType fromCode(String codeString) throws Exception {
+        public static GroupType fromCode(String codeString) throws FHIRException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("person".equals(codeString))
@@ -91,7 +88,7 @@ public class Group extends DomainResource {
           return MEDICATION;
         if ("substance".equals(codeString))
           return SUBSTANCE;
-        throw new Exception("Unknown GroupType code '"+codeString+"'");
+        throw new FHIRException("Unknown GroupType code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -157,6 +154,26 @@ public class Group extends DomainResource {
         if ("substance".equals(codeString))
           return GroupType.SUBSTANCE;
         throw new IllegalArgumentException("Unknown GroupType code '"+codeString+"'");
+        }
+        public Enumeration<GroupType> fromType(Base code) throws FHIRException {
+          if (code == null || code.isEmpty())
+            return null;
+          String codeString = ((PrimitiveType) code).asStringValue();
+          if (codeString == null || "".equals(codeString))
+            return null;
+        if ("person".equals(codeString))
+          return new Enumeration<GroupType>(this, GroupType.PERSON);
+        if ("animal".equals(codeString))
+          return new Enumeration<GroupType>(this, GroupType.ANIMAL);
+        if ("practitioner".equals(codeString))
+          return new Enumeration<GroupType>(this, GroupType.PRACTITIONER);
+        if ("device".equals(codeString))
+          return new Enumeration<GroupType>(this, GroupType.DEVICE);
+        if ("medication".equals(codeString))
+          return new Enumeration<GroupType>(this, GroupType.MEDICATION);
+        if ("substance".equals(codeString))
+          return new Enumeration<GroupType>(this, GroupType.SUBSTANCE);
+        throw new FHIRException("Unknown GroupType code '"+codeString+"'");
         }
     public String toCode(GroupType code) {
       if (code == GroupType.PERSON)
@@ -258,52 +275,52 @@ public class Group extends DomainResource {
         /**
          * @return {@link #value} (The value of the trait that holds (or does not hold - see 'exclude') for members of the group.)
          */
-        public CodeableConcept getValueCodeableConcept() throws Exception { 
+        public CodeableConcept getValueCodeableConcept() throws FHIRException { 
           if (!(this.value instanceof CodeableConcept))
-            throw new Exception("Type mismatch: the type CodeableConcept was expected, but "+this.value.getClass().getName()+" was encountered");
+            throw new FHIRException("Type mismatch: the type CodeableConcept was expected, but "+this.value.getClass().getName()+" was encountered");
           return (CodeableConcept) this.value;
         }
 
-        public boolean hasValueCodeableConcept() throws Exception { 
+        public boolean hasValueCodeableConcept() { 
           return this.value instanceof CodeableConcept;
         }
 
         /**
          * @return {@link #value} (The value of the trait that holds (or does not hold - see 'exclude') for members of the group.)
          */
-        public BooleanType getValueBooleanType() throws Exception { 
+        public BooleanType getValueBooleanType() throws FHIRException { 
           if (!(this.value instanceof BooleanType))
-            throw new Exception("Type mismatch: the type BooleanType was expected, but "+this.value.getClass().getName()+" was encountered");
+            throw new FHIRException("Type mismatch: the type BooleanType was expected, but "+this.value.getClass().getName()+" was encountered");
           return (BooleanType) this.value;
         }
 
-        public boolean hasValueBooleanType() throws Exception { 
+        public boolean hasValueBooleanType() { 
           return this.value instanceof BooleanType;
         }
 
         /**
          * @return {@link #value} (The value of the trait that holds (or does not hold - see 'exclude') for members of the group.)
          */
-        public Quantity getValueQuantity() throws Exception { 
+        public Quantity getValueQuantity() throws FHIRException { 
           if (!(this.value instanceof Quantity))
-            throw new Exception("Type mismatch: the type Quantity was expected, but "+this.value.getClass().getName()+" was encountered");
+            throw new FHIRException("Type mismatch: the type Quantity was expected, but "+this.value.getClass().getName()+" was encountered");
           return (Quantity) this.value;
         }
 
-        public boolean hasValueQuantity() throws Exception { 
+        public boolean hasValueQuantity() { 
           return this.value instanceof Quantity;
         }
 
         /**
          * @return {@link #value} (The value of the trait that holds (or does not hold - see 'exclude') for members of the group.)
          */
-        public Range getValueRange() throws Exception { 
+        public Range getValueRange() throws FHIRException { 
           if (!(this.value instanceof Range))
-            throw new Exception("Type mismatch: the type Range was expected, but "+this.value.getClass().getName()+" was encountered");
+            throw new FHIRException("Type mismatch: the type Range was expected, but "+this.value.getClass().getName()+" was encountered");
           return (Range) this.value;
         }
 
-        public boolean hasValueRange() throws Exception { 
+        public boolean hasValueRange() { 
           return this.value instanceof Range;
         }
 
@@ -396,6 +413,53 @@ public class Group extends DomainResource {
           childrenList.add(new Property("period", "Period", "The period over which the characteristic is tested; e.g. the patient had an operation during the month of June.", 0, java.lang.Integer.MAX_VALUE, period));
         }
 
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("code"))
+          this.code = castToCodeableConcept(value); // CodeableConcept
+        else if (name.equals("value[x]"))
+          this.value = (Type) value; // Type
+        else if (name.equals("exclude"))
+          this.exclude = castToBoolean(value); // BooleanType
+        else if (name.equals("period"))
+          this.period = castToPeriod(value); // Period
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("code")) {
+          this.code = new CodeableConcept();
+          return this.code;
+        }
+        else if (name.equals("valueCodeableConcept")) {
+          this.value = new CodeableConcept();
+          return this.value;
+        }
+        else if (name.equals("valueBoolean")) {
+          this.value = new BooleanType();
+          return this.value;
+        }
+        else if (name.equals("valueQuantity")) {
+          this.value = new Quantity();
+          return this.value;
+        }
+        else if (name.equals("valueRange")) {
+          this.value = new Range();
+          return this.value;
+        }
+        else if (name.equals("exclude")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Group.exclude");
+        }
+        else if (name.equals("period")) {
+          this.period = new Period();
+          return this.period;
+        }
+        else
+          return super.addChild(name);
+      }
+
       public GroupCharacteristicComponent copy() {
         GroupCharacteristicComponent dst = new GroupCharacteristicComponent();
         copyValues(dst);
@@ -431,6 +495,11 @@ public class Group extends DomainResource {
         return super.isEmpty() && (code == null || code.isEmpty()) && (value == null || value.isEmpty())
            && (exclude == null || exclude.isEmpty()) && (period == null || period.isEmpty());
       }
+
+  public String fhirType() {
+    return "Group.characteristic";
+
+  }
 
   }
 
@@ -594,6 +663,35 @@ public class Group extends DomainResource {
           childrenList.add(new Property("inactive", "boolean", "A flag to indicate that the member is no longer in the group, but previously may have been a member.", 0, java.lang.Integer.MAX_VALUE, inactive));
         }
 
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("entity"))
+          this.entity = castToReference(value); // Reference
+        else if (name.equals("period"))
+          this.period = castToPeriod(value); // Period
+        else if (name.equals("inactive"))
+          this.inactive = castToBoolean(value); // BooleanType
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("entity")) {
+          this.entity = new Reference();
+          return this.entity;
+        }
+        else if (name.equals("period")) {
+          this.period = new Period();
+          return this.period;
+        }
+        else if (name.equals("inactive")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Group.inactive");
+        }
+        else
+          return super.addChild(name);
+      }
+
       public GroupMemberComponent copy() {
         GroupMemberComponent dst = new GroupMemberComponent();
         copyValues(dst);
@@ -628,6 +726,11 @@ public class Group extends DomainResource {
         return super.isEmpty() && (entity == null || entity.isEmpty()) && (period == null || period.isEmpty())
            && (inactive == null || inactive.isEmpty());
       }
+
+  public String fhirType() {
+    return "Group.member";
+
+  }
 
   }
 
@@ -1045,6 +1148,64 @@ public class Group extends DomainResource {
         childrenList.add(new Property("member", "", "Identifies the resource instances that are members of the group.", 0, java.lang.Integer.MAX_VALUE, member));
       }
 
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("identifier"))
+          this.getIdentifier().add(castToIdentifier(value));
+        else if (name.equals("type"))
+          this.type = new GroupTypeEnumFactory().fromType(value); // Enumeration<GroupType>
+        else if (name.equals("actual"))
+          this.actual = castToBoolean(value); // BooleanType
+        else if (name.equals("code"))
+          this.code = castToCodeableConcept(value); // CodeableConcept
+        else if (name.equals("name"))
+          this.name = castToString(value); // StringType
+        else if (name.equals("quantity"))
+          this.quantity = castToUnsignedInt(value); // UnsignedIntType
+        else if (name.equals("characteristic"))
+          this.getCharacteristic().add((GroupCharacteristicComponent) value);
+        else if (name.equals("member"))
+          this.getMember().add((GroupMemberComponent) value);
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("identifier")) {
+          return addIdentifier();
+        }
+        else if (name.equals("type")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Group.type");
+        }
+        else if (name.equals("actual")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Group.actual");
+        }
+        else if (name.equals("code")) {
+          this.code = new CodeableConcept();
+          return this.code;
+        }
+        else if (name.equals("name")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Group.name");
+        }
+        else if (name.equals("quantity")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Group.quantity");
+        }
+        else if (name.equals("characteristic")) {
+          return addCharacteristic();
+        }
+        else if (name.equals("member")) {
+          return addMember();
+        }
+        else
+          return super.addChild(name);
+      }
+
+  public String fhirType() {
+    return "Group";
+
+  }
+
       public Group copy() {
         Group dst = new Group();
         copyValues(dst);
@@ -1114,7 +1275,7 @@ public class Group extends DomainResource {
   public static final String SP_ACTUAL = "actual";
   @SearchParamDefinition(name="identifier", path="Group.identifier", description="Unique id", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
-  @SearchParamDefinition(name="characteristic-value", path="", description="A composite of both characteristic and value", type="composite" )
+  @SearchParamDefinition(name="characteristic-value", path="null", description="A composite of both characteristic and value", type="composite" )
   public static final String SP_CHARACTERISTICVALUE = "characteristic-value";
   @SearchParamDefinition(name="code", path="Group.code", description="The kind of resources contained", type="token" )
   public static final String SP_CODE = "code";

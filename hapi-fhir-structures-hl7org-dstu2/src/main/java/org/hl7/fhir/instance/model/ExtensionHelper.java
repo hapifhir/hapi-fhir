@@ -1,5 +1,7 @@
 package org.hl7.fhir.instance.model;
 
+import org.hl7.fhir.exceptions.FHIRException;
+
 /**
  * in a language with helper classes, this would be a helper class (at least, the base exgtension helpers would be)
  * @author Grahame
@@ -86,9 +88,9 @@ public class ExtensionHelper {
    * @param modifier - whether this is a modifier. Note that this is a definitional property of the extension; don't alternate
    * @param uri - the identifier for the extension
    * @param value - the value of the extension. Delete if this is null
-   * @throws Exception - if the modifier logic is incorrect
+   * @- if the modifier logic is incorrect
    */
-  public static void setExtension(Element element, boolean modifier, String uri, Type value) throws Exception {
+  public static void setExtension(Element element, boolean modifier, String uri, Type value) throws FHIRException {
   	if (value == null) {
     	// deleting the extension
   		if (element instanceof BackboneElement)
@@ -108,7 +110,7 @@ public class ExtensionHelper {
   			for (Extension e : ((BackboneElement) element).getModifierExtension()) {
   				if (uri.equals(e.getUrl())) {
   					if (!modifier)
-  						throw new Exception("Error adding extension \""+uri+"\": found an existing modifier extension, and the extension is not marked as a modifier");
+  						throw new FHIRException("Error adding extension \""+uri+"\": found an existing modifier extension, and the extension is not marked as a modifier");
   					e.setValue(value);
   					found = true;
   				}
@@ -116,7 +118,7 @@ public class ExtensionHelper {
   		for (Extension e : element.getExtension()) {
   			if (uri.equals(e.getUrl())) {
 					if (modifier)
-						throw new Exception("Error adding extension \""+uri+"\": found an existing extension, and the extension is marked as a modifier");
+						throw new FHIRException("Error adding extension \""+uri+"\": found an existing extension, and the extension is marked as a modifier");
 					e.setValue(value);
 					found = true;
   			}
@@ -125,7 +127,7 @@ public class ExtensionHelper {
   			Extension ex = new Extension().setUrl(uri).setValue(value);
   			if (modifier) {
   	  		if (!(element instanceof BackboneElement))
-						throw new Exception("Error adding extension \""+uri+"\": extension is marked as a modifier, but element is not a backbone element");
+						throw new FHIRException("Error adding extension \""+uri+"\": extension is marked as a modifier, but element is not a backbone element");
   				((BackboneElement) element).getModifierExtension().add(ex);
   				
   			} else {

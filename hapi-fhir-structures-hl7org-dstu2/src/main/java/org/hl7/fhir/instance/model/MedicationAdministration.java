@@ -29,18 +29,15 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
+// Generated on Wed, Jul 13, 2016 05:32+1000 for FHIR v1.0.2
 import java.util.ArrayList;
 import java.util.List;
 
+import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
-import org.hl7.fhir.instance.utilities.Utilities;
+import org.hl7.fhir.utilities.Utilities;
 
-import ca.uhn.fhir.model.api.annotation.Block;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
-import ca.uhn.fhir.model.api.annotation.ResourceDef;
-import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.*;
 /**
  * Describes the event of a patient consuming or otherwise being administered a medication.  This may be as simple as swallowing a tablet or it may be a long running infusion.  Related resources tie this event to the authorizing prescription, and the specific encounter between patient and health care practitioner.
  */
@@ -72,7 +69,7 @@ public class MedicationAdministration extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static MedicationAdministrationStatus fromCode(String codeString) throws Exception {
+        public static MedicationAdministrationStatus fromCode(String codeString) throws FHIRException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("in-progress".equals(codeString))
@@ -85,7 +82,7 @@ public class MedicationAdministration extends DomainResource {
           return ENTEREDINERROR;
         if ("stopped".equals(codeString))
           return STOPPED;
-        throw new Exception("Unknown MedicationAdministrationStatus code '"+codeString+"'");
+        throw new FHIRException("Unknown MedicationAdministrationStatus code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -145,6 +142,24 @@ public class MedicationAdministration extends DomainResource {
         if ("stopped".equals(codeString))
           return MedicationAdministrationStatus.STOPPED;
         throw new IllegalArgumentException("Unknown MedicationAdministrationStatus code '"+codeString+"'");
+        }
+        public Enumeration<MedicationAdministrationStatus> fromType(Base code) throws FHIRException {
+          if (code == null || code.isEmpty())
+            return null;
+          String codeString = ((PrimitiveType) code).asStringValue();
+          if (codeString == null || "".equals(codeString))
+            return null;
+        if ("in-progress".equals(codeString))
+          return new Enumeration<MedicationAdministrationStatus>(this, MedicationAdministrationStatus.INPROGRESS);
+        if ("on-hold".equals(codeString))
+          return new Enumeration<MedicationAdministrationStatus>(this, MedicationAdministrationStatus.ONHOLD);
+        if ("completed".equals(codeString))
+          return new Enumeration<MedicationAdministrationStatus>(this, MedicationAdministrationStatus.COMPLETED);
+        if ("entered-in-error".equals(codeString))
+          return new Enumeration<MedicationAdministrationStatus>(this, MedicationAdministrationStatus.ENTEREDINERROR);
+        if ("stopped".equals(codeString))
+          return new Enumeration<MedicationAdministrationStatus>(this, MedicationAdministrationStatus.STOPPED);
+        throw new FHIRException("Unknown MedicationAdministrationStatus code '"+codeString+"'");
         }
     public String toCode(MedicationAdministrationStatus code) {
       if (code == MedicationAdministrationStatus.INPROGRESS)
@@ -273,26 +288,26 @@ public class MedicationAdministration extends DomainResource {
         /**
          * @return {@link #site} (A coded specification of the anatomic site where the medication first entered the body.  For example, "left arm".)
          */
-        public CodeableConcept getSiteCodeableConcept() throws Exception { 
+        public CodeableConcept getSiteCodeableConcept() throws FHIRException { 
           if (!(this.site instanceof CodeableConcept))
-            throw new Exception("Type mismatch: the type CodeableConcept was expected, but "+this.site.getClass().getName()+" was encountered");
+            throw new FHIRException("Type mismatch: the type CodeableConcept was expected, but "+this.site.getClass().getName()+" was encountered");
           return (CodeableConcept) this.site;
         }
 
-        public boolean hasSiteCodeableConcept() throws Exception { 
+        public boolean hasSiteCodeableConcept() { 
           return this.site instanceof CodeableConcept;
         }
 
         /**
          * @return {@link #site} (A coded specification of the anatomic site where the medication first entered the body.  For example, "left arm".)
          */
-        public Reference getSiteReference() throws Exception { 
+        public Reference getSiteReference() throws FHIRException { 
           if (!(this.site instanceof Reference))
-            throw new Exception("Type mismatch: the type Reference was expected, but "+this.site.getClass().getName()+" was encountered");
+            throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.site.getClass().getName()+" was encountered");
           return (Reference) this.site;
         }
 
-        public boolean hasSiteReference() throws Exception { 
+        public boolean hasSiteReference() { 
           return this.site instanceof Reference;
         }
 
@@ -390,26 +405,26 @@ public class MedicationAdministration extends DomainResource {
         /**
          * @return {@link #rate} (Identifies the speed with which the medication was or will be introduced into the patient.  Typically the rate for an infusion e.g. 100 ml per 1 hour or 100 ml/hr.  May also be expressed as a rate per unit of time e.g. 500 ml per 2 hours.  Currently we do not specify a default of '1' in the denominator, but this is being discussed.  Other examples:  200 mcg/min or 200 mcg/1 minute; 1 liter/8 hours.)
          */
-        public Ratio getRateRatio() throws Exception { 
+        public Ratio getRateRatio() throws FHIRException { 
           if (!(this.rate instanceof Ratio))
-            throw new Exception("Type mismatch: the type Ratio was expected, but "+this.rate.getClass().getName()+" was encountered");
+            throw new FHIRException("Type mismatch: the type Ratio was expected, but "+this.rate.getClass().getName()+" was encountered");
           return (Ratio) this.rate;
         }
 
-        public boolean hasRateRatio() throws Exception { 
+        public boolean hasRateRatio() { 
           return this.rate instanceof Ratio;
         }
 
         /**
          * @return {@link #rate} (Identifies the speed with which the medication was or will be introduced into the patient.  Typically the rate for an infusion e.g. 100 ml per 1 hour or 100 ml/hr.  May also be expressed as a rate per unit of time e.g. 500 ml per 2 hours.  Currently we do not specify a default of '1' in the denominator, but this is being discussed.  Other examples:  200 mcg/min or 200 mcg/1 minute; 1 liter/8 hours.)
          */
-        public Range getRateRange() throws Exception { 
+        public Range getRateRange() throws FHIRException { 
           if (!(this.rate instanceof Range))
-            throw new Exception("Type mismatch: the type Range was expected, but "+this.rate.getClass().getName()+" was encountered");
+            throw new FHIRException("Type mismatch: the type Range was expected, but "+this.rate.getClass().getName()+" was encountered");
           return (Range) this.rate;
         }
 
-        public boolean hasRateRange() throws Exception { 
+        public boolean hasRateRange() { 
           return this.rate instanceof Range;
         }
 
@@ -434,6 +449,61 @@ public class MedicationAdministration extends DomainResource {
           childrenList.add(new Property("quantity", "SimpleQuantity", "The amount of the medication given at one administration event.   Use this value when the administration is essentially an instantaneous event such as a swallowing a tablet or giving an injection.", 0, java.lang.Integer.MAX_VALUE, quantity));
           childrenList.add(new Property("rate[x]", "Ratio|Range", "Identifies the speed with which the medication was or will be introduced into the patient.  Typically the rate for an infusion e.g. 100 ml per 1 hour or 100 ml/hr.  May also be expressed as a rate per unit of time e.g. 500 ml per 2 hours.  Currently we do not specify a default of '1' in the denominator, but this is being discussed.  Other examples:  200 mcg/min or 200 mcg/1 minute; 1 liter/8 hours.", 0, java.lang.Integer.MAX_VALUE, rate));
         }
+
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("text"))
+          this.text = castToString(value); // StringType
+        else if (name.equals("site[x]"))
+          this.site = (Type) value; // Type
+        else if (name.equals("route"))
+          this.route = castToCodeableConcept(value); // CodeableConcept
+        else if (name.equals("method"))
+          this.method = castToCodeableConcept(value); // CodeableConcept
+        else if (name.equals("quantity"))
+          this.quantity = castToSimpleQuantity(value); // SimpleQuantity
+        else if (name.equals("rate[x]"))
+          this.rate = (Type) value; // Type
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("text")) {
+          throw new FHIRException("Cannot call addChild on a primitive type MedicationAdministration.text");
+        }
+        else if (name.equals("siteCodeableConcept")) {
+          this.site = new CodeableConcept();
+          return this.site;
+        }
+        else if (name.equals("siteReference")) {
+          this.site = new Reference();
+          return this.site;
+        }
+        else if (name.equals("route")) {
+          this.route = new CodeableConcept();
+          return this.route;
+        }
+        else if (name.equals("method")) {
+          this.method = new CodeableConcept();
+          return this.method;
+        }
+        else if (name.equals("quantity")) {
+          this.quantity = new SimpleQuantity();
+          return this.quantity;
+        }
+        else if (name.equals("rateRatio")) {
+          this.rate = new Ratio();
+          return this.rate;
+        }
+        else if (name.equals("rateRange")) {
+          this.rate = new Range();
+          return this.rate;
+        }
+        else
+          return super.addChild(name);
+      }
 
       public MedicationAdministrationDosageComponent copy() {
         MedicationAdministrationDosageComponent dst = new MedicationAdministrationDosageComponent();
@@ -474,6 +544,11 @@ public class MedicationAdministration extends DomainResource {
            && (route == null || route.isEmpty()) && (method == null || method.isEmpty()) && (quantity == null || quantity.isEmpty())
            && (rate == null || rate.isEmpty());
       }
+
+  public String fhirType() {
+    return "MedicationAdministration.dosage";
+
+  }
 
   }
 
@@ -1011,26 +1086,26 @@ public class MedicationAdministration extends DomainResource {
     /**
      * @return {@link #effectiveTime} (A specific date/time or interval of time during which the administration took place (or did not take place, when the 'notGiven' attribute is true). For many administrations, such as swallowing a tablet the use of dateTime is more appropriate.)
      */
-    public DateTimeType getEffectiveTimeDateTimeType() throws Exception { 
+    public DateTimeType getEffectiveTimeDateTimeType() throws FHIRException { 
       if (!(this.effectiveTime instanceof DateTimeType))
-        throw new Exception("Type mismatch: the type DateTimeType was expected, but "+this.effectiveTime.getClass().getName()+" was encountered");
+        throw new FHIRException("Type mismatch: the type DateTimeType was expected, but "+this.effectiveTime.getClass().getName()+" was encountered");
       return (DateTimeType) this.effectiveTime;
     }
 
-    public boolean hasEffectiveTimeDateTimeType() throws Exception { 
+    public boolean hasEffectiveTimeDateTimeType() { 
       return this.effectiveTime instanceof DateTimeType;
     }
 
     /**
      * @return {@link #effectiveTime} (A specific date/time or interval of time during which the administration took place (or did not take place, when the 'notGiven' attribute is true). For many administrations, such as swallowing a tablet the use of dateTime is more appropriate.)
      */
-    public Period getEffectiveTimePeriod() throws Exception { 
+    public Period getEffectiveTimePeriod() throws FHIRException { 
       if (!(this.effectiveTime instanceof Period))
-        throw new Exception("Type mismatch: the type Period was expected, but "+this.effectiveTime.getClass().getName()+" was encountered");
+        throw new FHIRException("Type mismatch: the type Period was expected, but "+this.effectiveTime.getClass().getName()+" was encountered");
       return (Period) this.effectiveTime;
     }
 
-    public boolean hasEffectiveTimePeriod() throws Exception { 
+    public boolean hasEffectiveTimePeriod() { 
       return this.effectiveTime instanceof Period;
     }
 
@@ -1056,26 +1131,26 @@ public class MedicationAdministration extends DomainResource {
     /**
      * @return {@link #medication} (Identifies the medication that was administered. This is either a link to a resource representing the details of the medication or a simple attribute carrying a code that identifies the medication from a known list of medications.)
      */
-    public CodeableConcept getMedicationCodeableConcept() throws Exception { 
+    public CodeableConcept getMedicationCodeableConcept() throws FHIRException { 
       if (!(this.medication instanceof CodeableConcept))
-        throw new Exception("Type mismatch: the type CodeableConcept was expected, but "+this.medication.getClass().getName()+" was encountered");
+        throw new FHIRException("Type mismatch: the type CodeableConcept was expected, but "+this.medication.getClass().getName()+" was encountered");
       return (CodeableConcept) this.medication;
     }
 
-    public boolean hasMedicationCodeableConcept() throws Exception { 
+    public boolean hasMedicationCodeableConcept() { 
       return this.medication instanceof CodeableConcept;
     }
 
     /**
      * @return {@link #medication} (Identifies the medication that was administered. This is either a link to a resource representing the details of the medication or a simple attribute carrying a code that identifies the medication from a known list of medications.)
      */
-    public Reference getMedicationReference() throws Exception { 
+    public Reference getMedicationReference() throws FHIRException { 
       if (!(this.medication instanceof Reference))
-        throw new Exception("Type mismatch: the type Reference was expected, but "+this.medication.getClass().getName()+" was encountered");
+        throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.medication.getClass().getName()+" was encountered");
       return (Reference) this.medication;
     }
 
-    public boolean hasMedicationReference() throws Exception { 
+    public boolean hasMedicationReference() { 
       return this.medication instanceof Reference;
     }
 
@@ -1242,6 +1317,108 @@ public class MedicationAdministration extends DomainResource {
         childrenList.add(new Property("note", "string", "Extra information about the medication administration that is not conveyed by the other attributes.", 0, java.lang.Integer.MAX_VALUE, note));
         childrenList.add(new Property("dosage", "", "Describes the medication dosage information details e.g. dose, rate, site, route, etc.", 0, java.lang.Integer.MAX_VALUE, dosage));
       }
+
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("identifier"))
+          this.getIdentifier().add(castToIdentifier(value));
+        else if (name.equals("status"))
+          this.status = new MedicationAdministrationStatusEnumFactory().fromType(value); // Enumeration<MedicationAdministrationStatus>
+        else if (name.equals("patient"))
+          this.patient = castToReference(value); // Reference
+        else if (name.equals("practitioner"))
+          this.practitioner = castToReference(value); // Reference
+        else if (name.equals("encounter"))
+          this.encounter = castToReference(value); // Reference
+        else if (name.equals("prescription"))
+          this.prescription = castToReference(value); // Reference
+        else if (name.equals("wasNotGiven"))
+          this.wasNotGiven = castToBoolean(value); // BooleanType
+        else if (name.equals("reasonNotGiven"))
+          this.getReasonNotGiven().add(castToCodeableConcept(value));
+        else if (name.equals("reasonGiven"))
+          this.getReasonGiven().add(castToCodeableConcept(value));
+        else if (name.equals("effectiveTime[x]"))
+          this.effectiveTime = (Type) value; // Type
+        else if (name.equals("medication[x]"))
+          this.medication = (Type) value; // Type
+        else if (name.equals("device"))
+          this.getDevice().add(castToReference(value));
+        else if (name.equals("note"))
+          this.note = castToString(value); // StringType
+        else if (name.equals("dosage"))
+          this.dosage = (MedicationAdministrationDosageComponent) value; // MedicationAdministrationDosageComponent
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("identifier")) {
+          return addIdentifier();
+        }
+        else if (name.equals("status")) {
+          throw new FHIRException("Cannot call addChild on a primitive type MedicationAdministration.status");
+        }
+        else if (name.equals("patient")) {
+          this.patient = new Reference();
+          return this.patient;
+        }
+        else if (name.equals("practitioner")) {
+          this.practitioner = new Reference();
+          return this.practitioner;
+        }
+        else if (name.equals("encounter")) {
+          this.encounter = new Reference();
+          return this.encounter;
+        }
+        else if (name.equals("prescription")) {
+          this.prescription = new Reference();
+          return this.prescription;
+        }
+        else if (name.equals("wasNotGiven")) {
+          throw new FHIRException("Cannot call addChild on a primitive type MedicationAdministration.wasNotGiven");
+        }
+        else if (name.equals("reasonNotGiven")) {
+          return addReasonNotGiven();
+        }
+        else if (name.equals("reasonGiven")) {
+          return addReasonGiven();
+        }
+        else if (name.equals("effectiveTimeDateTime")) {
+          this.effectiveTime = new DateTimeType();
+          return this.effectiveTime;
+        }
+        else if (name.equals("effectiveTimePeriod")) {
+          this.effectiveTime = new Period();
+          return this.effectiveTime;
+        }
+        else if (name.equals("medicationCodeableConcept")) {
+          this.medication = new CodeableConcept();
+          return this.medication;
+        }
+        else if (name.equals("medicationReference")) {
+          this.medication = new Reference();
+          return this.medication;
+        }
+        else if (name.equals("device")) {
+          return addDevice();
+        }
+        else if (name.equals("note")) {
+          throw new FHIRException("Cannot call addChild on a primitive type MedicationAdministration.note");
+        }
+        else if (name.equals("dosage")) {
+          this.dosage = new MedicationAdministrationDosageComponent();
+          return this.dosage;
+        }
+        else
+          return super.addChild(name);
+      }
+
+  public String fhirType() {
+    return "MedicationAdministration";
+
+  }
 
       public MedicationAdministration copy() {
         MedicationAdministration dst = new MedicationAdministration();

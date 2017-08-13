@@ -6,11 +6,7 @@ import static org.mockito.Mockito.when;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import javax.persistence.EntityManager;
 
@@ -18,9 +14,7 @@ import org.apache.commons.io.IOUtils;
 import org.hibernate.search.jpa.Search;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.dstu3.model.Resource;
-import org.hl7.fhir.instance.model.api.IBaseBundle;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.instance.model.api.*;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.mockito.Mockito;
@@ -37,8 +31,8 @@ import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
 import ca.uhn.fhir.jpa.term.VersionIndependentConcept;
 import ca.uhn.fhir.model.dstu2.resource.Bundle;
 import ca.uhn.fhir.model.dstu2.resource.Bundle.Entry;
-import ca.uhn.fhir.rest.method.IRequestOperationCallback;
-import ca.uhn.fhir.rest.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.IRequestOperationCallback;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.BundleUtil;
@@ -69,6 +63,14 @@ public abstract class BaseJpaTest {
 		org.hl7.fhir.dstu3.model.Bundle bundle = new org.hl7.fhir.dstu3.model.Bundle();
 		for (IBaseResource next : theSearch.getResources(0, theSearch.size())) {
 			bundle.addEntry().setResource((Resource) next);
+		}
+		return bundle;
+	}
+
+	protected org.hl7.fhir.r4.model.Bundle toBundleR4(IBundleProvider theSearch) {
+		org.hl7.fhir.r4.model.Bundle bundle = new org.hl7.fhir.r4.model.Bundle();
+		for (IBaseResource next : theSearch.getResources(0, theSearch.size())) {
+			bundle.addEntry().setResource((org.hl7.fhir.r4.model.Resource) next);
 		}
 		return bundle;
 	}
@@ -131,6 +133,16 @@ public abstract class BaseJpaTest {
 	protected List<IIdType> toUnqualifiedVersionlessIds(org.hl7.fhir.dstu3.model.Bundle theFound) {
 		List<IIdType> retVal = new ArrayList<IIdType>();
 		for (BundleEntryComponent next : theFound.getEntry()) {
+			// if (next.getResource()!= null) {
+			retVal.add(next.getResource().getIdElement().toUnqualifiedVersionless());
+			// }
+		}
+		return retVal;
+	}
+
+	protected List<IIdType> toUnqualifiedVersionlessIds(org.hl7.fhir.r4.model.Bundle theFound) {
+		List<IIdType> retVal = new ArrayList<IIdType>();
+		for (org.hl7.fhir.r4.model.Bundle.BundleEntryComponent next : theFound.getEntry()) {
 			// if (next.getResource()!= null) {
 			retVal.add(next.getResource().getIdElement().toUnqualifiedVersionless());
 			// }

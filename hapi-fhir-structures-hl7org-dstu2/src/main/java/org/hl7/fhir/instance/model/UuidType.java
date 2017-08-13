@@ -63,4 +63,8 @@ public class UuidType extends UriType {
 		return new UuidType(getValue());
 	}
 	
+	public String fhirType() {
+		return "uuid";		
+	}
+
 }

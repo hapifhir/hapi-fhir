@@ -32,17 +32,20 @@ import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import ca.uhn.fhir.context.ConfigurationException;
+
 /**
  * This feature is not yet in its final state and should be considered an internal part of HAPI for now - use with caution
  */
 public class HapiLocalizer {
 
-	public static final String UNKNOWN_I18N_KEY_MESSAGE = "!MESSAGE!";
+	private static boolean ourFailOnMissingMessage;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(HapiLocalizer.class);
-	private List<ResourceBundle> myBundle = new ArrayList<ResourceBundle>();
+	public static final String UNKNOWN_I18N_KEY_MESSAGE = "!MESSAGE!";
 
-	private final Map<String, MessageFormat> myKeyToMessageFormat = new ConcurrentHashMap<String, MessageFormat>();
+	private List<ResourceBundle> myBundle = new ArrayList<ResourceBundle>();
 	private String[] myBundleNames;
+	private final Map<String, MessageFormat> myKeyToMessageFormat = new ConcurrentHashMap<String, MessageFormat>();
 
 	public HapiLocalizer() {
 		this(HapiLocalizer.class.getPackage().getName() + ".hapi-messages");
@@ -51,12 +54,6 @@ public class HapiLocalizer {
 	public HapiLocalizer(String... theBundleNames) {
 		myBundleNames = theBundleNames;
 		init();
-	}
-
-	protected void init() {
-		for (String nextName : myBundleNames) {
-			myBundle.add(ResourceBundle.getBundle(nextName));
-		}
 	}
 
 	private String findFormatString(String theQualifiedKey) {
@@ -72,9 +69,23 @@ public class HapiLocalizer {
 
 		if (formatString == null) {
 			ourLog.warn("Unknown localization key: {}", theQualifiedKey);
+			if (ourFailOnMissingMessage) {
+				throw new ConfigurationException("Unknown localization key: " + theQualifiedKey);
+			}
 			formatString = UNKNOWN_I18N_KEY_MESSAGE;
 		}
 		return formatString;
+	}
+
+	public Set<String> getAllKeys(){
+		HashSet<String> retVal = new HashSet<String>();
+		for (ResourceBundle nextBundle : myBundle) {
+			Enumeration<String> keysEnum = nextBundle.getKeys();
+			while (keysEnum.hasMoreElements()) {
+				retVal.add(keysEnum.nextElement());
+			}
+		}
+		return retVal;
 	}
 
 	public String getMessage(Class<?> theType, String theKey, Object... theParameters) {
@@ -97,16 +108,20 @@ public class HapiLocalizer {
 		String retVal = findFormatString(theQualifiedKey);
 		return retVal;
 	}
-	
-	public Set<String> getAllKeys(){
-		HashSet<String> retVal = new HashSet<String>();
-		for (ResourceBundle nextBundle : myBundle) {
-			Enumeration<String> keysEnum = nextBundle.getKeys();
-			while (keysEnum.hasMoreElements()) {
-				retVal.add(keysEnum.nextElement());
-			}
+
+	protected void init() {
+		for (String nextName : myBundleNames) {
+			myBundle.add(ResourceBundle.getBundle(nextName));
 		}
-		return retVal;
+	}
+	
+	/**
+	 * This <b>global setting</b> causes the localizer to fail if any attempts
+	 * are made to retrieve a key that does not exist. This method is primarily for
+	 * unit tests.
+	 */
+	public static void setOurFailOnMissingMessage(boolean ourFailOnMissingMessage) {
+		HapiLocalizer.ourFailOnMissingMessage = ourFailOnMissingMessage;
 	}
 	
 }

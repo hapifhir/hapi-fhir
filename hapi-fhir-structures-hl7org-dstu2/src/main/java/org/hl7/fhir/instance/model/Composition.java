@@ -29,19 +29,14 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Wed, Jul 13, 2016 05:32+1000 for FHIR v1.0.2
+import java.util.*;
 
+import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
-import org.hl7.fhir.instance.utilities.Utilities;
+import org.hl7.fhir.utilities.Utilities;
 
-import ca.uhn.fhir.model.api.annotation.Block;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
-import ca.uhn.fhir.model.api.annotation.ResourceDef;
-import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.*;
 /**
  * A set of healthcare-related information that is assembled together into a single logical document that provides a single coherent statement of meaning, establishes its own context and that has clinical attestation with regard to who is making the statement. While a Composition defines the structure, it does not actually contain the content: rather the full content of a document is contained in a Bundle, of which the Composition is the first resource contained.
  */
@@ -69,7 +64,7 @@ public class Composition extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static CompositionStatus fromCode(String codeString) throws Exception {
+        public static CompositionStatus fromCode(String codeString) throws FHIRException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("preliminary".equals(codeString))
@@ -80,7 +75,7 @@ public class Composition extends DomainResource {
           return AMENDED;
         if ("entered-in-error".equals(codeString))
           return ENTEREDINERROR;
-        throw new Exception("Unknown CompositionStatus code '"+codeString+"'");
+        throw new FHIRException("Unknown CompositionStatus code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -135,6 +130,22 @@ public class Composition extends DomainResource {
           return CompositionStatus.ENTEREDINERROR;
         throw new IllegalArgumentException("Unknown CompositionStatus code '"+codeString+"'");
         }
+        public Enumeration<CompositionStatus> fromType(Base code) throws FHIRException {
+          if (code == null || code.isEmpty())
+            return null;
+          String codeString = ((PrimitiveType) code).asStringValue();
+          if (codeString == null || "".equals(codeString))
+            return null;
+        if ("preliminary".equals(codeString))
+          return new Enumeration<CompositionStatus>(this, CompositionStatus.PRELIMINARY);
+        if ("final".equals(codeString))
+          return new Enumeration<CompositionStatus>(this, CompositionStatus.FINAL);
+        if ("amended".equals(codeString))
+          return new Enumeration<CompositionStatus>(this, CompositionStatus.AMENDED);
+        if ("entered-in-error".equals(codeString))
+          return new Enumeration<CompositionStatus>(this, CompositionStatus.ENTEREDINERROR);
+        throw new FHIRException("Unknown CompositionStatus code '"+codeString+"'");
+        }
     public String toCode(CompositionStatus code) {
       if (code == CompositionStatus.PRELIMINARY)
         return "preliminary";
@@ -169,7 +180,7 @@ public class Composition extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static CompositionAttestationMode fromCode(String codeString) throws Exception {
+        public static CompositionAttestationMode fromCode(String codeString) throws FHIRException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("personal".equals(codeString))
@@ -180,7 +191,7 @@ public class Composition extends DomainResource {
           return LEGAL;
         if ("official".equals(codeString))
           return OFFICIAL;
-        throw new Exception("Unknown CompositionAttestationMode code '"+codeString+"'");
+        throw new FHIRException("Unknown CompositionAttestationMode code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -234,6 +245,22 @@ public class Composition extends DomainResource {
         if ("official".equals(codeString))
           return CompositionAttestationMode.OFFICIAL;
         throw new IllegalArgumentException("Unknown CompositionAttestationMode code '"+codeString+"'");
+        }
+        public Enumeration<CompositionAttestationMode> fromType(Base code) throws FHIRException {
+          if (code == null || code.isEmpty())
+            return null;
+          String codeString = ((PrimitiveType) code).asStringValue();
+          if (codeString == null || "".equals(codeString))
+            return null;
+        if ("personal".equals(codeString))
+          return new Enumeration<CompositionAttestationMode>(this, CompositionAttestationMode.PERSONAL);
+        if ("professional".equals(codeString))
+          return new Enumeration<CompositionAttestationMode>(this, CompositionAttestationMode.PROFESSIONAL);
+        if ("legal".equals(codeString))
+          return new Enumeration<CompositionAttestationMode>(this, CompositionAttestationMode.LEGAL);
+        if ("official".equals(codeString))
+          return new Enumeration<CompositionAttestationMode>(this, CompositionAttestationMode.OFFICIAL);
+        throw new FHIRException("Unknown CompositionAttestationMode code '"+codeString+"'");
         }
     public String toCode(CompositionAttestationMode code) {
       if (code == CompositionAttestationMode.PERSONAL)
@@ -434,6 +461,34 @@ public class Composition extends DomainResource {
           childrenList.add(new Property("party", "Reference(Patient|Practitioner|Organization)", "Who attested the composition in the specified way.", 0, java.lang.Integer.MAX_VALUE, party));
         }
 
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("mode"))
+          this.getMode().add(new CompositionAttestationModeEnumFactory().fromType(value));
+        else if (name.equals("time"))
+          this.time = castToDateTime(value); // DateTimeType
+        else if (name.equals("party"))
+          this.party = castToReference(value); // Reference
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("mode")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Composition.mode");
+        }
+        else if (name.equals("time")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Composition.time");
+        }
+        else if (name.equals("party")) {
+          this.party = new Reference();
+          return this.party;
+        }
+        else
+          return super.addChild(name);
+      }
+
       public CompositionAttesterComponent copy() {
         CompositionAttesterComponent dst = new CompositionAttesterComponent();
         copyValues(dst);
@@ -472,6 +527,11 @@ public class Composition extends DomainResource {
         return super.isEmpty() && (mode == null || mode.isEmpty()) && (time == null || time.isEmpty())
            && (party == null || party.isEmpty());
       }
+
+  public String fhirType() {
+    return "Composition.attester";
+
+  }
 
   }
 
@@ -632,6 +692,34 @@ public class Composition extends DomainResource {
           childrenList.add(new Property("detail", "Reference(Any)", "The description and/or reference of the event(s) being documented. For example, this could be used to document such a colonoscopy or an appendectomy.", 0, java.lang.Integer.MAX_VALUE, detail));
         }
 
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("code"))
+          this.getCode().add(castToCodeableConcept(value));
+        else if (name.equals("period"))
+          this.period = castToPeriod(value); // Period
+        else if (name.equals("detail"))
+          this.getDetail().add(castToReference(value));
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("code")) {
+          return addCode();
+        }
+        else if (name.equals("period")) {
+          this.period = new Period();
+          return this.period;
+        }
+        else if (name.equals("detail")) {
+          return addDetail();
+        }
+        else
+          return super.addChild(name);
+      }
+
       public CompositionEventComponent copy() {
         CompositionEventComponent dst = new CompositionEventComponent();
         copyValues(dst);
@@ -674,6 +762,11 @@ public class Composition extends DomainResource {
         return super.isEmpty() && (code == null || code.isEmpty()) && (period == null || period.isEmpty())
            && (detail == null || detail.isEmpty());
       }
+
+  public String fhirType() {
+    return "Composition.event";
+
+  }
 
   }
 
@@ -1044,6 +1137,62 @@ public class Composition extends DomainResource {
           childrenList.add(new Property("section", "@Composition.section", "A nested sub-section within this section.", 0, java.lang.Integer.MAX_VALUE, section));
         }
 
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("title"))
+          this.title = castToString(value); // StringType
+        else if (name.equals("code"))
+          this.code = castToCodeableConcept(value); // CodeableConcept
+        else if (name.equals("text"))
+          this.text = castToNarrative(value); // Narrative
+        else if (name.equals("mode"))
+          this.mode = castToCode(value); // CodeType
+        else if (name.equals("orderedBy"))
+          this.orderedBy = castToCodeableConcept(value); // CodeableConcept
+        else if (name.equals("entry"))
+          this.getEntry().add(castToReference(value));
+        else if (name.equals("emptyReason"))
+          this.emptyReason = castToCodeableConcept(value); // CodeableConcept
+        else if (name.equals("section"))
+          this.getSection().add((SectionComponent) value);
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("title")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Composition.title");
+        }
+        else if (name.equals("code")) {
+          this.code = new CodeableConcept();
+          return this.code;
+        }
+        else if (name.equals("text")) {
+          this.text = new Narrative();
+          return this.text;
+        }
+        else if (name.equals("mode")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Composition.mode");
+        }
+        else if (name.equals("orderedBy")) {
+          this.orderedBy = new CodeableConcept();
+          return this.orderedBy;
+        }
+        else if (name.equals("entry")) {
+          return addEntry();
+        }
+        else if (name.equals("emptyReason")) {
+          this.emptyReason = new CodeableConcept();
+          return this.emptyReason;
+        }
+        else if (name.equals("section")) {
+          return addSection();
+        }
+        else
+          return super.addChild(name);
+      }
+
       public SectionComponent copy() {
         SectionComponent dst = new SectionComponent();
         copyValues(dst);
@@ -1094,6 +1243,11 @@ public class Composition extends DomainResource {
            && (entry == null || entry.isEmpty()) && (emptyReason == null || emptyReason.isEmpty()) && (section == null || section.isEmpty())
           ;
       }
+
+  public String fhirType() {
+    return "Composition.section";
+
+  }
 
   }
 
@@ -1805,6 +1959,99 @@ public class Composition extends DomainResource {
         childrenList.add(new Property("encounter", "Reference(Encounter)", "Describes the clinical encounter or type of care this documentation is associated with.", 0, java.lang.Integer.MAX_VALUE, encounter));
         childrenList.add(new Property("section", "", "The root of the sections that make up the composition.", 0, java.lang.Integer.MAX_VALUE, section));
       }
+
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("identifier"))
+          this.identifier = castToIdentifier(value); // Identifier
+        else if (name.equals("date"))
+          this.date = castToDateTime(value); // DateTimeType
+        else if (name.equals("type"))
+          this.type = castToCodeableConcept(value); // CodeableConcept
+        else if (name.equals("class"))
+          this.class_ = castToCodeableConcept(value); // CodeableConcept
+        else if (name.equals("title"))
+          this.title = castToString(value); // StringType
+        else if (name.equals("status"))
+          this.status = new CompositionStatusEnumFactory().fromType(value); // Enumeration<CompositionStatus>
+        else if (name.equals("confidentiality"))
+          this.confidentiality = castToCode(value); // CodeType
+        else if (name.equals("subject"))
+          this.subject = castToReference(value); // Reference
+        else if (name.equals("author"))
+          this.getAuthor().add(castToReference(value));
+        else if (name.equals("attester"))
+          this.getAttester().add((CompositionAttesterComponent) value);
+        else if (name.equals("custodian"))
+          this.custodian = castToReference(value); // Reference
+        else if (name.equals("event"))
+          this.getEvent().add((CompositionEventComponent) value);
+        else if (name.equals("encounter"))
+          this.encounter = castToReference(value); // Reference
+        else if (name.equals("section"))
+          this.getSection().add((SectionComponent) value);
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("identifier")) {
+          this.identifier = new Identifier();
+          return this.identifier;
+        }
+        else if (name.equals("date")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Composition.date");
+        }
+        else if (name.equals("type")) {
+          this.type = new CodeableConcept();
+          return this.type;
+        }
+        else if (name.equals("class")) {
+          this.class_ = new CodeableConcept();
+          return this.class_;
+        }
+        else if (name.equals("title")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Composition.title");
+        }
+        else if (name.equals("status")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Composition.status");
+        }
+        else if (name.equals("confidentiality")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Composition.confidentiality");
+        }
+        else if (name.equals("subject")) {
+          this.subject = new Reference();
+          return this.subject;
+        }
+        else if (name.equals("author")) {
+          return addAuthor();
+        }
+        else if (name.equals("attester")) {
+          return addAttester();
+        }
+        else if (name.equals("custodian")) {
+          this.custodian = new Reference();
+          return this.custodian;
+        }
+        else if (name.equals("event")) {
+          return addEvent();
+        }
+        else if (name.equals("encounter")) {
+          this.encounter = new Reference();
+          return this.encounter;
+        }
+        else if (name.equals("section")) {
+          return addSection();
+        }
+        else
+          return super.addChild(name);
+      }
+
+  public String fhirType() {
+    return "Composition";
+
+  }
 
       public Composition copy() {
         Composition dst = new Composition();

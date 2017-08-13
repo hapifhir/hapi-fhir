@@ -1,10 +1,7 @@
 package ca.uhn.fhirtest.config;
 
 import org.springframework.beans.factory.annotation.Autowire;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.*;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.to.FhirTesterMvcConfig;
@@ -56,10 +53,10 @@ public class FhirTesterConfig {
 				.withBaseUrl("http://fhirtest.uhn.ca/baseDstu2")
 				.withName("UHN/HAPI Server (DSTU2 FHIR)")
 			.addServer()
-				.withId("home")
-				.withFhirVersion(FhirVersionEnum.DSTU1)
-				.withBaseUrl("http://fhirtest.uhn.ca/baseDstu1")
-				.withName("UHN/HAPI Server (DSTU1 FHIR)")
+				.withId("home_r4")
+				.withFhirVersion(FhirVersionEnum.R4)
+				.withBaseUrl("http://fhirtest.uhn.ca/baseR4")
+				.withName("UHN/HAPI Server (R4 FHIR)")
 //			.addServer()
 //				.withId("tdl_d2")
 //				.withFhirVersion(FhirVersionEnum.DSTU2)
@@ -72,6 +69,11 @@ public class FhirTesterConfig {
 //				.withBaseUrl("http://fhirtest.uhn.ca/testDataLibraryStu3")
 //				.withName("Test Data Library (DSTU3 FHIR)")
 //				.allowsApiKey()
+			.addServer()
+				.withId("hi4")
+				.withFhirVersion(FhirVersionEnum.DSTU3)
+				.withBaseUrl("http://test.fhir.org/r4")
+				.withName("Health Intersections (R4 FHIR)")
 			.addServer()
 				.withId("hi3")
 				.withFhirVersion(FhirVersionEnum.DSTU3)

@@ -12,19 +12,15 @@ import java.util.List;
 
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.instance.model.api.IBase;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.*;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.context.api.AddProfileTagEnum;
+import ca.uhn.fhir.model.api.annotation.*;
 import ca.uhn.fhir.model.api.annotation.Extension;
-import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.parser.CustomResource364Dstu3.CustomResource364CustomDate;
-import ca.uhn.fhir.rest.server.AddProfileTagEnum;
 import ca.uhn.fhir.util.ElementUtil;
 import ca.uhn.fhir.util.TestUtil;
 

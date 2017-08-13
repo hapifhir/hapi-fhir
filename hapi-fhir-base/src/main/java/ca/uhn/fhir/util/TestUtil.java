@@ -29,6 +29,7 @@ import java.util.TimeZone;
 import org.slf4j.LoggerFactory;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.HapiLocalizer;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.LoggerContext;
@@ -44,7 +45,8 @@ public class TestUtil {
 	 * static fields seems to solve this.
 	 */
 	public static void clearAllStaticFieldsForUnitTest() {
-
+		HapiLocalizer.setOurFailOnMissingMessage(true);
+		
 		Class<?> theType;
 		try {
 			throw new Exception();

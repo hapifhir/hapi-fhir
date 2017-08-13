@@ -10,7 +10,7 @@
    <value value="http://hl7.org/fhir"/>
   </telecom>
  </contact>
- <date value="2015-11-11T10:54:01-05:00"/>
+ <date value="2017-07-27T08:19:05-04:00"/>
  <description value="Base StructureDefinition for Period Type"/>
  <fhirVersion value="1.0.2"/>
  <mapping>
@@ -38,9 +38,6 @@
     <code value="Element"/>
    </type>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="start.empty() or end.empty() or (start.value &lt;= end.value)"/>
-    </extension>
     <key value="per-1"/>
     <severity value="error"/>
     <human value="If present, start SHALL have a lower value than end"/>
@@ -144,9 +141,6 @@
     <code value="Element"/>
    </type>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="start.empty() or end.empty() or (start.value &lt;= end.value)"/>
-    </extension>
     <key value="per-1"/>
     <severity value="error"/>
     <human value="If present, start SHALL have a lower value than end"/>

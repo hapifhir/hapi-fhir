@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-fhir</artifactId>
-		<version>2.6-SNAPSHOT</version>
+		<version>3.0.0-SNAPSHOT</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
@@ -32,8 +32,8 @@
 						<configuration>
 							<signature>
 								<groupId>org.codehaus.mojo.signature</groupId>
-								<artifactId>java16</artifactId>
-								<version>1.1</version>
+								<artifactId>java17</artifactId>
+								<version>1.0</version>
 							</signature>
 						</configuration>
 					</execution>

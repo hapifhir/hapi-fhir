@@ -24,13 +24,11 @@ import ca.uhn.fhir.jpa.dao.IFhirResourceDaoEncounter;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.dstu2.resource.Encounter;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
-import ca.uhn.fhir.rest.annotation.IdParam;
-import ca.uhn.fhir.rest.annotation.Operation;
-import ca.uhn.fhir.rest.annotation.OperationParam;
-import ca.uhn.fhir.rest.annotation.Sort;
+import ca.uhn.fhir.rest.annotation.*;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.SortSpec;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateRangeParam;
-import ca.uhn.fhir.rest.server.Constants;
 
 public class BaseJpaResourceProviderEncounterDstu2 extends JpaResourceProviderDstu2<Encounter> {
 
@@ -39,7 +37,7 @@ public class BaseJpaResourceProviderEncounterDstu2 extends JpaResourceProviderDs
 	 */
 	//@formatter:off
 	@Operation(name = "everything", idempotent = true, bundleType=BundleTypeEnum.SEARCHSET)
-	public ca.uhn.fhir.rest.server.IBundleProvider EncounterInstanceEverything(
+	public IBundleProvider EncounterInstanceEverything(
 
 			javax.servlet.http.HttpServletRequest theServletRequest,
 
@@ -71,7 +69,7 @@ public class BaseJpaResourceProviderEncounterDstu2 extends JpaResourceProviderDs
 		 */
 		//@formatter:off
 		@Operation(name = "everything", idempotent = true, bundleType=BundleTypeEnum.SEARCHSET)
-		public ca.uhn.fhir.rest.server.IBundleProvider EncounterTypeEverything(
+		public IBundleProvider EncounterTypeEverything(
 
 				javax.servlet.http.HttpServletRequest theServletRequest,
 

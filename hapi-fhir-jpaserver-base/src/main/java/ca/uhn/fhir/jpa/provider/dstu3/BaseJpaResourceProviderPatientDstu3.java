@@ -4,10 +4,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.util.List;
 
-import org.hl7.fhir.dstu3.model.IdType;
-import org.hl7.fhir.dstu3.model.Patient;
-import org.hl7.fhir.dstu3.model.StringType;
-import org.hl7.fhir.dstu3.model.UnsignedIntType;
+import org.hl7.fhir.dstu3.model.*;
 
 /*
  * #%L
@@ -32,17 +29,12 @@ import org.hl7.fhir.dstu3.model.UnsignedIntType;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoPatient;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
-import ca.uhn.fhir.rest.annotation.IdParam;
-import ca.uhn.fhir.rest.annotation.Operation;
-import ca.uhn.fhir.rest.annotation.OperationParam;
-import ca.uhn.fhir.rest.annotation.Sort;
+import ca.uhn.fhir.rest.annotation.*;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.SortSpec;
-import ca.uhn.fhir.rest.method.RequestDetails;
-import ca.uhn.fhir.rest.param.DateRangeParam;
-import ca.uhn.fhir.rest.param.StringAndListParam;
-import ca.uhn.fhir.rest.param.StringOrListParam;
-import ca.uhn.fhir.rest.param.StringParam;
-import ca.uhn.fhir.rest.server.Constants;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.param.*;
 
 public class BaseJpaResourceProviderPatientDstu3 extends JpaResourceProviderDstu3<Patient> {
 
@@ -52,7 +44,7 @@ public class BaseJpaResourceProviderPatientDstu3 extends JpaResourceProviderDstu
 	 */
 	//@formatter:off
 	@Operation(name = "everything", idempotent = true, bundleType=BundleTypeEnum.SEARCHSET)
-	public ca.uhn.fhir.rest.server.IBundleProvider patientInstanceEverything(
+	public IBundleProvider patientInstanceEverything(
 
 			javax.servlet.http.HttpServletRequest theServletRequest,
 
@@ -96,7 +88,7 @@ public class BaseJpaResourceProviderPatientDstu3 extends JpaResourceProviderDstu
 	 */
 	//@formatter:off
 		@Operation(name = "everything", idempotent = true, bundleType=BundleTypeEnum.SEARCHSET)
-		public ca.uhn.fhir.rest.server.IBundleProvider patientTypeEverything(
+		public IBundleProvider patientTypeEverything(
 
 				javax.servlet.http.HttpServletRequest theServletRequest,
 

@@ -10,7 +10,7 @@
    <value value="http://hl7.org/fhir"/>
   </telecom>
  </contact>
- <date value="2015-11-11T10:54:01-05:00"/>
+ <date value="2017-07-27T08:19:05-04:00"/>
  <description value="Base StructureDefinition for Ratio Type"/>
  <requirements value="Need to able to capture ratios for some measurements (titers) and some rates (costs)."/>
  <fhirVersion value="1.0.2"/>
@@ -38,9 +38,6 @@
     <code value="Element"/>
    </type>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="numerator.empty() xor denominator"/>
-    </extension>
     <key value="rat-1"/>
     <severity value="error"/>
     <human value="Numerator and denominator SHALL both be present, or both are absent. If both are absent, there SHALL be some extension present"/>
@@ -130,9 +127,6 @@
     <code value="Element"/>
    </type>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="numerator.empty() xor denominator"/>
-    </extension>
     <key value="rat-1"/>
     <severity value="error"/>
     <human value="Numerator and denominator SHALL both be present, or both are absent. If both are absent, there SHALL be some extension present"/>

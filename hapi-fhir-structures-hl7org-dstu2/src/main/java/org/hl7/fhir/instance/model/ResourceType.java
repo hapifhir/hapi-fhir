@@ -1,6 +1,8 @@
 package org.hl7.fhir.instance.model;
 
-// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
+import org.hl7.fhir.exceptions.FHIRException;
+
+// Generated on Wed, Jul 13, 2016 05:32+1000 for FHIR v1.0.2
 
 public enum ResourceType {
     Account,
@@ -291,6 +293,200 @@ public enum ResourceType {
       return "visionprescription";
     }
       return null;
+  }
+
+
+    public static ResourceType fromCode(String code) throws FHIRException {;
+    if ("Account".equals(code))
+      return Account;
+    if ("AllergyIntolerance".equals(code))
+      return AllergyIntolerance;
+    if ("Appointment".equals(code))
+      return Appointment;
+    if ("AppointmentResponse".equals(code))
+      return AppointmentResponse;
+    if ("AuditEvent".equals(code))
+      return AuditEvent;
+    if ("Basic".equals(code))
+      return Basic;
+    if ("Binary".equals(code))
+      return Binary;
+    if ("BodySite".equals(code))
+      return BodySite;
+    if ("Bundle".equals(code))
+      return Bundle;
+    if ("CarePlan".equals(code))
+      return CarePlan;
+    if ("Claim".equals(code))
+      return Claim;
+    if ("ClaimResponse".equals(code))
+      return ClaimResponse;
+    if ("ClinicalImpression".equals(code))
+      return ClinicalImpression;
+    if ("Communication".equals(code))
+      return Communication;
+    if ("CommunicationRequest".equals(code))
+      return CommunicationRequest;
+    if ("Composition".equals(code))
+      return Composition;
+    if ("ConceptMap".equals(code))
+      return ConceptMap;
+    if ("Condition".equals(code))
+      return Condition;
+    if ("Conformance".equals(code))
+      return Conformance;
+    if ("Contract".equals(code))
+      return Contract;
+    if ("Coverage".equals(code))
+      return Coverage;
+    if ("DataElement".equals(code))
+      return DataElement;
+    if ("DetectedIssue".equals(code))
+      return DetectedIssue;
+    if ("Device".equals(code))
+      return Device;
+    if ("DeviceComponent".equals(code))
+      return DeviceComponent;
+    if ("DeviceMetric".equals(code))
+      return DeviceMetric;
+    if ("DeviceUseRequest".equals(code))
+      return DeviceUseRequest;
+    if ("DeviceUseStatement".equals(code))
+      return DeviceUseStatement;
+    if ("DiagnosticOrder".equals(code))
+      return DiagnosticOrder;
+    if ("DiagnosticReport".equals(code))
+      return DiagnosticReport;
+    if ("DocumentManifest".equals(code))
+      return DocumentManifest;
+    if ("DocumentReference".equals(code))
+      return DocumentReference;
+    if ("EligibilityRequest".equals(code))
+      return EligibilityRequest;
+    if ("EligibilityResponse".equals(code))
+      return EligibilityResponse;
+    if ("Encounter".equals(code))
+      return Encounter;
+    if ("EnrollmentRequest".equals(code))
+      return EnrollmentRequest;
+    if ("EnrollmentResponse".equals(code))
+      return EnrollmentResponse;
+    if ("EpisodeOfCare".equals(code))
+      return EpisodeOfCare;
+    if ("ExplanationOfBenefit".equals(code))
+      return ExplanationOfBenefit;
+    if ("FamilyMemberHistory".equals(code))
+      return FamilyMemberHistory;
+    if ("Flag".equals(code))
+      return Flag;
+    if ("Goal".equals(code))
+      return Goal;
+    if ("Group".equals(code))
+      return Group;
+    if ("HealthcareService".equals(code))
+      return HealthcareService;
+    if ("ImagingObjectSelection".equals(code))
+      return ImagingObjectSelection;
+    if ("ImagingStudy".equals(code))
+      return ImagingStudy;
+    if ("Immunization".equals(code))
+      return Immunization;
+    if ("ImmunizationRecommendation".equals(code))
+      return ImmunizationRecommendation;
+    if ("ImplementationGuide".equals(code))
+      return ImplementationGuide;
+    if ("List".equals(code))
+      return List;
+    if ("Location".equals(code))
+      return Location;
+    if ("Media".equals(code))
+      return Media;
+    if ("Medication".equals(code))
+      return Medication;
+    if ("MedicationAdministration".equals(code))
+      return MedicationAdministration;
+    if ("MedicationDispense".equals(code))
+      return MedicationDispense;
+    if ("MedicationOrder".equals(code))
+      return MedicationOrder;
+    if ("MedicationStatement".equals(code))
+      return MedicationStatement;
+    if ("MessageHeader".equals(code))
+      return MessageHeader;
+    if ("NamingSystem".equals(code))
+      return NamingSystem;
+    if ("NutritionOrder".equals(code))
+      return NutritionOrder;
+    if ("Observation".equals(code))
+      return Observation;
+    if ("OperationDefinition".equals(code))
+      return OperationDefinition;
+    if ("OperationOutcome".equals(code))
+      return OperationOutcome;
+    if ("Order".equals(code))
+      return Order;
+    if ("OrderResponse".equals(code))
+      return OrderResponse;
+    if ("Organization".equals(code))
+      return Organization;
+    if ("Parameters".equals(code))
+      return Parameters;
+    if ("Patient".equals(code))
+      return Patient;
+    if ("PaymentNotice".equals(code))
+      return PaymentNotice;
+    if ("PaymentReconciliation".equals(code))
+      return PaymentReconciliation;
+    if ("Person".equals(code))
+      return Person;
+    if ("Practitioner".equals(code))
+      return Practitioner;
+    if ("Procedure".equals(code))
+      return Procedure;
+    if ("ProcedureRequest".equals(code))
+      return ProcedureRequest;
+    if ("ProcessRequest".equals(code))
+      return ProcessRequest;
+    if ("ProcessResponse".equals(code))
+      return ProcessResponse;
+    if ("Provenance".equals(code))
+      return Provenance;
+    if ("Questionnaire".equals(code))
+      return Questionnaire;
+    if ("QuestionnaireResponse".equals(code))
+      return QuestionnaireResponse;
+    if ("ReferralRequest".equals(code))
+      return ReferralRequest;
+    if ("RelatedPerson".equals(code))
+      return RelatedPerson;
+    if ("RiskAssessment".equals(code))
+      return RiskAssessment;
+    if ("Schedule".equals(code))
+      return Schedule;
+    if ("SearchParameter".equals(code))
+      return SearchParameter;
+    if ("Slot".equals(code))
+      return Slot;
+    if ("Specimen".equals(code))
+      return Specimen;
+    if ("StructureDefinition".equals(code))
+      return StructureDefinition;
+    if ("Subscription".equals(code))
+      return Subscription;
+    if ("Substance".equals(code))
+      return Substance;
+    if ("SupplyDelivery".equals(code))
+      return SupplyDelivery;
+    if ("SupplyRequest".equals(code))
+      return SupplyRequest;
+    if ("TestScript".equals(code))
+      return TestScript;
+    if ("ValueSet".equals(code))
+      return ValueSet;
+    if ("VisionPrescription".equals(code))
+      return VisionPrescription;
+
+    throw new FHIRException("Unknown resource type"+code);
   }
 
 }

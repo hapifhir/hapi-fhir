@@ -1,10 +1,6 @@
 package ca.uhn.fhir.okhttp.client;
 
-import static ca.uhn.fhir.okhttp.utils.UrlStringUtils.deleteLastCharacter;
-import static ca.uhn.fhir.okhttp.utils.UrlStringUtils.endsWith;
-import static ca.uhn.fhir.okhttp.utils.UrlStringUtils.everythingAfterFirstQuestionMark;
-import static ca.uhn.fhir.okhttp.utils.UrlStringUtils.hasQuestionMark;
-import static ca.uhn.fhir.okhttp.utils.UrlStringUtils.withTrailingQuestionMarkRemoved;
+import static ca.uhn.fhir.okhttp.utils.UrlStringUtils.*;
 
 import java.util.List;
 import java.util.Map;
@@ -31,15 +27,10 @@ import org.hl7.fhir.instance.model.api.IBaseBinary;
  * #L%
  */
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.api.RequestTypeEnum;
-import ca.uhn.fhir.rest.client.BaseHttpClientInvocation;
-import ca.uhn.fhir.rest.client.api.Header;
-import ca.uhn.fhir.rest.client.api.HttpClientUtil;
-import ca.uhn.fhir.rest.client.api.IHttpClient;
-import ca.uhn.fhir.rest.client.api.IHttpRequest;
-import ca.uhn.fhir.rest.server.Constants;
-import ca.uhn.fhir.rest.server.EncodingEnum;
-import ca.uhn.fhir.rest.server.RestfulServerUtils;
+import ca.uhn.fhir.rest.api.*;
+import ca.uhn.fhir.rest.client.api.*;
+import ca.uhn.fhir.rest.client.impl.BaseHttpClientInvocation;
+import ca.uhn.fhir.rest.client.method.MethodUtil;
 import okhttp3.*;
 import okhttp3.internal.Version;
 
@@ -131,7 +122,7 @@ public class OkHttpRestfulClient implements IHttpClient {
 
         addUserAgentHeader(theHttpRequest, theContext);
         addAcceptCharsetHeader(theHttpRequest);
-        RestfulServerUtils.addAcceptHeaderToRequest(theEncoding, theHttpRequest, theContext);
+        MethodUtil.addAcceptHeaderToRequest(theEncoding, theHttpRequest, theContext);
         addIfNoneExistHeader(theHttpRequest);
     }
 

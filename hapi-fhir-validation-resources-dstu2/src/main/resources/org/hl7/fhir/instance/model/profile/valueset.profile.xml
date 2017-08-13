@@ -1,7 +1,7 @@
 <StructureDefinition xmlns="http://hl7.org/fhir">
  <id value="ValueSet"/>
  <meta>
-  <lastUpdated value="2015-11-11T10:54:01.813-05:00"/>
+  <lastUpdated value="2017-07-27T08:19:05.564-04:00"/>
  </meta>
  <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
   <valueInteger value="3"/>
@@ -22,7 +22,7 @@
    <value value="http://www.hl7.org/Special/committees/Vocab/index.cfm"/>
   </telecom>
  </contact>
- <date value="2015-11-11T10:54:01-05:00"/>
+ <date value="2017-07-27T08:19:05-04:00"/>
  <description value="Base StructureDefinition for ValueSet Resource"/>
  <fhirVersion value="1.0.2"/>
  <mapping>
@@ -54,27 +54,18 @@
     <code value="DomainResource"/>
    </type>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="codeSystem.empty() or (codeSystem.url != url)"/>
-    </extension>
     <key value="vsd-7"/>
     <severity value="error"/>
     <human value="A defined code system (if present) SHALL have a different url than the value set url"/>
     <xpath value="not(f:codeSystem/f:system/@value = f:url/@value)"/>
    </constraint>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="compose.import.count != 1 or compose.include or copose.exclude or codeSystem"/>
-    </extension>
     <key value="vsd-2"/>
     <severity value="error"/>
     <human value="A value set with only one import SHALL also have an include and/or an exclude unless the value set includes and inline code system"/>
     <xpath value="not(exists(f:compose)) or (count(f:compose/f:import)!=1 or exists(f:compose/f:include) or exists(f:compose/f:exclude) or exists(f:codeSystem))"/>
    </constraint>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="codeSystem or compose or expansion"/>
-    </extension>
     <key value="vsd-5"/>
     <severity value="error"/>
     <human value="Value set SHALL contain at least one of a codeSystem, a compose, or an expansion element"/>
@@ -577,18 +568,12 @@
    </type>
    <condition value="vsd-5"/>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="concept.code*.distinct()"/>
-    </extension>
     <key value="vsd-8"/>
     <severity value="error"/>
     <human value="Codes must be unique"/>
     <xpath value="count(descendant::f:concept)=count(distinct-values(descendant::f:concept/f:code/@value))"/>
    </constraint>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="concept.code*.distinct()"/>
-    </extension>
     <key value="vsd-3"/>
     <severity value="error"/>
     <human value="Within a code system definition, all the codes SHALL be unique"/>
@@ -914,9 +899,6 @@
    </type>
    <condition value="vsd-5"/>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="include or import"/>
-    </extension>
     <key value="vsd-1"/>
     <severity value="error"/>
     <human value="A value set composition SHALL have an include or an import"/>
@@ -1007,9 +989,6 @@
    </type>
    <condition value="vsd-1"/>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="concept.empty() or filter.empty()"/>
-    </extension>
     <key value="vsd-11"/>
     <severity value="error"/>
     <human value="Cannot have both concept and filter"/>
@@ -1568,27 +1547,18 @@
     <code value="BackboneElement"/>
    </type>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="code or display"/>
-    </extension>
     <key value="vsd-6"/>
     <severity value="error"/>
     <human value="SHALL have a code or a display"/>
     <xpath value="exists(f:code) or exists(f:display)"/>
    </constraint>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="code or abstract = 'true'"/>
-    </extension>
     <key value="vsd-9"/>
     <severity value="error"/>
     <human value="Must have a code if not abstract"/>
     <xpath value="exists(f:code) or (f:abstract/@value = true())"/>
    </constraint>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="code.empty() or system"/>
-    </extension>
     <key value="vsd-10"/>
     <severity value="error"/>
     <human value="Must have a system if a code is present"/>
@@ -1721,27 +1691,18 @@
     <code value="DomainResource"/>
    </type>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="codeSystem.empty() or (codeSystem.url != url)"/>
-    </extension>
     <key value="vsd-7"/>
     <severity value="error"/>
     <human value="A defined code system (if present) SHALL have a different url than the value set url"/>
     <xpath value="not(f:codeSystem/f:system/@value = f:url/@value)"/>
    </constraint>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="compose.import.count != 1 or compose.include or copose.exclude or codeSystem"/>
-    </extension>
     <key value="vsd-2"/>
     <severity value="error"/>
     <human value="A value set with only one import SHALL also have an include and/or an exclude unless the value set includes and inline code system"/>
     <xpath value="not(exists(f:compose)) or (count(f:compose/f:import)!=1 or exists(f:compose/f:include) or exists(f:compose/f:exclude) or exists(f:codeSystem))"/>
    </constraint>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="codeSystem or compose or expansion"/>
-    </extension>
     <key value="vsd-5"/>
     <severity value="error"/>
     <human value="Value set SHALL contain at least one of a codeSystem, a compose, or an expansion element"/>
@@ -2068,18 +2029,12 @@
    </type>
    <condition value="vsd-5"/>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="concept.code*.distinct()"/>
-    </extension>
     <key value="vsd-8"/>
     <severity value="error"/>
     <human value="Codes must be unique"/>
     <xpath value="count(descendant::f:concept)=count(distinct-values(descendant::f:concept/f:code/@value))"/>
    </constraint>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="concept.code*.distinct()"/>
-    </extension>
     <key value="vsd-3"/>
     <severity value="error"/>
     <human value="Within a code system definition, all the codes SHALL be unique"/>
@@ -2252,9 +2207,6 @@
    </type>
    <condition value="vsd-5"/>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="include or import"/>
-    </extension>
     <key value="vsd-1"/>
     <severity value="error"/>
     <human value="A value set composition SHALL have an include or an import"/>
@@ -2294,9 +2246,6 @@
    </type>
    <condition value="vsd-1"/>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="concept.empty() or filter.empty()"/>
-    </extension>
     <key value="vsd-11"/>
     <severity value="error"/>
     <human value="Cannot have both concept and filter"/>
@@ -2600,27 +2549,18 @@
     <code value="BackboneElement"/>
    </type>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="code or display"/>
-    </extension>
     <key value="vsd-6"/>
     <severity value="error"/>
     <human value="SHALL have a code or a display"/>
     <xpath value="exists(f:code) or exists(f:display)"/>
    </constraint>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="code or abstract = 'true'"/>
-    </extension>
     <key value="vsd-9"/>
     <severity value="error"/>
     <human value="Must have a code if not abstract"/>
     <xpath value="exists(f:code) or (f:abstract/@value = true())"/>
    </constraint>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="code.empty() or system"/>
-    </extension>
     <key value="vsd-10"/>
     <severity value="error"/>
     <human value="Must have a system if a code is present"/>

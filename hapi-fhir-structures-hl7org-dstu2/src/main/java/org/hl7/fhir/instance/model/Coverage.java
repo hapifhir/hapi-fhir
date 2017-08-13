@@ -29,16 +29,14 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
+// Generated on Wed, Jul 13, 2016 05:32+1000 for FHIR v1.0.2
 import java.util.ArrayList;
 import java.util.List;
 
-import org.hl7.fhir.instance.utilities.Utilities;
+import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.utilities.Utilities;
 
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
-import ca.uhn.fhir.model.api.annotation.ResourceDef;
-import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.*;
 /**
  * Financial instrument which may be used to pay for or reimburse health care products and services.
  */
@@ -730,6 +728,100 @@ public class Coverage extends DomainResource {
         childrenList.add(new Property("network", "Identifier", "The identifier for a community of providers.", 0, java.lang.Integer.MAX_VALUE, network));
         childrenList.add(new Property("contract", "Reference(Contract)", "The policy(s) which constitute this insurance coverage.", 0, java.lang.Integer.MAX_VALUE, contract));
       }
+
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("issuer"))
+          this.issuer = castToReference(value); // Reference
+        else if (name.equals("bin"))
+          this.bin = castToIdentifier(value); // Identifier
+        else if (name.equals("period"))
+          this.period = castToPeriod(value); // Period
+        else if (name.equals("type"))
+          this.type = castToCoding(value); // Coding
+        else if (name.equals("subscriberId"))
+          this.subscriberId = castToIdentifier(value); // Identifier
+        else if (name.equals("identifier"))
+          this.getIdentifier().add(castToIdentifier(value));
+        else if (name.equals("group"))
+          this.group = castToString(value); // StringType
+        else if (name.equals("plan"))
+          this.plan = castToString(value); // StringType
+        else if (name.equals("subPlan"))
+          this.subPlan = castToString(value); // StringType
+        else if (name.equals("dependent"))
+          this.dependent = castToPositiveInt(value); // PositiveIntType
+        else if (name.equals("sequence"))
+          this.sequence = castToPositiveInt(value); // PositiveIntType
+        else if (name.equals("subscriber"))
+          this.subscriber = castToReference(value); // Reference
+        else if (name.equals("network"))
+          this.network = castToIdentifier(value); // Identifier
+        else if (name.equals("contract"))
+          this.getContract().add(castToReference(value));
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("issuer")) {
+          this.issuer = new Reference();
+          return this.issuer;
+        }
+        else if (name.equals("bin")) {
+          this.bin = new Identifier();
+          return this.bin;
+        }
+        else if (name.equals("period")) {
+          this.period = new Period();
+          return this.period;
+        }
+        else if (name.equals("type")) {
+          this.type = new Coding();
+          return this.type;
+        }
+        else if (name.equals("subscriberId")) {
+          this.subscriberId = new Identifier();
+          return this.subscriberId;
+        }
+        else if (name.equals("identifier")) {
+          return addIdentifier();
+        }
+        else if (name.equals("group")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Coverage.group");
+        }
+        else if (name.equals("plan")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Coverage.plan");
+        }
+        else if (name.equals("subPlan")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Coverage.subPlan");
+        }
+        else if (name.equals("dependent")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Coverage.dependent");
+        }
+        else if (name.equals("sequence")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Coverage.sequence");
+        }
+        else if (name.equals("subscriber")) {
+          this.subscriber = new Reference();
+          return this.subscriber;
+        }
+        else if (name.equals("network")) {
+          this.network = new Identifier();
+          return this.network;
+        }
+        else if (name.equals("contract")) {
+          return addContract();
+        }
+        else
+          return super.addChild(name);
+      }
+
+  public String fhirType() {
+    return "Coverage";
+
+  }
 
       public Coverage copy() {
         Coverage dst = new Coverage();

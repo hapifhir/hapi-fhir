@@ -1,6 +1,5 @@
 package ca.uhn.fhir.rest.param;
 
-import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.endsWith;
 import static org.hamcrest.Matchers.startsWith;
 import static org.junit.Assert.assertEquals;
@@ -11,14 +10,12 @@ import java.util.TimeZone;
 
 import org.junit.Test;
 
-import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 
 public class DateParamTest {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(DateParamTest.class);
 
-	@SuppressWarnings("deprecation")
 	@Test
 	public void testConstructors() {
 		new DateParam();
@@ -28,10 +25,6 @@ public class DateParamTest {
 		new DateParam(ParamPrefixEnum.GREATERTHAN, InstantDt.withCurrentTime());
 		new DateParam(ParamPrefixEnum.GREATERTHAN, "2011-01-02");
 
-		new DateParam(QuantityCompararatorEnum.GREATERTHAN, new Date());
-		new DateParam(QuantityCompararatorEnum.GREATERTHAN, new DateTimeDt("2011-01-02"));
-		new DateParam(QuantityCompararatorEnum.GREATERTHAN, InstantDt.withCurrentTime());
-		new DateParam(QuantityCompararatorEnum.GREATERTHAN, "2011-01-02");
 	}
 
 	@Test
@@ -103,5 +96,15 @@ public class DateParamTest {
 		ourLog.info("POST: " + dt.getValue());
 		assertEquals("2016-06-09T16:38:00.000-04:00", dt.getValueAsString());
 	}
+	
+	@Test
+	public void testParseLegacyPrefixes() {
+		assertEquals(ParamPrefixEnum.APPROXIMATE, new DateParam("ap2012").getPrefix());
+		assertEquals(ParamPrefixEnum.GREATERTHAN, new DateParam("gt2012").getPrefix());
+		assertEquals(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, new DateParam("ge2012").getPrefix());
+		assertEquals(ParamPrefixEnum.LESSTHAN, new DateParam("lt2012").getPrefix());
+		assertEquals(ParamPrefixEnum.LESSTHAN_OR_EQUALS, new DateParam("le2012").getPrefix());
+	}
+	
 
 }

@@ -1,23 +1,8 @@
 package ca.uhn.fhir.tinder;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
+import java.io.*;
 import java.nio.charset.Charset;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
+import java.util.*;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -28,23 +13,17 @@ import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.tools.generic.EscapeTool;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.api.Bundle;
-import ca.uhn.fhir.model.api.BundleEntry;
 import ca.uhn.fhir.model.dstu.resource.ValueSet;
 import ca.uhn.fhir.model.dstu.resource.ValueSet.ComposeInclude;
 import ca.uhn.fhir.model.dstu.resource.ValueSet.Define;
 import ca.uhn.fhir.model.dstu.resource.ValueSet.DefineConcept;
 import ca.uhn.fhir.model.dstu2.resource.Bundle.Entry;
-import ca.uhn.fhir.model.dstu2.resource.ValueSet.CodeSystem;
-import ca.uhn.fhir.model.dstu2.resource.ValueSet.CodeSystemConcept;
-import ca.uhn.fhir.model.dstu2.resource.ValueSet.ComposeIncludeConcept;
+import ca.uhn.fhir.model.dstu2.resource.ValueSet.*;
 import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.parser.LenientErrorHandler;
 import ca.uhn.fhir.tinder.TinderStructuresMojo.ValueSetFileDefinition;
-import ca.uhn.fhir.tinder.model.BaseRootType;
 import ca.uhn.fhir.tinder.model.ValueSetTm;
-import ca.uhn.fhir.tinder.parser.ResourceGeneratorUsingSpreadsheet;
 import ca.uhn.fhir.tinder.parser.TargetType;
 
 public class ValueSetGenerator {
@@ -102,7 +81,7 @@ public class ValueSetGenerator {
 	}
 
 	public void parse() throws FileNotFoundException, IOException {
-		FhirContext ctx = "dstu".equals(myVersion) ? FhirContext.forDstu1() : FhirContext.forDstu2();
+		FhirContext ctx = FhirContext.forDstu2();
 		IParser newXmlParser = ctx.newXmlParser();
 		newXmlParser.setParserErrorHandler(new LenientErrorHandler(false));
 
@@ -117,7 +96,7 @@ public class ValueSetGenerator {
 			name = "/org/hl7/fhir/instance/model/valueset/valuesets.xml";
 		}
 		if (version.equals("dstu3")) {
-			name = "/org/hl7/fhir/instance/model/dstu3/valueset/valuesets.xml";
+			name = "/org/hl7/fhir/dstu3/model/valueset/valuesets.xml";
 		}
 		ourLog.info("Loading valuesets from: {}", name);
 		InputStream is = ValueSetGenerator.class.getResourceAsStream(name);
@@ -126,18 +105,14 @@ public class ValueSetGenerator {
 			throw new FileNotFoundException(name);
 		}
 		String vs = IOUtils.toString(is, Charset.defaultCharset());
-		if ("dstu".equals(myVersion)) {
-			Bundle bundle = newXmlParser.parseBundle(vs);
-			for (BundleEntry next : bundle.getEntries()) {
-				ValueSet nextVs = (ValueSet) next.getResource();
-				parseValueSet(nextVs);
-			}
-		} else {
+		if ("dstu2".equals(myVersion)) {
 			ca.uhn.fhir.model.dstu2.resource.Bundle bundle = newXmlParser.parseResource(ca.uhn.fhir.model.dstu2.resource.Bundle.class, vs);
 			for (Entry nextEntry : bundle.getEntry()) {
 				ca.uhn.fhir.model.dstu2.resource.ValueSet nextVs = (ca.uhn.fhir.model.dstu2.resource.ValueSet) nextEntry.getResource();
 				parseValueSet(nextVs);
 			}
+		} else {
+			throw new IllegalStateException("Fhir version not supported");
 		}
 
 		if (myResourceValueSetFiles != null) {

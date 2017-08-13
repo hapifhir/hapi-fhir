@@ -29,17 +29,15 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
+// Generated on Wed, Jul 13, 2016 05:32+1000 for FHIR v1.0.2
 import java.util.ArrayList;
 import java.util.List;
 
+import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 
-import ca.uhn.fhir.model.api.annotation.Block;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
-import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.api.annotation.*;
 /**
  * This special resource type is used to represent an operation request and response (operations.html). It has no other use, and there is no RESTful endpoint associated with it.
  */
@@ -76,7 +74,7 @@ public class Parameters extends Resource implements IBaseParameters {
         @Description(shortDefinition="Named part of a parameter (e.g. Tuple)", formalDefinition="A named part of a parameter. In many implementation context, a set of named parts is known as a \"Tuple\"." )
         protected List<ParametersParameterComponent> part;
 
-        private static final long serialVersionUID = 1129239796L;
+        private static final long serialVersionUID = -198518915L;
 
     /*
      * Constructor
@@ -224,6 +222,167 @@ public class Parameters extends Resource implements IBaseParameters {
           childrenList.add(new Property("part", "@Parameters.parameter", "A named part of a parameter. In many implementation context, a set of named parts is known as a \"Tuple\".", 0, java.lang.Integer.MAX_VALUE, part));
         }
 
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("name"))
+          this.name = castToString(value); // StringType
+        else if (name.equals("value[x]"))
+          this.value = (org.hl7.fhir.instance.model.Type) value; // org.hl7.fhir.dstu2.model.Type
+        else if (name.equals("resource"))
+          this.resource = castToResource(value); // Resource
+        else if (name.equals("part"))
+          this.getPart().add((ParametersParameterComponent) value);
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("name")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Parameters.name");
+        }
+        else if (name.equals("valueBoolean")) {
+          this.value = new BooleanType();
+          return this.value;
+        }
+        else if (name.equals("valueInteger")) {
+          this.value = new IntegerType();
+          return this.value;
+        }
+        else if (name.equals("valueDecimal")) {
+          this.value = new DecimalType();
+          return this.value;
+        }
+        else if (name.equals("valueBase64Binary")) {
+          this.value = new Base64BinaryType();
+          return this.value;
+        }
+        else if (name.equals("valueInstant")) {
+          this.value = new InstantType();
+          return this.value;
+        }
+        else if (name.equals("valueString")) {
+          this.value = new StringType();
+          return this.value;
+        }
+        else if (name.equals("valueUri")) {
+          this.value = new UriType();
+          return this.value;
+        }
+        else if (name.equals("valueDate")) {
+          this.value = new DateType();
+          return this.value;
+        }
+        else if (name.equals("valueDateTime")) {
+          this.value = new DateTimeType();
+          return this.value;
+        }
+        else if (name.equals("valueTime")) {
+          this.value = new TimeType();
+          return this.value;
+        }
+        else if (name.equals("valueCode")) {
+          this.value = new CodeType();
+          return this.value;
+        }
+        else if (name.equals("valueOid")) {
+          this.value = new OidType();
+          return this.value;
+        }
+        else if (name.equals("valueId")) {
+          this.value = new IdType();
+          return this.value;
+        }
+        else if (name.equals("valueUnsignedInt")) {
+          this.value = new UnsignedIntType();
+          return this.value;
+        }
+        else if (name.equals("valuePositiveInt")) {
+          this.value = new PositiveIntType();
+          return this.value;
+        }
+        else if (name.equals("valueMarkdown")) {
+          this.value = new MarkdownType();
+          return this.value;
+        }
+        else if (name.equals("valueAnnotation")) {
+          this.value = new Annotation();
+          return this.value;
+        }
+        else if (name.equals("valueAttachment")) {
+          this.value = new Attachment();
+          return this.value;
+        }
+        else if (name.equals("valueIdentifier")) {
+          this.value = new Identifier();
+          return this.value;
+        }
+        else if (name.equals("valueCodeableConcept")) {
+          this.value = new CodeableConcept();
+          return this.value;
+        }
+        else if (name.equals("valueCoding")) {
+          this.value = new Coding();
+          return this.value;
+        }
+        else if (name.equals("valueQuantity")) {
+          this.value = new Quantity();
+          return this.value;
+        }
+        else if (name.equals("valueRange")) {
+          this.value = new Range();
+          return this.value;
+        }
+        else if (name.equals("valuePeriod")) {
+          this.value = new Period();
+          return this.value;
+        }
+        else if (name.equals("valueRatio")) {
+          this.value = new Ratio();
+          return this.value;
+        }
+        else if (name.equals("valueSampledData")) {
+          this.value = new SampledData();
+          return this.value;
+        }
+        else if (name.equals("valueSignature")) {
+          this.value = new Signature();
+          return this.value;
+        }
+        else if (name.equals("valueHumanName")) {
+          this.value = new HumanName();
+          return this.value;
+        }
+        else if (name.equals("valueAddress")) {
+          this.value = new Address();
+          return this.value;
+        }
+        else if (name.equals("valueContactPoint")) {
+          this.value = new ContactPoint();
+          return this.value;
+        }
+        else if (name.equals("valueTiming")) {
+          this.value = new Timing();
+          return this.value;
+        }
+        else if (name.equals("valueReference")) {
+          this.value = new Reference();
+          return this.value;
+        }
+        else if (name.equals("valueMeta")) {
+          this.value = new Meta();
+          return this.value;
+        }
+        else if (name.equals("resource")) {
+          throw new FHIRException("Cannot call addChild on an abstract type Parameters.resource");
+        }
+        else if (name.equals("part")) {
+          return addPart();
+        }
+        else
+          return super.addChild(name);
+      }
+
       public ParametersParameterComponent copy() {
         ParametersParameterComponent dst = new ParametersParameterComponent();
         copyValues(dst);
@@ -263,6 +422,11 @@ public class Parameters extends Resource implements IBaseParameters {
         return super.isEmpty() && (name == null || name.isEmpty()) && (value == null || value.isEmpty())
            && (resource == null || resource.isEmpty()) && (part == null || part.isEmpty());
       }
+
+  public String fhirType() {
+    return "null";
+
+  }
 
   }
 
@@ -326,6 +490,28 @@ public class Parameters extends Resource implements IBaseParameters {
         super.listChildren(childrenList);
         childrenList.add(new Property("parameter", "", "A parameter passed to or received from the operation.", 0, java.lang.Integer.MAX_VALUE, parameter));
       }
+
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("parameter"))
+          this.getParameter().add((ParametersParameterComponent) value);
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("parameter")) {
+          return addParameter();
+        }
+        else
+          return super.addChild(name);
+      }
+
+  public String fhirType() {
+    return "Parameters";
+
+  }
 
       public Parameters copy() {
         Parameters dst = new Parameters();

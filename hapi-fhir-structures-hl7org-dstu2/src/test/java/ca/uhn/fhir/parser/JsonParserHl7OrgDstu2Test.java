@@ -1,16 +1,34 @@
 package ca.uhn.fhir.parser;
 
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.stringContainsInOrder;
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.narrative.INarrativeGenerator;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.util.TestUtil;
+import net.sf.json.JSON;
+import net.sf.json.JSONSerializer;
+import org.apache.commons.io.IOUtils;
+import org.hamcrest.core.IsNot;
+import org.hamcrest.core.StringContains;
+import org.hamcrest.text.StringContainsInOrder;
+import org.hl7.fhir.instance.model.*;
+import org.hl7.fhir.instance.model.Address.AddressUse;
+import org.hl7.fhir.instance.model.Address.AddressUseEnumFactory;
+import org.hl7.fhir.instance.model.Bundle.BundleEntryComponent;
+import org.hl7.fhir.instance.model.Conformance.UnknownContentCode;
+import org.hl7.fhir.instance.model.Identifier.IdentifierUse;
+import org.hl7.fhir.instance.model.Narrative.NarrativeStatus;
+import org.hl7.fhir.instance.model.Patient.ContactComponent;
+import org.hl7.fhir.instance.model.ValueSet.ConceptDefinitionComponent;
+import org.hl7.fhir.instance.model.ValueSet.ValueSetCodeSystemComponent;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.instance.model.api.INarrative;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.utilities.xhtml.XhtmlNode;
+import org.junit.*;
+import org.xml.sax.SAXException;
 
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -19,64 +37,8 @@ import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.List;
 
-import org.apache.commons.io.IOUtils;
-import org.custommonkey.xmlunit.Diff;
-import org.hamcrest.core.IsNot;
-import org.hamcrest.core.StringContains;
-import org.hamcrest.text.StringContainsInOrder;
-import org.hl7.fhir.instance.model.Address;
-import org.hl7.fhir.instance.model.Address.AddressUse;
-import org.hl7.fhir.instance.model.Address.AddressUseEnumFactory;
-import org.hl7.fhir.instance.model.Binary;
-import org.hl7.fhir.instance.model.Bundle;
-import org.hl7.fhir.instance.model.Bundle.BundleEntryComponent;
-import org.hl7.fhir.instance.model.CodeableConcept;
-import org.hl7.fhir.instance.model.Conformance;
-import org.hl7.fhir.instance.model.Conformance.UnknownContentCode;
-import org.hl7.fhir.instance.model.DateTimeType;
-import org.hl7.fhir.instance.model.DateType;
-import org.hl7.fhir.instance.model.DecimalType;
-import org.hl7.fhir.instance.model.DiagnosticReport;
-import org.hl7.fhir.instance.model.EnumFactory;
-import org.hl7.fhir.instance.model.Enumeration;
-import org.hl7.fhir.instance.model.Extension;
-import org.hl7.fhir.instance.model.HumanName;
-import org.hl7.fhir.instance.model.Identifier.IdentifierUse;
-import org.hl7.fhir.instance.model.InstantType;
-import org.hl7.fhir.instance.model.List_;
-import org.hl7.fhir.instance.model.Narrative.NarrativeStatus;
-import org.hl7.fhir.instance.model.Observation;
-import org.hl7.fhir.instance.model.Organization;
-import org.hl7.fhir.instance.model.Patient;
-import org.hl7.fhir.instance.model.Patient.ContactComponent;
-import org.hl7.fhir.instance.model.PrimitiveType;
-import org.hl7.fhir.instance.model.Reference;
-import org.hl7.fhir.instance.model.Specimen;
-import org.hl7.fhir.instance.model.StringType;
-import org.hl7.fhir.instance.model.ValueSet;
-import org.hl7.fhir.instance.model.ValueSet.ConceptDefinitionComponent;
-import org.hl7.fhir.instance.model.ValueSet.ValueSetCodeSystemComponent;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.instance.model.api.INarrative;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.hl7.fhir.utilities.xhtml.XhtmlNode;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.xml.sax.SAXException;
-
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.api.TagList;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.ResourceDef;
-import ca.uhn.fhir.narrative.INarrativeGenerator;
-import ca.uhn.fhir.rest.server.Constants;
-import ca.uhn.fhir.util.TestUtil;
-import net.sf.json.JSON;
-import net.sf.json.JSONSerializer;
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
 
 public class JsonParserHl7OrgDstu2Test {
   private static FhirContext ourCtx = FhirContext.forDstu2Hl7Org();
@@ -1312,77 +1274,9 @@ public class JsonParserHl7OrgDstu2Test {
 		String expected = (xmlString);
 		String actual = (encoded.trim());
 
-		Diff d = new Diff(new StringReader(expected), new StringReader(actual));
-		assertTrue(d.toString(), d.identical());
-
+		XmlParserHl7OrgDstu2Test.compareXml(expected, actual);
 	}
 
-	@Test
-	public void testTagList() {
-
-		//@formatter:off
-		String tagListStr = "{\n" + 
-				"  \"resourceType\" : \"TagList\", " + 
-				"  \"category\" : [" + 
-				"    { " + 
-				"      \"term\" : \"term0\", " + 
-				"      \"label\" : \"label0\", " + 
-				"      \"scheme\" : \"scheme0\" " + 
-				"    }," +
-				"    { " + 
-				"      \"term\" : \"term1\", " + 
-				"      \"label\" : \"label1\", " + 
-				"      \"scheme\" : null " + 
-				"    }," +
-				"    { " + 
-				"      \"term\" : \"term2\", " + 
-				"      \"label\" : \"label2\" " + 
-				"    }" +
-				"  ] " + 
-				"}";
-		//@formatter:on
-
-    TagList tagList = ourCtx.newJsonParser().parseTagList(tagListStr);
-    assertEquals(3, tagList.size());
-    assertEquals("term0", tagList.get(0).getTerm());
-    assertEquals("label0", tagList.get(0).getLabel());
-    assertEquals("scheme0", tagList.get(0).getScheme());
-    assertEquals("term1", tagList.get(1).getTerm());
-    assertEquals("label1", tagList.get(1).getLabel());
-    assertEquals(null, tagList.get(1).getScheme());
-    assertEquals("term2", tagList.get(2).getTerm());
-    assertEquals("label2", tagList.get(2).getLabel());
-    assertEquals(null, tagList.get(2).getScheme());
-
-    /*
-     * Encode
-     */
-
-    //@formatter:off
-		String expected = "{" + 
-				"\"resourceType\":\"TagList\"," + 
-				"\"category\":[" + 
-				"{" + 
-				"\"term\":\"term0\"," + 
-				"\"label\":\"label0\"," + 
-				"\"scheme\":\"scheme0\"" + 
-				"}," +
-				"{" + 
-				"\"term\":\"term1\"," + 
-				"\"label\":\"label1\"" + 
-				"}," +
-				"{" + 
-				"\"term\":\"term2\"," + 
-				"\"label\":\"label2\"" + 
-				"}" +
-				"]" + 
-				"}";
-		//@formatter:on
-
-    String encoded = ourCtx.newJsonParser().encodeTagListToString(tagList);
-    assertEquals(expected, encoded);
-
-  }
 
 	@Test
 	public void testBaseUrlFooResourceCorrectlySerializedInExtensionValueReference() {

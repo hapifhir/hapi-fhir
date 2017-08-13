@@ -1,8 +1,6 @@
 package org.hl7.fhir.instance.model;
 
-import org.hl7.fhir.instance.model.api.IBaseDatatype;
-import org.hl7.fhir.instance.model.api.IBaseExtension;
-import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
+import org.hl7.fhir.instance.model.api.*;
 
 public abstract class BaseExtension extends Type implements IBaseExtension<Extension, Type>, IBaseHasExtensions {
 

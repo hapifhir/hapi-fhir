@@ -15,15 +15,13 @@ import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.*;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.dstu2.resource.Bundle;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
-import ca.uhn.fhir.model.valueset.BundleTypeEnum;
+import ca.uhn.fhir.model.dstu2.valueset.BundleTypeEnum;
 import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.util.PortUtil;
@@ -51,9 +49,9 @@ public class BundleTypeInResponseTest {
 		
 		ourLog.info(responseContent);
 		
-		Bundle bundle = ourCtx.newXmlParser().parseBundle(responseContent);
-		assertEquals(1, bundle.getEntries().size());
-		assertEquals(BundleTypeEnum.SEARCHSET, bundle.getType().getValueAsEnum());
+		Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
+		assertEquals(1, bundle.getEntry().size());
+		assertEquals(BundleTypeEnum.SEARCH_RESULTS, bundle.getTypeElement().getValueAsEnum());
 	}
 
 

@@ -73,7 +73,7 @@ class StringCriterion<A extends IParam> implements ICriterion<A>, ICriterionInte
 			return "";
 		}
 		if (myPrefix != null) {
-			return myPrefix.getValueForContext(theContext) + myValue;
+			return myPrefix.getValue() + myValue;
 		}
 		return myValue;
 	}

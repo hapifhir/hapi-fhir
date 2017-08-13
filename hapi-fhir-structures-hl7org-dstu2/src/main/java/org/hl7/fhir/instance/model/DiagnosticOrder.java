@@ -29,18 +29,13 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Wed, Jul 13, 2016 05:32+1000 for FHIR v1.0.2
+import java.util.*;
 
+import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 
-import ca.uhn.fhir.model.api.annotation.Block;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
-import ca.uhn.fhir.model.api.annotation.ResourceDef;
-import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.*;
 /**
  * A record of a request for a diagnostic investigation service to be performed.
  */
@@ -104,7 +99,7 @@ public class DiagnosticOrder extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static DiagnosticOrderStatus fromCode(String codeString) throws Exception {
+        public static DiagnosticOrderStatus fromCode(String codeString) throws FHIRException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("proposed".equals(codeString))
@@ -133,7 +128,7 @@ public class DiagnosticOrder extends DomainResource {
           return REJECTED;
         if ("failed".equals(codeString))
           return FAILED;
-        throw new Exception("Unknown DiagnosticOrderStatus code '"+codeString+"'");
+        throw new FHIRException("Unknown DiagnosticOrderStatus code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -242,6 +237,40 @@ public class DiagnosticOrder extends DomainResource {
           return DiagnosticOrderStatus.FAILED;
         throw new IllegalArgumentException("Unknown DiagnosticOrderStatus code '"+codeString+"'");
         }
+        public Enumeration<DiagnosticOrderStatus> fromType(Base code) throws FHIRException {
+          if (code == null || code.isEmpty())
+            return null;
+          String codeString = ((PrimitiveType) code).asStringValue();
+          if (codeString == null || "".equals(codeString))
+            return null;
+        if ("proposed".equals(codeString))
+          return new Enumeration<DiagnosticOrderStatus>(this, DiagnosticOrderStatus.PROPOSED);
+        if ("draft".equals(codeString))
+          return new Enumeration<DiagnosticOrderStatus>(this, DiagnosticOrderStatus.DRAFT);
+        if ("planned".equals(codeString))
+          return new Enumeration<DiagnosticOrderStatus>(this, DiagnosticOrderStatus.PLANNED);
+        if ("requested".equals(codeString))
+          return new Enumeration<DiagnosticOrderStatus>(this, DiagnosticOrderStatus.REQUESTED);
+        if ("received".equals(codeString))
+          return new Enumeration<DiagnosticOrderStatus>(this, DiagnosticOrderStatus.RECEIVED);
+        if ("accepted".equals(codeString))
+          return new Enumeration<DiagnosticOrderStatus>(this, DiagnosticOrderStatus.ACCEPTED);
+        if ("in-progress".equals(codeString))
+          return new Enumeration<DiagnosticOrderStatus>(this, DiagnosticOrderStatus.INPROGRESS);
+        if ("review".equals(codeString))
+          return new Enumeration<DiagnosticOrderStatus>(this, DiagnosticOrderStatus.REVIEW);
+        if ("completed".equals(codeString))
+          return new Enumeration<DiagnosticOrderStatus>(this, DiagnosticOrderStatus.COMPLETED);
+        if ("cancelled".equals(codeString))
+          return new Enumeration<DiagnosticOrderStatus>(this, DiagnosticOrderStatus.CANCELLED);
+        if ("suspended".equals(codeString))
+          return new Enumeration<DiagnosticOrderStatus>(this, DiagnosticOrderStatus.SUSPENDED);
+        if ("rejected".equals(codeString))
+          return new Enumeration<DiagnosticOrderStatus>(this, DiagnosticOrderStatus.REJECTED);
+        if ("failed".equals(codeString))
+          return new Enumeration<DiagnosticOrderStatus>(this, DiagnosticOrderStatus.FAILED);
+        throw new FHIRException("Unknown DiagnosticOrderStatus code '"+codeString+"'");
+        }
     public String toCode(DiagnosticOrderStatus code) {
       if (code == DiagnosticOrderStatus.PROPOSED)
         return "proposed";
@@ -294,7 +323,7 @@ public class DiagnosticOrder extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static DiagnosticOrderPriority fromCode(String codeString) throws Exception {
+        public static DiagnosticOrderPriority fromCode(String codeString) throws FHIRException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("routine".equals(codeString))
@@ -305,7 +334,7 @@ public class DiagnosticOrder extends DomainResource {
           return STAT;
         if ("asap".equals(codeString))
           return ASAP;
-        throw new Exception("Unknown DiagnosticOrderPriority code '"+codeString+"'");
+        throw new FHIRException("Unknown DiagnosticOrderPriority code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -359,6 +388,22 @@ public class DiagnosticOrder extends DomainResource {
         if ("asap".equals(codeString))
           return DiagnosticOrderPriority.ASAP;
         throw new IllegalArgumentException("Unknown DiagnosticOrderPriority code '"+codeString+"'");
+        }
+        public Enumeration<DiagnosticOrderPriority> fromType(Base code) throws FHIRException {
+          if (code == null || code.isEmpty())
+            return null;
+          String codeString = ((PrimitiveType) code).asStringValue();
+          if (codeString == null || "".equals(codeString))
+            return null;
+        if ("routine".equals(codeString))
+          return new Enumeration<DiagnosticOrderPriority>(this, DiagnosticOrderPriority.ROUTINE);
+        if ("urgent".equals(codeString))
+          return new Enumeration<DiagnosticOrderPriority>(this, DiagnosticOrderPriority.URGENT);
+        if ("stat".equals(codeString))
+          return new Enumeration<DiagnosticOrderPriority>(this, DiagnosticOrderPriority.STAT);
+        if ("asap".equals(codeString))
+          return new Enumeration<DiagnosticOrderPriority>(this, DiagnosticOrderPriority.ASAP);
+        throw new FHIRException("Unknown DiagnosticOrderPriority code '"+codeString+"'");
         }
     public String toCode(DiagnosticOrderPriority code) {
       if (code == DiagnosticOrderPriority.ROUTINE)
@@ -587,6 +632,40 @@ public class DiagnosticOrder extends DomainResource {
           childrenList.add(new Property("actor", "Reference(Practitioner|Device)", "The person responsible for performing or recording the action.", 0, java.lang.Integer.MAX_VALUE, actor));
         }
 
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("status"))
+          this.status = new DiagnosticOrderStatusEnumFactory().fromType(value); // Enumeration<DiagnosticOrderStatus>
+        else if (name.equals("description"))
+          this.description = castToCodeableConcept(value); // CodeableConcept
+        else if (name.equals("dateTime"))
+          this.dateTime = castToDateTime(value); // DateTimeType
+        else if (name.equals("actor"))
+          this.actor = castToReference(value); // Reference
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("status")) {
+          throw new FHIRException("Cannot call addChild on a primitive type DiagnosticOrder.status");
+        }
+        else if (name.equals("description")) {
+          this.description = new CodeableConcept();
+          return this.description;
+        }
+        else if (name.equals("dateTime")) {
+          throw new FHIRException("Cannot call addChild on a primitive type DiagnosticOrder.dateTime");
+        }
+        else if (name.equals("actor")) {
+          this.actor = new Reference();
+          return this.actor;
+        }
+        else
+          return super.addChild(name);
+      }
+
       public DiagnosticOrderEventComponent copy() {
         DiagnosticOrderEventComponent dst = new DiagnosticOrderEventComponent();
         copyValues(dst);
@@ -622,6 +701,11 @@ public class DiagnosticOrder extends DomainResource {
         return super.isEmpty() && (status == null || status.isEmpty()) && (description == null || description.isEmpty())
            && (dateTime == null || dateTime.isEmpty()) && (actor == null || actor.isEmpty());
       }
+
+  public String fhirType() {
+    return "DiagnosticOrder.event";
+
+  }
 
   }
 
@@ -891,6 +975,45 @@ public class DiagnosticOrder extends DomainResource {
           childrenList.add(new Property("event", "@DiagnosticOrder.event", "A summary of the events of interest that have occurred as this item of the request is processed.", 0, java.lang.Integer.MAX_VALUE, event));
         }
 
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("code"))
+          this.code = castToCodeableConcept(value); // CodeableConcept
+        else if (name.equals("specimen"))
+          this.getSpecimen().add(castToReference(value));
+        else if (name.equals("bodySite"))
+          this.bodySite = castToCodeableConcept(value); // CodeableConcept
+        else if (name.equals("status"))
+          this.status = new DiagnosticOrderStatusEnumFactory().fromType(value); // Enumeration<DiagnosticOrderStatus>
+        else if (name.equals("event"))
+          this.getEvent().add((DiagnosticOrderEventComponent) value);
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("code")) {
+          this.code = new CodeableConcept();
+          return this.code;
+        }
+        else if (name.equals("specimen")) {
+          return addSpecimen();
+        }
+        else if (name.equals("bodySite")) {
+          this.bodySite = new CodeableConcept();
+          return this.bodySite;
+        }
+        else if (name.equals("status")) {
+          throw new FHIRException("Cannot call addChild on a primitive type DiagnosticOrder.status");
+        }
+        else if (name.equals("event")) {
+          return addEvent();
+        }
+        else
+          return super.addChild(name);
+      }
+
       public DiagnosticOrderItemComponent copy() {
         DiagnosticOrderItemComponent dst = new DiagnosticOrderItemComponent();
         copyValues(dst);
@@ -936,6 +1059,11 @@ public class DiagnosticOrder extends DomainResource {
            && (bodySite == null || bodySite.isEmpty()) && (status == null || status.isEmpty()) && (event == null || event.isEmpty())
           ;
       }
+
+  public String fhirType() {
+    return "DiagnosticOrder.item";
+
+  }
 
   }
 
@@ -1616,6 +1744,86 @@ public class DiagnosticOrder extends DomainResource {
         childrenList.add(new Property("note", "Annotation", "Any other notes associated with this patient, specimen or order (e.g. \"patient hates needles\").", 0, java.lang.Integer.MAX_VALUE, note));
       }
 
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("subject"))
+          this.subject = castToReference(value); // Reference
+        else if (name.equals("orderer"))
+          this.orderer = castToReference(value); // Reference
+        else if (name.equals("identifier"))
+          this.getIdentifier().add(castToIdentifier(value));
+        else if (name.equals("encounter"))
+          this.encounter = castToReference(value); // Reference
+        else if (name.equals("reason"))
+          this.getReason().add(castToCodeableConcept(value));
+        else if (name.equals("supportingInformation"))
+          this.getSupportingInformation().add(castToReference(value));
+        else if (name.equals("specimen"))
+          this.getSpecimen().add(castToReference(value));
+        else if (name.equals("status"))
+          this.status = new DiagnosticOrderStatusEnumFactory().fromType(value); // Enumeration<DiagnosticOrderStatus>
+        else if (name.equals("priority"))
+          this.priority = new DiagnosticOrderPriorityEnumFactory().fromType(value); // Enumeration<DiagnosticOrderPriority>
+        else if (name.equals("event"))
+          this.getEvent().add((DiagnosticOrderEventComponent) value);
+        else if (name.equals("item"))
+          this.getItem().add((DiagnosticOrderItemComponent) value);
+        else if (name.equals("note"))
+          this.getNote().add(castToAnnotation(value));
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("subject")) {
+          this.subject = new Reference();
+          return this.subject;
+        }
+        else if (name.equals("orderer")) {
+          this.orderer = new Reference();
+          return this.orderer;
+        }
+        else if (name.equals("identifier")) {
+          return addIdentifier();
+        }
+        else if (name.equals("encounter")) {
+          this.encounter = new Reference();
+          return this.encounter;
+        }
+        else if (name.equals("reason")) {
+          return addReason();
+        }
+        else if (name.equals("supportingInformation")) {
+          return addSupportingInformation();
+        }
+        else if (name.equals("specimen")) {
+          return addSpecimen();
+        }
+        else if (name.equals("status")) {
+          throw new FHIRException("Cannot call addChild on a primitive type DiagnosticOrder.status");
+        }
+        else if (name.equals("priority")) {
+          throw new FHIRException("Cannot call addChild on a primitive type DiagnosticOrder.priority");
+        }
+        else if (name.equals("event")) {
+          return addEvent();
+        }
+        else if (name.equals("item")) {
+          return addItem();
+        }
+        else if (name.equals("note")) {
+          return addNote();
+        }
+        else
+          return super.addChild(name);
+      }
+
+  public String fhirType() {
+    return "DiagnosticOrder";
+
+  }
+
       public DiagnosticOrder copy() {
         DiagnosticOrder dst = new DiagnosticOrder();
         copyValues(dst);
@@ -1714,17 +1922,17 @@ public class DiagnosticOrder extends DomainResource {
   public static final String SP_CODE = "code";
   @SearchParamDefinition(name="event-date", path="DiagnosticOrder.event.dateTime", description="The date at which the event happened", type="date" )
   public static final String SP_EVENTDATE = "event-date";
-  @SearchParamDefinition(name="event-status-date", path="", description="A combination of past-status and date", type="composite" )
+  @SearchParamDefinition(name="event-status-date", path="null", description="A combination of past-status and date", type="composite" )
   public static final String SP_EVENTSTATUSDATE = "event-status-date";
   @SearchParamDefinition(name="subject", path="DiagnosticOrder.subject", description="Who and/or what test is about", type="reference" )
   public static final String SP_SUBJECT = "subject";
   @SearchParamDefinition(name="encounter", path="DiagnosticOrder.encounter", description="The encounter that this diagnostic order is associated with", type="reference" )
   public static final String SP_ENCOUNTER = "encounter";
-  @SearchParamDefinition(name="actor", path="DiagnosticOrder.event.actor|DiagnosticOrder.item.event.actor", description="Who recorded or did this", type="reference" )
+  @SearchParamDefinition(name="actor", path="DiagnosticOrder.event.actor | DiagnosticOrder.item.event.actor", description="Who recorded or did this", type="reference" )
   public static final String SP_ACTOR = "actor";
   @SearchParamDefinition(name="item-date", path="DiagnosticOrder.item.event.dateTime", description="The date at which the event happened", type="date" )
   public static final String SP_ITEMDATE = "item-date";
-  @SearchParamDefinition(name="item-status-date", path="", description="A combination of item-past-status and item-date", type="composite" )
+  @SearchParamDefinition(name="item-status-date", path="null", description="A combination of item-past-status and item-date", type="composite" )
   public static final String SP_ITEMSTATUSDATE = "item-status-date";
   @SearchParamDefinition(name="event-status", path="DiagnosticOrder.event.status", description="proposed | draft | planned | requested | received | accepted | in-progress | review | completed | cancelled | suspended | rejected | failed", type="token" )
   public static final String SP_EVENTSTATUS = "event-status";
@@ -1734,7 +1942,7 @@ public class DiagnosticOrder extends DomainResource {
   public static final String SP_PATIENT = "patient";
   @SearchParamDefinition(name="orderer", path="DiagnosticOrder.orderer", description="Who ordered the test", type="reference" )
   public static final String SP_ORDERER = "orderer";
-  @SearchParamDefinition(name="specimen", path="DiagnosticOrder.specimen|DiagnosticOrder.item.specimen", description="If the whole order relates to specific specimens", type="reference" )
+  @SearchParamDefinition(name="specimen", path="DiagnosticOrder.specimen | DiagnosticOrder.item.specimen", description="If the whole order relates to specific specimens", type="reference" )
   public static final String SP_SPECIMEN = "specimen";
   @SearchParamDefinition(name="status", path="DiagnosticOrder.status", description="proposed | draft | planned | requested | received | accepted | in-progress | review | completed | cancelled | suspended | rejected | failed", type="token" )
   public static final String SP_STATUS = "status";

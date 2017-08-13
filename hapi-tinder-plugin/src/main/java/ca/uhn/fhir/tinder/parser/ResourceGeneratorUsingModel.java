@@ -1,13 +1,9 @@
 package ca.uhn.fhir.tinder.parser;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 
-import org.apache.commons.lang.Validate;
 import org.apache.commons.lang.WordUtils;
-import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
 
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
@@ -40,14 +36,17 @@ public class ResourceGeneratorUsingModel extends BaseStructureParser {
 		return myTemplateFile;
 	}
 
+	@Override
 	public void setFilenameSuffix(String theFilenameSuffix) {
 		myFilenameSuffix = theFilenameSuffix;
 	}
 
+	@Override
 	public void setTemplate(String theTemplate) {
 		myTemplate = theTemplate;
 	}
 
+	@Override
 	public void setTemplateFile(File theTemplateFile) {
 		myTemplateFile = theTemplateFile;
 	}

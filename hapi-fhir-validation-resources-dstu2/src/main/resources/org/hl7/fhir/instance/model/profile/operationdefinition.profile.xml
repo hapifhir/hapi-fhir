@@ -1,7 +1,7 @@
 <StructureDefinition xmlns="http://hl7.org/fhir">
  <id value="OperationDefinition"/>
  <meta>
-  <lastUpdated value="2015-11-11T10:54:01.813-05:00"/>
+  <lastUpdated value="2017-07-27T08:19:05.564-04:00"/>
  </meta>
  <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
   <valueInteger value="1"/>
@@ -22,7 +22,7 @@
    <value value="http://www.hl7.org/Special/committees/fiwg/index.cfm"/>
   </telecom>
  </contact>
- <date value="2015-11-11T10:54:01-05:00"/>
+ <date value="2017-07-27T08:19:05-04:00"/>
  <description value="Base StructureDefinition for OperationDefinition Resource"/>
  <fhirVersion value="1.0.2"/>
  <mapping>
@@ -510,9 +510,6 @@
     <code value="BackboneElement"/>
    </type>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="type or part"/>
-    </extension>
     <key value="opd-1"/>
     <severity value="error"/>
     <human value="Either a type must be provided, or parts"/>
@@ -1062,9 +1059,6 @@
     <code value="BackboneElement"/>
    </type>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="type or part"/>
-    </extension>
     <key value="opd-1"/>
     <severity value="error"/>
     <human value="Either a type must be provided, or parts"/>

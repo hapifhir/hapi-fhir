@@ -1,7 +1,7 @@
 <StructureDefinition xmlns="http://hl7.org/fhir">
  <id value="Questionnaire"/>
  <meta>
-  <lastUpdated value="2015-11-11T10:54:01.813-05:00"/>
+  <lastUpdated value="2017-07-27T08:19:05.564-04:00"/>
  </meta>
  <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
   <valueInteger value="2"/>
@@ -22,7 +22,7 @@
    <value value="http://www.hl7.org/Special/committees/patientcare/index.cfm"/>
   </telecom>
  </contact>
- <date value="2015-11-11T10:54:01-05:00"/>
+ <date value="2017-07-27T08:19:05-04:00"/>
  <description value="Base StructureDefinition for Questionnaire Resource"/>
  <requirements value="To support structured, hierarchical registration of data gathered using digital forms and other questionnaires."/>
  <fhirVersion value="1.0.2"/>
@@ -53,18 +53,12 @@
     <code value="DomainResource"/>
    </type>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="group.required = true"/>
-    </extension>
     <key value="que-3"/>
     <severity value="error"/>
     <human value="If root group must be &quot;required&quot;"/>
     <xpath value="f:group/f:required/@value=true()"/>
    </constraint>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="**.linkId.distinct()"/>
-    </extension>
     <key value="que-2"/>
     <severity value="error"/>
     <human value="The link ids for groups and questions must be unique within the questionnaire"/>
@@ -371,9 +365,6 @@
    </type>
    <condition value="que-3"/>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="group.empty() or question.empty()"/>
-    </extension>
     <key value="que-1"/>
     <severity value="error"/>
     <human value="Groups may either contain questions or groups but not both"/>
@@ -571,9 +562,6 @@
    </type>
    <condition value="que-1"/>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="option.empty() or options.empty()"/>
-    </extension>
     <key value="que-4"/>
     <severity value="error"/>
     <human value="A question must use either option or options, not both"/>
@@ -812,18 +800,12 @@
     <code value="DomainResource"/>
    </type>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="group.required = true"/>
-    </extension>
     <key value="que-3"/>
     <severity value="error"/>
     <human value="If root group must be &quot;required&quot;"/>
     <xpath value="f:group/f:required/@value=true()"/>
    </constraint>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="**.linkId.distinct()"/>
-    </extension>
     <key value="que-2"/>
     <severity value="error"/>
     <human value="The link ids for groups and questions must be unique within the questionnaire"/>
@@ -1005,9 +987,6 @@
    </type>
    <condition value="que-3"/>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="group.empty() or question.empty()"/>
-    </extension>
     <key value="que-1"/>
     <severity value="error"/>
     <human value="Groups may either contain questions or groups but not both"/>
@@ -1154,9 +1133,6 @@
    </type>
    <condition value="que-1"/>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="option.empty() or options.empty()"/>
-    </extension>
     <key value="que-4"/>
     <severity value="error"/>
     <human value="A question must use either option or options, not both"/>

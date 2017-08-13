@@ -29,17 +29,13 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Wed, Jul 13, 2016 05:32+1000 for FHIR v1.0.2
+import java.util.*;
 
-import org.hl7.fhir.instance.utilities.Utilities;
+import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.utilities.Utilities;
 
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
-import ca.uhn.fhir.model.api.annotation.ResourceDef;
-import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.*;
 /**
  * This resource identifies an instance of a manufactured item that is used in the provision of healthcare without being substantially changed through that activity. The device may be a medical or non-medical device.  Medical devices includes durable (reusable) medical equipment, implantable devices, as well as disposable equipment used for diagnostic, treatment, and research for healthcare and public health.  Non-medical devices may include items such as a machine, cellphone, computer, application, etc.
  */
@@ -63,7 +59,7 @@ public class Device extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static DeviceStatus fromCode(String codeString) throws Exception {
+        public static DeviceStatus fromCode(String codeString) throws FHIRException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("available".equals(codeString))
@@ -72,7 +68,7 @@ public class Device extends DomainResource {
           return NOTAVAILABLE;
         if ("entered-in-error".equals(codeString))
           return ENTEREDINERROR;
-        throw new Exception("Unknown DeviceStatus code '"+codeString+"'");
+        throw new FHIRException("Unknown DeviceStatus code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -120,6 +116,20 @@ public class Device extends DomainResource {
         if ("entered-in-error".equals(codeString))
           return DeviceStatus.ENTEREDINERROR;
         throw new IllegalArgumentException("Unknown DeviceStatus code '"+codeString+"'");
+        }
+        public Enumeration<DeviceStatus> fromType(Base code) throws FHIRException {
+          if (code == null || code.isEmpty())
+            return null;
+          String codeString = ((PrimitiveType) code).asStringValue();
+          if (codeString == null || "".equals(codeString))
+            return null;
+        if ("available".equals(codeString))
+          return new Enumeration<DeviceStatus>(this, DeviceStatus.AVAILABLE);
+        if ("not-available".equals(codeString))
+          return new Enumeration<DeviceStatus>(this, DeviceStatus.NOTAVAILABLE);
+        if ("entered-in-error".equals(codeString))
+          return new Enumeration<DeviceStatus>(this, DeviceStatus.ENTEREDINERROR);
+        throw new FHIRException("Unknown DeviceStatus code '"+codeString+"'");
         }
     public String toCode(DeviceStatus code) {
       if (code == DeviceStatus.AVAILABLE)
@@ -1012,6 +1022,107 @@ public class Device extends DomainResource {
         childrenList.add(new Property("contact", "ContactPoint", "Contact details for an organization or a particular human that is responsible for the device.", 0, java.lang.Integer.MAX_VALUE, contact));
         childrenList.add(new Property("url", "uri", "A network address on which the device may be contacted directly.", 0, java.lang.Integer.MAX_VALUE, url));
       }
+
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("identifier"))
+          this.getIdentifier().add(castToIdentifier(value));
+        else if (name.equals("type"))
+          this.type = castToCodeableConcept(value); // CodeableConcept
+        else if (name.equals("note"))
+          this.getNote().add(castToAnnotation(value));
+        else if (name.equals("status"))
+          this.status = new DeviceStatusEnumFactory().fromType(value); // Enumeration<DeviceStatus>
+        else if (name.equals("manufacturer"))
+          this.manufacturer = castToString(value); // StringType
+        else if (name.equals("model"))
+          this.model = castToString(value); // StringType
+        else if (name.equals("version"))
+          this.version = castToString(value); // StringType
+        else if (name.equals("manufactureDate"))
+          this.manufactureDate = castToDateTime(value); // DateTimeType
+        else if (name.equals("expiry"))
+          this.expiry = castToDateTime(value); // DateTimeType
+        else if (name.equals("udi"))
+          this.udi = castToString(value); // StringType
+        else if (name.equals("lotNumber"))
+          this.lotNumber = castToString(value); // StringType
+        else if (name.equals("owner"))
+          this.owner = castToReference(value); // Reference
+        else if (name.equals("location"))
+          this.location = castToReference(value); // Reference
+        else if (name.equals("patient"))
+          this.patient = castToReference(value); // Reference
+        else if (name.equals("contact"))
+          this.getContact().add(castToContactPoint(value));
+        else if (name.equals("url"))
+          this.url = castToUri(value); // UriType
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("identifier")) {
+          return addIdentifier();
+        }
+        else if (name.equals("type")) {
+          this.type = new CodeableConcept();
+          return this.type;
+        }
+        else if (name.equals("note")) {
+          return addNote();
+        }
+        else if (name.equals("status")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Device.status");
+        }
+        else if (name.equals("manufacturer")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Device.manufacturer");
+        }
+        else if (name.equals("model")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Device.model");
+        }
+        else if (name.equals("version")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Device.version");
+        }
+        else if (name.equals("manufactureDate")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Device.manufactureDate");
+        }
+        else if (name.equals("expiry")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Device.expiry");
+        }
+        else if (name.equals("udi")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Device.udi");
+        }
+        else if (name.equals("lotNumber")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Device.lotNumber");
+        }
+        else if (name.equals("owner")) {
+          this.owner = new Reference();
+          return this.owner;
+        }
+        else if (name.equals("location")) {
+          this.location = new Reference();
+          return this.location;
+        }
+        else if (name.equals("patient")) {
+          this.patient = new Reference();
+          return this.patient;
+        }
+        else if (name.equals("contact")) {
+          return addContact();
+        }
+        else if (name.equals("url")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Device.url");
+        }
+        else
+          return super.addChild(name);
+      }
+
+  public String fhirType() {
+    return "Device";
+
+  }
 
       public Device copy() {
         Device dst = new Device();

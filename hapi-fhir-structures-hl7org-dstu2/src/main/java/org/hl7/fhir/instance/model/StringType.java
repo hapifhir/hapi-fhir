@@ -88,4 +88,8 @@ public class StringType extends PrimitiveType<String> {
 		return new StringType(getValue());
 	}
 
+	public String fhirType() {
+		return "string";
+	}
+
 }

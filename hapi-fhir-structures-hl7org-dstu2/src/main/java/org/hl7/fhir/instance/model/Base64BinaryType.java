@@ -70,4 +70,7 @@ public class Base64BinaryType extends PrimitiveType<byte[]> {
 		return new Base64BinaryType(getValue());
 	}
 
+	public String fhirType() {
+		return "base64Binary";
+	}
 }

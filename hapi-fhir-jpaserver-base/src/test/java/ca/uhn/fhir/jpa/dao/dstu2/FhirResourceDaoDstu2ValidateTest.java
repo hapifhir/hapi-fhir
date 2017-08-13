@@ -8,9 +8,7 @@ import java.io.IOException;
 import java.util.Arrays;
 
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
+import org.junit.*;
 import org.junit.Test;
 
 import ca.uhn.fhir.jpa.dao.DaoConfig;
@@ -20,12 +18,8 @@ import ca.uhn.fhir.model.dstu2.resource.*;
 import ca.uhn.fhir.model.dstu2.resource.Bundle.Entry;
 import ca.uhn.fhir.model.dstu2.valueset.ObservationStatusEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.rest.api.MethodOutcome;
-import ca.uhn.fhir.rest.api.ValidationModeEnum;
-import ca.uhn.fhir.rest.server.EncodingEnum;
-import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
-import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
-import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import ca.uhn.fhir.rest.api.*;
+import ca.uhn.fhir.rest.server.exceptions.*;
 import ca.uhn.fhir.util.TestUtil;
 
 public class FhirResourceDaoDstu2ValidateTest extends BaseJpaDstu2Test {
@@ -100,7 +94,8 @@ public class FhirResourceDaoDstu2ValidateTest extends BaseJpaDstu2Test {
 		ValidationModeEnum mode = ValidationModeEnum.CREATE;
 		switch (enc) {
 		case JSON:
-			encoded = myFhirCtx.newJsonParser().encodeResourceToString(input);
+			encoded = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input);
+			ourLog.info(encoded);
 			try {
 				myObservationDao.validate(input, null, encoded, EncodingEnum.JSON, mode, null, mySrd);
 				fail();

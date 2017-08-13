@@ -29,19 +29,15 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Wed, Jul 13, 2016 05:32+1000 for FHIR v1.0.2
+import java.util.*;
 
+import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.Enumerations.RemittanceOutcome;
 import org.hl7.fhir.instance.model.Enumerations.RemittanceOutcomeEnumFactory;
-import org.hl7.fhir.instance.utilities.Utilities;
+import org.hl7.fhir.utilities.Utilities;
 
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
-import ca.uhn.fhir.model.api.annotation.ResourceDef;
-import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.*;
 /**
  * This resource provides: the claim details; adjudication details from the processing of a Claim; and optionally account balance information, for informing the subscriber of the benefits provided.
  */
@@ -571,6 +567,79 @@ public class ExplanationOfBenefit extends DomainResource {
         childrenList.add(new Property("requestProvider", "Reference(Practitioner)", "The practitioner who is responsible for the services rendered to the patient.", 0, java.lang.Integer.MAX_VALUE, requestProvider));
         childrenList.add(new Property("requestOrganization", "Reference(Organization)", "The organization which is responsible for the services rendered to the patient.", 0, java.lang.Integer.MAX_VALUE, requestOrganization));
       }
+
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("identifier"))
+          this.getIdentifier().add(castToIdentifier(value));
+        else if (name.equals("request"))
+          this.request = castToReference(value); // Reference
+        else if (name.equals("outcome"))
+          this.outcome = new RemittanceOutcomeEnumFactory().fromType(value); // Enumeration<RemittanceOutcome>
+        else if (name.equals("disposition"))
+          this.disposition = castToString(value); // StringType
+        else if (name.equals("ruleset"))
+          this.ruleset = castToCoding(value); // Coding
+        else if (name.equals("originalRuleset"))
+          this.originalRuleset = castToCoding(value); // Coding
+        else if (name.equals("created"))
+          this.created = castToDateTime(value); // DateTimeType
+        else if (name.equals("organization"))
+          this.organization = castToReference(value); // Reference
+        else if (name.equals("requestProvider"))
+          this.requestProvider = castToReference(value); // Reference
+        else if (name.equals("requestOrganization"))
+          this.requestOrganization = castToReference(value); // Reference
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("identifier")) {
+          return addIdentifier();
+        }
+        else if (name.equals("request")) {
+          this.request = new Reference();
+          return this.request;
+        }
+        else if (name.equals("outcome")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ExplanationOfBenefit.outcome");
+        }
+        else if (name.equals("disposition")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ExplanationOfBenefit.disposition");
+        }
+        else if (name.equals("ruleset")) {
+          this.ruleset = new Coding();
+          return this.ruleset;
+        }
+        else if (name.equals("originalRuleset")) {
+          this.originalRuleset = new Coding();
+          return this.originalRuleset;
+        }
+        else if (name.equals("created")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ExplanationOfBenefit.created");
+        }
+        else if (name.equals("organization")) {
+          this.organization = new Reference();
+          return this.organization;
+        }
+        else if (name.equals("requestProvider")) {
+          this.requestProvider = new Reference();
+          return this.requestProvider;
+        }
+        else if (name.equals("requestOrganization")) {
+          this.requestOrganization = new Reference();
+          return this.requestOrganization;
+        }
+        else
+          return super.addChild(name);
+      }
+
+  public String fhirType() {
+    return "ExplanationOfBenefit";
+
+  }
 
       public ExplanationOfBenefit copy() {
         ExplanationOfBenefit dst = new ExplanationOfBenefit();

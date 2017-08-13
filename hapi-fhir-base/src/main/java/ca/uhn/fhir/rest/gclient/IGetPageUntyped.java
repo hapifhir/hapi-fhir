@@ -22,14 +22,7 @@ package ca.uhn.fhir.rest.gclient;
 
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 
-import ca.uhn.fhir.model.api.Bundle;
-
 public interface IGetPageUntyped {
-
-	/**
-	 * Return a DSTU1 Atom feed
-	 */
-	IGetPageTyped<Bundle> andReturnDstu1Bundle();
 	
 	/**
 	 * Return a Bundle resource of the given type

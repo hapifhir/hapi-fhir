@@ -1,5 +1,11 @@
 package ca.uhn.fhir.jaxrs.client;
 
+import java.util.List;
+import java.util.Map;
+
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
+
 /*
  * #%L
  * HAPI FHIR JAX-RS Server
@@ -22,14 +28,9 @@ package ca.uhn.fhir.jaxrs.client;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
-import ca.uhn.fhir.rest.client.RestfulClientFactory;
 import ca.uhn.fhir.rest.client.api.Header;
 import ca.uhn.fhir.rest.client.api.IHttpClient;
-
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
-import java.util.List;
-import java.util.Map;
+import ca.uhn.fhir.rest.client.impl.RestfulClientFactory;
 
 /**
  * A Restful Client Factory, based on Jax Rs

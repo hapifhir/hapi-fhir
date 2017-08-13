@@ -6,7 +6,7 @@ import java.util.*;
 
 import org.hl7.fhir.instance.model.api.IIdType;
 
-import ca.uhn.fhir.rest.method.RestSearchParameterTypeEnum;
+import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 
 /*
  * #%L

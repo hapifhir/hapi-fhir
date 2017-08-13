@@ -29,15 +29,12 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Wed, Jul 13, 2016 05:32+1000 for FHIR v1.0.2
+import java.util.*;
 
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
-import ca.uhn.fhir.model.api.annotation.ResourceDef;
-import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import org.hl7.fhir.exceptions.FHIRException;
+
+import ca.uhn.fhir.model.api.annotation.*;
 /**
  * This resource provides the status of the payment for goods and services rendered, and the request and response resource references.
  */
@@ -540,6 +537,81 @@ public class PaymentNotice extends DomainResource {
         childrenList.add(new Property("response", "Reference(Any)", "Reference of response to resource to reverse.", 0, java.lang.Integer.MAX_VALUE, response));
         childrenList.add(new Property("paymentStatus", "Coding", "The payment status, typically paid: payment sent, cleared: payment received.", 0, java.lang.Integer.MAX_VALUE, paymentStatus));
       }
+
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("identifier"))
+          this.getIdentifier().add(castToIdentifier(value));
+        else if (name.equals("ruleset"))
+          this.ruleset = castToCoding(value); // Coding
+        else if (name.equals("originalRuleset"))
+          this.originalRuleset = castToCoding(value); // Coding
+        else if (name.equals("created"))
+          this.created = castToDateTime(value); // DateTimeType
+        else if (name.equals("target"))
+          this.target = castToReference(value); // Reference
+        else if (name.equals("provider"))
+          this.provider = castToReference(value); // Reference
+        else if (name.equals("organization"))
+          this.organization = castToReference(value); // Reference
+        else if (name.equals("request"))
+          this.request = castToReference(value); // Reference
+        else if (name.equals("response"))
+          this.response = castToReference(value); // Reference
+        else if (name.equals("paymentStatus"))
+          this.paymentStatus = castToCoding(value); // Coding
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("identifier")) {
+          return addIdentifier();
+        }
+        else if (name.equals("ruleset")) {
+          this.ruleset = new Coding();
+          return this.ruleset;
+        }
+        else if (name.equals("originalRuleset")) {
+          this.originalRuleset = new Coding();
+          return this.originalRuleset;
+        }
+        else if (name.equals("created")) {
+          throw new FHIRException("Cannot call addChild on a primitive type PaymentNotice.created");
+        }
+        else if (name.equals("target")) {
+          this.target = new Reference();
+          return this.target;
+        }
+        else if (name.equals("provider")) {
+          this.provider = new Reference();
+          return this.provider;
+        }
+        else if (name.equals("organization")) {
+          this.organization = new Reference();
+          return this.organization;
+        }
+        else if (name.equals("request")) {
+          this.request = new Reference();
+          return this.request;
+        }
+        else if (name.equals("response")) {
+          this.response = new Reference();
+          return this.response;
+        }
+        else if (name.equals("paymentStatus")) {
+          this.paymentStatus = new Coding();
+          return this.paymentStatus;
+        }
+        else
+          return super.addChild(name);
+      }
+
+  public String fhirType() {
+    return "PaymentNotice";
+
+  }
 
       public PaymentNotice copy() {
         PaymentNotice dst = new PaymentNotice();

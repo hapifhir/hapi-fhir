@@ -29,17 +29,13 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Wed, Jul 13, 2016 05:32+1000 for FHIR v1.0.2
+import java.util.*;
 
-import org.hl7.fhir.instance.utilities.Utilities;
+import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.utilities.Utilities;
 
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
-import ca.uhn.fhir.model.api.annotation.ResourceDef;
-import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.*;
 /**
  * Used to record and send details about a request for referral service or transfer of a patient to the care of another provider or provider organization.
  */
@@ -79,7 +75,7 @@ public class ReferralRequest extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static ReferralStatus fromCode(String codeString) throws Exception {
+        public static ReferralStatus fromCode(String codeString) throws FHIRException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("draft".equals(codeString))
@@ -96,7 +92,7 @@ public class ReferralRequest extends DomainResource {
           return REJECTED;
         if ("completed".equals(codeString))
           return COMPLETED;
-        throw new Exception("Unknown ReferralStatus code '"+codeString+"'");
+        throw new FHIRException("Unknown ReferralStatus code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -168,6 +164,28 @@ public class ReferralRequest extends DomainResource {
         if ("completed".equals(codeString))
           return ReferralStatus.COMPLETED;
         throw new IllegalArgumentException("Unknown ReferralStatus code '"+codeString+"'");
+        }
+        public Enumeration<ReferralStatus> fromType(Base code) throws FHIRException {
+          if (code == null || code.isEmpty())
+            return null;
+          String codeString = ((PrimitiveType) code).asStringValue();
+          if (codeString == null || "".equals(codeString))
+            return null;
+        if ("draft".equals(codeString))
+          return new Enumeration<ReferralStatus>(this, ReferralStatus.DRAFT);
+        if ("requested".equals(codeString))
+          return new Enumeration<ReferralStatus>(this, ReferralStatus.REQUESTED);
+        if ("active".equals(codeString))
+          return new Enumeration<ReferralStatus>(this, ReferralStatus.ACTIVE);
+        if ("cancelled".equals(codeString))
+          return new Enumeration<ReferralStatus>(this, ReferralStatus.CANCELLED);
+        if ("accepted".equals(codeString))
+          return new Enumeration<ReferralStatus>(this, ReferralStatus.ACCEPTED);
+        if ("rejected".equals(codeString))
+          return new Enumeration<ReferralStatus>(this, ReferralStatus.REJECTED);
+        if ("completed".equals(codeString))
+          return new Enumeration<ReferralStatus>(this, ReferralStatus.COMPLETED);
+        throw new FHIRException("Unknown ReferralStatus code '"+codeString+"'");
         }
     public String toCode(ReferralStatus code) {
       if (code == ReferralStatus.DRAFT)
@@ -978,6 +996,111 @@ public class ReferralRequest extends DomainResource {
         childrenList.add(new Property("supportingInformation", "Reference(Any)", "Any additional (administrative, financial or clinical) information required to support request for referral or transfer of care.  For example: Presenting problems/chief complaints Medical History Family History Alerts Allergy/Intolerance and Adverse Reactions Medications Observations/Assessments (may include cognitive and fundtional assessments) Diagnostic Reports Care Plan.", 0, java.lang.Integer.MAX_VALUE, supportingInformation));
         childrenList.add(new Property("fulfillmentTime", "Period", "The period of time within which the services identified in the referral/transfer of care is specified or required to occur.", 0, java.lang.Integer.MAX_VALUE, fulfillmentTime));
       }
+
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("status"))
+          this.status = new ReferralStatusEnumFactory().fromType(value); // Enumeration<ReferralStatus>
+        else if (name.equals("identifier"))
+          this.getIdentifier().add(castToIdentifier(value));
+        else if (name.equals("date"))
+          this.date = castToDateTime(value); // DateTimeType
+        else if (name.equals("type"))
+          this.type = castToCodeableConcept(value); // CodeableConcept
+        else if (name.equals("specialty"))
+          this.specialty = castToCodeableConcept(value); // CodeableConcept
+        else if (name.equals("priority"))
+          this.priority = castToCodeableConcept(value); // CodeableConcept
+        else if (name.equals("patient"))
+          this.patient = castToReference(value); // Reference
+        else if (name.equals("requester"))
+          this.requester = castToReference(value); // Reference
+        else if (name.equals("recipient"))
+          this.getRecipient().add(castToReference(value));
+        else if (name.equals("encounter"))
+          this.encounter = castToReference(value); // Reference
+        else if (name.equals("dateSent"))
+          this.dateSent = castToDateTime(value); // DateTimeType
+        else if (name.equals("reason"))
+          this.reason = castToCodeableConcept(value); // CodeableConcept
+        else if (name.equals("description"))
+          this.description = castToString(value); // StringType
+        else if (name.equals("serviceRequested"))
+          this.getServiceRequested().add(castToCodeableConcept(value));
+        else if (name.equals("supportingInformation"))
+          this.getSupportingInformation().add(castToReference(value));
+        else if (name.equals("fulfillmentTime"))
+          this.fulfillmentTime = castToPeriod(value); // Period
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("status")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ReferralRequest.status");
+        }
+        else if (name.equals("identifier")) {
+          return addIdentifier();
+        }
+        else if (name.equals("date")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ReferralRequest.date");
+        }
+        else if (name.equals("type")) {
+          this.type = new CodeableConcept();
+          return this.type;
+        }
+        else if (name.equals("specialty")) {
+          this.specialty = new CodeableConcept();
+          return this.specialty;
+        }
+        else if (name.equals("priority")) {
+          this.priority = new CodeableConcept();
+          return this.priority;
+        }
+        else if (name.equals("patient")) {
+          this.patient = new Reference();
+          return this.patient;
+        }
+        else if (name.equals("requester")) {
+          this.requester = new Reference();
+          return this.requester;
+        }
+        else if (name.equals("recipient")) {
+          return addRecipient();
+        }
+        else if (name.equals("encounter")) {
+          this.encounter = new Reference();
+          return this.encounter;
+        }
+        else if (name.equals("dateSent")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ReferralRequest.dateSent");
+        }
+        else if (name.equals("reason")) {
+          this.reason = new CodeableConcept();
+          return this.reason;
+        }
+        else if (name.equals("description")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ReferralRequest.description");
+        }
+        else if (name.equals("serviceRequested")) {
+          return addServiceRequested();
+        }
+        else if (name.equals("supportingInformation")) {
+          return addSupportingInformation();
+        }
+        else if (name.equals("fulfillmentTime")) {
+          this.fulfillmentTime = new Period();
+          return this.fulfillmentTime;
+        }
+        else
+          return super.addChild(name);
+      }
+
+  public String fhirType() {
+    return "ReferralRequest";
+
+  }
 
       public ReferralRequest copy() {
         ReferralRequest dst = new ReferralRequest();

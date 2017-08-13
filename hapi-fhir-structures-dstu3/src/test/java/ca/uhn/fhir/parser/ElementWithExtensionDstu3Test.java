@@ -2,14 +2,13 @@ package ca.uhn.fhir.parser;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.util.TestUtil;
-import org.hl7.fhir.dstu3.model.Extension;
-import org.hl7.fhir.dstu3.model.HumanName;
-import org.hl7.fhir.dstu3.model.IdType;
-import org.hl7.fhir.dstu3.model.StringType;
+import org.hl7.fhir.dstu3.model.*;
 import org.junit.AfterClass;
 import org.junit.Test;
 
+import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 
 /**
  * Created by Sébastien Rivière 12/04/2017
@@ -179,5 +178,48 @@ public class ElementWithExtensionDstu3Test {
         patient = parser.parseResource(MyPatientWithCustomUrlExtension.class, xml);
         assertEquals(1, patient.getCustomId().getExtension().size());
     }
+
+	@Test
+    public void testExtensionOnResourceIdXml(){
+		Patient p = new Patient();
+		p.setActive(true);
+		p.getIdElement().setValue("123");
+		p.getIdElement().addExtension().setUrl("http://foo").setValue(new StringType("FOO"));
+
+		IParser parser = ctx.newXmlParser();
+		String encoded = parser.encodeResourceToString(p);
+		assertThat(encoded, containsString("http://foo"));
+		assertThat(encoded, containsString("FOO"));
+
+		p = (Patient) parser.parseResource(encoded);
+		assertEquals("Patient/123", p.getId());
+		Extension ex = p.getIdElement().getExtension().get(0);
+		assertEquals("http://foo", ex.getUrl());
+		assertEquals("FOO", ex.getValueAsPrimitive().getValueAsString());
+
+
+	 }
+
+	@Test
+	public void testExtensionOnResourceIdJson(){
+		Patient p = new Patient();
+		p.setActive(true);
+		p.getIdElement().setValue("123");
+		p.getIdElement().addExtension().setUrl("http://foo").setValue(new StringType("FOO"));
+
+		IParser parser = ctx.newJsonParser();
+		String encoded = parser.encodeResourceToString(p);
+		assertThat(encoded, containsString("http://foo"));
+		assertThat(encoded, containsString("FOO"));
+
+		p = (Patient) parser.parseResource(encoded);
+		assertEquals("Patient/123", p.getId());
+		Extension ex = p.getIdElement().getExtension().get(0);
+		assertEquals("http://foo", ex.getUrl());
+		assertEquals("FOO", ex.getValueAsPrimitive().getValueAsString());
+
+
+	}
+
 }
 

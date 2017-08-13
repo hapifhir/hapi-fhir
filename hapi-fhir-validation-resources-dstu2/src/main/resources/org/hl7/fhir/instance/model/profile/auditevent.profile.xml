@@ -1,7 +1,7 @@
 <StructureDefinition xmlns="http://hl7.org/fhir">
  <id value="AuditEvent"/>
  <meta>
-  <lastUpdated value="2015-11-11T10:54:01.813-05:00"/>
+  <lastUpdated value="2017-07-27T08:19:05.564-04:00"/>
  </meta>
  <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
   <valueInteger value="2"/>
@@ -22,7 +22,7 @@
    <value value="http://www.hl7.org/Special/committees/secure/index.cfm"/>
   </telecom>
  </contact>
- <date value="2015-11-11T10:54:01-05:00"/>
+ <date value="2017-07-27T08:19:05-04:00"/>
  <description value="Base StructureDefinition for AuditEvent Resource"/>
  <fhirVersion value="1.0.2"/>
  <mapping>
@@ -1178,9 +1178,6 @@
     <code value="BackboneElement"/>
    </type>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="name.empty() or query.empty()"/>
-    </extension>
     <key value="sev-1"/>
     <severity value="error"/>
     <human value="Either a name or a query (NOT both)"/>
@@ -2443,9 +2440,6 @@
     <code value="BackboneElement"/>
    </type>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="name.empty() or query.empty()"/>
-    </extension>
     <key value="sev-1"/>
     <severity value="error"/>
     <human value="Either a name or a query (NOT both)"/>

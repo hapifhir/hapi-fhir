@@ -10,7 +10,7 @@ package ca.uhn.fhir.model.api;
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  * 
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -23,29 +23,24 @@ package ca.uhn.fhir.model.api;
 import java.io.InputStream;
 import java.util.Date;
 
-import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.instance.model.api.*;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.context.*;
 import ca.uhn.fhir.context.support.IContextValidationSupport;
 import ca.uhn.fhir.fluentpath.IFluentPath;
-import ca.uhn.fhir.rest.server.IResourceProvider;
-import ca.uhn.fhir.rest.server.IServerConformanceProvider;
-import ca.uhn.fhir.rest.server.IVersionSpecificBundleFactory;
-import ca.uhn.fhir.rest.server.RestfulServer;
+import ca.uhn.fhir.rest.api.IVersionSpecificBundleFactory;
 
+/**
+ * Each structure version JAR will have an implementation of this interface.
+ * This is used internally by HAPI and subject to change. Do not use this interface
+ * directly in user code.
+ * 
+ * See also IFhirVersionServer for the hapi-fhir-server equivalent.
+ */
 public interface IFhirVersion {
 
 	IFluentPath createFluentPathExecutor(FhirContext theFhirContext);
-	
-	IServerConformanceProvider<? extends IBaseResource> createServerConformanceProvider(RestfulServer theRestfulServer); 
-	
-	IResourceProvider createServerProfilesProvider(RestfulServer theRestfulServer);
-	
+
 	IContextValidationSupport<?, ?, ?, ?, ?, ?> createValidationSupport();
 
 	IBaseResource generateProfile(RuntimeResourceDefinition theRuntimeResourceDefinition, String theServerBase);
@@ -67,5 +62,12 @@ public interface IFhirVersion {
 	IBase newCodingDt();
 
 	IIdType newIdType();
+
+	/**
+	 * Returns an instance of <code>IFhirVersionServer<code> for this version.
+	 * Note that this method may only be called if the <code>hapi-fhir-server</code>
+	 * JAR is on the classpath. Otherwise it will result in a {@link ClassNotFoundException}
+	 */
+	Object getServerVersion();
 
 }

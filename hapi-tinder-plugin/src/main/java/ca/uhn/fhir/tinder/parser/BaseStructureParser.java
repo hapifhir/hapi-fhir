@@ -81,12 +81,12 @@ public abstract class BaseStructureParser {
 		myBaseDir = theBaseDir;
 		myIsRi = myVersion.equals("dstu3");
 
-		if (myVersion.equals("dstu3")) {
+		if (myVersion.equals("r4")) {
+			myCtx = FhirContext.forR4();
+		} else if (myVersion.equals("dstu3")) {
 			myCtx = FhirContext.forDstu3();
 		} else if (myVersion.equals("dstu2")) {
 			myCtx = FhirContext.forDstu2();
-		} else if (myVersion.equals("dstu")) {
-			myCtx = FhirContext.forDstu1();
 		}
 	}
 
@@ -632,10 +632,7 @@ public abstract class BaseStructureParser {
 			myNameToResourceClass.put("Binary", thePackageBase + ".resource.Binary");
 			myNameToDatatypeClass.put("Extension", ExtensionDt.class.getName());
 
-			if (determineVersionEnum() == FhirVersionEnum.DSTU1) {
-				myNameToDatatypeClass.put("boundCode", BoundCodeDt.class.getName());
-				myNameToDatatypeClass.put("boundCodeableConcept", BoundCodeableConceptDt.class.getName());
-			} else if (determineVersionEnum() == FhirVersionEnum.DSTU2) {
+			if (determineVersionEnum() == FhirVersionEnum.DSTU2) {
 				myNameToDatatypeClass.put("boundCode", BoundCodeDt.class.getName());
 				myNameToDatatypeClass.put("boundCodeableConcept", ca.uhn.fhir.model.dstu2.composite.BoundCodeableConceptDt.class.getName());
 			}
@@ -687,12 +684,12 @@ public abstract class BaseStructureParser {
 
 	public static FhirVersionEnum determineVersionEnum(String version) throws MojoFailureException {
 		FhirVersionEnum versionEnum;
-		if ("dstu".equals(version)) {
-			versionEnum = FhirVersionEnum.DSTU1;
-		} else if ("dstu2".equals(version)) {
+		if ("dstu2".equals(version)) {
 			versionEnum = FhirVersionEnum.DSTU2;
 		} else if ("dstu3".equals(version)) {
 			versionEnum = FhirVersionEnum.DSTU3;
+		} else if ("r4".equals(version)) {
+			versionEnum = FhirVersionEnum.R4;
 		} else {
 			throw new MojoFailureException("Unknown version: " + version);
 		}

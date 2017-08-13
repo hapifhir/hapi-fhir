@@ -1,7 +1,7 @@
 <StructureDefinition xmlns="http://hl7.org/fhir">
  <id value="NamingSystem"/>
  <meta>
-  <lastUpdated value="2015-11-11T10:54:01.813-05:00"/>
+  <lastUpdated value="2017-07-27T08:19:05.564-04:00"/>
  </meta>
  <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
   <valueInteger value="1"/>
@@ -22,7 +22,7 @@
    <value value="http://www.hl7.org/Special/committees/fiwg/index.cfm"/>
   </telecom>
  </contact>
- <date value="2015-11-11T10:54:01-05:00"/>
+ <date value="2017-07-27T08:19:05-04:00"/>
  <description value="Base StructureDefinition for NamingSystem Resource"/>
  <fhirVersion value="1.0.2"/>
  <mapping>
@@ -54,27 +54,18 @@
     <code value="DomainResource"/>
    </type>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="kind != 'root' or uniqueId in ('uuid' | 'ruid')"/>
-    </extension>
     <key value="nsd-1"/>
     <severity value="error"/>
     <human value="Root systems cannot have uuid or sid identifiers"/>
     <xpath value="not(f:kind/@value='root' and f:uniqueId/f:type/@value=('uuid', 'ruid'))"/>
    </constraint>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="replacedBy.empty() or status = 'retired'"/>
-    </extension>
     <key value="nsd-3"/>
     <severity value="error"/>
     <human value="Can only have replacedBy if naming system is retired"/>
     <xpath value="not(f:replacedBy) or f:status/@value='retired'"/>
    </constraint>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="uniqueId.where(preferred = true).distinct(type)"/>
-    </extension>
     <key value="nsd-2"/>
     <severity value="error"/>
     <human value="Can't have more than one preferred identifier for a type"/>
@@ -604,27 +595,18 @@
     <code value="DomainResource"/>
    </type>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="kind != 'root' or uniqueId in ('uuid' | 'ruid')"/>
-    </extension>
     <key value="nsd-1"/>
     <severity value="error"/>
     <human value="Root systems cannot have uuid or sid identifiers"/>
     <xpath value="not(f:kind/@value='root' and f:uniqueId/f:type/@value=('uuid', 'ruid'))"/>
    </constraint>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="replacedBy.empty() or status = 'retired'"/>
-    </extension>
     <key value="nsd-3"/>
     <severity value="error"/>
     <human value="Can only have replacedBy if naming system is retired"/>
     <xpath value="not(f:replacedBy) or f:status/@value='retired'"/>
    </constraint>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="uniqueId.where(preferred = true).distinct(type)"/>
-    </extension>
     <key value="nsd-2"/>
     <severity value="error"/>
     <human value="Can't have more than one preferred identifier for a type"/>

@@ -19,17 +19,12 @@ package ca.uhn.fhir.rest.annotation;
  * limitations under the License.
  * #L%
  */
-
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import java.lang.annotation.*;
 
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.rest.client.api.IBasicClient;
 import ca.uhn.fhir.rest.client.api.IRestfulClient;
-import ca.uhn.fhir.rest.server.IResourceProvider;
 
 /**
  * RESTful method annotation to be used for the FHIR <a href="http://hl7.org/implement/standards/fhir/http.html#read">read</a> and <a
@@ -50,7 +45,7 @@ import ca.uhn.fhir.rest.server.IResourceProvider;
 public @interface Read {
 
 	/**
-	 * The return type for this method. This generally does not need to be populated for {@link IResourceProvider resource providers} in a server implementation, but often does need to be populated in
+	 * The return type for this method. This generally does not need to be populated for IResourceProvider in a server implementation, but often does need to be populated in
 	 * client implementations using {@link IBasicClient} or {@link IRestfulClient}, or in plain providers on a server.
 	 * <p>
 	 * This value also does not need to be populated if the return type for a method annotated with this annotation is sufficient to determine the type of resource provided. E.g. if the method returns

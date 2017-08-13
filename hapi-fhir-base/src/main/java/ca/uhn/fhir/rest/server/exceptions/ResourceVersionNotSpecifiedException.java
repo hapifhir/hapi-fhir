@@ -22,7 +22,7 @@ package ca.uhn.fhir.rest.server.exceptions;
 
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 
-import ca.uhn.fhir.rest.server.Constants;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.util.CoverageIgnore;
 
 /**

@@ -26,21 +26,15 @@ import java.util.Map;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.Invocation.Builder;
-import javax.ws.rs.core.Form;
-import javax.ws.rs.core.MultivaluedHashMap;
-import javax.ws.rs.core.MultivaluedMap;
+import javax.ws.rs.core.*;
 
 import org.hl7.fhir.instance.model.api.IBaseBinary;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.api.RequestTypeEnum;
-import ca.uhn.fhir.rest.client.BaseHttpClientInvocation;
-import ca.uhn.fhir.rest.client.api.Header;
-import ca.uhn.fhir.rest.client.api.HttpClientUtil;
-import ca.uhn.fhir.rest.client.api.IHttpClient;
-import ca.uhn.fhir.rest.client.api.IHttpRequest;
-import ca.uhn.fhir.rest.server.Constants;
-import ca.uhn.fhir.rest.server.EncodingEnum;
+import ca.uhn.fhir.rest.api.*;
+import ca.uhn.fhir.rest.client.api.*;
+import ca.uhn.fhir.rest.client.impl.BaseHttpClientInvocation;
+import ca.uhn.fhir.rest.client.method.MethodUtil;
 import ca.uhn.fhir.rest.server.RestfulServerUtils;
 
 /**
@@ -120,7 +114,7 @@ public class JaxRsHttpClient implements IHttpClient {
 		Builder request = theHttpRequest.getRequest();
 		request.acceptEncoding("gzip");
 
-		RestfulServerUtils.addAcceptHeaderToRequest(theEncoding, theHttpRequest, theContext);
+		MethodUtil.addAcceptHeaderToRequest(theEncoding, theHttpRequest, theContext);
 	}
 	
 	private JaxRsHttpRequest createHttpRequest(Entity<?> entity) {

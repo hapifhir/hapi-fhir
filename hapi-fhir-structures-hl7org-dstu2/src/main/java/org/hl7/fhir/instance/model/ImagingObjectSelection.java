@@ -29,19 +29,14 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Wed, Jul 13, 2016 05:32+1000 for FHIR v1.0.2
+import java.util.*;
 
+import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
-import org.hl7.fhir.instance.utilities.Utilities;
+import org.hl7.fhir.utilities.Utilities;
 
-import ca.uhn.fhir.model.api.annotation.Block;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
-import ca.uhn.fhir.model.api.annotation.ResourceDef;
-import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.*;
 /**
  * A manifest of a set of DICOM Service-Object Pair Instances (SOP Instances).  The referenced SOP Instances (images or other content) are for a single patient, and may be from one or more studies. The referenced SOP Instances have been selected for a purpose, such as quality assurance, conference, or consult. Reflecting that range of purposes, typical ImagingObjectSelection resources may include all SOP Instances in a study (perhaps for sharing through a Health Information Exchange); key images from multiple studies (for reference by a referring or treating physician); a multi-frame ultrasound instance ("cine" video clip) and a set of measurements taken from that instance (for inclusion in a teaching file); and so on.
  */
@@ -286,6 +281,39 @@ public class ImagingObjectSelection extends DomainResource {
           childrenList.add(new Property("series", "", "Series identity and locating information of the DICOM SOP instances in the selection.", 0, java.lang.Integer.MAX_VALUE, series));
         }
 
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("uid"))
+          this.uid = castToOid(value); // OidType
+        else if (name.equals("url"))
+          this.url = castToUri(value); // UriType
+        else if (name.equals("imagingStudy"))
+          this.imagingStudy = castToReference(value); // Reference
+        else if (name.equals("series"))
+          this.getSeries().add((SeriesComponent) value);
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("uid")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ImagingObjectSelection.uid");
+        }
+        else if (name.equals("url")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ImagingObjectSelection.url");
+        }
+        else if (name.equals("imagingStudy")) {
+          this.imagingStudy = new Reference();
+          return this.imagingStudy;
+        }
+        else if (name.equals("series")) {
+          return addSeries();
+        }
+        else
+          return super.addChild(name);
+      }
+
       public StudyComponent copy() {
         StudyComponent dst = new StudyComponent();
         copyValues(dst);
@@ -325,6 +353,11 @@ public class ImagingObjectSelection extends DomainResource {
         return super.isEmpty() && (uid == null || uid.isEmpty()) && (url == null || url.isEmpty()) && (imagingStudy == null || imagingStudy.isEmpty())
            && (series == null || series.isEmpty());
       }
+
+  public String fhirType() {
+    return "ImagingObjectSelection.study";
+
+  }
 
   }
 
@@ -505,6 +538,33 @@ public class ImagingObjectSelection extends DomainResource {
           childrenList.add(new Property("instance", "", "Identity and locating information of the selected DICOM SOP instances.", 0, java.lang.Integer.MAX_VALUE, instance));
         }
 
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("uid"))
+          this.uid = castToOid(value); // OidType
+        else if (name.equals("url"))
+          this.url = castToUri(value); // UriType
+        else if (name.equals("instance"))
+          this.getInstance().add((InstanceComponent) value);
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("uid")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ImagingObjectSelection.uid");
+        }
+        else if (name.equals("url")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ImagingObjectSelection.url");
+        }
+        else if (name.equals("instance")) {
+          return addInstance();
+        }
+        else
+          return super.addChild(name);
+      }
+
       public SeriesComponent copy() {
         SeriesComponent dst = new SeriesComponent();
         copyValues(dst);
@@ -543,6 +603,11 @@ public class ImagingObjectSelection extends DomainResource {
         return super.isEmpty() && (uid == null || uid.isEmpty()) && (url == null || url.isEmpty()) && (instance == null || instance.isEmpty())
           ;
       }
+
+  public String fhirType() {
+    return "ImagingObjectSelection.study.series";
+
+  }
 
   }
 
@@ -778,6 +843,38 @@ public class ImagingObjectSelection extends DomainResource {
           childrenList.add(new Property("frames", "", "Identity and location information of the frames in the selected instance.", 0, java.lang.Integer.MAX_VALUE, frames));
         }
 
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("sopClass"))
+          this.sopClass = castToOid(value); // OidType
+        else if (name.equals("uid"))
+          this.uid = castToOid(value); // OidType
+        else if (name.equals("url"))
+          this.url = castToUri(value); // UriType
+        else if (name.equals("frames"))
+          this.getFrames().add((FramesComponent) value);
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("sopClass")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ImagingObjectSelection.sopClass");
+        }
+        else if (name.equals("uid")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ImagingObjectSelection.uid");
+        }
+        else if (name.equals("url")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ImagingObjectSelection.url");
+        }
+        else if (name.equals("frames")) {
+          return addFrames();
+        }
+        else
+          return super.addChild(name);
+      }
+
       public InstanceComponent copy() {
         InstanceComponent dst = new InstanceComponent();
         copyValues(dst);
@@ -818,6 +915,11 @@ public class ImagingObjectSelection extends DomainResource {
         return super.isEmpty() && (sopClass == null || sopClass.isEmpty()) && (uid == null || uid.isEmpty())
            && (url == null || url.isEmpty()) && (frames == null || frames.isEmpty());
       }
+
+  public String fhirType() {
+    return "ImagingObjectSelection.study.series.instance";
+
+  }
 
   }
 
@@ -959,6 +1061,28 @@ public class ImagingObjectSelection extends DomainResource {
           childrenList.add(new Property("url", "uri", "WADO-RS URL to retrieve the DICOM frames.", 0, java.lang.Integer.MAX_VALUE, url));
         }
 
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("frameNumbers"))
+          this.getFrameNumbers().add(castToUnsignedInt(value));
+        else if (name.equals("url"))
+          this.url = castToUri(value); // UriType
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("frameNumbers")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ImagingObjectSelection.frameNumbers");
+        }
+        else if (name.equals("url")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ImagingObjectSelection.url");
+        }
+        else
+          return super.addChild(name);
+      }
+
       public FramesComponent copy() {
         FramesComponent dst = new FramesComponent();
         copyValues(dst);
@@ -995,6 +1119,11 @@ public class ImagingObjectSelection extends DomainResource {
         return super.isEmpty() && (frameNumbers == null || frameNumbers.isEmpty()) && (url == null || url.isEmpty())
           ;
       }
+
+  public String fhirType() {
+    return "ImagingObjectSelection.study.series.instance.frames";
+
+  }
 
   }
 
@@ -1376,6 +1505,61 @@ public class ImagingObjectSelection extends DomainResource {
         childrenList.add(new Property("authoringTime", "dateTime", "Date and time when the selection of the referenced instances were made. It is (typically) different from the creation date of the selection resource, and from dates associated with the referenced instances (e.g. capture time of the referenced image).", 0, java.lang.Integer.MAX_VALUE, authoringTime));
         childrenList.add(new Property("study", "", "Study identity and locating information of the DICOM SOP instances in the selection.", 0, java.lang.Integer.MAX_VALUE, study));
       }
+
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("uid"))
+          this.uid = castToOid(value); // OidType
+        else if (name.equals("patient"))
+          this.patient = castToReference(value); // Reference
+        else if (name.equals("title"))
+          this.title = castToCodeableConcept(value); // CodeableConcept
+        else if (name.equals("description"))
+          this.description = castToString(value); // StringType
+        else if (name.equals("author"))
+          this.author = castToReference(value); // Reference
+        else if (name.equals("authoringTime"))
+          this.authoringTime = castToDateTime(value); // DateTimeType
+        else if (name.equals("study"))
+          this.getStudy().add((StudyComponent) value);
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("uid")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ImagingObjectSelection.uid");
+        }
+        else if (name.equals("patient")) {
+          this.patient = new Reference();
+          return this.patient;
+        }
+        else if (name.equals("title")) {
+          this.title = new CodeableConcept();
+          return this.title;
+        }
+        else if (name.equals("description")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ImagingObjectSelection.description");
+        }
+        else if (name.equals("author")) {
+          this.author = new Reference();
+          return this.author;
+        }
+        else if (name.equals("authoringTime")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ImagingObjectSelection.authoringTime");
+        }
+        else if (name.equals("study")) {
+          return addStudy();
+        }
+        else
+          return super.addChild(name);
+      }
+
+  public String fhirType() {
+    return "ImagingObjectSelection";
+
+  }
 
       public ImagingObjectSelection copy() {
         ImagingObjectSelection dst = new ImagingObjectSelection();

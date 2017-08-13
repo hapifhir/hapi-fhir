@@ -29,18 +29,13 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Wed, Jul 13, 2016 05:32+1000 for FHIR v1.0.2
+import java.util.*;
 
+import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 
-import ca.uhn.fhir.model.api.annotation.Block;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
-import ca.uhn.fhir.model.api.annotation.ResourceDef;
-import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.*;
 /**
  * A request to perform an action.
  */
@@ -126,6 +121,30 @@ public class Order extends DomainResource {
           childrenList.add(new Property("schedule", "Timing", "A formal schedule.", 0, java.lang.Integer.MAX_VALUE, schedule));
         }
 
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("code"))
+          this.code = castToCodeableConcept(value); // CodeableConcept
+        else if (name.equals("schedule"))
+          this.schedule = castToTiming(value); // Timing
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("code")) {
+          this.code = new CodeableConcept();
+          return this.code;
+        }
+        else if (name.equals("schedule")) {
+          this.schedule = new Timing();
+          return this.schedule;
+        }
+        else
+          return super.addChild(name);
+      }
+
       public OrderWhenComponent copy() {
         OrderWhenComponent dst = new OrderWhenComponent();
         copyValues(dst);
@@ -158,6 +177,11 @@ public class Order extends DomainResource {
         return super.isEmpty() && (code == null || code.isEmpty()) && (schedule == null || schedule.isEmpty())
           ;
       }
+
+  public String fhirType() {
+    return "Order.when";
+
+  }
 
   }
 
@@ -462,26 +486,26 @@ public class Order extends DomainResource {
     /**
      * @return {@link #reason} (Text - why the order was made.)
      */
-    public CodeableConcept getReasonCodeableConcept() throws Exception { 
+    public CodeableConcept getReasonCodeableConcept() throws FHIRException { 
       if (!(this.reason instanceof CodeableConcept))
-        throw new Exception("Type mismatch: the type CodeableConcept was expected, but "+this.reason.getClass().getName()+" was encountered");
+        throw new FHIRException("Type mismatch: the type CodeableConcept was expected, but "+this.reason.getClass().getName()+" was encountered");
       return (CodeableConcept) this.reason;
     }
 
-    public boolean hasReasonCodeableConcept() throws Exception { 
+    public boolean hasReasonCodeableConcept() { 
       return this.reason instanceof CodeableConcept;
     }
 
     /**
      * @return {@link #reason} (Text - why the order was made.)
      */
-    public Reference getReasonReference() throws Exception { 
+    public Reference getReasonReference() throws FHIRException { 
       if (!(this.reason instanceof Reference))
-        throw new Exception("Type mismatch: the type Reference was expected, but "+this.reason.getClass().getName()+" was encountered");
+        throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.reason.getClass().getName()+" was encountered");
       return (Reference) this.reason;
     }
 
-    public boolean hasReasonReference() throws Exception { 
+    public boolean hasReasonReference() { 
       return this.reason instanceof Reference;
     }
 
@@ -581,6 +605,72 @@ public class Order extends DomainResource {
         childrenList.add(new Property("when", "", "When order should be fulfilled.", 0, java.lang.Integer.MAX_VALUE, when));
         childrenList.add(new Property("detail", "Reference(Any)", "What action is being ordered.", 0, java.lang.Integer.MAX_VALUE, detail));
       }
+
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("identifier"))
+          this.getIdentifier().add(castToIdentifier(value));
+        else if (name.equals("date"))
+          this.date = castToDateTime(value); // DateTimeType
+        else if (name.equals("subject"))
+          this.subject = castToReference(value); // Reference
+        else if (name.equals("source"))
+          this.source = castToReference(value); // Reference
+        else if (name.equals("target"))
+          this.target = castToReference(value); // Reference
+        else if (name.equals("reason[x]"))
+          this.reason = (Type) value; // Type
+        else if (name.equals("when"))
+          this.when = (OrderWhenComponent) value; // OrderWhenComponent
+        else if (name.equals("detail"))
+          this.getDetail().add(castToReference(value));
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("identifier")) {
+          return addIdentifier();
+        }
+        else if (name.equals("date")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Order.date");
+        }
+        else if (name.equals("subject")) {
+          this.subject = new Reference();
+          return this.subject;
+        }
+        else if (name.equals("source")) {
+          this.source = new Reference();
+          return this.source;
+        }
+        else if (name.equals("target")) {
+          this.target = new Reference();
+          return this.target;
+        }
+        else if (name.equals("reasonCodeableConcept")) {
+          this.reason = new CodeableConcept();
+          return this.reason;
+        }
+        else if (name.equals("reasonReference")) {
+          this.reason = new Reference();
+          return this.reason;
+        }
+        else if (name.equals("when")) {
+          this.when = new OrderWhenComponent();
+          return this.when;
+        }
+        else if (name.equals("detail")) {
+          return addDetail();
+        }
+        else
+          return super.addChild(name);
+      }
+
+  public String fhirType() {
+    return "Order";
+
+  }
 
       public Order copy() {
         Order dst = new Order();

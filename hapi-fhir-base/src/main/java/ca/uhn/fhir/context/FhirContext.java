@@ -27,28 +27,19 @@ import java.util.*;
 import java.util.Map.Entry;
 
 import org.apache.commons.lang3.Validate;
-import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IBaseBundle;
-import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.*;
 
+import ca.uhn.fhir.context.api.AddProfileTagEnum;
 import ca.uhn.fhir.context.support.IContextValidationSupport;
 import ca.uhn.fhir.fluentpath.IFluentPath;
 import ca.uhn.fhir.i18n.HapiLocalizer;
-import ca.uhn.fhir.model.api.IElement;
-import ca.uhn.fhir.model.api.IFhirVersion;
-import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.api.*;
 import ca.uhn.fhir.model.view.ViewGenerator;
 import ca.uhn.fhir.narrative.INarrativeGenerator;
 import ca.uhn.fhir.parser.*;
-import ca.uhn.fhir.rest.client.IGenericClient;
-import ca.uhn.fhir.rest.client.IRestfulClientFactory;
-import ca.uhn.fhir.rest.client.apache.ApacheRestfulClientFactory;
-import ca.uhn.fhir.rest.client.api.IBasicClient;
-import ca.uhn.fhir.rest.client.api.IRestfulClient;
-import ca.uhn.fhir.rest.server.AddProfileTagEnum;
-import ca.uhn.fhir.rest.server.IVersionSpecificBundleFactory;
-import ca.uhn.fhir.util.FhirTerser;
-import ca.uhn.fhir.util.VersionUtil;
+import ca.uhn.fhir.rest.api.IVersionSpecificBundleFactory;
+import ca.uhn.fhir.rest.client.api.*;
+import ca.uhn.fhir.util.*;
 import ca.uhn.fhir.validation.FhirValidator;
 
 /**
@@ -102,7 +93,7 @@ public class FhirContext {
 
 	/**
 	 * @deprecated It is recommended that you use one of the static initializer methods instead
-	 *             of this method, e.g. {@link #forDstu2()} or {@link #forDstu3()}
+	 *             of this method, e.g. {@link #forDstu2()} or {@link #forDstu3()} or {@link #forR4()}
 	 */
 	@Deprecated
 	public FhirContext() {
@@ -111,7 +102,7 @@ public class FhirContext {
 
 	/**
 	 * @deprecated It is recommended that you use one of the static initializer methods instead
-	 *             of this method, e.g. {@link #forDstu2()} or {@link #forDstu3()}
+	 *             of this method, e.g. {@link #forDstu2()} or {@link #forDstu3()} or {@link #forR4()}
 	 */
 	@Deprecated
 	public FhirContext(Class<? extends IBaseResource> theResourceType) {
@@ -120,7 +111,7 @@ public class FhirContext {
 
 	/**
 	 * @deprecated It is recommended that you use one of the static initializer methods instead
-	 *             of this method, e.g. {@link #forDstu2()} or {@link #forDstu3()}
+	 *             of this method, e.g. {@link #forDstu2()} or {@link #forDstu3()} or {@link #forR4()}
 	 */
 	@Deprecated
 	public FhirContext(Class<?>... theResourceTypes) {
@@ -129,7 +120,7 @@ public class FhirContext {
 
 	/**
 	 * @deprecated It is recommended that you use one of the static initializer methods instead
-	 *             of this method, e.g. {@link #forDstu2()} or {@link #forDstu3()}
+	 *             of this method, e.g. {@link #forDstu2()} or {@link #forDstu3()} or {@link #forR4()}
 	 */
 	@Deprecated
 	public FhirContext(Collection<Class<? extends IBaseResource>> theResourceTypes) {
@@ -138,7 +129,7 @@ public class FhirContext {
 
 	/**
 	 * In most cases it is recommended that you use one of the static initializer methods instead
-	 * of this method, e.g. {@link #forDstu2()} or {@link #forDstu3()}, but
+	 * of this method, e.g. {@link #forDstu2()} or {@link #forDstu3()} or {@link #forR4()}, but
 	 * this method can also be used if you wish to supply the version programmatically.
 	 */
 	public FhirContext(FhirVersionEnum theVersion) {
@@ -153,8 +144,6 @@ public class FhirContext {
 				throw new IllegalStateException(getLocalizer().getMessage(FhirContext.class, "noStructuresForSpecifiedVersion", theVersion.name()));
 			}
 			myVersion = theVersion.getVersionImplementation();
-		} else if (FhirVersionEnum.DSTU1.isPresentOnClasspath()) {
-			myVersion = FhirVersionEnum.DSTU1.getVersionImplementation();
 		} else if (FhirVersionEnum.DSTU2.isPresentOnClasspath()) {
 			myVersion = FhirVersionEnum.DSTU2.getVersionImplementation();
 		} else if (FhirVersionEnum.DSTU2_HL7ORG.isPresentOnClasspath()) {
@@ -426,7 +415,11 @@ public class FhirContext {
 	 */
 	public IRestfulClientFactory getRestfulClientFactory() {
 		if (myRestfulClientFactory == null) {
-			myRestfulClientFactory = new ApacheRestfulClientFactory(this);
+			try {
+				myRestfulClientFactory = (IRestfulClientFactory) ReflectionUtil.newInstance(Class.forName("ca.uhn.fhir.rest.client.apache.ApacheRestfulClientFactory"), FhirContext.class, this);
+			} catch (ClassNotFoundException e) {
+				throw new ConfigurationException("hapi-fhir-client does not appear to be on the classpath");
+			}
 		}
 		return myRestfulClientFactory;
 	}
@@ -466,10 +459,6 @@ public class FhirContext {
 		return !myDefaultTypeForProfile.isEmpty();
 	}
 
-	/**
-	 * This method should be considered experimental and will likely change in future releases
-	 * of HAPI. Use with caution!
-	 */
 	public IVersionSpecificBundleFactory newBundleFactory() {
 		return myVersion.newBundleFactory(this);
 	}
@@ -832,7 +821,7 @@ public class FhirContext {
 	public void setValidationSupport(IContextValidationSupport<?, ?, ?, ?, ?, ?> theValidationSupport) {
 		myValidationSupport = theValidationSupport;
 	}
-
+	
 	@SuppressWarnings({ "cast" })
 	private List<Class<? extends IElement>> toElementList(Collection<Class<? extends IBaseResource>> theResourceTypes) {
 		if (theResourceTypes == null) {
@@ -844,7 +833,7 @@ public class FhirContext {
 		}
 		return resTypes;
 	}
-	
+
 	private void validateInitialized() {
 		// See #610
 		if (!myInitialized) {
@@ -855,13 +844,6 @@ public class FhirContext {
 				}
 			}
 		}
-	}
-
-	/**
-	 * Creates and returns a new FhirContext with version {@link FhirVersionEnum#DSTU1 DSTU1}
-	 */
-	public static FhirContext forDstu1() {
-		return new FhirContext(FhirVersionEnum.DSTU1);
 	}
 
 	/**
@@ -894,6 +876,16 @@ public class FhirContext {
 	public static FhirContext forDstu3() {
 		return new FhirContext(FhirVersionEnum.DSTU3);
 	}
+
+	/**
+	 * Creates and returns a new FhirContext with version {@link FhirVersionEnum#DSTU3 DSTU3}
+	 * 
+	 * @since 3.0.0
+	 */
+	public static FhirContext forR4() {
+		return new FhirContext(FhirVersionEnum.R4);
+	}
+
 
 	private static Collection<Class<? extends IBaseResource>> toCollection(Class<? extends IBaseResource> theResourceType) {
 		ArrayList<Class<? extends IBaseResource>> retVal = new ArrayList<Class<? extends IBaseResource>>(1);

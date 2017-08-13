@@ -12,18 +12,13 @@ import java.io.StringReader;
 import java.nio.charset.Charset;
 
 import org.apache.commons.io.input.ReaderInputStream;
-import org.apache.http.Header;
-import org.apache.http.HttpResponse;
-import org.apache.http.ProtocolVersion;
+import org.apache.http.*;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicStatusLine;
 import org.hamcrest.core.StringContains;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.*;
 import org.mockito.ArgumentCaptor;
 import org.mockito.internal.stubbing.defaultanswers.ReturnsDeepStubs;
 
@@ -33,7 +28,9 @@ import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
-import ca.uhn.fhir.rest.server.Constants;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.server.exceptions.NotModifiedException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.util.TestUtil;
@@ -52,7 +49,6 @@ public class ETagClientDstu2Test {
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
-
 
 	@Before
 	public void before() {
@@ -98,7 +94,6 @@ public class ETagClientDstu2Test {
 		Header[] headers = new Header[] { 
 				new BasicHeader(Constants.HEADER_LAST_MODIFIED, "Wed, 15 Nov 1995 04:58:08 GMT"),
 				new BasicHeader(Constants.HEADER_CONTENT_LOCATION, "http://foo.com/Patient/123/_history/2333"),
-				new BasicHeader(Constants.HEADER_CATEGORY, "http://foo/tagdefinition.html; scheme=\"http://hl7.org/fhir/tag\"; label=\"Some tag\""),
 				new BasicHeader(Constants.HEADER_ETAG, "\"9999\"")
 				};
 		//@formatter:on
@@ -114,12 +109,6 @@ public class ETagClientDstu2Test {
 		lm.setTimeZoneZulu(true);
 		assertEquals("1995-11-15T04:58:08.000Z", lm.getValueAsString());
 
-		TagList tags = ResourceMetadataKeyEnum.TAG_LIST.get(response);
-		assertNotNull(tags);
-		assertEquals(1, tags.size());
-		assertEquals("http://foo/tagdefinition.html", tags.get(0).getTerm());
-		assertEquals("http://hl7.org/fhir/tag", tags.get(0).getScheme());
-		assertEquals("Some tag", tags.get(0).getLabel());
 	}
 
 	@Test
@@ -260,8 +249,10 @@ public class ETagClientDstu2Test {
 		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
-		Header[] headers = new Header[] { new BasicHeader(Constants.HEADER_LAST_MODIFIED, "Wed, 15 Nov 1995 04:58:08 GMT"), new BasicHeader(Constants.HEADER_CONTENT_LOCATION, "http://foo.com/Patient/123/_history/2333"),
-				new BasicHeader(Constants.HEADER_CATEGORY, "http://foo/tagdefinition.html; scheme=\"http://hl7.org/fhir/tag\"; label=\"Some tag\"") };
+		Header[] headers = new Header[] {
+				new BasicHeader(Constants.HEADER_LAST_MODIFIED, "Wed, 15 Nov 1995 04:58:08 GMT"),
+				new BasicHeader(Constants.HEADER_CONTENT_LOCATION, "http://foo.com/Patient/123/_history/2333"),
+		};
 		when(myHttpResponse.getAllHeaders()).thenReturn(headers);
 
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");

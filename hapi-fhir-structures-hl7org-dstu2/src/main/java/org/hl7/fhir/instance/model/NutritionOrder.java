@@ -29,19 +29,14 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Wed, Jul 13, 2016 05:32+1000 for FHIR v1.0.2
+import java.util.*;
 
+import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
-import org.hl7.fhir.instance.utilities.Utilities;
+import org.hl7.fhir.utilities.Utilities;
 
-import ca.uhn.fhir.model.api.annotation.Block;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
-import ca.uhn.fhir.model.api.annotation.ResourceDef;
-import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.*;
 /**
  * A request to supply a diet, formula feeding (enteral) or oral nutritional supplement to a patient/resident.
  */
@@ -85,7 +80,7 @@ public class NutritionOrder extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static NutritionOrderStatus fromCode(String codeString) throws Exception {
+        public static NutritionOrderStatus fromCode(String codeString) throws FHIRException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("proposed".equals(codeString))
@@ -104,7 +99,7 @@ public class NutritionOrder extends DomainResource {
           return COMPLETED;
         if ("cancelled".equals(codeString))
           return CANCELLED;
-        throw new Exception("Unknown NutritionOrderStatus code '"+codeString+"'");
+        throw new FHIRException("Unknown NutritionOrderStatus code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -182,6 +177,30 @@ public class NutritionOrder extends DomainResource {
         if ("cancelled".equals(codeString))
           return NutritionOrderStatus.CANCELLED;
         throw new IllegalArgumentException("Unknown NutritionOrderStatus code '"+codeString+"'");
+        }
+        public Enumeration<NutritionOrderStatus> fromType(Base code) throws FHIRException {
+          if (code == null || code.isEmpty())
+            return null;
+          String codeString = ((PrimitiveType) code).asStringValue();
+          if (codeString == null || "".equals(codeString))
+            return null;
+        if ("proposed".equals(codeString))
+          return new Enumeration<NutritionOrderStatus>(this, NutritionOrderStatus.PROPOSED);
+        if ("draft".equals(codeString))
+          return new Enumeration<NutritionOrderStatus>(this, NutritionOrderStatus.DRAFT);
+        if ("planned".equals(codeString))
+          return new Enumeration<NutritionOrderStatus>(this, NutritionOrderStatus.PLANNED);
+        if ("requested".equals(codeString))
+          return new Enumeration<NutritionOrderStatus>(this, NutritionOrderStatus.REQUESTED);
+        if ("active".equals(codeString))
+          return new Enumeration<NutritionOrderStatus>(this, NutritionOrderStatus.ACTIVE);
+        if ("on-hold".equals(codeString))
+          return new Enumeration<NutritionOrderStatus>(this, NutritionOrderStatus.ONHOLD);
+        if ("completed".equals(codeString))
+          return new Enumeration<NutritionOrderStatus>(this, NutritionOrderStatus.COMPLETED);
+        if ("cancelled".equals(codeString))
+          return new Enumeration<NutritionOrderStatus>(this, NutritionOrderStatus.CANCELLED);
+        throw new FHIRException("Unknown NutritionOrderStatus code '"+codeString+"'");
         }
     public String toCode(NutritionOrderStatus code) {
       if (code == NutritionOrderStatus.PROPOSED)
@@ -516,6 +535,48 @@ public class NutritionOrder extends DomainResource {
           childrenList.add(new Property("instruction", "string", "Free text or additional instructions or information pertaining to the oral diet.", 0, java.lang.Integer.MAX_VALUE, instruction));
         }
 
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("type"))
+          this.getType().add(castToCodeableConcept(value));
+        else if (name.equals("schedule"))
+          this.getSchedule().add(castToTiming(value));
+        else if (name.equals("nutrient"))
+          this.getNutrient().add((NutritionOrderOralDietNutrientComponent) value);
+        else if (name.equals("texture"))
+          this.getTexture().add((NutritionOrderOralDietTextureComponent) value);
+        else if (name.equals("fluidConsistencyType"))
+          this.getFluidConsistencyType().add(castToCodeableConcept(value));
+        else if (name.equals("instruction"))
+          this.instruction = castToString(value); // StringType
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("type")) {
+          return addType();
+        }
+        else if (name.equals("schedule")) {
+          return addSchedule();
+        }
+        else if (name.equals("nutrient")) {
+          return addNutrient();
+        }
+        else if (name.equals("texture")) {
+          return addTexture();
+        }
+        else if (name.equals("fluidConsistencyType")) {
+          return addFluidConsistencyType();
+        }
+        else if (name.equals("instruction")) {
+          throw new FHIRException("Cannot call addChild on a primitive type NutritionOrder.instruction");
+        }
+        else
+          return super.addChild(name);
+      }
+
       public NutritionOrderOralDietComponent copy() {
         NutritionOrderOralDietComponent dst = new NutritionOrderOralDietComponent();
         copyValues(dst);
@@ -575,6 +636,11 @@ public class NutritionOrder extends DomainResource {
            && (nutrient == null || nutrient.isEmpty()) && (texture == null || texture.isEmpty()) && (fluidConsistencyType == null || fluidConsistencyType.isEmpty())
            && (instruction == null || instruction.isEmpty());
       }
+
+  public String fhirType() {
+    return "NutritionOrder.oralDiet";
+
+  }
 
   }
 
@@ -657,6 +723,30 @@ public class NutritionOrder extends DomainResource {
           childrenList.add(new Property("amount", "SimpleQuantity", "The quantity of the specified nutrient to include in diet.", 0, java.lang.Integer.MAX_VALUE, amount));
         }
 
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("modifier"))
+          this.modifier = castToCodeableConcept(value); // CodeableConcept
+        else if (name.equals("amount"))
+          this.amount = castToSimpleQuantity(value); // SimpleQuantity
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("modifier")) {
+          this.modifier = new CodeableConcept();
+          return this.modifier;
+        }
+        else if (name.equals("amount")) {
+          this.amount = new SimpleQuantity();
+          return this.amount;
+        }
+        else
+          return super.addChild(name);
+      }
+
       public NutritionOrderOralDietNutrientComponent copy() {
         NutritionOrderOralDietNutrientComponent dst = new NutritionOrderOralDietNutrientComponent();
         copyValues(dst);
@@ -689,6 +779,11 @@ public class NutritionOrder extends DomainResource {
         return super.isEmpty() && (modifier == null || modifier.isEmpty()) && (amount == null || amount.isEmpty())
           ;
       }
+
+  public String fhirType() {
+    return "NutritionOrder.oralDiet.nutrient";
+
+  }
 
   }
 
@@ -771,6 +866,30 @@ public class NutritionOrder extends DomainResource {
           childrenList.add(new Property("foodType", "CodeableConcept", "The food type(s) (e.g. meats, all foods)  that the texture modification applies to.  This could be all foods types.", 0, java.lang.Integer.MAX_VALUE, foodType));
         }
 
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("modifier"))
+          this.modifier = castToCodeableConcept(value); // CodeableConcept
+        else if (name.equals("foodType"))
+          this.foodType = castToCodeableConcept(value); // CodeableConcept
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("modifier")) {
+          this.modifier = new CodeableConcept();
+          return this.modifier;
+        }
+        else if (name.equals("foodType")) {
+          this.foodType = new CodeableConcept();
+          return this.foodType;
+        }
+        else
+          return super.addChild(name);
+      }
+
       public NutritionOrderOralDietTextureComponent copy() {
         NutritionOrderOralDietTextureComponent dst = new NutritionOrderOralDietTextureComponent();
         copyValues(dst);
@@ -803,6 +922,11 @@ public class NutritionOrder extends DomainResource {
         return super.isEmpty() && (modifier == null || modifier.isEmpty()) && (foodType == null || foodType.isEmpty())
           ;
       }
+
+  public String fhirType() {
+    return "NutritionOrder.oralDiet.texture";
+
+  }
 
   }
 
@@ -1047,6 +1171,45 @@ public class NutritionOrder extends DomainResource {
           childrenList.add(new Property("instruction", "string", "Free text or additional instructions or information pertaining to the oral supplement.", 0, java.lang.Integer.MAX_VALUE, instruction));
         }
 
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("type"))
+          this.type = castToCodeableConcept(value); // CodeableConcept
+        else if (name.equals("productName"))
+          this.productName = castToString(value); // StringType
+        else if (name.equals("schedule"))
+          this.getSchedule().add(castToTiming(value));
+        else if (name.equals("quantity"))
+          this.quantity = castToSimpleQuantity(value); // SimpleQuantity
+        else if (name.equals("instruction"))
+          this.instruction = castToString(value); // StringType
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("type")) {
+          this.type = new CodeableConcept();
+          return this.type;
+        }
+        else if (name.equals("productName")) {
+          throw new FHIRException("Cannot call addChild on a primitive type NutritionOrder.productName");
+        }
+        else if (name.equals("schedule")) {
+          return addSchedule();
+        }
+        else if (name.equals("quantity")) {
+          this.quantity = new SimpleQuantity();
+          return this.quantity;
+        }
+        else if (name.equals("instruction")) {
+          throw new FHIRException("Cannot call addChild on a primitive type NutritionOrder.instruction");
+        }
+        else
+          return super.addChild(name);
+      }
+
       public NutritionOrderSupplementComponent copy() {
         NutritionOrderSupplementComponent dst = new NutritionOrderSupplementComponent();
         copyValues(dst);
@@ -1089,6 +1252,11 @@ public class NutritionOrder extends DomainResource {
            && (schedule == null || schedule.isEmpty()) && (quantity == null || quantity.isEmpty()) && (instruction == null || instruction.isEmpty())
           ;
       }
+
+  public String fhirType() {
+    return "NutritionOrder.supplement";
+
+  }
 
   }
 
@@ -1486,6 +1654,68 @@ public class NutritionOrder extends DomainResource {
           childrenList.add(new Property("administrationInstruction", "string", "Free text formula administration, feeding instructions or additional instructions or information.", 0, java.lang.Integer.MAX_VALUE, administrationInstruction));
         }
 
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("baseFormulaType"))
+          this.baseFormulaType = castToCodeableConcept(value); // CodeableConcept
+        else if (name.equals("baseFormulaProductName"))
+          this.baseFormulaProductName = castToString(value); // StringType
+        else if (name.equals("additiveType"))
+          this.additiveType = castToCodeableConcept(value); // CodeableConcept
+        else if (name.equals("additiveProductName"))
+          this.additiveProductName = castToString(value); // StringType
+        else if (name.equals("caloricDensity"))
+          this.caloricDensity = castToSimpleQuantity(value); // SimpleQuantity
+        else if (name.equals("routeofAdministration"))
+          this.routeofAdministration = castToCodeableConcept(value); // CodeableConcept
+        else if (name.equals("administration"))
+          this.getAdministration().add((NutritionOrderEnteralFormulaAdministrationComponent) value);
+        else if (name.equals("maxVolumeToDeliver"))
+          this.maxVolumeToDeliver = castToSimpleQuantity(value); // SimpleQuantity
+        else if (name.equals("administrationInstruction"))
+          this.administrationInstruction = castToString(value); // StringType
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("baseFormulaType")) {
+          this.baseFormulaType = new CodeableConcept();
+          return this.baseFormulaType;
+        }
+        else if (name.equals("baseFormulaProductName")) {
+          throw new FHIRException("Cannot call addChild on a primitive type NutritionOrder.baseFormulaProductName");
+        }
+        else if (name.equals("additiveType")) {
+          this.additiveType = new CodeableConcept();
+          return this.additiveType;
+        }
+        else if (name.equals("additiveProductName")) {
+          throw new FHIRException("Cannot call addChild on a primitive type NutritionOrder.additiveProductName");
+        }
+        else if (name.equals("caloricDensity")) {
+          this.caloricDensity = new SimpleQuantity();
+          return this.caloricDensity;
+        }
+        else if (name.equals("routeofAdministration")) {
+          this.routeofAdministration = new CodeableConcept();
+          return this.routeofAdministration;
+        }
+        else if (name.equals("administration")) {
+          return addAdministration();
+        }
+        else if (name.equals("maxVolumeToDeliver")) {
+          this.maxVolumeToDeliver = new SimpleQuantity();
+          return this.maxVolumeToDeliver;
+        }
+        else if (name.equals("administrationInstruction")) {
+          throw new FHIRException("Cannot call addChild on a primitive type NutritionOrder.administrationInstruction");
+        }
+        else
+          return super.addChild(name);
+      }
+
       public NutritionOrderEnteralFormulaComponent copy() {
         NutritionOrderEnteralFormulaComponent dst = new NutritionOrderEnteralFormulaComponent();
         copyValues(dst);
@@ -1537,6 +1767,11 @@ public class NutritionOrder extends DomainResource {
            && (administration == null || administration.isEmpty()) && (maxVolumeToDeliver == null || maxVolumeToDeliver.isEmpty())
            && (administrationInstruction == null || administrationInstruction.isEmpty());
       }
+
+  public String fhirType() {
+    return "NutritionOrder.enteralFormula";
+
+  }
 
   }
 
@@ -1630,26 +1865,26 @@ public class NutritionOrder extends DomainResource {
         /**
          * @return {@link #rate} (The rate of administration of formula via a feeding pump, e.g. 60 mL per hour, according to the specified schedule.)
          */
-        public SimpleQuantity getRateSimpleQuantity() throws Exception { 
+        public SimpleQuantity getRateSimpleQuantity() throws FHIRException { 
           if (!(this.rate instanceof SimpleQuantity))
-            throw new Exception("Type mismatch: the type SimpleQuantity was expected, but "+this.rate.getClass().getName()+" was encountered");
+            throw new FHIRException("Type mismatch: the type SimpleQuantity was expected, but "+this.rate.getClass().getName()+" was encountered");
           return (SimpleQuantity) this.rate;
         }
 
-        public boolean hasRateSimpleQuantity() throws Exception { 
+        public boolean hasRateSimpleQuantity() { 
           return this.rate instanceof SimpleQuantity;
         }
 
         /**
          * @return {@link #rate} (The rate of administration of formula via a feeding pump, e.g. 60 mL per hour, according to the specified schedule.)
          */
-        public Ratio getRateRatio() throws Exception { 
+        public Ratio getRateRatio() throws FHIRException { 
           if (!(this.rate instanceof Ratio))
-            throw new Exception("Type mismatch: the type Ratio was expected, but "+this.rate.getClass().getName()+" was encountered");
+            throw new FHIRException("Type mismatch: the type Ratio was expected, but "+this.rate.getClass().getName()+" was encountered");
           return (Ratio) this.rate;
         }
 
-        public boolean hasRateRatio() throws Exception { 
+        public boolean hasRateRatio() { 
           return this.rate instanceof Ratio;
         }
 
@@ -1671,6 +1906,40 @@ public class NutritionOrder extends DomainResource {
           childrenList.add(new Property("quantity", "SimpleQuantity", "The volume of formula to provide to the patient per the specified administration schedule.", 0, java.lang.Integer.MAX_VALUE, quantity));
           childrenList.add(new Property("rate[x]", "SimpleQuantity|Ratio", "The rate of administration of formula via a feeding pump, e.g. 60 mL per hour, according to the specified schedule.", 0, java.lang.Integer.MAX_VALUE, rate));
         }
+
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("schedule"))
+          this.schedule = castToTiming(value); // Timing
+        else if (name.equals("quantity"))
+          this.quantity = castToSimpleQuantity(value); // SimpleQuantity
+        else if (name.equals("rate[x]"))
+          this.rate = (Type) value; // Type
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("schedule")) {
+          this.schedule = new Timing();
+          return this.schedule;
+        }
+        else if (name.equals("quantity")) {
+          this.quantity = new SimpleQuantity();
+          return this.quantity;
+        }
+        else if (name.equals("rateSimpleQuantity")) {
+          this.rate = new SimpleQuantity();
+          return this.rate;
+        }
+        else if (name.equals("rateRatio")) {
+          this.rate = new Ratio();
+          return this.rate;
+        }
+        else
+          return super.addChild(name);
+      }
 
       public NutritionOrderEnteralFormulaAdministrationComponent copy() {
         NutritionOrderEnteralFormulaAdministrationComponent dst = new NutritionOrderEnteralFormulaAdministrationComponent();
@@ -1706,6 +1975,11 @@ public class NutritionOrder extends DomainResource {
         return super.isEmpty() && (schedule == null || schedule.isEmpty()) && (quantity == null || quantity.isEmpty())
            && (rate == null || rate.isEmpty());
       }
+
+  public String fhirType() {
+    return "NutritionOrder.enteralFormula.administration";
+
+  }
 
   }
 
@@ -2341,6 +2615,88 @@ public class NutritionOrder extends DomainResource {
         childrenList.add(new Property("supplement", "", "Oral nutritional products given in order to add further nutritional value to the patient's diet.", 0, java.lang.Integer.MAX_VALUE, supplement));
         childrenList.add(new Property("enteralFormula", "", "Feeding provided through the gastrointestinal tract via a tube, catheter, or stoma that delivers nutrition distal to the oral cavity.", 0, java.lang.Integer.MAX_VALUE, enteralFormula));
       }
+
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("patient"))
+          this.patient = castToReference(value); // Reference
+        else if (name.equals("orderer"))
+          this.orderer = castToReference(value); // Reference
+        else if (name.equals("identifier"))
+          this.getIdentifier().add(castToIdentifier(value));
+        else if (name.equals("encounter"))
+          this.encounter = castToReference(value); // Reference
+        else if (name.equals("dateTime"))
+          this.dateTime = castToDateTime(value); // DateTimeType
+        else if (name.equals("status"))
+          this.status = new NutritionOrderStatusEnumFactory().fromType(value); // Enumeration<NutritionOrderStatus>
+        else if (name.equals("allergyIntolerance"))
+          this.getAllergyIntolerance().add(castToReference(value));
+        else if (name.equals("foodPreferenceModifier"))
+          this.getFoodPreferenceModifier().add(castToCodeableConcept(value));
+        else if (name.equals("excludeFoodModifier"))
+          this.getExcludeFoodModifier().add(castToCodeableConcept(value));
+        else if (name.equals("oralDiet"))
+          this.oralDiet = (NutritionOrderOralDietComponent) value; // NutritionOrderOralDietComponent
+        else if (name.equals("supplement"))
+          this.getSupplement().add((NutritionOrderSupplementComponent) value);
+        else if (name.equals("enteralFormula"))
+          this.enteralFormula = (NutritionOrderEnteralFormulaComponent) value; // NutritionOrderEnteralFormulaComponent
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("patient")) {
+          this.patient = new Reference();
+          return this.patient;
+        }
+        else if (name.equals("orderer")) {
+          this.orderer = new Reference();
+          return this.orderer;
+        }
+        else if (name.equals("identifier")) {
+          return addIdentifier();
+        }
+        else if (name.equals("encounter")) {
+          this.encounter = new Reference();
+          return this.encounter;
+        }
+        else if (name.equals("dateTime")) {
+          throw new FHIRException("Cannot call addChild on a primitive type NutritionOrder.dateTime");
+        }
+        else if (name.equals("status")) {
+          throw new FHIRException("Cannot call addChild on a primitive type NutritionOrder.status");
+        }
+        else if (name.equals("allergyIntolerance")) {
+          return addAllergyIntolerance();
+        }
+        else if (name.equals("foodPreferenceModifier")) {
+          return addFoodPreferenceModifier();
+        }
+        else if (name.equals("excludeFoodModifier")) {
+          return addExcludeFoodModifier();
+        }
+        else if (name.equals("oralDiet")) {
+          this.oralDiet = new NutritionOrderOralDietComponent();
+          return this.oralDiet;
+        }
+        else if (name.equals("supplement")) {
+          return addSupplement();
+        }
+        else if (name.equals("enteralFormula")) {
+          this.enteralFormula = new NutritionOrderEnteralFormulaComponent();
+          return this.enteralFormula;
+        }
+        else
+          return super.addChild(name);
+      }
+
+  public String fhirType() {
+    return "NutritionOrder";
+
+  }
 
       public NutritionOrder copy() {
         NutritionOrder dst = new NutritionOrder();

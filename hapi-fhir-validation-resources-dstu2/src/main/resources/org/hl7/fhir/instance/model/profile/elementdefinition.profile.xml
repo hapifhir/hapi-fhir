@@ -10,7 +10,7 @@
    <value value="http://hl7.org/fhir"/>
   </telecom>
  </contact>
- <date value="2015-11-11T10:54:01-05:00"/>
+ <date value="2017-07-27T08:19:05-04:00"/>
  <description value="Base StructureDefinition for ElementDefinition Type"/>
  <fhirVersion value="1.0.2"/>
  <mapping>
@@ -52,81 +52,54 @@
     <code value="Element"/>
    </type>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="min.empty() or max.empty() or (max = &quot;*&quot;) or (min &lt; max)"/>
-    </extension>
     <key value="eld-2"/>
     <severity value="error"/>
     <human value="Min &lt;= Max"/>
     <xpath value="not(exists(f:min)) or not(exists(f:max)) or (not(f:max/@value) and not(f:min/@value)) or (f:max/@value = '*') or (number(f:max/@value) >= f:min/@value)"/>
    </constraint>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="nameReference.empty() or fixed[x].empty()"/>
-    </extension>
     <key value="eld-5"/>
     <severity value="error"/>
     <human value="Either a namereference or a fixed value (but not both) is permitted"/>
     <xpath value="not(exists(f:nameReference) and exists(f:*[starts-with(local-name(.), 'value')]))"/>
    </constraint>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="pattern[x].empty() or (typecount = 1)"/>
-    </extension>
     <key value="eld-7"/>
     <severity value="error"/>
     <human value="Pattern may only be specified if there is one type"/>
     <xpath value="not(exists(f:*[starts-with(local-name(.), 'pattern')])) or (count(f:type)=1)"/>
    </constraint>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="fixed[x].empty() or (type.count = 1)"/>
-    </extension>
     <key value="eld-6"/>
     <severity value="error"/>
     <human value="Fixed value may only be specified if there is one type"/>
     <xpath value="not(exists(f:*[starts-with(local-name(.), 'fixed')])) or (count(f:type)=1)"/>
    </constraint>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="binding.empty() or type.code.empty() or type.any((code = 'code') or (code = 'Coding') or (code='CodeableConcept') or (code = 'Quantity') or (code = 'Extension') or (code = 'string') or (code = 'uri'))"/>
-    </extension>
     <key value="eld-11"/>
     <severity value="error"/>
     <human value="Binding can only be present for coded elements, string, and uri"/>
     <xpath value="not(exists(f:binding)) or (count(f:type/f:code) = 0) or  f:type/f:code/@value=('code','Coding','CodeableConcept','Quantity','Extension', 'string', 'uri')"/>
    </constraint>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="pattern[x].empty() or fixed[x].empty()"/>
-    </extension>
     <key value="eld-8"/>
     <severity value="error"/>
     <human value="Pattern and value are mutually exclusive"/>
     <xpath value="not(exists(f:*[starts-with(local-name(.), 'pattern')])) or not(exists(f:*[starts-with(local-name(.), 'value')]))"/>
    </constraint>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="constraint.distinct(key)"/>
-    </extension>
     <key value="eld-14"/>
     <severity value="error"/>
     <human value="Constraints must be unique by key"/>
     <xpath value="count(f:constraint) = count(distinct-values(f:constraint/f:key/@value))"/>
    </constraint>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="type.distinct(code,profile)"/>
-    </extension>
     <key value="eld-13"/>
     <severity value="error"/>
     <human value="Types must be unique by the combination of code and profile"/>
     <xpath value="not(exists(for $type in f:type return $type/preceding-sibling::f:type[f:code/@value=$type/f:code/@value and f:profile/@value = $type/f:profile/@value]))"/>
    </constraint>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="default[x].empty() or meaningWhenMissing.empty()"/>
-    </extension>
     <key value="eld-15"/>
     <severity value="error"/>
     <human value="default value and meaningWhenMissing are mutually exclusive"/>
@@ -328,9 +301,6 @@
     <code value="Element"/>
    </type>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="discriminator or description"/>
-    </extension>
     <key value="eld-1"/>
     <severity value="error"/>
     <human value="If there are no discriminators, there must be a definition"/>
@@ -627,9 +597,6 @@
    <condition value="eld-3"/>
    <condition value="eld-2"/>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="max.empty() or (max = &quot;*&quot;) or (max.asInteger() >= 0)"/>
-    </extension>
     <key value="eld-3"/>
     <severity value="error"/>
     <human value="Max SHALL be a number or &quot;*&quot;"/>
@@ -775,9 +742,6 @@
    </type>
    <condition value="eld-13"/>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="aggregation.empty() or (code = &quot;Reference&quot;)"/>
-    </extension>
     <key value="eld-4"/>
     <severity value="error"/>
     <human value="Aggregation may only be specified if one of the allowed types for the element is a resource"/>
@@ -1859,9 +1823,6 @@
    </type>
    <condition value="eld-11"/>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="value[x] or description"/>
-    </extension>
     <key value="eld-10"/>
     <severity value="error"/>
     <human value="provide either a reference or a description (or both)"/>
@@ -1987,9 +1948,6 @@
    <condition value="eld-10"/>
    <condition value="eld-12"/>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="value.startsWith('http:') or value.startsWith('https')"/>
-    </extension>
     <key value="eld-12"/>
     <severity value="error"/>
     <human value="URI SHALL start with http:// or https://"/>
@@ -2138,81 +2096,54 @@
     <code value="Element"/>
    </type>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="min.empty() or max.empty() or (max = &quot;*&quot;) or (min &lt; max)"/>
-    </extension>
     <key value="eld-2"/>
     <severity value="error"/>
     <human value="Min &lt;= Max"/>
     <xpath value="not(exists(f:min)) or not(exists(f:max)) or (not(f:max/@value) and not(f:min/@value)) or (f:max/@value = '*') or (number(f:max/@value) >= f:min/@value)"/>
    </constraint>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="nameReference.empty() or fixed[x].empty()"/>
-    </extension>
     <key value="eld-5"/>
     <severity value="error"/>
     <human value="Either a namereference or a fixed value (but not both) is permitted"/>
     <xpath value="not(exists(f:nameReference) and exists(f:*[starts-with(local-name(.), 'value')]))"/>
    </constraint>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="pattern[x].empty() or (typecount = 1)"/>
-    </extension>
     <key value="eld-7"/>
     <severity value="error"/>
     <human value="Pattern may only be specified if there is one type"/>
     <xpath value="not(exists(f:*[starts-with(local-name(.), 'pattern')])) or (count(f:type)=1)"/>
    </constraint>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="fixed[x].empty() or (type.count = 1)"/>
-    </extension>
     <key value="eld-6"/>
     <severity value="error"/>
     <human value="Fixed value may only be specified if there is one type"/>
     <xpath value="not(exists(f:*[starts-with(local-name(.), 'fixed')])) or (count(f:type)=1)"/>
    </constraint>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="binding.empty() or type.code.empty() or type.any((code = 'code') or (code = 'Coding') or (code='CodeableConcept') or (code = 'Quantity') or (code = 'Extension') or (code = 'string') or (code = 'uri'))"/>
-    </extension>
     <key value="eld-11"/>
     <severity value="error"/>
     <human value="Binding can only be present for coded elements, string, and uri"/>
     <xpath value="not(exists(f:binding)) or (count(f:type/f:code) = 0) or  f:type/f:code/@value=('code','Coding','CodeableConcept','Quantity','Extension', 'string', 'uri')"/>
    </constraint>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="pattern[x].empty() or fixed[x].empty()"/>
-    </extension>
     <key value="eld-8"/>
     <severity value="error"/>
     <human value="Pattern and value are mutually exclusive"/>
     <xpath value="not(exists(f:*[starts-with(local-name(.), 'pattern')])) or not(exists(f:*[starts-with(local-name(.), 'value')]))"/>
    </constraint>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="constraint.distinct(key)"/>
-    </extension>
     <key value="eld-14"/>
     <severity value="error"/>
     <human value="Constraints must be unique by key"/>
     <xpath value="count(f:constraint) = count(distinct-values(f:constraint/f:key/@value))"/>
    </constraint>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="type.distinct(code,profile)"/>
-    </extension>
     <key value="eld-13"/>
     <severity value="error"/>
     <human value="Types must be unique by the combination of code and profile"/>
     <xpath value="not(exists(for $type in f:type return $type/preceding-sibling::f:type[f:code/@value=$type/f:code/@value and f:profile/@value = $type/f:profile/@value]))"/>
    </constraint>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="default[x].empty() or meaningWhenMissing.empty()"/>
-    </extension>
     <key value="eld-15"/>
     <severity value="error"/>
     <human value="default value and meaningWhenMissing are mutually exclusive"/>
@@ -2382,9 +2313,6 @@
     <code value="Element"/>
    </type>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="discriminator or description"/>
-    </extension>
     <key value="eld-1"/>
     <severity value="error"/>
     <human value="If there are no discriminators, there must be a definition"/>
@@ -2649,9 +2577,6 @@
    <condition value="eld-3"/>
    <condition value="eld-2"/>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="max.empty() or (max = &quot;*&quot;) or (max.asInteger() >= 0)"/>
-    </extension>
     <key value="eld-3"/>
     <severity value="error"/>
     <human value="Max SHALL be a number or &quot;*&quot;"/>
@@ -2765,9 +2690,6 @@
    </type>
    <condition value="eld-13"/>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="aggregation.empty() or (code = &quot;Reference&quot;)"/>
-    </extension>
     <key value="eld-4"/>
     <severity value="error"/>
     <human value="Aggregation may only be specified if one of the allowed types for the element is a resource"/>
@@ -3785,9 +3707,6 @@
    </type>
    <condition value="eld-11"/>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="value[x] or description"/>
-    </extension>
     <key value="eld-10"/>
     <severity value="error"/>
     <human value="provide either a reference or a description (or both)"/>
@@ -3881,9 +3800,6 @@
    <condition value="eld-10"/>
    <condition value="eld-12"/>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="value.startsWith('http:') or value.startsWith('https')"/>
-    </extension>
     <key value="eld-12"/>
     <severity value="error"/>
     <human value="URI SHALL start with http:// or https://"/>

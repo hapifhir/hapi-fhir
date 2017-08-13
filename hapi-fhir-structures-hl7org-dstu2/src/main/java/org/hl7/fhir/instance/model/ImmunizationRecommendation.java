@@ -29,19 +29,14 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Wed, Jul 13, 2016 05:32+1000 for FHIR v1.0.2
+import java.util.*;
 
+import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
-import org.hl7.fhir.instance.utilities.Utilities;
+import org.hl7.fhir.utilities.Utilities;
 
-import ca.uhn.fhir.model.api.annotation.Block;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
-import ca.uhn.fhir.model.api.annotation.ResourceDef;
-import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.*;
 /**
  * A patient's point-in-time immunization and recommendation (i.e. forecasting a patient's immunization eligibility according to a published schedule) with optional supporting justification.
  */
@@ -459,6 +454,61 @@ public class ImmunizationRecommendation extends DomainResource {
           childrenList.add(new Property("supportingPatientInformation", "Reference(Observation|AllergyIntolerance)", "Patient Information that supports the status and recommendation.  This includes patient observations, adverse reactions and allergy/intolerance information.", 0, java.lang.Integer.MAX_VALUE, supportingPatientInformation));
         }
 
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("date"))
+          this.date = castToDateTime(value); // DateTimeType
+        else if (name.equals("vaccineCode"))
+          this.vaccineCode = castToCodeableConcept(value); // CodeableConcept
+        else if (name.equals("doseNumber"))
+          this.doseNumber = castToPositiveInt(value); // PositiveIntType
+        else if (name.equals("forecastStatus"))
+          this.forecastStatus = castToCodeableConcept(value); // CodeableConcept
+        else if (name.equals("dateCriterion"))
+          this.getDateCriterion().add((ImmunizationRecommendationRecommendationDateCriterionComponent) value);
+        else if (name.equals("protocol"))
+          this.protocol = (ImmunizationRecommendationRecommendationProtocolComponent) value; // ImmunizationRecommendationRecommendationProtocolComponent
+        else if (name.equals("supportingImmunization"))
+          this.getSupportingImmunization().add(castToReference(value));
+        else if (name.equals("supportingPatientInformation"))
+          this.getSupportingPatientInformation().add(castToReference(value));
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("date")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ImmunizationRecommendation.date");
+        }
+        else if (name.equals("vaccineCode")) {
+          this.vaccineCode = new CodeableConcept();
+          return this.vaccineCode;
+        }
+        else if (name.equals("doseNumber")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ImmunizationRecommendation.doseNumber");
+        }
+        else if (name.equals("forecastStatus")) {
+          this.forecastStatus = new CodeableConcept();
+          return this.forecastStatus;
+        }
+        else if (name.equals("dateCriterion")) {
+          return addDateCriterion();
+        }
+        else if (name.equals("protocol")) {
+          this.protocol = new ImmunizationRecommendationRecommendationProtocolComponent();
+          return this.protocol;
+        }
+        else if (name.equals("supportingImmunization")) {
+          return addSupportingImmunization();
+        }
+        else if (name.equals("supportingPatientInformation")) {
+          return addSupportingPatientInformation();
+        }
+        else
+          return super.addChild(name);
+      }
+
       public ImmunizationRecommendationRecommendationComponent copy() {
         ImmunizationRecommendationRecommendationComponent dst = new ImmunizationRecommendationRecommendationComponent();
         copyValues(dst);
@@ -515,6 +565,11 @@ public class ImmunizationRecommendation extends DomainResource {
            && (supportingImmunization == null || supportingImmunization.isEmpty()) && (supportingPatientInformation == null || supportingPatientInformation.isEmpty())
           ;
       }
+
+  public String fhirType() {
+    return "ImmunizationRecommendation.recommendation";
+
+  }
 
   }
 
@@ -627,6 +682,29 @@ public class ImmunizationRecommendation extends DomainResource {
           childrenList.add(new Property("value", "dateTime", "The date whose meaning is specified by dateCriterion.code.", 0, java.lang.Integer.MAX_VALUE, value));
         }
 
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("code"))
+          this.code = castToCodeableConcept(value); // CodeableConcept
+        else if (name.equals("value"))
+          this.value = castToDateTime(value); // DateTimeType
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("code")) {
+          this.code = new CodeableConcept();
+          return this.code;
+        }
+        else if (name.equals("value")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ImmunizationRecommendation.value");
+        }
+        else
+          return super.addChild(name);
+      }
+
       public ImmunizationRecommendationRecommendationDateCriterionComponent copy() {
         ImmunizationRecommendationRecommendationDateCriterionComponent dst = new ImmunizationRecommendationRecommendationDateCriterionComponent();
         copyValues(dst);
@@ -659,6 +737,11 @@ public class ImmunizationRecommendation extends DomainResource {
         return super.isEmpty() && (code == null || code.isEmpty()) && (value == null || value.isEmpty())
           ;
       }
+
+  public String fhirType() {
+    return "ImmunizationRecommendation.recommendation.dateCriterion";
+
+  }
 
   }
 
@@ -901,6 +984,39 @@ public class ImmunizationRecommendation extends DomainResource {
           childrenList.add(new Property("series", "string", "One possible path to achieve presumed immunity against a disease - within the context of an authority.", 0, java.lang.Integer.MAX_VALUE, series));
         }
 
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("doseSequence"))
+          this.doseSequence = castToInteger(value); // IntegerType
+        else if (name.equals("description"))
+          this.description = castToString(value); // StringType
+        else if (name.equals("authority"))
+          this.authority = castToReference(value); // Reference
+        else if (name.equals("series"))
+          this.series = castToString(value); // StringType
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("doseSequence")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ImmunizationRecommendation.doseSequence");
+        }
+        else if (name.equals("description")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ImmunizationRecommendation.description");
+        }
+        else if (name.equals("authority")) {
+          this.authority = new Reference();
+          return this.authority;
+        }
+        else if (name.equals("series")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ImmunizationRecommendation.series");
+        }
+        else
+          return super.addChild(name);
+      }
+
       public ImmunizationRecommendationRecommendationProtocolComponent copy() {
         ImmunizationRecommendationRecommendationProtocolComponent dst = new ImmunizationRecommendationRecommendationProtocolComponent();
         copyValues(dst);
@@ -937,6 +1053,11 @@ public class ImmunizationRecommendation extends DomainResource {
         return super.isEmpty() && (doseSequence == null || doseSequence.isEmpty()) && (description == null || description.isEmpty())
            && (authority == null || authority.isEmpty()) && (series == null || series.isEmpty());
       }
+
+  public String fhirType() {
+    return "ImmunizationRecommendation.recommendation.protocol";
+
+  }
 
   }
 
@@ -1113,6 +1234,39 @@ public class ImmunizationRecommendation extends DomainResource {
         childrenList.add(new Property("patient", "Reference(Patient)", "The patient for whom the recommendations are for.", 0, java.lang.Integer.MAX_VALUE, patient));
         childrenList.add(new Property("recommendation", "", "Vaccine administration recommendations.", 0, java.lang.Integer.MAX_VALUE, recommendation));
       }
+
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("identifier"))
+          this.getIdentifier().add(castToIdentifier(value));
+        else if (name.equals("patient"))
+          this.patient = castToReference(value); // Reference
+        else if (name.equals("recommendation"))
+          this.getRecommendation().add((ImmunizationRecommendationRecommendationComponent) value);
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("identifier")) {
+          return addIdentifier();
+        }
+        else if (name.equals("patient")) {
+          this.patient = new Reference();
+          return this.patient;
+        }
+        else if (name.equals("recommendation")) {
+          return addRecommendation();
+        }
+        else
+          return super.addChild(name);
+      }
+
+  public String fhirType() {
+    return "ImmunizationRecommendation";
+
+  }
 
       public ImmunizationRecommendation copy() {
         ImmunizationRecommendation dst = new ImmunizationRecommendation();

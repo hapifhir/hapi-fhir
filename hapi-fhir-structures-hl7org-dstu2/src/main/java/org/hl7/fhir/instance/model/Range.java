@@ -29,14 +29,13 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
+// Generated on Wed, Jul 13, 2016 05:32+1000 for FHIR v1.0.2
 import java.util.List;
 
+import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.DatatypeDef;
-import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.*;
 /**
  * A set of ordered Quantities defined by a low and high limit.
  */
@@ -119,6 +118,35 @@ public class Range extends Type implements ICompositeType {
         childrenList.add(new Property("low", "SimpleQuantity", "The low limit. The boundary is inclusive.", 0, java.lang.Integer.MAX_VALUE, low));
         childrenList.add(new Property("high", "SimpleQuantity", "The high limit. The boundary is inclusive.", 0, java.lang.Integer.MAX_VALUE, high));
       }
+
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("low"))
+          this.low = castToSimpleQuantity(value); // SimpleQuantity
+        else if (name.equals("high"))
+          this.high = castToSimpleQuantity(value); // SimpleQuantity
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("low")) {
+          this.low = new SimpleQuantity();
+          return this.low;
+        }
+        else if (name.equals("high")) {
+          this.high = new SimpleQuantity();
+          return this.high;
+        }
+        else
+          return super.addChild(name);
+      }
+
+  public String fhirType() {
+    return "Range";
+
+  }
 
       public Range copy() {
         Range dst = new Range();

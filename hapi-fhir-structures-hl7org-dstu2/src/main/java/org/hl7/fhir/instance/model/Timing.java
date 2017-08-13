@@ -31,18 +31,14 @@ import java.math.BigDecimal;
   
 */
 
-// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Wed, Jul 13, 2016 05:32+1000 for FHIR v1.0.2
+import java.util.*;
 
+import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseDatatypeElement;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 
-import ca.uhn.fhir.model.api.annotation.Block;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.DatatypeDef;
-import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.*;
 /**
  * Specifies an event that may occur multiple times. Timing schedules are used to record when things are expected or requested to occur. The most common usage is in dosage instructions for medications. They are also used when planning care of various kinds.
  */
@@ -82,7 +78,7 @@ public class Timing extends Type implements ICompositeType {
          * added to help the parsers
          */
         NULL;
-        public static UnitsOfTime fromCode(String codeString) throws Exception {
+        public static UnitsOfTime fromCode(String codeString) throws FHIRException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("s".equals(codeString))
@@ -99,7 +95,7 @@ public class Timing extends Type implements ICompositeType {
           return MO;
         if ("a".equals(codeString))
           return A;
-        throw new Exception("Unknown UnitsOfTime code '"+codeString+"'");
+        throw new FHIRException("Unknown UnitsOfTime code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -171,6 +167,28 @@ public class Timing extends Type implements ICompositeType {
         if ("a".equals(codeString))
           return UnitsOfTime.A;
         throw new IllegalArgumentException("Unknown UnitsOfTime code '"+codeString+"'");
+        }
+        public Enumeration<UnitsOfTime> fromType(Base code) throws FHIRException {
+          if (code == null || code.isEmpty())
+            return null;
+          String codeString = ((PrimitiveType) code).asStringValue();
+          if (codeString == null || "".equals(codeString))
+            return null;
+        if ("s".equals(codeString))
+          return new Enumeration<UnitsOfTime>(this, UnitsOfTime.S);
+        if ("min".equals(codeString))
+          return new Enumeration<UnitsOfTime>(this, UnitsOfTime.MIN);
+        if ("h".equals(codeString))
+          return new Enumeration<UnitsOfTime>(this, UnitsOfTime.H);
+        if ("d".equals(codeString))
+          return new Enumeration<UnitsOfTime>(this, UnitsOfTime.D);
+        if ("wk".equals(codeString))
+          return new Enumeration<UnitsOfTime>(this, UnitsOfTime.WK);
+        if ("mo".equals(codeString))
+          return new Enumeration<UnitsOfTime>(this, UnitsOfTime.MO);
+        if ("a".equals(codeString))
+          return new Enumeration<UnitsOfTime>(this, UnitsOfTime.A);
+        throw new FHIRException("Unknown UnitsOfTime code '"+codeString+"'");
         }
     public String toCode(UnitsOfTime code) {
       if (code == UnitsOfTime.S)
@@ -252,7 +270,7 @@ public class Timing extends Type implements ICompositeType {
          * added to help the parsers
          */
         NULL;
-        public static EventTiming fromCode(String codeString) throws Exception {
+        public static EventTiming fromCode(String codeString) throws FHIRException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("HS".equals(codeString))
@@ -283,7 +301,7 @@ public class Timing extends Type implements ICompositeType {
           return PCD;
         if ("PCV".equals(codeString))
           return PCV;
-        throw new Exception("Unknown EventTiming code '"+codeString+"'");
+        throw new FHIRException("Unknown EventTiming code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -397,6 +415,42 @@ public class Timing extends Type implements ICompositeType {
         if ("PCV".equals(codeString))
           return EventTiming.PCV;
         throw new IllegalArgumentException("Unknown EventTiming code '"+codeString+"'");
+        }
+        public Enumeration<EventTiming> fromType(Base code) throws FHIRException {
+          if (code == null || code.isEmpty())
+            return null;
+          String codeString = ((PrimitiveType) code).asStringValue();
+          if (codeString == null || "".equals(codeString))
+            return null;
+        if ("HS".equals(codeString))
+          return new Enumeration<EventTiming>(this, EventTiming.HS);
+        if ("WAKE".equals(codeString))
+          return new Enumeration<EventTiming>(this, EventTiming.WAKE);
+        if ("C".equals(codeString))
+          return new Enumeration<EventTiming>(this, EventTiming.C);
+        if ("CM".equals(codeString))
+          return new Enumeration<EventTiming>(this, EventTiming.CM);
+        if ("CD".equals(codeString))
+          return new Enumeration<EventTiming>(this, EventTiming.CD);
+        if ("CV".equals(codeString))
+          return new Enumeration<EventTiming>(this, EventTiming.CV);
+        if ("AC".equals(codeString))
+          return new Enumeration<EventTiming>(this, EventTiming.AC);
+        if ("ACM".equals(codeString))
+          return new Enumeration<EventTiming>(this, EventTiming.ACM);
+        if ("ACD".equals(codeString))
+          return new Enumeration<EventTiming>(this, EventTiming.ACD);
+        if ("ACV".equals(codeString))
+          return new Enumeration<EventTiming>(this, EventTiming.ACV);
+        if ("PC".equals(codeString))
+          return new Enumeration<EventTiming>(this, EventTiming.PC);
+        if ("PCM".equals(codeString))
+          return new Enumeration<EventTiming>(this, EventTiming.PCM);
+        if ("PCD".equals(codeString))
+          return new Enumeration<EventTiming>(this, EventTiming.PCD);
+        if ("PCV".equals(codeString))
+          return new Enumeration<EventTiming>(this, EventTiming.PCV);
+        throw new FHIRException("Unknown EventTiming code '"+codeString+"'");
         }
     public String toCode(EventTiming code) {
       if (code == EventTiming.HS)
@@ -529,39 +583,39 @@ public class Timing extends Type implements ICompositeType {
         /**
          * @return {@link #bounds} (Either a duration for the length of the timing schedule, a range of possible length, or outer bounds for start and/or end limits of the timing schedule.)
          */
-        public Duration getBoundsDuration() throws Exception { 
+        public Duration getBoundsDuration() throws FHIRException { 
           if (!(this.bounds instanceof Duration))
-            throw new Exception("Type mismatch: the type Duration was expected, but "+this.bounds.getClass().getName()+" was encountered");
+            throw new FHIRException("Type mismatch: the type Duration was expected, but "+this.bounds.getClass().getName()+" was encountered");
           return (Duration) this.bounds;
         }
 
-        public boolean hasBoundsDuration() throws Exception { 
+        public boolean hasBoundsDuration() { 
           return this.bounds instanceof Duration;
         }
 
         /**
          * @return {@link #bounds} (Either a duration for the length of the timing schedule, a range of possible length, or outer bounds for start and/or end limits of the timing schedule.)
          */
-        public Range getBoundsRange() throws Exception { 
+        public Range getBoundsRange() throws FHIRException { 
           if (!(this.bounds instanceof Range))
-            throw new Exception("Type mismatch: the type Range was expected, but "+this.bounds.getClass().getName()+" was encountered");
+            throw new FHIRException("Type mismatch: the type Range was expected, but "+this.bounds.getClass().getName()+" was encountered");
           return (Range) this.bounds;
         }
 
-        public boolean hasBoundsRange() throws Exception { 
+        public boolean hasBoundsRange() { 
           return this.bounds instanceof Range;
         }
 
         /**
          * @return {@link #bounds} (Either a duration for the length of the timing schedule, a range of possible length, or outer bounds for start and/or end limits of the timing schedule.)
          */
-        public Period getBoundsPeriod() throws Exception { 
+        public Period getBoundsPeriod() throws FHIRException { 
           if (!(this.bounds instanceof Period))
-            throw new Exception("Type mismatch: the type Period was expected, but "+this.bounds.getClass().getName()+" was encountered");
+            throw new FHIRException("Type mismatch: the type Period was expected, but "+this.bounds.getClass().getName()+" was encountered");
           return (Period) this.bounds;
         }
 
-        public boolean hasBoundsPeriod() throws Exception { 
+        public boolean hasBoundsPeriod() { 
           return this.bounds instanceof Period;
         }
 
@@ -1070,6 +1124,82 @@ public class Timing extends Type implements ICompositeType {
           childrenList.add(new Property("when", "code", "A real world event that the occurrence of the event should be tied to.", 0, java.lang.Integer.MAX_VALUE, when));
         }
 
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("bounds[x]"))
+          this.bounds = (Type) value; // Type
+        else if (name.equals("count"))
+          this.count = castToInteger(value); // IntegerType
+        else if (name.equals("duration"))
+          this.duration = castToDecimal(value); // DecimalType
+        else if (name.equals("durationMax"))
+          this.durationMax = castToDecimal(value); // DecimalType
+        else if (name.equals("durationUnits"))
+          this.durationUnits = new UnitsOfTimeEnumFactory().fromType(value); // Enumeration<UnitsOfTime>
+        else if (name.equals("frequency"))
+          this.frequency = castToInteger(value); // IntegerType
+        else if (name.equals("frequencyMax"))
+          this.frequencyMax = castToInteger(value); // IntegerType
+        else if (name.equals("period"))
+          this.period = castToDecimal(value); // DecimalType
+        else if (name.equals("periodMax"))
+          this.periodMax = castToDecimal(value); // DecimalType
+        else if (name.equals("periodUnits"))
+          this.periodUnits = new UnitsOfTimeEnumFactory().fromType(value); // Enumeration<UnitsOfTime>
+        else if (name.equals("when"))
+          this.when = new EventTimingEnumFactory().fromType(value); // Enumeration<EventTiming>
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("boundsDuration")) {
+          this.bounds = new Duration();
+          return this.bounds;
+        }
+        else if (name.equals("boundsRange")) {
+          this.bounds = new Range();
+          return this.bounds;
+        }
+        else if (name.equals("boundsPeriod")) {
+          this.bounds = new Period();
+          return this.bounds;
+        }
+        else if (name.equals("count")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Timing.count");
+        }
+        else if (name.equals("duration")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Timing.duration");
+        }
+        else if (name.equals("durationMax")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Timing.durationMax");
+        }
+        else if (name.equals("durationUnits")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Timing.durationUnits");
+        }
+        else if (name.equals("frequency")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Timing.frequency");
+        }
+        else if (name.equals("frequencyMax")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Timing.frequencyMax");
+        }
+        else if (name.equals("period")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Timing.period");
+        }
+        else if (name.equals("periodMax")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Timing.periodMax");
+        }
+        else if (name.equals("periodUnits")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Timing.periodUnits");
+        }
+        else if (name.equals("when")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Timing.when");
+        }
+        else
+          return super.addChild(name);
+      }
+
       public TimingRepeatComponent copy() {
         TimingRepeatComponent dst = new TimingRepeatComponent();
         copyValues(dst);
@@ -1122,6 +1252,11 @@ public class Timing extends Type implements ICompositeType {
            && (periodMax == null || periodMax.isEmpty()) && (periodUnits == null || periodUnits.isEmpty())
            && (when == null || when.isEmpty());
       }
+
+  public String fhirType() {
+    return "Timing.repeat";
+
+  }
 
   }
 
@@ -1263,6 +1398,40 @@ public class Timing extends Type implements ICompositeType {
         childrenList.add(new Property("repeat", "", "A set of rules that describe when the event should occur.", 0, java.lang.Integer.MAX_VALUE, repeat));
         childrenList.add(new Property("code", "CodeableConcept", "A code for the timing pattern. Some codes such as BID are ubiquitous, but many institutions define their own additional codes.", 0, java.lang.Integer.MAX_VALUE, code));
       }
+
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("event"))
+          this.getEvent().add(castToDateTime(value));
+        else if (name.equals("repeat"))
+          this.repeat = (TimingRepeatComponent) value; // TimingRepeatComponent
+        else if (name.equals("code"))
+          this.code = castToCodeableConcept(value); // CodeableConcept
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("event")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Timing.event");
+        }
+        else if (name.equals("repeat")) {
+          this.repeat = new TimingRepeatComponent();
+          return this.repeat;
+        }
+        else if (name.equals("code")) {
+          this.code = new CodeableConcept();
+          return this.code;
+        }
+        else
+          return super.addChild(name);
+      }
+
+  public String fhirType() {
+    return "Timing";
+
+  }
 
       public Timing copy() {
         Timing dst = new Timing();

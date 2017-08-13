@@ -29,19 +29,14 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Wed, Jul 13, 2016 05:32+1000 for FHIR v1.0.2
+import java.util.*;
 
+import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
-import org.hl7.fhir.instance.utilities.Utilities;
+import org.hl7.fhir.utilities.Utilities;
 
-import ca.uhn.fhir.model.api.annotation.Block;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
-import ca.uhn.fhir.model.api.annotation.ResourceDef;
-import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.*;
 /**
  * A sample to be used for analysis.
  */
@@ -69,7 +64,7 @@ public class Specimen extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static SpecimenStatus fromCode(String codeString) throws Exception {
+        public static SpecimenStatus fromCode(String codeString) throws FHIRException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("available".equals(codeString))
@@ -80,7 +75,7 @@ public class Specimen extends DomainResource {
           return UNSATISFACTORY;
         if ("entered-in-error".equals(codeString))
           return ENTEREDINERROR;
-        throw new Exception("Unknown SpecimenStatus code '"+codeString+"'");
+        throw new FHIRException("Unknown SpecimenStatus code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -134,6 +129,22 @@ public class Specimen extends DomainResource {
         if ("entered-in-error".equals(codeString))
           return SpecimenStatus.ENTEREDINERROR;
         throw new IllegalArgumentException("Unknown SpecimenStatus code '"+codeString+"'");
+        }
+        public Enumeration<SpecimenStatus> fromType(Base code) throws FHIRException {
+          if (code == null || code.isEmpty())
+            return null;
+          String codeString = ((PrimitiveType) code).asStringValue();
+          if (codeString == null || "".equals(codeString))
+            return null;
+        if ("available".equals(codeString))
+          return new Enumeration<SpecimenStatus>(this, SpecimenStatus.AVAILABLE);
+        if ("unavailable".equals(codeString))
+          return new Enumeration<SpecimenStatus>(this, SpecimenStatus.UNAVAILABLE);
+        if ("unsatisfactory".equals(codeString))
+          return new Enumeration<SpecimenStatus>(this, SpecimenStatus.UNSATISFACTORY);
+        if ("entered-in-error".equals(codeString))
+          return new Enumeration<SpecimenStatus>(this, SpecimenStatus.ENTEREDINERROR);
+        throw new FHIRException("Unknown SpecimenStatus code '"+codeString+"'");
         }
     public String toCode(SpecimenStatus code) {
       if (code == SpecimenStatus.AVAILABLE)
@@ -314,26 +325,26 @@ public class Specimen extends DomainResource {
         /**
          * @return {@link #collected} (Time when specimen was collected from subject - the physiologically relevant time.)
          */
-        public DateTimeType getCollectedDateTimeType() throws Exception { 
+        public DateTimeType getCollectedDateTimeType() throws FHIRException { 
           if (!(this.collected instanceof DateTimeType))
-            throw new Exception("Type mismatch: the type DateTimeType was expected, but "+this.collected.getClass().getName()+" was encountered");
+            throw new FHIRException("Type mismatch: the type DateTimeType was expected, but "+this.collected.getClass().getName()+" was encountered");
           return (DateTimeType) this.collected;
         }
 
-        public boolean hasCollectedDateTimeType() throws Exception { 
+        public boolean hasCollectedDateTimeType() { 
           return this.collected instanceof DateTimeType;
         }
 
         /**
          * @return {@link #collected} (Time when specimen was collected from subject - the physiologically relevant time.)
          */
-        public Period getCollectedPeriod() throws Exception { 
+        public Period getCollectedPeriod() throws FHIRException { 
           if (!(this.collected instanceof Period))
-            throw new Exception("Type mismatch: the type Period was expected, but "+this.collected.getClass().getName()+" was encountered");
+            throw new FHIRException("Type mismatch: the type Period was expected, but "+this.collected.getClass().getName()+" was encountered");
           return (Period) this.collected;
         }
 
-        public boolean hasCollectedPeriod() throws Exception { 
+        public boolean hasCollectedPeriod() { 
           return this.collected instanceof Period;
         }
 
@@ -431,6 +442,57 @@ public class Specimen extends DomainResource {
           childrenList.add(new Property("bodySite", "CodeableConcept", "Anatomical location from which the specimen was collected (if subject is a patient). This is the target site.  This element is not used for environmental specimens.", 0, java.lang.Integer.MAX_VALUE, bodySite));
         }
 
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("collector"))
+          this.collector = castToReference(value); // Reference
+        else if (name.equals("comment"))
+          this.getComment().add(castToString(value));
+        else if (name.equals("collected[x]"))
+          this.collected = (Type) value; // Type
+        else if (name.equals("quantity"))
+          this.quantity = castToSimpleQuantity(value); // SimpleQuantity
+        else if (name.equals("method"))
+          this.method = castToCodeableConcept(value); // CodeableConcept
+        else if (name.equals("bodySite"))
+          this.bodySite = castToCodeableConcept(value); // CodeableConcept
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("collector")) {
+          this.collector = new Reference();
+          return this.collector;
+        }
+        else if (name.equals("comment")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Specimen.comment");
+        }
+        else if (name.equals("collectedDateTime")) {
+          this.collected = new DateTimeType();
+          return this.collected;
+        }
+        else if (name.equals("collectedPeriod")) {
+          this.collected = new Period();
+          return this.collected;
+        }
+        else if (name.equals("quantity")) {
+          this.quantity = new SimpleQuantity();
+          return this.quantity;
+        }
+        else if (name.equals("method")) {
+          this.method = new CodeableConcept();
+          return this.method;
+        }
+        else if (name.equals("bodySite")) {
+          this.bodySite = new CodeableConcept();
+          return this.bodySite;
+        }
+        else
+          return super.addChild(name);
+      }
+
       public SpecimenCollectionComponent copy() {
         SpecimenCollectionComponent dst = new SpecimenCollectionComponent();
         copyValues(dst);
@@ -474,6 +536,11 @@ public class Specimen extends DomainResource {
            && (collected == null || collected.isEmpty()) && (quantity == null || quantity.isEmpty())
            && (method == null || method.isEmpty()) && (bodySite == null || bodySite.isEmpty());
       }
+
+  public String fhirType() {
+    return "Specimen.collection";
+
+  }
 
   }
 
@@ -655,6 +722,34 @@ public class Specimen extends DomainResource {
           childrenList.add(new Property("additive", "Reference(Substance)", "Material used in the processing step.", 0, java.lang.Integer.MAX_VALUE, additive));
         }
 
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("description"))
+          this.description = castToString(value); // StringType
+        else if (name.equals("procedure"))
+          this.procedure = castToCodeableConcept(value); // CodeableConcept
+        else if (name.equals("additive"))
+          this.getAdditive().add(castToReference(value));
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("description")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Specimen.description");
+        }
+        else if (name.equals("procedure")) {
+          this.procedure = new CodeableConcept();
+          return this.procedure;
+        }
+        else if (name.equals("additive")) {
+          return addAdditive();
+        }
+        else
+          return super.addChild(name);
+      }
+
       public SpecimenTreatmentComponent copy() {
         SpecimenTreatmentComponent dst = new SpecimenTreatmentComponent();
         copyValues(dst);
@@ -693,6 +788,11 @@ public class Specimen extends DomainResource {
         return super.isEmpty() && (description == null || description.isEmpty()) && (procedure == null || procedure.isEmpty())
            && (additive == null || additive.isEmpty());
       }
+
+  public String fhirType() {
+    return "Specimen.treatment";
+
+  }
 
   }
 
@@ -920,26 +1020,26 @@ public class Specimen extends DomainResource {
         /**
          * @return {@link #additive} (Introduced substance to preserve, maintain or enhance the specimen. Examples: Formalin, Citrate, EDTA.)
          */
-        public CodeableConcept getAdditiveCodeableConcept() throws Exception { 
+        public CodeableConcept getAdditiveCodeableConcept() throws FHIRException { 
           if (!(this.additive instanceof CodeableConcept))
-            throw new Exception("Type mismatch: the type CodeableConcept was expected, but "+this.additive.getClass().getName()+" was encountered");
+            throw new FHIRException("Type mismatch: the type CodeableConcept was expected, but "+this.additive.getClass().getName()+" was encountered");
           return (CodeableConcept) this.additive;
         }
 
-        public boolean hasAdditiveCodeableConcept() throws Exception { 
+        public boolean hasAdditiveCodeableConcept() { 
           return this.additive instanceof CodeableConcept;
         }
 
         /**
          * @return {@link #additive} (Introduced substance to preserve, maintain or enhance the specimen. Examples: Formalin, Citrate, EDTA.)
          */
-        public Reference getAdditiveReference() throws Exception { 
+        public Reference getAdditiveReference() throws FHIRException { 
           if (!(this.additive instanceof Reference))
-            throw new Exception("Type mismatch: the type Reference was expected, but "+this.additive.getClass().getName()+" was encountered");
+            throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.additive.getClass().getName()+" was encountered");
           return (Reference) this.additive;
         }
 
-        public boolean hasAdditiveReference() throws Exception { 
+        public boolean hasAdditiveReference() { 
           return this.additive instanceof Reference;
         }
 
@@ -964,6 +1064,56 @@ public class Specimen extends DomainResource {
           childrenList.add(new Property("specimenQuantity", "SimpleQuantity", "The quantity of specimen in the container; may be volume, dimensions, or other appropriate measurements, depending on the specimen type.", 0, java.lang.Integer.MAX_VALUE, specimenQuantity));
           childrenList.add(new Property("additive[x]", "CodeableConcept|Reference(Substance)", "Introduced substance to preserve, maintain or enhance the specimen. Examples: Formalin, Citrate, EDTA.", 0, java.lang.Integer.MAX_VALUE, additive));
         }
+
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("identifier"))
+          this.getIdentifier().add(castToIdentifier(value));
+        else if (name.equals("description"))
+          this.description = castToString(value); // StringType
+        else if (name.equals("type"))
+          this.type = castToCodeableConcept(value); // CodeableConcept
+        else if (name.equals("capacity"))
+          this.capacity = castToSimpleQuantity(value); // SimpleQuantity
+        else if (name.equals("specimenQuantity"))
+          this.specimenQuantity = castToSimpleQuantity(value); // SimpleQuantity
+        else if (name.equals("additive[x]"))
+          this.additive = (Type) value; // Type
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("identifier")) {
+          return addIdentifier();
+        }
+        else if (name.equals("description")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Specimen.description");
+        }
+        else if (name.equals("type")) {
+          this.type = new CodeableConcept();
+          return this.type;
+        }
+        else if (name.equals("capacity")) {
+          this.capacity = new SimpleQuantity();
+          return this.capacity;
+        }
+        else if (name.equals("specimenQuantity")) {
+          this.specimenQuantity = new SimpleQuantity();
+          return this.specimenQuantity;
+        }
+        else if (name.equals("additiveCodeableConcept")) {
+          this.additive = new CodeableConcept();
+          return this.additive;
+        }
+        else if (name.equals("additiveReference")) {
+          this.additive = new Reference();
+          return this.additive;
+        }
+        else
+          return super.addChild(name);
+      }
 
       public SpecimenContainerComponent copy() {
         SpecimenContainerComponent dst = new SpecimenContainerComponent();
@@ -1008,6 +1158,11 @@ public class Specimen extends DomainResource {
            && (type == null || type.isEmpty()) && (capacity == null || capacity.isEmpty()) && (specimenQuantity == null || specimenQuantity.isEmpty())
            && (additive == null || additive.isEmpty());
       }
+
+  public String fhirType() {
+    return "Specimen.container";
+
+  }
 
   }
 
@@ -1511,6 +1666,77 @@ public class Specimen extends DomainResource {
         childrenList.add(new Property("treatment", "", "Details concerning treatment and processing steps for the specimen.", 0, java.lang.Integer.MAX_VALUE, treatment));
         childrenList.add(new Property("container", "", "The container holding the specimen.  The recursive nature of containers; i.e. blood in tube in tray in rack is not addressed here.", 0, java.lang.Integer.MAX_VALUE, container));
       }
+
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("identifier"))
+          this.getIdentifier().add(castToIdentifier(value));
+        else if (name.equals("status"))
+          this.status = new SpecimenStatusEnumFactory().fromType(value); // Enumeration<SpecimenStatus>
+        else if (name.equals("type"))
+          this.type = castToCodeableConcept(value); // CodeableConcept
+        else if (name.equals("parent"))
+          this.getParent().add(castToReference(value));
+        else if (name.equals("subject"))
+          this.subject = castToReference(value); // Reference
+        else if (name.equals("accessionIdentifier"))
+          this.accessionIdentifier = castToIdentifier(value); // Identifier
+        else if (name.equals("receivedTime"))
+          this.receivedTime = castToDateTime(value); // DateTimeType
+        else if (name.equals("collection"))
+          this.collection = (SpecimenCollectionComponent) value; // SpecimenCollectionComponent
+        else if (name.equals("treatment"))
+          this.getTreatment().add((SpecimenTreatmentComponent) value);
+        else if (name.equals("container"))
+          this.getContainer().add((SpecimenContainerComponent) value);
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("identifier")) {
+          return addIdentifier();
+        }
+        else if (name.equals("status")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Specimen.status");
+        }
+        else if (name.equals("type")) {
+          this.type = new CodeableConcept();
+          return this.type;
+        }
+        else if (name.equals("parent")) {
+          return addParent();
+        }
+        else if (name.equals("subject")) {
+          this.subject = new Reference();
+          return this.subject;
+        }
+        else if (name.equals("accessionIdentifier")) {
+          this.accessionIdentifier = new Identifier();
+          return this.accessionIdentifier;
+        }
+        else if (name.equals("receivedTime")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Specimen.receivedTime");
+        }
+        else if (name.equals("collection")) {
+          this.collection = new SpecimenCollectionComponent();
+          return this.collection;
+        }
+        else if (name.equals("treatment")) {
+          return addTreatment();
+        }
+        else if (name.equals("container")) {
+          return addContainer();
+        }
+        else
+          return super.addChild(name);
+      }
+
+  public String fhirType() {
+    return "Specimen";
+
+  }
 
       public Specimen copy() {
         Specimen dst = new Specimen();

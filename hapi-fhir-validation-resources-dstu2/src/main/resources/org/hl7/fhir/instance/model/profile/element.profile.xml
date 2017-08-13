@@ -10,7 +10,7 @@
    <value value="http://hl7.org/fhir"/>
   </telecom>
  </contact>
- <date value="2015-11-11T10:54:01-05:00"/>
+ <date value="2017-07-27T08:19:05-04:00"/>
  <description value="Base StructureDefinition for Element Type"/>
  <fhirVersion value="1.0.2"/>
  <mapping>
@@ -29,9 +29,6 @@
    <max value="*"/>
    <condition value="ele-1"/>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="*"/>
-    </extension>
     <key value="ele-1"/>
     <severity value="error"/>
     <human value="All FHIR elements must have a @value or children"/>
@@ -84,9 +81,6 @@
    <max value="*"/>
    <condition value="ele-1"/>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="*"/>
-    </extension>
     <key value="ele-1"/>
     <severity value="error"/>
     <human value="All FHIR elements must have a @value or children"/>

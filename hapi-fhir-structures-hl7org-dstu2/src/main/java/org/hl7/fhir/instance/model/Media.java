@@ -29,16 +29,14 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
+// Generated on Wed, Jul 13, 2016 05:32+1000 for FHIR v1.0.2
 import java.util.ArrayList;
 import java.util.List;
 
-import org.hl7.fhir.instance.utilities.Utilities;
+import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.utilities.Utilities;
 
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
-import ca.uhn.fhir.model.api.annotation.ResourceDef;
-import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.*;
 /**
  * A photo, video, or audio recording acquired or used in healthcare. The actual content may be inline or provided by direct reference.
  */
@@ -62,7 +60,7 @@ public class Media extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static DigitalMediaType fromCode(String codeString) throws Exception {
+        public static DigitalMediaType fromCode(String codeString) throws FHIRException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("photo".equals(codeString))
@@ -71,7 +69,7 @@ public class Media extends DomainResource {
           return VIDEO;
         if ("audio".equals(codeString))
           return AUDIO;
-        throw new Exception("Unknown DigitalMediaType code '"+codeString+"'");
+        throw new FHIRException("Unknown DigitalMediaType code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -119,6 +117,20 @@ public class Media extends DomainResource {
         if ("audio".equals(codeString))
           return DigitalMediaType.AUDIO;
         throw new IllegalArgumentException("Unknown DigitalMediaType code '"+codeString+"'");
+        }
+        public Enumeration<DigitalMediaType> fromType(Base code) throws FHIRException {
+          if (code == null || code.isEmpty())
+            return null;
+          String codeString = ((PrimitiveType) code).asStringValue();
+          if (codeString == null || "".equals(codeString))
+            return null;
+        if ("photo".equals(codeString))
+          return new Enumeration<DigitalMediaType>(this, DigitalMediaType.PHOTO);
+        if ("video".equals(codeString))
+          return new Enumeration<DigitalMediaType>(this, DigitalMediaType.VIDEO);
+        if ("audio".equals(codeString))
+          return new Enumeration<DigitalMediaType>(this, DigitalMediaType.AUDIO);
+        throw new FHIRException("Unknown DigitalMediaType code '"+codeString+"'");
         }
     public String toCode(DigitalMediaType code) {
       if (code == DigitalMediaType.PHOTO)
@@ -727,6 +739,88 @@ public class Media extends DomainResource {
         childrenList.add(new Property("duration", "unsignedInt", "The duration of the recording in seconds - for audio and video.", 0, java.lang.Integer.MAX_VALUE, duration));
         childrenList.add(new Property("content", "Attachment", "The actual content of the media - inline or by direct reference to the media source file.", 0, java.lang.Integer.MAX_VALUE, content));
       }
+
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("type"))
+          this.type = new DigitalMediaTypeEnumFactory().fromType(value); // Enumeration<DigitalMediaType>
+        else if (name.equals("subtype"))
+          this.subtype = castToCodeableConcept(value); // CodeableConcept
+        else if (name.equals("identifier"))
+          this.getIdentifier().add(castToIdentifier(value));
+        else if (name.equals("subject"))
+          this.subject = castToReference(value); // Reference
+        else if (name.equals("operator"))
+          this.operator = castToReference(value); // Reference
+        else if (name.equals("view"))
+          this.view = castToCodeableConcept(value); // CodeableConcept
+        else if (name.equals("deviceName"))
+          this.deviceName = castToString(value); // StringType
+        else if (name.equals("height"))
+          this.height = castToPositiveInt(value); // PositiveIntType
+        else if (name.equals("width"))
+          this.width = castToPositiveInt(value); // PositiveIntType
+        else if (name.equals("frames"))
+          this.frames = castToPositiveInt(value); // PositiveIntType
+        else if (name.equals("duration"))
+          this.duration = castToUnsignedInt(value); // UnsignedIntType
+        else if (name.equals("content"))
+          this.content = castToAttachment(value); // Attachment
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("type")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Media.type");
+        }
+        else if (name.equals("subtype")) {
+          this.subtype = new CodeableConcept();
+          return this.subtype;
+        }
+        else if (name.equals("identifier")) {
+          return addIdentifier();
+        }
+        else if (name.equals("subject")) {
+          this.subject = new Reference();
+          return this.subject;
+        }
+        else if (name.equals("operator")) {
+          this.operator = new Reference();
+          return this.operator;
+        }
+        else if (name.equals("view")) {
+          this.view = new CodeableConcept();
+          return this.view;
+        }
+        else if (name.equals("deviceName")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Media.deviceName");
+        }
+        else if (name.equals("height")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Media.height");
+        }
+        else if (name.equals("width")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Media.width");
+        }
+        else if (name.equals("frames")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Media.frames");
+        }
+        else if (name.equals("duration")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Media.duration");
+        }
+        else if (name.equals("content")) {
+          this.content = new Attachment();
+          return this.content;
+        }
+        else
+          return super.addChild(name);
+      }
+
+  public String fhirType() {
+    return "Media";
+
+  }
 
       public Media copy() {
         Media dst = new Media();

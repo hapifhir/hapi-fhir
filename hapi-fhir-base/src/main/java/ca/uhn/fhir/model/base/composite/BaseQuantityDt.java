@@ -25,21 +25,14 @@ import java.math.BigDecimal;
 import org.apache.commons.lang3.StringUtils;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.api.BaseIdentifiableElement;
-import ca.uhn.fhir.model.api.ICompositeDatatype;
-import ca.uhn.fhir.model.api.IQueryParameterType;
-//TODO: Use of a deprecated method should be resolved.
-import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
-import ca.uhn.fhir.model.primitive.BoundCodeDt;
-import ca.uhn.fhir.model.primitive.CodeDt;
-import ca.uhn.fhir.model.primitive.DecimalDt;
-import ca.uhn.fhir.model.primitive.StringDt;
-import ca.uhn.fhir.model.primitive.UriDt;
+import ca.uhn.fhir.model.api.*;
+import ca.uhn.fhir.model.primitive.*;
+import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import ca.uhn.fhir.rest.param.QuantityParam;
 
 public abstract class BaseQuantityDt extends BaseIdentifiableElement implements ICompositeDatatype, IQueryParameterType {
 
-	private static final long serialVersionUID = -925486613033086056L;
+	private static final long serialVersionUID = 1L;
 
 	/**
 	 * Sets the value(s) for <b>value</b> (Numerical value (with implicit precision))
@@ -65,21 +58,21 @@ public abstract class BaseQuantityDt extends BaseIdentifiableElement implements 
 		}
 		String[] parts = theValue.split("\\|");
 		if (parts.length > 0 && StringUtils.isNotBlank(parts[0])) {
-			if (parts[0].startsWith("<=")) {
+			if (parts[0].startsWith("le")) {
 				//TODO: Use of a deprecated method should be resolved.
-				getComparatorElement().setValue(QuantityCompararatorEnum.LESSTHAN_OR_EQUALS.getCode());
+				getComparatorElement().setValue(ParamPrefixEnum.LESSTHAN_OR_EQUALS.getValue());
 				setValue(new BigDecimal(parts[0].substring(2)));
-			} else if (parts[0].startsWith("<")) {
+			} else if (parts[0].startsWith("lt")) {
 				//TODO: Use of a deprecated method should be resolved.
-				getComparatorElement().setValue(QuantityCompararatorEnum.LESSTHAN.getCode());
+				getComparatorElement().setValue(ParamPrefixEnum.LESSTHAN.getValue());
 				setValue(new BigDecimal(parts[0].substring(1)));
-			} else if (parts[0].startsWith(">=")) {
+			} else if (parts[0].startsWith("ge")) {
 				//TODO: Use of a deprecated method should be resolved.
-				getComparatorElement().setValue(QuantityCompararatorEnum.GREATERTHAN_OR_EQUALS.getCode());
+				getComparatorElement().setValue(ParamPrefixEnum.GREATERTHAN_OR_EQUALS.getValue());
 				setValue(new BigDecimal(parts[0].substring(2)));
-			} else if (parts[0].startsWith(">")) {
+			} else if (parts[0].startsWith("gt")) {
 				//TODO: Use of a deprecated method should be resolved.
-				getComparatorElement().setValue(QuantityCompararatorEnum.GREATERTHAN.getCode());
+				getComparatorElement().setValue(ParamPrefixEnum.GREATERTHAN.getValue());
 				setValue(new BigDecimal(parts[0].substring(1)));
 			} else {
 				setValue(new BigDecimal(parts[0]));

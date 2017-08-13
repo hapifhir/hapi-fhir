@@ -3,9 +3,9 @@ package example;
 import javax.servlet.http.HttpServletRequest;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.client.IGenericClient;
+import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.interceptor.BasicAuthInterceptor;
-import ca.uhn.fhir.util.ITestingUiClientFactory;
+import ca.uhn.fhir.rest.server.util.ITestingUiClientFactory;
 
 public class AuthorizingTesterUiClientFactory implements ITestingUiClientFactory {
 

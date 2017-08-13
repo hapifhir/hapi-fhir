@@ -33,9 +33,9 @@ import ca.uhn.fhir.jpa.dao.SearchParameterMap;
 import ca.uhn.fhir.jpa.dao.SearchParameterMap.EverythingModeEnum;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.rest.api.SortSpec;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.StringParam;
-import ca.uhn.fhir.rest.server.IBundleProvider;
 
 public class FhirResourceDaoEncounterDstu3 extends FhirResourceDaoDstu3<Encounter>implements IFhirResourceDaoEncounter<Encounter> {
 
@@ -54,7 +54,7 @@ public class FhirResourceDaoEncounterDstu3 extends FhirResourceDaoDstu3<Encounte
 		if (theId != null) {
 			paramMap.add("_id", new StringParam(theId.getIdPart()));
 		}
-		ca.uhn.fhir.rest.server.IBundleProvider retVal = search(paramMap);
+		IBundleProvider retVal = search(paramMap);
 		return retVal;
 	}
 

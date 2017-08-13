@@ -1,8 +1,6 @@
 package ca.uhn.fhir.rest.gclient;
 
-import ca.uhn.fhir.context.FhirContext;
-
-/*
+/*-
  * #%L
  * HAPI FHIR - Core Library
  * %%
@@ -22,7 +20,8 @@ import ca.uhn.fhir.context.FhirContext;
  * #L%
  */
 
-import ca.uhn.fhir.rest.server.Constants;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.api.Constants;
 
 abstract class BaseClientParam implements IParam {
 

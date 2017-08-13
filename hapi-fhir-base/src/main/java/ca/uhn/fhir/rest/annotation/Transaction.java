@@ -19,19 +19,13 @@ package ca.uhn.fhir.rest.annotation;
  * limitations under the License.
  * #L%
  */
-
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-
-import ca.uhn.fhir.model.api.Bundle;
+import java.lang.annotation.*;
 
 /**
  * RESTful method annotation to be used for the FHIR <a href="http://hl7.org/implement/standards/fhir/http.html#transaction">transaction</a> method.
  * 
  * <p>
- * This method should have a parameter of type {@link Bundle} annotated with the {@link TransactionParam} annotation.
+ * This method should have a parameter of type Bundle annotated with the {@link TransactionParam} annotation.
  * </p>
  */
 @Retention(RetentionPolicy.RUNTIME)

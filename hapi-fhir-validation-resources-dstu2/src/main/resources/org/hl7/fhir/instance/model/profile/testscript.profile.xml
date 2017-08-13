@@ -1,7 +1,7 @@
 <StructureDefinition xmlns="http://hl7.org/fhir">
  <id value="TestScript"/>
  <meta>
-  <lastUpdated value="2015-11-11T10:54:01.813-05:00"/>
+  <lastUpdated value="2017-07-27T08:19:05.564-04:00"/>
  </meta>
  <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
   <valueInteger value="0"/>
@@ -22,7 +22,7 @@
    <value value="http://www.hl7.org/Special/committees/fiwg/index.cfm"/>
   </telecom>
  </contact>
- <date value="2015-11-11T10:54:01-05:00"/>
+ <date value="2017-07-27T08:19:05-04:00"/>
  <description value="Base StructureDefinition for TestScript Resource"/>
  <fhirVersion value="1.0.2"/>
  <mapping>
@@ -468,9 +468,6 @@
     <code value="BackboneElement"/>
    </type>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="capability.required or capability.validated"/>
-    </extension>
     <key value="inv-5"/>
     <severity value="error"/>
     <human value="TestScript metadata capability SHALL contain required or validated or both."/>
@@ -864,9 +861,6 @@
     <code value="BackboneElement"/>
    </type>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="headerField.empty() or path.empty()"/>
-    </extension>
     <key value="inv-4"/>
     <severity value="error"/>
     <human value="Variable cannot contain both headerField and path."/>
@@ -1037,9 +1031,6 @@
    <max value="1"/>
    <nameReference value="metadata"/>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="capability.required or capability.validated"/>
-    </extension>
     <key value="inv-6"/>
     <severity value="error"/>
     <human value="Setup metadata capability SHALL contain required or validated or both."/>
@@ -1057,9 +1048,6 @@
     <code value="BackboneElement"/>
    </type>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="operation.empty() xor assert"/>
-    </extension>
     <key value="inv-1"/>
     <severity value="error"/>
     <human value="Setup action SHALL contain either an operation or assert but not both."/>
@@ -1128,9 +1116,6 @@
     <code value="BackboneElement"/>
    </type>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="sourceId or (targetId.count() + url.count() + params.count() = 1) or (type.code in ('conformance' |'search' | 'transaction' | 'history'))"/>
-    </extension>
     <key value="inv-10"/>
     <severity value="error"/>
     <human value="Setup operation SHALL contain either sourceId or targetId or params or url."/>
@@ -1456,18 +1441,12 @@
     <code value="BackboneElement"/>
    </type>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="contentType.count() + headerField.count() + minimumId.count() + navigationLinks.count() + path.count() + resource.count() + responseCode.count() + response.count() + validateProfileId.count() &lt;=1"/>
-    </extension>
     <key value="inv-8"/>
     <severity value="error"/>
     <human value="Only a single assertion SHALL be present within setup action assert element."/>
     <xpath value="count(f:contentType) + count(f:headerField) + count(f:minimumId) + count(f:navigationLinks) + count(f:path) + count(f:resource) + count(f:responseCode) + count(f:response) + count(f:validateProfileId)  &lt;=1"/>
    </constraint>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="compareToSourceId.empty() xor compareToSourcePath"/>
-    </extension>
     <key value="inv-13"/>
     <severity value="error"/>
     <human value="Setup action assert shall contain both compareToSourceId and compareToSourcePath or neither."/>
@@ -1848,9 +1827,6 @@
    <max value="1"/>
    <nameReference value="metadata"/>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="capability.required or capability.validated"/>
-    </extension>
     <key value="inv-7"/>
     <severity value="error"/>
     <human value="Test metadata capability SHALL contain required or validated or both."/>
@@ -1868,9 +1844,6 @@
     <code value="BackboneElement"/>
    </type>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="operation.empty() xor assert"/>
-    </extension>
     <key value="inv-2"/>
     <severity value="error"/>
     <human value="Test action SHALL contain either an operation or assert but not both."/>
@@ -1936,9 +1909,6 @@
    <max value="1"/>
    <nameReference value="operation"/>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="sourceId or (targetId.count() + url.count() + params.count() = 1) or (type.code in ('conformance' | 'search' | 'transaction' | 'history'))"/>
-    </extension>
     <key value="inv-11"/>
     <severity value="error"/>
     <human value="Test operation SHALL contain either sourceId or targetId or params or url."/>
@@ -1954,18 +1924,12 @@
    <max value="1"/>
    <nameReference value="assert"/>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="contentType.count() + headerField.count() + minimumId.count() + navigationLinks.count() + path.count() + resource.count() + responseCode.count() + response.count() + validateProfileId.count() &lt;=1"/>
-    </extension>
     <key value="inv-9"/>
     <severity value="error"/>
     <human value="Only a single assertion SHALL be present within test action assert element."/>
     <xpath value="count(f:contentType) + count(f:headerField) + count(f:minimumId) + count(f:navigationLinks) + count(f:path) + count(f:resource) + count(f:responseCode) + count(f:response) + count(f:validateProfileId)  &lt;=1"/>
    </constraint>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="compareToSourceId.empty() xor compareToSourcePath"/>
-    </extension>
     <key value="inv-14"/>
     <severity value="error"/>
     <human value="Test action assert shall contain both compareToSourceId and compareToSourcePath or neither."/>
@@ -2044,9 +2008,6 @@
     <code value="BackboneElement"/>
    </type>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="operation"/>
-    </extension>
     <key value="inv-3"/>
     <severity value="error"/>
     <human value="Teardown action SHALL contain an operation."/>
@@ -2112,9 +2073,6 @@
    <max value="1"/>
    <nameReference value="operation"/>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="sourceId or (targetId.count() + url.count() + params.count() = 1) or (type.code in ('conformance' | 'search' | 'transaction' | 'history'))"/>
-    </extension>
     <key value="inv-12"/>
     <severity value="error"/>
     <human value="Teardown operation SHALL contain either sourceId or targetId or params or url."/>
@@ -2376,9 +2334,6 @@
     <code value="BackboneElement"/>
    </type>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="capability.required or capability.validated"/>
-    </extension>
     <key value="inv-5"/>
     <severity value="error"/>
     <human value="TestScript metadata capability SHALL contain required or validated or both."/>
@@ -2568,9 +2523,6 @@
     <code value="BackboneElement"/>
    </type>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="headerField.empty() or path.empty()"/>
-    </extension>
     <key value="inv-4"/>
     <severity value="error"/>
     <human value="Variable cannot contain both headerField and path."/>
@@ -2639,9 +2591,6 @@
    <max value="1"/>
    <nameReference value="metadata"/>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="capability.required or capability.validated"/>
-    </extension>
     <key value="inv-6"/>
     <severity value="error"/>
     <human value="Setup metadata capability SHALL contain required or validated or both."/>
@@ -2659,9 +2608,6 @@
     <code value="BackboneElement"/>
    </type>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="operation.empty() xor assert"/>
-    </extension>
     <key value="inv-1"/>
     <severity value="error"/>
     <human value="Setup action SHALL contain either an operation or assert but not both."/>
@@ -2679,9 +2625,6 @@
     <code value="BackboneElement"/>
    </type>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="sourceId or (targetId.count() + url.count() + params.count() = 1) or (type.code in ('conformance' |'search' | 'transaction' | 'history'))"/>
-    </extension>
     <key value="inv-10"/>
     <severity value="error"/>
     <human value="Setup operation SHALL contain either sourceId or targetId or params or url."/>
@@ -2905,18 +2848,12 @@
     <code value="BackboneElement"/>
    </type>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="contentType.count() + headerField.count() + minimumId.count() + navigationLinks.count() + path.count() + resource.count() + responseCode.count() + response.count() + validateProfileId.count() &lt;=1"/>
-    </extension>
     <key value="inv-8"/>
     <severity value="error"/>
     <human value="Only a single assertion SHALL be present within setup action assert element."/>
     <xpath value="count(f:contentType) + count(f:headerField) + count(f:minimumId) + count(f:navigationLinks) + count(f:path) + count(f:resource) + count(f:responseCode) + count(f:response) + count(f:validateProfileId)  &lt;=1"/>
    </constraint>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="compareToSourceId.empty() xor compareToSourcePath"/>
-    </extension>
     <key value="inv-13"/>
     <severity value="error"/>
     <human value="Setup action assert shall contain both compareToSourceId and compareToSourcePath or neither."/>
@@ -3195,9 +3132,6 @@
    <max value="1"/>
    <nameReference value="metadata"/>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="capability.required or capability.validated"/>
-    </extension>
     <key value="inv-7"/>
     <severity value="error"/>
     <human value="Test metadata capability SHALL contain required or validated or both."/>
@@ -3215,9 +3149,6 @@
     <code value="BackboneElement"/>
    </type>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="operation.empty() xor assert"/>
-    </extension>
     <key value="inv-2"/>
     <severity value="error"/>
     <human value="Test action SHALL contain either an operation or assert but not both."/>
@@ -3232,9 +3163,6 @@
    <max value="1"/>
    <nameReference value="operation"/>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="sourceId or (targetId.count() + url.count() + params.count() = 1) or (type.code in ('conformance' | 'search' | 'transaction' | 'history'))"/>
-    </extension>
     <key value="inv-11"/>
     <severity value="error"/>
     <human value="Test operation SHALL contain either sourceId or targetId or params or url."/>
@@ -3250,18 +3178,12 @@
    <max value="1"/>
    <nameReference value="assert"/>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="contentType.count() + headerField.count() + minimumId.count() + navigationLinks.count() + path.count() + resource.count() + responseCode.count() + response.count() + validateProfileId.count() &lt;=1"/>
-    </extension>
     <key value="inv-9"/>
     <severity value="error"/>
     <human value="Only a single assertion SHALL be present within test action assert element."/>
     <xpath value="count(f:contentType) + count(f:headerField) + count(f:minimumId) + count(f:navigationLinks) + count(f:path) + count(f:resource) + count(f:responseCode) + count(f:response) + count(f:validateProfileId)  &lt;=1"/>
    </constraint>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="compareToSourceId.empty() xor compareToSourcePath"/>
-    </extension>
     <key value="inv-14"/>
     <severity value="error"/>
     <human value="Test action assert shall contain both compareToSourceId and compareToSourcePath or neither."/>
@@ -3289,9 +3211,6 @@
     <code value="BackboneElement"/>
    </type>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="operation"/>
-    </extension>
     <key value="inv-3"/>
     <severity value="error"/>
     <human value="Teardown action SHALL contain an operation."/>
@@ -3306,9 +3225,6 @@
    <max value="1"/>
    <nameReference value="operation"/>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="sourceId or (targetId.count() + url.count() + params.count() = 1) or (type.code in ('conformance' | 'search' | 'transaction' | 'history'))"/>
-    </extension>
     <key value="inv-12"/>
     <severity value="error"/>
     <human value="Teardown operation SHALL contain either sourceId or targetId or params or url."/>

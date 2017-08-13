@@ -1,7 +1,7 @@
 <StructureDefinition xmlns="http://hl7.org/fhir">
  <id value="Media"/>
  <meta>
-  <lastUpdated value="2015-11-11T10:54:01.813-05:00"/>
+  <lastUpdated value="2017-07-27T08:19:05.564-04:00"/>
  </meta>
  <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
   <valueInteger value="1"/>
@@ -22,7 +22,7 @@
    <value value="http://www.hl7.org/Special/committees/fiwg/index.cfm"/>
   </telecom>
  </contact>
- <date value="2015-11-11T10:54:01-05:00"/>
+ <date value="2017-07-27T08:19:05-04:00"/>
  <description value="Base StructureDefinition for Media Resource"/>
  <fhirVersion value="1.0.2"/>
  <mapping>
@@ -54,36 +54,24 @@
     <code value="DomainResource"/>
    </type>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="height.empty() or type != 'audio'"/>
-    </extension>
     <key value="mda-1"/>
     <severity value="error"/>
     <human value="Height can only be used for a photo or video"/>
     <xpath value="not(f:type/@value='audio') or not(f:height)"/>
    </constraint>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="width.empty() or type != 'audio'"/>
-    </extension>
     <key value="mda-2"/>
     <severity value="error"/>
     <human value="Width can only be used for a photo or video"/>
     <xpath value="not(f:type/@value='audio') or not(f:width)"/>
    </constraint>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="frames.empty() or type = 'photo'"/>
-    </extension>
     <key value="mda-3"/>
     <severity value="error"/>
     <human value="Frames can only be used for a photo"/>
     <xpath value="(f:type/@value='photo') or not(f:frames)"/>
    </constraint>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="duration.empty() or type != 'photo'"/>
-    </extension>
     <key value="mda-4"/>
     <severity value="error"/>
     <human value="Duration can only be used for an audio or a video"/>
@@ -516,36 +504,24 @@
     <code value="DomainResource"/>
    </type>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="height.empty() or type != 'audio'"/>
-    </extension>
     <key value="mda-1"/>
     <severity value="error"/>
     <human value="Height can only be used for a photo or video"/>
     <xpath value="not(f:type/@value='audio') or not(f:height)"/>
    </constraint>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="width.empty() or type != 'audio'"/>
-    </extension>
     <key value="mda-2"/>
     <severity value="error"/>
     <human value="Width can only be used for a photo or video"/>
     <xpath value="not(f:type/@value='audio') or not(f:width)"/>
    </constraint>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="frames.empty() or type = 'photo'"/>
-    </extension>
     <key value="mda-3"/>
     <severity value="error"/>
     <human value="Frames can only be used for a photo"/>
     <xpath value="(f:type/@value='photo') or not(f:frames)"/>
    </constraint>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="duration.empty() or type != 'photo'"/>
-    </extension>
     <key value="mda-4"/>
     <severity value="error"/>
     <human value="Duration can only be used for an audio or a video"/>

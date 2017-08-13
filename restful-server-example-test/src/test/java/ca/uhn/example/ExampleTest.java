@@ -1,20 +1,19 @@
 package ca.uhn.example;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 
 import java.io.File;
 
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.webapp.WebAppContext;
 import org.hamcrest.core.StringContains;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.*;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.api.Bundle;
+import ca.uhn.fhir.model.dstu2.resource.Bundle;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
-import ca.uhn.fhir.rest.client.IGenericClient;
+import ca.uhn.fhir.rest.client.api.IGenericClient;
 
 public class ExampleTest {
 
@@ -46,8 +45,8 @@ public class ExampleTest {
 			return;
 		}
 
-		Bundle results = ourClient.search().forResource(Patient.class).execute();
-		assertEquals(1, results.size());
+		Bundle results = ourClient.search().forResource(Patient.class).returnBundle(Bundle.class).execute();
+		assertEquals(1, results.getEntry().size());
 	}
 
 	@Test

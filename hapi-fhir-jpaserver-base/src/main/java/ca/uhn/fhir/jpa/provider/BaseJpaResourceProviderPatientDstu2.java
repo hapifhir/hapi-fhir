@@ -29,17 +29,12 @@ import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
-import ca.uhn.fhir.rest.annotation.IdParam;
-import ca.uhn.fhir.rest.annotation.Operation;
-import ca.uhn.fhir.rest.annotation.OperationParam;
-import ca.uhn.fhir.rest.annotation.Sort;
+import ca.uhn.fhir.rest.annotation.*;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.SortSpec;
-import ca.uhn.fhir.rest.method.RequestDetails;
-import ca.uhn.fhir.rest.param.DateRangeParam;
-import ca.uhn.fhir.rest.param.StringAndListParam;
-import ca.uhn.fhir.rest.param.StringOrListParam;
-import ca.uhn.fhir.rest.param.StringParam;
-import ca.uhn.fhir.rest.server.Constants;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.param.*;
 
 public class BaseJpaResourceProviderPatientDstu2 extends JpaResourceProviderDstu2<Patient> {
 
@@ -49,7 +44,7 @@ public class BaseJpaResourceProviderPatientDstu2 extends JpaResourceProviderDstu
 	 */
 	//@formatter:off
 	@Operation(name = "everything", idempotent = true, bundleType=BundleTypeEnum.SEARCHSET)
-	public ca.uhn.fhir.rest.server.IBundleProvider patientInstanceEverything(
+	public IBundleProvider patientInstanceEverything(
 
 			javax.servlet.http.HttpServletRequest theServletRequest,
 
@@ -93,7 +88,7 @@ public class BaseJpaResourceProviderPatientDstu2 extends JpaResourceProviderDstu
 	 */
 	//@formatter:off
 		@Operation(name = "everything", idempotent = true, bundleType=BundleTypeEnum.SEARCHSET)
-		public ca.uhn.fhir.rest.server.IBundleProvider patientTypeEverything(
+		public IBundleProvider patientTypeEverything(
 
 				javax.servlet.http.HttpServletRequest theServletRequest,
 

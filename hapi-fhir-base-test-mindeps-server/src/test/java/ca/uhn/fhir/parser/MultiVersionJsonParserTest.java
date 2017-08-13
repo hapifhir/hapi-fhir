@@ -6,8 +6,8 @@ import static org.junit.Assert.fail;
 import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.dstu.composite.QuantityDt;
-import ca.uhn.fhir.model.dstu.resource.Patient;
+import ca.uhn.fhir.model.dstu2.composite.QuantityDt;
+import ca.uhn.fhir.model.dstu2.resource.Patient;
 
 public class MultiVersionJsonParserTest {
 	
@@ -16,14 +16,14 @@ public class MultiVersionJsonParserTest {
 	@Test
 	public void testEncodeExtensionFromDifferentVersion() {
 		Patient p = new Patient();
-		p.addIdentifier("urn:sys", "001");
+		p.addIdentifier().setSystem("urn:sys").setValue("001");
 		p.addUndeclaredExtension(false, "http://foo#ext", new QuantityDt(2.2));
 		
 		try {
-			FhirContext.forDstu2().newJsonParser().encodeResourceToString(p);
+			FhirContext.forDstu3().newJsonParser().encodeResourceToString(p);
 			fail();
 		} catch (IllegalArgumentException e) {
-			assertEquals("This parser is for FHIR version DSTU2 - Can not encode a structure for version DSTU1", e.getMessage());
+			assertEquals("This parser is for FHIR version DSTU3 - Can not encode a structure for version DSTU2", e.getMessage());
 		}
 	}
 

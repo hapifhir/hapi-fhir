@@ -30,38 +30,16 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 
  */
+import java.util.*;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-
-import org.hl7.fhir.instance.model.BooleanType;
-import org.hl7.fhir.instance.model.CodeType;
-import org.hl7.fhir.instance.model.CodeableConcept;
-import org.hl7.fhir.instance.model.Coding;
-import org.hl7.fhir.instance.model.DataElement;
-import org.hl7.fhir.instance.model.DomainResource;
-import org.hl7.fhir.instance.model.Element;
-import org.hl7.fhir.instance.model.ElementDefinition;
-import org.hl7.fhir.instance.model.Extension;
-import org.hl7.fhir.instance.model.ExtensionHelper;
-import org.hl7.fhir.instance.model.Factory;
-import org.hl7.fhir.instance.model.Identifier;
-import org.hl7.fhir.instance.model.IntegerType;
-import org.hl7.fhir.instance.model.MarkdownType;
-import org.hl7.fhir.instance.model.PrimitiveType;
+import org.hl7.fhir.exceptions.FHIRFormatError;
+import org.hl7.fhir.instance.model.*;
 import org.hl7.fhir.instance.model.Questionnaire.GroupComponent;
 import org.hl7.fhir.instance.model.Questionnaire.QuestionComponent;
-import org.hl7.fhir.instance.model.Reference;
-import org.hl7.fhir.instance.model.StringType;
-import org.hl7.fhir.instance.model.Type;
-import org.hl7.fhir.instance.model.UriType;
-import org.hl7.fhir.instance.model.ValueSet;
 import org.hl7.fhir.instance.model.ValueSet.ConceptDefinitionComponent;
 import org.hl7.fhir.instance.model.ValueSet.ValueSetCodeSystemComponent;
-import org.hl7.fhir.utilities.validation.ValidationMessage.Source;
-import org.hl7.fhir.exceptions.FHIRFormatError;
 import org.hl7.fhir.utilities.Utilities;
+import org.hl7.fhir.utilities.validation.ValidationMessage;
 
 
 public class ToolingExtensions {
@@ -99,7 +77,7 @@ public class ToolingExtensions {
 
   // specific extension helpers
 
-  public static Extension makeIssueSource(org.hl7.fhir.instance.validation.ValidationMessage.Source theSource) {
+  public static Extension makeIssueSource(ValidationMessage.Source theSource) {
     Extension ex = new Extension();
     // todo: write this up and get it published with the pack (and handle the redirect?)
     ex.setUrl(ToolingExtensions.EXT_ISSUE_SOURCE);

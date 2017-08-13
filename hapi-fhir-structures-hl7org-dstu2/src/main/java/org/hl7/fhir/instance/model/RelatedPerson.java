@@ -29,18 +29,14 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Wed, Jul 13, 2016 05:32+1000 for FHIR v1.0.2
+import java.util.*;
 
+import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.instance.model.Enumerations.AdministrativeGenderEnumFactory;
 
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
-import ca.uhn.fhir.model.api.annotation.ResourceDef;
-import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.*;
 /**
  * Information about a person that is involved in the care for a patient, but who is not the target of healthcare, nor has a formal responsibility in the care process.
  */
@@ -527,6 +523,77 @@ public class RelatedPerson extends DomainResource {
         childrenList.add(new Property("period", "Period", "The period of time that this relationship is considered to be valid. If there are no dates defined, then the interval is unknown.", 0, java.lang.Integer.MAX_VALUE, period));
       }
 
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("identifier"))
+          this.getIdentifier().add(castToIdentifier(value));
+        else if (name.equals("patient"))
+          this.patient = castToReference(value); // Reference
+        else if (name.equals("relationship"))
+          this.relationship = castToCodeableConcept(value); // CodeableConcept
+        else if (name.equals("name"))
+          this.name = castToHumanName(value); // HumanName
+        else if (name.equals("telecom"))
+          this.getTelecom().add(castToContactPoint(value));
+        else if (name.equals("gender"))
+          this.gender = new AdministrativeGenderEnumFactory().fromType(value); // Enumeration<AdministrativeGender>
+        else if (name.equals("birthDate"))
+          this.birthDate = castToDate(value); // DateType
+        else if (name.equals("address"))
+          this.getAddress().add(castToAddress(value));
+        else if (name.equals("photo"))
+          this.getPhoto().add(castToAttachment(value));
+        else if (name.equals("period"))
+          this.period = castToPeriod(value); // Period
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("identifier")) {
+          return addIdentifier();
+        }
+        else if (name.equals("patient")) {
+          this.patient = new Reference();
+          return this.patient;
+        }
+        else if (name.equals("relationship")) {
+          this.relationship = new CodeableConcept();
+          return this.relationship;
+        }
+        else if (name.equals("name")) {
+          this.name = new HumanName();
+          return this.name;
+        }
+        else if (name.equals("telecom")) {
+          return addTelecom();
+        }
+        else if (name.equals("gender")) {
+          throw new FHIRException("Cannot call addChild on a primitive type RelatedPerson.gender");
+        }
+        else if (name.equals("birthDate")) {
+          throw new FHIRException("Cannot call addChild on a primitive type RelatedPerson.birthDate");
+        }
+        else if (name.equals("address")) {
+          return addAddress();
+        }
+        else if (name.equals("photo")) {
+          return addPhoto();
+        }
+        else if (name.equals("period")) {
+          this.period = new Period();
+          return this.period;
+        }
+        else
+          return super.addChild(name);
+      }
+
+  public String fhirType() {
+    return "RelatedPerson";
+
+  }
+
       public RelatedPerson copy() {
         RelatedPerson dst = new RelatedPerson();
         copyValues(dst);
@@ -614,7 +681,7 @@ public class RelatedPerson extends DomainResource {
   public static final String SP_ADDRESSCOUNTRY = "address-country";
   @SearchParamDefinition(name="phonetic", path="RelatedPerson.name", description="A portion of name using some kind of phonetic matching algorithm", type="string" )
   public static final String SP_PHONETIC = "phonetic";
-  @SearchParamDefinition(name="phone", path="RelatedPerson.telecom(system=phone)", description="A value in a phone contact", type="token" )
+  @SearchParamDefinition(name="phone", path="RelatedPerson.telecom.where(system='phone')", description="A value in a phone contact", type="token" )
   public static final String SP_PHONE = "phone";
   @SearchParamDefinition(name="patient", path="RelatedPerson.patient", description="The patient this person is related to", type="reference" )
   public static final String SP_PATIENT = "patient";
@@ -626,7 +693,7 @@ public class RelatedPerson extends DomainResource {
   public static final String SP_TELECOM = "telecom";
   @SearchParamDefinition(name="address-city", path="RelatedPerson.address.city", description="A city specified in an address", type="string" )
   public static final String SP_ADDRESSCITY = "address-city";
-  @SearchParamDefinition(name="email", path="RelatedPerson.telecom(system=email)", description="A value in an email contact", type="token" )
+  @SearchParamDefinition(name="email", path="RelatedPerson.telecom.where(system='email')", description="A value in an email contact", type="token" )
   public static final String SP_EMAIL = "email";
 
 }

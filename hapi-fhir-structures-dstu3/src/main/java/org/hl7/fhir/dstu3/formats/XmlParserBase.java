@@ -28,15 +28,22 @@ POSSIBILITY OF SUCH DAMAGE.
 
  */
 
-import java.io.*;
+import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.xml.stream.XMLEventReader;
-import javax.xml.stream.XMLStreamException;
-
+import org.hl7.fhir.dstu3.model.Base;
+import org.hl7.fhir.dstu3.model.DomainResource;
+import org.hl7.fhir.dstu3.model.Element;
+import org.hl7.fhir.dstu3.model.Resource;
+import org.hl7.fhir.dstu3.model.StringType;
+import org.hl7.fhir.dstu3.model.Type;
 import org.hl7.fhir.exceptions.FHIRFormatError;
-import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.utilities.xhtml.NodeType;
@@ -47,6 +54,7 @@ import org.hl7.fhir.utilities.xml.IXMLWriter;
 import org.hl7.fhir.utilities.xml.XMLWriter;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
+import org.xmlpull.v1.XmlPullParserFactory;
 
 /**
  * General parser for XML content. You instantiate an XmlParser of these, but you 
@@ -166,16 +174,15 @@ public abstract class XmlParserBase extends ParserBase implements IParser {
 
 	protected XmlPullParser loadXml(InputStream stream) throws XmlPullParserException, IOException {
 		BufferedInputStream input = new BufferedInputStream(stream);
-//		XmlPullParserFactory factory = XmlPullParserFactory.newInstance(System.getProperty(XmlPullParserFactory.PROPERTY_NAME), null);
-//		factory.setNamespaceAware(true);
-//		factory.setFeature(XmlPullParser.FEATURE_PROCESS_DOCDECL, false);
-//		XmlPullParser xpp = factory.newPullParser();
-//		xpp.setInput(input, "UTF-8");
-//		next(xpp);
-//		nextNoWhitespace(xpp);
-//
-//		return xpp;
-		throw new UnsupportedOperationException();
+		XmlPullParserFactory factory = XmlPullParserFactory.newInstance(System.getProperty(XmlPullParserFactory.PROPERTY_NAME), null);
+		factory.setNamespaceAware(true);
+		factory.setFeature(XmlPullParser.FEATURE_PROCESS_DOCDECL, false);
+		XmlPullParser xpp = factory.newPullParser();
+		xpp.setInput(input, "UTF-8");
+		next(xpp);
+		nextNoWhitespace(xpp);
+
+		return xpp;
 	}
 
 	protected int next(XmlPullParser xpp) throws XmlPullParserException, IOException {
@@ -262,7 +269,7 @@ public abstract class XmlParserBase extends ParserBase implements IParser {
 			throw new FHIRFormatError("Unknown Content "+xpp.getName()+" @ "+pathForLocation(xpp));
 	}
 
-	protected XhtmlNode parseXhtml(XMLEventReader xpp) throws IOException, FHIRFormatError, XMLStreamException {
+	protected XhtmlNode parseXhtml(XmlPullParser xpp) throws XmlPullParserException, IOException, FHIRFormatError {
 		XhtmlParser prsr = new XhtmlParser();
 		try {
 			return prsr.parseHtmlNode(xpp);
@@ -376,6 +383,8 @@ public abstract class XmlParserBase extends ParserBase implements IParser {
 		composeResource(res.getResourceType().toString(), res);
 		xml.exit(FHIR_NS, name);
 	}
+
+	
 
 	protected abstract void composeResource(String name, Resource res) throws IOException ;
 

@@ -29,19 +29,14 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Wed, Jul 13, 2016 05:32+1000 for FHIR v1.0.2
+import java.util.*;
 
+import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
-import org.hl7.fhir.instance.utilities.Utilities;
+import org.hl7.fhir.utilities.Utilities;
 
-import ca.uhn.fhir.model.api.annotation.Block;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
-import ca.uhn.fhir.model.api.annotation.ResourceDef;
-import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.*;
 /**
  * A set of information summarized from a list of other resources.
  */
@@ -65,7 +60,7 @@ public class List_ extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static ListStatus fromCode(String codeString) throws Exception {
+        public static ListStatus fromCode(String codeString) throws FHIRException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("current".equals(codeString))
@@ -74,7 +69,7 @@ public class List_ extends DomainResource {
           return RETIRED;
         if ("entered-in-error".equals(codeString))
           return ENTEREDINERROR;
-        throw new Exception("Unknown ListStatus code '"+codeString+"'");
+        throw new FHIRException("Unknown ListStatus code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -123,6 +118,20 @@ public class List_ extends DomainResource {
           return ListStatus.ENTEREDINERROR;
         throw new IllegalArgumentException("Unknown ListStatus code '"+codeString+"'");
         }
+        public Enumeration<ListStatus> fromType(Base code) throws FHIRException {
+          if (code == null || code.isEmpty())
+            return null;
+          String codeString = ((PrimitiveType) code).asStringValue();
+          if (codeString == null || "".equals(codeString))
+            return null;
+        if ("current".equals(codeString))
+          return new Enumeration<ListStatus>(this, ListStatus.CURRENT);
+        if ("retired".equals(codeString))
+          return new Enumeration<ListStatus>(this, ListStatus.RETIRED);
+        if ("entered-in-error".equals(codeString))
+          return new Enumeration<ListStatus>(this, ListStatus.ENTEREDINERROR);
+        throw new FHIRException("Unknown ListStatus code '"+codeString+"'");
+        }
     public String toCode(ListStatus code) {
       if (code == ListStatus.CURRENT)
         return "current";
@@ -151,7 +160,7 @@ public class List_ extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static ListMode fromCode(String codeString) throws Exception {
+        public static ListMode fromCode(String codeString) throws FHIRException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("working".equals(codeString))
@@ -160,7 +169,7 @@ public class List_ extends DomainResource {
           return SNAPSHOT;
         if ("changes".equals(codeString))
           return CHANGES;
-        throw new Exception("Unknown ListMode code '"+codeString+"'");
+        throw new FHIRException("Unknown ListMode code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -208,6 +217,20 @@ public class List_ extends DomainResource {
         if ("changes".equals(codeString))
           return ListMode.CHANGES;
         throw new IllegalArgumentException("Unknown ListMode code '"+codeString+"'");
+        }
+        public Enumeration<ListMode> fromType(Base code) throws FHIRException {
+          if (code == null || code.isEmpty())
+            return null;
+          String codeString = ((PrimitiveType) code).asStringValue();
+          if (codeString == null || "".equals(codeString))
+            return null;
+        if ("working".equals(codeString))
+          return new Enumeration<ListMode>(this, ListMode.WORKING);
+        if ("snapshot".equals(codeString))
+          return new Enumeration<ListMode>(this, ListMode.SNAPSHOT);
+        if ("changes".equals(codeString))
+          return new Enumeration<ListMode>(this, ListMode.CHANGES);
+        throw new FHIRException("Unknown ListMode code '"+codeString+"'");
         }
     public String toCode(ListMode code) {
       if (code == ListMode.WORKING)
@@ -437,6 +460,40 @@ public class List_ extends DomainResource {
           childrenList.add(new Property("item", "Reference(Any)", "A reference to the actual resource from which data was derived.", 0, java.lang.Integer.MAX_VALUE, item));
         }
 
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("flag"))
+          this.flag = castToCodeableConcept(value); // CodeableConcept
+        else if (name.equals("deleted"))
+          this.deleted = castToBoolean(value); // BooleanType
+        else if (name.equals("date"))
+          this.date = castToDateTime(value); // DateTimeType
+        else if (name.equals("item"))
+          this.item = castToReference(value); // Reference
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("flag")) {
+          this.flag = new CodeableConcept();
+          return this.flag;
+        }
+        else if (name.equals("deleted")) {
+          throw new FHIRException("Cannot call addChild on a primitive type List_.deleted");
+        }
+        else if (name.equals("date")) {
+          throw new FHIRException("Cannot call addChild on a primitive type List_.date");
+        }
+        else if (name.equals("item")) {
+          this.item = new Reference();
+          return this.item;
+        }
+        else
+          return super.addChild(name);
+      }
+
       public ListEntryComponent copy() {
         ListEntryComponent dst = new ListEntryComponent();
         copyValues(dst);
@@ -472,6 +529,11 @@ public class List_ extends DomainResource {
         return super.isEmpty() && (flag == null || flag.isEmpty()) && (deleted == null || deleted.isEmpty())
            && (date == null || date.isEmpty()) && (item == null || item.isEmpty());
       }
+
+  public String fhirType() {
+    return "List.entry";
+
+  }
 
   }
 
@@ -1126,6 +1188,94 @@ public class List_ extends DomainResource {
         childrenList.add(new Property("entry", "", "Entries in this list.", 0, java.lang.Integer.MAX_VALUE, entry));
         childrenList.add(new Property("emptyReason", "CodeableConcept", "If the list is empty, why the list is empty.", 0, java.lang.Integer.MAX_VALUE, emptyReason));
       }
+
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("identifier"))
+          this.getIdentifier().add(castToIdentifier(value));
+        else if (name.equals("title"))
+          this.title = castToString(value); // StringType
+        else if (name.equals("code"))
+          this.code = castToCodeableConcept(value); // CodeableConcept
+        else if (name.equals("subject"))
+          this.subject = castToReference(value); // Reference
+        else if (name.equals("source"))
+          this.source = castToReference(value); // Reference
+        else if (name.equals("encounter"))
+          this.encounter = castToReference(value); // Reference
+        else if (name.equals("status"))
+          this.status = new ListStatusEnumFactory().fromType(value); // Enumeration<ListStatus>
+        else if (name.equals("date"))
+          this.date = castToDateTime(value); // DateTimeType
+        else if (name.equals("orderedBy"))
+          this.orderedBy = castToCodeableConcept(value); // CodeableConcept
+        else if (name.equals("mode"))
+          this.mode = new ListModeEnumFactory().fromType(value); // Enumeration<ListMode>
+        else if (name.equals("note"))
+          this.note = castToString(value); // StringType
+        else if (name.equals("entry"))
+          this.getEntry().add((ListEntryComponent) value);
+        else if (name.equals("emptyReason"))
+          this.emptyReason = castToCodeableConcept(value); // CodeableConcept
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("identifier")) {
+          return addIdentifier();
+        }
+        else if (name.equals("title")) {
+          throw new FHIRException("Cannot call addChild on a primitive type List_.title");
+        }
+        else if (name.equals("code")) {
+          this.code = new CodeableConcept();
+          return this.code;
+        }
+        else if (name.equals("subject")) {
+          this.subject = new Reference();
+          return this.subject;
+        }
+        else if (name.equals("source")) {
+          this.source = new Reference();
+          return this.source;
+        }
+        else if (name.equals("encounter")) {
+          this.encounter = new Reference();
+          return this.encounter;
+        }
+        else if (name.equals("status")) {
+          throw new FHIRException("Cannot call addChild on a primitive type List_.status");
+        }
+        else if (name.equals("date")) {
+          throw new FHIRException("Cannot call addChild on a primitive type List_.date");
+        }
+        else if (name.equals("orderedBy")) {
+          this.orderedBy = new CodeableConcept();
+          return this.orderedBy;
+        }
+        else if (name.equals("mode")) {
+          throw new FHIRException("Cannot call addChild on a primitive type List_.mode");
+        }
+        else if (name.equals("note")) {
+          throw new FHIRException("Cannot call addChild on a primitive type List_.note");
+        }
+        else if (name.equals("entry")) {
+          return addEntry();
+        }
+        else if (name.equals("emptyReason")) {
+          this.emptyReason = new CodeableConcept();
+          return this.emptyReason;
+        }
+        else
+          return super.addChild(name);
+      }
+
+  public String fhirType() {
+    return "List";
+
+  }
 
       public List_ copy() {
         List_ dst = new List_();

@@ -19,13 +19,7 @@ package ca.uhn.fhir.rest.annotation;
  * limitations under the License.
  * #L%
  */
-
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-
-import ca.uhn.fhir.rest.server.IResourceProvider;
+import java.lang.annotation.*;
 
 /**
  * Denotes a parameter for a REST method which will contain the resource actually 
@@ -37,7 +31,7 @@ import ca.uhn.fhir.rest.server.IResourceProvider;
  * <p>
  * Parameters with this annotation should typically be of the type of resource being
  * operated on (see below for an exception when raw data is required). For example, in a
- * {@link IResourceProvider} for Patient resources, the parameter annotated with this
+ * IResourceProvider for Patient resources, the parameter annotated with this
  * annotation should be of type Patient. 
  * </p>
  * <p>

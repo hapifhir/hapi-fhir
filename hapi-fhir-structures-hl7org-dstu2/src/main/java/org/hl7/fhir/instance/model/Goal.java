@@ -29,18 +29,13 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Wed, Jul 13, 2016 05:32+1000 for FHIR v1.0.2
+import java.util.*;
 
+import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 
-import ca.uhn.fhir.model.api.annotation.Block;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
-import ca.uhn.fhir.model.api.annotation.ResourceDef;
-import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.*;
 /**
  * Describes the intended objective(s) for a patient, group or organization care, for example, weight loss, restoring an activity of daily living, obtaining herd immunity via immunization, meeting a process improvement objective, etc.
  */
@@ -88,7 +83,7 @@ public class Goal extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static GoalStatus fromCode(String codeString) throws Exception {
+        public static GoalStatus fromCode(String codeString) throws FHIRException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("proposed".equals(codeString))
@@ -109,7 +104,7 @@ public class Goal extends DomainResource {
           return ONHOLD;
         if ("cancelled".equals(codeString))
           return CANCELLED;
-        throw new Exception("Unknown GoalStatus code '"+codeString+"'");
+        throw new FHIRException("Unknown GoalStatus code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -194,6 +189,32 @@ public class Goal extends DomainResource {
           return GoalStatus.CANCELLED;
         throw new IllegalArgumentException("Unknown GoalStatus code '"+codeString+"'");
         }
+        public Enumeration<GoalStatus> fromType(Base code) throws FHIRException {
+          if (code == null || code.isEmpty())
+            return null;
+          String codeString = ((PrimitiveType) code).asStringValue();
+          if (codeString == null || "".equals(codeString))
+            return null;
+        if ("proposed".equals(codeString))
+          return new Enumeration<GoalStatus>(this, GoalStatus.PROPOSED);
+        if ("planned".equals(codeString))
+          return new Enumeration<GoalStatus>(this, GoalStatus.PLANNED);
+        if ("accepted".equals(codeString))
+          return new Enumeration<GoalStatus>(this, GoalStatus.ACCEPTED);
+        if ("rejected".equals(codeString))
+          return new Enumeration<GoalStatus>(this, GoalStatus.REJECTED);
+        if ("in-progress".equals(codeString))
+          return new Enumeration<GoalStatus>(this, GoalStatus.INPROGRESS);
+        if ("achieved".equals(codeString))
+          return new Enumeration<GoalStatus>(this, GoalStatus.ACHIEVED);
+        if ("sustaining".equals(codeString))
+          return new Enumeration<GoalStatus>(this, GoalStatus.SUSTAINING);
+        if ("on-hold".equals(codeString))
+          return new Enumeration<GoalStatus>(this, GoalStatus.ONHOLD);
+        if ("cancelled".equals(codeString))
+          return new Enumeration<GoalStatus>(this, GoalStatus.CANCELLED);
+        throw new FHIRException("Unknown GoalStatus code '"+codeString+"'");
+        }
     public String toCode(GoalStatus code) {
       if (code == GoalStatus.PROPOSED)
         return "proposed";
@@ -245,26 +266,26 @@ public class Goal extends DomainResource {
         /**
          * @return {@link #result} (Details of what's changed (or not changed).)
          */
-        public CodeableConcept getResultCodeableConcept() throws Exception { 
+        public CodeableConcept getResultCodeableConcept() throws FHIRException { 
           if (!(this.result instanceof CodeableConcept))
-            throw new Exception("Type mismatch: the type CodeableConcept was expected, but "+this.result.getClass().getName()+" was encountered");
+            throw new FHIRException("Type mismatch: the type CodeableConcept was expected, but "+this.result.getClass().getName()+" was encountered");
           return (CodeableConcept) this.result;
         }
 
-        public boolean hasResultCodeableConcept() throws Exception { 
+        public boolean hasResultCodeableConcept() { 
           return this.result instanceof CodeableConcept;
         }
 
         /**
          * @return {@link #result} (Details of what's changed (or not changed).)
          */
-        public Reference getResultReference() throws Exception { 
+        public Reference getResultReference() throws FHIRException { 
           if (!(this.result instanceof Reference))
-            throw new Exception("Type mismatch: the type Reference was expected, but "+this.result.getClass().getName()+" was encountered");
+            throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.result.getClass().getName()+" was encountered");
           return (Reference) this.result;
         }
 
-        public boolean hasResultReference() throws Exception { 
+        public boolean hasResultReference() { 
           return this.result instanceof Reference;
         }
 
@@ -284,6 +305,28 @@ public class Goal extends DomainResource {
           super.listChildren(childrenList);
           childrenList.add(new Property("result[x]", "CodeableConcept|Reference(Observation)", "Details of what's changed (or not changed).", 0, java.lang.Integer.MAX_VALUE, result));
         }
+
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("result[x]"))
+          this.result = (Type) value; // Type
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("resultCodeableConcept")) {
+          this.result = new CodeableConcept();
+          return this.result;
+        }
+        else if (name.equals("resultReference")) {
+          this.result = new Reference();
+          return this.result;
+        }
+        else
+          return super.addChild(name);
+      }
 
       public GoalOutcomeComponent copy() {
         GoalOutcomeComponent dst = new GoalOutcomeComponent();
@@ -315,6 +358,11 @@ public class Goal extends DomainResource {
       public boolean isEmpty() {
         return super.isEmpty() && (result == null || result.isEmpty());
       }
+
+  public String fhirType() {
+    return "Goal.outcome";
+
+  }
 
   }
 
@@ -538,26 +586,26 @@ public class Goal extends DomainResource {
     /**
      * @return {@link #start} (The date or event after which the goal should begin being pursued.)
      */
-    public DateType getStartDateType() throws Exception { 
+    public DateType getStartDateType() throws FHIRException { 
       if (!(this.start instanceof DateType))
-        throw new Exception("Type mismatch: the type DateType was expected, but "+this.start.getClass().getName()+" was encountered");
+        throw new FHIRException("Type mismatch: the type DateType was expected, but "+this.start.getClass().getName()+" was encountered");
       return (DateType) this.start;
     }
 
-    public boolean hasStartDateType() throws Exception { 
+    public boolean hasStartDateType() { 
       return this.start instanceof DateType;
     }
 
     /**
      * @return {@link #start} (The date or event after which the goal should begin being pursued.)
      */
-    public CodeableConcept getStartCodeableConcept() throws Exception { 
+    public CodeableConcept getStartCodeableConcept() throws FHIRException { 
       if (!(this.start instanceof CodeableConcept))
-        throw new Exception("Type mismatch: the type CodeableConcept was expected, but "+this.start.getClass().getName()+" was encountered");
+        throw new FHIRException("Type mismatch: the type CodeableConcept was expected, but "+this.start.getClass().getName()+" was encountered");
       return (CodeableConcept) this.start;
     }
 
-    public boolean hasStartCodeableConcept() throws Exception { 
+    public boolean hasStartCodeableConcept() { 
       return this.start instanceof CodeableConcept;
     }
 
@@ -583,26 +631,26 @@ public class Goal extends DomainResource {
     /**
      * @return {@link #target} (Indicates either the date or the duration after start by which the goal should be met.)
      */
-    public DateType getTargetDateType() throws Exception { 
+    public DateType getTargetDateType() throws FHIRException { 
       if (!(this.target instanceof DateType))
-        throw new Exception("Type mismatch: the type DateType was expected, but "+this.target.getClass().getName()+" was encountered");
+        throw new FHIRException("Type mismatch: the type DateType was expected, but "+this.target.getClass().getName()+" was encountered");
       return (DateType) this.target;
     }
 
-    public boolean hasTargetDateType() throws Exception { 
+    public boolean hasTargetDateType() { 
       return this.target instanceof DateType;
     }
 
     /**
      * @return {@link #target} (Indicates either the date or the duration after start by which the goal should be met.)
      */
-    public Duration getTargetDuration() throws Exception { 
+    public Duration getTargetDuration() throws FHIRException { 
       if (!(this.target instanceof Duration))
-        throw new Exception("Type mismatch: the type Duration was expected, but "+this.target.getClass().getName()+" was encountered");
+        throw new FHIRException("Type mismatch: the type Duration was expected, but "+this.target.getClass().getName()+" was encountered");
       return (Duration) this.target;
     }
 
-    public boolean hasTargetDuration() throws Exception { 
+    public boolean hasTargetDuration() { 
       return this.target instanceof Duration;
     }
 
@@ -1030,6 +1078,107 @@ public class Goal extends DomainResource {
         childrenList.add(new Property("note", "Annotation", "Any comments related to the goal.", 0, java.lang.Integer.MAX_VALUE, note));
         childrenList.add(new Property("outcome", "", "Identifies the change (or lack of change) at the point where the goal was deepmed to be cancelled or achieved.", 0, java.lang.Integer.MAX_VALUE, outcome));
       }
+
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("identifier"))
+          this.getIdentifier().add(castToIdentifier(value));
+        else if (name.equals("subject"))
+          this.subject = castToReference(value); // Reference
+        else if (name.equals("start[x]"))
+          this.start = (Type) value; // Type
+        else if (name.equals("target[x]"))
+          this.target = (Type) value; // Type
+        else if (name.equals("category"))
+          this.getCategory().add(castToCodeableConcept(value));
+        else if (name.equals("description"))
+          this.description = castToString(value); // StringType
+        else if (name.equals("status"))
+          this.status = new GoalStatusEnumFactory().fromType(value); // Enumeration<GoalStatus>
+        else if (name.equals("statusDate"))
+          this.statusDate = castToDate(value); // DateType
+        else if (name.equals("statusReason"))
+          this.statusReason = castToCodeableConcept(value); // CodeableConcept
+        else if (name.equals("author"))
+          this.author = castToReference(value); // Reference
+        else if (name.equals("priority"))
+          this.priority = castToCodeableConcept(value); // CodeableConcept
+        else if (name.equals("addresses"))
+          this.getAddresses().add(castToReference(value));
+        else if (name.equals("note"))
+          this.getNote().add(castToAnnotation(value));
+        else if (name.equals("outcome"))
+          this.getOutcome().add((GoalOutcomeComponent) value);
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("identifier")) {
+          return addIdentifier();
+        }
+        else if (name.equals("subject")) {
+          this.subject = new Reference();
+          return this.subject;
+        }
+        else if (name.equals("startDate")) {
+          this.start = new DateType();
+          return this.start;
+        }
+        else if (name.equals("startCodeableConcept")) {
+          this.start = new CodeableConcept();
+          return this.start;
+        }
+        else if (name.equals("targetDate")) {
+          this.target = new DateType();
+          return this.target;
+        }
+        else if (name.equals("targetDuration")) {
+          this.target = new Duration();
+          return this.target;
+        }
+        else if (name.equals("category")) {
+          return addCategory();
+        }
+        else if (name.equals("description")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Goal.description");
+        }
+        else if (name.equals("status")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Goal.status");
+        }
+        else if (name.equals("statusDate")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Goal.statusDate");
+        }
+        else if (name.equals("statusReason")) {
+          this.statusReason = new CodeableConcept();
+          return this.statusReason;
+        }
+        else if (name.equals("author")) {
+          this.author = new Reference();
+          return this.author;
+        }
+        else if (name.equals("priority")) {
+          this.priority = new CodeableConcept();
+          return this.priority;
+        }
+        else if (name.equals("addresses")) {
+          return addAddresses();
+        }
+        else if (name.equals("note")) {
+          return addNote();
+        }
+        else if (name.equals("outcome")) {
+          return addOutcome();
+        }
+        else
+          return super.addChild(name);
+      }
+
+  public String fhirType() {
+    return "Goal";
+
+  }
 
       public Goal copy() {
         Goal dst = new Goal();

@@ -52,8 +52,12 @@ public abstract class BaseJavaConfig${versionCapitalized} extends ca.uhn.fhir.jp
 		IFhirResourceDaoValueSet<ca.uhn.fhir.model.dstu2.resource.ValueSet, ca.uhn.fhir.model.dstu2.composite.CodingDt, ca.uhn.fhir.model.dstu2.composite.CodeableConceptDt>
 #elseif ( ${versionCapitalized} == 'Dstu3' && ${res.name} == 'ValueSet' )
 		IFhirResourceDaoValueSet<org.hl7.fhir.dstu3.model.ValueSet, org.hl7.fhir.dstu3.model.Coding, org.hl7.fhir.dstu3.model.CodeableConcept>
+#elseif ( ${versionCapitalized} == 'R4' && ${res.name} == 'ValueSet' )
+		IFhirResourceDaoValueSet<org.hl7.fhir.r4.model.ValueSet, org.hl7.fhir.r4.model.Coding, org.hl7.fhir.r4.model.CodeableConcept>
 #elseif ( ${versionCapitalized} == 'Dstu3' && ${res.name} == 'CodeSystem' )
 		IFhirResourceDaoCodeSystem<org.hl7.fhir.dstu3.model.CodeSystem, org.hl7.fhir.dstu3.model.Coding, org.hl7.fhir.dstu3.model.CodeableConcept>
+#elseif ( ${versionCapitalized} == 'R4' && ${res.name} == 'CodeSystem' )
+		IFhirResourceDaoCodeSystem<org.hl7.fhir.r4.model.CodeSystem, org.hl7.fhir.r4.model.Coding, org.hl7.fhir.r4.model.CodeableConcept>
 #elseif ( ${versionCapitalized} != 'Dstu1' && ( ${res.name} == 'Encounter' || ${res.name} == 'Everything' || ${res.name} == 'Patient' || ${res.name} == 'Subscription' || ${res.name} == 'SearchParameter'))
 		IFhirResourceDao${res.name}<${resourcePackage}.${res.declaringClassNameComplete}>
 #else

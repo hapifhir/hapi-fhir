@@ -6,7 +6,62 @@
 		<title>HAPI FHIR Changelog</title>
 	</properties>
 	<body>
+		<release version="3.0" date="TBD">
+			<action type="add">
+				Bump the version of a few dependencies to the
+				latest versions (dependent HAPI modules listed in brackets):
+				<![CDATA[
+					<ul>
+						<li>Gson (JSON Parser): 2.8.0 -&gt; 2.8.1</li>
+						<li>Commons-lang3 (Everywhere): 3.5 -&gt; 3.6</li>
+						<!--<li>Saxon-HE (Validator): 9.5.1-5 -&gt; 9.8.0-3</li>-->
+						<li>Apache HttpClient (FHIR Client): 4.5.2 -&gt; 4.5.3</li>
+						<li>Apache HttpCore (FHIR Client): 4.4.5 -&gt; 4.4.6</li>
+						<li>Phloc Commons (Schematron Validator): 4.4.6 -&gt; 4.4.11</li>
+						<li>Hibernate (JPA): 5.2.9 -&gt; 5.2.10</li>
+						<li>Spring (JPA): 4.3.7.RELEASE -&gt; 4.3.10.RELEASE</li>
+						<li>Thymeleaf (Testpage Overlay): 3.0.2.RELEASE -&gt; 3.0.7.RELEASE</li>
+					</ul>
+				]]>
+			</action>
+
+			<action type="fix">
+				hapi-fhir-client-okhttp project POM had dependencies on both
+				hapi-fhir-structures-dstu2 and hapi-fhir-structures-dstu3, which 
+				meant that any project using ookhttp would import both structures
+				JARs. This has been removed.
+			</action>
+			<action type="add">
+				JPA server is now able to handle placeholder IDs (e.g. urn:uuid:00....000)
+				being used in Bundle.entry.request.url as a part of the conditional URL 
+				within transactions.
+			</action>
+			<action type="fix">
+				Schematron validator now applies invariants to resources within a Bundle, not
+				just to the outer Bundle resource itself
+			</action>
+			<action type="fix">
+				Server and Client both still included Category header for resource tags even though
+				this feature was only present in FHIR DSTU1 and was removed from the specification in
+				FHIR DSTU2. The presence of these headers sometimes caused parsed resource instances
+				to contain duplicate tags
+			</action>
+		</release>
 		<release version="2.6" date="TBD">
+			<action type="add">
+				<ul>
+					<li>AddProfileTagEnum moved from package ca.uhn.fhir.rest.server to package ca.uhn.fhir.context.api</li>
+					<li>IVersionSpecificBundleFactory moved from package ca.uhn.fhir.rest.server to package ca.uhn.fhir.context.api</li>
+					<li>BundleInclusionRule moved from package ca.uhn.fhir.rest.server to package ca.uhn.fhir.context.api</li>
+					<li>RestSearchParameterTypeEnum moved from package ca.uhn.fhir.rest.server to package ca.uhn.fhir.rest.api</li>
+					<li>EncodingEnum moved from package ca.uhn.fhir.rest.server to package ca.uhn.fhir.rest.api</li>
+					<li>Constants moved from package ca.uhn.fhir.rest.server to package ca.uhn.fhir.rest.api</li>
+					<li>IClientInterceptor moved from package ca.uhn.fhir.rest.client to package ca.uhn.fhir.rest.client.api</li>
+					<li>IGenericClient moved from package ca.uhn.fhir.rest.client to package ca.uhn.fhir.rest.client.api</li>
+					<li>IRestfulClient moved from package ca.uhn.fhir.rest.client to package ca.uhn.fhir.rest.client.api</li>
+					<li>ITestingUiClientFactory moved from package ca.uhn.fhir.util to package ca.uhn.fhir.rest.server.util</li>
+				</ul>
+			</action>
 			<action type="fix" issue="667">
 				When using the AuthorizationInterceptor with the JPA server, when a client is updating a resource
 				from A to B, the user now needs to have write permission for both A and B. This is particularly 
@@ -135,6 +190,14 @@
 				is often the case in more recent versions of HAPI). Thanks to Sujay R
 				for reporting!
 			</action>
+			<action type="fix">
+				When the server was returning a multi-page search result where the
+				client did not explicitly request an encoding via the _format 
+				parameter, a _format parameter was incorrectly added to the paging
+				links in the response Bundle. This would often explicitly request
+				XML encoding because of the browser Accept header even though
+				this was not what the client wanted.
+			</action>
 			<action type="add" issue="651">
 				Enhancement to ResponseHighlighterInterceptor where links in the resource 
 				body are now converted to actual clickable hyperlinks. Thanks to Eugene Lubarsky
@@ -200,6 +263,11 @@
 			<action type="fix" issue="699">
 				Fix an unfortunate typo in the custom structures documentation. Thanks to
 				Jason Owen for the PR!
+			</action>
+			<action type="fix" issue="686">
+				Correct an issue in the validator (DSTU3/R4) where elements were not always
+				correctly validated if the element contained only a profiled extension. Thanks
+				to Sébastien Rivière for the pull request!
 			</action>
 			<action type="add" issue="701">
 				Testing UI now has a dropdown for modifiers on token search. Thanks 

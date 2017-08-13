@@ -29,16 +29,15 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
+// Generated on Wed, Jul 13, 2016 05:32+1000 for FHIR v1.0.2
 import java.util.Date;
 import java.util.List;
 
+import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.ICompositeType;
-import org.hl7.fhir.instance.utilities.Utilities;
+import org.hl7.fhir.utilities.Utilities;
 
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.DatatypeDef;
-import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.*;
 /**
  * For referring to data content defined in other formats.
  */
@@ -509,6 +508,63 @@ public class Attachment extends Type implements ICompositeType {
         childrenList.add(new Property("title", "string", "A label or set of text to display in place of the data.", 0, java.lang.Integer.MAX_VALUE, title));
         childrenList.add(new Property("creation", "dateTime", "The date that the attachment was first created.", 0, java.lang.Integer.MAX_VALUE, creation));
       }
+
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("contentType"))
+          this.contentType = castToCode(value); // CodeType
+        else if (name.equals("language"))
+          this.language = castToCode(value); // CodeType
+        else if (name.equals("data"))
+          this.data = castToBase64Binary(value); // Base64BinaryType
+        else if (name.equals("url"))
+          this.url = castToUri(value); // UriType
+        else if (name.equals("size"))
+          this.size = castToUnsignedInt(value); // UnsignedIntType
+        else if (name.equals("hash"))
+          this.hash = castToBase64Binary(value); // Base64BinaryType
+        else if (name.equals("title"))
+          this.title = castToString(value); // StringType
+        else if (name.equals("creation"))
+          this.creation = castToDateTime(value); // DateTimeType
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("contentType")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Attachment.contentType");
+        }
+        else if (name.equals("language")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Attachment.language");
+        }
+        else if (name.equals("data")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Attachment.data");
+        }
+        else if (name.equals("url")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Attachment.url");
+        }
+        else if (name.equals("size")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Attachment.size");
+        }
+        else if (name.equals("hash")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Attachment.hash");
+        }
+        else if (name.equals("title")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Attachment.title");
+        }
+        else if (name.equals("creation")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Attachment.creation");
+        }
+        else
+          return super.addChild(name);
+      }
+
+  public String fhirType() {
+    return "Attachment";
+
+  }
 
       public Attachment copy() {
         Attachment dst = new Attachment();

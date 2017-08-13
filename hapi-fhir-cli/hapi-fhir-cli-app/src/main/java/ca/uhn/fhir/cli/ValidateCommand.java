@@ -1,39 +1,22 @@
 package ca.uhn.fhir.cli;
 
-import static org.apache.commons.lang3.StringUtils.defaultString;
-import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-import static org.apache.commons.lang3.StringUtils.leftPad;
+import static org.apache.commons.lang3.StringUtils.*;
 import static org.fusesource.jansi.Ansi.ansi;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.Option;
-import org.apache.commons.cli.OptionGroup;
-import org.apache.commons.cli.Options;
-import org.apache.commons.cli.ParseException;
+import org.apache.commons.cli.*;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.text.WordUtils;
 import org.fusesource.jansi.Ansi.Color;
-import org.hl7.fhir.dstu3.hapi.validation.DefaultProfileValidationSupport;
-import org.hl7.fhir.dstu3.hapi.validation.FhirInstanceValidator;
-import org.hl7.fhir.dstu3.hapi.validation.ValidationSupportChain;
+import org.hl7.fhir.dstu3.hapi.validation.*;
 import org.hl7.fhir.dstu3.model.StructureDefinition;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import com.phloc.commons.io.file.FileUtils;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.method.MethodUtil;
-import ca.uhn.fhir.rest.server.EncodingEnum;
-import ca.uhn.fhir.validation.FhirValidator;
-import ca.uhn.fhir.validation.SingleValidationMessage;
-import ca.uhn.fhir.validation.ValidationResult;
+import ca.uhn.fhir.validation.*;
 
 public class ValidateCommand extends BaseCommand {
 
@@ -89,7 +72,7 @@ public class ValidateCommand extends BaseCommand {
 			ourLog.info("Fully read - Size is {}", FileUtils.getFileSizeDisplay(contents.length()));
 		}
 
-		EncodingEnum enc = MethodUtil.detectEncodingNoDefault(defaultString(contents));
+		ca.uhn.fhir.rest.api.EncodingEnum enc = ca.uhn.fhir.rest.api.EncodingEnum.detectEncodingNoDefault(defaultString(contents));
 		if (enc == null) {
 			throw new ParseException("Could not detect encoding (json/xml) of contents");
 		}
@@ -108,7 +91,7 @@ public class ValidateCommand extends BaseCommand {
 				throw new ParseException("Failed to load file '" + localProfile + "' - Error: " + e.toString());
 			}
 
-			localProfileResource = MethodUtil.detectEncodingNoDefault(input).newParser(ctx).parseResource(input);
+			localProfileResource = ca.uhn.fhir.rest.api.EncodingEnum.detectEncodingNoDefault(input).newParser(ctx).parseResource(input);
 		}
 
 		if (theCommandLine.hasOption("p")) {
