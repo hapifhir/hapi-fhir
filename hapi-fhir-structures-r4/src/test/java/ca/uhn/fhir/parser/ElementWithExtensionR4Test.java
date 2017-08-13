@@ -2,21 +2,20 @@ package ca.uhn.fhir.parser;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.util.TestUtil;
-import org.hl7.fhir.dstu3.model.*;
+import org.hl7.fhir.r4.model.*;
 import org.junit.AfterClass;
 import org.junit.Test;
 
 import static org.hamcrest.Matchers.containsString;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
+import static org.junit.Assert.*;
 
 /**
  * Created by Sébastien Rivière 12/04/2017
  */
-public class ElementWithExtensionDstu3Test {
+public class ElementWithExtensionR4Test {
 
-    private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ca.uhn.fhir.parser.ElementWithExtensionDstu3Test.class);
-    private final FhirContext ctx = FhirContext.forDstu3();
+    private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ElementWithExtensionR4Test.class);
+    private static FhirContext ourCtx = FhirContext.forR4();
 
     @AfterClass
     public static void afterClassClearContext() {
@@ -43,7 +42,7 @@ public class ElementWithExtensionDstu3Test {
         ext.setUrl("/myExt");
         patient.addExtension(ext);
 
-        final IParser parser = ctx.newJsonParser().setPrettyPrint(true);
+        final IParser parser = ourCtx.newJsonParser().setPrettyPrint(true);
         final String json = parser.encodeResourceToString(patient);
 
         ourLog.info(json);
@@ -61,7 +60,7 @@ public class ElementWithExtensionDstu3Test {
         patient.getExtensionsByUrl("/petname");
         patient.getPetName().addExtension("http://hl7.org/fhir/StructureDefinition/iso21090-nullFlavor", new StringType("UNK"));
 
-        final IParser parser = ctx.newJsonParser().setPrettyPrint(true);
+        final IParser parser = ourCtx.newJsonParser().setPrettyPrint(true);
         final String json = parser.encodeResourceToString(patient);
 
         ourLog.info(json);
@@ -90,7 +89,7 @@ public class ElementWithExtensionDstu3Test {
         ext.setUrl("/myExt");
         patient.addExtension(ext);
 
-        final IParser parser = ctx.newXmlParser().setPrettyPrint(true);
+        final IParser parser = ourCtx.newXmlParser().setPrettyPrint(true);
         final String xml = parser.encodeResourceToString(patient);
 
         ourLog.info(xml);
@@ -110,7 +109,7 @@ public class ElementWithExtensionDstu3Test {
         patient.getExtensionsByUrl("/petname");
         patient.getPetName().addExtension("http://hl7.org/fhir/StructureDefinition/iso21090-nullFlavor", new StringType("UNK"));
 
-        final IParser parser = ctx.newXmlParser().setPrettyPrint(true);
+        final IParser parser = ourCtx.newXmlParser().setPrettyPrint(true);
         final String xml = parser.encodeResourceToString(patient);
 
         ourLog.info(xml);
@@ -125,7 +124,7 @@ public class ElementWithExtensionDstu3Test {
         MyPatientWithCustomUrlExtension patient = new MyPatientWithCustomUrlExtension();
         patient.setId("1");
         patient.getIdElement().addExtension("http://hl7.org/fhir/StructureDefinition/iso21090-nullFlavor", new StringType("UNK"));
-        final IParser parser = ctx.newJsonParser().setPrettyPrint(true);
+        final IParser parser = ourCtx.newJsonParser().setPrettyPrint(true);
         final String json = parser.encodeResourceToString(patient);
 
         ourLog.info(json);
@@ -139,7 +138,7 @@ public class ElementWithExtensionDstu3Test {
         MyPatientWithCustomUrlExtension patient = new MyPatientWithCustomUrlExtension();
         patient.setId("1");
         patient.getIdElement().addExtension("http://hl7.org/fhir/StructureDefinition/iso21090-nullFlavor", new StringType("UNK"));
-        final IParser parser = ctx.newXmlParser().setPrettyPrint(true);
+        final IParser parser = ourCtx.newXmlParser().setPrettyPrint(true);
         final String xml = parser.encodeResourceToString(patient);
 
         ourLog.info(xml);
@@ -154,7 +153,7 @@ public class ElementWithExtensionDstu3Test {
         patient.setId("1");
         patient.setCustomId(new IdType(("4")));
         patient.getCustomId().addExtension("http://hl7.org/fhir/StructureDefinition/iso21090-nullFlavor", new StringType("UNK"));
-        final IParser parser = ctx.newJsonParser().setPrettyPrint(true);
+        final IParser parser = ourCtx.newJsonParser().setPrettyPrint(true);
         final String json = parser.encodeResourceToString(patient);
 
         ourLog.info(json);
@@ -167,7 +166,7 @@ public class ElementWithExtensionDstu3Test {
     public void testNullFlavorExtensionIDDatatypeXml() throws Exception {
         MyPatientWithCustomUrlExtension patient = new MyPatientWithCustomUrlExtension();
         patient.setId("1");
-        final IParser parser = ctx.newXmlParser().setPrettyPrint(true);
+        final IParser parser = ourCtx.newXmlParser().setPrettyPrint(true);
         patient.setCustomId(new IdType(("4")));
         patient.getCustomId().addExtension("http://hl7.org/fhir/StructureDefinition/iso21090-nullFlavor", new StringType("UNK"));
 
@@ -186,7 +185,7 @@ public class ElementWithExtensionDstu3Test {
 		p.getIdElement().setValue("123");
 		p.getIdElement().addExtension().setUrl("http://foo").setValue(new StringType("FOO"));
 
-		IParser parser = ctx.newXmlParser();
+		IParser parser = ourCtx.newXmlParser();
 		String encoded = parser.encodeResourceToString(p);
 		assertThat(encoded, containsString("http://foo"));
 		assertThat(encoded, containsString("FOO"));
@@ -207,7 +206,7 @@ public class ElementWithExtensionDstu3Test {
 		p.getIdElement().setValue("123");
 		p.getIdElement().addExtension().setUrl("http://foo").setValue(new StringType("FOO"));
 
-		IParser parser = ctx.newJsonParser();
+		IParser parser = ourCtx.newJsonParser();
 		String encoded = parser.encodeResourceToString(p);
 		assertThat(encoded, containsString("http://foo"));
 		assertThat(encoded, containsString("FOO"));
