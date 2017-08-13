@@ -84,7 +84,38 @@ public class IdDtTest {
 		assertEquals("foo/_history/2", id.withVersion("2").getValue());
 	}
 
-	
+	@Test
+	public void testBaseUrlFoo1() {
+		IdDt id = new IdDt("http://my.org/foo");
+		assertEquals("http://my.org/foo", id.getValueAsString());
+		assertEquals(null, id.getIdPart());
+		assertEquals("foo", id.toUnqualified().getValueAsString());
+		assertEquals("foo", id.toUnqualifiedVersionless().getValueAsString());
+		assertEquals(null, id.getVersionIdPart());
+		assertEquals("foo", id.getResourceType());
+		assertEquals("http://my.org", id.getBaseUrl());
+
+		assertEquals("Patient", id.withResourceType("Patient").getValue());
+		assertEquals("http://foo/Patient", id.withServerBase("http://foo", "Patient").getValue());
+		assertEquals("http://my.org/foo//_history/2", id.withVersion("2").getValue());
+	}
+
+	@Test
+	public void testBaseUrlFoo2() {
+		IdDt id = new IdDt("http://my.org/a/b/c/foo");
+		assertEquals("http://my.org/a/b/c/foo", id.getValueAsString());
+		assertEquals("foo", id.getIdPart());
+		assertEquals("c/foo", id.toUnqualified().getValueAsString());
+		assertEquals("c/foo", id.toUnqualifiedVersionless().getValueAsString());
+		assertEquals(null, id.getVersionIdPart());
+		assertEquals("c", id.getResourceType());
+		assertEquals("http://my.org/a/b", id.getBaseUrl());
+
+		assertEquals("Patient/foo", id.withResourceType("Patient").getValue());
+		assertEquals("http://foo/Patient/foo", id.withServerBase("http://foo", "Patient").getValue());
+		assertEquals("http://my.org/a/b/c/foo/_history/2", id.withVersion("2").getValue());
+	}
+
 	@Test
 	public void testDetectIsIdPartValid() {
 		assertTrue(new IdDt("0").isIdPartValid());

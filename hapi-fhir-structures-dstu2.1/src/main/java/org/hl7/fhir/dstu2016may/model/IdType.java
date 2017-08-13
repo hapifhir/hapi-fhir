@@ -358,11 +358,16 @@ public final class IdType extends UriType implements IPrimitiveType<String>, IId
         b.append(myResourceType);
       }
 
-      if (b.length() > 0) {
+      if (b.length() > 0 && isNotBlank(myUnqualifiedId)) {
         b.append('/');
       }
 
-      b.append(myUnqualifiedId);
+      if (isNotBlank(myUnqualifiedId)) {
+        b.append(myUnqualifiedId);
+      } else if (isNotBlank(myUnqualifiedVersionId)) {
+        b.append('/');
+      }
+
       if (isNotBlank(myUnqualifiedVersionId)) {
         b.append('/');
         b.append("_history");
@@ -554,7 +559,21 @@ public final class IdType extends UriType implements IPrimitiveType<String>, IId
         if (typeIndex == -1) {
           myResourceType = theValue.substring(0, idIndex);
         } else {
-          myResourceType = theValue.substring(typeIndex + 1, idIndex);
+          if (typeIndex > 0 && '/' == theValue.charAt(typeIndex - 1)) {
+            typeIndex = theValue.indexOf('/', typeIndex + 1);
+          }
+          if (typeIndex >= idIndex) {
+            // e.g. http://example.org/foo
+            // 'foo' was the id but we're making that the resource type. Nullify the id part because we don't have an id.
+            // Also set null value to the super.setValue() and enable myHaveComponentParts so it forces getValue() to properly
+            // recreate the url
+            myResourceType = myUnqualifiedId;
+            myUnqualifiedId = null;
+            super.setValue(null);
+            myHaveComponentParts = true;
+          } else {
+            myResourceType = theValue.substring(typeIndex + 1, idIndex);
+          }
 
           if (typeIndex > 4) {
             myBaseUrl = theValue.substring(0, typeIndex);

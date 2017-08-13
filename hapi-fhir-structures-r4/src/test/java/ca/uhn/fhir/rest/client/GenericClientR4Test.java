@@ -108,7 +108,31 @@ public class GenericClientR4Test {
     return capt;
   }
 
-  @Test
+	@Test
+	public void testSearchWithNoExplicitBundleReturnType() throws Exception {
+
+		String msg = ClientR4Test.getPatientFeedWithOneResult();
+
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+
+		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
+
+		// httpResponse = new BasicHttpResponse(statusline, catalog, locale)
+		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
+
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://foo");
+		Bundle response = (Bundle) client.search().forResource(Patient.class).execute();
+
+		assertEquals("http://foo/Patient", capt.getValue().getURI().toString());
+		Patient patient = (Patient) response.getEntry().get(0).getResource();
+		assertEquals("PRP1660", patient.getIdentifier().get(0).getValueElement().getValue());
+
+	}
+
+
+	@Test
   public void testAcceptHeaderWithEncodingSpecified() throws Exception {
     final String msg = "{\"resourceType\":\"Bundle\",\"id\":null,\"base\":\"http://localhost:57931/fhir/contextDev\",\"total\":1,\"link\":[{\"relation\":\"self\",\"url\":\"http://localhost:57931/fhir/contextDev/Patient?identifier=urn%3AMultiFhirVersionTest%7CtestSubmitPatient01&_format=json\"}],\"entry\":[{\"resource\":{\"resourceType\":\"Patient\",\"id\":\"1\",\"meta\":{\"versionId\":\"1\",\"lastUpdated\":\"2014-12-20T18:41:29.706-05:00\"},\"identifier\":[{\"system\":\"urn:MultiFhirVersionTest\",\"value\":\"testSubmitPatient01\"}]}}]}";
 

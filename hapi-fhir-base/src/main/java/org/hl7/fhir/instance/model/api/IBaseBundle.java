@@ -28,20 +28,20 @@ public interface IBaseBundle extends IBaseResource {
 	 * link.type field to indicate that the given link is for
 	 * the next page of results.  
 	 */
-	public static final String LINK_NEXT = "next";
+	String LINK_NEXT = "next";
 	
 	/**
 	 * Constant for links provided in the bundle. This constant is used in the
 	 * link.type field to indicate that the given link is for
 	 * the previous page of results.   
 	 */
-	public static final String LINK_PREV = "previous";
+	String LINK_PREV = "previous";
 
 	/**
 	 * Constant for links provided in the bundle. This constant is used in the
 	 * link.type field to indicate that the given link is for
 	 * this bundle.  
 	 */
-	public static final String LINK_SELF = "self";
+	String LINK_SELF = "self";
 
 }

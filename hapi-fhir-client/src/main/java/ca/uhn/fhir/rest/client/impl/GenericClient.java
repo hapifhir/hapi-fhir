@@ -1681,7 +1681,6 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 		@Override
 		public OUTPUT execute() {
-			Validate.notNull(myReturnBundleType, "Return bundle type mustbe specified");
 
 			Map<String, List<String>> params = getParamMap();
 

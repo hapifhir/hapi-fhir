@@ -243,7 +243,7 @@ public class ClientR4Test {
     CapabilityStatement cs = new CapabilityStatement();
     cs.getPublisherElement().setValue("Health Intersections");
     String msg = ourCtx.newXmlParser().encodeResourceToString(cs);
-   
+
 
     ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
     when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
@@ -389,11 +389,11 @@ public class ClientR4Test {
     String msg = getPatient();
 
     ourLog.info(msg);
-    
+
     ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
     when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
     when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
-    Header[] headers = new Header[] { 
+    Header[] headers = new Header[] {
         new BasicHeader(Constants.HEADER_LAST_MODIFIED, "Wed, 15 Nov 1995 04:58:08 GMT"),
         new BasicHeader(Constants.HEADER_CONTENT_LOCATION, "http://foo.com/Patient/123/_history/2333")
     };
@@ -1138,7 +1138,7 @@ public class ClientR4Test {
     OperationOutcome oo = new OperationOutcome();
     oo.addIssue().setDiagnostics("ALL GOOD");
     String resp = ourCtx.newJsonParser().encodeResourceToString(oo);
-    
+
     Patient patient = new Patient();
     patient.addIdentifier().setSystem("urn:foo").setValue("123");
 
@@ -1161,12 +1161,12 @@ public class ClientR4Test {
     assertNull(response.getResource());
   }
 
-  
+
   @Test
   public void testVRead() throws Exception {
 
     //@formatter:off
-		String msg = "<Patient xmlns=\"http://hl7.org/fhir\">" 
+		String msg = "<Patient xmlns=\"http://hl7.org/fhir\">"
 				+ "<text><status value=\"generated\" /><div xmlns=\"http://www.w3.org/1999/xhtml\">John Cardinal:            444333333        </div></text>"
 				+ "<identifier><label value=\"SSN\" /><system value=\"http://orionhealth.com/mrn\" /><value value=\"PRP1660\" /></identifier>"
 				+ "<name><use value=\"official\" /><family value=\"Cardinal\" /><given value=\"John\" /></name>"
@@ -1216,7 +1216,7 @@ public class ClientR4Test {
     TestUtil.clearAllStaticFieldsForUnitTest();
   }
 
-  private static String getPatientFeedWithOneResult() {
+  static String getPatientFeedWithOneResult() {
     return getPatientFeedWithOneResult(ourCtx);
   }
 
