@@ -314,9 +314,10 @@ public class RestHookSubscriptionR4Interceptor extends BaseRestHookSubscriptionI
 			Subscription subscription = (Subscription) theResource;
 			if (subscription.getChannel() != null
 					&& subscription.getChannel().getType() == Subscription.SubscriptionChannelType.RESTHOOK
-					&& subscription.getStatus() == Subscription.SubscriptionStatus.ACTIVE) {
+					&& subscription.getStatus() == Subscription.SubscriptionStatus.REQUESTED) {
 				removeLocalSubscription(subscription.getIdElement().getIdPart());
 				myRestHookSubscriptions.add(subscription);
+				subscription.setStatus(Subscription.SubscriptionStatus.ACTIVE);
 				ourLog.info("Subscription was added, id: {} - Have {}", subscription.getIdElement().getIdPart(), myRestHookSubscriptions.size());
 			}
 		} else {

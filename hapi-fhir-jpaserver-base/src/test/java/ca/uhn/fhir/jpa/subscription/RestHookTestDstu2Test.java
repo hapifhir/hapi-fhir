@@ -1,23 +1,6 @@
 
 package ca.uhn.fhir.jpa.subscription;
 
-import static org.junit.Assert.*;
-
-import java.util.List;
-
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.servlet.ServletContextHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
-
-import com.google.common.collect.Lists;
-
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderDstu2Test;
@@ -38,6 +21,19 @@ import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.PortUtil;
+import com.google.common.collect.Lists;
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.servlet.ServletContextHandler;
+import org.eclipse.jetty.servlet.ServletHolder;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.junit.*;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 /**
  * Test the rest-hook subscriptions
@@ -51,12 +47,19 @@ public class RestHookTestDstu2Test extends BaseResourceProviderDstu2Test {
 	private static String ourListenerServerBase;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(RestHookTestDstu2Test.class);
 	private static List<Observation> ourUpdatedObservations = Lists.newArrayList();
+	private List<IIdType> mySubscriptionIds = new ArrayList<IIdType>();
 
 	@After
 	public void afterUnregisterRestHookListener() {
+		for (IIdType next : mySubscriptionIds){
+			ourClient.delete().resourceById(next).execute();
+		}
+		mySubscriptionIds.clear();
+
 		myDaoConfig.setAllowMultipleDelete(true);
 		ourLog.info("Deleting all subscriptions");
 		ourClient.delete().resourceConditionalByUrl("Subscription?status=active").execute();
+		ourClient.delete().resourceConditionalByUrl("Observation?code:missing=false").execute();
 		ourLog.info("Done deleting all subscriptions");
 		myDaoConfig.setAllowMultipleDelete(new DaoConfig().isAllowMultipleDelete());
 
@@ -77,7 +80,7 @@ public class RestHookTestDstu2Test extends BaseResourceProviderDstu2Test {
 	private Subscription createSubscription(String criteria, String payload, String endpoint) {
 		Subscription subscription = new Subscription();
 		subscription.setReason("Monitor new neonatal function (note, age will be determined by the monitor)");
-		subscription.setStatus(SubscriptionStatusEnum.ACTIVE);
+		subscription.setStatus(SubscriptionStatusEnum.REQUESTED);
 		subscription.setCriteria(criteria);
 
 		Channel channel = new Channel();
@@ -88,6 +91,7 @@ public class RestHookTestDstu2Test extends BaseResourceProviderDstu2Test {
 
 		MethodOutcome methodOutcome = ourClient.create().resource(subscription).execute();
 		subscription.setId(methodOutcome.getId().getIdPart());
+		mySubscriptionIds.add(methodOutcome.getId());
 
 		return subscription;
 	}
@@ -136,9 +140,9 @@ public class RestHookTestDstu2Test extends BaseResourceProviderDstu2Test {
 
 		Observation observation2 = sendObservation(code, "SNOMED-CT");
 
-		// Should see two subscription notifications
+		// Should see one subscription notification
 		Thread.sleep(500);
-		assertEquals(3, ourCreatedObservations.size());
+		assertEquals(2, ourCreatedObservations.size());
 		assertEquals(0, ourUpdatedObservations.size());
 
 		ourClient.delete().resourceById(new IdDt("Subscription/" + subscription2.getId())).execute();
@@ -147,7 +151,7 @@ public class RestHookTestDstu2Test extends BaseResourceProviderDstu2Test {
 
 		// Should see only one subscription notification
 		Thread.sleep(500);
-		assertEquals(4, ourCreatedObservations.size());
+		assertEquals(3, ourCreatedObservations.size());
 		assertEquals(0, ourUpdatedObservations.size());
 
 		Observation observation3 = ourClient.read(Observation.class, observationTemp3.getId());
@@ -160,7 +164,7 @@ public class RestHookTestDstu2Test extends BaseResourceProviderDstu2Test {
 
 		// Should see no subscription notification
 		Thread.sleep(500);
-		assertEquals(4, ourCreatedObservations.size());
+		assertEquals(3, ourCreatedObservations.size());
 		assertEquals(0, ourUpdatedObservations.size());
 
 		Observation observation3a = ourClient.read(Observation.class, observationTemp3.getId());
@@ -174,7 +178,7 @@ public class RestHookTestDstu2Test extends BaseResourceProviderDstu2Test {
 
 		// Should see only one subscription notification
 		Thread.sleep(500);
-		assertEquals(4, ourCreatedObservations.size());
+		assertEquals(3, ourCreatedObservations.size());
 		assertEquals(1, ourUpdatedObservations.size());
 
 		Assert.assertFalse(subscription1.getId().equals(subscription2.getId()));
@@ -222,9 +226,9 @@ public class RestHookTestDstu2Test extends BaseResourceProviderDstu2Test {
 
 		Observation observation2 = sendObservation(code, "SNOMED-CT");
 
-		// Should see two subscription notifications
+		// Should see one subscription notification
 		Thread.sleep(500);
-		assertEquals(3, ourCreatedObservations.size());
+		assertEquals(ourCreatedObservations.toString(), 2, ourCreatedObservations.size());
 		assertEquals(0, ourUpdatedObservations.size());
 
 		ourClient.delete().resourceById(new IdDt("Subscription/" + subscription2.getId())).execute();
@@ -233,7 +237,7 @@ public class RestHookTestDstu2Test extends BaseResourceProviderDstu2Test {
 
 		// Should see only one subscription notification
 		Thread.sleep(500);
-		assertEquals(4, ourCreatedObservations.size());
+		assertEquals(3, ourCreatedObservations.size());
 		assertEquals(0, ourUpdatedObservations.size());
 
 		Observation observation3 = ourClient.read(Observation.class, observationTemp3.getId());
@@ -246,7 +250,7 @@ public class RestHookTestDstu2Test extends BaseResourceProviderDstu2Test {
 
 		// Should see no subscription notification
 		Thread.sleep(500);
-		assertEquals(4, ourCreatedObservations.size());
+		assertEquals(3, ourCreatedObservations.size());
 		assertEquals(0, ourUpdatedObservations.size());
 
 		Observation observation3a = ourClient.read(Observation.class, observationTemp3.getId());
@@ -260,7 +264,7 @@ public class RestHookTestDstu2Test extends BaseResourceProviderDstu2Test {
 
 		// Should see only one subscription notification
 		Thread.sleep(500);
-		assertEquals(4, ourCreatedObservations.size());
+		assertEquals(3, ourCreatedObservations.size());
 		assertEquals(1, ourUpdatedObservations.size());
 
 		Assert.assertFalse(subscription1.getId().equals(subscription2.getId()));

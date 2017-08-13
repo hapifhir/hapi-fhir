@@ -116,7 +116,7 @@ public abstract class BaseResourceProviderDstu2Test extends BaseJpaDstu2Test {
 			server.start();
 	
 			ourClient = myFhirCtx.newRestfulGenericClient(ourServerBase);
-			ourClient.registerInterceptor(new LoggingInterceptor(true));
+			ourClient.registerInterceptor(new LoggingInterceptor());
 	
 			PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 			HttpClientBuilder builder = HttpClientBuilder.create();
