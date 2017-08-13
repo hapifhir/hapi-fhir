@@ -390,7 +390,7 @@ public class IdDt extends UriDt implements /*IPrimitiveDatatype<String>, */IIdTy
 
 	@Override
 	public boolean isEmpty() {
-		return isBlank(getValue());
+		return super.isBaseEmpty() && isBlank(getValue());
 	}
 
 	@Override

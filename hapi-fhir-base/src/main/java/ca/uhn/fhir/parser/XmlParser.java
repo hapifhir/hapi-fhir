@@ -507,13 +507,17 @@ public class XmlParser extends BaseParser /*implements IParser */{
 
 		switch (childDef.getChildType()) {
 		case ID_DATATYPE: {
-			IIdType value = IIdType.class.cast(theElement);
-			String encodedValue = "id".equals(childName) ? value.getIdPart() : value.getValue();
-			theEventWriter.writeStartElement(childName);
-			theEventWriter.writeAttribute("value", encodedValue);
-			encodeExtensionsIfPresent(theResource, theEventWriter, theElement, theIncludedResource);
-			theEventWriter.writeEndElement();
-			break;
+      IIdType value = IIdType.class.cast(theElement);
+      String encodedValue = "id".equals(childName) ? value.getIdPart() : value.getValue();
+      if (StringUtils.isNotBlank(encodedValue) || super.hasExtensions(value)) {
+        theEventWriter.writeStartElement(childName);
+        if (StringUtils.isNotBlank(encodedValue)) {
+          theEventWriter.writeAttribute("value", encodedValue);
+        }
+        encodeExtensionsIfPresent(theResource, theEventWriter, theElement, theIncludedResource);
+        theEventWriter.writeEndElement();
+      }
+      break;
 		}
 		case PRIMITIVE_DATATYPE: {
 			IPrimitiveType<?> pd = IPrimitiveType.class.cast(theElement);
@@ -756,13 +760,15 @@ public class XmlParser extends BaseParser /*implements IParser */{
 		theEventWriter.writeDefaultNamespace(FHIR_NS);
 
 		if (theResource instanceof IAnyResource) {
-
 			// HL7.org Structures
-			if (theResourceId != null) {
-				writeCommentsPre(theEventWriter, theResourceId);
-				writeOptionalTagWithValue(theEventWriter, "id", theResourceId.getIdPart());
-				writeCommentsPost(theEventWriter, theResourceId);
-			}
+     if (theResourceId != null) {
+        writeCommentsPre(theEventWriter, theResourceId);
+        theEventWriter.writeStartElement("id");
+        theEventWriter.writeAttribute("value", theResourceId.getIdPart());
+        encodeExtensionsIfPresent(theResource, theEventWriter, theResourceId, false);
+        theEventWriter.writeEndElement();
+        writeCommentsPost(theEventWriter, theResourceId);
+      }
 
 			encodeCompositeElementToStreamWriter(theResource, theResource, theEventWriter, theContainedResource, new CompositeChildElement(resDef));
 
@@ -773,11 +779,16 @@ public class XmlParser extends BaseParser /*implements IParser */{
 				// DSTU2+
 
 				IResource resource = (IResource) theResource;
-				if (theResourceId != null) {
-					writeCommentsPre(theEventWriter, theResourceId);
-					writeOptionalTagWithValue(theEventWriter, "id", theResourceId.getIdPart());
-					writeCommentsPost(theEventWriter, theResourceId);
-				}
+        if (theResourceId != null) {
+          /*	writeCommentsPre(theEventWriter, theResourceId);
+              writeOptionalTagWithValue(theEventWriter, "id", theResourceId.getIdPart());
+					    writeCommentsPost(theEventWriter, theResourceId);*/
+          theEventWriter.writeStartElement("id");
+          theEventWriter.writeAttribute("value", theResourceId.getIdPart());
+          encodeExtensionsIfPresent(theResource, theEventWriter, theResourceId, false);
+          theEventWriter.writeEndElement();
+          writeCommentsPost(theEventWriter, theResourceId);
+        }
 
 				InstantDt updated = (InstantDt) resource.getResourceMetadata().get(ResourceMetadataKeyEnum.UPDATED);
 				IdDt resourceId = resource.getId();

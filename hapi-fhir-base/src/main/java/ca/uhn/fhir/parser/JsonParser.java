@@ -95,6 +95,8 @@ import ca.uhn.fhir.parser.json.JsonLikeValue.ValueType;
 import ca.uhn.fhir.parser.json.JsonLikeWriter;
 import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.util.ElementUtil;
+import static ca.uhn.fhir.context.BaseRuntimeElementDefinition.ChildTypeEnum.ID_DATATYPE;
+import static ca.uhn.fhir.context.BaseRuntimeElementDefinition.ChildTypeEnum.PRIMITIVE_DATATYPE;
 
 /**
  * This class is the FHIR JSON parser/encoder. Users should not interact with this class directly, but should use
@@ -867,14 +869,28 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 		}
 
 		write(theEventWriter, "resourceType", resDef.getName());
-		if (theResourceId != null && theResourceId.hasIdPart()) {
-			write(theEventWriter, "id", theResourceId.getIdPart());
-			if (theResourceId.hasFormatComment()) {
-				beginObject(theEventWriter, "_id");
-				writeCommentsPreAndPost(theResourceId, theEventWriter);
-				theEventWriter.endObject();
-			}
-		}
+    if (theResourceId != null && theResourceId.hasIdPart()) {
+      write(theEventWriter, "id", theResourceId.getIdPart());
+      final List<HeldExtension> extensions = new ArrayList<HeldExtension>(0);
+      final List<HeldExtension> modifierExtensions = new ArrayList<HeldExtension>(0);
+      // Undeclared extensions
+      extractUndeclaredExtensions(theResourceId, extensions, modifierExtensions, null, null);
+      boolean haveExtension = false;
+      if (!extensions.isEmpty()) {
+        haveExtension = true;
+      }
+
+      if (theResourceId.hasFormatComment() || haveExtension) {
+        beginObject(theEventWriter, "_id");
+        if (theResourceId.hasFormatComment()) {
+          writeCommentsPreAndPost(theResourceId, theEventWriter);
+        }
+        if (haveExtension) {
+          writeExtensionsAsDirectChild(theResource, theEventWriter, theResDef, extensions, modifierExtensions);
+        }
+        theEventWriter.endObject();
+      }
+    }
 
 		if (myContext.getVersion().getVersion().isNewerThan(FhirVersionEnum.DSTU1) && theResource instanceof IResource) {
 			IResource resource = (IResource) theResource;
@@ -1428,41 +1444,78 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 		}
 	}
 
-	private void parseExtension(ParserState<?> theState, JsonLikeArray theValues, boolean theIsModifier) {
-		for (int i = 0; i < theValues.size(); i++) {
-			JsonLikeObject nextExtObj = JsonLikeValue.asObject(theValues.get(i));
-			JsonLikeValue jsonElement = nextExtObj.get("url");
-			String url;
-			if (null == jsonElement || !(jsonElement.isScalar())) {
-				String parentElementName;
-				if (theIsModifier) {
-					parentElementName = "modifierExtension";
-				} else {
-					parentElementName = "extension";
-				}
-				getErrorHandler().missingRequiredElement(new ParseLocation(parentElementName), "url");
-				url = null;
-			} else {
-				url = getExtensionUrl(jsonElement.getAsString());
-			}
-			theState.enteringNewElementExtension(null, url, theIsModifier, getServerBaseUrl());
-			for (String next : nextExtObj.keySet()) {
-				if ("url".equals(next)) {
-					continue;
-				} else if ("extension".equals(next)) {
-					JsonLikeArray jsonVal = JsonLikeValue.asArray(nextExtObj.get(next));
-					parseExtension(theState, jsonVal, false);
-				} else if ("modifierExtension".equals(next)) {
-					JsonLikeArray jsonVal = JsonLikeValue.asArray(nextExtObj.get(next));
-					parseExtension(theState, jsonVal, true);
-				} else {
-					JsonLikeValue jsonVal = nextExtObj.get(next);
-					parseChildren(theState, next, jsonVal, null, null, false);
-				}
-			}
-			theState.endingElement();
-		}
-	}
+  private void parseExtension(ParserState<?> theState, JsonLikeArray theValues, boolean theIsModifier) {
+    int allUnderscoreNames = 0;
+    int handledUnderscoreNames = 0;
+
+    for (int i = 0; i < theValues.size(); i++) {
+      JsonLikeObject nextExtObj = JsonLikeValue.asObject(theValues.get(i));
+      JsonLikeValue jsonElement = nextExtObj.get("url");
+      String url;
+      if (null == jsonElement || !(jsonElement.isScalar())) {
+        String parentElementName;
+        if (theIsModifier) {
+          parentElementName = "modifierExtension";
+        } else {
+          parentElementName = "extension";
+        }
+        getErrorHandler().missingRequiredElement(new ParseLocation(parentElementName), "url");
+        url = null;
+      } else {
+        url = getExtensionUrl(jsonElement.getAsString());
+      }
+      theState.enteringNewElementExtension(null, url, theIsModifier, getServerBaseUrl());
+      for (String next : nextExtObj.keySet()) {
+        if ("url".equals(next)) {
+          continue;
+        } else if ("extension".equals(next)) {
+          JsonLikeArray jsonVal = JsonLikeValue.asArray(nextExtObj.get(next));
+          parseExtension(theState, jsonVal, false);
+        } else if ("modifierExtension".equals(next)) {
+          JsonLikeArray jsonVal = JsonLikeValue.asArray(nextExtObj.get(next));
+          parseExtension(theState, jsonVal, true);
+        } else if (next.charAt(0) == '_') {
+          allUnderscoreNames++;
+          continue;
+        } else {
+          JsonLikeValue jsonVal = nextExtObj.get(next);
+          String alternateName = '_' + next;
+          JsonLikeValue alternateVal = nextExtObj.get(alternateName);
+          if (alternateVal != null) {
+            handledUnderscoreNames++;
+          }
+          parseChildren(theState, next, jsonVal, alternateVal, alternateName, false);
+        }
+      }
+      
+      /*
+       * This happens if an element has an extension but no actual value. I.e.
+		   * if a resource has a "_status" element but no corresponding "status"
+		   * element. This could be used to handle a null value with an extension
+		   * for example.
+		  */
+      if (allUnderscoreNames > handledUnderscoreNames) {
+        for (String alternateName : nextExtObj.keySet()) {
+          if (alternateName.startsWith("_") && alternateName.length() > 1) {
+            JsonLikeValue nextValue = nextExtObj.get(alternateName);
+            if (nextValue != null) {
+              if (nextValue.isObject()) {
+                String nextName = alternateName.substring(1);
+                if (nextExtObj.get(nextName) == null) {
+                  theState.enteringNewElement(null, nextName);
+                  parseAlternates(nextValue, theState, alternateName, alternateName);
+                  theState.endingElement();
+                }
+              } else {
+                getErrorHandler().incorrectJsonType(null, alternateName, ValueType.OBJECT, null, nextValue.getJsonType(), null);
+              }
+             }
+          }
+        }
+      }
+      theState.endingElement();
+    }
+  }
 
 	private void parseFhirComments(JsonLikeValue theObject, ParserState<?> theState) {
 		if (theObject.isArray()) {
@@ -1842,6 +1895,7 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 				} else {
 					String childName = myDef.getChildNameByDatatype(myValue.getClass());
 					encodeChildElementToStreamWriter(theResDef, theResource, theEventWriter, myValue, def, childName, false, myParent, false);
+          managePrimitiveExtension(myValue, theResDef, theResource, theEventWriter, def, childName);
 				}
 
 				theEventWriter.endObject();
@@ -1897,13 +1951,34 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 					throw new ConfigurationException("Unable to encode extension, unregognized child element type: " + value.getClass().getCanonicalName());
 				}
 				encodeChildElementToStreamWriter(theResDef, theResource, theEventWriter, value, childDef, childName, true, myParent, false);
+        managePrimitiveExtension(value, theResDef, theResource, theEventWriter, childDef, childName);
 			}
 
 			// theEventWriter.name(myUndeclaredExtension.get);
 
 			theEventWriter.endObject();
 		}
-
-	}
-
+    
+    private void managePrimitiveExtension(final IBase theValue, final RuntimeResourceDefinition theResDef, final IBaseResource theResource, final JsonLikeWriter theEventWriter, final BaseRuntimeElementDefinition<?> def, final String childName) throws IOException {
+      if (def.getChildType().equals(ID_DATATYPE) || def.getChildType().equals(PRIMITIVE_DATATYPE)) {
+        final List<HeldExtension> extensions = new ArrayList<HeldExtension>(0);
+        final List<HeldExtension> modifierExtensions = new ArrayList<HeldExtension>(0);
+        // Undeclared extensions
+        extractUndeclaredExtensions(theValue, extensions, modifierExtensions, myParent, null);
+        // Declared extensions
+        if (def != null) {
+          extractDeclaredExtensions(theValue, def, extensions, modifierExtensions, myParent);
+        }
+        boolean haveContent = false;
+        if (!extensions.isEmpty() || !modifierExtensions.isEmpty()) {
+          haveContent = true;
+        }
+        if (haveContent) {
+          beginObject(theEventWriter, '_' + childName);
+          writeExtensionsAsDirectChild(theResource, theEventWriter, theResDef, extensions, modifierExtensions);
+          theEventWriter.endObject();
+        }
+      }
+    }    
+	}  
 }
