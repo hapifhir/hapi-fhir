@@ -211,6 +211,10 @@
 				Previously my.org was treated as the resource type and Foo was treated as the ID. Thanks
 				to GitHub user @CarthageKing for the pull request!
 			</action>
+			<action type="fix" issue="695">
+				Extensions on ID datatypes were not parsed or serialized correctly. Thanks to
+				Stephen Rivière for the pull request!
+			</action>
 		</release>
 		<release version="2.5" date="2017-06-08">
 			<action type="fix">
