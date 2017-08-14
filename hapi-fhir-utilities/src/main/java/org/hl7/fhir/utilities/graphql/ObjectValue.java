@@ -50,6 +50,11 @@ public class ObjectValue extends Value {
     write(b, indent, System.lineSeparator());
   }
 
+  @Override
+  public String getValue() {
+    return null;
+  }
+
   /**
    * Write the output using the system default line separator (as defined in {@link System#lineSeparator}
    * @param b The StringBuilder to populate

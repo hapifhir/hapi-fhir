@@ -11,10 +11,13 @@ import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
+import org.hl7.fhir.r4.hapi.rest.server.GraphQLProvider;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.*;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.web.context.ContextLoader;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.*;
@@ -56,6 +59,7 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 	protected static RestHookSubscriptionR4Interceptor ourRestHookSubscriptionInterceptor;
 	protected static ISearchDao mySearchEntityDao;
 	protected static ISearchCoordinatorSvc mySearchCoordinatorSvc;
+	private Object ourGraphQLProvider;
 
 	public BaseResourceProviderR4Test() {
 		super();
@@ -85,8 +89,9 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 			ourRestServer.getFhirContext().setNarrativeGenerator(new DefaultThymeleafNarrativeGenerator());
 
 			myTerminologyUploaderProvider = myAppCtx.getBean(TerminologyUploaderProviderR4.class);
+			ourGraphQLProvider = myAppCtx.getBean("myGraphQLProvider");
 
-			ourRestServer.setPlainProviders(mySystemProvider, myTerminologyUploaderProvider);
+			ourRestServer.setPlainProviders(mySystemProvider, myTerminologyUploaderProvider, ourGraphQLProvider);
 
 			JpaConformanceProviderR4 confProvider = new JpaConformanceProviderR4(ourRestServer, mySystemDao, myDaoConfig);
 			confProvider.setImplementationDescription("THIS IS THE DESC");
@@ -106,9 +111,6 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 			ourWebApplicationContext = new GenericWebApplicationContext();
 			ourWebApplicationContext.setParent(myAppCtx);
 			ourWebApplicationContext.refresh();
-			// ContextLoaderListener loaderListener = new ContextLoaderListener(webApplicationContext);
-			// loaderListener.initWebApplicationContext(mock(ServletContext.class));
-			//
 			proxyHandler.getServletContext().setAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE, ourWebApplicationContext);
 
 			DispatcherServlet dispatcherServlet = new DispatcherServlet();

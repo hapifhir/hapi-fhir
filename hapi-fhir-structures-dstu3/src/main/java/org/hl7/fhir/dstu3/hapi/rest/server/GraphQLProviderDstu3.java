@@ -1,4 +1,4 @@
-package org.hl7.fhir.r4.hapi.rest.server;
+package org.hl7.fhir.dstu3.hapi.rest.server;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
@@ -10,24 +10,24 @@ import ca.uhn.fhir.rest.annotation.Initialize;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import org.hl7.fhir.dstu3.context.IWorkerContext;
+import org.hl7.fhir.dstu3.hapi.validation.DefaultProfileValidationSupport;
+import org.hl7.fhir.dstu3.hapi.validation.HapiWorkerContext;
+import org.hl7.fhir.dstu3.hapi.validation.IValidationSupport;
+import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.Reference;
+import org.hl7.fhir.dstu3.model.Resource;
+import org.hl7.fhir.dstu3.utils.GraphQLEngine;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.context.IWorkerContext;
-import org.hl7.fhir.r4.hapi.ctx.DefaultProfileValidationSupport;
-import org.hl7.fhir.r4.hapi.ctx.HapiWorkerContext;
-import org.hl7.fhir.r4.hapi.ctx.IValidationSupport;
-import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.Reference;
-import org.hl7.fhir.r4.model.Resource;
-import org.hl7.fhir.r4.utils.GraphQLEngine;
 import org.hl7.fhir.utilities.graphql.IGraphQLStorageServices;
 import org.hl7.fhir.utilities.graphql.ObjectValue;
 import org.hl7.fhir.utilities.graphql.Parser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class GraphQLProvider {
+public class GraphQLProviderDstu3 {
   private final IWorkerContext myWorkerContext;
-  private Logger ourLog = LoggerFactory.getLogger(GraphQLProvider.class);
+  private Logger ourLog = LoggerFactory.getLogger(GraphQLProviderDstu3.class);
   private IGraphQLStorageServices<Resource, Reference, Bundle> myStorageServices;
 
   /**
@@ -35,8 +35,8 @@ public class GraphQLProvider {
    *
    * @param theStorageServices The storage services (this object will be used to retrieve various resources as required by the GraphQL engine)
    */
-  public GraphQLProvider(IGraphQLStorageServices<Resource, Reference, Bundle> theStorageServices) {
-    this(FhirContext.forR4(), new DefaultProfileValidationSupport(), theStorageServices);
+  public GraphQLProviderDstu3(IGraphQLStorageServices<Resource, Reference, Bundle> theStorageServices) {
+    this(FhirContext.forDstu3(), new DefaultProfileValidationSupport(), theStorageServices);
   }
 
   /**
@@ -46,7 +46,7 @@ public class GraphQLProvider {
    * @param theValidationSupport The HAPI Validation Support object
    * @param theStorageServices   The storage services (this object will be used to retrieve various resources as required by the GraphQL engine)
    */
-  public GraphQLProvider(FhirContext theFhirContext, IValidationSupport theValidationSupport, IGraphQLStorageServices<Resource, Reference, Bundle> theStorageServices) {
+  public GraphQLProviderDstu3(FhirContext theFhirContext, IValidationSupport theValidationSupport, IGraphQLStorageServices<Resource, Reference, Bundle> theStorageServices) {
     myWorkerContext = new HapiWorkerContext(theFhirContext, theValidationSupport);
     myStorageServices = theStorageServices;
   }
@@ -54,7 +54,7 @@ public class GraphQLProvider {
   @Initialize
   public void initialize(RestfulServer theServer) {
     ourLog.trace("Initializing GraphQL provider");
-    if (theServer.getFhirContext().getVersion().getVersion() != FhirVersionEnum.R4) {
+    if (theServer.getFhirContext().getVersion().getVersion() != FhirVersionEnum.DSTU3) {
       throw new ConfigurationException("Can not use " + getClass().getName() + " provider on server with FHIR " + theServer.getFhirContext().getVersion().getVersion().name() + " context");
     }
   }

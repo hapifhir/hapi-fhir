@@ -6,16 +6,11 @@ import org.hl7.fhir.r4.hapi.ctx.DefaultProfileValidationSupport;
 import org.hl7.fhir.r4.hapi.ctx.HapiWorkerContext;
 import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.utils.GraphQLEngine;
-import org.hl7.fhir.utilities.graphql.EGraphEngine;
-import org.hl7.fhir.utilities.graphql.EGraphQLException;
-import org.hl7.fhir.utilities.graphql.ObjectValue;
-import org.hl7.fhir.utilities.graphql.Parser;
+import org.hl7.fhir.utilities.graphql.*;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
@@ -104,8 +99,8 @@ public class GraphQLEngineTest {
 
 	}
 
-	private GraphQLEngine.IGraphQLStorageServices createStorageServices() throws FHIRException {
-		GraphQLEngine.IGraphQLStorageServices retVal = mock(GraphQLEngine.IGraphQLStorageServices.class);
+	private IGraphQLStorageServices<Resource, Reference, Bundle> createStorageServices() throws FHIRException {
+		IGraphQLStorageServices<Resource, Reference, Bundle> retVal = mock(IGraphQLStorageServices.class);
 		when(retVal.lookup(any(Object.class), any(Resource.class), any(Reference.class))).thenAnswer(new Answer<Object>() {
 			@Override
 			public Object answer(InvocationOnMock invocation) throws Throwable {
@@ -117,7 +112,7 @@ public class GraphQLEngineTest {
 				if (reference.getReference().equalsIgnoreCase("Patient/123")) {
 					Patient p = new Patient();
 					p.getBirthDateElement().setValueAsString("2011-02-22");
-					return new GraphQLEngine.IGraphQLStorageServices.ReferenceResolution(context, p);
+					return new ReferenceResolution<>(context, p);
 				}
 
 				ourLog.info("Not found!");

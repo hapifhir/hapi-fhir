@@ -1,10 +1,10 @@
-package org.hl7.fhir.r4.utils;
+package org.hl7.fhir.dstu3.utils;
 
+import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.r4.context.IWorkerContext;
-import org.hl7.fhir.r4.model.*;
-import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
-import org.hl7.fhir.r4.model.Bundle.BundleLinkComponent;
+import org.hl7.fhir.dstu3.context.IWorkerContext;
+import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
+import org.hl7.fhir.dstu3.model.Bundle.BundleLinkComponent;
 import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.utilities.graphql.*;
 import org.hl7.fhir.utilities.graphql.Operation.OperationType;
@@ -48,15 +48,15 @@ public class GraphQLEngine {
       throw new Error("Not Implemented");
     }
 
-    @Override
-    public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
-      switch (_hash) {
-      case 3357091:    /*mode*/     return new Property(_name, "string",   "n/a", 0, 1, be.getSearch().hasMode() ? be.getSearch().getModeElement() : null);
-      case 109264530:  /*score*/    return new Property(_name, "string",   "n/a", 0, 1, be.getSearch().hasScore() ? be.getSearch().getScoreElement() : null);
-      case -341064690: /*resource*/ return new Property(_name, "resource",  "n/a", 0, 1, be.hasResource() ? be.getResource() : null);
-      default: return super.getNamedProperty(_hash, _name, _checkValid);
-      }
-    }
+//    @Override
+//    public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+//      switch (_hash) {
+//      case 3357091:    /*mode*/     return new Property(_name, "string",   "n/a", 0, 1, be.getSearch().hasMode() ? be.getSearch().getModeElement() : null);
+//      case 109264530:  /*score*/    return new Property(_name, "string",   "n/a", 0, 1, be.getSearch().hasScore() ? be.getSearch().getScoreElement() : null);
+//      case -341064690: /*resource*/ return new Property(_name, "resource",  "n/a", 0, 1, be.hasResource() ? be.getResource() : null);
+//      default: return super.getNamedProperty(_hash, _name, _checkValid);
+//      }
+//    }
   }
 
   public class SearchWrapper extends Base {
@@ -93,20 +93,20 @@ public class GraphQLEngine {
       throw new Error("Not Implemented");
     }
 
-    @Override
-    public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
-      switch (_hash) {
-      case 97440432:   /*first*/     return new Property(_name, "string",  "n/a", 0, 1, extractLink(_name));
-      case -1273775369: /*previous*/  return new Property(_name, "string",  "n/a", 0, 1, extractLink(_name));
-      case 3377907:    /*next*/      return new Property(_name, "string",  "n/a", 0, 1, extractLink(_name));
-      case 3314326:    /*last*/      return new Property(_name, "string",  "n/a", 0, 1, extractLink(_name));
-      case 94851343:   /*count*/     return new Property(_name, "integer", "n/a", 0, 1, bnd.getTotalElement());
-      case -1019779949:/*offset*/    return new Property(_name, "integer", "n/a", 0, 1, extractParam("search-offset"));
-      case 860381968:  /*pagesize*/  return new Property(_name, "integer", "n/a", 0, 1, extractParam("_count"));
-      case 96356950:  /*edges*/      return new Property(_name, "edge",    "n/a", 0, Integer.MAX_VALUE, getEdges());
-      default: return super.getNamedProperty(_hash, _name, _checkValid);
-      }
-    }
+//    @Override
+//    public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+//      switch (_hash) {
+//      case 97440432:   /*first*/     return new Property(_name, "string",  "n/a", 0, 1, extractLink(_name));
+//      case -1273775369: /*previous*/  return new Property(_name, "string",  "n/a", 0, 1, extractLink(_name));
+//      case 3377907:    /*next*/      return new Property(_name, "string",  "n/a", 0, 1, extractLink(_name));
+//      case 3314326:    /*last*/      return new Property(_name, "string",  "n/a", 0, 1, extractLink(_name));
+//      case 94851343:   /*count*/     return new Property(_name, "integer", "n/a", 0, 1, bnd.getTotalElement());
+//      case -1019779949:/*offset*/    return new Property(_name, "integer", "n/a", 0, 1, extractParam("search-offset"));
+//      case 860381968:  /*pagesize*/  return new Property(_name, "integer", "n/a", 0, 1, extractParam("_count"));
+//      case 96356950:  /*edges*/      return new Property(_name, "edge",    "n/a", 0, Integer.MAX_VALUE, getEdges());
+//      default: return super.getNamedProperty(_hash, _name, _checkValid);
+//      }
+//    }
 
     private List<Base> getEdges() {
       List<Base> list = new ArrayList<>();
@@ -403,7 +403,7 @@ public class GraphQLEngine {
     if (!name.endsWith(suffix))
       return false;
     name = name.substring(0, name.length()-suffix.length());
-    return context.getResourceNamesAsSet().contains(name);
+    return context.getResourceNames().contains(name);
   }
 
   private void processObject(Resource context, Base source, ObjectValue target, List<Selection> selection) throws EGraphQLException, FHIRException {

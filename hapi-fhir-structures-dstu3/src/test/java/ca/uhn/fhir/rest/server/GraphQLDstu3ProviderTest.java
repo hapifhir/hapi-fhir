@@ -18,18 +18,14 @@ import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
+import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.hapi.rest.server.GraphQLProvider;
-import org.hl7.fhir.r4.model.*;
-import org.hl7.fhir.r4.utils.GraphQLEngine;
+import org.hl7.fhir.dstu3.hapi.rest.server.GraphQLProviderDstu3;
 import org.hl7.fhir.utilities.graphql.Argument;
 import org.hl7.fhir.utilities.graphql.IGraphQLStorageServices;
 import org.hl7.fhir.utilities.graphql.ReferenceResolution;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.*;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -40,11 +36,11 @@ import static org.hamcrest.Matchers.startsWith;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 
-public class GraphQLR4ProviderTest {
+public class GraphQLDstu3ProviderTest {
 
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(GraphQLR4ProviderTest.class);
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(GraphQLDstu3ProviderTest.class);
 	private static CloseableHttpClient ourClient;
-	private static FhirContext ourCtx = FhirContext.forR4();
+	private static FhirContext ourCtx = FhirContext.forDstu3();
 	private static int ourPort;
 	private static Server ourServer;
 
@@ -66,7 +62,7 @@ public class GraphQLR4ProviderTest {
 
 		servlet.registerProvider(new DummyPatientResourceProvider());
 		MyStorageServices storageServices = new MyStorageServices();
-		servlet.registerProvider(new GraphQLProvider(storageServices));
+		servlet.registerProvider(new GraphQLProviderDstu3(storageServices));
 		ServletHolder servletHolder = new ServletHolder(servlet);
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
 		ourServer.setHandler(proxyHandler);
@@ -85,6 +81,7 @@ public class GraphQLR4ProviderTest {
 	}
 
 	@Test
+	@Ignore
 	public void testGraphInstance() throws Exception {
 		String query = "{name{family,given}}";
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/123/$graphql?query=" + UrlUtil.escape(query));
@@ -111,6 +108,7 @@ public class GraphQLR4ProviderTest {
 	}
 
 	@Test
+	@Ignore
 	public void testGraphSystemInstance() throws Exception {
 		String query = "{Patient(id:123){id,name{given,family}}}";
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/$graphql?query=" + UrlUtil.escape(query));
@@ -139,6 +137,7 @@ public class GraphQLR4ProviderTest {
 	}
 
 	@Test
+	@Ignore
 	public void testGraphSystemList() throws Exception {
 		String query = "{PatientList(name:\"pet\"){name{family,given}}}";
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/$graphql?query=" + UrlUtil.escape(query));
@@ -171,6 +170,7 @@ public class GraphQLR4ProviderTest {
 	}
 
 	@Test
+	@Ignore
 	public void testGraphInstanceWithFhirpath() throws Exception {
 		String query = "{name(fhirpath:\"family.exists()\"){text,given,family}}";
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/123/$graphql?query=" + UrlUtil.escape(query));

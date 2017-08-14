@@ -660,6 +660,10 @@ private Map<String, Object> userData;
   	return false;
 	}
 
+  public Property getNamedProperty(String _name) throws FHIRException {
+    return getChildByName(_name);
+  }
+
 	public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
 		if (checkValid)
 			throw new FHIRException("Attempt to read invalid property '"+name+"' on type "+fhirType());

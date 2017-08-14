@@ -23,6 +23,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -88,7 +89,8 @@ public abstract class BaseSubscriptionInterceptor extends ServerOperationInterce
 			myIdToSubscription.put(nextId, resource);
 		}
 
-		for (String next : myIdToSubscription.keySet()) {
+		for (Enumeration<String> keyEnum = myIdToSubscription.keys(); keyEnum.hasMoreElements(); ) {
+			String next = keyEnum.nextElement();
 			if (!allIds.contains(next)) {
 				myIdToSubscription.remove(next);
 			}
