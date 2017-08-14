@@ -28,6 +28,9 @@ import java.util.concurrent.*;
 
 public abstract class BaseSubscriptionInterceptor extends ServerOperationInterceptorAdapter {
 
+	static final String SUBSCRIPTION_CRITERIA = "criteria";
+	static final String SUBSCRIPTION_ENDPOINT = "channel.endpoint";
+	static final String SUBSCRIPTION_PAYLOAD = "channel.payload";
 	private static final Integer MAX_SUBSCRIPTION_RESULTS = 1000;
 	private SubscribableChannel myProcessingChannel;
 	private ExecutorService myExecutor;
@@ -36,8 +39,19 @@ public abstract class BaseSubscriptionInterceptor extends ServerOperationInterce
 	private MessageHandler mySubscriptionActivatingSubscriber;
 	private MessageHandler mySubscriptionCheckingSubscriber;
 	private ConcurrentHashMap<String, IBaseResource> myIdToSubscription = new ConcurrentHashMap<>();
-	private Subscription.SubscriptionChannelType myChannelType = Subscription.SubscriptionChannelType.RESTHOOK;
 	private Logger ourLog = LoggerFactory.getLogger(BaseSubscriptionInterceptor.class);
+	private SubscriptionDeliveringRestHookSubscriber mySubscriptionDeliverySubscriber;
+	private BlockingQueue<Runnable> myExecutorQueue;
+
+	public abstract Subscription.SubscriptionChannelType getChannelType();
+
+	public SubscribableChannel getProcessingChannel() {
+		return myProcessingChannel;
+	}
+
+	public void setProcessingChannel(SubscribableChannel theProcessingChannel) {
+		myProcessingChannel = theProcessingChannel;
+	}
 
 	protected abstract IFhirResourceDao<?> getSubscriptionDao();
 
@@ -48,7 +62,7 @@ public abstract class BaseSubscriptionInterceptor extends ServerOperationInterce
 	@Scheduled(fixedDelay = 10000)
 	public void initSubscriptions() {
 		SearchParameterMap map = new SearchParameterMap();
-		map.add(Subscription.SP_TYPE, new TokenParam(null, myChannelType.toCode()));
+		map.add(Subscription.SP_TYPE, new TokenParam(null, getChannelType().toCode()));
 		map.add(Subscription.SP_STATUS, new TokenParam(null, Subscription.SubscriptionStatus.ACTIVE.toCode()));
 		map.setLoadSynchronousUpTo(MAX_SUBSCRIPTION_RESULTS);
 
@@ -76,8 +90,14 @@ public abstract class BaseSubscriptionInterceptor extends ServerOperationInterce
 		}
 	}
 
+	public BlockingQueue<Runnable> getExecutorQueue() {
+		return myExecutorQueue;
+	}
+
 	@PostConstruct
 	public void postConstruct() {
+		myExecutorQueue = new LinkedBlockingQueue<>(1000);
+
 		RejectedExecutionHandler rejectedExecutionHandler = new ThreadPoolExecutor.AbortPolicy();
 		ThreadFactory threadFactory = new BasicThreadFactory.Builder()
 			.namingPattern("subscription-%d")
@@ -89,7 +109,7 @@ public abstract class BaseSubscriptionInterceptor extends ServerOperationInterce
 			myExecutorThreadCount,
 			0L,
 			TimeUnit.MILLISECONDS,
-			new LinkedBlockingQueue<Runnable>(1000),
+			myExecutorQueue,
 			threadFactory,
 			rejectedExecutionHandler);
 
@@ -100,15 +120,21 @@ public abstract class BaseSubscriptionInterceptor extends ServerOperationInterce
 
 		if (myAutoActivateSubscriptions) {
 			if (mySubscriptionActivatingSubscriber == null) {
-				mySubscriptionActivatingSubscriber = new SubscriptionActivatingSubscriber(getSubscriptionDao(), myIdToSubscription, myChannelType, myProcessingChannel);
+				mySubscriptionActivatingSubscriber = new SubscriptionActivatingSubscriber(getSubscriptionDao(), myIdToSubscription, getChannelType(), myProcessingChannel);
 			}
 			myProcessingChannel.subscribe(mySubscriptionActivatingSubscriber);
 		}
 
 		if (mySubscriptionCheckingSubscriber == null) {
-			mySubscriptionCheckingSubscriber = new SubscriptionCheckingSubscriber(getSubscriptionDao(), myIdToSubscription, myChannelType, myProcessingChannel);
+			mySubscriptionCheckingSubscriber = new SubscriptionCheckingSubscriber(getSubscriptionDao(), myIdToSubscription, getChannelType(), myProcessingChannel);
 		}
 		myProcessingChannel.subscribe(mySubscriptionCheckingSubscriber);
+
+		if (mySubscriptionDeliverySubscriber == null) {
+			mySubscriptionDeliverySubscriber = new SubscriptionDeliveringRestHookSubscriber(getSubscriptionDao(), myIdToSubscription, getChannelType(), myProcessingChannel);
+		}
+		myProcessingChannel.subscribe(mySubscriptionDeliverySubscriber);
+
 	}
 
 	@SuppressWarnings("unused")
@@ -118,6 +144,7 @@ public abstract class BaseSubscriptionInterceptor extends ServerOperationInterce
 			myProcessingChannel.unsubscribe(mySubscriptionActivatingSubscriber);
 		}
 		myProcessingChannel.unsubscribe(mySubscriptionCheckingSubscriber);
+		myProcessingChannel.unsubscribe(mySubscriptionDeliverySubscriber);
 	}
 
 	@Override

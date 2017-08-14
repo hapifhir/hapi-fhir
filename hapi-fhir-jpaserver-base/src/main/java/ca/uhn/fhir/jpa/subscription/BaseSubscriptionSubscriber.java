@@ -11,8 +11,9 @@ import org.springframework.messaging.SubscribableChannel;
 import java.util.concurrent.ConcurrentHashMap;
 
 public abstract class BaseSubscriptionSubscriber implements MessageHandler {
-	static final String SUBSCRIPTION_STATUS = "Subscription.status";
-	private static final String SUBSCRIPTION_TYPE = "Subscription.channel.type";
+	static final String SUBSCRIPTION_STATUS = "status";
+	static final String SUBSCRIPTION_TYPE = "channel.type";
+
 	private final IFhirResourceDao mySubscriptionDao;
 	private final ConcurrentHashMap<String, IBaseResource> myIdToSubscription;
 	private final Subscription.SubscriptionChannelType myChannelType;

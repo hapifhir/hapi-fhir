@@ -47,6 +47,7 @@ public class SubscriptionActivatingSubscriber extends BaseSubscriptionSubscriber
 			status.setValueAsString(newStatus);
 			ourLog.info("Activating subscription {} from status {} to {}", subscription.getIdElement().toUnqualifiedVersionless().getValue(), oldStatus, newStatus);
 			getSubscriptionDao().update(subscription);
+			getIdToSubscription().put(subscription.getIdElement().getIdPart(), subscription);
 		}
 	}
 
@@ -88,6 +89,8 @@ public class SubscriptionActivatingSubscriber extends BaseSubscriptionSubscriber
 		IBaseResource subscription = theMsg.getNewPayload();
 		IPrimitiveType<?> status = ctx.newTerser().getSingleValueOrNull(subscription, SUBSCRIPTION_STATUS, IPrimitiveType.class);
 		String statusString = status.getValueAsString();
+
+		ourLog.info("Subscription {} has status {}", subscription.getIdElement().toUnqualifiedVersionless().getValue(), statusString);
 
 		if (Subscription.SubscriptionStatus.ACTIVE.toCode().equals(statusString)) {
 			getIdToSubscription().put(theMsg.getId().getIdPart(), theMsg.getNewPayload());

@@ -5,6 +5,7 @@ import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.SearchParameterMap;
 import ca.uhn.fhir.jpa.provider.ServletSubRequestDetails;
+import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.apache.commons.lang3.StringUtils;
@@ -50,7 +51,7 @@ public class SubscriptionCheckingSubscriber extends BaseSubscriptionSubscriber {
 		for (IBaseResource nextSubscription : getIdToSubscription().values()) {
 
 			String nextSubscriptionId = nextSubscription.getIdElement().toUnqualifiedVersionless().getValue();
-			IPrimitiveType<?> nextCriteria = getContext().newTerser().getSingleValueOrNull(nextSubscription, "Subscription.criteria", IPrimitiveType.class);
+			IPrimitiveType<?> nextCriteria = getContext().newTerser().getSingleValueOrNull(nextSubscription, BaseSubscriptionInterceptor.SUBSCRIPTION_CRITERIA, IPrimitiveType.class);
 			String nextCriteriaString = nextCriteria != null ? nextCriteria.getValueAsString() : null;
 
 			if (StringUtils.isBlank(nextCriteriaString)) {
@@ -76,6 +77,12 @@ public class SubscriptionCheckingSubscriber extends BaseSubscriptionSubscriber {
 			criteria += "&_id=" + resourceType + "/" + resourceId;
 			criteria = massageCriteria(criteria);
 
+			try {
+				Thread.sleep(500);
+			} catch (InterruptedException theE) {
+				theE.printStackTrace();
+			}
+
 			IBundleProvider results = performSearch(criteria);
 			if (results.size() == 0) {
 				continue;
@@ -83,13 +90,14 @@ public class SubscriptionCheckingSubscriber extends BaseSubscriptionSubscriber {
 
 			// should just be one resource as it was filtered by the id
 			for (IBaseResource nextBase : results.getResources(0, results.size())) {
-				IAnyResource next = (IAnyResource) nextBase;
+				IBaseResource next = (IBaseResource) nextBase;
 				ourLog.info("Found match: queueing rest-hook notification for resource: {}", next.getIdElement());
 
 				ResourceDeliveryMessage deliveryMsg = new ResourceDeliveryMessage();
 				deliveryMsg.setPayoad(next);
 				deliveryMsg.setSubscription(nextSubscription);
 				deliveryMsg.setOperationType(msg.getOperationType());
+				deliveryMsg.setPayloadId(msg.getId());
 
 				getProcessingChannel().send(new GenericMessage<>(deliveryMsg));
 			}
