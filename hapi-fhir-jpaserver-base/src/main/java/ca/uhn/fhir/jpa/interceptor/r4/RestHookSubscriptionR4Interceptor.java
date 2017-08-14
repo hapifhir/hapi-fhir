@@ -58,10 +58,10 @@ public class RestHookSubscriptionR4Interceptor extends BaseRestHookSubscriptionI
 	private final static int MAX_THREADS = 1;
 	private static final Logger ourLog = LoggerFactory.getLogger(RestHookSubscriptionR4Interceptor.class);
 
+	private final List<Subscription> myRestHookSubscriptions = new ArrayList<>();
 	@Autowired
 	private FhirContext myFhirContext;
 
-	private final List<Subscription> myRestHookSubscriptions = new ArrayList<Subscription>();
 
 	@Autowired
 	@Qualifier("mySubscriptionDaoR4")

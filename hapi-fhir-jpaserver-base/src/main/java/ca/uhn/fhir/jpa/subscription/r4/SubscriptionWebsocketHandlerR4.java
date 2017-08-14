@@ -57,11 +57,8 @@ public class SubscriptionWebsocketHandlerR4 extends TextWebSocketHandler impleme
 	private static IFhirResourceDaoSubscription<Subscription> ourSubscriptionDao;
 
 	private ScheduledFuture<?> myScheduleFuture;
-
 	private IState myState = new InitialState();
-
 	private IIdType mySubscriptionId;
-
 	private Long mySubscriptionPid;
 
 	@Autowired
