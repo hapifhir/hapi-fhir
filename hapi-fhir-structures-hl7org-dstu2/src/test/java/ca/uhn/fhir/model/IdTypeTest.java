@@ -83,7 +83,55 @@ public class IdTypeTest {
 		assertEquals("Patient/cid:Patient-72/_history/1", id2.getIdPart());
 
 	}
-	
+
+	@Test
+	public void testNormal() {
+		IdType id = new IdType("foo");
+		assertEquals("foo", id.getValueAsString());
+		assertEquals("foo", id.getIdPart());
+		assertEquals("foo", id.toUnqualified().getValueAsString());
+		assertEquals("foo", id.toUnqualifiedVersionless().getValueAsString());
+		assertEquals(null, id.getVersionIdPart());
+		assertEquals(null, id.getResourceType());
+		assertEquals(null, id.getBaseUrl());
+
+		assertEquals("Patient/foo", id.withResourceType("Patient").getValue());
+		assertEquals("http://foo/Patient/foo", id.withServerBase("http://foo", "Patient").getValue());
+		assertEquals("foo/_history/2", id.withVersion("2").getValue());
+	}
+
+	@Test
+	public void testBaseUrlFoo1() {
+		IdType id = new IdType("http://my.org/foo");
+		assertEquals("http://my.org/foo", id.getValueAsString());
+		assertEquals(null, id.getIdPart());
+		assertEquals("foo", id.toUnqualified().getValueAsString());
+		assertEquals("foo", id.toUnqualifiedVersionless().getValueAsString());
+		assertEquals(null, id.getVersionIdPart());
+		assertEquals("foo", id.getResourceType());
+		assertEquals("http://my.org", id.getBaseUrl());
+
+		assertEquals("Patient", id.withResourceType("Patient").getValue());
+		assertEquals("http://foo/Patient", id.withServerBase("http://foo", "Patient").getValue());
+		assertEquals("http://my.org/foo//_history/2", id.withVersion("2").getValue());
+	}
+
+	@Test
+	public void testBaseUrlFoo2() {
+		IdType id = new IdType("http://my.org/a/b/c/foo");
+		assertEquals("http://my.org/a/b/c/foo", id.getValueAsString());
+		assertEquals("foo", id.getIdPart());
+		assertEquals("c/foo", id.toUnqualified().getValueAsString());
+		assertEquals("c/foo", id.toUnqualifiedVersionless().getValueAsString());
+		assertEquals(null, id.getVersionIdPart());
+		assertEquals("c", id.getResourceType());
+		assertEquals("http://my.org/a/b", id.getBaseUrl());
+
+		assertEquals("Patient/foo", id.withResourceType("Patient").getValue());
+		assertEquals("http://foo/Patient/foo", id.withServerBase("http://foo", "Patient").getValue());
+		assertEquals("http://my.org/a/b/c/foo/_history/2", id.withVersion("2").getValue());
+	}
+
 	@Test
 	public void testDetermineBase() {
 

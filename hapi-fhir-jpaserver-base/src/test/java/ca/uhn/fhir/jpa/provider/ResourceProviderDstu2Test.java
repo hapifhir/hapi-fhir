@@ -13,6 +13,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.*;
 import org.apache.http.entity.*;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.*;
@@ -2059,12 +2060,12 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		Observation o = new Observation();
 		o.getCode().setText("testSearchWithInvalidSort");
 		myObservationDao.create(o, mySrd);
-		ourClient
-				.search()
-				.forResource(Observation.class)
-				.sort().ascending(Observation.CODE_VALUE_QUANTITY) // composite sort not supported yet
-				.prettyPrint()
-				.execute();
+		IBaseBundle bundle = ourClient
+			.search()
+			.forResource(Observation.class)
+			.sort().ascending(Observation.CODE_VALUE_QUANTITY) // composite sort not supported yet
+			.prettyPrint()
+			.execute();
 	}
 
 	@Test

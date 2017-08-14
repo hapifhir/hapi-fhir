@@ -1,57 +1,63 @@
-
 package ca.uhn.fhir.jpa.subscription.r4;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.servlet.http.HttpServletRequest;
-import ca.uhn.fhir.rest.api.Constants;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.servlet.ServletContextHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
-import org.hl7.fhir.r4.model.*;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.junit.*;
-
-import com.google.common.collect.Lists;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.provider.r4.BaseResourceProviderR4Test;
-import ca.uhn.fhir.jpa.testutil.RandomServerPortProvider;
-import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.rest.annotation.*;
+import ca.uhn.fhir.jpa.subscription.RestHookTestDstu2Test;
+import ca.uhn.fhir.rest.annotation.Create;
+import ca.uhn.fhir.rest.annotation.ResourceParam;
+import ca.uhn.fhir.rest.annotation.Update;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.util.PortUtil;
+import com.google.common.collect.Lists;
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.servlet.ServletContextHandler;
+import org.eclipse.jetty.servlet.ServletHolder;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.*;
+import org.junit.*;
+
+import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 /**
  * Test the rest-hook subscriptions
  */
 public class RestHookTestR4Test extends BaseResourceProviderR4Test {
 
-	private static List<String> ourContentTypes = new ArrayList<String>();
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(RestHookTestDstu2Test.class);
 	private static List<Observation> ourCreatedObservations = Lists.newArrayList();
 	private static int ourListenerPort;
 	private static RestfulServer ourListenerRestServer;
 	private static Server ourListenerServer;
 	private static String ourListenerServerBase;
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(RestHookTestR4Test.class);
-
 	private static List<Observation> ourUpdatedObservations = Lists.newArrayList();
+	private static List<String> ourContentTypes = new ArrayList<>();
+	private List<IIdType> mySubscriptionIds = new ArrayList<>();
 
 	@After
 	public void afterUnregisterRestHookListener() {
+		for (IIdType next : mySubscriptionIds) {
+			ourClient.delete().resourceById(next).execute();
+		}
+		mySubscriptionIds.clear();
+
 		myDaoConfig.setAllowMultipleDelete(true);
 		ourLog.info("Deleting all subscriptions");
 		ourClient.delete().resourceConditionalByUrl("Subscription?status=active").execute();
+		ourClient.delete().resourceConditionalByUrl("Observation?code:missing=false").execute();
 		ourLog.info("Done deleting all subscriptions");
 		myDaoConfig.setAllowMultipleDelete(new DaoConfig().isAllowMultipleDelete());
-		
+
 		ourRestServer.unregisterInterceptor(ourRestHookSubscriptionInterceptor);
 	}
 
@@ -66,7 +72,7 @@ public class RestHookTestR4Test extends BaseResourceProviderR4Test {
 		ourUpdatedObservations.clear();
 		ourContentTypes.clear();
 	}
-	
+
 	@Test
 	public void testRestHookSubscriptionInvalidCriteria() throws Exception {
 		String payload = "application/xml";
@@ -81,11 +87,10 @@ public class RestHookTestR4Test extends BaseResourceProviderR4Test {
 		}
 	}
 
-
 	private Subscription createSubscription(String theCriteria, String thePayload, String theEndpoint) {
 		Subscription subscription = new Subscription();
 		subscription.setReason("Monitor new neonatal function (note, age will be determined by the monitor)");
-		subscription.setStatus(Subscription.SubscriptionStatus.ACTIVE);
+		subscription.setStatus(Subscription.SubscriptionStatus.REQUESTED);
 		subscription.setCriteria(theCriteria);
 
 		Subscription.SubscriptionChannelComponent channel = new Subscription.SubscriptionChannelComponent();
@@ -96,6 +101,7 @@ public class RestHookTestR4Test extends BaseResourceProviderR4Test {
 
 		MethodOutcome methodOutcome = ourClient.create().resource(subscription).execute();
 		subscription.setId(methodOutcome.getId().getIdPart());
+		mySubscriptionIds.add(methodOutcome.getId());
 
 		return subscription;
 	}
@@ -117,7 +123,7 @@ public class RestHookTestR4Test extends BaseResourceProviderR4Test {
 
 		return observation;
 	}
-	
+
 	@Test
 	public void testRestHookSubscriptionApplicationFhirJson() throws Exception {
 		String payload = "application/fhir+json";
@@ -137,7 +143,7 @@ public class RestHookTestR4Test extends BaseResourceProviderR4Test {
 		assertEquals(0, ourUpdatedObservations.size());
 		assertEquals(Constants.CT_FHIR_JSON_NEW, ourContentTypes.get(0));
 	}
-	
+
 	@Test
 	public void testRestHookSubscriptionApplicationJson() throws Exception {
 		String payload = "application/json";
@@ -156,28 +162,27 @@ public class RestHookTestR4Test extends BaseResourceProviderR4Test {
 		assertEquals(1, ourCreatedObservations.size());
 		assertEquals(0, ourUpdatedObservations.size());
 		assertEquals(Constants.CT_FHIR_JSON_NEW, ourContentTypes.get(0));
-		
+
 		Subscription subscriptionTemp = ourClient.read(Subscription.class, subscription2.getId());
 		Assert.assertNotNull(subscriptionTemp);
 
 		subscriptionTemp.setCriteria(criteria1);
 		ourClient.update().resource(subscriptionTemp).withId(subscriptionTemp.getIdElement()).execute();
 
-
 		Observation observation2 = sendObservation(code, "SNOMED-CT");
 
-		// Should see two subscription notifications
+		// Should see one subscription notification
 		Thread.sleep(500);
-		assertEquals(3, ourCreatedObservations.size());
+		assertEquals(2, ourCreatedObservations.size());
 		assertEquals(0, ourUpdatedObservations.size());
-		
-		ourClient.delete().resourceById(new IdDt("Subscription", subscription2.getId())).execute();
+
+		ourClient.delete().resourceById(new IdType("Subscription/" + subscription2.getId())).execute();
 
 		Observation observationTemp3 = sendObservation(code, "SNOMED-CT");
 
 		// Should see only one subscription notification
 		Thread.sleep(500);
-		assertEquals(4, ourCreatedObservations.size());
+		assertEquals(3, ourCreatedObservations.size());
 		assertEquals(0, ourUpdatedObservations.size());
 
 		Observation observation3 = ourClient.read(Observation.class, observationTemp3.getId());
@@ -190,7 +195,7 @@ public class RestHookTestR4Test extends BaseResourceProviderR4Test {
 
 		// Should see no subscription notification
 		Thread.sleep(500);
-		assertEquals(4, ourCreatedObservations.size());
+		assertEquals(3, ourCreatedObservations.size());
 		assertEquals(0, ourUpdatedObservations.size());
 
 		Observation observation3a = ourClient.read(Observation.class, observationTemp3.getId());
@@ -204,7 +209,7 @@ public class RestHookTestR4Test extends BaseResourceProviderR4Test {
 
 		// Should see only one subscription notification
 		Thread.sleep(500);
-		assertEquals(4, ourCreatedObservations.size());
+		assertEquals(3, ourCreatedObservations.size());
 		assertEquals(1, ourUpdatedObservations.size());
 
 		Assert.assertFalse(subscription1.getId().equals(subscription2.getId()));
@@ -232,7 +237,6 @@ public class RestHookTestR4Test extends BaseResourceProviderR4Test {
 		assertEquals(Constants.CT_FHIR_XML_NEW, ourContentTypes.get(0));
 	}
 
-	
 	@Test
 	public void testRestHookSubscriptionApplicationXml() throws Exception {
 		String payload = "application/xml";
@@ -251,28 +255,27 @@ public class RestHookTestR4Test extends BaseResourceProviderR4Test {
 		assertEquals(1, ourCreatedObservations.size());
 		assertEquals(0, ourUpdatedObservations.size());
 		assertEquals(Constants.CT_FHIR_XML_NEW, ourContentTypes.get(0));
-		
+
 		Subscription subscriptionTemp = ourClient.read(Subscription.class, subscription2.getId());
 		Assert.assertNotNull(subscriptionTemp);
 
 		subscriptionTemp.setCriteria(criteria1);
 		ourClient.update().resource(subscriptionTemp).withId(subscriptionTemp.getIdElement()).execute();
 
-
 		Observation observation2 = sendObservation(code, "SNOMED-CT");
 
-		// Should see two subscription notifications
+		// Should see one subscription notification
 		Thread.sleep(500);
-		assertEquals(3, ourCreatedObservations.size());
+		assertEquals(ourCreatedObservations.toString(), 2, ourCreatedObservations.size());
 		assertEquals(0, ourUpdatedObservations.size());
-		
-		ourClient.delete().resourceById(new IdDt("Subscription", subscription2.getId())).execute();
+
+		ourClient.delete().resourceById(new IdType("Subscription/" + subscription2.getId())).execute();
 
 		Observation observationTemp3 = sendObservation(code, "SNOMED-CT");
 
 		// Should see only one subscription notification
 		Thread.sleep(500);
-		assertEquals(4, ourCreatedObservations.size());
+		assertEquals(3, ourCreatedObservations.size());
 		assertEquals(0, ourUpdatedObservations.size());
 
 		Observation observation3 = ourClient.read(Observation.class, observationTemp3.getId());
@@ -285,7 +288,7 @@ public class RestHookTestR4Test extends BaseResourceProviderR4Test {
 
 		// Should see no subscription notification
 		Thread.sleep(500);
-		assertEquals(4, ourCreatedObservations.size());
+		assertEquals(3, ourCreatedObservations.size());
 		assertEquals(0, ourUpdatedObservations.size());
 
 		Observation observation3a = ourClient.read(Observation.class, observationTemp3.getId());
@@ -299,17 +302,17 @@ public class RestHookTestR4Test extends BaseResourceProviderR4Test {
 
 		// Should see only one subscription notification
 		Thread.sleep(500);
-		assertEquals(4, ourCreatedObservations.size());
+		assertEquals(3, ourCreatedObservations.size());
 		assertEquals(1, ourUpdatedObservations.size());
 
 		Assert.assertFalse(subscription1.getId().equals(subscription2.getId()));
 		Assert.assertFalse(observation1.getId().isEmpty());
 		Assert.assertFalse(observation2.getId().isEmpty());
 	}
-	
+
 	@BeforeClass
 	public static void startListenerServer() throws Exception {
-		ourListenerPort = RandomServerPortProvider.findFreePort();
+		ourListenerPort = PortUtil.findFreePort();
 		ourListenerRestServer = new RestfulServer(FhirContext.forR4());
 		ourListenerServerBase = "http://localhost:" + ourListenerPort + "/fhir/context";
 

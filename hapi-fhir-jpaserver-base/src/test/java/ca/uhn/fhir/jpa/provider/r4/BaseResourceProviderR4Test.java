@@ -151,7 +151,7 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 			myFhirCtx.getRestfulClientFactory().setSocketTimeout(5000000);
 			ourClient = myFhirCtx.newRestfulGenericClient(ourServerBase);
 			if (shouldLogClient()) {
-				ourClient.registerInterceptor(new LoggingInterceptor(true));
+				ourClient.registerInterceptor(new LoggingInterceptor());
 			}
 			
 			PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);

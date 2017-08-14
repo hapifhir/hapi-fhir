@@ -1,13 +1,13 @@
 package ca.uhn.fhir.parser;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
-
-import java.io.*;
-import java.nio.charset.Charset;
-import java.util.Arrays;
-import java.util.List;
-
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.narrative.INarrativeGenerator;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.util.TestUtil;
+import net.sf.json.JSON;
+import net.sf.json.JSONSerializer;
 import org.apache.commons.io.IOUtils;
 import org.hamcrest.core.IsNot;
 import org.hamcrest.core.StringContains;
@@ -22,19 +22,23 @@ import org.hl7.fhir.instance.model.Narrative.NarrativeStatus;
 import org.hl7.fhir.instance.model.Patient.ContactComponent;
 import org.hl7.fhir.instance.model.ValueSet.ConceptDefinitionComponent;
 import org.hl7.fhir.instance.model.ValueSet.ValueSetCodeSystemComponent;
-import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.instance.model.api.INarrative;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
 import org.junit.*;
 import org.xml.sax.SAXException;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.ResourceDef;
-import ca.uhn.fhir.narrative.INarrativeGenerator;
-import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.util.TestUtil;
-import net.sf.json.JSON;
-import net.sf.json.JSONSerializer;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.StringReader;
+import java.nio.charset.Charset;
+import java.util.Arrays;
+import java.util.List;
+
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
 
 public class JsonParserHl7OrgDstu2Test {
   private static FhirContext ourCtx = FhirContext.forDstu2Hl7Org();
@@ -1273,6 +1277,26 @@ public class JsonParserHl7OrgDstu2Test {
 		XmlParserHl7OrgDstu2Test.compareXml(expected, actual);
 	}
 
+
+	@Test
+	public void testBaseUrlFooResourceCorrectlySerializedInExtensionValueReference() {
+		String refVal = "http://my.org/FooBar";
+
+		Patient fhirPat = new Patient();
+		fhirPat.addExtension().setUrl("x1").setValue(new Reference(refVal));
+
+		IParser parser = ourCtx.newJsonParser();
+
+		String output = parser.encodeResourceToString(fhirPat);
+		System.out.println("output: " + output);
+
+		// Deserialize then check that valueReference value is still correct
+		fhirPat = parser.parseResource(Patient.class, output);
+
+		List<Extension> extlst = fhirPat.getExtension();
+		Assert.assertEquals(1, extlst.size());
+		Assert.assertEquals(refVal, ((Reference) extlst.get(0).getValue()).getReference());
+	}
 
   @ResourceDef(name = "Patient")
   public static class MyPatientWithOneDeclaredAddressExtension extends Patient {

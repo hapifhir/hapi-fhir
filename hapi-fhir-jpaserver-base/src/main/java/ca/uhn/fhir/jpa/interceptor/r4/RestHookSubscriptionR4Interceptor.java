@@ -58,10 +58,10 @@ public class RestHookSubscriptionR4Interceptor extends BaseRestHookSubscriptionI
 	private final static int MAX_THREADS = 1;
 	private static final Logger ourLog = LoggerFactory.getLogger(RestHookSubscriptionR4Interceptor.class);
 
+	private final List<Subscription> myRestHookSubscriptions = new ArrayList<>();
 	@Autowired
 	private FhirContext myFhirContext;
 
-	private final List<Subscription> myRestHookSubscriptions = new ArrayList<Subscription>();
 
 	@Autowired
 	@Qualifier("mySubscriptionDaoR4")
@@ -314,9 +314,10 @@ public class RestHookSubscriptionR4Interceptor extends BaseRestHookSubscriptionI
 			Subscription subscription = (Subscription) theResource;
 			if (subscription.getChannel() != null
 					&& subscription.getChannel().getType() == Subscription.SubscriptionChannelType.RESTHOOK
-					&& subscription.getStatus() == Subscription.SubscriptionStatus.ACTIVE) {
+					&& subscription.getStatus() == Subscription.SubscriptionStatus.REQUESTED) {
 				removeLocalSubscription(subscription.getIdElement().getIdPart());
 				myRestHookSubscriptions.add(subscription);
+				subscription.setStatus(Subscription.SubscriptionStatus.ACTIVE);
 				ourLog.info("Subscription was added, id: {} - Have {}", subscription.getIdElement().getIdPart(), myRestHookSubscriptions.size());
 			}
 		} else {

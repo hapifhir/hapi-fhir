@@ -80,7 +80,8 @@ public class RestHookSubscriptionDstu2Interceptor extends BaseRestHookSubscripti
 	 */
 	private void checkSubscriptions(IIdType idType, String resourceType, RestOperationTypeEnum theOperation) {
 		//avoid a ConcurrentModificationException by copying to an array
-		for (Object object : myRestHookSubscriptions.toArray()) {
+		Object[] subscriptions = myRestHookSubscriptions.toArray();
+		for (Object object : subscriptions) {
 			if (object == null) {
 				continue;
 			}
@@ -330,8 +331,9 @@ public class RestHookSubscriptionDstu2Interceptor extends BaseRestHookSubscripti
 			Subscription subscription = (Subscription) theResource;
 			if (subscription.getChannel() != null
 					&& subscription.getChannel().getTypeElement().getValueAsEnum() == SubscriptionChannelTypeEnum.REST_HOOK
-					&& subscription.getStatusElement().getValueAsEnum() == SubscriptionStatusEnum.ACTIVE) {
+					&& subscription.getStatusElement().getValueAsEnum() == SubscriptionStatusEnum.REQUESTED) {
 				removeLocalSubscription(subscription.getIdElement().getIdPart());
+				subscription.setStatus(SubscriptionStatusEnum.ACTIVE);
 				myRestHookSubscriptions.add(subscription);
 				ourLog.info("Subscription was added. Id: " + subscription.getId());
 			}

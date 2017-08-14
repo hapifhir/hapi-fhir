@@ -319,8 +319,9 @@ public class RestHookSubscriptionDstu3Interceptor extends BaseRestHookSubscripti
 			Subscription subscription = (Subscription) theResource;
 			if (subscription.getChannel() != null
 					&& subscription.getChannel().getType() == Subscription.SubscriptionChannelType.RESTHOOK
-					&& subscription.getStatus() == Subscription.SubscriptionStatus.ACTIVE) {
+					&& subscription.getStatus() == Subscription.SubscriptionStatus.REQUESTED) {
 				removeLocalSubscription(subscription.getIdElement().getIdPart());
+				subscription.setStatus(Subscription.SubscriptionStatus.ACTIVE);
 				myRestHookSubscriptions.add(subscription);
 				ourLog.info("Subscription was added, id: {} - Have {}", subscription.getIdElement().getIdPart(), myRestHookSubscriptions.size());
 			}

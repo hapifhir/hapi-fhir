@@ -1755,11 +1755,6 @@ public class GenericClient extends BaseClient implements IGenericClient {
 				}
 			}
 
-			if (myReturnBundleType == null && myContext.getVersion().getVersion().isRi()) {
-				throw new IllegalArgumentException("When using the client with HL7.org structures, you must specify "
-						+ "the bundle return type for the client by adding \".returnBundle(org.hl7.fhir.instance.model.Bundle.class)\" to your search method call before the \".execute()\" method");
-			}
-
 			IClientResponseHandler<? extends IBase> binding;
 			binding = new ResourceResponseHandler(myReturnBundleType, getPreferResponseTypes(myResourceType));
 

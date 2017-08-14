@@ -269,6 +269,33 @@
 				correctly validated if the element contained only a profiled extension. Thanks
 				to Sébastien Rivière for the pull request!
 			</action>
+			<action type="add" issue="701">
+				Testing UI now has a dropdown for modifiers on token search. Thanks 
+				to GitHub user @dconlan for the pull request!
+			</action>
+			<action type="add" issue="688">
+				When parsing an incomplete ID with the form <![CDATA[<code>http://my.org/Foo</code>]]> into
+				IdDt and IdType objects, the Foo portion will now be treated as the resource type.
+				Previously my.org was treated as the resource type and Foo was treated as the ID. Thanks
+				to GitHub user @CarthageKing for the pull request!
+			</action>
+			<action type="fix" issue="695">
+				Extensions on ID datatypes were not parsed or serialized correctly. Thanks to
+				Stephen Rivière for the pull request!
+			</action>
+			<action type="fix" issue="710">
+				Fix a bug in REST Hook Subscription interceptors which prevented subscriptions
+				from being activated. Thanks to Jeff Chung for the pull request!
+			</action>
+			<action type="fix" issue="708">
+				Fix broken links in usage pattern diagram on website. Thanks to
+				Pascal Brandt for the pull request!
+			</action>
+			<action type="fix" issue="706">
+				Fix incorrect FHIR Version Strings that were being outputted and verified in the 
+				client for some versions of FHIR. Thanks to Clayton Bodendein for the
+				pull request!
+			</action>
 		</release>
 		<release version="2.5" date="2017-06-08">
 			<action type="fix">

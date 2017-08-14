@@ -136,7 +136,7 @@ public class BaseResourceReferenceDtTest {
 			new ResourceReferenceDt("http://foo/123123").loadResource(client);
 			fail();
 		} catch (DataFormatException e) {
-			assertEquals("Unknown resource name \"foo\" (this name is not known in FHIR version \"DSTU2\")", e.getMessage());
+			assertEquals("Unknown resource name \"123123\" (this name is not known in FHIR version \"DSTU2\")", e.getMessage());
 		}
 
 		try {

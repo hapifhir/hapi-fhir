@@ -346,6 +346,18 @@
 			<id>SarenCurrie</id>
 			<name>Saren Currie</name>
 		</developer>
+		<developer>
+			<id>dconlan</id>
+			<name>dconlan</name>
+		</developer>
+		<developer>
+			<id>psbrandt</id>
+			<name>Pascal Brandt</name>
+		</developer>
+		<developer>
+			<id>InfiniteLoop90</id>
+			<name>Clayton Bodendein</name>
+		</developer>
 	</developers>
 
 	<licenses>
