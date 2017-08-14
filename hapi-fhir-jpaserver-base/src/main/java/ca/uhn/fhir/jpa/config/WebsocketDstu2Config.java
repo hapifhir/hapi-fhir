@@ -31,7 +31,7 @@ import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
 import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry;
 import org.springframework.web.socket.handler.PerConnectionWebSocketHandler;
 
-import ca.uhn.fhir.jpa.subscription.SubscriptionWebsocketHandlerDstu2;
+import ca.uhn.fhir.jpa.subscription.dstu2.SubscriptionWebsocketHandlerDstu2;
 
 @Configuration
 @EnableWebSocket()

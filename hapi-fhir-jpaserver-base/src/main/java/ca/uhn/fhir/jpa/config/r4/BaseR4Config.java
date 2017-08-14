@@ -34,7 +34,7 @@ import ca.uhn.fhir.jpa.config.BaseConfig;
 import ca.uhn.fhir.jpa.dao.*;
 import ca.uhn.fhir.jpa.dao.r4.SearchParamExtractorR4;
 import ca.uhn.fhir.jpa.dao.r4.SearchParamRegistryR4;
-import ca.uhn.fhir.jpa.interceptor.r4.RestHookSubscriptionR4Interceptor;
+import ca.uhn.fhir.jpa.subscription.r4.RestHookSubscriptionR4Interceptor;
 import ca.uhn.fhir.jpa.provider.r4.TerminologyUploaderProviderR4;
 import ca.uhn.fhir.jpa.term.*;
 import ca.uhn.fhir.jpa.term.HapiTerminologySvcR4;

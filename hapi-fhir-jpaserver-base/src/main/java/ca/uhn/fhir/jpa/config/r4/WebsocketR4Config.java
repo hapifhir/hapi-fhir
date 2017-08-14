@@ -30,7 +30,7 @@ import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.config.annotation.*;
 import org.springframework.web.socket.handler.PerConnectionWebSocketHandler;
 
-import ca.uhn.fhir.jpa.interceptor.r4.WebSocketSubscriptionR4Interceptor;
+import ca.uhn.fhir.jpa.subscription.r4.WebSocketSubscriptionR4Interceptor;
 import ca.uhn.fhir.jpa.subscription.r4.SubscriptionWebsocketHandlerR4;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 

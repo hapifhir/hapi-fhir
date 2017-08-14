@@ -77,12 +77,6 @@ public class SubscriptionCheckingSubscriber extends BaseSubscriptionSubscriber {
 			criteria += "&_id=" + resourceType + "/" + resourceId;
 			criteria = massageCriteria(criteria);
 
-			try {
-				Thread.sleep(500);
-			} catch (InterruptedException theE) {
-				theE.printStackTrace();
-			}
-
 			IBundleProvider results = performSearch(criteria);
 			if (results.size() == 0) {
 				continue;
@@ -90,11 +84,10 @@ public class SubscriptionCheckingSubscriber extends BaseSubscriptionSubscriber {
 
 			// should just be one resource as it was filtered by the id
 			for (IBaseResource nextBase : results.getResources(0, results.size())) {
-				IBaseResource next = (IBaseResource) nextBase;
-				ourLog.info("Found match: queueing rest-hook notification for resource: {}", next.getIdElement());
+				ourLog.info("Found match: queueing rest-hook notification for resource: {}", nextBase.getIdElement());
 
 				ResourceDeliveryMessage deliveryMsg = new ResourceDeliveryMessage();
-				deliveryMsg.setPayoad(next);
+				deliveryMsg.setPayoad(nextBase);
 				deliveryMsg.setSubscription(nextSubscription);
 				deliveryMsg.setOperationType(msg.getOperationType());
 				deliveryMsg.setPayloadId(msg.getId());

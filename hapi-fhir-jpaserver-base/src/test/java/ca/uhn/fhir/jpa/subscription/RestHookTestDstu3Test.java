@@ -21,8 +21,6 @@ import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.*;
-import org.springframework.messaging.support.ChannelInterceptor;
-import org.springframework.messaging.support.ExecutorSubscribableChannel;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
@@ -153,11 +151,11 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 	}
 
 	private void waitForQueueToDrain() throws InterruptedException {
-		ourLog.info("QUEUE HAS {} ITEMS", ourRestHookSubscriptionInterceptor.getExecutorQueue().size());
-		while (ourRestHookSubscriptionInterceptor.getExecutorQueue().size() > 0) {
+		ourLog.info("QUEUE HAS {} ITEMS", ourRestHookSubscriptionInterceptor.getExecutorQueueForUnitTests().size());
+		while (ourRestHookSubscriptionInterceptor.getExecutorQueueForUnitTests().size() > 0) {
 			Thread.sleep(250);
 		}
-		ourLog.info("QUEUE HAS {} ITEMS", ourRestHookSubscriptionInterceptor.getExecutorQueue().size());
+		ourLog.info("QUEUE HAS {} ITEMS", ourRestHookSubscriptionInterceptor.getExecutorQueueForUnitTests().size());
 	}
 
 	@Test

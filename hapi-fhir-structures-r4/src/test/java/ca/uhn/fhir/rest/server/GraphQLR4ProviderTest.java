@@ -24,7 +24,10 @@ import org.hl7.fhir.r4.hapi.rest.server.GraphQLProvider;
 import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.utils.GraphQLEngine;
 import org.hl7.fhir.utilities.graphql.Argument;
-import org.junit.*;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -106,7 +109,6 @@ public class GraphQLR4ProviderTest {
 	}
 
 	@Test
-	@Ignore
 	public void testGraphSystemInstance() throws Exception {
 		String query = "{Patient(id:123){id,name{given,family}}}";
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/$graphql?query=" + UrlUtil.escape(query));
@@ -117,12 +119,14 @@ public class GraphQLR4ProviderTest {
 			assertEquals(200, status.getStatusLine().getStatusCode());
 
 			assertEquals("{\n" +
-				"  \"name\":[{\n" +
-				"    \"family\":\"FAMILY\",\n" +
-				"    \"given\":[\"GIVEN1\",\"GIVEN2\"]\n" +
-				"  },{\n" +
-				"    \"given\":[\"GivenOnly1\",\"GivenOnly2\"]\n" +
-				"  }]\n" +
+				"  \"Patient\":{\n" +
+				"    \"name\":[{\n" +
+				"      \"given\":[\"GIVEN1\",\"GIVEN2\"],\n" +
+				"      \"family\":\"FAMILY\"\n" +
+				"    },{\n" +
+				"      \"given\":[\"GivenOnly1\",\"GivenOnly2\"]\n" +
+				"    }]\n" +
+				"  }\n" +
 				"}", responseContent);
 			assertThat(status.getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue(), startsWith("application/json"));
 
@@ -133,7 +137,6 @@ public class GraphQLR4ProviderTest {
 	}
 
 	@Test
-	@Ignore
 	public void testGraphSystemList() throws Exception {
 		String query = "{PatientList(name:\"pet\"){name{family,given}}}";
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/$graphql?query=" + UrlUtil.escape(query));
@@ -144,11 +147,17 @@ public class GraphQLR4ProviderTest {
 			assertEquals(200, status.getStatusLine().getStatusCode());
 
 			assertEquals("{\n" +
-				"  \"name\":[{\n" +
-				"    \"family\":\"FAMILY\",\n" +
-				"    \"given\":[\"GIVEN1\",\"GIVEN2\"]\n" +
+				"  \"PatientList\":[{\n" +
+				"    \"name\":[{\n" +
+				"      \"family\":\"pet\",\n" +
+				"      \"given\":[\"GIVEN1\",\"GIVEN2\"]\n" +
+				"    },{\n" +
+				"      \"given\":[\"GivenOnly1\",\"GivenOnly2\"]\n" +
+				"    }]\n" +
 				"  },{\n" +
-				"    \"given\":[\"GivenOnly1\",\"GivenOnly2\"]\n" +
+				"    \"name\":[{\n" +
+				"      \"given\":[\"GivenOnlyB1\",\"GivenOnlyB2\"]\n" +
+				"    }]\n" +
 				"  }]\n" +
 				"}", responseContent);
 			assertThat(status.getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue(), startsWith("application/json"));
@@ -209,24 +218,22 @@ public class GraphQLR4ProviderTest {
 
 	private static class MyStorageServices implements GraphQLEngine.IGraphQLStorageServices {
 		@Override
-		public ReferenceResolution lookup(Object appInfo, Resource context, Reference reference) throws FHIRException {
-			ourLog.info("lookup from {} to {}", context.getIdElement().getValue(), reference.getReference());
+		public ReferenceResolution lookup(Object theAppInfo, Resource theContext, Reference theReference) throws FHIRException {
+			ourLog.info("lookup from {} to {}", theContext.getIdElement().getValue(), theReference.getReference());
 			return null;
 		}
 
 		@Override
-		public Resource lookup(Object appInfo, String type, String id) throws FHIRException {
-			ourLog.info("lookup {}/{}", type, id);
+		public Resource lookup(Object theAppInfo, String theType, String theId) throws FHIRException {
+			ourLog.info("lookup {}/{}", theType, theId);
 
-			if (type.equals("Patient") && id.equals("123")) {
+			if (theType.equals("Patient") && theId.equals("123")) {
 				Patient p = new Patient();
-				p
-					.addName()
+				p.addName()
 					.setFamily("FAMILY")
 					.addGiven("GIVEN1")
 					.addGiven("GIVEN2");
-				p
-					.addName()
+				p.addName()
 					.addGiven("GivenOnly1")
 					.addGiven("GivenOnly2");
 				return p;
@@ -236,13 +243,35 @@ public class GraphQLR4ProviderTest {
 		}
 
 		@Override
-		public void listResources(Object appInfo, String type, List<Argument> searchParams, List<Resource> matches) throws FHIRException {
-			ourLog.info("listResources of {} - {}", type, searchParams);
+		public void listResources(Object theAppInfo, String theType, List<Argument> theSearchParams, List<Resource> theMatches) throws FHIRException {
+			ourLog.info("listResources of {} - {}", theType, theSearchParams);
+
+			if (theSearchParams.size() == 1) {
+				String name = theSearchParams.get(0).getName();
+				if ("name".equals(name)) {
+					Patient p = new Patient();
+					p.addName()
+						.setFamily(theSearchParams.get(0).getValues().get(0).toString())
+						.addGiven("GIVEN1")
+						.addGiven("GIVEN2");
+					p.addName()
+						.addGiven("GivenOnly1")
+						.addGiven("GivenOnly2");
+					theMatches.add(p);
+
+					p = new Patient();
+					p.addName()
+						.addGiven("GivenOnlyB1")
+						.addGiven("GivenOnlyB2");
+					theMatches.add(p);
+
+				}
+			}
 		}
 
 		@Override
-		public Bundle search(Object appInfo, String type, List<Argument> searchParams) throws FHIRException {
-			ourLog.info("search on {} - {}", type, searchParams);
+		public Bundle search(Object theAppInfo, String theType, List<Argument> theSearchParams) throws FHIRException {
+			ourLog.info("search on {} - {}", theType, theSearchParams);
 			return null;
 		}
 	}

@@ -9,7 +9,6 @@ import org.hl7.fhir.r4.model.Subscription;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.messaging.Message;
-import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.MessagingException;
 import org.springframework.messaging.SubscribableChannel;
 
@@ -41,12 +40,16 @@ public class SubscriptionActivatingSubscriber extends BaseSubscriptionSubscriber
 		IPrimitiveType<?> status = ctx.newTerser().getSingleValueOrNull(subscription, SUBSCRIPTION_STATUS, IPrimitiveType.class);
 		String statusString = status.getValueAsString();
 
-		String oldStatus = Subscription.SubscriptionStatus.REQUESTED.toCode();
-		if (oldStatus.equals(statusString)) {
-			String newStatus = Subscription.SubscriptionStatus.ACTIVE.toCode();
-			status.setValueAsString(newStatus);
-			ourLog.info("Activating subscription {} from status {} to {}", subscription.getIdElement().toUnqualifiedVersionless().getValue(), oldStatus, newStatus);
+		String requestedStatus = Subscription.SubscriptionStatus.REQUESTED.toCode();
+		String activeStatus = Subscription.SubscriptionStatus.ACTIVE.toCode();
+		if (requestedStatus.equals(statusString)) {
+			status.setValueAsString(activeStatus);
+			ourLog.info("Activating subscription {} from status {} to {}", subscription.getIdElement().toUnqualified().getValue(), requestedStatus, activeStatus);
 			getSubscriptionDao().update(subscription);
+			getIdToSubscription().put(subscription.getIdElement().getIdPart(), subscription);
+		} else if (activeStatus.equals(statusString)) {
+			ourLog.info("Newly created active subscription {}", subscription.getIdElement().toUnqualified().getValue());
+
 			getIdToSubscription().put(subscription.getIdElement().getIdPart(), subscription);
 		}
 	}

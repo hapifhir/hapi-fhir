@@ -1326,7 +1326,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 				}
 			}
 			if (!newPlainProviders.isEmpty()) {
-				ourLog.info("Added {} plain provider(s). Total {}", newPlainProviders.size());
+				ourLog.info("Added {} plain provider(s). Total {}", newPlainProviders.size(), myPlainProviders.size());
 				for (Object provider : newPlainProviders) {
 					assertProviderIsValid(provider);
 					findResourceMethods(provider);

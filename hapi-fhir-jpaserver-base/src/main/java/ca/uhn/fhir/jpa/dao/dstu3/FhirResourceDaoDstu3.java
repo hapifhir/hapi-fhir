@@ -70,24 +70,6 @@ public class FhirResourceDaoDstu3<T extends IAnyResource> extends BaseHapiFhirRe
 		return oo;
 	}
 
-	@Override
-	protected List<Object> getIncludeValues(FhirTerser theTerser, Include theInclude, IBaseResource theResource, RuntimeResourceDefinition theResourceDef) {
-		List<Object> values;
-		if ("*".equals(theInclude.getValue())) {
-			values = new ArrayList<Object>();
-			values.addAll(theTerser.getAllPopulatedChildElementsOfType(theResource, BaseResourceReferenceDt.class));
-		} else if (theInclude.getValue().startsWith(theResourceDef.getName() + ":")) {
-			values = new ArrayList<Object>();
-			String paramName = theInclude.getValue().substring(theInclude.getValue().indexOf(':') + 1);
-			RuntimeSearchParam sp = getSearchParamByName(theResourceDef, paramName);
-			for (String nextPath : sp.getPathsSplit()) {
-				values.addAll(theTerser.getValues(theResource, nextPath));
-			}
-		} else {
-			values = Collections.emptyList();
-		}
-		return values;
-	}
 
 	@Override
 	public MethodOutcome validate(T theResource, IIdType theId, String theRawResource, EncodingEnum theEncoding, ValidationModeEnum theMode, String theProfile, RequestDetails theRequestDetails) {

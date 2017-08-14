@@ -28,7 +28,7 @@ import org.springframework.context.annotation.Configuration;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoSubscription;
-import ca.uhn.fhir.jpa.subscription.SubscriptionWebsocketHandlerDstu2;
+import ca.uhn.fhir.jpa.subscription.dstu2.SubscriptionWebsocketHandlerDstu2;
 import ca.uhn.fhir.model.dstu2.resource.Subscription;
 
 @Configuration

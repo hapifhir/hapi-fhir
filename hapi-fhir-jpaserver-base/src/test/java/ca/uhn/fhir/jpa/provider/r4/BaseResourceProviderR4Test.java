@@ -26,7 +26,7 @@ import ca.uhn.fhir.jpa.config.r4.WebsocketR4DispatcherConfig;
 import ca.uhn.fhir.jpa.dao.data.ISearchDao;
 import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.dao.r4.SearchParamRegistryR4;
-import ca.uhn.fhir.jpa.interceptor.r4.RestHookSubscriptionR4Interceptor;
+import ca.uhn.fhir.jpa.subscription.r4.RestHookSubscriptionR4Interceptor;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.validation.JpaValidationSupportChainR4;

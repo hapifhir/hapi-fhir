@@ -1,5 +1,6 @@
 package ca.uhn.fhir.context;
 
+import java.io.IOException;
 import java.lang.reflect.Method;
 
 /*
@@ -324,7 +325,7 @@ public class FhirContext {
 			Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> existing = new HashMap<>();
 			ModelScanner.scanVersionPropertyFile(null, nameToType, theVersion, existing);
 
-			Map<FhirVersionEnum, Map<String, Class<? extends IBaseResource>>> newVersionToNameToResourceType = new HashMap<FhirVersionEnum, Map<String, Class<? extends IBaseResource>>>();
+			Map<FhirVersionEnum, Map<String, Class<? extends IBaseResource>>> newVersionToNameToResourceType = new HashMap<>();
 			newVersionToNameToResourceType.putAll(myVersionToNameToResourceType);
 			newVersionToNameToResourceType.put(theVersion, nameToType);
 			myVersionToNameToResourceType = newVersionToNameToResourceType;
@@ -913,16 +914,25 @@ public class FhirContext {
 		Set<String> resourceNames= new HashSet<>();
 
 		if (myNameToResourceDefinition.isEmpty()) {
-
+			Properties props = new Properties();
+			try {
+				props.load(myVersion.getFhirVersionPropertiesFile());
+			} catch (IOException theE) {
+				throw new ConfigurationException("Failed to load version properties file");
+			}
+			Enumeration<?> propNames = props.propertyNames();
+			while (propNames.hasMoreElements()){
+				String next = (String) propNames.nextElement();
+				if (next.startsWith("resource.")) {
+					resourceNames.add(next.substring("resource.".length()).trim());
+				}
+			}
 		}
 
 		for (RuntimeResourceDefinition next : myNameToResourceDefinition.values()) {
 			resourceNames.add(next.getName());
 		}
 
-//		Properties versionProperties = new Properties();
-//		versionProperties.load(myVersion.getFhirVersionPropertiesFile());
-//
 		return Collections.unmodifiableSet(resourceNames);
 	}
 }

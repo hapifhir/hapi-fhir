@@ -20,64 +20,53 @@ package ca.uhn.fhir.jpa.entity;
  * #L%
  */
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.ForeignKey;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.SequenceGenerator;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 @Entity
 @Table(name = "HFJ_SUBSCRIPTION_FLAG_RES")
 public class SubscriptionFlaggedResource {
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO, generator="SEQ_SUBSCRIPTION_FLAG_ID")
+	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_SUBSCRIPTION_FLAG_ID")
 	@SequenceGenerator(name = "SEQ_SUBSCRIPTION_FLAG_ID", sequenceName = "SEQ_SUBSCRIPTION_FLAG_ID")
 	@Column(name = "PID", insertable = false, updatable = false)
 	private Long myId;
 
 	@ManyToOne()
-	@JoinColumn(name="RES_ID", nullable=false, foreignKey=@ForeignKey(name="FK_SUBSFLAGRES_RES"))
+	@JoinColumn(name = "RES_ID", nullable = false, foreignKey = @ForeignKey(name = "FK_SUBSFLAGRES_RES"))
 	private ResourceTable myResource;
-	
-	//@formatter:off
+
 	@ManyToOne()
-	@JoinColumn(name="SUBSCRIPTION_ID", 
-		foreignKey=@ForeignKey(name="FK_SUBSFLAG_SUBS")
+	@JoinColumn(name = "SUBSCRIPTION_ID",
+		foreignKey = @ForeignKey(name = "FK_SUBSFLAG_SUBS")
 	)
 	private SubscriptionTable mySubscription;
-	//@formatter:om
-	
-	@Column(name="RES_VERSION", nullable=false)
+
+	@Column(name = "RES_VERSION", nullable = false)
 	private Long myVersion;
 
 	public ResourceTable getResource() {
 		return myResource;
 	}
 
-	public SubscriptionTable getSubscription() {
-		return mySubscription;
-	}
-
-	public Long getVersion() {
-		return myVersion;
-	}
-
 	public void setResource(ResourceTable theResource) {
 		myResource = theResource;
+	}
+
+	public SubscriptionTable getSubscription() {
+		return mySubscription;
 	}
 
 	public void setSubscription(SubscriptionTable theSubscription) {
 		mySubscription = theSubscription;
 	}
 
+	public Long getVersion() {
+		return myVersion;
+	}
+
 	public void setVersion(Long theVersion) {
 		myVersion = theVersion;
 	}
-	
+
 }

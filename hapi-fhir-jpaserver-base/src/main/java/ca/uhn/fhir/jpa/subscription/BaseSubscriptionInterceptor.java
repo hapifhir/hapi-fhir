@@ -18,6 +18,8 @@ import org.springframework.messaging.SubscribableChannel;
 import org.springframework.messaging.support.ExecutorSubscribableChannel;
 import org.springframework.messaging.support.GenericMessage;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.transaction.support.TransactionSynchronizationAdapter;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -40,8 +42,11 @@ public abstract class BaseSubscriptionInterceptor extends ServerOperationInterce
 	private MessageHandler mySubscriptionCheckingSubscriber;
 	private ConcurrentHashMap<String, IBaseResource> myIdToSubscription = new ConcurrentHashMap<>();
 	private Logger ourLog = LoggerFactory.getLogger(BaseSubscriptionInterceptor.class);
-	private SubscriptionDeliveringRestHookSubscriber mySubscriptionDeliverySubscriber;
 	private BlockingQueue<Runnable> myExecutorQueue;
+
+	public ConcurrentHashMap<String, IBaseResource> getIdToSubscription() {
+		return myIdToSubscription;
+	}
 
 	public abstract Subscription.SubscriptionChannelType getChannelType();
 
@@ -90,7 +95,7 @@ public abstract class BaseSubscriptionInterceptor extends ServerOperationInterce
 		}
 	}
 
-	public BlockingQueue<Runnable> getExecutorQueue() {
+	public BlockingQueue<Runnable> getExecutorQueueForUnitTests() {
 		return myExecutorQueue;
 	}
 
@@ -122,30 +127,32 @@ public abstract class BaseSubscriptionInterceptor extends ServerOperationInterce
 			if (mySubscriptionActivatingSubscriber == null) {
 				mySubscriptionActivatingSubscriber = new SubscriptionActivatingSubscriber(getSubscriptionDao(), myIdToSubscription, getChannelType(), myProcessingChannel);
 			}
-			myProcessingChannel.subscribe(mySubscriptionActivatingSubscriber);
+			getProcessingChannel().subscribe(mySubscriptionActivatingSubscriber);
 		}
 
 		if (mySubscriptionCheckingSubscriber == null) {
 			mySubscriptionCheckingSubscriber = new SubscriptionCheckingSubscriber(getSubscriptionDao(), myIdToSubscription, getChannelType(), myProcessingChannel);
 		}
-		myProcessingChannel.subscribe(mySubscriptionCheckingSubscriber);
+		getProcessingChannel().subscribe(mySubscriptionCheckingSubscriber);
 
-		if (mySubscriptionDeliverySubscriber == null) {
-			mySubscriptionDeliverySubscriber = new SubscriptionDeliveringRestHookSubscriber(getSubscriptionDao(), myIdToSubscription, getChannelType(), myProcessingChannel);
-		}
-		myProcessingChannel.subscribe(mySubscriptionDeliverySubscriber);
+		registerDeliverySubscriber();
 
 	}
+
+	protected abstract void registerDeliverySubscriber();
 
 	@SuppressWarnings("unused")
 	@PreDestroy
 	public void preDestroy() {
 		if (myAutoActivateSubscriptions) {
-			myProcessingChannel.unsubscribe(mySubscriptionActivatingSubscriber);
+			getProcessingChannel().unsubscribe(mySubscriptionActivatingSubscriber);
 		}
-		myProcessingChannel.unsubscribe(mySubscriptionCheckingSubscriber);
-		myProcessingChannel.unsubscribe(mySubscriptionDeliverySubscriber);
+		getProcessingChannel().unsubscribe(mySubscriptionCheckingSubscriber);
+
+		unregisterDeliverySubscriber();
 	}
+
+	protected abstract void unregisterDeliverySubscriber();
 
 	@Override
 	public void resourceCreated(RequestDetails theRequest, IBaseResource theResource) {
@@ -173,7 +180,15 @@ public abstract class BaseSubscriptionInterceptor extends ServerOperationInterce
 		submitResourceModified(msg);
 	}
 
-	private void submitResourceModified(ResourceModifiedMessage theMsg) {
-		myProcessingChannel.send(new GenericMessage<>(theMsg));
+	private void submitResourceModified(final ResourceModifiedMessage theMsg) {
+		/*
+		 * We only actually submit this item work working after the
+		 */
+		TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
+			@Override
+			public void afterCommit() {
+				getProcessingChannel().send(new GenericMessage<>(theMsg));
+			}
+		});
 	}
 }

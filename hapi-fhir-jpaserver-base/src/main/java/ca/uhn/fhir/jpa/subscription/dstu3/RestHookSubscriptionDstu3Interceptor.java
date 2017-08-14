@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.interceptor;
+package ca.uhn.fhir.jpa.subscription.dstu3;
 
 /*-
  * #%L
@@ -21,19 +21,15 @@ package ca.uhn.fhir.jpa.interceptor;
  */
 
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.subscription.BaseSubscriptionInterceptor;
-import ca.uhn.fhir.model.dstu2.resource.Subscription;
+import ca.uhn.fhir.jpa.subscription.BaseSubscriptionRestHookInterceptor;
+import org.hl7.fhir.dstu3.model.Subscription;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
-public class RestHookSubscriptionDstu2Interceptor extends BaseSubscriptionInterceptor {
+public class RestHookSubscriptionDstu3Interceptor extends BaseSubscriptionRestHookInterceptor {
 	@Autowired
-	@Qualifier("mySubscriptionDaoDstu2")
+	@Qualifier("mySubscriptionDaoDstu3")
 	private IFhirResourceDao<Subscription> mySubscriptionDao;
-
-	public org.hl7.fhir.r4.model.Subscription.SubscriptionChannelType getChannelType() {
-		return org.hl7.fhir.r4.model.Subscription.SubscriptionChannelType.RESTHOOK;
-	}
 
 	@Override
 	protected IFhirResourceDao<?> getSubscriptionDao() {
@@ -42,6 +38,10 @@ public class RestHookSubscriptionDstu2Interceptor extends BaseSubscriptionInterc
 
 	public void setSubscriptionDao(IFhirResourceDao<Subscription> theSubscriptionDao) {
 		mySubscriptionDao = theSubscriptionDao;
+	}
+
+	public org.hl7.fhir.r4.model.Subscription.SubscriptionChannelType getChannelType() {
+		return org.hl7.fhir.r4.model.Subscription.SubscriptionChannelType.RESTHOOK;
 	}
 
 

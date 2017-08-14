@@ -50,6 +50,7 @@ public class RestHookTestDstu2Test extends BaseResourceProviderDstu2Test {
 
 	@After
 	public void afterUnregisterRestHookListener() {
+		ourLog.info("** AFTER **");
 		for (IIdType next : mySubscriptionIds) {
 			ourClient.delete().resourceById(next).execute();
 		}
@@ -279,11 +280,11 @@ public class RestHookTestDstu2Test extends BaseResourceProviderDstu2Test {
 	}
 
 	private void waitForQueueToDrain() throws InterruptedException {
-		ourLog.info("QUEUE HAS {} ITEMS", ourRestHookSubscriptionInterceptor.getExecutorQueue().size());
-		while (ourRestHookSubscriptionInterceptor.getExecutorQueue().size() > 0) {
+		ourLog.info("QUEUE HAS {} ITEMS", ourRestHookSubscriptionInterceptor.getExecutorQueueForUnitTests().size());
+		while (ourRestHookSubscriptionInterceptor.getExecutorQueueForUnitTests().size() > 0) {
 			Thread.sleep(250);
 		}
-		ourLog.info("QUEUE HAS {} ITEMS", ourRestHookSubscriptionInterceptor.getExecutorQueue().size());
+		ourLog.info("QUEUE HAS {} ITEMS", ourRestHookSubscriptionInterceptor.getExecutorQueueForUnitTests().size());
 	}
 
 	@BeforeClass
