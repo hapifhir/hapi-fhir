@@ -3,10 +3,12 @@ package ca.uhn.fhir.rest.server;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.Search;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.util.PortUtil;
 import ca.uhn.fhir.util.TestUtil;
+import ca.uhn.fhir.util.UrlUtil;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -16,9 +18,12 @@ import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
+import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.HumanName;
-import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.hapi.rest.server.GraphQLProvider;
+import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.r4.utils.GraphQLEngine;
+import org.hl7.fhir.utilities.graphql.Argument;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -29,42 +34,17 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import static org.hamcrest.Matchers.startsWith;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 
 public class GraphQLR4ProviderTest {
 
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(GraphQLR4ProviderTest.class);
 	private static CloseableHttpClient ourClient;
 	private static FhirContext ourCtx = FhirContext.forR4();
-	private static TokenAndListParam ourIdentifiers;
-	private static String ourLastMethod;
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(GraphQLR4ProviderTest.class);
 	private static int ourPort;
 	private static Server ourServer;
-
-	@Before
-	public void before() {
-		ourLastMethod = null;
-		ourIdentifiers = null;
-	}
-
-	@Test
-	public void testSearchNormal() throws Exception {
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?identifier=foo%7Cbar");
-		CloseableHttpResponse status = ourClient.execute(httpGet);
-		try {
-			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-			ourLog.info(responseContent);
-			assertEquals(200, status.getStatusLine().getStatusCode());
-
-			assertEquals("search", ourLastMethod);
-
-			assertEquals("foo", ourIdentifiers.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getSystem());
-			assertEquals("bar", ourIdentifiers.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue());
-		} finally {
-			IOUtils.closeQuietly(status.getEntity().getContent());
-		}
-
-	}
 
 	@AfterClass
 	public static void afterClassClearContext() throws Exception {
@@ -77,14 +57,14 @@ public class GraphQLR4ProviderTest {
 		ourPort = PortUtil.findFreePort();
 		ourServer = new Server(ourPort);
 
-		DummyPatientResourceProvider patientProvider = new DummyPatientResourceProvider();
-
 		ServletHandler proxyHandler = new ServletHandler();
 		RestfulServer servlet = new RestfulServer(ourCtx);
 		servlet.setDefaultResponseEncoding(EncodingEnum.JSON);
 		servlet.setPagingProvider(new FifoMemoryPagingProvider(10));
 
-		servlet.setResourceProviders(patientProvider);
+		servlet.registerProvider(new DummyPatientResourceProvider());
+		GraphQLEngine.IGraphQLStorageServices storageServices = new MyStorageServices();
+		servlet.registerProvider(new GraphQLProvider(storageServices));
 		ServletHolder servletHolder = new ServletHolder(servlet);
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
 		ourServer.setHandler(proxyHandler);
@@ -94,6 +74,113 @@ public class GraphQLR4ProviderTest {
 		HttpClientBuilder builder = HttpClientBuilder.create();
 		builder.setConnectionManager(connectionManager);
 		ourClient = builder.build();
+
+	}
+
+	@Before
+	public void before() {
+		//nothing
+	}
+
+	@Test
+	public void testGraphInstance() throws Exception {
+		String query = "{name{family,given}}";
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/123/$graphql?query=" + UrlUtil.escape(query));
+		CloseableHttpResponse status = ourClient.execute(httpGet);
+		try {
+			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
+			ourLog.info(responseContent);
+			assertEquals(200, status.getStatusLine().getStatusCode());
+
+			assertEquals("{\n" +
+				"  \"name\":[{\n" +
+				"    \"family\":\"FAMILY\",\n" +
+				"    \"given\":[\"GIVEN1\",\"GIVEN2\"]\n" +
+				"  },{\n" +
+				"    \"given\":[\"GivenOnly1\",\"GivenOnly2\"]\n" +
+				"  }]\n" +
+				"}", responseContent);
+			assertThat(status.getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue(), startsWith("application/json"));
+
+		} finally {
+			IOUtils.closeQuietly(status.getEntity().getContent());
+		}
+
+	}
+
+	@Test
+	public void testGraphSystemInstance() throws Exception {
+		String query = "{Patient(id:123){id,name{given,family}}}";
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/$graphql?query=" + UrlUtil.escape(query));
+		CloseableHttpResponse status = ourClient.execute(httpGet);
+		try {
+			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
+			ourLog.info(responseContent);
+			assertEquals(200, status.getStatusLine().getStatusCode());
+
+			assertEquals("{\n" +
+				"  \"name\":[{\n" +
+				"    \"family\":\"FAMILY\",\n" +
+				"    \"given\":[\"GIVEN1\",\"GIVEN2\"]\n" +
+				"  },{\n" +
+				"    \"given\":[\"GivenOnly1\",\"GivenOnly2\"]\n" +
+				"  }]\n" +
+				"}", responseContent);
+			assertThat(status.getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue(), startsWith("application/json"));
+
+		} finally {
+			IOUtils.closeQuietly(status.getEntity().getContent());
+		}
+
+	}
+
+	@Test
+	public void testGraphSystemList() throws Exception {
+		String query = "{PatientList(name:\"pet\"){name{family,given}}}";
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/$graphql?query=" + UrlUtil.escape(query));
+		CloseableHttpResponse status = ourClient.execute(httpGet);
+		try {
+			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
+			ourLog.info(responseContent);
+			assertEquals(200, status.getStatusLine().getStatusCode());
+
+			assertEquals("{\n" +
+				"  \"name\":[{\n" +
+				"    \"family\":\"FAMILY\",\n" +
+				"    \"given\":[\"GIVEN1\",\"GIVEN2\"]\n" +
+				"  },{\n" +
+				"    \"given\":[\"GivenOnly1\",\"GivenOnly2\"]\n" +
+				"  }]\n" +
+				"}", responseContent);
+			assertThat(status.getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue(), startsWith("application/json"));
+
+		} finally {
+			IOUtils.closeQuietly(status.getEntity().getContent());
+		}
+
+	}
+
+	@Test
+	public void testGraphInstanceWithFhirpath() throws Exception {
+		String query = "{name(fhirpath:\"family.exists()\"){text,given,family}}";
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/123/$graphql?query=" + UrlUtil.escape(query));
+		CloseableHttpResponse status = ourClient.execute(httpGet);
+		try {
+			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
+			ourLog.info(responseContent);
+			assertEquals(200, status.getStatusLine().getStatusCode());
+
+			assertEquals("{\n" +
+				"  \"name\":[{\n" +
+				"    \"given\":[\"GIVEN1\",\"GIVEN2\"],\n" +
+				"    \"family\":\"FAMILY\"\n" +
+				"  }]\n" +
+				"}", responseContent);
+			assertThat(status.getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue(), startsWith("application/json"));
+
+		} finally {
+			IOUtils.closeQuietly(status.getEntity().getContent());
+		}
 
 	}
 
@@ -108,10 +195,8 @@ public class GraphQLR4ProviderTest {
 		@Search()
 		public List search(
 			@OptionalParam(name = Patient.SP_IDENTIFIER) TokenAndListParam theIdentifiers) {
-			ourLastMethod = "search";
-			ourIdentifiers = theIdentifiers;
-			ArrayList<Patient> retVal = new ArrayList<Patient>();
-			
+			ArrayList<Patient> retVal = new ArrayList<>();
+
 			for (int i = 0; i < 200; i++) {
 				Patient patient = new Patient();
 				patient.addName(new HumanName().setFamily("FAMILY"));
@@ -123,4 +208,43 @@ public class GraphQLR4ProviderTest {
 
 	}
 
+	private static class MyStorageServices implements GraphQLEngine.IGraphQLStorageServices {
+		@Override
+		public ReferenceResolution lookup(Object appInfo, Resource context, Reference reference) throws FHIRException {
+			ourLog.info("lookup from {} to {}", context.getIdElement().getValue(), reference.getReference());
+			return null;
+		}
+
+		@Override
+		public Resource lookup(Object appInfo, String type, String id) throws FHIRException {
+			ourLog.info("lookup {}/{}", type, id);
+
+			if (type.equals("Patient") && id.equals("123")) {
+				Patient p = new Patient();
+				p
+					.addName()
+					.setFamily("FAMILY")
+					.addGiven("GIVEN1")
+					.addGiven("GIVEN2");
+				p
+					.addName()
+					.addGiven("GivenOnly1")
+					.addGiven("GivenOnly2");
+				return p;
+			}
+
+			return null;
+		}
+
+		@Override
+		public void listResources(Object appInfo, String type, List<Argument> searchParams, List<Resource> matches) throws FHIRException {
+			ourLog.info("listResources of {} - {}", type, searchParams);
+		}
+
+		@Override
+		public Bundle search(Object appInfo, String type, List<Argument> searchParams) throws FHIRException {
+			ourLog.info("search on {} - {}", type, searchParams);
+			return null;
+		}
+	}
 }

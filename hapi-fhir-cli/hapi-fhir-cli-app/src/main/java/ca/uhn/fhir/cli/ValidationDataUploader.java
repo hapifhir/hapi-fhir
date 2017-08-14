@@ -65,6 +65,8 @@ public class ValidationDataUploader extends BaseCommand {
 			uploadDefinitionsDstu2(targetServer, ctx);
 		} else if (ctx.getVersion().getVersion() == FhirVersionEnum.DSTU3){
 			uploadDefinitionsDstu3(targetServer, ctx);
+		} else if (ctx.getVersion().getVersion() == FhirVersionEnum.R4){
+			uploadDefinitionsR4(targetServer, ctx);
 		}
 	}
 
@@ -248,6 +250,95 @@ public class ValidationDataUploader extends BaseCommand {
 		uploadDstu3Profiles(ctx, client, "profiles-resources");
 		uploadDstu3Profiles(ctx, client, "profiles-types");
 		uploadDstu3Profiles(ctx, client, "profiles-others");
+
+		ourLog.info("Finished uploading ValueSets");
+
+		long delay = System.currentTimeMillis() - start;
+
+		ourLog.info("Finished uploading definitions to server (took {} ms)", delay);
+	}
+
+	private void uploadDefinitionsR4(String theTargetServer, FhirContext theCtx) throws CommandFailureException {
+		IGenericClient client = newClient(theCtx, theTargetServer);
+		ourLog.info("Uploading definitions to server: " + theTargetServer);
+
+		long start = System.currentTimeMillis();
+		int total = 0;
+		int count = 0;
+		org.hl7.fhir.r4.model.Bundle bundle;
+		String vsContents;
+
+		try {
+			theCtx.getVersion().getPathToSchemaDefinitions();
+			vsContents = IOUtils.toString(ValidationDataUploader.class.getResourceAsStream("/org/hl7/fhir/r4/model/valueset/"+"valuesets.xml"), "UTF-8");
+		} catch (IOException e) {
+			throw new CommandFailureException(e.toString());
+		}
+		bundle = theCtx.newXmlParser().parseResource(org.hl7.fhir.r4.model.Bundle.class, vsContents);
+
+		total = bundle.getEntry().size();
+		count = 1;
+		for (org.hl7.fhir.r4.model.Bundle.BundleEntryComponent i : bundle.getEntry()) {
+			org.hl7.fhir.r4.model.Resource next = i.getResource();
+			next.setId(next.getIdElement().toUnqualifiedVersionless());
+
+			int bytes = theCtx.newXmlParser().encodeResourceToString(next).length();
+
+			ourLog.info("Uploading ValueSet {}/{} : {} ({} bytes}", new Object[] { count, total, next.getIdElement().getValue(), bytes });
+			try {
+				IIdType id = client.update().resource(next).execute().getId();
+				ourLog.info("  - Got ID: {}", id.getValue());
+			} catch (UnprocessableEntityException e) {
+				ourLog.warn("UnprocessableEntityException: " + e.toString());
+			}
+			count++;
+		}
+
+		try {
+			vsContents = IOUtils.toString(ValidationDataUploader.class.getResourceAsStream("/org/hl7/fhir/r4/model/valueset/"+"v3-codesystems.xml"), "UTF-8");
+		} catch (IOException e) {
+			throw new CommandFailureException(e.toString());
+		}
+
+		bundle = theCtx.newXmlParser().parseResource(org.hl7.fhir.r4.model.Bundle.class, vsContents);
+		total = bundle.getEntry().size();
+		count = 1;
+		for (org.hl7.fhir.r4.model.Bundle.BundleEntryComponent i : bundle.getEntry()) {
+			org.hl7.fhir.r4.model.Resource next = i.getResource();
+			next.setId(next.getIdElement().toUnqualifiedVersionless());
+
+			ourLog.info("Uploading v3-codesystems ValueSet {}/{} : {}", new Object[] { count, total, next.getIdElement().getValue() });
+			client.update().resource(next).execute();
+
+			count++;
+		}
+
+		try {
+			vsContents = IOUtils.toString(ValidationDataUploader.class.getResourceAsStream("/org/hl7/fhir/r4/model/valueset/"+"v2-tables.xml"), "UTF-8");
+		} catch (IOException e) {
+			throw new CommandFailureException(e.toString());
+		}
+		bundle = theCtx.newXmlParser().parseResource(org.hl7.fhir.r4.model.Bundle.class, vsContents);
+		total = bundle.getEntry().size();
+		count = 1;
+		for (org.hl7.fhir.r4.model.Bundle.BundleEntryComponent i : bundle.getEntry()) {
+			org.hl7.fhir.r4.model.Resource next = i.getResource();
+			if (next.getIdElement().isIdPartValidLong()) {
+				next.setIdElement(new org.hl7.fhir.r4.model.IdType("v2-"+ next.getIdElement().getIdPart()));
+			}
+			next.setId(next.getIdElement().toUnqualifiedVersionless());
+
+			ourLog.info("Uploading v2-tables ValueSet {}/{} : {}", new Object[] { count, total, next.getIdElement().getValue() });
+			client.update().resource(next).execute();
+			count++;
+		}
+
+		ourLog.info("Finished uploading ValueSets");
+
+
+		uploadDstu3Profiles(theCtx, client, "profiles-resources");
+		uploadDstu3Profiles(theCtx, client, "profiles-types");
+		uploadDstu3Profiles(theCtx, client, "profiles-others");
 
 		ourLog.info("Finished uploading ValueSets");
 

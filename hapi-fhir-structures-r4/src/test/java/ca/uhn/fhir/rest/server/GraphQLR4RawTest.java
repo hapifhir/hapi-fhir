@@ -31,7 +31,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.startsWith;
 import static org.junit.Assert.*;
 
 public class GraphQLR4RawTest {
@@ -57,14 +59,13 @@ public class GraphQLR4RawTest {
 		ourPort = PortUtil.findFreePort();
 		ourServer = new Server(ourPort);
 
-		MyProvider provider = new MyProvider();
-
 		ServletHandler proxyHandler = new ServletHandler();
 		RestfulServer servlet = new RestfulServer(ourCtx);
 		servlet.setDefaultResponseEncoding(EncodingEnum.JSON);
 		servlet.setPagingProvider(new FifoMemoryPagingProvider(10));
 
-		servlet.registerProvider(provider);
+		servlet.registerProvider(new MyGraphQLProvider());
+		servlet.registerProvider(new MyPatientResourceProvider());
 		ServletHolder servletHolder = new ServletHolder(servlet);
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
 		ourServer.setHandler(proxyHandler);
@@ -98,7 +99,7 @@ public class GraphQLR4RawTest {
 			assertEquals(200, status.getStatusLine().getStatusCode());
 
 			assertEquals("{\"foo\"}", responseContent);
-			assertEquals("application/json", status.getFirstHeader(Constants.HEADER_CONTENT_TYPE));
+			assertThat(status.getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue(), startsWith("application/json"));
 			assertEquals("Patient/123", ourLastId.getValue());
 			assertEquals("{name{family,given}}", ourLastQuery);
 
@@ -108,7 +109,48 @@ public class GraphQLR4RawTest {
 
 	}
 
-	public static class MyProvider {
+	@Test
+	public void testGraphInstanceUnknownType() throws Exception {
+		ourNextRetVal = "{\"foo\"}";
+
+
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Condition/123/$graphql?query=" + UrlUtil.escape("{name{family,given}}"));
+		CloseableHttpResponse status = ourClient.execute(httpGet);
+		try {
+			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
+			ourLog.info(responseContent);
+			assertEquals(404, status.getStatusLine().getStatusCode());
+			assertThat(responseContent, containsString("Unknown resource type"));
+		} finally {
+			IOUtils.closeQuietly(status.getEntity().getContent());
+		}
+
+	}
+
+	@Test
+	public void testGraphSystem() throws Exception {
+		ourNextRetVal = "{\"foo\"}";
+
+
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/$graphql?query=" + UrlUtil.escape("{name{family,given}}"));
+		CloseableHttpResponse status = ourClient.execute(httpGet);
+		try {
+			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
+			ourLog.info(responseContent);
+			assertEquals(200, status.getStatusLine().getStatusCode());
+
+			assertEquals("{\"foo\"}", responseContent);
+			assertThat(status.getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue(), startsWith("application/json"));
+			assertEquals(null, ourLastId);
+			assertEquals("{name{family,given}}", ourLastQuery);
+
+		} finally {
+			IOUtils.closeQuietly(status.getEntity().getContent());
+		}
+
+	}
+
+	public static class MyGraphQLProvider {
 
 
 		@GraphQL
@@ -120,5 +162,30 @@ public class GraphQLR4RawTest {
 		}
 
 	}
+
+	public static class MyPatientResourceProvider implements IResourceProvider {
+
+		@Override
+		public Class<? extends IBaseResource> getResourceType() {
+			return Patient.class;
+		}
+
+		@SuppressWarnings("rawtypes")
+		@Search()
+		public List search(
+			@OptionalParam(name = Patient.SP_IDENTIFIER) TokenAndListParam theIdentifiers) {
+			ArrayList<Patient> retVal = new ArrayList<Patient>();
+
+			for (int i = 0; i < 200; i++) {
+				Patient patient = new Patient();
+				patient.addName(new HumanName().setFamily("FAMILY"));
+				patient.getIdElement().setValue("Patient/" + i);
+				retVal.add((Patient) patient);
+			}
+			return retVal;
+		}
+
+	}
+
 
 }

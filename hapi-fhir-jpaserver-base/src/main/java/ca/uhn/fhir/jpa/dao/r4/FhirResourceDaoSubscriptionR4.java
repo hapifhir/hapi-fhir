@@ -104,8 +104,9 @@ public class FhirResourceDaoSubscriptionR4 extends FhirResourceDaoR4<Subscriptio
 		return retVal;
 	}
 
+	@Transactional(propagation = Propagation.NOT_SUPPORTED)
 	public int pollForNewUndeliveredResources() {
-		return pollForNewUndeliveredResources((String) null);
+		return pollForNewUndeliveredResources(null);
 	}
 
 	@Override

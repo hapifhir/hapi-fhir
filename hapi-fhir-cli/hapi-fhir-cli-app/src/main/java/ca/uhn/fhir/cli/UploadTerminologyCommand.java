@@ -20,11 +20,9 @@ public class UploadTerminologyCommand extends BaseCommand {
 
 	@Override
 	public String getCommandDescription() {
-		//@formatter:off
 		return "Uploads a terminology package (e.g. a SNOMED CT ZIP file) to a HAPI JPA server. "
 				+ "Note that this command uses a custom operation that is only implemented on HAPI "
 				+ "JPA servers that have been configured to accept it.";
-		//@formatter:on
 	}
 
 	@Override

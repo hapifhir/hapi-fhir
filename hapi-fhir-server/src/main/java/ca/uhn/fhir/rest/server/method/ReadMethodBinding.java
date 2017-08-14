@@ -1,5 +1,25 @@
 package ca.uhn.fhir.rest.server.method;
 
+/*-
+ * #%L
+ * HAPI FHIR - Server Framework
+ * %%
+ * Copyright (C) 2014 - 2017 University Health Network
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.lang.reflect.Method;
@@ -122,7 +142,9 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding {
 
 	@Override
 	public IBundleProvider invokeServer(IRestfulServer<?> theServer, RequestDetails theRequest, Object[] theMethodParams) throws InvalidRequestException, InternalErrorException {
-		theMethodParams[myIdIndex] = ParameterUtil.convertIdToType(theRequest.getId(), myIdParameterType);
+		IIdType requestId = theRequest.getId();
+
+		theMethodParams[myIdIndex] = ParameterUtil.convertIdToType(requestId, myIdParameterType);
 
 		Object response = invokeServerMethod(theServer, theRequest, theMethodParams);
 		IBundleProvider retVal = toResourceList(response);
@@ -157,7 +179,7 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding {
 						lastModified = lastModifiedDt.getValue();
 					}
 				} else {
-					lastModified = ((IAnyResource)responseResource).getMeta().getLastUpdated();
+					lastModified = responseResource.getMeta().getLastUpdated();
 				}
 				
 				if (lastModified != null && lastModified.getTime() > ifModifiedSinceDate.getTime()) {

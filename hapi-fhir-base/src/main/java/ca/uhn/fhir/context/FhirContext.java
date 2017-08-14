@@ -320,8 +320,8 @@ public class FhirContext {
 
 		Map<String, Class<? extends IBaseResource>> nameToType = myVersionToNameToResourceType.get(theVersion);
 		if (nameToType == null) {
-			nameToType = new HashMap<String, Class<? extends IBaseResource>>();
-			Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> existing = Collections.emptyMap();
+			nameToType = new HashMap<>();
+			Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> existing = new HashMap<>();
 			ModelScanner.scanVersionPropertyFile(null, nameToType, theVersion, existing);
 
 			Map<FhirVersionEnum, Map<String, Class<? extends IBaseResource>>> newVersionToNameToResourceType = new HashMap<FhirVersionEnum, Map<String, Class<? extends IBaseResource>>>();
@@ -905,4 +905,24 @@ public class FhirContext {
 		return retVal;
 	}
 
+	/**
+	 * Returns an unmodifiable set containing all resource names known to this
+	 * context
+	 */
+	public Set<String> getResourceNames() {
+		Set<String> resourceNames= new HashSet<>();
+
+		if (myNameToResourceDefinition.isEmpty()) {
+
+		}
+
+		for (RuntimeResourceDefinition next : myNameToResourceDefinition.values()) {
+			resourceNames.add(next.getName());
+		}
+
+//		Properties versionProperties = new Properties();
+//		versionProperties.load(myVersion.getFhirVersionPropertiesFile());
+//
+		return Collections.unmodifiableSet(resourceNames);
+	}
 }

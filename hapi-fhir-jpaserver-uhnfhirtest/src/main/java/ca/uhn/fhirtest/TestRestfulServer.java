@@ -6,6 +6,8 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 
+import ca.uhn.fhir.jpa.provider.r4.JpaConformanceProviderR4;
+import ca.uhn.fhir.jpa.provider.r4.JpaSystemProviderR4;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.context.ContextLoaderListener;
 import org.springframework.web.context.WebApplicationContext;
@@ -125,10 +127,10 @@ public class TestRestfulServer extends RestfulServer {
 			myAppCtx.refresh();
 			setFhirContext(FhirContext.forR4());
 			beans = myAppCtx.getBean("myResourceProvidersR4", List.class);
-			plainProviders.add(myAppCtx.getBean("mySystemProviderR4", JpaSystemProviderDstu3.class));
+			plainProviders.add(myAppCtx.getBean("mySystemProviderR4", JpaSystemProviderR4.class));
 			systemDao = myAppCtx.getBean("mySystemDaoR4", IFhirSystemDao.class);
 			etagSupport = ETagSupportEnum.ENABLED;
-			JpaConformanceProviderDstu3 confProvider = new JpaConformanceProviderDstu3(this, systemDao, myAppCtx.getBean(DaoConfig.class));
+			JpaConformanceProviderR4 confProvider = new JpaConformanceProviderR4(this, systemDao, myAppCtx.getBean(DaoConfig.class));
 			confProvider.setImplementationDescription(implDesc);
 			setServerConformanceProvider(confProvider);
 			plainProviders.add(myAppCtx.getBean(TerminologyUploaderProviderR4.class));

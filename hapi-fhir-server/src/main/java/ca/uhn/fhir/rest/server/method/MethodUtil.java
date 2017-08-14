@@ -1,5 +1,25 @@
 package ca.uhn.fhir.rest.server.method;
 
+/*-
+ * #%L
+ * HAPI FHIR - Server Framework
+ * %%
+ * Copyright (C) 2014 - 2017 University Health Network
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.lang.annotation.Annotation;
@@ -9,6 +29,7 @@ import java.util.*;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.context.ConfigurationException;
@@ -77,7 +98,7 @@ public class MethodUtil {
 				param = new ServletRequestParameter();
 			} else if (ServletResponse.class.isAssignableFrom(parameterType)) {
 				param = new ServletResponseParameter();
-			} else if (parameterType.equals(RequestDetails.class)) {
+			} else if (parameterType.equals(RequestDetails.class) || parameterType.equals(ServletRequestDetails.class)) {
 				param = new RequestDetailsParameter();
 			} else if (parameterType.equals(IRequestOperationCallback.class)) {
 				param = new RequestOperationCallbackParameter();

@@ -5,6 +5,7 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.IRestfulServer;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.RestfulServerUtils;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
@@ -15,8 +16,12 @@ import java.lang.reflect.Method;
 
 public class GraphQLMethodBinding extends BaseMethodBinding<String> {
 
+	private final Integer myIdParamIndex;
+
 	public GraphQLMethodBinding(Method theMethod, FhirContext theContext, Object theProvider) {
 		super(theMethod, theContext, theProvider);
+
+		myIdParamIndex = ParameterUtil.findIdParameterIndex(theMethod, theContext);
 	}
 
 	@Override
@@ -30,8 +35,13 @@ public class GraphQLMethodBinding extends BaseMethodBinding<String> {
 	}
 
 	@Override
+	public boolean isGlobalMethod() {
+		return true;
+	}
+
+	@Override
 	public boolean incomingServerRequestMatchesMethod(RequestDetails theRequest) {
-		if ("graphql".equals(theRequest.getOperation())) {
+		if ("$graphql".equals(theRequest.getOperation())) {
 			return true;
 		}
 
@@ -41,6 +51,10 @@ public class GraphQLMethodBinding extends BaseMethodBinding<String> {
 	@Override
 	public Object invokeServer(IRestfulServer<?> theServer, RequestDetails theRequest) throws BaseServerResponseException, IOException {
 		Object[] methodParams = createMethodParams(theRequest);
+		if (myIdParamIndex != null) {
+			methodParams[myIdParamIndex] = theRequest.getId();
+		}
+
 		Object response = invokeServerMethod(theServer, theRequest, methodParams);
 
 		int statusCode = Constants.STATUS_HTTP_200_OK;

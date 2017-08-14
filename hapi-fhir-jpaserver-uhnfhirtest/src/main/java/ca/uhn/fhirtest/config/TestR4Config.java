@@ -7,6 +7,8 @@ import javax.sql.DataSource;
 
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.apache.commons.lang3.time.DateUtils;
+import org.hibernate.dialect.DerbyTenSevenDialect;
+import org.hibernate.dialect.PostgreSQL94Dialect;
 import org.hibernate.dialect.PostgreSQL95Dialect;
 import org.hibernate.jpa.HibernatePersistenceProvider;
 import org.springframework.beans.factory.annotation.Autowire;
@@ -74,8 +76,12 @@ public class TestR4Config extends BaseJavaConfigR4 {
 	@Bean(name = "myPersistenceDataSourceR4", destroyMethod = "close")
 	public DataSource dataSource() {
 		BasicDataSource retVal = new BasicDataSource();
-		retVal.setDriver(new org.postgresql.Driver());
-		retVal.setUrl("jdbc:postgresql://localhost/fhirtest_r4");
+		if (CommonConfig.isLocalTestMode()) {
+			retVal.setUrl("jdbc:derby:memory:fhirtest_r4;create=true");
+		} else {
+			retVal.setDriver(new org.postgresql.Driver());
+			retVal.setUrl("jdbc:postgresql://localhost/fhirtest_r4");
+		}
 		retVal.setUsername(myDbUsername);
 		retVal.setPassword(myDbPassword);
 		return retVal;
@@ -94,7 +100,11 @@ public class TestR4Config extends BaseJavaConfigR4 {
 
 	private Properties jpaProperties() {
 		Properties extraProperties = new Properties();
-		extraProperties.put("hibernate.dialect", PostgreSQL95Dialect.class.getName());
+		if (CommonConfig.isLocalTestMode()) {
+			extraProperties.put("hibernate.dialect", DerbyTenSevenDialect.class.getName());
+		} else {
+			extraProperties.put("hibernate.dialect", PostgreSQL94Dialect.class.getName());
+		}
 		extraProperties.put("hibernate.format_sql", "false");
 		extraProperties.put("hibernate.show_sql", "false");
 		extraProperties.put("hibernate.hbm2ddl.auto", "update");

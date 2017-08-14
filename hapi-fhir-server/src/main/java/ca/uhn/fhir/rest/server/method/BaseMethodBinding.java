@@ -2,7 +2,7 @@ package ca.uhn.fhir.rest.server.method;
 
 /*
  * #%L
- * HAPI FHIR - Core Library
+ * HAPI FHIR - Server Framework
  * %%
  * Copyright (C) 2014 - 2017 University Health Network
  * %%
@@ -113,6 +113,13 @@ public abstract class BaseMethodBinding<T> {
 			params[i] = param.translateQueryParametersIntoServerArgument(theRequest, this);
 		}
 		return params;
+	}
+
+	/**
+	 * Subclasses may override to declare that they apply to all resource types
+	 */
+	public boolean isGlobalMethod() {
+		return false;
 	}
 
 	public List<Class<?>> getAllowableParamAnnotations() {

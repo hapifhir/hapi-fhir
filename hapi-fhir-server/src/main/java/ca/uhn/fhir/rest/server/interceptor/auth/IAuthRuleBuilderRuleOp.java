@@ -4,7 +4,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 
 /*
  * #%L
- * HAPI FHIR - Core Library
+ * HAPI FHIR - Server Framework
  * %%
  * Copyright (C) 2014 - 2017 University Health Network
  * %%
