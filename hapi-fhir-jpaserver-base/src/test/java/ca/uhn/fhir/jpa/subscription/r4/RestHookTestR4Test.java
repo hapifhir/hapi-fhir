@@ -24,8 +24,11 @@ import org.junit.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.List;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.hasItem;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
@@ -42,6 +45,7 @@ public class RestHookTestR4Test extends BaseResourceProviderR4Test {
 	private static String ourListenerServerBase;
 	private static List<Observation> ourUpdatedObservations = Lists.newArrayList();
 	private static List<String> ourContentTypes = new ArrayList<>();
+	private static List<String> ourHeaders = new ArrayList<>();
 	private List<IIdType> mySubscriptionIds = new ArrayList<>();
 
 	@After
@@ -71,6 +75,7 @@ public class RestHookTestR4Test extends BaseResourceProviderR4Test {
 		ourCreatedObservations.clear();
 		ourUpdatedObservations.clear();
 		ourContentTypes.clear();
+		ourHeaders.clear();
 	}
 
 	private Subscription createSubscription(String theCriteria, String thePayload, String theEndpoint) throws InterruptedException {
@@ -79,11 +84,10 @@ public class RestHookTestR4Test extends BaseResourceProviderR4Test {
 		subscription.setStatus(Subscription.SubscriptionStatus.REQUESTED);
 		subscription.setCriteria(theCriteria);
 
-		Subscription.SubscriptionChannelComponent channel = new Subscription.SubscriptionChannelComponent();
+		Subscription.SubscriptionChannelComponent channel = subscription.getChannel();
 		channel.setType(Subscription.SubscriptionChannelType.RESTHOOK);
 		channel.setPayload(thePayload);
 		channel.setEndpoint(theEndpoint);
-		subscription.setChannel(channel);
 
 		MethodOutcome methodOutcome = ourClient.create().resource(subscription).execute();
 		subscription.setId(methodOutcome.getId().getIdPart());
@@ -315,6 +319,62 @@ public class RestHookTestR4Test extends BaseResourceProviderR4Test {
 		}
 	}
 
+	@Test
+	public void testSubscriptionWithHeaders() throws Exception {
+		String payload = "application/fhir+json";
+
+		String code = "1000000050";
+		String criteria1 = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
+
+		// Add some headers, and we'll also turn back to requested status for fun
+		Subscription subscription = createSubscription(criteria1, payload, ourListenerServerBase);
+		subscription.getChannel().addHeader("X-Foo: FOO");
+		subscription.getChannel().addHeader("X-Bar: BAR");
+		subscription.setStatus(Subscription.SubscriptionStatus.REQUESTED);
+		ourClient.update().resource(subscription).execute();
+		waitForQueueToDrain();
+
+		sendObservation(code, "SNOMED-CT");
+
+		// Should see 1 subscription notification
+		waitForQueueToDrain();
+		waitForSize(1, ourCreatedObservations);
+		waitForSize(0, ourUpdatedObservations);
+		assertEquals(Constants.CT_FHIR_JSON_NEW, ourContentTypes.get(0));
+		assertThat(ourHeaders, hasItem("X-Foo: FOO"));
+		assertThat(ourHeaders, hasItem("X-Bar: BAR"));
+	}
+
+	@Test
+	public void testDisableSubscription() throws Exception {
+		String payload = "application/fhir+json";
+
+		String code = "1000000050";
+		String criteria1 = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
+
+		Subscription subscription = createSubscription(criteria1, payload, ourListenerServerBase);
+		sendObservation(code, "SNOMED-CT");
+
+		// Should see 1 subscription notification
+		waitForQueueToDrain();
+		waitForSize(1, ourCreatedObservations);
+		waitForSize(0, ourUpdatedObservations);
+
+		// Disable
+		subscription.setStatus(Subscription.SubscriptionStatus.OFF);
+		ourClient.update().resource(subscription).execute();
+		waitForQueueToDrain();
+
+		// Send another object
+		sendObservation(code, "SNOMED-CT");
+
+		// Should see 1 subscription notification
+		waitForQueueToDrain();
+		waitForSize(1, ourCreatedObservations);
+		waitForSize(0, ourUpdatedObservations);
+
+	}
+
 	private void waitForQueueToDrain() throws InterruptedException {
 		RestHookTestDstu2Test.waitForQueueToDrain(ourRestHookSubscriptionInterceptor);
 	}
@@ -353,7 +413,20 @@ public class RestHookTestR4Test extends BaseResourceProviderR4Test {
 			ourLog.info("Received Listener Create");
 			ourContentTypes.add(theRequest.getHeader(Constants.HEADER_CONTENT_TYPE).replaceAll(";.*", ""));
 			ourCreatedObservations.add(theObservation);
+			extractHeaders(theRequest);
 			return new MethodOutcome(new IdType("Observation/1"), true);
+		}
+
+		private void extractHeaders(HttpServletRequest theRequest) {
+			Enumeration<String> headerNamesEnum = theRequest.getHeaderNames();
+			while (headerNamesEnum.hasMoreElements()) {
+				String nextName = headerNamesEnum.nextElement();
+				Enumeration<String> valueEnum = theRequest.getHeaders(nextName);
+				while (valueEnum.hasMoreElements()) {
+					String nextValue = valueEnum.nextElement();
+					ourHeaders.add(nextName + ": " + nextValue);
+				}
+			}
 		}
 
 		@Override
@@ -366,6 +439,7 @@ public class RestHookTestR4Test extends BaseResourceProviderR4Test {
 			ourLog.info("Received Listener Update");
 			ourUpdatedObservations.add(theObservation);
 			ourContentTypes.add(theRequest.getHeader(Constants.HEADER_CONTENT_TYPE).replaceAll(";.*", ""));
+			extractHeaders(theRequest);
 			return new MethodOutcome(new IdType("Observation/1"), false);
 		}
 

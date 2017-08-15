@@ -31,8 +31,6 @@ import org.springframework.messaging.SubscribableChannel;
 import java.util.concurrent.ConcurrentHashMap;
 
 public abstract class BaseSubscriptionSubscriber implements MessageHandler {
-	static final String SUBSCRIPTION_STATUS = "status";
-	static final String SUBSCRIPTION_TYPE = "channel.type";
 
 	private final IFhirResourceDao mySubscriptionDao;
 	private final ConcurrentHashMap<String, IBaseResource> myIdToSubscription;
@@ -82,7 +80,7 @@ public abstract class BaseSubscriptionSubscriber implements MessageHandler {
 	 * Does this subscription type (e.g. rest hook, websocket, etc) apply to this interceptor?
 	 */
 	protected boolean subscriptionTypeApplies(FhirContext theCtx, IBaseResource theSubscription) {
-		IPrimitiveType<?> status = theCtx.newTerser().getSingleValueOrNull(theSubscription, SUBSCRIPTION_TYPE, IPrimitiveType.class);
+		IPrimitiveType<?> status = theCtx.newTerser().getSingleValueOrNull(theSubscription, BaseSubscriptionInterceptor.SUBSCRIPTION_TYPE, IPrimitiveType.class);
 		boolean subscriptionTypeApplies = false;
 		if (getChannelType().toCode().equals(status.getValueAsString())) {
 			subscriptionTypeApplies = true;

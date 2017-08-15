@@ -111,7 +111,7 @@ public class GenericClientR4Test {
 	@Test
 	public void testSearchWithNoExplicitBundleReturnType() throws Exception {
 
-		String msg = ClientR4Test.getPatientFeedWithOneResult();
+		String msg = ClientR4Test.getPatientFeedWithOneResult(ourCtx);
 
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
 

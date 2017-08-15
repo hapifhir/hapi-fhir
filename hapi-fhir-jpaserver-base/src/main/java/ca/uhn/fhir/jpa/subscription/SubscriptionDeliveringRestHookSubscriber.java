@@ -20,12 +20,12 @@ package ca.uhn.fhir.jpa.subscription;
  * #L%
  */
 
-import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
+import ca.uhn.fhir.rest.client.interceptor.SimpleRequestHeaderInterceptor;
 import ca.uhn.fhir.rest.gclient.IClientExecutable;
 import org.apache.commons.lang3.ObjectUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -37,7 +37,10 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.MessagingException;
 import org.springframework.messaging.SubscribableChannel;
 
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
+
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class SubscriptionDeliveringRestHookSubscriber extends BaseSubscriptionSubscriber {
 	private Logger ourLog = LoggerFactory.getLogger(SubscriptionDeliveringRestHookSubscriber.class);
@@ -61,11 +64,12 @@ public class SubscriptionDeliveringRestHookSubscriber extends BaseSubscriptionSu
 		RestOperationTypeEnum operationType = msg.getOperationType();
 		IBaseResource subscription = msg.getSubscription();
 
+
 		// Grab the endpoint from the subscription
 		IPrimitiveType<?> endpoint = getContext().newTerser().getSingleValueOrNull(subscription, BaseSubscriptionInterceptor.SUBSCRIPTION_ENDPOINT, IPrimitiveType.class);
 		String endpointUrl = endpoint.getValueAsString();
 
-		// Grab the payload type (encoding mimetype ) from the subscription
+		// Grab the payload type (encoding mimetype) from the subscription
 		IPrimitiveType<?> payload = getContext().newTerser().getSingleValueOrNull(subscription, BaseSubscriptionInterceptor.SUBSCRIPTION_PAYLOAD, IPrimitiveType.class);
 		String payloadString = payload.getValueAsString();
 		if (payloadString.contains(";")) {
@@ -75,8 +79,17 @@ public class SubscriptionDeliveringRestHookSubscriber extends BaseSubscriptionSu
 		EncodingEnum payloadType = EncodingEnum.forContentType(payloadString);
 		payloadType = ObjectUtils.defaultIfNull(payloadType, EncodingEnum.XML);
 
+		// Create the client request
 		getContext().getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
 		IGenericClient client = getContext().newRestfulGenericClient(endpointUrl);
+
+		// Additional headers specified in the subscription
+		List<IPrimitiveType> headers = getContext().newTerser().getValues(subscription, BaseSubscriptionInterceptor.SUBSCRIPTION_HEADER, IPrimitiveType.class);
+		for (IPrimitiveType next : headers) {
+			if (isNotBlank(next.getValueAsString())) {
+				client.registerInterceptor(new SimpleRequestHeaderInterceptor(next.getValueAsString()));
+			}
+		}
 
 		IBaseResource payloadResource = msg.getPayoad();
 

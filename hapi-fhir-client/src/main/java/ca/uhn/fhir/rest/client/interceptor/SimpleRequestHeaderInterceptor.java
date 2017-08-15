@@ -27,6 +27,7 @@ import java.io.IOException;
 import ca.uhn.fhir.rest.client.api.IClientInterceptor;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
 import ca.uhn.fhir.rest.client.api.IHttpResponse;
+import org.apache.commons.lang3.Validate;
 
 /**
  * This interceptor adds an arbitrary header to requests made by this client. Both the
@@ -46,11 +47,33 @@ public class SimpleRequestHeaderInterceptor implements IClientInterceptor {
 
 	/**
 	 * Constructor
+	 *
+	 * @param theHeaderName The header name, e.g. "<code>Authorization</code>"
+	 * @param theHeaderValue The header value, e.g. "<code>Bearer 09uer90uw9yh</code>"
 	 */
 	public SimpleRequestHeaderInterceptor(String theHeaderName, String theHeaderValue) {
 		super();
 		myHeaderName = theHeaderName;
 		myHeaderValue = theHeaderValue;
+	}
+
+	/**
+	 * Constructor which takes a complete header including name and value
+	 *
+	 * @param theCompleteHeader The complete header, e.g. "<code>Authorization: Bearer af09ufe90efh</code>". Must not be null or empty.
+	 */
+	public SimpleRequestHeaderInterceptor(String theCompleteHeader) {
+		Validate.notBlank(theCompleteHeader, "theCompleteHeader must not be null");
+
+		int colonIdx = theCompleteHeader.indexOf(':');
+		if (colonIdx != -1) {
+			setHeaderName(theCompleteHeader.substring(0, colonIdx).trim());
+			setHeaderValue(theCompleteHeader.substring(colonIdx+1, theCompleteHeader.length()).trim());
+		} else {
+			setHeaderName(theCompleteHeader.trim());
+			setHeaderValue(null);
+		}
+
 	}
 
 	public String getHeaderName() {

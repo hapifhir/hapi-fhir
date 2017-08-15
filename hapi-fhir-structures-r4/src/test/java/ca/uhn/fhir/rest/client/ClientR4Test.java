@@ -1216,7 +1216,7 @@ public class ClientR4Test {
     TestUtil.clearAllStaticFieldsForUnitTest();
   }
 
-  static String getPatientFeedWithOneResult() {
+  private static String getPatientFeedWithOneResult() {
     return getPatientFeedWithOneResult(ourCtx);
   }
 

@@ -45,6 +45,30 @@ public class SubscriptionActivatingSubscriber extends BaseSubscriptionSubscriber
 		super(theSubscriptionDao, theIdToSubscription, theChannelType, theProcessingChannel);
 	}
 
+	private void activateAndRegisterSubscriptionIfRequired(ResourceModifiedMessage theMsg) {
+		FhirContext ctx = getSubscriptionDao().getContext();
+		IBaseResource subscription = theMsg.getNewPayload();
+		IPrimitiveType<?> status = ctx.newTerser().getSingleValueOrNull(subscription, BaseSubscriptionInterceptor.SUBSCRIPTION_STATUS, IPrimitiveType.class);
+		String statusString = status.getValueAsString();
+
+		String requestedStatus = Subscription.SubscriptionStatus.REQUESTED.toCode();
+		String activeStatus = Subscription.SubscriptionStatus.ACTIVE.toCode();
+		if (requestedStatus.equals(statusString)) {
+			status.setValueAsString(activeStatus);
+			ourLog.info("Activating and registering subscription {} from status {} to {}", subscription.getIdElement().toUnqualified().getValue(), requestedStatus, activeStatus);
+			getSubscriptionDao().update(subscription);
+			getIdToSubscription().put(subscription.getIdElement().getIdPart(), subscription);
+		} else if (activeStatus.equals(statusString)) {
+			ourLog.info("Registering active subscription {}", subscription.getIdElement().toUnqualified().getValue());
+			getIdToSubscription().put(subscription.getIdElement().getIdPart(), subscription);
+		} else {
+			if (getIdToSubscription().containsKey(subscription.getIdElement().getIdPart())) {
+				ourLog.info("Removing {} subscription {}", statusString, subscription.getIdElement().toUnqualified().getValue());
+			}
+			getIdToSubscription().remove(subscription.getIdElement().getIdPart());
+		}
+	}
+
 	private void handleCreate(ResourceModifiedMessage theMsg) {
 		if (!theMsg.getId().getResourceType().equals("Subscription")) {
 			return;
@@ -55,23 +79,7 @@ public class SubscriptionActivatingSubscriber extends BaseSubscriptionSubscriber
 			return;
 		}
 
-		FhirContext ctx = getSubscriptionDao().getContext();
-		IBaseResource subscription = theMsg.getNewPayload();
-		IPrimitiveType<?> status = ctx.newTerser().getSingleValueOrNull(subscription, SUBSCRIPTION_STATUS, IPrimitiveType.class);
-		String statusString = status.getValueAsString();
-
-		String requestedStatus = Subscription.SubscriptionStatus.REQUESTED.toCode();
-		String activeStatus = Subscription.SubscriptionStatus.ACTIVE.toCode();
-		if (requestedStatus.equals(statusString)) {
-			status.setValueAsString(activeStatus);
-			ourLog.info("Activating subscription {} from status {} to {}", subscription.getIdElement().toUnqualified().getValue(), requestedStatus, activeStatus);
-			getSubscriptionDao().update(subscription);
-			getIdToSubscription().put(subscription.getIdElement().getIdPart(), subscription);
-		} else if (activeStatus.equals(statusString)) {
-			ourLog.info("Newly created active subscription {}", subscription.getIdElement().toUnqualified().getValue());
-
-			getIdToSubscription().put(subscription.getIdElement().getIdPart(), subscription);
-		}
+		activateAndRegisterSubscriptionIfRequired(theMsg);
 	}
 
 	@Override
@@ -108,15 +116,6 @@ public class SubscriptionActivatingSubscriber extends BaseSubscriptionSubscriber
 			return;
 		}
 
-		FhirContext ctx = getSubscriptionDao().getContext();
-		IBaseResource subscription = theMsg.getNewPayload();
-		IPrimitiveType<?> status = ctx.newTerser().getSingleValueOrNull(subscription, SUBSCRIPTION_STATUS, IPrimitiveType.class);
-		String statusString = status.getValueAsString();
-
-		ourLog.info("Subscription {} has status {}", subscription.getIdElement().toUnqualifiedVersionless().getValue(), statusString);
-
-		if (Subscription.SubscriptionStatus.ACTIVE.toCode().equals(statusString)) {
-			getIdToSubscription().put(theMsg.getId().getIdPart(), theMsg.getNewPayload());
-		}
+		activateAndRegisterSubscriptionIfRequired(theMsg);
 	}
 }

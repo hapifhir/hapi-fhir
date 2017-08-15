@@ -51,9 +51,12 @@ import java.util.concurrent.*;
 
 public abstract class BaseSubscriptionInterceptor extends ServerOperationInterceptorAdapter {
 
-	static final String SUBSCRIPTION_CRITERIA = "criteria";
-	static final String SUBSCRIPTION_ENDPOINT = "channel.endpoint";
-	static final String SUBSCRIPTION_PAYLOAD = "channel.payload";
+	static final String SUBSCRIPTION_STATUS = "Subscription.status";
+	static final String SUBSCRIPTION_TYPE = "Subscription.channel.type";
+	static final String SUBSCRIPTION_CRITERIA = "Subscription.criteria";
+	static final String SUBSCRIPTION_ENDPOINT = "Subscription.channel.endpoint";
+	static final String SUBSCRIPTION_PAYLOAD = "Subscription.channel.payload";
+	static final String SUBSCRIPTION_HEADER = "Subscription.channel.header";
 	private static final Integer MAX_SUBSCRIPTION_RESULTS = 1000;
 	private SubscribableChannel myProcessingChannel;
 	private ExecutorService myExecutor;
@@ -65,11 +68,15 @@ public abstract class BaseSubscriptionInterceptor extends ServerOperationInterce
 	private Logger ourLog = LoggerFactory.getLogger(BaseSubscriptionInterceptor.class);
 	private BlockingQueue<Runnable> myExecutorQueue;
 
+	public abstract Subscription.SubscriptionChannelType getChannelType();
+
+	public BlockingQueue<Runnable> getExecutorQueueForUnitTests() {
+		return myExecutorQueue;
+	}
+
 	public ConcurrentHashMap<String, IBaseResource> getIdToSubscription() {
 		return myIdToSubscription;
 	}
-
-	public abstract Subscription.SubscriptionChannelType getChannelType();
 
 	public SubscribableChannel getProcessingChannel() {
 		return myProcessingChannel;
@@ -117,10 +124,6 @@ public abstract class BaseSubscriptionInterceptor extends ServerOperationInterce
 		}
 	}
 
-	public BlockingQueue<Runnable> getExecutorQueueForUnitTests() {
-		return myExecutorQueue;
-	}
-
 	@PostConstruct
 	public void postConstruct() {
 		myExecutorQueue = new LinkedBlockingQueue<>(1000);
@@ -161,8 +164,6 @@ public abstract class BaseSubscriptionInterceptor extends ServerOperationInterce
 
 	}
 
-	protected abstract void registerDeliverySubscriber();
-
 	@SuppressWarnings("unused")
 	@PreDestroy
 	public void preDestroy() {
@@ -174,7 +175,7 @@ public abstract class BaseSubscriptionInterceptor extends ServerOperationInterce
 		unregisterDeliverySubscriber();
 	}
 
-	protected abstract void unregisterDeliverySubscriber();
+	protected abstract void registerDeliverySubscriber();
 
 	@Override
 	public void resourceCreated(RequestDetails theRequest, IBaseResource theResource) {
@@ -213,4 +214,6 @@ public abstract class BaseSubscriptionInterceptor extends ServerOperationInterce
 			}
 		});
 	}
+
+	protected abstract void unregisterDeliverySubscriber();
 }

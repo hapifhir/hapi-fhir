@@ -79,7 +79,7 @@ public class SubscriptionCheckingSubscriber extends BaseSubscriptionSubscriber {
 			}
 
 			// see if the criteria matches the created object
-			ourLog.info("Checking subscription {} for {} with criteria {}", nextSubscriptionId, resourceType, nextCriteriaString);
+			ourLog.debug("Checking subscription {} for {} with criteria {}", nextSubscriptionId, resourceType, nextCriteriaString);
 
 			String criteriaResource = nextCriteriaString;
 			int index = criteriaResource.indexOf("?");
@@ -88,7 +88,7 @@ public class SubscriptionCheckingSubscriber extends BaseSubscriptionSubscriber {
 			}
 
 			if (resourceType != null && nextCriteriaString != null && !criteriaResource.equals(resourceType)) {
-				ourLog.info("Skipping subscription search for {} because it does not match the criteria {}", resourceType, nextCriteriaString);
+				ourLog.debug("Skipping subscription search for {} because it does not match the criteria {}", resourceType, nextCriteriaString);
 				continue;
 			}
 

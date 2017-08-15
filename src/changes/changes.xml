@@ -311,6 +311,13 @@
 				client for some versions of FHIR. Thanks to Clayton Bodendein for the
 				pull request!
 			</action>
+			<action type="add">
+				Add a new constructor to SimpleRequestHeaderInterceptor which allows a complete header
+				to be passed in (including name and value in one string)
+			</action>
+			<action type="add">
+				REST Hook subscriptions now honour the Subscription.channel.header field
+			</action>
 		</release>
 		<release version="2.5" date="2017-06-08">
 			<action type="fix">
