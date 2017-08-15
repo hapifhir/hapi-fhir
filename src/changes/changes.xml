@@ -43,7 +43,19 @@
 					</ul>
 				]]>
 			</action>
-
+			<action type="add">
+				JPA Subscription support has been refactored. A design contributed
+				by Jeff Chung for the REST Hook subscription module has been ported
+				so that Websocket subscriptions use it too. This design uses an 
+				interceptor to scan resources as they are processed to test whether
+				they should be delivered to subscriptions, instead of using a
+				polling design. 
+				<![CDATA[<br/><br/>]]>
+				In addition, this scanning has been reworked to happen in a separate
+				thread from the main storage thread, which should improve 
+				performance and scalability of systems with multiple 
+				subscriptions. Thanks to Jeff for all of his work on this!
+			</action>
 			<action type="fix">
 				hapi-fhir-client-okhttp project POM had dependencies on both
 				hapi-fhir-structures-dstu2 and hapi-fhir-structures-dstu3, which 
