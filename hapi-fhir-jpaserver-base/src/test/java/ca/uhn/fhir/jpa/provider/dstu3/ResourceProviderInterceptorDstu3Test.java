@@ -1,29 +1,5 @@
 package ca.uhn.fhir.jpa.provider.dstu3;
 
-import static org.hamcrest.Matchers.startsWith;
-import static org.junit.Assert.*;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.*;
-
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import org.apache.commons.io.IOUtils;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.StringEntity;
-import org.hl7.fhir.dstu3.model.*;
-import org.hl7.fhir.dstu3.model.Bundle.*;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
-import org.junit.*;
-import org.mockito.ArgumentCaptor;
-
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
@@ -33,12 +9,41 @@ import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
 import ca.uhn.fhir.rest.server.interceptor.InterceptorAdapter;
 import ca.uhn.fhir.util.TestUtil;
+import org.apache.commons.io.IOUtils;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.StringEntity;
+import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
+import org.hl7.fhir.dstu3.model.Bundle.BundleType;
+import org.hl7.fhir.dstu3.model.Bundle.HTTPVerb;
+import org.hl7.fhir.dstu3.model.Organization;
+import org.hl7.fhir.dstu3.model.Patient;
+import org.hl7.fhir.dstu3.model.Reference;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Test;
+import org.mockito.ArgumentCaptor;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+
+import static org.hamcrest.Matchers.startsWith;
+import static org.junit.Assert.*;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.*;
 
 public class ResourceProviderInterceptorDstu3Test extends BaseResourceProviderDstu3Test {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResourceProviderInterceptorDstu3Test.class);
-	private IServerInterceptor myDaoInterceptor;
 
+	private IServerInterceptor myDaoInterceptor;
 	private IServerInterceptor myServerInterceptor;
 
 	@Override
@@ -117,55 +122,6 @@ public class ResourceProviderInterceptorDstu3Test extends BaseResourceProviderDs
 	}
 
 	@Test
-	public void testCreateResourceWithVersionedReference() throws IOException, ServletException {
-		String methodName = "testCreateResourceWithVersionedReference";
-
-		Organization org = new Organization();
-		org.setName("orgName");
-		IIdType orgId = ourClient.create().resource(org).execute().getId().toUnqualified();
-		assertNotNull(orgId.getVersionIdPartAsLong());
-
-		resetServerInterceptor();
-		
-		Patient pt = new Patient();
-		pt.addName().setFamily(methodName);
-		pt.setManagingOrganization(new Reference(orgId));
-
-		IParser parser = myFhirCtx.newXmlParser();
-		parser.setDontStripVersionsFromReferencesAtPaths("Patient.managingOrganization");
-		parser.setPrettyPrint(true);
-		String resource = parser.encodeResourceToString(pt);
-
-		ourLog.info(resource);
-
-		HttpPost post = new HttpPost(ourServerBase + "/Patient");
-		post.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
-		CloseableHttpResponse response = ourHttpClient.execute(post);
-		try {
-			String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			ourLog.info("Response was: {}", resp);
-			assertEquals(201, response.getStatusLine().getStatusCode());
-			String newIdString = response.getFirstHeader(Constants.HEADER_LOCATION_LC).getValue();
-			assertThat(newIdString, startsWith(ourServerBase + "/Patient/"));
-		} finally {
-			response.close();
-		}
-
-		ArgumentCaptor<ActionRequestDetails> ardCaptor = ArgumentCaptor.forClass(ActionRequestDetails.class);
-		ArgumentCaptor<RestOperationTypeEnum> opTypeCaptor = ArgumentCaptor.forClass(RestOperationTypeEnum.class);
-		verify(myServerInterceptor, times(1)).incomingRequestPreHandled(opTypeCaptor.capture(), ardCaptor.capture());
-
-		assertEquals(RestOperationTypeEnum.CREATE, opTypeCaptor.getValue());
-		assertEquals("Patient", ardCaptor.getValue().getResourceType());
-		assertNotNull(ardCaptor.getValue().getResource());
-
-		Patient patient;
-		patient = (Patient) ardCaptor.getAllValues().get(0).getResource();
-		assertEquals(orgId.getValue(), patient.getManagingOrganization().getReference());
-
-	}
-
-	@Test
 	public void testCreateResourceInTransaction() throws IOException {
 		String methodName = "testCreateResourceInTransaction";
 
@@ -228,6 +184,55 @@ public class ResourceProviderInterceptorDstu3Test extends BaseResourceProviderDs
 		srCaptor = ArgumentCaptor.forClass(HttpServletRequest.class);
 		sRespCaptor = ArgumentCaptor.forClass(HttpServletResponse.class);
 		verify(myDaoInterceptor, times(0)).incomingRequestPostProcessed(rdCaptor.capture(), srCaptor.capture(), sRespCaptor.capture());
+
+	}
+
+	@Test
+	public void testCreateResourceWithVersionedReference() throws IOException, ServletException {
+		String methodName = "testCreateResourceWithVersionedReference";
+
+		Organization org = new Organization();
+		org.setName("orgName");
+		IIdType orgId = ourClient.create().resource(org).execute().getId().toUnqualified();
+		assertNotNull(orgId.getVersionIdPartAsLong());
+
+		resetServerInterceptor();
+
+		Patient pt = new Patient();
+		pt.addName().setFamily(methodName);
+		pt.setManagingOrganization(new Reference(orgId));
+
+		IParser parser = myFhirCtx.newXmlParser();
+		parser.setDontStripVersionsFromReferencesAtPaths("Patient.managingOrganization");
+		parser.setPrettyPrint(true);
+		String resource = parser.encodeResourceToString(pt);
+
+		ourLog.info(resource);
+
+		HttpPost post = new HttpPost(ourServerBase + "/Patient");
+		post.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+		CloseableHttpResponse response = ourHttpClient.execute(post);
+		try {
+			String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
+			ourLog.info("Response was: {}", resp);
+			assertEquals(201, response.getStatusLine().getStatusCode());
+			String newIdString = response.getFirstHeader(Constants.HEADER_LOCATION_LC).getValue();
+			assertThat(newIdString, startsWith(ourServerBase + "/Patient/"));
+		} finally {
+			response.close();
+		}
+
+		ArgumentCaptor<ActionRequestDetails> ardCaptor = ArgumentCaptor.forClass(ActionRequestDetails.class);
+		ArgumentCaptor<RestOperationTypeEnum> opTypeCaptor = ArgumentCaptor.forClass(RestOperationTypeEnum.class);
+		verify(myServerInterceptor, times(1)).incomingRequestPreHandled(opTypeCaptor.capture(), ardCaptor.capture());
+
+		assertEquals(RestOperationTypeEnum.CREATE, opTypeCaptor.getValue());
+		assertEquals("Patient", ardCaptor.getValue().getResourceType());
+		assertNotNull(ardCaptor.getValue().getResource());
+
+		Patient patient;
+		patient = (Patient) ardCaptor.getAllValues().get(0).getResource();
+		assertEquals(orgId.getValue(), patient.getManagingOrganization().getReference());
 
 	}
 
