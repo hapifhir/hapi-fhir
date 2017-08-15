@@ -28,7 +28,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.*;
-import ca.uhn.fhir.jpa.interceptor.RestHookSubscriptionDstu2Interceptor;
+import ca.uhn.fhir.jpa.subscription.dstu2.RestHookSubscriptionDstu2Interceptor;
 import ca.uhn.fhir.jpa.term.HapiTerminologySvcDstu2;
 import ca.uhn.fhir.jpa.term.IHapiTerminologySvc;
 import ca.uhn.fhir.model.dstu2.composite.MetaDt;

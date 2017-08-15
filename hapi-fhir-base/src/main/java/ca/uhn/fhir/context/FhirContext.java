@@ -1,5 +1,6 @@
 package ca.uhn.fhir.context;
 
+import java.io.IOException;
 import java.lang.reflect.Method;
 
 /*
@@ -320,11 +321,11 @@ public class FhirContext {
 
 		Map<String, Class<? extends IBaseResource>> nameToType = myVersionToNameToResourceType.get(theVersion);
 		if (nameToType == null) {
-			nameToType = new HashMap<String, Class<? extends IBaseResource>>();
-			Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> existing = Collections.emptyMap();
+			nameToType = new HashMap<>();
+			Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> existing = new HashMap<>();
 			ModelScanner.scanVersionPropertyFile(null, nameToType, theVersion, existing);
 
-			Map<FhirVersionEnum, Map<String, Class<? extends IBaseResource>>> newVersionToNameToResourceType = new HashMap<FhirVersionEnum, Map<String, Class<? extends IBaseResource>>>();
+			Map<FhirVersionEnum, Map<String, Class<? extends IBaseResource>>> newVersionToNameToResourceType = new HashMap<>();
 			newVersionToNameToResourceType.putAll(myVersionToNameToResourceType);
 			newVersionToNameToResourceType.put(theVersion, nameToType);
 			myVersionToNameToResourceType = newVersionToNameToResourceType;
@@ -905,4 +906,33 @@ public class FhirContext {
 		return retVal;
 	}
 
+	/**
+	 * Returns an unmodifiable set containing all resource names known to this
+	 * context
+	 */
+	public Set<String> getResourceNames() {
+		Set<String> resourceNames= new HashSet<>();
+
+		if (myNameToResourceDefinition.isEmpty()) {
+			Properties props = new Properties();
+			try {
+				props.load(myVersion.getFhirVersionPropertiesFile());
+			} catch (IOException theE) {
+				throw new ConfigurationException("Failed to load version properties file");
+			}
+			Enumeration<?> propNames = props.propertyNames();
+			while (propNames.hasMoreElements()){
+				String next = (String) propNames.nextElement();
+				if (next.startsWith("resource.")) {
+					resourceNames.add(next.substring("resource.".length()).trim());
+				}
+			}
+		}
+
+		for (RuntimeResourceDefinition next : myNameToResourceDefinition.values()) {
+			resourceNames.add(next.getName());
+		}
+
+		return Collections.unmodifiableSet(resourceNames);
+	}
 }

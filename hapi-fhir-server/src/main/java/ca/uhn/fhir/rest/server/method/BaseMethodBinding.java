@@ -113,6 +113,17 @@ public abstract class BaseMethodBinding<T> {
 		return parser;
 	}
 
+	protected Object[] createMethodParams(RequestDetails theRequest) {
+		Object[] params = new Object[getParameters().size()];
+		for (int i = 0; i < getParameters().size(); i++) {
+			IParameter param = getParameters().get(i);
+			if (param != null) {
+				params[i] = param.translateQueryParametersIntoServerArgument(theRequest, this);
+			}
+		}
+		return params;
+	}
+
 	protected Object[] createParametersForServerRequest(RequestDetails theRequest) {
 		Object[] params = new Object[getParameters().size()];
 		for (int i = 0; i < getParameters().size(); i++) {
@@ -123,6 +134,13 @@ public abstract class BaseMethodBinding<T> {
 			params[i] = param.translateQueryParametersIntoServerArgument(theRequest, this);
 		}
 		return params;
+	}
+
+	/**
+	 * Subclasses may override to declare that they apply to all resource types
+	 */
+	public boolean isGlobalMethod() {
+		return false;
 	}
 
 	public List<Class<?>> getAllowableParamAnnotations() {
@@ -345,16 +363,21 @@ public abstract class BaseMethodBinding<T> {
 		Operation operation = theMethod.getAnnotation(Operation.class);
 		GetPage getPage = theMethod.getAnnotation(GetPage.class);
 		Patch patch = theMethod.getAnnotation(Patch.class);
+		GraphQL graphQL = theMethod.getAnnotation(GraphQL.class);
 
 		// ** if you add another annotation above, also add it to the next line:
-		if (!verifyMethodHasZeroOrOneOperationAnnotation(theMethod, read, search, conformance, create, update, delete, history, validate, addTags, deleteTags, transaction, operation, getPage, patch)) {
+		if (!verifyMethodHasZeroOrOneOperationAnnotation(theMethod, read, search, conformance, create, update, delete, history, validate, addTags, deleteTags, transaction, operation, getPage, patch, graphQL)) {
 			return null;
 		}
 
 		if (getPage != null) {
 			return new PageMethodBinding(theContext, theMethod);
 		}
-		
+
+		if (graphQL != null) {
+			return new GraphQLMethodBinding(theMethod, theContext, theProvider);
+		}
+
 		Class<? extends IBaseResource> returnType;
 
 		Class<? extends IBaseResource> returnTypeFromRp = null;

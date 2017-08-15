@@ -400,6 +400,13 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			return (T) this;
 		}
 
+		@Override
+		public T encoded(EncodingEnum theEncoding) {
+			Validate.notNull(theEncoding, "theEncoding must not be null");
+			myParamEncoding = theEncoding;
+			return (T) this;
+		}
+
 		@SuppressWarnings("unchecked")
 		@Override
 		public T encodedXml() {

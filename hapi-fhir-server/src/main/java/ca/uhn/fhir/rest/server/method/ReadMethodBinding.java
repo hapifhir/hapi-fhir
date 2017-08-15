@@ -142,7 +142,9 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding {
 
 	@Override
 	public IBundleProvider invokeServer(IRestfulServer<?> theServer, RequestDetails theRequest, Object[] theMethodParams) throws InvalidRequestException, InternalErrorException {
-		theMethodParams[myIdIndex] = ParameterUtil.convertIdToType(theRequest.getId(), myIdParameterType);
+		IIdType requestId = theRequest.getId();
+
+		theMethodParams[myIdIndex] = ParameterUtil.convertIdToType(requestId, myIdParameterType);
 
 		Object response = invokeServerMethod(theServer, theRequest, theMethodParams);
 		IBundleProvider retVal = toResourceList(response);
@@ -177,7 +179,7 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding {
 						lastModified = lastModifiedDt.getValue();
 					}
 				} else {
-					lastModified = ((IAnyResource)responseResource).getMeta().getLastUpdated();
+					lastModified = responseResource.getMeta().getLastUpdated();
 				}
 				
 				if (lastModified != null && lastModified.getTime() > ifModifiedSinceDate.getTime()) {

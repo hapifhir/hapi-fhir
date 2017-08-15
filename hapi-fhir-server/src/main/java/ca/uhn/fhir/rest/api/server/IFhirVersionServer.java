@@ -35,5 +35,5 @@ public interface IFhirVersionServer {
 	IServerConformanceProvider<? extends IBaseResource> createServerConformanceProvider(RestfulServer theRestfulServer); 
 	
 	IResourceProvider createServerProfilesProvider(RestfulServer theRestfulServer);
-	
+
 }

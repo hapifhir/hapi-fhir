@@ -64,7 +64,7 @@ public class GenericClientDstu3IT {
 	}
 
 	private String expectedUserAgent() {
-		return "HAPI-FHIR/" + VersionUtil.getVersion() + " (FHIR Client; FHIR " + FhirVersionEnum.DSTU3.getFhirVersionString() + "/DSTU3; okhttp/3.4.1)";
+		return "HAPI-FHIR/" + VersionUtil.getVersion() + " (FHIR Client; FHIR " + FhirVersionEnum.DSTU3.getFhirVersionString() + "/DSTU3; okhttp/3.8.1)";
 	}
 
 
@@ -94,6 +94,7 @@ public class GenericClientDstu3IT {
 				.protocol(myProtocol)
 				.code(200)
 				.body(ResponseBody.create(MediaType.parse(Constants.CT_FHIR_XML + "; charset=UTF-8"), respString))
+				.message("")
 				.build();
 
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
@@ -131,7 +132,6 @@ public class GenericClientDstu3IT {
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
 		int idx = 0;
 
-		//@formatter:off
       client
       	.search()
       	.forResource(Patient.class)
@@ -141,7 +141,6 @@ public class GenericClientDstu3IT {
       	.and(Patient.ORGANIZATION.hasId((String)null))
       	.returnBundle(Bundle.class)
       	.execute();
-		//@formatter:on
 
 		assertEquals("http://example.com/fhir/Patient", capt.getAllValues().get(idx).url().toString());
 		idx++;
@@ -166,6 +165,7 @@ public class GenericClientDstu3IT {
 				.protocol(myProtocol)
 				.code(200)
 				.body(ResponseBody.create(MediaType.parse(Constants.CT_FHIR_JSON_NEW + "; charset=UTF-8"), respString))
+				.message("")
 				.build();
 
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
@@ -197,6 +197,7 @@ public class GenericClientDstu3IT {
 				.protocol(myProtocol)
 				.code(200)
 				.body(body)
+				.message("")
 				.build();
 
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
@@ -242,6 +243,7 @@ public class GenericClientDstu3IT {
 				.code(200)
 				.body(ResponseBody.create(MediaType.parse(Constants.CT_FHIR_JSON_NEW + "; charset=UTF-8"), respString))
 				.headers(Headers.of(Constants.HEADER_LOCATION, "http://foo.com/base/Patient/222/_history/3"))
+				.message("")
 				.build();
 
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
@@ -267,6 +269,7 @@ public class GenericClientDstu3IT {
 				.code(200)
 				.body(ResponseBody.create(MediaType.parse(Constants.CT_FHIR_JSON + "; charset=UTF-8"), respString))
 				.headers(Headers.of(Constants.HEADER_LOCATION, "http://foo.com/base/Patient/222/_history/3"))
+				.message("")
 				.build();
 
 		return capt;

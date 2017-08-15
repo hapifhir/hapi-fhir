@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.config.r4;
 
 import org.hl7.fhir.r4.hapi.ctx.IValidationSupport;
+import org.hl7.fhir.r4.hapi.rest.server.GraphQLProvider;
 import org.hl7.fhir.r4.hapi.validation.FhirInstanceValidator;
 import org.hl7.fhir.r4.utils.IResourceValidator.BestPracticeWarningLevel;
 
@@ -34,7 +35,7 @@ import ca.uhn.fhir.jpa.config.BaseConfig;
 import ca.uhn.fhir.jpa.dao.*;
 import ca.uhn.fhir.jpa.dao.r4.SearchParamExtractorR4;
 import ca.uhn.fhir.jpa.dao.r4.SearchParamRegistryR4;
-import ca.uhn.fhir.jpa.interceptor.r4.RestHookSubscriptionR4Interceptor;
+import ca.uhn.fhir.jpa.subscription.r4.RestHookSubscriptionR4Interceptor;
 import ca.uhn.fhir.jpa.provider.r4.TerminologyUploaderProviderR4;
 import ca.uhn.fhir.jpa.term.*;
 import ca.uhn.fhir.jpa.term.HapiTerminologySvcR4;
@@ -76,6 +77,12 @@ public class BaseR4Config extends BaseConfig {
 	public IFulltextSearchSvc searchDaoR4() {
 		FulltextSearchSvcImpl searchDao = new FulltextSearchSvcImpl();
 		return searchDao;
+	}
+
+	@Bean(name = "myGraphQLProvider")
+	@Lazy
+	public GraphQLProvider graphQLProvider() {
+		return new GraphQLProvider(fhirContextR4(), validationSupportChainR4(), jpaStorageServices());
 	}
 
 	@Bean(autowire = Autowire.BY_TYPE)

@@ -79,5 +79,5 @@ public @interface Operation {
 	 * bundle type to set in the bundle.
 	 */
 	BundleTypeEnum bundleType() default BundleTypeEnum.COLLECTION;
-	
+
 }

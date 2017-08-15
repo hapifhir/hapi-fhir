@@ -29,6 +29,7 @@ import java.util.*;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.context.ConfigurationException;
@@ -97,7 +98,7 @@ public class MethodUtil {
 				param = new ServletRequestParameter();
 			} else if (ServletResponse.class.isAssignableFrom(parameterType)) {
 				param = new ServletResponseParameter();
-			} else if (parameterType.equals(RequestDetails.class)) {
+			} else if (parameterType.equals(RequestDetails.class) || parameterType.equals(ServletRequestDetails.class)) {
 				param = new RequestDetailsParameter();
 			} else if (parameterType.equals(IRequestOperationCallback.class)) {
 				param = new RequestOperationCallbackParameter();
@@ -183,6 +184,8 @@ public class MethodUtil {
 						((AtParameter) param).setType(theContext, parameterType, innerCollectionType, outerCollectionType);
 					} else if (nextAnnotation instanceof Count) {
 						param = new CountParameter();
+					} else if (nextAnnotation instanceof GraphQLQuery) {
+						param = new GraphQLQueryParameter();
 					} else if (nextAnnotation instanceof Sort) {
 						param = new SortParameter(theContext);
 					} else if (nextAnnotation instanceof TransactionParam) {

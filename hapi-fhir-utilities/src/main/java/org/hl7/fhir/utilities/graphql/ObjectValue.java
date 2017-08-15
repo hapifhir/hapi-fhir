@@ -41,22 +41,41 @@ public class ObjectValue extends Value {
     return result;
   }
 
+  /**
+   * Write the output using the system default line separator (as defined in {@link System#lineSeparator}
+   * @param b The StringBuilder to populate
+   * @param indent The indent level, or <code>-1</code> for no indent
+   */
   public void write(StringBuilder b, int indent) throws EGraphQLException, EGraphEngine {
+    write(b, indent, System.lineSeparator());
+  }
+
+  @Override
+  public String getValue() {
+    return null;
+  }
+
+  /**
+   * Write the output using the system default line separator (as defined in {@link System#lineSeparator}
+   * @param b The StringBuilder to populate
+   * @param indent The indent level, or <code>-1</code> for no indent
+   * @param lineSeparator The line separator
+   */
+  public void write(StringBuilder b, Integer indent, String lineSeparator) throws EGraphQLException, EGraphEngine {
     b.append("{");
-    int ni = indent;
     String s = "";
     String se = "";
-    if ((ni > -1))
+    if ((indent > -1))
     {
-      se = "\r\n"+Utilities.padLeft("",' ', ni*2);
-      ni++;
-      s = "\r\n"+Utilities.padLeft("",' ', ni*2);
+      se = lineSeparator + Utilities.padLeft("",' ', indent*2);
+      indent++;
+      s = lineSeparator + Utilities.padLeft("",' ', indent*2);
     }
     boolean first = true;
     for (Argument a : fields) {
       if (first) first = false; else b.append(",");
       b.append(s);
-      a.write(b, ni);
+      a.write(b, indent);
     }
     b.append(se);
     b.append("}");

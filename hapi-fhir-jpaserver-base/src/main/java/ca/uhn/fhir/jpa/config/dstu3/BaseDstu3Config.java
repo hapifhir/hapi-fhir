@@ -40,7 +40,7 @@ import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
 import ca.uhn.fhir.jpa.dao.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.dao.dstu3.SearchParamExtractorDstu3;
 import ca.uhn.fhir.jpa.dao.dstu3.SearchParamRegistryDstu3;
-import ca.uhn.fhir.jpa.interceptor.RestHookSubscriptionDstu3Interceptor;
+import ca.uhn.fhir.jpa.subscription.dstu3.RestHookSubscriptionDstu3Interceptor;
 import ca.uhn.fhir.jpa.provider.dstu3.TerminologyUploaderProviderDstu3;
 import ca.uhn.fhir.jpa.term.HapiTerminologySvcDstu3;
 import ca.uhn.fhir.jpa.term.IHapiTerminologyLoaderSvc;

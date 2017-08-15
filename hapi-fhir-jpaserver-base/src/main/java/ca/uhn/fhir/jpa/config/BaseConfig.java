@@ -22,6 +22,9 @@ package ca.uhn.fhir.jpa.config;
 
 import javax.annotation.Resource;
 
+import ca.uhn.fhir.jpa.graphql.JpaStorageServices;
+import org.hl7.fhir.r4.utils.GraphQLEngine;
+import org.hl7.fhir.utilities.graphql.IGraphQLStorageServices;
 import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -111,6 +114,11 @@ public class BaseConfig implements SchedulingConfigurer {
 	@Bean
 	public static PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer() {
 		return new PropertySourcesPlaceholderConfigurer();
+	}
+
+	@Bean
+	public IGraphQLStorageServices jpaStorageServices() {
+		return new JpaStorageServices();
 	}
 
 }

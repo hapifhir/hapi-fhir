@@ -1,52 +1,21 @@
 package org.hl7.fhir.r4.utils;
 
+import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.r4.context.IWorkerContext;
+import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
+import org.hl7.fhir.r4.model.Bundle.BundleLinkComponent;
+import org.hl7.fhir.utilities.Utilities;
+import org.hl7.fhir.utilities.graphql.*;
+import org.hl7.fhir.utilities.graphql.Operation.OperationType;
+import org.hl7.fhir.utilities.graphql.Package;
+
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-
-import org.hl7.fhir.utilities.graphql.Package;
-import org.hl7.fhir.utilities.graphql.Selection;
-import org.hl7.fhir.utilities.graphql.StringValue;
-import org.hl7.fhir.utilities.graphql.Value;
-import org.hl7.fhir.utilities.graphql.Variable;
-import org.hl7.fhir.utilities.graphql.VariableValue;
-import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.r4.context.IWorkerContext;
-import org.hl7.fhir.r4.model.BackboneElement;
-import org.hl7.fhir.r4.model.Base;
-import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
-import org.hl7.fhir.r4.model.Bundle.BundleLinkComponent;
-import org.hl7.fhir.r4.model.DomainResource;
-import org.hl7.fhir.r4.model.Element;
-import org.hl7.fhir.r4.model.ExpressionNode;
-import org.hl7.fhir.r4.model.IntegerType;
-import org.hl7.fhir.r4.model.Property;
-import org.hl7.fhir.r4.model.Reference;
-import org.hl7.fhir.r4.model.Resource;
-import org.hl7.fhir.r4.model.StringType;
-import org.hl7.fhir.r4.model.StructureDefinition;
-import org.hl7.fhir.r4.utils.GraphQLEngine.SearchEdge;
-import org.hl7.fhir.r4.utils.GraphQLEngine.SearchWrapper;
-import org.hl7.fhir.r4.utils.FHIRLexer.FHIRLexerException;
-import org.hl7.fhir.r4.utils.GraphQLEngine.IGraphQLStorageServices.ReferenceResolution;
-import org.hl7.fhir.utilities.Utilities;
-import org.hl7.fhir.utilities.graphql.Argument;
-import org.hl7.fhir.utilities.graphql.Directive;
-import org.hl7.fhir.utilities.graphql.EGraphEngine;
-import org.hl7.fhir.utilities.graphql.EGraphQLException;
-import org.hl7.fhir.utilities.graphql.Field;
-import org.hl7.fhir.utilities.graphql.Fragment;
-import org.hl7.fhir.utilities.graphql.NameValue;
-import org.hl7.fhir.utilities.graphql.NumberValue;
-import org.hl7.fhir.utilities.graphql.ObjectValue;
-import org.hl7.fhir.utilities.graphql.Operation;
-import org.hl7.fhir.utilities.graphql.Operation.OperationType;
 
 public class GraphQLEngine {
   
@@ -179,32 +148,7 @@ public class GraphQLEngine {
 
   }
 
-  public interface IGraphQLStorageServices {
-    public class ReferenceResolution {
-      private Resource targetContext;
-      private Resource target;
-      public ReferenceResolution(Resource targetContext, Resource target) {
-        super();
-        this.targetContext = targetContext;
-        this.target = target;
-      }
-      
-      
-    }
-    // given a reference inside a context, return what it references (including resolving internal references (e.g. start with #)
-    public ReferenceResolution lookup(Object appInfo, Resource context, Reference reference) throws FHIRException;
-    
-    // just get the identified resource
-    public Resource lookup(Object appInfo, String type, String id) throws FHIRException;
 
-    // list the matching resources. searchParams are the standard search params. 
-    // this instanceof different to search because the server returns all matching resources, or an error. There instanceof no paging on this search   
-    public void listResources(Object appInfo, String type, List<Argument> searchParams, List<Resource> matches) throws FHIRException;
-
-    // just perform a standard search, and return the bundle as you return to the client  
-    public Bundle search(Object appInfo, String type, List<Argument> searchParams) throws FHIRException;
-  }
-  
   private IWorkerContext context;
   
   public GraphQLEngine(IWorkerContext context) {
@@ -235,7 +179,7 @@ public class GraphQLEngine {
   /** 
    * Application provided reference resolution services 
    */
-  private IGraphQLStorageServices services;
+  private IGraphQLStorageServices<Resource, Reference, Bundle> services;
 
   // internal stuff 
   private Map<String, Argument> workingVariables = new HashMap<String, Argument>();
@@ -526,13 +470,13 @@ public class GraphQLEngine {
       throw new EGraphQLException("Resource Referencing services not provided");
 
     Reference ref = (Reference) source;
-    ReferenceResolution res = services.lookup(appInfo, context, ref);
+    ReferenceResolution<Resource> res = services.lookup(appInfo, context, ref);
     if (res != null) {
-      if (targetTypeOk(field.getArguments(), res.target)) {
+      if (targetTypeOk(field.getArguments(), res.getTarget())) {
         Argument arg = target.addField(field.getAlias(), false);
         ObjectValue obj = new ObjectValue();
         arg.addValue(obj);
-        processObject(res.targetContext, res.target, obj, field.getSelectionSet());
+        processObject(res.getTargetContext(), res.getTarget(), obj, field.getSelectionSet());
       }
     }
     else if (!hasArgument(field.getArguments(), "optional", "true"))

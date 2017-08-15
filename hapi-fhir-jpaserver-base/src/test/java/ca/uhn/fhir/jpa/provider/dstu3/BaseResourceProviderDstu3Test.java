@@ -26,7 +26,7 @@ import ca.uhn.fhir.jpa.config.dstu3.WebsocketDstu3DispatcherConfig;
 import ca.uhn.fhir.jpa.dao.data.ISearchDao;
 import ca.uhn.fhir.jpa.dao.dstu3.BaseJpaDstu3Test;
 import ca.uhn.fhir.jpa.dao.dstu3.SearchParamRegistryDstu3;
-import ca.uhn.fhir.jpa.interceptor.RestHookSubscriptionDstu3Interceptor;
+import ca.uhn.fhir.jpa.subscription.dstu3.RestHookSubscriptionDstu3Interceptor;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.validation.JpaValidationSupportChainDstu3;
@@ -151,7 +151,7 @@ public abstract class BaseResourceProviderDstu3Test extends BaseJpaDstu3Test {
 			myFhirCtx.getRestfulClientFactory().setSocketTimeout(5000000);
 			ourClient = myFhirCtx.newRestfulGenericClient(ourServerBase);
 			if (shouldLogClient()) {
-				ourClient.registerInterceptor(new LoggingInterceptor(true));
+				ourClient.registerInterceptor(new LoggingInterceptor());
 			}
 			
 			PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);

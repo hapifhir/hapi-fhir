@@ -384,7 +384,7 @@
 		<hibernate_version>5.2.10.Final</hibernate_version>
 		<hibernate_validator_version>5.4.1.Final</hibernate_validator_version>
 		<!-- Update lucene version when you update hibernate-search version -->
-		<hibernate_search_version>5.7.0.Final</hibernate_search_version>
+		<hibernate_search_version>5.7.1.Final</hibernate_search_version>
 		<lucene_version>5.5.4</lucene_version>
 		<maven_assembly_plugin_version>2.5.3</maven_assembly_plugin_version>
 		<maven_license_plugin_version>1.8</maven_license_plugin_version>
@@ -451,7 +451,7 @@
 			<dependency>
 				<groupId>com.squareup.okhttp3</groupId>
 				<artifactId>okhttp</artifactId>
-				<version>3.4.1</version>
+				<version>3.8.1</version>
 			</dependency>
 			<dependency>
 				<groupId>commons-cli</groupId>
@@ -877,7 +877,7 @@
 			<dependency>
 				<groupId>org.springframework.data</groupId>
 				<artifactId>spring-data-jpa</artifactId>
-				<version>1.10.4.RELEASE</version>
+				<version>1.11.6.RELEASE</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework</groupId>

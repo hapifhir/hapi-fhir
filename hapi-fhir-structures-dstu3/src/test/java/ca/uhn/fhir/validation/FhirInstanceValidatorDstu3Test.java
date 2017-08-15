@@ -23,6 +23,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.zip.GZIPInputStream;
 
+import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.dstu3.hapi.validation.DefaultProfileValidationSupport;
 import org.hl7.fhir.dstu3.hapi.validation.FhirInstanceValidator;
@@ -100,6 +101,19 @@ public class FhirInstanceValidatorDstu3Test {
 		t.setValue("http://infoway-inforoute.ca");
 
 		ValidationResult results = myVal.validateWithResult(p);
+		List<SingleValidationMessage> outcome = logResultsAndReturnNonInformationalOnes(results);
+		assertThat(outcome, empty());
+
+	}
+
+	/**
+	 * See #703
+	 */
+	@Test
+	public void testDstu3UsesLatestDefinitions() throws IOException {
+		String input = IOUtils.toString(FhirInstanceValidatorDstu3Test.class.getResourceAsStream("/bug703.json"), Charsets.UTF_8);
+
+		ValidationResult results = myVal.validateWithResult(input);
 		List<SingleValidationMessage> outcome = logResultsAndReturnNonInformationalOnes(results);
 		assertThat(outcome, empty());
 

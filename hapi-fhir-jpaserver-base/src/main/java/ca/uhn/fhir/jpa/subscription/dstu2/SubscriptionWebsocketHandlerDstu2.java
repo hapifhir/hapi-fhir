@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.subscription;
+package ca.uhn.fhir.jpa.subscription.dstu2;
 
 /*
  * #%L
@@ -27,6 +27,7 @@ import java.util.concurrent.ScheduledFuture;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
+import ca.uhn.fhir.jpa.subscription.ISubscriptionWebsocketHandler;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;

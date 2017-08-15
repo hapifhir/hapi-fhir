@@ -495,8 +495,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 	}
 
 	@SuppressWarnings("unchecked")
-	private <T extends BaseResourceIndexedSearchParam> void findMissingSearchParams(ResourceTable theEntity, Set<Entry<String, RuntimeSearchParam>> activeSearchParams, RestSearchParameterTypeEnum type,
-			Set<T> paramCollection) {
+	private <RT extends BaseResourceIndexedSearchParam> void findMissingSearchParams(ResourceTable theEntity, Set<Entry<String, RuntimeSearchParam>> activeSearchParams, RestSearchParameterTypeEnum type,
+	                                                                                 Set<RT> paramCollection) {
 		for (Entry<String, RuntimeSearchParam> nextEntry : activeSearchParams) {
 			String nextParamName = nextEntry.getKey();
 			if (nextEntry.getValue().getParamType() == type) {
@@ -538,7 +538,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 					param.setResource(theEntity);
 					param.setMissing(true);
 					param.setParamName(nextParamName);
-					paramCollection.add((T) param);
+					paramCollection.add((RT) param);
 				}
 			}
 		}
@@ -1278,35 +1278,35 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 			theEntity.setPublished(theUpdateTime);
 		}
 
-		Collection<ResourceIndexedSearchParamString> paramsString = new ArrayList<ResourceIndexedSearchParamString>();
+		Collection<ResourceIndexedSearchParamString> paramsString = new ArrayList<>();
 		if (theEntity.isParamsStringPopulated()) {
 			paramsString.addAll(theEntity.getParamsString());
 		}
-		Collection<ResourceIndexedSearchParamToken> paramsToken = new ArrayList<ResourceIndexedSearchParamToken>();
+		Collection<ResourceIndexedSearchParamToken> paramsToken = new ArrayList<>();
 		if (theEntity.isParamsTokenPopulated()) {
 			paramsToken.addAll(theEntity.getParamsToken());
 		}
-		Collection<ResourceIndexedSearchParamNumber> paramsNumber = new ArrayList<ResourceIndexedSearchParamNumber>();
+		Collection<ResourceIndexedSearchParamNumber> paramsNumber = new ArrayList<>();
 		if (theEntity.isParamsNumberPopulated()) {
 			paramsNumber.addAll(theEntity.getParamsNumber());
 		}
-		Collection<ResourceIndexedSearchParamQuantity> paramsQuantity = new ArrayList<ResourceIndexedSearchParamQuantity>();
+		Collection<ResourceIndexedSearchParamQuantity> paramsQuantity = new ArrayList<>();
 		if (theEntity.isParamsQuantityPopulated()) {
 			paramsQuantity.addAll(theEntity.getParamsQuantity());
 		}
-		Collection<ResourceIndexedSearchParamDate> paramsDate = new ArrayList<ResourceIndexedSearchParamDate>();
+		Collection<ResourceIndexedSearchParamDate> paramsDate = new ArrayList<>();
 		if (theEntity.isParamsDatePopulated()) {
 			paramsDate.addAll(theEntity.getParamsDate());
 		}
-		Collection<ResourceIndexedSearchParamUri> paramsUri = new ArrayList<ResourceIndexedSearchParamUri>();
+		Collection<ResourceIndexedSearchParamUri> paramsUri = new ArrayList<>();
 		if (theEntity.isParamsUriPopulated()) {
 			paramsUri.addAll(theEntity.getParamsUri());
 		}
-		Collection<ResourceIndexedSearchParamCoords> paramsCoords = new ArrayList<ResourceIndexedSearchParamCoords>();
+		Collection<ResourceIndexedSearchParamCoords> paramsCoords = new ArrayList<>();
 		if (theEntity.isParamsCoordsPopulated()) {
 			paramsCoords.addAll(theEntity.getParamsCoords());
 		}
-		Collection<ResourceLink> existingResourceLinks = new ArrayList<ResourceLink>();
+		Collection<ResourceLink> existingResourceLinks = new ArrayList<>();
 		if (theEntity.isHasLinks()) {
 			existingResourceLinks.addAll(theEntity.getResourceLinks());
 		}
@@ -1524,7 +1524,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		 * those by path and not by parameter name.
 		 */
 		if (thePerformIndexing) {
-			Map<String, Boolean> presentSearchParams = new HashMap<String, Boolean>();
+			Map<String, Boolean> presentSearchParams = new HashMap<>();
 			for (String nextKey : populatedResourceLinkParameters) {
 				presentSearchParams.put(nextKey, Boolean.TRUE);
 			}
