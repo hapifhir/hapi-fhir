@@ -148,8 +148,8 @@ public class RestHookTestDstu2Test extends BaseResourceProviderDstu2Test {
 
 		// Should see 1 subscription notification
 		waitForQueueToDrain();
-		assertEquals(1, ourCreatedObservations.size());
-		assertEquals(0, ourUpdatedObservations.size());
+		waitForSize(1, ourCreatedObservations);
+		waitForSize(0, ourUpdatedObservations);
 
 		Subscription subscriptionTemp = ourClient.read(Subscription.class, subscription2.getId());
 		Assert.assertNotNull(subscriptionTemp);
@@ -163,8 +163,8 @@ public class RestHookTestDstu2Test extends BaseResourceProviderDstu2Test {
 		waitForQueueToDrain();
 
 		// Should see one subscription notification
-		assertEquals(3, ourCreatedObservations.size());
-		assertEquals(0, ourUpdatedObservations.size());
+		waitForSize(3, ourCreatedObservations);
+		waitForSize(0, ourUpdatedObservations);
 
 		// Delet one subscription
 		ourClient.delete().resourceById(new IdDt("Subscription/" + subscription2.getId())).execute();
@@ -173,8 +173,8 @@ public class RestHookTestDstu2Test extends BaseResourceProviderDstu2Test {
 
 		// Should see only one subscription notification
 		waitForQueueToDrain();
-		assertEquals(4, ourCreatedObservations.size());
-		assertEquals(0, ourUpdatedObservations.size());
+		waitForSize(4, ourCreatedObservations);
+		waitForSize(0, ourUpdatedObservations);
 
 		Observation observation3 = ourClient.read(Observation.class, observationTemp3.getId());
 		CodeableConceptDt codeableConcept = new CodeableConceptDt();
@@ -186,8 +186,8 @@ public class RestHookTestDstu2Test extends BaseResourceProviderDstu2Test {
 
 		// Should see no subscription notification
 		waitForQueueToDrain();
-		assertEquals(4, ourCreatedObservations.size());
-		assertEquals(0, ourUpdatedObservations.size());
+		waitForSize(4, ourCreatedObservations);
+		waitForSize(0, ourUpdatedObservations);
 
 		Observation observation3a = ourClient.read(Observation.class, observationTemp3.getId());
 
@@ -200,8 +200,8 @@ public class RestHookTestDstu2Test extends BaseResourceProviderDstu2Test {
 
 		// Should see only one subscription notification
 		waitForQueueToDrain();
-		assertEquals(4, ourCreatedObservations.size());
-		assertEquals(1, ourUpdatedObservations.size());
+		waitForSize(4, ourCreatedObservations);
+		waitForSize(1, ourUpdatedObservations);
 
 		Assert.assertFalse(subscription1.getId().equals(subscription2.getId()));
 		Assert.assertFalse(observation1.getId().isEmpty());
@@ -223,8 +223,9 @@ public class RestHookTestDstu2Test extends BaseResourceProviderDstu2Test {
 
 		// Should see 1 subscription notification
 		waitForQueueToDrain();
-		assertEquals(1, ourCreatedObservations.size());
-		assertEquals(0, ourUpdatedObservations.size());
+		waitForSize(1, ourCreatedObservations);
+		waitForSize(1, ourCreatedObservations);
+		waitForSize(0, ourUpdatedObservations);
 
 		Subscription subscriptionTemp = ourClient.read(Subscription.class, subscription2.getId());
 		Assert.assertNotNull(subscriptionTemp);
@@ -236,8 +237,8 @@ public class RestHookTestDstu2Test extends BaseResourceProviderDstu2Test {
 
 		// Should see one subscription notification
 		waitForQueueToDrain();
-		assertEquals(3, ourCreatedObservations.size());
-		assertEquals(0, ourUpdatedObservations.size());
+		waitForSize(3, ourCreatedObservations);
+		waitForSize(0, ourUpdatedObservations);
 
 		ourClient.delete().resourceById(new IdDt("Subscription/" + subscription2.getId())).execute();
 
@@ -245,8 +246,8 @@ public class RestHookTestDstu2Test extends BaseResourceProviderDstu2Test {
 
 		// Should see only one subscription notification
 		waitForQueueToDrain();
-		assertEquals(4, ourCreatedObservations.size());
-		assertEquals(0, ourUpdatedObservations.size());
+		waitForSize(4, ourCreatedObservations);
+		waitForSize(0, ourUpdatedObservations);
 
 		Observation observation3 = ourClient.read(Observation.class, observationTemp3.getId());
 		CodeableConceptDt codeableConcept = new CodeableConceptDt();
@@ -258,8 +259,8 @@ public class RestHookTestDstu2Test extends BaseResourceProviderDstu2Test {
 
 		// Should see no subscription notification
 		waitForQueueToDrain();
-		assertEquals(4, ourCreatedObservations.size());
-		assertEquals(0, ourUpdatedObservations.size());
+		waitForSize(4, ourCreatedObservations);
+		waitForSize(0, ourUpdatedObservations);
 
 		Observation observation3a = ourClient.read(Observation.class, observationTemp3.getId());
 
@@ -272,8 +273,8 @@ public class RestHookTestDstu2Test extends BaseResourceProviderDstu2Test {
 
 		// Should see only one subscription notification
 		waitForQueueToDrain();
-		assertEquals(4, ourCreatedObservations.size());
-		assertEquals(1, ourUpdatedObservations.size());
+		waitForSize(4, ourCreatedObservations);
+		waitForSize(1, ourUpdatedObservations);
 
 		Assert.assertFalse(subscription1.getId().equals(subscription2.getId()));
 		Assert.assertFalse(observation1.getId().isEmpty());
@@ -281,12 +282,11 @@ public class RestHookTestDstu2Test extends BaseResourceProviderDstu2Test {
 	}
 
 	public static void waitForQueueToDrain(BaseSubscriptionInterceptor theRestHookSubscriptionInterceptor) throws InterruptedException {
-		Thread.sleep(500);
-		ourLog.info("QUEUE HAS {} ITEMS", ourRestHookSubscriptionInterceptor.getExecutorQueueForUnitTests().size());
-		while (ourRestHookSubscriptionInterceptor.getExecutorQueueForUnitTests().size() > 0) {
-			Thread.sleep(500);
+		ourLog.info("QUEUE HAS {} ITEMS", theRestHookSubscriptionInterceptor.getExecutorQueueForUnitTests().size());
+		while (theRestHookSubscriptionInterceptor.getExecutorQueueForUnitTests().size() > 0) {
+			Thread.sleep(50);
 		}
-		ourLog.info("QUEUE HAS {} ITEMS", ourRestHookSubscriptionInterceptor.getExecutorQueueForUnitTests().size());
+		ourLog.info("QUEUE HAS {} ITEMS", theRestHookSubscriptionInterceptor.getExecutorQueueForUnitTests().size());
 	}
 
 	private void waitForQueueToDrain() throws InterruptedException {

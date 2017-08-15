@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao;
 
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -10,6 +11,8 @@ import java.util.*;
 
 import javax.persistence.EntityManager;
 
+import ca.uhn.fhir.jpa.util.StopWatch;
+import ca.uhn.fhir.model.dstu2.resource.Observation;
 import org.apache.commons.io.IOUtils;
 import org.hibernate.search.jpa.Search;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
@@ -291,4 +294,17 @@ public abstract class BaseJpaTest {
 		return retVal;
 	}
 
+	public static void waitForSize(int theTarget, List<?> theList) {
+		StopWatch sw = new StopWatch();
+		while (theList.size() != theTarget && sw.getMillis() < 10000) {
+			try {
+				Thread.sleep(50);
+			} catch (InterruptedException theE) {
+				throw new Error(theE);
+			}
+		}
+		if (sw.getMillis() >= 10000) {
+			fail("Size " + theList.size() + " is != target " + theTarget);
+		}
+	}
 }
