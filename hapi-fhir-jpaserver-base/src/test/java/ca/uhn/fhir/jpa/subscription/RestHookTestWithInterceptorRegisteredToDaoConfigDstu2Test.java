@@ -75,12 +75,7 @@ public class RestHookTestWithInterceptorRegisteredToDaoConfigDstu2Test extends B
 	}
 
 	private void waitForQueueToDrain() throws InterruptedException {
-		Thread.sleep(1000);
-		ourLog.info("QUEUE HAS {} ITEMS", ourRestHookSubscriptionInterceptor.getExecutorQueueForUnitTests().size());
-		while (ourRestHookSubscriptionInterceptor.getExecutorQueueForUnitTests().size() > 0) {
-			Thread.sleep(250);
-		}
-		ourLog.info("QUEUE HAS {} ITEMS", ourRestHookSubscriptionInterceptor.getExecutorQueueForUnitTests().size());
+		RestHookTestDstu2Test.waitForQueueToDrain(ourRestHookSubscriptionInterceptor);
 	}
 
 

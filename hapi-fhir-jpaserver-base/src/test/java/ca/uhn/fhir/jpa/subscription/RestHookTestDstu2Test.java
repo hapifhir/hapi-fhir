@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.subscription;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderDstu2Test;
+import ca.uhn.fhir.jpa.subscription.dstu2.RestHookSubscriptionDstu2Interceptor;
 import ca.uhn.fhir.model.dstu2.composite.CodeableConceptDt;
 import ca.uhn.fhir.model.dstu2.composite.CodingDt;
 import ca.uhn.fhir.model.dstu2.resource.Observation;
@@ -279,12 +280,17 @@ public class RestHookTestDstu2Test extends BaseResourceProviderDstu2Test {
 		Assert.assertFalse(observation2.getId().isEmpty());
 	}
 
-	private void waitForQueueToDrain() throws InterruptedException {
+	public static void waitForQueueToDrain(BaseSubscriptionInterceptor theRestHookSubscriptionInterceptor) throws InterruptedException {
+		Thread.sleep(500);
 		ourLog.info("QUEUE HAS {} ITEMS", ourRestHookSubscriptionInterceptor.getExecutorQueueForUnitTests().size());
 		while (ourRestHookSubscriptionInterceptor.getExecutorQueueForUnitTests().size() > 0) {
-			Thread.sleep(250);
+			Thread.sleep(500);
 		}
 		ourLog.info("QUEUE HAS {} ITEMS", ourRestHookSubscriptionInterceptor.getExecutorQueueForUnitTests().size());
+	}
+
+	private void waitForQueueToDrain() throws InterruptedException {
+		RestHookTestDstu2Test.waitForQueueToDrain(ourRestHookSubscriptionInterceptor);
 	}
 
 	@BeforeClass

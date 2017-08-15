@@ -84,11 +84,7 @@ public class RestHookTestWithInterceptorRegisteredToDaoConfigDstu3Test extends B
 	}
 
 	private void waitForQueueToDrain() throws InterruptedException {
-		ourLog.info("QUEUE HAS {} ITEMS", ourRestHookSubscriptionInterceptor.getExecutorQueueForUnitTests().size());
-		while (ourRestHookSubscriptionInterceptor.getExecutorQueueForUnitTests().size() > 0) {
-			Thread.sleep(250);
-		}
-		ourLog.info("QUEUE HAS {} ITEMS", ourRestHookSubscriptionInterceptor.getExecutorQueueForUnitTests().size());
+		RestHookTestDstu2Test.waitForQueueToDrain(ourRestHookSubscriptionInterceptor);
 	}
 
 	private Observation sendObservation(String code, String system) throws InterruptedException {
