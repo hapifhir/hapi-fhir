@@ -20,6 +20,8 @@ import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
 import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
 
+import static org.junit.Assert.fail;
+
 @Configuration
 @EnableTransactionManagement()
 public class TestDstu3Config extends BaseJavaConfigDstu3 {
@@ -46,6 +48,9 @@ public class TestDstu3Config extends BaseJavaConfigDstu3 {
 				} catch (Exception e) {
 					ourLog.error("Exceeded maximum wait for connection", e);
 					logGetConnectionStackTrace();
+					if ("true".equals(System.getProperty("ci"))) {
+						fail("Exceeded maximum wait for connection: "+ e.toString());
+					}
 					System.exit(1);
 					retVal = null;
 				}
