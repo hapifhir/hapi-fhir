@@ -207,7 +207,7 @@ public class ExampleDataUploader extends BaseCommand {
 			case DSTU3:
 				return getBundleFromFileDstu3(theLimit, theSuppliedFile, theCtx);
 			case R4:
-				return getBundleFromFileDstu3(theLimit, theSuppliedFile, theCtx);
+				return getBundleFromFileR4(theLimit, theSuppliedFile, theCtx);
 			default:
 				throw new ParseException("Invalid spec version for this command: " + theCtx.getVersion().getVersion());
 		}
@@ -240,12 +240,12 @@ public class ExampleDataUploader extends BaseCommand {
 				IBaseResource nextCandidateSource = subResourceList.get(i);
 				for (ResourceReferenceInfo nextRef : ctx.newTerser().getAllResourceReferences(nextCandidateSource)) {
 					String nextRefResourceType = nextRef.getResourceReference().getReferenceElement().getResourceType();
-					if (isBlank(nextRefResourceType)) {
+					String nextRefIdPart = nextRef.getResourceReference().getReferenceElement().getIdPart();
+					if (isBlank(nextRefResourceType) || isBlank(nextRefIdPart)) {
 						nextRef.getResourceReference().setResource(null);
 						nextRef.getResourceReference().setReference(null);
 						continue;
 					}
-					String nextRefIdPart = nextRef.getResourceReference().getReferenceElement().getIdPart();
 					if (nextRefIdPart.startsWith("EX")) {
 						nextRefIdPart = nextRefIdPart.substring(2);
 					}
@@ -702,6 +702,90 @@ public class ExampleDataUploader extends BaseCommand {
 				BundleEntryComponent entry = bundle.addEntry();
 				entry.getRequest().setMethod(HTTPVerb.POST);
 				entry.setResource((Resource) parsed);
+			}
+		}
+		return bundle;
+	}
+
+	@SuppressWarnings("unchecked")
+	private org.hl7.fhir.r4.model.Bundle getBundleFromFileR4(Integer limit, File inputFile, FhirContext ctx) throws IOException, UnsupportedEncodingException {
+
+		org.hl7.fhir.r4.model.Bundle bundle = new org.hl7.fhir.r4.model.Bundle();
+		bundle.setType(org.hl7.fhir.r4.model.Bundle.BundleType.TRANSACTION);
+
+		FhirValidator val = ctx.newValidator();
+		val.registerValidatorModule(new org.hl7.fhir.r4.hapi.validation.FhirInstanceValidator(new org.hl7.fhir.r4.hapi.ctx.DefaultProfileValidationSupport()));
+
+		ZipInputStream zis = new ZipInputStream(FileUtils.openInputStream(inputFile));
+		byte[] buffer = new byte[2048];
+
+		int count = 0;
+		while (true) {
+			count++;
+			if (limit != null && count > limit) {
+				break;
+			}
+
+			ZipEntry nextEntry = zis.getNextEntry();
+			if (nextEntry == null) {
+				break;
+			}
+
+			int len = 0;
+			ByteArrayOutputStream bos = new ByteArrayOutputStream();
+			while ((len = zis.read(buffer)) > 0) {
+				bos.write(buffer, 0, len);
+			}
+			byte[] exampleBytes = bos.toByteArray();
+			String exampleString = new String(exampleBytes, "UTF-8");
+
+			if (ourLog.isTraceEnabled()) {
+				ourLog.trace("Next example: " + exampleString);
+			}
+
+			IBaseResource parsed;
+			try {
+				parsed = ctx.newJsonParser().parseResource(exampleString);
+			} catch (Exception e) {
+				ourLog.info("FAILED to parse example {}", nextEntry.getName(), e);
+				continue;
+			}
+			ourLog.info("Found example {} - {} - {} chars", nextEntry.getName(), parsed.getClass().getSimpleName(), exampleString.length());
+
+			ValidationResult result = val.validateWithResult(parsed);
+			if (result.isSuccessful() == false) {
+				ourLog.info("FAILED to validate example {} - {}", nextEntry.getName(), result.toString());
+				continue;
+			}
+
+			if (ctx.getResourceDefinition(parsed).getName().equals("Bundle")) {
+				BaseRuntimeChildDefinition entryChildDef = ctx.getResourceDefinition(parsed).getChildByName("entry");
+				BaseRuntimeElementCompositeDefinition<?> entryDef = (BaseRuntimeElementCompositeDefinition<?>) entryChildDef.getChildByName("entry");
+
+				for (IBase nextEntry1 : entryChildDef.getAccessor().getValues(parsed)) {
+					List<IBase> resources = entryDef.getChildByName("resource").getAccessor().getValues(nextEntry1);
+					if (resources == null) {
+						continue;
+					}
+					for (IBase nextResource : resources) {
+						if (nextResource == null) {
+							continue;
+						}
+						if (!ctx.getResourceDefinition((Class<? extends IBaseResource>) nextResource.getClass()).getName().equals("Bundle")
+							&& ctx.getResourceDefinition((Class<? extends IBaseResource>) nextResource.getClass()).getName().equals("SearchParameter")) {
+							org.hl7.fhir.r4.model.Bundle.BundleEntryComponent entry = bundle.addEntry();
+							entry.getRequest().setMethod(org.hl7.fhir.r4.model.Bundle.HTTPVerb.POST);
+							entry.setResource((org.hl7.fhir.r4.model.Resource) nextResource);
+						}
+					}
+				}
+			} else {
+				if (ctx.getResourceDefinition(parsed).getName().equals("SearchParameter")) {
+					continue;
+				}
+				org.hl7.fhir.r4.model.Bundle.BundleEntryComponent entry = bundle.addEntry();
+				entry.getRequest().setMethod(org.hl7.fhir.r4.model.Bundle.HTTPVerb.POST);
+				entry.setResource((org.hl7.fhir.r4.model.Resource) parsed);
 			}
 		}
 		return bundle;

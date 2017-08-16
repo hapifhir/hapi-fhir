@@ -19,6 +19,7 @@ import org.apache.http.message.BasicHeader;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.dstu3.model.CapabilityStatement.CapabilityStatementRestComponent;
 import org.hl7.fhir.dstu3.model.CapabilityStatement.CapabilityStatementRestResourceComponent;
+import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -572,6 +573,7 @@ public class BaseController {
 			theModelMap.put("outcomeDescription", outcomeDescription);
 			theModelMap.put("resultDescription", resultDescription.toString());
 			theModelMap.put("action", action);
+			theModelMap.put("ri", riBundle instanceof IAnyResource);
 			theModelMap.put("riBundle", riBundle);
 			theModelMap.put("resultStatus", resultStatus);
 

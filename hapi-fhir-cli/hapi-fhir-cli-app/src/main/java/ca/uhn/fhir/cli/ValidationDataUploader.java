@@ -336,9 +336,9 @@ public class ValidationDataUploader extends BaseCommand {
 		ourLog.info("Finished uploading ValueSets");
 
 
-		uploadDstu3Profiles(theCtx, client, "profiles-resources");
-		uploadDstu3Profiles(theCtx, client, "profiles-types");
-		uploadDstu3Profiles(theCtx, client, "profiles-others");
+		uploadR4Profiles(theCtx, client, "profiles-resources");
+		uploadR4Profiles(theCtx, client, "profiles-types");
+		uploadR4Profiles(theCtx, client, "profiles-others");
 
 		ourLog.info("Finished uploading ValueSets");
 
@@ -389,6 +389,52 @@ public class ValidationDataUploader extends BaseCommand {
 			ourLog.info("Uploading {} StructureDefinition {}/{} : {}", new Object[] { name, count, total, next.getIdElement().getValue() });
 			client.update().resource(next).execute();
 	
+			count++;
+		}
+	}
+
+	private void uploadR4Profiles(FhirContext ctx, IGenericClient client, String name) throws CommandFailureException {
+		int total;
+		int count;
+		org.hl7.fhir.r4.model.Bundle bundle;
+		ourLog.info("Uploading " + name);
+		String vsContents;
+		try {
+			vsContents = IOUtils.toString(ValidationDataUploader.class.getResourceAsStream("/org/hl7/fhir/r4/model/profile/" + name + ".xml"), "UTF-8");
+		} catch (IOException e) {
+			throw new CommandFailureException(e.toString());
+		}
+
+		bundle = ctx.newXmlParser().parseResource(org.hl7.fhir.r4.model.Bundle.class, vsContents);
+		total = bundle.getEntry().size();
+		count = 1;
+
+		Collections.sort(bundle.getEntry(), new Comparator<org.hl7.fhir.r4.model.Bundle.BundleEntryComponent>() {
+			@Override
+			public int compare(org.hl7.fhir.r4.model.Bundle.BundleEntryComponent theO1, org.hl7.fhir.r4.model.Bundle.BundleEntryComponent theO2) {
+				if (theO1.getResource() == null && theO2.getResource() == null) {
+					return 0;
+				}
+				if (theO1.getResource() == null) {
+					return 1;
+				}
+				if (theO2.getResource() == null) {
+					return -1;
+				}
+				// StructureDefinition, then OperationDefinition, then CompartmentDefinition
+				return theO2.getResource().getClass().getName().compareTo(theO1.getResource().getClass().getName());
+			}});
+
+		for (org.hl7.fhir.r4.model.Bundle.BundleEntryComponent i : bundle.getEntry()) {
+			org.hl7.fhir.r4.model.Resource next = i.getResource();
+			next.setId(next.getIdElement().toUnqualifiedVersionless());
+			if (next instanceof org.hl7.fhir.r4.model.CapabilityStatement) {
+				continue;
+			}
+
+			ourLog.info("Uploading {} StructureDefinition {}/{} : {}", new Object[] { name, count, total, next.getIdElement().getValue() });
+			client.update().resource(next).execute();
+
 			count++;
 		}
 	}

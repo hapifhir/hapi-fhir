@@ -38,6 +38,7 @@
 						<li>Hibernate Search (JPA): 5.7.0 -&gt; 5.7.1</li>
 						<li>Spring (JPA): 4.3.7 -&gt; 4.3.10</li>
 						<li>Spring Data JPA (JPA): 1.10.4 -&gt; 1.11.6</li>
+						<li>Guava (JPA): 22.0 -&gt; 23.0</li>
 						<li>Thymeleaf (Testpage Overlay): 3.0.2 -&gt; 3.0.7</li>
 						<li>OkHttp (Android): 3.4.1 -&gt; 3.8.1</li>
 					</ul>
