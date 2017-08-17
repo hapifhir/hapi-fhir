@@ -22,7 +22,6 @@ package ca.uhn.fhir.jpa.subscription;
 
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.rest.api.EncodingEnum;
-import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.client.interceptor.SimpleRequestHeaderInterceptor;
@@ -61,7 +60,6 @@ public class SubscriptionDeliveringRestHookSubscriber extends BaseSubscriptionSu
 			return;
 		}
 
-		RestOperationTypeEnum operationType = msg.getOperationType();
 		IBaseResource subscription = msg.getSubscription();
 
 
@@ -91,10 +89,11 @@ public class SubscriptionDeliveringRestHookSubscriber extends BaseSubscriptionSu
 			}
 		}
 
-		IBaseResource payloadResource = msg.getPayoad();
+		msg = massage(msg);
 
+		IBaseResource payloadResource = msg.getPayoad();
 		IClientExecutable<?, ?> operation;
-		switch (operationType) {
+		switch (msg.getOperationType()) {
 			case CREATE:
 				operation = client.create().resource(payloadResource);
 				break;
@@ -111,9 +110,16 @@ public class SubscriptionDeliveringRestHookSubscriber extends BaseSubscriptionSu
 
 		operation.encoded(payloadType);
 
-		ourLog.info("Delivering {} rest-hook payload {} for {}", operationType, payloadResource.getIdElement().toUnqualified().getValue(), subscription.getIdElement().toUnqualifiedVersionless().getValue());
+		ourLog.info("Delivering {} rest-hook payload {} for {}", msg.getOperationType(), payloadResource.getIdElement().toUnqualified().getValue(), subscription.getIdElement().toUnqualifiedVersionless().getValue());
 
 		operation.execute();
 
+	}
+
+	/**
+	 * Subclasses may override
+	 */
+	protected ResourceDeliveryMessage massage(ResourceDeliveryMessage theMsg) {
+		return theMsg;
 	}
 }
