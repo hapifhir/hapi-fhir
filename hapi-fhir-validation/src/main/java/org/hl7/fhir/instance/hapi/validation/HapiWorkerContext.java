@@ -2,6 +2,7 @@ package org.hl7.fhir.instance.hapi.validation;
 
 import java.util.List;
 
+import ca.uhn.fhir.parser.DataFormatException;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.formats.IParser;
 import org.hl7.fhir.instance.formats.ParserType;
@@ -172,6 +173,22 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
 
 	@Override
 	public ValidationResult validateCode(String theSystem, String theCode, String theDisplay, ValueSet theVs) {
+
+		/*
+		 * For some reason the built-in valueset is empty
+		 */
+		if (theVs.getIdElement().getValue().equals("http://hl7.org/fhir/ValueSet/defined-types")) {
+//			try {
+//				myCtx.getResourceDefinition(theCode);
+//				return new ValidationResult(new ConceptDefinitionComponent(new CodeType(theCode)));
+//			} catch (DataFormatException e){
+//				if (myCtx.getElementDefinition(theCode) != null) {
+//					return new ValidationResult(new ConceptDefinitionComponent(new CodeType(theCode)));
+//				}
+//			}
+			return new ValidationResult(new ConceptDefinitionComponent(new CodeType(theCode)));
+		}
+
 		if (theSystem == null || StringUtils.equals(theSystem, theVs.getCodeSystem().getSystem())) {
 			for (ConceptDefinitionComponent next : theVs.getCodeSystem().getConcept()) {
 				ValidationResult retVal = validateCodeSystem(theCode, next);
