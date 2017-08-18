@@ -73,6 +73,7 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 
 	private void resetServerInterceptor() throws ServletException, IOException {
 		reset(myServerInterceptor);
+		reset(myDaoInterceptor);
 		when(myServerInterceptor.handleException(any(RequestDetails.class), any(BaseServerResponseException.class), any(HttpServletRequest.class), any(HttpServletResponse.class))).thenReturn(true);
 		when(myServerInterceptor.incomingRequestPostProcessed(any(RequestDetails.class), any(HttpServletRequest.class), any(HttpServletResponse.class))).thenReturn(true);
 		when(myServerInterceptor.incomingRequestPreProcessed(any(HttpServletRequest.class), any(HttpServletResponse.class))).thenReturn(true);
@@ -87,6 +88,9 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 		Patient pt = new Patient();
 		pt.addName().setFamily(methodName);
 		String resource = myFhirCtx.newXmlParser().encodeResourceToString(pt);
+
+		verify(myServerInterceptor, times(0)).incomingRequestPreHandled(any(RestOperationTypeEnum.class), any(ActionRequestDetails.class));
+		verify(myDaoInterceptor, times(0)).incomingRequestPreHandled(any(RestOperationTypeEnum.class), any(ActionRequestDetails.class));
 
 		HttpPost post = new HttpPost(ourServerBase + "/Patient");
 		post.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
@@ -137,6 +141,9 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 		String resource = parser.encodeResourceToString(pt);
 
 		ourLog.info(resource);
+
+		verify(myServerInterceptor, times(0)).incomingRequestPreHandled(any(RestOperationTypeEnum.class), any(ActionRequestDetails.class));
+		verify(myDaoInterceptor, times(0)).incomingRequestPreHandled(any(RestOperationTypeEnum.class), any(ActionRequestDetails.class));
 
 		HttpPost post = new HttpPost(ourServerBase + "/Patient");
 		post.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
