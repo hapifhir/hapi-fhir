@@ -335,7 +335,7 @@ public class FHIRLexer {
     return b.toString();
   }
   
-  void skipComments() throws FHIRLexerException {
+  public void skipComments() throws FHIRLexerException {
     while (!done() && hasComment())
       next();
   }
