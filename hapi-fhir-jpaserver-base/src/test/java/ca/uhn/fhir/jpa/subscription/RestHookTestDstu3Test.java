@@ -34,15 +34,15 @@ import static org.junit.Assert.fail;
  */
 public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(RestHookTestDstu2Test.class);
 	private static List<Observation> ourCreatedObservations = Lists.newArrayList();
 	private static int ourListenerPort;
 	private static RestfulServer ourListenerRestServer;
 	private static Server ourListenerServer;
 	private static String ourListenerServerBase;
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(RestHookTestDstu2Test.class);
 	private static List<Observation> ourUpdatedObservations = Lists.newArrayList();
-	private List<IIdType> mySubscriptionIds = new ArrayList<>();
 	private static List<String> ourContentTypes = new ArrayList<>();
+	private List<IIdType> mySubscriptionIds = new ArrayList<>();
 
 	@After
 	public void afterUnregisterRestHookListener() {
@@ -73,23 +73,6 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 		ourUpdatedObservations.clear();
 		ourContentTypes.clear();
 	}
-
-	// TODO: Reenable this
-	@Test
-	@Ignore
-	public void testRestHookSubscriptionInvalidCriteria() throws Exception {
-		String payload = "application/xml";
-
-		String criteria1 = "Observation?codeeeee=SNOMED-CT";
-
-		try {
-			createSubscription(criteria1, payload, ourListenerServerBase);
-			fail();
-		} catch (InvalidRequestException e) {
-			assertEquals("HTTP 400 Bad Request: Invalid criteria: Failed to parse match URL[Observation?codeeeee=SNOMED-CT] - Resource type Observation does not have a parameter with name: codeeeee", e.getMessage());
-		}
-	}
-
 
 	private Subscription createSubscription(String theCriteria, String thePayload, String theEndpoint) throws InterruptedException {
 		Subscription subscription = new Subscription();
@@ -129,7 +112,7 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 
 		return observation;
 	}
-	
+
 	@Test
 	public void testRestHookSubscriptionApplicationFhirJson() throws Exception {
 		String payload = "application/fhir+json";
@@ -145,15 +128,11 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 
 		// Should see 1 subscription notification
 		waitForQueueToDrain();
-		waitForSize(1, ourCreatedObservations);
-		waitForSize(0, ourUpdatedObservations);
+		waitForSize(0, ourCreatedObservations);
+		waitForSize(1, ourUpdatedObservations);
 		assertEquals(Constants.CT_FHIR_JSON_NEW, ourContentTypes.get(0));
 	}
-
-	private void waitForQueueToDrain() throws InterruptedException {
-		RestHookTestDstu2Test.waitForQueueToDrain(ourRestHookSubscriptionInterceptor);
-	}
-
+	
 	@Test
 	public void testRestHookSubscriptionApplicationJson() throws Exception {
 		String payload = "application/json";
@@ -169,8 +148,8 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 
 		// Should see 1 subscription notification
 		waitForQueueToDrain();
-		waitForSize(1, ourCreatedObservations);
-		waitForSize(0, ourUpdatedObservations);
+		waitForSize(0, ourCreatedObservations);
+		waitForSize(1, ourUpdatedObservations);
 		assertEquals(Constants.CT_FHIR_JSON_NEW, ourContentTypes.get(0));
 
 		// Modify subscription 2 to also match
@@ -185,8 +164,8 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 
 		// Should see one subscription notification
 		waitForQueueToDrain();
-		waitForSize(3, ourCreatedObservations);
-		waitForSize(0, ourUpdatedObservations);
+		waitForSize(0, ourCreatedObservations);
+		waitForSize(3, ourUpdatedObservations);
 
 		ourClient.delete().resourceById(new IdType("Subscription/" + subscription2.getId())).execute();
 		waitForQueueToDrain();
@@ -195,8 +174,8 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 
 		// Should see only one subscription notification
 		waitForQueueToDrain();
-		waitForSize(4, ourCreatedObservations);
-		waitForSize(0, ourUpdatedObservations);
+		waitForSize(0, ourCreatedObservations);
+		waitForSize(4, ourUpdatedObservations);
 
 		Observation observation3 = ourClient.read(Observation.class, observationTemp3.getId());
 		CodeableConcept codeableConcept = new CodeableConcept();
@@ -208,8 +187,8 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 
 		// Should see no subscription notification
 		waitForQueueToDrain();
-		waitForSize(4, ourCreatedObservations);
-		waitForSize(0, ourUpdatedObservations);
+		waitForSize(0, ourCreatedObservations);
+		waitForSize(4, ourUpdatedObservations);
 
 		Observation observation3a = ourClient.read(Observation.class, observationTemp3.getId());
 
@@ -222,8 +201,85 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 
 		// Should see only one subscription notification
 		waitForQueueToDrain();
-		waitForSize(4, ourCreatedObservations);
+		waitForSize(0, ourCreatedObservations);
+		waitForSize(5, ourUpdatedObservations);
+
+		Assert.assertFalse(subscription1.getId().equals(subscription2.getId()));
+		Assert.assertFalse(observation1.getId().isEmpty());
+		Assert.assertFalse(observation2.getId().isEmpty());
+	}
+
+	@Test
+	public void testRestHookSubscriptionApplicationXml() throws Exception {
+		String payload = "application/xml";
+
+		String code = "1000000050";
+		String criteria1 = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
+		String criteria2 = "Observation?code=SNOMED-CT|" + code + "111&_format=xml";
+
+		Subscription subscription1 = createSubscription(criteria1, payload, ourListenerServerBase);
+		Subscription subscription2 = createSubscription(criteria2, payload, ourListenerServerBase);
+
+		Observation observation1 = sendObservation(code, "SNOMED-CT");
+
+		// Should see 1 subscription notification
+		waitForQueueToDrain();
+		waitForSize(0, ourCreatedObservations);
 		waitForSize(1, ourUpdatedObservations);
+		assertEquals(Constants.CT_FHIR_XML_NEW, ourContentTypes.get(0));
+
+		// Modify subscription 2 to also match
+		Subscription subscriptionTemp = ourClient.read(Subscription.class, subscription2.getId());
+		Assert.assertNotNull(subscriptionTemp);
+		subscriptionTemp.setCriteria(criteria1);
+		ourClient.update().resource(subscriptionTemp).withId(subscriptionTemp.getIdElement()).execute();
+		waitForQueueToDrain();
+
+		// Send another observation
+		Observation observation2 = sendObservation(code, "SNOMED-CT");
+
+		// Should see two subscription notifications
+		waitForQueueToDrain();
+		waitForSize(0, ourCreatedObservations);
+		waitForSize(3, ourUpdatedObservations);
+
+		ourClient.delete().resourceById(new IdType("Subscription/" + subscription2.getId())).execute();
+		waitForQueueToDrain();
+
+		// Send another
+		Observation observationTemp3 = sendObservation(code, "SNOMED-CT");
+
+		// Should see only one subscription notification
+		waitForQueueToDrain();
+		waitForSize(0, ourCreatedObservations);
+		waitForSize(4, ourUpdatedObservations);
+
+		Observation observation3 = ourClient.read(Observation.class, observationTemp3.getId());
+		CodeableConcept codeableConcept = new CodeableConcept();
+		observation3.setCode(codeableConcept);
+		Coding coding = codeableConcept.addCoding();
+		coding.setCode(code + "111");
+		coding.setSystem("SNOMED-CT");
+		ourClient.update().resource(observation3).withId(observation3.getIdElement()).execute();
+
+		// Should see no subscription notification
+		waitForQueueToDrain();
+		waitForSize(0, ourCreatedObservations);
+		waitForSize(4, ourUpdatedObservations);
+
+		Observation observation3a = ourClient.read(Observation.class, observationTemp3.getId());
+
+		CodeableConcept codeableConcept1 = new CodeableConcept();
+		observation3a.setCode(codeableConcept1);
+		Coding coding1 = codeableConcept1.addCoding();
+		coding1.setCode(code);
+		coding1.setSystem("SNOMED-CT");
+		ourClient.update().resource(observation3a).withId(observation3a.getIdElement()).execute();
+
+		// Should see only one subscription notification
+		waitForQueueToDrain();
+		waitForSize(0, ourCreatedObservations);
+		waitForSize(5, ourUpdatedObservations);
 
 		Assert.assertFalse(subscription1.getId().equals(subscription2.getId()));
 		Assert.assertFalse(observation1.getId().isEmpty());
@@ -245,86 +301,29 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 
 		// Should see 1 subscription notification
 		waitForQueueToDrain();
-		waitForSize(1, ourCreatedObservations);
-		waitForSize(0, ourUpdatedObservations);
+		waitForSize(0, ourCreatedObservations);
+		waitForSize(1, ourUpdatedObservations);
 		assertEquals(Constants.CT_FHIR_XML_NEW, ourContentTypes.get(0));
 	}
 
+	// TODO: Reenable this
 	@Test
-	public void testRestHookSubscriptionApplicationXml() throws Exception {
+	@Ignore
+	public void testRestHookSubscriptionInvalidCriteria() throws Exception {
 		String payload = "application/xml";
 
-		String code = "1000000050";
-		String criteria1 = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
-		String criteria2 = "Observation?code=SNOMED-CT|" + code + "111&_format=xml";
+		String criteria1 = "Observation?codeeeee=SNOMED-CT";
 
-		Subscription subscription1 = createSubscription(criteria1, payload, ourListenerServerBase);
-		Subscription subscription2 = createSubscription(criteria2, payload, ourListenerServerBase);
+		try {
+			createSubscription(criteria1, payload, ourListenerServerBase);
+			fail();
+		} catch (InvalidRequestException e) {
+			assertEquals("HTTP 400 Bad Request: Invalid criteria: Failed to parse match URL[Observation?codeeeee=SNOMED-CT] - Resource type Observation does not have a parameter with name: codeeeee", e.getMessage());
+		}
+	}
 
-		Observation observation1 = sendObservation(code, "SNOMED-CT");
-
-		// Should see 1 subscription notification
-		waitForQueueToDrain();
-		waitForSize(1, ourCreatedObservations);
-		waitForSize(0, ourUpdatedObservations);
-		assertEquals(Constants.CT_FHIR_XML_NEW, ourContentTypes.get(0));
-
-		// Modify subscription 2 to also match
-		Subscription subscriptionTemp = ourClient.read(Subscription.class, subscription2.getId());
-		Assert.assertNotNull(subscriptionTemp);
-		subscriptionTemp.setCriteria(criteria1);
-		ourClient.update().resource(subscriptionTemp).withId(subscriptionTemp.getIdElement()).execute();
-		waitForQueueToDrain();
-
-		// Send another observation
-		Observation observation2 = sendObservation(code, "SNOMED-CT");
-
-		// Should see two subscription notifications
-		waitForQueueToDrain();
-		waitForSize(3, ourCreatedObservations);
-		waitForSize(0, ourUpdatedObservations);
-
-		ourClient.delete().resourceById(new IdType("Subscription/" + subscription2.getId())).execute();
-		waitForQueueToDrain();
-
-		// Send another
-		Observation observationTemp3 = sendObservation(code, "SNOMED-CT");
-
-		// Should see only one subscription notification
-		waitForQueueToDrain();
-		waitForSize(4, ourCreatedObservations);
-		waitForSize(0, ourUpdatedObservations);
-
-		Observation observation3 = ourClient.read(Observation.class, observationTemp3.getId());
-		CodeableConcept codeableConcept = new CodeableConcept();
-		observation3.setCode(codeableConcept);
-		Coding coding = codeableConcept.addCoding();
-		coding.setCode(code + "111");
-		coding.setSystem("SNOMED-CT");
-		ourClient.update().resource(observation3).withId(observation3.getIdElement()).execute();
-
-		// Should see no subscription notification
-		waitForQueueToDrain();
-		waitForSize(4, ourCreatedObservations);
-		waitForSize(0, ourUpdatedObservations);
-
-		Observation observation3a = ourClient.read(Observation.class, observationTemp3.getId());
-
-		CodeableConcept codeableConcept1 = new CodeableConcept();
-		observation3a.setCode(codeableConcept1);
-		Coding coding1 = codeableConcept1.addCoding();
-		coding1.setCode(code);
-		coding1.setSystem("SNOMED-CT");
-		ourClient.update().resource(observation3a).withId(observation3a.getIdElement()).execute();
-
-		// Should see only one subscription notification
-		waitForQueueToDrain();
-		waitForSize(4, ourCreatedObservations);
-		waitForSize(1, ourUpdatedObservations);
-
-		Assert.assertFalse(subscription1.getId().equals(subscription2.getId()));
-		Assert.assertFalse(observation1.getId().isEmpty());
-		Assert.assertFalse(observation2.getId().isEmpty());
+	private void waitForQueueToDrain() throws InterruptedException {
+		RestHookTestDstu2Test.waitForQueueToDrain(ourRestHookSubscriptionInterceptor);
 	}
 
 	@BeforeClass

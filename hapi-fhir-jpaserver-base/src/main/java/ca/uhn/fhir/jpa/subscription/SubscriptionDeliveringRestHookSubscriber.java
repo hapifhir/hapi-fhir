@@ -34,7 +34,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessagingException;
-import org.springframework.messaging.SubscribableChannel;
 
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
@@ -44,8 +43,34 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 public class SubscriptionDeliveringRestHookSubscriber extends BaseSubscriptionSubscriber {
 	private Logger ourLog = LoggerFactory.getLogger(SubscriptionDeliveringRestHookSubscriber.class);
 
-	public SubscriptionDeliveringRestHookSubscriber(IFhirResourceDao theSubscriptionDao, ConcurrentHashMap<String, IBaseResource> theIdToSubscription, Subscription.SubscriptionChannelType theChannelType, BaseSubscriptionInterceptor theSubscriptionInterceptor) {
+	public SubscriptionDeliveringRestHookSubscriber(IFhirResourceDao<?> theSubscriptionDao, ConcurrentHashMap<String, IBaseResource> theIdToSubscription, Subscription.SubscriptionChannelType theChannelType, BaseSubscriptionInterceptor theSubscriptionInterceptor) {
 		super(theSubscriptionDao, theIdToSubscription, theChannelType, theSubscriptionInterceptor);
+	}
+
+	protected void deliverPayload(ResourceDeliveryMessage theMsg, IBaseResource theSubscription, EncodingEnum thePayloadType, IGenericClient theClient) {
+		IBaseResource payloadResource = theMsg.getPayoad();
+
+		IClientExecutable<?, ?> operation;
+		switch (theMsg.getOperationType()) {
+			case CREATE:
+				operation = theClient.update().resource(payloadResource);
+				break;
+			case UPDATE:
+				operation = theClient.update().resource(payloadResource);
+				break;
+			case DELETE:
+				operation = theClient.delete().resourceById(theMsg.getPayloadId());
+				break;
+			default:
+				ourLog.warn("Ignoring delivery message of type: {}", theMsg.getOperationType());
+				return;
+		}
+
+		operation.encoded(thePayloadType);
+
+		ourLog.info("Delivering {} rest-hook payload {} for {}", theMsg.getOperationType(), payloadResource.getIdElement().toUnqualified().getValue(), theSubscription.getIdElement().toUnqualifiedVersionless().getValue());
+
+		operation.execute();
 	}
 
 	@Override
@@ -89,37 +114,8 @@ public class SubscriptionDeliveringRestHookSubscriber extends BaseSubscriptionSu
 			}
 		}
 
-		msg = massage(msg);
-
-		IBaseResource payloadResource = msg.getPayoad();
-		IClientExecutable<?, ?> operation;
-		switch (msg.getOperationType()) {
-			case CREATE:
-				operation = client.create().resource(payloadResource);
-				break;
-			case UPDATE:
-				operation = client.update().resource(payloadResource);
-				break;
-			case DELETE:
-				operation = client.delete().resourceById(msg.getPayloadId());
-				break;
-			default:
-				ourLog.warn("Ignoring delivery message of type: {}", msg.getOperationType());
-				return;
-		}
-
-		operation.encoded(payloadType);
-
-		ourLog.info("Delivering {} rest-hook payload {} for {}", msg.getOperationType(), payloadResource.getIdElement().toUnqualified().getValue(), subscription.getIdElement().toUnqualifiedVersionless().getValue());
-
-		operation.execute();
+		deliverPayload(msg, subscription, payloadType, client);
 
 	}
 
-	/**
-	 * Subclasses may override
-	 */
-	protected ResourceDeliveryMessage massage(ResourceDeliveryMessage theMsg) {
-		return theMsg;
-	}
 }

@@ -121,8 +121,8 @@ public class RestHookTestWithInterceptorRegisteredToDaoConfigDstu3Test extends B
 
 		// Should see 1 subscription notification
 		Thread.sleep(500);
-		waitForSize(1, ourCreatedObservations);
-		waitForSize(0, ourUpdatedObservations);
+		waitForSize(0, ourCreatedObservations);
+		waitForSize(1, ourUpdatedObservations);
 		
 		Subscription subscriptionTemp = ourClient.read(Subscription.class, subscription2.getId());
 		Assert.assertNotNull(subscriptionTemp);
@@ -135,8 +135,8 @@ public class RestHookTestWithInterceptorRegisteredToDaoConfigDstu3Test extends B
 
 		// Should see two subscription notifications
 		Thread.sleep(500);
-		waitForSize(3, ourCreatedObservations);
-		waitForSize(0, ourUpdatedObservations);
+		waitForSize(0, ourCreatedObservations);
+		waitForSize(3, ourUpdatedObservations);
 		
 		ourClient.delete().resourceById(new IdDt("Subscription", subscription2.getId())).execute();
 
@@ -144,8 +144,8 @@ public class RestHookTestWithInterceptorRegisteredToDaoConfigDstu3Test extends B
 
 		// Should see only one subscription notification
 		Thread.sleep(500);
-		waitForSize(4, ourCreatedObservations);
-		waitForSize(0, ourUpdatedObservations);
+		waitForSize(0, ourCreatedObservations);
+		waitForSize(4, ourUpdatedObservations);
 
 		Observation observation3 = ourClient.read(Observation.class, observationTemp3.getId());
 		CodeableConcept codeableConcept = new CodeableConcept();
@@ -157,8 +157,8 @@ public class RestHookTestWithInterceptorRegisteredToDaoConfigDstu3Test extends B
 
 		// Should see no subscription notification
 		Thread.sleep(500);
-		waitForSize(4, ourCreatedObservations);
-		waitForSize(0, ourUpdatedObservations);
+		waitForSize(0, ourCreatedObservations);
+		waitForSize(4, ourUpdatedObservations);
 
 		Observation observation3a = ourClient.read(Observation.class, observationTemp3.getId());
 
@@ -171,8 +171,8 @@ public class RestHookTestWithInterceptorRegisteredToDaoConfigDstu3Test extends B
 
 		// Should see only one subscription notification
 		Thread.sleep(500);
-		waitForSize(4, ourCreatedObservations);
-		waitForSize(1, ourUpdatedObservations);
+		waitForSize(0, ourCreatedObservations);
+		waitForSize(5, ourUpdatedObservations);
 
 		Assert.assertFalse(subscription1.getId().equals(subscription2.getId()));
 		Assert.assertFalse(observation1.getId().isEmpty());
@@ -194,8 +194,8 @@ public class RestHookTestWithInterceptorRegisteredToDaoConfigDstu3Test extends B
 
 		// Should see 1 subscription notification
 		waitForQueueToDrain();
-		waitForSize(1, ourCreatedObservations);
-		waitForSize(0, ourUpdatedObservations);
+		waitForSize(0, ourCreatedObservations);
+		waitForSize(1, ourUpdatedObservations);
 		
 		Subscription subscriptionTemp = ourClient.read(Subscription.class, subscription2.getId());
 		Assert.assertNotNull(subscriptionTemp);
@@ -208,8 +208,8 @@ public class RestHookTestWithInterceptorRegisteredToDaoConfigDstu3Test extends B
 
 		// Should see two subscription notifications
 		waitForQueueToDrain();
-		waitForSize(3, ourCreatedObservations);
-		waitForSize(0, ourUpdatedObservations);
+		waitForSize(0, ourCreatedObservations);
+		waitForSize(3, ourUpdatedObservations);
 		
 		ourClient.delete().resourceById(new IdDt("Subscription", subscription2.getId())).execute();
 
@@ -217,8 +217,8 @@ public class RestHookTestWithInterceptorRegisteredToDaoConfigDstu3Test extends B
 
 		// Should see only one subscription notification
 		waitForQueueToDrain();
-		waitForSize(4, ourCreatedObservations);
-		waitForSize(0, ourUpdatedObservations);
+		waitForSize(0, ourCreatedObservations);
+		waitForSize(4, ourUpdatedObservations);
 
 		Observation observation3 = ourClient.read(Observation.class, observationTemp3.getId());
 		CodeableConcept codeableConcept = new CodeableConcept();
@@ -230,8 +230,8 @@ public class RestHookTestWithInterceptorRegisteredToDaoConfigDstu3Test extends B
 
 		// Should see no subscription notification
 		waitForQueueToDrain();
-		waitForSize(4, ourCreatedObservations);
-		waitForSize(0, ourUpdatedObservations);
+		waitForSize(0, ourCreatedObservations);
+		waitForSize(4, ourUpdatedObservations);
 
 		Observation observation3a = ourClient.read(Observation.class, observationTemp3.getId());
 
@@ -244,8 +244,8 @@ public class RestHookTestWithInterceptorRegisteredToDaoConfigDstu3Test extends B
 
 		// Should see only one subscription notification
 		waitForQueueToDrain();
-		waitForSize(4, ourCreatedObservations);
-		waitForSize(1, ourUpdatedObservations);
+		waitForSize(0, ourCreatedObservations);
+		waitForSize(5, ourUpdatedObservations);
 
 		Assert.assertFalse(subscription1.getId().equals(subscription2.getId()));
 		Assert.assertFalse(observation1.getId().isEmpty());

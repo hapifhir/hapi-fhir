@@ -323,6 +323,11 @@
 				DSTU2 validator has been enhanced to do a better job handling
 				ValueSets with expansions pointing to other ValueSets
 			</action>
+			<action type="fix">
+				REST HOOK subscriptions now use HTTP PUT if there is a payload type
+				specified, regardless of whether the source event was a create or an
+				update
+			</action>
 		</release>
 		<release version="2.5" date="2017-06-08">
 			<action type="fix">
