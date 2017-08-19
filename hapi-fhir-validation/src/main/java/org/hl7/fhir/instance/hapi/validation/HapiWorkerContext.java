@@ -1,8 +1,6 @@
 package org.hl7.fhir.instance.hapi.validation;
 
-import java.util.List;
-
-import ca.uhn.fhir.parser.DataFormatException;
+import ca.uhn.fhir.context.FhirContext;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.formats.IParser;
 import org.hl7.fhir.instance.formats.ParserType;
@@ -15,10 +13,14 @@ import org.hl7.fhir.instance.model.ValueSet.ValueSetExpansionComponent;
 import org.hl7.fhir.instance.terminologies.ValueSetExpander;
 import org.hl7.fhir.instance.terminologies.ValueSetExpanderFactory;
 import org.hl7.fhir.instance.terminologies.ValueSetExpanderSimple;
-import org.hl7.fhir.instance.utils.*;
+import org.hl7.fhir.instance.utils.INarrativeGenerator;
+import org.hl7.fhir.instance.utils.IResourceValidator;
+import org.hl7.fhir.instance.utils.IWorkerContext;
 import org.hl7.fhir.utilities.validation.ValidationMessage.IssueSeverity;
 
-import ca.uhn.fhir.context.FhirContext;
+import java.util.List;
+
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public final class HapiWorkerContext implements IWorkerContext, ValueSetExpanderFactory, ValueSetExpander {
 	private final FhirContext myCtx;
@@ -174,21 +176,6 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
 	@Override
 	public ValidationResult validateCode(String theSystem, String theCode, String theDisplay, ValueSet theVs) {
 
-		/*
-		 * For some reason the built-in valueset is empty
-		 */
-		if (theVs.getIdElement().getValue().equals("http://hl7.org/fhir/ValueSet/defined-types")) {
-//			try {
-//				myCtx.getResourceDefinition(theCode);
-//				return new ValidationResult(new ConceptDefinitionComponent(new CodeType(theCode)));
-//			} catch (DataFormatException e){
-//				if (myCtx.getElementDefinition(theCode) != null) {
-//					return new ValidationResult(new ConceptDefinitionComponent(new CodeType(theCode)));
-//				}
-//			}
-			return new ValidationResult(new ConceptDefinitionComponent(new CodeType(theCode)));
-		}
-
 		if (theSystem == null || StringUtils.equals(theSystem, theVs.getCodeSystem().getSystem())) {
 			for (ConceptDefinitionComponent next : theVs.getCodeSystem().getConcept()) {
 				ValidationResult retVal = validateCodeSystem(theCode, next);
@@ -199,7 +186,13 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
 		}
 
 		for (ConceptSetComponent nextComposeConceptSet : theVs.getCompose().getInclude()) {
-			if (StringUtils.equals(theSystem, nextComposeConceptSet.getSystem())) {
+
+			String nextSystem = theSystem;
+			if (nextSystem == null && isNotBlank(nextComposeConceptSet.getSystem())) {
+				nextSystem = nextComposeConceptSet.getSystem();
+			}
+
+			if (StringUtils.equals(nextSystem, nextComposeConceptSet.getSystem())) {
 				for (ConceptReferenceComponent nextComposeCode : nextComposeConceptSet.getConcept()) {
 					ConceptDefinitionComponent conceptDef = new ConceptDefinitionComponent();
 					conceptDef.setCode(nextComposeCode.getCode());
@@ -209,8 +202,16 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
 						return retVal;
 					}
 				}
+
+				if (nextComposeConceptSet.getConcept().isEmpty()){
+					ValidationResult result = validateCode(nextSystem, theCode, null);
+					if (result.isOk()){
+						return result;
+					}
+				}
 			}
 		}
+
 		return new ValidationResult(IssueSeverity.ERROR, "Unknown code[" + theCode + "] in system[" + theSystem + "]");
 	}
 

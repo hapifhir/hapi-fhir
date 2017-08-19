@@ -59,6 +59,7 @@ public abstract class BaseSubscriptionInterceptor extends ServerOperationInterce
 	static final String SUBSCRIPTION_HEADER = "Subscription.channel.header";
 	private static final Integer MAX_SUBSCRIPTION_RESULTS = 1000;
 	private SubscribableChannel myProcessingChannel;
+	private SubscribableChannel myDeliveryChannel;
 	private ExecutorService myExecutor;
 	private boolean myAutoActivateSubscriptions = true;
 	private int myExecutorThreadCount = 1;
@@ -69,6 +70,14 @@ public abstract class BaseSubscriptionInterceptor extends ServerOperationInterce
 	private BlockingQueue<Runnable> myExecutorQueue;
 
 	public abstract Subscription.SubscriptionChannelType getChannelType();
+
+	public SubscribableChannel getDeliveryChannel() {
+		return myDeliveryChannel;
+	}
+
+	public void setDeliveryChannel(SubscribableChannel theDeliveryChannel) {
+		myDeliveryChannel = theDeliveryChannel;
+	}
 
 	public BlockingQueue<Runnable> getExecutorQueueForUnitTests() {
 		return myExecutorQueue;
@@ -144,19 +153,22 @@ public abstract class BaseSubscriptionInterceptor extends ServerOperationInterce
 			rejectedExecutionHandler);
 
 
-		if (myProcessingChannel == null) {
-			myProcessingChannel = new ExecutorSubscribableChannel(myExecutor);
+		if (getProcessingChannel() == null) {
+			setProcessingChannel(new ExecutorSubscribableChannel(myExecutor));
+		}
+		if (getDeliveryChannel() == null) {
+			setDeliveryChannel(new ExecutorSubscribableChannel(myExecutor));
 		}
 
 		if (myAutoActivateSubscriptions) {
 			if (mySubscriptionActivatingSubscriber == null) {
-				mySubscriptionActivatingSubscriber = new SubscriptionActivatingSubscriber(getSubscriptionDao(), myIdToSubscription, getChannelType(), myProcessingChannel);
+				mySubscriptionActivatingSubscriber = new SubscriptionActivatingSubscriber(getSubscriptionDao(), myIdToSubscription, getChannelType(), this);
 			}
 			getProcessingChannel().subscribe(mySubscriptionActivatingSubscriber);
 		}
 
 		if (mySubscriptionCheckingSubscriber == null) {
-			mySubscriptionCheckingSubscriber = new SubscriptionCheckingSubscriber(getSubscriptionDao(), myIdToSubscription, getChannelType(), myProcessingChannel);
+			mySubscriptionCheckingSubscriber = new SubscriptionCheckingSubscriber(getSubscriptionDao(), myIdToSubscription, getChannelType(), this);
 		}
 		getProcessingChannel().subscribe(mySubscriptionCheckingSubscriber);
 

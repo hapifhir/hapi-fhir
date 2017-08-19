@@ -41,8 +41,8 @@ public class SubscriptionActivatingSubscriber extends BaseSubscriptionSubscriber
 	/**
 	 * Constructor
 	 */
-	public SubscriptionActivatingSubscriber(IFhirResourceDao<? extends IBaseResource> theSubscriptionDao, ConcurrentHashMap<String, IBaseResource> theIdToSubscription, Subscription.SubscriptionChannelType theChannelType, SubscribableChannel theProcessingChannel) {
-		super(theSubscriptionDao, theIdToSubscription, theChannelType, theProcessingChannel);
+	public SubscriptionActivatingSubscriber(IFhirResourceDao<? extends IBaseResource> theSubscriptionDao, ConcurrentHashMap<String, IBaseResource> theIdToSubscription, Subscription.SubscriptionChannelType theChannelType, BaseSubscriptionInterceptor theSubscriptionInterceptor) {
+		super(theSubscriptionDao, theIdToSubscription, theChannelType, theSubscriptionInterceptor);
 	}
 
 	private void activateAndRegisterSubscriptionIfRequired(ResourceModifiedMessage theMsg) {

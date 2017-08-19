@@ -44,14 +44,14 @@ public abstract class BaseSubscriptionWebsocketInterceptor extends BaseSubscript
 	@Override
 	protected void registerDeliverySubscriber() {
 		if (mySubscriptionDeliverySubscriber == null) {
-			mySubscriptionDeliverySubscriber = new SubscriptionDeliveringWebsocketSubscriber(getSubscriptionDao(), getIdToSubscription(), getChannelType(), getProcessingChannel(), myTxManager, mySubscriptionFlaggedResourceDataDao, mySubscriptionTableDao, myResourceTableDao);
+			mySubscriptionDeliverySubscriber = new SubscriptionDeliveringWebsocketSubscriber(getSubscriptionDao(), getIdToSubscription(), getChannelType(), this, myTxManager, mySubscriptionFlaggedResourceDataDao, mySubscriptionTableDao, myResourceTableDao);
 		}
-		getProcessingChannel().subscribe(mySubscriptionDeliverySubscriber);
+		getDeliveryChannel().subscribe(mySubscriptionDeliverySubscriber);
 	}
 
 
 	@Override
 	protected void unregisterDeliverySubscriber() {
-		getProcessingChannel().unsubscribe(mySubscriptionDeliverySubscriber);
+		getDeliveryChannel().unsubscribe(mySubscriptionDeliverySubscriber);
 	}
 }

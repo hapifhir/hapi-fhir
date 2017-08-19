@@ -58,8 +58,8 @@ public class SubscriptionDeliveringWebsocketSubscriber extends BaseSubscriptionS
 	private final IResourceTableDao myResourceTableDao;
 	private Logger ourLog = LoggerFactory.getLogger(SubscriptionDeliveringWebsocketSubscriber.class);
 
-	public SubscriptionDeliveringWebsocketSubscriber(IFhirResourceDao theSubscriptionDao, ConcurrentHashMap<String, IBaseResource> theIdToSubscription, Subscription.SubscriptionChannelType theChannelType, SubscribableChannel theProcessingChannel, PlatformTransactionManager theTxManager, ISubscriptionFlaggedResourceDataDao theSubscriptionFlaggedResourceDataDao, ISubscriptionTableDao theSubscriptionTableDao, IResourceTableDao theResourceTableDao) {
-		super(theSubscriptionDao, theIdToSubscription, theChannelType, theProcessingChannel);
+	public SubscriptionDeliveringWebsocketSubscriber(IFhirResourceDao theSubscriptionDao, ConcurrentHashMap<String, IBaseResource> theIdToSubscription, Subscription.SubscriptionChannelType theChannelType, BaseSubscriptionInterceptor theSubscriptionInterceptor, PlatformTransactionManager theTxManager, ISubscriptionFlaggedResourceDataDao theSubscriptionFlaggedResourceDataDao, ISubscriptionTableDao theSubscriptionTableDao, IResourceTableDao theResourceTableDao) {
+		super(theSubscriptionDao, theIdToSubscription, theChannelType, theSubscriptionInterceptor);
 
 		myTxManager = theTxManager;
 		mySubscriptionFlaggedResourceDao = theSubscriptionFlaggedResourceDataDao;

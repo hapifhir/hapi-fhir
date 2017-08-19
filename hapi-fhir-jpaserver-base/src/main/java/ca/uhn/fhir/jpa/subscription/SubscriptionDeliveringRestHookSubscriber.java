@@ -44,8 +44,8 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 public class SubscriptionDeliveringRestHookSubscriber extends BaseSubscriptionSubscriber {
 	private Logger ourLog = LoggerFactory.getLogger(SubscriptionDeliveringRestHookSubscriber.class);
 
-	public SubscriptionDeliveringRestHookSubscriber(IFhirResourceDao theSubscriptionDao, ConcurrentHashMap<String, IBaseResource> theIdToSubscription, Subscription.SubscriptionChannelType theChannelType, SubscribableChannel theProcessingChannel) {
-		super(theSubscriptionDao, theIdToSubscription, theChannelType, theProcessingChannel);
+	public SubscriptionDeliveringRestHookSubscriber(IFhirResourceDao theSubscriptionDao, ConcurrentHashMap<String, IBaseResource> theIdToSubscription, Subscription.SubscriptionChannelType theChannelType, BaseSubscriptionInterceptor theSubscriptionInterceptor) {
+		super(theSubscriptionDao, theIdToSubscription, theChannelType, theSubscriptionInterceptor);
 	}
 
 	@Override

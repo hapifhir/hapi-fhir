@@ -26,7 +26,6 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Subscription;
 import org.springframework.messaging.MessageHandler;
-import org.springframework.messaging.SubscribableChannel;
 
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -35,16 +34,16 @@ public abstract class BaseSubscriptionSubscriber implements MessageHandler {
 	private final IFhirResourceDao mySubscriptionDao;
 	private final ConcurrentHashMap<String, IBaseResource> myIdToSubscription;
 	private final Subscription.SubscriptionChannelType myChannelType;
-	private final SubscribableChannel myProcessingChannel;
+	private final BaseSubscriptionInterceptor mySubscriptionInterceptor;
 
 	/**
 	 * Constructor
 	 */
-	public BaseSubscriptionSubscriber(IFhirResourceDao<? extends IBaseResource> theSubscriptionDao, ConcurrentHashMap<String, IBaseResource> theIdToSubscription, Subscription.SubscriptionChannelType theChannelType, SubscribableChannel theProcessingChannel) {
+	public BaseSubscriptionSubscriber(IFhirResourceDao<? extends IBaseResource> theSubscriptionDao, ConcurrentHashMap<String, IBaseResource> theIdToSubscription, Subscription.SubscriptionChannelType theChannelType, BaseSubscriptionInterceptor theSubscriptionInterceptor) {
 		mySubscriptionDao = theSubscriptionDao;
 		myIdToSubscription = theIdToSubscription;
 		myChannelType = theChannelType;
-		myProcessingChannel = theProcessingChannel;
+		mySubscriptionInterceptor = theSubscriptionInterceptor;
 	}
 
 	public Subscription.SubscriptionChannelType getChannelType() {
@@ -59,12 +58,12 @@ public abstract class BaseSubscriptionSubscriber implements MessageHandler {
 		return myIdToSubscription;
 	}
 
-	public SubscribableChannel getProcessingChannel() {
-		return myProcessingChannel;
-	}
-
 	public IFhirResourceDao getSubscriptionDao() {
 		return mySubscriptionDao;
+	}
+
+	public BaseSubscriptionInterceptor getSubscriptionInterceptor() {
+		return mySubscriptionInterceptor;
 	}
 
 	/**

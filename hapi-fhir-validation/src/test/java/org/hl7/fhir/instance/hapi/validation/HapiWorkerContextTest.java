@@ -13,16 +13,27 @@ public class HapiWorkerContextTest {
 	@Test
 	public void testIdTypes(){
 
-		HapiWorkerContext hwc = new HapiWorkerContext(FhirContext.forDstu2(), new DefaultProfileValidationSupport());
-		ValueSet vs = new ValueSet();
-		vs.setId("http://hl7.org/fhir/ValueSet/defined-types");
+		DefaultProfileValidationSupport validationSupport = new DefaultProfileValidationSupport();
+		FhirContext ctx = FhirContext.forDstu2();
+		HapiWorkerContext hwc = new HapiWorkerContext(ctx, validationSupport);
+
+		ValueSet vs = validationSupport.fetchResource(ctx, ValueSet.class, "http://hl7.org/fhir/ValueSet/defined-types");
 		IWorkerContext.ValidationResult outcome;
+
+		outcome = hwc.validateCode("http://hl7.org/fhir/resource-types", "Patient", null);
+		assertTrue(outcome.isOk());
+
+		outcome = hwc.validateCode("http://hl7.org/fhir/resource-types", "Patient", null, vs);
+		assertTrue(outcome.isOk());
 
 		outcome = hwc.validateCode(null, "Patient", null, vs);
 		assertTrue(outcome.isOk());
 
 		outcome = hwc.validateCode(null, "id", null, vs);
 		assertTrue(outcome.isOk());
+
+		outcome = hwc.validateCode(null, "foo", null, vs);
+		assertFalse(outcome.isOk());
 
 	}
 

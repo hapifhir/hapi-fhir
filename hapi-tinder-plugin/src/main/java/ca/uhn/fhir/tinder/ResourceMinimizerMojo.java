@@ -151,10 +151,14 @@ public class ResourceMinimizerMojo extends AbstractMojo {
 	}
 
 	public static void main(String[] args) throws Exception {
-		FhirContext ctxDstu2 = FhirContext.forDstu2();
-		FhirContext ctxDstu2_1 = FhirContext.forDstu2_1();
-		FhirContext ctxDstu3 = FhirContext.forDstu3();
-		FhirContext ctxR4 = FhirContext.forR4();
+		FhirContext ctxDstu2;
+		FhirContext ctxDstu2_1;
+		FhirContext ctxDstu3;
+		FhirContext ctxR4;
+		ctxDstu2 = FhirContext.forDstu2();
+		ctxDstu2_1 = FhirContext.forDstu2_1();
+		ctxDstu3 = FhirContext.forDstu3();
+		ctxR4 = FhirContext.forR4();
 
 		LoggerContext loggerContext = ((ch.qos.logback.classic.Logger) ourLog).getLoggerContext();
 		URL mainURL = ConfigurationWatchListUtil.getMainWatchURL(loggerContext);

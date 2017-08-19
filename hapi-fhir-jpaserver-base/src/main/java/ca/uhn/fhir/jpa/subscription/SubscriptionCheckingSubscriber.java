@@ -45,8 +45,8 @@ import java.util.concurrent.ConcurrentHashMap;
 public class SubscriptionCheckingSubscriber extends BaseSubscriptionSubscriber {
 	private Logger ourLog = LoggerFactory.getLogger(SubscriptionCheckingSubscriber.class);
 
-	public SubscriptionCheckingSubscriber(IFhirResourceDao theSubscriptionDao, ConcurrentHashMap<String, IBaseResource> theIdToSubscription, Subscription.SubscriptionChannelType theChannelType, SubscribableChannel theProcessingChannel) {
-		super(theSubscriptionDao, theIdToSubscription, theChannelType, theProcessingChannel);
+	public SubscriptionCheckingSubscriber(IFhirResourceDao theSubscriptionDao, ConcurrentHashMap<String, IBaseResource> theIdToSubscription, Subscription.SubscriptionChannelType theChannelType,BaseSubscriptionInterceptor theSubscriptionInterceptor) {
+		super(theSubscriptionDao, theIdToSubscription, theChannelType, theSubscriptionInterceptor);
 	}
 
 	@Override
@@ -112,7 +112,7 @@ public class SubscriptionCheckingSubscriber extends BaseSubscriptionSubscriber {
 				deliveryMsg.setOperationType(msg.getOperationType());
 				deliveryMsg.setPayloadId(msg.getId());
 
-				getProcessingChannel().send(new GenericMessage<>(deliveryMsg));
+				getSubscriptionInterceptor().getDeliveryChannel().send(new GenericMessage<>(deliveryMsg));
 			}
 		}
 

@@ -26,14 +26,14 @@ public abstract class BaseSubscriptionRestHookInterceptor extends BaseSubscripti
 	@Override
 	protected void registerDeliverySubscriber() {
 		if (mySubscriptionDeliverySubscriber == null) {
-			mySubscriptionDeliverySubscriber = new SubscriptionDeliveringRestHookSubscriber(getSubscriptionDao(), getIdToSubscription(), getChannelType(), getProcessingChannel());
+			mySubscriptionDeliverySubscriber = new SubscriptionDeliveringRestHookSubscriber(getSubscriptionDao(), getIdToSubscription(), getChannelType(), this);
 		}
-		getProcessingChannel().subscribe(mySubscriptionDeliverySubscriber);
+		getDeliveryChannel().subscribe(mySubscriptionDeliverySubscriber);
 	}
 
 
 	@Override
 	protected void unregisterDeliverySubscriber() {
-		getProcessingChannel().unsubscribe(mySubscriptionDeliverySubscriber);
+		getDeliveryChannel().unsubscribe(mySubscriptionDeliverySubscriber);
 	}
 }
