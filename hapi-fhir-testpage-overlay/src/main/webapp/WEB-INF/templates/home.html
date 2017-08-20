@@ -34,11 +34,11 @@
 								<col class="col-xs-7" />
 							</colgroup>
 							<tbody>
-								<tr th:if="${!strings.isEmpty(conf.implementation.description.value)}">
+								<tr th:if="${!#strings.isEmpty(conf.implementation.description)}">
 									<td>Server</td>
 									<td th:utext="'' + ${conf.implementation.description}">HAPI Restful Server</td>
 								</tr>
-								<tr th:if="${!strings.isEmpty(conf.software.name.value)} or ${!strings.isEmpty(conf.software.version.value)}">
+								<tr th:if="${!#strings.isEmpty(conf.software.name)} or ${!#strings.isEmpty(conf.software.version)}">
 									<td>Software</td>
 									<td>
 										<th:block th:utext="'' + ${conf.software.name}"/> - <th:block th:utext="'' + ${conf.software.version}"/>
