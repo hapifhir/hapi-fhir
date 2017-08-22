@@ -26,7 +26,7 @@ import org.hl7.fhir.instance.hapi.validation.IValidationSupport;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
-import ca.uhn.fhir.rest.method.RequestDetails;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 
 public class HapiTerminologySvcDstu2 extends BaseHapiTerminologySvc {
 

@@ -3,19 +3,14 @@ package ca.uhn.fhir.cli;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.Option;
-import org.apache.commons.cli.Options;
-import org.apache.commons.cli.ParseException;
-import org.hl7.fhir.dstu3.model.Parameters;
-import org.hl7.fhir.dstu3.model.StringType;
-import org.hl7.fhir.dstu3.model.UriType;
+import org.apache.commons.cli.*;
+import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.jpa.term.IHapiTerminologyLoaderSvc;
-import ca.uhn.fhir.rest.client.IGenericClient;
+import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.interceptor.BearerTokenAuthInterceptor;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 
@@ -25,11 +20,9 @@ public class UploadTerminologyCommand extends BaseCommand {
 
 	@Override
 	public String getCommandDescription() {
-		//@formatter:off
 		return "Uploads a terminology package (e.g. a SNOMED CT ZIP file) to a HAPI JPA server. "
 				+ "Note that this command uses a custom operation that is only implemented on HAPI "
 				+ "JPA servers that have been configured to accept it.";
-		//@formatter:on
 	}
 
 	@Override

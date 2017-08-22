@@ -5,11 +5,7 @@ import java.util.List;
 import org.hl7.fhir.dstu2016may.validation.ValidationMessage;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
-import ca.uhn.fhir.model.api.Bundle;
-import ca.uhn.fhir.validation.IValidationContext;
-import ca.uhn.fhir.validation.IValidatorModule;
-import ca.uhn.fhir.validation.ResultSeverityEnum;
-import ca.uhn.fhir.validation.SingleValidationMessage;
+import ca.uhn.fhir.validation.*;
 
 /**
  * Base class for a bridge between the RI validation tools and HAPI
@@ -41,11 +37,6 @@ abstract class BaseValidatorBridge implements IValidatorModule {
 	}
 
 	protected abstract List<ValidationMessage> validate(IValidationContext<?> theCtx);
-
-	@Override
-	public void validateBundle(IValidationContext<Bundle> theCtx) {
-		doValidate(theCtx);
-	}
 
 	@Override
 	public void validateResource(IValidationContext<IBaseResource> theCtx) {

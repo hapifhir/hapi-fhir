@@ -29,22 +29,16 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Wed, Jul 13, 2016 05:32+1000 for FHIR v1.0.2
+import java.util.*;
 
+import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.Enumerations.DocumentReferenceStatus;
 import org.hl7.fhir.instance.model.Enumerations.DocumentReferenceStatusEnumFactory;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.utilities.Utilities;
+import org.hl7.fhir.utilities.Utilities;
 
-import ca.uhn.fhir.model.api.annotation.Block;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
-import ca.uhn.fhir.model.api.annotation.ResourceDef;
-import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.*;
 /**
  * A manifest that defines a set of documents.
  */
@@ -56,7 +50,7 @@ public class DocumentManifest extends DomainResource {
         /**
          * The list of references to document content, or Attachment that consist of the parts of this document manifest. Usually, these would be document references, but direct references to Media or Attachments are also allowed.
          */
-        @Child(name = "p", type = {Attachment.class, IBaseResource.class}, order=1, min=1, max=1, modifier=false, summary=true)
+        @Child(name = "p", type = {Attachment.class}, order=1, min=1, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Contents of this set of documents", formalDefinition="The list of references to document content, or Attachment that consist of the parts of this document manifest. Usually, these would be document references, but direct references to Media or Attachments are also allowed." )
         protected Type p;
 
@@ -87,26 +81,26 @@ public class DocumentManifest extends DomainResource {
         /**
          * @return {@link #p} (The list of references to document content, or Attachment that consist of the parts of this document manifest. Usually, these would be document references, but direct references to Media or Attachments are also allowed.)
          */
-        public Attachment getPAttachment() throws Exception { 
+        public Attachment getPAttachment() throws FHIRException { 
           if (!(this.p instanceof Attachment))
-            throw new Exception("Type mismatch: the type Attachment was expected, but "+this.p.getClass().getName()+" was encountered");
+            throw new FHIRException("Type mismatch: the type Attachment was expected, but "+this.p.getClass().getName()+" was encountered");
           return (Attachment) this.p;
         }
 
-        public boolean hasPAttachment() throws Exception { 
+        public boolean hasPAttachment() { 
           return this.p instanceof Attachment;
         }
 
         /**
          * @return {@link #p} (The list of references to document content, or Attachment that consist of the parts of this document manifest. Usually, these would be document references, but direct references to Media or Attachments are also allowed.)
          */
-        public Reference getPReference() throws Exception { 
+        public Reference getPReference() throws FHIRException { 
           if (!(this.p instanceof Reference))
-            throw new Exception("Type mismatch: the type Reference was expected, but "+this.p.getClass().getName()+" was encountered");
+            throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.p.getClass().getName()+" was encountered");
           return (Reference) this.p;
         }
 
-        public boolean hasPReference() throws Exception { 
+        public boolean hasPReference() { 
           return this.p instanceof Reference;
         }
 
@@ -126,6 +120,28 @@ public class DocumentManifest extends DomainResource {
           super.listChildren(childrenList);
           childrenList.add(new Property("p[x]", "Attachment|Reference(Any)", "The list of references to document content, or Attachment that consist of the parts of this document manifest. Usually, these would be document references, but direct references to Media or Attachments are also allowed.", 0, java.lang.Integer.MAX_VALUE, p));
         }
+
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("p[x]"))
+          this.p = (Type) value; // Type
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("pAttachment")) {
+          this.p = new Attachment();
+          return this.p;
+        }
+        else if (name.equals("pReference")) {
+          this.p = new Reference();
+          return this.p;
+        }
+        else
+          return super.addChild(name);
+      }
 
       public DocumentManifestContentComponent copy() {
         DocumentManifestContentComponent dst = new DocumentManifestContentComponent();
@@ -157,6 +173,11 @@ public class DocumentManifest extends DomainResource {
       public boolean isEmpty() {
         return super.isEmpty() && (p == null || p.isEmpty());
       }
+
+  public String fhirType() {
+    return "DocumentManifest.content";
+
+  }
 
   }
 
@@ -259,6 +280,30 @@ public class DocumentManifest extends DomainResource {
           childrenList.add(new Property("ref", "Reference(Any)", "Related Resource to this DocumentManifest. For example, Order, DiagnosticOrder,  Procedure, EligibilityRequest, etc.", 0, java.lang.Integer.MAX_VALUE, ref));
         }
 
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("identifier"))
+          this.identifier = castToIdentifier(value); // Identifier
+        else if (name.equals("ref"))
+          this.ref = castToReference(value); // Reference
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("identifier")) {
+          this.identifier = new Identifier();
+          return this.identifier;
+        }
+        else if (name.equals("ref")) {
+          this.ref = new Reference();
+          return this.ref;
+        }
+        else
+          return super.addChild(name);
+      }
+
       public DocumentManifestRelatedComponent copy() {
         DocumentManifestRelatedComponent dst = new DocumentManifestRelatedComponent();
         copyValues(dst);
@@ -291,6 +336,11 @@ public class DocumentManifest extends DomainResource {
         return super.isEmpty() && (identifier == null || identifier.isEmpty()) && (ref == null || ref.isEmpty())
           ;
       }
+
+  public String fhirType() {
+    return "DocumentManifest.related";
+
+  }
 
   }
 
@@ -923,6 +973,86 @@ public class DocumentManifest extends DomainResource {
         childrenList.add(new Property("related", "", "Related identifiers or resources associated with the DocumentManifest.", 0, java.lang.Integer.MAX_VALUE, related));
       }
 
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("masterIdentifier"))
+          this.masterIdentifier = castToIdentifier(value); // Identifier
+        else if (name.equals("identifier"))
+          this.getIdentifier().add(castToIdentifier(value));
+        else if (name.equals("subject"))
+          this.subject = castToReference(value); // Reference
+        else if (name.equals("recipient"))
+          this.getRecipient().add(castToReference(value));
+        else if (name.equals("type"))
+          this.type = castToCodeableConcept(value); // CodeableConcept
+        else if (name.equals("author"))
+          this.getAuthor().add(castToReference(value));
+        else if (name.equals("created"))
+          this.created = castToDateTime(value); // DateTimeType
+        else if (name.equals("source"))
+          this.source = castToUri(value); // UriType
+        else if (name.equals("status"))
+          this.status = new DocumentReferenceStatusEnumFactory().fromType(value); // Enumeration<DocumentReferenceStatus>
+        else if (name.equals("description"))
+          this.description = castToString(value); // StringType
+        else if (name.equals("content"))
+          this.getContent().add((DocumentManifestContentComponent) value);
+        else if (name.equals("related"))
+          this.getRelated().add((DocumentManifestRelatedComponent) value);
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("masterIdentifier")) {
+          this.masterIdentifier = new Identifier();
+          return this.masterIdentifier;
+        }
+        else if (name.equals("identifier")) {
+          return addIdentifier();
+        }
+        else if (name.equals("subject")) {
+          this.subject = new Reference();
+          return this.subject;
+        }
+        else if (name.equals("recipient")) {
+          return addRecipient();
+        }
+        else if (name.equals("type")) {
+          this.type = new CodeableConcept();
+          return this.type;
+        }
+        else if (name.equals("author")) {
+          return addAuthor();
+        }
+        else if (name.equals("created")) {
+          throw new FHIRException("Cannot call addChild on a primitive type DocumentManifest.created");
+        }
+        else if (name.equals("source")) {
+          throw new FHIRException("Cannot call addChild on a primitive type DocumentManifest.source");
+        }
+        else if (name.equals("status")) {
+          throw new FHIRException("Cannot call addChild on a primitive type DocumentManifest.status");
+        }
+        else if (name.equals("description")) {
+          throw new FHIRException("Cannot call addChild on a primitive type DocumentManifest.description");
+        }
+        else if (name.equals("content")) {
+          return addContent();
+        }
+        else if (name.equals("related")) {
+          return addRelated();
+        }
+        else
+          return super.addChild(name);
+      }
+
+  public String fhirType() {
+    return "DocumentManifest";
+
+  }
+
       public DocumentManifest copy() {
         DocumentManifest dst = new DocumentManifest();
         copyValues(dst);
@@ -1003,7 +1133,7 @@ public class DocumentManifest extends DomainResource {
     return ResourceType.DocumentManifest;
    }
 
-  @SearchParamDefinition(name="identifier", path="DocumentManifest.masterIdentifier|DocumentManifest.identifier", description="Unique Identifier for the set of documents", type="token" )
+  @SearchParamDefinition(name="identifier", path="DocumentManifest.masterIdentifier | DocumentManifest.identifier", description="Unique Identifier for the set of documents", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
   @SearchParamDefinition(name="related-id", path="DocumentManifest.related.identifier", description="Identifiers of things that are related", type="token" )
   public static final String SP_RELATEDID = "related-id";

@@ -11,9 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import ca.uhn.fhir.model.dstu2.resource.Bundle;
 import ca.uhn.fhir.model.dstu2.resource.Bundle.Entry;
 import ca.uhn.fhir.model.dstu2.resource.Subscription;
-import ca.uhn.fhir.model.dstu2.valueset.SubscriptionChannelTypeEnum;
-import ca.uhn.fhir.model.dstu2.valueset.SubscriptionStatusEnum;
-import ca.uhn.fhir.rest.client.GenericClient;
+import ca.uhn.fhir.rest.client.impl.GenericClient;
 import ca.uhn.fhir.to.BaseController;
 import ca.uhn.fhir.to.model.HomeRequest;
 
@@ -21,6 +19,7 @@ import ca.uhn.fhir.to.model.HomeRequest;
 public class SubscriptionPlaygroundController extends BaseController {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SubscriptionPlaygroundController.class);
 
+	@SuppressWarnings("unchecked")
 	@RequestMapping(value = { "/subscriptions" })
 	public String subscriptionsHome(final HttpServletRequest theServletRequest, HomeRequest theRequest, final ModelMap theModel) {
 		addCommonParams(theServletRequest, theRequest, theModel);
@@ -33,8 +32,7 @@ public class SubscriptionPlaygroundController extends BaseController {
 		CaptureInterceptor interceptor = new CaptureInterceptor();
 		GenericClient client = theRequest.newClient(theServletRequest, getContext(theRequest), myConfig, interceptor);
 
-		//@formatter:off
-		Bundle resp = client
+		Bundle resp = (Bundle) client
 			.search()
 			.forResource(Subscription.class)
 //			.where(Subscription.TYPE.exactly().code(SubscriptionChannelTypeEnum.WEBSOCKET.getCode()))
@@ -43,7 +41,6 @@ public class SubscriptionPlaygroundController extends BaseController {
 			.sort().ascending(Subscription.STATUS)
 			.returnBundle(Bundle.class)
 			.execute();
-		//@formatter:off
 		
 		List<Subscription> subscriptions = new ArrayList<Subscription>();
 		for (Entry next : resp.getEntry()) {

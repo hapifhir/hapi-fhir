@@ -1,0 +1,4 @@
+changes in 3.0.0
+
+- QuantityComparatorEnum has been removed. It was deprecated replaced with ParamPrefixEnum in HAPI FHIR 1.5.
+- ca.uhn.fhir.model.api.Bundle (the DSTU1 Atom Bundle class) has been removed. Each structure JAR includes a Bundle resource class which can be used instead. 

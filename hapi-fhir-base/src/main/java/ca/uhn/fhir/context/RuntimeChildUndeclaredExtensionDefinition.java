@@ -56,8 +56,7 @@ public class RuntimeChildUndeclaredExtensionDefinition extends BaseRuntimeChildD
 		/*
 		 * Resource reference - The correct name is 'valueReference' in DSTU2 and 'valueResource' in DSTU1
 		 */
-		boolean dstu1 = (theContext.getVersion().getVersion().equals(FhirVersionEnum.DSTU1));
-		if ((dstu1 && (value != VALUE_REFERENCE)) || (!dstu1 && (value != VALUE_RESOURCE))) {
+		if (value != VALUE_RESOURCE) {
 			myDatatypeToAttributeName.put(theContext.getVersion().getResourceReferenceType(), value);
 			myDatatypeToDefinition.put(BaseResourceReferenceDt.class, def);
 			myDatatypeToDefinition.put(theContext.getVersion().getResourceReferenceType(), def);

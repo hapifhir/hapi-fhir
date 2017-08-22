@@ -1,13 +1,10 @@
 package ca.uhn.fhir.cli;
 
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.Option;
-import org.apache.commons.cli.Options;
-import org.apache.commons.cli.ParseException;
+import org.apache.commons.cli.*;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.rest.client.IGenericClient;
+import ca.uhn.fhir.rest.client.api.IGenericClient;
 
 public abstract class BaseCommand implements Comparable<BaseCommand> {
 
@@ -60,6 +57,8 @@ public abstract class BaseCommand implements Comparable<BaseCommand> {
 				version = FhirVersionEnum.DSTU2;
 			} else if ("dstu3".equals(specVersion)) {
 				version = FhirVersionEnum.DSTU3;
+			} else if ("r4".equals(specVersion)) {
+				version = FhirVersionEnum.R4;
 			} else {
 				throw new ParseException("Unknown spec version: " + specVersion);
 			}

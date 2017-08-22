@@ -2,8 +2,6 @@ package ca.uhn.fhir.validation;
 
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
-import ca.uhn.fhir.model.api.Bundle;
-
 
 /*
  * #%L
@@ -41,13 +39,5 @@ public interface IValidatorModule {
 	 * and is populated with the results.
 	 */
 	void validateResource(IValidationContext<IBaseResource> theCtx);
-
-	/**
-	 * This method applies only to DSTU1 Atom Bundles. All other validation will pass through
-	 * {@link #validateResource(IValidationContext)} inclusing DSTU2+ Bundle resources. If you
-	 * will not be validating DSTU1 Bundles, you may implement this method as
-	 * a NO-OP.
-	 */
-	void validateBundle(IValidationContext<Bundle> theContext);
 
 }

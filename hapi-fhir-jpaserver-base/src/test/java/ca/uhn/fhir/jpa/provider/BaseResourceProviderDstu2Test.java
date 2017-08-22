@@ -22,16 +22,16 @@ import org.springframework.web.servlet.DispatcherServlet;
 import ca.uhn.fhir.jpa.config.WebsocketDstu2Config;
 import ca.uhn.fhir.jpa.config.WebsocketDstu2DispatcherConfig;
 import ca.uhn.fhir.jpa.dao.dstu2.BaseJpaDstu2Test;
-import ca.uhn.fhir.jpa.interceptor.RestHookSubscriptionDstu2Interceptor;
+import ca.uhn.fhir.jpa.subscription.dstu2.RestHookSubscriptionDstu2Interceptor;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.testutil.RandomServerPortProvider;
-import ca.uhn.fhir.model.api.Bundle;
-import ca.uhn.fhir.model.api.BundleEntry;
+import ca.uhn.fhir.model.dstu2.resource.Bundle;
+import ca.uhn.fhir.model.dstu2.resource.Bundle.Entry;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
-import ca.uhn.fhir.rest.client.IGenericClient;
-import ca.uhn.fhir.rest.client.ServerValidationModeEnum;
+import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.util.TestUtil;
@@ -80,58 +80,58 @@ public abstract class BaseResourceProviderDstu2Test extends BaseJpaDstu2Test {
 			JpaConformanceProviderDstu2 confProvider = new JpaConformanceProviderDstu2(ourRestServer, mySystemDao, myDaoConfig);
 			confProvider.setImplementationDescription("THIS IS THE DESC");
 			ourRestServer.setServerConformanceProvider(confProvider);
-	
+
 			ourPagingProvider = myAppCtx.getBean(DatabaseBackedPagingProvider.class);
 			ourRestServer.setPagingProvider(ourPagingProvider);
-	
+
 			Server server = new Server(ourPort);
-	
+
 			ServletContextHandler proxyHandler = new ServletContextHandler();
 			proxyHandler.setContextPath("/");
-	
+
 			ServletHolder servletHolder = new ServletHolder();
 			servletHolder.setServlet(ourRestServer);
 			proxyHandler.addServlet(servletHolder, "/fhir/context/*");
-	
+
 			ourWebApplicationContext = new GenericWebApplicationContext();
 			ourWebApplicationContext.setParent(myAppCtx);
 			ourWebApplicationContext.refresh();
 
 			ourRestHookSubscriptionInterceptor = ourWebApplicationContext.getBean(RestHookSubscriptionDstu2Interceptor.class);
-			
-			proxyHandler.getServletContext().setAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE, ourWebApplicationContext); 
-			
+
+			proxyHandler.getServletContext().setAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE, ourWebApplicationContext);
+
 			DispatcherServlet dispatcherServlet = new DispatcherServlet();
 			dispatcherServlet.setContextClass(AnnotationConfigWebApplicationContext.class);
 			ServletHolder subsServletHolder = new ServletHolder();
 			subsServletHolder.setServlet(dispatcherServlet);
 			subsServletHolder.setInitParameter(
-					ContextLoader.CONFIG_LOCATION_PARAM, 
-					WebsocketDstu2Config.class.getName() + "\n" + 
+				ContextLoader.CONFIG_LOCATION_PARAM,
+				WebsocketDstu2Config.class.getName() + "\n" +
 					WebsocketDstu2DispatcherConfig.class.getName());
 			proxyHandler.addServlet(subsServletHolder, "/*");
 
-			
+
 			server.setHandler(proxyHandler);
 			server.start();
-	
+
 			ourClient = myFhirCtx.newRestfulGenericClient(ourServerBase);
-			ourClient.registerInterceptor(new LoggingInterceptor(true));
-	
+			ourClient.registerInterceptor(new LoggingInterceptor());
+
 			PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 			HttpClientBuilder builder = HttpClientBuilder.create();
 			builder.setConnectionManager(connectionManager);
 			ourHttpClient = builder.build();
-	
+
 			ourServer = server;
 		}
-		
+
 		ourRestServer.setPagingProvider(ourPagingProvider);
 	}
 
 	protected List<IdDt> toIdListUnqualifiedVersionless(Bundle found) {
 		List<IdDt> list = new ArrayList<IdDt>();
-		for (BundleEntry next : found.getEntries()) {
+		for (Entry next : found.getEntry()) {
 			list.add(next.getResource().getId().toUnqualifiedVersionless());
 		}
 		return list;
@@ -139,7 +139,7 @@ public abstract class BaseResourceProviderDstu2Test extends BaseJpaDstu2Test {
 
 	protected List<String> toNameList(Bundle resp) {
 		List<String> names = new ArrayList<String>();
-		for (BundleEntry next : resp.getEntries()) {
+		for (Entry next : resp.getEntry()) {
 			Patient nextPt = (Patient) next.getResource();
 			String nextStr = nextPt.getNameFirstRep().getGivenAsSingleString() + " " + nextPt.getNameFirstRep().getFamilyAsSingleString();
 			if (isNotBlank(nextStr)) {

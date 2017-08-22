@@ -135,4 +135,7 @@ public class DateType extends BaseDateTimeType {
 		return retVal;
 	}
 
+	public String fhirType() {
+		return "date";		
+	}
 }

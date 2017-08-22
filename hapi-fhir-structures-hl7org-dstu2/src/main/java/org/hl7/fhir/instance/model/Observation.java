@@ -29,19 +29,14 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Wed, Jul 13, 2016 05:32+1000 for FHIR v1.0.2
+import java.util.*;
 
+import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
-import org.hl7.fhir.instance.utilities.Utilities;
+import org.hl7.fhir.utilities.Utilities;
 
-import ca.uhn.fhir.model.api.annotation.Block;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
-import ca.uhn.fhir.model.api.annotation.ResourceDef;
-import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.*;
 /**
  * Measurements and simple assertions made about a patient, device or other subject.
  */
@@ -81,7 +76,7 @@ public class Observation extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static ObservationStatus fromCode(String codeString) throws Exception {
+        public static ObservationStatus fromCode(String codeString) throws FHIRException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("registered".equals(codeString))
@@ -98,7 +93,7 @@ public class Observation extends DomainResource {
           return ENTEREDINERROR;
         if ("unknown".equals(codeString))
           return UNKNOWN;
-        throw new Exception("Unknown ObservationStatus code '"+codeString+"'");
+        throw new FHIRException("Unknown ObservationStatus code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -171,6 +166,28 @@ public class Observation extends DomainResource {
           return ObservationStatus.UNKNOWN;
         throw new IllegalArgumentException("Unknown ObservationStatus code '"+codeString+"'");
         }
+        public Enumeration<ObservationStatus> fromType(Base code) throws FHIRException {
+          if (code == null || code.isEmpty())
+            return null;
+          String codeString = ((PrimitiveType) code).asStringValue();
+          if (codeString == null || "".equals(codeString))
+            return null;
+        if ("registered".equals(codeString))
+          return new Enumeration<ObservationStatus>(this, ObservationStatus.REGISTERED);
+        if ("preliminary".equals(codeString))
+          return new Enumeration<ObservationStatus>(this, ObservationStatus.PRELIMINARY);
+        if ("final".equals(codeString))
+          return new Enumeration<ObservationStatus>(this, ObservationStatus.FINAL);
+        if ("amended".equals(codeString))
+          return new Enumeration<ObservationStatus>(this, ObservationStatus.AMENDED);
+        if ("cancelled".equals(codeString))
+          return new Enumeration<ObservationStatus>(this, ObservationStatus.CANCELLED);
+        if ("entered-in-error".equals(codeString))
+          return new Enumeration<ObservationStatus>(this, ObservationStatus.ENTEREDINERROR);
+        if ("unknown".equals(codeString))
+          return new Enumeration<ObservationStatus>(this, ObservationStatus.UNKNOWN);
+        throw new FHIRException("Unknown ObservationStatus code '"+codeString+"'");
+        }
     public String toCode(ObservationStatus code) {
       if (code == ObservationStatus.REGISTERED)
         return "registered";
@@ -219,7 +236,7 @@ public class Observation extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static ObservationRelationshipType fromCode(String codeString) throws Exception {
+        public static ObservationRelationshipType fromCode(String codeString) throws FHIRException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("has-member".equals(codeString))
@@ -234,7 +251,7 @@ public class Observation extends DomainResource {
           return QUALIFIEDBY;
         if ("interfered-by".equals(codeString))
           return INTERFEREDBY;
-        throw new Exception("Unknown ObservationRelationshipType code '"+codeString+"'");
+        throw new FHIRException("Unknown ObservationRelationshipType code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -300,6 +317,26 @@ public class Observation extends DomainResource {
         if ("interfered-by".equals(codeString))
           return ObservationRelationshipType.INTERFEREDBY;
         throw new IllegalArgumentException("Unknown ObservationRelationshipType code '"+codeString+"'");
+        }
+        public Enumeration<ObservationRelationshipType> fromType(Base code) throws FHIRException {
+          if (code == null || code.isEmpty())
+            return null;
+          String codeString = ((PrimitiveType) code).asStringValue();
+          if (codeString == null || "".equals(codeString))
+            return null;
+        if ("has-member".equals(codeString))
+          return new Enumeration<ObservationRelationshipType>(this, ObservationRelationshipType.HASMEMBER);
+        if ("derived-from".equals(codeString))
+          return new Enumeration<ObservationRelationshipType>(this, ObservationRelationshipType.DERIVEDFROM);
+        if ("sequel-to".equals(codeString))
+          return new Enumeration<ObservationRelationshipType>(this, ObservationRelationshipType.SEQUELTO);
+        if ("replaces".equals(codeString))
+          return new Enumeration<ObservationRelationshipType>(this, ObservationRelationshipType.REPLACES);
+        if ("qualified-by".equals(codeString))
+          return new Enumeration<ObservationRelationshipType>(this, ObservationRelationshipType.QUALIFIEDBY);
+        if ("interfered-by".equals(codeString))
+          return new Enumeration<ObservationRelationshipType>(this, ObservationRelationshipType.INTERFEREDBY);
+        throw new FHIRException("Unknown ObservationRelationshipType code '"+codeString+"'");
         }
     public String toCode(ObservationRelationshipType code) {
       if (code == ObservationRelationshipType.HASMEMBER)
@@ -518,6 +555,47 @@ public class Observation extends DomainResource {
           childrenList.add(new Property("text", "string", "Text based reference range in an observation which may be used when a quantitative range is not appropriate for an observation.  An example would be a reference value of \"Negative\" or a list or table of 'normals'.", 0, java.lang.Integer.MAX_VALUE, text));
         }
 
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("low"))
+          this.low = castToSimpleQuantity(value); // SimpleQuantity
+        else if (name.equals("high"))
+          this.high = castToSimpleQuantity(value); // SimpleQuantity
+        else if (name.equals("meaning"))
+          this.meaning = castToCodeableConcept(value); // CodeableConcept
+        else if (name.equals("age"))
+          this.age = castToRange(value); // Range
+        else if (name.equals("text"))
+          this.text = castToString(value); // StringType
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("low")) {
+          this.low = new SimpleQuantity();
+          return this.low;
+        }
+        else if (name.equals("high")) {
+          this.high = new SimpleQuantity();
+          return this.high;
+        }
+        else if (name.equals("meaning")) {
+          this.meaning = new CodeableConcept();
+          return this.meaning;
+        }
+        else if (name.equals("age")) {
+          this.age = new Range();
+          return this.age;
+        }
+        else if (name.equals("text")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Observation.text");
+        }
+        else
+          return super.addChild(name);
+      }
+
       public ObservationReferenceRangeComponent copy() {
         ObservationReferenceRangeComponent dst = new ObservationReferenceRangeComponent();
         copyValues(dst);
@@ -555,6 +633,11 @@ public class Observation extends DomainResource {
            && (meaning == null || meaning.isEmpty()) && (age == null || age.isEmpty()) && (text == null || text.isEmpty())
           ;
       }
+
+  public String fhirType() {
+    return "Observation.referenceRange";
+
+  }
 
   }
 
@@ -690,6 +773,29 @@ public class Observation extends DomainResource {
           childrenList.add(new Property("target", "Reference(Observation|QuestionnaireResponse)", "A reference to the observation or [[[QuestionnaireResponse]]] resource that is related to this observation.", 0, java.lang.Integer.MAX_VALUE, target));
         }
 
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("type"))
+          this.type = new ObservationRelationshipTypeEnumFactory().fromType(value); // Enumeration<ObservationRelationshipType>
+        else if (name.equals("target"))
+          this.target = castToReference(value); // Reference
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("type")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Observation.type");
+        }
+        else if (name.equals("target")) {
+          this.target = new Reference();
+          return this.target;
+        }
+        else
+          return super.addChild(name);
+      }
+
       public ObservationRelatedComponent copy() {
         ObservationRelatedComponent dst = new ObservationRelatedComponent();
         copyValues(dst);
@@ -722,6 +828,11 @@ public class Observation extends DomainResource {
         return super.isEmpty() && (type == null || type.isEmpty()) && (target == null || target.isEmpty())
           ;
       }
+
+  public String fhirType() {
+    return "Observation.related";
+
+  }
 
   }
 
@@ -806,130 +917,130 @@ public class Observation extends DomainResource {
         /**
          * @return {@link #value} (The information determined as a result of making the observation, if the information has a simple value.)
          */
-        public Quantity getValueQuantity() throws Exception { 
+        public Quantity getValueQuantity() throws FHIRException { 
           if (!(this.value instanceof Quantity))
-            throw new Exception("Type mismatch: the type Quantity was expected, but "+this.value.getClass().getName()+" was encountered");
+            throw new FHIRException("Type mismatch: the type Quantity was expected, but "+this.value.getClass().getName()+" was encountered");
           return (Quantity) this.value;
         }
 
-        public boolean hasValueQuantity() throws Exception { 
+        public boolean hasValueQuantity() { 
           return this.value instanceof Quantity;
         }
 
         /**
          * @return {@link #value} (The information determined as a result of making the observation, if the information has a simple value.)
          */
-        public CodeableConcept getValueCodeableConcept() throws Exception { 
+        public CodeableConcept getValueCodeableConcept() throws FHIRException { 
           if (!(this.value instanceof CodeableConcept))
-            throw new Exception("Type mismatch: the type CodeableConcept was expected, but "+this.value.getClass().getName()+" was encountered");
+            throw new FHIRException("Type mismatch: the type CodeableConcept was expected, but "+this.value.getClass().getName()+" was encountered");
           return (CodeableConcept) this.value;
         }
 
-        public boolean hasValueCodeableConcept() throws Exception { 
+        public boolean hasValueCodeableConcept() { 
           return this.value instanceof CodeableConcept;
         }
 
         /**
          * @return {@link #value} (The information determined as a result of making the observation, if the information has a simple value.)
          */
-        public StringType getValueStringType() throws Exception { 
+        public StringType getValueStringType() throws FHIRException { 
           if (!(this.value instanceof StringType))
-            throw new Exception("Type mismatch: the type StringType was expected, but "+this.value.getClass().getName()+" was encountered");
+            throw new FHIRException("Type mismatch: the type StringType was expected, but "+this.value.getClass().getName()+" was encountered");
           return (StringType) this.value;
         }
 
-        public boolean hasValueStringType() throws Exception { 
+        public boolean hasValueStringType() { 
           return this.value instanceof StringType;
         }
 
         /**
          * @return {@link #value} (The information determined as a result of making the observation, if the information has a simple value.)
          */
-        public Range getValueRange() throws Exception { 
+        public Range getValueRange() throws FHIRException { 
           if (!(this.value instanceof Range))
-            throw new Exception("Type mismatch: the type Range was expected, but "+this.value.getClass().getName()+" was encountered");
+            throw new FHIRException("Type mismatch: the type Range was expected, but "+this.value.getClass().getName()+" was encountered");
           return (Range) this.value;
         }
 
-        public boolean hasValueRange() throws Exception { 
+        public boolean hasValueRange() { 
           return this.value instanceof Range;
         }
 
         /**
          * @return {@link #value} (The information determined as a result of making the observation, if the information has a simple value.)
          */
-        public Ratio getValueRatio() throws Exception { 
+        public Ratio getValueRatio() throws FHIRException { 
           if (!(this.value instanceof Ratio))
-            throw new Exception("Type mismatch: the type Ratio was expected, but "+this.value.getClass().getName()+" was encountered");
+            throw new FHIRException("Type mismatch: the type Ratio was expected, but "+this.value.getClass().getName()+" was encountered");
           return (Ratio) this.value;
         }
 
-        public boolean hasValueRatio() throws Exception { 
+        public boolean hasValueRatio() { 
           return this.value instanceof Ratio;
         }
 
         /**
          * @return {@link #value} (The information determined as a result of making the observation, if the information has a simple value.)
          */
-        public SampledData getValueSampledData() throws Exception { 
+        public SampledData getValueSampledData() throws FHIRException { 
           if (!(this.value instanceof SampledData))
-            throw new Exception("Type mismatch: the type SampledData was expected, but "+this.value.getClass().getName()+" was encountered");
+            throw new FHIRException("Type mismatch: the type SampledData was expected, but "+this.value.getClass().getName()+" was encountered");
           return (SampledData) this.value;
         }
 
-        public boolean hasValueSampledData() throws Exception { 
+        public boolean hasValueSampledData() { 
           return this.value instanceof SampledData;
         }
 
         /**
          * @return {@link #value} (The information determined as a result of making the observation, if the information has a simple value.)
          */
-        public Attachment getValueAttachment() throws Exception { 
+        public Attachment getValueAttachment() throws FHIRException { 
           if (!(this.value instanceof Attachment))
-            throw new Exception("Type mismatch: the type Attachment was expected, but "+this.value.getClass().getName()+" was encountered");
+            throw new FHIRException("Type mismatch: the type Attachment was expected, but "+this.value.getClass().getName()+" was encountered");
           return (Attachment) this.value;
         }
 
-        public boolean hasValueAttachment() throws Exception { 
+        public boolean hasValueAttachment() { 
           return this.value instanceof Attachment;
         }
 
         /**
          * @return {@link #value} (The information determined as a result of making the observation, if the information has a simple value.)
          */
-        public TimeType getValueTimeType() throws Exception { 
+        public TimeType getValueTimeType() throws FHIRException { 
           if (!(this.value instanceof TimeType))
-            throw new Exception("Type mismatch: the type TimeType was expected, but "+this.value.getClass().getName()+" was encountered");
+            throw new FHIRException("Type mismatch: the type TimeType was expected, but "+this.value.getClass().getName()+" was encountered");
           return (TimeType) this.value;
         }
 
-        public boolean hasValueTimeType() throws Exception { 
+        public boolean hasValueTimeType() { 
           return this.value instanceof TimeType;
         }
 
         /**
          * @return {@link #value} (The information determined as a result of making the observation, if the information has a simple value.)
          */
-        public DateTimeType getValueDateTimeType() throws Exception { 
+        public DateTimeType getValueDateTimeType() throws FHIRException { 
           if (!(this.value instanceof DateTimeType))
-            throw new Exception("Type mismatch: the type DateTimeType was expected, but "+this.value.getClass().getName()+" was encountered");
+            throw new FHIRException("Type mismatch: the type DateTimeType was expected, but "+this.value.getClass().getName()+" was encountered");
           return (DateTimeType) this.value;
         }
 
-        public boolean hasValueDateTimeType() throws Exception { 
+        public boolean hasValueDateTimeType() { 
           return this.value instanceof DateTimeType;
         }
 
         /**
          * @return {@link #value} (The information determined as a result of making the observation, if the information has a simple value.)
          */
-        public Period getValuePeriod() throws Exception { 
+        public Period getValuePeriod() throws FHIRException { 
           if (!(this.value instanceof Period))
-            throw new Exception("Type mismatch: the type Period was expected, but "+this.value.getClass().getName()+" was encountered");
+            throw new FHIRException("Type mismatch: the type Period was expected, but "+this.value.getClass().getName()+" was encountered");
           return (Period) this.value;
         }
 
-        public boolean hasValuePeriod() throws Exception { 
+        public boolean hasValuePeriod() { 
           return this.value instanceof Period;
         }
 
@@ -1017,6 +1128,77 @@ public class Observation extends DomainResource {
           childrenList.add(new Property("referenceRange", "@Observation.referenceRange", "Guidance on how to interpret the value by comparison to a normal or recommended range.", 0, java.lang.Integer.MAX_VALUE, referenceRange));
         }
 
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("code"))
+          this.code = castToCodeableConcept(value); // CodeableConcept
+        else if (name.equals("value[x]"))
+          this.value = (Type) value; // Type
+        else if (name.equals("dataAbsentReason"))
+          this.dataAbsentReason = castToCodeableConcept(value); // CodeableConcept
+        else if (name.equals("referenceRange"))
+          this.getReferenceRange().add((ObservationReferenceRangeComponent) value);
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("code")) {
+          this.code = new CodeableConcept();
+          return this.code;
+        }
+        else if (name.equals("valueQuantity")) {
+          this.value = new Quantity();
+          return this.value;
+        }
+        else if (name.equals("valueCodeableConcept")) {
+          this.value = new CodeableConcept();
+          return this.value;
+        }
+        else if (name.equals("valueString")) {
+          this.value = new StringType();
+          return this.value;
+        }
+        else if (name.equals("valueRange")) {
+          this.value = new Range();
+          return this.value;
+        }
+        else if (name.equals("valueRatio")) {
+          this.value = new Ratio();
+          return this.value;
+        }
+        else if (name.equals("valueSampledData")) {
+          this.value = new SampledData();
+          return this.value;
+        }
+        else if (name.equals("valueAttachment")) {
+          this.value = new Attachment();
+          return this.value;
+        }
+        else if (name.equals("valueTime")) {
+          this.value = new TimeType();
+          return this.value;
+        }
+        else if (name.equals("valueDateTime")) {
+          this.value = new DateTimeType();
+          return this.value;
+        }
+        else if (name.equals("valuePeriod")) {
+          this.value = new Period();
+          return this.value;
+        }
+        else if (name.equals("dataAbsentReason")) {
+          this.dataAbsentReason = new CodeableConcept();
+          return this.dataAbsentReason;
+        }
+        else if (name.equals("referenceRange")) {
+          return addReferenceRange();
+        }
+        else
+          return super.addChild(name);
+      }
+
       public ObservationComponentComponent copy() {
         ObservationComponentComponent dst = new ObservationComponentComponent();
         copyValues(dst);
@@ -1057,6 +1239,11 @@ public class Observation extends DomainResource {
            && (dataAbsentReason == null || dataAbsentReason.isEmpty()) && (referenceRange == null || referenceRange.isEmpty())
           ;
       }
+
+  public String fhirType() {
+    return "Observation.component";
+
+  }
 
   }
 
@@ -1469,26 +1656,26 @@ public class Observation extends DomainResource {
     /**
      * @return {@link #effective} (The time or time-period the observed value is asserted as being true. For biological subjects - e.g. human patients - this is usually called the "physiologically relevant time". This is usually either the time of the procedure or of specimen collection, but very often the source of the date/time is not known, only the date/time itself.)
      */
-    public DateTimeType getEffectiveDateTimeType() throws Exception { 
+    public DateTimeType getEffectiveDateTimeType() throws FHIRException { 
       if (!(this.effective instanceof DateTimeType))
-        throw new Exception("Type mismatch: the type DateTimeType was expected, but "+this.effective.getClass().getName()+" was encountered");
+        throw new FHIRException("Type mismatch: the type DateTimeType was expected, but "+this.effective.getClass().getName()+" was encountered");
       return (DateTimeType) this.effective;
     }
 
-    public boolean hasEffectiveDateTimeType() throws Exception { 
+    public boolean hasEffectiveDateTimeType() { 
       return this.effective instanceof DateTimeType;
     }
 
     /**
      * @return {@link #effective} (The time or time-period the observed value is asserted as being true. For biological subjects - e.g. human patients - this is usually called the "physiologically relevant time". This is usually either the time of the procedure or of specimen collection, but very often the source of the date/time is not known, only the date/time itself.)
      */
-    public Period getEffectivePeriod() throws Exception { 
+    public Period getEffectivePeriod() throws FHIRException { 
       if (!(this.effective instanceof Period))
-        throw new Exception("Type mismatch: the type Period was expected, but "+this.effective.getClass().getName()+" was encountered");
+        throw new FHIRException("Type mismatch: the type Period was expected, but "+this.effective.getClass().getName()+" was encountered");
       return (Period) this.effective;
     }
 
-    public boolean hasEffectivePeriod() throws Exception { 
+    public boolean hasEffectivePeriod() { 
       return this.effective instanceof Period;
     }
 
@@ -1612,130 +1799,130 @@ public class Observation extends DomainResource {
     /**
      * @return {@link #value} (The information determined as a result of making the observation, if the information has a simple value.)
      */
-    public Quantity getValueQuantity() throws Exception { 
+    public Quantity getValueQuantity() throws FHIRException { 
       if (!(this.value instanceof Quantity))
-        throw new Exception("Type mismatch: the type Quantity was expected, but "+this.value.getClass().getName()+" was encountered");
+        throw new FHIRException("Type mismatch: the type Quantity was expected, but "+this.value.getClass().getName()+" was encountered");
       return (Quantity) this.value;
     }
 
-    public boolean hasValueQuantity() throws Exception { 
+    public boolean hasValueQuantity() { 
       return this.value instanceof Quantity;
     }
 
     /**
      * @return {@link #value} (The information determined as a result of making the observation, if the information has a simple value.)
      */
-    public CodeableConcept getValueCodeableConcept() throws Exception { 
+    public CodeableConcept getValueCodeableConcept() throws FHIRException { 
       if (!(this.value instanceof CodeableConcept))
-        throw new Exception("Type mismatch: the type CodeableConcept was expected, but "+this.value.getClass().getName()+" was encountered");
+        throw new FHIRException("Type mismatch: the type CodeableConcept was expected, but "+this.value.getClass().getName()+" was encountered");
       return (CodeableConcept) this.value;
     }
 
-    public boolean hasValueCodeableConcept() throws Exception { 
+    public boolean hasValueCodeableConcept() { 
       return this.value instanceof CodeableConcept;
     }
 
     /**
      * @return {@link #value} (The information determined as a result of making the observation, if the information has a simple value.)
      */
-    public StringType getValueStringType() throws Exception { 
+    public StringType getValueStringType() throws FHIRException { 
       if (!(this.value instanceof StringType))
-        throw new Exception("Type mismatch: the type StringType was expected, but "+this.value.getClass().getName()+" was encountered");
+        throw new FHIRException("Type mismatch: the type StringType was expected, but "+this.value.getClass().getName()+" was encountered");
       return (StringType) this.value;
     }
 
-    public boolean hasValueStringType() throws Exception { 
+    public boolean hasValueStringType() { 
       return this.value instanceof StringType;
     }
 
     /**
      * @return {@link #value} (The information determined as a result of making the observation, if the information has a simple value.)
      */
-    public Range getValueRange() throws Exception { 
+    public Range getValueRange() throws FHIRException { 
       if (!(this.value instanceof Range))
-        throw new Exception("Type mismatch: the type Range was expected, but "+this.value.getClass().getName()+" was encountered");
+        throw new FHIRException("Type mismatch: the type Range was expected, but "+this.value.getClass().getName()+" was encountered");
       return (Range) this.value;
     }
 
-    public boolean hasValueRange() throws Exception { 
+    public boolean hasValueRange() { 
       return this.value instanceof Range;
     }
 
     /**
      * @return {@link #value} (The information determined as a result of making the observation, if the information has a simple value.)
      */
-    public Ratio getValueRatio() throws Exception { 
+    public Ratio getValueRatio() throws FHIRException { 
       if (!(this.value instanceof Ratio))
-        throw new Exception("Type mismatch: the type Ratio was expected, but "+this.value.getClass().getName()+" was encountered");
+        throw new FHIRException("Type mismatch: the type Ratio was expected, but "+this.value.getClass().getName()+" was encountered");
       return (Ratio) this.value;
     }
 
-    public boolean hasValueRatio() throws Exception { 
+    public boolean hasValueRatio() { 
       return this.value instanceof Ratio;
     }
 
     /**
      * @return {@link #value} (The information determined as a result of making the observation, if the information has a simple value.)
      */
-    public SampledData getValueSampledData() throws Exception { 
+    public SampledData getValueSampledData() throws FHIRException { 
       if (!(this.value instanceof SampledData))
-        throw new Exception("Type mismatch: the type SampledData was expected, but "+this.value.getClass().getName()+" was encountered");
+        throw new FHIRException("Type mismatch: the type SampledData was expected, but "+this.value.getClass().getName()+" was encountered");
       return (SampledData) this.value;
     }
 
-    public boolean hasValueSampledData() throws Exception { 
+    public boolean hasValueSampledData() { 
       return this.value instanceof SampledData;
     }
 
     /**
      * @return {@link #value} (The information determined as a result of making the observation, if the information has a simple value.)
      */
-    public Attachment getValueAttachment() throws Exception { 
+    public Attachment getValueAttachment() throws FHIRException { 
       if (!(this.value instanceof Attachment))
-        throw new Exception("Type mismatch: the type Attachment was expected, but "+this.value.getClass().getName()+" was encountered");
+        throw new FHIRException("Type mismatch: the type Attachment was expected, but "+this.value.getClass().getName()+" was encountered");
       return (Attachment) this.value;
     }
 
-    public boolean hasValueAttachment() throws Exception { 
+    public boolean hasValueAttachment() { 
       return this.value instanceof Attachment;
     }
 
     /**
      * @return {@link #value} (The information determined as a result of making the observation, if the information has a simple value.)
      */
-    public TimeType getValueTimeType() throws Exception { 
+    public TimeType getValueTimeType() throws FHIRException { 
       if (!(this.value instanceof TimeType))
-        throw new Exception("Type mismatch: the type TimeType was expected, but "+this.value.getClass().getName()+" was encountered");
+        throw new FHIRException("Type mismatch: the type TimeType was expected, but "+this.value.getClass().getName()+" was encountered");
       return (TimeType) this.value;
     }
 
-    public boolean hasValueTimeType() throws Exception { 
+    public boolean hasValueTimeType() { 
       return this.value instanceof TimeType;
     }
 
     /**
      * @return {@link #value} (The information determined as a result of making the observation, if the information has a simple value.)
      */
-    public DateTimeType getValueDateTimeType() throws Exception { 
+    public DateTimeType getValueDateTimeType() throws FHIRException { 
       if (!(this.value instanceof DateTimeType))
-        throw new Exception("Type mismatch: the type DateTimeType was expected, but "+this.value.getClass().getName()+" was encountered");
+        throw new FHIRException("Type mismatch: the type DateTimeType was expected, but "+this.value.getClass().getName()+" was encountered");
       return (DateTimeType) this.value;
     }
 
-    public boolean hasValueDateTimeType() throws Exception { 
+    public boolean hasValueDateTimeType() { 
       return this.value instanceof DateTimeType;
     }
 
     /**
      * @return {@link #value} (The information determined as a result of making the observation, if the information has a simple value.)
      */
-    public Period getValuePeriod() throws Exception { 
+    public Period getValuePeriod() throws FHIRException { 
       if (!(this.value instanceof Period))
-        throw new Exception("Type mismatch: the type Period was expected, but "+this.value.getClass().getName()+" was encountered");
+        throw new FHIRException("Type mismatch: the type Period was expected, but "+this.value.getClass().getName()+" was encountered");
       return (Period) this.value;
     }
 
-    public boolean hasValuePeriod() throws Exception { 
+    public boolean hasValuePeriod() { 
       return this.value instanceof Period;
     }
 
@@ -2123,6 +2310,175 @@ public class Observation extends DomainResource {
         childrenList.add(new Property("component", "", "Some observations have multiple component observations.  These component observations are expressed as separate code value pairs that share the same attributes.  Examples include systolic and diastolic component observations for blood pressure measurement and multiple component observations for genetics observations.", 0, java.lang.Integer.MAX_VALUE, component));
       }
 
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("identifier"))
+          this.getIdentifier().add(castToIdentifier(value));
+        else if (name.equals("status"))
+          this.status = new ObservationStatusEnumFactory().fromType(value); // Enumeration<ObservationStatus>
+        else if (name.equals("category"))
+          this.category = castToCodeableConcept(value); // CodeableConcept
+        else if (name.equals("code"))
+          this.code = castToCodeableConcept(value); // CodeableConcept
+        else if (name.equals("subject"))
+          this.subject = castToReference(value); // Reference
+        else if (name.equals("encounter"))
+          this.encounter = castToReference(value); // Reference
+        else if (name.equals("effective[x]"))
+          this.effective = (Type) value; // Type
+        else if (name.equals("issued"))
+          this.issued = castToInstant(value); // InstantType
+        else if (name.equals("performer"))
+          this.getPerformer().add(castToReference(value));
+        else if (name.equals("value[x]"))
+          this.value = (Type) value; // Type
+        else if (name.equals("dataAbsentReason"))
+          this.dataAbsentReason = castToCodeableConcept(value); // CodeableConcept
+        else if (name.equals("interpretation"))
+          this.interpretation = castToCodeableConcept(value); // CodeableConcept
+        else if (name.equals("comments"))
+          this.comments = castToString(value); // StringType
+        else if (name.equals("bodySite"))
+          this.bodySite = castToCodeableConcept(value); // CodeableConcept
+        else if (name.equals("method"))
+          this.method = castToCodeableConcept(value); // CodeableConcept
+        else if (name.equals("specimen"))
+          this.specimen = castToReference(value); // Reference
+        else if (name.equals("device"))
+          this.device = castToReference(value); // Reference
+        else if (name.equals("referenceRange"))
+          this.getReferenceRange().add((ObservationReferenceRangeComponent) value);
+        else if (name.equals("related"))
+          this.getRelated().add((ObservationRelatedComponent) value);
+        else if (name.equals("component"))
+          this.getComponent().add((ObservationComponentComponent) value);
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("identifier")) {
+          return addIdentifier();
+        }
+        else if (name.equals("status")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Observation.status");
+        }
+        else if (name.equals("category")) {
+          this.category = new CodeableConcept();
+          return this.category;
+        }
+        else if (name.equals("code")) {
+          this.code = new CodeableConcept();
+          return this.code;
+        }
+        else if (name.equals("subject")) {
+          this.subject = new Reference();
+          return this.subject;
+        }
+        else if (name.equals("encounter")) {
+          this.encounter = new Reference();
+          return this.encounter;
+        }
+        else if (name.equals("effectiveDateTime")) {
+          this.effective = new DateTimeType();
+          return this.effective;
+        }
+        else if (name.equals("effectivePeriod")) {
+          this.effective = new Period();
+          return this.effective;
+        }
+        else if (name.equals("issued")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Observation.issued");
+        }
+        else if (name.equals("performer")) {
+          return addPerformer();
+        }
+        else if (name.equals("valueQuantity")) {
+          this.value = new Quantity();
+          return this.value;
+        }
+        else if (name.equals("valueCodeableConcept")) {
+          this.value = new CodeableConcept();
+          return this.value;
+        }
+        else if (name.equals("valueString")) {
+          this.value = new StringType();
+          return this.value;
+        }
+        else if (name.equals("valueRange")) {
+          this.value = new Range();
+          return this.value;
+        }
+        else if (name.equals("valueRatio")) {
+          this.value = new Ratio();
+          return this.value;
+        }
+        else if (name.equals("valueSampledData")) {
+          this.value = new SampledData();
+          return this.value;
+        }
+        else if (name.equals("valueAttachment")) {
+          this.value = new Attachment();
+          return this.value;
+        }
+        else if (name.equals("valueTime")) {
+          this.value = new TimeType();
+          return this.value;
+        }
+        else if (name.equals("valueDateTime")) {
+          this.value = new DateTimeType();
+          return this.value;
+        }
+        else if (name.equals("valuePeriod")) {
+          this.value = new Period();
+          return this.value;
+        }
+        else if (name.equals("dataAbsentReason")) {
+          this.dataAbsentReason = new CodeableConcept();
+          return this.dataAbsentReason;
+        }
+        else if (name.equals("interpretation")) {
+          this.interpretation = new CodeableConcept();
+          return this.interpretation;
+        }
+        else if (name.equals("comments")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Observation.comments");
+        }
+        else if (name.equals("bodySite")) {
+          this.bodySite = new CodeableConcept();
+          return this.bodySite;
+        }
+        else if (name.equals("method")) {
+          this.method = new CodeableConcept();
+          return this.method;
+        }
+        else if (name.equals("specimen")) {
+          this.specimen = new Reference();
+          return this.specimen;
+        }
+        else if (name.equals("device")) {
+          this.device = new Reference();
+          return this.device;
+        }
+        else if (name.equals("referenceRange")) {
+          return addReferenceRange();
+        }
+        else if (name.equals("related")) {
+          return addRelated();
+        }
+        else if (name.equals("component")) {
+          return addComponent();
+        }
+        else
+          return super.addChild(name);
+      }
+
+  public String fhirType() {
+    return "Observation";
+
+  }
+
       public Observation copy() {
         Observation dst = new Observation();
         copyValues(dst);
@@ -2227,9 +2583,9 @@ public class Observation extends DomainResource {
   public static final String SP_COMPONENTDATAABSENTREASON = "component-data-absent-reason";
   @SearchParamDefinition(name="value-concept", path="Observation.valueCodeableConcept", description="The value of the observation, if the value is a CodeableConcept", type="token" )
   public static final String SP_VALUECONCEPT = "value-concept";
-  @SearchParamDefinition(name="value-date", path="Observation.valueDateTime|Observation.valuePeriod", description="The value of the observation, if the value is a date or period of time", type="date" )
+  @SearchParamDefinition(name="value-date", path="Observation.valueDateTime | Observation.valuePeriod", description="The value of the observation, if the value is a date or period of time", type="date" )
   public static final String SP_VALUEDATE = "value-date";
-  @SearchParamDefinition(name="related", path="", description="Related Observations - search on related-type and related-target together", type="composite" )
+  @SearchParamDefinition(name="related", path="null", description="Related Observations - search on related-type and related-target together", type="composite" )
   public static final String SP_RELATED = "related";
   @SearchParamDefinition(name="patient", path="Observation.subject", description="The subject that the observation is about (if patient)", type="reference" )
   public static final String SP_PATIENT = "patient";
@@ -2241,9 +2597,9 @@ public class Observation extends DomainResource {
   public static final String SP_VALUESTRING = "value-string";
   @SearchParamDefinition(name="identifier", path="Observation.identifier", description="The unique id for a particular observation", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
-  @SearchParamDefinition(name="component-code-value-[x]", path="", description="Both component code and one of the component value parameters", type="composite" )
+  @SearchParamDefinition(name="component-code-value-[x]", path="null", description="Both component code and one of the component value parameters", type="composite" )
   public static final String SP_COMPONENTCODEVALUEX = "component-code-value-[x]";
-  @SearchParamDefinition(name="code-value-[x]", path="", description="Both code and one of the value parameters", type="composite" )
+  @SearchParamDefinition(name="code-value-[x]", path="null", description="Both code and one of the value parameters", type="composite" )
   public static final String SP_CODEVALUEX = "code-value-[x]";
   @SearchParamDefinition(name="performer", path="Observation.performer", description="Who performed the observation", type="reference" )
   public static final String SP_PERFORMER = "performer";

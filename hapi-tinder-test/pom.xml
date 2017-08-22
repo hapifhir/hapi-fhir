@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-fhir</artifactId>
-		<version>2.6-SNAPSHOT</version>
+		<version>3.0.0-SNAPSHOT</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
@@ -17,11 +17,6 @@
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-base</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>ca.uhn.hapi.fhir</groupId>
-			<artifactId>hapi-fhir-structures-dstu</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
@@ -65,7 +60,6 @@
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-			<version>4.11</version>
 			<scope>test</scope>
 		</dependency>
 
@@ -87,11 +81,6 @@
 					<dependency>
 						<groupId>ca.uhn.hapi.fhir</groupId>
 						<artifactId>hapi-fhir-base</artifactId>
-						<version>${project.version}</version>
-					</dependency>
-					<dependency>
-						<groupId>ca.uhn.hapi.fhir</groupId>
-						<artifactId>hapi-fhir-structures-dstu</artifactId>
 						<version>${project.version}</version>
 					</dependency>
 					<dependency>
@@ -132,6 +121,7 @@
 					</dependency>
 				</dependencies>
 				<executions>
+				<!-- 
 					<execution>
 						<id>custom-structs</id>
 						<goals>
@@ -161,6 +151,7 @@
 							</resourceValueSetFiles>
 						</configuration>
 					</execution>
+				-->
 					<execution>
 						<id>generalstructs</id>
 						<goals>
@@ -168,7 +159,7 @@
 						</goals>
 						<configuration>
 							<package>ca.uhn.test.realstructs</package>
-							<version>dstu</version>
+							<version>dstu2</version>
 							<baseResourceNames>
 								<baseResourceName>patient</baseResourceName>
 								<baseResourceName>valueset</baseResourceName>
@@ -177,7 +168,7 @@
 								<baseResourceName>location</baseResourceName>
 								<baseResourceName>practitioner</baseResourceName>
 								<baseResourceName>list</baseResourceName>
-								<baseResourceName>securityevent</baseResourceName>
+								<baseResourceName>auditevent</baseResourceName>
 							</baseResourceNames>
 							<buildDatatypes>true</buildDatatypes>
 						</configuration>
@@ -188,7 +179,7 @@
 							<goal>generate-multi-files</goal>
 						</goals>
 						<configuration>
-							<version>dstu</version>
+							<version>dstu2</version>
 							<generateResources>true</generateResources>
 							<templateFile>${project.basedir}/src/test/resources/templates/resource_test.vm</templateFile>
 							<targetSourceDirectory>${project.build.directory}/generated-sources/tinder</targetSourceDirectory>
@@ -227,13 +218,13 @@
 							<goal>generate-single-file</goal>
 						</goals>
 						<configuration>
-							<version>dstu</version>
+							<version>dstu2</version>
 							<generateResources>true</generateResources>
 							<templateFile>${project.basedir}/src/test/resources/templates/resource_test_beans_java.vm</templateFile>
 							<targetSourceDirectory>${project.build.directory}/generated-sources/tinder</targetSourceDirectory>
 							<targetPackage>ca.uhn.test.generic.single</targetPackage>
 							<packageBase>ca.uhn.test.generic.multi</packageBase>
-							<targetFile>TestConfigDstu1.java</targetFile>
+							<targetFile>TestConfigDstu2.java</targetFile>
 							<includeResources>
 								<includeResource>patient</includeResource>
 								<includeResource>organization</includeResource>
@@ -290,11 +281,6 @@
 					<dependency>
 						<groupId>ca.uhn.hapi.fhir</groupId>
 						<artifactId>hapi-fhir-base</artifactId>
-						<version>${project.version}</version>
-					</dependency>
-					<dependency>
-						<groupId>ca.uhn.hapi.fhir</groupId>
-						<artifactId>hapi-fhir-structures-dstu</artifactId>
 						<version>${project.version}</version>
 					</dependency>
 					<dependency>

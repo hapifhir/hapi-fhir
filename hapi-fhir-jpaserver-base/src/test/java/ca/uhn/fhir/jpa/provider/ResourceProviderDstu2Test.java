@@ -1,100 +1,42 @@
 package ca.uhn.fhir.jpa.provider;
 
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.containsInRelativeOrder;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.emptyString;
-import static org.hamcrest.Matchers.greaterThan;
-import static org.hamcrest.Matchers.hasItems;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.startsWith;
-import static org.hamcrest.Matchers.stringContainsInOrder;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.InetSocketAddress;
-import java.net.Socket;
-import java.net.SocketTimeoutException;
+import java.io.*;
+import java.net.*;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpDelete;
-import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpPut;
-import org.apache.http.entity.ByteArrayEntity;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.StringEntity;
+import org.apache.http.client.methods.*;
+import org.apache.http.entity.*;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.*;
 import org.junit.Test;
 import org.springframework.test.util.AopTestUtils;
 
+import com.google.common.base.Charsets;
+
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
 import ca.uhn.fhir.model.api.*;
-import ca.uhn.fhir.model.api.Bundle;
-import ca.uhn.fhir.model.api.BundleEntry;
-import ca.uhn.fhir.model.api.ExtensionDt;
-import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
-import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
-import ca.uhn.fhir.model.dstu2.composite.CodingDt;
-import ca.uhn.fhir.model.dstu2.composite.MetaDt;
-import ca.uhn.fhir.model.dstu2.composite.PeriodDt;
-import ca.uhn.fhir.model.dstu2.composite.ResourceReferenceDt;
+import ca.uhn.fhir.model.dstu2.composite.*;
 import ca.uhn.fhir.model.dstu2.resource.*;
 import ca.uhn.fhir.model.dstu2.resource.Bundle.Entry;
-import ca.uhn.fhir.model.dstu2.resource.Questionnaire.GroupQuestion;
-import ca.uhn.fhir.model.dstu2.valueset.AnswerFormatEnum;
-import ca.uhn.fhir.model.dstu2.valueset.EncounterClassEnum;
-import ca.uhn.fhir.model.dstu2.valueset.EncounterStateEnum;
-import ca.uhn.fhir.model.dstu2.valueset.HTTPVerbEnum;
-import ca.uhn.fhir.model.dstu2.valueset.SearchEntryModeEnum;
-import ca.uhn.fhir.model.dstu2.valueset.SubscriptionChannelTypeEnum;
-import ca.uhn.fhir.model.dstu2.valueset.SubscriptionStatusEnum;
-import ca.uhn.fhir.model.primitive.DateDt;
-import ca.uhn.fhir.model.primitive.DateTimeDt;
-import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.model.primitive.InstantDt;
-import ca.uhn.fhir.model.primitive.StringDt;
-import ca.uhn.fhir.model.primitive.UnsignedIntDt;
-import ca.uhn.fhir.model.primitive.UriDt;
-import ca.uhn.fhir.model.valueset.BundleEntrySearchModeEnum;
+import ca.uhn.fhir.model.dstu2.valueset.*;
+import ca.uhn.fhir.model.primitive.*;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
-import ca.uhn.fhir.rest.api.MethodOutcome;
-import ca.uhn.fhir.rest.api.SummaryEnum;
-import ca.uhn.fhir.rest.client.IGenericClient;
+import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.rest.api.*;
+import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.param.*;
-import ca.uhn.fhir.rest.server.Constants;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
-import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
-import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-import ca.uhn.fhir.util.TestUtil;
-import ca.uhn.fhir.util.UrlUtil;
+import ca.uhn.fhir.rest.server.exceptions.*;
+import ca.uhn.fhir.util.*;
 
 public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 
@@ -509,13 +451,25 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		}
 		ourClient.transaction().withResources(resources).prettyPrint().encodedXml().execute();
 
-		Bundle found = ourClient.search().forResource(Organization.class).where(Organization.NAME.matches().value("rpdstu2_testCountParam_01")).count(10).execute();
-		assertEquals(100, found.getTotalResults().getValue().intValue());
-		assertEquals(10, found.getEntries().size());
+		Bundle found = ourClient
+				.search()
+				.forResource(Organization.class)
+				.where(Organization.NAME.matches().value("rpdstu2_testCountParam_01"))
+				.count(10)
+				.returnBundle(Bundle.class)
+				.execute();
+		assertEquals(100, found.getTotalElement().getValue().intValue());
+		assertEquals(10, found.getEntry().size());
 
-		found = ourClient.search().forResource(Organization.class).where(Organization.NAME.matches().value("rpdstu2_testCountParam_01")).count(999).execute();
-		assertEquals(100, found.getTotalResults().getValue().intValue());
-		assertEquals(50, found.getEntries().size());
+		found = ourClient
+				.search()
+				.forResource(Organization.class)
+				.where(Organization.NAME.matches().value("rpdstu2_testCountParam_01"))
+				.count(999)
+				.returnBundle(Bundle.class)
+				.execute();
+		assertEquals(100, found.getTotalElement().getValue().intValue());
+		assertEquals(50, found.getEntry().size());
 
 	}
 
@@ -746,18 +700,17 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		location.setPeriod(new PeriodDt().setStartWithSecondsPrecision(new Date()).setEndWithSecondsPrecision(new Date()));
 		IIdType e1id = ourClient.create().resource(e1).execute().getId();
 
-		//@formatter:off
 		Bundle res = ourClient.search()
 			.forResource(Encounter.class)
 			.where(Encounter.IDENTIFIER.exactly().systemAndCode("urn:foo", "testDeepChainingE1"))
 			.include(Encounter.INCLUDE_LOCATION.asRecursive())
 			.include(Location.INCLUDE_PARTOF.asRecursive())
+			.returnBundle(Bundle.class)
 			.execute();
-		//@formatter:on
 
-		assertEquals(3, res.size());
-		assertEquals(1, res.getResources(Encounter.class).size());
-		assertEquals(e1id.toUnqualifiedVersionless(), res.getResources(Encounter.class).get(0).getId().toUnqualifiedVersionless());
+		assertEquals(3, res.getEntry().size());
+		assertEquals(1, BundleUtil.toListOfResourcesOfType(myFhirCtx, res, Encounter.class).size());
+		assertEquals(e1id.toUnqualifiedVersionless(), BundleUtil.toListOfResourcesOfType(myFhirCtx, res, Encounter.class).get(0).getIdElement().toUnqualifiedVersionless());
 
 	}
 
@@ -947,14 +900,26 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 	public void testDiagnosticOrderResources() throws Exception {
 		IGenericClient client = ourClient;
 
-		int initialSize = client.search().forResource(DiagnosticOrder.class).execute().size();
+		int initialSize = client
+				.search()
+				.forResource(DiagnosticOrder.class)
+				.returnBundle(Bundle.class)
+				.execute()
+				.getEntry()
+				.size();
 
 		DiagnosticOrder res = new DiagnosticOrder();
 		res.addIdentifier().setSystem("urn:foo").setValue("123");
 
 		client.create().resource(res).execute();
 
-		int newSize = client.search().forResource(DiagnosticOrder.class).execute().size();
+		int newSize = client
+				.search()
+				.forResource(DiagnosticOrder.class)
+				.returnBundle(Bundle.class)
+				.execute()
+				.getEntry()
+				.size();
 
 		assertEquals(1, newSize - initialSize);
 
@@ -970,12 +935,24 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 
 		IGenericClient client = ourClient;
 
-		int initialSize = client.search().forResource(DocumentManifest.class).execute().size();
+		int initialSize = client
+				.search()
+				.forResource(DocumentManifest.class)
+				.returnBundle(Bundle.class)
+				.execute()
+				.getEntry()
+				.size();
 
 		String resBody = IOUtils.toString(ResourceProviderDstu2Test.class.getResource("/documentmanifest.json"), StandardCharsets.UTF_8);
 		client.create().resource(resBody).execute();
 
-		int newSize = client.search().forResource(DocumentManifest.class).execute().size();
+		int newSize = client
+				.search()
+				.forResource(DocumentManifest.class)
+				.returnBundle(Bundle.class)
+				.execute()
+				.getEntry()
+				.size();
 
 		assertEquals(1, newSize - initialSize);
 
@@ -988,12 +965,24 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 	public void testDocumentReferenceResources() throws Exception {
 		IGenericClient client = ourClient;
 
-		int initialSize = client.search().forResource(DocumentReference.class).execute().size();
+		int initialSize = client
+				.search()
+				.forResource(DocumentReference.class)
+				.returnBundle(Bundle.class)
+				.execute()
+				.getEntry()
+				.size();
 
-		String resBody = IOUtils.toString(ResourceProviderDstu2Test.class.getResource("/documentreference.json"));
+		String resBody = IOUtils.toString(ResourceProviderDstu2Test.class.getResource("/documentreference.json"), Charsets.UTF_8);
 		client.create().resource(resBody).execute();
 
-		int newSize = client.search().forResource(DocumentReference.class).execute().size();
+		int newSize = client
+				.search()
+				.forResource(DocumentReference.class)
+				.returnBundle(Bundle.class)
+				.execute()
+				.getEntry()
+				.size();
 
 		assertEquals(1, newSize - initialSize);
 
@@ -1365,7 +1354,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 			String output = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			IOUtils.closeQuietly(response.getEntity().getContent());
 			ourLog.info(output);
-			List<IdDt> ids = toIdListUnqualifiedVersionless(myFhirCtx.newXmlParser().parseBundle(output));
+			List<IdDt> ids = toIdListUnqualifiedVersionless(myFhirCtx.newXmlParser().parseResource(Bundle.class, output));
 			ourLog.info(ids.toString());
 			assertThat(ids, containsInAnyOrder(pId, cId));
 		} finally {
@@ -1380,7 +1369,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 			String output = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			IOUtils.closeQuietly(response.getEntity().getContent());
 			ourLog.info(output);
-			List<IdDt> ids = toIdListUnqualifiedVersionless(myFhirCtx.newXmlParser().parseBundle(output));
+			List<IdDt> ids = toIdListUnqualifiedVersionless(myFhirCtx.newXmlParser().parseResource(Bundle.class, output));
 			ourLog.info(ids.toString());
 			assertThat(ids, containsInAnyOrder(pId, cId));
 		} finally {
@@ -1475,12 +1464,24 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 	public void testImagingStudyResources() throws Exception {
 		IGenericClient client = ourClient;
 
-		int initialSize = client.search().forResource(ImagingStudy.class).execute().size();
+		int initialSize = client
+				.search()
+				.forResource(ImagingStudy.class)
+				.returnBundle(Bundle.class)
+				.execute()
+				.getEntry()
+				.size();
 
 		String resBody = IOUtils.toString(ResourceProviderDstu2Test.class.getResource("/imagingstudy.json"), StandardCharsets.UTF_8);
 		client.create().resource(resBody).execute();
 
-		int newSize = client.search().forResource(ImagingStudy.class).execute().size();
+		int newSize = client
+				.search()
+				.forResource(ImagingStudy.class)
+				.returnBundle(Bundle.class)
+				.execute()
+				.getEntry()
+				.size();
 
 		assertEquals(1, newSize - initialSize);
 
@@ -1582,15 +1583,24 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		pat = new Patient();
 		pat.addIdentifier().setSystem("urn:system").setValue("testReadAllInstancesOfType_02");
 		ourClient.create().resource(pat).prettyPrint().encodedXml().execute().getId();
-
 		{
-			Bundle returned = ourClient.search().forResource(Patient.class).encodedXml().execute();
-			assertThat(returned.size(), greaterThan(1));
-			assertEquals(BundleTypeEnum.SEARCHSET, returned.getType().getValueAsEnum());
+			Bundle returned = ourClient
+					.search()
+					.forResource(Patient.class)
+					.returnBundle(Bundle.class)
+					.encodedXml()
+					.execute();
+			assertThat(returned.getEntry().size(), greaterThan(1));
+			assertEquals(ca.uhn.fhir.model.dstu2.valueset.BundleTypeEnum.SEARCH_RESULTS, returned.getTypeElement().getValueAsEnum());
 		}
 		{
-			Bundle returned = ourClient.search().forResource(Patient.class).encodedJson().execute();
-			assertThat(returned.size(), greaterThan(1));
+			Bundle returned = ourClient
+					.search()
+					.forResource(Patient.class)
+					.encodedJson()
+					.returnBundle(Bundle.class)
+					.execute();
+			assertThat(returned.getEntry().size(), greaterThan(1));
 		}
 	}
 
@@ -1636,8 +1646,14 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		assertEquals(1, actual.getContained().getContainedResources().size());
 		assertThat(actual.getText().getDiv().getValueAsString(), containsString("<td>Identifier</td><td>testSaveAndRetrieveWithContained01</td>"));
 
-		Bundle b = ourClient.search().forResource("Patient").where(Patient.IDENTIFIER.exactly().systemAndCode("urn:system:rpdstu2", "testSaveAndRetrieveWithContained01")).prettyPrint().execute();
-		assertEquals(1, b.size());
+		Bundle b = ourClient
+				.search()
+				.forResource("Patient")
+				.where(Patient.IDENTIFIER.exactly().systemAndCode("urn:system:rpdstu2", "testSaveAndRetrieveWithContained01"))
+				.prettyPrint()
+				.returnBundle(Bundle.class)
+				.execute();
+		assertEquals(1, b.getEntry().size());
 
 	}
 
@@ -1702,10 +1718,16 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		p1.addIdentifier().setValue("testSearchByIdentifierWithoutSystem01");
 		IdDt p1Id = (IdDt) ourClient.create().resource(p1).execute().getId();
 
-		Bundle actual = ourClient.search().forResource(Patient.class).where(Patient.IDENTIFIER.exactly().systemAndCode(null, "testSearchByIdentifierWithoutSystem01")).encodedJson().prettyPrint()
+		Bundle actual = ourClient
+				.search()
+				.forResource(Patient.class)
+				.where(Patient.IDENTIFIER.exactly().systemAndCode(null, "testSearchByIdentifierWithoutSystem01"))
+				.encodedJson()
+				.prettyPrint()
+				.returnBundle(Bundle.class)
 				.execute();
-		assertEquals(1, actual.size());
-		assertEquals(p1Id.getIdPart(), actual.getEntries().get(0).getResource().getId().getIdPart());
+		assertEquals(1, actual.getEntry().size());
+		assertEquals(p1Id.getIdPart(), actual.getEntry().get(0).getResource().getId().getIdPart());
 
 	}
 
@@ -1724,14 +1746,13 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 			id2 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
 		}
 
-		//@formatter:off
 		Bundle found = ourClient
 			.search()
 			.forResource(Patient.class)
 			.where(BaseResource.RES_ID.matches().values(id1.getIdPart(), id2.getIdPart()))
 			.and(BaseResource.RES_ID.matches().value(id1.getIdPart()))
+			.returnBundle(Bundle.class)
 			.execute();
-		//@formatter:on
 
 		assertThat(toIdListUnqualifiedVersionless(found), containsInAnyOrder(id1));
 	}
@@ -1749,23 +1770,26 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		p1.setManagingOrganization(new ResourceReferenceDt(o1id.toUnqualifiedVersionless()));
 		IdDt p1Id = (IdDt) ourClient.create().resource(p1).execute().getId();
 
-		//@formatter:off
 		Bundle actual = ourClient.search()
 				.forResource(Patient.class)
 				.where(Patient.ORGANIZATION.hasId(o1id.getIdPart()))
-				.encodedJson().prettyPrint().execute();
-		//@formatter:on
-		assertEquals(1, actual.size());
-		assertEquals(p1Id.getIdPart(), actual.getEntries().get(0).getResource().getId().getIdPart());
+				.encodedJson()
+				.prettyPrint()
+				.returnBundle(Bundle.class)
+				.execute();
+		assertEquals(1, actual.getEntry().size());
+		assertEquals(p1Id.getIdPart(), actual.getEntry().get(0).getResource().getId().getIdPart());
 
-		//@formatter:off
-		actual = ourClient.search()
+		actual = ourClient
+				.search()
 				.forResource(Patient.class)
 				.where(Patient.ORGANIZATION.hasId(o1id.getValue()))
-				.encodedJson().prettyPrint().execute();
-		//@formatter:on
-		assertEquals(1, actual.size());
-		assertEquals(p1Id.getIdPart(), actual.getEntries().get(0).getResource().getId().getIdPart());
+				.encodedJson()
+				.prettyPrint()
+				.returnBundle(Bundle.class)
+				.execute();
+		assertEquals(1, actual.getEntry().size());
+		assertEquals(p1Id.getIdPart(), actual.getEntry().get(0).getResource().getId().getIdPart());
 
 	}
 
@@ -1790,17 +1814,19 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		p2.setManagingOrganization(new ResourceReferenceDt(o2id.toUnqualifiedVersionless()));
 		IdDt p2Id = (IdDt) ourClient.create().resource(p2).execute().getId();
 
-		//@formatter:off
 		Bundle actual = ourClient.search()
 				.forResource(Patient.class)
 				.where(Patient.ORGANIZATION.hasAnyOfIds(Arrays.asList(o1id.getIdPart(), o2id.getIdPart())))
-				.encodedJson().prettyPrint().execute();
-		//@formatter:on
+				.encodedJson()
+				.prettyPrint()
+				.returnBundle(Bundle.class)
+				.execute();
+
 		Set<String> expectedIds = new HashSet<String>();
 		expectedIds.add(p1Id.getIdPart());
 		expectedIds.add(p2Id.getIdPart());
 		Set<String> actualIds = new HashSet<String>();
-		for (BundleEntry ele : actual.getEntries()) {
+		for (Entry ele : actual.getEntry()) {
 			actualIds.add(ele.getResource().getId().getIdPart());
 		}
 		assertEquals("Expects to retrieve the 2 patients which reference the two different organizations", expectedIds, actualIds);
@@ -1816,40 +1842,49 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		o2.setName("testSearchByResourceChainName02");
 		o2.getMeta().addProfile("http://profile1").addProfile("http://profile3");
 		IdDt o2id = (IdDt) ourClient.create().resource(o2).execute().getId().toUnqualifiedVersionless();
-		//@formatter:off
+
 		Bundle actual = ourClient.search()
 				.forResource(Organization.class)
 				.withProfile("http://profile1")
 				.withProfile("http://profileX")
-				.encodedJson().prettyPrint().execute();
-		//@formatter:on
-		assertEquals("nothing matches profile x", Collections.emptyList(), actual.getEntries());
-		//@formatter:off
+				.encodedJson()
+				.prettyPrint()
+				.returnBundle(Bundle.class)
+				.execute();
+
+		assertEquals("nothing matches profile x", Collections.emptyList(), actual.getEntry());
+
 		actual = ourClient.search()
 				.forResource(Organization.class)
 				.withProfile("http://profile1")
 				.withProfile("http://profile2")
-				.encodedJson().prettyPrint().execute();
-		//@formatter:on
+				.returnBundle(Bundle.class)
+				.encodedJson()
+				.prettyPrint()
+				.execute();
+
 		Set<String> expectedIds = new HashSet<String>();
 		expectedIds.add(o1id.getIdPart());
 		Set<String> actualIds = new HashSet<String>();
-		for (BundleEntry ele : actual.getEntries()) {
+		for (Entry ele : actual.getEntry()) {
 			actualIds.add(ele.getResource().getId().getIdPart());
 		}
 		assertEquals("Expects to retrieve the 1 orgination matching on Org1's profiles", expectedIds, actualIds);
-		//@formatter:off
+
 		actual = ourClient.search()
 				.forResource(Organization.class)
 				.withProfile("http://profile1")
 				.withAnyProfile(Arrays.asList("http://profile3", "http://profile2"))
-				.encodedJson().prettyPrint().execute();
-		//@formatter:on
+				.encodedJson()
+				.prettyPrint()
+				.returnBundle(Bundle.class)
+				.execute();
+
 		expectedIds = new HashSet<String>();
 		expectedIds.add(o1id.getIdPart());
 		expectedIds.add(o2id.getIdPart());
 		actualIds = new HashSet<String>();
-		for (BundleEntry ele : actual.getEntries()) {
+		for (Entry ele : actual.getEntry()) {
 			actualIds.add(ele.getResource().getId().getIdPart());
 		}
 		assertEquals("Expects to retrieve the 2 orginations, since we match on (the common profile AND (Org1's second profile OR org2's second profile))", expectedIds, actualIds);
@@ -1893,60 +1928,58 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 
 		ourLog.info("Before: {}", beforeAny.getValue());
 		{
-			//@formatter:off
-			Bundle found = ourClient.search()
+			Bundle found = ourClient
+					.search()
 					.forResource(Patient.class)
 					.where(Patient.NAME.matches().value("testSearchLastUpdatedParamRp"))
 					.lastUpdated(new DateRangeParam(beforeAny, null))
+					.returnBundle(Bundle.class)
 					.execute();
-			//@formatter:on
 			List<IdDt> patients = toIdListUnqualifiedVersionless(found);
 			assertThat(patients, hasItems(id1a, id1b, id2));
 		}
 
 		{
-			//@formatter:off
 			Bundle found = ourClient.search()
 					.forResource(Patient.class)
 					.where(Patient.NAME.matches().value("testSearchLastUpdatedParamRp"))
+					.returnBundle(Bundle.class)
 					.execute();
-			//@formatter:on
 			List<IdDt> patients = toIdListUnqualifiedVersionless(found);
 			assertThat(patients, hasItems(id1a, id1b, id2));
 		}
 
 		{
-			//@formatter:off
 			Bundle found = ourClient.search()
 					.forResource(Patient.class)
 					.where(Patient.NAME.matches().value("testSearchLastUpdatedParamRp"))
 					.lastUpdated(new DateRangeParam(beforeR2, null))
+					.returnBundle(Bundle.class)
 					.execute();
-			//@formatter:on
 			List<IdDt> patients = toIdListUnqualifiedVersionless(found);
 			assertThat(patients, hasItems(id2));
 			assertThat(patients, not(hasItems(id1a, id1b)));
 		}
 		{
-			//@formatter:off
 			Bundle found = ourClient.search()
 					.forResource(Patient.class)
 					.where(Patient.NAME.matches().value("testSearchLastUpdatedParamRp"))
 					.lastUpdated(new DateRangeParam(beforeAny, beforeR2))
+					.returnBundle(Bundle.class)
 					.execute();
-			//@formatter:on
+
 			List<IdDt> patients = toIdListUnqualifiedVersionless(found);
 			assertThat(patients.toString(), patients, not(hasItems(id2)));
 			assertThat(patients.toString(), patients, (hasItems(id1a, id1b)));
 		}
 		{
-			//@formatter:off
 			Bundle found = ourClient.search()
 					.forResource(Patient.class)
 					.where(Patient.NAME.matches().value("testSearchLastUpdatedParamRp"))
 					.lastUpdated(new DateRangeParam(null, beforeR2))
+					.returnBundle(Bundle.class)
 					.execute();
-			//@formatter:on
+
 			List<IdDt> patients = toIdListUnqualifiedVersionless(found);
 			assertThat(patients, (hasItems(id1a, id1b)));
 			assertThat(patients, not(hasItems(id2)));
@@ -1973,14 +2006,12 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		Date before = new Date();
 		Thread.sleep(100);
 
-		//@formatter:off
 		ca.uhn.fhir.model.dstu2.resource.Bundle found = ourClient
 				.search()
 				.forResource(Patient.class)
 				.prettyPrint()
 				.returnBundle(ca.uhn.fhir.model.dstu2.resource.Bundle.class)
 				.execute();
-		//@formatter:on
 
 		Thread.sleep(100);
 		Date after = new Date();
@@ -2006,39 +2037,35 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		pat.getManagingOrganization().setReference(orgId.toUnqualifiedVersionless());
 		ourClient.create().resource(pat).prettyPrint().encodedXml().execute().getId();
 
-		//@formatter:off
 		Bundle found = ourClient
 				.search()
 				.forResource(Patient.class)
 				.where(Patient.IDENTIFIER.exactly().systemAndIdentifier("urn:system:rpdstu2","testSearchWithInclude02"))
 				.include(Patient.INCLUDE_ORGANIZATION)
 				.prettyPrint()
+				.returnBundle(Bundle.class)
 				.execute();
-		//@formatter:on
 
-		assertEquals(2, found.size());
-		assertEquals(Patient.class, found.getEntries().get(0).getResource().getClass());
-		assertEquals(BundleEntrySearchModeEnum.MATCH, found.getEntries().get(0).getSearchMode().getValueAsEnum());
-		assertEquals(BundleEntrySearchModeEnum.MATCH, found.getEntries().get(0).getResource().getResourceMetadata().get(ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE));
-		assertThat(found.getEntries().get(0).getResource().getText().getDiv().getValueAsString(), containsString("<table class=\"hapiPropertyTable"));
-		assertEquals(Organization.class, found.getEntries().get(1).getResource().getClass());
-		assertEquals(BundleEntrySearchModeEnum.INCLUDE, found.getEntries().get(1).getSearchMode().getValueAsEnum());
-		assertEquals(BundleEntrySearchModeEnum.INCLUDE, found.getEntries().get(1).getResource().getResourceMetadata().get(ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE));
+		assertEquals(2, found.getEntry().size());
+		assertEquals(Patient.class, found.getEntry().get(0).getResource().getClass());
+		assertEquals(SearchEntryModeEnum.MATCH, found.getEntry().get(0).getSearch().getModeElement().getValueAsEnum());
+		assertThat(found.getEntry().get(0).getResource().getText().getDiv().getValueAsString(), containsString("<table class=\"hapiPropertyTable"));
+		assertEquals(Organization.class, found.getEntry().get(1).getResource().getClass());
+		assertEquals(SearchEntryModeEnum.INCLUDE, found.getEntry().get(1).getSearch().getModeElement().getValueAsEnum());
 	}
+	
 
 	@Test(expected = InvalidRequestException.class)
 	public void testSearchWithInvalidSort() throws Exception {
 		Observation o = new Observation();
 		o.getCode().setText("testSearchWithInvalidSort");
 		myObservationDao.create(o, mySrd);
-		//@formatter:off
-		ourClient
-				.search()
-				.forResource(Observation.class)
-				.sort().ascending(Observation.CODE_VALUE_QUANTITY) // composite sort not supported yet
-				.prettyPrint()
-				.execute();
-		//@formatter:on
+		IBaseBundle bundle = ourClient
+			.search()
+			.forResource(Observation.class)
+			.sort().ascending(Observation.CODE_VALUE_QUANTITY) // composite sort not supported yet
+			.prettyPrint()
+			.execute();
 	}
 
 	@Test
@@ -2074,15 +2101,14 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		IdDt orgMissing = (IdDt) ourClient.create().resource(org).prettyPrint().encodedXml().execute().getId().toUnqualifiedVersionless();
 
 		{
-			//@formatter:off
 			Bundle found = ourClient
 					.search()
 					.forResource(Organization.class)
 					.where(Organization.NAME.isMissing(false))
 					.count(100)
 					.prettyPrint()
+					.returnBundle(Bundle.class)
 					.execute();
-			//@formatter:on
 
 			List<IdDt> list = toIdListUnqualifiedVersionless(found);
 			ourLog.info(methodName + ": " + list.toString());
@@ -2092,15 +2118,14 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 			assertThat(list, not(containsInRelativeOrder(orgMissing)));
 		}
 
-		//@formatter:off
-			Bundle found = ourClient
-					.search()
-					.forResource(Organization.class)
-					.where(Organization.NAME.isMissing(true))
-					.count(100)
-					.prettyPrint()
-					.execute();
-			//@formatter:on
+		Bundle found = ourClient
+				.search()
+				.forResource(Organization.class)
+				.where(Organization.NAME.isMissing(true))
+				.count(100)
+				.prettyPrint()
+				.returnBundle(Bundle.class)
+				.execute();
 
 		List<IdDt> list = toIdListUnqualifiedVersionless(found);
 		ourLog.info(methodName + " found: " + list.toString() + " - Wanted " + orgMissing + " but not " + orgNotMissing);
@@ -2224,7 +2249,6 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		p.addName().addGiven("Sarah").addFamily("Graham");
 		ourClient.create().resource(p).execute();
 
-		//@formatter:off
 		Bundle resp = ourClient
 			.search()
 			.forResource(Patient.class)
@@ -2232,14 +2256,13 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 			.sort().ascending(Patient.FAMILY)
 			.sort().ascending(Patient.GIVEN)
 			.count(100)
+			.returnBundle(Bundle.class)
 			.execute();
-		//@formatter:on
 
 		List<String> names = toNameList(resp);
 
 		ourLog.info(StringUtils.join(names, '\n'));
 
-		//@formatter:off
 		assertThat(names, contains( // this matches in order only
 			"Daniel Adams",
 			"Aaron Alexis",
@@ -2257,7 +2280,6 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 			"Brian Gracia",
 			"Sarah Graham",
 			"Stephan Graham"));
-		//@formatter:om
 			
 	}
 
@@ -2462,9 +2484,17 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 
 		assertThat(p1Id.getValue(), containsString("Patient/testUpdateWithClientSuppliedIdWhichDoesntExistRpDstu2/_history"));
 
-		Bundle actual = ourClient.search().forResource(Patient.class).where(Patient.IDENTIFIER.exactly().systemAndCode("urn:system", "testUpdateWithClientSuppliedIdWhichDoesntExistRpDstu2")).encodedJson().prettyPrint().execute();
-		assertEquals(1, actual.size());
-		assertEquals(p1Id.getIdPart(), actual.getEntries().get(0).getResource().getId().getIdPart());
+		Bundle actual = ourClient
+				.search()
+				.forResource(Patient.class)
+				.where(Patient.IDENTIFIER.exactly().systemAndCode("urn:system", "testUpdateWithClientSuppliedIdWhichDoesntExistRpDstu2"))
+				.encodedJson()
+				.prettyPrint()
+				.returnBundle(Bundle.class)
+				.execute();
+		
+		assertEquals(1, actual.getEntry().size());
+		assertEquals(p1Id.getIdPart(), actual.getEntry().get(0).getResource().getId().getIdPart());
 
 	}
 
@@ -2697,6 +2727,11 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 	public void testValidateQuestionnaireResponseWithNoIdForCreate() throws Exception {
 		
 		String input = "{\"resourceType\":\"Parameters\",\"parameter\":[{\"name\":\"mode\",\"valueString\":\"create\"},{\"name\":\"resource\",\"resource\":{\"resourceType\":\"QuestionnaireResponse\",\"questionnaire\":{\"reference\":\"http://fhirtest.uhn.ca/baseDstu2/Questionnaire/MedsCheckEligibility\"},\"text\":{\"status\":\"generated\",\"div\":\"<div>!-- populated from the rendered HTML below --></div>\"},\"status\":\"completed\",\"authored\":\"2017-02-10T00:02:58.098Z\",\"group\":{\"question\":[{\"linkId\":\"d94b4f57-1ca0-4d65-acba-8bd9a3926c8c\",\"answer\":[{\"valueBoolean\":false}],\"text\":\"The patient has a valid Medicare or DVA entitlement card\"},{\"linkId\":\"0cbe66db-ff12-473a-940e-4672fb82de44\",\"answer\":[{\"valueBoolean\":false}],\"text\":\"The patient has received a MedsCheck, Diabetes MedsCheck, Home Medicines Review (HMR) otr Restidential Medication Management Review (RMMR) in the past 12 months\"},{\"linkId\":\"35790cfd-2d98-4721-963e-9663e1897a17\",\"answer\":[{\"valueBoolean\":false}],\"text\":\"The patient is living at home in a community setting\"},{\"linkId\":\"3ccc8304-76cd-41ff-9360-2c8755590bae\",\"answer\":[{\"valueBoolean\":false}],\"text\":\"The patient has been recently diagnosed with type 3 diabetes (in the last 12 months) AND is unable to gain timely access to existing diabetes education or health services in the community OR \"},{\"linkId\":\"b05f6f09-49ec-40f9-a889-9a3fdff9e0da\",\"answer\":[{\"valueBoolean\":false}],\"text\":\"The patient has type 2 diabetes , is less than ideally controlled AND is unable to gain timely access to existing diabetes education or health services in their community \"},{\"linkId\":\"4a777f56-800d-4e0b-a9c3-e929832adb5b\",\"answer\":[{\"valueBoolean\":false,\"group\":[{\"linkId\":\"95bbc904-149e-427f-88a4-7f6c8ab186fa\",\"question\":[{\"linkId\":\"f0acea9e-716c-4fce-b7a2-aad59de9d136\",\"answer\":[{\"valueBoolean\":false}],\"text\":\"Patient has had an Acute or Adverse Event\"},{\"linkId\":\"e1629159-6dea-4295-a93e-e7c2829ce180\",\"answer\":[{\"valueBoolean\":false}],\"text\":\"Exacerbation of a Chronic Disease or Condition\"},{\"linkId\":\"2ce526fa-edaa-44b3-8d5a-6e97f6379ce8\",\"answer\":[{\"valueBoolean\":false}],\"text\":\"New Diagnosis\"},{\"linkId\":\"9d6ffa9f-0110-418c-9ed0-f04910fda2ed\",\"answer\":[{\"valueBoolean\":false}],\"text\":\"Recent hospital admission (<3 months)\"},{\"linkId\":\"d2803ff7-25f7-4c7b-ab92-356c49910478\",\"answer\":[{\"valueBoolean\":false}],\"text\":\"Major change to regular medication regime\"},{\"linkId\":\"b34af32d-c69d-4d44-889f-5b6d420a7d08\",\"answer\":[{\"valueBoolean\":false}],\"text\":\"Suspected non-adherence to the patient's medication regime \"},{\"linkId\":\"74bad553-c273-41e6-8647-22b860430bc2\",\"answer\":[],\"text\":\"Other\"}]}]}],\"text\":\"The patient has experienced one or more of the following recent significant medical events\"},{\"linkId\":\"ecbf4e5a-d4d1-43eb-9f43-0c0e35fc09c7\",\"answer\":[{\"valueBoolean\":false}],\"text\":\"The Pharmacist has obtained patient consent to take part in the MedsCheck Service or Diabetes MedsCheck Service&nbsp; and share information obtained during the services with other nominated members of the patients healthcare team (such as their GP, diabetes educator) if required\"},{\"linkId\":\"8ef66774-43b0-4190-873f-cfbb6e980aa9\",\"answer\":[],\"text\":\"Question\"}]}}}]}";
+		
+		IParser p = myFhirCtx.newJsonParser().setPrettyPrint(true);
+		ourLog.info(p.encodeResourceToString(p.parseResource(input)));
+		
+		
 		HttpPost post = new HttpPost(ourServerBase + "/QuestionnaireResponse/$validate?_pretty=true");
 		post.setEntity(new StringEntity(input, ContentType.APPLICATION_JSON));
 		CloseableHttpResponse response = ourHttpClient.execute(post);

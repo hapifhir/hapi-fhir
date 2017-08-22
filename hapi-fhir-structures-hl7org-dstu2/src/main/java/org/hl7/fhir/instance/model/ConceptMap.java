@@ -29,23 +29,15 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Wed, Jul 13, 2016 05:32+1000 for FHIR v1.0.2
+import java.util.*;
 
-import org.hl7.fhir.instance.model.Enumerations.ConceptMapEquivalence;
-import org.hl7.fhir.instance.model.Enumerations.ConceptMapEquivalenceEnumFactory;
-import org.hl7.fhir.instance.model.Enumerations.ConformanceResourceStatus;
-import org.hl7.fhir.instance.model.Enumerations.ConformanceResourceStatusEnumFactory;
+import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.instance.model.Enumerations.*;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
-import org.hl7.fhir.instance.utilities.Utilities;
+import org.hl7.fhir.utilities.Utilities;
 
-import ca.uhn.fhir.model.api.annotation.Block;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
-import ca.uhn.fhir.model.api.annotation.ResourceDef;
-import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.*;
 /**
  * A statement of relationships from one set of concepts to one or more other concepts - either code systems or data elements, or classes in class models.
  */
@@ -172,6 +164,28 @@ public class ConceptMap extends DomainResource {
           childrenList.add(new Property("telecom", "ContactPoint", "Contact details for individual (if a name was provided) or the publisher.", 0, java.lang.Integer.MAX_VALUE, telecom));
         }
 
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("name"))
+          this.name = castToString(value); // StringType
+        else if (name.equals("telecom"))
+          this.getTelecom().add(castToContactPoint(value));
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("name")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ConceptMap.name");
+        }
+        else if (name.equals("telecom")) {
+          return addTelecom();
+        }
+        else
+          return super.addChild(name);
+      }
+
       public ConceptMapContactComponent copy() {
         ConceptMapContactComponent dst = new ConceptMapContactComponent();
         copyValues(dst);
@@ -208,6 +222,11 @@ public class ConceptMap extends DomainResource {
         return super.isEmpty() && (name == null || name.isEmpty()) && (telecom == null || telecom.isEmpty())
           ;
       }
+
+  public String fhirType() {
+    return "ConceptMap.contact";
+
+  }
 
   }
 
@@ -388,6 +407,33 @@ public class ConceptMap extends DomainResource {
           childrenList.add(new Property("target", "", "A concept from the target value set that this concept maps to.", 0, java.lang.Integer.MAX_VALUE, target));
         }
 
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("codeSystem"))
+          this.codeSystem = castToUri(value); // UriType
+        else if (name.equals("code"))
+          this.code = castToCode(value); // CodeType
+        else if (name.equals("target"))
+          this.getTarget().add((TargetElementComponent) value);
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("codeSystem")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ConceptMap.codeSystem");
+        }
+        else if (name.equals("code")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ConceptMap.code");
+        }
+        else if (name.equals("target")) {
+          return addTarget();
+        }
+        else
+          return super.addChild(name);
+      }
+
       public SourceElementComponent copy() {
         SourceElementComponent dst = new SourceElementComponent();
         copyValues(dst);
@@ -426,6 +472,11 @@ public class ConceptMap extends DomainResource {
         return super.isEmpty() && (codeSystem == null || codeSystem.isEmpty()) && (code == null || code.isEmpty())
            && (target == null || target.isEmpty());
       }
+
+  public String fhirType() {
+    return "ConceptMap.element";
+
+  }
 
   }
 
@@ -772,6 +823,48 @@ public class ConceptMap extends DomainResource {
           childrenList.add(new Property("product", "@ConceptMap.element.target.dependsOn", "A set of additional outcomes from this mapping to other elements. To properly execute this mapping, the specified element must be mapped to some data element or source that is in context. The mapping may still be useful without a place for the additional data elements, but the equivalence cannot be relied on.", 0, java.lang.Integer.MAX_VALUE, product));
         }
 
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("codeSystem"))
+          this.codeSystem = castToUri(value); // UriType
+        else if (name.equals("code"))
+          this.code = castToCode(value); // CodeType
+        else if (name.equals("equivalence"))
+          this.equivalence = new ConceptMapEquivalenceEnumFactory().fromType(value); // Enumeration<ConceptMapEquivalence>
+        else if (name.equals("comments"))
+          this.comments = castToString(value); // StringType
+        else if (name.equals("dependsOn"))
+          this.getDependsOn().add((OtherElementComponent) value);
+        else if (name.equals("product"))
+          this.getProduct().add((OtherElementComponent) value);
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("codeSystem")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ConceptMap.codeSystem");
+        }
+        else if (name.equals("code")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ConceptMap.code");
+        }
+        else if (name.equals("equivalence")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ConceptMap.equivalence");
+        }
+        else if (name.equals("comments")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ConceptMap.comments");
+        }
+        else if (name.equals("dependsOn")) {
+          return addDependsOn();
+        }
+        else if (name.equals("product")) {
+          return addProduct();
+        }
+        else
+          return super.addChild(name);
+      }
+
       public TargetElementComponent copy() {
         TargetElementComponent dst = new TargetElementComponent();
         copyValues(dst);
@@ -820,6 +913,11 @@ public class ConceptMap extends DomainResource {
            && (equivalence == null || equivalence.isEmpty()) && (comments == null || comments.isEmpty())
            && (dependsOn == null || dependsOn.isEmpty()) && (product == null || product.isEmpty());
       }
+
+  public String fhirType() {
+    return "ConceptMap.element.target";
+
+  }
 
   }
 
@@ -1007,6 +1105,33 @@ public class ConceptMap extends DomainResource {
           childrenList.add(new Property("code", "string", "Identity (code or path) or the element/item/ValueSet that the map depends on / refers to.", 0, java.lang.Integer.MAX_VALUE, code));
         }
 
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("element"))
+          this.element = castToUri(value); // UriType
+        else if (name.equals("codeSystem"))
+          this.codeSystem = castToUri(value); // UriType
+        else if (name.equals("code"))
+          this.code = castToString(value); // StringType
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("element")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ConceptMap.element");
+        }
+        else if (name.equals("codeSystem")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ConceptMap.codeSystem");
+        }
+        else if (name.equals("code")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ConceptMap.code");
+        }
+        else
+          return super.addChild(name);
+      }
+
       public OtherElementComponent copy() {
         OtherElementComponent dst = new OtherElementComponent();
         copyValues(dst);
@@ -1042,6 +1167,11 @@ public class ConceptMap extends DomainResource {
         return super.isEmpty() && (element == null || element.isEmpty()) && (codeSystem == null || codeSystem.isEmpty())
            && (code == null || code.isEmpty());
       }
+
+  public String fhirType() {
+    return "ConceptMap.element.target.dependsOn";
+
+  }
 
   }
 
@@ -1772,26 +1902,26 @@ public class ConceptMap extends DomainResource {
     /**
      * @return {@link #source} (The source value set that specifies the concepts that are being mapped.)
      */
-    public UriType getSourceUriType() throws Exception { 
+    public UriType getSourceUriType() throws FHIRException { 
       if (!(this.source instanceof UriType))
-        throw new Exception("Type mismatch: the type UriType was expected, but "+this.source.getClass().getName()+" was encountered");
+        throw new FHIRException("Type mismatch: the type UriType was expected, but "+this.source.getClass().getName()+" was encountered");
       return (UriType) this.source;
     }
 
-    public boolean hasSourceUriType() throws Exception { 
+    public boolean hasSourceUriType() { 
       return this.source instanceof UriType;
     }
 
     /**
      * @return {@link #source} (The source value set that specifies the concepts that are being mapped.)
      */
-    public Reference getSourceReference() throws Exception { 
+    public Reference getSourceReference() throws FHIRException { 
       if (!(this.source instanceof Reference))
-        throw new Exception("Type mismatch: the type Reference was expected, but "+this.source.getClass().getName()+" was encountered");
+        throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.source.getClass().getName()+" was encountered");
       return (Reference) this.source;
     }
 
-    public boolean hasSourceReference() throws Exception { 
+    public boolean hasSourceReference() { 
       return this.source instanceof Reference;
     }
 
@@ -1817,26 +1947,26 @@ public class ConceptMap extends DomainResource {
     /**
      * @return {@link #target} (The target value set provides context to the mappings. Note that the mapping is made between concepts, not between value sets, but the value set provides important context about how the concept mapping choices are made.)
      */
-    public UriType getTargetUriType() throws Exception { 
+    public UriType getTargetUriType() throws FHIRException { 
       if (!(this.target instanceof UriType))
-        throw new Exception("Type mismatch: the type UriType was expected, but "+this.target.getClass().getName()+" was encountered");
+        throw new FHIRException("Type mismatch: the type UriType was expected, but "+this.target.getClass().getName()+" was encountered");
       return (UriType) this.target;
     }
 
-    public boolean hasTargetUriType() throws Exception { 
+    public boolean hasTargetUriType() { 
       return this.target instanceof UriType;
     }
 
     /**
      * @return {@link #target} (The target value set provides context to the mappings. Note that the mapping is made between concepts, not between value sets, but the value set provides important context about how the concept mapping choices are made.)
      */
-    public Reference getTargetReference() throws Exception { 
+    public Reference getTargetReference() throws FHIRException { 
       if (!(this.target instanceof Reference))
-        throw new Exception("Type mismatch: the type Reference was expected, but "+this.target.getClass().getName()+" was encountered");
+        throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.target.getClass().getName()+" was encountered");
       return (Reference) this.target;
     }
 
-    public boolean hasTargetReference() throws Exception { 
+    public boolean hasTargetReference() { 
       return this.target instanceof Reference;
     }
 
@@ -1911,6 +2041,114 @@ public class ConceptMap extends DomainResource {
         childrenList.add(new Property("target[x]", "uri|Reference(ValueSet|StructureDefinition)", "The target value set provides context to the mappings. Note that the mapping is made between concepts, not between value sets, but the value set provides important context about how the concept mapping choices are made.", 0, java.lang.Integer.MAX_VALUE, target));
         childrenList.add(new Property("element", "", "Mappings for an individual concept in the source to one or more concepts in the target.", 0, java.lang.Integer.MAX_VALUE, element));
       }
+
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("url"))
+          this.url = castToUri(value); // UriType
+        else if (name.equals("identifier"))
+          this.identifier = castToIdentifier(value); // Identifier
+        else if (name.equals("version"))
+          this.version = castToString(value); // StringType
+        else if (name.equals("name"))
+          this.name = castToString(value); // StringType
+        else if (name.equals("status"))
+          this.status = new ConformanceResourceStatusEnumFactory().fromType(value); // Enumeration<ConformanceResourceStatus>
+        else if (name.equals("experimental"))
+          this.experimental = castToBoolean(value); // BooleanType
+        else if (name.equals("publisher"))
+          this.publisher = castToString(value); // StringType
+        else if (name.equals("contact"))
+          this.getContact().add((ConceptMapContactComponent) value);
+        else if (name.equals("date"))
+          this.date = castToDateTime(value); // DateTimeType
+        else if (name.equals("description"))
+          this.description = castToString(value); // StringType
+        else if (name.equals("useContext"))
+          this.getUseContext().add(castToCodeableConcept(value));
+        else if (name.equals("requirements"))
+          this.requirements = castToString(value); // StringType
+        else if (name.equals("copyright"))
+          this.copyright = castToString(value); // StringType
+        else if (name.equals("source[x]"))
+          this.source = (Type) value; // Type
+        else if (name.equals("target[x]"))
+          this.target = (Type) value; // Type
+        else if (name.equals("element"))
+          this.getElement().add((SourceElementComponent) value);
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("url")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ConceptMap.url");
+        }
+        else if (name.equals("identifier")) {
+          this.identifier = new Identifier();
+          return this.identifier;
+        }
+        else if (name.equals("version")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ConceptMap.version");
+        }
+        else if (name.equals("name")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ConceptMap.name");
+        }
+        else if (name.equals("status")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ConceptMap.status");
+        }
+        else if (name.equals("experimental")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ConceptMap.experimental");
+        }
+        else if (name.equals("publisher")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ConceptMap.publisher");
+        }
+        else if (name.equals("contact")) {
+          return addContact();
+        }
+        else if (name.equals("date")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ConceptMap.date");
+        }
+        else if (name.equals("description")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ConceptMap.description");
+        }
+        else if (name.equals("useContext")) {
+          return addUseContext();
+        }
+        else if (name.equals("requirements")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ConceptMap.requirements");
+        }
+        else if (name.equals("copyright")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ConceptMap.copyright");
+        }
+        else if (name.equals("sourceUri")) {
+          this.source = new UriType();
+          return this.source;
+        }
+        else if (name.equals("sourceReference")) {
+          this.source = new Reference();
+          return this.source;
+        }
+        else if (name.equals("targetUri")) {
+          this.target = new UriType();
+          return this.target;
+        }
+        else if (name.equals("targetReference")) {
+          this.target = new Reference();
+          return this.target;
+        }
+        else if (name.equals("element")) {
+          return addElement();
+        }
+        else
+          return super.addChild(name);
+      }
+
+  public String fhirType() {
+    return "ConceptMap";
+
+  }
 
       public ConceptMap copy() {
         ConceptMap dst = new ConceptMap();

@@ -11,21 +11,14 @@ import java.util.concurrent.TimeUnit;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.client.ClientUpgradeRequest;
 import org.eclipse.jetty.websocket.client.WebSocketClient;
-import org.hl7.fhir.dstu3.model.CodeableConcept;
-import org.hl7.fhir.dstu3.model.Coding;
-import org.hl7.fhir.dstu3.model.Observation;
-import org.hl7.fhir.dstu3.model.Patient;
-import org.hl7.fhir.dstu3.model.Reference;
-import org.hl7.fhir.dstu3.model.Subscription;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.hl7.fhir.dstu3.model.*;
+import org.junit.*;
 import org.slf4j.Logger;
 
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.provider.dstu3.BaseResourceProviderDstu3Test;
+import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.MethodOutcome;
-import ca.uhn.fhir.rest.server.EncodingEnum;
 
 /**
  * Adds a FHIR subscription with criteria through the rest interface. Then creates a websocket with the id of the
@@ -104,7 +97,7 @@ public class FhirSubscriptionWithSubscriptionIdDstu3Test extends BaseResourcePro
 		ClientUpgradeRequest request = new ClientUpgradeRequest();
 		ourLog.info("Connecting to : {}", echoUri);
 		Future<Session> connection = myWebSocketClient.connect(mySocketImplementation, echoUri, request);
-		Session session = connection.get(2, TimeUnit.SECONDS);
+		Session session = connection.get(5, TimeUnit.SECONDS);
 		
 		ourLog.info("Connected to WS: {}", session.isOpen());
 	}

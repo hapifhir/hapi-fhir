@@ -1,58 +1,33 @@
 package ca.uhn.fhir.jpa.search;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyBoolean;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Matchers.same;
-import static org.mockito.Mockito.atLeast;
-import static org.mockito.Mockito.atLeastOnce;
-import static org.mockito.Mockito.atMost;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.junit.Assert.*;
+import static org.mockito.Matchers.*;
+import static org.mockito.Mockito.*;
 
 import java.util.*;
 
 import javax.persistence.EntityManager;
 
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.*;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
-import org.mockito.Mock;
-import org.mockito.Mockito;
+import org.mockito.*;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.*;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import com.google.common.collect.Lists;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.dao.DaoConfig;
-import ca.uhn.fhir.jpa.dao.IDao;
-import ca.uhn.fhir.jpa.dao.ISearchBuilder;
-import ca.uhn.fhir.jpa.dao.SearchParameterMap;
-import ca.uhn.fhir.jpa.dao.data.ISearchDao;
-import ca.uhn.fhir.jpa.dao.data.ISearchIncludeDao;
-import ca.uhn.fhir.jpa.dao.data.ISearchResultDao;
-import ca.uhn.fhir.jpa.entity.Search;
-import ca.uhn.fhir.jpa.entity.SearchResult;
-import ca.uhn.fhir.jpa.entity.SearchStatusEnum;
-import ca.uhn.fhir.jpa.entity.SearchTypeEnum;
+import ca.uhn.fhir.jpa.dao.*;
+import ca.uhn.fhir.jpa.dao.data.*;
+import ca.uhn.fhir.jpa.entity.*;
+import ca.uhn.fhir.jpa.util.BaseIterator;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.StringParam;
-import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.TestUtil;
 
@@ -165,9 +140,6 @@ public class SearchCoordinatorSvcImplTest {
 
 	}
 
-	private String newUuid() {
-		return UUID.randomUUID().toString();
-	}
 	@Test
 	public void testAsyncSearchLargeResultSetBigCountSameCoordinator() {
 		SearchParameterMap params = new SearchParameterMap();
@@ -418,7 +390,7 @@ public class SearchCoordinatorSvcImplTest {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
-	public static class FailAfterNIterator<T> implements Iterator<T> {
+	public static class FailAfterNIterator<T> extends BaseIterator<T> implements Iterator<T> {
 
 		private int myCount;
 		private Iterator<T> myWrap;
@@ -445,7 +417,7 @@ public class SearchCoordinatorSvcImplTest {
 	}
 
 	
-	public static class SlowIterator<T> implements Iterator<T> {
+	public static class SlowIterator<T> extends BaseIterator<T> implements Iterator<T> {
 
 		private int myDelay;
 		private Iterator<T> myWrap;

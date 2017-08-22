@@ -1,0 +1,407 @@
+{
+  "resourceType": "Bundle",
+  "meta": {
+    "lastUpdated": "2013-05-28T22:12:21Z",
+    "tag": [
+      {
+        "system": "http://hl7.org/fhir/tag",
+        "code": "document"
+      }
+    ]
+  },
+  "type": "document",
+  "entry": [
+    {
+      "fullUrl": "urn:uuid:180f219f-97a8-486d-99d9-ed631fe4fc57",
+      "resource": {
+        "resourceType": "Composition",
+        "meta": {
+          "lastUpdated": "2013-05-28T22:12:21Z"
+        },
+        "text": {
+          "status": "generated",
+          "div": "<div><p><b>Generated Narrative with Details</b></p><p><b>id</b>: 180f219f-97a8-486d-99d9-ed631fe4fc57</p><p><b>meta</b>: </p><p><b>date</b>: Feb 1, 2013 12:30:02 PM</p><p><b>type</b>: Discharge Summary from Responsible Clinician <span>(Details : {LOINC code '28655-9' = 'Physician attending Discharge summary)</span></p><p><b>status</b>: final</p><p><b>confidentiality</b>: N</p><p><b>author</b>: <a>Doctor Dave. Generated Summary: 23; Adam Careful </a></p><p><b>encounter</b>: <a>http://fhir.healthintersections.com.au/open/Encounter/doc-example</a></p></div>"
+        },
+        "date": "2013-02-01T12:30:02Z",
+        "type": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "28655-9"
+            }
+          ],
+          "text": "Discharge Summary from Responsible Clinician"
+        },
+        "status": "final",
+        "confidentiality": "N",
+        "subject": {
+          "reference": "http://fhir.healthintersections.com.au/open/Patient/d1",
+          "display": "Eve Everywoman"
+        },
+        "author": [
+          {
+            "reference": "Practitioner/example",
+            "display": "Doctor Dave"
+          }
+        ],
+        "encounter": {
+          "reference": "http://fhir.healthintersections.com.au/open/Encounter/doc-example"
+        },
+        "section": [
+          {
+            "title": "Reason for admission",
+            "entry": [{
+              "reference": "urn:uuid:d0dd51d3-3ab2-4c84-b697-a630c3e40e7a"
+            }]
+          },
+          {
+            "title": "Medications on Discharge",
+            "entry": [{
+              "reference": "urn:uuid:673f8db5-0ffd-4395-9657-6da00420bbc1"
+            }]
+          },
+          {
+            "title": "Known allergies",
+            "entry": [{
+              "reference": "urn:uuid:68f86194-e6e1-4f65-b64a-5314256f8d7b"
+            }]
+          }
+        ]
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Practitioner",
+        "id": "example",
+        "meta": {
+          "lastUpdated": "2013-05-05T16:13:03Z"
+        },
+        "text": {
+          "status": "generated",
+          "div": "<div>\n            \n            <p>Dr Adam Careful is a Referring Practitioner for Acme Hospital from 1-Jan 2012 to 31-Mar\n              2012</p>\n          \n          </div>"
+        },
+        "identifier": [
+          {
+            "system": "http://www.acme.org/practitioners",
+            "value": "23"
+          }
+        ],
+        "name": [{
+          "family": [
+            "Careful"
+          ],
+          "given": [
+            "Adam"
+          ],
+          "prefix": [
+            "Dr"
+          ]
+        }]
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Patient",
+        "id": "d1",
+        "text": {
+          "status": "generated",
+          "div": "<div>\n            <h1>Eve Everywoman</h1>\n          </div>"
+        },
+        "name": [
+          {
+            "text": "Eve Everywoman",
+            "family": [
+              "Everywoman1"
+            ],
+            "given": [
+              "Eve"
+            ]
+          }
+        ],
+        "telecom": [
+          {
+            "system": "phone",
+            "value": "555-555-2003",
+            "use": "work"
+          }
+        ],
+        "gender": "female",
+        "birthDate": "1955-01-06",
+        "address": [
+          {
+            "use": "home",
+            "line": [
+              "2222 Home Street"
+            ]
+          }
+        ],
+        "active": true
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Encounter",
+        "id": "doc-example",
+        "meta": {
+          "lastUpdated": "2013-05-05T16:13:03Z"
+        },
+        "text": {
+          "status": "generated",
+          "div": "<div> Admitted to Orthopedics Service,\n                        Middlemore Hospital between Jan 20 and Feb ist 2013 </div>"
+        },
+        "identifier": [
+          {
+            "value": "S100"
+          }
+        ],
+        "status": "finished",
+        "type": [
+          {
+            "text": "Orthopedic Admission"
+          }
+        ],
+        "subject": {
+          "reference": "Patient/d1"
+        },
+        "period": {
+          "start": "2013-01-20T12:30:02Z",
+          "end": "2013-02-01T12:30:02Z"
+        },
+        "hospitalization": {
+          "dischargeDisposition": {
+            "text": "Discharged to care of GP"
+          }
+        }
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:d0dd51d3-3ab2-4c84-b697-a630c3e40e7a",
+      "resource": {
+        "resourceType": "List",
+        "meta": {
+          "lastUpdated": "2013-05-05T16:13:03Z"
+        },
+        "text": {
+          "status": "additional",
+          "div": "<div>\n            <table>\n              <thead>\n                <tr>\n                  <td>Details</td>\n                  <td/>\n                </tr>\n              </thead>\n              <tbody>\n                <tr>\n                  <td>Acute Asthmatic attack. Was wheezing\n                        for days prior to admission.</td>\n                  <td/>\n                </tr>\n              </tbody>\n            </table>\n          </div>"
+        },
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "8646-2",
+              "display": "Hospital admission diagnosis"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "http://fhir.healthintersections.com.au/open/Patient/d1",
+          "display": "Peter Patient"
+        },
+        "status": "current",
+        "mode": "working",
+        "entry": [
+          {
+            "item": {
+              "reference": "urn:uuid:541a72a8-df75-4484-ac89-ac4923f03b81"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:541a72a8-df75-4484-ac89-ac4923f03b81",
+      "resource": {
+        "resourceType": "Observation",
+        "meta": {
+          "lastUpdated": "2013-05-05T16:13:03Z"
+        },
+        "text": {
+          "status": "additional",
+          "div": "<div> Acute Asthmatic attack. Was wheezing\n                        for days prior to admission. </div>"
+        },
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "46241-6"
+            }
+          ],
+          "text": "Reason for admission"
+        },
+        "valueString": "Acute Asthmatic attack. Was wheezing for days prior to admission.",
+        "status": "final"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:673f8db5-0ffd-4395-9657-6da00420bbc1",
+      "resource": {
+        "resourceType": "List",
+        "meta": {
+          "lastUpdated": "2013-05-05T16:13:03Z"
+        },
+        "text": {
+          "status": "additional",
+          "div": "<div>\n            <table>\n              <thead>\n                <tr>\n                  <td>Medication</td>\n                  <td>Last Change</td>\n                  <td>Last ChangeReason</td>\n                </tr>\n              </thead>\n              <tbody>\n                <tr>\n                  <td>Theophylline 200mg BD after meals</td>\n                  <td>continued</td>\n                </tr>\n                <tr>\n                  <td>Ventolin Inhaler</td>\n                  <td>stopped</td>\n                  <td>Getting side effect of tremor</td>\n                </tr>\n              </tbody>\n            </table>\n          </div>"
+        },
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "10183-2",
+              "display": "Hospital discharge medications"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "http://fhir.healthintersections.com.au/open/Patient/d1",
+          "display": "Peter Patient"
+        },
+        "status": "current",
+        "mode": "working",
+        "entry": [
+          {
+            "flag": [
+              {
+                "coding": [
+                  {
+                    "system": "http://www.ithealthboard.health.nz/fhir/ValueSet/medicationStatus",
+                    "code": "started"
+                  }
+                ]
+              }
+            ],
+            "item": {
+              "reference": "urn:uuid:124a6916-5d84-4b8c-b250-10cefb8e6e86"
+            }
+          },
+          {
+            "flag": [
+              {
+                "coding": [
+                  {
+                    "system": "http://www.ithealthboard.health.nz/fhir/ValueSet/medicationStatus",
+                    "code": "stopped"
+                  }
+                ]
+              }
+            ],
+            "deleted": true,
+            "item": {
+              "reference": "MedicationRequest/1",
+              "display": "use of Ventolin Inhaler was discontinued"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:124a6916-5d84-4b8c-b250-10cefb8e6e86",
+      "resource": {
+        "resourceType": "MedicationRequest",
+        "meta": {
+          "lastUpdated": "2013-05-05T16:13:03Z"
+        },
+        "text": {
+          "status": "generated",
+          "div": "<div>\n            <p>Theophylline 200mg twice a day</p>\n          </div>"
+        },
+        "contained": [
+          {
+            "resourceType": "Medication",
+            "id": "med1",
+            "code": {
+              "coding": [
+                {
+                  "system": "http://snomed.info/sct",
+                  "code": "66493003"
+                }
+              ]
+            }
+          }
+        ],
+        "subject": {
+          "reference": "http://fhir.healthintersections.com.au/open/Patient/d1",
+          "display": "Peter Patient"
+        },
+        "medicationReference": {
+          "reference": "#med1",
+          "display": "Theophylline 200mg BD"
+        },
+        "dosageInstruction": [
+          {
+            "route": {
+              "coding": [
+                {
+                  "system": "http://snomed.info/sct",
+                  "code": "394899003",
+                  "display": "oral administration of treatment"
+                }
+              ]
+            },
+            "doseQuantity": {
+              "value": 1,
+              "unit": "tablet",
+              "system": "http://unitsofmeasure.org",
+              "code": "tbl"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:68f86194-e6e1-4f65-b64a-5314256f8d7b",
+      "resource": {
+        "resourceType": "List",
+        "meta": {
+          "lastUpdated": "2013-05-05T16:13:03Z"
+        },
+        "text": {
+          "status": "additional",
+          "div": "<div>\n            <table>\n              <thead>\n                <tr>\n                  <td>Allergen</td>\n                  <td>Reaction</td>\n                </tr>\n              </thead>\n              <tbody>\n                <tr>\n                  <td>Doxycycline</td>\n                  <td>Hives</td>\n                </tr>\n              </tbody>\n            </table>\n          </div>"
+        },
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "48765-2",
+              "display": "Allergies and adverse reactions Document"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "http://fhir.healthintersections.com.au/open/Patient/d1",
+          "display": "Peter Patient"
+        },
+        "status": "current",
+        "mode": "working",
+        "entry": [
+          {
+            "item": {
+              "reference": "urn:uuid:47600e0f-b6b5-4308-84b5-5dec157f7637"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:47600e0f-b6b5-4308-84b5-5dec157f7637",
+      "resource": {
+        "resourceType": "AllergyIntolerance",
+        "meta": {
+          "lastUpdated": "2013-05-05T16:13:03Z"
+        },
+        "text": {
+          "status": "generated",
+          "div": "<div>Sensitivity to Doxycycline :\n                        Hives</div>"
+        },
+        "patient": {
+          "reference": "http://fhir.healthintersections.com.au/open/Patient/d1",
+          "display": "Eve Everywoman"
+        },
+        "criticality": "high",
+        "type": "allergy"
+      }
+    }
+  ]
+}

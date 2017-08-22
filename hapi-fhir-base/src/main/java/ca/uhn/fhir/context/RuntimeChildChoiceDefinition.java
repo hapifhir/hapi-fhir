@@ -84,11 +84,7 @@ public class RuntimeChildChoiceDefinition extends BaseRuntimeDeclaredChildDefini
 		myDatatypeToElementDefinition = new HashMap<Class<? extends IBase>, BaseRuntimeElementDefinition<?>>();
 		myResourceTypes = new ArrayList<Class<? extends IBaseResource>>();
 
-		if (theContext.getVersion().getVersion().equals(FhirVersionEnum.DSTU1)) {
-			myReferenceSuffix = "Resource";
-		} else {
-			myReferenceSuffix = "Reference";
-		}
+		myReferenceSuffix = "Reference";
 
 		for (Class<? extends IBase> next : myChoiceTypes) {
 

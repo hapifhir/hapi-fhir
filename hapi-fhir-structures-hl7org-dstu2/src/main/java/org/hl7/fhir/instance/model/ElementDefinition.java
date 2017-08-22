@@ -29,20 +29,18 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
+// Generated on Wed, Jul 13, 2016 05:32+1000 for FHIR v1.0.2
 import java.util.ArrayList;
 import java.util.List;
 
+import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.Enumerations.BindingStrength;
 import org.hl7.fhir.instance.model.Enumerations.BindingStrengthEnumFactory;
 import org.hl7.fhir.instance.model.api.IBaseDatatypeElement;
 import org.hl7.fhir.instance.model.api.ICompositeType;
-import org.hl7.fhir.instance.utilities.Utilities;
+import org.hl7.fhir.utilities.Utilities;
 
-import ca.uhn.fhir.model.api.annotation.Block;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.DatatypeDef;
-import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.*;
 /**
  * Captures constraints on each element within the resource, profile, or extension.
  */
@@ -58,12 +56,12 @@ public class ElementDefinition extends Type implements ICompositeType {
          * added to help the parsers
          */
         NULL;
-        public static PropertyRepresentation fromCode(String codeString) throws Exception {
+        public static PropertyRepresentation fromCode(String codeString) throws FHIRException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("xmlAttr".equals(codeString))
           return XMLATTR;
-        throw new Exception("Unknown PropertyRepresentation code '"+codeString+"'");
+        throw new FHIRException("Unknown PropertyRepresentation code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -100,6 +98,16 @@ public class ElementDefinition extends Type implements ICompositeType {
           return PropertyRepresentation.XMLATTR;
         throw new IllegalArgumentException("Unknown PropertyRepresentation code '"+codeString+"'");
         }
+        public Enumeration<PropertyRepresentation> fromType(Base code) throws FHIRException {
+          if (code == null || code.isEmpty())
+            return null;
+          String codeString = ((PrimitiveType) code).asStringValue();
+          if (codeString == null || "".equals(codeString))
+            return null;
+        if ("xmlAttr".equals(codeString))
+          return new Enumeration<PropertyRepresentation>(this, PropertyRepresentation.XMLATTR);
+        throw new FHIRException("Unknown PropertyRepresentation code '"+codeString+"'");
+        }
     public String toCode(PropertyRepresentation code) {
       if (code == PropertyRepresentation.XMLATTR)
         return "xmlAttr";
@@ -124,7 +132,7 @@ public class ElementDefinition extends Type implements ICompositeType {
          * added to help the parsers
          */
         NULL;
-        public static SlicingRules fromCode(String codeString) throws Exception {
+        public static SlicingRules fromCode(String codeString) throws FHIRException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("closed".equals(codeString))
@@ -133,7 +141,7 @@ public class ElementDefinition extends Type implements ICompositeType {
           return OPEN;
         if ("openAtEnd".equals(codeString))
           return OPENATEND;
-        throw new Exception("Unknown SlicingRules code '"+codeString+"'");
+        throw new FHIRException("Unknown SlicingRules code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -182,6 +190,20 @@ public class ElementDefinition extends Type implements ICompositeType {
           return SlicingRules.OPENATEND;
         throw new IllegalArgumentException("Unknown SlicingRules code '"+codeString+"'");
         }
+        public Enumeration<SlicingRules> fromType(Base code) throws FHIRException {
+          if (code == null || code.isEmpty())
+            return null;
+          String codeString = ((PrimitiveType) code).asStringValue();
+          if (codeString == null || "".equals(codeString))
+            return null;
+        if ("closed".equals(codeString))
+          return new Enumeration<SlicingRules>(this, SlicingRules.CLOSED);
+        if ("open".equals(codeString))
+          return new Enumeration<SlicingRules>(this, SlicingRules.OPEN);
+        if ("openAtEnd".equals(codeString))
+          return new Enumeration<SlicingRules>(this, SlicingRules.OPENATEND);
+        throw new FHIRException("Unknown SlicingRules code '"+codeString+"'");
+        }
     public String toCode(SlicingRules code) {
       if (code == SlicingRules.CLOSED)
         return "closed";
@@ -210,7 +232,7 @@ public class ElementDefinition extends Type implements ICompositeType {
          * added to help the parsers
          */
         NULL;
-        public static AggregationMode fromCode(String codeString) throws Exception {
+        public static AggregationMode fromCode(String codeString) throws FHIRException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("contained".equals(codeString))
@@ -219,7 +241,7 @@ public class ElementDefinition extends Type implements ICompositeType {
           return REFERENCED;
         if ("bundled".equals(codeString))
           return BUNDLED;
-        throw new Exception("Unknown AggregationMode code '"+codeString+"'");
+        throw new FHIRException("Unknown AggregationMode code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -268,6 +290,20 @@ public class ElementDefinition extends Type implements ICompositeType {
           return AggregationMode.BUNDLED;
         throw new IllegalArgumentException("Unknown AggregationMode code '"+codeString+"'");
         }
+        public Enumeration<AggregationMode> fromType(Base code) throws FHIRException {
+          if (code == null || code.isEmpty())
+            return null;
+          String codeString = ((PrimitiveType) code).asStringValue();
+          if (codeString == null || "".equals(codeString))
+            return null;
+        if ("contained".equals(codeString))
+          return new Enumeration<AggregationMode>(this, AggregationMode.CONTAINED);
+        if ("referenced".equals(codeString))
+          return new Enumeration<AggregationMode>(this, AggregationMode.REFERENCED);
+        if ("bundled".equals(codeString))
+          return new Enumeration<AggregationMode>(this, AggregationMode.BUNDLED);
+        throw new FHIRException("Unknown AggregationMode code '"+codeString+"'");
+        }
     public String toCode(AggregationMode code) {
       if (code == AggregationMode.CONTAINED)
         return "contained";
@@ -292,14 +328,14 @@ public class ElementDefinition extends Type implements ICompositeType {
          * added to help the parsers
          */
         NULL;
-        public static ConstraintSeverity fromCode(String codeString) throws Exception {
+        public static ConstraintSeverity fromCode(String codeString) throws FHIRException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("error".equals(codeString))
           return ERROR;
         if ("warning".equals(codeString))
           return WARNING;
-        throw new Exception("Unknown ConstraintSeverity code '"+codeString+"'");
+        throw new FHIRException("Unknown ConstraintSeverity code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -341,6 +377,18 @@ public class ElementDefinition extends Type implements ICompositeType {
         if ("warning".equals(codeString))
           return ConstraintSeverity.WARNING;
         throw new IllegalArgumentException("Unknown ConstraintSeverity code '"+codeString+"'");
+        }
+        public Enumeration<ConstraintSeverity> fromType(Base code) throws FHIRException {
+          if (code == null || code.isEmpty())
+            return null;
+          String codeString = ((PrimitiveType) code).asStringValue();
+          if (codeString == null || "".equals(codeString))
+            return null;
+        if ("error".equals(codeString))
+          return new Enumeration<ConstraintSeverity>(this, ConstraintSeverity.ERROR);
+        if ("warning".equals(codeString))
+          return new Enumeration<ConstraintSeverity>(this, ConstraintSeverity.WARNING);
+        throw new FHIRException("Unknown ConstraintSeverity code '"+codeString+"'");
         }
     public String toCode(ConstraintSeverity code) {
       if (code == ConstraintSeverity.ERROR)
@@ -599,6 +647,38 @@ public class ElementDefinition extends Type implements ICompositeType {
           childrenList.add(new Property("rules", "code", "Whether additional slices are allowed or not. When the slices are ordered, profile authors can also say that additional slices are only allowed at the end.", 0, java.lang.Integer.MAX_VALUE, rules));
         }
 
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("discriminator"))
+          this.getDiscriminator().add(castToString(value));
+        else if (name.equals("description"))
+          this.description = castToString(value); // StringType
+        else if (name.equals("ordered"))
+          this.ordered = castToBoolean(value); // BooleanType
+        else if (name.equals("rules"))
+          this.rules = new SlicingRulesEnumFactory().fromType(value); // Enumeration<SlicingRules>
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("discriminator")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ElementDefinition.discriminator");
+        }
+        else if (name.equals("description")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ElementDefinition.description");
+        }
+        else if (name.equals("ordered")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ElementDefinition.ordered");
+        }
+        else if (name.equals("rules")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ElementDefinition.rules");
+        }
+        else
+          return super.addChild(name);
+      }
+
       public ElementDefinitionSlicingComponent copy() {
         ElementDefinitionSlicingComponent dst = new ElementDefinitionSlicingComponent();
         copyValues(dst);
@@ -639,6 +719,11 @@ public class ElementDefinition extends Type implements ICompositeType {
         return super.isEmpty() && (discriminator == null || discriminator.isEmpty()) && (description == null || description.isEmpty())
            && (ordered == null || ordered.isEmpty()) && (rules == null || rules.isEmpty());
       }
+
+  public String fhirType() {
+    return "ElementDefinition.slicing";
+
+  }
 
   }
 
@@ -826,6 +911,33 @@ public class ElementDefinition extends Type implements ICompositeType {
           childrenList.add(new Property("max", "string", "Maximum cardinality of the base element identified by the path.", 0, java.lang.Integer.MAX_VALUE, max));
         }
 
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("path"))
+          this.path = castToString(value); // StringType
+        else if (name.equals("min"))
+          this.min = castToInteger(value); // IntegerType
+        else if (name.equals("max"))
+          this.max = castToString(value); // StringType
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("path")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ElementDefinition.path");
+        }
+        else if (name.equals("min")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ElementDefinition.min");
+        }
+        else if (name.equals("max")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ElementDefinition.max");
+        }
+        else
+          return super.addChild(name);
+      }
+
       public ElementDefinitionBaseComponent copy() {
         ElementDefinitionBaseComponent dst = new ElementDefinitionBaseComponent();
         copyValues(dst);
@@ -861,6 +973,11 @@ public class ElementDefinition extends Type implements ICompositeType {
         return super.isEmpty() && (path == null || path.isEmpty()) && (min == null || min.isEmpty())
            && (max == null || max.isEmpty());
       }
+
+  public String fhirType() {
+    return "ElementDefinition.base";
+
+  }
 
   }
 
@@ -1064,6 +1181,33 @@ public class ElementDefinition extends Type implements ICompositeType {
           childrenList.add(new Property("aggregation", "code", "If the type is a reference to another resource, how the resource is or can be aggregated - is it a contained resource, or a reference, and if the context is a bundle, is it included in the bundle.", 0, java.lang.Integer.MAX_VALUE, aggregation));
         }
 
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("code"))
+          this.code = castToCode(value); // CodeType
+        else if (name.equals("profile"))
+          this.getProfile().add(castToUri(value));
+        else if (name.equals("aggregation"))
+          this.getAggregation().add(new AggregationModeEnumFactory().fromType(value));
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("code")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ElementDefinition.code");
+        }
+        else if (name.equals("profile")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ElementDefinition.profile");
+        }
+        else if (name.equals("aggregation")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ElementDefinition.aggregation");
+        }
+        else
+          return super.addChild(name);
+      }
+
       public TypeRefComponent copy() {
         TypeRefComponent dst = new TypeRefComponent();
         copyValues(dst);
@@ -1107,6 +1251,11 @@ public class ElementDefinition extends Type implements ICompositeType {
         return super.isEmpty() && (code == null || code.isEmpty()) && (profile == null || profile.isEmpty())
            && (aggregation == null || aggregation.isEmpty());
       }
+
+  public String fhirType() {
+    return "ElementDefinition.type";
+
+  }
 
   }
 
@@ -1405,6 +1554,43 @@ public class ElementDefinition extends Type implements ICompositeType {
           childrenList.add(new Property("xpath", "string", "An XPath expression of constraint that can be executed to see if this constraint is met.", 0, java.lang.Integer.MAX_VALUE, xpath));
         }
 
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("key"))
+          this.key = castToId(value); // IdType
+        else if (name.equals("requirements"))
+          this.requirements = castToString(value); // StringType
+        else if (name.equals("severity"))
+          this.severity = new ConstraintSeverityEnumFactory().fromType(value); // Enumeration<ConstraintSeverity>
+        else if (name.equals("human"))
+          this.human = castToString(value); // StringType
+        else if (name.equals("xpath"))
+          this.xpath = castToString(value); // StringType
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("key")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ElementDefinition.key");
+        }
+        else if (name.equals("requirements")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ElementDefinition.requirements");
+        }
+        else if (name.equals("severity")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ElementDefinition.severity");
+        }
+        else if (name.equals("human")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ElementDefinition.human");
+        }
+        else if (name.equals("xpath")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ElementDefinition.xpath");
+        }
+        else
+          return super.addChild(name);
+      }
+
       public ElementDefinitionConstraintComponent copy() {
         ElementDefinitionConstraintComponent dst = new ElementDefinitionConstraintComponent();
         copyValues(dst);
@@ -1443,6 +1629,11 @@ public class ElementDefinition extends Type implements ICompositeType {
            && (severity == null || severity.isEmpty()) && (human == null || human.isEmpty()) && (xpath == null || xpath.isEmpty())
           ;
       }
+
+  public String fhirType() {
+    return "ElementDefinition.constraint";
+
+  }
 
   }
 
@@ -1590,26 +1781,26 @@ public class ElementDefinition extends Type implements ICompositeType {
         /**
          * @return {@link #valueSet} (Points to the value set or external definition (e.g. implicit value set) that identifies the set of codes to be used.)
          */
-        public UriType getValueSetUriType() throws Exception { 
+        public UriType getValueSetUriType() throws FHIRException { 
           if (!(this.valueSet instanceof UriType))
-            throw new Exception("Type mismatch: the type UriType was expected, but "+this.valueSet.getClass().getName()+" was encountered");
+            throw new FHIRException("Type mismatch: the type UriType was expected, but "+this.valueSet.getClass().getName()+" was encountered");
           return (UriType) this.valueSet;
         }
 
-        public boolean hasValueSetUriType() throws Exception { 
+        public boolean hasValueSetUriType() { 
           return this.valueSet instanceof UriType;
         }
 
         /**
          * @return {@link #valueSet} (Points to the value set or external definition (e.g. implicit value set) that identifies the set of codes to be used.)
          */
-        public Reference getValueSetReference() throws Exception { 
+        public Reference getValueSetReference() throws FHIRException { 
           if (!(this.valueSet instanceof Reference))
-            throw new Exception("Type mismatch: the type Reference was expected, but "+this.valueSet.getClass().getName()+" was encountered");
+            throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.valueSet.getClass().getName()+" was encountered");
           return (Reference) this.valueSet;
         }
 
-        public boolean hasValueSetReference() throws Exception { 
+        public boolean hasValueSetReference() { 
           return this.valueSet instanceof Reference;
         }
 
@@ -1631,6 +1822,38 @@ public class ElementDefinition extends Type implements ICompositeType {
           childrenList.add(new Property("description", "string", "Describes the intended use of this particular set of codes.", 0, java.lang.Integer.MAX_VALUE, description));
           childrenList.add(new Property("valueSet[x]", "uri|Reference(ValueSet)", "Points to the value set or external definition (e.g. implicit value set) that identifies the set of codes to be used.", 0, java.lang.Integer.MAX_VALUE, valueSet));
         }
+
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("strength"))
+          this.strength = new BindingStrengthEnumFactory().fromType(value); // Enumeration<BindingStrength>
+        else if (name.equals("description"))
+          this.description = castToString(value); // StringType
+        else if (name.equals("valueSet[x]"))
+          this.valueSet = (Type) value; // Type
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("strength")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ElementDefinition.strength");
+        }
+        else if (name.equals("description")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ElementDefinition.description");
+        }
+        else if (name.equals("valueSetUri")) {
+          this.valueSet = new UriType();
+          return this.valueSet;
+        }
+        else if (name.equals("valueSetReference")) {
+          this.valueSet = new Reference();
+          return this.valueSet;
+        }
+        else
+          return super.addChild(name);
+      }
 
       public ElementDefinitionBindingComponent copy() {
         ElementDefinitionBindingComponent dst = new ElementDefinitionBindingComponent();
@@ -1667,6 +1890,11 @@ public class ElementDefinition extends Type implements ICompositeType {
         return super.isEmpty() && (strength == null || strength.isEmpty()) && (description == null || description.isEmpty())
            && (valueSet == null || valueSet.isEmpty());
       }
+
+  public String fhirType() {
+    return "ElementDefinition.binding";
+
+  }
 
   }
 
@@ -1857,6 +2085,33 @@ public class ElementDefinition extends Type implements ICompositeType {
           childrenList.add(new Property("map", "string", "Expresses what part of the target specification corresponds to this element.", 0, java.lang.Integer.MAX_VALUE, map));
         }
 
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("identity"))
+          this.identity = castToId(value); // IdType
+        else if (name.equals("language"))
+          this.language = castToCode(value); // CodeType
+        else if (name.equals("map"))
+          this.map = castToString(value); // StringType
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("identity")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ElementDefinition.identity");
+        }
+        else if (name.equals("language")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ElementDefinition.language");
+        }
+        else if (name.equals("map")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ElementDefinition.map");
+        }
+        else
+          return super.addChild(name);
+      }
+
       public ElementDefinitionMappingComponent copy() {
         ElementDefinitionMappingComponent dst = new ElementDefinitionMappingComponent();
         copyValues(dst);
@@ -1892,6 +2147,11 @@ public class ElementDefinition extends Type implements ICompositeType {
         return super.isEmpty() && (identity == null || identity.isEmpty()) && (language == null || language.isEmpty())
            && (map == null || map.isEmpty());
       }
+
+  public String fhirType() {
+    return "ElementDefinition.mapping";
+
+  }
 
   }
 
@@ -2112,7 +2372,7 @@ public class ElementDefinition extends Type implements ICompositeType {
     @Description(shortDefinition="Map element to another set of definitions", formalDefinition="Identifies a concept from an external specification that roughly corresponds to this element." )
     protected List<ElementDefinitionMappingComponent> mapping;
 
-    private static final long serialVersionUID = -2084587620L;
+    private static final long serialVersionUID = -447087484L;
 
   /*
    * Constructor
@@ -3382,6 +3642,955 @@ public class ElementDefinition extends Type implements ICompositeType {
         childrenList.add(new Property("binding", "", "Binds to a value set if this element is coded (code, Coding, CodeableConcept).", 0, java.lang.Integer.MAX_VALUE, binding));
         childrenList.add(new Property("mapping", "", "Identifies a concept from an external specification that roughly corresponds to this element.", 0, java.lang.Integer.MAX_VALUE, mapping));
       }
+
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("path"))
+          this.path = castToString(value); // StringType
+        else if (name.equals("representation"))
+          this.getRepresentation().add(new PropertyRepresentationEnumFactory().fromType(value));
+        else if (name.equals("name"))
+          this.name = castToString(value); // StringType
+        else if (name.equals("label"))
+          this.label = castToString(value); // StringType
+        else if (name.equals("code"))
+          this.getCode().add(castToCoding(value));
+        else if (name.equals("slicing"))
+          this.slicing = (ElementDefinitionSlicingComponent) value; // ElementDefinitionSlicingComponent
+        else if (name.equals("short"))
+          this.short_ = castToString(value); // StringType
+        else if (name.equals("definition"))
+          this.definition = castToMarkdown(value); // MarkdownType
+        else if (name.equals("comments"))
+          this.comments = castToMarkdown(value); // MarkdownType
+        else if (name.equals("requirements"))
+          this.requirements = castToMarkdown(value); // MarkdownType
+        else if (name.equals("alias"))
+          this.getAlias().add(castToString(value));
+        else if (name.equals("min"))
+          this.min = castToInteger(value); // IntegerType
+        else if (name.equals("max"))
+          this.max = castToString(value); // StringType
+        else if (name.equals("base"))
+          this.base = (ElementDefinitionBaseComponent) value; // ElementDefinitionBaseComponent
+        else if (name.equals("type"))
+          this.getType().add((TypeRefComponent) value);
+        else if (name.equals("nameReference"))
+          this.nameReference = castToString(value); // StringType
+        else if (name.equals("defaultValue[x]"))
+          this.defaultValue = (org.hl7.fhir.instance.model.Type) value; // org.hl7.fhir.dstu2.model.Type
+        else if (name.equals("meaningWhenMissing"))
+          this.meaningWhenMissing = castToMarkdown(value); // MarkdownType
+        else if (name.equals("fixed[x]"))
+          this.fixed = (org.hl7.fhir.instance.model.Type) value; // org.hl7.fhir.dstu2.model.Type
+        else if (name.equals("pattern[x]"))
+          this.pattern = (org.hl7.fhir.instance.model.Type) value; // org.hl7.fhir.dstu2.model.Type
+        else if (name.equals("example[x]"))
+          this.example = (org.hl7.fhir.instance.model.Type) value; // org.hl7.fhir.dstu2.model.Type
+        else if (name.equals("minValue[x]"))
+          this.minValue = (org.hl7.fhir.instance.model.Type) value; // org.hl7.fhir.dstu2.model.Type
+        else if (name.equals("maxValue[x]"))
+          this.maxValue = (org.hl7.fhir.instance.model.Type) value; // org.hl7.fhir.dstu2.model.Type
+        else if (name.equals("maxLength"))
+          this.maxLength = castToInteger(value); // IntegerType
+        else if (name.equals("condition"))
+          this.getCondition().add(castToId(value));
+        else if (name.equals("constraint"))
+          this.getConstraint().add((ElementDefinitionConstraintComponent) value);
+        else if (name.equals("mustSupport"))
+          this.mustSupport = castToBoolean(value); // BooleanType
+        else if (name.equals("isModifier"))
+          this.isModifier = castToBoolean(value); // BooleanType
+        else if (name.equals("isSummary"))
+          this.isSummary = castToBoolean(value); // BooleanType
+        else if (name.equals("binding"))
+          this.binding = (ElementDefinitionBindingComponent) value; // ElementDefinitionBindingComponent
+        else if (name.equals("mapping"))
+          this.getMapping().add((ElementDefinitionMappingComponent) value);
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("path")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ElementDefinition.path");
+        }
+        else if (name.equals("representation")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ElementDefinition.representation");
+        }
+        else if (name.equals("name")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ElementDefinition.name");
+        }
+        else if (name.equals("label")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ElementDefinition.label");
+        }
+        else if (name.equals("code")) {
+          return addCode();
+        }
+        else if (name.equals("slicing")) {
+          this.slicing = new ElementDefinitionSlicingComponent();
+          return this.slicing;
+        }
+        else if (name.equals("short")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ElementDefinition.short");
+        }
+        else if (name.equals("definition")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ElementDefinition.definition");
+        }
+        else if (name.equals("comments")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ElementDefinition.comments");
+        }
+        else if (name.equals("requirements")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ElementDefinition.requirements");
+        }
+        else if (name.equals("alias")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ElementDefinition.alias");
+        }
+        else if (name.equals("min")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ElementDefinition.min");
+        }
+        else if (name.equals("max")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ElementDefinition.max");
+        }
+        else if (name.equals("base")) {
+          this.base = new ElementDefinitionBaseComponent();
+          return this.base;
+        }
+        else if (name.equals("type")) {
+          return addType();
+        }
+        else if (name.equals("nameReference")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ElementDefinition.nameReference");
+        }
+        else if (name.equals("defaultValueBoolean")) {
+          this.defaultValue = new BooleanType();
+          return this.defaultValue;
+        }
+        else if (name.equals("defaultValueInteger")) {
+          this.defaultValue = new IntegerType();
+          return this.defaultValue;
+        }
+        else if (name.equals("defaultValueDecimal")) {
+          this.defaultValue = new DecimalType();
+          return this.defaultValue;
+        }
+        else if (name.equals("defaultValueBase64Binary")) {
+          this.defaultValue = new Base64BinaryType();
+          return this.defaultValue;
+        }
+        else if (name.equals("defaultValueInstant")) {
+          this.defaultValue = new InstantType();
+          return this.defaultValue;
+        }
+        else if (name.equals("defaultValueString")) {
+          this.defaultValue = new StringType();
+          return this.defaultValue;
+        }
+        else if (name.equals("defaultValueUri")) {
+          this.defaultValue = new UriType();
+          return this.defaultValue;
+        }
+        else if (name.equals("defaultValueDate")) {
+          this.defaultValue = new DateType();
+          return this.defaultValue;
+        }
+        else if (name.equals("defaultValueDateTime")) {
+          this.defaultValue = new DateTimeType();
+          return this.defaultValue;
+        }
+        else if (name.equals("defaultValueTime")) {
+          this.defaultValue = new TimeType();
+          return this.defaultValue;
+        }
+        else if (name.equals("defaultValueCode")) {
+          this.defaultValue = new CodeType();
+          return this.defaultValue;
+        }
+        else if (name.equals("defaultValueOid")) {
+          this.defaultValue = new OidType();
+          return this.defaultValue;
+        }
+        else if (name.equals("defaultValueId")) {
+          this.defaultValue = new IdType();
+          return this.defaultValue;
+        }
+        else if (name.equals("defaultValueUnsignedInt")) {
+          this.defaultValue = new UnsignedIntType();
+          return this.defaultValue;
+        }
+        else if (name.equals("defaultValuePositiveInt")) {
+          this.defaultValue = new PositiveIntType();
+          return this.defaultValue;
+        }
+        else if (name.equals("defaultValueMarkdown")) {
+          this.defaultValue = new MarkdownType();
+          return this.defaultValue;
+        }
+        else if (name.equals("defaultValueAnnotation")) {
+          this.defaultValue = new Annotation();
+          return this.defaultValue;
+        }
+        else if (name.equals("defaultValueAttachment")) {
+          this.defaultValue = new Attachment();
+          return this.defaultValue;
+        }
+        else if (name.equals("defaultValueIdentifier")) {
+          this.defaultValue = new Identifier();
+          return this.defaultValue;
+        }
+        else if (name.equals("defaultValueCodeableConcept")) {
+          this.defaultValue = new CodeableConcept();
+          return this.defaultValue;
+        }
+        else if (name.equals("defaultValueCoding")) {
+          this.defaultValue = new Coding();
+          return this.defaultValue;
+        }
+        else if (name.equals("defaultValueQuantity")) {
+          this.defaultValue = new Quantity();
+          return this.defaultValue;
+        }
+        else if (name.equals("defaultValueRange")) {
+          this.defaultValue = new Range();
+          return this.defaultValue;
+        }
+        else if (name.equals("defaultValuePeriod")) {
+          this.defaultValue = new Period();
+          return this.defaultValue;
+        }
+        else if (name.equals("defaultValueRatio")) {
+          this.defaultValue = new Ratio();
+          return this.defaultValue;
+        }
+        else if (name.equals("defaultValueSampledData")) {
+          this.defaultValue = new SampledData();
+          return this.defaultValue;
+        }
+        else if (name.equals("defaultValueSignature")) {
+          this.defaultValue = new Signature();
+          return this.defaultValue;
+        }
+        else if (name.equals("defaultValueHumanName")) {
+          this.defaultValue = new HumanName();
+          return this.defaultValue;
+        }
+        else if (name.equals("defaultValueAddress")) {
+          this.defaultValue = new Address();
+          return this.defaultValue;
+        }
+        else if (name.equals("defaultValueContactPoint")) {
+          this.defaultValue = new ContactPoint();
+          return this.defaultValue;
+        }
+        else if (name.equals("defaultValueTiming")) {
+          this.defaultValue = new Timing();
+          return this.defaultValue;
+        }
+        else if (name.equals("defaultValueReference")) {
+          this.defaultValue = new Reference();
+          return this.defaultValue;
+        }
+        else if (name.equals("defaultValueMeta")) {
+          this.defaultValue = new Meta();
+          return this.defaultValue;
+        }
+        else if (name.equals("meaningWhenMissing")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ElementDefinition.meaningWhenMissing");
+        }
+        else if (name.equals("fixedBoolean")) {
+          this.fixed = new BooleanType();
+          return this.fixed;
+        }
+        else if (name.equals("fixedInteger")) {
+          this.fixed = new IntegerType();
+          return this.fixed;
+        }
+        else if (name.equals("fixedDecimal")) {
+          this.fixed = new DecimalType();
+          return this.fixed;
+        }
+        else if (name.equals("fixedBase64Binary")) {
+          this.fixed = new Base64BinaryType();
+          return this.fixed;
+        }
+        else if (name.equals("fixedInstant")) {
+          this.fixed = new InstantType();
+          return this.fixed;
+        }
+        else if (name.equals("fixedString")) {
+          this.fixed = new StringType();
+          return this.fixed;
+        }
+        else if (name.equals("fixedUri")) {
+          this.fixed = new UriType();
+          return this.fixed;
+        }
+        else if (name.equals("fixedDate")) {
+          this.fixed = new DateType();
+          return this.fixed;
+        }
+        else if (name.equals("fixedDateTime")) {
+          this.fixed = new DateTimeType();
+          return this.fixed;
+        }
+        else if (name.equals("fixedTime")) {
+          this.fixed = new TimeType();
+          return this.fixed;
+        }
+        else if (name.equals("fixedCode")) {
+          this.fixed = new CodeType();
+          return this.fixed;
+        }
+        else if (name.equals("fixedOid")) {
+          this.fixed = new OidType();
+          return this.fixed;
+        }
+        else if (name.equals("fixedId")) {
+          this.fixed = new IdType();
+          return this.fixed;
+        }
+        else if (name.equals("fixedUnsignedInt")) {
+          this.fixed = new UnsignedIntType();
+          return this.fixed;
+        }
+        else if (name.equals("fixedPositiveInt")) {
+          this.fixed = new PositiveIntType();
+          return this.fixed;
+        }
+        else if (name.equals("fixedMarkdown")) {
+          this.fixed = new MarkdownType();
+          return this.fixed;
+        }
+        else if (name.equals("fixedAnnotation")) {
+          this.fixed = new Annotation();
+          return this.fixed;
+        }
+        else if (name.equals("fixedAttachment")) {
+          this.fixed = new Attachment();
+          return this.fixed;
+        }
+        else if (name.equals("fixedIdentifier")) {
+          this.fixed = new Identifier();
+          return this.fixed;
+        }
+        else if (name.equals("fixedCodeableConcept")) {
+          this.fixed = new CodeableConcept();
+          return this.fixed;
+        }
+        else if (name.equals("fixedCoding")) {
+          this.fixed = new Coding();
+          return this.fixed;
+        }
+        else if (name.equals("fixedQuantity")) {
+          this.fixed = new Quantity();
+          return this.fixed;
+        }
+        else if (name.equals("fixedRange")) {
+          this.fixed = new Range();
+          return this.fixed;
+        }
+        else if (name.equals("fixedPeriod")) {
+          this.fixed = new Period();
+          return this.fixed;
+        }
+        else if (name.equals("fixedRatio")) {
+          this.fixed = new Ratio();
+          return this.fixed;
+        }
+        else if (name.equals("fixedSampledData")) {
+          this.fixed = new SampledData();
+          return this.fixed;
+        }
+        else if (name.equals("fixedSignature")) {
+          this.fixed = new Signature();
+          return this.fixed;
+        }
+        else if (name.equals("fixedHumanName")) {
+          this.fixed = new HumanName();
+          return this.fixed;
+        }
+        else if (name.equals("fixedAddress")) {
+          this.fixed = new Address();
+          return this.fixed;
+        }
+        else if (name.equals("fixedContactPoint")) {
+          this.fixed = new ContactPoint();
+          return this.fixed;
+        }
+        else if (name.equals("fixedTiming")) {
+          this.fixed = new Timing();
+          return this.fixed;
+        }
+        else if (name.equals("fixedReference")) {
+          this.fixed = new Reference();
+          return this.fixed;
+        }
+        else if (name.equals("fixedMeta")) {
+          this.fixed = new Meta();
+          return this.fixed;
+        }
+        else if (name.equals("patternBoolean")) {
+          this.pattern = new BooleanType();
+          return this.pattern;
+        }
+        else if (name.equals("patternInteger")) {
+          this.pattern = new IntegerType();
+          return this.pattern;
+        }
+        else if (name.equals("patternDecimal")) {
+          this.pattern = new DecimalType();
+          return this.pattern;
+        }
+        else if (name.equals("patternBase64Binary")) {
+          this.pattern = new Base64BinaryType();
+          return this.pattern;
+        }
+        else if (name.equals("patternInstant")) {
+          this.pattern = new InstantType();
+          return this.pattern;
+        }
+        else if (name.equals("patternString")) {
+          this.pattern = new StringType();
+          return this.pattern;
+        }
+        else if (name.equals("patternUri")) {
+          this.pattern = new UriType();
+          return this.pattern;
+        }
+        else if (name.equals("patternDate")) {
+          this.pattern = new DateType();
+          return this.pattern;
+        }
+        else if (name.equals("patternDateTime")) {
+          this.pattern = new DateTimeType();
+          return this.pattern;
+        }
+        else if (name.equals("patternTime")) {
+          this.pattern = new TimeType();
+          return this.pattern;
+        }
+        else if (name.equals("patternCode")) {
+          this.pattern = new CodeType();
+          return this.pattern;
+        }
+        else if (name.equals("patternOid")) {
+          this.pattern = new OidType();
+          return this.pattern;
+        }
+        else if (name.equals("patternId")) {
+          this.pattern = new IdType();
+          return this.pattern;
+        }
+        else if (name.equals("patternUnsignedInt")) {
+          this.pattern = new UnsignedIntType();
+          return this.pattern;
+        }
+        else if (name.equals("patternPositiveInt")) {
+          this.pattern = new PositiveIntType();
+          return this.pattern;
+        }
+        else if (name.equals("patternMarkdown")) {
+          this.pattern = new MarkdownType();
+          return this.pattern;
+        }
+        else if (name.equals("patternAnnotation")) {
+          this.pattern = new Annotation();
+          return this.pattern;
+        }
+        else if (name.equals("patternAttachment")) {
+          this.pattern = new Attachment();
+          return this.pattern;
+        }
+        else if (name.equals("patternIdentifier")) {
+          this.pattern = new Identifier();
+          return this.pattern;
+        }
+        else if (name.equals("patternCodeableConcept")) {
+          this.pattern = new CodeableConcept();
+          return this.pattern;
+        }
+        else if (name.equals("patternCoding")) {
+          this.pattern = new Coding();
+          return this.pattern;
+        }
+        else if (name.equals("patternQuantity")) {
+          this.pattern = new Quantity();
+          return this.pattern;
+        }
+        else if (name.equals("patternRange")) {
+          this.pattern = new Range();
+          return this.pattern;
+        }
+        else if (name.equals("patternPeriod")) {
+          this.pattern = new Period();
+          return this.pattern;
+        }
+        else if (name.equals("patternRatio")) {
+          this.pattern = new Ratio();
+          return this.pattern;
+        }
+        else if (name.equals("patternSampledData")) {
+          this.pattern = new SampledData();
+          return this.pattern;
+        }
+        else if (name.equals("patternSignature")) {
+          this.pattern = new Signature();
+          return this.pattern;
+        }
+        else if (name.equals("patternHumanName")) {
+          this.pattern = new HumanName();
+          return this.pattern;
+        }
+        else if (name.equals("patternAddress")) {
+          this.pattern = new Address();
+          return this.pattern;
+        }
+        else if (name.equals("patternContactPoint")) {
+          this.pattern = new ContactPoint();
+          return this.pattern;
+        }
+        else if (name.equals("patternTiming")) {
+          this.pattern = new Timing();
+          return this.pattern;
+        }
+        else if (name.equals("patternReference")) {
+          this.pattern = new Reference();
+          return this.pattern;
+        }
+        else if (name.equals("patternMeta")) {
+          this.pattern = new Meta();
+          return this.pattern;
+        }
+        else if (name.equals("exampleBoolean")) {
+          this.example = new BooleanType();
+          return this.example;
+        }
+        else if (name.equals("exampleInteger")) {
+          this.example = new IntegerType();
+          return this.example;
+        }
+        else if (name.equals("exampleDecimal")) {
+          this.example = new DecimalType();
+          return this.example;
+        }
+        else if (name.equals("exampleBase64Binary")) {
+          this.example = new Base64BinaryType();
+          return this.example;
+        }
+        else if (name.equals("exampleInstant")) {
+          this.example = new InstantType();
+          return this.example;
+        }
+        else if (name.equals("exampleString")) {
+          this.example = new StringType();
+          return this.example;
+        }
+        else if (name.equals("exampleUri")) {
+          this.example = new UriType();
+          return this.example;
+        }
+        else if (name.equals("exampleDate")) {
+          this.example = new DateType();
+          return this.example;
+        }
+        else if (name.equals("exampleDateTime")) {
+          this.example = new DateTimeType();
+          return this.example;
+        }
+        else if (name.equals("exampleTime")) {
+          this.example = new TimeType();
+          return this.example;
+        }
+        else if (name.equals("exampleCode")) {
+          this.example = new CodeType();
+          return this.example;
+        }
+        else if (name.equals("exampleOid")) {
+          this.example = new OidType();
+          return this.example;
+        }
+        else if (name.equals("exampleId")) {
+          this.example = new IdType();
+          return this.example;
+        }
+        else if (name.equals("exampleUnsignedInt")) {
+          this.example = new UnsignedIntType();
+          return this.example;
+        }
+        else if (name.equals("examplePositiveInt")) {
+          this.example = new PositiveIntType();
+          return this.example;
+        }
+        else if (name.equals("exampleMarkdown")) {
+          this.example = new MarkdownType();
+          return this.example;
+        }
+        else if (name.equals("exampleAnnotation")) {
+          this.example = new Annotation();
+          return this.example;
+        }
+        else if (name.equals("exampleAttachment")) {
+          this.example = new Attachment();
+          return this.example;
+        }
+        else if (name.equals("exampleIdentifier")) {
+          this.example = new Identifier();
+          return this.example;
+        }
+        else if (name.equals("exampleCodeableConcept")) {
+          this.example = new CodeableConcept();
+          return this.example;
+        }
+        else if (name.equals("exampleCoding")) {
+          this.example = new Coding();
+          return this.example;
+        }
+        else if (name.equals("exampleQuantity")) {
+          this.example = new Quantity();
+          return this.example;
+        }
+        else if (name.equals("exampleRange")) {
+          this.example = new Range();
+          return this.example;
+        }
+        else if (name.equals("examplePeriod")) {
+          this.example = new Period();
+          return this.example;
+        }
+        else if (name.equals("exampleRatio")) {
+          this.example = new Ratio();
+          return this.example;
+        }
+        else if (name.equals("exampleSampledData")) {
+          this.example = new SampledData();
+          return this.example;
+        }
+        else if (name.equals("exampleSignature")) {
+          this.example = new Signature();
+          return this.example;
+        }
+        else if (name.equals("exampleHumanName")) {
+          this.example = new HumanName();
+          return this.example;
+        }
+        else if (name.equals("exampleAddress")) {
+          this.example = new Address();
+          return this.example;
+        }
+        else if (name.equals("exampleContactPoint")) {
+          this.example = new ContactPoint();
+          return this.example;
+        }
+        else if (name.equals("exampleTiming")) {
+          this.example = new Timing();
+          return this.example;
+        }
+        else if (name.equals("exampleReference")) {
+          this.example = new Reference();
+          return this.example;
+        }
+        else if (name.equals("exampleMeta")) {
+          this.example = new Meta();
+          return this.example;
+        }
+        else if (name.equals("minValueBoolean")) {
+          this.minValue = new BooleanType();
+          return this.minValue;
+        }
+        else if (name.equals("minValueInteger")) {
+          this.minValue = new IntegerType();
+          return this.minValue;
+        }
+        else if (name.equals("minValueDecimal")) {
+          this.minValue = new DecimalType();
+          return this.minValue;
+        }
+        else if (name.equals("minValueBase64Binary")) {
+          this.minValue = new Base64BinaryType();
+          return this.minValue;
+        }
+        else if (name.equals("minValueInstant")) {
+          this.minValue = new InstantType();
+          return this.minValue;
+        }
+        else if (name.equals("minValueString")) {
+          this.minValue = new StringType();
+          return this.minValue;
+        }
+        else if (name.equals("minValueUri")) {
+          this.minValue = new UriType();
+          return this.minValue;
+        }
+        else if (name.equals("minValueDate")) {
+          this.minValue = new DateType();
+          return this.minValue;
+        }
+        else if (name.equals("minValueDateTime")) {
+          this.minValue = new DateTimeType();
+          return this.minValue;
+        }
+        else if (name.equals("minValueTime")) {
+          this.minValue = new TimeType();
+          return this.minValue;
+        }
+        else if (name.equals("minValueCode")) {
+          this.minValue = new CodeType();
+          return this.minValue;
+        }
+        else if (name.equals("minValueOid")) {
+          this.minValue = new OidType();
+          return this.minValue;
+        }
+        else if (name.equals("minValueId")) {
+          this.minValue = new IdType();
+          return this.minValue;
+        }
+        else if (name.equals("minValueUnsignedInt")) {
+          this.minValue = new UnsignedIntType();
+          return this.minValue;
+        }
+        else if (name.equals("minValuePositiveInt")) {
+          this.minValue = new PositiveIntType();
+          return this.minValue;
+        }
+        else if (name.equals("minValueMarkdown")) {
+          this.minValue = new MarkdownType();
+          return this.minValue;
+        }
+        else if (name.equals("minValueAnnotation")) {
+          this.minValue = new Annotation();
+          return this.minValue;
+        }
+        else if (name.equals("minValueAttachment")) {
+          this.minValue = new Attachment();
+          return this.minValue;
+        }
+        else if (name.equals("minValueIdentifier")) {
+          this.minValue = new Identifier();
+          return this.minValue;
+        }
+        else if (name.equals("minValueCodeableConcept")) {
+          this.minValue = new CodeableConcept();
+          return this.minValue;
+        }
+        else if (name.equals("minValueCoding")) {
+          this.minValue = new Coding();
+          return this.minValue;
+        }
+        else if (name.equals("minValueQuantity")) {
+          this.minValue = new Quantity();
+          return this.minValue;
+        }
+        else if (name.equals("minValueRange")) {
+          this.minValue = new Range();
+          return this.minValue;
+        }
+        else if (name.equals("minValuePeriod")) {
+          this.minValue = new Period();
+          return this.minValue;
+        }
+        else if (name.equals("minValueRatio")) {
+          this.minValue = new Ratio();
+          return this.minValue;
+        }
+        else if (name.equals("minValueSampledData")) {
+          this.minValue = new SampledData();
+          return this.minValue;
+        }
+        else if (name.equals("minValueSignature")) {
+          this.minValue = new Signature();
+          return this.minValue;
+        }
+        else if (name.equals("minValueHumanName")) {
+          this.minValue = new HumanName();
+          return this.minValue;
+        }
+        else if (name.equals("minValueAddress")) {
+          this.minValue = new Address();
+          return this.minValue;
+        }
+        else if (name.equals("minValueContactPoint")) {
+          this.minValue = new ContactPoint();
+          return this.minValue;
+        }
+        else if (name.equals("minValueTiming")) {
+          this.minValue = new Timing();
+          return this.minValue;
+        }
+        else if (name.equals("minValueReference")) {
+          this.minValue = new Reference();
+          return this.minValue;
+        }
+        else if (name.equals("minValueMeta")) {
+          this.minValue = new Meta();
+          return this.minValue;
+        }
+        else if (name.equals("maxValueBoolean")) {
+          this.maxValue = new BooleanType();
+          return this.maxValue;
+        }
+        else if (name.equals("maxValueInteger")) {
+          this.maxValue = new IntegerType();
+          return this.maxValue;
+        }
+        else if (name.equals("maxValueDecimal")) {
+          this.maxValue = new DecimalType();
+          return this.maxValue;
+        }
+        else if (name.equals("maxValueBase64Binary")) {
+          this.maxValue = new Base64BinaryType();
+          return this.maxValue;
+        }
+        else if (name.equals("maxValueInstant")) {
+          this.maxValue = new InstantType();
+          return this.maxValue;
+        }
+        else if (name.equals("maxValueString")) {
+          this.maxValue = new StringType();
+          return this.maxValue;
+        }
+        else if (name.equals("maxValueUri")) {
+          this.maxValue = new UriType();
+          return this.maxValue;
+        }
+        else if (name.equals("maxValueDate")) {
+          this.maxValue = new DateType();
+          return this.maxValue;
+        }
+        else if (name.equals("maxValueDateTime")) {
+          this.maxValue = new DateTimeType();
+          return this.maxValue;
+        }
+        else if (name.equals("maxValueTime")) {
+          this.maxValue = new TimeType();
+          return this.maxValue;
+        }
+        else if (name.equals("maxValueCode")) {
+          this.maxValue = new CodeType();
+          return this.maxValue;
+        }
+        else if (name.equals("maxValueOid")) {
+          this.maxValue = new OidType();
+          return this.maxValue;
+        }
+        else if (name.equals("maxValueId")) {
+          this.maxValue = new IdType();
+          return this.maxValue;
+        }
+        else if (name.equals("maxValueUnsignedInt")) {
+          this.maxValue = new UnsignedIntType();
+          return this.maxValue;
+        }
+        else if (name.equals("maxValuePositiveInt")) {
+          this.maxValue = new PositiveIntType();
+          return this.maxValue;
+        }
+        else if (name.equals("maxValueMarkdown")) {
+          this.maxValue = new MarkdownType();
+          return this.maxValue;
+        }
+        else if (name.equals("maxValueAnnotation")) {
+          this.maxValue = new Annotation();
+          return this.maxValue;
+        }
+        else if (name.equals("maxValueAttachment")) {
+          this.maxValue = new Attachment();
+          return this.maxValue;
+        }
+        else if (name.equals("maxValueIdentifier")) {
+          this.maxValue = new Identifier();
+          return this.maxValue;
+        }
+        else if (name.equals("maxValueCodeableConcept")) {
+          this.maxValue = new CodeableConcept();
+          return this.maxValue;
+        }
+        else if (name.equals("maxValueCoding")) {
+          this.maxValue = new Coding();
+          return this.maxValue;
+        }
+        else if (name.equals("maxValueQuantity")) {
+          this.maxValue = new Quantity();
+          return this.maxValue;
+        }
+        else if (name.equals("maxValueRange")) {
+          this.maxValue = new Range();
+          return this.maxValue;
+        }
+        else if (name.equals("maxValuePeriod")) {
+          this.maxValue = new Period();
+          return this.maxValue;
+        }
+        else if (name.equals("maxValueRatio")) {
+          this.maxValue = new Ratio();
+          return this.maxValue;
+        }
+        else if (name.equals("maxValueSampledData")) {
+          this.maxValue = new SampledData();
+          return this.maxValue;
+        }
+        else if (name.equals("maxValueSignature")) {
+          this.maxValue = new Signature();
+          return this.maxValue;
+        }
+        else if (name.equals("maxValueHumanName")) {
+          this.maxValue = new HumanName();
+          return this.maxValue;
+        }
+        else if (name.equals("maxValueAddress")) {
+          this.maxValue = new Address();
+          return this.maxValue;
+        }
+        else if (name.equals("maxValueContactPoint")) {
+          this.maxValue = new ContactPoint();
+          return this.maxValue;
+        }
+        else if (name.equals("maxValueTiming")) {
+          this.maxValue = new Timing();
+          return this.maxValue;
+        }
+        else if (name.equals("maxValueReference")) {
+          this.maxValue = new Reference();
+          return this.maxValue;
+        }
+        else if (name.equals("maxValueMeta")) {
+          this.maxValue = new Meta();
+          return this.maxValue;
+        }
+        else if (name.equals("maxLength")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ElementDefinition.maxLength");
+        }
+        else if (name.equals("condition")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ElementDefinition.condition");
+        }
+        else if (name.equals("constraint")) {
+          return addConstraint();
+        }
+        else if (name.equals("mustSupport")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ElementDefinition.mustSupport");
+        }
+        else if (name.equals("isModifier")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ElementDefinition.isModifier");
+        }
+        else if (name.equals("isSummary")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ElementDefinition.isSummary");
+        }
+        else if (name.equals("binding")) {
+          this.binding = new ElementDefinitionBindingComponent();
+          return this.binding;
+        }
+        else if (name.equals("mapping")) {
+          return addMapping();
+        }
+        else
+          return super.addChild(name);
+      }
+
+  public String fhirType() {
+    return "ElementDefinition";
+
+  }
 
       public ElementDefinition copy() {
         ElementDefinition dst = new ElementDefinition();

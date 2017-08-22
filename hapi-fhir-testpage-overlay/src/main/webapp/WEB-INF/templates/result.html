@@ -314,9 +314,14 @@
 																<td>
 																	<a th:if="${entry.resource} != null" th:href="${entry.resource.id}" th:text="${entry.resource.idElement.toUnqualified()}" style="font-size: 0.8em"/>
 																</td>
-																<td th:if="${entry.resource} == null or ${entry.resource.meta.lastUpdatedElement.value} == null"></td>
-																<td th:if="${entry.resource} != null and ${entry.resource.meta.lastUpdatedElement.value} != null and ${entry.resource.meta.lastUpdatedElement.today} == true" th:text="${#dates.format(entry.resource.meta.lastUpdated, 'HH:mm:ss')}"></td>
-																<td th:if="${entry.resource} != null and ${entry.resource.meta.lastUpdatedElement.value} != null and ${entry.resource.meta.lastUpdatedElement.today} == false" th:text="${#dates.format(entry.resource.meta.lastUpdated, 'yyyy-MM-dd HH:mm:ss')}"></td>
+                                                <th:block th:if="${ri}">
+                                                   <td th:if="${entry.resource} == null or ${entry.resource.meta.lastUpdatedElement.value} == null"></td>
+                                                   <td th:if="${entry.resource} != null and ${entry.resource.meta.lastUpdatedElement.value} != null and ${entry.resource.meta.lastUpdatedElement.today} == true" th:text="${#dates.format(entry.resource.meta.lastUpdated, 'HH:mm:ss')}"></td>
+                                                   <td th:if="${entry.resource} != null and ${entry.resource.meta.lastUpdatedElement.value} != null and ${entry.resource.meta.lastUpdatedElement.today} == false" th:text="${#dates.format(entry.resource.meta.lastUpdated, 'yyyy-MM-dd HH:mm:ss')}"></td>
+                                                </th:block>
+                                                <th:block th:unless="${ri}">
+                                                   <td></td>
+                                                </th:block>
 															</tr>
 															</tbody>
 														</table>

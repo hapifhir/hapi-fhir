@@ -131,9 +131,6 @@ public class RuntimeResourceDefinition extends BaseRuntimeElementCompositeDefini
 
 		if (!UrlUtil.isValid(profile)) {
 			String resourceName = "/StructureDefinition/";
-			if (myContext.getVersion().getVersion() == FhirVersionEnum.DSTU1) {
-				resourceName = "/Profile/";
-			}
 			String profileWithUrl = theServerBase + resourceName + profile;
 			if (UrlUtil.isValid(profileWithUrl)) {
 				return profileWithUrl;

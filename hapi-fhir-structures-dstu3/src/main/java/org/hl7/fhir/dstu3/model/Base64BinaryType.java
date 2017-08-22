@@ -31,7 +31,6 @@ package org.hl7.fhir.dstu3.model;
 import org.apache.commons.codec.binary.Base64;
 
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
-import ca.uhn.fhir.rest.server.Constants;
 
 /**
  * Primitive type "base64Binary" in FHIR: a sequence of bytes represented in base64
@@ -59,14 +58,14 @@ public class Base64BinaryType extends PrimitiveType<byte[]> {
   }
 
   protected byte[] parse(String theValue) {
-    return Base64.decodeBase64(theValue.getBytes(Constants.CHARSET_UTF8));
+    return Base64.decodeBase64(theValue.getBytes(ca.uhn.fhir.rest.api.Constants.CHARSET_UTF8));
   }
 
   protected String encode(byte[] theValue) {
     if (theValue == null) {
       return null;
     }
-    return new String(Base64.encodeBase64(theValue), Constants.CHARSET_UTF8);
+    return new String(Base64.encodeBase64(theValue), ca.uhn.fhir.rest.api.Constants.CHARSET_UTF8);
   }
 
   @Override

@@ -29,18 +29,13 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Wed, Jul 13, 2016 05:32+1000 for FHIR v1.0.2
+import java.util.*;
 
+import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 
-import ca.uhn.fhir.model.api.annotation.Block;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
-import ca.uhn.fhir.model.api.annotation.ResourceDef;
-import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.*;
 /**
  * An occurrence of information being transmitted; e.g. an alert that was sent to a responsible provider, a public health agency was notified about a reportable condition.
  */
@@ -72,7 +67,7 @@ public class Communication extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static CommunicationStatus fromCode(String codeString) throws Exception {
+        public static CommunicationStatus fromCode(String codeString) throws FHIRException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("in-progress".equals(codeString))
@@ -85,7 +80,7 @@ public class Communication extends DomainResource {
           return REJECTED;
         if ("failed".equals(codeString))
           return FAILED;
-        throw new Exception("Unknown CommunicationStatus code '"+codeString+"'");
+        throw new FHIRException("Unknown CommunicationStatus code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -146,6 +141,24 @@ public class Communication extends DomainResource {
           return CommunicationStatus.FAILED;
         throw new IllegalArgumentException("Unknown CommunicationStatus code '"+codeString+"'");
         }
+        public Enumeration<CommunicationStatus> fromType(Base code) throws FHIRException {
+          if (code == null || code.isEmpty())
+            return null;
+          String codeString = ((PrimitiveType) code).asStringValue();
+          if (codeString == null || "".equals(codeString))
+            return null;
+        if ("in-progress".equals(codeString))
+          return new Enumeration<CommunicationStatus>(this, CommunicationStatus.INPROGRESS);
+        if ("completed".equals(codeString))
+          return new Enumeration<CommunicationStatus>(this, CommunicationStatus.COMPLETED);
+        if ("suspended".equals(codeString))
+          return new Enumeration<CommunicationStatus>(this, CommunicationStatus.SUSPENDED);
+        if ("rejected".equals(codeString))
+          return new Enumeration<CommunicationStatus>(this, CommunicationStatus.REJECTED);
+        if ("failed".equals(codeString))
+          return new Enumeration<CommunicationStatus>(this, CommunicationStatus.FAILED);
+        throw new FHIRException("Unknown CommunicationStatus code '"+codeString+"'");
+        }
     public String toCode(CommunicationStatus code) {
       if (code == CommunicationStatus.INPROGRESS)
         return "in-progress";
@@ -197,39 +210,39 @@ public class Communication extends DomainResource {
         /**
          * @return {@link #content} (A communicated content (or for multi-part communications, one portion of the communication).)
          */
-        public StringType getContentStringType() throws Exception { 
+        public StringType getContentStringType() throws FHIRException { 
           if (!(this.content instanceof StringType))
-            throw new Exception("Type mismatch: the type StringType was expected, but "+this.content.getClass().getName()+" was encountered");
+            throw new FHIRException("Type mismatch: the type StringType was expected, but "+this.content.getClass().getName()+" was encountered");
           return (StringType) this.content;
         }
 
-        public boolean hasContentStringType() throws Exception { 
+        public boolean hasContentStringType() { 
           return this.content instanceof StringType;
         }
 
         /**
          * @return {@link #content} (A communicated content (or for multi-part communications, one portion of the communication).)
          */
-        public Attachment getContentAttachment() throws Exception { 
+        public Attachment getContentAttachment() throws FHIRException { 
           if (!(this.content instanceof Attachment))
-            throw new Exception("Type mismatch: the type Attachment was expected, but "+this.content.getClass().getName()+" was encountered");
+            throw new FHIRException("Type mismatch: the type Attachment was expected, but "+this.content.getClass().getName()+" was encountered");
           return (Attachment) this.content;
         }
 
-        public boolean hasContentAttachment() throws Exception { 
+        public boolean hasContentAttachment() { 
           return this.content instanceof Attachment;
         }
 
         /**
          * @return {@link #content} (A communicated content (or for multi-part communications, one portion of the communication).)
          */
-        public Reference getContentReference() throws Exception { 
+        public Reference getContentReference() throws FHIRException { 
           if (!(this.content instanceof Reference))
-            throw new Exception("Type mismatch: the type Reference was expected, but "+this.content.getClass().getName()+" was encountered");
+            throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.content.getClass().getName()+" was encountered");
           return (Reference) this.content;
         }
 
-        public boolean hasContentReference() throws Exception { 
+        public boolean hasContentReference() { 
           return this.content instanceof Reference;
         }
 
@@ -249,6 +262,32 @@ public class Communication extends DomainResource {
           super.listChildren(childrenList);
           childrenList.add(new Property("content[x]", "string|Attachment|Reference(Any)", "A communicated content (or for multi-part communications, one portion of the communication).", 0, java.lang.Integer.MAX_VALUE, content));
         }
+
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("content[x]"))
+          this.content = (Type) value; // Type
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("contentString")) {
+          this.content = new StringType();
+          return this.content;
+        }
+        else if (name.equals("contentAttachment")) {
+          this.content = new Attachment();
+          return this.content;
+        }
+        else if (name.equals("contentReference")) {
+          this.content = new Reference();
+          return this.content;
+        }
+        else
+          return super.addChild(name);
+      }
 
       public CommunicationPayloadComponent copy() {
         CommunicationPayloadComponent dst = new CommunicationPayloadComponent();
@@ -280,6 +319,11 @@ public class Communication extends DomainResource {
       public boolean isEmpty() {
         return super.isEmpty() && (content == null || content.isEmpty());
       }
+
+  public String fhirType() {
+    return "Communication.payload";
+
+  }
 
   }
 
@@ -975,6 +1019,93 @@ public class Communication extends DomainResource {
         childrenList.add(new Property("subject", "Reference(Patient)", "The patient who was the focus of this communication.", 0, java.lang.Integer.MAX_VALUE, subject));
         childrenList.add(new Property("requestDetail", "Reference(CommunicationRequest)", "The communication request that was responsible for producing this communication.", 0, java.lang.Integer.MAX_VALUE, requestDetail));
       }
+
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("identifier"))
+          this.getIdentifier().add(castToIdentifier(value));
+        else if (name.equals("category"))
+          this.category = castToCodeableConcept(value); // CodeableConcept
+        else if (name.equals("sender"))
+          this.sender = castToReference(value); // Reference
+        else if (name.equals("recipient"))
+          this.getRecipient().add(castToReference(value));
+        else if (name.equals("payload"))
+          this.getPayload().add((CommunicationPayloadComponent) value);
+        else if (name.equals("medium"))
+          this.getMedium().add(castToCodeableConcept(value));
+        else if (name.equals("status"))
+          this.status = new CommunicationStatusEnumFactory().fromType(value); // Enumeration<CommunicationStatus>
+        else if (name.equals("encounter"))
+          this.encounter = castToReference(value); // Reference
+        else if (name.equals("sent"))
+          this.sent = castToDateTime(value); // DateTimeType
+        else if (name.equals("received"))
+          this.received = castToDateTime(value); // DateTimeType
+        else if (name.equals("reason"))
+          this.getReason().add(castToCodeableConcept(value));
+        else if (name.equals("subject"))
+          this.subject = castToReference(value); // Reference
+        else if (name.equals("requestDetail"))
+          this.requestDetail = castToReference(value); // Reference
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("identifier")) {
+          return addIdentifier();
+        }
+        else if (name.equals("category")) {
+          this.category = new CodeableConcept();
+          return this.category;
+        }
+        else if (name.equals("sender")) {
+          this.sender = new Reference();
+          return this.sender;
+        }
+        else if (name.equals("recipient")) {
+          return addRecipient();
+        }
+        else if (name.equals("payload")) {
+          return addPayload();
+        }
+        else if (name.equals("medium")) {
+          return addMedium();
+        }
+        else if (name.equals("status")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Communication.status");
+        }
+        else if (name.equals("encounter")) {
+          this.encounter = new Reference();
+          return this.encounter;
+        }
+        else if (name.equals("sent")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Communication.sent");
+        }
+        else if (name.equals("received")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Communication.received");
+        }
+        else if (name.equals("reason")) {
+          return addReason();
+        }
+        else if (name.equals("subject")) {
+          this.subject = new Reference();
+          return this.subject;
+        }
+        else if (name.equals("requestDetail")) {
+          this.requestDetail = new Reference();
+          return this.requestDetail;
+        }
+        else
+          return super.addChild(name);
+      }
+
+  public String fhirType() {
+    return "Communication";
+
+  }
 
       public Communication copy() {
         Communication dst = new Communication();

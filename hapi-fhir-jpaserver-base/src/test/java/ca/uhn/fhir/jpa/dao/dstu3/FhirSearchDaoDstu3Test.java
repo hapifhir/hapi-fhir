@@ -14,11 +14,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
 import ca.uhn.fhir.jpa.dao.SearchParameterMap;
-import ca.uhn.fhir.rest.param.StringAndListParam;
-import ca.uhn.fhir.rest.param.StringOrListParam;
-import ca.uhn.fhir.rest.param.StringParam;
-import ca.uhn.fhir.rest.server.Constants;
-import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.param.*;
 import ca.uhn.fhir.util.TestUtil;
 
 public class FhirSearchDaoDstu3Test extends BaseJpaDstu3Test {

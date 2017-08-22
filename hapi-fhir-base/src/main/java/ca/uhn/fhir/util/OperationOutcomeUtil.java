@@ -70,10 +70,7 @@ public class OperationOutcomeUtil {
 	}
 
 	public static String getFirstIssueDetails(FhirContext theCtx, IBaseOperationOutcome theOutcome) {
-		if (theCtx.getVersion().getVersion().isNewerThan(FhirVersionEnum.DSTU1)) {
-			return getFirstIssueStringPart(theCtx, theOutcome, "diagnostics");
-		}
-		return getFirstIssueStringPart(theCtx, theOutcome, "details");
+		return getFirstIssueStringPart(theCtx, theOutcome, "diagnostics");
 	}
 
 	public static String getFirstIssueLocation(FhirContext theCtx, IBaseOperationOutcome theOutcome) {
@@ -130,16 +127,12 @@ public class OperationOutcomeUtil {
 	private static void populateDetails(FhirContext theCtx, IBase theIssue, String theSeverity, String theDetails, String theLocation, String theCode) {
 		BaseRuntimeElementCompositeDefinition<?> issueElement = (BaseRuntimeElementCompositeDefinition<?>) theCtx.getElementDefinition(theIssue.getClass());
 		BaseRuntimeChildDefinition detailsChild;
-		if (theCtx.getVersion().getVersion().isNewerThan(FhirVersionEnum.DSTU1)) {
-			detailsChild = issueElement.getChildByName("diagnostics");
+		detailsChild = issueElement.getChildByName("diagnostics");
 
-			BaseRuntimeChildDefinition codeChild = issueElement.getChildByName("code");
-			IPrimitiveType<?> codeElem = (IPrimitiveType<?>) codeChild.getChildByName("code").newInstance(codeChild.getInstanceConstructorArguments());
-			codeElem.setValueAsString(theCode);
-			codeChild.getMutator().addValue(theIssue, codeElem);
-		} else {
-			detailsChild = issueElement.getChildByName("details");
-		}
+		BaseRuntimeChildDefinition codeChild = issueElement.getChildByName("code");
+		IPrimitiveType<?> codeElem = (IPrimitiveType<?>) codeChild.getChildByName("code").newInstance(codeChild.getInstanceConstructorArguments());
+		codeElem.setValueAsString(theCode);
+		codeChild.getMutator().addValue(theIssue, codeElem);
 
 		BaseRuntimeElementDefinition<?> stringDef = detailsChild.getChildByName(detailsChild.getElementName());
 		BaseRuntimeChildDefinition severityChild = issueElement.getChildByName("severity");

@@ -14,11 +14,11 @@ public class FhirContextIntro {
 	@SuppressWarnings("unused")
 	public static void creatingContext() {
 // START SNIPPET: creatingContext
-// Create a context for DSTU1
-FhirContext ctx = FhirContext.forDstu1();
-
-// Alternately, create a context for DSTU2
+// Create a context for DSTU2
 FhirContext ctxDstu2 = FhirContext.forDstu2();
+
+// Alternately, create a context for R4
+FhirContext ctxR4 = FhirContext.forR4();
 // END SNIPPET: creatingContext
 		
 	}
@@ -103,7 +103,7 @@ System.out.println(encoded);
 	
 	
 	public static void parseMsg() {
-FhirContext ctx = FhirContext.forDstu1();
+FhirContext ctx = FhirContext.forR4();
 
 //START SNIPPET: parseMsg
 // The following is an example Patient resource

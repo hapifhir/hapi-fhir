@@ -13,7 +13,7 @@ import org.junit.AfterClass;
 import org.junit.Before;
 
 import ca.uhn.fhir.jpa.rp.dstu2.PatientResourceProvider;
-import ca.uhn.fhir.rest.method.IRequestOperationCallback;
+import ca.uhn.fhir.rest.api.server.IRequestOperationCallback;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.TestUtil;

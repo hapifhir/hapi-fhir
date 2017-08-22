@@ -29,19 +29,14 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Wed, Jul 13, 2016 05:32+1000 for FHIR v1.0.2
+import java.util.*;
 
+import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
-import org.hl7.fhir.instance.utilities.Utilities;
+import org.hl7.fhir.utilities.Utilities;
 
-import ca.uhn.fhir.model.api.annotation.Block;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
-import ca.uhn.fhir.model.api.annotation.ResourceDef;
-import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.*;
 /**
  * Describes the characteristics, operational status and capabilities of a medical-related component of a medical device.
  */
@@ -97,7 +92,7 @@ public class DeviceComponent extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static MeasmntPrinciple fromCode(String codeString) throws Exception {
+        public static MeasmntPrinciple fromCode(String codeString) throws FHIRException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("other".equals(codeString))
@@ -122,7 +117,7 @@ public class DeviceComponent extends DomainResource {
           return ACOUSTICAL;
         if ("manual".equals(codeString))
           return MANUAL;
-        throw new Exception("Unknown MeasmntPrinciple code '"+codeString+"'");
+        throw new FHIRException("Unknown MeasmntPrinciple code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -218,6 +213,36 @@ public class DeviceComponent extends DomainResource {
         if ("manual".equals(codeString))
           return MeasmntPrinciple.MANUAL;
         throw new IllegalArgumentException("Unknown MeasmntPrinciple code '"+codeString+"'");
+        }
+        public Enumeration<MeasmntPrinciple> fromType(Base code) throws FHIRException {
+          if (code == null || code.isEmpty())
+            return null;
+          String codeString = ((PrimitiveType) code).asStringValue();
+          if (codeString == null || "".equals(codeString))
+            return null;
+        if ("other".equals(codeString))
+          return new Enumeration<MeasmntPrinciple>(this, MeasmntPrinciple.OTHER);
+        if ("chemical".equals(codeString))
+          return new Enumeration<MeasmntPrinciple>(this, MeasmntPrinciple.CHEMICAL);
+        if ("electrical".equals(codeString))
+          return new Enumeration<MeasmntPrinciple>(this, MeasmntPrinciple.ELECTRICAL);
+        if ("impedance".equals(codeString))
+          return new Enumeration<MeasmntPrinciple>(this, MeasmntPrinciple.IMPEDANCE);
+        if ("nuclear".equals(codeString))
+          return new Enumeration<MeasmntPrinciple>(this, MeasmntPrinciple.NUCLEAR);
+        if ("optical".equals(codeString))
+          return new Enumeration<MeasmntPrinciple>(this, MeasmntPrinciple.OPTICAL);
+        if ("thermal".equals(codeString))
+          return new Enumeration<MeasmntPrinciple>(this, MeasmntPrinciple.THERMAL);
+        if ("biological".equals(codeString))
+          return new Enumeration<MeasmntPrinciple>(this, MeasmntPrinciple.BIOLOGICAL);
+        if ("mechanical".equals(codeString))
+          return new Enumeration<MeasmntPrinciple>(this, MeasmntPrinciple.MECHANICAL);
+        if ("acoustical".equals(codeString))
+          return new Enumeration<MeasmntPrinciple>(this, MeasmntPrinciple.ACOUSTICAL);
+        if ("manual".equals(codeString))
+          return new Enumeration<MeasmntPrinciple>(this, MeasmntPrinciple.MANUAL);
+        throw new FHIRException("Unknown MeasmntPrinciple code '"+codeString+"'");
         }
     public String toCode(MeasmntPrinciple code) {
       if (code == MeasmntPrinciple.OTHER)
@@ -382,6 +407,35 @@ public class DeviceComponent extends DomainResource {
           childrenList.add(new Property("productionSpec", "string", "Describes the printable string defining the component.", 0, java.lang.Integer.MAX_VALUE, productionSpec));
         }
 
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("specType"))
+          this.specType = castToCodeableConcept(value); // CodeableConcept
+        else if (name.equals("componentId"))
+          this.componentId = castToIdentifier(value); // Identifier
+        else if (name.equals("productionSpec"))
+          this.productionSpec = castToString(value); // StringType
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("specType")) {
+          this.specType = new CodeableConcept();
+          return this.specType;
+        }
+        else if (name.equals("componentId")) {
+          this.componentId = new Identifier();
+          return this.componentId;
+        }
+        else if (name.equals("productionSpec")) {
+          throw new FHIRException("Cannot call addChild on a primitive type DeviceComponent.productionSpec");
+        }
+        else
+          return super.addChild(name);
+      }
+
       public DeviceComponentProductionSpecificationComponent copy() {
         DeviceComponentProductionSpecificationComponent dst = new DeviceComponentProductionSpecificationComponent();
         copyValues(dst);
@@ -416,6 +470,11 @@ public class DeviceComponent extends DomainResource {
         return super.isEmpty() && (specType == null || specType.isEmpty()) && (componentId == null || componentId.isEmpty())
            && (productionSpec == null || productionSpec.isEmpty());
       }
+
+  public String fhirType() {
+    return "DeviceComponent.productionSpecification";
+
+  }
 
   }
 
@@ -889,6 +948,79 @@ public class DeviceComponent extends DomainResource {
         childrenList.add(new Property("productionSpecification", "", "Describes the production specification such as component revision, serial number, etc.", 0, java.lang.Integer.MAX_VALUE, productionSpecification));
         childrenList.add(new Property("languageCode", "CodeableConcept", "Describes the language code for the human-readable text string produced by the device. This language code will follow the IETF language tag. Example: en-US.", 0, java.lang.Integer.MAX_VALUE, languageCode));
       }
+
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("type"))
+          this.type = castToCodeableConcept(value); // CodeableConcept
+        else if (name.equals("identifier"))
+          this.identifier = castToIdentifier(value); // Identifier
+        else if (name.equals("lastSystemChange"))
+          this.lastSystemChange = castToInstant(value); // InstantType
+        else if (name.equals("source"))
+          this.source = castToReference(value); // Reference
+        else if (name.equals("parent"))
+          this.parent = castToReference(value); // Reference
+        else if (name.equals("operationalStatus"))
+          this.getOperationalStatus().add(castToCodeableConcept(value));
+        else if (name.equals("parameterGroup"))
+          this.parameterGroup = castToCodeableConcept(value); // CodeableConcept
+        else if (name.equals("measurementPrinciple"))
+          this.measurementPrinciple = new MeasmntPrincipleEnumFactory().fromType(value); // Enumeration<MeasmntPrinciple>
+        else if (name.equals("productionSpecification"))
+          this.getProductionSpecification().add((DeviceComponentProductionSpecificationComponent) value);
+        else if (name.equals("languageCode"))
+          this.languageCode = castToCodeableConcept(value); // CodeableConcept
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("type")) {
+          this.type = new CodeableConcept();
+          return this.type;
+        }
+        else if (name.equals("identifier")) {
+          this.identifier = new Identifier();
+          return this.identifier;
+        }
+        else if (name.equals("lastSystemChange")) {
+          throw new FHIRException("Cannot call addChild on a primitive type DeviceComponent.lastSystemChange");
+        }
+        else if (name.equals("source")) {
+          this.source = new Reference();
+          return this.source;
+        }
+        else if (name.equals("parent")) {
+          this.parent = new Reference();
+          return this.parent;
+        }
+        else if (name.equals("operationalStatus")) {
+          return addOperationalStatus();
+        }
+        else if (name.equals("parameterGroup")) {
+          this.parameterGroup = new CodeableConcept();
+          return this.parameterGroup;
+        }
+        else if (name.equals("measurementPrinciple")) {
+          throw new FHIRException("Cannot call addChild on a primitive type DeviceComponent.measurementPrinciple");
+        }
+        else if (name.equals("productionSpecification")) {
+          return addProductionSpecification();
+        }
+        else if (name.equals("languageCode")) {
+          this.languageCode = new CodeableConcept();
+          return this.languageCode;
+        }
+        else
+          return super.addChild(name);
+      }
+
+  public String fhirType() {
+    return "DeviceComponent";
+
+  }
 
       public DeviceComponent copy() {
         DeviceComponent dst = new DeviceComponent();

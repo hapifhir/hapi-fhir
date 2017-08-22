@@ -10,7 +10,7 @@ package ca.uhn.fhir.validation.schematron;
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  * 
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,13 +22,12 @@ package ca.uhn.fhir.validation.schematron;
 
 import java.io.InputStream;
 import java.io.StringReader;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 
 import javax.xml.transform.stream.StreamSource;
 
 import org.apache.commons.io.IOUtils;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.oclc.purl.dsdl.svrl.SchematronOutputType;
 
@@ -39,17 +38,10 @@ import com.phloc.schematron.SchematronHelper;
 import com.phloc.schematron.xslt.SchematronResourceSCH;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.api.Bundle;
-import ca.uhn.fhir.model.api.BundleEntry;
-import ca.uhn.fhir.rest.server.EncodingEnum;
+import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import ca.uhn.fhir.validation.FhirValidator;
-import ca.uhn.fhir.validation.IValidationContext;
-import ca.uhn.fhir.validation.IValidatorModule;
-import ca.uhn.fhir.validation.ResultSeverityEnum;
-import ca.uhn.fhir.validation.SchemaBaseValidator;
-import ca.uhn.fhir.validation.SingleValidationMessage;
-import ca.uhn.fhir.validation.ValidationContext;
+import ca.uhn.fhir.util.BundleUtil;
+import ca.uhn.fhir.validation.*;
 
 /**
  * This class is only used using reflection from {@link SchematronProvider} in order
@@ -67,6 +59,14 @@ public class SchematronBaseValidator implements IValidatorModule {
 	@Override
 	public void validateResource(IValidationContext<IBaseResource> theCtx) {
 
+		if (theCtx.getResource() instanceof IBaseBundle) {
+			IBaseBundle bundle = (IBaseBundle) theCtx.getResource();
+			List<IBaseResource> subResources = BundleUtil.toListOfResources(myCtx, bundle);
+			for (IBaseResource nextSubResource : subResources) {
+				validateResource(ValidationContext.subContext(theCtx, nextSubResource));
+			}
+		}
+		
 		ISchematronResource sch = getSchematron(theCtx);
 		String resourceAsString;
 		if (theCtx.getResourceAsStringEncoding() == EncodingEnum.XML) {
@@ -132,11 +132,13 @@ public class SchematronBaseValidator implements IValidatorModule {
 				return retVal;
 			}
 
-			String pathToBase = myCtx.getVersion().getPathToSchemaDefinitions() + '/' + theCtx.getFhirContext().getResourceDefinition(theCtx.getResource()).getBaseDefinition().getName().toLowerCase() + ".sch";
+			String pathToBase = myCtx.getVersion().getPathToSchemaDefinitions() + '/' + theCtx.getFhirContext().getResourceDefinition(theCtx.getResource()).getBaseDefinition().getName().toLowerCase()
+					+ ".sch";
 			InputStream baseIs = FhirValidator.class.getResourceAsStream(pathToBase);
 			try {
 				if (baseIs == null) {
-					throw new InternalErrorException("Failed to load schematron for resource '" + theCtx.getFhirContext().getResourceDefinition(theCtx.getResource()).getBaseDefinition().getName() + "'. " + SchemaBaseValidator.RESOURCES_JAR_NOTE);
+					throw new InternalErrorException("Failed to load schematron for resource '" + theCtx.getFhirContext().getResourceDefinition(theCtx.getResource()).getBaseDefinition().getName() + "'. "
+							+ SchemaBaseValidator.RESOURCES_JAR_NOTE);
 				}
 			} finally {
 				IOUtils.closeQuietly(baseIs);
@@ -145,16 +147,6 @@ public class SchematronBaseValidator implements IValidatorModule {
 			retVal = SchematronResourceSCH.fromClassPath(pathToBase);
 			myClassToSchematron.put(theClass, retVal);
 			return retVal;
-		}
-	}
-
-	@Override
-	public void validateBundle(IValidationContext<Bundle> theContext) {
-		for (BundleEntry next : theContext.getResource().getEntries()) {
-			if (next.getResource() != null) {
-				IValidationContext<IBaseResource> ctx = ValidationContext.newChild(theContext, next.getResource());
-				validateResource(ctx);
-			}
 		}
 	}
 

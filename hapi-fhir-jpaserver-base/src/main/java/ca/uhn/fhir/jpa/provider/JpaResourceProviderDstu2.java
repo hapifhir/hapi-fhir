@@ -27,21 +27,10 @@ import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu2.composite.MetaDt;
 import ca.uhn.fhir.model.dstu2.resource.Parameters;
 import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.rest.annotation.ConditionalUrlParam;
-import ca.uhn.fhir.rest.annotation.Create;
-import ca.uhn.fhir.rest.annotation.Delete;
-import ca.uhn.fhir.rest.annotation.IdParam;
-import ca.uhn.fhir.rest.annotation.Operation;
-import ca.uhn.fhir.rest.annotation.OperationParam;
-import ca.uhn.fhir.rest.annotation.ResourceParam;
-import ca.uhn.fhir.rest.annotation.Update;
-import ca.uhn.fhir.rest.annotation.Validate;
-import ca.uhn.fhir.rest.api.MethodOutcome;
-import ca.uhn.fhir.rest.api.ValidationModeEnum;
-import ca.uhn.fhir.rest.method.RequestDetails;
-import ca.uhn.fhir.rest.server.EncodingEnum;
+import ca.uhn.fhir.rest.annotation.*;
+import ca.uhn.fhir.rest.api.*;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 
 public class JpaResourceProviderDstu2<T extends IResource> extends BaseJpaResourceProvider<T> {
 
@@ -109,11 +98,9 @@ public class JpaResourceProviderDstu2<T extends IResource> extends BaseJpaResour
 		return parameters;
 	}
 
-	//@formatter:off
 	@Operation(name=OPERATION_NAME_META_ADD, idempotent=true, returnParameters= {
 		@OperationParam(name="return", type=MetaDt.class)
 	})
-	//@formatter:on
 	public Parameters metaAdd(@IdParam IdDt theId, @OperationParam(name = "meta") MetaDt theMeta, RequestDetails theRequestDetails) {
 		if (theMeta == null) {
 			throw new InvalidRequestException("Input contains no parameter with name 'meta'");
@@ -124,11 +111,9 @@ public class JpaResourceProviderDstu2<T extends IResource> extends BaseJpaResour
 		return parameters;
 	}
 
-	//@formatter:off
 	@Operation(name=OPERATION_NAME_META_DELETE, idempotent=true, returnParameters= {
 		@OperationParam(name="return", type=MetaDt.class)
 	})
-	//@formatter:on
 	public Parameters metaDelete(@IdParam IdDt theId, @OperationParam(name = "meta") MetaDt theMeta, RequestDetails theRequestDetails) {
 		if (theMeta == null) {
 			throw new InvalidRequestException("Input contains no parameter with name 'meta'");

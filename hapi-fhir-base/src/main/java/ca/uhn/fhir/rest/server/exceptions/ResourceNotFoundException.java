@@ -26,7 +26,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.base.composite.BaseIdentifierDt;
 import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.rest.server.Constants;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.util.CoverageIgnore;
 
 /**
@@ -82,7 +82,7 @@ public class ResourceNotFoundException extends BaseServerResponseException {
 		super(STATUS_CODE, createErrorMessage(theId));
 	}
 
-	public ResourceNotFoundException(IdDt theId, IBaseOperationOutcome theOperationOutcome) {
+	public ResourceNotFoundException(IIdType theId, IBaseOperationOutcome theOperationOutcome) {
 		super(STATUS_CODE, createErrorMessage(theId), theOperationOutcome);
 	}
 
@@ -90,7 +90,7 @@ public class ResourceNotFoundException extends BaseServerResponseException {
 		super(STATUS_CODE, theMessage);
 	}
 
-	private static String createErrorMessage(Class<? extends IResource> theClass, IIdType theId) {
+  private static String createErrorMessage(Class<? extends IResource> theClass, IIdType theId) {
 		return "Resource of type " + theClass.getSimpleName() + " with ID " + theId + " is not known";
 	}
 

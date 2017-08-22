@@ -2,11 +2,13 @@ package example;
 
 import java.util.HashSet;
 import java.util.Set;
+
+import org.hl7.fhir.instance.model.api.IBaseBundle;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.dstu2.resource.Bundle;
 import ca.uhn.fhir.model.dstu2.resource.RelatedPerson;
-import ca.uhn.fhir.rest.client.IGenericClient;
-import org.hl7.fhir.instance.model.api.IBaseBundle;
+import ca.uhn.fhir.rest.client.api.IGenericClient;
 
 /**
  * @author Bill de Beaubien on 1/13/2016.

@@ -29,16 +29,15 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
+// Generated on Wed, Jul 13, 2016 05:32+1000 for FHIR v1.0.2
 import java.util.ArrayList;
 import java.util.List;
 
+import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.ICompositeType;
-import org.hl7.fhir.instance.utilities.Utilities;
+import org.hl7.fhir.utilities.Utilities;
 
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.DatatypeDef;
-import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.*;
 /**
  * A human's name with the ability to identify parts and usage.
  */
@@ -78,7 +77,7 @@ public class HumanName extends Type implements ICompositeType {
          * added to help the parsers
          */
         NULL;
-        public static NameUse fromCode(String codeString) throws Exception {
+        public static NameUse fromCode(String codeString) throws FHIRException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("usual".equals(codeString))
@@ -95,7 +94,7 @@ public class HumanName extends Type implements ICompositeType {
           return OLD;
         if ("maiden".equals(codeString))
           return MAIDEN;
-        throw new Exception("Unknown NameUse code '"+codeString+"'");
+        throw new FHIRException("Unknown NameUse code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -167,6 +166,28 @@ public class HumanName extends Type implements ICompositeType {
         if ("maiden".equals(codeString))
           return NameUse.MAIDEN;
         throw new IllegalArgumentException("Unknown NameUse code '"+codeString+"'");
+        }
+        public Enumeration<NameUse> fromType(Base code) throws FHIRException {
+          if (code == null || code.isEmpty())
+            return null;
+          String codeString = ((PrimitiveType) code).asStringValue();
+          if (codeString == null || "".equals(codeString))
+            return null;
+        if ("usual".equals(codeString))
+          return new Enumeration<NameUse>(this, NameUse.USUAL);
+        if ("official".equals(codeString))
+          return new Enumeration<NameUse>(this, NameUse.OFFICIAL);
+        if ("temp".equals(codeString))
+          return new Enumeration<NameUse>(this, NameUse.TEMP);
+        if ("nickname".equals(codeString))
+          return new Enumeration<NameUse>(this, NameUse.NICKNAME);
+        if ("anonymous".equals(codeString))
+          return new Enumeration<NameUse>(this, NameUse.ANONYMOUS);
+        if ("old".equals(codeString))
+          return new Enumeration<NameUse>(this, NameUse.OLD);
+        if ("maiden".equals(codeString))
+          return new Enumeration<NameUse>(this, NameUse.MAIDEN);
+        throw new FHIRException("Unknown NameUse code '"+codeString+"'");
         }
     public String toCode(NameUse code) {
       if (code == NameUse.USUAL)
@@ -593,6 +614,59 @@ public class HumanName extends Type implements ICompositeType {
         childrenList.add(new Property("suffix", "string", "Part of the name that is acquired as a title due to academic, legal, employment or nobility status, etc. and that appears at the end of the name.", 0, java.lang.Integer.MAX_VALUE, suffix));
         childrenList.add(new Property("period", "Period", "Indicates the period of time when this name was valid for the named person.", 0, java.lang.Integer.MAX_VALUE, period));
       }
+
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("use"))
+          this.use = new NameUseEnumFactory().fromType(value); // Enumeration<NameUse>
+        else if (name.equals("text"))
+          this.text = castToString(value); // StringType
+        else if (name.equals("family"))
+          this.getFamily().add(castToString(value));
+        else if (name.equals("given"))
+          this.getGiven().add(castToString(value));
+        else if (name.equals("prefix"))
+          this.getPrefix().add(castToString(value));
+        else if (name.equals("suffix"))
+          this.getSuffix().add(castToString(value));
+        else if (name.equals("period"))
+          this.period = castToPeriod(value); // Period
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("use")) {
+          throw new FHIRException("Cannot call addChild on a primitive type HumanName.use");
+        }
+        else if (name.equals("text")) {
+          throw new FHIRException("Cannot call addChild on a primitive type HumanName.text");
+        }
+        else if (name.equals("family")) {
+          throw new FHIRException("Cannot call addChild on a primitive type HumanName.family");
+        }
+        else if (name.equals("given")) {
+          throw new FHIRException("Cannot call addChild on a primitive type HumanName.given");
+        }
+        else if (name.equals("prefix")) {
+          throw new FHIRException("Cannot call addChild on a primitive type HumanName.prefix");
+        }
+        else if (name.equals("suffix")) {
+          throw new FHIRException("Cannot call addChild on a primitive type HumanName.suffix");
+        }
+        else if (name.equals("period")) {
+          this.period = new Period();
+          return this.period;
+        }
+        else
+          return super.addChild(name);
+      }
+
+  public String fhirType() {
+    return "HumanName";
+
+  }
 
       public HumanName copy() {
         HumanName dst = new HumanName();

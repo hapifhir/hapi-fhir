@@ -29,17 +29,13 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Wed, Jul 13, 2016 05:32+1000 for FHIR v1.0.2
+import java.util.*;
 
-import org.hl7.fhir.instance.utilities.Utilities;
+import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.utilities.Utilities;
 
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
-import ca.uhn.fhir.model.api.annotation.ResourceDef;
-import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.*;
 /**
  * A slot of time on a schedule that may be available for booking appointments.
  */
@@ -67,7 +63,7 @@ public class Slot extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static SlotStatus fromCode(String codeString) throws Exception {
+        public static SlotStatus fromCode(String codeString) throws FHIRException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("busy".equals(codeString))
@@ -78,7 +74,7 @@ public class Slot extends DomainResource {
           return BUSYUNAVAILABLE;
         if ("busy-tentative".equals(codeString))
           return BUSYTENTATIVE;
-        throw new Exception("Unknown SlotStatus code '"+codeString+"'");
+        throw new FHIRException("Unknown SlotStatus code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -132,6 +128,22 @@ public class Slot extends DomainResource {
         if ("busy-tentative".equals(codeString))
           return SlotStatus.BUSYTENTATIVE;
         throw new IllegalArgumentException("Unknown SlotStatus code '"+codeString+"'");
+        }
+        public Enumeration<SlotStatus> fromType(Base code) throws FHIRException {
+          if (code == null || code.isEmpty())
+            return null;
+          String codeString = ((PrimitiveType) code).asStringValue();
+          if (codeString == null || "".equals(codeString))
+            return null;
+        if ("busy".equals(codeString))
+          return new Enumeration<SlotStatus>(this, SlotStatus.BUSY);
+        if ("free".equals(codeString))
+          return new Enumeration<SlotStatus>(this, SlotStatus.FREE);
+        if ("busy-unavailable".equals(codeString))
+          return new Enumeration<SlotStatus>(this, SlotStatus.BUSYUNAVAILABLE);
+        if ("busy-tentative".equals(codeString))
+          return new Enumeration<SlotStatus>(this, SlotStatus.BUSYTENTATIVE);
+        throw new FHIRException("Unknown SlotStatus code '"+codeString+"'");
         }
     public String toCode(SlotStatus code) {
       if (code == SlotStatus.BUSY)
@@ -575,6 +587,65 @@ public class Slot extends DomainResource {
         childrenList.add(new Property("overbooked", "boolean", "This slot has already been overbooked, appointments are unlikely to be accepted for this time.", 0, java.lang.Integer.MAX_VALUE, overbooked));
         childrenList.add(new Property("comment", "string", "Comments on the slot to describe any extended information. Such as custom constraints on the slot.", 0, java.lang.Integer.MAX_VALUE, comment));
       }
+
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("identifier"))
+          this.getIdentifier().add(castToIdentifier(value));
+        else if (name.equals("type"))
+          this.type = castToCodeableConcept(value); // CodeableConcept
+        else if (name.equals("schedule"))
+          this.schedule = castToReference(value); // Reference
+        else if (name.equals("freeBusyType"))
+          this.freeBusyType = new SlotStatusEnumFactory().fromType(value); // Enumeration<SlotStatus>
+        else if (name.equals("start"))
+          this.start = castToInstant(value); // InstantType
+        else if (name.equals("end"))
+          this.end = castToInstant(value); // InstantType
+        else if (name.equals("overbooked"))
+          this.overbooked = castToBoolean(value); // BooleanType
+        else if (name.equals("comment"))
+          this.comment = castToString(value); // StringType
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("identifier")) {
+          return addIdentifier();
+        }
+        else if (name.equals("type")) {
+          this.type = new CodeableConcept();
+          return this.type;
+        }
+        else if (name.equals("schedule")) {
+          this.schedule = new Reference();
+          return this.schedule;
+        }
+        else if (name.equals("freeBusyType")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Slot.freeBusyType");
+        }
+        else if (name.equals("start")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Slot.start");
+        }
+        else if (name.equals("end")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Slot.end");
+        }
+        else if (name.equals("overbooked")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Slot.overbooked");
+        }
+        else if (name.equals("comment")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Slot.comment");
+        }
+        else
+          return super.addChild(name);
+      }
+
+  public String fhirType() {
+    return "Slot";
+
+  }
 
       public Slot copy() {
         Slot dst = new Slot();

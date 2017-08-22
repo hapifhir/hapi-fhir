@@ -1,5 +1,9 @@
 package ca.uhn.fhir.rest.gclient;
 
+import java.util.*;
+
+import ca.uhn.fhir.model.api.IQueryParameterType;
+
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -23,6 +27,8 @@ package ca.uhn.fhir.rest.gclient;
 public interface IBaseQuery<T extends IBaseQuery<?>> {
 
     T where(ICriterion<?> theCriterion);
+
+    T where(Map<String, List<IQueryParameterType>> theCriterion);
 
     T and(ICriterion<?> theCriterion);
 

@@ -10,15 +10,7 @@ import ca.uhn.fhir.util.TestUtil;
 
 public class ReferenceParamTest {
 
-	@Test
-	public void testWithResourceTypeAsQualifier() {
-		
-		ReferenceParam rp = new ReferenceParam();
-		rp.setValueAsQueryToken(ourCtx, null, ":Location", "123");
-		assertEquals("Location", rp.getResourceType());
-		assertEquals("123", rp.getIdPart());
-		
-	}
+	private FhirContext ourCtx = FhirContext.forDstu3();
 
 	@Test
 	public void testWithResourceType() {
@@ -30,7 +22,15 @@ public class ReferenceParamTest {
 		
 	}
 	
-	private FhirContext ourCtx = FhirContext.forDstu1();
+	@Test
+	public void testWithResourceTypeAsQualifier() {
+		
+		ReferenceParam rp = new ReferenceParam();
+		rp.setValueAsQueryToken(ourCtx, null, ":Location", "123");
+		assertEquals("Location", rp.getResourceType());
+		assertEquals("123", rp.getIdPart());
+		
+	}
 
 	@AfterClass
 	public static void afterClassClearContext() {

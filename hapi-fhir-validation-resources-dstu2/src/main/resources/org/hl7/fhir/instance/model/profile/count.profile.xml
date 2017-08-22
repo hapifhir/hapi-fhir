@@ -10,7 +10,7 @@
    <value value="http://hl7.org/fhir"/>
   </telecom>
  </contact>
- <date value="2015-11-11T10:54:01-05:00"/>
+ <date value="2017-07-27T08:19:05-04:00"/>
  <description value="A count of a discrete element (no unit)"/>
  <fhirVersion value="1.0.2"/>
  <kind value="datatype"/>
@@ -35,9 +35,6 @@
     <code value="Quantity"/>
    </type>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="code.empty() or system"/>
-    </extension>
     <key value="qty-3"/>
     <severity value="error"/>
     <human value="If a code for the unit is present, the system SHALL also be present"/>

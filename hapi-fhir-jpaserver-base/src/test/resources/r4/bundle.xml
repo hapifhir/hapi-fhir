@@ -1,0 +1,378 @@
+<Bundle xmlns="http://hl7.org/fhir">
+   <entry>
+     <resource>
+         <QuestionnaireResponse xmlns="http://hl7.org/fhir">
+            <text>
+               <status value="generated"/>
+               <div xmlns="http://www.w3.org/1999/xhtml">
+                  <p>
+                     <b>Generated Narrative with Details</b>
+                  </p>
+                  <p>
+                     <b>id</b>: gcs
+                  </p>
+                  <p>
+                     <b>questionnaire</b>: 
+                     <a>Questionnaire/gcs</a>
+                  </p>
+                  <p>
+                     <b>status</b>: completed
+                  </p>
+                  <p>
+                     <b>subject</b>: 
+                     <a>Peter James Chalmers</a>
+                  </p>
+                  <p>
+                     <b>authored</b>: Dec 11, 2014 4:44:16 AM
+                  </p>
+                  <p>
+                     <b>source</b>: 
+                     <a>Practitioner/f007</a>
+                  </p>
+                  <blockquote>
+                     <p>
+                        <b>item</b>
+                     </p>
+                     <p>
+                        <b>linkId</b>: 1.1
+                     </p>
+                     <h3>Answers</h3>
+                     <table>
+                        <tr>
+                           <td>-</td>
+                           <td>
+                              <b>Value[x]</b>
+                           </td>
+                        </tr>
+                        <tr>
+                           <td>*</td>
+                           <td>Confused (Details: LOINC code LA6560-2 = 'Confused', stated as 'Confused')</td>
+                        </tr>
+                     </table>
+                  </blockquote>
+                  <blockquote>
+                     <p>
+                        <b>item</b>
+                     </p>
+                     <p>
+                        <b>linkId</b>: 1.2
+                     </p>
+                     <h3>Answers</h3>
+                     <table>
+                        <tr>
+                           <td>-</td>
+                           <td>
+                              <b>Value[x]</b>
+                           </td>
+                        </tr>
+                        <tr>
+                           <td>*</td>
+                           <td>Localizing pain (Details: LOINC code LA6566-9 = 'Localizing pain', stated as 'Localizing pain')</td>
+                        </tr>
+                     </table>
+                  </blockquote>
+                  <blockquote>
+                     <p>
+                        <b>item</b>
+                     </p>
+                     <p>
+                        <b>linkId</b>: 1.3
+                     </p>
+                     <h3>Answers</h3>
+                     <table>
+                        <tr>
+                           <td>-</td>
+                           <td>
+                              <b>Value[x]</b>
+                           </td>
+                        </tr>
+                        <tr>
+                           <td>*</td>
+                           <td>Eyes open spontaneously (Details: LOINC code LA6556-0 = 'Eyes open spontaneously', stated as 'Eyes open spontaneously')</td>
+                        </tr>
+                     </table>
+                  </blockquote>
+               </div>
+            </text>
+            <questionnaire>
+               <reference value="Questionnaire/Questionnairegcs"/>
+            </questionnaire>
+            <status value="completed"/>
+            <authored value="2014-12-11T04:44:16Z"/>
+            <item>
+               <linkId value="1.1"/>
+               <answer>
+                  <valueCoding>
+                     <extension url="http://hl7.org/fhir/StructureDefinition/iso21090-CO-value">
+                        <valueDecimal value="4"/>
+                     </extension>
+                     <system value="http://loinc.org"/>
+                     <code value="LA6560-2"/>
+                     <display value="Confused"/>
+                  </valueCoding>
+               </answer>
+            </item>
+            <item>
+               <linkId value="1.2"/>
+               <answer>
+                  <valueCoding>
+                     <extension url="http://hl7.org/fhir/StructureDefinition/iso21090-CO-value">
+                        <valueDecimal value="5"/>
+                     </extension>
+                     <system value="http://loinc.org"/>
+                     <code value="LA6566-9"/>
+                     <display value="Localizing pain"/>
+                  </valueCoding>
+               </answer>
+            </item>
+            <item>
+               <linkId value="1.3"/>
+               <answer>
+                  <valueCoding>
+                     <extension url="http://hl7.org/fhir/StructureDefinition/iso21090-CO-value">
+                        <valueDecimal value="4"/>
+                     </extension>
+                     <system value="http://loinc.org"/>
+                     <code value="LA6556-0"/>
+                     <display value="Eyes open spontaneously"/>
+                  </valueCoding>
+               </answer>
+            </item>
+         </QuestionnaireResponse>
+      </resource>
+      <request>
+         <method value="PUT"/>
+         <url value="QuestionnaireResponse/QuestionnaireResponsegcs"/>
+      </request>
+   </entry>
+   <entry>
+      <resource>
+         <Questionnaire xmlns="http://hl7.org/fhir">
+            <text>
+               <status value="generated"/>
+               <div xmlns="http://www.w3.org/1999/xhtml">
+                  <p>
+                     <b>Generated Narrative with Details</b>
+                  </p>
+                  <p>
+                     <b>id</b>: gcs
+                  </p>
+                  <p>
+                     <b>contained</b>: , , 
+                  </p>
+                  <p>
+                     <b>status</b>: draft
+                  </p>
+                  <p>
+                     <b>date</b>: Aug 3, 2015
+                  </p>
+                  <p>
+                     <b>publisher</b>: FHIR Project team
+                  </p>
+                  <p>
+                     <b>title</b>: Glasgow Coma Score
+                  </p>
+                  <p>
+                     <b>concept</b>: Glasgow coma score total (Details: LOINC code 9269-2 = 'Glasgow coma score total', stated as 'null')
+                  </p>
+                  <p>
+                     <b>subjectType</b>: Patient
+                  </p>
+                  <blockquote>
+                     <p>
+                        <b>item</b>
+                     </p>
+                     <p>
+                        <b>linkId</b>: 1.1
+                     </p>
+                     <p>
+                        <b>concept</b>: Glasgow coma score verbal (Details: LOINC code 9270-0 = 'Glasgow coma score verbal', stated as 'null')
+                     </p>
+                     <p>
+                        <b>type</b>: choice
+                     </p>
+                     <p>
+                        <b>options</b>: id: verbal; http://loinc.org/ValueSet/LL356-7; name: GCS Verbal Value Set; status: active; description: LOINC ANSWER LIST    (LL356-7)
+                     </p>
+                  </blockquote>
+                  <blockquote>
+                     <p>
+                        <b>item</b>
+                     </p>
+                     <p>
+                        <b>linkId</b>: 1.2
+                     </p>
+                     <p>
+                        <b>concept</b>: Glasgow coma score motor (Details: LOINC code 9268-4 = 'Glasgow coma score motor', stated as 'null')
+                     </p>
+                     <p>
+                        <b>type</b>: choice
+                     </p>
+                     <p>
+                        <b>options</b>: id: motor; http://loinc.org/ValueSet/LL357-5; name: GCS Motor Value Set; status: active; description: LOINC ANSWER LIST    (LL357-5)
+                     </p>
+                  </blockquote>
+                  <blockquote>
+                     <p>
+                        <b>item</b>
+                     </p>
+                     <p>
+                        <b>linkId</b>: 1.3
+                     </p>
+                     <p>
+                        <b>concept</b>: Glasgow coma score eye opening (Details: LOINC code 9267-6 = 'Glasgow coma score eye opening', stated as 'null')
+                     </p>
+                     <p>
+                        <b>type</b>: choice
+                     </p>
+                     <p>
+                        <b>options</b>: id: eye; http://loinc.org/ValueSet/LL355-9; name: GCS Eye Value Set; status: active; description: LOINC ANSWER LIST    (LL355-9)
+                     </p>
+                  </blockquote>
+               </div>
+            </text>
+            <contained>
+               <ValueSet xmlns="http://hl7.org/fhir">
+                  <id value="verbal"/>
+                  <identifier>
+                     <system value="http://loinc.org"/>
+                     <value value="http://loinc.org/ValueSet/LL356-7"/>
+                  </identifier>
+                  <name value="GCS Verbal Value Set"/>
+                  <status value="active"/>
+                  <description value="LOINC ANSWER LIST    (LL356-7)"/>
+                  <compose>
+                     <include>
+                        <system value="http://loinc.org"/>
+                        <concept>
+                           <code value="LA6557-8"/>
+                           <display value="No verbal response (>2yrs); no vocal response (&lt;=2yrs)"/>
+                        </concept>
+                        <concept>
+                           <code value="LA6558-6"/>
+                           <display value="Incomprehensible sounds"/>
+                        </concept>
+                        <concept>
+                           <code value="LA6559-4"/>
+                           <display value="Inappropriate words"/>
+                        </concept>
+                        <concept>
+                           <code value="LA6560-2"/>
+                           <display value="Confused"/>
+                        </concept>
+                        <concept>
+                           <code value="LA6561-0"/>
+                           <display value="Oriented"/>
+                        </concept>
+                     </include>
+                  </compose>
+               </ValueSet>
+            </contained>
+            <contained>
+               <ValueSet xmlns="http://hl7.org/fhir">
+                  <id value="motor"/>
+                  <identifier>
+                     <system value="http://loinc.org"/>
+                     <value value="http://loinc.org/ValueSet/LL357-5"/>
+                  </identifier>
+                  <name value="GCS Motor Value Set"/>
+                  <status value="active"/>
+                  <description value="LOINC ANSWER LIST    (LL357-5)"/>
+                  <compose>
+                     <include>
+                        <system value="http://loinc.org"/>
+                        <concept>
+                           <code value="LA6562-8"/>
+                           <display value="No motor response"/>
+                        </concept>
+                        <concept>
+                           <code value="LA6563-6"/>
+                           <display value="Extension to pain"/>
+                        </concept>
+                        <concept>
+                           <code value="LA6564-4"/>
+                           <display value="Flexion to pain"/>
+                        </concept>
+                        <concept>
+                           <code value="LA6565-1"/>
+                           <display value="Withdrawl from pain"/>
+                        </concept>
+                        <concept>
+                           <code value="LA6566-9"/>
+                           <display value="Localizing pain"/>
+                        </concept>
+                        <concept>
+                           <code value="LA6567-7"/>
+                           <display value="Obeys commands"/>
+                        </concept>
+                     </include>
+                  </compose>
+               </ValueSet>
+            </contained>
+            <contained>
+               <ValueSet xmlns="http://hl7.org/fhir">
+                  <id value="eye"/>
+                  <identifier>
+                     <system value="http://loinc.org"/>
+                     <value value="http://loinc.org/ValueSet/LL355-9"/>
+                  </identifier>
+                  <name value="GCS Eye Value Set"/>
+                  <status value="active"/>
+                  <description value="LOINC ANSWER LIST    (LL355-9)"/>
+                  <compose>
+                     <include>
+                        <system value="http://loinc.org"/>
+                        <concept>
+                           <code value="LA6553-7"/>
+                           <display value="No eye opening"/>
+                        </concept>
+                        <concept>
+                           <code value="LA6554-5"/>
+                           <display value="Eye opening to pain"/>
+                        </concept>
+                        <concept>
+                           <code value="LA6555-2"/>
+                           <display value="Eye opening to verbal command"/>
+                        </concept>
+                        <concept>
+                           <code value="LA6556-0"/>
+                           <display value="Eyes open spontaneously"/>
+                        </concept>
+                     </include>
+                  </compose>
+               </ValueSet>
+            </contained>
+            <status value="draft"/>
+            <date value="2015-08-03"/>
+            <publisher value="FHIR Project team"/>
+            <title value="Glasgow Coma Score"/>
+            <subjectType value="Patient"/>
+            <item>
+               <linkId value="1.1"/>
+               <type value="choice"/>
+               <options>
+                  <reference value="#verbal"/>
+               </options>
+            </item>
+            <item>
+               <linkId value="1.2"/>
+               <type value="choice"/>
+               <options>
+                  <reference value="#motor"/>
+               </options>
+            </item>
+            <item>
+               <linkId value="1.3"/>
+               <type value="choice"/>
+               <options>
+                  <reference value="#eye"/>
+               </options>
+            </item>
+         </Questionnaire>
+      </resource>
+      <request>
+         <method value="PUT"/>
+         <url value="Questionnaire/Questionnairegcs"/>
+      </request>
+   </entry>
+</Bundle>

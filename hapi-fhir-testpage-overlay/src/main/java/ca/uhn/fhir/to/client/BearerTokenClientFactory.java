@@ -5,9 +5,9 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import javax.servlet.http.HttpServletRequest;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.client.IGenericClient;
+import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.interceptor.BearerTokenAuthInterceptor;
-import ca.uhn.fhir.util.ITestingUiClientFactory;
+import ca.uhn.fhir.rest.server.util.ITestingUiClientFactory;
 
 public class BearerTokenClientFactory implements ITestingUiClientFactory {
 

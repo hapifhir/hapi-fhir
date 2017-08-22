@@ -4727,7 +4727,7 @@
     <Cell ss:StyleID="s87"><Data ss:Type="String">The kind of diagnostic request </Data></Cell>
     <Cell ss:StyleID="s118"><Data ss:Type="String">value set</Data></Cell>
     <Cell ss:StyleID="s118"><Data ss:Type="String">required</Data></Cell>
-    <Cell ss:StyleID="s150"><Data ss:Type="String">http://hl7.org/fhir/ValueSet/request-intent</Data></Cell>
+    <Cell ss:StyleID="s150"><Data ss:Type="String">http://build.fhir.org/valueset-request-intent.html</Data></Cell>
     <Cell ss:StyleID="s118"/>
     <Cell ss:StyleID="s118"/>
     <Cell ss:StyleID="s118"/>

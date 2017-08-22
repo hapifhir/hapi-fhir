@@ -1,6 +1,6 @@
 package ca.uhn.fhir.rest.client.api;
 
-/*
+/*-
  * #%L
  * HAPI FHIR - Core Library
  * %%
@@ -20,7 +20,8 @@ package ca.uhn.fhir.rest.client.api;
  * #L%
  */
 
-import ca.uhn.fhir.model.base.resource.BaseConformance;
+import org.hl7.fhir.instance.model.api.IBaseConformance;
+
 import ca.uhn.fhir.rest.annotation.Metadata;
 
 /**
@@ -36,6 +37,6 @@ public interface IBasicClient extends IRestfulClient {
 	 * for more information.
 	 */
 	@Metadata
-	BaseConformance getServerConformanceStatement();
+	IBaseConformance getServerConformanceStatement();
 
 }

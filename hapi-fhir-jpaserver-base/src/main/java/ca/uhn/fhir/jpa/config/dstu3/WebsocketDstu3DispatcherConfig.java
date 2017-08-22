@@ -29,7 +29,7 @@ import org.springframework.context.annotation.Configuration;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoSubscription;
-import ca.uhn.fhir.jpa.subscription.SubscriptionWebsocketHandlerDstu3;
+import ca.uhn.fhir.jpa.subscription.dstu3.SubscriptionWebsocketHandlerDstu3;
 
 @Configuration
 public class WebsocketDstu3DispatcherConfig {

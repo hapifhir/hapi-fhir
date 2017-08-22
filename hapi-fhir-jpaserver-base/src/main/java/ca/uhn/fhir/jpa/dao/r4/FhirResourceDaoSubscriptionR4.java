@@ -1,0 +1,368 @@
+package ca.uhn.fhir.jpa.dao.r4;
+
+/*
+ * #%L
+ * HAPI FHIR JPA Server
+ * %%
+ * Copyright (C) 2014 - 2017 University Health Network
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+
+import static org.apache.commons.lang3.StringUtils.isBlank;
+
+import java.util.*;
+
+import javax.persistence.Query;
+
+import org.apache.commons.lang3.time.DateUtils;
+import org.hl7.fhir.r4.model.Subscription;
+import org.hl7.fhir.r4.model.Subscription.SubscriptionChannelType;
+import org.hl7.fhir.r4.model.Subscription.SubscriptionStatus;
+import org.hl7.fhir.instance.model.api.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.transaction.*;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionCallback;
+import org.springframework.transaction.support.TransactionTemplate;
+
+import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.jpa.dao.*;
+import ca.uhn.fhir.jpa.dao.data.ISubscriptionFlaggedResourceDataDao;
+import ca.uhn.fhir.jpa.dao.data.ISubscriptionTableDao;
+import ca.uhn.fhir.jpa.entity.*;
+import ca.uhn.fhir.model.dstu2.valueset.SubscriptionStatusEnum;
+import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.model.primitive.InstantDt;
+import ca.uhn.fhir.parser.DataFormatException;
+import ca.uhn.fhir.rest.api.*;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.param.*;
+import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+
+public class FhirResourceDaoSubscriptionR4 extends FhirResourceDaoR4<Subscription> implements IFhirResourceDaoSubscription<Subscription> {
+
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoSubscriptionR4.class);
+
+	@Autowired
+	private ISubscriptionFlaggedResourceDataDao mySubscriptionFlaggedResourceDataDao;
+
+	@Autowired
+	private ISubscriptionTableDao mySubscriptionTableDao;
+
+	@Autowired
+	private PlatformTransactionManager myTxManager;
+
+	private void createSubscriptionTable(ResourceTable theEntity, Subscription theSubscription) {
+		SubscriptionTable subscriptionEntity = new SubscriptionTable();
+		subscriptionEntity.setCreated(new Date());
+		subscriptionEntity.setSubscriptionResource(theEntity);
+		subscriptionEntity.setNextCheck(theEntity.getPublished().getValue());
+		subscriptionEntity.setMostRecentMatch(theEntity.getPublished().getValue());
+		subscriptionEntity.setStatus(theSubscription.getStatusElement().getValueAsString());
+		myEntityManager.persist(subscriptionEntity);
+	}
+
+	@Override
+	public Long getSubscriptionTablePidForSubscriptionResource(IIdType theId) {
+		ResourceTable entity = readEntityLatestVersion(theId);
+		SubscriptionTable table = mySubscriptionTableDao.findOneByResourcePid(entity.getId());
+		if (table == null) {
+			return null;
+		}
+		return table.getId();
+	}
+
+	@Override
+	public synchronized List<IBaseResource> getUndeliveredResourcesAndPurge(Long theSubscriptionPid) {
+		List<IBaseResource> retVal = new ArrayList<IBaseResource>();
+		Page<SubscriptionFlaggedResource> flaggedResources = mySubscriptionFlaggedResourceDataDao.findAllBySubscriptionId(theSubscriptionPid, new PageRequest(0, 100));
+		for (SubscriptionFlaggedResource nextFlaggedResource : flaggedResources) {
+			retVal.add(toResource(nextFlaggedResource.getResource(), false));
+		}
+
+		mySubscriptionFlaggedResourceDataDao.delete(flaggedResources);
+		mySubscriptionFlaggedResourceDataDao.flush();
+
+		mySubscriptionTableDao.updateLastClientPoll(new Date());
+
+		return retVal;
+	}
+
+	@Transactional(propagation = Propagation.NOT_SUPPORTED)
+	public int pollForNewUndeliveredResources() {
+		return pollForNewUndeliveredResources(null);
+	}
+
+	@Override
+	@Transactional(propagation = Propagation.NOT_SUPPORTED)
+	public synchronized int pollForNewUndeliveredResources(final String resourceType) {
+		if (getConfig().isSubscriptionEnabled() == false) {
+			return 0;
+		}
+		ourLog.trace("Beginning pollForNewUndeliveredResources()");
+
+		// SubscriptionCandidateResource
+
+		TransactionTemplate txTemplate = new TransactionTemplate(myTxManager);
+		txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+
+		Collection<Long> subscriptions = txTemplate.execute(new TransactionCallback<Collection<Long>>() {
+			@Override
+			public Collection<Long> doInTransaction(TransactionStatus theStatus) {
+				return mySubscriptionTableDao.findSubscriptionsWhichNeedToBeChecked(SubscriptionStatusEnum.ACTIVE.getCode(), new Date());
+			}
+		});
+
+		int retVal = 0;
+		for (final Long nextSubscriptionTablePid : subscriptions) {
+			retVal += txTemplate.execute(new TransactionCallback<Integer>() {
+				@Override
+				public Integer doInTransaction(TransactionStatus theStatus) {
+					SubscriptionTable nextSubscriptionTable = mySubscriptionTableDao.findOne(nextSubscriptionTablePid);
+					return pollForNewUndeliveredResources(nextSubscriptionTable, resourceType);
+				}
+			});
+		}
+
+		return retVal;
+	}
+
+	private int pollForNewUndeliveredResources(SubscriptionTable theSubscriptionTable, String resourceType) {
+		Subscription subscription = toResource(Subscription.class, theSubscriptionTable.getSubscriptionResource(), false);
+		if (subscription.getChannel().getType() != Subscription.SubscriptionChannelType.WEBSOCKET) {
+			ourLog.info("Skipping non web socket subscription");
+			return 0;
+		}
+
+		ourLog.info("subscription for " + resourceType + " with criteria " + subscription.getCriteria());
+		if (resourceType != null && subscription.getCriteria() != null && !subscription.getCriteria().startsWith(resourceType)) {
+			ourLog.info("Skipping subscription search for " + resourceType + " because it does not match the criteria " + subscription.getCriteria());
+			return 0;
+		}
+
+		RuntimeResourceDefinition resourceDef = validateCriteriaAndReturnResourceDefinition(subscription);
+		SearchParameterMap criteriaUrl = translateMatchUrl(this, getContext(), subscription.getCriteria(), resourceDef);
+		criteriaUrl.setLoadSynchronousUpTo(1000);
+
+		long start = theSubscriptionTable.getMostRecentMatch().getTime();
+		long end = System.currentTimeMillis() - getConfig().getSubscriptionPollDelay();
+		if (end <= start) {
+			ourLog.trace("Skipping search for subscription");
+			return 0;
+		}
+
+		ourLog.info("Subscription {} search from {} to {}", new Object[] { subscription.getIdElement().getIdPart(), new InstantDt(new Date(start)), new InstantDt(new Date(end)) });
+
+		DateRangeParam range = new DateRangeParam();
+		range.setLowerBound(new DateParam(ParamPrefixEnum.GREATERTHAN, start));
+		range.setUpperBound(new DateParam(ParamPrefixEnum.LESSTHAN, end));
+		criteriaUrl.setLastUpdated(range);
+		criteriaUrl.setSort(new SortSpec(Constants.PARAM_LASTUPDATED, SortOrderEnum.ASC));
+		IFhirResourceDao<? extends IBaseResource> dao = getDao(resourceDef.getImplementingClass());
+		IBundleProvider results = dao.search(criteriaUrl);
+		if (results.size() == 0) {
+			return 0;
+		}
+
+		ourLog.info("Found {} new results for Subscription {}", results.size(), subscription.getIdElement().getIdPart());
+
+		List<SubscriptionFlaggedResource> flags = new ArrayList<SubscriptionFlaggedResource>();
+		Date mostRecentMatch = null;
+		for (IBaseResource nextBase : results.getResources(0, results.size())) {
+			IAnyResource next = (IAnyResource) nextBase;
+
+			Date updated = next.getMeta().getLastUpdated();
+			if (mostRecentMatch == null) {
+				mostRecentMatch = updated;
+			} else {
+				long mostRecentMatchTime = mostRecentMatch.getTime();
+				long updatedTime = updated.getTime();
+				if (mostRecentMatchTime < updatedTime) {
+					mostRecentMatch = updated;
+				}
+			}
+
+			SubscriptionFlaggedResource nextFlag = new SubscriptionFlaggedResource();
+			Long pid = IDao.RESOURCE_PID.get(next);
+
+			ourLog.info("New resource for subscription: {}", pid);
+
+			nextFlag.setResource(myEntityManager.find(ResourceTable.class, pid));
+			nextFlag.setSubscription(theSubscriptionTable);
+			nextFlag.setVersion(next.getIdElement().getVersionIdPartAsLong());
+			flags.add(nextFlag);
+		}
+
+		mySubscriptionFlaggedResourceDataDao.save(flags);
+
+		ourLog.debug("Updating most recent match for subcription {} to {}", subscription.getIdElement().getIdPart(), new InstantDt(mostRecentMatch));
+
+		theSubscriptionTable.setMostRecentMatch(mostRecentMatch);
+		mySubscriptionTableDao.save(theSubscriptionTable);
+
+		return results.size();
+	}
+
+	@Scheduled(fixedDelay = 10 * DateUtils.MILLIS_PER_SECOND)
+	@Transactional(propagation = Propagation.NOT_SUPPORTED)
+	@Override
+	public synchronized void pollForNewUndeliveredResourcesScheduler() {
+		if (getConfig().isSchedulingDisabled()) {
+			return;
+		}
+		pollForNewUndeliveredResources();
+	}
+
+	@Override
+	protected void postPersist(ResourceTable theEntity, Subscription theSubscription) {
+		super.postPersist(theEntity, theSubscription);
+
+		createSubscriptionTable(theEntity, theSubscription);
+	}
+
+	@Scheduled(fixedDelay = DateUtils.MILLIS_PER_MINUTE)
+	@Transactional(propagation = Propagation.NOT_SUPPORTED)
+	@Override
+	public void purgeInactiveSubscriptions() {
+		if (getConfig().isSchedulingDisabled()) {
+			return;
+		}
+
+		Long purgeInactiveAfterMillis = getConfig().getSubscriptionPurgeInactiveAfterMillis();
+		if (getConfig().isSubscriptionEnabled() == false || purgeInactiveAfterMillis == null) {
+			return;
+		}
+
+		TransactionTemplate txTemplate = new TransactionTemplate(myTxManager);
+		txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+		final Date cutoff = new Date(System.currentTimeMillis() - purgeInactiveAfterMillis);
+
+		Collection<SubscriptionTable> toPurge = txTemplate.execute(new TransactionCallback<Collection<SubscriptionTable>>() {
+			@Override
+			public Collection<SubscriptionTable> doInTransaction(TransactionStatus theStatus) {
+				Collection<SubscriptionTable> toPurge = mySubscriptionTableDao.findInactiveBeforeCutoff(cutoff);
+				toPurge.size();
+				return toPurge;
+			}
+		});
+
+		for (SubscriptionTable subscriptionTable : toPurge) {
+
+			final IdDt subscriptionId = subscriptionTable.getSubscriptionResource().getIdDt();
+			ourLog.info("Deleting inactive subscription {} - Created {}, last client poll {}",
+					new Object[] { subscriptionId.toUnqualified(), subscriptionTable.getCreated(), subscriptionTable.getLastClientPoll() });
+			txTemplate.execute(new TransactionCallback<Void>() {
+				@Override
+				public Void doInTransaction(TransactionStatus theStatus) {
+					delete(subscriptionId, null);
+					return null;
+				}
+			});
+		}
+	}
+
+	@Override
+	protected ResourceTable updateEntity(IBaseResource theResource, ResourceTable theEntity, Date theDeletedTimestampOrNull, boolean thePerformIndexing, boolean theUpdateVersion,
+			Date theUpdateTime, boolean theForceUpdate, boolean theCreateNewHistoryEntry) {
+		ResourceTable retVal = super.updateEntity(theResource, theEntity, theDeletedTimestampOrNull, thePerformIndexing, theUpdateVersion, theUpdateTime, theForceUpdate, theCreateNewHistoryEntry);
+
+		Subscription resource = (Subscription) theResource;
+		Long resourceId = theEntity.getId();
+		if (theDeletedTimestampOrNull != null) {
+			Long subscriptionId = getSubscriptionTablePidForSubscriptionResource(theEntity.getIdDt());
+			if (subscriptionId != null) {
+				mySubscriptionFlaggedResourceDataDao.deleteAllForSubscription(subscriptionId);
+				mySubscriptionTableDao.deleteAllForSubscription(subscriptionId);
+			}
+		} else {
+			Query q = myEntityManager.createNamedQuery("Q_HFJ_SUBSCRIPTION_SET_STATUS");
+			q.setParameter("res_id", resourceId);
+			q.setParameter("status", resource.getStatusElement().getValueAsString());
+			if (q.executeUpdate() > 0) {
+				ourLog.info("Updated subscription status for subscription {} to {}", resourceId, resource.getStatus());
+			} else {
+				createSubscriptionTable(retVal, resource);
+			}
+		}
+		return retVal;
+	}
+
+	public RuntimeResourceDefinition validateCriteriaAndReturnResourceDefinition(Subscription theResource) {
+		String query = theResource.getCriteria();
+		if (isBlank(query)) {
+			throw new UnprocessableEntityException("Subscription.criteria must be populated");
+		}
+
+		int sep = query.indexOf('?');
+		if (sep <= 1) {
+			throw new UnprocessableEntityException("Subscription.criteria must be in the form \"{Resource Type}?[params]\"");
+		}
+
+		String resType = query.substring(0, sep);
+		if (resType.contains("/")) {
+			throw new UnprocessableEntityException("Subscription.criteria must be in the form \"{Resource Type}?[params]\"");
+		}
+
+		if (theResource.getChannel().getType() == null) {
+			throw new UnprocessableEntityException("Subscription.channel.type must be populated");
+		} else if (theResource.getChannel().getType() == SubscriptionChannelType.RESTHOOK) {
+			if (isBlank(theResource.getChannel().getPayload())) {
+				throw new UnprocessableEntityException("Subscription.channel.payload must be populated for rest-hook subscriptions");
+			}
+			
+			if (EncodingEnum.forContentType(theResource.getChannel().getPayload()) == null){
+				throw new UnprocessableEntityException("Invalid value for Subscription.channel.payload: " + theResource.getChannel().getPayload());
+			}
+			if (isBlank(theResource.getChannel().getEndpoint())){
+				throw new UnprocessableEntityException("Rest-hook subscriptions must have Subscription.channel.endpoint defined");
+			}
+		}
+
+		RuntimeResourceDefinition resDef;
+		try {
+			resDef = getContext().getResourceDefinition(resType);
+		} catch (DataFormatException e) {
+			throw new UnprocessableEntityException("Subscription.criteria contains invalid/unsupported resource type: " + resType);
+		}
+		return resDef;
+	}
+
+	@Override
+	protected void validateResourceForStorage(Subscription theResource, ResourceTable theEntityToSave) {
+		super.validateResourceForStorage(theResource, theEntityToSave);
+
+		RuntimeResourceDefinition resDef = validateCriteriaAndReturnResourceDefinition(theResource);
+
+		IFhirResourceDao<? extends IBaseResource> dao = getDao(resDef.getImplementingClass());
+		if (dao == null) {
+			throw new UnprocessableEntityException("Subscription.criteria contains invalid/unsupported resource type: " + resDef);
+		}
+
+		if (theResource.getChannel().getType() == null) {
+			throw new UnprocessableEntityException("Subscription.channel.type must be populated on this server");
+		}
+
+		SubscriptionStatus status = theResource.getStatus();
+		if (status == null) {
+			throw new UnprocessableEntityException("Subscription.status must be populated on this server");
+		}
+
+	}
+
+}

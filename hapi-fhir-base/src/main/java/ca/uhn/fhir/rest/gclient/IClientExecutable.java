@@ -1,10 +1,10 @@
 package ca.uhn.fhir.rest.gclient;
 
-import java.util.List;
-
+import ca.uhn.fhir.rest.api.EncodingEnum;
+import ca.uhn.fhir.rest.api.SummaryEnum;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
-import ca.uhn.fhir.rest.api.SummaryEnum;
+import java.util.List;
 
 /*
  * #%L
@@ -27,7 +27,7 @@ import ca.uhn.fhir.rest.api.SummaryEnum;
  */
 
 
-public interface IClientExecutable<T extends IClientExecutable<?,?>, Y> {
+public interface IClientExecutable<T extends IClientExecutable<?,Y>, Y> {
 
 	/**
 	 * If set to true, the client will log the request and response to the SLF4J logger. This can be useful for
@@ -45,13 +45,16 @@ public interface IClientExecutable<T extends IClientExecutable<?,?>, Y> {
 	 */
 	T elementsSubset(String... theElements);
 
+	T encoded(EncodingEnum theEncoding);
+
 	T encodedJson();
 
 	T encodedXml();
 
+	/**
+	 * Actually execute the client operation
+	 */
 	Y execute();
-
-	T prettyPrint();
 
 	/**
 	 * Explicitly specify a custom structure type to attempt to use when parsing the response. This
@@ -73,6 +76,8 @@ public interface IClientExecutable<T extends IClientExecutable<?,?>, Y> {
 	 * </p>
 	 */
 	T preferResponseTypes(List<Class<? extends IBaseResource>> theTypes);
+
+	T prettyPrint();
 
 	/**
 	 * Request that the server modify the response using the <code>_summary</code> param 

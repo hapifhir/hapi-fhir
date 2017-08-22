@@ -10,7 +10,7 @@ package ca.uhn.fhir.util;
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  * 
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,22 +19,20 @@ package ca.uhn.fhir.util;
  * limitations under the License.
  * #L%
  */
-
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.lang.reflect.TypeVariable;
-import java.lang.reflect.WildcardType;
+import java.lang.reflect.*;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.lang3.Validate;
 
 import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.context.support.IContextValidationSupport;
 import javassist.Modifier;
 
 public class ReflectionUtil {
+
+	private static final ConcurrentHashMap<String, Object> ourFhirServerVersions = new ConcurrentHashMap<String, Object>();
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ReflectionUtil.class);
 
@@ -73,7 +71,7 @@ public class ReflectionUtil {
 		if (!List.class.isAssignableFrom(next.getType())) {
 			return getGenericCollectionTypeOfField(next);
 		}
-		
+
 		Class<?> type;
 		ParameterizedType collectionType = (ParameterizedType) next.getGenericType();
 		Type firstArg = collectionType.getActualTypeArguments()[0];
@@ -127,6 +125,10 @@ public class ReflectionUtil {
 		return type;
 	}
 
+	public static boolean isInstantiable(Class<?> theType) {
+		return !theType.isInterface() && !Modifier.isAbstract(theType.getModifiers());
+	}
+
 	/**
 	 * Instantiate a class by no-arg constructor, throw {@link ConfigurationException} if we fail to do so
 	 */
@@ -138,6 +140,49 @@ public class ReflectionUtil {
 		} catch (Exception e) {
 			throw new ConfigurationException("Failed to instantiate " + theType.getName(), e);
 		}
+	}
+
+	public static <T> T newInstance(Class<T> theType, Class<?> theArgumentType, Object theArgument) {
+		Validate.notNull(theType, "theType must not be null");
+		try {
+			Constructor<T> constructor = theType.getConstructor(theArgumentType);
+			return constructor.newInstance(theArgument);
+		} catch (Exception e) {
+			throw new ConfigurationException("Failed to instantiate " + theType.getName(), e);
+		}
+	}
+
+	public static Object newInstanceOfFhirServerType(String theType) {
+		String errorMessage = "Unable to instantiate server framework. Please make sure that hapi-fhir-server library is on your classpath!";
+		String wantedType = "ca.uhn.fhir.rest.api.server.IFhirVersionServer";
+		Object fhirServerVersion = newInstanceOfType(theType, errorMessage, wantedType);
+		return fhirServerVersion;
+	}
+
+	@SuppressWarnings("unchecked")
+	public static <EVS_IN, EVS_OUT, SDT, CST, CDCT, IST> ca.uhn.fhir.context.support.IContextValidationSupport<EVS_IN, EVS_OUT, SDT, CST, CDCT, IST> newInstanceOfFhirProfileValidationSupport(
+			String theType) {
+		String errorMessage = "Unable to instantiate validation support! Please make sure that hapi-fhir-validation and the appropriate structures JAR are on your classpath!";
+		String wantedType = "ca.uhn.fhir.context.support.IContextValidationSupport";
+		Object fhirServerVersion = newInstanceOfType(theType, errorMessage, wantedType);
+		return (IContextValidationSupport<EVS_IN, EVS_OUT, SDT, CST, CDCT, IST>) fhirServerVersion;
+	}
+
+	private static Object newInstanceOfType(String theType, String errorMessage, String wantedType) {
+		Object fhirServerVersion = ourFhirServerVersions.get(theType);
+		if (fhirServerVersion == null) {
+			try {
+				Class<?> type = Class.forName(theType);
+				Class<?> serverType = Class.forName(wantedType);
+				Validate.isTrue(serverType.isAssignableFrom(type));
+				fhirServerVersion = type.newInstance();
+			} catch (Exception e) {
+				throw new ConfigurationException(errorMessage, e);
+			}
+
+			ourFhirServerVersions.put(theType, fhirServerVersion);
+		}
+		return fhirServerVersion;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -154,10 +199,6 @@ public class ReflectionUtil {
 			ourLog.info("Failed to instantiate {}: {}", theClassName, e.toString());
 			return null;
 		}
-	}
-
-	public static boolean isInstantiable(Class<?> theType) {
-		return !theType.isInterface() && !Modifier.isAbstract(theType.getModifiers());
 	}
 
 }

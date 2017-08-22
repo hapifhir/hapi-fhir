@@ -52,7 +52,7 @@ class QuantityCriterion implements ICriterion<QuantityClientParam>, ICriterionIn
 		StringBuilder b = new StringBuilder();
 		if (isNotBlank(myValue) || isNotBlank(mySystem) || isNotBlank(myUnits)) {
 			if (myPrefix != null) {
-				b.append(ParameterUtil.escapeWithDefault(myPrefix.getValueForContext(theContext)));
+				b.append(ParameterUtil.escapeWithDefault(myPrefix.getValue()));
 			}
 			b.append(ParameterUtil.escapeWithDefault(myValue));
 			b.append('|');

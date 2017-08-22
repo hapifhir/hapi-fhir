@@ -10,7 +10,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.http.ParseException;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -177,7 +176,7 @@ public class TinderClientMojo extends AbstractMojo {
 		w.close();
 	}
 
-	public static void main(String[] args) throws ParseException, IOException, MojoFailureException, MojoExecutionException {
+	public static void main(String[] args) throws IOException, MojoFailureException, MojoExecutionException {
 
 		// PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 		// HttpClientBuilder builder = HttpClientBuilder.create();

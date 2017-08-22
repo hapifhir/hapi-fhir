@@ -57,4 +57,8 @@ public class CommonConfig {
 		return new HolyFooCowInterceptor();
 	}
 
+	public static boolean isLocalTestMode(){
+		return "true".equalsIgnoreCase(System.getProperty("testmode.local"));
+	}
+
 }

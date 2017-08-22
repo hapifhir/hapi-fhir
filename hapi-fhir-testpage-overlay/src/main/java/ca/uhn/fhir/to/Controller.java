@@ -1,56 +1,41 @@
 package ca.uhn.fhir.to;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.context.RuntimeResourceDefinition;
-import ca.uhn.fhir.model.api.ExtensionDt;
-import ca.uhn.fhir.model.api.Include;
-import ca.uhn.fhir.model.dstu.resource.Conformance;
-import ca.uhn.fhir.model.dstu.resource.Conformance.Rest;
-import ca.uhn.fhir.model.dstu.resource.Conformance.RestQuery;
-import ca.uhn.fhir.model.dstu.resource.Conformance.RestResource;
-import ca.uhn.fhir.model.dstu.resource.Conformance.RestResourceSearchParam;
-import ca.uhn.fhir.model.dstu.valueset.SearchParamTypeEnum;
-import ca.uhn.fhir.model.dstu2.valueset.ResourceTypeEnum;
-import ca.uhn.fhir.model.primitive.BoundCodeDt;
-import ca.uhn.fhir.model.primitive.DateTimeDt;
-import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.model.primitive.StringDt;
-import ca.uhn.fhir.parser.DataFormatException;
-import ca.uhn.fhir.rest.client.GenericClient;
-import ca.uhn.fhir.rest.gclient.*;
-import ca.uhn.fhir.rest.gclient.NumberClientParam.IMatches;
-import ca.uhn.fhir.rest.gclient.QuantityClientParam.IAndUnits;
-import ca.uhn.fhir.rest.server.Constants;
-import ca.uhn.fhir.rest.server.EncodingEnum;
-import ca.uhn.fhir.to.model.HomeRequest;
-import ca.uhn.fhir.to.model.ResourceRequest;
-import ca.uhn.fhir.to.model.TransactionRequest;
-import ca.uhn.fhir.util.ExtensionConstants;
-import com.google.gson.stream.JsonWriter;
+import static org.apache.commons.lang3.StringUtils.defaultIfEmpty;
+import static org.apache.commons.lang3.StringUtils.defaultString;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
+import java.io.IOException;
+import java.io.StringWriter;
+import java.util.*;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.dstu3.model.CapabilityStatement;
-import org.hl7.fhir.dstu3.model.CapabilityStatement.CapabilityStatementRestComponent;
-import org.hl7.fhir.dstu3.model.CapabilityStatement.CapabilityStatementRestResourceComponent;
-import org.hl7.fhir.dstu3.model.CapabilityStatement.CapabilityStatementRestResourceSearchParamComponent;
+import org.hl7.fhir.dstu3.model.CapabilityStatement.*;
 import org.hl7.fhir.dstu3.model.StringType;
-import org.hl7.fhir.instance.model.api.IBaseBundle;
-import org.hl7.fhir.instance.model.api.IBaseConformance;
-import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.*;
 import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import java.io.IOException;
-import java.io.StringWriter;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.TreeSet;
+import com.google.gson.stream.JsonWriter;
 
-import static org.apache.commons.lang3.StringUtils.*;
+import ca.uhn.fhir.context.*;
+import ca.uhn.fhir.model.api.Include;
+import ca.uhn.fhir.model.dstu2.resource.Conformance;
+import ca.uhn.fhir.model.dstu2.valueset.ResourceTypeEnum;
+import ca.uhn.fhir.model.primitive.*;
+import ca.uhn.fhir.parser.DataFormatException;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.EncodingEnum;
+import ca.uhn.fhir.rest.client.impl.GenericClient;
+import ca.uhn.fhir.rest.gclient.*;
+import ca.uhn.fhir.rest.gclient.NumberClientParam.IMatches;
+import ca.uhn.fhir.rest.gclient.QuantityClientParam.IAndUnits;
+import ca.uhn.fhir.to.model.*;
 
 @org.springframework.stereotype.Controller()
 public class Controller extends BaseController {
@@ -81,14 +66,14 @@ public class Controller extends BaseController {
 			Class<? extends IBaseConformance> type;
 			switch (getContext(theRequest).getVersion().getVersion()) {
 			default:
-			case DSTU1:
-				type = Conformance.class;
-				break;
 			case DSTU2:
 				type = ca.uhn.fhir.model.dstu2.resource.Conformance.class;
 				break;
 			case DSTU3:
 				type = org.hl7.fhir.dstu3.model.CapabilityStatement.class;
+				break;
+			case R4:
+				type = org.hl7.fhir.r4.model.CapabilityStatement.class;
 				break;
 			}
 			client.fetchConformance().ofType(type).execute();
@@ -136,7 +121,7 @@ public class Controller extends BaseController {
 
 		long start = System.currentTimeMillis();
 		try {
-			client.delete((Class<? extends IBaseResource>) def.getImplementingClass(), new IdDt(id));
+			client.delete().resourceById(new IdDt(id)).execute();
 		} catch (Exception e) {
 			returnsResource = handleClientException(client, e, theModel);
 		}
@@ -144,57 +129,6 @@ public class Controller extends BaseController {
 		processAndAddLastClientInvocation(client, returnsResource, theModel, delay, outcomeDescription, interceptor, theRequest);
 
 		ourLog.info(logPrefix(theModel) + "Deleted resource of type " + def.getName());
-
-		return "result";
-	}
-
-	@RequestMapping(value = { "/get-tags" })
-	public String actionGetTags(HttpServletRequest theReq, HomeRequest theRequest, BindingResult theBindingResult, ModelMap theModel) {
-		addCommonParams(theReq, theRequest, theModel);
-
-		CaptureInterceptor interceptor = new CaptureInterceptor();
-		GenericClient client = theRequest.newClient(theReq, getContext(theRequest), myConfig, interceptor);
-
-		Class<? extends IBaseResource> resType = null;
-		ResultType returnsResource = ResultType.TAGLIST;
-		String outcomeDescription = "Tag List";
-
-		long start = System.currentTimeMillis();
-		try {
-			if (isNotBlank(theReq.getParameter(PARAM_RESOURCE))) {
-				RuntimeResourceDefinition def;
-				try {
-					def = getResourceType(theRequest, theReq);
-				} catch (ServletException e) {
-					theModel.put("errorMsg", toDisplayError(e.toString(), e));
-					return "resource";
-				}
-
-				resType = (Class<? extends IBaseResource>) def.getImplementingClass();
-				String id = theReq.getParameter("resource-tags-id");
-				if (isNotBlank(id)) {
-					String vid = theReq.getParameter("resource-tags-vid");
-					if (isNotBlank(vid)) {
-						client.getTags().forResource(resType, id, vid).execute();
-						ourLog.info(logPrefix(theModel) + "Got tags for type " + def.getName() + " ID " + id + " version" + vid);
-					} else {
-						client.getTags().forResource(resType, id).execute();
-						ourLog.info(logPrefix(theModel) + "Got tags for type " + def.getName() + " ID " + id);
-					}
-				} else {
-					client.getTags().forResource(resType).execute();
-					ourLog.info(logPrefix(theModel) + "Got tags for type " + def.getName());
-				}
-			} else {
-				client.getTags().execute();
-				ourLog.info(logPrefix(theModel) + "Got tags for server");
-			}
-		} catch (Exception e) {
-			returnsResource = handleClientException(client, e, theModel);
-		}
-		long delay = System.currentTimeMillis() - start;
-
-		processAndAddLastClientInvocation(client, returnsResource, theModel, delay, outcomeDescription, interceptor, theRequest);
 
 		return "result";
 	}
@@ -234,7 +168,7 @@ public class Controller extends BaseController {
 				return "result";
 			}
 		}
-		
+
 		url = url.replace("&amp;", "&");
 
 		ResultType returnsResource = ResultType.BUNDLE;
@@ -242,13 +176,9 @@ public class Controller extends BaseController {
 		long start = System.currentTimeMillis();
 		try {
 			ourLog.info(logPrefix(theModel) + "Loading paging URL: {}", url);
-			if (context.getVersion().getVersion() == FhirVersionEnum.DSTU1) {
-				client.loadPage().byUrl(url).andReturnDstu1Bundle().execute();
-			} else {
-				@SuppressWarnings("unchecked")
-				Class<? extends IBaseBundle> bundleType = (Class<? extends IBaseBundle>) context.getResourceDefinition("Bundle").getImplementingClass();
-				client.loadPage().byUrl(url).andReturnBundle(bundleType).execute();
-			}
+			@SuppressWarnings("unchecked")
+			Class<? extends IBaseBundle> bundleType = (Class<? extends IBaseBundle>) context.getResourceDefinition("Bundle").getImplementingClass();
+			client.loadPage().byUrl(url).andReturnBundle(bundleType).execute();
 		} catch (Exception e) {
 			returnsResource = handleClientException(client, e, theModel);
 		}
@@ -323,19 +253,18 @@ public class Controller extends BaseController {
 		TreeSet<String> includes = new TreeSet<String>();
 		TreeSet<String> revIncludes = new TreeSet<String>();
 		TreeSet<String> sortParams = new TreeSet<String>();
-		List<RestQuery> queries = new ArrayList<Conformance.RestQuery>();
 		boolean haveSearchParams = false;
 		List<List<String>> queryIncludes = new ArrayList<List<String>>();
 
 		switch (theRequest.getFhirVersion(myConfig)) {
-		case DSTU1:
-			haveSearchParams = extractSearchParamsDstu1(conformance, resourceName, includes, sortParams, queries, haveSearchParams, queryIncludes);
-			break;
 		case DSTU2:
-			haveSearchParams = extractSearchParamsDstu2(conformance, resourceName, includes, revIncludes, sortParams, queries, haveSearchParams, queryIncludes);
+			haveSearchParams = extractSearchParamsDstu2(conformance, resourceName, includes, revIncludes, sortParams, haveSearchParams, queryIncludes);
 			break;
 		case DSTU3:
-			haveSearchParams = extractSearchParamsDstu3CapabilityStatement(conformance, resourceName, includes, revIncludes, sortParams, queries, haveSearchParams, queryIncludes);
+			haveSearchParams = extractSearchParamsDstu3CapabilityStatement(conformance, resourceName, includes, revIncludes, sortParams, haveSearchParams, queryIncludes);
+			break;
+		case R4:
+			haveSearchParams = extractSearchParamsR4CapabilityStatement(conformance, resourceName, includes, revIncludes, sortParams, haveSearchParams, queryIncludes);
 			break;
 		default:
 			throw new IllegalStateException("Unknown FHIR version: " + theRequest.getFhirVersion(myConfig));
@@ -343,7 +272,7 @@ public class Controller extends BaseController {
 
 		theModel.put("includes", includes);
 		theModel.put("revincludes", revIncludes);
-		theModel.put("queries", queries);
+		theModel.put("queries", Collections.emptyList()); // TODO: remove this, it does nothing
 		theModel.put("haveSearchParams", haveSearchParams);
 		theModel.put("queryIncludes", queryIncludes);
 		theModel.put("sortParams", sortParams);
@@ -460,7 +389,7 @@ public class Controller extends BaseController {
 				return "resource";
 			}
 			int limitInt = Integer.parseInt(limit);
-			query.limitTo(limitInt);
+			query.count(limitInt);
 			clientCodeJsonWriter.name("limit");
 			clientCodeJsonWriter.value(limit);
 		} else {
@@ -485,16 +414,16 @@ public class Controller extends BaseController {
 			}
 		}
 
-		if (client.getFhirContext().getVersion().getVersion() != FhirVersionEnum.DSTU1) {
-			query.returnBundle(client.getFhirContext().getResourceDefinition("Bundle").getImplementingClass());
-		}
+		Class<? extends IBaseBundle> bundleType;
+		bundleType = (Class<? extends IBaseBundle>) client.getFhirContext().getResourceDefinition("Bundle").getImplementingClass();
+		IQuery<?> queryTyped = query.returnBundle(bundleType);
 
 		long start = System.currentTimeMillis();
 		ResultType returnsResource;
 		try {
 			ourLog.info(logPrefix(theModel) + "Executing a search");
 
-			query.execute();
+			queryTyped.execute();
 			returnsResource = ResultType.BUNDLE;
 		} catch (Exception e) {
 			returnsResource = handleClientException(client, e, theModel);
@@ -527,7 +456,8 @@ public class Controller extends BaseController {
 			} else if (body.startsWith("<")) {
 				// XML content
 			} else {
-				theModel.put("errorMsg", toDisplayError("Message body does not appear to be a valid FHIR resource instance document. Body should start with '<' (for XML encoding) or '{' (for JSON encoding).", null));
+				theModel.put("errorMsg",
+						toDisplayError("Message body does not appear to be a valid FHIR resource instance document. Body should start with '<' (for XML encoding) or '{' (for JSON encoding).", null));
 				return "home";
 			}
 		} catch (DataFormatException e) {
@@ -595,7 +525,8 @@ public class Controller extends BaseController {
 				resource = getContext(theRequest).newXmlParser().parseResource(type, body);
 				client.setEncoding(EncodingEnum.XML);
 			} else {
-				theModel.put("errorMsg", toDisplayError("Message body does not appear to be a valid FHIR resource instance document. Body should start with '<' (for XML encoding) or '{' (for JSON encoding).", null));
+				theModel.put("errorMsg",
+						toDisplayError("Message body does not appear to be a valid FHIR resource instance document. Body should start with '<' (for XML encoding) or '{' (for JSON encoding).", null));
 				return;
 			}
 		} catch (DataFormatException e) {
@@ -623,9 +554,6 @@ public class Controller extends BaseController {
 				} else {
 					outcomeDescription = "Create Resource";
 					ICreateTyped create = client.create().resource(body);
-					if (isNotBlank(id)) {
-						create.withId(id);
-					}
 					create.execute();
 				}
 			}
@@ -693,11 +621,7 @@ public class Controller extends BaseController {
 			}
 
 			IHistoryTyped<?> hist2;
-			if (client.getFhirContext().getVersion().getVersion() == FhirVersionEnum.DSTU1) {
-				hist2 = hist1.andReturnDstu1Bundle();
-			} else {
-				hist2 = hist1.andReturnBundle(client.getFhirContext().getResourceDefinition("Bundle").getImplementingClass(IBaseBundle.class));
-			}
+			hist2 = hist1.andReturnBundle(client.getFhirContext().getResourceDefinition("Bundle").getImplementingClass(IBaseBundle.class));
 
 			if (since != null) {
 				hist2.since(since);
@@ -716,55 +640,8 @@ public class Controller extends BaseController {
 
 	}
 
-	private boolean extractSearchParamsDstu1(IBaseResource theConformance, String resourceName, TreeSet<String> includes, TreeSet<String> sortParams, List<RestQuery> queries, boolean haveSearchParams, List<List<String>> queryIncludes) {
-		Conformance conformance = (Conformance) theConformance;
-		for (Rest nextRest : conformance.getRest()) {
-			for (RestResource nextRes : nextRest.getResource()) {
-				if (nextRes.getType().getValue().equals(resourceName)) {
-					for (StringDt next : nextRes.getSearchInclude()) {
-						if (next.isEmpty() == false) {
-							includes.add(next.getValue());
-						}
-					}
-					for (RestResourceSearchParam next : nextRes.getSearchParam()) {
-						if (next.getType().getValueAsEnum() != SearchParamTypeEnum.COMPOSITE) {
-							sortParams.add(next.getName().getValue());
-						}
-					}
-					if (nextRes.getSearchParam().size() > 0) {
-						haveSearchParams = true;
-					}
-				}
-			}
-			for (RestQuery nextQuery : nextRest.getQuery()) {
-				boolean queryMatchesResource = false;
-				List<ExtensionDt> returnTypeExt = nextQuery.getUndeclaredExtensionsByUrl(ExtensionConstants.QUERY_RETURN_TYPE);
-				if (returnTypeExt != null) {
-					for (ExtensionDt nextExt : returnTypeExt) {
-						if (resourceName.equals(nextExt.getValueAsPrimitive().getValueAsString())) {
-							queries.add(nextQuery);
-							queryMatchesResource = true;
-							break;
-						}
-					}
-				}
-
-				if (queryMatchesResource) {
-					ArrayList<String> nextQueryIncludes = new ArrayList<String>();
-					queryIncludes.add(nextQueryIncludes);
-					List<ExtensionDt> includesExt = nextQuery.getUndeclaredExtensionsByUrl(ExtensionConstants.QUERY_ALLOWED_INCLUDE);
-					if (includesExt != null) {
-						for (ExtensionDt nextExt : includesExt) {
-							nextQueryIncludes.add(nextExt.getValueAsPrimitive().getValueAsString());
-						}
-					}
-				}
-			}
-		}
-		return haveSearchParams;
-	}
-
-	private boolean extractSearchParamsDstu2(IBaseResource theConformance, String resourceName, TreeSet<String> includes, TreeSet<String> theRevIncludes, TreeSet<String> sortParams, List<RestQuery> queries, boolean haveSearchParams, List<List<String>> queryIncludes) {
+	private boolean extractSearchParamsDstu2(IBaseResource theConformance, String resourceName, TreeSet<String> includes, TreeSet<String> theRevIncludes, TreeSet<String> sortParams,
+			boolean haveSearchParams, List<List<String>> queryIncludes) {
 		ca.uhn.fhir.model.dstu2.resource.Conformance conformance = (ca.uhn.fhir.model.dstu2.resource.Conformance) theConformance;
 		for (ca.uhn.fhir.model.dstu2.resource.Conformance.Rest nextRest : conformance.getRest()) {
 			for (ca.uhn.fhir.model.dstu2.resource.Conformance.RestResource nextRes : nextRest.getResource()) {
@@ -800,7 +677,8 @@ public class Controller extends BaseController {
 		return haveSearchParams;
 	}
 
-	private boolean extractSearchParamsDstu3CapabilityStatement(IBaseResource theConformance, String resourceName, TreeSet<String> includes, TreeSet<String> theRevIncludes, TreeSet<String> sortParams, List<RestQuery> queries, boolean haveSearchParams, List<List<String>> queryIncludes) {
+	private boolean extractSearchParamsDstu3CapabilityStatement(IBaseResource theConformance, String resourceName, TreeSet<String> includes, TreeSet<String> theRevIncludes, TreeSet<String> sortParams,
+			boolean haveSearchParams, List<List<String>> queryIncludes) {
 		CapabilityStatement conformance = (org.hl7.fhir.dstu3.model.CapabilityStatement) theConformance;
 		for (CapabilityStatementRestComponent nextRest : conformance.getRest()) {
 			for (CapabilityStatementRestResourceComponent nextRes : nextRest.getResource()) {
@@ -823,11 +701,6 @@ public class Controller extends BaseController {
 					// scan for revinclude candidates
 					for (CapabilityStatementRestResourceSearchParamComponent next : nextRes.getSearchParam()) {
 						if (next.getTypeElement().getValue() == org.hl7.fhir.dstu3.model.Enumerations.SearchParamType.REFERENCE) {
-//							for (CodeType nextTargetType : next.getTarget()) {
-//								if (nextTargetType.getValue().equals(resourceName)) {
-//									theRevIncludes.add(nextRes.getTypeElement().getValue() + ":" + next.getName());
-//								}
-//							}
 						}
 					}
 				}
@@ -836,7 +709,39 @@ public class Controller extends BaseController {
 		return haveSearchParams;
 	}
 
-	private boolean handleSearchParam(String paramIdxString, HttpServletRequest theReq, IQuery<?> theQuery, JsonWriter theClientCodeJsonWriter) throws IOException {
+	private boolean extractSearchParamsR4CapabilityStatement(IBaseResource theConformance, String resourceName, TreeSet<String> includes, TreeSet<String> theRevIncludes, TreeSet<String> sortParams,
+			boolean haveSearchParams, List<List<String>> queryIncludes) {
+		org.hl7.fhir.r4.model.CapabilityStatement conformance = (org.hl7.fhir.r4.model.CapabilityStatement) theConformance;
+		for (org.hl7.fhir.r4.model.CapabilityStatement.CapabilityStatementRestComponent nextRest : conformance.getRest()) {
+			for (org.hl7.fhir.r4.model.CapabilityStatement.CapabilityStatementRestResourceComponent nextRes : nextRest.getResource()) {
+				if (nextRes.getTypeElement().getValue().equals(resourceName)) {
+					for (org.hl7.fhir.r4.model.StringType next : nextRes.getSearchInclude()) {
+						if (next.isEmpty() == false) {
+							includes.add(next.getValue());
+						}
+					}
+					for (org.hl7.fhir.r4.model.CapabilityStatement.CapabilityStatementRestResourceSearchParamComponent next : nextRes.getSearchParam()) {
+						if (next.getTypeElement().getValue() != org.hl7.fhir.r4.model.Enumerations.SearchParamType.COMPOSITE) {
+							sortParams.add(next.getNameElement().getValue());
+						}
+					}
+					if (nextRes.getSearchParam().size() > 0) {
+						haveSearchParams = true;
+					}
+				} else {
+					// It's a different resource from the one we're searching, so
+					// scan for revinclude candidates
+					for (org.hl7.fhir.r4.model.CapabilityStatement.CapabilityStatementRestResourceSearchParamComponent next : nextRes.getSearchParam()) {
+						if (next.getTypeElement().getValue() == org.hl7.fhir.r4.model.Enumerations.SearchParamType.REFERENCE) {
+						}
+					}
+				}
+			}
+		}
+		return haveSearchParams;
+	}
+
+	private boolean handleSearchParam(String paramIdxString, HttpServletRequest theReq, IQuery theQuery, JsonWriter theClientCodeJsonWriter) throws IOException {
 		String nextName = theReq.getParameter("param." + paramIdxString + ".name");
 		if (isBlank(nextName)) {
 			return false;

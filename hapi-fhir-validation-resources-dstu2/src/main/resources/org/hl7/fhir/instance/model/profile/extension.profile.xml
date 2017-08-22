@@ -10,7 +10,7 @@
    <value value="http://hl7.org/fhir"/>
   </telecom>
  </contact>
- <date value="2015-11-11T10:54:01-05:00"/>
+ <date value="2017-07-27T08:19:05-04:00"/>
  <description value="Base StructureDefinition for Extension Type"/>
  <requirements value="The ability to add extensions in a structured way is what keeps FHIR resources simple."/>
  <fhirVersion value="1.0.2"/>

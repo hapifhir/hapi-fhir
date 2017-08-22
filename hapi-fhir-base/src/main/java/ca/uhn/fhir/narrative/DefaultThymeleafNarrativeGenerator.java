@@ -23,8 +23,6 @@ package ca.uhn.fhir.narrative;
 import java.util.ArrayList;
 import java.util.List;
 
-import ca.uhn.fhir.rest.server.RestfulServer;
-
 public class DefaultThymeleafNarrativeGenerator extends BaseThymeleafNarrativeGenerator implements INarrativeGenerator {
 
 	public static final String NARRATIVES_PROPERTIES = "classpath:ca/uhn/fhir/narrative/narratives.properties";

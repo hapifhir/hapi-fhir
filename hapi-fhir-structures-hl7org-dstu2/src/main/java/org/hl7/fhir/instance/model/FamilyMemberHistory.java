@@ -29,21 +29,16 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Wed, Jul 13, 2016 05:32+1000 for FHIR v1.0.2
+import java.util.*;
 
+import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.instance.model.Enumerations.AdministrativeGenderEnumFactory;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
-import org.hl7.fhir.instance.utilities.Utilities;
+import org.hl7.fhir.utilities.Utilities;
 
-import ca.uhn.fhir.model.api.annotation.Block;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
-import ca.uhn.fhir.model.api.annotation.ResourceDef;
-import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.*;
 /**
  * Significant health events and conditions for a person related to the patient relevant in the context of care for the patient.
  */
@@ -71,7 +66,7 @@ public class FamilyMemberHistory extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static FamilyHistoryStatus fromCode(String codeString) throws Exception {
+        public static FamilyHistoryStatus fromCode(String codeString) throws FHIRException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("partial".equals(codeString))
@@ -82,7 +77,7 @@ public class FamilyMemberHistory extends DomainResource {
           return ENTEREDINERROR;
         if ("health-unknown".equals(codeString))
           return HEALTHUNKNOWN;
-        throw new Exception("Unknown FamilyHistoryStatus code '"+codeString+"'");
+        throw new FHIRException("Unknown FamilyHistoryStatus code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -136,6 +131,22 @@ public class FamilyMemberHistory extends DomainResource {
         if ("health-unknown".equals(codeString))
           return FamilyHistoryStatus.HEALTHUNKNOWN;
         throw new IllegalArgumentException("Unknown FamilyHistoryStatus code '"+codeString+"'");
+        }
+        public Enumeration<FamilyHistoryStatus> fromType(Base code) throws FHIRException {
+          if (code == null || code.isEmpty())
+            return null;
+          String codeString = ((PrimitiveType) code).asStringValue();
+          if (codeString == null || "".equals(codeString))
+            return null;
+        if ("partial".equals(codeString))
+          return new Enumeration<FamilyHistoryStatus>(this, FamilyHistoryStatus.PARTIAL);
+        if ("completed".equals(codeString))
+          return new Enumeration<FamilyHistoryStatus>(this, FamilyHistoryStatus.COMPLETED);
+        if ("entered-in-error".equals(codeString))
+          return new Enumeration<FamilyHistoryStatus>(this, FamilyHistoryStatus.ENTEREDINERROR);
+        if ("health-unknown".equals(codeString))
+          return new Enumeration<FamilyHistoryStatus>(this, FamilyHistoryStatus.HEALTHUNKNOWN);
+        throw new FHIRException("Unknown FamilyHistoryStatus code '"+codeString+"'");
         }
     public String toCode(FamilyHistoryStatus code) {
       if (code == FamilyHistoryStatus.PARTIAL)
@@ -255,52 +266,52 @@ public class FamilyMemberHistory extends DomainResource {
         /**
          * @return {@link #onset} (Either the age of onset, range of approximate age or descriptive string can be recorded.  For conditions with multiple occurrences, this describes the first known occurrence.)
          */
-        public Age getOnsetAge() throws Exception { 
+        public Age getOnsetAge() throws FHIRException { 
           if (!(this.onset instanceof Age))
-            throw new Exception("Type mismatch: the type Age was expected, but "+this.onset.getClass().getName()+" was encountered");
+            throw new FHIRException("Type mismatch: the type Age was expected, but "+this.onset.getClass().getName()+" was encountered");
           return (Age) this.onset;
         }
 
-        public boolean hasOnsetAge() throws Exception { 
+        public boolean hasOnsetAge() { 
           return this.onset instanceof Age;
         }
 
         /**
          * @return {@link #onset} (Either the age of onset, range of approximate age or descriptive string can be recorded.  For conditions with multiple occurrences, this describes the first known occurrence.)
          */
-        public Range getOnsetRange() throws Exception { 
+        public Range getOnsetRange() throws FHIRException { 
           if (!(this.onset instanceof Range))
-            throw new Exception("Type mismatch: the type Range was expected, but "+this.onset.getClass().getName()+" was encountered");
+            throw new FHIRException("Type mismatch: the type Range was expected, but "+this.onset.getClass().getName()+" was encountered");
           return (Range) this.onset;
         }
 
-        public boolean hasOnsetRange() throws Exception { 
+        public boolean hasOnsetRange() { 
           return this.onset instanceof Range;
         }
 
         /**
          * @return {@link #onset} (Either the age of onset, range of approximate age or descriptive string can be recorded.  For conditions with multiple occurrences, this describes the first known occurrence.)
          */
-        public Period getOnsetPeriod() throws Exception { 
+        public Period getOnsetPeriod() throws FHIRException { 
           if (!(this.onset instanceof Period))
-            throw new Exception("Type mismatch: the type Period was expected, but "+this.onset.getClass().getName()+" was encountered");
+            throw new FHIRException("Type mismatch: the type Period was expected, but "+this.onset.getClass().getName()+" was encountered");
           return (Period) this.onset;
         }
 
-        public boolean hasOnsetPeriod() throws Exception { 
+        public boolean hasOnsetPeriod() { 
           return this.onset instanceof Period;
         }
 
         /**
          * @return {@link #onset} (Either the age of onset, range of approximate age or descriptive string can be recorded.  For conditions with multiple occurrences, this describes the first known occurrence.)
          */
-        public StringType getOnsetStringType() throws Exception { 
+        public StringType getOnsetStringType() throws FHIRException { 
           if (!(this.onset instanceof StringType))
-            throw new Exception("Type mismatch: the type StringType was expected, but "+this.onset.getClass().getName()+" was encountered");
+            throw new FHIRException("Type mismatch: the type StringType was expected, but "+this.onset.getClass().getName()+" was encountered");
           return (StringType) this.onset;
         }
 
-        public boolean hasOnsetStringType() throws Exception { 
+        public boolean hasOnsetStringType() { 
           return this.onset instanceof StringType;
         }
 
@@ -348,6 +359,54 @@ public class FamilyMemberHistory extends DomainResource {
           childrenList.add(new Property("note", "Annotation", "An area where general notes can be placed about this specific condition.", 0, java.lang.Integer.MAX_VALUE, note));
         }
 
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("code"))
+          this.code = castToCodeableConcept(value); // CodeableConcept
+        else if (name.equals("outcome"))
+          this.outcome = castToCodeableConcept(value); // CodeableConcept
+        else if (name.equals("onset[x]"))
+          this.onset = (Type) value; // Type
+        else if (name.equals("note"))
+          this.note = castToAnnotation(value); // Annotation
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("code")) {
+          this.code = new CodeableConcept();
+          return this.code;
+        }
+        else if (name.equals("outcome")) {
+          this.outcome = new CodeableConcept();
+          return this.outcome;
+        }
+        else if (name.equals("onsetAge")) {
+          this.onset = new Age();
+          return this.onset;
+        }
+        else if (name.equals("onsetRange")) {
+          this.onset = new Range();
+          return this.onset;
+        }
+        else if (name.equals("onsetPeriod")) {
+          this.onset = new Period();
+          return this.onset;
+        }
+        else if (name.equals("onsetString")) {
+          this.onset = new StringType();
+          return this.onset;
+        }
+        else if (name.equals("note")) {
+          this.note = new Annotation();
+          return this.note;
+        }
+        else
+          return super.addChild(name);
+      }
+
       public FamilyMemberHistoryConditionComponent copy() {
         FamilyMemberHistoryConditionComponent dst = new FamilyMemberHistoryConditionComponent();
         copyValues(dst);
@@ -383,6 +442,11 @@ public class FamilyMemberHistory extends DomainResource {
         return super.isEmpty() && (code == null || code.isEmpty()) && (outcome == null || outcome.isEmpty())
            && (onset == null || onset.isEmpty()) && (note == null || note.isEmpty());
       }
+
+  public String fhirType() {
+    return "FamilyMemberHistory.condition";
+
+  }
 
   }
 
@@ -804,39 +868,39 @@ public class FamilyMemberHistory extends DomainResource {
     /**
      * @return {@link #born} (The actual or approximate date of birth of the relative.)
      */
-    public Period getBornPeriod() throws Exception { 
+    public Period getBornPeriod() throws FHIRException { 
       if (!(this.born instanceof Period))
-        throw new Exception("Type mismatch: the type Period was expected, but "+this.born.getClass().getName()+" was encountered");
+        throw new FHIRException("Type mismatch: the type Period was expected, but "+this.born.getClass().getName()+" was encountered");
       return (Period) this.born;
     }
 
-    public boolean hasBornPeriod() throws Exception { 
+    public boolean hasBornPeriod() { 
       return this.born instanceof Period;
     }
 
     /**
      * @return {@link #born} (The actual or approximate date of birth of the relative.)
      */
-    public DateType getBornDateType() throws Exception { 
+    public DateType getBornDateType() throws FHIRException { 
       if (!(this.born instanceof DateType))
-        throw new Exception("Type mismatch: the type DateType was expected, but "+this.born.getClass().getName()+" was encountered");
+        throw new FHIRException("Type mismatch: the type DateType was expected, but "+this.born.getClass().getName()+" was encountered");
       return (DateType) this.born;
     }
 
-    public boolean hasBornDateType() throws Exception { 
+    public boolean hasBornDateType() { 
       return this.born instanceof DateType;
     }
 
     /**
      * @return {@link #born} (The actual or approximate date of birth of the relative.)
      */
-    public StringType getBornStringType() throws Exception { 
+    public StringType getBornStringType() throws FHIRException { 
       if (!(this.born instanceof StringType))
-        throw new Exception("Type mismatch: the type StringType was expected, but "+this.born.getClass().getName()+" was encountered");
+        throw new FHIRException("Type mismatch: the type StringType was expected, but "+this.born.getClass().getName()+" was encountered");
       return (StringType) this.born;
     }
 
-    public boolean hasBornStringType() throws Exception { 
+    public boolean hasBornStringType() { 
       return this.born instanceof StringType;
     }
 
@@ -862,39 +926,39 @@ public class FamilyMemberHistory extends DomainResource {
     /**
      * @return {@link #age} (The actual or approximate age of the relative at the time the family member history is recorded.)
      */
-    public Age getAgeAge() throws Exception { 
+    public Age getAgeAge() throws FHIRException { 
       if (!(this.age instanceof Age))
-        throw new Exception("Type mismatch: the type Age was expected, but "+this.age.getClass().getName()+" was encountered");
+        throw new FHIRException("Type mismatch: the type Age was expected, but "+this.age.getClass().getName()+" was encountered");
       return (Age) this.age;
     }
 
-    public boolean hasAgeAge() throws Exception { 
+    public boolean hasAgeAge() { 
       return this.age instanceof Age;
     }
 
     /**
      * @return {@link #age} (The actual or approximate age of the relative at the time the family member history is recorded.)
      */
-    public Range getAgeRange() throws Exception { 
+    public Range getAgeRange() throws FHIRException { 
       if (!(this.age instanceof Range))
-        throw new Exception("Type mismatch: the type Range was expected, but "+this.age.getClass().getName()+" was encountered");
+        throw new FHIRException("Type mismatch: the type Range was expected, but "+this.age.getClass().getName()+" was encountered");
       return (Range) this.age;
     }
 
-    public boolean hasAgeRange() throws Exception { 
+    public boolean hasAgeRange() { 
       return this.age instanceof Range;
     }
 
     /**
      * @return {@link #age} (The actual or approximate age of the relative at the time the family member history is recorded.)
      */
-    public StringType getAgeStringType() throws Exception { 
+    public StringType getAgeStringType() throws FHIRException { 
       if (!(this.age instanceof StringType))
-        throw new Exception("Type mismatch: the type StringType was expected, but "+this.age.getClass().getName()+" was encountered");
+        throw new FHIRException("Type mismatch: the type StringType was expected, but "+this.age.getClass().getName()+" was encountered");
       return (StringType) this.age;
     }
 
-    public boolean hasAgeStringType() throws Exception { 
+    public boolean hasAgeStringType() { 
       return this.age instanceof StringType;
     }
 
@@ -920,65 +984,65 @@ public class FamilyMemberHistory extends DomainResource {
     /**
      * @return {@link #deceased} (Deceased flag or the actual or approximate age of the relative at the time of death for the family member history record.)
      */
-    public BooleanType getDeceasedBooleanType() throws Exception { 
+    public BooleanType getDeceasedBooleanType() throws FHIRException { 
       if (!(this.deceased instanceof BooleanType))
-        throw new Exception("Type mismatch: the type BooleanType was expected, but "+this.deceased.getClass().getName()+" was encountered");
+        throw new FHIRException("Type mismatch: the type BooleanType was expected, but "+this.deceased.getClass().getName()+" was encountered");
       return (BooleanType) this.deceased;
     }
 
-    public boolean hasDeceasedBooleanType() throws Exception { 
+    public boolean hasDeceasedBooleanType() { 
       return this.deceased instanceof BooleanType;
     }
 
     /**
      * @return {@link #deceased} (Deceased flag or the actual or approximate age of the relative at the time of death for the family member history record.)
      */
-    public Age getDeceasedAge() throws Exception { 
+    public Age getDeceasedAge() throws FHIRException { 
       if (!(this.deceased instanceof Age))
-        throw new Exception("Type mismatch: the type Age was expected, but "+this.deceased.getClass().getName()+" was encountered");
+        throw new FHIRException("Type mismatch: the type Age was expected, but "+this.deceased.getClass().getName()+" was encountered");
       return (Age) this.deceased;
     }
 
-    public boolean hasDeceasedAge() throws Exception { 
+    public boolean hasDeceasedAge() { 
       return this.deceased instanceof Age;
     }
 
     /**
      * @return {@link #deceased} (Deceased flag or the actual or approximate age of the relative at the time of death for the family member history record.)
      */
-    public Range getDeceasedRange() throws Exception { 
+    public Range getDeceasedRange() throws FHIRException { 
       if (!(this.deceased instanceof Range))
-        throw new Exception("Type mismatch: the type Range was expected, but "+this.deceased.getClass().getName()+" was encountered");
+        throw new FHIRException("Type mismatch: the type Range was expected, but "+this.deceased.getClass().getName()+" was encountered");
       return (Range) this.deceased;
     }
 
-    public boolean hasDeceasedRange() throws Exception { 
+    public boolean hasDeceasedRange() { 
       return this.deceased instanceof Range;
     }
 
     /**
      * @return {@link #deceased} (Deceased flag or the actual or approximate age of the relative at the time of death for the family member history record.)
      */
-    public DateType getDeceasedDateType() throws Exception { 
+    public DateType getDeceasedDateType() throws FHIRException { 
       if (!(this.deceased instanceof DateType))
-        throw new Exception("Type mismatch: the type DateType was expected, but "+this.deceased.getClass().getName()+" was encountered");
+        throw new FHIRException("Type mismatch: the type DateType was expected, but "+this.deceased.getClass().getName()+" was encountered");
       return (DateType) this.deceased;
     }
 
-    public boolean hasDeceasedDateType() throws Exception { 
+    public boolean hasDeceasedDateType() { 
       return this.deceased instanceof DateType;
     }
 
     /**
      * @return {@link #deceased} (Deceased flag or the actual or approximate age of the relative at the time of death for the family member history record.)
      */
-    public StringType getDeceasedStringType() throws Exception { 
+    public StringType getDeceasedStringType() throws FHIRException { 
       if (!(this.deceased instanceof StringType))
-        throw new Exception("Type mismatch: the type StringType was expected, but "+this.deceased.getClass().getName()+" was encountered");
+        throw new FHIRException("Type mismatch: the type StringType was expected, but "+this.deceased.getClass().getName()+" was encountered");
       return (StringType) this.deceased;
     }
 
-    public boolean hasDeceasedStringType() throws Exception { 
+    public boolean hasDeceasedStringType() { 
       return this.deceased instanceof StringType;
     }
 
@@ -1073,6 +1137,121 @@ public class FamilyMemberHistory extends DomainResource {
         childrenList.add(new Property("note", "Annotation", "This property allows a non condition-specific note to the made about the related person. Ideally, the note would be in the condition property, but this is not always possible.", 0, java.lang.Integer.MAX_VALUE, note));
         childrenList.add(new Property("condition", "", "The significant Conditions (or condition) that the family member had. This is a repeating section to allow a system to represent more than one condition per resource, though there is nothing stopping multiple resources - one per condition.", 0, java.lang.Integer.MAX_VALUE, condition));
       }
+
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("identifier"))
+          this.getIdentifier().add(castToIdentifier(value));
+        else if (name.equals("patient"))
+          this.patient = castToReference(value); // Reference
+        else if (name.equals("date"))
+          this.date = castToDateTime(value); // DateTimeType
+        else if (name.equals("status"))
+          this.status = new FamilyHistoryStatusEnumFactory().fromType(value); // Enumeration<FamilyHistoryStatus>
+        else if (name.equals("name"))
+          this.name = castToString(value); // StringType
+        else if (name.equals("relationship"))
+          this.relationship = castToCodeableConcept(value); // CodeableConcept
+        else if (name.equals("gender"))
+          this.gender = new AdministrativeGenderEnumFactory().fromType(value); // Enumeration<AdministrativeGender>
+        else if (name.equals("born[x]"))
+          this.born = (Type) value; // Type
+        else if (name.equals("age[x]"))
+          this.age = (Type) value; // Type
+        else if (name.equals("deceased[x]"))
+          this.deceased = (Type) value; // Type
+        else if (name.equals("note"))
+          this.note = castToAnnotation(value); // Annotation
+        else if (name.equals("condition"))
+          this.getCondition().add((FamilyMemberHistoryConditionComponent) value);
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("identifier")) {
+          return addIdentifier();
+        }
+        else if (name.equals("patient")) {
+          this.patient = new Reference();
+          return this.patient;
+        }
+        else if (name.equals("date")) {
+          throw new FHIRException("Cannot call addChild on a primitive type FamilyMemberHistory.date");
+        }
+        else if (name.equals("status")) {
+          throw new FHIRException("Cannot call addChild on a primitive type FamilyMemberHistory.status");
+        }
+        else if (name.equals("name")) {
+          throw new FHIRException("Cannot call addChild on a primitive type FamilyMemberHistory.name");
+        }
+        else if (name.equals("relationship")) {
+          this.relationship = new CodeableConcept();
+          return this.relationship;
+        }
+        else if (name.equals("gender")) {
+          throw new FHIRException("Cannot call addChild on a primitive type FamilyMemberHistory.gender");
+        }
+        else if (name.equals("bornPeriod")) {
+          this.born = new Period();
+          return this.born;
+        }
+        else if (name.equals("bornDate")) {
+          this.born = new DateType();
+          return this.born;
+        }
+        else if (name.equals("bornString")) {
+          this.born = new StringType();
+          return this.born;
+        }
+        else if (name.equals("ageAge")) {
+          this.age = new Age();
+          return this.age;
+        }
+        else if (name.equals("ageRange")) {
+          this.age = new Range();
+          return this.age;
+        }
+        else if (name.equals("ageString")) {
+          this.age = new StringType();
+          return this.age;
+        }
+        else if (name.equals("deceasedBoolean")) {
+          this.deceased = new BooleanType();
+          return this.deceased;
+        }
+        else if (name.equals("deceasedAge")) {
+          this.deceased = new Age();
+          return this.deceased;
+        }
+        else if (name.equals("deceasedRange")) {
+          this.deceased = new Range();
+          return this.deceased;
+        }
+        else if (name.equals("deceasedDate")) {
+          this.deceased = new DateType();
+          return this.deceased;
+        }
+        else if (name.equals("deceasedString")) {
+          this.deceased = new StringType();
+          return this.deceased;
+        }
+        else if (name.equals("note")) {
+          this.note = new Annotation();
+          return this.note;
+        }
+        else if (name.equals("condition")) {
+          return addCondition();
+        }
+        else
+          return super.addChild(name);
+      }
+
+  public String fhirType() {
+    return "FamilyMemberHistory";
+
+  }
 
       public FamilyMemberHistory copy() {
         FamilyMemberHistory dst = new FamilyMemberHistory();

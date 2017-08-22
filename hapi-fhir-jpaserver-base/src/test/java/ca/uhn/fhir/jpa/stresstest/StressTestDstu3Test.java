@@ -6,6 +6,7 @@ import static org.junit.Assert.fail;
 import java.util.List;
 import java.util.UUID;
 
+import ca.uhn.fhir.rest.api.Constants;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -19,7 +20,6 @@ import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
 
 import ca.uhn.fhir.jpa.provider.dstu3.BaseResourceProviderDstu3Test;
-import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
 import ca.uhn.fhir.util.TestUtil;
 

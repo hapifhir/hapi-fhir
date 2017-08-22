@@ -12,6 +12,7 @@
  </contact>
  <date value="2013-10-02"/>
  <description value="Adds additional information to a family member history supporting both the capture of mother/father relationships as well as additional observations necessary to enable genetics-based risk analysis for patients"/>
+ <fhirVersion value="1.0.2"/>
  <kind value="resource"/>
  <constrainedType value="FamilyMemberHistory"/>
  <abstract value="false"/>
@@ -54,7 +55,7 @@
   <element>
    <path value="FamilyMemberHistory.id"/>
    <short value="Logical id of this artifact"/>
-   <definition value="The logical id of the resource, as used in the url for the resource. Once assigned, this value never changes."/>
+   <definition value="The logical id of the resource, as used in the URL for the resource. Once assigned, this value never changes."/>
    <comments value="The only time that a resource does not have an id is when it is being submitted to the server using a create operation. Bundles always have an id, though it is usually a generated UUID."/>
    <min value="0"/>
    <max value="1"/>
@@ -88,7 +89,7 @@
    <path value="FamilyMemberHistory.implicitRules"/>
    <short value="A set of rules under which this content was created"/>
    <definition value="A reference to a set of rules that were followed when the resource was constructed, and which must be understood when processing the content."/>
-   <comments value="Asserting this rule set restricts the content to be only understood by a limited set of trading partners. This inherently limits the usefulness of the data in the long term. However the existing health eco-system is highly fractured, and not yet ready to define, collect, and exchange data in a generally computable sense. Wherever possible, implementers and/or specification writers should avoid using this element as much as possible."/>
+   <comments value="Asserting this rule set restricts the content to be only understood by a limited set of trading partners. This inherently limits the usefulness of the data in the long term. However, the existing health eco-system is highly fractured, and not yet ready to define, collect, and exchange data in a generally computable sense. Wherever possible, implementers and/or specification writers should avoid using this element as much as possible."/>
    <min value="0"/>
    <max value="1"/>
    <base>
@@ -119,7 +120,7 @@
    </type>
    <binding>
     <strength value="required"/>
-    <description value="A human language"/>
+    <description value="A human language."/>
     <valueSetUri value="http://tools.ietf.org/html/bcp47"/>
    </binding>
   </element>
@@ -350,7 +351,7 @@
    <isSummary value="true"/>
    <binding>
     <strength value="required"/>
-    <description value="A code that identifies the status of the family history record"/>
+    <description value="A code that identifies the status of the family history record."/>
     <valueSetReference>
      <reference value="http://hl7.org/fhir/ValueSet/history-status"/>
     </valueSetReference>
@@ -363,7 +364,7 @@
   <element>
    <path value="FamilyMemberHistory.name"/>
    <short value="The family member described"/>
-   <definition value="This will either be a name or a description.  E.g. &quot;Aunt Susan&quot;, &quot;my cousin with the red hair&quot;."/>
+   <definition value="This will either be a name or a description; e.g. &quot;Aunt Susan&quot;, &quot;my cousin with the red hair&quot;."/>
    <requirements value="Allows greater ease in ensuring the same person is being talked about."/>
    <min value="0"/>
    <max value="1"/>
@@ -398,7 +399,7 @@
    <isSummary value="true"/>
    <binding>
     <strength value="example"/>
-    <description value="The nature of the relationship between the patient and the related person being described in the family member history"/>
+    <description value="The nature of the relationship between the patient and the related person being described in the family member history."/>
     <valueSetReference>
      <reference value="http://hl7.org/fhir/ValueSet/v3-FamilyMember"/>
     </valueSetReference>
@@ -426,7 +427,7 @@
    <isSummary value="true"/>
    <binding>
     <strength value="required"/>
-    <description value="The gender of a person used for administrative purposes"/>
+    <description value="The gender of a person used for administrative purposes."/>
     <valueSetReference>
      <reference value="http://hl7.org/fhir/ValueSet/administrative-gender"/>
     </valueSetReference>
@@ -666,7 +667,7 @@
    </type>
    <binding>
     <strength value="example"/>
-    <description value="The result of the condition for the patient.  E.g. death, permanent disability, temporary disability, etc."/>
+    <description value="The result of the condition for the patient; e.g. death, permanent disability, temporary disability, etc."/>
     <valueSetReference>
      <reference value="http://hl7.org/fhir/ValueSet/condition-outcome"/>
     </valueSetReference>

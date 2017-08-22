@@ -1,7 +1,7 @@
 <StructureDefinition xmlns="http://hl7.org/fhir">
  <id value="Conformance"/>
  <meta>
-  <lastUpdated value="2015-11-11T10:54:01.813-05:00"/>
+  <lastUpdated value="2017-07-27T08:19:05.564-04:00"/>
  </meta>
  <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
   <valueInteger value="2"/>
@@ -22,7 +22,7 @@
    <value value="http://www.hl7.org/Special/committees/fiwg/index.cfm"/>
   </telecom>
  </contact>
- <date value="2015-11-11T10:54:01-05:00"/>
+ <date value="2017-07-27T08:19:05-04:00"/>
  <description value="Base StructureDefinition for Conformance Resource"/>
  <fhirVersion value="1.0.2"/>
  <mapping>
@@ -49,63 +49,42 @@
     <code value="DomainResource"/>
    </type>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="rest.distinct(mode)"/>
-    </extension>
     <key value="cnf-8"/>
     <severity value="error"/>
     <human value="There can only be one REST declaration per mode"/>
     <xpath value="count(f:rest)=count(distinct-values(f:rest/f:mode/@value))"/>
    </constraint>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="document.distinct(profile,mode)"/>
-    </extension>
     <key value="cnf-7"/>
     <severity value="error"/>
     <human value="The set of documents must be unique by the combination of profile &amp; mode"/>
     <xpath value="count(f:document[f:mode/@value='producer'])=count(distinct-values(f:document[f:mode/@value='producer']/f:profile/f:reference/@value)) and count(f:document[f:mode/@value='consumer'])=count(distinct-values(f:document[f:mode/@value='consumer']/f:profile/f:reference/@value))"/>
    </constraint>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="description or software or implementation"/>
-    </extension>
     <key value="cnf-2"/>
     <severity value="error"/>
     <human value="A Conformance statement SHALL have at least one of description, software, or implementation"/>
     <xpath value="count(f:software | f:implementation | f:description) > 0"/>
    </constraint>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="messaging.endpoint.empty() or kind = 'instance'"/>
-    </extension>
     <key value="cnf-3"/>
     <severity value="error"/>
     <human value="Messaging end-point is required (and is only permitted) when statement is for an implementation"/>
     <xpath value="not(exists(f:messaging/f:endpoint)) or f:kind/@value = 'instance'"/>
    </constraint>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="rest or messaging or document"/>
-    </extension>
     <key value="cnf-1"/>
     <severity value="error"/>
     <human value="A Conformance statement SHALL have at least one of REST, messaging or document"/>
     <xpath value="exists(f:rest) or exists(f:messaging) or exists(f:document)"/>
    </constraint>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="(software.empty() and implementation.empty()) or kind != 'requirements'"/>
-    </extension>
     <key value="cnf-14"/>
     <severity value="error"/>
     <human value="Conformance statements of kind 'requirements' do not have software or implementation elements"/>
     <xpath value="not(exists(f:software) or exists(f:implementation)) or (f:kind/@value != 'requirements')"/>
    </constraint>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="implementation.empty() or kind != capability"/>
-    </extension>
     <key value="cnf-15"/>
     <severity value="error"/>
     <human value="Conformance statements of kind 'software' do not have implementation elements"/>
@@ -751,9 +730,6 @@
    </type>
    <condition value="cnf-1"/>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="resource.distinct(type)"/>
-    </extension>
     <key value="cnf-9"/>
     <severity value="error"/>
     <human value="A given resource can only be described once per RESTful mode"/>
@@ -1036,9 +1012,6 @@
     <code value="BackboneElement"/>
    </type>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="searchParam.distinct(name)"/>
-    </extension>
     <key value="cnf-12"/>
     <severity value="error"/>
     <human value="Search parameter names must be unique in the context of a resource"/>
@@ -1332,9 +1305,6 @@
     <code value="BackboneElement"/>
    </type>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="chain.empty() or type = 'reference'"/>
-    </extension>
     <key value="cnf-13"/>
     <severity value="error"/>
     <human value="Search parameters can only have chain names when the search parameter type is 'reference'"/>
@@ -2150,63 +2120,42 @@
     <code value="DomainResource"/>
    </type>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="rest.distinct(mode)"/>
-    </extension>
     <key value="cnf-8"/>
     <severity value="error"/>
     <human value="There can only be one REST declaration per mode"/>
     <xpath value="count(f:rest)=count(distinct-values(f:rest/f:mode/@value))"/>
    </constraint>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="document.distinct(profile,mode)"/>
-    </extension>
     <key value="cnf-7"/>
     <severity value="error"/>
     <human value="The set of documents must be unique by the combination of profile &amp; mode"/>
     <xpath value="count(f:document[f:mode/@value='producer'])=count(distinct-values(f:document[f:mode/@value='producer']/f:profile/f:reference/@value)) and count(f:document[f:mode/@value='consumer'])=count(distinct-values(f:document[f:mode/@value='consumer']/f:profile/f:reference/@value))"/>
    </constraint>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="description or software or implementation"/>
-    </extension>
     <key value="cnf-2"/>
     <severity value="error"/>
     <human value="A Conformance statement SHALL have at least one of description, software, or implementation"/>
     <xpath value="count(f:software | f:implementation | f:description) > 0"/>
    </constraint>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="messaging.endpoint.empty() or kind = 'instance'"/>
-    </extension>
     <key value="cnf-3"/>
     <severity value="error"/>
     <human value="Messaging end-point is required (and is only permitted) when statement is for an implementation"/>
     <xpath value="not(exists(f:messaging/f:endpoint)) or f:kind/@value = 'instance'"/>
    </constraint>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="rest or messaging or document"/>
-    </extension>
     <key value="cnf-1"/>
     <severity value="error"/>
     <human value="A Conformance statement SHALL have at least one of REST, messaging or document"/>
     <xpath value="exists(f:rest) or exists(f:messaging) or exists(f:document)"/>
    </constraint>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="(software.empty() and implementation.empty()) or kind != 'requirements'"/>
-    </extension>
     <key value="cnf-14"/>
     <severity value="error"/>
     <human value="Conformance statements of kind 'requirements' do not have software or implementation elements"/>
     <xpath value="not(exists(f:software) or exists(f:implementation)) or (f:kind/@value != 'requirements')"/>
    </constraint>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="implementation.empty() or kind != capability"/>
-    </extension>
     <key value="cnf-15"/>
     <severity value="error"/>
     <human value="Conformance statements of kind 'software' do not have implementation elements"/>
@@ -2574,9 +2523,6 @@
    </type>
    <condition value="cnf-1"/>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="resource.distinct(type)"/>
-    </extension>
     <key value="cnf-9"/>
     <severity value="error"/>
     <human value="A given resource can only be described once per RESTful mode"/>
@@ -2706,9 +2652,6 @@
     <code value="BackboneElement"/>
    </type>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="searchParam.distinct(name)"/>
-    </extension>
     <key value="cnf-12"/>
     <severity value="error"/>
     <human value="Search parameter names must be unique in the context of a resource"/>
@@ -2900,9 +2843,6 @@
     <code value="BackboneElement"/>
    </type>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="chain.empty() or type = 'reference'"/>
-    </extension>
     <key value="cnf-13"/>
     <severity value="error"/>
     <human value="Search parameters can only have chain names when the search parameter type is 'reference'"/>

@@ -10,7 +10,7 @@ public class VersionConvertor_10_30Test {
 	@Test
 	public void testConvert() throws FHIRException {
 		
-		VersionConvertorAdvisor advisor = new NullVersionConverterAdvisor();
+		NullVersionConverterAdvisor30 advisor = new NullVersionConverterAdvisor30();
 		VersionConvertor_10_30 converter = new VersionConvertor_10_30(advisor);
 		
 		org.hl7.fhir.instance.model.Observation input = new org.hl7.fhir.instance.model.Observation();

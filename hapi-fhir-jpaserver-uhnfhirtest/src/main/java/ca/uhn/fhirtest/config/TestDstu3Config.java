@@ -21,7 +21,6 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 import ca.uhn.fhir.jpa.config.BaseJavaConfigDstu3;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
-import ca.uhn.fhir.jpa.util.SubscriptionsRequireManualActivationInterceptorDstu3;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
@@ -31,13 +30,14 @@ import ca.uhn.fhirtest.interceptor.PublicSecurityInterceptor;
 @Import(CommonConfig.class)
 @EnableTransactionManagement()
 public class TestDstu3Config extends BaseJavaConfigDstu3 {
-
+	public static final String FHIR_DB_USERNAME = "${fhir.db.username}";
+	public  static final String FHIR_DB_PASSWORD = "${fhir.db.password}";
 	public static final String FHIR_LUCENE_LOCATION_DSTU3 = "${fhir.lucene.location.dstu3}";
 
-	@Value(TestDstu1Config.FHIR_DB_USERNAME)
+	@Value(TestDstu3Config.FHIR_DB_USERNAME)
 	private String myDbUsername;
 
-	@Value(TestDstu1Config.FHIR_DB_PASSWORD)
+	@Value(TestDstu3Config.FHIR_DB_PASSWORD)
 	private String myDbPassword;
 
 	@Value(FHIR_LUCENE_LOCATION_DSTU3)
@@ -75,8 +75,12 @@ public class TestDstu3Config extends BaseJavaConfigDstu3 {
 	@Bean(name = "myPersistenceDataSourceDstu3", destroyMethod = "close")
 	public DataSource dataSource() {
 		BasicDataSource retVal = new BasicDataSource();
-		retVal.setDriver(new org.postgresql.Driver());
-		retVal.setUrl("jdbc:postgresql://localhost/fhirtest_dstu3");
+		if (CommonConfig.isLocalTestMode()) {
+			retVal.setUrl("jdbc:derby:memory:fhirtest_dstu3;create=true");
+		} else {
+			retVal.setDriver(new org.postgresql.Driver());
+			retVal.setUrl("jdbc:postgresql://localhost/fhirtest_dstu3");
+		}
 		retVal.setUsername(myDbUsername);
 		retVal.setPassword(myDbPassword);
 		return retVal;
@@ -95,7 +99,11 @@ public class TestDstu3Config extends BaseJavaConfigDstu3 {
 
 	private Properties jpaProperties() {
 		Properties extraProperties = new Properties();
-		extraProperties.put("hibernate.dialect", PostgreSQL94Dialect.class.getName());
+		if (CommonConfig.isLocalTestMode()) {
+			extraProperties.put("hibernate.dialect", DerbyTenSevenDialect.class.getName());
+		} else {
+			extraProperties.put("hibernate.dialect", PostgreSQL94Dialect.class.getName());
+		}
 		extraProperties.put("hibernate.format_sql", "false");
 		extraProperties.put("hibernate.show_sql", "false");
 		extraProperties.put("hibernate.hbm2ddl.auto", "update");

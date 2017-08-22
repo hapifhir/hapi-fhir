@@ -25,10 +25,10 @@ import java.util.Collection;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 
 import ca.uhn.fhir.model.api.Include;
-import ca.uhn.fhir.rest.method.SearchStyleEnum;
+import ca.uhn.fhir.rest.api.SearchStyleEnum;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 
-public interface IQuery<T> extends IClientExecutable<IQuery<T>, T>, IBaseQuery<IQuery<T>> {
+public interface IQuery<Y> extends IBaseQuery<IQuery<Y>>, IClientExecutable<IQuery<Y>, Y> {
 
 	/**
 	 * Add an "_include" specification or an "_include:recurse" specification. If you are using
@@ -39,9 +39,9 @@ public interface IQuery<T> extends IClientExecutable<IQuery<T>, T>, IBaseQuery<I
 	 * <li><b>No Recurse:</b> <code>.include(Patient.INCLUDE_ORGANIZATION.asNonRecursive())</code>
 	 * </ul>
 	 */
-	IQuery<T> include(Include theInclude);
+	IQuery<Y> include(Include theInclude);
 
-	ISort<T> sort();
+	ISort<Y> sort();
 
 	/**
 	 * Specifies the <code>_count</code> parameter, which indicates to the server how many resources should be returned
@@ -50,7 +50,7 @@ public interface IQuery<T> extends IClientExecutable<IQuery<T>, T>, IBaseQuery<I
 	 * @deprecated This parameter is badly named, since FHIR calls this parameter "_count" and not "_limit". Use {@link #count(int)} instead (it also sets the _count parameter)
 	 */
 	@Deprecated
-	IQuery<T> limitTo(int theLimitTo);
+	IQuery<Y> limitTo(int theLimitTo);
 
 	/**
 	 * Specifies the <code>_count</code> parameter, which indicates to the server how many resources should be returned
@@ -58,7 +58,7 @@ public interface IQuery<T> extends IClientExecutable<IQuery<T>, T>, IBaseQuery<I
 	 * 
 	 * @since 1.4
 	 */
-	IQuery<T> count(int theCount);
+	IQuery<Y> count(int theCount);
 
 	/**
 	 * Match only resources where the resource has the given tag. This parameter corresponds to
@@ -66,7 +66,7 @@ public interface IQuery<T> extends IClientExecutable<IQuery<T>, T>, IBaseQuery<I
 	 * @param theSystem The tag code system, or <code>null</code> to match any code system (this may not be supported on all servers)
 	 * @param theCode The tag code. Must not be <code>null</code> or empty.
 	 */
-	IQuery<T> withTag(String theSystem, String theCode);
+	IQuery<Y> withTag(String theSystem, String theCode);
 
 	/**
 	 * Match only resources where the resource has the given security tag. This parameter corresponds to
@@ -74,21 +74,21 @@ public interface IQuery<T> extends IClientExecutable<IQuery<T>, T>, IBaseQuery<I
 	 * @param theSystem The tag code system, or <code>null</code> to match any code system (this may not be supported on all servers)
 	 * @param theCode The tag code. Must not be <code>null</code> or empty.
 	 */
-	IQuery<T> withSecurity(String theSystem, String theCode);
+	IQuery<Y> withSecurity(String theSystem, String theCode);
 
 	/**
 	 * Match only resources where the resource has the given profile declaration. This parameter corresponds to
 	 * the <code>_profile</code> URL parameter.
 	 * @param theProfileUri The URI of a given profile to search for resources which match  
 	 */
-	IQuery<T> withProfile(String theProfileUri);
+	IQuery<Y> withProfile(String theProfileUri);
 
 	/**
 	 * Matches any of the profiles given as argument. This would result in an OR search for resources matching one or more profiles.
 	 * To do an AND search, make multiple calls to {@link #withProfile(String)}.
 	 * @param theProfileUris The URIs of a given profile to search for resources which match.
 	 */
-	IQuery<T> withAnyProfile(Collection<String> theProfileUris);
+	IQuery<Y> withAnyProfile(Collection<String> theProfileUris);
 	
 	/**
 	 * Forces the query to perform the search using the given method (allowable methods are described in the 
@@ -100,51 +100,44 @@ public interface IQuery<T> extends IClientExecutable<IQuery<T>, T>, IBaseQuery<I
 	 * @see SearchStyleEnum
 	 * @since 0.6
 	 */
-	IQuery<T> usingStyle(SearchStyleEnum theStyle);
+	IQuery<Y> usingStyle(SearchStyleEnum theStyle);
 
-	IQuery<T> withIdAndCompartment(String theResourceId, String theCompartmentName);
+	IQuery<Y> withIdAndCompartment(String theResourceId, String theCompartmentName);
 
 	/**
 	 * Add a "_revinclude" specification
 	 * 
 	 * @since HAPI FHIR 1.0 - Note that option was added to FHIR itself in DSTU2
 	 */
-	IQuery<T> revInclude(Include theIncludeTarget);
+	IQuery<Y> revInclude(Include theIncludeTarget);
 
 	/**
 	 * Add a "_lastUpdated" specification
 	 * 
 	 * @since HAPI FHIR 1.1 - Note that option was added to FHIR itself in DSTU2
 	 */
-	IQuery<T> lastUpdated(DateRangeParam theLastUpdated);
+	IQuery<Y> lastUpdated(DateRangeParam theLastUpdated);
 
 	/**
 	 * Request that the client return the specified bundle type, e.g. <code>org.hl7.fhir.instance.model.Bundle.class</code>
 	 * or <code>ca.uhn.fhir.model.dstu2.resource.Bundle.class</code>
 	 */
-	<B extends IBaseBundle> IClientExecutable<IQuery<B>, B> returnBundle(Class<B> theClass);
+	<B extends IBaseBundle> IQuery<B> returnBundle(Class<B> theClass);
 
 	/**
 	 * {@inheritDoc}
 	 */
 	// This is here as an overridden method to allow mocking clients with Mockito to work
 	@Override
-	IQuery<T> where(ICriterion<?> theCriterion);
+	IQuery<Y> where(ICriterion<?> theCriterion);
 
 	/**
 	 * {@inheritDoc}
 	 */
 	// This is here as an overridden method to allow mocking clients with Mockito to work
 	@Override
-	IQuery<T> and(ICriterion<?> theCriterion);
+	IQuery<Y> and(ICriterion<?> theCriterion);
 
-	/**
-	 * @deprecated You should call {@link #returnBundle(Class)} on the method chain before calling
-	 * {@link #execute()} in order to specify why return type to use
-	 */
-	// This is overriding in order to deprecate
-	@Deprecated
-	@Override
-	T execute();
-	
+//	Y execute();
+
 }

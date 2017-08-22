@@ -31,8 +31,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.UriParam;
-import ca.uhn.fhir.rest.server.IBundleProvider;
 
 @Transactional(value=TxType.REQUIRED)
 public class JpaValidationSupportDstu2 implements IJpaValidationSupportDstu2 {

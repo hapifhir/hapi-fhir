@@ -15,30 +15,22 @@ import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.ByteArrayEntity;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.StringEntity;
+import org.apache.http.entity.*;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.*;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu2.resource.Binary;
+import ca.uhn.fhir.model.dstu2.resource.Bundle;
 import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.rest.annotation.Create;
-import ca.uhn.fhir.rest.annotation.IdParam;
-import ca.uhn.fhir.rest.annotation.Read;
-import ca.uhn.fhir.rest.annotation.ResourceParam;
-import ca.uhn.fhir.rest.annotation.Search;
+import ca.uhn.fhir.rest.annotation.*;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.util.PortUtil;
 import ca.uhn.fhir.util.TestUtil;
@@ -191,8 +183,8 @@ public class BinaryDstu2Test {
 
 		ourLog.info(responseContent);
 
-		Bundle bundle = ourCtx.newJsonParser().parseBundle(responseContent);
-		Binary bin = (Binary) bundle.getEntries().get(0).getResource();
+		Bundle bundle = ourCtx.newJsonParser().parseResource(Bundle.class, responseContent);
+		Binary bin = (Binary) bundle.getEntry().get(0).getResource();
 
 		assertEquals("text/plain", bin.getContentType());
 		assertArrayEquals(new byte[] { 1, 2, 3, 4 }, bin.getContent());
@@ -209,8 +201,8 @@ public class BinaryDstu2Test {
 
 		ourLog.info(responseContent);
 
-		Bundle bundle = ourCtx.newXmlParser().parseBundle(responseContent);
-		Binary bin = (Binary) bundle.getEntries().get(0).getResource();
+		Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
+		Binary bin = (Binary) bundle.getEntry().get(0).getResource();
 
 		assertEquals("text/plain", bin.getContentType());
 		assertArrayEquals(new byte[] { 1, 2, 3, 4 }, bin.getContent());

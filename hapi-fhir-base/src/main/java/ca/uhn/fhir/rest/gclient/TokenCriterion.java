@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.gclient;
 
+import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.util.Collection;
@@ -27,6 +28,7 @@ import java.util.Collection;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.instance.model.api.IBaseCoding;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.base.composite.BaseIdentifierDt;
@@ -87,6 +89,23 @@ class TokenCriterion implements ICriterion<TokenClientParam>, ICriterionInternal
 
 	public TokenCriterion(String theParamName, Collection<String> theCodes) {
 		this(theParamName, null, theCodes);
+	}
+
+	public TokenCriterion(String theParamName, IBaseCoding... theCodings) {
+		myName=theParamName;
+		StringBuilder b = new StringBuilder();
+		if (theCodings != null) {
+		for (IBaseCoding next : theCodings) {
+			if (isBlank(next.getSystem()) && isBlank(next.getCode())) {
+				continue;
+			}
+			if (b.length() > 0) {
+				b.append(',');
+			}
+			b.append(toValue(next.getSystem(), next.getCode()));
+		}
+		}
+		myValue = b.toString();
 	}
 
 	@Override

@@ -22,9 +22,7 @@ import org.springframework.web.context.ContextLoaderListener;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 
 import ca.uhn.fhir.jpa.dao.DaoConfig;
-import ca.uhn.fhir.jpa.demo.ContextHolder;
-import ca.uhn.fhir.jpa.demo.FhirServerConfig;
-import ca.uhn.fhir.jpa.demo.FhirServerConfigDstu3;
+import ca.uhn.fhir.jpa.demo.*;
 
 public class RunServerCommand extends BaseCommand {
 
@@ -141,7 +139,9 @@ public class RunServerCommand extends BaseCommand {
 				case DSTU3:
 					theSce.getServletContext().setInitParameter(ContextLoader.CONFIG_LOCATION_PARAM, FhirServerConfigDstu3.class.getName());
 					break;
-				case DSTU1:
+				case R4:
+					theSce.getServletContext().setInitParameter(ContextLoader.CONFIG_LOCATION_PARAM, FhirServerConfigR4.class.getName());
+					break;
 				case DSTU2_1:
 				case DSTU2_HL7ORG:
 					break;

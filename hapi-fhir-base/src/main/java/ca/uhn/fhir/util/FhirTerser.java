@@ -200,7 +200,8 @@ public class FhirTerser {
 		BaseRuntimeElementCompositeDefinition<?> currentDef = (BaseRuntimeElementCompositeDefinition<?>) def;
 		Object currentObj = theTarget;
 
-		List<String> parts = Arrays.asList(thePath.split("\\."));
+		List<String> parts = parsePath(currentDef, thePath);
+
 		List<T> retVal = getValues(currentDef, currentObj, parts, theWantedType);
 		if (retVal.isEmpty()) {
 			return null;
@@ -262,16 +263,23 @@ public class FhirTerser {
 
 	public <T> List<T> getValues(IBaseResource theResource, String thePath, Class<T> theWantedClass) {
 		RuntimeResourceDefinition def = myContext.getResourceDefinition(theResource);
+		List<String> parts = parsePath(def, thePath);
+		return getValues(def, theResource, parts, theWantedClass);
+	}
 
-		BaseRuntimeElementCompositeDefinition<?> currentDef = def;
-		Object currentObj = theResource;
-
+	private List<String> parsePath(BaseRuntimeElementCompositeDefinition<?> theElementDef, String thePath) {
 		List<String> parts = Arrays.asList(thePath.split("\\."));
-		List<String> subList = parts.subList(1, parts.size());
-		if (subList.size() < 1) {
+
+		if (theElementDef instanceof RuntimeResourceDefinition) {
+			if (parts.size() > 0 && parts.get(0).equals(theElementDef.getName())) {
+				parts = parts.subList(1, parts.size());
+			}
+		}
+
+		if (parts.size() < 1) {
 			throw new ConfigurationException("Invalid path: " + thePath);
 		}
-		return getValues(currentDef, currentObj, subList, theWantedClass);
+		return parts;
 	}
 
 	/**

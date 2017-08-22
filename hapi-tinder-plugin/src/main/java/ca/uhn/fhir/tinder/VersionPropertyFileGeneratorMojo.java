@@ -121,8 +121,11 @@ public class VersionPropertyFileGeneratorMojo extends AbstractMojo {
 	public static void main(String[] theArgs) throws MojoExecutionException, MojoFailureException {
 
 		VersionPropertyFileGeneratorMojo m = new VersionPropertyFileGeneratorMojo();
-		m.packageName = "org.hl7.fhir.dstu3.model";
-		m.targetFile = new File("../hapi-fhir-structures-dstu3/src/main/resources/org/hl7/fhir/dstu3/model/fhirversion.properties");
+		m.packageName = "org.hl7.fhir.r4.model";
+		m.targetFile = new File("../hapi-fhir-structures-r4/src/main/resources/org/hl7/fhir/r4/model/fhirversion.properties");
+
+//		m.packageName = "org.hl7.fhir.dstu3.model";
+//		m.targetFile = new File("../hapi-fhir-structures-dstu3/src/main/resources/org/hl7/fhir/dstu3/model/fhirversion.properties");
 
 //		m.packageName = "org.hl7.fhir.dstu2016may.model";
 //		m.targetFile = new File("../hapi-fhir-structures-dstu2.1/src/main/resources/org/hl7/fhir/dstu2016may/model/fhirversion.properties");

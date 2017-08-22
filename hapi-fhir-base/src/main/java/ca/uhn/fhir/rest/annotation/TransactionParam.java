@@ -19,19 +19,13 @@ package ca.uhn.fhir.rest.annotation;
  * limitations under the License.
  * #L%
  */
-
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import java.lang.annotation.*;
 import java.util.List;
-
-import ca.uhn.fhir.model.api.Bundle;
 
 /**
  * Parameter annotation for the "transaction" operation. The parameter annotated with this
- * annotation must be either of type <code>{@link Bundle}</code> or of type 
- * <code>{@link List}&lt;IResource&gt;</code>
+ * annotation must be a Bundle resource type, or a type that implements 
+ * <code>{@link List}&lt;IBaseResource&gt;</code>
  */
 @Target(value=ElementType.PARAMETER)
 @Retention(RetentionPolicy.RUNTIME)

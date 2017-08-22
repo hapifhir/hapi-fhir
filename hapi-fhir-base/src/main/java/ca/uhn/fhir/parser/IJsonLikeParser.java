@@ -10,7 +10,7 @@ package ca.uhn.fhir.parser;
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  * 
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -25,9 +25,7 @@ import java.io.IOException;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
-import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.parser.json.JsonLikeStructure;
 import ca.uhn.fhir.parser.json.JsonLikeWriter;
 
@@ -41,26 +39,7 @@ import ca.uhn.fhir.parser.json.JsonLikeWriter;
  */
 public interface IJsonLikeParser extends IParser {
 
-	void encodeBundleToJsonLikeWriter(Bundle theBundle, JsonLikeWriter theJsonLikeWriter) throws IOException, DataFormatException;
-
 	void encodeResourceToJsonLikeWriter(IBaseResource theResource, JsonLikeWriter theJsonLikeWriter) throws IOException, DataFormatException;
-
-	void encodeTagListToJsonLikeWriter(TagList theTagList, JsonLikeWriter theJsonLikeWriter) throws IOException;
-
-
-	/**
-	 * Parse a DSTU1 style Atom Bundle. Note that as of DSTU2, Bundle is a resource so you should use
-	 * {@link #parseResource(Class, JsonLikeStructure)} with the Bundle class found in the
-	 * <code>ca.uhn.hapi.fhir.model.[version].resource</code> package instead.
-	 */
-	<T extends IBaseResource> Bundle parseBundle(Class<T> theResourceType, JsonLikeStructure theJsonLikeStructure);
-
-	/**
-	 * Parse a DSTU1 style Atom Bundle. Note that as of DSTU2, Bundle is a resource so you should use
-	 * {@link #parseResource(Class, JsonLikeStructure)} with the Bundle class found in the
-	 * <code>ca.uhn.hapi.fhir.model.[version].resource</code> package instead.
-	 */
-	Bundle parseBundle(JsonLikeStructure theJsonLikeStructure) throws DataFormatException;
 
 	/**
 	 * Parses a resource from a JSON-like data structure
@@ -76,7 +55,6 @@ public interface IJsonLikeParser extends IParser {
 	 */
 	<T extends IBaseResource> T parseResource(Class<T> theResourceType, JsonLikeStructure theJsonLikeStructure) throws DataFormatException;
 
-
 	/**
 	 * Parses a resource from a JSON-like data structure
 	 * 
@@ -88,14 +66,5 @@ public interface IJsonLikeParser extends IParser {
 	 *            If the resource can not be parsed because the data is not recognized or invalid for any reason
 	 */
 	IBaseResource parseResource(JsonLikeStructure theJsonLikeStructure) throws DataFormatException;
-
-	/**
-	 * Parses a tag list from a JSON-like data structure
-	 * 
-	 * @param theJsonLikeStructure
-	 *           The JSON-like structure to parse
-	 * @return A parsed tag list
-	 */
-	TagList parseTagList(JsonLikeStructure theJsonLikeStructure);
 
 }

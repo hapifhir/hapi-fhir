@@ -92,4 +92,7 @@ public class UnsignedIntType extends IntegerType {
 		return new UnsignedIntType(getValue());
 	}
 
+	public String fhirType() {
+		return "unsignedInt";		
+	}
 }

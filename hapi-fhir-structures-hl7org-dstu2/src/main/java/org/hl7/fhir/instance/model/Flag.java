@@ -29,14 +29,13 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
+// Generated on Wed, Jul 13, 2016 05:32+1000 for FHIR v1.0.2
 import java.util.ArrayList;
 import java.util.List;
 
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
-import ca.uhn.fhir.model.api.annotation.ResourceDef;
-import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import org.hl7.fhir.exceptions.FHIRException;
+
+import ca.uhn.fhir.model.api.annotation.*;
 /**
  * Prospective warnings of potential issues when providing care to the patient.
  */
@@ -60,7 +59,7 @@ public class Flag extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static FlagStatus fromCode(String codeString) throws Exception {
+        public static FlagStatus fromCode(String codeString) throws FHIRException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("active".equals(codeString))
@@ -69,7 +68,7 @@ public class Flag extends DomainResource {
           return INACTIVE;
         if ("entered-in-error".equals(codeString))
           return ENTEREDINERROR;
-        throw new Exception("Unknown FlagStatus code '"+codeString+"'");
+        throw new FHIRException("Unknown FlagStatus code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -117,6 +116,20 @@ public class Flag extends DomainResource {
         if ("entered-in-error".equals(codeString))
           return FlagStatus.ENTEREDINERROR;
         throw new IllegalArgumentException("Unknown FlagStatus code '"+codeString+"'");
+        }
+        public Enumeration<FlagStatus> fromType(Base code) throws FHIRException {
+          if (code == null || code.isEmpty())
+            return null;
+          String codeString = ((PrimitiveType) code).asStringValue();
+          if (codeString == null || "".equals(codeString))
+            return null;
+        if ("active".equals(codeString))
+          return new Enumeration<FlagStatus>(this, FlagStatus.ACTIVE);
+        if ("inactive".equals(codeString))
+          return new Enumeration<FlagStatus>(this, FlagStatus.INACTIVE);
+        if ("entered-in-error".equals(codeString))
+          return new Enumeration<FlagStatus>(this, FlagStatus.ENTEREDINERROR);
+        throw new FHIRException("Unknown FlagStatus code '"+codeString+"'");
         }
     public String toCode(FlagStatus code) {
       if (code == FlagStatus.ACTIVE)
@@ -509,6 +522,69 @@ public class Flag extends DomainResource {
         childrenList.add(new Property("author", "Reference(Device|Organization|Patient|Practitioner)", "The person, organization or device that created the flag.", 0, java.lang.Integer.MAX_VALUE, author));
         childrenList.add(new Property("code", "CodeableConcept", "The coded value or textual component of the flag to display to the user.", 0, java.lang.Integer.MAX_VALUE, code));
       }
+
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("identifier"))
+          this.getIdentifier().add(castToIdentifier(value));
+        else if (name.equals("category"))
+          this.category = castToCodeableConcept(value); // CodeableConcept
+        else if (name.equals("status"))
+          this.status = new FlagStatusEnumFactory().fromType(value); // Enumeration<FlagStatus>
+        else if (name.equals("period"))
+          this.period = castToPeriod(value); // Period
+        else if (name.equals("subject"))
+          this.subject = castToReference(value); // Reference
+        else if (name.equals("encounter"))
+          this.encounter = castToReference(value); // Reference
+        else if (name.equals("author"))
+          this.author = castToReference(value); // Reference
+        else if (name.equals("code"))
+          this.code = castToCodeableConcept(value); // CodeableConcept
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("identifier")) {
+          return addIdentifier();
+        }
+        else if (name.equals("category")) {
+          this.category = new CodeableConcept();
+          return this.category;
+        }
+        else if (name.equals("status")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Flag.status");
+        }
+        else if (name.equals("period")) {
+          this.period = new Period();
+          return this.period;
+        }
+        else if (name.equals("subject")) {
+          this.subject = new Reference();
+          return this.subject;
+        }
+        else if (name.equals("encounter")) {
+          this.encounter = new Reference();
+          return this.encounter;
+        }
+        else if (name.equals("author")) {
+          this.author = new Reference();
+          return this.author;
+        }
+        else if (name.equals("code")) {
+          this.code = new CodeableConcept();
+          return this.code;
+        }
+        else
+          return super.addChild(name);
+      }
+
+  public String fhirType() {
+    return "Flag";
+
+  }
 
       public Flag copy() {
         Flag dst = new Flag();

@@ -70,4 +70,7 @@ public class CodeType extends StringType implements Comparable<CodeType>  {
 		return new CodeType(getValue());
 	}
 
+	public String fhirType() {
+		return "code";		
+	}
 }

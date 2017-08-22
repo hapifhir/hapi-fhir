@@ -29,21 +29,16 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Wed, Jul 13, 2016 05:32+1000 for FHIR v1.0.2
+import java.util.*;
 
+import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.Enumerations.ConformanceResourceStatus;
 import org.hl7.fhir.instance.model.Enumerations.ConformanceResourceStatusEnumFactory;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
-import org.hl7.fhir.instance.utilities.Utilities;
+import org.hl7.fhir.utilities.Utilities;
 
-import ca.uhn.fhir.model.api.annotation.Block;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
-import ca.uhn.fhir.model.api.annotation.ResourceDef;
-import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.*;
 /**
  * A set of rules or how FHIR is used to solve a particular problem. This resource is used to gather all the parts of an implementation guide into a logical whole, and to publish a computable definition of all the parts.
  */
@@ -63,14 +58,14 @@ public class ImplementationGuide extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static GuideDependencyType fromCode(String codeString) throws Exception {
+        public static GuideDependencyType fromCode(String codeString) throws FHIRException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("reference".equals(codeString))
           return REFERENCE;
         if ("inclusion".equals(codeString))
           return INCLUSION;
-        throw new Exception("Unknown GuideDependencyType code '"+codeString+"'");
+        throw new FHIRException("Unknown GuideDependencyType code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -113,6 +108,18 @@ public class ImplementationGuide extends DomainResource {
           return GuideDependencyType.INCLUSION;
         throw new IllegalArgumentException("Unknown GuideDependencyType code '"+codeString+"'");
         }
+        public Enumeration<GuideDependencyType> fromType(Base code) throws FHIRException {
+          if (code == null || code.isEmpty())
+            return null;
+          String codeString = ((PrimitiveType) code).asStringValue();
+          if (codeString == null || "".equals(codeString))
+            return null;
+        if ("reference".equals(codeString))
+          return new Enumeration<GuideDependencyType>(this, GuideDependencyType.REFERENCE);
+        if ("inclusion".equals(codeString))
+          return new Enumeration<GuideDependencyType>(this, GuideDependencyType.INCLUSION);
+        throw new FHIRException("Unknown GuideDependencyType code '"+codeString+"'");
+        }
     public String toCode(GuideDependencyType code) {
       if (code == GuideDependencyType.REFERENCE)
         return "reference";
@@ -151,7 +158,7 @@ public class ImplementationGuide extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static GuideResourcePurpose fromCode(String codeString) throws Exception {
+        public static GuideResourcePurpose fromCode(String codeString) throws FHIRException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("example".equals(codeString))
@@ -166,7 +173,7 @@ public class ImplementationGuide extends DomainResource {
           return DICTIONARY;
         if ("logical".equals(codeString))
           return LOGICAL;
-        throw new Exception("Unknown GuideResourcePurpose code '"+codeString+"'");
+        throw new FHIRException("Unknown GuideResourcePurpose code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -233,6 +240,26 @@ public class ImplementationGuide extends DomainResource {
           return GuideResourcePurpose.LOGICAL;
         throw new IllegalArgumentException("Unknown GuideResourcePurpose code '"+codeString+"'");
         }
+        public Enumeration<GuideResourcePurpose> fromType(Base code) throws FHIRException {
+          if (code == null || code.isEmpty())
+            return null;
+          String codeString = ((PrimitiveType) code).asStringValue();
+          if (codeString == null || "".equals(codeString))
+            return null;
+        if ("example".equals(codeString))
+          return new Enumeration<GuideResourcePurpose>(this, GuideResourcePurpose.EXAMPLE);
+        if ("terminology".equals(codeString))
+          return new Enumeration<GuideResourcePurpose>(this, GuideResourcePurpose.TERMINOLOGY);
+        if ("profile".equals(codeString))
+          return new Enumeration<GuideResourcePurpose>(this, GuideResourcePurpose.PROFILE);
+        if ("extension".equals(codeString))
+          return new Enumeration<GuideResourcePurpose>(this, GuideResourcePurpose.EXTENSION);
+        if ("dictionary".equals(codeString))
+          return new Enumeration<GuideResourcePurpose>(this, GuideResourcePurpose.DICTIONARY);
+        if ("logical".equals(codeString))
+          return new Enumeration<GuideResourcePurpose>(this, GuideResourcePurpose.LOGICAL);
+        throw new FHIRException("Unknown GuideResourcePurpose code '"+codeString+"'");
+        }
     public String toCode(GuideResourcePurpose code) {
       if (code == GuideResourcePurpose.EXAMPLE)
         return "example";
@@ -287,7 +314,7 @@ public class ImplementationGuide extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static GuidePageKind fromCode(String codeString) throws Exception {
+        public static GuidePageKind fromCode(String codeString) throws FHIRException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("page".equals(codeString))
@@ -306,7 +333,7 @@ public class ImplementationGuide extends DomainResource {
           return TOC;
         if ("resource".equals(codeString))
           return RESOURCE;
-        throw new Exception("Unknown GuidePageKind code '"+codeString+"'");
+        throw new FHIRException("Unknown GuidePageKind code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -384,6 +411,30 @@ public class ImplementationGuide extends DomainResource {
         if ("resource".equals(codeString))
           return GuidePageKind.RESOURCE;
         throw new IllegalArgumentException("Unknown GuidePageKind code '"+codeString+"'");
+        }
+        public Enumeration<GuidePageKind> fromType(Base code) throws FHIRException {
+          if (code == null || code.isEmpty())
+            return null;
+          String codeString = ((PrimitiveType) code).asStringValue();
+          if (codeString == null || "".equals(codeString))
+            return null;
+        if ("page".equals(codeString))
+          return new Enumeration<GuidePageKind>(this, GuidePageKind.PAGE);
+        if ("example".equals(codeString))
+          return new Enumeration<GuidePageKind>(this, GuidePageKind.EXAMPLE);
+        if ("list".equals(codeString))
+          return new Enumeration<GuidePageKind>(this, GuidePageKind.LIST);
+        if ("include".equals(codeString))
+          return new Enumeration<GuidePageKind>(this, GuidePageKind.INCLUDE);
+        if ("directory".equals(codeString))
+          return new Enumeration<GuidePageKind>(this, GuidePageKind.DIRECTORY);
+        if ("dictionary".equals(codeString))
+          return new Enumeration<GuidePageKind>(this, GuidePageKind.DICTIONARY);
+        if ("toc".equals(codeString))
+          return new Enumeration<GuidePageKind>(this, GuidePageKind.TOC);
+        if ("resource".equals(codeString))
+          return new Enumeration<GuidePageKind>(this, GuidePageKind.RESOURCE);
+        throw new FHIRException("Unknown GuidePageKind code '"+codeString+"'");
         }
     public String toCode(GuidePageKind code) {
       if (code == GuidePageKind.PAGE)
@@ -526,6 +577,28 @@ public class ImplementationGuide extends DomainResource {
           childrenList.add(new Property("telecom", "ContactPoint", "Contact details for individual (if a name was provided) or the publisher.", 0, java.lang.Integer.MAX_VALUE, telecom));
         }
 
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("name"))
+          this.name = castToString(value); // StringType
+        else if (name.equals("telecom"))
+          this.getTelecom().add(castToContactPoint(value));
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("name")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ImplementationGuide.name");
+        }
+        else if (name.equals("telecom")) {
+          return addTelecom();
+        }
+        else
+          return super.addChild(name);
+      }
+
       public ImplementationGuideContactComponent copy() {
         ImplementationGuideContactComponent dst = new ImplementationGuideContactComponent();
         copyValues(dst);
@@ -562,6 +635,11 @@ public class ImplementationGuide extends DomainResource {
         return super.isEmpty() && (name == null || name.isEmpty()) && (telecom == null || telecom.isEmpty())
           ;
       }
+
+  public String fhirType() {
+    return "ImplementationGuide.contact";
+
+  }
 
   }
 
@@ -695,6 +773,28 @@ public class ImplementationGuide extends DomainResource {
           childrenList.add(new Property("uri", "uri", "Where the dependency is located.", 0, java.lang.Integer.MAX_VALUE, uri));
         }
 
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("type"))
+          this.type = new GuideDependencyTypeEnumFactory().fromType(value); // Enumeration<GuideDependencyType>
+        else if (name.equals("uri"))
+          this.uri = castToUri(value); // UriType
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("type")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ImplementationGuide.type");
+        }
+        else if (name.equals("uri")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ImplementationGuide.uri");
+        }
+        else
+          return super.addChild(name);
+      }
+
       public ImplementationGuideDependencyComponent copy() {
         ImplementationGuideDependencyComponent dst = new ImplementationGuideDependencyComponent();
         copyValues(dst);
@@ -727,6 +827,11 @@ public class ImplementationGuide extends DomainResource {
         return super.isEmpty() && (type == null || type.isEmpty()) && (uri == null || uri.isEmpty())
           ;
       }
+
+  public String fhirType() {
+    return "ImplementationGuide.dependency";
+
+  }
 
   }
 
@@ -911,6 +1016,33 @@ public class ImplementationGuide extends DomainResource {
           childrenList.add(new Property("resource", "", "A resource that is part of the implementation guide. Conformance resources (value set, structure definition, conformance statements etc.) are obvious candidates for inclusion, but any kind of resource can be included as an example resource.", 0, java.lang.Integer.MAX_VALUE, resource));
         }
 
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("name"))
+          this.name = castToString(value); // StringType
+        else if (name.equals("description"))
+          this.description = castToString(value); // StringType
+        else if (name.equals("resource"))
+          this.getResource().add((ImplementationGuidePackageResourceComponent) value);
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("name")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ImplementationGuide.name");
+        }
+        else if (name.equals("description")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ImplementationGuide.description");
+        }
+        else if (name.equals("resource")) {
+          return addResource();
+        }
+        else
+          return super.addChild(name);
+      }
+
       public ImplementationGuidePackageComponent copy() {
         ImplementationGuidePackageComponent dst = new ImplementationGuidePackageComponent();
         copyValues(dst);
@@ -949,6 +1081,11 @@ public class ImplementationGuide extends DomainResource {
         return super.isEmpty() && (name == null || name.isEmpty()) && (description == null || description.isEmpty())
            && (resource == null || resource.isEmpty());
       }
+
+  public String fhirType() {
+    return "ImplementationGuide.package";
+
+  }
 
   }
 
@@ -1221,26 +1358,26 @@ public class ImplementationGuide extends DomainResource {
         /**
          * @return {@link #source} (Where this resource is found.)
          */
-        public UriType getSourceUriType() throws Exception { 
+        public UriType getSourceUriType() throws FHIRException { 
           if (!(this.source instanceof UriType))
-            throw new Exception("Type mismatch: the type UriType was expected, but "+this.source.getClass().getName()+" was encountered");
+            throw new FHIRException("Type mismatch: the type UriType was expected, but "+this.source.getClass().getName()+" was encountered");
           return (UriType) this.source;
         }
 
-        public boolean hasSourceUriType() throws Exception { 
+        public boolean hasSourceUriType() { 
           return this.source instanceof UriType;
         }
 
         /**
          * @return {@link #source} (Where this resource is found.)
          */
-        public Reference getSourceReference() throws Exception { 
+        public Reference getSourceReference() throws FHIRException { 
           if (!(this.source instanceof Reference))
-            throw new Exception("Type mismatch: the type Reference was expected, but "+this.source.getClass().getName()+" was encountered");
+            throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.source.getClass().getName()+" was encountered");
           return (Reference) this.source;
         }
 
-        public boolean hasSourceReference() throws Exception { 
+        public boolean hasSourceReference() { 
           return this.source instanceof Reference;
         }
 
@@ -1310,6 +1447,54 @@ public class ImplementationGuide extends DomainResource {
           childrenList.add(new Property("exampleFor", "Reference(StructureDefinition)", "Another resource that this resource is an example for. This is mostly used for resources that are included as examples of StructureDefinitions.", 0, java.lang.Integer.MAX_VALUE, exampleFor));
         }
 
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("purpose"))
+          this.purpose = new GuideResourcePurposeEnumFactory().fromType(value); // Enumeration<GuideResourcePurpose>
+        else if (name.equals("name"))
+          this.name = castToString(value); // StringType
+        else if (name.equals("description"))
+          this.description = castToString(value); // StringType
+        else if (name.equals("acronym"))
+          this.acronym = castToString(value); // StringType
+        else if (name.equals("source[x]"))
+          this.source = (Type) value; // Type
+        else if (name.equals("exampleFor"))
+          this.exampleFor = castToReference(value); // Reference
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("purpose")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ImplementationGuide.purpose");
+        }
+        else if (name.equals("name")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ImplementationGuide.name");
+        }
+        else if (name.equals("description")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ImplementationGuide.description");
+        }
+        else if (name.equals("acronym")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ImplementationGuide.acronym");
+        }
+        else if (name.equals("sourceUri")) {
+          this.source = new UriType();
+          return this.source;
+        }
+        else if (name.equals("sourceReference")) {
+          this.source = new Reference();
+          return this.source;
+        }
+        else if (name.equals("exampleFor")) {
+          this.exampleFor = new Reference();
+          return this.exampleFor;
+        }
+        else
+          return super.addChild(name);
+      }
+
       public ImplementationGuidePackageResourceComponent copy() {
         ImplementationGuidePackageResourceComponent dst = new ImplementationGuidePackageResourceComponent();
         copyValues(dst);
@@ -1350,6 +1535,11 @@ public class ImplementationGuide extends DomainResource {
            && (description == null || description.isEmpty()) && (acronym == null || acronym.isEmpty())
            && (source == null || source.isEmpty()) && (exampleFor == null || exampleFor.isEmpty());
       }
+
+  public String fhirType() {
+    return "ImplementationGuide.package.resource";
+
+  }
 
   }
 
@@ -1487,6 +1677,29 @@ public class ImplementationGuide extends DomainResource {
           childrenList.add(new Property("profile", "Reference(StructureDefinition)", "A reference to the profile that all instances must conform to.", 0, java.lang.Integer.MAX_VALUE, profile));
         }
 
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("type"))
+          this.type = castToCode(value); // CodeType
+        else if (name.equals("profile"))
+          this.profile = castToReference(value); // Reference
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("type")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ImplementationGuide.type");
+        }
+        else if (name.equals("profile")) {
+          this.profile = new Reference();
+          return this.profile;
+        }
+        else
+          return super.addChild(name);
+      }
+
       public ImplementationGuideGlobalComponent copy() {
         ImplementationGuideGlobalComponent dst = new ImplementationGuideGlobalComponent();
         copyValues(dst);
@@ -1519,6 +1732,11 @@ public class ImplementationGuide extends DomainResource {
         return super.isEmpty() && (type == null || type.isEmpty()) && (profile == null || profile.isEmpty())
           ;
       }
+
+  public String fhirType() {
+    return "ImplementationGuide.global";
+
+  }
 
   }
 
@@ -1935,6 +2153,53 @@ public class ImplementationGuide extends DomainResource {
           childrenList.add(new Property("page", "@ImplementationGuide.page", "Nested Pages/Sections under this page.", 0, java.lang.Integer.MAX_VALUE, page));
         }
 
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("source"))
+          this.source = castToUri(value); // UriType
+        else if (name.equals("name"))
+          this.name = castToString(value); // StringType
+        else if (name.equals("kind"))
+          this.kind = new GuidePageKindEnumFactory().fromType(value); // Enumeration<GuidePageKind>
+        else if (name.equals("type"))
+          this.getType().add(castToCode(value));
+        else if (name.equals("package"))
+          this.getPackage().add(castToString(value));
+        else if (name.equals("format"))
+          this.format = castToCode(value); // CodeType
+        else if (name.equals("page"))
+          this.getPage().add((ImplementationGuidePageComponent) value);
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("source")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ImplementationGuide.source");
+        }
+        else if (name.equals("name")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ImplementationGuide.name");
+        }
+        else if (name.equals("kind")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ImplementationGuide.kind");
+        }
+        else if (name.equals("type")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ImplementationGuide.type");
+        }
+        else if (name.equals("package")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ImplementationGuide.package");
+        }
+        else if (name.equals("format")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ImplementationGuide.format");
+        }
+        else if (name.equals("page")) {
+          return addPage();
+        }
+        else
+          return super.addChild(name);
+      }
+
       public ImplementationGuidePageComponent copy() {
         ImplementationGuidePageComponent dst = new ImplementationGuidePageComponent();
         copyValues(dst);
@@ -1989,6 +2254,11 @@ public class ImplementationGuide extends DomainResource {
            && (kind == null || kind.isEmpty()) && (type == null || type.isEmpty()) && (package_ == null || package_.isEmpty())
            && (format == null || format.isEmpty()) && (page == null || page.isEmpty());
       }
+
+  public String fhirType() {
+    return "ImplementationGuide.page";
+
+  }
 
   }
 
@@ -2903,6 +3173,109 @@ public class ImplementationGuide extends DomainResource {
         childrenList.add(new Property("binary", "uri", "A binary file that is included in the  implementation guide when it is published.", 0, java.lang.Integer.MAX_VALUE, binary));
         childrenList.add(new Property("page", "", "A page / section in the implementation guide. The root page is the implementation guide home page.", 0, java.lang.Integer.MAX_VALUE, page));
       }
+
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("url"))
+          this.url = castToUri(value); // UriType
+        else if (name.equals("version"))
+          this.version = castToString(value); // StringType
+        else if (name.equals("name"))
+          this.name = castToString(value); // StringType
+        else if (name.equals("status"))
+          this.status = new ConformanceResourceStatusEnumFactory().fromType(value); // Enumeration<ConformanceResourceStatus>
+        else if (name.equals("experimental"))
+          this.experimental = castToBoolean(value); // BooleanType
+        else if (name.equals("publisher"))
+          this.publisher = castToString(value); // StringType
+        else if (name.equals("contact"))
+          this.getContact().add((ImplementationGuideContactComponent) value);
+        else if (name.equals("date"))
+          this.date = castToDateTime(value); // DateTimeType
+        else if (name.equals("description"))
+          this.description = castToString(value); // StringType
+        else if (name.equals("useContext"))
+          this.getUseContext().add(castToCodeableConcept(value));
+        else if (name.equals("copyright"))
+          this.copyright = castToString(value); // StringType
+        else if (name.equals("fhirVersion"))
+          this.fhirVersion = castToId(value); // IdType
+        else if (name.equals("dependency"))
+          this.getDependency().add((ImplementationGuideDependencyComponent) value);
+        else if (name.equals("package"))
+          this.getPackage().add((ImplementationGuidePackageComponent) value);
+        else if (name.equals("global"))
+          this.getGlobal().add((ImplementationGuideGlobalComponent) value);
+        else if (name.equals("binary"))
+          this.getBinary().add(castToUri(value));
+        else if (name.equals("page"))
+          this.page = (ImplementationGuidePageComponent) value; // ImplementationGuidePageComponent
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("url")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ImplementationGuide.url");
+        }
+        else if (name.equals("version")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ImplementationGuide.version");
+        }
+        else if (name.equals("name")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ImplementationGuide.name");
+        }
+        else if (name.equals("status")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ImplementationGuide.status");
+        }
+        else if (name.equals("experimental")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ImplementationGuide.experimental");
+        }
+        else if (name.equals("publisher")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ImplementationGuide.publisher");
+        }
+        else if (name.equals("contact")) {
+          return addContact();
+        }
+        else if (name.equals("date")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ImplementationGuide.date");
+        }
+        else if (name.equals("description")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ImplementationGuide.description");
+        }
+        else if (name.equals("useContext")) {
+          return addUseContext();
+        }
+        else if (name.equals("copyright")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ImplementationGuide.copyright");
+        }
+        else if (name.equals("fhirVersion")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ImplementationGuide.fhirVersion");
+        }
+        else if (name.equals("dependency")) {
+          return addDependency();
+        }
+        else if (name.equals("package")) {
+          return addPackage();
+        }
+        else if (name.equals("global")) {
+          return addGlobal();
+        }
+        else if (name.equals("binary")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ImplementationGuide.binary");
+        }
+        else if (name.equals("page")) {
+          this.page = new ImplementationGuidePageComponent();
+          return this.page;
+        }
+        else
+          return super.addChild(name);
+      }
+
+  public String fhirType() {
+    return "ImplementationGuide";
+
+  }
 
       public ImplementationGuide copy() {
         ImplementationGuide dst = new ImplementationGuide();

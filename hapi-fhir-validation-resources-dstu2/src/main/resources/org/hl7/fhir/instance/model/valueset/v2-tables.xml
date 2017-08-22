@@ -1,7 +1,7 @@
 <Bundle xmlns="http://hl7.org/fhir">
  <id value="v2-valuesets"/>
  <meta>
-  <lastUpdated value="2015-11-11T10:54:01.813-05:00"/>
+  <lastUpdated value="2015-10-24T07:41:03.495+11:00"/>
  </meta>
  <type value="collection"/>
  <entry>
@@ -34461,7 +34461,7 @@
       <display value="MMR"/>
       <designation>
        <language value="nl"/>
-       <value value="BMR - bof, mazelen, rodehond"/>
+       <value value="BMR - mazelen, bof, rodehond"/>
       </designation>
      </concept>
      <concept>
@@ -34901,7 +34901,7 @@
       <display value="DTaP"/>
       <designation>
        <language value="nl"/>
-       <value value="DaKT -difterie-acellulaire kinkhoest-tetanus"/>
+       <value value="DaKT"/>
       </designation>
      </concept>
      <concept>
@@ -35396,7 +35396,7 @@
       <display value="leprosy"/>
       <designation>
        <language value="nl"/>
-       <value value="lepra"/>
+       <value value="leprosy"/>
       </designation>
      </concept>
      <concept>
@@ -35715,7 +35715,7 @@
       <display value="MMRV"/>
       <designation>
        <language value="nl"/>
-       <value value="BMRV - bof, mazelen, rodehond en varicella"/>
+       <value value="BMRV - mazelen, bof, rodehond en varicella"/>
       </designation>
      </concept>
      <concept>

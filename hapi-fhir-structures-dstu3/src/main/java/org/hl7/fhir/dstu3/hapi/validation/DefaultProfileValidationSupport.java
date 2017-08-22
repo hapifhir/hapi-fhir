@@ -70,9 +70,9 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
         codeSystems = new HashMap<String, CodeSystem>();
         valueSets = new HashMap<String, ValueSet>();
 
-        loadCodeSystems(theContext, codeSystems, valueSets, "/org/hl7/fhir/instance/model/dstu3/valueset/valuesets.xml");
-        loadCodeSystems(theContext, codeSystems, valueSets, "/org/hl7/fhir/instance/model/dstu3/valueset/v2-tables.xml");
-        loadCodeSystems(theContext, codeSystems, valueSets, "/org/hl7/fhir/instance/model/dstu3/valueset/v3-codesystems.xml");
+        loadCodeSystems(theContext, codeSystems, valueSets, "/org/hl7/fhir/dstu3/model/valueset/valuesets.xml");
+        loadCodeSystems(theContext, codeSystems, valueSets, "/org/hl7/fhir/dstu3/model/valueset/v2-tables.xml");
+        loadCodeSystems(theContext, codeSystems, valueSets, "/org/hl7/fhir/dstu3/model/valueset/v3-codesystems.xml");
 
         myCodeSystems = codeSystems;
         myValueSets = valueSets;
@@ -186,9 +186,9 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
     if (structureDefinitions == null) {
       structureDefinitions = new HashMap<String, StructureDefinition>();
 
-      loadStructureDefinitions(theContext, structureDefinitions, "/org/hl7/fhir/instance/model/dstu3/profile/profiles-resources.xml");
-      loadStructureDefinitions(theContext, structureDefinitions, "/org/hl7/fhir/instance/model/dstu3/profile/profiles-types.xml");
-      loadStructureDefinitions(theContext, structureDefinitions, "/org/hl7/fhir/instance/model/dstu3/profile/profiles-others.xml");
+      loadStructureDefinitions(theContext, structureDefinitions, "/org/hl7/fhir/dstu3/model/profile/profiles-resources.xml");
+      loadStructureDefinitions(theContext, structureDefinitions, "/org/hl7/fhir/dstu3/model/profile/profiles-types.xml");
+      loadStructureDefinitions(theContext, structureDefinitions, "/org/hl7/fhir/dstu3/model/profile/profiles-others.xml");
 
       myStructureDefinitions = structureDefinitions;
     }

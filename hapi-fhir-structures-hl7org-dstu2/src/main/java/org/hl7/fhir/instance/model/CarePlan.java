@@ -29,19 +29,14 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Wed, Jul 13, 2016 05:32+1000 for FHIR v1.0.2
+import java.util.*;
 
+import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
-import org.hl7.fhir.instance.utilities.Utilities;
+import org.hl7.fhir.utilities.Utilities;
 
-import ca.uhn.fhir.model.api.annotation.Block;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
-import ca.uhn.fhir.model.api.annotation.ResourceDef;
-import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.*;
 /**
  * Describes the intention of how one or more practitioners intend to deliver care for a particular patient, group or community for a period of time, possibly limited to care for a specific condition or set of conditions.
  */
@@ -73,7 +68,7 @@ public class CarePlan extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static CarePlanStatus fromCode(String codeString) throws Exception {
+        public static CarePlanStatus fromCode(String codeString) throws FHIRException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("proposed".equals(codeString))
@@ -86,7 +81,7 @@ public class CarePlan extends DomainResource {
           return COMPLETED;
         if ("cancelled".equals(codeString))
           return CANCELLED;
-        throw new Exception("Unknown CarePlanStatus code '"+codeString+"'");
+        throw new FHIRException("Unknown CarePlanStatus code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -147,6 +142,24 @@ public class CarePlan extends DomainResource {
           return CarePlanStatus.CANCELLED;
         throw new IllegalArgumentException("Unknown CarePlanStatus code '"+codeString+"'");
         }
+        public Enumeration<CarePlanStatus> fromType(Base code) throws FHIRException {
+          if (code == null || code.isEmpty())
+            return null;
+          String codeString = ((PrimitiveType) code).asStringValue();
+          if (codeString == null || "".equals(codeString))
+            return null;
+        if ("proposed".equals(codeString))
+          return new Enumeration<CarePlanStatus>(this, CarePlanStatus.PROPOSED);
+        if ("draft".equals(codeString))
+          return new Enumeration<CarePlanStatus>(this, CarePlanStatus.DRAFT);
+        if ("active".equals(codeString))
+          return new Enumeration<CarePlanStatus>(this, CarePlanStatus.ACTIVE);
+        if ("completed".equals(codeString))
+          return new Enumeration<CarePlanStatus>(this, CarePlanStatus.COMPLETED);
+        if ("cancelled".equals(codeString))
+          return new Enumeration<CarePlanStatus>(this, CarePlanStatus.CANCELLED);
+        throw new FHIRException("Unknown CarePlanStatus code '"+codeString+"'");
+        }
     public String toCode(CarePlanStatus code) {
       if (code == CarePlanStatus.PROPOSED)
         return "proposed";
@@ -179,7 +192,7 @@ public class CarePlan extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static CarePlanRelationship fromCode(String codeString) throws Exception {
+        public static CarePlanRelationship fromCode(String codeString) throws FHIRException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("includes".equals(codeString))
@@ -188,7 +201,7 @@ public class CarePlan extends DomainResource {
           return REPLACES;
         if ("fulfills".equals(codeString))
           return FULFILLS;
-        throw new Exception("Unknown CarePlanRelationship code '"+codeString+"'");
+        throw new FHIRException("Unknown CarePlanRelationship code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -237,6 +250,20 @@ public class CarePlan extends DomainResource {
           return CarePlanRelationship.FULFILLS;
         throw new IllegalArgumentException("Unknown CarePlanRelationship code '"+codeString+"'");
         }
+        public Enumeration<CarePlanRelationship> fromType(Base code) throws FHIRException {
+          if (code == null || code.isEmpty())
+            return null;
+          String codeString = ((PrimitiveType) code).asStringValue();
+          if (codeString == null || "".equals(codeString))
+            return null;
+        if ("includes".equals(codeString))
+          return new Enumeration<CarePlanRelationship>(this, CarePlanRelationship.INCLUDES);
+        if ("replaces".equals(codeString))
+          return new Enumeration<CarePlanRelationship>(this, CarePlanRelationship.REPLACES);
+        if ("fulfills".equals(codeString))
+          return new Enumeration<CarePlanRelationship>(this, CarePlanRelationship.FULFILLS);
+        throw new FHIRException("Unknown CarePlanRelationship code '"+codeString+"'");
+        }
     public String toCode(CarePlanRelationship code) {
       if (code == CarePlanRelationship.INCLUDES)
         return "includes";
@@ -277,7 +304,7 @@ public class CarePlan extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static CarePlanActivityStatus fromCode(String codeString) throws Exception {
+        public static CarePlanActivityStatus fromCode(String codeString) throws FHIRException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("not-started".equals(codeString))
@@ -292,7 +319,7 @@ public class CarePlan extends DomainResource {
           return COMPLETED;
         if ("cancelled".equals(codeString))
           return CANCELLED;
-        throw new Exception("Unknown CarePlanActivityStatus code '"+codeString+"'");
+        throw new FHIRException("Unknown CarePlanActivityStatus code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -358,6 +385,26 @@ public class CarePlan extends DomainResource {
         if ("cancelled".equals(codeString))
           return CarePlanActivityStatus.CANCELLED;
         throw new IllegalArgumentException("Unknown CarePlanActivityStatus code '"+codeString+"'");
+        }
+        public Enumeration<CarePlanActivityStatus> fromType(Base code) throws FHIRException {
+          if (code == null || code.isEmpty())
+            return null;
+          String codeString = ((PrimitiveType) code).asStringValue();
+          if (codeString == null || "".equals(codeString))
+            return null;
+        if ("not-started".equals(codeString))
+          return new Enumeration<CarePlanActivityStatus>(this, CarePlanActivityStatus.NOTSTARTED);
+        if ("scheduled".equals(codeString))
+          return new Enumeration<CarePlanActivityStatus>(this, CarePlanActivityStatus.SCHEDULED);
+        if ("in-progress".equals(codeString))
+          return new Enumeration<CarePlanActivityStatus>(this, CarePlanActivityStatus.INPROGRESS);
+        if ("on-hold".equals(codeString))
+          return new Enumeration<CarePlanActivityStatus>(this, CarePlanActivityStatus.ONHOLD);
+        if ("completed".equals(codeString))
+          return new Enumeration<CarePlanActivityStatus>(this, CarePlanActivityStatus.COMPLETED);
+        if ("cancelled".equals(codeString))
+          return new Enumeration<CarePlanActivityStatus>(this, CarePlanActivityStatus.CANCELLED);
+        throw new FHIRException("Unknown CarePlanActivityStatus code '"+codeString+"'");
         }
     public String toCode(CarePlanActivityStatus code) {
       if (code == CarePlanActivityStatus.NOTSTARTED)
@@ -513,6 +560,29 @@ public class CarePlan extends DomainResource {
           childrenList.add(new Property("plan", "Reference(CarePlan)", "A reference to the plan to which a relationship is asserted.", 0, java.lang.Integer.MAX_VALUE, plan));
         }
 
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("code"))
+          this.code = new CarePlanRelationshipEnumFactory().fromType(value); // Enumeration<CarePlanRelationship>
+        else if (name.equals("plan"))
+          this.plan = castToReference(value); // Reference
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("code")) {
+          throw new FHIRException("Cannot call addChild on a primitive type CarePlan.code");
+        }
+        else if (name.equals("plan")) {
+          this.plan = new Reference();
+          return this.plan;
+        }
+        else
+          return super.addChild(name);
+      }
+
       public CarePlanRelatedPlanComponent copy() {
         CarePlanRelatedPlanComponent dst = new CarePlanRelatedPlanComponent();
         copyValues(dst);
@@ -545,6 +615,11 @@ public class CarePlan extends DomainResource {
         return super.isEmpty() && (code == null || code.isEmpty()) && (plan == null || plan.isEmpty())
           ;
       }
+
+  public String fhirType() {
+    return "CarePlan.relatedPlan";
+
+  }
 
   }
 
@@ -647,6 +722,30 @@ public class CarePlan extends DomainResource {
           childrenList.add(new Property("member", "Reference(Practitioner|RelatedPerson|Patient|Organization)", "The specific person or organization who is participating/expected to participate in the care plan.", 0, java.lang.Integer.MAX_VALUE, member));
         }
 
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("role"))
+          this.role = castToCodeableConcept(value); // CodeableConcept
+        else if (name.equals("member"))
+          this.member = castToReference(value); // Reference
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("role")) {
+          this.role = new CodeableConcept();
+          return this.role;
+        }
+        else if (name.equals("member")) {
+          this.member = new Reference();
+          return this.member;
+        }
+        else
+          return super.addChild(name);
+      }
+
       public CarePlanParticipantComponent copy() {
         CarePlanParticipantComponent dst = new CarePlanParticipantComponent();
         copyValues(dst);
@@ -679,6 +778,11 @@ public class CarePlan extends DomainResource {
         return super.isEmpty() && (role == null || role.isEmpty()) && (member == null || member.isEmpty())
           ;
       }
+
+  public String fhirType() {
+    return "CarePlan.participant";
+
+  }
 
   }
 
@@ -891,6 +995,40 @@ public class CarePlan extends DomainResource {
           childrenList.add(new Property("detail", "", "A simple summary of a planned activity suitable for a general care plan system (e.g. form driven) that doesn't know about specific resources such as procedure etc.", 0, java.lang.Integer.MAX_VALUE, detail));
         }
 
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("actionResulting"))
+          this.getActionResulting().add(castToReference(value));
+        else if (name.equals("progress"))
+          this.getProgress().add(castToAnnotation(value));
+        else if (name.equals("reference"))
+          this.reference = castToReference(value); // Reference
+        else if (name.equals("detail"))
+          this.detail = (CarePlanActivityDetailComponent) value; // CarePlanActivityDetailComponent
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("actionResulting")) {
+          return addActionResulting();
+        }
+        else if (name.equals("progress")) {
+          return addProgress();
+        }
+        else if (name.equals("reference")) {
+          this.reference = new Reference();
+          return this.reference;
+        }
+        else if (name.equals("detail")) {
+          this.detail = new CarePlanActivityDetailComponent();
+          return this.detail;
+        }
+        else
+          return super.addChild(name);
+      }
+
       public CarePlanActivityComponent copy() {
         CarePlanActivityComponent dst = new CarePlanActivityComponent();
         copyValues(dst);
@@ -934,6 +1072,11 @@ public class CarePlan extends DomainResource {
         return super.isEmpty() && (actionResulting == null || actionResulting.isEmpty()) && (progress == null || progress.isEmpty())
            && (reference == null || reference.isEmpty()) && (detail == null || detail.isEmpty());
       }
+
+  public String fhirType() {
+    return "CarePlan.activity";
+
+  }
 
   }
 
@@ -1419,39 +1562,39 @@ public class CarePlan extends DomainResource {
         /**
          * @return {@link #scheduled} (The period, timing or frequency upon which the described activity is to occur.)
          */
-        public Timing getScheduledTiming() throws Exception { 
+        public Timing getScheduledTiming() throws FHIRException { 
           if (!(this.scheduled instanceof Timing))
-            throw new Exception("Type mismatch: the type Timing was expected, but "+this.scheduled.getClass().getName()+" was encountered");
+            throw new FHIRException("Type mismatch: the type Timing was expected, but "+this.scheduled.getClass().getName()+" was encountered");
           return (Timing) this.scheduled;
         }
 
-        public boolean hasScheduledTiming() throws Exception { 
+        public boolean hasScheduledTiming() { 
           return this.scheduled instanceof Timing;
         }
 
         /**
          * @return {@link #scheduled} (The period, timing or frequency upon which the described activity is to occur.)
          */
-        public Period getScheduledPeriod() throws Exception { 
+        public Period getScheduledPeriod() throws FHIRException { 
           if (!(this.scheduled instanceof Period))
-            throw new Exception("Type mismatch: the type Period was expected, but "+this.scheduled.getClass().getName()+" was encountered");
+            throw new FHIRException("Type mismatch: the type Period was expected, but "+this.scheduled.getClass().getName()+" was encountered");
           return (Period) this.scheduled;
         }
 
-        public boolean hasScheduledPeriod() throws Exception { 
+        public boolean hasScheduledPeriod() { 
           return this.scheduled instanceof Period;
         }
 
         /**
          * @return {@link #scheduled} (The period, timing or frequency upon which the described activity is to occur.)
          */
-        public StringType getScheduledStringType() throws Exception { 
+        public StringType getScheduledStringType() throws FHIRException { 
           if (!(this.scheduled instanceof StringType))
-            throw new Exception("Type mismatch: the type StringType was expected, but "+this.scheduled.getClass().getName()+" was encountered");
+            throw new FHIRException("Type mismatch: the type StringType was expected, but "+this.scheduled.getClass().getName()+" was encountered");
           return (StringType) this.scheduled;
         }
 
-        public boolean hasScheduledStringType() throws Exception { 
+        public boolean hasScheduledStringType() { 
           return this.scheduled instanceof StringType;
         }
 
@@ -1570,26 +1713,26 @@ public class CarePlan extends DomainResource {
         /**
          * @return {@link #product} (Identifies the food, drug or other product to be consumed or supplied in the activity.)
          */
-        public CodeableConcept getProductCodeableConcept() throws Exception { 
+        public CodeableConcept getProductCodeableConcept() throws FHIRException { 
           if (!(this.product instanceof CodeableConcept))
-            throw new Exception("Type mismatch: the type CodeableConcept was expected, but "+this.product.getClass().getName()+" was encountered");
+            throw new FHIRException("Type mismatch: the type CodeableConcept was expected, but "+this.product.getClass().getName()+" was encountered");
           return (CodeableConcept) this.product;
         }
 
-        public boolean hasProductCodeableConcept() throws Exception { 
+        public boolean hasProductCodeableConcept() { 
           return this.product instanceof CodeableConcept;
         }
 
         /**
          * @return {@link #product} (Identifies the food, drug or other product to be consumed or supplied in the activity.)
          */
-        public Reference getProductReference() throws Exception { 
+        public Reference getProductReference() throws FHIRException { 
           if (!(this.product instanceof Reference))
-            throw new Exception("Type mismatch: the type Reference was expected, but "+this.product.getClass().getName()+" was encountered");
+            throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.product.getClass().getName()+" was encountered");
           return (Reference) this.product;
         }
 
-        public boolean hasProductReference() throws Exception { 
+        public boolean hasProductReference() { 
           return this.product instanceof Reference;
         }
 
@@ -1721,6 +1864,113 @@ public class CarePlan extends DomainResource {
           childrenList.add(new Property("description", "string", "This provides a textual description of constraints on the intended activity occurrence, including relation to other activities.  It may also include objectives, pre-conditions and end-conditions.  Finally, it may convey specifics about the activity such as body site, method, route, etc.", 0, java.lang.Integer.MAX_VALUE, description));
         }
 
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("category"))
+          this.category = castToCodeableConcept(value); // CodeableConcept
+        else if (name.equals("code"))
+          this.code = castToCodeableConcept(value); // CodeableConcept
+        else if (name.equals("reasonCode"))
+          this.getReasonCode().add(castToCodeableConcept(value));
+        else if (name.equals("reasonReference"))
+          this.getReasonReference().add(castToReference(value));
+        else if (name.equals("goal"))
+          this.getGoal().add(castToReference(value));
+        else if (name.equals("status"))
+          this.status = new CarePlanActivityStatusEnumFactory().fromType(value); // Enumeration<CarePlanActivityStatus>
+        else if (name.equals("statusReason"))
+          this.statusReason = castToCodeableConcept(value); // CodeableConcept
+        else if (name.equals("prohibited"))
+          this.prohibited = castToBoolean(value); // BooleanType
+        else if (name.equals("scheduled[x]"))
+          this.scheduled = (Type) value; // Type
+        else if (name.equals("location"))
+          this.location = castToReference(value); // Reference
+        else if (name.equals("performer"))
+          this.getPerformer().add(castToReference(value));
+        else if (name.equals("product[x]"))
+          this.product = (Type) value; // Type
+        else if (name.equals("dailyAmount"))
+          this.dailyAmount = castToSimpleQuantity(value); // SimpleQuantity
+        else if (name.equals("quantity"))
+          this.quantity = castToSimpleQuantity(value); // SimpleQuantity
+        else if (name.equals("description"))
+          this.description = castToString(value); // StringType
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("category")) {
+          this.category = new CodeableConcept();
+          return this.category;
+        }
+        else if (name.equals("code")) {
+          this.code = new CodeableConcept();
+          return this.code;
+        }
+        else if (name.equals("reasonCode")) {
+          return addReasonCode();
+        }
+        else if (name.equals("reasonReference")) {
+          return addReasonReference();
+        }
+        else if (name.equals("goal")) {
+          return addGoal();
+        }
+        else if (name.equals("status")) {
+          throw new FHIRException("Cannot call addChild on a primitive type CarePlan.status");
+        }
+        else if (name.equals("statusReason")) {
+          this.statusReason = new CodeableConcept();
+          return this.statusReason;
+        }
+        else if (name.equals("prohibited")) {
+          throw new FHIRException("Cannot call addChild on a primitive type CarePlan.prohibited");
+        }
+        else if (name.equals("scheduledTiming")) {
+          this.scheduled = new Timing();
+          return this.scheduled;
+        }
+        else if (name.equals("scheduledPeriod")) {
+          this.scheduled = new Period();
+          return this.scheduled;
+        }
+        else if (name.equals("scheduledString")) {
+          this.scheduled = new StringType();
+          return this.scheduled;
+        }
+        else if (name.equals("location")) {
+          this.location = new Reference();
+          return this.location;
+        }
+        else if (name.equals("performer")) {
+          return addPerformer();
+        }
+        else if (name.equals("productCodeableConcept")) {
+          this.product = new CodeableConcept();
+          return this.product;
+        }
+        else if (name.equals("productReference")) {
+          this.product = new Reference();
+          return this.product;
+        }
+        else if (name.equals("dailyAmount")) {
+          this.dailyAmount = new SimpleQuantity();
+          return this.dailyAmount;
+        }
+        else if (name.equals("quantity")) {
+          this.quantity = new SimpleQuantity();
+          return this.quantity;
+        }
+        else if (name.equals("description")) {
+          throw new FHIRException("Cannot call addChild on a primitive type CarePlan.description");
+        }
+        else
+          return super.addChild(name);
+      }
+
       public CarePlanActivityDetailComponent copy() {
         CarePlanActivityDetailComponent dst = new CarePlanActivityDetailComponent();
         copyValues(dst);
@@ -1794,6 +2044,11 @@ public class CarePlan extends DomainResource {
            && (quantity == null || quantity.isEmpty()) && (description == null || description.isEmpty())
           ;
       }
+
+  public String fhirType() {
+    return "CarePlan.activity.detail";
+
+  }
 
   }
 
@@ -2665,6 +2920,107 @@ public class CarePlan extends DomainResource {
         childrenList.add(new Property("note", "Annotation", "General notes about the care plan not covered elsewhere.", 0, java.lang.Integer.MAX_VALUE, note));
       }
 
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("identifier"))
+          this.getIdentifier().add(castToIdentifier(value));
+        else if (name.equals("subject"))
+          this.subject = castToReference(value); // Reference
+        else if (name.equals("status"))
+          this.status = new CarePlanStatusEnumFactory().fromType(value); // Enumeration<CarePlanStatus>
+        else if (name.equals("context"))
+          this.context = castToReference(value); // Reference
+        else if (name.equals("period"))
+          this.period = castToPeriod(value); // Period
+        else if (name.equals("author"))
+          this.getAuthor().add(castToReference(value));
+        else if (name.equals("modified"))
+          this.modified = castToDateTime(value); // DateTimeType
+        else if (name.equals("category"))
+          this.getCategory().add(castToCodeableConcept(value));
+        else if (name.equals("description"))
+          this.description = castToString(value); // StringType
+        else if (name.equals("addresses"))
+          this.getAddresses().add(castToReference(value));
+        else if (name.equals("support"))
+          this.getSupport().add(castToReference(value));
+        else if (name.equals("relatedPlan"))
+          this.getRelatedPlan().add((CarePlanRelatedPlanComponent) value);
+        else if (name.equals("participant"))
+          this.getParticipant().add((CarePlanParticipantComponent) value);
+        else if (name.equals("goal"))
+          this.getGoal().add(castToReference(value));
+        else if (name.equals("activity"))
+          this.getActivity().add((CarePlanActivityComponent) value);
+        else if (name.equals("note"))
+          this.note = castToAnnotation(value); // Annotation
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("identifier")) {
+          return addIdentifier();
+        }
+        else if (name.equals("subject")) {
+          this.subject = new Reference();
+          return this.subject;
+        }
+        else if (name.equals("status")) {
+          throw new FHIRException("Cannot call addChild on a primitive type CarePlan.status");
+        }
+        else if (name.equals("context")) {
+          this.context = new Reference();
+          return this.context;
+        }
+        else if (name.equals("period")) {
+          this.period = new Period();
+          return this.period;
+        }
+        else if (name.equals("author")) {
+          return addAuthor();
+        }
+        else if (name.equals("modified")) {
+          throw new FHIRException("Cannot call addChild on a primitive type CarePlan.modified");
+        }
+        else if (name.equals("category")) {
+          return addCategory();
+        }
+        else if (name.equals("description")) {
+          throw new FHIRException("Cannot call addChild on a primitive type CarePlan.description");
+        }
+        else if (name.equals("addresses")) {
+          return addAddresses();
+        }
+        else if (name.equals("support")) {
+          return addSupport();
+        }
+        else if (name.equals("relatedPlan")) {
+          return addRelatedPlan();
+        }
+        else if (name.equals("participant")) {
+          return addParticipant();
+        }
+        else if (name.equals("goal")) {
+          return addGoal();
+        }
+        else if (name.equals("activity")) {
+          return addActivity();
+        }
+        else if (name.equals("note")) {
+          this.note = new Annotation();
+          return this.note;
+        }
+        else
+          return super.addChild(name);
+      }
+
+  public String fhirType() {
+    return "CarePlan";
+
+  }
+
       public CarePlan copy() {
         CarePlan dst = new CarePlan();
         copyValues(dst);
@@ -2790,7 +3146,7 @@ public class CarePlan extends DomainResource {
   public static final String SP_RELATEDPLAN = "relatedplan";
   @SearchParamDefinition(name="condition", path="CarePlan.addresses", description="Health issues this plan addresses", type="reference" )
   public static final String SP_CONDITION = "condition";
-  @SearchParamDefinition(name="related", path="", description="A combination of the type of relationship and the related plan", type="composite" )
+  @SearchParamDefinition(name="related", path="null", description="A combination of the type of relationship and the related plan", type="composite" )
   public static final String SP_RELATED = "related";
   @SearchParamDefinition(name="patient", path="CarePlan.subject", description="Who care plan is for", type="reference" )
   public static final String SP_PATIENT = "patient";

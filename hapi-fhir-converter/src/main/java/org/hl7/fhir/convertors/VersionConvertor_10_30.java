@@ -90,9 +90,9 @@ import org.hl7.fhir.utilities.Utilities;
 
 public class VersionConvertor_10_30 {
 
-  public VersionConvertorAdvisor advisor;
+  public VersionConvertorAdvisor30 advisor;
 
-  public VersionConvertor_10_30(VersionConvertorAdvisor advisor) {
+  public VersionConvertor_10_30(VersionConvertorAdvisor30 advisor) {
     super();
     this.advisor = advisor;
   }
@@ -1807,7 +1807,7 @@ public class VersionConvertor_10_30 {
       return convertMoney((org.hl7.fhir.instance.model.Money) src);
     if (src instanceof org.hl7.fhir.instance.model.SimpleQuantity)
       return convertSimpleQuantity((org.hl7.fhir.instance.model.SimpleQuantity) src);
-    throw new Error("Unknown type "+src.getClass());
+    throw new Error("Unknown type "+src.fhirType());
   }
 
   public org.hl7.fhir.instance.model.Type convertType(org.hl7.fhir.dstu3.model.Type src) throws FHIRException {
@@ -12969,7 +12969,7 @@ public org.hl7.fhir.instance.model.ValueSet.ConceptDefinitionDesignationComponen
       return convertTestScript((org.hl7.fhir.instance.model.TestScript) src);
     if (src instanceof org.hl7.fhir.instance.model.ValueSet)
       return convertValueSet((org.hl7.fhir.instance.model.ValueSet) src);
-    throw new Error("Unknown resource "+src.getClass());
+    throw new Error("Unknown resource "+src.fhirType());
   }
 
   public org.hl7.fhir.instance.model.Resource convertResource(org.hl7.fhir.dstu3.model.Resource src) throws FHIRException {

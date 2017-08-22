@@ -31,9 +31,7 @@ POSSIBILITY OF SUCH DAMAGE.
  */
 package org.hl7.fhir.instance.model;
 
-import java.util.Calendar;
-import java.util.Date;
-import java.util.TimeZone;
+import java.util.*;
 import java.util.zip.DataFormatException;
 
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
@@ -217,4 +215,7 @@ public class InstantType extends BaseDateTimeType {
 		return retVal;
 	}
 
+	public String fhirType() {
+		return "instant";
+	}
 }

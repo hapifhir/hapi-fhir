@@ -26,19 +26,15 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import java.math.BigDecimal;
 import java.util.UUID;
 
-import org.apache.commons.lang3.ObjectUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.*;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.hl7.fhir.instance.model.api.IAnyResource;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.instance.model.api.*;
 
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.api.annotation.SimpleSetter;
 import ca.uhn.fhir.parser.DataFormatException;
-import ca.uhn.fhir.rest.server.Constants;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.util.UrlUtil;
 
 /**
@@ -305,11 +301,16 @@ public class IdDt extends UriDt implements /*IPrimitiveDatatype<String>, */IIdTy
 				b.append(myResourceType);
 			}
 
-			if (b.length() > 0) {
+			if (b.length() > 0 && isNotBlank(myUnqualifiedId)) {
 				b.append('/');
 			}
 
-			b.append(myUnqualifiedId);
+			if (isNotBlank(myUnqualifiedId)) {
+				b.append(myUnqualifiedId);
+			} else if (isNotBlank(myUnqualifiedVersionId)) {
+				b.append('/');
+			}
+
 			if (isNotBlank(myUnqualifiedVersionId)) {
 				b.append('/');
 				b.append(Constants.PARAM_HISTORY);
@@ -385,7 +386,7 @@ public class IdDt extends UriDt implements /*IPrimitiveDatatype<String>, */IIdTy
 
 	@Override
 	public boolean isEmpty() {
-		return isBlank(getValue());
+		return super.isBaseEmpty() && isBlank(getValue());
 	}
 
 	@Override
@@ -527,7 +528,21 @@ public class IdDt extends UriDt implements /*IPrimitiveDatatype<String>, */IIdTy
 				if (typeIndex == -1) {
 					myResourceType = theValue.substring(0, idIndex);
 				} else {
-					myResourceType = theValue.substring(typeIndex + 1, idIndex);
+					if (typeIndex > 0 && '/' == theValue.charAt(typeIndex - 1)) {
+						typeIndex = theValue.indexOf('/', typeIndex + 1);
+					}
+					if (typeIndex >= idIndex) {
+						// e.g. http://example.org/foo
+						// 'foo' was the id but we're making that the resource type. Nullify the id part because we don't have an id.
+						// Also set null value to the super.setValue() and enable myHaveComponentParts so it forces getValue() to properly
+						// recreate the url
+						myResourceType = myUnqualifiedId;
+						myUnqualifiedId = null;
+						super.setValue(null);
+						myHaveComponentParts = true;
+					} else {
+						myResourceType = theValue.substring(typeIndex + 1, idIndex);
+					}
 
 					if (typeIndex > 4) {
 						myBaseUrl = theValue.substring(0, typeIndex);

@@ -29,19 +29,14 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Wed, Jul 13, 2016 05:32+1000 for FHIR v1.0.2
+import java.util.*;
 
+import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
-import org.hl7.fhir.instance.utilities.Utilities;
+import org.hl7.fhir.utilities.Utilities;
 
-import ca.uhn.fhir.model.api.annotation.Block;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
-import ca.uhn.fhir.model.api.annotation.ResourceDef;
-import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.*;
 /**
  * The findings and interpretation of diagnostic  tests performed on patients, groups of patients, devices, and locations, and/or specimens derived from these. The report includes clinical context such as requesting and provider information, and some mix of atomic results, images, textual and coded interpretations, and formatted representation of diagnostic reports.
  */
@@ -81,7 +76,7 @@ public class DiagnosticReport extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static DiagnosticReportStatus fromCode(String codeString) throws Exception {
+        public static DiagnosticReportStatus fromCode(String codeString) throws FHIRException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("registered".equals(codeString))
@@ -98,7 +93,7 @@ public class DiagnosticReport extends DomainResource {
           return CANCELLED;
         if ("entered-in-error".equals(codeString))
           return ENTEREDINERROR;
-        throw new Exception("Unknown DiagnosticReportStatus code '"+codeString+"'");
+        throw new FHIRException("Unknown DiagnosticReportStatus code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -170,6 +165,28 @@ public class DiagnosticReport extends DomainResource {
         if ("entered-in-error".equals(codeString))
           return DiagnosticReportStatus.ENTEREDINERROR;
         throw new IllegalArgumentException("Unknown DiagnosticReportStatus code '"+codeString+"'");
+        }
+        public Enumeration<DiagnosticReportStatus> fromType(Base code) throws FHIRException {
+          if (code == null || code.isEmpty())
+            return null;
+          String codeString = ((PrimitiveType) code).asStringValue();
+          if (codeString == null || "".equals(codeString))
+            return null;
+        if ("registered".equals(codeString))
+          return new Enumeration<DiagnosticReportStatus>(this, DiagnosticReportStatus.REGISTERED);
+        if ("partial".equals(codeString))
+          return new Enumeration<DiagnosticReportStatus>(this, DiagnosticReportStatus.PARTIAL);
+        if ("final".equals(codeString))
+          return new Enumeration<DiagnosticReportStatus>(this, DiagnosticReportStatus.FINAL);
+        if ("corrected".equals(codeString))
+          return new Enumeration<DiagnosticReportStatus>(this, DiagnosticReportStatus.CORRECTED);
+        if ("appended".equals(codeString))
+          return new Enumeration<DiagnosticReportStatus>(this, DiagnosticReportStatus.APPENDED);
+        if ("cancelled".equals(codeString))
+          return new Enumeration<DiagnosticReportStatus>(this, DiagnosticReportStatus.CANCELLED);
+        if ("entered-in-error".equals(codeString))
+          return new Enumeration<DiagnosticReportStatus>(this, DiagnosticReportStatus.ENTEREDINERROR);
+        throw new FHIRException("Unknown DiagnosticReportStatus code '"+codeString+"'");
         }
     public String toCode(DiagnosticReportStatus code) {
       if (code == DiagnosticReportStatus.REGISTERED)
@@ -327,6 +344,29 @@ public class DiagnosticReport extends DomainResource {
           childrenList.add(new Property("link", "Reference(Media)", "Reference to the image source.", 0, java.lang.Integer.MAX_VALUE, link));
         }
 
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("comment"))
+          this.comment = castToString(value); // StringType
+        else if (name.equals("link"))
+          this.link = castToReference(value); // Reference
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("comment")) {
+          throw new FHIRException("Cannot call addChild on a primitive type DiagnosticReport.comment");
+        }
+        else if (name.equals("link")) {
+          this.link = new Reference();
+          return this.link;
+        }
+        else
+          return super.addChild(name);
+      }
+
       public DiagnosticReportImageComponent copy() {
         DiagnosticReportImageComponent dst = new DiagnosticReportImageComponent();
         copyValues(dst);
@@ -359,6 +399,11 @@ public class DiagnosticReport extends DomainResource {
         return super.isEmpty() && (comment == null || comment.isEmpty()) && (link == null || link.isEmpty())
           ;
       }
+
+  public String fhirType() {
+    return "DiagnosticReport.image";
+
+  }
 
   }
 
@@ -764,26 +809,26 @@ public class DiagnosticReport extends DomainResource {
     /**
      * @return {@link #effective} (The time or time-period the observed values are related to. When the subject of the report is a patient, this is usually either the time of the procedure or of specimen collection(s), but very often the source of the date/time is not known, only the date/time itself.)
      */
-    public DateTimeType getEffectiveDateTimeType() throws Exception { 
+    public DateTimeType getEffectiveDateTimeType() throws FHIRException { 
       if (!(this.effective instanceof DateTimeType))
-        throw new Exception("Type mismatch: the type DateTimeType was expected, but "+this.effective.getClass().getName()+" was encountered");
+        throw new FHIRException("Type mismatch: the type DateTimeType was expected, but "+this.effective.getClass().getName()+" was encountered");
       return (DateTimeType) this.effective;
     }
 
-    public boolean hasEffectiveDateTimeType() throws Exception { 
+    public boolean hasEffectiveDateTimeType() { 
       return this.effective instanceof DateTimeType;
     }
 
     /**
      * @return {@link #effective} (The time or time-period the observed values are related to. When the subject of the report is a patient, this is usually either the time of the procedure or of specimen collection(s), but very often the source of the date/time is not known, only the date/time itself.)
      */
-    public Period getEffectivePeriod() throws Exception { 
+    public Period getEffectivePeriod() throws FHIRException { 
       if (!(this.effective instanceof Period))
-        throw new Exception("Type mismatch: the type Period was expected, but "+this.effective.getClass().getName()+" was encountered");
+        throw new FHIRException("Type mismatch: the type Period was expected, but "+this.effective.getClass().getName()+" was encountered");
       return (Period) this.effective;
     }
 
-    public boolean hasEffectivePeriod() throws Exception { 
+    public boolean hasEffectivePeriod() { 
       return this.effective instanceof Period;
     }
 
@@ -1292,6 +1337,118 @@ public class DiagnosticReport extends DomainResource {
         childrenList.add(new Property("codedDiagnosis", "CodeableConcept", "Codes for the conclusion.", 0, java.lang.Integer.MAX_VALUE, codedDiagnosis));
         childrenList.add(new Property("presentedForm", "Attachment", "Rich text representation of the entire result as issued by the diagnostic service. Multiple formats are allowed but they SHALL be semantically equivalent.", 0, java.lang.Integer.MAX_VALUE, presentedForm));
       }
+
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("identifier"))
+          this.getIdentifier().add(castToIdentifier(value));
+        else if (name.equals("status"))
+          this.status = new DiagnosticReportStatusEnumFactory().fromType(value); // Enumeration<DiagnosticReportStatus>
+        else if (name.equals("category"))
+          this.category = castToCodeableConcept(value); // CodeableConcept
+        else if (name.equals("code"))
+          this.code = castToCodeableConcept(value); // CodeableConcept
+        else if (name.equals("subject"))
+          this.subject = castToReference(value); // Reference
+        else if (name.equals("encounter"))
+          this.encounter = castToReference(value); // Reference
+        else if (name.equals("effective[x]"))
+          this.effective = (Type) value; // Type
+        else if (name.equals("issued"))
+          this.issued = castToInstant(value); // InstantType
+        else if (name.equals("performer"))
+          this.performer = castToReference(value); // Reference
+        else if (name.equals("request"))
+          this.getRequest().add(castToReference(value));
+        else if (name.equals("specimen"))
+          this.getSpecimen().add(castToReference(value));
+        else if (name.equals("result"))
+          this.getResult().add(castToReference(value));
+        else if (name.equals("imagingStudy"))
+          this.getImagingStudy().add(castToReference(value));
+        else if (name.equals("image"))
+          this.getImage().add((DiagnosticReportImageComponent) value);
+        else if (name.equals("conclusion"))
+          this.conclusion = castToString(value); // StringType
+        else if (name.equals("codedDiagnosis"))
+          this.getCodedDiagnosis().add(castToCodeableConcept(value));
+        else if (name.equals("presentedForm"))
+          this.getPresentedForm().add(castToAttachment(value));
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("identifier")) {
+          return addIdentifier();
+        }
+        else if (name.equals("status")) {
+          throw new FHIRException("Cannot call addChild on a primitive type DiagnosticReport.status");
+        }
+        else if (name.equals("category")) {
+          this.category = new CodeableConcept();
+          return this.category;
+        }
+        else if (name.equals("code")) {
+          this.code = new CodeableConcept();
+          return this.code;
+        }
+        else if (name.equals("subject")) {
+          this.subject = new Reference();
+          return this.subject;
+        }
+        else if (name.equals("encounter")) {
+          this.encounter = new Reference();
+          return this.encounter;
+        }
+        else if (name.equals("effectiveDateTime")) {
+          this.effective = new DateTimeType();
+          return this.effective;
+        }
+        else if (name.equals("effectivePeriod")) {
+          this.effective = new Period();
+          return this.effective;
+        }
+        else if (name.equals("issued")) {
+          throw new FHIRException("Cannot call addChild on a primitive type DiagnosticReport.issued");
+        }
+        else if (name.equals("performer")) {
+          this.performer = new Reference();
+          return this.performer;
+        }
+        else if (name.equals("request")) {
+          return addRequest();
+        }
+        else if (name.equals("specimen")) {
+          return addSpecimen();
+        }
+        else if (name.equals("result")) {
+          return addResult();
+        }
+        else if (name.equals("imagingStudy")) {
+          return addImagingStudy();
+        }
+        else if (name.equals("image")) {
+          return addImage();
+        }
+        else if (name.equals("conclusion")) {
+          throw new FHIRException("Cannot call addChild on a primitive type DiagnosticReport.conclusion");
+        }
+        else if (name.equals("codedDiagnosis")) {
+          return addCodedDiagnosis();
+        }
+        else if (name.equals("presentedForm")) {
+          return addPresentedForm();
+        }
+        else
+          return super.addChild(name);
+      }
+
+  public String fhirType() {
+    return "DiagnosticReport";
+
+  }
 
       public DiagnosticReport copy() {
         DiagnosticReport dst = new DiagnosticReport();

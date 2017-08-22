@@ -6,14 +6,10 @@ import javax.xml.parsers.FactoryConfigurationError;
 import javax.xml.stream.XMLStreamException;
 
 import org.hl7.fhir.dstu3.model.Patient;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.*;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.parser.DataFormatException;
 
 public class XmlUtilDstu3Test {
@@ -53,12 +49,6 @@ public class XmlUtilDstu3Test {
 		}
 		try {
 			ourCtx.newXmlParser().encodeResourceToString(myPatient);
-			fail();
-		} catch (ConfigurationException e) {
-			// good
-		}
-		try {
-			ourCtx.newXmlParser().encodeBundleToString(new Bundle());
 			fail();
 		} catch (ConfigurationException e) {
 			// good

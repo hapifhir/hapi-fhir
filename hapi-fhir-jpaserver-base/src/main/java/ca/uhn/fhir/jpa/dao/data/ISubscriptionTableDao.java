@@ -33,19 +33,19 @@ import ca.uhn.fhir.jpa.entity.SubscriptionTable;
 public interface ISubscriptionTableDao extends JpaRepository<SubscriptionTable, Long> {
 
 	@Query("SELECT t FROM SubscriptionTable t WHERE t.myResId = :pid")
-   public SubscriptionTable findOneByResourcePid(@Param("pid") Long theId);
+	SubscriptionTable findOneByResourcePid(@Param("pid") Long theId);
 
 	@Modifying
 	@Query("DELETE FROM SubscriptionTable t WHERE t.myId = :id ")
-	public void deleteAllForSubscription(@Param("id") Long theSubscriptionId);
+	void deleteAllForSubscription(@Param("id") Long theSubscriptionId);
 
 	@Modifying
 	@Query("UPDATE SubscriptionTable t SET t.myLastClientPoll = :last_client_poll")
-	public int updateLastClientPoll(@Param("last_client_poll") Date theLastClientPoll);
+	int updateLastClientPoll(@Param("last_client_poll") Date theLastClientPoll);
 
 	@Query("SELECT t FROM SubscriptionTable t WHERE t.myLastClientPoll < :cutoff OR (t.myLastClientPoll IS NULL AND t.myCreated < :cutoff)")
-	public Collection<SubscriptionTable> findInactiveBeforeCutoff(@Param("cutoff") Date theCutoff);
+	Collection<SubscriptionTable> findInactiveBeforeCutoff(@Param("cutoff") Date theCutoff);
 
 	@Query("SELECT t.myId FROM SubscriptionTable t WHERE t.myStatus = :status AND t.myNextCheck <= :next_check")
-	public Collection<Long> findSubscriptionsWhichNeedToBeChecked(@Param("status") String theStatus, @Param("next_check") Date theNextCheck);
+	Collection<Long> findSubscriptionsWhichNeedToBeChecked(@Param("status") String theStatus, @Param("next_check") Date theNextCheck);
 }

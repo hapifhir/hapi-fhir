@@ -74,6 +74,14 @@ public abstract class PrimitiveType<T> extends Type implements IPrimitiveType<T>
 	 */
 	protected abstract String encode(T theValue);
 
+	public boolean isPrimitive() {
+		return true;
+	}
+	
+	public String primitiveValue() {
+		return asStringValue();
+	}
+
 	@Override
 	public String toString() {
 		return getClass().getSimpleName() + "[" + asStringValue() + "]";

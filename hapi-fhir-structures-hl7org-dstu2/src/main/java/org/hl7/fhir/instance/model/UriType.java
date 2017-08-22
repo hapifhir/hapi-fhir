@@ -156,4 +156,8 @@ public class UriType extends PrimitiveType<String> {
 		return normalize.equals(normalize2);
    }
 
+		public String fhirType() {
+			return "uri";			
+		}
+
 }

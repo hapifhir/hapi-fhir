@@ -6,7 +6,7 @@ import org.junit.AfterClass;
 import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.method.QualifiedParamList;
+import ca.uhn.fhir.rest.api.QualifiedParamList;
 import ca.uhn.fhir.util.TestUtil;
 
 public class TokenOrListParamDstu3Test {

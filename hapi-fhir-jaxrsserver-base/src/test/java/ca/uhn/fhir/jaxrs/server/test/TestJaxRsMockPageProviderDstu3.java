@@ -7,7 +7,7 @@ import javax.ws.rs.core.MediaType;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jaxrs.server.AbstractJaxRsPageProvider;
-import ca.uhn.fhir.rest.server.Constants;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.IPagingProvider;
 
 @Path("/")

@@ -1,5 +1,7 @@
 package ca.uhn.fhir.validation;
 
+import java.util.List;
+
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -21,7 +23,7 @@ package ca.uhn.fhir.validation;
  */
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.server.EncodingEnum;
+import ca.uhn.fhir.rest.api.EncodingEnum;
 
 public interface IValidationContext<T> {
 
@@ -35,6 +37,8 @@ public interface IValidationContext<T> {
 
 	void addValidationMessage(SingleValidationMessage theMessage);
 
+	List<SingleValidationMessage> getMessages();
+	
 	ValidationResult toResult();
 
 }

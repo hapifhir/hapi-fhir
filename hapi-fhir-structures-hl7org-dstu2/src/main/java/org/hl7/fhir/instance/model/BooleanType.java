@@ -84,4 +84,11 @@ public class BooleanType extends PrimitiveType<Boolean> implements IBaseBooleanD
 	public BooleanType copy() {
 		return new BooleanType(getValue());
  	}
+	public String fhirType() {
+		return "boolean";		
+	}
+
+  public boolean booleanValue() {
+    return getValue().booleanValue();
+  }
 }

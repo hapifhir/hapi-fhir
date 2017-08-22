@@ -87,13 +87,18 @@ public class SubscriptionTable {
 	@Column(name = "SUBSCRIPTION_STATUS", nullable = false, length = 20)
 	private String myStatus;
 
-	//@formatter:off
 	@OneToOne()
 	@JoinColumn(name = "RES_ID", insertable = true, updatable = false, referencedColumnName = "RES_ID", 
 		foreignKey = @ForeignKey(name = "FK_SUBSCRIPTION_RESOURCE_ID") 
 	)
 	private ResourceTable mySubscriptionResource;
-	//@formatter:on
+
+	/**
+	 * Constructor
+	 */
+	public SubscriptionTable(){
+		super();
+	}
 
 	public long getCheckInterval() {
 		return myCheckInterval;

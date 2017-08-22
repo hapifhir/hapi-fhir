@@ -1,16 +1,11 @@
 package ca.uhn.fhir.rest.server.exceptions;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 
-import ca.uhn.fhir.rest.server.IResourceProvider;
 
 /*
  * #%L
@@ -37,7 +32,7 @@ import ca.uhn.fhir.rest.server.IResourceProvider;
  * subclasses of this exception type.
  * <p>
  * HAPI provides a number of subclasses of BaseServerResponseException, and each one corresponds to a specific
- * HTTP status code. For example, if a {@link IResourceProvider resource provider} method throws 
+ * HTTP status code. For example, if a IResourceProvider method throws 
  * {@link ResourceNotFoundException}, this is a signal to the server that an <code>HTTP 404</code> should
  * be returned to the client.
  * </p>

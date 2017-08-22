@@ -3,7 +3,6 @@ package ca.uhn.fhir.jpa.dao;
 import java.util.Collection;
 import java.util.Set;
 
-import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -12,7 +11,6 @@ import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.entity.BaseHasResource;
 import ca.uhn.fhir.jpa.entity.ResourceTable;
 import ca.uhn.fhir.jpa.search.PersistedJpaBundleProvider;
-import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum.ResourceMetadataKeySupportingAnyResource;
 
 /*
@@ -37,30 +35,7 @@ import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum.ResourceMetadataKeySupporti
 
 public interface IDao {
 
-	public static final ResourceMetadataKeySupportingAnyResource<Long, Long> RESOURCE_PID = new ResourceMetadataKeySupportingAnyResource<Long, Long>("RESOURCE_PID") {
-
-		private static final long serialVersionUID = 1L;
-
-		@Override
-		public Long get(IAnyResource theResource) {
-			return (Long) theResource.getUserData(RESOURCE_PID.name());
-		}
-
-		@Override
-		public Long get(IResource theResource) {
-			return (Long) theResource.getResourceMetadata().get(RESOURCE_PID);
-		}
-
-		@Override
-		public void put(IAnyResource theResource, Long theObject) {
-			theResource.setUserData(RESOURCE_PID.name(), theObject);
-		}
-
-		@Override
-		public void put(IResource theResource, Long theObject) {
-			theResource.getResourceMetadata().put(RESOURCE_PID, theObject);
-		}
-	};
+	public static final ResourceMetadataKeySupportingAnyResource<Long, Long> RESOURCE_PID = new MetadataKeyResourcePid("RESOURCE_PID");
 
 	FhirContext getContext();
 

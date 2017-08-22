@@ -1,5 +1,13 @@
 package ca.uhn.fhir.okhttp.client;
 
+import java.io.*;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.commons.io.IOUtils;
+
+import ca.uhn.fhir.rest.api.Constants;
+
 /*
  * #%L
  * HAPI FHIR OkHttp Client
@@ -21,15 +29,9 @@ package ca.uhn.fhir.okhttp.client;
  */
 
 import ca.uhn.fhir.rest.client.api.IHttpResponse;
-import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import okhttp3.MediaType;
 import okhttp3.Response;
-import org.apache.commons.io.IOUtils;
-
-import java.io.*;
-import java.util.List;
-import java.util.Map;
 
 /**
  * Wraps an OkHttp {@link Response}

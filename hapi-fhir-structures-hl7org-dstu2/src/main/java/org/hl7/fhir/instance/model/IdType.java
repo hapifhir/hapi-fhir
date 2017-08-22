@@ -35,13 +35,9 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import java.math.BigDecimal;
 import java.util.UUID;
 
-import org.apache.commons.lang3.ObjectUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.*;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.instance.model.api.*;
 
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 
@@ -384,11 +380,16 @@ public final class IdType extends UriType implements IPrimitiveType<String>, IId
         b.append(myResourceType);
       }
 
-      if (b.length() > 0) {
+      if (b.length() > 0 && isNotBlank(myUnqualifiedId)) {
         b.append('/');
       }
 
-      b.append(myUnqualifiedId);
+      if (isNotBlank(myUnqualifiedId)) {
+        b.append(myUnqualifiedId);
+      } else if (isNotBlank(myUnqualifiedVersionId)) {
+        b.append('/');
+      }
+
       if (isNotBlank(myUnqualifiedVersionId)) {
         b.append('/');
         b.append("_history");
@@ -495,6 +496,10 @@ public final class IdType extends UriType implements IPrimitiveType<String>, IId
     return true;
   }
 
+	/**
+   * Returns <code>true</code> if the unqualified ID is a valid {@link Long}
+   * value (in other words, it consists only of digits)
+	 */
   @Override
   public boolean isIdPartValidLong() {
     return isValidLong(getIdPart());
@@ -571,7 +576,21 @@ public final class IdType extends UriType implements IPrimitiveType<String>, IId
         if (typeIndex == -1) {
           myResourceType = theValue.substring(0, idIndex);
         } else {
-          myResourceType = theValue.substring(typeIndex + 1, idIndex);
+          if (typeIndex > 0 && '/' == theValue.charAt(typeIndex - 1)) {
+            typeIndex = theValue.indexOf('/', typeIndex + 1);
+          }
+          if (typeIndex >= idIndex) {
+            // e.g. http://example.org/foo
+            // 'foo' was the id but we're making that the resource type. Nullify the id part because we don't have an id.
+            // Also set null value to the super.setValue() and enable myHaveComponentParts so it forces getValue() to properly
+            // recreate the url
+            myResourceType = myUnqualifiedId;
+            myUnqualifiedId = null;
+            super.setValue(null);
+            myHaveComponentParts = true;
+          } else {
+            myResourceType = theValue.substring(typeIndex + 1, idIndex);
+          }
 
           if (typeIndex > 4) {
             myBaseUrl = theValue.substring(0, typeIndex);
@@ -733,24 +752,28 @@ public final class IdType extends UriType implements IPrimitiveType<String>, IId
     return theIdPart.toString();
   }
 
-  public IIdType setParts(String theBaseUrl, String theResourceType, String theIdPart, String theVersionIdPart) {
-    if (isNotBlank(theVersionIdPart)) {
-      Validate.notBlank(theResourceType, "If theVersionIdPart is populated, theResourceType and theIdPart must be populated");
-      Validate.notBlank(theIdPart, "If theVersionIdPart is populated, theResourceType and theIdPart must be populated");
-    }
-    if (isNotBlank(theBaseUrl) && isNotBlank(theIdPart)) {
-      Validate.notBlank(theResourceType, "If theBaseUrl is populated and theIdPart is populated, theResourceType must be populated");
-    }
-    
-    setValue(null);
-    
-    myBaseUrl = theBaseUrl;
-    myResourceType = theResourceType;
-    myUnqualifiedId = theIdPart;
-    myUnqualifiedVersionId = StringUtils.defaultIfBlank(theVersionIdPart, null);
-    myHaveComponentParts = true;
-    
-    return this;
-  }
+	public String fhirType() {
+		return "id";
+	}
 
+	@Override
+	public IIdType setParts(String theBaseUrl, String theResourceType, String theIdPart, String theVersionIdPart) {
+		if (isNotBlank(theVersionIdPart)) {
+			Validate.notBlank(theResourceType, "If theVersionIdPart is populated, theResourceType and theIdPart must be populated");
+			Validate.notBlank(theIdPart, "If theVersionIdPart is populated, theResourceType and theIdPart must be populated");
+		}
+		if (isNotBlank(theBaseUrl) && isNotBlank(theIdPart)) {
+			Validate.notBlank(theResourceType, "If theBaseUrl is populated and theIdPart is populated, theResourceType must be populated");
+		}
+		
+		setValue(null);
+		
+		myBaseUrl = theBaseUrl;
+		myResourceType = theResourceType;
+		myUnqualifiedId = theIdPart;
+		myUnqualifiedVersionId = StringUtils.defaultIfBlank(theVersionIdPart, null);
+		myHaveComponentParts = true;
+		
+		return this;
+	}
 }

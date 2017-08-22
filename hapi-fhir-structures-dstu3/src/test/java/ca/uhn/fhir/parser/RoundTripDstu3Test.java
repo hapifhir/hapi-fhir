@@ -1,21 +1,12 @@
 package ca.uhn.fhir.parser;
 
-import static org.junit.Assert.assertTrue;
-
-import java.io.ByteArrayOutputStream;
-import java.io.FileInputStream;
-import java.io.StringReader;
-import java.io.StringWriter;
+import java.io.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-import javax.xml.stream.XMLEventReader;
-import javax.xml.stream.XMLEventWriter;
-import javax.xml.stream.XMLStreamConstants;
+import javax.xml.stream.*;
 import javax.xml.stream.events.XMLEvent;
 
-import org.custommonkey.xmlunit.DetailedDiff;
-import org.custommonkey.xmlunit.Diff;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.AfterClass;
 import org.junit.Test;
@@ -68,31 +59,17 @@ public class RoundTripDstu3Test {
 				exampleText = cleanXml(exampleText);
 				encodedXml = cleanXml(encodedXml);
 
-				DetailedDiff d = new DetailedDiff(new Diff(new StringReader(exampleText), new StringReader(encodedXml)));
-//				d.overrideDifferenceListener(new DifferenceListener() {
-//					
-//					@Override
-//					public void skippedComparison(Node theControl, Node theTest) {
-//						ourLog.info("" + theControl);
+				XmlParserDstu3Test.compareXml(exampleText, encodedXml);
+//				DetailedDiff d = new DetailedDiff(new Diff(new StringReader(exampleText), new StringReader(encodedXml)));
+//				
+//				boolean similar = d.similar();
+//				if (!similar) {
+//					exampleText = exampleText.replace(" xmlns=\"http://hl7.org/fhir\"", "");
+//					encodedXml = encodedXml.replace(" xmlns=\"http://hl7.org/fhir\"", "");
+//					if (exampleText.length() != encodedXml.length()) {
+//						assertTrue(d.toString(), similar);
 //					}
-//					
-//					@Override
-//					public int differenceFound(Difference theDifference) {
-//						ourLog.info("" + theDifference);
-//						return 0;
-//					}
-//				});
-				
-				boolean similar = d.similar();
-				if (!similar) {
-					exampleText = exampleText.replace(" xmlns=\"http://hl7.org/fhir\"", "");
-					encodedXml = encodedXml.replace(" xmlns=\"http://hl7.org/fhir\"", "");
-					if (exampleText.length() != encodedXml.length()) {
-//						ourLog.info("Expected: " + exampleText);
-//						ourLog.info("Actual  : " + encodedXml);
-						assertTrue(d.toString(), similar);
-					}
-				}
+//				}
 
 			}
 

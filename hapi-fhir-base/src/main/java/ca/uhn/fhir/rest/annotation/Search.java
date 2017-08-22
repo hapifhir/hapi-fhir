@@ -29,8 +29,6 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.rest.client.api.IBasicClient;
 import ca.uhn.fhir.rest.client.api.IRestfulClient;
-import ca.uhn.fhir.rest.server.IDynamicSearchResourceProvider;
-import ca.uhn.fhir.rest.server.IResourceProvider;
 
 
 /**
@@ -66,7 +64,7 @@ public @interface Search {
 
 	/**
 	 * The return type for this method. This generally does not need
-	 * to be populated for {@link IResourceProvider resource providers} in a server implementation, 
+	 * to be populated for IResourceProvider instances in a server implementation, 
 	 * but often does need to be populated in client implementations using {@link IBasicClient} or
 	 * {@link IRestfulClient}, or in plain providers on a server.
 	 * <p>
@@ -82,8 +80,6 @@ public @interface Search {
 
 	/**
 	 * This is an experimental option - Use with caution
-	 * 
-	 * @see IDynamicSearchResourceProvider
 	 */
 	boolean dynamic() default false;
 	

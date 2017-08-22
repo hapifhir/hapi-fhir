@@ -29,19 +29,14 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Wed, Jul 13, 2016 05:32+1000 for FHIR v1.0.2
+import java.util.*;
 
+import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
-import org.hl7.fhir.instance.utilities.Utilities;
+import org.hl7.fhir.utilities.Utilities;
 
-import ca.uhn.fhir.model.api.annotation.Block;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
-import ca.uhn.fhir.model.api.annotation.ResourceDef;
-import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.*;
 /**
  * Risk of harmful or undesirable, physiological response which is unique to an individual and associated with exposure to a substance.
  */
@@ -81,7 +76,7 @@ public class AllergyIntolerance extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static AllergyIntoleranceStatus fromCode(String codeString) throws Exception {
+        public static AllergyIntoleranceStatus fromCode(String codeString) throws FHIRException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("active".equals(codeString))
@@ -98,7 +93,7 @@ public class AllergyIntolerance extends DomainResource {
           return REFUTED;
         if ("entered-in-error".equals(codeString))
           return ENTEREDINERROR;
-        throw new Exception("Unknown AllergyIntoleranceStatus code '"+codeString+"'");
+        throw new FHIRException("Unknown AllergyIntoleranceStatus code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -171,6 +166,28 @@ public class AllergyIntolerance extends DomainResource {
           return AllergyIntoleranceStatus.ENTEREDINERROR;
         throw new IllegalArgumentException("Unknown AllergyIntoleranceStatus code '"+codeString+"'");
         }
+        public Enumeration<AllergyIntoleranceStatus> fromType(Base code) throws FHIRException {
+          if (code == null || code.isEmpty())
+            return null;
+          String codeString = ((PrimitiveType) code).asStringValue();
+          if (codeString == null || "".equals(codeString))
+            return null;
+        if ("active".equals(codeString))
+          return new Enumeration<AllergyIntoleranceStatus>(this, AllergyIntoleranceStatus.ACTIVE);
+        if ("unconfirmed".equals(codeString))
+          return new Enumeration<AllergyIntoleranceStatus>(this, AllergyIntoleranceStatus.UNCONFIRMED);
+        if ("confirmed".equals(codeString))
+          return new Enumeration<AllergyIntoleranceStatus>(this, AllergyIntoleranceStatus.CONFIRMED);
+        if ("inactive".equals(codeString))
+          return new Enumeration<AllergyIntoleranceStatus>(this, AllergyIntoleranceStatus.INACTIVE);
+        if ("resolved".equals(codeString))
+          return new Enumeration<AllergyIntoleranceStatus>(this, AllergyIntoleranceStatus.RESOLVED);
+        if ("refuted".equals(codeString))
+          return new Enumeration<AllergyIntoleranceStatus>(this, AllergyIntoleranceStatus.REFUTED);
+        if ("entered-in-error".equals(codeString))
+          return new Enumeration<AllergyIntoleranceStatus>(this, AllergyIntoleranceStatus.ENTEREDINERROR);
+        throw new FHIRException("Unknown AllergyIntoleranceStatus code '"+codeString+"'");
+        }
     public String toCode(AllergyIntoleranceStatus code) {
       if (code == AllergyIntoleranceStatus.ACTIVE)
         return "active";
@@ -207,7 +224,7 @@ public class AllergyIntolerance extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static AllergyIntoleranceCriticality fromCode(String codeString) throws Exception {
+        public static AllergyIntoleranceCriticality fromCode(String codeString) throws FHIRException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("CRITL".equals(codeString))
@@ -216,7 +233,7 @@ public class AllergyIntolerance extends DomainResource {
           return CRITH;
         if ("CRITU".equals(codeString))
           return CRITU;
-        throw new Exception("Unknown AllergyIntoleranceCriticality code '"+codeString+"'");
+        throw new FHIRException("Unknown AllergyIntoleranceCriticality code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -265,6 +282,20 @@ public class AllergyIntolerance extends DomainResource {
           return AllergyIntoleranceCriticality.CRITU;
         throw new IllegalArgumentException("Unknown AllergyIntoleranceCriticality code '"+codeString+"'");
         }
+        public Enumeration<AllergyIntoleranceCriticality> fromType(Base code) throws FHIRException {
+          if (code == null || code.isEmpty())
+            return null;
+          String codeString = ((PrimitiveType) code).asStringValue();
+          if (codeString == null || "".equals(codeString))
+            return null;
+        if ("CRITL".equals(codeString))
+          return new Enumeration<AllergyIntoleranceCriticality>(this, AllergyIntoleranceCriticality.CRITL);
+        if ("CRITH".equals(codeString))
+          return new Enumeration<AllergyIntoleranceCriticality>(this, AllergyIntoleranceCriticality.CRITH);
+        if ("CRITU".equals(codeString))
+          return new Enumeration<AllergyIntoleranceCriticality>(this, AllergyIntoleranceCriticality.CRITU);
+        throw new FHIRException("Unknown AllergyIntoleranceCriticality code '"+codeString+"'");
+        }
     public String toCode(AllergyIntoleranceCriticality code) {
       if (code == AllergyIntoleranceCriticality.CRITL)
         return "CRITL";
@@ -289,14 +320,14 @@ public class AllergyIntolerance extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static AllergyIntoleranceType fromCode(String codeString) throws Exception {
+        public static AllergyIntoleranceType fromCode(String codeString) throws FHIRException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("allergy".equals(codeString))
           return ALLERGY;
         if ("intolerance".equals(codeString))
           return INTOLERANCE;
-        throw new Exception("Unknown AllergyIntoleranceType code '"+codeString+"'");
+        throw new FHIRException("Unknown AllergyIntoleranceType code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -339,6 +370,18 @@ public class AllergyIntolerance extends DomainResource {
           return AllergyIntoleranceType.INTOLERANCE;
         throw new IllegalArgumentException("Unknown AllergyIntoleranceType code '"+codeString+"'");
         }
+        public Enumeration<AllergyIntoleranceType> fromType(Base code) throws FHIRException {
+          if (code == null || code.isEmpty())
+            return null;
+          String codeString = ((PrimitiveType) code).asStringValue();
+          if (codeString == null || "".equals(codeString))
+            return null;
+        if ("allergy".equals(codeString))
+          return new Enumeration<AllergyIntoleranceType>(this, AllergyIntoleranceType.ALLERGY);
+        if ("intolerance".equals(codeString))
+          return new Enumeration<AllergyIntoleranceType>(this, AllergyIntoleranceType.INTOLERANCE);
+        throw new FHIRException("Unknown AllergyIntoleranceType code '"+codeString+"'");
+        }
     public String toCode(AllergyIntoleranceType code) {
       if (code == AllergyIntoleranceType.ALLERGY)
         return "allergy";
@@ -369,7 +412,7 @@ public class AllergyIntolerance extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static AllergyIntoleranceCategory fromCode(String codeString) throws Exception {
+        public static AllergyIntoleranceCategory fromCode(String codeString) throws FHIRException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("food".equals(codeString))
@@ -380,7 +423,7 @@ public class AllergyIntolerance extends DomainResource {
           return ENVIRONMENT;
         if ("other".equals(codeString))
           return OTHER;
-        throw new Exception("Unknown AllergyIntoleranceCategory code '"+codeString+"'");
+        throw new FHIRException("Unknown AllergyIntoleranceCategory code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -435,6 +478,22 @@ public class AllergyIntolerance extends DomainResource {
           return AllergyIntoleranceCategory.OTHER;
         throw new IllegalArgumentException("Unknown AllergyIntoleranceCategory code '"+codeString+"'");
         }
+        public Enumeration<AllergyIntoleranceCategory> fromType(Base code) throws FHIRException {
+          if (code == null || code.isEmpty())
+            return null;
+          String codeString = ((PrimitiveType) code).asStringValue();
+          if (codeString == null || "".equals(codeString))
+            return null;
+        if ("food".equals(codeString))
+          return new Enumeration<AllergyIntoleranceCategory>(this, AllergyIntoleranceCategory.FOOD);
+        if ("medication".equals(codeString))
+          return new Enumeration<AllergyIntoleranceCategory>(this, AllergyIntoleranceCategory.MEDICATION);
+        if ("environment".equals(codeString))
+          return new Enumeration<AllergyIntoleranceCategory>(this, AllergyIntoleranceCategory.ENVIRONMENT);
+        if ("other".equals(codeString))
+          return new Enumeration<AllergyIntoleranceCategory>(this, AllergyIntoleranceCategory.OTHER);
+        throw new FHIRException("Unknown AllergyIntoleranceCategory code '"+codeString+"'");
+        }
     public String toCode(AllergyIntoleranceCategory code) {
       if (code == AllergyIntoleranceCategory.FOOD)
         return "food";
@@ -465,7 +524,7 @@ public class AllergyIntolerance extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static AllergyIntoleranceCertainty fromCode(String codeString) throws Exception {
+        public static AllergyIntoleranceCertainty fromCode(String codeString) throws FHIRException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("unlikely".equals(codeString))
@@ -474,7 +533,7 @@ public class AllergyIntolerance extends DomainResource {
           return LIKELY;
         if ("confirmed".equals(codeString))
           return CONFIRMED;
-        throw new Exception("Unknown AllergyIntoleranceCertainty code '"+codeString+"'");
+        throw new FHIRException("Unknown AllergyIntoleranceCertainty code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -523,6 +582,20 @@ public class AllergyIntolerance extends DomainResource {
           return AllergyIntoleranceCertainty.CONFIRMED;
         throw new IllegalArgumentException("Unknown AllergyIntoleranceCertainty code '"+codeString+"'");
         }
+        public Enumeration<AllergyIntoleranceCertainty> fromType(Base code) throws FHIRException {
+          if (code == null || code.isEmpty())
+            return null;
+          String codeString = ((PrimitiveType) code).asStringValue();
+          if (codeString == null || "".equals(codeString))
+            return null;
+        if ("unlikely".equals(codeString))
+          return new Enumeration<AllergyIntoleranceCertainty>(this, AllergyIntoleranceCertainty.UNLIKELY);
+        if ("likely".equals(codeString))
+          return new Enumeration<AllergyIntoleranceCertainty>(this, AllergyIntoleranceCertainty.LIKELY);
+        if ("confirmed".equals(codeString))
+          return new Enumeration<AllergyIntoleranceCertainty>(this, AllergyIntoleranceCertainty.CONFIRMED);
+        throw new FHIRException("Unknown AllergyIntoleranceCertainty code '"+codeString+"'");
+        }
     public String toCode(AllergyIntoleranceCertainty code) {
       if (code == AllergyIntoleranceCertainty.UNLIKELY)
         return "unlikely";
@@ -551,7 +624,7 @@ public class AllergyIntolerance extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static AllergyIntoleranceSeverity fromCode(String codeString) throws Exception {
+        public static AllergyIntoleranceSeverity fromCode(String codeString) throws FHIRException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("mild".equals(codeString))
@@ -560,7 +633,7 @@ public class AllergyIntolerance extends DomainResource {
           return MODERATE;
         if ("severe".equals(codeString))
           return SEVERE;
-        throw new Exception("Unknown AllergyIntoleranceSeverity code '"+codeString+"'");
+        throw new FHIRException("Unknown AllergyIntoleranceSeverity code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -608,6 +681,20 @@ public class AllergyIntolerance extends DomainResource {
         if ("severe".equals(codeString))
           return AllergyIntoleranceSeverity.SEVERE;
         throw new IllegalArgumentException("Unknown AllergyIntoleranceSeverity code '"+codeString+"'");
+        }
+        public Enumeration<AllergyIntoleranceSeverity> fromType(Base code) throws FHIRException {
+          if (code == null || code.isEmpty())
+            return null;
+          String codeString = ((PrimitiveType) code).asStringValue();
+          if (codeString == null || "".equals(codeString))
+            return null;
+        if ("mild".equals(codeString))
+          return new Enumeration<AllergyIntoleranceSeverity>(this, AllergyIntoleranceSeverity.MILD);
+        if ("moderate".equals(codeString))
+          return new Enumeration<AllergyIntoleranceSeverity>(this, AllergyIntoleranceSeverity.MODERATE);
+        if ("severe".equals(codeString))
+          return new Enumeration<AllergyIntoleranceSeverity>(this, AllergyIntoleranceSeverity.SEVERE);
+        throw new FHIRException("Unknown AllergyIntoleranceSeverity code '"+codeString+"'");
         }
     public String toCode(AllergyIntoleranceSeverity code) {
       if (code == AllergyIntoleranceSeverity.MILD)
@@ -1007,6 +1094,61 @@ public class AllergyIntolerance extends DomainResource {
           childrenList.add(new Property("note", "Annotation", "Additional text about the adverse reaction event not captured in other fields.", 0, java.lang.Integer.MAX_VALUE, note));
         }
 
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("substance"))
+          this.substance = castToCodeableConcept(value); // CodeableConcept
+        else if (name.equals("certainty"))
+          this.certainty = new AllergyIntoleranceCertaintyEnumFactory().fromType(value); // Enumeration<AllergyIntoleranceCertainty>
+        else if (name.equals("manifestation"))
+          this.getManifestation().add(castToCodeableConcept(value));
+        else if (name.equals("description"))
+          this.description = castToString(value); // StringType
+        else if (name.equals("onset"))
+          this.onset = castToDateTime(value); // DateTimeType
+        else if (name.equals("severity"))
+          this.severity = new AllergyIntoleranceSeverityEnumFactory().fromType(value); // Enumeration<AllergyIntoleranceSeverity>
+        else if (name.equals("exposureRoute"))
+          this.exposureRoute = castToCodeableConcept(value); // CodeableConcept
+        else if (name.equals("note"))
+          this.note = castToAnnotation(value); // Annotation
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("substance")) {
+          this.substance = new CodeableConcept();
+          return this.substance;
+        }
+        else if (name.equals("certainty")) {
+          throw new FHIRException("Cannot call addChild on a primitive type AllergyIntolerance.certainty");
+        }
+        else if (name.equals("manifestation")) {
+          return addManifestation();
+        }
+        else if (name.equals("description")) {
+          throw new FHIRException("Cannot call addChild on a primitive type AllergyIntolerance.description");
+        }
+        else if (name.equals("onset")) {
+          throw new FHIRException("Cannot call addChild on a primitive type AllergyIntolerance.onset");
+        }
+        else if (name.equals("severity")) {
+          throw new FHIRException("Cannot call addChild on a primitive type AllergyIntolerance.severity");
+        }
+        else if (name.equals("exposureRoute")) {
+          this.exposureRoute = new CodeableConcept();
+          return this.exposureRoute;
+        }
+        else if (name.equals("note")) {
+          this.note = new Annotation();
+          return this.note;
+        }
+        else
+          return super.addChild(name);
+      }
+
       public AllergyIntoleranceReactionComponent copy() {
         AllergyIntoleranceReactionComponent dst = new AllergyIntoleranceReactionComponent();
         copyValues(dst);
@@ -1054,6 +1196,11 @@ public class AllergyIntolerance extends DomainResource {
            && (onset == null || onset.isEmpty()) && (severity == null || severity.isEmpty()) && (exposureRoute == null || exposureRoute.isEmpty())
            && (note == null || note.isEmpty());
       }
+
+  public String fhirType() {
+    return "AllergyIntolerance.reaction";
+
+  }
 
   }
 
@@ -1799,6 +1946,98 @@ public class AllergyIntolerance extends DomainResource {
         childrenList.add(new Property("reaction", "", "Details about each adverse reaction event linked to exposure to the identified Substance.", 0, java.lang.Integer.MAX_VALUE, reaction));
       }
 
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("identifier"))
+          this.getIdentifier().add(castToIdentifier(value));
+        else if (name.equals("onset"))
+          this.onset = castToDateTime(value); // DateTimeType
+        else if (name.equals("recordedDate"))
+          this.recordedDate = castToDateTime(value); // DateTimeType
+        else if (name.equals("recorder"))
+          this.recorder = castToReference(value); // Reference
+        else if (name.equals("patient"))
+          this.patient = castToReference(value); // Reference
+        else if (name.equals("reporter"))
+          this.reporter = castToReference(value); // Reference
+        else if (name.equals("substance"))
+          this.substance = castToCodeableConcept(value); // CodeableConcept
+        else if (name.equals("status"))
+          this.status = new AllergyIntoleranceStatusEnumFactory().fromType(value); // Enumeration<AllergyIntoleranceStatus>
+        else if (name.equals("criticality"))
+          this.criticality = new AllergyIntoleranceCriticalityEnumFactory().fromType(value); // Enumeration<AllergyIntoleranceCriticality>
+        else if (name.equals("type"))
+          this.type = new AllergyIntoleranceTypeEnumFactory().fromType(value); // Enumeration<AllergyIntoleranceType>
+        else if (name.equals("category"))
+          this.category = new AllergyIntoleranceCategoryEnumFactory().fromType(value); // Enumeration<AllergyIntoleranceCategory>
+        else if (name.equals("lastOccurence"))
+          this.lastOccurence = castToDateTime(value); // DateTimeType
+        else if (name.equals("note"))
+          this.note = castToAnnotation(value); // Annotation
+        else if (name.equals("reaction"))
+          this.getReaction().add((AllergyIntoleranceReactionComponent) value);
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("identifier")) {
+          return addIdentifier();
+        }
+        else if (name.equals("onset")) {
+          throw new FHIRException("Cannot call addChild on a primitive type AllergyIntolerance.onset");
+        }
+        else if (name.equals("recordedDate")) {
+          throw new FHIRException("Cannot call addChild on a primitive type AllergyIntolerance.recordedDate");
+        }
+        else if (name.equals("recorder")) {
+          this.recorder = new Reference();
+          return this.recorder;
+        }
+        else if (name.equals("patient")) {
+          this.patient = new Reference();
+          return this.patient;
+        }
+        else if (name.equals("reporter")) {
+          this.reporter = new Reference();
+          return this.reporter;
+        }
+        else if (name.equals("substance")) {
+          this.substance = new CodeableConcept();
+          return this.substance;
+        }
+        else if (name.equals("status")) {
+          throw new FHIRException("Cannot call addChild on a primitive type AllergyIntolerance.status");
+        }
+        else if (name.equals("criticality")) {
+          throw new FHIRException("Cannot call addChild on a primitive type AllergyIntolerance.criticality");
+        }
+        else if (name.equals("type")) {
+          throw new FHIRException("Cannot call addChild on a primitive type AllergyIntolerance.type");
+        }
+        else if (name.equals("category")) {
+          throw new FHIRException("Cannot call addChild on a primitive type AllergyIntolerance.category");
+        }
+        else if (name.equals("lastOccurence")) {
+          throw new FHIRException("Cannot call addChild on a primitive type AllergyIntolerance.lastOccurence");
+        }
+        else if (name.equals("note")) {
+          this.note = new Annotation();
+          return this.note;
+        }
+        else if (name.equals("reaction")) {
+          return addReaction();
+        }
+        else
+          return super.addChild(name);
+      }
+
+  public String fhirType() {
+    return "AllergyIntolerance";
+
+  }
+
       public AllergyIntolerance copy() {
         AllergyIntolerance dst = new AllergyIntolerance();
         copyValues(dst);
@@ -1881,7 +2120,7 @@ public class AllergyIntolerance extends DomainResource {
   public static final String SP_MANIFESTATION = "manifestation";
   @SearchParamDefinition(name="recorder", path="AllergyIntolerance.recorder", description="Who recorded the sensitivity", type="reference" )
   public static final String SP_RECORDER = "recorder";
-  @SearchParamDefinition(name="substance", path="AllergyIntolerance.substance|AllergyIntolerance.reaction.substance", description="Substance, (or class) considered to be responsible for risk", type="token" )
+  @SearchParamDefinition(name="substance", path="AllergyIntolerance.substance | AllergyIntolerance.reaction.substance", description="Substance, (or class) considered to be responsible for risk", type="token" )
   public static final String SP_SUBSTANCE = "substance";
   @SearchParamDefinition(name="criticality", path="AllergyIntolerance.criticality", description="CRITL | CRITH | CRITU", type="token" )
   public static final String SP_CRITICALITY = "criticality";

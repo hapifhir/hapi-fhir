@@ -22,66 +22,33 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
  */
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.IdentityHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Set;
-import java.util.TreeMap;
-import java.util.TreeSet;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 
+import ca.uhn.fhir.context.FhirVersionEnum;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.model.dstu2.resource.Conformance;
-import ca.uhn.fhir.model.dstu2.resource.Conformance.Rest;
-import ca.uhn.fhir.model.dstu2.resource.Conformance.RestResource;
-import ca.uhn.fhir.model.dstu2.resource.Conformance.RestResourceInteraction;
-import ca.uhn.fhir.model.dstu2.resource.Conformance.RestResourceSearchParam;
+import ca.uhn.fhir.model.dstu2.resource.Conformance.*;
 import ca.uhn.fhir.model.dstu2.resource.OperationDefinition;
 import ca.uhn.fhir.model.dstu2.resource.OperationDefinition.Parameter;
-import ca.uhn.fhir.model.dstu2.valueset.ConditionalDeleteStatusEnum;
-import ca.uhn.fhir.model.dstu2.valueset.ConformanceResourceStatusEnum;
-import ca.uhn.fhir.model.dstu2.valueset.ConformanceStatementKindEnum;
-import ca.uhn.fhir.model.dstu2.valueset.OperationKindEnum;
-import ca.uhn.fhir.model.dstu2.valueset.OperationParameterUseEnum;
-import ca.uhn.fhir.model.dstu2.valueset.ResourceTypeEnum;
-import ca.uhn.fhir.model.dstu2.valueset.RestfulConformanceModeEnum;
-import ca.uhn.fhir.model.dstu2.valueset.SystemRestfulInteractionEnum;
-import ca.uhn.fhir.model.dstu2.valueset.TypeRestfulInteractionEnum;
-import ca.uhn.fhir.model.dstu2.valueset.UnknownContentCodeEnum;
+import ca.uhn.fhir.model.dstu2.valueset.*;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.parser.DataFormatException;
-import ca.uhn.fhir.rest.annotation.IdParam;
-import ca.uhn.fhir.rest.annotation.Initialize;
-import ca.uhn.fhir.rest.annotation.Metadata;
-import ca.uhn.fhir.rest.annotation.Read;
-import ca.uhn.fhir.rest.method.BaseMethodBinding;
-import ca.uhn.fhir.rest.method.DynamicSearchMethodBinding;
-import ca.uhn.fhir.rest.method.IParameter;
-import ca.uhn.fhir.rest.method.OperationMethodBinding;
-import ca.uhn.fhir.rest.method.OperationMethodBinding.ReturnType;
-import ca.uhn.fhir.rest.method.OperationParameter;
-import ca.uhn.fhir.rest.method.RestSearchParameterTypeEnum;
-import ca.uhn.fhir.rest.method.SearchMethodBinding;
-import ca.uhn.fhir.rest.method.SearchParameter;
-import ca.uhn.fhir.rest.server.Constants;
-import ca.uhn.fhir.rest.server.IServerConformanceProvider;
-import ca.uhn.fhir.rest.server.ResourceBinding;
-import ca.uhn.fhir.rest.server.RestfulServer;
-import ca.uhn.fhir.rest.server.RestulfulServerConfiguration;
+import ca.uhn.fhir.rest.annotation.*;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
+import ca.uhn.fhir.rest.server.*;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.rest.server.method.*;
+import ca.uhn.fhir.rest.server.method.OperationMethodBinding.ReturnType;
 
 /**
  * Server FHIR Provider which serves the conformance statement for a RESTful server implementation
@@ -196,7 +163,7 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
 
 		retVal.setPublisher(myPublisher);
 		retVal.setDate(conformanceDate());
-		retVal.setFhirVersion("1.0.2"); // TODO: pull from model
+		retVal.setFhirVersion(FhirVersionEnum.DSTU2.getFhirVersionString());
 		retVal.setAcceptUnknown(UnknownContentCodeEnum.UNKNOWN_EXTENSIONS); // TODO: make this configurable - this is a fairly big effort since the parser
 		// needs to be modified to actually allow it
 
