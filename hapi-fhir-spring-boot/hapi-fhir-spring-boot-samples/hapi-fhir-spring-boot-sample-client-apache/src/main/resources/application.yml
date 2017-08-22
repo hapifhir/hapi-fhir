@@ -1,0 +1,13 @@
+server:
+  port: 8888
+hapi:
+  fhir:
+    version: dstu3
+    server:
+      url: http://localhost:8080/fhir
+management:
+  security:
+    enabled: false
+logging:
+  level:
+    ca.uhn.fhir.jaxrs: debug

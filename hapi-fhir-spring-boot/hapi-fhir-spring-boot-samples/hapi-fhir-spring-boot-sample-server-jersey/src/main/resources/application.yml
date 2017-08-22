@@ -1,0 +1,21 @@
+hapi:
+  fhir:
+    version: dstu3
+    server:
+      path: /fhir/*
+    rest:
+      server-name: hapi-fhir-spring-boot-sample-server-jersey
+      server-version: 1.0.0
+      implementation-description: Spring Boot Jersey Server Sample
+      default-response-encoding: json
+      e-tag-support: enabled
+      default-pretty-print: true
+    validation:
+      enabled: true
+      request-only: true
+management:
+  security:
+    enabled: false
+logging:
+  level:
+    ca.uhn.fhir.jaxrs: debug
