@@ -115,11 +115,6 @@ public class JaxRsRestfulClientFactory extends RestfulClientFactory {
 	protected JaxRsHttpClient getHttpClient(String theServerBase) {
 		return new JaxRsHttpClient(getNativeClientClient(), new StringBuilder(theServerBase), null, null, null, null);
 	}
-
-	@Override
-	protected void resetHttpClient() {
-		this.myNativeClient = null;
-	}
   
   @Override
   protected void resetHttpClient() {
