@@ -802,8 +802,12 @@ public class StructureMap extends MetadataResource {
         /**
          * Create a contact details. Parameters = (value) or (system, value). If no system is provided, the system should be inferred from the content of the value
          */
-        CP, 
+        CP,
         /**
+         * Create an extension - temporarily added by CN
+         */
+        EXTENSION,
+      /**
          * added to help the parsers with the generic types
          */
         NULL;
@@ -844,6 +848,8 @@ public class StructureMap extends MetadataResource {
           return ID;
         if ("cp".equals(codeString))
           return CP;
+        if ("extension".equals(codeString))
+          return EXTENSION;
         if (Configuration.isAcceptInvalidEnums())
           return null;
         else
@@ -868,6 +874,7 @@ public class StructureMap extends MetadataResource {
             case QTY: return "qty";
             case ID: return "id";
             case CP: return "cp";
+            case EXTENSION: return "extension";
             default: return "?";
           }
         }
@@ -890,6 +897,7 @@ public class StructureMap extends MetadataResource {
             case QTY: return "http://hl7.org/fhir/map-transform";
             case ID: return "http://hl7.org/fhir/map-transform";
             case CP: return "http://hl7.org/fhir/map-transform";
+            case EXTENSION: return "http://hl7.org/fhir/map-transform";
             default: return "?";
           }
         }
@@ -912,6 +920,7 @@ public class StructureMap extends MetadataResource {
             case QTY: return "Create a quantity. Parameters = (text) or (value, unit, [system, code]) where text is the natural representation e.g. [comparator]value[space]unit";
             case ID: return "Create an identifier. Parameters = (system, value[, type]) where type is a code from the identifier type value set";
             case CP: return "Create a contact details. Parameters = (value) or (system, value). If no system is provided, the system should be inferred from the content of the value";
+            case EXTENSION: return "Create an extension";
             default: return "?";
           }
         }
@@ -934,6 +943,7 @@ public class StructureMap extends MetadataResource {
             case QTY: return "qty";
             case ID: return "id";
             case CP: return "cp";
+            case EXTENSION: return "cp";
             default: return "?";
           }
         }
@@ -978,6 +988,8 @@ public class StructureMap extends MetadataResource {
           return StructureMapTransform.ID;
         if ("cp".equals(codeString))
           return StructureMapTransform.CP;
+        if ("extension".equals(codeString))
+          return StructureMapTransform.EXTENSION;
         throw new IllegalArgumentException("Unknown StructureMapTransform code '"+codeString+"'");
         }
         public Enumeration<StructureMapTransform> fromType(Base code) throws FHIRException {
@@ -1022,6 +1034,8 @@ public class StructureMap extends MetadataResource {
           return new Enumeration<StructureMapTransform>(this, StructureMapTransform.ID);
         if ("cp".equals(codeString))
           return new Enumeration<StructureMapTransform>(this, StructureMapTransform.CP);
+        if ("extension".equals(codeString))
+          return new Enumeration<StructureMapTransform>(this, StructureMapTransform.EXTENSION);
         throw new FHIRException("Unknown StructureMapTransform code '"+codeString+"'");
         }
     public String toCode(StructureMapTransform code) {
@@ -1059,6 +1073,8 @@ public class StructureMap extends MetadataResource {
         return "id";
       if (code == StructureMapTransform.CP)
         return "cp";
+      if (code == StructureMapTransform.EXTENSION)
+        return "extension";
       return "?";
       }
     public String toSystem(StructureMapTransform code) {

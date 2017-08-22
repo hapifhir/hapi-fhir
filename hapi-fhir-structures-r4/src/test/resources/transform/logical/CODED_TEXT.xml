@@ -1,0 +1,68 @@
+<StructureDefinition xmlns="http://hl7.org/fhir">
+	<id value="CODED_TEXT"/>
+	<url value="http://opencimi.org/logical-model/fhir/CODED_TEXT" />
+	<name value="CODED_TEXT" />
+	<title value="CODED_TEXT" />
+	<status value="draft" />
+	<description value="A text item whose value must be the rubric from a controlled terminology, the key (i.e. the code') of which is the code attribute. In other words: a CODED_TEXT is a combination of a CODE_PHRASE (effectively a code) and the rubric of that term, from a terminology service, in the language in which the data was authored.&#xA;&#xA;Since CODED_TEXT is a subtype of TEXT, it can be used in place of it, effectively allowing the type TEXT to mean a text item, which may optionally be coded.&#xA;&#xA;Misuse: If the intention is to represent a term code attached in some way to a fragment of plain text, CODED_TEXT should not be used." />
+	<kind value="logical" />
+	<abstract value="false" />
+	<type value="CODED_TEXT" />
+	<baseDefinition value="http://opencimi.org/logical-model/fhir/TEXT" />
+	<snapshot>
+		<element>
+			<path value="CODED_TEXT" />
+			<label value="CODED_TEXT" />
+		</element>
+		<element>
+			<path value="CODED_TEXT.code" />
+			<label value="code" />
+			<definition value="The identifier of a concept in a terminology." />
+			<min value="1" />
+			<max value="1" />
+			<type>
+				<code value="string" />
+			</type>
+		</element>
+		<element>
+			<path value="CODED_TEXT.term" />
+			<label value="term" />
+			<definition value="The preferred textual rendition of the code attribute." />
+			<min value="0" />
+			<max value="1" />
+			<type>
+				<code value="string" />
+			</type>
+		</element>
+		<element>
+			<path value="CODED_TEXT.terminology_id" />
+			<label value="terminology_id" />
+			<definition value="The terminology that provides the namespace for the code attribute." />
+			<min value="1" />
+			<max value="1" />
+			<type>
+				<code value="string" />
+			</type>
+		</element>
+		<element>
+			<path value="CODED_TEXT.terminology_version" />
+			<label value="terminology_version" />
+			<definition value="The version of the terminology where the concept exists." />
+			<min value="0" />
+			<max value="1" />
+			<type>
+				<code value="string" />
+			</type>
+		</element>
+		<element>
+			<path value="CODED_TEXT.uri" />
+			<label value="uri" />
+			<definition value="A URI representation for the identifier of the concept represented by CODED_TEXT." />
+			<min value="0" />
+			<max value="1" />
+			<type>
+				<code value="uri" />
+			</type>
+		</element>
+	</snapshot>
+</StructureDefinition>
