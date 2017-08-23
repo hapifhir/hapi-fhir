@@ -80,15 +80,40 @@ public class FhirExtensionGeneratorTest {
 	}
 
 	private void validateExtensionStructureDefinition(StructureDefinition sd) {
-		assertEquals("MyExtension", sd.getId());
-		assertEquals("StructureDefinition/MyExtension", sd.getUrl());
-		assertEquals("MyExtension", sd.getName());
-		assertEquals(StructureDefinition.StructureDefinitionKind.COMPLEXTYPE, sd.getKind());
-		assertEquals(StructureDefinition.ExtensionContext.RESOURCE, sd.getContextType());
-		assertEquals("Patient", sd.getContext().get(0).getValue());
-		assertEquals("Extension", sd.getType());
-		assertEquals("StructureDefinition/MyExtension", sd.getUrl());
-		assertEquals(StructureDefinition.TypeDerivationRule.CONSTRAINT, sd.getDerivation());
-		assertEquals(3, sd.getDifferential().getElement().size());
+		try {
+			assertEquals("MyExtension", sd.getId());
+			assertEquals("StructureDefinition/MyExtension", sd.getUrl());
+			assertEquals("MyExtension", sd.getName());
+			assertEquals(StructureDefinition.StructureDefinitionKind.COMPLEXTYPE, sd.getKind());
+			assertEquals(StructureDefinition.ExtensionContext.RESOURCE, sd.getContextType());
+			assertEquals("Patient", sd.getContext().get(0).getValue());
+			assertEquals("Extension", sd.getType());
+			assertEquals("StructureDefinition/MyExtension", sd.getUrl());
+			assertEquals(StructureDefinition.TypeDerivationRule.CONSTRAINT, sd.getDerivation());
+			assertEquals(3, sd.getDifferential().getElement().size());
+			ElementDefinition extensionDef = sd.getDifferential().getElement().get(0);
+			assertNotNull(extensionDef);
+			assertEquals("Extension", extensionDef.getId());
+			assertEquals("Extension", extensionDef.getPath());
+			assertEquals("Short description", extensionDef.getShort());
+			assertEquals("Long description", extensionDef.getDefinition());
+			ElementDefinition extensionUrl = sd.getDifferential().getElement().get(1);
+			assertNotNull(extensionUrl);
+			assertEquals("Extension.url", extensionUrl.getId());
+			assertEquals("Extension.url", extensionUrl.getPath());
+			assertEquals("StructureDefinition/MyExtension", extensionUrl.getFixed());
+			ElementDefinition extensionValue = sd.getDifferential().getElement().get(2);
+			assertNotNull(extensionValue);
+			assertEquals("Extension.value[x]:valueInteger", extensionValue.getId());
+			assertEquals("Extension.valueInteger", extensionValue.getPath());
+			assertEquals("valueInteger", extensionValue.getSliceName());
+			assertEquals("Short description", extensionValue.getShort());
+			assertEquals("Long description", extensionValue.getDefinition());
+			assertEquals("Integer", extensionValue.getTypeFirstRep().getCode());
+			assertEquals("0", extensionValue.getDefaultValue());
+		} catch(Exception e) {
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
 	}
 }
