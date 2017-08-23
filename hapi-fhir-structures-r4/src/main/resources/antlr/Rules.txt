@@ -1,0 +1,7 @@
+﻿qty:
+qty(text)
+qty(value, unitString, systemUrl/codeVariable)
+Where text is a natural string expression of the quantity
+
+id (not implemented):
+id(systemUrl, value, [nullable] type)
