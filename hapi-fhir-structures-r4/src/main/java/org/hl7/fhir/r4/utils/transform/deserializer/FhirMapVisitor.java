@@ -5,10 +5,11 @@
 package org.hl7.fhir.r4.utils.transform.deserializer;
 
 
-import common.grammar.VisitorExtensions;
-import common.grammar.antlr.FhirMapJavaBaseVisitor;
-import common.grammar.antlr.FhirMapJavaParser;
+
 import org.antlr.v4.runtime.tree.ParseTree;
+import org.hl7.fhir.r4.utils.transform.deserializer.grammar.VisitorExtensions;
+import org.hl7.fhir.r4.utils.transform.deserializer.grammar.antlr.javaAntlr.FhirMapJavaBaseVisitor;
+import org.hl7.fhir.r4.utils.transform.deserializer.grammar.antlr.javaAntlr.FhirMapJavaParser;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -66,7 +67,7 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
     }
 
     /**
-     Parse antlr rule keyMap.
+     Parse grammar rule keyMap.
      This will trigger a Executor.Map callback.
 
      @param context
@@ -87,7 +88,7 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
     }
 
     /**
-     Parse antlr rule structureMap.
+     Parse grammar rule structureMap.
 
      @param context
      @return UrlData instance
@@ -105,7 +106,7 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
     }
 
     /**
-     Parse antlr rule keyImports.
+     Parse grammar rule keyImports.
      This will trigger a Executor.Imports callback.
 
      @param context
@@ -130,7 +131,7 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
     }
 
     /**
-     Parse antlr rule structureDefinition.
+     Parse grammar rule structureDefinition.
 
      @param context
      @return UrlData instance
@@ -148,7 +149,7 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
     }
 
     /**
-     Parse antlr rule identifier
+     Parse grammar rule identifier
      This verifies that thwe identifier is not too long.
 
      @param context
@@ -166,7 +167,7 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
     }
 
     /**
-     Parse antlr rule quotedIdentifier
+     Parse grammar rule quotedIdentifier
 
      @param context
      @return String without the surrounding quotes
@@ -180,7 +181,7 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
     }
 
     /**
-     Parse antlr rule quotedString
+     Parse grammar rule quotedString
 
      @param context
      @return String without the surrounding quotes
@@ -194,7 +195,7 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
     }
 
     /**
-     Parse antlr rule quotedStringWQuotes
+     Parse grammar rule quotedStringWQuotes
 
      @param context
      @return String without the surrounding quotes
@@ -207,7 +208,7 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
     }
 
     /**
-     Parse antlr rule int
+     Parse grammar rule int
      created.
 
      @param context
@@ -220,7 +221,7 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
     }
 
     /**
-     Parse antlr rule quotedUrl
+     Parse grammar rule quotedUrl
      The url parser is split off from this because of some incompatabilitied between the two
      grammars. Here we pass the url portion to this seperate parser and return the UrlData
      created.
@@ -248,7 +249,7 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
 //C# TO JAVA CONVERTER TODO TASK: There is no preprocessor in Java:
     ///#region Uses methods
     /**
-     Parse antlr rule keyUses.
+     Parse grammar rule keyUses.
      This will trigger a Executor.Uses callback.
 
      @param context
@@ -276,7 +277,7 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
     }
 
     /**
-     Parse antlr rule keyUsesName.
+     Parse grammar rule keyUsesName.
 
      @param context
      @return null
@@ -290,7 +291,7 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
     }
 
     /**
-     Parse antlr rule keyUsesNameSource.
+     Parse grammar rule keyUsesNameSource.
 
      @param context
      @return UseNames.Source
@@ -304,7 +305,7 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
     }
 
     /**
-     Parse antlr rule keyUsesNameTarget.
+     Parse grammar rule keyUsesNameTarget.
 
      @param context
      @return UseNames.Target
@@ -318,7 +319,7 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
     }
 
     /**
-     Parse antlr rule keyUsesNameQueried.
+     Parse grammar rule keyUsesNameQueried.
 
      @param context
      @return UseNames.Queried
@@ -332,7 +333,7 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
     }
 
     /**
-     Parse antlr rule keyUsesNameProduced.
+     Parse grammar rule keyUsesNameProduced.
 
      @param context
      @return UseNames.Produced
@@ -349,7 +350,7 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
 //C# TO JAVA CONVERTER TODO TASK: There is no preprocessor in Java:
     ///#region Group Methods
     /**
-     Parse antlr rule groupStart.
+     Parse grammar rule groupStart.
 
      @param context
      @return GroupTypes
@@ -367,7 +368,7 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
     }
 
     /**
-     Parse antlr rule groupEnd.
+     Parse grammar rule groupEnd.
 
      @param context
      @return GroupTypes
@@ -385,7 +386,7 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
     }
 
     /**
-     Parse antlr rule groupExtends.
+     Parse grammar rule groupExtends.
 
      @param context
      @return String[] of group
@@ -405,7 +406,7 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
     }
 
     /**
-     Parse antlr rule groupType.
+     Parse grammar rule groupType.
 
      @param context
      @return GroupTypes
@@ -419,7 +420,7 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
     }
 
     /**
-     Parse antlr rule groupTypeType.
+     Parse grammar rule groupTypeType.
 
      @param context
      @return GroupTypes.Type
@@ -433,7 +434,7 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
     }
 
     /**
-     Parse antlr rule groupTypeTypeTypes.
+     Parse grammar rule groupTypeTypeTypes.
 
      @param context
      @return GroupTypes.TypeTypes
@@ -447,7 +448,7 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
     }
 
     /**
-     Parse antlr rule ruleInput.
+     Parse grammar rule ruleInput.
 
      @param context
      @return FhirMapRuleInput
@@ -465,7 +466,7 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
     }
 
     /**
-     Parse antlr rule ruleInputModes.
+     Parse grammar rule ruleInputModes.
 
      @param context
      @return FhirMapInputModes
@@ -485,7 +486,7 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
     }
 
     /**
-     Parse antlr rule ruleInputModesSource.
+     Parse grammar rule ruleInputModesSource.
 
      @param context
      @return FhirMapInputModes.Source
@@ -499,7 +500,7 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
     }
 
     /**
-     Parse antlr rule ruleInputModesTarget.
+     Parse grammar rule ruleInputModesTarget.
 
      @param context
      @return FhirMapInputModes.Target
@@ -517,7 +518,7 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
     ///#region Rule Methods
 
     /**
-     Parse antlr rule ruleInstance
+     Parse grammar rule ruleInstance
 
      @param context
      @return null
@@ -541,7 +542,7 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
     }
 
     /**
-     Parse antlr rule ruleTargetReference
+     Parse grammar rule ruleTargetReference
 
      @param context
      @return String[]
@@ -559,7 +560,7 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
     }
 
     /**
-     Parse antlr rule ruleTargetTruncate
+     Parse grammar rule ruleTargetTruncate
 
      @param context
      @return String[]
@@ -577,7 +578,7 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
     }
 
     /**
-     Parse antlr rule ruleTargetCast
+     Parse grammar rule ruleTargetCast
 
      @param context
      @return String[]
@@ -595,7 +596,7 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
     }
 
     /**
-     Parse antlr rule ruleTargetAs
+     Parse grammar rule ruleTargetAs
 
      @param context
      @return String[]
@@ -613,7 +614,7 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
     }
 
     /**
-     Parse antlr rule ruleTargetAssign
+     Parse grammar rule ruleTargetAssign
 
      @param context
      @return String[]
@@ -631,7 +632,7 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
     }
 
     /**
-     Parse antlr rule ruleTargetCopy
+     Parse grammar rule ruleTargetCopy
 
      @param context
      @return String[]
@@ -649,7 +650,7 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
     }
 
     /**
-     Parse antlr rule ruleTargetCreate
+     Parse grammar rule ruleTargetCreate
 
      @param context
      @return String[]
@@ -665,7 +666,7 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
     }
 
     /**
-     Parse antlr rule ruleTargetTranslate
+     Parse grammar rule ruleTargetTranslate
 
      @param context
      @return String[]
@@ -681,7 +682,7 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
     }
 
     /**
-     Parse antlr rule ruleTargetTranslateOutputCode
+     Parse grammar rule ruleTargetTranslateOutputCode
 
      @param context
      @return String[]
@@ -695,7 +696,7 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
     }
 
     /**
-     Parse antlr rule ruleTargetTranslateOutputSystem
+     Parse grammar rule ruleTargetTranslateOutputSystem
 
      @param context
      @return String[]
@@ -709,7 +710,7 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
     }
 
     /**
-     Parse antlr rule ruleTargetTranslateOutputDisplay
+     Parse grammar rule ruleTargetTranslateOutputDisplay
 
      @param context
      @return String[]
@@ -723,7 +724,7 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
     }
 
     /**
-     Parse antlr rule ruleTargetTranslateOutputCoding
+     Parse grammar rule ruleTargetTranslateOutputCoding
 
      @param context
      @return String[]
@@ -737,7 +738,7 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
     }
 
     /**
-     Parse antlr rule ruleTargetTranslateOutputCodeableConcept
+     Parse grammar rule ruleTargetTranslateOutputCodeableConcept
 
      @param context
      @return String[]
@@ -751,7 +752,7 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
     }
 
     /**
-     Parse antlr rule ruleTargetCp
+     Parse grammar rule ruleTargetCp
 
      @param context
      @return String[]
@@ -769,7 +770,7 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
     }
 
     /**
-     Parse antlr rule ruleTargetAppend
+     Parse grammar rule ruleTargetAppend
 
      @param context
      @return String[]
@@ -787,7 +788,7 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
     }
 
     /**
-     Parse antlr rule ruleTargetAppendSources
+     Parse grammar rule ruleTargetAppendSources
 
      @param context
      @return String[]
@@ -802,7 +803,7 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
     }
 
     /**
-     Parse antlr rule ruleTargetC
+     Parse grammar rule ruleTargetC
 
      @param context
      @return String[]
@@ -820,7 +821,7 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
     }
 
     /**
-     Parse antlr rule ruleTargetCC1
+     Parse grammar rule ruleTargetCC1
 
      @param context
      @return String[]
@@ -838,7 +839,7 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
     }
 
     /**
-     Parse antlr rule ruleTargetCC2
+     Parse grammar rule ruleTargetCC2
 
      @param context
      @return String[]
@@ -856,7 +857,7 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
     }
 
     /**
-     Parse antlr rule ruleTargetContext
+     Parse grammar rule ruleTargetContext
 
      @param context
      @return String[]
@@ -876,7 +877,7 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
     }
 
     /**
-     Parse antlr rule ruleTargetVariable
+     Parse grammar rule ruleTargetVariable
 
      @param context
      @return String[]
@@ -896,7 +897,7 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
     }
 
     /**
-     Parse antlr rule ruleTargetEscape
+     Parse grammar rule ruleTargetEscape
 
      @param context
      @return String[]
@@ -913,7 +914,7 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
     }
 
     /**
-     Parse antlr rule ruleTargetEvaluate
+     Parse grammar rule ruleTargetEvaluate
 
      @param context
      @return String[]
@@ -931,7 +932,7 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
     }
 
     /**
-     Parse antlr rule ruleTargetId
+     Parse grammar rule ruleTargetId
 
      @param context
      @return String[]
@@ -949,7 +950,7 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
     }
 
     /**
-     Parse antlr rule ruleTargetPointer
+     Parse grammar rule ruleTargetPointer
 
      @param context
      @return String[]
@@ -967,7 +968,7 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
     }
 
     /**
-     Parse antlr rule ruleTargetQty1
+     Parse grammar rule ruleTargetQty1
 
      @param context
      @return String[]
@@ -985,7 +986,7 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
     }
 
     /**
-     Parse antlr rule ruleTargetQty2
+     Parse grammar rule ruleTargetQty2
 
      @param context
      @return String[]
@@ -1003,7 +1004,7 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
     }
 
     /**
-     Parse antlr rule ruleTargetQty3
+     Parse grammar rule ruleTargetQty3
 
      @param context
      @return String[]
@@ -1021,7 +1022,7 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
     }
 
     /**
-     Parse antlr rule ruleTargetUuid
+     Parse grammar rule ruleTargetUuid
 
      @param context
      @return String[]
@@ -1039,7 +1040,7 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
     }
 
     /**
-     Parse antlr rule ruleTargetEscape
+     Parse grammar rule ruleTargetEscape
 
      @param context
      @return String[]
@@ -1057,7 +1058,7 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
     }
 
     /**
-     Parse antlr rule ruleName
+     Parse grammar rule ruleName
 
      @param context
      @return String[]
@@ -1072,7 +1073,7 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
     }
 
     /**
-     Parse antlr rule ruleSource
+     Parse grammar rule ruleSource
 
      @param context
      @return FhirMapRuleType instance
@@ -1090,7 +1091,7 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
     }
 
     /**
-     Parse antlr rule ruleType
+     Parse grammar rule ruleType
 
      @param context
      @return FhirMapRuleType instance
@@ -1119,7 +1120,7 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
     }
 
     /**
-     Parse antlr rule ruleDefault
+     Parse grammar rule ruleDefault
      #! Verify format of default value. Currently accepts an identifier.
      #! Also write test for this...
 
@@ -1141,7 +1142,7 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
     }
 
     /**
-     Parse antlr rule ruleVariable
+     Parse grammar rule ruleVariable
 
      @param context
      @return String
@@ -1161,7 +1162,7 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
     }
 
     /**
-     Parse antlr rule ruleContext
+     Parse grammar rule ruleContext
 
      @param context
      @return String[]
@@ -1176,7 +1177,7 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
     }
 
     /**
-     Parse antlr rule ruleContextElement
+     Parse grammar rule ruleContextElement
 
      @param context
      @return String

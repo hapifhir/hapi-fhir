@@ -4,14 +4,14 @@
 
 package org.hl7.fhir.r4.utils.transform.deserializer;
 
-import common.grammar.DebugParseListener;
-import common.grammar.ThrowExceptionErrorListener;
-import common.grammar.antlr.UrlJavaLexer;
-import common.grammar.antlr.UrlJavaParser;
 import org.antlr.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
+import org.hl7.fhir.r4.utils.transform.deserializer.grammar.DebugParseListener;
+import org.hl7.fhir.r4.utils.transform.deserializer.grammar.ThrowExceptionErrorListener;
+import org.hl7.fhir.r4.utils.transform.deserializer.grammar.antlr.javaAntlr.UrlJavaLexer;
+import org.hl7.fhir.r4.utils.transform.deserializer.grammar.antlr.javaAntlr.UrlJavaParser;
 
 import java.io.FileInputStream;
 import java.io.PrintWriter;

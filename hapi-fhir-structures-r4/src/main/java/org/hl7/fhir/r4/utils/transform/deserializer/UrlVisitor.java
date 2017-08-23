@@ -1,5 +1,9 @@
 package org.hl7.fhir.r4.utils.transform.deserializer;
 
+import org.hl7.fhir.r4.utils.transform.deserializer.grammar.VisitorExtensions;
+import org.hl7.fhir.r4.utils.transform.deserializer.grammar.antlr.javaAntlr.UrlJavaBaseVisitor;
+import org.hl7.fhir.r4.utils.transform.deserializer.grammar.antlr.javaAntlr.UrlJavaParser;
+
 import java.util.ArrayList;
 
 // <copyright company="Applicadia LLC">
@@ -17,7 +21,6 @@ import java.util.ArrayList;
 	 Delegate for optional dumping of info.
 	 
 	*/
-	@FunctionalInterface
 	public interface DumpDelegate
 	{
 		void invoke(String msg);
@@ -37,7 +40,7 @@ import java.util.ArrayList;
 	}
 
 	/** 
-	 Parse antlr rule url
+	 Parse grammar rule url
 	 
 	 @param context
 	 @return url
@@ -65,7 +68,7 @@ import java.util.ArrayList;
 	}
 
 	/** 
-	 Parse antlr rule authority
+	 Parse grammar rule authority
 	 Return Uri authority field
 	 
 	 @param context
@@ -80,7 +83,7 @@ import java.util.ArrayList;
 	}
 
 	/** 
-	 Parse antlr rule hostName
+	 Parse grammar rule hostName
 	 Return host name
 	 
 	 @param context
@@ -95,7 +98,7 @@ import java.util.ArrayList;
 	}
 
 	/** 
-	 Parse antlr rule port
+	 Parse grammar rule port
 	 
 	 @param context
 	 @return Port number
@@ -109,7 +112,7 @@ import java.util.ArrayList;
 	}
 
 	/** 
-	 Parse antlr rule search
+	 Parse grammar rule search
 	 
 	 @param context
 	 @return SearchData array of search components
@@ -124,7 +127,7 @@ import java.util.ArrayList;
 	}
 
 	/** 
-	 Parse antlr rule searchParameter
+	 Parse grammar rule searchParameter
 	 
 	 @param context
 	 @return Path component
@@ -145,7 +148,7 @@ import java.util.ArrayList;
 	}
 
 	/** 
-	 Parse antlr rule searchParameterName
+	 Parse grammar rule searchParameterName
 	 
 	 @param context
 	 @return String search parameter name
@@ -159,7 +162,7 @@ import java.util.ArrayList;
 	}
 
 	/** 
-	 Parse antlr rule searchParameterValue
+	 Parse grammar rule searchParameterValue
 	 
 	 @param context
 	 @return String search parameter value
@@ -173,7 +176,7 @@ import java.util.ArrayList;
 	}
 
 	/** 
-	 Parse antlr rule path
+	 Parse grammar rule path
 	 
 	 @param context
 	 @return String array of components
@@ -188,7 +191,7 @@ import java.util.ArrayList;
 	}
 
 	/** 
-	 Parse antlr rule login
+	 Parse grammar rule login
 	 Load LoginData instance with parsed login data.
 	 
 	 @param context
@@ -211,7 +214,7 @@ import java.util.ArrayList;
 	}
 
 	/** 
-	 Parse antlr rule string
+	 Parse grammar rule string
 	 
 	 @param context
 	 @return String user name
@@ -225,7 +228,7 @@ import java.util.ArrayList;
 	}
 
 	/** 
-	 Parse antlr rule user
+	 Parse grammar rule user
 	 
 	 @param context
 	 @return String user name
@@ -239,7 +242,7 @@ import java.util.ArrayList;
 	}
 
 	/** 
-	 Parse antlr rule password
+	 Parse grammar rule password
 	 
 	 @param context
 	 @return String user name

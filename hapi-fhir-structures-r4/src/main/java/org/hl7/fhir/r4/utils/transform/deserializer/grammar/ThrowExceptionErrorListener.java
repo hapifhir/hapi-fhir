@@ -1,4 +1,4 @@
-package org.hl7.fhir.r4.utils.transform.deserializer.antlr;
+package org.hl7.fhir.r4.utils.transform.deserializer.grammar;
 
 import org.antlr.v4.runtime.*;
 
