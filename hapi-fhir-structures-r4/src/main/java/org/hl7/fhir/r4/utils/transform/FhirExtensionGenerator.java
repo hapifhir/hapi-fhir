@@ -68,7 +68,7 @@ public class FhirExtensionGenerator {
   private void populateExtensionUrlElement(StructureDefinition extensionStructureDefinition, String extensionName) {
     ElementDefinition extension = new ElementDefinition(new StringType("Extension.url"));
     extension.setId("Extension.url");
-    UriType uri = new UriType("StructureDefinition" + extensionName);
+    UriType uri = new UriType("StructureDefinition" + "/" + extensionName);
     extension.setFixed(uri);
     extensionStructureDefinition.getDifferential().addElement(extension);
   }

@@ -3,6 +3,7 @@ package org.hl7.fhir.r4.utils.transform;
 import org.hl7.fhir.r4.model.ElementDefinition;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.StructureDefinition;
+import org.hl7.fhir.r4.model.UriType;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -25,7 +26,7 @@ public class FhirExtensionGeneratorTest {
 		try {
 			List<StringType> contexts = new ArrayList<>();
 			contexts.add(new StringType("Patient"));
-			StructureDefinition extensionStrDef = generator.generateExtensionStructureDefinition("MyExtension", contexts, "An extension", "An extension definition", 0, "*", "Integer");
+			StructureDefinition extensionStrDef = generator.generateExtensionStructureDefinition("MyExtension", contexts, "Short description", "Long description", 0, "*", "Integer");
 			validateExtensionStructureDefinition(extensionStrDef);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -101,7 +102,7 @@ public class FhirExtensionGeneratorTest {
 			assertNotNull(extensionUrl);
 			assertEquals("Extension.url", extensionUrl.getId());
 			assertEquals("Extension.url", extensionUrl.getPath());
-			assertEquals("StructureDefinition/MyExtension", extensionUrl.getFixed());
+			assertEquals("StructureDefinition/MyExtension", ((UriType)extensionUrl.getFixed()).getValue());
 			ElementDefinition extensionValue = sd.getDifferential().getElement().get(2);
 			assertNotNull(extensionValue);
 			assertEquals("Extension.value[x]:valueInteger", extensionValue.getId());
@@ -110,7 +111,7 @@ public class FhirExtensionGeneratorTest {
 			assertEquals("Short description", extensionValue.getShort());
 			assertEquals("Long description", extensionValue.getDefinition());
 			assertEquals("Integer", extensionValue.getTypeFirstRep().getCode());
-			assertEquals("0", extensionValue.getDefaultValue());
+			assertNull(extensionValue.getDefaultValue());
 		} catch(Exception e) {
 			e.printStackTrace();
 			fail(e.getMessage());
