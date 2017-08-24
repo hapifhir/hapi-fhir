@@ -328,6 +328,10 @@
 				specified, regardless of whether the source event was a create or an
 				update
 			</action>
+			<action type="add" issue="712">
+				Add appropriate import statements for logging to JPA demo code. Thanks to
+				Rob Hausam for the pull request!
+			</action>
 		</release>
 		<release version="2.5" date="2017-06-08">
 			<action type="fix">

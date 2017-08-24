@@ -35,7 +35,7 @@ public interface ITermConceptParentChildLinkDao extends JpaRepository<TermConcep
 	@Modifying
 	void deleteByCodeSystemVersion(@Param("cs_pid") Long thePid);
 
-	@Query("SELECT t FROM TermConceptParentChildLink t WHERE t.myChildPid = :child_pid")
-	Collection<TermConceptParentChildLink> findAllWithChild(@Param("child_pid") Long theConceptPid);
+	@Query("SELECT t.myParentPid FROM TermConceptParentChildLink t WHERE t.myChildPid = :child_pid")
+	Collection<Long> findAllWithChild(@Param("child_pid") Long theConceptPid);
 	
 }
