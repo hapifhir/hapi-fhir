@@ -396,6 +396,17 @@ public abstract class BaseHapiTerminologySvc implements IHapiTerminologySvc {
 
 				if (myChildToParentPidCache == null) {
 					myChildToParentPidCache = ArrayListMultimap.create();
+
+					ourLog.info("Filling terminology parent/child cache");
+					int count = 0;
+					for (TermConceptParentChildLink next : myConceptParentChildLinkDao.findAll()) {
+						myChildToParentPidCache.put(next.getChildPid(), next.getParentPid());
+						if (count++ % 1000 == 0) {
+							ourLog.info("Loaded {} links", count);
+						}
+					}
+					ourLog.info("Done filling terminology parent/child cache");
+
 				}
 
 				ourLog.info("Indexing {} / {} concepts", concepts.getContent().size(), concepts.getTotalElements());
