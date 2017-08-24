@@ -357,13 +357,14 @@ public abstract class BaseHapiTerminologySvc implements IHapiTerminologySvc {
 				if (parents.contains(-1L)) {
 					return;
 				} else if (parents.isEmpty()) {
-					Collection<TermConceptParentChildLink> parentLinks = myConceptParentChildLinkDao.findAllWithChild(theConceptPid);
+					ourLog.info("Loading parent concepts of concept {}", theConceptPid);
+					Collection<Long> parentLinks = myConceptParentChildLinkDao.findAllWithChild(theConceptPid);
 					if (parentLinks.isEmpty()) {
 						myChildToParentPidCache.put(theConceptPid, -1L);
 						return;
 					} else {
-						for (TermConceptParentChildLink next : parentLinks) {
-							myChildToParentPidCache.put(theConceptPid, next.getParentPid());
+						for (Long next : parentLinks) {
+							myChildToParentPidCache.put(theConceptPid, next);
 						}
 					}
 				}
@@ -382,6 +383,7 @@ public abstract class BaseHapiTerminologySvc implements IHapiTerminologySvc {
 				int maxResult = 1000;
 				Page<TermConcept> concepts = myConceptDao.findResourcesRequiringReindexing(new PageRequest(0, maxResult));
 				if (concepts.hasContent() == false) {
+					ourLog.info("Clearing parent concept cache");
 					myNextReindexPass = System.currentTimeMillis() + DateUtils.MILLIS_PER_MINUTE;
 					myChildToParentPidCache = null;
 					return;

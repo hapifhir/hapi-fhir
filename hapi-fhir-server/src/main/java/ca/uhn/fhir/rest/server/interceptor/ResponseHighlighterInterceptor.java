@@ -351,6 +351,7 @@ public class ResponseHighlighterInterceptor extends InterceptorAdapter {
 	 * 
 	 * @return Returns a reference to this for easy method chaining
 	 */
+	@SuppressWarnings("UnusedReturnValue")
 	public ResponseHighlighterInterceptor setShowRequestHeaders(boolean theShowRequestHeaders) {
 		myShowRequestHeaders = theShowRequestHeaders;
 		return this;
@@ -362,6 +363,7 @@ public class ResponseHighlighterInterceptor extends InterceptorAdapter {
 	 * 
 	 * @return Returns a reference to this for easy method chaining
 	 */
+	@SuppressWarnings("UnusedReturnValue")
 	public ResponseHighlighterInterceptor setShowResponseHeaders(boolean theShowResponseHeaders) {
 		myShowResponseHeaders = theShowResponseHeaders;
 		return this;
@@ -415,7 +417,7 @@ public class ResponseHighlighterInterceptor extends InterceptorAdapter {
 			}
 		}
 		if (prettyPrintResponse) {
-			p.setPrettyPrint(prettyPrintResponse);
+			p.setPrettyPrint(true);
 		}
 
 		EncodingEnum encoding = p.getEncoding();
@@ -558,18 +560,16 @@ public class ResponseHighlighterInterceptor extends InterceptorAdapter {
 			b.append("\n");
 			b.append("\n");
 
-			if (true) {
-				try {
-					if (isShowRequestHeaders()) {
-						streamRequestHeaders(theServletRequest, b);
-					}
-					if (isShowResponseHeaders()) {
-						streamResponseHeaders(theRequestDetails, theServletResponse, b);
-					}
-				} catch (Throwable t) {
-					// ignore (this will hit if we're running in a servlet 2.5 environment)
-				}
-			}
+			try {
+            if (isShowRequestHeaders()) {
+               streamRequestHeaders(theServletRequest, b);
+            }
+            if (isShowResponseHeaders()) {
+               streamResponseHeaders(theRequestDetails, theServletResponse, b);
+            }
+         } catch (Throwable t) {
+            // ignore (this will hit if we're running in a servlet 2.5 environment)
+         }
 
 			StringBuilder target = new StringBuilder();
 			int linesCount = format(encoded, target, encoding);
