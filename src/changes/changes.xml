@@ -332,6 +332,11 @@
 				Add appropriate import statements for logging to JPA demo code. Thanks to
 				Rob Hausam for the pull request!
 			</action>
+			<action type="add" issue="700">
+				Add some browser performance logging to ResponseHighlightingInterceptor. Thanks
+				to Eugene Lubarsky for the pull request, and for convincing James not to 
+				optimize something that did not need optimizing!
+			</action>
 		</release>
 		<release version="2.5" date="2017-06-08">
 			<action type="fix">
