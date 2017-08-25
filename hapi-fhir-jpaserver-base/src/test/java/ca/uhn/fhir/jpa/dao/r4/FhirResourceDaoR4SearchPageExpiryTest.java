@@ -154,8 +154,13 @@ public class FhirResourceDaoR4SearchPageExpiryTest extends BaseJpaR4Test {
 		newTxTemplate().execute(new TransactionCallbackWithoutResult() {
 			@Override
 			protected void doInTransactionWithoutResult(TransactionStatus theArg0) {
-				assertNull(mySearchEntityDao.findByUuid(searchUuid1));
 				assertNotNull(mySearchEntityDao.findByUuid(searchUuid3));
+			}
+		});
+		newTxTemplate().execute(new TransactionCallbackWithoutResult() {
+			@Override
+			protected void doInTransactionWithoutResult(TransactionStatus theArg0) {
+				assertNull(mySearchEntityDao.findByUuid(searchUuid1));
 			}
 		});
 

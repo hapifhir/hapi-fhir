@@ -53,9 +53,9 @@ public class DaoConfig {
 			"http://hl7.org/fhir/StructureDefinition/*")));
 
 	/**
-	 * Default value for {@link #setMaximumSearchResultCountInTransaction(int)}
-	 * 
-	 * @see #setMaximumSearchResultCountInTransaction(int)
+	 * Default value for {@link #setMaximumSearchResultCountInTransaction(Integer)}
+	 *
+	 * @see #setMaximumSearchResultCountInTransaction(Integer)
 	 */
 	private static final Integer DEFAULT_MAXIMUM_SEARCH_RESULT_COUNT_IN_TRANSACTION = null;
 
@@ -220,7 +220,7 @@ public class DaoConfig {
 	 */
 	public List<IServerInterceptor> getInterceptors() {
 		if (myInterceptors == null) {
-			myInterceptors = new ArrayList<IServerInterceptor>();
+			myInterceptors = new ArrayList<>();
 		}
 		return myInterceptors;
 	}
