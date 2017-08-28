@@ -193,8 +193,14 @@ public class Include implements Serializable {
 		return myRecurse;
 	}
 
-	public void setRecurse(boolean theRecurse) {
+	/**
+	 * Should this include recurse
+	 *
+	 * @return  Returns a reference to <code>this</code> for easy method chaining
+	 */
+	public Include setRecurse(boolean theRecurse) {
 		myRecurse = theRecurse;
+		return this;
 	}
 
 	public void setValue(String theValue) {

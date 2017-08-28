@@ -1,8 +1,33 @@
 package ca.uhn.fhir.rest.server.interceptor;
 
-import static org.apache.commons.lang3.StringUtils.defaultString;
-import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.EncodingEnum;
+import ca.uhn.fhir.rest.api.RequestTypeEnum;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.RestfulServer;
+import ca.uhn.fhir.rest.server.RestfulServerUtils;
+import ca.uhn.fhir.rest.server.RestfulServerUtils.ResponseEncoding;
+import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
+import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.util.UrlUtil;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringEscapeUtils;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Date;
+import java.util.Enumeration;
+import java.util.Map;
+import java.util.Set;
+
+import static org.apache.commons.lang3.StringUtils.*;
 
 /*
  * #%L
@@ -13,9 +38,9 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -24,39 +49,13 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * #L%
  */
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.*;
-
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.StringEscapeUtils;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-
-import ca.uhn.fhir.parser.IParser;
-import ca.uhn.fhir.rest.api.*;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.server.RestfulServer;
-import ca.uhn.fhir.rest.server.RestfulServerUtils;
-import ca.uhn.fhir.rest.server.RestfulServerUtils.ResponseEncoding;
-import ca.uhn.fhir.rest.server.exceptions.*;
-import ca.uhn.fhir.util.UrlUtil;
-
 /**
  * This interceptor detects when a request is coming from a browser, and automatically returns a response with syntax
  * highlighted (coloured) HTML for the response instead of just returning raw XML/JSON.
- * 
+ *
  * @since 1.0
  */
 public class ResponseHighlighterInterceptor extends InterceptorAdapter {
-
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResponseHighlighterInterceptor.class);
-	private static final String[] PARAM_FORMAT_VALUE_JSON = new String[] { Constants.FORMAT_JSON };
-	private static final String[] PARAM_FORMAT_VALUE_XML = new String[] { Constants.FORMAT_XML };
 
 	/**
 	 * TODO: As of HAPI 1.6 (2016-06-10) this parameter has been replaced with simply
@@ -65,7 +64,9 @@ public class ResponseHighlighterInterceptor extends InterceptorAdapter {
 	public static final String PARAM_RAW = "_raw";
 	public static final String PARAM_RAW_TRUE = "true";
 	public static final String PARAM_TRUE = "true";
-
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResponseHighlighterInterceptor.class);
+	private static final String[] PARAM_FORMAT_VALUE_JSON = new String[]{Constants.FORMAT_JSON};
+	private static final String[] PARAM_FORMAT_VALUE_XML = new String[]{Constants.FORMAT_XML};
 	private boolean myShowRequestHeaders = false;
 	private boolean myShowResponseHeaders = true;
 
@@ -226,7 +227,7 @@ public class ResponseHighlighterInterceptor extends InterceptorAdapter {
 
 	@Override
 	public boolean handleException(RequestDetails theRequestDetails, BaseServerResponseException theException, HttpServletRequest theServletRequest, HttpServletResponse theServletResponse)
-			throws ServletException, IOException {
+		throws ServletException, IOException {
 		/*
 		 * It's not a browser...
 		 */
@@ -268,6 +269,18 @@ public class ResponseHighlighterInterceptor extends InterceptorAdapter {
 	}
 
 	/**
+	 * If set to <code>true</code> (default is <code>false</code>) response will include the
+	 * request headers
+	 *
+	 * @return Returns a reference to this for easy method chaining
+	 */
+	@SuppressWarnings("UnusedReturnValue")
+	public ResponseHighlighterInterceptor setShowRequestHeaders(boolean theShowRequestHeaders) {
+		myShowRequestHeaders = theShowRequestHeaders;
+		return this;
+	}
+
+	/**
 	 * If set to <code>true</code> (default is <code>true</code>) response will include the
 	 * response headers
 	 */
@@ -275,9 +288,21 @@ public class ResponseHighlighterInterceptor extends InterceptorAdapter {
 		return myShowResponseHeaders;
 	}
 
+	/**
+	 * If set to <code>true</code> (default is <code>true</code>) response will include the
+	 * response headers
+	 *
+	 * @return Returns a reference to this for easy method chaining
+	 */
+	@SuppressWarnings("UnusedReturnValue")
+	public ResponseHighlighterInterceptor setShowResponseHeaders(boolean theShowResponseHeaders) {
+		myShowResponseHeaders = theShowResponseHeaders;
+		return this;
+	}
+
 	@Override
 	public boolean outgoingResponse(RequestDetails theRequestDetails, IBaseResource theResponseObject, HttpServletRequest theServletRequest, HttpServletResponse theServletResponse)
-			throws AuthenticationException {
+		throws AuthenticationException {
 
 		/*
 		 * Request for _raw
@@ -343,30 +368,6 @@ public class ResponseHighlighterInterceptor extends InterceptorAdapter {
 		streamResponse(theRequestDetails, theServletResponse, theResponseObject, theServletRequest, 200);
 
 		return false;
-	}
-
-	/**
-	 * If set to <code>true</code> (default is <code>false</code>) response will include the
-	 * request headers
-	 * 
-	 * @return Returns a reference to this for easy method chaining
-	 */
-	@SuppressWarnings("UnusedReturnValue")
-	public ResponseHighlighterInterceptor setShowRequestHeaders(boolean theShowRequestHeaders) {
-		myShowRequestHeaders = theShowRequestHeaders;
-		return this;
-	}
-
-	/**
-	 * If set to <code>true</code> (default is <code>true</code>) response will include the
-	 * response headers
-	 * 
-	 * @return Returns a reference to this for easy method chaining
-	 */
-	@SuppressWarnings("UnusedReturnValue")
-	public ResponseHighlighterInterceptor setShowResponseHeaders(boolean theShowResponseHeaders) {
-		myShowResponseHeaders = theShowResponseHeaders;
-		return this;
 	}
 
 	private void streamRequestHeaders(ServletRequest theServletRequest, StringBuilder b) {
@@ -479,14 +480,21 @@ public class ResponseHighlighterInterceptor extends InterceptorAdapter {
 			b.append("  font-family: monospace;\n");
 			b.append("}");
 			b.append(".responseBodyTable {");
-			b.append("  width: 100%;");
-			b.append("  margin-left: 0px;");
-			b.append("  margin-top: 20px;");
+			b.append("  width: 100%;\n");
+			b.append("  margin-left: 0px;\n");
+			b.append("  margin-top: -10px;\n");
+			b.append("  position: relative;\n");
 			b.append("}");
 			b.append(".responseBodyTableFirstColumn {");
+			b.append("  position: absolute;\n");
+			b.append("  width: 70px;\n");
 			b.append("}");
 			b.append(".responseBodyTableSecondColumn {");
-			b.append("  width: 100%;");
+			b.append("  position: absolute;\n");
+			b.append("  margin-left: 70px;\n");
+			b.append("  vertical-align: top;\n");
+			b.append("  left: 0px;\n");
+			b.append("  right: 0px;\n");
 			b.append("}");
 			b.append(".lineAnchor A {");
 			b.append("  text-decoration: none;");
@@ -561,23 +569,29 @@ public class ResponseHighlighterInterceptor extends InterceptorAdapter {
 			b.append("\n");
 
 			try {
-            if (isShowRequestHeaders()) {
-               streamRequestHeaders(theServletRequest, b);
-            }
-            if (isShowResponseHeaders()) {
-               streamResponseHeaders(theRequestDetails, theServletResponse, b);
-            }
-         } catch (Throwable t) {
-            // ignore (this will hit if we're running in a servlet 2.5 environment)
-         }
+				if (isShowRequestHeaders()) {
+					streamRequestHeaders(theServletRequest, b);
+				}
+				if (isShowResponseHeaders()) {
+					streamResponseHeaders(theRequestDetails, theServletResponse, b);
+				}
+			} catch (Throwable t) {
+				// ignore (this will hit if we're running in a servlet 2.5 environment)
+			}
 
+			b.append("<h1>Response Body</h1>");
+
+			b.append("<div class=\"responseBodyTable\">");
+
+			// Response Body
+			b.append("<div class=\"responseBodyTableSecondColumn\"><pre>");
 			StringBuilder target = new StringBuilder();
 			int linesCount = format(encoded, target, encoding);
+			b.append(target);
+			b.append("</pre></div>");
 
-			b.append("<table class=\"responseBodyTable\" cellspacing=\"0\">");
-			b.append("<tr>");
-
-			b.append("<td class=\"responseBodyTableFirstColumn\"><pre>");
+			// Line Numbers
+			b.append("<div class=\"responseBodyTableFirstColumn\"><pre>");
 			for (int i = 1; i <= linesCount; i++) {
 				b.append("<div class=\"lineAnchor\" id=\"anchor");
 				b.append(i);
@@ -593,15 +607,9 @@ public class ResponseHighlighterInterceptor extends InterceptorAdapter {
 				b.append(i);
 				b.append("</a></div>");
 			}
-			b.append("</pre></td>");
+			b.append("</div></td>");
 
-			// Response Body
-			b.append("<td class=\"responseBodyTableSecondColumn\"><pre>");
-			b.append(target);
-			b.append("</pre></td>");
-
-			b.append("</tr>");
-			b.append("</table>");
+			b.append("</div>");
 
 			b.append("\n");
 
@@ -614,9 +622,7 @@ public class ResponseHighlighterInterceptor extends InterceptorAdapter {
 
 			b.append("</body>");
 			b.append("</html>");
-		//@formatter:off
-		String out = b.toString();
-		//@formatter:on
+			String out = b.toString();
 
 			theServletResponse.getWriter().append(out);
 			theServletResponse.getWriter().close();
@@ -627,7 +633,7 @@ public class ResponseHighlighterInterceptor extends InterceptorAdapter {
 
 	private void streamResponseHeaders(RequestDetails theRequestDetails, HttpServletResponse theServletResponse, StringBuilder b) {
 		if (theServletResponse.getHeaderNames().isEmpty() == false) {
-			b.append("<h1>Response</h1>");
+			b.append("<h1>Response Headers</h1>");
 
 			b.append("<div class=\"headersDiv\">");
 			for (String nextHeaderName : theServletResponse.getHeaderNames()) {

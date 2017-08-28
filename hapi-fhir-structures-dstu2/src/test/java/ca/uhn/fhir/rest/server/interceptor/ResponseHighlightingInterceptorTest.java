@@ -14,6 +14,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
@@ -79,7 +80,15 @@ public class ResponseHighlightingInterceptorTest {
 		ourInterceptor.setShowRequestHeaders(new ResponseHighlighterInterceptor().isShowRequestHeaders());
 		ourInterceptor.setShowResponseHeaders(new ResponseHighlighterInterceptor().isShowResponseHeaders());
 	}
-	
+
+	/**
+	 * For interactive testing only
+	 */
+	@Test
+	public void waitForInput() throws IOException {
+		System.in.read();
+	}
+
 	/**
 	 * See #464
 	 */
@@ -661,6 +670,7 @@ public class ResponseHighlightingInterceptorTest {
 		assertEquals(Constants.CT_FHIR_JSON + ";charset=utf-8", status.getFirstHeader("content-type").getValue().replace(" ", "").toLowerCase());
 		assertThat(responseContent, not(containsString("html")));
 	}
+
 	@Test
 	public void testForceApplicationJsonPlusFhir() throws Exception {
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1?_format=" + UrlUtil.escape("application/json+fhir"));

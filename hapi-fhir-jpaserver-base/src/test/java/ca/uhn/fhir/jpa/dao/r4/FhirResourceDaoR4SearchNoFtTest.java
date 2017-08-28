@@ -69,7 +69,55 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 
 		assertThat(ids, contains(moId.getValue()));
 	}
-	
+
+	@Test
+	public void testIncludeLinkedObservations() {
+
+		DiagnosticReport dr = new DiagnosticReport();
+		dr.setId("DiagnosticReport/DR");
+		dr.setStatus(DiagnosticReport.DiagnosticReportStatus.FINAL);
+
+		Observation parentObs = new Observation();
+		parentObs.setStatus(ObservationStatus.FINAL);
+		parentObs.setId("Observation/parentObs");
+
+		Observation childObs = new Observation();
+		childObs.setId("Observation/childObs");
+		childObs.setStatus(ObservationStatus.FINAL);
+
+		dr.addResult().setReference("Observation/parentObs").setResource(parentObs);
+		parentObs.addRelated()
+			.setType(Observation.ObservationRelationshipType.HASMEMBER)
+			.setTarget(new Reference(childObs).setReference("Observation/childObs"));
+		childObs.addRelated()
+			.setType(Observation.ObservationRelationshipType.QUALIFIEDBY)
+			.setTarget(new Reference(parentObs).setReference("Observation/parentObs"));
+
+		Bundle input = new Bundle();
+		input.setType(BundleType.TRANSACTION);
+		input.addEntry()
+			.setResource(dr)
+			.getRequest().setMethod(HTTPVerb.PUT).setUrl(dr.getId());
+		input.addEntry()
+			.setResource(parentObs)
+			.getRequest().setMethod(HTTPVerb.PUT).setUrl(parentObs.getId());
+		input.addEntry()
+			.setResource(childObs)
+			.getRequest().setMethod(HTTPVerb.PUT).setUrl(childObs.getId());
+		mySystemDao.transaction(mySrd, input);
+
+		SearchParameterMap params = new SearchParameterMap();
+		params.add("_id", new TokenParam(null, "DR"));
+		params.addInclude(new Include("DiagnosticReport:subject").setRecurse(true));
+		params.addInclude(new Include("DiagnosticReport:result").setRecurse(true));
+		params.addInclude(new Include("Observation:related-target").setRecurse(true));
+
+		IBundleProvider result = myDiagnosticReportDao.search(params);
+		List<String> resultIds = toUnqualifiedVersionlessIdValues(result);
+		assertThat(resultIds, containsInAnyOrder("DiagnosticReport/DR", "Observation/parentObs", "Observation/childObs"));
+
+	}
+
 	@Test
 	public void testEmptyChain() {
 

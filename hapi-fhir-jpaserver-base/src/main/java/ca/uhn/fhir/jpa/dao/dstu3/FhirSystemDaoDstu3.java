@@ -439,7 +439,12 @@ public class FhirSystemDaoDstu3 extends BaseHapiFhirSystemDao<Bundle, Meta> {
 					outcome = resourceDao.update(res, null, false, theRequestDetails);
 				} else {
 					res.setId((String) null);
-					String matchUrl = parts.getResourceType() + '?' + parts.getParams();
+					String matchUrl;
+					if (isNotBlank(parts.getParams())) {
+						matchUrl = parts.getResourceType() + '?' + parts.getParams();
+					} else {
+						matchUrl = parts.getResourceType();
+					}
 					matchUrl = performIdSubstitutionsInMatchUrl(idSubstitutions, matchUrl);
 					outcome = resourceDao.update(res, matchUrl, false, theRequestDetails);
 					if (Boolean.TRUE.equals(outcome.getCreated())) {
