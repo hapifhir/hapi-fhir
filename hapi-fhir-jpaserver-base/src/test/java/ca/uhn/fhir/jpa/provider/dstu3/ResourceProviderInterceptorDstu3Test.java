@@ -79,6 +79,7 @@ public class ResourceProviderInterceptorDstu3Test extends BaseResourceProviderDs
 
 	private void resetServerInterceptor() throws ServletException, IOException {
 		reset(myServerInterceptor);
+		reset(myDaoInterceptor);
 		when(myServerInterceptor.handleException(any(RequestDetails.class), any(BaseServerResponseException.class), any(HttpServletRequest.class), any(HttpServletResponse.class))).thenReturn(true);
 		when(myServerInterceptor.incomingRequestPostProcessed(any(RequestDetails.class), any(HttpServletRequest.class), any(HttpServletResponse.class))).thenReturn(true);
 		when(myServerInterceptor.incomingRequestPreProcessed(any(HttpServletRequest.class), any(HttpServletResponse.class))).thenReturn(true);
@@ -87,14 +88,14 @@ public class ResourceProviderInterceptorDstu3Test extends BaseResourceProviderDs
 	}
 
 	@Test
-	public void testCreateResource() throws IOException {
+	public void testCreateResource() throws IOException, ServletException {
 		String methodName = "testCreateResource";
 
 		Patient pt = new Patient();
 		pt.addName().setFamily(methodName);
 		String resource = myFhirCtx.newXmlParser().encodeResourceToString(pt);
 
-		verify(myServerInterceptor, never()).incomingRequestPreHandled(any(RestOperationTypeEnum.class), any(ActionRequestDetails.class));
+		resetServerInterceptor();
 
 		HttpPost post = new HttpPost(ourServerBase + "/Patient");
 		post.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
@@ -125,7 +126,7 @@ public class ResourceProviderInterceptorDstu3Test extends BaseResourceProviderDs
 	}
 
 	@Test
-	public void testCreateResourceInTransaction() throws IOException {
+	public void testCreateResourceInTransaction() throws IOException, ServletException {
 		String methodName = "testCreateResourceInTransaction";
 
 		Patient pt = new Patient();
@@ -141,7 +142,7 @@ public class ResourceProviderInterceptorDstu3Test extends BaseResourceProviderDs
 
 		String resource = myFhirCtx.newXmlParser().encodeResourceToString(bundle);
 
-		verify(myServerInterceptor, never()).incomingRequestPreHandled(any(RestOperationTypeEnum.class), any(ActionRequestDetails.class));
+		resetServerInterceptor();
 
 		HttpPost post = new HttpPost(ourServerBase + "/");
 		post.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));

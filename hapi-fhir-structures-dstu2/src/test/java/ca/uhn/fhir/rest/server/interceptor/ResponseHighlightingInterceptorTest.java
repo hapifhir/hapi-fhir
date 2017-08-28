@@ -761,6 +761,7 @@ public class ResponseHighlightingInterceptorTest {
 	@BeforeClass
 	public static void beforeClass() throws Exception {
 		ourPort = PortUtil.findFreePort();
+		ourLog.info("Using port: {}", ourPort);
 		ourServer = new Server(ourPort);
 
 		DummyPatientResourceProvider patientProvider = new DummyPatientResourceProvider();

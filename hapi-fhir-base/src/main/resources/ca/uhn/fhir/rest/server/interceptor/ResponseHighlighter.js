@@ -38,19 +38,7 @@ function updateHighlightedLineTo(theNewHash) {
 	selectedLine = line;
 }
 
-
-(function() {
-    'use strict';
-    
-    updateHighlightedLine();
-    window.onhashchange = updateHighlightedLine;
-    
-    /* bail out if user is testing a version of this script via Greasemonkey or Tampermonkey */
-    if (window.HAPI_ResponseHighlighter_userscript) {
-        console.log("HAPI ResponseHighlighter: userscript detected - not executing embedded script");
-        return;
-    }
-
+function updateHyperlinksAndStyles() {
     /* adds hyperlinks and CSS styles to dates and UUIDs (e.g. to enable user-select: all) */
     const logicalReferenceRegex = /^[A-Z][A-Za-z]+\/[0-9]+$/;
     const dateTimeRegex = /^-?[0-9]{4}(-(0[1-9]|1[0-2])(-(0[0-9]|[1-2][0-9]|3[0-1])(T([01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9](\.[0-9]+)?(Z|(\+|-)((0[0-9]|1[0-3]):[0-5][0-9]|14:00)))?)?)?$/; // from the spec - https://www.hl7.org/fhir/datatypes.html#datetime
@@ -85,4 +73,31 @@ function updateHighlightedLineTo(theNewHash) {
             quote.appendChild(document.createTextNode('"'));
         }
     }
+}
+
+(function() {
+    'use strict';
+
+    /* bail out if user is testing a version of this script via Greasemonkey or Tampermonkey */
+    if (window.HAPI_ResponseHighlighter_userscript) {
+        console.log("HAPI ResponseHighlighter: userscript detected - not executing embedded script");
+        return;
+    }
+
+    console.time("updateHighlightedLine");
+    updateHighlightedLine();
+    console.timeEnd("updateHighlightedLine");
+    window.onhashchange = updateHighlightedLine;
+
+    console.time("updateHyperlinksAndStyles");
+    updateHyperlinksAndStyles();
+    console.timeEnd("updateHyperlinksAndStyles");
+
+    window.addEventListener("load", function(event) {
+      // https://developer.mozilla.org/en-US/docs/Web/API/Navigation_timing_API
+      var now = new Date().getTime();
+      var page_load_time = now - performance.timing.navigationStart;
+      console.log("User-perceived page loading time: " + page_load_time + "ms");
+    });
+
 })();

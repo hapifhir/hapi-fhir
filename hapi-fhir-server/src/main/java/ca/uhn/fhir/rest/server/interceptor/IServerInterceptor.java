@@ -126,8 +126,6 @@ public interface IServerInterceptor {
 	 * will be aborted with an appropriate error returned to the client.
 	 * </p>
 	 * 
-	 * @param theServletRequest
-	 *           The incoming servlet request as provided by the servlet container
 	 * @param theOperation
 	 *           The type of operation that the FHIR server has determined that the client is trying to invoke
 	 * @param theProcessedRequest
