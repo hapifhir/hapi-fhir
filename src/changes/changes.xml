@@ -342,6 +342,13 @@
 				This property causes references to unknown resources in created/updated resources to have a placeholder
 				target resource automatically created.
 			</action>
+			<action type="add">
+				The server LoggingInterceptor has had a variable called
+				<![CDATA[<code>processingTimeMillis</code>]]> which logs the number
+				of milliseconds the server took to process a given request since
+				HAPI FHIR 2.5, but this was not documented. This variable has now been
+				documented as a part of the available features.
+			</action>
 		</release>
 		<release version="2.5" date="2017-06-08">
 			<action type="fix">

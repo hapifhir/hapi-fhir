@@ -1,6 +1,8 @@
 package ca.uhn.fhir.rest.server.interceptor;
 
+import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.matchesPattern;
+import static org.hamcrest.Matchers.startsWith;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
@@ -147,6 +149,28 @@ public class LoggingInterceptorDstu2Test {
 		ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
 		verify(logger, timeout(1000).times(1)).info(captor.capture());
 		assertEquals("read -  - Patient/1 - ", captor.getValue());
+	}
+
+	@Test
+	public void testRequestProcessingTime() throws Exception {
+
+		LoggingInterceptor interceptor = new LoggingInterceptor();
+		interceptor.setMessageFormat("${operationType} - ${processingTimeMillis}");
+		servlet.setInterceptors(Collections.singletonList((IServerInterceptor) interceptor));
+
+		Logger logger = mock(Logger.class);
+		interceptor.setLogger(logger);
+
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1");
+
+		HttpResponse status = ourClient.execute(httpGet);
+		IOUtils.closeQuietly(status.getEntity().getContent());
+
+		ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
+		verify(logger, timeout(1000).times(1)).info(captor.capture());
+		assertThat(captor.getValue(), startsWith("read - "));
+		int millis = Integer.parseInt(captor.getValue().substring("read - ".length()));
+		assertThat(millis, greaterThan(1));
 	}
 
 	@Test

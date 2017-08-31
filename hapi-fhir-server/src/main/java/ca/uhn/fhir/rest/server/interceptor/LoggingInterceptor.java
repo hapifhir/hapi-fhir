@@ -113,17 +113,13 @@ import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
  * <td>${exceptionMessage}</td>
  * <td>Applies only to an error message: The message from {@link Exception#getMessage()}</td>
  * </tr>
- * </table>
- */
-
-/*
- * TODO: implement this, but it needs the logging to happen at the end
  * <tr>
  * <td>${processingTimeMillis}</td>
  * <td>The number of milliseconds spent processing this request</td>
  * </tr>
-
+ * </table>
  */
+
 public class LoggingInterceptor extends InterceptorAdapter {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(LoggingInterceptor.class);
@@ -169,7 +165,7 @@ public class LoggingInterceptor extends InterceptorAdapter {
 		StrLookup<?> lookup = new MyLookup(theRequestDetails.getServletRequest(), theRequestDetails);
 		StrSubstitutor subs = new StrSubstitutor(lookup, "${", "}", '\\');
 
-		// Actuall log the line
+		// Actually log the line
 		String line = subs.replace(myMessageFormat);
 		myLogger.info(line);
 	}
