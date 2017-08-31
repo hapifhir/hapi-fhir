@@ -332,7 +332,15 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 					if (myConfig.isEnforceReferentialIntegrityOnWrite() == false) {
 						continue;
 					}
-					String resName = getContext().getResourceDefinition(type).getName();
+					RuntimeResourceDefinition missingResourceDef = getContext().getResourceDefinition(type);
+					String resName = missingResourceDef.getName();
+
+					if (getConfig().isAutoCreatePlaceholderReferenceTargets()) {
+						IBaseResource newResource = missingResourceDef.newInstance();
+						newResource.setId(resName + "/" + id);
+						autoCreateResource(newResource);
+					}
+
 					throw new InvalidRequestException("Resource " + resName + "/" + id + " not found, specified in path: " + nextPathsUnsplit);
 				}
 				ResourceTable target = myEntityManager.find(ResourceTable.class, valueOf);
@@ -365,6 +373,11 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		theEntity.setHasLinks(theLinks.size() > 0);
 
 		return retVal;
+	}
+
+	private <T extends IBaseResource> void autoCreateResource(T theResource) {
+		IFhirResourceDao<T> dao = (IFhirResourceDao<T>) getDao(theResource.getClass());
+		dao.create(theResource);
 	}
 
 	protected Set<ResourceIndexedSearchParamCoords> extractSearchParamCoords(ResourceTable theEntity, IBaseResource theResource) {

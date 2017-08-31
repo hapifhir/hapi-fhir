@@ -1,15 +1,12 @@
 package ca.uhn.fhir.jpa.dao;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
+import ca.uhn.fhir.jpa.entity.ResourceEncodingEnum;
+import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.time.DateUtils;
+
+import java.util.*;
 
 /*
  * #%L
@@ -31,9 +28,6 @@ import org.apache.commons.lang3.time.DateUtils;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.entity.ResourceEncodingEnum;
-import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
-
 public class DaoConfig {
 
 	/**
@@ -46,24 +40,21 @@ public class DaoConfig {
 	 * </ul>
 	 */
 	public static final Set<String> DEFAULT_LOGICAL_BASE_URLS = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(
-			"http://hl7.org/fhir/ValueSet/*",
-			"http://hl7.org/fhir/CodeSystem/*",
-			"http://hl7.org/fhir/valueset-*",
-			"http://hl7.org/fhir/codesystem-*",
-			"http://hl7.org/fhir/StructureDefinition/*")));
-
+		"http://hl7.org/fhir/ValueSet/*",
+		"http://hl7.org/fhir/CodeSystem/*",
+		"http://hl7.org/fhir/valueset-*",
+		"http://hl7.org/fhir/codesystem-*",
+		"http://hl7.org/fhir/StructureDefinition/*")));
+	/**
+	 * Default value for {@link #setReuseCachedSearchResultsForMillis(Long)}: 60000ms (one minute)
+	 */
+	public static final Long DEFAULT_REUSE_CACHED_SEARCH_RESULTS_FOR_MILLIS = DateUtils.MILLIS_PER_MINUTE;
 	/**
 	 * Default value for {@link #setMaximumSearchResultCountInTransaction(Integer)}
 	 *
 	 * @see #setMaximumSearchResultCountInTransaction(Integer)
 	 */
 	private static final Integer DEFAULT_MAXIMUM_SEARCH_RESULT_COUNT_IN_TRANSACTION = null;
-
-	/**
-	 * Default value for {@link #setReuseCachedSearchResultsForMillis(Long)}: 60000ms (one minute)
-	 */
-	public static final Long DEFAULT_REUSE_CACHED_SEARCH_RESULTS_FOR_MILLIS = DateUtils.MILLIS_PER_MINUTE;
-
 	/**
 	 * update setter javadoc if default changes
 	 */
@@ -127,9 +118,11 @@ public class DaoConfig {
 	private boolean mySuppressUpdatesWithNoChange = true;
 	private Set<String> myTreatBaseUrlsAsLocal = new HashSet<String>();
 	private Set<String> myTreatReferencesAsLogical = new HashSet<String>(DEFAULT_LOGICAL_BASE_URLS);
+	private boolean myAutoCreatePlaceholderReferenceTargets;
+
 	/**
 	 * Add a value to the {@link #setTreatReferencesAsLogical(Set) logical references list}.
-	 * 
+	 *
 	 * @see #setTreatReferencesAsLogical(Set)
 	 */
 	public void addTreatReferencesAsLogical(String theTreatReferencesAsLogical) {
@@ -140,6 +133,7 @@ public class DaoConfig {
 		}
 		myTreatReferencesAsLogical.add(theTreatReferencesAsLogical);
 	}
+
 	/**
 	 * When a code system is added that contains more than this number of codes,
 	 * the code system will be indexed later in an incremental process in order to
@@ -150,6 +144,18 @@ public class DaoConfig {
 	 */
 	public int getDeferIndexingForCodesystemsOfSize() {
 		return myDeferIndexingForCodesystemsOfSize;
+	}
+
+	/**
+	 * When a code system is added that contains more than this number of codes,
+	 * the code system will be indexed later in an incremental process in order to
+	 * avoid overwhelming Lucene with a huge number of codes in a single operation.
+	 * <p>
+	 * Defaults to 2000
+	 * </p>
+	 */
+	public void setDeferIndexingForCodesystemsOfSize(int theDeferIndexingForCodesystemsOfSize) {
+		myDeferIndexingForCodesystemsOfSize = theDeferIndexingForCodesystemsOfSize;
 	}
 
 	/**
@@ -166,412 +172,6 @@ public class DaoConfig {
 	 */
 	public int getEverythingIncludesFetchPageSize() {
 		return myEverythingIncludesFetchPageSize;
-	}
-
-	/**
-	 * Sets the number of milliseconds that search results for a given client search
-	 * should be preserved before being purged from the database.
-	 * <p>
-	 * Search results are stored in the database so that they can be paged over multiple
-	 * requests. After this
-	 * number of milliseconds, they will be deleted from the database, and any paging links
-	 * (next/prev links in search response bundles) will become invalid. Defaults to 1 hour.
-	 * </p>
-	 * <p>
-	 * <p>
-	 * To disable this feature entirely, see {@link #setExpireSearchResults(boolean)}
-	 * </p>
-	 * 
-	 * @since 1.5
-	 */
-	public long getExpireSearchResultsAfterMillis() {
-		return myExpireSearchResultsAfterMillis;
-	}
-
-	/**
-	 * Gets the default maximum number of results to load in a query.
-	 * <p>
-	 * For example, if the database has a million Patient resources in it, and
-	 * the client requests <code>GET /Patient</code>, if this value is set
-	 * to a non-null value (default is <code>null</code>) only this number
-	 * of results will be fetched. Setting this value appropriately
-	 * can be useful to improve performance in some situations.
-	 * </p>
-	 */
-	public Integer getFetchSizeDefaultMaximum() {
-		return myFetchSizeDefaultMaximum;
-	}
-
-	/**
-	 * Gets the maximum number of results to return in a GetTags query (DSTU1 only)
-	 */
-	public int getHardTagListLimit() {
-		return myHardTagListLimit;
-	}
-
-	public int getIncludeLimit() {
-		return myIncludeLimit;
-	}
-
-	/**
-	 * Returns the interceptors which will be notified of operations.
-	 * 
-	 * @see #setInterceptors(List)
-	 */
-	public List<IServerInterceptor> getInterceptors() {
-		if (myInterceptors == null) {
-			myInterceptors = new ArrayList<>();
-		}
-		return myInterceptors;
-	}
-
-	/**
-	 * See {@link #setMaximumExpansionSize(int)}
-	 */
-	public int getMaximumExpansionSize() {
-		return myMaximumExpansionSize;
-	}
-
-	/**
-	 * Provides the maximum number of results which may be returned by a search (HTTP GET) which
-	 * is executed as a sub-operation within within a FHIR <code>transaction</code> or
-	 * <code>batch</code> operation. For example, if this value is set to <code>100</code> and 
-	 * a FHIR transaction is processed with a sub-request for <code>Patient?gender=male</code>,
-	 * the server will throw an error (and the transaction will fail) if there are more than
-	 * 100 resources on the server which match this query.
-	 * <p>
-	 * The default value is <code>null</code>, which means that there is no limit.
-	 * </p>  
-	 */
-	public Integer getMaximumSearchResultCountInTransaction() {
-		return myMaximumSearchResultCountInTransaction;
-	}
-
-	public ResourceEncodingEnum getResourceEncoding() {
-		return myResourceEncoding;
-	}
-
-	/**
-	 * If set, an individual resource will not be allowed to have more than the
-	 * given number of tags, profiles, and security labels (the limit is for the combined
-	 * total for all of these things on an individual resource).
-	 * <p>
-	 * If set to <code>null</code>, no limit will be applied.
-	 * </p>
-	 * <p>
-	 * The default value for this setting is 1000.
-	 * </p>
-	 */
-	public Integer getResourceMetaCountHardLimit() {
-		return myResourceMetaCountHardLimit;
-	}
-
-	/**
-	 * If set to a non {@literal null} value (default is {@link #DEFAULT_REUSE_CACHED_SEARCH_RESULTS_FOR_MILLIS non null})
-	 * if an identical search is requested multiple times within this window, the same results will be returned
-	 * to multiple queries. For example, if this value is set to 1 minute and a client searches for all
-	 * patients named "smith", and then a second client also performs the same search within 1 minute,
-	 * the same cached results will be returned.
-	 * <p>
-	 * This approach can improve performance, especially under heavy load, but can also mean that
-	 * searches may potentially return slightly out-of-date results.
-	 * </p>
-	 */
-	public Long getReuseCachedSearchResultsForMillis() {
-		return myReuseCachedSearchResultsForMillis;
-	}
-
-	public long getSubscriptionPollDelay() {
-		return mySubscriptionPollDelay;
-	}
-
-	public Long getSubscriptionPurgeInactiveAfterMillis() {
-		return mySubscriptionPurgeInactiveAfterMillis;
-	}
-
-	/**
-	 * This setting may be used to advise the server that any references found in
-	 * resources that have any of the base URLs given here will be replaced with
-	 * simple local references.
-	 * <p>
-	 * For example, if the set contains the value <code>http://example.com/base/</code>
-	 * and a resource is submitted to the server that contains a reference to
-	 * <code>http://example.com/base/Patient/1</code>, the server will automatically
-	 * convert this reference to <code>Patient/1</code>
-	 * </p>
-	 * <p>
-	 * Note that this property has different behaviour from {@link DaoConfig#getTreatReferencesAsLogical()}
-	 * </p>
-	 * 
-	 * @see #getTreatReferencesAsLogical()
-	 */
-	public Set<String> getTreatBaseUrlsAsLocal() {
-		return myTreatBaseUrlsAsLocal;
-	}
-
-	/**
-	 * This setting may be used to advise the server that any references found in
-	 * resources that have any of the base URLs given here will be treated as logical
-	 * references instead of being treated as real references.
-	 * <p>
-	 * A logical reference is a reference which is treated as an identifier, and
-	 * does not neccesarily resolve. See {@link "http://hl7.org/fhir/references.html"} for
-	 * a description of logical references. For example, the valueset
-	 * {@link "http://hl7.org/fhir/valueset-quantity-comparator.html"} is a logical
-	 * reference.
-	 * </p>
-	 * <p>
-	 * Values for this field may take either of the following forms:
-	 * </p>
-	 * <ul>
-	 * <li><code>http://example.com/some-url</code> <b>(will be matched exactly)</b></li>
-	 * <li><code>http://example.com/some-base*</code> <b>(will match anything beginning with the part before the *)</b></li>
-	 * </ul>
-	 * 
-	 * @see #DEFAULT_LOGICAL_BASE_URLS Default values for this property
-	 */
-	public Set<String> getTreatReferencesAsLogical() {
-		return myTreatReferencesAsLogical;
-	}
-
-	/**
-	 * If set to <code>true</code> (default is <code>false</code>) the server will allow
-	 * resources to have references to external servers. For example if this server is
-	 * running at <code>http://example.com/fhir</code> and this setting is set to
-	 * <code>true</code> the server will allow a Patient resource to be saved with a
-	 * Patient.organization value of <code>http://foo.com/Organization/1</code>.
-	 * <p>
-	 * Under the default behaviour if this value has not been changed, the above
-	 * resource would be rejected by the server because it requires all references
-	 * to be resolvable on the local server.
-	 * </p>
-	 * <p>
-	 * Note that external references will be indexed by the server and may be searched
-	 * (e.g. <code>Patient:organization</code>), but
-	 * chained searches (e.g. <code>Patient:organization.name</code>) will not work across
-	 * these references.
-	 * </p>
-	 * <p>
-	 * It is recommended to also set {@link #setTreatBaseUrlsAsLocal(Set)} if this value
-	 * is set to <code>true</code>
-	 * </p>
-	 * 
-	 * @see #setTreatBaseUrlsAsLocal(Set)
-	 * @see #setAllowExternalReferences(boolean)
-	 */
-	public boolean isAllowExternalReferences() {
-		return myAllowExternalReferences;
-	}
-
-	/**
-	 * @see #setAllowInlineMatchUrlReferences(boolean)
-	 */
-	public boolean isAllowInlineMatchUrlReferences() {
-		return myAllowInlineMatchUrlReferences;
-	}
-
-	public boolean isAllowMultipleDelete() {
-		return myAllowMultipleDelete;
-	}
-
-	/**
-	 * If set to {@code true} the default search params (i.e. the search parameters that are
-	 * defined by the FHIR specification itself) may be overridden by uploading search
-	 * parameters to the server with the same code as the built-in search parameter.
-	 * <p>
-	 * This can be useful if you want to be able to disable or alter
-	 * the behaviour of the default search parameters.
-	 * </p>
-	 * <p>
-	 * The default value for this setting is {@code false}
-	 * </p>
-	 */
-	public boolean isDefaultSearchParamsCanBeOverridden() {
-		return myDefaultSearchParamsCanBeOverridden;
-	}
-
-	/**
-	 * If set to <code>false</code> (default is <code>true</code>) resources will be permitted to be
-	 * deleted even if other resources currently contain references to them.
-	 * <p>
-	 * This property can cause confusing results for clients of the server since searches, includes,
-	 * and other FHIR features may not behave as expected when referential integrity is not
-	 * preserved. Use this feature with caution.
-	 * </p>
-	 */
-	public boolean isEnforceReferentialIntegrityOnDelete() {
-		return myEnforceReferentialIntegrityOnDelete;
-	}
-
-	/**
-	 * If set to <code>false</code> (default is <code>true</code>) resources will be permitted to be
-	 * created or updated even if they contain references to local resources that do not exist.
-	 * <p>
-	 * For example, if a patient contains a reference to managing organization <code>Organization/FOO</code>
-	 * but FOO is not a valid ID for an organization on the server, the operation will be blocked unless
-	 * this propery has been set to <code>false</code>
-	 * </p>
-	 * <p>
-	 * This property can cause confusing results for clients of the server since searches, includes,
-	 * and other FHIR features may not behave as expected when referential integrity is not
-	 * preserved. Use this feature with caution.
-	 * </p>
-	 */
-	public boolean isEnforceReferentialIntegrityOnWrite() {
-		return myEnforceReferentialIntegrityOnWrite;
-	}
-
-	/**
-	 * If this is set to <code>false</code> (default is <code>true</code>) the stale search deletion
-	 * task will be disabled (meaning that search results will be retained in the database indefinitely). USE WITH CAUTION.
-	 * <p>
-	 * This feature is useful if you want to define your own process for deleting these (e.g. because
-	 * you are running in a cluster)
-	 * </p>
-	 */
-	public boolean isExpireSearchResults() {
-		return myDeleteStaleSearches;
-	}
-
-	/**
-	 * Should contained IDs be indexed the same way that non-contained IDs are (default is
-	 * <code>true</code>)
-	 */
-	public boolean isIndexContainedResources() {
-		return myIndexContainedResources;
-	}
-
-	public boolean isSchedulingDisabled() {
-		return mySchedulingDisabled;
-	}
-
-	/**
-	 * See {@link #setSubscriptionEnabled(boolean)}
-	 */
-	public boolean isSubscriptionEnabled() {
-		return mySubscriptionEnabled;
-	}
-
-	/**
-	 * If set to {@literal true} (default is true), if a client performs an update which does not actually
-	 * result in any chance to a given resource (e.g. an update where the resource body matches the
-	 * existing resource body in the database) the operation will succeed but a new version (and corresponding history
-	 * entry) will not actually be created. The existing resource version will be returned to the client.
-	 * <p>
-	 * If set to {@literal false}, all updates will result in the creation of a new version
-	 * </p>
-	 */
-	public boolean isSuppressUpdatesWithNoChange() {
-		return mySuppressUpdatesWithNoChange;
-	}
-
-	/**
-	 * If set to <code>true</code> (default is <code>false</code>) the server will allow
-	 * resources to have references to external servers. For example if this server is
-	 * running at <code>http://example.com/fhir</code> and this setting is set to
-	 * <code>true</code> the server will allow a Patient resource to be saved with a
-	 * Patient.organization value of <code>http://foo.com/Organization/1</code>.
-	 * <p>
-	 * Under the default behaviour if this value has not been changed, the above
-	 * resource would be rejected by the server because it requires all references
-	 * to be resolvable on the local server.
-	 * </p>
-	 * <p>
-	 * Note that external references will be indexed by the server and may be searched
-	 * (e.g. <code>Patient:organization</code>), but
-	 * chained searches (e.g. <code>Patient:organization.name</code>) will not work across
-	 * these references.
-	 * </p>
-	 * <p>
-	 * It is recommended to also set {@link #setTreatBaseUrlsAsLocal(Set)} if this value
-	 * is set to <code>true</code>
-	 * </p>
-	 * 
-	 * @see #setTreatBaseUrlsAsLocal(Set)
-	 * @see #setAllowExternalReferences(boolean)
-	 */
-	public void setAllowExternalReferences(boolean theAllowExternalReferences) {
-		myAllowExternalReferences = theAllowExternalReferences;
-	}
-
-	/**
-	 * Should references containing match URLs be resolved and replaced in create and update operations. For
-	 * example, if this property is set to true and a resource is created containing a reference
-	 * to "Patient?identifier=12345", this is reference match URL will be resolved and replaced according
-	 * to the usual match URL rules.
-	 * <p>
-	 * Default is {@literal true} beginning in HAPI FHIR 2.4, since this
-	 * feature is now specified in the FHIR specification. (Previously it
-	 * was an experimental/rpposed feature)
-	 * </p>
-	 * 
-	 * @since 1.5
-	 */
-	public void setAllowInlineMatchUrlReferences(boolean theAllowInlineMatchUrlReferences) {
-		myAllowInlineMatchUrlReferences = theAllowInlineMatchUrlReferences;
-	}
-
-	public void setAllowMultipleDelete(boolean theAllowMultipleDelete) {
-		myAllowMultipleDelete = theAllowMultipleDelete;
-	}
-
-	/**
-	 * If set to {@code true} the default search params (i.e. the search parameters that are
-	 * defined by the FHIR specification itself) may be overridden by uploading search
-	 * parameters to the server with the same code as the built-in search parameter.
-	 * <p>
-	 * This can be useful if you want to be able to disable or alter
-	 * the behaviour of the default search parameters.
-	 * </p>
-	 * <p>
-	 * The default value for this setting is {@code false}
-	 * </p>
-	 */
-	public void setDefaultSearchParamsCanBeOverridden(boolean theDefaultSearchParamsCanBeOverridden) {
-		myDefaultSearchParamsCanBeOverridden = theDefaultSearchParamsCanBeOverridden;
-	}
-
-	/**
-	 * When a code system is added that contains more than this number of codes,
-	 * the code system will be indexed later in an incremental process in order to
-	 * avoid overwhelming Lucene with a huge number of codes in a single operation.
-	 * <p>
-	 * Defaults to 2000
-	 * </p>
-	 */
-	public void setDeferIndexingForCodesystemsOfSize(int theDeferIndexingForCodesystemsOfSize) {
-		myDeferIndexingForCodesystemsOfSize = theDeferIndexingForCodesystemsOfSize;
-	}
-
-	/**
-	 * If set to <code>false</code> (default is <code>true</code>) resources will be permitted to be
-	 * deleted even if other resources currently contain references to them.
-	 * <p>
-	 * This property can cause confusing results for clients of the server since searches, includes,
-	 * and other FHIR features may not behave as expected when referential integrity is not
-	 * preserved. Use this feature with caution.
-	 * </p>
-	 */
-	public void setEnforceReferentialIntegrityOnDelete(boolean theEnforceReferentialIntegrityOnDelete) {
-		myEnforceReferentialIntegrityOnDelete = theEnforceReferentialIntegrityOnDelete;
-	}
-
-	/**
-	 * If set to <code>false</code> (default is <code>true</code>) resources will be permitted to be
-	 * created or updated even if they contain references to local resources that do not exist.
-	 * <p>
-	 * For example, if a patient contains a reference to managing organization <code>Organization/FOO</code>
-	 * but FOO is not a valid ID for an organization on the server, the operation will be blocked unless
-	 * this propery has been set to <code>false</code>
-	 * </p>
-	 * <p>
-	 * This property can cause confusing results for clients of the server since searches, includes,
-	 * and other FHIR features may not behave as expected when referential integrity is not
-	 * preserved. Use this feature with caution.
-	 * </p>
-	 */
-	public void setEnforceReferentialIntegrityOnWrite(boolean theEnforceReferentialIntegrityOnWrite) {
-		myEnforceReferentialIntegrityOnWrite = theEnforceReferentialIntegrityOnWrite;
 	}
 
 	/**
@@ -592,15 +192,23 @@ public class DaoConfig {
 	}
 
 	/**
-	 * If this is set to <code>false</code> (default is <code>true</code>) the stale search deletion
-	 * task will be disabled (meaning that search results will be retained in the database indefinitely). USE WITH CAUTION.
+	 * Sets the number of milliseconds that search results for a given client search
+	 * should be preserved before being purged from the database.
 	 * <p>
-	 * This feature is useful if you want to define your own process for deleting these (e.g. because
-	 * you are running in a cluster)
+	 * Search results are stored in the database so that they can be paged over multiple
+	 * requests. After this
+	 * number of milliseconds, they will be deleted from the database, and any paging links
+	 * (next/prev links in search response bundles) will become invalid. Defaults to 1 hour.
 	 * </p>
+	 * <p>
+	 * <p>
+	 * To disable this feature entirely, see {@link #setExpireSearchResults(boolean)}
+	 * </p>
+	 *
+	 * @since 1.5
 	 */
-	public void setExpireSearchResults(boolean theDeleteStaleSearches) {
-		myDeleteStaleSearches = theDeleteStaleSearches;
+	public long getExpireSearchResultsAfterMillis() {
+		return myExpireSearchResultsAfterMillis;
 	}
 
 	/**
@@ -613,15 +221,29 @@ public class DaoConfig {
 	 * (next/prev links in search response bundles) will become invalid. Defaults to 1 hour.
 	 * </p>
 	 * <p>
-	 * 
+	 * <p>
 	 * <p>
 	 * To disable this feature entirely, see {@link #setExpireSearchResults(boolean)}
 	 * </p>
-	 * 
+	 *
 	 * @since 1.5
 	 */
 	public void setExpireSearchResultsAfterMillis(long theExpireSearchResultsAfterMillis) {
 		myExpireSearchResultsAfterMillis = theExpireSearchResultsAfterMillis;
+	}
+
+	/**
+	 * Gets the default maximum number of results to load in a query.
+	 * <p>
+	 * For example, if the database has a million Patient resources in it, and
+	 * the client requests <code>GET /Patient</code>, if this value is set
+	 * to a non-null value (default is <code>null</code>) only this number
+	 * of results will be fetched. Setting this value appropriately
+	 * can be useful to improve performance in some situations.
+	 * </p>
+	 */
+	public Integer getFetchSizeDefaultMaximum() {
+		return myFetchSizeDefaultMaximum;
 	}
 
 	/**
@@ -639,16 +261,10 @@ public class DaoConfig {
 	}
 
 	/**
-	 * Do not call this method, it exists only for legacy reasons. It
-	 * will be removed in a future version. Configure the page size on your
-	 * paging provider instead.
-	 * 
-	 * @deprecated This method does not do anything. Configure the page size on your
-	 *             paging provider instead. Deprecated in HAPI FHIR 2.3 (Jan 2017)
+	 * Gets the maximum number of results to return in a GetTags query (DSTU1 only)
 	 */
-	@Deprecated
-	public void setHardSearchLimit(int theHardSearchLimit) {
-		// this method does nothing
+	public int getHardTagListLimit() {
+		return myHardTagListLimit;
 	}
 
 	/**
@@ -656,6 +272,10 @@ public class DaoConfig {
 	 */
 	public void setHardTagListLimit(int theHardTagListLimit) {
 		myHardTagListLimit = theHardTagListLimit;
+	}
+
+	public int getIncludeLimit() {
+		return myIncludeLimit;
 	}
 
 	/**
@@ -668,11 +288,15 @@ public class DaoConfig {
 	}
 
 	/**
-	 * Should contained IDs be indexed the same way that non-contained IDs are (default is
-	 * <code>true</code>)
+	 * Returns the interceptors which will be notified of operations.
+	 *
+	 * @see #setInterceptors(List)
 	 */
-	public void setIndexContainedResources(boolean theIndexContainedResources) {
-		myIndexContainedResources = theIndexContainedResources;
+	public List<IServerInterceptor> getInterceptors() {
+		if (myInterceptors == null) {
+			myInterceptors = new ArrayList<>();
+		}
+		return myInterceptors;
 	}
 
 	/**
@@ -686,10 +310,10 @@ public class DaoConfig {
 	}
 
 	/**
-	 * This may be used to optionally register server interceptors directly against the DAOs.
+	 * See {@link #setMaximumExpansionSize(int)}
 	 */
-	public void setInterceptors(List<IServerInterceptor> theInterceptors) {
-		myInterceptors = theInterceptors;
+	public int getMaximumExpansionSize() {
+		return myMaximumExpansionSize;
 	}
 
 	/**
@@ -704,20 +328,54 @@ public class DaoConfig {
 	/**
 	 * Provides the maximum number of results which may be returned by a search (HTTP GET) which
 	 * is executed as a sub-operation within within a FHIR <code>transaction</code> or
-	 * <code>batch</code> operation. For example, if this value is set to <code>100</code> and 
+	 * <code>batch</code> operation. For example, if this value is set to <code>100</code> and
 	 * a FHIR transaction is processed with a sub-request for <code>Patient?gender=male</code>,
 	 * the server will throw an error (and the transaction will fail) if there are more than
 	 * 100 resources on the server which match this query.
 	 * <p>
 	 * The default value is <code>null</code>, which means that there is no limit.
-	 * </p>  
+	 * </p>
+	 */
+	public Integer getMaximumSearchResultCountInTransaction() {
+		return myMaximumSearchResultCountInTransaction;
+	}
+
+	/**
+	 * Provides the maximum number of results which may be returned by a search (HTTP GET) which
+	 * is executed as a sub-operation within within a FHIR <code>transaction</code> or
+	 * <code>batch</code> operation. For example, if this value is set to <code>100</code> and
+	 * a FHIR transaction is processed with a sub-request for <code>Patient?gender=male</code>,
+	 * the server will throw an error (and the transaction will fail) if there are more than
+	 * 100 resources on the server which match this query.
+	 * <p>
+	 * The default value is <code>null</code>, which means that there is no limit.
+	 * </p>
 	 */
 	public void setMaximumSearchResultCountInTransaction(Integer theMaximumSearchResultCountInTransaction) {
 		myMaximumSearchResultCountInTransaction = theMaximumSearchResultCountInTransaction;
 	}
 
+	public ResourceEncodingEnum getResourceEncoding() {
+		return myResourceEncoding;
+	}
+
 	public void setResourceEncoding(ResourceEncodingEnum theResourceEncoding) {
 		myResourceEncoding = theResourceEncoding;
+	}
+
+	/**
+	 * If set, an individual resource will not be allowed to have more than the
+	 * given number of tags, profiles, and security labels (the limit is for the combined
+	 * total for all of these things on an individual resource).
+	 * <p>
+	 * If set to <code>null</code>, no limit will be applied.
+	 * </p>
+	 * <p>
+	 * The default value for this setting is 1000.
+	 * </p>
+	 */
+	public Integer getResourceMetaCountHardLimit() {
+		return myResourceMetaCountHardLimit;
 	}
 
 	/**
@@ -746,25 +404,35 @@ public class DaoConfig {
 	 * searches may potentially return slightly out-of-date results.
 	 * </p>
 	 */
+	public Long getReuseCachedSearchResultsForMillis() {
+		return myReuseCachedSearchResultsForMillis;
+	}
+
+	/**
+	 * If set to a non {@literal null} value (default is {@link #DEFAULT_REUSE_CACHED_SEARCH_RESULTS_FOR_MILLIS non null})
+	 * if an identical search is requested multiple times within this window, the same results will be returned
+	 * to multiple queries. For example, if this value is set to 1 minute and a client searches for all
+	 * patients named "smith", and then a second client also performs the same search within 1 minute,
+	 * the same cached results will be returned.
+	 * <p>
+	 * This approach can improve performance, especially under heavy load, but can also mean that
+	 * searches may potentially return slightly out-of-date results.
+	 * </p>
+	 */
 	public void setReuseCachedSearchResultsForMillis(Long theReuseCachedSearchResultsForMillis) {
 		myReuseCachedSearchResultsForMillis = theReuseCachedSearchResultsForMillis;
 	}
 
-	public void setSchedulingDisabled(boolean theSchedulingDisabled) {
-		mySchedulingDisabled = theSchedulingDisabled;
-	}
-
-	/**
-	 * If set to true, the server will enable support for subscriptions. Subscriptions
-	 * will by default be handled via a polling task. Note that if this is enabled, you must also include Spring task scanning to your XML
-	 * config for the scheduled tasks used by the subscription module.
-	 */
-	public void setSubscriptionEnabled(boolean theSubscriptionEnabled) {
-		mySubscriptionEnabled = theSubscriptionEnabled;
+	public long getSubscriptionPollDelay() {
+		return mySubscriptionPollDelay;
 	}
 
 	public void setSubscriptionPollDelay(long theSubscriptionPollDelay) {
 		mySubscriptionPollDelay = theSubscriptionPollDelay;
+	}
+
+	public Long getSubscriptionPurgeInactiveAfterMillis() {
+		return mySubscriptionPurgeInactiveAfterMillis;
 	}
 
 	public void setSubscriptionPurgeInactiveAfterMillis(Long theMillis) {
@@ -772,24 +440,6 @@ public class DaoConfig {
 			Validate.exclusiveBetween(0, Long.MAX_VALUE, theMillis);
 		}
 		mySubscriptionPurgeInactiveAfterMillis = theMillis;
-	}
-
-	public void setSubscriptionPurgeInactiveAfterSeconds(int theSeconds) {
-		setSubscriptionPurgeInactiveAfterMillis(theSeconds * DateUtils.MILLIS_PER_SECOND);
-	}
-
-	/**
-	 * If set to {@literal true} (default is true), if a client performs an update which does not actually
-	 * result in any chance to a given resource (e.g. an update where the resource body matches the
-	 * existing resource body in the database) the operation will succeed but a new version (and corresponding history
-	 * entry) will not actually be created. The existing resource version will be returned to the client.
-	 * <p>
-	 * If set to {@literal false}, all updates will result in the creation of a new version
-	 * </p>
-	 */
-	public void setSuppressUpdatesWithNoChange(boolean theSuppressUpdatesWithNoChange) {
-		mySuppressUpdatesWithNoChange = theSuppressUpdatesWithNoChange;
-
 	}
 
 	/**
@@ -802,10 +452,29 @@ public class DaoConfig {
 	 * <code>http://example.com/base/Patient/1</code>, the server will automatically
 	 * convert this reference to <code>Patient/1</code>
 	 * </p>
-	 * 
-	 * @param theTreatBaseUrlsAsLocal
-	 *           The set of base URLs. May be <code>null</code>, which
-	 *           means no references will be treated as external
+	 * <p>
+	 * Note that this property has different behaviour from {@link DaoConfig#getTreatReferencesAsLogical()}
+	 * </p>
+	 *
+	 * @see #getTreatReferencesAsLogical()
+	 */
+	public Set<String> getTreatBaseUrlsAsLocal() {
+		return myTreatBaseUrlsAsLocal;
+	}
+
+	/**
+	 * This setting may be used to advise the server that any references found in
+	 * resources that have any of the base URLs given here will be replaced with
+	 * simple local references.
+	 * <p>
+	 * For example, if the set contains the value <code>http://example.com/base/</code>
+	 * and a resource is submitted to the server that contains a reference to
+	 * <code>http://example.com/base/Patient/1</code>, the server will automatically
+	 * convert this reference to <code>Patient/1</code>
+	 * </p>
+	 *
+	 * @param theTreatBaseUrlsAsLocal The set of base URLs. May be <code>null</code>, which
+	 *                                means no references will be treated as external
 	 */
 	public void setTreatBaseUrlsAsLocal(Set<String> theTreatBaseUrlsAsLocal) {
 		if (theTreatBaseUrlsAsLocal != null) {
@@ -842,12 +511,378 @@ public class DaoConfig {
 	 * <li><code>http://example.com/some-url</code> <b>(will be matched exactly)</b></li>
 	 * <li><code>http://example.com/some-base*</code> <b>(will match anything beginning with the part before the *)</b></li>
 	 * </ul>
-	 * 
+	 *
+	 * @see #DEFAULT_LOGICAL_BASE_URLS Default values for this property
+	 */
+	public Set<String> getTreatReferencesAsLogical() {
+		return myTreatReferencesAsLogical;
+	}
+
+	/**
+	 * This setting may be used to advise the server that any references found in
+	 * resources that have any of the base URLs given here will be treated as logical
+	 * references instead of being treated as real references.
+	 * <p>
+	 * A logical reference is a reference which is treated as an identifier, and
+	 * does not neccesarily resolve. See {@link "http://hl7.org/fhir/references.html"} for
+	 * a description of logical references. For example, the valueset
+	 * {@link "http://hl7.org/fhir/valueset-quantity-comparator.html"} is a logical
+	 * reference.
+	 * </p>
+	 * <p>
+	 * Values for this field may take either of the following forms:
+	 * </p>
+	 * <ul>
+	 * <li><code>http://example.com/some-url</code> <b>(will be matched exactly)</b></li>
+	 * <li><code>http://example.com/some-base*</code> <b>(will match anything beginning with the part before the *)</b></li>
+	 * </ul>
+	 *
 	 * @see #DEFAULT_LOGICAL_BASE_URLS Default values for this property
 	 */
 	public DaoConfig setTreatReferencesAsLogical(Set<String> theTreatReferencesAsLogical) {
 		myTreatReferencesAsLogical = theTreatReferencesAsLogical;
 		return this;
+	}
+
+	/**
+	 * If set to <code>true</code> (default is <code>false</code>) the server will allow
+	 * resources to have references to external servers. For example if this server is
+	 * running at <code>http://example.com/fhir</code> and this setting is set to
+	 * <code>true</code> the server will allow a Patient resource to be saved with a
+	 * Patient.organization value of <code>http://foo.com/Organization/1</code>.
+	 * <p>
+	 * Under the default behaviour if this value has not been changed, the above
+	 * resource would be rejected by the server because it requires all references
+	 * to be resolvable on the local server.
+	 * </p>
+	 * <p>
+	 * Note that external references will be indexed by the server and may be searched
+	 * (e.g. <code>Patient:organization</code>), but
+	 * chained searches (e.g. <code>Patient:organization.name</code>) will not work across
+	 * these references.
+	 * </p>
+	 * <p>
+	 * It is recommended to also set {@link #setTreatBaseUrlsAsLocal(Set)} if this value
+	 * is set to <code>true</code>
+	 * </p>
+	 *
+	 * @see #setTreatBaseUrlsAsLocal(Set)
+	 * @see #setAllowExternalReferences(boolean)
+	 */
+	public boolean isAllowExternalReferences() {
+		return myAllowExternalReferences;
+	}
+
+	/**
+	 * If set to <code>true</code> (default is <code>false</code>) the server will allow
+	 * resources to have references to external servers. For example if this server is
+	 * running at <code>http://example.com/fhir</code> and this setting is set to
+	 * <code>true</code> the server will allow a Patient resource to be saved with a
+	 * Patient.organization value of <code>http://foo.com/Organization/1</code>.
+	 * <p>
+	 * Under the default behaviour if this value has not been changed, the above
+	 * resource would be rejected by the server because it requires all references
+	 * to be resolvable on the local server.
+	 * </p>
+	 * <p>
+	 * Note that external references will be indexed by the server and may be searched
+	 * (e.g. <code>Patient:organization</code>), but
+	 * chained searches (e.g. <code>Patient:organization.name</code>) will not work across
+	 * these references.
+	 * </p>
+	 * <p>
+	 * It is recommended to also set {@link #setTreatBaseUrlsAsLocal(Set)} if this value
+	 * is set to <code>true</code>
+	 * </p>
+	 *
+	 * @see #setTreatBaseUrlsAsLocal(Set)
+	 * @see #setAllowExternalReferences(boolean)
+	 */
+	public void setAllowExternalReferences(boolean theAllowExternalReferences) {
+		myAllowExternalReferences = theAllowExternalReferences;
+	}
+
+	/**
+	 * @see #setAllowInlineMatchUrlReferences(boolean)
+	 */
+	public boolean isAllowInlineMatchUrlReferences() {
+		return myAllowInlineMatchUrlReferences;
+	}
+
+	/**
+	 * Should references containing match URLs be resolved and replaced in create and update operations. For
+	 * example, if this property is set to true and a resource is created containing a reference
+	 * to "Patient?identifier=12345", this is reference match URL will be resolved and replaced according
+	 * to the usual match URL rules.
+	 * <p>
+	 * Default is {@literal true} beginning in HAPI FHIR 2.4, since this
+	 * feature is now specified in the FHIR specification. (Previously it
+	 * was an experimental/rpposed feature)
+	 * </p>
+	 *
+	 * @since 1.5
+	 */
+	public void setAllowInlineMatchUrlReferences(boolean theAllowInlineMatchUrlReferences) {
+		myAllowInlineMatchUrlReferences = theAllowInlineMatchUrlReferences;
+	}
+
+	public boolean isAllowMultipleDelete() {
+		return myAllowMultipleDelete;
+	}
+
+	public void setAllowMultipleDelete(boolean theAllowMultipleDelete) {
+		myAllowMultipleDelete = theAllowMultipleDelete;
+	}
+
+	/**
+	 * When creating or updating a resource: If this property is set to <code>true</code>
+	 * (default is <code>false</code>), if the resource has a reference to another resource
+	 * on the local server but that reference does not exist, a placeholder resource will be
+	 * created.
+	 * <p>
+	 * In other words, if an observation with subject <code>Patient/FOO</code> is created, but
+	 * there is no resource called <code>Patient/FOO</code> on the server, this property causes
+	 * an empty patient with ID "FOO" to be created in order to prevent this operation
+	 * from failing.
+	 * </p>
+	 * <p>
+	 * This property can be useful in cases where replication between two servers is wanted.
+	 * Note however that references containing purely numeric IDs will not be auto-created
+	 * as they are never allowed to be client supplied in HAPI FHIR JPA.
+	 * </p>
+	 */
+	public boolean isAutoCreatePlaceholderReferenceTargets() {
+		return myAutoCreatePlaceholderReferenceTargets;
+	}
+
+	/**
+	 * When creating or updating a resource: If this property is set to <code>true</code>
+	 * (default is <code>false</code>), if the resource has a reference to another resource
+	 * on the local server but that reference does not exist, a placeholder resource will be
+	 * created.
+	 * <p>
+	 * In other words, if an observation with subject <code>Patient/FOO</code> is created, but
+	 * there is no resource called <code>Patient/FOO</code> on the server, this property causes
+	 * an empty patient with ID "FOO" to be created in order to prevent this operation
+	 * from failing.
+	 * </p>
+	 * <p>
+	 * This property can be useful in cases where replication between two servers is wanted.
+	 * Note however that references containing purely numeric IDs will not be auto-created
+	 * as they are never allowed to be client supplied in HAPI FHIR JPA.
+	 * </p>
+	 */
+	public void setAutoCreatePlaceholderReferenceTargets(boolean theAutoCreatePlaceholderReferenceTargets) {
+		myAutoCreatePlaceholderReferenceTargets = theAutoCreatePlaceholderReferenceTargets;
+	}
+
+	/**
+	 * If set to {@code true} the default search params (i.e. the search parameters that are
+	 * defined by the FHIR specification itself) may be overridden by uploading search
+	 * parameters to the server with the same code as the built-in search parameter.
+	 * <p>
+	 * This can be useful if you want to be able to disable or alter
+	 * the behaviour of the default search parameters.
+	 * </p>
+	 * <p>
+	 * The default value for this setting is {@code false}
+	 * </p>
+	 */
+	public boolean isDefaultSearchParamsCanBeOverridden() {
+		return myDefaultSearchParamsCanBeOverridden;
+	}
+
+	/**
+	 * If set to {@code true} the default search params (i.e. the search parameters that are
+	 * defined by the FHIR specification itself) may be overridden by uploading search
+	 * parameters to the server with the same code as the built-in search parameter.
+	 * <p>
+	 * This can be useful if you want to be able to disable or alter
+	 * the behaviour of the default search parameters.
+	 * </p>
+	 * <p>
+	 * The default value for this setting is {@code false}
+	 * </p>
+	 */
+	public void setDefaultSearchParamsCanBeOverridden(boolean theDefaultSearchParamsCanBeOverridden) {
+		myDefaultSearchParamsCanBeOverridden = theDefaultSearchParamsCanBeOverridden;
+	}
+
+	/**
+	 * If set to <code>false</code> (default is <code>true</code>) resources will be permitted to be
+	 * deleted even if other resources currently contain references to them.
+	 * <p>
+	 * This property can cause confusing results for clients of the server since searches, includes,
+	 * and other FHIR features may not behave as expected when referential integrity is not
+	 * preserved. Use this feature with caution.
+	 * </p>
+	 */
+	public boolean isEnforceReferentialIntegrityOnDelete() {
+		return myEnforceReferentialIntegrityOnDelete;
+	}
+
+	/**
+	 * If set to <code>false</code> (default is <code>true</code>) resources will be permitted to be
+	 * deleted even if other resources currently contain references to them.
+	 * <p>
+	 * This property can cause confusing results for clients of the server since searches, includes,
+	 * and other FHIR features may not behave as expected when referential integrity is not
+	 * preserved. Use this feature with caution.
+	 * </p>
+	 */
+	public void setEnforceReferentialIntegrityOnDelete(boolean theEnforceReferentialIntegrityOnDelete) {
+		myEnforceReferentialIntegrityOnDelete = theEnforceReferentialIntegrityOnDelete;
+	}
+
+	/**
+	 * If set to <code>false</code> (default is <code>true</code>) resources will be permitted to be
+	 * created or updated even if they contain references to local resources that do not exist.
+	 * <p>
+	 * For example, if a patient contains a reference to managing organization <code>Organization/FOO</code>
+	 * but FOO is not a valid ID for an organization on the server, the operation will be blocked unless
+	 * this propery has been set to <code>false</code>
+	 * </p>
+	 * <p>
+	 * This property can cause confusing results for clients of the server since searches, includes,
+	 * and other FHIR features may not behave as expected when referential integrity is not
+	 * preserved. Use this feature with caution.
+	 * </p>
+	 */
+	public boolean isEnforceReferentialIntegrityOnWrite() {
+		return myEnforceReferentialIntegrityOnWrite;
+	}
+
+	/**
+	 * If set to <code>false</code> (default is <code>true</code>) resources will be permitted to be
+	 * created or updated even if they contain references to local resources that do not exist.
+	 * <p>
+	 * For example, if a patient contains a reference to managing organization <code>Organization/FOO</code>
+	 * but FOO is not a valid ID for an organization on the server, the operation will be blocked unless
+	 * this propery has been set to <code>false</code>
+	 * </p>
+	 * <p>
+	 * This property can cause confusing results for clients of the server since searches, includes,
+	 * and other FHIR features may not behave as expected when referential integrity is not
+	 * preserved. Use this feature with caution.
+	 * </p>
+	 */
+	public void setEnforceReferentialIntegrityOnWrite(boolean theEnforceReferentialIntegrityOnWrite) {
+		myEnforceReferentialIntegrityOnWrite = theEnforceReferentialIntegrityOnWrite;
+	}
+
+	/**
+	 * If this is set to <code>false</code> (default is <code>true</code>) the stale search deletion
+	 * task will be disabled (meaning that search results will be retained in the database indefinitely). USE WITH CAUTION.
+	 * <p>
+	 * This feature is useful if you want to define your own process for deleting these (e.g. because
+	 * you are running in a cluster)
+	 * </p>
+	 */
+	public boolean isExpireSearchResults() {
+		return myDeleteStaleSearches;
+	}
+
+	/**
+	 * If this is set to <code>false</code> (default is <code>true</code>) the stale search deletion
+	 * task will be disabled (meaning that search results will be retained in the database indefinitely). USE WITH CAUTION.
+	 * <p>
+	 * This feature is useful if you want to define your own process for deleting these (e.g. because
+	 * you are running in a cluster)
+	 * </p>
+	 */
+	public void setExpireSearchResults(boolean theDeleteStaleSearches) {
+		myDeleteStaleSearches = theDeleteStaleSearches;
+	}
+
+	/**
+	 * Should contained IDs be indexed the same way that non-contained IDs are (default is
+	 * <code>true</code>)
+	 */
+	public boolean isIndexContainedResources() {
+		return myIndexContainedResources;
+	}
+
+	/**
+	 * Should contained IDs be indexed the same way that non-contained IDs are (default is
+	 * <code>true</code>)
+	 */
+	public void setIndexContainedResources(boolean theIndexContainedResources) {
+		myIndexContainedResources = theIndexContainedResources;
+	}
+
+	public boolean isSchedulingDisabled() {
+		return mySchedulingDisabled;
+	}
+
+	public void setSchedulingDisabled(boolean theSchedulingDisabled) {
+		mySchedulingDisabled = theSchedulingDisabled;
+	}
+
+	/**
+	 * See {@link #setSubscriptionEnabled(boolean)}
+	 */
+	public boolean isSubscriptionEnabled() {
+		return mySubscriptionEnabled;
+	}
+
+	/**
+	 * If set to true, the server will enable support for subscriptions. Subscriptions
+	 * will by default be handled via a polling task. Note that if this is enabled, you must also include Spring task scanning to your XML
+	 * config for the scheduled tasks used by the subscription module.
+	 */
+	public void setSubscriptionEnabled(boolean theSubscriptionEnabled) {
+		mySubscriptionEnabled = theSubscriptionEnabled;
+	}
+
+	/**
+	 * If set to {@literal true} (default is true), if a client performs an update which does not actually
+	 * result in any chance to a given resource (e.g. an update where the resource body matches the
+	 * existing resource body in the database) the operation will succeed but a new version (and corresponding history
+	 * entry) will not actually be created. The existing resource version will be returned to the client.
+	 * <p>
+	 * If set to {@literal false}, all updates will result in the creation of a new version
+	 * </p>
+	 */
+	public boolean isSuppressUpdatesWithNoChange() {
+		return mySuppressUpdatesWithNoChange;
+	}
+
+	/**
+	 * If set to {@literal true} (default is true), if a client performs an update which does not actually
+	 * result in any chance to a given resource (e.g. an update where the resource body matches the
+	 * existing resource body in the database) the operation will succeed but a new version (and corresponding history
+	 * entry) will not actually be created. The existing resource version will be returned to the client.
+	 * <p>
+	 * If set to {@literal false}, all updates will result in the creation of a new version
+	 * </p>
+	 */
+	public void setSuppressUpdatesWithNoChange(boolean theSuppressUpdatesWithNoChange) {
+		mySuppressUpdatesWithNoChange = theSuppressUpdatesWithNoChange;
+
+	}
+
+	/**
+	 * Do not call this method, it exists only for legacy reasons. It
+	 * will be removed in a future version. Configure the page size on your
+	 * paging provider instead.
+	 *
+	 * @deprecated This method does not do anything. Configure the page size on your
+	 * paging provider instead. Deprecated in HAPI FHIR 2.3 (Jan 2017)
+	 */
+	@Deprecated
+	public void setHardSearchLimit(int theHardSearchLimit) {
+		// this method does nothing
+	}
+
+	/**
+	 * This may be used to optionally register server interceptors directly against the DAOs.
+	 */
+	public void setInterceptors(List<IServerInterceptor> theInterceptors) {
+		myInterceptors = theInterceptors;
+	}
+
+	public void setSubscriptionPurgeInactiveAfterSeconds(int theSeconds) {
+		setSubscriptionPurgeInactiveAfterMillis(theSeconds * DateUtils.MILLIS_PER_SECOND);
 	}
 
 	private static void validateTreatBaseUrlsAsLocal(String theUrl) {

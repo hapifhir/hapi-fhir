@@ -337,6 +337,11 @@
 				to Eugene Lubarsky for the pull request, and for convincing James not to 
 				optimize something that did not need optimizing!
 			</action>
+			<action type="add">
+				A new config property has been added to the JPA seerver DaoConfig called "setAutoCreatePlaceholderReferenceTargets".
+				This property causes references to unknown resources in created/updated resources to have a placeholder
+				target resource automatically created.
+			</action>
 		</release>
 		<release version="2.5" date="2017-06-08">
 			<action type="fix">
