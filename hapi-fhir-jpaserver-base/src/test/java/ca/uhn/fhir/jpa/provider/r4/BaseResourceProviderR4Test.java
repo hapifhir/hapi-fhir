@@ -1,37 +1,13 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
-import java.util.*;
-import java.util.concurrent.TimeUnit;
-
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.servlet.ServletContextHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
-import org.hl7.fhir.r4.hapi.rest.server.GraphQLProvider;
-import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
-import org.hl7.fhir.r4.model.Patient;
-import org.junit.*;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.web.context.ContextLoader;
-import org.springframework.web.context.WebApplicationContext;
-import org.springframework.web.context.support.*;
-import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.servlet.DispatcherServlet;
-
 import ca.uhn.fhir.jpa.config.r4.WebsocketR4Config;
 import ca.uhn.fhir.jpa.config.r4.WebsocketR4DispatcherConfig;
 import ca.uhn.fhir.jpa.dao.data.ISearchDao;
 import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.dao.r4.SearchParamRegistryR4;
-import ca.uhn.fhir.jpa.subscription.r4.RestHookSubscriptionR4Interceptor;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.ISearchCoordinatorSvc;
+import ca.uhn.fhir.jpa.subscription.r4.RestHookSubscriptionR4Interceptor;
 import ca.uhn.fhir.jpa.validation.JpaValidationSupportChainR4;
 import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
 import ca.uhn.fhir.parser.StrictErrorHandler;
@@ -42,6 +18,32 @@ import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.interceptor.CorsInterceptor;
 import ca.uhn.fhir.util.PortUtil;
 import ca.uhn.fhir.util.TestUtil;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.servlet.ServletContextHandler;
+import org.eclipse.jetty.servlet.ServletHolder;
+import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
+import org.hl7.fhir.r4.model.Patient;
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.springframework.web.context.ContextLoader;
+import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
+import org.springframework.web.context.support.GenericWebApplicationContext;
+import org.springframework.web.context.support.WebApplicationContextUtils;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.servlet.DispatcherServlet;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 
@@ -50,16 +52,16 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 	protected static CloseableHttpClient ourHttpClient;
 	protected static int ourPort;
 	protected static RestfulServer ourRestServer;
-	private static Server ourServer;
 	protected static String ourServerBase;
-	private static GenericWebApplicationContext ourWebApplicationContext;
-	private TerminologyUploaderProviderR4 myTerminologyUploaderProvider;
 	protected static SearchParamRegistryR4 ourSearchParamRegistry;
 	protected static DatabaseBackedPagingProvider ourPagingProvider;
-	protected static RestHookSubscriptionR4Interceptor ourRestHookSubscriptionInterceptor;
 	protected static ISearchDao mySearchEntityDao;
 	protected static ISearchCoordinatorSvc mySearchCoordinatorSvc;
+	private static Server ourServer;
+	private static GenericWebApplicationContext ourWebApplicationContext;
+	private TerminologyUploaderProviderR4 myTerminologyUploaderProvider;
 	private Object ourGraphQLProvider;
+	private boolean ourRestHookSubscriptionInterceptorRequested;
 
 	public BaseResourceProviderR4Test() {
 		super();
@@ -70,7 +72,7 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 		myFhirCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.ONCE);
 	}
 
-	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@SuppressWarnings({"unchecked", "rawtypes"})
 	@Before
 	public void before() throws Exception {
 		myFhirCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
@@ -119,8 +121,8 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 			ServletHolder subsServletHolder = new ServletHolder();
 			subsServletHolder.setServlet(dispatcherServlet);
 			subsServletHolder.setInitParameter(
-					ContextLoader.CONFIG_LOCATION_PARAM, 
-					WebsocketR4Config.class.getName() + "\n" + 
+				ContextLoader.CONFIG_LOCATION_PARAM,
+				WebsocketR4Config.class.getName() + "\n" +
 					WebsocketR4DispatcherConfig.class.getName());
 			proxyHandler.addServlet(subsServletHolder, "/*");
 
@@ -147,7 +149,6 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 			myValidationSupport = wac.getBean(JpaValidationSupportChainR4.class);
 			mySearchCoordinatorSvc = wac.getBean(ISearchCoordinatorSvc.class);
 			mySearchEntityDao = wac.getBean(ISearchDao.class);
-			ourRestHookSubscriptionInterceptor = wac.getBean(RestHookSubscriptionR4Interceptor.class);
 			ourSearchParamRegistry = wac.getBean(SearchParamRegistryR4.class);
 
 			myFhirCtx.getRestfulClientFactory().setSocketTimeout(5000000);
@@ -155,7 +156,7 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 			if (shouldLogClient()) {
 				ourClient.registerInterceptor(new LoggingInterceptor());
 			}
-			
+
 			PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 			HttpClientBuilder builder = HttpClientBuilder.create();
 			builder.setConnectionManager(connectionManager);
@@ -166,6 +167,19 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 		}
 
 		ourRestServer.setPagingProvider(ourPagingProvider);
+	}
+
+	/**
+	 * This is lazy created so we only ask for it if its needed
+	 */
+	protected RestHookSubscriptionR4Interceptor getRestHookSubscriptionInterceptor() {
+		RestHookSubscriptionR4Interceptor retVal = ourWebApplicationContext.getBean(RestHookSubscriptionR4Interceptor.class);
+		ourRestHookSubscriptionInterceptorRequested = true;
+		return retVal;
+	}
+
+	protected boolean hasRestHookSubscriptionInterceptor() {
+		return ourRestHookSubscriptionInterceptorRequested;
 	}
 
 	protected boolean shouldLogClient() {

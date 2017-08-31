@@ -50,12 +50,12 @@ public class RestHookTestWithInterceptorRegisteredToDaoConfigR4Test extends Base
 		ourLog.info("Done deleting all subscriptions");
 		myDaoConfig.setAllowMultipleDelete(new DaoConfig().isAllowMultipleDelete());
 		
-		myDaoConfig.getInterceptors().remove(ourRestHookSubscriptionInterceptor);
+		myDaoConfig.getInterceptors().remove(getRestHookSubscriptionInterceptor());
 	}
 
 	@Before
 	public void beforeRegisterRestHookListener() {
-		myDaoConfig.getInterceptors().add(ourRestHookSubscriptionInterceptor);
+		myDaoConfig.getInterceptors().add(getRestHookSubscriptionInterceptor());
 	}
 
 	@Before
@@ -84,11 +84,11 @@ public class RestHookTestWithInterceptorRegisteredToDaoConfigR4Test extends Base
 	}
 
 	private void waitForQueueToDrain() throws InterruptedException {
-		ourLog.info("QUEUE HAS {} ITEMS", ourRestHookSubscriptionInterceptor.getExecutorQueueForUnitTests().size());
-		while (ourRestHookSubscriptionInterceptor.getExecutorQueueForUnitTests().size() > 0) {
+		ourLog.info("QUEUE HAS {} ITEMS", getRestHookSubscriptionInterceptor().getExecutorQueueForUnitTests().size());
+		while (getRestHookSubscriptionInterceptor().getExecutorQueueForUnitTests().size() > 0) {
 			Thread.sleep(250);
 		}
-		ourLog.info("QUEUE HAS {} ITEMS", ourRestHookSubscriptionInterceptor.getExecutorQueueForUnitTests().size());
+		ourLog.info("QUEUE HAS {} ITEMS", getRestHookSubscriptionInterceptor().getExecutorQueueForUnitTests().size());
 	}
 
 	private Observation sendObservation(String code, String system) throws InterruptedException {

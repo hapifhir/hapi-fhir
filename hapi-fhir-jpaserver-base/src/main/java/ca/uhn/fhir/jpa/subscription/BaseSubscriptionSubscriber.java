@@ -69,10 +69,9 @@ public abstract class BaseSubscriptionSubscriber implements MessageHandler {
 	/**
 	 * Does this subscription type (e.g. rest hook, websocket, etc) apply to this interceptor?
 	 */
-	protected boolean subscriptionTypeApplies(ResourceModifiedMessage theMsg) {
+	protected boolean subscriptionTypeApplies(IBaseResource theSubscription) {
 		FhirContext ctx = mySubscriptionDao.getContext();
-		IBaseResource subscription = theMsg.getNewPayload();
-		return subscriptionTypeApplies(ctx, subscription);
+		return subscriptionTypeApplies(ctx, theSubscription);
 	}
 
 	/**

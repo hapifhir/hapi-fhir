@@ -62,12 +62,12 @@ public class RestHookTestR4Test extends BaseResourceProviderR4Test {
 		ourLog.info("Done deleting all subscriptions");
 		myDaoConfig.setAllowMultipleDelete(new DaoConfig().isAllowMultipleDelete());
 
-		ourRestServer.unregisterInterceptor(ourRestHookSubscriptionInterceptor);
+		ourRestServer.unregisterInterceptor(getRestHookSubscriptionInterceptor());
 	}
 
 	@Before
 	public void beforeRegisterRestHookListener() {
-		ourRestServer.registerInterceptor(ourRestHookSubscriptionInterceptor);
+		ourRestServer.registerInterceptor(getRestHookSubscriptionInterceptor());
 	}
 
 	@Before
@@ -376,7 +376,7 @@ public class RestHookTestR4Test extends BaseResourceProviderR4Test {
 	}
 
 	private void waitForQueueToDrain() throws InterruptedException {
-		RestHookTestDstu2Test.waitForQueueToDrain(ourRestHookSubscriptionInterceptor);
+		RestHookTestDstu2Test.waitForQueueToDrain(getRestHookSubscriptionInterceptor());
 	}
 
 	@BeforeClass

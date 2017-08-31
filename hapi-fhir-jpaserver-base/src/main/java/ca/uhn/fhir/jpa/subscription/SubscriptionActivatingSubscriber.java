@@ -30,7 +30,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessagingException;
-import org.springframework.messaging.SubscribableChannel;
 
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -46,36 +45,41 @@ public class SubscriptionActivatingSubscriber extends BaseSubscriptionSubscriber
 	}
 
 	private void activateAndRegisterSubscriptionIfRequired(ResourceModifiedMessage theMsg) {
-		FhirContext ctx = getSubscriptionDao().getContext();
 		IBaseResource subscription = theMsg.getNewPayload();
-		IPrimitiveType<?> status = ctx.newTerser().getSingleValueOrNull(subscription, BaseSubscriptionInterceptor.SUBSCRIPTION_STATUS, IPrimitiveType.class);
+		activateAndRegisterSubscriptionIfRequired(subscription);
+	}
+
+	public void activateAndRegisterSubscriptionIfRequired(IBaseResource theSubscription) {
+		boolean subscriptionTypeApplies = subscriptionTypeApplies(theSubscription);
+		if (subscriptionTypeApplies == false) {
+			return;
+		}
+
+		FhirContext ctx = getSubscriptionDao().getContext();
+		IPrimitiveType<?> status = ctx.newTerser().getSingleValueOrNull(theSubscription, BaseSubscriptionInterceptor.SUBSCRIPTION_STATUS, IPrimitiveType.class);
 		String statusString = status.getValueAsString();
 
 		String requestedStatus = Subscription.SubscriptionStatus.REQUESTED.toCode();
 		String activeStatus = Subscription.SubscriptionStatus.ACTIVE.toCode();
 		if (requestedStatus.equals(statusString)) {
 			status.setValueAsString(activeStatus);
-			ourLog.info("Activating and registering subscription {} from status {} to {}", subscription.getIdElement().toUnqualified().getValue(), requestedStatus, activeStatus);
-			getSubscriptionDao().update(subscription);
-			getIdToSubscription().put(subscription.getIdElement().getIdPart(), subscription);
+			ourLog.info("Activating and registering subscription {} from status {} to {}", theSubscription.getIdElement().toUnqualified().getValue(), requestedStatus, activeStatus);
+			getSubscriptionDao().update(theSubscription);
+			getIdToSubscription().put(theSubscription.getIdElement().getIdPart(), theSubscription);
 		} else if (activeStatus.equals(statusString)) {
-			ourLog.info("Registering active subscription {}", subscription.getIdElement().toUnqualified().getValue());
-			getIdToSubscription().put(subscription.getIdElement().getIdPart(), subscription);
+			ourLog.info("Registering active subscription {}", theSubscription.getIdElement().toUnqualified().getValue());
+			getIdToSubscription().put(theSubscription.getIdElement().getIdPart(), theSubscription);
 		} else {
-			if (getIdToSubscription().containsKey(subscription.getIdElement().getIdPart())) {
-				ourLog.info("Removing {} subscription {}", statusString, subscription.getIdElement().toUnqualified().getValue());
+			if (getIdToSubscription().containsKey(theSubscription.getIdElement().getIdPart())) {
+				ourLog.info("Removing {} subscription {}", statusString, theSubscription.getIdElement().toUnqualified().getValue());
 			}
-			getIdToSubscription().remove(subscription.getIdElement().getIdPart());
+			getIdToSubscription().remove(theSubscription.getIdElement().getIdPart());
 		}
 	}
 
+
 	private void handleCreate(ResourceModifiedMessage theMsg) {
 		if (!theMsg.getId().getResourceType().equals("Subscription")) {
-			return;
-		}
-
-		boolean subscriptionTypeApplies = subscriptionTypeApplies(theMsg);
-		if (subscriptionTypeApplies == false) {
 			return;
 		}
 
@@ -108,11 +112,6 @@ public class SubscriptionActivatingSubscriber extends BaseSubscriptionSubscriber
 
 	private void handleUpdate(ResourceModifiedMessage theMsg) {
 		if (!theMsg.getId().getResourceType().equals("Subscription")) {
-			return;
-		}
-
-		boolean subscriptionTypeApplies = subscriptionTypeApplies(theMsg);
-		if (subscriptionTypeApplies == false) {
 			return;
 		}
 

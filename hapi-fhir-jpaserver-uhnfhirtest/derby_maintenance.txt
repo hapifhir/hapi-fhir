@@ -25,6 +25,7 @@ delete from hfj_spidx_token where res_id in (select res_id from hfj_resource whe
 delete from hfj_spidx_uri where res_id in (select res_id from hfj_resource where sp_index_status = 2);
 delete from hfj_res_tag where res_id in (select res_id from hfj_resource where sp_index_status = 2);
 delete from hfj_search_result where resource_pid in (select res_id from hfj_resource where sp_index_status = 2);
+delete from hfj_res_param_present where res_id in (select res_id from hfj_resource where sp_index_status = 2);
 delete from hfj_resource where res_id in (select res_id from hfj_resource where sp_index_status = 2);
 
 

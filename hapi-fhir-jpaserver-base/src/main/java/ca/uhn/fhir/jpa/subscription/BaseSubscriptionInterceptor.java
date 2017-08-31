@@ -26,6 +26,7 @@ import ca.uhn.fhir.jpa.provider.ServletSubRequestDetails;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.interceptor.ServerOperationInterceptorAdapter;
 import org.apache.commons.lang3.concurrent.BasicThreadFactory;
@@ -61,9 +62,8 @@ public abstract class BaseSubscriptionInterceptor extends ServerOperationInterce
 	private SubscribableChannel myProcessingChannel;
 	private SubscribableChannel myDeliveryChannel;
 	private ExecutorService myExecutor;
-	private boolean myAutoActivateSubscriptions = true;
 	private int myExecutorThreadCount = 1;
-	private MessageHandler mySubscriptionActivatingSubscriber;
+	private SubscriptionActivatingSubscriber mySubscriptionActivatingSubscriber;
 	private MessageHandler mySubscriptionCheckingSubscriber;
 	private ConcurrentHashMap<String, IBaseResource> myIdToSubscription = new ConcurrentHashMap<>();
 	private Logger ourLog = LoggerFactory.getLogger(BaseSubscriptionInterceptor.class);
@@ -98,6 +98,13 @@ public abstract class BaseSubscriptionInterceptor extends ServerOperationInterce
 	protected abstract IFhirResourceDao<?> getSubscriptionDao();
 
 	/**
+	 * Constructor
+	 */
+	public BaseSubscriptionInterceptor() {
+		super();
+	}
+
+	/**
 	 * Read the existing subscriptions from the database
 	 */
 	@SuppressWarnings("unused")
@@ -105,7 +112,9 @@ public abstract class BaseSubscriptionInterceptor extends ServerOperationInterce
 	public void initSubscriptions() {
 		SearchParameterMap map = new SearchParameterMap();
 		map.add(Subscription.SP_TYPE, new TokenParam(null, getChannelType().toCode()));
-		map.add(Subscription.SP_STATUS, new TokenParam(null, Subscription.SubscriptionStatus.ACTIVE.toCode()));
+		map.add(Subscription.SP_STATUS, new TokenOrListParam()
+			.addOr(new TokenParam(null, Subscription.SubscriptionStatus.REQUESTED.toCode()))
+			.addOr(new TokenParam(null, Subscription.SubscriptionStatus.ACTIVE.toCode())));
 		map.setLoadSynchronousUpTo(MAX_SUBSCRIPTION_RESULTS);
 
 		RequestDetails req = new ServletSubRequestDetails();
@@ -122,12 +131,13 @@ public abstract class BaseSubscriptionInterceptor extends ServerOperationInterce
 		for (IBaseResource resource : resourceList) {
 			String nextId = resource.getIdElement().getIdPart();
 			allIds.add(nextId);
-			myIdToSubscription.put(nextId, resource);
+			mySubscriptionActivatingSubscriber.activateAndRegisterSubscriptionIfRequired(resource);
 		}
 
 		for (Enumeration<String> keyEnum = myIdToSubscription.keys(); keyEnum.hasMoreElements(); ) {
 			String next = keyEnum.nextElement();
 			if (!allIds.contains(next)) {
+				ourLog.info("Unregistering Subscription/{} as it no longer exists", next);
 				myIdToSubscription.remove(next);
 			}
 		}
@@ -160,12 +170,10 @@ public abstract class BaseSubscriptionInterceptor extends ServerOperationInterce
 			setDeliveryChannel(new ExecutorSubscribableChannel(myExecutor));
 		}
 
-		if (myAutoActivateSubscriptions) {
-			if (mySubscriptionActivatingSubscriber == null) {
-				mySubscriptionActivatingSubscriber = new SubscriptionActivatingSubscriber(getSubscriptionDao(), myIdToSubscription, getChannelType(), this);
-			}
-			getProcessingChannel().subscribe(mySubscriptionActivatingSubscriber);
+		if (mySubscriptionActivatingSubscriber == null) {
+			mySubscriptionActivatingSubscriber = new SubscriptionActivatingSubscriber(getSubscriptionDao(), myIdToSubscription, getChannelType(), this);
 		}
+		getProcessingChannel().subscribe(mySubscriptionActivatingSubscriber);
 
 		if (mySubscriptionCheckingSubscriber == null) {
 			mySubscriptionCheckingSubscriber = new SubscriptionCheckingSubscriber(getSubscriptionDao(), myIdToSubscription, getChannelType(), this);
@@ -174,14 +182,13 @@ public abstract class BaseSubscriptionInterceptor extends ServerOperationInterce
 
 		registerDeliverySubscriber();
 
+		initSubscriptions();
 	}
 
 	@SuppressWarnings("unused")
 	@PreDestroy
 	public void preDestroy() {
-		if (myAutoActivateSubscriptions) {
-			getProcessingChannel().unsubscribe(mySubscriptionActivatingSubscriber);
-		}
+		getProcessingChannel().unsubscribe(mySubscriptionActivatingSubscriber);
 		getProcessingChannel().unsubscribe(mySubscriptionCheckingSubscriber);
 
 		unregisterDeliverySubscriber();
