@@ -20,6 +20,17 @@ public enum FhirMapInputModes
     /**
     * Target mode
     */
-    Target
+    Target;
+
+    public String getValue(){
+      switch (this){
+        case Source:
+          return "SOURCE";
+        case Target:
+          return "TARGET";
+        default:
+          return "?";
+      }
+    }
 }
 

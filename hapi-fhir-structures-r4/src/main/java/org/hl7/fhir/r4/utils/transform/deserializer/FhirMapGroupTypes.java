@@ -24,9 +24,16 @@ public enum FhirMapGroupTypes
 
     public static final int SIZE = java.lang.Integer.SIZE;
 
-    public int getValue()
+    public String getValue()
     {
-        return this.ordinal();
+        switch (this){
+          case Types:
+            return "TYPES";
+          case TypeTypes:
+            return "TYPE+TYPES";
+          default:
+            return "?";
+        }
     }
 
     public static FhirMapGroupTypes forValue(int value)

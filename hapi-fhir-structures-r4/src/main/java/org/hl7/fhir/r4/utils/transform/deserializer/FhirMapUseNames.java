@@ -34,10 +34,22 @@ public enum FhirMapUseNames
 
     public static final int SIZE = java.lang.Integer.SIZE;
 
-    public int getValue()
+    public String getValue()
     {
-        return this.ordinal();
+      switch (this) {
+        case Source:
+          return "source";
+        case Queried:
+          return "queried";
+        case Target:
+          return "target";
+        case Produced:
+          return "produced";
+        default:
+          return "?";
+      }
     }
+
 
     public static FhirMapUseNames forValue(int value)
     {
