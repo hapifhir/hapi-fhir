@@ -20,40 +20,55 @@ package ca.uhn.fhir.jpa.dao.r4;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
-
-import java.util.*;
-
-import javax.persistence.Query;
-
+import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.jpa.dao.IDao;
+import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.dao.IFhirResourceDaoSubscription;
+import ca.uhn.fhir.jpa.dao.SearchParameterMap;
+import ca.uhn.fhir.jpa.dao.data.ISubscriptionFlaggedResourceDataDao;
+import ca.uhn.fhir.jpa.dao.data.ISubscriptionTableDao;
+import ca.uhn.fhir.jpa.entity.ResourceTable;
+import ca.uhn.fhir.jpa.entity.SubscriptionFlaggedResource;
+import ca.uhn.fhir.jpa.entity.SubscriptionTable;
+import ca.uhn.fhir.model.dstu2.valueset.SubscriptionStatusEnum;
+import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.model.primitive.InstantDt;
+import ca.uhn.fhir.parser.DataFormatException;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.EncodingEnum;
+import ca.uhn.fhir.rest.api.SortOrderEnum;
+import ca.uhn.fhir.rest.api.SortSpec;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.param.DateParam;
+import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.ParamPrefixEnum;
+import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import org.apache.commons.lang3.time.DateUtils;
+import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Subscription;
 import org.hl7.fhir.r4.model.Subscription.SubscriptionChannelType;
 import org.hl7.fhir.r4.model.Subscription.SubscriptionStatus;
-import org.hl7.fhir.instance.model.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.transaction.*;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import ca.uhn.fhir.context.RuntimeResourceDefinition;
-import ca.uhn.fhir.jpa.dao.*;
-import ca.uhn.fhir.jpa.dao.data.ISubscriptionFlaggedResourceDataDao;
-import ca.uhn.fhir.jpa.dao.data.ISubscriptionTableDao;
-import ca.uhn.fhir.jpa.entity.*;
-import ca.uhn.fhir.model.dstu2.valueset.SubscriptionStatusEnum;
-import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.model.primitive.InstantDt;
-import ca.uhn.fhir.parser.DataFormatException;
-import ca.uhn.fhir.rest.api.*;
-import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import ca.uhn.fhir.rest.param.*;
-import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import javax.persistence.Query;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.List;
+
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class FhirResourceDaoSubscriptionR4 extends FhirResourceDaoR4<Subscription> implements IFhirResourceDaoSubscription<Subscription> {
 
@@ -167,7 +182,7 @@ public class FhirResourceDaoSubscriptionR4 extends FhirResourceDaoR4<Subscriptio
 			return 0;
 		}
 
-		ourLog.info("Subscription {} search from {} to {}", new Object[] { subscription.getIdElement().getIdPart(), new InstantDt(new Date(start)), new InstantDt(new Date(end)) });
+		ourLog.info("Subscription {} search from {} to {}", new Object[]{subscription.getIdElement().getIdPart(), new InstantDt(new Date(start)), new InstantDt(new Date(end))});
 
 		DateRangeParam range = new DateRangeParam();
 		range.setLowerBound(new DateParam(ParamPrefixEnum.GREATERTHAN, start));
@@ -266,7 +281,7 @@ public class FhirResourceDaoSubscriptionR4 extends FhirResourceDaoR4<Subscriptio
 
 			final IdDt subscriptionId = subscriptionTable.getSubscriptionResource().getIdDt();
 			ourLog.info("Deleting inactive subscription {} - Created {}, last client poll {}",
-					new Object[] { subscriptionId.toUnqualified(), subscriptionTable.getCreated(), subscriptionTable.getLastClientPoll() });
+				new Object[]{subscriptionId.toUnqualified(), subscriptionTable.getCreated(), subscriptionTable.getLastClientPoll()});
 			txTemplate.execute(new TransactionCallback<Void>() {
 				@Override
 				public Void doInTransaction(TransactionStatus theStatus) {
@@ -279,7 +294,7 @@ public class FhirResourceDaoSubscriptionR4 extends FhirResourceDaoR4<Subscriptio
 
 	@Override
 	protected ResourceTable updateEntity(IBaseResource theResource, ResourceTable theEntity, Date theDeletedTimestampOrNull, boolean thePerformIndexing, boolean theUpdateVersion,
-			Date theUpdateTime, boolean theForceUpdate, boolean theCreateNewHistoryEntry) {
+													 Date theUpdateTime, boolean theForceUpdate, boolean theCreateNewHistoryEntry) {
 		ResourceTable retVal = super.updateEntity(theResource, theEntity, theDeletedTimestampOrNull, thePerformIndexing, theUpdateVersion, theUpdateTime, theForceUpdate, theCreateNewHistoryEntry);
 
 		Subscription resource = (Subscription) theResource;
@@ -303,6 +318,22 @@ public class FhirResourceDaoSubscriptionR4 extends FhirResourceDaoR4<Subscriptio
 		return retVal;
 	}
 
+	protected void validateChannelEndpoint(Subscription theResource) {
+		if (isBlank(theResource.getChannel().getEndpoint())) {
+			throw new UnprocessableEntityException("Rest-hook subscriptions must have Subscription.channel.endpoint defined");
+		}
+	}
+
+	protected void validateChannelPayload(Subscription theResource) {
+		if (isBlank(theResource.getChannel().getPayload())) {
+			throw new UnprocessableEntityException("Subscription.channel.payload must be populated for rest-hook subscriptions");
+		}
+
+		if (EncodingEnum.forContentType(theResource.getChannel().getPayload()) == null) {
+			throw new UnprocessableEntityException("Invalid value for Subscription.channel.payload: " + theResource.getChannel().getPayload());
+		}
+	}
+
 	public RuntimeResourceDefinition validateCriteriaAndReturnResourceDefinition(Subscription theResource) {
 		String query = theResource.getCriteria();
 		if (isBlank(query)) {
@@ -322,16 +353,8 @@ public class FhirResourceDaoSubscriptionR4 extends FhirResourceDaoR4<Subscriptio
 		if (theResource.getChannel().getType() == null) {
 			throw new UnprocessableEntityException("Subscription.channel.type must be populated");
 		} else if (theResource.getChannel().getType() == SubscriptionChannelType.RESTHOOK) {
-			if (isBlank(theResource.getChannel().getPayload())) {
-				throw new UnprocessableEntityException("Subscription.channel.payload must be populated for rest-hook subscriptions");
-			}
-			
-			if (EncodingEnum.forContentType(theResource.getChannel().getPayload()) == null){
-				throw new UnprocessableEntityException("Invalid value for Subscription.channel.payload: " + theResource.getChannel().getPayload());
-			}
-			if (isBlank(theResource.getChannel().getEndpoint())){
-				throw new UnprocessableEntityException("Rest-hook subscriptions must have Subscription.channel.endpoint defined");
-			}
+			validateChannelPayload(theResource);
+			validateChannelEndpoint(theResource);
 		}
 
 		RuntimeResourceDefinition resDef;
