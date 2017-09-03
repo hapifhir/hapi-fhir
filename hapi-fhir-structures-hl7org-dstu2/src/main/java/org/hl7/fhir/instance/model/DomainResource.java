@@ -265,6 +265,7 @@ public abstract class DomainResource extends Resource implements IBaseHasExtensi
       public abstract DomainResource copy();
 
       public void copyValues(DomainResource dst) {
+        super.copyValues(dst);
         dst.text = text == null ? null : text.copy();
         if (contained != null) {
           dst.contained = new ArrayList<Resource>();
