@@ -7,7 +7,7 @@ import org.junit.Test;
 public class DomainResourceHL7_Dstu2Test {
     /**
      * Ensuring that IDs of subtypes of DomainResource get copied when
-     * the {@link org.hl7.fhir.instance.model.DomainResource#copy() method is called
+     * the {@link org.hl7.fhir.instance.model.DomainResource#copy()} method is called
      */
     @Test
     public void testPatientIdCopy() {

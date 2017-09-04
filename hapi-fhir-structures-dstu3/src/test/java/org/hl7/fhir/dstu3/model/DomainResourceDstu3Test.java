@@ -6,7 +6,7 @@ import org.junit.Test;
 public class DomainResourceDstu3Test {
     /**
      * Ensuring that IDs of subtypes of DomainResource get copied when
-     * the {@link DomainResource#copy() method is called
+     * the {@link DomainResource#copy()} method is called
      */
     @Test
     public void testPatientIdCopy() {
