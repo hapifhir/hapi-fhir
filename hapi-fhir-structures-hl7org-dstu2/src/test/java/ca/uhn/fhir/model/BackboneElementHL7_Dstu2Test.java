@@ -1,6 +1,9 @@
 package ca.uhn.fhir.model;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
+import org.hl7.fhir.instance.model.BackboneElement;
 import org.hl7.fhir.instance.model.Patient.PatientCommunicationComponent;
 import org.junit.Test;
 
@@ -16,6 +19,8 @@ public class BackboneElementHL7_Dstu2Test {
 
         PatientCommunicationComponent copiedPcc = pcc1.copy();
         String copiedPccID = copiedPcc.getIdElement().getIdPart();
+
+        assertTrue(copiedPcc instanceof BackboneElement); // Just making sure this assumption still holds up, otherwise this test isn't very useful
         assertEquals("1001", copiedPccID);
     }
 }
