@@ -170,7 +170,7 @@ public class LoggingInterceptorDstu2Test {
 		verify(logger, timeout(1000).times(1)).info(captor.capture());
 		assertThat(captor.getValue(), startsWith("read - "));
 		int millis = Integer.parseInt(captor.getValue().substring("read - ".length()));
-		assertThat(millis, greaterThan(1));
+		assertThat(millis, greaterThan(0));
 	}
 
 	@Test
