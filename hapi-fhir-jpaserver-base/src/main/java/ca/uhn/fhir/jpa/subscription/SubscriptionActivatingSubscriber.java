@@ -67,7 +67,9 @@ public class SubscriptionActivatingSubscriber extends BaseSubscriptionSubscriber
 			getSubscriptionDao().update(theSubscription);
 			getIdToSubscription().put(theSubscription.getIdElement().getIdPart(), theSubscription);
 		} else if (activeStatus.equals(statusString)) {
-			ourLog.info("Registering active subscription {}", theSubscription.getIdElement().toUnqualified().getValue());
+			if (!getIdToSubscription().containsKey(theSubscription.getIdElement().getIdPart())) {
+				ourLog.info("Registering active subscription {}", theSubscription.getIdElement().toUnqualified().getValue());
+			}
 			getIdToSubscription().put(theSubscription.getIdElement().getIdPart(), theSubscription);
 		} else {
 			if (getIdToSubscription().containsKey(theSubscription.getIdElement().getIdPart())) {
