@@ -207,7 +207,7 @@ public abstract class BaseJpaTest {
 		return bundleStr;
 	}
 
-	public static void purgeDatabase(final EntityManager entityManager, PlatformTransactionManager theTxManager, ISearchParamPresenceSvc theSearchParamPresenceSvc, ISearchCoordinatorSvc theSearchCoordinatorSvc) {
+	public static void purgeDatabase(final EntityManager entityManager, PlatformTransactionManager theTxManager, ISearchParamPresenceSvc theSearchParamPresenceSvc, ISearchCoordinatorSvc theSearchCoordinatorSvc, ISearchParamRegistry theSearchParamRegistry) {
 		
 		theSearchCoordinatorSvc.cancelAllActiveSearches();
 		
@@ -276,11 +276,13 @@ public abstract class BaseJpaTest {
 				return null;
 			}
 		});
+
 		theSearchParamPresenceSvc.flushCachesForUnitTest();
+		theSearchParamRegistry.forceRefresh();
 	}
 
 	public static Set<String> toCodes(Set<TermConcept> theConcepts) {
-		HashSet<String> retVal = new HashSet<String>();
+		HashSet<String> retVal = new HashSet<>();
 		for (TermConcept next : theConcepts) {
 			retVal.add(next.getCode());
 		}

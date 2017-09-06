@@ -7,6 +7,7 @@ import ca.uhn.fhir.jpa.dao.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.entity.ResourceTable;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import ca.uhn.fhir.util.ElementUtil;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Enumerations;
@@ -124,6 +125,10 @@ public class FhirResourceDaoSearchParameterDstu3 extends FhirResourceDaoDstu3<Se
 
 		if (theResource.getStatus() == null) {
 			throw new UnprocessableEntityException("SearchParameter.status is missing or invalid: " + theResource.getStatusElement().getValueAsString());
+		}
+
+		if (ElementUtil.isEmpty(theResource.getBase())) {
+			throw new UnprocessableEntityException("SearchParameter.base is missing");
 		}
 
 		String expression = theResource.getExpression();

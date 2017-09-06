@@ -146,6 +146,8 @@ protected IFhirResourceDao<MedicationAdministration> myMedicationAdministrationD
 	@Autowired
 	@Qualifier("myValueSetDaoDstu2")
 	protected IFhirResourceDaoValueSet<ValueSet, CodingDt, CodeableConceptDt> myValueSetDao;
+	@Autowired
+	private ISearchParamRegistry mySearchParamRegistry;
 
 	@Before
 	public void beforeCreateInterceptor() {
@@ -167,7 +169,7 @@ protected IFhirResourceDao<MedicationAdministration> myMedicationAdministrationD
 	@Transactional()
 	public void beforePurgeDatabase() {
 		final EntityManager entityManager = this.myEntityManager;
-		purgeDatabase(entityManager, myTxManager, mySearchParamPresenceSvc, mySearchCoordinatorSvc);
+		purgeDatabase(entityManager, myTxManager, mySearchParamPresenceSvc, mySearchCoordinatorSvc, mySearchParamRegistry);
 	}
 
 	@Before

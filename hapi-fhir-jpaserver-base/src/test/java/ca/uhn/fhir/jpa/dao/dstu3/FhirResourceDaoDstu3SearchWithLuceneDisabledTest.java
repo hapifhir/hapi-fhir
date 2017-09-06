@@ -146,12 +146,14 @@ public class FhirResourceDaoDstu3SearchWithLuceneDisabledTest extends BaseJpaTes
 	private IValidationSupport myValidationSupport;
 	@Autowired
 	protected ISearchCoordinatorSvc mySearchCoordinatorSvc;
+	@Autowired
+	protected ISearchParamRegistry mySearchParamRegistry;
 
 	@Before
 	@Transactional()
 	public void beforePurgeDatabase() {
 		final EntityManager entityManager = this.myEntityManager;
-		purgeDatabase(entityManager, myTxManager, mySearchParamPresenceSvc, mySearchCoordinatorSvc);
+		purgeDatabase(entityManager, myTxManager, mySearchParamPresenceSvc, mySearchCoordinatorSvc, mySearchParamRegistry);
 	}
 
 	@Before
