@@ -36,6 +36,7 @@ import org.apache.lucene.analysis.phonetic.PhoneticFilterFactory;
 import org.apache.lucene.analysis.snowball.SnowballPorterFilterFactory;
 import org.apache.lucene.analysis.standard.StandardFilterFactory;
 import org.apache.lucene.analysis.standard.StandardTokenizerFactory;
+import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.search.annotations.*;
 import org.hibernate.search.annotations.Parameter;
 
@@ -204,8 +205,9 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 	private String myProfile;
 	@OneToMany(mappedBy = "myResource", cascade = {}, fetch = FetchType.LAZY, orphanRemoval = false)
 	private Collection<ResourceIndexedCompositeStringUnique> myParamsCompositeStringUnique;
+	// Added in 3.0.0 - Should make this a primitive Boolean at some point
 	@Column(name = "SP_CMPSTR_UNIQ_PRESENT")
-	private boolean myParamsCompositeStringUniquePresent;
+	private Boolean myParamsCompositeStringUniquePresent = false;
 	@OneToMany(mappedBy = "mySourceResource", cascade = {}, fetch = FetchType.LAZY, orphanRemoval = false)
 	@IndexedEmbedded()
 	private Collection<ResourceLink> myResourceLinks;
@@ -456,6 +458,9 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 	}
 
 	public boolean isParamsCompositeStringUniquePresent() {
+		if (myParamsCompositeStringUniquePresent == null) {
+			return false;
+		}
 		return myParamsCompositeStringUniquePresent;
 	}
 

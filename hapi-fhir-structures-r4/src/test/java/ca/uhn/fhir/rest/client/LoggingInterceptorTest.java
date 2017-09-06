@@ -66,7 +66,32 @@ public class LoggingInterceptorTest {
 	}
 
 	@Test
-	public void testLogger() throws Exception {
+	public void testLoggerNonVerbose() throws Exception {
+		System.out.println("Starting testLogger");
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort);
+		ourCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
+
+		LoggingInterceptor interceptor = new LoggingInterceptor(false);
+		client.registerInterceptor(interceptor);
+		Patient patient = client.read(Patient.class, "1");
+		assertFalse(patient.getIdentifierFirstRep().isEmpty());
+
+		verify(myMockAppender, times(2)).doAppend(argThat(new ArgumentMatcher<ILoggingEvent>() {
+			@Override
+			public boolean matches(final Object argument) {
+				String formattedMessage = ((LoggingEvent) argument).getFormattedMessage();
+				System.out.flush();
+				System.out.println("** Got Message: " + formattedMessage);
+				System.out.flush();
+				return
+					formattedMessage.contains("Client request: GET http://localhost:" + ourPort + "/Patient/1 HTTP/1.1") ||
+					formattedMessage.contains("Client response: HTTP 200 OK (Location: http://localhost:" + ourPort + "/Patient/1/_history/1)");
+			}
+		}));
+	}
+
+		@Test
+	public void testLoggerVerbose() throws Exception {
 		System.out.println("Starting testLogger");
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort);
 		ourCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);

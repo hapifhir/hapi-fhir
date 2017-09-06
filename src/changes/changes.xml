@@ -355,6 +355,12 @@
 				so that a database constraint will prevent more than one resource from
 				having a matching pair
 			</action>
+			<action type="add">
+				When using the client LoggingInterceptor in non-verbose mode, the
+				log line showing the server's response HTTP status will now also include
+				the returned
+				<![CDATA[<code>Location</code>]]> header value as well
+			</action>
 		</release>
 		<release version="2.5" date="2017-06-08">
 			<action type="fix">

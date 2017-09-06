@@ -26,6 +26,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import ca.uhn.fhir.rest.api.Constants;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
@@ -99,7 +100,16 @@ public class LoggingInterceptor implements IClientInterceptor {
 	public void interceptResponse(IHttpResponse theResponse) throws IOException {
 		if (myLogResponseSummary) {
 			String message = "HTTP " + theResponse.getStatus() + " " + theResponse.getStatusInfo();
-			myLog.info("Client response: {}", message);
+			String respLocation = "";
+
+			/*
+			 * Add response location
+			 */
+			List<String> locationHeaders = theResponse.getHeaders(Constants.HEADER_LOCATION);
+			if (locationHeaders != null && locationHeaders.size() > 0) {
+				respLocation = " (Location: " + locationHeaders.get(0) + ")";
+			}
+			myLog.info("Client response: {}{}", message, respLocation);
 		}
 
 		if (myLogResponseHeaders) {
