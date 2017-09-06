@@ -20,21 +20,27 @@ package ca.uhn.fhir.jpa.dao;
  * #L%
  */
 
-import java.util.Map;
-
 import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.jpa.search.JpaRuntimeSearchParam;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public interface ISearchParamRegistry {
 
 	void forceRefresh();
-
-	Map<String, Map<String, RuntimeSearchParam>> getActiveSearchParams();
-
-	Map<String,RuntimeSearchParam> getActiveSearchParams(String theResourceName);
 
 	/**
 	 * @return Returns {@literal null} if no match
 	 */
 	RuntimeSearchParam getActiveSearchParam(String theResourceName, String theParamName);
 
+	Map<String, RuntimeSearchParam> getActiveSearchParams(String theResourceName);
+
+	Map<String, Map<String, RuntimeSearchParam>> getActiveSearchParams();
+
+	List<JpaRuntimeSearchParam> getActiveUniqueSearchParams(String theResourceName);
+
+	List<JpaRuntimeSearchParam> getActiveUniqueSearchParams(String theResourceName, Set<String> theParamNames);
 }

@@ -133,29 +133,33 @@ public class SearchParamExtractorR4 extends BaseSearchParamExtractor implements 
 					if (nextValue.isEmpty()) {
 						continue;
 					}
-					nextEntity = new ResourceIndexedSearchParamDate(nextSpDef.getName(), nextValue.getValue(), nextValue.getValue());
+					nextEntity = new ResourceIndexedSearchParamDate(nextSpDef.getName(), nextValue.getValue(), nextValue.getValue(), nextValue.getValueAsString());
 				} else if (nextObject instanceof Period) {
 					Period nextValue = (Period) nextObject;
 					if (nextValue.isEmpty()) {
 						continue;
 					}
-					nextEntity = new ResourceIndexedSearchParamDate(nextSpDef.getName(), nextValue.getStart(), nextValue.getEnd());
+					nextEntity = new ResourceIndexedSearchParamDate(nextSpDef.getName(), nextValue.getStart(), nextValue.getEnd(), nextValue.getStartElement().getValueAsString());
 				} else if (nextObject instanceof Timing) {
 					Timing nextValue = (Timing) nextObject;
 					if (nextValue.isEmpty()) {
 						continue;
 					}
-					TreeSet<Date> dates = new TreeSet<Date>();
+					TreeSet<Date> dates = new TreeSet<>();
+					String firstValue = null;
 					for (DateTimeType nextEvent : nextValue.getEvent()) {
 						if (nextEvent.getValue() != null) {
 							dates.add(nextEvent.getValue());
+							if (firstValue == null) {
+								firstValue = nextEvent.getValueAsString();
+							}
 						}
 					}
 					if (dates.isEmpty()) {
 						continue;
 					}
 
-					nextEntity = new ResourceIndexedSearchParamDate(nextSpDef.getName(), dates.first(), dates.last());
+					nextEntity = new ResourceIndexedSearchParamDate(nextSpDef.getName(), dates.first(), dates.last(), firstValue);
 				} else if (nextObject instanceof StringType) {
 					// CarePlan.activitydate can be a string
 					continue;
@@ -450,7 +454,7 @@ public class SearchParamExtractorR4 extends BaseSearchParamExtractor implements 
 	 */
 	@Override
 	public Set<BaseResourceIndexedSearchParam> extractSearchParamTokens(ResourceTable theEntity, IBaseResource theResource) {
-		HashSet<BaseResourceIndexedSearchParam> retVal = new HashSet<BaseResourceIndexedSearchParam>();
+		HashSet<BaseResourceIndexedSearchParam> retVal = new HashSet<>();
 
 		String useSystem = null;
 		if (theResource instanceof CodeSystem) {
@@ -476,16 +480,6 @@ public class SearchParamExtractorR4 extends BaseSearchParamExtractor implements 
 
 			List<String> systems = new ArrayList<String>();
 			List<String> codes = new ArrayList<String>();
-
-			// String needContactPointSystem = null;
-			// if (nextPath.contains(".where(system='phone')")) {
-			// nextPath = nextPath.replace(".where(system='phone')", "");
-			// needContactPointSystem = "phone";
-			// }
-			// if (nextPath.contains(".where(system='email')")) {
-			// nextPath = nextPath.replace(".where(system='email')", "");
-			// needContactPointSystem = "email";
-			// }
 
 			for (Object nextObject : extractValues(nextPath, theResource)) {
 

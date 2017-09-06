@@ -201,13 +201,29 @@ public class SearchParameterMap extends LinkedHashMap<String, List<List<? extend
 
 	public Set<Include> getRevIncludes() {
 		if (myRevIncludes == null) {
-			myRevIncludes = new HashSet<Include>();
+			myRevIncludes = new HashSet<>();
 		}
 		return myRevIncludes;
 	}
 
 	public SortSpec getSort() {
 		return mySort;
+	}
+
+	/**
+	 * This will only return true if all parameters have no modifier of any kind
+	 */
+	public boolean isAllParametersHaveNoModifier() {
+		for (List<List<? extends IQueryParameterType>> nextParamName : values()) {
+			for (List<? extends IQueryParameterType> nextAnd : nextParamName) {
+				for (IQueryParameterType nextOr : nextAnd) {
+					if (isNotBlank(nextOr.getQueryParameterQualifier())) {
+						return false;
+					}
+				}
+			}
+		}
+		return true;
 	}
 
 	/**

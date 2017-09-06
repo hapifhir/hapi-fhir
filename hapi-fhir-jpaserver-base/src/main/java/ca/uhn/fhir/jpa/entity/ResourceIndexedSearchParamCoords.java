@@ -30,6 +30,8 @@ import javax.persistence.Index;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
+import ca.uhn.fhir.model.api.IQueryParameterType;
+import com.sun.prism.image.Coords;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -97,6 +99,11 @@ public class ResourceIndexedSearchParamCoords extends BaseResourceIndexedSearchP
 	@Override
 	protected Long getId() {
 		return myId;
+	}
+
+	@Override
+	public IQueryParameterType toQueryParameterType() {
+		return null;
 	}
 
 	public double getLatitude() {

@@ -20,13 +20,13 @@ package ca.uhn.fhir.jpa.entity;
  * #L%
  */
 
-import java.io.Serializable;
-import java.util.Date;
-
-import javax.persistence.*;
-
+import ca.uhn.fhir.model.api.IQueryParameterType;
 import org.hibernate.search.annotations.ContainedIn;
 import org.hibernate.search.annotations.Field;
+
+import javax.persistence.*;
+import java.io.Serializable;
+import java.util.Date;
 
 @MappedSuperclass
 public abstract class BaseResourceIndexedSearchParam implements Serializable {
@@ -67,8 +67,17 @@ public abstract class BaseResourceIndexedSearchParam implements Serializable {
 		return myParamName;
 	}
 
+	public void setParamName(String theName) {
+		myParamName = theName;
+	}
+
 	public ResourceTable getResource() {
 		return myResource;
+	}
+
+	public void setResource(ResourceTable theResource) {
+		myResource = theResource;
+		myResourceType = theResource.getResourceType();
 	}
 
 	public Long getResourcePid() {
@@ -83,6 +92,10 @@ public abstract class BaseResourceIndexedSearchParam implements Serializable {
 		return myUpdated;
 	}
 
+	public void setUpdated(Date theUpdated) {
+		myUpdated = theUpdated;
+	}
+
 	public boolean isMissing() {
 		return Boolean.TRUE.equals(myMissing);
 	}
@@ -91,17 +104,5 @@ public abstract class BaseResourceIndexedSearchParam implements Serializable {
 		myMissing = theMissing;
 	}
 
-	public void setParamName(String theName) {
-		myParamName = theName;
-	}
-
-	public void setResource(ResourceTable theResource) {
-		myResource = theResource;
-		myResourceType = theResource.getResourceType();
-	}
-
-	public void setUpdated(Date theUpdated) {
-		myUpdated = theUpdated;
-	}
-
+	public abstract IQueryParameterType toQueryParameterType();
 }

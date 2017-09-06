@@ -49,7 +49,7 @@ public interface IServerOperationInterceptor extends IServerInterceptor {
 	 * User code may call this method to indicate to an interceptor that
 	 * a resource is being updated
 	 * 
-	 * @deprecated Deprecated in HAPI FHIR 2.6 in favour of {@link #resourceUpdated(RequestDetails, IBaseResource, IBaseResource)}
+	 * @deprecated Deprecated in HAPI FHIR 3.0.0 in favour of {@link #resourceUpdated(RequestDetails, IBaseResource, IBaseResource)}
 	 */
 	@Deprecated
 	void resourceUpdated(RequestDetails theRequest, IBaseResource theResource);

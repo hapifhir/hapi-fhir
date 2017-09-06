@@ -349,6 +349,12 @@
 				HAPI FHIR 2.5, but this was not documented. This variable has now been
 				documented as a part of the available features.
 			</action>
+			<action type="add">
+				A new experimental feature has been added to the JPA server which allows
+				you to define certain search parameter combinations as being resource keys,
+				so that a database constraint will prevent more than one resource from
+				having a matching pair
+			</action>
 		</release>
 		<release version="2.5" date="2017-06-08">
 			<action type="fix">

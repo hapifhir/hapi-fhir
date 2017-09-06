@@ -3,9 +3,11 @@ package ca.uhn.fhir.jpa.dao.dstu3;
 import static org.junit.Assert.assertEquals;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import ca.uhn.fhir.jpa.search.JpaRuntimeSearchParam;
 import org.hl7.fhir.dstu3.hapi.validation.DefaultProfileValidationSupport;
 import org.hl7.fhir.dstu3.hapi.validation.IValidationSupport;
 import org.hl7.fhir.dstu3.model.Observation;
@@ -51,6 +53,16 @@ public class SearchParamExtractorDstu3Test {
 					sps.put(nextSp.getName(), nextSp);
 				}
 				return sps;
+			}
+
+			@Override
+			public List<JpaRuntimeSearchParam> getActiveUniqueSearchParams(String theResourceName) {
+				throw new UnsupportedOperationException();
+			}
+
+			@Override
+			public List<JpaRuntimeSearchParam> getActiveUniqueSearchParams(String theResourceName, Set<String> theParamNames) {
+				throw new UnsupportedOperationException();
 			}
 
 			@Override

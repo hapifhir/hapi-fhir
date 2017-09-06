@@ -1,5 +1,6 @@
 package ca.uhn.fhir.context;
 
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.trim;
 
 import java.util.*;
@@ -50,7 +51,12 @@ public class RuntimeSearchParam {
 	}
 
 	public RuntimeSearchParam(IIdType theId, String theUri, String theName, String theDescription, String thePath, RestSearchParameterTypeEnum theParamType, List<RuntimeSearchParam> theCompositeOf,
-			Set<String> theProvidesMembershipInCompartments, Set<String> theTargets, RuntimeSearchParamStatusEnum theStatus) {
+									  Set<String> theProvidesMembershipInCompartments, Set<String> theTargets, RuntimeSearchParamStatusEnum theStatus) {
+		this(theId, theUri, theName, theDescription, thePath, theParamType, theCompositeOf, theProvidesMembershipInCompartments, theTargets, theStatus, null);
+	}
+
+	public RuntimeSearchParam(IIdType theId, String theUri, String theName, String theDescription, String thePath, RestSearchParameterTypeEnum theParamType, List<RuntimeSearchParam> theCompositeOf,
+			Set<String> theProvidesMembershipInCompartments, Set<String> theTargets, RuntimeSearchParamStatusEnum theStatus, Collection<String> theBase) {
 		super();
 		myId = theId;
 		myUri = theUri;
@@ -70,13 +76,19 @@ public class RuntimeSearchParam {
 		} else {
 			myTargets = null;
 		}
-		
-		HashSet<String> base = new HashSet<String>();
-		int indexOf = thePath.indexOf('.');
-		if (indexOf != -1) {
-			base.add(trim(thePath.substring(0, indexOf)));
+
+		if (theBase == null || theBase.isEmpty()) {
+			HashSet<String> base = new HashSet<>();
+			if (isNotBlank(thePath)) {
+				int indexOf = thePath.indexOf('.');
+				if (indexOf != -1) {
+					base.add(trim(thePath.substring(0, indexOf)));
+				}
+			}
+			myBase = Collections.unmodifiableSet(base);
+		} else {
+			myBase = Collections.unmodifiableSet(new HashSet<>(theBase));
 		}
-		myBase = Collections.unmodifiableSet(base);
 	}
 
 	public Set<String> getBase() {

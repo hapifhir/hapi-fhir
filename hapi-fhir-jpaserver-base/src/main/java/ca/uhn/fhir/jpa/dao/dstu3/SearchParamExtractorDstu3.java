@@ -133,29 +133,33 @@ public class SearchParamExtractorDstu3 extends BaseSearchParamExtractor implemen
 					if (nextValue.isEmpty()) {
 						continue;
 					}
-					nextEntity = new ResourceIndexedSearchParamDate(nextSpDef.getName(), nextValue.getValue(), nextValue.getValue());
+					nextEntity = new ResourceIndexedSearchParamDate(nextSpDef.getName(), nextValue.getValue(), nextValue.getValue(), nextValue.getValueAsString());
 				} else if (nextObject instanceof Period) {
 					Period nextValue = (Period) nextObject;
 					if (nextValue.isEmpty()) {
 						continue;
 					}
-					nextEntity = new ResourceIndexedSearchParamDate(nextSpDef.getName(), nextValue.getStart(), nextValue.getEnd());
+					nextEntity = new ResourceIndexedSearchParamDate(nextSpDef.getName(), nextValue.getStart(), nextValue.getEnd(), nextValue.getStartElement().getValueAsString());
 				} else if (nextObject instanceof Timing) {
 					Timing nextValue = (Timing) nextObject;
 					if (nextValue.isEmpty()) {
 						continue;
 					}
-					TreeSet<Date> dates = new TreeSet<Date>();
+					String firstValue = null;
+					TreeSet<Date> dates = new TreeSet<>();
 					for (DateTimeType nextEvent : nextValue.getEvent()) {
 						if (nextEvent.getValue() != null) {
 							dates.add(nextEvent.getValue());
+							if (firstValue == null) {
+								firstValue = nextEvent.getValueAsString();
+							}
 						}
 					}
 					if (dates.isEmpty()) {
 						continue;
 					}
 
-					nextEntity = new ResourceIndexedSearchParamDate(nextSpDef.getName(), dates.first(), dates.last());
+					nextEntity = new ResourceIndexedSearchParamDate(nextSpDef.getName(), dates.first(), dates.last(), firstValue);
 				} else if (nextObject instanceof StringType) {
 					// CarePlan.activitydate can be a string
 					continue;

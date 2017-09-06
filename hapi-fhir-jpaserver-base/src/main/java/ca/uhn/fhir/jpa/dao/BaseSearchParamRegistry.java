@@ -20,27 +20,28 @@ package ca.uhn.fhir.jpa.dao;
  * #L%
  */
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-
-import javax.annotation.PostConstruct;
-
-import org.apache.commons.lang3.Validate;
-import org.springframework.beans.factory.annotation.Autowired;
-
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.jpa.search.JpaRuntimeSearchParam;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import javax.annotation.PostConstruct;
+import java.util.*;
 
 public abstract class BaseSearchParamRegistry implements ISearchParamRegistry {
 
+	private static final Logger ourLog = LoggerFactory.getLogger(BaseSearchParamRegistry.class);
 	private Map<String, Map<String, RuntimeSearchParam>> myBuiltInSearchParams;
+	private volatile Map<String, List<JpaRuntimeSearchParam>> myActiveUniqueSearchParams;
+	private volatile Map<String, Map<Set<String>, List<JpaRuntimeSearchParam>>> myActiveParamNamesToUniqueSearchParams;
 
 	@Autowired
 	private FhirContext myCtx;
-
 	@Autowired
 	private Collection<IFhirResourceDao<?>> myDaos;
 
@@ -75,18 +76,119 @@ public abstract class BaseSearchParamRegistry implements ISearchParamRegistry {
 		return myBuiltInSearchParams.get(theResourceName);
 	}
 
+	@Override
+	public List<JpaRuntimeSearchParam> getActiveUniqueSearchParams(String theResourceName) {
+		refreshCacheIfNecessary();
+		List<JpaRuntimeSearchParam> retVal = myActiveUniqueSearchParams.get(theResourceName);
+		if (retVal == null) {
+			retVal = Collections.emptyList();
+		}
+		return retVal;
+	}
+
+	@Override
+	public List<JpaRuntimeSearchParam> getActiveUniqueSearchParams(String theResourceName, Set<String> theParamNames) {
+		refreshCacheIfNecessary();
+
+		Map<Set<String>, List<JpaRuntimeSearchParam>> paramNamesToParams = myActiveParamNamesToUniqueSearchParams.get(theResourceName);
+		if (paramNamesToParams == null) {
+			return Collections.emptyList();
+		}
+
+		List<JpaRuntimeSearchParam> retVal = paramNamesToParams.get(theParamNames);
+		if (retVal == null) {
+			retVal = Collections.emptyList();
+		}
+		return Collections.unmodifiableList(retVal);
+	}
+
 	public Map<String, Map<String, RuntimeSearchParam>> getBuiltInSearchParams() {
 		return myBuiltInSearchParams;
 	}
 
+	public void populateActiveSearchParams(Map<String, Map<String, RuntimeSearchParam>> theActiveSearchParams) {
+		Map<String, List<JpaRuntimeSearchParam>> activeUniqueSearchParams = new HashMap<>();
+		Map<String, Map<Set<String>, List<JpaRuntimeSearchParam>>> activeParamNamesToUniqueSearchParams = new HashMap<>();
+
+		Map<String, RuntimeSearchParam> idToRuntimeSearchParam = new HashMap<>();
+		List<JpaRuntimeSearchParam> jpaSearchParams = new ArrayList<>();
+
+		/*
+		 * Loop through parameters and find JPA params
+		 */
+		for (Map.Entry<String, Map<String, RuntimeSearchParam>> nextResourceNameToEntries : theActiveSearchParams.entrySet()) {
+			List<JpaRuntimeSearchParam> uniqueSearchParams = activeUniqueSearchParams.get(nextResourceNameToEntries.getKey());
+			if (uniqueSearchParams == null) {
+				uniqueSearchParams = new ArrayList<>();
+				activeUniqueSearchParams.put(nextResourceNameToEntries.getKey(), uniqueSearchParams);
+			}
+			Collection<RuntimeSearchParam> nextSearchParamsForResourceName = nextResourceNameToEntries.getValue().values();
+			for (RuntimeSearchParam nextCandidate : nextSearchParamsForResourceName) {
+
+				if (nextCandidate.getId() != null) {
+					idToRuntimeSearchParam.put(nextCandidate.getId().toUnqualifiedVersionless().getValue(), nextCandidate);
+				}
+
+				if (nextCandidate instanceof JpaRuntimeSearchParam) {
+					JpaRuntimeSearchParam nextCandidateCasted = (JpaRuntimeSearchParam) nextCandidate;
+					jpaSearchParams.add(nextCandidateCasted);
+					if (nextCandidateCasted.isUnique()) {
+						uniqueSearchParams.add(nextCandidateCasted);
+					}
+				}
+			}
+
+		}
+
+		Set<String> haveSeen = new HashSet<>();
+		for (JpaRuntimeSearchParam next : jpaSearchParams) {
+			if (!haveSeen.add(next.getId().toUnqualifiedVersionless().getValue())) {
+				continue;
+			}
+
+			Set<String> paramNames = new HashSet<>();
+			for (JpaRuntimeSearchParam.Component nextComponent : next.getComponents()) {
+				String nextRef = nextComponent.getReference().getReferenceElement().toUnqualifiedVersionless().getValue();
+				RuntimeSearchParam componentTarget = idToRuntimeSearchParam.get(nextRef);
+				if (componentTarget != null) {
+					next.getCompositeOf().add(componentTarget);
+					paramNames.add(componentTarget.getName());
+				} else {
+					ourLog.warn("Search parameter {} refers to unknown component {}", next.getId().toUnqualifiedVersionless().getValue(), nextRef);
+				}
+			}
+
+			if (next.getCompositeOf() != null) {
+				Collections.sort(next.getCompositeOf(), new Comparator<RuntimeSearchParam>() {
+					@Override
+					public int compare(RuntimeSearchParam theO1, RuntimeSearchParam theO2) {
+						return StringUtils.compare(theO1.getName(), theO2.getName());
+					}
+				});
+				for (String nextBase : next.getBase()) {
+					if (!activeParamNamesToUniqueSearchParams.containsKey(nextBase)) {
+						activeParamNamesToUniqueSearchParams.put(nextBase, new HashMap<Set<String>, List<JpaRuntimeSearchParam>>());
+					}
+					if (!activeParamNamesToUniqueSearchParams.get(nextBase).containsKey(paramNames)) {
+						activeParamNamesToUniqueSearchParams.get(nextBase).put(paramNames, new ArrayList<JpaRuntimeSearchParam>());
+					}
+					activeParamNamesToUniqueSearchParams.get(nextBase).get(paramNames).add(next);
+				}
+			}
+		}
+
+		myActiveUniqueSearchParams = activeUniqueSearchParams;
+		myActiveParamNamesToUniqueSearchParams = activeParamNamesToUniqueSearchParams;
+	}
+
 	@PostConstruct
 	public void postConstruct() {
-		Map<String, Map<String, RuntimeSearchParam>> resourceNameToSearchParams = new HashMap<String, Map<String, RuntimeSearchParam>>();
+		Map<String, Map<String, RuntimeSearchParam>> resourceNameToSearchParams = new HashMap<>();
 
 		for (IFhirResourceDao<?> nextDao : myDaos) {
 			RuntimeResourceDefinition nextResDef = myCtx.getResourceDefinition(nextDao.getResourceType());
 			String nextResourceName = nextResDef.getName();
-			HashMap<String, RuntimeSearchParam> nameToParam = new HashMap<String, RuntimeSearchParam>();
+			HashMap<String, RuntimeSearchParam> nameToParam = new HashMap<>();
 			resourceNameToSearchParams.put(nextResourceName, nameToParam);
 
 			for (RuntimeSearchParam nextSp : nextResDef.getSearchParams()) {
@@ -96,5 +198,7 @@ public abstract class BaseSearchParamRegistry implements ISearchParamRegistry {
 
 		myBuiltInSearchParams = Collections.unmodifiableMap(resourceNameToSearchParams);
 	}
+
+	protected abstract void refreshCacheIfNecessary();
 
 }

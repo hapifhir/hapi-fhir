@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 
 import java.util.*;
 
+import ca.uhn.fhir.jpa.search.JpaRuntimeSearchParam;
 import org.hl7.fhir.r4.hapi.ctx.DefaultProfileValidationSupport;
 import org.hl7.fhir.r4.hapi.ctx.IValidationSupport;
 import org.hl7.fhir.r4.model.Observation;
@@ -43,6 +44,16 @@ public class SearchParamExtractorR4Test {
 					sps.put(nextSp.getName(), nextSp);
 				}
 				return sps;
+			}
+
+			@Override
+			public List<JpaRuntimeSearchParam> getActiveUniqueSearchParams(String theResourceName) {
+				throw new UnsupportedOperationException();
+			}
+
+			@Override
+			public List<JpaRuntimeSearchParam> getActiveUniqueSearchParams(String theResourceName, Set<String> theParamNames) {
+				throw new UnsupportedOperationException();
 			}
 
 			@Override

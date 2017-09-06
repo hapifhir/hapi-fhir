@@ -48,10 +48,10 @@ public class TestR4Config extends BaseJavaConfigR4 {
 				} catch (Exception e) {
 					ourLog.error("Exceeded maximum wait for connection", e);
 					logGetConnectionStackTrace();
-					if ("true".equals(System.getProperty("ci"))) {
-						fail("Exceeded maximum wait for connection: " + e.toString());
-					}
-					System.exit(1);
+//					if ("true".equals(System.getProperty("ci"))) {
+					fail("Exceeded maximum wait for connection: " + e.toString());
+//					}
+//					System.exit(1);
 					retVal = null;
 				}
 				

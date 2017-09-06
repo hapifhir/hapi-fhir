@@ -20,18 +20,9 @@ package ca.uhn.fhir.jpa.entity;
  * #L%
  */
 
-import java.math.BigDecimal;
-
-import javax.persistence.Column;
-import javax.persistence.Embeddable;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Index;
-import javax.persistence.SequenceGenerator;
-import javax.persistence.Table;
-
+import ca.uhn.fhir.jpa.util.BigDecimalNumericFieldBridge;
+import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.rest.param.QuantityParam;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -40,15 +31,16 @@ import org.hibernate.search.annotations.Field;
 import org.hibernate.search.annotations.FieldBridge;
 import org.hibernate.search.annotations.NumericField;
 
-import ca.uhn.fhir.jpa.util.BigDecimalNumericFieldBridge;
+import javax.persistence.*;
+import java.math.BigDecimal;
 
 //@formatter:off
 @Embeddable
 @Entity
 @Table(name = "HFJ_SPIDX_QUANTITY", indexes = {
 	@Index(name = "IDX_SP_QUANTITY", columnList = "RES_TYPE,SP_NAME,SP_SYSTEM,SP_UNITS,SP_VALUE"),
-	@Index(name = "IDX_SP_QUANTITY_UPDATED", columnList = "SP_UPDATED"), 
-	@Index(name = "IDX_SP_QUANTITY_RESID", columnList = "RES_ID") 
+	@Index(name = "IDX_SP_QUANTITY_UPDATED", columnList = "SP_UPDATED"),
+	@Index(name = "IDX_SP_QUANTITY_RESID", columnList = "RES_ID")
 })
 //@formatter:on
 public class ResourceIndexedSearchParamQuantity extends BaseResourceIndexedSearchParam {
@@ -56,26 +48,22 @@ public class ResourceIndexedSearchParamQuantity extends BaseResourceIndexedSearc
 	private static final int MAX_LENGTH = 200;
 
 	private static final long serialVersionUID = 1L;
-
-	@Id
-	@SequenceGenerator(name = "SEQ_SPIDX_QUANTITY", sequenceName = "SEQ_SPIDX_QUANTITY")
-	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_SPIDX_QUANTITY")
-	@Column(name = "SP_ID")
-	private Long myId;
-
 	@Column(name = "SP_SYSTEM", nullable = true, length = MAX_LENGTH)
 	@Field
 	public String mySystem;
-
 	@Column(name = "SP_UNITS", nullable = true, length = MAX_LENGTH)
 	@Field
 	public String myUnits;
-
 	@Column(name = "SP_VALUE", nullable = true)
 	@Field
 	@NumericField
 	@FieldBridge(impl = BigDecimalNumericFieldBridge.class)
 	public BigDecimal myValue;
+	@Id
+	@SequenceGenerator(name = "SEQ_SPIDX_QUANTITY", sequenceName = "SEQ_SPIDX_QUANTITY")
+	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_SPIDX_QUANTITY")
+	@Column(name = "SP_ID")
+	private Long myId;
 
 	public ResourceIndexedSearchParamQuantity() {
 		// nothing
@@ -118,12 +106,24 @@ public class ResourceIndexedSearchParamQuantity extends BaseResourceIndexedSearc
 		return mySystem;
 	}
 
+	public void setSystem(String theSystem) {
+		mySystem = theSystem;
+	}
+
 	public String getUnits() {
 		return myUnits;
 	}
 
+	public void setUnits(String theUnits) {
+		myUnits = theUnits;
+	}
+
 	public BigDecimal getValue() {
 		return myValue;
+	}
+
+	public void setValue(BigDecimal theValue) {
+		myValue = theValue;
 	}
 
 	@Override
@@ -137,16 +137,9 @@ public class ResourceIndexedSearchParamQuantity extends BaseResourceIndexedSearc
 		return b.toHashCode();
 	}
 
-	public void setSystem(String theSystem) {
-		mySystem = theSystem;
-	}
-
-	public void setUnits(String theUnits) {
-		myUnits = theUnits;
-	}
-
-	public void setValue(BigDecimal theValue) {
-		myValue = theValue;
+	@Override
+	public IQueryParameterType toQueryParameterType() {
+		return new QuantityParam(null, getValue(), getSystem(), getUnits());
 	}
 
 	@Override

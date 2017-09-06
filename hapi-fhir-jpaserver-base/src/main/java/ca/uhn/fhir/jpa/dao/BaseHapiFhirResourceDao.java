@@ -34,7 +34,10 @@ import ca.uhn.fhir.jpa.util.DeleteConflict;
 import ca.uhn.fhir.jpa.util.StopWatch;
 import ca.uhn.fhir.jpa.util.jsonpatch.JsonPatchUtils;
 import ca.uhn.fhir.jpa.util.xmlpatch.XmlPatchUtils;
-import ca.uhn.fhir.model.api.*;
+import ca.uhn.fhir.model.api.IQueryParameterAnd;
+import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
+import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.PatchTypeEnum;
 import ca.uhn.fhir.rest.api.QualifiedParamList;
@@ -384,7 +387,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		// Notify JPA interceptors
 		if (theRequestDetails != null) {
-			ActionRequestDetails requestDetails = new ActionRequestDetails(theRequestDetails, getContext(), theResource);
 			theRequestDetails.getRequestOperationCallback().resourceCreated(theResource);
 		}
 		for (IServerInterceptor next : getConfig().getInterceptors()) {
@@ -871,8 +873,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			throw new ResourceNotFoundException(theId);
 		}
 
-		//@formatter:off
-		for (BaseTag next : new ArrayList<BaseTag>(entity.getTags())) {
+		for (BaseTag next : new ArrayList<>(entity.getTags())) {
 			if (ObjectUtil.equals(next.getTag().getTagType(), theTagType) &&
 				ObjectUtil.equals(next.getTag().getSystem(), theScheme) &&
 				ObjectUtil.equals(next.getTag().getCode(), theTerm)) {
@@ -880,7 +881,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				entity.getTags().remove(next);
 			}
 		}
-		//@formatter:on
 
 		if (entity.getTags().isEmpty()) {
 			entity.setHasTags(false);

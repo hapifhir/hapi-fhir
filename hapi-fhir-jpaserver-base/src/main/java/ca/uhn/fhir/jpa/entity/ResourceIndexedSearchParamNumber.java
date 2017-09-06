@@ -20,18 +20,9 @@ package ca.uhn.fhir.jpa.entity;
  * #L%
  */
 
-import java.math.BigDecimal;
-
-import javax.persistence.Column;
-import javax.persistence.Embeddable;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Index;
-import javax.persistence.SequenceGenerator;
-import javax.persistence.Table;
-
+import ca.uhn.fhir.jpa.util.BigDecimalNumericFieldBridge;
+import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.rest.param.NumberParam;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -40,32 +31,31 @@ import org.hibernate.search.annotations.Field;
 import org.hibernate.search.annotations.FieldBridge;
 import org.hibernate.search.annotations.NumericField;
 
-import ca.uhn.fhir.jpa.util.BigDecimalNumericFieldBridge;
+import javax.persistence.*;
+import java.math.BigDecimal;
 
 //@formatter:off
 @Embeddable
 @Entity
-@Table(name = "HFJ_SPIDX_NUMBER", indexes= {
+@Table(name = "HFJ_SPIDX_NUMBER", indexes = {
 	@Index(name = "IDX_SP_NUMBER", columnList = "RES_TYPE,SP_NAME,SP_VALUE"),
-	@Index(name = "IDX_SP_NUMBER_UPDATED", columnList = "SP_UPDATED"), 
-	@Index(name = "IDX_SP_NUMBER_RESID", columnList = "RES_ID") 
+	@Index(name = "IDX_SP_NUMBER_UPDATED", columnList = "SP_UPDATED"),
+	@Index(name = "IDX_SP_NUMBER_RESID", columnList = "RES_ID")
 })
 //@formatter:on
 public class ResourceIndexedSearchParamNumber extends BaseResourceIndexedSearchParam {
 
 	private static final long serialVersionUID = 1L;
-	
-	@Id
-	@SequenceGenerator(name = "SEQ_SPIDX_NUMBER", sequenceName = "SEQ_SPIDX_NUMBER")
-	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_SPIDX_NUMBER")
-	@Column(name = "SP_ID")
-	private Long myId;
-
 	@Column(name = "SP_VALUE", nullable = true)
 	@Field
 	@NumericField
 	@FieldBridge(impl = BigDecimalNumericFieldBridge.class)
 	public BigDecimal myValue;
+	@Id
+	@SequenceGenerator(name = "SEQ_SPIDX_NUMBER", sequenceName = "SEQ_SPIDX_NUMBER")
+	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_SPIDX_NUMBER")
+	@Column(name = "SP_ID")
+	private Long myId;
 
 	public ResourceIndexedSearchParamNumber() {
 	}
@@ -103,6 +93,10 @@ public class ResourceIndexedSearchParamNumber extends BaseResourceIndexedSearchP
 		return myValue;
 	}
 
+	public void setValue(BigDecimal theValue) {
+		myValue = theValue;
+	}
+
 	@Override
 	public int hashCode() {
 		HashCodeBuilder b = new HashCodeBuilder();
@@ -112,8 +106,9 @@ public class ResourceIndexedSearchParamNumber extends BaseResourceIndexedSearchP
 		return b.toHashCode();
 	}
 
-	public void setValue(BigDecimal theValue) {
-		myValue = theValue;
+	@Override
+	public IQueryParameterType toQueryParameterType() {
+		return new NumberParam(myValue.toPlainString());
 	}
 
 	@Override

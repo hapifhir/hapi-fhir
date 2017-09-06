@@ -47,17 +47,15 @@ import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.util.UrlUtil;
 
-//@formatter:off
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes= {TestR4Config.class})
-//@formatter:on
 public abstract class BaseJpaR4Test extends BaseJpaTest {
 
 	private static JpaValidationSupportChainR4 ourJpaValidationSupportChainR4;
 	private static IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept> ourValueSetDao;
 
-	// @Autowired
-	// protected HapiWorkerContext myHapiWorkerContext;
+	@Autowired
+	protected IResourceIndexedCompositeStringUniqueDao myResourceIndexedCompositeStringUniqueDao;
 	@Autowired
 	@Qualifier("myAllergyIntoleranceDaoR4")
 	protected IFhirResourceDao<AllergyIntolerance> myAllergyIntoleranceDao;
