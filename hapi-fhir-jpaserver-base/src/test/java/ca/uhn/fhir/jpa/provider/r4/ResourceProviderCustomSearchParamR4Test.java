@@ -381,7 +381,7 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 	public void testSearchQualifiedWithCustomReferenceParam() {
 
 		SearchParameter fooSp = new SearchParameter();
-		fooSp.addBase("Patient");
+		fooSp.addBase("Observation");
 		fooSp.setCode("foo");
 		fooSp.setType(org.hl7.fhir.r4.model.Enumerations.SearchParamType.REFERENCE);
 		fooSp.setTitle("FOO SP");

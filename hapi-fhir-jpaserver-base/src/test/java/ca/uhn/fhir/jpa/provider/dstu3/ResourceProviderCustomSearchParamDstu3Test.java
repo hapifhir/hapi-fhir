@@ -381,7 +381,7 @@ public class ResourceProviderCustomSearchParamDstu3Test extends BaseResourceProv
 	public void testSearchQualifiedWithCustomReferenceParam() {
 
 		SearchParameter fooSp = new SearchParameter();
-		fooSp.addBase("Patient");
+		fooSp.addBase("Observation");
 		fooSp.setCode("foo");
 		fooSp.setType(org.hl7.fhir.dstu3.model.Enumerations.SearchParamType.REFERENCE);
 		fooSp.setTitle("FOO SP");

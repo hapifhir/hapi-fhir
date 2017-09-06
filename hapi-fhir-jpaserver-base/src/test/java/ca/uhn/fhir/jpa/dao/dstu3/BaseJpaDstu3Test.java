@@ -221,6 +221,7 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 		myDaoConfig.setExpireSearchResultsAfterMillis(new DaoConfig().getExpireSearchResultsAfterMillis());
 		myDaoConfig.setReuseCachedSearchResultsForMillis(new DaoConfig().getReuseCachedSearchResultsForMillis());
 		myDaoConfig.setSuppressUpdatesWithNoChange(new DaoConfig().isSuppressUpdatesWithNoChange());
+		myDaoConfig.getInterceptors().clear();
 	}
 
 	@After()
@@ -232,7 +233,7 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 	@Before
 	public void beforeCreateInterceptor() {
 		myInterceptor = mock(IServerInterceptor.class);
-		myDaoConfig.setInterceptors(myInterceptor);
+		myDaoConfig.getInterceptors().add(myInterceptor);
 	}
 
 	@Before

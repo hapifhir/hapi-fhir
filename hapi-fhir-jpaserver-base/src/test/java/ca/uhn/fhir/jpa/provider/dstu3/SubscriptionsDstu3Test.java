@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.provider.dstu3;
 
+import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.*;
 
 import java.net.URI;
@@ -122,7 +123,7 @@ public class SubscriptionsDstu3Test extends BaseResourceProviderDstu3Test {
 			ourClient.create().resource(subs).execute();
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertEquals("HTTP 422 Unprocessable Entity: Can not create resource: Subscription.status must be populated", e.getMessage());
+			assertThat(e.getMessage(), containsString("Subscription.status must be populated on this server"));
 		}
 
 		subs.setId("ABC");
@@ -130,7 +131,7 @@ public class SubscriptionsDstu3Test extends BaseResourceProviderDstu3Test {
 			ourClient.update().resource(subs).execute();
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertEquals("HTTP 422 Unprocessable Entity: Can not create resource: Subscription.status must be populated", e.getMessage());
+			assertThat(e.getMessage(), containsString("Subscription.status must be populated on this server"));
 		}
 
 		subs.setStatus(SubscriptionStatus.REQUESTED);
@@ -141,6 +142,8 @@ public class SubscriptionsDstu3Test extends BaseResourceProviderDstu3Test {
 	public void testCreateInvalidWrongStatus() {
 		Subscription subs = new Subscription();
 		subs.getChannel().setType(SubscriptionChannelType.RESTHOOK);
+		subs.getChannel().setPayload("application/fhir+json");
+		subs.getChannel().setEndpoint("http://foo");
 		subs.setStatus(SubscriptionStatus.ACTIVE);
 		subs.setCriteria("Observation?identifier=123");
 		try {
@@ -375,7 +378,7 @@ public class SubscriptionsDstu3Test extends BaseResourceProviderDstu3Test {
 			ourClient.update().resource(subs).execute();
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertEquals("HTTP 422 Unprocessable Entity: Can not update resource: Subscription.status must be populated", e.getMessage());
+			assertThat(e.getMessage(), containsString("Subscription.status must be populated on this server"));
 		}
 
 		subs.setStatus(SubscriptionStatus.OFF);
@@ -406,7 +409,7 @@ public class SubscriptionsDstu3Test extends BaseResourceProviderDstu3Test {
 			ourClient.update().resource(subs).execute();
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertEquals("HTTP 422 Unprocessable Entity: Can not update resource: Subscription.status must be populated", e.getMessage());
+			assertThat(e.getMessage(), containsString("Subscription.status must be populated on this server"));
 		}
 
 		subs.setStatus(SubscriptionStatus.OFF);

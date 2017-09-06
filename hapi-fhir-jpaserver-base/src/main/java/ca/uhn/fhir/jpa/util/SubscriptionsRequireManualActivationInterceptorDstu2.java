@@ -1,5 +1,18 @@
 package ca.uhn.fhir.jpa.util;
 
+import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
+import ca.uhn.fhir.model.dstu2.resource.Subscription;
+import ca.uhn.fhir.model.dstu2.valueset.SubscriptionChannelTypeEnum;
+import ca.uhn.fhir.model.dstu2.valueset.SubscriptionStatusEnum;
+import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import ca.uhn.fhir.rest.server.interceptor.ServerOperationInterceptorAdapter;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /*
@@ -11,9 +24,9 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -22,53 +35,37 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * #L%
  */
 
-import org.hl7.fhir.instance.model.api.IIdType;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-
-import ca.uhn.fhir.jpa.dao.FhirResourceDaoSubscriptionDstu2;
-import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
-import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
-import ca.uhn.fhir.model.dstu2.resource.Subscription;
-import ca.uhn.fhir.model.dstu2.valueset.SubscriptionChannelTypeEnum;
-import ca.uhn.fhir.model.dstu2.valueset.SubscriptionStatusEnum;
-import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
-import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-import ca.uhn.fhir.rest.server.interceptor.InterceptorAdapter;
-
 /**
  * Interceptor which requires newly created {@link Subscription subscriptions} to be in
  * {@link SubscriptionStatusEnum#REQUESTED} state and prevents clients from changing the status.
  */
-public class SubscriptionsRequireManualActivationInterceptorDstu2 extends InterceptorAdapter {
-
-	public static final ResourceMetadataKeyEnum<Object> ALLOW_STATUS_CHANGE = new AllowStatusChangeMetadata(FhirResourceDaoSubscriptionDstu2.class.getName() + "_ALLOW_STATUS_CHANGE");
+public class SubscriptionsRequireManualActivationInterceptorDstu2 extends ServerOperationInterceptorAdapter {
 
 	@Autowired
-	@Qualifier("mySubscriptionDaoDstu2")
+	@Qualifier("mySubscriptionDaoR4")
 	private IFhirResourceDao<Subscription> myDao;
 
 	@Override
-	public void incomingRequestPreHandled(RestOperationTypeEnum theOperation, ActionRequestDetails theProcessedRequest) {
-		switch (theOperation) {
-		case CREATE:
-		case UPDATE:
-			if (theProcessedRequest.getResourceType().equals("Subscription")) {
-				verifyStatusOk(theOperation, theProcessedRequest);
-			}
-			break;
-		default:
-			break;
+	public void resourceCreated(RequestDetails theRequest, IBaseResource theResource) {
+		if (myDao.getContext().getResourceDefinition(theResource).getName().equals("Subscription")) {
+			verifyStatusOk(RestOperationTypeEnum.CREATE, null, theResource);
 		}
 	}
+
+	@Override
+	public void resourceUpdated(RequestDetails theRequest, IBaseResource theOldResource, IBaseResource theNewResource) {
+		if (myDao.getContext().getResourceDefinition(theNewResource).getName().equals("Subscription")) {
+			verifyStatusOk(RestOperationTypeEnum.UPDATE, theOldResource, theNewResource);
+		}
+	}
+
 
 	public void setDao(IFhirResourceDao<Subscription> theDao) {
 		myDao = theDao;
 	}
 
-	private void verifyStatusOk(RestOperationTypeEnum theOperation, ActionRequestDetails theRequestDetails) {
-		Subscription subscription = (Subscription) theRequestDetails.getResource();
+	private void verifyStatusOk(RestOperationTypeEnum theOperation, IBaseResource theOldResourceOrNull, IBaseResource theResource) {
+		Subscription subscription = (Subscription) theResource;
 		SubscriptionStatusEnum newStatus = subscription.getStatusElement().getValueAsEnum();
 
 		if (newStatus == SubscriptionStatusEnum.REQUESTED || newStatus == SubscriptionStatusEnum.OFF) {
@@ -80,24 +77,22 @@ public class SubscriptionsRequireManualActivationInterceptorDstu2 extends Interc
 			throw new UnprocessableEntityException("Can not " + theOperation.getCode() + " resource: Subscription.status must be populated" + ((isNotBlank(actualCode)) ? " (invalid value " + actualCode + ")" : ""));
 		}
 
-		IIdType requestId = theRequestDetails.getId();
-		if (requestId != null && requestId.hasIdPart()) {
-			Subscription existing;
+		if (theOldResourceOrNull != null) {
 			try {
-				existing = myDao.read(requestId, null);
+				Subscription existing = (Subscription) theOldResourceOrNull;
 				SubscriptionStatusEnum existingStatus = existing.getStatusElement().getValueAsEnum();
 				if (existingStatus != newStatus) {
-					verifyActiveStatus(subscription, newStatus, existingStatus);
+					verifyActiveStatus(theOperation, subscription, newStatus, existingStatus);
 				}
 			} catch (ResourceNotFoundException e) {
-				verifyActiveStatus(subscription, newStatus, null);
+				verifyActiveStatus(theOperation, subscription, newStatus, null);
 			}
 		} else {
-			verifyActiveStatus(subscription, newStatus, null);
+			verifyActiveStatus(theOperation, subscription, newStatus, null);
 		}
 	}
 
-	private void verifyActiveStatus(Subscription theSubscription, SubscriptionStatusEnum newStatus, SubscriptionStatusEnum theExistingStatus) {
+	private void verifyActiveStatus(RestOperationTypeEnum theOperation, Subscription theSubscription, SubscriptionStatusEnum newStatus, SubscriptionStatusEnum theExistingStatus) {
 		SubscriptionChannelTypeEnum channelType = theSubscription.getChannel().getTypeElement().getValueAsEnum();
 
 		if (channelType == null) {
@@ -110,6 +105,10 @@ public class SubscriptionsRequireManualActivationInterceptorDstu2 extends Interc
 
 		if (theExistingStatus != null) {
 			throw new UnprocessableEntityException("Subscription.status can not be changed from " + describeStatus(theExistingStatus) + " to " + describeStatus(newStatus));
+		}
+
+		if (theSubscription.getStatus() == null) {
+			throw new UnprocessableEntityException("Can not " + theOperation.getCode().toLowerCase() + " resource: Subscription.status must be populated");
 		}
 
 		throw new UnprocessableEntityException("Subscription.status must be '" + SubscriptionStatusEnum.OFF.getCode() + "' or '" + SubscriptionStatusEnum.REQUESTED.getCode() + "' on a newly created subscription");

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.provider;
 
+import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.*;
 
 import java.net.URI;
@@ -131,7 +132,7 @@ public class SubscriptionsDstu2Test extends BaseResourceProviderDstu2Test {
 			ourClient.create().resource(subs).execute();
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertEquals("HTTP 422 Unprocessable Entity: Can not create resource: Subscription.status must be populated", e.getMessage());
+			assertThat(e.getMessage(), containsString("Subscription.status must be populated on this server"));
 		}
 
 		subs.setId("ABC");
@@ -139,7 +140,7 @@ public class SubscriptionsDstu2Test extends BaseResourceProviderDstu2Test {
 			ourClient.update().resource(subs).execute();
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertEquals("HTTP 422 Unprocessable Entity: Can not create resource: Subscription.status must be populated", e.getMessage());
+			assertThat(e.getMessage(), containsString("Subscription.status must be populated on this server"));
 		}
 
 		subs.setStatus(SubscriptionStatusEnum.REQUESTED);
@@ -168,7 +169,7 @@ public class SubscriptionsDstu2Test extends BaseResourceProviderDstu2Test {
 			ourClient.update().resource(subs).execute();
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertEquals("HTTP 422 Unprocessable Entity: Can not update resource: Subscription.status must be populated", e.getMessage());
+			assertThat(e.getMessage(), containsString("Subscription.status must be populated on this server"));
 		}
 
 		subs.setStatus(SubscriptionStatusEnum.OFF);
@@ -186,7 +187,7 @@ public class SubscriptionsDstu2Test extends BaseResourceProviderDstu2Test {
 			ourClient.create().resource(subs).execute();
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertEquals("HTTP 422 Unprocessable Entity: Can not create resource: Subscription.status must be populated (invalid value aaaaa)", e.getMessage());
+			assertThat(e.getMessage(), containsString("Subscription.status must be populated on this server"));
 		}
 	}
 
@@ -194,6 +195,8 @@ public class SubscriptionsDstu2Test extends BaseResourceProviderDstu2Test {
 	public void testCreateInvalidWrongStatus() {
 		Subscription subs = new Subscription();
 		subs.getChannel().setType(SubscriptionChannelTypeEnum.REST_HOOK);
+		subs.getChannel().setPayload("application/fhir+json");
+		subs.getChannel().setEndpoint("http://foo");
 		subs.setStatus(SubscriptionStatusEnum.ACTIVE);
 		subs.setCriteria("Observation?identifier=123");
 		try {
@@ -425,7 +428,7 @@ public class SubscriptionsDstu2Test extends BaseResourceProviderDstu2Test {
 			ourClient.update().resource(subs).execute();
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertEquals("HTTP 422 Unprocessable Entity: Can not update resource: Subscription.status must be populated", e.getMessage());
+			assertThat(e.getMessage(), containsString("Subscription.status must be populated on this server"));
 		}
 
 		subs.setStatus(SubscriptionStatusEnum.OFF);

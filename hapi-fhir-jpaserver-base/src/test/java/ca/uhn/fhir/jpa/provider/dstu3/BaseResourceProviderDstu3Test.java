@@ -73,7 +73,6 @@ public abstract class BaseResourceProviderDstu3Test extends BaseJpaDstu3Test {
 		myFhirCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
 		myFhirCtx.getRestfulClientFactory().setSocketTimeout(1200 * 1000);
 		myFhirCtx.setParserErrorHandler(new StrictErrorHandler());
-		myDaoConfig.getInterceptors().clear();
 
 		if (ourServer == null) {
 			ourPort = PortUtil.findFreePort();
