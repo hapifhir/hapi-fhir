@@ -1422,6 +1422,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 			uriParams = Collections.emptySet();
 			coordsParams = Collections.emptySet();
 			links = Collections.emptySet();
+			compositeStringUniques = Collections.emptySet();
+			
 			theEntity.setDeleted(theDeletedTimestampOrNull);
 			theEntity.setUpdated(theDeletedTimestampOrNull);
 			theEntity.setNarrativeTextParsedIntoWords(null);

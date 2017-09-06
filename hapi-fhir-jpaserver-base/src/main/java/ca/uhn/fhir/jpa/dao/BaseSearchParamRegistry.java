@@ -37,8 +37,8 @@ public abstract class BaseSearchParamRegistry implements ISearchParamRegistry {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseSearchParamRegistry.class);
 	private Map<String, Map<String, RuntimeSearchParam>> myBuiltInSearchParams;
-	private volatile Map<String, List<JpaRuntimeSearchParam>> myActiveUniqueSearchParams;
-	private volatile Map<String, Map<Set<String>, List<JpaRuntimeSearchParam>>> myActiveParamNamesToUniqueSearchParams;
+	private volatile Map<String, List<JpaRuntimeSearchParam>> myActiveUniqueSearchParams = Collections.emptyMap();
+	private volatile Map<String, Map<Set<String>, List<JpaRuntimeSearchParam>>> myActiveParamNamesToUniqueSearchParams = Collections.emptyMap();
 
 	@Autowired
 	private FhirContext myCtx;

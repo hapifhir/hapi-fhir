@@ -21,7 +21,7 @@ public class ResourceIndexedCompositeStringUnique implements Comparable<Resource
 	private Long myId;
 
 	@ManyToOne
-	@JoinColumn(name = "RES_ID", referencedColumnName = "RES_ID")
+	@JoinColumn(name = "RES_ID", referencedColumnName = "RES_ID", foreignKey = @ForeignKey(name="FK_IDXCMPSTRUNIQ_RES_ID"))
 	private ResourceTable myResource;
 
 	@Override
