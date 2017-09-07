@@ -6,6 +6,7 @@ package org.hl7.fhir.r4.utils.transform.deserializer;
 
 
 
+import com.sun.istack.internal.NotNull;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.hl7.fhir.r4.utils.transform.deserializer.grammar.VisitorExtensions;
 import org.hl7.fhir.r4.utils.transform.deserializer.grammar.antlr.javaAntlr.FhirMapJavaBaseVisitor;
@@ -13,6 +14,7 @@ import org.hl7.fhir.r4.utils.transform.deserializer.grammar.antlr.javaAntlr.Fhir
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -30,7 +32,14 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
      */
     private IFhirMapExecutor executor;
 
-    /**
+  public IFhirMapExecutor getExecutor() {
+    return executor;
+  }
+  public void setExecutor(IFhirMapExecutor executor){
+    this.executor = executor;
+  }
+
+  /**
      Lazy create url processor.
      */
     private UrlProcessor getUrlProcessor() throws Exception {
@@ -77,8 +86,8 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
     public Object visitKeyMap(FhirMapJavaParser.KeyMapContext context) {
         UrlData urlData = null;
         try {
-            urlData = VisitorExtensions.VisitOrDefault(this, context.structureMap(), UrlData.class);
-            String name = VisitorExtensions.VisitOrDefault(this, context.quotedString(), String.class);
+            urlData = (UrlData) this.visit(context.structureMap());
+            String name = (String) this.visit(context.quotedString());
             this.executor.map(urlData, name);
         } catch (Exception e) {
             e.printStackTrace();
@@ -95,14 +104,8 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
      */
     @Override
     public Object visitStructureMap(FhirMapJavaParser.StructureMapContext context) {
-        try {
-            return VisitorExtensions.<UrlData>VisitOrDefault(this, context.quotedUrl(), UrlData.class);
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (InstantiationException e) {
-            e.printStackTrace();
-        }
-        return null;
+            return (UrlData) this.visit(context.quotedUrl());
+
     }
 
     /**
@@ -115,13 +118,8 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
     @Override
     public Object visitKeyImports(FhirMapJavaParser.KeyImportsContext context) {
         UrlData urlData = null;
-        try {
-            urlData = VisitorExtensions.VisitOrDefault(this, context.structureMap(), UrlData.class);
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (InstantiationException e) {
-            e.printStackTrace();
-        }
+            urlData = (UrlData) this.visit(context.structureMap());
+
         try {
             this.executor.imports(urlData);
         } catch (Exception e) {
@@ -138,14 +136,7 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
      */
     @Override
     public Object visitStructureDefinition(FhirMapJavaParser.StructureDefinitionContext context) {
-        try {
-            return VisitorExtensions.<UrlData>VisitOrDefault(this, context.quotedUrl(),UrlData.class);
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (InstantiationException e) {
-            e.printStackTrace();
-        }
-        return null;
+            return this.visit(context.quotedUrl());
     }
 
     /**
@@ -230,21 +221,18 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
      @return UrlData instance
      */
     @Override
-    public Object visitQuotedUrl(FhirMapJavaParser.QuotedUrlContext context) {
+    public Object visitQuotedUrl(@NotNull FhirMapJavaParser.QuotedUrlContext context) {
         String urlStr = null;
-        try {
-            urlStr = VisitorExtensions.VisitOrDefault(this, context.quotedString(), String.class);
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (InstantiationException e) {
-            e.printStackTrace();
-        }
-        try {
-            return this.getUrlProcessor().parseUrl(urlStr);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return null;
+
+            urlStr = (String) this.visit(context.quotedString());
+
+      try {
+        return this.getUrlProcessor().parseUrl(urlStr);
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
+
+      return null;
     }
 //C# TO JAVA CONVERTER TODO TASK: There is no preprocessor in Java:
     ///#region Uses methods
@@ -258,16 +246,11 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
 //C# TO JAVA CONVERTER TODO TASK: Java annotations will not correspond to .NET attributes:
 //ORIGINAL LINE: public override Object VisitKeyUses([NotNull] KeyUsesContext context)
     @Override
-    public Object visitKeyUses(FhirMapJavaParser.KeyUsesContext context) {
+    public Object visitKeyUses(@NotNull FhirMapJavaParser.KeyUsesContext context) {
         UrlData urlData = null;
-        try {
-            urlData = VisitorExtensions.VisitOrDefault(this, context.structureDefinition(), UrlData.class);
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (InstantiationException e) {
-            e.printStackTrace();
-        }
-        FhirMapUseNames name = FhirMapUseNames.forValue((Integer) this.visit(context.keyUsesName()));
+            urlData = (UrlData) this.visit(context.structureDefinition());
+
+        FhirMapUseNames name = (FhirMapUseNames) this.visit(context.keyUsesName());
         try {
             this.executor.uses(urlData, name);
         } catch (Exception e) {
@@ -285,9 +268,9 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
 //C# TO JAVA CONVERTER TODO TASK: Java annotations will not correspond to .NET attributes:
 //ORIGINAL LINE: public override Object VisitKeyUsesName([NotNull] KeyUsesNameContext context)
     @Override
-    public Object visitKeyUsesName(FhirMapJavaParser.KeyUsesNameContext context)
+    public Object visitKeyUsesName(@NotNull FhirMapJavaParser.KeyUsesNameContext context)
     {
-        return FhirMapUseNames.forValue((Integer)this.visitChildren(context));
+        return this.visitChildren(context);
     }
 
     /**
@@ -299,7 +282,7 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
 //C# TO JAVA CONVERTER TODO TASK: Java annotations will not correspond to .NET attributes:
 //ORIGINAL LINE: public override Object VisitKeyUsesNameSource([NotNull] KeyUsesNameSourceContext context)
     @Override
-    public Object visitKeyUsesNameSource(FhirMapJavaParser.KeyUsesNameSourceContext context)
+    public Object visitKeyUsesNameSource(@NotNull FhirMapJavaParser.KeyUsesNameSourceContext context)
     {
         return FhirMapUseNames.Source;
     }
@@ -313,7 +296,7 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
 //C# TO JAVA CONVERTER TODO TASK: Java annotations will not correspond to .NET attributes:
 //ORIGINAL LINE: public override Object VisitKeyUsesNameTarget([NotNull] KeyUsesNameTargetContext context)
     @Override
-    public Object visitKeyUsesNameTarget(FhirMapJavaParser.KeyUsesNameTargetContext context)
+    public Object visitKeyUsesNameTarget(@NotNull FhirMapJavaParser.KeyUsesNameTargetContext context)
     {
         return FhirMapUseNames.Target;
     }
@@ -327,7 +310,7 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
 //C# TO JAVA CONVERTER TODO TASK: Java annotations will not correspond to .NET attributes:
 //ORIGINAL LINE: public override Object VisitKeyUsesNameQueried([NotNull] KeyUsesNameQueriedContext context)
     @Override
-    public Object visitKeyUsesNameQueried(FhirMapJavaParser.KeyUsesNameQueriedContext context)
+    public Object visitKeyUsesNameQueried(@NotNull FhirMapJavaParser.KeyUsesNameQueriedContext context)
     {
         return FhirMapUseNames.Queried;
     }
@@ -358,9 +341,17 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
 //C# TO JAVA CONVERTER TODO TASK: Java annotations will not correspond to .NET attributes:
 //ORIGINAL LINE: public override Object VisitGroupStart([NotNull] GroupStartContext context)
     @Override
-    public Object visitGroupStart(FhirMapJavaParser.GroupStartContext context)  {
-        try {
-            this.executor.groupStart(VisitorExtensions.VisitOrDefault(this, context.identifier(), String.class), VisitorExtensions.VisitOrDefault(this, context.groupType(), FhirMapGroupTypes.NotSet), VisitorExtensions.VisitOrDefault(this, context.groupExtends(),String.class));
+    public Object visitGroupStart(@NotNull FhirMapJavaParser.GroupStartContext context)  {
+        try { //TODO: MAKE SURE THE NULLABLE FIELDS CAN BE NULL!
+          FhirMapJavaParser.GroupExtendsContext extendsContext = context.groupExtends();
+          String extension;
+          if (context.groupExtends() != null){
+            extension = (String) this.visit(extendsContext);
+          }
+          else {
+            extension = null;
+          }
+            this.executor.groupStart( (String) this.visit(context.identifier()), (FhirMapGroupTypes) this.visit(context.groupType()), extension);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -376,7 +367,7 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
 //C# TO JAVA CONVERTER TODO TASK: Java annotations will not correspond to .NET attributes:
 //ORIGINAL LINE: public override Object VisitGroupEnd([NotNull] GroupEndContext context)
     @Override
-    public Object visitGroupEnd(FhirMapJavaParser.GroupEndContext context) {
+    public Object visitGroupEnd(@NotNull FhirMapJavaParser.GroupEndContext context) {
         try {
             this.executor.groupEnd();
         } catch (Exception e) {
@@ -389,20 +380,13 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
      Parse grammar rule groupExtends.
 
      @param context
-     @return String[] of group
+     @return List<String> of group
      */
 //C# TO JAVA CONVERTER TODO TASK: Java annotations will not correspond to .NET attributes:
 //ORIGINAL LINE: public override Object VisitGroupExtends([NotNull] GroupExtendsContext context)
     @Override
-    public Object visitGroupExtends(FhirMapJavaParser.GroupExtendsContext context) {
-        try {
-            return VisitorExtensions.<String>VisitOrDefault(this, context.identifier(), String.class);
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (InstantiationException e) {
-            e.printStackTrace();
-        }
-        return null;
+    public Object visitGroupExtends(@NotNull FhirMapJavaParser.GroupExtendsContext context) {
+            return this.visit(context.identifier());
     }
 
     /**
@@ -416,7 +400,7 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
     @Override
     public Object visitGroupType(FhirMapJavaParser.GroupTypeContext context)
     {
-        return FhirMapGroupTypes.forValue((Integer) this.visitChildren(context));
+        return this.visitChildren(context);
     }
 
     /**
@@ -428,7 +412,7 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
 //C# TO JAVA CONVERTER TODO TASK: Java annotations will not correspond to .NET attributes:
 //ORIGINAL LINE: public override Object VisitGroupTypeType([NotNull] GroupTypeTypeContext context)
     @Override
-    public Object visitGroupTypeType(FhirMapJavaParser.GroupTypeTypeContext context)
+    public Object visitGroupTypeType(@NotNull FhirMapJavaParser.GroupTypeTypeContext context)
     {
         return FhirMapGroupTypes.Types;
     }
@@ -456,9 +440,9 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
 //C# TO JAVA CONVERTER TODO TASK: Java annotations will not correspond to .NET attributes:
 //ORIGINAL LINE: public override Object VisitRuleInput([NotNull] RuleInputContext context)
     @Override
-    public Object visitRuleInput(FhirMapJavaParser.RuleInputContext context)  {
+    public Object visitRuleInput(@NotNull FhirMapJavaParser.RuleInputContext context)  {
         try {
-            this.executor.groupInput(VisitorExtensions.VisitOrDefault(this, context.ruleInputName(), String.class), VisitorExtensions.VisitOrDefault(this, context.ruleInputType(), String.class), VisitorExtensions.VisitOrDefault(this, context.ruleInputMode(), FhirMapInputModes.class));
+            this.executor.groupInput( (String) this.visit(context.ruleInputName()), (String) this.visit(context.ruleInputType()), (FhirMapInputModes) this.visit(context.ruleInputMode()));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -474,15 +458,8 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
 //C# TO JAVA CONVERTER TODO TASK: Java annotations will not correspond to .NET attributes:
 //ORIGINAL LINE: public override Object VisitRuleInputMode([NotNull] RuleInputModeContext context)
     @Override
-    public Object visitRuleInputMode(FhirMapJavaParser.RuleInputModeContext context)  {
-        try {
-            return VisitorExtensions.<FhirMapInputModes>VisitOrDefault(this, context.ruleInputModes(), FhirMapInputModes.class);
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (InstantiationException e) {
-            e.printStackTrace();
-        }
-        return null;
+    public Object visitRuleInputMode(@NotNull FhirMapJavaParser.RuleInputModeContext context)  {
+            return this.visit(context.ruleInputModes());
     }
 
     /**
@@ -494,7 +471,7 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
 //C# TO JAVA CONVERTER TODO TASK: Java annotations will not correspond to .NET attributes:
 //ORIGINAL LINE: public override Object VisitRuleInputModesSource([NotNull] RuleInputModesSourceContext context)
     @Override
-    public Object visitRuleInputModesSource(FhirMapJavaParser.RuleInputModesSourceContext context)
+    public Object visitRuleInputModesSource(@NotNull FhirMapJavaParser.RuleInputModesSourceContext context)
     {
         return FhirMapInputModes.Source;
     }
@@ -526,9 +503,9 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
 //C# TO JAVA CONVERTER TODO TASK: Java annotations will not correspond to .NET attributes:
 //ORIGINAL LINE: public override Object VisitRuleInstance([NotNull] RuleInstanceContext context)
     @Override
-    public Object visitRuleInstance(FhirMapJavaParser.RuleInstanceContext context) {
+    public Object visitRuleInstance(@NotNull FhirMapJavaParser.RuleInstanceContext context) {
         try {
-            this.executor.ruleStart(VisitorExtensions.VisitOrDefault(this, context.ruleName(), String[].class));
+            this.executor.ruleStart((List<String>) this.visit(context.ruleName()));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -545,14 +522,29 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
      Parse grammar rule ruleTargetReference
 
      @param context
-     @return String[]
+     @return List<String>
      */
 //C# TO JAVA CONVERTER TODO TASK: Java annotations will not correspond to .NET attributes:
 //ORIGINAL LINE: public override Object VisitRuleTargetReference([NotNull] RuleTargetReferenceContext context)
     @Override
-    public Object visitRuleTargetReference(FhirMapJavaParser.RuleTargetReferenceContext context) {
+    public Object visitRuleTargetReference(@NotNull FhirMapJavaParser.RuleTargetReferenceContext context) {
         try {
-            this.executor.transformReference(VisitorExtensions.VisitOrDefault(this, context.ruleTargetContext(), String[].class), VisitorExtensions.VisitOrDefault(this, context.ruleTargetReferenceSource(), String.class), VisitorExtensions.VisitOrDefault(this, context.ruleTargetVariable(), String.class));
+            List<String> ctx = null;
+            String refSource = null;
+            String targetVar = null;
+            if (context.ruleTargetContext() != null){
+              ctx = (List<String>) this.visit(context.ruleTargetContext());
+            }
+          if (context.ruleTargetReferenceSource() != null){
+            refSource = (String) this.visit(context.ruleTargetReferenceSource());
+          }
+          if (context.ruleTargetVariable() != null){
+            targetVar = (String) this.visit(context.ruleTargetVariable());
+          }
+
+            this.executor.transformReference(ctx,
+              refSource,
+              targetVar);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -563,14 +555,15 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
      Parse grammar rule ruleTargetTruncate
 
      @param context
-     @return String[]
+     @return List<String>
      */
 //C# TO JAVA CONVERTER TODO TASK: Java annotations will not correspond to .NET attributes:
 //ORIGINAL LINE: public override Object VisitRuleTargetTruncate([NotNull] RuleTargetTruncateContext context)
     @Override
-    public Object visitRuleTargetTruncate(FhirMapJavaParser.RuleTargetTruncateContext context) {
+    public Object visitRuleTargetTruncate(@NotNull FhirMapJavaParser.RuleTargetTruncateContext context) {
         try {
-            this.executor.transformTruncate(VisitorExtensions.VisitOrDefault(this, context.ruleTargetContext(), String[].class), VisitorExtensions.VisitOrDefault(this, context.ruleTargetTruncateSource(), String.class), VisitorExtensions.<Integer>VisitOrDefault(this, context.ruleTargetTruncateLength(), Integer.class), VisitorExtensions.VisitOrDefault(this, context.ruleTargetVariable(), String.class));
+            //Not implented in fhir code
+            this.executor.transformTruncate((List<String>) this.visit(context.ruleTargetContext()), (String)  this.visit(context.ruleTargetTruncateSource()), (Integer) this.visit(context.ruleTargetTruncateLength()), (String) this.visit(context.ruleTargetVariable()));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -581,14 +574,14 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
      Parse grammar rule ruleTargetCast
 
      @param context
-     @return String[]
+     @return List<String>
      */
 //C# TO JAVA CONVERTER TODO TASK: Java annotations will not correspond to .NET attributes:
 //ORIGINAL LINE: public override Object VisitRuleTargetCast([NotNull] RuleTargetCastContext context)
     @Override
-    public Object visitRuleTargetCast(FhirMapJavaParser.RuleTargetCastContext context) {
+    public Object visitRuleTargetCast(@NotNull FhirMapJavaParser.RuleTargetCastContext context) {
         try {
-            this.executor.transformCast(VisitorExtensions.VisitOrDefault(this, context.ruleTargetContext(), String[].class), VisitorExtensions.VisitOrDefault(this, context.ruleTargetCastSource(), String.class), VisitorExtensions.VisitOrDefault(this, context.ruleTargetCastType(), String.class), VisitorExtensions.VisitOrDefault(this, context.ruleTargetVariable(), String.class));
+            this.executor.transformCast((List<String>) this.visit(context.ruleTargetContext()), (String) this.visit(context.ruleTargetCastSource()), (String) this.visit(context.ruleTargetCastType()), (String) this.visit(context.ruleTargetVariable()));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -599,14 +592,14 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
      Parse grammar rule ruleTargetAs
 
      @param context
-     @return String[]
+     @return List<String>
      */
 //C# TO JAVA CONVERTER TODO TASK: Java annotations will not correspond to .NET attributes:
 //ORIGINAL LINE: public override Object VisitRuleTargetAs([NotNull] RuleTargetAsContext context)
     @Override
-    public Object visitRuleTargetAs(FhirMapJavaParser.RuleTargetAsContext context) {
+    public Object visitRuleTargetAs(@NotNull FhirMapJavaParser.RuleTargetAsContext context) {
         try {
-            this.executor.transformAs(VisitorExtensions.VisitOrDefault(this, context.ruleContext(), String[].class), VisitorExtensions.VisitOrDefault(this, context.ruleTargetVariable(), String.class));
+            this.executor.transformAs((List<String>) this.visit(context.ruleContext()), (String) this.visit(context.ruleTargetVariable()));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -617,14 +610,26 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
      Parse grammar rule ruleTargetAssign
 
      @param context
-     @return String[]
+     @return List<String>
      */
 //C# TO JAVA CONVERTER TODO TASK: Java annotations will not correspond to .NET attributes:
 //ORIGINAL LINE: public override Object VisitRuleTargetAssign([NotNull] RuleTargetAssignContext context)
     @Override
-    public Object visitRuleTargetAssign(FhirMapJavaParser.RuleTargetAssignContext context) {
+    public Object visitRuleTargetAssign(@NotNull FhirMapJavaParser.RuleTargetAssignContext context) {
         try {
-            this.executor.transformCopy(VisitorExtensions.VisitOrDefault(this, context.ruleTargetContext(), String[].class), VisitorExtensions.VisitOrDefault(this, context.ruleTargetAssignValue(), String.class), VisitorExtensions.VisitOrDefault(this, context.ruleTargetVariable(), String.class));
+          List<String> ctx = null;
+          String assignVal = null;
+          String targetVar = null;
+          if (context.ruleTargetContext()!=null){
+            ctx = (List<String>) (this.visit(context.ruleTargetContext()));
+          }
+          if (context.ruleTargetAssignValue()!=null){
+            assignVal = (String) (this.visit(context.ruleTargetAssignValue()));
+          }
+          if (context.ruleTargetVariable()!=null){
+            targetVar = (String) (this.visit(context.ruleTargetVariable()));
+          }
+            this.executor.transformCopy(ctx, assignVal, targetVar);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -635,14 +640,15 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
      Parse grammar rule ruleTargetCopy
 
      @param context
-     @return String[]
+     @return List<String>
      */
 //C# TO JAVA CONVERTER TODO TASK: Java annotations will not correspond to .NET attributes:
 //ORIGINAL LINE: public override Object VisitRuleTargetCopy([NotNull] RuleTargetCopyContext context)
     @Override
-    public Object visitRuleTargetCopy(FhirMapJavaParser.RuleTargetCopyContext context) {
+    public Object visitRuleTargetCopy(@NotNull FhirMapJavaParser.RuleTargetCopyContext context) {
         try {
-            this.executor.transformCopy(VisitorExtensions.VisitOrDefault(this, context.ruleTargetContext(), String[].class), VisitorExtensions.VisitOrDefault(this, context.ruleTargetCopySource(), String.class), VisitorExtensions.VisitOrDefault(this, context.ruleTargetVariable(), String.class));
+
+            this.executor.transformCopy((List<String>) this.visit(context.ruleTargetContext()), (String) this.visit(context.ruleTargetCopySource()), (String) this.visit(context.ruleTargetVariable()));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -653,12 +659,24 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
      Parse grammar rule ruleTargetCreate
 
      @param context
-     @return String[]
+     @return List<String>
      */
     @Override
     public Object visitRuleTargetCreate(FhirMapJavaParser.RuleTargetCreateContext context) {
         try {
-            this.executor.transformCreate(VisitorExtensions.VisitOrDefault(this, context.ruleTargetContext(), String[].class), VisitorExtensions.VisitOrDefault(this, context.ruleTargetCreateType(), String.class), VisitorExtensions.VisitOrDefault(this, context.ruleTargetVariable(), String.class));
+            List<String> ctx = null;
+            String createType = null;
+            String ruleTarget = null;
+            if (context.ruleTargetContext() != null){
+              ctx = (List<String>) this.visit(context.ruleTargetContext());
+            }
+          if (context.ruleTargetCreateType() != null){
+            createType = (String) this.visit(context.ruleTargetCreateType());
+          }
+          if (context.ruleTargetVariable() != null){
+            ruleTarget = (String) this.visit(context.ruleTargetVariable());
+          }
+            this.executor.transformCreate(ctx,createType,ruleTarget);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -669,12 +687,35 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
      Parse grammar rule ruleTargetTranslate
 
      @param context
-     @return String[]
+     @return List<String>
      */
     @Override
     public Object visitRuleTargetTranslate(FhirMapJavaParser.RuleTargetTranslateContext context) {
         try {
-            this.executor.transformTranslate(VisitorExtensions.VisitOrDefault(this, context.ruleTargetContext(), String[].class), VisitorExtensions.VisitOrDefault(this, context.ruleTargetTranslateSource(), String.class), VisitorExtensions.VisitOrDefault(this, context.ruleTargetTranslateMap(), UrlData.class), VisitorExtensions.VisitOrDefault(this, context.ruleTargetTranslateOutput(), FhirMapTranslateOutputTypes.class), VisitorExtensions.VisitOrDefault(this, context.ruleTargetVariable(), String.class));
+          List<String> ctx = null;
+          String source = null;
+          UrlData map = null;
+          FhirMapTranslateOutputTypes types = null;
+          String targetVar = null;
+
+          if (context.ruleTargetContext() != null){
+            ctx = (List<String>) this.visit(context.ruleTargetContext());
+          }
+          if (context.ruleTargetTranslateSource() != null){
+            source = (String) this.visit(context.ruleTargetTranslateSource());
+          }
+          if (context.ruleTargetTranslateMap() != null){
+            map = (UrlData) this.visit(context.ruleTargetTranslateMap());
+          }
+          if (context.ruleTargetTranslateOutput() != null){
+            types = (FhirMapTranslateOutputTypes) this.visit(context.ruleTargetTranslateOutput());
+          }
+          if (context.ruleTargetVariable() != null){
+            targetVar = (String) this.visit(context.ruleTargetVariable());
+          }
+
+
+          this.executor.transformTranslate(ctx, source, map, types, targetVar);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -685,12 +726,12 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
      Parse grammar rule ruleTargetTranslateOutputCode
 
      @param context
-     @return String[]
+     @return List<String>
      */
 //C# TO JAVA CONVERTER TODO TASK: Java annotations will not correspond to .NET attributes:
 //ORIGINAL LINE: public override Object VisitRuleTargetTranslateOutputCode([NotNull] RuleTargetTranslateOutputCodeContext context)
     @Override
-    public Object visitRuleTargetTranslateOutputCode(FhirMapJavaParser.RuleTargetTranslateOutputCodeContext context)
+    public Object visitRuleTargetTranslateOutputCode(@NotNull FhirMapJavaParser.RuleTargetTranslateOutputCodeContext context)
     {
         return FhirMapTranslateOutputTypes.Code;
     }
@@ -699,12 +740,12 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
      Parse grammar rule ruleTargetTranslateOutputSystem
 
      @param context
-     @return String[]
+     @return List<String>
      */
 //C# TO JAVA CONVERTER TODO TASK: Java annotations will not correspond to .NET attributes:
 //ORIGINAL LINE: public override Object VisitRuleTargetTranslateOutputSystem([NotNull] RuleTargetTranslateOutputSystemContext context)
     @Override
-    public Object visitRuleTargetTranslateOutputSystem(FhirMapJavaParser.RuleTargetTranslateOutputSystemContext context)
+    public Object visitRuleTargetTranslateOutputSystem(@NotNull FhirMapJavaParser.RuleTargetTranslateOutputSystemContext context)
     {
         return FhirMapTranslateOutputTypes.System;
     }
@@ -713,12 +754,12 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
      Parse grammar rule ruleTargetTranslateOutputDisplay
 
      @param context
-     @return String[]
+     @return List<String>
      */
 //C# TO JAVA CONVERTER TODO TASK: Java annotations will not correspond to .NET attributes:
 //ORIGINAL LINE: public override Object VisitRuleTargetTranslateOutputDisplay([NotNull] RuleTargetTranslateOutputDisplayContext context)
     @Override
-    public Object visitRuleTargetTranslateOutputDisplay(FhirMapJavaParser.RuleTargetTranslateOutputDisplayContext context)
+    public Object visitRuleTargetTranslateOutputDisplay(@NotNull FhirMapJavaParser.RuleTargetTranslateOutputDisplayContext context)
     {
         return FhirMapTranslateOutputTypes.Display;
     }
@@ -727,12 +768,12 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
      Parse grammar rule ruleTargetTranslateOutputCoding
 
      @param context
-     @return String[]
+     @return List<String>
      */
 //C# TO JAVA CONVERTER TODO TASK: Java annotations will not correspond to .NET attributes:
 //ORIGINAL LINE: public override Object VisitRuleTargetTranslateOutputCoding([NotNull] RuleTargetTranslateOutputCodingContext context)
     @Override
-    public Object visitRuleTargetTranslateOutputCoding(FhirMapJavaParser.RuleTargetTranslateOutputCodingContext context)
+    public Object visitRuleTargetTranslateOutputCoding(@NotNull FhirMapJavaParser.RuleTargetTranslateOutputCodingContext context)
     {
         return FhirMapTranslateOutputTypes.Coding;
     }
@@ -741,12 +782,12 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
      Parse grammar rule ruleTargetTranslateOutputCodeableConcept
 
      @param context
-     @return String[]
+     @return List<String>
      */
 //C# TO JAVA CONVERTER TODO TASK: Java annotations will not correspond to .NET attributes:
 //ORIGINAL LINE: public override Object VisitRuleTargetTranslateOutputCodeableConcept([NotNull] RuleTargetTranslateOutputCodeableConceptContext context)
     @Override
-    public Object visitRuleTargetTranslateOutputCodeableConcept(FhirMapJavaParser.RuleTargetTranslateOutputCodeableConceptContext context)
+    public Object visitRuleTargetTranslateOutputCodeableConcept(@NotNull FhirMapJavaParser.RuleTargetTranslateOutputCodeableConceptContext context)
     {
         return FhirMapTranslateOutputTypes.CodeableConcept;
     }
@@ -755,14 +796,14 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
      Parse grammar rule ruleTargetCp
 
      @param context
-     @return String[]
+     @return List<String>
      */
 //C# TO JAVA CONVERTER TODO TASK: Java annotations will not correspond to .NET attributes:
 //ORIGINAL LINE: public override Object VisitRuleTargetCp([NotNull] RuleTargetCpContext context)
     @Override
-    public Object visitRuleTargetCp(FhirMapJavaParser.RuleTargetCpContext context) {
+    public Object visitRuleTargetCp(@NotNull FhirMapJavaParser.RuleTargetCpContext context) {
         try {
-            this.executor.transformCp(VisitorExtensions.VisitOrDefault(this, context.ruleTargetContext(), String[].class), VisitorExtensions.VisitOrDefault(this, context.ruleTargetCpSystem(), UrlData.class), VisitorExtensions.VisitOrDefault(this, context.ruleTargetCpVariable(), String.class), VisitorExtensions.VisitOrDefault(this, context.ruleTargetVariable(), String.class));
+            this.executor.transformCp((List<String>) this.visit(context.ruleTargetContext()), (UrlData) this.visit(context.ruleTargetCpSystem()), (String) this.visit(context.ruleTargetCpVariable()), (String) this.visit(context.ruleTargetVariable()));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -773,14 +814,15 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
      Parse grammar rule ruleTargetAppend
 
      @param context
-     @return String[]
+     @return List<String>
      */
 //C# TO JAVA CONVERTER TODO TASK: Java annotations will not correspond to .NET attributes:
 //ORIGINAL LINE: public override Object VisitRuleTargetAppend([NotNull] RuleTargetAppendContext context)
     @Override
-    public Object visitRuleTargetAppend(FhirMapJavaParser.RuleTargetAppendContext context) {
+    public Object visitRuleTargetAppend(@NotNull FhirMapJavaParser.RuleTargetAppendContext context) {
         try {
-            this.executor.transformAppend(VisitorExtensions.VisitOrDefault(this, context.ruleTargetContext(), String[].class), VisitorExtensions.VisitOrDefault(this, context.ruleTargetAppendSources(), String[].class), VisitorExtensions.VisitOrDefault(this, context.ruleTargetVariable(), String.class));
+          //Not implemented
+            this.executor.transformAppend((List<String>) this.visit(context.ruleTargetContext()), (List<String>) this.visit(context.ruleTargetAppendSources()), (String) this.visit(context.ruleTargetVariable()));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -791,29 +833,58 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
      Parse grammar rule ruleTargetAppendSources
 
      @param context
-     @return String[]
+     @return List<String>
      */
 //C# TO JAVA CONVERTER TODO TASK: Java annotations will not correspond to .NET attributes:
 //ORIGINAL LINE: public override Object VisitRuleTargetAppendSources([NotNull] RuleTargetAppendSourcesContext context)
     @Override
-    public Object visitRuleTargetAppendSources(FhirMapJavaParser.RuleTargetAppendSourcesContext context)
+    public Object visitRuleTargetAppendSources(@NotNull FhirMapJavaParser.RuleTargetAppendSourcesContext context)
     {
-        ArrayList<String> values = new ArrayList<>();
-        return VisitorExtensions.VisitMultiple(this, context.ruleTargetAppendSource(), values);
+      ArrayList<String> values = new ArrayList<String>();
+      String[] retVals = new String[context.ruleTargetAppendSource().size()];
+      if (context.ruleTargetAppendSource() != null){
+        int count = context.ruleTargetAppendSource().size();
+        for (ParseTree treeItem : context.ruleTargetAppendSource()){
+          values.add((String) this.visit(treeItem));
+        }
+      }
+      return values;
+        //return VisitorExtensions.VisitMultiple(this, context.ruleTargetAppendSource(), values);
     }
 
     /**
      Parse grammar rule ruleTargetC
 
      @param context
-     @return String[]
+     @return List<String>
      */
 //C# TO JAVA CONVERTER TODO TASK: Java annotations will not correspond to .NET attributes:
 //ORIGINAL LINE: public override Object VisitRuleTargetC([NotNull] RuleTargetCContext context)
     @Override
-    public Object visitRuleTargetC(FhirMapJavaParser.RuleTargetCContext context) {
+    public Object visitRuleTargetC(@NotNull FhirMapJavaParser.RuleTargetCContext context) {
         try {
-            this.executor.transformCoding(VisitorExtensions.VisitOrDefault(this, context.ruleTargetContext(), String[].class), VisitorExtensions.VisitOrDefault(this, context.ruleTargetCSystem(), UrlData.class), VisitorExtensions.VisitOrDefault(this, context.ruleTargetCCode(), String.class), VisitorExtensions.VisitOrDefault(this, context.ruleTargetCDisplay(), String.class), VisitorExtensions.VisitOrDefault(this, context.ruleTargetVariable(), String.class));
+          List<String> ctx = null;
+          UrlData system = null;
+          String code = null;
+          String display = null;
+          String targetVar = null;
+
+          if (context.ruleTargetContext() != null){
+            ctx = (List<String>) this.visit(context.ruleTargetContext());
+          }
+          if (context.ruleTargetCSystem() != null){
+            system = (UrlData) this.visit(context.ruleTargetCSystem());
+          }
+          if (context.ruleTargetCCode() != null){
+            code = (String) this.visit(context.ruleTargetCCode());
+          }
+          if (context.ruleTargetCDisplay() != null){
+            display = (String) this.visit(context.ruleTargetCDisplay());
+          }
+          if (context.ruleTargetVariable() != null){
+            targetVar = (String) this.visit(context.ruleTargetVariable());
+          }
+            this.executor.transformCoding(ctx, system, code, display, targetVar);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -824,14 +895,14 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
      Parse grammar rule ruleTargetCC1
 
      @param context
-     @return String[]
+     @return List<String>
      */
 //C# TO JAVA CONVERTER TODO TASK: Java annotations will not correspond to .NET attributes:
 //ORIGINAL LINE: public override Object VisitRuleTargetCC1([NotNull] RuleTargetCC1Context context)
     @Override
-    public Object visitRuleTargetCC1(FhirMapJavaParser.RuleTargetCC1Context context) {
+    public Object visitRuleTargetCC1(@NotNull FhirMapJavaParser.RuleTargetCC1Context context) {
         try {
-            this.executor.transformCodeableConcept(VisitorExtensions.VisitOrDefault(this, context.ruleTargetContext(), String[].class), VisitorExtensions.VisitOrDefault(this, context.ruleTargetCC1Text(), String.class), VisitorExtensions.VisitOrDefault(this, context.ruleTargetVariable(), String.class));
+            this.executor.transformCodeableConcept((List<String>) this.visit(context.ruleTargetContext()),(String)  this.visit(context.ruleTargetCC1Text()), (String) this.visit(context.ruleTargetVariable()));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -842,14 +913,34 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
      Parse grammar rule ruleTargetCC2
 
      @param context
-     @return String[]
+     @return List<String>
      */
 //C# TO JAVA CONVERTER TODO TASK: Java annotations will not correspond to .NET attributes:
 //ORIGINAL LINE: public override Object VisitRuleTargetCC2([NotNull] RuleTargetCC2Context context)
     @Override
-    public Object visitRuleTargetCC2(FhirMapJavaParser.RuleTargetCC2Context context) {
+    public Object visitRuleTargetCC2(@NotNull FhirMapJavaParser.RuleTargetCC2Context context) {
         try {
-            this.executor.transformCodeableConcept(VisitorExtensions.VisitOrDefault(this, context.ruleTargetContext(), String[].class), VisitorExtensions.VisitOrDefault(this, context.ruleTargetCC2System(), UrlData.class), VisitorExtensions.VisitOrDefault(this, context.ruleTargetCC2Code(), String.class), VisitorExtensions.VisitOrDefault(this, context.ruleTargetCC2Display(), String.class), VisitorExtensions.VisitOrDefault(this, context.ruleTargetVariable(), String.class));
+          List<String> ctx = null;
+          UrlData system = null;
+          String code = null;
+          String display = null;
+          String var = null;
+          if (context.ruleTargetContext() != null){
+            ctx = (List<String>) this.visit(context.ruleTargetContext());
+          }
+          if (context.ruleTargetCC2System() != null){
+            system = (UrlData) this.visit(context.ruleTargetCC2System());
+          }
+          if (context.ruleTargetCC2Code() != null){
+            code = (String) this.visit(context.ruleTargetCC2Code());
+          }
+          if (context.ruleTargetCC2Display() != null){
+            display = (String) this.visit(context.ruleTargetCC2Display());
+          }
+          if (context.ruleTargetVariable() != null){
+            var = (String) this.visit(context.ruleTargetVariable());
+          }
+            this.executor.transformCodeableConcept(ctx, system, code, display, var);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -860,53 +951,60 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
      Parse grammar rule ruleTargetContext
 
      @param context
-     @return String[]
+     @return List<String>
      */
 //C# TO JAVA CONVERTER TODO TASK: Java annotations will not correspond to .NET attributes:
 //ORIGINAL LINE: public override Object VisitRuleTargetContext([NotNull] RuleTargetContextContext context)
     @Override
-    public Object visitRuleTargetContext(FhirMapJavaParser.RuleTargetContextContext context) {
-        try {
-            return VisitorExtensions.<String[]>VisitOrDefault(this, context.ruleContext(), String[].class);
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (InstantiationException e) {
-            e.printStackTrace();
-        }
-        return null;
+    public Object visitRuleTargetContext(@NotNull FhirMapJavaParser.RuleTargetContextContext context) {
+            return this.visit(context.ruleContext());
     }
 
     /**
      Parse grammar rule ruleTargetVariable
 
      @param context
-     @return String[]
+     @return List<String>
      */
 //C# TO JAVA CONVERTER TODO TASK: Java annotations will not correspond to .NET attributes:
 //ORIGINAL LINE: public override Object VisitRuleTargetVariable([NotNull] RuleTargetVariableContext context)
     @Override
-    public Object visitRuleTargetVariable(FhirMapJavaParser.RuleTargetVariableContext context) {
-        try {
-            return VisitorExtensions.<String>VisitOrDefault(this, context.identifier(), String.class);
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (InstantiationException e) {
-            e.printStackTrace();
-        }
-        return null;
+    public Object visitRuleTargetVariable(@NotNull FhirMapJavaParser.RuleTargetVariableContext context) {
+            return this.visit(context.identifier());
     }
 
     /**
      Parse grammar rule ruleTargetEscape
 
      @param context
-     @return String[]
+     @return List<String>
      */
     @Override
     public Object visitRuleTargetEscape(FhirMapJavaParser.RuleTargetEscapeContext context)
     {
         try {
-            this.executor.transformEscape(VisitorExtensions.VisitOrDefault(this, context.ruleTargetContext(), String[].class), VisitorExtensions.VisitOrDefault(this, context.ruleTargetEscapeVariable(), String.class), VisitorExtensions.VisitOrDefault(this, context.ruleTargetEscapeString1(), String.class), VisitorExtensions.VisitOrDefault(this, context.ruleTargetEscapeString2(), String.class), VisitorExtensions.VisitOrDefault(this, context.ruleTargetVariable(), String.class));
+          List<String> ctx = null;
+          String var = null;
+          String str1 = null;
+          String str2 = null;
+          String targetVar = null;
+          if (context.ruleTargetContext() != null){
+            ctx = (List<String>) this.visit(context.ruleTargetContext());
+          }
+          if (context.ruleTargetEscapeVariable() != null){
+            var = (String) this.visit(context.ruleTargetEscapeVariable());
+          }
+          if (context.ruleTargetEscapeString1() != null){
+            str1 = (String) this.visit(context.ruleTargetEscapeString1());
+          }
+          if (context.ruleTargetEscapeString2() != null){
+            str2 = (String) this.visit(context.ruleTargetEscapeString2());
+          }
+          if (context.ruleTargetVariable() != null){
+            targetVar = (String) this.visit(context.ruleTargetVariable());
+          }
+
+            this.executor.transformEscape(ctx, var, str1, str2, targetVar);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -917,14 +1015,30 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
      Parse grammar rule ruleTargetEvaluate
 
      @param context
-     @return String[]
+     @return List<String>
      */
 //C# TO JAVA CONVERTER TODO TASK: Java annotations will not correspond to .NET attributes:
 //ORIGINAL LINE: public override Object VisitRuleTargetEvaluate([NotNull] RuleTargetEvaluateContext context)
     @Override
-    public Object visitRuleTargetEvaluate(FhirMapJavaParser.RuleTargetEvaluateContext context) {
+    public Object visitRuleTargetEvaluate(@NotNull FhirMapJavaParser.RuleTargetEvaluateContext context) {
         try {
-            this.executor.transformEvaluate(VisitorExtensions.VisitOrDefault(this, context.ruleTargetContext(), String[].class), VisitorExtensions.VisitOrDefault(this, context.ruleTargetEvaluateObject(), String.class), VisitorExtensions.VisitOrDefault(this, context.ruleTargetEvaluateObjectElement(), String.class), VisitorExtensions.VisitOrDefault(this, context.ruleTargetVariable(), String.class));
+          List<String> ctx = null;
+          String obj = null;
+          String element = null;
+          String targetVar = null;
+          if (context.ruleTargetContext() != null){
+            ctx = (List<String>) this.visit(context.ruleTargetContext());
+          }
+          if (context.ruleTargetEvaluateObject() != null){
+            obj = (String) this.visit(context.ruleTargetEvaluateObject());
+          }
+          if (context.ruleTargetEvaluateObjectElement() != null){
+            element = (String) this.visit(context.ruleTargetEvaluateObjectElement());
+          }
+          if (context.ruleTargetVariable() != null){
+            targetVar = (String) this.visit(context.ruleTargetVariable());
+          }
+            this.executor.transformEvaluate(ctx, obj, element, targetVar);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -935,14 +1049,14 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
      Parse grammar rule ruleTargetId
 
      @param context
-     @return String[]
+     @return List<String>
      */
 //C# TO JAVA CONVERTER TODO TASK: Java annotations will not correspond to .NET attributes:
 //ORIGINAL LINE: public override Object VisitRuleTargetId([NotNull] RuleTargetIdContext context)
     @Override
-    public Object visitRuleTargetId(FhirMapJavaParser.RuleTargetIdContext context) {
+    public Object visitRuleTargetId(@NotNull FhirMapJavaParser.RuleTargetIdContext context) {
         try {
-            this.executor.transformId(VisitorExtensions.VisitOrDefault(this, context.ruleTargetContext(), String[].class), VisitorExtensions.VisitOrDefault(this, context.ruleTargetIdSystem(), UrlData.class), VisitorExtensions.VisitOrDefault(this, context.ruleTargetIdValue(), String.class), VisitorExtensions.VisitOrDefault(this, context.ruleTargetIdType(), String.class), VisitorExtensions.VisitOrDefault(this, context.ruleTargetVariable(), String.class));
+            this.executor.transformId((List<String>) this.visit(context.ruleTargetContext()), (UrlData) this.visit(context.ruleTargetIdSystem()),  (String) this.visit(context.ruleTargetIdValue()), (String) this.visit(context.ruleTargetIdType()), (String) this.visit(context.ruleTargetVariable()));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -953,14 +1067,15 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
      Parse grammar rule ruleTargetPointer
 
      @param context
-     @return String[]
+     @return List<String>
      */
 //C# TO JAVA CONVERTER TODO TASK: Java annotations will not correspond to .NET attributes:
 //ORIGINAL LINE: public override Object VisitRuleTargetPointer([NotNull] RuleTargetPointerContext context)
     @Override
-    public Object visitRuleTargetPointer(FhirMapJavaParser.RuleTargetPointerContext context) {
+    public Object visitRuleTargetPointer(@NotNull FhirMapJavaParser.RuleTargetPointerContext context) {
         try {
-            this.executor.transformPointer(VisitorExtensions.VisitOrDefault(this, context.ruleTargetContext(), String[].class), VisitorExtensions.VisitOrDefault(this, context.ruleTargetPointerResource(), String.class), VisitorExtensions.VisitOrDefault(this, context.ruleTargetVariable(), String.class));
+          //Not Implemented
+            this.executor.transformPointer((List<String>) this.visit(context.ruleTargetContext()), (String) this.visit(context.ruleTargetPointerResource()), (String) this.visit(context.ruleTargetVariable()));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -971,14 +1086,26 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
      Parse grammar rule ruleTargetQty1
 
      @param context
-     @return String[]
+     @return List<String>
      */
 //C# TO JAVA CONVERTER TODO TASK: Java annotations will not correspond to .NET attributes:
 //ORIGINAL LINE: public override Object VisitRuleTargetQty1([NotNull] RuleTargetQty1Context context)
     @Override
-    public Object visitRuleTargetQty1(FhirMapJavaParser.RuleTargetQty1Context context) {
+    public Object visitRuleTargetQty1(@NotNull FhirMapJavaParser.RuleTargetQty1Context context) {
         try {
-            this.executor.transformQty(VisitorExtensions.VisitOrDefault(this, context.ruleTargetContext(), String[].class), VisitorExtensions.VisitOrDefault(this, context.ruleTargetQty1Text(), String.class), VisitorExtensions.VisitOrDefault(this, context.ruleTargetVariable(), String.class));
+          List<String> ctx = null;
+          String text = null;
+          String targetVar = null;
+          if (context.ruleTargetContext() != null){
+            ctx = (List<String>) this.visit(context.ruleTargetContext());
+          }
+          if (context.ruleTargetContext() != null){
+            text = (String) this.visit(context.ruleTargetQty1Text());
+          }
+          if (context.ruleTargetContext() != null){
+            targetVar = (String) this.visit(context.ruleTargetVariable());
+          }
+            this.executor.transformQty(ctx,text,targetVar);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -989,14 +1116,34 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
      Parse grammar rule ruleTargetQty2
 
      @param context
-     @return String[]
+     @return List<String>
      */
 //C# TO JAVA CONVERTER TODO TASK: Java annotations will not correspond to .NET attributes:
 //ORIGINAL LINE: public override Object VisitRuleTargetQty2([NotNull] RuleTargetQty2Context context)
     @Override
-    public Object visitRuleTargetQty2(FhirMapJavaParser.RuleTargetQty2Context context) {
+    public Object visitRuleTargetQty2(@NotNull FhirMapJavaParser.RuleTargetQty2Context context) {
         try {
-            this.executor.transformQty(VisitorExtensions.VisitOrDefault(this, context.ruleTargetContext(), String[].class), VisitorExtensions.VisitOrDefault(this, context.ruleTargetQty2Value(), String.class), VisitorExtensions.VisitOrDefault(this, context.ruleTargetQty2UnitString(), String.class), VisitorExtensions.<UrlData>VisitOrDefault(this, context.ruleTargetQty2System(), UrlData.class), VisitorExtensions.VisitOrDefault(this, context.ruleTargetVariable(), String.class));
+          List<String> ctx = null;
+          String value = null;
+          String unitSystem = null;
+          UrlData system = null;
+          String targetVar = null;
+          if (context.ruleTargetContext() != null){
+            ctx = (List<String>) this.visit(context.ruleTargetContext());
+          }
+          if (context.ruleTargetQty2Value() != null){
+            value = (String) this.visit(context.ruleTargetQty2Value());
+          }
+          if (context.ruleTargetQty2UnitString() != null){
+            unitSystem = (String) this.visit(context.ruleTargetQty2UnitString());
+          }
+          if (context.ruleTargetQty2System() != null){
+            system = (UrlData) this.visit(context.ruleTargetQty2System());
+          }
+          if (context.ruleTargetVariable() != null){
+            targetVar = (String) this.visit(context.ruleTargetVariable());
+          }
+          this.executor.transformQty(ctx, value, unitSystem, system, targetVar);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -1007,14 +1154,26 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
      Parse grammar rule ruleTargetQty3
 
      @param context
-     @return String[]
+     @return List<String>
      */
 //C# TO JAVA CONVERTER TODO TASK: Java annotations will not correspond to .NET attributes:
 //ORIGINAL LINE: public override Object VisitRuleTargetQty3([NotNull] RuleTargetQty3Context context)
     @Override
-    public Object visitRuleTargetQty3(FhirMapJavaParser.RuleTargetQty3Context context) {
+    public Object visitRuleTargetQty3(@NotNull FhirMapJavaParser.RuleTargetQty3Context context) {
         try {
-            this.executor.transformQty(VisitorExtensions.VisitOrDefault(this, context.ruleTargetContext(), String[].class), VisitorExtensions.VisitOrDefault(this, context.ruleTargetQty3Value(), String.class), VisitorExtensions.VisitOrDefault(this, context.ruleTargetQty3UnitString(), String.class), VisitorExtensions.<String>VisitOrDefault(this, context.ruleTargetQty3CodeVariable(), String.class), VisitorExtensions.VisitOrDefault(this, context.ruleTargetVariable(), String.class));
+          List<String> ctx = null;
+          String value = null;
+          String unitString = null;
+          String codeVar = null;
+          String targetVar = null;
+          if (context.ruleTargetContext() != null){
+            ctx = (List<String>) this.visit(context.ruleTargetContext());
+          }
+            this.executor.transformQty((List<String>) this.visit(context.ruleTargetContext()),
+              (String) this.visit(context.ruleTargetQty3Value()),
+              (String) this.visit(context.ruleTargetQty3UnitString()),
+              (String) this.visit(context.ruleTargetQty3CodeVariable()),
+              (String) this.visit(context.ruleTargetVariable()));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -1025,14 +1184,15 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
      Parse grammar rule ruleTargetUuid
 
      @param context
-     @return String[]
+     @return List<String>
      */
 //C# TO JAVA CONVERTER TODO TASK: Java annotations will not correspond to .NET attributes:
 //ORIGINAL LINE: public override Object VisitRuleTargetUuid([NotNull] RuleTargetUuidContext context)
     @Override
-    public Object visitRuleTargetUuid(FhirMapJavaParser.RuleTargetUuidContext context) {
+    public Object visitRuleTargetUuid(@NotNull FhirMapJavaParser.RuleTargetUuidContext context) {
         try {
-            this.executor.transformUuid(VisitorExtensions.VisitOrDefault(this, context.ruleTargetContext(), String[].class), VisitorExtensions.VisitOrDefault(this, context.ruleTargetVariable(), String.class));
+          //not implemented
+            this.executor.transformUuid((List<String>) this.visit( context.ruleTargetContext()), (String) this.visit(context.ruleTargetVariable()));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -1043,14 +1203,15 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
      Parse grammar rule ruleTargetEscape
 
      @param context
-     @return String[]
+     @return List<String>
      */
 //C# TO JAVA CONVERTER TODO TASK: Java annotations will not correspond to .NET attributes:
 //ORIGINAL LINE: public override Object VisitRuleTargetDateOp([NotNull] RuleTargetDateOpContext context)
     @Override
-    public Object visitRuleTargetDateOp(FhirMapJavaParser.RuleTargetDateOpContext context) {
+    public Object visitRuleTargetDateOp(@NotNull FhirMapJavaParser.RuleTargetDateOpContext context) {
         try {
-            this.executor.transformDateOp(VisitorExtensions.VisitOrDefault(this, context.ruleTargetContext(), String[].class), VisitorExtensions.VisitOrDefault(this, context.ruleTargetDateOpVariable(), String.class), VisitorExtensions.VisitOrDefault(this, context.ruleTargetDateOpOperation(), String.class), VisitorExtensions.VisitOrDefault(this, context.ruleTargetDateOpVariable2(), String.class), VisitorExtensions.VisitOrDefault(this, context.ruleTargetVariable(), String.class));
+          //not implemented
+            this.executor.transformDateOp((List<String>) this.visit(context.ruleTargetContext()),(String)  this.visit(context.ruleTargetDateOpVariable()), (String) this.visit(context.ruleTargetDateOpOperation()), (String) this.visit(context.ruleTargetDateOpVariable2()), (String) this.visit(context.ruleTargetVariable()));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -1061,15 +1222,23 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
      Parse grammar rule ruleName
 
      @param context
-     @return String[]
+     @return List<String>
      */
 //C# TO JAVA CONVERTER TODO TASK: Java annotations will not correspond to .NET attributes:
 //ORIGINAL LINE: public override Object VisitRuleName([NotNull] RuleNameContext context)
     @Override
-    public Object visitRuleName(FhirMapJavaParser.RuleNameContext context)
+    public Object visitRuleName(@NotNull FhirMapJavaParser.RuleNameContext context)
     {
         ArrayList<String> values = new ArrayList<String>();
-        return VisitorExtensions.VisitMultiple(this, context.identifier(), values);
+        String[] retVals = new String[context.identifier().size()];
+        if (context.identifier() != null){
+          int count = context.identifier().size();
+          for (ParseTree treeItem : context.identifier()){
+            values.add((String) this.visit(treeItem));
+          }
+        }
+        return values;
+        //return VisitorExtensions.VisitMultiple(this, context.identifier(), values);
     }
 
     /**
@@ -1081,9 +1250,51 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
 //C# TO JAVA CONVERTER TODO TASK: Java annotations will not correspond to .NET attributes:
 //ORIGINAL LINE: public override Object VisitRuleSource([NotNull] RuleSourceContext context)
     @Override
-    public Object visitRuleSource(FhirMapJavaParser.RuleSourceContext context) {
+    public Object visitRuleSource(@NotNull FhirMapJavaParser.RuleSourceContext context) {
         try {
-            this.executor.ruleSource(VisitorExtensions.VisitOrDefault(this, context.ruleContext(), String[].class), VisitorExtensions.VisitOrDefault(this, context.ruleType(), FhirMapRuleType.class), VisitorExtensions.VisitOrDefault(this, context.ruleDefault(), String.class), VisitorExtensions.VisitOrDefault(this, context.ruleListOption(), FhirMapListOptions.class), VisitorExtensions.VisitOrDefault(this, context.ruleVariable(), String.class), VisitorExtensions.VisitOrDefault(this, context.ruleWherePath(), String.class), VisitorExtensions.VisitOrDefault(this, context.ruleCheckPath(), String.class));
+          List<String> ctx = null;
+          FhirMapJavaParser.RuleTypeContext typeContext = context.ruleType();
+          FhirMapRuleType type;
+          FhirMapJavaParser.RuleDefaultContext defaultContext = context.ruleDefault();
+          String defaultVal = null;
+          FhirMapJavaParser.RuleListOptionContext listOptionContext = context.ruleListOption();
+          FhirMapListOptions listOptions = null;
+          FhirMapJavaParser.RuleVariableContext variableContext = context.ruleVariable();
+          String var = null;
+          FhirMapJavaParser.RuleWherePathContext wherePathContext = context.ruleWherePath();
+          String where = null;
+          FhirMapJavaParser.RuleCheckPathContext checkPathContext = context.ruleCheckPath();
+          String check = null;
+          ctx = (List<String>) this.visit(context.ruleContext());
+          if (typeContext != null){
+            type = (FhirMapRuleType) this.visit(typeContext);
+          }
+          else {
+            type = null;
+          }
+          if (defaultContext != null ){
+            defaultVal = (String) this.visit(defaultContext);
+          }
+          if (listOptionContext != null){
+            listOptions = (FhirMapListOptions) this.visit(listOptionContext);
+          }
+          if (variableContext != null){
+            var = (String) this.visit(variableContext);
+          }
+          if (wherePathContext != null){
+            where = (String) this.visit(wherePathContext);
+          }
+          if (checkPathContext != null){
+            check = (String) this.visit(checkPathContext);
+          }
+            this.executor.ruleSource(ctx,
+              type,
+              defaultVal,
+              listOptions,
+              var,
+              where,
+              check
+              );
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -1099,21 +1310,23 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
 //C# TO JAVA CONVERTER TODO TASK: Java annotations will not correspond to .NET attributes:
 //ORIGINAL LINE: public override Object VisitRuleType([NotNull] RuleTypeContext context)
     @Override
-    public Object visitRuleType(FhirMapJavaParser.RuleTypeContext context) {
+    public Object visitRuleType(@NotNull FhirMapJavaParser.RuleTypeContext context) {
         ArrayList<Integer> values = new ArrayList<Integer>();
         FhirMapRuleType tempVar = new FhirMapRuleType();
-        try {
-            tempVar.TypeName = VisitorExtensions.VisitOrDefault(this, context.identifier(), String.class);
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (InstantiationException e) {
-            e.printStackTrace();
-        }
+        tempVar.TypeName = (String) this.visit(context.identifier());
         for (ParseTree treeItem : context.integer())
             {
-                List<Integer> occurances = Arrays.asList(tempVar.Occurances);
-                occurances.add((Integer) this.visit(treeItem));
-                tempVar.Occurances = occurances.toArray(tempVar.Occurances);
+                List<Integer> occurances;
+              if (tempVar.Occurances == null) {
+                occurances = new ArrayList<>();
+              }
+              else {
+                  occurances =tempVar.Occurances;
+
+              }
+              int i = (int) this.visit(treeItem);
+                  occurances.add(i);
+                tempVar.Occurances = occurances;
             }
 
         return tempVar;
@@ -1130,7 +1343,7 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
 //C# TO JAVA CONVERTER TODO TASK: Java annotations will not correspond to .NET attributes:
 //ORIGINAL LINE: public override Object VisitRuleDefault([NotNull] RuleDefaultContext context)
     @Override
-    public Object visitRuleDefault(FhirMapJavaParser.RuleDefaultContext context)  {
+    public Object visitRuleDefault(@NotNull FhirMapJavaParser.RuleDefaultContext context)  {
         try {
             return VisitorExtensions.<String>VisitOrDefault(this, context.identifier(), String.class);
         } catch (IllegalAccessException e) {
@@ -1151,30 +1364,29 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
 //ORIGINAL LINE: public override Object VisitRuleVariable([NotNull] RuleVariableContext context)
     @Override
     public Object visitRuleVariable(FhirMapJavaParser.RuleVariableContext context)  {
-        try {
-            return VisitorExtensions.<String>VisitOrDefault(this, context.identifier(), String.class);
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (InstantiationException e) {
-            e.printStackTrace();
-        }
-        return null;
+            return this.visit(context.identifier());
     }
 
     /**
      Parse grammar rule ruleContext
 
      @param context
-     @return String[]
+     @return List<String>
      */
 //C# TO JAVA CONVERTER TODO TASK: Java annotations will not correspond to .NET attributes:
 //ORIGINAL LINE: public override Object VisitRuleContext([NotNull] RuleContextContext context)
     @Override
-    public Object visitRuleContext(FhirMapJavaParser.RuleContextContext context)
+    public Object visitRuleContext(@NotNull FhirMapJavaParser.RuleContextContext context)
     {
-        ArrayList<String> values = new ArrayList<String>();
-        return VisitorExtensions.VisitMultiple(this, context.ruleContextElement(), values);
-    }
+      ArrayList<String> values = new ArrayList<String>();
+      String[] retVals = new String[context.ruleContextElement().size()];
+      if (context.ruleContextElement() != null){
+        int count = context.ruleContextElement().size();
+        for (ParseTree treeItem : context.ruleContextElement()){
+          values.add((String) this.visit(treeItem));
+        }
+      }
+      return values;    }
 
     /**
      Parse grammar rule ruleContextElement
@@ -1185,7 +1397,7 @@ public class FhirMapVisitor  extends FhirMapJavaBaseVisitor<Object>
 //C# TO JAVA CONVERTER TODO TASK: Java annotations will not correspond to .NET attributes:
 //ORIGINAL LINE: public override Object VisitRuleContextElement([NotNull] RuleContextElementContext context)
     @Override
-    public Object visitRuleContextElement(FhirMapJavaParser.RuleContextElementContext context)
+    public Object visitRuleContextElement(@NotNull FhirMapJavaParser.RuleContextElementContext context)
     {
         return this.visitChildren(context);
     }

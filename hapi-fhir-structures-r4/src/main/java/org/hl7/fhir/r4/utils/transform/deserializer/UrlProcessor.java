@@ -6,15 +6,21 @@ package org.hl7.fhir.r4.utils.transform.deserializer;
 
 import org.antlr.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CharStream;
+import org.antlr.v4.runtime.CodePointBuffer;
+import org.antlr.v4.runtime.CodePointCharStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
+import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.r4.utils.transform.deserializer.grammar.DebugParseListener;
 import org.hl7.fhir.r4.utils.transform.deserializer.grammar.ThrowExceptionErrorListener;
+import org.hl7.fhir.r4.utils.transform.deserializer.grammar.antlr.javaAntlr.FhirMapJavaLexer;
+import org.hl7.fhir.r4.utils.transform.deserializer.grammar.antlr.javaAntlr.FhirMapJavaParser;
 import org.hl7.fhir.r4.utils.transform.deserializer.grammar.antlr.javaAntlr.UrlJavaLexer;
 import org.hl7.fhir.r4.utils.transform.deserializer.grammar.antlr.javaAntlr.UrlJavaParser;
 
-import java.io.FileInputStream;
-import java.io.PrintWriter;
+import java.io.*;
+import java.nio.CharBuffer;
+import java.nio.charset.Charset;
 
 /**
 * Process Adl Language data.
@@ -48,16 +54,14 @@ public class UrlProcessor
     *  @return ANTLR parser
     */
     public UrlJavaParser loadGrammar(String text) throws Exception {
-        FileInputStream adlStream = new FileInputStream("");
-        PrintWriter writer = new PrintWriter(String.valueOf(adlStream));
-        writer.print(text);
-        writer.flush();
-        adlStream.reset();
-        ANTLRInputStream inputStream = new ANTLRInputStream(adlStream);
-        UrlJavaLexer lexer = new UrlJavaLexer((CharStream) inputStream);
-        lexer.addErrorListener(new ThrowExceptionErrorListener(text));
-        CommonTokenStream commonTokenStream = new CommonTokenStream(lexer);
-        UrlJavaParser grammar = new UrlJavaParser(commonTokenStream);
+      CharBuffer buffer = CharBuffer.allocate(text.length());
+      buffer.append(text);
+      buffer.position(0);
+
+      FhirMapJavaLexer lexer = new FhirMapJavaLexer(CodePointCharStream.fromBuffer(CodePointBuffer.withChars(CharBuffer.wrap(text.toCharArray()))));
+      lexer.addErrorListener(new ThrowExceptionErrorListener(text));
+      CommonTokenStream commonTokenStream = new CommonTokenStream(lexer);
+      UrlJavaParser grammar = new UrlJavaParser(commonTokenStream);
         if (this.getDebugFlag() == true)
         {
             DebugParseListener parseListener = new DebugParseListener(grammar, (s) ->
@@ -68,7 +72,7 @@ public class UrlProcessor
         }
          
         grammar.removeErrorListeners();
-        grammar.addErrorListener(new ThrowExceptionErrorListener(text));
+        //grammar.addErrorListener(new ThrowExceptionErrorListener(text));
         return grammar;
     }
 

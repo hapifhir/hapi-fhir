@@ -10,8 +10,8 @@ import org.hl7.fhir.instance.model.QuestionnaireResponse.QuestionnaireResponseSt
 import org.junit.*;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.dstu2.resource.Parameters;
-import ca.uhn.fhir.model.dstu2.resource.Patient;
+//import ca.uhn.fhir.model.dstu2.resource.Parameters;
+//import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.primitive.DateDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.util.TestUtil;
@@ -28,7 +28,7 @@ public class FhirInstanceValidatorTest {
 	public void testParametersOkDstu2() {
 		Patient patient = new Patient();
 		patient.addName().addGiven("James");
-		patient.setBirthDate(new DateDt("2011-02-02"));
+		//patient.setBirthDate(new DateDt("2011-02-02"));
 
 		Parameters input = new Parameters();
 		input.addParameter().setName("resource").setResource(patient);
@@ -158,10 +158,10 @@ public class FhirInstanceValidatorTest {
 	public void testParametersWithParameterTwoValues() {
 		Patient patient = new Patient();
 		patient.addName().addGiven("James");
-		patient.setBirthDate(new DateDt("2011-02-02"));
+		//patient.setBirthDate(new DateDt("2011-02-02"));
 
 		Parameters input = new Parameters();
-		input.addParameter().setName("resource").setResource(patient).setValue(new StringDt("AAA"));
+		//input.addParameter().setName("resource").setResource(patient).setValue(new StringDt("AAA"));
 
 		FhirValidator val = ourCtxDstu2.newValidator();
 		

@@ -28,9 +28,9 @@ public enum FhirMapGroupTypes
     {
         switch (this){
           case Types:
-            return "TYPES";
+            return "types";
           case TypeTypes:
-            return "TYPE+TYPES";
+            return "type+types";
           default:
             return "?";
         }

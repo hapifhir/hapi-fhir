@@ -51,9 +51,30 @@ public enum FhirMapUseNames
     }
 
 
+
+
     public static FhirMapUseNames forValue(int value)
     {
         return values()[value];
     }
+
+  public static FhirMapUseNames forValue(String value)
+  {
+
+    if (value == "Source"){
+      return FhirMapUseNames.Source;
+    }
+    else if (value == "Target"){
+      return FhirMapUseNames.Target;
+    }
+    else if (value == "Queried"){
+      return FhirMapUseNames.Queried;
+    }
+    else if (value == "Produced"){
+      return FhirMapUseNames.Produced;
+    }
+    else
+      return FhirMapUseNames.NotSet;
+  }
 }
 

@@ -5,6 +5,8 @@
 package org.hl7.fhir.r4.utils.transform.deserializer;
 
 
+import java.util.List;
+
 /**
 * Names that can be used in mapping 'uses ... as' clause.
 */
@@ -38,13 +40,13 @@ public class FhirMapRuleType
         if (b.Occurances == null)
             return 1;
          
-        retVal = a.Occurances.length - b.Occurances.length;
+        retVal = a.Occurances.size() - b.Occurances.size();
         if (retVal != 0)
             return retVal;
          
-        for (int i = 0;i < a.Occurances.length;i++)
+        for (int i = 0;i < a.Occurances.size();i++)
         {
-            retVal = a.Occurances[i] - b.Occurances[i];
+            retVal = a.Occurances.get(i) - b.Occurances.get(i);
             if (retVal != 0)
                 return retVal;
              
@@ -59,7 +61,7 @@ public class FhirMapRuleType
     /**
     * Cardinality (minimum, maximum) Zero length if unset.
     */
-    public Integer[] Occurances;
+    public List<Integer> Occurances;
 }
 
 

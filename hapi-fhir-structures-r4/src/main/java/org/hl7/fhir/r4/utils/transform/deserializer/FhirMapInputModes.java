@@ -25,9 +25,9 @@ public enum FhirMapInputModes
     public String getValue(){
       switch (this){
         case Source:
-          return "SOURCE";
+          return "source";
         case Target:
-          return "TARGET";
+          return "target";
         default:
           return "?";
       }

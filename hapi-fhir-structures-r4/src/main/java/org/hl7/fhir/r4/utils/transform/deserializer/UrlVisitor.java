@@ -1,5 +1,6 @@
 package org.hl7.fhir.r4.utils.transform.deserializer;
 
+import org.antlr.v4.runtime.tree.ParseTree;
 import org.hl7.fhir.r4.utils.transform.deserializer.grammar.VisitorExtensions;
 import org.hl7.fhir.r4.utils.transform.deserializer.grammar.antlr.javaAntlr.UrlJavaBaseVisitor;
 import org.hl7.fhir.r4.utils.transform.deserializer.grammar.antlr.javaAntlr.UrlJavaParser;
@@ -50,21 +51,19 @@ import java.util.ArrayList;
 	@Override
 	public Object visitUrl(UrlJavaParser.UrlContext context) {
 	  UrlData retVal = new UrlData();
-		try {
 			retVal.CompleteUrl = context.getText();
-			retVal.Authority = VisitorExtensions.<String>VisitOrDefault(this, context.authority(), "");
-			retVal.Login = VisitorExtensions.<UrlLogin>VisitOrDefault(this, context.login(), UrlLogin.class);
-			retVal.Host = VisitorExtensions.<String>VisitOrDefault(this, context.host(), "");
-			retVal.Port = VisitorExtensions.<Integer>VisitOrDefault(this, context.port(), -1);
-			retVal.Path = VisitorExtensions.<String[]>VisitOrDefault(this, context.path(), new String[0]);
-			retVal.Search = VisitorExtensions.<UrlSearch[]>VisitOrDefault(this, context.search(), new UrlSearch[0]);
+			retVal.Authority = (String) this.visit( context.authority());
+			if (context.login() != null)
+			  retVal.Login = (UrlLogin) this.visit( context.login());
+			if (context.host()!= null)
+			retVal.Host = (String) this.visit(context.host());
+			if (context.port() != null)
+			retVal.Port = (int) this.visit(context.port());
+			if (context.path() != null)
+			retVal.Path = (String[]) this.visit(context.path());
+			if (context.search() != null)
+			retVal.Search = (UrlSearch[]) this.visit(context.search());
 			return retVal;
-		} catch (IllegalAccessException e) {
-			e.printStackTrace();
-		} catch (InstantiationException e) {
-			e.printStackTrace();
-		}
-		return null;
 	}
 
 	/** 
@@ -123,7 +122,12 @@ import java.util.ArrayList;
 	public Object visitSearch(UrlJavaParser.SearchContext context)
 	{
 	  ArrayList<UrlSearch> retVal = new ArrayList<UrlSearch>();
-	  return VisitorExtensions.<UrlSearch>VisitMultiple(this, context.searchParameter(), retVal);
+	  if (context.searchParameter()!= null){
+	    for (ParseTree treeItem : context.searchParameter()){
+	      retVal.add((UrlSearch)this.visit(treeItem));
+       }
+     }
+     return retVal;
 	}
 
 	/** 
@@ -138,8 +142,8 @@ import java.util.ArrayList;
 	public Object visitSearchParameter(UrlJavaParser.SearchParameterContext context) {
 		try {
 			UrlSearch tempVar = new UrlSearch();
-			tempVar.Name = VisitorExtensions.<String>VisitOrDefault(this, context.searchParameterName(), String.class);
-			tempVar.Value = VisitorExtensions.<String>VisitOrDefault(this, context.searchParameterValue(), String.class);
+			tempVar.Name = (String) this.visit(context.searchParameterName());
+			tempVar.Value = (String) this.visit( context.searchParameterValue());
 			return tempVar;
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -202,14 +206,9 @@ import java.util.ArrayList;
 	@Override
 	public Object visitLogin(UrlJavaParser.LoginContext context) {
 	  UrlLogin retVal = new UrlLogin();
-		try {
-			retVal.Name = VisitorExtensions.<String>VisitOrDefault(this, context.user(), String.class);
-			retVal.Password = VisitorExtensions.<String>VisitOrDefault(this, context.password(), String.class);
-		} catch (IllegalAccessException e) {
-			e.printStackTrace();
-		} catch (InstantiationException e) {
-			e.printStackTrace();
-		}
+			retVal.Name = (String) this.visit(context.user());
+			retVal.Password = (String) this.visit( context.password());
+
 	  return retVal;
 	}
 

@@ -23,19 +23,19 @@ public interface FhirMapJavaVisitor<T> extends ParseTreeVisitor<T> {
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitKeyMap(FhirMapJavaParser.KeyMapContext ctx) throws Exception;
+	T visitKeyMap(FhirMapJavaParser.KeyMapContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link FhirMapJavaParser#keyUses}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitKeyUses(FhirMapJavaParser.KeyUsesContext ctx) throws Exception;
+	T visitKeyUses(FhirMapJavaParser.KeyUsesContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link FhirMapJavaParser#keyUsesName}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitKeyUsesName(FhirMapJavaParser.KeyUsesNameContext ctx) throws Exception;
+	T visitKeyUsesName(FhirMapJavaParser.KeyUsesNameContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link FhirMapJavaParser#keyUsesNameSource}.
 	 * @param ctx the parse tree
@@ -65,7 +65,7 @@ public interface FhirMapJavaVisitor<T> extends ParseTreeVisitor<T> {
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitKeyImports(FhirMapJavaParser.KeyImportsContext ctx) throws Exception;
+	T visitKeyImports(FhirMapJavaParser.KeyImportsContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link FhirMapJavaParser#group}.
 	 * @param ctx the parse tree
@@ -77,19 +77,19 @@ public interface FhirMapJavaVisitor<T> extends ParseTreeVisitor<T> {
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitGroupStart(FhirMapJavaParser.GroupStartContext ctx) throws Exception;
+	T visitGroupStart(FhirMapJavaParser.GroupStartContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link FhirMapJavaParser#groupExtends}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitGroupExtends(FhirMapJavaParser.GroupExtendsContext ctx) throws InstantiationException, IllegalAccessException;
+	T visitGroupExtends(FhirMapJavaParser.GroupExtendsContext ctx) ;
 	/**
 	 * Visit a parse tree produced by {@link FhirMapJavaParser#groupEnd}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitGroupEnd(FhirMapJavaParser.GroupEndContext ctx) throws Exception;
+	T visitGroupEnd(FhirMapJavaParser.GroupEndContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link FhirMapJavaParser#groupType}.
 	 * @param ctx the parse tree
@@ -119,7 +119,7 @@ public interface FhirMapJavaVisitor<T> extends ParseTreeVisitor<T> {
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitRuleInput(FhirMapJavaParser.RuleInputContext ctx) throws Exception;
+	T visitRuleInput(FhirMapJavaParser.RuleInputContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link FhirMapJavaParser#ruleInputName}.
 	 * @param ctx the parse tree
@@ -137,7 +137,7 @@ public interface FhirMapJavaVisitor<T> extends ParseTreeVisitor<T> {
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitRuleInputMode(FhirMapJavaParser.RuleInputModeContext ctx) throws InstantiationException, IllegalAccessException;
+	T visitRuleInputMode(FhirMapJavaParser.RuleInputModeContext ctx) ;
 	/**
 	 * Visit a parse tree produced by {@link FhirMapJavaParser#ruleInputModes}.
 	 * @param ctx the parse tree
@@ -161,7 +161,7 @@ public interface FhirMapJavaVisitor<T> extends ParseTreeVisitor<T> {
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitRuleInstance(FhirMapJavaParser.RuleInstanceContext ctx) throws Exception;
+	T visitRuleInstance(FhirMapJavaParser.RuleInstanceContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link FhirMapJavaParser#ruleName}.
 	 * @param ctx the parse tree
@@ -179,19 +179,19 @@ public interface FhirMapJavaVisitor<T> extends ParseTreeVisitor<T> {
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitRuleSource(FhirMapJavaParser.RuleSourceContext ctx) throws Exception;
+	T visitRuleSource(FhirMapJavaParser.RuleSourceContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link FhirMapJavaParser#ruleType}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitRuleType(FhirMapJavaParser.RuleTypeContext ctx) throws InstantiationException, IllegalAccessException;
+	T visitRuleType(FhirMapJavaParser.RuleTypeContext ctx) ;
 	/**
 	 * Visit a parse tree produced by {@link FhirMapJavaParser#ruleDefault}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitRuleDefault(FhirMapJavaParser.RuleDefaultContext ctx) throws InstantiationException, IllegalAccessException;
+	T visitRuleDefault(FhirMapJavaParser.RuleDefaultContext ctx) ;
 	/**
 	 * Visit a parse tree produced by {@link FhirMapJavaParser#ruleListOption}.
 	 * @param ctx the parse tree
@@ -203,7 +203,7 @@ public interface FhirMapJavaVisitor<T> extends ParseTreeVisitor<T> {
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitRuleVariable(FhirMapJavaParser.RuleVariableContext ctx) throws InstantiationException, IllegalAccessException;
+	T visitRuleVariable(FhirMapJavaParser.RuleVariableContext ctx) ;
 	/**
 	 * Visit a parse tree produced by {@link FhirMapJavaParser#ruleContext}.
 	 * @param ctx the parse tree
@@ -257,19 +257,19 @@ public interface FhirMapJavaVisitor<T> extends ParseTreeVisitor<T> {
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitRuleTargetContext(FhirMapJavaParser.RuleTargetContextContext ctx) throws InstantiationException, IllegalAccessException;
+	T visitRuleTargetContext(FhirMapJavaParser.RuleTargetContextContext ctx) ;
 	/**
 	 * Visit a parse tree produced by {@link FhirMapJavaParser#ruleTargetAs}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitRuleTargetAs(FhirMapJavaParser.RuleTargetAsContext ctx) throws Exception;
+	T visitRuleTargetAs(FhirMapJavaParser.RuleTargetAsContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link FhirMapJavaParser#ruleTargetAssign}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitRuleTargetAssign(FhirMapJavaParser.RuleTargetAssignContext ctx) throws Exception;
+	T visitRuleTargetAssign(FhirMapJavaParser.RuleTargetAssignContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link FhirMapJavaParser#ruleTargetAssignValue}.
 	 * @param ctx the parse tree
@@ -281,7 +281,7 @@ public interface FhirMapJavaVisitor<T> extends ParseTreeVisitor<T> {
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitRuleTargetAppend(FhirMapJavaParser.RuleTargetAppendContext ctx) throws Exception;
+	T visitRuleTargetAppend(FhirMapJavaParser.RuleTargetAppendContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link FhirMapJavaParser#ruleTargetAppendSources}.
 	 * @param ctx the parse tree
@@ -299,7 +299,7 @@ public interface FhirMapJavaVisitor<T> extends ParseTreeVisitor<T> {
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitRuleTargetC(FhirMapJavaParser.RuleTargetCContext ctx) throws Exception;
+	T visitRuleTargetC(FhirMapJavaParser.RuleTargetCContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link FhirMapJavaParser#ruleTargetCSystem}.
 	 * @param ctx the parse tree
@@ -323,7 +323,7 @@ public interface FhirMapJavaVisitor<T> extends ParseTreeVisitor<T> {
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitRuleTargetCast(FhirMapJavaParser.RuleTargetCastContext ctx) throws Exception;
+	T visitRuleTargetCast(FhirMapJavaParser.RuleTargetCastContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link FhirMapJavaParser#ruleTargetCastSource}.
 	 * @param ctx the parse tree
@@ -347,7 +347,7 @@ public interface FhirMapJavaVisitor<T> extends ParseTreeVisitor<T> {
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitRuleTargetCC1(FhirMapJavaParser.RuleTargetCC1Context ctx) throws Exception;
+	T visitRuleTargetCC1(FhirMapJavaParser.RuleTargetCC1Context ctx);
 	/**
 	 * Visit a parse tree produced by {@link FhirMapJavaParser#ruleTargetCC1Text}.
 	 * @param ctx the parse tree
@@ -359,7 +359,7 @@ public interface FhirMapJavaVisitor<T> extends ParseTreeVisitor<T> {
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitRuleTargetCC2(FhirMapJavaParser.RuleTargetCC2Context ctx) throws Exception;
+	T visitRuleTargetCC2(FhirMapJavaParser.RuleTargetCC2Context ctx);
 	/**
 	 * Visit a parse tree produced by {@link FhirMapJavaParser#ruleTargetCC2System}.
 	 * @param ctx the parse tree
@@ -383,7 +383,7 @@ public interface FhirMapJavaVisitor<T> extends ParseTreeVisitor<T> {
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitRuleTargetCp(FhirMapJavaParser.RuleTargetCpContext ctx) throws Exception;
+	T visitRuleTargetCp(FhirMapJavaParser.RuleTargetCpContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link FhirMapJavaParser#ruleTargetCpSystem}.
 	 * @param ctx the parse tree
@@ -401,7 +401,7 @@ public interface FhirMapJavaVisitor<T> extends ParseTreeVisitor<T> {
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitRuleTargetCopy(FhirMapJavaParser.RuleTargetCopyContext ctx) throws Exception;
+	T visitRuleTargetCopy(FhirMapJavaParser.RuleTargetCopyContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link FhirMapJavaParser#ruleTargetCopySource}.
 	 * @param ctx the parse tree
@@ -413,7 +413,7 @@ public interface FhirMapJavaVisitor<T> extends ParseTreeVisitor<T> {
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitRuleTargetCreate(FhirMapJavaParser.RuleTargetCreateContext ctx) throws Exception;
+	T visitRuleTargetCreate(FhirMapJavaParser.RuleTargetCreateContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link FhirMapJavaParser#ruleTargetCreateType}.
 	 * @param ctx the parse tree
@@ -425,7 +425,7 @@ public interface FhirMapJavaVisitor<T> extends ParseTreeVisitor<T> {
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitRuleTargetDateOp(FhirMapJavaParser.RuleTargetDateOpContext ctx) throws Exception;
+	T visitRuleTargetDateOp(FhirMapJavaParser.RuleTargetDateOpContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link FhirMapJavaParser#ruleTargetDateOpVariable}.
 	 * @param ctx the parse tree
@@ -473,7 +473,7 @@ public interface FhirMapJavaVisitor<T> extends ParseTreeVisitor<T> {
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitRuleTargetEvaluate(FhirMapJavaParser.RuleTargetEvaluateContext ctx) throws Exception;
+	T visitRuleTargetEvaluate(FhirMapJavaParser.RuleTargetEvaluateContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link FhirMapJavaParser#ruleTargetEvaluateObject}.
 	 * @param ctx the parse tree
@@ -491,7 +491,7 @@ public interface FhirMapJavaVisitor<T> extends ParseTreeVisitor<T> {
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitRuleTargetId(FhirMapJavaParser.RuleTargetIdContext ctx) throws Exception;
+	T visitRuleTargetId(FhirMapJavaParser.RuleTargetIdContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link FhirMapJavaParser#ruleTargetIdSystem}.
 	 * @param ctx the parse tree
@@ -515,7 +515,7 @@ public interface FhirMapJavaVisitor<T> extends ParseTreeVisitor<T> {
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitRuleTargetPointer(FhirMapJavaParser.RuleTargetPointerContext ctx) throws Exception;
+	T visitRuleTargetPointer(FhirMapJavaParser.RuleTargetPointerContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link FhirMapJavaParser#ruleTargetPointerResource}.
 	 * @param ctx the parse tree
@@ -533,7 +533,7 @@ public interface FhirMapJavaVisitor<T> extends ParseTreeVisitor<T> {
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitRuleTargetQty1(FhirMapJavaParser.RuleTargetQty1Context ctx) throws Exception;
+	T visitRuleTargetQty1(FhirMapJavaParser.RuleTargetQty1Context ctx);
 	/**
 	 * Visit a parse tree produced by {@link FhirMapJavaParser#ruleTargetQty1Text}.
 	 * @param ctx the parse tree
@@ -545,7 +545,7 @@ public interface FhirMapJavaVisitor<T> extends ParseTreeVisitor<T> {
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitRuleTargetQty2(FhirMapJavaParser.RuleTargetQty2Context ctx) throws Exception;
+	T visitRuleTargetQty2(FhirMapJavaParser.RuleTargetQty2Context ctx);
 	/**
 	 * Visit a parse tree produced by {@link FhirMapJavaParser#ruleTargetQty2Value}.
 	 * @param ctx the parse tree
@@ -569,7 +569,7 @@ public interface FhirMapJavaVisitor<T> extends ParseTreeVisitor<T> {
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitRuleTargetQty3(FhirMapJavaParser.RuleTargetQty3Context ctx) throws Exception;
+	T visitRuleTargetQty3(FhirMapJavaParser.RuleTargetQty3Context ctx);
 	/**
 	 * Visit a parse tree produced by {@link FhirMapJavaParser#ruleTargetQty3Value}.
 	 * @param ctx the parse tree
@@ -593,7 +593,7 @@ public interface FhirMapJavaVisitor<T> extends ParseTreeVisitor<T> {
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitRuleTargetReference(FhirMapJavaParser.RuleTargetReferenceContext ctx) throws Exception;
+	T visitRuleTargetReference(FhirMapJavaParser.RuleTargetReferenceContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link FhirMapJavaParser#ruleTargetReferenceSource}.
 	 * @param ctx the parse tree
@@ -605,7 +605,7 @@ public interface FhirMapJavaVisitor<T> extends ParseTreeVisitor<T> {
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitRuleTargetTranslate(FhirMapJavaParser.RuleTargetTranslateContext ctx) throws Exception;
+	T visitRuleTargetTranslate(FhirMapJavaParser.RuleTargetTranslateContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link FhirMapJavaParser#ruleTargetTranslateSource}.
 	 * @param ctx the parse tree
@@ -659,7 +659,7 @@ public interface FhirMapJavaVisitor<T> extends ParseTreeVisitor<T> {
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitRuleTargetTruncate(FhirMapJavaParser.RuleTargetTruncateContext ctx) throws Exception;
+	T visitRuleTargetTruncate(FhirMapJavaParser.RuleTargetTruncateContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link FhirMapJavaParser#ruleTargetTruncateSource}.
 	 * @param ctx the parse tree
@@ -677,13 +677,13 @@ public interface FhirMapJavaVisitor<T> extends ParseTreeVisitor<T> {
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitRuleTargetUuid(FhirMapJavaParser.RuleTargetUuidContext ctx) throws Exception;
+	T visitRuleTargetUuid(FhirMapJavaParser.RuleTargetUuidContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link FhirMapJavaParser#ruleTargetVariable}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitRuleTargetVariable(FhirMapJavaParser.RuleTargetVariableContext ctx) throws InstantiationException, IllegalAccessException;
+	T visitRuleTargetVariable(FhirMapJavaParser.RuleTargetVariableContext ctx) ;
 	/**
 	 * Visit a parse tree produced by {@link FhirMapJavaParser#fhirPath}.
 	 * @param ctx the parse tree
@@ -725,17 +725,17 @@ public interface FhirMapJavaVisitor<T> extends ParseTreeVisitor<T> {
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitQuotedUrl(FhirMapJavaParser.QuotedUrlContext ctx) throws Exception;
+	T visitQuotedUrl(FhirMapJavaParser.QuotedUrlContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link FhirMapJavaParser#structureDefinition}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitStructureDefinition(FhirMapJavaParser.StructureDefinitionContext ctx) throws InstantiationException, IllegalAccessException;
+	T visitStructureDefinition(FhirMapJavaParser.StructureDefinitionContext ctx) ;
 	/**
 	 * Visit a parse tree produced by {@link FhirMapJavaParser#structureMap}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitStructureMap(FhirMapJavaParser.StructureMapContext ctx) throws InstantiationException, IllegalAccessException;
+	T visitStructureMap(FhirMapJavaParser.StructureMapContext ctx) ;
 }
