@@ -1,16 +1,18 @@
 package org.hl7.fhir.r4.hapi.ctx;
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
-
-import java.util.*;
-
+import ca.uhn.fhir.context.FhirContext;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.r4.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.r4.model.ValueSet.ValueSetExpansionComponent;
 
-import ca.uhn.fhir.context.FhirContext;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class ValidationSupportChain implements IValidationSupport {
 
@@ -51,7 +53,19 @@ public class ValidationSupportChain implements IValidationSupport {
 		return myChain.get(0).expandValueSet(theCtx, theInclude);
 	}
 
-	@Override
+  @Override
+  public List<IBaseResource> fetchAllConformanceResources(FhirContext theContext) {
+    List<IBaseResource> retVal = new ArrayList<>();
+    for (IValidationSupport next : myChain) {
+      List<IBaseResource> candidates = next.fetchAllConformanceResources(theContext);
+      if (candidates != null) {
+        retVal.addAll(candidates);
+      }
+    }
+    return retVal;
+  }
+
+  @Override
 	public CodeSystem fetchCodeSystem(FhirContext theCtx, String theSystem) {
 		for (IValidationSupport next : myChain) {
 			CodeSystem retVal = next.fetchCodeSystem(theCtx, theSystem);

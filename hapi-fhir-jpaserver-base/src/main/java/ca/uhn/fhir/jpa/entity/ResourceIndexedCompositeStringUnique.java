@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.entity;
 
+import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.*;
 import org.hl7.fhir.r4.model.Resource;
 
@@ -88,6 +89,7 @@ public class ResourceIndexedCompositeStringUnique implements Comparable<Resource
 	}
 
 	public void setResource(ResourceTable theResource) {
+		Validate.notNull(theResource);
 		myResource = theResource;
 	}
 

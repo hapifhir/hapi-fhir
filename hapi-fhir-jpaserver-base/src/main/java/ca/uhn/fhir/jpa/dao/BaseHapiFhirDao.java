@@ -243,16 +243,20 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 						if (nextParam.getParamName().equals(nextCompositeOf.getName())) {
 							IQueryParameterType nextParamAsClientParam = nextParam.toQueryParameterType();
 							String value = nextParamAsClientParam.getValueAsQueryToken(getContext());
-							value = UrlUtil.escape(value);
-							nextChoicesList.add(key + "=" + value);
+							if (isNotBlank(value)) {
+								value = UrlUtil.escape(value);
+								nextChoicesList.add(key + "=" + value);
+							}
 						}
 					}
 				}
 				if (linksForCompositePart != null) {
 					for (ResourceLink nextLink : linksForCompositePart) {
 						String value = nextLink.getTargetResource().getIdDt().toUnqualifiedVersionless().getValue();
-						value = UrlUtil.escape(value);
-						nextChoicesList.add(key + "=" + value);
+						if (isNotBlank(value)) {
+							value = UrlUtil.escape(value);
+							nextChoicesList.add(key + "=" + value);
+						}
 					}
 				}
 			}
@@ -260,7 +264,9 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 			Set<String> queryStringsToPopulate = extractCompositeStringUniquesValueChains(theEntity.getResourceType(), partsChoices);
 
 			for (String nextQueryString : queryStringsToPopulate) {
-				compositeStringUniques.add(new ResourceIndexedCompositeStringUnique(theEntity, nextQueryString));
+				if (isNotBlank(nextQueryString)) {
+					compositeStringUniques.add(new ResourceIndexedCompositeStringUnique(theEntity, nextQueryString));
+				}
 			}
 		}
 
@@ -1562,7 +1568,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 				theEntity.setParamsUriPopulated(uriParams.isEmpty() == false);
 				theEntity.setParamsCoords(coordsParams);
 				theEntity.setParamsCoordsPopulated(coordsParams.isEmpty() == false);
-				theEntity.setParamsCompositeStringUnique(compositeStringUniques);
+//				theEntity.setParamsCompositeStringUnique(compositeStringUniques);
 				theEntity.setParamsCompositeStringUniquePresent(compositeStringUniques.isEmpty() == false);
 				theEntity.setResourceLinks(links);
 				theEntity.setHasLinks(links.isEmpty() == false);
@@ -1715,11 +1721,24 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 			theEntity.setResourceLinks(links);
 
 			// Store composite string uniques
-			for (ResourceIndexedCompositeStringUnique next : existingCompositeStringUniques) {
-				myEntityManager.remove(next);
-			}
-			for (ResourceIndexedCompositeStringUnique next : compositeStringUniques) {
-				myEntityManager.persist(next);
+			if (getConfig().isUniqueIndexesEnabled()) {
+				for (ResourceIndexedCompositeStringUnique next : existingCompositeStringUniques) {
+					if (!compositeStringUniques.contains(next)) {
+						myEntityManager.remove(next);
+					}
+				}
+				for (ResourceIndexedCompositeStringUnique next : compositeStringUniques) {
+					if (!existingCompositeStringUniques.contains(next)) {
+						if (myConfig.isUniqueIndexesCheckedBeforeSave()) {
+							ResourceIndexedCompositeStringUnique existing = myResourceIndexedCompositeStringUniqueDao.findByQueryString(next.getIndexString());
+							if (existing != null) {
+								throw new PreconditionFailedException("Can not create resource of type " + theEntity.getResourceType() + " as it would create a duplicate index matching query: " + next.getIndexString() + " (existing index belongs to " + existing.getResource().getIdDt().toUnqualifiedVersionless().getValue() + ")");
+							}
+						}
+						ourLog.debug("Persisting unique index: {}", next);
+						myEntityManager.persist(next);
+					}
+				}
 			}
 
 			theEntity.toString();
@@ -1896,6 +1915,21 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 	 * @param thePartsChoices E.g. <code>[[gender=male], [name=SMITH, name=JOHN]]</code>
 	 */
 	public static Set<String> extractCompositeStringUniquesValueChains(String theResourceType, List<List<String>> thePartsChoices) {
+
+		for (List<String> next : thePartsChoices) {
+			for (Iterator<String> iter = next.iterator(); iter.hasNext(); ) {
+				if (isBlank(iter.next())) {
+					iter.remove();
+				}
+			}
+			if (next.isEmpty()) {
+				return Collections.emptySet();
+			}
+		}
+
+		if (thePartsChoices.isEmpty()) {
+			return Collections.emptySet();
+		}
 
 		Collections.sort(thePartsChoices, new Comparator<List<String>>() {
 			@Override

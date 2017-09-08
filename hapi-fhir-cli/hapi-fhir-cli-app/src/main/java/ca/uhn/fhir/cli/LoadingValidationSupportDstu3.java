@@ -1,8 +1,9 @@
 package ca.uhn.fhir.cli;
 
-import java.util.Collections;
-import java.util.List;
-
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
+import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import org.hl7.fhir.dstu3.hapi.validation.IValidationSupport;
 import org.hl7.fhir.dstu3.model.CodeSystem;
 import org.hl7.fhir.dstu3.model.StructureDefinition;
@@ -10,10 +11,8 @@ import org.hl7.fhir.dstu3.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.dstu3.model.ValueSet.ValueSetExpansionComponent;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.client.api.IGenericClient;
-import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
-import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
+import java.util.Collections;
+import java.util.List;
 
 public class LoadingValidationSupportDstu3 implements IValidationSupport {
 
@@ -23,6 +22,11 @@ public class LoadingValidationSupportDstu3 implements IValidationSupport {
 
 	@Override
 	public ValueSetExpansionComponent expandValueSet(FhirContext theContext, ConceptSetComponent theInclude) {
+		return null;
+	}
+
+	@Override
+	public List<IBaseResource> fetchAllConformanceResources(FhirContext theContext) {
 		return null;
 	}
 

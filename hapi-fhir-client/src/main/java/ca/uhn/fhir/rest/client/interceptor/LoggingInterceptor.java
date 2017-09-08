@@ -26,6 +26,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.Constants;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.Validate;
@@ -107,7 +108,12 @@ public class LoggingInterceptor implements IClientInterceptor {
 			 */
 			List<String> locationHeaders = theResponse.getHeaders(Constants.HEADER_LOCATION);
 			if (locationHeaders != null && locationHeaders.size() > 0) {
-				respLocation = " (Location: " + locationHeaders.get(0) + ")";
+				String locationValue = locationHeaders.get(0);
+				IdDt locationValueId = new IdDt(locationValue);
+				if (locationValueId.hasBaseUrl() && locationValueId.hasIdPart()) {
+					locationValue = locationValueId.toUnqualified().getValue();
+				}
+				respLocation = " (" + locationValue + ")";
 			}
 			myLog.info("Client response: {}{}", message, respLocation);
 		}

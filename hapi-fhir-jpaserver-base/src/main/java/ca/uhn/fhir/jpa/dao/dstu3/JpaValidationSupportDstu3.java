@@ -1,15 +1,23 @@
 package ca.uhn.fhir.jpa.dao.dstu3;
 
-import java.util.Collections;
-import java.util.List;
-
-import javax.transaction.Transactional;
-import javax.transaction.Transactional.TxType;
-
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.dao.SearchParameterMap;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.param.StringParam;
+import ca.uhn.fhir.rest.param.UriParam;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.dstu3.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.dstu3.model.ValueSet.ValueSetExpansionComponent;
 import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+
+import javax.transaction.Transactional;
+import javax.transaction.Transactional.TxType;
+import java.util.Collections;
+import java.util.List;
 
 /*
  * #%L
@@ -20,9 +28,9 @@ import org.hl7.fhir.instance.model.api.IAnyResource;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -31,18 +39,7 @@ import org.hl7.fhir.instance.model.api.IAnyResource;
  * #L%
  */
 
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.dao.SearchParameterMap;
-import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import ca.uhn.fhir.rest.param.StringParam;
-import ca.uhn.fhir.rest.param.UriParam;
-
-@Transactional(value=TxType.REQUIRED)
+@Transactional(value = TxType.REQUIRED)
 public class JpaValidationSupportDstu3 implements IJpaValidationSupportDstu3 {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(JpaValidationSupportDstu3.class);
@@ -69,12 +66,23 @@ public class JpaValidationSupportDstu3 implements IJpaValidationSupportDstu3 {
 	public JpaValidationSupportDstu3() {
 		super();
 	}
-	
-	
+
+
 	@Override
-	@Transactional(value=TxType.SUPPORTS)
+	@Transactional(value = TxType.SUPPORTS)
 	public ValueSetExpansionComponent expandValueSet(FhirContext theCtx, ConceptSetComponent theInclude) {
 		return null;
+	}
+
+	@Override
+	public List<IBaseResource> fetchAllConformanceResources(FhirContext theContext) {
+		return null;
+	}
+
+	@Override
+	@Transactional(value = TxType.SUPPORTS)
+	public List<StructureDefinition> fetchAllStructureDefinitions(FhirContext theContext) {
+		return Collections.emptyList();
 	}
 
 	@Override
@@ -103,7 +111,7 @@ public class JpaValidationSupportDstu3 implements IJpaValidationSupportDstu3 {
 					params = new SearchParameterMap();
 					params.setLoadSynchronousUpTo(1);
 					params.add(ValueSet.SP_URL, new UriParam(theUri));
-				  search = myValueSetDao.search(params);
+					search = myValueSetDao.search(params);
 				}
 			} else {
 				SearchParameterMap params = new SearchParameterMap();
@@ -145,28 +153,20 @@ public class JpaValidationSupportDstu3 implements IJpaValidationSupportDstu3 {
 	}
 
 	@Override
-	@Transactional(value=TxType.SUPPORTS)
+	public StructureDefinition fetchStructureDefinition(FhirContext theCtx, String theUrl) {
+		return fetchResource(theCtx, StructureDefinition.class, theUrl);
+	}
+
+	@Override
+	@Transactional(value = TxType.SUPPORTS)
 	public boolean isCodeSystemSupported(FhirContext theCtx, String theSystem) {
 		return false;
 	}
 
 	@Override
-	@Transactional(value=TxType.SUPPORTS)
+	@Transactional(value = TxType.SUPPORTS)
 	public CodeValidationResult validateCode(FhirContext theCtx, String theCodeSystem, String theCode, String theDisplay) {
 		return null;
-	}
-
-
-	@Override
-	public StructureDefinition fetchStructureDefinition(FhirContext theCtx, String theUrl) {
-		return fetchResource(theCtx, StructureDefinition.class, theUrl);
-	}
-
-
-	@Override
-	@Transactional(value=TxType.SUPPORTS)
-	public List<StructureDefinition> fetchAllStructureDefinitions(FhirContext theContext) {
-		return Collections.emptyList();
 	}
 
 }

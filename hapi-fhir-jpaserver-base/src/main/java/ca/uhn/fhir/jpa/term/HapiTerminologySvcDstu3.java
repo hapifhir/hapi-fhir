@@ -255,6 +255,11 @@ public class HapiTerminologySvcDstu3 extends BaseHapiTerminologySvc implements I
 	}
 
 	@Override
+	public List<IBaseResource> fetchAllConformanceResources(FhirContext theContext) {
+		return null;
+	}
+
+	@Override
 	public List<VersionIndependentConcept> expandValueSet(String theValueSet) {
 		ValueSet source = new ValueSet();
 		source.getCompose().addInclude().addValueSet(theValueSet);

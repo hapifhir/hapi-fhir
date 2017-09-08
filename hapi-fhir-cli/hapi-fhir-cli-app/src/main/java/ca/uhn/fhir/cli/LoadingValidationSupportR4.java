@@ -1,28 +1,36 @@
 package ca.uhn.fhir.cli;
 
-import java.util.Collections;
-import java.util.List;
-
-import org.hl7.fhir.r4.model.CodeSystem;
-import org.hl7.fhir.r4.model.StructureDefinition;
-import org.hl7.fhir.r4.model.ValueSet.ConceptSetComponent;
-import org.hl7.fhir.r4.model.ValueSet.ValueSetExpansionComponent;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.CodeSystem;
+import org.hl7.fhir.r4.model.StructureDefinition;
+import org.hl7.fhir.r4.model.ValueSet.ConceptSetComponent;
+import org.hl7.fhir.r4.model.ValueSet.ValueSetExpansionComponent;
+
+import java.util.Collections;
+import java.util.List;
 
 public class LoadingValidationSupportR4 implements org.hl7.fhir.r4.hapi.ctx.IValidationSupport {
 
-	private FhirContext myCtx = FhirContext.forR4();
-
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(LoadingValidationSupportR4.class);
+	private FhirContext myCtx = FhirContext.forR4();
 
 	@Override
 	public ValueSetExpansionComponent expandValueSet(FhirContext theContext, ConceptSetComponent theInclude) {
 		return null;
+	}
+
+	@Override
+	public List<IBaseResource> fetchAllConformanceResources(FhirContext theContext) {
+		return null;
+	}
+
+	@Override
+	public List<StructureDefinition> fetchAllStructureDefinitions(FhirContext theContext) {
+		return Collections.emptyList();
 	}
 
 	@Override
@@ -34,10 +42,10 @@ public class LoadingValidationSupportR4 implements org.hl7.fhir.r4.hapi.ctx.IVal
 	public <T extends IBaseResource> T fetchResource(FhirContext theContext, Class<T> theClass, String theUri) {
 		String resName = myCtx.getResourceDefinition(theClass).getName();
 		ourLog.info("Attempting to fetch {} at URL: {}", resName, theUri);
-		
+
 		myCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
 		IGenericClient client = myCtx.newRestfulGenericClient("http://example.com");
-		
+
 		T result;
 		try {
 			result = client.read(theClass, theUri);
@@ -61,11 +69,6 @@ public class LoadingValidationSupportR4 implements org.hl7.fhir.r4.hapi.ctx.IVal
 	@Override
 	public CodeValidationResult validateCode(FhirContext theContext, String theCodeSystem, String theCode, String theDisplay) {
 		return null;
-	}
-
-	@Override
-	public List<StructureDefinition> fetchAllStructureDefinitions(FhirContext theContext) {
-		return Collections.emptyList();
 	}
 
 }
