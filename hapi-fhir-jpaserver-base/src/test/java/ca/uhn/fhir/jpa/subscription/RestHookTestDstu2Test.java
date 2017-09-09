@@ -281,11 +281,11 @@ public class RestHookTestDstu2Test extends BaseResourceProviderDstu2Test {
 	}
 
 	public static void waitForQueueToDrain(BaseSubscriptionInterceptor theRestHookSubscriptionInterceptor) throws InterruptedException {
-		ourLog.info("QUEUE HAS {} ITEMS", theRestHookSubscriptionInterceptor.getExecutorQueueForUnitTests().size());
-		while (theRestHookSubscriptionInterceptor.getExecutorQueueForUnitTests().size() > 0) {
+		ourLog.info("QUEUE HAS {} ITEMS", theRestHookSubscriptionInterceptor.getExecutorQueueSizeForUnitTests());
+		while (theRestHookSubscriptionInterceptor.getExecutorQueueSizeForUnitTests() > 0) {
 			Thread.sleep(50);
 		}
-		ourLog.info("QUEUE HAS {} ITEMS", theRestHookSubscriptionInterceptor.getExecutorQueueForUnitTests().size());
+		ourLog.info("QUEUE HAS {} ITEMS", theRestHookSubscriptionInterceptor.getExecutorQueueSizeForUnitTests());
 	}
 
 	private void waitForQueueToDrain() throws InterruptedException {

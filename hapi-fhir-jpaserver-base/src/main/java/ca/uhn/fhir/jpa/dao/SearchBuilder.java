@@ -1258,33 +1258,35 @@ public class SearchBuilder implements ISearchBuilder {
 		 * Check if there is a unique key associated with the set
 		 * of parameters passed in
 		 */
-		if (myParams.getIncludes().isEmpty()) {
-			if (myParams.getRevIncludes().isEmpty()) {
-				if (myParams.getEverythingMode() == null) {
-					if (myParams.isAllParametersHaveNoModifier()) {
-						Set<String> paramNames = theParams.keySet();
-						if (paramNames.isEmpty() == false) {
-							List<JpaRuntimeSearchParam> searchParams = mySearchParamRegistry.getActiveUniqueSearchParams(myResourceName, paramNames);
-							if (searchParams.size() > 0) {
-								List<List<String>> params = new ArrayList<>();
-								for (Entry<String, List<List<? extends IQueryParameterType>>> nextParamNameToValues : theParams.entrySet()) {
-									String nextParamName = nextParamNameToValues.getKey();
-									nextParamName = UrlUtil.escape(nextParamName);
-									for (List<? extends IQueryParameterType> nextAnd : nextParamNameToValues.getValue()) {
-										ArrayList<String> nextValueList = new ArrayList<>();
-										params.add(nextValueList);
-										for (IQueryParameterType nextOr : nextAnd) {
-											String nextOrValue = nextOr.getValueAsQueryToken(myContext);
-											nextOrValue = UrlUtil.escape(nextOrValue);
-											nextValueList.add(nextParamName + "=" + nextOrValue);
+		if (myCallingDao.getConfig().isUniqueIndexesEnabled()) {
+			if (myParams.getIncludes().isEmpty()) {
+				if (myParams.getRevIncludes().isEmpty()) {
+					if (myParams.getEverythingMode() == null) {
+						if (myParams.isAllParametersHaveNoModifier()) {
+							Set<String> paramNames = theParams.keySet();
+							if (paramNames.isEmpty() == false) {
+								List<JpaRuntimeSearchParam> searchParams = mySearchParamRegistry.getActiveUniqueSearchParams(myResourceName, paramNames);
+								if (searchParams.size() > 0) {
+									List<List<String>> params = new ArrayList<>();
+									for (Entry<String, List<List<? extends IQueryParameterType>>> nextParamNameToValues : theParams.entrySet()) {
+										String nextParamName = nextParamNameToValues.getKey();
+										nextParamName = UrlUtil.escape(nextParamName);
+										for (List<? extends IQueryParameterType> nextAnd : nextParamNameToValues.getValue()) {
+											ArrayList<String> nextValueList = new ArrayList<>();
+											params.add(nextValueList);
+											for (IQueryParameterType nextOr : nextAnd) {
+												String nextOrValue = nextOr.getValueAsQueryToken(myContext);
+												nextOrValue = UrlUtil.escape(nextOrValue);
+												nextValueList.add(nextParamName + "=" + nextOrValue);
+											}
 										}
 									}
+
+									Set<String> uniqueQueryStrings = BaseHapiFhirDao.extractCompositeStringUniquesValueChains(myResourceName, params);
+									ourLastHandlerMechanismForUnitTest = HandlerTypeEnum.UNIQUE_INDEX;
+									return new UniqueIndexIterator(uniqueQueryStrings);
+
 								}
-
-								Set<String> uniqueQueryStrings = BaseHapiFhirDao.extractCompositeStringUniquesValueChains(myResourceName, params);
-								ourLastHandlerMechanismForUnitTest = HandlerTypeEnum.UNIQUE_INDEX;
-								return new UniqueIndexIterator(uniqueQueryStrings);
-
 							}
 						}
 					}

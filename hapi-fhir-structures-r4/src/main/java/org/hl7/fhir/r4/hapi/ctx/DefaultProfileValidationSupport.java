@@ -1,11 +1,6 @@
 package org.hl7.fhir.r4.hapi.ctx;
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.util.*;
-
+import ca.uhn.fhir.context.FhirContext;
 import org.apache.commons.io.Charsets;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
@@ -14,10 +9,16 @@ import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.CodeSystem.CodeSystemContentMode;
 import org.hl7.fhir.r4.model.CodeSystem.ConceptDefinitionComponent;
-import org.hl7.fhir.r4.model.ValueSet.*;
+import org.hl7.fhir.r4.model.ValueSet.ConceptReferenceComponent;
+import org.hl7.fhir.r4.model.ValueSet.ConceptSetComponent;
+import org.hl7.fhir.r4.model.ValueSet.ValueSetExpansionComponent;
 import org.hl7.fhir.utilities.validation.ValidationMessage.IssueSeverity;
 
-import ca.uhn.fhir.context.FhirContext;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.*;
+
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class DefaultProfileValidationSupport implements IValidationSupport {
 
@@ -51,9 +52,19 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
   }
 
   @Override
-  public List<StructureDefinition> fetchAllStructureDefinitions(FhirContext theContext) {
-    return new ArrayList<StructureDefinition>(provideStructureDefinitionMap(theContext).values());
+  public List<IBaseResource> fetchAllConformanceResources(FhirContext theContext) {
+    ArrayList<IBaseResource> retVal = new ArrayList<>();
+    retVal.addAll(myCodeSystems.values());
+    retVal.addAll(myStructureDefinitions.values());
+    retVal.addAll(myValueSets.values());
+    return retVal;
   }
+
+  @Override
+  public List<StructureDefinition> fetchAllStructureDefinitions(FhirContext theContext) {
+    return new ArrayList<>(provideStructureDefinitionMap(theContext).values());
+  }
+
 
   @Override
   public CodeSystem fetchCodeSystem(FhirContext theContext, String theSystem) {
@@ -65,8 +76,8 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
       Map<String, CodeSystem> codeSystems = myCodeSystems;
       Map<String, ValueSet> valueSets = myValueSets;
       if (codeSystems == null || valueSets == null) {
-        codeSystems = new HashMap<String, CodeSystem>();
-        valueSets = new HashMap<String, ValueSet>();
+        codeSystems = new HashMap<>();
+        valueSets = new HashMap<>();
 
         loadCodeSystems(theContext, codeSystems, valueSets, "/org/hl7/fhir/r4/model/valueset/valuesets.xml");
         loadCodeSystems(theContext, codeSystems, valueSets, "/org/hl7/fhir/r4/model/valueset/v2-tables.xml");
@@ -92,7 +103,7 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
     if (theClass.equals(StructureDefinition.class)) {
       return (T) fetchStructureDefinition(theContext, theUri);
     }
-    
+
     if (theClass.equals(ValueSet.class) || theUri.startsWith(URL_PREFIX_VALUE_SET)) {
       return (T) fetchValueSet(theContext, theUri);
     }
@@ -193,25 +204,6 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
     return structureDefinitions;
   }
 
-  @Override
-  public CodeValidationResult validateCode(FhirContext theContext, String theCodeSystem, String theCode, String theDisplay) {
-    CodeSystem cs = fetchCodeSystem(theContext, theCodeSystem);
-    if (cs != null) {
-      boolean caseSensitive = true;
-      if (cs.hasCaseSensitive()) {
-        caseSensitive = cs.getCaseSensitive();
-      }
-
-      CodeValidationResult retVal = testIfConceptIsInList(theCode, cs.getConcept(), caseSensitive);
-
-      if (retVal != null) {
-        return retVal;
-      }
-    }
-
-    return new CodeValidationResult(IssueSeverity.WARNING, "Unknown code: " + theCodeSystem + " / " + theCode);
-  }
-
   private CodeValidationResult testIfConceptIsInList(String theCode, List<ConceptDefinitionComponent> conceptList, boolean theCaseSensitive) {
     String code = theCode;
     if (theCaseSensitive == false) {
@@ -241,6 +233,25 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
     }
 
     return retVal;
+  }
+
+  @Override
+  public CodeValidationResult validateCode(FhirContext theContext, String theCodeSystem, String theCode, String theDisplay) {
+    CodeSystem cs = fetchCodeSystem(theContext, theCodeSystem);
+    if (cs != null) {
+      boolean caseSensitive = true;
+      if (cs.hasCaseSensitive()) {
+        caseSensitive = cs.getCaseSensitive();
+      }
+
+      CodeValidationResult retVal = testIfConceptIsInList(theCode, cs.getConcept(), caseSensitive);
+
+      if (retVal != null) {
+        return retVal;
+      }
+    }
+
+    return new CodeValidationResult(IssueSeverity.WARNING, "Unknown code: " + theCodeSystem + " / " + theCode);
   }
 
 }

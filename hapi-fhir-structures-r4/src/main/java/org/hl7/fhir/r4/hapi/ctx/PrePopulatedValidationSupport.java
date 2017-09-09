@@ -1,16 +1,21 @@
 package org.hl7.fhir.r4.hapi.ctx;
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
-import java.util.*;
-
+import ca.uhn.fhir.context.FhirContext;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.r4.model.CodeSystem;
+import org.hl7.fhir.r4.model.MetadataResource;
+import org.hl7.fhir.r4.model.StructureDefinition;
+import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.r4.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.r4.model.ValueSet.ValueSetExpansionComponent;
 
-import ca.uhn.fhir.context.FhirContext;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /**
  * This class is an implementation of {@link IValidationSupport} which may be pre-populated
@@ -26,23 +31,21 @@ public class PrePopulatedValidationSupport implements IValidationSupport {
    * Constructor
    */
   public PrePopulatedValidationSupport() {
-    myStructureDefinitions = new HashMap<String, StructureDefinition>();
-    myValueSets = new HashMap<String, ValueSet>();
-    myCodeSystems = new HashMap<String, CodeSystem>();
+    myStructureDefinitions = new HashMap<>();
+    myValueSets = new HashMap<>();
+    myCodeSystems = new HashMap<>();
   }
+
 
   /**
    * Constructor
-   * 
-   * @param theStructureDefinitions
-   *          The StructureDefinitions to be returned by this module. Keys are the logical URL for the resource, and
-   *          values are the resource itself.
-   * @param theValueSets
-   *          The ValueSets to be returned by this module. Keys are the logical URL for the resource, and values are
-   *          the resource itself.
-   * @param theCodeSystems
-   *          The CodeSystems to be returned by this module. Keys are the logical URL for the resource, and values are
-   *          the resource itself.
+   *
+   * @param theStructureDefinitions The StructureDefinitions to be returned by this module. Keys are the logical URL for the resource, and
+   *                                values are the resource itself.
+   * @param theValueSets            The ValueSets to be returned by this module. Keys are the logical URL for the resource, and values are
+   *                                the resource itself.
+   * @param theCodeSystems          The CodeSystems to be returned by this module. Keys are the logical URL for the resource, and values are
+   *                                the resource itself.
    */
   public PrePopulatedValidationSupport(Map<String, StructureDefinition> theStructureDefinitions, Map<String, ValueSet> theValueSets, Map<String, CodeSystem> theCodeSystems) {
     myStructureDefinitions = theStructureDefinitions;
@@ -126,6 +129,15 @@ public class PrePopulatedValidationSupport implements IValidationSupport {
   @Override
   public ValueSetExpansionComponent expandValueSet(FhirContext theContext, ConceptSetComponent theInclude) {
     return null;
+  }
+
+  @Override
+  public List<IBaseResource> fetchAllConformanceResources(FhirContext theContext) {
+    ArrayList<IBaseResource> retVal = new ArrayList<>();
+    retVal.addAll(myCodeSystems.values());
+    retVal.addAll(myStructureDefinitions.values());
+    retVal.addAll(myValueSets.values());
+    return retVal;
   }
 
   @Override

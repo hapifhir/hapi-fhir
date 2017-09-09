@@ -21,12 +21,14 @@ package ca.uhn.fhir.jpa.subscription;
  */
 
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.client.interceptor.SimpleRequestHeaderInterceptor;
 import ca.uhn.fhir.rest.gclient.IClientExecutable;
 import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Subscription;
@@ -78,44 +80,51 @@ public class SubscriptionDeliveringRestHookSubscriber extends BaseSubscriptionSu
 		if (!(theMessage.getPayload() instanceof ResourceDeliveryMessage)) {
 			return;
 		}
+		try {
+			ResourceDeliveryMessage msg = (ResourceDeliveryMessage) theMessage.getPayload();
 
-		ResourceDeliveryMessage msg = (ResourceDeliveryMessage) theMessage.getPayload();
-
-		if (!subscriptionTypeApplies(getContext(), msg.getSubscription())) {
-			return;
-		}
-
-		IBaseResource subscription = msg.getSubscription();
-
-
-		// Grab the endpoint from the subscription
-		IPrimitiveType<?> endpoint = getContext().newTerser().getSingleValueOrNull(subscription, BaseSubscriptionInterceptor.SUBSCRIPTION_ENDPOINT, IPrimitiveType.class);
-		String endpointUrl = endpoint.getValueAsString();
-
-		// Grab the payload type (encoding mimetype) from the subscription
-		IPrimitiveType<?> payload = getContext().newTerser().getSingleValueOrNull(subscription, BaseSubscriptionInterceptor.SUBSCRIPTION_PAYLOAD, IPrimitiveType.class);
-		String payloadString = payload.getValueAsString();
-		if (payloadString.contains(";")) {
-			payloadString = payloadString.substring(0, payloadString.indexOf(';'));
-		}
-		payloadString = payloadString.trim();
-		EncodingEnum payloadType = EncodingEnum.forContentType(payloadString);
-		payloadType = ObjectUtils.defaultIfNull(payloadType, EncodingEnum.XML);
-
-		// Create the client request
-		getContext().getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
-		IGenericClient client = getContext().newRestfulGenericClient(endpointUrl);
-
-		// Additional headers specified in the subscription
-		List<IPrimitiveType> headers = getContext().newTerser().getValues(subscription, BaseSubscriptionInterceptor.SUBSCRIPTION_HEADER, IPrimitiveType.class);
-		for (IPrimitiveType next : headers) {
-			if (isNotBlank(next.getValueAsString())) {
-				client.registerInterceptor(new SimpleRequestHeaderInterceptor(next.getValueAsString()));
+			if (!subscriptionTypeApplies(getContext(), msg.getSubscription())) {
+				return;
 			}
+
+			IBaseResource subscription = msg.getSubscription();
+
+
+			// Grab the endpoint from the subscription
+			IPrimitiveType<?> endpoint = getContext().newTerser().getSingleValueOrNull(subscription, BaseSubscriptionInterceptor.SUBSCRIPTION_ENDPOINT, IPrimitiveType.class);
+			String endpointUrl = endpoint != null ? endpoint.getValueAsString() : null;
+
+			// Grab the payload type (encoding mimetype) from the subscription
+			IPrimitiveType<?> payload = getContext().newTerser().getSingleValueOrNull(subscription, BaseSubscriptionInterceptor.SUBSCRIPTION_PAYLOAD, IPrimitiveType.class);
+			String payloadString = payload != null ? payload.getValueAsString() : null;
+			payloadString = StringUtils.defaultString(payloadString, Constants.CT_FHIR_XML_NEW);
+			if (payloadString.contains(";")) {
+				payloadString = payloadString.substring(0, payloadString.indexOf(';'));
+			}
+			payloadString = payloadString.trim();
+			EncodingEnum payloadType = EncodingEnum.forContentType(payloadString);
+			payloadType = ObjectUtils.defaultIfNull(payloadType, EncodingEnum.XML);
+
+			// Create the client request
+			getContext().getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
+			IGenericClient client = null;
+			if (isNotBlank(endpointUrl)) {
+				client = getContext().newRestfulGenericClient(endpointUrl);
+
+				// Additional headers specified in the subscription
+				List<IPrimitiveType> headers = getContext().newTerser().getValues(subscription, BaseSubscriptionInterceptor.SUBSCRIPTION_HEADER, IPrimitiveType.class);
+				for (IPrimitiveType next : headers) {
+					if (isNotBlank(next.getValueAsString())) {
+						client.registerInterceptor(new SimpleRequestHeaderInterceptor(next.getValueAsString()));
+					}
+				}
+			}
+
+			deliverPayload(msg, subscription, payloadType, client);
+		} catch (Exception e) {
+			ourLog.error("Failure handling subscription payload", e);
+			throw new MessagingException(theMessage, "Failure handling subscription payload", e);
 		}
-
-		deliverPayload(msg, subscription, payloadType, client);
-
 	}
 
 }

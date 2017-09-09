@@ -1,5 +1,43 @@
 package ca.uhn.fhir.jpa.term;
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.dao.DaoMethodOutcome;
+import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.entity.ResourceTable;
+import ca.uhn.fhir.jpa.entity.TermCodeSystem;
+import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
+import ca.uhn.fhir.jpa.entity.TermConcept;
+import ca.uhn.fhir.jpa.util.StopWatch;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.util.CoverageIgnore;
+import ca.uhn.fhir.util.UrlUtil;
+import org.apache.lucene.search.Query;
+import org.hibernate.search.jpa.FullTextEntityManager;
+import org.hibernate.search.jpa.FullTextQuery;
+import org.hibernate.search.query.dsl.BooleanJunction;
+import org.hibernate.search.query.dsl.QueryBuilder;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.hapi.ctx.HapiWorkerContext;
+import org.hl7.fhir.r4.hapi.ctx.IValidationSupport;
+import org.hl7.fhir.r4.model.CodeSystem;
+import org.hl7.fhir.r4.model.CodeSystem.CodeSystemContentMode;
+import org.hl7.fhir.r4.model.CodeSystem.ConceptDefinitionComponent;
+import org.hl7.fhir.r4.model.StructureDefinition;
+import org.hl7.fhir.r4.model.ValueSet;
+import org.hl7.fhir.r4.model.ValueSet.*;
+import org.hl7.fhir.r4.terminologies.ValueSetExpander.ValueSetExpansionOutcome;
+import org.hl7.fhir.utilities.validation.ValidationMessage.IssueSeverity;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.*;
+
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -12,9 +50,9 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -22,36 +60,6 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * limitations under the License.
  * #L%
  */
-import java.util.*;
-
-import org.apache.lucene.search.Query;
-import org.hibernate.search.jpa.FullTextEntityManager;
-import org.hibernate.search.jpa.FullTextQuery;
-import org.hibernate.search.query.dsl.BooleanJunction;
-import org.hibernate.search.query.dsl.QueryBuilder;
-import org.hl7.fhir.r4.hapi.ctx.HapiWorkerContext;
-import org.hl7.fhir.r4.hapi.ctx.IValidationSupport;
-import org.hl7.fhir.r4.model.*;
-import org.hl7.fhir.r4.model.CodeSystem.CodeSystemContentMode;
-import org.hl7.fhir.r4.model.CodeSystem.ConceptDefinitionComponent;
-import org.hl7.fhir.r4.model.ValueSet.*;
-import org.hl7.fhir.r4.terminologies.ValueSetExpander.ValueSetExpansionOutcome;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.utilities.validation.ValidationMessage.IssueSeverity;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
-
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.dao.*;
-import ca.uhn.fhir.jpa.entity.*;
-import ca.uhn.fhir.jpa.util.StopWatch;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.server.exceptions.*;
-import ca.uhn.fhir.util.CoverageIgnore;
-import ca.uhn.fhir.util.UrlUtil;
 
 public class HapiTerminologySvcR4 extends BaseHapiTerminologySvc implements IValidationSupport, IHapiTerminologySvcR4 {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(HapiTerminologySvcR4.class);
@@ -63,6 +71,15 @@ public class HapiTerminologySvcR4 extends BaseHapiTerminologySvc implements IVal
 	@Autowired
 	private IValidationSupport myValidationSupport;
 
+	private void addAllChildren(String theSystemString, ConceptDefinitionComponent theCode, List<VersionIndependentConcept> theListToPopulate) {
+		if (isNotBlank(theCode.getCode())) {
+			theListToPopulate.add(new VersionIndependentConcept(theSystemString, theCode.getCode()));
+		}
+		for (ConceptDefinitionComponent nextChild : theCode.getConcept()) {
+			addAllChildren(theSystemString, nextChild, theListToPopulate);
+		}
+	}
+
 	private void addCodeIfNotAlreadyAdded(String system, ValueSetExpansionComponent retVal, Set<String> addedCodes, TermConcept nextConcept) {
 		if (addedCodes.add(nextConcept.getCode())) {
 			ValueSetExpansionContainsComponent contains = retVal.addContains();
@@ -72,36 +89,20 @@ public class HapiTerminologySvcR4 extends BaseHapiTerminologySvc implements IVal
 		}
 	}
 
-	@Override
-	protected List<VersionIndependentConcept> findCodesBelowUsingBuiltInSystems(String theSystem, String theCode) {
-		ArrayList<VersionIndependentConcept> retVal = new ArrayList<VersionIndependentConcept>();
-		CodeSystem system = myValidationSupport.fetchCodeSystem(myContext, theSystem);
-		if (system != null) {
-			findCodesBelow(system, theSystem, theCode, retVal);
-		}
-		return retVal;
+	private void addDisplayFilterExact(QueryBuilder qb, BooleanJunction<?> bool, ConceptSetFilterComponent nextFilter) {
+		bool.must(qb.phrase().onField("myDisplay").sentence(nextFilter.getValue()).createQuery());
 	}
 
-	private void findCodesBelow(CodeSystem theSystem, String theSystemString, String theCode, List<VersionIndependentConcept> theListToPopulate) {
-		List<ConceptDefinitionComponent> conceptList = theSystem.getConcept();
-		findCodesBelow(theSystemString, theCode, theListToPopulate, conceptList);
-	}
-
-	private void findCodesBelow(String theSystemString, String theCode, List<VersionIndependentConcept> theListToPopulate, List<ConceptDefinitionComponent> conceptList) {
-		for (ConceptDefinitionComponent next : conceptList) {
-			if (theCode.equals(next.getCode())) {
-				addAllChildren(theSystemString, next, theListToPopulate);
-			} else {
-				findCodesBelow(theSystemString, theCode, theListToPopulate, next.getConcept());
-			}
-		}
-	}
-
-	private void findCodesAbove(CodeSystem theSystem, String theSystemString, String theCode, List<VersionIndependentConcept> theListToPopulate) {
-		List<ConceptDefinitionComponent> conceptList = theSystem.getConcept();
-		for (ConceptDefinitionComponent next : conceptList) {
-			addTreeIfItContainsCode(theSystemString, next, theCode, theListToPopulate);
-		}
+	private void addDisplayFilterInexact(QueryBuilder qb, BooleanJunction<?> bool, ConceptSetFilterComponent nextFilter) {
+		Query textQuery = qb
+			.phrase()
+			.withSlop(2)
+			.onField("myDisplay").boostedTo(4.0f)
+			.andField("myDisplayEdgeNGram").boostedTo(2.0f)
+			// .andField("myDisplayNGram").boostedTo(1.0f)
+			// .andField("myDisplayPhonetic").boostedTo(0.5f)
+			.sentence(nextFilter.getValue().toLowerCase()).createQuery();
+		bool.must(textQuery);
 	}
 
 	private boolean addTreeIfItContainsCode(String theSystemString, ConceptDefinitionComponent theNext, String theCode, List<VersionIndependentConcept> theListToPopulate) {
@@ -116,41 +117,6 @@ public class HapiTerminologySvcR4 extends BaseHapiTerminologySvc implements IVal
 		}
 
 		return false;
-	}
-
-	private void addAllChildren(String theSystemString, ConceptDefinitionComponent theCode, List<VersionIndependentConcept> theListToPopulate) {
-		if (isNotBlank(theCode.getCode())) {
-			theListToPopulate.add(new VersionIndependentConcept(theSystemString, theCode.getCode()));
-		}
-		for (ConceptDefinitionComponent nextChild : theCode.getConcept()) {
-			addAllChildren(theSystemString, nextChild, theListToPopulate);
-		}
-	}
-
-	@Override
-	protected List<VersionIndependentConcept> findCodesAboveUsingBuiltInSystems(String theSystem, String theCode) {
-		ArrayList<VersionIndependentConcept> retVal = new ArrayList<VersionIndependentConcept>();
-		CodeSystem system = myValidationSupport.fetchCodeSystem(myContext, theSystem);
-		if (system != null) {
-			findCodesAbove(system, theSystem, theCode, retVal);
-		}
-		return retVal;
-	}
-
-	private void addDisplayFilterExact(QueryBuilder qb, BooleanJunction<?> bool, ConceptSetFilterComponent nextFilter) {
-		bool.must(qb.phrase().onField("myDisplay").sentence(nextFilter.getValue()).createQuery());
-	}
-
-	private void addDisplayFilterInexact(QueryBuilder qb, BooleanJunction<?> bool, ConceptSetFilterComponent nextFilter) {
-		Query textQuery = qb
-				.phrase()
-				.withSlop(2)
-				.onField("myDisplay").boostedTo(4.0f)
-				.andField("myDisplayEdgeNGram").boostedTo(2.0f)
-				// .andField("myDisplayNGram").boostedTo(1.0f)
-				// .andField("myDisplayPhonetic").boostedTo(0.5f)
-				.sentence(nextFilter.getValue().toLowerCase()).createQuery();
-		bool.must(textQuery);
 	}
 
 	@Override
@@ -204,8 +170,8 @@ public class HapiTerminologySvcR4 extends BaseHapiTerminologySvc implements IVal
 				if (isBlank(nextFilter.getValue()) || nextFilter.getOp() == null || isBlank(nextFilter.getProperty())) {
 					throw new InvalidRequestException("Invalid filter, must have fields populated: property op value");
 				}
-				
-				
+
+
 				if (nextFilter.getProperty().equals("display:exact") && nextFilter.getOp() == FilterOperator.EQUAL) {
 					addDisplayFilterExact(qb, bool, nextFilter);
 				} else if ("display".equals(nextFilter.getProperty()) && nextFilter.getOp() == FilterOperator.EQUAL) {
@@ -232,12 +198,12 @@ public class HapiTerminologySvcR4 extends BaseHapiTerminologySvc implements IVal
 			jpaQuery.setMaxResults(1000);
 
 			StopWatch sw = new StopWatch();
-			
+
 			@SuppressWarnings("unchecked")
 			List<TermConcept> result = jpaQuery.getResultList();
-			
+
 			ourLog.info("Expansion completed in {}ms", sw.getMillis());
-			
+
 			for (TermConcept nextConcept : result) {
 				addCodeIfNotAlreadyAdded(system, retVal, addedCodes, nextConcept);
 			}
@@ -279,6 +245,11 @@ public class HapiTerminologySvcR4 extends BaseHapiTerminologySvc implements IVal
 	}
 
 	@Override
+	public List<IBaseResource> fetchAllConformanceResources(FhirContext theContext) {
+		return null;
+	}
+
+	@Override
 	public List<StructureDefinition> fetchAllStructureDefinitions(FhirContext theContext) {
 		return Collections.emptyList();
 	}
@@ -298,6 +269,48 @@ public class HapiTerminologySvcR4 extends BaseHapiTerminologySvc implements IVal
 	@Override
 	public StructureDefinition fetchStructureDefinition(FhirContext theCtx, String theUrl) {
 		return null;
+	}
+
+	private void findCodesAbove(CodeSystem theSystem, String theSystemString, String theCode, List<VersionIndependentConcept> theListToPopulate) {
+		List<ConceptDefinitionComponent> conceptList = theSystem.getConcept();
+		for (ConceptDefinitionComponent next : conceptList) {
+			addTreeIfItContainsCode(theSystemString, next, theCode, theListToPopulate);
+		}
+	}
+
+	@Override
+	protected List<VersionIndependentConcept> findCodesAboveUsingBuiltInSystems(String theSystem, String theCode) {
+		ArrayList<VersionIndependentConcept> retVal = new ArrayList<VersionIndependentConcept>();
+		CodeSystem system = myValidationSupport.fetchCodeSystem(myContext, theSystem);
+		if (system != null) {
+			findCodesAbove(system, theSystem, theCode, retVal);
+		}
+		return retVal;
+	}
+
+	private void findCodesBelow(CodeSystem theSystem, String theSystemString, String theCode, List<VersionIndependentConcept> theListToPopulate) {
+		List<ConceptDefinitionComponent> conceptList = theSystem.getConcept();
+		findCodesBelow(theSystemString, theCode, theListToPopulate, conceptList);
+	}
+
+	private void findCodesBelow(String theSystemString, String theCode, List<VersionIndependentConcept> theListToPopulate, List<ConceptDefinitionComponent> conceptList) {
+		for (ConceptDefinitionComponent next : conceptList) {
+			if (theCode.equals(next.getCode())) {
+				addAllChildren(theSystemString, next, theListToPopulate);
+			} else {
+				findCodesBelow(theSystemString, theCode, theListToPopulate, next.getConcept());
+			}
+		}
+	}
+
+	@Override
+	protected List<VersionIndependentConcept> findCodesBelowUsingBuiltInSystems(String theSystem, String theCode) {
+		ArrayList<VersionIndependentConcept> retVal = new ArrayList<VersionIndependentConcept>();
+		CodeSystem system = myValidationSupport.fetchCodeSystem(myContext, theSystem);
+		if (system != null) {
+			findCodesBelow(system, theSystem, theCode, retVal);
+		}
+		return retVal;
 	}
 
 	@Override

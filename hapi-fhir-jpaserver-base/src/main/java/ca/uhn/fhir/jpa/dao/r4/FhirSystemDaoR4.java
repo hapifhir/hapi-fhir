@@ -662,6 +662,7 @@ public class FhirSystemDaoR4 extends BaseHapiFhirSystemDao<Bundle, Meta> {
 				String nextReplacementIdPart = nextReplacementId.getValueAsString();
 				if (nextTemporaryId.isUrn() && nextTemporaryIdPart.length() > IdType.URN_PREFIX.length()) {
 					matchUrl = matchUrl.replace(nextTemporaryIdPart, nextReplacementIdPart);
+					matchUrl = matchUrl.replace(UrlUtil.escape(nextTemporaryIdPart), nextReplacementIdPart);
 				}
 			}
 		}

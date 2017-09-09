@@ -41,6 +41,7 @@ public class App {
 		ourCommands.add(new ValidationDataUploader());
 		ourCommands.add(new WebsocketSubscribeCommand());
 		ourCommands.add(new UploadTerminologyCommand());
+		ourCommands.add(new IgPackUploader());
 
 		Collections.sort(ourCommands);
 	}

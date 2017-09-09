@@ -85,7 +85,7 @@ public class LoggingInterceptorTest {
 				System.out.flush();
 				return
 					formattedMessage.contains("Client request: GET http://localhost:" + ourPort + "/Patient/1 HTTP/1.1") ||
-					formattedMessage.contains("Client response: HTTP 200 OK (Location: http://localhost:" + ourPort + "/Patient/1/_history/1)");
+					formattedMessage.contains("Client response: HTTP 200 OK (Patient/1/_history/1)");
 			}
 		}));
 	}

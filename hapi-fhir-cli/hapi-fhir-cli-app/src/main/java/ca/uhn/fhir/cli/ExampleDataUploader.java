@@ -127,78 +127,16 @@ public class ExampleDataUploader extends BaseCommand {
 
 		boolean cacheFile = theCommandLine.hasOption('c');
 
-		String userHomeDir = System.getProperty("user.home");
+		Collection<File> inputFiles = loadFile(ctx, specUrl, filepath, cacheFile);
 
-		File applicationDir = new File(userHomeDir + File.separator + "." + "hapi-fhir-cli");
-		FileUtils.forceMkdir(applicationDir);
-
-		if (isNotBlank(filepath)) {
-			ourLog.info("Loading from local path: {}", filepath);
-
-			if (filepath.startsWith("~" + File.separator)) {
-				filepath = userHomeDir + filepath.substring(1);
-			}
-
-			File suppliedFile = new File(FilenameUtils.normalize(filepath));
-
-			if (suppliedFile.isDirectory()) {
-				Collection<File> inputFiles;
-				inputFiles = FileUtils.listFiles(suppliedFile, new String[]{"zip"}, false);
-
-				for (File inputFile : inputFiles) {
-					IBaseBundle bundle = getBundleFromFile(limit, inputFile, ctx);
-					processBundle(ctx, bundle);
-					sendBundleToTarget(targetServer, ctx, bundle);
-				}
-			} else {
-				IBaseBundle bundle = getBundleFromFile(limit, suppliedFile, ctx);
-				processBundle(ctx, bundle);
-				sendBundleToTarget(targetServer, ctx, bundle);
-			}
-
-		} else {
-
-			File cacheDir = new File(applicationDir, "cache");
-			FileUtils.forceMkdir(cacheDir);
-
-			File inputFile = new File(cacheDir, "examples-json-" + ctx.getVersion().getVersion() + ".zip");
-
-			Date cacheExpiryDate = DateUtils.addHours(new Date(), -12);
-
-			if (!inputFile.exists() | (cacheFile && FileUtils.isFileOlder(inputFile, cacheExpiryDate))) {
-
-				File exampleFileDownloading = new File(cacheDir, "examples-json-" + ctx.getVersion().getVersion() + ".zip.partial");
-
-				HttpGet get = new HttpGet(specUrl);
-				CloseableHttpClient client = HttpClientBuilder.create().build();
-				CloseableHttpResponse result = client.execute(get);
-
-				if (result.getStatusLine().getStatusCode() != 200) {
-					throw new CommandFailureException("Got HTTP " + result.getStatusLine().getStatusCode() + " response code loading " + specUrl);
-				}
-
-				ourLog.info("Downloading from remote url: {}", specUrl);
-				downloadFileFromInternet(result, exampleFileDownloading);
-
-				FileUtils.deleteQuietly(inputFile);
-				FileUtils.moveFile(exampleFileDownloading, inputFile);
-
-				if (!cacheFile) {
-					inputFile.deleteOnExit();
-				}
-
-				ourLog.info("Successfully Loaded example pack ({})", FileUtils.byteCountToDisplaySize(FileUtils.sizeOf(inputFile)));
-				IOUtils.closeQuietly(result.getEntity().getContent());
-			}
-
+		for (File inputFile : inputFiles) {
 			IBaseBundle bundle = getBundleFromFile(limit, inputFile, ctx);
 			processBundle(ctx, bundle);
-
 			sendBundleToTarget(targetServer, ctx, bundle);
-
 		}
 
 	}
+
 
 	private IBaseBundle getBundleFromFile(Integer theLimit, File theSuppliedFile, FhirContext theCtx) throws ParseException, IOException {
 		switch (theCtx.getVersion().getVersion()) {
@@ -791,43 +729,5 @@ public class ExampleDataUploader extends BaseCommand {
 		return bundle;
 	}
 
-	private void downloadFileFromInternet(CloseableHttpResponse result, File localFile) throws IOException {
-		FileOutputStream buffer = FileUtils.openOutputStream(localFile);
-		try {
-
-			long maxLength = result.getEntity().getContentLength();
-			long nextLog = -1;
-			// ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-			int nRead;
-			byte[] data = new byte[16384];
-			while ((nRead = result.getEntity().getContent().read(data, 0, data.length)) != -1) {
-				buffer.write(data, 0, nRead);
-				long fileSize = FileUtils.sizeOf(localFile);
-				if (fileSize > nextLog) {
-					System.err.print("\r" + Ansi.ansi().eraseLine());
-					System.err.print(FileUtils.byteCountToDisplaySize(fileSize));
-					if (maxLength > 0) {
-						System.err.print(" [");
-						int stars = (int) (50.0f * ((float) fileSize / (float) maxLength));
-						for (int i = 0; i < stars; i++) {
-							System.err.print("*");
-						}
-						for (int i = stars; i < 50; i++) {
-							System.err.print(" ");
-						}
-						System.err.print("]");
-					}
-					System.err.flush();
-					nextLog += 100000;
-				}
-			}
-			buffer.flush();
-
-			System.err.println();
-			System.err.flush();
-		} finally {
-			IOUtils.closeQuietly(buffer);
-		}
-	}
 
 }

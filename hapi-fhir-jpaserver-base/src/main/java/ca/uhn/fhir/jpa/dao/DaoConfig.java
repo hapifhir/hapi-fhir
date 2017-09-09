@@ -75,10 +75,64 @@ public class DaoConfig {
 	private boolean myDeleteStaleSearches = true;
 
 	private boolean myEnforceReferentialIntegrityOnDelete = true;
+	private boolean myUniqueIndexesEnabled = true;
 
+	/**
+	 * If set to <code>true</code> (default is <code>true</code>), indexes will be
+	 * created for search parameters marked as {@link ca.uhn.fhir.jpa.util.JpaConstants#EXT_SP_UNIQUE}.
+	 * This is a HAPI FHIR specific extension which can be used to specify that no more than one
+	 * resource can exist which matches a given criteria, using a database constraint to
+	 * enforce this.
+	 */
+	public boolean isUniqueIndexesEnabled() {
+		return myUniqueIndexesEnabled;
+	}
+
+	/**
+	 * If set to <code>true</code> (default is <code>true</code>), indexes will be
+	 * created for search parameters marked as {@link ca.uhn.fhir.jpa.util.JpaConstants#EXT_SP_UNIQUE}.
+	 * This is a HAPI FHIR specific extension which can be used to specify that no more than one
+	 * resource can exist which matches a given criteria, using a database constraint to
+	 * enforce this.
+	 */
+	public void setUniqueIndexesEnabled(boolean theUniqueIndexesEnabled) {
+		myUniqueIndexesEnabled = theUniqueIndexesEnabled;
+	}
+
+	/**
+	 * When using {@link #setUniqueIndexesEnabled(boolean) unique indexes}, if this
+	 * setting is set to <code>true</code> (default is <code>true</code>) the system
+	 * will test for the existence of a particular unique index value prior to saving
+	 * a new one.
+	 * <p>
+	 *    This causes friendlier error messages to be generated, but adds an
+	 *    extra round-trip to the database for eavh save so it can cause
+	 *    a small performance hit.
+	 * </p>
+	 */
+	public boolean isUniqueIndexesCheckedBeforeSave() {
+		return myUniqueIndexesCheckedBeforeSave;
+	}
+
+	/**
+	 * When using {@link #setUniqueIndexesEnabled(boolean) unique indexes}, if this
+	 * setting is set to <code>true</code> (default is <code>true</code>) the system
+	 * will test for the existence of a particular unique index value prior to saving
+	 * a new one.
+	 * <p>
+	 *    This causes friendlier error messages to be generated, but adds an
+	 *    extra round-trip to the database for eavh save so it can cause
+	 *    a small performance hit.
+	 * </p>
+	 */
+	public void setUniqueIndexesCheckedBeforeSave(boolean theUniqueIndexesCheckedBeforeSave) {
+		myUniqueIndexesCheckedBeforeSave = theUniqueIndexesCheckedBeforeSave;
+	}
+
+	private boolean myUniqueIndexesCheckedBeforeSave = true;
 	private boolean myEnforceReferentialIntegrityOnWrite = true;
-
 	private int myEverythingIncludesFetchPageSize = 50;
+
 	/**
 	 * update setter javadoc if default changes
 	 */

@@ -35,6 +35,7 @@ import ca.uhn.fhir.rest.param.DateRangeParam;
 public class BaseJpaSystemProvider<T, MT> extends BaseJpaProvider {
 
 	public static final String MARK_ALL_RESOURCES_FOR_REINDEXING = "$mark-all-resources-for-reindexing";
+	public static final String PERFORM_REINDEXING_PASS = "$perform-reindexing-pass";
 
 	private IFhirSystemDao<T, MT> myDao;
 

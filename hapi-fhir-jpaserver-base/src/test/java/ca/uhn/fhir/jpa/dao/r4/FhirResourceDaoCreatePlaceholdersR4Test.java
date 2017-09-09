@@ -83,12 +83,32 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 		Observation o = new Observation();
 		o.setStatus(ObservationStatus.FINAL);
 		o.getSubject().setReference("Patient/FOO");
-		try {
-			myObservationDao.create(o, mySrd);
-			fail();
-		} catch (InvalidRequestException e) {
-			assertEquals("Resource Patient/FOO not found, specified in path: Observation.subject", e.getMessage());
-		}
+		myObservationDao.create(o, mySrd);
+	}
+
+	@Test
+	public void testCreateWithMultiplePlaceholders() {
+		myDaoConfig.setAutoCreatePlaceholderReferenceTargets(true);
+
+		Task task = new Task();
+		task.addNote().setText("A note");
+		task.addPartOf().setReference("Task/AAA");
+		task.addPartOf().setReference("Task/AAA");
+		task.addPartOf().setReference("Task/AAA");
+		IIdType id = myTaskDao.create(task).getId().toUnqualifiedVersionless();
+
+		task = myTaskDao.read(id);
+		assertEquals(3, task.getPartOf().size());
+		assertEquals("Task/AAA", task.getPartOf().get(0).getReference());
+		assertEquals("Task/AAA", task.getPartOf().get(1).getReference());
+		assertEquals("Task/AAA", task.getPartOf().get(2).getReference());
+
+		SearchParameterMap params = new SearchParameterMap();
+		params.add(Task.SP_PART_OF, new ReferenceParam("Task/AAA"));
+		List<String> found = toUnqualifiedVersionlessIdValues(myTaskDao.search(params));
+		assertThat(found, contains(id.getValue()));
+
+
 	}
 
 	@Test
@@ -123,12 +143,7 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 		o.setId(id);
 		o.setStatus(ObservationStatus.FINAL);
 		o.getSubject().setReference("Patient/FOO");
-		try {
-			myObservationDao.update(o, mySrd);
-			fail();
-		} catch (InvalidRequestException e) {
-			assertEquals("Resource Patient/FOO not found, specified in path: Observation.subject", e.getMessage());
-		}
+		myObservationDao.update(o, mySrd);
 	}
 
 	@AfterClass

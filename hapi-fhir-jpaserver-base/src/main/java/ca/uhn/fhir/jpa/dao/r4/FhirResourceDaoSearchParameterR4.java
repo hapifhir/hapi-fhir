@@ -60,7 +60,7 @@ public class FhirResourceDaoSearchParameterR4 extends FhirResourceDaoR4<SearchPa
 			String expression = theResource.getExpression();
 			if (isNotBlank(expression)) {
 				final String resourceType = expression.substring(0, expression.indexOf('.'));
-				ourLog.info("Marking all resources of type {} for reindexing due to updated search parameter with path: {}", expression);
+				ourLog.info("Marking all resources of type {} for reindexing due to updated search parameter with path: {}", resourceType, expression);
 
 				TransactionTemplate txTemplate = new TransactionTemplate(myPlatformTransactionManager);
 				txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);

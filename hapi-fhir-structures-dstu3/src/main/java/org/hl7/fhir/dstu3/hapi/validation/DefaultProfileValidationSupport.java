@@ -1,11 +1,6 @@
 package org.hl7.fhir.dstu3.hapi.validation;
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.util.*;
-
+import ca.uhn.fhir.context.FhirContext;
 import org.apache.commons.io.Charsets;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
@@ -19,7 +14,11 @@ import org.hl7.fhir.dstu3.model.ValueSet.ValueSetExpansionComponent;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.utilities.validation.ValidationMessage.IssueSeverity;
 
-import ca.uhn.fhir.context.FhirContext;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.*;
+
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class DefaultProfileValidationSupport implements IValidationSupport {
 
@@ -49,6 +48,15 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
       }
     }
 
+    return retVal;
+  }
+
+  @Override
+  public List<IBaseResource> fetchAllConformanceResources(FhirContext theContext) {
+    ArrayList<IBaseResource> retVal = new ArrayList<>();
+    retVal.addAll(myCodeSystems.values());
+    retVal.addAll(myStructureDefinitions.values());
+    retVal.addAll(myValueSets.values());
     return retVal;
   }
 
@@ -94,7 +102,7 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
     if (theClass.equals(StructureDefinition.class)) {
       return (T) fetchStructureDefinition(theContext, theUri);
     }
-    
+
     if (theClass.equals(ValueSet.class) || theUri.startsWith(URL_PREFIX_VALUE_SET)) {
       return (T) fetchValueSet(theContext, theUri);
     }
@@ -195,25 +203,6 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
     return structureDefinitions;
   }
 
-  @Override
-  public CodeValidationResult validateCode(FhirContext theContext, String theCodeSystem, String theCode, String theDisplay) {
-    CodeSystem cs = fetchCodeSystem(theContext, theCodeSystem);
-    if (cs != null) {
-      boolean caseSensitive = true;
-      if (cs.hasCaseSensitive()) {
-        caseSensitive = cs.getCaseSensitive();
-      }
-
-      CodeValidationResult retVal = testIfConceptIsInList(theCode, cs.getConcept(), caseSensitive);
-
-      if (retVal != null) {
-        return retVal;
-      }
-    }
-
-    return new CodeValidationResult(IssueSeverity.WARNING, "Unknown code: " + theCodeSystem + " / " + theCode);
-  }
-
   private CodeValidationResult testIfConceptIsInList(String theCode, List<ConceptDefinitionComponent> conceptList, boolean theCaseSensitive) {
     String code = theCode;
     if (theCaseSensitive == false) {
@@ -243,6 +232,25 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
     }
 
     return retVal;
+  }
+
+  @Override
+  public CodeValidationResult validateCode(FhirContext theContext, String theCodeSystem, String theCode, String theDisplay) {
+    CodeSystem cs = fetchCodeSystem(theContext, theCodeSystem);
+    if (cs != null) {
+      boolean caseSensitive = true;
+      if (cs.hasCaseSensitive()) {
+        caseSensitive = cs.getCaseSensitive();
+      }
+
+      CodeValidationResult retVal = testIfConceptIsInList(theCode, cs.getConcept(), caseSensitive);
+
+      if (retVal != null) {
+        return retVal;
+      }
+    }
+
+    return new CodeValidationResult(IssueSeverity.WARNING, "Unknown code: " + theCodeSystem + " / " + theCode);
   }
 
 }

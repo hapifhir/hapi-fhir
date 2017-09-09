@@ -165,11 +165,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 	@Autowired
 	private IResourceIndexedCompositeStringUniqueDao myResourceIndexedCompositeStringUniqueDao;
 
-	private <T extends IBaseResource> void autoCreateResource(T theResource) {
-		IFhirResourceDao<T> dao = (IFhirResourceDao<T>) getDao(theResource.getClass());
-		dao.create(theResource);
-	}
-
 	protected void clearRequestAsProcessingSubRequest(ServletRequestDetails theRequestDetails) {
 		if (theRequestDetails != null) {
 			theRequestDetails.getUserData().remove(PROCESSING_SUB_REQUEST);
@@ -243,16 +238,20 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 						if (nextParam.getParamName().equals(nextCompositeOf.getName())) {
 							IQueryParameterType nextParamAsClientParam = nextParam.toQueryParameterType();
 							String value = nextParamAsClientParam.getValueAsQueryToken(getContext());
-							value = UrlUtil.escape(value);
-							nextChoicesList.add(key + "=" + value);
+							if (isNotBlank(value)) {
+								value = UrlUtil.escape(value);
+								nextChoicesList.add(key + "=" + value);
+							}
 						}
 					}
 				}
 				if (linksForCompositePart != null) {
 					for (ResourceLink nextLink : linksForCompositePart) {
 						String value = nextLink.getTargetResource().getIdDt().toUnqualifiedVersionless().getValue();
-						value = UrlUtil.escape(value);
-						nextChoicesList.add(key + "=" + value);
+						if (isNotBlank(value)) {
+							value = UrlUtil.escape(value);
+							nextChoicesList.add(key + "=" + value);
+						}
 					}
 				}
 			}
@@ -260,7 +259,9 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 			Set<String> queryStringsToPopulate = extractCompositeStringUniquesValueChains(theEntity.getResourceType(), partsChoices);
 
 			for (String nextQueryString : queryStringsToPopulate) {
-				compositeStringUniques.add(new ResourceIndexedCompositeStringUnique(theEntity, nextQueryString));
+				if (isNotBlank(nextQueryString)) {
+					compositeStringUniques.add(new ResourceIndexedCompositeStringUnique(theEntity, nextQueryString));
+				}
 			}
 		}
 
@@ -417,10 +418,12 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 					if (getConfig().isAutoCreatePlaceholderReferenceTargets()) {
 						IBaseResource newResource = missingResourceDef.newInstance();
 						newResource.setId(resName + "/" + id);
-						autoCreateResource(newResource);
+						IFhirResourceDao<IBaseResource> placeholderResourceDao = (IFhirResourceDao<IBaseResource>) getDao(newResource.getClass());
+						ourLog.info("Automatically creating empty placeholder resource: {}", newResource.getIdElement().getValue());
+						valueOf = placeholderResourceDao.update(newResource).getEntity().getId();
+					} else {
+						throw new InvalidRequestException("Resource " + resName + "/" + id + " not found, specified in path: " + nextPathsUnsplit);
 					}
-
-					throw new InvalidRequestException("Resource " + resName + "/" + id + " not found, specified in path: " + nextPathsUnsplit);
 				}
 				ResourceTable target = myEntityManager.find(ResourceTable.class, valueOf);
 				RuntimeResourceDefinition targetResourceDef = getContext().getResourceDefinition(type);
@@ -1562,7 +1565,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 				theEntity.setParamsUriPopulated(uriParams.isEmpty() == false);
 				theEntity.setParamsCoords(coordsParams);
 				theEntity.setParamsCoordsPopulated(coordsParams.isEmpty() == false);
-				theEntity.setParamsCompositeStringUnique(compositeStringUniques);
+//				theEntity.setParamsCompositeStringUnique(compositeStringUniques);
 				theEntity.setParamsCompositeStringUniquePresent(compositeStringUniques.isEmpty() == false);
 				theEntity.setResourceLinks(links);
 				theEntity.setHasLinks(links.isEmpty() == false);
@@ -1715,11 +1718,24 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 			theEntity.setResourceLinks(links);
 
 			// Store composite string uniques
-			for (ResourceIndexedCompositeStringUnique next : existingCompositeStringUniques) {
-				myEntityManager.remove(next);
-			}
-			for (ResourceIndexedCompositeStringUnique next : compositeStringUniques) {
-				myEntityManager.persist(next);
+			if (getConfig().isUniqueIndexesEnabled()) {
+				for (ResourceIndexedCompositeStringUnique next : existingCompositeStringUniques) {
+					if (!compositeStringUniques.contains(next)) {
+						myEntityManager.remove(next);
+					}
+				}
+				for (ResourceIndexedCompositeStringUnique next : compositeStringUniques) {
+					if (!existingCompositeStringUniques.contains(next)) {
+						if (myConfig.isUniqueIndexesCheckedBeforeSave()) {
+							ResourceIndexedCompositeStringUnique existing = myResourceIndexedCompositeStringUniqueDao.findByQueryString(next.getIndexString());
+							if (existing != null) {
+								throw new PreconditionFailedException("Can not create resource of type " + theEntity.getResourceType() + " as it would create a duplicate index matching query: " + next.getIndexString() + " (existing index belongs to " + existing.getResource().getIdDt().toUnqualifiedVersionless().getValue() + ")");
+							}
+						}
+						ourLog.debug("Persisting unique index: {}", next);
+						myEntityManager.persist(next);
+					}
+				}
 			}
 
 			theEntity.toString();
@@ -1896,6 +1912,21 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 	 * @param thePartsChoices E.g. <code>[[gender=male], [name=SMITH, name=JOHN]]</code>
 	 */
 	public static Set<String> extractCompositeStringUniquesValueChains(String theResourceType, List<List<String>> thePartsChoices) {
+
+		for (List<String> next : thePartsChoices) {
+			for (Iterator<String> iter = next.iterator(); iter.hasNext(); ) {
+				if (isBlank(iter.next())) {
+					iter.remove();
+				}
+			}
+			if (next.isEmpty()) {
+				return Collections.emptySet();
+			}
+		}
+
+		if (thePartsChoices.isEmpty()) {
+			return Collections.emptySet();
+		}
 
 		Collections.sort(thePartsChoices, new Comparator<List<String>>() {
 			@Override

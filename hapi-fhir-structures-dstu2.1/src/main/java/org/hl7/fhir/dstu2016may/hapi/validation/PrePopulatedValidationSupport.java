@@ -1,10 +1,6 @@
 package org.hl7.fhir.dstu2016may.hapi.validation;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
+import ca.uhn.fhir.context.FhirContext;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.dstu2016may.model.CodeSystem;
 import org.hl7.fhir.dstu2016may.model.StructureDefinition;
@@ -13,7 +9,10 @@ import org.hl7.fhir.dstu2016may.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.dstu2016may.model.ValueSet.ValueSetExpansionComponent;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
-import ca.uhn.fhir.context.FhirContext;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * This class is an implementation of {@link IValidationSupport} which may be pre-populated
@@ -29,30 +28,25 @@ public class PrePopulatedValidationSupport implements IValidationSupport {
 	 * Constructor
 	 */
 	public PrePopulatedValidationSupport() {
-		myStructureDefinitions = new HashMap<String,StructureDefinition>();
-		myValueSets = new HashMap<String,ValueSet>();
-		myCodeSystems = new HashMap<String,CodeSystem>();
+		myStructureDefinitions = new HashMap<String, StructureDefinition>();
+		myValueSets = new HashMap<String, ValueSet>();
+		myCodeSystems = new HashMap<String, CodeSystem>();
 	}
-	
-	
+
 	/**
-	 * Add a new StructureDefinition resource which will be available to the validator. Note that
-	 * {@link StructureDefinition#getUrl() the URL field) in this resource must contain a value as this
-	 * value will be used as the logical URL.
+	 * Constructor
+	 *
+	 * @param theStructureDefinitions The StructureDefinitions to be returned by this module. Keys are the logical URL for the resource, and
+	 *                                values are the resource itself.
+	 * @param theValueSets            The ValueSets to be returned by this module. Keys are the logical URL for the resource, and values are
+	 *                                the resource itself.
+	 * @param theCodeSystems          The CodeSystems to be returned by this module. Keys are the logical URL for the resource, and values are
+	 *                                the resource itself.
 	 */
-	public void addStructureDefinition(StructureDefinition theStructureDefinition) {
-		Validate.notBlank(theStructureDefinition.getUrl(), "theStructureDefinition.getUrl() must not return a value");
-		myStructureDefinitions.put(theStructureDefinition.getUrl(), theStructureDefinition);
-	}
-	
-	/**
-	 * Add a new ValueSet resource which will be available to the validator. Note that
-	 * {@link ValueSet#getUrl() the URL field) in this resource must contain a value as this
-	 * value will be used as the logical URL.
-	 */
-	public void addValueSet(ValueSet theValueSet) {
-		Validate.notBlank(theValueSet.getUrl(), "theValueSet.getUrl() must not return a value");
-		myValueSets.put(theValueSet.getUrl(), theValueSet);
+	public PrePopulatedValidationSupport(Map<String, StructureDefinition> theStructureDefinitions, Map<String, ValueSet> theValueSets, Map<String, CodeSystem> theCodeSystems) {
+		myStructureDefinitions = theStructureDefinitions;
+		myValueSets = theValueSets;
+		myCodeSystems = theCodeSystems;
 	}
 
 	/**
@@ -66,27 +60,37 @@ public class PrePopulatedValidationSupport implements IValidationSupport {
 	}
 
 	/**
-	 * Constructor
-	 * 
-	 * @param theStructureDefinitions
-	 *           The StructureDefinitions to be returned by this module. Keys are the logical URL for the resource, and
-	 *           values are the resource itself.
-	 * @param theValueSets
-	 *           The ValueSets to be returned by this module. Keys are the logical URL for the resource, and values are
-	 *           the resource itself.
-	 * @param theCodeSystems
-	 *           The CodeSystems to be returned by this module. Keys are the logical URL for the resource, and values are
-	 *           the resource itself.
+	 * Add a new StructureDefinition resource which will be available to the validator. Note that
+	 * {@link StructureDefinition#getUrl() the URL field) in this resource must contain a value as this
+	 * value will be used as the logical URL.
 	 */
-	public PrePopulatedValidationSupport(Map<String, StructureDefinition> theStructureDefinitions, Map<String, ValueSet> theValueSets, Map<String, CodeSystem> theCodeSystems) {
-		myStructureDefinitions = theStructureDefinitions;
-		myValueSets = theValueSets;
-		myCodeSystems = theCodeSystems;
+	public void addStructureDefinition(StructureDefinition theStructureDefinition) {
+		Validate.notBlank(theStructureDefinition.getUrl(), "theStructureDefinition.getUrl() must not return a value");
+		myStructureDefinitions.put(theStructureDefinition.getUrl(), theStructureDefinition);
+	}
+
+	/**
+	 * Add a new ValueSet resource which will be available to the validator. Note that
+	 * {@link ValueSet#getUrl() the URL field) in this resource must contain a value as this
+	 * value will be used as the logical URL.
+	 */
+	public void addValueSet(ValueSet theValueSet) {
+		Validate.notBlank(theValueSet.getUrl(), "theValueSet.getUrl() must not return a value");
+		myValueSets.put(theValueSet.getUrl(), theValueSet);
 	}
 
 	@Override
 	public ValueSetExpansionComponent expandValueSet(FhirContext theContext, ConceptSetComponent theInclude) {
 		return null;
+	}
+
+	@Override
+	public List<IBaseResource> fetchAllConformanceResources(FhirContext theContext) {
+		ArrayList<IBaseResource> retVal = new ArrayList<>();
+		retVal.addAll(myCodeSystems.values());
+		retVal.addAll(myStructureDefinitions.values());
+		retVal.addAll(myValueSets.values());
+		return retVal;
 	}
 
 	@Override

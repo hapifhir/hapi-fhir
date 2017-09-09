@@ -362,6 +362,17 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 		} finally {
 			IOUtils.closeQuietly(http);;
 		}
+
+		get = new HttpGet(ourServerBase + "/$perform-reindexing-pass");
+		http = ourHttpClient.execute(get);
+		try {
+			String output = IOUtils.toString(http.getEntity().getContent(), StandardCharsets.UTF_8);
+			ourLog.info(output);
+			assertEquals(200, http.getStatusLine().getStatusCode());
+		} finally {
+			IOUtils.closeQuietly(http);;
+		}
+
 	}
 	
 	@Transactional(propagation = Propagation.NEVER)

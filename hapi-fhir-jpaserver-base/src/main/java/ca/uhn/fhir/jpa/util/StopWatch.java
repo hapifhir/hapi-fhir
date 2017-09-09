@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.util;
 
+import org.apache.commons.lang3.time.DateUtils;
+
 import java.util.Date;
 
 /*
@@ -72,9 +74,15 @@ public class StopWatch {
 
 	static public String formatMillis(long val) {
 		StringBuilder buf = new StringBuilder(20);
-		append(buf, "", 2, ((val % 3600000) / 60000));
-		append(buf, ":", 2, ((val % 60000) / 1000));
-		append(buf, ".", 3, (val % 1000));
+		if (val >= DateUtils.MILLIS_PER_DAY) {
+			append(buf, "", 1, ((val / DateUtils.MILLIS_PER_DAY)));
+			append(buf, "d", 2, ((val % DateUtils.MILLIS_PER_DAY) / DateUtils.MILLIS_PER_HOUR));
+		} else {
+			append(buf, "", 2, ((val % DateUtils.MILLIS_PER_DAY) / DateUtils.MILLIS_PER_HOUR));
+		}
+		append(buf, ":", 2, ((val % DateUtils.MILLIS_PER_HOUR) / DateUtils.MILLIS_PER_MINUTE));
+		append(buf, ":", 2, ((val % DateUtils.MILLIS_PER_MINUTE) / DateUtils.MILLIS_PER_SECOND));
+		append(buf, ".", 3, (val % DateUtils.MILLIS_PER_SECOND));
 		return buf.toString();
 	}
 
