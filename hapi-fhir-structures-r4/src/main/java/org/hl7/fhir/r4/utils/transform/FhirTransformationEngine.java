@@ -258,11 +258,15 @@ public class FhirTransformationEngine extends BaseRunner {
    * @return
    * @throws Exception
    */
-  public StructureMapAnalysis analyse(Object appInfo, StructureMap map) throws Exception {
+  public StructureMapAnalysis analyse(BatchContext batchContext, Object appInfo, StructureMap map) throws Exception {
     setStructureMap(map);
     getIds().clear();
+    TransformContext context = batchContext.getTransformationContext(map.getUrl());//In case transform context is added prior to invocation of analyze.
+    if(context == null) {
+      context = new TransformContext(appInfo);
+      batchContext.addTransformationContext(map.getUrl(), context);
+    }
     StructureMapAnalysis result = new StructureMapAnalysis();
-    TransformContext context = new TransformContext(appInfo);
     VariablesForProfiling vars = new VariablesForProfiling(false, false);
     if (map.getGroup().size() == 0) {
       throw new InvalidMapConfigurationException("A StructureMap must specify at least one group");

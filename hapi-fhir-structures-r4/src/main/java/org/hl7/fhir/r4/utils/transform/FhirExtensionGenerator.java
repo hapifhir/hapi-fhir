@@ -14,7 +14,7 @@ public class FhirExtensionGenerator {
   public StructureDefinition generateExtensionStructureDefinition(String name, List<StringType> contexts, String shortDescription, String definition, int min, String max, String type) {
     StructureDefinition extensionStructureDefinition = new StructureDefinition();
     extensionStructureDefinition.setStatus(Enumerations.PublicationStatus.ACTIVE);
-    extensionStructureDefinition.setFhirVersion("3.0.1");//TODO Find out from Grahame or James
+    extensionStructureDefinition.setFhirVersion("3.0.1");//TODO Find out from Grahame or James See Constants
     extensionStructureDefinition.setKind(StructureDefinition.StructureDefinitionKind.COMPLEXTYPE);
     extensionStructureDefinition.setType("Extension");
     extensionStructureDefinition.setContextType(StructureDefinition.ExtensionContext.RESOURCE);

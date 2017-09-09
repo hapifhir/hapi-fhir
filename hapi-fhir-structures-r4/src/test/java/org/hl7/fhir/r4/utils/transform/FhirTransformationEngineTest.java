@@ -117,7 +117,7 @@ public class FhirTransformationEngineTest {
 			FhirTransformationEngine transformEngine = new FhirTransformationEngine(hapiContext, maps, null, null);
 			codedTextToCodingMap = createCodedTextToCodingMap();
 			maps.put(codedTextToCodingMap.getUrl(), codedTextToCodingMap);
-			List<StructureDefinition> result = transformEngine.analyse(null, codedTextToCodingMap).getProfiles();
+			List<StructureDefinition> result = transformEngine.analyse(null,null, codedTextToCodingMap).getProfiles();
 			File currentDir = new File(".");
 			String filePath = currentDir.getAbsolutePath();
 
