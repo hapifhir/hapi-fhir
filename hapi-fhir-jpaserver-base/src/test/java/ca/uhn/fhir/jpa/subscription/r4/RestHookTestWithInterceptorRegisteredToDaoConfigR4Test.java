@@ -84,11 +84,11 @@ public class RestHookTestWithInterceptorRegisteredToDaoConfigR4Test extends Base
 	}
 
 	private void waitForQueueToDrain() throws InterruptedException {
-		ourLog.info("QUEUE HAS {} ITEMS", getRestHookSubscriptionInterceptor().getExecutorQueueForUnitTests().size());
-		while (getRestHookSubscriptionInterceptor().getExecutorQueueForUnitTests().size() > 0) {
+		ourLog.info("QUEUE HAS {} ITEMS", getRestHookSubscriptionInterceptor().getExecutorQueueSizeForUnitTests());
+		while (getRestHookSubscriptionInterceptor().getExecutorQueueSizeForUnitTests() > 0) {
 			Thread.sleep(250);
 		}
-		ourLog.info("QUEUE HAS {} ITEMS", getRestHookSubscriptionInterceptor().getExecutorQueueForUnitTests().size());
+		ourLog.info("QUEUE HAS {} ITEMS", getRestHookSubscriptionInterceptor().getExecutorQueueSizeForUnitTests());
 	}
 
 	private Observation sendObservation(String code, String system) throws InterruptedException {

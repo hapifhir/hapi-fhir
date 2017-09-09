@@ -58,6 +58,9 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 	private static IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept> ourValueSetDao;
 
 	@Autowired
+	@Qualifier("myCoverageDaoDstu3")
+	protected IFhirResourceDao<Coverage> myCoverageDao;
+	@Autowired
 	protected IResourceIndexedCompositeStringUniqueDao myResourceIndexedCompositeStringUniqueDao;
 	@Autowired
 	@Qualifier("myAllergyIntoleranceDaoDstu3")

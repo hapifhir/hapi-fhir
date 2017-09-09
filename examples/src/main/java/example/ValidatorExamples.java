@@ -215,6 +215,12 @@ public class ValidatorExamples {
 			}
 
 			@Override
+			public List<IBaseResource> fetchAllConformanceResources(FhirContext theContext) {
+				// TODO: implement
+				return null;
+			}
+
+			@Override
 			public List<StructureDefinition> fetchAllStructureDefinitions(FhirContext theContext) {
 				// TODO: implement
 				return null;

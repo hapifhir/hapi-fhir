@@ -165,11 +165,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 	@Autowired
 	private IResourceIndexedCompositeStringUniqueDao myResourceIndexedCompositeStringUniqueDao;
 
-	private <T extends IBaseResource> void autoCreateResource(T theResource) {
-		IFhirResourceDao<T> dao = (IFhirResourceDao<T>) getDao(theResource.getClass());
-		dao.create(theResource);
-	}
-
 	protected void clearRequestAsProcessingSubRequest(ServletRequestDetails theRequestDetails) {
 		if (theRequestDetails != null) {
 			theRequestDetails.getUserData().remove(PROCESSING_SUB_REQUEST);
@@ -423,10 +418,12 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 					if (getConfig().isAutoCreatePlaceholderReferenceTargets()) {
 						IBaseResource newResource = missingResourceDef.newInstance();
 						newResource.setId(resName + "/" + id);
-						autoCreateResource(newResource);
+						IFhirResourceDao<IBaseResource> placeholderResourceDao = (IFhirResourceDao<IBaseResource>) getDao(newResource.getClass());
+						ourLog.info("Automatically creating empty placeholder resource: {}", newResource.getIdElement().getValue());
+						valueOf = placeholderResourceDao.update(newResource).getEntity().getId();
+					} else {
+						throw new InvalidRequestException("Resource " + resName + "/" + id + " not found, specified in path: " + nextPathsUnsplit);
 					}
-
-					throw new InvalidRequestException("Resource " + resName + "/" + id + " not found, specified in path: " + nextPathsUnsplit);
 				}
 				ResourceTable target = myEntityManager.find(ResourceTable.class, valueOf);
 				RuntimeResourceDefinition targetResourceDef = getContext().getResourceDefinition(type);

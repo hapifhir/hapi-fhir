@@ -46,10 +46,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
-import java.util.Enumeration;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.*;
 
 public abstract class BaseSubscriptionInterceptor extends ServerOperationInterceptorAdapter {
@@ -63,13 +60,15 @@ public abstract class BaseSubscriptionInterceptor extends ServerOperationInterce
 	private static final Integer MAX_SUBSCRIPTION_RESULTS = 1000;
 	private SubscribableChannel myProcessingChannel;
 	private SubscribableChannel myDeliveryChannel;
-	private ExecutorService myExecutor;
+	private ExecutorService myProcessingExecutor;
 	private int myExecutorThreadCount;
 	private SubscriptionActivatingSubscriber mySubscriptionActivatingSubscriber;
 	private MessageHandler mySubscriptionCheckingSubscriber;
 	private ConcurrentHashMap<String, IBaseResource> myIdToSubscription = new ConcurrentHashMap<>();
 	private Logger ourLog = LoggerFactory.getLogger(BaseSubscriptionInterceptor.class);
-	private BlockingQueue<Runnable> myExecutorQueue;
+	private ThreadPoolExecutor myDeliveryExecutor;
+	private LinkedBlockingQueue<Runnable> myProcessingExecutorQueue;
+	private LinkedBlockingQueue<Runnable> myDeliveryExecutorQueue;
 
 	/**
 	 * Constructor
@@ -89,8 +88,8 @@ public abstract class BaseSubscriptionInterceptor extends ServerOperationInterce
 		myDeliveryChannel = theDeliveryChannel;
 	}
 
-	public BlockingQueue<Runnable> getExecutorQueueForUnitTests() {
-		return myExecutorQueue;
+	public int getExecutorQueueSizeForUnitTests() {
+		return myProcessingExecutorQueue.size() + myDeliveryExecutorQueue.size();
 	}
 
 	public int getExecutorThreadCount() {
@@ -157,42 +156,73 @@ public abstract class BaseSubscriptionInterceptor extends ServerOperationInterce
 
 	@PostConstruct
 	public void postConstruct() {
-		myExecutorQueue = new LinkedBlockingQueue<>(1000);
+		{
+			myProcessingExecutorQueue = new LinkedBlockingQueue<>(1000);
 
-		RejectedExecutionHandler rejectedExecutionHandler = new RejectedExecutionHandler() {
-			@Override
-			public void rejectedExecution(Runnable theRunnable, ThreadPoolExecutor theExecutor) {
-				ourLog.info("Note: Executor queue is full ({} elements), waiting for a slot to become available!", myExecutorQueue.size());
-				StopWatch sw = new StopWatch();
-				try {
-					myExecutorQueue.put(theRunnable);
-				} catch (InterruptedException theE) {
-					throw new RejectedExecutionException("Task " + theRunnable.toString() +
-						" rejected from " + theE.toString());
+			RejectedExecutionHandler rejectedExecutionHandler = new RejectedExecutionHandler() {
+				@Override
+				public void rejectedExecution(Runnable theRunnable, ThreadPoolExecutor theExecutor) {
+					ourLog.info("Note: Executor queue is full ({} elements), waiting for a slot to become available!", myProcessingExecutorQueue.size());
+					StopWatch sw = new StopWatch();
+					try {
+						myProcessingExecutorQueue.put(theRunnable);
+					} catch (InterruptedException theE) {
+						throw new RejectedExecutionException("Task " + theRunnable.toString() +
+							" rejected from " + theE.toString());
+					}
+					ourLog.info("Slot become available after {}ms", sw.getMillis());
 				}
-				ourLog.info("Slot become available after {}ms", sw.getMillis());
-			}
-		};
-		ThreadFactory threadFactory = new BasicThreadFactory.Builder()
-			.namingPattern("subscription-%d")
-			.daemon(false)
-			.priority(Thread.NORM_PRIORITY)
-			.build();
-		myExecutor = new ThreadPoolExecutor(
-			1,
-			getExecutorThreadCount(),
-			0L,
-			TimeUnit.MILLISECONDS,
-			myExecutorQueue,
-			threadFactory,
-			rejectedExecutionHandler);
-
+			};
+			ThreadFactory threadFactory = new BasicThreadFactory.Builder()
+				.namingPattern("subscription-proc-%d")
+				.daemon(false)
+				.priority(Thread.NORM_PRIORITY)
+				.build();
+			myProcessingExecutor = new ThreadPoolExecutor(
+				1,
+				getExecutorThreadCount(),
+				0L,
+				TimeUnit.MILLISECONDS,
+				myProcessingExecutorQueue,
+				threadFactory,
+				rejectedExecutionHandler);
+		}
+		{
+			myDeliveryExecutorQueue = new LinkedBlockingQueue<>(1000);
+			BasicThreadFactory threadFactory = new BasicThreadFactory.Builder()
+				.namingPattern("subscription-delivery-%d")
+				.daemon(false)
+				.priority(Thread.NORM_PRIORITY)
+				.build();
+			RejectedExecutionHandler rejectedExecutionHandler2 = new RejectedExecutionHandler() {
+				@Override
+				public void rejectedExecution(Runnable theRunnable, ThreadPoolExecutor theExecutor) {
+					ourLog.info("Note: Executor queue is full ({} elements), waiting for a slot to become available!", myDeliveryExecutorQueue.size());
+					StopWatch sw = new StopWatch();
+					try {
+						myDeliveryExecutorQueue.put(theRunnable);
+					} catch (InterruptedException theE) {
+						throw new RejectedExecutionException("Task " + theRunnable.toString() +
+							" rejected from " + theE.toString());
+					}
+					ourLog.info("Slot become available after {}ms", sw.getMillis());
+				}
+			};
+			myDeliveryExecutor = new ThreadPoolExecutor(
+				1,
+				getExecutorThreadCount(),
+				0L,
+				TimeUnit.MILLISECONDS,
+				myDeliveryExecutorQueue,
+				threadFactory,
+				rejectedExecutionHandler2);
+		}
 
 		if (getProcessingChannel() == null) {
-			setProcessingChannel(new ExecutorSubscribableChannel(myExecutor));
+			setProcessingChannel(new ExecutorSubscribableChannel(myProcessingExecutor));
 		}
 		if (getDeliveryChannel() == null) {
-			setDeliveryChannel(new ExecutorSubscribableChannel(myExecutor));
+			setDeliveryChannel(new ExecutorSubscribableChannel(myDeliveryExecutor));
 		}
 
 		if (mySubscriptionActivatingSubscriber == null) {
