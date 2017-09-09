@@ -45,12 +45,12 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 public class SubscriptionDeliveringRestHookSubscriber extends BaseSubscriptionSubscriber {
 	private Logger ourLog = LoggerFactory.getLogger(SubscriptionDeliveringRestHookSubscriber.class);
 
-	public SubscriptionDeliveringRestHookSubscriber(IFhirResourceDao<?> theSubscriptionDao, ConcurrentHashMap<String, IBaseResource> theIdToSubscription, Subscription.SubscriptionChannelType theChannelType, BaseSubscriptionInterceptor theSubscriptionInterceptor) {
-		super(theSubscriptionDao, theIdToSubscription, theChannelType, theSubscriptionInterceptor);
+	public SubscriptionDeliveringRestHookSubscriber(IFhirResourceDao<?> theSubscriptionDao, Subscription.SubscriptionChannelType theChannelType, BaseSubscriptionInterceptor theSubscriptionInterceptor) {
+		super(theSubscriptionDao, theChannelType, theSubscriptionInterceptor);
 	}
 
-	protected void deliverPayload(ResourceDeliveryMessage theMsg, IBaseResource theSubscription, EncodingEnum thePayloadType, IGenericClient theClient) {
-		IBaseResource payloadResource = theMsg.getPayoad();
+	protected void deliverPayload(ResourceDeliveryMessage theMsg, CanonicalSubscription theSubscription, EncodingEnum thePayloadType, IGenericClient theClient) {
+		IBaseResource payloadResource = theMsg.getPayload();
 
 		IClientExecutable<?, ?> operation;
 		switch (theMsg.getOperationType()) {
@@ -83,20 +83,17 @@ public class SubscriptionDeliveringRestHookSubscriber extends BaseSubscriptionSu
 		try {
 			ResourceDeliveryMessage msg = (ResourceDeliveryMessage) theMessage.getPayload();
 
-			if (!subscriptionTypeApplies(getContext(), msg.getSubscription())) {
+			if (!subscriptionTypeApplies(getContext(), msg.getSubscription().getBackingSubscription())) {
 				return;
 			}
 
-			IBaseResource subscription = msg.getSubscription();
-
+			CanonicalSubscription subscription = msg.getSubscription();
 
 			// Grab the endpoint from the subscription
-			IPrimitiveType<?> endpoint = getContext().newTerser().getSingleValueOrNull(subscription, BaseSubscriptionInterceptor.SUBSCRIPTION_ENDPOINT, IPrimitiveType.class);
-			String endpointUrl = endpoint != null ? endpoint.getValueAsString() : null;
+			String endpointUrl = subscription.getEndpointUrl();
 
 			// Grab the payload type (encoding mimetype) from the subscription
-			IPrimitiveType<?> payload = getContext().newTerser().getSingleValueOrNull(subscription, BaseSubscriptionInterceptor.SUBSCRIPTION_PAYLOAD, IPrimitiveType.class);
-			String payloadString = payload != null ? payload.getValueAsString() : null;
+			String payloadString = subscription.getPayloadString();
 			payloadString = StringUtils.defaultString(payloadString, Constants.CT_FHIR_XML_NEW);
 			if (payloadString.contains(";")) {
 				payloadString = payloadString.substring(0, payloadString.indexOf(';'));
@@ -112,10 +109,10 @@ public class SubscriptionDeliveringRestHookSubscriber extends BaseSubscriptionSu
 				client = getContext().newRestfulGenericClient(endpointUrl);
 
 				// Additional headers specified in the subscription
-				List<IPrimitiveType> headers = getContext().newTerser().getValues(subscription, BaseSubscriptionInterceptor.SUBSCRIPTION_HEADER, IPrimitiveType.class);
-				for (IPrimitiveType next : headers) {
-					if (isNotBlank(next.getValueAsString())) {
-						client.registerInterceptor(new SimpleRequestHeaderInterceptor(next.getValueAsString()));
+				List<String> headers = subscription.getHeaders();
+				for (String next : headers) {
+					if (isNotBlank(next)) {
+						client.registerInterceptor(new SimpleRequestHeaderInterceptor(next));
 					}
 				}
 			}

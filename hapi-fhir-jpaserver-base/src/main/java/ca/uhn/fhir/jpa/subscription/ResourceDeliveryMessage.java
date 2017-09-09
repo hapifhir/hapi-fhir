@@ -30,7 +30,7 @@ public class ResourceDeliveryMessage implements Serializable {
 
 	private static final long serialVersionUID = 0L;
 
-	private IBaseResource mySubscription;
+	private CanonicalSubscription mySubscription;
 	private IBaseResource myPayoad;
 	private IIdType myPayloadId;
 	private RestOperationTypeEnum myOperationType;
@@ -51,19 +51,19 @@ public class ResourceDeliveryMessage implements Serializable {
 		myPayloadId = thePayloadId;
 	}
 
-	public IBaseResource getPayoad() {
+	public IBaseResource getPayload() {
 		return myPayoad;
 	}
 
-	public void setPayoad(IBaseResource thePayoad) {
-		myPayoad = thePayoad;
+	public void setPayload(IBaseResource thePayload) {
+		myPayoad = thePayload;
 	}
 
-	public IBaseResource getSubscription() {
+	public CanonicalSubscription getSubscription() {
 		return mySubscription;
 	}
 
-	public void setSubscription(IBaseResource theSubscription) {
+	public void setSubscription(CanonicalSubscription theSubscription) {
 		mySubscription = theSubscription;
 	}
 

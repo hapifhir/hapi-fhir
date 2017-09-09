@@ -26,6 +26,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Subscription;
+import org.hl7.fhir.utilities.ucum.Canonical;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.messaging.Message;
@@ -40,8 +41,8 @@ public class SubscriptionActivatingSubscriber extends BaseSubscriptionSubscriber
 	/**
 	 * Constructor
 	 */
-	public SubscriptionActivatingSubscriber(IFhirResourceDao<? extends IBaseResource> theSubscriptionDao, ConcurrentHashMap<String, IBaseResource> theIdToSubscription, Subscription.SubscriptionChannelType theChannelType, BaseSubscriptionInterceptor theSubscriptionInterceptor) {
-		super(theSubscriptionDao, theIdToSubscription, theChannelType, theSubscriptionInterceptor);
+	public SubscriptionActivatingSubscriber(IFhirResourceDao<? extends IBaseResource> theSubscriptionDao, Subscription.SubscriptionChannelType theChannelType, BaseSubscriptionInterceptor theSubscriptionInterceptor) {
+		super(theSubscriptionDao, theChannelType, theSubscriptionInterceptor);
 	}
 
 	private void activateAndRegisterSubscriptionIfRequired(ResourceModifiedMessage theMsg) {
@@ -65,17 +66,17 @@ public class SubscriptionActivatingSubscriber extends BaseSubscriptionSubscriber
 			status.setValueAsString(activeStatus);
 			ourLog.info("Activating and registering subscription {} from status {} to {}", theSubscription.getIdElement().toUnqualified().getValue(), requestedStatus, activeStatus);
 			getSubscriptionDao().update(theSubscription);
-			getIdToSubscription().put(theSubscription.getIdElement().getIdPart(), theSubscription);
+			getSubscriptionInterceptor().registerSubscription(theSubscription.getIdElement(), theSubscription);
 		} else if (activeStatus.equals(statusString)) {
-			if (!getIdToSubscription().containsKey(theSubscription.getIdElement().getIdPart())) {
+			if (!getSubscriptionInterceptor().hasSubscription(theSubscription.getIdElement())) {
 				ourLog.info("Registering active subscription {}", theSubscription.getIdElement().toUnqualified().getValue());
 			}
-			getIdToSubscription().put(theSubscription.getIdElement().getIdPart(), theSubscription);
+			getSubscriptionInterceptor().registerSubscription(theSubscription.getIdElement(), theSubscription);
 		} else {
-			if (getIdToSubscription().containsKey(theSubscription.getIdElement().getIdPart())) {
+			if (getSubscriptionInterceptor().hasSubscription(theSubscription.getIdElement())) {
 				ourLog.info("Removing {} subscription {}", statusString, theSubscription.getIdElement().toUnqualified().getValue());
 			}
-			getIdToSubscription().remove(theSubscription.getIdElement().getIdPart());
+			getSubscriptionInterceptor().unregisterSubscription(theSubscription.getIdElement());
 		}
 	}
 
@@ -100,7 +101,7 @@ public class SubscriptionActivatingSubscriber extends BaseSubscriptionSubscriber
 
 		switch (msg.getOperationType()) {
 			case DELETE:
-				getIdToSubscription().remove(id.getIdPart());
+				getSubscriptionInterceptor().unregisterSubscription(id);
 				return;
 			case CREATE:
 				handleCreate(msg);

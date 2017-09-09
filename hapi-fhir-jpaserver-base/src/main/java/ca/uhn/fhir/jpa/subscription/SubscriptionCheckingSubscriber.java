@@ -25,28 +25,27 @@ import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.SearchParameterMap;
 import ca.uhn.fhir.jpa.provider.ServletSubRequestDetails;
-import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.apache.commons.lang3.StringUtils;
-import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Subscription;
+import org.hl7.fhir.utilities.ucum.Canonical;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessagingException;
-import org.springframework.messaging.SubscribableChannel;
 import org.springframework.messaging.support.GenericMessage;
 
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.Collection;
+import java.util.List;
 
 public class SubscriptionCheckingSubscriber extends BaseSubscriptionSubscriber {
 	private Logger ourLog = LoggerFactory.getLogger(SubscriptionCheckingSubscriber.class);
 
-	public SubscriptionCheckingSubscriber(IFhirResourceDao theSubscriptionDao, ConcurrentHashMap<String, IBaseResource> theIdToSubscription, Subscription.SubscriptionChannelType theChannelType,BaseSubscriptionInterceptor theSubscriptionInterceptor) {
-		super(theSubscriptionDao, theIdToSubscription, theChannelType, theSubscriptionInterceptor);
+	public SubscriptionCheckingSubscriber(IFhirResourceDao theSubscriptionDao, Subscription.SubscriptionChannelType theChannelType, BaseSubscriptionInterceptor theSubscriptionInterceptor) {
+		super(theSubscriptionDao, theChannelType, theSubscriptionInterceptor);
 	}
 
 	@Override
@@ -68,11 +67,11 @@ public class SubscriptionCheckingSubscriber extends BaseSubscriptionSubscriber {
 		String resourceType = msg.getId().getResourceType();
 		String resourceId = msg.getId().getIdPart();
 
-		for (IBaseResource nextSubscription : getIdToSubscription().values()) {
+		List<CanonicalSubscription> subscriptions = getSubscriptionInterceptor().getSubscriptions();
+		for (CanonicalSubscription nextSubscription : subscriptions) {
 
 			String nextSubscriptionId = nextSubscription.getIdElement().toUnqualifiedVersionless().getValue();
-			IPrimitiveType<?> nextCriteria = getContext().newTerser().getSingleValueOrNull(nextSubscription, BaseSubscriptionInterceptor.SUBSCRIPTION_CRITERIA, IPrimitiveType.class);
-			String nextCriteriaString = nextCriteria != null ? nextCriteria.getValueAsString() : null;
+			String nextCriteriaString = nextSubscription.getCriteriaString();
 
 			if (StringUtils.isBlank(nextCriteriaString)) {
 				continue;
@@ -107,7 +106,7 @@ public class SubscriptionCheckingSubscriber extends BaseSubscriptionSubscriber {
 				ourLog.info("Found match: queueing rest-hook notification for resource: {}", nextBase.getIdElement());
 
 				ResourceDeliveryMessage deliveryMsg = new ResourceDeliveryMessage();
-				deliveryMsg.setPayoad(nextBase);
+				deliveryMsg.setPayload(nextBase);
 				deliveryMsg.setSubscription(nextSubscription);
 				deliveryMsg.setOperationType(msg.getOperationType());
 				deliveryMsg.setPayloadId(msg.getId());

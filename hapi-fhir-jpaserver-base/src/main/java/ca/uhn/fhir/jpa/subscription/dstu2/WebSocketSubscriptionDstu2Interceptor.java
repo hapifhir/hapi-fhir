@@ -1,9 +1,10 @@
-
 package ca.uhn.fhir.jpa.subscription.dstu2;
 
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.subscription.BaseSubscriptionWebsocketInterceptor;
+import ca.uhn.fhir.jpa.subscription.CanonicalSubscription;
 import ca.uhn.fhir.model.dstu2.resource.Subscription;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
@@ -32,6 +33,11 @@ public class WebSocketSubscriptionDstu2Interceptor extends BaseSubscriptionWebso
 	@Autowired
 	@Qualifier("mySubscriptionDaoDstu2")
 	private IFhirResourceDao<Subscription> mySubscriptionDao;
+
+	@Override
+	protected CanonicalSubscription canonicalize(IBaseResource theSubscription) {
+		return RestHookSubscriptionDstu2Interceptor.doCanonicalize(theSubscription);
+	}
 
 	@Override
 	public org.hl7.fhir.r4.model.Subscription.SubscriptionChannelType getChannelType() {

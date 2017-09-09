@@ -27,21 +27,17 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Subscription;
 import org.springframework.messaging.MessageHandler;
 
-import java.util.concurrent.ConcurrentHashMap;
-
 public abstract class BaseSubscriptionSubscriber implements MessageHandler {
 
 	private final IFhirResourceDao mySubscriptionDao;
-	private final ConcurrentHashMap<String, IBaseResource> myIdToSubscription;
 	private final Subscription.SubscriptionChannelType myChannelType;
 	private final BaseSubscriptionInterceptor mySubscriptionInterceptor;
 
 	/**
 	 * Constructor
 	 */
-	public BaseSubscriptionSubscriber(IFhirResourceDao<? extends IBaseResource> theSubscriptionDao, ConcurrentHashMap<String, IBaseResource> theIdToSubscription, Subscription.SubscriptionChannelType theChannelType, BaseSubscriptionInterceptor theSubscriptionInterceptor) {
+	public BaseSubscriptionSubscriber(IFhirResourceDao<? extends IBaseResource> theSubscriptionDao, Subscription.SubscriptionChannelType theChannelType, BaseSubscriptionInterceptor theSubscriptionInterceptor) {
 		mySubscriptionDao = theSubscriptionDao;
-		myIdToSubscription = theIdToSubscription;
 		myChannelType = theChannelType;
 		mySubscriptionInterceptor = theSubscriptionInterceptor;
 	}
@@ -52,10 +48,6 @@ public abstract class BaseSubscriptionSubscriber implements MessageHandler {
 
 	public FhirContext getContext() {
 		return getSubscriptionDao().getContext();
-	}
-
-	public ConcurrentHashMap<String, IBaseResource> getIdToSubscription() {
-		return myIdToSubscription;
 	}
 
 	public IFhirResourceDao getSubscriptionDao() {

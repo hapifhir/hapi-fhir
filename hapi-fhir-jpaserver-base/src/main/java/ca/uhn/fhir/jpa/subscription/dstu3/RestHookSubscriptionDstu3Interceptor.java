@@ -22,9 +22,15 @@ package ca.uhn.fhir.jpa.subscription.dstu3;
 
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.subscription.BaseSubscriptionRestHookInterceptor;
+import ca.uhn.fhir.jpa.subscription.CanonicalSubscription;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.hl7.fhir.dstu3.model.Subscription;
+import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+
+import java.util.Arrays;
 
 public class RestHookSubscriptionDstu3Interceptor extends BaseSubscriptionRestHookInterceptor {
 	@Autowired
@@ -43,6 +49,31 @@ public class RestHookSubscriptionDstu3Interceptor extends BaseSubscriptionRestHo
 	public org.hl7.fhir.r4.model.Subscription.SubscriptionChannelType getChannelType() {
 		return org.hl7.fhir.r4.model.Subscription.SubscriptionChannelType.RESTHOOK;
 	}
+
+	@Override
+	protected CanonicalSubscription canonicalize(IBaseResource theSubscription) {
+		return doCanonicalize(theSubscription);
+	}
+
+	static CanonicalSubscription doCanonicalize(IBaseResource theSubscription) {
+		Subscription subscription = (Subscription) theSubscription;
+
+		CanonicalSubscription retVal = new CanonicalSubscription();
+		try {
+			retVal.setStatus(org.hl7.fhir.r4.model.Subscription.SubscriptionStatus.fromCode(subscription.getStatus().toCode()));
+			retVal.setBackingSubscription(theSubscription);
+			retVal.setChannelType(org.hl7.fhir.r4.model.Subscription.SubscriptionChannelType.fromCode(subscription.getStatus().toCode()));
+			retVal.setCriteriaString(subscription.getCriteria());
+			retVal.setEndpointUrl(subscription.getChannel().getEndpoint());
+			retVal.setHeaders(subscription.getChannel().getHeader());
+			retVal.setIdElement(subscription.getIdElement());
+			retVal.setPayloadString(subscription.getChannel().getPayload());
+		} catch (FHIRException theE) {
+			throw new InternalErrorException(theE);
+		}
+		return retVal;
+	}
+
 
 
 }

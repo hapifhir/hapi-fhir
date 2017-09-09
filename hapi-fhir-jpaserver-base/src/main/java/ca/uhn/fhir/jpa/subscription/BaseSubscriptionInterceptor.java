@@ -33,6 +33,7 @@ import ca.uhn.fhir.rest.server.interceptor.ServerOperationInterceptorAdapter;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Subscription;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,7 +50,7 @@ import javax.annotation.PreDestroy;
 import java.util.*;
 import java.util.concurrent.*;
 
-public abstract class BaseSubscriptionInterceptor extends ServerOperationInterceptorAdapter {
+public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> extends ServerOperationInterceptorAdapter {
 
 	static final String SUBSCRIPTION_STATUS = "Subscription.status";
 	static final String SUBSCRIPTION_TYPE = "Subscription.channel.type";
@@ -64,7 +65,7 @@ public abstract class BaseSubscriptionInterceptor extends ServerOperationInterce
 	private int myExecutorThreadCount;
 	private SubscriptionActivatingSubscriber mySubscriptionActivatingSubscriber;
 	private MessageHandler mySubscriptionCheckingSubscriber;
-	private ConcurrentHashMap<String, IBaseResource> myIdToSubscription = new ConcurrentHashMap<>();
+	private ConcurrentHashMap<String, CanonicalSubscription> myIdToSubscription = new ConcurrentHashMap<>();
 	private Logger ourLog = LoggerFactory.getLogger(BaseSubscriptionInterceptor.class);
 	private ThreadPoolExecutor myDeliveryExecutor;
 	private LinkedBlockingQueue<Runnable> myProcessingExecutorQueue;
@@ -77,6 +78,8 @@ public abstract class BaseSubscriptionInterceptor extends ServerOperationInterce
 		super();
 		setExecutorThreadCount(5);
 	}
+
+	protected abstract CanonicalSubscription canonicalize(S theSubscription);
 
 	public abstract Subscription.SubscriptionChannelType getChannelType();
 
@@ -101,8 +104,8 @@ public abstract class BaseSubscriptionInterceptor extends ServerOperationInterce
 		myExecutorThreadCount = theExecutorThreadCount;
 	}
 
-	public ConcurrentHashMap<String, IBaseResource> getIdToSubscription() {
-		return myIdToSubscription;
+	public Map<String, CanonicalSubscription> getIdToSubscription() {
+		return Collections.unmodifiableMap(myIdToSubscription);
 	}
 
 	public SubscribableChannel getProcessingChannel() {
@@ -114,6 +117,16 @@ public abstract class BaseSubscriptionInterceptor extends ServerOperationInterce
 	}
 
 	protected abstract IFhirResourceDao<?> getSubscriptionDao();
+
+	public List<CanonicalSubscription> getSubscriptions() {
+		return new ArrayList<>(myIdToSubscription.values());
+	}
+
+	public boolean hasSubscription(IIdType theId) {
+		Validate.notNull(theId);
+		Validate.notBlank(theId.getIdPart());
+		return myIdToSubscription.containsKey(theId.getIdPart());
+	}
 
 	/**
 	 * Read the existing subscriptions from the database
@@ -226,12 +239,12 @@ public abstract class BaseSubscriptionInterceptor extends ServerOperationInterce
 		}
 
 		if (mySubscriptionActivatingSubscriber == null) {
-			mySubscriptionActivatingSubscriber = new SubscriptionActivatingSubscriber(getSubscriptionDao(), myIdToSubscription, getChannelType(), this);
+			mySubscriptionActivatingSubscriber = new SubscriptionActivatingSubscriber(getSubscriptionDao(), getChannelType(), this);
 		}
 		getProcessingChannel().subscribe(mySubscriptionActivatingSubscriber);
 
 		if (mySubscriptionCheckingSubscriber == null) {
-			mySubscriptionCheckingSubscriber = new SubscriptionCheckingSubscriber(getSubscriptionDao(), myIdToSubscription, getChannelType(), this);
+			mySubscriptionCheckingSubscriber = new SubscriptionCheckingSubscriber(getSubscriptionDao(), getChannelType(), this);
 		}
 		getProcessingChannel().subscribe(mySubscriptionCheckingSubscriber);
 
@@ -250,6 +263,14 @@ public abstract class BaseSubscriptionInterceptor extends ServerOperationInterce
 	}
 
 	protected abstract void registerDeliverySubscriber();
+
+	public void registerSubscription(IIdType theId, S theSubscription) {
+		Validate.notNull(theId);
+		Validate.notBlank(theId.getIdPart());
+		Validate.notNull(theSubscription);
+
+		myIdToSubscription.put(theId.getIdPart(), canonicalize(theSubscription));
+	}
 
 	@Override
 	public void resourceCreated(RequestDetails theRequest, IBaseResource theResource) {
@@ -290,4 +311,11 @@ public abstract class BaseSubscriptionInterceptor extends ServerOperationInterce
 	}
 
 	protected abstract void unregisterDeliverySubscriber();
+
+	public void unregisterSubscription(IIdType theId) {
+		Validate.notNull(theId);
+		Validate.notBlank(theId.getIdPart());
+
+		myIdToSubscription.remove(theId.getIdPart());
+	}
 }

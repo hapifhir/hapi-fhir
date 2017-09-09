@@ -43,13 +43,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessagingException;
-import org.springframework.messaging.SubscribableChannel;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
-
-import java.util.concurrent.ConcurrentHashMap;
 
 public class SubscriptionDeliveringWebsocketSubscriber extends BaseSubscriptionSubscriber {
 	private final PlatformTransactionManager myTxManager;
@@ -58,8 +55,8 @@ public class SubscriptionDeliveringWebsocketSubscriber extends BaseSubscriptionS
 	private final IResourceTableDao myResourceTableDao;
 	private Logger ourLog = LoggerFactory.getLogger(SubscriptionDeliveringWebsocketSubscriber.class);
 
-	public SubscriptionDeliveringWebsocketSubscriber(IFhirResourceDao theSubscriptionDao, ConcurrentHashMap<String, IBaseResource> theIdToSubscription, Subscription.SubscriptionChannelType theChannelType, BaseSubscriptionInterceptor theSubscriptionInterceptor, PlatformTransactionManager theTxManager, ISubscriptionFlaggedResourceDataDao theSubscriptionFlaggedResourceDataDao, ISubscriptionTableDao theSubscriptionTableDao, IResourceTableDao theResourceTableDao) {
-		super(theSubscriptionDao, theIdToSubscription, theChannelType, theSubscriptionInterceptor);
+	public SubscriptionDeliveringWebsocketSubscriber(IFhirResourceDao theSubscriptionDao, Subscription.SubscriptionChannelType theChannelType, BaseSubscriptionInterceptor theSubscriptionInterceptor, PlatformTransactionManager theTxManager, ISubscriptionFlaggedResourceDataDao theSubscriptionFlaggedResourceDataDao, ISubscriptionTableDao theSubscriptionTableDao, IResourceTableDao theResourceTableDao) {
+		super(theSubscriptionDao, theChannelType, theSubscriptionInterceptor);
 
 		myTxManager = theTxManager;
 		mySubscriptionFlaggedResourceDao = theSubscriptionFlaggedResourceDataDao;
@@ -76,7 +73,7 @@ public class SubscriptionDeliveringWebsocketSubscriber extends BaseSubscriptionS
 
 		final ResourceDeliveryMessage msg = (ResourceDeliveryMessage) theMessage.getPayload();
 
-		if (!subscriptionTypeApplies(getContext(), msg.getSubscription())) {
+		if (!subscriptionTypeApplies(getContext(), msg.getSubscription().getBackingSubscription())) {
 			return;
 		}
 
@@ -85,11 +82,11 @@ public class SubscriptionDeliveringWebsocketSubscriber extends BaseSubscriptionS
 		txTemplate.execute(new TransactionCallbackWithoutResult() {
 			@Override
 			protected void doInTransactionWithoutResult(TransactionStatus status) {
-				IBaseResource payload = msg.getPayoad();
+				IBaseResource payload = msg.getPayload();
 				Long payloadPid = extractResourcePid(payload);
 				ResourceTable payloadTable = myResourceTableDao.findOne(payloadPid);
 
-				IBaseResource subscription = msg.getSubscription();
+				IBaseResource subscription = msg.getSubscription().getBackingSubscription();
 				Long subscriptionPid = extractResourcePid(subscription);
 				SubscriptionTable subscriptionTable = mySubscriptionTableDao.findOneByResourcePid(subscriptionPid);
 
@@ -105,15 +102,13 @@ public class SubscriptionDeliveringWebsocketSubscriber extends BaseSubscriptionS
 		});
 
 		RestOperationTypeEnum operationType = msg.getOperationType();
-		IBaseResource subscription = msg.getSubscription();
+		CanonicalSubscription subscription = msg.getSubscription();
 
 		// Grab the endpoint from the subscription
-		IPrimitiveType<?> endpoint = getContext().newTerser().getSingleValueOrNull(subscription, BaseSubscriptionInterceptor.SUBSCRIPTION_ENDPOINT, IPrimitiveType.class);
-		String endpointUrl = endpoint.getValueAsString();
+		String endpointUrl = subscription.getEndpointUrl();
 
 		// Grab the payload type (encoding mimetype ) from the subscription
-		IPrimitiveType<?> payload = getContext().newTerser().getSingleValueOrNull(subscription, BaseSubscriptionInterceptor.SUBSCRIPTION_PAYLOAD, IPrimitiveType.class);
-		String payloadString = payload.getValueAsString();
+		String payloadString = subscription.getPayloadString();
 		if (payloadString.contains(";")) {
 			payloadString = payloadString.substring(0, payloadString.indexOf(';'));
 		}
@@ -124,7 +119,7 @@ public class SubscriptionDeliveringWebsocketSubscriber extends BaseSubscriptionS
 		getContext().getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
 		IGenericClient client = getContext().newRestfulGenericClient(endpointUrl);
 
-		IBaseResource payloadResource = msg.getPayoad();
+		IBaseResource payloadResource = msg.getPayload();
 
 		IClientExecutable<?, ?> operation;
 		switch (operationType) {

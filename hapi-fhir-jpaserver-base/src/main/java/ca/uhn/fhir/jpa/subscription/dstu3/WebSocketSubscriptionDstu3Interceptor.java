@@ -6,6 +6,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import ca.uhn.fhir.jpa.subscription.BaseSubscriptionWebsocketInterceptor;
+import ca.uhn.fhir.jpa.subscription.CanonicalSubscription;
 import org.hl7.fhir.dstu3.model.Subscription;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,6 +50,12 @@ public class WebSocketSubscriptionDstu3Interceptor extends BaseSubscriptionWebso
 	public org.hl7.fhir.r4.model.Subscription.SubscriptionChannelType getChannelType() {
 		return org.hl7.fhir.r4.model.Subscription.SubscriptionChannelType.WEBSOCKET;
 	}
+
+	@Override
+	protected CanonicalSubscription canonicalize(IBaseResource theSubscription) {
+		return RestHookSubscriptionDstu3Interceptor.doCanonicalize(theSubscription);
+	}
+
 
 	@Override
 	protected IFhirResourceDao<?> getSubscriptionDao() {
