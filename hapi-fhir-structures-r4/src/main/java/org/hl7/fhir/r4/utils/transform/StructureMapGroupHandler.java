@@ -41,7 +41,7 @@ public class StructureMapGroupHandler extends BaseRunner {
     }
   }
 
-  public void analyzeGroup(String indent, StructureMapAnalysis result, TransformContext context) throws Exception {
+  public void analyzeGroup(BatchContext context, String indent, StructureMapAnalysis result) throws Exception {
     initialize(result);
     log(indent + "Analyse Group : " + getRuleGroup().getName());
     // todo: extends
@@ -57,7 +57,7 @@ public class StructureMapGroupHandler extends BaseRunner {
     }
     for (StructureMap.StructureMapGroupRuleComponent rule : getRuleGroup().getRule()) {
       StructureMapRuleRunner ruleRunner = new StructureMapRuleRunner(getStructureMap(), getTransformationEngine(), this, rule, getWorker());
-      ruleRunner.analyseRule(indent + "  ", context, result);
+      ruleRunner.analyseRule(context, indent + "  ", result);
     }
   }
 

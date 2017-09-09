@@ -78,7 +78,7 @@ public class StructureMapRuleRunner extends BaseRunner {
    * @param result
    * @throws Exception
    */
-  protected void analyseRule(String indent, TransformContext context, StructureMapAnalysis result) throws Exception {
+  protected void analyseRule(BatchContext context, String indent, StructureMapAnalysis result) throws Exception {
     log(indent + "Analyse rule : " + rule.getName());
     XhtmlNode tr = result.getSummary().addTag("tr");
     XhtmlNode xs = tr.addTag("td");
@@ -88,16 +88,16 @@ public class StructureMapRuleRunner extends BaseRunner {
     if (rule.getSource().size() != 1) {
       throw new UnsupportedOperationException("Unsupported configuration at this time: Rule \"" + rule.getName() + "\": declares more than one source input.");
     }
-    VariablesForProfiling source = analyseSource(rule.getName(), context, srcVars, rule.getSourceFirstRep(), xs);//TODO Add support for more than one source
+    VariablesForProfiling source = analyseSource(context, rule.getName(), srcVars, rule.getSourceFirstRep(), xs);//TODO Add support for more than one source
 
     TargetWriter tw = new TargetWriter();
     for (StructureMap.StructureMapGroupRuleTargetComponent t : rule.getTarget()) {
-      analyseTarget(rule.getName(), context, source, getStructureMap(), t, rule.getSourceFirstRep().getVariable(), tw, result.getProfiles(), rule.getName());
+      analyseTarget(context, rule.getName(), source, getStructureMap(), t, rule.getSourceFirstRep().getVariable(), tw, result.getProfiles(), rule.getName());
     }
     tw.commit(xt);
 
     for (StructureMap.StructureMapGroupRuleComponent childrule : rule.getRule()) {
-      analyseRule(indent + "  ", context, result);
+      analyseRule(context, indent + "  ", result);
     }
 //    for (StructureMapGroupRuleDependentComponent dependent : rule.getDependent()) {
 //      executeDependency(indent+"  ", context, map, v, group, dependent); // do we need group here?
@@ -211,7 +211,7 @@ public class StructureMapRuleRunner extends BaseRunner {
     return res;
   }
 
-  protected VariablesForProfiling analyseSource(String ruleId, TransformContext context, VariablesForProfiling vars, StructureMap.StructureMapGroupRuleSourceComponent src, XhtmlNode td) throws Exception {
+  protected VariablesForProfiling analyseSource(BatchContext context, String ruleId, VariablesForProfiling vars, StructureMap.StructureMapGroupRuleSourceComponent src, XhtmlNode td) throws Exception {
     VariableForProfiling var = vars.get(VariableMode.INPUT, src.getContext());
     if (var == null)
       throw new FHIRException("Rule \"" + ruleId + "\": Unknown input variable " + src.getContext() + ". Has the input parameter been defined for the map and for the parent group?");
@@ -357,7 +357,7 @@ public class StructureMapRuleRunner extends BaseRunner {
   }
 
 
-  protected void analyseTarget(String ruleId, TransformContext context, VariablesForProfiling vars, StructureMap map, StructureMap.StructureMapGroupRuleTargetComponent tgt, String tv, TargetWriter tw, List<StructureDefinition> profiles, String sliceName) throws Exception {
+  protected void analyseTarget(BatchContext context, String ruleId, VariablesForProfiling vars, StructureMap map, StructureMap.StructureMapGroupRuleTargetComponent tgt, String tv, TargetWriter tw, List<StructureDefinition> profiles, String sliceName) throws Exception {
     VariableForProfiling var = null;
     boolean isExtensionTransform = false;
     List<ElementDefinition> extensionReferences = null;
@@ -467,7 +467,7 @@ public class StructureMapRuleRunner extends BaseRunner {
     return p.primitiveValue();
   }
 
-  private TypeDetails analyseTransform(TransformContext context, StructureMap map, StructureMap.StructureMapGroupRuleTargetComponent tgt, VariableForProfiling var, VariablesForProfiling vars) throws FHIRException {
+  private TypeDetails analyseTransform(BatchContext context, StructureMap map, StructureMap.StructureMapGroupRuleTargetComponent tgt, VariableForProfiling var, VariablesForProfiling vars) throws FHIRException {
     switch (tgt.getTransform()) {
       case CREATE:
         String p = getParamString(vars, tgt.getParameter().get(0));

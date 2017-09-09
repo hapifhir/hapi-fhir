@@ -11,6 +11,7 @@ import java.util.Map;
 public class BatchContext {
   private Map<String, TransformContext> transformationContextMap;
   private Map<String, StructureDefinition> generatedStructureDefinitionMap;
+  private String baseGeneratedProfileUrl;
 
   public BatchContext() {
     transformationContextMap = new HashMap<>();
@@ -33,4 +34,11 @@ public class BatchContext {
     return this.generatedStructureDefinitionMap.get(structureDefinitionUrl);
   }
 
+  public String getBaseGeneratedProfileUrl() {
+    return baseGeneratedProfileUrl;
+  }
+
+  public void setBaseGeneratedProfileUrl(String baseGeneratedProfileUrl) {
+    this.baseGeneratedProfileUrl = baseGeneratedProfileUrl;
+  }
 }

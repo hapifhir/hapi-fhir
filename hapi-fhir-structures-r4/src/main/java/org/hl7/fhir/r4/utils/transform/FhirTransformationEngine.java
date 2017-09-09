@@ -279,7 +279,7 @@ public class FhirTransformationEngine extends BaseRunner {
 
     log("Start Profiling Transform " + map.getUrl());
     StructureMapGroupHandler groupRunner = new StructureMapGroupHandler(getStructureMap(), getWorker(), this, map.getGroup().get(0));
-    groupRunner.analyzeGroup("", result, context);
+    groupRunner.analyzeGroup( batchContext,"", result);
     //analyseGroup("", context, map, vars, start, result);
     ProfileUtilities pu = new ProfileUtilities(getWorker(), null, pkp);
     for (StructureDefinition sd : result.getProfiles())
