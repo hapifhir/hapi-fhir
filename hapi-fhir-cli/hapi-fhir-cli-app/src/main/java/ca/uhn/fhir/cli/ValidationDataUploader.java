@@ -35,7 +35,7 @@ public class ValidationDataUploader extends BaseCommand {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ValidationDataUploader.class);
 
-	private ArrayList<IIdType> myExcludes;
+	private ArrayList<IIdType> myExcludes = new ArrayList<>();
 
 	private void filterBundle(ca.uhn.fhir.model.dstu2.resource.Bundle theBundle) {
 		for (Iterator<Entry> iter = theBundle.getEntry().iterator(); iter.hasNext(); ) {
@@ -120,16 +120,8 @@ public class ValidationDataUploader extends BaseCommand {
 		}
 
 		FhirContext ctx = getSpecVersionContext(theCommandLine);
-		if (ctx.getVersion().getVersion() == FhirVersionEnum.DSTU2) {
-			uploadDefinitionsDstu2(targetServer, ctx);
-		} else if (ctx.getVersion().getVersion() == FhirVersionEnum.DSTU3) {
-			uploadDefinitionsDstu3(targetServer, ctx);
-		} else if (ctx.getVersion().getVersion() == FhirVersionEnum.R4) {
-			uploadDefinitionsR4(targetServer, ctx);
-		}
-
 		String exclude = theCommandLine.getOptionValue("e");
-		myExcludes = new ArrayList<>();
+
 		if (isNotBlank(exclude)) {
 			for (String next : exclude.split(",")) {
 				if (isNotBlank(next)) {
@@ -138,6 +130,14 @@ public class ValidationDataUploader extends BaseCommand {
 					myExcludes.add(id);
 				}
 			}
+		}
+
+		if (ctx.getVersion().getVersion() == FhirVersionEnum.DSTU2) {
+			uploadDefinitionsDstu2(targetServer, ctx);
+		} else if (ctx.getVersion().getVersion() == FhirVersionEnum.DSTU3) {
+			uploadDefinitionsDstu3(targetServer, ctx);
+		} else if (ctx.getVersion().getVersion() == FhirVersionEnum.R4) {
+			uploadDefinitionsR4(targetServer, ctx);
 		}
 
 	}

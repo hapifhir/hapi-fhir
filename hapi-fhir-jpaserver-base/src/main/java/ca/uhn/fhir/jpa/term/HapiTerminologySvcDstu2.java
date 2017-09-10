@@ -20,13 +20,12 @@ package ca.uhn.fhir.jpa.term;
  * #L%
  */
 
-import java.util.List;
-
+import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.hl7.fhir.instance.hapi.validation.IValidationSupport;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
+import java.util.List;
 
 public class HapiTerminologySvcDstu2 extends BaseHapiTerminologySvc {
 
@@ -46,5 +45,4 @@ public class HapiTerminologySvcDstu2 extends BaseHapiTerminologySvc {
 	}
 
 
-	
 }

@@ -618,4 +618,15 @@ public abstract class BaseHapiTerminologySvc implements IHapiTerminologySvc {
 		ourForceSaveDeferredAlwaysForUnitTest = theForceSaveDeferredAlwaysForUnitTest;
 	}
 
+	@Override
+	public void deleteCodeSystem(TermCodeSystem theCodeSystem) {
+		ourLog.info(" * Deleting code system {}", theCodeSystem.getPid());
+		for (TermCodeSystemVersion next : myCodeSystemVersionDao.findByCodeSystemResource(theCodeSystem.getPid())) {
+			myConceptParentChildLinkDao.deleteByCodeSystemVersion(next.getPid());
+			myConceptDao.deleteByCodeSystemVersion(next.getPid());
+		}
+		myCodeSystemDao.delete(theCodeSystem.getPid());
+	}
+
+
 }

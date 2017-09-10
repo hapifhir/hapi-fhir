@@ -1,0 +1,61 @@
+{
+	"resourceType": "CommunicationRequest",
+	"id": "Christol0808",
+	"meta": {
+		"versionId": "1",
+		"lastUpdated": "2017-09-09T13:40:35.438-04:00"
+	},
+	"text": {
+		"status": "generated",
+		"div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">Request for Encounter 08082017 Report</div>"
+	},
+	"extension": [
+		{
+			"url": "http://hl7.org/fhir/us/attachments/StructureDefinition/attachment-type",
+			"valueCodeableConcept": {
+				"coding": [
+					{
+						"system": "http://loinc.org",
+						"code": "34133-1",
+						"display": "Summarization of Encounter Note 08082017"
+					}
+				]
+			}
+		}
+	],
+	"identifier": [
+		{
+			"system": "http://www.jurisdiction.com/insurer/123456",
+			"value": "AnthemChristol08082017",
+			"_value": {
+				"fhir_comments": [
+					"  this is the value to which the response will refer  "
+				]
+			}
+		}
+	],
+	"basedOn": [
+		{
+			"reference": "Claim/good-health-claim-1"
+		}
+	],
+	"status": "active",
+	"subject": {
+		"reference": "Patient/good-health-patient-1"
+	},
+	"recipient": [
+		{
+			"reference": "Organization/good-health"
+		}
+	],
+	"payload": [
+		{
+			"contentString": "Please provide the summarization of encounter note. "
+		}
+	],
+	"occurrenceDateTime": "2017-09-09T08:01:10-08:00",
+	"authoredOn": "2017-09-09T08:01:10-08:00",
+	"sender": {
+		"reference": "Organization/example-payer"
+	}
+}
