@@ -389,19 +389,23 @@ public class StructureMapRuleRunner extends BaseRunner {
     } else if (ruleTarget.getTransform() == StructureMap.StructureMapTransform.EXTENSION) {
       isExtensionTransform = true;
       VariableForProfiling inputElementVariable = vars.get(VariableMode.INPUT, targetVariable);
-      String extensionUri = ruleTarget.getParameter().get(0).getValueStringType().getValueAsString();
-      String extensionName = ruleTarget.getParameter().get(1).getValueStringType().getValueAsString();
-      String baseContext = ruleTarget.getParameter().get(2).getValueStringType().getValueAsString();
-      StringType extContext = ruleTarget.getParameter().get(3).getValueStringType();
-      String shortDescription = ruleTarget.getParameter().get(4).getValueStringType().getValueAsString();
-      String longDescription = ruleTarget.getParameter().get(5).getValueStringType().getValueAsString();
-      Integer min = ruleTarget.getParameter().get(6).getValueIntegerType().getValue();
-      String max = ruleTarget.getParameter().get(7).getValueStringType().getValueAsString();
-      String extType = ruleTarget.getParameter().get(8).getValueStringType().getValueAsString();
+      ElementDefinition srcElementDefinition = inputElementVariable.getProperty().getBaseProperty().getDefinition();
+      String extensionName = ruleTarget.getElement();
+      String extensionUri = context.getBaseGeneratedProfileUrl() + extensionName + "-extension";
+      String extContext = targetContextVariable.getProperty().getPath();
+      String shortDescription = srcElementDefinition.getShort();
+      String longDescription = srcElementDefinition.getDefinition();
+      Integer min = srcElementDefinition.getMin();
+      String max = srcElementDefinition.getMax();
+      String extType = srcElementDefinition.getTypeFirstRep().getCode();
       List<StringType> contexts = new ArrayList<>();
-      contexts.add(extContext);
+      contexts.add(new StringType(extContext));
       FhirExtensionGenerator extensionGenerator = new FhirExtensionGenerator();
-      StructureDefinition extensionStructureDef = extensionGenerator.generateExtensionStructureDefinition(extensionName, contexts, shortDescription, longDescription, min, max, extType);
+      StructureDefinition extensionStructureDef = context.getStructureDefinition(extensionUri);
+      if(extensionStructureDef == null) {
+        extensionStructureDef = extensionGenerator.generateExtensionStructureDefinition(extensionName, contexts, shortDescription, longDescription, min, max, extType);
+        context.addStructureDefinition(extensionStructureDef);
+      }
       profiles.add(extensionStructureDef);
       extensionReferences = extensionGenerator.generateExtensionElementDefinitions(false, targetContextVariable.getProperty().getPath(), extensionName, shortDescription, longDescription, min, max, extensionUri);//TODO why does ProfileUtilities add a slice when I add one but does not when I don't
 
