@@ -294,8 +294,11 @@ public class ValidationDataUploader extends BaseCommand {
 			next.setId(next.getIdElement().toUnqualifiedVersionless());
 
 			ourLog.info("Uploading v3-codesystems ValueSet {}/{} : {}", new Object[]{count, total, next.getIdElement().getValue()});
-			client.update().resource(next).execute();
-
+			try {
+				client.update().resource(next).execute();
+			} catch (Exception e) {
+				ourLog.error("Failed to upload: {}", e.toString());
+			}
 			count++;
 		}
 
