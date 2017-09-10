@@ -253,6 +253,7 @@ public class FhirTransformationEngine extends BaseRunner {
    * - a list or profiles for what it will create. First profile is the target
    * - a table with a summary (in xhtml) for easy human undertanding of the mapping
    *
+     * @param batchContext
    * @param appInfo
    * @param map
    * @return

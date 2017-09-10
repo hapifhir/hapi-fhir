@@ -10,6 +10,7 @@ import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
 
 import java.util.*;
+import org.apache.commons.lang3.StringUtils;
 
 import static org.hl7.fhir.r4.utils.transform.FhirTransformationEngine.*;
 
@@ -384,8 +385,13 @@ public class StructureMapRuleRunner extends BaseRunner {
 
     if (ruleTarget.getTransform() == StructureMap.StructureMapTransform.CREATE) {
       String s = getParamString(vars, ruleTarget.getParameter().get(0));
-      if (getWorker().getResourceNames().contains(s))
+      if (getWorker().getResourceNames().contains(s)){
         tw.newResource(ruleTarget.getVariable(), s);
+      }
+      if (!StringUtils.isBlank(context.getBaseGeneratedProfileUrl())){
+        String finalURL = context.getBaseGeneratedProfileUrl()+"/"+type.getType().substring(type.getType().lastIndexOf("/")+1);
+        ruleTarget.setUserData("profile-url", finalURL);
+      }
     } else if (ruleTarget.getTransform() == StructureMap.StructureMapTransform.EXTENSION) {
       isExtensionTransform = true;
       VariableForProfiling inputElementVariable = vars.get(VariableMode.INPUT, targetVariable);
@@ -408,7 +414,6 @@ public class StructureMapRuleRunner extends BaseRunner {
       }
       profiles.add(extensionStructureDef);
       extensionReferences = extensionGenerator.generateExtensionElementDefinitions(false, targetContextVariable.getProperty().getPath(), extensionName, shortDescription, longDescription, min, max, extensionUri);//TODO why does ProfileUtilities add a slice when I add one but does not when I don't
-
     } else {
       boolean mapsSrc = false;
       for (StructureMap.StructureMapGroupRuleTargetParameterComponent parameter : ruleTarget.getParameter()) {
@@ -434,13 +439,23 @@ public class StructureMapRuleRunner extends BaseRunner {
     if (isExtensionTransform) {
       prop = addExtensionToProfile(targetContextVariable, extensionReferences, sliceName, fixed);
     } else {
-      prop = updateProfile(targetContextVariable, ruleTarget.getElement(), type, map, profiles, sliceName, fixed, ruleTarget);
+      //Check if there is already a StructureDefinition with that URL. If so,
+      //do not create the profile.
+      String finalURL = ruleTarget.getUserString("profile-url");
+      if (finalURL == null || context.getStructureDefinition(finalURL) == null){
+        prop = updateProfile(targetContextVariable, ruleTarget.getElement(), type, map, profiles, sliceName, fixed, ruleTarget);
+        context.addStructureDefinition(prop.getProfileProperty().getStructure());
+      }  
     }
-    if (ruleTarget.hasVariable())
-      if (ruleTarget.hasElement())
-        vars.add(VariableMode.OUTPUT, ruleTarget.getVariable(), prop);
-      else
-        vars.add(VariableMode.OUTPUT, ruleTarget.getVariable(), prop);
+    
+    if (ruleTarget.hasVariable() && prop != null) {
+        if (ruleTarget.hasElement()) {
+            vars.add(VariableMode.OUTPUT, ruleTarget.getVariable(), prop);
+        } else {
+            vars.add(VariableMode.OUTPUT, ruleTarget.getVariable(), prop);
+        }
+    }
+    
   }
 
   private void processTarget(String ruleId, TransformContext context, Variables vars, StructureMap map, StructureMap.StructureMapGroupComponent group, StructureMap.StructureMapGroupRuleTargetComponent tgt, String srcVar) throws FHIRException {

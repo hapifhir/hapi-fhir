@@ -12,6 +12,7 @@ import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
 
 import java.util.*;
+import org.apache.commons.lang3.StringUtils;
 
 public abstract class BaseRunner {
 
@@ -87,6 +88,7 @@ public abstract class BaseRunner {
   }
 
   protected PropertyWithType createProfile(StructureMap map, List<StructureDefinition> profiles, PropertyWithType prop, String sliceName, Base ctxt) throws DefinitionException {
+      
     if (prop.getBaseProperty().getDefinition().getPath().contains("."))
       throw new DefinitionException("Unable to process entry point");
 
@@ -100,13 +102,17 @@ public abstract class BaseRunner {
     } else
       ids.put(type, 0);
 
+    String finalURL = StringUtils.isBlank(ctxt.getUserString("profile-url")) ?
+        map.getUrl().replace("StructureMap", "StructureDefinition") + "-" + type + suffix :
+        ctxt.getUserString("profile-url");
+    
     StructureDefinition profile = new StructureDefinition();
     profiles.add(profile);
     profile.setDerivation(StructureDefinition.TypeDerivationRule.CONSTRAINT);
     profile.setType(type);
     profile.setBaseDefinition(prop.getBaseProperty().getStructure().getUrl());
     profile.setName("Profile for " + profile.getType() + " for " + sliceName);
-    profile.setUrl(map.getUrl().replace("StructureMap", "StructureDefinition") + "-" + profile.getType() + suffix);
+    profile.setUrl(finalURL);
     ctxt.setUserData("profile", profile.getUrl()); // then we can easily assign this profile url for validation later when we actually transform
     profile.setId(map.getId() + "-" + profile.getType() + suffix);
     profile.setStatus(map.getStatus());

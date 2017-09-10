@@ -1,5 +1,6 @@
 package org.hl7.fhir.r4.utils.transform;
 
+import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.exceptions.DefinitionException;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.context.IWorkerContext;
@@ -29,20 +30,26 @@ public class StructureMapGroupHandler extends BaseRunner {
 
 
 
-  protected void initialize(StructureMapAnalysis result) throws DefinitionException {
+  protected void initialize(BatchContext context, StructureMapAnalysis result) throws DefinitionException {
     vars = new VariablesForProfiling(false, false);
     for (StructureMap.StructureMapGroupInputComponent t : ruleGroup.getInput()) {
       PropertyWithType ti = resolveType(getWorker(), getStructureMap(), t.getType(), t.getMode());
       if (t.getMode() == StructureMap.StructureMapInputMode.SOURCE) {
         vars.add(VariableMode.INPUT, t.getName(), ti);
       } else {
-        vars.add(VariableMode.OUTPUT, t.getName(), createProfile(getStructureMap(), result.getProfiles(), ti, ruleGroup.getName(), ruleGroup));
+          if (!StringUtils.isBlank(context.getBaseGeneratedProfileUrl())){
+            String finalURL = context.getBaseGeneratedProfileUrl()+"/"+ti.getBaseProperty().getDefinition().getPath();
+            ruleGroup.setUserData("profile-url", finalURL);
+          }
+          
+        PropertyWithType profile = createProfile(getStructureMap(), result.getProfiles(), ti, ruleGroup.getName(), ruleGroup);
+        vars.add(VariableMode.OUTPUT, t.getName(), profile);
       }
     }
   }
 
   public void analyzeGroup(BatchContext context, String indent, StructureMapAnalysis result) throws Exception {
-    initialize(result);
+    initialize(context, result);
     log(indent + "Analyse Group : " + getRuleGroup().getName());
     // todo: extends
     // todo: check inputs
