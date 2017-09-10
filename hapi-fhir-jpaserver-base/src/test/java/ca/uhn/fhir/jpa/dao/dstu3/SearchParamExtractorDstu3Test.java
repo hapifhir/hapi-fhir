@@ -9,7 +9,7 @@ import java.util.Set;
 
 import ca.uhn.fhir.jpa.search.JpaRuntimeSearchParam;
 import org.hl7.fhir.dstu3.hapi.validation.DefaultProfileValidationSupport;
-import org.hl7.fhir.dstu3.hapi.validation.IValidationSupport;
+import org.hl7.fhir.dstu3.hapi.ctx.IValidationSupport;
 import org.hl7.fhir.dstu3.model.Observation;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;

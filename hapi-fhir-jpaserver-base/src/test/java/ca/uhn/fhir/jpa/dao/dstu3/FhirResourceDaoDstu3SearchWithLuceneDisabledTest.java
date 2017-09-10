@@ -5,7 +5,7 @@ import static org.junit.Assert.fail;
 
 import javax.persistence.EntityManager;
 
-import org.hl7.fhir.dstu3.hapi.validation.IValidationSupport;
+import org.hl7.fhir.dstu3.hapi.ctx.IValidationSupport;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.*;

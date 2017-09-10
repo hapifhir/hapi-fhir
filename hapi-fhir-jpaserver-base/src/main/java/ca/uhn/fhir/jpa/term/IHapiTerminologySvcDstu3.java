@@ -20,7 +20,7 @@ package ca.uhn.fhir.jpa.term;
  * #L%
  */
 
-import org.hl7.fhir.dstu3.hapi.validation.IValidationSupport;
+import org.hl7.fhir.dstu3.hapi.ctx.IValidationSupport;
 
 public interface IHapiTerminologySvcDstu3 extends IHapiTerminologySvc, IValidationSupport {
 	// nothing

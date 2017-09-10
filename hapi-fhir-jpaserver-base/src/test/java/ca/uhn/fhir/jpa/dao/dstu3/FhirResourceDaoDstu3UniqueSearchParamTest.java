@@ -18,6 +18,7 @@ import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.data.mapping.PreferredConstructor;
 import org.springframework.orm.jpa.JpaSystemException;
 
 import java.util.Collections;
@@ -338,7 +339,7 @@ public class FhirResourceDaoDstu3UniqueSearchParamTest extends BaseJpaDstu3Test 
 		try {
 			myPatientDao.update(pt2);
 			fail();
-		} catch (JpaSystemException e) {
+		} catch (PreconditionFailedException e) {
 			// good
 		}
 

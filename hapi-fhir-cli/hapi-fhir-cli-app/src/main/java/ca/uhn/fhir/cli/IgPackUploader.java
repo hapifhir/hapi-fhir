@@ -1,19 +1,18 @@
 package ca.uhn.fhir.cli;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.igpacks.parser.IgPackParserDstu3;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
-import org.hl7.fhir.dstu3.hapi.validation.IValidationSupport;
+import org.hl7.fhir.dstu3.hapi.ctx.IValidationSupport;
 import org.hl7.fhir.dstu3.model.StructureDefinition;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import parser.IgPackParserDstu3;
-import parser.IgPackValidationSupportDstu3;
 
 import java.io.File;
 import java.io.FileInputStream;

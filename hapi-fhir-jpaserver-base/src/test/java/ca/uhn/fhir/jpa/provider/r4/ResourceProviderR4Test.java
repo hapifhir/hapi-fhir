@@ -165,6 +165,41 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		return ids;
 	}
 
+	@Test
+	public void testUpdateThatCreatesReturnsHttp201() throws IOException {
+
+		Patient p = new Patient();
+		p.setId("A");
+		p.setActive(true);
+		String encoded = myFhirCtx.newJsonParser().encodeResourceToString(p);
+
+		HttpPut put = new HttpPut(ourServerBase + "/Patient/A");
+		put.setEntity(new StringEntity(encoded, "application/fhir+json", "UTF-8"));
+
+		CloseableHttpResponse response = ourHttpClient.execute(put);
+		try {
+			assertEquals(201, response.getStatusLine().getStatusCode());
+		} finally {
+			IOUtils.closeQuietly(response);
+		}
+
+		p = new Patient();
+		p.setId("A");
+		p.setActive(false);
+		encoded = myFhirCtx.newJsonParser().encodeResourceToString(p);
+
+		put = new HttpPut(ourServerBase + "/Patient/A");
+		put.setEntity(new StringEntity(encoded, "application/fhir+json", "UTF-8"));
+
+		response = ourHttpClient.execute(put);
+		try {
+			assertEquals(200, response.getStatusLine().getStatusCode());
+		} finally {
+			IOUtils.closeQuietly(response);
+		}
+
+	}
+
 	// Y
 	@Test
 	public void testBundleCreate() throws Exception {

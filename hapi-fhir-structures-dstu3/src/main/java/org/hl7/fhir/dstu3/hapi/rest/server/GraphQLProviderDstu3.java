@@ -11,9 +11,8 @@ import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import org.hl7.fhir.dstu3.context.IWorkerContext;
-import org.hl7.fhir.dstu3.hapi.validation.DefaultProfileValidationSupport;
-import org.hl7.fhir.dstu3.hapi.validation.HapiWorkerContext;
-import org.hl7.fhir.dstu3.hapi.validation.IValidationSupport;
+import org.hl7.fhir.dstu3.hapi.ctx.HapiWorkerContext;
+import org.hl7.fhir.dstu3.hapi.ctx.IValidationSupport;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.Resource;
@@ -29,15 +28,6 @@ public class GraphQLProviderDstu3 {
   private final IWorkerContext myWorkerContext;
   private Logger ourLog = LoggerFactory.getLogger(GraphQLProviderDstu3.class);
   private IGraphQLStorageServices<Resource, Reference, Bundle> myStorageServices;
-
-  /**
-   * Constructor which uses a default context and validation support object
-   *
-   * @param theStorageServices The storage services (this object will be used to retrieve various resources as required by the GraphQL engine)
-   */
-  public GraphQLProviderDstu3(IGraphQLStorageServices<Resource, Reference, Bundle> theStorageServices) {
-    this(FhirContext.forDstu3(), new DefaultProfileValidationSupport(), theStorageServices);
-  }
 
   /**
    * Constructor which uses the given worker context

@@ -29,6 +29,21 @@ public class FhirResourceDaoDstu3UpdateTest extends BaseJpaDstu3Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoDstu3UpdateTest.class);
 
 	@Test
+	public void testReCreateMatchResource() {
+
+		CodeSystem codeSystem = new CodeSystem();
+		codeSystem.setUrl("http://foo");
+		IIdType id = myCodeSystemDao.create(codeSystem).getId().toUnqualifiedVersionless();
+
+		myCodeSystemDao.delete(id);
+
+		codeSystem = new CodeSystem();
+		codeSystem.setUrl("http://foo");
+		myCodeSystemDao.update(codeSystem, "Patient?name=FAM").getId().toUnqualifiedVersionless();
+
+	}
+
+	@Test
 	public void testCreateAndUpdateWithoutRequest() throws Exception {
 		String methodName = "testUpdateByUrl";
 

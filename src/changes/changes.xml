@@ -361,6 +361,15 @@
 				the returned
 				<![CDATA[<code>Location</code>]]> header value as well
 			</action>
+			<action type="add">
+				A new flag has been add to the CLI upload-definitions command
+				"-e" which allows skipping particular resources
+			</action>
+			<action type="add">
+				An issue in JPA server has been corrected where if a CodeSystem
+				resource was deleted, it was not possible to create a new resource
+				with the same URI as the previous one
+			</action>
 		</release>
 		<release version="2.5" date="2017-06-08">
 			<action type="fix">

@@ -139,14 +139,6 @@ public class FhirResourceDaoDstu3SearchPageExpiryTest extends BaseJpaDstu3Test {
 
 		// Search just got used so it shouldn't be deleted
 
-		myStaleSearchDeletingSvc.pollForStaleSearchesAndDeleteThem();
-		newTxTemplate().execute(new TransactionCallbackWithoutResult() {
-			@Override
-			protected void doInTransactionWithoutResult(TransactionStatus theArg0) {
-				assertNotNull(mySearchEntityDao.findByUuid(searchUuid3));
-			}
-		});
-
 		Thread.sleep(750);
 
 		myStaleSearchDeletingSvc.pollForStaleSearchesAndDeleteThem();

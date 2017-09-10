@@ -20,28 +20,39 @@ package ca.uhn.fhir.jpa.dao.r4;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
-import java.util.*;
-
-import org.hl7.fhir.r4.hapi.ctx.ValidationSupportChain;
-import org.hl7.fhir.r4.hapi.ctx.IValidationSupport.CodeValidationResult;
-import org.hl7.fhir.r4.model.*;
-import org.hl7.fhir.r4.model.CodeSystem.CodeSystemContentMode;
-import org.hl7.fhir.r4.model.CodeSystem.ConceptDefinitionComponent;
-import org.hl7.fhir.instance.model.api.*;
-import org.springframework.beans.factory.annotation.Autowired;
-
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoCodeSystem;
 import ca.uhn.fhir.jpa.dao.SearchParameterMap;
+import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemDao;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemVersionDao;
-import ca.uhn.fhir.jpa.entity.*;
+import ca.uhn.fhir.jpa.entity.ResourceTable;
+import ca.uhn.fhir.jpa.entity.TermCodeSystem;
+import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
+import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink.RelationshipTypeEnum;
 import ca.uhn.fhir.jpa.term.IHapiTerminologySvc;
 import ca.uhn.fhir.jpa.util.LogicUtil;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.r4.hapi.ctx.IValidationSupport.CodeValidationResult;
+import org.hl7.fhir.r4.hapi.ctx.ValidationSupportChain;
+import org.hl7.fhir.r4.model.CodeSystem;
+import org.hl7.fhir.r4.model.CodeSystem.CodeSystemContentMode;
+import org.hl7.fhir.r4.model.CodeSystem.ConceptDefinitionComponent;
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.IdType;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Set;
+
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class FhirResourceDaoCodeSystemR4 extends FhirResourceDaoR4<CodeSystem> implements IFhirResourceDaoCodeSystem<CodeSystem, Coding, CodeableConcept> {
 
@@ -49,10 +60,10 @@ public class FhirResourceDaoCodeSystemR4 extends FhirResourceDaoR4<CodeSystem> i
 
 	@Autowired
 	private ITermCodeSystemVersionDao myCsvDao;
-
+	@Autowired
+	private ITermCodeSystemDao myCsDao;
 	@Autowired
 	private IHapiTerminologySvc myTerminologySvc;
-
 	@Autowired
 	private ValidationSupportChain myValidationSupport;
 
@@ -115,7 +126,7 @@ public class FhirResourceDaoCodeSystemR4 extends FhirResourceDaoR4<CodeSystem> i
 		}
 
 		ourLog.info("Looking up {} / {}", system, code);
-		
+
 		if (myValidationSupport.isCodeSystemSupported(getContext(), system)) {
 
 			ourLog.info("Code system {} is supported", system);
@@ -133,7 +144,7 @@ public class FhirResourceDaoCodeSystemR4 extends FhirResourceDaoR4<CodeSystem> i
 					return retVal;
 				}
 			}
-			
+
 //			HapiWorkerContext ctx = new HapiWorkerContext(getContext(), myValidationSupport);
 //			ValueSetExpander expander = ctx.getExpander();
 //			ValueSet source = new ValueSet();
@@ -165,6 +176,19 @@ public class FhirResourceDaoCodeSystemR4 extends FhirResourceDaoR4<CodeSystem> i
 
 	}
 
+	@Override
+	protected void preDelete(CodeSystem theResourceToDelete, ResourceTable theEntityToDelete) {
+		super.preDelete(theResourceToDelete, theEntityToDelete);
+
+		String codeSystemUrl = theResourceToDelete.getUrl();
+		if (isNotBlank(codeSystemUrl)) {
+			TermCodeSystem persCs = myCsDao.findByCodeSystemUri(codeSystemUrl);
+			if (persCs != null) {
+				myTerminologySvc.deleteCodeSystem(persCs);
+			}
+		}
+	}
+
 	private List<TermConcept> toPersistedConcepts(List<ConceptDefinitionComponent> theConcept, TermCodeSystemVersion theCodeSystemVersion) {
 		ArrayList<TermConcept> retVal = new ArrayList<TermConcept>();
 
@@ -181,10 +205,10 @@ public class FhirResourceDaoCodeSystemR4 extends FhirResourceDaoR4<CodeSystem> i
 
 		return retVal;
 	}
-	
+
 	@Override
 	protected ResourceTable updateEntity(IBaseResource theResource, ResourceTable theEntity, Date theDeletedTimestampOrNull, boolean thePerformIndexing,
-			boolean theUpdateVersion, Date theUpdateTime, boolean theForceUpdate, boolean theCreateNewHistoryEntry) {
+													 boolean theUpdateVersion, Date theUpdateTime, boolean theForceUpdate, boolean theCreateNewHistoryEntry) {
 		ResourceTable retVal = super.updateEntity(theResource, theEntity, theDeletedTimestampOrNull, thePerformIndexing, theUpdateVersion, theUpdateTime, theForceUpdate, theCreateNewHistoryEntry);
 
 		CodeSystem cs = (CodeSystem) theResource;
@@ -193,20 +217,20 @@ public class FhirResourceDaoCodeSystemR4 extends FhirResourceDaoR4<CodeSystem> i
 			String codeSystemUrl = cs.getUrl();
 			if (cs.getContent() == CodeSystemContentMode.COMPLETE || cs.getContent() == null) {
 				ourLog.info("CodeSystem {} has a status of {}, going to store concepts in terminology tables", retVal.getIdDt().getValue(), cs.getContentElement().getValueAsString());
-				
+
 				Long codeSystemResourcePid = retVal.getId();
 				TermCodeSystemVersion persCs = myCsvDao.findByCodeSystemResourceAndVersion(codeSystemResourcePid, retVal.getVersion());
 				if (persCs != null) {
 					ourLog.info("Code system version already exists in database");
 				} else {
-					
+
 					persCs = new TermCodeSystemVersion();
 					persCs.setResource(retVal);
 					persCs.setResourceVersionId(retVal.getVersion());
 					persCs.getConcepts().addAll(toPersistedConcepts(cs.getConcept(), persCs));
 					ourLog.info("Code system has {} concepts", persCs.getConcepts().size());
 					myTerminologySvc.storeNewCodeSystemVersion(codeSystemResourcePid, codeSystemUrl, persCs);
-					
+
 				}
 
 			}

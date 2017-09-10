@@ -1,59 +1,5 @@
 package ca.uhn.fhir.parser;
 
-import static org.apache.commons.lang3.StringUtils.countMatches;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.stringContainsInOrder;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Matchers.isNull;
-import static org.mockito.Mockito.atLeastOnce;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-
-import java.io.IOException;
-import java.io.StringReader;
-import java.math.BigDecimal;
-import java.nio.charset.StandardCharsets;
-import java.util.*;
-
-import org.apache.commons.io.IOUtils;
-import org.hamcrest.Matchers;
-import org.hamcrest.core.StringContains;
-import org.hl7.fhir.dstu3.hapi.validation.DefaultProfileValidationSupport;
-import org.hl7.fhir.dstu3.hapi.validation.FhirInstanceValidator;
-import org.hl7.fhir.dstu3.model.*;
-import org.hl7.fhir.dstu3.model.Address.AddressUse;
-import org.hl7.fhir.dstu3.model.Address.AddressUseEnumFactory;
-import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
-import org.hl7.fhir.dstu3.model.Bundle.BundleType;
-import org.hl7.fhir.dstu3.model.CapabilityStatement.UnknownContentCode;
-import org.hl7.fhir.dstu3.model.Condition.ConditionVerificationStatus;
-import org.hl7.fhir.dstu3.model.Enumeration;
-import org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGender;
-import org.hl7.fhir.dstu3.model.Identifier.IdentifierUse;
-import org.hl7.fhir.dstu3.model.Observation.ObservationStatus;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.utilities.xhtml.XhtmlNode;
-import org.junit.*;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Mockito;
-
-import com.google.common.base.Charsets;
-import com.google.common.collect.Sets;
-
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
 import ca.uhn.fhir.parser.IParserErrorHandler.IParseLocation;
@@ -62,8 +8,47 @@ import ca.uhn.fhir.parser.XmlParserDstu3Test.TestPatientFor327;
 import ca.uhn.fhir.parser.json.JsonLikeValue.ScalarType;
 import ca.uhn.fhir.parser.json.JsonLikeValue.ValueType;
 import ca.uhn.fhir.util.TestUtil;
-import ca.uhn.fhir.validation.*;
-import net.sf.json.*;
+import ca.uhn.fhir.validation.FhirValidator;
+import ca.uhn.fhir.validation.ValidationResult;
+import com.google.common.base.Charsets;
+import com.google.common.collect.Sets;
+import net.sf.json.JSON;
+import net.sf.json.JSONSerializer;
+import net.sf.json.JsonConfig;
+import org.apache.commons.io.IOUtils;
+import org.hamcrest.Matchers;
+import org.hamcrest.core.StringContains;
+import org.hl7.fhir.dstu3.model.Address.AddressUse;
+import org.hl7.fhir.dstu3.model.Address.AddressUseEnumFactory;
+import org.hl7.fhir.dstu3.model.*;
+import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
+import org.hl7.fhir.dstu3.model.Bundle.BundleType;
+import org.hl7.fhir.dstu3.model.CapabilityStatement.UnknownContentCode;
+import org.hl7.fhir.dstu3.model.Condition.ConditionVerificationStatus;
+import org.hl7.fhir.dstu3.model.Enumeration;
+import org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGender;
+import org.hl7.fhir.dstu3.model.Identifier.IdentifierUse;
+import org.hl7.fhir.dstu3.model.Observation.ObservationStatus;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.utilities.xhtml.XhtmlNode;
+import org.junit.*;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mockito;
+
+import java.io.IOException;
+import java.io.StringReader;
+import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
+
+import static org.apache.commons.lang3.StringUtils.countMatches;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Matchers.isNull;
+import static org.mockito.Mockito.*;
 
 public class JsonParserDstu3Test {
 	private static FhirContext ourCtx = FhirContext.forDstu3();
@@ -74,77 +59,6 @@ public class JsonParserDstu3Test {
 		ourCtx.setNarrativeGenerator(null);
 	}
 	
-	@Test
-	public void testActivityDefinitionElementsOrder() throws Exception {
-		final String origContent = "{\"resourceType\":\"ActivityDefinition\",\"id\":\"x1\",\"url\":\"http://testing.org\",\"status\":\"draft\",\"timingDateTime\":\"2011-02-03\"}";
-		final IParser parser = ourCtx.newJsonParser();
-		DefaultProfileValidationSupport validationSupport = new DefaultProfileValidationSupport();
-
-		// verify that InstanceValidator likes the format
-		{
-			IValidationContext<IBaseResource> validationCtx = ValidationContext.forText(ourCtx, origContent);
-			new FhirInstanceValidator(validationSupport).validateResource(validationCtx);
-			ValidationResult result = validationCtx.toResult();
-			for (SingleValidationMessage msg : result.getMessages()) {
-				ourLog.info("{}", msg);
-			}
-			Assert.assertEquals(0, result.getMessages().size());
-		}
-
-		ActivityDefinition fhirObj = parser.parseResource(ActivityDefinition.class, origContent);
-		String content = parser.encodeResourceToString(fhirObj);
-		ourLog.info("Serialized form: {}", content);
-
-		// verify that InstanceValidator still likes the format
-		{
-			IValidationContext<IBaseResource> validationCtx = ValidationContext.forText(ourCtx, content);
-			new FhirInstanceValidator(validationSupport).validateResource(validationCtx);
-			ValidationResult result = validationCtx.toResult();
-			for (SingleValidationMessage msg : result.getMessages()) {
-				ourLog.info("{}", msg);
-			}
-			Assert.assertEquals(0, result.getMessages().size());
-		}
-
-		// verify that the original and newly serialized match
-		Assert.assertEquals(origContent, content);
-	}
-	
-	@Test
-	public void testConceptMapElementsOrder() throws Exception {
-		final String origContent = "{\"resourceType\":\"ConceptMap\",\"id\":\"x1\",\"url\":\"http://testing.org\",\"status\":\"draft\",\"sourceUri\":\"http://y1\"}";
-		final IParser parser = ourCtx.newJsonParser();
-		DefaultProfileValidationSupport validationSupport = new DefaultProfileValidationSupport();
-
-		// verify that InstanceValidator likes the format
-		{
-			IValidationContext<IBaseResource> validationCtx = ValidationContext.forText(ourCtx, origContent);
-			new FhirInstanceValidator(validationSupport).validateResource(validationCtx);
-			ValidationResult result = validationCtx.toResult();
-			for (SingleValidationMessage msg : result.getMessages()) {
-				ourLog.info("{}", msg);
-			}
-			Assert.assertEquals(0, result.getMessages().size());
-		}
-
-		ConceptMap fhirObj = parser.parseResource(ConceptMap.class, origContent);
-		String content = parser.encodeResourceToString(fhirObj);
-		ourLog.info("Serialized form: {}", content);
-
-		// verify that InstanceValidator still likes the format
-		{
-			IValidationContext<IBaseResource> validationCtx = ValidationContext.forText(ourCtx, content);
-			new FhirInstanceValidator(validationSupport).validateResource(validationCtx);
-			ValidationResult result = validationCtx.toResult();
-			for (SingleValidationMessage msg : result.getMessages()) {
-				ourLog.info("{}", msg);
-			}
-			Assert.assertEquals(0, result.getMessages().size());
-		}
-
-		// verify that the original and newly serialized match
-		Assert.assertEquals(origContent, content);
-	}
 
 	/**
 	 * See #563

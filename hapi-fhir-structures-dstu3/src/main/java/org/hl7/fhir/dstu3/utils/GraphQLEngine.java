@@ -309,8 +309,10 @@ public class GraphQLEngine {
       }
       if (fp.length() == 0)
         for (Base v : values) {
-          if (passesExtensionMode(v, extensionMode))
-            result.add(v);
+          if (v != null) {
+            if (passesExtensionMode(v, extensionMode))
+              result.add(v);
+          }
         } else {
           FHIRPathEngine fpe = new FHIRPathEngine(this.context);
           ExpressionNode node = fpe.parse(fp.toString().substring(5));
@@ -416,6 +418,8 @@ public class GraphQLEngine {
           if (prop == null) {
             if ((sel.getField().getName().equals("resourceType") && source instanceof Resource))
               target.addField("resourceType", false).addValue(new StringValue(source.fhirType()));
+            else if ((sel.getField().getName().equals("id") && source instanceof Resource))
+              target.addField("id", false).addValue(new StringValue(((Resource) source).getIdElement().getIdPart()));
             else if ((sel.getField().getName().equals("resource") && source.fhirType().equals("Reference")))
               processReference(context, source, sel.getField(), target);
             else if (isResourceName(sel.getField().getName(), "List") && (source instanceof Resource))

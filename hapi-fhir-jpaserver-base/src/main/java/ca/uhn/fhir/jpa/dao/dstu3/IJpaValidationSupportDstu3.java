@@ -1,6 +1,6 @@
 package ca.uhn.fhir.jpa.dao.dstu3;
 
-import org.hl7.fhir.dstu3.hapi.validation.IValidationSupport;
+import org.hl7.fhir.dstu3.hapi.ctx.IValidationSupport;
 
 /*
  * #%L
