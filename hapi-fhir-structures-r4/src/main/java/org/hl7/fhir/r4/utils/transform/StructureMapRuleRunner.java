@@ -357,85 +357,86 @@ public class StructureMapRuleRunner extends BaseRunner {
   }
 
 
-  protected void analyseTarget(BatchContext context, String ruleId, VariablesForProfiling vars, StructureMap map, StructureMap.StructureMapGroupRuleTargetComponent tgt, String tv, TargetWriter tw, List<StructureDefinition> profiles, String sliceName) throws Exception {
-    VariableForProfiling var = null;
+  protected void analyseTarget(BatchContext context, String ruleId, VariablesForProfiling vars, StructureMap map, StructureMap.StructureMapGroupRuleTargetComponent ruleTarget, String targetVariable, TargetWriter tw, List<StructureDefinition> profiles, String sliceName) throws Exception {
+    VariableForProfiling targetContextVariable = null;
     boolean isExtensionTransform = false;
     List<ElementDefinition> extensionReferences = null;
-    if (tgt.hasContext()) {
-      var = vars.get(VariableMode.OUTPUT, tgt.getContext());
-      if (var == null)
-        throw new Exception("Rule \"" + ruleId + "\": target context not known: " + tgt.getContext());
-      if (!tgt.hasElement())
+    if (ruleTarget.hasContext()) {
+      targetContextVariable = vars.get(VariableMode.OUTPUT, ruleTarget.getContext());
+      if (targetContextVariable == null)
+        throw new Exception("Rule \"" + ruleId + "\": target context not known: " + ruleTarget.getContext());
+      if (!ruleTarget.hasElement())
         throw new Exception("Rule \"" + ruleId + "\": Not supported yet");
     }
 
 
     TypeDetails type = null;
-    if (tgt.hasTransform()) {
-      type = analyseTransform(context, map, tgt, var, vars);
-      // profiling: dest.setProperty(tgt.getElement().hashCode(), tgt.getElement(), v);
+    if (ruleTarget.hasTransform()) {
+      type = analyseTransform(context, map, ruleTarget, targetContextVariable, vars);
+      // profiling: dest.setProperty(ruleTarget.getElement().hashCode(), ruleTarget.getElement(), v);
     } else {
-      Property vp = var.getProperty().getBaseProperty().getChild(tgt.getElement(), tgt.getElement());
+      Property vp = targetContextVariable.getProperty().getBaseProperty().getChild(ruleTarget.getElement(), ruleTarget.getElement());
       if (vp == null)
-        throw new Exception("Unknown Property " + tgt.getElement() + " on " + var.getProperty().getPath());
+        throw new Exception("Unknown Property " + ruleTarget.getElement() + " on " + targetContextVariable.getProperty().getPath());
 
-      type = new TypeDetails(ExpressionNode.CollectionStatus.SINGLETON, vp.getType(tgt.getElement()));
+      type = new TypeDetails(ExpressionNode.CollectionStatus.SINGLETON, vp.getType(ruleTarget.getElement()));
     }
 
-    if (tgt.getTransform() == StructureMap.StructureMapTransform.CREATE) {
-      String s = getParamString(vars, tgt.getParameter().get(0));
+    if (ruleTarget.getTransform() == StructureMap.StructureMapTransform.CREATE) {
+      String s = getParamString(vars, ruleTarget.getParameter().get(0));
       if (getWorker().getResourceNames().contains(s))
-        tw.newResource(tgt.getVariable(), s);
-    } else if (tgt.getTransform() == StructureMap.StructureMapTransform.EXTENSION) {
+        tw.newResource(ruleTarget.getVariable(), s);
+    } else if (ruleTarget.getTransform() == StructureMap.StructureMapTransform.EXTENSION) {
       isExtensionTransform = true;
-      String extensionUri = tgt.getParameter().get(0).getValueStringType().getValueAsString();
-      String extensionName = tgt.getParameter().get(1).getValueStringType().getValueAsString();
-      String baseContext = tgt.getParameter().get(2).getValueStringType().getValueAsString();
-      StringType extContext = tgt.getParameter().get(3).getValueStringType();
-      String shortDescription = tgt.getParameter().get(4).getValueStringType().getValueAsString();
-      String longDescription = tgt.getParameter().get(5).getValueStringType().getValueAsString();
-      Integer min = tgt.getParameter().get(6).getValueIntegerType().getValue();
-      String max = tgt.getParameter().get(7).getValueStringType().getValueAsString();
-      String extType = tgt.getParameter().get(8).getValueStringType().getValueAsString();
+      VariableForProfiling inputElementVariable = vars.get(VariableMode.INPUT, targetVariable);
+      String extensionUri = ruleTarget.getParameter().get(0).getValueStringType().getValueAsString();
+      String extensionName = ruleTarget.getParameter().get(1).getValueStringType().getValueAsString();
+      String baseContext = ruleTarget.getParameter().get(2).getValueStringType().getValueAsString();
+      StringType extContext = ruleTarget.getParameter().get(3).getValueStringType();
+      String shortDescription = ruleTarget.getParameter().get(4).getValueStringType().getValueAsString();
+      String longDescription = ruleTarget.getParameter().get(5).getValueStringType().getValueAsString();
+      Integer min = ruleTarget.getParameter().get(6).getValueIntegerType().getValue();
+      String max = ruleTarget.getParameter().get(7).getValueStringType().getValueAsString();
+      String extType = ruleTarget.getParameter().get(8).getValueStringType().getValueAsString();
       List<StringType> contexts = new ArrayList<>();
       contexts.add(extContext);
       FhirExtensionGenerator extensionGenerator = new FhirExtensionGenerator();
       StructureDefinition extensionStructureDef = extensionGenerator.generateExtensionStructureDefinition(extensionName, contexts, shortDescription, longDescription, min, max, extType);
       profiles.add(extensionStructureDef);
-      extensionReferences = extensionGenerator.generateExtensionElementDefinitions(false, var.getProperty().getPath(), extensionName, shortDescription, longDescription, min, max, extensionUri);//TODO why does ProfileUtilities add a slice when I add one but does not when I don't
+      extensionReferences = extensionGenerator.generateExtensionElementDefinitions(false, targetContextVariable.getProperty().getPath(), extensionName, shortDescription, longDescription, min, max, extensionUri);//TODO why does ProfileUtilities add a slice when I add one but does not when I don't
 
     } else {
       boolean mapsSrc = false;
-      for (StructureMap.StructureMapGroupRuleTargetParameterComponent p : tgt.getParameter()) {
-        Type pr = p.getValue();
-        if (pr instanceof IdType && ((IdType) pr).asStringValue().equals(tv))
+      for (StructureMap.StructureMapGroupRuleTargetParameterComponent parameter : ruleTarget.getParameter()) {
+        Type parameterValue = parameter.getValue();
+        if (parameterValue instanceof IdType && ((IdType) parameterValue).asStringValue().equals(targetVariable))
           mapsSrc = true;
       }
       if (mapsSrc) {
-        if (var == null)
+        if (targetContextVariable == null)
           throw new Error("Rule \"" + ruleId + "\": Attempt to assign with no context");
-        tw.valueAssignment(tgt.getContext(), var.getProperty().getPath() + "." + tgt.getElement() + getTransformSuffix(tgt.getTransform()));
-      } else if (tgt.hasContext()) {
-        if (isSignificantElement(var.getProperty(), tgt.getElement())) {
-          String td = describeTransform(tgt);
+        tw.valueAssignment(ruleTarget.getContext(), targetContextVariable.getProperty().getPath() + "." + ruleTarget.getElement() + getTransformSuffix(ruleTarget.getTransform()));
+      } else if (ruleTarget.hasContext()) {
+        if (isSignificantElement(targetContextVariable.getProperty(), ruleTarget.getElement())) {
+          String td = describeTransform(ruleTarget);
           if (td != null)
-            tw.keyAssignment(tgt.getContext(), var.getProperty().getPath() + "." + tgt.getElement() + " = " + td);
+            tw.keyAssignment(ruleTarget.getContext(), targetContextVariable.getProperty().getPath() + "." + ruleTarget.getElement() + " = " + td);
         }
       }
     }
-    Type fixed = generateFixedValue(tgt);
+    Type fixed = generateFixedValue(ruleTarget);
 
     PropertyWithType prop = null;
     if (isExtensionTransform) {
-      prop = addExtensionToProfile(var, extensionReferences, sliceName, fixed);
+      prop = addExtensionToProfile(targetContextVariable, extensionReferences, sliceName, fixed);
     } else {
-      prop = updateProfile(var, tgt.getElement(), type, map, profiles, sliceName, fixed, tgt);
+      prop = updateProfile(targetContextVariable, ruleTarget.getElement(), type, map, profiles, sliceName, fixed, ruleTarget);
     }
-    if (tgt.hasVariable())
-      if (tgt.hasElement())
-        vars.add(VariableMode.OUTPUT, tgt.getVariable(), prop);
+    if (ruleTarget.hasVariable())
+      if (ruleTarget.hasElement())
+        vars.add(VariableMode.OUTPUT, ruleTarget.getVariable(), prop);
       else
-        vars.add(VariableMode.OUTPUT, tgt.getVariable(), prop);
+        vars.add(VariableMode.OUTPUT, ruleTarget.getVariable(), prop);
   }
 
   private void processTarget(String ruleId, TransformContext context, Variables vars, StructureMap map, StructureMap.StructureMapGroupComponent group, StructureMap.StructureMapGroupRuleTargetComponent tgt, String srcVar) throws FHIRException {
@@ -701,8 +702,8 @@ public class StructureMapRuleRunner extends BaseRunner {
       return false;
   }
 
-  private String describeTransform(StructureMap.StructureMapGroupRuleTargetComponent tgt) throws FHIRException {
-    switch (tgt.getTransform()) {
+  private String describeTransform(StructureMap.StructureMapGroupRuleTargetComponent ruleTarget) throws FHIRException {
+    switch (ruleTarget.getTransform()) {
       case COPY:
         return null;
       case TRUNCATE:
@@ -717,9 +718,9 @@ public class StructureMapRuleRunner extends BaseRunner {
       //case POINTER,
       //case EVALUATE,
       case CC:
-        return describeTransformCCorC(tgt);
+        return describeTransformCCorC(ruleTarget);
       case C:
-        return describeTransformCCorC(tgt);
+        return describeTransformCCorC(ruleTarget);
       case QTY:
         return null;
       //case ID,
