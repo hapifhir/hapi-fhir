@@ -1,0 +1,447 @@
+<StructureDefinition xmlns="http://hl7.org/fhir">
+    <id value="Patient"/>
+    <meta>
+        <lastUpdated value="2017-07-14T08:37:31.190+02:00"/>
+    </meta>
+    <contained>
+        <ValueSet xmlns="http://hl7.org/fhir">
+            <id value="1"/>
+        </ValueSet>
+    </contained>
+    <contained>
+        <ValueSet xmlns="http://hl7.org/fhir">
+            <id value="2"/>
+        </ValueSet>
+    </contained>
+    <contained>
+        <ValueSet xmlns="http://hl7.org/fhir">
+            <id value="3"/>
+        </ValueSet>
+    </contained>
+    <contained>
+        <ValueSet xmlns="http://hl7.org/fhir">
+            <id value="4"/>
+        </ValueSet>
+    </contained>
+    <contained>
+        <ValueSet xmlns="http://hl7.org/fhir">
+            <id value="5"/>
+        </ValueSet>
+    </contained>
+    <url value="http://www.myServer.com/fhir/StructureDefinition/Patient"/>
+    <version value="1.0"/>
+    <name value="Custom Patient"/>
+    <title value="Patient"/>
+    <status value="draft"/>
+    <experimental value="false"/>
+    <date value="2017-07-14T08:37:31+02:00"/>
+    <publisher value="Me"/>
+    <contact>
+        <name value="test"/>
+        <telecom>
+            <system value="email"/>
+            <value value="test@test.com"/>
+            <use value="work"/>
+        </telecom>
+    </contact>
+    <description value="Information about an individual receiving health care services"/>
+    <useContext>
+        <code>
+            <system value="urn:iso:std:iso:3166"/>
+            <code value="FR"/>
+            <display value="France"/>
+        </code>
+    </useContext>
+    <fhirVersion value="3.0.1"/>
+    <kind value="resource"/>
+    <abstract value="false"/>
+    <type value="Patient"/>
+    <baseDefinition value="http://hl7.org/fhir/StructureDefinition/patient"/>
+    <derivation value="constraint"/>
+    <snapshot>
+        <element>
+            <path value="Patient"/>
+        </element>
+        <element>
+            <path value="Patient.id"/>
+            <short value="Logical id of this artifact"/>
+            <definition value="The logical id of the resource, as used in the URL for the resource. Once assigned, this value never changes."/>
+            <min value="0"/>
+            <max value="1"/>
+            <type>
+                <code value="id"/>
+            </type>
+            <isSummary value="true"/>
+        </element>
+        <element>
+            <path value="Patient.meta"/>
+            <short value="Metadata about the resource"/>
+            <definition value="The metadata about the resource. This is content that is maintained by the infrastructure. Changes to the content may not always be associated with version changes to the resource."/>
+            <min value="0"/>
+            <max value="1"/>
+            <type>
+                <code value="Meta"/>
+            </type>
+            <isSummary value="true"/>
+        </element>
+        <element>
+            <path value="Patient.text"/>
+            <max value="0"/>
+        </element>
+        <element>
+            <path value="Patient.contained"/>
+            <max value="0"/>
+        </element>
+        <element>
+            <path value="Patient.implicitRules"/>
+            <max value="0"/>
+        </element>
+        <element>
+            <path value="Patient.language"/>
+            <short value="Language of the resource content"/>
+            <definition value="The base language in which the resource is written."/>
+            <min value="0"/>
+            <max value="1"/>
+            <type>
+                <code value="code"/>
+            </type>
+            <isModifier value="false"/>
+            <isSummary value="false"/>
+        </element>
+        <element>
+            <path value="Patient.extension"/>
+            <slicing>
+                <discriminator>
+                    <type value="value"/>
+                    <path value="url"/>
+                </discriminator>
+                <rules value="open"/>
+            </slicing>
+            <definition value="May be used to represent additional information that is not part of the basic definition of the element."/>
+        </element>
+        <element>
+            <path value="Patient.extension"/>
+            <short value="identityReliabilityCode"/>
+            <definition value="The patient identity reliability code"/>
+            <min value="0"/>
+            <max value="1"/>
+            <type>
+                <code value="Extension"/>
+                <profile value="http://www.myServer.com/fhir/StructureDefinition/identityReliabilityCode"/>
+            </type>
+            <isModifier value="false"/>
+            <isSummary value="true"/>
+            <binding>
+                <strength value="required"/>
+                <valueSetReference>
+                    <reference value="ValueSet/IDENTITYSTATUS"/>
+                </valueSetReference>
+            </binding>
+        </element>
+        <element>
+            <path value="Patient.extension"/>
+            <short value="lunarBirthDate"/>
+            <definition value="The patient lunar's birth date"/>
+            <min value="0"/>
+            <max value="1"/>
+            <type>
+                <code value="Extension"/>
+                <profile value="http://www.myServer.com/fhir/StructureDefinition/lunarBirthDate"/>
+            </type>
+            <isModifier value="false"/>
+            <isSummary value="false"/>
+        </element>
+        <element>
+            <path value="Patient.extension"/>
+            <short value="legalStatus"/>
+            <definition value="The patient legal status"/>
+            <min value="0"/>
+            <max value="1"/>
+            <type>
+                <code value="Extension"/>
+                <profile value="http://www.myServer.com/fhir/StructureDefinition/legalStatus"/>
+            </type>
+            <isModifier value="false"/>
+            <isSummary value="false"/>
+            <binding>
+                <strength value="required"/>
+                <valueSetReference>
+                    <reference value="ValueSet/ADT_LEGALSTATUS"/>
+                </valueSetReference>
+            </binding>
+        </element>
+        <element>
+            <path value="Patient.extension"/>
+            <short value="familyStatus"/>
+            <definition value="The patient family status"/>
+            <min value="0"/>
+            <max value="1"/>
+            <type>
+                <code value="Extension"/>
+                <profile value="http://www.myServer.com/fhir/StructureDefinition/familyStatus"/>
+            </type>
+            <isModifier value="false"/>
+            <isSummary value="false"/>
+            <binding>
+                <strength value="required"/>
+                <valueSetReference>
+                    <reference value="ValueSet/FAMILYSTATUS"/>
+                </valueSetReference>
+            </binding>
+        </element>
+        <element>
+            <path value="Patient.extension"/>
+            <short value="birthPlace"/>
+            <definition value="The patient birth place"/>
+            <min value="0"/>
+            <max value="1"/>
+            <type>
+                <code value="Extension"/>
+                <profile value="http://hl7.org/fhir/StructureDefinition/birthPlace"/>
+            </type>
+            <isModifier value="false"/>
+            <isSummary value="false"/>
+        </element>
+        <element>
+            <path value="Patient.extension"/>
+            <short value="homeless"/>
+            <definition value="The patient being homeless, true if homeless"/>
+            <min value="0"/>
+            <max value="1"/>
+            <type>
+                <code value="Extension"/>
+                <profile value="http://www.myServer.com/fhir/StructureDefinition/homeless"/>
+            </type>
+            <isModifier value="false"/>
+            <isSummary value="false"/>
+        </element>
+        <element>
+            <path value="Patient.extension"/>
+            <short value="phoneConsent"/>
+            <definition value="The patient consent on phone level"/>
+            <min value="0"/>
+            <max value="1"/>
+            <type>
+                <code value="Extension"/>
+                <profile value="http://www.myServer.com/fhir/StructureDefinition/phoneConsent"/>
+            </type>
+            <isModifier value="false"/>
+            <isSummary value="false"/>
+            <binding>
+                <strength value="required"/>
+                <valueSetReference>
+                    <reference value="ValueSet/ADT_CONTACT_CONSENT_MOBILE"/>
+                </valueSetReference>
+            </binding>
+        </element>
+        <element>
+            <path value="Patient.extension"/>
+            <short value="emailConsent"/>
+            <definition value="The patient consent on email level"/>
+            <min value="0"/>
+            <max value="1"/>
+            <type>
+                <code value="Extension"/>
+                <profile value="http://www.myServer.com/fhir/StructureDefinition/emailConsent"/>
+            </type>
+            <isModifier value="false"/>
+            <isSummary value="false"/>
+            <binding>
+                <strength value="required"/>
+                <valueSetReference>
+                    <reference value="ValueSet/ADT_CONTACT_CONSENT_EMAIL"/>
+                </valueSetReference>
+            </binding>
+        </element>
+        <element>
+            <path value="Patient.extension"/>
+            <short value="comments"/>
+            <definition value="The patient comments"/>
+            <min value="0"/>
+            <max value="1"/>
+            <type>
+                <code value="Extension"/>
+                <profile value="http://www.myServer.com/fhir/StructureDefinition/comments"/>
+            </type>
+            <isModifier value="false"/>
+            <isSummary value="false"/>
+        </element>
+        <element>
+            <path value="Patient.extension"/>
+            <short value="nationality"/>
+            <definition value="The patient nationality"/>
+            <min value="0"/>
+            <max value="1"/>
+            <type>
+                <code value="Extension"/>
+                <profile value="http://hl7.org/fhir/StructureDefinition/patient-nationality"/>
+            </type>
+            <isModifier value="false"/>
+        </element>
+        <element>
+            <path value="Patient.identifier"/>
+            <short value="An identifier for this patient"/>
+            <definition value="An identifier for this patient."/>
+            <min value="0"/>
+            <max value="*"/>
+            <type>
+                <code value="Identifier"/>
+                <profile value="http://www.myServer.com/fhir/StructureDefinition/Identifier"/>
+            </type>
+            <isModifier value="false"/>
+            <isSummary value="true"/>
+        </element>
+        <element>
+            <path value="Patient.active"/>
+            <max value="0"/>
+        </element>
+        <element>
+            <path value="Patient.name"/>
+            <short value="A name associated with the patient"/>
+            <definition value="A name associated with the individual."/>
+            <min value="0"/>
+            <max value="*"/>
+            <type>
+                <code value="HumanName"/>
+                <profile value="http://www.myServer.com/fhir/StructureDefinition/HumanName"/>
+            </type>
+            <isModifier value="false"/>
+            <isSummary value="true"/>
+        </element>
+        <element>
+            <path value="Patient.telecom"/>
+            <short value="A contact detail for the individual"/>
+            <definition value="A contact detail (e.g. a telephone number or an email address) by which the individual may be contacted."/>
+            <min value="0"/>
+            <max value="*"/>
+            <type>
+                <code value="ContactPoint"/>
+                <profile value="http://www.myServer.com/fhir/StructureDefinition/ContactPoint"/>
+            </type>
+            <isModifier value="false"/>
+            <isSummary value="true"/>
+        </element>
+        <element>
+            <path value="Patient.gender"/>
+            <short value="male | female | other | unknown"/>
+            <definition value="Administrative Gender - the gender that the patient is considered to have for administration and record keeping purposes."/>
+            <min value="0"/>
+            <max value="1"/>
+            <type>
+                <code value="code"/>
+            </type>
+            <isModifier value="false"/>
+            <isSummary value="true"/>
+        </element>
+        <element>
+            <path value="Patient.birthDate"/>
+            <short value="The date of birth for the individual"/>
+            <definition value="The date of birth for the individual."/>
+            <min value="0"/>
+            <max value="1"/>
+            <type>
+                <code value="date"/>
+            </type>
+            <isModifier value="false"/>
+            <isSummary value="true"/>
+        </element>
+        <element>
+            <path value="Patient.birthDate.extension"/>
+            <slicing>
+                <discriminator>
+                    <type value="value"/>
+                    <path value="url"/>
+                </discriminator>
+                <rules value="open"/>
+            </slicing>
+        </element>
+        <element>
+            <path value="Patient.birthDate.extension"/>
+            <short value="approximateBirthDate"/>
+            <definition value="Flag to indicate if the birthdate is approximative or not"/>
+            <min value="0"/>
+            <max value="1"/>
+            <type>
+                <code value="Extension"/>
+                <profile value="http://www.myServer.com/fhir/StructureDefinition/birthdate-approximative"/>
+            </type>
+            <isModifier value="false"/>
+        </element>
+        <element>
+            <path value="Patient.deceased[x]"/>
+            <short value="Indicates if the individual is deceased or not"/>
+            <definition value="Indicates if the individual is deceased or not."/>
+            <min value="0"/>
+            <max value="1"/>
+            <type>
+                <code value="boolean"/>
+            </type>
+            <type>
+                <code value="dateTime"/>
+            </type>
+            <isModifier value="true"/>
+            <isSummary value="true"/>
+        </element>
+        <element>
+            <path value="Patient.address"/>
+            <short value="Addresses for the individual"/>
+            <definition value="Addresses for the individual."/>
+            <min value="0"/>
+            <max value="*"/>
+            <type>
+                <code value="Address"/>
+                <profile value="http://www.myServer.com/fhir/StructureDefinition/Address"/>
+            </type>
+            <isModifier value="false"/>
+            <isSummary value="true"/>
+        </element>
+        <element>
+            <path value="Patient.maritalStatus"/>
+            <max value="0"/>
+        </element>
+        <element>
+            <path value="Patient.multipleBirth[x]"/>
+            <short value="Whether patient is part of a multiple birth"/>
+            <definition value="Indicates whether the patient is part of a multiple (bool) or indicates the actual birth order (integer)."/>
+            <min value="0"/>
+            <max value="1"/>
+            <type>
+                <code value="boolean"/>
+            </type>
+            <type>
+                <code value="integer"/>
+            </type>
+            <isModifier value="false"/>
+            <isSummary value="false"/>
+        </element>
+        <element>
+            <path value="Patient.photo"/>
+            <max value="0"/>
+        </element>
+        <element>
+            <path value="Patient.contact"/>
+            <max value="0"/>
+        </element>
+        <element>
+            <path value="Patient.animal"/>
+            <max value="0"/>
+        </element>
+        <element>
+            <path value="Patient.communication"/>
+            <max value="0"/>
+        </element>
+        <element>
+            <path value="Patient.generalPractitioner"/>
+            <max value="0"/>
+        </element>
+        <element>
+            <path value="Patient.managingOrganization"/>
+            <max value="0"/>
+        </element>
+        <element>
+            <path value="Patient.link"/>
+            <max value="0"/>
+        </element>
+    </snapshot>
+</StructureDefinition>
+

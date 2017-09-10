@@ -2,13 +2,12 @@ package ca.uhn.fhir.igpack.parser;
 
 
 import ca.uhn.fhir.context.FhirContext;
-import org.hl7.fhir.dstu3.hapi.validation.IValidationSupport;
+import ca.uhn.fhir.igpacks.parser.IgPackParserDstu3;
+import org.hl7.fhir.dstu3.hapi.ctx.IValidationSupport;
 import org.hl7.fhir.dstu3.model.ValueSet;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import parser.IgPackParserDstu3;
 
 import static org.junit.Assert.*;
 

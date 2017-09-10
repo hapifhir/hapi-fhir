@@ -20,24 +20,25 @@ package org.hl7.fhir.dstu3.hapi.ctx;
  * #L%
  */
 
-import java.io.InputStream;
-import java.util.Date;
-import java.util.List;
-
-import org.apache.commons.lang3.StringUtils;
-import org.hl7.fhir.dstu3.hapi.fluentpath.FluentPathDstu3;
-import org.hl7.fhir.dstu3.hapi.rest.server.Dstu3BundleFactory;
-import org.hl7.fhir.dstu3.hapi.validation.DefaultProfileValidationSupport;
-import org.hl7.fhir.dstu3.model.*;
-import org.hl7.fhir.instance.model.api.*;
-
-import ca.uhn.fhir.context.*;
+import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.support.IContextValidationSupport;
 import ca.uhn.fhir.fluentpath.IFluentPath;
 import ca.uhn.fhir.model.api.IFhirVersion;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.IVersionSpecificBundleFactory;
 import ca.uhn.fhir.util.ReflectionUtil;
+import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.dstu3.hapi.fluentpath.FluentPathDstu3;
+import org.hl7.fhir.dstu3.hapi.rest.server.Dstu3BundleFactory;
+import org.hl7.fhir.dstu3.model.*;
+import org.hl7.fhir.instance.model.api.*;
+
+import java.io.InputStream;
+import java.util.Date;
+import java.util.List;
 
 public class FhirDstu3 implements IFhirVersion {
 
@@ -50,7 +51,12 @@ public class FhirDstu3 implements IFhirVersion {
 
   @Override
   public IContextValidationSupport<?, ?, ?, ?, ?, ?> createValidationSupport() {
-    return new DefaultProfileValidationSupport();
+    String className = "org.hl7.fhir.dstu3.hapi.validation.DefaultProfileValidationSupport";
+    try {
+      return (IContextValidationSupport<?, ?, ?, ?, ?, ?>) Class.forName(className).newInstance();
+    } catch (Exception theE) {
+      throw new ConfigurationException(className + " is not on classpath. Make sure that hapi-fhir-validation-VERSION.jar is available.");
+    }
   }
 
   @Override

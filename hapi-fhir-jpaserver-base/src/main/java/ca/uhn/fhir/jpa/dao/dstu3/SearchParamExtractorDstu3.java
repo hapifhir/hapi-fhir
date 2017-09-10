@@ -31,7 +31,7 @@ import javax.measure.unit.Unit;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.hl7.fhir.dstu3.context.IWorkerContext;
-import org.hl7.fhir.dstu3.hapi.validation.IValidationSupport;
+import org.hl7.fhir.dstu3.hapi.ctx.IValidationSupport;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.dstu3.model.CapabilityStatement.CapabilityStatementRestSecurityComponent;
 import org.hl7.fhir.dstu3.model.Enumeration;
@@ -55,7 +55,7 @@ public class SearchParamExtractorDstu3 extends BaseSearchParamExtractor implemen
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchParamExtractorDstu3.class);
 
 	@Autowired
-	private org.hl7.fhir.dstu3.hapi.validation.IValidationSupport myValidationSupport;
+	private org.hl7.fhir.dstu3.hapi.ctx.IValidationSupport myValidationSupport;
 
 	/**
 	 * Constructor
@@ -690,7 +690,7 @@ public class SearchParamExtractorDstu3 extends BaseSearchParamExtractor implemen
 	 */
 	@Override
 	protected List<Object> extractValues(String thePaths, IBaseResource theResource) {
-		IWorkerContext worker = new org.hl7.fhir.dstu3.hapi.validation.HapiWorkerContext(getContext(), myValidationSupport);
+		IWorkerContext worker = new org.hl7.fhir.dstu3.hapi.ctx.HapiWorkerContext(getContext(), myValidationSupport);
 		FHIRPathEngine fp = new FHIRPathEngine(worker);
 
 		List<Object> values = new ArrayList<Object>();
@@ -736,7 +736,7 @@ public class SearchParamExtractorDstu3 extends BaseSearchParamExtractor implemen
 	}
 
 	@VisibleForTesting
-	void setValidationSupportForTesting(org.hl7.fhir.dstu3.hapi.validation.IValidationSupport theValidationSupport) {
+	void setValidationSupportForTesting(org.hl7.fhir.dstu3.hapi.ctx.IValidationSupport theValidationSupport) {
 		myValidationSupport = theValidationSupport;
 	}
 
