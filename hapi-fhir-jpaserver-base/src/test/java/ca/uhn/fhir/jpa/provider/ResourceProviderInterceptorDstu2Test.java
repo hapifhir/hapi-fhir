@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.provider;
 
+import ca.uhn.fhir.jpa.provider.r4.ResourceProviderInterceptorR4Test;
 import ca.uhn.fhir.model.dstu2.resource.Bundle;
 import ca.uhn.fhir.model.dstu2.resource.Bundle.Entry;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
@@ -114,12 +115,7 @@ public class ResourceProviderInterceptorDstu2Test extends BaseResourceProviderDs
 		assertEquals("Patient", ardCaptor.getValue().getResourceType());
 		assertNotNull(ardCaptor.getValue().getResource());
 
-		ardCaptor = ArgumentCaptor.forClass(ActionRequestDetails.class);
-		opTypeCaptor = ArgumentCaptor.forClass(RestOperationTypeEnum.class);
-		verify(myDaoInterceptor, times(1)).incomingRequestPreHandled(opTypeCaptor.capture(), ardCaptor.capture());
-		assertEquals(RestOperationTypeEnum.CREATE, opTypeCaptor.getValue());
-		assertEquals("Patient", ardCaptor.getValue().getResourceType());
-		assertNotNull(ardCaptor.getValue().getResource());
+		ResourceProviderInterceptorR4Test.verifyDaoInterceptor(myDaoInterceptor);
 	}
 
 	@Test

@@ -20,23 +20,25 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.hamcrest.Matchers;
+import org.hl7.fhir.dstu3.hapi.rest.server.GraphQLProviderDstu3;
 import org.hl7.fhir.dstu3.hapi.validation.DefaultProfileValidationSupport;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.dstu3.hapi.rest.server.GraphQLProviderDstu3;
 import org.hl7.fhir.utilities.graphql.Argument;
 import org.hl7.fhir.utilities.graphql.IGraphQLStorageServices;
 import org.hl7.fhir.utilities.graphql.ReferenceResolution;
-import org.junit.*;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
+import static org.junit.Assert.*;
 
 public class GraphQLDstu3ProviderTest {
 
@@ -112,7 +114,7 @@ public class GraphQLDstu3ProviderTest {
 	}
 
 	@Test
-	@Ignore
+	@org.junit.Ignore
 	public void testGraphSystemInstance() throws Exception {
 		String query = "{Patient(id:123){id,name{given,family}}}";
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/$graphql?query=" + UrlUtil.escape(query));
