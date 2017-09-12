@@ -5,7 +5,7 @@ uses "http://fhir.hl7.org.au/fhir/rcpa/StructureDefinition/Colorectal" as source
 group for types Colorectal
   input source : Colorectal as source
 
-  %20Colorectal : for source make  create("DiagnosticReport") as cdr,  cdr.status = "final",  cdr.code = cc("http://snomed.info/sct", "todo") then {
+    Colorectal : for source make  create("DiagnosticReport") as cdr,  cdr.status = "final",  cdr.code = cc("http://snomed.info/sct", "todo") then {
     Colorectal.subject : for source.subject : Reference 1..1 as v make cdr.subject = v
     Colorectal.requester : for source.requester : Reference 0..1 as v make  create("ProcedureRequest") as do,  cdr.basedOn = reference(do),  do.subject = reference(cdr),  do.requester as prr,  prr.agent = v
     Colorectal.performer : for source.performer : Reference 0..1 as v make  cdr.performer = v

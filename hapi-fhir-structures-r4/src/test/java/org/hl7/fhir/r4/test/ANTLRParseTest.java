@@ -5,6 +5,7 @@ import org.hl7.fhir.r4.model.StructureMap;
 import org.hl7.fhir.r4.utils.transform.ParseImpl;
 import org.hl7.fhir.r4.utils.transform.deserializer.FhirMapProcessor;
 import org.hl7.fhir.r4.utils.transform.deserializer.FhirMapVisitor;
+import org.hl7.fhir.r4.utils.transform.deserializer.UrlProcessor;
 import org.hl7.fhir.r4.utils.transform.deserializer.grammar.antlr.javaAntlr.FhirMapJavaParser;
 import org.junit.Test;
 
@@ -67,5 +68,11 @@ public class ANTLRParseTest {
 
 		System.out.println(parse.structureMap);
 
+	}
+
+	@Test
+	public void testUrlPrse() throws Exception{
+		UrlProcessor processor = new UrlProcessor();
+		processor.parseUrl("\"http://fhir.hl7.org.au/fhir/rcpa/StructureMap/ColorectalMap\"");
 	}
 }

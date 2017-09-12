@@ -25,7 +25,7 @@ import java.nio.charset.Charset;
 /**
 * Process Adl Language data.
 */
-public class UrlProcessor   
+public class UrlProcessor
 {
     /**
     * If true, output debug info during parsing.
@@ -41,7 +41,7 @@ public class UrlProcessor
 
     /**
     * Constructor.
-    * 
+    *
     */
     public UrlProcessor() throws Exception {
         setDebugFlag(false);
@@ -49,7 +49,7 @@ public class UrlProcessor
 
     /**
     * Method to load string grammar.
-    * 
+    *
     *  @param text Adl text
     *  @return ANTLR parser
     */
@@ -58,7 +58,7 @@ public class UrlProcessor
       buffer.append(text);
       buffer.position(0);
 
-      FhirMapJavaLexer lexer = new FhirMapJavaLexer(CodePointCharStream.fromBuffer(CodePointBuffer.withChars(CharBuffer.wrap(text.toCharArray()))));
+      UrlJavaLexer lexer = new UrlJavaLexer(CodePointCharStream.fromBuffer(CodePointBuffer.withChars(CharBuffer.wrap(text.toCharArray()))));
       lexer.addErrorListener(new ThrowExceptionErrorListener(text));
       CommonTokenStream commonTokenStream = new CommonTokenStream(lexer);
       UrlJavaParser grammar = new UrlJavaParser(commonTokenStream);
@@ -70,22 +70,23 @@ public class UrlProcessor
             });
             grammar.addParseListener(parseListener);
         }
-         
+
         grammar.removeErrorListeners();
-        //grammar.addErrorListener(new ThrowExceptionErrorListener(text));
+        grammar.addErrorListener(new ThrowExceptionErrorListener(text));
         return grammar;
     }
 
     /**
     * Parse Adl Definition text.
-    * 
+    *
     *  @param UrlText Adl Archetype Text to process
     */
     public UrlData parseUrl(String UrlText) throws Exception {
         UrlJavaParser grammar = this.loadGrammar(UrlText);
         ParseTree parseTree = grammar.url();
         UrlVisitor visitor = new UrlVisitor();
-        return (UrlData)visitor.visit(parseTree);
+        UrlData retVal = (UrlData)visitor.visit(parseTree);
+        return retVal;
     }
 
 }
