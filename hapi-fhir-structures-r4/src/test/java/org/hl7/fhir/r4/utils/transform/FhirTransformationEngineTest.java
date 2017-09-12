@@ -117,34 +117,32 @@ public class FhirTransformationEngineTest {
 			FhirTransformationEngine transformEngine = new FhirTransformationEngine(hapiContext, maps, null, null);
 			codedTextToCodingMap = createCodedTextToCodingMap();
 			maps.put(codedTextToCodingMap.getUrl(), codedTextToCodingMap);
-			List<StructureDefinition> result = transformEngine.analyse(null, codedTextToCodingMap).getProfiles();
+			List<StructureDefinition> result = transformEngine.analyse(null,null, codedTextToCodingMap).getProfiles();
 			File currentDir = new File(".");
 			String filePath = currentDir.getAbsolutePath();
 
 			assertTrue(result.size() > 0);
 
-			for (StructureDefinition generatedFhirProfile : result) {
-				List<ElementDefinition> definitions = generatedFhirProfile.getDifferential().getElement();
-				assertEquals(9, definitions.size());
-				final Map<String, ElementDefinition> definitionMap = new HashMap<>();
-				for(ElementDefinition eltDefinition : definitions) {
-					definitionMap.put(eltDefinition.getPath(), eltDefinition);
-				}
-				assertNotNull(definitionMap.get("Coding"));
-				assertNotNull(definitionMap.get("Coding.system"));
-				assertNotNull(definitionMap.get("Coding.version"));
-				assertNotNull(definitionMap.get("Coding.code"));
-				assertNotNull(definitionMap.get("Coding.display"));
-				assertNotNull(definitionMap.get("Coding.userSelected"));
-				assertNotNull(definitionMap.get("Coding.extension")); //TODO Fix with proper extension builder
-				assertNotNull(definitionMap.get("Coding.extension.url"));
-				ElementDefinition userSelected = definitionMap.get("Coding.userSelected");
-				assertTrue(userSelected.getFixed() instanceof BooleanType);
-				assertFalse(((BooleanType)userSelected.getFixed()).booleanValue());
-				assertNotNull(definitionMap.get("Coding.extension.value[x]"));
+			StructureDefinition generatedFhirProfile = result.get(0);
+			List<ElementDefinition> definitions = generatedFhirProfile.getDifferential().getElement();
+			assertEquals(7, definitions.size());//TODO Really should be 8 if we include the slicing definition for extensions.
+			final Map<String, ElementDefinition> definitionMap = new HashMap<>();
+			for(ElementDefinition eltDefinition : definitions) {
+				definitionMap.put(eltDefinition.getPath(), eltDefinition);
 			}
+			assertNotNull(definitionMap.get("Coding"));
+			assertNotNull(definitionMap.get("Coding.system"));
+			assertNotNull(definitionMap.get("Coding.version"));
+			assertNotNull(definitionMap.get("Coding.code"));
+			assertNotNull(definitionMap.get("Coding.display"));
+			assertNotNull(definitionMap.get("Coding.userSelected"));
+			assertNotNull(definitionMap.get("Coding.extension"));
+			ElementDefinition userSelected = definitionMap.get("Coding.userSelected");
+			assertTrue(userSelected.getFixed() instanceof BooleanType);
+			assertFalse(((BooleanType)userSelected.getFixed()).booleanValue());
+
 		} catch (Exception e) {
-			System.err.println(e.getMessage());
+			e.printStackTrace();
 			fail("Test failed. Exception thrown: " + e.getMessage());
 		}
 	}
@@ -239,6 +237,9 @@ public class FhirTransformationEngineTest {
 		source.setContext("source");
 		source.setElement("terminology_id");
 		source.setVariable("term");
+		source.setMin(1);
+		source.setMax("1");
+		source.setType("uri");
 		system.addSource(source);
 		target.setContext("target");
 		target.setElement("system");
@@ -317,7 +318,31 @@ public class FhirTransformationEngineTest {
 		/**
 		 * Add URI Extension
 		 */
-		extension.setName("Coding.extension");
+//		extension.setName("Coding.extension");
+//		source = new StructureMap.StructureMapGroupRuleSourceComponent();
+//		source.setContext("source");
+//		source.setElement("uri");
+//		source.setVariable("uri");
+//		extension.addSource(source);
+//		target = new StructureMap.StructureMapGroupRuleTargetComponent();
+//		target.setContext("target");
+//		target.setElement("extension");
+//		target.setVariable("ex");
+//		extension.addTarget(target);
+//		target = new StructureMap.StructureMapGroupRuleTargetComponent();
+//		target.setContext("ex");
+//		target.setElement("url");
+//		target.setTransform(StructureMap.StructureMapTransform.COPY);
+//		target.addParameter(new StructureMap.StructureMapGroupRuleTargetParameterComponent(new UriType("http://opencimi.org/fhir/extension/coding/coded_text_uri.html")));
+//		extension.addTarget(target);
+//		target = new StructureMap.StructureMapGroupRuleTargetComponent();
+//		target.setContext("ex");
+//		target.setElement("value");
+//		target.setTransform(StructureMap.StructureMapTransform.COPY);
+//		target.addParameter(new StructureMap.StructureMapGroupRuleTargetParameterComponent(new IdType("uri")));
+//		extension.addTarget(target);
+
+		extension.setName("Coding.uri");
 		source = new StructureMap.StructureMapGroupRuleSourceComponent();
 		source.setContext("source");
 		source.setElement("uri");
@@ -325,21 +350,20 @@ public class FhirTransformationEngineTest {
 		extension.addSource(source);
 		target = new StructureMap.StructureMapGroupRuleTargetComponent();
 		target.setContext("target");
-		target.setElement("extension");
-		target.setVariable("ex");
-		extension.addTarget(target);
-		target = new StructureMap.StructureMapGroupRuleTargetComponent();
-		target.setContext("ex");
 		target.setElement("url");
-		target.setTransform(StructureMap.StructureMapTransform.COPY);
-		target.addParameter(new StructureMap.StructureMapGroupRuleTargetParameterComponent(new UriType("http://opencimi.org/fhir/extension/coding/coded_text_uri.html")));
+		target.setVariable("ex");
+		target.setTransform(StructureMap.StructureMapTransform.EXTENSION);
+		target.addParameter(new StructureMap.StructureMapGroupRuleTargetParameterComponent(new StringType("http://opencimi.org/fhir/extension/coding/coded_text_uri.html")));
+		target.addParameter(new StructureMap.StructureMapGroupRuleTargetParameterComponent(new StringType("coded_text_uri")));
+		target.addParameter(new StructureMap.StructureMapGroupRuleTargetParameterComponent(new StringType("Resource")));
+		target.addParameter(new StructureMap.StructureMapGroupRuleTargetParameterComponent(new StringType("Coding")));
+		target.addParameter(new StructureMap.StructureMapGroupRuleTargetParameterComponent(new StringType("URI representing the specific concept")));
+		target.addParameter(new StructureMap.StructureMapGroupRuleTargetParameterComponent(new StringType("URI representing the specific concept")));
+		target.addParameter(new StructureMap.StructureMapGroupRuleTargetParameterComponent(new IntegerType(0)));
+		target.addParameter(new StructureMap.StructureMapGroupRuleTargetParameterComponent(new StringType("1")));
+		target.addParameter(new StructureMap.StructureMapGroupRuleTargetParameterComponent(new StringType("uri")));
 		extension.addTarget(target);
-		target = new StructureMap.StructureMapGroupRuleTargetComponent();
-		target.setContext("ex");
-		target.setElement("value");
-		target.setTransform(StructureMap.StructureMapTransform.COPY);
-		target.addParameter(new StructureMap.StructureMapGroupRuleTargetParameterComponent(new IdType("uri")));
-		extension.addTarget(target);
+
 
 		retVal.add(extension);
 
