@@ -6,6 +6,7 @@ import static org.junit.Assert.*;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.*;
 
+import java.io.IOException;
 import java.util.*;
 
 import org.apache.commons.io.IOUtils;
@@ -80,7 +81,24 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		}
 	}
 
-	
+
+	@Test
+	public void testSaveAndReturnCollectionBundle() throws IOException {
+		String input = IOUtils.toString(FhirResourceDaoR4Test.class.getResourceAsStream("/r4/collection-bundle.json"));
+		Bundle inputBundle = myFhirCtx.newJsonParser().parseResource(Bundle.class, input);
+
+		myBundleDao.update(inputBundle);
+
+		Bundle outputBundle = myBundleDao.read(new IdType("cftest"));
+		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(outputBundle));
+
+		for (BundleEntryComponent next : outputBundle.getEntry()) {
+			assertTrue(next.getResource().getIdElement().hasIdPart());
+		}
+	}
+
+
+
 	@Before
 	public void beforeDisableResultReuse() {
 		myDaoConfig.setReuseCachedSearchResultsForMillis(null);

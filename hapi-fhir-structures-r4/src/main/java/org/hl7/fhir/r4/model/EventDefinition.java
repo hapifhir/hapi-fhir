@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sat, Jul 8, 2017 23:19+1000 for FHIR v3.1.0
+// Generated on Fri, Aug 11, 2017 07:23+1000 for FHIR v3.1.0
 
 import java.util.*;
 
@@ -124,11 +124,11 @@ public class EventDefinition extends MetadataResource {
     /**
      * The trigger element defines when the event occurs.
      */
-    @Child(name = "trigger", type = {TriggerDefinition.class}, order=10, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "trigger", type = {TriggerDefinition.class}, order=10, min=1, max=1, modifier=false, summary=false)
     @Description(shortDefinition="\"when\" the event occurs", formalDefinition="The trigger element defines when the event occurs." )
-    protected List<TriggerDefinition> trigger;
+    protected TriggerDefinition trigger;
 
-    private static final long serialVersionUID = -809799868L;
+    private static final long serialVersionUID = 1396769290L;
 
   /**
    * Constructor
@@ -140,9 +140,10 @@ public class EventDefinition extends MetadataResource {
   /**
    * Constructor
    */
-    public EventDefinition(Enumeration<PublicationStatus> status) {
+    public EventDefinition(Enumeration<PublicationStatus> status, TriggerDefinition trigger) {
       super();
       this.status = status;
+      this.trigger = trigger;
     }
 
     /**
@@ -1221,54 +1222,25 @@ public class EventDefinition extends MetadataResource {
     /**
      * @return {@link #trigger} (The trigger element defines when the event occurs.)
      */
-    public List<TriggerDefinition> getTrigger() { 
+    public TriggerDefinition getTrigger() { 
       if (this.trigger == null)
-        this.trigger = new ArrayList<TriggerDefinition>();
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create EventDefinition.trigger");
+        else if (Configuration.doAutoCreate())
+          this.trigger = new TriggerDefinition(); // cc
       return this.trigger;
     }
 
-    /**
-     * @return Returns a reference to <code>this</code> for easy method chaining
-     */
-    public EventDefinition setTrigger(List<TriggerDefinition> theTrigger) { 
-      this.trigger = theTrigger;
-      return this;
-    }
-
     public boolean hasTrigger() { 
-      if (this.trigger == null)
-        return false;
-      for (TriggerDefinition item : this.trigger)
-        if (!item.isEmpty())
-          return true;
-      return false;
-    }
-
-    public TriggerDefinition addTrigger() { //3
-      TriggerDefinition t = new TriggerDefinition();
-      if (this.trigger == null)
-        this.trigger = new ArrayList<TriggerDefinition>();
-      this.trigger.add(t);
-      return t;
-    }
-
-    public EventDefinition addTrigger(TriggerDefinition t) { //3
-      if (t == null)
-        return this;
-      if (this.trigger == null)
-        this.trigger = new ArrayList<TriggerDefinition>();
-      this.trigger.add(t);
-      return this;
+      return this.trigger != null && !this.trigger.isEmpty();
     }
 
     /**
-     * @return The first repetition of repeating field {@link #trigger}, creating it if it does not already exist
+     * @param value {@link #trigger} (The trigger element defines when the event occurs.)
      */
-    public TriggerDefinition getTriggerFirstRep() { 
-      if (getTrigger().isEmpty()) {
-        addTrigger();
-      }
-      return getTrigger().get(0);
+    public EventDefinition setTrigger(TriggerDefinition value) { 
+      this.trigger = value;
+      return this;
     }
 
       protected void listChildren(List<Property> children) {
@@ -1295,7 +1267,7 @@ public class EventDefinition extends MetadataResource {
         children.add(new Property("contact", "ContactDetail", "Contact details to assist a user in finding and communicating with the publisher.", 0, java.lang.Integer.MAX_VALUE, contact));
         children.add(new Property("copyright", "markdown", "A copyright statement relating to the event definition and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the event definition.", 0, 1, copyright));
         children.add(new Property("relatedArtifact", "RelatedArtifact", "Related resources such as additional documentation, justification, or bibliographic references.", 0, java.lang.Integer.MAX_VALUE, relatedArtifact));
-        children.add(new Property("trigger", "TriggerDefinition", "The trigger element defines when the event occurs.", 0, java.lang.Integer.MAX_VALUE, trigger));
+        children.add(new Property("trigger", "TriggerDefinition", "The trigger element defines when the event occurs.", 0, 1, trigger));
       }
 
       @Override
@@ -1323,7 +1295,7 @@ public class EventDefinition extends MetadataResource {
         case 951526432: /*contact*/  return new Property("contact", "ContactDetail", "Contact details to assist a user in finding and communicating with the publisher.", 0, java.lang.Integer.MAX_VALUE, contact);
         case 1522889671: /*copyright*/  return new Property("copyright", "markdown", "A copyright statement relating to the event definition and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the event definition.", 0, 1, copyright);
         case 666807069: /*relatedArtifact*/  return new Property("relatedArtifact", "RelatedArtifact", "Related resources such as additional documentation, justification, or bibliographic references.", 0, java.lang.Integer.MAX_VALUE, relatedArtifact);
-        case -1059891784: /*trigger*/  return new Property("trigger", "TriggerDefinition", "The trigger element defines when the event occurs.", 0, java.lang.Integer.MAX_VALUE, trigger);
+        case -1059891784: /*trigger*/  return new Property("trigger", "TriggerDefinition", "The trigger element defines when the event occurs.", 0, 1, trigger);
         default: return super.getNamedProperty(_hash, _name, _checkValid);
         }
 
@@ -1354,7 +1326,7 @@ public class EventDefinition extends MetadataResource {
         case 951526432: /*contact*/ return this.contact == null ? new Base[0] : this.contact.toArray(new Base[this.contact.size()]); // ContactDetail
         case 1522889671: /*copyright*/ return this.copyright == null ? new Base[0] : new Base[] {this.copyright}; // MarkdownType
         case 666807069: /*relatedArtifact*/ return this.relatedArtifact == null ? new Base[0] : this.relatedArtifact.toArray(new Base[this.relatedArtifact.size()]); // RelatedArtifact
-        case -1059891784: /*trigger*/ return this.trigger == null ? new Base[0] : this.trigger.toArray(new Base[this.trigger.size()]); // TriggerDefinition
+        case -1059891784: /*trigger*/ return this.trigger == null ? new Base[0] : new Base[] {this.trigger}; // TriggerDefinition
         default: return super.getProperty(hash, name, checkValid);
         }
 
@@ -1431,7 +1403,7 @@ public class EventDefinition extends MetadataResource {
           this.getRelatedArtifact().add(castToRelatedArtifact(value)); // RelatedArtifact
           return value;
         case -1059891784: // trigger
-          this.getTrigger().add(castToTriggerDefinition(value)); // TriggerDefinition
+          this.trigger = castToTriggerDefinition(value); // TriggerDefinition
           return value;
         default: return super.setProperty(hash, name, value);
         }
@@ -1486,7 +1458,7 @@ public class EventDefinition extends MetadataResource {
         } else if (name.equals("relatedArtifact")) {
           this.getRelatedArtifact().add(castToRelatedArtifact(value));
         } else if (name.equals("trigger")) {
-          this.getTrigger().add(castToTriggerDefinition(value));
+          this.trigger = castToTriggerDefinition(value); // TriggerDefinition
         } else
           return super.setProperty(name, value);
         return value;
@@ -1517,7 +1489,7 @@ public class EventDefinition extends MetadataResource {
         case 951526432:  return addContact(); 
         case 1522889671:  return getCopyrightElement();
         case 666807069:  return addRelatedArtifact(); 
-        case -1059891784:  return addTrigger(); 
+        case -1059891784:  return getTrigger(); 
         default: return super.makeProperty(hash, name);
         }
 
@@ -1624,7 +1596,8 @@ public class EventDefinition extends MetadataResource {
           return addRelatedArtifact();
         }
         else if (name.equals("trigger")) {
-          return addTrigger();
+          this.trigger = new TriggerDefinition();
+          return this.trigger;
         }
         else
           return super.addChild(name);
@@ -1688,11 +1661,7 @@ public class EventDefinition extends MetadataResource {
           for (RelatedArtifact i : relatedArtifact)
             dst.relatedArtifact.add(i.copy());
         };
-        if (trigger != null) {
-          dst.trigger = new ArrayList<TriggerDefinition>();
-          for (TriggerDefinition i : trigger)
-            dst.trigger.add(i.copy());
-        };
+        dst.trigger = trigger == null ? null : trigger.copy();
         return dst;
       }
 

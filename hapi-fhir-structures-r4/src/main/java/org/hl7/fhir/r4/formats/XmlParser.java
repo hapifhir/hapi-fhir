@@ -7735,8 +7735,6 @@ public class XmlParser extends XmlParserBase {
         res.setCopyrightElement(parseMarkdown(xpp));
       } else if (eventType == XmlPullParser.START_TAG && xpp.getName().equals("relatedArtifact")) {
         res.getRelatedArtifact().add(parseRelatedArtifact(xpp));
-      } else if (eventType == XmlPullParser.START_TAG && xpp.getName().equals("trigger")) {
-        res.getTrigger().add(parseTriggerDefinition(xpp));
       } else if (!parseDomainResourceContent(eventType, xpp, res))
         return false;
     return true;
@@ -26345,10 +26343,6 @@ public class XmlParser extends XmlParserBase {
       if (element.hasRelatedArtifact()) { 
         for (RelatedArtifact e : element.getRelatedArtifact()) 
           composeRelatedArtifact("relatedArtifact", e);
-      }
-      if (element.hasTrigger()) { 
-        for (TriggerDefinition e : element.getTrigger()) 
-          composeTriggerDefinition("trigger", e);
       }
   }
 

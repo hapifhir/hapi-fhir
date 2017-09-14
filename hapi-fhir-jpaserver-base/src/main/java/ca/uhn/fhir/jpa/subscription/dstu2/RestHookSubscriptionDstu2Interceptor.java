@@ -50,7 +50,7 @@ public class RestHookSubscriptionDstu2Interceptor extends BaseSubscriptionRestHo
 		try {
 			retVal.setStatus(org.hl7.fhir.r4.model.Subscription.SubscriptionStatus.fromCode(subscription.getStatus()));
 			retVal.setBackingSubscription(theSubscription);
-			retVal.setChannelType(org.hl7.fhir.r4.model.Subscription.SubscriptionChannelType.fromCode(subscription.getStatus()));
+			retVal.setChannelType(org.hl7.fhir.r4.model.Subscription.SubscriptionChannelType.fromCode(subscription.getChannel().getType()));
 			retVal.setCriteriaString(subscription.getCriteria());
 			retVal.setEndpointUrl(subscription.getChannel().getEndpoint());
 			retVal.setHeaders(subscription.getChannel().getHeader());

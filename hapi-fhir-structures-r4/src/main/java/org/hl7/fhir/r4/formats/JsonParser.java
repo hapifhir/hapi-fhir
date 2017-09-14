@@ -8407,12 +8407,7 @@ public class JsonParser extends JsonParserBase {
         res.getRelatedArtifact().add(parseRelatedArtifact(array.get(i).getAsJsonObject()));
       }
     };
-    if (json.has("trigger")) {
-      JsonArray array = json.getAsJsonArray("trigger");
-      for (int i = 0; i < array.size(); i++) {
-        res.getTrigger().add(parseTriggerDefinition(array.get(i).getAsJsonObject()));
-      }
-    };
+
   }
 
   protected ExpansionProfile parseExpansionProfile(JsonObject json) throws IOException, FHIRFormatError {
@@ -29458,12 +29453,6 @@ public class JsonParser extends JsonParserBase {
         openArray("relatedArtifact");
         for (RelatedArtifact e : element.getRelatedArtifact()) 
           composeRelatedArtifact(null, e);
-        closeArray();
-      };
-      if (element.hasTrigger()) {
-        openArray("trigger");
-        for (TriggerDefinition e : element.getTrigger()) 
-          composeTriggerDefinition(null, e);
         closeArray();
       };
   }

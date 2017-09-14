@@ -86,10 +86,7 @@ public class RestHookSubscriptionR4Interceptor extends BaseSubscriptionRestHookI
 			}
 
 			EventDefinition def = theEventDefinitionDao.read(ref.getReferenceElement());
-			for (TriggerDefinition next : def.getTrigger()) {
-				retVal.addTrigger(next);
-			}
-
+			retVal.addTrigger(def.getTrigger());
 		}
 
 		return retVal;

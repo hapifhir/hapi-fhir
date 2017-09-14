@@ -169,9 +169,8 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 
 	@PostConstruct
 	public void postConstruct() {
-		{
+		if (getProcessingChannel() == null) {
 			myProcessingExecutorQueue = new LinkedBlockingQueue<>(1000);
-
 			RejectedExecutionHandler rejectedExecutionHandler = new RejectedExecutionHandler() {
 				@Override
 				public void rejectedExecution(Runnable theRunnable, ThreadPoolExecutor theExecutor) {
@@ -199,15 +198,17 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 				myProcessingExecutorQueue,
 				threadFactory,
 				rejectedExecutionHandler);
+			setProcessingChannel(new ExecutorSubscribableChannel(myProcessingExecutor));
 		}
-		{
+
+		if (getDeliveryChannel() == null) {
 			myDeliveryExecutorQueue = new LinkedBlockingQueue<>(1000);
 			BasicThreadFactory threadFactory = new BasicThreadFactory.Builder()
 				.namingPattern("subscription-delivery-%d")
 				.daemon(false)
 				.priority(Thread.NORM_PRIORITY)
 				.build();
-			RejectedExecutionHandler rejectedExecutionHandler2 = new RejectedExecutionHandler() {
+			RejectedExecutionHandler rejectedExecutionHandler = new RejectedExecutionHandler() {
 				@Override
 				public void rejectedExecution(Runnable theRunnable, ThreadPoolExecutor theExecutor) {
 					ourLog.info("Note: Executor queue is full ({} elements), waiting for a slot to become available!", myDeliveryExecutorQueue.size());
@@ -228,35 +229,30 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 				TimeUnit.MILLISECONDS,
 				myDeliveryExecutorQueue,
 				threadFactory,
-				rejectedExecutionHandler2);
-		}
-
-		if (getProcessingChannel() == null) {
-			setProcessingChannel(new ExecutorSubscribableChannel(myProcessingExecutor));
-		}
-		if (getDeliveryChannel() == null) {
+				rejectedExecutionHandler);
 			setDeliveryChannel(new ExecutorSubscribableChannel(myDeliveryExecutor));
 		}
 
 		if (mySubscriptionActivatingSubscriber == null) {
 			mySubscriptionActivatingSubscriber = new SubscriptionActivatingSubscriber(getSubscriptionDao(), getChannelType(), this);
 		}
-		getProcessingChannel().subscribe(mySubscriptionActivatingSubscriber);
 
-		if (mySubscriptionCheckingSubscriber == null) {
-			mySubscriptionCheckingSubscriber = new SubscriptionCheckingSubscriber(getSubscriptionDao(), getChannelType(), this);
-		}
-		getProcessingChannel().subscribe(mySubscriptionCheckingSubscriber);
-
+		registerSubscriptionCheckingSubscriber();
 		registerDeliverySubscriber();
 
 		initSubscriptions();
 	}
 
+	protected void registerSubscriptionCheckingSubscriber() {
+		if (mySubscriptionCheckingSubscriber == null) {
+			mySubscriptionCheckingSubscriber = new SubscriptionCheckingSubscriber(getSubscriptionDao(), getChannelType(), this);
+		}
+		getProcessingChannel().subscribe(mySubscriptionCheckingSubscriber);
+	}
+
 	@SuppressWarnings("unused")
 	@PreDestroy
 	public void preDestroy() {
-		getProcessingChannel().unsubscribe(mySubscriptionActivatingSubscriber);
 		getProcessingChannel().unsubscribe(mySubscriptionCheckingSubscriber);
 
 		unregisterDeliverySubscriber();
@@ -298,16 +294,10 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 		submitResourceModified(msg);
 	}
 
-	private void submitResourceModified(final ResourceModifiedMessage theMsg) {
-		/*
-		 * We only actually submit this item work working after the
-		 */
-		TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
-			@Override
-			public void afterCommit() {
-				getProcessingChannel().send(new GenericMessage<>(theMsg));
-			}
-		});
+	protected void submitResourceModified(final ResourceModifiedMessage theMsg) {
+		final GenericMessage<ResourceModifiedMessage> message = new GenericMessage<>(theMsg);
+		mySubscriptionActivatingSubscriber.handleMessage(message);
+		getProcessingChannel().send(message);
 	}
 
 	protected abstract void unregisterDeliverySubscriber();

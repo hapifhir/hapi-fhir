@@ -34,9 +34,13 @@ public class WebSocketSubscriptionR4Interceptor extends BaseSubscriptionWebsocke
 	@Qualifier("mySubscriptionDaoR4")
 	private IFhirResourceDao<org.hl7.fhir.r4.model.Subscription> mySubscriptionDao;
 
+	@Autowired
+	@Qualifier("myEventDefinitionDaoR4")
+	private IFhirResourceDao<org.hl7.fhir.r4.model.EventDefinition> myEventDefinitionDao;
+
 	@Override
 	protected CanonicalSubscription canonicalize(IBaseResource theSubscription) {
-		return RestHookSubscriptionR4Interceptor.doCanonicalize(theSubscription);
+		return RestHookSubscriptionR4Interceptor.doCanonicalize(theSubscription, myEventDefinitionDao);
 	}
 
 	@Override

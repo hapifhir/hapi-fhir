@@ -3,20 +3,17 @@ package ca.uhn.fhir.jpa.subscription.r4;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.provider.r4.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.subscription.SocketImplementation;
-import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.MethodOutcome;
-import org.eclipse.jetty.websocket.api.Session;
-import org.eclipse.jetty.websocket.client.ClientUpgradeRequest;
-import org.eclipse.jetty.websocket.client.WebSocketClient;
+import com.google.common.collect.Lists;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.*;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
 
-import java.net.URI;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.hamcrest.Matchers.contains;
 import static org.junit.Assert.*;
@@ -41,32 +38,53 @@ import static org.junit.Assert.*;
 public class FhirSubscriptionWithEventDefinitionR4Test extends BaseResourceProviderR4Test {
 
 	private static final Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirSubscriptionWithEventDefinitionR4Test.class);
-
+	private static List<Observation> ourUpdatedObservations = Lists.newArrayList();
+	private static List<String> ourContentTypes = new ArrayList<>();
+	private static List<String> ourHeaders = new ArrayList<>();
+	private static List<Observation> ourCreatedObservations = Lists.newArrayList();
 	private String myPatientId;
 	private String mySubscriptionId;
-	private WebSocketClient myWebSocketClient;
-	private SocketImplementation mySocketImplementation;
+	private List<IIdType> mySubscriptionIds = new ArrayList<>();
 
 	@Override
 	@After
 	public void after() throws Exception {
 		super.after();
 		myDaoConfig.setSubscriptionEnabled(new DaoConfig().isSubscriptionEnabled());
-		myDaoConfig.setSubscriptionPollDelay(new DaoConfig().getSubscriptionPollDelay());
 	}
-	
+
+	@After
+	public void afterUnregisterRestHookListener() {
+		for (IIdType next : mySubscriptionIds) {
+			ourClient.delete().resourceById(next).execute();
+		}
+		mySubscriptionIds.clear();
+
+		myDaoConfig.setAllowMultipleDelete(true);
+		ourLog.info("Deleting all subscriptions");
+		ourClient.delete().resourceConditionalByUrl("Subscription?status=active").execute();
+		ourClient.delete().resourceConditionalByUrl("Observation?code:missing=false").execute();
+		ourLog.info("Done deleting all subscriptions");
+		myDaoConfig.setAllowMultipleDelete(new DaoConfig().isAllowMultipleDelete());
+
+		ourRestServer.unregisterInterceptor(getRestHookSubscriptionInterceptor());
+	}
+
 	@Override
 	@Before
 	public void before() throws Exception {
 		super.before();
-		
+
 		myDaoConfig.setSubscriptionEnabled(true);
-		myDaoConfig.setSubscriptionPollDelay(0L);
-		
+
+	}
+
+	@Test
+	public void testSubscriptionAddedTrigger() {
 		/*
 		 * Create patient
 		 */
-		
+
 		Patient patient = FhirR4Util.getPatient();
 		MethodOutcome methodOutcome = ourClient.create().resource(patient).execute();
 		myPatientId = methodOutcome.getId().getIdPart();
@@ -76,9 +94,18 @@ public class FhirSubscriptionWithEventDefinitionR4Test extends BaseResourceProvi
 		 */
 
 		EventDefinition eventDef = new EventDefinition();
+		eventDef
+			.setPurpose("Monitor all admissions to Emergency")
+			.setTrigger(new TriggerDefinition()
+				.setType(TriggerDefinition.TriggerType.DATAADDED)
+				.setEventCondition(new TriggerDefinition.TriggerDefinitionEventConditionComponent()
+					.setDescription("Encounter Location = emergency (active/completed encounters, current or previous)")
+					.setLanguage("text/fhirpath")
+					.setExpression("(this | %previous).location.where(location = 'Location/emergency' and status in {'active', 'completed'}).exists()")
+				)
+			);
 
-		 */
-		/* 
+		/*
 		 * Create subscription
 		 */
 		Subscription subscription = new Subscription();
@@ -92,85 +119,21 @@ public class FhirSubscriptionWithEventDefinitionR4Test extends BaseResourceProvi
 
 		methodOutcome = ourClient.create().resource(subscription).execute();
 		mySubscriptionId = methodOutcome.getId().getIdPart();
-		
-		/*
-		 * Attach websocket
-		 */
 
-		myWebSocketClient = new WebSocketClient();
-		mySocketImplementation = new SocketImplementation(mySubscriptionId, EncodingEnum.JSON);
-
-		myWebSocketClient.start();
-		URI echoUri = new URI("ws://localhost:" + ourPort + "/websocket/r4");
-		ClientUpgradeRequest request = new ClientUpgradeRequest();
-		ourLog.info("Connecting to : {}", echoUri);
-		Future<Session> connection = myWebSocketClient.connect(mySocketImplementation, echoUri, request);
-		Session session = connection.get(2, TimeUnit.SECONDS);
-		
-		ourLog.info("Connected to WS: {}", session.isOpen());
 	}
 
-	@After
-	public void afterCloseWebsocket() throws Exception {
-		ourLog.info("Shutting down websocket client");
-		myWebSocketClient.stop();
-	}
-	
-	@Test
-	public void createObservation() throws Exception {
-		Observation observation = new Observation();
-		CodeableConcept codeableConcept = new CodeableConcept();
-		observation.setCode(codeableConcept);
-		Coding coding = codeableConcept.addCoding();
-		coding.setCode("82313006");
-		coding.setSystem("SNOMED-CT");
-		Reference reference = new Reference();
-		reference.setReference("Patient/" + myPatientId);
-		observation.setSubject(reference);
-		observation.setStatus(Observation.ObservationStatus.FINAL);
-
-		MethodOutcome methodOutcome2 = ourClient.create().resource(observation).execute();
-		String observationId = methodOutcome2.getId().getIdPart();
-		observation.setId(observationId);
-
-		ourLog.info("Observation id generated by server is: " + observationId);
-		
-		int changes = mySubscriptionDao.pollForNewUndeliveredResources();
-		ourLog.info("Polling showed {}", changes);
-		assertEquals(1, changes);
-
-		Thread.sleep(2000);
-		
-		ourLog.info("WS Messages: {}", mySocketImplementation.getMessages());
-		assertThat(mySocketImplementation.getMessages(), contains("bound " + mySubscriptionId, "ping " + mySubscriptionId));
+	@Before
+	public void beforeRegisterRestHookListener() {
+		ourRestServer.registerInterceptor(getRestHookSubscriptionInterceptor());
 	}
 
-	@Test
-	public void createObservationThatDoesNotMatch() throws Exception {
-		Observation observation = new Observation();
-		CodeableConcept codeableConcept = new CodeableConcept();
-		observation.setCode(codeableConcept);
-		Coding coding = codeableConcept.addCoding();
-		coding.setCode("8231");
-		coding.setSystem("SNOMED-CT");
-		Reference reference = new Reference();
-		reference.setReference("Patient/" + myPatientId);
-		observation.setSubject(reference);
-		observation.setStatus(Observation.ObservationStatus.FINAL);
-
-		MethodOutcome methodOutcome2 = ourClient.create().resource(observation).execute();
-		String observationId = methodOutcome2.getId().getIdPart();
-		observation.setId(observationId);
-
-		ourLog.info("Observation id generated by server is: " + observationId);
-		
-		int changes = mySubscriptionDao.pollForNewUndeliveredResources();
-		ourLog.info("Polling showed {}", changes);
-		assertEquals(0, changes);
-
-		Thread.sleep(2000);
-		
-		ourLog.info("WS Messages: {}", mySocketImplementation.getMessages());
-		assertThat(mySocketImplementation.getMessages(), contains("bound " + mySubscriptionId));
+	@Before
+	public void beforeReset() {
+		ourCreatedObservations.clear();
+		ourUpdatedObservations.clear();
+		ourContentTypes.clear();
+		ourHeaders.clear();
 	}
+
+
 }

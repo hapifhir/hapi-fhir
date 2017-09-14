@@ -5669,8 +5669,6 @@ public class RdfParser extends RdfParserBase {
       composeMarkdown(t, "EventDefinition", "copyright", element.getCopyrightElement(), -1);
     for (int i = 0; i < element.getRelatedArtifact().size(); i++)
       composeRelatedArtifact(t, "EventDefinition", "relatedArtifact", element.getRelatedArtifact().get(i), i);
-    for (int i = 0; i < element.getTrigger().size(); i++)
-      composeTriggerDefinition(t, "EventDefinition", "trigger", element.getTrigger().get(i), i);
   }
 
   protected void composeExpansionProfile(Complex parent, String parentType, String name, ExpansionProfile element, int index) {
