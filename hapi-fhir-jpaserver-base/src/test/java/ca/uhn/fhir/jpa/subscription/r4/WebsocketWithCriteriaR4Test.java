@@ -1,25 +1,25 @@
 package ca.uhn.fhir.jpa.subscription.r4;
 
-import static org.hamcrest.Matchers.contains;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
+import ca.uhn.fhir.jpa.provider.r4.BaseResourceProviderR4Test;
+import ca.uhn.fhir.jpa.subscription.SocketImplementation;
+import ca.uhn.fhir.rest.api.EncodingEnum;
+import ca.uhn.fhir.rest.api.MethodOutcome;
+import org.eclipse.jetty.websocket.api.Session;
+import org.eclipse.jetty.websocket.client.ClientUpgradeRequest;
+import org.eclipse.jetty.websocket.client.WebSocketClient;
+import org.hl7.fhir.r4.model.*;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Ignore;
+import org.junit.Test;
+import org.slf4j.Logger;
 
 import java.net.URI;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
-import org.eclipse.jetty.websocket.api.Session;
-import org.eclipse.jetty.websocket.client.ClientUpgradeRequest;
-import org.eclipse.jetty.websocket.client.WebSocketClient;
-import org.hl7.fhir.r4.model.*;
-import org.junit.*;
-import org.slf4j.Logger;
-
-import ca.uhn.fhir.jpa.dao.DaoConfig;
-import ca.uhn.fhir.jpa.provider.r4.BaseResourceProviderR4Test;
-import ca.uhn.fhir.jpa.subscription.SocketImplementation;
-import ca.uhn.fhir.rest.api.EncodingEnum;
-import ca.uhn.fhir.rest.api.MethodOutcome;
+import static org.hamcrest.Matchers.contains;
+import static org.junit.Assert.*;
 
 
 // This is currently disabled as the criteria mechanism was a non-standard experiment
@@ -37,17 +37,12 @@ public class WebsocketWithCriteriaR4Test extends BaseResourceProviderR4Test {
 	@After
 	public void after() throws Exception {
 		super.after();
-		myDaoConfig.setSubscriptionEnabled(new DaoConfig().isSubscriptionEnabled());
-		myDaoConfig.setSubscriptionPollDelay(new DaoConfig().getSubscriptionPollDelay());
 	}
 	
 	@Override
 	@Before
 	public void before() throws Exception {
 		super.before();
-		
-		myDaoConfig.setSubscriptionEnabled(true);
-		myDaoConfig.setSubscriptionPollDelay(0L);
 		
 		/*
 		 * Create patient

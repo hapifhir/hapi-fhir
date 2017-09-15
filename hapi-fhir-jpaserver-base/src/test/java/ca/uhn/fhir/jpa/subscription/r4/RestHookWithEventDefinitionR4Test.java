@@ -15,8 +15,6 @@ import org.slf4j.Logger;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.hamcrest.Matchers.contains;
-
 /**
  * Adds a FHIR subscription with criteria through the rest interface. Then creates a websocket with the id of the
  * subscription
@@ -49,7 +47,6 @@ public class RestHookWithEventDefinitionR4Test extends BaseResourceProviderR4Tes
 	@After
 	public void after() throws Exception {
 		super.after();
-		myDaoConfig.setSubscriptionEnabled(new DaoConfig().isSubscriptionEnabled());
 	}
 
 	@After

@@ -1,13 +1,18 @@
 package ca.uhn.fhir.jpa.subscription;
 
-import static org.hamcrest.Matchers.contains;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-
-import java.net.URI;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-
+import ca.uhn.fhir.jpa.provider.BaseResourceProviderDstu2Test;
+import ca.uhn.fhir.model.dstu2.composite.CodeableConceptDt;
+import ca.uhn.fhir.model.dstu2.composite.CodingDt;
+import ca.uhn.fhir.model.dstu2.composite.ResourceReferenceDt;
+import ca.uhn.fhir.model.dstu2.resource.Observation;
+import ca.uhn.fhir.model.dstu2.resource.Patient;
+import ca.uhn.fhir.model.dstu2.resource.Subscription;
+import ca.uhn.fhir.model.dstu2.resource.Subscription.Channel;
+import ca.uhn.fhir.model.dstu2.valueset.ObservationStatusEnum;
+import ca.uhn.fhir.model.dstu2.valueset.SubscriptionChannelTypeEnum;
+import ca.uhn.fhir.model.dstu2.valueset.SubscriptionStatusEnum;
+import ca.uhn.fhir.rest.api.EncodingEnum;
+import ca.uhn.fhir.rest.api.MethodOutcome;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.client.ClientUpgradeRequest;
 import org.eclipse.jetty.websocket.client.WebSocketClient;
@@ -17,14 +22,12 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 
-import ca.uhn.fhir.jpa.dao.DaoConfig;
-import ca.uhn.fhir.jpa.provider.BaseResourceProviderDstu2Test;
-import ca.uhn.fhir.model.dstu2.composite.*;
-import ca.uhn.fhir.model.dstu2.resource.*;
-import ca.uhn.fhir.model.dstu2.resource.Subscription.Channel;
-import ca.uhn.fhir.model.dstu2.valueset.*;
-import ca.uhn.fhir.rest.api.EncodingEnum;
-import ca.uhn.fhir.rest.api.MethodOutcome;
+import java.net.URI;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+
+import static org.hamcrest.Matchers.contains;
+import static org.junit.Assert.*;
 
 // This is currently disabled as the criteria mechanism was a non-standard experiment
 @Ignore
@@ -39,17 +42,12 @@ public class WebsocketWithCriteriaDstu2Test extends BaseResourceProviderDstu2Tes
 	@After
 	public void after() throws Exception {
 		super.after();
-		myDaoConfig.setSubscriptionEnabled(new DaoConfig().isSubscriptionEnabled());
-		myDaoConfig.setSubscriptionPollDelay(new DaoConfig().getSubscriptionPollDelay());
 	}
 	
 	@Before
 	public void before() throws Exception {
 		super.before();
-		
-		myDaoConfig.setSubscriptionEnabled(true);
-		myDaoConfig.setSubscriptionPollDelay(0L);
-		
+
 		/*
 		 * Create patient
 		 */

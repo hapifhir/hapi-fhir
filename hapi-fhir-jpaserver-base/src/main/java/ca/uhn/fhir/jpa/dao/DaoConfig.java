@@ -31,6 +31,15 @@ import java.util.*;
 public class DaoConfig {
 
 	/**
+	 * Constructor
+	 */
+	public DaoConfig() {
+		setSubscriptionEnabled(true);
+		setSubscriptionPollDelay(0);
+		setSubscriptionPurgeInactiveAfterMillis(Long.MAX_VALUE);
+	}
+
+	/**
 	 * Default {@link #getTreatReferencesAsLogical() logical URL bases}. Includes the following
 	 * values:
 	 * <ul>
@@ -76,68 +85,13 @@ public class DaoConfig {
 
 	private boolean myEnforceReferentialIntegrityOnDelete = true;
 	private boolean myUniqueIndexesEnabled = true;
-
-	/**
-	 * If set to <code>true</code> (default is <code>true</code>), indexes will be
-	 * created for search parameters marked as {@link ca.uhn.fhir.jpa.util.JpaConstants#EXT_SP_UNIQUE}.
-	 * This is a HAPI FHIR specific extension which can be used to specify that no more than one
-	 * resource can exist which matches a given criteria, using a database constraint to
-	 * enforce this.
-	 */
-	public boolean isUniqueIndexesEnabled() {
-		return myUniqueIndexesEnabled;
-	}
-
-	/**
-	 * If set to <code>true</code> (default is <code>true</code>), indexes will be
-	 * created for search parameters marked as {@link ca.uhn.fhir.jpa.util.JpaConstants#EXT_SP_UNIQUE}.
-	 * This is a HAPI FHIR specific extension which can be used to specify that no more than one
-	 * resource can exist which matches a given criteria, using a database constraint to
-	 * enforce this.
-	 */
-	public void setUniqueIndexesEnabled(boolean theUniqueIndexesEnabled) {
-		myUniqueIndexesEnabled = theUniqueIndexesEnabled;
-	}
-
-	/**
-	 * When using {@link #setUniqueIndexesEnabled(boolean) unique indexes}, if this
-	 * setting is set to <code>true</code> (default is <code>true</code>) the system
-	 * will test for the existence of a particular unique index value prior to saving
-	 * a new one.
-	 * <p>
-	 *    This causes friendlier error messages to be generated, but adds an
-	 *    extra round-trip to the database for eavh save so it can cause
-	 *    a small performance hit.
-	 * </p>
-	 */
-	public boolean isUniqueIndexesCheckedBeforeSave() {
-		return myUniqueIndexesCheckedBeforeSave;
-	}
-
-	/**
-	 * When using {@link #setUniqueIndexesEnabled(boolean) unique indexes}, if this
-	 * setting is set to <code>true</code> (default is <code>true</code>) the system
-	 * will test for the existence of a particular unique index value prior to saving
-	 * a new one.
-	 * <p>
-	 *    This causes friendlier error messages to be generated, but adds an
-	 *    extra round-trip to the database for eavh save so it can cause
-	 *    a small performance hit.
-	 * </p>
-	 */
-	public void setUniqueIndexesCheckedBeforeSave(boolean theUniqueIndexesCheckedBeforeSave) {
-		myUniqueIndexesCheckedBeforeSave = theUniqueIndexesCheckedBeforeSave;
-	}
-
 	private boolean myUniqueIndexesCheckedBeforeSave = true;
 	private boolean myEnforceReferentialIntegrityOnWrite = true;
 	private int myEverythingIncludesFetchPageSize = 50;
-
 	/**
 	 * update setter javadoc if default changes
 	 */
 	private long myExpireSearchResultsAfterMillis = DateUtils.MILLIS_PER_HOUR;
-
 	/**
 	 * update setter javadoc if default changes
 	 */
@@ -148,9 +102,7 @@ public class DaoConfig {
 	 * update setter javadoc if default changes
 	 */
 	private boolean myIndexContainedResources = true;
-
 	private List<IServerInterceptor> myInterceptors;
-
 	/**
 	 * update setter javadoc if default changes
 	 */
@@ -163,12 +115,6 @@ public class DaoConfig {
 	private Integer myResourceMetaCountHardLimit = 1000;
 	private Long myReuseCachedSearchResultsForMillis = DEFAULT_REUSE_CACHED_SEARCH_RESULTS_FOR_MILLIS;
 	private boolean mySchedulingDisabled;
-	private boolean mySubscriptionEnabled;
-	/**
-	 * update setter javadoc if default changes
-	 */
-	private long mySubscriptionPollDelay = 1000;
-	private Long mySubscriptionPurgeInactiveAfterMillis;
 	private boolean mySuppressUpdatesWithNoChange = true;
 	private Set<String> myTreatBaseUrlsAsLocal = new HashSet<String>();
 	private Set<String> myTreatReferencesAsLogical = new HashSet<String>(DEFAULT_LOGICAL_BASE_URLS);
@@ -356,11 +302,8 @@ public class DaoConfig {
 	/**
 	 * This may be used to optionally register server interceptors directly against the DAOs.
 	 */
-	public void setInterceptors(IServerInterceptor... theInterceptor) {
-		setInterceptors(new ArrayList<IServerInterceptor>());
-		if (theInterceptor != null && theInterceptor.length != 0) {
-			getInterceptors().addAll(Arrays.asList(theInterceptor));
-		}
+	public void setInterceptors(List<IServerInterceptor> theInterceptors) {
+		myInterceptors = theInterceptors;
 	}
 
 	/**
@@ -477,23 +420,22 @@ public class DaoConfig {
 		myReuseCachedSearchResultsForMillis = theReuseCachedSearchResultsForMillis;
 	}
 
-	public long getSubscriptionPollDelay() {
-		return mySubscriptionPollDelay;
-	}
-
+	/**
+	 * @deprecated As of HAPI FHIR 3.0.0, subscriptions no longer use polling for
+	 * detecting changes, so this setting has no effect
+	 */
+	@Deprecated
 	public void setSubscriptionPollDelay(long theSubscriptionPollDelay) {
-		mySubscriptionPollDelay = theSubscriptionPollDelay;
+		// ignore
 	}
 
-	public Long getSubscriptionPurgeInactiveAfterMillis() {
-		return mySubscriptionPurgeInactiveAfterMillis;
-	}
-
+	/**
+	 * @deprecated As of HAPI FHIR 3.0.0, subscriptions no longer use polling for
+	 * detecting changes, so this setting has no effect
+	 */
+	@Deprecated
 	public void setSubscriptionPurgeInactiveAfterMillis(Long theMillis) {
-		if (theMillis != null) {
-			Validate.exclusiveBetween(0, Long.MAX_VALUE, theMillis);
-		}
-		mySubscriptionPurgeInactiveAfterMillis = theMillis;
+		// ignore
 	}
 
 	/**
@@ -872,20 +814,14 @@ public class DaoConfig {
 		mySchedulingDisabled = theSchedulingDisabled;
 	}
 
-	/**
-	 * See {@link #setSubscriptionEnabled(boolean)}
-	 */
-	public boolean isSubscriptionEnabled() {
-		return mySubscriptionEnabled;
-	}
 
 	/**
-	 * If set to true, the server will enable support for subscriptions. Subscriptions
-	 * will by default be handled via a polling task. Note that if this is enabled, you must also include Spring task scanning to your XML
-	 * config for the scheduled tasks used by the subscription module.
+	 * @deprecated As of HAPI FHIR 3.0.0, subscriptions no longer use polling for
+	 * detecting changes, so this setting has no effect
 	 */
+	@Deprecated
 	public void setSubscriptionEnabled(boolean theSubscriptionEnabled) {
-		mySubscriptionEnabled = theSubscriptionEnabled;
+		// nothing
 	}
 
 	/**
@@ -916,6 +852,58 @@ public class DaoConfig {
 	}
 
 	/**
+	 * When using {@link #setUniqueIndexesEnabled(boolean) unique indexes}, if this
+	 * setting is set to <code>true</code> (default is <code>true</code>) the system
+	 * will test for the existence of a particular unique index value prior to saving
+	 * a new one.
+	 * <p>
+	 * This causes friendlier error messages to be generated, but adds an
+	 * extra round-trip to the database for eavh save so it can cause
+	 * a small performance hit.
+	 * </p>
+	 */
+	public boolean isUniqueIndexesCheckedBeforeSave() {
+		return myUniqueIndexesCheckedBeforeSave;
+	}
+
+	/**
+	 * When using {@link #setUniqueIndexesEnabled(boolean) unique indexes}, if this
+	 * setting is set to <code>true</code> (default is <code>true</code>) the system
+	 * will test for the existence of a particular unique index value prior to saving
+	 * a new one.
+	 * <p>
+	 * This causes friendlier error messages to be generated, but adds an
+	 * extra round-trip to the database for eavh save so it can cause
+	 * a small performance hit.
+	 * </p>
+	 */
+	public void setUniqueIndexesCheckedBeforeSave(boolean theUniqueIndexesCheckedBeforeSave) {
+		myUniqueIndexesCheckedBeforeSave = theUniqueIndexesCheckedBeforeSave;
+	}
+
+	/**
+	 * If set to <code>true</code> (default is <code>true</code>), indexes will be
+	 * created for search parameters marked as {@link ca.uhn.fhir.jpa.util.JpaConstants#EXT_SP_UNIQUE}.
+	 * This is a HAPI FHIR specific extension which can be used to specify that no more than one
+	 * resource can exist which matches a given criteria, using a database constraint to
+	 * enforce this.
+	 */
+	public boolean isUniqueIndexesEnabled() {
+		return myUniqueIndexesEnabled;
+	}
+
+	/**
+	 * If set to <code>true</code> (default is <code>true</code>), indexes will be
+	 * created for search parameters marked as {@link ca.uhn.fhir.jpa.util.JpaConstants#EXT_SP_UNIQUE}.
+	 * This is a HAPI FHIR specific extension which can be used to specify that no more than one
+	 * resource can exist which matches a given criteria, using a database constraint to
+	 * enforce this.
+	 */
+	public void setUniqueIndexesEnabled(boolean theUniqueIndexesEnabled) {
+		myUniqueIndexesEnabled = theUniqueIndexesEnabled;
+	}
+
+	/**
 	 * Do not call this method, it exists only for legacy reasons. It
 	 * will be removed in a future version. Configure the page size on your
 	 * paging provider instead.
@@ -931,8 +919,11 @@ public class DaoConfig {
 	/**
 	 * This may be used to optionally register server interceptors directly against the DAOs.
 	 */
-	public void setInterceptors(List<IServerInterceptor> theInterceptors) {
-		myInterceptors = theInterceptors;
+	public void setInterceptors(IServerInterceptor... theInterceptor) {
+		setInterceptors(new ArrayList<IServerInterceptor>());
+		if (theInterceptor != null && theInterceptor.length != 0) {
+			getInterceptors().addAll(Arrays.asList(theInterceptor));
+		}
 	}
 
 	public void setSubscriptionPurgeInactiveAfterSeconds(int theSeconds) {
