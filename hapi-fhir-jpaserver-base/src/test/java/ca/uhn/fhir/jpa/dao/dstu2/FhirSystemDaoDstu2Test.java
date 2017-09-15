@@ -60,6 +60,43 @@ public class FhirSystemDaoDstu2Test extends BaseJpaDstu2SystemTest {
 		assertEquals(18, resp.getEntry().size());
 	}
 
+	@Test
+	public void testTransactionWhichFailsPersistsNothing() {
+
+		// Run a transaction which points to that practitioner
+		// in a field that isn't allowed to refer to a practitioner
+		Bundle input = new Bundle();
+		input.setType(BundleTypeEnum.TRANSACTION);
+
+		Patient pt = new Patient();
+		pt.setId("PT");
+		pt.setActive(true);
+		pt.addName().addFamily("FAMILY");
+		input.addEntry()
+			.setResource(pt)
+			.getRequest().setMethod(HTTPVerbEnum.PUT).setUrl("Patient/PT");
+
+		Observation obs = new Observation();
+		obs.setId("OBS");
+		obs.getCode().addCoding().setSystem("foo").setCode("bar");
+		obs.addPerformer().setReference("Practicioner/AAAAA");
+		input.addEntry()
+			.setResource(obs)
+			.getRequest().setMethod(HTTPVerbEnum.PUT).setUrl("Observation/OBS");
+
+		try {
+			mySystemDao.transaction(mySrd, input);
+			fail();
+		} catch (UnprocessableEntityException e) {
+			assertThat(e.getMessage(), containsString("Resource type 'Practicioner' is not valid for this path"));
+		}
+
+		assertThat(myResourceTableDao.findAll(), empty());
+		assertThat(myResourceIndexedSearchParamStringDao.findAll(), empty());
+
+	}
+
+
 	/**
 	 * Per a message on the mailing list
 	 */

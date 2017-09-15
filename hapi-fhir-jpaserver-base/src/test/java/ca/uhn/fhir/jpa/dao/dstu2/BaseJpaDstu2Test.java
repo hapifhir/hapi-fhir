@@ -3,6 +3,8 @@ package ca.uhn.fhir.jpa.dao.dstu2;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.config.TestDstu2Config;
 import ca.uhn.fhir.jpa.dao.*;
+import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamStringDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.entity.ResourceTable;
 import ca.uhn.fhir.jpa.provider.JpaSystemProviderDstu2;
@@ -133,6 +135,10 @@ protected IFhirResourceDao<MedicationAdministration> myMedicationAdministrationD
 	@Autowired
 	@Qualifier("mySubstanceDaoDstu2")
 	protected IFhirResourceDao<Substance> mySubstanceDao;
+	@Autowired
+	protected IResourceIndexedSearchParamStringDao myResourceIndexedSearchParamStringDao;
+	@Autowired
+	protected IResourceTableDao myResourceTableDao;
 	@Autowired
 	@Qualifier("mySystemDaoDstu2")
 	protected IFhirSystemDao<Bundle, MetaDt> mySystemDao;
