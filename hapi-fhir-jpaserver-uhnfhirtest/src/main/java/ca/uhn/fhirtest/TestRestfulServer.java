@@ -1,35 +1,42 @@
 package ca.uhn.fhirtest;
 
-import java.util.*;
-
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.config.WebsocketDispatcherConfig;
+import ca.uhn.fhir.jpa.dao.DaoConfig;
+import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
+import ca.uhn.fhir.jpa.provider.JpaConformanceProviderDstu2;
+import ca.uhn.fhir.jpa.provider.JpaSystemProviderDstu2;
+import ca.uhn.fhir.jpa.provider.dstu3.JpaConformanceProviderDstu3;
+import ca.uhn.fhir.jpa.provider.dstu3.JpaSystemProviderDstu3;
+import ca.uhn.fhir.jpa.provider.dstu3.TerminologyUploaderProviderDstu3;
 import ca.uhn.fhir.jpa.provider.r4.JpaConformanceProviderR4;
 import ca.uhn.fhir.jpa.provider.r4.JpaSystemProviderR4;
+import ca.uhn.fhir.jpa.provider.r4.TerminologyUploaderProviderR4;
+import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
+import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
+import ca.uhn.fhir.rest.api.EncodingEnum;
+import ca.uhn.fhir.rest.server.ETagSupportEnum;
+import ca.uhn.fhir.rest.server.HardcodedServerAddressStrategy;
+import ca.uhn.fhir.rest.server.IResourceProvider;
+import ca.uhn.fhir.rest.server.RestfulServer;
+import ca.uhn.fhir.rest.server.interceptor.BanUnsupportedHttpMethodsInterceptor;
+import ca.uhn.fhir.rest.server.interceptor.CorsInterceptor;
+import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
+import ca.uhn.fhir.rest.server.interceptor.ResponseHighlighterInterceptor;
+import ca.uhn.fhirtest.config.*;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.context.ContextLoaderListener;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 import org.springframework.web.cors.CorsConfiguration;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.config.WebsocketDstu2DispatcherConfig;
-import ca.uhn.fhir.jpa.config.dstu3.WebsocketDstu3DispatcherConfig;
-import ca.uhn.fhir.jpa.config.r4.WebsocketR4DispatcherConfig;
-import ca.uhn.fhir.jpa.dao.DaoConfig;
-import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
-import ca.uhn.fhir.jpa.provider.JpaConformanceProviderDstu2;
-import ca.uhn.fhir.jpa.provider.JpaSystemProviderDstu2;
-import ca.uhn.fhir.jpa.provider.dstu3.*;
-import ca.uhn.fhir.jpa.provider.r4.TerminologyUploaderProviderR4;
-import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
-import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
-import ca.uhn.fhir.rest.api.EncodingEnum;
-import ca.uhn.fhir.rest.server.*;
-import ca.uhn.fhir.rest.server.interceptor.*;
-import ca.uhn.fhirtest.config.*;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
 
 public class TestRestfulServer extends RestfulServer {
 
@@ -80,7 +87,7 @@ public class TestRestfulServer extends RestfulServer {
 				myAppCtx.register(TdlDstu2Config.class);
 				baseUrlProperty = FHIR_BASEURL_TDL2;
 			} else {
-				myAppCtx.register(TestDstu2Config.class, WebsocketDstu2DispatcherConfig.class);
+				myAppCtx.register(TestDstu2Config.class, WebsocketDispatcherConfig.class);
 				baseUrlProperty = FHIR_BASEURL_DSTU2;
 			}
 			myAppCtx.refresh();
@@ -103,7 +110,7 @@ public class TestRestfulServer extends RestfulServer {
 				myAppCtx.register(TdlDstu3Config.class);
 				baseUrlProperty = FHIR_BASEURL_TDL3;
 			} else {
-				myAppCtx.register(TestDstu3Config.class, WebsocketDstu3DispatcherConfig.class);
+				myAppCtx.register(TestDstu3Config.class, WebsocketDispatcherConfig.class);
 				baseUrlProperty = FHIR_BASEURL_DSTU3;
 			}
 			myAppCtx.refresh();
@@ -122,7 +129,7 @@ public class TestRestfulServer extends RestfulServer {
 			myAppCtx = new AnnotationConfigWebApplicationContext();
 			myAppCtx.setServletConfig(getServletConfig());
 			myAppCtx.setParent(parentAppCtx);
-			myAppCtx.register(TestR4Config.class, WebsocketR4DispatcherConfig.class);
+			myAppCtx.register(TestR4Config.class, WebsocketDispatcherConfig.class);
 			baseUrlProperty = FHIR_BASEURL_R4;
 			myAppCtx.refresh();
 			setFhirContext(FhirContext.forR4());

@@ -29,14 +29,14 @@ import org.springframework.messaging.MessageHandler;
 
 public abstract class BaseSubscriptionSubscriber implements MessageHandler {
 
-	private final IFhirResourceDao mySubscriptionDao;
+	private final IFhirResourceDao<?> mySubscriptionDao;
 	private final Subscription.SubscriptionChannelType myChannelType;
 	private final BaseSubscriptionInterceptor mySubscriptionInterceptor;
 
 	/**
 	 * Constructor
 	 */
-	public BaseSubscriptionSubscriber(IFhirResourceDao<? extends IBaseResource> theSubscriptionDao, Subscription.SubscriptionChannelType theChannelType, BaseSubscriptionInterceptor theSubscriptionInterceptor) {
+	public BaseSubscriptionSubscriber(IFhirResourceDao<?> theSubscriptionDao, Subscription.SubscriptionChannelType theChannelType, BaseSubscriptionInterceptor theSubscriptionInterceptor) {
 		mySubscriptionDao = theSubscriptionDao;
 		myChannelType = theChannelType;
 		mySubscriptionInterceptor = theSubscriptionInterceptor;

@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.subscription;
+package ca.uhn.fhir.jpa.subscription.websocket;
 
 /*
  * #%L

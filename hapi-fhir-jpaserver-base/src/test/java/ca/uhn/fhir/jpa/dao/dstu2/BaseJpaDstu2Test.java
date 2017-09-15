@@ -1,13 +1,22 @@
 package ca.uhn.fhir.jpa.dao.dstu2;
 
-import static org.junit.Assert.fail;
-import static org.mockito.Mockito.mock;
-
-import java.io.IOException;
-import java.io.InputStream;
-
-import javax.persistence.EntityManager;
-
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.config.TestDstu2Config;
+import ca.uhn.fhir.jpa.dao.*;
+import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamString;
+import ca.uhn.fhir.jpa.entity.ResourceTable;
+import ca.uhn.fhir.jpa.provider.JpaSystemProviderDstu2;
+import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
+import ca.uhn.fhir.jpa.search.ISearchCoordinatorSvc;
+import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
+import ca.uhn.fhir.model.dstu2.composite.CodeableConceptDt;
+import ca.uhn.fhir.model.dstu2.composite.CodingDt;
+import ca.uhn.fhir.model.dstu2.composite.MetaDt;
+import ca.uhn.fhir.model.dstu2.resource.*;
+import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.rest.api.EncodingEnum;
+import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
+import ca.uhn.fhir.util.TestUtil;
 import org.apache.commons.io.IOUtils;
 import org.hibernate.search.jpa.FullTextEntityManager;
 import org.hibernate.search.jpa.Search;
@@ -24,26 +33,15 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.config.TestDstu2Config;
-import ca.uhn.fhir.jpa.dao.*;
-import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamString;
-import ca.uhn.fhir.jpa.entity.ResourceTable;
-import ca.uhn.fhir.jpa.provider.JpaSystemProviderDstu2;
-import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
-import ca.uhn.fhir.jpa.search.ISearchCoordinatorSvc;
-import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
-import ca.uhn.fhir.model.dstu2.composite.*;
-import ca.uhn.fhir.model.dstu2.resource.*;
-import ca.uhn.fhir.parser.IParser;
-import ca.uhn.fhir.rest.api.EncodingEnum;
-import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
-import ca.uhn.fhir.util.TestUtil;
+import javax.persistence.EntityManager;
+import java.io.IOException;
+import java.io.InputStream;
 
-//@formatter:off
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.mock;
+
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes= {TestDstu2Config.class, ca.uhn.fhir.jpa.config.WebsocketDstu2DispatcherConfig.class})
-//@formatter:on
+@ContextConfiguration(classes= {TestDstu2Config.class})
 public abstract class BaseJpaDstu2Test extends BaseJpaTest {
 	@Autowired
 	protected ApplicationContext myAppCtx;

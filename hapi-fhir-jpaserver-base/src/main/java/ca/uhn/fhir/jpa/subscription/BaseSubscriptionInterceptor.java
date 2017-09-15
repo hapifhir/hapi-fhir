@@ -20,6 +20,9 @@ package ca.uhn.fhir.jpa.subscription;
  * #L%
  */
 
+import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.SearchParameterMap;
 import ca.uhn.fhir.jpa.provider.ServletSubRequestDetails;
@@ -29,21 +32,25 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.interceptor.ServerOperationInterceptorAdapter;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.concurrent.BasicThreadFactory;
+import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Subscription;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.SubscribableChannel;
 import org.springframework.messaging.support.ExecutorSubscribableChannel;
 import org.springframework.messaging.support.GenericMessage;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.transaction.support.TransactionSynchronizationAdapter;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -70,6 +77,14 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 	private ThreadPoolExecutor myDeliveryExecutor;
 	private LinkedBlockingQueue<Runnable> myProcessingExecutorQueue;
 	private LinkedBlockingQueue<Runnable> myDeliveryExecutorQueue;
+	private IFhirResourceDao<?> mySubscriptionDao;
+	@Autowired
+	private List<IFhirResourceDao<?>> myResourceDaos;
+	@Autowired
+	private FhirContext myCtx;
+	@Autowired(required = false)
+	@Qualifier("myEventDefinitionDaoR4")
+	private IFhirResourceDao<org.hl7.fhir.r4.model.EventDefinition> myEventDefinitionDaoR4;
 
 	/**
 	 * Constructor
@@ -79,7 +94,83 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 		setExecutorThreadCount(5);
 	}
 
-	protected abstract CanonicalSubscription canonicalize(S theSubscription);
+	protected CanonicalSubscription canonicalize(S theSubscription) {
+		switch (myCtx.getVersion().getVersion()) {
+			case DSTU2:
+				return canonicalizeDstu2(theSubscription);
+			case DSTU3:
+				return canonicalizeDstu3(theSubscription);
+			case R4:
+				return canonicalizeR4(theSubscription);
+			default:
+				throw new ConfigurationException("Subscription not supported for version: " + myCtx.getVersion().getVersion());
+		}
+	}
+
+	protected CanonicalSubscription canonicalizeDstu2(IBaseResource theSubscription) {
+		ca.uhn.fhir.model.dstu2.resource.Subscription subscription = (ca.uhn.fhir.model.dstu2.resource.Subscription) theSubscription;
+
+		CanonicalSubscription retVal = new CanonicalSubscription();
+		try {
+			retVal.setStatus(org.hl7.fhir.r4.model.Subscription.SubscriptionStatus.fromCode(subscription.getStatus()));
+			retVal.setBackingSubscription(theSubscription);
+			retVal.setChannelType(org.hl7.fhir.r4.model.Subscription.SubscriptionChannelType.fromCode(subscription.getChannel().getType()));
+			retVal.setCriteriaString(subscription.getCriteria());
+			retVal.setEndpointUrl(subscription.getChannel().getEndpoint());
+			retVal.setHeaders(subscription.getChannel().getHeader());
+			retVal.setIdElement(subscription.getIdElement());
+			retVal.setPayloadString(subscription.getChannel().getPayload());
+		} catch (FHIRException theE) {
+			throw new InternalErrorException(theE);
+		}
+		return retVal;
+	}
+
+	protected CanonicalSubscription canonicalizeDstu3(IBaseResource theSubscription) {
+		org.hl7.fhir.dstu3.model.Subscription subscription = (org.hl7.fhir.dstu3.model.Subscription) theSubscription;
+
+		CanonicalSubscription retVal = new CanonicalSubscription();
+		try {
+			retVal.setStatus(org.hl7.fhir.r4.model.Subscription.SubscriptionStatus.fromCode(subscription.getStatus().toCode()));
+			retVal.setBackingSubscription(theSubscription);
+			retVal.setChannelType(org.hl7.fhir.r4.model.Subscription.SubscriptionChannelType.fromCode(subscription.getChannel().getType().toCode()));
+			retVal.setCriteriaString(subscription.getCriteria());
+			retVal.setEndpointUrl(subscription.getChannel().getEndpoint());
+			retVal.setHeaders(subscription.getChannel().getHeader());
+			retVal.setIdElement(subscription.getIdElement());
+			retVal.setPayloadString(subscription.getChannel().getPayload());
+		} catch (FHIRException theE) {
+			throw new InternalErrorException(theE);
+		}
+		return retVal;
+	}
+
+	protected CanonicalSubscription canonicalizeR4(IBaseResource theSubscription) {
+		org.hl7.fhir.r4.model.Subscription subscription = (org.hl7.fhir.r4.model.Subscription) theSubscription;
+
+		CanonicalSubscription retVal = new CanonicalSubscription();
+		retVal.setStatus(subscription.getStatus());
+		retVal.setBackingSubscription(theSubscription);
+		retVal.setChannelType(subscription.getChannel().getType());
+		retVal.setCriteriaString(subscription.getCriteria());
+		retVal.setEndpointUrl(subscription.getChannel().getEndpoint());
+		retVal.setHeaders(subscription.getChannel().getHeader());
+		retVal.setIdElement(subscription.getIdElement());
+		retVal.setPayloadString(subscription.getChannel().getPayload());
+
+		List<org.hl7.fhir.r4.model.Extension> topicExts = subscription.getExtensionsByUrl("http://hl7.org/fhir/subscription/topics");
+		if (topicExts.size() > 0) {
+			IBaseReference ref = (IBaseReference) topicExts.get(0).getValueAsPrimitive();
+			if (!"EventDefinition".equals(ref.getReferenceElement().getResourceType())) {
+				throw new PreconditionFailedException("Topic reference must be an EventDefinition");
+			}
+
+			org.hl7.fhir.r4.model.EventDefinition def = myEventDefinitionDaoR4.read(ref.getReferenceElement());
+			retVal.addTrigger(def.getTrigger());
+		}
+
+		return retVal;
+	}
 
 	public abstract Subscription.SubscriptionChannelType getChannelType();
 
@@ -116,7 +207,9 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 		myProcessingChannel = theProcessingChannel;
 	}
 
-	protected abstract IFhirResourceDao<?> getSubscriptionDao();
+	protected IFhirResourceDao<?> getSubscriptionDao() {
+		return mySubscriptionDao;
+	}
 
 	public List<CanonicalSubscription> getSubscriptions() {
 		return new ArrayList<>(myIdToSubscription.values());
@@ -243,13 +336,6 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 		initSubscriptions();
 	}
 
-	protected void registerSubscriptionCheckingSubscriber() {
-		if (mySubscriptionCheckingSubscriber == null) {
-			mySubscriptionCheckingSubscriber = new SubscriptionCheckingSubscriber(getSubscriptionDao(), getChannelType(), this);
-		}
-		getProcessingChannel().subscribe(mySubscriptionCheckingSubscriber);
-	}
-
 	@SuppressWarnings("unused")
 	@PreDestroy
 	public void preDestroy() {
@@ -266,6 +352,13 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 		Validate.notNull(theSubscription);
 
 		myIdToSubscription.put(theId.getIdPart(), canonicalize(theSubscription));
+	}
+
+	protected void registerSubscriptionCheckingSubscriber() {
+		if (mySubscriptionCheckingSubscriber == null) {
+			mySubscriptionCheckingSubscriber = new SubscriptionCheckingSubscriber(getSubscriptionDao(), getChannelType(), this);
+		}
+		getProcessingChannel().subscribe(mySubscriptionCheckingSubscriber);
 	}
 
 	@Override
@@ -294,6 +387,20 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 		submitResourceModified(msg);
 	}
 
+	@PostConstruct
+	public void start() {
+		for (IFhirResourceDao<?> next : myResourceDaos) {
+			if (myCtx.getResourceDefinition(next.getResourceType()).getName().equals("Subscription")) {
+				mySubscriptionDao = next;
+			}
+		}
+		Validate.notNull(mySubscriptionDao);
+
+		if (myCtx.getVersion().getVersion() == FhirVersionEnum.R4) {
+			Validate.notNull(myEventDefinitionDaoR4);
+		}
+	}
+
 	protected void submitResourceModified(final ResourceModifiedMessage theMsg) {
 		final GenericMessage<ResourceModifiedMessage> message = new GenericMessage<>(theMsg);
 		mySubscriptionActivatingSubscriber.handleMessage(message);
@@ -308,4 +415,6 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 
 		myIdToSubscription.remove(theId.getIdPart());
 	}
+
+
 }

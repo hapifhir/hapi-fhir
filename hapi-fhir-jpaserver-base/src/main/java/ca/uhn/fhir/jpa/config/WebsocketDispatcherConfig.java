@@ -10,7 +10,7 @@ package ca.uhn.fhir.jpa.config;
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  * 
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,38 +20,32 @@ package ca.uhn.fhir.jpa.config;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.subscription.websocket.SubscriptionWebsocketHandler;
+import ca.uhn.fhir.jpa.subscription.websocket.SubscriptionWebsocketInterceptor;
+import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.scheduling.TaskScheduler;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.config.annotation.EnableWebSocket;
 import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
 import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry;
 import org.springframework.web.socket.handler.PerConnectionWebSocketHandler;
 
-import ca.uhn.fhir.jpa.subscription.dstu2.SubscriptionWebsocketHandlerDstu2;
-
 @Configuration
 @EnableWebSocket()
-public class WebsocketDstu2Config implements WebSocketConfigurer {
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(WebsocketDstu2Config.class);
+@Controller
+public class WebsocketDispatcherConfig implements WebSocketConfigurer {
 
 	@Override
 	public void registerWebSocketHandlers(WebSocketHandlerRegistry theRegistry) {
-		theRegistry.addHandler(subscriptionWebSocketHandler(), "/websocket/dstu2").setAllowedOrigins("*");
+		theRegistry.addHandler(subscriptionWebSocketHandler(), "/websocket").setAllowedOrigins("*");
 	}
 
 	@Bean(autowire = Autowire.BY_TYPE)
 	public WebSocketHandler subscriptionWebSocketHandler() {
-		return new PerConnectionWebSocketHandler(SubscriptionWebsocketHandlerDstu2.class);
-	}
-
-	@Bean
-	public TaskScheduler websocketTaskScheduler() {
-		ThreadPoolTaskScheduler retVal = new ThreadPoolTaskScheduler();
-		retVal.setPoolSize(5);
+		PerConnectionWebSocketHandler retVal = new PerConnectionWebSocketHandler(SubscriptionWebsocketHandler.class);
 		return retVal;
 	}
 

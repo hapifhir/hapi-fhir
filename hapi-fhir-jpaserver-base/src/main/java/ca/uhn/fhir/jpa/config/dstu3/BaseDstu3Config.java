@@ -1,8 +1,30 @@
 package ca.uhn.fhir.jpa.config.dstu3;
 
-import org.hl7.fhir.dstu3.hapi.validation.FhirInstanceValidator;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.ParserOptions;
+import ca.uhn.fhir.jpa.config.BaseConfig;
+import ca.uhn.fhir.jpa.dao.FulltextSearchSvcImpl;
+import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
+import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
+import ca.uhn.fhir.jpa.dao.ISearchParamRegistry;
+import ca.uhn.fhir.jpa.dao.dstu3.SearchParamExtractorDstu3;
+import ca.uhn.fhir.jpa.dao.dstu3.SearchParamRegistryDstu3;
+import ca.uhn.fhir.jpa.provider.dstu3.TerminologyUploaderProviderDstu3;
+import ca.uhn.fhir.jpa.term.HapiTerminologySvcDstu3;
+import ca.uhn.fhir.jpa.term.IHapiTerminologyLoaderSvc;
+import ca.uhn.fhir.jpa.term.IHapiTerminologySvcDstu3;
+import ca.uhn.fhir.jpa.term.TerminologyLoaderSvc;
+import ca.uhn.fhir.jpa.validation.JpaValidationSupportChainDstu3;
+import ca.uhn.fhir.validation.IValidatorModule;
 import org.hl7.fhir.dstu3.hapi.ctx.IValidationSupport;
+import org.hl7.fhir.dstu3.hapi.validation.FhirInstanceValidator;
 import org.hl7.fhir.dstu3.utils.IResourceValidator.BestPracticeWarningLevel;
+import org.springframework.beans.factory.annotation.Autowire;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.context.annotation.Primary;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 /*
  * #%L
@@ -13,9 +35,9 @@ import org.hl7.fhir.dstu3.utils.IResourceValidator.BestPracticeWarningLevel;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -23,31 +45,6 @@ import org.hl7.fhir.dstu3.utils.IResourceValidator.BestPracticeWarningLevel;
  * limitations under the License.
  * #L%
  */
-
-import org.springframework.beans.factory.annotation.Autowire;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.context.annotation.Primary;
-import org.springframework.transaction.annotation.EnableTransactionManagement;
-
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.ParserOptions;
-import ca.uhn.fhir.jpa.config.BaseConfig;
-import ca.uhn.fhir.jpa.dao.FulltextSearchSvcImpl;
-import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
-import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
-import ca.uhn.fhir.jpa.dao.ISearchParamRegistry;
-import ca.uhn.fhir.jpa.dao.dstu3.SearchParamExtractorDstu3;
-import ca.uhn.fhir.jpa.dao.dstu3.SearchParamRegistryDstu3;
-import ca.uhn.fhir.jpa.subscription.dstu3.RestHookSubscriptionDstu3Interceptor;
-import ca.uhn.fhir.jpa.provider.dstu3.TerminologyUploaderProviderDstu3;
-import ca.uhn.fhir.jpa.term.HapiTerminologySvcDstu3;
-import ca.uhn.fhir.jpa.term.IHapiTerminologyLoaderSvc;
-import ca.uhn.fhir.jpa.term.IHapiTerminologySvcDstu3;
-import ca.uhn.fhir.jpa.term.TerminologyLoaderSvc;
-import ca.uhn.fhir.jpa.validation.JpaValidationSupportChainDstu3;
-import ca.uhn.fhir.validation.IValidatorModule;
 
 @Configuration
 @EnableTransactionManagement
@@ -133,10 +130,4 @@ public class BaseDstu3Config extends BaseConfig {
 		return new JpaValidationSupportChainDstu3();
 	}
 	
-	@Bean
-	@Lazy
-	public RestHookSubscriptionDstu3Interceptor restHookSubscriptionDstu3Interceptor() {
-		return new RestHookSubscriptionDstu3Interceptor();
-	}
-
 }

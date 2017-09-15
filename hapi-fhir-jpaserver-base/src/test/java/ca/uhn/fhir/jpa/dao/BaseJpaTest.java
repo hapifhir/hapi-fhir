@@ -226,8 +226,6 @@ public abstract class BaseJpaTest {
 			public Void doInTransaction(TransactionStatus theStatus) {
 				entityManager.createQuery("DELETE from " + SearchParamPresent.class.getSimpleName() + " d").executeUpdate();
 				entityManager.createQuery("DELETE from " + SearchParam.class.getSimpleName() + " d").executeUpdate();
-				entityManager.createQuery("DELETE from " + SubscriptionFlaggedResource.class.getSimpleName() + " d").executeUpdate();
-				entityManager.createQuery("DELETE from " + SubscriptionFlaggedResource.class.getSimpleName() + " d").executeUpdate();
 				entityManager.createQuery("DELETE from " + ForcedId.class.getSimpleName() + " d").executeUpdate();
 				entityManager.createQuery("DELETE from " + ResourceIndexedSearchParamDate.class.getSimpleName() + " d").executeUpdate();
 				entityManager.createQuery("DELETE from " + ResourceIndexedSearchParamNumber.class.getSimpleName() + " d").executeUpdate();

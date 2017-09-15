@@ -1,34 +1,12 @@
 package ca.uhn.fhir.jpa.provider.dstu3;
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
-import java.util.*;
-import java.util.concurrent.TimeUnit;
-
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.servlet.ServletContextHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
-import org.hl7.fhir.dstu3.model.Bundle;
-import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
-import org.hl7.fhir.dstu3.model.Patient;
-import org.junit.*;
-import org.springframework.web.context.ContextLoader;
-import org.springframework.web.context.WebApplicationContext;
-import org.springframework.web.context.support.*;
-import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.servlet.DispatcherServlet;
-
-import ca.uhn.fhir.jpa.config.dstu3.WebsocketDstu3Config;
-import ca.uhn.fhir.jpa.config.dstu3.WebsocketDstu3DispatcherConfig;
+import ca.uhn.fhir.jpa.config.WebsocketDispatcherConfig;
 import ca.uhn.fhir.jpa.dao.data.ISearchDao;
 import ca.uhn.fhir.jpa.dao.dstu3.BaseJpaDstu3Test;
 import ca.uhn.fhir.jpa.dao.dstu3.SearchParamRegistryDstu3;
-import ca.uhn.fhir.jpa.subscription.dstu3.RestHookSubscriptionDstu3Interceptor;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.ISearchCoordinatorSvc;
+import ca.uhn.fhir.jpa.subscription.resthook.SubscriptionRestHookInterceptor;
 import ca.uhn.fhir.jpa.validation.JpaValidationSupportChainDstu3;
 import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
 import ca.uhn.fhir.parser.StrictErrorHandler;
@@ -39,6 +17,32 @@ import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.interceptor.CorsInterceptor;
 import ca.uhn.fhir.util.PortUtil;
 import ca.uhn.fhir.util.TestUtil;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.servlet.ServletContextHandler;
+import org.eclipse.jetty.servlet.ServletHolder;
+import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
+import org.hl7.fhir.dstu3.model.Patient;
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.springframework.web.context.ContextLoader;
+import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
+import org.springframework.web.context.support.GenericWebApplicationContext;
+import org.springframework.web.context.support.WebApplicationContextUtils;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.servlet.DispatcherServlet;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public abstract class BaseResourceProviderDstu3Test extends BaseJpaDstu3Test {
 
@@ -49,11 +53,11 @@ public abstract class BaseResourceProviderDstu3Test extends BaseJpaDstu3Test {
 	protected static RestfulServer ourRestServer;
 	private static Server ourServer;
 	protected static String ourServerBase;
-	private static GenericWebApplicationContext ourWebApplicationContext;
+	protected static GenericWebApplicationContext ourWebApplicationContext;
 	private TerminologyUploaderProviderDstu3 myTerminologyUploaderProvider;
 	protected static SearchParamRegistryDstu3 ourSearchParamRegistry;
 	protected static DatabaseBackedPagingProvider ourPagingProvider;
-	protected static RestHookSubscriptionDstu3Interceptor ourRestHookSubscriptionInterceptor;
+	protected static SubscriptionRestHookInterceptor ourRestHookSubscriptionInterceptor;
 	protected static ISearchDao mySearchEntityDao;
 	protected static ISearchCoordinatorSvc mySearchCoordinatorSvc;
 
@@ -119,8 +123,7 @@ public abstract class BaseResourceProviderDstu3Test extends BaseJpaDstu3Test {
 			subsServletHolder.setServlet(dispatcherServlet);
 			subsServletHolder.setInitParameter(
 					ContextLoader.CONFIG_LOCATION_PARAM, 
-					WebsocketDstu3Config.class.getName() + "\n" + 
-					WebsocketDstu3DispatcherConfig.class.getName());
+					WebsocketDispatcherConfig.class.getName());
 			proxyHandler.addServlet(subsServletHolder, "/*");
 
 			// Register a CORS filter
@@ -146,7 +149,7 @@ public abstract class BaseResourceProviderDstu3Test extends BaseJpaDstu3Test {
 			myValidationSupport = wac.getBean(JpaValidationSupportChainDstu3.class);
 			mySearchCoordinatorSvc = wac.getBean(ISearchCoordinatorSvc.class);
 			mySearchEntityDao = wac.getBean(ISearchDao.class);
-			ourRestHookSubscriptionInterceptor = wac.getBean(RestHookSubscriptionDstu3Interceptor.class);
+			ourRestHookSubscriptionInterceptor = wac.getBean(SubscriptionRestHookInterceptor.class);
 			ourSearchParamRegistry = wac.getBean(SearchParamRegistryDstu3.class);
 
 			myFhirCtx.getRestfulClientFactory().setSocketTimeout(5000000);

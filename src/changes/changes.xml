@@ -370,6 +370,11 @@
 				resource was deleted, it was not possible to create a new resource
 				with the same URI as the previous one
 			</action>
+			<action type="fix">
+				When uploading a Bundle resource to the server (as a collection or 
+				document, not as a transaction) the ID was incorrectly stripped from
+				resources being saved within the Bundle. This has been corrected.
+			</action>
 		</release>
 		<release version="2.5" date="2017-06-08">
 			<action type="fix">

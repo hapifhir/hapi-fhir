@@ -3,7 +3,6 @@ package ca.uhn.fhir.jpa.subscription;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderDstu2Test;
-import ca.uhn.fhir.jpa.subscription.dstu2.RestHookSubscriptionDstu2Interceptor;
 import ca.uhn.fhir.model.dstu2.composite.CodeableConceptDt;
 import ca.uhn.fhir.model.dstu2.composite.CodingDt;
 import ca.uhn.fhir.model.dstu2.resource.Observation;
@@ -32,8 +31,7 @@ import org.junit.*;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 /**
  * Test the rest-hook subscriptions

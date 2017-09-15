@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.subscription;
+package ca.uhn.fhir.jpa.subscription.resthook;
 
 /*-
  * #%L
@@ -21,6 +21,10 @@ package ca.uhn.fhir.jpa.subscription;
  */
 
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.subscription.BaseSubscriptionInterceptor;
+import ca.uhn.fhir.jpa.subscription.BaseSubscriptionSubscriber;
+import ca.uhn.fhir.jpa.subscription.CanonicalSubscription;
+import ca.uhn.fhir.jpa.subscription.ResourceDeliveryMessage;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
@@ -30,7 +34,6 @@ import ca.uhn.fhir.rest.gclient.IClientExecutable;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Subscription;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,7 +41,6 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.MessagingException;
 
 import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 

@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.subscription;
+package ca.uhn.fhir.jpa.subscription.resthook;
 
 /*-
  * #%L
@@ -20,7 +20,9 @@ package ca.uhn.fhir.jpa.subscription;
  * #L%
  */
 
-public abstract class BaseSubscriptionRestHookInterceptor extends BaseSubscriptionInterceptor {
+import ca.uhn.fhir.jpa.subscription.BaseSubscriptionInterceptor;
+
+public class SubscriptionRestHookInterceptor extends BaseSubscriptionInterceptor {
 	private SubscriptionDeliveringRestHookSubscriber mySubscriptionDeliverySubscriber;
 
 	@Override
@@ -31,6 +33,10 @@ public abstract class BaseSubscriptionRestHookInterceptor extends BaseSubscripti
 		getDeliveryChannel().subscribe(mySubscriptionDeliverySubscriber);
 	}
 
+	@Override
+	public org.hl7.fhir.r4.model.Subscription.SubscriptionChannelType getChannelType() {
+		return org.hl7.fhir.r4.model.Subscription.SubscriptionChannelType.RESTHOOK;
+	}
 
 	@Override
 	protected void unregisterDeliverySubscriber() {

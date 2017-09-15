@@ -20,6 +20,8 @@ package ca.uhn.fhir.jpa.subscription;
  * #L%
  */
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
@@ -52,6 +54,19 @@ public class CanonicalSubscription implements Serializable {
 	 */
 	public void addTrigger(TriggerDefinition theTrigger) {
 		myTrigger = theTrigger;
+	}
+
+	@Override
+	public boolean equals(Object theO) {
+		if (this == theO) return true;
+
+		if (theO == null || getClass() != theO.getClass()) return false;
+
+		CanonicalSubscription that = (CanonicalSubscription) theO;
+
+		return new EqualsBuilder()
+			.append(getIdElement().getIdPart(), that.getIdElement().getIdPart())
+			.isEquals();
 	}
 
 	public IBaseResource getBackingSubscription() {
@@ -90,10 +105,12 @@ public class CanonicalSubscription implements Serializable {
 		return myHeaders;
 	}
 
-	public void setHeaders(String theHeaders) {
+	public void setHeaders(List<? extends IPrimitiveType<String>> theHeader) {
 		myHeaders = new ArrayList<>();
-		if (isNotBlank(theHeaders)) {
-			myHeaders.add(theHeaders);
+		for (IPrimitiveType<String> next : theHeader) {
+			if (isNotBlank(next.getValueAsString())) {
+				myHeaders.add(next.getValueAsString());
+			}
 		}
 	}
 
@@ -129,12 +146,17 @@ public class CanonicalSubscription implements Serializable {
 		return myTrigger;
 	}
 
-	public void setHeaders(List<? extends IPrimitiveType<String>> theHeader) {
+	@Override
+	public int hashCode() {
+		return new HashCodeBuilder(17, 37)
+			.append(getIdElement().getIdPart())
+			.toHashCode();
+	}
+
+	public void setHeaders(String theHeaders) {
 		myHeaders = new ArrayList<>();
-		for (IPrimitiveType<String> next : theHeader) {
-			if (isNotBlank(next.getValueAsString())) {
-				myHeaders.add(next.getValueAsString());
-			}
+		if (isNotBlank(theHeaders)) {
+			myHeaders.add(theHeaders);
 		}
 	}
 }

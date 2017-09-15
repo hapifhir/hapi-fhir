@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.subscription.r4;
+package ca.uhn.fhir.jpa.subscription;
 
 import static org.hamcrest.Matchers.contains;
 import static org.junit.Assert.assertEquals;
@@ -11,36 +11,25 @@ import java.util.concurrent.TimeUnit;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.client.ClientUpgradeRequest;
 import org.eclipse.jetty.websocket.client.WebSocketClient;
-import org.hl7.fhir.r4.model.*;
-import org.junit.*;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Ignore;
+import org.junit.Test;
 import org.slf4j.Logger;
 
 import ca.uhn.fhir.jpa.dao.DaoConfig;
-import ca.uhn.fhir.jpa.provider.r4.BaseResourceProviderR4Test;
-import ca.uhn.fhir.jpa.subscription.SocketImplementation;
+import ca.uhn.fhir.jpa.provider.BaseResourceProviderDstu2Test;
+import ca.uhn.fhir.model.dstu2.composite.*;
+import ca.uhn.fhir.model.dstu2.resource.*;
+import ca.uhn.fhir.model.dstu2.resource.Subscription.Channel;
+import ca.uhn.fhir.model.dstu2.valueset.*;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 
-/**
- * Adds a FHIR subscription with criteria through the rest interface. Then creates a websocket with the id of the
- * subscription
- * <p>
- * Note: This test only returns a ping with the subscription id, Check FhirSubscriptionWithSubscriptionIdR4Test for
- * a test that returns the xml of the observation
- * <p>
- * To execute the following test, execute it the following way:
- * 0. execute 'clean' test
- * 1. Execute the 'createPatient' test
- * 2. Update the patient id static variable
- * 3. Execute the 'createSubscription' test
- * 4. Update the subscription id static variable
- * 5. Execute the 'attachWebSocket' test
- * 6. Execute the 'sendObservation' test
- * 7. Look in the 'attachWebSocket' terminal execution and wait for your ping with the subscription id
- */
-public class FhirSubscriptionWithSubscriptionIdR4Test extends BaseResourceProviderR4Test {
-
-	private static final Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirSubscriptionWithSubscriptionIdR4Test.class);
+// This is currently disabled as the criteria mechanism was a non-standard experiment
+@Ignore
+public class WebsocketWithCriteriaDstu2Test extends BaseResourceProviderDstu2Test {
+	private static final Logger ourLog = org.slf4j.LoggerFactory.getLogger(WebsocketWithCriteriaDstu2Test.class);
 
 	private String myPatientId;
 	private String mySubscriptionId;
@@ -65,7 +54,7 @@ public class FhirSubscriptionWithSubscriptionIdR4Test extends BaseResourceProvid
 		 * Create patient
 		 */
 		
-		Patient patient = FhirR4Util.getPatient();
+		Patient patient = FhirDstu2Util.getPatient();
 		MethodOutcome methodOutcome = ourClient.create().resource(patient).execute();
 		myPatientId = methodOutcome.getId().getIdPart();
 
@@ -74,12 +63,12 @@ public class FhirSubscriptionWithSubscriptionIdR4Test extends BaseResourceProvid
 		 */
 		Subscription subscription = new Subscription();
 		subscription.setReason("Monitor new neonatal function (note, age will be determined by the monitor)");
-		subscription.setStatus(Subscription.SubscriptionStatus.ACTIVE);
+		subscription.setStatus(SubscriptionStatusEnum.ACTIVE);
 		// subscription.setCriteria("Observation?subject=Patient/" + PATIENT_ID);
-		subscription.setCriteria("Observation?code=SNOMED-CT|82313006");
+		subscription.setCriteria("Observation?code=SNOMED-CT|82313006&_format=xml");
 
-		Subscription.SubscriptionChannelComponent channel = new Subscription.SubscriptionChannelComponent();
-		channel.setType(Subscription.SubscriptionChannelType.WEBSOCKET);
+		Channel channel = new Channel();
+		channel.setType(SubscriptionChannelTypeEnum.WEBSOCKET);
 		channel.setPayload("application/json");
 		subscription.setChannel(channel);
 
@@ -94,7 +83,7 @@ public class FhirSubscriptionWithSubscriptionIdR4Test extends BaseResourceProvid
 		mySocketImplementation = new SocketImplementation(mySubscriptionId, EncodingEnum.JSON);
 
 		myWebSocketClient.start();
-		URI echoUri = new URI("ws://localhost:" + ourPort + "/websocket/r4");
+		URI echoUri = new URI("ws://localhost:" + ourPort + "/websocket/dstu2");
 		ClientUpgradeRequest request = new ClientUpgradeRequest();
 		ourLog.info("Connecting to : {}", echoUri);
 		Future<Session> connection = myWebSocketClient.connect(mySocketImplementation, echoUri, request);
@@ -112,57 +101,47 @@ public class FhirSubscriptionWithSubscriptionIdR4Test extends BaseResourceProvid
 	@Test
 	public void createObservation() throws Exception {
 		Observation observation = new Observation();
-		CodeableConcept codeableConcept = new CodeableConcept();
-		observation.setCode(codeableConcept);
-		Coding coding = codeableConcept.addCoding();
+		CodeableConceptDt cc = new CodeableConceptDt();
+		observation.setCode(cc);
+		CodingDt coding = cc.addCoding();
 		coding.setCode("82313006");
 		coding.setSystem("SNOMED-CT");
-		Reference reference = new Reference();
+		ResourceReferenceDt reference = new ResourceReferenceDt();
 		reference.setReference("Patient/" + myPatientId);
 		observation.setSubject(reference);
-		observation.setStatus(Observation.ObservationStatus.FINAL);
+		observation.setStatus(ObservationStatusEnum.FINAL);
 
 		MethodOutcome methodOutcome2 = ourClient.create().resource(observation).execute();
 		String observationId = methodOutcome2.getId().getIdPart();
 		observation.setId(observationId);
 
 		ourLog.info("Observation id generated by server is: " + observationId);
-		
-		int changes = mySubscriptionDao.pollForNewUndeliveredResources();
-		ourLog.info("Polling showed {}", changes);
-		assertEquals(1, changes);
 
-		Thread.sleep(2000);
-		
 		ourLog.info("WS Messages: {}", mySocketImplementation.getMessages());
+		waitForSize(2, mySocketImplementation.getMessages());
 		assertThat(mySocketImplementation.getMessages(), contains("bound " + mySubscriptionId, "ping " + mySubscriptionId));
 	}
 
 	@Test
 	public void createObservationThatDoesNotMatch() throws Exception {
 		Observation observation = new Observation();
-		CodeableConcept codeableConcept = new CodeableConcept();
-		observation.setCode(codeableConcept);
-		Coding coding = codeableConcept.addCoding();
+		CodeableConceptDt cc = new CodeableConceptDt();
+		observation.setCode(cc);
+		CodingDt coding = cc.addCoding();
 		coding.setCode("8231");
 		coding.setSystem("SNOMED-CT");
-		Reference reference = new Reference();
+		ResourceReferenceDt reference = new ResourceReferenceDt();
 		reference.setReference("Patient/" + myPatientId);
 		observation.setSubject(reference);
-		observation.setStatus(Observation.ObservationStatus.FINAL);
+		observation.setStatus(ObservationStatusEnum.FINAL);
 
 		MethodOutcome methodOutcome2 = ourClient.create().resource(observation).execute();
 		String observationId = methodOutcome2.getId().getIdPart();
 		observation.setId(observationId);
 
 		ourLog.info("Observation id generated by server is: " + observationId);
-		
-		int changes = mySubscriptionDao.pollForNewUndeliveredResources();
-		ourLog.info("Polling showed {}", changes);
-		assertEquals(0, changes);
 
-		Thread.sleep(2000);
-		
+		waitForSize(2, mySocketImplementation.getMessages());
 		ourLog.info("WS Messages: {}", mySocketImplementation.getMessages());
 		assertThat(mySocketImplementation.getMessages(), contains("bound " + mySubscriptionId));
 	}

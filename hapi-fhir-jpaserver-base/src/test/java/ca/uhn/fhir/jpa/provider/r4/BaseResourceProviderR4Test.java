@@ -1,13 +1,12 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
-import ca.uhn.fhir.jpa.config.r4.WebsocketR4Config;
-import ca.uhn.fhir.jpa.config.r4.WebsocketR4DispatcherConfig;
+import ca.uhn.fhir.jpa.config.WebsocketDispatcherConfig;
 import ca.uhn.fhir.jpa.dao.data.ISearchDao;
 import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.dao.r4.SearchParamRegistryR4;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.ISearchCoordinatorSvc;
-import ca.uhn.fhir.jpa.subscription.r4.RestHookSubscriptionR4Interceptor;
+import ca.uhn.fhir.jpa.subscription.resthook.SubscriptionRestHookInterceptor;
 import ca.uhn.fhir.jpa.validation.JpaValidationSupportChainR4;
 import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
 import ca.uhn.fhir.parser.StrictErrorHandler;
@@ -58,7 +57,7 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 	protected static ISearchDao mySearchEntityDao;
 	protected static ISearchCoordinatorSvc mySearchCoordinatorSvc;
 	private static Server ourServer;
-	private static GenericWebApplicationContext ourWebApplicationContext;
+	protected static GenericWebApplicationContext ourWebApplicationContext;
 	private TerminologyUploaderProviderR4 myTerminologyUploaderProvider;
 	private Object ourGraphQLProvider;
 	private boolean ourRestHookSubscriptionInterceptorRequested;
@@ -122,8 +121,7 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 			subsServletHolder.setServlet(dispatcherServlet);
 			subsServletHolder.setInitParameter(
 				ContextLoader.CONFIG_LOCATION_PARAM,
-				WebsocketR4Config.class.getName() + "\n" +
-					WebsocketR4DispatcherConfig.class.getName());
+					WebsocketDispatcherConfig.class.getName());
 			proxyHandler.addServlet(subsServletHolder, "/*");
 
 			// Register a CORS filter
@@ -172,8 +170,8 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 	/**
 	 * This is lazy created so we only ask for it if its needed
 	 */
-	protected RestHookSubscriptionR4Interceptor getRestHookSubscriptionInterceptor() {
-		RestHookSubscriptionR4Interceptor retVal = ourWebApplicationContext.getBean(RestHookSubscriptionR4Interceptor.class);
+	protected SubscriptionRestHookInterceptor getRestHookSubscriptionInterceptor() {
+		SubscriptionRestHookInterceptor retVal = ourWebApplicationContext.getBean(SubscriptionRestHookInterceptor.class);
 		ourRestHookSubscriptionInterceptorRequested = true;
 		return retVal;
 	}

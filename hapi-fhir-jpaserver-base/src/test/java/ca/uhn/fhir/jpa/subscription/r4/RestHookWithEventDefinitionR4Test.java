@@ -2,13 +2,13 @@ package ca.uhn.fhir.jpa.subscription.r4;
 
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.provider.r4.BaseResourceProviderR4Test;
-import ca.uhn.fhir.jpa.subscription.SocketImplementation;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import com.google.common.collect.Lists;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.*;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 
@@ -16,7 +16,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.hamcrest.Matchers.contains;
-import static org.junit.Assert.*;
 
 /**
  * Adds a FHIR subscription with criteria through the rest interface. Then creates a websocket with the id of the
@@ -35,9 +34,9 @@ import static org.junit.Assert.*;
  * 6. Execute the 'sendObservation' test
  * 7. Look in the 'attachWebSocket' terminal execution and wait for your ping with the subscription id
  */
-public class FhirSubscriptionWithEventDefinitionR4Test extends BaseResourceProviderR4Test {
+public class RestHookWithEventDefinitionR4Test extends BaseResourceProviderR4Test {
 
-	private static final Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirSubscriptionWithEventDefinitionR4Test.class);
+	private static final Logger ourLog = org.slf4j.LoggerFactory.getLogger(RestHookWithEventDefinitionR4Test.class);
 	private static List<Observation> ourUpdatedObservations = Lists.newArrayList();
 	private static List<String> ourContentTypes = new ArrayList<>();
 	private static List<String> ourHeaders = new ArrayList<>();
@@ -80,6 +79,7 @@ public class FhirSubscriptionWithEventDefinitionR4Test extends BaseResourceProvi
 	}
 
 	@Test
+	@Ignore
 	public void testSubscriptionAddedTrigger() {
 		/*
 		 * Create patient

@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.subscription;
+package ca.uhn.fhir.jpa.subscription.websocket;
 
 /*-
  * #%L
@@ -21,16 +21,13 @@ package ca.uhn.fhir.jpa.subscription;
  */
 
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
-import ca.uhn.fhir.jpa.dao.data.ISubscriptionFlaggedResourceDataDao;
 import ca.uhn.fhir.jpa.dao.data.ISubscriptionTableDao;
+import ca.uhn.fhir.jpa.subscription.BaseSubscriptionInterceptor;
+import org.hl7.fhir.r4.model.Subscription;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.PlatformTransactionManager;
 
-public abstract class BaseSubscriptionWebsocketInterceptor extends BaseSubscriptionInterceptor {
-	private SubscriptionDeliveringWebsocketSubscriber mySubscriptionDeliverySubscriber;
-
-	@Autowired
-	private ISubscriptionFlaggedResourceDataDao mySubscriptionFlaggedResourceDataDao;
+public class SubscriptionWebsocketInterceptor extends BaseSubscriptionInterceptor {
 
 	@Autowired
 	private ISubscriptionTableDao mySubscriptionTableDao;
@@ -42,16 +39,25 @@ public abstract class BaseSubscriptionWebsocketInterceptor extends BaseSubscript
 	private IResourceTableDao myResourceTableDao;
 
 	@Override
-	protected void registerDeliverySubscriber() {
-		if (mySubscriptionDeliverySubscriber == null) {
-			mySubscriptionDeliverySubscriber = new SubscriptionDeliveringWebsocketSubscriber(getSubscriptionDao(), getChannelType(), this, myTxManager, mySubscriptionFlaggedResourceDataDao, mySubscriptionTableDao, myResourceTableDao);
-		}
-		getDeliveryChannel().subscribe(mySubscriptionDeliverySubscriber);
+	public Subscription.SubscriptionChannelType getChannelType() {
+		return Subscription.SubscriptionChannelType.WEBSOCKET;
 	}
 
+	@Override
+	protected void registerDeliverySubscriber() {
+		/*
+		 * nothing, since individual websocket connections
+		 * register themselves
+		 */
+	}
 
 	@Override
 	protected void unregisterDeliverySubscriber() {
-		getDeliveryChannel().unsubscribe(mySubscriptionDeliverySubscriber);
+
+		/*
+		 * nothing, since individual websocket connections
+		 * register themselves
+		 */
+
 	}
 }
